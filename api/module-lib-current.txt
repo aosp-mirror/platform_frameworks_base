@@ -67,6 +67,16 @@ package android.media {
     field public static final int METADATA_KEY_VIDEO_CODEC_MIME_TYPE = 40; // 0x28
   }
 
+  @Deprecated public final class MediaParceledListSlice<T extends android.os.Parcelable> implements android.os.Parcelable {
+    ctor @Deprecated public MediaParceledListSlice(@NonNull java.util.List<T>);
+    method @Deprecated public int describeContents();
+    method @Deprecated @NonNull public static <T extends android.os.Parcelable> android.media.MediaParceledListSlice<T> emptyList();
+    method @Deprecated public java.util.List<T> getList();
+    method @Deprecated public void setInlineCountLimit(int);
+    method @Deprecated public void writeToParcel(android.os.Parcel, int);
+    field @Deprecated @NonNull public static final android.os.Parcelable.ClassLoaderCreator<android.media.MediaParceledListSlice> CREATOR;
+  }
+
 }
 
 package android.media.session {
@@ -106,6 +116,46 @@ package android.media.session {
 
 }
 
+package android.net {
+
+  public final class TetheringConstants {
+    field public static final String EXTRA_ADD_TETHER_TYPE = "extraAddTetherType";
+    field public static final String EXTRA_PROVISION_CALLBACK = "extraProvisionCallback";
+    field public static final String EXTRA_REM_TETHER_TYPE = "extraRemTetherType";
+    field public static final String EXTRA_RUN_PROVISION = "extraRunProvision";
+    field public static final String EXTRA_SET_ALARM = "extraSetAlarm";
+  }
+
+  public class TetheringManager {
+    ctor public TetheringManager(@NonNull android.content.Context, @NonNull java.util.function.Supplier<android.os.IBinder>);
+    method public int getLastTetherError(@NonNull String);
+    method @NonNull public String[] getTetherableBluetoothRegexs();
+    method @NonNull public String[] getTetherableIfaces();
+    method @NonNull public String[] getTetherableUsbRegexs();
+    method @NonNull public String[] getTetherableWifiRegexs();
+    method @NonNull public String[] getTetheredIfaces();
+    method @NonNull public String[] getTetheringErroredIfaces();
+    method public boolean isTetheringSupported();
+    method public boolean isTetheringSupported(@NonNull String);
+    method public void requestLatestTetheringEntitlementResult(int, @NonNull android.os.ResultReceiver, boolean);
+    method @Deprecated public int setUsbTethering(boolean);
+    method @RequiresPermission(anyOf={android.Manifest.permission.TETHER_PRIVILEGED, android.Manifest.permission.WRITE_SETTINGS}) public void startTethering(int, @NonNull java.util.concurrent.Executor, @NonNull android.net.TetheringManager.StartTetheringCallback);
+    method @Deprecated public int tether(@NonNull String);
+    method @Deprecated public int untether(@NonNull String);
+  }
+
+  public static interface TetheringManager.TetheringEventCallback {
+    method public default void onTetherableInterfaceRegexpsChanged(@NonNull android.net.TetheringManager.TetheringInterfaceRegexps);
+  }
+
+  public static class TetheringManager.TetheringInterfaceRegexps {
+    method @NonNull public java.util.List<java.lang.String> getTetherableBluetoothRegexs();
+    method @NonNull public java.util.List<java.lang.String> getTetherableUsbRegexs();
+    method @NonNull public java.util.List<java.lang.String> getTetherableWifiRegexs();
+  }
+
+}
+
 package android.os {
 
   public class Binder implements android.os.IBinder {
@@ -114,6 +164,11 @@ package android.os {
 
   public interface Parcelable {
     method public default int getStability();
+  }
+
+  public class StatsFrameworkInitializer {
+    method public static void registerServiceWrappers();
+    method public static void setStatsServiceManager(@NonNull android.os.StatsServiceManager);
   }
 
   public class StatsServiceManager {
