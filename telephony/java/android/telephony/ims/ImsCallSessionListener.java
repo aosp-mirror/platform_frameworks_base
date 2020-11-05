@@ -28,6 +28,10 @@ import android.telephony.ims.stub.ImsCallSessionImplBase;
 
 import com.android.ims.internal.IImsCallSession;
 
+import java.util.ArrayList;
+import java.util.Objects;
+import java.util.Set;
+
 /**
  * Listener interface for notifying the Framework's {@link ImsCallSession} for updates to an ongoing
  * IMS call.
@@ -677,6 +681,59 @@ public class ImsCallSessionListener {
     public void callQualityChanged(@NonNull CallQuality callQuality) {
         try {
             mListener.callQualityChanged(callQuality);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * The {@link ImsService} calls this method to inform the framework of a DTMF digit which was
+     * received from the network.
+     * <p>
+     * According to <a href="http://tools.ietf.org/html/rfc2833">RFC 2833 sec 3.10</a>,
+     * event 0 ~ 9 maps to decimal value 0 ~ 9, '*' to 10, '#' to 11, event 'A' ~ 'D' to 12 ~ 15.
+     * <p>
+     * <em>Note:</em> Alpha DTMF digits are converted from lower-case to upper-case.
+     *
+     * @param dtmf The DTMF digit received, '0'-'9', *, #, A, B, C, or D.
+     * @throws IllegalArgumentException If an invalid DTMF character is provided.
+     */
+    public void callSessionDtmfReceived(char dtmf) {
+        if (!(dtmf >= '0' && dtmf <= '9'
+                || dtmf >= 'A' && dtmf <= 'D'
+                || dtmf >= 'a' && dtmf <= 'd'
+                || dtmf == '*'
+                || dtmf == '#')) {
+            throw new IllegalArgumentException("DTMF digit must be 0-9, *, #, A, B, C, D");
+        }
+        try {
+            mListener.callSessionDtmfReceived(Character.toUpperCase(dtmf));
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * The {@link ImsService} calls this method to inform the framework of RTP header extension data
+     * which was received from the network.
+     * <p>
+     * The set of {@link RtpHeaderExtension} data are identified by local identifiers which were
+     * negotiated during SDP signalling.  See RFC8285,
+     * {@link ImsCallProfile#getAcceptedRtpHeaderExtensionTypes()} and
+     * {@link RtpHeaderExtensionType} for more information.
+     * <p>
+     * By specification, the RTP header extension is an unacknowledged transmission and there is no
+     * guarantee that the header extension will be delivered by the network to the other end of the
+     * call.
+     *
+     * @param extensions The RTP header extension data received.
+     */
+    public void callSessionRtpHeaderExtensionsReceived(
+            @NonNull Set<RtpHeaderExtension> extensions) {
+        Objects.requireNonNull(extensions, "extensions are required.");
+        try {
+            mListener.callSessionRtpHeaderExtensionsReceived(
+                    new ArrayList<RtpHeaderExtension>(extensions));
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }
