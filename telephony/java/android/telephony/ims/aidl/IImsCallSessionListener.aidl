@@ -21,8 +21,11 @@ import android.telephony.ims.ImsStreamMediaProfile;
 import android.telephony.ims.ImsCallProfile;
 import android.telephony.ims.ImsReasonInfo;
 import android.telephony.ims.ImsConferenceState;
+import android.telephony.ims.RtpHeaderExtension;
 import com.android.ims.internal.IImsCallSession;
 import android.telephony.ims.ImsSuppServiceNotification;
+
+import java.util.List;
 
 /**
  * A listener type for receiving notification on IMS call session events.
@@ -153,9 +156,17 @@ oneway interface IImsCallSessionListener {
     void callSessionTransferred();
     void callSessionTransferFailed(in ImsReasonInfo reasonInfo);
 
+    void callSessionDtmfReceived(char dtmf);
+
     /**
      * Notifies of a change to the call quality.
      * @param callQuality then updated call quality
      */
     void callQualityChanged(in CallQuality callQuality);
+
+    /**
+     * Notifies of incoming RTP header extensions from the network.
+     * @param extensions the RTP header extensions received.
+     */
+    void callSessionRtpHeaderExtensionsReceived(in List<RtpHeaderExtension> extensions);
 }

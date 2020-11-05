@@ -29,10 +29,13 @@ import android.telephony.ims.ImsConferenceState;
 import android.telephony.ims.ImsReasonInfo;
 import android.telephony.ims.ImsStreamMediaProfile;
 import android.telephony.ims.ImsSuppServiceNotification;
+import android.telephony.ims.RtpHeaderExtension;
 import android.telephony.ims.aidl.IImsCallSessionListener;
 
 import com.android.ims.internal.IImsCallSession;
 import com.android.ims.internal.IImsVideoCallProvider;
+
+import java.util.List;
 
 /**
  * Compat implementation of ImsCallSessionImplBase for older implementations.
@@ -401,6 +404,15 @@ public class ImsCallSessionImplBase extends IImsCallSession.Stub {
      */
     @Override
     public void sendRttMessage(String rttMessage) {
+    }
+
+    /**
+     * Device sends RTP header extensions.
+     * @param headerExtensions The header extensions to send.
+     */
+    @Override
+    public void sendRtpHeaderExtensions(@NonNull List<RtpHeaderExtension> headerExtensions) {
+        // no-op; not supported in compat layer.
     }
 
     /**
