@@ -186,7 +186,7 @@ public class SystemPreparer extends ExternalResource {
     private File copyResourceToTemp(String resourcePath) throws IOException {
         final File tempFile = mHostTempFolder.newFile();
         final ClassLoader classLoader = getClass().getClassLoader();
-        try (InputStream assetIs = classLoader.getResource(resourcePath).openStream();
+        try (InputStream assetIs = classLoader.getResourceAsStream(resourcePath);
              FileOutputStream assetOs = new FileOutputStream(tempFile)) {
             if (assetIs == null) {
                 throw new IllegalStateException("Failed to find resource " + resourcePath);
