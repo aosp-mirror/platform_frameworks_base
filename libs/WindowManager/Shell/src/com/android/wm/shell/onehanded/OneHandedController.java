@@ -32,6 +32,7 @@ import android.os.ServiceManager;
 import android.os.SystemProperties;
 import android.provider.Settings;
 import android.util.Slog;
+import android.view.accessibility.AccessibilityManager;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -74,6 +75,7 @@ public class OneHandedController implements OneHanded {
     private final Handler mMainHandler = new Handler(Looper.getMainLooper());
 
     private OneHandedDisplayAreaOrganizer mDisplayAreaOrganizer;
+    private final AccessibilityManager mAccessibilityManager;
 
     /**
      * Handle rotation based on OnDisplayChangingListener callback
@@ -163,6 +165,26 @@ public class OneHandedController implements OneHanded {
                 }
             };
 
+    private AccessibilityManager.AccessibilityStateChangeListener
+            mAccessibilityStateChangeListener =
+            new AccessibilityManager.AccessibilityStateChangeListener() {
+                @Override
+                public void onAccessibilityStateChanged(boolean enabled) {
+                    if (enabled) {
+                        final int mOneHandedTimeout = OneHandedSettingsUtil
+                                .getSettingsOneHandedModeTimeout(mContext.getContentResolver());
+                        final int timeout = mAccessibilityManager
+                                .getRecommendedTimeoutMillis(mOneHandedTimeout * 1000
+                                        /* align with A11y timeout millis */,
+                                        AccessibilityManager.FLAG_CONTENT_CONTROLS);
+                        mTimeoutHandler.setTimeout(timeout / 1000);
+                    } else {
+                        mTimeoutHandler.setTimeout(OneHandedSettingsUtil
+                                .getSettingsOneHandedModeTimeout(mContext.getContentResolver()));
+                    }
+                }
+            };
+
     /**
      * Creates {@link OneHandedController}, returns {@code null} if the feature is not supported.
      */
@@ -238,6 +260,11 @@ public class OneHandedController implements OneHanded {
                         stopOneHanded(OneHandedEvents.EVENT_ONE_HANDED_TRIGGER_APP_TAPS_OUT);
                     }
                 });
+
+        mAccessibilityManager = (AccessibilityManager)
+                context.getSystemService(Context.ACCESSIBILITY_SERVICE);
+        mAccessibilityManager.addAccessibilityStateChangeListener(
+                mAccessibilityStateChangeListener);
     }
 
     /**
