@@ -66,6 +66,10 @@ abstract class BaseAppHelper(
         uiDevice.wait(Until.hasObject(appSelector), APP_LAUNCH_WAIT_TIME_MS)
     }
 
+    fun waitUntilClosed(): Boolean {
+        return uiDevice.wait(Until.gone(appSelector), APP_CLOSE_WAIT_TIME_MS)
+    }
+
     fun forceStop() = activityManager?.forceStopPackage(packageName)
 
     override fun getOpenAppIntent(): Intent {
@@ -77,5 +81,6 @@ abstract class BaseAppHelper(
 
     companion object {
         private const val APP_LAUNCH_WAIT_TIME_MS = 10_000L
+        private const val APP_CLOSE_WAIT_TIME_MS = 3_000L
     }
 }
