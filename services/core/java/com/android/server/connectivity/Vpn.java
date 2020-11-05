@@ -1036,20 +1036,21 @@ public class Vpn {
 
         final long token = Binder.clearCallingIdentity();
         try {
-            final int[] toChange;
+            final String[] toChange;
 
             // Clear all AppOps if the app is being unauthorized.
             switch (vpnType) {
                 case VpnManager.TYPE_VPN_NONE:
-                    toChange = new int[] {
-                            AppOpsManager.OP_ACTIVATE_VPN, AppOpsManager.OP_ACTIVATE_PLATFORM_VPN
+                    toChange = new String[] {
+                            AppOpsManager.OPSTR_ACTIVATE_VPN,
+                            AppOpsManager.OPSTR_ACTIVATE_PLATFORM_VPN
                     };
                     break;
                 case VpnManager.TYPE_VPN_PLATFORM:
-                    toChange = new int[] {AppOpsManager.OP_ACTIVATE_PLATFORM_VPN};
+                    toChange = new String[] {AppOpsManager.OPSTR_ACTIVATE_PLATFORM_VPN};
                     break;
                 case VpnManager.TYPE_VPN_SERVICE:
-                    toChange = new int[] {AppOpsManager.OP_ACTIVATE_VPN};
+                    toChange = new String[] {AppOpsManager.OPSTR_ACTIVATE_VPN};
                     break;
                 default:
                     Log.wtf(TAG, "Unrecognized VPN type while granting authorization");
@@ -1058,9 +1059,9 @@ public class Vpn {
 
             final AppOpsManager appOpMgr =
                     (AppOpsManager) mContext.getSystemService(Context.APP_OPS_SERVICE);
-            for (final int appOp : toChange) {
+            for (final String appOpStr : toChange) {
                 appOpMgr.setMode(
-                        appOp,
+                        appOpStr,
                         uid,
                         packageName,
                         vpnType == VpnManager.TYPE_VPN_NONE
@@ -1086,21 +1087,22 @@ public class Vpn {
         }
     }
 
-    private static boolean doesPackageHaveAppop(Context context, String packageName, int appop) {
+    private static boolean doesPackageHaveAppop(Context context, String packageName,
+            String appOpStr) {
         final AppOpsManager appOps =
                 (AppOpsManager) context.getSystemService(Context.APP_OPS_SERVICE);
 
         // Verify that the caller matches the given package and has the required permission.
-        return appOps.noteOpNoThrow(appop, Binder.getCallingUid(), packageName)
-                == AppOpsManager.MODE_ALLOWED;
+        return appOps.noteOpNoThrow(appOpStr, Binder.getCallingUid(), packageName,
+                null /* attributionTag */, null /* message */) == AppOpsManager.MODE_ALLOWED;
     }
 
     private static boolean isVpnServicePreConsented(Context context, String packageName) {
-        return doesPackageHaveAppop(context, packageName, AppOpsManager.OP_ACTIVATE_VPN);
+        return doesPackageHaveAppop(context, packageName, AppOpsManager.OPSTR_ACTIVATE_VPN);
     }
 
     private static boolean isVpnProfilePreConsented(Context context, String packageName) {
-        return doesPackageHaveAppop(context, packageName, AppOpsManager.OP_ACTIVATE_PLATFORM_VPN)
+        return doesPackageHaveAppop(context, packageName, AppOpsManager.OPSTR_ACTIVATE_PLATFORM_VPN)
                 || isVpnServicePreConsented(context, packageName);
     }
 
