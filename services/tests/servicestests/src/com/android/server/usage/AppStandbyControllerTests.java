@@ -728,7 +728,6 @@ public class AppStandbyControllerTests {
         assertEquals(STANDBY_BUCKET_ACTIVE, getStandbyBucket(mController, PACKAGE_1));
     }
 
-    @Ignore
     @Test
     public void testPredictionTimedOut() throws Exception {
         // Set it to timeout or usage, so that prediction can override it
@@ -1257,6 +1256,7 @@ public class AppStandbyControllerTests {
         assertBucket(STANDBY_BUCKET_ACTIVE);
     }
 
+    @Ignore
     @Test
     public void testPredictionStrikesBack() throws Exception {
         reportEvent(mController, USER_INTERACTION, 0, PACKAGE_1);
