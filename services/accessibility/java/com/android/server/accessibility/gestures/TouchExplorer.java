@@ -245,6 +245,8 @@ public class TouchExplorer extends BaseEventStreamTransformation
         mSendTouchInteractionEndDelayed.cancel();
         // Clear the gesture detector
         mGestureDetector.clear();
+        // Clear the offset data by long pressing.
+        mDispatcher.clear();
         // Go to initial state.
         mState.clear();
         mAms.onTouchInteractionEnd();

@@ -16,6 +16,7 @@
 
 package com.android.server.accessibility.gestures;
 
+import static android.view.MotionEvent.ACTION_CANCEL;
 import static android.view.MotionEvent.ACTION_DOWN;
 import static android.view.MotionEvent.ACTION_HOVER_ENTER;
 import static android.view.MotionEvent.ACTION_HOVER_EXIT;
@@ -33,6 +34,7 @@ import static com.android.server.accessibility.gestures.TouchState.STATE_GESTURE
 import static com.android.server.accessibility.gestures.TouchState.STATE_TOUCH_EXPLORING;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
 import android.content.Context;
@@ -171,6 +173,42 @@ public class TouchExplorerTest {
                 ACTION_HOVER_MOVE,
                 ACTION_HOVER_MOVE,
                 ACTION_HOVER_EXIT);
+    }
+
+    /**
+     * Test the case where the event location is correct when clicking after the following
+     * situation happened: entering the delegate state through doubleTapAndHold gesture and
+     * receiving a cancel event to return the clear state.
+     */
+    @Test
+    public void testClick_afterCanceledDoubleTapAndHold_eventLocationIsCorrect() {
+        // Generates the click position by this click operation, otherwise the offset used
+        // while delegating could not be set.
+        send(downEvent(DEFAULT_X + 10, DEFAULT_Y + 10));
+        // Waits for transition to touch exploring state.
+        mHandler.fastForward(2 * USER_INTENT_TIMEOUT);
+        send(upEvent());
+
+        // Simulates detecting the doubleTapAndHold gesture and enters the delegate state.
+        final MotionEvent sendEvent =
+                fromTouchscreen(downEvent(DEFAULT_X + 100, DEFAULT_Y + 100));
+        mTouchExplorer.onDoubleTapAndHold(sendEvent, sendEvent, 0);
+        assertState(STATE_DELEGATING);
+
+        send(cancelEvent());
+
+        // Generates the click operation, and checks the event location of the ACTION_HOVER_ENTER
+        // event is correct.
+        send(downEvent());
+        // Waits for transition to touch exploring state.
+        mHandler.fastForward(2 * USER_INTENT_TIMEOUT);
+        send(upEvent());
+
+        final List<MotionEvent> events = getCapturedEvents();
+        assertTrue(events.stream().anyMatch(
+                motionEvent -> motionEvent.getActionMasked() == ACTION_HOVER_ENTER
+                        && motionEvent.getX() == DEFAULT_X
+                        && motionEvent.getY() == DEFAULT_Y));
     }
 
     /**
@@ -447,6 +485,19 @@ public class TouchExplorerTest {
 
     private List<MotionEvent> getCapturedEvents() {
         return ((EventCaptor) mCaptor).mEvents;
+    }
+
+    private MotionEvent cancelEvent() {
+        mLastDownTime = SystemClock.uptimeMillis();
+        return fromTouchscreen(
+                MotionEvent.obtain(mLastDownTime, mLastDownTime, ACTION_CANCEL,
+                        DEFAULT_X, DEFAULT_Y, 0));
+    }
+
+    private MotionEvent downEvent(float x, float y) {
+        mLastDownTime = SystemClock.uptimeMillis();
+        return fromTouchscreen(
+                MotionEvent.obtain(mLastDownTime, mLastDownTime, ACTION_DOWN, x, y, 0));
     }
 
     private MotionEvent downEvent() {
