@@ -26,7 +26,6 @@ import static com.android.server.location.timezone.LocationTimeZoneProvider.Prov
 import static com.android.server.location.timezone.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_PERM_FAILED;
 import static com.android.server.location.timezone.TestSupport.USER1_CONFIG_GEO_DETECTION_DISABLED;
 import static com.android.server.location.timezone.TestSupport.USER1_CONFIG_GEO_DETECTION_ENABLED;
-import static com.android.server.location.timezone.TestSupport.USER1_ID;
 import static com.android.server.location.timezone.TestSupport.USER2_CONFIG_GEO_DETECTION_ENABLED;
 
 import static org.junit.Assert.assertEquals;
@@ -38,9 +37,7 @@ import static java.util.Arrays.asList;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.UserIdInt;
 import android.location.timezone.LocationTimeZoneEvent;
-import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
 import android.util.IndentingPrintWriter;
 
@@ -66,13 +63,13 @@ public class ControllerImplTest {
     private static final long ARBITRARY_TIME = 12345L;
 
     private static final LocationTimeZoneEvent USER1_SUCCESS_LOCATION_TIME_ZONE_EVENT1 =
-            createLocationTimeZoneEvent(USER1_ID, EVENT_TYPE_SUCCESS, asList("Europe/London"));
+            createLocationTimeZoneEvent(EVENT_TYPE_SUCCESS, asList("Europe/London"));
     private static final LocationTimeZoneEvent USER1_SUCCESS_LOCATION_TIME_ZONE_EVENT2 =
-            createLocationTimeZoneEvent(USER1_ID, EVENT_TYPE_SUCCESS, asList("Europe/Paris"));
+            createLocationTimeZoneEvent(EVENT_TYPE_SUCCESS, asList("Europe/Paris"));
     private static final LocationTimeZoneEvent USER1_UNCERTAIN_LOCATION_TIME_ZONE_EVENT =
-            createLocationTimeZoneEvent(USER1_ID, EVENT_TYPE_UNCERTAIN, null);
+            createLocationTimeZoneEvent(EVENT_TYPE_UNCERTAIN, null);
     private static final LocationTimeZoneEvent USER1_PERM_FAILURE_LOCATION_TIME_ZONE_EVENT =
-            createLocationTimeZoneEvent(USER1_ID, EVENT_TYPE_PERMANENT_FAILURE, null);
+            createLocationTimeZoneEvent(EVENT_TYPE_PERMANENT_FAILURE, null);
 
     private TestThreadingDomain mTestThreadingDomain;
     private TestCallback mTestCallback;
@@ -936,11 +933,10 @@ public class ControllerImplTest {
                 controller.getUncertaintyTimeoutDelayMillis());
     }
 
-    private static LocationTimeZoneEvent createLocationTimeZoneEvent(@UserIdInt int userId,
+    private static LocationTimeZoneEvent createLocationTimeZoneEvent(
             int eventType, @Nullable List<String> timeZoneIds) {
         LocationTimeZoneEvent.Builder builder = new LocationTimeZoneEvent.Builder()
                 .setElapsedRealtimeNanos(ARBITRARY_TIME)
-                .setUserHandle(UserHandle.of(userId))
                 .setEventType(eventType);
         if (timeZoneIds != null) {
             builder.setTimeZoneIds(timeZoneIds);
