@@ -451,6 +451,49 @@ public class HdmiCecMessageValidatorTest {
         assertMessageValidity("40:93:91:09:F4:40").isEqualTo(ERROR_PARAMETER);
     }
 
+    @Test
+    public void isValid_UserControlPressed() {
+        assertMessageValidity("40:44:07").isEqualTo(OK);
+        assertMessageValidity("40:44:52:A7").isEqualTo(OK);
+
+        assertMessageValidity("40:44:60").isEqualTo(OK);
+        assertMessageValidity("40:44:60:1A").isEqualTo(OK);
+
+        assertMessageValidity("40:44:67").isEqualTo(OK);
+        assertMessageValidity("40:44:67:04:00:B1").isEqualTo(OK);
+        assertMessageValidity("40:44:67:09:C8:72:C8").isEqualTo(OK);
+
+        assertMessageValidity("40:44:68").isEqualTo(OK);
+        assertMessageValidity("40:44:68:93").isEqualTo(OK);
+        assertMessageValidity("40:44:69").isEqualTo(OK);
+        assertMessageValidity("40:44:69:7C").isEqualTo(OK);
+        assertMessageValidity("40:44:6A").isEqualTo(OK);
+        assertMessageValidity("40:44:6A:B4").isEqualTo(OK);
+
+        assertMessageValidity("40:44:56").isEqualTo(OK);
+        assertMessageValidity("40:44:56:60").isEqualTo(OK);
+
+        assertMessageValidity("40:44:57").isEqualTo(OK);
+        assertMessageValidity("40:44:57:A0").isEqualTo(OK);
+
+        assertMessageValidity("4F:44:07").isEqualTo(ERROR_DESTINATION);
+        assertMessageValidity("F0:44:52:A7").isEqualTo(ERROR_SOURCE);
+        assertMessageValidity("40:44").isEqualTo(ERROR_PARAMETER_SHORT);
+        assertMessageValidity("40:44:67:04:B1").isEqualTo(ERROR_PARAMETER_SHORT);
+        // Invalid Play mode
+        assertMessageValidity("40:44:60:04").isEqualTo(ERROR_PARAMETER);
+        assertMessageValidity("40:44:60:08").isEqualTo(ERROR_PARAMETER);
+        assertMessageValidity("40:44:60:26").isEqualTo(ERROR_PARAMETER);
+        // Invalid Channel Identifier - Channel number format
+        assertMessageValidity("40:44:67:11:8A:42").isEqualTo(ERROR_PARAMETER);
+        // Insufficient data for 2 - part channel number
+        assertMessageValidity("40:44:67:09:C8:72").isEqualTo(ERROR_PARAMETER);
+        // Invalid UI Broadcast type
+        assertMessageValidity("40:44:56:11").isEqualTo(ERROR_PARAMETER);
+        // Invalid UI Sound Presentation Control
+        assertMessageValidity("40:44:57:40").isEqualTo(ERROR_PARAMETER);
+    }
+
     private IntegerSubject assertMessageValidity(String message) {
         return assertThat(mHdmiCecMessageValidator.isValid(buildMessage(message)));
     }
