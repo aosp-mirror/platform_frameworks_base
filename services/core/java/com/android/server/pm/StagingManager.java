@@ -919,10 +919,10 @@ public class StagingManager {
             } catch (PackageManagerException e) {
                 onInstallationFailure(session, e);
             } catch (Exception e) {
-                final String errorMsg = "Staged install failed due to unhandled exception";
-                Slog.e(TAG, errorMsg, e);
+                Slog.e(TAG, "Staged install failed due to unhandled exception", e);
                 onInstallationFailure(session, new PackageManagerException(
-                        SessionInfo.STAGED_SESSION_ACTIVATION_FAILED, errorMsg));
+                        SessionInfo.STAGED_SESSION_ACTIVATION_FAILED,
+                        "Staged install failed due to unhandled exception: " + e));
             }
         }
     }
