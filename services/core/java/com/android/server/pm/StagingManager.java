@@ -21,10 +21,12 @@ import android.annotation.Nullable;
 import android.apex.ApexInfo;
 import android.apex.ApexInfoList;
 import android.apex.ApexSessionInfo;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.IIntentReceiver;
 import android.content.IIntentSender;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageInstaller;
@@ -44,6 +46,7 @@ import android.os.ParcelableException;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.SystemProperties;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.apk.ApkSignatureVerifier;
@@ -72,12 +75,16 @@ public class StagingManager {
     private final PackageInstallerService mPi;
     private final ApexManager mApexManager;
     private final PowerManager mPowerManager;
+    private final Context mContext;
     private final Handler mBgHandler;
+    private PackageInstallerSession mPendingSession;
+    private boolean mIsReady;
 
     @GuardedBy("mStagedSessions")
     private final SparseArray<PackageInstallerSession> mStagedSessions = new SparseArray<>();
 
     StagingManager(PackageInstallerService pi, ApexManager am, Context context) {
+        mContext = context;
         mPi = pi;
         mApexManager = am;
         mPowerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
@@ -202,85 +209,97 @@ public class StagingManager {
     }
 
     private void preRebootVerification(@NonNull PackageInstallerSession session) {
-        boolean success = true;
-
-        final ApexInfoList apexInfoList = new ApexInfoList();
-        // APEX checks. For single-package sessions, check if they contain an APEX. For
-        // multi-package sessions, find all the child sessions that contain an APEX.
-        if (!session.isMultiPackage()
-                && isApexSession(session)) {
-            success = submitSessionToApexService(session, null, apexInfoList);
-
-        } else if (session.isMultiPackage()) {
-            List<PackageInstallerSession> childSessions =
-                    Arrays.stream(session.getChildSessionIds())
-                            // Retrieve cached sessions matching ids.
-                            .mapToObj(i -> mStagedSessions.get(i))
-                            // Filter only the ones containing APEX.
-                            .filter(childSession -> isApexSession(childSession))
-                            .collect(Collectors.toList());
-            if (!childSessions.isEmpty()) {
-                success = submitSessionToApexService(session, childSessions, apexInfoList);
-            } // else this is a staged multi-package session with no APEX files.
-        }
-
-        if (!success) {
-            // submitSessionToApexService will populate error.
-            return;
-        }
-
-        if (sessionContainsApk(session)) {
-            if (!installApksInSession(session, /* preReboot */ true)) {
-                session.setStagedSessionFailed(SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
-                        "APK verification failed. Check logcat messages for "
-                                + "more information.");
-                // TODO(b/118865310): abort the session on apexd.
+        try {
+            if (!mIsReady) {
+                mPendingSession = session;
                 return;
             }
-        }
 
-        if (apexInfoList.apexInfos != null && apexInfoList.apexInfos.length > 0) {
-            // For APEXes, we validate the signature here before we mark the session as ready,
-            // so we fail the session early if there is a signature mismatch. For APKs, the
-            // signature verification will be done by the package manager at the point at which
-            // it applies the staged install.
-            for (ApexInfo apexPackage : apexInfoList.apexInfos) {
-                if (!validateApexSignature(apexPackage.packagePath,
-                        apexPackage.packageName)) {
+            boolean success = true;
+
+            final ApexInfoList apexInfoList = new ApexInfoList();
+            // APEX checks. For single-package sessions, check if they contain an APEX. For
+            // multi-package sessions, find all the child sessions that contain an APEX.
+            if (!session.isMultiPackage()
+                    && isApexSession(session)) {
+                success = submitSessionToApexService(session, null, apexInfoList);
+
+            } else if (session.isMultiPackage()) {
+                List<PackageInstallerSession> childSessions =
+                        Arrays.stream(session.getChildSessionIds())
+                                // Retrieve cached sessions matching ids.
+                                .mapToObj(i -> mStagedSessions.get(i))
+                                // Filter only the ones containing APEX.
+                                .filter(childSession -> isApexSession(childSession))
+                                .collect(Collectors.toList());
+                if (!childSessions.isEmpty()) {
+                    success = submitSessionToApexService(session, childSessions, apexInfoList);
+                } // else this is a staged multi-package session with no APEX files.
+            }
+
+            if (!success) {
+                // submitSessionToApexService will populate error.
+                return;
+            }
+
+            if (sessionContainsApk(session)) {
+                if (!installApksInSession(session, /* preReboot */ true)) {
                     session.setStagedSessionFailed(SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
-                            "APK-container signature verification failed for package "
-                                    + apexPackage.packageName + ". Signature of file "
-                                    + apexPackage.packagePath + " does not match the signature of "
-                                    + " the package already installed.");
+                            "APK verification failed. Check logcat messages for "
+                                    + "more information.");
                     // TODO(b/118865310): abort the session on apexd.
                     return;
                 }
             }
-        }
 
-        if ((session.params.installFlags & PackageManager.INSTALL_ENABLE_ROLLBACK) != 0) {
-            // If rollback is enabled for this session, we call through to the RollbackManager
-            // with the list of sessions it must enable rollback for. Note that notifyStagedSession
-            // is a synchronous operation.
-            final IRollbackManager rm = IRollbackManager.Stub.asInterface(
-                    ServiceManager.getService(Context.ROLLBACK_SERVICE));
-            try {
-                // NOTE: To stay consistent with the non-staged install flow, we don't fail the
-                // entire install if rollbacks can't be enabled.
-                if (!rm.notifyStagedSession(session.sessionId)) {
-                    Slog.e(TAG, "Unable to enable rollback for session: " + session.sessionId);
+            if (apexInfoList.apexInfos != null && apexInfoList.apexInfos.length > 0) {
+                // For APEXes, we validate the signature here before we mark the session as ready,
+                // so we fail the session early if there is a signature mismatch. For APKs, the
+                // signature verification will be done by the package manager at the point at which
+                // it applies the staged install.
+                for (ApexInfo apexPackage : apexInfoList.apexInfos) {
+                    if (!validateApexSignature(apexPackage.packagePath,
+                            apexPackage.packageName)) {
+                        session.setStagedSessionFailed(
+                                SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
+                                "APK-container signature verification failed for package "
+                                        + apexPackage.packageName + ". Signature of file "
+                                        + apexPackage.packagePath + " does not match the signature"
+                                        + " of the package already installed.");
+                        // TODO(b/118865310): abort the session on apexd.
+                        return;
+                    }
                 }
-            } catch (RemoteException re) {
-                // Cannot happen, the rollback manager is in the same process.
             }
-        }
 
-        session.setStagedSessionReady();
-        if (sessionContainsApex(session)
-                && !mApexManager.markStagedSessionReady(session.sessionId)) {
+            if ((session.params.installFlags & PackageManager.INSTALL_ENABLE_ROLLBACK) != 0) {
+                // If rollback is enabled for this session, we call through to the RollbackManager
+                // with the list of sessions it must enable rollback for. Note that
+                // notifyStagedSession is a synchronous operation.
+                final IRollbackManager rm = IRollbackManager.Stub.asInterface(
+                        ServiceManager.getService(Context.ROLLBACK_SERVICE));
+                try {
+                    // NOTE: To stay consistent with the non-staged install flow, we don't fail the
+                    // entire install if rollbacks can't be enabled.
+                    if (!rm.notifyStagedSession(session.sessionId)) {
+                        Slog.e(TAG, "Unable to enable rollback for session: " + session.sessionId);
+                    }
+                } catch (RemoteException re) {
+                    // Cannot happen, the rollback manager is in the same process.
+                }
+            }
+
+            session.setStagedSessionReady();
+            if (sessionContainsApex(session)
+                    && !mApexManager.markStagedSessionReady(session.sessionId)) {
+                session.setStagedSessionFailed(SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
+                        "APEX staging failed, check logcat messages from apexd for more "
+                                + "details.");
+            }
+        } catch (Exception e) {
+            Slog.e(TAG, "Pre-reboot verification failed due to unhandled exception", e);
             session.setStagedSessionFailed(SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
-                            "APEX staging failed, check logcat messages from apexd for more "
-                            + "details.");
+                    "Pre-reboot verification failed due to unhandled exception: " + e);
         }
     }
 
@@ -346,28 +365,30 @@ public class StagingManager {
         }
         // The APEX part of the session is activated, proceed with the installation of APKs.
         if (!installApksInSession(session, /* preReboot */ false)) {
-            session.setStagedSessionFailed(SessionInfo.STAGED_SESSION_ACTIVATION_FAILED,
-                    "Staged installation of APKs failed. Check logcat messages for"
-                        + "more information.");
-
-            if (!hasApex) {
-                return;
-            }
-
-            if (!mApexManager.abortActiveSession()) {
-                Slog.e(TAG, "Failed to abort APEXd session");
-            } else {
-                Slog.e(TAG,
-                        "Successfully aborted apexd session. Rebooting device in order to revert "
-                                + "to the previous state of APEXd.");
-                mPowerManager.reboot(null);
-            }
+            onInstallationFailure(session, new PackageManagerException(
+                    SessionInfo.STAGED_SESSION_ACTIVATION_FAILED, "Staged installation of APKs "
+                    + "failed. Check logcat messages for more information."));
             return;
         }
 
         session.setStagedSessionApplied();
         if (hasApex) {
             mApexManager.markStagedSessionSuccessful(session.sessionId);
+        }
+    }
+
+    void onInstallationFailure(PackageInstallerSession session, PackageManagerException e) {
+        session.setStagedSessionFailed(e.error, e.getMessage());
+        if (!sessionContainsApex(session)) {
+            return;
+        }
+        if (!mApexManager.abortActiveSession()) {
+            Slog.e(TAG, "Failed to abort APEXd session");
+        } else {
+            Slog.e(TAG,
+                    "Successfully aborted apexd session. Rebooting device in order to revert "
+                            + "to the previous state of APEXd.");
+            mPowerManager.reboot(null);
         }
     }
 
@@ -648,6 +669,11 @@ public class StagingManager {
     }
 
     private void checkStateAndResume(@NonNull PackageInstallerSession session) {
+        // Do not resume session if boot completed already
+        if (SystemProperties.getBoolean("sys.boot_completed", false)) {
+            return;
+        }
+
         if (!session.isCommitted()) {
             // Session hasn't been committed yet, ignore.
             return;
@@ -664,7 +690,37 @@ public class StagingManager {
         } else {
             // Session had already being marked ready. Start the checks to verify if there is any
             // follow-up work.
-            resumeSession(session);
+            try {
+                resumeSession(session);
+            } catch (Exception e) {
+                Slog.e(TAG, "Staged install failed due to unhandled exception", e);
+                onInstallationFailure(session, new PackageManagerException(
+                        SessionInfo.STAGED_SESSION_ACTIVATION_FAILED,
+                        "Staged install failed due to unhandled exception: " + e));
+
+            }
+        }
+    }
+
+    void systemReady() {
+        // Register the receiver of boot completed intent for staging manager.
+        mContext.registerReceiver(new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context ctx, Intent intent) {
+                readyToStart();
+                ctx.unregisterReceiver(this);
+            }
+        }, new IntentFilter(Intent.ACTION_BOOT_COMPLETED));
+    }
+
+    // Notify the handler that system is ready, and reschedule the pre-reboot verifications.
+    private synchronized void readyToStart() {
+        mIsReady = true;
+        if (mPendingSession != null) {
+            mBgHandler.post(() -> {
+                preRebootVerification(mPendingSession);
+                mPendingSession = null;
+            });
         }
     }
 
