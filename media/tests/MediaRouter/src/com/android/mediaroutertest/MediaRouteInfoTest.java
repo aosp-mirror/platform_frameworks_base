@@ -20,12 +20,13 @@ import static com.google.common.truth.Truth.assertThat;
 
 import android.hardware.display.DisplayManagerGlobal;
 import android.media.MediaRouter;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
 import android.view.Display;
 import android.view.DisplayAddress;
 import android.view.DisplayAdjustments;
 import android.view.DisplayInfo;
+
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
 import org.junit.BeforeClass;

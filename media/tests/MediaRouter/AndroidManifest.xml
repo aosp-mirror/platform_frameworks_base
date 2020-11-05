@@ -27,7 +27,7 @@
         </service>
     </application>
 
-    <instrumentation android:name="android.support.test.runner.AndroidJUnitRunner"
+    <instrumentation android:name="androidx.test.runner.AndroidJUnitRunner"
                      android:targetPackage="com.android.mediaroutertest"
                      android:label="MediaRouter Tests"/>
 </manifest>
