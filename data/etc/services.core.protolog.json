@@ -73,6 +73,12 @@
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
+    "-2036671725": {
+      "message": "      SKIP: is wallpaper",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_TRANSITIONS",
+      "at": "com\/android\/server\/wm\/Transition.java"
+    },
     "-2029985709": {
       "message": "setFocusedTask: taskId=%d",
       "level": "DEBUG",
