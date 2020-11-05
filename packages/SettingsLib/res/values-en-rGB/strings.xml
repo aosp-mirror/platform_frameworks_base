@@ -558,4 +558,8 @@
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Enabled"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Your device must be rebooted for this change to apply. Reboot now or cancel."</string>
     <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"Wired headphones"</string>
+    <!-- no translation found for wifi_hotspot_switch_on_text (9212273118217786155) -->
+    <skip />
+    <!-- no translation found for wifi_hotspot_switch_off_text (7245567251496959764) -->
+    <skip />
 </resources>
