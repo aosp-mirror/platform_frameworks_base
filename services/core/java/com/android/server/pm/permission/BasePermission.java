@@ -83,6 +83,8 @@ public final class BasePermission {
 
     final @PermissionType int type;
 
+    private boolean mPermissionDefinitionChanged;
+
     String sourcePackageName;
 
     int protectionLevel;
@@ -126,6 +128,11 @@ public final class BasePermission {
     public String getSourcePackageName() {
         return sourcePackageName;
     }
+
+    public boolean isPermissionDefinitionChanged() {
+        return mPermissionDefinitionChanged;
+    }
+
     public int getType() {
         return type;
     }
@@ -138,6 +145,10 @@ public final class BasePermission {
     }
     public void setPermission(@Nullable ParsedPermission perm) {
         this.perm = perm;
+    }
+
+    public void setPermissionDefinitionChanged(boolean shouldOverride) {
+        mPermissionDefinitionChanged = shouldOverride;
     }
 
     public int[] computeGids(int userId) {
@@ -322,6 +333,7 @@ public final class BasePermission {
         final PackageSettingBase pkgSetting =
                 (PackageSettingBase) packageManagerInternal.getPackageSetting(pkg.getPackageName());
         // Allow system apps to redefine non-system permissions
+        boolean ownerChanged = false;
         if (bp != null && !Objects.equals(bp.sourcePackageName, p.getPackageName())) {
             final boolean currentOwnerIsSystem;
             if (bp.perm == null) {
@@ -347,6 +359,7 @@ public final class BasePermission {
                     String msg = "New decl " + pkg + " of permission  "
                             + p.getName() + " is system; overriding " + bp.sourcePackageName;
                     PackageManagerService.reportSettingsProblem(Log.WARN, msg);
+                    ownerChanged = true;
                     bp = null;
                 }
             }
@@ -354,6 +367,7 @@ public final class BasePermission {
         if (bp == null) {
             bp = new BasePermission(p.getName(), p.getPackageName(), TYPE_NORMAL);
         }
+        boolean wasNonRuntime = !bp.isRuntime();
         StringBuilder r = null;
         if (bp.perm == null) {
             if (bp.sourcePackageName == null
@@ -396,6 +410,11 @@ public final class BasePermission {
         if (bp.perm != null && Objects.equals(bp.perm.getPackageName(), p.getPackageName())
                 && Objects.equals(bp.perm.getName(), p.getName())) {
             bp.protectionLevel = p.getProtectionLevel();
+        }
+        if (bp.isRuntime() && (ownerChanged || wasNonRuntime)) {
+            // If this is a runtime permission and the owner has changed, or this was a normal
+            // permission, then permission state should be cleaned up
+            bp.mPermissionDefinitionChanged = true;
         }
         if (PackageManagerService.DEBUG_PACKAGE_SCANNING && r != null) {
             Log.d(TAG, "  Permissions: " + r);
