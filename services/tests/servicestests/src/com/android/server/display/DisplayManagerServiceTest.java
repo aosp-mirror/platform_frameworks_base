@@ -460,6 +460,7 @@ public class DisplayManagerServiceTest {
      * Tests that collection of display color sampling results are sensible.
      */
     @Test
+    @FlakyTest(bugId = 172555744)
     public void testDisplayedContentSampling() {
         DisplayManagerService displayManager =
                 new DisplayManagerService(mContext, mShortMockedInjector);
