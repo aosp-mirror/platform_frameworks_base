@@ -312,14 +312,7 @@ java_defaults {
 }
 
 java_library_static {
-    name: "android_monolith_stubs_current",
-    srcs: [ ":api-stubs-docs" ],
-    static_libs: [ "private-stub-annotations-jar" ],
-    defaults: ["android_defaults_stubs_current"],
-}
-
-java_library_static {
-    name: "android_merged_stubs_current",
+    name: "android_stubs_current",
     srcs: [ ":api-stubs-docs-non-updatable" ],
     static_libs: [
         "conscrypt.module.public.api.stubs",
@@ -350,22 +343,7 @@ java_library_static {
 }
 
 java_library_static {
-    name: "android_stubs_current",
-    static_libs: ["android_merged_stubs_current"],
-    defaults: ["android_defaults_stubs_current"],
-}
-
-java_library_static {
-    name: "android_system_monolith_stubs_current",
-    srcs: [ ":system-api-stubs-docs" ],
-    static_libs: [ "private-stub-annotations-jar" ],
-    defaults: [
-        "android_defaults_stubs_current",
-    ],
-}
-
-java_library_static {
-    name: "android_system_merged_stubs_current",
+    name: "android_system_stubs_current",
     srcs: [ ":system-api-stubs-docs-non-updatable" ],
     static_libs: [
         "conscrypt.module.public.api.stubs",
@@ -378,12 +356,6 @@ java_library_static {
         "framework-wifi.stubs.system",
         "private-stub-annotations-jar",
     ],
-    defaults: ["android_defaults_stubs_current"],
-}
-
-java_library_static {
-    name: "android_system_stubs_current",
-    static_libs: ["android_system_merged_stubs_current"],
     defaults: ["android_defaults_stubs_current"],
 }
 
