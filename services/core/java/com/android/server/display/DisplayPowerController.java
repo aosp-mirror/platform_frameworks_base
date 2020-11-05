@@ -328,8 +328,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     private BrightnessReason mBrightnessReasonTemp = new BrightnessReason();
 
     // Brightness animation ramp rates in brightness units per second
-    private final float mBrightnessRampRateSlow = 0.2352941f;
-    private final float mBrightnessRampRateFast = 0.7058823f;
+    private final float mBrightnessRampRateSlow;
+    private final float mBrightnessRampRateFast;
 
 
     // Whether or not to skip the initial brightness ramps into STATE_ON.
@@ -454,6 +454,10 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         mAllowAutoBrightnessWhileDozingConfig = resources.getBoolean(
                 com.android.internal.R.bool.config_allowAutoBrightnessWhileDozing);
 
+        mBrightnessRampRateFast = BrightnessSynchronizer.brightnessIntToFloat(resources.getInteger(
+                com.android.internal.R.integer.config_brightness_ramp_rate_fast));
+        mBrightnessRampRateSlow = BrightnessSynchronizer.brightnessIntToFloat(resources.getInteger(
+                com.android.internal.R.integer.config_brightness_ramp_rate_slow));
         mSkipScreenOnBrightnessRamp = resources.getBoolean(
                 com.android.internal.R.bool.config_skipScreenOnBrightnessRamp);
 
