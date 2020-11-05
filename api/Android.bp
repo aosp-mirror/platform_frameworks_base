@@ -19,7 +19,7 @@ package {
 genrule {
     name: "current-api-xml",
     tools: ["metalava"],
-    srcs: ["current.txt"],
+    srcs: [":frameworks-base-api-current.txt"],
     out: ["current.api"],
     cmd: "$(location metalava) --no-banner -convert2xmlnostrip $(in) $(out)",
     visibility: ["//visibility:public"],
