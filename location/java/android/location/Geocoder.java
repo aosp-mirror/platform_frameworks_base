@@ -21,6 +21,8 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 
+import com.android.internal.util.Preconditions;
+
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
@@ -77,12 +79,9 @@ public final class Geocoder {
      * @throws NullPointerException if Locale is null
      */
     public Geocoder(Context context, Locale locale) {
-        if (locale == null) {
-            throw new NullPointerException("locale == null");
-        }
         mParams = new GeocoderParams(context, locale);
-        IBinder b = ServiceManager.getService(Context.LOCATION_SERVICE);
-        mService = ILocationManager.Stub.asInterface(b);
+        mService = ILocationManager.Stub.asInterface(
+                ServiceManager.getService(Context.LOCATION_SERVICE));
     }
 
     /**
@@ -121,13 +120,10 @@ public final class Geocoder {
      * I/O problem occurs
      */
     public List<Address> getFromLocation(double latitude, double longitude, int maxResults)
-        throws IOException {
-        if (latitude < -90.0 || latitude > 90.0) {
-            throw new IllegalArgumentException("latitude == " + latitude);
-        }
-        if (longitude < -180.0 || longitude > 180.0) {
-            throw new IllegalArgumentException("longitude == " + longitude);
-        }
+            throws IOException {
+        Preconditions.checkArgumentInRange(latitude, -90.0, 90.0, "latitude");
+        Preconditions.checkArgumentInRange(longitude, -180.0, 180.0, "longitude");
+
         try {
             GeocodeListener listener = new GeocodeListener();
             mService.getFromLocation(latitude, longitude, maxResults, mParams, listener);
@@ -161,17 +157,7 @@ public final class Geocoder {
      * I/O problem occurs
      */
     public List<Address> getFromLocationName(String locationName, int maxResults) throws IOException {
-        if (locationName == null) {
-            throw new IllegalArgumentException("locationName == null");
-        }
-
-        try {
-            GeocodeListener listener = new GeocodeListener();
-            mService.getFromLocationName(locationName, 0, 0, 0, 0, maxResults, mParams, listener);
-            return listener.getResults();
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        return getFromLocationName(locationName, maxResults, 0, 0, 0, 0);
     }
 
     /**
@@ -210,27 +196,14 @@ public final class Geocoder {
      * I/O problem occurs
      */
     public List<Address> getFromLocationName(String locationName, int maxResults,
-        double lowerLeftLatitude, double lowerLeftLongitude,
-        double upperRightLatitude, double upperRightLongitude) throws IOException {
-        if (locationName == null) {
-            throw new IllegalArgumentException("locationName == null");
-        }
-        if (lowerLeftLatitude < -90.0 || lowerLeftLatitude > 90.0) {
-            throw new IllegalArgumentException("lowerLeftLatitude == "
-                + lowerLeftLatitude);
-        }
-        if (lowerLeftLongitude < -180.0 || lowerLeftLongitude > 180.0) {
-            throw new IllegalArgumentException("lowerLeftLongitude == "
-                + lowerLeftLongitude);
-        }
-        if (upperRightLatitude < -90.0 || upperRightLatitude > 90.0) {
-            throw new IllegalArgumentException("upperRightLatitude == "
-                + upperRightLatitude);
-        }
-        if (upperRightLongitude < -180.0 || upperRightLongitude > 180.0) {
-            throw new IllegalArgumentException("upperRightLongitude == "
-                + upperRightLongitude);
-        }
+            double lowerLeftLatitude, double lowerLeftLongitude, double upperRightLatitude,
+            double upperRightLongitude) throws IOException {
+        Preconditions.checkArgument(locationName != null);
+        Preconditions.checkArgumentInRange(lowerLeftLatitude, -90.0, 90.0, "lowerLeftLatitude");
+        Preconditions.checkArgumentInRange(lowerLeftLongitude, -180.0, 180.0, "lowerLeftLongitude");
+        Preconditions.checkArgumentInRange(upperRightLatitude, -90.0, 90.0, "upperRightLatitude");
+        Preconditions.checkArgumentInRange(upperRightLongitude, -180.0, 180.0,
+                "upperRightLongitude");
 
         try {
             GeocodeListener listener = new GeocodeListener();
