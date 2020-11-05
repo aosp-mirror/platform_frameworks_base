@@ -605,9 +605,13 @@ jobjectArray FilterCallback::getTsRecordEvent(
 
         jlong pts = (eventsExt.size() > i) ? static_cast<jlong>(eventsExt[i].tsRecord().pts)
                 : static_cast<jlong>(Constant64Bit::INVALID_PRESENTATION_TIME_STAMP);
+        jlong firstMbInSlice = (eventsExt.size() > i)
+                ? static_cast<jint>(eventsExt[i].tsRecord().firstMbInSlice)
+                : static_cast<jint>(Constant::INVALID_FIRST_MACROBLOCK_IN_SLICE);
 
         jobject obj =
-                env->NewObject(eventClazz, eventInit, jpid, ts, sc, byteNumber, pts);
+                env->NewObject(eventClazz, eventInit, jpid, ts, sc, byteNumber,
+                        pts, firstMbInSlice);
         env->SetObjectArrayElement(arr, i, obj);
     }
     return arr;
@@ -632,10 +636,13 @@ jobjectArray FilterCallback::getMmtpRecordEvent(
                 : static_cast<jint>(Constant::INVALID_MMTP_RECORD_EVENT_MPT_SEQUENCE_NUM);
         jlong pts = (eventsExt.size() > i) ? static_cast<jlong>(eventsExt[i].mmtpRecord().pts)
                 : static_cast<jlong>(Constant64Bit::INVALID_PRESENTATION_TIME_STAMP);
+        jlong firstMbInSlice = (eventsExt.size() > i)
+                ? static_cast<jint>(eventsExt[i].mmtpRecord().firstMbInSlice)
+                : static_cast<jint>(Constant::INVALID_FIRST_MACROBLOCK_IN_SLICE);
 
         jobject obj =
                 env->NewObject(eventClazz, eventInit, scHevcIndexMask, byteNumber,
-                        mpuSequenceNumber, pts);
+                        mpuSequenceNumber, pts, firstMbInSlice);
         env->SetObjectArrayElement(arr, i, obj);
     }
     return arr;
@@ -1058,8 +1065,16 @@ Return<void> FrontendCallback::onScanMessageExt1_1(FrontendScanMessageTypeExt1_1
             bool isHighPriority = message.isHighPriority();
             env->CallVoidMethod(
                     mObject,
-                    env->GetMethodID(clazz, "onPriorityReported", "([B)V"),
+                    env->GetMethodID(clazz, "onPriorityReported", "(B)V"),
                     isHighPriority);
+            break;
+        }
+        case FrontendScanMessageTypeExt1_1::DVBC_ANNEX: {
+            jint dvbcAnnex = (jint) message.annex();
+            env->CallVoidMethod(
+                    mObject,
+                    env->GetMethodID(clazz, "onDvbcAnnexReported", "(I)V"),
+                    dvbcAnnex);
             break;
         }
         default:

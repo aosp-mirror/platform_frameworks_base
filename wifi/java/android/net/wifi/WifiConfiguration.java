@@ -447,6 +447,8 @@ public class WifiConfiguration implements Parcelable {
     public static final int SECURITY_TYPE_WAPI_PSK = 7;
     /** Security type for a WAPI Certificate network. */
     public static final int SECURITY_TYPE_WAPI_CERT = 8;
+    /** Security type for a WPA3-Enterprise network. */
+    public static final int SECURITY_TYPE_EAP_WPA3_ENTERPRISE = 9;
 
     /**
      * Security types we support.
@@ -462,7 +464,8 @@ public class WifiConfiguration implements Parcelable {
             SECURITY_TYPE_EAP_SUITE_B,
             SECURITY_TYPE_OWE,
             SECURITY_TYPE_WAPI_PSK,
-            SECURITY_TYPE_WAPI_CERT
+            SECURITY_TYPE_WAPI_CERT,
+            SECURITY_TYPE_EAP_WPA3_ENTERPRISE,
     })
     public @interface SecurityType {}
 
@@ -478,8 +481,9 @@ public class WifiConfiguration implements Parcelable {
      * {@link #SECURITY_TYPE_SAE},
      * {@link #SECURITY_TYPE_EAP_SUITE_B},
      * {@link #SECURITY_TYPE_OWE},
-     * {@link #SECURITY_TYPE_WAPI_PSK}, or
-     * {@link #SECURITY_TYPE_WAPI_CERT}
+     * {@link #SECURITY_TYPE_WAPI_PSK},
+     * {@link #SECURITY_TYPE_WAPI_CERT},
+     * {@link #SECURITY_TYPE_EAP_WPA3_ENTERPRISE}
      */
     public void setSecurityParams(@SecurityType int securityType) {
         // Clear all the bitsets.
@@ -554,6 +558,16 @@ public class WifiConfiguration implements Parcelable {
                 allowedProtocols.set(WifiConfiguration.Protocol.WAPI);
                 allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.SMS4);
                 allowedGroupCiphers.set(WifiConfiguration.GroupCipher.SMS4);
+                break;
+            case SECURITY_TYPE_EAP_WPA3_ENTERPRISE:
+                allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_EAP);
+                allowedKeyManagement.set(WifiConfiguration.KeyMgmt.IEEE8021X);
+                allowedProtocols.set(WifiConfiguration.Protocol.RSN);
+                allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.CCMP);
+                allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.GCMP_256);
+                allowedGroupCiphers.set(WifiConfiguration.GroupCipher.CCMP);
+                allowedGroupCiphers.set(WifiConfiguration.GroupCipher.GCMP_256);
+                requirePmf = true;
                 break;
             default:
                 throw new IllegalArgumentException("unknown security type " + securityType);

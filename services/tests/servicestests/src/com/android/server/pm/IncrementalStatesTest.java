@@ -44,7 +44,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class IncrementalStatesTest {
     private IncrementalStates mIncrementalStates;
     private ConditionVariable mUnstartableCalled = new ConditionVariable();
-    private ConditionVariable mStartableCalled = new ConditionVariable();
     private ConditionVariable mFullyLoadedCalled = new ConditionVariable();
     private AtomicInteger mUnstartableReason = new AtomicInteger(0);
     private static final int WAIT_TIMEOUT_MILLIS = 1000; /* 1 second */
@@ -57,7 +56,6 @@ public class IncrementalStatesTest {
 
         @Override
         public void onPackageStartable() {
-            mStartableCalled.open();
         }
 
         @Override
@@ -77,24 +75,22 @@ public class IncrementalStatesTest {
         mIncrementalStates.setCallback(mCallback);
         mIncrementalStates.onCommit(true);
         // Test that package is now startable and loading
-        assertTrue(mStartableCalled.block(WAIT_TIMEOUT_MILLIS));
         assertTrue(mIncrementalStates.isStartable());
         assertTrue(mIncrementalStates.isLoading());
-        mStartableCalled.close();
         mUnstartableCalled.close();
         mFullyLoadedCalled.close();
     }
 
     /**
-     * Test that startable state changes to false when Incremental Storage is unhealthy.
+     * Test that the package is still startable when Incremental Storage is unhealthy.
      */
     @Test
     public void testStartableTransition_IncrementalStorageUnhealthy() {
         mIncrementalStates.onStorageHealthStatusChanged(
                 IStorageHealthListener.HEALTH_STATUS_UNHEALTHY);
-        // Test that package is now unstartable
-        assertTrue(mUnstartableCalled.block(WAIT_TIMEOUT_MILLIS));
-        assertFalse(mIncrementalStates.isStartable());
+        // Test that package is still startable
+        assertFalse(mUnstartableCalled.block(WAIT_TIMEOUT_MILLIS));
+        assertTrue(mIncrementalStates.isStartable());
         assertEquals(PackageManager.UNSTARTABLE_REASON_UNKNOWN, mUnstartableReason.get());
     }
 
@@ -112,70 +108,31 @@ public class IncrementalStatesTest {
     }
 
     /**
-     * Test that the package becomes unstartable when health status indicate storage issues.
+     * Test that the package is still startable when health status indicate storage issues.
      */
     @Test
     public void testStartableTransition_IncrementalStorageBlocked() {
         mIncrementalStates.onStorageHealthStatusChanged(
                 IStorageHealthListener.HEALTH_STATUS_UNHEALTHY_STORAGE);
-        // Test that package is now unstartable
-        assertTrue(mUnstartableCalled.block(WAIT_TIMEOUT_MILLIS));
-        assertFalse(mIncrementalStates.isStartable());
-        assertEquals(PackageManager.UNSTARTABLE_REASON_INSUFFICIENT_STORAGE,
+        // Test that package is still startable
+        assertFalse(mUnstartableCalled.block(WAIT_TIMEOUT_MILLIS));
+        assertTrue(mIncrementalStates.isStartable());
+        assertEquals(PackageManager.UNSTARTABLE_REASON_UNKNOWN,
                 mUnstartableReason.get());
     }
 
     /**
-     * Test that the package becomes unstartable when health status indicates transport issues.
+     * Test that the package is still startable when health status indicates transport issues.
      */
     @Test
     public void testStartableTransition_DataLoaderIntegrityError() {
         mIncrementalStates.onStorageHealthStatusChanged(
                 IStorageHealthListener.HEALTH_STATUS_UNHEALTHY_TRANSPORT);
-        // Test that package is now unstartable
-        assertTrue(mUnstartableCalled.block(WAIT_TIMEOUT_MILLIS));
-        assertFalse(mIncrementalStates.isStartable());
-        assertEquals(PackageManager.UNSTARTABLE_REASON_CONNECTION_ERROR,
+        // Test that package is still startable
+        assertFalse(mUnstartableCalled.block(WAIT_TIMEOUT_MILLIS));
+        assertTrue(mIncrementalStates.isStartable());
+        assertEquals(PackageManager.UNSTARTABLE_REASON_UNKNOWN,
                 mUnstartableReason.get());
-    }
-
-    /**
-     * Test that the package becomes unstartable when Incremental Storage is unhealthy, and it
-     * becomes startable again when Incremental Storage is healthy again.
-     */
-    @Test
-    public void testStartableTransition_IncrementalStorageUnhealthyBackToHealthy()
-            throws InterruptedException {
-        mIncrementalStates.onStorageHealthStatusChanged(
-                IStorageHealthListener.HEALTH_STATUS_UNHEALTHY);
-        // Test that package is unstartable
-        assertTrue(mUnstartableCalled.block(WAIT_TIMEOUT_MILLIS));
-        assertFalse(mIncrementalStates.isStartable());
-
-        mIncrementalStates.onStorageHealthStatusChanged(
-                IStorageHealthListener.HEALTH_STATUS_OK);
-        // Test that package is now startable
-        assertTrue(mStartableCalled.block(WAIT_TIMEOUT_MILLIS));
-        assertTrue(mIncrementalStates.isStartable());
-    }
-
-    /**
-     * Test that the package becomes unstartable when health status indicates transportation issue,
-     * and it becomes startable again when health status is ok again.
-     */
-    @Test
-    public void testStartableTransition_DataLoaderUnhealthyBackToHealthy()
-            throws InterruptedException {
-        mIncrementalStates.onStorageHealthStatusChanged(
-                IStorageHealthListener.HEALTH_STATUS_UNHEALTHY_TRANSPORT);
-        // Test that package is unstartable
-        assertTrue(mUnstartableCalled.block(WAIT_TIMEOUT_MILLIS));
-        assertFalse(mIncrementalStates.isStartable());
-
-        mIncrementalStates.onStorageHealthStatusChanged(IStorageHealthListener.HEALTH_STATUS_OK);
-        // Test that package is now startable
-        assertTrue(mStartableCalled.block(WAIT_TIMEOUT_MILLIS));
-        assertTrue(mIncrementalStates.isStartable());
     }
 
     /**
@@ -197,43 +154,11 @@ public class IncrementalStatesTest {
     }
 
     /**
-     * Test that when loading progress is 1, the package becomes fully loaded, and if the package
-     * was unstartable, it becomes startable.
-     */
-    @Test
-    public void testLoadingTransition_FullyLoadedWhenUnstartable() throws InterruptedException {
-        mIncrementalStates.onStorageHealthStatusChanged(
-                IStorageHealthListener.HEALTH_STATUS_UNHEALTHY);
-        // Test that package is unstartable
-        assertTrue(mUnstartableCalled.block(WAIT_TIMEOUT_MILLIS));
-        assertFalse(mIncrementalStates.isStartable());
-        // Test that package is still loading
-        assertTrue(mIncrementalStates.isLoading());
-
-        mIncrementalStates.setProgress(0.5f);
-        // Test that package is still unstartable
-        assertFalse(mStartableCalled.block(WAIT_TIMEOUT_MILLIS));
-        assertFalse(mIncrementalStates.isStartable());
-        mIncrementalStates.setProgress(1.0f);
-        // Test that package is now startable
-        assertTrue(mStartableCalled.block(WAIT_TIMEOUT_MILLIS));
-        assertTrue(mIncrementalStates.isStartable());
-        // Test that package is now fully loaded
-        assertTrue(mFullyLoadedCalled.block(WAIT_TIMEOUT_MILLIS));
-        assertFalse(mIncrementalStates.isLoading());
-    }
-
-    /**
      * Test startability transitions if app crashes or anrs
      */
     @Test
     public void testStartableTransition_AppCrashOrAnr() {
         mIncrementalStates.onCrashOrAnr();
-        assertFalse(mIncrementalStates.isStartable());
-        mIncrementalStates.setProgress(1.0f);
-        assertTrue(mIncrementalStates.isStartable());
-        mIncrementalStates.onCrashOrAnr();
-        // Test that if fully loaded, app remains startable even if it has crashed
         assertTrue(mIncrementalStates.isStartable());
     }
 }

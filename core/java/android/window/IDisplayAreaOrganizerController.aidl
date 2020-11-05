@@ -24,9 +24,11 @@ import android.window.IDisplayAreaOrganizer;
 interface IDisplayAreaOrganizerController {
 
     /**
-     * Registers a DisplayAreaOrganizer to manage display areas for a given feature.
+     * Registers a DisplayAreaOrganizer to manage display areas for a given feature. A feature can
+     * not be registered by multiple organizers at the same time.
      *
      * @return a list of display areas that should be managed by the organizer.
+     * @throws IllegalStateException if the feature has already been registered.
      */
     ParceledListSlice<DisplayAreaAppearedInfo> registerOrganizer(in IDisplayAreaOrganizer organizer,
         int displayAreaFeature);

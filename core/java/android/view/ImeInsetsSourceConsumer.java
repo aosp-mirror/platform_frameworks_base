@@ -16,6 +16,7 @@
 
 package android.view;
 
+import static android.os.Trace.TRACE_TAG_VIEW;
 import static android.view.ImeInsetsSourceConsumerProto.INSETS_SOURCE_CONSUMER;
 import static android.view.ImeInsetsSourceConsumerProto.IS_REQUESTED_VISIBLE_AWAITING_CONTROL;
 import static android.view.InsetsController.AnimationType;
@@ -24,6 +25,7 @@ import static android.view.InsetsState.ITYPE_IME;
 import android.annotation.Nullable;
 import android.inputmethodservice.InputMethodService;
 import android.os.IBinder;
+import android.os.Trace;
 import android.util.proto.ProtoOutputStream;
 import android.view.SurfaceControl.Transaction;
 import android.view.inputmethod.InputMethodManager;
@@ -105,6 +107,7 @@ public final class ImeInsetsSourceConsumer extends InsetsSourceConsumer {
     @Override
     void notifyHidden() {
         getImm().notifyImeHidden(mController.getHost().getWindowToken());
+        Trace.asyncTraceEnd(TRACE_TAG_VIEW, "IC.hideRequestFromApi", 0);
     }
 
     @Override

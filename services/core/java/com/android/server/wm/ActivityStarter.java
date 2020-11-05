@@ -75,7 +75,7 @@ import static com.android.server.wm.ActivityTaskManagerService.ANIMATE;
 import static com.android.server.wm.LaunchParamsController.LaunchParamsModifier.PHASE_BOUNDS;
 import static com.android.server.wm.LaunchParamsController.LaunchParamsModifier.PHASE_DISPLAY;
 import static com.android.server.wm.Task.ActivityState.RESUMED;
-import static com.android.server.wm.Task.REPARENT_MOVE_STACK_TO_FRONT;
+import static com.android.server.wm.Task.REPARENT_MOVE_ROOT_TASK_TO_FRONT;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
 
 import android.annotation.NonNull;
@@ -1665,11 +1665,6 @@ class ActivityStarter {
             final Task taskToAffiliate = (mLaunchTaskBehind && mSourceRecord != null)
                     ? mSourceRecord.getTask() : null;
             setNewTask(taskToAffiliate);
-            if (mService.getLockTaskController().isLockTaskModeViolation(
-                    mStartActivity.getTask())) {
-                Slog.e(TAG, "Attempted Lock Task Mode violation mStartActivity=" + mStartActivity);
-                return START_RETURN_LOCK_TASK_MODE_VIOLATION;
-            }
         } else if (mAddingToTask) {
             addOrReparentStartingActivity(targetTask, "adding to task");
         }
@@ -1848,10 +1843,17 @@ class ActivityStarter {
         final boolean isNewClearTask =
                 (mLaunchFlags & (FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_CLEAR_TASK))
                         == (FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_CLEAR_TASK);
-        if (!newTask && mService.getLockTaskController().isLockTaskModeViolation(targetTask,
-                isNewClearTask)) {
-            Slog.e(TAG, "Attempted Lock Task Mode violation mStartActivity=" + mStartActivity);
-            return START_RETURN_LOCK_TASK_MODE_VIOLATION;
+        if (!newTask) {
+            if (mService.getLockTaskController().isLockTaskModeViolation(targetTask,
+                    isNewClearTask)) {
+                Slog.e(TAG, "Attempted Lock Task Mode violation mStartActivity=" + mStartActivity);
+                return START_RETURN_LOCK_TASK_MODE_VIOLATION;
+            }
+        } else {
+            if (mService.getLockTaskController().isNewTaskLockTaskModeViolation(mStartActivity)) {
+                Slog.e(TAG, "Attempted Lock Task Mode violation mStartActivity=" + mStartActivity);
+                return START_RETURN_LOCK_TASK_MODE_VIOLATION;
+            }
         }
 
         return START_SUCCESS;
@@ -2530,8 +2532,8 @@ class ActivityStarter {
                             "bringingFoundTaskToFront");
                     mMovedToFront = !isSplitScreenTopStack;
                 } else {
-                    intentTask.reparent(launchStack, ON_TOP, REPARENT_MOVE_STACK_TO_FRONT, ANIMATE,
-                            DEFER_RESUME, "reparentToTargetStack");
+                    intentTask.reparent(launchStack, ON_TOP, REPARENT_MOVE_ROOT_TASK_TO_FRONT,
+                            ANIMATE, DEFER_RESUME, "reparentToTargetStack");
                     mMovedToFront = true;
                 }
                 mOptions = null;

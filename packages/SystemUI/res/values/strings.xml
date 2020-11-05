@@ -233,10 +233,16 @@
     <!-- Notification text displayed when we fail to take a screenshot. [CHAR LIMIT=100] -->
     <string name="screenshot_failed_to_capture_text">Taking screenshots isn\'t allowed by the app or
         your organization</string>
+    <!-- Label for UI element which allows editing the screenshot [CHAR LIMIT=30] -->
+    <string name="screenshot_edit_label">Edit</string>
     <!-- Content description indicating that tapping the element will allow editing the screenshot [CHAR LIMIT=NONE] -->
-    <string name="screenshot_edit">Edit screenshot</string>
+    <string name="screenshot_edit_description">Edit screenshot</string>
+    <!-- Label for UI element which allows scrolling and extending the screenshot to be taller [CHAR LIMIT=30] -->
+    <string name="screenshot_scroll_label">Scroll</string>
+    <!-- Content description UI element which allows scrolling and extending the screenshot to be taller [CHAR LIMIT=NONE] -->
+    <string name="screenshot_scroll_description">Scroll screenshot</string>
     <!-- Content description indicating that tapping a button will dismiss the screenshots UI [CHAR LIMIT=NONE] -->
-    <string name="screenshot_dismiss_ui_description">Dismiss screenshot</string>
+    <string name="screenshot_dismiss_description">Dismiss screenshot</string>
     <!-- Content description indicating that the view is a preview of the screenshot that was just taken [CHAR LIMIT=NONE] -->
     <string name="screenshot_preview_description">Screenshot preview</string>
 
@@ -645,9 +651,6 @@
 
     <!-- Content description to tell the user a notification has been removed from the notification shade -->
     <string name="accessibility_notification_dismissed">Notification dismissed.</string>
-
-    <!-- Content description to tell the user a bubble has been dismissed. -->
-    <string name="accessibility_bubble_dismissed">Bubble dismissed.</string>
 
     <!-- Content description for the notification shade panel (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_desc_notification_shade">Notification shade.</string>
@@ -1846,9 +1849,6 @@
     <string name="notification_alert_title">Default</string>
 
     <!-- [CHAR LIMIT=100] Notification Importance title -->
-    <string name="notification_bubble_title">Bubble</string>
-
-    <!-- [CHAR LIMIT=100] Notification Importance title -->
     <string name="notification_automatic_title">Automatic</string>
 
     <!-- [CHAR LIMIT=150] Notification Importance title: low importance level summary -->
@@ -1880,12 +1880,6 @@
 
     <!-- Text shown in notification guts for conversation notifications that don't implement the full feature -->
     <string name="no_shortcut"><xliff:g id="app_name" example="YouTube">%1$s</xliff:g> doesn\u2019t support conversation features</string>
-
-    <!-- [CHAR LIMIT=NONE] Empty overflow title -->
-    <string name="bubble_overflow_empty_title">No recent bubbles</string>
-
-    <!-- [CHAR LIMIT=NONE] Empty overflow subtitle -->
-    <string name="bubble_overflow_empty_subtitle">Recent bubbles and dismissed bubbles will appear here</string>
 
     <!-- Notification: Control panel: Label that displays when the app's notifications cannot be blocked. -->
     <string name="notification_unblockable_desc">These notifications can\'t be modified.</string>
@@ -2607,45 +2601,8 @@
     <!-- Description of the restart button in the hint of size compatibility mode. [CHAR LIMIT=NONE] -->
     <string name="restart_button_description">Tap to restart this app and go full screen.</string>
 
-    <!-- Text used for content description of settings button in the header of expanded bubble
-         view. [CHAR_LIMIT=NONE] -->
-    <string name="bubbles_settings_button_description">Settings for <xliff:g id="app_name" example="YouTube">%1$s</xliff:g> bubbles</string>
-    <!-- Content description for button that shows bubble overflow on click [CHAR LIMIT=NONE] -->
-    <string name="bubble_overflow_button_content_description">Overflow</string>
-    <!-- Action to add overflow bubble back to stack. [CHAR LIMIT=NONE] -->
-    <string name="bubble_accessibility_action_add_back">Add back to stack</string>
-    <!-- The text for the manage bubbles link. [CHAR LIMIT=NONE] -->
-    <string name="manage_bubbles_text">Manage</string>
-    <!-- Content description when a bubble is focused. [CHAR LIMIT=NONE] -->
-    <string name="bubble_content_description_single"><xliff:g id="notification_title" example="some title">%1$s</xliff:g> from <xliff:g id="app_name" example="YouTube">%2$s</xliff:g></string>
-    <!-- Content description when the stack of bubbles is focused. [CHAR LIMIT=NONE] -->
-    <string name="bubble_content_description_stack"><xliff:g id="notification_title" example="some title">%1$s</xliff:g> from <xliff:g id="app_name" example="YouTube">%2$s</xliff:g> and <xliff:g id="bubble_count" example="4">%3$d</xliff:g> more</string>
     <!-- Action in accessibility menu to move the stack of bubbles [CHAR LIMIT=20] -->
     <string name="bubble_accessibility_action_move">Move</string>
-    <!-- Action in accessibility menu to move the stack of bubbles to the top left of the screen. [CHAR LIMIT=30] -->
-    <string name="bubble_accessibility_action_move_top_left">Move top left</string>
-    <!-- Action in accessibility menu to move the stack of bubbles to the top right of the screen. [CHAR LIMIT=30] -->
-    <string name="bubble_accessibility_action_move_top_right">Move top right</string>
-    <!-- Action in accessibility menu to move the stack of bubbles to the bottom left of the screen. [CHAR LIMIT=30]-->
-    <string name="bubble_accessibility_action_move_bottom_left">Move bottom left</string>
-    <!-- Action in accessibility menu to move the stack of bubbles to the bottom right of the screen. [CHAR LIMIT=30]-->
-    <string name="bubble_accessibility_action_move_bottom_right">Move bottom right</string>
-    <!-- Text used for the bubble dismiss area. Bubbles dragged to, or flung towards, this area will go away. [CHAR LIMIT=30] -->
-    <string name="bubble_dismiss_text">Dismiss bubble</string>
-    <!-- Button text to stop a conversation from bubbling [CHAR LIMIT=60]-->
-    <string name="bubbles_dont_bubble_conversation">Don\u2019t bubble conversation</string>
-    <!-- Title text for the bubbles feature education cling shown when a bubble is on screen for the first time. [CHAR LIMIT=60]-->
-    <string name="bubbles_user_education_title">Chat using bubbles</string>
-    <!-- Descriptive text for the bubble feature education cling shown when a bubble is on screen for the first time. [CHAR LIMIT=NONE] -->
-    <string name="bubbles_user_education_description">New conversations appear as floating icons, or bubbles. Tap to open bubble. Drag to move it.</string>
-    <!-- Title text for the bubble "manage" button tool tip highlighting where users can go to control bubble settings. [CHAR LIMIT=60]-->
-    <string name="bubbles_user_education_manage_title">Control bubbles anytime</string>
-    <!-- Descriptive text for the bubble "manage" button tool tip highlighting where users can go to control bubble settings. [CHAR LIMIT=80]-->
-    <string name="bubbles_user_education_manage">Tap Manage to turn off bubbles from this app</string>
-    <!-- Button text for dismissing the bubble "manage" button tool tip  [CHAR LIMIT=20]-->
-    <string name="bubbles_user_education_got_it">Got it</string>
-    <!-- Label for the button that takes the user to the notification settings for the given app. -->
-    <string name="bubbles_app_settings"><xliff:g id="notification_title" example="Android Messages">%1$s</xliff:g> settings</string>
 
     <!-- Notification content text when the system navigation mode changes as a result of changing the default launcher [CHAR LIMIT=NONE] -->
     <string name="notification_content_system_nav_changed">System navigation updated. To make changes, go to Settings.</string>

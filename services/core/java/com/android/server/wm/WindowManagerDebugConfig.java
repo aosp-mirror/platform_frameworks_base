@@ -50,7 +50,7 @@ public class WindowManagerDebugConfig {
     static final boolean DEBUG_WINDOW_TRACE = false;
     static final boolean DEBUG_TASK_MOVEMENT = false;
     static final boolean DEBUG_TASK_POSITIONING = false;
-    static final boolean DEBUG_STACK = false;
+    static final boolean DEBUG_ROOT_TASK = false;
     static final boolean DEBUG_DISPLAY = false;
     static final boolean DEBUG_POWER = false;
     static final boolean SHOW_VERBOSE_TRANSACTIONS = false;

@@ -39,7 +39,6 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.media.MediaHost;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.qs.QSTileView;
-import com.android.systemui.qs.customize.QSCustomizer;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.statusbar.policy.SecurityController;
@@ -65,11 +64,7 @@ public class QSPanelTest extends SysuiTestCase {
     @Mock
     private QSTileHost mHost;
     @Mock
-    private QSCustomizer mCustomizer;
-    @Mock
     private QSTileImpl dndTile;
-    @Mock
-    private QSTileImpl mNonTile;
     @Mock
     private QSPanelControllerBase.TileRecord mDndTileRecord;
     @Mock
@@ -84,7 +79,6 @@ public class QSPanelTest extends SysuiTestCase {
     @Mock
     private ActivityStarter mActivityStarter;
     private UiEventLoggerFake mUiEventLogger;
-    private String mCachedSpecs = "";
 
     @Before
     public void setup() throws Exception {
@@ -113,8 +107,6 @@ public class QSPanelTest extends SysuiTestCase {
             when(dndTile.getTileSpec()).thenReturn("dnd");
             when(mHost.getTiles()).thenReturn(Collections.emptyList());
             when(mHost.createTileView(any(), anyBoolean())).thenReturn(mQSTileView);
-
-            mQsPanel.setCustomizer(mCustomizer);
             mQsPanel.addTile(mDndTileRecord);
             mQsPanel.setCallback(mCallback);
         });

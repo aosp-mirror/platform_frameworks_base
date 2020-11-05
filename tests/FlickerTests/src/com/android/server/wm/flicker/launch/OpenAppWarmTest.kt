@@ -38,6 +38,8 @@ import com.android.server.wm.flicker.startRotation
 import com.android.server.wm.flicker.statusBarLayerIsAlwaysVisible
 import com.android.server.wm.flicker.statusBarLayerRotatesScales
 import com.android.server.wm.flicker.statusBarWindowIsAlwaysVisible
+import com.android.server.wm.flicker.visibleWindowsShownMoreThanOneConsecutiveEntry
+import com.android.server.wm.flicker.visibleLayersShownMoreThanOneConsecutiveEntry
 import org.junit.FixMethodOrder
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
@@ -91,9 +93,10 @@ class OpenAppWarmTest(
                         windowManagerTrace {
                             navBarWindowIsAlwaysVisible()
                             statusBarWindowIsAlwaysVisible()
+                            visibleWindowsShownMoreThanOneConsecutiveEntry()
 
                             appWindowReplacesLauncherAsTopWindow(testApp)
-                            wallpaperWindowBecomesInvisible(enabled = false)
+                            wallpaperWindowBecomesInvisible()
                         }
 
                         layersTrace {
@@ -106,8 +109,10 @@ class OpenAppWarmTest(
                                 configuration.endRotation)
                             navBarLayerIsAlwaysVisible(enabled = false)
                             statusBarLayerIsAlwaysVisible(enabled = false)
+                            visibleLayersShownMoreThanOneConsecutiveEntry(
+                                    enabled = Surface.ROTATION_0 == configuration.endRotation)
 
-                            wallpaperLayerBecomesInvisible(testApp)
+                            appLayerReplacesWallpaperLayer(testApp)
                         }
 
                         eventLog {

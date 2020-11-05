@@ -294,9 +294,9 @@ public class RequestSync {
                 "       -a|--authority <AUTHORITY>\n" +
                 "    App-standby related options\n" +
                 "\n" +
-                "       -f|--foreground (cause WORKING_SET, FREQUENT sync adapters" +
-                        " to run immediately)\n" +
-                "       -F|--top (cause even RARE sync adapters to run immediately)\n" +
+                "       -f|--foreground (defeat app-standby job throttling," +
+                " but not battery saver)\n" +
+                "       -F|--top (defeat app-standby job throttling and battery saver)\n" +
                 "    ContentResolver extra options:\n" +
                 "      --is|--ignore-settings: Add SYNC_EXTRAS_IGNORE_SETTINGS\n" +
                 "      --ib|--ignore-backoff: Add SYNC_EXTRAS_IGNORE_BACKOFF\n" +

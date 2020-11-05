@@ -22,13 +22,13 @@ import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 
 import com.android.systemui.assist.AssistManager;
-import com.android.systemui.bubbles.Bubbles;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.StatusBarState;
+import com.android.wm.shell.bubbles.Bubbles;
 
 import java.util.ArrayList;
 import java.util.Optional;
@@ -51,7 +51,7 @@ public class ShadeControllerImpl implements ShadeController {
     private final int mDisplayId;
     protected final Lazy<StatusBar> mStatusBarLazy;
     private final Lazy<AssistManager> mAssistManagerLazy;
-    private final Optional<Lazy<Bubbles>> mBubblesOptional;
+    private final Optional<Bubbles> mBubblesOptional;
 
     private final ArrayList<Runnable> mPostCollapseRunnables = new ArrayList<>();
 
@@ -64,7 +64,7 @@ public class ShadeControllerImpl implements ShadeController {
             WindowManager windowManager,
             Lazy<StatusBar> statusBarLazy,
             Lazy<AssistManager> assistManagerLazy,
-            Optional<Lazy<Bubbles>> bubblesOptional
+            Optional<Bubbles> bubblesOptional
     ) {
         mCommandQueue = commandQueue;
         mStatusBarStateController = statusBarStateController;
@@ -135,7 +135,7 @@ public class ShadeControllerImpl implements ShadeController {
             getStatusBar().getNotificationShadeWindowViewController().cancelExpandHelper();
             getStatusBarView().collapsePanel(true /* animate */, delayed, speedUpFactor);
         } else if (mBubblesOptional.isPresent()) {
-            mBubblesOptional.get().get().collapseStack();
+            mBubblesOptional.get().collapseStack();
         }
     }
 

@@ -108,12 +108,14 @@ public class SystemUIFactory {
                     .setPip(mWMComponent.getPip())
                     .setSplitScreen(mWMComponent.getSplitScreen())
                     .setOneHanded(mWMComponent.getOneHanded())
+                    .setBubbles(mWMComponent.getBubbles())
                     .setShellDump(mWMComponent.getShellDump());
         } else {
             // TODO: Call on prepareSysUIComponentBuilder but not with real components.
             builder = builder.setPip(Optional.ofNullable(null))
                     .setSplitScreen(Optional.ofNullable(null))
                     .setOneHanded(Optional.ofNullable(null))
+                    .setBubbles(Optional.ofNullable(null))
                     .setShellDump(Optional.ofNullable(null));
         }
         mSysUIComponent = builder

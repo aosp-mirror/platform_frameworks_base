@@ -2242,9 +2242,15 @@ public class HdmiControlService extends SystemService {
             List<String> allSettings = hdmiCecConfig.getAllSettings();
             Set<String> userSettings = new HashSet<>(hdmiCecConfig.getUserSettings());
             for (String setting : allSettings) {
-                pw.println(setting + ": " + hdmiCecConfig.getValue(setting)
-                        + " (default: " + hdmiCecConfig.getDefaultValue(setting) + ")"
-                        + (userSettings.contains(setting) ? " [modifiable]" : ""));
+                if (hdmiCecConfig.isStringValueType(setting)) {
+                    pw.println(setting + " (string): " + hdmiCecConfig.getStringValue(setting)
+                            + " (default: " + hdmiCecConfig.getDefaultStringValue(setting) + ")"
+                            + (userSettings.contains(setting) ? " [modifiable]" : ""));
+                } else if (hdmiCecConfig.isIntValueType(setting)) {
+                    pw.println(setting + " (int): " + hdmiCecConfig.getIntValue(setting)
+                            + " (default: " + hdmiCecConfig.getDefaultIntValue(setting) + ")"
+                            + (userSettings.contains(setting) ? " [modifiable]" : ""));
+                }
             }
             pw.decreaseIndent();
 
@@ -2273,33 +2279,68 @@ public class HdmiControlService extends SystemService {
         }
 
         @Override
-        public List<String> getAllowedCecSettingValues(String name) {
+        public List<String> getAllowedCecSettingStringValues(String name) {
             enforceAccessPermission();
             long token = Binder.clearCallingIdentity();
             try {
-                return HdmiControlService.this.getHdmiCecConfig().getAllowedValues(name);
+                return HdmiControlService.this.getHdmiCecConfig().getAllowedStringValues(name);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
         }
 
         @Override
-        public String getCecSettingValue(String name) {
+        public int[] getAllowedCecSettingIntValues(String name) {
             enforceAccessPermission();
             long token = Binder.clearCallingIdentity();
             try {
-                return HdmiControlService.this.getHdmiCecConfig().getValue(name);
+                List<Integer> allowedValues =
+                        HdmiControlService.this.getHdmiCecConfig().getAllowedIntValues(name);
+                return allowedValues.stream().mapToInt(i->i).toArray();
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
         }
 
         @Override
-        public void setCecSettingValue(String name, String value) {
+        public String getCecSettingStringValue(String name) {
             enforceAccessPermission();
             long token = Binder.clearCallingIdentity();
             try {
-                HdmiControlService.this.getHdmiCecConfig().setValue(name, value);
+                return HdmiControlService.this.getHdmiCecConfig().getStringValue(name);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override
+        public void setCecSettingStringValue(String name, String value) {
+            enforceAccessPermission();
+            long token = Binder.clearCallingIdentity();
+            try {
+                HdmiControlService.this.getHdmiCecConfig().setStringValue(name, value);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override
+        public int getCecSettingIntValue(String name) {
+            enforceAccessPermission();
+            long token = Binder.clearCallingIdentity();
+            try {
+                return HdmiControlService.this.getHdmiCecConfig().getIntValue(name);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override
+        public void setCecSettingIntValue(String name, int value) {
+            enforceAccessPermission();
+            long token = Binder.clearCallingIdentity();
+            try {
+                HdmiControlService.this.getHdmiCecConfig().setIntValue(name, value);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }

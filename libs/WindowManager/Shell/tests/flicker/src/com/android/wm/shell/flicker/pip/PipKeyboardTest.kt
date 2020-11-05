@@ -18,7 +18,6 @@ package com.android.wm.shell.flicker.pip
 
 import android.content.ComponentName
 import android.graphics.Region
-import android.support.test.launcherhelper.LauncherStrategyFactory
 import android.util.Log
 import android.view.Surface
 import android.view.WindowManager
@@ -29,6 +28,9 @@ import com.android.server.wm.flicker.dsl.runWithFlicker
 import com.android.server.wm.flicker.helpers.closePipWindow
 import com.android.server.wm.flicker.helpers.hasPipWindow
 import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
+import com.android.wm.shell.flicker.TEST_APP_IME_ACTIVITY_COMPONENT_NAME
+import com.android.wm.shell.flicker.IME_WINDOW_NAME
+import com.android.wm.shell.flicker.TEST_APP_PIP_ACTIVITY_WINDOW_NAME
 import com.android.wm.shell.flicker.helpers.ImeAppHelper
 import org.junit.FixMethodOrder
 import org.junit.Test
@@ -51,19 +53,11 @@ class PipKeyboardTest(
     private val windowManager: WindowManager =
             instrumentation.context.getSystemService(WindowManager::class.java)
 
-    private val keyboardApp = ImeAppHelper(instrumentation, "ImeApp",
-            LauncherStrategyFactory.getInstance(instrumentation).launcherStrategy)
-
-    private val KEYBOARD_ACTIVITY: ComponentName = ComponentName.createRelative(
-            "com.android.wm.shell.flicker.testapp", ".ImeActivity")
-    private val PIP_ACTIVITY_WINDOW_NAME = "PipActivity"
-    private val INPUT_METHOD_WINDOW_NAME = "InputMethod"
-
-    private val testRepetitions = 10
+    private val keyboardApp = ImeAppHelper(instrumentation)
 
     private val keyboardScenario: FlickerBuilder
         get() = FlickerBuilder(instrumentation).apply {
-            repeat { testRepetitions }
+            repeat { TEST_REPETITIONS }
             // disable layer tracing
             withLayerTracing { null }
             setup {
@@ -73,11 +67,11 @@ class PipKeyboardTest(
                     // launch our target pip app
                     testApp.open()
                     this.setRotation(rotation)
-                    testApp.clickEnterPipButton(device)
+                    testApp.clickEnterPipButton()
                     // open an app with an input field and a keyboard
                     // UiAutomator doesn't support to launch the multiple Activities in a task.
                     // So use launchActivity() for the Keyboard Activity.
-                    launchActivity(KEYBOARD_ACTIVITY)
+                    launchActivity(TEST_APP_IME_ACTIVITY_COMPONENT_NAME)
                 }
             }
             teardown {
@@ -101,10 +95,10 @@ class PipKeyboardTest(
             withTestName { testTag }
             transitions {
                 // open the soft keyboard
-                keyboardApp.openIME(device)
+                keyboardApp.openIME()
 
                 // then close it again
-                keyboardApp.closeIME(device)
+                keyboardApp.closeIME()
             }
             assertions {
                 windowManagerTrace {
@@ -127,18 +121,18 @@ class PipKeyboardTest(
             withTestName { testTag }
             transitions {
                 // open the soft keyboard
-                keyboardApp.openIME(device)
+                keyboardApp.openIME()
             }
             teardown {
                 eachRun {
                     // close the keyboard
-                    keyboardApp.closeIME(device)
+                    keyboardApp.closeIME()
                 }
             }
             assertions {
                 windowManagerTrace {
                     end {
-                        isAboveWindow(INPUT_METHOD_WINDOW_NAME, PIP_ACTIVITY_WINDOW_NAME)
+                        isAboveWindow(IME_WINDOW_NAME, TEST_APP_PIP_ACTIVITY_WINDOW_NAME)
                     }
                 }
             }
@@ -207,6 +201,8 @@ class PipKeyboardTest(
     }
 
     companion object {
+        private const val TEST_REPETITIONS = 10
+
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
         fun getParams(): Collection<Array<Any>> {

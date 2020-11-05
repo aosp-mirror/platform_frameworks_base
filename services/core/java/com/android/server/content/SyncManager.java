@@ -151,6 +151,8 @@ import java.util.function.Predicate;
  * run at a later time. Similarly, when a sync succeeds, backoff is cleared and all associated syncs
  * are rescheduled. A rescheduled sync will get a new jobId.
  *
+ * See also {@code SyncManager.md} in the same directory for how app-standby affects sync adapters.
+ *
  * @hide
  */
 public class SyncManager {

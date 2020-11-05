@@ -5030,6 +5030,7 @@ package android.media.tv.tuner {
     field public static final int INVALID_AV_SYNC_ID = -1; // 0xffffffff
     field public static final int INVALID_FILTER_ID = -1; // 0xffffffff
     field public static final long INVALID_FILTER_ID_64BIT = -1L; // 0xffffffffffffffffL
+    field public static final int INVALID_FIRST_MACROBLOCK_IN_SLICE = -1; // 0xffffffff
     field public static final int INVALID_FRONTEND_SETTING_FREQUENCY = -1; // 0xffffffff
     field public static final int INVALID_LTS_ID = -1; // 0xffffffff
     field public static final int INVALID_MMTP_RECORD_EVENT_MPT_SEQUENCE_NUM = -1; // 0xffffffff
@@ -5330,6 +5331,7 @@ package android.media.tv.tuner.filter {
 
   public class MmtpRecordEvent extends android.media.tv.tuner.filter.FilterEvent {
     method public long getDataLength();
+    method public int getFirstMbInSlice();
     method public int getMpuSequenceNumber();
     method public long getPts();
     method public int getScHevcIndexMask();
@@ -5370,9 +5372,14 @@ package android.media.tv.tuner.filter {
     field public static final int SC_HEVC_INDEX_SLICE_TRAIL_CRA = 128; // 0x80
     field public static final int SC_HEVC_INDEX_SPS = 1; // 0x1
     field public static final int SC_INDEX_B_FRAME = 4; // 0x4
+    field public static final int SC_INDEX_B_SLICE = 64; // 0x40
     field public static final int SC_INDEX_I_FRAME = 1; // 0x1
+    field public static final int SC_INDEX_I_SLICE = 16; // 0x10
     field public static final int SC_INDEX_P_FRAME = 2; // 0x2
+    field public static final int SC_INDEX_P_SLICE = 32; // 0x20
     field public static final int SC_INDEX_SEQUENCE = 8; // 0x8
+    field public static final int SC_INDEX_SI_SLICE = 128; // 0x80
+    field public static final int SC_INDEX_SP_SLICE = 256; // 0x100
     field public static final int TS_INDEX_ADAPTATION_EXTENSION_FLAG = 4096; // 0x1000
     field public static final int TS_INDEX_CHANGE_TO_EVEN_SCRAMBLED = 8; // 0x8
     field public static final int TS_INDEX_CHANGE_TO_NOT_SCRAMBLED = 4; // 0x4
@@ -5493,6 +5500,7 @@ package android.media.tv.tuner.filter {
 
   public class TsRecordEvent extends android.media.tv.tuner.filter.FilterEvent {
     method public long getDataLength();
+    method public int getFirstMbInSlice();
     method public int getPacketId();
     method public long getPts();
     method public int getScIndexMask();
@@ -5818,6 +5826,7 @@ package android.media.tv.tuner.frontend {
   public class DvbsFrontendSettings extends android.media.tv.tuner.frontend.FrontendSettings {
     method @NonNull public static android.media.tv.tuner.frontend.DvbsFrontendSettings.Builder builder();
     method @Nullable public android.media.tv.tuner.frontend.DvbsCodeRate getCodeRate();
+    method public boolean getCouldHandleDiseqcRxMessage();
     method public int getInputStreamId();
     method public int getModulation();
     method public int getPilot();
@@ -5827,7 +5836,6 @@ package android.media.tv.tuner.frontend {
     method public int getSymbolRate();
     method public int getType();
     method public int getVcmMode();
-    method public boolean isDiseqcRxMessage();
     field public static final int MODULATION_AUTO = 1; // 0x1
     field public static final int MODULATION_MOD_128APSK = 2048; // 0x800
     field public static final int MODULATION_MOD_16APSK = 256; // 0x100
@@ -5871,7 +5879,7 @@ package android.media.tv.tuner.frontend {
   public static class DvbsFrontendSettings.Builder {
     method @NonNull public android.media.tv.tuner.frontend.DvbsFrontendSettings build();
     method @NonNull public android.media.tv.tuner.frontend.DvbsFrontendSettings.Builder setCodeRate(@Nullable android.media.tv.tuner.frontend.DvbsCodeRate);
-    method @NonNull public android.media.tv.tuner.frontend.DvbsFrontendSettings.Builder setDiseqcRxMessage(boolean);
+    method @NonNull public android.media.tv.tuner.frontend.DvbsFrontendSettings.Builder setCouldHandleDiseqcRxMessage(boolean);
     method @IntRange(from=1) @NonNull public android.media.tv.tuner.frontend.DvbsFrontendSettings.Builder setFrequency(int);
     method @NonNull public android.media.tv.tuner.frontend.DvbsFrontendSettings.Builder setInputStreamId(int);
     method @NonNull public android.media.tv.tuner.frontend.DvbsFrontendSettings.Builder setModulation(int);
@@ -6011,7 +6019,7 @@ package android.media.tv.tuner.frontend {
   }
 
   public abstract class FrontendSettings {
-    method public int getEndFrequency();
+    method @IntRange(from=1) public int getEndFrequency();
     method public int getFrequency();
     method public int getFrontendSpectralInversion();
     method public abstract int getType();
@@ -6293,6 +6301,7 @@ package android.media.tv.tuner.frontend {
   public interface ScanCallback {
     method public void onAnalogSifStandardReported(int);
     method public void onAtsc3PlpInfosReported(@NonNull android.media.tv.tuner.frontend.Atsc3PlpInfo[]);
+    method public default void onDvbcAnnexReported(int);
     method public void onDvbsStandardReported(int);
     method public void onDvbtStandardReported(int);
     method public void onFrequenciesReported(@NonNull int[]);
@@ -11179,6 +11188,17 @@ package android.telephony.euicc {
 
 package android.telephony.ims {
 
+  public final class AudioCodecAttributes implements android.os.Parcelable {
+    ctor public AudioCodecAttributes(float, @NonNull android.util.Range<java.lang.Float>, float, @NonNull android.util.Range<java.lang.Float>);
+    method public int describeContents();
+    method public float getBandwidthKhz();
+    method @NonNull public android.util.Range<java.lang.Float> getBandwidthRangeKhz();
+    method public float getBitrateKbps();
+    method @NonNull public android.util.Range<java.lang.Float> getBitrateRangeKbps();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.ims.AudioCodecAttributes> CREATOR;
+  }
+
   public final class ImsCallForwardInfo implements android.os.Parcelable {
     ctor public ImsCallForwardInfo(int, int, int, int, @NonNull String, int);
     method public int describeContents();
@@ -11547,6 +11567,7 @@ package android.telephony.ims {
     ctor public ImsStreamMediaProfile(int, int, int, int, int);
     method public void copyFrom(android.telephony.ims.ImsStreamMediaProfile);
     method public int describeContents();
+    method @Nullable public android.telephony.ims.AudioCodecAttributes getAudioCodecAttributes();
     method public int getAudioDirection();
     method public int getAudioQuality();
     method public int getRttMode();
@@ -11554,6 +11575,7 @@ package android.telephony.ims {
     method public int getVideoQuality();
     method public boolean isReceivingRttAudio();
     method public boolean isRttCall();
+    method public void setAudioCodecAttributes(@NonNull android.telephony.ims.AudioCodecAttributes);
     method public void setReceivingRttAudio(boolean);
     method public void setRttMode(int);
     method public void writeToParcel(android.os.Parcel, int);

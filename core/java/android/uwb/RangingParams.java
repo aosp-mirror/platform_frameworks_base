@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -199,6 +200,43 @@ public final class RangingParams implements Parcelable {
      */
     public @Nullable PersistableBundle getSpecificationParameters() {
         return new PersistableBundle(mSpecificationParameters);
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public boolean equals(@Nullable Object obj) {
+        if (this == obj) {
+            return true;
+        }
+
+        if (obj instanceof RangingParams) {
+            RangingParams other = (RangingParams) obj;
+
+            return mIsInitiator == other.mIsInitiator
+                    && mIsController == other.mIsController
+                    && mSamplePeriod.equals(other.mSamplePeriod)
+                    && mLocalDeviceAddress.equals(other.mLocalDeviceAddress)
+                    && mRemoteDeviceAddresses.equals(other.mRemoteDeviceAddresses)
+                    && mChannelNumber == other.mChannelNumber
+                    && mTransmitPreambleCodeIndex == other.mTransmitPreambleCodeIndex
+                    && mReceivePreambleCodeIndex == other.mReceivePreambleCodeIndex
+                    && mStsPhyPacketType == other.mStsPhyPacketType
+                    && mSpecificationParameters.size() == other.mSpecificationParameters.size()
+                    && mSpecificationParameters.kindofEquals(other.mSpecificationParameters);
+        }
+        return false;
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public int hashCode() {
+        return Objects.hash(mIsInitiator, mIsController, mSamplePeriod, mLocalDeviceAddress,
+                mRemoteDeviceAddresses, mChannelNumber, mTransmitPreambleCodeIndex,
+                mReceivePreambleCodeIndex, mStsPhyPacketType, mSpecificationParameters);
     }
 
     @Override

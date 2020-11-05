@@ -7745,10 +7745,14 @@ public class ActivityManagerService extends IActivityManager.Stub
      * @return true if the process should exit immediately (WTF is fatal)
      */
     @Override
-    public boolean handleApplicationWtf(final IBinder app, final String tag, boolean system,
-            final ApplicationErrorReport.ParcelableCrashInfo crashInfo, int immediateCallerPid) {
+    public boolean handleApplicationWtf(@Nullable final IBinder app, @Nullable final String tag,
+            boolean system, @NonNull final ApplicationErrorReport.ParcelableCrashInfo crashInfo,
+            int immediateCallerPid) {
         final int callingUid = Binder.getCallingUid();
         final int callingPid = Binder.getCallingPid();
+
+        // Internal callers in RuntimeInit should always generate a crashInfo.
+        Preconditions.checkNotNull(crashInfo);
 
         // If this is coming from the system, we could very well have low-level
         // system locks held, so we want to do this all asynchronously.  And we
@@ -7782,14 +7786,15 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
-    ProcessRecord handleApplicationWtfInner(int callingUid, int callingPid, IBinder app, String tag,
-            final ApplicationErrorReport.CrashInfo crashInfo) {
+    ProcessRecord handleApplicationWtfInner(int callingUid, int callingPid, @Nullable IBinder app,
+            @Nullable String tag, @Nullable final ApplicationErrorReport.CrashInfo crashInfo) {
         final ProcessRecord r = findAppProcess(app, "WTF");
         final String processName = app == null ? "system_server"
                 : (r == null ? "unknown" : r.processName);
 
         EventLogTags.writeAmWtf(UserHandle.getUserId(callingUid), callingPid,
-                processName, r == null ? -1 : r.info.flags, tag, crashInfo.exceptionMessage);
+                processName, r == null ? -1 : r.info.flags, tag,
+                crashInfo == null ? "unknown" : crashInfo.exceptionMessage);
 
         FrameworkStatsLog.write(FrameworkStatsLog.WTF_OCCURRED, callingUid, tag, processName,
                 callingPid, (r != null) ? r.getProcessClassEnum() : 0);

@@ -42,7 +42,6 @@ import com.android.wm.shell.pip.PipBoundsState;
 import com.android.wm.shell.pip.PipSnapAlgorithm;
 import com.android.wm.shell.pip.PipTaskOrganizer;
 
-import java.io.PrintWriter;
 import java.util.function.Consumer;
 
 import kotlin.Unit;
@@ -80,20 +79,6 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
     /** The region that all of PIP must stay within. */
     private final Rect mFloatingAllowedArea = new Rect();
 
-    /**
-     * Temporary bounds used when PIP is being dragged or animated. These bounds are applied to PIP
-     * using {@link PipTaskOrganizer#scheduleUserResizePip}, so that we can animate shrinking into
-     * and expanding out of the magnetic dismiss target.
-     *
-     * Once PIP is done being dragged or animated, we set {@link #mBounds} equal to these temporary
-     * bounds, and call {@link PipTaskOrganizer#scheduleFinishResizePip} to 'officially' move PIP to
-     * its new bounds.
-     */
-    private final Rect mTemporaryBounds = new Rect();
-
-    /** The destination bounds to which PIP is animating. */
-    private final Rect mAnimatingToBounds = new Rect();
-
     private int mStashOffset = 0;
 
     /** Coordinator instance for resolving conflicts with other floating content. */
@@ -108,15 +93,15 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
             });
 
     /**
-     * PhysicsAnimator instance for animating {@link #mTemporaryBounds} using physics animations.
+     * PhysicsAnimator instance for animating {@link PipBoundsState#getAnimatingBoundsState()}
+     * using physics animations.
      */
-    private PhysicsAnimator<Rect> mTemporaryBoundsPhysicsAnimator = PhysicsAnimator.getInstance(
-            mTemporaryBounds);
+    private final PhysicsAnimator<Rect> mTemporaryBoundsPhysicsAnimator;
 
     private MagnetizedObject<Rect> mMagnetizedPip;
 
     /**
-     * Update listener that resizes the PIP to {@link #mTemporaryBounds}.
+     * Update listener that resizes the PIP to {@link PipBoundsState#getAnimatingBoundsState()}.
      */
     private final PhysicsAnimator.UpdateListener<Rect> mResizePipUpdateListener;
 
@@ -189,14 +174,17 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
         mSnapAlgorithm = snapAlgorithm;
         mFloatingContentCoordinator = floatingContentCoordinator;
         mPipTaskOrganizer.registerPipTransitionCallback(mPipTransitionCallback);
+        mTemporaryBoundsPhysicsAnimator = PhysicsAnimator.getInstance(
+                mPipBoundsState.getAnimatingBoundsState().getTemporaryBounds());
         mTemporaryBoundsPhysicsAnimator.setCustomAnimationHandler(
                 mSfAnimationHandlerThreadLocal.get());
+
         reloadResources();
 
         mResizePipUpdateListener = (target, values) -> {
-            if (!mTemporaryBounds.isEmpty()) {
-                mPipTaskOrganizer.scheduleUserResizePip(
-                        getBounds(), mTemporaryBounds, null);
+            if (mPipBoundsState.getAnimatingBoundsState().isAnimating()) {
+                mPipTaskOrganizer.scheduleUserResizePip(getBounds(),
+                        mPipBoundsState.getAnimatingBoundsState().getTemporaryBounds(), null);
             }
         };
     }
@@ -209,7 +197,8 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
     @NonNull
     @Override
     public Rect getFloatingBoundsOnScreen() {
-        return !mAnimatingToBounds.isEmpty() ? mAnimatingToBounds : getBounds();
+        return !mPipBoundsState.getAnimatingBoundsState().getAnimatingToBounds().isEmpty()
+                ? mPipBoundsState.getAnimatingBoundsState().getAnimatingToBounds() : getBounds();
     }
 
     @NonNull
@@ -227,16 +216,12 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
      * Synchronizes the current bounds with the pinned stack, cancelling any ongoing animations.
      */
     void synchronizePinnedStackBounds() {
-        cancelAnimations();
-        mTemporaryBounds.setEmpty();
+        cancelPhysicsAnimation();
+        mPipBoundsState.getAnimatingBoundsState().onAllAnimationsEnded();
 
         if (mPipTaskOrganizer.isInPip()) {
             mFloatingContentCoordinator.onContentMoved(this);
         }
-    }
-
-    boolean isAnimating() {
-        return mTemporaryBoundsPhysicsAnimator.isRunning();
     }
 
     /**
@@ -261,14 +246,14 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
         if (!mSpringingToTouch) {
             // If we are moving PIP directly to the touch event locations, cancel any animations and
             // move PIP to the given bounds.
-            cancelAnimations();
+            cancelPhysicsAnimation();
 
             if (!isDragging) {
                 resizePipUnchecked(toBounds);
                 mPipBoundsState.setBounds(toBounds);
             } else {
-                mTemporaryBounds.set(toBounds);
-                mPipTaskOrganizer.scheduleUserResizePip(getBounds(), mTemporaryBounds,
+                mPipBoundsState.getAnimatingBoundsState().setTemporaryBounds(toBounds);
+                mPipTaskOrganizer.scheduleUserResizePip(getBounds(), toBounds,
                         (Rect newBounds) -> {
                             mMainHandler.post(() -> {
                                 mMenuController.updateMenuLayout(newBounds);
@@ -303,9 +288,9 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
         final float destinationY = targetCenter.y - (desiredHeight / 2f);
 
         // If we're already in the dismiss target area, then there won't be a move to set the
-        // temporary bounds, so just initialize it to the current bounds
-        if (mTemporaryBounds.isEmpty()) {
-            mTemporaryBounds.set(getBounds());
+        // temporary bounds, so just initialize it to the current bounds.
+        if (!mPipBoundsState.getAnimatingBoundsState().isAnimating()) {
+            mPipBoundsState.getAnimatingBoundsState().setTemporaryBounds(getBounds());
         }
         mTemporaryBoundsPhysicsAnimator
                 .spring(FloatProperties.RECT_X, destinationX, velX, mSpringConfig)
@@ -339,7 +324,7 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
             Log.d(TAG, "exitPip: skipAnimation=" + skipAnimation
                     + " callers=\n" + Debug.getCallers(5, "    "));
         }
-        cancelAnimations();
+        cancelPhysicsAnimation();
         mMenuController.hideMenuWithoutResize();
         mPipTaskOrganizer.getUpdateHandler().post(() -> {
             mPipTaskOrganizer.exitPip(skipAnimation
@@ -356,7 +341,7 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
         if (DEBUG) {
             Log.d(TAG, "removePip: callers=\n" + Debug.getCallers(5, "    "));
         }
-        cancelAnimations();
+        cancelPhysicsAnimation();
         mMenuController.hideMenuWithoutResize();
         mPipTaskOrganizer.removePip();
     }
@@ -380,14 +365,6 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
      */
     Rect getBounds() {
         return mPipBoundsState.getBounds();
-    }
-
-    /**
-     * Returns the PIP bounds if we're not animating, or the current, temporary animating bounds
-     * otherwise.
-     */
-    Rect getPossiblyAnimatingBounds() {
-        return mTemporaryBounds.isEmpty() ? getBounds() : mTemporaryBounds;
     }
 
     /**
@@ -428,9 +405,10 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
                 : mMovementBounds.right;
 
         final float xEndValue = velocityX < 0 ? leftEdge : rightEdge;
+
+        final int startValueY = mPipBoundsState.getAnimatingBoundsState().getTemporaryBounds().top;
         final float estimatedFlingYEndValue =
-                PhysicsAnimator.estimateFlingEndValue(
-                        mTemporaryBounds.top, velocityY, mFlingConfigY);
+                PhysicsAnimator.estimateFlingEndValue(startValueY, velocityY, mFlingConfigY);
 
         startBoundsAnimator(xEndValue /* toX */, estimatedFlingYEndValue /* toY */,
                 false /* dismiss */);
@@ -443,7 +421,7 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
     void animateToBounds(Rect bounds, PhysicsAnimator.SpringConfig springConfig) {
         if (!mTemporaryBoundsPhysicsAnimator.isRunning()) {
             // Animate from the current bounds if we're not already animating.
-            mTemporaryBounds.set(getBounds());
+            mPipBoundsState.getAnimatingBoundsState().setTemporaryBounds(getBounds());
         }
 
         mTemporaryBoundsPhysicsAnimator
@@ -513,7 +491,7 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
             Log.d(TAG, "animateToOffset: originalBounds=" + originalBounds + " offset=" + offset
                     + " callers=\n" + Debug.getCallers(5, "    "));
         }
-        cancelAnimations();
+        cancelPhysicsAnimation();
         mPipTaskOrganizer.scheduleOffsetPip(originalBounds, offset, SHIFT_DURATION,
                 mUpdateBoundsCallback);
     }
@@ -521,9 +499,9 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
     /**
      * Cancels all existing animations.
      */
-    private void cancelAnimations() {
+    private void cancelPhysicsAnimation() {
         mTemporaryBoundsPhysicsAnimator.cancel();
-        mAnimatingToBounds.setEmpty();
+        mPipBoundsState.getAnimatingBoundsState().onPhysicsAnimationEnded();
         mSpringingToTouch = false;
     }
 
@@ -547,22 +525,19 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
      */
     private void startBoundsAnimator(float toX, float toY, boolean dismiss) {
         if (!mSpringingToTouch) {
-            cancelAnimations();
+            cancelPhysicsAnimation();
         }
 
-        // Set animatingToBounds directly to avoid allocating a new Rect, but then call
-        // setAnimatingToBounds to run the normal logic for changing animatingToBounds.
-        mAnimatingToBounds.set(
+        setAnimatingToBounds(new Rect(
                 (int) toX,
                 (int) toY,
                 (int) toX + getBounds().width(),
-                (int) toY + getBounds().height());
-        setAnimatingToBounds(mAnimatingToBounds);
+                (int) toY + getBounds().height()));
 
         if (!mTemporaryBoundsPhysicsAnimator.isRunning()) {
             mTemporaryBoundsPhysicsAnimator
                     .addUpdateListener(mResizePipUpdateListener)
-                    .withEndActions(this::onBoundsAnimationEnd);
+                    .withEndActions(this::onBoundsPhysicsAnimationEnd);
         }
 
         mTemporaryBoundsPhysicsAnimator.start();
@@ -576,31 +551,34 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
         mDismissalPending = true;
     }
 
-    private void onBoundsAnimationEnd() {
+    private void onBoundsPhysicsAnimationEnd() {
+        // The physics animation ended, though we may not necessarily be done animating, such as
+        // when we're still dragging after moving out of the magnetic target.
         if (!mDismissalPending
                 && !mSpringingToTouch
                 && !mMagnetizedPip.getObjectStuckToTarget()) {
-            mPipBoundsState.setBounds(mTemporaryBounds);
+            // All animations (including dragging) have actually finished.
+            mPipBoundsState.setBounds(
+                    mPipBoundsState.getAnimatingBoundsState().getTemporaryBounds());
+            mPipBoundsState.getAnimatingBoundsState().onAllAnimationsEnded();
             if (!mDismissalPending) {
                 // do not schedule resize if PiP is dismissing, which may cause app re-open to
                 // mBounds instead of it's normal bounds.
                 mPipTaskOrganizer.scheduleFinishResizePip(getBounds());
             }
-            mTemporaryBounds.setEmpty();
         }
-
-        mAnimatingToBounds.setEmpty();
+        mPipBoundsState.getAnimatingBoundsState().onPhysicsAnimationEnded();
         mSpringingToTouch = false;
         mDismissalPending = false;
     }
 
     /**
-     * Notifies the floating coordinator that we're moving, and sets {@link #mAnimatingToBounds} so
+     * Notifies the floating coordinator that we're moving, and sets the animating to bounds so
      * we return these bounds from
      * {@link FloatingContentCoordinator.FloatingContent#getFloatingBoundsOnScreen()}.
      */
     private void setAnimatingToBounds(Rect bounds) {
-        mAnimatingToBounds.set(bounds);
+        mPipBoundsState.getAnimatingBoundsState().setAnimatingToBounds(bounds);
         mFloatingContentCoordinator.onContentMoved(this);
     }
 
@@ -639,7 +617,8 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
     MagnetizedObject<Rect> getMagnetizedPip() {
         if (mMagnetizedPip == null) {
             mMagnetizedPip = new MagnetizedObject<Rect>(
-                    mContext, mTemporaryBounds, FloatProperties.RECT_X, FloatProperties.RECT_Y) {
+                    mContext, mPipBoundsState.getAnimatingBoundsState().getTemporaryBounds(),
+                    FloatProperties.RECT_X, FloatProperties.RECT_Y) {
                 @Override
                 public float getWidth(@NonNull Rect animatedPipBounds) {
                     return animatedPipBounds.width();
@@ -660,11 +639,5 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
         }
 
         return mMagnetizedPip;
-    }
-
-    public void dump(PrintWriter pw, String prefix) {
-        final String innerPrefix = prefix + "  ";
-        pw.println(prefix + TAG);
-        pw.println(innerPrefix + "mBounds=" + getBounds());
     }
 }

@@ -83,4 +83,9 @@ public interface SplitScreen {
      * @return {@code true} if it successes to split the primary task.
      */
     boolean splitPrimaryTask();
+
+    /**
+     * Exits the split to make the primary task fullscreen.
+     */
+    void dismissSplitToPrimaryTask();
 }

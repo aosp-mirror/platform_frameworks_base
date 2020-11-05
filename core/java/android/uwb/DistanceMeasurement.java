@@ -17,8 +17,11 @@
 package android.uwb;
 
 import android.annotation.FloatRange;
+import android.annotation.Nullable;
 import android.os.Parcel;
 import android.os.Parcelable;
+
+import java.util.Objects;
 
 /**
  * A data point for the distance measurement
@@ -69,6 +72,32 @@ public final class DistanceMeasurement implements Parcelable {
     @FloatRange(from = 0.0, to = 1.0)
     public double getConfidenceLevel() {
         return mConfidenceLevel;
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public boolean equals(@Nullable Object obj) {
+        if (this == obj) {
+            return true;
+        }
+
+        if (obj instanceof DistanceMeasurement) {
+            DistanceMeasurement other = (DistanceMeasurement) obj;
+            return mMeters == other.getMeters()
+                    && mErrorMeters == other.getErrorMeters()
+                    && mConfidenceLevel == other.getConfidenceLevel();
+        }
+        return false;
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public int hashCode() {
+        return Objects.hash(mMeters, mErrorMeters, mConfidenceLevel);
     }
 
     @Override

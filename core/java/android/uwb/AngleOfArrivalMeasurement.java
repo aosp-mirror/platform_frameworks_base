@@ -21,6 +21,8 @@ import android.annotation.Nullable;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.Objects;
+
 /**
  * Represents an angle of arrival measurement between two devices using Ultra Wideband
  *
@@ -70,6 +72,31 @@ public final class AngleOfArrivalMeasurement implements Parcelable {
     @Nullable
     public AngleMeasurement getAltitude() {
         return mAltitudeAngleMeasurement;
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+
+        if (obj instanceof AngleOfArrivalMeasurement) {
+            AngleOfArrivalMeasurement other = (AngleOfArrivalMeasurement) obj;
+            return mAzimuthAngleMeasurement.equals(other.getAzimuth())
+                    && mAltitudeAngleMeasurement.equals(other.getAltitude());
+        }
+        return false;
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public int hashCode() {
+        return Objects.hash(mAzimuthAngleMeasurement, mAltitudeAngleMeasurement);
     }
 
     @Override
