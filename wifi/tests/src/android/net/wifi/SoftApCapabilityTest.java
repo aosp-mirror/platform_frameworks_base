@@ -42,10 +42,12 @@ public class SoftApCapabilityTest {
                 | SoftApCapability.SOFTAP_FEATURE_ACS_OFFLOAD;
         int[] testSupported2Glist = {1, 2, 3, 4};
         int[] testSupported5Glist = {36, 149};
+        int[] testSupported60Glist = {1, 2};
         SoftApCapability capability = new SoftApCapability(testSoftApFeature);
         capability.setMaxSupportedClients(10);
         capability.setSupportedChannelList(SoftApConfiguration.BAND_2GHZ, testSupported2Glist);
         capability.setSupportedChannelList(SoftApConfiguration.BAND_5GHZ, testSupported5Glist);
+        capability.setSupportedChannelList(SoftApConfiguration.BAND_60GHZ, testSupported60Glist);
 
         SoftApCapability copiedCapability = new SoftApCapability(capability);
 
@@ -64,9 +66,11 @@ public class SoftApCapabilityTest {
         capability.setMaxSupportedClients(10);
         int[] testSupported2Glist = {1, 2, 3, 4};
         int[] testSupported5Glist = {36, 149};
+        int[] testSupported60Glist = {1, 2};
 
         capability.setSupportedChannelList(SoftApConfiguration.BAND_2GHZ, testSupported2Glist);
         capability.setSupportedChannelList(SoftApConfiguration.BAND_5GHZ, testSupported5Glist);
+        capability.setSupportedChannelList(SoftApConfiguration.BAND_60GHZ, testSupported60Glist);
 
         Parcel parcelW = Parcel.obtain();
         capability.writeToParcel(parcelW, 0);
