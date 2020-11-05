@@ -31,8 +31,6 @@
 
     <include layout="@layout/notification_template_right_icon" />
 
-    <include layout="@layout/notification_template_reply_icon" />
-
     <LinearLayout
         android:id="@+id/notification_action_list_margin_target"
         android:layout_width="match_parent"

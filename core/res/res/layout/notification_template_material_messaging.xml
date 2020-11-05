@@ -58,5 +58,4 @@
         <include layout="@layout/notification_material_action_list" />
     </com.android.internal.widget.RemeasuringLinearLayout>
     <include layout="@layout/notification_template_right_icon" />
-    <include layout="@layout/notification_template_reply_icon" />
 </com.android.internal.widget.MessagingLayout>

@@ -216,9 +216,6 @@
     <!-- The margin on the end of the top-line content views (accommodates the expander) -->
     <dimen name="notification_heading_margin_end">48dp</dimen>
 
-    <!-- The inset of the reply icon. -->
-    <dimen name="notification_reply_inset">8dp</dimen>
-
     <!-- The margin for text at the end of the image view for media notifications -->
     <dimen name="notification_media_image_margin_end">72dp</dimen>
 
@@ -710,8 +707,6 @@
     <dimen name="notification_right_icon_size">52dp</dimen>
     <!-- The top margin of the right icon in the "big" notification states -->
     <dimen name="notification_right_icon_big_margin_top">16dp</dimen>
-    <!-- The size of the reply icon -->
-    <dimen name="notification_reply_icon_size">36dp</dimen>
     <!-- The alpha of a disabled notification button -->
     <item type="dimen" format="float" name="notification_action_disabled_alpha">0.5</item>
 

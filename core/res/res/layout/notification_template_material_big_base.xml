@@ -67,7 +67,6 @@
             </LinearLayout>
 
             <include layout="@layout/notification_template_right_icon" />
-            <include layout="@layout/notification_template_reply_icon" />
         </FrameLayout>
 
         <ViewStub
