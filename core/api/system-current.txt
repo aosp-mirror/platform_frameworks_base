@@ -4364,11 +4364,11 @@ package android.media {
   }
 
   public class MediaPlayer implements android.media.AudioRouting android.media.VolumeAutomation {
-    method @RequiresPermission("android.permission.BIND_IMS_SERVICE") public void setOnImsRxNoticeListener(@Nullable android.media.MediaPlayer.OnImsRxNoticeListener, @Nullable android.os.Handler);
+    method @RequiresPermission("android.permission.BIND_IMS_SERVICE") public void setOnRtpRxNoticeListener(@NonNull android.content.Context, @NonNull android.media.MediaPlayer.OnRtpRxNoticeListener, @Nullable android.os.Handler);
   }
 
-  public static interface MediaPlayer.OnImsRxNoticeListener {
-    method public void onImsRxNotice(@NonNull android.media.MediaPlayer, @NonNull byte[]);
+  public static interface MediaPlayer.OnRtpRxNoticeListener {
+    method public void onRtpRxNotice(@NonNull android.media.MediaPlayer, int, @NonNull int[]);
   }
 
   public final class MediaRecorder.AudioSource {
