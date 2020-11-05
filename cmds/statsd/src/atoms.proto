@@ -58,6 +58,7 @@ import "frameworks/base/core/proto/android/stats/mediaprovider/mediaprovider_enu
 import "frameworks/base/core/proto/android/stats/storage/storage_enums.proto";
 import "frameworks/base/core/proto/android/stats/style/style_enums.proto";
 import "frameworks/base/core/proto/android/stats/sysui/notification_enums.proto";
+import "frameworks/base/core/proto/android/stats/tls/enums.proto";
 import "frameworks/base/core/proto/android/telecomm/enums.proto";
 import "frameworks/base/core/proto/android/telephony/enums.proto";
 import "frameworks/base/core/proto/android/view/enums.proto";
@@ -485,6 +486,7 @@ message Atom {
         NetworkTetheringReported  network_tethering_reported =
             303 [(module) = "network_tethering"];
         ImeTouchReported ime_touch_reported = 304 [(module) = "sysui"];
+        TlsHandshakeReported tls_handshake_reported = 317 [(module) = "conscrypt"];
 
         MediametricsMediaParserReported mediametrics_mediaparser_reported = 316;
 
@@ -11261,4 +11263,20 @@ message BlobInfo {
 
     // List of leasees of this Blob
     optional BlobLeaseeListProto leasees = 5;
+}
+
+/**
+  * Pushes TLS handshake counters from Conscrypt.
+  * Pulled from:
+  *   external/conscrypt/common/src/main/java/org/conscrypt/ConscryptEngineSocket.java
+  *   external/conscrypt/common/src/main/java/org/conscrypt/ConscryptFileDescriptorSocket.java
+  */
+  message TlsHandshakeReported {
+    optional bool success = 1;
+
+    optional android.stats.tls.Protocol protocol = 2;
+
+    optional android.stats.tls.CipherSuite cipher_suite = 3;
+
+    optional int32 handshake_duration_millis = 4;
 }
