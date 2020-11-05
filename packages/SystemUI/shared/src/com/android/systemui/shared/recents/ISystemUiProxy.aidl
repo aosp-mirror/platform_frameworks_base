@@ -30,12 +30,13 @@ import android.view.MotionEvent;
 
 import com.android.systemui.shared.recents.IPinnedStackAnimationListener;
 import com.android.systemui.shared.recents.ISplitScreenListener;
+import com.android.systemui.shared.recents.IStartingWindowListener;
 import com.android.systemui.shared.recents.model.Task;
 import com.android.systemui.shared.system.RemoteTransitionCompat;
 
 /**
  * Temporary callbacks into SystemUI.
- * Next id = 43
+ * Next id = 44
  */
 interface ISystemUiProxy {
 
@@ -255,4 +256,8 @@ interface ISystemUiProxy {
             in PendingIntent intent, in Intent fillInIntent, in int stage, in int position,
             in Bundle options) = 41;
     void removeFromSideStage(in int taskId) = 42;
+    /**
+     * Sets listener to get task launching callbacks.
+     */
+    void setStartingWindowListener(IStartingWindowListener listener) = 43;
 }
