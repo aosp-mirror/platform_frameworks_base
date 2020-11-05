@@ -22,7 +22,9 @@ import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Rect;
+import android.hardware.display.DisplayManager;
 import android.os.Handler;
+import android.view.Display;
 import android.view.SurfaceControl;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.IRemoteMagnificationAnimationCallback;
@@ -52,8 +54,6 @@ public class WindowMagnification extends SystemUI implements WindowMagnifierCall
             ActivityInfo.CONFIG_DENSITY | ActivityInfo.CONFIG_ORIENTATION
                     | ActivityInfo.CONFIG_LOCALE;
 
-    @VisibleForTesting
-    protected WindowMagnificationAnimationController mWindowMagnificationAnimationController;
     private final ModeSwitchesController mModeSwitchesController;
     private final Handler mHandler;
     private final AccessibilityManager mAccessibilityManager;
@@ -61,6 +61,43 @@ public class WindowMagnification extends SystemUI implements WindowMagnifierCall
 
     private WindowMagnificationConnectionImpl mWindowMagnificationConnectionImpl;
     private Configuration mLastConfiguration;
+
+    private static class AnimationControllerSupplier extends
+            DisplayIdIndexSupplier<WindowMagnificationAnimationController> {
+
+        private final Context mContext;
+        private final Handler mHandler;
+        private final NavigationModeController mNavigationModeController;
+        private final WindowMagnifierCallback mWindowMagnifierCallback;
+
+        AnimationControllerSupplier(Context context, Handler handler,
+                NavigationModeController navigationModeController,
+                WindowMagnifierCallback windowMagnifierCallback, DisplayManager displayManager) {
+            super(displayManager);
+            mContext = context;
+            mHandler = handler;
+            mNavigationModeController = navigationModeController;
+            mWindowMagnifierCallback = windowMagnifierCallback;
+        }
+
+        @Override
+        protected WindowMagnificationAnimationController createInstance(Display display) {
+            final Context context = (display.getDisplayId() == Display.DEFAULT_DISPLAY)
+                    ? mContext
+                    : mContext.createDisplayContext(display);
+            final WindowMagnificationController controller = new WindowMagnificationController(
+                    mContext,
+                    mHandler, new SfVsyncFrameCallbackProvider(), null,
+                    new SurfaceControl.Transaction(), mWindowMagnifierCallback);
+            final int navBarMode = mNavigationModeController.addListener(
+                    controller::onNavigationModeChanged);
+            controller.onNavigationModeChanged(navBarMode);
+            return new WindowMagnificationAnimationController(context, controller);
+        }
+    }
+
+    @VisibleForTesting
+    DisplayIdIndexSupplier<WindowMagnificationAnimationController> mAnimationControllerSupplier;
 
     @Inject
     public WindowMagnification(Context context, @Main Handler mainHandler,
@@ -72,14 +109,9 @@ public class WindowMagnification extends SystemUI implements WindowMagnifierCall
         mAccessibilityManager = mContext.getSystemService(AccessibilityManager.class);
         mCommandQueue = commandQueue;
         mModeSwitchesController = modeSwitchesController;
-        final WindowMagnificationController controller = new WindowMagnificationController(mContext,
-                mHandler, new SfVsyncFrameCallbackProvider(), null,
-                new SurfaceControl.Transaction(), this);
-        final int navBarMode = navigationModeController.addListener(
-                controller::onNavigationModeChanged);
-        controller.onNavigationModeChanged(navBarMode);
-        mWindowMagnificationAnimationController = new WindowMagnificationAnimationController(
-                mContext, controller);
+        mAnimationControllerSupplier = new AnimationControllerSupplier(context,
+                mHandler, navigationModeController, this,
+                context.getSystemService(DisplayManager.class));
     }
 
     @Override
@@ -89,7 +121,8 @@ public class WindowMagnification extends SystemUI implements WindowMagnifierCall
             return;
         }
         mLastConfiguration.setTo(newConfig);
-        mWindowMagnificationAnimationController.onConfigurationChanged(configDiff);
+        mAnimationControllerSupplier.forEach(
+                animationController -> animationController.onConfigurationChanged(configDiff));
         if (mModeSwitchesController != null) {
             mModeSwitchesController.onConfigurationChanged(configDiff);
         }
@@ -103,28 +136,40 @@ public class WindowMagnification extends SystemUI implements WindowMagnifierCall
     @MainThread
     void enableWindowMagnification(int displayId, float scale, float centerX, float centerY,
             @Nullable IRemoteMagnificationAnimationCallback callback) {
-        //TODO: b/144080869 support multi-display.
-        mWindowMagnificationAnimationController.enableWindowMagnification(scale, centerX, centerY,
-                callback);
+        final WindowMagnificationAnimationController windowMagnificationAnimationController =
+                mAnimationControllerSupplier.get(displayId);
+        if (windowMagnificationAnimationController != null) {
+            windowMagnificationAnimationController.enableWindowMagnification(scale, centerX,
+                    centerY, callback);
+        }
     }
 
     @MainThread
     void setScale(int displayId, float scale) {
-        //TODO: b/144080869 support multi-display.
-        mWindowMagnificationAnimationController.setScale(scale);
+        final WindowMagnificationAnimationController windowMagnificationAnimationController =
+                mAnimationControllerSupplier.get(displayId);
+        if (windowMagnificationAnimationController != null) {
+            windowMagnificationAnimationController.setScale(scale);
+        }
     }
 
     @MainThread
     void moveWindowMagnifier(int displayId, float offsetX, float offsetY) {
-        //TODO: b/144080869 support multi-display.
-        mWindowMagnificationAnimationController.moveWindowMagnifier(offsetX, offsetY);
+        final WindowMagnificationAnimationController windowMagnificationAnimationController =
+                mAnimationControllerSupplier.get(displayId);
+        if (windowMagnificationAnimationController != null) {
+            windowMagnificationAnimationController.moveWindowMagnifier(offsetX, offsetY);
+        }
     }
 
     @MainThread
     void disableWindowMagnification(int displayId,
             @Nullable IRemoteMagnificationAnimationCallback callback) {
-        //TODO: b/144080869 support multi-display.
-        mWindowMagnificationAnimationController.deleteWindowMagnification(callback);
+        final WindowMagnificationAnimationController windowMagnificationAnimationController =
+                mAnimationControllerSupplier.get(displayId);
+        if (windowMagnificationAnimationController != null) {
+            windowMagnificationAnimationController.deleteWindowMagnification(callback);
+        }
     }
 
     @Override
