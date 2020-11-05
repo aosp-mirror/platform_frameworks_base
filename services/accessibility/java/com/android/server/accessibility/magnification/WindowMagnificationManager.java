@@ -16,6 +16,7 @@
 
 package com.android.server.accessibility.magnification;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -79,9 +80,27 @@ public class WindowMagnificationManager implements
         }
     };
 
-    public WindowMagnificationManager(Context context, int userId) {
+    /**
+     * Callback to handle magnification actions from system UI.
+     */
+    public interface Callback {
+
+        /**
+         * Called when the accessibility action of scale requests to be performed.
+         * It is invoked from System UI. And the action is provided by the mirror window.
+         *
+         * @param displayId The logical display id.
+         * @param scale the target scale, or {@link Float#NaN} to leave unchanged
+         */
+        void onPerformScaleAction(int displayId, float scale);
+    }
+
+    private final Callback mCallback;
+
+    public WindowMagnificationManager(Context context, int userId, @NonNull Callback callback) {
         mContext = context;
         mUserId = userId;
+        mCallback = callback;
     }
 
     /**
@@ -494,6 +513,13 @@ public class WindowMagnificationManager implements
                     magnifier = createWindowMagnifier(displayId);
                 }
                 magnifier.onSourceBoundsChanged(sourceBounds);
+            }
+        }
+
+        @Override
+        public void onPerformScaleAction(int displayId, float scale) {
+            synchronized (mLock) {
+                mCallback.onPerformScaleAction(displayId, scale);
             }
         }
 

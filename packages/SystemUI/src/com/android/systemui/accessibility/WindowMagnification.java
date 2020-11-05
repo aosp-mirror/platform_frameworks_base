@@ -146,6 +146,13 @@ public class WindowMagnification extends SystemUI implements WindowMagnifierCall
     }
 
     @Override
+    public void onPerformScaleAction(int displayId, float scale) {
+        if (mWindowMagnificationConnectionImpl != null) {
+            mWindowMagnificationConnectionImpl.onPerformScaleAction(displayId, scale);
+        }
+    }
+
+    @Override
     public void requestWindowMagnificationConnection(boolean connect) {
         if (connect) {
             setWindowMagnificationConnection();
@@ -244,6 +251,16 @@ public class WindowMagnification extends SystemUI implements WindowMagnifierCall
                     mConnectionCallback.onSourceBoundsChanged(displayId, sourceBounds);
                 } catch (RemoteException e) {
                     Log.e(TAG, "Failed to inform source bounds changed", e);
+                }
+            }
+        }
+
+        void onPerformScaleAction(int displayId, float scale) {
+            if (mConnectionCallback != null) {
+                try {
+                    mConnectionCallback.onPerformScaleAction(displayId, scale);
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Failed to inform performing scale action", e);
                 }
             }
         }
