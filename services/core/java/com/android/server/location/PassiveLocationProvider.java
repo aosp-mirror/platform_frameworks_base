@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 The Android Open Source Project
+ * Copyright (C) 2010 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,8 @@ package com.android.server.location;
 
 import static com.android.internal.util.ConcurrentUtils.DIRECT_EXECUTOR;
 
-import android.annotation.Nullable;
+import android.content.Context;
+import android.location.Criteria;
 import android.location.Location;
 import android.location.util.identity.CallerIdentity;
 import android.os.Bundle;
@@ -30,30 +31,37 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
 /**
- * A mock location provider used by LocationManagerService to implement test providers.
+ * A passive location provider reports locations received from other providers
+ * for clients that want to listen passively without actually triggering
+ * location updates.
  *
  * {@hide}
  */
-public class MockProvider extends AbstractLocationProvider {
+public class PassiveLocationProvider extends AbstractLocationProvider {
 
-    @Nullable private Location mLocation;
+    private static final ProviderProperties PROPERTIES = new ProviderProperties(
+            /* requiresNetwork = */false,
+            /* requiresSatellite = */false,
+            /* requiresCell = */false,
+            /* hasMonetaryCost = */false,
+            /* supportsAltitude = */false,
+            /* supportsSpeed = */false,
+            /* supportsBearing = */false,
+            Criteria.POWER_LOW,
+            Criteria.ACCURACY_COARSE);
 
-    public MockProvider(ProviderProperties properties, CallerIdentity identity) {
+    public PassiveLocationProvider(Context context) {
         // using a direct executor is ok because this class has no locks that could deadlock
-        super(DIRECT_EXECUTOR, identity);
-        setProperties(properties);
+        super(DIRECT_EXECUTOR, CallerIdentity.fromContext(context));
+
+        setProperties(PROPERTIES);
+        setAllowed(true);
     }
 
-    /** Sets the allowed state of this mock provider. */
-    public void setProviderAllowed(boolean allowed) {
-        setAllowed(allowed);
-    }
-
-    /** Sets the location to report for this mock provider. */
-    public void setProviderLocation(Location l) {
-        Location location = new Location(l);
-        location.setIsFromMockProvider(true);
-        mLocation = location;
+    /**
+     * Pass a location into the passive provider.
+     */
+    public void updateLocation(Location location) {
         reportLocation(location);
     }
 
@@ -64,7 +72,5 @@ public class MockProvider extends AbstractLocationProvider {
     protected void onExtraCommand(int uid, int pid, String command, Bundle extras) {}
 
     @Override
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        pw.println("last mock location=" + mLocation);
-    }
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {}
 }

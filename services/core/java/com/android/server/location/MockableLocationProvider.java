@@ -54,7 +54,7 @@ public class MockableLocationProvider extends AbstractLocationProvider {
     @GuardedBy("mOwnerLock")
     @Nullable private AbstractLocationProvider mRealProvider;
     @GuardedBy("mOwnerLock")
-    @Nullable private MockProvider mMockProvider;
+    @Nullable private MockLocationProvider mMockProvider;
 
     @GuardedBy("mOwnerLock")
     private ProviderRequest mRequest;
@@ -113,7 +113,7 @@ public class MockableLocationProvider extends AbstractLocationProvider {
      * inline invocation of {@link Listener#onStateChanged(State, State)} if this results in a
      * state change.
      */
-    public void setMockProvider(@Nullable MockProvider provider) {
+    public void setMockProvider(@Nullable MockLocationProvider provider) {
         synchronized (mOwnerLock) {
             if (mMockProvider == provider) {
                 return;

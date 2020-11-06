@@ -245,7 +245,7 @@ public class LocationManagerService extends ILocationManager.Stub {
         // set up passive provider first since it will be required for all other location providers,
         // which are loaded later once the system is ready.
         mPassiveManager = new PassiveLocationProviderManager(mContext, injector);
-        addLocationProviderManager(mPassiveManager, new PassiveProvider(mContext));
+        addLocationProviderManager(mPassiveManager, new PassiveLocationProvider(mContext));
 
         // TODO: load the gps provider here as well, which will require refactoring
 
@@ -320,7 +320,7 @@ public class LocationManagerService extends ILocationManager.Stub {
     }
 
     void onSystemThirdPartyAppsCanStart() {
-        LocationProviderProxy networkProvider = LocationProviderProxy.createAndRegister(
+        ProxyLocationProvider networkProvider = ProxyLocationProvider.createAndRegister(
                 mContext,
                 NETWORK_LOCATION_SERVICE_ACTION,
                 com.android.internal.R.bool.config_enableNetworkLocationOverlay,
@@ -339,7 +339,7 @@ public class LocationManagerService extends ILocationManager.Stub {
                 MATCH_DIRECT_BOOT_AWARE | MATCH_SYSTEM_ONLY, UserHandle.USER_SYSTEM).isEmpty(),
                 "Unable to find a direct boot aware fused location provider");
 
-        LocationProviderProxy fusedProvider = LocationProviderProxy.createAndRegister(
+        ProxyLocationProvider fusedProvider = ProxyLocationProvider.createAndRegister(
                 mContext,
                 FUSED_LOCATION_SERVICE_ACTION,
                 com.android.internal.R.bool.config_enableFusedLocationOverlay,
@@ -404,7 +404,7 @@ public class LocationManagerService extends ILocationManager.Stub {
                     Integer.parseInt(fragments[8]) /* powerRequirement */,
                     Integer.parseInt(fragments[9]) /* accuracy */);
             getOrAddLocationProviderManager(name).setMockProvider(
-                    new MockProvider(properties, CallerIdentity.fromContext(mContext)));
+                    new MockLocationProvider(properties, CallerIdentity.fromContext(mContext)));
         }
     }
 
@@ -1027,7 +1027,7 @@ public class LocationManagerService extends ILocationManager.Stub {
         }
 
         getOrAddLocationProviderManager(provider).setMockProvider(
-                new MockProvider(properties, identity));
+                new MockLocationProvider(properties, identity));
     }
 
     @Override
