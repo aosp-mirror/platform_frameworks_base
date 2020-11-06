@@ -1020,6 +1020,32 @@ public class ActivityRecordTests extends WindowTestsBase {
     }
 
     /**
+     * Verify that complete finish request for top invisible activity must not be delayed while
+     * sleeping, but next invisible activity must be resumed (and paused/stopped)
+     */
+    @Test
+    public void testCompleteFinishing_noWaitForNextVisible_sleeping() {
+        // Create a top activity on a new task
+        final ActivityRecord topActivity = new ActivityBuilder(mAtm).setCreateTask(true).build();
+        mDisplayContent.setIsSleeping(true);
+        doReturn(true).when(mActivity).shouldBeVisible();
+        topActivity.mVisibleRequested = false;
+        topActivity.nowVisible = false;
+        topActivity.finishing = true;
+        topActivity.setState(STOPPED, "true");
+
+        // Mark the activity behind (on a separate task) as not visible
+        mActivity.mVisibleRequested = false;
+        mActivity.nowVisible = false;
+        mActivity.setState(STOPPED, "test");
+
+        clearInvocations(mActivity);
+        topActivity.completeFinishing("test");
+        verify(mActivity).setState(eq(RESUMED), any());
+        verify(topActivity).destroyIfPossible(anyString());
+    }
+
+    /**
      * Verify that complete finish request for invisible activity must not be delayed.
      */
     @Test
@@ -1231,12 +1257,13 @@ public class ActivityRecordTests extends WindowTestsBase {
      */
     @Test
     public void testCompleteFinishing_lastActivityAboveEmptyHomeStack() {
-        // Empty the home stack.
-        final Task homeStack = mActivity.getDisplayArea().getRootHomeTask();
-        homeStack.forAllLeafTasks((t) -> {
-            homeStack.removeChild(t, "test");
+        // Empty the home root task.
+        final Task homeRootTask = mActivity.getDisplayArea().getRootHomeTask();
+        homeRootTask.forAllLeafTasks((t) -> {
+            homeRootTask.removeChild(t, "test");
         }, true /* traverseTopToBottom */);
         mActivity.finishing = true;
+        mActivity.mVisibleRequested = true;
         spyOn(mStack);
 
         // Try to finish the last activity above the home stack.

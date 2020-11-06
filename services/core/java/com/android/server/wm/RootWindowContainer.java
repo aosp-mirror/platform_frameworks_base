@@ -2377,6 +2377,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                         }
                         return resumed;
                     }, false /* initValue */);
+            result |= resumedOnDisplay;
             if (!resumedOnDisplay) {
                 // In cases when there are no valid activities (e.g. device just booted or launcher
                 // crashed) it's possible that nothing was resumed on a display. Requesting resume

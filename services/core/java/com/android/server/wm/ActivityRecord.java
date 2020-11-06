@@ -2761,19 +2761,33 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // than destroy immediately.
         final boolean isNextNotYetVisible = next != null
                 && (!next.nowVisible || !next.mVisibleRequested);
-        if (isCurrentVisible && isNextNotYetVisible) {
-            // Add this activity to the list of stopping activities. It will be processed and
-            // destroyed when the next activity reports idle.
-            addToStopping(false /* scheduleIdle */, false /* idleDelayed */,
-                    "completeFinishing");
-            setState(STOPPING, "completeFinishing");
-        } else if (addToFinishingAndWaitForIdle()) {
-            // We added this activity to the finishing list and something else is becoming resumed.
-            // The activity will complete finishing when the next activity reports idle. No need to
-            // do anything else here.
+
+        // Clear last paused activity to ensure top activity can be resumed during sleeping.
+        if (isNextNotYetVisible && mDisplayContent.isSleeping()
+                && next == next.getRootTask().mLastPausedActivity) {
+            next.getRootTask().mLastPausedActivity = null;
+        }
+
+        if (isCurrentVisible) {
+            if (isNextNotYetVisible) {
+                // Add this activity to the list of stopping activities. It will be processed and
+                // destroyed when the next activity reports idle.
+                addToStopping(false /* scheduleIdle */, false /* idleDelayed */,
+                        "completeFinishing");
+                setState(STOPPING, "completeFinishing");
+            } else if (addToFinishingAndWaitForIdle()) {
+                // We added this activity to the finishing list and something else is becoming
+                // resumed. The activity will complete finishing when the next activity reports
+                // idle. No need to do anything else here.
+            } else {
+                // Not waiting for the next one to become visible, and nothing else will be
+                // resumed in place of this activity - requesting destruction right away.
+                activityRemoved = destroyIfPossible(reason);
+            }
         } else {
-            // Not waiting for the next one to become visible, and nothing else will be resumed in
-            // place of this activity - requesting destruction right away.
+            // Just need to make sure the next activities can be resumed (if needed) and is free
+            // to destroy this activity since it is currently not visible.
+            addToFinishingAndWaitForIdle();
             activityRemoved = destroyIfPossible(reason);
         }
 
