@@ -29,6 +29,7 @@ import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.R;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.media.MediaHost;
+import com.android.systemui.plugins.qs.DetailAdapter;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.qs.customize.QSCustomizerController;
 import com.android.systemui.qs.dagger.QSScope;
@@ -243,6 +244,16 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
     /** */
     public Pair<Integer, Integer> getVisualSideMargins() {
         return mView.getVisualSideMargins();
+    }
+
+    /** */
+    public void showDetailDapater(DetailAdapter detailAdapter, int x, int y) {
+        mView.showDetailAdapter(true, detailAdapter, new int[]{x, y});
+    }
+
+    /** */
+    public void setFooterPageIndicator(PageIndicator pageIndicator) {
+        mView.setFooterPageIndicator(pageIndicator);
     }
 }
 

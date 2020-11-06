@@ -84,4 +84,8 @@ public class QuickQSPanelController extends QSPanelControllerBase<QuickQSPanel> 
         }
         super.setTiles(quickTiles, true);
     }
+
+    public int getNumQuickTiles() {
+        return mView.getNumQuickTiles();
+    }
 }
