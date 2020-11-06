@@ -2775,6 +2775,20 @@ public class PermissionManagerService {
                                     }
                                 });
                             }
+                        } else {
+                            mPackageManagerInt.forEachPackage(p -> {
+                                PackageSetting ps = (PackageSetting) p.mExtras;
+                                if (ps == null) {
+                                    return;
+                                }
+                                PermissionsState permissionsState = ps.getPermissionsState();
+                                if (permissionsState.getInstallPermissionState(bp.getName())
+                                        != null) {
+                                    permissionsState.revokeInstallPermission(bp);
+                                    permissionsState.updatePermissionFlags(bp, UserHandle.USER_ALL,
+                                            MASK_PERMISSION_FLAGS_ALL, 0);
+                                }
+                            });
                         }
                         flags |= UPDATE_PERMISSIONS_ALL;
                         it.remove();
