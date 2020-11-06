@@ -4971,15 +4971,8 @@ public final class ActivityThread extends ClientTransactionHandler {
     }
 
     private void relaunchAllActivities(boolean preserveWindows) {
-        for (Map.Entry<IBinder, ActivityClientRecord> entry : mActivities.entrySet()) {
-            final ActivityClientRecord r = entry.getValue();
-            // Schedule relaunch the activity if it is not a local object or finishing.
-            if (!r.activity.mFinished && !(r.token instanceof Binder)) {
-                if (preserveWindows && r.window != null) {
-                    r.mPreserveWindow = true;
-                }
-                scheduleRelaunchActivity(entry.getKey());
-            }
+        for (int i = mActivities.size() - 1; i >= 0; i--) {
+            scheduleRelaunchActivityIfPossible(mActivities.valueAt(i), preserveWindows);
         }
     }
 
@@ -5348,15 +5341,31 @@ public final class ActivityThread extends ClientTransactionHandler {
         }
     }
 
+    void scheduleRelaunchActivity(IBinder token) {
+        final ActivityClientRecord r = mActivities.get(token);
+        if (r != null) {
+            scheduleRelaunchActivityIfPossible(r, !r.stopped /* preserveWindow */);
+        }
+    }
+
     /**
      * Post a message to relaunch the activity. We do this instead of launching it immediately,
      * because this will destroy the activity from which it was called and interfere with the
      * lifecycle changes it was going through before. We need to make sure that we have finished
      * handling current transaction item before relaunching the activity.
      */
-    void scheduleRelaunchActivity(IBinder token) {
-        mH.removeMessages(H.RELAUNCH_ACTIVITY, token);
-        sendMessage(H.RELAUNCH_ACTIVITY, token);
+    private void scheduleRelaunchActivityIfPossible(@NonNull ActivityClientRecord r,
+            boolean preserveWindow) {
+        if (r.activity.mFinished || r.token instanceof Binder) {
+            // Do not schedule relaunch if the activity is finishing or not a local object (e.g.
+            // created by ActivtiyGroup that server side doesn't recognize it).
+            return;
+        }
+        if (preserveWindow && r.window != null) {
+            r.mPreserveWindow = true;
+        }
+        mH.removeMessages(H.RELAUNCH_ACTIVITY, r.token);
+        sendMessage(H.RELAUNCH_ACTIVITY, r.token);
     }
 
     /** Performs the activity relaunch locally vs. requesting from system-server. */

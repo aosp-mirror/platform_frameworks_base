@@ -73,6 +73,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 /**
  * Test for verifying {@link android.app.ActivityThread} class.
@@ -173,29 +174,41 @@ public class ActivityThreadTest {
 
     @Test
     public void testHandleActivity_assetsChanged() {
+        relaunchActivityAndAssertPreserveWindow(activity -> {
+            // Relaunches all activities.
+            activity.getActivityThread().handleApplicationInfoChanged(
+                    activity.getApplicationInfo());
+        });
+    }
+
+    @Test
+    public void testRecreateActivity() {
+        relaunchActivityAndAssertPreserveWindow(Activity::recreate);
+    }
+
+    private void relaunchActivityAndAssertPreserveWindow(Consumer<Activity> relaunch) {
         final TestActivity activity = mActivityTestRule.launchActivity(new Intent());
+        final ActivityThread activityThread = activity.getActivityThread();
 
         final IBinder[] token = new IBinder[1];
         final View[] decorView = new View[1];
 
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
-            final ActivityThread activityThread = activity.getActivityThread();
-
             token[0] = activity.getActivityToken();
             decorView[0] = activity.getWindow().getDecorView();
 
-            // Relaunches all activities
-            activityThread.handleApplicationInfoChanged(activity.getApplicationInfo());
+            relaunch.accept(activity);
         });
 
         final View[] newDecorView = new View[1];
-        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
-            final ActivityThread activityThread = activity.getActivityThread();
+        final Activity[] newActivity = new Activity[1];
 
-            final Activity newActivity = activityThread.getActivity(token[0]);
-            newDecorView[0] = activity.getWindow().getDecorView();
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
+            newActivity[0] = activityThread.getActivity(token[0]);
+            newDecorView[0] = newActivity[0].getWindow().getDecorView();
         });
 
+        assertNotEquals("Activity must be relaunched", activity, newActivity[0]);
         assertEquals("Window must be preserved", decorView[0], newDecorView[0]);
     }
 
