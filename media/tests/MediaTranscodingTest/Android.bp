@@ -9,7 +9,7 @@ android_test {
         "androidx.test.ext.junit",
         "androidx.test.rules",
         "androidx.test.uiautomator_uiautomator",
-        "android-support-test",
+        "androidx.test.rules",
         "testng"
     ],
     platform_apis: true,

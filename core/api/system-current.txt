@@ -381,6 +381,7 @@ package android.app {
     field public static final String OPSTR_ACCEPT_HANDOVER = "android:accept_handover";
     field public static final String OPSTR_ACCESS_ACCESSIBILITY = "android:access_accessibility";
     field public static final String OPSTR_ACCESS_NOTIFICATIONS = "android:access_notifications";
+    field public static final String OPSTR_ACTIVATE_PLATFORM_VPN = "android:activate_platform_vpn";
     field public static final String OPSTR_ACTIVATE_VPN = "android:activate_vpn";
     field public static final String OPSTR_ASSIST_SCREENSHOT = "android:assist_screenshot";
     field public static final String OPSTR_ASSIST_STRUCTURE = "android:assist_structure";
@@ -4363,11 +4364,11 @@ package android.media {
   }
 
   public class MediaPlayer implements android.media.AudioRouting android.media.VolumeAutomation {
-    method @RequiresPermission("android.permission.BIND_IMS_SERVICE") public void setOnImsRxNoticeListener(@Nullable android.media.MediaPlayer.OnImsRxNoticeListener, @Nullable android.os.Handler);
+    method @RequiresPermission("android.permission.BIND_IMS_SERVICE") public void setOnRtpRxNoticeListener(@NonNull android.content.Context, @NonNull android.media.MediaPlayer.OnRtpRxNoticeListener, @Nullable android.os.Handler);
   }
 
-  public static interface MediaPlayer.OnImsRxNoticeListener {
-    method public void onImsRxNotice(@NonNull android.media.MediaPlayer, @NonNull byte[]);
+  public static interface MediaPlayer.OnRtpRxNoticeListener {
+    method public void onRtpRxNotice(@NonNull android.media.MediaPlayer, int, @NonNull int[]);
   }
 
   public final class MediaRecorder.AudioSource {
@@ -11228,6 +11229,7 @@ package android.telephony.ims {
     ctor public ImsCallProfile(int, int);
     ctor public ImsCallProfile(int, int, android.os.Bundle, android.telephony.ims.ImsStreamMediaProfile);
     method public int describeContents();
+    method @NonNull public java.util.Set<android.telephony.ims.RtpHeaderExtensionType> getAcceptedRtpHeaderExtensionTypes();
     method public String getCallExtra(String);
     method public String getCallExtra(String, String);
     method public boolean getCallExtraBoolean(String);
@@ -11242,6 +11244,7 @@ package android.telephony.ims {
     method public int getEmergencyServiceCategories();
     method @NonNull public java.util.List<java.lang.String> getEmergencyUrns();
     method public android.telephony.ims.ImsStreamMediaProfile getMediaProfile();
+    method @NonNull public java.util.Set<android.telephony.ims.RtpHeaderExtensionType> getOfferedRtpHeaderExtensionTypes();
     method @NonNull public android.os.Bundle getProprietaryCallExtras();
     method public int getRestrictCause();
     method public int getServiceType();
@@ -11252,6 +11255,7 @@ package android.telephony.ims {
     method public boolean isVideoCall();
     method public boolean isVideoPaused();
     method public static int presentationToOir(int);
+    method public void setAcceptedRtpHeaderExtensionTypes(@NonNull java.util.Set<android.telephony.ims.RtpHeaderExtensionType>);
     method public void setCallExtra(String, String);
     method public void setCallExtraBoolean(String, boolean);
     method public void setCallExtraInt(String, int);
@@ -11262,6 +11266,7 @@ package android.telephony.ims {
     method public void setEmergencyServiceCategories(int);
     method public void setEmergencyUrns(@NonNull java.util.List<java.lang.String>);
     method public void setHasKnownUserIntentEmergency(boolean);
+    method public void setOfferedRtpHeaderExtensionTypes(@NonNull java.util.Set<android.telephony.ims.RtpHeaderExtensionType>);
     method public void updateCallExtras(android.telephony.ims.ImsCallProfile);
     method public void updateCallType(android.telephony.ims.ImsCallProfile);
     method public void updateMediaProfile(android.telephony.ims.ImsCallProfile);
@@ -11321,6 +11326,7 @@ package android.telephony.ims {
     method public void callSessionConferenceExtendReceived(android.telephony.ims.stub.ImsCallSessionImplBase, android.telephony.ims.ImsCallProfile);
     method public void callSessionConferenceExtended(android.telephony.ims.stub.ImsCallSessionImplBase, android.telephony.ims.ImsCallProfile);
     method public void callSessionConferenceStateUpdated(android.telephony.ims.ImsConferenceState);
+    method public void callSessionDtmfReceived(char);
     method @Deprecated public void callSessionHandover(int, int, android.telephony.ims.ImsReasonInfo);
     method @Deprecated public void callSessionHandoverFailed(int, int, android.telephony.ims.ImsReasonInfo);
     method public void callSessionHeld(android.telephony.ims.ImsCallProfile);
@@ -11341,6 +11347,7 @@ package android.telephony.ims {
     method public void callSessionResumeFailed(android.telephony.ims.ImsReasonInfo);
     method public void callSessionResumeReceived(android.telephony.ims.ImsCallProfile);
     method public void callSessionResumed(android.telephony.ims.ImsCallProfile);
+    method public void callSessionRtpHeaderExtensionsReceived(@NonNull java.util.Set<android.telephony.ims.RtpHeaderExtension>);
     method public void callSessionRttAudioIndicatorChanged(@NonNull android.telephony.ims.ImsStreamMediaProfile);
     method public void callSessionRttMessageReceived(String);
     method public void callSessionRttModifyRequestReceived(android.telephony.ims.ImsCallProfile);
@@ -11697,6 +11704,24 @@ package android.telephony.ims {
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setUceSettingEnabled(boolean) throws android.telephony.ims.ImsException;
   }
 
+  public final class RtpHeaderExtension implements android.os.Parcelable {
+    ctor public RtpHeaderExtension(@IntRange(from=1, to=14) int, @NonNull byte[]);
+    method public int describeContents();
+    method @NonNull public byte[] getExtensionData();
+    method @IntRange(from=1, to=14) public int getLocalIdentifier();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.ims.RtpHeaderExtension> CREATOR;
+  }
+
+  public final class RtpHeaderExtensionType implements android.os.Parcelable {
+    ctor public RtpHeaderExtensionType(@IntRange(from=1, to=14) int, @NonNull android.net.Uri);
+    method public int describeContents();
+    method @IntRange(from=1, to=14) public int getLocalIdentifier();
+    method @NonNull public android.net.Uri getUri();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.ims.RtpHeaderExtensionType> CREATOR;
+  }
+
   public class SipDelegateManager {
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isSupported() throws android.telephony.ims.ImsException;
   }
@@ -11813,6 +11838,7 @@ package android.telephony.ims.stub {
     method public void removeParticipants(String[]);
     method public void resume(android.telephony.ims.ImsStreamMediaProfile);
     method public void sendDtmf(char, android.os.Message);
+    method public void sendRtpHeaderExtensions(@NonNull java.util.Set<android.telephony.ims.RtpHeaderExtension>);
     method public void sendRttMessage(String);
     method public void sendRttModifyRequest(android.telephony.ims.ImsCallProfile);
     method public void sendRttModifyResponse(boolean);

@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <private/android_filesystem_config.h>
 #include <stdio.h>
@@ -92,8 +93,12 @@ StatsdConfig buildGoodConfig() {
     return config;
 }
 
-bool isSubset(const set<int32_t>& set1, const set<int32_t>& set2) {
-    return std::includes(set2.begin(), set2.end(), set1.begin(), set1.end());
+set<int32_t> unionSet(const vector<set<int32_t>> sets) {
+    set<int32_t> toRet;
+    for (const set<int32_t>& s : sets) {
+        toRet.insert(s.begin(), s.end());
+    }
+    return toRet;
 }
 }  // anonymous namespace
 
@@ -110,9 +115,7 @@ TEST(MetricsManagerTest, TestLogSources) {
     pkgToUids[app2] = app2Uids;
     pkgToUids[app3] = app3Uids;
 
-    int32_t atom1 = 10;
-    int32_t atom2 = 20;
-    int32_t atom3 = 30;
+    int32_t atom1 = 10, atom2 = 20, atom3 = 30;
     sp<MockUidMap> uidMap = new StrictMock<MockUidMap>();
     EXPECT_CALL(*uidMap, getAppUid(_))
             .Times(4)
@@ -150,42 +153,115 @@ TEST(MetricsManagerTest, TestLogSources) {
 
     MetricsManager metricsManager(kConfigKey, config, timeBaseSec, timeBaseSec, uidMap,
                                   pullerManager, anomalyAlarmMonitor, periodicAlarmMonitor);
-
     EXPECT_TRUE(metricsManager.isConfigValid());
 
-    ASSERT_EQ(metricsManager.mAllowedUid.size(), 1);
-    EXPECT_EQ(metricsManager.mAllowedUid[0], AID_SYSTEM);
-
-    ASSERT_EQ(metricsManager.mAllowedPkg.size(), 1);
-    EXPECT_EQ(metricsManager.mAllowedPkg[0], app1);
-
-    ASSERT_EQ(metricsManager.mAllowedLogSources.size(), 3);
-    EXPECT_TRUE(isSubset({AID_SYSTEM}, metricsManager.mAllowedLogSources));
-    EXPECT_TRUE(isSubset(app1Uids, metricsManager.mAllowedLogSources));
-
-    ASSERT_EQ(metricsManager.mDefaultPullUids.size(), 2);
-    EXPECT_TRUE(isSubset(defaultPullUids, metricsManager.mDefaultPullUids));
-    ;
+    EXPECT_THAT(metricsManager.mAllowedUid, ElementsAre(AID_SYSTEM));
+    EXPECT_THAT(metricsManager.mAllowedPkg, ElementsAre(app1));
+    EXPECT_THAT(metricsManager.mAllowedLogSources,
+                ContainerEq(unionSet(vector<set<int32_t>>({app1Uids, {AID_SYSTEM}}))));
+    EXPECT_THAT(metricsManager.mDefaultPullUids, ContainerEq(defaultPullUids));
 
     vector<int32_t> atom1Uids = metricsManager.getPullAtomUids(atom1);
-    ASSERT_EQ(atom1Uids.size(), 5);
-    set<int32_t> expectedAtom1Uids;
-    expectedAtom1Uids.insert(defaultPullUids.begin(), defaultPullUids.end());
-    expectedAtom1Uids.insert(app1Uids.begin(), app1Uids.end());
-    expectedAtom1Uids.insert(app3Uids.begin(), app3Uids.end());
-    EXPECT_TRUE(isSubset(expectedAtom1Uids, set<int32_t>(atom1Uids.begin(), atom1Uids.end())));
+    EXPECT_THAT(atom1Uids,
+                UnorderedElementsAreArray(unionSet({defaultPullUids, app1Uids, app3Uids})));
 
     vector<int32_t> atom2Uids = metricsManager.getPullAtomUids(atom2);
-    ASSERT_EQ(atom2Uids.size(), 4);
-    set<int32_t> expectedAtom2Uids;
-    expectedAtom1Uids.insert(defaultPullUids.begin(), defaultPullUids.end());
-    expectedAtom1Uids.insert(app2Uids.begin(), app2Uids.end());
-    expectedAtom1Uids.insert(AID_STATSD);
-    EXPECT_TRUE(isSubset(expectedAtom2Uids, set<int32_t>(atom2Uids.begin(), atom2Uids.end())));
+    EXPECT_THAT(atom2Uids,
+                UnorderedElementsAreArray(unionSet({defaultPullUids, app2Uids, {AID_STATSD}})));
 
     vector<int32_t> atom3Uids = metricsManager.getPullAtomUids(atom3);
-    ASSERT_EQ(atom3Uids.size(), 2);
-    EXPECT_TRUE(isSubset(defaultPullUids, set<int32_t>(atom3Uids.begin(), atom3Uids.end())));
+    EXPECT_THAT(atom3Uids, UnorderedElementsAreArray(defaultPullUids));
+}
+
+TEST(MetricsManagerTest, TestLogSourcesOnConfigUpdate) {
+    string app1 = "app1";
+    set<int32_t> app1Uids = {1111, 11111};
+    string app2 = "app2";
+    set<int32_t> app2Uids = {2222};
+    string app3 = "app3";
+    set<int32_t> app3Uids = {3333, 1111};
+
+    map<string, set<int32_t>> pkgToUids;
+    pkgToUids[app1] = app1Uids;
+    pkgToUids[app2] = app2Uids;
+    pkgToUids[app3] = app3Uids;
+
+    int32_t atom1 = 10, atom2 = 20, atom3 = 30;
+    sp<MockUidMap> uidMap = new StrictMock<MockUidMap>();
+    EXPECT_CALL(*uidMap, getAppUid(_))
+            .Times(8)
+            .WillRepeatedly(Invoke([&pkgToUids](const string& pkg) {
+                const auto& it = pkgToUids.find(pkg);
+                if (it != pkgToUids.end()) {
+                    return it->second;
+                }
+                return set<int32_t>();
+            }));
+    sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
+    EXPECT_CALL(*pullerManager, RegisterPullUidProvider(kConfigKey, _)).Times(1);
+    EXPECT_CALL(*pullerManager, UnregisterPullUidProvider(kConfigKey, _)).Times(1);
+
+    sp<AlarmMonitor> anomalyAlarmMonitor;
+    sp<AlarmMonitor> periodicAlarmMonitor;
+
+    StatsdConfig config;
+    config.add_allowed_log_source("AID_SYSTEM");
+    config.add_allowed_log_source(app1);
+    config.add_default_pull_packages("AID_SYSTEM");
+    config.add_default_pull_packages("AID_ROOT");
+
+    PullAtomPackages* pullAtomPackages = config.add_pull_atom_packages();
+    pullAtomPackages->set_atom_id(atom1);
+    pullAtomPackages->add_packages(app1);
+    pullAtomPackages->add_packages(app3);
+
+    pullAtomPackages = config.add_pull_atom_packages();
+    pullAtomPackages->set_atom_id(atom2);
+    pullAtomPackages->add_packages(app2);
+    pullAtomPackages->add_packages("AID_STATSD");
+
+    MetricsManager metricsManager(kConfigKey, config, timeBaseSec, timeBaseSec, uidMap,
+                                  pullerManager, anomalyAlarmMonitor, periodicAlarmMonitor);
+    EXPECT_TRUE(metricsManager.isConfigValid());
+
+    // Update with new allowed log sources.
+    StatsdConfig newConfig;
+    newConfig.add_allowed_log_source("AID_ROOT");
+    newConfig.add_allowed_log_source(app2);
+    newConfig.add_default_pull_packages("AID_SYSTEM");
+    newConfig.add_default_pull_packages("AID_STATSD");
+
+    pullAtomPackages = newConfig.add_pull_atom_packages();
+    pullAtomPackages->set_atom_id(atom2);
+    pullAtomPackages->add_packages(app1);
+    pullAtomPackages->add_packages(app3);
+
+    pullAtomPackages = newConfig.add_pull_atom_packages();
+    pullAtomPackages->set_atom_id(atom3);
+    pullAtomPackages->add_packages(app2);
+    pullAtomPackages->add_packages("AID_ADB");
+
+    metricsManager.updateConfig(newConfig, timeBaseSec, timeBaseSec, anomalyAlarmMonitor,
+                                periodicAlarmMonitor);
+    EXPECT_TRUE(metricsManager.isConfigValid());
+
+    EXPECT_THAT(metricsManager.mAllowedUid, ElementsAre(AID_ROOT));
+    EXPECT_THAT(metricsManager.mAllowedPkg, ElementsAre(app2));
+    EXPECT_THAT(metricsManager.mAllowedLogSources,
+                ContainerEq(unionSet(vector<set<int32_t>>({app2Uids, {AID_ROOT}}))));
+    const set<int32_t> defaultPullUids = {AID_SYSTEM, AID_STATSD};
+    EXPECT_THAT(metricsManager.mDefaultPullUids, ContainerEq(defaultPullUids));
+
+    vector<int32_t> atom1Uids = metricsManager.getPullAtomUids(atom1);
+    EXPECT_THAT(atom1Uids, UnorderedElementsAreArray(defaultPullUids));
+
+    vector<int32_t> atom2Uids = metricsManager.getPullAtomUids(atom2);
+    EXPECT_THAT(atom2Uids,
+                UnorderedElementsAreArray(unionSet({defaultPullUids, app1Uids, app3Uids})));
+
+    vector<int32_t> atom3Uids = metricsManager.getPullAtomUids(atom3);
+    EXPECT_THAT(atom3Uids,
+                UnorderedElementsAreArray(unionSet({defaultPullUids, app2Uids, {AID_ADB}})));
 }
 
 TEST(MetricsManagerTest, TestCheckLogCredentialsWhitelistedAtom) {

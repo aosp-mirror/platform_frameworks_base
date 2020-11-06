@@ -2878,6 +2878,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         return true;
     }
 
+    @Nullable
     static WindowContainer fromBinder(IBinder binder) {
         return RemoteToken.fromBinder(binder).getContainer();
     }
@@ -2891,6 +2892,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             mWeakRef = new WeakReference<>(container);
         }
 
+        @Nullable
         WindowContainer getContainer() {
             return mWeakRef.get();
         }

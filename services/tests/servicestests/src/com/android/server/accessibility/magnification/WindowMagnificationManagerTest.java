@@ -16,7 +16,6 @@
 
 package com.android.server.accessibility.magnification;
 
-
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
@@ -76,6 +75,8 @@ public class WindowMagnificationManagerTest {
     private StatusBarManagerInternal mMockStatusBarManagerInternal;
     @Mock
     private MagnificationAnimationCallback mAnimationCallback;
+    @Mock
+    private WindowMagnificationManager.Callback mMockCallback;
     private MockContentResolver mResolver;
     private WindowMagnificationManager mWindowMagnificationManager;
 
@@ -86,7 +87,8 @@ public class WindowMagnificationManagerTest {
         LocalServices.addService(StatusBarManagerInternal.class, mMockStatusBarManagerInternal);
         mResolver = new MockContentResolver();
         mMockConnection = new MockWindowMagnificationConnection();
-        mWindowMagnificationManager = new WindowMagnificationManager(mContext, CURRENT_USER_ID);
+        mWindowMagnificationManager = new WindowMagnificationManager(mContext, CURRENT_USER_ID,
+                mMockCallback);
 
         when(mContext.getContentResolver()).thenReturn(mResolver);
         doAnswer((InvocationOnMock invocation) -> {
@@ -297,6 +299,17 @@ public class WindowMagnificationManagerTest {
         MotionEvent event = generatePointersDownEvent(pointersLocation);
 
         assertEquals(mWindowMagnificationManager.pointersInWindow(TEST_DISPLAY, event), 1);
+    }
+
+    @Test
+    public void onPerformScaleAction_magnifierEnabled_notifyAction() throws RemoteException {
+        final float newScale = 4.0f;
+        mWindowMagnificationManager.setConnection(mMockConnection.getConnection());
+        mWindowMagnificationManager.enableWindowMagnification(TEST_DISPLAY, 3.0f, NaN, NaN);
+
+        mMockConnection.getConnectionCallback().onPerformScaleAction(TEST_DISPLAY, newScale);
+
+        verify(mMockCallback).onPerformScaleAction(eq(TEST_DISPLAY), eq(newScale));
     }
 
     @Test

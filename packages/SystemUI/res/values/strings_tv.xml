@@ -20,4 +20,10 @@
     <!-- Title and subtitle for AudioRecordingIndicator -->
     <string name="mic_active">Microphone Active</string>
     <string name="app_accessed_mic">%1$s accessed your microphone</string>
+
+    <string name="notification_vpn_connected">VPN is connected</string>
+    <string name="notification_vpn_disconnected">VPN is disconnected</string>
+    <!-- Disclosure text in the connected notification that indicates that the device is connected to a VPN. The placeholder is the VPN name. [CHAR LIMIT=40] -->
+    <string name="notification_disclosure_vpn_text">Via <xliff:g id="vpn_app" example="Foo VPN App">%1$s</xliff:g></string>
+
 </resources>

@@ -65,8 +65,7 @@ class PipAppHelper(
             assertNotNull("Pip menu close button is not found", closeButton)
             closeButton.click()
 
-            // Give it 1 second, just in case
-            SystemClock.sleep(1_000)
+            waitUntilClosed()
         }
     }
 }

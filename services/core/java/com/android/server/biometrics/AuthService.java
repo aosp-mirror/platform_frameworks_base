@@ -329,6 +329,10 @@ public class AuthService extends SystemService {
                     return;
                 }
 
+                // Initialize this outside of FingerprintAuthenticator. Only HIDL HALs require
+                // initialization from here. AIDL HALs are initialized by FingerprintService since
+                // the HAL interface provides ID, strength, and other configuration information.
+                fingerprintService.initializeConfiguration(config.id, config.strength);
                 authenticator = new FingerprintAuthenticator(fingerprintService, config);
                 break;
 
@@ -340,6 +344,10 @@ public class AuthService extends SystemService {
                     return;
                 }
 
+                // Initialize this outside of FingerprintAuthenticator. Only HIDL HALs require
+                // initialization from here. AIDL HALs are initialized by FaceService since
+                // the HAL interface provides ID, strength, and other configuration information.
+                faceService.initializeConfiguration(config.id, config.strength);
                 authenticator = new FaceAuthenticator(faceService, config);
                 break;
 

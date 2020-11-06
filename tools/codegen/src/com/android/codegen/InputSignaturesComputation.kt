@@ -63,6 +63,7 @@ private fun ClassPrinter.annotationToString(ann: AnnotationExpr?): String {
         append("@")
         append(getFullClassName(ann.nameAsString))
         if (ann is MarkerAnnotationExpr) return@buildString
+        if (!ann.nameAsString.startsWith("DataClass")) return@buildString
 
         append("(")
 

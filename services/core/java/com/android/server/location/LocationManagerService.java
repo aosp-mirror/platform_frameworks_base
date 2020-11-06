@@ -988,9 +988,13 @@ public class LocationManagerService extends ILocationManager.Stub {
     @Override
     public void getFromLocation(double latitude, double longitude, int maxResults,
             GeocoderParams params, IGeocodeListener listener) {
+        // validate identity
+        CallerIdentity identity = CallerIdentity.fromBinder(mContext, params.getClientPackage(),
+                params.getClientAttributionTag());
+        Preconditions.checkArgument(identity.getUid() == params.getClientUid());
+
         if (mGeocodeProvider != null) {
-            mGeocodeProvider.getFromLocation(latitude, longitude, maxResults,
-                    params, listener);
+            mGeocodeProvider.getFromLocation(latitude, longitude, maxResults, params, listener);
         } else {
             try {
                 listener.onResults(null, Collections.emptyList());
@@ -1005,6 +1009,11 @@ public class LocationManagerService extends ILocationManager.Stub {
             double lowerLeftLatitude, double lowerLeftLongitude,
             double upperRightLatitude, double upperRightLongitude, int maxResults,
             GeocoderParams params, IGeocodeListener listener) {
+        // validate identity
+        CallerIdentity identity = CallerIdentity.fromBinder(mContext, params.getClientPackage(),
+                params.getClientAttributionTag());
+        Preconditions.checkArgument(identity.getUid() == params.getClientUid());
+
         if (mGeocodeProvider != null) {
             mGeocodeProvider.getFromLocationName(locationName, lowerLeftLatitude,
                     lowerLeftLongitude, upperRightLatitude, upperRightLongitude,

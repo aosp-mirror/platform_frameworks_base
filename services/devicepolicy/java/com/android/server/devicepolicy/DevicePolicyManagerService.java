@@ -567,6 +567,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     final boolean mIsWatch;
 
     /**
+     * Whether or not this device is an automotive.
+     */
+    private final boolean mIsAutomotive;
+
+    /**
      * Whether this device has the telephony feature.
      */
     final boolean mHasTelephonyFeature;
@@ -1383,6 +1388,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 .hasSystemFeature(PackageManager.FEATURE_WATCH);
         mHasTelephonyFeature = mInjector.getPackageManager()
                 .hasSystemFeature(PackageManager.FEATURE_TELEPHONY);
+        mIsAutomotive = mInjector.getPackageManager()
+                .hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE);
         mBackgroundHandler = BackgroundThread.getHandler();
 
         // Needed when mHasFeature == false, because it controls the certificate warning text.
@@ -3356,7 +3363,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     public boolean isSeparateProfileChallengeAllowed(int userHandle) {
         enforceSystemCaller("query separate challenge support");
 
-        ComponentName profileOwner = getProfileOwner(userHandle);
+        ComponentName profileOwner = getProfileOwnerAsUser(userHandle);
         // Profile challenge is supported on N or newer release.
         return profileOwner != null &&
                 getTargetSdk(profileOwner.getPackageName(), userHandle) > Build.VERSION_CODES.M;
@@ -4794,9 +4801,16 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
                 // Require authentication for the device or profile
                 if (userToLock == UserHandle.USER_ALL) {
-                    // Power off the display
-                    mInjector.powerManagerGoToSleep(SystemClock.uptimeMillis(),
-                            PowerManager.GO_TO_SLEEP_REASON_DEVICE_ADMIN, 0);
+                    if (mIsAutomotive) {
+                        if (VERBOSE_LOG) {
+                            Slog.v(LOG_TAG, "lockNow(): not powering off display on automotive"
+                                    + " build");
+                        }
+                    } else {
+                        // Power off the display
+                        mInjector.powerManagerGoToSleep(SystemClock.uptimeMillis(),
+                                PowerManager.GO_TO_SLEEP_REASON_DEVICE_ADMIN, 0);
+                    }
                     mInjector.getIWindowManager().lockNow(null);
                 } else {
                     mInjector.getTrustManager().setDeviceLockedForUser(userToLock, true);
@@ -5290,7 +5304,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         final UserHandle caller = mInjector.binderGetCallingUserHandle();
         // If there is a profile owner, redirect to that; otherwise query the device owner.
-        ComponentName aliasChooser = getProfileOwner(caller.getIdentifier());
+        ComponentName aliasChooser = getProfileOwnerAsUser(caller.getIdentifier());
         if (aliasChooser == null && caller.isSystem()) {
             synchronized (getLockObject()) {
                 final ActiveAdmin deviceOwnerAdmin = getDeviceOwnerAdminLocked();
@@ -7346,7 +7360,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     public boolean isProfileOwner(ComponentName who, int userId) {
-        final ComponentName profileOwner = getProfileOwner(userId);
+        final ComponentName profileOwner = getProfileOwnerAsUser(userId);
         return who != null && who.equals(profileOwner);
     }
 
@@ -7357,7 +7371,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
      */
     public boolean isProfileOwner(CallerIdentity caller) {
         synchronized (getLockObject()) {
-            final ComponentName profileOwner = getProfileOwner(caller.getUserId());
+            final ComponentName profileOwner = getProfileOwnerAsUser(caller.getUserId());
             // No profile owner.
             if (profileOwner == null) {
                 return false;
@@ -7958,19 +7972,14 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @Override
     public ComponentName getProfileOwnerAsUser(int userHandle) {
+        if (!mHasFeature) {
+            return null;
+        }
         Preconditions.checkArgumentNonnegative(userHandle, "Invalid userId");
 
         final CallerIdentity caller = getCallerIdentity();
         Preconditions.checkCallAuthorization(hasCrossUsersPermission(caller, userHandle));
 
-        return getProfileOwner(userHandle);
-    }
-
-    @Override
-    public ComponentName getProfileOwner(int userHandle) {
-        if (!mHasFeature) {
-            return null;
-        }
         synchronized (getLockObject()) {
             return mOwners.getProfileOwnerComponent(userHandle);
         }
@@ -8013,9 +8022,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         return mInjector.binderWithCleanCallingIdentity(() -> {
             for (UserInfo userInfo : mUserManager.getProfiles(userHandle)) {
                 if (userInfo.isManagedProfile()) {
-                    if (getProfileOwner(userInfo.id) != null
+                    if (getProfileOwnerAsUser(userInfo.id) != null
                             && isProfileOwnerOfOrganizationOwnedDevice(userInfo.id)) {
-                        ComponentName who = getProfileOwner(userInfo.id);
+                        ComponentName who = getProfileOwnerAsUser(userInfo.id);
                         return getActiveAdminUncheckedLocked(who, userInfo.id);
                     }
                 }
@@ -8062,7 +8071,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
         Preconditions.checkCallAuthorization(canManageUsers(getCallerIdentity()));
 
-        ComponentName profileOwner = getProfileOwner(userHandle);
+        ComponentName profileOwner = getProfileOwnerAsUser(userHandle);
         if (profileOwner == null) {
             return null;
         }
@@ -8366,7 +8375,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return false;
         }
 
-        final ComponentName profileOwner = getProfileOwner(userId);
+        final ComponentName profileOwner = getProfileOwnerAsUser(userId);
         if (profileOwner == null) {
             return false;
         }
@@ -8532,6 +8541,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         pw.increaseIndent();
         pw.printf("mHasFeature=%b\n", mHasFeature);
         pw.printf("mIsWatch=%b\n", mIsWatch);
+        pw.printf("mIsAutomotive=%b\n", mIsAutomotive);
         pw.printf("mHasTelephonyFeature=%b\n", mHasTelephonyFeature);
         pw.decreaseIndent();
     }
@@ -12050,7 +12060,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             // Managed-profiles cannot be setup on the system user.
             return CODE_SPLIT_SYSTEM_USER_DEVICE_SYSTEM_USER;
         }
-        if (getProfileOwner(callingUserId) != null) {
+        if (getProfileOwnerAsUser(callingUserId) != null) {
             // Managed user cannot have a managed profile.
             return CODE_USER_HAS_PROFILE_OWNER;
         }
@@ -12727,7 +12737,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return true;
         }
 
-        final ComponentName profileOwner = getProfileOwner(userId);
+        final ComponentName profileOwner = getProfileOwnerAsUser(userId);
         if (profileOwner == null) {
             return false;
         }
@@ -12936,7 +12946,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         final int userId = caller.getUserId();
         enforceUserUnlocked(userId);
 
-        final ComponentName profileOwner = getProfileOwner(userId);
+        final ComponentName profileOwner = getProfileOwnerAsUser(userId);
         if (profileOwner != null && packageName.equals(profileOwner.getPackageName())) {
             throw new IllegalArgumentException("Cannot uninstall a package with a profile owner");
         }
@@ -14516,7 +14526,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             final List<ActiveAdmin> admins = new ArrayList<>();
             int[] users = mUserManager.getProfileIdsWithDisabled(UserHandle.getCallingUserId());
             for (int i = 0; i < users.length; i++) {
-                final ComponentName componentName = getProfileOwner(users[i]);
+                final ComponentName componentName = getProfileOwnerAsUser(users[i]);
                 if (componentName != null) {
                     ActiveAdmin admin = getActiveAdminUncheckedLocked(componentName, users[i]);
                     if (admin != null) {

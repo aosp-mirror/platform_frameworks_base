@@ -30,6 +30,7 @@
         <item>com.android.systemui.volume.VolumeUI</item>
         <item>com.android.systemui.statusbar.tv.TvStatusBar</item>
         <item>com.android.systemui.statusbar.tv.TvNotificationPanel</item>
+        <item>com.android.systemui.statusbar.tv.VpnStatusObserver</item>
         <item>com.android.systemui.usb.StorageNotification</item>
         <item>com.android.systemui.power.PowerUI</item>
         <item>com.android.systemui.media.RingtonePlayer</item>
