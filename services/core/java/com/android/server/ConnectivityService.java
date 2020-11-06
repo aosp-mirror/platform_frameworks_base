@@ -235,6 +235,7 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.ConcurrentModificationException;
 import java.util.HashMap;
@@ -5358,7 +5359,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
      * Also used to notice when the calling process dies so we can self-expire
      */
     private class NetworkRequestInfo implements IBinder.DeathRecipient {
+        final List<NetworkRequest> mRequests;
         final NetworkRequest request;
+
         // The network currently satisfying this request, or null if none. Must only be touched
         // on the handler thread. This only makes sense for network requests and not for listens,
         // as defined by NetworkRequest#isRequest(). For listens, this is always null.
@@ -5373,6 +5376,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
         NetworkRequestInfo(NetworkRequest r, PendingIntent pi) {
             request = r;
+            mRequests = initializeRequests(r);
             ensureNetworkRequestHasType(request);
             mPendingIntent = pi;
             messenger = null;
@@ -5386,6 +5390,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             super();
             messenger = m;
             request = r;
+            mRequests = initializeRequests(r);
             ensureNetworkRequestHasType(request);
             mBinder = binder;
             mPid = getCallingPid();
@@ -5403,6 +5408,13 @@ public class ConnectivityService extends IConnectivityManager.Stub
         NetworkRequestInfo(NetworkRequest r) {
             this(r, null);
         }
+
+        private List<NetworkRequest> initializeRequests(NetworkRequest r) {
+            final ArrayList<NetworkRequest> tempRequests = new ArrayList<>();
+            tempRequests.add(new NetworkRequest(r));
+            return Collections.unmodifiableList(tempRequests);
+        }
+
 
         private void enforceRequestCountLimit() {
             synchronized (mUidToNetworkRequestCount) {
