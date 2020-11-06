@@ -796,10 +796,12 @@ public final class WifiNetworkSuggestion implements Parcelable {
                         && WifiEnterpriseConfig.isSuiteBCipherCert(
                         mWpa3EnterpriseConfig.getCaCertificate())) {
                     // WPA3-Enterprise in 192-bit security mode
-                    configuration.setSecurityParams(WifiConfiguration.SECURITY_TYPE_EAP_SUITE_B);
+                    configuration.setSecurityParams(
+                            WifiConfiguration.SECURITY_TYPE_EAP_WPA3_ENTERPRISE_192_BIT);
                 } else if (mWpa3EnterpriseType == WPA3_ENTERPRISE_192_BIT) {
                     // WPA3-Enterprise in 192-bit security mode
-                    configuration.setSecurityParams(WifiConfiguration.SECURITY_TYPE_EAP_SUITE_B);
+                    configuration.setSecurityParams(
+                            WifiConfiguration.SECURITY_TYPE_EAP_WPA3_ENTERPRISE_192_BIT);
                 } else {
                     // WPA3-Enterprise
                     configuration.setSecurityParams(
