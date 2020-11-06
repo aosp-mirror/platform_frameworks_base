@@ -16,33 +16,69 @@
 
 package com.android.wm.shell.pip;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ComponentName;
+import android.content.Context;
 import android.graphics.Rect;
 import android.util.Size;
 import android.view.DisplayInfo;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.wm.shell.R;
 import com.android.wm.shell.common.DisplayLayout;
 
 import java.io.PrintWriter;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Objects;
 
 /**
  * Singleton source of truth for the current state of PIP bounds.
  */
 public final class PipBoundsState {
+    public static final int STASH_TYPE_NONE = 0;
+    public static final int STASH_TYPE_LEFT = 1;
+    public static final int STASH_TYPE_RIGHT = 2;
+
+    @IntDef(prefix = { "STASH_TYPE_" }, value =  {
+            STASH_TYPE_NONE,
+            STASH_TYPE_LEFT,
+            STASH_TYPE_RIGHT
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    @interface StashType {}
+
     private static final String TAG = PipBoundsState.class.getSimpleName();
 
     private final @NonNull Rect mBounds = new Rect();
+    private final Context mContext;
     private float mAspectRatio;
-    private boolean mIsStashed;
+    private int mStashedState = STASH_TYPE_NONE;
+    private int mStashOffset;
     private PipReentryState mPipReentryState;
     private ComponentName mLastPipComponentName;
     private final DisplayInfo mDisplayInfo = new DisplayInfo();
     private final DisplayLayout mDisplayLayout = new DisplayLayout();
     private final @NonNull AnimatingBoundsState mAnimatingBoundsState = new AnimatingBoundsState();
+
+    public PipBoundsState(Context context) {
+        mContext = context;
+        reloadResources();
+    }
+
+    /**
+     * Reloads the resources.
+     */
+    public void onConfigurationChanged() {
+        reloadResources();
+    }
+
+    private void reloadResources() {
+        mStashOffset = mContext.getResources()
+                .getDimensionPixelSize(R.dimen.pip_stash_offset);
+    }
 
     /**
      * Set the current PIP bounds.
@@ -57,17 +93,32 @@ public final class PipBoundsState {
     }
 
     /**
-     * Dictate where PiP currently should be stashed or not.
+     * Dictate where PiP currently should be stashed, if at all.
      */
-    public void setStashed(boolean isStashed) {
-        mIsStashed = isStashed;
+    public void setStashed(@StashType int stashedState) {
+        mStashedState = stashedState;
+    }
+
+    /**
+     * Return where the PiP is stashed, if at all.
+     * @return {@code STASH_NONE}, {@code STASH_LEFT} or {@code STASH_RIGHT}.
+     */
+    public @StashType int getStashedState() {
+        return mStashedState;
     }
 
     /**
      * Whether PiP is stashed or not.
      */
     public boolean isStashed() {
-        return mIsStashed;
+        return mStashedState != STASH_TYPE_NONE;
+    }
+
+    /**
+     * Returns the offset from the edge of the screen for PiP stash.
+     */
+    public int getStashOffset() {
+        return mStashOffset;
     }
 
     public void setAspectRatio(float aspectRatio) {
@@ -245,7 +296,8 @@ public final class PipBoundsState {
         pw.println(innerPrefix + "mAspectRatio=" + mAspectRatio);
         pw.println(innerPrefix + "mDisplayInfo=" + mDisplayInfo);
         pw.println(innerPrefix + "mDisplayLayout=" + mDisplayLayout);
-        pw.println(innerPrefix + "mIsStashed=" + mIsStashed);
+        pw.println(innerPrefix + "mStashedState=" + mStashedState);
+        pw.println(innerPrefix + "mStashOffset=" + mStashOffset);
         if (mPipReentryState == null) {
             pw.println(innerPrefix + "mPipReentryState=null");
         } else {

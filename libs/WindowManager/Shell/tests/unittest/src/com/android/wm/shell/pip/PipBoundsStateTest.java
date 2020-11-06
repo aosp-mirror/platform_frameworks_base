@@ -51,7 +51,7 @@ public class PipBoundsStateTest extends ShellTestCase {
 
     @Before
     public void setUp() {
-        mPipBoundsState = new PipBoundsState();
+        mPipBoundsState = new PipBoundsState(mContext);
         mTestComponentName1 = new ComponentName(mContext, "component1");
         mTestComponentName2 = new ComponentName(mContext, "component2");
     }
