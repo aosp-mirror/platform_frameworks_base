@@ -24,6 +24,7 @@
 #include <android/hardware/power/Mode.h>
 #include <android/system/suspend/1.0/ISystemSuspend.h>
 #include <android/system/suspend/ISuspendControlService.h>
+#include <android/system/suspend/internal/ISuspendControlServiceInternal.h>
 #include <nativehelper/JNIHelp.h>
 #include "jni.h"
 
@@ -355,6 +356,8 @@ void android_server_PowerManagerService_userActivity(nsecs_t eventTime, int32_t 
 
 static sp<ISystemSuspend> gSuspendHal = nullptr;
 static sp<ISuspendControlService> gSuspendControl = nullptr;
+static sp<system::suspend::internal::ISuspendControlServiceInternal> gSuspendControlInternal =
+        nullptr;
 static sp<IWakeLock> gSuspendBlocker = nullptr;
 static std::mutex gSuspendMutex;
 
@@ -379,10 +382,22 @@ sp<ISuspendControlService> getSuspendControl() {
     return gSuspendControl;
 }
 
+sp<system::suspend::internal::ISuspendControlServiceInternal> getSuspendControlInternal() {
+    static std::once_flag suspendControlFlag;
+    std::call_once(suspendControlFlag, []() {
+        gSuspendControlInternal =
+                waitForService<system::suspend::internal::ISuspendControlServiceInternal>(
+                        String16("suspend_control_internal"));
+        LOG_ALWAYS_FATAL_IF(gSuspendControlInternal == nullptr);
+    });
+    return gSuspendControlInternal;
+}
+
 void enableAutoSuspend() {
     static bool enabled = false;
     if (!enabled) {
-        sp<ISuspendControlService> suspendControl = getSuspendControl();
+        sp<system::suspend::internal::ISuspendControlServiceInternal> suspendControl =
+                getSuspendControlInternal();
         suspendControl->enableAutosuspend(&enabled);
     }
 
@@ -515,7 +530,7 @@ static void nativeSetFeature(JNIEnv* /* env */, jclass /* clazz */, jint feature
 
 static bool nativeForceSuspend(JNIEnv* /* env */, jclass /* clazz */) {
     bool retval = false;
-    getSuspendControl()->forceSuspend(&retval);
+    getSuspendControlInternal()->forceSuspend(&retval);
     return retval;
 }
 
