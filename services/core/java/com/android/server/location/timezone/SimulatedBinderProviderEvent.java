@@ -25,11 +25,9 @@ import static com.android.server.location.timezone.LocationTimeZoneManagerServic
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.ActivityManager;
 import android.location.timezone.LocationTimeZoneEvent;
 import android.os.ShellCommand;
 import android.os.SystemClock;
-import android.os.UserHandle;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -119,8 +117,7 @@ final class SimulatedBinderProviderEvent {
 
     private static LocationTimeZoneEvent parseLocationTimeZoneEventArgs(ShellCommand shellCommand) {
         LocationTimeZoneEvent.Builder eventBuilder = new LocationTimeZoneEvent.Builder()
-                .setElapsedRealtimeNanos(SystemClock.elapsedRealtime())
-                .setUserHandle(UserHandle.of(ActivityManager.getCurrentUser()));
+                .setElapsedRealtimeNanos(SystemClock.elapsedRealtime());
 
         String eventTypeString = shellCommand.getNextArgRequired();
         switch (eventTypeString.toUpperCase()) {

@@ -18,10 +18,8 @@ package com.android.location.timezone.provider;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
-import android.app.ActivityManager;
 import android.location.timezone.LocationTimeZoneEvent;
 import android.os.SystemClock;
-import android.os.UserHandle;
 
 import java.util.Collections;
 import java.util.List;
@@ -146,7 +144,6 @@ public final class LocationTimeZoneEventUnbundled {
         public LocationTimeZoneEventUnbundled build() {
             final int internalEventType = this.mEventType;
             LocationTimeZoneEvent event = new LocationTimeZoneEvent.Builder()
-                    .setUserHandle(UserHandle.of(ActivityManager.getCurrentUser()))
                     .setEventType(internalEventType)
                     .setTimeZoneIds(mTimeZoneIds)
                     .setElapsedRealtimeNanos(SystemClock.elapsedRealtimeNanos())
