@@ -16,18 +16,22 @@
 
 package com.android.server.devicestate;
 
-import static android.hardware.devicestate.DeviceStateManager.INVALID_DEVICE_STATE;
 import static android.Manifest.permission.CONTROL_DEVICE_STATE;
+import static android.hardware.devicestate.DeviceStateManager.INVALID_DEVICE_STATE;
 
 import android.annotation.NonNull;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.hardware.devicestate.IDeviceStateManager;
+import android.hardware.devicestate.IDeviceStateManagerCallback;
 import android.os.Binder;
+import android.os.IBinder;
+import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ShellCallback;
 import android.util.IntArray;
 import android.util.Slog;
+import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -37,6 +41,7 @@ import com.android.server.policy.DeviceStatePolicyImpl;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Arrays;
 
 /**
@@ -66,6 +71,8 @@ public final class DeviceStateManagerService extends SystemService {
     private final Object mLock = new Object();
     @NonNull
     private final DeviceStatePolicy mDeviceStatePolicy;
+    @NonNull
+    private final BinderService mBinderService;
 
     @GuardedBy("mLock")
     private IntArray mSupportedDeviceStates;
@@ -88,6 +95,10 @@ public final class DeviceStateManagerService extends SystemService {
     @GuardedBy("mLock")
     private int mRequestedOverrideState = INVALID_DEVICE_STATE;
 
+    // List of registered callbacks indexed by process id.
+    @GuardedBy("mLock")
+    private final SparseArray<CallbackRecord> mCallbacks = new SparseArray<>();
+
     public DeviceStateManagerService(@NonNull Context context) {
         this(context, new DeviceStatePolicyImpl());
     }
@@ -96,12 +107,13 @@ public final class DeviceStateManagerService extends SystemService {
     DeviceStateManagerService(@NonNull Context context, @NonNull DeviceStatePolicy policy) {
         super(context);
         mDeviceStatePolicy = policy;
+        mDeviceStatePolicy.getDeviceStateProvider().setListener(new DeviceStateProviderListener());
+        mBinderService = new BinderService();
     }
 
     @Override
     public void onStart() {
-        mDeviceStatePolicy.getDeviceStateProvider().setListener(new DeviceStateProviderListener());
-        publishBinderService(Context.DEVICE_STATE_SERVICE, new BinderService());
+        publishBinderService(Context.DEVICE_STATE_SERVICE, mBinderService);
     }
 
     /**
@@ -184,6 +196,11 @@ public final class DeviceStateManagerService extends SystemService {
             // Copy array to prevent external modification of internal state.
             return Arrays.copyOf(mSupportedDeviceStates.toArray(), mSupportedDeviceStates.size());
         }
+    }
+
+    @VisibleForTesting
+    IDeviceStateManager getBinderService() {
+        return mBinderService;
     }
 
     private void updateSupportedStates(int[] supportedDeviceStates) {
@@ -310,16 +327,79 @@ public final class DeviceStateManagerService extends SystemService {
      * </p>
      */
     private void commitPendingState() {
+        // Update the current state.
+        int newState;
         synchronized (mLock) {
             if (DEBUG) {
                 Slog.d(TAG, "Committing state: " + mPendingState);
             }
             mCommittedState = mPendingState;
+            newState = mCommittedState;
             mPendingState = INVALID_DEVICE_STATE;
             updatePendingStateLocked();
         }
 
+        // Notify callbacks of a change.
+        notifyDeviceStateChanged(newState);
+
+        // Try to configure the next state if needed.
         notifyPolicyIfNeeded();
+    }
+
+    private void notifyDeviceStateChanged(int deviceState) {
+        if (Thread.holdsLock(mLock)) {
+            throw new IllegalStateException(
+                    "Attempting to notify callbacks with service lock held.");
+        }
+
+        // Grab the lock and copy the callbacks.
+        ArrayList<CallbackRecord> callbacks;
+        synchronized (mLock) {
+            if (mCallbacks.size() == 0) {
+                return;
+            }
+
+            callbacks = new ArrayList<>();
+            for (int i = 0; i < mCallbacks.size(); i++) {
+                callbacks.add(mCallbacks.valueAt(i));
+            }
+        }
+
+        // After releasing the lock, send the notifications out.
+        for (int i = 0; i < callbacks.size(); i++) {
+            callbacks.get(i).notifyDeviceStateAsync(deviceState);
+        }
+    }
+
+    private void registerCallbackInternal(IDeviceStateManagerCallback callback, int callingPid) {
+        int currentState;
+        CallbackRecord record;
+        // Grab the lock to register the callback and get the current state.
+        synchronized (mLock) {
+            if (mCallbacks.contains(callingPid)) {
+                throw new SecurityException("The calling process has already registered an"
+                        + " IDeviceStateManagerCallback.");
+            }
+
+            record = new CallbackRecord(callback, callingPid);
+            try {
+                callback.asBinder().linkToDeath(record, 0);
+            } catch (RemoteException ex) {
+                throw new RuntimeException(ex);
+            }
+
+            mCallbacks.put(callingPid, record);
+            currentState = mCommittedState;
+        }
+
+        // Notify the callback of the state at registration.
+        record.notifyDeviceStateAsync(currentState);
+    }
+
+    private void unregisterCallbackInternal(CallbackRecord record) {
+        synchronized (mLock) {
+            mCallbacks.remove(record.mPid);
+        }
     }
 
     private void dumpInternal(PrintWriter pw) {
@@ -330,6 +410,14 @@ public final class DeviceStateManagerService extends SystemService {
             pw.println("  mPendingState=" + toString(mPendingState));
             pw.println("  mRequestedState=" + toString(mRequestedState));
             pw.println("  mRequestedOverrideState=" + toString(mRequestedOverrideState));
+
+            final int callbackCount = mCallbacks.size();
+            pw.println();
+            pw.println("Callbacks: size=" + callbackCount);
+            for (int i = 0; i < callbackCount; i++) {
+                CallbackRecord callback = mCallbacks.valueAt(i);
+                pw.println("  " + i + ": mPid=" + callback.mPid);
+            }
         }
     }
 
@@ -360,8 +448,47 @@ public final class DeviceStateManagerService extends SystemService {
         }
     }
 
+    private final class CallbackRecord implements IBinder.DeathRecipient {
+        private final IDeviceStateManagerCallback mCallback;
+        private final int mPid;
+
+        CallbackRecord(IDeviceStateManagerCallback callback, int pid) {
+            mCallback = callback;
+            mPid = pid;
+        }
+
+        @Override
+        public void binderDied() {
+            unregisterCallbackInternal(this);
+        }
+
+        public void notifyDeviceStateAsync(int devicestate) {
+            try {
+                mCallback.onDeviceStateChanged(devicestate);
+            } catch (RemoteException ex) {
+                Slog.w(TAG, "Failed to notify process " + mPid + " that device state changed.",
+                        ex);
+            }
+        }
+    }
+
     /** Implementation of {@link IDeviceStateManager} published as a binder service. */
     private final class BinderService extends IDeviceStateManager.Stub {
+        @Override // Binder call
+        public void registerCallback(IDeviceStateManagerCallback callback) {
+            if (callback == null) {
+                throw new IllegalArgumentException("Device state callback must not be null.");
+            }
+
+            final int callingPid = Binder.getCallingPid();
+            final long token = Binder.clearCallingIdentity();
+            try {
+                registerCallbackInternal(callback, callingPid);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
         @Override // Binder call
         public void onShellCommand(FileDescriptor in, FileDescriptor out, FileDescriptor err,
                 String[] args, ShellCallback callback, ResultReceiver result) {

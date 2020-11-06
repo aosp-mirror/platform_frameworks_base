@@ -16,8 +16,11 @@
 
 package android.hardware.devicestate;
 
+import android.annotation.NonNull;
 import android.annotation.SystemService;
 import android.content.Context;
+
+import java.util.concurrent.Executor;
 
 /**
  * Manages the state of the system for devices with user-configurable hardware like a foldable
@@ -33,6 +36,47 @@ public final class DeviceStateManager {
     private DeviceStateManagerGlobal mGlobal;
 
     public DeviceStateManager() {
-        mGlobal = DeviceStateManagerGlobal.getInstance();
+        DeviceStateManagerGlobal global = DeviceStateManagerGlobal.getInstance();
+        if (global == null) {
+            throw new IllegalStateException(
+                    "Failed to get instance of global device state manager.");
+        }
+        mGlobal = global;
+    }
+
+    /**
+     * Registers a listener to receive notifications about changes in device state.
+     *
+     * @param listener the listener to register.
+     * @param executor the executor to process notifications.
+     *
+     * @see DeviceStateListener
+     */
+    public void registerDeviceStateListener(@NonNull DeviceStateListener listener,
+            @NonNull Executor executor) {
+        mGlobal.registerDeviceStateListener(listener, executor);
+    }
+
+    /**
+     * Unregisters a listener previously registered with
+     * {@link #registerDeviceStateListener(DeviceStateListener, Executor)}.
+     */
+    public void unregisterDeviceStateListener(@NonNull DeviceStateListener listener) {
+        mGlobal.unregisterDeviceStateListener(listener);
+    }
+
+    /**
+     * Listens for changes in device states.
+     */
+    public interface DeviceStateListener {
+        /**
+         * Called in response to device state changes.
+         * <p>
+         * Guaranteed to be called once on registration of the listener with the
+         * initial value and then on every subsequent change in device state.
+         *
+         * @param deviceState the new device state.
+         */
+        void onDeviceStateChanged(int deviceState);
     }
 }
