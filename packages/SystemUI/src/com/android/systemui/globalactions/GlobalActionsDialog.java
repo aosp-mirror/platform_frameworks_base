@@ -870,8 +870,6 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                 Context context, View convertView, ViewGroup parent, LayoutInflater inflater) {
             View v = super.create(context, convertView, parent, inflater);
             int textColor;
-            v.setBackgroundTintList(ColorStateList.valueOf(v.getResources().getColor(
-                    com.android.systemui.R.color.global_actions_emergency_background)));
             textColor = v.getResources().getColor(
                     com.android.systemui.R.color.global_actions_emergency_text);
             TextView messageView = v.findViewById(R.id.message);
