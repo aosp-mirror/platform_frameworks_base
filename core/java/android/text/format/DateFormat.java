@@ -19,7 +19,7 @@ package android.text.format;
 import android.annotation.NonNull;
 import android.app.compat.CompatChanges;
 import android.compat.annotation.ChangeId;
-import android.compat.annotation.EnabledAfter;
+import android.compat.annotation.EnabledSince;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.icu.text.DateFormatSymbols;
@@ -169,7 +169,7 @@ public class DateFormat {
      * mean using 12-hour in some locales and, in this case, is duplicated as the 'a' field.
      */
     @ChangeId
-    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.R)
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.CUR_DEVELOPMENT)
     static final long DISALLOW_DUPLICATE_FIELD_IN_SKELETON = 170233598L;
 
     /**
