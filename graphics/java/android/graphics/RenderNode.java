@@ -858,8 +858,6 @@ public final class RenderNode {
      * be blurred when this RenderNode is drawn into the destination.
      * @param renderEffect to be applied to the RenderNode. Passing null clears all previously
      *          configured RenderEffects
-     *
-     * @hide
      */
     public void setRenderEffect(@Nullable RenderEffect renderEffect) {
         nSetRenderEffect(mNativeRenderNode,
