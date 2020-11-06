@@ -1007,7 +1007,7 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable {
         intent.putExtra("seq", mDelayedShowingSequence);
         intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
         PendingIntent sender = PendingIntent.getBroadcast(mContext,
-                0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
+                0, intent, PendingIntent.FLAG_CANCEL_CURRENT |  PendingIntent.FLAG_IMMUTABLE);
         mAlarmManager.setExactAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP, when, sender);
         if (DEBUG) Log.d(TAG, "setting alarm to turn off keyguard, seq = "
                          + mDelayedShowingSequence);
