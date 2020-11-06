@@ -5815,7 +5815,7 @@ public class Activity extends ContextThemeWrapper
                 intent.migrateExtraStreamToClipData(this);
                 intent.prepareToLeaveProcess(this);
                 result = ActivityTaskManager.getService()
-                    .startActivity(mMainThread.getApplicationThread(), getBasePackageName(),
+                    .startActivity(mMainThread.getApplicationThread(), getOpPackageName(),
                             getAttributionTag(), intent,
                             intent.resolveTypeIfNeeded(getContentResolver()), mToken, mEmbeddedID,
                             requestCode, ActivityManager.START_FLAG_ONLY_IF_NEEDED, null, options);

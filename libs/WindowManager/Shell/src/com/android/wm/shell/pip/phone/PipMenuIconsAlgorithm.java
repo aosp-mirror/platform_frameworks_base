@@ -60,6 +60,7 @@ public class PipMenuIconsAlgorithm {
         if (mViewRoot == null || mTopEndContainer == null || mDragHandle == null
                 || mSettingsButton == null || mDismissButton == null) {
             Log.e(TAG, "One if the required views is null.");
+            return;
         }
 
         //We only need to calculate the layout once since it does not change.

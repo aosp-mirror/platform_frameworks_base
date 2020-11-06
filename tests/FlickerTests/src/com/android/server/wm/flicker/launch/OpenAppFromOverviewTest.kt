@@ -22,14 +22,25 @@ import androidx.test.platform.app.InstrumentationRegistry
 import com.android.server.wm.flicker.Flicker
 import com.android.server.wm.flicker.FlickerTestRunnerFactory
 import com.android.server.wm.flicker.FlickerTestRunner
+import com.android.server.wm.flicker.endRotation
+import com.android.server.wm.flicker.focusChanges
+import com.android.server.wm.flicker.visibleLayersShownMoreThanOneConsecutiveEntry
+import com.android.server.wm.flicker.visibleWindowsShownMoreThanOneConsecutiveEntry
 import com.android.server.wm.flicker.helpers.StandardAppHelper
 import com.android.server.wm.flicker.helpers.reopenAppFromOverview
 import com.android.server.wm.flicker.helpers.hasWindow
 import com.android.server.wm.flicker.helpers.buildTestTag
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
+import com.android.server.wm.flicker.navBarLayerIsAlwaysVisible
+import com.android.server.wm.flicker.navBarLayerRotatesAndScales
+import com.android.server.wm.flicker.navBarWindowIsAlwaysVisible
+import com.android.server.wm.flicker.noUncoveredRegions
 import com.android.server.wm.flicker.repetitions
 import com.android.server.wm.flicker.startRotation
+import com.android.server.wm.flicker.statusBarLayerIsAlwaysVisible
+import com.android.server.wm.flicker.statusBarLayerRotatesScales
+import com.android.server.wm.flicker.statusBarWindowIsAlwaysVisible
 import org.junit.FixMethodOrder
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
@@ -76,6 +87,37 @@ class OpenAppFromOverviewTest(
                             test {
                                 testApp.exit()
                                 this.setRotation(Surface.ROTATION_0)
+                            }
+                        }
+                        assertions {
+                            windowManagerTrace {
+                                navBarWindowIsAlwaysVisible()
+                                statusBarWindowIsAlwaysVisible()
+                                visibleWindowsShownMoreThanOneConsecutiveEntry()
+
+                                appWindowReplacesLauncherAsTopWindow(testApp)
+                                wallpaperWindowBecomesInvisible()
+                            }
+
+                            layersTrace {
+                                noUncoveredRegions(Surface.ROTATION_0, configuration.endRotation,
+                                        bugId = 141361128)
+                                navBarLayerRotatesAndScales(Surface.ROTATION_0,
+                                        configuration.endRotation)
+                                statusBarLayerRotatesScales(Surface.ROTATION_0,
+                                        configuration.endRotation)
+                                statusBarLayerIsAlwaysVisible(
+                                        enabled = Surface.ROTATION_0 == configuration.endRotation)
+                                navBarLayerIsAlwaysVisible(
+                                        enabled = Surface.ROTATION_0 == configuration.endRotation)
+                                visibleLayersShownMoreThanOneConsecutiveEntry(
+                                        enabled = Surface.ROTATION_0 == configuration.endRotation)
+
+                                appLayerReplacesWallpaperLayer(testApp)
+                            }
+
+                            eventLog {
+                                focusChanges("NexusLauncherActivity", testApp.`package`)
                             }
                         }
                     }

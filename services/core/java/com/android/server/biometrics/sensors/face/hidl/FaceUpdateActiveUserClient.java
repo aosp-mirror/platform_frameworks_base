@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.biometrics.sensors.face;
+package com.android.server.biometrics.sensors.face.hidl;
 
 import android.annotation.NonNull;
 import android.content.Context;

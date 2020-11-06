@@ -34,7 +34,7 @@ import com.android.systemui.Prefs;
 import com.android.systemui.Prefs.Key;
 import com.android.systemui.R;
 import com.android.systemui.plugins.qs.DetailAdapter;
-import com.android.systemui.qs.QSPanel;
+import com.android.systemui.qs.QSDetailDisplayer;
 import com.android.systemui.statusbar.policy.KeyguardUserSwitcher;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 
@@ -43,14 +43,13 @@ import com.android.systemui.statusbar.policy.UserSwitcherController;
  */
 public class MultiUserSwitch extends FrameLayout implements View.OnClickListener {
 
-    protected QSPanel mQsPanel;
+    protected QSDetailDisplayer mQSDetailDisplayer;
     private KeyguardUserSwitcher mKeyguardUserSwitcher;
     private boolean mKeyguardMode;
     private UserSwitcherController.BaseUserAdapter mUserListener;
 
     final UserManager mUserManager;
 
-    private final int[] mTmpInt2 = new int[2];
 
     protected UserSwitcherController mUserSwitcherController;
 
@@ -66,8 +65,9 @@ public class MultiUserSwitch extends FrameLayout implements View.OnClickListener
         refreshContentDescription();
     }
 
-    public void setQsPanel(QSPanel qsPanel) {
-        mQsPanel = qsPanel;
+    /** */
+    public void setQSDetailDisplayer(QSDetailDisplayer detailDisplayer) {
+        mQSDetailDisplayer = detailDisplayer;
         setUserSwitcherController(Dependency.get(UserSwitcherController.class));
     }
 
@@ -127,16 +127,15 @@ public class MultiUserSwitch extends FrameLayout implements View.OnClickListener
             if (mKeyguardUserSwitcher != null) {
                 mKeyguardUserSwitcher.show(true /* animate */);
             }
-        } else if (mQsPanel != null && mUserSwitcherController != null) {
+        } else if (mQSDetailDisplayer != null && mUserSwitcherController != null) {
             View center = getChildCount() > 0 ? getChildAt(0) : this;
 
-            center.getLocationInWindow(mTmpInt2);
-            mTmpInt2[0] += center.getWidth() / 2;
-            mTmpInt2[1] += center.getHeight() / 2;
+            int[] tmpInt = new int[2];
+            center.getLocationInWindow(tmpInt);
+            tmpInt[0] += center.getWidth() / 2;
+            tmpInt[1] += center.getHeight() / 2;
 
-            mQsPanel.showDetailAdapter(true,
-                    getUserDetailAdapter(),
-                    mTmpInt2);
+            mQSDetailDisplayer.showDetailAdapter(getUserDetailAdapter(), tmpInt[0], tmpInt[1]);
         }
     }
 

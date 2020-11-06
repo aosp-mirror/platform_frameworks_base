@@ -410,10 +410,10 @@ public final class HdmiCecConfigTest {
                 + "           value-type=\"int\""
                 + "           user-configurable=\"true\">"
                 + "    <allowed-values>"
-                + "      <value hex-value=\"0x00\" />"
-                + "      <value hex-value=\"0x01\" />"
+                + "      <value int-value=\"0x00\" />"
+                + "      <value int-value=\"0x01\" />"
                 + "    </allowed-values>"
-                + "    <default-value hex-value=\"0x01\" />"
+                + "    <default-value int-value=\"0x01\" />"
                 + "  </setting>"
                 + "</cec-settings>", null);
         assertThat(hdmiCecConfig.getAllowedIntValues(
@@ -556,10 +556,10 @@ public final class HdmiCecConfigTest {
                 + "           value-type=\"int\""
                 + "           user-configurable=\"true\">"
                 + "    <allowed-values>"
-                + "      <value hex-value=\"0x00\" />"
-                + "      <value hex-value=\"0x01\" />"
+                + "      <value int-value=\"0x00\" />"
+                + "      <value int-value=\"0x01\" />"
                 + "    </allowed-values>"
-                + "    <default-value hex-value=\"0x01\" />"
+                + "    <default-value int-value=\"0x01\" />"
                 + "  </setting>"
                 + "</cec-settings>", null);
         assertThat(hdmiCecConfig.getDefaultIntValue(
@@ -741,10 +741,10 @@ public final class HdmiCecConfigTest {
                 + "           value-type=\"int\""
                 + "           user-configurable=\"true\">"
                 + "    <allowed-values>"
-                + "      <value hex-value=\"0x0\" />"
-                + "      <value hex-value=\"0x1\" />"
+                + "      <value int-value=\"0x0\" />"
+                + "      <value int-value=\"0x1\" />"
                 + "    </allowed-values>"
-                + "    <default-value hex-value=\"0x1\" />"
+                + "    <default-value int-value=\"0x1\" />"
                 + "  </setting>"
                 + "</cec-settings>", null);
         assertThat(hdmiCecConfig.getIntValue(
@@ -988,10 +988,10 @@ public final class HdmiCecConfigTest {
                 + "           value-type=\"int\""
                 + "           user-configurable=\"true\">"
                 + "    <allowed-values>"
-                + "      <value hex-value=\"0x0\" />"
-                + "      <value hex-value=\"0x1\" />"
+                + "      <value int-value=\"0x0\" />"
+                + "      <value int-value=\"0x1\" />"
                 + "    </allowed-values>"
-                + "    <default-value hex-value=\"0x1\" />"
+                + "    <default-value int-value=\"0x1\" />"
                 + "  </setting>"
                 + "</cec-settings>", null);
         hdmiCecConfig.setIntValue(HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_ENABLED,

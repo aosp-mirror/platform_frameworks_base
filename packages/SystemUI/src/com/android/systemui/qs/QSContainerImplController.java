@@ -16,7 +16,10 @@
 
 package com.android.systemui.qs;
 
+import android.content.res.Configuration;
+
 import com.android.systemui.qs.dagger.QSScope;
+import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.util.ViewController;
 
 import javax.inject.Inject;
@@ -24,13 +27,26 @@ import javax.inject.Inject;
 /** */
 @QSScope
 public class QSContainerImplController extends ViewController<QSContainerImpl> {
+    private final QSPanelController mQsPanelController;
     private final QuickStatusBarHeaderController mQuickStatusBarHeaderController;
+    private final ConfigurationController mConfigurationController;
+
+    private final ConfigurationController.ConfigurationListener mConfigurationListener =
+            new ConfigurationController.ConfigurationListener() {
+        @Override
+        public void onConfigChanged(Configuration newConfig) {
+            mView.updateResources(mQsPanelController);
+        }
+    };
 
     @Inject
-    QSContainerImplController(QSContainerImpl view,
-            QuickStatusBarHeaderController quickStatusBarHeaderController) {
+    QSContainerImplController(QSContainerImpl view, QSPanelController qsPanelController,
+            QuickStatusBarHeaderController quickStatusBarHeaderController,
+            ConfigurationController configurationController) {
         super(view);
+        mQsPanelController = qsPanelController;
         mQuickStatusBarHeaderController = quickStatusBarHeaderController;
+        mConfigurationController = configurationController;
     }
 
     @Override
@@ -44,10 +60,19 @@ public class QSContainerImplController extends ViewController<QSContainerImpl> {
 
     @Override
     protected void onViewAttached() {
+        mView.updateResources(mQsPanelController);
+        mQsPanelController.setMediaVisibilityChangedListener((visible) -> {
+            if (mQsPanelController.isShown()) {
+                mView.onMediaVisibilityChanged(true);
+            }
+        });
+
+        mConfigurationController.addCallback(mConfigurationListener);
     }
 
     @Override
     protected void onViewDetached() {
+        mConfigurationController.removeCallback(mConfigurationListener);
     }
 
     public QSContainerImpl getView() {

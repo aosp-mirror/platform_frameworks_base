@@ -1082,10 +1082,11 @@ public final class MediaSessionManager {
          * has specified the target.
          * <p>
          * The session token can be {@link null} if the media button session is unset. In that case,
-         * framework would dispatch to the last sessions's media button receiver. If the media
-         * button receive isn't set as well, then it
+         * packageName will return the package name of the last session's media button receiver, or
+         * an empty string if the last session didn't set a media button receiver.
          *
-         * @param packageName The package name who would receive the media key event. Can be empty.
+         * @param packageName The package name of the component that will receive the media key
+         *                    event. Can be empty.
          * @param sessionToken The media session's token. Can be {@code null}.
          */
         void onMediaKeyEventSessionChanged(@NonNull String packageName,
