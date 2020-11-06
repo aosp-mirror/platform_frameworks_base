@@ -2659,8 +2659,9 @@
     <permission android:name="android.permission.GET_PROCESS_STATE_AND_OOM_SCORE"
         android:protectionLevel="signature|privileged|development" />
 
-    <!-- Allows use of PendingIntent.getIntent().
-         @hide -->
+    <!-- Allows use of PendingIntent.getIntent(), .
+         @hide @SystemApi(client=android.annotation.SystemApi.Client.MODULE_LIBRARIES)
+         -->
     <permission android:name="android.permission.GET_INTENT_SENDER_INTENT"
         android:protectionLevel="signature" />
 

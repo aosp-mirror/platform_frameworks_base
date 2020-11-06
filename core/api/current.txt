@@ -6189,7 +6189,11 @@ package android.app {
     method public android.content.IntentSender getIntentSender();
     method public static android.app.PendingIntent getService(android.content.Context, int, @NonNull android.content.Intent, int);
     method @Deprecated public String getTargetPackage();
+    method public boolean isActivity();
+    method public boolean isBroadcast();
+    method public boolean isForegroundService();
     method public boolean isImmutable();
+    method public boolean isService();
     method @Nullable public static android.app.PendingIntent readPendingIntentOrNullFromParcel(@NonNull android.os.Parcel);
     method public void send() throws android.app.PendingIntent.CanceledException;
     method public void send(int) throws android.app.PendingIntent.CanceledException;
