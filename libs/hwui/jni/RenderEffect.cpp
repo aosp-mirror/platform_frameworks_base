@@ -48,6 +48,73 @@ static jlong createBlurEffect(JNIEnv* env , jobject, jfloat radiusX,
     return reinterpret_cast<jlong>(blurFilter.release());
 }
 
+static jlong createBitmapEffect(
+    JNIEnv* env,
+    jobject,
+    jlong bitmapHandle,
+    jfloat srcLeft,
+    jfloat srcTop,
+    jfloat srcRight,
+    jfloat srcBottom,
+    jfloat dstLeft,
+    jfloat dstTop,
+    jfloat dstRight,
+    jfloat dstBottom
+) {
+    sk_sp<SkImage> image = android::bitmap::toBitmap(bitmapHandle).makeImage();
+    SkRect srcRect = SkRect::MakeLTRB(srcLeft, srcTop, srcRight, srcBottom);
+    SkRect dstRect = SkRect::MakeLTRB(dstLeft, dstTop, dstRight, dstBottom);
+    sk_sp<SkImageFilter> bitmapFilter =
+        SkImageFilters::Image(image, srcRect, dstRect, kLow_SkFilterQuality);
+    return reinterpret_cast<jlong>(bitmapFilter.release());
+}
+
+static jlong createColorFilterEffect(
+    JNIEnv* env,
+    jobject,
+    jlong colorFilterHandle,
+    jlong inputFilterHandle
+) {
+    auto* colorFilter = reinterpret_cast<const SkColorFilter*>(colorFilterHandle);
+    auto* inputFilter = reinterpret_cast<const SkImageFilter*>(inputFilterHandle);
+    sk_sp<SkImageFilter> colorFilterImageFilter = SkImageFilters::ColorFilter(
+            sk_ref_sp(colorFilter), sk_ref_sp(inputFilter), nullptr);
+   return reinterpret_cast<jlong>(colorFilterImageFilter.release());
+}
+
+static jlong createBlendModeEffect(
+    JNIEnv* env,
+    jobject,
+    jlong backgroundImageFilterHandle,
+    jlong foregroundImageFilterHandle,
+    jint blendmodeHandle
+) {
+    auto* backgroundFilter = reinterpret_cast<const SkImageFilter*>(backgroundImageFilterHandle);
+    auto* foregroundFilter = reinterpret_cast<const SkImageFilter*>(foregroundImageFilterHandle);
+    SkBlendMode blendMode = static_cast<SkBlendMode>(blendmodeHandle);
+    sk_sp<SkImageFilter> xfermodeFilter = SkImageFilters::Blend(
+            blendMode,
+            sk_ref_sp(backgroundFilter),
+            sk_ref_sp(foregroundFilter)
+    );
+    return reinterpret_cast<jlong>(xfermodeFilter.release());
+}
+
+static jlong createChainEffect(
+    JNIEnv* env,
+    jobject,
+    jlong outerFilterHandle,
+    jlong innerFilterHandle
+) {
+    auto* outerImageFilter = reinterpret_cast<const SkImageFilter*>(outerFilterHandle);
+    auto* innerImageFilter = reinterpret_cast<const SkImageFilter*>(innerFilterHandle);
+    sk_sp<SkImageFilter> composeFilter = SkImageFilters::Compose(
+        sk_ref_sp(outerImageFilter),
+        sk_ref_sp(innerImageFilter)
+    );
+    return reinterpret_cast<jlong>(composeFilter.release());
+}
+
 static void RenderEffect_safeUnref(SkImageFilter* filter) {
     SkSafeUnref(filter);
 }
@@ -59,7 +126,11 @@ static jlong getRenderEffectFinalizer(JNIEnv*, jobject) {
 static const JNINativeMethod gRenderEffectMethods[] = {
     {"nativeGetFinalizer", "()J", (void*)getRenderEffectFinalizer},
     {"nativeCreateOffsetEffect", "(FFJ)J", (void*)createOffsetEffect},
-    {"nativeCreateBlurEffect", "(FFJI)J", (void*)createBlurEffect}
+    {"nativeCreateBlurEffect", "(FFJI)J", (void*)createBlurEffect},
+    {"nativeCreateBitmapEffect", "(JFFFFFFFF)J", (void*)createBitmapEffect},
+    {"nativeCreateColorFilterEffect", "(JJ)J", (void*)createColorFilterEffect},
+    {"nativeCreateBlendModeEffect", "(JJI)J", (void*)createBlendModeEffect},
+    {"nativeCreateChainEffect", "(JJ)J", (void*)createChainEffect}
 };
 
 int register_android_graphics_RenderEffect(JNIEnv* env) {
