@@ -90,6 +90,10 @@ public final class SurroundingText implements Parcelable {
 
     /**
      * Returns the text offset of the start of the selection in the surrounding text.
+     *
+     * <p>A selection is the current range of the text that is selected by the user, or the current
+     * position of the cursor. A cursor is a selection where the start and end are at the same
+     * offset.<p>
      */
     @IntRange(from = 0)
     public int getSelectionStart() {
@@ -98,6 +102,10 @@ public final class SurroundingText implements Parcelable {
 
     /**
      * Returns the text offset of the end of the selection in the surrounding text.
+     *
+     * <p>A selection is the current range of the text that is selected by the user, or the current
+     * position of the cursor. A cursor is a selection where the start and end are at the same
+     * offset.<p>
      */
     @IntRange(from = 0)
     public int getSelectionEnd() {
