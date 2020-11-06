@@ -92,7 +92,7 @@ final class RollbackPackageHealthObserver implements PackageHealthObserver {
 
     @Override
     public int onHealthCheckFailed(@Nullable VersionedPackage failedPackage,
-            @FailureReasons int failureReason) {
+            @FailureReasons int failureReason, int mitigationCount) {
         // For native crashes, we will roll back any available rollbacks
         if (failureReason == PackageWatchdog.FAILURE_REASON_NATIVE_CRASH
                 && !mContext.getSystemService(RollbackManager.class)
@@ -110,7 +110,7 @@ final class RollbackPackageHealthObserver implements PackageHealthObserver {
 
     @Override
     public boolean execute(@Nullable VersionedPackage failedPackage,
-            @FailureReasons int rollbackReason) {
+            @FailureReasons int rollbackReason, int mitigationCount) {
         if (rollbackReason == PackageWatchdog.FAILURE_REASON_NATIVE_CRASH) {
             mHandler.post(() -> rollbackAll());
             return true;
