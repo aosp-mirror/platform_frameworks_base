@@ -29,8 +29,8 @@ import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.ViewParent;
-
 import android.widget.PopupWindow;
+
 import com.android.internal.R;
 import com.android.internal.view.menu.MenuBuilder;
 import com.android.internal.widget.FloatingToolbar;
@@ -148,16 +148,21 @@ public final class FloatingActionMode extends ActionMode {
     @Override
     public void invalidateContentRect() {
         mCallback.onGetContentRect(this, mOriginatingView, mContentRect);
-        repositionToolbar();
+        updateViewLocationInWindow(/* forceRepositionToolbar= */ true);
     }
 
     public void updateViewLocationInWindow() {
+        updateViewLocationInWindow(/* forceRepositionToolbar= */ false);
+    }
+
+    private void updateViewLocationInWindow(boolean forceRepositionToolbar) {
         mOriginatingView.getLocationOnScreen(mViewPositionOnScreen);
         mOriginatingView.getRootView().getLocationOnScreen(mRootViewPositionOnScreen);
         mOriginatingView.getGlobalVisibleRect(mViewRectOnScreen);
         mViewRectOnScreen.offset(mRootViewPositionOnScreen[0], mRootViewPositionOnScreen[1]);
 
-        if (!Arrays.equals(mViewPositionOnScreen, mPreviousViewPositionOnScreen)
+        if (forceRepositionToolbar
+                || !Arrays.equals(mViewPositionOnScreen, mPreviousViewPositionOnScreen)
                 || !mViewRectOnScreen.equals(mPreviousViewRectOnScreen)) {
             repositionToolbar();
             mPreviousViewPositionOnScreen[0] = mViewPositionOnScreen[0];
@@ -192,10 +197,15 @@ public final class FloatingActionMode extends ActionMode {
                             mViewRectOnScreen.bottom + mBottomAllowance));
 
             if (!mContentRectOnScreen.equals(mPreviousContentRectOnScreen)) {
-                // Content rect is moving.
-                mOriginatingView.removeCallbacks(mMovingOff);
-                mFloatingToolbarVisibilityHelper.setMoving(true);
-                mOriginatingView.postDelayed(mMovingOff, MOVING_HIDE_DELAY);
+                // Content rect is moving
+                if (!mPreviousContentRectOnScreen.isEmpty()) {
+                    mOriginatingView.removeCallbacks(mMovingOff);
+                    mFloatingToolbarVisibilityHelper.setMoving(true);
+                    mOriginatingView.postDelayed(mMovingOff, MOVING_HIDE_DELAY);
+                } else {
+                    // mPreviousContentRectOnScreen is empty. That means we are are showing the
+                    // toolbar rather than moving it. And we should show it right away.
+                }
 
                 mFloatingToolbar.setContentRect(mContentRectOnScreen);
                 mFloatingToolbar.updateLayout();
