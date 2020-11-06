@@ -429,6 +429,8 @@ cc_defaults {
     whole_static_libs: ["libskia"],
 
     srcs: [
+        "canvas/CanvasOpBuffer.cpp",
+        "canvas/CanvasOpRasterizer.cpp",
         "pipeline/skia/SkiaDisplayList.cpp",
         "pipeline/skia/SkiaRecordingCanvas.cpp",
         "pipeline/skia/RenderNodeDrawable.cpp",
@@ -604,6 +606,7 @@ cc_test {
         "tests/unit/ABitmapTests.cpp",
         "tests/unit/CacheManagerTests.cpp",
         "tests/unit/CanvasContextTests.cpp",
+        "tests/unit/CanvasOpTests.cpp",
         "tests/unit/CommonPoolTests.cpp",
         "tests/unit/DamageAccumulatorTests.cpp",
         "tests/unit/DeferredLayerUpdaterTests.cpp",
