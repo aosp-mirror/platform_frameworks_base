@@ -95,12 +95,6 @@ public class BubbleController implements Bubbles {
     private BubblePositioner mBubblePositioner;
     private SysuiProxy mSysuiProxy;
 
-    /**
-     * The relative position of the stack when we removed it and nulled it out. If the stack is
-     * re-created, it will re-appear at this position.
-     */
-    @Nullable private BubbleStackView.RelativeStackPosition mPositionFromRemovedStack;
-
     // Tracks the id of the current (foreground) user.
     private int mCurrentUserId;
     // Saves notification keys of active bubbles when users are switched.
@@ -176,12 +170,12 @@ public class BubbleController implements Bubbles {
             Handler mainHandler,
             ShellTaskOrganizer organizer) {
         BubbleLogger logger = new BubbleLogger(uiEventLogger);
-        return new BubbleController(context,
-                new BubbleData(context, logger), synchronizer,
-                floatingContentCoordinator, new BubbleDataRepository(context, launcherApps),
-                statusBarService, windowManager,
-                windowManagerShellWrapper, launcherApps, logger, mainHandler, organizer,
-                new BubblePositioner(context, windowManager));
+        BubblePositioner positioner = new BubblePositioner(context, windowManager);
+        BubbleData data = new BubbleData(context, logger);
+        return new BubbleController(context, data, synchronizer, floatingContentCoordinator,
+                new BubbleDataRepository(context, launcherApps),
+                statusBarService, windowManager, windowManagerShellWrapper, launcherApps,
+                logger, mainHandler, organizer, positioner);
     }
 
     /**
@@ -207,6 +201,7 @@ public class BubbleController implements Bubbles {
         mLogger = bubbleLogger;
         mMainHandler = mainHandler;
 
+        mBubblePositioner = positioner;
         mBubbleData = data;
         mBubbleData.setListener(mBubbleDataListener);
         mBubbleData.setSuppressionChangedListener(bubble -> {
@@ -249,7 +244,6 @@ public class BubbleController implements Bubbles {
 
         mBubbleIconFactory = new BubbleIconFactory(context);
         mTaskOrganizer = organizer;
-        mBubblePositioner = positioner;
 
         launcherApps.registerCallback(new LauncherApps.Callback() {
             @Override
@@ -388,7 +382,6 @@ public class BubbleController implements Bubbles {
         if (mStackView == null) {
             mStackView = new BubbleStackView(
                     mContext, this, mBubbleData, mSurfaceSynchronizer, mFloatingContentCoordinator);
-            mStackView.setStackStartPosition(mPositionFromRemovedStack);
             mStackView.addView(mBubbleScrim);
             mStackView.onOrientationChanged();
             if (mExpandListener != null) {
@@ -430,6 +423,8 @@ public class BubbleController implements Bubbles {
         try {
             mAddedToWindowManager = true;
             mWindowManager.addView(mStackView, mWmLayoutParams);
+            // Position info is dependent on us being attached to a window
+            mBubblePositioner.update(mOrientation);
         } catch (IllegalStateException e) {
             // This means the stack has already been added. This shouldn't happen...
             e.printStackTrace();
@@ -449,7 +444,6 @@ public class BubbleController implements Bubbles {
         try {
             mAddedToWindowManager = false;
             if (mStackView != null) {
-                mPositionFromRemovedStack = mStackView.getRelativeStackPosition();
                 mWindowManager.removeView(mStackView);
                 mStackView.removeView(mBubbleScrim);
                 mStackView = null;
@@ -544,7 +538,7 @@ public class BubbleController implements Bubbles {
             }
             if (newConfig.fontScale != mFontScale) {
                 mFontScale = newConfig.fontScale;
-                mStackView.updateFlyout(mFontScale);
+                mStackView.updateFontScale(mFontScale);
             }
             if (newConfig.getLayoutDirection() != mLayoutDirection) {
                 mLayoutDirection = newConfig.getLayoutDirection();

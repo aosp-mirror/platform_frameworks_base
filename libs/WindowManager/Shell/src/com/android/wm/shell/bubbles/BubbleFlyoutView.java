@@ -68,9 +68,8 @@ public class BubbleFlyoutView extends FrameLayout {
     private final int mFlyoutPadding;
     private final int mFlyoutSpaceFromBubble;
     private final int mPointerSize;
-    private final int mBubbleSize;
-    private final int mBubbleBitmapSize;
-    private final float mBubbleIconTopPadding;
+    private int mBubbleSize;
+    private int mBubbleBitmapSize;
 
     private final int mFlyoutElevation;
     private final int mBubbleElevation;
@@ -83,9 +82,9 @@ public class BubbleFlyoutView extends FrameLayout {
     private final TextView mMessageText;
 
     /** Values related to the 'new' dot which we use to figure out where to collapse the flyout. */
-    private final float mNewDotRadius;
-    private final float mNewDotSize;
-    private final float mOriginalDotSize;
+    private float mNewDotRadius;
+    private float mNewDotSize;
+    private float mOriginalDotSize;
 
     /**
      * The paint used to draw the background, whose color changes as the flyout transitions to the
@@ -169,16 +168,8 @@ public class BubbleFlyoutView extends FrameLayout {
         mFlyoutSpaceFromBubble = res.getDimensionPixelSize(R.dimen.bubble_flyout_space_from_bubble);
         mPointerSize = res.getDimensionPixelSize(R.dimen.bubble_flyout_pointer_size);
 
-        mBubbleSize = res.getDimensionPixelSize(R.dimen.individual_bubble_size);
-        mBubbleBitmapSize = res.getDimensionPixelSize(R.dimen.bubble_bitmap_size);
-        mBubbleIconTopPadding  = (mBubbleSize - mBubbleBitmapSize) / 2f;
-
         mBubbleElevation = res.getDimensionPixelSize(R.dimen.bubble_elevation);
         mFlyoutElevation = res.getDimensionPixelSize(R.dimen.bubble_flyout_elevation);
-
-        mOriginalDotSize = SIZE_PERCENTAGE * mBubbleBitmapSize;
-        mNewDotRadius = (DOT_SCALE * mOriginalDotSize) / 2f;
-        mNewDotSize = mNewDotRadius * 2f;
 
         final TypedArray ta = mContext.obtainStyledAttributes(
                 new int[] {
@@ -306,7 +297,15 @@ public class BubbleFlyoutView extends FrameLayout {
             @Nullable Runnable onLayoutComplete,
             @Nullable Runnable onHide,
             float[] dotCenter,
-            boolean hideDot)  {
+            boolean hideDot,
+            BubblePositioner positioner)  {
+
+        mBubbleBitmapSize = positioner.getBubbleBitmapSize();
+        mBubbleSize = positioner.getBubbleSize();
+
+        mOriginalDotSize = SIZE_PERCENTAGE * mBubbleBitmapSize;
+        mNewDotRadius = (DOT_SCALE * mOriginalDotSize) / 2f;
+        mNewDotSize = mNewDotRadius * 2f;
 
         updateFlyoutMessage(flyoutMessage, parentWidth);
 

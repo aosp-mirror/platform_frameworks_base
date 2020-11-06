@@ -17,6 +17,6 @@
 <com.android.wm.shell.bubbles.BadgedImageView
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/bubble_overflow_button"
-    android:layout_width="@dimen/individual_bubble_size"
-    android:layout_height="@dimen/individual_bubble_size"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
     android:src="@drawable/bubble_ic_overflow_button"/>

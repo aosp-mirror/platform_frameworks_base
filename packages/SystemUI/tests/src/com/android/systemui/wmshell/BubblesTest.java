@@ -45,9 +45,6 @@ import android.app.INotificationManager;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.pm.LauncherApps;
-import android.content.res.Configuration;
-import android.graphics.Insets;
-import android.graphics.Rect;
 import android.hardware.display.AmbientDisplayConfiguration;
 import android.hardware.face.FaceManager;
 import android.os.Handler;
@@ -99,7 +96,6 @@ import com.android.wm.shell.bubbles.BubbleData;
 import com.android.wm.shell.bubbles.BubbleDataRepository;
 import com.android.wm.shell.bubbles.BubbleEntry;
 import com.android.wm.shell.bubbles.BubbleLogger;
-import com.android.wm.shell.bubbles.BubblePositioner;
 import com.android.wm.shell.bubbles.BubbleStackView;
 import com.android.wm.shell.bubbles.Bubbles;
 import com.android.wm.shell.common.FloatingContentCoordinator;
@@ -206,8 +202,8 @@ public class BubblesTest extends SysuiTestCase {
     private WindowManagerShellWrapper mWindowManagerShellWrapper;
     @Mock
     private BubbleLogger mBubbleLogger;
-    @Mock
-    private BubblePositioner mPositioner;
+
+    private TestableBubblePositioner mPositioner;
 
     private BubbleData mBubbleData;
 
@@ -257,10 +253,7 @@ public class BubblesTest extends SysuiTestCase {
 
         mBubbleData = new BubbleData(mContext, mBubbleLogger);
 
-        Rect availableRect = new Rect(0, 0, 1000, 5000);
-        when(mPositioner.getAvailableRect()).thenReturn(availableRect);
-        when(mPositioner.getOrientation()).thenReturn(Configuration.ORIENTATION_PORTRAIT);
-        when(mPositioner.getInsets()).thenReturn(Insets.of(0, 0, 0, 0));
+        mPositioner = new TestableBubblePositioner(mContext, mWindowManager);
 
         TestableNotificationInterruptStateProviderImpl interruptionStateProvider =
                 new TestableNotificationInterruptStateProviderImpl(mContext.getContentResolver(),

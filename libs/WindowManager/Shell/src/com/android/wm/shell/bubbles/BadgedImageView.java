@@ -31,7 +31,6 @@ import android.util.PathParser;
 import android.widget.ImageView;
 
 import com.android.launcher3.icons.DotRenderer;
-import com.android.wm.shell.R;
 import com.android.wm.shell.animation.Interpolators;
 
 import java.util.EnumSet;
@@ -75,9 +74,8 @@ public class BadgedImageView extends ImageView {
     private boolean mDotIsAnimating = false;
 
     private BubbleViewProvider mBubble;
+    private BubblePositioner mPositioner;
 
-    private int mBubbleBitmapSize;
-    private int mBubbleSize;
     private DotRenderer mDotRenderer;
     private DotRenderer.DrawParams mDrawParams;
     private boolean mOnLeft;
@@ -101,16 +99,19 @@ public class BadgedImageView extends ImageView {
     public BadgedImageView(Context context, AttributeSet attrs, int defStyleAttr,
             int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
-        mBubbleBitmapSize = getResources().getDimensionPixelSize(R.dimen.bubble_bitmap_size);
-        mBubbleSize = getResources().getDimensionPixelSize(R.dimen.individual_bubble_size);
         mDrawParams = new DotRenderer.DrawParams();
-
-        Path iconPath = PathParser.createPathFromPathData(
-                getResources().getString(com.android.internal.R.string.config_icon_mask));
-        mDotRenderer = new DotRenderer(mBubbleBitmapSize, iconPath, DEFAULT_PATH_SIZE);
 
         setFocusable(true);
         setClickable(true);
+    }
+
+    public void initialize(BubblePositioner positioner) {
+        mPositioner = positioner;
+
+        Path iconPath = PathParser.createPathFromPathData(
+                getResources().getString(com.android.internal.R.string.config_icon_mask));
+        mDotRenderer = new DotRenderer(mPositioner.getBubbleBitmapSize(),
+                iconPath, DEFAULT_PATH_SIZE);
     }
 
     public void showDotAndBadge(boolean onLeft) {
@@ -186,7 +187,8 @@ public class BadgedImageView extends ImageView {
      * @param iconPath The new icon path to use when calculating dot position.
      */
     void drawDot(Path iconPath) {
-        mDotRenderer = new DotRenderer(mBubbleBitmapSize, iconPath, DEFAULT_PATH_SIZE);
+        mDotRenderer = new DotRenderer(mPositioner.getBubbleBitmapSize(),
+                iconPath, DEFAULT_PATH_SIZE);
         invalidate();
     }
 
@@ -310,13 +312,13 @@ public class BadgedImageView extends ImageView {
 
         bubbleCanvas.setDrawFilter(new PaintFlagsDrawFilter(DITHER_FLAG, FILTER_BITMAP_FLAG));
         bubbleCanvas.setBitmap(bubble);
-
-        final int badgeSize = (int) (ICON_BADGE_SCALE * mBubbleSize);
+        final int bubbleSize = bubble.getWidth();
+        final int badgeSize = (int) (ICON_BADGE_SCALE * bubbleSize);
         if (mOnLeft) {
-            badge.setBounds(0, mBubbleSize - badgeSize, badgeSize, mBubbleSize);
+            badge.setBounds(0, bubbleSize - badgeSize, badgeSize, bubbleSize);
         } else {
-            badge.setBounds(mBubbleSize - badgeSize, mBubbleSize - badgeSize,
-                    mBubbleSize, mBubbleSize);
+            badge.setBounds(bubbleSize - badgeSize, bubbleSize - badgeSize,
+                    bubbleSize, bubbleSize);
         }
         badge.draw(bubbleCanvas);
         bubbleCanvas.setBitmap(null);
