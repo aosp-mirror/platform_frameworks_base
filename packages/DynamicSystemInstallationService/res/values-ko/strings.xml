@@ -13,6 +13,5 @@
     <string name="notification_action_reboot_to_origin" msgid="4013901243271889897">"다시 시작"</string>
     <string name="toast_dynsystem_discarded" msgid="1733249860276017050">"동적 시스템 삭제됨"</string>
     <string name="toast_failed_to_reboot_to_dynsystem" msgid="6336737274625452067">"동적 시스템을 다시 시작하거나 로드할 수 없음"</string>
-    <!-- no translation found for toast_failed_to_disable_dynsystem (3285742944977744413) -->
-    <skip />
+    <string name="toast_failed_to_disable_dynsystem" msgid="3285742944977744413">"동적 시스템을 사용 중지하는 데 실패함"</string>
 </resources>
