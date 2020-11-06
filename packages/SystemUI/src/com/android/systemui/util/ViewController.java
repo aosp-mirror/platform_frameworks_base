@@ -76,12 +76,10 @@ public abstract class ViewController<T extends View> {
         onInit();
         mInited = true;
 
-        if (mView != null) {
-            if (mView.isAttachedToWindow()) {
-                mOnAttachStateListener.onViewAttachedToWindow(mView);
-            }
-            mView.addOnAttachStateChangeListener(mOnAttachStateListener);
+        if (isAttachedToWindow()) {
+            mOnAttachStateListener.onViewAttachedToWindow(mView);
         }
+        addOnAttachStateChangeListener(mOnAttachStateListener);
     }
 
     /**
@@ -100,6 +98,17 @@ public abstract class ViewController<T extends View> {
         return mView.getResources();
     }
 
+    public boolean isAttachedToWindow() {
+        return mView != null && mView.isAttachedToWindow();
+    }
+
+    /** Add an OnAttachStateListener to the view. Does nothing if the view is null. */
+    public void addOnAttachStateChangeListener(View.OnAttachStateChangeListener listener) {
+        if (mView != null) {
+            mView.addOnAttachStateChangeListener(listener);
+        }
+    }
+
     /**
      * Called when the view is attached and a call to {@link #init()} has been made in either order.
      */
@@ -109,4 +118,5 @@ public abstract class ViewController<T extends View> {
      * Called when the view is detached.
      */
     protected abstract void onViewDetached();
+
 }

@@ -119,10 +119,6 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
         mView.setHeaderContainer(headerContainer);
     }
 
-    public QSPanel.QSTileLayout getTileLayout() {
-        return mView.getTileLayout();
-    }
-
     /** */
     public void setVisibility(int visibility) {
         mView.setVisibility(visibility);
@@ -209,4 +205,22 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
     public void setGridContentVisibility(boolean visible) {
         mView.setGridContentVisibility(visible);
     }
+
+    public boolean isLayoutRtl() {
+        return mView.isLayoutRtl();
+    }
+
+    public View getBrightnessView() {
+        return mView.getBrightnessView();
+    }
+
+    public View getDivider() {
+        return mView.getDivider();
+    }
+
+    /** */
+    public void setPageListener(PagedTileLayout.PageListener listener) {
+        mView.setPageListener(listener);
+    }
 }
+
