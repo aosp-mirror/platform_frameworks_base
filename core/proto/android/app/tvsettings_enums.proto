@@ -149,6 +149,34 @@ enum ItemId {
     ACCOUNT_SLICE_REG_ACCOUNT = 0x12100000;
 
     // TvSettings > Account & Sign In (Slice) > [A regular account] >
+    // Services
+    ACCOUNT_SLICE_REG_ACCOUNT_SERVICES = 0x12110000;
+
+    // TvSettings > Account & Sign In (Slice) > [A regular account] >
+    // Payment & Purchases
+    ACCOUNT_SLICE_REG_ACCOUNT_PAYMENT = 0x12120000;
+
+    // TvSettings > Account & Sign In (Slice) > [A regular account] >
+    // Payment & Purchases >
+    // Require authentication for purchases (reauth interval)
+    ACCOUNT_SLICE_REG_ACCOUNT_PAYMENT_REAUTH = 0x12121000;
+
+    // TvSettings > Account & Sign In (Slice) > [A regular account] >
+    // Payment & Purchases >
+    // Require authentication for purchases (reauth interval) > Always
+    ACCOUNT_SLICE_REG_ACCOUNT_PAYMENT_REAUTH_ALWAYS = 0x12121100;
+
+    // TvSettings > Account & Sign In (Slice) > [A regular account] >
+    // Payment & Purchases >
+    // Require authentication for purchases (reauth interval) > Every 30 minutes
+    ACCOUNT_SLICE_REG_ACCOUNT_PAYMENT_REAUTH_30MINS = 0x12121200;
+
+    // TvSettings > Account & Sign In (Slice) > [A regular account] >
+    // Payment & Purchases >
+    // Require authentication for purchases (reauth interval) > Never
+    ACCOUNT_SLICE_REG_ACCOUNT_PAYMENT_REAUTH_NEVER = 0x12121300;
+
+    // TvSettings > Account & Sign In (Slice) > [A regular account] >
     // Google Assistant
     ACCOUNT_SLICE_REG_ACCOUNT_ASSISTANT = 0x12130000;
 
@@ -219,6 +247,48 @@ enum ItemId {
 
     // TvSettings > Account & Sign In (Classic) > Add account
     ACCOUNT_CLASSIC_ADD_ACCOUNT = 0x13A00000;
+
+    // TvSettings > Privacy
+    PRIVACY = 0x14000000;
+
+    // TvSettings > Privacy > Location
+    PRIVACY_LOCATION = 0x14100000;
+
+    // TvSettings > Privacy > Location > Location status (radio button)
+    PRIVACY_LOCATION_STATUS = 0x14110000;
+
+    // TvSettings > Privacy > Location > Location status (radio button) >
+    // Use Wi-Fi to estimate location
+    PRIVACY_LOCATION_STATUS_USE_WIFI = 0x14111000;
+
+    // TvSettings > Privacy > Location > Location status (radio button) > Off
+    PRIVACY_LOCATION_STATUS_OFF = 0x14112000;
+
+    // TvSettings > Privacy > Location > Scanning always available (toggle)
+    PRIVACY_LOCATION_ALWAYS_SCANNING_NETWORKS = 0x14120000;
+
+    // TvSettings > Privacy > Location > [An app that had recent requests]
+    PRIVACY_LOCATION_REQUESTED_APP = 0x14130000;
+
+    // TvSettings > Privacy > Usage & Diagnostics
+    PRIVACY_DIAGNOSTICS = 0x14200000;
+
+    // TvSettings > Privacy > Usage & Diagnostics > On (Toggle)
+    PRIVACY_DIAGNOSTICS_ON_OFF = 0x14210000;
+
+    // TvSettings > Privacy > Ads
+    PRIVACY_ADS = 0x14300000;
+
+    // The following three IDs may not actually be logged as they are within a
+    // GMSCore Activity but we reserve IDs for them.
+    // TvSettings > Privacy > Ads > Reset advertising ID
+    PRIVACY_ADS_RESET_AD_ID = 0x14310000;
+
+    // TvSettings > Privacy > Ads > Opt out of Ads Personalization
+    PRIVACY_ADS_OPT_OUT_PERSONALIZATION = 0x14320000;
+
+    // TvSettings > Privacy > Ads > Ads by Google (WebView)
+    PRIVACY_ADS_ADS_BY_GOOGLE = 0x14330000;
 
     // TvSettings > Display & Sound
     DISPLAY_SOUND = 0x15000000;
@@ -539,6 +609,123 @@ enum ItemId {
     // TvSettings > System > Internal shared storage >
     // Cached data (brings up "Clear cached data?" dialog upon click)
     SYSTEM_STORAGE_INTERNAL_STORAGE_CACHED = 0x17512000;
+
+    // TvSettings > System > Ambient mode
+    SYSTEM_AMBIENT = 0x17600000;
+
+    // TvSettings > System > Ambient mode > Start now
+    SYSTEM_AMBIENT_START = 0x17610000;
+
+    // TvSettings > System > Ambient mode > Settings
+    SYSTEM_AMBIENT_SETTINGS = 0x17620000;
+
+    // TvSettings > System > Ambient mode > Settings > Google Photos (Channels)
+    SYSTEM_AMBIENT_SETTINGS_CHANNEL_GP = 0x17621000;
+
+    // TvSettings > System > Ambient mode > Settings > Art gallery (Channels)
+    SYSTEM_AMBIENT_SETTINGS_CHANNEL_AG = 0x17622000;
+
+    // TvSettings > System > Ambient mode > Settings >
+    // Cinematic videos (Channels)
+    SYSTEM_AMBIENT_SETTINGS_CHANNEL_CV = 0x17623000;
+
+    // TvSettings > System > Ambient mode > Settings > Experimental (Channels)
+    SYSTEM_AMBIENT_SETTINGS_CHANNEL_EXP = 0x17624000;
+
+    // TvSettings > System > Ambient mode > Settings > Weather
+    SYSTEM_AMBIENT_SETTINGS_WEATHER = 0x17625000;
+
+    // TvSettings > System > Ambient mode > Settings > Weather > Hide
+    SYSTEM_AMBIENT_SETTINGS_WEATHER_HIDE = 0x17625100;
+
+    // TvSettings > System > Ambient mode > Settings > Weather > Celsius (Unit)
+    SYSTEM_AMBIENT_SETTINGS_WEATHER_UNIT_C = 0x17625200;
+
+    // TvSettings > System > Ambient mode > Settings > Weather >
+    // Fahrenheit (Unit)
+    SYSTEM_AMBIENT_SETTINGS_WEATHER_UNIT_F = 0x17625300;
+
+    // TvSettings > System > Ambient mode > Settings > Weather > Both (Unit)
+    SYSTEM_AMBIENT_SETTINGS_WEATHER_UNIT_BOTH = 0x17625400;
+
+    // TvSettings > System > Ambient mode > Settings > Time
+    SYSTEM_AMBIENT_SETTINGS_TIME = 0x17626000;
+
+    // TvSettings > System > Ambient mode > Settings > Time > Hide
+    SYSTEM_AMBIENT_SETTINGS_TIME_HIDE = 0x17626100;
+
+    // TvSettings > System > Ambient mode > Settings > Time > Show
+    SYSTEM_AMBIENT_SETTINGS_TIME_SHOW = 0x17626200;
+
+    // TvSettings > System > Ambient mode > Settings > Device information
+    SYSTEM_AMBIENT_SETTINGS_DEVICE_INFO = 0x17627000;
+
+    // TvSettings > System > Ambient mode > Settings > Device information > Hide
+    SYSTEM_AMBIENT_SETTINGS_DEVICE_INFO_HIDE = 0x17627100;
+
+    // TvSettings > System > Ambient mode > Settings > Device information > Show
+    SYSTEM_AMBIENT_SETTINGS_DEVICE_INFO_SHOW = 0x17627200;
+
+    // TvSettings > System > Ambient mode > Settings > Personal photo data
+    SYSTEM_AMBIENT_SETTINGS_PPD = 0x17628000;
+
+    // TvSettings > System > Ambient mode > Settings > Personal photo data >
+    // Hide
+    SYSTEM_AMBIENT_SETTINGS_PPD_HIDE = 0x17628100;
+
+    // TvSettings > System > Ambient mode > Settings > Personal photo data >
+    // Show
+    SYSTEM_AMBIENT_SETTINGS_PPD_SHOW = 0x17628200;
+
+    // TvSettings > System > Ambient mode > Settings > Portrait Google Photos
+    SYSTEM_AMBIENT_SETTINGS_PGP = 0x17629000;
+
+    // TvSettings > System > Ambient mode > Settings > Portrait Google Photos >
+    // Hide
+    SYSTEM_AMBIENT_SETTINGS_PGP_HIDE = 0x17629100;
+
+    // TvSettings > System > Ambient mode > Settings > Portrait Google Photos >
+    // Show
+    SYSTEM_AMBIENT_SETTINGS_PGP_SHOW = 0x17629200;
+
+    // TvSettings > System > Ambient mode > Settings > Portrait Google Photos >
+    // Show pairs
+    SYSTEM_AMBIENT_SETTINGS_PGP_SHOW_PAIRS = 0x17629300;
+
+    // TvSettings > System > Ambient mode > Settings > Personal photo curation
+    SYSTEM_AMBIENT_SETTINGS_PPC = 0x1762A000;
+
+    // TvSettings > System > Ambient mode > Settings > Personal photo curation >
+    // All albums
+    SYSTEM_AMBIENT_SETTINGS_PPC_ALL_ALBUMS = 0x1762A100;
+
+    // TvSettings > System > Ambient mode > Settings > Personal photo curation >
+    // Live albums only
+    SYSTEM_AMBIENT_SETTINGS_PPC_LIVE_ALBUMS = 0x1762A200;
+
+    // TvSettings > System > Ambient mode > Settings > Slideshow speed
+    SYSTEM_AMBIENT_SETTINGS_SLIDE_SPEED = 0x1762B000;
+
+    // TvSettings > System > Ambient mode > Settings > Slideshow speed > 5s
+    SYSTEM_AMBIENT_SETTINGS_SLIDE_SPEED_5S = 0x1762B100;
+
+    // TvSettings > System > Ambient mode > Settings > Slideshow speed > 10s
+    SYSTEM_AMBIENT_SETTINGS_SLIDE_SPEED_10S = 0x1762B200;
+
+    // TvSettings > System > Ambient mode > Settings > Slideshow speed > 30s
+    SYSTEM_AMBIENT_SETTINGS_SLIDE_SPEED_30S = 0x1762B300;
+
+    // TvSettings > System > Ambient mode > Settings > Slideshow speed > 1m
+    SYSTEM_AMBIENT_SETTINGS_SLIDE_SPEED_1M = 0x1762B400;
+
+    // TvSettings > System > Ambient mode > Settings > Slideshow speed > 3m
+    SYSTEM_AMBIENT_SETTINGS_SLIDE_SPEED_3M = 0x1762B500;
+
+    // TvSettings > System > Ambient mode > Settings > Slideshow speed > 5m
+    SYSTEM_AMBIENT_SETTINGS_SLIDE_SPEED_5M = 0x1762B600;
+
+    // TvSettings > System > Ambient mode > Settings > Slideshow speed > 10m
+    SYSTEM_AMBIENT_SETTINGS_SLIDE_SPEED_10M = 0x1762B700;
 
     // TvSettings > System > Energy saver
     SYSTEM_ENERGYSAVER = 0x17700000;
