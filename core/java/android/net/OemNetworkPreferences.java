@@ -36,12 +36,16 @@ public final class OemNetworkPreferences implements Parcelable {
     public static final int OEM_NETWORK_PREFERENCE_DEFAULT = 0;
 
     /**
-     * Prefer networks in order: NET_CAPABILITY_NOT_METERED, NET_CAPABILITY_OEM_PAID, default.
+     * If an unmetered network is available, use it.
+     * Otherwise, if a network with the OEM_PAID capability is available, use it.
+     * Otherwise, use the general default network.
      */
     public static final int OEM_NETWORK_PREFERENCE_OEM_PAID = 1;
 
     /**
-     * Prefer networks in order: NET_CAPABILITY_NOT_METERED, NET_CAPABILITY_OEM_PAID.
+     * If an unmetered network is available, use it.
+     * Otherwise, if a network with the OEM_PAID capability is available, use it.
+     * Otherwise, the app doesn't get a network.
      */
     public static final int OEM_NETWORK_PREFERENCE_OEM_PAID_NO_FALLBACK = 2;
 
