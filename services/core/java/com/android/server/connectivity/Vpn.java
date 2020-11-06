@@ -25,6 +25,7 @@ import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_SUSPENDED;
 import static android.net.RouteInfo.RTN_THROW;
 import static android.net.RouteInfo.RTN_UNREACHABLE;
 
+import static com.android.internal.util.Preconditions.checkArgument;
 import static com.android.internal.util.Preconditions.checkNotNull;
 
 import android.Manifest;
@@ -2759,6 +2760,8 @@ public class Vpn {
 
         LegacyVpnRunner(VpnConfig config, String[] racoon, String[] mtpd, VpnProfile profile) {
             super(TAG);
+            checkArgument(racoon != null || mtpd != null, "Arguments to racoon and mtpd "
+                    + "must not both be null");
             mConfig = config;
             mDaemons = new String[] {"racoon", "mtpd"};
             // TODO: clear arguments from memory once launched
@@ -2915,15 +2918,6 @@ public class Vpn {
                 }
                 new File("/data/misc/vpn/abort").delete();
 
-                // Check if we need to restart any of the daemons.
-                boolean restart = false;
-                for (String[] arguments : mArguments) {
-                    restart = restart || (arguments != null);
-                }
-                if (!restart) {
-                    agentDisconnect();
-                    return;
-                }
                 updateState(DetailedState.CONNECTING, "execute");
 
                 // Start the daemon with arguments.
