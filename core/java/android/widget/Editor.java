@@ -4116,6 +4116,8 @@ public class Editor {
         private final boolean mHasSelection;
         private final int mHandleHeight;
         private final Map<MenuItem, OnClickListener> mAssistClickHandlers = new HashMap<>();
+        @Nullable
+        private TextClassification mPrevTextClassification;
 
         TextActionModeCallback(@TextActionMode int mode) {
             mHasSelection = mode == TextActionMode.SELECTION
@@ -4266,13 +4268,17 @@ public class Editor {
         }
 
         private void updateAssistMenuItems(Menu menu) {
-            clearAssistMenuItems(menu);
-            if (!shouldEnableAssistMenuItems()) {
-                return;
-            }
             final TextClassification textClassification =
                     getSelectionActionModeHelper().getTextClassification();
+            if (mPrevTextClassification == textClassification) {
+                // Already handled.
+                return;
+            }
+            clearAssistMenuItems(menu);
             if (textClassification == null) {
+                return;
+            }
+            if (!shouldEnableAssistMenuItems()) {
                 return;
             }
             if (!textClassification.getActions().isEmpty()) {
@@ -4301,6 +4307,7 @@ public class Editor {
                         MENU_ITEM_ORDER_SECONDARY_ASSIST_ACTIONS_START + i - 1,
                         MenuItem.SHOW_AS_ACTION_NEVER);
             }
+            mPrevTextClassification = textClassification;
         }
 
         private MenuItem addAssistMenuItem(Menu menu, RemoteAction action, int itemId, int order,

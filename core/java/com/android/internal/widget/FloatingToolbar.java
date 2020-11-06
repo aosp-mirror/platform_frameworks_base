@@ -261,18 +261,14 @@ public final class FloatingToolbar {
 
     /**
      * If this is set to true, the action mode view will dismiss itself on touch events outside of
-     * its window. If the toolbar is already showing, it will be re-shown so that this setting takes
-     * effect immediately.
+     * its window. The setting takes effect immediately.
      *
      * @param outsideTouchable whether or not this action mode is "outside touchable"
      * @param onDismiss optional. Sets a callback for when this action mode popup dismisses itself
      */
     public void setOutsideTouchable(
             boolean outsideTouchable, @Nullable PopupWindow.OnDismissListener onDismiss) {
-        if (mPopup.setOutsideTouchable(outsideTouchable, onDismiss) && isShowing()) {
-            dismiss();
-            doShow();
-        }
+        mPopup.setOutsideTouchable(outsideTouchable, onDismiss);
     }
 
     private void doShow() {
@@ -530,7 +526,6 @@ public final class FloatingToolbar {
 
         /**
          * Makes this toolbar "outside touchable" and sets the onDismissListener.
-         * This will take effect the next time the toolbar is re-shown.
          *
          * @param outsideTouchable if true, the popup will be made "outside touchable" and
          *      "non focusable". The reverse will happen if false.
@@ -548,6 +543,7 @@ public final class FloatingToolbar {
             if (mPopupWindow.isOutsideTouchable() ^ outsideTouchable) {
                 mPopupWindow.setOutsideTouchable(outsideTouchable);
                 mPopupWindow.setFocusable(!outsideTouchable);
+                mPopupWindow.update();
                 ret = true;
             }
             mPopupWindow.setOnDismissListener(onDismiss);
