@@ -2643,18 +2643,12 @@ public final class ViewRootImpl implements ViewParent,
                 || mForceNextWindowRelayout) {
             mForceNextWindowRelayout = false;
 
-            if (isViewVisible) {
-                // If this window is giving internal insets to the window
-                // manager, and it is being added or changing its visibility,
-                // then we want to first give the window manager "fake"
-                // insets to cause it to effectively ignore the content of
-                // the window during layout.  This avoids it briefly causing
-                // other windows to resize/move based on the raw frame of the
-                // window, waiting until we can finish laying out this window
-                // and get back to the window manager with the ultimately
-                // computed insets.
-                insetsPending = computesInternalInsets && (mFirst || viewVisibilityChanged);
-            }
+            // If this window is giving internal insets to the window manager, then we want to first
+            // make the provided insets unchanged during layout. This avoids it briefly causing
+            // other windows to resize/move based on the raw frame of the window, waiting until we
+            // can finish laying out this window and get back to the window manager with the
+            // ultimately computed insets.
+            insetsPending = computesInternalInsets;
 
             if (mSurfaceHolder != null) {
                 mSurfaceHolder.mSurfaceLock.lock();
