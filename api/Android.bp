@@ -57,25 +57,6 @@ genrule {
 }
 
 genrule {
-    name: "frameworks-base-api-current.srcjar",
-    srcs: [
-        ":api-stubs-docs-non-updatable",
-        ":conscrypt.module.public.api{.public.stubs.source}",
-        ":framework-media{.public.stubs.source}",
-        ":framework-mediaprovider{.public.stubs.source}",
-        ":framework-permission{.public.stubs.source}",
-        ":framework-sdkextensions{.public.stubs.source}",
-        ":framework-statsd{.public.stubs.source}",
-        ":framework-tethering{.public.stubs.source}",
-        ":framework-wifi{.public.stubs.source}",
-    ],
-    out: ["current.srcjar"],
-    tools: ["merge_zips"],
-    cmd: "$(location merge_zips) $(out) $(in)",
-    visibility: ["//visibility:private"], // Used by make module in //development, mind.
-}
-
-genrule {
     name: "frameworks-base-api-removed.txt",
     srcs: [
         ":conscrypt.module.public.api{.public.removed-api.txt}",
