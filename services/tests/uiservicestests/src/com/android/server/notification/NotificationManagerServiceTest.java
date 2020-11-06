@@ -4923,6 +4923,32 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testDontCallShowToastAgainOnTheSameCustomToast() throws Exception {
+        final String testPackage = "testPackageName";
+        assertEquals(0, mService.mToastQueue.size());
+        mService.isSystemUid = false;
+
+        // package is not suspended
+        when(mPackageManager.isPackageSuspendedForUser(testPackage, UserHandle.getUserId(mUid)))
+                .thenReturn(false);
+
+        setAppInForegroundForToasts(mUid, true);
+
+        Binder token = new Binder();
+        ITransientNotification callback = mock(ITransientNotification.class);
+        INotificationManager nmService = (INotificationManager) mService.mService;
+
+        // first time trying to show the toast, showToast gets called
+        nmService.enqueueToast(testPackage, token, callback, 2000, 0);
+        verify(callback, times(1)).show(any());
+
+        // second time trying to show the same toast, showToast isn't called again (total number of
+        // invocations stays at one)
+        nmService.enqueueToast(testPackage, token, callback, 2000, 0);
+        verify(callback, times(1)).show(any());
+    }
+
+    @Test
     public void testAllowForegroundTextToasts() throws Exception {
         final String testPackage = "testPackageName";
         assertEquals(0, mService.mToastQueue.size());
@@ -4956,6 +4982,33 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         ((INotificationManager) mService.mService).enqueueTextToast(testPackage, new Binder(),
                 "Text", 2000, 0, null);
         assertEquals(1, mService.mToastQueue.size());
+    }
+
+    @Test
+    public void testDontCallShowToastAgainOnTheSameTextToast() throws Exception {
+        final String testPackage = "testPackageName";
+        assertEquals(0, mService.mToastQueue.size());
+        mService.isSystemUid = false;
+
+        // package is not suspended
+        when(mPackageManager.isPackageSuspendedForUser(testPackage, UserHandle.getUserId(mUid)))
+                .thenReturn(false);
+
+        setAppInForegroundForToasts(mUid, true);
+
+        Binder token = new Binder();
+        INotificationManager nmService = (INotificationManager) mService.mService;
+
+        // first time trying to show the toast, showToast gets called
+        nmService.enqueueTextToast(testPackage, token, "Text", 2000, 0, null);
+        verify(mStatusBar, times(1))
+                .showToast(anyInt(), any(), any(), any(), any(), anyInt(), any());
+
+        // second time trying to show the same toast, showToast isn't called again (total number of
+        // invocations stays at one)
+        nmService.enqueueTextToast(testPackage, token, "Text", 2000, 0, null);
+        verify(mStatusBar, times(1))
+                .showToast(anyInt(), any(), any(), any(), any(), anyInt(), any());
     }
 
     @Test
