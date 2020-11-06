@@ -19,7 +19,12 @@ package com.android.server.devicestate;
 import static android.hardware.devicestate.DeviceStateManager.INVALID_DEVICE_STATE;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertThrows;
+
+import android.hardware.devicestate.IDeviceStateManagerCallback;
+import android.os.RemoteException;
+import android.platform.test.annotations.Presubmit;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
@@ -28,11 +33,14 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import javax.annotation.Nullable;
+
 /**
  * Unit tests for {@link DeviceStateManagerService}.
  * <p/>
  * Run with <code>atest DeviceStateManagerServiceTest</code>.
  */
+@Presubmit
 @RunWith(AndroidJUnit4.class)
 public final class DeviceStateManagerServiceTest {
     private static final int DEFAULT_DEVICE_STATE = 0;
@@ -48,7 +56,6 @@ public final class DeviceStateManagerServiceTest {
         mProvider = new TestDeviceStateProvider();
         mPolicy = new TestDeviceStatePolicy(mProvider);
         mService = new DeviceStateManagerService(InstrumentationRegistry.getContext(), mPolicy);
-        mService.onStart();
     }
 
     @Test
@@ -187,6 +194,38 @@ public final class DeviceStateManagerServiceTest {
         assertEquals(mPolicy.getMostRecentRequestedStateToConfigure(), DEFAULT_DEVICE_STATE);
     }
 
+    @Test
+    public void registerCallback() throws RemoteException {
+        TestDeviceStateManagerCallback callback = new TestDeviceStateManagerCallback();
+        mService.getBinderService().registerCallback(callback);
+
+        mProvider.notifyRequestState(OTHER_DEVICE_STATE);
+        assertNotNull(callback.getLastNotifiedValue());
+        assertEquals(callback.getLastNotifiedValue().intValue(), OTHER_DEVICE_STATE);
+
+        mProvider.notifyRequestState(DEFAULT_DEVICE_STATE);
+        assertEquals(callback.getLastNotifiedValue().intValue(), DEFAULT_DEVICE_STATE);
+
+        mPolicy.blockConfigure();
+        mProvider.notifyRequestState(OTHER_DEVICE_STATE);
+        // The callback should not have been notified of the state change as the policy is still
+        // pending callback.
+        assertEquals(callback.getLastNotifiedValue().intValue(), DEFAULT_DEVICE_STATE);
+
+        mPolicy.resumeConfigure();
+        // Now that the policy is finished processing the callback should be notified of the state
+        // change.
+        assertEquals(callback.getLastNotifiedValue().intValue(), OTHER_DEVICE_STATE);
+    }
+
+    @Test
+    public void registerCallback_emitsInitialValue() throws RemoteException {
+        TestDeviceStateManagerCallback callback = new TestDeviceStateManagerCallback();
+        mService.getBinderService().registerCallback(callback);
+        assertNotNull(callback.getLastNotifiedValue());
+        assertEquals(callback.getLastNotifiedValue().intValue(), DEFAULT_DEVICE_STATE);
+    }
+
     private static final class TestDeviceStatePolicy implements DeviceStatePolicy {
         private final DeviceStateProvider mProvider;
         private int mLastDeviceStateRequestedToConfigure = INVALID_DEVICE_STATE;
@@ -260,6 +299,21 @@ public final class DeviceStateManagerServiceTest {
         public void notifyRequestState(int state) {
             mCurrentDeviceState = state;
             mListener.onStateChanged(state);
+        }
+    }
+
+    private static final class TestDeviceStateManagerCallback extends
+            IDeviceStateManagerCallback.Stub {
+        Integer mLastNotifiedValue;
+
+        @Override
+        public void onDeviceStateChanged(int deviceState) {
+            mLastNotifiedValue = deviceState;
+        }
+
+        @Nullable
+        Integer getLastNotifiedValue() {
+            return mLastNotifiedValue;
         }
     }
 }
