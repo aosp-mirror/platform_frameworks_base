@@ -283,9 +283,7 @@ public class HdmiCecConfig {
     }
 
     private int getIntValue(@NonNull Value value) {
-        return value.getHexValue() != null
-               ? Integer.decode(value.getHexValue())
-               : value.getIntValue();
+        return Integer.decode(value.getIntValue());
     }
 
     /**

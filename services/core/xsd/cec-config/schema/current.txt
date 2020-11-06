@@ -22,11 +22,9 @@ package com.android.server.hdmi.cec.config {
 
   public class Value {
     ctor public Value();
-    method public String getHexValue();
-    method public int getIntValue();
+    method public String getIntValue();
     method public String getStringValue();
-    method public void setHexValue(String);
-    method public void setIntValue(int);
+    method public void setIntValue(String);
     method public void setStringValue(String);
   }
 
