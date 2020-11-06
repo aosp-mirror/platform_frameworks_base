@@ -19605,6 +19605,8 @@ public class PackageManagerService extends IPackageManager.Stub
                     if (installed) {
                         ps.setUninstallReason(UNINSTALL_REASON_UNKNOWN, userId);
                     }
+
+                    writeRuntimePermissionsForUserLPrTEMP(userId, false);
                 }
                 // Regardless of writeSettings we need to ensure that this restriction
                 // state propagation is persisted
@@ -25749,9 +25751,8 @@ public class PackageManagerService extends IPackageManager.Stub
         @Override
         public void writePermissionSettings(int[] userIds, boolean async) {
             synchronized (mLock) {
-                mPermissionManager.writeLegacyPermissionStateTEMP();
                 for (int userId : userIds) {
-                    mSettings.writeRuntimePermissionsForUserLPr(userId, !async);
+                    writeRuntimePermissionsForUserLPrTEMP(userId, !async);
                 }
             }
         }
@@ -26398,6 +26399,17 @@ public class PackageManagerService extends IPackageManager.Stub
         mPermissionManager.writeLegacyPermissionsTEMP(mSettings.mPermissions);
         mPermissionManager.writeLegacyPermissionStateTEMP();
         mSettings.writeLPr();
+    }
+
+    /**
+     * Temporary method that wraps mSettings.writeRuntimePermissionsForUserLPr() and calls
+     * mPermissionManager.writeLegacyPermissionStateTEMP() beforehand.
+     *
+     * TODO(zhanghai): This should be removed once we finish migration of permission storage.
+     */
+    private void writeRuntimePermissionsForUserLPrTEMP(@UserIdInt int userId, boolean async) {
+        mPermissionManager.writeLegacyPermissionStateTEMP();
+        mSettings.writeRuntimePermissionsForUserLPr(userId, async);
     }
 
     @Override
