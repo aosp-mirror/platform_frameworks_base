@@ -485,7 +485,6 @@ java_library {
     name: "framework-internal-utils",
     static_libs: [
         "apex_aidl_interface-java",
-        "suspend_control_aidl_interface-java",
         "framework-protos",
         "updatable-driver-protos",
         "android.hidl.base-V1.0-java",
@@ -521,6 +520,7 @@ java_library {
         "android.hardware.vibrator-V1.2-java",
         "android.hardware.vibrator-V1.3-java",
         "android.system.keystore2-java",
+        "android.system.suspend.control.internal-java",
         "devicepolicyprotosnano",
 
         "com.android.sysprop.apex",
