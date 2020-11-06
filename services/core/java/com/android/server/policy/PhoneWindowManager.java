@@ -3687,6 +3687,32 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 break;
             }
 
+            case KeyEvent.KEYCODE_TV_POWER: {
+                result &= ~ACTION_PASS_TO_USER;
+                isWakeKey = false; // wake-up will be handled separately
+                HdmiControlManager hdmiControlManager = getHdmiControlManager();
+                if (hdmiControlManager != null && hdmiControlManager.shouldHandleTvPowerKey()) {
+                    if (down) {
+                        hdmiControlManager.toggleAndFollowTvPower();
+                    }
+                } else if (mHasFeatureLeanback) {
+                    KeyEvent fallbackEvent = KeyEvent.obtain(
+                            event.getDownTime(), event.getEventTime(),
+                            event.getAction(), KeyEvent.KEYCODE_POWER,
+                            event.getRepeatCount(), event.getMetaState(),
+                            event.getDeviceId(), event.getScanCode(),
+                            event.getFlags(), event.getSource(), event.getDisplayId(), null);
+                    if (down) {
+                        interceptPowerKeyDown(fallbackEvent, interactive);
+                    } else {
+                        interceptPowerKeyUp(fallbackEvent, interactive, canceled);
+                    }
+                }
+                // Ignore this key for any device that is not connected to a TV via HDMI and
+                // not an Android TV device.
+                break;
+            }
+
             case KeyEvent.KEYCODE_POWER: {
                 EventLogTags.writeInterceptPower(
                         KeyEvent.actionToString(event.getAction()),
