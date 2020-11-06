@@ -188,6 +188,23 @@ bool MetricsManager::updateConfig(const StatsdConfig& config, const int64_t time
     mAlertTrackerMap = newAlertTrackerMap;
     mAllPeriodicAlarmTrackers = newPeriodicAlarmTrackers;
 
+    mTtlNs = config.has_ttl_in_seconds() ? config.ttl_in_seconds() * NS_PER_SEC : -1;
+    refreshTtl(currentTimeNs);
+
+    mHashStringsInReport = config.hash_strings_in_metric_report();
+    mVersionStringsInReport = config.version_strings_in_metric_report();
+    mInstallerInReport = config.installer_in_metric_report();
+    mWhitelistedAtomIds.clear();
+    mWhitelistedAtomIds.insert(config.whitelisted_atom_ids().begin(),
+                               config.whitelisted_atom_ids().end());
+    mShouldPersistHistory = config.persist_locally();
+
+    // Store the sub-configs used.
+    mAnnotations.clear();
+    for (const auto& annotation : config.annotation()) {
+        mAnnotations.emplace_back(annotation.field_int64(), annotation.field_int32());
+    }
+
     mAllowedUid.clear();
     mAllowedPkg.clear();
     mDefaultPullUids.clear();

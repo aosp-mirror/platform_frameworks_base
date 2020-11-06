@@ -520,10 +520,10 @@ void StatsLogProcessor::GetActiveConfigsLocked(const int uid, vector<int64_t>& o
 }
 
 void StatsLogProcessor::OnConfigUpdated(const int64_t timestampNs, const ConfigKey& key,
-                                        const StatsdConfig& config) {
+                                        const StatsdConfig& config, bool modularUpdate) {
     std::lock_guard<std::mutex> lock(mMetricsMutex);
     WriteDataToDiskLocked(key, timestampNs, CONFIG_UPDATED, NO_TIME_CONSTRAINTS);
-    OnConfigUpdatedLocked(timestampNs, key, config);
+    OnConfigUpdatedLocked(timestampNs, key, config, modularUpdate);
 }
 
 void StatsLogProcessor::OnConfigUpdatedLocked(const int64_t timestampNs, const ConfigKey& key,
@@ -720,7 +720,8 @@ void StatsLogProcessor::resetConfigsLocked(const int64_t timestampNs,
     for (const auto& key : configs) {
         StatsdConfig config;
         if (StorageManager::readConfigFromDisk(key, &config)) {
-            OnConfigUpdatedLocked(timestampNs, key, config);
+            // Force a full update when resetting a config.
+            OnConfigUpdatedLocked(timestampNs, key, config, /*modularUpdate=*/false);
             StatsdStats::getInstance().noteConfigReset(key);
         } else {
             ALOGE("Failed to read backup config from disk for : %s", key.ToString().c_str());

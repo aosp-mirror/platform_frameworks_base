@@ -39,7 +39,7 @@ public:
      * A configuration was added or updated.
      */
     virtual void OnConfigUpdated(const int64_t timestampNs, const ConfigKey& key,
-                                 const StatsdConfig& config) = 0;
+                                 const StatsdConfig& config, bool modularUpdate = false) = 0;
 
     /**
      * A configuration was removed.
