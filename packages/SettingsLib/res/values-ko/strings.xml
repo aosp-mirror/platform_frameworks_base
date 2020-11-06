@@ -558,4 +558,8 @@
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"사용 설정됨"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"변경사항을 적용하려면 기기를 재부팅해야 합니다. 지금 재부팅하거나 취소하세요."</string>
     <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"유선 헤드폰"</string>
+    <!-- no translation found for wifi_hotspot_switch_on_text (9212273118217786155) -->
+    <skip />
+    <!-- no translation found for wifi_hotspot_switch_off_text (7245567251496959764) -->
+    <skip />
 </resources>

@@ -305,7 +305,7 @@
     <string name="adbwifi_warning_message" msgid="8005936574322702388">"Tính năng gỡ lỗi qua Wi-Fi chỉ dành cho mục đích phát triển. Hãy sử dụng tính năng này để sao chép dữ liệu giữa máy tính và thiết bị của bạn, cài đặt ứng dụng trên thiết bị mà không thông báo và đọc dữ liệu nhật ký."</string>
     <string name="adb_keys_warning_message" msgid="2968555274488101220">"Thu hồi quyền truy cập gỡ lỗi USB từ tất cả máy tính mà bạn đã ủy quyền trước đó?"</string>
     <string name="dev_settings_warning_title" msgid="8251234890169074553">"Cho phép cài đặt phát triển?"</string>
-    <string name="dev_settings_warning_message" msgid="37741686486073668">"Những cài đặt này chỉ dành cho mục đích phát triển. Chúng có thể làm cho thiết bị và ứng dụng trên thiết bị của bạn bị lỗi và hoạt động sai."</string>
+    <string name="dev_settings_warning_message" msgid="37741686486073668">"Những tùy chọn cài đặt này chỉ dành cho mục đích phát triển. Chúng có thể làm cho thiết bị và ứng dụng trên thiết bị của bạn bị lỗi và hoạt động không đúng cách."</string>
     <string name="verify_apps_over_usb_title" msgid="6031809675604442636">"Xác minh ứng dụng qua USB"</string>
     <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"Kiểm tra các ứng dụng được cài đặt qua ADB/ADT để xem có hoạt động gây hại hay không."</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"Các thiết bị Bluetooth không có tên (chỉ có địa chỉ MAC) sẽ được hiển thị"</string>
@@ -558,4 +558,8 @@
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Đã bật"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Bạn phải khởi động lại thiết bị để áp dụng sự thay đổi này. Hãy khởi động lại ngay hoặc hủy."</string>
     <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"Tai nghe có dây"</string>
+    <!-- no translation found for wifi_hotspot_switch_on_text (9212273118217786155) -->
+    <skip />
+    <!-- no translation found for wifi_hotspot_switch_off_text (7245567251496959764) -->
+    <skip />
 </resources>
