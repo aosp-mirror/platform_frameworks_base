@@ -43,7 +43,7 @@ public class Face10Test {
     private Context mContext;
 
     private LockoutResetDispatcher mLockoutResetDispatcher;
-    private Face10 mFace10;
+    private com.android.server.biometrics.sensors.face.hidl.Face10 mFace10;
     private IBinder mBinder;
 
     private static void waitForIdle() {
@@ -55,9 +55,9 @@ public class Face10Test {
         MockitoAnnotations.initMocks(this);
 
         mLockoutResetDispatcher = new LockoutResetDispatcher(mContext);
-        mFace10 = new Face10(mContext, SENSOR_ID, BiometricManager.Authenticators.BIOMETRIC_STRONG,
-                mLockoutResetDispatcher, false /* supportsSelfIllumination */,
-                1 /* maxTemplatesAllowed */);
+        mFace10 = new com.android.server.biometrics.sensors.face.hidl.Face10(mContext, SENSOR_ID,
+                BiometricManager.Authenticators.BIOMETRIC_STRONG, mLockoutResetDispatcher,
+                false /* supportsSelfIllumination */, 1 /* maxTemplatesAllowed */);
         mBinder = new Binder();
     }
 
