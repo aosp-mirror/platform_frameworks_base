@@ -46,7 +46,7 @@ public class QuickQSPanel extends QSPanel {
 
     public static final String NUM_QUICK_TILES = "sysui_qqs_count";
     private static final String TAG = "QuickQSPanel";
-    // Start it at 6 so a non-zero value can be obtained statically.
+    // A default value so that we never return 0.
     private static int sDefaultMaxTiles = 6;
 
     private boolean mDisabledByPolicy;
@@ -63,6 +63,7 @@ public class QuickQSPanel extends QSPanel {
             UiEventLogger uiEventLogger) {
         super(context, attrs, qsLogger, mediaHost, uiEventLogger);
         sDefaultMaxTiles = getResources().getInteger(R.integer.quick_qs_panel_max_columns);
+        mMaxTiles = sDefaultMaxTiles;
         applyBottomMargin((View) mRegularTileLayout);
     }
 
@@ -168,10 +169,6 @@ public class QuickQSPanel extends QSPanel {
             // Couldn't read an int from the new setting value. Use default.
             return sDefaultMaxTiles;
         }
-    }
-
-    public static int getDefaultMaxTiles() {
-        return sDefaultMaxTiles;
     }
 
     void setDisabledByPolicy(boolean disabled) {

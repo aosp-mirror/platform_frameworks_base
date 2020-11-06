@@ -167,6 +167,7 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
                 mock(QSTileHost.class),
                 mock(StatusBarStateController.class),
                 commandQueue,
+                new QSDetailDisplayer(),
                 mQsComponentFactory);
     }
 }

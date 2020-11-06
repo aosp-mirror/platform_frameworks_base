@@ -89,7 +89,7 @@ import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
-import com.android.systemui.qs.QSFragment;
+import com.android.systemui.qs.QSDetailDisplayer;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.GestureRecorder;
 import com.android.systemui.statusbar.KeyguardAffordanceView;
@@ -268,6 +268,7 @@ public class NotificationPanelViewController extends PanelViewController {
     private final MediaHierarchyManager mMediaHierarchyManager;
     private final StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
     private final KeyguardStatusViewComponent.Factory mKeyguardStatusViewComponentFactory;
+    private final QSDetailDisplayer mQSDetailDisplayer;
     // Maximum # notifications to show on Keyguard; extras will be collapsed in an overflow card.
     // If there are exactly 1 + mMaxKeyguardNotifications, then still shows all notifications
     private final int mMaxKeyguardNotifications;
@@ -519,7 +520,8 @@ public class NotificationPanelViewController extends PanelViewController {
             KeyguardStatusViewComponent.Factory keyguardStatusViewComponentFactory,
             NotificationGroupManagerLegacy groupManager,
             NotificationIconAreaController notificationIconAreaController,
-            AuthController authController) {
+            AuthController authController,
+            QSDetailDisplayer qsDetailDisplayer) {
         super(view, falsingManager, dozeLog, keyguardStateController,
                 (SysuiStatusBarStateController) statusBarStateController, vibratorHelper,
                 latencyTracker, flingAnimationUtilsBuilder, statusBarTouchableRegionManager);
@@ -534,6 +536,7 @@ public class NotificationPanelViewController extends PanelViewController {
         mGroupManager = groupManager;
         mNotificationIconAreaController = notificationIconAreaController;
         mKeyguardStatusViewComponentFactory = keyguardStatusViewComponentFactory;
+        mQSDetailDisplayer = qsDetailDisplayer;
         mView.setWillNotDraw(!DEBUG);
         mInjectionInflationController = injectionInflationController;
         mFalsingManager = falsingManager;
@@ -606,6 +609,7 @@ public class NotificationPanelViewController extends PanelViewController {
     private void onFinishInflate() {
         loadDimens();
         mKeyguardStatusBar = mView.findViewById(R.id.keyguard_header);
+        mKeyguardStatusBar.setQSDetailDisplayer(mQSDetailDisplayer);
         mBigClockContainer = mView.findViewById(R.id.big_clock_container);
         updateViewControllers(mView.findViewById(R.id.keyguard_status_view));
         mNotificationContainerParent = mView.findViewById(R.id.notification_container_parent);
@@ -2867,9 +2871,6 @@ public class NotificationPanelViewController extends PanelViewController {
                         }
                     });
             mNotificationStackScrollLayoutController.setQsContainer((ViewGroup) mQs.getView());
-            if (mQs instanceof QSFragment) {
-                mKeyguardStatusBar.setQSPanel(((QSFragment) mQs).getQsPanel());
-            }
             updateQsExpansion();
         }
 

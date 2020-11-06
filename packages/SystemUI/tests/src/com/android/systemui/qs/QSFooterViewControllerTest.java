@@ -40,6 +40,7 @@ import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.settings.UserTracker;
+import com.android.systemui.statusbar.phone.MultiUserSwitch;
 import com.android.systemui.statusbar.phone.SettingsButton;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.UserInfoController;
@@ -75,6 +76,8 @@ public class QSFooterViewControllerTest extends LeakCheckedTest {
     private QSPanelController mQSPanelController;
     @Mock
     private ClipboardManager mClipboardManager;
+    @Mock
+    private QuickQSPanelController mQuickQSPanelController;
     private FakeTunerService mFakeTunerService;
     private MetricsLogger mMetricsLogger = new FakeMetricsLogger();
 
@@ -84,6 +87,8 @@ public class QSFooterViewControllerTest extends LeakCheckedTest {
     private TextView mBuildText;
     @Mock
     private View mEdit;
+    @Mock
+    private MultiUserSwitch mMultiUserSwitch;
 
     private QSFooterViewController mController;
 
@@ -105,10 +110,12 @@ public class QSFooterViewControllerTest extends LeakCheckedTest {
         when(mView.findViewById(R.id.settings_button)).thenReturn(mSettingsButton);
         when(mView.findViewById(R.id.build)).thenReturn(mBuildText);
         when(mView.findViewById(android.R.id.edit)).thenReturn(mEdit);
+        when(mView.findViewById(R.id.multi_user_switch)).thenReturn(mMultiUserSwitch);
 
         mController = new QSFooterViewController(mView, mUserManager, mUserInfoController,
                 mActivityStarter, mDeviceProvisionedController, mUserTracker, mQSPanelController,
-                mFakeTunerService, mMetricsLogger);
+                new QSDetailDisplayer(), mQuickQSPanelController, mFakeTunerService,
+                mMetricsLogger);
 
         mController.init();
     }
