@@ -86,8 +86,11 @@ public class OneHandedTutorialHandler implements OneHandedTransitionCallback {
                 context.getSystemService(Context.ACCESSIBILITY_SERVICE);
         mTargetViewContainer = new FrameLayout(context);
         mTargetViewContainer.setClipChildren(false);
-        mTutorialAreaHeight = Math.round(mDisplaySize.y
-                * (SystemProperties.getInt(ONE_HANDED_MODE_OFFSET_PERCENTAGE, 50) / 100.0f));
+        final float offsetPercentageConfig = context.getResources().getFraction(
+                R.fraction.config_one_handed_offset, 1, 1);
+        final int sysPropPercentageConfig = SystemProperties.getInt(
+                ONE_HANDED_MODE_OFFSET_PERCENTAGE, Math.round(offsetPercentageConfig * 100.0f));
+        mTutorialAreaHeight = Math.round(mDisplaySize.y * (sysPropPercentageConfig / 100.0f));
         mTutorialView = LayoutInflater.from(context).inflate(R.layout.one_handed_tutorial, null);
         mTargetViewContainer.addView(mTutorialView);
         mCanShowTutorial = (Settings.Secure.getInt(mContentResolver,
