@@ -439,8 +439,19 @@ public class WifiConfiguration implements Parcelable {
     public static final int SECURITY_TYPE_EAP = 3;
     /** Security type for an SAE network. */
     public static final int SECURITY_TYPE_SAE = 4;
-    /** Security type for an EAP Suite B network. */
-    public static final int SECURITY_TYPE_EAP_SUITE_B = 5;
+    /**
+     * Security type for a WPA3-Enterprise in 192-bit security network.
+     * This is the same as {@link #SECURITY_TYPE_EAP_SUITE_B} and uses the same value.
+     */
+    public static final int SECURITY_TYPE_EAP_WPA3_ENTERPRISE_192_BIT = 5;
+    /**
+     * Security type for a WPA3-Enterprise in 192-bit security network.
+     * @deprecated Use the {@link #SECURITY_TYPE_EAP_WPA3_ENTERPRISE_192_BIT} constant
+     * (which is the same value).
+     */
+    @Deprecated
+    public static final int SECURITY_TYPE_EAP_SUITE_B =
+            SECURITY_TYPE_EAP_WPA3_ENTERPRISE_192_BIT;
     /** Security type for an OWE network. */
     public static final int SECURITY_TYPE_OWE = 6;
     /** Security type for a WAPI PSK network. */
@@ -466,6 +477,7 @@ public class WifiConfiguration implements Parcelable {
             SECURITY_TYPE_WAPI_PSK,
             SECURITY_TYPE_WAPI_CERT,
             SECURITY_TYPE_EAP_WPA3_ENTERPRISE,
+            SECURITY_TYPE_EAP_WPA3_ENTERPRISE_192_BIT,
     })
     public @interface SecurityType {}
 
@@ -483,7 +495,8 @@ public class WifiConfiguration implements Parcelable {
      * {@link #SECURITY_TYPE_OWE},
      * {@link #SECURITY_TYPE_WAPI_PSK},
      * {@link #SECURITY_TYPE_WAPI_CERT},
-     * {@link #SECURITY_TYPE_EAP_WPA3_ENTERPRISE}
+     * {@link #SECURITY_TYPE_EAP_WPA3_ENTERPRISE},
+     * {@link #SECURITY_TYPE_EAP_WPA3_ENTERPRISE_192_BIT}
      */
     public void setSecurityParams(@SecurityType int securityType) {
         // Clear all the bitsets.
@@ -522,7 +535,10 @@ public class WifiConfiguration implements Parcelable {
                 allowedGroupCiphers.set(WifiConfiguration.GroupCipher.GCMP_256);
                 requirePmf = true;
                 break;
-            case SECURITY_TYPE_EAP_SUITE_B:
+            // The value of {@link SECURITY_TYPE_EAP_SUITE_B} is the same as
+            // {@link SECURITY_TYPE_EAP_WPA3_ENTERPRISE_192_BIT}, remove it to avoid
+            // duplicate case label errors.
+            case SECURITY_TYPE_EAP_WPA3_ENTERPRISE_192_BIT:
                 allowedProtocols.set(WifiConfiguration.Protocol.RSN);
                 allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_EAP);
                 allowedKeyManagement.set(WifiConfiguration.KeyMgmt.IEEE8021X);

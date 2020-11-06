@@ -17,8 +17,8 @@
 package android.net.wifi;
 
 import static android.net.wifi.WifiConfiguration.SECURITY_TYPE_EAP;
-import static android.net.wifi.WifiConfiguration.SECURITY_TYPE_EAP_SUITE_B;
 import static android.net.wifi.WifiConfiguration.SECURITY_TYPE_EAP_WPA3_ENTERPRISE;
+import static android.net.wifi.WifiConfiguration.SECURITY_TYPE_EAP_WPA3_ENTERPRISE_192_BIT;
 import static android.net.wifi.WifiConfiguration.SECURITY_TYPE_OPEN;
 import static android.net.wifi.WifiConfiguration.SECURITY_TYPE_OWE;
 import static android.net.wifi.WifiConfiguration.SECURITY_TYPE_PSK;
@@ -570,7 +570,7 @@ public class WifiConfigurationTest {
     public void testSetSecurityParamsForSuiteB() throws Exception {
         WifiConfiguration config = new WifiConfiguration();
 
-        config.setSecurityParams(SECURITY_TYPE_EAP_SUITE_B);
+        config.setSecurityParams(SECURITY_TYPE_EAP_WPA3_ENTERPRISE_192_BIT);
 
         assertTrue(config.allowedKeyManagement.get(WifiConfiguration.KeyMgmt.SUITE_B_192));
         assertTrue(config.allowedKeyManagement.get(WifiConfiguration.KeyMgmt.WPA_EAP));
@@ -666,7 +666,7 @@ public class WifiConfigurationTest {
         configuration.setSecurityParams(SECURITY_TYPE_EAP_WPA3_ENTERPRISE);
         assertFalse(configuration.needsPreSharedKey());
 
-        configuration.setSecurityParams(SECURITY_TYPE_EAP_SUITE_B);
+        configuration.setSecurityParams(SECURITY_TYPE_EAP_WPA3_ENTERPRISE_192_BIT);
         assertFalse(configuration.needsPreSharedKey());
     }
 
@@ -695,7 +695,7 @@ public class WifiConfigurationTest {
         configuration.setSecurityParams(SECURITY_TYPE_EAP_WPA3_ENTERPRISE);
         assertEquals(KeyMgmt.WPA_EAP, configuration.getAuthType());
 
-        configuration.setSecurityParams(SECURITY_TYPE_EAP_SUITE_B);
+        configuration.setSecurityParams(SECURITY_TYPE_EAP_WPA3_ENTERPRISE_192_BIT);
         assertEquals(KeyMgmt.SUITE_B_192, configuration.getAuthType());
 
         configuration.setSecurityParams(SECURITY_TYPE_WAPI_CERT);
