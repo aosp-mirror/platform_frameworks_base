@@ -95,6 +95,20 @@ interface IAppSearchManager {
         in IAppSearchResultCallback callback);
 
     /**
+     * Executes a global query, i.e. over all permitted databases, against the AppSearch index and
+     * returns results.
+     *
+     * @param queryExpression String to search for
+     * @param searchSpecBundle SearchSpec bundle
+     * @param callback {@link AppSearchResult}&lt;{@link Bundle}&gt; of performing this
+     *         operation.
+     */
+    void globalQuery(
+        in String queryExpression,
+        in Bundle searchSpecBundle,
+        in IAppSearchResultCallback callback);
+
+    /**
      * Fetches the next page of results of a previously executed query. Results can be empty if
      * next-page token is invalid or all pages have been returned.
      *

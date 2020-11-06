@@ -141,6 +141,25 @@ public class AppSearchManager {
     }
 
     /**
+     * Creates a new {@link GlobalSearchSession}.
+     *
+     * <p>This process requires an AppSearch native indexing file system for each user. If it's not
+     * created for this user, the initialization process will create one under user's directory.
+     *
+     * @param executor      Executor on which to invoke the callback.
+     * @param callback      The {@link AppSearchResult}&lt;{@link GlobalSearchSession}&gt; of
+     *                      performing this operation. Or a {@link AppSearchResult} with failure
+     *                      reason code and error information.
+     */
+    public void createGlobalSearchSession(
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull Consumer<AppSearchResult<GlobalSearchSession>> callback) {
+        Objects.requireNonNull(executor);
+        Objects.requireNonNull(callback);
+        GlobalSearchSession.createGlobalSearchSession(mService, executor, callback);
+    }
+
+    /**
      * Sets the schema being used by documents provided to the {@link #putDocuments} method.
      *
      * <p>The schema provided here is compared to the stored copy of the schema previously supplied

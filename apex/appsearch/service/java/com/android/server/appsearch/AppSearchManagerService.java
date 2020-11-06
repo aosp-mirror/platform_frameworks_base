@@ -68,6 +68,7 @@ public class AppSearchManagerService extends SystemService {
                 @NonNull IAppSearchResultCallback callback) {
             Preconditions.checkNotNull(databaseName);
             Preconditions.checkNotNull(schemaBundles);
+            Preconditions.checkNotNull(callback);
             int callingUid = Binder.getCallingUidOrThrow();
             int callingUserId = UserHandle.getUserId(callingUid);
             final long callingIdentity = Binder.clearCallingIdentity();
@@ -166,6 +167,7 @@ public class AppSearchManagerService extends SystemService {
             Preconditions.checkNotNull(databaseName);
             Preconditions.checkNotNull(queryExpression);
             Preconditions.checkNotNull(searchSpecBundle);
+            Preconditions.checkNotNull(callback);
             int callingUid = Binder.getCallingUidOrThrow();
             int callingUserId = UserHandle.getUserId(callingUid);
             final long callingIdentity = Binder.clearCallingIdentity();
@@ -185,9 +187,34 @@ public class AppSearchManagerService extends SystemService {
             }
         }
 
+        public void globalQuery(
+                @NonNull String queryExpression,
+                @NonNull Bundle searchSpecBundle,
+                @NonNull IAppSearchResultCallback callback) {
+            Preconditions.checkNotNull(queryExpression);
+            Preconditions.checkNotNull(searchSpecBundle);
+            Preconditions.checkNotNull(callback);
+            int callingUid = Binder.getCallingUidOrThrow();
+            int callingUserId = UserHandle.getUserId(callingUid);
+            final long callingIdentity = Binder.clearCallingIdentity();
+            try {
+                AppSearchImpl impl = ImplInstanceManager.getInstance(getContext(), callingUserId);
+                SearchResultPage searchResultPage = impl.globalQuery(
+                        queryExpression,
+                        new SearchSpec(searchSpecBundle));
+                invokeCallbackOnResult(callback,
+                        AppSearchResult.newSuccessfulResult(searchResultPage.getBundle()));
+            } catch (Throwable t) {
+                invokeCallbackOnError(callback, t);
+            } finally {
+                Binder.restoreCallingIdentity(callingIdentity);
+            }
+        }
+
         @Override
         public void getNextPage(long nextPageToken,
                 @NonNull IAppSearchResultCallback callback) {
+            Preconditions.checkNotNull(callback);
             int callingUid = Binder.getCallingUidOrThrow();
             int callingUserId = UserHandle.getUserId(callingUid);
             final long callingIdentity = Binder.clearCallingIdentity();
@@ -261,6 +288,7 @@ public class AppSearchManagerService extends SystemService {
             Preconditions.checkNotNull(databaseName);
             Preconditions.checkNotNull(queryExpression);
             Preconditions.checkNotNull(searchSpecBundle);
+            Preconditions.checkNotNull(callback);
             int callingUid = Binder.getCallingUidOrThrow();
             int callingUserId = UserHandle.getUserId(callingUid);
             final long callingIdentity = Binder.clearCallingIdentity();
@@ -279,6 +307,7 @@ public class AppSearchManagerService extends SystemService {
 
         @Override
         public void initialize(@NonNull IAppSearchResultCallback callback) {
+            Preconditions.checkNotNull(callback);
             int callingUid = Binder.getCallingUidOrThrow();
             int callingUserId = UserHandle.getUserId(callingUid);
             final long callingIdentity = Binder.clearCallingIdentity();
