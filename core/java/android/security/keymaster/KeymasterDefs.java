@@ -157,6 +157,11 @@ public final class KeymasterDefs {
     public static final int HW_AUTH_PASSWORD = 1 << 0;
     public static final int HW_AUTH_BIOMETRIC = 1 << 1;
 
+    // Security Levels.
+    public static final int KM_SECURITY_LEVEL_SOFTWARE = 0;
+    public static final int KM_SECURITY_LEVEL_TRUSTED_ENVIRONMENT = 1;
+    public static final int KM_SECURITY_LEVEL_STRONGBOX = 2;
+
     // Error codes.
     public static final int KM_ERROR_OK = 0;
     public static final int KM_ERROR_ROOT_OF_TRUST_ALREADY_SET = -1;
