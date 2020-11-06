@@ -348,7 +348,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
             win.mRelayoutCalled = true;
             win.mHasSurface = true;
             win.mHidden = false;
-            win.showLw(false /* doAnimation */, false /* requestAnim */);
+            win.show(false /* doAnimation */, false /* requestAnim */);
         }
     }
 

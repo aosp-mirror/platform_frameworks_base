@@ -2219,7 +2219,7 @@ public class DisplayPolicy {
             WindowState attached, WindowState imeTarget) {
         final boolean affectsSystemUi = win.canAffectSystemUiFlags();
         if (DEBUG_LAYOUT) Slog.i(TAG, "Win " + win + ": affectsSystemUi=" + affectsSystemUi);
-        mService.mPolicy.applyKeyguardPolicyLw(win, imeTarget);
+        applyKeyguardPolicy(win, imeTarget);
         final int fl = attrs.flags;
         if (mTopFullscreenOpaqueWindowState == null && affectsSystemUi
                 && attrs.type == TYPE_INPUT_METHOD) {
@@ -2384,6 +2384,55 @@ public class DisplayPolicy {
 
         mService.mPolicy.setAllowLockscreenWhenOn(getDisplayId(), mAllowLockscreenWhenOn);
         return changes;
+    }
+
+    /**
+     * Applies the keyguard policy to a specific window.
+     *
+     * @param win The window to apply the keyguard policy.
+     * @param imeTarget The current IME target window.
+     */
+    private void applyKeyguardPolicy(WindowState win, WindowState imeTarget) {
+        if (mService.mPolicy.canBeHiddenByKeyguardLw(win)) {
+            if (shouldBeHiddenByKeyguard(win, imeTarget)) {
+                win.hide(false /* doAnimation */, true /* requestAnim */);
+            } else {
+                win.show(false /* doAnimation */, true /* requestAnim */);
+            }
+        }
+    }
+
+    private boolean shouldBeHiddenByKeyguard(WindowState win, WindowState imeTarget) {
+        // If AOD is showing, the IME should be hidden. However, sometimes the AOD is considered
+        // hidden because it's in the process of hiding, but it's still being shown on screen.
+        // In that case, we want to continue hiding the IME until the windows have completed
+        // drawing. This way, we know that the IME can be safely shown since the other windows are
+        // now shown.
+        final boolean hideIme = win.mIsImWindow
+                && (mService.mAtmService.mKeyguardController.isAodShowing()
+                        || (mDisplayContent.isDefaultDisplay && !mWindowManagerDrawComplete));
+        if (hideIme) {
+            return true;
+        }
+
+        if (!mDisplayContent.isDefaultDisplay || !isKeyguardShowing()) {
+            return false;
+        }
+
+        // Show IME over the keyguard if the target allows it.
+        final boolean showImeOverKeyguard = imeTarget != null && imeTarget.isVisibleLw()
+                && win.mIsImWindow && (imeTarget.canShowWhenLocked()
+                        || !mService.mPolicy.canBeHiddenByKeyguardLw(imeTarget));
+        if (showImeOverKeyguard) {
+            return false;
+        }
+
+        // Show SHOW_WHEN_LOCKED windows if keyguard is occluded.
+        final boolean allowShowWhenLocked = isKeyguardOccluded()
+                // Show error dialogs over apps that are shown on keyguard.
+                && (win.canShowWhenLocked()
+                        || (win.mAttrs.privateFlags & LayoutParams.PRIVATE_FLAG_SYSTEM_ERROR) != 0);
+        return !allowShowWhenLocked;
     }
 
     /**

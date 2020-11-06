@@ -7596,13 +7596,6 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         @Override
-        public boolean isStackVisibleLw(int windowingMode) {
-            // TODO(b/153090332): Support multiple task display areas & displays
-            final TaskDisplayArea tc = mRoot.getDefaultTaskDisplayArea();
-            return tc.isStackVisible(windowingMode);
-        }
-
-        @Override
         public void computeWindowsForAccessibility(int displayId) {
             final AccessibilityController accessibilityController;
             synchronized (mGlobalLock) {
@@ -7992,19 +7985,6 @@ public class WindowManagerService extends IWindowManager.Stub
                     DisplayPolicy::onLockTaskStateChangedLw, PooledLambda.__(), lockTaskState);
             mRoot.forAllDisplayPolicies(c);
             c.recycle();
-        }
-    }
-
-    /**
-     * Updates {@link WindowManagerPolicy} with new value about whether AOD  is showing. If AOD
-     * has changed, this will trigger a {@link WindowSurfacePlacer#performSurfacePlacement} to
-     * ensure the new value takes effect.
-     */
-    public void setAodShowing(boolean aodShowing) {
-        synchronized (mGlobalLock) {
-            if (mPolicy.setAodShowing(aodShowing)) {
-                mWindowPlacerLocked.performSurfacePlacement();
-            }
         }
     }
 

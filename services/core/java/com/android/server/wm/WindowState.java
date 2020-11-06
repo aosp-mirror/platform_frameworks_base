@@ -309,7 +309,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     /**
      * The visibility flag of the window based on policy like {@link WindowManagerPolicy}.
-     * Normally set by calling {@link #showLw} and {@link #hideLw}.
+     * Normally set by calling {@link #show} and {@link #hide}.
      *
      * TODO: b/131253938 This will eventually be split into individual visibility policy flags.
      */
@@ -1544,8 +1544,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return state;
     }
 
-    @Override
-    public int getDisplayId() {
+    int getDisplayId() {
         final DisplayContent displayContent = getDisplayContent();
         if (displayContent == null) {
             return Display.INVALID_DISPLAY;
@@ -2960,12 +2959,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return mWinAnimator.mDrawState == WindowStateAnimator.HAS_DRAWN;
     }
 
-    @Override
-    public boolean showLw(boolean doAnimation) {
-        return showLw(doAnimation, true);
-    }
-
-    boolean showLw(boolean doAnimation, boolean requestAnim) {
+    /**
+     * Can be called to undo the effect of {@link #hide}, allowing a window to be shown as long
+     * as the client would also like it to be shown.
+     */
+    boolean show(boolean doAnimation, boolean requestAnim) {
         if (isLegacyPolicyVisibility() && mLegacyPolicyVisibilityAfterAnim) {
             // Already showing.
             return false;
@@ -3018,12 +3016,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return true;
     }
 
-    @Override
-    public boolean hideLw(boolean doAnimation) {
-        return hideLw(doAnimation, true);
-    }
-
-    boolean hideLw(boolean doAnimation, boolean requestAnim) {
+    /** Forces the window to be hidden, regardless of whether the client like it shown. */
+    boolean hide(boolean doAnimation, boolean requestAnim) {
         if (doAnimation) {
             if (!mToken.okToAnimate()) {
                 doAnimation = false;
@@ -3075,9 +3069,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
         mForceHideNonSystemOverlayWindow = forceHide;
         if (forceHide) {
-            hideLw(true /* doAnimation */, true /* requestAnim */);
+            hide(true /* doAnimation */, true /* requestAnim */);
         } else {
-            showLw(true /* doAnimation */, true /* requestAnim */);
+            show(true /* doAnimation */, true /* requestAnim */);
         }
     }
 
@@ -3091,9 +3085,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
         mHiddenWhileSuspended = hide;
         if (hide) {
-            hideLw(true, true);
+            hide(true /* doAnimation */, true /* requestAnim */);
         } else {
-            showLw(true, true);
+            show(true /* doAnimation */, true /* requestAnim */);
         }
     }
 
@@ -3107,9 +3101,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 // ops modifies they should only be hidden by policy due to the
                 // lock screen, and the user won't be changing this if locked.
                 // Plus it will quickly be fixed the next time we do a layout.
-                showLw(true, true);
+                show(true /* doAnimation */, true /* requestAnim */);
             } else {
-                hideLw(true, true);
+                hide(true /* doAnimation */, true /* requestAnim */);
             }
         }
     }
@@ -3163,7 +3157,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     public void hidePermanentlyLw() {
         if (!mPermanentlyHidden) {
             mPermanentlyHidden = true;
-            hideLw(true, true);
+            hide(true /* doAnimation */, true /* requestAnim */);
         }
     }
 
@@ -4433,11 +4427,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         } else {
             return -1;
         }
-    }
-
-    @Override
-    public boolean isInputMethodWindow() {
-        return mIsImWindow;
     }
 
     // This must be called while inside a transaction.
