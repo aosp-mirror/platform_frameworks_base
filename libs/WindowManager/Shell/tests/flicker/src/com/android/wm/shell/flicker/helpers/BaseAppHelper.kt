@@ -26,6 +26,7 @@ import android.content.pm.PackageManager.FEATURE_LEANBACK_ONLY
 import android.support.test.launcherhelper.LauncherStrategyFactory
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiDevice
+import androidx.test.uiautomator.UiObject2
 import androidx.test.uiautomator.Until
 import com.android.server.wm.flicker.helpers.StandardAppHelper
 import com.android.wm.shell.flicker.TEST_APP_PACKAGE_NAME
@@ -59,6 +60,9 @@ abstract class BaseAppHelper(
         get() = context.packageManager.run {
             getApplicationLabel(getApplicationInfo(packageName, 0)).toString()
         }
+
+    val ui: UiObject2?
+        get() = uiDevice.findObject(appSelector)
 
     fun launchViaIntent() {
         context.startActivity(openAppIntent)

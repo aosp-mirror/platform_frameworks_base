@@ -16,11 +16,35 @@
 
 package com.android.wm.shell.flicker.pip.tv
 
+import android.view.KeyEvent
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiDevice
+import androidx.test.uiautomator.UiObject2
 import androidx.test.uiautomator.Until
 import com.android.wm.shell.flicker.SYSTEM_UI_PACKAGE_NAME
 
-fun UiDevice.waitForTvPipMenu(): Boolean {
-    return wait(Until.findObject(By.res(SYSTEM_UI_PACKAGE_NAME, "pip_controls")), 3_000) != null
+/** Id of the root view in the com.android.wm.shell.pip.tv.PipMenuActivity */
+private const val TV_PIP_MENU_ROOT_ID = "tv_pip_menu"
+private const val TV_PIP_MENU_CLOSE_BUTTON_ID = "close_button"
+private const val TV_PIP_MENU_FULLSCREEN_BUTTON_ID = "full_button"
+
+private const val WAIT_TIME_MS = 3_000L
+
+private val tvPipMenuSelector = By.res(SYSTEM_UI_PACKAGE_NAME, TV_PIP_MENU_ROOT_ID)
+
+fun UiDevice.pressWindowKey() = pressKeyCode(KeyEvent.KEYCODE_WINDOW)
+
+fun UiDevice.waitForTvPipMenu(): UiObject2? =
+        wait(Until.findObject(tvPipMenuSelector), WAIT_TIME_MS)
+
+fun UiDevice.waitForTvPipMenuToClose(): Boolean = wait(Until.gone(tvPipMenuSelector), WAIT_TIME_MS)
+
+fun UiDevice.findTvPipMenuCloseButton(): UiObject2? = findObject(
+        By.res(SYSTEM_UI_PACKAGE_NAME, TV_PIP_MENU_CLOSE_BUTTON_ID))
+
+fun UiDevice.findTvPipMenuFullscreenButton(): UiObject2? = findObject(
+        By.res(SYSTEM_UI_PACKAGE_NAME, TV_PIP_MENU_FULLSCREEN_BUTTON_ID))
+
+fun UiObject2.isFullscreen(uiDevice: UiDevice): Boolean = visibleBounds.run {
+    height() == uiDevice.displayHeight && width() == uiDevice.displayWidth
 }
