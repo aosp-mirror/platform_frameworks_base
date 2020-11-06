@@ -4816,4 +4816,9 @@ public class ConnectivityManager {
             e.rethrowFromSystemServer();
         }
     }
+
+    private void setOemNetworkPreference(@NonNull OemNetworkPreferences preference) {
+        Log.d(TAG, "setOemNetworkPreference called with preference: "
+                + preference.toString());
+    }
 }
