@@ -897,6 +897,26 @@ public class Notification implements Parcelable
     public static final String CATEGORY_CAR_INFORMATION = "car_information";
 
     /**
+     * Notification category: tracking a user's workout.
+     */
+    public static final String CATEGORY_WORKOUT = "workout";
+
+    /**
+     * Notification category: temporarily sharing location.
+     */
+    public static final String CATEGORY_LOCATION_SHARING = "location_sharing";
+
+    /**
+     * Notification category: running stopwatch.
+     */
+    public static final String CATEGORY_STOPWATCH = "stopwatch";
+
+    /**
+     * Notification category: missed call.
+     */
+    public static final String CATEGORY_MISSED_CALL = "missed_call";
+
+    /**
      * One of the predefined notification categories (see the <code>CATEGORY_*</code> constants)
      * that best describes this Notification.  May be used by the system for ranking and filtering.
      */
