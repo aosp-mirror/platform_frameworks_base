@@ -86,8 +86,16 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"स्क्रीनशॉट दोबारा लेने की कोशिश करें"</string>
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"मेमोरी कम होने की वजह से स्क्रीनशॉट सेव नहीं किया जा सका"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"ऐप्लिकेशन या आपका संगठन स्क्रीनशॉट लेने की अनुमति नहीं देता"</string>
-    <string name="screenshot_edit" msgid="3510496440489019191">"स्क्रीनशॉट में बदलाव करें"</string>
-    <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"स्क्रीनशॉट खारिज करें"</string>
+    <!-- no translation found for screenshot_edit_label (8754981973544133050) -->
+    <skip />
+    <!-- no translation found for screenshot_edit_description (3333092254706788906) -->
+    <skip />
+    <!-- no translation found for screenshot_scroll_label (7682877978685434621) -->
+    <skip />
+    <!-- no translation found for screenshot_scroll_description (7855773867093272175) -->
+    <skip />
+    <!-- no translation found for screenshot_dismiss_description (4702341245899508786) -->
+    <skip />
     <string name="screenshot_preview_description" msgid="7606510140714080474">"स्क्रीनशॉट की झलक"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"स्क्रीन रिकॉर्डर"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"स्क्रीन रिकॉर्डिंग को प्रोसेस किया जा रहा है"</string>
@@ -182,8 +190,7 @@
     <string name="accessibility_battery_two_bars" msgid="7895789999668425551">"बैटरी दो बार."</string>
     <string name="accessibility_battery_three_bars" msgid="118341923832368291">"बैटरी तीन बार."</string>
     <string name="accessibility_battery_full" msgid="1480463938961288494">"बैटरी पूरी है."</string>
-    <!-- no translation found for accessibility_battery_unknown (1807789554617976440) -->
-    <skip />
+    <string name="accessibility_battery_unknown" msgid="1807789554617976440">"इस बारे में जानकारी नहीं है कि अभी बैटरी कितने प्रतिशत चार्ज है."</string>
     <string name="accessibility_no_phone" msgid="8828412144430247025">"कोई फ़ोन नहीं."</string>
     <string name="accessibility_phone_one_bar" msgid="8786055123727785588">"फ़ोन एक बार."</string>
     <string name="accessibility_phone_two_bars" msgid="3316909612598670674">"फ़ोन दो बार."</string>
@@ -259,7 +266,6 @@
     <!-- no translation found for accessibility_work_mode (1280025758672376313) -->
     <skip />
     <string name="accessibility_notification_dismissed" msgid="4411652015138892952">"सूचना खारिज की गई."</string>
-    <string name="accessibility_bubble_dismissed" msgid="270358867566720729">"बबल खारिज किया गया."</string>
     <string name="accessibility_desc_notification_shade" msgid="5355229129428759989">"सूचना शेड."</string>
     <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"त्वरित सेटिंग."</string>
     <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"लॉक स्क्रीन."</string>
@@ -573,7 +579,7 @@
     <string name="monitoring_description_network_logging" msgid="577305979174002252">"आपके एडमिन ने नेटवर्क लॉग करना चालू कर दिया है, जो आपके डिवाइस पर ट्रैफ़िक की निगरानी करता है.\n\nज़्यादा जानकारी के लिए अपने एडमिन से संपर्क करें."</string>
     <string name="monitoring_description_vpn" msgid="1685428000684586870">"आपने किसी ऐप को VPN कनेक्‍शन सेट करने की अनुमति दी है.\n\nयह ऐप ईमेल, ऐप्‍स और सुरक्षित वेबसाइटों सहित आपके डिवाइस और नेटवर्क की गतिविधि की निगरानी कर सकता है."</string>
     <string name="monitoring_description_vpn_profile_owned" msgid="4964237035412372751">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> आपकी वर्क प्रोफ़ाइल को प्रबंधित करता है.\n\n आपका एडमिन ईमेल, ऐप्लिकेशन और वेबसाइटों सहित आपकी नेटवर्क गतिविधि की निगरानी कर सकता है.\n\nऔर जानकारी के लिए अपने एडमिन से संपर्क करें.\n\nआप ऐसे VPN से भी कनेक्‍ट हैं, जो आपकी नेटवर्क गतिविधि की निगरानी कर सकता है."</string>
-    <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"इस डिवाइस का प्रबंधन आपके अभिभावक करते हैं. अभिभावक आपके डिवाइस से जुड़ी जानकारी देख सकते हैं और उस जानकारी को प्रबंधित कर सकते हैं. इनमें, आपके इस्तेमाल किए गए ऐप्लिकेशन की जानकारी, आपकी जगह की जानकारी, और डिवाइस के इस्तेमाल में बिताए गए समय जैसी जानकारी शामिल हैं."</string>
+    <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"इस डिवाइस का प्रबंधन आपके अभिभावक करते हैं. अभिभावक आपके डिवाइस से जुड़ी जानकारी देख सकते हैं और उसे प्रबंधित कर सकते हैं. इनमें, आपके इस्तेमाल किए गए ऐप्लिकेशन, जगह की जानकारी, और डिवाइस के इस्तेमाल में बिताए गए समय जैसी जानकारी शामिल है."</string>
     <string name="legacy_vpn_name" msgid="4174223520162559145">"वीपीएन"</string>
     <string name="monitoring_description_app" msgid="376868879287922929">"आप <xliff:g id="APPLICATION">%1$s</xliff:g> से कनेक्ट हैं, जो ईमेल, ऐप्लिकेशन और वेबसाइटों सहित आपकी नेटवर्क गतिविधि की निगरानी कर सकता है."</string>
     <string name="monitoring_description_app_personal" msgid="1970094872688265987">"आप <xliff:g id="APPLICATION">%1$s</xliff:g> से कनेक्‍ट हैं, जो ईमेल, ऐप्‍स और वेबसाइटों सहित आपकी व्‍यक्‍तिगत नेटवर्क गतिविधि की निगरानी कर सकता है."</string>
@@ -716,7 +722,6 @@
     <string name="inline_keep_showing_app" msgid="4393429060390649757">"इस ऐप्लिकेशन से जुड़ी सूचनाएं दिखाना जारी रखें?"</string>
     <string name="notification_silence_title" msgid="8608090968400832335">"आवाज़ के बिना सूचनाएं दिखाएं"</string>
     <string name="notification_alert_title" msgid="3656229781017543655">"डिफ़ॉल्ट"</string>
-    <string name="notification_bubble_title" msgid="8330481035191903164">"बबल"</string>
     <string name="notification_automatic_title" msgid="3745465364578762652">"अपने-आप"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"किसी तरह की आवाज़ या वाइब्रेशन न हो"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"इससे किसी तरह की आवाज़ या वाइब्रेशन नहीं होता और बातचीत, सेक्शन में सबसे नीचे दिखती है"</string>
@@ -728,8 +733,6 @@
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"सेटिंग"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"प्राथमिकता"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> पर बातचीत की सुविधाएं काम नहीं करतीं"</string>
-    <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"हाल ही के बबल्स मौजूद नहीं हैं"</string>
-    <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"हाल ही के बबल्स और हटाए गए बबल्स यहां दिखेंगे"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"ये सूचनाएं नहीं बदली जा सकती हैं."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"सूचनाओं के इस समूह को यहां कॉन्फ़िगर नहीं किया जा सकता"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"प्रॉक्सी सूचना"</string>
@@ -988,25 +991,7 @@
     <string name="device_services" msgid="1549944177856658705">"डिवाइस सेवाएं"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"कोई शीर्षक नहीं"</string>
     <string name="restart_button_description" msgid="6916116576177456480">"इस ऐप्लिकेशन को रीस्टार्ट करने और फ़ुल स्क्रीन चालू करने के लिए टैप करें."</string>
-    <string name="bubbles_settings_button_description" msgid="7324245408859877545">"<xliff:g id="APP_NAME">%1$s</xliff:g> बबल्स की सेटिंग"</string>
-    <string name="bubble_overflow_button_content_description" msgid="5523744621434300510">"ओवरफ़्लो"</string>
-    <string name="bubble_accessibility_action_add_back" msgid="6217995665917123890">"स्टैक में वापस जोड़ें"</string>
-    <string name="manage_bubbles_text" msgid="6856830436329494850">"प्रबंधित करें"</string>
-    <string name="bubble_content_description_single" msgid="5175160674436546329">"<xliff:g id="APP_NAME">%2$s</xliff:g> से <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
-    <string name="bubble_content_description_stack" msgid="7907610717462651870">"<xliff:g id="APP_NAME">%2$s</xliff:g> और <xliff:g id="BUBBLE_COUNT">%3$d</xliff:g> अन्य ऐप्लिकेशन से <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
     <string name="bubble_accessibility_action_move" msgid="3185080443743819178">"ले जाएं"</string>
-    <string name="bubble_accessibility_action_move_top_left" msgid="4347227665275929728">"सबसे ऊपर बाईं ओर ले जाएं"</string>
-    <string name="bubble_accessibility_action_move_top_right" msgid="6916868852433483569">"सबसे ऊपर दाईं ओर ले जाएं"</string>
-    <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"बाईं ओर सबसे नीचे ले जाएं"</string>
-    <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"सबसे नीचे दाईं ओर ले जाएं"</string>
-    <string name="bubble_dismiss_text" msgid="1314082410868930066">"बबल खारिज करें"</string>
-    <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"बातचीत को बबल न करें"</string>
-    <string name="bubbles_user_education_title" msgid="5547017089271445797">"बबल्स का इस्तेमाल करके चैट करें"</string>
-    <string name="bubbles_user_education_description" msgid="1160281719576715211">"नई बातचीत फ़्लोटिंग आइकॉन या बबल्स की तरह दिखेंगी. बबल को खोलने के लिए टैप करें. इसे एक जगह से दूसरी जगह ले जाने के लिए खींचें और छोड़ें."</string>
-    <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"जब चाहें, बबल्स को कंट्रोल करें"</string>
-    <string name="bubbles_user_education_manage" msgid="1391639189507036423">"इस ऐप्लिकेशन पर बबल्स को बंद करने के लिए \'प्रबंधित करें\' पर टैप करें"</string>
-    <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"ठीक है"</string>
-    <string name="bubbles_app_settings" msgid="5779443644062348657">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> की सेटिंग"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"सिस्टम नेविगेशन अपडेट हो गया. बदलाव करने के लिए \'सेटिंग\' पर जाएं."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"सिस्टम नेविगेशन अपडेट करने के लिए \'सेटिंग\' में जाएं"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"स्टैंडबाई"</string>
@@ -1096,8 +1081,6 @@
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"नया डिवाइस जोड़ें"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"बिल्ड नंबर"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"बिल्ड नंबर को क्लिपबोर्ड पर कॉपी किया गया."</string>
-    <!-- no translation found for battery_state_unknown_notification_title (8464703640483773454) -->
-    <skip />
-    <!-- no translation found for battery_state_unknown_notification_text (13720937839460899) -->
-    <skip />
+    <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"आपके डिवाइस के बैटरी मीटर की रीडिंग लेने में समस्या आ रही है"</string>
+    <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"ज़्यादा जानकारी के लिए टैप करें"</string>
 </resources>

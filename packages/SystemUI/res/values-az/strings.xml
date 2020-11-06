@@ -86,8 +86,11 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"Skrinşotu yenidən çəkin"</string>
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"Yaddaş ehtiyatının az olması səbəbindən skrinşotu yadda saxlamaq olmur"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Skrinşot çəkməyə tətbiq və ya təşkilat tərəfindən icazə verilmir"</string>
-    <string name="screenshot_edit" msgid="3510496440489019191">"Skrinşota düzəliş edin"</string>
-    <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"Ekran şəklini ötürün"</string>
+    <string name="screenshot_edit_label" msgid="8754981973544133050">"Redaktə edin"</string>
+    <string name="screenshot_edit_description" msgid="3333092254706788906">"Skrinşota düzəliş edin"</string>
+    <string name="screenshot_scroll_label" msgid="7682877978685434621">"Sürüşdürün"</string>
+    <string name="screenshot_scroll_description" msgid="7855773867093272175">"Sürüşdürülərək çəkilən skrinşot"</string>
+    <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Ekran şəklini ötürün"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Ekran şəklinə önbaxış"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Ekran Yazıcısı"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Ekran çəkilişi emal edilir"</string>
@@ -182,8 +185,7 @@
     <string name="accessibility_battery_two_bars" msgid="7895789999668425551">"Batareya iki xətdir."</string>
     <string name="accessibility_battery_three_bars" msgid="118341923832368291">"Batareya üç xətdir."</string>
     <string name="accessibility_battery_full" msgid="1480463938961288494">"Batareya doludur"</string>
-    <!-- no translation found for accessibility_battery_unknown (1807789554617976440) -->
-    <skip />
+    <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Batareyanın faizi naməlumdur."</string>
     <string name="accessibility_no_phone" msgid="8828412144430247025">"Telefon yoxdur."</string>
     <string name="accessibility_phone_one_bar" msgid="8786055123727785588">"Şəbəkə bir xətdir."</string>
     <string name="accessibility_phone_two_bars" msgid="3316909612598670674">"Şəbəkə iki xətdir."</string>
@@ -257,7 +259,6 @@
     <!-- no translation found for accessibility_work_mode (1280025758672376313) -->
     <skip />
     <string name="accessibility_notification_dismissed" msgid="4411652015138892952">"Bildiriş uzaqlaşdırıldı."</string>
-    <string name="accessibility_bubble_dismissed" msgid="270358867566720729">"Qabarcıqdan imtina edilib."</string>
     <string name="accessibility_desc_notification_shade" msgid="5355229129428759989">"Bildiriş kölgəsi."</string>
     <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"Tez ayarlar."</string>
     <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"Ekranı kilidləyin."</string>
@@ -714,7 +715,6 @@
     <string name="inline_keep_showing_app" msgid="4393429060390649757">"Bu tətbiqin bildirişləri göstərilməyə davam edilsin?"</string>
     <string name="notification_silence_title" msgid="8608090968400832335">"Səssiz"</string>
     <string name="notification_alert_title" msgid="3656229781017543655">"Defolt"</string>
-    <string name="notification_bubble_title" msgid="8330481035191903164">"Qabarcıq"</string>
     <string name="notification_automatic_title" msgid="3745465364578762652">"Avtomatik"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Səs və ya vibrasiya yoxdur"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Səs və ya vibrasiya yoxdur və söhbət bölməsinin aşağısında görünür"</string>
@@ -726,8 +726,6 @@
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Ayarlar"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioritet"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> söhbət funksiyalarını dəstəkləmir"</string>
-    <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Yumrucuqlar yoxdur"</string>
-    <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Son yumrucuqlar və buraxılmış yumrucuqlar burada görünəcək"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Bu bildirişlər dəyişdirilə bilməz."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Bu bildiriş qrupunu burada konfiqurasiya etmək olmaz"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"Proksi bildirişi"</string>
@@ -986,25 +984,7 @@
     <string name="device_services" msgid="1549944177856658705">"Cihaz Xidmətləri"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"Başlıq yoxdur"</string>
     <string name="restart_button_description" msgid="6916116576177456480">"Bu tətbiqi sıfırlayaraq tam ekrana keçmək üçün klikləyin."</string>
-    <string name="bubbles_settings_button_description" msgid="7324245408859877545">"<xliff:g id="APP_NAME">%1$s</xliff:g> yumrucuqları üçün ayarlar"</string>
-    <string name="bubble_overflow_button_content_description" msgid="5523744621434300510">"Kənara çıxma"</string>
-    <string name="bubble_accessibility_action_add_back" msgid="6217995665917123890">"Yenidən dəstəyə əlavə edin"</string>
-    <string name="manage_bubbles_text" msgid="6856830436329494850">"İdarə edin"</string>
-    <string name="bubble_content_description_single" msgid="5175160674436546329">"<xliff:g id="APP_NAME">%2$s</xliff:g> tətbiqindən <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
-    <string name="bubble_content_description_stack" msgid="7907610717462651870">"<xliff:g id="APP_NAME">%2$s</xliff:g> tətbiqindən <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> və daha <xliff:g id="BUBBLE_COUNT">%3$d</xliff:g> qabarcıq"</string>
     <string name="bubble_accessibility_action_move" msgid="3185080443743819178">"Hərəkət etdirin"</string>
-    <string name="bubble_accessibility_action_move_top_left" msgid="4347227665275929728">"Yuxarıya sola köçürün"</string>
-    <string name="bubble_accessibility_action_move_top_right" msgid="6916868852433483569">"Yuxarıya sağa köçürün"</string>
-    <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"Aşağıya sola köçürün"</string>
-    <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"Aşağıya sağa köçürün"</string>
-    <string name="bubble_dismiss_text" msgid="1314082410868930066">"Yumrucuğu ləğv edin"</string>
-    <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"Söhbəti yumrucuqda göstərmə"</string>
-    <string name="bubbles_user_education_title" msgid="5547017089271445797">"Yumrucuqlardan istifadə edərək söhbət edin"</string>
-    <string name="bubbles_user_education_description" msgid="1160281719576715211">"Yeni söhbətlər üzən nişanlar və ya yumrucuqlar kimi görünür. Yumrucuğu açmaq üçün toxunun. Hərəkət etdirmək üçün sürüşdürün."</string>
-    <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"Yumrucuqları istənilən vaxt idarə edin"</string>
-    <string name="bubbles_user_education_manage" msgid="1391639189507036423">"Bu tətbiqdə yumrucuqları deaktiv etmək üçün \"İdarə edin\" seçiminə toxunun"</string>
-    <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"Anladım"</string>
-    <string name="bubbles_app_settings" msgid="5779443644062348657">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> ayarları"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Sistem naviqasiyası yeniləndi. Dəyişiklik etmək üçün Ayarlara daxil olun."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Sistem naviqasiyasını yeniləmək üçün Ayarlara keçin"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Gözləmə rejimi"</string>
@@ -1094,8 +1074,6 @@
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Yeni cihazı qoşalaşdırın"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Versiya nömrəsi"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Versiya nömrəsi mübadilə buferinə kopyalandı."</string>
-    <!-- no translation found for battery_state_unknown_notification_title (8464703640483773454) -->
-    <skip />
-    <!-- no translation found for battery_state_unknown_notification_text (13720937839460899) -->
-    <skip />
+    <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Batareya ölçüsünü oxuyarkən problem yarandı"</string>
+    <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Ətraflı məlumat üçün toxunun"</string>
 </resources>

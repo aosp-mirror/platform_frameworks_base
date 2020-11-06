@@ -86,8 +86,16 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"جرّب أخذ لقطة الشاشة مرة أخرى"</string>
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"يتعذر حفظ لقطة الشاشة لأن مساحة التخزين المتاحة محدودة."</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"يحظر التطبيق أو تحظر مؤسستك التقاط لقطات شاشة"</string>
-    <string name="screenshot_edit" msgid="3510496440489019191">"تعديل لقطة الشاشة"</string>
-    <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"إغلاق لقطة الشاشة"</string>
+    <!-- no translation found for screenshot_edit_label (8754981973544133050) -->
+    <skip />
+    <!-- no translation found for screenshot_edit_description (3333092254706788906) -->
+    <skip />
+    <!-- no translation found for screenshot_scroll_label (7682877978685434621) -->
+    <skip />
+    <!-- no translation found for screenshot_scroll_description (7855773867093272175) -->
+    <skip />
+    <!-- no translation found for screenshot_dismiss_description (4702341245899508786) -->
+    <skip />
     <string name="screenshot_preview_description" msgid="7606510140714080474">"معاينة لقطة الشاشة"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"مسجّل الشاشة"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"جارٍ معالجة تسجيل الشاشة"</string>
@@ -182,8 +190,7 @@
     <string name="accessibility_battery_two_bars" msgid="7895789999668425551">"إشارة البطارية تتكون من شريطين."</string>
     <string name="accessibility_battery_three_bars" msgid="118341923832368291">"إشارة البطارية تتكون من ثلاثة أشرطة."</string>
     <string name="accessibility_battery_full" msgid="1480463938961288494">"إشارة البطارية كاملة."</string>
-    <!-- no translation found for accessibility_battery_unknown (1807789554617976440) -->
-    <skip />
+    <string name="accessibility_battery_unknown" msgid="1807789554617976440">"نسبة شحن البطارية غير معروفة."</string>
     <string name="accessibility_no_phone" msgid="8828412144430247025">"ليست هناك إشارة بالهاتف."</string>
     <string name="accessibility_phone_one_bar" msgid="8786055123727785588">"إشارة الهاتف تتكون من شريط واحد."</string>
     <string name="accessibility_phone_two_bars" msgid="3316909612598670674">"إشارة الهاتف تتكون من شريطين."</string>
@@ -257,7 +264,6 @@
     <!-- no translation found for accessibility_work_mode (1280025758672376313) -->
     <skip />
     <string name="accessibility_notification_dismissed" msgid="4411652015138892952">"تم تجاهل الإشعار."</string>
-    <string name="accessibility_bubble_dismissed" msgid="270358867566720729">"تم إغلاق الفقاعة."</string>
     <string name="accessibility_desc_notification_shade" msgid="5355229129428759989">"مركز الإشعارات."</string>
     <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"الإعدادات السريعة."</string>
     <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"شاشة القفل."</string>
@@ -726,7 +732,6 @@
     <string name="inline_keep_showing_app" msgid="4393429060390649757">"هل تريد الاستمرار في تلقي إشعارات من هذا التطبيق؟"</string>
     <string name="notification_silence_title" msgid="8608090968400832335">"صامتة"</string>
     <string name="notification_alert_title" msgid="3656229781017543655">"تلقائية"</string>
-    <string name="notification_bubble_title" msgid="8330481035191903164">"فقاعة"</string>
     <string name="notification_automatic_title" msgid="3745465364578762652">"تلقائي"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"بدون صوت أو اهتزاز"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"بدون صوت أو اهتزاز وتظهر في موضع أسفل في قسم المحادثات"</string>
@@ -738,8 +743,6 @@
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"الإعدادات"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"الأولوية"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"لا يدعم تطبيق <xliff:g id="APP_NAME">%1$s</xliff:g> ميزات المحادثات."</string>
-    <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"ليس هناك فقاعات محادثات"</string>
-    <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"ستظهر هنا أحدث فقاعات المحادثات وفقاعات المحادثات التي تم إغلاقها."</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"يتعذّر تعديل هذه الإشعارات."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"يتعذّر ضبط مجموعة الإشعارات هذه هنا."</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"إشعار مستند إلى خادم وكيل"</string>
@@ -1006,25 +1009,7 @@
     <string name="device_services" msgid="1549944177856658705">"خدمات الأجهزة"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"بلا عنوان"</string>
     <string name="restart_button_description" msgid="6916116576177456480">"انقر لإعادة تشغيل هذا التطبيق والانتقال إلى وضع ملء الشاشة."</string>
-    <string name="bubbles_settings_button_description" msgid="7324245408859877545">"إعدادات فقاعات المحادثات على <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="bubble_overflow_button_content_description" msgid="5523744621434300510">"القائمة الكاملة"</string>
-    <string name="bubble_accessibility_action_add_back" msgid="6217995665917123890">"إضافة دعم إلى الحزم"</string>
-    <string name="manage_bubbles_text" msgid="6856830436329494850">"إدارة"</string>
-    <string name="bubble_content_description_single" msgid="5175160674436546329">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> من <xliff:g id="APP_NAME">%2$s</xliff:g>"</string>
-    <string name="bubble_content_description_stack" msgid="7907610717462651870">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> من <xliff:g id="APP_NAME">%2$s</xliff:g> و<xliff:g id="BUBBLE_COUNT">%3$d</xliff:g> أيضًا"</string>
     <string name="bubble_accessibility_action_move" msgid="3185080443743819178">"نقل"</string>
-    <string name="bubble_accessibility_action_move_top_left" msgid="4347227665275929728">"نقل إلى أعلى يمين الشاشة"</string>
-    <string name="bubble_accessibility_action_move_top_right" msgid="6916868852433483569">"الانتقال إلى أعلى اليسار"</string>
-    <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"نقل إلى أسفل يمين الشاشة"</string>
-    <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"نقل إلى أسفل اليسار"</string>
-    <string name="bubble_dismiss_text" msgid="1314082410868930066">"إغلاق فقاعة المحادثة"</string>
-    <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"عدم عرض المحادثة كفقاعة محادثة"</string>
-    <string name="bubbles_user_education_title" msgid="5547017089271445797">"الدردشة باستخدام فقاعات المحادثات"</string>
-    <string name="bubbles_user_education_description" msgid="1160281719576715211">"تظهر المحادثات الجديدة كرموز عائمة أو كفقاعات. انقر لفتح فقاعة المحادثة، واسحبها لتحريكها."</string>
-    <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"التحكّم في فقاعات المحادثات في أي وقت"</string>
-    <string name="bubbles_user_education_manage" msgid="1391639189507036423">"انقر على \"إدارة\" لإيقاف فقاعات المحادثات من هذا التطبيق."</string>
-    <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"حسنًا"</string>
-    <string name="bubbles_app_settings" msgid="5779443644062348657">"إعدادات <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"تم تحديث التنقل داخل النظام. لإجراء التغييرات، يُرجى الانتقال إلى \"الإعدادات\"."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"الانتقال إلى \"الإعدادات\" لتعديل التنقل داخل النظام"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"وضع الاستعداد"</string>
@@ -1118,8 +1103,6 @@
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"إقران جهاز جديد"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"رقم الإصدار"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"تم نسخ رقم الإصدار إلى الحافظة."</string>
-    <!-- no translation found for battery_state_unknown_notification_title (8464703640483773454) -->
-    <skip />
-    <!-- no translation found for battery_state_unknown_notification_text (13720937839460899) -->
-    <skip />
+    <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"حدثت مشكلة أثناء قراءة مقياس مستوى شحن البطارية."</string>
+    <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"انقر للحصول على مزيد من المعلومات."</string>
 </resources>
