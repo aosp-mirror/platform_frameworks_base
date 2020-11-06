@@ -2658,6 +2658,14 @@
                 android:description="@string/permdesc_useDataInBackground"
                 android:protectionLevel="normal" />
 
+    <!-- Allows app to request to be associated with a device via
+         {@link android.companion.CompanionDeviceManager}
+         as a "watch"
+         <p>Protection level: normal
+     -->
+    <permission android:name="android.permission.REQUEST_COMPANION_PROFILE_WATCH"
+                android:protectionLevel="normal" />
+
     <!-- Allows a companion app to associate to Wi-Fi.
          <p>Only for use by a single pre-approved app.
          @hide
