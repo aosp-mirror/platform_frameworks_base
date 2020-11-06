@@ -66,7 +66,7 @@ public class FaceService extends SystemService {
     private final LockoutResetDispatcher mLockoutResetDispatcher;
     private final LockPatternUtils mLockPatternUtils;
     @NonNull
-    private List<ServiceProvider> mServiceProviders;
+    private final List<ServiceProvider> mServiceProviders;
 
     @Nullable
     private ServiceProvider getProviderForSensor(int sensorId) {
@@ -498,7 +498,8 @@ public class FaceService extends SystemService {
                 @BiometricManager.Authenticators.Types int strength) {
             Utils.checkPermission(getContext(), USE_BIOMETRIC_INTERNAL);
             mServiceProviders.add(
-                    new Face10(getContext(), sensorId, strength, mLockoutResetDispatcher));
+                    new com.android.server.biometrics.sensors.face.hidl.Face10(getContext(),
+                            sensorId, strength, mLockoutResetDispatcher));
         }
     }
 

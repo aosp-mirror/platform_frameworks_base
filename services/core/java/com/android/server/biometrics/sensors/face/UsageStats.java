@@ -28,7 +28,7 @@ import java.util.ArrayDeque;
  * Keep a short historical buffer of stats, with an aggregated usage time.
  */
 
-class UsageStats {
+public class UsageStats {
     private static final int EVENT_LOG_SIZE = 100;
 
     /**
@@ -44,7 +44,7 @@ class UsageStats {
         private int mVendorError;
         private int mUser;
 
-        AuthenticationEvent(long startTime, long latency, boolean authenticated, int error,
+        public AuthenticationEvent(long startTime, long latency, boolean authenticated, int error,
                 int vendorError, int user) {
             mStartTime = startTime;
             mLatency = latency;
@@ -76,14 +76,14 @@ class UsageStats {
     private long mRejectLatency;
     private SparseLongArray mErrorLatency;
 
-    UsageStats(Context context) {
+    public UsageStats(Context context) {
         mAuthenticationEvents = new ArrayDeque<>();
         mErrorCount = new SparseIntArray();
         mErrorLatency = new SparseLongArray();
         mContext = context;
     }
 
-    void addEvent(AuthenticationEvent event) {
+    public void addEvent(AuthenticationEvent event) {
         if (mAuthenticationEvents.size() >= EVENT_LOG_SIZE) {
             mAuthenticationEvents.removeFirst();
         }
@@ -101,7 +101,7 @@ class UsageStats {
         }
     }
 
-    void print(PrintWriter pw) {
+    public void print(PrintWriter pw) {
         pw.println("Events since last reboot: " + mAuthenticationEvents.size());
         for (AuthenticationEvent event : mAuthenticationEvents) {
             pw.println(event.toString(mContext));
