@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,8 +17,8 @@
 package com.android.server.wm.flicker.rotation
 
 import android.platform.test.annotations.Presubmit
-import androidx.test.filters.RequiresDevice
 import android.view.Surface
+import androidx.test.filters.RequiresDevice
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.server.wm.flicker.Flicker
 import com.android.server.wm.flicker.FlickerTestRunner
@@ -27,8 +27,8 @@ import com.android.server.wm.flicker.endRotation
 import com.android.server.wm.flicker.focusDoesNotChange
 import com.android.server.wm.flicker.helpers.StandardAppHelper
 import com.android.server.wm.flicker.helpers.WindowUtils
-import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.helpers.buildTestTag
+import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
 import com.android.server.wm.flicker.navBarLayerIsAlwaysVisible
 import com.android.server.wm.flicker.navBarLayerRotatesAndScales
@@ -36,6 +36,8 @@ import com.android.server.wm.flicker.navBarWindowIsAlwaysVisible
 import com.android.server.wm.flicker.noUncoveredRegions
 import com.android.server.wm.flicker.repetitions
 import com.android.server.wm.flicker.startRotation
+import com.android.server.wm.flicker.visibleLayersShownMoreThanOneConsecutiveEntry
+import com.android.server.wm.flicker.visibleWindowsShownMoreThanOneConsecutiveEntry
 import com.android.server.wm.flicker.statusBarLayerIsAlwaysVisible
 import com.android.server.wm.flicker.statusBarLayerRotatesScales
 import com.android.server.wm.flicker.statusBarWindowIsAlwaysVisible
@@ -46,7 +48,7 @@ import org.junit.runners.Parameterized
 
 /**
  * Cycle through supported app rotations.
- * To run this test: `atest FlickerTest:ChangeAppRotationTest`
+ * To run this test: `atest FlickerTests:ChangeAppRotationTest`
  */
 @Presubmit
 @RequiresDevice
@@ -96,6 +98,7 @@ class ChangeAppRotationTest(
                         windowManagerTrace {
                             navBarWindowIsAlwaysVisible()
                             statusBarWindowIsAlwaysVisible()
+                            visibleWindowsShownMoreThanOneConsecutiveEntry()
                         }
 
                         layersTrace {
@@ -107,6 +110,7 @@ class ChangeAppRotationTest(
                                 configuration.endRotation)
                             statusBarLayerRotatesScales(configuration.startRotation,
                                 configuration.endRotation)
+                            visibleLayersShownMoreThanOneConsecutiveEntry(bugId = 140855415)
                         }
 
                         layersTrace {
@@ -128,7 +132,7 @@ class ChangeAppRotationTest(
                                         .then()
                                         .showsLayer(SCREENSHOT_LAYER)
                                         .then()
-                                showsLayer(testApp.getPackage())
+                                        .showsLayer(testApp.getPackage())
                             }
                         }
 
