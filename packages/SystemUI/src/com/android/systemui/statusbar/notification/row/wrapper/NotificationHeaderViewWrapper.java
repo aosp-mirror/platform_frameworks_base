@@ -240,8 +240,9 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
 
     protected void updateTransformedTypes() {
         mTransformationHelper.reset();
-        mTransformationHelper.addTransformedView(TransformableView.TRANSFORMING_VIEW_ICON,
-                mIcon);
+        mTransformationHelper.addTransformedView(TransformableView.TRANSFORMING_VIEW_ICON, mIcon);
+        mTransformationHelper.addTransformedView(TransformableView.TRANSFORMING_VIEW_EXPANDER,
+                mExpandButton);
         mTransformationHelper.addViewTransformingToSimilar(mWorkProfileImage);
         if (mIsLowPriority && mHeaderText != null) {
             mTransformationHelper.addTransformedView(TransformableView.TRANSFORMING_VIEW_TITLE,

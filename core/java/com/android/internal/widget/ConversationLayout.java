@@ -134,7 +134,6 @@ public class ConversationLayout extends FrameLayout
     private CachingIconView mConversationIconBadgeBg;
     private Icon mLargeIcon;
     private View mExpandButtonContainer;
-    private View mExpandButtonInnerContainer;
     private ViewGroup mExpandButtonAndContentContainer;
     private NotificationExpandButton mExpandButton;
     private MessagingLinearLayout mImageMessageContainer;
@@ -266,7 +265,6 @@ public class ConversationLayout extends FrameLayout
         mConversationHeader = findViewById(R.id.conversation_header);
         mContentContainer = findViewById(R.id.notification_action_list_margin_target);
         mExpandButtonAndContentContainer = findViewById(R.id.expand_button_and_content_container);
-        mExpandButtonInnerContainer = findViewById(R.id.expand_button_inner_container);
         mExpandButton = findViewById(R.id.expand_button);
         mExpandButtonExpandedTopMargin = getResources().getDimensionPixelSize(
                 R.dimen.conversation_expand_button_top_margin_expanded);
@@ -1217,25 +1215,18 @@ public class ConversationLayout extends FrameLayout
     }
 
     private void updateExpandButton() {
-        int drawableId;
-        int contentDescriptionId;
         int gravity;
         int topMargin = 0;
         ViewGroup newContainer;
         if (mIsCollapsed) {
-            drawableId = R.drawable.ic_expand_notification;
-            contentDescriptionId = R.string.expand_button_content_description_collapsed;
             gravity = Gravity.CENTER;
             newContainer = mExpandButtonAndContentContainer;
         } else {
-            drawableId = R.drawable.ic_collapse_notification;
-            contentDescriptionId = R.string.expand_button_content_description_expanded;
             gravity = Gravity.CENTER_HORIZONTAL | Gravity.TOP;
             topMargin = mExpandButtonExpandedTopMargin;
             newContainer = this;
         }
-        mExpandButton.setImageDrawable(getContext().getDrawable(drawableId));
-        mExpandButton.setColorFilter(mExpandButton.getOriginalNotificationColor());
+        mExpandButton.setExpanded(!mIsCollapsed);
 
         // We need to make sure that the expand button is in the linearlayout pushing over the
         // content when collapsed, but allows the content to flow under it when expanded.
@@ -1250,8 +1241,6 @@ public class ConversationLayout extends FrameLayout
         layoutParams.gravity = gravity;
         layoutParams.topMargin = topMargin;
         mExpandButton.setLayoutParams(layoutParams);
-
-        mExpandButtonInnerContainer.setContentDescription(mContext.getText(contentDescriptionId));
     }
 
     private void updateContentEndPaddings() {
@@ -1298,7 +1287,7 @@ public class ConversationLayout extends FrameLayout
         mExpandable = expandable;
         if (expandable) {
             mExpandButtonContainer.setVisibility(VISIBLE);
-            mExpandButtonInnerContainer.setOnClickListener(onClickListener);
+            mExpandButton.setOnClickListener(onClickListener);
             mConversationIconContainer.setOnClickListener(onClickListener);
         } else {
             mExpandButtonContainer.setVisibility(GONE);
