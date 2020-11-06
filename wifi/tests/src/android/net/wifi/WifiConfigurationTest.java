@@ -51,6 +51,9 @@ import org.junit.Test;
 @SmallTest
 public class WifiConfigurationTest {
     private static final String TEST_PASSPOINT_UNIQUE_ID = "uniqueId";
+    private static final int TEST_CARRIER_ID = 1234;
+    private static final int TEST_SUB_ID = 3;
+    private static final String TEST_PACKAGE_NAME = "google.com";
 
     @Before
     public void setUp() {
@@ -719,5 +722,143 @@ public class WifiConfigurationTest {
         configuration.allowedKeyManagement.set(KeyMgmt.WPA_EAP);
         configuration.allowedKeyManagement.set(KeyMgmt.SAE);
         configuration.getAuthType();
+    }
+
+    /**
+     * Verifies that getProfileKey returns the correct String for networks of
+     * various different security types, the result should be stable.
+     */
+    @Test
+    public void testGetProfileKeyString() {
+        WifiConfiguration config = new WifiConfiguration();
+        final String mSsid = "TestAP";
+        config.SSID = mSsid;
+        config.carrierId = TEST_CARRIER_ID;
+        config.subscriptionId = TEST_SUB_ID;
+        config.creatorName = TEST_PACKAGE_NAME;
+
+
+        // Test various combinations
+        config.allowedKeyManagement.set(KeyMgmt.WPA_PSK);
+        config.fromWifiNetworkSuggestion = false;
+        assertEquals(createProfileKey(mSsid, KeyMgmt.strings[KeyMgmt.WPA_PSK], TEST_PACKAGE_NAME,
+                TEST_CARRIER_ID, TEST_SUB_ID, false), config.getProfileKey());
+        config.fromWifiNetworkSuggestion = true;
+        assertEquals(createProfileKey(mSsid, KeyMgmt.strings[KeyMgmt.WPA_PSK], TEST_PACKAGE_NAME,
+                TEST_CARRIER_ID, TEST_SUB_ID, true), config.getProfileKey());
+
+        config.allowedKeyManagement.clear();
+        config.allowedKeyManagement.set(KeyMgmt.WPA_EAP);
+        config.fromWifiNetworkSuggestion = false;
+        assertEquals(createProfileKey(mSsid, KeyMgmt.strings[KeyMgmt.WPA_EAP], TEST_PACKAGE_NAME,
+                TEST_CARRIER_ID, TEST_SUB_ID, false), config.getProfileKey());
+        config.fromWifiNetworkSuggestion = true;
+        assertEquals(createProfileKey(mSsid, KeyMgmt.strings[KeyMgmt.WPA_EAP], TEST_PACKAGE_NAME,
+                TEST_CARRIER_ID, TEST_SUB_ID, true), config.getProfileKey());
+
+        config.wepKeys[0] = "TestWep";
+        config.allowedKeyManagement.clear();
+        config.fromWifiNetworkSuggestion = false;
+        assertEquals(createProfileKey(mSsid, "WEP", TEST_PACKAGE_NAME,
+                TEST_CARRIER_ID, TEST_SUB_ID, false), config.getProfileKey());
+        config.fromWifiNetworkSuggestion = true;
+        assertEquals(createProfileKey(mSsid, "WEP", TEST_PACKAGE_NAME,
+                TEST_CARRIER_ID, TEST_SUB_ID, true), config.getProfileKey());
+
+        // set WEP key and give a valid index.
+        config.wepKeys[0] = null;
+        config.wepKeys[2] = "TestWep";
+        config.wepTxKeyIndex = 2;
+        config.allowedKeyManagement.clear();
+        config.fromWifiNetworkSuggestion = false;
+        assertEquals(createProfileKey(mSsid, "WEP", TEST_PACKAGE_NAME,
+                TEST_CARRIER_ID, TEST_SUB_ID, false), config.getProfileKey());
+        config.fromWifiNetworkSuggestion = true;
+        assertEquals(createProfileKey(mSsid, "WEP", TEST_PACKAGE_NAME,
+                TEST_CARRIER_ID, TEST_SUB_ID, true), config.getProfileKey());
+
+        // set WEP key but does not give a valid index.
+        config.wepKeys[0] = null;
+        config.wepKeys[2] = "TestWep";
+        config.wepTxKeyIndex = 0;
+        config.allowedKeyManagement.clear();
+        config.allowedKeyManagement.set(KeyMgmt.OWE);
+        config.fromWifiNetworkSuggestion = false;
+        assertEquals(createProfileKey(mSsid, KeyMgmt.strings[KeyMgmt.OWE], TEST_PACKAGE_NAME,
+                TEST_CARRIER_ID, TEST_SUB_ID, false), config.getProfileKey());
+        config.fromWifiNetworkSuggestion = true;
+        assertEquals(createProfileKey(mSsid, KeyMgmt.strings[KeyMgmt.OWE], TEST_PACKAGE_NAME,
+                TEST_CARRIER_ID, TEST_SUB_ID, true), config.getProfileKey());
+
+        config.wepKeys[0] = null;
+        config.wepTxKeyIndex = 0;
+        config.allowedKeyManagement.clear();
+        config.allowedKeyManagement.set(KeyMgmt.OWE);
+        config.fromWifiNetworkSuggestion = false;
+        assertEquals(createProfileKey(mSsid, KeyMgmt.strings[KeyMgmt.OWE], TEST_PACKAGE_NAME,
+                TEST_CARRIER_ID, TEST_SUB_ID, false), config.getProfileKey());
+        config.fromWifiNetworkSuggestion = true;
+        assertEquals(createProfileKey(mSsid, KeyMgmt.strings[KeyMgmt.OWE], TEST_PACKAGE_NAME,
+                TEST_CARRIER_ID, TEST_SUB_ID, true), config.getProfileKey());
+
+        config.allowedKeyManagement.clear();
+        config.allowedKeyManagement.set(KeyMgmt.SAE);
+        config.fromWifiNetworkSuggestion = false;
+        assertEquals(createProfileKey(mSsid, KeyMgmt.strings[KeyMgmt.SAE], TEST_PACKAGE_NAME,
+                TEST_CARRIER_ID, TEST_SUB_ID, false), config.getProfileKey());
+        config.fromWifiNetworkSuggestion = true;
+        assertEquals(createProfileKey(mSsid, KeyMgmt.strings[KeyMgmt.SAE], TEST_PACKAGE_NAME,
+                TEST_CARRIER_ID, TEST_SUB_ID, true), config.getProfileKey());
+
+        config.allowedKeyManagement.clear();
+        config.allowedKeyManagement.set(KeyMgmt.SUITE_B_192);
+        config.fromWifiNetworkSuggestion = false;
+        assertEquals(createProfileKey(mSsid, KeyMgmt.strings[KeyMgmt.SUITE_B_192],
+                TEST_PACKAGE_NAME, TEST_CARRIER_ID, TEST_SUB_ID, false), config.getProfileKey());
+        config.fromWifiNetworkSuggestion = true;
+        assertEquals(createProfileKey(mSsid, KeyMgmt.strings[KeyMgmt.SUITE_B_192],
+                TEST_PACKAGE_NAME, TEST_CARRIER_ID, TEST_SUB_ID, true), config.getProfileKey());
+
+        config.allowedKeyManagement.clear();
+        config.allowedKeyManagement.set(KeyMgmt.NONE);
+        config.fromWifiNetworkSuggestion = false;
+        assertEquals(createProfileKey(mSsid, KeyMgmt.strings[KeyMgmt.NONE], TEST_PACKAGE_NAME,
+                TEST_CARRIER_ID, TEST_SUB_ID, false), config.getProfileKey());
+        config.fromWifiNetworkSuggestion = true;
+        assertEquals(createProfileKey(mSsid, KeyMgmt.strings[KeyMgmt.NONE], TEST_PACKAGE_NAME,
+                TEST_CARRIER_ID, TEST_SUB_ID, true), config.getProfileKey());
+
+        config.allowedKeyManagement.clear();
+        config.allowedKeyManagement.set(KeyMgmt.WAPI_PSK);
+        config.fromWifiNetworkSuggestion = false;
+        assertEquals(createProfileKey(mSsid, KeyMgmt.strings[KeyMgmt.WAPI_PSK], TEST_PACKAGE_NAME,
+                TEST_CARRIER_ID, TEST_SUB_ID, false), config.getProfileKey());
+        config.fromWifiNetworkSuggestion = true;
+        assertEquals(createProfileKey(mSsid, KeyMgmt.strings[KeyMgmt.WAPI_PSK], TEST_PACKAGE_NAME,
+                TEST_CARRIER_ID, TEST_SUB_ID, true), config.getProfileKey());
+
+        config.allowedKeyManagement.clear();
+        config.allowedKeyManagement.set(KeyMgmt.WAPI_CERT);
+        config.fromWifiNetworkSuggestion = false;
+        assertEquals(createProfileKey(mSsid, KeyMgmt.strings[KeyMgmt.WAPI_CERT], TEST_PACKAGE_NAME,
+                TEST_CARRIER_ID, TEST_SUB_ID, false), config.getProfileKey());
+        config.fromWifiNetworkSuggestion = true;
+        assertEquals(createProfileKey(mSsid, KeyMgmt.strings[KeyMgmt.WAPI_CERT], TEST_PACKAGE_NAME,
+                TEST_CARRIER_ID, TEST_SUB_ID, true), config.getProfileKey());
+
+        config.allowedKeyManagement.clear();
+        config.setPasspointUniqueId(TEST_PASSPOINT_UNIQUE_ID);
+        assertEquals(TEST_PASSPOINT_UNIQUE_ID, config.getProfileKey());
+    }
+
+    private String createProfileKey(String ssid, String keyMgmt, String providerName,
+            int carrierId, int subId, boolean isFromSuggestion) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(ssid).append(keyMgmt);
+        if (isFromSuggestion) {
+            sb.append("_").append(providerName).append('-')
+                    .append(carrierId).append('-').append(subId);
+        }
+        return sb.toString();
     }
 }
