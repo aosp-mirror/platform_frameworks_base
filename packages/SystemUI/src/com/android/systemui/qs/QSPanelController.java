@@ -20,6 +20,7 @@ import static com.android.systemui.qs.QSPanel.QS_SHOW_BRIGHTNESS;
 
 import android.annotation.NonNull;
 import android.content.res.Configuration;
+import android.util.Pair;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -34,6 +35,8 @@ import com.android.systemui.qs.dagger.QSScope;
 import com.android.systemui.settings.BrightnessController;
 import com.android.systemui.statusbar.policy.BrightnessMirrorController;
 import com.android.systemui.tuner.TunerService;
+
+import java.util.function.Consumer;
 
 import javax.inject.Inject;
 
@@ -221,6 +224,25 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
     /** */
     public void setPageListener(PagedTileLayout.PageListener listener) {
         mView.setPageListener(listener);
+    }
+
+    /** */
+    public void setMediaVisibilityChangedListener(Consumer<Boolean> visibilityChangedListener) {
+        mView.setMediaVisibilityChangedListener(visibilityChangedListener);
+    }
+
+    public boolean isShown() {
+        return mView.isShown();
+    }
+
+    /** */
+    public void setContentMargins(int startMargin, int endMargin) {
+        mView.setContentMargins(startMargin, endMargin);
+    }
+
+    /** */
+    public Pair<Integer, Integer> getVisualSideMargins() {
+        return mView.getVisualSideMargins();
     }
 }
 
