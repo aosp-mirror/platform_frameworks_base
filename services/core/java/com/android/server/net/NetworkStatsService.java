@@ -2214,15 +2214,6 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         }
     }
 
-    // TODO: Remove unused definitions after removing JNI that fills these variables.
-    //  See {@code com_android_server_net_NetworkStatsService.cpp}.
-    private static int TYPE_RX_BYTES;
-    private static int TYPE_RX_PACKETS;
-    private static int TYPE_TX_BYTES;
-    private static int TYPE_TX_PACKETS;
-    private static int TYPE_TCP_RX_PACKETS;
-    private static int TYPE_TCP_TX_PACKETS;
-
     private static native long nativeGetTotalStat(int type, boolean useBpfStats);
     private static native long nativeGetIfaceStat(String iface, int type, boolean useBpfStats);
     private static native long nativeGetUidStat(int uid, int type, boolean useBpfStats);
