@@ -207,8 +207,9 @@ public class OverviewProxyService extends CurrentUserTracker implements
             try {
                 // TODO move this logic to message queue
                 mStatusBarOptionalLazy.ifPresent(statusBarLazy -> {
+                    StatusBar statusBar = statusBarLazy.get();
+                    statusBar.getPanelController().startExpandLatencyTracking();
                     mHandler.post(()-> {
-                        StatusBar statusBar = statusBarLazy.get();
                         int action = event.getActionMasked();
                         if (action == ACTION_DOWN) {
                             mInputFocusTransferStarted = true;
