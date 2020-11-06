@@ -92,6 +92,7 @@ public:
     virtual incfs::RawMetadata getMetadata(const Control& control, FileId fileid) const = 0;
     virtual incfs::RawMetadata getMetadata(const Control& control, std::string_view path) const = 0;
     virtual FileId getFileId(const Control& control, std::string_view path) const = 0;
+    virtual std::string toString(FileId fileId) const = 0;
     virtual std::pair<IncFsBlockIndex, IncFsBlockIndex> countFilledBlocks(
             const Control& control, std::string_view path) const = 0;
     virtual ErrorCode link(const Control& control, std::string_view from,
