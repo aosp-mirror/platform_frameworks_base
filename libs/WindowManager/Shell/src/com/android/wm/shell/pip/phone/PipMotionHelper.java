@@ -16,6 +16,9 @@
 
 package com.android.wm.shell.pip.phone;
 
+import static com.android.wm.shell.pip.PipBoundsState.STASH_TYPE_LEFT;
+import static com.android.wm.shell.pip.PipBoundsState.STASH_TYPE_RIGHT;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ComponentName;
@@ -33,7 +36,6 @@ import androidx.dynamicanimation.animation.AnimationHandler;
 import androidx.dynamicanimation.animation.AnimationHandler.FrameCallbackScheduler;
 import androidx.dynamicanimation.animation.SpringForce;
 
-import com.android.wm.shell.R;
 import com.android.wm.shell.animation.FloatProperties;
 import com.android.wm.shell.animation.PhysicsAnimator;
 import com.android.wm.shell.common.FloatingContentCoordinator;
@@ -78,8 +80,6 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
 
     /** The region that all of PIP must stay within. */
     private final Rect mFloatingAllowedArea = new Rect();
-
-    private int mStashOffset = 0;
 
     /** Coordinator instance for resolving conflicts with other floating content. */
     private FloatingContentCoordinator mFloatingContentCoordinator;
@@ -179,19 +179,12 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
         mTemporaryBoundsPhysicsAnimator.setCustomAnimationHandler(
                 mSfAnimationHandlerThreadLocal.get());
 
-        reloadResources();
-
         mResizePipUpdateListener = (target, values) -> {
             if (mPipBoundsState.getAnimatingBoundsState().isAnimating()) {
                 mPipTaskOrganizer.scheduleUserResizePip(getBounds(),
                         mPipBoundsState.getAnimatingBoundsState().getTemporaryBounds(), null);
             }
         };
-    }
-
-    void reloadResources() {
-        mStashOffset = mContext.getResources()
-                .getDimensionPixelSize(R.dimen.pip_stash_offset);
     }
 
     @NonNull
@@ -380,6 +373,7 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
      */
     void stashToEdge(
             float velocityX, float velocityY, @Nullable Runnable endAction) {
+        mPipBoundsState.setStashed(velocityX < 0 ? STASH_TYPE_LEFT : STASH_TYPE_RIGHT);
         movetoTarget(velocityX, velocityY, endAction, true /* isStash */);
     }
 
@@ -399,9 +393,11 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
                         FloatProperties.RECT_Y, velocityY, mFlingConfigY, mSpringConfig)
                 .withEndActions(endAction);
 
-        final float leftEdge = isStash ? mStashOffset - mPipBoundsState.getBounds().width()
+        final float leftEdge = isStash
+                ? mPipBoundsState.getStashOffset() - mPipBoundsState.getBounds().width()
                 : mMovementBounds.left;
-        final float rightEdge = isStash ?  mPipBoundsState.getDisplayBounds().right - mStashOffset
+        final float rightEdge = isStash
+                ?  mPipBoundsState.getDisplayBounds().right - mPipBoundsState.getStashOffset()
                 : mMovementBounds.right;
 
         final float xEndValue = velocityX < 0 ? leftEdge : rightEdge;
@@ -471,9 +467,12 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
         if (savedSnapFraction < 0f) {
             // If there are no saved snap fractions, then just use the current bounds
             savedSnapFraction = mSnapAlgorithm.getSnapFraction(new Rect(getBounds()),
-                    currentMovementBounds);
+                    currentMovementBounds, mPipBoundsState.getStashedState());
         }
-        mSnapAlgorithm.applySnapFraction(normalBounds, normalMovementBounds, savedSnapFraction);
+
+        mSnapAlgorithm.applySnapFraction(normalBounds, normalMovementBounds, savedSnapFraction,
+                mPipBoundsState.getStashedState(), mPipBoundsState.getStashOffset(),
+                mPipBoundsState.getDisplayBounds());
 
         if (immediate) {
             movePip(normalBounds);
@@ -512,8 +511,9 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
         mFlingConfigY = new PhysicsAnimator.FlingConfig(
                 DEFAULT_FRICTION, mMovementBounds.top, mMovementBounds.bottom);
         mStashConfigX = new PhysicsAnimator.FlingConfig(
-                DEFAULT_FRICTION, mStashOffset - mPipBoundsState.getBounds().width(),
-                mPipBoundsState.getDisplayBounds().right - mStashOffset);
+                DEFAULT_FRICTION,
+                mPipBoundsState.getStashOffset() - mPipBoundsState.getBounds().width(),
+                mPipBoundsState.getDisplayBounds().right - mPipBoundsState.getStashOffset());
     }
 
     /**

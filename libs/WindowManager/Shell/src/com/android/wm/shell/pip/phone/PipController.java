@@ -196,6 +196,7 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
             mMainExecutor.execute(() -> {
                 mPipBoundsHandler.onConfigurationChanged(mContext);
                 mTouchHandler.onConfigurationChanged();
+                mPipBoundsState.onConfigurationChanged();
             });
         }
 

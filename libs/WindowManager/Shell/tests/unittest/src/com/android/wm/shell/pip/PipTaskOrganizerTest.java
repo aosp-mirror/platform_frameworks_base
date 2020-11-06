@@ -79,7 +79,7 @@ public class PipTaskOrganizerTest extends ShellTestCase {
         MockitoAnnotations.initMocks(this);
         mComponent1 = new ComponentName(mContext, "component1");
         mComponent2 = new ComponentName(mContext, "component2");
-        mPipBoundsState = new PipBoundsState();
+        mPipBoundsState = new PipBoundsState(mContext);
         mSpiedPipTaskOrganizer = spy(new PipTaskOrganizer(mContext, mPipBoundsState,
                 mMockPipBoundsHandler, mMenuActivityController, mMockPipSurfaceTransactionHelper,
                 mMockOptionalSplitScreen, mMockdDisplayController, mMockPipUiEventLogger,
