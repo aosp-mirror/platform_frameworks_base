@@ -224,9 +224,6 @@ public class NotificationShadeWindowViewController {
                 if (!isCancel && mService.shouldIgnoreTouch()) {
                     return false;
                 }
-                if (isDown && mNotificationPanelViewController.isFullyCollapsed()) {
-                    mNotificationPanelViewController.startExpandLatencyTracking();
-                }
                 if (isDown) {
                     setTouchActive(true);
                     mTouchCancelled = false;
