@@ -34,8 +34,6 @@ import android.app.WindowConfiguration;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
 import android.graphics.Rect;
@@ -45,7 +43,6 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
-import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.IRecentsAnimationController;
@@ -58,7 +55,6 @@ import com.android.systemui.shared.recents.model.ThumbnailData;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Future;
 import java.util.function.Consumer;
 
 public class ActivityManagerWrapper {
@@ -74,14 +70,7 @@ public class ActivityManagerWrapper {
     // Should match the value in AssistManager
     private static final String INVOCATION_TIME_MS_KEY = "invocation_time_ms";
 
-    private final PackageManager mPackageManager;
-    private final BackgroundExecutor mBackgroundExecutor;
-
-    private ActivityManagerWrapper() {
-        final Context context = AppGlobals.getInitialApplication();
-        mPackageManager = context.getPackageManager();
-        mBackgroundExecutor = BackgroundExecutor.get();
-    }
+    private ActivityManagerWrapper() { }
 
     public static ActivityManagerWrapper getInstance() {
         return sInstance;
@@ -159,60 +148,12 @@ public class ActivityManagerWrapper {
      * Removes the outdated snapshot of home task.
      */
     public void invalidateHomeTaskSnapshot(final Activity homeActivity) {
-        mBackgroundExecutor.submit(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    ActivityTaskManager.getService().invalidateHomeTaskSnapshot(
-                            homeActivity.getActivityToken());
-                } catch (RemoteException e) {
-                    Log.w(TAG, "Failed to invalidate home snapshot", e);
-                }
-            }
-        });
-    }
-
-    /**
-     * @return the activity label, badging if necessary.
-     */
-    public String getBadgedActivityLabel(ActivityInfo info, int userId) {
-        return getBadgedLabel(info.loadLabel(mPackageManager).toString(), userId);
-    }
-
-    /**
-     * @return the application label, badging if necessary.
-     */
-    public String getBadgedApplicationLabel(ApplicationInfo appInfo, int userId) {
-        return getBadgedLabel(appInfo.loadLabel(mPackageManager).toString(), userId);
-    }
-
-    /**
-     * @return the content description for a given task, badging it if necessary.  The content
-     * description joins the app and activity labels.
-     */
-    public String getBadgedContentDescription(ActivityInfo info, int userId,
-            ActivityManager.TaskDescription td) {
-        String activityLabel;
-        if (td != null && td.getLabel() != null) {
-            activityLabel = td.getLabel();
-        } else {
-            activityLabel = info.loadLabel(mPackageManager).toString();
+        try {
+            ActivityTaskManager.getService().invalidateHomeTaskSnapshot(
+                    homeActivity.getActivityToken());
+        } catch (RemoteException e) {
+            Log.w(TAG, "Failed to invalidate home snapshot", e);
         }
-        String applicationLabel = info.applicationInfo.loadLabel(mPackageManager).toString();
-        String badgedApplicationLabel = getBadgedLabel(applicationLabel, userId);
-        return applicationLabel.equals(activityLabel)
-                ? badgedApplicationLabel
-                : badgedApplicationLabel + " " + activityLabel;
-    }
-
-    /**
-     * @return the given label for a user, badging if necessary.
-     */
-    private String getBadgedLabel(String label, int userId) {
-        if (userId != UserHandle.myUserId()) {
-            label = mPackageManager.getUserBadgedLabel(label, new UserHandle(userId)).toString();
-        }
-        return label;
     }
 
     /**
@@ -342,59 +283,33 @@ public class ActivityManagerWrapper {
     /**
      * Requests that the system close any open system windows (including other SystemUI).
      */
-    public Future<?> closeSystemWindows(final String reason) {
-        return mBackgroundExecutor.submit(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    ActivityManager.getService().closeSystemDialogs(reason);
-                } catch (RemoteException e) {
-                    Log.w(TAG, "Failed to close system windows", e);
-                }
-            }
-        });
+    public void closeSystemWindows(final String reason) {
+        try {
+            ActivityManager.getService().closeSystemDialogs(reason);
+        } catch (RemoteException e) {
+            Log.w(TAG, "Failed to close system windows", e);
+        }
     }
 
     /**
      * Removes a task by id.
      */
     public void removeTask(final int taskId) {
-        mBackgroundExecutor.submit(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    ActivityTaskManager.getService().removeTask(taskId);
-                } catch (RemoteException e) {
-                    Log.w(TAG, "Failed to remove task=" + taskId, e);
-                }
-            }
-        });
+        try {
+            ActivityTaskManager.getService().removeTask(taskId);
+        } catch (RemoteException e) {
+            Log.w(TAG, "Failed to remove task=" + taskId, e);
+        }
     }
 
     /**
      * Removes all the recent tasks.
      */
     public void removeAllRecentTasks() {
-        mBackgroundExecutor.submit(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    ActivityTaskManager.getService().removeAllVisibleRecentTasks();
-                } catch (RemoteException e) {
-                    Log.w(TAG, "Failed to remove all tasks", e);
-                }
-            }
-        });
-    }
-
-    /**
-     * Cancels the current window transtion to/from Recents for the given task id.
-     */
-    public void cancelWindowTransition(int taskId) {
         try {
-            ActivityTaskManager.getService().cancelTaskWindowTransition(taskId);
+            ActivityTaskManager.getService().removeAllVisibleRecentTasks();
         } catch (RemoteException e) {
-            Log.w(TAG, "Failed to cancel window transition for task=" + taskId, e);
+            Log.w(TAG, "Failed to remove all tasks", e);
         }
     }
 

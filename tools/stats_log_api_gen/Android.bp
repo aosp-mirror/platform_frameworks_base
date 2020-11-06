@@ -142,6 +142,9 @@ cc_library {
                 "libstatspull",
             ],
         },
+        darwin: {
+            enabled: false,
+        },
     },
 }
 
