@@ -261,12 +261,6 @@ public class ShellTaskOrganizer extends TaskOrganizer {
         synchronized (mLock) {
             ProtoLog.v(WM_SHELL_TASK_ORG, "Task info changed taskId=%d", taskInfo.taskId);
             final TaskAppearedInfo data = mTasks.get(taskInfo.taskId);
-            if (data == null) {
-                // TODO(b/171749427): It means onTaskInfoChanged send before onTaskAppeared or
-                //  after onTaskVanished, it should be fixed in controller side.
-                return;
-            }
-
             final TaskListener oldListener = getTaskListener(data.getTaskInfo());
             final TaskListener newListener = getTaskListener(taskInfo);
             mTasks.put(taskInfo.taskId, new TaskAppearedInfo(taskInfo, data.getLeash()));
