@@ -344,6 +344,7 @@ package android.net.wifi {
     method public boolean isWapiSupported();
     method public boolean isWifiEnabled();
     method public boolean isWifiStandardSupported(int);
+    method public boolean isWpa3ApValidationSupported();
     method public boolean isWpa3SaeSupported();
     method public boolean isWpa3SuiteBSupported();
     method @Deprecated public boolean pingSupplicant();
