@@ -24,6 +24,7 @@ import android.content.res.Resources;
 import android.icu.text.DateFormatSymbols;
 import android.icu.text.DecimalFormatSymbols;
 
+import com.android.i18n.timezone.WallTime;
 import com.android.i18n.timezone.ZoneInfoData;
 
 import java.nio.CharBuffer;
@@ -149,7 +150,7 @@ class TimeFormatter {
     /**
      * Format the specified {@code wallTime} using {@code pattern}. The output is returned.
      */
-    public String format(String pattern, ZoneInfoData.WallTime wallTime,
+    public String format(String pattern, WallTime wallTime,
             ZoneInfoData zoneInfoData) {
         try {
             StringBuilder stringBuilder = new StringBuilder();
@@ -192,7 +193,7 @@ class TimeFormatter {
      * Format the specified {@code wallTime} using {@code pattern}. The output is written to
      * {@link #outputBuilder}.
      */
-    private void formatInternal(String pattern, ZoneInfoData.WallTime wallTime,
+    private void formatInternal(String pattern, WallTime wallTime,
             ZoneInfoData zoneInfoData) {
         CharBuffer formatBuffer = CharBuffer.wrap(pattern);
         while (formatBuffer.remaining() > 0) {
@@ -208,7 +209,7 @@ class TimeFormatter {
         }
     }
 
-    private boolean handleToken(CharBuffer formatBuffer, ZoneInfoData.WallTime wallTime,
+    private boolean handleToken(CharBuffer formatBuffer, WallTime wallTime,
             ZoneInfoData zoneInfoData) {
 
         // The char at formatBuffer.position() is expected to be '%' at this point.
