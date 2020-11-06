@@ -41,6 +41,7 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.same;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doCallRealMethod;
 
 import android.app.ActivityManager;
@@ -702,7 +703,6 @@ public class SizeCompatTests extends WindowTestsBase {
         // size compat cache.
         verify(mTask).onDescendantOrientationChanged(any(), same(newActivity));
         verify(mTask).computeFullscreenBounds(any(), any(), any(), anyInt());
-        verify(newActivity).clearSizeCompatMode(false /* recomputeTask */);
 
         final Rect displayBounds = display.getBounds();
         final Rect taskBounds = mTask.getBounds();
@@ -744,7 +744,6 @@ public class SizeCompatTests extends WindowTestsBase {
         // size compat cache.
         verify(mTask).onDescendantOrientationChanged(any(), same(newActivity));
         verify(mTask).computeFullscreenBounds(any(), any(), any(), anyInt());
-        verify(newActivity).clearSizeCompatMode(false /* recomputeTask */);
 
         final Rect displayBounds = display.getBounds();
         final Rect taskBounds = mTask.getBounds();
@@ -759,6 +758,40 @@ public class SizeCompatTests extends WindowTestsBase {
         // App bounds should be fullscreen in Task bounds.
         assertFalse(newActivity.inSizeCompatMode());
         assertEquals(taskBounds, newActivityBounds);
+    }
+
+    @Test
+    public void testDisplayIgnoreOrientationRequest_pausedAppNotLostSizeCompat() {
+        // Set up a display in landscape and ignoring orientation request.
+        setUpDisplaySizeWithApp(2800, 1400);
+        final DisplayContent display = mActivity.mDisplayContent;
+        display.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
+
+        // Portrait fixed app.
+        prepareUnresizable(0, SCREEN_ORIENTATION_PORTRAIT);
+        clearInvocations(mActivity);
+
+        assertTrue(mTask.isTaskLetterboxed());
+        assertFalse(mActivity.inSizeCompatMode());
+        assertEquals(mTask.getLastTaskBoundsComputeActivity(), mActivity);
+
+        // Rotate display to portrait.
+        rotateDisplay(mActivity.mDisplayContent, ROTATION_90);
+
+        // App should be in size compat.
+        assertFalse(mTask.isTaskLetterboxed());
+        assertScaled();
+        assertEquals(mTask.getLastTaskBoundsComputeActivity(), mActivity);
+
+        final Rect activityBounds = new Rect(mActivity.getBounds());
+        mStack.resumeTopActivityUncheckedLocked(null /* prev */, null /* options */);
+
+        // App still in size compat, and the bounds don't change.
+        verify(mActivity, never()).clearSizeCompatMode();
+        assertFalse(mTask.isTaskLetterboxed());
+        assertScaled();
+        assertEquals(mTask.getLastTaskBoundsComputeActivity(), mActivity);
+        assertEquals(activityBounds, mActivity.getBounds());
     }
 
     private static WindowState addWindowToActivity(ActivityRecord activity) {
