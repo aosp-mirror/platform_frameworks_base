@@ -193,6 +193,73 @@ TEST(CanvasOp, simpleDrawRect) {
     EXPECT_EQ(1, canvas.sumTotalDrawCalls());
 }
 
+TEST(CanvasOp, simpleDrawRoundRect) {
+    CanvasOpBuffer buffer;
+    EXPECT_EQ(buffer.size(), 0);
+    buffer.push(CanvasOp<Op::DrawRoundRect> {
+        .paint = SkPaint{},
+        .rect = SkRect::MakeEmpty(),
+        .rx = 10,
+        .ry = 10
+    });
+
+    CallCountingCanvas canvas;
+    EXPECT_EQ(0, canvas.sumTotalDrawCalls());
+    rasterizeCanvasBuffer(buffer, &canvas);
+    EXPECT_EQ(1, canvas.drawRRectCount);
+    EXPECT_EQ(1, canvas.sumTotalDrawCalls());
+}
+
+TEST(CanvasOp, simpleDrawCircle) {
+    CanvasOpBuffer buffer;
+    EXPECT_EQ(buffer.size(), 0);
+    buffer.push(CanvasOp<Op::DrawCircle> {
+        .cx = 5,
+        .cy = 7,
+        .radius = 10,
+        .paint = SkPaint{}
+    });
+
+    CallCountingCanvas canvas;
+    EXPECT_EQ(0, canvas.sumTotalDrawCalls());
+    rasterizeCanvasBuffer(buffer, &canvas);
+    EXPECT_EQ(1, canvas.drawOvalCount);
+    EXPECT_EQ(1, canvas.sumTotalDrawCalls());
+}
+
+TEST(CanvasOp, simpleDrawOval) {
+    CanvasOpBuffer buffer;
+    EXPECT_EQ(buffer.size(), 0);
+    buffer.push(CanvasOp<Op::DrawOval> {
+        .oval = SkRect::MakeEmpty(),
+        .paint = SkPaint{}
+    });
+
+    CallCountingCanvas canvas;
+    EXPECT_EQ(0, canvas.sumTotalDrawCalls());
+    rasterizeCanvasBuffer(buffer, &canvas);
+    EXPECT_EQ(1, canvas.drawOvalCount);
+    EXPECT_EQ(1, canvas.sumTotalDrawCalls());
+}
+
+TEST(CanvasOp, simpleDrawArc) {
+    CanvasOpBuffer buffer;
+    EXPECT_EQ(buffer.size(), 0);
+    buffer.push(CanvasOp<Op::DrawArc> {
+        .oval = SkRect::MakeWH(100, 100),
+        .startAngle = 120,
+        .sweepAngle = 70,
+        .useCenter = true,
+        .paint = SkPaint{}
+    });
+
+    CallCountingCanvas canvas;
+    EXPECT_EQ(0, canvas.sumTotalDrawCalls());
+    rasterizeCanvasBuffer(buffer, &canvas);
+    EXPECT_EQ(1, canvas.drawArcCount);
+    EXPECT_EQ(1, canvas.sumTotalDrawCalls());
+}
+
 TEST(CanvasOp, immediateRendering) {
     auto canvas = std::make_shared<CallCountingCanvas>();
 
