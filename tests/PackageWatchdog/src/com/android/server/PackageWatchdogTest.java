@@ -376,7 +376,7 @@ public class PackageWatchdogTest {
         TestObserver observer = new TestObserver(OBSERVER_NAME_1) {
                 @Override
                 public int onHealthCheckFailed(VersionedPackage versionedPackage,
-                        int failureReason) {
+                        int failureReason, int mitigationCount) {
                     if (versionedPackage.getVersionCode() == VERSION_CODE) {
                         // Only rollback for specific versionCode
                         return PackageHealthObserverImpact.USER_IMPACT_MEDIUM;
@@ -1146,6 +1146,45 @@ public class PackageWatchdogTest {
         assertThat(observer.mMitigatedPackages).isEqualTo(List.of(APP_A));
     }
 
+    /**
+     * Ensure that the sliding window logic results in the correct mitigation count being sent to
+     * an observer.
+     */
+    @Test
+    public void testMitigationSlidingWindow() {
+        PackageWatchdog watchdog = createWatchdog();
+        TestObserver observer = new TestObserver(OBSERVER_NAME_1);
+        watchdog.startObservingHealth(observer, List.of(APP_A),
+                PackageWatchdog.DEFAULT_OBSERVING_DURATION_MS * 2);
+
+
+        raiseFatalFailureAndDispatch(watchdog, Arrays.asList(new VersionedPackage(APP_A,
+                VERSION_CODE)), PackageWatchdog.FAILURE_REASON_UNKNOWN);
+
+        moveTimeForwardAndDispatch(TimeUnit.MINUTES.toMillis(10));
+
+        raiseFatalFailureAndDispatch(watchdog, Arrays.asList(new VersionedPackage(APP_A,
+                VERSION_CODE)), PackageWatchdog.FAILURE_REASON_UNKNOWN);
+        raiseFatalFailureAndDispatch(watchdog, Arrays.asList(new VersionedPackage(APP_A,
+                VERSION_CODE)), PackageWatchdog.FAILURE_REASON_UNKNOWN);
+
+        moveTimeForwardAndDispatch(PackageWatchdog.DEFAULT_DEESCALATION_WINDOW_MS);
+
+        // The first failure will be outside the threshold.
+        raiseFatalFailureAndDispatch(watchdog, Arrays.asList(new VersionedPackage(APP_A,
+                VERSION_CODE)), PackageWatchdog.FAILURE_REASON_UNKNOWN);
+
+        moveTimeForwardAndDispatch(TimeUnit.MINUTES.toMillis(20));
+
+        // The next 2 failures will also be outside the threshold.
+        raiseFatalFailureAndDispatch(watchdog, Arrays.asList(new VersionedPackage(APP_A,
+                VERSION_CODE)), PackageWatchdog.FAILURE_REASON_UNKNOWN);
+        raiseFatalFailureAndDispatch(watchdog, Arrays.asList(new VersionedPackage(APP_A,
+                VERSION_CODE)), PackageWatchdog.FAILURE_REASON_UNKNOWN);
+
+        assertThat(observer.mMitigationCounts).isEqualTo(List.of(1, 2, 3, 3, 2, 3));
+    }
+
     private void adoptShellPermissions(String... permissions) {
         InstrumentationRegistry
                 .getInstrumentation()
@@ -1227,6 +1266,7 @@ public class PackageWatchdogTest {
         private boolean mMitigatedBootLoop = false;
         final List<String> mHealthCheckFailedPackages = new ArrayList<>();
         final List<String> mMitigatedPackages = new ArrayList<>();
+        final List<Integer> mMitigationCounts = new ArrayList<>();
 
         TestObserver(String name) {
             mName = name;
@@ -1238,13 +1278,16 @@ public class PackageWatchdogTest {
             mImpact = impact;
         }
 
-        public int onHealthCheckFailed(VersionedPackage versionedPackage, int failureReason) {
+        public int onHealthCheckFailed(VersionedPackage versionedPackage, int failureReason,
+                int mitigationCount) {
             mHealthCheckFailedPackages.add(versionedPackage.getPackageName());
             return mImpact;
         }
 
-        public boolean execute(VersionedPackage versionedPackage, int failureReason) {
+        public boolean execute(VersionedPackage versionedPackage, int failureReason,
+                int mitigationCount) {
             mMitigatedPackages.add(versionedPackage.getPackageName());
+            mMitigationCounts.add(mitigationCount);
             mLastFailureReason = failureReason;
             return true;
         }
