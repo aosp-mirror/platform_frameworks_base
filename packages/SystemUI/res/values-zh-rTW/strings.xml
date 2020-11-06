@@ -86,8 +86,11 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"請再次嘗試拍攝螢幕截圖"</string>
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"由於儲存空間有限，因此無法儲存螢幕截圖"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"這個應用程式或貴機構不允許擷取螢幕畫面"</string>
-    <string name="screenshot_edit" msgid="3510496440489019191">"編輯螢幕截圖"</string>
-    <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"關閉螢幕截圖"</string>
+    <string name="screenshot_edit_label" msgid="8754981973544133050">"編輯"</string>
+    <string name="screenshot_edit_description" msgid="3333092254706788906">"編輯螢幕截圖"</string>
+    <string name="screenshot_scroll_label" msgid="7682877978685434621">"拍攝長截圖"</string>
+    <string name="screenshot_scroll_description" msgid="7855773867093272175">"以捲動畫面的方式拍攝長截圖"</string>
+    <string name="screenshot_dismiss_description" msgid="4702341245899508786">"關閉螢幕截圖"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"螢幕截圖預覽"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"螢幕錄影器"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"處理螢幕錄影內容"</string>
@@ -182,8 +185,7 @@
     <string name="accessibility_battery_two_bars" msgid="7895789999668425551">"電池電量兩格。"</string>
     <string name="accessibility_battery_three_bars" msgid="118341923832368291">"電池電量三格。"</string>
     <string name="accessibility_battery_full" msgid="1480463938961288494">"電池電量已滿。"</string>
-    <!-- no translation found for accessibility_battery_unknown (1807789554617976440) -->
-    <skip />
+    <string name="accessibility_battery_unknown" msgid="1807789554617976440">"電池電量不明。"</string>
     <string name="accessibility_no_phone" msgid="8828412144430247025">"沒有電話訊號。"</string>
     <string name="accessibility_phone_one_bar" msgid="8786055123727785588">"電話訊號強度一格。"</string>
     <string name="accessibility_phone_two_bars" msgid="3316909612598670674">"電話訊號強度兩格。"</string>
@@ -257,7 +259,6 @@
     <!-- no translation found for accessibility_work_mode (1280025758672376313) -->
     <skip />
     <string name="accessibility_notification_dismissed" msgid="4411652015138892952">"已關閉通知。"</string>
-    <string name="accessibility_bubble_dismissed" msgid="270358867566720729">"已關閉泡泡。"</string>
     <string name="accessibility_desc_notification_shade" msgid="5355229129428759989">"通知欄。"</string>
     <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"快捷設定。"</string>
     <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"螢幕鎖定。"</string>
@@ -714,7 +715,6 @@
     <string name="inline_keep_showing_app" msgid="4393429060390649757">"要繼續顯示這個應用程式的通知嗎？"</string>
     <string name="notification_silence_title" msgid="8608090968400832335">"靜音"</string>
     <string name="notification_alert_title" msgid="3656229781017543655">"預設"</string>
-    <string name="notification_bubble_title" msgid="8330481035191903164">"泡泡"</string>
     <string name="notification_automatic_title" msgid="3745465364578762652">"自動"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"不震動或發出聲音"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"不震動或發出聲音，並調整排序到其他對話下方"</string>
@@ -726,8 +726,6 @@
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"設定"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"優先"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"「<xliff:g id="APP_NAME">%1$s</xliff:g>」不支援對話功能"</string>
-    <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"最近沒有任何對話框"</string>
-    <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"最近的對話框和已關閉的對話框會顯示在這裡"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"無法修改這些通知。"</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"無法在這裡設定這個通知群組"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"經過 Proxy 處理的通知"</string>
@@ -986,25 +984,7 @@
     <string name="device_services" msgid="1549944177856658705">"裝置服務"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"無標題"</string>
     <string name="restart_button_description" msgid="6916116576177456480">"輕觸即可重新啟動這個應用程式並進入全螢幕模式。"</string>
-    <string name="bubbles_settings_button_description" msgid="7324245408859877545">"「<xliff:g id="APP_NAME">%1$s</xliff:g>」對話框的設定"</string>
-    <string name="bubble_overflow_button_content_description" msgid="5523744621434300510">"溢位"</string>
-    <string name="bubble_accessibility_action_add_back" msgid="6217995665917123890">"重新加入堆疊"</string>
-    <string name="manage_bubbles_text" msgid="6856830436329494850">"管理"</string>
-    <string name="bubble_content_description_single" msgid="5175160674436546329">"<xliff:g id="APP_NAME">%2$s</xliff:g>：<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
-    <string name="bubble_content_description_stack" msgid="7907610717462651870">"「<xliff:g id="APP_NAME">%2$s</xliff:g>」和其他 <xliff:g id="BUBBLE_COUNT">%3$d</xliff:g> 個應用程式：<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
     <string name="bubble_accessibility_action_move" msgid="3185080443743819178">"移動"</string>
-    <string name="bubble_accessibility_action_move_top_left" msgid="4347227665275929728">"移至左上方"</string>
-    <string name="bubble_accessibility_action_move_top_right" msgid="6916868852433483569">"移至右上方"</string>
-    <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"移至左下方"</string>
-    <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"移至右下方"</string>
-    <string name="bubble_dismiss_text" msgid="1314082410868930066">"關閉對話框"</string>
-    <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"不要以對話框形式顯示對話"</string>
-    <string name="bubbles_user_education_title" msgid="5547017089271445797">"透過對話框來聊天"</string>
-    <string name="bubbles_user_education_description" msgid="1160281719576715211">"新的對話會以浮動圖示或對話框形式顯示。輕觸即可開啟對話框，拖曳則可移動對話框。"</string>
-    <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"你隨時可以控管對話框的各項設定"</string>
-    <string name="bubbles_user_education_manage" msgid="1391639189507036423">"輕觸 [管理] 即可關閉來自這個應用程式的對話框"</string>
-    <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"我知道了"</string>
-    <string name="bubbles_app_settings" msgid="5779443644062348657">"「<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>」設定"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"系統操作機制已更新。如要進行變更，請前往「設定」。"</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"請前往「設定」更新系統操作機制"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"待機"</string>
@@ -1094,8 +1074,6 @@
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"配對新裝置"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"版本號碼"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"已將版本號碼複製到剪貼簿。"</string>
-    <!-- no translation found for battery_state_unknown_notification_title (8464703640483773454) -->
-    <skip />
-    <!-- no translation found for battery_state_unknown_notification_text (13720937839460899) -->
-    <skip />
+    <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"讀取電池計量器時發生問題"</string>
+    <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"輕觸即可瞭解詳情"</string>
 </resources>

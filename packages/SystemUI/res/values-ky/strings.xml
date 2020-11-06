@@ -86,8 +86,11 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"Скриншотту кайра тартып көрүңүз"</string>
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"Сактагычта бош орун аз болгондуктан, скриншот сакталбай жатат"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Скриншот тартууга колдонмо же ишканаңыз тыюу салган."</string>
-    <string name="screenshot_edit" msgid="3510496440489019191">"Скриншотту түзөтүү"</string>
-    <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"Скриншотту четке кагуу"</string>
+    <string name="screenshot_edit_label" msgid="8754981973544133050">"Түзөтүү"</string>
+    <string name="screenshot_edit_description" msgid="3333092254706788906">"Скриншотту түзөтүү"</string>
+    <string name="screenshot_scroll_label" msgid="7682877978685434621">"Сыдыруу"</string>
+    <string name="screenshot_scroll_description" msgid="7855773867093272175">"Скриншотту сыдырып кароо"</string>
+    <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Скриншотту четке кагуу"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Скриншотту алдын ала көрүү"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"экрандан видео жаздырып алуу"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Экрандан жаздырылып алынган видео иштетилүүдө"</string>
@@ -182,6 +185,7 @@
     <string name="accessibility_battery_two_bars" msgid="7895789999668425551">"Эки таякча батарея."</string>
     <string name="accessibility_battery_three_bars" msgid="118341923832368291">"Үч таякча батарея."</string>
     <string name="accessibility_battery_full" msgid="1480463938961288494">"Батарея толук."</string>
+    <!-- String.format failed for translation -->
     <!-- no translation found for accessibility_battery_unknown (1807789554617976440) -->
     <skip />
     <string name="accessibility_no_phone" msgid="8828412144430247025">"Телефон сигналы жок."</string>
@@ -257,7 +261,6 @@
     <!-- no translation found for accessibility_work_mode (1280025758672376313) -->
     <skip />
     <string name="accessibility_notification_dismissed" msgid="4411652015138892952">"Эскертме өчүрүлдү."</string>
-    <string name="accessibility_bubble_dismissed" msgid="270358867566720729">"Калкып чыкма билдирме жабылды."</string>
     <string name="accessibility_desc_notification_shade" msgid="5355229129428759989">"Билдирмелер тактасы."</string>
     <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"Тез тууралоолор."</string>
     <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"Кулпуланган экран."</string>
@@ -714,7 +717,6 @@
     <string name="inline_keep_showing_app" msgid="4393429060390649757">"Бул колдонмонун билдирмелери көрсөтүлө берсинби?"</string>
     <string name="notification_silence_title" msgid="8608090968400832335">"Үнсүз"</string>
     <string name="notification_alert_title" msgid="3656229781017543655">"Демейки"</string>
-    <string name="notification_bubble_title" msgid="8330481035191903164">"Көбүк"</string>
     <string name="notification_automatic_title" msgid="3745465364578762652">"Автоматтык"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Үнү чыкпайт жана дирилдебейт"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Үнү чыгып же дирилдебейт жана жазышуу бөлүмүнүн ылдый жагында көрүнөт"</string>
@@ -726,8 +728,6 @@
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Жөндөөлөр"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Маанилүүлүгү"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> жазышуу функцияларын колдоого албайт"</string>
-    <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Азырынча эч нерсе жок"</string>
-    <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Акыркы жана жабылган калкып чыкма билдирмелер ушул жерде көрүнөт"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Бул билдирмелерди өзгөртүүгө болбойт."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Бул билдирмелердин тобун бул жерде конфигурациялоого болбойт"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"Прокси билдирмеси"</string>
@@ -986,25 +986,7 @@
     <string name="device_services" msgid="1549944177856658705">"Түзмөк кызматтары"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"Аталышы жок"</string>
     <string name="restart_button_description" msgid="6916116576177456480">"Бул колдонмону өчүрүп күйгүзүп, толук экранга өтүү үчүн, таптап коюңуз."</string>
-    <string name="bubbles_settings_button_description" msgid="7324245408859877545">"<xliff:g id="APP_NAME">%1$s</xliff:g> калкып чыкма билдирмелер жөндөөлөрү"</string>
-    <string name="bubble_overflow_button_content_description" msgid="5523744621434300510">"Кошумча меню"</string>
-    <string name="bubble_accessibility_action_add_back" msgid="6217995665917123890">"Кайра топтомго кошуу"</string>
-    <string name="manage_bubbles_text" msgid="6856830436329494850">"Башкаруу"</string>
-    <string name="bubble_content_description_single" msgid="5175160674436546329">"<xliff:g id="APP_NAME">%2$s</xliff:g> колдонмосунан <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
-    <string name="bubble_content_description_stack" msgid="7907610717462651870">"<xliff:g id="APP_NAME">%2$s</xliff:g> жана дагы <xliff:g id="BUBBLE_COUNT">%3$d</xliff:g> колдонмодон <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
     <string name="bubble_accessibility_action_move" msgid="3185080443743819178">"Жылдыруу"</string>
-    <string name="bubble_accessibility_action_move_top_left" msgid="4347227665275929728">"Жогорку сол жакка жылдыруу"</string>
-    <string name="bubble_accessibility_action_move_top_right" msgid="6916868852433483569">"Жогорку оң жакка жылдырыңыз"</string>
-    <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"Төмөнкү сол жакка жылдыруу"</string>
-    <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"Төмөнкү оң жакка жылдырыңыз"</string>
-    <string name="bubble_dismiss_text" msgid="1314082410868930066">"Калкып чыкма билдирмени жабуу"</string>
-    <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"Жазышууда калкып чыкма билдирмелер көрүнбөсүн"</string>
-    <string name="bubbles_user_education_title" msgid="5547017089271445797">"Калкып чыкма билдирмелер аркылуу маектешүү"</string>
-    <string name="bubbles_user_education_description" msgid="1160281719576715211">"Жаңы жазышуулар калкыма сүрөтчөлөр же калкып чыкма билдирмелер түрүндө көрүнөт. Калкып чыкма билдирмелерди ачуу үчүн таптап коюңуз. Жылдыруу үчүн сүйрөңүз."</string>
-    <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"Калкып чыкма билдирмелерди каалаган убакта көзөмөлдөңүз"</string>
-    <string name="bubbles_user_education_manage" msgid="1391639189507036423">"Бул колдонмодогу калкып чыкма билдирмелерди өчүрүү үчүн, \"Башкарууну\" басыңыз"</string>
-    <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"Түшүндүм"</string>
-    <string name="bubbles_app_settings" msgid="5779443644062348657">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> жөндөөлөрү"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Тутум чабыттоосу жаңырды. Өзгөртүү үчүн, Жөндөөлөргө өтүңүз."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Тутум чабыттоосун жаңыртуу үчүн Жөндөөлөргө өтүңүз"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Көшүү режими"</string>
@@ -1094,8 +1076,6 @@
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Жаңы түзмөктү жупташтыруу"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Курама номери"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Курама номери алмашуу буферине көчүрүлдү."</string>
-    <!-- no translation found for battery_state_unknown_notification_title (8464703640483773454) -->
-    <skip />
-    <!-- no translation found for battery_state_unknown_notification_text (13720937839460899) -->
-    <skip />
+    <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Батареяңыздын кубаты аныкталбай жатат"</string>
+    <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Кеңири маалымат алуу үчүн таптап коюңуз"</string>
 </resources>

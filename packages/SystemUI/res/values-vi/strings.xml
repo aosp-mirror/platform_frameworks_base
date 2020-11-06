@@ -86,8 +86,11 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"Hãy thử chụp lại màn hình"</string>
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"Không thể lưu ảnh chụp màn hình do giới hạn dung lượng bộ nhớ"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Ứng dụng hoặc tổ chức của bạn không cho phép chụp ảnh màn hình"</string>
-    <string name="screenshot_edit" msgid="3510496440489019191">"Chỉnh sửa ảnh chụp màn hình"</string>
-    <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"Đóng ảnh chụp màn hình"</string>
+    <string name="screenshot_edit_label" msgid="8754981973544133050">"Chỉnh sửa"</string>
+    <string name="screenshot_edit_description" msgid="3333092254706788906">"Chỉnh sửa ảnh chụp màn hình"</string>
+    <string name="screenshot_scroll_label" msgid="7682877978685434621">"Cuộn"</string>
+    <string name="screenshot_scroll_description" msgid="7855773867093272175">"Cuộn để phóng to ảnh chụp màn hình"</string>
+    <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Đóng ảnh chụp màn hình"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Xem trước ảnh chụp màn hình"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Trình ghi màn hình"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Đang xử lý video ghi màn hình"</string>
@@ -182,8 +185,7 @@
     <string name="accessibility_battery_two_bars" msgid="7895789999668425551">"Mức pin hai vạch."</string>
     <string name="accessibility_battery_three_bars" msgid="118341923832368291">"Mức pin ba vạch."</string>
     <string name="accessibility_battery_full" msgid="1480463938961288494">"Mức pin đầy."</string>
-    <!-- no translation found for accessibility_battery_unknown (1807789554617976440) -->
-    <skip />
+    <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Tỷ lệ phần trăm pin không xác định."</string>
     <string name="accessibility_no_phone" msgid="8828412144430247025">"Không có điện thoại nào."</string>
     <string name="accessibility_phone_one_bar" msgid="8786055123727785588">"Tín hiệu điện thoại một vạch."</string>
     <string name="accessibility_phone_two_bars" msgid="3316909612598670674">"Tín hiệu điện thoại hai vạch."</string>
@@ -257,7 +259,6 @@
     <!-- no translation found for accessibility_work_mode (1280025758672376313) -->
     <skip />
     <string name="accessibility_notification_dismissed" msgid="4411652015138892952">"Đã loại bỏ thông báo."</string>
-    <string name="accessibility_bubble_dismissed" msgid="270358867566720729">"Đã đóng bong bóng."</string>
     <string name="accessibility_desc_notification_shade" msgid="5355229129428759989">"Bóng thông báo."</string>
     <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"Cài đặt nhanh."</string>
     <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"Màn hình khóa."</string>
@@ -714,7 +715,6 @@
     <string name="inline_keep_showing_app" msgid="4393429060390649757">"Tiếp tục hiển thị các thông báo từ ứng dụng này?"</string>
     <string name="notification_silence_title" msgid="8608090968400832335">"Im lặng"</string>
     <string name="notification_alert_title" msgid="3656229781017543655">"Mặc định"</string>
-    <string name="notification_bubble_title" msgid="8330481035191903164">"Bong bóng"</string>
     <string name="notification_automatic_title" msgid="3745465364578762652">"Tự động"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Không phát âm thanh hoặc rung"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Không phát âm thanh hoặc rung và xuất hiện phía dưới trong phần cuộc trò chuyện"</string>
@@ -726,8 +726,6 @@
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Cài đặt"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Mức độ ưu tiên"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> không hỗ trợ các tính năng trò chuyện"</string>
-    <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Không có bong bóng trò chuyện nào gần đây"</string>
-    <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Bong bóng trò chuyện đã đóng và bong bóng trò chuyện gần đây sẽ xuất hiện ở đây"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Không thể sửa đổi các thông báo này."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Không thể định cấu hình nhóm thông báo này tại đây"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"Thông báo đã xử lý qua máy chủ proxy"</string>
@@ -986,25 +984,7 @@
     <string name="device_services" msgid="1549944177856658705">"Dịch vụ cho thiết bị"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"Không có tiêu đề"</string>
     <string name="restart_button_description" msgid="6916116576177456480">"Nhấn để khởi động lại ứng dụng này và xem ở chế độ toàn màn hình."</string>
-    <string name="bubbles_settings_button_description" msgid="7324245408859877545">"Tùy chọn cài đặt cho bong bóng trò chuyện <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="bubble_overflow_button_content_description" msgid="5523744621434300510">"Trình đơn mục bổ sung"</string>
-    <string name="bubble_accessibility_action_add_back" msgid="6217995665917123890">"Thêm lại vào ngăn xếp"</string>
-    <string name="manage_bubbles_text" msgid="6856830436329494850">"Quản lý"</string>
-    <string name="bubble_content_description_single" msgid="5175160674436546329">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> của <xliff:g id="APP_NAME">%2$s</xliff:g>"</string>
-    <string name="bubble_content_description_stack" msgid="7907610717462651870">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> từ <xliff:g id="APP_NAME">%2$s</xliff:g> và <xliff:g id="BUBBLE_COUNT">%3$d</xliff:g> bong bóng khác"</string>
     <string name="bubble_accessibility_action_move" msgid="3185080443743819178">"Di chuyển"</string>
-    <string name="bubble_accessibility_action_move_top_left" msgid="4347227665275929728">"Chuyển lên trên cùng bên trái"</string>
-    <string name="bubble_accessibility_action_move_top_right" msgid="6916868852433483569">"Chuyển lên trên cùng bên phải"</string>
-    <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"Chuyển tới dưới cùng bên trái"</string>
-    <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"Chuyển tới dưới cùng bên phải"</string>
-    <string name="bubble_dismiss_text" msgid="1314082410868930066">"Đóng bong bóng"</string>
-    <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"Dừng sử dụng bong bóng cho cuộc trò chuyện"</string>
-    <string name="bubbles_user_education_title" msgid="5547017089271445797">"Trò chuyện bằng bong bóng trò chuyện"</string>
-    <string name="bubbles_user_education_description" msgid="1160281719576715211">"Các cuộc trò chuyện mới sẽ xuất hiện dưới dạng biểu tượng nổi hoặc bong bóng trò chuyện. Nhấn để mở bong bóng trò chuyện. Kéo để di chuyển bong bóng trò chuyện."</string>
-    <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"Kiểm soát bong bóng bất cứ lúc nào"</string>
-    <string name="bubbles_user_education_manage" msgid="1391639189507036423">"Nhấn vào nút Quản lý để tắt bong bóng trò chuyện từ ứng dụng này"</string>
-    <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"OK"</string>
-    <string name="bubbles_app_settings" msgid="5779443644062348657">"Cài đặt <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Đã cập nhật chế độ di chuyển trên hệ thống. Để thay đổi, hãy chuyển đến phần Cài đặt."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Chuyển đến phần Cài đặt để cập nhật chế độ di chuyển trên hệ thống"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Chế độ chờ"</string>
@@ -1094,8 +1074,6 @@
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Ghép nối thiết bị mới"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Số bản dựng"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Đã sao chép số bản dựng vào khay nhớ tạm."</string>
-    <!-- no translation found for battery_state_unknown_notification_title (8464703640483773454) -->
-    <skip />
-    <!-- no translation found for battery_state_unknown_notification_text (13720937839460899) -->
-    <skip />
+    <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Đã xảy ra vấn đề khi đọc dung lượng pin của bạn"</string>
+    <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Nhấn để biết thêm thông tin"</string>
 </resources>

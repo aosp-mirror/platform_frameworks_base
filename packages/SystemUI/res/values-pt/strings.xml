@@ -86,8 +86,11 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"Tente fazer a captura de tela novamente"</string>
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"Não é possível salvar a captura de tela, porque não há espaço suficiente"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"O app ou a organização não permitem capturas de tela"</string>
-    <string name="screenshot_edit" msgid="3510496440489019191">"Editar captura de tela"</string>
-    <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"Dispensar captura de tela"</string>
+    <string name="screenshot_edit_label" msgid="8754981973544133050">"Editar"</string>
+    <string name="screenshot_edit_description" msgid="3333092254706788906">"Editar captura de tela"</string>
+    <string name="screenshot_scroll_label" msgid="7682877978685434621">"Rolar"</string>
+    <string name="screenshot_scroll_description" msgid="7855773867093272175">"Captura de tela da página inteira"</string>
+    <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Dispensar captura de tela"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Visualização de captura de tela"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Gravador de tela"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Processando gravação de tela"</string>
@@ -182,8 +185,7 @@
     <string name="accessibility_battery_two_bars" msgid="7895789999668425551">"Duas barras de bateria."</string>
     <string name="accessibility_battery_three_bars" msgid="118341923832368291">"Três barras de bateria."</string>
     <string name="accessibility_battery_full" msgid="1480463938961288494">"Bateria cheia."</string>
-    <!-- no translation found for accessibility_battery_unknown (1807789554617976440) -->
-    <skip />
+    <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Porcentagem da bateria desconhecida."</string>
     <string name="accessibility_no_phone" msgid="8828412144430247025">"Sem telefone."</string>
     <string name="accessibility_phone_one_bar" msgid="8786055123727785588">"Uma barra de sinal do telefone."</string>
     <string name="accessibility_phone_two_bars" msgid="3316909612598670674">"Duas barras de sinal do telefone."</string>
@@ -257,7 +259,6 @@
     <!-- no translation found for accessibility_work_mode (1280025758672376313) -->
     <skip />
     <string name="accessibility_notification_dismissed" msgid="4411652015138892952">"Notificação dispensada."</string>
-    <string name="accessibility_bubble_dismissed" msgid="270358867566720729">"Balão dispensado."</string>
     <string name="accessibility_desc_notification_shade" msgid="5355229129428759989">"Aba de notificações."</string>
     <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"Configurações rápidas."</string>
     <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"Tela de bloqueio."</string>
@@ -714,7 +715,6 @@
     <string name="inline_keep_showing_app" msgid="4393429060390649757">"Continuar mostrando notificações desse app?"</string>
     <string name="notification_silence_title" msgid="8608090968400832335">"Silencioso"</string>
     <string name="notification_alert_title" msgid="3656229781017543655">"Padrão"</string>
-    <string name="notification_bubble_title" msgid="8330481035191903164">"Bolha"</string>
     <string name="notification_automatic_title" msgid="3745465364578762652">"Automática"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Som e vibração desativados"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"O som e a vibração estão desativados, e o balão aparece na parte inferior da seção de conversa"</string>
@@ -726,8 +726,6 @@
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Configurações"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioritárias"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"O app <xliff:g id="APP_NAME">%1$s</xliff:g> não é compatível com recursos de conversa"</string>
-    <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Nenhum balão recente"</string>
-    <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Os balões recentes e dispensados aparecerão aqui"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Não é possível modificar essas notificações."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Não é possível configurar esse grupo de notificações aqui"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"Notificação salva no proxy"</string>
@@ -986,25 +984,7 @@
     <string name="device_services" msgid="1549944177856658705">"Serviços do dispositivo"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"Sem título"</string>
     <string name="restart_button_description" msgid="6916116576177456480">"Toque para reiniciar o app e usar tela cheia."</string>
-    <string name="bubbles_settings_button_description" msgid="7324245408859877545">"Configurações de balões do <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="bubble_overflow_button_content_description" msgid="5523744621434300510">"Menu flutuante"</string>
-    <string name="bubble_accessibility_action_add_back" msgid="6217995665917123890">"Devolver à pilha"</string>
-    <string name="manage_bubbles_text" msgid="6856830436329494850">"Gerenciar"</string>
-    <string name="bubble_content_description_single" msgid="5175160674436546329">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> de <xliff:g id="APP_NAME">%2$s</xliff:g>"</string>
-    <string name="bubble_content_description_stack" msgid="7907610717462651870">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> de <xliff:g id="APP_NAME">%2$s</xliff:g> mais <xliff:g id="BUBBLE_COUNT">%3$d</xliff:g>"</string>
     <string name="bubble_accessibility_action_move" msgid="3185080443743819178">"Mover"</string>
-    <string name="bubble_accessibility_action_move_top_left" msgid="4347227665275929728">"Mover para canto superior esquerdo"</string>
-    <string name="bubble_accessibility_action_move_top_right" msgid="6916868852433483569">"Mover para canto superior direito"</string>
-    <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"Mover para canto inferior esquerdo"</string>
-    <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"Mover para canto inferior direito"</string>
-    <string name="bubble_dismiss_text" msgid="1314082410868930066">"Dispensar balão"</string>
-    <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"Não criar balões de conversa"</string>
-    <string name="bubbles_user_education_title" msgid="5547017089271445797">"Converse usando balões"</string>
-    <string name="bubbles_user_education_description" msgid="1160281719576715211">"Novas conversas aparecerão como ícones flutuantes, ou balões. Toque para abrir o balão. Arraste para movê-lo."</string>
-    <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"Controle os balões a qualquer momento"</string>
-    <string name="bubbles_user_education_manage" msgid="1391639189507036423">"Toque em \"Gerenciar\" para desativar os balões desse app"</string>
-    <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"Ok"</string>
-    <string name="bubbles_app_settings" msgid="5779443644062348657">"Configurações de <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Navegação no sistema atualizada. Se quiser alterá-la, acesse as configurações."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Acesse as configurações para atualizar a navegação no sistema"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Em espera"</string>
@@ -1094,8 +1074,6 @@
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Parear novo dispositivo"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Número da versão"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Número da versão copiado para a área de transferência."</string>
-    <!-- no translation found for battery_state_unknown_notification_title (8464703640483773454) -->
-    <skip />
-    <!-- no translation found for battery_state_unknown_notification_text (13720937839460899) -->
-    <skip />
+    <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Problema para ler seu medidor de bateria"</string>
+    <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Toque para mais informações"</string>
 </resources>
