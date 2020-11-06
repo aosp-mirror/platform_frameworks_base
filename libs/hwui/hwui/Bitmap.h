@@ -100,6 +100,12 @@ public:
 
     void getSkBitmap(SkBitmap* outBitmap);
 
+    SkBitmap getSkBitmap() {
+        SkBitmap ret;
+        getSkBitmap(&ret);
+        return ret;
+    }
+
     int getAshmemFd() const;
     size_t getAllocationByteCount() const;
 
