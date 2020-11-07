@@ -1480,6 +1480,17 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
         }
     }
 
+    @Override
+    public void startAssist(Bundle args) {
+        enforceStatusBarService();
+        if (mBar != null) {
+            try {
+                mBar.startAssist(args);
+            } catch (RemoteException ex) {
+            }
+        }
+    }
+
     public String[] getStatusBarIcons() {
         return mContext.getResources().getStringArray(R.array.config_statusBarIcons);
     }
