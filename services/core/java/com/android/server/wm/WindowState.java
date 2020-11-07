@@ -2138,6 +2138,14 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return getDisplayContent().getBounds().equals(getBounds());
     }
 
+    private boolean matchesRootDisplayAreaBounds() {
+        RootDisplayArea root = getRootDisplayArea();
+        if (root == null || root == getDisplayContent()) {
+            return matchesDisplayBounds();
+        }
+        return root.getBounds().equals(getBounds());
+    }
+
     /**
      * @return {@code true} if last applied config was reported to the client already, {@code false}
      *         otherwise.
@@ -3781,7 +3789,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     /** @return true when the window is in fullscreen mode, but has non-fullscreen bounds set, or
      *          is transitioning into/out-of fullscreen. */
     boolean isLetterboxedAppWindow() {
-        return !inMultiWindowMode() && !matchesDisplayBounds()
+        return !inMultiWindowMode() && !matchesRootDisplayAreaBounds()
                 || isLetterboxedForDisplayCutout();
     }
 

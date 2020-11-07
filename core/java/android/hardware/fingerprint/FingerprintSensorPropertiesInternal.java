@@ -43,24 +43,36 @@ public class FingerprintSensorPropertiesInternal extends SensorPropertiesInterna
      * The location of the center of the sensor if applicable. For example, sensors of type
      * {@link FingerprintSensorProperties#TYPE_UDFPS_OPTICAL} would report this value as the
      * distance in pixels, measured from the left edge of the screen.
-     * TODO: Value should be provided from the HAL
      */
-    public final int sensorLocationX = 540;
+    public final int sensorLocationX;
 
     /**
      * The location of the center of the sensor if applicable. For example, sensors of type
      * {@link FingerprintSensorProperties#TYPE_UDFPS_OPTICAL} would report this value as the
      * distance in pixels, measured from the top edge of the screen.
-     * TODO: Value should be provided from the HAL
+     *
      */
-    public final int sensorLocationY = 1636;
+    public final int sensorLocationY;
 
     /**
      * The radius of the sensor if applicable. For example, sensors of type
      * {@link FingerprintSensorProperties#TYPE_UDFPS_OPTICAL} would report this value as the radius
      * of the sensor, in pixels.
      */
-    public final int sensorRadius = 130;
+    public final int sensorRadius;
+
+    public FingerprintSensorPropertiesInternal(int sensorId,
+            @SensorProperties.Strength int strength, int maxEnrollmentsPerUser,
+            @FingerprintSensorProperties.SensorType int sensorType,
+            boolean resetLockoutRequiresHardwareAuthToken, int sensorLocationX, int sensorLocationY,
+            int sensorRadius) {
+        super(sensorId, strength, maxEnrollmentsPerUser);
+        this.sensorType = sensorType;
+        this.resetLockoutRequiresHardwareAuthToken = resetLockoutRequiresHardwareAuthToken;
+        this.sensorLocationX = sensorLocationX;
+        this.sensorLocationY = sensorLocationY;
+        this.sensorRadius = sensorRadius;
+    }
 
     /**
      * Initializes SensorProperties with specified values
@@ -69,15 +81,19 @@ public class FingerprintSensorPropertiesInternal extends SensorPropertiesInterna
             @SensorProperties.Strength int strength, int maxEnrollmentsPerUser,
             @FingerprintSensorProperties.SensorType int sensorType,
             boolean resetLockoutRequiresHardwareAuthToken) {
-        super(sensorId, strength, maxEnrollmentsPerUser);
-        this.sensorType = sensorType;
-        this.resetLockoutRequiresHardwareAuthToken = resetLockoutRequiresHardwareAuthToken;
+        // TODO: Value should be provided from the HAL
+        this(sensorId, strength, maxEnrollmentsPerUser, sensorType,
+                resetLockoutRequiresHardwareAuthToken, 540 /* sensorLocationX */,
+                1636 /* sensorLocationY */, 130 /* sensorRadius */);
     }
 
     protected FingerprintSensorPropertiesInternal(Parcel in) {
         super(in);
         sensorType = in.readInt();
         resetLockoutRequiresHardwareAuthToken = in.readBoolean();
+        sensorLocationX = in.readInt();
+        sensorLocationY = in.readInt();
+        sensorRadius = in.readInt();
     }
 
     public static final Creator<FingerprintSensorPropertiesInternal> CREATOR =
@@ -103,6 +119,9 @@ public class FingerprintSensorPropertiesInternal extends SensorPropertiesInterna
         super.writeToParcel(dest, flags);
         dest.writeInt(sensorType);
         dest.writeBoolean(resetLockoutRequiresHardwareAuthToken);
+        dest.writeInt(sensorLocationX);
+        dest.writeInt(sensorLocationY);
+        dest.writeInt(sensorRadius);
     }
 
     public boolean isAnyUdfpsType() {

@@ -112,6 +112,13 @@ struct CanvasOp<CanvasOpType::DrawColor> {
 };
 
 template <>
+struct CanvasOp<CanvasOpType::DrawPaint> {
+    SkPaint paint;
+    void draw(SkCanvas* canvas) const { canvas->drawPaint(paint); }
+    ASSERT_DRAWABLE()
+};
+
+template <>
 struct CanvasOp<CanvasOpType::DrawRect> {
     SkRect rect;
     SkPaint paint;
@@ -119,6 +126,53 @@ struct CanvasOp<CanvasOpType::DrawRect> {
     ASSERT_DRAWABLE()
 };
 
+template<>
+struct CanvasOp<CanvasOpType::DrawRoundRect> {
+    SkRect rect;
+    SkScalar rx;
+    SkScalar ry;
+    SkPaint paint;
+    void draw(SkCanvas* canvas) const {
+        canvas->drawRoundRect(rect, rx, ry, paint);
+    }
+    ASSERT_DRAWABLE()
+};
+
+template<>
+struct CanvasOp<CanvasOpType::DrawCircle> {
+    SkScalar cx;
+    SkScalar cy;
+    SkScalar radius;
+    SkPaint paint;
+    void draw(SkCanvas* canvas) const {
+        canvas->drawCircle(cx, cy, radius, paint);
+    }
+    ASSERT_DRAWABLE()
+};
+
+template<>
+struct CanvasOp<CanvasOpType::DrawOval> {
+    SkRect oval;
+    SkPaint paint;
+    void draw(SkCanvas* canvas) const {
+        canvas->drawOval(oval, paint);
+    }
+    ASSERT_DRAWABLE()
+};
+
+template<>
+struct CanvasOp<CanvasOpType::DrawArc> {
+    SkRect oval;
+    SkScalar startAngle;
+    SkScalar sweepAngle;
+    bool useCenter;
+    SkPaint paint;
+
+    void draw(SkCanvas* canvas) const {
+        canvas->drawArc(oval, startAngle, sweepAngle, useCenter, paint);
+    }
+    ASSERT_DRAWABLE()
+};
 
 // cleanup our macros
 #undef ASSERT_DRAWABLE

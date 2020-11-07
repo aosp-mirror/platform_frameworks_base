@@ -2658,6 +2658,14 @@
                 android:description="@string/permdesc_useDataInBackground"
                 android:protectionLevel="normal" />
 
+    <!-- Allows app to request to be associated with a device via
+         {@link android.companion.CompanionDeviceManager}
+         as a "watch"
+         <p>Protection level: normal
+     -->
+    <permission android:name="android.permission.REQUEST_COMPANION_PROFILE_WATCH"
+                android:protectionLevel="normal" />
+
     <!-- Allows a companion app to associate to Wi-Fi.
          <p>Only for use by a single pre-approved app.
          @hide
@@ -2666,6 +2674,21 @@
     <permission android:name="android.permission.COMPANION_APPROVE_WIFI_CONNECTIONS"
                 android:protectionLevel="signature|privileged" />
 
+    <!-- Allows an app to read and listen to projection state.
+         @hide
+         @SystemApi
+    -->
+    <permission android:name="android.permission.READ_PROJECTION_STATE"
+                android:protectionLevel="signature" />
+
+    <!-- Allows an app to set and release automotive projection.
+         <p>Once permissions can be granted via role-only, this needs to be changed to
+          protectionLevel="role" and added to the SYSTEM_AUTOMOTIVE_PROJECTION role.
+         @hide
+         @SystemApi
+    -->
+    <permission android:name="android.permission.TOGGLE_AUTOMOTIVE_PROJECTION"
+                android:protectionLevel="signature|privileged" />
 
     <!-- ================================== -->
     <!-- Permissions affecting the system wallpaper -->

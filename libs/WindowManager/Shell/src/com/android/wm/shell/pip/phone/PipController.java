@@ -196,6 +196,7 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
             mMainExecutor.execute(() -> {
                 mPipBoundsHandler.onConfigurationChanged(mContext);
                 mTouchHandler.onConfigurationChanged();
+                mPipBoundsState.onConfigurationChanged();
             });
         }
 
@@ -276,7 +277,6 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
         mMainExecutor.execute(() -> {
             mTouchHandler.onActivityPinned();
             mMediaController.onActivityPinned();
-            mMenuController.onActivityPinned();
             mAppOpsListener.onActivityPinned(packageName);
         });
     }
@@ -284,7 +284,6 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
     @Override
     public void onActivityUnpinned(ComponentName topActivity) {
         mMainExecutor.execute(() -> {
-            mMenuController.onActivityUnpinned();
             mTouchHandler.onActivityUnpinned(topActivity);
             mAppOpsListener.onActivityUnpinned();
         });

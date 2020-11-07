@@ -16,6 +16,10 @@
 
 package com.android.wm.shell.pip;
 
+import static com.android.wm.shell.pip.PipBoundsState.STASH_TYPE_LEFT;
+import static com.android.wm.shell.pip.PipBoundsState.STASH_TYPE_NONE;
+import static com.android.wm.shell.pip.PipBoundsState.STASH_TYPE_RIGHT;
+
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.PointF;
@@ -42,9 +46,20 @@ public class PipSnapAlgorithm {
     }
 
     /**
+     * Returns a fraction that describes where the PiP bounds is.
+     * See {@link #getSnapFraction(Rect, Rect, int)}.
+     */
+    public float getSnapFraction(Rect stackBounds, Rect movementBounds) {
+        return getSnapFraction(stackBounds, movementBounds, STASH_TYPE_NONE);
+    }
+
+    /**
      * @return returns a fraction that describes where along the {@param movementBounds} the
      *         {@param stackBounds} are. If the {@param stackBounds} are not currently on the
      *         {@param movementBounds} exactly, then they will be snapped to the movement bounds.
+     *         stashType dictates whether the PiP is stashed (off-screen) or not. If
+     *         that's the case, we will have to do some math to calculate the snap fraction
+     *         correctly.
      *
      *         The fraction is defined in a clockwise fashion against the {@param movementBounds}:
      *
@@ -54,9 +69,10 @@ public class PipSnapAlgorithm {
      *          3 +---+ 2
      *            3   2
      */
-    public float getSnapFraction(Rect stackBounds, Rect movementBounds) {
+    public float getSnapFraction(Rect stackBounds, Rect movementBounds,
+            @PipBoundsState.StashType int stashType) {
         final Rect tmpBounds = new Rect();
-        snapRectToClosestEdge(stackBounds, movementBounds, tmpBounds);
+        snapRectToClosestEdge(stackBounds, movementBounds, tmpBounds, stashType);
         final float widthFraction = (float) (tmpBounds.left - movementBounds.left) /
                 movementBounds.width();
         final float heightFraction = (float) (tmpBounds.top - movementBounds.top) /
@@ -100,6 +116,22 @@ public class PipSnapAlgorithm {
             snapFraction -= 3f;
             int offset = movementBounds.top + (int) ((1f - snapFraction) * movementBounds.height());
             stackBounds.offsetTo(movementBounds.left, offset);
+        }
+    }
+
+    /**
+     * Same as {@link #applySnapFraction(Rect, Rect, float)}, but take stash state into
+     * consideration.
+     */
+    public void applySnapFraction(Rect stackBounds, Rect movementBounds, float snapFraction,
+            @PipBoundsState.StashType int stashType, int stashOffset, Rect displayBounds) {
+        applySnapFraction(stackBounds, movementBounds, snapFraction);
+
+        if (stashType != STASH_TYPE_NONE) {
+            stackBounds.offsetTo(stashType == STASH_TYPE_LEFT
+                            ? stashOffset - stackBounds.width()
+                            : displayBounds.right - stashOffset,
+                    stackBounds.top);
         }
     }
 
@@ -178,17 +210,24 @@ public class PipSnapAlgorithm {
      * Snaps the {@param stackBounds} to the closest edge of the {@param movementBounds} and writes
      * the new bounds out to {@param boundsOut}.
      */
-    public void snapRectToClosestEdge(Rect stackBounds, Rect movementBounds, Rect boundsOut) {
+    public void snapRectToClosestEdge(Rect stackBounds, Rect movementBounds, Rect boundsOut,
+            @PipBoundsState.StashType int stashType) {
+        int leftEdge = stackBounds.left;
+        if (stashType == STASH_TYPE_LEFT) {
+            leftEdge = movementBounds.left;
+        } else if (stashType == STASH_TYPE_RIGHT) {
+            leftEdge = movementBounds.right;
+        }
         final int boundedLeft = Math.max(movementBounds.left, Math.min(movementBounds.right,
-                stackBounds.left));
+                leftEdge));
         final int boundedTop = Math.max(movementBounds.top, Math.min(movementBounds.bottom,
                 stackBounds.top));
         boundsOut.set(stackBounds);
 
         // Otherwise, just find the closest edge
-        final int fromLeft = Math.abs(stackBounds.left - movementBounds.left);
+        final int fromLeft = Math.abs(leftEdge - movementBounds.left);
         final int fromTop = Math.abs(stackBounds.top - movementBounds.top);
-        final int fromRight = Math.abs(movementBounds.right - stackBounds.left);
+        final int fromRight = Math.abs(movementBounds.right - leftEdge);
         final int fromBottom = Math.abs(movementBounds.bottom - stackBounds.top);
         final int shortest = Math.min(Math.min(fromLeft, fromRight), Math.min(fromTop, fromBottom));
         if (shortest == fromLeft) {

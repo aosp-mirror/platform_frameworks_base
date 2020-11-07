@@ -6372,7 +6372,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
 
         final IBinder freezeToken = mayFreezeScreenLocked() ? appToken : null;
-        onDescendantOrientationChanged(freezeToken, this);
+        if (onDescendantOrientationChanged(freezeToken, this)) {
+            // The app is just becoming visible, and the parent Task has updated with the
+            // orientation request. Update the size compat mode.
+            updateSizeCompatMode();
+        }
     }
 
     /**
@@ -6538,6 +6542,13 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return;
         }
 
+        if (task == null || (!handlesOrientationChangeFromDescendant()
+                && task.getLastTaskBoundsComputeActivity() != this)) {
+            // Don't compute when Task hasn't computed its bounds for this app, because the Task can
+            // be letterboxed, and its bounds may not be accurate until then.
+            return;
+        }
+
         Configuration overrideConfig = getRequestedOverrideConfiguration();
         final Configuration fullConfig = getConfiguration();
 
@@ -6562,20 +6573,14 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         mCompatDisplayInsets = new CompatDisplayInsets(mDisplayContent, this);
     }
 
-    void clearSizeCompatMode(boolean recomputeTask) {
+    @VisibleForTesting
+    void clearSizeCompatMode() {
         mSizeCompatScale = 1f;
         mSizeCompatBounds = null;
         mCompatDisplayInsets = null;
 
-        if (recomputeTask) {
-            // Recompute from Task because letterbox can also happen on Task level.
-            task.onRequestedOverrideConfigurationChanged(task.getRequestedOverrideConfiguration());
-        }
-    }
-
-    @VisibleForTesting
-    void clearSizeCompatMode() {
-        clearSizeCompatMode(true /* recomputeTask */);
+        // Recompute from Task because letterbox can also happen on Task level.
+        task.onRequestedOverrideConfigurationChanged(task.getRequestedOverrideConfiguration());
     }
 
     @Override
@@ -7788,15 +7793,23 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 return;
             }
 
-            if (container.getTask().isTaskLetterboxed()) {
+            final Task task = container.getTask();
+            if (task != null && task.isTaskLetterboxed()) {
                 // For apps in Task letterbox, it should fill the task bounds.
-                final Rect taskBounds = container.getTask().getBounds();
-                mWidth = taskBounds.width();
-                mHeight = taskBounds.height();
+                final Point dimensions = getRotationZeroDimensions(task);
+                mWidth = dimensions.x;
+                mHeight = dimensions.y;
             } else {
-                // If the activity is not floating nor letterboxed, assume it fills the display.
-                mWidth = display.mBaseDisplayWidth;
-                mHeight = display.mBaseDisplayHeight;
+                // If the activity is not floating nor letterboxed, assume it fills the root.
+                final RootDisplayArea root = container.getRootDisplayArea();
+                if (root == null || root == display) {
+                    mWidth = display.mBaseDisplayWidth;
+                    mHeight = display.mBaseDisplayHeight;
+                } else {
+                    final Point dimensions = getRotationZeroDimensions(root);
+                    mWidth = dimensions.x;
+                    mHeight = dimensions.y;
+                }
             }
             final DisplayPolicy policy = display.getDisplayPolicy();
             for (int rotation = 0; rotation < 4; rotation++) {
@@ -7811,6 +7824,20 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 mStableInsets[rotation].set(mNonDecorInsets[rotation]);
                 policy.convertNonDecorInsetsToStableInsets(mStableInsets[rotation], rotation);
             }
+        }
+
+        /**
+         * Gets the width and height of the {@code container} when it is not rotated, so that after
+         * the display is rotated, we can calculate the bounds by rotating the dimensions.
+         * @see #getBoundsByRotation
+         */
+        private static Point getRotationZeroDimensions(WindowContainer container) {
+            final Rect bounds = container.getBounds();
+            final int rotation = container.getConfiguration().windowConfiguration.getRotation();
+            final boolean rotated = (rotation == ROTATION_90 || rotation == ROTATION_270);
+            final int width = bounds.width();
+            final int height = bounds.height();
+            return rotated ? new Point(height, width) : new Point(width, height);
         }
 
         void getBoundsByRotation(Rect outBounds, int rotation) {

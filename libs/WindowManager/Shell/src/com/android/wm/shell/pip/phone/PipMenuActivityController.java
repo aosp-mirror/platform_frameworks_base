@@ -135,14 +135,21 @@ public class PipMenuActivityController {
         return mPipMenuView != null && mMenuState != MENU_STATE_NONE;
     }
 
-    public void onActivityPinned() {
+    /**
+     * Attach the menu when the PiP task first appears.
+     */
+    public void onTaskAppeared() {
         attachPipMenuView();
     }
 
-    public void onActivityUnpinned() {
+    /**
+     * Detach the menu when the PiP task is gone.
+     */
+    public void onTaskVanished() {
         hideMenu();
         detachPipMenuView();
     }
+
 
     public void onPinnedStackAnimationEnded() {
         if (isMenuVisible()) {
@@ -151,10 +158,11 @@ public class PipMenuActivityController {
     }
 
     private void attachPipMenuView() {
-        if (mPipMenuView == null) {
-            mPipMenuView = new PipMenuView(mContext, this);
+        // In case detach was not called (e.g. PIP unexpectedly closed)
+        if (mPipMenuView != null) {
+            detachPipMenuView();
         }
-
+        mPipMenuView = new PipMenuView(mContext, this);
         mSystemWindows.addView(mPipMenuView, getPipMenuLayoutParams(0, 0), 0, SHELL_ROOT_LAYER_PIP);
     }
 

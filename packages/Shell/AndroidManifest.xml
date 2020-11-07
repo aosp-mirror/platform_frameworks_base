@@ -250,6 +250,9 @@
     <!-- Permission required for CTS test - UiModeManagerTest -->
     <uses-permission android:name="android.permission.ENTER_CAR_MODE_PRIORITIZED"/>
 
+    <!-- Permission required for CTS tests - UiModeManagerTest, CarModeInCallServiceTest -->
+    <uses-permission android:name="android.permission.TOGGLE_AUTOMOTIVE_PROJECTION"/>
+
     <!-- Permission required for CTS test - SystemConfigTest -->
     <uses-permission android:name="android.permission.READ_CARRIER_APP_INFO"/>
 

@@ -42,7 +42,7 @@ abstract class BaseAppHelper(
 ) {
     protected val uiDevice: UiDevice = UiDevice.getInstance(instrumentation)
 
-    private val context: Context
+    protected val context: Context
         get() = mInstrumentation.context
 
     private val activityManager: ActivityManager?

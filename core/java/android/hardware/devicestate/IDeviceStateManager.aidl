@@ -16,5 +16,9 @@
 
 package android.hardware.devicestate;
 
+import android.hardware.devicestate.IDeviceStateManagerCallback;
+
 /** @hide */
-interface IDeviceStateManager {}
+interface IDeviceStateManager {
+    void registerCallback(in IDeviceStateManagerCallback callback);
+}

@@ -17,12 +17,8 @@ package com.android.server.power.batterysaver;
 
 import android.annotation.IntDef;
 import android.app.UiModeManager;
-import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.res.Configuration;
 import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.BatterySaverPolicyConfig;
@@ -190,12 +186,12 @@ public class BatterySaverPolicy extends ContentObserver {
     /**
      * Whether accessibility is currently enabled or not.
      */
-    @GuardedBy("mLock")
-    private boolean mAccessibilityEnabled;
+    @VisibleForTesting
+    final PolicyBoolean mAccessibilityEnabled = new PolicyBoolean("accessibility");
 
-    /** Whether the phone is projecting in car mode or not. */
-    @GuardedBy("mLock")
-    private boolean mCarModeEnabled;
+    /** Whether the phone has set automotive projection or not. */
+    @VisibleForTesting
+    final PolicyBoolean mAutomotiveProjectionActive = new PolicyBoolean("automotiveProjection");
 
     /** The current default adaptive policy. */
     @GuardedBy("mLock")
@@ -235,19 +231,8 @@ public class BatterySaverPolicy extends ContentObserver {
     private final ContentResolver mContentResolver;
     private final BatterySavingStats mBatterySavingStats;
 
-    private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            switch (intent.getAction()) {
-                case UiModeManager.ACTION_ENTER_CAR_MODE_PRIORITIZED:
-                    setCarModeEnabled(true);
-                    break;
-                case UiModeManager.ACTION_EXIT_CAR_MODE_PRIORITIZED:
-                    setCarModeEnabled(false);
-                    break;
-            }
-        }
-    };
+    private final UiModeManager.OnProjectionStateChangeListener mOnProjectionStateChangeListener =
+            (t, pkgs) -> mAutomotiveProjectionActive.update(!pkgs.isEmpty());
 
     @GuardedBy("mLock")
     private final List<BatterySaverPolicyListener> mListeners = new ArrayList<>();
@@ -282,24 +267,14 @@ public class BatterySaverPolicy extends ContentObserver {
 
         final AccessibilityManager acm = mContext.getSystemService(AccessibilityManager.class);
 
-        acm.addAccessibilityStateChangeListener((enabled) -> setAccessibilityEnabled(enabled));
-        final boolean accessibilityEnabled = acm.isEnabled();
-        synchronized (mLock) {
-            mAccessibilityEnabled = accessibilityEnabled;
-        }
+        acm.addAccessibilityStateChangeListener(enabled -> mAccessibilityEnabled.update(enabled));
+        mAccessibilityEnabled.initialize(acm.isEnabled());
 
-        final IntentFilter filter = new IntentFilter(
-                UiModeManager.ACTION_ENTER_CAR_MODE_PRIORITIZED);
-        filter.addAction(UiModeManager.ACTION_EXIT_CAR_MODE_PRIORITIZED);
-        // The ENTER/EXIT_CAR_MODE_PRIORITIZED intents are sent to UserHandle.ALL, so no need to
-        // register as all users here.
-        mContext.registerReceiver(mBroadcastReceiver, filter);
-        final boolean carModeEnabled =
-                mContext.getSystemService(UiModeManager.class).getCurrentModeType()
-                        == Configuration.UI_MODE_TYPE_CAR;
-        synchronized (mLock) {
-            mCarModeEnabled = carModeEnabled;
-        }
+        UiModeManager uiModeManager = mContext.getSystemService(UiModeManager.class);
+        uiModeManager.addOnProjectionStateChangeListener(UiModeManager.PROJECTION_TYPE_AUTOMOTIVE,
+                mContext.getMainExecutor(), mOnProjectionStateChangeListener);
+        mAutomotiveProjectionActive.initialize(
+                uiModeManager.getActiveProjectionTypes() != UiModeManager.PROJECTION_TYPE_NONE);
 
         onChange(true, null);
     }
@@ -450,7 +425,7 @@ public class BatterySaverPolicy extends ContentObserver {
         final int locationMode;
 
         invalidatePowerSaveModeCaches();
-        if (mCarModeEnabled
+        if (mAutomotiveProjectionActive.get()
                 && rawPolicy.locationMode != PowerManager.LOCATION_MODE_NO_CHANGE
                 && rawPolicy.locationMode != PowerManager.LOCATION_MODE_FOREGROUND_ONLY) {
             // If car projection is enabled, ensure that navigation works.
@@ -470,12 +445,12 @@ public class BatterySaverPolicy extends ContentObserver {
                 rawPolicy.disableOptionalSensors,
                 rawPolicy.disableSoundTrigger,
                 // Don't disable vibration when accessibility is on.
-                rawPolicy.disableVibration && !mAccessibilityEnabled,
+                rawPolicy.disableVibration && !mAccessibilityEnabled.get(),
                 rawPolicy.enableAdjustBrightness,
                 rawPolicy.enableDataSaver,
                 rawPolicy.enableFirewall,
                 // Don't force night mode when car projection is enabled.
-                rawPolicy.enableNightMode && !mCarModeEnabled,
+                rawPolicy.enableNightMode && !mAutomotiveProjectionActive.get(),
                 rawPolicy.enableQuickDoze,
                 rawPolicy.filesForInteractive,
                 rawPolicy.filesForNoninteractive,
@@ -1073,8 +1048,8 @@ public class BatterySaverPolicy extends ContentObserver {
                     + Settings.Global.BATTERY_SAVER_ADAPTIVE_DEVICE_SPECIFIC_CONSTANTS);
             pw.println("    value: " + mAdaptiveDeviceSpecificSettings);
 
-            pw.println("  mAccessibilityEnabled=" + mAccessibilityEnabled);
-            pw.println("  mCarModeEnabled=" + mCarModeEnabled);
+            pw.println("  mAccessibilityEnabled=" + mAccessibilityEnabled.get());
+            pw.println("  mAutomotiveProjectionActive=" + mAutomotiveProjectionActive.get());
             pw.println("  mPolicyLevel=" + mPolicyLevel);
 
             dumpPolicyLocked(pw, "  ", "full", mFullPolicy);
@@ -1147,24 +1122,42 @@ public class BatterySaverPolicy extends ContentObserver {
         }
     }
 
+    /**
+     * A boolean value which should trigger a policy update when it changes.
+     */
     @VisibleForTesting
-    void setAccessibilityEnabled(boolean enabled) {
-        synchronized (mLock) {
-            if (mAccessibilityEnabled != enabled) {
-                mAccessibilityEnabled = enabled;
-                updatePolicyDependenciesLocked();
-                maybeNotifyListenersOfPolicyChange();
+    class PolicyBoolean {
+        private final String mDebugName;
+        @GuardedBy("mLock")
+        private boolean mValue;
+
+        private PolicyBoolean(String debugName) {
+            mDebugName = debugName;
+        }
+
+        /** Sets the initial value without triggering a policy update. */
+        private void initialize(boolean initialValue) {
+            synchronized (mLock) {
+                mValue = initialValue;
             }
         }
-    }
 
-    @VisibleForTesting
-    void setCarModeEnabled(boolean enabled) {
-        synchronized (mLock) {
-            if (mCarModeEnabled != enabled) {
-                mCarModeEnabled = enabled;
-                updatePolicyDependenciesLocked();
-                maybeNotifyListenersOfPolicyChange();
+        private boolean get() {
+            synchronized (mLock) {
+                return mValue;
+            }
+        }
+
+        /** Sets a value, which if different from the current value, triggers a policy update. */
+        @VisibleForTesting
+        void update(boolean newValue) {
+            synchronized (mLock) {
+                if (mValue != newValue) {
+                    Slog.d(TAG, mDebugName + " changed to " + newValue + ", updating policy.");
+                    mValue = newValue;
+                    updatePolicyDependenciesLocked();
+                    maybeNotifyListenersOfPolicyChange();
+                }
             }
         }
     }

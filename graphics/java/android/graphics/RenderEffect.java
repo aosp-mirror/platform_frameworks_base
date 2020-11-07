@@ -17,6 +17,7 @@
 package android.graphics;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.graphics.Shader.TileMode;
 
 import libcore.util.NativeAllocationRegistry;
@@ -24,8 +25,6 @@ import libcore.util.NativeAllocationRegistry;
 /**
  * Intermediate rendering step used to render drawing commands with a corresponding
  * visual effect
- *
- * @hide
  */
 public final class RenderEffect {
 
@@ -99,7 +98,7 @@ public final class RenderEffect {
     /**
      * Create a {@link RenderEffect} that blurs the contents of the
      * {@link android.graphics.RenderNode} that this RenderEffect is installed on with the
-     * specified radius along hte x and y axis.
+     * specified radius along the x and y axis.
      * @param radiusX Radius of blur along the X axis
      * @param radiusY Radius of blur along the Y axis
      * @param edgeTreatment Policy for how to blur content near edges of the blur kernel
@@ -117,7 +116,157 @@ public final class RenderEffect {
                         0,
                         edgeTreatment.nativeInt
                 )
+            );
+    }
+
+    /**
+     * Create a {@link RenderEffect} that renders the contents of the input {@link Bitmap}.
+     * This is useful to create an input for other {@link RenderEffect} types such as
+     * {@link RenderEffect#createBlurEffect(float, float, RenderEffect, TileMode)} or
+     * {@link RenderEffect#createColorFilterEffect(ColorFilter, RenderEffect)}
+     *
+     * @param bitmap The source bitmap to be rendered by the created {@link RenderEffect}
+     */
+    @NonNull
+    public static RenderEffect createBitmapEffect(@NonNull Bitmap bitmap) {
+        float right = bitmap.getWidth();
+        float bottom = bitmap.getHeight();
+        return new RenderEffect(
+                nativeCreateBitmapEffect(
+                        bitmap.getNativeInstance(),
+                        0f,
+                        0f,
+                        right,
+                        bottom,
+                        0f,
+                        0f,
+                        right,
+                        bottom
+                )
         );
+    }
+
+    /**
+     * Create a {@link RenderEffect} that renders the contents of the input {@link Bitmap}.
+     * This is useful to create an input for other {@link RenderEffect} types such as
+     * {@link RenderEffect#createBlurEffect(float, float, RenderEffect, TileMode)} or
+     * {@link RenderEffect#createColorFilterEffect(ColorFilter, RenderEffect)}
+     *
+     * @param bitmap The source bitmap to be rendered by the created {@link RenderEffect}
+     * @param src Optional subset of the bitmap to be part of the rendered output. If null
+     *            is provided, the entire bitmap bounds are used.
+     * @param dst Bounds of the destination which the bitmap is translated and scaled to be
+     *            drawn into
+     */
+    @NonNull
+    public static RenderEffect createBitmapEffect(
+            @NonNull Bitmap bitmap,
+            @Nullable Rect src,
+            @NonNull Rect dst
+    ) {
+        long bitmapHandle = bitmap.getNativeInstance();
+        int left = src == null ? 0 : src.left;
+        int top = src == null ? 0 : src.top;
+        int right = src == null ? bitmap.getWidth() : src.right;
+        int bottom = src == null ? bitmap.getHeight() : src.bottom;
+        return new RenderEffect(
+                nativeCreateBitmapEffect(
+                        bitmapHandle,
+                        left,
+                        top,
+                        right,
+                        bottom,
+                        dst.left,
+                        dst.top,
+                        dst.right,
+                        dst.bottom
+                )
+        );
+    }
+
+    /**
+     * Create a filter that applies the color filter to the provided RenderEffect
+     *
+     * @param colorFilter ColorFilter applied to the content in the input RenderEffect
+     * @param renderEffect Source to be transformed by the specified {@link ColorFilter}
+     */
+    @NonNull
+    public static RenderEffect createColorFilterEffect(
+            @NonNull ColorFilter colorFilter,
+            @NonNull RenderEffect renderEffect
+    ) {
+        return new RenderEffect(
+                nativeCreateColorFilterEffect(
+                    colorFilter.getNativeInstance(),
+                    renderEffect.getNativeInstance()
+                )
+            );
+    }
+
+    /**
+     * Create a filter that applies the color filter to the contents of the
+     * {@link android.graphics.RenderNode} that this RenderEffect is installed on
+     * @param colorFilter ColorFilter applied to the content in the input RenderEffect
+     */
+    @NonNull
+    public static RenderEffect createColorFilterEffect(@NonNull ColorFilter colorFilter) {
+        return new RenderEffect(
+                nativeCreateColorFilterEffect(
+                        colorFilter.getNativeInstance(),
+                        0
+                )
+        );
+    }
+
+    /**
+     * {@link RenderEffect} that is a composition of 2 other {@link RenderEffect} instances
+     * combined by the specified {@link BlendMode}
+     *
+     * @param dst The Dst pixels used in blending, if null the source bitmap is used.
+     * @param src The Src pixels used in blending, if null the source bitmap is use
+     * @param blendMode The {@link BlendMode} to be used to combine colors from the two
+     *                  {@link RenderEffect}s
+     */
+    @NonNull
+    public static RenderEffect createBlendModeEffect(
+            @NonNull RenderEffect dst,
+            @NonNull RenderEffect src,
+            @NonNull BlendMode blendMode
+    ) {
+        return new RenderEffect(
+                nativeCreateBlendModeEffect(
+                        dst.getNativeInstance(),
+                        src.getNativeInstance(),
+                        blendMode.getXfermode().porterDuffMode
+                )
+        );
+    }
+
+    /**
+     * Create a filter that composes 'inner' with 'outer', such that the results of 'inner' are
+     * treated as the source bitmap passed to 'outer', i.e.
+     *
+     * result = outer(inner(source)).
+     *
+     * Consumers should favor explicit chaining of {@link RenderEffect} instances at creation time
+     * rather than using chain effect. Chain effects are useful for situations where the input or
+     * output are provided from elsewhere and the input or output {@link RenderEffect} need to be
+     * changed.
+     *
+     * @param outer {@link RenderEffect} that consumes the output of {@param inner} as its input
+     * @param inner {@link RenderEffect} that is consumed as input by {@param outer}
+     */
+    @NonNull
+    public static RenderEffect createChainEffect(
+            @NonNull RenderEffect outer,
+            @NonNull RenderEffect inner
+    ) {
+        return new RenderEffect(
+                nativeCreateChainEffect(
+                    outer.getNativeInstance(),
+                    inner.getNativeInstance()
+                )
+            );
     }
 
     private final long mNativeRenderEffect;
@@ -141,5 +290,11 @@ public final class RenderEffect {
             float offsetX, float offsetY, long nativeInput);
     private static native long nativeCreateBlurEffect(
             float radiusX, float radiusY, long nativeInput, int edgeTreatment);
+    private static native long nativeCreateBitmapEffect(
+            long bitmapHandle, float srcLeft, float srcTop, float srcRight, float srcBottom,
+            float dstLeft, float dstTop, float dstRight, float dstBottom);
+    private static native long nativeCreateColorFilterEffect(long colorFilter, long nativeInput);
+    private static native long nativeCreateBlendModeEffect(long dst, long src, int blendmode);
+    private static native long nativeCreateChainEffect(long outer, long inner);
     private static native long nativeGetFinalizer();
 }

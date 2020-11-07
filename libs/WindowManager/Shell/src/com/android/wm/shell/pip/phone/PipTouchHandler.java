@@ -221,7 +221,6 @@ public class PipTouchHandler {
                 R.dimen.pip_expanded_shortest_edge_size);
         mImeOffset = res.getDimensionPixelSize(R.dimen.pip_ime_offset);
         mPipDismissTargetHandler.updateMagneticTargetSize();
-        mMotionHelper.reloadResources();
     }
 
     private boolean shouldShowResizeHandle() {
@@ -730,7 +729,7 @@ public class PipTouchHandler {
             }
 
             if (touchState.startedDragging()) {
-                mPipBoundsState.setStashed(false);
+                mPipBoundsState.setStashed(PipBoundsState.STASH_TYPE_NONE);
                 mSavedSnapFraction = -1f;
                 mPipDismissTargetHandler.showDismissTargetMaybe();
             }
@@ -789,7 +788,6 @@ public class PipTouchHandler {
                 if (mEnableStash
                         && (animatingBounds.right > mPipBoundsState.getDisplayBounds().right
                         || animatingBounds.left < mPipBoundsState.getDisplayBounds().left)) {
-                    mPipBoundsState.setStashed(true);
                     mMotionHelper.stashToEdge(vel.x, vel.y, this::flingEndAction /* endAction */);
                 } else {
                     mMotionHelper.flingToSnapTarget(vel.x, vel.y,
