@@ -2344,8 +2344,74 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         }
     }
 
-    private void addAllPermissions(AndroidPackage pkg, boolean chatty) {
+    /**
+     * If permissions are upgraded to runtime, or their owner changes to the system, then any
+     * granted permissions must be revoked.
+     *
+     * @param permissionsToRevoke A list of permission names to revoke
+     * @param allPackageNames All package names
+     * @param permissionCallback Callback for permission changed
+     */
+    private void revokeRuntimePermissionsIfPermissionDefinitionChanged(
+            @NonNull List<String> permissionsToRevoke,
+            @NonNull ArrayList<String> allPackageNames,
+            @NonNull PermissionCallback permissionCallback) {
+
+        final int[] userIds = mUserManagerInt.getUserIds();
+        final int numPermissions = permissionsToRevoke.size();
+        final int numUserIds = userIds.length;
+        final int numPackages = allPackageNames.size();
+        final int callingUid = Binder.getCallingUid();
+
+        for (int permNum = 0; permNum < numPermissions; permNum++) {
+            String permName = permissionsToRevoke.get(permNum);
+            BasePermission bp = mSettings.getPermission(permName);
+            if (bp == null || !bp.isRuntime()) {
+                continue;
+            }
+            for (int userIdNum = 0; userIdNum < numUserIds; userIdNum++) {
+                final int userId = userIds[userIdNum];
+                for (int packageNum = 0; packageNum < numPackages; packageNum++) {
+                    final String packageName = allPackageNames.get(packageNum);
+                    final int uid = mPackageManagerInt.getPackageUid(packageName, 0, userId);
+                    if (uid < Process.FIRST_APPLICATION_UID) {
+                        // do not revoke from system apps
+                        continue;
+                    }
+                    final int permissionState = checkPermissionImpl(permName, packageName,
+                            userId);
+                    final int flags = getPermissionFlags(permName, packageName, userId);
+                    final int flagMask = FLAG_PERMISSION_SYSTEM_FIXED
+                            | FLAG_PERMISSION_POLICY_FIXED
+                            | FLAG_PERMISSION_GRANTED_BY_DEFAULT
+                            | FLAG_PERMISSION_GRANTED_BY_ROLE;
+                    if (permissionState == PackageManager.PERMISSION_GRANTED
+                            && (flags & flagMask) == 0) {
+                        EventLog.writeEvent(0x534e4554, "154505240", uid,
+                                "Revoking permission " + permName + " from package "
+                                        + packageName + " due to definition change");
+                        EventLog.writeEvent(0x534e4554, "168319670", uid,
+                                "Revoking permission " + permName + " from package "
+                                        + packageName + " due to definition change");
+                        Slog.e(TAG, "Revoking permission " + permName + " from package "
+                                + packageName + " due to definition change");
+                        try {
+                            revokeRuntimePermissionInternal(permName, packageName,
+                                    false, callingUid, userId, null, permissionCallback);
+                        } catch (Exception e) {
+                            Slog.e(TAG, "Could not revoke " + permName + " from "
+                                    + packageName, e);
+                        }
+                    }
+                }
+            }
+            bp.setPermissionDefinitionChanged(false);
+        }
+    }
+
+    private List<String> addAllPermissions(AndroidPackage pkg, boolean chatty) {
         final int N = ArrayUtils.size(pkg.getPermissions());
+        ArrayList<String> definitionChangedPermissions = new ArrayList<>();
         for (int i=0; i<N; i++) {
             ParsedPermission p = pkg.getPermissions().get(i);
 
@@ -2367,21 +2433,26 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                     }
                 }
 
+                final BasePermission bp;
                 if (p.isTree()) {
-                    final BasePermission bp = BasePermission.createOrUpdate(
+                    bp = BasePermission.createOrUpdate(
                             mPackageManagerInt,
                             mSettings.getPermissionTreeLocked(p.getName()), p, pkg,
                             mSettings.getAllPermissionTreesLocked(), chatty);
                     mSettings.putPermissionTreeLocked(p.getName(), bp);
                 } else {
-                    final BasePermission bp = BasePermission.createOrUpdate(
+                    bp = BasePermission.createOrUpdate(
                             mPackageManagerInt,
                             mSettings.getPermissionLocked(p.getName()),
                             p, pkg, mSettings.getAllPermissionTreesLocked(), chatty);
                     mSettings.putPermissionLocked(p.getName(), bp);
                 }
+                if (bp.isPermissionDefinitionChanged()) {
+                    definitionChangedPermissions.add(p.getName());
+                }
             }
         }
+        return definitionChangedPermissions;
     }
 
     private void addAllPermissionGroups(AndroidPackage pkg, boolean chatty) {
@@ -4672,9 +4743,18 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             PermissionManagerService.this.revokeRuntimePermissionsIfGroupChanged(newPackage,
                     oldPackage, allPackageNames, mDefaultPermissionCallback);
         }
+
         @Override
-        public void addAllPermissions(AndroidPackage pkg, boolean chatty) {
-            PermissionManagerService.this.addAllPermissions(pkg, chatty);
+        public void revokeRuntimePermissionsIfPermissionDefinitionChanged(
+                @NonNull List<String> permissionsToRevoke,
+                @NonNull ArrayList<String> allPackageNames) {
+            PermissionManagerService.this.revokeRuntimePermissionsIfPermissionDefinitionChanged(
+                    permissionsToRevoke, allPackageNames, mDefaultPermissionCallback);
+        }
+
+        @Override
+        public List<String> addAllPermissions(AndroidPackage pkg, boolean chatty) {
+            return PermissionManagerService.this.addAllPermissions(pkg, chatty);
         }
         @Override
         public void addAllPermissionGroups(AndroidPackage pkg, boolean chatty) {
