@@ -28,7 +28,7 @@
     <string name="bugreport_finished_pending_screenshot_text" product="tv" msgid="2343263822812016950">"तपाईंको बग रिपोर्ट स्क्रिनसट बिना आदान प्रदान गर्नाका लागि चयन गर्नुहोस् वा स्क्रिनसट लिने प्रक्रिया पूरा हुने प्रतीक्षा गर्नुहोस्"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"तपाईँको बग रिपोर्टलाई स्क्रिनसट बिना साझेदारी गर्नाका लागि ट्याप गर्नुहोस् वा स्क्रिनसट लिने प्रक्रिया पूरा हुन प्रतीक्षा गर्नुहोस्"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"तपाईँको बग रिपोर्टलाई स्क्रिनसट बिना साझेदारी गर्नाका लागि ट्याप गर्नुहोस् वा स्क्रिनसट लिने प्रक्रिया पूरा हुन प्रतीक्षा गर्नुहोस्"</string>
-    <string name="bugreport_confirm" msgid="5917407234515812495">"बग रिपोर्टमा प्रणालीका विभिन्न लग फाइलहरूको डेटा हुन्छ। यस रिपोर्टमा (एपको प्रयोग र स्थानसम्बन्धी डेटा जस्ता) जसमा तपाईंका संवेदनशील डेटा समावेश हुन सक्छ । आफूले विश्वास गर्ने व्यक्ति र अनुप्रयोगहरूसँग मात्र बग रिपोर्ट सेयर गर्नुहोस्।"</string>
+    <string name="bugreport_confirm" msgid="5917407234515812495">"बग रिपोर्टहरूमा प्रणालीका विभिन्न लग फाइलहरूको डेटा हुन्छ जसमा तपाईँले संवेदनशील मानेको डेटा समावेश हुन सक्छ (जस्तै अनुप्रयोगको प्रयोग र स्थानसम्बन्धी डेटा)। तपाईँले विश्वास गर्ने व्यक्ति र अनुप्रयोगहरूसँग मात्र बग रिपोर्टहरूलाई साझेदारी गर्नुहोस्।"</string>
     <string name="bugreport_confirm_dont_repeat" msgid="6179945398364357318">"फेरि नदेखाउनुहोस्"</string>
     <string name="bugreport_storage_title" msgid="5332488144740527109">"बग रिपोर्टहरू"</string>
     <string name="bugreport_unreadable_text" msgid="586517851044535486">"बग रिपोर्ट फाइल पढ्न सकिएन"</string>
@@ -43,5 +43,5 @@
     <string name="bugreport_info_title" msgid="2306030793918239804">"बगको शीर्षक"</string>
     <string name="bugreport_info_description" msgid="5072835127481627722">"बगको सारांश"</string>
     <string name="save" msgid="4781509040564835759">"सुरक्षित गर्नुहोस्"</string>
-    <string name="bugreport_intent_chooser_title" msgid="7605709494790894076">"बग रिपोर्ट सेयर गर्नुहोस्"</string>
+    <string name="bugreport_intent_chooser_title" msgid="7605709494790894076">"बग रिपोर्ट साझेदारी गर्नुहोस्"</string>
 </resources>

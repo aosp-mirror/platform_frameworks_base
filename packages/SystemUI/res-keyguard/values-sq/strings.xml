@@ -33,7 +33,7 @@
     <string name="keyguard_enter_your_password" msgid="7225626204122735501">"Fut fjalëkalimin"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="3514267777289393046">"Kodi PIN është i pasaktë."</string>
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"Karta e pavlefshme."</string>
-    <string name="keyguard_charged" msgid="5478247181205188995">"I karikuar"</string>
+    <string name="keyguard_charged" msgid="5478247181205188995">"I ngarkuar"</string>
     <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Po karikohet me valë"</string>
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Po karikohet"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Po karikohet me shpejtësi"</string>

@@ -112,7 +112,7 @@
     <string name="bluetooth_opp_profile_summary_use_for" msgid="461981154387015457">"Используется для передачи файлов"</string>
     <string name="bluetooth_hid_profile_summary_use_for" msgid="4289460627406490952">"Использовать для ввода"</string>
     <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="7689393730163320483">"Использовать для слухового аппарата"</string>
-    <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"Добавить"</string>
+    <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"Подключить"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="2734383073450506220">"ДОБАВИТЬ"</string>
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Отмена"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"Установление соединения обеспечивает доступ к вашим контактам и журналу звонков при подключении."</string>
@@ -194,8 +194,8 @@
     <item msgid="581904787661470707">"Максимальная"</item>
   </string-array>
     <string name="choose_profile" msgid="343803890897657450">"Выбор профиля"</string>
-    <string name="category_personal" msgid="6236798763159385225">"Личный профиль"</string>
-    <string name="category_work" msgid="4014193632325996115">"Рабочий профиль"</string>
+    <string name="category_personal" msgid="6236798763159385225">"Личные данные"</string>
+    <string name="category_work" msgid="4014193632325996115">"Работа"</string>
     <string name="development_settings_title" msgid="140296922921597393">"Для разработчиков"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"Включить параметры для разработчиков"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"Настройка параметров для разработчиков"</string>
@@ -210,9 +210,10 @@
     <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Режим отладки при подключении к сети Wi‑Fi"</string>
     <string name="adb_wireless_error" msgid="721958772149779856">"Ошибка"</string>
     <string name="adb_wireless_settings" msgid="2295017847215680229">"Отладка по Wi-Fi"</string>
-    <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Чтобы увидеть и использовать доступные устройства, включите отладку по Wi-Fi."</string>
+    <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Чтобы посмотреть и использовать доступные устройства, включите отладку по Wi-Fi"</string>
     <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"Подключить устройство с помощью QR-кода"</string>
-    <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"Подключение новых устройств с помощью сканера QR-кодов"</string>
+    <!-- no translation found for adb_pair_method_qrcode_summary (7130694277228970888) -->
+    <skip />
     <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Подключить устройство с помощью кода подключения"</string>
     <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"Подключение новых устройств с помощью шестизначного кода"</string>
     <string name="adb_paired_devices_title" msgid="5268997341526217362">"Подключенные устройства"</string>
@@ -223,15 +224,16 @@
     <string name="adb_wireless_connection_failed_title" msgid="664211177427438438">"Не удалось установить подключение"</string>
     <string name="adb_wireless_connection_failed_message" msgid="9213896700171602073">"Убедитесь, что устройство \"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>\" подключено к нужной сети."</string>
     <string name="adb_pairing_device_dialog_title" msgid="7141739231018530210">"Подключение к устройству"</string>
-    <string name="adb_pairing_device_dialog_pairing_code_label" msgid="3639239786669722731">"Код подключения по сети Wi‑Fi"</string>
+    <string name="adb_pairing_device_dialog_pairing_code_label" msgid="3639239786669722731">"Код подключения к сети Wi‑Fi"</string>
     <string name="adb_pairing_device_dialog_failed_title" msgid="3426758947882091735">"Не удалось подключить устройство"</string>
     <string name="adb_pairing_device_dialog_failed_msg" msgid="6611097519661997148">"Устройство должно быть подключено к той же самой сети."</string>
     <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"Подключение устройства через Wi‑Fi с использованием QR-кода"</string>
     <string name="adb_wireless_verifying_qrcode_text" msgid="6123192424916029207">"Подключение устройства…"</string>
     <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"Не удалось подключить устройство. QR-код неверный, или устройство находится в другой сети."</string>
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"IP-адрес и порт"</string>
-    <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"Отсканируйте QR-код"</string>
-    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"Подключение устройства через Wi‑Fi с использованием QR-кода"</string>
+    <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"Сканировать QR-код"</string>
+    <!-- no translation found for adb_wireless_qrcode_pairing_description (6014121407143607851) -->
+    <skip />
     <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Подключите устройство к сети Wi-Fi."</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, отладка, разработчик"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Отчет об ошибке"</string>
@@ -251,12 +253,12 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"Серт. беспроводн. мониторов"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Подробный журнал Wi‑Fi"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Ограничивать поиск сетей Wi‑Fi"</string>
-    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"Случайные MAC-адреса в сети Wi-Fi"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Не отключать мобильный Интернет"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Аппаратное ускорение в режиме модема"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Показывать Bluetooth-устройства без названий"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"Отключить абсолютный уровень громкости"</string>
     <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"Включить Gabeldorsche"</string>
+    <string name="enhanced_connectivity" msgid="7201127377781666804">"Улучшенный обмен данными"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="1710571610177659127">"Версия Bluetooth AVRCP"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7846922290083709633">"Выберите версию Bluetooth AVRCP"</string>
     <string name="bluetooth_select_map_version_string" msgid="526308145174175327">"Версия Bluetooth MAP"</string>
@@ -283,7 +285,6 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Показывать параметры сертификации беспроводных мониторов"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Вести подробный журнал, показывать RSSI для каждого SSID при выборе сети"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Уменьшает расход заряда батареи и улучшает работу сети"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"Если этот режим активирован, MAC-адрес устройства может меняться при каждом подключении к сети, в которой возможно создание случайных MAC-адресов."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Сеть с тарификацией трафика"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Сеть без тарификации трафика"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Размер буфера журнала"</string>
@@ -372,6 +373,10 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Уведомлять о том, что приложение, запущенное в фоновом режиме, не отвечает"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Показывать предупреждения канала передачи уведомлений"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Показывать предупреждение о новых уведомлениях приложения вне допустимого канала"</string>
+    <!-- no translation found for enforce_shortcuts_for_conversations (7040735163945040763) -->
+    <skip />
+    <!-- no translation found for enforce_shortcuts_for_conversations_summary (1860168037282467862) -->
+    <skip />
     <string name="force_allow_on_external" msgid="9187902444231637880">"Разрешить сохранение на внешние накопители"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Разрешить сохранение приложений на внешних накопителях (независимо от значений в манифесте)"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Изменение размера в многооконном режиме"</string>
@@ -433,10 +438,10 @@
     <string name="power_discharge_by_only" msgid="92545648425937000">"Заряда хватит примерно до <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"До <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"Батарея может разрядиться к <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_remaining_less_than_duration_only" msgid="8956656616031395152">"Осталось менее <xliff:g id="THRESHOLD">%1$s</xliff:g>"</string>
-    <string name="power_remaining_less_than_duration" msgid="318215464914990578">"Уровень заряда батареи: <xliff:g id="LEVEL">%2$s</xliff:g> (хватит менее чем на <xliff:g id="THRESHOLD">%1$s</xliff:g>)"</string>
-    <string name="power_remaining_more_than_subtext" msgid="446388082266121894">"Уровень заряда батареи: <xliff:g id="LEVEL">%2$s</xliff:g> (хватит более чем на <xliff:g id="TIME_REMAINING">%1$s</xliff:g>)"</string>
-    <string name="power_remaining_only_more_than_subtext" msgid="4873750633368888062">"Осталось более <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
+    <string name="power_remaining_less_than_duration_only" msgid="5802195288324091585">"Осталось менее <xliff:g id="THRESHOLD">%1$s</xliff:g>"</string>
+    <string name="power_remaining_less_than_duration" msgid="1812668275239801236">"Уровень заряда батареи: <xliff:g id="LEVEL">%2$s</xliff:g> (хватит менее чем на <xliff:g id="THRESHOLD">%1$s</xliff:g>)"</string>
+    <string name="power_remaining_more_than_subtext" msgid="7919119719242734848">"Уровень заряда батареи: <xliff:g id="LEVEL">%2$s</xliff:g> (хватит более чем на <xliff:g id="TIME_REMAINING">%1$s</xliff:g>)"</string>
+    <string name="power_remaining_only_more_than_subtext" msgid="3274496164769110480">"Хватит более чем на <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="137330009791560774">"Телефон скоро выключится"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="145489081521468132">"Планшет скоро выключится"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="1070562682853942350">"Устройство скоро выключится"</string>
@@ -535,7 +540,7 @@
     <string name="user_add_user_message_long" msgid="1527434966294733380">"Если этим устройством пользуются сразу несколько человек, для каждого из них можно создать отдельный профиль – практически собственное пространство со своими приложениями, обоями и т. д. При этом из профиля можно поменять и настройки устройства, общие для всех, например выбрать сеть Wi-Fi.\n\nКогда вы добавляете нового пользователя, ему нужно настроить свой профиль.\n\nОбновлять общие приложения может любой пользователь, однако специальные возможности настраиваются индивидуально."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"После создания профиля его потребуется настроить.\n\nЛюбой пользователь устройства может обновлять приложения для всех аккаунтов."</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Настроить профиль?"</string>
-    <string name="user_setup_dialog_message" msgid="269931619868102841">"Вам потребуется передать устройство пользователю, чтобы он мог настроить свой профиль."</string>
+    <string name="user_setup_dialog_message" msgid="269931619868102841">"Вам потребуется передать устройство пользователю, чтобы он мог настроить свое личное пространство."</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Настроить профиль?"</string>
     <string name="user_setup_button_setup_now" msgid="1708269547187760639">"Настроить"</string>
     <string name="user_setup_button_setup_later" msgid="8712980133555493516">"Не сейчас"</string>
@@ -547,21 +552,7 @@
     <string name="user_need_lock_message" msgid="4311424336209509301">"Чтобы создать профиль с ограниченным доступом, необходимо предварительно настроить блокировку экрана для защиты приложений и личных данных"</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"Включить блокировку"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"Переключиться на этот аккаунт: <xliff:g id="USER_NAME">%s</xliff:g>"</string>
-    <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"Создаем нового пользователя…"</string>
-    <string name="user_nickname" msgid="262624187455825083">"Псевдоним"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"Добавить аккаунт гостя"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Удалить аккаунт гостя"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"Гость"</string>
-    <string name="user_image_take_photo" msgid="467512954561638530">"Сделать снимок"</string>
-    <string name="user_image_choose_photo" msgid="1363820919146782908">"Выбрать фото"</string>
-    <string name="user_image_photo_selector" msgid="433658323306627093">"Выбрать фотографию"</string>
-    <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"Вариант по умолчанию"</string>
-    <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Отключено"</string>
-    <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Включено"</string>
-    <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Чтобы изменение вступило в силу, необходимо перезапустить устройство. Вы можете сделать это сейчас или позже."</string>
-    <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"Проводные наушники"</string>
-    <!-- no translation found for wifi_hotspot_switch_on_text (9212273118217786155) -->
-    <skip />
-    <!-- no translation found for wifi_hotspot_switch_off_text (7245567251496959764) -->
-    <skip />
 </resources>

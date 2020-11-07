@@ -112,7 +112,7 @@
     <string name="kg_pin_accepted" msgid="1625501841604389716">"تم قبول الرمز"</string>
     <string name="keyguard_carrier_default" msgid="6359808469637388586">"لا تتوفر خدمة."</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"تبديل أسلوب الإدخال"</string>
-    <string name="airplane_mode" msgid="2528005343938497866">"وضع الطيران"</string>
+    <string name="airplane_mode" msgid="2528005343938497866">"وضع الطائرة"</string>
     <string name="kg_prompt_reason_restart_pattern" msgid="4720554342633852066">"يجب رسم النقش بعد إعادة تشغيل الجهاز"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="1587671566498057656">"يجب إدخال رقم التعريف الشخصي بعد إعادة تشغيل الجهاز"</string>
     <string name="kg_prompt_reason_restart_password" msgid="8061279087240952002">"يجب إدخال كلمة المرور بعد إعادة تشغيل الجهاز"</string>

@@ -60,7 +60,7 @@
     <string name="error_disable_esim_msg" msgid="2441188596467999327">"कुनै त्रुटिका कारण यो eSIM लाई असक्षम पार्न सकिएन।"</string>
     <string name="keyboardview_keycode_enter" msgid="6727192265631761174">"प्रविष्टि गर्नुहोस्"</string>
     <string name="kg_forgot_pattern_button_text" msgid="3304688032024541260">"ढाँचा बिर्सनुभयो"</string>
-    <string name="kg_wrong_pattern" msgid="5907301342430102842">"प्याटर्न मिलेन"</string>
+    <string name="kg_wrong_pattern" msgid="5907301342430102842">"गलत ढाँचा"</string>
     <string name="kg_wrong_password" msgid="4143127991071670512">"गलत पासवर्ड"</string>
     <string name="kg_wrong_pin" msgid="4160978845968732624">"गलत PIN"</string>
     <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="991400408675793914">
