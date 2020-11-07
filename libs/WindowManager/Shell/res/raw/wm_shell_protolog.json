@@ -79,6 +79,12 @@
       "group": "WM_SHELL_TASK_ORG",
       "at": "com\/android\/wm\/shell\/splitscreen\/SplitScreenTaskListener.java"
     },
+    "-742394458": {
+      "message": "pair task1=%d task2=%d in AppPair=%s",
+      "level": "VERBOSE",
+      "group": "WM_SHELL_TASK_ORG",
+      "at": "com\/android\/wm\/shell\/apppairs\/AppPair.java"
+    },
     "-710770147": {
       "message": "Add target: %s",
       "level": "VERBOSE",
@@ -90,6 +96,12 @@
       "level": "VERBOSE",
       "group": "WM_SHELL_TASK_ORG",
       "at": "com\/android\/wm\/shell\/splitscreen\/SplitScreenTaskListener.java"
+    },
+    "-234284913": {
+      "message": "unpair taskId=%d pair=%s",
+      "level": "VERBOSE",
+      "group": "WM_SHELL_TASK_ORG",
+      "at": "com\/android\/wm\/shell\/apppairs\/AppPairsController.java"
     },
     "-191422040": {
       "message": "Transition animations finished, notifying core %s",
@@ -139,11 +151,29 @@
       "group": "WM_SHELL_TASK_ORG",
       "at": "com\/android\/wm\/shell\/ShellTaskOrganizer.java"
     },
+    "900599280": {
+      "message": "Can't pair unresizeable tasks task1.isResizeable=%b task1.isResizeable=%b",
+      "level": "ERROR",
+      "group": "WM_SHELL_TASK_ORG",
+      "at": "com\/android\/wm\/shell\/apppairs\/AppPair.java"
+    },
+    "950299522": {
+      "message": "taskId %d isn't isn't in an app-pair.",
+      "level": "VERBOSE",
+      "group": "WM_SHELL_TASK_ORG",
+      "at": "com\/android\/wm\/shell\/apppairs\/AppPairsController.java"
+    },
     "980952660": {
       "message": "Task root back pressed taskId=%d",
       "level": "VERBOSE",
       "group": "WM_SHELL_TASK_ORG",
       "at": "com\/android\/wm\/shell\/ShellTaskOrganizer.java"
+    },
+    "1079041527": {
+      "message": "incrementPool size=%d",
+      "level": "VERBOSE",
+      "group": "WM_SHELL_TASK_ORG",
+      "at": "com\/android\/wm\/shell\/apppairs\/AppPairsPool.java"
     },
     "1104702476": {
       "message": "Letterbox Task Changed: #%d",
@@ -175,11 +205,23 @@
       "group": "WM_SHELL_DRAG_AND_DROP",
       "at": "com\/android\/wm\/shell\/draganddrop\/DragAndDropController.java"
     },
+    "1891981945": {
+      "message": "release entry.taskId=%s listener=%s size=%d",
+      "level": "VERBOSE",
+      "group": "WM_SHELL_TASK_ORG",
+      "at": "com\/android\/wm\/shell\/apppairs\/AppPairsPool.java"
+    },
     "1990759023": {
       "message": "addListenerForType types=%s listener=%s",
       "level": "VERBOSE",
       "group": "WM_SHELL_TASK_ORG",
       "at": "com\/android\/wm\/shell\/ShellTaskOrganizer.java"
+    },
+    "2006473416": {
+      "message": "acquire entry.taskId=%s listener=%s size=%d",
+      "level": "VERBOSE",
+      "group": "WM_SHELL_TASK_ORG",
+      "at": "com\/android\/wm\/shell\/apppairs\/AppPairsPool.java"
     },
     "2057038970": {
       "message": "Display changed: %d",

@@ -25,6 +25,7 @@ import com.android.systemui.keyguard.KeyguardSliceProvider;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.util.InjectionInflationController;
 import com.android.wm.shell.ShellDump;
+import com.android.wm.shell.apppairs.AppPairs;
 import com.android.wm.shell.bubbles.Bubbles;
 import com.android.wm.shell.hidedisplaycutout.HideDisplayCutout;
 import com.android.wm.shell.onehanded.OneHanded;
@@ -59,6 +60,9 @@ public interface SysUIComponent {
 
         @BindsInstance
         Builder setSplitScreen(Optional<SplitScreen> s);
+
+        @BindsInstance
+        Builder setAppPairs(Optional<AppPairs> s);
 
         @BindsInstance
         Builder setOneHanded(Optional<OneHanded> o);
