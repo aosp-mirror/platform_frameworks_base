@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package com.android.server.biometrics.sensors.fingerprint.aidl;
+package com.android.server.biometrics.sensors.face.aidl;
 
 import android.annotation.NonNull;
 import android.content.Context;
 import android.hardware.biometrics.BiometricsProtoEnums;
-import android.hardware.biometrics.fingerprint.IFingerprint;
-import android.hardware.biometrics.fingerprint.ISession;
+import android.hardware.biometrics.face.IFace;
+import android.hardware.biometrics.face.ISession;
 import android.hardware.keymaster.HardwareAuthToken;
 import android.os.RemoteException;
 import android.util.Slog;
@@ -32,19 +32,19 @@ import com.android.server.biometrics.sensors.LockoutResetDispatcher;
 import com.android.server.biometrics.sensors.LockoutTracker;
 
 /**
- * Fingerprint-specific resetLockout client for the {@link IFingerprint} AIDL HAL interface.
+ * Face-specific resetLockout client for the {@link IFace} AIDL HAL interface.
  * Updates the framework's lockout cache and notifies clients such as Keyguard when lockout is
  * cleared.
  */
-class FingerprintResetLockoutClient extends ClientMonitor<ISession> {
+public class FaceResetLockoutClient extends ClientMonitor<ISession> {
 
-    private static final String TAG = "FingerprintResetLockoutClient";
+    private static final String TAG = "FaceResetLockoutClient";
 
     private final HardwareAuthToken mHardwareAuthToken;
     private final LockoutCache mLockoutCache;
     private final LockoutResetDispatcher mLockoutResetDispatcher;
 
-    FingerprintResetLockoutClient(@NonNull Context context,
+    FaceResetLockoutClient(@NonNull Context context,
             @NonNull LazyDaemon<ISession> lazyDaemon, int userId, String owner, int sensorId,
             @NonNull byte[] hardwareAuthToken, @NonNull LockoutCache lockoutTracker,
             @NonNull LockoutResetDispatcher lockoutResetDispatcher) {

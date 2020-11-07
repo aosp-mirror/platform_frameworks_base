@@ -14,21 +14,19 @@
  * limitations under the License.
  */
 
-package com.android.server.biometrics.sensors.fingerprint.aidl;
+package com.android.server.biometrics.sensors;
 
 import android.util.SparseIntArray;
-
-import com.android.server.biometrics.sensors.LockoutTracker;
 
 /**
  * For a single sensor, caches lockout states for all users.
  */
-class LockoutCache implements LockoutTracker {
+public class LockoutCache implements LockoutTracker {
 
     // Map of userId to LockoutMode
     private final SparseIntArray mUserLockoutStates;
 
-    LockoutCache() {
+    public LockoutCache() {
         mUserLockoutStates = new SparseIntArray();
     }
 

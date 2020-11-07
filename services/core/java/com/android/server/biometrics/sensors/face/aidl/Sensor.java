@@ -14,35 +14,28 @@
  * limitations under the License.
  */
 
-package com.android.server.biometrics.sensors.fingerprint.aidl;
+package com.android.server.biometrics.sensors.face.aidl;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
-import android.content.pm.UserInfo;
 import android.hardware.biometrics.BiometricsProtoEnums;
-import android.hardware.biometrics.ITestSession;
-import android.hardware.biometrics.fingerprint.Error;
-import android.hardware.biometrics.fingerprint.IFingerprint;
-import android.hardware.biometrics.fingerprint.ISession;
-import android.hardware.biometrics.fingerprint.ISessionCallback;
-import android.hardware.fingerprint.Fingerprint;
-import android.hardware.fingerprint.FingerprintManager;
-import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
+import android.hardware.biometrics.face.Error;
+import android.hardware.biometrics.face.IFace;
+import android.hardware.biometrics.face.ISession;
+import android.hardware.biometrics.face.ISessionCallback;
+import android.hardware.face.Face;
+import android.hardware.face.FaceManager;
+import android.hardware.face.FaceSensorPropertiesInternal;
 import android.hardware.keymaster.HardwareAuthToken;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.os.UserManager;
 import android.util.Slog;
-import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.biometrics.HardwareAuthTokenUtils;
 import com.android.server.biometrics.Utils;
-import com.android.server.biometrics.fingerprint.FingerprintServiceStateProto;
-import com.android.server.biometrics.fingerprint.SensorStateProto;
-import com.android.server.biometrics.fingerprint.UserStateProto;
 import com.android.server.biometrics.sensors.AcquisitionClient;
 import com.android.server.biometrics.sensors.AuthenticationConsumer;
 import com.android.server.biometrics.sensors.BiometricScheduler;
@@ -52,33 +45,27 @@ import com.android.server.biometrics.sensors.Interruptable;
 import com.android.server.biometrics.sensors.LockoutCache;
 import com.android.server.biometrics.sensors.LockoutConsumer;
 import com.android.server.biometrics.sensors.RemovalConsumer;
-import com.android.server.biometrics.sensors.fingerprint.FingerprintUtils;
-import com.android.server.biometrics.sensors.fingerprint.GestureAvailabilityDispatcher;
+import com.android.server.biometrics.sensors.face.FaceUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Maintains the state of a single sensor within an instance of the
- * {@link android.hardware.biometrics.fingerprint.IFingerprint} HAL.
+ * Maintains the state of a single sensor within an instance of the {@link IFace} HAL.
  */
-@SuppressWarnings("deprecation")
-class Sensor implements IBinder.DeathRecipient {
-
-    private boolean mTestHalEnabled;
+public class Sensor implements IBinder.DeathRecipient {
 
     @NonNull private final String mTag;
-    @NonNull private final FingerprintProvider mProvider;
+    @NonNull private final FaceProvider mProvider;
     @NonNull private final Context mContext;
     @NonNull private final Handler mHandler;
-    @NonNull private final FingerprintSensorPropertiesInternal mSensorProperties;
+    @NonNull private final FaceSensorPropertiesInternal mSensorProperties;
     @NonNull private final BiometricScheduler mScheduler;
     @NonNull private final LockoutCache mLockoutCache;
     @NonNull private final Map<Integer, Long> mAuthenticatorIds;
-
-    @Nullable private Session mCurrentSession;
     @NonNull private final ClientMonitor.LazyDaemon<ISession> mLazySession;
+    @Nullable private Session mCurrentSession;
 
     @Override
     public void binderDied() {
@@ -88,13 +75,13 @@ class Sensor implements IBinder.DeathRecipient {
             if (client instanceof Interruptable) {
                 Slog.e(mTag, "Sending ERROR_HW_UNAVAILABLE for client: " + client);
                 final Interruptable interruptable = (Interruptable) client;
-                interruptable.onError(FingerprintManager.FINGERPRINT_ERROR_HW_UNAVAILABLE,
+                interruptable.onError(FaceManager.FACE_ERROR_HW_UNAVAILABLE,
                         0 /* vendorCode */);
 
                 mScheduler.recordCrashState();
 
                 FrameworkStatsLog.write(FrameworkStatsLog.BIOMETRIC_SYSTEM_HEALTH_ISSUE_DETECTED,
-                        BiometricsProtoEnums.MODALITY_FINGERPRINT,
+                        BiometricsProtoEnums.MODALITY_FACE,
                         BiometricsProtoEnums.ISSUE_HAL_DEATH);
                 mCurrentSession = null;
             }
@@ -102,10 +89,10 @@ class Sensor implements IBinder.DeathRecipient {
     }
 
     static class Session {
+        @NonNull final HalSessionCallback mHalSessionCallback;
         @NonNull private final String mTag;
         @NonNull private final ISession mSession;
         private final int mUserId;
-        @NonNull final HalSessionCallback mHalSessionCallback;
 
         Session(@NonNull String tag, @NonNull ISession session, int userId,
                 @NonNull HalSessionCallback halSessionCallback) {
@@ -117,8 +104,68 @@ class Sensor implements IBinder.DeathRecipient {
         }
     }
 
-    static class HalSessionCallback extends ISessionCallback.Stub {
+    Sensor(@NonNull String tag, @NonNull FaceProvider provider, @NonNull Context context,
+            @NonNull Handler handler, @NonNull FaceSensorPropertiesInternal sensorProperties) {
+        mTag = tag;
+        mProvider = provider;
+        mContext = context;
+        mHandler = handler;
+        mSensorProperties = sensorProperties;
+        mScheduler = new BiometricScheduler(tag, null /* gestureAvailabilityDispatcher */);
+        mLockoutCache = new LockoutCache();
+        mAuthenticatorIds = new HashMap<>();
+        mLazySession = () -> (mCurrentSession != null) ? mCurrentSession.mSession : null;
+    }
 
+    @NonNull ClientMonitor.LazyDaemon<ISession> getLazySession() {
+        return mLazySession;
+    }
+
+    @NonNull FaceSensorPropertiesInternal getSensorProperties() {
+        return mSensorProperties;
+    }
+
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
+    boolean hasSessionForUser(int userId) {
+        return mCurrentSession != null && mCurrentSession.mUserId == userId;
+    }
+
+    @Nullable Session getSessionForUser(int userId) {
+        if (mCurrentSession != null && mCurrentSession.mUserId == userId) {
+            return mCurrentSession;
+        } else {
+            return null;
+        }
+    }
+
+    void createNewSession(@NonNull IFace daemon, int sensorId, int userId)
+            throws RemoteException {
+
+        final HalSessionCallback.Callback callback = () -> {
+            Slog.e(mTag, "Got ERROR_HW_UNAVAILABLE");
+            mCurrentSession = null;
+        };
+        final HalSessionCallback resultController = new HalSessionCallback(mContext, mHandler,
+                mTag, mScheduler, sensorId, userId, callback);
+
+        final ISession newSession = daemon.createSession(sensorId, userId, resultController);
+        newSession.asBinder().linkToDeath(this, 0 /* flags */);
+        mCurrentSession = new Session(mTag, newSession, userId, resultController);
+    }
+
+    @NonNull BiometricScheduler getScheduler() {
+        return mScheduler;
+    }
+
+    @NonNull LockoutCache getLockoutCache() {
+        return mLockoutCache;
+    }
+
+    @NonNull Map<Integer, Long> getAuthenticatorIds() {
+        return mAuthenticatorIds;
+    }
+
+    static class HalSessionCallback extends ISessionCallback.Stub {
         /**
          * Interface to sends results to the HalSessionCallback's owner.
          */
@@ -129,13 +176,18 @@ class Sensor implements IBinder.DeathRecipient {
             void onHardwareUnavailable();
         }
 
-        @NonNull private final Context mContext;
-        @NonNull private final Handler mHandler;
-        @NonNull private final String mTag;
-        @NonNull private final BiometricScheduler mScheduler;
+        @NonNull
+        private final Context mContext;
+        @NonNull
+        private final Handler mHandler;
+        @NonNull
+        private final String mTag;
+        @NonNull
+        private final BiometricScheduler mScheduler;
         private final int mSensorId;
         private final int mUserId;
-        @NonNull private final Callback mCallback;
+        @NonNull
+        private final Callback mCallback;
 
         HalSessionCallback(@NonNull Context context, @NonNull Handler handler, @NonNull String tag,
                 @NonNull BiometricScheduler scheduler, int sensorId, int userId,
@@ -155,33 +207,33 @@ class Sensor implements IBinder.DeathRecipient {
         }
 
         @Override
-        public void onChallengeGenerated(long challenge) {
+        public void onChallengeGenerated(int sensorId, int userId, long challenge) {
             mHandler.post(() -> {
                 final ClientMonitor<?> client = mScheduler.getCurrentClient();
-                if (!(client instanceof FingerprintGenerateChallengeClient)) {
+                if (!(client instanceof FaceGenerateChallengeClient)) {
                     Slog.e(mTag, "onChallengeGenerated for wrong client: "
                             + Utils.getClientName(client));
                     return;
                 }
 
-                final FingerprintGenerateChallengeClient generateChallengeClient =
-                        (FingerprintGenerateChallengeClient) client;
+                final FaceGenerateChallengeClient generateChallengeClient =
+                        (FaceGenerateChallengeClient) client;
                 generateChallengeClient.onChallengeGenerated(mSensorId, mUserId, challenge);
             });
         }
 
         @Override
-        public void onChallengeRevoked(long challenge) {
+        public void onChallengeRevoked(int sensorId, int userId, long challenge) {
             mHandler.post(() -> {
                 final ClientMonitor<?> client = mScheduler.getCurrentClient();
-                if (!(client instanceof FingerprintRevokeChallengeClient)) {
+                if (!(client instanceof FaceRevokeChallengeClient)) {
                     Slog.e(mTag, "onChallengeRevoked for wrong client: "
                             + Utils.getClientName(client));
                     return;
                 }
 
-                final FingerprintRevokeChallengeClient revokeChallengeClient =
-                        (FingerprintRevokeChallengeClient) client;
+                final FaceRevokeChallengeClient revokeChallengeClient =
+                        (FaceRevokeChallengeClient) client;
                 revokeChallengeClient.onChallengeRevoked(mSensorId, mUserId, challenge);
             });
         }
@@ -228,19 +280,19 @@ class Sensor implements IBinder.DeathRecipient {
         public void onEnrollmentProgress(int enrollmentId, int remaining) {
             mHandler.post(() -> {
                 final ClientMonitor<?> client = mScheduler.getCurrentClient();
-                if (!(client instanceof FingerprintEnrollClient)) {
+                if (!(client instanceof FaceEnrollClient)) {
                     Slog.e(mTag, "onEnrollmentProgress for non-enroll client: "
                             + Utils.getClientName(client));
                     return;
                 }
 
                 final int currentUserId = client.getTargetUserId();
-                final CharSequence name = FingerprintUtils.getInstance(mSensorId)
+                final CharSequence name = FaceUtils.getInstance(mSensorId)
                         .getUniqueName(mContext, currentUserId);
-                final Fingerprint fingerprint = new Fingerprint(name, enrollmentId, mSensorId);
+                final Face face = new Face(name, enrollmentId, mSensorId);
 
-                final FingerprintEnrollClient enrollClient = (FingerprintEnrollClient) client;
-                enrollClient.onEnrollResult(fingerprint, remaining);
+                final FaceEnrollClient enrollClient = (FaceEnrollClient) client;
+                enrollClient.onEnrollResult(face, remaining);
             });
         }
 
@@ -256,14 +308,13 @@ class Sensor implements IBinder.DeathRecipient {
 
                 final AuthenticationConsumer authenticationConsumer =
                         (AuthenticationConsumer) client;
-                final Fingerprint fp = new Fingerprint("", enrollmentId, mSensorId);
+                final Face face = new Face("" /* name */, enrollmentId, mSensorId);
                 final byte[] byteArray = HardwareAuthTokenUtils.toByteArray(hat);
                 final ArrayList<Byte> byteList = new ArrayList<>();
                 for (byte b : byteArray) {
                     byteList.add(b);
                 }
-
-                authenticationConsumer.onAuthenticated(fp, true /* authenticated */, byteList);
+                authenticationConsumer.onAuthenticated(face, true /* authenticated */, byteList);
             });
         }
 
@@ -279,9 +330,9 @@ class Sensor implements IBinder.DeathRecipient {
 
                 final AuthenticationConsumer authenticationConsumer =
                         (AuthenticationConsumer) client;
-                final Fingerprint fp = new Fingerprint("", 0 /* enrollmentId */, mSensorId);
-                authenticationConsumer
-                        .onAuthenticated(fp, false /* authenticated */, null /* hat */);
+                final Face face = new Face("" /* name */, 0 /* faceId */, mSensorId);
+                authenticationConsumer.onAuthenticated(face, false /* authenticated */,
+                        null /* hat */);
             });
         }
 
@@ -319,32 +370,20 @@ class Sensor implements IBinder.DeathRecipient {
         public void onLockoutCleared() {
             mHandler.post(() -> {
                 final ClientMonitor<?> client = mScheduler.getCurrentClient();
-                if (!(client instanceof FingerprintResetLockoutClient)) {
+                if (!(client instanceof FaceResetLockoutClient)) {
                     Slog.e(mTag, "onLockoutCleared for non-resetLockout client: "
                             + Utils.getClientName(client));
                     return;
                 }
 
-                final FingerprintResetLockoutClient resetLockoutClient =
-                        (FingerprintResetLockoutClient) client;
+                final FaceResetLockoutClient resetLockoutClient = (FaceResetLockoutClient) client;
                 resetLockoutClient.onLockoutCleared();
             });
         }
 
         @Override
         public void onInteractionDetected() {
-            mHandler.post(() -> {
-                final ClientMonitor<?> client = mScheduler.getCurrentClient();
-                if (!(client instanceof FingerprintDetectClient)) {
-                    Slog.e(mTag, "onInteractionDetected for non-detect client: "
-                            + Utils.getClientName(client));
-                    return;
-                }
-
-                final FingerprintDetectClient fingerprintDetectClient =
-                        (FingerprintDetectClient) client;
-                fingerprintDetectClient.onInteractionDetected();
-            });
+            // no-op
         }
 
         @Override
@@ -360,12 +399,12 @@ class Sensor implements IBinder.DeathRecipient {
                 final EnumerateConsumer enumerateConsumer =
                         (EnumerateConsumer) client;
                 if (enrollmentIds.length > 0) {
-                    for (int i = 0; i < enrollmentIds.length; i++) {
-                        final Fingerprint fp = new Fingerprint("", enrollmentIds[i], mSensorId);
-                        enumerateConsumer.onEnumerationResult(fp, enrollmentIds.length - i - 1);
+                    for (int i = 0; i < enrollmentIds.length; ++i) {
+                        final Face face = new Face("" /* name */, enrollmentIds[i], mSensorId);
+                        enumerateConsumer.onEnumerationResult(face, enrollmentIds.length - i - 1);
                     }
                 } else {
-                    enumerateConsumer.onEnumerationResult(null /* identifier */, 0);
+                    enumerateConsumer.onEnumerationResult(null /* identifier */, 0 /* remaining */);
                 }
             });
         }
@@ -382,12 +421,12 @@ class Sensor implements IBinder.DeathRecipient {
 
                 final RemovalConsumer removalConsumer = (RemovalConsumer) client;
                 if (enrollmentIds.length > 0) {
-                    for (int i  = 0; i < enrollmentIds.length; i++) {
-                        final Fingerprint fp = new Fingerprint("", enrollmentIds[i], mSensorId);
-                        removalConsumer.onRemoved(fp, enrollmentIds.length - i - 1);
+                    for (int i = 0; i < enrollmentIds.length; i++) {
+                        final Face face = new Face("" /* name */, enrollmentIds[i], mSensorId);
+                        removalConsumer.onRemoved(face, enrollmentIds.length - i - 1);
                     }
                 } else {
-                    removalConsumer.onRemoved(null, 0);
+                    removalConsumer.onRemoved(null /* identifier */, 0 /* remaining */);
                 }
             });
         }
@@ -396,116 +435,22 @@ class Sensor implements IBinder.DeathRecipient {
         public void onAuthenticatorIdRetrieved(long authenticatorId) {
             mHandler.post(() -> {
                 final ClientMonitor<?> client = mScheduler.getCurrentClient();
-                if (!(client instanceof FingerprintGetAuthenticatorIdClient)) {
+                if (!(client instanceof FaceGetAuthenticatorIdClient)) {
                     Slog.e(mTag, "onAuthenticatorIdRetrieved for wrong consumer: "
                             + Utils.getClientName(client));
                     return;
                 }
 
-                final FingerprintGetAuthenticatorIdClient getAuthenticatorIdClient =
-                        (FingerprintGetAuthenticatorIdClient) client;
+                final FaceGetAuthenticatorIdClient getAuthenticatorIdClient =
+                        (FaceGetAuthenticatorIdClient) client;
                 getAuthenticatorIdClient.onAuthenticatorIdRetrieved(authenticatorId);
             });
         }
 
         @Override
         public void onAuthenticatorIdInvalidated() {
-            // TODO(159667191)
-        }
-    }
-
-    Sensor(@NonNull String tag, @NonNull FingerprintProvider provider, @NonNull Context context,
-            @NonNull Handler handler, @NonNull FingerprintSensorPropertiesInternal sensorProperties,
-            @NonNull GestureAvailabilityDispatcher gestureAvailabilityDispatcher) {
-        mTag = tag;
-        mProvider = provider;
-        mContext = context;
-        mHandler = handler;
-        mSensorProperties = sensorProperties;
-        mScheduler = new BiometricScheduler(tag, gestureAvailabilityDispatcher);
-        mLockoutCache = new LockoutCache();
-        mAuthenticatorIds = new HashMap<>();
-        mLazySession = () -> {
-            if (mTestHalEnabled) {
-                return new TestSession(mCurrentSession.mHalSessionCallback);
-            } else {
-                return mCurrentSession != null ? mCurrentSession.mSession : null;
-            }
-        };
-    }
-
-    @NonNull ClientMonitor.LazyDaemon<ISession> getLazySession() {
-        return mLazySession;
-    }
-
-    @NonNull FingerprintSensorPropertiesInternal getSensorProperties() {
-        return mSensorProperties;
-    }
-
-    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
-    boolean hasSessionForUser(int userId) {
-        return mCurrentSession != null && mCurrentSession.mUserId == userId;
-    }
-
-    @Nullable Session getSessionForUser(int userId) {
-        if (mCurrentSession != null && mCurrentSession.mUserId == userId) {
-            return mCurrentSession;
-        } else {
-            return null;
-        }
-    }
-
-    @NonNull ITestSession createTestSession() {
-        return new BiometricTestSessionImpl(mContext, mSensorProperties.sensorId, mProvider, this);
-    }
-
-    void createNewSession(@NonNull IFingerprint daemon, int sensorId, int userId)
-            throws RemoteException {
-
-        final HalSessionCallback.Callback callback = () -> {
-            Slog.e(mTag, "Got ERROR_HW_UNAVAILABLE");
-            mCurrentSession = null;
-        };
-        final HalSessionCallback resultController = new HalSessionCallback(mContext, mHandler,
-                mTag, mScheduler, sensorId, userId, callback);
-
-        final ISession newSession = daemon.createSession(sensorId, userId, resultController);
-        newSession.asBinder().linkToDeath(this, 0 /* flags */);
-        mCurrentSession = new Session(mTag, newSession, userId, resultController);
-    }
-
-    @NonNull BiometricScheduler getScheduler() {
-        return mScheduler;
-    }
-
-    @NonNull LockoutCache getLockoutCache() {
-        return mLockoutCache;
-    }
-
-    @NonNull Map<Integer, Long> getAuthenticatorIds() {
-        return mAuthenticatorIds;
-    }
-
-    void setTestHalEnabled(boolean enabled) {
-        mTestHalEnabled = enabled;
-    }
-
-    void dumpProtoState(int sensorId, @NonNull ProtoOutputStream proto) {
-        final long sensorToken = proto.start(FingerprintServiceStateProto.SENSOR_STATES);
-
-        proto.write(SensorStateProto.SENSOR_ID, mSensorProperties.sensorId);
-        proto.write(SensorStateProto.IS_BUSY, mScheduler.getCurrentClient() != null);
-
-        for (UserInfo user : UserManager.get(mContext).getUsers()) {
-            final int userId = user.getUserHandle().getIdentifier();
-
-            final long userToken = proto.start(SensorStateProto.USER_STATES);
-            proto.write(UserStateProto.USER_ID, userId);
-            proto.write(UserStateProto.NUM_ENROLLED, FingerprintUtils.getInstance()
-                    .getBiometricsForUser(mContext, userId).size());
-            proto.end(userToken);
+            // TODO(b/159667191)
         }
 
-        proto.end(sensorToken);
     }
 }
