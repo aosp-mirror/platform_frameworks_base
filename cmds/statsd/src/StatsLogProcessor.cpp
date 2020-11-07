@@ -549,9 +549,7 @@ void StatsLogProcessor::OnConfigUpdatedLocked(const int64_t timestampNs, const C
         configValid = it->second->updateConfig(config, mTimeBaseNs, timestampNs,
                                                mAnomalyAlarmMonitor, mPeriodicAlarmMonitor);
         if (configValid) {
-            // TODO(b/162323476): refresh TTL, ensure init() is handled properly.
             mUidMap->OnConfigUpdated(key);
-
         }
     }
     if (!configValid) {

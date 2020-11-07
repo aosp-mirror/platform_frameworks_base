@@ -895,6 +895,12 @@ bool updateMetrics(const ConfigKey& key, const StatsdConfig& config, const int64
         }
     }
 
+    // Init new/replaced metrics.
+    for (size_t i = 0; i < newMetricProducers.size(); i++) {
+        if (metricsToUpdate[i] == UPDATE_REPLACE || metricsToUpdate[i] == UPDATE_NEW) {
+            newMetricProducers[i]->prepareFirstBucket();
+        }
+    }
     return true;
 }
 

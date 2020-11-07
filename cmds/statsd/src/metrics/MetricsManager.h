@@ -292,6 +292,14 @@ private:
     // Calls initAllowedLogSources and initPullAtomSources. Sets mConfigValid to false on error.
     void createAllLogSourcesFromConfig(const StatsdConfig& config);
 
+    // Verifies the config meets guardrails and updates statsdStats.
+    // Sets mConfigValid to false on error. Should be called on config creation/update
+    void verifyGuardrailsAndUpdateStatsdStats();
+
+    // Initializes mIsAlwaysActive and mIsActive.
+    // Should be called on config creation/update.
+    void initializeConfigActiveStatus();
+
     // The metrics that don't need to be uploaded or even reported.
     std::set<int64_t> mNoReportMetricIds;
 
