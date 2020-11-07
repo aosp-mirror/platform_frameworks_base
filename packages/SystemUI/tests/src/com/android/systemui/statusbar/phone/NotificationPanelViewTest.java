@@ -64,6 +64,7 @@ import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.doze.DozeLog;
 import com.android.systemui.media.MediaHierarchyManager;
 import com.android.systemui.plugins.FalsingManager;
+import com.android.systemui.qs.QSDetailDisplayer;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.KeyguardAffordanceView;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
@@ -214,6 +215,7 @@ public class NotificationPanelViewTest extends SysuiTestCase {
         mDisplayMetrics.density = 100;
         when(mResources.getBoolean(R.bool.config_enableNotificationShadeDrag)).thenReturn(true);
         when(mView.getContext()).thenReturn(getContext());
+        when(mView.findViewById(R.id.keyguard_header)).thenReturn(mKeyguardStatusBar);
         when(mView.findViewById(R.id.keyguard_clock_container)).thenReturn(mKeyguardClockSwitch);
         when(mView.findViewById(R.id.notification_stack_scroller))
                 .thenReturn(mNotificationStackScrollLayout);
@@ -273,7 +275,8 @@ public class NotificationPanelViewTest extends SysuiTestCase {
                 mKeyguardStatusViewComponentFactory,
                 mGroupManager,
                 mNotificationAreaController,
-                mAuthController);
+                mAuthController,
+                new QSDetailDisplayer());
         mNotificationPanelViewController.initDependencies(
                 mStatusBar,
                 mNotificationShelfController);

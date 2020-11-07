@@ -558,4 +558,8 @@
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"இயக்கப்பட்டது"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"இந்த மாற்றங்கள் செயல்படுத்தப்பட உங்கள் சாதனத்தை மறுபடி தொடங்க வேண்டும். இப்போதே மறுபடி தொடங்கவும் அல்லது ரத்துசெய்யவும்."</string>
     <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"வயருள்ள ஹெட்ஃபோன்"</string>
+    <!-- no translation found for wifi_hotspot_switch_on_text (9212273118217786155) -->
+    <skip />
+    <!-- no translation found for wifi_hotspot_switch_off_text (7245567251496959764) -->
+    <skip />
 </resources>

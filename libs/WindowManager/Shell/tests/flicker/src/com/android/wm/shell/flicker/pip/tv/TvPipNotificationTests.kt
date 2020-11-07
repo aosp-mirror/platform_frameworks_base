@@ -22,12 +22,14 @@ import android.os.Bundle
 import android.service.notification.StatusBarNotification
 import android.view.Surface
 import androidx.test.filters.RequiresDevice
+import com.android.wm.shell.flicker.NotificationListener.Companion.findNotification
 import com.android.wm.shell.flicker.NotificationListener.Companion.startNotificationListener
 import com.android.wm.shell.flicker.NotificationListener.Companion.stopNotificationListener
 import com.android.wm.shell.flicker.NotificationListener.Companion.waitForNotificationToAppear
 import com.android.wm.shell.flicker.NotificationListener.Companion.waitForNotificationToDisappear
 import org.junit.After
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.FixMethodOrder
@@ -83,10 +85,10 @@ class TvPipNotificationTests(rotationName: String, rotation: Int)
 
         val notification: StatusBarNotification = waitForNotificationToAppear {
             it.isPipNotificationWithTitle(testApp.label)
-        } ?: throw AssertionError("Pip notification should have been posted")
+        } ?: fail("Pip notification should have been posted")
 
         notification.deleteIntent?.send()
-            ?: throw AssertionError("Pip notification should contain `delete_intent`")
+            ?: fail("Pip notification should contain `delete_intent`")
 
         assertTrue("Pip should have closed by sending the `delete_intent`",
                 testApp.waitUntilClosed())
@@ -101,10 +103,10 @@ class TvPipNotificationTests(rotationName: String, rotation: Int)
 
         val notification: StatusBarNotification = waitForNotificationToAppear {
             it.isPipNotificationWithTitle(testApp.label)
-        } ?: throw AssertionError("Pip notification should have been posted")
+        } ?: fail("Pip notification should have been posted")
 
         notification.contentIntent?.send()
-            ?: throw AssertionError("Pip notification should contain `content_intent`")
+            ?: fail("Pip notification should contain `content_intent`")
 
         assertTrue("Pip menu should have been shown after sending `content_intent`",
                 uiDevice.waitForTvPipMenu())
@@ -113,7 +115,53 @@ class TvPipNotificationTests(rotationName: String, rotation: Int)
         testApp.closePipWindow()
     }
 
+    @Test
+    fun pipNotification_mediaSessionTitle_isDisplayed() {
+        testApp.launchViaIntent()
+        // Start media session and to PiP
+        testApp.clickStartMediaSessionButton()
+        testApp.clickEnterPipButton()
+
+        // Wait for the correct notification to show up...
+        waitForNotificationToAppear {
+            it.isPipNotificationWithTitle(TITLE_MEDIA_SESSION_PLAYING)
+        } ?: fail("Pip notification with media session title should have been posted")
+        // ... and make sure "regular" PiP notification is now shown
+        assertNull("Regular notification should not have been posted",
+            findNotification { it.isPipNotificationWithTitle(testApp.label) })
+
+        // Pause the media session. When paused the application updates the title for the media
+        // session. This change should be reflected in the notification.
+        testApp.pauseMedia()
+
+        // Wait for the "paused" notification to show up...
+        waitForNotificationToAppear {
+            it.isPipNotificationWithTitle(TITLE_MEDIA_SESSION_PAUSED)
+        } ?: fail("Pip notification with media session title should have been posted")
+        // ... and make sure "playing" PiP notification is gone
+        assertNull("Regular notification should not have been posted",
+                findNotification { it.isPipNotificationWithTitle(TITLE_MEDIA_SESSION_PLAYING) })
+
+        // Now stop the media session, which should revert the title to the "default" one.
+        testApp.stopMedia()
+
+        // Wait for the "regular" notification to show up...
+        waitForNotificationToAppear {
+            it.isPipNotificationWithTitle(testApp.label)
+        } ?: fail("Pip notification with media session title should have been posted")
+        // ... and make sure previous ("paused") notification is gone
+        assertNull("Regular notification should not have been posted",
+                findNotification { it.isPipNotificationWithTitle(TITLE_MEDIA_SESSION_PAUSED) })
+
+        testApp.closePipWindow()
+    }
+
+    private fun fail(message: String): Nothing = throw AssertionError(message)
+
     companion object {
+        private const val TITLE_MEDIA_SESSION_PLAYING = "TestApp media is playing"
+        private const val TITLE_MEDIA_SESSION_PAUSED = "TestApp media is paused"
+
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
         fun getParams(): Collection<Array<Any>> {

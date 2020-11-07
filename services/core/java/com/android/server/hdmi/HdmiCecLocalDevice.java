@@ -997,6 +997,11 @@ abstract class HdmiCecLocalDevice {
     protected void onStandby(boolean initiatedByCec, int standbyAction) {}
 
     /**
+     * Called when the initialization of local devices is complete.
+     */
+    protected void onInitializeCecComplete(int initiatedBy) {}
+
+    /**
      * Disable device. {@code callback} is used to get notified when all pending actions are
      * completed or timeout is issued.
      *

@@ -17,6 +17,8 @@
 package com.android.wm.shell.flicker.helpers
 
 import android.app.Instrumentation
+import android.media.session.MediaController
+import android.media.session.MediaSessionManager
 import android.os.SystemClock
 import android.view.KeyEvent.KEYCODE_WINDOW
 import androidx.test.uiautomator.By
@@ -35,6 +37,15 @@ class PipAppHelper(
         TEST_APP_PIP_ACTIVITY_LABEL,
         TEST_APP_PIP_ACTIVITY_COMPONENT_NAME
 ) {
+    private val mediaSessionManager: MediaSessionManager
+        get() = context.getSystemService(MediaSessionManager::class.java)
+                ?: error("Could not get MediaSessionManager")
+
+    private val mediaController: MediaController?
+        get() = mediaSessionManager.getActiveSessions(null).firstOrNull {
+            it.packageName == packageName
+        }
+
     fun clickEnterPipButton() {
         val enterPipButton = uiDevice.findObject(By.res(packageName, "enter_pip"))
         assertNotNull("Pip button not found, this usually happens when the device " +
@@ -49,6 +60,19 @@ class PipAppHelper(
             SystemClock.sleep(3_000)
         }
     }
+
+    fun clickStartMediaSessionButton() {
+        val startButton = uiDevice.findObject(By.res(packageName, "media_session_start"))
+        assertNotNull("Start button not found, this usually happens when the device " +
+                "was left in an unknown state (e.g. in split screen)", startButton)
+        startButton.click()
+    }
+
+    fun pauseMedia() = mediaController?.transportControls?.pause()
+            ?: error("No active media session found")
+
+    fun stopMedia() = mediaController?.transportControls?.stop()
+            ?: error("No active media session found")
 
     fun closePipWindow() {
         // TODO(b/172321238): remove this check once and simply call closePipWindow once the TV

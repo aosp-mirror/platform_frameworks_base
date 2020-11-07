@@ -35,7 +35,7 @@ import com.android.systemui.qs.customize.QSCustomizer;
 import com.android.wm.shell.animation.PhysicsAnimator;
 
 /**
- * Wrapper view with background which contains {@link QSPanel} and {@link BaseStatusBarHeader}
+ * Wrapper view with background which contains {@link QSPanel} and {@link QuickStatusBarHeader}
  */
 public class QSContainerImpl extends FrameLayout {
 
@@ -57,7 +57,6 @@ public class QSContainerImpl extends FrameLayout {
             SpringForce.DAMPING_RATIO_LOW_BOUNCY);
     private int mBackgroundBottom = -1;
     private int mHeightOverride = -1;
-    private QSPanel mQSPanel;
     private View mQSDetail;
     private QuickStatusBarHeader mHeader;
     private float mQsExpansion;
@@ -81,7 +80,6 @@ public class QSContainerImpl extends FrameLayout {
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        mQSPanel = findViewById(R.id.quick_settings_panel);
         mQSPanelContainer = findViewById(R.id.expanded_qs_scroll_view);
         mQSDetail = findViewById(R.id.qs_detail);
         mHeader = findViewById(R.id.header);
@@ -90,20 +88,16 @@ public class QSContainerImpl extends FrameLayout {
         mBackground = findViewById(R.id.quick_settings_background);
         mStatusBarBackground = findViewById(R.id.quick_settings_status_bar_background);
         mBackgroundGradient = findViewById(R.id.quick_settings_gradient_view);
-        updateResources();
         mHeader.getHeaderQsPanel().setMediaVisibilityChangedListener((visible) -> {
             if (mHeader.getHeaderQsPanel().isShown()) {
                 mAnimateBottomOnNextLayout = true;
             }
         });
-        mQSPanel.setMediaVisibilityChangedListener((visible) -> {
-            if (mQSPanel.isShown()) {
-                mAnimateBottomOnNextLayout = true;
-            }
-        });
-
-
         setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
+    }
+
+    void onMediaVisibilityChanged(boolean qsVisible) {
+        mAnimateBottomOnNextLayout = qsVisible;
     }
 
     private void setBackgroundBottom(int value) {
@@ -124,7 +118,6 @@ public class QSContainerImpl extends FrameLayout {
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         setBackgroundGradientVisibility(newConfig);
-        updateResources();
         mSizePoint.set(0, 0); // Will be retrieved on next measure pass.
     }
 
@@ -197,7 +190,7 @@ public class QSContainerImpl extends FrameLayout {
         mBackground.setVisibility(mQsDisabled ? View.GONE : View.VISIBLE);
     }
 
-    private void updateResources() {
+    void updateResources(QSPanelController qsPanelController) {
         LayoutParams layoutParams = (LayoutParams) mQSPanelContainer.getLayoutParams();
         layoutParams.topMargin = mContext.getResources().getDimensionPixelSize(
                 com.android.internal.R.dimen.quick_qs_offset_height);
@@ -209,7 +202,7 @@ public class QSContainerImpl extends FrameLayout {
         boolean marginsChanged = padding != mContentPadding;
         mContentPadding = padding;
         if (marginsChanged) {
-            updatePaddingsAndMargins();
+            updatePaddingsAndMargins(qsPanelController);
         }
     }
 
@@ -275,7 +268,7 @@ public class QSContainerImpl extends FrameLayout {
         updateExpansion();
     }
 
-    private void updatePaddingsAndMargins() {
+    private void updatePaddingsAndMargins(QSPanelController qsPanelController) {
         for (int i = 0; i < getChildCount(); i++) {
             View view = getChildAt(i);
             if (view == mStatusBarBackground || view == mBackgroundGradient
@@ -288,8 +281,8 @@ public class QSContainerImpl extends FrameLayout {
             lp.leftMargin = mSideMargins;
             if (view == mQSPanelContainer) {
                 // QS panel lays out some of its content full width
-                mQSPanel.setContentMargins(mContentPadding, mContentPadding);
-                Pair<Integer, Integer> margins = mQSPanel.getVisualSideMargins();
+                qsPanelController.setContentMargins(mContentPadding, mContentPadding);
+                Pair<Integer, Integer> margins = qsPanelController.getVisualSideMargins();
                 // Apply paddings based on QSPanel
                 mQSCustomizer.setContentPaddings(margins.first, margins.second);
             } else if (view == mHeader) {

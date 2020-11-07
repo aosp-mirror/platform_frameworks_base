@@ -256,7 +256,8 @@ public class PipBoundsHandler {
 
         // Calculate the snap fraction of the current stack along the old movement bounds
         final Rect postChangeStackBounds = new Rect(oldBounds);
-        final float snapFraction = getSnapFraction(postChangeStackBounds);
+        final float snapFraction = mSnapAlgorithm.getSnapFraction(postChangeStackBounds,
+                getMovementBounds(postChangeStackBounds), mPipBoundsState.getStashedState());
 
         // Update the display layout
         mPipBoundsState.getDisplayLayout().rotateTo(context.getResources(), toRotation);
@@ -273,7 +274,8 @@ public class PipBoundsHandler {
         final Rect postChangeMovementBounds = getMovementBounds(postChangeStackBounds,
                 false /* adjustForIme */);
         mSnapAlgorithm.applySnapFraction(postChangeStackBounds, postChangeMovementBounds,
-                snapFraction);
+                snapFraction, mPipBoundsState.getStashedState(), mPipBoundsState.getStashOffset(),
+                mPipBoundsState.getDisplayBounds());
 
         getInsetBounds(outInsetBounds);
         outBounds.set(postChangeStackBounds);
@@ -321,7 +323,7 @@ public class PipBoundsHandler {
             boolean useCurrentMinEdgeSize, boolean useCurrentSize) {
         // Save the snap fraction and adjust the size based on the new aspect ratio.
         final float snapFraction = mSnapAlgorithm.getSnapFraction(stackBounds,
-                getMovementBounds(stackBounds));
+                getMovementBounds(stackBounds), mPipBoundsState.getStashedState());
         final int minEdgeSize = useCurrentMinEdgeSize ? mCurrentMinSize : mDefaultMinSize;
         final Size size;
         if (useCurrentMinEdgeSize || useCurrentSize) {

@@ -1039,7 +1039,7 @@ class ContextImpl extends Context {
     public void startActivityAsUser(Intent intent, Bundle options, UserHandle user) {
         try {
             ActivityTaskManager.getService().startActivityAsUser(
-                    mMainThread.getApplicationThread(), getBasePackageName(), getAttributionTag(),
+                    mMainThread.getApplicationThread(), getOpPackageName(), getAttributionTag(),
                     intent, intent.resolveTypeIfNeeded(getContentResolver()),
                     null, null, 0, Intent.FLAG_ACTIVITY_NEW_TASK, null, options,
                     user.getIdentifier());

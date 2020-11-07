@@ -404,13 +404,6 @@ class ControllerImpl extends LocationTimeZoneProviderController {
             return;
         }
 
-        // Consistency check for user. This may be possible as there are various races around
-        // current user switches.
-        if (!Objects.equals(event.getUserHandle(), mCurrentUserConfiguration.getUserHandle())) {
-            warnLog("Using event=" + event + " from a different user="
-                    + mCurrentUserConfiguration);
-        }
-
         if (!mCurrentUserConfiguration.getGeoDetectionEnabledBehavior()) {
             // This should not happen: the provider should not be in an enabled state if the user
             // does not have geodetection enabled.

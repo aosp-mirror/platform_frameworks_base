@@ -86,8 +86,16 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"Zama ukuthatha isithombe-skrini futhi"</string>
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"Ayikwazi ukulondoloza isithombe-skrini ngenxa yesikhala sesitoreji esikhawulelwe"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Ukuthatha izithombe-skrini akuvunyelwe uhlelo lokusebenza noma inhlangano yakho"</string>
-    <string name="screenshot_edit" msgid="3510496440489019191">"Hlela isithombe-skrini"</string>
-    <string name="screenshot_dismiss_ui_description" msgid="934736855340147968">"Cashisa isithombe-skrini"</string>
+    <!-- no translation found for screenshot_edit_label (8754981973544133050) -->
+    <skip />
+    <!-- no translation found for screenshot_edit_description (3333092254706788906) -->
+    <skip />
+    <!-- no translation found for screenshot_scroll_label (7682877978685434621) -->
+    <skip />
+    <!-- no translation found for screenshot_scroll_description (7855773867093272175) -->
+    <skip />
+    <!-- no translation found for screenshot_dismiss_description (4702341245899508786) -->
+    <skip />
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Ukubuka kuqala isithombe-skrini"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Irekhoda yesikrini"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Icubungula okokuqopha iskrini"</string>
@@ -182,8 +190,7 @@
     <string name="accessibility_battery_two_bars" msgid="7895789999668425551">"Amabha amabili ebhethri"</string>
     <string name="accessibility_battery_three_bars" msgid="118341923832368291">"Amabha amathathu ebhethri"</string>
     <string name="accessibility_battery_full" msgid="1480463938961288494">"Ibhethri igcwele."</string>
-    <!-- no translation found for accessibility_battery_unknown (1807789554617976440) -->
-    <skip />
+    <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Iphesenti lebhethri alaziwa."</string>
     <string name="accessibility_no_phone" msgid="8828412144430247025">"Ayikho ifoni."</string>
     <string name="accessibility_phone_one_bar" msgid="8786055123727785588">"Ibha eyodwa yefoni"</string>
     <string name="accessibility_phone_two_bars" msgid="3316909612598670674">"Amabha amabilil efoni."</string>
@@ -257,7 +264,6 @@
     <!-- no translation found for accessibility_work_mode (1280025758672376313) -->
     <skip />
     <string name="accessibility_notification_dismissed" msgid="4411652015138892952">"Isaziso sichithiwe."</string>
-    <string name="accessibility_bubble_dismissed" msgid="270358867566720729">"Ibhamuza licashisiwe."</string>
     <string name="accessibility_desc_notification_shade" msgid="5355229129428759989">"Umthunzi wesaziso."</string>
     <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"Izilingiselelo ezisheshayo."</string>
     <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"Khiya isikrini."</string>
@@ -714,7 +720,6 @@
     <string name="inline_keep_showing_app" msgid="4393429060390649757">"Qhubeka nokubonisa izaziso kusuka kulolu hlelo lokusebenza?"</string>
     <string name="notification_silence_title" msgid="8608090968400832335">"Kuthulile"</string>
     <string name="notification_alert_title" msgid="3656229781017543655">"Okuzenzekelayo"</string>
-    <string name="notification_bubble_title" msgid="8330481035191903164">"Ibhamuza"</string>
     <string name="notification_automatic_title" msgid="3745465364578762652">"Okuzenzekelayo"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Awukho umsindo noma ukudlidliza"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Awukho umsindo noma ukudlidliza futhi ivela ngezansi esigabeni sengxoxo"</string>
@@ -726,8 +731,6 @@
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Izilungiselelo"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Okubalulekile"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"I-<xliff:g id="APP_NAME">%1$s</xliff:g> ayisekeli izici zengxoxo"</string>
-    <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Awekho amabhamuza akamuva"</string>
-    <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Amabhamuza akamuva namabhamuza asusiwe azobonakala lapha."</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Lezi zaziso azikwazi ukushintshwa."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Leli qembu lezaziso alikwazi ukulungiselelwa lapha"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"Isaziso sommeli"</string>
@@ -986,25 +989,7 @@
     <string name="device_services" msgid="1549944177856658705">"Amasevisi edivayisi"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"Asikho isihloko"</string>
     <string name="restart_button_description" msgid="6916116576177456480">"Thepha ukuze uqale kabusha lolu hlelo lokusebenza uphinde uye kusikrini esigcwele."</string>
-    <string name="bubbles_settings_button_description" msgid="7324245408859877545">"Izilungiselelo zamabhamuza e-<xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="bubble_overflow_button_content_description" msgid="5523744621434300510">"Ukuphuphuma"</string>
-    <string name="bubble_accessibility_action_add_back" msgid="6217995665917123890">"Engeza emuva kusitaki"</string>
-    <string name="manage_bubbles_text" msgid="6856830436329494850">"Phatha"</string>
-    <string name="bubble_content_description_single" msgid="5175160674436546329">"I-<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> kusuka ku-<xliff:g id="APP_NAME">%2$s</xliff:g>"</string>
-    <string name="bubble_content_description_stack" msgid="7907610717462651870">"I-<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> kusukela ku-<xliff:g id="APP_NAME">%2$s</xliff:g> nokungu-<xliff:g id="BUBBLE_COUNT">%3$d</xliff:g> ngaphezulu"</string>
     <string name="bubble_accessibility_action_move" msgid="3185080443743819178">"Hambisa"</string>
-    <string name="bubble_accessibility_action_move_top_left" msgid="4347227665275929728">"Hambisa phezulu kwesokunxele"</string>
-    <string name="bubble_accessibility_action_move_top_right" msgid="6916868852433483569">"Hambisa phezulu ngakwesokudla"</string>
-    <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"Hambisa inkinobho ngakwesokunxele"</string>
-    <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"Hambisa inkinobho ngakwesokudla"</string>
-    <string name="bubble_dismiss_text" msgid="1314082410868930066">"Cashisa ibhamuza"</string>
-    <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"Ungayibhamuzi ingxoxo"</string>
-    <string name="bubbles_user_education_title" msgid="5547017089271445797">"Xoxa usebenzisa amabhamuza"</string>
-    <string name="bubbles_user_education_description" msgid="1160281719576715211">"Izingxoxo ezintsha zivela njengezithonjana ezintantayo, noma amabhamuza. Thepha ukuze uvule ibhamuza. Hudula ukuze ulihambise."</string>
-    <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"Lawula amabhamuza noma nini"</string>
-    <string name="bubbles_user_education_manage" msgid="1391639189507036423">"Thepha okuthi Phatha ukuvala amabhamuza kusuka kulolu hlelo lokusebenza"</string>
-    <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"Ngiyezwa"</string>
-    <string name="bubbles_app_settings" msgid="5779443644062348657">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> izilungiselelo"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Ukuzulazula kwesistimu kubuyekeziwe. Ukuze wenze ushintsho, hamba kokuthi Izilungiselelo."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Hamba kuzilungiselelo ukuze ubuyekeze ukuzulazula kwesistimu"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Ilindile"</string>
@@ -1091,11 +1076,9 @@
     <string name="media_output_dialog_multiple_devices" msgid="1093771040315422350">"amadivayisi akhethiwe angu-<xliff:g id="COUNT">%1$d</xliff:g>"</string>
     <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (inqamukile)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"Ayikwazanga ukuxhumeka. Zama futhi."</string>
-    <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Bhanqa idivayisi entsha"</string>
+    <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Bhangqa idivayisi entsha"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Yakha inombolo"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Yakha inombolo ekopishelwe kubhodi yokunamathisela."</string>
-    <!-- no translation found for battery_state_unknown_notification_title (8464703640483773454) -->
-    <skip />
-    <!-- no translation found for battery_state_unknown_notification_text (13720937839460899) -->
-    <skip />
+    <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Kube khona inkinga ngokufunda imitha yakho yebhethri"</string>
+    <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Thepha ukuze uthole olunye ulwazi"</string>
 </resources>

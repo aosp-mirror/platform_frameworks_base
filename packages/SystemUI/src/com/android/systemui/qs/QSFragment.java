@@ -80,6 +80,8 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
 
     private final RemoteInputQuickSettingsDisabler mRemoteInputQuickSettingsDisabler;
     private final InjectionInflationController mInjectionInflater;
+    private final CommandQueue mCommandQueue;
+    private final QSDetailDisplayer mQsDetailDisplayer;
     private final QSFragmentComponent.Factory mQsComponentFactory;
     private final QSTileHost mHost;
     private boolean mShowCollapsedOnKeyguard;
@@ -102,9 +104,12 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
     public QSFragment(RemoteInputQuickSettingsDisabler remoteInputQsDisabler,
             InjectionInflationController injectionInflater, QSTileHost qsTileHost,
             StatusBarStateController statusBarStateController, CommandQueue commandQueue,
+            QSDetailDisplayer qsDetailDisplayer,
             QSFragmentComponent.Factory qsComponentFactory) {
         mRemoteInputQuickSettingsDisabler = remoteInputQsDisabler;
         mInjectionInflater = injectionInflater;
+        mCommandQueue = commandQueue;
+        mQsDetailDisplayer = qsDetailDisplayer;
         mQsComponentFactory = qsComponentFactory;
         commandQueue.observe(getLifecycle(), this);
         mHost = qsTileHost;
@@ -143,6 +148,8 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         mHeader = view.findViewById(R.id.header);
         mQSPanelController.setHeaderContainer(view.findViewById(R.id.header_text_container));
         mFooter = qsFragmentComponent.getQSFooter();
+
+        mQsDetailDisplayer.setQsPanelController(mQSPanelController);
 
         mQSContainerImplController = qsFragmentComponent.getQSContainerImplController();
         mQSContainerImplController.init();
@@ -183,6 +190,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
             setListening(false);
         }
         mQSCustomizerController.setQs(null);
+        mQsDetailDisplayer.setQsPanelController(null);
     }
 
     @Override
@@ -254,7 +262,6 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
 
     public void setHost(QSTileHost qsh) {
         mHeader.setQSPanel(mQSPanelController.getView());
-        mFooter.setQSPanel(mQSPanelController.getView());
         mQSDetail.setHost(qsh);
     }
 
@@ -319,10 +326,6 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
 
     public QSPanelController getQSPanelController() {
         return mQSPanelController;
-    }
-
-    public QSPanel getQsPanel() {
-        return mQSPanelController.getView();
     }
 
     @Override

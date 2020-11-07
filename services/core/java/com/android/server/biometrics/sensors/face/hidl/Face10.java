@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.biometrics.sensors.face;
+package com.android.server.biometrics.sensors.face.hidl;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -63,6 +63,10 @@ import com.android.server.biometrics.sensors.LockoutResetDispatcher;
 import com.android.server.biometrics.sensors.LockoutTracker;
 import com.android.server.biometrics.sensors.PerformanceTracker;
 import com.android.server.biometrics.sensors.RemovalConsumer;
+import com.android.server.biometrics.sensors.face.FaceUtils;
+import com.android.server.biometrics.sensors.face.LockoutHalImpl;
+import com.android.server.biometrics.sensors.face.ServiceProvider;
+import com.android.server.biometrics.sensors.face.UsageStats;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -82,7 +86,7 @@ import java.util.Map;
  * Supports a single instance of the {@link android.hardware.biometrics.face.V1_0} or
  * its extended minor versions.
  */
-class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
+public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
 
     private static final String TAG = "Face10";
     private static final int ENROLL_TIMEOUT_SEC = 75;
@@ -120,166 +124,175 @@ class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
 
     private final IBiometricsFaceClientCallback mDaemonCallback =
             new IBiometricsFaceClientCallback.Stub() {
-        @Override
-        public void onEnrollResult(long deviceId, int faceId, int userId, int remaining) {
-            mHandler.post(() -> {
-                final CharSequence name = FaceUtils.getInstance()
-                        .getUniqueName(mContext, userId);
-                final Face face = new Face(name, faceId, deviceId);
+                @Override
+                public void onEnrollResult(long deviceId, int faceId, int userId, int remaining) {
+                    mHandler.post(() -> {
+                        final CharSequence name = FaceUtils.getInstance()
+                                .getUniqueName(mContext, userId);
+                        final Face face = new Face(name, faceId, deviceId);
 
-                final ClientMonitor<?> client = mScheduler.getCurrentClient();
-                if (!(client instanceof FaceEnrollClient)) {
-                    Slog.e(TAG, "onEnrollResult for non-enroll client: "
-                            + Utils.getClientName(client));
-                    return;
+                        final ClientMonitor<?> client = mScheduler.getCurrentClient();
+                        if (!(client instanceof FaceEnrollClient)) {
+                            Slog.e(TAG, "onEnrollResult for non-enroll client: "
+                                    + Utils.getClientName(client));
+                            return;
+                        }
+
+                        final FaceEnrollClient enrollClient = (FaceEnrollClient) client;
+                        enrollClient.onEnrollResult(face, remaining);
+                    });
                 }
 
-                final FaceEnrollClient enrollClient = (FaceEnrollClient) client;
-                enrollClient.onEnrollResult(face, remaining);
-            });
-        }
+                @Override
+                public void onAuthenticated(long deviceId, int faceId, int userId,
+                        ArrayList<Byte> token) {
+                    mHandler.post(() -> {
+                        final ClientMonitor<?> client = mScheduler.getCurrentClient();
+                        if (!(client instanceof AuthenticationConsumer)) {
+                            Slog.e(TAG, "onAuthenticated for non-authentication consumer: "
+                                    + Utils.getClientName(client));
+                            return;
+                        }
 
-        @Override
-        public void onAuthenticated(long deviceId, int faceId, int userId, ArrayList<Byte> token) {
-            mHandler.post(() -> {
-                final ClientMonitor<?> client = mScheduler.getCurrentClient();
-                if (!(client instanceof AuthenticationConsumer)) {
-                    Slog.e(TAG, "onAuthenticated for non-authentication consumer: "
-                            + Utils.getClientName(client));
-                    return;
+                        final AuthenticationConsumer authenticationConsumer =
+                                (AuthenticationConsumer) client;
+                        final boolean authenticated = faceId != 0;
+                        final Face face = new Face("", faceId, deviceId);
+                        authenticationConsumer.onAuthenticated(face, authenticated, token);
+                    });
                 }
 
-                final AuthenticationConsumer authenticationConsumer =
-                        (AuthenticationConsumer) client;
-                final boolean authenticated = faceId != 0;
-                final Face face = new Face("", faceId, deviceId);
-                authenticationConsumer.onAuthenticated(face, authenticated, token);
-            });
-        }
+                @Override
+                public void onAcquired(long deviceId, int userId, int acquiredInfo,
+                        int vendorCode) {
+                    mHandler.post(() -> {
+                        final ClientMonitor<?> client = mScheduler.getCurrentClient();
+                        if (!(client instanceof AcquisitionClient)) {
+                            Slog.e(TAG, "onAcquired for non-acquire client: "
+                                    + Utils.getClientName(client));
+                            return;
+                        }
 
-        @Override
-        public void onAcquired(long deviceId, int userId, int acquiredInfo, int vendorCode) {
-            mHandler.post(() -> {
-                final ClientMonitor<?> client = mScheduler.getCurrentClient();
-                if (!(client instanceof AcquisitionClient)) {
-                    Slog.e(TAG, "onAcquired for non-acquire client: "
-                            + Utils.getClientName(client));
-                    return;
+                        final AcquisitionClient<?> acquisitionClient =
+                                (AcquisitionClient<?>) client;
+                        acquisitionClient.onAcquired(acquiredInfo, vendorCode);
+                    });
                 }
 
-                final AcquisitionClient<?> acquisitionClient = (AcquisitionClient<?>) client;
-                acquisitionClient.onAcquired(acquiredInfo, vendorCode);
-            });
-        }
+                @Override
+                public void onError(long deviceId, int userId, int error, int vendorCode) {
+                    mHandler.post(() -> {
+                        final ClientMonitor<?> client = mScheduler.getCurrentClient();
+                        Slog.d(TAG, "handleError"
+                                + ", client: " + (client != null ? client.getOwnerString() : null)
+                                + ", error: " + error
+                                + ", vendorCode: " + vendorCode);
+                        if (!(client instanceof Interruptable)) {
+                            Slog.e(TAG, "onError for non-error consumer: " + Utils.getClientName(
+                                    client));
+                            return;
+                        }
 
-        @Override
-        public void onError(long deviceId, int userId, int error, int vendorCode) {
-            mHandler.post(() -> {
-                final ClientMonitor<?> client = mScheduler.getCurrentClient();
-                Slog.d(TAG, "handleError"
-                        + ", client: " + (client != null ? client.getOwnerString() : null)
-                        + ", error: " + error
-                        + ", vendorCode: " + vendorCode);
-                if (!(client instanceof Interruptable)) {
-                    Slog.e(TAG, "onError for non-error consumer: " + Utils.getClientName(client));
-                    return;
+                        final Interruptable interruptable = (Interruptable) client;
+                        interruptable.onError(error, vendorCode);
+
+                        if (error == BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE) {
+                            Slog.e(TAG, "Got ERROR_HW_UNAVAILABLE");
+                            mDaemon = null;
+                            mCurrentUserId = UserHandle.USER_NULL;
+                        }
+                    });
                 }
 
-                final Interruptable interruptable = (Interruptable) client;
-                interruptable.onError(error, vendorCode);
+                @Override
+                public void onRemoved(long deviceId, ArrayList<Integer> removed, int userId) {
+                    mHandler.post(() -> {
+                        final ClientMonitor<?> client = mScheduler.getCurrentClient();
+                        if (!(client instanceof RemovalConsumer)) {
+                            Slog.e(TAG, "onRemoved for non-removal consumer: "
+                                    + Utils.getClientName(client));
+                            return;
+                        }
 
-                if (error == BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE) {
-                    Slog.e(TAG, "Got ERROR_HW_UNAVAILABLE");
-                    mDaemon = null;
-                    mCurrentUserId = UserHandle.USER_NULL;
-                }
-            });
-        }
+                        final RemovalConsumer removalConsumer = (RemovalConsumer) client;
 
-        @Override
-        public void onRemoved(long deviceId, ArrayList<Integer> removed, int userId) {
-            mHandler.post(() -> {
-                final ClientMonitor<?> client = mScheduler.getCurrentClient();
-                if (!(client instanceof RemovalConsumer)) {
-                    Slog.e(TAG, "onRemoved for non-removal consumer: "
-                            + Utils.getClientName(client));
-                    return;
-                }
+                        if (!removed.isEmpty()) {
+                            // Convert to old fingerprint-like behavior, where remove() receives
+                            // one removal
+                            // at a time. This way, remove can share some more common code.
+                            for (int i = 0; i < removed.size(); i++) {
+                                final int id = removed.get(i);
+                                final Face face = new Face("", id, deviceId);
+                                final int remaining = removed.size() - i - 1;
+                                Slog.d(TAG, "Removed, faceId: " + id + ", remaining: " + remaining);
+                                removalConsumer.onRemoved(face, remaining);
+                            }
+                        } else {
+                            removalConsumer.onRemoved(null, 0 /* remaining */);
+                        }
 
-                final RemovalConsumer removalConsumer = (RemovalConsumer) client;
-
-                if (!removed.isEmpty()) {
-                    // Convert to old fingerprint-like behavior, where remove() receives one removal
-                    // at a time. This way, remove can share some more common code.
-                    for (int i = 0; i < removed.size(); i++) {
-                        final int id = removed.get(i);
-                        final Face face = new Face("", id, deviceId);
-                        final int remaining = removed.size() - i - 1;
-                        Slog.d(TAG, "Removed, faceId: " + id + ", remaining: " + remaining);
-                        removalConsumer.onRemoved(face, remaining);
-                    }
-                } else {
-                    removalConsumer.onRemoved(null, 0 /* remaining */);
+                        Settings.Secure.putIntForUser(mContext.getContentResolver(),
+                                Settings.Secure.FACE_UNLOCK_RE_ENROLL, 0, UserHandle.USER_CURRENT);
+                    });
                 }
 
-                Settings.Secure.putIntForUser(mContext.getContentResolver(),
-                        Settings.Secure.FACE_UNLOCK_RE_ENROLL, 0, UserHandle.USER_CURRENT);
-            });
-        }
+                @Override
+                public void onEnumerate(long deviceId, ArrayList<Integer> faceIds, int userId) {
+                    mHandler.post(() -> {
+                        final ClientMonitor<?> client = mScheduler.getCurrentClient();
+                        if (!(client instanceof EnumerateConsumer)) {
+                            Slog.e(TAG, "onEnumerate for non-enumerate consumer: "
+                                    + Utils.getClientName(client));
+                            return;
+                        }
 
-        @Override
-        public void onEnumerate(long deviceId, ArrayList<Integer> faceIds, int userId) {
-            mHandler.post(() -> {
-                final ClientMonitor<?> client = mScheduler.getCurrentClient();
-                if (!(client instanceof EnumerateConsumer)) {
-                    Slog.e(TAG, "onEnumerate for non-enumerate consumer: "
-                            + Utils.getClientName(client));
-                    return;
+                        final EnumerateConsumer enumerateConsumer = (EnumerateConsumer) client;
+
+                        if (!faceIds.isEmpty()) {
+                            // Convert to old fingerprint-like behavior, where enumerate()
+                            // receives one
+                            // template at a time. This way, enumerate can share some more common
+                            // code.
+                            for (int i = 0; i < faceIds.size(); i++) {
+                                final Face face = new Face("", faceIds.get(i), deviceId);
+                                enumerateConsumer.onEnumerationResult(face, faceIds.size() - i - 1);
+                            }
+                        } else {
+                            // For face, the HIDL contract is to receive an empty list when there
+                            // are no
+                            // templates enrolled. Send a null identifier since we don't consume
+                            // them
+                            // anywhere, and send remaining == 0 so this code can be shared with
+                            // Fingerprint@2.1
+                            enumerateConsumer.onEnumerationResult(null /* identifier */, 0);
+                        }
+                    });
                 }
 
-                final EnumerateConsumer enumerateConsumer = (EnumerateConsumer) client;
+                @Override
+                public void onLockoutChanged(long duration) {
+                    mHandler.post(() -> {
+                        Slog.d(TAG, "onLockoutChanged: " + duration);
+                        final @LockoutTracker.LockoutMode int lockoutMode;
+                        if (duration == 0) {
+                            lockoutMode = LockoutTracker.LOCKOUT_NONE;
+                        } else if (duration == -1 || duration == Long.MAX_VALUE) {
+                            lockoutMode = LockoutTracker.LOCKOUT_PERMANENT;
+                        } else {
+                            lockoutMode = LockoutTracker.LOCKOUT_TIMED;
+                        }
 
-                if (!faceIds.isEmpty()) {
-                    // Convert to old fingerprint-like behavior, where enumerate() receives one
-                    // template at a time. This way, enumerate can share some more common code.
-                    for (int i = 0; i < faceIds.size(); i++) {
-                        final Face face = new Face("", faceIds.get(i), deviceId);
-                        enumerateConsumer.onEnumerationResult(face, faceIds.size() - i - 1);
-                    }
-                } else {
-                    // For face, the HIDL contract is to receive an empty list when there are no
-                    // templates enrolled. Send a null identifier since we don't consume them
-                    // anywhere, and send remaining == 0 so this code can be shared with
-                    // Fingerprint@2.1
-                    enumerateConsumer.onEnumerationResult(null /* identifier */, 0);
+                        mLockoutTracker.setCurrentUserLockoutMode(lockoutMode);
+
+                        if (duration == 0) {
+                            mLockoutResetDispatcher.notifyLockoutResetCallbacks(mSensorId);
+                        }
+                    });
                 }
-            });
-        }
-
-        @Override
-        public void onLockoutChanged(long duration) {
-            mHandler.post(() -> {
-                Slog.d(TAG, "onLockoutChanged: " + duration);
-                final @LockoutTracker.LockoutMode int lockoutMode;
-                if (duration == 0) {
-                    lockoutMode = LockoutTracker.LOCKOUT_NONE;
-                } else if (duration == -1 || duration == Long.MAX_VALUE) {
-                    lockoutMode = LockoutTracker.LOCKOUT_PERMANENT;
-                } else {
-                    lockoutMode = LockoutTracker.LOCKOUT_TIMED;
-                }
-
-                mLockoutTracker.setCurrentUserLockoutMode(lockoutMode);
-
-                if (duration == 0) {
-                    mLockoutResetDispatcher.notifyLockoutResetCallbacks(mSensorId);
-                }
-            });
-        }
-    };
+            };
 
     @VisibleForTesting
-    Face10(@NonNull Context context, int sensorId,
+    public Face10(@NonNull Context context, int sensorId,
             @BiometricManager.Authenticators.Types int strength,
             @NonNull LockoutResetDispatcher lockoutResetDispatcher,
             boolean supportsSelfIllumination, int maxTemplatesAllowed) {
@@ -304,7 +317,7 @@ class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
         }
     }
 
-    Face10(@NonNull Context context, int sensorId,
+    public Face10(@NonNull Context context, int sensorId,
             @BiometricManager.Authenticators.Types int strength,
             @NonNull LockoutResetDispatcher lockoutResetDispatcher) {
         this(context, sensorId, strength, lockoutResetDispatcher,
@@ -479,8 +492,8 @@ class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
     public void scheduleRevokeChallenge(int sensorId, int userId, @NonNull IBinder token,
             @NonNull String opPackageName, long challenge) {
         mHandler.post(() -> {
-            if (mCurrentChallengeOwner != null &&
-                    !mCurrentChallengeOwner.getOwnerString().contentEquals(opPackageName)) {
+            if (mCurrentChallengeOwner != null
+                    && !mCurrentChallengeOwner.getOwnerString().contentEquals(opPackageName)) {
                 Slog.e(TAG, "scheduleRevokeChallenge, package: " + opPackageName
                         + " attempting to revoke challenge owned by: "
                         + mCurrentChallengeOwner.getOwnerString());
@@ -717,10 +730,10 @@ class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
             JSONArray sets = new JSONArray();
             for (UserInfo user : UserManager.get(mContext).getUsers()) {
                 final int userId = user.getUserHandle().getIdentifier();
-                final int N = FaceUtils.getInstance().getBiometricsForUser(mContext, userId).size();
+                final int c = FaceUtils.getInstance().getBiometricsForUser(mContext, userId).size();
                 JSONObject set = new JSONObject();
                 set.put("id", userId);
-                set.put("count", N);
+                set.put("count", c);
                 set.put("accept", performanceTracker.getAcceptForUser(userId));
                 set.put("reject", performanceTracker.getRejectForUser(userId));
                 set.put("acquire", performanceTracker.getAcquireForUser(userId));
@@ -816,7 +829,7 @@ class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
             try {
                 devnull = new FileOutputStream("/dev/null");
                 final NativeHandle handle = new NativeHandle(
-                        new FileDescriptor[] { devnull.getFD(), fd },
+                        new FileDescriptor[]{devnull.getFD(), fd},
                         new int[0], false);
                 daemon.debug(handle, new ArrayList<String>(Arrays.asList(args)));
             } catch (IOException | RemoteException ex) {

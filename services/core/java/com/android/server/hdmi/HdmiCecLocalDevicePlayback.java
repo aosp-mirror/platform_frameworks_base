@@ -224,6 +224,21 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
 
     @Override
     @ServiceThreadOnly
+    protected void onInitializeCecComplete(int initiatedBy) {
+        if (initiatedBy == HdmiControlService.INITIATED_BY_SCREEN_ON) {
+            oneTouchPlay(new IHdmiControlCallback.Stub() {
+                @Override
+                public void onComplete(int result) {
+                    if (result != HdmiControlManager.RESULT_SUCCESS) {
+                        Slog.w(TAG, "Failed to complete One Touch Play. result=" + result);
+                    }
+                }
+            });
+        }
+    }
+
+    @Override
+    @ServiceThreadOnly
     void setAutoDeviceOff(boolean enabled) {
         assertRunOnServiceThread();
         mAutoTvOff = enabled;

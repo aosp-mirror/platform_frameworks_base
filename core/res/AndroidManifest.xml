@@ -2658,6 +2658,14 @@
                 android:description="@string/permdesc_useDataInBackground"
                 android:protectionLevel="normal" />
 
+    <!-- Allows app to request to be associated with a device via
+         {@link android.companion.CompanionDeviceManager}
+         as a "watch"
+         <p>Protection level: normal
+     -->
+    <permission android:name="android.permission.REQUEST_COMPANION_PROFILE_WATCH"
+                android:protectionLevel="normal" />
+
     <!-- Allows a companion app to associate to Wi-Fi.
          <p>Only for use by a single pre-approved app.
          @hide
@@ -3399,6 +3407,12 @@
          @hide -->
     <permission android:name="android.permission.BIND_COMPANION_DEVICE_MANAGER_SERVICE"
         android:protectionLevel="signature" />
+
+    <!-- Must be required by any
+         {@link android.companion.CompanionDeviceService}s
+         to ensure that only the system can bind to it. -->
+    <permission android:name="android.permission.BIND_COMPANION_DEVICE_SERVICE"
+                android:protectionLevel="signature" />
 
     <!-- @SystemApi Must be required by the RuntimePermissionPresenterService to ensure
          that only the system can bind to it.

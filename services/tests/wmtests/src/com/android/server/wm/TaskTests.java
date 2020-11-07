@@ -257,4 +257,24 @@ public class TaskTests extends WindowTestsBase {
         task.resolveOverrideConfiguration(parentConfig);
         assertThat(resolvedOverride.getWindowingMode()).isEqualTo(WINDOWING_MODE_UNDEFINED);
     }
+
+    @Test
+    public void testCleanUpActivityReferences_clearLastTaskBoundsComputeActivity() {
+        final Task rootTask = createTaskStackOnDisplay(mDisplayContent);
+        final Task leafTask = createTaskInStack(rootTask, 0 /* userId */);
+        final ActivityRecord activity2 = createActivityRecord(mDisplayContent, leafTask);
+        final ActivityRecord activity1 = createActivityRecord(mDisplayContent, leafTask);
+        activity1.finishing = false;
+        leafTask.resolveOverrideConfiguration(rootTask.getConfiguration());
+
+        assertEquals(activity1, leafTask.getLastTaskBoundsComputeActivity());
+
+        leafTask.cleanUpActivityReferences(activity2);
+
+        assertNotNull(leafTask.getLastTaskBoundsComputeActivity());
+
+        leafTask.cleanUpActivityReferences(activity1);
+
+        assertNull(leafTask.getLastTaskBoundsComputeActivity());
+    }
 }

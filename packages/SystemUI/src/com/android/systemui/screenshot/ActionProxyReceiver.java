@@ -35,9 +35,6 @@ import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.statusbar.phone.StatusBar;
 
 import java.util.Optional;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import javax.inject.Inject;
 
@@ -48,7 +45,6 @@ import javax.inject.Inject;
 public class ActionProxyReceiver extends BroadcastReceiver {
     private static final String TAG = "ActionProxyReceiver";
 
-    private static final int CLOSE_WINDOWS_TIMEOUT_MILLIS = 3000;
     private final StatusBar mStatusBar;
     private final ActivityManagerWrapper mActivityManagerWrapper;
     private final ScreenshotSmartActions mScreenshotSmartActions;
@@ -65,14 +61,7 @@ public class ActionProxyReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, final Intent intent) {
         Runnable startActivityRunnable = () -> {
-            try {
-                mActivityManagerWrapper.closeSystemWindows(
-                        SYSTEM_DIALOG_REASON_SCREENSHOT).get(
-                        CLOSE_WINDOWS_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
-            } catch (TimeoutException | InterruptedException | ExecutionException e) {
-                Log.e(TAG, "Unable to share screenshot", e);
-                return;
-            }
+            mActivityManagerWrapper.closeSystemWindows(SYSTEM_DIALOG_REASON_SCREENSHOT);
 
             PendingIntent actionIntent = intent.getParcelableExtra(EXTRA_ACTION_INTENT);
             ActivityOptions opts = ActivityOptions.makeBasic();

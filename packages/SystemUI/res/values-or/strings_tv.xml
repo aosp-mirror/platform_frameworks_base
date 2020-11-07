@@ -21,4 +21,10 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="mic_active" msgid="5766614241012047024">"ମାଇକ୍ରୋଫୋନ୍ ସକ୍ରିୟ"</string>
     <string name="app_accessed_mic" msgid="2754428675130470196">"%1$s ଆପଣଙ୍କର ମାଇକ୍ରୋଫୋନ୍‌କୁ ଆକ୍ସେସ୍ କରିଛି"</string>
+    <!-- no translation found for notification_vpn_connected (3891023882833274730) -->
+    <skip />
+    <!-- no translation found for notification_vpn_disconnected (7150747626448044843) -->
+    <skip />
+    <!-- no translation found for notification_disclosure_vpn_text (3873532735584866236) -->
+    <skip />
 </resources>

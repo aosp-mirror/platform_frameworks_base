@@ -36,6 +36,7 @@ import static android.view.WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATIO
 import static android.view.WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS;
 import static android.view.WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_DRAW_BAR_BACKGROUNDS;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 
 import static com.android.internal.policy.DecorView.NAVIGATION_BAR_COLOR_VIEW_ATTRIBUTES;
@@ -129,6 +130,7 @@ class TaskSnapshotSurface implements StartingSurface {
     private SurfaceControl mChildSurfaceControl;
     private final IWindowSession mSession;
     private final WindowManagerService mService;
+    private final int mDisplayId;
     private final Rect mTaskBounds;
     private final Rect mFrame = new Rect();
     private final Rect mSystemBarInsets = new Rect();
@@ -151,10 +153,15 @@ class TaskSnapshotSurface implements StartingSurface {
 
     static TaskSnapshotSurface create(WindowManagerService service, ActivityRecord activity,
             TaskSnapshot snapshot) {
+        return create(service, activity, snapshot, WindowManagerGlobal.getWindowSession());
+    }
+
+    @VisibleForTesting
+    static TaskSnapshotSurface create(WindowManagerService service, ActivityRecord activity,
+            TaskSnapshot snapshot, IWindowSession session) {
 
         final WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams();
         final Window window = new Window();
-        final IWindowSession session = WindowManagerGlobal.getWindowSession();
         window.setSession(session);
         final SurfaceControl surfaceControl = new SurfaceControl();
         final ClientWindowFrames tmpFrames = new ClientWindowFrames();
@@ -215,7 +222,10 @@ class TaskSnapshotSurface implements StartingSurface {
             layoutParams.flags = (windowFlags & ~FLAG_INHERIT_EXCLUDES)
                     | FLAG_NOT_FOCUSABLE
                     | FLAG_NOT_TOUCHABLE;
-            layoutParams.privateFlags = windowPrivateFlags & PRIVATE_FLAG_INHERITS;
+            // Setting as trusted overlay to let touches pass through. This is safe because this
+            // window is controlled by the system.
+            layoutParams.privateFlags = (windowPrivateFlags & PRIVATE_FLAG_INHERITS)
+                    | PRIVATE_FLAG_TRUSTED_OVERLAY;
             layoutParams.token = activity.token;
             layoutParams.width = LayoutParams.MATCH_PARENT;
             layoutParams.height = LayoutParams.MATCH_PARENT;
@@ -239,11 +249,11 @@ class TaskSnapshotSurface implements StartingSurface {
             insetsState = getInsetsStateWithVisibilityOverride(topFullscreenOpaqueWindow);
 
         }
+        int displayId = activity.getDisplayContent().getDisplayId();
         try {
             final int res = session.addToDisplay(window, layoutParams,
-                    View.GONE, activity.getDisplayContent().getDisplayId(), mTmpInsetsState,
-                    tmpFrames.frame, tmpFrames.displayCutout, null /* outInputChannel */,
-                    mTmpInsetsState, mTempControls);
+                    View.GONE, displayId, mTmpInsetsState, tmpFrames.frame, tmpFrames.displayCutout,
+                    null /* outInputChannel */, mTmpInsetsState, mTempControls);
             if (res < 0) {
                 Slog.w(TAG, "Failed to add snapshot starting window res=" + res);
                 return null;
@@ -251,10 +261,10 @@ class TaskSnapshotSurface implements StartingSurface {
         } catch (RemoteException e) {
             // Local call.
         }
-        final TaskSnapshotSurface snapshotSurface = new TaskSnapshotSurface(service, window,
-                surfaceControl, snapshot, layoutParams.getTitle(), taskDescription, appearance,
-                windowFlags, windowPrivateFlags, taskBounds, currentOrientation, activityType,
-                insetsState);
+        final TaskSnapshotSurface snapshotSurface = new TaskSnapshotSurface(service, displayId,
+                window, surfaceControl, snapshot, layoutParams.getTitle(), taskDescription,
+                appearance, windowFlags, windowPrivateFlags, taskBounds, currentOrientation,
+                activityType, insetsState);
         window.setOuter(snapshotSurface);
         try {
             session.relayout(window, layoutParams, -1, -1, View.VISIBLE, 0, -1,
@@ -271,11 +281,13 @@ class TaskSnapshotSurface implements StartingSurface {
     }
 
     @VisibleForTesting
-    TaskSnapshotSurface(WindowManagerService service, Window window, SurfaceControl surfaceControl,
-            TaskSnapshot snapshot, CharSequence title, TaskDescription taskDescription,
-            int appearance, int windowFlags, int windowPrivateFlags, Rect taskBounds,
-            int currentOrientation, int activityType, InsetsState insetsState) {
+    TaskSnapshotSurface(WindowManagerService service, int displayId, Window window,
+            SurfaceControl surfaceControl, TaskSnapshot snapshot, CharSequence title,
+            TaskDescription taskDescription, int appearance, int windowFlags,
+            int windowPrivateFlags, Rect taskBounds, int currentOrientation, int activityType,
+            InsetsState insetsState) {
         mService = service;
+        mDisplayId = displayId;
         mSurface = service.mSurfaceFactory.get();
         mHandler = new Handler(mService.mH.getLooper());
         mSession = WindowManagerGlobal.getWindowSession();
@@ -368,8 +380,9 @@ class TaskSnapshotSurface implements StartingSurface {
                 - ((float) mFrame.width() / mFrame.height())) > 0.01f;
 
         // Keep a reference to it such that it doesn't get destroyed when finalized.
+        final String name = mTitle + " - task-snapshot-surface";
         mChildSurfaceControl = mService.mSurfaceControlFactory.apply(session)
-                .setName(mTitle + " - task-snapshot-surface")
+                .setName(name)
                 .setBufferSize(buffer.getWidth(), buffer.getHeight())
                 .setFormat(buffer.getFormat())
                 .setParent(mSurfaceControl)
@@ -401,6 +414,11 @@ class TaskSnapshotSurface implements StartingSurface {
         mSnapshotMatrix.setRectToRect(mTmpSnapshotSize, mTmpDstFrame, Matrix.ScaleToFit.FILL);
         mTransaction.setMatrix(mChildSurfaceControl, mSnapshotMatrix, mTmpFloat9);
 
+        // This is the way to tell the input system to exclude this surface from occlusion
+        // detection since we don't have a window for it. We do this because this window is
+        // generated by the system as well as its content (the snapshot of the app).
+        InputMonitor.setTrustedOverlayInputInfo(mChildSurfaceControl, mTransaction, mDisplayId,
+                name);
         mTransaction.apply();
         surface.attachAndQueueBufferWithColorSpace(buffer, mSnapshot.getColorSpace());
         surface.release();

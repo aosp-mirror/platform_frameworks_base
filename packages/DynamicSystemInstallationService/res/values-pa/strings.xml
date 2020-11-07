@@ -5,7 +5,7 @@
     <string name="notification_install_completed" msgid="6252047868415172643">"ਪਰਿਵਰਤਨਸ਼ੀਲ ਸਿਸਟਮ ਤਿਆਰ ਹੈ। ਇਸ ਦੀ ਵਰਤੋਂ ਸ਼ੁਰੂ ਕਰਨ ਲਈ, ਆਪਣਾ ਡੀਵਾਈਸ ਮੁੜ-ਸ਼ੁਰੂ ਕਰੋ।"</string>
     <string name="notification_install_inprogress" msgid="7383334330065065017">"ਸਥਾਪਨਾ ਜਾਰੀ ਹੈ"</string>
     <string name="notification_install_failed" msgid="4066039210317521404">"ਸਥਾਪਤ ਕਰਨਾ ਅਸਫਲ ਰਿਹਾ"</string>
-    <string name="notification_image_validation_failed" msgid="2720357826403917016">"ਚਿੱਤਰ ਪ੍ਰਮਾਣਿਕਤਾ ਅਸਫਲ ਰਹੀ। ਸਥਾਪਨਾ ਨੂੰ ਰੱਦ ਕਰੋ।"</string>
+    <string name="notification_image_validation_failed" msgid="2720357826403917016">"ਇਮੇਜ ਪ੍ਰਮਾਣਿਕਤਾ ਅਸਫਲ ਰਹੀ। ਸਥਾਪਨਾ ਨੂੰ ਰੱਦ ਕਰੋ।"</string>
     <string name="notification_dynsystem_in_use" msgid="1053194595682188396">"ਫ਼ਿਲਹਾਲ ਪਰਿਵਰਤਨਸ਼ੀਲ ਸਿਸਟਮ ਚੱਲ ਰਿਹਾ ਹੈ। ਮੂਲ Android ਵਰਜਨ ਵਰਤਣ ਲਈ ਮੁੜ-ਸ਼ੁਰੂ ਕਰੋ।"</string>
     <string name="notification_action_cancel" msgid="5929299408545961077">"ਰੱਦ ਕਰੋ"</string>
     <string name="notification_action_discard" msgid="1817481003134947493">"ਖਾਰਜ ਕਰੋ"</string>
@@ -13,6 +13,5 @@
     <string name="notification_action_reboot_to_origin" msgid="4013901243271889897">"ਮੁੜ-ਸ਼ੁਰੂ ਕਰੋ"</string>
     <string name="toast_dynsystem_discarded" msgid="1733249860276017050">"ਪਰਿਵਰਤਨਸ਼ੀਲ ਸਿਸਟਮ ਰੱਦ ਕੀਤਾ ਗਿਆ"</string>
     <string name="toast_failed_to_reboot_to_dynsystem" msgid="6336737274625452067">"ਪਰਿਵਰਤਨਸ਼ੀਲ ਸਿਸਟਮ ਮੁੜ-ਸ਼ੁਰੂ ਜਾਂ ਲੋਡ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਦਾ"</string>
-    <!-- no translation found for toast_failed_to_disable_dynsystem (3285742944977744413) -->
-    <skip />
+    <string name="toast_failed_to_disable_dynsystem" msgid="3285742944977744413">"ਪਰਿਵਰਤਨਸ਼ੀਲ ਸਿਸਟਮ ਨੂੰ ਬੰਦ ਕਰਨਾ ਅਸਫਲ ਰਿਹਾ"</string>
 </resources>

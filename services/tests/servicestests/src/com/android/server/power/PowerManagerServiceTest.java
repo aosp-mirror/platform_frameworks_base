@@ -1053,6 +1053,35 @@ public class PowerManagerServiceTest {
     }
 
     @Test
+    public void testGetAmbientDisplaySuppressionTokens_default() {
+        createService();
+        BinderService service = mService.getBinderServiceInstance();
+
+        assertThat(service.getAmbientDisplaySuppressionTokens()).isEmpty();
+    }
+
+    @Test
+    public void testGetAmbientDisplaySuppressionTokens_singleToken() {
+        createService();
+        BinderService service = mService.getBinderServiceInstance();
+        service.suppressAmbientDisplay("test1", true);
+        service.suppressAmbientDisplay("test2", false);
+
+        assertThat(service.getAmbientDisplaySuppressionTokens()).containsExactly("test1");
+    }
+
+    @Test
+    public void testGetAmbientDisplaySuppressionTokens_multipleTokens() {
+        createService();
+        BinderService service = mService.getBinderServiceInstance();
+        service.suppressAmbientDisplay("test1", true);
+        service.suppressAmbientDisplay("test2", true);
+
+        assertThat(service.getAmbientDisplaySuppressionTokens())
+                .containsExactly("test1", "test2");
+    }
+
+    @Test
     public void testSetPowerBoost_redirectsCallToNativeWrapper() {
         createService();
         mService.systemReady(null);

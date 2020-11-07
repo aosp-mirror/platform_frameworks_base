@@ -6372,7 +6372,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
 
         final IBinder freezeToken = mayFreezeScreenLocked() ? appToken : null;
-        onDescendantOrientationChanged(freezeToken, this);
+        if (onDescendantOrientationChanged(freezeToken, this)) {
+            // The app is just becoming visible, and the parent Task has updated with the
+            // orientation request. Update the size compat mode.
+            updateSizeCompatMode();
+        }
     }
 
     /**
@@ -6538,6 +6542,13 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return;
         }
 
+        if (task == null || (!handlesOrientationChangeFromDescendant()
+                && task.getLastTaskBoundsComputeActivity() != this)) {
+            // Don't compute when Task hasn't computed its bounds for this app, because the Task can
+            // be letterboxed, and its bounds may not be accurate until then.
+            return;
+        }
+
         Configuration overrideConfig = getRequestedOverrideConfiguration();
         final Configuration fullConfig = getConfiguration();
 
@@ -6562,20 +6573,14 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         mCompatDisplayInsets = new CompatDisplayInsets(mDisplayContent, this);
     }
 
-    void clearSizeCompatMode(boolean recomputeTask) {
+    @VisibleForTesting
+    void clearSizeCompatMode() {
         mSizeCompatScale = 1f;
         mSizeCompatBounds = null;
         mCompatDisplayInsets = null;
 
-        if (recomputeTask) {
-            // Recompute from Task because letterbox can also happen on Task level.
-            task.onRequestedOverrideConfigurationChanged(task.getRequestedOverrideConfiguration());
-        }
-    }
-
-    @VisibleForTesting
-    void clearSizeCompatMode() {
-        clearSizeCompatMode(true /* recomputeTask */);
+        // Recompute from Task because letterbox can also happen on Task level.
+        task.onRequestedOverrideConfigurationChanged(task.getRequestedOverrideConfiguration());
     }
 
     @Override

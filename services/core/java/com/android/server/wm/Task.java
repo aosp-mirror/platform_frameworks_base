@@ -571,6 +571,10 @@ class Task extends WindowContainer<WindowContainer> {
     /** Current activity that is resumed, or null if there is none. */
     ActivityRecord mResumedActivity = null;
 
+    /** Last activity that is used to compute the Task bounds. */
+    @Nullable
+    private ActivityRecord mLastTaskBoundsComputeActivity;
+
     private boolean mForceShowForAllUsers;
 
     /** When set, will force the task to report as invisible. */
@@ -1496,6 +1500,11 @@ class Task extends WindowContainer<WindowContainer> {
     }
 
     void cleanUpActivityReferences(ActivityRecord r) {
+        // mLastTaskBoundsComputeActivity is set at leaf Task
+        if (mLastTaskBoundsComputeActivity == r) {
+            mLastTaskBoundsComputeActivity = null;
+        }
+
         final WindowContainer parent = getParent();
         if (parent != null && parent.asTask() != null) {
             parent.asTask().cleanUpActivityReferences(r);
@@ -2833,6 +2842,8 @@ class Task extends WindowContainer<WindowContainer> {
 
     private void resolveLeafOnlyOverrideConfigs(Configuration newParentConfig,
             Rect previousBounds) {
+        mLastTaskBoundsComputeActivity = getTopNonFinishingActivity(false /* includeOverlays */);
+
         int windowingMode =
                 getResolvedOverrideConfiguration().windowConfiguration.getWindowingMode();
         if (windowingMode == WINDOWING_MODE_UNDEFINED) {
@@ -2961,6 +2972,11 @@ class Task extends WindowContainer<WindowContainer> {
             bounds.set(getRequestedOverrideBounds());
         }
         return bounds;
+    }
+
+    @Nullable
+    ActivityRecord getLastTaskBoundsComputeActivity() {
+        return mLastTaskBoundsComputeActivity;
     }
 
     /** Updates the task's bounds and override configuration to match what is expected for the
@@ -3307,18 +3323,6 @@ class Task extends WindowContainer<WindowContainer> {
         // No one in higher hierarchy handles this request, let's adjust our bounds to fulfill
         // it if possible.
         if (getParent() != null) {
-            final ActivityRecord activity = requestingContainer.asActivityRecord();
-            if (activity != null) {
-                // Clear the size compat cache to recompute the bounds for requested orientation;
-                // otherwise when Task#computeFullscreenBounds(), it will not try to do Task level
-                // letterboxing because app may prefer to keep its original size (size compat).
-                //
-                // Normally, ActivityRecord#clearSizeCompatMode() recomputes from its parent Task,
-                // which is the leaf Task. However, because this orientation request is new to all
-                // Tasks, pass false to clearSizeCompatMode, and trigger onConfigurationChanged from
-                // here (root Task) to make sure all Tasks are up-to-date.
-                activity.clearSizeCompatMode(false /* recomputeTask */);
-            }
             onConfigurationChanged(getParent().getConfiguration());
             return true;
         }

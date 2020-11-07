@@ -558,4 +558,8 @@
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Ingeschakeld"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Je apparaat moet opnieuw worden opgestart om deze wijziging toe te passen. Start nu opnieuw op of annuleer de wijziging."</string>
     <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"Bedrade hoofdtelefoon"</string>
+    <!-- no translation found for wifi_hotspot_switch_on_text (9212273118217786155) -->
+    <skip />
+    <!-- no translation found for wifi_hotspot_switch_off_text (7245567251496959764) -->
+    <skip />
 </resources>

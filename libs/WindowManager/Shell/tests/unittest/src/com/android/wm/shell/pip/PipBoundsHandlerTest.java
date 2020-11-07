@@ -61,7 +61,7 @@ public class PipBoundsHandlerTest extends ShellTestCase {
     @Before
     public void setUp() throws Exception {
         initializeMockResources();
-        mPipBoundsState = new PipBoundsState();
+        mPipBoundsState = new PipBoundsState(mContext);
         mPipBoundsHandler = new PipBoundsHandler(mContext, mPipBoundsState);
 
         mPipBoundsState.setDisplayInfo(mDefaultDisplayInfo);
