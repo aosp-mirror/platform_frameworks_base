@@ -22,6 +22,9 @@
 
 #include <tests/common/CallCountingCanvas.h>
 
+#include "SkColor.h"
+#include "pipeline/skia/AnimatedDrawables.h"
+
 using namespace android;
 using namespace android::uirenderer;
 using namespace android::uirenderer::test;
@@ -178,6 +181,21 @@ TEST(CanvasOp, simplePush) {
     EXPECT_EQ(buffer.size(), 0);
 }
 
+TEST(CanvasOp, simpleDrawPaint) {
+    CanvasOpBuffer buffer;
+    EXPECT_EQ(buffer.size(), 0);
+    buffer.push(CanvasOp<Op::DrawColor> {
+        .color = SkColor4f{1, 1, 1, 1},
+        .mode = SkBlendMode::kSrcIn
+    });
+
+    CallCountingCanvas canvas;
+    EXPECT_EQ(0, canvas.sumTotalDrawCalls());
+    rasterizeCanvasBuffer(buffer, &canvas);
+    EXPECT_EQ(1, canvas.drawPaintCount);
+    EXPECT_EQ(1, canvas.sumTotalDrawCalls());
+}
+
 TEST(CanvasOp, simpleDrawRect) {
     CanvasOpBuffer buffer;
     EXPECT_EQ(buffer.size(), 0);
@@ -257,6 +275,60 @@ TEST(CanvasOp, simpleDrawArc) {
     EXPECT_EQ(0, canvas.sumTotalDrawCalls());
     rasterizeCanvasBuffer(buffer, &canvas);
     EXPECT_EQ(1, canvas.drawArcCount);
+    EXPECT_EQ(1, canvas.sumTotalDrawCalls());
+}
+
+TEST(CanvasOp, simpleDrawRoundRectProperty) {
+    CanvasOpBuffer buffer;
+    EXPECT_EQ(buffer.size(), 0);
+
+    auto left = sp<CanvasPropertyPrimitive>(new uirenderer::CanvasPropertyPrimitive(1));
+    auto top = sp<CanvasPropertyPrimitive>(new uirenderer::CanvasPropertyPrimitive(2));
+    auto right = sp<CanvasPropertyPrimitive>(new uirenderer::CanvasPropertyPrimitive(3));
+    auto bottom = sp<CanvasPropertyPrimitive>(new uirenderer::CanvasPropertyPrimitive(4));
+    auto radiusX = sp<CanvasPropertyPrimitive>(new uirenderer::CanvasPropertyPrimitive(5));
+    auto radiusY = sp<CanvasPropertyPrimitive>(new uirenderer::CanvasPropertyPrimitive(6));
+    auto propertyPaint =
+            sp<uirenderer::CanvasPropertyPaint>(new uirenderer::CanvasPropertyPaint(SkPaint{}));
+
+    buffer.push(CanvasOp<Op::DrawRoundRectProperty> {
+        .left = left,
+        .top = top,
+        .right = right,
+        .bottom = bottom,
+        .rx = radiusX,
+        .ry = radiusY,
+        .paint = propertyPaint
+    });
+
+    CallCountingCanvas canvas;
+    EXPECT_EQ(0, canvas.sumTotalDrawCalls());
+    rasterizeCanvasBuffer(buffer, &canvas);
+    EXPECT_EQ(1, canvas.drawRRectCount);
+    EXPECT_EQ(1, canvas.sumTotalDrawCalls());
+}
+
+TEST(CanvasOp, simpleDrawCircleProperty) {
+    CanvasOpBuffer buffer;
+    EXPECT_EQ(buffer.size(), 0);
+
+    auto x = sp<CanvasPropertyPrimitive>(new uirenderer::CanvasPropertyPrimitive(1));
+    auto y = sp<CanvasPropertyPrimitive>(new uirenderer::CanvasPropertyPrimitive(2));
+    auto radius = sp<CanvasPropertyPrimitive>(new uirenderer::CanvasPropertyPrimitive(5));
+    auto propertyPaint =
+            sp<uirenderer::CanvasPropertyPaint>(new uirenderer::CanvasPropertyPaint(SkPaint{}));
+
+    buffer.push(CanvasOp<Op::DrawCircleProperty> {
+        .x = x,
+        .y = y,
+        .radius = radius,
+        .paint = propertyPaint
+    });
+
+    CallCountingCanvas canvas;
+    EXPECT_EQ(0, canvas.sumTotalDrawCalls());
+    rasterizeCanvasBuffer(buffer, &canvas);
+    EXPECT_EQ(1, canvas.drawOvalCount);
     EXPECT_EQ(1, canvas.sumTotalDrawCalls());
 }
 
