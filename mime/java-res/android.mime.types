@@ -91,6 +91,7 @@
 ?image/heic-sequence heics
 ?image/heif heif hif
 ?image/heif-sequence heifs
+?image/avif avif
 ?image/ico cur
 ?image/webp webp
 ?image/x-adobe-dng dng
