@@ -182,6 +182,7 @@ package android {
     field public static final String READ_PRINT_SERVICES = "android.permission.READ_PRINT_SERVICES";
     field public static final String READ_PRINT_SERVICE_RECOMMENDATIONS = "android.permission.READ_PRINT_SERVICE_RECOMMENDATIONS";
     field public static final String READ_PRIVILEGED_PHONE_STATE = "android.permission.READ_PRIVILEGED_PHONE_STATE";
+    field public static final String READ_PROJECTION_STATE = "android.permission.READ_PROJECTION_STATE";
     field public static final String READ_RUNTIME_PROFILES = "android.permission.READ_RUNTIME_PROFILES";
     field public static final String READ_SEARCH_INDEXABLES = "android.permission.READ_SEARCH_INDEXABLES";
     field public static final String READ_SYSTEM_UPDATE_INFO = "android.permission.READ_SYSTEM_UPDATE_INFO";
@@ -234,6 +235,7 @@ package android {
     field public static final String SUSPEND_APPS = "android.permission.SUSPEND_APPS";
     field public static final String SYSTEM_CAMERA = "android.permission.SYSTEM_CAMERA";
     field public static final String TETHER_PRIVILEGED = "android.permission.TETHER_PRIVILEGED";
+    field public static final String TOGGLE_AUTOMOTIVE_PROJECTION = "android.permission.TOGGLE_AUTOMOTIVE_PROJECTION";
     field public static final String TV_INPUT_HARDWARE = "android.permission.TV_INPUT_HARDWARE";
     field public static final String TV_VIRTUAL_REMOTE_CONTROLLER = "android.permission.TV_VIRTUAL_REMOTE_CONTROLLER";
     field public static final String UNLIMITED_SHORTCUTS_API_CALLS = "android.permission.UNLIMITED_SHORTCUTS_API_CALLS";
@@ -796,12 +798,20 @@ package android.app {
   }
 
   public class UiModeManager {
+    method @RequiresPermission(android.Manifest.permission.READ_PROJECTION_STATE) public void addOnProjectionStateChangeListener(int, @NonNull java.util.concurrent.Executor, @NonNull android.app.UiModeManager.OnProjectionStateChangeListener);
     method @RequiresPermission(android.Manifest.permission.ENTER_CAR_MODE_PRIORITIZED) public void enableCarMode(@IntRange(from=0) int, int);
+    method @RequiresPermission(android.Manifest.permission.READ_PROJECTION_STATE) public int getActiveProjectionTypes();
+    method @NonNull @RequiresPermission(android.Manifest.permission.READ_PROJECTION_STATE) public java.util.Set<java.lang.String> getProjectingPackages(int);
+    method @RequiresPermission(android.Manifest.permission.READ_PROJECTION_STATE) public void removeOnProjectionStateChangeListener(@NonNull android.app.UiModeManager.OnProjectionStateChangeListener);
     field public static final String ACTION_ENTER_CAR_MODE_PRIORITIZED = "android.app.action.ENTER_CAR_MODE_PRIORITIZED";
     field public static final String ACTION_EXIT_CAR_MODE_PRIORITIZED = "android.app.action.EXIT_CAR_MODE_PRIORITIZED";
     field public static final int DEFAULT_PRIORITY = 0; // 0x0
     field public static final String EXTRA_CALLING_PACKAGE = "android.app.extra.CALLING_PACKAGE";
     field public static final String EXTRA_PRIORITY = "android.app.extra.PRIORITY";
+  }
+
+  public static interface UiModeManager.OnProjectionStateChangeListener {
+    method public void onProjectionStateChanged(int, @NonNull java.util.Set<java.lang.String>);
   }
 
   public final class Vr2dDisplayProperties implements android.os.Parcelable {
