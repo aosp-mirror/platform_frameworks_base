@@ -257,6 +257,8 @@ public class GlobalSettingsValidators {
                             String.valueOf(Global.Wearable.CARD_PREVIEW_MODE_HIGH)
                         }));
         VALIDATORS.put(Global.Wearable.CORNER_ROUNDNESS, ANY_INTEGER_VALIDATOR);
+        VALIDATORS.put(Global.Wearable.SIDE_BUTTON, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(Global.Wearable.BUTTON_SET, BOOLEAN_VALIDATOR);
     }
 }
 

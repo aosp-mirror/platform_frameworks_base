@@ -5271,6 +5271,13 @@ public class SettingsProvider extends ContentProvider {
                                         .getInteger(
                                                 R.integer
                                                         .def_wearable_squareScreenCornerRoundness));
+                        initGlobalSettingsDefaultValForWearLocked(
+                                Global.Wearable.BUTTON_SET, false);
+                        initGlobalSettingsDefaultValForWearLocked(
+                                Global.Wearable.SIDE_BUTTON,
+                                getContext()
+                                        .getResources()
+                                        .getBoolean(R.bool.def_wearable_sideButtonPresent));
 
                         // TODO(b/164398026): add necessary initialization logic for all entries.
                         currentVersion = 204;
