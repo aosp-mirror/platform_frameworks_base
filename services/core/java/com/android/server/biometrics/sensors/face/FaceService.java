@@ -27,13 +27,19 @@ import android.hardware.biometrics.BiometricManager;
 import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.IBiometricSensorReceiver;
 import android.hardware.biometrics.IBiometricServiceLockoutResetCallback;
+import android.hardware.biometrics.face.IFace;
+import android.hardware.biometrics.face.SensorProps;
 import android.hardware.face.Face;
 import android.hardware.face.FaceSensorPropertiesInternal;
 import android.hardware.face.IFaceService;
 import android.hardware.face.IFaceServiceReceiver;
 import android.os.Binder;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Process;
 import android.os.NativeHandle;
+import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.util.Pair;
 import android.util.Slog;
@@ -42,11 +48,13 @@ import android.view.Surface;
 
 import com.android.internal.util.DumpUtils;
 import com.android.internal.widget.LockPatternUtils;
+import com.android.server.ServiceThread;
 import com.android.server.SystemService;
 import com.android.server.biometrics.Utils;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.LockoutResetDispatcher;
 import com.android.server.biometrics.sensors.LockoutTracker;
+import com.android.server.biometrics.sensors.face.aidl.FaceProvider;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -508,6 +516,38 @@ public class FaceService extends SystemService {
         mLockoutResetDispatcher = new LockoutResetDispatcher(context);
         mLockPatternUtils = new LockPatternUtils(context);
         mServiceProviders = new ArrayList<>();
+
+        initializeAidlHals();
+    }
+
+    private void initializeAidlHals() {
+        final String[] instances = ServiceManager.getDeclaredInstances(IFace.DESCRIPTOR);
+        if (instances == null || instances.length == 0) {
+            return;
+        }
+
+        // If for some reason the HAL is not started before the system service, do not block
+        // the rest of system server. Put this on a background thread.
+        final ServiceThread thread = new ServiceThread(TAG, Process.THREAD_PRIORITY_BACKGROUND,
+                true /* allowIo */);
+        thread.start();
+        final Handler handler = new Handler(thread.getLooper());
+
+        handler.post(() -> {
+            for (String instance : instances) {
+                final String fqName = IFace.DESCRIPTOR + "/" + instance;
+                final IFace face = IFace.Stub.asInterface(
+                        ServiceManager.waitForDeclaredService(fqName));
+                try {
+                    final SensorProps[] props = face.getSensorProps();
+                    final FaceProvider provider = new FaceProvider(getContext(), props, instance,
+                            mLockoutResetDispatcher);
+                    mServiceProviders.add(provider);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Remote exception when initializing instance: " + fqName);
+                }
+            }
+        });
     }
 
     @Override
