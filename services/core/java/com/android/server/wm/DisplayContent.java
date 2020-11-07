@@ -1428,8 +1428,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         if (!WindowManagerService.ENABLE_FIXED_ROTATION_TRANSFORM) {
             return ROTATION_UNDEFINED;
         }
-        if (r.inMultiWindowMode()
-                || r.getRequestedConfigurationOrientation() == getConfiguration().orientation) {
+        if (r.inMultiWindowMode() || r.getRequestedConfigurationOrientation(true /* forDisplay */)
+                == getConfiguration().orientation) {
             return ROTATION_UNDEFINED;
         }
         final int currentRotation = getRotation();
@@ -5494,7 +5494,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
          */
         boolean isTopFixedOrientationRecentsAnimating() {
             return mAnimatingRecents != null
-                    && mAnimatingRecents.getRequestedConfigurationOrientation()
+                    && mAnimatingRecents.getRequestedConfigurationOrientation(true /* forDisplay */)
                     != ORIENTATION_UNDEFINED && !hasTopFixedRotationLaunchingApp();
         }
 
