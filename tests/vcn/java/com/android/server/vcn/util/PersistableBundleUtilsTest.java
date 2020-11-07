@@ -28,6 +28,7 @@ import org.junit.runner.RunWith;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Objects;
 
@@ -39,6 +40,43 @@ public class PersistableBundleUtilsTest {
     private static final int[] TEST_INT_ARRAY = new int[] {0, 1, 2, 3, 4};
 
     private static final int NUM_COLLECTION_ENTRIES = 10;
+
+    private static class TestKey {
+        private static final String TEST_INTEGER_KEY =
+                "mTestInteger"; // Purposely colliding with keys of test class to ensure namespacing
+        private final int mTestInteger;
+
+        TestKey(int testInteger) {
+            mTestInteger = testInteger;
+        }
+
+        TestKey(PersistableBundle in) {
+            mTestInteger = in.getInt(TEST_INTEGER_KEY);
+        }
+
+        public PersistableBundle toPersistableBundle() {
+            final PersistableBundle result = new PersistableBundle();
+
+            result.putInt(TEST_INTEGER_KEY, mTestInteger);
+
+            return result;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(mTestInteger);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (!(o instanceof TestKey)) {
+                return false;
+            }
+
+            final TestKey other = (TestKey) o;
+            return mTestInteger == other.mTestInteger;
+        }
+    }
 
     private static class TestClass {
         private static final String TEST_INTEGER_KEY = "mTestInteger";
@@ -113,7 +151,7 @@ public class PersistableBundleUtilsTest {
     }
 
     @Test
-    public void testConversionLossless() throws Exception {
+    public void testListConversionLossless() throws Exception {
         final List<TestClass> sourceList = new ArrayList<>();
         for (int i = 0; i < NUM_COLLECTION_ENTRIES; i++) {
             final PersistableBundle innerBundle = new PersistableBundle();
@@ -127,5 +165,28 @@ public class PersistableBundleUtilsTest {
         final List<TestClass> resultList = PersistableBundleUtils.toList(bundled, TestClass::new);
 
         assertEquals(sourceList, resultList);
+    }
+
+    @Test
+    public void testMapConversionLossless() throws Exception {
+        final LinkedHashMap<TestKey, TestClass> sourceMap = new LinkedHashMap<>();
+        for (int i = 0; i < NUM_COLLECTION_ENTRIES; i++) {
+            final TestKey key = new TestKey(i * i);
+
+            final PersistableBundle innerBundle = new PersistableBundle();
+            innerBundle.putInt(TEST_KEY, i);
+            final TestClass value =
+                    new TestClass(i, TEST_INT_ARRAY, TEST_STRING_PREFIX + i, innerBundle);
+
+            sourceMap.put(key, value);
+        }
+
+        final PersistableBundle bundled =
+                PersistableBundleUtils.fromMap(
+                        sourceMap, TestKey::toPersistableBundle, TestClass::toPersistableBundle);
+        final LinkedHashMap<TestKey, TestClass> resultList =
+                PersistableBundleUtils.toMap(bundled, TestKey::new, TestClass::new);
+
+        assertEquals(sourceMap, resultList);
     }
 }
