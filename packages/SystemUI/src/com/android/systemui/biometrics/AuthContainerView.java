@@ -21,11 +21,9 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.graphics.PixelFormat;
-import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.PromptInfo;
 import android.hardware.face.FaceSensorPropertiesInternal;
-import android.hardware.fingerprint.FingerprintSensorProperties;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.os.Binder;
 import android.os.Bundle;
@@ -286,8 +284,23 @@ public class AuthContainerView extends LinearLayout
             if (config.mSensorIds.length == 1) {
                 final int singleSensorAuthId = config.mSensorIds[0];
                 if (Utils.containsSensorId(mFpProps, singleSensorAuthId)) {
-                    mBiometricView = (AuthBiometricFingerprintView)
-                            factory.inflate(R.layout.auth_biometric_fingerprint_view, null, false);
+                    FingerprintSensorPropertiesInternal sensorProps = null;
+                    for (FingerprintSensorPropertiesInternal prop : mFpProps) {
+                        if (prop.sensorId == singleSensorAuthId) {
+                            sensorProps = prop;
+                            break;
+                        }
+                    }
+
+                    if (sensorProps.isAnyUdfpsType()) {
+                        AuthBiometricUdfpsView udfpsView = (AuthBiometricUdfpsView) factory
+                                .inflate(R.layout.auth_biometric_udfps_view, null, false);
+                        udfpsView.setSensorProps(sensorProps);
+                        mBiometricView = udfpsView;
+                    } else {
+                        mBiometricView = (AuthBiometricFingerprintView) factory
+                                .inflate(R.layout.auth_biometric_fingerprint_view, null, false);
+                    }
                 } else if (Utils.containsSensorId(mFaceProps, singleSensorAuthId)) {
                     mBiometricView = (AuthBiometricFaceView)
                             factory.inflate(R.layout.auth_biometric_face_view, null, false);

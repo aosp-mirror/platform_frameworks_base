@@ -59,6 +59,20 @@ public interface AuthDialog {
     @interface DialogSize {}
 
     /**
+     * Parameters used when laying out {@link AuthBiometricView}, its sublclasses, and
+     * {@link AuthPanelController}.
+     */
+    class LayoutParams {
+        final int mMediumHeight;
+        final int mMediumWidth;
+
+        LayoutParams(int mediumWidth, int mediumHeight) {
+            mMediumWidth = mediumWidth;
+            mMediumHeight = mediumHeight;
+        }
+    }
+
+    /**
      * Animation duration, from small to medium dialog, including back panel, icon translation, etc
      */
     int ANIMATE_SMALL_TO_MEDIUM_DURATION_MS = 150;

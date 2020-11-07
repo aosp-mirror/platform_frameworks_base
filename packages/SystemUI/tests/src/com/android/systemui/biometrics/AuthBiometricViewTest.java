@@ -22,11 +22,16 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.hardware.biometrics.PromptInfo;
+import android.hardware.biometrics.SensorProperties;
+import android.hardware.fingerprint.FingerprintSensorProperties;
+import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.os.Bundle;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
@@ -62,6 +67,7 @@ public class AuthBiometricViewTest extends SysuiTestCase {
     @Mock private TextView mDescriptionView;
     @Mock private TextView mIndicatorView;
     @Mock private ImageView mIconView;
+    @Mock private View mIconHolderView;
 
     private TestableBiometricView mBiometricView;
 
@@ -200,6 +206,7 @@ public class AuthBiometricViewTest extends SysuiTestCase {
     @Test
     public void testBackgroundClicked_whenSmallDialog_neverSendsUserCanceled() {
         initDialog(mContext, false /* allowDeviceCredential */, mCallback, new MockInjector());
+        mBiometricView.mLayoutParams = new AuthDialog.LayoutParams(0, 0);
         mBiometricView.updateSize(AuthDialog.SIZE_SMALL);
 
         View view = new View(mContext);
@@ -275,7 +282,7 @@ public class AuthBiometricViewTest extends SysuiTestCase {
     }
 
     @Test
-    public void testNegativeButton_whenDeviceCredentialAllowed() throws InterruptedException {
+    public void testNegativeButton_whenDeviceCredentialAllowed() {
         Button negativeButton = new Button(mContext);
         initDialog(mContext, true /* allowDeviceCredential */, mCallback, new MockInjector() {
             @Override
@@ -288,6 +295,32 @@ public class AuthBiometricViewTest extends SysuiTestCase {
         waitForIdleSync();
 
         verify(mCallback).onAction(AuthBiometricView.Callback.ACTION_USE_DEVICE_CREDENTIAL);
+    }
+
+    @Test
+    public void testUdfpsBottomSpacerCalculation() {
+        final int displayHeightPx = 3000;
+        final int navbarHeightPx = 10;
+        final int dialogBottomMarginPx = 20;
+
+        final View buttonBar = mock(View.class);
+        when(buttonBar.getMeasuredHeight()).thenReturn(100);
+
+        final View textIndicator = mock(View.class);
+        when(textIndicator.getMeasuredHeight()).thenReturn(200);
+
+        final int sensorLocationX = 540;
+        final int sensorLocationY = 1600;
+        final int sensorRadius = 100;
+        final FingerprintSensorPropertiesInternal props = new FingerprintSensorPropertiesInternal(
+                0 /* sensorId */, SensorProperties.STRENGTH_STRONG, 5 /* maxEnrollmentsPerUser */,
+                FingerprintSensorProperties.TYPE_UDFPS_OPTICAL,
+                true /* resetLockoutRequiresHardwareAuthToken */, sensorLocationX, sensorLocationY,
+                sensorRadius);
+
+        assertEquals(970, AuthBiometricUdfpsView.calculateBottomSpacerHeight(
+                displayHeightPx, navbarHeightPx, dialogBottomMarginPx, buttonBar, textIndicator,
+                props));
     }
 
     private PromptInfo buildPromptInfo(boolean allowDeviceCredential) {
@@ -360,6 +393,11 @@ public class AuthBiometricViewTest extends SysuiTestCase {
         @Override
         public ImageView getIconView() {
             return mIconView;
+        }
+
+        @Override
+        public View getIconHolderView() {
+            return mIconHolderView;
         }
 
         @Override

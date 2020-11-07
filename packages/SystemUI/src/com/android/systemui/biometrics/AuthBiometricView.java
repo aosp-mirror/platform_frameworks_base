@@ -144,6 +144,10 @@ public abstract class AuthBiometricView extends LinearLayout {
             return mBiometricView.findViewById(R.id.biometric_icon);
         }
 
+        public View getIconHolderView() {
+            return mBiometricView.findViewById(R.id.biometric_icon_frame);
+        }
+
         public int getDelayAfterError() {
             return BiometricPrompt.HIDE_DIALOG_DELAY;
         }
@@ -164,11 +168,12 @@ public abstract class AuthBiometricView extends LinearLayout {
     private boolean mRequireConfirmation;
     private int mUserId;
     private int mEffectiveUserId;
-    @AuthDialog.DialogSize int mSize = AuthDialog.SIZE_UNKNOWN;
+    private @AuthDialog.DialogSize int mSize = AuthDialog.SIZE_UNKNOWN;
 
     private TextView mTitleView;
     private TextView mSubtitleView;
     private TextView mDescriptionView;
+    private View mIconHolderView;
     protected ImageView mIconView;
     @VisibleForTesting protected TextView mIndicatorView;
     @VisibleForTesting Button mNegativeButton;
@@ -176,8 +181,7 @@ public abstract class AuthBiometricView extends LinearLayout {
     @VisibleForTesting Button mTryAgainButton;
 
     // Measurements when biometric view is showing text, buttons, etc.
-    private int mMediumHeight;
-    private int mMediumWidth;
+    @Nullable @VisibleForTesting AuthDialog.LayoutParams mLayoutParams;
 
     private Callback mCallback;
     protected @BiometricState int mState;
@@ -302,13 +306,13 @@ public abstract class AuthBiometricView extends LinearLayout {
 
             final float iconPadding = getResources()
                     .getDimension(R.dimen.biometric_dialog_icon_padding);
-            mIconView.setY(getHeight() - mIconView.getHeight() - iconPadding);
+            mIconHolderView.setY(getHeight() - mIconHolderView.getHeight() - iconPadding);
 
             // Subtract the vertical padding from the new height since it's only used to create
             // extra space between the other elements, and not part of the actual icon.
-            final int newHeight = mIconView.getHeight() + 2 * (int) iconPadding
-                    - mIconView.getPaddingTop() - mIconView.getPaddingBottom();
-            mPanelController.updateForContentDimensions(mMediumWidth, newHeight,
+            final int newHeight = mIconHolderView.getHeight() + 2 * (int) iconPadding
+                    - mIconHolderView.getPaddingTop() - mIconHolderView.getPaddingBottom();
+            mPanelController.updateForContentDimensions(mLayoutParams.mMediumWidth, newHeight,
                     0 /* animateDurationMs */);
 
             mSize = newSize;
@@ -320,9 +324,9 @@ public abstract class AuthBiometricView extends LinearLayout {
 
             // Animate the icon back to original position
             final ValueAnimator iconAnimator =
-                    ValueAnimator.ofFloat(mIconView.getY(), mIconOriginalY);
+                    ValueAnimator.ofFloat(mIconHolderView.getY(), mIconOriginalY);
             iconAnimator.addUpdateListener((animation) -> {
-                mIconView.setY((float) animation.getAnimatedValue());
+                mIconHolderView.setY((float) animation.getAnimatedValue());
             });
 
             // Animate the text
@@ -374,10 +378,12 @@ public abstract class AuthBiometricView extends LinearLayout {
             as.play(iconAnimator).with(opacityAnimator);
             as.start();
             // Animate the panel
-            mPanelController.updateForContentDimensions(mMediumWidth, mMediumHeight,
+            mPanelController.updateForContentDimensions(mLayoutParams.mMediumWidth,
+                    mLayoutParams.mMediumHeight,
                     AuthDialog.ANIMATE_SMALL_TO_MEDIUM_DURATION_MS);
         } else if (newSize == AuthDialog.SIZE_MEDIUM) {
-            mPanelController.updateForContentDimensions(mMediumWidth, mMediumHeight,
+            mPanelController.updateForContentDimensions(mLayoutParams.mMediumWidth,
+                    mLayoutParams.mMediumHeight,
                     0 /* animateDurationMs */);
             mSize = newSize;
         } else if (newSize == AuthDialog.SIZE_LARGE) {
@@ -566,6 +572,7 @@ public abstract class AuthBiometricView extends LinearLayout {
         mIndicatorView.setText(message);
         mIndicatorView.setTextColor(mTextColorError);
         mIndicatorView.setVisibility(View.VISIBLE);
+        mIndicatorView.setSelected(true);
         mHandler.postDelayed(resetMessageRunnable, BiometricPrompt.HIDE_DIALOG_DELAY);
 
         Utils.notifyAccessibilityContentChanged(mAccessibilityManager, this);
@@ -586,6 +593,7 @@ public abstract class AuthBiometricView extends LinearLayout {
         mSubtitleView = mInjector.getSubtitleView();
         mDescriptionView = mInjector.getDescriptionView();
         mIconView = mInjector.getIconView();
+        mIconHolderView = mInjector.getIconHolderView();
         mIndicatorView = mInjector.getIndicatorView();
         mNegativeButton = mInjector.getNegativeButton();
         mPositiveButton = mInjector.getPositiveButton();
@@ -688,29 +696,45 @@ public abstract class AuthBiometricView extends LinearLayout {
         mHandler.removeCallbacksAndMessages(null /* all */);
     }
 
-    @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        final int width = MeasureSpec.getSize(widthMeasureSpec);
-        final int height = MeasureSpec.getSize(heightMeasureSpec);
-        final int newWidth = Math.min(width, height);
-
+    /**
+     * Contains all of the testable logic that should be invoked when {@link #onMeasure(int, int)}
+     * is invoked. In addition, this allows subclasses to implement custom measuring logic while
+     * allowing the base class to have common code to apply the custom measurements.
+     *
+     * @param width Width to constrain the measurements to.
+     * @param height Height to constrain the measurements to.
+     * @return See {@link AuthDialog.LayoutParams}
+     */
+    AuthDialog.LayoutParams onMeasureInternal(int width, int height) {
         int totalHeight = 0;
         final int numChildren = getChildCount();
         for (int i = 0; i < numChildren; i++) {
             final View child = getChildAt(i);
 
-            if (child.getId() == R.id.biometric_icon) {
+            if (child.getId() == R.id.space_above_icon) {
                 child.measure(
-                        MeasureSpec.makeMeasureSpec(newWidth, MeasureSpec.AT_MOST),
+                        MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY),
+                        MeasureSpec.makeMeasureSpec(child.getLayoutParams().height,
+                                MeasureSpec.EXACTLY));
+            } else if (child.getId() == R.id.biometric_icon_frame) {
+                final View iconView = findViewById(R.id.biometric_icon);
+                child.measure(
+                        MeasureSpec.makeMeasureSpec(iconView.getLayoutParams().width,
+                                MeasureSpec.EXACTLY),
+                        MeasureSpec.makeMeasureSpec(iconView.getLayoutParams().height,
+                                MeasureSpec.EXACTLY));
+            } else if (child.getId() == R.id.biometric_icon) {
+                child.measure(
+                        MeasureSpec.makeMeasureSpec(width, MeasureSpec.AT_MOST),
                         MeasureSpec.makeMeasureSpec(height, MeasureSpec.AT_MOST));
-            } else if (child.getId() == R.id.button_bar) {
+            }  else if (child.getId() == R.id.button_bar) {
                 child.measure(
-                        MeasureSpec.makeMeasureSpec(newWidth, MeasureSpec.EXACTLY),
+                        MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY),
                         MeasureSpec.makeMeasureSpec(child.getLayoutParams().height,
                                 MeasureSpec.EXACTLY));
             } else {
                 child.measure(
-                        MeasureSpec.makeMeasureSpec(newWidth, MeasureSpec.EXACTLY),
+                        MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY),
                         MeasureSpec.makeMeasureSpec(height, MeasureSpec.AT_MOST));
             }
 
@@ -719,11 +743,19 @@ public abstract class AuthBiometricView extends LinearLayout {
             }
         }
 
-        // Use the new width so it's centered horizontally
-        setMeasuredDimension(newWidth, totalHeight);
+        return new AuthDialog.LayoutParams(width, totalHeight);
+    }
 
-        mMediumHeight = totalHeight;
-        mMediumWidth = getMeasuredWidth();
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        final int width = MeasureSpec.getSize(widthMeasureSpec);
+        final int height = MeasureSpec.getSize(heightMeasureSpec);
+        final int newWidth = Math.min(width, height);
+
+        // Use "newWidth" instead, so the landscape dialog width is the same as the portrait
+        // width.
+        mLayoutParams = onMeasureInternal(newWidth, height);
+        setMeasuredDimension(mLayoutParams.mMediumWidth, mLayoutParams.mMediumHeight);
     }
 
     @Override
@@ -741,7 +773,7 @@ public abstract class AuthBiometricView extends LinearLayout {
         // Start with initial size only once. Subsequent layout changes don't matter since we
         // only care about the initial icon position.
         if (mIconOriginalY == 0) {
-            mIconOriginalY = mIconView.getY();
+            mIconOriginalY = mIconHolderView.getY();
             if (mSavedState == null) {
                 updateSize(!mRequireConfirmation && supportsSmallDialog() ? AuthDialog.SIZE_SMALL
                         : AuthDialog.SIZE_MEDIUM);
@@ -763,5 +795,9 @@ public abstract class AuthBiometricView extends LinearLayout {
 
     private boolean isDeviceCredentialAllowed() {
         return Utils.isDeviceCredentialAllowed(mPromptInfo);
+    }
+
+    @AuthDialog.DialogSize int getSize() {
+        return mSize;
     }
 }
