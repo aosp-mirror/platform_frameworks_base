@@ -89,8 +89,19 @@ public final class LegacyPermissionState {
             return false;
         }
         final LegacyPermissionState other = (LegacyPermissionState) object;
-        return Objects.equals(mUserStates, other.mUserStates)
-                && Objects.equals(mMissing, other.mMissing);
+        // Hand-code equals() for mUserStates, since SparseArray only has the
+        // default equals() method.
+        final int userStatesSize = mUserStates.size();
+        if (userStatesSize != other.mUserStates.size()) {
+            return false;
+        }
+        for (int i = 0; i < userStatesSize; i++) {
+            final int userId = mUserStates.keyAt(i);
+            if (!Objects.equals(mUserStates.get(userId), other.mUserStates.get(userId))) {
+                return false;
+            }
+        }
+        return Objects.equals(mMissing, other.mMissing);
     }
 
     /**
