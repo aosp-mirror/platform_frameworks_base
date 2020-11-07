@@ -245,6 +245,31 @@ TEST(CanvasOp, simpleDrawPoint) {
     EXPECT_EQ(1, canvas.sumTotalDrawCalls());
 }
 
+TEST(CanvasOp, simpleDrawPoints) {
+    CanvasOpBuffer buffer;
+    EXPECT_EQ(buffer.size(), 0);
+    size_t numPts = 3;
+    auto pts = sk_ref_sp(
+          new Points({
+              {32, 16},
+              {48, 48},
+              {16, 32}
+          })
+    );
+
+    buffer.push(CanvasOp<Op::DrawPoints> {
+        .count = numPts,
+        .paint = SkPaint{},
+        .points = pts
+    });
+
+    CallCountingCanvas canvas;
+    EXPECT_EQ(0, canvas.sumTotalDrawCalls());
+    rasterizeCanvasBuffer(buffer, &canvas);
+    EXPECT_EQ(1, canvas.drawPoints);
+    EXPECT_EQ(1, canvas.sumTotalDrawCalls());
+}
+
 TEST(CanvasOp, simpleDrawLine) {
     CanvasOpBuffer buffer;
     EXPECT_EQ(buffer.size(), 0);
@@ -254,6 +279,30 @@ TEST(CanvasOp, simpleDrawLine) {
         .endX = 12,
         .endY = 30,
         .paint = SkPaint{}
+    });
+
+    CallCountingCanvas canvas;
+    EXPECT_EQ(0, canvas.sumTotalDrawCalls());
+    rasterizeCanvasBuffer(buffer, &canvas);
+    EXPECT_EQ(1, canvas.drawPoints);
+    EXPECT_EQ(1, canvas.sumTotalDrawCalls());
+}
+
+TEST(CanvasOp, simpleDrawLines) {
+    CanvasOpBuffer buffer;
+    EXPECT_EQ(buffer.size(), 0);
+    size_t numPts = 3;
+    auto pts = sk_ref_sp(
+        new Points({
+               {32, 16},
+               {48, 48},
+               {16, 32}
+          })
+        );
+    buffer.push(CanvasOp<Op::DrawLines> {
+        .count = numPts,
+        .paint = SkPaint{},
+        .points = pts
     });
 
     CallCountingCanvas canvas;
