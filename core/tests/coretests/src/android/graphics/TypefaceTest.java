@@ -17,6 +17,7 @@
 package android.graphics;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import android.content.Context;
@@ -34,6 +35,9 @@ import com.android.frameworks.coretests.R;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.nio.ByteBuffer;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Random;
 
 @RunWith(AndroidJUnit4.class)
@@ -171,4 +175,27 @@ public class TypefaceTest {
 
     }
 
+    @SmallTest
+    @Test
+    public void testSerialize() throws Exception {
+        int size = Typeface.writeTypefaces(null, Arrays.asList(mFaces));
+        ByteBuffer buffer = ByteBuffer.allocateDirect(size);
+        Typeface.writeTypefaces(buffer, Arrays.asList(mFaces));
+        List<Typeface> copiedTypefaces = Typeface.readTypefaces(buffer);
+        assertNotNull(copiedTypefaces);
+        assertEquals(mFaces.length, copiedTypefaces.size());
+        for (int i = 0; i < mFaces.length; i++) {
+            Typeface original = mFaces[i];
+            Typeface copied = copiedTypefaces.get(i);
+            assertEquals(original.getStyle(), copied.getStyle());
+            assertEquals(original.getWeight(), copied.getWeight());
+            assertEquals(measureText(original, "hello"), measureText(copied, "hello"), 1e-6);
+        }
+    }
+
+    private static float measureText(Typeface typeface, String text) {
+        Paint paint = new Paint();
+        paint.setTypeface(typeface);
+        return paint.measureText(text);
+    }
 }
