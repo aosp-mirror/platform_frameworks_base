@@ -156,41 +156,28 @@ public class PipBoundsHandler {
         reloadResources(context);
     }
 
-    /**
-     * See {@link #getDestinationBounds(Rect, boolean)}
-     */
-    public Rect getDestinationBounds(Rect bounds) {
-        return getDestinationBounds(bounds, false /* useCurrentMinEdgeSize */);
-    }
+    /** Returns the destination bounds to place the PIP window on entry. */
+    public Rect getEntryDestinationBounds() {
+        final PipBoundsState.PipReentryState reentryState = mPipBoundsState.getReentryState();
+        final boolean shouldRestoreReentryBounds = reentryState != null;
 
-    /**
-     * @return {@link Rect} of the destination PiP window bounds.
-     */
-    public Rect getDestinationBounds(Rect bounds, boolean useCurrentMinEdgeSize) {
-        boolean isReentryBounds = false;
-        final Rect destinationBounds;
-        if (bounds == null) {
-            // Calculating initial entry bounds
-            final PipBoundsState.PipReentryState state = mPipBoundsState.getReentryState();
+        final Rect destinationBounds = shouldRestoreReentryBounds
+                ? getDefaultBounds(reentryState.getSnapFraction(), reentryState.getSize())
+                : getDefaultBounds(INVALID_SNAP_FRACTION, null /* size */);
 
-            final Rect defaultBounds;
-            if (state != null) {
-                // Restore to reentry bounds.
-                defaultBounds = getDefaultBounds(state.getSnapFraction(), state.getSize());
-                isReentryBounds = true;
-            } else {
-                // Get actual default bounds.
-                defaultBounds = getDefaultBounds(INVALID_SNAP_FRACTION, null /* size */);
-            }
-
-            destinationBounds = new Rect(defaultBounds);
-        } else {
-            // Just adjusting bounds (e.g. on aspect ratio changed).
-            destinationBounds = new Rect(bounds);
-        }
         if (isValidPictureInPictureAspectRatio(mPipBoundsState.getAspectRatio())) {
             transformBoundsToAspectRatio(destinationBounds, mPipBoundsState.getAspectRatio(),
-                    useCurrentMinEdgeSize, isReentryBounds);
+                    false /* useCurrentMinEdgeSize */, shouldRestoreReentryBounds);
+        }
+        return destinationBounds;
+    }
+
+    /** Returns the current bounds adjusted to the new aspect ratio, if valid. */
+    public Rect getAdjustedDestinationBounds(Rect currentBounds, float newAspectRatio) {
+        final Rect destinationBounds = new Rect(currentBounds);
+        if (isValidPictureInPictureAspectRatio(newAspectRatio)) {
+            transformBoundsToAspectRatio(destinationBounds, newAspectRatio,
+                    true /* useCurrentMinEdgeSize */, false /* isReentryBounds */);
         }
         return destinationBounds;
     }
