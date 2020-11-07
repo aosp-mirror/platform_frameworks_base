@@ -117,7 +117,7 @@ public class BatterySaverPolicyTest extends AndroidTestCase {
 
     @SmallTest
     public void testGetBatterySaverPolicy_PolicyVibration_WithAccessibilityEnabled() {
-        mBatterySaverPolicy.setAccessibilityEnabled(true);
+        mBatterySaverPolicy.mAccessibilityEnabled.update(true);
         testServiceDefaultValue_Off(ServiceType.VIBRATION);
     }
 
@@ -340,7 +340,7 @@ public class BatterySaverPolicyTest extends AndroidTestCase {
         verifyBatterySaverConstantsUpdated();
     }
 
-    public void testCarModeChanges_Full() {
+    public void testAutomotiveProjectionChanges_Full() {
         mBatterySaverPolicy.updateConstantsLocked(
                 "gps_mode=" + PowerManager.LOCATION_MODE_ALL_DISABLED_WHEN_SCREEN_OFF
                         + ",enable_night_mode=true", "");
@@ -350,7 +350,7 @@ public class BatterySaverPolicyTest extends AndroidTestCase {
         assertTrue(mBatterySaverPolicy.getBatterySaverPolicy(
                 ServiceType.NIGHT_MODE).batterySaverEnabled);
 
-        mBatterySaverPolicy.setCarModeEnabled(true);
+        mBatterySaverPolicy.mAutomotiveProjectionActive.update(true);
 
         assertThat(mBatterySaverPolicy.getBatterySaverPolicy(ServiceType.LOCATION).locationMode)
                 .isAnyOf(PowerManager.LOCATION_MODE_NO_CHANGE,
@@ -358,7 +358,7 @@ public class BatterySaverPolicyTest extends AndroidTestCase {
         assertFalse(mBatterySaverPolicy.getBatterySaverPolicy(
                 ServiceType.NIGHT_MODE).batterySaverEnabled);
 
-        mBatterySaverPolicy.setCarModeEnabled(false);
+        mBatterySaverPolicy.mAutomotiveProjectionActive.update(false);
 
         assertThat(mBatterySaverPolicy.getBatterySaverPolicy(ServiceType.LOCATION).locationMode)
                 .isEqualTo(PowerManager.LOCATION_MODE_ALL_DISABLED_WHEN_SCREEN_OFF);
@@ -366,7 +366,7 @@ public class BatterySaverPolicyTest extends AndroidTestCase {
                 ServiceType.NIGHT_MODE).batterySaverEnabled);
     }
 
-    public void testCarModeChanges_Adaptive() {
+    public void testAutomotiveProjectionChanges_Adaptive() {
         mBatterySaverPolicy.setAdaptivePolicyLocked(
                 Policy.fromSettings(
                         "gps_mode=" + PowerManager.LOCATION_MODE_ALL_DISABLED_WHEN_SCREEN_OFF
@@ -377,7 +377,7 @@ public class BatterySaverPolicyTest extends AndroidTestCase {
         assertTrue(mBatterySaverPolicy.getBatterySaverPolicy(
                 ServiceType.NIGHT_MODE).batterySaverEnabled);
 
-        mBatterySaverPolicy.setCarModeEnabled(true);
+        mBatterySaverPolicy.mAutomotiveProjectionActive.update(true);
 
         assertThat(mBatterySaverPolicy.getBatterySaverPolicy(ServiceType.LOCATION).locationMode)
                 .isAnyOf(PowerManager.LOCATION_MODE_NO_CHANGE,
@@ -385,7 +385,7 @@ public class BatterySaverPolicyTest extends AndroidTestCase {
         assertFalse(mBatterySaverPolicy.getBatterySaverPolicy(
                 ServiceType.NIGHT_MODE).batterySaverEnabled);
 
-        mBatterySaverPolicy.setCarModeEnabled(false);
+        mBatterySaverPolicy.mAutomotiveProjectionActive.update(false);
 
         assertThat(mBatterySaverPolicy.getBatterySaverPolicy(ServiceType.LOCATION).locationMode)
                 .isEqualTo(PowerManager.LOCATION_MODE_ALL_DISABLED_WHEN_SCREEN_OFF);

@@ -16,6 +16,7 @@
 
 package android.app;
 
+import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
@@ -27,20 +28,32 @@ import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.Configuration;
+import android.os.Binder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.ServiceManager.ServiceNotFoundException;
+import android.util.ArrayMap;
+import android.util.ArraySet;
+import android.util.Slog;
+
+import com.android.internal.annotations.GuardedBy;
+import com.android.internal.util.function.pooled.PooledLambda;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.lang.ref.WeakReference;
 import java.time.LocalTime;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.Executor;
 
 /**
  * This class provides access to the system uimode services.  These services
  * allow applications to control UI modes of the device.
  * It provides functionality to disable the car mode and it gives access to the
  * night mode settings.
- * 
+ *
  * <p>These facilities are built on top of the underlying
  * {@link android.content.Intent#ACTION_DOCK_EVENT} broadcasts that are sent when the user
  * physical places the device into and out of a dock.  When that happens,
@@ -49,7 +62,7 @@ import java.time.LocalTime;
  * starts the corresponding mode activity if appropriate.  See the
  * broadcasts {@link #ACTION_ENTER_CAR_MODE} and
  * {@link #ACTION_ENTER_DESK_MODE} for more information.
- * 
+ *
  * <p>In addition, the user may manually switch the system to car mode without
  * physically being in a dock.  While in car mode -- whether by manual action
  * from the user or being physically placed in a dock -- a notification is
@@ -59,6 +72,25 @@ import java.time.LocalTime;
  */
 @SystemService(Context.UI_MODE_SERVICE)
 public class UiModeManager {
+    /**
+     * A listener with a single method that is invoked whenever the packages projecting using the
+     * {@link ProjectionType}s for which it is registered change.
+     *
+     * @hide
+     */
+    @SystemApi
+    public interface OnProjectionStateChangeListener {
+        /**
+         * Callback invoked when projection state changes for a {@link ProjectionType} for which
+         * this listener was added.
+         * @param projectionType the listened-for {@link ProjectionType}s that have changed
+         * @param packageNames the {@link Set} of package names that have currently set those
+         *     {@link ProjectionType}s.
+         */
+        void onProjectionStateChanged(@ProjectionType int projectionType,
+                @NonNull Set<String> packageNames);
+    }
+
     private static final String TAG = "UiModeManager";
 
     /**
@@ -100,7 +132,7 @@ public class UiModeManager {
     @SystemApi
     public static final String ACTION_ENTER_CAR_MODE_PRIORITIZED =
             "android.app.action.ENTER_CAR_MODE_PRIORITIZED";
-    
+
     /**
      * Broadcast sent when the device's UI has switch away from car mode back
      * to normal mode.  Typically used by a car mode app, to dismiss itself
@@ -137,7 +169,7 @@ public class UiModeManager {
     @SystemApi
     public static final String ACTION_EXIT_CAR_MODE_PRIORITIZED =
             "android.app.action.EXIT_CAR_MODE_PRIORITIZED";
-    
+
     /**
      * Broadcast sent when the device's UI has switched to desk mode,
      * by being placed in a desk dock.  After
@@ -151,7 +183,7 @@ public class UiModeManager {
      * of the broadcast to {@link Activity#RESULT_CANCELED}.
      */
     public static String ACTION_ENTER_DESK_MODE = "android.app.action.ENTER_DESK_MODE";
-    
+
     /**
      * Broadcast sent when the device's UI has switched away from desk mode back
      * to normal mode.  Typically used by a desk mode app, to dismiss itself
@@ -198,13 +230,13 @@ public class UiModeManager {
      * automatically switch night mode on and off based on the time.
      */
     public static final int MODE_NIGHT_CUSTOM = 3;
-    
+
     /**
      * Constant for {@link #setNightMode(int)} and {@link #getNightMode()}:
      * never run in night mode.
      */
     public static final int MODE_NIGHT_NO = 1;
-    
+
     /**
      * Constant for {@link #setNightMode(int)} and {@link #getNightMode()}:
      * always run in night mode.
@@ -218,6 +250,24 @@ public class UiModeManager {
      * old constructor marked with UnSupportedAppUsage is used.
      */
     private @Nullable Context mContext;
+
+    private final Object mLock = new Object();
+    /**
+     * Map that stores internally created {@link InnerListener} objects keyed by their corresponding
+     * externally provided {@link OnProjectionStateChangeListener} objects.
+     */
+    @GuardedBy("mLock")
+    private final Map<OnProjectionStateChangeListener, InnerListener>
+            mProjectionStateListenerMap = new ArrayMap<>();
+
+    /**
+     * Resource manager that prevents memory leakage of Contexts via binder objects if clients
+     * fail to remove listeners.
+     */
+    @GuardedBy("mLock")
+    private final OnProjectionStateChangeListenerResourceManager
+            mOnProjectionStateChangeListenerResourceManager =
+            new OnProjectionStateChangeListenerResourceManager();
 
     @UnsupportedAppUsage
     /*package*/ UiModeManager() throws ServiceNotFoundException {
@@ -251,7 +301,7 @@ public class UiModeManager {
     public static final int ENABLE_CAR_MODE_ALLOW_SLEEP = 0x0002;
 
     /** @hide */
-    @IntDef(prefix = { "ENABLE_CAR_MODE_" }, value = {
+    @IntDef(prefix = {"ENABLE_CAR_MODE_"}, value = {
             ENABLE_CAR_MODE_GO_CAR_HOME,
             ENABLE_CAR_MODE_ALLOW_SLEEP
     })
@@ -362,7 +412,7 @@ public class UiModeManager {
      */
     @SystemApi
     public static final int DEFAULT_PRIORITY = 0;
-    
+
     /**
      * Turn off special mode if currently in car mode.
      * @param flags One of the disable car mode flags.
@@ -595,4 +645,264 @@ public class UiModeManager {
         }
     }
 
+    /**
+     * Indicates no projection type. Can be used to compare with the {@link ProjectionType} in
+     * {@link OnProjectionStateChangeListener#onProjectionStateChanged(int, Set)}.
+     *
+     * @hide
+     */
+    @TestApi
+    public static final int PROJECTION_TYPE_NONE = 0x0000;
+    /**
+     * Automotive projection prevents degradation of GPS to save battery, routes incoming calls to
+     * the automotive role holder, etc. For use with {@link #requestProjection(int)} and
+     * {@link #clearProjectionState(int)}.
+     *
+     * @hide
+     */
+    @TestApi
+    public static final int PROJECTION_TYPE_AUTOMOTIVE = 0x0001;
+    /**
+     * Indicates all projection types. For use with
+     * {@link #addOnProjectionStateChangeListener(int, Executor, OnProjectionStateChangeListener)}
+     * and {@link #getProjectingPackages(int)}.
+     *
+     * @hide
+     */
+    @TestApi
+    public static final int PROJECTION_TYPE_ALL = 0xffff;
+
+    /** @hide */
+    @IntDef(prefix = {"PROJECTION_TYPE_"}, value = {
+            PROJECTION_TYPE_NONE,
+            PROJECTION_TYPE_AUTOMOTIVE,
+            PROJECTION_TYPE_ALL,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ProjectionType {
+    }
+
+    /**
+     * Sets the given {@link ProjectionType}.
+     *
+     * Caller must have {@link android.Manifest.permission.TOGGLE_AUTOMOTIVE_PROJECTION} if
+     * argument is {@link #PROJECTION_TYPE_AUTOMOTIVE}.
+     * @param projectionType the type of projection to request. This must be a single
+     * {@link ProjectionType} and cannot be a bitmask.
+     * @return true if the projection was successfully set
+     * @throws IllegalArgumentException if passed {@link #PROJECTION_TYPE_NONE},
+     * {@link #PROJECTION_TYPE_ALL}, or any combination of more than one {@link ProjectionType}.
+     *
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(value = android.Manifest.permission.TOGGLE_AUTOMOTIVE_PROJECTION,
+            conditional = true)
+    public boolean requestProjection(@ProjectionType int projectionType) {
+        if (mService != null) {
+            try {
+                return mService.requestProjection(new Binder(), projectionType,
+                        mContext.getOpPackageName());
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Releases the given {@link ProjectionType}.
+     *
+     * Caller must have {@link android.Manifest.permission.TOGGLE_AUTOMOTIVE_PROJECTION} if
+     * argument is {@link #PROJECTION_TYPE_AUTOMOTIVE}.
+     * @param projectionType the type of projection to release. This must be a single
+     * {@link ProjectionType} and cannot be a bitmask.
+     * @return true if the package had set projection and it was successfully released
+     * @throws IllegalArgumentException if passed {@link #PROJECTION_TYPE_NONE},
+     * {@link #PROJECTION_TYPE_ALL}, or any combination of more than one {@link ProjectionType}.
+     *
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(value = android.Manifest.permission.TOGGLE_AUTOMOTIVE_PROJECTION,
+            conditional = true)
+    public boolean releaseProjection(@ProjectionType int projectionType) {
+        if (mService != null) {
+            try {
+                return mService.releaseProjection(projectionType, mContext.getOpPackageName());
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Gets the packages that are currently projecting.
+     *
+     * @param projectionType the {@link ProjectionType}s to consider when computing which packages
+     *                       are projecting. Use {@link #PROJECTION_TYPE_ALL} to get all projecting
+     *                       packages.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.READ_PROJECTION_STATE)
+    @NonNull
+    public Set<String> getProjectingPackages(@ProjectionType int projectionType) {
+        if (mService != null) {
+            try {
+                return new ArraySet<>(mService.getProjectingPackages(projectionType));
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return Set.of();
+    }
+
+    /**
+     * Gets the {@link ProjectionType}s that are currently active.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.READ_PROJECTION_STATE)
+    public @ProjectionType int getActiveProjectionTypes() {
+        if (mService != null) {
+            try {
+                return mService.getActiveProjectionTypes();
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return PROJECTION_TYPE_NONE;
+    }
+
+    /**
+     * Configures the listener to receive callbacks when the packages projecting using the given
+     * {@link ProjectionType}s change.
+     *
+     * @param projectionType one or more {@link ProjectionType}s to listen for changes regarding
+     * @param executor an {@link Executor} on which to invoke the callbacks
+     * @param listener the {@link OnProjectionStateChangeListener} to add
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.READ_PROJECTION_STATE)
+    public void addOnProjectionStateChangeListener(@ProjectionType int projectionType,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull OnProjectionStateChangeListener listener) {
+        synchronized (mLock) {
+            if (mProjectionStateListenerMap.containsKey(listener)) {
+                Slog.i(TAG, "Attempted to add listener that was already added.");
+                return;
+            }
+            if (mService != null) {
+                InnerListener innerListener = new InnerListener(executor, listener,
+                        mOnProjectionStateChangeListenerResourceManager);
+                try {
+                    mService.addOnProjectionStateChangeListener(innerListener, projectionType);
+                    mProjectionStateListenerMap.put(listener, innerListener);
+                } catch (RemoteException e) {
+                    mOnProjectionStateChangeListenerResourceManager.remove(innerListener);
+                    throw e.rethrowFromSystemServer();
+                }
+            }
+        }
+    }
+
+    /**
+     * Removes the listener so it stops receiving updates for all {@link ProjectionType}s.
+     *
+     * @param listener the {@link OnProjectionStateChangeListener} to remove
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.READ_PROJECTION_STATE)
+    public void removeOnProjectionStateChangeListener(
+            @NonNull OnProjectionStateChangeListener listener) {
+        synchronized (mLock) {
+            InnerListener innerListener = mProjectionStateListenerMap.get(listener);
+            if (innerListener == null) {
+                Slog.i(TAG, "Attempted to remove listener that was not added.");
+                return;
+            }
+            if (mService != null) {
+                try {
+                    mService.removeOnProjectionStateChangeListener(innerListener);
+                } catch (RemoteException e) {
+                    throw e.rethrowFromSystemServer();
+                }
+            }
+            mProjectionStateListenerMap.remove(listener);
+            mOnProjectionStateChangeListenerResourceManager.remove(innerListener);
+        }
+    }
+
+    private static class InnerListener extends IOnProjectionStateChangeListener.Stub {
+        private final WeakReference<OnProjectionStateChangeListenerResourceManager>
+                mResourceManager;
+
+        private InnerListener(@NonNull Executor executor,
+                @NonNull OnProjectionStateChangeListener outerListener,
+                @NonNull OnProjectionStateChangeListenerResourceManager resourceManager) {
+            resourceManager.put(this, executor, outerListener);
+            mResourceManager = new WeakReference<>(resourceManager);
+        }
+
+        @Override
+        public void onProjectionStateChanged(int activeProjectionTypes,
+                List<String> projectingPackages) {
+            OnProjectionStateChangeListenerResourceManager resourceManager = mResourceManager.get();
+            if (resourceManager == null) {
+                Slog.w(TAG, "Can't execute onProjectionStateChanged, resource manager is gone.");
+                return;
+            }
+
+            OnProjectionStateChangeListener outerListener = resourceManager.getOuterListener(this);
+            Executor executor = resourceManager.getExecutor(this);
+            if (outerListener == null || executor == null) {
+                Slog.w(TAG, "Can't execute onProjectionStatechanged, references are null.");
+                return;
+            }
+
+            executor.execute(PooledLambda.obtainRunnable(
+                    OnProjectionStateChangeListener::onProjectionStateChanged,
+                    outerListener,
+                    activeProjectionTypes,
+                    new ArraySet<>(projectingPackages)).recycleOnUse());
+        }
+    }
+
+    /**
+     * Wrapper class that ensures we don't leak {@link Activity} or other large {@link Context} in
+     * which this {@link UiModeManager} resides if/when it ends without unregistering associated
+     * {@link OnProjectionStateChangeListener}s.
+     */
+    private static class OnProjectionStateChangeListenerResourceManager {
+        private final Map<InnerListener, OnProjectionStateChangeListener> mOuterListenerMap =
+                new ArrayMap<>(1);
+        private final Map<InnerListener, Executor> mExecutorMap = new ArrayMap<>(1);
+
+        void put(@NonNull InnerListener innerListener, @NonNull Executor executor,
+                OnProjectionStateChangeListener outerListener) {
+            mOuterListenerMap.put(innerListener, outerListener);
+            mExecutorMap.put(innerListener, executor);
+        }
+
+        void remove(InnerListener innerListener) {
+            mOuterListenerMap.remove(innerListener);
+            mExecutorMap.remove(innerListener);
+        }
+
+        OnProjectionStateChangeListener getOuterListener(@NonNull InnerListener innerListener) {
+            return mOuterListenerMap.get(innerListener);
+        }
+
+        Executor getExecutor(@NonNull InnerListener innerListener) {
+            return mExecutorMap.get(innerListener);
+        }
+    }
 }
