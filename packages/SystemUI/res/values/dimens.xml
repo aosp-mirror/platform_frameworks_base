@@ -149,7 +149,7 @@
     <dimen name="notification_max_heads_up_height_increased">188dp</dimen>
 
     <!-- Side padding on the lockscreen on the side of notifications -->
-    <dimen name="notification_side_paddings">4dp</dimen>
+    <dimen name="notification_side_paddings">16dp</dimen>
 
     <!-- padding between the heads up and the statusbar -->
     <dimen name="heads_up_status_bar_padding">8dp</dimen>
