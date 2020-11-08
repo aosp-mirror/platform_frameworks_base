@@ -47,12 +47,12 @@
     <string name="savetopdf_button" msgid="2976186791686924743">"PDFରେ ସେଭ୍‍ କରନ୍ତୁ"</string>
     <string name="print_options_expanded" msgid="6944679157471691859">"ପ୍ରିଣ୍ଟ ବିକଳ୍ପକୁ ବଡ଼ କରାଯାଇଛି"</string>
     <string name="print_options_collapsed" msgid="7455930445670414332">"ପ୍ରିଣ୍ଟ ବିକଳ୍ପକୁ ଛୋଟ କରାଯାଇଛି"</string>
-    <string name="search" msgid="5421724265322228497">"Search"</string>
+    <string name="search" msgid="5421724265322228497">"ସର୍ଚ୍ଚ କରନ୍ତୁ"</string>
     <string name="all_printers_label" msgid="3178848870161526399">"ସମସ୍ତ ପ୍ରିଣ୍ଟର୍‌"</string>
-    <string name="add_print_service_label" msgid="5356702546188981940">"ସେବା ଯୋଗ କରନ୍ତୁ"</string>
+    <string name="add_print_service_label" msgid="5356702546188981940">"ସେବା ଯୋଡ଼ନ୍ତୁ"</string>
     <string name="print_search_box_shown_utterance" msgid="7967404953901376090">"ସର୍ଚ୍ଚ ବକ୍ସ ଦେଖାଯାଇଛି"</string>
     <string name="print_search_box_hidden_utterance" msgid="5727755169343113351">"ସର୍ଚ୍ଚ ବକ୍ସ ଲୁଚି ରହିଛି"</string>
-    <string name="print_add_printer" msgid="1088656468360653455">"ପ୍ରିଣ୍ଟର୍‌ ଯୋଗ କରନ୍ତୁ"</string>
+    <string name="print_add_printer" msgid="1088656468360653455">"ପ୍ରିଣ୍ଟର୍‌ ଯୋଡ଼ନ୍ତୁ"</string>
     <string name="print_select_printer" msgid="7388760939873368698">"ପ୍ରିଣ୍ଟର୍‍ ଚୟନ କରନ୍ତୁ"</string>
     <string name="print_forget_printer" msgid="5035287497291910766">"ପ୍ରିଣ୍ଟର୍‍ ଭୁଲିଯାଆନ୍ତୁ"</string>
     <plurals name="print_search_result_count_utterance" formatted="false" msgid="6997663738361080868">
@@ -94,7 +94,7 @@
     <item msgid="2762241247228983754">"ରଙ୍ଗ"</item>
   </string-array>
   <string-array name="duplex_mode_labels">
-    <item msgid="3882302912790928315">"କିଛି ନାହିଁ"</item>
+    <item msgid="3882302912790928315">"କିଛିନୁହେଁ"</item>
     <item msgid="7296563835355641719">"ଲମ୍ବା ପ୍ରାନ୍ତ"</item>
     <item msgid="79513688117503758">"ଛୋଟ ପ୍ରାନ୍ତ"</item>
   </string-array>

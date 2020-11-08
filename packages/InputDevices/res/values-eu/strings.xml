@@ -19,7 +19,6 @@
     <string name="keyboard_layout_swiss_german_label" msgid="2305520941993314258">"Alemana (Suitza)"</string>
     <string name="keyboard_layout_belgian" msgid="2011984572838651558">"Belgikarra"</string>
     <string name="keyboard_layout_bulgarian" msgid="8951224309972028398">"Bulgariarra"</string>
-    <string name="keyboard_layout_bulgarian_phonetic" msgid="7568914730360106653">"Bulgariarra, fonetikoa"</string>
     <string name="keyboard_layout_italian" msgid="6497079660449781213">"Italiarra"</string>
     <string name="keyboard_layout_danish" msgid="8036432066627127851">"Daniarra"</string>
     <string name="keyboard_layout_norwegian" msgid="9090097917011040937">"Norvegiarra"</string>
@@ -27,7 +26,6 @@
     <string name="keyboard_layout_finnish" msgid="5585659438924315466">"Finlandiarra"</string>
     <string name="keyboard_layout_croatian" msgid="4172229471079281138">"Kroaziarra"</string>
     <string name="keyboard_layout_czech" msgid="1349256901452975343">"Txekiarra"</string>
-    <string name="keyboard_layout_czech_qwerty" msgid="3331402534128515501">"QWERTY estilo txekiarra"</string>
     <string name="keyboard_layout_estonian" msgid="8775830985185665274">"Estoniarra"</string>
     <string name="keyboard_layout_hungarian" msgid="4154963661406035109">"Hungariarra"</string>
     <string name="keyboard_layout_icelandic" msgid="5836645650912489642">"Islandiarra"</string>
@@ -36,7 +34,6 @@
     <string name="keyboard_layout_slovak" msgid="2469379934672837296">"Eslovakiarra"</string>
     <string name="keyboard_layout_slovenian" msgid="1735933028924982368">"Esloveniarra"</string>
     <string name="keyboard_layout_turkish" msgid="7736163250907964898">"Turkiarra"</string>
-    <string name="keyboard_layout_turkish_f" msgid="9130320856010776018">"Turkiarra (F teklatua)"</string>
     <string name="keyboard_layout_ukrainian" msgid="8176637744389480417">"Ukrainarra"</string>
     <string name="keyboard_layout_arabic" msgid="5671970465174968712">"Arabiarra"</string>
     <string name="keyboard_layout_greek" msgid="7289253560162386040">"Greziarra"</string>
@@ -47,7 +44,4 @@
     <string name="keyboard_layout_persian" msgid="3920643161015888527">"Pertsiera"</string>
     <string name="keyboard_layout_azerbaijani" msgid="7315895417176467567">"Azerbaijandarra"</string>
     <string name="keyboard_layout_polish" msgid="1121588624094925325">"Poloniarra"</string>
-    <string name="keyboard_layout_belarusian" msgid="7619281752698687588">"Bielorrusiera"</string>
-    <string name="keyboard_layout_mongolian" msgid="7678483495823936626">"Mongoliera"</string>
-    <string name="keyboard_layout_georgian" msgid="4596185456863747454">"Georgiera"</string>
 </resources>

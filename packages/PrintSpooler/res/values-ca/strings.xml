@@ -16,7 +16,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_label" msgid="4469836075319831821">"Gestor de cues d\'impressió"</string>
+    <string name="app_label" msgid="4469836075319831821">"Gest. cues impr."</string>
     <string name="more_options_button" msgid="2243228396432556771">"Més opcions"</string>
     <string name="label_destination" msgid="9132510997381599275">"Destinació"</string>
     <string name="label_copies" msgid="3634531042822968308">"Còpies"</string>

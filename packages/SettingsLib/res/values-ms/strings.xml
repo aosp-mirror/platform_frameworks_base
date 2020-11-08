@@ -155,7 +155,7 @@
     <string name="launch_defaults_some" msgid="3631650616557252926">"Beberapa lalai ditetapkan"</string>
     <string name="launch_defaults_none" msgid="8049374306261262709">"Tiada lalai ditetapkan"</string>
     <string name="tts_settings" msgid="8130616705989351312">"Tetapan teks kepada pertuturan"</string>
-    <string name="tts_settings_title" msgid="7602210956640483039">"Output teks kepada pertuturan"</string>
+    <string name="tts_settings_title" msgid="7602210956640483039">"Output teks ke pertuturan"</string>
     <string name="tts_default_rate_title" msgid="3964187817364304022">"Kadar pertuturan"</string>
     <string name="tts_default_rate_summary" msgid="3781937042151716987">"Kelajuan pertuturan teks"</string>
     <string name="tts_default_pitch_title" msgid="6988592215554485479">"Pic"</string>
@@ -212,7 +212,8 @@
     <string name="adb_wireless_settings" msgid="2295017847215680229">"Penyahpepijatan wayarles"</string>
     <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Untuk melihat dan menggunakan peranti yang tersedia, hidupkan penyahpepijatan wayarles"</string>
     <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"Gandingkan peranti dengan kod QR"</string>
-    <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"Gandingkan peranti baharu menggunakan pengimbas kod QR"</string>
+    <!-- no translation found for adb_pair_method_qrcode_summary (7130694277228970888) -->
+    <skip />
     <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Gandingkan peranti dengan kod gandingan"</string>
     <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"Gandingkan peranti baharu menggunakan kod enam digit"</string>
     <string name="adb_paired_devices_title" msgid="5268997341526217362">"Peranti gandingan"</string>
@@ -231,7 +232,8 @@
     <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"Gagal menggandingkan peranti. Kod QR salah atau peranti tidak disambungkan kepada rangkaian yang sama."</string>
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"Alamat IP &amp; Port"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"Imbas kod QR"</string>
-    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"Gandingkan peranti melalui Wi-Fi dengan mengimbas kod QR"</string>
+    <!-- no translation found for adb_wireless_qrcode_pairing_description (6014121407143607851) -->
+    <skip />
     <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Sila sambungkan kepada rangkaian Wi-Fi"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, debug, dev"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Pintasan laporan pepijat"</string>
@@ -251,12 +253,12 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"Pensijilan paparan wayarles"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Dayakan Pengelogan Berjela-jela Wi-Fi"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Pendikitan pengimbasan Wi-Fi"</string>
-    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"Perawakan MAC dipertingkat Wi‑Fi"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Data mudah alih sentiasa aktif"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Pecutan perkakasan penambatan"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Tunjukkan peranti Bluetooth tanpa nama"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"Lumpuhkan kelantangan mutlak"</string>
     <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"Dayakan Gabeldorsche"</string>
+    <string name="enhanced_connectivity" msgid="7201127377781666804">"Kesambungan Dipertingkat"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="1710571610177659127">"Versi AVRCP Bluetooth"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7846922290083709633">"Pilih Versi AVRCP Bluetooth"</string>
     <string name="bluetooth_select_map_version_string" msgid="526308145174175327">"Versi MAP Bluetooth"</string>
@@ -283,7 +285,6 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Tunjukkan pilihan untuk pensijilan paparan wayarles"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Tingkatkan tahap pengelogan Wi-Fi, tunjuk setiap SSID RSSI dalam Pemilih Wi-Fi"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Mengurangkan penyusutan bateri &amp; meningkatkan prestasi rangkaian"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"Apabila mod ini didayakan, alamat MAC peranti ini mungkin berubah setiap kali peranti bersambung kepada rangkaian yang telah mendayakan perawakan MAC."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Bermeter"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Tidak bermeter"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Saiz penimbal pengelog"</string>
@@ -372,6 +373,10 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Paparkan dialog Apl Tiada Respons untuk apl latar belakang"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Papar amaran saluran pemberitahuan"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Memaparkan amaran pada skrin apabila apl menyiarkan pemberitahuan tanpa saluran sah"</string>
+    <!-- no translation found for enforce_shortcuts_for_conversations (7040735163945040763) -->
+    <skip />
+    <!-- no translation found for enforce_shortcuts_for_conversations_summary (1860168037282467862) -->
+    <skip />
     <string name="force_allow_on_external" msgid="9187902444231637880">"Benarkan apl secara paksa pada storan luaran"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Menjadikan sebarang apl layak ditulis ke storan luaran, tanpa mengambil kira nilai manifes"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Paksa aktiviti supaya boleh diubah saiz"</string>
@@ -432,11 +437,11 @@
     <string name="power_discharge_by" msgid="4113180890060388350">"Seharusnya boleh digunakan hingga kira-kira <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only" msgid="92545648425937000">"Seharusnya boleh digunakan hingga kira-kira <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"Hingga <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"Bateri mungkin habis menjelang <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_remaining_less_than_duration_only" msgid="8956656616031395152">"Kurang daripada <xliff:g id="THRESHOLD">%1$s</xliff:g> lagi"</string>
-    <string name="power_remaining_less_than_duration" msgid="318215464914990578">"Kurang daripada <xliff:g id="THRESHOLD">%1$s</xliff:g> lagi (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_more_than_subtext" msgid="446388082266121894">"Lebih daripada <xliff:g id="TIME_REMAINING">%1$s</xliff:g> lagi (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_only_more_than_subtext" msgid="4873750633368888062">"Lebih daripada <xliff:g id="TIME_REMAINING">%1$s</xliff:g> lagi"</string>
+    <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"Bateri mungkin kehabisan selewat-lewatnya <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_remaining_less_than_duration_only" msgid="5802195288324091585">"Tinggal kurang daripada <xliff:g id="THRESHOLD">%1$s</xliff:g>"</string>
+    <string name="power_remaining_less_than_duration" msgid="1812668275239801236">"Kurang daripada <xliff:g id="THRESHOLD">%1$s</xliff:g> lagi (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_more_than_subtext" msgid="7919119719242734848">"Lebih daripada <xliff:g id="TIME_REMAINING">%1$s</xliff:g> lagi (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_only_more_than_subtext" msgid="3274496164769110480">"Lebih daripada <xliff:g id="TIME_REMAINING">%1$s</xliff:g> lagi"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="137330009791560774">"Telefon mungkin ditutup tidak lama lagi"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="145489081521468132">"Tablet mungkin ditutup tidak lama lagi"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="1070562682853942350">"Peranti mungkin ditutup tidak lama lagi"</string>
@@ -545,21 +550,7 @@
     <string name="user_need_lock_message" msgid="4311424336209509301">"Sebelum anda boleh membuat profil yang terhad, anda perlu menyediakan kunci skrin untuk melindungi apl dan data peribadi anda."</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"Tetapkan kunci"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"Tukar kepada <xliff:g id="USER_NAME">%s</xliff:g>"</string>
-    <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"Mencipta pengguna baharu…"</string>
-    <string name="user_nickname" msgid="262624187455825083">"Nama panggilan"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"Tambah tetamu"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Alih keluar tetamu"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"Tetamu"</string>
-    <string name="user_image_take_photo" msgid="467512954561638530">"Ambil foto"</string>
-    <string name="user_image_choose_photo" msgid="1363820919146782908">"Pilih imej"</string>
-    <string name="user_image_photo_selector" msgid="433658323306627093">"Pilih foto"</string>
-    <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"Lalai peranti"</string>
-    <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Dilumpuhkan"</string>
-    <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Didayakan"</string>
-    <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Peranti anda mesti dibut semula supaya perubahan ini berlaku. But semula sekarang atau batalkan."</string>
-    <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"Fon kepala berwayar"</string>
-    <!-- no translation found for wifi_hotspot_switch_on_text (9212273118217786155) -->
-    <skip />
-    <!-- no translation found for wifi_hotspot_switch_off_text (7245567251496959764) -->
-    <skip />
 </resources>

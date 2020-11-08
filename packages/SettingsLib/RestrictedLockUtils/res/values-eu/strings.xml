@@ -18,5 +18,5 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="enabled_by_admin" msgid="6630472777476410137">"Administratzaileak gaitu egin du"</string>
-    <string name="disabled_by_admin" msgid="4023569940620832713">"Administratzaileak desgaitu du"</string>
+    <string name="disabled_by_admin" msgid="4023569940620832713">"Administratzaileak desgaitu egin du"</string>
 </resources>
