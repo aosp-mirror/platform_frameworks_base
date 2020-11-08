@@ -33,6 +33,7 @@ import static com.android.server.wm.WindowContainerChildProto.DISPLAY_AREA;
 import android.annotation.Nullable;
 import android.content.res.Configuration;
 import android.graphics.Rect;
+import android.os.IBinder;
 import android.util.proto.ProtoOutputStream;
 import android.window.DisplayAreaInfo;
 import android.window.IDisplayAreaOrganizer;
@@ -147,6 +148,15 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
     @Override
     boolean handlesOrientationChangeFromDescendant() {
         return !mIgnoreOrientationRequest && super.handlesOrientationChangeFromDescendant();
+    }
+
+    @Override
+    boolean onDescendantOrientationChanged(IBinder freezeDisplayToken,
+            WindowContainer requestingContainer) {
+        // If this is set to ignore the orientation request, we don't propagate descendant
+        // orientation request.
+        return !mIgnoreOrientationRequest
+                && super.onDescendantOrientationChanged(freezeDisplayToken, requestingContainer);
     }
 
     /**

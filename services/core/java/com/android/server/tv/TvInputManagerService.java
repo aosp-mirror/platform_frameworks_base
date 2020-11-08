@@ -2457,7 +2457,19 @@ public final class TvInputManagerService extends SystemService {
         private final boolean isRecordingSession;
         private final ITvInputClient client;
         private final int seq;
+        /**
+         * The {code UID} of the application that created the session.
+         *
+         * <p>
+         * The application is usually the TIF Player.
+         */
         private final int callingUid;
+        /**
+         * The  {@code PID} of the application that created the session.
+         *
+         * <p>
+         * The application is usually the TIF Player.
+         */
         private final int callingPid;
         private final int userId;
         private final IBinder sessionToken;

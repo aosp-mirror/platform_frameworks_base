@@ -16,6 +16,8 @@
 
 package android.app;
 
+import android.app.IOnProjectionStateChangeListener;
+
 /**
  * Interface used to control special UI modes.
  * @hide
@@ -93,4 +95,34 @@ interface IUiModeManager {
     * Sets custom end clock time
     */
     void setCustomNightModeEnd(long time);
+
+    /**
+    * Sets projection state for the caller for the given projection type.
+    */
+    boolean requestProjection(in IBinder binder, int projectionType, String callingPackage);
+
+    /**
+    * Releases projection state for the caller for the given projection type.
+    */
+    boolean releaseProjection(int projectionType, String callingPackage);
+
+    /**
+    * Registers a listener for changes to projection state.
+    */
+    void addOnProjectionStateChangeListener(in IOnProjectionStateChangeListener listener, int projectionType);
+
+    /**
+    * Unregisters a listener for changes to projection state.
+    */
+    void removeOnProjectionStateChangeListener(in IOnProjectionStateChangeListener listener);
+
+    /**
+    * Returns packages that have currently set the given projection type.
+    */
+    List<String> getProjectingPackages(int projectionType);
+
+    /**
+    * Returns currently set projection types.
+    */
+    int getActiveProjectionTypes();
 }

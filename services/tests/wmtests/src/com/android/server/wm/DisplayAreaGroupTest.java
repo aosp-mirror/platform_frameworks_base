@@ -90,7 +90,7 @@ public class DisplayAreaGroupTest extends WindowTestsBase {
     }
 
     @Test
-    public void testGetOrientation() {
+    public void testGetRequestedOrientationForDisplay() {
         doReturn(true).when(mDisplayContent).onDescendantOrientationChanged(any(), any());
         mActivity.setRequestedOrientation(SCREEN_ORIENTATION_PORTRAIT);
 
@@ -98,21 +98,44 @@ public class DisplayAreaGroupTest extends WindowTestsBase {
         mDisplayContent.setBounds(0, 0, 600, 900);
 
         assertThat(mDisplayAreaGroup.getOrientation()).isEqualTo(SCREEN_ORIENTATION_PORTRAIT);
-        assertThat(mActivity.getRequestedConfigurationOrientation())
+        assertThat(mActivity.getRequestedConfigurationOrientation(true /* forDisplay */))
                 .isEqualTo(ORIENTATION_PORTRAIT);
 
         // DisplayAreaGroup is landscape, different from Display
         mDisplayAreaGroup.setBounds(0, 0, 600, 450);
 
         assertThat(mDisplayAreaGroup.getOrientation()).isEqualTo(SCREEN_ORIENTATION_LANDSCAPE);
-        assertThat(mActivity.getRequestedConfigurationOrientation())
+        assertThat(mActivity.getRequestedConfigurationOrientation(true /* forDisplay */))
                 .isEqualTo(ORIENTATION_LANDSCAPE);
 
         // DisplayAreaGroup is portrait, same as Display
         mDisplayAreaGroup.setBounds(0, 0, 300, 900);
 
         assertThat(mDisplayAreaGroup.getOrientation()).isEqualTo(SCREEN_ORIENTATION_PORTRAIT);
-        assertThat(mActivity.getRequestedConfigurationOrientation())
+        assertThat(mActivity.getRequestedConfigurationOrientation(true /* forDisplay */))
+                .isEqualTo(ORIENTATION_PORTRAIT);
+    }
+
+    @Test
+    public void testResolveOverrideConfiguration_reverseOrientationWhenDifferentFromParentRoot() {
+        mDisplayContent.setBounds(0, 0, 600, 900);
+        mDisplayContent.updateOrientation();
+        mDisplayContent.sendNewConfiguration();
+
+        // DAG fills Display
+        assertThat(mDisplayAreaGroup.getConfiguration().orientation)
+                .isEqualTo(ORIENTATION_PORTRAIT);
+
+        // DisplayAreaGroup is landscape, different from Display
+        mDisplayAreaGroup.setBounds(0, 0, 600, 450);
+
+        assertThat(mDisplayAreaGroup.getConfiguration().orientation)
+                .isEqualTo(ORIENTATION_LANDSCAPE);
+
+        // DisplayAreaGroup is portriat, same as Display
+        mDisplayAreaGroup.setBounds(0, 0, 300, 450);
+
+        assertThat(mDisplayAreaGroup.getConfiguration().orientation)
                 .isEqualTo(ORIENTATION_PORTRAIT);
     }
 }
