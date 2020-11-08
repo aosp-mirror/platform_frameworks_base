@@ -549,11 +549,10 @@ public class DisplayPolicy {
                         synchronized (mLock) {
                             mDisplayContent.calculateSystemGestureExclusion(
                                     excludedRegion, null /* outUnrestricted */);
-                            final boolean sideAllowed = mNavigationBarAlwaysShowOnSideGesture
-                                    || mNavigationBarPosition == NAV_BAR_RIGHT;
-                            if (mNavigationBar != null && sideAllowed
-                                    && !mSystemGestures.currentGestureStartedInRegion(
-                                            excludedRegion)) {
+                            final boolean excluded =
+                                    mSystemGestures.currentGestureStartedInRegion(excludedRegion);
+                            if (mNavigationBar != null && (mNavigationBarPosition == NAV_BAR_RIGHT
+                                    || !excluded && mNavigationBarAlwaysShowOnSideGesture)) {
                                 requestTransientBars(mNavigationBar);
                             }
                             checkAltBarSwipeForTransientBars(ALT_BAR_RIGHT);
@@ -567,11 +566,10 @@ public class DisplayPolicy {
                         synchronized (mLock) {
                             mDisplayContent.calculateSystemGestureExclusion(
                                     excludedRegion, null /* outUnrestricted */);
-                            final boolean sideAllowed = mNavigationBarAlwaysShowOnSideGesture
-                                    || mNavigationBarPosition == NAV_BAR_LEFT;
-                            if (mNavigationBar != null && sideAllowed
-                                    && !mSystemGestures.currentGestureStartedInRegion(
-                                            excludedRegion)) {
+                            final boolean excluded =
+                                    mSystemGestures.currentGestureStartedInRegion(excludedRegion);
+                            if (mNavigationBar != null && (mNavigationBarPosition == NAV_BAR_LEFT
+                                    || !excluded && mNavigationBarAlwaysShowOnSideGesture)) {
                                 requestTransientBars(mNavigationBar);
                             }
                             checkAltBarSwipeForTransientBars(ALT_BAR_LEFT);
