@@ -198,7 +198,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     private int mIntrinsicContentHeight;
     private int mCollapsedSize;
     private int mPaddingBetweenElements;
-    private int mIncreasedPaddingBetweenElements;
     private int mMaxTopPadding;
     private int mTopPadding;
     private int mBottomMargin;
@@ -883,8 +882,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         mAmbientState.reload(context);
         mPaddingBetweenElements = Math.max(1,
                 res.getDimensionPixelSize(R.dimen.notification_divider_height));
-        mIncreasedPaddingBetweenElements =
-                res.getDimensionPixelSize(R.dimen.notification_divider_height_increased);
         mMinTopOverScrollToEscape = res.getDimensionPixelSize(
                 R.dimen.min_top_overscroll_to_qs);
         mStatusBarHeight = res.getDimensionPixelSize(R.dimen.status_bar_height);
@@ -1101,11 +1098,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             for (int i = 0; i < getChildCount(); i++) {
                 ExpandableView child = (ExpandableView) getChildAt(i);
                 if (mChildrenToAddAnimated.contains(child)) {
-                    int startingPosition = getPositionInLinearLayout(child);
-                    float increasedPaddingAmount = child.getIncreasedPaddingAmount();
-                    int padding = increasedPaddingAmount == 1.0f ? mIncreasedPaddingBetweenElements
-                            : increasedPaddingAmount == -1.0f ? 0 : mPaddingBetweenElements;
-                    int childHeight = getIntrinsicHeight(child) + padding;
+                    final int startingPosition = getPositionInLinearLayout(child);
+                    final int childHeight = getIntrinsicHeight(child) + mPaddingBetweenElements;
                     if (startingPosition < mOwnScrollY) {
                         // This child starts off screen, so let's keep it offscreen to keep the
                         // others visible
@@ -2299,7 +2293,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     private void updateContentHeight() {
         int height = 0;
         float previousPaddingRequest = mPaddingBetweenElements;
-        float previousPaddingAmount = 0.0f;
         int numShownItems = 0;
         boolean finish = false;
         int maxDisplayedNotifications = mMaxDisplayedNotifications;
@@ -2318,37 +2311,10 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
                 } else {
                     viewHeight = expandableView.getIntrinsicHeight();
                 }
-                float increasedPaddingAmount = expandableView.getIncreasedPaddingAmount();
-                float padding;
-                if (increasedPaddingAmount >= 0.0f) {
-                    padding = (int) NotificationUtils.interpolate(
-                            previousPaddingRequest,
-                            mIncreasedPaddingBetweenElements,
-                            increasedPaddingAmount);
-                    previousPaddingRequest = (int) NotificationUtils.interpolate(
-                            mPaddingBetweenElements,
-                            mIncreasedPaddingBetweenElements,
-                            increasedPaddingAmount);
-                } else {
-                    int ownPadding = (int) NotificationUtils.interpolate(
-                            0,
-                            mPaddingBetweenElements,
-                            1.0f + increasedPaddingAmount);
-                    if (previousPaddingAmount > 0.0f) {
-                        padding = (int) NotificationUtils.interpolate(
-                                ownPadding,
-                                mIncreasedPaddingBetweenElements,
-                                previousPaddingAmount);
-                    } else {
-                        padding = ownPadding;
-                    }
-                    previousPaddingRequest = ownPadding;
-                }
                 if (height != 0) {
-                    height += padding;
+                    height += mPaddingBetweenElements;
                 }
                 height += calculateGapHeight(previousView, expandableView, numShownItems);
-                previousPaddingAmount = increasedPaddingAmount;
                 height += viewHeight;
                 numShownItems++;
                 previousView = expandableView;
@@ -3056,22 +3022,9 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             }
             updateOnScrollChange();
         } else {
-            int startingPosition = getPositionInLinearLayout(removedChild);
-            float increasedPaddingAmount = removedChild.getIncreasedPaddingAmount();
-            int padding;
-            if (increasedPaddingAmount >= 0) {
-                padding = (int) NotificationUtils.interpolate(
-                        mPaddingBetweenElements,
-                        mIncreasedPaddingBetweenElements,
-                        increasedPaddingAmount);
-            } else {
-                padding = (int) NotificationUtils.interpolate(
-                        0,
-                        mPaddingBetweenElements,
-                        1.0f + increasedPaddingAmount);
-            }
-            int childHeight = getIntrinsicHeight(removedChild) + padding;
-            int endPosition = startingPosition + childHeight;
+            final int startingPosition = getPositionInLinearLayout(removedChild);
+            final int childHeight = getIntrinsicHeight(removedChild) + mPaddingBetweenElements;
+            final int endPosition = startingPosition + childHeight;
             if (endPosition <= mOwnScrollY) {
                 // This child is fully scrolled of the top, so we have to deduct its height from the
                 // scrollPosition
@@ -3104,42 +3057,13 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             requestedView = requestedRow = childInGroup.getNotificationParent();
         }
         int position = 0;
-        float previousPaddingRequest = mPaddingBetweenElements;
-        float previousPaddingAmount = 0.0f;
         for (int i = 0; i < getChildCount(); i++) {
             ExpandableView child = (ExpandableView) getChildAt(i);
             boolean notGone = child.getVisibility() != View.GONE;
             if (notGone && !child.hasNoContentHeight()) {
-                float increasedPaddingAmount = child.getIncreasedPaddingAmount();
-                float padding;
-                if (increasedPaddingAmount >= 0.0f) {
-                    padding = (int) NotificationUtils.interpolate(
-                            previousPaddingRequest,
-                            mIncreasedPaddingBetweenElements,
-                            increasedPaddingAmount);
-                    previousPaddingRequest = (int) NotificationUtils.interpolate(
-                            mPaddingBetweenElements,
-                            mIncreasedPaddingBetweenElements,
-                            increasedPaddingAmount);
-                } else {
-                    int ownPadding = (int) NotificationUtils.interpolate(
-                            0,
-                            mPaddingBetweenElements,
-                            1.0f + increasedPaddingAmount);
-                    if (previousPaddingAmount > 0.0f) {
-                        padding = (int) NotificationUtils.interpolate(
-                                ownPadding,
-                                mIncreasedPaddingBetweenElements,
-                                previousPaddingAmount);
-                    } else {
-                        padding = ownPadding;
-                    }
-                    previousPaddingRequest = ownPadding;
-                }
                 if (position != 0) {
-                    position += padding;
+                    position += mPaddingBetweenElements;
                 }
-                previousPaddingAmount = increasedPaddingAmount;
             }
             if (child == requestedView) {
                 if (requestedRow != null) {

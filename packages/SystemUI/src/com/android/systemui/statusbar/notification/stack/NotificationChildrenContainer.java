@@ -1271,13 +1271,6 @@ public class NotificationChildrenContainer extends ViewGroup {
         }
     }
 
-    public float getIncreasedPaddingAmount() {
-        if (showingAsLowPriority()) {
-            return 0.0f;
-        }
-        return getGroupExpandFraction();
-    }
-
     @VisibleForTesting
     public boolean isUserLocked() {
         return mUserLocked;
