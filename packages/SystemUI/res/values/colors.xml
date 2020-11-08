@@ -51,8 +51,8 @@
     <color name="global_actions_alert_text">@color/GM2_red_700</color>
 
     <!-- The color of the background of the emergency button when home controls are visible -->
-    <color name="global_actions_emergency_background">@color/GM2_red_400</color>
-    <color name="global_actions_emergency_text">@color/GM2_grey_100</color>
+    <color name="global_actions_emergency_background">@color/control_default_background</color>
+    <color name="global_actions_emergency_text">@color/GM2_red_300</color>
 
     <!-- Tint color for the content on the notification overflow card. -->
     <color name="keyguard_overflow_content_color">#ff686868</color>
