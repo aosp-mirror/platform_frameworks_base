@@ -576,7 +576,7 @@ public final class QuotaController extends StateController {
             Slog.wtf(TAG, "Told app removed but given null package name.");
             return;
         }
-        clearAppStats(UserHandle.getUserId(uid), packageName);
+        clearAppStatsLocked(UserHandle.getUserId(uid), packageName);
         mForegroundUids.delete(uid);
         mUidToPackageCache.remove(uid);
     }
@@ -592,7 +592,7 @@ public final class QuotaController extends StateController {
     }
 
     /** Drop all historical stats and stop tracking any active sessions for the specified app. */
-    public void clearAppStats(int userId, @NonNull String packageName) {
+    public void clearAppStatsLocked(int userId, @NonNull String packageName) {
         mTrackedJobs.delete(userId, packageName);
         Timer timer = mPkgTimers.get(userId, packageName);
         if (timer != null) {
@@ -1008,7 +1008,7 @@ public final class QuotaController extends StateController {
     }
 
     @VisibleForTesting
-    void incrementJobCount(final int userId, @NonNull final String packageName, int count) {
+    void incrementJobCountLocked(final int userId, @NonNull final String packageName, int count) {
         final long now = sElapsedRealtimeClock.millis();
         ExecutionStats[] appStats = mExecutionStatsCache.get(userId, packageName);
         if (appStats == null) {
@@ -1029,7 +1029,8 @@ public final class QuotaController extends StateController {
         }
     }
 
-    private void incrementTimingSessionCount(final int userId, @NonNull final String packageName) {
+    private void incrementTimingSessionCountLocked(final int userId,
+            @NonNull final String packageName) {
         final long now = sElapsedRealtimeClock.millis();
         ExecutionStats[] appStats = mExecutionStatsCache.get(userId, packageName);
         if (appStats == null) {
@@ -1481,7 +1482,7 @@ public final class QuotaController extends StateController {
             mRunningBgJobs.add(jobStatus);
             if (shouldTrackLocked()) {
                 mBgJobCount++;
-                incrementJobCount(mPkg.userId, mPkg.packageName, 1);
+                incrementJobCountLocked(mPkg.userId, mPkg.packageName, 1);
                 if (mRunningBgJobs.size() == 1) {
                     // Started tracking the first job.
                     mStartTimeElapsed = sElapsedRealtimeClock.millis();
@@ -1534,7 +1535,7 @@ public final class QuotaController extends StateController {
             // of jobs.
             // However, cancel the currently scheduled cutoff since it's not currently useful.
             cancelCutoff();
-            incrementTimingSessionCount(mPkg.userId, mPkg.packageName);
+            incrementTimingSessionCountLocked(mPkg.userId, mPkg.packageName);
         }
 
         /**
@@ -1581,7 +1582,7 @@ public final class QuotaController extends StateController {
                     // repeatedly plugged in and unplugged, or an app changes foreground state
                     // very frequently, the job count for a package may be artificially high.
                     mBgJobCount = mRunningBgJobs.size();
-                    incrementJobCount(mPkg.userId, mPkg.packageName, mBgJobCount);
+                    incrementJobCountLocked(mPkg.userId, mPkg.packageName, mBgJobCount);
                     // Starting the timer means that all cached execution stats are now
                     // incorrect.
                     invalidateAllExecutionStatsLocked(mPkg.userId, mPkg.packageName);
