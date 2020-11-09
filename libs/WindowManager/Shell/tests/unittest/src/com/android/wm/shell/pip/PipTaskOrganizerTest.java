@@ -65,7 +65,7 @@ public class PipTaskOrganizerTest extends ShellTestCase {
     private PipTaskOrganizer mSpiedPipTaskOrganizer;
 
     @Mock private DisplayController mMockdDisplayController;
-    @Mock private PipBoundsHandler mMockPipBoundsHandler;
+    @Mock private PipBoundsAlgorithm mMockPipBoundsAlgorithm;
     @Mock private PipMenuActivityController mMenuActivityController;
     @Mock private PipSurfaceTransactionHelper mMockPipSurfaceTransactionHelper;
     @Mock private PipUiEventLogger mMockPipUiEventLogger;
@@ -83,7 +83,7 @@ public class PipTaskOrganizerTest extends ShellTestCase {
         mComponent2 = new ComponentName(mContext, "component2");
         mPipBoundsState = new PipBoundsState(mContext);
         mSpiedPipTaskOrganizer = spy(new PipTaskOrganizer(mContext, mPipBoundsState,
-                mMockPipBoundsHandler, mMenuActivityController, mMockPipSurfaceTransactionHelper,
+                mMockPipBoundsAlgorithm, mMenuActivityController, mMockPipSurfaceTransactionHelper,
                 mMockOptionalSplitScreen, mMockdDisplayController, mMockPipUiEventLogger,
                 mMockShellTaskOrganizer));
         preparePipTaskOrg();
@@ -192,8 +192,8 @@ public class PipTaskOrganizerTest extends ShellTestCase {
     private void preparePipTaskOrg() {
         final DisplayInfo info = new DisplayInfo();
         mPipBoundsState.setDisplayInfo(info);
-        when(mMockPipBoundsHandler.getEntryDestinationBounds()).thenReturn(new Rect());
-        when(mMockPipBoundsHandler.getAdjustedDestinationBounds(any(), anyFloat()))
+        when(mMockPipBoundsAlgorithm.getEntryDestinationBounds()).thenReturn(new Rect());
+        when(mMockPipBoundsAlgorithm.getAdjustedDestinationBounds(any(), anyFloat()))
                 .thenReturn(new Rect());
         mPipBoundsState.setDisplayInfo(info);
         mSpiedPipTaskOrganizer.setOneShotAnimationType(PipAnimationController.ANIM_TYPE_ALPHA);

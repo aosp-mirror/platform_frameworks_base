@@ -53,7 +53,7 @@ import com.android.wm.shell.common.TaskStackListenerCallback;
 import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.pip.PinnedStackListenerForwarder;
 import com.android.wm.shell.pip.Pip;
-import com.android.wm.shell.pip.PipBoundsHandler;
+import com.android.wm.shell.pip.PipBoundsAlgorithm;
 import com.android.wm.shell.pip.PipBoundsState;
 import com.android.wm.shell.pip.PipMediaController;
 import com.android.wm.shell.pip.PipTaskOrganizer;
@@ -110,7 +110,7 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
 
     private final Context mContext;
     private final PipBoundsState mPipBoundsState;
-    private final PipBoundsHandler mPipBoundsHandler;
+    private final PipBoundsAlgorithm mPipBoundsAlgorithm;
     private final PipTaskOrganizer mPipTaskOrganizer;
     private final PipMediaController mPipMediaController;
 
@@ -206,9 +206,12 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
         public void onMovementBoundsChanged(boolean fromImeAdjustment) {
             mHandler.post(() -> {
                 mTmpDisplayInfo.copyFrom(mPipBoundsState.getDisplayInfo());
-                // Populate the inset / normal bounds from mPipBoundsHandler first.
-                mPipBoundsHandler.onMovementBoundsChanged(mTmpInsetBounds, mPipBounds,
-                        mDefaultPipBounds);
+
+                mPipBoundsAlgorithm.getInsetBounds(mTmpInsetBounds);
+                mPipBounds.set(mPipBoundsAlgorithm.getNormalBounds());
+                if (mDefaultPipBounds.isEmpty()) {
+                    mDefaultPipBounds.set(mPipBoundsAlgorithm.getDefaultBounds());
+                }
             });
         }
 
@@ -225,7 +228,7 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
 
     public PipController(Context context,
             PipBoundsState pipBoundsState,
-            PipBoundsHandler pipBoundsHandler,
+            PipBoundsAlgorithm pipBoundsAlgorithm,
             PipTaskOrganizer pipTaskOrganizer,
             PipMediaController pipMediaController,
             PipNotification pipNotification,
@@ -234,7 +237,7 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
         mContext = context;
         mPipBoundsState = pipBoundsState;
         mPipNotification = pipNotification;
-        mPipBoundsHandler = pipBoundsHandler;
+        mPipBoundsAlgorithm = pipBoundsAlgorithm;
         mPipMediaController = pipMediaController;
         // Ensure that we have the display info in case we get calls to update the bounds
         // before the listener calls back
