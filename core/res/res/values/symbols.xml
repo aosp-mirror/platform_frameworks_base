@@ -2165,6 +2165,7 @@
   <java-symbol type="string" name="config_defaultNetworkScorerPackageName" />
   <java-symbol type="string" name="config_persistentDataPackageName" />
   <java-symbol type="string" name="config_deviceConfiguratorPackageName" />
+  <java-symbol type="bool" name="config_enableGeolocationTimeZoneDetection" />
   <java-symbol type="bool" name="config_enablePrimaryLocationTimeZoneOverlay" />
   <java-symbol type="string" name="config_primaryLocationTimeZoneProviderPackageName" />
   <java-symbol type="bool" name="config_enableSecondaryLocationTimeZoneOverlay" />
