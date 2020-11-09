@@ -70,7 +70,7 @@ public class ColorInversionTile extends QSTileImpl<BooleanState> {
         super(host, backgroundLooper, mainHandler, metricsLogger, statusBarStateController,
                 activityStarter, qsLogger);
 
-        mSetting = new SecureSetting(secureSettings, mainHandler,
+        mSetting = new SecureSetting(secureSettings, mHandler,
                 Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED, userTracker.getUserId()) {
             @Override
             protected void handleValueChanged(int value, boolean observedChange) {
