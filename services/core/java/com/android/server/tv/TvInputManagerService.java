@@ -549,6 +549,11 @@ public final class TvInputManagerService extends SystemService {
 
     private SessionState getSessionStateLocked(IBinder sessionToken, int callingUid, int userId) {
         UserState userState = getOrCreateUserStateLocked(userId);
+        return getSessionStateLocked(sessionToken, callingUid, userState);
+    }
+
+    private SessionState getSessionStateLocked(IBinder sessionToken,
+            int callingUid, UserState userState) {
         SessionState sessionState = userState.sessionStateMap.get(sessionToken);
         if (sessionState == null) {
             throw new SessionNotFoundException("Session state not found for token " + sessionToken);
@@ -1436,12 +1441,11 @@ public final class TvInputManagerService extends SystemService {
                         getSessionLocked(sessionToken, callingUid, resolvedUserId).tune(
                                 channelUri, params);
                         UserState userState = getOrCreateUserStateLocked(resolvedUserId);
-                        SessionState sessionState = userState.sessionStateMap.get(sessionToken);
-                        if (sessionState != null) {
-                            sessionState.isCurrent = true;
-                            sessionState.currentChannel = channelUri;
-                            notifyCurrentChannelInfosUpdatedLocked(userState);
-                        }
+                        SessionState sessionState = getSessionStateLocked(sessionToken, callingUid,
+                                userState);
+                        sessionState.isCurrent = true;
+                        sessionState.currentChannel = channelUri;
+                        notifyCurrentChannelInfosUpdatedLocked(userState);
                         if (TvContract.isChannelUriForPassthroughInput(channelUri)) {
                             // Do not log the watch history for passthrough inputs.
                             return;
