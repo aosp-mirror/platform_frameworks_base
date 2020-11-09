@@ -846,6 +846,8 @@ public class AppOpsManager {
     @UnsupportedAppUsage
     public static final int OP_SEND_SMS = AppProtoEnums.APP_OP_SEND_SMS;
     /** @hide */
+    public static final int OP_MANAGE_ONGOING_CALLS = AppProtoEnums.APP_OP_MANAGE_ONGOING_CALLS;
+    /** @hide */
     @UnsupportedAppUsage
     public static final int OP_READ_ICC_SMS = AppProtoEnums.APP_OP_READ_ICC_SMS;
     /** @hide */
@@ -1136,7 +1138,7 @@ public class AppOpsManager {
 
     /** @hide */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    public static final int _NUM_OP = 103;
+    public static final int _NUM_OP = 104;
 
     /** Access to coarse location information. */
     public static final String OPSTR_COARSE_LOCATION = "android:coarse_location";
@@ -1448,6 +1450,15 @@ public class AppOpsManager {
     public static final String OPSTR_LOADER_USAGE_STATS = "android:loader_usage_stats";
 
     /**
+     * Grants an app access to the {@link android.telecom.InCallService} API to see
+     * information about ongoing calls and to enable control of calls.
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    public static final String OPSTR_MANAGE_ONGOING_CALLS = "android:manage_ongoing_calls";
+
+    /**
      * AppOp granted to apps that we are started via {@code am instrument -e --no-isolated-storage}
      *
      * @hide
@@ -1552,6 +1563,7 @@ public class AppOpsManager {
             OP_MANAGE_EXTERNAL_STORAGE,
             OP_INTERACT_ACROSS_PROFILES,
             OP_LOADER_USAGE_STATS,
+            OP_MANAGE_ONGOING_CALLS,
     };
 
     /**
@@ -1666,6 +1678,7 @@ public class AppOpsManager {
             OP_PHONE_CALL_MICROPHONE,           // OP_PHONE_CALL_MICROPHONE
             OP_PHONE_CALL_CAMERA,               // OP_PHONE_CALL_CAMERA
             OP_RECORD_AUDIO_HOTWORD,            // RECORD_AUDIO_HOTWORD
+            OP_MANAGE_ONGOING_CALLS,            // MANAGE_ONGOING_CALLS
     };
 
     /**
@@ -1775,6 +1788,7 @@ public class AppOpsManager {
             OPSTR_PHONE_CALL_MICROPHONE,
             OPSTR_PHONE_CALL_CAMERA,
             OPSTR_RECORD_AUDIO_HOTWORD,
+            OPSTR_MANAGE_ONGOING_CALLS,
     };
 
     /**
@@ -1885,6 +1899,7 @@ public class AppOpsManager {
             "PHONE_CALL_MICROPHONE",
             "PHONE_CALL_CAMERA",
             "RECORD_AUDIO_HOTWORD",
+            "MANAGE_ONGOING_CALLS",
     };
 
     /**
@@ -1996,6 +2011,7 @@ public class AppOpsManager {
             null, // no permission for OP_PHONE_CALL_MICROPHONE
             null, // no permission for OP_PHONE_CALL_CAMERA
             null, // no permission for OP_RECORD_AUDIO_HOTWORD
+            Manifest.permission.MANAGE_ONGOING_CALLS,
     };
 
     /**
@@ -2107,6 +2123,7 @@ public class AppOpsManager {
             null, // PHONE_CALL_MICROPHONE
             null, // PHONE_CALL_MICROPHONE
             null, // RECORD_AUDIO_HOTWORD
+            null, // MANAGE_ONGOING_CALLS
     };
 
     /**
@@ -2217,6 +2234,7 @@ public class AppOpsManager {
             null, // PHONE_CALL_MICROPHONE
             null, // PHONE_CALL_CAMERA
             null, // RECORD_AUDIO_HOTWORD
+            null, // MANAGE_ONGOING_CALLS
     };
 
     /**
@@ -2326,6 +2344,7 @@ public class AppOpsManager {
             AppOpsManager.MODE_ALLOWED, // PHONE_CALL_MICROPHONE
             AppOpsManager.MODE_ALLOWED, // PHONE_CALL_CAMERA
             AppOpsManager.MODE_ALLOWED, // OP_RECORD_AUDIO_HOTWORD
+            AppOpsManager.MODE_DEFAULT, // MANAGE_ONGOING_CALLS
     };
 
     /**
@@ -2439,6 +2458,7 @@ public class AppOpsManager {
             false, // PHONE_CALL_MICROPHONE
             false, // PHONE_CALL_CAMERA
             false, // RECORD_AUDIO_HOTWORD
+            true, // MANAGE_ONGOING_CALLS
     };
 
     /**
