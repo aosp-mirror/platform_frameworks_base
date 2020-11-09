@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.location;
+package com.android.server.location.contexthub;
 
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
@@ -54,6 +54,7 @@ import android.util.Log;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.util.DumpUtils;
+import com.android.server.location.ContextHubServiceProto;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;

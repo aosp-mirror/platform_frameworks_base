@@ -1312,7 +1312,7 @@ class LocationProviderManager extends
         }
     }
 
-    public void setMockProvider(@Nullable MockProvider provider) {
+    public void setMockProvider(@Nullable MockLocationProvider provider) {
         synchronized (mLock) {
             Preconditions.checkState(mState != STATE_STOPPED);
 

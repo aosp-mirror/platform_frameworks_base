@@ -152,7 +152,7 @@ public class LocationProviderManagerTest {
 
         mPassive = new PassiveLocationProviderManager(mContext, mInjector);
         mPassive.startManager();
-        mPassive.setRealProvider(new PassiveProvider(mContext));
+        mPassive.setRealProvider(new PassiveLocationProvider(mContext));
 
         mProvider = new TestProvider(PROPERTIES, IDENTITY);
         mProvider.setProviderAllowed(true);
@@ -308,7 +308,7 @@ public class LocationProviderManagerTest {
 
     @Test
     public void testGetLastLocation_ClearOnMockRemoval() {
-        MockProvider mockProvider = new MockProvider(PROPERTIES, IDENTITY);
+        MockLocationProvider mockProvider = new MockLocationProvider(PROPERTIES, IDENTITY);
         mockProvider.setAllowed(true);
         mManager.setMockProvider(mockProvider);
 

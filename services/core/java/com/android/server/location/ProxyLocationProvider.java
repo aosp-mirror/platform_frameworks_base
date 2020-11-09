@@ -43,16 +43,16 @@ import java.util.Objects;
 /**
  * Proxy for ILocationProvider implementations.
  */
-public class LocationProviderProxy extends AbstractLocationProvider {
+public class ProxyLocationProvider extends AbstractLocationProvider {
 
     /**
      * Creates and registers this proxy. If no suitable service is available for the proxy, returns
      * null.
      */
     @Nullable
-    public static LocationProviderProxy createAndRegister(Context context, String action,
+    public static ProxyLocationProvider createAndRegister(Context context, String action,
             int enableOverlayResId, int nonOverlayPackageResId) {
-        LocationProviderProxy proxy = new LocationProviderProxy(context, action, enableOverlayResId,
+        ProxyLocationProvider proxy = new ProxyLocationProvider(context, action, enableOverlayResId,
                 nonOverlayPackageResId);
         if (proxy.register()) {
             return proxy;
@@ -73,7 +73,7 @@ public class LocationProviderProxy extends AbstractLocationProvider {
 
     private volatile ProviderRequest mRequest;
 
-    private LocationProviderProxy(Context context, String action, int enableOverlayResId,
+    private ProxyLocationProvider(Context context, String action, int enableOverlayResId,
             int nonOverlayPackageResId) {
         // safe to use direct executor since our locks are not acquired in a code path invoked by
         // our owning provider

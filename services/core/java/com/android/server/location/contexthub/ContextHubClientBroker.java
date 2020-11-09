@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.location;
+package com.android.server.location.contexthub;
 
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
@@ -36,6 +36,8 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
 import android.util.proto.ProtoOutputStream;
+
+import com.android.server.location.ClientBrokerProto;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;

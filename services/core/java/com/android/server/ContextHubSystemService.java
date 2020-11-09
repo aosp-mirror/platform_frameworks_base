@@ -20,7 +20,7 @@ import android.content.Context;
 import android.util.Log;
 
 import com.android.internal.util.ConcurrentUtils;
-import com.android.server.location.ContextHubService;
+import com.android.server.location.contexthub.ContextHubService;
 
 import java.util.concurrent.Future;
 
