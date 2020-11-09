@@ -34,7 +34,7 @@
     <string name="defaultMsisdnAlphaTag" msgid="2285034592902077488">"MSISDN1"</string>
     <string name="mmiError" msgid="2862759606579822246">"Kapcsolódási probléma vagy érvénytelen MMI-kód."</string>
     <string name="mmiFdnError" msgid="3975490266767565852">"A művelet fix hívószámokra van korlátozva."</string>
-    <string name="mmiErrorWhileRoaming" msgid="1204173664713870114">"A hívásátirányítási beállításokat roaming közben telefonról nem lehet módosítani."</string>
+    <string name="mmiErrorWhileRoaming" msgid="1204173664713870114">"A hívásátirányítási beállításokat barangolás közben telefonról nem lehet módosítani."</string>
     <string name="serviceEnabled" msgid="7549025003394765639">"A szolgáltatás engedélyezésre került."</string>
     <string name="serviceEnabledFor" msgid="1463104778656711613">"Engedélyezett szolgáltatás(ok):"</string>
     <string name="serviceDisabled" msgid="641878791205871379">"A szolgáltatás ki van kapcsolva."</string>
@@ -113,12 +113,12 @@
     <string name="roamingText2" msgid="2834048284153110598">"Barangolásjelző villog"</string>
     <string name="roamingText3" msgid="831690234035748988">"A környéken kívül"</string>
     <string name="roamingText4" msgid="2171252529065590728">"Épületen kívül"</string>
-    <string name="roamingText5" msgid="4294671587635796641">"Roaming - preferált rendszer"</string>
-    <string name="roamingText6" msgid="5536156746637992029">"Roaming - elérhető rendszer"</string>
-    <string name="roamingText7" msgid="1783303085512907706">"Roaming - szövetségi partner"</string>
-    <string name="roamingText8" msgid="7774800704373721973">"Roaming - Prémium partner"</string>
-    <string name="roamingText9" msgid="1933460020190244004">"Roaming - teljes szolgáltatásműködés"</string>
-    <string name="roamingText10" msgid="7434767033595769499">"Roaming - részleges szolgáltatásműködés"</string>
+    <string name="roamingText5" msgid="4294671587635796641">"Barangolás - preferált rendszer"</string>
+    <string name="roamingText6" msgid="5536156746637992029">"Barangolás -- elérhető rendszer"</string>
+    <string name="roamingText7" msgid="1783303085512907706">"Barangolás - szövetségi partner"</string>
+    <string name="roamingText8" msgid="7774800704373721973">"Barangolás -- Prémium partner"</string>
+    <string name="roamingText9" msgid="1933460020190244004">"Barangolás - teljes szolgáltatásműködés"</string>
+    <string name="roamingText10" msgid="7434767033595769499">"Barangolás - részleges szolgáltatásműködés"</string>
     <string name="roamingText11" msgid="5245687407203281407">"Barangolást jelző szalaghirdetés bekapcsolva"</string>
     <string name="roamingText12" msgid="673537506362152640">"Barangolást jelző szalaghirdetés kikapcsolva"</string>
     <string name="roamingTextSearching" msgid="5323235489657753486">"Szolgáltatás keresése"</string>
@@ -193,7 +193,6 @@
     <string name="network_logging_notification_text" msgid="1327373071132562512">"Ezt az eszközt szervezete kezeli, és lehetséges, hogy a hálózati forgalmat is figyelik. További részletekért koppintson."</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"Az alkalmazások hozzáférhetnek az Ön tartózkodási helyéhez"</string>
     <string name="location_changed_notification_text" msgid="7158423339982706912">"További információt a rendszergazdától kaphat"</string>
-    <string name="geofencing_service" msgid="3826902410740315456">"Földrajzi helymeghatározási szolgáltatás"</string>
     <string name="country_detector" msgid="7023275114706088854">"Országfelismerő"</string>
     <string name="location_service" msgid="2439187616018455546">"Helyszolgáltatás"</string>
     <string name="gnss_service" msgid="8907781262179951385">"GNSS-szolgáltatás"</string>
@@ -202,10 +201,10 @@
     <string name="factory_reset_warning" msgid="6858705527798047809">"A rendszer törölni fogja eszközét"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"A rendszergazdai alkalmazás nem használható. A rendszer most törli az eszközt.\n\nKérdéseivel forduljon szervezete rendszergazdájához."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"A(z) <xliff:g id="OWNER_APP">%s</xliff:g> letiltotta a nyomtatást."</string>
-    <string name="personal_apps_suspension_title" msgid="7561416677884286600">"Munkaprofil bekapcsolása"</string>
-    <string name="personal_apps_suspension_text" msgid="6115455688932935597">"A személyes alkalmazások le lesznek tiltva, amíg be nem kapcsolja a munkaprofilt"</string>
-    <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"A rendszer a következő időpontban letiltja a személyes alkalmazásokat: <xliff:g id="DATE">%1$s</xliff:g>, <xliff:g id="TIME">%2$s</xliff:g>. Rendszergazdája nem engedélyezi, hogy a munkaprofil <xliff:g id="NUMBER">%3$d</xliff:g> napnál tovább kikapcsolva legyen."</string>
-    <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"Bekapcsolás"</string>
+    <string name="personal_apps_suspended_title" msgid="4543693107104417750">"A személyes appok feloldása"</string>
+    <string name="personal_apps_suspended_tomorrow_title" msgid="6414440257969874914">"Appok feloldása holnap"</string>
+    <string name="personal_apps_suspended_text" msgid="8954038765131038226">"Rendszergazdája nem engedélyezi, hogy a munkaprofil <xliff:g id="DAYS">%1$d</xliff:g> napnál tovább szüneteltetve legyen"</string>
+    <string name="personal_apps_suspended_turn_profile_on" msgid="4278188538997940785">"Munkaprofil bekapcsolása"</string>
     <string name="me" msgid="6207584824693813140">"Saját"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Táblagép beállításai"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Android TV beállításai"</string>
@@ -309,7 +308,7 @@
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"hanganyag rögzítése"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Testmozgás"</string>
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"hozzáférés a testmozgási adatokhoz"</string>
-    <string name="permgrouplab_camera" msgid="9090413408963547706">"Kamera"</string>
+    <string name="permgrouplab_camera" msgid="9090413408963547706">"Fényképezőgép"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"fotók és videók készítése"</string>
     <string name="permgrouplab_calllog" msgid="7926834372073550288">"Hívásnaplók"</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"hívásnapló olvasása és írása"</string>
@@ -432,17 +431,13 @@
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"hangbeállítások módosítása"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"Lehetővé teszi az alkalmazás számára az általános hangbeállítások, például a hangerő és a használni kívánt kimeneti hangszóró módosítását."</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"hanganyag rögzítése"</string>
-    <string name="permdesc_recordAudio" msgid="5857246765327514062">"Az alkalmazás a mikrofon használatával akkor készíthet hangfelvételt, amikor az alkalmazás használatban van."</string>
-    <string name="permlab_recordBackgroundAudio" msgid="5891032812308878254">"hangfelvétel készítése a háttérben"</string>
-    <string name="permdesc_recordBackgroundAudio" msgid="1992623135737407516">"Az alkalmazás a mikrofon használatával bármikor készíthet hangfelvételt."</string>
+    <string name="permdesc_recordAudio" msgid="3976213377904701093">"Az alkalmazás a mikrofon használatával bármikor készíthet hangfelvételt."</string>
     <string name="permlab_sim_communication" msgid="176788115994050692">"parancsok küldése a SIM-kártyára"</string>
     <string name="permdesc_sim_communication" msgid="4179799296415957960">"Engedélyezi, hogy az alkalmazás parancsokat küldjön a SIM kártyára. Ez rendkívül veszélyes lehet."</string>
     <string name="permlab_activityRecognition" msgid="1782303296053990884">"testmozgás felismerése"</string>
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"Az alkalmazás képes felismerni a testmozgást."</string>
     <string name="permlab_camera" msgid="6320282492904119413">"fotók és videók készítése"</string>
-    <string name="permdesc_camera" msgid="5240801376168647151">"Az alkalmazás a kamera használatával akkor készíthet fényképeket és videókat, amikor az alkalmazás használatban van."</string>
-    <string name="permlab_backgroundCamera" msgid="7549917926079731681">"fényképek és videók készítése a háttérben"</string>
-    <string name="permdesc_backgroundCamera" msgid="1615291686191138250">"Az alkalmazás a kamera használatával bármikor készíthet fényképeket és videókat."</string>
+    <string name="permdesc_camera" msgid="1354600178048761499">"Az alkalmazás a kamera használatával bármikor készíthet fényképeket és rögzíthet videókat."</string>
     <string name="permlab_systemCamera" msgid="3642917457796210580">"A rendszerkamerákhoz való hozzáférés, illetve képek és videók rögzítésének engedélyezése alkalmazás vagy szolgáltatás számára"</string>
     <string name="permdesc_systemCamera" msgid="5938360914419175986">"A rendszerkamera használatával ez az előnyben részesített vagy rendszeralkalmazás bármikor készíthet fényképeket és videókat. Az alkalmazásnak az „android.permission.CAMERA” engedéllyel is rendelkeznie kell."</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Visszahívás fogadásának engedélyezése alkalmazás vagy szolgáltatás számára, ha a kamerákat megnyitják vagy bezárják."</string>
@@ -542,13 +537,12 @@
     <string name="permdesc_imagesWrite" msgid="5195054463269193317">"Engedélyezi az alkalmazásnak a fényképgyűjtemény módosítását."</string>
     <string name="permlab_mediaLocation" msgid="7368098373378598066">"helyek olvasása a médiagyűjteményből"</string>
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"Engedélyezi az alkalmazásnak a helyek médiagyűjteményből való olvasását."</string>
-    <string name="biometric_dialog_default_title" msgid="55026799173208210">"Igazolja, hogy Ön az"</string>
+    <string name="biometric_dialog_default_title" msgid="5284880398508155088">"Igazolja, hogy Ön az"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"Biometrikus hardver nem áll rendelkezésre"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"Hitelesítés megszakítva"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"Nem ismerhető fel"</string>
     <string name="biometric_error_canceled" msgid="8266582404844179778">"Hitelesítés megszakítva"</string>
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"Nem állított be PIN-kódot, mintát vagy jelszót."</string>
-    <string name="biometric_error_generic" msgid="6784371929985434439">"Hiba történt a hitelesítés közben"</string>
     <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"A rendszer az ujjlenyomatnak csak egy részletét érzékelte. Próbálkozzon újra."</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Nem sikerült feldolgozni az ujjlenyomatot. Próbálkozzon újra."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"Az ujjlenyomat-olvasó koszos. Tisztítsa meg, majd próbálkozzon újra."</string>
@@ -836,7 +830,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"A feloldáshoz vagy segélyhívás kezdeményezéséhez nyomja meg a Menü gombot."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"A feloldáshoz nyomja meg a Menü gombot."</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"Rajzolja le a mintát a feloldáshoz"</string>
-    <string name="lockscreen_emergency_call" msgid="7549683825868928636">"Segélyhívás"</string>
+    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"Segélyhívás"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"Hívás folytatása"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"Helyes!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Próbálja újra"</string>
@@ -1129,8 +1123,6 @@
     <string name="capital_off" msgid="7443704171014626777">"Ki"</string>
     <string name="checked" msgid="9179896827054513119">"kiválasztva"</string>
     <string name="not_checked" msgid="7972320087569023342">"nincs kiválasztva"</string>
-    <string name="selected" msgid="6614607926197755875">"kiválasztva"</string>
-    <string name="not_selected" msgid="410652016565864475">"nincs kiválasztva"</string>
     <string name="whichApplication" msgid="5432266899591255759">"Művelet végrehajtása a következővel:"</string>
     <string name="whichApplicationNamed" msgid="6969946041713975681">"Művelet elvégzése a(z) %1$s segítségével"</string>
     <string name="whichApplicationLabel" msgid="7852182961472531728">"Művelet végrehajtása"</string>
@@ -1318,7 +1310,7 @@
     <string name="adb_active_notification_title" msgid="408390247354560331">"USB-hibakereső csatlakoztatva"</string>
     <string name="adb_active_notification_message" msgid="5617264033476778211">"Koppintson az USB-hibakeresés kikapcsolásához"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"Válassza ezt az USB hibakeresés kikapcsolásához."</string>
-    <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"Vezeték nélküli hibakeresés csatlakoztatva"</string>
+    <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"Vezeték nélküli hibakereső csatlakoztatva"</string>
     <string name="adbwifi_active_notification_message" msgid="930987922852867972">"Koppintson a vezeték nélküli hibakeresés kikapcsolásához"</string>
     <string name="adbwifi_active_notification_message" product="tv" msgid="8633421848366915478">"Válassza ezt a vezeték nélküli hibakeresés letiltásához."</string>
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"Tesztelési alapkörnyezet mód engedélyezve"</string>
@@ -1350,20 +1342,14 @@
     <string name="ext_media_checking_notification_title" msgid="8299199995416510094">"<xliff:g id="NAME">%s</xliff:g> ellenőrzése…"</string>
     <string name="ext_media_checking_notification_message" msgid="2231566971425375542">"Az aktuális tartalom ellenőrzése"</string>
     <string name="ext_media_new_notification_title" msgid="3517407571407687677">"Új <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="ext_media_new_notification_title" product="automotive" msgid="9085349544984742727">"A(z) <xliff:g id="NAME">%s</xliff:g> nem működik"</string>
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"Koppintson ide a beállításhoz"</string>
-    <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"Előfordulhat, hogy újra kell formáznia az eszközt. Koppintson az eltávolításhoz."</string>
     <string name="ext_media_ready_notification_message" msgid="777258143284919261">"Fotók és más tartalmak átviteléhez"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"Probléma a következővel: <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"A(z) <xliff:g id="NAME">%s</xliff:g> nem működik"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"Koppintson a javításhoz"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3003611129979934633">"A(z) <xliff:g id="NAME">%s</xliff:g> sérült. Válassza ki a javításhoz."</string>
-    <string name="ext_media_unmountable_notification_message" product="automotive" msgid="2274596120715020680">"Előfordulhat, hogy újra kell formáznia az eszközt. Koppintson az eltávolításhoz."</string>
     <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"Nem támogatott <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"A(z) <xliff:g id="NAME">%s</xliff:g> nem működik"</string>
     <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"Ez az eszköz nem támogatja ezt a(z) <xliff:g id="NAME">%s</xliff:g> eszközt. Koppintson rá a támogatott formátumban való beállításhoz."</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="7744945987775645685">"Ez az eszköz nem támogatja a(z) <xliff:g id="NAME">%s</xliff:g> nevű alkalmazást. Válassza ki a támogatott formátumú beállításhoz."</string>
-    <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"Előfordulhat, hogy újra kell formáznia az eszközt"</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"A(z) <xliff:g id="NAME">%s</xliff:g> váratlanul eltávolítva"</string>
     <string name="ext_media_badremoval_notification_message" msgid="1986514704499809244">"A tartalomvesztés elkerülése érdekében az eltávolítás előtt előbb hajtsa végre az eszköz kiadását"</string>
     <string name="ext_media_nomedia_notification_title" msgid="742671636376975890">"<xliff:g id="NAME">%s</xliff:g> eltávolítva"</string>
@@ -1554,7 +1540,9 @@
     <string name="launchBrowserDefault" msgid="6328349989932924119">"Böngésző indítása?"</string>
     <string name="SetupCallDefault" msgid="5581740063237175247">"Fogadja a hívást?"</string>
     <string name="activity_resolver_use_always" msgid="5575222334666843269">"Mindig"</string>
+    <string name="activity_resolver_set_always" msgid="4142825808921411476">"Megnyitás mindig ezzel"</string>
     <string name="activity_resolver_use_once" msgid="948462794469672658">"Csak egyszer"</string>
+    <string name="activity_resolver_app_settings" msgid="6758823206817748026">"Beállítások"</string>
     <string name="activity_resolver_work_profiles_support" msgid="4071345609235361269">"A(z) %1$s nem támogatja a munkaprofilokat."</string>
     <string name="default_audio_route_name" product="tablet" msgid="367936735632195517">"Táblagép"</string>
     <string name="default_audio_route_name" product="tv" msgid="4908971385068087367">"TV"</string>
@@ -1625,18 +1613,19 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"<xliff:g id="NUMBER_0">%1$d</xliff:g> alkalommal helytelenül rajzolta le a feloldási mintát. További <xliff:g id="NUMBER_1">%2$d</xliff:g> sikertelen kísérlet után egy e-mail fiók használatával kell feloldania a telefonját.\n\n Kérjük, próbálja újra <xliff:g id="NUMBER_2">%3$d</xliff:g> másodperc múlva."</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" – "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Eltávolítás"</string>
+    <string name="allow_while_in_use_permission_in_fgs" msgid="4101339676785053656">"A háttér által indított előtérben futó szolgáltatás (innen: <xliff:g id="PACKAGENAME">%1$s</xliff:g>) nem tartalmaz majd használat közbeni engedélyt a jövőbeli R buildekben. Kérjük, keresse fel a go/r-bg-fgs-restriction webhelyet, és jelentse a hibát."</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Az ajánlott szint fölé szeretné emelni a hangerőt?\n\nHa hosszú időn át teszi ki magát nagy hangerőnek, azzal károsíthatja a hallását."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Szeretné használni a Kisegítő lehetőségek billentyűparancsot?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Ha a gyorsparancs aktív, akkor a két hangerőgomb három másodpercig tartó együttes lenyomásával kisegítő funkciót indíthat el."</string>
-    <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Bekapcsol gyorsparancsot a kisegítő lehetőségekhez?"</string>
+    <string name="accessibility_shortcut_multiple_service_warning_title" msgid="8417489297036013065">"Bekapcsolja a kisegítő lehetőségeket?"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"A kisegítő lehetőségek bekapcsolásához tartsa nyomva néhány másodpercig mindkét hangerőgombot. Ez hatással lehet az eszköz működésére.\n\nJelenlegi funkciók:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nA kiválasztott funkciókat a Beállítások &gt; Kisegítő lehetőségek pontban módosíthatja."</string>
     <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
-    <string name="accessibility_shortcut_single_service_warning_title" msgid="1909518473488345266">"Bekapcsolja a(z) <xliff:g id="SERVICE">%1$s</xliff:g> szolgáltatás gyorsparancsát?"</string>
+    <string name="accessibility_shortcut_talkback_warning_title" msgid="3410100187167382427">"Bekapcsolja a TalkBack funkciót?"</string>
+    <string name="accessibility_shortcut_talkback_warning" msgid="8412954203626349109">"Tartsa nyomva néhány másodpercig mindkét hangerőgombot a TalkBack bekapcsolásához. A TalkBack képernyőolvasó a vak vagy gyengénlátó személyek számára hasznos. A TalkBack teljesen megváltoztatja az eszköz működését.\n\nEzt a gyorsparancsot a Beállítások &gt; Kisegítő lehetőségek pontban módosíthatja másik funkció használatára."</string>
+    <string name="accessibility_shortcut_single_service_warning_title" msgid="2819109500943271385">"Bekapcsolja a következőt: <xliff:g id="SERVICE">%1$s</xliff:g>?"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"A(z) <xliff:g id="SERVICE">%1$s</xliff:g> kisegítő lehetőség bekapcsolásához tartsa nyomva néhány másodpercig mindkét hangerőgombot. Ez hatással lehet az eszköz működésére.\n\nEzt a gyorsparancsot a Beállítások &gt; Kisegítő lehetőségek pontban módosíthatja másik funkció használatára."</string>
-    <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Bekapcsolom"</string>
+    <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Bekapcsolás"</string>
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"Nem kapcsolom be"</string>
-    <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"BE"</string>
-    <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"KI"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Teljes körű vezérlést biztosít eszköze felett a(z) <xliff:g id="SERVICE">%1$s</xliff:g> szolgáltatás számára?"</string>
     <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"Ha engedélyezi a(z) <xliff:g id="SERVICE">%1$s</xliff:g> szolgáltatást, az eszköz nem fogja használni a képernyőzárat az adattitkosítás növelése érdekében."</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"A teljes vezérlés indokolt olyan alkalmazásoknál, amelyek kisegítő lehetőségeket nyújtanak, a legtöbb alkalmazásnál azonban nem."</string>
@@ -1798,9 +1787,9 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"A rendszergazda által frissítve"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"A rendszergazda által törölve"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"Az Akkumulátorkímélő mód az akkumulátor üzemidejének növelése érdekében a következőket teszi:\n\n• Bekapcsolja a sötét témát.\n• Kikapcsolja vagy korlátozza a háttérben futó tevékenységeket, egyes vizuális effekteket, az „Ok Google” parancsot és egyéb funkciókat.\n\n"<annotation id="url">"További információ"</annotation>"."</string>
-    <string name="battery_saver_description" msgid="6794188153647295212">"Az Akkumulátorkímélő mód az akkumulátor üzemidejének növelése érdekében a következőket teszi:\n\n• Bekapcsolja a sötét témát.\n• Kikapcsolja vagy korlátozza a háttérben futó tevékenységeket, egyes vizuális effekteket, az „Ok Google” parancsot és egyéb funkciókat."</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"Az adatforgalom csökkentése érdekében az Adatforgalom-csökkentő megakadályozza, hogy egyes alkalmazások adatokat küldjenek vagy fogadjanak a háttérben. Az Ön által jelenleg használt alkalmazások hozzáférhetnek az adatokhoz, de csak ritkábban. Ez például azt jelentheti, hogy a képek csak rákoppintás után jelennek meg."</string>
+    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"Az Akkumulátorkímélő mód az akkumulátor üzemidejének növelése érdekében a következőket teszi:\n Bekapcsolja a sötét témát.\n Kikapcsolja vagy korlátozza a háttérben futó tevékenységeket, egyes vizuális effekteket, az „Ok Google” parancsot és egyéb funkciókat.\n\n"<annotation id="url">"További információ"</annotation>"."</string>
+    <string name="battery_saver_description" msgid="7618492104632328184">"Az Akkumulátorkímélő mód az akkumulátor üzemidejének növelése érdekében a következőket teszi:\n Bekapcsolja a sötét témát.\n Kikapcsolja vagy korlátozza a háttérben futó tevékenységeket, egyes vizuális effekteket, az „Ok Google” parancsot és egyéb funkciókat."</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"Az adatforgalom csökkentése érdekében az Adatforgalom-csökkentő megakadályozza, hogy egyes alkalmazások adatokat küldjenek vagy fogadjanak a háttérben. Az Ön által aktuálisan használt alkalmazások hozzáférhetnek az adatokhoz, de csak ritkábban. Ez például azt jelentheti, hogy a képek csak rákoppintás után jelennek meg."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Bekapcsolja az Adatforgalom-csökkentőt?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Bekapcsolás"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
@@ -1835,7 +1824,6 @@
       <item quantity="other">%d órán keresztül</item>
       <item quantity="one">1 órán keresztül</item>
     </plurals>
-    <string name="zen_mode_until_next_day" msgid="1403042784161725038">"Eddig: <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_until" msgid="2250286190237669079">"Eddig: <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"Eddig: <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (ez a következő ébresztés)"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"Kikapcsolásig"</string>
@@ -1907,8 +1895,8 @@
     <string name="profile_encrypted_message" msgid="1128512616293157802">"A feloldáshoz koppintson rá"</string>
     <string name="usb_mtp_launch_notification_title" msgid="774319638256707227">"Csatlakoztatva a(z) <xliff:g id="PRODUCT_NAME">%1$s</xliff:g> eszközhöz"</string>
     <string name="usb_mtp_launch_notification_description" msgid="6942535713629852684">"Koppintson ide a fájlok megtekintéséhez"</string>
-    <string name="pin_target" msgid="8036028973110156895">"Kitűzés"</string>
-    <string name="pin_specific_target" msgid="7824671240625957415">"<xliff:g id="LABEL">%1$s</xliff:g> kitűzése"</string>
+    <string name="pin_target" msgid="8036028973110156895">"Rögzítés"</string>
+    <string name="pin_specific_target" msgid="7824671240625957415">"<xliff:g id="LABEL">%1$s</xliff:g> rögzítése"</string>
     <string name="unpin_target" msgid="3963318576590204447">"Feloldás"</string>
     <string name="unpin_specific_target" msgid="3859828252160908146">"<xliff:g id="LABEL">%1$s</xliff:g> rögzítésének feloldása"</string>
     <string name="app_info" msgid="6113278084877079851">"Alkalmazásinformáció"</string>
@@ -2004,7 +1992,6 @@
     <string name="notification_appops_camera_active" msgid="8177643089272352083">"Kamera"</string>
     <string name="notification_appops_microphone_active" msgid="581333393214739332">"Mikrofon"</string>
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"megjelenítés a képernyőn lévő egyéb alkalmazások előtt"</string>
-    <string name="notification_feedback_indicator" msgid="663476517711323016">"Visszajelzés küldése"</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Információs értesítés a rutinmódról"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Előfordulhat, hogy az akkumulátor lemerül a szokásos töltési időszak előtt"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Akkumulátorkímélő mód aktiválva az akkumulátor üzemidejének növelése érdekében"</string>
@@ -2046,18 +2033,15 @@
     <string name="accessibility_system_action_notifications_label" msgid="6083767351772162010">"Értesítések"</string>
     <string name="accessibility_system_action_quick_settings_label" msgid="4583900123506773783">"Gyorsbeállítások"</string>
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"Akkumulátorral kapcsolatos párbeszédpanel"</string>
+    <string name="accessibility_system_action_toggle_split_screen_label" msgid="6626177163849387748">"Osztott képernyő be- vagy kikapcsolása"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"Lezárási képernyő"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"Képernyőkép"</string>
-    <string name="accessibility_system_action_on_screen_a11y_shortcut_label" msgid="8488701469459210309">"Képernyőn megjelenő kisegítő lehetőségekre vonatkozó parancs"</string>
-    <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"Képernyőn megjelenő kisegítő lehetőségekre vonatkozó parancsválasztó"</string>
-    <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"Kisegítő lehetőségek gyorsparancsa"</string>
+    <string name="accessibility_system_action_accessibility_menu_label" msgid="8436484650391125184">"Kisegítő lehetőségek menü"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"A(z) <xliff:g id="APP_NAME">%1$s</xliff:g> alkalmazás címsora."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"A következő csomag a KORLÁTOZOTT csoportba került: <xliff:g id="PACKAGE_NAME">%1$s</xliff:g>"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
-    <string name="conversation_single_line_image_placeholder" msgid="6983271082911936900">"képet küldött"</string>
     <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"Beszélgetés"</string>
     <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"Csoportos beszélgetés"</string>
-    <string name="unread_convo_overflow" msgid="920517615597353833">"<xliff:g id="MAX_UNREAD_COUNT">%1$d</xliff:g>+"</string>
     <string name="resolver_personal_tab" msgid="2051260504014442073">"Személyes"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"Munka"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Személyes nézet"</string>
@@ -2070,12 +2054,14 @@
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="2959282422751315171">"Rendszergazdája nem engedélyezi, hogy ezt a tartalmat a személyes profiljában lévő alkalmazásokkal ossza meg"</string>
     <string name="resolver_cant_access_personal_apps" msgid="648291604475669395">"Ez a tartalom nem nyitható meg személyes alkalmazásokkal"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="2298773629302296519">"Rendszergazdája nem engedélyezi, hogy ezt a tartalmat a személyes profiljában lévő alkalmazásokkal nyissa meg"</string>
-    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"A munkaprofil használata szünetel"</string>
+    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"A munkaprofil szüneteltetve van"</string>
     <string name="resolver_switch_on_work" msgid="2873009160846966379">"Bekapcsolás"</string>
     <string name="resolver_no_work_apps_available_share" msgid="7933949011797699505">"A munkahelyi alkalmazások nem támogatják ezt a tartalmat"</string>
     <string name="resolver_no_work_apps_available_resolve" msgid="1244844292366099399">"Munkahelyi alkalmazásokkal nem nyitható meg ez a tartalom"</string>
     <string name="resolver_no_personal_apps_available_share" msgid="5639102815174748732">"A személyes alkalmazások nem támogatják ezt a tartalmat"</string>
     <string name="resolver_no_personal_apps_available_resolve" msgid="5120671970531446978">"Személyes alkalmazásokkal nem nyitható meg ez a tartalom"</string>
+    <string name="permlab_accessCallAudio" msgid="1682957511874097664">"Audiotartalmak felvétele és lejátszása telefonhívások közben"</string>
+    <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"Lehetővé teszi ennek az alkalmazásnak audiotartalmak felvételét és lejátszását telefonhívások közben, amennyiben az alkalmazás alapértelmezett tárcsázóalkalmazásként van kijelölve."</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"Hálózati SIM feloldó PIN-kódja"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"Hálózati SIM alkészletének feloldó PIN-kódja"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"Vállalati SIM feloldó PIN-kódja"</string>
@@ -2184,8 +2170,4 @@
     <string name="PERSOSUBSTATE_SIM_ICCID_SUCCESS" msgid="8058678548991999545">"Sikerült az ICCID feloldása."</string>
     <string name="PERSOSUBSTATE_SIM_IMPI_SUCCESS" msgid="2545608067978550571">"Sikerült az IMPI feloldása."</string>
     <string name="PERSOSUBSTATE_SIM_NS_SP_SUCCESS" msgid="4352382949744625007">"Sikerült a szolgáltató hálózati alkészletének feloldása."</string>
-    <string name="config_pdp_reject_dialog_title" msgid="4072057179246785727"></string>
-    <string name="config_pdp_reject_user_authentication_failed" msgid="4531693033885744689"></string>
-    <string name="config_pdp_reject_service_not_subscribed" msgid="8190338397128671588"></string>
-    <string name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed" msgid="6024904218067254186"></string>
 </resources>
