@@ -78,6 +78,7 @@ public class RescueParty {
     @VisibleForTesting
     static final String PROP_RESCUE_LEVEL = "sys.rescue_level";
     static final String PROP_ATTEMPTING_FACTORY_RESET = "sys.attempting_factory_reset";
+    static final String PROP_MAX_RESCUE_LEVEL_ATTEMPTED = "sys.max_rescue_level_attempted";
     @VisibleForTesting
     static final int LEVEL_NONE = 0;
     @VisibleForTesting
@@ -94,6 +95,8 @@ public class RescueParty {
     static final String TAG = "RescueParty";
     @VisibleForTesting
     static final long DEFAULT_OBSERVING_DURATION_MS = TimeUnit.DAYS.toMillis(2);
+    @VisibleForTesting
+    static final int DEVICE_CONFIG_RESET_MODE = Settings.RESET_MODE_TRUSTED_DEFAULTS;
 
     private static final String NAME = "rescue-party-observer";
 
@@ -225,7 +228,7 @@ public class RescueParty {
                 if (NAMESPACE_CONFIGURATION.equals(resetNativeCategories[i])) {
                     continue;
                 }
-                DeviceConfig.resetToDefaults(Settings.RESET_MODE_TRUSTED_DEFAULTS,
+                DeviceConfig.resetToDefaults(DEVICE_CONFIG_RESET_MODE,
                         resetNativeCategories[i]);
             }
         }
@@ -300,15 +303,48 @@ public class RescueParty {
     private static void executeRescueLevelInternal(Context context, int level, @Nullable
             String failedPackage) throws Exception {
         FrameworkStatsLog.write(FrameworkStatsLog.RESCUE_PARTY_RESET_REPORTED, level);
+        // Try our best to reset all settings possible, and once finished
+        // rethrow any exception that we encountered
+        Exception res = null;
         switch (level) {
             case LEVEL_RESET_SETTINGS_UNTRUSTED_DEFAULTS:
-                resetAllSettings(context, Settings.RESET_MODE_UNTRUSTED_DEFAULTS, failedPackage);
+                try {
+                    resetAllSettingsIfNecessary(context, Settings.RESET_MODE_UNTRUSTED_DEFAULTS,
+                            level);
+                } catch (Exception e) {
+                    res = e;
+                }
+                try {
+                    resetDeviceConfig(context, /*isScoped=*/true, failedPackage);
+                } catch (Exception e) {
+                    res = e;
+                }
                 break;
             case LEVEL_RESET_SETTINGS_UNTRUSTED_CHANGES:
-                resetAllSettings(context, Settings.RESET_MODE_UNTRUSTED_CHANGES, failedPackage);
+                try {
+                    resetAllSettingsIfNecessary(context, Settings.RESET_MODE_UNTRUSTED_CHANGES,
+                            level);
+                } catch (Exception e) {
+                    res = e;
+                }
+                try {
+                    resetDeviceConfig(context, /*isScoped=*/true, failedPackage);
+                } catch (Exception e) {
+                    res = e;
+                }
                 break;
             case LEVEL_RESET_SETTINGS_TRUSTED_DEFAULTS:
-                resetAllSettings(context, Settings.RESET_MODE_TRUSTED_DEFAULTS, failedPackage);
+                try {
+                    resetAllSettingsIfNecessary(context, Settings.RESET_MODE_TRUSTED_DEFAULTS,
+                            level);
+                } catch (Exception e) {
+                    res = e;
+                }
+                try {
+                    resetDeviceConfig(context, /*isScoped=*/false, failedPackage);
+                } catch (Exception e) {
+                    res = e;
+                }
                 break;
             case LEVEL_FACTORY_RESET:
                 // Request the reboot from a separate thread to avoid deadlock on PackageWatchdog
@@ -327,6 +363,10 @@ public class RescueParty {
                 Thread thread = new Thread(runnable);
                 thread.start();
                 break;
+        }
+
+        if (res != null) {
+            throw res;
         }
     }
 
@@ -350,17 +390,17 @@ public class RescueParty {
         }
     }
 
-    private static void resetAllSettings(Context context, int mode, @Nullable String failedPackage)
-            throws Exception {
+    private static void resetAllSettingsIfNecessary(Context context, int mode,
+            int level) throws Exception {
+        // No need to reset Settings again if they are already reset in the current level once.
+        if (SystemProperties.getInt(PROP_MAX_RESCUE_LEVEL_ATTEMPTED, LEVEL_NONE) >= level) {
+            return;
+        }
+        SystemProperties.set(PROP_MAX_RESCUE_LEVEL_ATTEMPTED, Integer.toString(level));
         // Try our best to reset all settings possible, and once finished
         // rethrow any exception that we encountered
         Exception res = null;
         final ContentResolver resolver = context.getContentResolver();
-        try {
-            resetDeviceConfig(context, mode, failedPackage);
-        } catch (Exception e) {
-            res = new RuntimeException("Failed to reset config settings", e);
-        }
         try {
             Settings.Global.resetToDefaultsAsUser(resolver, null, mode, UserHandle.USER_SYSTEM);
         } catch (Exception e) {
@@ -378,16 +418,21 @@ public class RescueParty {
         }
     }
 
-    private static void resetDeviceConfig(Context context, int resetMode,
-            @Nullable String failedPackage) {
-        if (!shouldPerformScopedResets(resetMode) || failedPackage == null) {
-            resetAllAffectedNamespaces(context, resetMode);
-        } else {
-            performScopedReset(context, resetMode, failedPackage);
+    private static void resetDeviceConfig(Context context, boolean isScoped,
+            @Nullable String failedPackage) throws Exception {
+        final ContentResolver resolver = context.getContentResolver();
+        try {
+            if (!isScoped || failedPackage == null) {
+                resetAllAffectedNamespaces(context);
+            } else {
+                performScopedReset(context, failedPackage);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to reset config settings", e);
         }
     }
 
-    private static void resetAllAffectedNamespaces(Context context, int resetMode) {
+    private static void resetAllAffectedNamespaces(Context context) {
         RescuePartyObserver rescuePartyObserver = RescuePartyObserver.getInstance(context);
         Set<String> allAffectedNamespaces = rescuePartyObserver.getAllAffectedNamespaceSet();
 
@@ -401,16 +446,11 @@ public class RescueParty {
             if (NAMESPACE_CONFIGURATION.equals(namespace)) {
                 continue;
             }
-            DeviceConfig.resetToDefaults(resetMode, namespace);
+            DeviceConfig.resetToDefaults(DEVICE_CONFIG_RESET_MODE, namespace);
         }
     }
 
-    private static boolean shouldPerformScopedResets(int resetMode) {
-        return resetMode <= Settings.RESET_MODE_UNTRUSTED_CHANGES;
-    }
-
-    private static void performScopedReset(Context context, int resetMode,
-            @NonNull String failedPackage) {
+    private static void performScopedReset(Context context, @NonNull String failedPackage) {
         RescuePartyObserver rescuePartyObserver = RescuePartyObserver.getInstance(context);
         Set<String> affectedNamespaces = rescuePartyObserver.getAffectedNamespaceSet(
                 failedPackage);
@@ -428,7 +468,7 @@ public class RescueParty {
                 if (NAMESPACE_CONFIGURATION.equals(namespace)) {
                     continue;
                 }
-                DeviceConfig.resetToDefaults(resetMode, namespace);
+                DeviceConfig.resetToDefaults(DEVICE_CONFIG_RESET_MODE, namespace);
             }
         }
     }
