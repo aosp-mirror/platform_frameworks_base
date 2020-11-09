@@ -651,6 +651,7 @@ public class UiModeManager {
      *
      * @hide
      */
+    @SystemApi
     @TestApi
     public static final int PROJECTION_TYPE_NONE = 0x0000;
     /**
@@ -660,6 +661,7 @@ public class UiModeManager {
      *
      * @hide
      */
+    @SystemApi
     @TestApi
     public static final int PROJECTION_TYPE_AUTOMOTIVE = 0x0001;
     /**
@@ -669,6 +671,7 @@ public class UiModeManager {
      *
      * @hide
      */
+    @SystemApi
     @TestApi
     public static final int PROJECTION_TYPE_ALL = 0xffff;
 
@@ -695,6 +698,7 @@ public class UiModeManager {
      *
      * @hide
      */
+    @SystemApi
     @TestApi
     @RequiresPermission(value = android.Manifest.permission.TOGGLE_AUTOMOTIVE_PROJECTION,
             conditional = true)
@@ -723,6 +727,7 @@ public class UiModeManager {
      *
      * @hide
      */
+    @SystemApi
     @TestApi
     @RequiresPermission(value = android.Manifest.permission.TOGGLE_AUTOMOTIVE_PROJECTION,
             conditional = true)
