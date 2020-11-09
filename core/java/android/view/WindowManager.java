@@ -74,6 +74,7 @@ import android.content.pm.ActivityInfo;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.Region;
+import android.os.Build;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -1035,7 +1036,7 @@ public interface WindowManager extends ViewManager {
          * In multiuser systems shows only on the owning user's window.
          * @hide
          */
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public static final int TYPE_SECURE_SYSTEM_OVERLAY = FIRST_SYSTEM_WINDOW+15;
 
         /**
@@ -1104,7 +1105,7 @@ public interface WindowManager extends ViewManager {
          * In multiuser systems shows on all users' windows.
          * @hide
          */
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public static final int TYPE_DISPLAY_OVERLAY = FIRST_SYSTEM_WINDOW+26;
 
         /**
@@ -2554,7 +2555,7 @@ public interface WindowManager extends ViewManager {
          * The ui visibility as requested by the views in this hierarchy.
          * the combined value should be systemUiVisibility | subtreeSystemUiVisibility.
          */
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public int subtreeSystemUiVisibility;
 
         /**
@@ -2730,7 +2731,7 @@ public interface WindowManager extends ViewManager {
          *
          * @hide
          */
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public static final int INPUT_FEATURE_DISABLE_USER_ACTIVITY = 0x00000004;
 
         /**

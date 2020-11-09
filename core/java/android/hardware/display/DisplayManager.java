@@ -29,6 +29,7 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Point;
 import android.media.projection.MediaProjection;
+import android.os.Build;
 import android.os.Handler;
 import android.util.Pair;
 import android.util.SparseArray;
@@ -64,7 +65,7 @@ public final class DisplayManager {
      * </p>
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static final String ACTION_WIFI_DISPLAY_STATUS_CHANGED =
             "android.hardware.display.action.WIFI_DISPLAY_STATUS_CHANGED";
 
@@ -72,7 +73,7 @@ public final class DisplayManager {
      * Contains a {@link WifiDisplayStatus} object.
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static final String EXTRA_WIFI_DISPLAY_STATUS =
             "android.hardware.display.extra.WIFI_DISPLAY_STATUS";
 

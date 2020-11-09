@@ -506,7 +506,7 @@ public class CompatibilityInfo implements Parcelable {
      * @param outDm If non-null the width and height will be set to their scaled values.
      * @return Returns the scaling factor for the window.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static float computeCompatibleScaling(DisplayMetrics dm, DisplayMetrics outDm) {
         final int width = dm.noncompatWidthPixels;
         final int height = dm.noncompatHeightPixels;

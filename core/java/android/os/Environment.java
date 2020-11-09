@@ -681,7 +681,7 @@ public class Environment {
     }
 
     /** {@hide} */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static File getLegacyExternalStorageObbDirectory() {
         return buildPath(getLegacyExternalStorageDirectory(), DIR_ANDROID, DIR_OBB);
     }
@@ -1002,7 +1002,7 @@ public class Environment {
      * Generates the raw path to an application's OBB files
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static File[] buildExternalStorageAppObbDirs(String packageName) {
         throwIfUserRequired();
         return sCurrentUser.buildExternalStorageAppObbDirs(packageName);

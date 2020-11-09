@@ -61,7 +61,7 @@ interface IVoiceInteractionManagerService {
      * @param bcp47Locale The BCP47 language tag  for the keyphrase's locale.
      * @RequiresPermission Manifest.permission.MANAGE_VOICE_KEYPHRASES
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     SoundTrigger.KeyphraseSoundModel getKeyphraseSoundModel(int keyphraseId, in String bcp47Locale);
     /**
      * Add/Update the given keyphrase sound model for the current user.

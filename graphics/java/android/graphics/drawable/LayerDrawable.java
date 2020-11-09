@@ -30,6 +30,7 @@ import android.graphics.ColorFilter;
 import android.graphics.Outline;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
+import android.os.Build;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.LayoutDirection;
@@ -434,7 +435,7 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
      * @param layer The layer to add.
      * @return The index of the layer.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     int addLayer(@NonNull ChildDrawable layer) {
         final LayerState st = mLayerState;
         final int N = st.mChildren != null ? st.mChildren.length : 0;
