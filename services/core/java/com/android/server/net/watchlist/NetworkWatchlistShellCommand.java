@@ -23,7 +23,6 @@ import android.os.RemoteException;
 import android.os.ShellCommand;
 import android.provider.Settings;
 
-import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.PrintWriter;
 
@@ -75,8 +74,9 @@ class NetworkWatchlistShellCommand extends ShellCommand {
                 pw.println("Error: can't open input file " + configXmlPath);
                 return -1;
             }
-            final InputStream fileStream = new FileInputStream(pfd.getFileDescriptor());
-            WatchlistConfig.getInstance().setTestMode(fileStream);
+            try (InputStream inputStream = new ParcelFileDescriptor.AutoCloseInputStream(pfd)) {
+                WatchlistConfig.getInstance().setTestMode(inputStream);
+            }
             pw.println("Success!");
         } catch (Exception ex) {
             pw.println("Error: " + ex.toString());

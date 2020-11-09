@@ -2702,12 +2702,18 @@ public class Activity extends ContextThemeWrapper
      */
     public void reportFullyDrawn() {
         if (mDoReportFullyDrawn) {
+            if (Trace.isTagEnabled(Trace.TRACE_TAG_ACTIVITY_MANAGER)) {
+                Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER,
+                        "reportFullyDrawn() for " + mComponent.toShortString());
+            }
             mDoReportFullyDrawn = false;
             try {
                 ActivityTaskManager.getService().reportActivityFullyDrawn(
                         mToken, mRestoredFromBundle);
                 VMRuntime.getRuntime().notifyStartupCompleted();
             } catch (RemoteException e) {
+            } finally {
+                Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
             }
         }
     }

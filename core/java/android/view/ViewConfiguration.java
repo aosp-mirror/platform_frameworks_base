@@ -604,7 +604,6 @@ public class ViewConfiguration {
     /**
      * @return the duration in milliseconds between the first tap's up event and the second tap's
      * down event for an interaction to be considered part of the same multi-press.
-     * @hide
      */
     public static int getMultiPressTimeout() {
         return AppGlobals.getIntCoreSetting(Settings.Secure.MULTI_PRESS_TIMEOUT,

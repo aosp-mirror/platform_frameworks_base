@@ -549,6 +549,11 @@ public final class TvInputManagerService extends SystemService {
 
     private SessionState getSessionStateLocked(IBinder sessionToken, int callingUid, int userId) {
         UserState userState = getOrCreateUserStateLocked(userId);
+        return getSessionStateLocked(sessionToken, callingUid, userState);
+    }
+
+    private SessionState getSessionStateLocked(IBinder sessionToken,
+            int callingUid, UserState userState) {
         SessionState sessionState = userState.sessionStateMap.get(sessionToken);
         if (sessionState == null) {
             throw new SessionNotFoundException("Session state not found for token " + sessionToken);
@@ -1224,7 +1229,7 @@ public final class TvInputManagerService extends SystemService {
             try {
                 synchronized (mLock) {
                     if (userId != mCurrentUserId && !isRecordingSession) {
-                        // A non-recording session of a backgroud (non-current) user
+                        // A non-recording session of a background (non-current) user
                         // should not be created.
                         // Let the client get onConnectionFailed callback for this case.
                         sendSessionTokenToClientLocked(client, inputId, null, null, seq);
@@ -1436,12 +1441,11 @@ public final class TvInputManagerService extends SystemService {
                         getSessionLocked(sessionToken, callingUid, resolvedUserId).tune(
                                 channelUri, params);
                         UserState userState = getOrCreateUserStateLocked(resolvedUserId);
-                        SessionState sessionState = userState.sessionStateMap.get(sessionToken);
-                        if (sessionState != null) {
-                            sessionState.isCurrent = true;
-                            sessionState.currentChannel = channelUri;
-                            notifyCurrentChannelInfosUpdatedLocked(userState);
-                        }
+                        SessionState sessionState = getSessionStateLocked(sessionToken, callingUid,
+                                userState);
+                        sessionState.isCurrent = true;
+                        sessionState.currentChannel = channelUri;
+                        notifyCurrentChannelInfosUpdatedLocked(userState);
                         if (TvContract.isChannelUriForPassthroughInput(channelUri)) {
                             // Do not log the watch history for passthrough inputs.
                             return;
@@ -2028,10 +2032,8 @@ public final class TvInputManagerService extends SystemService {
                         SessionState[] sessionStates = userState.sessionStateMap.values().toArray(
                                 new SessionState[2]);
                         // Check if there is a wrapper input.
-                        if (sessionStates[0].hardwareSessionToken != null
-                                || sessionStates[1].hardwareSessionToken != null) {
-                            return true;
-                        }
+                        return sessionStates[0].hardwareSessionToken != null
+                                || sessionStates[1].hardwareSessionToken != null;
                     }
                     return false;
                 }
@@ -2111,7 +2113,7 @@ public final class TvInputManagerService extends SystemService {
          * Add a hardware device in the TvInputHardwareManager for CTS testing
          * purpose.
          *
-         * @param device id of the adding hardware device.
+         * @param deviceId  the id of the adding hardware device.
          */
         @Override
         public void addHardwareDevice(int deviceId) {
@@ -2123,14 +2125,13 @@ public final class TvInputManagerService extends SystemService {
                         .hdmiPortId(0)
                         .build();
             mTvInputHardwareManager.onDeviceAvailable(info, null);
-            return;
         }
 
         /**
          * Remove a hardware device in the TvInputHardwareManager for CTS testing
          * purpose.
          *
-         * @param device id of the removing hardware device.
+         * @param deviceId the id of the removing hardware device.
          */
         @Override
         public void removeHardwareDevice(int deviceId) {
@@ -2254,7 +2255,6 @@ public final class TvInputManagerService extends SystemService {
                         pw.println("userId: " + session.userId);
                         pw.println("sessionToken: " + session.sessionToken);
                         pw.println("session: " + session.session);
-                        pw.println("logUri: " + session.logUri);
                         pw.println("hardwareSessionToken: " + session.hardwareSessionToken);
                         pw.decreaseIndent();
                     }
@@ -2264,7 +2264,7 @@ public final class TvInputManagerService extends SystemService {
                     pw.increaseIndent();
                     int n = userState.mCallbacks.beginBroadcast();
                     for (int j = 0; j < n; ++j) {
-                        pw.println(userState.mCallbacks.getRegisteredCallbackItem(j).toString());
+                        pw.println(userState.mCallbacks.getRegisteredCallbackItem(j));
                     }
                     userState.mCallbacks.finishBroadcast();
                     pw.decreaseIndent();
@@ -2363,7 +2363,7 @@ public final class TvInputManagerService extends SystemService {
 
         // A list of callbacks.
         private final RemoteCallbackList<ITvInputManagerCallback> mCallbacks =
-                new RemoteCallbackList<ITvInputManagerCallback>();
+                new RemoteCallbackList<>();
 
         private final Map<ITvInputManagerCallback, Pair<Integer, Integer>> callbackPidUidMap =
                 new HashMap<>();
@@ -2474,7 +2474,6 @@ public final class TvInputManagerService extends SystemService {
         private final int userId;
         private final IBinder sessionToken;
         private ITvInputSession session;
-        private Uri logUri;
         // Not null if this session represents an external device connected to a hardware TV input.
         private IBinder hardwareSessionToken;
 
@@ -3024,7 +3023,7 @@ public final class TvInputManagerService extends SystemService {
                     IBinder sessionToken = (IBinder) args.arg5;
 
                     ContentValues values = new ContentValues();
-                    values.put(TvContract.WatchedPrograms.COLUMN_PACKAGE_NAME, packageName);
+                    values.put(TvContract.BaseTvColumns.COLUMN_PACKAGE_NAME, packageName);
                     values.put(TvContract.WatchedPrograms.COLUMN_WATCH_START_TIME_UTC_MILLIS,
                             watchStartTime);
                     values.put(TvContract.WatchedPrograms.COLUMN_CHANNEL_ID, channelId);
