@@ -71,6 +71,7 @@
             android:layout_marginTop="13dp"
             android:layout_marginStart="@dimen/notification_content_margin_start"
             android:layout_marginEnd="@dimen/notification_content_margin_end"
+            android:background="@drawable/notification_big_picture_outline"
             android:scaleType="centerCrop"
             />
 
