@@ -5158,10 +5158,10 @@ public class Notification implements Parcelable
 
         private void bindNotificationHeader(RemoteViews contentView, StandardTemplateParams p) {
             bindSmallIcon(contentView, p);
-            bindHeaderAppName(contentView, p);
-            bindHeaderText(contentView, p);
-            bindHeaderTextSecondary(contentView, p);
-            bindHeaderChronometerAndTime(contentView, p);
+            boolean hasTextToLeft = bindHeaderAppName(contentView, p);
+            hasTextToLeft |= bindHeaderTextSecondary(contentView, p, hasTextToLeft);
+            hasTextToLeft |= bindHeaderText(contentView, p, hasTextToLeft);
+            bindHeaderChronometerAndTime(contentView, p, hasTextToLeft);
             bindProfileBadge(contentView, p);
             bindAlertedIcon(contentView, p);
             bindFeedbackIcon(contentView, p);
@@ -5183,10 +5183,12 @@ public class Notification implements Parcelable
         }
 
         private void bindHeaderChronometerAndTime(RemoteViews contentView,
-                StandardTemplateParams p) {
+                StandardTemplateParams p, boolean hasTextToLeft) {
             if (showsTimeOrChronometer()) {
-                contentView.setViewVisibility(R.id.time_divider, View.VISIBLE);
-                setTextViewColorSecondary(contentView, R.id.time_divider, p);
+                if (hasTextToLeft) {
+                    contentView.setViewVisibility(R.id.time_divider, View.VISIBLE);
+                    setTextViewColorSecondary(contentView, R.id.time_divider, p);
+                }
                 if (mN.extras.getBoolean(EXTRA_SHOW_CHRONOMETER)) {
                     contentView.setViewVisibility(R.id.chronometer, View.VISIBLE);
                     contentView.setLong(R.id.chronometer, "setBase",
@@ -5207,7 +5209,11 @@ public class Notification implements Parcelable
             }
         }
 
-        private void bindHeaderText(RemoteViews contentView, StandardTemplateParams p) {
+        /**
+         * @return true if the header text will be visible
+         */
+        private boolean bindHeaderText(RemoteViews contentView, StandardTemplateParams p,
+                boolean hasTextToLeft) {
             CharSequence summaryText = p.summaryText;
             if (summaryText == null && mStyle != null && mStyle.mSummaryTextSet
                     && mStyle.hasSummaryInHeader()) {
@@ -5224,20 +5230,32 @@ public class Notification implements Parcelable
                         processLegacyText(summaryText)));
                 setTextViewColorSecondary(contentView, R.id.header_text, p);
                 contentView.setViewVisibility(R.id.header_text, View.VISIBLE);
-                contentView.setViewVisibility(R.id.header_text_divider, View.VISIBLE);
-                setTextViewColorSecondary(contentView, R.id.header_text_divider, p);
+                if (hasTextToLeft) {
+                    contentView.setViewVisibility(R.id.header_text_divider, View.VISIBLE);
+                    setTextViewColorSecondary(contentView, R.id.header_text_divider, p);
+                }
+                return true;
             }
+            return false;
         }
 
-        private void bindHeaderTextSecondary(RemoteViews contentView, StandardTemplateParams p) {
+        /**
+         * @return true if the secondary header text will be visible
+         */
+        private boolean bindHeaderTextSecondary(RemoteViews contentView, StandardTemplateParams p,
+                boolean hasTextToLeft) {
             if (!TextUtils.isEmpty(p.headerTextSecondary)) {
                 contentView.setTextViewText(R.id.header_text_secondary, processTextSpans(
                         processLegacyText(p.headerTextSecondary)));
                 setTextViewColorSecondary(contentView, R.id.header_text_secondary, p);
                 contentView.setViewVisibility(R.id.header_text_secondary, View.VISIBLE);
-                contentView.setViewVisibility(R.id.header_text_secondary_divider, View.VISIBLE);
-                setTextViewColorSecondary(contentView, R.id.header_text_secondary_divider, p);
+                if (hasTextToLeft) {
+                    contentView.setViewVisibility(R.id.header_text_secondary_divider, View.VISIBLE);
+                    setTextViewColorSecondary(contentView, R.id.header_text_secondary_divider, p);
+                }
+                return true;
             }
+            return false;
         }
 
         /**
@@ -5274,13 +5292,23 @@ public class Notification implements Parcelable
 
             return String.valueOf(name);
         }
-        private void bindHeaderAppName(RemoteViews contentView, StandardTemplateParams p) {
+
+        /**
+         * @return true if the app name will be visible
+         */
+        private boolean bindHeaderAppName(RemoteViews contentView, StandardTemplateParams p) {
+            if (p.mViewType == StandardTemplateParams.VIEW_TYPE_MINIMIZED) {
+                contentView.setViewVisibility(R.id.app_name_text, View.GONE);
+                return false;
+            }
+            contentView.setViewVisibility(R.id.app_name_text, View.VISIBLE);
             contentView.setTextViewText(R.id.app_name_text, loadHeaderAppName());
             if (isColorized(p)) {
                 setTextViewColorPrimary(contentView, R.id.app_name_text, p);
             } else {
                 contentView.setTextColor(R.id.app_name_text, getSecondaryTextColor(p));
             }
+            return true;
         }
 
         private boolean isColorized(StandardTemplateParams p) {
@@ -5504,7 +5532,7 @@ public class Notification implements Parcelable
          */
         public RemoteViews makeNotificationHeader() {
             return makeNotificationHeader(mParams.reset()
-                    .viewType(StandardTemplateParams.VIEW_TYPE_MINIMIZED)
+                    .viewType(StandardTemplateParams.VIEW_TYPE_GROUP_HEADER)
                     .fillTextsFrom(this));
         }
 
@@ -10977,6 +11005,7 @@ public class Notification implements Parcelable
         public static int VIEW_TYPE_HEADS_UP = 3;
         public static int VIEW_TYPE_MINIMIZED = 4;
         public static int VIEW_TYPE_PUBLIC = 5;
+        public static int VIEW_TYPE_GROUP_HEADER = 6;
 
         int mViewType = VIEW_TYPE_UNSPECIFIED;
         boolean mHeaderless;
