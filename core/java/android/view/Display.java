@@ -1405,16 +1405,29 @@ public final class Display {
         private final int mWidth;
         private final int mHeight;
         private final float mRefreshRate;
+        @NonNull
+        private final float[] mAlternativeRefreshRates;
 
         /**
          * @hide
          */
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public Mode(int modeId, int width, int height, float refreshRate) {
+            this(modeId, width, height, refreshRate, new float[0]);
+        }
+
+        /**
+         * @hide
+         */
+        public Mode(int modeId, int width, int height, float refreshRate,
+                float[] alternativeRefreshRates) {
             mModeId = modeId;
             mWidth = width;
             mHeight = height;
             mRefreshRate = refreshRate;
+            mAlternativeRefreshRates =
+                    Arrays.copyOf(alternativeRefreshRates, alternativeRefreshRates.length);
+            Arrays.sort(mAlternativeRefreshRates);
         }
 
         /**
@@ -1464,6 +1477,28 @@ public final class Display {
         }
 
         /**
+         * Returns an array of refresh rates which can be switched to seamlessly.
+         * <p>
+         * A seamless switch is one without visual interruptions, such as a black screen for
+         * a second or two.
+         * <p>
+         * Presence in this list does not guarantee a switch will occur to the desired
+         * refresh rate, but rather, if a switch does occur to a refresh rate in this list,
+         * it is guaranteed to be seamless.
+         * <p>
+         * The binary relation "refresh rate X is alternative to Y" is non-reflexive,
+         * symmetric and transitive. For example the mode 1920x1080 60Hz, will never have an
+         * alternative refresh rate of 60Hz. If 1920x1080 60Hz has an alternative of 50Hz
+         * then 1920x1080 50Hz will have alternative refresh rate of 60Hz. If 1920x1080 60Hz
+         * has an alternative of 50Hz and 1920x1080 50Hz has an alternative of 24Hz, then 1920x1080
+         * 60Hz will also have an alternative of 24Hz.
+         */
+        @NonNull
+        public float[] getAlternativeRefreshRates() {
+            return mAlternativeRefreshRates;
+        }
+
+        /**
          * Returns {@code true} if this mode matches the given parameters.
          *
          * @hide
@@ -1483,7 +1518,8 @@ public final class Display {
                 return false;
             }
             Mode that = (Mode) other;
-            return mModeId == that.mModeId && matches(that.mWidth, that.mHeight, that.mRefreshRate);
+            return mModeId == that.mModeId && matches(that.mWidth, that.mHeight, that.mRefreshRate)
+                    && Arrays.equals(mAlternativeRefreshRates, that.mAlternativeRefreshRates);
         }
 
         @Override
@@ -1493,6 +1529,7 @@ public final class Display {
             hash = hash * 17 + mWidth;
             hash = hash * 17 + mHeight;
             hash = hash * 17 + Float.floatToIntBits(mRefreshRate);
+            hash = hash * 17 + Arrays.hashCode(mAlternativeRefreshRates);
             return hash;
         }
 
@@ -1503,6 +1540,8 @@ public final class Display {
                     .append(", width=").append(mWidth)
                     .append(", height=").append(mHeight)
                     .append(", fps=").append(mRefreshRate)
+                    .append(", alternativeRefreshRates=")
+                    .append(Arrays.toString(mAlternativeRefreshRates))
                     .append("}")
                     .toString();
         }
@@ -1513,7 +1552,7 @@ public final class Display {
         }
 
         private Mode(Parcel in) {
-            this(in.readInt(), in.readInt(), in.readInt(), in.readFloat());
+            this(in.readInt(), in.readInt(), in.readInt(), in.readFloat(), in.createFloatArray());
         }
 
         @Override
@@ -1522,6 +1561,7 @@ public final class Display {
             out.writeInt(mWidth);
             out.writeInt(mHeight);
             out.writeFloat(mRefreshRate);
+            out.writeFloatArray(mAlternativeRefreshRates);
         }
 
         @SuppressWarnings("hiding")
