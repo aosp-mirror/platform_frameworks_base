@@ -393,6 +393,7 @@ package android.app {
     field public static final String OPSTR_LOADER_USAGE_STATS = "android:loader_usage_stats";
     field public static final String OPSTR_MANAGE_EXTERNAL_STORAGE = "android:manage_external_storage";
     field public static final String OPSTR_MANAGE_IPSEC_TUNNELS = "android:manage_ipsec_tunnels";
+    field public static final String OPSTR_MANAGE_ONGOING_CALLS = "android:manage_ongoing_calls";
     field public static final String OPSTR_MUTE_MICROPHONE = "android:mute_microphone";
     field public static final String OPSTR_NEIGHBORING_CELLS = "android:neighboring_cells";
     field public static final String OPSTR_PLAY_AUDIO = "android:play_audio";
