@@ -125,8 +125,8 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
             // not during the fixed rotation. In fixed rotation case, app is about to enter PiP
             // and we need the offsets preserved to calculate the destination bounds.
             if (!mIsInFixedRotation) {
-                mPipBoundsHandler.setShelfHeight(false, 0);
-                mPipBoundsHandler.onImeVisibilityChanged(false, 0);
+                mPipBoundsState.setShelfVisibility(false /* showing */, 0 /* height */);
+                mPipBoundsState.setImeVisibility(false /* showing */, 0 /* height */);
                 mTouchHandler.onShelfVisibilityChanged(false, 0);
                 mTouchHandler.onImeVisibilityChanged(false, 0);
             }
@@ -168,7 +168,7 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
         @Override
         public void onImeVisibilityChanged(boolean imeVisible, int imeHeight) {
             mMainExecutor.execute(() -> {
-                mPipBoundsHandler.onImeVisibilityChanged(imeVisible, imeHeight);
+                mPipBoundsState.setImeVisibility(imeVisible, imeHeight);
                 mTouchHandler.onImeVisibilityChanged(imeVisible, imeHeight);
             });
         }
@@ -247,6 +247,12 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
         mPipBoundsState = pipBoundsState;
         mPipTaskOrganizer = pipTaskOrganizer;
         mMainExecutor = mainExecutor;
+        mMediaController = pipMediaController;
+        mMenuController = pipMenuActivityController;
+        mTouchHandler = pipTouchHandler;
+        mAppOpsListener = pipAppOpsListener;
+        mPipInputConsumer = new PipInputConsumer(WindowManagerGlobal.getWindowManagerService(),
+                INPUT_CONSUMER_PIP);
         mPipTaskOrganizer.registerPipTransitionCallback(this);
         mPipTaskOrganizer.registerOnDisplayIdChangeCallback((int displayId) -> {
             final DisplayInfo newDisplayInfo = new DisplayInfo();
@@ -263,17 +269,17 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
                             false /* fromImeAdjustment */, false /* fromShelfAdjustment */,
                             null /* wct */);
                 });
-        mMediaController = pipMediaController;
-        mMenuController = pipMenuActivityController;
-        mPipInputConsumer = new PipInputConsumer(WindowManagerGlobal.getWindowManagerService(),
-                INPUT_CONSUMER_PIP);
-        mTouchHandler = pipTouchHandler;
+        mPipBoundsState.setOnShelfVisibilityChangeCallback((isShowing, height) -> {
+            mTouchHandler.onShelfVisibilityChanged(isShowing, height);
+            updateMovementBounds(mPipBoundsState.getBounds(),
+                    false /* fromRotation */, false /* fromImeAdjustment */,
+                    true /* fromShelfAdjustment */, null /* windowContainerTransaction */);
+        });
         if (mTouchHandler != null) {
             // Register the listener for input consumer touch events. Only for Phone
             mPipInputConsumer.setInputListener(mTouchHandler::handleTouchEvent);
             mPipInputConsumer.setRegistrationListener(mTouchHandler::onRegistrationChanged);
         }
-        mAppOpsListener = pipAppOpsListener;
         displayController.addDisplayChangingController(mRotationController);
         displayController.addDisplayWindowListener(mFixedRotationListener);
 
@@ -413,13 +419,7 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
 
     private void setShelfHeightLocked(boolean visible, int height) {
         final int shelfHeight = visible ? height : 0;
-        final boolean changed = mPipBoundsHandler.setShelfHeight(visible, shelfHeight);
-        if (changed) {
-            mTouchHandler.onShelfVisibilityChanged(visible, shelfHeight);
-            updateMovementBounds(mPipBoundsState.getBounds(),
-                    false /* fromRotation */, false /* fromImeAdjustment */,
-                    true /* fromShelfAdjustment */, null /* windowContainerTransaction */);
-        }
+        mPipBoundsState.setShelfVisibility(visible, shelfHeight);
     }
 
     @Override

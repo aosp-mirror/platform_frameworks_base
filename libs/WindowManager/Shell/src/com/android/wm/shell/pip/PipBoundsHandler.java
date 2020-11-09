@@ -59,11 +59,6 @@ public class PipBoundsHandler {
     private int mDefaultMinSize;
     private Point mScreenEdgeInsets;
 
-    private boolean mIsImeShowing;
-    private int mImeHeight;
-    private boolean mIsShelfShowing;
-    private int mShelfHeight;
-
     public PipBoundsHandler(Context context, @NonNull PipBoundsState pipBoundsState) {
         mPipBoundsState = pipBoundsState;
         mSnapAlgorithm = new PipSnapAlgorithm(context);
@@ -98,29 +93,6 @@ public class PipBoundsHandler {
                 com.android.internal.R.dimen.config_pictureInPictureMinAspectRatio);
         mMaxAspectRatio = res.getFloat(
                 com.android.internal.R.dimen.config_pictureInPictureMaxAspectRatio);
-    }
-
-    /**
-     * Sets both shelf visibility and its height if applicable.
-     * @return {@code true} if the internal shelf state is changed, {@code false} otherwise.
-     */
-    public boolean setShelfHeight(boolean shelfVisible, int shelfHeight) {
-        final boolean shelfShowing = shelfVisible && shelfHeight > 0;
-        if (shelfShowing == mIsShelfShowing && shelfHeight == mShelfHeight) {
-            return false;
-        }
-
-        mIsShelfShowing = shelfVisible;
-        mShelfHeight = shelfHeight;
-        return true;
-    }
-
-    /**
-     * Responds to IPinnedStackListener on IME visibility change.
-     */
-    public void onImeVisibilityChanged(boolean imeVisible, int imeHeight) {
-        mIsImeShowing = imeVisible;
-        mImeHeight = imeHeight;
     }
 
     /**
@@ -360,8 +332,10 @@ public class PipBoundsHandler {
                         mDefaultMinSize, displayInfo.logicalWidth, displayInfo.logicalHeight);
             }
             Gravity.apply(mDefaultStackGravity, defaultSize.getWidth(), defaultSize.getHeight(),
-                    insetBounds, 0, Math.max(mIsImeShowing ? mImeHeight : 0,
-                            mIsShelfShowing ? mShelfHeight : 0), defaultBounds);
+                    insetBounds, 0, Math.max(
+                            mPipBoundsState.isImeShowing() ? mPipBoundsState.getImeHeight() : 0,
+                            mPipBoundsState.isShelfShowing()
+                                    ? mPipBoundsState.getShelfHeight() : 0), defaultBounds);
         }
         return defaultBounds;
     }
@@ -396,7 +370,8 @@ public class PipBoundsHandler {
 
         // Apply the movement bounds adjustments based on the current state.
         mSnapAlgorithm.getMovementBounds(stackBounds, movementBounds, movementBounds,
-                (adjustForIme && mIsImeShowing) ? mImeHeight : 0);
+                (adjustForIme && mPipBoundsState.isImeShowing())
+                        ? mPipBoundsState.getImeHeight() : 0);
         return movementBounds;
     }
 
@@ -437,10 +412,6 @@ public class PipBoundsHandler {
         pw.println(innerPrefix + "mMinAspectRatio=" + mMinAspectRatio);
         pw.println(innerPrefix + "mMaxAspectRatio=" + mMaxAspectRatio);
         pw.println(innerPrefix + "mDefaultStackGravity=" + mDefaultStackGravity);
-        pw.println(innerPrefix + "mIsImeShowing=" + mIsImeShowing);
-        pw.println(innerPrefix + "mImeHeight=" + mImeHeight);
-        pw.println(innerPrefix + "mIsShelfShowing=" + mIsShelfShowing);
-        pw.println(innerPrefix + "mShelfHeight=" + mShelfHeight);
         pw.println(innerPrefix + "mSnapAlgorithm" + mSnapAlgorithm);
     }
 }
