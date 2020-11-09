@@ -22,7 +22,6 @@ import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNull;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -511,30 +510,6 @@ public class AuthControllerTest extends SysuiTestCase {
         showDialog(new int[] {1} /* sensorIds */, false /* credentialAllowed */);
         mAuthController.onBiometricError(0, 0, 0);
         verify(mUdfpsController).onCancelAodInterrupt();
-    }
-
-    @Test
-    public void testOnFullyShown_DelegatesToUdfpsController() {
-        mAuthController.onFullyShown();
-        verify(mUdfpsController).setBouncerVisibility(eq(true));
-    }
-
-    @Test
-    public void testOnFullyHidden_DelegatesToUdfpsController() {
-        mAuthController.onFullyHidden();
-        verify(mUdfpsController).setBouncerVisibility(eq(false));
-    }
-
-    @Test
-    public void testOnStartingToShow_NeverDelegatesToUdfpsController() {
-        mAuthController.onStartingToShow();
-        verify(mUdfpsController).setBouncerVisibility(eq(true));
-    }
-
-    @Test
-    public void testOnStartingToHide_NeverDelegatesToUdfpsController() {
-        mAuthController.onStartingToHide();
-        verify(mUdfpsController, never()).setBouncerVisibility(anyBoolean());
     }
 
     // Helpers
