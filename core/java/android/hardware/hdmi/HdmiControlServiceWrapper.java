@@ -273,17 +273,6 @@ public final class HdmiControlServiceWrapper {
         }
 
         @Override
-        public void setHdmiCecVolumeControlEnabled(boolean isHdmiCecVolumeControlEnabled) {
-            HdmiControlServiceWrapper.this.setHdmiCecVolumeControlEnabled(
-                    isHdmiCecVolumeControlEnabled);
-        }
-
-        @Override
-        public boolean isHdmiCecVolumeControlEnabled() {
-            return HdmiControlServiceWrapper.this.isHdmiCecVolumeControlEnabled();
-        }
-
-        @Override
         public void reportAudioStatus(int deviceType, int volume, int maxVolume, boolean isMute) {
             HdmiControlServiceWrapper.this.reportAudioStatus(deviceType, volume, maxVolume, isMute);
         }
