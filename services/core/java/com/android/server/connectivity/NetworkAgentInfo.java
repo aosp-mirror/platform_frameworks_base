@@ -132,6 +132,16 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
     // TODO: make this private with a getter.
     public NetworkCapabilities networkCapabilities;
     public final NetworkAgentConfig networkAgentConfig;
+
+    // Underlying networks declared by the agent. Only set if supportsUnderlyingNetworks is true.
+    // The networks in this list might be declared by a VPN app using setUnderlyingNetworks and are
+    // not guaranteed to be current or correct, or even to exist.
+    public @Nullable Network[] declaredUnderlyingNetworks;
+
+    // Whether this network is always metered even if its underlying networks are unmetered.
+    // Only relevant if #supportsUnderlyingNetworks is true.
+    public boolean declaredMetered;
+
     // Indicates if netd has been told to create this Network. From this point on the appropriate
     // routing rules are setup and routes are added so packets can begin flowing over the Network.
     // This is a sticky bit; once set it is never cleared.
@@ -474,8 +484,14 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
                         networkCapabilities);
     }
 
+    /** Whether this network is a VPN. */
     public boolean isVPN() {
         return networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_VPN);
+    }
+
+    /** Whether this network might have underlying networks. Currently only true for VPNs. */
+    public boolean supportsUnderlyingNetworks() {
+        return isVPN();
     }
 
     private int getCurrentScore(boolean pretendValidated) {
