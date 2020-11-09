@@ -983,8 +983,6 @@ public class TelecomManager {
      * <p>
      * If no {@link PhoneAccount} fits the criteria above, this method will return {@code null}.
      *
-     * Requires permission: {@link android.Manifest.permission#READ_PHONE_STATE}
-     *
      * @param uriScheme The URI scheme.
      * @return The {@link PhoneAccountHandle} corresponding to the account to be used.
      */
@@ -1160,8 +1158,6 @@ public class TelecomManager {
      * Returns a list of {@link PhoneAccountHandle}s which can be used to make and receive phone
      * calls. The returned list includes only those accounts which have been explicitly enabled
      * by the user.
-     *
-     * Requires permission: {@link android.Manifest.permission#READ_PHONE_STATE}
      *
      * @see #EXTRA_PHONE_ACCOUNT_HANDLE
      * @return A list of {@code PhoneAccountHandle} objects.
@@ -1462,9 +1458,6 @@ public class TelecomManager {
      *         the specified package does not correspond to an installed dialer, or is already
      *         the default dialer.
      *
-     * Requires permission: {@link android.Manifest.permission#MODIFY_PHONE_STATE}
-     * Requires permission: {@link android.Manifest.permission#WRITE_SECURE_SETTINGS}
-     *
      * @hide
      * @deprecated Use
      * {@link android.app.role.RoleManager#addRoleHolderAsUser(String, String, int, UserHandle,
@@ -1508,8 +1501,6 @@ public class TelecomManager {
      * Return whether a given phone number is the configured voicemail number for a
      * particular phone account.
      *
-     * Requires permission: {@link android.Manifest.permission#READ_PHONE_STATE}
-     *
      * @param accountHandle The handle for the account to check the voicemail number against
      * @param number The number to look up.
      */
@@ -1528,8 +1519,6 @@ public class TelecomManager {
 
     /**
      * Return the voicemail number for a given phone account.
-     *
-     * Requires permission: {@link android.Manifest.permission#READ_PHONE_STATE}
      *
      * @param accountHandle The handle for the phone account.
      * @return The voicemail number for the phone account, and {@code null} if one has not been
@@ -1582,8 +1571,6 @@ public class TelecomManager {
     /**
      * Returns whether there is an ongoing phone call (can be in dialing, ringing, active or holding
      * states) originating from either a manager or self-managed {@link ConnectionService}.
-     * <p>
-     * Requires permission: {@link android.Manifest.permission#READ_PHONE_STATE}
      *
      * @return {@code true} if there is an ongoing call in either a managed or self-managed
      *      {@link ConnectionService}, {@code false} otherwise.
@@ -1608,8 +1595,6 @@ public class TelecomManager {
      * <p>
      * If you also need to know if there are ongoing self-managed calls, use {@link #isInCall()}
      * instead.
-     * <p>
-     * Requires permission: {@link android.Manifest.permission#READ_PHONE_STATE}
      *
      * @return {@code true} if there is an ongoing call in a managed {@link ConnectionService},
      *      {@code false} otherwise.
@@ -1683,8 +1668,6 @@ public class TelecomManager {
      * If there is a ringing call, calling this method rejects the ringing call.  Otherwise the
      * foreground call is ended.
      * <p>
-     * Requires permission {@link android.Manifest.permission#ANSWER_PHONE_CALLS}.
-     * <p>
      * Note: this method CANNOT be used to end ongoing emergency calls and will return {@code false}
      * if an attempt is made to end an emergency call.
      *
@@ -1714,9 +1697,6 @@ public class TelecomManager {
      * the incoming call requests.  This means, for example, that an incoming call requesting
      * {@link VideoProfile#STATE_BIDIRECTIONAL} will be answered, accepting that state.
      *
-     * Requires permission: {@link android.Manifest.permission#MODIFY_PHONE_STATE} or
-     * {@link android.Manifest.permission#ANSWER_PHONE_CALLS}
-     *
      * @deprecated Companion apps for wearable devices should use the {@link InCallService} API
      * instead.
      */
@@ -1738,9 +1718,6 @@ public class TelecomManager {
     /**
      * If there is a ringing incoming call, this method accepts the call on behalf of the user,
      * with the specified video state.
-     *
-     * Requires permission: {@link android.Manifest.permission#MODIFY_PHONE_STATE} or
-     * {@link android.Manifest.permission#ANSWER_PHONE_CALLS}
      *
      * @param videoState The desired video state to answer the call with.
      * @deprecated Companion apps for wearable devices should use the {@link InCallService} API
@@ -1953,8 +1930,6 @@ public class TelecomManager {
      * Requires that the method-caller be set as the system dialer app.
      * </p>
      *
-     * Requires permission: {@link android.Manifest.permission#MODIFY_PHONE_STATE}
-     *
      * @param dialString The digits to dial.
      * @return True if the digits were processed as an MMI code, false otherwise.
      */
@@ -1979,8 +1954,6 @@ public class TelecomManager {
      * Requires that the method-caller be set as the system dialer app.
      * </p>
      *
-     * Requires permission: {@link android.Manifest.permission#MODIFY_PHONE_STATE}
-     *
      * @param accountHandle The handle for the account the MMI code should apply to.
      * @param dialString The digits to dial.
      * @return True if the digits were processed as an MMI code, false otherwise.
@@ -2000,8 +1973,8 @@ public class TelecomManager {
     }
 
     /**
-     * Requires permission: {@link android.Manifest.permission#MODIFY_PHONE_STATE}
-     *
+     * Returns a URI (with the content:// scheme) specific to the specified {@link PhoneAccount}
+     * for ADN content retrieval.
      * @param accountHandle The handle for the account to derive an adn query URI for or
      * {@code null} to return a URI which will use the default account.
      * @return The URI (with the content:// scheme) specific to the specified {@link PhoneAccount}
@@ -2025,8 +1998,6 @@ public class TelecomManager {
      * <p>
      * Requires that the method-caller be set as the system dialer app.
      * </p>
-     *
-     * Requires permission: {@link android.Manifest.permission#MODIFY_PHONE_STATE}
      */
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     public void cancelMissedCallsNotification() {
