@@ -17,6 +17,7 @@
 package android.media;
 
 import android.compat.annotation.UnsupportedAppUsage;
+import android.os.Build;
 
 
 /**
@@ -36,7 +37,7 @@ public class AudioPatch {
     private final AudioPortConfig[] mSources;
     private final AudioPortConfig[] mSinks;
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     AudioPatch(AudioHandle patchHandle, AudioPortConfig[] sources, AudioPortConfig[] sinks) {
         mHandle = patchHandle;
         mSources = sources;

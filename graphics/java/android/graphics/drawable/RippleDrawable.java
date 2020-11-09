@@ -36,6 +36,7 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.Rect;
 import android.graphics.Shader;
+import android.os.Build;
 import android.util.AttributeSet;
 
 import com.android.internal.R;
@@ -121,7 +122,7 @@ public class RippleDrawable extends LayerDrawable {
     private final Rect mDirtyBounds = new Rect();
 
     /** Mirrors mLayerState with some extra information. */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private RippleState mState;
 
     /** The masking layer, e.g. the layer with id R.id.mask. */
@@ -159,7 +160,7 @@ public class RippleDrawable extends LayerDrawable {
     private Paint mRipplePaint;
 
     /** Target density of the display into which ripples are drawn. */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private int mDensity;
 
     /** Whether bounds are being overridden. */
@@ -980,7 +981,7 @@ public class RippleDrawable extends LayerDrawable {
 
     static class RippleState extends LayerState {
         int[] mTouchThemeAttrs;
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         ColorStateList mColor = ColorStateList.valueOf(Color.MAGENTA);
         int mMaxRadius = RADIUS_AUTO;
 

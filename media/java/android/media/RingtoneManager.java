@@ -36,6 +36,7 @@ import android.content.res.AssetFileDescriptor;
 import android.database.Cursor;
 import android.database.StaleDataException;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Environment;
 import android.os.FileUtils;
 import android.os.IBinder;
@@ -585,7 +586,7 @@ public class RingtoneManager {
         return new ExternalRingtonesCursorWrapper(res, MediaStore.Audio.Media.EXTERNAL_CONTENT_URI);
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private Cursor getMediaRingtones(Context context) {
         // MediaStore now returns ringtones on other storage devices, even when
         // we don't have storage or audio permissions
@@ -728,7 +729,7 @@ public class RingtoneManager {
      * @param volumeShaperConfig config for volume shaper of the ringtone if applied.
      * @see #getRingtone(Context, Uri)
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private static Ringtone getRingtone(
             final Context context, Uri ringtoneUri, int streamType,
             @Nullable VolumeShaper.Configuration volumeShaperConfig) {

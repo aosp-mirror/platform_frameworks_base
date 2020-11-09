@@ -418,7 +418,7 @@ public class AccountManager {
     /**
      * @hide used for testing only
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public AccountManager(Context context, IAccountManager service, Handler handler) {
         mContext = context;
         mService = service;
@@ -712,7 +712,7 @@ public class AccountManager {
 
     /** @hide Same as {@link #getAccountsByType(String)} but for a specific user. */
     @NonNull
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public Account[] getAccountsByTypeAsUser(String type, UserHandle userHandle) {
         try {
             return mService.getAccountsAsUser(type, userHandle.getIdentifier(),
@@ -2003,7 +2003,7 @@ public class AccountManager {
      * Same as {@link #confirmCredentials(Account, Bundle, Activity, AccountManagerCallback, Handler)}
      * but for the specified user.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public AccountManagerFuture<Bundle> confirmCredentialsAsUser(final Account account,
             final Bundle options,
             final Activity activity,

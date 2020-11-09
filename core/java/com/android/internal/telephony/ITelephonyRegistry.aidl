@@ -51,7 +51,7 @@ interface ITelephonyRegistry {
             boolean notifyNow);
     void listenForSubscriber(in int subId, String pkg, String featureId,
             IPhoneStateListener callback, int events, boolean notifyNow);
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     void notifyCallStateForAllSubs(int state, String incomingNumber);
     void notifyCallState(in int phoneId, in int subId, int state, String incomingNumber);
     void notifyServiceStateForPhoneId(in int phoneId, in int subId, in ServiceState state);

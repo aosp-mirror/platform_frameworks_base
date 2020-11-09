@@ -39,7 +39,7 @@ public final class CellInfoLte extends CellInfo implements Parcelable {
     private CellConfigLte mCellConfig;
 
     /** @hide */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public CellInfoLte() {
         super();
         mCellIdentityLte = new CellIdentityLte();

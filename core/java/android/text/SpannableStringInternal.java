@@ -17,6 +17,7 @@
 package android.text;
 
 import android.compat.annotation.UnsupportedAppUsage;
+import android.os.Build;
 
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.GrowingArrayUtils;
@@ -152,7 +153,7 @@ import java.lang.reflect.Array;
      *
      * @return True if excluded, false if included.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private final boolean isOutOfCopyRange(int start, int end, int spanStart, int spanEnd) {
         if (spanStart > end || spanEnd < start) return true;
         if (spanStart != spanEnd && start != end) {
@@ -184,12 +185,12 @@ import java.lang.reflect.Array;
         setSpan(what, start, end, flags, true/*enforceParagraph*/);
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private boolean isIndexFollowsNextLine(int index) {
         return index != 0 && index != length() && charAt(index - 1) != '\n';
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private void setSpan(Object what, int start, int end, int flags, boolean enforceParagraph) {
         int nstart = start;
         int nend = end;
@@ -554,12 +555,12 @@ import java.lang.reflect.Array;
      *
      * Due to backward compatibility reasons, we copy even NoCopySpan by default
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private void copySpans(Spanned src, int start, int end) {
         copySpansFromSpanned(src, start, end, false);
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private void copySpans(SpannableStringInternal src, int start, int end) {
         copySpansFromInternal(src, start, end, false);
     }
@@ -575,15 +576,15 @@ import java.lang.reflect.Array;
     @UnsupportedAppUsage
     private int mSpanCount;
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     /* package */ static final Object[] EMPTY = new Object[0];
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private static final int START = 0;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private static final int END = 1;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private static final int FLAGS = 2;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private static final int COLUMNS = 3;
 }

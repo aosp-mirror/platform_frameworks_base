@@ -459,7 +459,7 @@ public class DateFormat {
      *
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static boolean hasDesignator(CharSequence inFormat, char designator) {
         if (inFormat == null) return false;
 

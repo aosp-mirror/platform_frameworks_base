@@ -2661,7 +2661,7 @@ class ContextImpl extends Context {
         return context;
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     static ContextImpl createActivityContext(ActivityThread mainThread,
             LoadedApk packageInfo, ActivityInfo activityInfo, IBinder activityToken, int displayId,
             Configuration overrideConfiguration) {
