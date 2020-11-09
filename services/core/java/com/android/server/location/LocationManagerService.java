@@ -906,9 +906,26 @@ public class LocationManagerService extends ILocationManager.Stub {
                 if (enabled == null) {
                     // this generally shouldn't occur, but might be possible due to race conditions
                     // on when we are notified of new users
+
+                    // hack to fix b/171910679. mutating the user enabled state within this method
+                    // may cause unexpected changes to other state (for instance, this could cause
+                    // provider enable/disable notifications to be sent to clients, which could
+                    // result in a dead client being detected, which could result in the client
+                    // being removed, which means that if this function is called while clients are
+                    // being iterated over we have now unexpectedly mutated the iterated
+                    // collection). instead, we return a correct value immediately here, and
+                    // schedule the actual update for later. this has been completely rewritten and
+                    // is no longer a problem in the next version of android.
+                    enabled = mProvider.getState().allowed
+                            && mUserInfoHelper.isCurrentUserId(userId)
+                            && mSettingsHelper.isLocationEnabled(userId);
+
                     Log.w(TAG, mName + " provider saw user " + userId + " unexpectedly");
-                    onEnabledChangedLocked(userId);
-                    enabled = Objects.requireNonNull(mEnabled.get(userId));
+                    mHandler.post(() -> {
+                        synchronized (mLock) {
+                            onEnabledChangedLocked(userId);
+                        }
+                    });
                 }
 
                 return enabled;
