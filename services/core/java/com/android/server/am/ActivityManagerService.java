@@ -194,6 +194,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.ApplicationInfo.HiddenApiEnforcementPolicy;
 import android.content.pm.IPackageDataObserver;
 import android.content.pm.IPackageManager;
+import android.content.pm.IncrementalStatesInfo;
 import android.content.pm.InstrumentationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -7574,6 +7575,15 @@ public class ActivityManagerService extends IActivityManager.Stub
      */
     void handleApplicationCrashInner(String eventType, ProcessRecord r, String processName,
             ApplicationErrorReport.CrashInfo crashInfo) {
+        boolean isPackageLoading = false;
+        // Notify package manager service to possibly update package state
+        if (r != null && r.info != null && r.info.packageName != null) {
+            mPackageManagerInt.notifyPackageCrashOrAnr(r.info.packageName);
+            IncrementalStatesInfo incrementalStatesInfo =
+                    mPackageManagerInt.getIncrementalStatesInfo(r.info.packageName, r.uid,
+                            r.userId);
+            isPackageLoading = incrementalStatesInfo.isLoading();
+        }
 
         EventLogTags.writeAmCrash(Binder.getCallingPid(),
                 UserHandle.getUserId(Binder.getCallingUid()), processName,
@@ -7599,7 +7609,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                         : FrameworkStatsLog.APP_CRASH_OCCURRED__FOREGROUND_STATE__UNKNOWN,
                 processName.equals("system_server") ? ServerProtoEnums.SYSTEM_SERVER
                         : (r != null) ? r.getProcessClassEnum()
-                                      : ServerProtoEnums.ERROR_SOURCE_UNKNOWN
+                                      : ServerProtoEnums.ERROR_SOURCE_UNKNOWN,
+                isPackageLoading
         );
 
         final int relaunchReason = r == null ? RELAUNCH_REASON_NONE
@@ -7615,10 +7626,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                 eventType, r, processName, null, null, null, null, null, null, crashInfo);
 
         mAppErrors.crashApplication(r, crashInfo);
-        // Notify package manager service to possibly update package state
-        if (r != null && r.info != null && r.info.packageName != null) {
-            mPackageManagerInt.notifyPackageCrashOrAnr(r.info.packageName);
-        }
     }
 
     public void handleApplicationStrictModeViolation(

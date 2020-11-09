@@ -3609,6 +3609,8 @@ message AppCrashOccurred {
     optional ForegroundState foreground_state = 7;
 
     optional android.server.ErrorSource error_source = 8;
+
+    optional bool is_package_loading = 9;
 }
 
 /**
@@ -3670,6 +3672,8 @@ message ANROccurred {
     optional android.server.ErrorSource error_source = 7;
 
     optional string package_name = 8;
+
+    optional bool is_package_loading = 9;
 }
 
 /**

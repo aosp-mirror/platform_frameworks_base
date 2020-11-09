@@ -36,6 +36,8 @@ import android.app.IApplicationThread;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.IncrementalStatesInfo;
+import android.content.pm.PackageManagerInternal;
 import android.content.pm.ProcessInfo;
 import android.content.pm.ServiceInfo;
 import android.content.pm.VersionedPackage;
@@ -1652,6 +1654,19 @@ class ProcessRecord implements WindowProcessListener {
             }
         }
 
+        // Check if package is still being loaded
+        boolean isPackageLoading = false;
+        final PackageManagerInternal packageManagerInternal =
+                mService.getPackageManagerInternalLocked();
+        if (aInfo != null && aInfo.packageName != null) {
+            IncrementalStatesInfo incrementalStatesInfo =
+                    packageManagerInternal.getIncrementalStatesInfo(
+                            aInfo.packageName, uid, userId);
+            if (incrementalStatesInfo != null) {
+                isPackageLoading = incrementalStatesInfo.isLoading();
+            }
+        }
+
         // Log the ANR to the main log.
         StringBuilder info = new StringBuilder();
         info.setLength(0);
@@ -1736,7 +1751,7 @@ class ProcessRecord implements WindowProcessListener {
                         ? FrameworkStatsLog.ANROCCURRED__FOREGROUND_STATE__FOREGROUND
                         : FrameworkStatsLog.ANROCCURRED__FOREGROUND_STATE__BACKGROUND,
                 getProcessClassEnum(),
-                (this.info != null) ? this.info.packageName : "");
+                (this.info != null) ? this.info.packageName : "", isPackageLoading);
         final ProcessRecord parentPr = parentProcess != null
                 ? (ProcessRecord) parentProcess.mOwner : null;
         mService.addErrorToDropBox("anr", this, processName, activityShortComponentName,
@@ -1771,8 +1786,7 @@ class ProcessRecord implements WindowProcessListener {
 
             // Notify package manager service to possibly update package state
             if (aInfo != null && aInfo.packageName != null) {
-                mService.getPackageManagerInternalLocked().notifyPackageCrashOrAnr(
-                        aInfo.packageName);
+                packageManagerInternal.notifyPackageCrashOrAnr(aInfo.packageName);
             }
 
             // mUiHandler can be null if the AMS is constructed with injector only. This will only
