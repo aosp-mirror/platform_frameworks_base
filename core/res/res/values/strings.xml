@@ -433,6 +433,9 @@
     <string name="sensor_notification_service">Sensor Notification Service</string>
     <!-- Attribution for Twilight service. [CHAR LIMIT=NONE]-->
     <string name="twilight_service">Twilight Service</string>
+    <!-- Attribution for Offline LocationTimeZoneDetector service, i.e. one capable of performing
+         time zone lookup using geo-spacial information held on the device. [CHAR LIMIT=NONE]-->
+    <string name="offline_location_time_zone_detection_service">Offline Time Zone Detection Service</string>
 
     <!-- Factory reset warning dialog strings--> <skip />
     <!-- Shows up in the dialog's title to warn about an impeding factory reset. [CHAR LIMIT=NONE] -->

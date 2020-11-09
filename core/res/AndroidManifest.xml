@@ -5219,6 +5219,9 @@
              android:label="@string/sensor_notification_service"/>
     <!-- Attribution for Twilight service. -->
     <attribution android:tag="TwilightService" android:label="@string/twilight_service"/>
+    <!-- Attribution for the Offline LocationTimeZoneProvider, used to detect time zone using
+         on-device data -->
+    <attribution android:tag="OfflineLocationTimeZoneProvider" android:label="@string/offline_location_time_zone_detection_service"/>
 
     <application android:process="system"
                  android:persistent="true"
@@ -5683,6 +5686,18 @@
             <intent-filter>
                 <action android:name="android.intent.action.LOAD_DATA"/>
             </intent-filter>
+        </service>
+
+        <!-- AOSP configures a default secondary LocationTimeZoneProvider that uses an on-device
+             data set from the com.android.geotz APEX. -->
+        <uses-library android:name="com.android.location.provider" />
+        <service android:name="com.android.timezone.geotz.provider.OfflineLocationTimeZoneService"
+                 android:exported="false">
+            <intent-filter>
+                <action android:name="com.android.location.timezone.service.v1.SecondaryLocationTimeZoneProvider" />
+            </intent-filter>
+            <meta-data android:name="serviceVersion" android:value="1" />
+            <meta-data android:name="serviceIsMultiuser" android:value="true" />
         </service>
 
         <provider

@@ -1622,8 +1622,13 @@
          wants to disable the overlay mechanism can set it to false. -->
     <bool name="config_enableSecondaryLocationTimeZoneOverlay" translatable="false">false</bool>
     <!-- Package name providing the secondary location time zone provider. Used only when
-         config_enableSecondaryLocationTimeZoneOverlay is false. -->
-    <string name="config_secondaryLocationTimeZoneProviderPackageName" translatable="false">@null</string>
+         config_enableSecondaryLocationTimeZoneOverlay is false.
+
+         By default, set to "android" to pick up the default LocationTimeZoneProvider configured in
+         the system server's AndroidManifest.xml. See the
+         com.android.location.timezone.service.v1.SecondaryLocationTimeZoneProvider intent-filter
+         definition there for more information. -->
+    <string name="config_secondaryLocationTimeZoneProviderPackageName" translatable="false">android</string>
 
     <!-- Whether to enable network location overlay which allows network location provider to be
          replaced by an app at run-time. When disabled, only the
