@@ -2816,8 +2816,12 @@
     <!-- Text to display when copying the build number off QS [CHAR LIMIT=NONE]-->
     <string name="build_number_copy_toast">Build number copied to clipboard.</string>
 
-    <!-- Status for last interaction [CHAR LIMIT=120] -->
+    <!-- Status for last interaction with exact time [CHAR LIMIT=120] -->
     <string name="last_interaction_status" translatable="false">You last chatted <xliff:g id="duration" example="5 hours">%1$s</xliff:g> ago</string>
+    <!-- Status for last interaction when less than a certain time window [CHAR LIMIT=120] -->
+    <string name="last_interaction_status_less_than" translatable="false">You last chatted less than <xliff:g id="duration" example="5 hours">%1$s</xliff:g> ago</string>
+    <!-- Status for last interaction when over a certain time window [CHAR LIMIT=120] -->
+    <string name="last_interaction_status_over" translatable="false">You last chatted over <xliff:g id="duration" example="1 week">%1$s</xliff:g> ago</string>
     <!-- Status for conversation without interaction data [CHAR LIMIT=120] -->
     <string name="basic_status" translatable="false">Open conversation</string>
 
