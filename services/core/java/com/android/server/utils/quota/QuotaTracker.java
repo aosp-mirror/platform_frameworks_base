@@ -149,9 +149,13 @@ abstract class QuotaTracker {
     @VisibleForTesting
     static final long MAX_WINDOW_SIZE_MS = 30 * 24 * 60 * MINUTE_IN_MILLIS; // 1 month
 
-    /** The minimum time any window size can be. */
+    /**
+     * The minimum time any window size can be. A minimum window size helps to avoid CPU
+     * churn/looping in cases where there are registered listeners for when UPTCs go in and out of
+     * quota.
+     */
     @VisibleForTesting
-    static final long MIN_WINDOW_SIZE_MS = 30_000; // 30 seconds
+    static final long MIN_WINDOW_SIZE_MS = 20_000;
 
     QuotaTracker(@NonNull Context context, @NonNull Categorizer categorizer,
             @NonNull Injector injector) {
@@ -622,6 +626,9 @@ abstract class QuotaTracker {
 
     /** Dump state in text format. */
     public void dump(final IndentingPrintWriter pw) {
+        pw.println("QuotaTracker:");
+        pw.increaseIndent();
+
         synchronized (mLock) {
             pw.println("Is enabled: " + mIsEnabled);
             pw.println("Is global quota free: " + mIsQuotaFree);
@@ -646,6 +653,8 @@ abstract class QuotaTracker {
             }
             pw.decreaseIndent();
         }
+
+        pw.decreaseIndent();
     }
 
     /**
