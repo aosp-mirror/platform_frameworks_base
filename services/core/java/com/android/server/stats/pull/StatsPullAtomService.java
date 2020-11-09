@@ -249,6 +249,13 @@ public class StatsPullAtomService extends SystemService {
     // 20% as a conservative estimate.
     private static final int MAX_PROCSTATS_RAW_SHARD_SIZE = (int) (MAX_PROCSTATS_SHARD_SIZE * 1.20);
 
+    /**
+     * Threshold to filter out small CPU times at frequency per UID. Those small values appear
+     * because of more precise accounting in a BPF program. Discarding them reduces the data by at
+     * least 20% with negligible error.
+     */
+    private static final int MIN_CPU_TIME_PER_UID_FREQ = 10;
+
     private final Object mThermalLock = new Object();
     @GuardedBy("mThermalLock")
     private IThermalService mThermalService;
@@ -1556,7 +1563,7 @@ public class StatsPullAtomService extends SystemService {
     int pullCpuTimePerUidFreqLocked(int atomTag, List<StatsEvent> pulledData) {
         mCpuUidFreqTimeReader.readAbsolute((uid, cpuFreqTimeMs) -> {
             for (int freqIndex = 0; freqIndex < cpuFreqTimeMs.length; ++freqIndex) {
-                if (cpuFreqTimeMs[freqIndex] != 0) {
+                if (cpuFreqTimeMs[freqIndex] >= MIN_CPU_TIME_PER_UID_FREQ) {
                     StatsEvent e = StatsEvent.newBuilder()
                             .setAtomId(atomTag)
                             .writeInt(uid)
