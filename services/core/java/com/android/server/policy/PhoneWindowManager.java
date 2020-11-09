@@ -18,6 +18,7 @@ package com.android.server.policy;
 
 import static android.Manifest.permission.INTERNAL_SYSTEM_WINDOW;
 import static android.Manifest.permission.SYSTEM_ALERT_WINDOW;
+import static android.Manifest.permission.SYSTEM_APPLICATION_OVERLAY;
 import static android.app.AppOpsManager.OP_SYSTEM_ALERT_WINDOW;
 import static android.app.AppOpsManager.OP_TOAST_WINDOW;
 import static android.content.Context.CONTEXT_RESTRICTED;
@@ -2189,6 +2190,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
              */
             return (mContext.checkCallingOrSelfPermission(INTERNAL_SYSTEM_WINDOW)
                     == PERMISSION_GRANTED) ? ADD_OKAY : ADD_PERMISSION_DENIED;
+        }
+
+        if (mContext.checkCallingOrSelfPermission(SYSTEM_APPLICATION_OVERLAY)
+                == PERMISSION_GRANTED) {
+            return ADD_OKAY;
         }
 
         // check if user has enabled this operation. SecurityException will be thrown if this app
