@@ -16,6 +16,7 @@
 
 package com.android.server.vcn.util;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
 import android.os.PersistableBundle;
@@ -188,5 +189,15 @@ public class PersistableBundleUtilsTest {
                 PersistableBundleUtils.toMap(bundled, TestKey::new, TestClass::new);
 
         assertEquals(sourceMap, resultList);
+    }
+
+    @Test
+    public void testByteArrayConversionLossless() {
+        final byte[] byteArray = "testByteArrayConversionLossless".getBytes();
+
+        PersistableBundle bundle = PersistableBundleUtils.fromByteArray(byteArray);
+        byte[] result = PersistableBundleUtils.toByteArray(bundle);
+
+        assertArrayEquals(byteArray, result);
     }
 }

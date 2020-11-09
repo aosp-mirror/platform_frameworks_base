@@ -21,6 +21,8 @@ import android.annotation.Nullable;
 import android.os.ParcelUuid;
 import android.os.PersistableBundle;
 
+import com.android.internal.util.HexDump;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -42,6 +44,7 @@ public class PersistableBundleUtils {
     private static final String MAP_VALUE_FORMAT = "MAP_VALUE_%d";
 
     private static final String PARCEL_UUID_KEY = "PARCEL_UUID";
+    private static final String BYTE_ARRAY_KEY = "BYTE_ARRAY_KEY";
 
     /**
      * Functional interface to convert an object of the specified type to a PersistableBundle.
@@ -144,6 +147,43 @@ public class PersistableBundleUtils {
             result.add(deserializer.fromPersistableBundle(item));
         }
         return result;
+    }
+
+    // TODO: b/170513329 Delete #fromByteArray and #toByteArray once BaseBundle#putByteArray and
+    // BaseBundle#getByteArray are exposed.
+
+    /**
+     * Converts a byte array to a PersistableBundle.
+     *
+     * <p>To avoid key collisions, NO additional key/value pairs should be added to the returned
+     * PersistableBundle object.
+     *
+     * @param array a byte array instance to persist
+     * @return the PersistableBundle instance
+     */
+    public static PersistableBundle fromByteArray(byte[] array) {
+        final PersistableBundle result = new PersistableBundle();
+
+        result.putString(BYTE_ARRAY_KEY, HexDump.toHexString(array));
+
+        return result;
+    }
+
+    /**
+     * Converts from a PersistableBundle to a byte array.
+     *
+     * @param bundle the PersistableBundle containing the byte array
+     * @return the byte array instance
+     */
+    public static byte[] toByteArray(PersistableBundle bundle) {
+        Objects.requireNonNull(bundle, "PersistableBundle is null");
+
+        String hex = bundle.getString(BYTE_ARRAY_KEY);
+        if (hex == null || hex.length() % 2 != 0) {
+            throw new IllegalArgumentException("PersistableBundle contains invalid byte array");
+        }
+
+        return HexDump.hexStringToByteArray(hex);
     }
 
     /**
