@@ -32,6 +32,7 @@ import android.media.IRemoteVolumeControllerCallback;
 import android.media.MediaFrameworkInitializer;
 import android.media.MediaSession2;
 import android.media.Session2Token;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.RemoteException;
@@ -209,7 +210,10 @@ public final class MediaSessionManager {
      * @return A list of controllers for ongoing sessions.
      * @hide
      */
-    @UnsupportedAppUsage
+    // TODO: Remove @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, publicAlternatives = "Should only be"
+            + " used by system apps, since non-system apps cannot get other users' sessions."
+            + " Use {@link #getActiveSessions} instead.")
     public @NonNull List<MediaController> getActiveSessionsForUser(
             @Nullable ComponentName notificationListener, int userId) {
         ArrayList<MediaController> controllers = new ArrayList<MediaController>();
