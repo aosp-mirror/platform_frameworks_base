@@ -199,10 +199,9 @@
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"تنازل المشرف عن الجهاز للاستخدام الشخصي"</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"تتم إدارة الجهاز"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"تدير مؤسستك هذا الجهاز ويمكنها مراقبة حركة بيانات الشبكة. يمكنك النقر للحصول على تفاصيل."</string>
-    <!-- no translation found for location_changed_notification_title (3620158742816699316) -->
-    <skip />
-    <!-- no translation found for location_changed_notification_text (7158423339982706912) -->
-    <skip />
+    <string name="location_changed_notification_title" msgid="3620158742816699316">"يمكن للتطبيقات الوصول إلى موقعك الجغرافي"</string>
+    <string name="location_changed_notification_text" msgid="7158423339982706912">"يُرجى التواصل مع مشرف تكنولوجيا المعلومات لمزيد من المعلومات."</string>
+    <string name="geofencing_service" msgid="3826902410740315456">"خدمة \"وضع حدود جغرافية\""</string>
     <string name="country_detector" msgid="7023275114706088854">"أداة التعرّف على البلدان"</string>
     <string name="location_service" msgid="2439187616018455546">"خدمات الموقع الجغرافي"</string>
     <string name="gnss_service" msgid="8907781262179951385">"‏خدمة GNSS"</string>
@@ -211,21 +210,17 @@
     <string name="factory_reset_warning" msgid="6858705527798047809">"سيتم محو بيانات جهازك."</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"تعذّر استخدام تطبيق المشرف. سيتم محو بيانات جهازك الآن.\n\nإذا كانت لديك أسئلة، اتصل بمشرف مؤسستك."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"تم إيقاف الطباعة بواسطة <xliff:g id="OWNER_APP">%s</xliff:g>."</string>
-    <!-- no translation found for personal_apps_suspended_title (4543693107104417750) -->
-    <skip />
-    <!-- no translation found for personal_apps_suspended_tomorrow_title (6414440257969874914) -->
-    <skip />
-    <!-- no translation found for personal_apps_suspended_text (8954038765131038226) -->
-    <skip />
-    <!-- no translation found for personal_apps_suspended_turn_profile_on (4278188538997940785) -->
-    <skip />
+    <string name="personal_apps_suspension_title" msgid="7561416677884286600">"تفعيل الملف الشخصي للعمل"</string>
+    <string name="personal_apps_suspension_text" msgid="6115455688932935597">"تم حظر تطبيقاتك الشخصية إلى أن تفعِّل ملفك الشخصي للعمل."</string>
+    <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"سيتم حظر التطبيقات الشخصية في <xliff:g id="DATE">%1$s</xliff:g> في <xliff:g id="TIME">%2$s</xliff:g>. لا يسمح مشرف تكنولوجيا المعلومات في مؤسستك بإيقاف الملف الشخصي للعمل أكثر من <xliff:g id="NUMBER">%3$d</xliff:g> يوم."</string>
+    <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"تفعيل"</string>
     <string name="me" msgid="6207584824693813140">"أنا"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"خيارات الجهاز اللوحي"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"‏خيارات Android TV"</string>
     <string name="power_dialog" product="default" msgid="1107775420270203046">"خيارات الهاتف"</string>
     <string name="silent_mode" msgid="8796112363642579333">"وضع صامت"</string>
     <string name="turn_on_radio" msgid="2961717788170634233">"تفعيل اللاسلكي"</string>
-    <string name="turn_off_radio" msgid="7222573978109933360">"إيقاف تفعيل الشبكة اللاسلكية"</string>
+    <string name="turn_off_radio" msgid="7222573978109933360">"إيقاف الشبكة اللاسلكية"</string>
     <string name="screen_lock" msgid="2072642720826409809">"قفل الشاشة"</string>
     <string name="power_off" msgid="4111692782492232778">"إيقاف التشغيل"</string>
     <string name="silent_mode_silent" msgid="5079789070221150912">"إيقاف الرنين"</string>
@@ -238,24 +233,22 @@
     <string name="reboot_to_reset_title" msgid="2226229680017882787">"إعادة الضبط على الإعدادات الأصلية"</string>
     <string name="reboot_to_reset_message" msgid="3347690497972074356">"جارٍ إعادة التشغيل…"</string>
     <string name="shutdown_progress" msgid="5017145516412657345">"جارٍ إيقاف التشغيل..."</string>
-    <string name="shutdown_confirm" product="tablet" msgid="2872769463279602432">"سيتم إيقاف تفعيل الجهاز اللوحي."</string>
+    <string name="shutdown_confirm" product="tablet" msgid="2872769463279602432">"سيتم إيقاف الجهاز اللوحي."</string>
     <string name="shutdown_confirm" product="tv" msgid="7975942887313518330">"‏سيتم إيقاف جهاز Android TV."</string>
     <string name="shutdown_confirm" product="watch" msgid="2977299851200240146">"سيتم إيقاف المشاهدة."</string>
-    <string name="shutdown_confirm" product="default" msgid="136816458966692315">"سيتم إيقاف تفعيل هاتفك."</string>
+    <string name="shutdown_confirm" product="default" msgid="136816458966692315">"سيتم إيقاف هاتفك."</string>
     <string name="shutdown_confirm_question" msgid="796151167261608447">"هل تريد إيقاف التشغيل؟"</string>
     <string name="reboot_safemode_title" msgid="5853949122655346734">"إعادة تشغيل في الوضع الآمن"</string>
     <string name="reboot_safemode_confirm" msgid="1658357874737219624">"هل تريد إعادة تشغيل الكمبيوتر في الوضع الآمن؟ سيؤدي ذلك إلى إيقاف جميع تطبيقات الجهات الخارجية التي تم تثبيتها. ستتم استعادتها عند إعادة التشغيل مرة أخرى."</string>
     <string name="recent_tasks_title" msgid="8183172372995396653">"حديثة"</string>
-    <string name="no_recent_tasks" msgid="9063946524312275906">"ليست هناك تطبيقات حديثة."</string>
+    <string name="no_recent_tasks" msgid="9063946524312275906">"لم يتمّ استخدام تطبيقات مؤخرًا."</string>
     <string name="global_actions" product="tablet" msgid="4412132498517933867">"خيارات الجهاز اللوحي"</string>
     <string name="global_actions" product="tv" msgid="3871763739487450369">"‏خيارات Android TV"</string>
     <string name="global_actions" product="default" msgid="6410072189971495460">"خيارات الهاتف"</string>
     <string name="global_action_lock" msgid="6949357274257655383">"قفل الشاشة"</string>
     <string name="global_action_power_off" msgid="4404936470711393203">"إيقاف التشغيل"</string>
-    <!-- no translation found for global_action_power_options (1185286119330160073) -->
-    <skip />
-    <!-- no translation found for global_action_restart (4678451019561687074) -->
-    <skip />
+    <string name="global_action_power_options" msgid="1185286119330160073">"التشغيل"</string>
+    <string name="global_action_restart" msgid="4678451019561687074">"إعادة التشغيل"</string>
     <string name="global_action_emergency" msgid="1387617624177105088">"الطوارئ"</string>
     <string name="global_action_bug_report" msgid="5127867163044170003">"تقرير الأخطاء"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"إنهاء الجلسة"</string>
@@ -279,9 +272,9 @@
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"وضع صامت"</string>
     <string name="global_action_silent_mode_on_status" msgid="2371892537738632013">"الصوت متوقف"</string>
     <string name="global_action_silent_mode_off_status" msgid="6608006545950920042">"الصوت قيد التفعيل"</string>
-    <string name="global_actions_toggle_airplane_mode" msgid="6911684460146916206">"وضع الطائرة"</string>
-    <string name="global_actions_airplane_mode_on_status" msgid="5508025516695361936">"وضع الطائرة قيد التفعيل"</string>
-    <string name="global_actions_airplane_mode_off_status" msgid="8522219771500505475">"وضع الطائرة متوقف"</string>
+    <string name="global_actions_toggle_airplane_mode" msgid="6911684460146916206">"وضع الطيران"</string>
+    <string name="global_actions_airplane_mode_on_status" msgid="5508025516695361936">"وضع الطيران قيد التفعيل"</string>
+    <string name="global_actions_airplane_mode_off_status" msgid="8522219771500505475">"وضع الطيران متوقف"</string>
     <string name="global_action_settings" msgid="4671878836947494217">"الإعدادات"</string>
     <string name="global_action_assist" msgid="2517047220311505805">"مساعدة"</string>
     <string name="global_action_voice_assist" msgid="6655788068555086695">"المساعد الصوتي"</string>
@@ -407,7 +400,7 @@
     <string name="permlab_getPackageSize" msgid="375391550792886641">"قياس مساحة تخزين التطبيق"</string>
     <string name="permdesc_getPackageSize" msgid="742743530909966782">"للسماح للتطبيق باسترداد شفرته وبياناته وأحجام ذاكرات التخزين المؤقت"</string>
     <string name="permlab_writeSettings" msgid="8057285063719277394">"تعديل إعدادات النظام"</string>
-    <string name="permdesc_writeSettings" msgid="8293047411196067188">"للسماح للتطبيق بتعديل بيانات إعدادات النظام. يمكن أن تتلف التطبيقات الضارة تهيئة نظامك."</string>
+    <string name="permdesc_writeSettings" msgid="8293047411196067188">"للسماح للتطبيق بتعديل بيانات إعدادات النظام. يمكن أن تتلف التطبيقات الضارة إعداد نظامك."</string>
     <string name="permlab_receiveBootCompleted" msgid="6643339400247325379">"العمل عند بدء التشغيل"</string>
     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="5565659082718177484">"للسماح للتطبيق ببدء تشغيل نفسه عقب انتهاء النظام من التشغيل. قد يؤدي ذلك إلى استغراق المزيد من الوقت عند بدء الجهاز اللوحي والسماح للتطبيق بإبطاء الأداء الإجمالي للجهاز اللوحي من خلال تشغيله دائمًا."</string>
     <string name="permdesc_receiveBootCompleted" product="tv" msgid="4900842256047614307">"‏للسماح بتشغيل التطبيق تلقائيًا بعد الانتهاء من بدء تشغيل النظام. وقد يؤدي ذلك إلى إطالة فترة بدء تشغيل جهاز Android TV، بالإضافة إلى أنه يسمح للتطبيق بإبطاء أداء الجهاز بشكل عام لأنه يتم تشغيله بشكل دائم."</string>
@@ -451,18 +444,21 @@
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"تغيير إعداداتك الصوتية"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"للسماح للتطبيق بتعديل إعدادات الصوت العامة مثل مستوى الصوت وأي السماعات يتم استخدامها للاستماع."</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"تسجيل الصوت"</string>
-    <string name="permdesc_recordAudio" msgid="3976213377904701093">"يمكن لهذا التطبيق تسجيل الصوت باستخدام الميكروفون في أي وقت."</string>
+    <string name="permdesc_recordAudio" msgid="5857246765327514062">"يمكن لهذا التطبيق تسجيل الصوت باستخدام الميكروفون عندما يكون التطبيق قيد الاستخدام."</string>
+    <string name="permlab_recordBackgroundAudio" msgid="5891032812308878254">"تسجيل الصوت في الخلفية"</string>
+    <string name="permdesc_recordBackgroundAudio" msgid="1992623135737407516">"يمكن لهذا التطبيق تسجيل الصوت باستخدام الميكروفون في أي وقت."</string>
     <string name="permlab_sim_communication" msgid="176788115994050692">"‏إرسال أوامر إلى شريحة SIM"</string>
     <string name="permdesc_sim_communication" msgid="4179799296415957960">"‏السماح للتطبيق بإرسال أوامر إلى شريحة SIM. وهذا أمر بالغ الخطورة."</string>
     <string name="permlab_activityRecognition" msgid="1782303296053990884">"التعرّف على النشاط البدني"</string>
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"يمكن لهذا التطبيق التعرّف على نشاطك البدني."</string>
     <string name="permlab_camera" msgid="6320282492904119413">"التقاط صور وفيديوهات"</string>
-    <string name="permdesc_camera" msgid="1354600178048761499">"يمكن لهذا التطبيق التقاط صور وتسجيل فيديوهات باستخدام الكاميرا في أي وقت."</string>
+    <string name="permdesc_camera" msgid="5240801376168647151">"يمكن لهذا التطبيق التقاط صور وتسجيل فيديوهات باستخدام الكاميرا عندما يكون التطبيق قيد الاستخدام."</string>
+    <string name="permlab_backgroundCamera" msgid="7549917926079731681">"التقاط صور وتصوير فيديوهات في الخلفية"</string>
+    <string name="permdesc_backgroundCamera" msgid="1615291686191138250">"يمكن لهذا التطبيق التقاط صور وتسجيل فيديوهات باستخدام الكاميرا في أي وقت."</string>
     <string name="permlab_systemCamera" msgid="3642917457796210580">"السماح لتطبيق أو خدمة بالوصول إلى كاميرات النظام لالتقاط صور وتسجيل فيديوهات"</string>
-    <!-- no translation found for permdesc_systemCamera (5938360914419175986) -->
-    <skip />
+    <string name="permdesc_systemCamera" msgid="5938360914419175986">"‏إنّ تطبيق النظام هذا، أو التطبيق المزوّد بأذونات مميّزة، يمكنه التقاط صور وتسجيل فيديوهات باستخدام كاميرا النظام في أي وقت. ويجب أن يحصل التطبيق أيضًا على الإذن android.permission.CAMERA."</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"يسمح الإذن لتطبيق أو خدمة بتلقّي استدعاءات عما إذا كانت أجهزة الكاميرات مفتوحة أو مغلقة."</string>
-    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"يمكن أن يتلقّى هذا التطبيق استدعاءات عندما يكون جهاز أي كاميرا مفتوحًا (بتطبيق) أو مغلقًا."</string>
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"يمكن أن يتلقّى هذا التطبيق استدعاءات عندما تكون هناك كاميرا مفتوحة (بواسطة هذا التطبيق) أو مغلقة."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"التحكم في الاهتزاز"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"للسماح للتطبيق بالتحكم في الهزّاز."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"يسمح هذا الإذن للتطبيق بالوصول إلى حالة الهزّاز."</string>
@@ -517,15 +513,15 @@
     <string name="permlab_accessWifiState" msgid="5552488500317911052">"‏عرض اتصالات Wi-Fi"</string>
     <string name="permdesc_accessWifiState" msgid="6913641669259483363">"‏للسماح للتطبيق بعرض معلومات حول شبكات Wi-Fi، كعرض معلومات حول ما إذا تم تفعيل Wi-Fi واسم أجهزة Wi-Fi المتصلة."</string>
     <string name="permlab_changeWifiState" msgid="7947824109713181554">"‏التوصيل والفصل من Wi-Fi"</string>
-    <string name="permdesc_changeWifiState" msgid="7170350070554505384">"‏للسماح للتطبيق بالاتصال بنقاط الوصول إلى Wi-Fi وقطع الاتصال بها، وإجراء تغييرات على تهيئة الجهاز لشبكات Wi-Fi."</string>
+    <string name="permdesc_changeWifiState" msgid="7170350070554505384">"‏للسماح للتطبيق بالاتصال بنقاط الوصول إلى Wi-Fi وقطع الاتصال بها، وإجراء تغييرات على إعداد الجهاز لشبكات Wi-Fi."</string>
     <string name="permlab_changeWifiMulticastState" msgid="285626875870754696">"‏السماح باستقبال بث Wi-Fi متعدد"</string>
     <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="191079868596433554">"‏للسماح للتطبيق بتلقي الحزم التي يتم إرسالها إلى جميع الأجهزة على شبكة Wi-Fi باستخدام عناوين بث متعدد، وليس باستخدام جهازك اللوحي فقط. ويؤدي ذلك إلى استخدام قدر أكبر من الطاقة يفوق وضع البث غير المتعدد."</string>
     <string name="permdesc_changeWifiMulticastState" product="tv" msgid="1336952358450652595">"‏للسماح للتطبيق بتلقّي الحِزم التي يتم إرسالها إلى جميع الأجهزة على شبكة Wi-Fi باستخدام عناوين بث متعدد، وليس باستخدام جهاز Android TV فقط. ويؤدي ذلك إلى استخدام قدر أكبر من الطاقة يفوق ما يتم استهلاكه في وضع البث غير المتعدد."</string>
     <string name="permdesc_changeWifiMulticastState" product="default" msgid="8296627590220222740">"‏للسماح للتطبيق بتلقي الحزم التي يتم إرسالها إلى جميع الأجهزة على شبكة Wi-Fi باستخدام عناوين بث متعدد، وليس باستخدام هاتفك فقط. ويؤدي ذلك إلى استخدام قدر أكبر من الطاقة يفوق وضع البث غير المتعدد."</string>
     <string name="permlab_bluetoothAdmin" msgid="6490373569441946064">"الدخول إلى إعدادات بلوتوث"</string>
-    <string name="permdesc_bluetoothAdmin" product="tablet" msgid="5370837055438574863">"للسماح للتطبيق بتهيئة لوحة البلوتوث المحلي، واكتشاف أجهزة التحكم عن بعد والاقتران بها."</string>
+    <string name="permdesc_bluetoothAdmin" product="tablet" msgid="5370837055438574863">"للسماح للتطبيق بإعداد لوحة البلوتوث المحلي، واكتشاف أجهزة التحكم عن بعد والاقتران بها."</string>
     <string name="permdesc_bluetoothAdmin" product="tv" msgid="1623992984547014588">"‏للسماح للتطبيق بضبط البلوتوث على جهاز Android TV واكتشاف الأجهزة البعيدة والاقتران بها."</string>
-    <string name="permdesc_bluetoothAdmin" product="default" msgid="7381341743021234863">"للسماح للتطبيق بتهيئة هاتف البلوتوث المحلي، واكتشاف أجهزة التحكم عن بعد والاقتران بها."</string>
+    <string name="permdesc_bluetoothAdmin" product="default" msgid="7381341743021234863">"للسماح للتطبيق بإعداد هاتف البلوتوث المحلي، واكتشاف أجهزة التحكم عن بعد والاقتران بها."</string>
     <string name="permlab_accessWimaxState" msgid="7029563339012437434">"‏الاتصال بـشبكة WiMAX وقطع الاتصال بها"</string>
     <string name="permdesc_accessWimaxState" msgid="5372734776802067708">"‏للسماح للتطبيق بتحديد ما إذا تم تفعيل WiMAX وتحديد معلومات حول أي شبكات WiMAX متصلة."</string>
     <string name="permlab_changeWimaxState" msgid="6223305780806267462">"‏تغيير حالة WiMAX"</string>
@@ -533,9 +529,9 @@
     <string name="permdesc_changeWimaxState" product="tv" msgid="5373274458799425276">"‏للسماح للتطبيق بتوصيل جهاز Android TV بشبكات WiMAX وقطع اتصاله بها."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="1551666203780202101">"‏للسماح للتطبيق بتوصيل الهاتف بشبكات WiMAX وقطع اتصاله بها."</string>
     <string name="permlab_bluetooth" msgid="586333280736937209">"الاتصال بأجهزة بلوتوث"</string>
-    <string name="permdesc_bluetooth" product="tablet" msgid="3053222571491402635">"للسماح للتطبيق بعرض تهيئة البلوتوث على الجهاز اللوحي وإجراء اتصالات وقبولها مع الأجهزة المقترنة."</string>
+    <string name="permdesc_bluetooth" product="tablet" msgid="3053222571491402635">"للسماح للتطبيق بعرض إعداد البلوتوث على الجهاز اللوحي وإجراء اتصالات وقبولها مع الأجهزة المقترنة."</string>
     <string name="permdesc_bluetooth" product="tv" msgid="8851534496561034998">"‏للسماح للتطبيق بعرض بيانات ضبط البلوتوث على جهاز Android TV وإجراء اتصالات مع الأجهزة المقترنة وقبولها."</string>
-    <string name="permdesc_bluetooth" product="default" msgid="2779606714091276746">"للسماح للتطبيق بعرض تهيئة البلوتوث على الهاتف وإجراء اتصالات وقبولها مع الأجهزة المقترنة."</string>
+    <string name="permdesc_bluetooth" product="default" msgid="2779606714091276746">"للسماح للتطبيق بعرض إعداد البلوتوث على الهاتف وإجراء اتصالات وقبولها مع الأجهزة المقترنة."</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"‏معلومات الخدمات المدفوعة باستخدام الاتصال قصير المدى NFC المفضّل"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"‏يسمح هذا الإذن للتطبيق بالحصول على معلومات الخدمات المدفوعة باستخدام الاتصال قصير المدى NFC المفضّل، مثلاً المساعدات المسجّلة ووجهة المسار."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"التحكم في اتصال الحقل القريب"</string>
@@ -558,13 +554,14 @@
     <string name="permdesc_imagesWrite" msgid="5195054463269193317">"للسماح للتطبيق بتعديل مجموعة صورك."</string>
     <string name="permlab_mediaLocation" msgid="7368098373378598066">"قراءة المواقع من مجموعة الوسائط التابعة لك"</string>
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"للسماح للتطبيق بقراءة المواقع من مجموعة الوسائط التابعة لك."</string>
-    <string name="biometric_dialog_default_title" msgid="5284880398508155088">"إثبات هويتك"</string>
+    <string name="biometric_dialog_default_title" msgid="55026799173208210">"إثبات هويتك"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"معدّات المقاييس الحيوية غير متاحة."</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"تم إلغاء المصادقة."</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"لم يتم التعرف عليها."</string>
     <string name="biometric_error_canceled" msgid="8266582404844179778">"تم إلغاء المصادقة."</string>
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"لم يتم ضبط رقم تعريف شخصي أو نقش أو كلمة مرور."</string>
-    <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"تم اكتشاف بصمة الإصبع بشكل جزئي؛ يرجى إعادة المحاولة."</string>
+    <string name="biometric_error_generic" msgid="6784371929985434439">"خطأ في المصادقة"</string>
+    <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"تم اكتشاف جزء من بصمة الإصبع فقط؛ يرجى إعادة المحاولة."</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"تعذرت معالجة بصمة الإصبع. يُرجى إعادة المحاولة."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"زر استشعار بصمات الأصابع متّسخ. يُرجى تنظيفه وإعادة المحاولة."</string>
     <string name="fingerprint_acquired_too_fast" msgid="5151661932298844352">"لقد حرّكت إصبعك بسرعة، يُرجى إعادة المحاولة."</string>
@@ -638,7 +635,7 @@
     <string name="permlab_writeSyncSettings" msgid="6583154300780427399">"التبديل بين تفعيل المزامنة وإيقافها"</string>
     <string name="permdesc_writeSyncSettings" msgid="6029151549667182687">"للسماح للتطبيق بتعديل إعدادات المزامنة لحساب ما. على سبيل المثال، يمكن استخدام ذلك لتفعيل مزامنة تطبيق \"الأشخاص\" مع حساب ما."</string>
     <string name="permlab_readSyncStats" msgid="3747407238320105332">"قراءة إحصاءات المزامنة"</string>
-    <string name="permdesc_readSyncStats" msgid="3867809926567379434">"للسماح للتطبيق بقراءة إحصائيات المزامنة لحساب ما، بما في ذلك سجل الأحداث المتزامنة ومقدار البيانات التي تمت مزامنتها."</string>
+    <string name="permdesc_readSyncStats" msgid="3867809926567379434">"للسماح للتطبيق بقراءة إحصاءات المزامنة لحساب ما، بما في ذلك سجل الأحداث المتزامنة ومقدار البيانات التي تمت مزامنتها."</string>
     <string name="permlab_sdcardRead" msgid="5791467020950064920">"قراءة محتوى مساحة التخزين المشتركة"</string>
     <string name="permdesc_sdcardRead" msgid="6872973242228240382">"للسماح للتطبيق بقراءة محتوى مساحة التخزين المشتركة."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"تعديل محتوى مساحة التخزين المشتركة أو حذفه"</string>
@@ -671,8 +668,8 @@
     <string name="permdesc_bindConditionProviderService" msgid="6106018791256120258">"للسماح للمالك بالربط بواجهة المستوى العلوي لخدمة موفر الحالة. لن تكون هناك حاجة إلى هذا الإعداد مطلقًا مع التطبيقات العادية."</string>
     <string name="permlab_bindDreamService" msgid="4776175992848982706">"‏الالتزام بخدمة dream"</string>
     <string name="permdesc_bindDreamService" msgid="9129615743300572973">"‏للسماح للمالك بالالتزام بواجهة المستوى العلوي لخدمة dream. لن تكون هناك حاجة إليه مطلقًا مع التطبيقات العادية."</string>
-    <string name="permlab_invokeCarrierSetup" msgid="5098810760209818140">"استدعاء تطبيق التهيئة الذي يوفره مشغل شبكة الجوال"</string>
-    <string name="permdesc_invokeCarrierSetup" msgid="4790845896063237887">"للسماح للمالك باستدعاء تطبيق التهيئة الذي يوفره مشغل شبكة الجوال. لن تكون هناك حاجة إليه مطلقًا مع التطبيقات العادية."</string>
+    <string name="permlab_invokeCarrierSetup" msgid="5098810760209818140">"استدعاء تطبيق الإعداد الذي يوفره مشغل شبكة الجوال"</string>
+    <string name="permdesc_invokeCarrierSetup" msgid="4790845896063237887">"للسماح للمالك باستدعاء تطبيق الإعداد الذي يوفره مشغل شبكة الجوال. لن تكون هناك حاجة إليه مطلقًا مع التطبيقات العادية."</string>
     <string name="permlab_accessNetworkConditions" msgid="1270732533356286514">"الاستماع إلى ملاحظات حول أحوال الشبكة"</string>
     <string name="permdesc_accessNetworkConditions" msgid="2959269186741956109">"للسماح للتطبيق بالاستماع إلى ملاحظات حول أحوال الشبكة. لا حاجة إلى هذا مع التطبيقات العادية."</string>
     <string name="permlab_setInputCalibration" msgid="932069700285223434">"تغيير معايرة أجهزة الإدخال"</string>
@@ -688,7 +685,7 @@
     <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"الالتزام بخدمات مشغل شبكة الجوال"</string>
     <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"للسماح للمالك بالالتزام بخدمات مشغل شبكة الجوال. لن تكون هناك حاجة إليه مطلقًا مع التطبيقات العادية."</string>
     <string name="permlab_access_notification_policy" msgid="5524112842876975537">"الوصول إلى إعداد \"عدم الإزعاج\""</string>
-    <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"للسماح للتطبيق بقراءة تهيئة \"عدم الإزعاج\" وكتابتها."</string>
+    <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"للسماح للتطبيق بقراءة إعداد \"عدم الإزعاج\" وكتابتها."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"بدء استخدام إذن العرض"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"للسماح للمالك ببدء استخدام الإذن لأحد التطبيقات. ولن تكون هناك حاجة إليه مطلقًا مع التطبيقات العادية."</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"تعيين قواعد كلمة المرور"</string>
@@ -734,7 +731,7 @@
   </string-array>
   <string-array name="emailAddressTypes">
     <item msgid="7786349763648997741">"المنزل"</item>
-    <item msgid="435564470865989199">"عمل"</item>
+    <item msgid="435564470865989199">"العمل"</item>
     <item msgid="4199433197875490373">"آخر"</item>
     <item msgid="3233938986670468328">"مخصص"</item>
   </string-array>
@@ -788,7 +785,7 @@
     <string name="phoneTypeMms" msgid="1799747455131365989">"رسالة وسائط متعددة"</string>
     <string name="eventTypeCustom" msgid="3257367158986466481">"مخصص"</string>
     <string name="eventTypeBirthday" msgid="7770026752793912283">"عيد ميلاد"</string>
-    <string name="eventTypeAnniversary" msgid="4684702412407916888">"الذكرى السنوية"</string>
+    <string name="eventTypeAnniversary" msgid="4684702412407916888">"ذكرى سنوية"</string>
     <string name="eventTypeOther" msgid="530671238533887997">"غير ذلك"</string>
     <string name="emailTypeCustom" msgid="1809435350482181786">"مخصص"</string>
     <string name="emailTypeHome" msgid="1597116303154775999">"المنزل"</string>
@@ -825,9 +822,9 @@
     <string name="relationTypeFriend" msgid="3192092625893980574">"صديق"</string>
     <string name="relationTypeManager" msgid="2272860813153171857">"مدير"</string>
     <string name="relationTypeMother" msgid="2331762740982699460">"أم"</string>
-    <string name="relationTypeParent" msgid="4177920938333039882">"الوالدان"</string>
+    <string name="relationTypeParent" msgid="4177920938333039882">"ولي أمر"</string>
     <string name="relationTypePartner" msgid="4018017075116766194">"شريك"</string>
-    <string name="relationTypeReferredBy" msgid="5285082289602849400">"جهة الإحالة"</string>
+    <string name="relationTypeReferredBy" msgid="5285082289602849400">"جهة إحالة"</string>
     <string name="relationTypeRelative" msgid="3396498519818009134">"قريب"</string>
     <string name="relationTypeSister" msgid="3721676005094140671">"أخت"</string>
     <string name="relationTypeSpouse" msgid="6916682664436031703">"زوج/زوجة"</string>
@@ -851,7 +848,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"اضغط على \"القائمة\" لإلغاء التأمين أو إجراء اتصال بالطوارئ."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"اضغط على \"القائمة\" لإلغاء التأمين."</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"رسم نقش لإلغاء التأمين"</string>
-    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"الطوارئ"</string>
+    <string name="lockscreen_emergency_call" msgid="7549683825868928636">"مكالمة طوارئ"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"العودة إلى الاتصال"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"صحيح!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"أعد المحاولة"</string>
@@ -983,7 +980,7 @@
     <string name="permlab_addVoicemail" msgid="4770245808840814471">"إضافة بريد صوتي"</string>
     <string name="permdesc_addVoicemail" msgid="5470312139820074324">"للسماح للتطبيق بإضافة رسائل إلى صندوق البريد الصوتي."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="8605631647492879449">"تعديل أذونات الموقع الجغرافي للمتصفح"</string>
-    <string name="permdesc_writeGeolocationPermissions" msgid="5817346421222227772">"للسماح لأحد التطبيقات بتعديل أذونات الموقع الجغرافي للمتصفح. يمكن أن تستخدم التطبيقات الضارة هذا للسماح بإرسال معلومات الموقع إلى مواقع ويب عشوائية."</string>
+    <string name="permdesc_writeGeolocationPermissions" msgid="5817346421222227772">"للسماح لأحد التطبيقات بتعديل أذونات الموقع الجغرافي للمتصفح. يمكن أن تستخدم التطبيقات الضارة هذا للسماح بإرسال معلومات الموقع إلى مواقع إلكترونية عشوائية."</string>
     <string name="save_password_message" msgid="2146409467245462965">"هل تريد من المتصفح تذكر كلمة المرور هذه؟"</string>
     <string name="save_password_notnow" msgid="2878327088951240061">"ليس الآن"</string>
     <string name="save_password_remember" msgid="6490888932657708341">"تذكّر"</string>
@@ -1179,7 +1176,7 @@
     <string name="Midnight" msgid="8176019203622191377">"منتصف الليل"</string>
     <string name="elapsed_time_short_format_mm_ss" msgid="8689459651807876423">"<xliff:g id="MINUTES">%1$02d</xliff:g>:<xliff:g id="SECONDS">%2$02d</xliff:g>"</string>
     <string name="elapsed_time_short_format_h_mm_ss" msgid="2302144714803345056">"<xliff:g id="HOURS">%1$d</xliff:g>:<xliff:g id="MINUTES">%2$02d</xliff:g>:<xliff:g id="SECONDS">%3$02d</xliff:g>"</string>
-    <string name="selectAll" msgid="1532369154488982046">"اختيار الكل"</string>
+    <string name="selectAll" msgid="1532369154488982046">"تحديد الكل"</string>
     <string name="cut" msgid="2561199725874745819">"قص"</string>
     <string name="copy" msgid="5472512047143665218">"نسخ"</string>
     <string name="failed_to_copy_to_clipboard" msgid="725919885138539875">"تعذّر النسخ في الحافظة"</string>
@@ -1212,6 +1209,8 @@
     <string name="capital_off" msgid="7443704171014626777">"إيقاف"</string>
     <string name="checked" msgid="9179896827054513119">"تم وضع علامة"</string>
     <string name="not_checked" msgid="7972320087569023342">"لم يتم وضع علامة"</string>
+    <string name="selected" msgid="6614607926197755875">"محدّد"</string>
+    <string name="not_selected" msgid="410652016565864475">"غير محدّد"</string>
     <string name="whichApplication" msgid="5432266899591255759">"إكمال الإجراء باستخدام"</string>
     <string name="whichApplicationNamed" msgid="6969946041713975681">"‏إكمال الإجراء باستخدام %1$s"</string>
     <string name="whichApplicationLabel" msgid="7852182961472531728">"إكمال الإجراء"</string>
@@ -1232,7 +1231,7 @@
     <string name="whichSendToApplication" msgid="77101541959464018">"إرسال باستخدام"</string>
     <string name="whichSendToApplicationNamed" msgid="3385686512014670003">"‏إرسال باستخدام %1$s"</string>
     <string name="whichSendToApplicationLabel" msgid="3543240188816513303">"إرسال"</string>
-    <string name="whichHomeApplication" msgid="8276350727038396616">"تحديد تطبيق شاشة رئيسية"</string>
+    <string name="whichHomeApplication" msgid="8276350727038396616">"اختيار تطبيق شاشة رئيسية"</string>
     <string name="whichHomeApplicationNamed" msgid="5855990024847433794">"‏استخدام %1$s كصفحة رئيسية"</string>
     <string name="whichHomeApplicationLabel" msgid="8907334282202933959">"التقاط صورة"</string>
     <string name="whichImageCaptureApplication" msgid="2737413019463215284">"التقاط صورة باستخدام"</string>
@@ -1308,7 +1307,7 @@
     <string name="volume_ringtone" msgid="134784084629229029">"مستوى صوت الرنين"</string>
     <string name="volume_music" msgid="7727274216734955095">"مستوى صوت الوسائط"</string>
     <string name="volume_music_hint_playing_through_bluetooth" msgid="2614142915948898228">"تشغيل من خلال البلوتوث"</string>
-    <string name="volume_music_hint_silent_ringtone_selected" msgid="1514829655029062233">"تم تعيين نغمة الرنين الصامتة"</string>
+    <string name="volume_music_hint_silent_ringtone_selected" msgid="1514829655029062233">"تم ضبط نغمة الرنين الصامتة"</string>
     <string name="volume_call" msgid="7625321655265747433">"مستوى صوت المكالمات الواردة"</string>
     <string name="volume_bluetooth_call" msgid="2930204618610115061">"مستوى صوت المكالمة الواردة بالبلوتوث"</string>
     <string name="volume_alarm" msgid="4486241060751798448">"مستوى صوت المنبّه"</string>
@@ -1399,9 +1398,9 @@
     <string name="adb_active_notification_title" msgid="408390247354560331">"‏تم توصيل أداة تصحيح أخطاء الجهاز عبر USB"</string>
     <string name="adb_active_notification_message" msgid="5617264033476778211">"‏انقر لإيقاف تصحيح أخطاء الجهاز عبر USB."</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"‏اختيار إيقاف تصحيح أخطاء USB."</string>
-    <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"‏تم تفعيل ميزة \"تصحيح الأخطاء عبر شبكة Wi-Fi\""</string>
-    <string name="adbwifi_active_notification_message" msgid="930987922852867972">"‏انقر لإيقاف ميزة \"تصحيح الأخطاء عبر شبكة Wi-Fi\"."</string>
-    <string name="adbwifi_active_notification_message" product="tv" msgid="8633421848366915478">"‏اختيار إيقاف ميزة \"تصحيح الأخطاء عبر شبكة Wi-Fi\""</string>
+    <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"تم تفعيل ميزة \"تصحيح الأخطاء اللاسلكي\"."</string>
+    <string name="adbwifi_active_notification_message" msgid="930987922852867972">"انقر لإيقاف ميزة \"تصحيح الأخطاء اللاسلكي\"."</string>
+    <string name="adbwifi_active_notification_message" product="tv" msgid="8633421848366915478">"انقر لإيقاف ميزة \"تصحيح الأخطاء اللاسلكي\""</string>
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"تم تفعيل وضع \"مفعّل الاختبار\""</string>
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"يمكنك إجراء إعادة ضبط على الإعدادات الأصلية لإيقاف وضع \"مفعِّل اختبار\"."</string>
     <string name="console_running_notification_title" msgid="6087888939261635904">"وحدة التحكّم التسلسلية مفعّلة"</string>
@@ -1419,7 +1418,7 @@
     <string name="select_input_method" msgid="3971267998568587025">"اختيار أسلوب الإدخال"</string>
     <string name="show_ime" msgid="6406112007347443383">"استمرار عرضها على الشاشة أثناء نشاط لوحة المفاتيح الفعلية"</string>
     <string name="hardware" msgid="1800597768237606953">"إظهار لوحة المفاتيح الافتراضية"</string>
-    <string name="select_keyboard_layout_notification_title" msgid="4427643867639774118">"تهيئة لوحة المفاتيح الفعلية"</string>
+    <string name="select_keyboard_layout_notification_title" msgid="4427643867639774118">"إعداد لوحة المفاتيح الفعلية"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"انقر لاختيار لغة وتنسيق"</string>
     <string name="fast_scroll_alphabet" msgid="8854435958703888376">" أ ب ت ث ج ح خ د ذ ر ز س ش ص ض ط ظ ع غ ف ق ك ل م ن ه و ي"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="2529539945421557329">" 0123456789 أ ب ت ث ج ح خ د ذ ر ز س ش ص ض ط ظ ع غ ف ق ك ل م ن ه و ي"</string>
@@ -1431,14 +1430,20 @@
     <string name="ext_media_checking_notification_title" msgid="8299199995416510094">"جارٍ التحقق من <xliff:g id="NAME">%s</xliff:g>…"</string>
     <string name="ext_media_checking_notification_message" msgid="2231566971425375542">"جارٍ مراجعة المحتوى الحالي"</string>
     <string name="ext_media_new_notification_title" msgid="3517407571407687677">"<xliff:g id="NAME">%s</xliff:g> جديدة"</string>
+    <string name="ext_media_new_notification_title" product="automotive" msgid="9085349544984742727">"<xliff:g id="NAME">%s</xliff:g> لا يعمل."</string>
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"انقر للإعداد."</string>
+    <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"قد تحتاج إلى إعادة تنسيق الجهاز. انقر على إخراج."</string>
     <string name="ext_media_ready_notification_message" msgid="777258143284919261">"لنقل الصور والوسائط"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"هناك مشكلة في <xliff:g id="NAME">%s</xliff:g>."</string>
+    <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"<xliff:g id="NAME">%s</xliff:g> لا يعمل."</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"انقر للإصلاح"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3003611129979934633">"<xliff:g id="NAME">%s</xliff:g> تالف، ويمكنك اختيار إصلاحه."</string>
+    <string name="ext_media_unmountable_notification_message" product="automotive" msgid="2274596120715020680">"قد تحتاج إلى إعادة تنسيق الجهاز. انقر على إخراج."</string>
     <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"<xliff:g id="NAME">%s</xliff:g> غير متوافق"</string>
+    <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"<xliff:g id="NAME">%s</xliff:g> لا يعمل."</string>
     <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"هذا الجهاز غير متوافق مع <xliff:g id="NAME">%s</xliff:g> هذا. انقر للإعداد بتنسيق متوافق."</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="7744945987775645685">"لا يتوافق هذا الجهاز مع <xliff:g id="NAME">%s</xliff:g>. يمكنك النقر للإعداد بتنسيق متوافق."</string>
+    <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"قد تحتاج إلى إعادة تنسيق الجهاز."</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"تمت إزالة <xliff:g id="NAME">%s</xliff:g> بشكل غير متوقع"</string>
     <string name="ext_media_badremoval_notification_message" msgid="1986514704499809244">"إخراج الوسائط قبل الإزالة لتجنّب فقدان المحتوى"</string>
     <string name="ext_media_nomedia_notification_title" msgid="742671636376975890">"تمت إزالة <xliff:g id="NAME">%s</xliff:g>."</string>
@@ -1466,7 +1471,7 @@
     <string name="ext_media_status_unmountable" msgid="7043574843541087748">"تالف"</string>
     <string name="ext_media_status_unsupported" msgid="5460509911660539317">"غير متوافق"</string>
     <string name="ext_media_status_ejecting" msgid="7532403368044013797">"جارٍ إنهاء التحميل…"</string>
-    <string name="ext_media_status_formatting" msgid="774148701503179906">"جارٍ التهيئة…"</string>
+    <string name="ext_media_status_formatting" msgid="774148701503179906">"تجري التهيئة..."</string>
     <string name="ext_media_status_missing" msgid="6520746443048867314">"لم يتم الإدخال"</string>
     <string name="activity_list_empty" msgid="4219430010716034252">"لم يتم العثور على أي أنشطة متطابقة."</string>
     <string name="permlab_route_media_output" msgid="8048124531439513118">"توجيه إخراج الوسائط"</string>
@@ -1633,9 +1638,7 @@
     <string name="launchBrowserDefault" msgid="6328349989932924119">"تشغيل المتصفح؟"</string>
     <string name="SetupCallDefault" msgid="5581740063237175247">"هل تريد قبول المكالمة؟"</string>
     <string name="activity_resolver_use_always" msgid="5575222334666843269">"دائمًا"</string>
-    <string name="activity_resolver_set_always" msgid="4142825808921411476">"ضبط على الفتح دائمًا"</string>
     <string name="activity_resolver_use_once" msgid="948462794469672658">"مرة واحدة فقط"</string>
-    <string name="activity_resolver_app_settings" msgid="6758823206817748026">"الإعدادات"</string>
     <string name="activity_resolver_work_profiles_support" msgid="4071345609235361269">"‏لا يدعم %1$s الملفات الشخصية للعمل"</string>
     <string name="default_audio_route_name" product="tablet" msgid="367936735632195517">"الجهاز اللوحي"</string>
     <string name="default_audio_route_name" product="tv" msgid="4908971385068087367">"التلفزيون"</string>
@@ -1710,28 +1713,18 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"لقد رسمت نقش فتح القفل بشكل غير صحيح <xliff:g id="NUMBER_0">%1$d</xliff:g> مرة. بعد إجراء <xliff:g id="NUMBER_1">%2$d</xliff:g> من المحاولات غير الناجحة الأخرى، ستُطالب بإلغاء تأمين الهاتف باستخدام حساب بريد إلكتروني لإلغاء تأمين الهاتف.\n\n أعد المحاولة خلال <xliff:g id="NUMBER_2">%3$d</xliff:g> ثانية."</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"إزالة"</string>
-    <string name="allow_while_in_use_permission_in_fgs" msgid="4101339676785053656">"‏لن يتم منح إذن الوصول إلى الموقع الجغرافي أثناء الاستخدام للخدمات التي تعمل في المقدّمة من <xliff:g id="PACKAGENAME">%1$s</xliff:g> والتي تبدأ من الخلفية في إصدارات R القادمة. يُرجى مراجعة go/r-bg-fgs-restriction وتقديم تقرير خطأ."</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"هل تريد رفع مستوى الصوت فوق المستوى الموصى به؟\n\nقد يضر سماع صوت عالٍ لفترات طويلة بسمعك."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"هل تريد استخدام اختصار \"سهولة الاستخدام\"؟"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"عند تفعيل الاختصار، يؤدي الضغط على زرّي التحكّم في مستوى الصوت معًا لمدة 3 ثوانٍ إلى تفعيل إحدى ميزات إمكانية الوصول."</string>
-    <!-- no translation found for accessibility_shortcut_multiple_service_warning_title (8417489297036013065) -->
-    <skip />
-    <!-- no translation found for accessibility_shortcut_multiple_service_warning (3740723309483706911) -->
-    <skip />
-    <!-- no translation found for accessibility_shortcut_multiple_service_list (6935581470716541531) -->
-    <skip />
-    <!-- no translation found for accessibility_shortcut_talkback_warning_title (3410100187167382427) -->
-    <skip />
-    <!-- no translation found for accessibility_shortcut_talkback_warning (8412954203626349109) -->
-    <skip />
-    <!-- no translation found for accessibility_shortcut_single_service_warning_title (2819109500943271385) -->
-    <skip />
-    <!-- no translation found for accessibility_shortcut_single_service_warning (6363127705112844257) -->
-    <skip />
-    <!-- no translation found for accessibility_shortcut_on (5463618449556111344) -->
-    <skip />
-    <!-- no translation found for accessibility_shortcut_off (3651336255403648739) -->
-    <skip />
+    <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"هل تريد تفعيل الاختصار لميزات إمكانية الوصول؟"</string>
+    <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"يؤدي الضغط مع الاستمرار على كلا مفتاحَي التحكّم في مستوى الصوت لبضع ثوانٍ إلى تفعيل ميزات إمكانية الوصول. قد يؤدي هذا الإجراء إلى تغيير طريقة عمل جهازك.\n\nالميزات الحالية:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nيمكنك تغيير الميزات المحددة في الإعدادات &gt; إمكانية الوصول."</string>
+    <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
+    <string name="accessibility_shortcut_single_service_warning_title" msgid="1909518473488345266">"هل تريد تفعيل اختصار <xliff:g id="SERVICE">%1$s</xliff:g>؟"</string>
+    <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"‏يؤدي الضغط مع الاستمرار لبضع ثوانٍ على كلا مفتاحَي التحكّم في مستوى الصوت إلى تفعيل <xliff:g id="SERVICE">%1$s</xliff:g> وهي إحدى ميزات إمكانية الوصول. يمكن أن يؤدي هذا الإجراء إلى تغيير كيفية عمل جهازك.\n\nيمكنك تغيير هذا الاختصار لاستخدامه مع ميزة أخرى في الإعدادات &gt; أدوات تمكين الوصول."</string>
+    <string name="accessibility_shortcut_on" msgid="5463618449556111344">"تفعيل"</string>
+    <string name="accessibility_shortcut_off" msgid="3651336255403648739">"عدم التفعيل"</string>
+    <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"مفعّل"</string>
+    <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"غير مفعّل"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"هل تريد السماح لخدمة <xliff:g id="SERVICE">%1$s</xliff:g> بالتحكّم الكامل في جهازك؟"</string>
     <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"في حال تفعيل <xliff:g id="SERVICE">%1$s</xliff:g>، لن يستخدم جهازك ميزة قفل الشاشة لتحسين ترميز البيانات."</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"إنّ التحكّم الكامل ليس ملائمًا لمعظم التطبيقات، باستثناء التطبيقات المعنية بسهولة الاستخدام."</string>
@@ -1742,34 +1735,24 @@
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"سماح"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"رفض"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"انقر على ميزة لبدء استخدامها:"</string>
-    <!-- no translation found for accessibility_edit_shortcut_menu_button_title (239446795930436325) -->
-    <skip />
-    <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (1077294237378645981) -->
-    <skip />
+    <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"اختيار الميزات التي تريد استخدامها مع زر أدوات تمكين الوصول"</string>
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"اختيار الميزات التي تريد استخدامها مع اختصار مفتاح التحكّم في مستوى الصوت"</string>
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"تم إيقاف <xliff:g id="SERVICE_NAME">%s</xliff:g>."</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"تعديل الاختصارات"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"تم"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"إيقاف الاختصار"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"استخدام الاختصار"</string>
-    <string name="color_inversion_feature_name" msgid="326050048927789012">"عكس الألوان"</string>
+    <string name="color_inversion_feature_name" msgid="326050048927789012">"قلب الألوان"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"تصحيح الألوان"</string>
-    <!-- no translation found for accessibility_shortcut_enabling_service (5473495203759847687) -->
-    <skip />
-    <!-- no translation found for accessibility_shortcut_disabling_service (8675244165062700619) -->
-    <skip />
+    <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"تم الضغط مع الاستمرار على مفتاحَي التحكّم في مستوى الصوت. تم تفعيل <xliff:g id="SERVICE_NAME">%1$s</xliff:g>."</string>
+    <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"تم الضغط مع الاستمرار على مفتاحَي التحكّم في مستوى الصوت. تم إيقاف <xliff:g id="SERVICE_NAME">%1$s</xliff:g>."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"اضغط مع الاستمرار على مفتاحي مستوى الصوت لمدة 3 ثوانٍ لاستخدام <xliff:g id="SERVICE_NAME">%1$s</xliff:g>."</string>
-    <!-- no translation found for accessibility_button_prompt_text (8343213623338605305) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_prompt_text (8742535972130563952) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_3finger_prompt_text (5211827854510660203) -->
-    <skip />
-    <!-- no translation found for accessibility_button_instructional_text (8853928358872550500) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_instructional_text (9196230728837090497) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_3finger_instructional_text (3425123684990193765) -->
-    <skip />
+    <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"يمكنك اختيار إحدى الميزات لاستخدامها عند النقر على زر أدوات تمكين الوصول:"</string>
+    <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"يمكنك اختيار إحدى الميزات لاستخدامها مع إيماءة أدوات تمكين الوصول (مرّر سريعًا إلى الأعلى من أسفل الشاشة باستخدام إصبعين):"</string>
+    <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"يمكنك اختيار إحدى الميزات التالية لاستخدامها مع إيماءة أدوات تمكين الوصول (مرّر سريعًا إلى الأعلى من أسفل الشاشة باستخدام ثلاثة أصابع):"</string>
+    <string name="accessibility_button_instructional_text" msgid="8853928358872550500">"للتبديل بين الخدمات، يمكنك النقر مع الاستمرار على زر أدوات تمكين الوصول."</string>
+    <string name="accessibility_gesture_instructional_text" msgid="9196230728837090497">"للتبديل بين الخدمات، مرّر سريعًا من أسفل الشاشة إلى أعلاها باستخدام إصبعين مع تثبيتهما."</string>
+    <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"للتبديل بين الميزات، مرّر سريعًا من أسفل الشاشة لأعلاها بثلاثة أصابع مع تثبيتها."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"التكبير"</string>
     <string name="user_switched" msgid="7249833311585228097">"المستخدم الحالي <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="1912993630661332336">"جارٍ التبديل إلى <xliff:g id="NAME">%1$s</xliff:g>…"</string>
@@ -1907,9 +1890,9 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"تم التحديث بواسطة المشرف"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"تم الحذف بواسطة المشرف"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"حسنًا"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"‏لإطالة عمر البطارية، \"توفير شحن البطارية\":\n·تفعيل \"التصميم الداكن\"\n إيقاف النشاط في الخلفية أو تقييده وأيضًا بعض التأثيرات المرئية والميزات الأخرى، مثلاً \"Ok Google\"\n\n"<annotation id="url">"مزيد من المعلومات"</annotation></string>
-    <string name="battery_saver_description" msgid="7618492104632328184">"‏لإطالة عمر البطارية، \"توفير شحن البطارية\":\n·تفعيل \"التصميم الداكن\"\n إيقاف النشاط في الخلفية أو تقييده وأيضًا بعض التأثيرات المرئية والميزات الأخرى، مثلاً \"Ok Google\"."</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"للمساعدة في خفض استخدام البيانات، تمنع ميزة \"توفير البيانات\" بعض التطبيقات من إرسال البيانات وتلقّيها في الخلفية. يمكن للتطبيق الذي تستخدمه الآن الوصول إلى البيانات، ولكن لا يمكنه تنفيذ ذلك كثيرًا. وهذا يعني أن الصور مثلاً لا تظهر حتى تنقر عليها."</string>
+    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"‏لإطالة عمر البطارية، تعمل ميزة \"توفير شحن البطارية\" على:\n·تفعيل \"المظهر الداكن\"\n إيقاف أو حظر النشاط في الخلفية وبعض التأثيرات المرئية والميزات الأخرى، مثل \"Ok Google\"\n\n\n"<annotation id="url">"مزيد من المعلومات"</annotation></string>
+    <string name="battery_saver_description" msgid="6794188153647295212">"‏لإطالة عمر البطارية، تعمل ميزة \"توفير شحن البطارية\" على:\n\n• تفعيل \"المظهر الداكن\"\n• إيقاف أو حظر النشاط في الخلفية وبعض التأثيرات المرئية والميزات الأخرى، مثل \"Ok Google\"."</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"للمساعدة في خفض استخدام البيانات، تمنع ميزة \"توفير البيانات\" بعض التطبيقات من إرسال البيانات وتلقّيها في الخلفية. يمكن للتطبيقات المتاحة لديك الآن استخدام البيانات، ولكن لا يمكنها الإكثار من ذلك. وهذا يعني أن الصور مثلاً لا تظهر حتى تنقر عليها."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"هل تريد تفعيل توفير البيانات؟"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"تفعيل"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
@@ -1976,9 +1959,10 @@
       <item quantity="other">‏لمدة %d من الساعات</item>
       <item quantity="one">لمدة ساعة</item>
     </plurals>
+    <string name="zen_mode_until_next_day" msgid="1403042784161725038">"حتى <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_until" msgid="2250286190237669079">"حتى <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"حتى <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (التنبيه التالي)"</string>
-    <string name="zen_mode_forever" msgid="740585666364912448">"لحين الإيقاف"</string>
+    <string name="zen_mode_forever" msgid="740585666364912448">"إلى أن يتم إيقاف الوضع"</string>
     <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"حتى يتم إيقاف \"عدم الإزعاج\""</string>
     <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="8009920446193610996">"تصغير"</string>
@@ -2004,21 +1988,21 @@
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"توسيع"</string>
     <string name="expand_button_content_description_expanded" msgid="7484217944948667489">"تصغير"</string>
     <string name="expand_action_accessibility" msgid="1947657036871746627">"تبديل التوسيع"</string>
-    <string name="usb_midi_peripheral_name" msgid="490523464968655741">"‏منفذ الأجهزة الطرفية المزودة بكابل USB ونظام التشغيل Android"</string>
+    <string name="usb_midi_peripheral_name" msgid="490523464968655741">"‏منفذ الأجهزة الملحقة المزودة بكابل USB ونظام التشغيل Android"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7557148557088787741">"Android"</string>
-    <string name="usb_midi_peripheral_product_name" msgid="2836276258480904434">"‏منفذ الأجهزة الطرفية المزودة بكابل USB"</string>
+    <string name="usb_midi_peripheral_product_name" msgid="2836276258480904434">"‏منفذ الأجهزة الملحقة المزودة بكابل USB"</string>
     <string name="floating_toolbar_open_overflow_description" msgid="2260297653578167367">"خيارات أخرى"</string>
     <string name="floating_toolbar_close_overflow_description" msgid="3949818077708138098">"إغلاق التجاوز"</string>
     <string name="maximize_button_text" msgid="4258922519914732645">"تكبير"</string>
     <string name="close_button_text" msgid="10603510034455258">"إغلاق"</string>
     <string name="notification_messaging_title_template" msgid="772857526770251989">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>: <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
     <plurals name="selected_count" formatted="false" msgid="3946212171128200491">
-      <item quantity="zero">تم تحديد <xliff:g id="COUNT_1">%1$d</xliff:g> من العناصر</item>
-      <item quantity="two">تم تحديد عنصرين (<xliff:g id="COUNT_1">%1$d</xliff:g>)</item>
-      <item quantity="few">تم تحديد <xliff:g id="COUNT_1">%1$d</xliff:g> عناصر</item>
-      <item quantity="many">تم تحديد <xliff:g id="COUNT_1">%1$d</xliff:g> عنصرًا</item>
-      <item quantity="other">تم تحديد <xliff:g id="COUNT_1">%1$d</xliff:g> من العناصر</item>
-      <item quantity="one">تم تحديد عنصر واحد (<xliff:g id="COUNT_0">%1$d</xliff:g>)</item>
+      <item quantity="zero">تم اختيار <xliff:g id="COUNT_1">%1$d</xliff:g> عنصر</item>
+      <item quantity="two">تم اختيار عنصرين (<xliff:g id="COUNT_1">%1$d</xliff:g>)</item>
+      <item quantity="few">تم اختيار <xliff:g id="COUNT_1">%1$d</xliff:g> عناصر</item>
+      <item quantity="many">تم اختيار <xliff:g id="COUNT_1">%1$d</xliff:g> عنصرًا</item>
+      <item quantity="other">تم اختيار <xliff:g id="COUNT_1">%1$d</xliff:g> عنصر</item>
+      <item quantity="one">تم اختيار عنصر واحد (<xliff:g id="COUNT_0">%1$d</xliff:g>)</item>
     </plurals>
     <string name="default_notification_channel_label" msgid="3697928973567217330">"غير مصنفة"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"لقد عيَّنت أهمية هذه الإشعارات."</string>
@@ -2029,7 +2013,7 @@
     <string name="language_selection_title" msgid="52674936078683285">"إضافة لغة"</string>
     <string name="country_selection_title" msgid="5221495687299014379">"تفضيل المنطقة"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"اكتب اسم اللغة"</string>
-    <string name="language_picker_section_suggested" msgid="6556199184638990447">"اللغات المقترحة"</string>
+    <string name="language_picker_section_suggested" msgid="6556199184638990447">"المناطق المقترحة"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"جميع اللغات"</string>
     <string name="region_picker_section_all" msgid="756441309928774155">"كل المناطق"</string>
     <string name="locale_search_menu" msgid="6258090710176422934">"البحث"</string>
@@ -2037,7 +2021,7 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"التطبيق <xliff:g id="APP_NAME_0">%1$s</xliff:g> غير متاح الآن، وهو مُدار بواسطة <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"مزيد من المعلومات"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"استئناف تشغيل التطبيق"</string>
-    <string name="work_mode_off_title" msgid="5503291976647976560">"تفعيل الملف الشخصي للعمل؟"</string>
+    <string name="work_mode_off_title" msgid="5503291976647976560">"هل تريد تفعيل الملف الشخصي للعمل؟"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"سيتم تفعيل تطبيقات العمل التي تستخدمها والإشعارات والبيانات وغيرها من ميزات الملف الشخصي للعمل"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"تفعيل"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"التطبيق غير متاح"</string>
@@ -2152,6 +2136,7 @@
     <string name="notification_appops_camera_active" msgid="8177643089272352083">"كاميرا"</string>
     <string name="notification_appops_microphone_active" msgid="581333393214739332">"ميكروفون"</string>
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"العرض فوق التطبيقات الأخرى على شاشتك"</string>
+    <string name="notification_feedback_indicator" msgid="663476517711323016">"تقديم تعليقات"</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"إشعار معلومات \"وضع سلسلة الإجراءات\""</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"قد تنفد طاقة البطارية قبل الشحن المعتاد"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"تم تفعيل \"توفير شحن البطارية\" لإطالة عمرها."</string>
@@ -2178,7 +2163,7 @@
     <string name="mime_type_spreadsheet_ext" msgid="8720173181137254414">"جدول بيانات: <xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
     <string name="mime_type_presentation" msgid="1145384236788242075">"عرض تقديمي"</string>
     <string name="mime_type_presentation_ext" msgid="8761049335564371468">"عرض تقديمي: <xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
-    <string name="bluetooth_airplane_mode_toast" msgid="2066399056595768554">"سيظل البلوتوث مفعَّلاً أثناء استخدام \"وضع الطائرة\"."</string>
+    <string name="bluetooth_airplane_mode_toast" msgid="2066399056595768554">"سيظل البلوتوث مفعَّلاً أثناء استخدام \"وضع الطيران\"."</string>
     <string name="car_loading_profile" msgid="8219978381196748070">"جارٍ التحميل"</string>
     <plurals name="file_count" formatted="false" msgid="7063513834724389247">
       <item quantity="zero"><xliff:g id="FILE_NAME_2">%s</xliff:g> و<xliff:g id="COUNT_3">%d</xliff:g> ملف</item>
@@ -2188,8 +2173,7 @@
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> و<xliff:g id="COUNT_3">%d</xliff:g> ملف</item>
       <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> وملف (<xliff:g id="COUNT_1">%d</xliff:g>)</item>
     </plurals>
-    <!-- no translation found for chooser_no_direct_share_targets (1511722103987329028) -->
-    <skip />
+    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"ليس هناك أشخاص مقترحون للمشاركة معهم"</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"قائمة التطبيقات"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"‏لم يتم منح هذا التطبيق إذن تسجيل، ولكن يمكنه تسجيل الصوت من خلال جهاز USB هذا."</string>
     <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"الشاشة الرئيسية"</string>
@@ -2198,17 +2182,20 @@
     <string name="accessibility_system_action_notifications_label" msgid="6083767351772162010">"الإشعارات"</string>
     <string name="accessibility_system_action_quick_settings_label" msgid="4583900123506773783">"الإعدادات السريعة"</string>
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"مربّع حوار الطاقة"</string>
-    <string name="accessibility_system_action_toggle_split_screen_label" msgid="6626177163849387748">"تبديل \"تقسيم الشاشة\""</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"شاشة القفل"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"لقطة شاشة"</string>
-    <string name="accessibility_system_action_accessibility_menu_label" msgid="8436484650391125184">"قائمة \"سهولة الاستخدام\""</string>
+    <string name="accessibility_system_action_on_screen_a11y_shortcut_label" msgid="8488701469459210309">"اختصار أدوات تمكين الوصول على الشاشة"</string>
+    <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"أداة اختيار اختصارات أدوات تمكين الوصول على الشاشة"</string>
+    <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"اختصارات أدوات تمكين الوصول"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"شريط الشرح لتطبيق <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"تم وضع <xliff:g id="PACKAGE_NAME">%1$s</xliff:g> في الحزمة \"محظورة\"."</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
+    <string name="conversation_single_line_image_placeholder" msgid="6983271082911936900">"هذا المستخدم أرسل صورة"</string>
     <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"محادثة"</string>
     <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"محادثة جماعية"</string>
+    <string name="unread_convo_overflow" msgid="920517615597353833">"<xliff:g id="MAX_UNREAD_COUNT">%1$d</xliff:g>+"</string>
     <string name="resolver_personal_tab" msgid="2051260504014442073">"شخصي"</string>
-    <string name="resolver_work_tab" msgid="2690019516263167035">"عمل"</string>
+    <string name="resolver_work_tab" msgid="2690019516263167035">"للعمل"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"عرض المحتوى الشخصي"</string>
     <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"عرض محتوى العمل"</string>
     <string name="resolver_cant_share_with_work_apps" msgid="637686613606502219">"تتعذّر مشاركة هذا المحتوى باستخدام تطبيقات العمل"</string>
@@ -2219,228 +2206,122 @@
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="2959282422751315171">"لا يسمح لك مشرف تكنولوجيا المعلومات بمشاركة هذا المحتوى باستخدام التطبيقات في ملفك الشخصي."</string>
     <string name="resolver_cant_access_personal_apps" msgid="648291604475669395">"يتعذّر فتح هذا المحتوى باستخدام التطبيقات الشخصية"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="2298773629302296519">"لا يسمح لك مشرف تكنولوجيا المعلومات بفتح هذا المحتوى باستخدام التطبيقات في ملفك الشخصي."</string>
-    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"تم إيقاف الملف الشخصي للعمل مؤقتًا."</string>
+    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"الملف الشخصي للعمل متوقف مؤقتًا."</string>
     <string name="resolver_switch_on_work" msgid="2873009160846966379">"تفعيل"</string>
-    <string name="resolver_no_work_apps_available_share" msgid="7933949011797699505">"لا يمكن لتطبيقات العمل أن تدعم هذا المحتوى."</string>
+    <string name="resolver_no_work_apps_available_share" msgid="7933949011797699505">"لا يمكن لتطبيقات العمل أن تتوافق مع هذا المحتوى."</string>
     <string name="resolver_no_work_apps_available_resolve" msgid="1244844292366099399">"لا يمكن لتطبيقات العمل أن تفتح هذا المحتوى."</string>
     <string name="resolver_no_personal_apps_available_share" msgid="5639102815174748732">"لا يمكن للتطبيقات الشخصية أن تدعم هذا المحتوى."</string>
     <string name="resolver_no_personal_apps_available_resolve" msgid="5120671970531446978">"لا يمكن للتطبيقات الشخصية أن تفتح هذا المحتوى."</string>
-    <string name="permlab_accessCallAudio" msgid="1682957511874097664">"تسجيل الصوت أو تشغيله في المكالمات الهاتفية"</string>
-    <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"يسمح الإذن لهذا التطبيق بتسجيل الصوت أو تشغيله في المكالمات الهاتفية عندما يتم تخصيصه كالتطبيق التلقائي لبرنامج الاتصال."</string>
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_ENTRY (8050953231914637819) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY (7164399703751688214) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_CORPORATE_ENTRY (4447629474818217364) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SERVICE_PROVIDER_ENTRY (973059024670737358) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SIM_ENTRY (4487435301206073787) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_PUK_ENTRY (768060297218652809) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_ENTRY (7129527319490548930) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_CORPORATE_PUK_ENTRY (2876126640607573252) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_ENTRY (8952595089930109282) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SIM_PUK_ENTRY (3013902515773728996) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK1_ENTRY (2974411408893410289) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK2_ENTRY (687618528751880721) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_HRPD_ENTRY (6810596579655575381) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_CORPORATE_ENTRY (2715929642540980259) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_ENTRY (8557791623303951590) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_RUIM_ENTRY (7382468767274580323) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK1_PUK_ENTRY (6730880791104286987) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK2_PUK_ENTRY (6432126539782267026) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_HRPD_PUK_ENTRY (1730510161529488920) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_ENTRY (3369885925003346830) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_RUIM_PUK_ENTRY (9129139686191167829) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_CORPORATE_PUK_ENTRY (2869929685874615358) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SPN_ENTRY (1238663472392741771) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SP_EHPLMN_ENTRY (3988705848553894358) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_ICCID_ENTRY (6186770686690993200) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_IMPI_ENTRY (7043865376145617024) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NS_SP_ENTRY (6144227308185112176) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_IN_PROGRESS (4233355366318061180) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_SUBSET_IN_PROGRESS (6742563947637715645) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SERVICE_PROVIDER_IN_PROGRESS (2033399698172403560) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_CORPORATE_IN_PROGRESS (4795977251920732254) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_PUK_IN_PROGRESS (1090425878157254446) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_IN_PROGRESS (6476898876518094438) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_CORPORATE_PUK_IN_PROGRESS (6006806734293747731) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_IN_PROGRESS (6546680489620881893) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SIM_PUK_IN_PROGRESS (3506845511000727015) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SIM_IN_PROGRESS (6709169861932992750) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK1_IN_PROGRESS (4013870911606478520) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK2_IN_PROGRESS (9032651188219523434) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_HRPD_IN_PROGRESS (6584576506344491207) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_IN_PROGRESS (830981927724888114) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_CORPORATE_IN_PROGRESS (7851790973098894802) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SPN_IN_PROGRESS (1149560739586960121) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SP_EHPLMN_IN_PROGRESS (5708964693522116025) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_ICCID_IN_PROGRESS (7288103122966483455) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_IMPI_IN_PROGRESS (4036752174056147753) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NS_SP_IN_PROGRESS (5089536274515338566) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_RUIM_IN_PROGRESS (6737197986936251958) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK1_PUK_IN_PROGRESS (5658767775619998623) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK2_PUK_IN_PROGRESS (665978313257653727) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_HRPD_PUK_IN_PROGRESS (3857142652251836850) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_CORPORATE_PUK_IN_PROGRESS (2695664012344346788) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_IN_PROGRESS (2695678959963807782) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_RUIM_PUK_IN_PROGRESS (1230605365926493599) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_ERROR (1924844017037151535) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_SUBSET_ERROR (3372797822292089708) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SERVICE_PROVIDER_ERROR (1878443146720411381) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_CORPORATE_ERROR (7664778312218023192) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SIM_ERROR (2472944311643350302) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK1_ERROR (828089694480999120) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK2_ERROR (17619001007092511) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_HRPD_ERROR (807214229604353614) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_CORPORATE_ERROR (8644184447744175747) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_ERROR (3801002648649640407) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_RUIM_ERROR (707397021218680753) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_PUK_ERROR (894358680773257820) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_ERROR (352466878146726991) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_CORPORATE_PUK_ERROR (7353389721907138671) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_ERROR (2655263155490857920) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SIM_PUK_ERROR (6903740900892931310) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK1_PUK_ERROR (5165901670447518687) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK2_PUK_ERROR (2856763216589267623) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_HRPD_PUK_ERROR (817542684437829139) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_ERROR (5178635064113393143) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_RUIM_PUK_ERROR (5391587926974531008) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_CORPORATE_PUK_ERROR (4895494864493315868) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SPN_ERROR (9017576601595353649) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SP_EHPLMN_ERROR (1116993930995545742) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_ICCID_ERROR (7559167306794441462) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_IMPI_ERROR (2782926139511136588) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NS_SP_ERROR (1890493954453456758) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_SUCCESS (4886243367747126325) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_SUBSET_SUCCESS (4053809277733513987) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SERVICE_PROVIDER_SUCCESS (8249342930499801740) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_CORPORATE_SUCCESS (2339794542560381270) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SIM_SUCCESS (6975608174152828954) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK1_SUCCESS (2846699261330463192) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK2_SUCCESS (5335414726057102801) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_HRPD_SUCCESS (8868100318474971969) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_SUCCESS (6020936629725666932) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_CORPORATE_SUCCESS (6944873647584595489) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_RUIM_SUCCESS (2526483514124121988) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_PUK_SUCCESS (7662200333621664621) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_SUCCESS (2861223407953766632) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_CORPORATE_PUK_SUCCESS (5345648571175243272) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_SUCCESS (3725278343103422466) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SIM_PUK_SUCCESS (6998502547560297983) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK1_PUK_SUCCESS (8555433771162560361) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK2_PUK_SUCCESS (3555767296933606232) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_HRPD_PUK_SUCCESS (6778051818199974237) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_CORPORATE_PUK_SUCCESS (4080108758498911429) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_SUCCESS (7873675303000794343) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_RUIM_PUK_SUCCESS (1763198215069819523) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SPN_SUCCESS (2053891977727320532) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SP_EHPLMN_SUCCESS (8146602361895007345) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_ICCID_SUCCESS (8058678548991999545) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_IMPI_SUCCESS (2545608067978550571) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NS_SP_SUCCESS (4352382949744625007) -->
-    <skip />
+    <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"‏رقم التعريف الشخصي لإلغاء قفل شبكة شريحة SIM"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"‏رقم التعريف الشخصي لإلغاء قفل المجموعة الفرعية لشبكة شريحة SIM"</string>
+    <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"‏رقم التعريف الشخصي لإلغاء قفل شريحة SIM للشركات"</string>
+    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_ENTRY" msgid="973059024670737358">"‏رقم التعريف الشخصي لإلغاء قفل مقدم خدمة شريحة SIM"</string>
+    <string name="PERSOSUBSTATE_SIM_SIM_ENTRY" msgid="4487435301206073787">"‏رقم التعريف الشخصي لإلغاء قفل شريحة SIM"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_PUK_ENTRY" msgid="768060297218652809">"‏إدخال رمز PUK"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_ENTRY" msgid="7129527319490548930">"‏إدخال رمز PUK"</string>
+    <string name="PERSOSUBSTATE_SIM_CORPORATE_PUK_ENTRY" msgid="2876126640607573252">"‏إدخال رمز PUK"</string>
+    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_ENTRY" msgid="8952595089930109282">"‏إدخال رمز PUK"</string>
+    <string name="PERSOSUBSTATE_SIM_SIM_PUK_ENTRY" msgid="3013902515773728996">"‏إدخال رمز PUK"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_ENTRY" msgid="2974411408893410289">"‏رقم التعريف الشخصي لإلغاء قفل RUIM network1"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_ENTRY" msgid="687618528751880721">"‏رقم التعريف الشخصي لإلغاء قفل RUIM network2"</string>
+    <string name="PERSOSUBSTATE_RUIM_HRPD_ENTRY" msgid="6810596579655575381">"‏رقم التعريف الشخصي لإلغاء قفل بطاقة RUIM لبيانات الحزمة ذات المعدل العالي"</string>
+    <string name="PERSOSUBSTATE_RUIM_CORPORATE_ENTRY" msgid="2715929642540980259">"‏رقم التعريف الشخصي لإلغاء قفل بطاقة RUIM للشركات"</string>
+    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_ENTRY" msgid="8557791623303951590">"‏رقم التعريف الشخصي لإلغاء قفل مقدم خدمة بطاقة RUIM"</string>
+    <string name="PERSOSUBSTATE_RUIM_RUIM_ENTRY" msgid="7382468767274580323">"‏رقم التعريف الشخصي لإلغاء قفل بطاقة RUIM"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_PUK_ENTRY" msgid="6730880791104286987">"‏إدخال رمز PUK"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_PUK_ENTRY" msgid="6432126539782267026">"‏إدخال رمز PUK"</string>
+    <string name="PERSOSUBSTATE_RUIM_HRPD_PUK_ENTRY" msgid="1730510161529488920">"‏إدخال رمز PUK"</string>
+    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_ENTRY" msgid="3369885925003346830">"‏إدخال رمز PUK"</string>
+    <string name="PERSOSUBSTATE_RUIM_RUIM_PUK_ENTRY" msgid="9129139686191167829">"‏إدخال رمز PUK"</string>
+    <string name="PERSOSUBSTATE_RUIM_CORPORATE_PUK_ENTRY" msgid="2869929685874615358">"‏إدخال رمز PUK"</string>
+    <string name="PERSOSUBSTATE_SIM_SPN_ENTRY" msgid="1238663472392741771">"‏رقم التعريف الشخصي لإلغاء قفل SPN"</string>
+    <string name="PERSOSUBSTATE_SIM_SP_EHPLMN_ENTRY" msgid="3988705848553894358">"‏رقم التعريف الشخصي لإلغاء قفل SP Equivalent Home PLMN"</string>
+    <string name="PERSOSUBSTATE_SIM_ICCID_ENTRY" msgid="6186770686690993200">"‏رقم التعريف الشخصي لإلغاء قفل ICCID"</string>
+    <string name="PERSOSUBSTATE_SIM_IMPI_ENTRY" msgid="7043865376145617024">"‏رقم التعريف الشخصي لإلغاء قفل IMPI"</string>
+    <string name="PERSOSUBSTATE_SIM_NS_SP_ENTRY" msgid="6144227308185112176">"رقم التعريف الشخصي لإلغاء قفل مقدم خدمة المجموعة الفرعية للشبكة"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_IN_PROGRESS" msgid="4233355366318061180">"‏جارٍ طلب إلغاء قفل شبكة شريحة SIM.…"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_IN_PROGRESS" msgid="6742563947637715645">"‏جارٍ طلب إلغاء قفل المجموعة الفرعية لشبكة شريحة SIM …"</string>
+    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_IN_PROGRESS" msgid="2033399698172403560">"‏جارٍ طلب إلغاء قفل مقدم خدمة شريحة SIM…"</string>
+    <string name="PERSOSUBSTATE_SIM_CORPORATE_IN_PROGRESS" msgid="4795977251920732254">"‏جارٍ طلب إلغاء قفل شريحة SIM للشركات…"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_PUK_IN_PROGRESS" msgid="1090425878157254446">"‏جارٍ طلب إلغاء القفل باستخدام رمز PUK…"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_IN_PROGRESS" msgid="6476898876518094438">"‏جارٍ طلب إلغاء القفل باستخدام رمز PUK…"</string>
+    <string name="PERSOSUBSTATE_SIM_CORPORATE_PUK_IN_PROGRESS" msgid="6006806734293747731">"‏جارٍ طلب إلغاء القفل باستخدام رمز PUK…"</string>
+    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_IN_PROGRESS" msgid="6546680489620881893">"‏جارٍ طلب إلغاء القفل باستخدام رمز PUK…"</string>
+    <string name="PERSOSUBSTATE_SIM_SIM_PUK_IN_PROGRESS" msgid="3506845511000727015">"‏جارٍ طلب إلغاء القفل باستخدام رمز PUK…"</string>
+    <string name="PERSOSUBSTATE_SIM_SIM_IN_PROGRESS" msgid="6709169861932992750">"‏جارٍ طلب إلغاء قفل شريحة SIM…"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_IN_PROGRESS" msgid="4013870911606478520">"‏جارٍ طلب إلغاء قفل RUIM network1…"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_IN_PROGRESS" msgid="9032651188219523434">"‏جارٍ طلب إلغاء قفل RUIM network2…"</string>
+    <string name="PERSOSUBSTATE_RUIM_HRPD_IN_PROGRESS" msgid="6584576506344491207">"‏جارٍ طلب إلغاء قفل بطاقة RUIM لبيانات الحزمة ذات المعدل العالي.…"</string>
+    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_IN_PROGRESS" msgid="830981927724888114">"‏جارٍ طلب إلغاء قفل مقدم خدمة بطاقة RUIM…"</string>
+    <string name="PERSOSUBSTATE_RUIM_CORPORATE_IN_PROGRESS" msgid="7851790973098894802">"‏جارٍ طلب إلغاء قفل بطاقة RUIM للشركات…"</string>
+    <string name="PERSOSUBSTATE_SIM_SPN_IN_PROGRESS" msgid="1149560739586960121">"‏جارٍ طلب إلغاء قفل SPN…"</string>
+    <string name="PERSOSUBSTATE_SIM_SP_EHPLMN_IN_PROGRESS" msgid="5708964693522116025">"‏جارٍ طلب إلغاء قفل SP Equivalent Home PLMN…"</string>
+    <string name="PERSOSUBSTATE_SIM_ICCID_IN_PROGRESS" msgid="7288103122966483455">"‏جارٍ طلب إلغاء قفل ICCID.…"</string>
+    <string name="PERSOSUBSTATE_SIM_IMPI_IN_PROGRESS" msgid="4036752174056147753">"‏جارٍ طلب إلغاء قفل IMPI…"</string>
+    <string name="PERSOSUBSTATE_SIM_NS_SP_IN_PROGRESS" msgid="5089536274515338566">"جارٍ طلب إلغاء قفل مقدم خدمة المجموعة الفرعية للشبكة…"</string>
+    <string name="PERSOSUBSTATE_RUIM_RUIM_IN_PROGRESS" msgid="6737197986936251958">"‏جارٍ طلب إلغاء قفل بطاقة RUIM…"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_PUK_IN_PROGRESS" msgid="5658767775619998623">"‏جارٍ طلب إلغاء القفل باستخدام رمز PUK…"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_PUK_IN_PROGRESS" msgid="665978313257653727">"‏جارٍ طلب إلغاء القفل باستخدام رمز PUK…"</string>
+    <string name="PERSOSUBSTATE_RUIM_HRPD_PUK_IN_PROGRESS" msgid="3857142652251836850">"‏جارٍ طلب إلغاء القفل باستخدام رمز PUK…"</string>
+    <string name="PERSOSUBSTATE_RUIM_CORPORATE_PUK_IN_PROGRESS" msgid="2695664012344346788">"‏جارٍ طلب إلغاء القفل باستخدام رمز PUK…"</string>
+    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_IN_PROGRESS" msgid="2695678959963807782">"‏جارٍ طلب إلغاء القفل باستخدام رمز PUK…"</string>
+    <string name="PERSOSUBSTATE_RUIM_RUIM_PUK_IN_PROGRESS" msgid="1230605365926493599">"‏جارٍ طلب إلغاء القفل باستخدام رمز PUK…"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_ERROR" msgid="1924844017037151535">"‏تعذّر طلب إلغاء قفل شبكة شريحة SIM."</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ERROR" msgid="3372797822292089708">"‏تعذّر طلب إلغاء قفل المجموعة الفرعية لشبكة شريحة SIM."</string>
+    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_ERROR" msgid="1878443146720411381">"‏تعذّر طلب إلغاء قفل مقدم خدمة شريحة SIM."</string>
+    <string name="PERSOSUBSTATE_SIM_CORPORATE_ERROR" msgid="7664778312218023192">"‏تعذّر طلب إلغاء قفل شريحة SIM للشركات."</string>
+    <string name="PERSOSUBSTATE_SIM_SIM_ERROR" msgid="2472944311643350302">"‏تعذّر طلب إلغاء قفل شريحة SIM."</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_ERROR" msgid="828089694480999120">"‏تعذّر طلب إلغاء قفل RUIM Network1."</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_ERROR" msgid="17619001007092511">"‏تعذّر طلب إلغاء قفل RUIM network2."</string>
+    <string name="PERSOSUBSTATE_RUIM_HRPD_ERROR" msgid="807214229604353614">"‏تعذّر طلب إلغاء قفل بطاقة RUIM لبيانات الحزمة ذات المعدل العالي."</string>
+    <string name="PERSOSUBSTATE_RUIM_CORPORATE_ERROR" msgid="8644184447744175747">"‏تعذّر طلب إلغاء قفل بطاقة RUIM للشركات."</string>
+    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_ERROR" msgid="3801002648649640407">"‏تعذّر طلب إلغاء قفل مقدم خدمة بطاقة RUIM"</string>
+    <string name="PERSOSUBSTATE_RUIM_RUIM_ERROR" msgid="707397021218680753">"‏تعذّر طلب إلغاء قفل بطاقة RUIM."</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_PUK_ERROR" msgid="894358680773257820">"‏تعذّر إلغاء القفل باستخدام رمز PUK."</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_ERROR" msgid="352466878146726991">"‏تعذّر إلغاء القفل باستخدام رمز PUK."</string>
+    <string name="PERSOSUBSTATE_SIM_CORPORATE_PUK_ERROR" msgid="7353389721907138671">"‏تعذّر إلغاء القفل باستخدام رمز PUK."</string>
+    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_ERROR" msgid="2655263155490857920">"‏تعذّر إلغاء القفل باستخدام رمز PUK."</string>
+    <string name="PERSOSUBSTATE_SIM_SIM_PUK_ERROR" msgid="6903740900892931310">"‏تعذّر إلغاء القفل باستخدام رمز PUK."</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_PUK_ERROR" msgid="5165901670447518687">"‏تعذّر إلغاء القفل باستخدام رمز PUK."</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_PUK_ERROR" msgid="2856763216589267623">"‏تعذّر إلغاء القفل باستخدام رمز PUK."</string>
+    <string name="PERSOSUBSTATE_RUIM_HRPD_PUK_ERROR" msgid="817542684437829139">"‏تعذّر إلغاء القفل باستخدام رمز PUK."</string>
+    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_ERROR" msgid="5178635064113393143">"‏تعذّر إلغاء القفل باستخدام رمز PUK."</string>
+    <string name="PERSOSUBSTATE_RUIM_RUIM_PUK_ERROR" msgid="5391587926974531008">"‏تعذّر إلغاء القفل باستخدام رمز PUK."</string>
+    <string name="PERSOSUBSTATE_RUIM_CORPORATE_PUK_ERROR" msgid="4895494864493315868">"‏تعذّر إلغاء القفل باستخدام رمز PUK."</string>
+    <string name="PERSOSUBSTATE_SIM_SPN_ERROR" msgid="9017576601595353649">"‏تعذّر طلب إلغاء قفل SPN."</string>
+    <string name="PERSOSUBSTATE_SIM_SP_EHPLMN_ERROR" msgid="1116993930995545742">"‏تعذّر طلب إلغاء قفل SP Equivalent Home PLMN."</string>
+    <string name="PERSOSUBSTATE_SIM_ICCID_ERROR" msgid="7559167306794441462">"‏تعذّر طلب إلغاء قفل ICCID."</string>
+    <string name="PERSOSUBSTATE_SIM_IMPI_ERROR" msgid="2782926139511136588">"‏تعذّر طلب إلغاء قفل IMPI."</string>
+    <string name="PERSOSUBSTATE_SIM_NS_SP_ERROR" msgid="1890493954453456758">"تعذّر طلب إلغاء قفل مقدم خدمة المجموعة الفرعية للشبكة."</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUCCESS" msgid="4886243367747126325">"‏تم إلغاء قفل شبكة شريحة SIM."</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_SUCCESS" msgid="4053809277733513987">"‏تم إلغاء قفل المجموعة الفرعية لشبكة شريحة SIM."</string>
+    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_SUCCESS" msgid="8249342930499801740">"‏تم إلغاء قفل مقدم خدمة شريحة SIM."</string>
+    <string name="PERSOSUBSTATE_SIM_CORPORATE_SUCCESS" msgid="2339794542560381270">"‏تم إلغاء قفل شريحة SIM للشركات."</string>
+    <string name="PERSOSUBSTATE_SIM_SIM_SUCCESS" msgid="6975608174152828954">"‏تم إلغاء قفل شريحة SIM."</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_SUCCESS" msgid="2846699261330463192">"‏تم إلغاء قفل RUIM Network1."</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_SUCCESS" msgid="5335414726057102801">"‏تم إلغاء قفل RUIM network2."</string>
+    <string name="PERSOSUBSTATE_RUIM_HRPD_SUCCESS" msgid="8868100318474971969">"‏تم إلغاء قفل بطاقة RUIM لبيانات الحزمة ذات المعدل العالي."</string>
+    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_SUCCESS" msgid="6020936629725666932">"‏تم إلغاء قفل مقدم خدمة بطاقة RUIM."</string>
+    <string name="PERSOSUBSTATE_RUIM_CORPORATE_SUCCESS" msgid="6944873647584595489">"‏تم إلغاء قفل بطاقة RUIM للشركات بنجاح."</string>
+    <string name="PERSOSUBSTATE_RUIM_RUIM_SUCCESS" msgid="2526483514124121988">"‏تم إلغاء قفل بطاقة RUIM."</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_PUK_SUCCESS" msgid="7662200333621664621">"‏تم إلغاء القفل باستخدام رمز PUK بنجاح."</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_SUCCESS" msgid="2861223407953766632">"‏تم إلغاء القفل باستخدام رمز PUK بنجاح."</string>
+    <string name="PERSOSUBSTATE_SIM_CORPORATE_PUK_SUCCESS" msgid="5345648571175243272">"‏تم إلغاء القفل باستخدام رمز PUK بنجاح."</string>
+    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_SUCCESS" msgid="3725278343103422466">"‏تم إلغاء القفل باستخدام رمز PUK بنجاح."</string>
+    <string name="PERSOSUBSTATE_SIM_SIM_PUK_SUCCESS" msgid="6998502547560297983">"‏تم إلغاء القفل باستخدام رمز PUK بنجاح."</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_PUK_SUCCESS" msgid="8555433771162560361">"‏تم إلغاء القفل باستخدام رمز PUK بنجاح."</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_PUK_SUCCESS" msgid="3555767296933606232">"‏تم إلغاء القفل باستخدام رمز PUK بنجاح."</string>
+    <string name="PERSOSUBSTATE_RUIM_HRPD_PUK_SUCCESS" msgid="6778051818199974237">"‏تم إلغاء القفل باستخدام رمز PUK بنجاح."</string>
+    <string name="PERSOSUBSTATE_RUIM_CORPORATE_PUK_SUCCESS" msgid="4080108758498911429">"‏تم إلغاء القفل باستخدام رمز PUK بنجاح."</string>
+    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_SUCCESS" msgid="7873675303000794343">"‏تم إلغاء القفل باستخدام رمز PUK بنجاح."</string>
+    <string name="PERSOSUBSTATE_RUIM_RUIM_PUK_SUCCESS" msgid="1763198215069819523">"‏تم إلغاء القفل باستخدام رمز PUK بنجاح."</string>
+    <string name="PERSOSUBSTATE_SIM_SPN_SUCCESS" msgid="2053891977727320532">"‏تم إلغاء قفل SPN."</string>
+    <string name="PERSOSUBSTATE_SIM_SP_EHPLMN_SUCCESS" msgid="8146602361895007345">"‏تم إلغاء قفل SP Equivalent Home PLMN."</string>
+    <string name="PERSOSUBSTATE_SIM_ICCID_SUCCESS" msgid="8058678548991999545">"‏تم إلغاء قفل ICCID."</string>
+    <string name="PERSOSUBSTATE_SIM_IMPI_SUCCESS" msgid="2545608067978550571">"‏تم إلغاء قفل IMPI."</string>
+    <string name="PERSOSUBSTATE_SIM_NS_SP_SUCCESS" msgid="4352382949744625007">"تم إلغاء قفل مقدم خدمة المجموعة الفرعية للشبكة."</string>
+    <string name="config_pdp_reject_dialog_title" msgid="4072057179246785727"></string>
+    <string name="config_pdp_reject_user_authentication_failed" msgid="4531693033885744689"></string>
+    <string name="config_pdp_reject_service_not_subscribed" msgid="8190338397128671588"></string>
+    <string name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed" msgid="6024904218067254186"></string>
 </resources>
