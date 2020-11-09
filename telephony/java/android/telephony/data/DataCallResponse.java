@@ -110,10 +110,10 @@ public final class DataCallResponse implements Parcelable {
     public static final int HANDOVER_FAILURE_MODE_NO_FALLBACK_RETRY_SETUP_NORMAL = 3;
 
     /**
-     * Indicates that data retry interval is not specified. Platform can determine when to
+     * Indicates that data retry duration is not specified. Platform can determine when to
      * perform data setup appropriately.
      */
-    public static final int RETRY_INTERVAL_UNDEFINED = -1;
+    public static final int RETRY_DURATION_UNDEFINED = -1;
 
     private final @DataFailureCause int mCause;
     private final long mSuggestedRetryTime;
@@ -236,12 +236,12 @@ public final class DataCallResponse implements Parcelable {
     /**
      * @return The suggested data retry time in milliseconds.
      *
-     * @deprecated Use {@link #getRetryIntervalMillis()} instead.
+     * @deprecated Use {@link #getRetryDurationMillis()} instead.
      */
     @Deprecated
     public int getSuggestedRetryTime() {
         // To match the pre-deprecated getSuggestedRetryTime() behavior.
-        if (mSuggestedRetryTime == RETRY_INTERVAL_UNDEFINED) {
+        if (mSuggestedRetryTime == RETRY_DURATION_UNDEFINED) {
             return 0;
         } else if (mSuggestedRetryTime > Integer.MAX_VALUE) {
             return Integer.MAX_VALUE;
@@ -250,11 +250,11 @@ public final class DataCallResponse implements Parcelable {
     }
 
     /**
-     * @return The network suggested data retry interval in milliseconds. {@code Long.MAX_VALUE}
-     * indicates data retry should not occur. {@link #RETRY_INTERVAL_UNDEFINED} indicates network
-     * did not suggest any retry interval.
+     * @return The network suggested data retry duration in milliseconds. {@code Long.MAX_VALUE}
+     * indicates data retry should not occur. {@link #RETRY_DURATION_UNDEFINED} indicates network
+     * did not suggest any retry duration.
      */
-    public long getRetryIntervalMillis() {
+    public long getRetryDurationMillis() {
         return mSuggestedRetryTime;
     }
 
@@ -472,7 +472,7 @@ public final class DataCallResponse implements Parcelable {
     public static final class Builder {
         private @DataFailureCause int mCause;
 
-        private long mSuggestedRetryTime = RETRY_INTERVAL_UNDEFINED;
+        private long mSuggestedRetryTime = RETRY_DURATION_UNDEFINED;
 
         private int mId;
 
@@ -521,7 +521,7 @@ public final class DataCallResponse implements Parcelable {
          * @param suggestedRetryTime The suggested data retry time in milliseconds.
          * @return The same instance of the builder.
          *
-         * @deprecated Use {@link #setRetryIntervalMillis(long)} instead.
+         * @deprecated Use {@link #setRetryDurationMillis(long)} instead.
          */
         @Deprecated
         public @NonNull Builder setSuggestedRetryTime(int suggestedRetryTime) {
@@ -530,13 +530,13 @@ public final class DataCallResponse implements Parcelable {
         }
 
         /**
-         * Set the network suggested data retry interval.
+         * Set the network suggested data retry duration.
          *
-         * @param retryIntervalMillis The suggested data retry interval in milliseconds.
+         * @param retryDurationMillis The suggested data retry duration in milliseconds.
          * @return The same instance of the builder.
          */
-        public @NonNull Builder setRetryIntervalMillis(long retryIntervalMillis) {
-            mSuggestedRetryTime = retryIntervalMillis;
+        public @NonNull Builder setRetryDurationMillis(long retryDurationMillis) {
+            mSuggestedRetryTime = retryDurationMillis;
             return this;
         }
 
