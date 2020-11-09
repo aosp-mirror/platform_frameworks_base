@@ -10784,7 +10784,7 @@ public class PackageManagerService extends IPackageManager.Stub
         } else {
             final int userId = user == null ? 0 : user.getIdentifier();
             // Modify state for the given package setting
-            commitPackageSettings(pkg, pkgSetting, user, scanFlags,
+            commitPackageSettings(pkg, oldPkg, pkgSetting, user, scanFlags,
                     (policyFlags & PackageParser.PARSE_CHATTY) != 0 /*chatty*/);
             if (pkgSetting.getInstantApp(userId)) {
                 mInstantAppRegistry.addInstantAppLPw(userId, pkgSetting.appId);
@@ -11147,10 +11147,73 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     /**
+     * If permissions are upgraded to runtime, or their owner changes to the system, then any
+     * granted permissions must be revoked.
+     *
+     * @param permissionsToRevoke A list of permission names to revoke
+     * @param allPackageNames All package names
+     */
+    private void revokeRuntimePermissionsIfPermissionDefinitionChanged(
+            @NonNull List<String> permissionsToRevoke,
+            @NonNull ArrayList<String> allPackageNames) {
+
+        final int[] userIds = UserManagerService.getInstance().getUserIds();
+        final int numPermissions = permissionsToRevoke.size();
+        final int numUserIds = userIds.length;
+        final int numPackages = allPackageNames.size();
+        final int callingUid = Binder.getCallingUid();
+
+        for (int permNum = 0; permNum < numPermissions; permNum++) {
+            String permName = permissionsToRevoke.get(permNum);
+
+            BasePermission bp = mSettings.mPermissions.get(permName);
+            if (bp == null || !bp.isRuntime()) {
+                continue;
+            }
+            for (int userIdNum = 0; userIdNum < numUserIds; userIdNum++) {
+                final int userId = userIds[userIdNum];
+                for (int packageNum = 0; packageNum < numPackages; packageNum++) {
+                    final String packageName = allPackageNames.get(packageNum);
+                    final int uid = getPackageUid(packageName, 0, userId);
+                    if (uid < Process.FIRST_APPLICATION_UID) {
+                        // do not revoke from system apps
+                        continue;
+                    }
+                    final int permissionState = checkPermission(permName, packageName,
+                            userId);
+                    final int flags = getPermissionFlags(permName, packageName, userId);
+                    final int flagMask = FLAG_PERMISSION_SYSTEM_FIXED
+                            | FLAG_PERMISSION_POLICY_FIXED
+                            | FLAG_PERMISSION_GRANTED_BY_DEFAULT;
+                    if (permissionState == PackageManager.PERMISSION_GRANTED
+                            && (flags & flagMask) == 0) {
+                        EventLog.writeEvent(0x534e4554, "154505240", uid,
+                                "Revoking permission " + permName + " from package "
+                                        + packageName + " due to definition change");
+                        EventLog.writeEvent(0x534e4554, "168319670", uid,
+                                "Revoking permission " + permName + " from package "
+                                        + packageName + " due to definition change");
+                        Slog.e(TAG, "Revoking permission " + permName + " from package "
+                                + packageName + " due to definition change");
+                        try {
+                            revokeRuntimePermission(packageName, permName, userId, false);
+                        } catch (Exception e) {
+                            Slog.e(TAG, "Could not revoke " + permName + " from "
+                                    + packageName, e);
+                        }
+                    }
+                }
+            }
+            bp.setPermissionDefinitionChanged(false);
+        }
+    }
+
+    /**
      * Adds a scanned package to the system. When this method is finished, the package will
      * be available for query, resolution, etc...
      */
-    private void commitPackageSettings(PackageParser.Package pkg, PackageSetting pkgSetting,
+    private void commitPackageSettings(PackageParser.Package pkg, PackageParser.Package oldPkg,
+            PackageSetting pkgSetting,
             UserHandle user, int scanFlags, boolean chatty) throws PackageManagerException {
         final String pkgName = pkg.packageName;
         if (mCustomResolverComponentName != null &&
@@ -11482,6 +11545,10 @@ public class PackageManagerService extends IPackageManager.Stub
                 if (DEBUG_PACKAGE_SCANNING) Log.d(TAG, "  Permission Groups: " + r);
             }
 
+            // If a permission has had its defining app changed, or it has had its protection
+            // upgraded, we need to revoke apps that hold it
+            final List<String> permissionsWithChangedDefinition = new ArrayList<String>();
+
             N = pkg.permissions.size();
             r = null;
             for (i=0; i<N; i++) {
@@ -11517,6 +11584,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 BasePermission bp = permissionMap.get(p.info.name);
 
                 // Allow system apps to redefine non-system permissions
+                boolean ownerChanged = false;
                 if (bp != null && !Objects.equals(bp.sourcePackage, p.info.packageName)) {
                     final boolean currentOwnerIsSystem = (bp.perm != null
                             && isSystemApp(bp.perm.owner));
@@ -11532,6 +11600,7 @@ public class PackageManagerService extends IPackageManager.Stub
                             String msg = "New decl " + p.owner + " of permission  "
                                     + p.info.name + " is system; overriding " + bp.sourcePackage;
                             reportSettingsProblem(Log.WARN, msg);
+                            ownerChanged = true;
                             bp = null;
                         }
                     }
@@ -11543,6 +11612,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     permissionMap.put(p.info.name, bp);
                 }
 
+                boolean wasNonRuntime = !bp.isRuntime();
                 if (bp.perm == null) {
                     if (bp.sourcePackage == null
                             || bp.sourcePackage.equals(p.info.packageName)) {
@@ -11585,8 +11655,15 @@ public class PackageManagerService extends IPackageManager.Stub
                 if (bp.perm == p) {
                     bp.protectionLevel = p.info.protectionLevel;
                 }
-            }
 
+                if (bp.isRuntime() && (ownerChanged || wasNonRuntime)) {
+                    // If this is a runtime permission and the owner has changed, or this was a normal
+                    // permission, then permission state should be cleaned up
+                    bp.setPermissionDefinitionChanged(true);
+
+                    permissionsWithChangedDefinition.add(p.info.name);
+                }
+            }
             if (r != null) {
                 if (DEBUG_PACKAGE_SCANNING) Log.d(TAG, "  Permissions: " + r);
             }
@@ -11626,6 +11703,28 @@ public class PackageManagerService extends IPackageManager.Stub
                 for (i=0; i<N; i++) {
                     mProtectedBroadcasts.add(pkg.protectedBroadcasts.get(i));
                 }
+            }
+
+            boolean hasOldPkg = oldPkg != null;
+            boolean hasPermissionDefinitionChanges = !permissionsWithChangedDefinition.isEmpty();
+            if (hasOldPkg || hasPermissionDefinitionChanges) {
+                // We need to call revokeRuntimePermissionsIfPermissionDefinitionChanged async
+                // as permission
+                // revoke callbacks from this method might need to kill apps which need the
+                // mPackages lock on a different thread. This would dead lock.
+                //
+                // Hence create a copy of all package names and pass it into
+                // revokeRuntimePermissionsIfGroupChanged. Only for those permissions might get
+                // revoked. If a new package is added before the async code runs the permission
+                // won't be granted yet, hence new packages are no problem.
+                final ArrayList<String> allPackageNames = new ArrayList<>(mPackages.keySet());
+
+                AsyncTask.execute(() -> {
+                    if (hasPermissionDefinitionChanges) {
+                        revokeRuntimePermissionsIfPermissionDefinitionChanged(
+                                permissionsWithChangedDefinition, allPackageNames);
+                    }
+                });
             }
         }
 
