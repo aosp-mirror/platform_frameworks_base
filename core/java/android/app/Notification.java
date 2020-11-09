@@ -8256,8 +8256,6 @@ public class Notification implements Parcelable
                             mBuilder.processTextSpans(mBuilder.processLegacyText(str)));
                     mBuilder.setTextViewColorSecondary(contentView, rowIds[i], p);
                     contentView.setViewPadding(rowIds[i], 0, topPadding, 0, 0);
-                    handleInboxImageMargin(contentView, rowIds[i], first,
-                            result.getHeadingFullMarginEnd());
                     if (first) {
                         onlyViewId = rowIds[i];
                     } else {
@@ -8302,20 +8300,6 @@ public class Notification implements Parcelable
                 }
             }
             return false;
-        }
-
-        private void handleInboxImageMargin(RemoteViews contentView, int id, boolean first,
-                int marginEndValue) {
-            int endMargin = 0;
-            if (first) {
-                final int max = mBuilder.mN.extras.getInt(EXTRA_PROGRESS_MAX, 0);
-                final boolean ind = mBuilder.mN.extras.getBoolean(EXTRA_PROGRESS_INDETERMINATE);
-                boolean hasProgress = max != 0 || ind;
-                if (!hasProgress) {
-                    endMargin = marginEndValue;
-                }
-            }
-            contentView.setViewLayoutMarginEnd(id, endMargin);
         }
     }
 
