@@ -11677,7 +11677,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     permissionMap.put(p.info.name, bp);
                 }
 
-                boolean wasNormal = bp.type == BasePermission.TYPE_NORMAL;
+                boolean wasNonRuntime = !bp.isRuntime();
                 if (bp.perm == null) {
                     if (bp.sourcePackage == null
                             || bp.sourcePackage.equals(p.info.packageName)) {
@@ -11721,7 +11721,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     bp.protectionLevel = p.info.protectionLevel;
                 }
 
-                if (bp.isRuntime() && (ownerChanged || wasNormal)) {
+                if (bp.isRuntime() && (ownerChanged || wasNonRuntime)) {
                     // If this is a runtime permission and the owner has changed, or this was a normal
                     // permission, then permission state should be cleaned up
                     bp.setPermissionDefinitionChanged(true);
