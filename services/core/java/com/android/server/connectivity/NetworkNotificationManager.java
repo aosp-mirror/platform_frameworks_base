@@ -79,7 +79,6 @@ public class NetworkNotificationManager {
     // server.
     public static final String NOTIFICATION_CHANNEL_NETWORK_STATUS = "NETWORK_STATUS";
     public static final String NOTIFICATION_CHANNEL_NETWORK_ALERTS = "NETWORK_ALERTS";
-    public static final String NOTIFICATION_CHANNEL_VPN = "VPN";
 
     // The context is for the current user (system server)
     private final Context mContext;

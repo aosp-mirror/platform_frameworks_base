@@ -18,9 +18,9 @@ package com.android.server.net;
 
 import static android.net.ConnectivityManager.TYPE_NONE;
 import static android.net.NetworkCapabilities.TRANSPORT_VPN;
+import static android.net.VpnManager.NOTIFICATION_CHANNEL_VPN;
 import static android.provider.Settings.ACTION_VPN_SETTINGS;
 
-import static com.android.server.connectivity.NetworkNotificationManager.NOTIFICATION_CHANNEL_VPN;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
