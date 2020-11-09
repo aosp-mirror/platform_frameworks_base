@@ -56,6 +56,9 @@ abstract class BaseAppHelper(
             hasSystemFeature(FEATURE_LEANBACK) || hasSystemFeature(FEATURE_LEANBACK_ONLY)
         }
 
+    val defaultWindowName: String
+        get() = launcherActivityComponent.className
+
     val label: String
         get() = context.packageManager.run {
             getApplicationLabel(getApplicationInfo(packageName, 0)).toString()
@@ -74,7 +77,9 @@ abstract class BaseAppHelper(
         return uiDevice.wait(Until.gone(appSelector), APP_CLOSE_WAIT_TIME_MS)
     }
 
-    fun forceStop() = activityManager?.forceStopPackage(packageName)
+    fun forceStop() {
+        activityManager?.forceStopPackage(packageName)
+    }
 
     override fun getOpenAppIntent(): Intent {
         val intent = Intent()

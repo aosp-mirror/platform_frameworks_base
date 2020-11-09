@@ -72,6 +72,16 @@ fun LayersAssertion.noUncoveredRegions(
 }
 
 @JvmOverloads
+fun LayersAssertion.statusBarLayerIsAlwaysVisible(
+    bugId: Int = 0,
+    enabled: Boolean = bugId == 0
+) {
+    all("statusBarLayerIsAlwaysVisible", bugId, enabled) {
+        this.showsLayer(FlickerTestBase.STATUS_BAR_WINDOW_TITLE)
+    }
+}
+
+@JvmOverloads
 fun LayersAssertion.navBarLayerIsAlwaysVisible(
     bugId: Int = 0,
     enabled: Boolean = bugId == 0
@@ -82,12 +92,22 @@ fun LayersAssertion.navBarLayerIsAlwaysVisible(
 }
 
 @JvmOverloads
-fun LayersAssertion.statusBarLayerIsAlwaysVisible(
+fun LayersAssertion.dockedStackDividerIsVisible(
     bugId: Int = 0,
     enabled: Boolean = bugId == 0
 ) {
-    all("statusBarLayerIsAlwaysVisible", bugId, enabled) {
-        this.showsLayer(FlickerTestBase.STATUS_BAR_WINDOW_TITLE)
+    end("dockedStackDividerIsVisible", bugId, enabled) {
+        this.showsLayer(FlickerTestBase.DOCKED_STACK_DIVIDER)
+    }
+}
+
+@JvmOverloads
+fun LayersAssertion.dockedStackDividerIsInvisible(
+    bugId: Int = 0,
+    enabled: Boolean = bugId == 0
+) {
+    end("dockedStackDividerIsInvisible", bugId, enabled) {
+        this.hasNotLayer(FlickerTestBase.DOCKED_STACK_DIVIDER)
     }
 }
 
