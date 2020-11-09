@@ -435,6 +435,7 @@ public class WorkSource implements Parcelable {
                 for (WorkChain wc : other.mChains) {
                     if (!mChains.contains(wc)) {
                         mChains.add(new WorkChain(wc));
+                        chainAdded = true;
                     }
                 }
             }
