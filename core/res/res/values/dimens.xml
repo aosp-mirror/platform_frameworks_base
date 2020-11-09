@@ -705,6 +705,8 @@
     <dimen name="notification_media_image_max_width">280dp</dimen>
     <!-- The size of the right icon -->
     <dimen name="notification_right_icon_size">52dp</dimen>
+    <!-- The top and bottom margin of the right icon in the normal notification states -->
+    <dimen name="notification_right_icon_headerless_margin">12dp</dimen>
     <!-- The top margin of the right icon in the "big" notification states -->
     <dimen name="notification_right_icon_big_margin_top">16dp</dimen>
     <!-- The alpha of a disabled notification button -->
