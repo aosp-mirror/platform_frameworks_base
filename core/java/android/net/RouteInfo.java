@@ -232,7 +232,7 @@ public final class RouteInfo implements Parcelable {
      *
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public RouteInfo(@Nullable IpPrefix destination, @Nullable InetAddress gateway,
             @Nullable String iface) {
         this(destination, gateway, iface, RTN_UNICAST);
@@ -501,7 +501,7 @@ public final class RouteInfo implements Parcelable {
      *
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     @Nullable
     public static RouteInfo selectBestRoute(Collection<RouteInfo> routes, InetAddress dest) {
         return NetUtils.selectBestRoute(routes, dest);

@@ -142,7 +142,7 @@ public abstract class FileObserver {
             stopWatching(m_fd, descriptors);
         }
 
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public void onEvent(int wfd, @NotifyEventType int mask, String path) {
             // look up our observer, fixing up the map if necessary...
             FileObserver observer = null;

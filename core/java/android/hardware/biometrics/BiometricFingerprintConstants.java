@@ -20,6 +20,7 @@ import android.app.KeyguardManager;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.hardware.biometrics.BiometricManager.Authenticators;
 import android.hardware.fingerprint.FingerprintManager;
+import android.os.Build;
 
 /**
  * Interface containing all of the fingerprint-specific constants.
@@ -142,7 +143,7 @@ public interface BiometricFingerprintConstants {
     /**
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     int FINGERPRINT_ERROR_VENDOR_BASE = 1000;
 
     //
