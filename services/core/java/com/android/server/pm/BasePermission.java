@@ -35,6 +35,8 @@ final class BasePermission {
 
     final int type;
 
+    private boolean mPermissionDefinitionChanged;
+
     int protectionLevel;
 
     PackageParser.Permission perm;
@@ -67,9 +69,17 @@ final class BasePermission {
                 + "}";
     }
 
+    public boolean isPermissionDefinitionChanged() {
+        return mPermissionDefinitionChanged;
+    }
+
     public void setGids(int[] gids, boolean perUser) {
         this.gids = gids;
         this.perUser = perUser;
+    }
+
+    public void setPermissionDefinitionChanged(boolean shouldOverride) {
+        mPermissionDefinitionChanged = shouldOverride;
     }
 
     public int[] computeGids(int userId) {
