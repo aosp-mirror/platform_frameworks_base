@@ -16,10 +16,16 @@
 
 package com.android.server.biometrics;
 
+import static android.Manifest.permission.USE_BIOMETRIC_INTERNAL;
+
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.UserHandle;
 import android.provider.Settings;
+
+import com.android.internal.R;
 
 public class Utils {
     public static boolean isDebugEnabled(Context context, int targetUserId) {
@@ -37,5 +43,16 @@ public class Utils {
             return false;
         }
         return true;
+    }
+
+    static boolean isKeyguard(Context context, String clientPackage) {
+        final boolean hasPermission = context.checkCallingOrSelfPermission(USE_BIOMETRIC_INTERNAL)
+                == PackageManager.PERMISSION_GRANTED;
+
+        final ComponentName keyguardComponent = ComponentName.unflattenFromString(
+                context.getResources().getString(R.string.config_keyguardComponent));
+        final String keyguardPackage = keyguardComponent != null
+                ? keyguardComponent.getPackageName() : null;
+        return hasPermission && keyguardPackage != null && keyguardPackage.equals(clientPackage);
     }
 }
