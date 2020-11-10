@@ -27,6 +27,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
 
+import com.android.modules.utils.build.SdkLevel;
 import com.android.net.module.util.Inet4AddressUtils;
 
 import java.net.Inet4Address;
@@ -167,6 +168,11 @@ public class WifiInfo implements Parcelable {
      * Whether the network is oem private or not.
      */
     private boolean mOemPrivate;
+
+    /**
+     * Whether the network is a carrier merged network.
+     */
+    private boolean mCarrierMerged;
 
     /**
      * OSU (Online Sign Up) AP for Passpoint R2.
@@ -335,6 +341,7 @@ public class WifiInfo implements Parcelable {
         setTrusted(false);
         setOemPaid(false);
         setOemPrivate(false);
+        setCarrierMerged(false);
         setOsuAp(false);
         setRequestingPackageName(null);
         setFQDN(null);
@@ -373,6 +380,7 @@ public class WifiInfo implements Parcelable {
             mTrusted = source.mTrusted;
             mOemPaid = source.mOemPaid;
             mOemPrivate = source.mOemPrivate;
+            mCarrierMerged = source.mCarrierMerged;
             mRequestingPackageName =
                     source.mRequestingPackageName;
             mOsuAp = source.mOsuAp;
@@ -753,6 +761,9 @@ public class WifiInfo implements Parcelable {
      */
     @SystemApi
     public boolean isOemPaid() {
+        if (!SdkLevel.isAtLeastS()) {
+            throw new UnsupportedOperationException();
+        }
         return mOemPaid;
     }
 
@@ -768,8 +779,32 @@ public class WifiInfo implements Parcelable {
      */
     @SystemApi
     public boolean isOemPrivate() {
+        if (!SdkLevel.isAtLeastS()) {
+            throw new UnsupportedOperationException();
+        }
         return mOemPrivate;
     }
+
+    /**
+     * {@hide}
+     */
+    public void setCarrierMerged(boolean carrierMerged) {
+        mCarrierMerged = carrierMerged;
+    }
+
+    /**
+     * Returns true if the current Wifi network is a carrier merged network, false otherwise.
+     * @see WifiNetworkSuggestion.Builder#setCarrierMerged(boolean).
+     * {@hide}
+     */
+    @SystemApi
+    public boolean isCarrierMerged() {
+        if (!SdkLevel.isAtLeastS()) {
+            throw new UnsupportedOperationException();
+        }
+        return mCarrierMerged;
+    }
+
 
     /** {@hide} */
     public void setOsuAp(boolean osuAp) {
@@ -1010,6 +1045,7 @@ public class WifiInfo implements Parcelable {
         dest.writeInt(mTrusted ? 1 : 0);
         dest.writeInt(mOemPaid ? 1 : 0);
         dest.writeInt(mOemPrivate ? 1 : 0);
+        dest.writeInt(mCarrierMerged ? 1 : 0);
         dest.writeInt(score);
         dest.writeLong(txSuccess);
         dest.writeDouble(mSuccessfulTxPacketsPerSecond);
@@ -1057,6 +1093,7 @@ public class WifiInfo implements Parcelable {
                 info.mTrusted = in.readInt() != 0;
                 info.mOemPaid = in.readInt() != 0;
                 info.mOemPrivate = in.readInt() != 0;
+                info.mCarrierMerged = in.readInt() != 0;
                 info.score = in.readInt();
                 info.txSuccess = in.readLong();
                 info.mSuccessfulTxPacketsPerSecond = in.readDouble();

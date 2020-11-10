@@ -64,6 +64,7 @@ public class WifiInfoTest {
         writeWifiInfo.setTrusted(true);
         writeWifiInfo.setOemPaid(true);
         writeWifiInfo.setOemPrivate(true);
+        writeWifiInfo.setCarrierMerged(true);
         writeWifiInfo.setOsuAp(true);
         writeWifiInfo.setFQDN(TEST_FQDN);
         writeWifiInfo.setProviderFriendlyName(TEST_PROVIDER_NAME);
@@ -86,6 +87,7 @@ public class WifiInfoTest {
         assertTrue(readWifiInfo.isTrusted());
         assertTrue(readWifiInfo.isOemPaid());
         assertTrue(readWifiInfo.isOemPrivate());
+        assertTrue(readWifiInfo.isCarrierMerged());
         assertTrue(readWifiInfo.isOsuAp());
         assertTrue(readWifiInfo.isPasspointAp());
         assertEquals(TEST_PACKAGE_NAME, readWifiInfo.getRequestingPackageName());
@@ -108,6 +110,7 @@ public class WifiInfoTest {
         writeWifiInfo.setTrusted(true);
         writeWifiInfo.setOemPaid(true);
         writeWifiInfo.setOemPrivate(true);
+        writeWifiInfo.setCarrierMerged(true);
         writeWifiInfo.setOsuAp(true);
         writeWifiInfo.setFQDN(TEST_FQDN);
         writeWifiInfo.setProviderFriendlyName(TEST_PROVIDER_NAME);
@@ -125,6 +128,7 @@ public class WifiInfoTest {
         assertTrue(readWifiInfo.isTrusted());
         assertTrue(readWifiInfo.isOemPaid());
         assertTrue(readWifiInfo.isOemPrivate());
+        assertTrue(readWifiInfo.isCarrierMerged());
         assertTrue(readWifiInfo.isOsuAp());
         assertTrue(readWifiInfo.isPasspointAp());
         assertEquals(TEST_PACKAGE_NAME, readWifiInfo.getRequestingPackageName());
@@ -154,6 +158,7 @@ public class WifiInfoTest {
         assertEquals(-1, wifiInfo.getNetworkId());
         assertFalse(wifiInfo.isOemPaid());
         assertFalse(wifiInfo.isOemPrivate());
+        assertFalse(wifiInfo.isCarrierMerged());
     }
 
     /**
