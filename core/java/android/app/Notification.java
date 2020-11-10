@@ -384,6 +384,7 @@ public class Notification implements Parcelable
     private static final ArraySet<Integer> STANDARD_LAYOUTS = new ArraySet<>();
     static {
         STANDARD_LAYOUTS.add(R.layout.notification_template_material_base);
+        STANDARD_LAYOUTS.add(R.layout.notification_template_material_heads_up_base);
         STANDARD_LAYOUTS.add(R.layout.notification_template_material_big_base);
         STANDARD_LAYOUTS.add(R.layout.notification_template_material_big_picture);
         STANDARD_LAYOUTS.add(R.layout.notification_template_material_big_text);
@@ -4876,7 +4877,8 @@ public class Notification implements Parcelable
 
         private RemoteViews applyStandardTemplate(int resId, StandardTemplateParams p,
                 TemplateBindResult result) {
-            p.headerless(resId == getBaseLayoutResource());
+            p.headerless(resId == getBaseLayoutResource()
+                    || resId == getHeadsUpBaseLayoutResource());
             RemoteViews contentView = new BuilderRemoteViews(mContext.getApplicationInfo(), resId);
 
             resetStandardTemplate(contentView);
@@ -5144,10 +5146,7 @@ public class Notification implements Parcelable
             if (mN.mLargeIcon == null && mN.largeIcon != null) {
                 mN.mLargeIcon = Icon.createWithBitmap(mN.largeIcon);
             }
-            // Hide the large icon in Heads Up view, because the icon is partly within header,
-            // which for HUNs will be hidden and cropped.
-            boolean showLargeIcon = mN.mLargeIcon != null && !p.hideLargeIcon
-                    && p.mViewType != StandardTemplateParams.VIEW_TYPE_HEADS_UP;
+            boolean showLargeIcon = mN.mLargeIcon != null && !p.hideLargeIcon;
             if (showLargeIcon) {
                 contentView.setViewVisibility(R.id.right_icon, View.VISIBLE);
                 contentView.setImageViewIcon(R.id.right_icon, mN.mLargeIcon);
@@ -5610,7 +5609,7 @@ public class Notification implements Parcelable
                     .viewType(StandardTemplateParams.VIEW_TYPE_HEADS_UP)
                     .fillTextsFrom(this)
                     .setMaxRemoteInputHistory(1);
-            return applyStandardTemplateWithActions(getBigBaseLayoutResource(),
+            return applyStandardTemplateWithActions(getHeadsUpBaseLayoutResource(),
                     p,
                     null /* result */);
         }
@@ -6166,6 +6165,10 @@ public class Notification implements Parcelable
         @UnsupportedAppUsage
         private int getBaseLayoutResource() {
             return R.layout.notification_template_material_base;
+        }
+
+        private int getHeadsUpBaseLayoutResource() {
+            return R.layout.notification_template_material_heads_up_base;
         }
 
         private int getBigBaseLayoutResource() {
@@ -7088,6 +7091,7 @@ public class Notification implements Parcelable
         @Override
         public RemoteViews makeHeadsUpContentView(boolean increasedHeight) {
             if (increasedHeight && mBuilder.mActions.size() > 0) {
+                // TODO(b/163626038): pass VIEW_TYPE_HEADS_UP?
                 return makeBigContentView();
             }
             return super.makeHeadsUpContentView(increasedHeight);
@@ -8657,7 +8661,7 @@ public class Notification implements Parcelable
             }
             TemplateBindResult result = new TemplateBindResult();
             RemoteViews remoteViews = mBuilder.applyStandardTemplateWithActions(
-                    mBuilder.getBigBaseLayoutResource(),
+                    mBuilder.getHeadsUpBaseLayoutResource(),
                     StandardTemplateParams.VIEW_TYPE_HEADS_UP, result);
             buildIntoRemoteViewContent(remoteViews, headsUpContentView, result, false);
             return remoteViews;

@@ -2184,6 +2184,7 @@
   <java-symbol type="layout" name="notification_material_action_list" />
   <java-symbol type="layout" name="notification_material_action_tombstone" />
   <java-symbol type="layout" name="notification_template_material_base" />
+  <java-symbol type="layout" name="notification_template_material_heads_up_base" />
   <java-symbol type="layout" name="notification_template_material_big_base" />
   <java-symbol type="layout" name="notification_template_material_big_picture" />
   <java-symbol type="layout" name="notification_template_material_inbox" />

@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.notification.row.wrapper;
 
+import static android.view.View.VISIBLE;
+
 import static com.android.systemui.statusbar.notification.row.ExpandableNotificationRow.DEFAULT_HEADER_VISIBLE_AMOUNT;
 
 import android.app.PendingIntent;
@@ -61,6 +63,7 @@ public class NotificationTemplateViewWrapper extends NotificationHeaderViewWrapp
     private ArraySet<PendingIntent> mCancelledPendingIntents = new ArraySet<>();
     private UiOffloadThread mUiOffloadThread;
     private View mRemoteInputHistory;
+    private boolean mCanHideHeader;
     private float mHeaderTranslation;
 
     protected NotificationTemplateViewWrapper(Context ctx, View view,
@@ -236,6 +239,10 @@ public class NotificationTemplateViewWrapper extends NotificationHeaderViewWrapp
         // the transformation types and we need to have our values set by then.
         resolveTemplateViews(row.getEntry().getSbn());
         super.onContentUpdated(row);
+        // With the modern templates, a large icon visually overlaps the header, so we can't
+        // simply hide the header -- just show the
+        mCanHideHeader = mNotificationHeader != null
+                && (mPicture == null || mPicture.getVisibility() != VISIBLE);
         if (row.getHeaderVisibleAmount() != DEFAULT_HEADER_VISIBLE_AMOUNT) {
             setHeaderVisibleAmount(row.getHeaderVisibleAmount());
         }
@@ -294,14 +301,14 @@ public class NotificationTemplateViewWrapper extends NotificationHeaderViewWrapp
 
     @Override
     public int getHeaderTranslation(boolean forceNoHeader) {
-        return forceNoHeader ? mFullHeaderTranslation : (int) mHeaderTranslation;
+        return forceNoHeader && mCanHideHeader ? mFullHeaderTranslation : (int) mHeaderTranslation;
     }
 
     @Override
     public void setHeaderVisibleAmount(float headerVisibleAmount) {
         super.setHeaderVisibleAmount(headerVisibleAmount);
         float headerTranslation = 0f;
-        if (mNotificationHeader != null) {
+        if (mCanHideHeader && mNotificationHeader != null) {
             mNotificationHeader.setAlpha(headerVisibleAmount);
             headerTranslation = (1.0f - headerVisibleAmount) * mFullHeaderTranslation;
         }
