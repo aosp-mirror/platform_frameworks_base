@@ -20,6 +20,8 @@
 
     <option name="test-suite-tag" value="apct" />
     <option name="test-tag" value="FrameworksWifiApiTests" />
+    <option name="config-descriptor:metadata" key="mainline-param"
+            value="com.google.android.wifi.apex" />
     <test class="com.android.tradefed.testtype.AndroidJUnitTest" >
         <option name="package" value="android.net.wifi.test" />
         <option name="runner" value="androidx.test.runner.AndroidJUnitRunner" />
