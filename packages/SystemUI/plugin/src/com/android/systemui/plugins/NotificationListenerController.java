@@ -14,6 +14,8 @@
 
 package com.android.systemui.plugins;
 
+import android.app.NotificationChannel;
+import android.os.UserHandle;
 import android.service.notification.NotificationListenerService.RankingMap;
 import android.service.notification.StatusBarNotification;
 
@@ -30,10 +32,29 @@ public interface NotificationListenerController extends Plugin {
 
     void onListenerConnected(NotificationProvider provider);
 
+    /**
+     * @return whether plugin wants to skip the default callbacks.
+     */
     default boolean onNotificationPosted(StatusBarNotification sbn, RankingMap rankingMap) {
         return false;
     }
+
+    /**
+     * @return whether plugin wants to skip the default callbacks.
+     */
     default boolean onNotificationRemoved(StatusBarNotification sbn, RankingMap rankingMap) {
+        return false;
+    }
+
+    /**
+     * Called when a notification channel is modified.
+     * @param modificationType One of {@link #NOTIFICATION_CHANNEL_OR_GROUP_ADDED},
+     *                                {@link #NOTIFICATION_CHANNEL_OR_GROUP_UPDATED},
+     *                                {@link #NOTIFICATION_CHANNEL_OR_GROUP_DELETED}.
+     * @return whether a plugin wants to skip the default callbacks.
+     */
+    default boolean onNotificationChannelModified(
+            String pkgName, UserHandle user, NotificationChannel channel, int modificationType) {
         return false;
     }
 
