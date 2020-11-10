@@ -83,9 +83,7 @@ import android.view.ViewConfiguration;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.util.DumpUtils;
 import com.android.server.SystemService;
-import com.android.server.SystemService.TargetUser;
 import com.android.server.Watchdog;
 import com.android.server.Watchdog.Monitor;
 
@@ -1883,7 +1881,7 @@ public class MediaSessionService extends SystemService implements Monitor {
 
         @Override
         public void dump(FileDescriptor fd, final PrintWriter pw, String[] args) {
-            if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
+            if (!MediaServerUtils.checkDumpPermission(mContext, TAG, pw)) return;
 
             pw.println("MEDIA SESSION SERVICE (dumpsys media_session)");
             pw.println();
