@@ -16,6 +16,7 @@
 
 package android.content.pm;
 
+import android.annotation.FloatRange;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -86,7 +87,7 @@ public class LauncherActivityInfo {
     /**
      * @return Package loading progress, range between [0, 1].
      */
-    public float getLoadingProgress() {
+    public @FloatRange(from = 0.0, to = 1.0) float getLoadingProgress() {
         return mInternal.getIncrementalStatesInfo().getProgress();
     }
 
