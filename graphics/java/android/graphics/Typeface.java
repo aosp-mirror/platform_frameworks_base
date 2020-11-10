@@ -56,6 +56,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -1209,6 +1210,36 @@ public class Typeface {
         return Arrays.binarySearch(mSupportedAxes, axis) >= 0;
     }
 
+    /**
+     * Writes Typeface instances to the ByteBuffer and returns the number of bytes written.
+     *
+     * <p>If {@code buffer} is null, this method returns the number of bytes required to serialize
+     * the typefaces, without writing anything.
+     * @hide
+     */
+    public static int writeTypefaces(
+            @Nullable ByteBuffer buffer, @NonNull List<Typeface> typefaces) {
+        long[] nativePtrs = new long[typefaces.size()];
+        for (int i = 0; i < nativePtrs.length; i++) {
+            nativePtrs[i] = typefaces.get(i).native_instance;
+        }
+        return nativeWriteTypefaces(buffer, nativePtrs);
+    }
+
+    /**
+     * Reads serialized Typeface instances from the ByteBuffer. Returns null on errors.
+     * @hide
+     */
+    public static @Nullable List<Typeface> readTypefaces(@NonNull ByteBuffer buffer) {
+        long[] nativePtrs = nativeReadTypefaces(buffer);
+        if (nativePtrs == null) return null;
+        List<Typeface> typefaces = new ArrayList<>(nativePtrs.length);
+        for (long nativePtr : nativePtrs) {
+            typefaces.add(new Typeface(nativePtr));
+        }
+        return typefaces;
+    }
+
     private static native long nativeCreateFromTypeface(long native_instance, int style);
     private static native long nativeCreateFromTypefaceWithExactStyle(
             long native_instance, int weight, boolean italic);
@@ -1234,4 +1265,9 @@ public class Typeface {
     private static native long nativeGetReleaseFunc();
 
     private static native void nativeRegisterGenericFamily(String str, long nativePtr);
+
+    private static native int nativeWriteTypefaces(
+            @Nullable ByteBuffer buffer, @NonNull long[] nativePtrs);
+
+    private static native @Nullable long[] nativeReadTypefaces(@NonNull ByteBuffer buffer);
 }
