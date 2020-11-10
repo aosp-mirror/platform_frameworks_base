@@ -19383,6 +19383,8 @@ package android.media {
     field public static final int ENCODING_MP3 = 9; // 0x9
     field public static final int ENCODING_OPUS = 20; // 0x14
     field public static final int ENCODING_PCM_16BIT = 2; // 0x2
+    field public static final int ENCODING_PCM_24BIT_PACKED = 21; // 0x15
+    field public static final int ENCODING_PCM_32BIT = 22; // 0x16
     field public static final int ENCODING_PCM_8BIT = 3; // 0x3
     field public static final int ENCODING_PCM_FLOAT = 4; // 0x4
     field public static final int SAMPLE_RATE_UNSPECIFIED = 0; // 0x0
