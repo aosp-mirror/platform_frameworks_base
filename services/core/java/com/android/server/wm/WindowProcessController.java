@@ -516,29 +516,33 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         }
     }
 
-    boolean areBackgroundActivityStartsAllowed() {
-        // allow if any activity in the caller has either started or finished very recently, and
-        // it must be started or finished after last stop app switches time.
-        final long now = SystemClock.uptimeMillis();
-        if (now - mLastActivityLaunchTime < ACTIVITY_BG_START_GRACE_PERIOD_MS
-                || now - mLastActivityFinishTime < ACTIVITY_BG_START_GRACE_PERIOD_MS) {
-            // if activity is started and finished before stop app switch time, we should not
-            // let app to be able to start background activity even it's in grace period.
-            if (mLastActivityLaunchTime > mAtm.getLastStopAppSwitchesTime()
-                    || mLastActivityFinishTime > mAtm.getLastStopAppSwitchesTime()) {
-                if (DEBUG_ACTIVITY_STARTS) {
-                    Slog.d(TAG, "[WindowProcessController(" + mPid
-                            + ")] Activity start allowed: within "
-                            + ACTIVITY_BG_START_GRACE_PERIOD_MS + "ms grace period");
+    boolean areBackgroundActivityStartsAllowed(boolean appSwitchAllowed) {
+        // If app switching is not allowed, we ignore all the start activity grace period
+        // exception so apps cannot start itself in onPause() after pressing home button.
+        if (appSwitchAllowed) {
+            // allow if any activity in the caller has either started or finished very recently, and
+            // it must be started or finished after last stop app switches time.
+            final long now = SystemClock.uptimeMillis();
+            if (now - mLastActivityLaunchTime < ACTIVITY_BG_START_GRACE_PERIOD_MS
+                    || now - mLastActivityFinishTime < ACTIVITY_BG_START_GRACE_PERIOD_MS) {
+                // if activity is started and finished before stop app switch time, we should not
+                // let app to be able to start background activity even it's in grace period.
+                if (mLastActivityLaunchTime > mAtm.getLastStopAppSwitchesTime()
+                        || mLastActivityFinishTime > mAtm.getLastStopAppSwitchesTime()) {
+                    if (DEBUG_ACTIVITY_STARTS) {
+                        Slog.d(TAG, "[WindowProcessController(" + mPid
+                                + ")] Activity start allowed: within "
+                                + ACTIVITY_BG_START_GRACE_PERIOD_MS + "ms grace period");
+                    }
+                    return true;
                 }
-                return true;
-            }
-            if (DEBUG_ACTIVITY_STARTS) {
-                Slog.d(TAG, "[WindowProcessController(" + mPid + ")] Activity start within "
-                        + ACTIVITY_BG_START_GRACE_PERIOD_MS
-                        + "ms grace period but also within stop app switch window");
-            }
+                if (DEBUG_ACTIVITY_STARTS) {
+                    Slog.d(TAG, "[WindowProcessController(" + mPid + ")] Activity start within "
+                            + ACTIVITY_BG_START_GRACE_PERIOD_MS
+                            + "ms grace period but also within stop app switch window");
+                }
 
+            }
         }
         // allow if the proc is instrumenting with background activity starts privs
         if (mInstrumentingWithBackgroundActivityStartPrivileges) {
@@ -550,7 +554,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
             return true;
         }
         // allow if the caller has an activity in any foreground task
-        if (hasActivityInVisibleTask()) {
+        if (appSwitchAllowed && hasActivityInVisibleTask()) {
             if (DEBUG_ACTIVITY_STARTS) {
                 Slog.d(TAG, "[WindowProcessController(" + mPid
                         + ")] Activity start allowed: process has activity in foreground task");
