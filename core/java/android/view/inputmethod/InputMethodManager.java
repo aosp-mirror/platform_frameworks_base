@@ -1672,10 +1672,12 @@ public final class InputMethodManager {
         checkFocus();
         synchronized (mH) {
             if (!hasServedByInputMethodLocked(view)) {
+                Log.w(TAG, "Ignoring showSoftInput() as view=" + view + " is not served.");
                 return false;
             }
 
             try {
+                Log.d(TAG, "showSoftInput() view=" + view + " flags=" + flags);
                 return mService.showSoftInput(
                         mClient, view.getWindowToken(), flags, resultReceiver);
             } catch (RemoteException e) {
