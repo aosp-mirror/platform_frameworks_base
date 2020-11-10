@@ -2214,14 +2214,15 @@ public class PackageManagerService extends IPackageManager.Stub
             // that the installer requested to be granted at install time.
             if (whitelistedRestrictedPermissions != null
                     && !whitelistedRestrictedPermissions.isEmpty()) {
-                mPermissionManager.setWhitelistedRestrictedPermissions(
-                        res.pkg, res.newUsers, whitelistedRestrictedPermissions,
-                        Process.myUid(), FLAG_PERMISSION_WHITELIST_INSTALLER);
+                mPermissionManager.setAllowlistedRestrictedPermissions(res.pkg,
+                        whitelistedRestrictedPermissions, FLAG_PERMISSION_WHITELIST_INSTALLER,
+                        res.newUsers);
             }
 
-            if (autoRevokePermissionsMode == MODE_ALLOWED || autoRevokePermissionsMode == MODE_IGNORED) {
-                mPermissionManager.setAutoRevokeWhitelisted(res.pkg.getPackageName(),
-                        autoRevokePermissionsMode == MODE_IGNORED, UserHandle.myUserId());
+            if (autoRevokePermissionsMode == MODE_ALLOWED
+                    || autoRevokePermissionsMode == MODE_IGNORED) {
+                mPermissionManager.setAutoRevokeExempted(res.pkg,
+                        autoRevokePermissionsMode == MODE_IGNORED, res.newUsers);
             }
 
             // Now that we successfully installed the package, grant runtime
@@ -2231,8 +2232,9 @@ public class PackageManagerService extends IPackageManager.Stub
             // legacy apps.
             if (grantPermissions) {
                 final int callingUid = Binder.getCallingUid();
-                mPermissionManager.grantRequestedRuntimePermissions(
-                        res.pkg, res.newUsers, grantedPermissions, callingUid);
+                mPermissionManager.grantRequestedRuntimePermissions(res.pkg,
+                        grantedPermissions != null ? Arrays.asList(grantedPermissions) : null,
+                        res.newUsers);
             }
 
             final String installerPackageName =
@@ -13546,12 +13548,15 @@ public class PackageManagerService extends IPackageManager.Stub
             }
 
             if (installed) {
-                if ((installFlags & PackageManager.INSTALL_ALL_WHITELIST_RESTRICTED_PERMISSIONS)
-                        != 0 && pkgSetting.pkg != null) {
-                    whiteListedPermissions = pkgSetting.pkg.getRequestedPermissions();
+                if (pkgSetting.pkg != null) {
+                    if ((installFlags & PackageManager.INSTALL_ALL_WHITELIST_RESTRICTED_PERMISSIONS)
+                            != 0) {
+                        whiteListedPermissions = pkgSetting.pkg.getRequestedPermissions();
+                    }
+                    mPermissionManager.setAllowlistedRestrictedPermissions(pkgSetting.pkg,
+                            whiteListedPermissions, FLAG_PERMISSION_WHITELIST_INSTALLER,
+                            new int[] { userId });
                 }
-                mPermissionManager.setWhitelistedRestrictedPermissions(packageName,
-                        whiteListedPermissions, FLAG_PERMISSION_WHITELIST_INSTALLER, userId);
 
                 if (pkgSetting.pkg != null) {
                     synchronized (mInstallLock) {
@@ -25023,14 +25028,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
         @Override
         public boolean isPermissionsReviewRequired(String packageName, int userId) {
-            synchronized (mLock) {
-                final AndroidPackage pkg = mPackages.get(packageName);
-                if (pkg == null) {
-                    return false;
-                }
-
-                return mPermissionManager.isPermissionsReviewRequired(pkg, userId);
-            }
+            return mPermissionManager.isPermissionsReviewRequired(packageName, userId);
         }
 
         @Override
