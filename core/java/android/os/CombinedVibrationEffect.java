@@ -34,13 +34,14 @@ import java.util.Objects;
  * @hide
  * @see VibrationEffect
  */
+@SuppressWarnings({"ParcelNotFinal", "ParcelCreator"}) // Parcel only extended here.
 public abstract class CombinedVibrationEffect implements Parcelable {
     private static final int PARCEL_TOKEN_MONO = 1;
     private static final int PARCEL_TOKEN_STEREO = 2;
     private static final int PARCEL_TOKEN_SEQUENTIAL = 3;
 
-    /** @hide to prevent subclassing from outside of the framework */
-    public CombinedVibrationEffect() {
+    /** Prevent subclassing from outside of the framework. */
+    CombinedVibrationEffect() {
     }
 
     /**
@@ -113,7 +114,7 @@ public abstract class CombinedVibrationEffect implements Parcelable {
          * @see VibrationEffect#createOneShot(long, int)
          */
         @NonNull
-        public SyncedCombination addVibrator(int vibratorId, VibrationEffect effect) {
+        public SyncedCombination addVibrator(int vibratorId, @NonNull VibrationEffect effect) {
             mEffects.put(vibratorId, effect);
             return this;
         }
@@ -256,11 +257,11 @@ public abstract class CombinedVibrationEffect implements Parcelable {
     public static final class Mono extends CombinedVibrationEffect {
         private final VibrationEffect mEffect;
 
-        public Mono(Parcel in) {
+        Mono(Parcel in) {
             mEffect = VibrationEffect.CREATOR.createFromParcel(in);
         }
 
-        public Mono(@NonNull VibrationEffect effect) {
+        Mono(@NonNull VibrationEffect effect) {
             mEffect = effect;
         }
 
@@ -327,7 +328,7 @@ public abstract class CombinedVibrationEffect implements Parcelable {
         /** Mapping vibrator ids to effects. */
         private final SparseArray<VibrationEffect> mEffects;
 
-        public Stereo(Parcel in) {
+        Stereo(Parcel in) {
             int size = in.readInt();
             mEffects = new SparseArray<>(size);
             for (int i = 0; i < size; i++) {
@@ -336,7 +337,7 @@ public abstract class CombinedVibrationEffect implements Parcelable {
             }
         }
 
-        public Stereo(@NonNull SparseArray<VibrationEffect> effects) {
+        Stereo(@NonNull SparseArray<VibrationEffect> effects) {
             mEffects = new SparseArray<>(effects.size());
             for (int i = 0; i < effects.size(); i++) {
                 mEffects.put(effects.keyAt(i), effects.valueAt(i));
@@ -422,7 +423,7 @@ public abstract class CombinedVibrationEffect implements Parcelable {
         private final List<CombinedVibrationEffect> mEffects;
         private final List<Integer> mDelays;
 
-        public Sequential(Parcel in) {
+        Sequential(Parcel in) {
             int size = in.readInt();
             mEffects = new ArrayList<>(size);
             mDelays = new ArrayList<>(size);
@@ -432,7 +433,7 @@ public abstract class CombinedVibrationEffect implements Parcelable {
             }
         }
 
-        public Sequential(@NonNull List<CombinedVibrationEffect> effects,
+        Sequential(@NonNull List<CombinedVibrationEffect> effects,
                 @NonNull List<Integer> delays) {
             mEffects = new ArrayList<>(effects);
             mDelays = new ArrayList<>(delays);
