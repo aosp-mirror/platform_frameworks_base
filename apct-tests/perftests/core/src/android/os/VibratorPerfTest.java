@@ -19,9 +19,9 @@ package android.os;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
 import android.content.Context;
-import android.perftests.utils.BenchmarkState;
-import android.perftests.utils.PerfStatusReporter;
 
+import androidx.benchmark.BenchmarkState;
+import androidx.benchmark.junit4.BenchmarkRule;
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.LargeTest;
 
@@ -32,7 +32,7 @@ import org.junit.Test;
 @LargeTest
 public class VibratorPerfTest {
     @Rule
-    public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
+    public final BenchmarkRule mBenchmarkRule = new BenchmarkRule();
 
     private Vibrator mVibrator;
 
@@ -44,7 +44,7 @@ public class VibratorPerfTest {
 
     @Test
     public void testEffectClick() {
-        final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             mVibrator.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK));
         }
@@ -52,7 +52,7 @@ public class VibratorPerfTest {
 
     @Test
     public void testOneShot() {
-        final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             mVibrator.vibrate(VibrationEffect.createOneShot(SECONDS.toMillis(2),
                     VibrationEffect.DEFAULT_AMPLITUDE));
@@ -61,7 +61,7 @@ public class VibratorPerfTest {
 
     @Test
     public void testWaveform() {
-        final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         long[] timings = new long[]{SECONDS.toMillis(1), SECONDS.toMillis(2), SECONDS.toMillis(1)};
         while (state.keepRunning()) {
             mVibrator.vibrate(VibrationEffect.createWaveform(timings, -1));
@@ -70,7 +70,7 @@ public class VibratorPerfTest {
 
     @Test
     public void testCompose() {
-        final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             mVibrator.vibrate(
                     VibrationEffect.startComposition()
@@ -82,7 +82,7 @@ public class VibratorPerfTest {
 
     @Test
     public void testAreEffectsSupported() {
-        final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         int[] effects = new int[]{VibrationEffect.EFFECT_CLICK, VibrationEffect.EFFECT_TICK};
         while (state.keepRunning()) {
             mVibrator.areEffectsSupported(effects);
@@ -91,7 +91,7 @@ public class VibratorPerfTest {
 
     @Test
     public void testArePrimitivesSupported() {
-        final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         int[] primitives = new int[]{VibrationEffect.Composition.PRIMITIVE_CLICK,
                 VibrationEffect.Composition.PRIMITIVE_TICK};
         while (state.keepRunning()) {

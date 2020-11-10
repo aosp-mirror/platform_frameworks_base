@@ -50,7 +50,7 @@ public class MockableLocationProviderTest {
     private ProviderListenerCapture mListener;
 
     private AbstractLocationProvider mRealProvider;
-    private MockProvider mMockProvider;
+    private MockLocationProvider mMockProvider;
 
     private MockableLocationProvider mProvider;
 
@@ -60,7 +60,7 @@ public class MockableLocationProviderTest {
         mListener = new ProviderListenerCapture(lock);
 
         mRealProvider = spy(new FakeProvider());
-        mMockProvider = spy(new MockProvider(new ProviderProperties(
+        mMockProvider = spy(new MockLocationProvider(new ProviderProperties(
                 false,
                 false,
                 false,

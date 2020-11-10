@@ -98,6 +98,8 @@ interface IActivityManager {
     void unregisterUidObserver(in IUidObserver observer);
     boolean isUidActive(int uid, String callingPackage);
     int getUidProcessState(int uid, in String callingPackage);
+    @UnsupportedAppUsage
+    int checkPermission(in String permission, int pid, int uid);
     // =============== End of transactions used on native side as well ============================
 
     // Special low-level communication with activity manager.
@@ -215,8 +217,6 @@ interface IActivityManager {
     void setProcessLimit(int max);
     @UnsupportedAppUsage
     int getProcessLimit();
-    @UnsupportedAppUsage
-    int checkPermission(in String permission, int pid, int uid);
     int checkUriPermission(in Uri uri, int pid, int uid, int mode, int userId,
             in IBinder callerToken);
     void grantUriPermission(in IApplicationThread caller, in String targetPkg, in Uri uri,

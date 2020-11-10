@@ -46,6 +46,7 @@ cc_library_shared {
         "native_window_jni.cpp",
         "net.c",
         "obb.cpp",
+        "permission_manager.cpp",
         "sensor.cpp",
         "sharedmem.cpp",
         "storage_manager.cpp",

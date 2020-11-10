@@ -16,6 +16,7 @@
 
 package android.graphics;
 
+import android.annotation.Nullable;
 import android.view.Surface;
 import android.view.SurfaceControl;
 
@@ -60,8 +61,13 @@ public final class BLASTBufferQueue {
         return nativeGetSurface(mNativeObject, true /* includeSurfaceControlHandle */);
     }
 
-    public void setNextTransaction(SurfaceControl.Transaction t) {
-        nativeSetNextTransaction(mNativeObject, t.mNativeObject);
+    /**
+     * Send the transaction to BBQ so the next frame can be added and not applied immediately.
+     * This gives the caller a chance to apply the transaction when it's ready.
+     * @param t The transaction to add the frame to. This can be null to clear the transaction.
+     */
+    public void setNextTransaction(@Nullable SurfaceControl.Transaction t) {
+        nativeSetNextTransaction(mNativeObject, t == null ? 0 : t.mNativeObject);
     }
 
     public void update(SurfaceControl sc, int width, int height) {

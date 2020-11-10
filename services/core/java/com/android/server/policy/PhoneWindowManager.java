@@ -2414,6 +2414,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             params.privateFlags |=
                     WindowManager.LayoutParams.PRIVATE_FLAG_FAKE_HARDWARE_ACCELERATED;
             params.privateFlags |= WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS;
+            // Setting as trusted overlay to let touches pass through. This is safe because this
+            // window is controlled by the system.
+            params.privateFlags |= WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY;
 
             if (!compatInfo.supportsScreen()) {
                 params.privateFlags |= WindowManager.LayoutParams.PRIVATE_FLAG_COMPATIBLE_WINDOW;

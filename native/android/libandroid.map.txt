@@ -176,6 +176,7 @@ LIBANDROID {
     AObbInfo_getPackageName;
     AObbInfo_getVersion;
     AObbScanner_getObbInfo;
+    APermissionManager_checkPermission; # introduced=31
     ASensorEventQueue_disableSensor;
     ASensorEventQueue_enableSensor;
     ASensorEventQueue_getEvents;

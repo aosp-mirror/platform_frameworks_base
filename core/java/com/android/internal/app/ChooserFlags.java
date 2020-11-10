@@ -33,7 +33,7 @@ public class ChooserFlags {
      */
     public static final boolean USE_SERVICE_TARGETS_FOR_DIRECT_TARGETS =
             DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_SYSTEMUI,
-                SystemUiDeviceConfigFlags.SHARE_USE_SERVICE_TARGETS, false);
+                SystemUiDeviceConfigFlags.SHARE_USE_SERVICE_TARGETS, true);
 
     /**
      * Whether to use {@link AppPredictionManager} to query for direct share targets (as opposed to

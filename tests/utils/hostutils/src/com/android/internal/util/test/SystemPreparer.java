@@ -16,6 +16,7 @@
 
 package com.android.internal.util.test;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import com.android.tradefed.device.DeviceNotAvailableException;
@@ -140,6 +141,24 @@ public class SystemPreparer extends ExternalResource {
         return this;
     }
 
+    /** Stages multiple APEXs within the host test jar onto the device. */
+    public SystemPreparer stageMultiplePackages(String[] resourcePaths, String[] packageNames)
+            throws DeviceNotAvailableException, IOException {
+        assertEquals(resourcePaths.length, packageNames.length);
+        final ITestDevice device = mDeviceProvider.getDevice();
+        final String[] adbCommandLine = new String[resourcePaths.length + 2];
+        adbCommandLine[0] = "install-multi-package";
+        adbCommandLine[1] = "--staged";
+        for (int i = 0; i < resourcePaths.length; i++) {
+            final File tmpFile = copyResourceToTemp(resourcePaths[i]);
+            adbCommandLine[i + 2] = tmpFile.getAbsolutePath();
+            mInstalledPackages.add(packageNames[i]);
+        }
+        final String output = device.executeAdbCommand(adbCommandLine);
+        assertTrue(output.contains("Success. Reboot device to apply staged session"));
+        return this;
+    }
+
     /** Sets the enable state of an overlay package. */
     public SystemPreparer setOverlayEnabled(String packageName, boolean enabled)
             throws DeviceNotAvailableException {
@@ -210,9 +229,27 @@ public class SystemPreparer extends ExternalResource {
         return this;
     }
 
+    private static @Nullable String getFileExtension(@Nullable String path) {
+        if (path == null) {
+            return null;
+        }
+        final int lastDot = path.lastIndexOf('.');
+        if (lastDot >= 0) {
+            return path.substring(lastDot + 1);
+        } else {
+            return null;
+        }
+    }
+
     /** Copies a file within the host test jar to a temporary file on the host machine. */
     private File copyResourceToTemp(String resourcePath) throws IOException {
-        final File tempFile = mHostTempFolder.newFile();
+        final String ext = getFileExtension(resourcePath);
+        final File tempFile;
+        if (ext != null) {
+            tempFile = File.createTempFile("junit", "." + ext, mHostTempFolder.getRoot());
+        } else {
+            tempFile = mHostTempFolder.newFile();
+        }
         final ClassLoader classLoader = getClass().getClassLoader();
         try (InputStream assetIs = classLoader.getResourceAsStream(resourcePath);
              FileOutputStream assetOs = new FileOutputStream(tempFile)) {

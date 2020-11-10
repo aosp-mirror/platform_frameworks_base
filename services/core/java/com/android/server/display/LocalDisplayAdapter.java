@@ -266,12 +266,27 @@ final class LocalDisplayAdapter extends DisplayAdapter {
             boolean modesAdded = false;
             for (int i = 0; i < configs.length; i++) {
                 SurfaceControl.DisplayConfig config = configs[i];
+                List<Float> alternativeRefreshRates = new ArrayList<>();
+                for (int j = 0; j < configs.length; j++) {
+                    SurfaceControl.DisplayConfig other = configs[j];
+                    boolean isAlternative = j != i && other.width == config.width
+                            && other.height == config.height
+                            && other.refreshRate != config.refreshRate
+                            && other.configGroup == config.configGroup;
+                    if (isAlternative) {
+                        alternativeRefreshRates.add(configs[j].refreshRate);
+                    }
+                }
+                Collections.sort(alternativeRefreshRates);
+
                 // First, check to see if we've already added a matching mode. Since not all
                 // configuration options are exposed via Display.Mode, it's possible that we have
                 // multiple DisplayConfigs that would generate the same Display.Mode.
                 boolean existingMode = false;
-                for (int j = 0; j < records.size(); j++) {
-                    if (records.get(j).hasMatchingMode(config)) {
+                for (DisplayModeRecord record : records) {
+                    if (record.hasMatchingMode(config)
+                            && refreshRatesEquals(alternativeRefreshRates,
+                                    record.mMode.getAlternativeRefreshRates())) {
                         existingMode = true;
                         break;
                     }
@@ -282,9 +297,13 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                 // If we haven't already added a mode for this configuration to the new set of
                 // supported modes then check to see if we have one in the prior set of supported
                 // modes to reuse.
-                DisplayModeRecord record = findDisplayModeRecord(config);
+                DisplayModeRecord record = findDisplayModeRecord(config, alternativeRefreshRates);
                 if (record == null) {
-                    record = new DisplayModeRecord(config);
+                    float[] alternativeRates = new float[alternativeRefreshRates.size()];
+                    for (int j = 0; j < alternativeRates.length; j++) {
+                        alternativeRates[j] = alternativeRefreshRates.get(j);
+                    }
+                    record = new DisplayModeRecord(config, alternativeRates);
                     modesAdded = true;
                 }
                 records.add(record);
@@ -495,14 +514,29 @@ final class LocalDisplayAdapter extends DisplayAdapter {
             return true;
         }
 
-        private DisplayModeRecord findDisplayModeRecord(SurfaceControl.DisplayConfig config) {
+        private DisplayModeRecord findDisplayModeRecord(SurfaceControl.DisplayConfig config,
+                List<Float> alternativeRefreshRates) {
             for (int i = 0; i < mSupportedModes.size(); i++) {
                 DisplayModeRecord record = mSupportedModes.valueAt(i);
-                if (record.hasMatchingMode(config)) {
+                if (record.hasMatchingMode(config)
+                        && refreshRatesEquals(alternativeRefreshRates,
+                                record.mMode.getAlternativeRefreshRates())) {
                     return record;
                 }
             }
             return null;
+        }
+
+        private boolean refreshRatesEquals(List<Float> list, float[] array) {
+            if (list.size() != array.length) {
+                return false;
+            }
+            for (int i = 0; i < list.size(); i++) {
+                if (Float.floatToIntBits(list.get(i)) != Float.floatToIntBits(array[i])) {
+                    return false;
+                }
+            }
+            return true;
         }
 
         @Override
@@ -1032,8 +1066,10 @@ final class LocalDisplayAdapter extends DisplayAdapter {
     private static final class DisplayModeRecord {
         public final Display.Mode mMode;
 
-        DisplayModeRecord(SurfaceControl.DisplayConfig config) {
-            mMode = createMode(config.width, config.height, config.refreshRate);
+        DisplayModeRecord(SurfaceControl.DisplayConfig config,
+                float[] alternativeRefreshRates) {
+            mMode = createMode(config.width, config.height, config.refreshRate,
+                    alternativeRefreshRates);
         }
 
         /**
