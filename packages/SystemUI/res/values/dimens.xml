@@ -635,9 +635,6 @@
     <!-- The height of a notification header -->
     <dimen name="notification_header_height">53dp</dimen>
 
-    <!-- The height of the divider between the individual notifications when the notification wants it to be increased. This is currently the case for notification groups -->
-    <dimen name="notification_divider_height_increased">6dp</dimen>
-
     <!-- The height of the gap between adjacent notification sections. -->
     <dimen name="notification_section_divider_height">@dimen/notification_side_paddings</dimen>
 
