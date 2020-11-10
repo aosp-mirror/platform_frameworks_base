@@ -23,10 +23,13 @@ import android.annotation.SystemService;
 import android.content.Context;
 import android.os.IBinder;
 import android.os.PersistableBundle;
+import android.os.RemoteException;
 import android.os.ServiceManager;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Executor;
@@ -167,7 +170,11 @@ public final class UwbManager {
      */
     @NonNull
     public PersistableBundle getSpecificationInfo() {
-        throw new UnsupportedOperationException();
+        try {
+            return mUwbAdapter.getSpecificationInfo();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -176,7 +183,11 @@ public final class UwbManager {
      * @return true if ranging is supported
      */
     public boolean isRangingSupported() {
-        throw new UnsupportedOperationException();
+        try {
+            return mUwbAdapter.isRangingSupported();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     @Retention(RetentionPolicy.SOURCE)
@@ -225,7 +236,24 @@ public final class UwbManager {
      */
     @AngleOfArrivalSupportType
     public int getAngleOfArrivalSupport() {
-        throw new UnsupportedOperationException();
+        try {
+            switch (mUwbAdapter.getAngleOfArrivalSupport()) {
+                case AngleOfArrivalSupport.TWO_DIMENSIONAL:
+                    return ANGLE_OF_ARRIVAL_SUPPORT_TYPE_2D;
+
+                case AngleOfArrivalSupport.THREE_DIMENSIONAL_HEMISPHERICAL:
+                    return ANGLE_OF_ARRIVAL_SUPPORT_TYPE_3D_HEMISPHERICAL;
+
+                case AngleOfArrivalSupport.THREE_DIMENSIONAL_SPHERICAL:
+                    return ANGLE_OF_ARRIVAL_SUPPORT_TYPE_3D_SPHERICAL;
+
+                case AngleOfArrivalSupport.NONE:
+                default:
+                    return ANGLE_OF_ARRIVAL_SUPPORT_TYPE_NONE;
+            }
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -239,7 +267,15 @@ public final class UwbManager {
      */
     @NonNull
     public List<Integer> getSupportedChannelNumbers() {
-        throw new UnsupportedOperationException();
+        List<Integer> channels = new ArrayList<>();
+        try {
+            for (int channel : mUwbAdapter.getSupportedChannels()) {
+                channels.add(channel);
+            }
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+        return channels;
     }
 
     /**
@@ -250,7 +286,15 @@ public final class UwbManager {
      */
     @NonNull
     public Set<Integer> getSupportedPreambleCodeIndices() {
-        throw new UnsupportedOperationException();
+        Set<Integer> preambles = new HashSet<>();
+        try {
+            for (int preamble : mUwbAdapter.getSupportedPreambleCodes()) {
+                preambles.add(preamble);
+            }
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+        return preambles;
     }
 
     /**
@@ -262,7 +306,11 @@ public final class UwbManager {
      */
     @SuppressLint("MethodNameUnits")
     public long elapsedRealtimeResolutionNanos() {
-        throw new UnsupportedOperationException();
+        try {
+            return mUwbAdapter.getTimestampResolutionNanos();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -271,7 +319,11 @@ public final class UwbManager {
      * @return the maximum allowed number of simultaneously open {@link RangingSession} instances.
      */
     public int getMaxSimultaneousSessions() {
-        throw new UnsupportedOperationException();
+        try {
+            return mUwbAdapter.getMaxSimultaneousSessions();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -281,7 +333,11 @@ public final class UwbManager {
      * @return the maximum number of remote devices per {@link RangingSession}
      */
     public int getMaxRemoteDevicesPerInitiatorSession() {
-        throw new UnsupportedOperationException();
+        try {
+            return mUwbAdapter.getMaxRemoteDevicesPerInitiatorSession();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -291,7 +347,11 @@ public final class UwbManager {
      * @return the maximum number of remote devices per {@link RangingSession}
      */
     public int getMaxRemoteDevicesPerResponderSession() {
-        throw new UnsupportedOperationException();
+        try {
+            return mUwbAdapter.getMaxRemoteDevicesPerResponderSession();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**
