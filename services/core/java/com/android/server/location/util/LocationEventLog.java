@@ -59,46 +59,46 @@ public class LocationEventLog extends LocalEventLog {
     }
 
     /** Logs a location enabled/disabled event. */
-    public synchronized void logLocationEnabled(int userId, boolean enabled) {
+    public void logLocationEnabled(int userId, boolean enabled) {
         addLogEvent(EVENT_LOCATION_POWER_SAVE_MODE_CHANGE, userId, enabled);
     }
 
     /** Logs a location provider enabled/disabled event. */
-    public synchronized void logProviderEnabled(String provider, int userId, boolean enabled) {
+    public void logProviderEnabled(String provider, int userId, boolean enabled) {
         addLogEvent(EVENT_PROVIDER_ENABLED, provider, userId, enabled);
     }
 
     /** Logs a location provider being replaced/unreplaced by a mock provider. */
-    public synchronized void logProviderMocked(String provider, boolean mocked) {
+    public void logProviderMocked(String provider, boolean mocked) {
         addLogEvent(EVENT_PROVIDER_MOCKED, provider, mocked);
     }
 
     /** Logs a new client registration for a location provider. */
-    public synchronized void logProviderClientRegistered(String provider, CallerIdentity identity,
+    public void logProviderClientRegistered(String provider, CallerIdentity identity,
             LocationRequest request) {
         addLogEvent(EVENT_PROVIDER_REGISTER_CLIENT, provider, identity, request);
     }
 
     /** Logs a client unregistration for a location provider. */
-    public synchronized void logProviderClientUnregistered(String provider,
+    public void logProviderClientUnregistered(String provider,
             CallerIdentity identity) {
         addLogEvent(EVENT_PROVIDER_UNREGISTER_CLIENT, provider, identity);
     }
 
     /** Logs a change to the provider request for a location provider. */
-    public synchronized void logProviderUpdateRequest(String provider, ProviderRequest request) {
+    public void logProviderUpdateRequest(String provider, ProviderRequest request) {
         addLogEvent(EVENT_PROVIDER_UPDATE_REQUEST, provider, request);
     }
 
     /** Logs a new incoming location for a location provider. */
-    public synchronized void logProviderReceivedLocations(String provider, int numLocations) {
+    public void logProviderReceivedLocations(String provider, int numLocations) {
         if (Build.IS_DEBUGGABLE || D) {
             addLogEvent(EVENT_PROVIDER_RECEIVE_LOCATION, provider, numLocations);
         }
     }
 
     /** Logs a location deliver for a client of a location provider. */
-    public synchronized void logProviderDeliveredLocations(String provider, int numLocations,
+    public void logProviderDeliveredLocations(String provider, int numLocations,
             CallerIdentity identity) {
         if (Build.IS_DEBUGGABLE || D) {
             addLogEvent(EVENT_PROVIDER_DELIVER_LOCATION, provider, numLocations, identity);
@@ -106,7 +106,7 @@ public class LocationEventLog extends LocalEventLog {
     }
 
     /** Logs that the location power save mode has changed. */
-    public synchronized void logLocationPowerSaveMode(
+    public void logLocationPowerSaveMode(
             @LocationPowerSaveMode int locationPowerSaveMode) {
         addLogEvent(EVENT_LOCATION_POWER_SAVE_MODE_CHANGE, locationPowerSaveMode);
     }
