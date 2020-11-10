@@ -22,8 +22,8 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="202579285008794431">"B"</string>
     <string name="kilobyteShort" msgid="2214285521564195803">"kB"</string>
-    <string name="megabyteShort" msgid="6649361267635823443">"មេកាបៃ"</string>
-    <string name="gigabyteShort" msgid="7515809460261287991">"ជីកាបៃ"</string>
+    <string name="megabyteShort" msgid="6649361267635823443">"MB"</string>
+    <string name="gigabyteShort" msgid="7515809460261287991">"GB"</string>
     <string name="terabyteShort" msgid="1822367128583886496">"តេរ៉ាបៃ"</string>
     <string name="petabyteShort" msgid="5651571254228534832">"PB"</string>
     <string name="fileSizeSuffix" msgid="4233671691980131257">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
@@ -192,7 +192,8 @@
     <string name="network_logging_notification_title" msgid="554983187553845004">"ឧបករណ៍ស្ថិតក្រោមការគ្រប់គ្រង"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"ស្ថាប័នរបស់អ្នកគ្រប់គ្រងឧបករណ៍នេះ ហើយអាចនឹងតាមដានចរាចរណ៍បណ្តាញ។ ចុចដើម្បីទទួលបានព័ត៌មានលម្អិត។"</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"កម្មវិធី​អាច​ចូលប្រើ​ទីតាំង​របស់អ្នក​បាន"</string>
-    <string name="location_changed_notification_text" msgid="7158423339982706912">"សូម​ទាក់ទង​អ្នក​គ្រប់គ្រងផ្នែក​ព័ត៌មានវិទ្យា​របស់អ្នក ដើម្បីស្វែងយល់​បន្ថែម"</string>
+    <string name="location_changed_notification_text" msgid="7158423339982706912">"ទាក់ទង​អ្នក​គ្រប់គ្រងផ្នែកព័ត៌មានវិទ្យា​របស់អ្នក​ដើម្បីស្វែងយល់​បន្ថែម"</string>
+    <string name="geofencing_service" msgid="3826902410740315456">"សេវាកម្ម​បង្កើតដែនភូមិសាស្ត្រ"</string>
     <string name="country_detector" msgid="7023275114706088854">"ឧបករណ៍​សម្គាល់​ប្រទេស"</string>
     <string name="location_service" msgid="2439187616018455546">"សេវាកម្ម​ទីតាំង"</string>
     <string name="gnss_service" msgid="8907781262179951385">"សេវាកម្ម GNSS"</string>
@@ -201,10 +202,10 @@
     <string name="factory_reset_warning" msgid="6858705527798047809">"ឧបករណ៍របស់អ្នកនឹងត្រូវបានលុប"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"មិនអាច​ប្រើ​កម្មវិធី​អ្នកគ្រប់គ្រង​បានទេ។ ឧបករណ៍​របស់អ្នក​នឹងលុប​ឥឡូវនេះ។\n\nប្រសិនបើ​អ្នកមាន​សំណួរផ្សេងៗ​ សូមទាក់ទង​ទៅអ្នក​គ្រប់គ្រង​ស្ថាប័ន​របស់​អ្នក។"</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"ការបោះពុម្ព​ត្រូវបាន​បិទ​ដោយ <xliff:g id="OWNER_APP">%s</xliff:g> ។"</string>
-    <string name="personal_apps_suspended_title" msgid="4543693107104417750">"ឈប់ទប់ស្កាត់កម្មវិធីផ្ទាល់ខ្លួនរបស់អ្នក"</string>
-    <string name="personal_apps_suspended_tomorrow_title" msgid="6414440257969874914">"កម្មវិធីនឹងត្រូវទប់ស្កាត់ថ្ងៃស្អែក"</string>
-    <string name="personal_apps_suspended_text" msgid="8954038765131038226">"អ្នកគ្រប់គ្រង​ផ្នែកព័ត៌មានវិទ្យា​របស់អ្នក​មិន​អនុញ្ញាតឱ្យ​ផ្អាក​កម្រងព័ត៌មាន​ការងារ​របស់អ្នក​លើសពី <xliff:g id="DAYS">%1$d</xliff:g> ថ្ងៃ​ទេ"</string>
-    <string name="personal_apps_suspended_turn_profile_on" msgid="4278188538997940785">"បើក​កម្រង​ព័ត៌មាន​ការងារ"</string>
+    <string name="personal_apps_suspension_title" msgid="7561416677884286600">"បើកកម្រងព័ត៌មានការងាររបស់អ្នក"</string>
+    <string name="personal_apps_suspension_text" msgid="6115455688932935597">"កម្មវិធីផ្ទាល់ខ្លួន​របស់អ្នកត្រូវ​បានទប់ស្កាត់ រហូតទាល់តែ​អ្នកបើក​កម្រងព័ត៌មាន​ការងាររបស់អ្នក"</string>
+    <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"កម្មវិធីផ្ទាល់ខ្លួន​នឹងត្រូវបាន​ទប់ស្កាត់​នៅថ្ងៃទី <xliff:g id="DATE">%1$s</xliff:g> នៅម៉ោង <xliff:g id="TIME">%2$s</xliff:g>។ អ្នកគ្រប់គ្រង​ផ្នែកព័ត៌មានវិទ្យា​របស់អ្នក​មិនអនុញ្ញាតឱ្យ​បន្តបិទ​កម្រងព័ត៌មាន​ការងារ​របស់អ្នក​លើសពី <xliff:g id="NUMBER">%3$d</xliff:g> ថ្ងៃ​ទេ។"</string>
+    <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"បើក"</string>
     <string name="me" msgid="6207584824693813140">"ខ្ញុំ"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"ជម្រើស​កុំព្យូទ័រ​បន្ទះ"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"ជម្រើស Android TV"</string>
@@ -238,10 +239,8 @@
     <string name="global_actions" product="default" msgid="6410072189971495460">"ជម្រើស​ទូរស័ព្ទ"</string>
     <string name="global_action_lock" msgid="6949357274257655383">"ចាក់​សោ​អេក្រង់"</string>
     <string name="global_action_power_off" msgid="4404936470711393203">"បិទ"</string>
-    <!-- no translation found for global_action_power_options (1185286119330160073) -->
-    <skip />
-    <!-- no translation found for global_action_restart (4678451019561687074) -->
-    <skip />
+    <string name="global_action_power_options" msgid="1185286119330160073">"ថាមពល"</string>
+    <string name="global_action_restart" msgid="4678451019561687074">"ចាប់ផ្ដើមឡើងវិញ"</string>
     <string name="global_action_emergency" msgid="1387617624177105088">"អាសន្ន"</string>
     <string name="global_action_bug_report" msgid="5127867163044170003">"របាយការណ៍​កំហុស"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"បញ្ចប់​សម័យ"</string>
@@ -433,16 +432,19 @@
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"ប្ដូរ​ការ​កំណត់​អូឌីយូ​របស់​អ្នក"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"ឲ្យ​កម្មវិធី​កែ​ការ​កំណត់​សំឡេង​សកល ដូច​ជា​កម្រិត​សំឡេង និង​អូប៉ាល័រ​ដែល​បាន​ប្រើ​សម្រាប់​លទ្ធផល។"</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"ថត​សំឡេង"</string>
-    <string name="permdesc_recordAudio" msgid="3976213377904701093">"កម្មវិធី​នេះ​អាច​ថត​សំឡេង​ដោយ​ប្រើ​មីក្រូហ្វូន​បាន​គ្រប់​ពេល។"</string>
+    <string name="permdesc_recordAudio" msgid="5857246765327514062">"កម្មវិធី​នេះ​អាច​ថតសំឡេងដោយប្រើមីក្រូហ្វូន នៅពេលកំពុងប្រើប្រាស់កម្មវិធី។"</string>
+    <string name="permlab_recordBackgroundAudio" msgid="5891032812308878254">"ថតសំឡេងនៅផ្ទៃខាងក្រោយ"</string>
+    <string name="permdesc_recordBackgroundAudio" msgid="1992623135737407516">"កម្មវិធី​នេះ​អាច​ថត​សំឡេង​ដោយ​ប្រើ​មីក្រូហ្វូន​បាន​គ្រប់​ពេល។"</string>
     <string name="permlab_sim_communication" msgid="176788115994050692">"ផ្ញើពាក្យបញ្ជាទៅស៊ីមកាត"</string>
     <string name="permdesc_sim_communication" msgid="4179799296415957960">"ឲ្យ​កម្មវិធី​ផ្ញើ​ពាក្យ​បញ្ជា​ទៅ​ស៊ីម​កាត។ វា​គ្រោះ​ថ្នាក់​ណាស់។"</string>
     <string name="permlab_activityRecognition" msgid="1782303296053990884">"ស្គាល់​សកម្មភាព​រាងកាយ"</string>
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"កម្មវិធីនេះ​អាចស្គាល់សកម្មភាព​រាងកាយ​របស់អ្នក។"</string>
     <string name="permlab_camera" msgid="6320282492904119413">"ថត​រូប និងវីដេអូ"</string>
-    <string name="permdesc_camera" msgid="1354600178048761499">"កម្មវិធី​នេះ​អាច​ថត​រូប​ និង​ថត​វីដេអូ​ ដោយ​ប្រើ​កាមេរ៉ា​បាន​គ្រប់​ពេល​។"</string>
+    <string name="permdesc_camera" msgid="5240801376168647151">"កម្មវិធី​នេះ​អាច​ថត​រូប​ និង​វីដេអូ​ដោយ​ប្រើ​កាមេរ៉ា នៅពេលកំពុងប្រើប្រាស់កម្មវិធី។"</string>
+    <string name="permlab_backgroundCamera" msgid="7549917926079731681">"ថតរូបភាព និងវីដេអូនៅផ្ទៃខាងក្រោយ"</string>
+    <string name="permdesc_backgroundCamera" msgid="1615291686191138250">"កម្មវិធី​នេះ​អាច​ថត​រូប​ និង​វីដេអូ​ដោយ​ប្រើ​កាមេរ៉ា​បាន​គ្រប់​ពេល​។"</string>
     <string name="permlab_systemCamera" msgid="3642917457796210580">"អនុញ្ញាតឱ្យកម្មវិធី ឬសេវាកម្ម​ចូលប្រើកាមេរ៉ា​ប្រព័ន្ធ ដើម្បីថតរូប និង​ថតវីដេអូ"</string>
-    <!-- no translation found for permdesc_systemCamera (5938360914419175986) -->
-    <skip />
+    <string name="permdesc_systemCamera" msgid="5938360914419175986">"កម្មវិធីប្រព័ន្ធ ឬកម្មវិធីដែលមានសិទ្ធិអនុញ្ញាត​នេះអាចថត​រូប និង​ថតវីដេអូ ដោយប្រើ​កាមេរ៉ា​ប្រព័ន្ធបាន​គ្រប់ពេល។ តម្រូវឱ្យមាន​ការអនុញ្ញាត android.permission.CAMERA ដើម្បីឱ្យ​កម្មវិធីអាចធ្វើ​សកម្មភាព​បានផងដែរ"</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"អនុញ្ញាតឱ្យកម្មវិធី ឬសេវាកម្ម​ទទួលការហៅត្រឡប់វិញអំពី​កាមេរ៉ាដែលកំពុងបិទ ឬបើក។"</string>
     <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"កម្មវិធី​នេះ​អាច​ទទួល​ការហៅត្រឡប់វិញ​បាន នៅពេល​កំពុងបិទ ឬ​បើក​កាមេរ៉ា (ដោយ​កម្មវិធី)​។"</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"ពិនិត្យ​ការ​ញ័រ"</string>
@@ -540,12 +542,13 @@
     <string name="permdesc_imagesWrite" msgid="5195054463269193317">"អនុញ្ញាតឱ្យ​កម្មវិធី​កែប្រែ​បណ្ដុំ​រូបថត​របស់​អ្នក។"</string>
     <string name="permlab_mediaLocation" msgid="7368098373378598066">"អាន​ទីតាំង​ពី​បណ្ដុំ​មេឌៀ​របស់​អ្នក"</string>
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"អនុញ្ញាតឱ្យ​កម្មវិធី​អាន​ទីតាំង​ពីបណ្ដុំ​មេឌៀ​របស់​អ្នក។"</string>
-    <string name="biometric_dialog_default_title" msgid="5284880398508155088">"ផ្ទៀងផ្ទាត់ថា​ជា​អ្នក"</string>
+    <string name="biometric_dialog_default_title" msgid="55026799173208210">"ផ្ទៀងផ្ទាត់ថាជាអ្នក"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"មិនអាច​ប្រើឧបករណ៍​ស្កេន​ស្នាមម្រាមដៃ​បានទេ"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"បាន​បោះបង់​ការ​ផ្ទៀងផ្ទាត់"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"មិនអាចសម្គាល់បានទេ"</string>
     <string name="biometric_error_canceled" msgid="8266582404844179778">"បាន​បោះបង់​ការ​ផ្ទៀងផ្ទាត់"</string>
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"គ្មាន​ការកំណត់​កូដ pin លំនាំ ឬពាក្យសម្ងាត់​ទេ"</string>
+    <string name="biometric_error_generic" msgid="6784371929985434439">"មានបញ្ហាក្នុង​ការផ្ទៀងផ្ទាត់"</string>
     <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"បានផ្តិតយកស្នាមម្រាមដៃមិនពេញលក្ខណៈ។ សូមព្យាយាមម្តងទៀត។"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"មិនអាចដំណើរការស្នាមម្រាមដៃបានទេ។ សូមព្យាយាមម្តងទៀត។"</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"ឧបករណ៍ចាប់ស្នាមម្រាមដៃគឺប្រឡាក់។ សូមសម្អាត រួចព្យាយាមម្តងទៀត។"</string>
@@ -685,7 +688,7 @@
     <string name="policylab_resetPassword" msgid="214556238645096520">"ប្តូរការចាក់សោអេក្រង់"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"ប្តូរការចាក់សោអេក្រង់។"</string>
     <string name="policylab_forceLock" msgid="7360335502968476434">"ចាក់សោ​អេក្រង់"</string>
-    <string name="policydesc_forceLock" msgid="1008844760853899693">"ពិនិត្យ​វិធី និង​ពេលវេលា​ចាក់សោ​អេក្រង់។"</string>
+    <string name="policydesc_forceLock" msgid="1008844760853899693">"គ្រប់គ្រងវិធី និង​ពេលវេលា​ចាក់សោ​អេក្រង់។"</string>
     <string name="policylab_wipeData" msgid="1359485247727537311">"លុប​ទិន្នន័យ​ទាំង​អស់"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"លុប​ទិន្នន័យ​កុំព្យូទ័រ​បន្ទះ​ដោយ​មិន​​ព្រមាន​ដោយ​អនុវត្ត​ការ​កំណត់​ទិន្នន័យ​ដូច​ចេញ​ពី​រោងចក្រ។"</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"លុប​ទិន្នន័យឧបករណ៍ Android TV របស់អ្នក​ដោយមិនមានការព្រមាន ដោយ​ធ្វើការកំណត់​ទិន្នន័យ​ដូច​ចេញ​ពី​រោងចក្រ។"</string>
@@ -833,7 +836,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"ចុច​ម៉ឺនុយ ដើម្បី​ដោះ​សោ​ ឬ​ហៅ​ពេល​អាសន្ន។"</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"ចុច​ម៉ឺនុយ ដើម្បី​ដោះ​សោ។"</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"គូរ​លំនាំ ដើម្បី​ដោះ​សោ"</string>
-    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"បន្ទាន់"</string>
+    <string name="lockscreen_emergency_call" msgid="7549683825868928636">"ហៅទៅលេខសង្គ្រោះបន្ទាន់"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"ត្រឡប់​ទៅ​ការ​ហៅ"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"ត្រឹមត្រូវ!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"ព្យាយាម​ម្ដង​ទៀត"</string>
@@ -855,7 +858,7 @@
     <string name="lockscreen_transport_stop_description" msgid="1449552232598355348">"បញ្ឈប់"</string>
     <string name="lockscreen_transport_rew_description" msgid="7680106856221622779">"ខា​ថយក្រោយ"</string>
     <string name="lockscreen_transport_ffw_description" msgid="4763794746640196772">"ទៅ​មុខ​​​រហ័ស"</string>
-    <string name="emergency_calls_only" msgid="3057351206678279851">"សម្រាប់​តែ​ហៅ​ពេល​អាសន្ន​ប៉ុណ្ណោះ"</string>
+    <string name="emergency_calls_only" msgid="3057351206678279851">"ការហៅទៅលេខសង្គ្រោះបន្ទាន់​តែប៉ុណ្ណោះ"</string>
     <string name="lockscreen_network_locked_message" msgid="2814046965899249635">"បណ្ដាញ​ជាប់​សោ"</string>
     <string name="lockscreen_sim_puk_locked_message" msgid="6618356415831082174">"ស៊ីម​កាត​ជាប់​សោ PUK។"</string>
     <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"មើល​មគ្គុទ្ទេសក៍​អ្នក​ប្រើ ឬ​ទាក់ទង​សេវា​អតិថិជន។"</string>
@@ -1126,18 +1129,18 @@
     <string name="capital_off" msgid="7443704171014626777">"បិទ"</string>
     <string name="checked" msgid="9179896827054513119">"បានធីក​"</string>
     <string name="not_checked" msgid="7972320087569023342">"មិន​បាន​ធីក​"</string>
+    <string name="selected" msgid="6614607926197755875">"បាន​ជ្រើសរើស"</string>
+    <string name="not_selected" msgid="410652016565864475">"មិនបានជ្រើសរើសទេ"</string>
     <string name="whichApplication" msgid="5432266899591255759">"បញ្ចប់​សកម្មភាព​ដោយ​ប្រើ"</string>
-    <!-- String.format failed for translation -->
-    <!-- no translation found for whichApplicationNamed (6969946041713975681) -->
-    <skip />
+    <string name="whichApplicationNamed" msgid="6969946041713975681">"បញ្ចប់​សកម្មភាព​ដោយ​ប្រើ​ %1$s"</string>
     <string name="whichApplicationLabel" msgid="7852182961472531728">"បញ្ចប់សកម្មភាព"</string>
     <string name="whichViewApplication" msgid="5733194231473132945">"បើក​ជា​មួយ"</string>
     <string name="whichViewApplicationNamed" msgid="415164730629690105">"បើក​ជាមួយ %1$s"</string>
     <string name="whichViewApplicationLabel" msgid="7367556735684742409">"បើក"</string>
-    <string name="whichOpenHostLinksWith" msgid="7645631470199397485">"បើក​តំណ <xliff:g id="HOST">%1$s</xliff:g> ជាមួយ"</string>
-    <string name="whichOpenLinksWith" msgid="1120936181362907258">"បើកតំណជាមួយ"</string>
-    <string name="whichOpenLinksWithApp" msgid="6917864367861910086">"បើក​តំណជាមួយ <xliff:g id="APPLICATION">%1$s</xliff:g>"</string>
-    <string name="whichOpenHostLinksWithApp" msgid="2401668560768463004">"បើក​តំណ <xliff:g id="HOST">%1$s</xliff:g> ជាមួយ <xliff:g id="APPLICATION">%2$s</xliff:g>"</string>
+    <string name="whichOpenHostLinksWith" msgid="7645631470199397485">"បើក​តំណ <xliff:g id="HOST">%1$s</xliff:g> ដោយប្រើ"</string>
+    <string name="whichOpenLinksWith" msgid="1120936181362907258">"បើកតំណដោយប្រើ"</string>
+    <string name="whichOpenLinksWithApp" msgid="6917864367861910086">"បើក​តំណដោយប្រើ <xliff:g id="APPLICATION">%1$s</xliff:g>"</string>
+    <string name="whichOpenHostLinksWithApp" msgid="2401668560768463004">"បើក​តំណ <xliff:g id="HOST">%1$s</xliff:g> ដោយប្រើ <xliff:g id="APPLICATION">%2$s</xliff:g>"</string>
     <string name="whichGiveAccessToApplicationLabel" msgid="7805857277166106236">"ផ្តល់​សិទ្ធិ​ចូល​ប្រើ"</string>
     <string name="whichEditApplication" msgid="6191568491456092812">"កែសម្រួល​ជាមួយ"</string>
     <string name="whichEditApplicationNamed" msgid="8096494987978521514">"កែសម្រួល​ជាមួយ​ %1$s"</string>
@@ -1225,14 +1228,14 @@
     <string name="volume_music" msgid="7727274216734955095">"កម្រិត​សំឡេង​មេឌៀ"</string>
     <string name="volume_music_hint_playing_through_bluetooth" msgid="2614142915948898228">"ចាក់​តាម​ប៊្លូធូស"</string>
     <string name="volume_music_hint_silent_ringtone_selected" msgid="1514829655029062233">"កំណត់​សំឡេង​រោទ៍​ស្ងាត់"</string>
-    <string name="volume_call" msgid="7625321655265747433">"កម្រិត​សំឡេង​ហៅ​ចូល"</string>
-    <string name="volume_bluetooth_call" msgid="2930204618610115061">"កម្រិត​សំឡេង​ហៅ​ចូល​តាម​ប៊្លូធូស"</string>
+    <string name="volume_call" msgid="7625321655265747433">"កម្រិត​សំឡេង​ក្នុងពេលនិយាយទូរសព្ទ"</string>
+    <string name="volume_bluetooth_call" msgid="2930204618610115061">"កម្រិត​សំឡេង​ក្នុងពេលនិយាយទូរសព្ទ​តាម​ប៊្លូធូស"</string>
     <string name="volume_alarm" msgid="4486241060751798448">"កម្រិត​សំឡេងម៉ោងរោទ៍"</string>
     <string name="volume_notification" msgid="6864412249031660057">"កម្រិត​សំឡេង​ការ​ជូន​ដំណឹង"</string>
     <string name="volume_unknown" msgid="4041914008166576293">"កម្រិត​សំឡេង"</string>
     <string name="volume_icon_description_bluetooth" msgid="7540388479345558400">"កម្រិត​សំឡេង​ប៊្លូធូស"</string>
     <string name="volume_icon_description_ringer" msgid="2187800636867423459">"កម្រិត​សំឡេង​រោទ៍"</string>
-    <string name="volume_icon_description_incall" msgid="4491255105381227919">"កម្រិត​សំឡេង​ហៅ"</string>
+    <string name="volume_icon_description_incall" msgid="4491255105381227919">"កម្រិត​សំឡេង​ហៅទូរសព្ទ"</string>
     <string name="volume_icon_description_media" msgid="4997633254078171233">"កម្រិត​សំឡេង​មេឌៀ"</string>
     <string name="volume_icon_description_notification" msgid="579091344110747279">"កម្រិត​សំឡេង​ការ​ជូន​ដំណឹង"</string>
     <string name="ringtone_default" msgid="9118299121288174597">"សំឡេង​រោទ៍​លំនាំដើម"</string>
@@ -1347,14 +1350,20 @@
     <string name="ext_media_checking_notification_title" msgid="8299199995416510094">"កំពុង​ពិនិត្យ <xliff:g id="NAME">%s</xliff:g>…"</string>
     <string name="ext_media_checking_notification_message" msgid="2231566971425375542">"កំពុង​ពិនិត្យ​​មើលខ្លឹមសារ​បច្ចុប្បន្ន"</string>
     <string name="ext_media_new_notification_title" msgid="3517407571407687677">"<xliff:g id="NAME">%s</xliff:g> ថ្មី"</string>
+    <string name="ext_media_new_notification_title" product="automotive" msgid="9085349544984742727">"<xliff:g id="NAME">%s</xliff:g> មិនដំណើរការទេ"</string>
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"ចុច​ដើម្បី​រៀបចំ"</string>
+    <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"អ្នកប្រហែលជាត្រូវសម្អាតឧបករណ៍ឡើងវិញ។ សូមចុច ដើម្បីដកចេញ។"</string>
     <string name="ext_media_ready_notification_message" msgid="777258143284919261">"សម្រាប់ផ្ទេររូបភាព និងមេឌៀ"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"មាន​បញ្ហា​ជាមួយ <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"<xliff:g id="NAME">%s</xliff:g> មិនដំណើរការទេ"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"ចុចដើម្បីកែបញ្ហា"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3003611129979934633">"<xliff:g id="NAME">%s</xliff:g> ខូចហើយ។ សូម​ជ្រើសរើស​ដើម្បី​ជួសជុល។"</string>
+    <string name="ext_media_unmountable_notification_message" product="automotive" msgid="2274596120715020680">"អ្នកប្រហែលជាត្រូវសម្អាតឧបករណ៍ឡើងវិញ។ សូមចុច ដើម្បីដកចេញ។"</string>
     <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"<xliff:g id="NAME">%s</xliff:g> មិនគាំទ្រ"</string>
+    <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"<xliff:g id="NAME">%s</xliff:g> មិនដំណើរការទេ"</string>
     <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"ឧបករណ៍នេះមិនគាំទ្រ <xliff:g id="NAME">%s</xliff:g> នេះទេ។ ប៉ះដើម្បីកំណត់ទម្រង់ដែលគាំទ្រ។"</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="7744945987775645685">"ឧបករណ៍នេះ​មិន​ស្គាល់ <xliff:g id="NAME">%s</xliff:g> នេះ​ទេ។ សូម​ជ្រើសរើស​ដើម្បី​រៀបចំ​ក្នុង​ទម្រង់ដែលស្គាល់។"</string>
+    <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"អ្នកប្រហែលជាត្រូវសម្អាតឧបករណ៍ឡើងវិញ"</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"បានដក <xliff:g id="NAME">%s</xliff:g> ចេញដោយមិនបានរំពឹងទុក"</string>
     <string name="ext_media_badremoval_notification_message" msgid="1986514704499809244">"ដក​មេឌៀ​មុន​ពេល​យក​វា​ចេញ ដើម្បី​ជៀសវាង​ការ​បាត់​បង់​ខ្លឹមសារ"</string>
     <string name="ext_media_nomedia_notification_title" msgid="742671636376975890">"បានយក <xliff:g id="NAME">%s</xliff:g> ចេញ"</string>
@@ -1545,9 +1554,7 @@
     <string name="launchBrowserDefault" msgid="6328349989932924119">"ចាប់ផ្ដើម​កម្មវិធី​អ៊ីនធឺណិត?"</string>
     <string name="SetupCallDefault" msgid="5581740063237175247">"ទទួល​ការ​ហៅ​?"</string>
     <string name="activity_resolver_use_always" msgid="5575222334666843269">"ជា​និច្ច"</string>
-    <string name="activity_resolver_set_always" msgid="4142825808921411476">"កំណត់​ឱ្យ​បើក​ជានិច្ច"</string>
     <string name="activity_resolver_use_once" msgid="948462794469672658">"តែ​ម្ដង"</string>
-    <string name="activity_resolver_app_settings" msgid="6758823206817748026">"ការកំណត់"</string>
     <string name="activity_resolver_work_profiles_support" msgid="4071345609235361269">"%1$s មិន​គាំទ្រ​ប្រវត្តិរូប​ការងារ"</string>
     <string name="default_audio_route_name" product="tablet" msgid="367936735632195517">"កុំព្យូទ័រ​បន្ទះ"</string>
     <string name="default_audio_route_name" product="tv" msgid="4908971385068087367">"ទូរទស្សន៍"</string>
@@ -1618,28 +1625,18 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"អ្នក​បាន​គូរ​លំនាំ​ដោះ​​សោ​របស់​អ្នក​មិន​ត្រឹមត្រូវ​ចំនួន <xliff:g id="NUMBER_0">%1$d</xliff:g> ដង។ បន្ទាប់​ពី​ការ​ព្យាយាម​មិន​ជោគជ័យ​​ច្រើនជាង <xliff:g id="NUMBER_1">%2$d</xliff:g> ដង អ្នក​នឹង​ត្រូវ​បាន​​ស្នើ​ឲ្យ​ដោះ​សោ​ទូរស័ព្ទ​របស់​អ្នក​ដោយ​ប្រើ​គណនី​អ៊ីមែល។\n\n ព្យាយាម​ម្ដង​ទៀត​ក្នុង​រយៈ​ពេល <xliff:g id="NUMBER_2">%3$d</xliff:g> វិនាទី។"</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"លុប​ចេញ"</string>
-    <string name="allow_while_in_use_permission_in_fgs" msgid="4101339676785053656">"សេវាកម្ម​ផ្ទៃខាងមុខ​ដែលចាប់ផ្ដើមដោយ​ផ្ទៃខាងក្រោយ​ពី <xliff:g id="PACKAGENAME">%1$s</xliff:g> នឹង​មិនមាន​ការអនុញ្ញាត​ខណៈពេល​កំពុង​ប្រើប្រាស់​ទេ នៅក្នុង​កំណែបង្កើត R នៅពេល​អនាគត​។ សូម​មើល go/r-bg-fgs-restriction និង​ផ្ញើ​របាយការណ៍​អំពី​បញ្ហា​។"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"បង្កើន​កម្រិត​សំឡេង​លើស​ពី​កម្រិត​បាន​ផ្ដល់​យោបល់?\n\nការ​ស្ដាប់​នៅ​កម្រិត​សំឡេង​ខ្លាំង​យូរ​អាច​ធ្វើឲ្យ​ខូច​ត្រចៀក។"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"ប្រើប្រាស់​ផ្លូវកាត់​ភាព​ងាយស្រួល?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"នៅពេលបើក​ផ្លូវកាត់ ការចុច​ប៊ូតុង​កម្រិតសំឡេង​ទាំងពីរ​រយៈពេល 3 វិនាទី​នឹង​ចាប់ផ្តើម​មុខងារ​ភាពងាយប្រើ។"</string>
-    <!-- no translation found for accessibility_shortcut_multiple_service_warning_title (8417489297036013065) -->
-    <skip />
-    <!-- no translation found for accessibility_shortcut_multiple_service_warning (3740723309483706911) -->
-    <skip />
-    <!-- no translation found for accessibility_shortcut_multiple_service_list (6935581470716541531) -->
-    <skip />
-    <!-- no translation found for accessibility_shortcut_talkback_warning_title (3410100187167382427) -->
-    <skip />
-    <!-- no translation found for accessibility_shortcut_talkback_warning (8412954203626349109) -->
-    <skip />
-    <!-- no translation found for accessibility_shortcut_single_service_warning_title (2819109500943271385) -->
-    <skip />
-    <!-- no translation found for accessibility_shortcut_single_service_warning (6363127705112844257) -->
-    <skip />
-    <!-- no translation found for accessibility_shortcut_on (5463618449556111344) -->
-    <skip />
-    <!-- no translation found for accessibility_shortcut_off (3651336255403648739) -->
-    <skip />
+    <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"បើក​ផ្លូវកាត់​សម្រាប់មុខងារ​ភាពងាយស្រួលឬ?"</string>
+    <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"ការសង្កត់​គ្រាប់ចុច​កម្រិតសំឡេង​ទាំងពីរ​ឱ្យជាប់​រយៈពេល​ពីរបីវិនាទី​នឹងបើក​មុខងារ​ភាពងាយប្រើ។ ការធ្វើ​បែបនេះ​អាចផ្លាស់ប្ដូរ​របៀបដែល​ឧបករណ៍​របស់អ្នក​ដំណើរការ។\n\nមុខងារ​បច្ចុប្បន្ន៖\n<xliff:g id="SERVICE">%1$s</xliff:g>\nអ្នកអាច​ប្ដូរ​មុខងារ​ដែលបាន​ជ្រើសរើស​នៅក្នុង​ការកំណត់ &gt; ភាពងាយស្រួល។"</string>
+    <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
+    <string name="accessibility_shortcut_single_service_warning_title" msgid="1909518473488345266">"បើក​ផ្លូវកាត់ <xliff:g id="SERVICE">%1$s</xliff:g> ឬ?"</string>
+    <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"ការសង្កត់​គ្រាប់ចុច​កម្រិតសំឡេង​ទាំងពីរ​ឱ្យជាប់​រយៈពេល​ពីរបីវិនាទី​នឹងបើក <xliff:g id="SERVICE">%1$s</xliff:g> ដែលជា​មុខងារ​ភាពងាយប្រើ។ ការធ្វើ​បែបនេះ​អាចផ្លាស់ប្ដូរ​របៀបដែល​ឧបករណ៍​របស់អ្នក​ដំណើរការ។\n\nអ្នកអាច​ប្ដូរផ្លូវកាត់​នេះទៅ​មុខងារ​ផ្សេងទៀត​នៅក្នុង​ការកំណត់ &gt; ភាពងាយស្រួល។"</string>
+    <string name="accessibility_shortcut_on" msgid="5463618449556111344">"បើក"</string>
+    <string name="accessibility_shortcut_off" msgid="3651336255403648739">"កុំបើក"</string>
+    <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"បើក"</string>
+    <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"បិទ"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"អនុញ្ញាតឱ្យ <xliff:g id="SERVICE">%1$s</xliff:g> មានសិទ្ធិគ្រប់គ្រងឧបករណ៍​របស់អ្នក​ទាំងស្រុងឬ?"</string>
     <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"បើ​អ្នក​បើក <xliff:g id="SERVICE">%1$s</xliff:g> ឧបករណ៍របស់​អ្នកនឹង​មិន​ប្រើ​ការចាក់សោអេក្រង់របស់​អ្នក​ ដើម្បី​បង្កើន​ប្រសិទ្ធភាពការ​អ៊ីនគ្រីប​ទិន្នន័យ​ទេ។"</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"ការគ្រប់គ្រង​ទាំងស្រុងមានលក្ខណៈ​សមស្របសម្រាប់​កម្មវិធី ដែលជួយអ្នក​ទាក់ទងនឹងការប្រើមុខងារភាពងាយស្រួល ប៉ុន្តែមិនសមស្របសម្រាប់​កម្មវិធីភាគច្រើនទេ។"</string>
@@ -1650,10 +1647,8 @@
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"អនុញ្ញាត"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"បដិសេធ"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"ចុចមុខងារណាមួយ ដើម្បចាប់ផ្ដើមប្រើ៖"</string>
-    <!-- no translation found for accessibility_edit_shortcut_menu_button_title (239446795930436325) -->
-    <skip />
-    <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (1077294237378645981) -->
-    <skip />
+    <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"ជ្រើសរើស​មុខងារ ដើម្បីប្រើ​ជាមួយ​ប៊ូតុង​ភាពងាយស្រួល"</string>
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"ជ្រើសរើស​មុខងារ ដើម្បីប្រើ​ជាមួយផ្លូវកាត់គ្រាប់ចុច​កម្រិតសំឡេង"</string>
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"បានបិទ <xliff:g id="SERVICE_NAME">%s</xliff:g>"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"កែ​ផ្លូវកាត់"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"រួចរាល់"</string>
@@ -1661,23 +1656,15 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"ប្រើប្រាស់​ផ្លូវកាត់"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"បញ្ច្រាស​ពណ៌"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"ការ​កែ​ពណ៌"</string>
-    <!-- no translation found for accessibility_shortcut_enabling_service (5473495203759847687) -->
-    <skip />
-    <!-- no translation found for accessibility_shortcut_disabling_service (8675244165062700619) -->
-    <skip />
+    <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"បានសង្កត់​គ្រាប់ចុច​កម្រិតសំឡេង​ជាប់។ បាន​បើក <xliff:g id="SERVICE_NAME">%1$s</xliff:g>។"</string>
+    <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"បានសង្កត់​គ្រាប់ចុច​កម្រិតសំឡេង​ជាប់។ បាន​បិទ <xliff:g id="SERVICE_NAME">%1$s</xliff:g>។"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"ចុចគ្រាប់ចុច​កម្រិត​សំឡេងទាំងពីរ​ឱ្យជាប់រយៈពេលបីវិនាទី ដើម្បីប្រើ <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
-    <!-- no translation found for accessibility_button_prompt_text (8343213623338605305) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_prompt_text (8742535972130563952) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_3finger_prompt_text (5211827854510660203) -->
-    <skip />
-    <!-- no translation found for accessibility_button_instructional_text (8853928358872550500) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_instructional_text (9196230728837090497) -->
-    <skip />
-    <!-- no translation found for accessibility_gesture_3finger_instructional_text (3425123684990193765) -->
-    <skip />
+    <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"ជ្រើសរើស​មុខងារ​ដែលត្រូវប្រើ នៅពេល​ដែល​អ្នកចុច​ប៊ូតុង​ភាពងាយស្រួល៖"</string>
+    <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"ជ្រើសរើស​មុខងារ ដើម្បី​ប្រើជាមួយចលនា​ភាពងាយស្រួល (អូស​ឡើងលើ​ពី​ផ្នែកខាងក្រោម​នៃ​អេក្រង់​ដោយប្រើ​ម្រាមដៃ​ពីរ)៖"</string>
+    <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"ជ្រើសរើស​មុខងារ ដើម្បី​ប្រើជាមួយ​ចលនា​ភាពងាយស្រួល (អូស​ឡើងលើ​ពី​ផ្នែកខាងក្រោម​នៃ​អេក្រង់​ដោយប្រើ​ម្រាមដៃ​បី)៖"</string>
+    <string name="accessibility_button_instructional_text" msgid="8853928358872550500">"ដើម្បី​ប្ដូររវាង​មុខងារផ្សេងៗ សូមចុច​ប៊ូតុង​ភាពងាយស្រួល​ឱ្យជាប់។"</string>
+    <string name="accessibility_gesture_instructional_text" msgid="9196230728837090497">"ដើម្បី​ប្ដូររវាង​មុខងារផ្សេងៗ សូមអូស​ឡើងលើ​ដោយប្រើ​ម្រាមដៃ​ពីរ ហើយ​សង្កត់ឱ្យជាប់។"</string>
+    <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"ដើម្បី​ប្ដូររវាង​មុខងារផ្សេងៗ សូមអូស​ឡើងលើ​ដោយប្រើ​ម្រាមដៃ​បី ហើយ​សង្កត់ឱ្យជាប់។"</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"ការ​ពង្រីក"</string>
     <string name="user_switched" msgid="7249833311585228097">"អ្នក​ប្រើ​បច្ចុប្បន្ន <xliff:g id="NAME">%1$s</xliff:g> ។"</string>
     <string name="user_switching_message" msgid="1912993630661332336">"កំពុង​ប្ដូរ​ទៅ <xliff:g id="NAME">%1$s</xliff:g>…"</string>
@@ -1811,10 +1798,10 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"ធ្វើ​បច្ចុប្បន្នភាព​ដោយ​អ្នកគ្រប់គ្រង​របស់​អ្នក"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"លុប​ដោយ​អ្នកគ្រប់គ្រង​របស់​អ្នក"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"យល់ព្រម"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"ដើម្បី​បង្កើនកម្រិត​ថាមពលថ្ម កម្មវិធី​សន្សំ​ថ្ម៖\n·បើករចនាប័ទ្មងងឹត​\n·បិទ ឬដាក់កំហិតលើ​សកម្មភាពផ្ទៃខាងក្រោយ ឥទ្ធិពល​ជារូបភាពមួយចំនួន និងមុខងារផ្សេងទៀត​ដូចជា “Hey Google” ជាដើម\n\n"<annotation id="url">"ស្វែងយល់បន្ថែម"</annotation></string>
-    <string name="battery_saver_description" msgid="7618492104632328184">"ដើម្បី​បង្កើនកម្រិត​ថាមពលថ្ម កម្មវិធី​សន្សំ​ថ្ម៖\n·បើករចនាប័ទ្មងងឹត​\n·បិទ ឬដាក់កំហិតលើ​សកម្មភាពផ្ទៃខាងក្រោយ ឥទ្ធិពល​ជារូបភាពមួយចំនួន និងមុខងារផ្សេងទៀត​ដូចជា “Hey Google” ជាដើម"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"ដើម្បី​បង្កើនកម្រិត​ថាមពលថ្ម មុខងារ​សន្សំ​ថ្ម៖\n\n• បើករចនាប័ទ្មងងឹត\n• បិទ ឬដាក់កំហិតលើ​សកម្មភាពផ្ទៃខាងក្រោយ ឥទ្ធិពល​ជារូបភាពមួយចំនួន និងមុខងារផ្សេងទៀត​ដូចជា “Hey Google” ជាដើម\n\n"<annotation id="url">"ស្វែងយល់​បន្ថែម"</annotation></string>
+    <string name="battery_saver_description" msgid="6794188153647295212">"ដើម្បី​បង្កើនកម្រិត​ថាមពលថ្ម មុខងារ​សន្សំថ្ម៖\n\n• បើករចនាប័ទ្មងងឹត\n• បិទ ឬដាក់កំហិតលើ​សកម្មភាពផ្ទៃខាងក្រោយ ឥទ្ធិពលរូបភាពមួយចំនួន និងមុខងារផ្សេងទៀត​ដូចជា “Ok Google” ជាដើម"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"ដើម្បីជួយកាត់បន្ថយការប្រើប្រាស់ទិន្នន័យ កម្មវិធីសន្សំសំចៃទិន្នន័យរារាំងកម្មវិធីមួយចំនួនមិនឲ្យបញ្ជូន ឬទទួលទិន្នន័យនៅផ្ទៃខាងក្រោយទេ។ កម្មវិធីដែលអ្នកកំពុងប្រើនាពេលបច្ចុប្បន្នអាចចូលប្រើប្រាស់​ទិន្នន័យបាន ប៉ុន្តែអាចនឹងមិនញឹកញាប់ដូចមុនទេ។ ឧទាហរណ៍ រូបភាពមិនបង្ហាញទេ លុះត្រាតែអ្នកប៉ះរូបភាពទាំងនោះ។"</string>
-    <string name="data_saver_enable_title" msgid="7080620065745260137">"បើកកម្មវិធីសន្សំសំចៃទិន្នន័យឬ?"</string>
+    <string name="data_saver_enable_title" msgid="7080620065745260137">"បើកកម្មវិធីសន្សំសំចៃទិន្នន័យ?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"បើក"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
       <item quantity="other">រយៈពេល %1$d នាទី (រហូតដល់ <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
@@ -1848,6 +1835,7 @@
       <item quantity="other">អស់រយៈពេល %d ម៉ោង</item>
       <item quantity="one">អស់រយៈពេល 1 ម៉ោង</item>
     </plurals>
+    <string name="zen_mode_until_next_day" msgid="1403042784161725038">"រហូត​ដល់​ម៉ោង <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_until" msgid="2250286190237669079">"រហូត​ដល់ <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"រហូតដល់ <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (ម៉ោងរោទិ៍បន្ទាប់)"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"រហូតទាល់តែ​អ្នកបិទ"</string>
@@ -2016,11 +2004,12 @@
     <string name="notification_appops_camera_active" msgid="8177643089272352083">"កាមេរ៉ា"</string>
     <string name="notification_appops_microphone_active" msgid="581333393214739332">"មីក្រូហ្វូន"</string>
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"កំពុងបង្ហាញ​ពីលើកម្មវិធីផ្សេងទៀត​នៅលើអេក្រង់​របស់អ្នក"</string>
+    <string name="notification_feedback_indicator" msgid="663476517711323016">"ផ្ដល់​មតិកែលម្អ"</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"ការ​ជូនដំណឹង​ព័ត៌មាន​របស់​មុខងារ​ទម្លាប់"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"ថ្ម​អាច​នឹង​អស់ មុនពេល​សាកថ្មធម្មតា"</string>
-    <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"បាន​បើក​ដំណើរការកម្មវិធី​សន្សំ​ថ្ម ដើម្បីបង្កើនកម្រិត​ថាមពល​​ថ្ម"</string>
-    <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"កម្មវិធីសន្សំថ្ម"</string>
-    <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"កម្មវិធី​សន្សំ​ថ្ម​ត្រូវបានបិទ"</string>
+    <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"បាន​បើក​ដំណើរការមុខងារ​សន្សំ​ថ្ម ដើម្បីបង្កើនកម្រិត​ថាមពល​​ថ្ម"</string>
+    <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"មុខងារ​សន្សំ​ថ្ម"</string>
+    <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"មុខងារ​សន្សំ​ថ្ម​ត្រូវបានបិទ"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"ទូរសព្ទ​មាន​កម្រិតថ្ម​គ្រប់គ្រាន់​។ មុខងារ​ផ្សេងៗ​មិន​ត្រូវបាន​រឹតបន្តឹងទៀត​ទេ។"</string>
     <string name="battery_saver_charged_notification_summary" product="tablet" msgid="4426317048139996888">"ថេប្លេត​មាន​កម្រិតថ្ម​គ្រប់គ្រាន់​។ មុខងារ​ផ្សេងៗ​មិន​ត្រូវបាន​រឹតបន្តឹងទៀត​ទេ។"</string>
     <string name="battery_saver_charged_notification_summary" product="device" msgid="1031562417867646649">"ឧបករណ៍​មាន​កម្រិតថ្ម​គ្រប់គ្រាន់​។ មុខងារ​ផ្សេងៗ​មិន​ត្រូវបាន​រឹតបន្តឹងទៀត​ទេ។"</string>
@@ -2048,8 +2037,7 @@
       <item quantity="other">ឯកសារ <xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g></item>
       <item quantity="one">ឯកសារ​ <xliff:g id="FILE_NAME_0">%s</xliff:g> + <xliff:g id="COUNT_1">%d</xliff:g></item>
     </plurals>
-    <!-- no translation found for chooser_no_direct_share_targets (1511722103987329028) -->
-    <skip />
+    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"មិនមាន​មនុស្សដែល​បានណែនាំ​សម្រាប់​ចែករំលែក​ជាមួយទេ"</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"បញ្ជីកម្មវិធី"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"កម្មវិធីនេះ​មិនទាន់បាន​ទទួលសិទ្ធិ​ថតសំឡេង​នៅឡើយទេ ប៉ុន្តែអាច​ថតសំឡេង​តាមរយៈ​ឧបករណ៍ USB នេះបាន។"</string>
     <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"ទំព័រដើម"</string>
@@ -2058,15 +2046,18 @@
     <string name="accessibility_system_action_notifications_label" msgid="6083767351772162010">"ការជូនដំណឹង"</string>
     <string name="accessibility_system_action_quick_settings_label" msgid="4583900123506773783">"ការកំណត់រហ័ស"</string>
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"ប្រអប់​ថាមពល"</string>
-    <string name="accessibility_system_action_toggle_split_screen_label" msgid="6626177163849387748">"បិទ/បើក​មុខងារ​បំបែកអេក្រង់"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"អេក្រង់ចាក់សោ"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"រូបថតអេក្រង់"</string>
-    <string name="accessibility_system_action_accessibility_menu_label" msgid="8436484650391125184">"ម៉ឺនុយ​ភាពងាយស្រួល"</string>
+    <string name="accessibility_system_action_on_screen_a11y_shortcut_label" msgid="8488701469459210309">"ផ្លូវកាត់​ភាពងាយស្រួល​នៅលើអេក្រង់"</string>
+    <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"ម៉ឺនុយជ្រើសរើស​ផ្លូវកាត់ភាពងាយស្រួល​នៅលើអេក្រង់"</string>
+    <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"ផ្លូវកាត់​ភាពងាយស្រួល"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"របារពណ៌នា​អំពី <xliff:g id="APP_NAME">%1$s</xliff:g>។"</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> ត្រូវបានដាក់​ទៅក្នុងធុង​ដែលបានដាក់កំហិត"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>៖"</string>
+    <string name="conversation_single_line_image_placeholder" msgid="6983271082911936900">"បាន​ផ្ញើរូបភាព"</string>
     <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"ការ​សន្ទនា"</string>
     <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"ការសន្ទនា​ជាក្រុម"</string>
+    <string name="unread_convo_overflow" msgid="920517615597353833">"<xliff:g id="MAX_UNREAD_COUNT">%1$d</xliff:g>+"</string>
     <string name="resolver_personal_tab" msgid="2051260504014442073">"ផ្ទាល់ខ្លួន"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"ការងារ"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"ទិដ្ឋភាពផ្ទាល់ខ្លួន"</string>
@@ -2085,222 +2076,116 @@
     <string name="resolver_no_work_apps_available_resolve" msgid="1244844292366099399">"មិនមានកម្មវិធីការងារដែលអាចបើក​ខ្លឹមសារនេះបានទេ"</string>
     <string name="resolver_no_personal_apps_available_share" msgid="5639102815174748732">"មិនមានកម្មវិធីផ្ទាល់ខ្លួន​ដែលអាចប្រើ​ខ្លឹមសារនេះបានទេ"</string>
     <string name="resolver_no_personal_apps_available_resolve" msgid="5120671970531446978">"មិនមានកម្មវិធីផ្ទាល់ខ្លួន​ដែលអាចបើក​ខ្លឹមសារនេះបានទេ"</string>
-    <string name="permlab_accessCallAudio" msgid="1682957511874097664">"ថត ឬចាក់សំឡេង​នៅក្នុង​ការហៅទូរសព្ទ"</string>
-    <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"នៅពេលកំណត់​ជាកម្មវិធីផ្ទាំងចុច​ហៅទូរសព្ទលំនាំដើម សូមអនុញ្ញាត​ឱ្យកម្មវិធីនេះថត ឬចាក់សំឡេង​នៅក្នុង​ការហៅទូរសព្ទ។"</string>
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_ENTRY (8050953231914637819) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY (7164399703751688214) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_CORPORATE_ENTRY (4447629474818217364) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SERVICE_PROVIDER_ENTRY (973059024670737358) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SIM_ENTRY (4487435301206073787) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_PUK_ENTRY (768060297218652809) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_ENTRY (7129527319490548930) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_CORPORATE_PUK_ENTRY (2876126640607573252) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_ENTRY (8952595089930109282) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SIM_PUK_ENTRY (3013902515773728996) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK1_ENTRY (2974411408893410289) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK2_ENTRY (687618528751880721) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_HRPD_ENTRY (6810596579655575381) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_CORPORATE_ENTRY (2715929642540980259) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_ENTRY (8557791623303951590) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_RUIM_ENTRY (7382468767274580323) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK1_PUK_ENTRY (6730880791104286987) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK2_PUK_ENTRY (6432126539782267026) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_HRPD_PUK_ENTRY (1730510161529488920) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_ENTRY (3369885925003346830) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_RUIM_PUK_ENTRY (9129139686191167829) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_CORPORATE_PUK_ENTRY (2869929685874615358) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SPN_ENTRY (1238663472392741771) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SP_EHPLMN_ENTRY (3988705848553894358) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_ICCID_ENTRY (6186770686690993200) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_IMPI_ENTRY (7043865376145617024) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NS_SP_ENTRY (6144227308185112176) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_IN_PROGRESS (4233355366318061180) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_SUBSET_IN_PROGRESS (6742563947637715645) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SERVICE_PROVIDER_IN_PROGRESS (2033399698172403560) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_CORPORATE_IN_PROGRESS (4795977251920732254) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_PUK_IN_PROGRESS (1090425878157254446) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_IN_PROGRESS (6476898876518094438) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_CORPORATE_PUK_IN_PROGRESS (6006806734293747731) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_IN_PROGRESS (6546680489620881893) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SIM_PUK_IN_PROGRESS (3506845511000727015) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SIM_IN_PROGRESS (6709169861932992750) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK1_IN_PROGRESS (4013870911606478520) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK2_IN_PROGRESS (9032651188219523434) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_HRPD_IN_PROGRESS (6584576506344491207) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_IN_PROGRESS (830981927724888114) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_CORPORATE_IN_PROGRESS (7851790973098894802) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SPN_IN_PROGRESS (1149560739586960121) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SP_EHPLMN_IN_PROGRESS (5708964693522116025) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_ICCID_IN_PROGRESS (7288103122966483455) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_IMPI_IN_PROGRESS (4036752174056147753) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NS_SP_IN_PROGRESS (5089536274515338566) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_RUIM_IN_PROGRESS (6737197986936251958) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK1_PUK_IN_PROGRESS (5658767775619998623) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK2_PUK_IN_PROGRESS (665978313257653727) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_HRPD_PUK_IN_PROGRESS (3857142652251836850) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_CORPORATE_PUK_IN_PROGRESS (2695664012344346788) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_IN_PROGRESS (2695678959963807782) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_RUIM_PUK_IN_PROGRESS (1230605365926493599) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_ERROR (1924844017037151535) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_SUBSET_ERROR (3372797822292089708) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SERVICE_PROVIDER_ERROR (1878443146720411381) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_CORPORATE_ERROR (7664778312218023192) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SIM_ERROR (2472944311643350302) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK1_ERROR (828089694480999120) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK2_ERROR (17619001007092511) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_HRPD_ERROR (807214229604353614) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_CORPORATE_ERROR (8644184447744175747) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_ERROR (3801002648649640407) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_RUIM_ERROR (707397021218680753) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_PUK_ERROR (894358680773257820) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_ERROR (352466878146726991) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_CORPORATE_PUK_ERROR (7353389721907138671) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_ERROR (2655263155490857920) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SIM_PUK_ERROR (6903740900892931310) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK1_PUK_ERROR (5165901670447518687) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK2_PUK_ERROR (2856763216589267623) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_HRPD_PUK_ERROR (817542684437829139) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_ERROR (5178635064113393143) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_RUIM_PUK_ERROR (5391587926974531008) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_CORPORATE_PUK_ERROR (4895494864493315868) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SPN_ERROR (9017576601595353649) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SP_EHPLMN_ERROR (1116993930995545742) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_ICCID_ERROR (7559167306794441462) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_IMPI_ERROR (2782926139511136588) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NS_SP_ERROR (1890493954453456758) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_SUCCESS (4886243367747126325) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_SUBSET_SUCCESS (4053809277733513987) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SERVICE_PROVIDER_SUCCESS (8249342930499801740) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_CORPORATE_SUCCESS (2339794542560381270) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SIM_SUCCESS (6975608174152828954) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK1_SUCCESS (2846699261330463192) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK2_SUCCESS (5335414726057102801) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_HRPD_SUCCESS (8868100318474971969) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_SUCCESS (6020936629725666932) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_CORPORATE_SUCCESS (6944873647584595489) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_RUIM_SUCCESS (2526483514124121988) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_PUK_SUCCESS (7662200333621664621) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_SUCCESS (2861223407953766632) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_CORPORATE_PUK_SUCCESS (5345648571175243272) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_SUCCESS (3725278343103422466) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SIM_PUK_SUCCESS (6998502547560297983) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK1_PUK_SUCCESS (8555433771162560361) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK2_PUK_SUCCESS (3555767296933606232) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_HRPD_PUK_SUCCESS (6778051818199974237) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_CORPORATE_PUK_SUCCESS (4080108758498911429) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_SUCCESS (7873675303000794343) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_RUIM_RUIM_PUK_SUCCESS (1763198215069819523) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SPN_SUCCESS (2053891977727320532) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_SP_EHPLMN_SUCCESS (8146602361895007345) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_ICCID_SUCCESS (8058678548991999545) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_IMPI_SUCCESS (2545608067978550571) -->
-    <skip />
-    <!-- no translation found for PERSOSUBSTATE_SIM_NS_SP_SUCCESS (4352382949744625007) -->
-    <skip />
+    <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"កូដ PIN ដោះ​សោ​បណ្ដាញ​ស៊ីម"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"កូដ PIN ដោះសោ​សំណុំរង​នៃ​បណ្ដាញស៊ីម"</string>
+    <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"កូដ PIN ដោះសោ​ក្រុមហ៊ុនស៊ីម"</string>
+    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_ENTRY" msgid="973059024670737358">"កូដ PIN ដោះសោ​ក្រុមហ៊ុនផ្ដល់សេវា​ស៊ីម"</string>
+    <string name="PERSOSUBSTATE_SIM_SIM_ENTRY" msgid="4487435301206073787">"កូដ PIN ដោះសោ​ស៊ីម"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_PUK_ENTRY" msgid="768060297218652809">"បញ្ចូល PUK"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_ENTRY" msgid="7129527319490548930">"បញ្ចូល PUK"</string>
+    <string name="PERSOSUBSTATE_SIM_CORPORATE_PUK_ENTRY" msgid="2876126640607573252">"បញ្ចូល PUK"</string>
+    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_ENTRY" msgid="8952595089930109282">"បញ្ចូល PUK"</string>
+    <string name="PERSOSUBSTATE_SIM_SIM_PUK_ENTRY" msgid="3013902515773728996">"បញ្ចូល PUK"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_ENTRY" msgid="2974411408893410289">"កូដ PIN ដោះ​សោ RUIM បណ្ដាញ​ទី 1"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_ENTRY" msgid="687618528751880721">"កូដ PIN ដោះ​សោ RUIM បណ្ដាញ​ទី 2"</string>
+    <string name="PERSOSUBSTATE_RUIM_HRPD_ENTRY" msgid="6810596579655575381">"កូដ PIN ដោះសោ RUIM hrpd"</string>
+    <string name="PERSOSUBSTATE_RUIM_CORPORATE_ENTRY" msgid="2715929642540980259">"កូដ PIN ដោះសោ​ក្រុមហ៊ុន RUIM"</string>
+    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_ENTRY" msgid="8557791623303951590">"កូដ PIN ដោះសោ​ក្រុមហ៊ុនផ្ដល់​សេវា RUIM"</string>
+    <string name="PERSOSUBSTATE_RUIM_RUIM_ENTRY" msgid="7382468767274580323">"កូដ PIN ដោះ​សោ RUIM"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_PUK_ENTRY" msgid="6730880791104286987">"បញ្ចូល PUK"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_PUK_ENTRY" msgid="6432126539782267026">"បញ្ចូល PUK"</string>
+    <string name="PERSOSUBSTATE_RUIM_HRPD_PUK_ENTRY" msgid="1730510161529488920">"បញ្ចូល PUK"</string>
+    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_ENTRY" msgid="3369885925003346830">"បញ្ចូល PUK"</string>
+    <string name="PERSOSUBSTATE_RUIM_RUIM_PUK_ENTRY" msgid="9129139686191167829">"បញ្ចូល PUK"</string>
+    <string name="PERSOSUBSTATE_RUIM_CORPORATE_PUK_ENTRY" msgid="2869929685874615358">"បញ្ចូល PUK"</string>
+    <string name="PERSOSUBSTATE_SIM_SPN_ENTRY" msgid="1238663472392741771">"កូដ PIN ដោះសោ SPN"</string>
+    <string name="PERSOSUBSTATE_SIM_SP_EHPLMN_ENTRY" msgid="3988705848553894358">"កូដ PIN ដោះសោ SP Equivalent Home PLMN"</string>
+    <string name="PERSOSUBSTATE_SIM_ICCID_ENTRY" msgid="6186770686690993200">"កូដ PIN ដោះ​សោ ICCID"</string>
+    <string name="PERSOSUBSTATE_SIM_IMPI_ENTRY" msgid="7043865376145617024">"កូដ PIN ដោះសោ IMPI"</string>
+    <string name="PERSOSUBSTATE_SIM_NS_SP_ENTRY" msgid="6144227308185112176">"កូដ PIN ដោះសោ​ក្រុមហ៊ុន​ផ្ដល់សេវា​សំណុំរង​នៃបណ្ដាញ"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_IN_PROGRESS" msgid="4233355366318061180">"កំពុង​ស្នើសុំ​ដោះសោ​បណ្ដាញស៊ីម…"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_IN_PROGRESS" msgid="6742563947637715645">"កំពុង​ស្នើសុំ​ដោះសោ​សំណុំរង​នៃ​បណ្ដាញស៊ីម …"</string>
+    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_IN_PROGRESS" msgid="2033399698172403560">"កំពុង​ស្នើសុំ​ដោះសោ​ក្រុមហ៊ុន​ផ្ដល់សេវា​ស៊ីម…"</string>
+    <string name="PERSOSUBSTATE_SIM_CORPORATE_IN_PROGRESS" msgid="4795977251920732254">"កំពុង​ស្នើសុំ​ដោះសោ​ក្រុមហ៊ុន​ស៊ីម…"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_PUK_IN_PROGRESS" msgid="1090425878157254446">"កំពុង​ស្នើសុំ​ដោះសោ PUK…"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_IN_PROGRESS" msgid="6476898876518094438">"កំពុង​ស្នើសុំ​ដោះសោ PUK…"</string>
+    <string name="PERSOSUBSTATE_SIM_CORPORATE_PUK_IN_PROGRESS" msgid="6006806734293747731">"កំពុង​ស្នើសុំ​ដោះសោ PUK…"</string>
+    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_IN_PROGRESS" msgid="6546680489620881893">"កំពុង​ស្នើសុំ​ដោះសោ PUK…"</string>
+    <string name="PERSOSUBSTATE_SIM_SIM_PUK_IN_PROGRESS" msgid="3506845511000727015">"កំពុង​ស្នើសុំ​ដោះសោ PUK…"</string>
+    <string name="PERSOSUBSTATE_SIM_SIM_IN_PROGRESS" msgid="6709169861932992750">"កំពុង​ស្នើសុំ​ដោះសោស៊ីម…"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_IN_PROGRESS" msgid="4013870911606478520">"កំពុង​ស្នើសុំ​ដោះសោ RUIM បណ្ដាញ​ទី 1…"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_IN_PROGRESS" msgid="9032651188219523434">"កំពុង​ស្នើសុំ​ដោះសោ RUIM បណ្ដាញ​ទី 2…"</string>
+    <string name="PERSOSUBSTATE_RUIM_HRPD_IN_PROGRESS" msgid="6584576506344491207">"កំពុង​ស្នើសុំ​ដោះសោ RUIM hrpd…"</string>
+    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_IN_PROGRESS" msgid="830981927724888114">"កំពុង​ស្នើសុំ​ដោះសោ​ក្រុមហ៊ុន​ផ្ដល់សេវា RUIM…"</string>
+    <string name="PERSOSUBSTATE_RUIM_CORPORATE_IN_PROGRESS" msgid="7851790973098894802">"កំពុង​ស្នើសុំ​ដោះសោ​ក្រុមហ៊ុន RUIM…"</string>
+    <string name="PERSOSUBSTATE_SIM_SPN_IN_PROGRESS" msgid="1149560739586960121">"កំពុង​ស្នើសុំ​ដោះ​សោ SPN…"</string>
+    <string name="PERSOSUBSTATE_SIM_SP_EHPLMN_IN_PROGRESS" msgid="5708964693522116025">"កំពុង​ស្នើសុំ​ដោះសោ SP Equivalent Home PLMN…"</string>
+    <string name="PERSOSUBSTATE_SIM_ICCID_IN_PROGRESS" msgid="7288103122966483455">"កំពុង​ស្នើសុំ​ដោះសោ ICCID…"</string>
+    <string name="PERSOSUBSTATE_SIM_IMPI_IN_PROGRESS" msgid="4036752174056147753">"កំពុង​ស្នើសុំ​ដោះសោ IMPI…"</string>
+    <string name="PERSOSUBSTATE_SIM_NS_SP_IN_PROGRESS" msgid="5089536274515338566">"កំពុង​ស្នើសុំ​ដោះសោ​ក្រុមហ៊ុន​ផ្ដល់សេវា​សំណុំរង​នៃបណ្ដាញ…"</string>
+    <string name="PERSOSUBSTATE_RUIM_RUIM_IN_PROGRESS" msgid="6737197986936251958">"កំពុង​ស្នើសុំ​ដោះសោ RUIM…"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_PUK_IN_PROGRESS" msgid="5658767775619998623">"កំពុង​ស្នើសុំ​ដោះសោ PUK…"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_PUK_IN_PROGRESS" msgid="665978313257653727">"កំពុង​ស្នើសុំ​ដោះសោ PUK…"</string>
+    <string name="PERSOSUBSTATE_RUIM_HRPD_PUK_IN_PROGRESS" msgid="3857142652251836850">"កំពុង​ស្នើសុំ​ដោះសោ PUK…"</string>
+    <string name="PERSOSUBSTATE_RUIM_CORPORATE_PUK_IN_PROGRESS" msgid="2695664012344346788">"កំពុង​ស្នើសុំ​ដោះសោ PUK…"</string>
+    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_IN_PROGRESS" msgid="2695678959963807782">"កំពុង​ស្នើសុំ​ដោះសោ PUK…"</string>
+    <string name="PERSOSUBSTATE_RUIM_RUIM_PUK_IN_PROGRESS" msgid="1230605365926493599">"កំពុង​ស្នើសុំ​ដោះសោ PUK…"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_ERROR" msgid="1924844017037151535">"សំណើសុំ​ដោះសោបណ្ដាញស៊ីម​មិនទទួលបាន​ជោគជ័យ​ទេ។"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ERROR" msgid="3372797822292089708">"សំណើសុំ​ដោះសោ​សំណុំរង​នៃ​បណ្ដាញស៊ីម​មិនទទួលបាន​ជោគជ័យទេ។"</string>
+    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_ERROR" msgid="1878443146720411381">"សំណើសុំ​ដោះសោ​ក្រុមហ៊ុន​ផ្ដល់សេវាស៊ីម​មិនទទួលបាន​ជោគជ័យទេ។"</string>
+    <string name="PERSOSUBSTATE_SIM_CORPORATE_ERROR" msgid="7664778312218023192">"សំណើសុំ​ដោះសោ​ក្រុមហ៊ុនស៊ីម​មិនទទួលបាន​ជោគជ័យ​ទេ។"</string>
+    <string name="PERSOSUBSTATE_SIM_SIM_ERROR" msgid="2472944311643350302">"សំណើសុំ​ដោះសោ​ស៊ីម​មិនទទួលបាន​ជោគជ័យ​ទេ។"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_ERROR" msgid="828089694480999120">"សំណើ​សុំដោះ​សោ RUIM បណ្ដាញ​ទី 1 មិនទទួលបាន​ជោគជ័យ​ទេ។"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_ERROR" msgid="17619001007092511">"សំណើ​សុំដោះ​សោ RUIM បណ្ដាញ​ទី 2 មិន​ទទួលបាន​ជោគជ័យ​ទេ។"</string>
+    <string name="PERSOSUBSTATE_RUIM_HRPD_ERROR" msgid="807214229604353614">"សំណើសុំ​ដោះសោ RUIM Hrpd មិនបាន​ទទួល​ជោគជ័យទេ។"</string>
+    <string name="PERSOSUBSTATE_RUIM_CORPORATE_ERROR" msgid="8644184447744175747">"សំណើ​សុំដោះសោ​ក្រុមហ៊ុន RUIM មិន​ទទួលបាន​ជោគជ័យ​ទេ។"</string>
+    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_ERROR" msgid="3801002648649640407">"សំណើសុំ​ដោះសោ​ក្រុមហ៊ុន​ផ្ដល់សេវា RUIM មិនទទួលបាន​ជោគជ័យទេ។"</string>
+    <string name="PERSOSUBSTATE_RUIM_RUIM_ERROR" msgid="707397021218680753">"សំណើ​សុំដោះ​សោ RUIM មិន​ទទួលបាន​ជោគជ័យ​ទេ។"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_PUK_ERROR" msgid="894358680773257820">"ការដោះ​សោ PUK មិន​ទទួលបាន​ជោគជ័យទេ។"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_ERROR" msgid="352466878146726991">"ការដោះ​សោ PUK មិន​ទទួលបាន​ជោគជ័យទេ។"</string>
+    <string name="PERSOSUBSTATE_SIM_CORPORATE_PUK_ERROR" msgid="7353389721907138671">"ការដោះ​សោ PUK មិន​ទទួលបាន​ជោគជ័យទេ។"</string>
+    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_ERROR" msgid="2655263155490857920">"ការដោះ​សោ PUK មិន​ទទួលបាន​ជោគជ័យទេ។"</string>
+    <string name="PERSOSUBSTATE_SIM_SIM_PUK_ERROR" msgid="6903740900892931310">"ការដោះ​សោ PUK មិន​ទទួលបាន​ជោគជ័យទេ។"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_PUK_ERROR" msgid="5165901670447518687">"ការដោះ​សោ PUK មិន​ទទួលបាន​ជោគជ័យទេ។"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_PUK_ERROR" msgid="2856763216589267623">"ការដោះ​សោ PUK មិន​ទទួលបាន​ជោគជ័យទេ។"</string>
+    <string name="PERSOSUBSTATE_RUIM_HRPD_PUK_ERROR" msgid="817542684437829139">"ការដោះ​សោ PUK មិន​ទទួលបាន​ជោគជ័យទេ។"</string>
+    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_ERROR" msgid="5178635064113393143">"ការដោះ​សោ PUK មិន​ទទួលបាន​ជោគជ័យទេ។"</string>
+    <string name="PERSOSUBSTATE_RUIM_RUIM_PUK_ERROR" msgid="5391587926974531008">"ការដោះ​សោ PUK មិន​ទទួលបាន​ជោគជ័យទេ។"</string>
+    <string name="PERSOSUBSTATE_RUIM_CORPORATE_PUK_ERROR" msgid="4895494864493315868">"ការដោះ​សោ PUK មិន​ទទួលបាន​ជោគជ័យទេ។"</string>
+    <string name="PERSOSUBSTATE_SIM_SPN_ERROR" msgid="9017576601595353649">"សំណើសុំ​ដោះសោ SPN ​មិនទទួលបាន​ជោគជ័យ​ទេ។"</string>
+    <string name="PERSOSUBSTATE_SIM_SP_EHPLMN_ERROR" msgid="1116993930995545742">"សំណើសុំ​ដោះសោ SP Equivalent Home PLMN មិនទទួលបាន​ជោគជ័យទេ។"</string>
+    <string name="PERSOSUBSTATE_SIM_ICCID_ERROR" msgid="7559167306794441462">"សំណើសុំ​ដោះសោ ICCID មិន​ទទួលបាន​ជោគជ័យ​ទេ។"</string>
+    <string name="PERSOSUBSTATE_SIM_IMPI_ERROR" msgid="2782926139511136588">"សំណើសុំ​ដោះសោ IMPI មិន​ទទួលបាន​ជោគជ័យ​ទេ។"</string>
+    <string name="PERSOSUBSTATE_SIM_NS_SP_ERROR" msgid="1890493954453456758">"សំណើសុំ​ដោះសោ​ក្រុមហ៊ុន​ផ្ដល់សេវា​សំណុំរង​នៃបណ្ដាញ​មិនទទួលបាន​ជោគជ័យទេ។"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUCCESS" msgid="4886243367747126325">"ការ​ដោះសោ​បណ្ដាញ​ស៊ីម​ទទួលបាន​ជោគជ័យ​ហើយ។"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_SUCCESS" msgid="4053809277733513987">"ការដោះសោ​សំណុំរង​នៃ​បណ្ដាញស៊ីម​ទទួលបាន​ជោគជ័យ​ហើយ។"</string>
+    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_SUCCESS" msgid="8249342930499801740">"ការដោះសោ​ក្រុមហ៊ុនផ្ដល់សេវា​ស៊ីមទទួលបាន​ជោគជ័យ​ហើយ។"</string>
+    <string name="PERSOSUBSTATE_SIM_CORPORATE_SUCCESS" msgid="2339794542560381270">"ការដោះសោ​ក្រុមហ៊ុន​ស៊ីម​ទទួលបាន​ជោគជ័យ​ហើយ។"</string>
+    <string name="PERSOSUBSTATE_SIM_SIM_SUCCESS" msgid="6975608174152828954">"ការដោះសោ​ស៊ីម​ទទួលបាន​ជោគជ័យ​ហើយ។"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_SUCCESS" msgid="2846699261330463192">"ការដោះ​សោ RUIM បណ្ដាញ​ទី 1 ទទួលបាន​ជោគជ័យ​ហើយ។"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_SUCCESS" msgid="5335414726057102801">"ការដោះ​សោ RUIM បណ្ដាញ​ទី 2 ទទួលបាន​ជោគជ័យ​ហើយ។"</string>
+    <string name="PERSOSUBSTATE_RUIM_HRPD_SUCCESS" msgid="8868100318474971969">"ការដោះសោ RUIM Hrpd ទទួលបាន​ជោគជ័យ​ហើយ។"</string>
+    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_SUCCESS" msgid="6020936629725666932">"ការដោះសោ​ក្រុមហ៊ុន​ផ្ដល់សេវា RUIM ទទួលបាន​ជោគជ័យ​ហើយ។"</string>
+    <string name="PERSOSUBSTATE_RUIM_CORPORATE_SUCCESS" msgid="6944873647584595489">"ការដោះសោ​ក្រុមហ៊ុន RUIM ទទួលបាន​ជោគជ័យ​ហើយ។"</string>
+    <string name="PERSOSUBSTATE_RUIM_RUIM_SUCCESS" msgid="2526483514124121988">"ការដោះ​សោ RUIM ទទួលបាន​ជោគជ័យហើយ។"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_PUK_SUCCESS" msgid="7662200333621664621">"ការដោះ​សោ PUK ទទួល​បានជោគជ័យ​ហើយ។"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_SUCCESS" msgid="2861223407953766632">"ការដោះ​សោ PUK ទទួល​បានជោគជ័យ​ហើយ។"</string>
+    <string name="PERSOSUBSTATE_SIM_CORPORATE_PUK_SUCCESS" msgid="5345648571175243272">"ការដោះ​សោ PUK ទទួល​បានជោគជ័យ​ហើយ។"</string>
+    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_SUCCESS" msgid="3725278343103422466">"ការដោះ​សោ PUK ទទួល​បានជោគជ័យ​ហើយ។"</string>
+    <string name="PERSOSUBSTATE_SIM_SIM_PUK_SUCCESS" msgid="6998502547560297983">"ការដោះ​សោ PUK ទទួល​បានជោគជ័យ​ហើយ។"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_PUK_SUCCESS" msgid="8555433771162560361">"ការដោះ​សោ PUK ទទួល​បានជោគជ័យ​ហើយ។"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_PUK_SUCCESS" msgid="3555767296933606232">"ការដោះ​សោ PUK ទទួល​បានជោគជ័យ​ហើយ។"</string>
+    <string name="PERSOSUBSTATE_RUIM_HRPD_PUK_SUCCESS" msgid="6778051818199974237">"ការដោះ​សោ PUK ទទួល​បានជោគជ័យ​ហើយ។"</string>
+    <string name="PERSOSUBSTATE_RUIM_CORPORATE_PUK_SUCCESS" msgid="4080108758498911429">"ការដោះ​សោ PUK ទទួល​បានជោគជ័យ​ហើយ។"</string>
+    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_SUCCESS" msgid="7873675303000794343">"ការដោះ​សោ PUK ទទួល​បានជោគជ័យ​ហើយ។"</string>
+    <string name="PERSOSUBSTATE_RUIM_RUIM_PUK_SUCCESS" msgid="1763198215069819523">"ការដោះ​សោ PUK ទទួល​បានជោគជ័យ​ហើយ។"</string>
+    <string name="PERSOSUBSTATE_SIM_SPN_SUCCESS" msgid="2053891977727320532">"ការដោះសោ SPN ទទួលបាន​ជោគជ័យ​ហើយ។"</string>
+    <string name="PERSOSUBSTATE_SIM_SP_EHPLMN_SUCCESS" msgid="8146602361895007345">"ការដោះសោ SP Equivalent Home PLMN ទទួលបាន​ជោគជ័យ​ហើយ។"</string>
+    <string name="PERSOSUBSTATE_SIM_ICCID_SUCCESS" msgid="8058678548991999545">"ការដោះសោ ICCID ទទួលបាន​ជោគជ័យ​ហើយ។"</string>
+    <string name="PERSOSUBSTATE_SIM_IMPI_SUCCESS" msgid="2545608067978550571">"ការដោះសោ IMPI ទទួលបាន​ជោគជ័យ​ហើយ។"</string>
+    <string name="PERSOSUBSTATE_SIM_NS_SP_SUCCESS" msgid="4352382949744625007">"ការដោះសោ​ក្រុមហ៊ុន​ផ្ដល់សេវា​សំណុំរង​នៃបណ្ដាញ​ទទួលបាន​ជោគជ័យ​ហើយ។"</string>
+    <string name="config_pdp_reject_dialog_title" msgid="4072057179246785727"></string>
+    <string name="config_pdp_reject_user_authentication_failed" msgid="4531693033885744689"></string>
+    <string name="config_pdp_reject_service_not_subscribed" msgid="8190338397128671588"></string>
+    <string name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed" msgid="6024904218067254186"></string>
 </resources>

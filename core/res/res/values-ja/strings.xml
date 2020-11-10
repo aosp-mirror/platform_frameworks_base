@@ -193,6 +193,7 @@
     <string name="network_logging_notification_text" msgid="1327373071132562512">"このデバイスは組織によって管理され、ネットワーク トラフィックが監視される場合があります。詳しくはタップしてください。"</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"アプリに位置情報へのアクセスを許可しました"</string>
     <string name="location_changed_notification_text" msgid="7158423339982706912">"詳しくは IT 管理者にお問い合わせください"</string>
+    <string name="geofencing_service" msgid="3826902410740315456">"ジオフェンス サービス"</string>
     <string name="country_detector" msgid="7023275114706088854">"国の検出"</string>
     <string name="location_service" msgid="2439187616018455546">"位置情報サービス"</string>
     <string name="gnss_service" msgid="8907781262179951385">"GNSS サービス"</string>
@@ -201,10 +202,10 @@
     <string name="factory_reset_warning" msgid="6858705527798047809">"デバイスのデータが消去されます"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"管理アプリを使用できません。デバイスのデータはこれから消去されます。\n\nご不明な点がある場合は、組織の管理者にお問い合わせください。"</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"「<xliff:g id="OWNER_APP">%s</xliff:g>」により印刷は無効にされています。"</string>
-    <string name="personal_apps_suspended_title" msgid="4543693107104417750">"個人用アプリのブロック解除"</string>
-    <string name="personal_apps_suspended_tomorrow_title" msgid="6414440257969874914">"アプリは明日ブロックされます"</string>
-    <string name="personal_apps_suspended_text" msgid="8954038765131038226">"IT 管理者は、仕事用プロファイルの一時停止が <xliff:g id="DAYS">%1$d</xliff:g> 日を超えることを許可していません"</string>
-    <string name="personal_apps_suspended_turn_profile_on" msgid="4278188538997940785">"仕事用プロファイルを有効にする"</string>
+    <string name="personal_apps_suspension_title" msgid="7561416677884286600">"仕事用プロファイルを ON にする"</string>
+    <string name="personal_apps_suspension_text" msgid="6115455688932935597">"個人用アプリは、仕事用プロファイルを ON にしない限りブロックされます"</string>
+    <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"個人用アプリは、<xliff:g id="DATE">%1$s</xliff:g> <xliff:g id="TIME">%2$s</xliff:g> にブロックされます。仕事用プロファイルを <xliff:g id="NUMBER">%3$d</xliff:g> 日を超えて OFF にすることは、IT 管理者から許可されていません。"</string>
+    <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"ON にする"</string>
     <string name="me" msgid="6207584824693813140">"自分"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"タブレットオプション"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Android TV のオプション"</string>
@@ -431,13 +432,17 @@
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"音声設定の変更"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"音声全般の設定（音量、出力に使用するスピーカーなど）の変更をアプリに許可します。"</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"録音"</string>
-    <string name="permdesc_recordAudio" msgid="3976213377904701093">"このアプリは、いつでもマイクを使用して録音できます。"</string>
+    <string name="permdesc_recordAudio" msgid="5857246765327514062">"このアプリは、ユーザーがアプリを使用している場合にマイクを使用して音声を録音できます。"</string>
+    <string name="permlab_recordBackgroundAudio" msgid="5891032812308878254">"バックグラウンドでの音声の録音"</string>
+    <string name="permdesc_recordBackgroundAudio" msgid="1992623135737407516">"このアプリは、いつでもマイクを使用して音声を録音できます。"</string>
     <string name="permlab_sim_communication" msgid="176788115994050692">"SIMへのコマンド送信"</string>
     <string name="permdesc_sim_communication" msgid="4179799296415957960">"SIMにコマンドを送信することをアプリに許可します｡この許可は非常に危険です。"</string>
     <string name="permlab_activityRecognition" msgid="1782303296053990884">"身体活動の認識"</string>
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"このアプリで身体活動が認識されるようにします。"</string>
     <string name="permlab_camera" msgid="6320282492904119413">"写真と動画の撮影"</string>
-    <string name="permdesc_camera" msgid="1354600178048761499">"このアプリは、いつでもカメラを使用して写真や動画を撮影できます。"</string>
+    <string name="permdesc_camera" msgid="5240801376168647151">"このアプリは、ユーザーがアプリを使用している場合にカメラを使用して写真や動画を撮影できます。"</string>
+    <string name="permlab_backgroundCamera" msgid="7549917926079731681">"バックグラウンドでの写真と動画の撮影"</string>
+    <string name="permdesc_backgroundCamera" msgid="1615291686191138250">"このアプリは、いつでもカメラを使用して写真や動画を撮影できます。"</string>
     <string name="permlab_systemCamera" msgid="3642917457796210580">"写真と動画を撮影するには、システムカメラへのアクセスをアプリまたはサービスに許可してください"</string>
     <string name="permdesc_systemCamera" msgid="5938360914419175986">"権限を付与されたこのアプリまたはシステムアプリは、いつでもシステムカメラを使用して写真と動画を撮影できます。アプリには android.permission.CAMERA 権限も必要です"</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"カメラデバイスが起動または終了したときにコールバックを受け取ることを、アプリまたはサービスに許可してください。"</string>
@@ -537,16 +542,17 @@
     <string name="permdesc_imagesWrite" msgid="5195054463269193317">"写真コレクションの変更をアプリに許可します。"</string>
     <string name="permlab_mediaLocation" msgid="7368098373378598066">"メディア コレクションの位置情報の読み取り"</string>
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"メディア コレクションの位置情報の読み取りをアプリに許可します。"</string>
-    <string name="biometric_dialog_default_title" msgid="5284880398508155088">"本人確認"</string>
+    <string name="biometric_dialog_default_title" msgid="55026799173208210">"本人確認"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"生体認証ハードウェアが利用できません"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"認証をキャンセルしました"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"認識されませんでした"</string>
     <string name="biometric_error_canceled" msgid="8266582404844179778">"認証をキャンセルしました"</string>
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"PIN、パターン、パスワードが設定されていません"</string>
+    <string name="biometric_error_generic" msgid="6784371929985434439">"エラー認証"</string>
     <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"指紋を一部しか検出できませんでした。もう一度お試しください。"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"指紋を処理できませんでした。もう一度お試しください。"</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"指紋認証センサーに汚れがあります。汚れを落としてもう一度お試しください。"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="5151661932298844352">"指の動きが速すぎました。もう一度お試しください。"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="5151661932298844352">"指を離すのが速すぎました。もう一度お試しください。"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"指の動きが遅すぎました。もう一度お試しください。"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
@@ -699,7 +705,7 @@
     <string name="policydesc_encryptedStorage" msgid="1102516950740375617">"保存したアプリデータが暗号化されるようにします。"</string>
     <string name="policylab_disableCamera" msgid="5749486347810162018">"カメラを無効にする"</string>
     <string name="policydesc_disableCamera" msgid="3204405908799676104">"すべてのデバイスカメラを使用できないようにします。"</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="5071855750149949741">"画面ロックの一部の機能を無効化"</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="5071855750149949741">"画面ロックの一部機能を無効化"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="6641673177041195957">"画面ロックの一部の機能の使用を禁止します。"</string>
   <string-array name="phoneTypes">
     <item msgid="8996339953292723951">"自宅"</item>
@@ -830,7 +836,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"MENUキーでロック解除(または緊急通報)"</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"MENUキーでロック解除"</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"パターンを入力"</string>
-    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"緊急通報"</string>
+    <string name="lockscreen_emergency_call" msgid="7549683825868928636">"緊急通報"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"通話に戻る"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"一致しました"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"もう一度お試しください"</string>
@@ -1123,6 +1129,8 @@
     <string name="capital_off" msgid="7443704171014626777">"OFF"</string>
     <string name="checked" msgid="9179896827054513119">"ON"</string>
     <string name="not_checked" msgid="7972320087569023342">"OFF"</string>
+    <string name="selected" msgid="6614607926197755875">"選択済み"</string>
+    <string name="not_selected" msgid="410652016565864475">"未選択"</string>
     <string name="whichApplication" msgid="5432266899591255759">"アプリケーションを選択"</string>
     <string name="whichApplicationNamed" msgid="6969946041713975681">"%1$sを使用してアクションを完了"</string>
     <string name="whichApplicationLabel" msgid="7852182961472531728">"アクションを実行"</string>
@@ -1150,7 +1158,7 @@
     <string name="whichImageCaptureApplicationNamed" msgid="8820702441847612202">"「%1$s」を使用して画像をキャプチャ"</string>
     <string name="whichImageCaptureApplicationLabel" msgid="6505433734824988277">"画像をキャプチャ"</string>
     <string name="alwaysUse" msgid="3153558199076112903">"常にこの操作で使用する"</string>
-    <string name="use_a_different_app" msgid="4987790276170972776">"別のアプリの使用"</string>
+    <string name="use_a_different_app" msgid="4987790276170972776">"別のアプリを使用"</string>
     <string name="clearDefaultHintMsg" msgid="1325866337702524936">"[システム設定]&gt;[アプリ]&gt;[ダウンロード済み]でデフォルト設定をクリアします。"</string>
     <string name="chooseActivity" msgid="8563390197659779956">"操作の選択"</string>
     <string name="chooseUsbActivity" msgid="2096269989990986612">"USBデバイス用アプリを選択"</string>
@@ -1307,12 +1315,12 @@
     <string name="usb_power_notification_message" msgid="7284765627437897702">"接続されているデバイスを充電しています。タップすると、他の項目が表示されます。"</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"アナログのオーディオ アクセサリを検出"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"接続したデバイスはこのスマートフォンと互換性がありません。タップすると、詳細を確認できます。"</string>
-    <string name="adb_active_notification_title" msgid="408390247354560331">"USBデバッグが接続されました"</string>
+    <string name="adb_active_notification_title" msgid="408390247354560331">"USB デバッグが接続されました"</string>
     <string name="adb_active_notification_message" msgid="5617264033476778211">"USB デバッグを無効にするにはここをタップしてください"</string>
-    <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"USBデバッグを無効にする場合に選択します。"</string>
+    <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"USB デバッグを無効にする場合に選択します。"</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"ワイヤレス デバッグが接続されました"</string>
     <string name="adbwifi_active_notification_message" msgid="930987922852867972">"ワイヤレス デバッグをUSB デバッグを無効にするにはここをタップしてください"</string>
-    <string name="adbwifi_active_notification_message" product="tv" msgid="8633421848366915478">"ワイヤレス デバッグを無効にする場合に選択します。"</string>
+    <string name="adbwifi_active_notification_message" product="tv" msgid="8633421848366915478">"ワイヤレス デバッグを無効にするには選択します。"</string>
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"テストハーネス モード有効"</string>
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"出荷時設定にリセットしてテストハーネス モードを無効にしてください。"</string>
     <string name="console_running_notification_title" msgid="6087888939261635904">"シリアル コンソールは有効です"</string>
@@ -1328,7 +1336,7 @@
     <string name="share_remote_bugreport_action" msgid="7630880678785123682">"共有する"</string>
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"共有しない"</string>
     <string name="select_input_method" msgid="3971267998568587025">"入力方法の選択"</string>
-    <string name="show_ime" msgid="6406112007347443383">"物理キーボードが有効になっている間は、画面に表示されます"</string>
+    <string name="show_ime" msgid="6406112007347443383">"物理キーボードが有効になっていても画面に表示させます"</string>
     <string name="hardware" msgid="1800597768237606953">"仮想キーボードの表示"</string>
     <string name="select_keyboard_layout_notification_title" msgid="4427643867639774118">"物理キーボードの設定"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"タップして言語とレイアウトを選択してください"</string>
@@ -1342,14 +1350,20 @@
     <string name="ext_media_checking_notification_title" msgid="8299199995416510094">"<xliff:g id="NAME">%s</xliff:g>を確認しています…"</string>
     <string name="ext_media_checking_notification_message" msgid="2231566971425375542">"現在のコンテンツを確認しています"</string>
     <string name="ext_media_new_notification_title" msgid="3517407571407687677">"新しい <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_new_notification_title" product="automotive" msgid="9085349544984742727">"<xliff:g id="NAME">%s</xliff:g>は動作していません"</string>
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"タップして設定してください"</string>
+    <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"デバイスの再フォーマットが必要になる場合があります。取り出すにはタップしてください。"</string>
     <string name="ext_media_ready_notification_message" msgid="777258143284919261">"写真などのメディア転送用"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"<xliff:g id="NAME">%s</xliff:g>に関する問題"</string>
+    <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"<xliff:g id="NAME">%s</xliff:g>は動作していません"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"タップして修正してください"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3003611129979934633">"<xliff:g id="NAME">%s</xliff:g>が破損しています。修正するには選択してください。"</string>
+    <string name="ext_media_unmountable_notification_message" product="automotive" msgid="2274596120715020680">"デバイスの再フォーマットが必要になる場合があります。取り出すにはタップしてください。"</string>
     <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"対応していない<xliff:g id="NAME">%s</xliff:g>です"</string>
+    <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"<xliff:g id="NAME">%s</xliff:g>は動作していません"</string>
     <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"このデバイスはこの <xliff:g id="NAME">%s</xliff:g>に対応していません。タップして、対応している形式でセットアップしてください。"</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="7744945987775645685">"このデバイスはこの <xliff:g id="NAME">%s</xliff:g>に対応していません。サポートされるフォーマットで設定するには選択してください。"</string>
+    <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"デバイスの再フォーマットが必要になる場合があります"</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"<xliff:g id="NAME">%s</xliff:g>が不適切に取り外されました"</string>
     <string name="ext_media_badremoval_notification_message" msgid="1986514704499809244">"コンテンツの喪失を防ぐため、メディアを取り出してから取り外してください"</string>
     <string name="ext_media_nomedia_notification_title" msgid="742671636376975890">"<xliff:g id="NAME">%s</xliff:g>の取り外し"</string>
@@ -1506,7 +1520,7 @@
     <string name="storage_usb_drive_label" msgid="6631740655876540521">"<xliff:g id="MANUFACTURER">%s</xliff:g>製USBドライブ"</string>
     <string name="storage_usb" msgid="2391213347883616886">"USBストレージ"</string>
     <string name="extract_edit_menu_button" msgid="63954536535863040">"編集"</string>
-    <string name="data_usage_warning_title" msgid="9034893717078325845">"データ使用の警告"</string>
+    <string name="data_usage_warning_title" msgid="9034893717078325845">"警告するデータ使用量"</string>
     <string name="data_usage_warning_body" msgid="1669325367188029454">"<xliff:g id="APP">%s</xliff:g> のデータを使用しました"</string>
     <string name="data_usage_mobile_limit_title" msgid="3911447354393775241">"モバイルデータの上限に達しました"</string>
     <string name="data_usage_wifi_limit_title" msgid="2069698056520812232">"Wi-Fiデータの上限に達しました"</string>
@@ -1540,9 +1554,7 @@
     <string name="launchBrowserDefault" msgid="6328349989932924119">"ブラウザを起動しますか？"</string>
     <string name="SetupCallDefault" msgid="5581740063237175247">"通話を受けますか？"</string>
     <string name="activity_resolver_use_always" msgid="5575222334666843269">"常時"</string>
-    <string name="activity_resolver_set_always" msgid="4142825808921411476">"[常に開く] に設定"</string>
-    <string name="activity_resolver_use_once" msgid="948462794469672658">"1回のみ"</string>
-    <string name="activity_resolver_app_settings" msgid="6758823206817748026">"設定"</string>
+    <string name="activity_resolver_use_once" msgid="948462794469672658">"1 回のみ"</string>
     <string name="activity_resolver_work_profiles_support" msgid="4071345609235361269">"%1$sは仕事用プロファイルをサポートしていません"</string>
     <string name="default_audio_route_name" product="tablet" msgid="367936735632195517">"タブレット"</string>
     <string name="default_audio_route_name" product="tv" msgid="4908971385068087367">"テレビ"</string>
@@ -1553,7 +1565,7 @@
     <string name="default_audio_route_name_usb" msgid="895668743163316932">"USB"</string>
     <string name="default_audio_route_category_name" msgid="5241740395748134483">"システム"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="4214648773120426288">"Bluetooth音声"</string>
-    <string name="wireless_display_route_description" msgid="8297563323032966831">"ワイヤレスディスプレイ"</string>
+    <string name="wireless_display_route_description" msgid="8297563323032966831">"ワイヤレス ディスプレイ"</string>
     <string name="media_route_button_content_description" msgid="2299223698196869956">"キャスト"</string>
     <string name="media_route_chooser_title" msgid="6646594924991269208">"デバイスに接続"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"デバイスへの画面のキャスト"</string>
@@ -1613,19 +1625,18 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"ロック解除パターンの入力を<xliff:g id="NUMBER_0">%1$d</xliff:g>回間違えました。あと<xliff:g id="NUMBER_1">%2$d</xliff:g>回間違えると、モバイルデバイスのロック解除にメールアカウントが必要になります。\n\n<xliff:g id="NUMBER_2">%3$d</xliff:g>秒後にもう一度お試しください。"</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" - "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"削除"</string>
-    <string name="allow_while_in_use_permission_in_fgs" msgid="4101339676785053656">"今後の R ビルドでは、<xliff:g id="PACKAGENAME">%1$s</xliff:g> からバックグラウンドで開始されるフォアグラウンド サービスに「使用中のみ許可」の権限がありません。go/r-bg-fgs-restriction を確認し、バグレポートを提出してください。"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"推奨レベルを超えるまで音量を上げますか？\n\n大音量で長時間聞き続けると、聴力を損なう恐れがあります。"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"ユーザー補助機能のショートカットの使用"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"ショートカットが ON の場合、両方の音量ボタンを 3 秒ほど長押しするとユーザー補助機能が起動します。"</string>
-    <string name="accessibility_shortcut_multiple_service_warning_title" msgid="8417489297036013065">"ユーザー補助機能を ON にしますか？"</string>
+    <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"ユーザー補助機能のショートカットを ON にしますか？"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"音量大と音量小の両方のボタンを数秒ほど長押しすると、ユーザー補助機能が ON になります。この機能が ON になると、デバイスの動作が変わることがあります。\n\n現在の機能:\n<xliff:g id="SERVICE">%1$s</xliff:g>\n選択した機能は [設定] &gt; [ユーザー補助] で変更できます。"</string>
     <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
-    <string name="accessibility_shortcut_talkback_warning_title" msgid="3410100187167382427">"TalkBack を ON にしますか？"</string>
-    <string name="accessibility_shortcut_talkback_warning" msgid="8412954203626349109">"音量大と音量小の両方のボタンを数秒ほど長押しすると、TalkBack が ON になります。TalkBack は、目の不自由な方や視力の弱い方向けのスクリーン リーダーです。TalkBack を ON にすると、デバイスの動作が完全に変わります。\n\nこのショートカットは [設定] &gt; [ユーザー補助] で別の機能に変更できます。"</string>
-    <string name="accessibility_shortcut_single_service_warning_title" msgid="2819109500943271385">"<xliff:g id="SERVICE">%1$s</xliff:g> を ON にしますか？"</string>
+    <string name="accessibility_shortcut_single_service_warning_title" msgid="1909518473488345266">"<xliff:g id="SERVICE">%1$s</xliff:g> のショートカットを ON にしますか？"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"音量大と音量小の両方のボタンを数秒ほど長押しすると、ユーザー補助機能の <xliff:g id="SERVICE">%1$s</xliff:g> が ON になります。この機能が ON になると、デバイスの動作が変わることがあります。\n\nこのショートカットは [設定] &gt; [ユーザー補助] で別の機能に変更できます。"</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"ON にする"</string>
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"ON にしない"</string>
+    <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"ON"</string>
+    <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"OFF"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"<xliff:g id="SERVICE">%1$s</xliff:g> にデバイスのフル コントロールを許可しますか？"</string>
     <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"<xliff:g id="SERVICE">%1$s</xliff:g> をオンにすると、デバイスデータの暗号化の強化に画面ロックは使用されなくなります。"</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"フル コントロールは、ユーザー補助機能を必要とするユーザーをサポートするアプリには適していますが、ほとんどのアプリには適していません。"</string>
@@ -1787,9 +1798,9 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"管理者により更新されています"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"管理者により削除されています"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"電池を長持ちさせるためにバッテリー セーバーが行う操作:\n·ダークテーマを ON にする\n·バックグラウンド アクティビティ、一部の視覚効果や、「OK Google」などの機能を OFF にする、または制限する\n\n"<annotation id="url">"詳細"</annotation></string>
-    <string name="battery_saver_description" msgid="7618492104632328184">"電池を長持ちさせるためにバッテリー セーバーが行う操作:\n·ダークテーマを ON にする\n·バックグラウンド アクティビティ、一部の視覚効果や、「OK Google」などの機能を OFF にする、または制限する"</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"データセーバーは、一部のアプリによるバックグラウンドでのデータ送受信を停止することでデータ使用量を抑制します。使用中のアプリからデータにアクセスすることはできますが、その頻度は低くなる場合があります。この影響として、たとえば画像はタップしないと表示されないようになります。"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"電池を長持ちさせるためにバッテリー セーバーが行う操作:\n\n• ダークテーマを ON にする\n• バックグラウンド アクティビティ、一部の視覚効果や、「OK Google」などの機能を OFF にする、または制限する\n\n"<annotation id="url">"詳細"</annotation></string>
+    <string name="battery_saver_description" msgid="6794188153647295212">"電池を長持ちさせるためにバッテリー セーバーが行う操作:\n\n• ダークテーマを ON にする\n• バックグラウンド アクティビティ、一部の視覚効果や、「OK Google」などの機能を OFF にする、または制限する"</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"データセーバーは、一部のアプリによるバックグラウンドでのデータ送受信を停止することでデータ使用量を抑制します。使用中のアプリからデータを送受信することはできますが、その頻度は低くなる場合があります。この影響として、たとえば画像はタップしないと表示されないようになります。"</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"データセーバーを ON にしますか？"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"ON にする"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
@@ -1824,6 +1835,7 @@
       <item quantity="other">%d時間</item>
       <item quantity="one">1時間</item>
     </plurals>
+    <string name="zen_mode_until_next_day" msgid="1403042784161725038">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>まで"</string>
     <string name="zen_mode_until" msgid="2250286190237669079">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>まで"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>（次のアラーム）まで"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"自分が OFF にするまで"</string>
@@ -1881,7 +1893,7 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"現在、<xliff:g id="APP_NAME_0">%1$s</xliff:g> は使用できません。このアプリの使用は [<xliff:g id="APP_NAME_1">%2$s</xliff:g>] で管理されています。"</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"詳細"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"アプリの一時停止を解除"</string>
-    <string name="work_mode_off_title" msgid="5503291976647976560">"仕事用プロファイルの有効化"</string>
+    <string name="work_mode_off_title" msgid="5503291976647976560">"仕事用プロファイルを ON にしますか？"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"仕事用のアプリ、通知、データなど、仕事用プロファイルの機能が ON になります"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"ON にする"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"アプリの利用不可"</string>
@@ -1992,6 +2004,7 @@
     <string name="notification_appops_camera_active" msgid="8177643089272352083">"カメラ"</string>
     <string name="notification_appops_microphone_active" msgid="581333393214739332">"マイク"</string>
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"画面の他のアプリの上に重ねて表示"</string>
+    <string name="notification_feedback_indicator" msgid="663476517711323016">"フィードバックを送信"</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"ルーティン モード情報の通知"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"通常の充電を行う前に電池が切れる可能性があります"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"電池を長持ちさせるため、バッテリー セーバーが有効になりました"</string>
@@ -2004,7 +2017,7 @@
     <string name="mime_type_apk" msgid="3168784749499623902">"Android アプリ"</string>
     <string name="mime_type_generic" msgid="4606589110116560228">"ファイル"</string>
     <string name="mime_type_generic_ext" msgid="9220220924380909486">"<xliff:g id="EXTENSION">%1$s</xliff:g> ファイル"</string>
-    <string name="mime_type_audio" msgid="4933450584432509875">"音声"</string>
+    <string name="mime_type_audio" msgid="4933450584432509875">"オーディオ"</string>
     <string name="mime_type_audio_ext" msgid="2615491023840514797">"<xliff:g id="EXTENSION">%1$s</xliff:g> 音声"</string>
     <string name="mime_type_video" msgid="7071965726609428150">"動画"</string>
     <string name="mime_type_video_ext" msgid="185438149044230136">"<xliff:g id="EXTENSION">%1$s</xliff:g> 動画"</string>
@@ -2033,15 +2046,18 @@
     <string name="accessibility_system_action_notifications_label" msgid="6083767351772162010">"通知"</string>
     <string name="accessibility_system_action_quick_settings_label" msgid="4583900123506773783">"クイック設定"</string>
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"電源ダイアログ"</string>
-    <string name="accessibility_system_action_toggle_split_screen_label" msgid="6626177163849387748">"分割画面の切り替え"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"ロック画面"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"スクリーンショット"</string>
-    <string name="accessibility_system_action_accessibility_menu_label" msgid="8436484650391125184">"ユーザー補助機能メニュー"</string>
+    <string name="accessibility_system_action_on_screen_a11y_shortcut_label" msgid="8488701469459210309">"画面上のユーザー補助のショートカット"</string>
+    <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"画面上のユーザー補助のショートカットの選択メニュー"</string>
+    <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"ユーザー補助のショートカット"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"<xliff:g id="APP_NAME">%1$s</xliff:g> のキャプション バーです。"</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> は RESTRICTED バケットに移動しました。"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
+    <string name="conversation_single_line_image_placeholder" msgid="6983271082911936900">"画像を送信しました"</string>
     <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"会話"</string>
     <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"グループの会話"</string>
+    <string name="unread_convo_overflow" msgid="920517615597353833">"<xliff:g id="MAX_UNREAD_COUNT">%1$d</xliff:g>+"</string>
     <string name="resolver_personal_tab" msgid="2051260504014442073">"個人用"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"仕事用"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"個人用ビュー"</string>
@@ -2055,16 +2071,14 @@
     <string name="resolver_cant_access_personal_apps" msgid="648291604475669395">"個人用アプリでこのコンテンツを開くことはできません"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="2298773629302296519">"IT 管理者は、個人用プロファイルのアプリでこのコンテンツを開くことを許可していません"</string>
     <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"仕事用プロファイルが一時停止しています"</string>
-    <string name="resolver_switch_on_work" msgid="2873009160846966379">"オンにする"</string>
+    <string name="resolver_switch_on_work" msgid="2873009160846966379">"ON にする"</string>
     <string name="resolver_no_work_apps_available_share" msgid="7933949011797699505">"このコンテンツに対応する仕事用アプリはありません"</string>
     <string name="resolver_no_work_apps_available_resolve" msgid="1244844292366099399">"このコンテンツを開くことができる仕事用アプリはありません"</string>
     <string name="resolver_no_personal_apps_available_share" msgid="5639102815174748732">"このコンテンツに対応する個人用アプリはありません"</string>
     <string name="resolver_no_personal_apps_available_resolve" msgid="5120671970531446978">"このコンテンツを開くことができる個人用アプリはありません"</string>
-    <string name="permlab_accessCallAudio" msgid="1682957511874097664">"通話中に録音または音声の再生を行う"</string>
-    <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"デフォルトの電話アプリケーションとして割り当てられている場合、このアプリに通話中の録音または音声の再生を許可します。"</string>
-    <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"SIM のネットワークのロック解除 PIN"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"SIM のネットワーク ロック解除 PIN"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"SIM のネットワーク サブネットのロック解除 PIN"</string>
-    <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"SIM の企業のロック解除 PIN"</string>
+    <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"SIM の企業ロック解除 PIN"</string>
     <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_ENTRY" msgid="973059024670737358">"SIM のサービス プロバイダのロック解除 PIN"</string>
     <string name="PERSOSUBSTATE_SIM_SIM_ENTRY" msgid="4487435301206073787">"SIM のロック解除 PIN"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_PUK_ENTRY" msgid="768060297218652809">"PUK を入力"</string>
@@ -2074,8 +2088,8 @@
     <string name="PERSOSUBSTATE_SIM_SIM_PUK_ENTRY" msgid="3013902515773728996">"PUK を入力"</string>
     <string name="PERSOSUBSTATE_RUIM_NETWORK1_ENTRY" msgid="2974411408893410289">"RUIM の Network1 のロック解除 PIN"</string>
     <string name="PERSOSUBSTATE_RUIM_NETWORK2_ENTRY" msgid="687618528751880721">"RUIM の Network2 のロック解除 PIN"</string>
-    <string name="PERSOSUBSTATE_RUIM_HRPD_ENTRY" msgid="6810596579655575381">"RUIM の Hrpd のロック解除 PIN"</string>
-    <string name="PERSOSUBSTATE_RUIM_CORPORATE_ENTRY" msgid="2715929642540980259">"RUIM の企業のロック解除 PIN"</string>
+    <string name="PERSOSUBSTATE_RUIM_HRPD_ENTRY" msgid="6810596579655575381">"HRPD のロック解除 PIN"</string>
+    <string name="PERSOSUBSTATE_RUIM_CORPORATE_ENTRY" msgid="2715929642540980259">"RUIM の企業ロック解除 PIN"</string>
     <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_ENTRY" msgid="8557791623303951590">"RUIM のサービス プロバイダのロック解除 PIN"</string>
     <string name="PERSOSUBSTATE_RUIM_RUIM_ENTRY" msgid="7382468767274580323">"RUIM のロック解除 PIN"</string>
     <string name="PERSOSUBSTATE_RUIM_NETWORK1_PUK_ENTRY" msgid="6730880791104286987">"PUK を入力"</string>
@@ -2089,85 +2103,89 @@
     <string name="PERSOSUBSTATE_SIM_ICCID_ENTRY" msgid="6186770686690993200">"ICCID のロック解除 PIN"</string>
     <string name="PERSOSUBSTATE_SIM_IMPI_ENTRY" msgid="7043865376145617024">"IMPI のロック解除 PIN"</string>
     <string name="PERSOSUBSTATE_SIM_NS_SP_ENTRY" msgid="6144227308185112176">"ネットワーク サブセットのサービス プロバイダのロック解除 PIN"</string>
-    <string name="PERSOSUBSTATE_SIM_NETWORK_IN_PROGRESS" msgid="4233355366318061180">"SIM のネットワークのロック解除をリクエストしています…"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_IN_PROGRESS" msgid="4233355366318061180">"SIM のネットワーク ロック解除をリクエストしています…"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_IN_PROGRESS" msgid="6742563947637715645">"SIM のネットワーク サブセットのロック解除をリクエストしています…"</string>
     <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_IN_PROGRESS" msgid="2033399698172403560">"SIM のサービス プロバイダのロック解除をリクエストしています…"</string>
-    <string name="PERSOSUBSTATE_SIM_CORPORATE_IN_PROGRESS" msgid="4795977251920732254">"SIM の企業のロック解除をリクエストしています…"</string>
-    <string name="PERSOSUBSTATE_SIM_NETWORK_PUK_IN_PROGRESS" msgid="1090425878157254446">"PUK のロック解除をリクエストしています…"</string>
-    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_IN_PROGRESS" msgid="6476898876518094438">"PUK のロック解除をリクエストしています…"</string>
-    <string name="PERSOSUBSTATE_SIM_CORPORATE_PUK_IN_PROGRESS" msgid="6006806734293747731">"PUK のロック解除をリクエストしています…"</string>
-    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_IN_PROGRESS" msgid="6546680489620881893">"PUK のロック解除をリクエストしています…"</string>
-    <string name="PERSOSUBSTATE_SIM_SIM_PUK_IN_PROGRESS" msgid="3506845511000727015">"PUK のロック解除をリクエストしています…"</string>
+    <string name="PERSOSUBSTATE_SIM_CORPORATE_IN_PROGRESS" msgid="4795977251920732254">"SIM の企業ロック解除をリクエストしています…"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_PUK_IN_PROGRESS" msgid="1090425878157254446">"PUK によるロック解除をリクエストしています…"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_IN_PROGRESS" msgid="6476898876518094438">"PUK によるロック解除をリクエストしています…"</string>
+    <string name="PERSOSUBSTATE_SIM_CORPORATE_PUK_IN_PROGRESS" msgid="6006806734293747731">"PUK によるロック解除をリクエストしています…"</string>
+    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_IN_PROGRESS" msgid="6546680489620881893">"PUK によるロック解除をリクエストしています…"</string>
+    <string name="PERSOSUBSTATE_SIM_SIM_PUK_IN_PROGRESS" msgid="3506845511000727015">"PUK によるロック解除をリクエストしています…"</string>
     <string name="PERSOSUBSTATE_SIM_SIM_IN_PROGRESS" msgid="6709169861932992750">"SIM のロック解除をリクエストしています…"</string>
     <string name="PERSOSUBSTATE_RUIM_NETWORK1_IN_PROGRESS" msgid="4013870911606478520">"RUIM の Network1 のロック解除をリクエストしています…"</string>
     <string name="PERSOSUBSTATE_RUIM_NETWORK2_IN_PROGRESS" msgid="9032651188219523434">"RUIM の Network2 のロック解除をリクエストしています…"</string>
-    <string name="PERSOSUBSTATE_RUIM_HRPD_IN_PROGRESS" msgid="6584576506344491207">"RUIM の Hrpd のロック解除をリクエストしています…"</string>
+    <string name="PERSOSUBSTATE_RUIM_HRPD_IN_PROGRESS" msgid="6584576506344491207">"HRPD のロック解除をリクエストしています…"</string>
     <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_IN_PROGRESS" msgid="830981927724888114">"RUIM のサービス プロバイダのロック解除をリクエストしています…"</string>
-    <string name="PERSOSUBSTATE_RUIM_CORPORATE_IN_PROGRESS" msgid="7851790973098894802">"RUIM の企業のロック解除をリクエストしています…"</string>
+    <string name="PERSOSUBSTATE_RUIM_CORPORATE_IN_PROGRESS" msgid="7851790973098894802">"RUIM の企業ロック解除をリクエストしています…"</string>
     <string name="PERSOSUBSTATE_SIM_SPN_IN_PROGRESS" msgid="1149560739586960121">"SPN のロック解除をリクエストしています…"</string>
     <string name="PERSOSUBSTATE_SIM_SP_EHPLMN_IN_PROGRESS" msgid="5708964693522116025">"SP Equivalent Home PLMN のロック解除をリクエストしています…"</string>
     <string name="PERSOSUBSTATE_SIM_ICCID_IN_PROGRESS" msgid="7288103122966483455">"ICCID のロック解除をリクエストしています…"</string>
     <string name="PERSOSUBSTATE_SIM_IMPI_IN_PROGRESS" msgid="4036752174056147753">"IMPI のロック解除をリクエストしています…"</string>
     <string name="PERSOSUBSTATE_SIM_NS_SP_IN_PROGRESS" msgid="5089536274515338566">"ネットワーク サブセットのサービス プロバイダのロック解除をリクエストしています…"</string>
     <string name="PERSOSUBSTATE_RUIM_RUIM_IN_PROGRESS" msgid="6737197986936251958">"RUIM のロック解除をリクエストしています…"</string>
-    <string name="PERSOSUBSTATE_RUIM_NETWORK1_PUK_IN_PROGRESS" msgid="5658767775619998623">"PUK のロック解除をリクエストしています…"</string>
-    <string name="PERSOSUBSTATE_RUIM_NETWORK2_PUK_IN_PROGRESS" msgid="665978313257653727">"PUK のロック解除をリクエストしています…"</string>
-    <string name="PERSOSUBSTATE_RUIM_HRPD_PUK_IN_PROGRESS" msgid="3857142652251836850">"PUK のロック解除をリクエストしています…"</string>
-    <string name="PERSOSUBSTATE_RUIM_CORPORATE_PUK_IN_PROGRESS" msgid="2695664012344346788">"PUK のロック解除をリクエストしています…"</string>
-    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_IN_PROGRESS" msgid="2695678959963807782">"PUK のロック解除をリクエストしています…"</string>
-    <string name="PERSOSUBSTATE_RUIM_RUIM_PUK_IN_PROGRESS" msgid="1230605365926493599">"PUK のロック解除をリクエストしています…"</string>
-    <string name="PERSOSUBSTATE_SIM_NETWORK_ERROR" msgid="1924844017037151535">"SIM のネットワークのロック解除をリクエストできませんでした。"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_PUK_IN_PROGRESS" msgid="5658767775619998623">"PUK によるロック解除をリクエストしています…"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_PUK_IN_PROGRESS" msgid="665978313257653727">"PUK によるロック解除をリクエストしています…"</string>
+    <string name="PERSOSUBSTATE_RUIM_HRPD_PUK_IN_PROGRESS" msgid="3857142652251836850">"PUK によるロック解除をリクエストしています…"</string>
+    <string name="PERSOSUBSTATE_RUIM_CORPORATE_PUK_IN_PROGRESS" msgid="2695664012344346788">"PUK によるロック解除をリクエストしています…"</string>
+    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_IN_PROGRESS" msgid="2695678959963807782">"PUK によるロック解除をリクエストしています…"</string>
+    <string name="PERSOSUBSTATE_RUIM_RUIM_PUK_IN_PROGRESS" msgid="1230605365926493599">"PUK によるロック解除をリクエストしています…"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_ERROR" msgid="1924844017037151535">"SIM のネットワーク ロック解除をリクエストできませんでした。"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ERROR" msgid="3372797822292089708">"SIM のネットワーク サブセットのロック解除をリクエストできませんでした。"</string>
     <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_ERROR" msgid="1878443146720411381">"SIM のサービス プロバイダのロック解除をリクエストできませんでした。"</string>
-    <string name="PERSOSUBSTATE_SIM_CORPORATE_ERROR" msgid="7664778312218023192">"SIM の企業のロック解除をリクエストできませんでした。"</string>
+    <string name="PERSOSUBSTATE_SIM_CORPORATE_ERROR" msgid="7664778312218023192">"SIM の企業ロック解除をリクエストできませんでした。"</string>
     <string name="PERSOSUBSTATE_SIM_SIM_ERROR" msgid="2472944311643350302">"SIM のロック解除をリクエストできませんでした。"</string>
     <string name="PERSOSUBSTATE_RUIM_NETWORK1_ERROR" msgid="828089694480999120">"RUIM の Network1 のロック解除をリクエストできませんでした。"</string>
     <string name="PERSOSUBSTATE_RUIM_NETWORK2_ERROR" msgid="17619001007092511">"RUIM の Network2 のロック解除をリクエストできませんでした。"</string>
-    <string name="PERSOSUBSTATE_RUIM_HRPD_ERROR" msgid="807214229604353614">"RUIM の Hrpd のロック解除をリクエストできませんでした。"</string>
-    <string name="PERSOSUBSTATE_RUIM_CORPORATE_ERROR" msgid="8644184447744175747">"RUIM の企業のロック解除をリクエストできませんでした。"</string>
+    <string name="PERSOSUBSTATE_RUIM_HRPD_ERROR" msgid="807214229604353614">"HRPD のロック解除をリクエストできませんでした。"</string>
+    <string name="PERSOSUBSTATE_RUIM_CORPORATE_ERROR" msgid="8644184447744175747">"RUIM の企業ロック解除をリクエストできませんでした。"</string>
     <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_ERROR" msgid="3801002648649640407">"RUIM のサービス プロバイダのロック解除をリクエストできませんでした。"</string>
     <string name="PERSOSUBSTATE_RUIM_RUIM_ERROR" msgid="707397021218680753">"RUIM のロック解除をリクエストできませんでした。"</string>
-    <string name="PERSOSUBSTATE_SIM_NETWORK_PUK_ERROR" msgid="894358680773257820">"PUK をロック解除できませんでした。"</string>
-    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_ERROR" msgid="352466878146726991">"PUK をロック解除できませんでした。"</string>
-    <string name="PERSOSUBSTATE_SIM_CORPORATE_PUK_ERROR" msgid="7353389721907138671">"PUK をロック解除できませんでした。"</string>
-    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_ERROR" msgid="2655263155490857920">"PUK をロック解除できませんでした。"</string>
-    <string name="PERSOSUBSTATE_SIM_SIM_PUK_ERROR" msgid="6903740900892931310">"PUK をロック解除できませんでした。"</string>
-    <string name="PERSOSUBSTATE_RUIM_NETWORK1_PUK_ERROR" msgid="5165901670447518687">"PUK をロック解除できませんでした。"</string>
-    <string name="PERSOSUBSTATE_RUIM_NETWORK2_PUK_ERROR" msgid="2856763216589267623">"PUK をロック解除できませんでした。"</string>
-    <string name="PERSOSUBSTATE_RUIM_HRPD_PUK_ERROR" msgid="817542684437829139">"PUK をロック解除できませんでした。"</string>
-    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_ERROR" msgid="5178635064113393143">"PUK をロック解除できませんでした。"</string>
-    <string name="PERSOSUBSTATE_RUIM_RUIM_PUK_ERROR" msgid="5391587926974531008">"PUK をロック解除できませんでした。"</string>
-    <string name="PERSOSUBSTATE_RUIM_CORPORATE_PUK_ERROR" msgid="4895494864493315868">"PUK をロック解除できませんでした。"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_PUK_ERROR" msgid="894358680773257820">"PUK によるロック解除ができませんでした。"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_ERROR" msgid="352466878146726991">"PUK によるロック解除ができませんでした。"</string>
+    <string name="PERSOSUBSTATE_SIM_CORPORATE_PUK_ERROR" msgid="7353389721907138671">"PUK によるロック解除ができませんでした。"</string>
+    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_ERROR" msgid="2655263155490857920">"PUK によるロック解除ができませんでした。"</string>
+    <string name="PERSOSUBSTATE_SIM_SIM_PUK_ERROR" msgid="6903740900892931310">"PUK によるロック解除ができませんでした。"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_PUK_ERROR" msgid="5165901670447518687">"PUK によるロック解除ができませんでした。"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_PUK_ERROR" msgid="2856763216589267623">"PUK によるロック解除ができませんでした。"</string>
+    <string name="PERSOSUBSTATE_RUIM_HRPD_PUK_ERROR" msgid="817542684437829139">"PUK によるロック解除ができませんでした。"</string>
+    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_ERROR" msgid="5178635064113393143">"PUK によるロック解除ができませんでした。"</string>
+    <string name="PERSOSUBSTATE_RUIM_RUIM_PUK_ERROR" msgid="5391587926974531008">"PUK によるロック解除ができませんでした。"</string>
+    <string name="PERSOSUBSTATE_RUIM_CORPORATE_PUK_ERROR" msgid="4895494864493315868">"PUK によるロック解除ができませんでした。"</string>
     <string name="PERSOSUBSTATE_SIM_SPN_ERROR" msgid="9017576601595353649">"SPN のロック解除をリクエストできませんでした。"</string>
     <string name="PERSOSUBSTATE_SIM_SP_EHPLMN_ERROR" msgid="1116993930995545742">"SP Equivalent Home PLMN のロック解除をリクエストできませんでした。"</string>
     <string name="PERSOSUBSTATE_SIM_ICCID_ERROR" msgid="7559167306794441462">"ICCID のロック解除をリクエストできませんでした。"</string>
     <string name="PERSOSUBSTATE_SIM_IMPI_ERROR" msgid="2782926139511136588">"IMPI のロック解除をリクエストできませんでした。"</string>
     <string name="PERSOSUBSTATE_SIM_NS_SP_ERROR" msgid="1890493954453456758">"ネットワーク サブセットのサービス プロバイダのロック解除をリクエストできませんでした。"</string>
-    <string name="PERSOSUBSTATE_SIM_NETWORK_SUCCESS" msgid="4886243367747126325">"SIM のネットワークをロック解除しました。"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUCCESS" msgid="4886243367747126325">"SIM のネットワーク ロックを解除しました。"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_SUCCESS" msgid="4053809277733513987">"SIM のネットワーク サブセットをロック解除しました。"</string>
     <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_SUCCESS" msgid="8249342930499801740">"SIM のサービス プロバイダをロック解除しました。"</string>
-    <string name="PERSOSUBSTATE_SIM_CORPORATE_SUCCESS" msgid="2339794542560381270">"SIM の企業をロック解除しました。"</string>
+    <string name="PERSOSUBSTATE_SIM_CORPORATE_SUCCESS" msgid="2339794542560381270">"SIM の企業ロックを解除しました。"</string>
     <string name="PERSOSUBSTATE_SIM_SIM_SUCCESS" msgid="6975608174152828954">"SIM をロック解除しました。"</string>
     <string name="PERSOSUBSTATE_RUIM_NETWORK1_SUCCESS" msgid="2846699261330463192">"RUIM の Network1 をロック解除しました。"</string>
     <string name="PERSOSUBSTATE_RUIM_NETWORK2_SUCCESS" msgid="5335414726057102801">"RUIM の Network2 をロック解除しました。"</string>
-    <string name="PERSOSUBSTATE_RUIM_HRPD_SUCCESS" msgid="8868100318474971969">"RUIM の Hrpd をロック解除しました。"</string>
-    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_SUCCESS" msgid="6020936629725666932">"RUIM のサービス プロバイダをロック解除しました。"</string>
+    <string name="PERSOSUBSTATE_RUIM_HRPD_SUCCESS" msgid="8868100318474971969">"HRPD のロックを解除しました。"</string>
+    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_SUCCESS" msgid="6020936629725666932">"RUIM のサービス プロバイダ ロックを解除しました。"</string>
     <string name="PERSOSUBSTATE_RUIM_CORPORATE_SUCCESS" msgid="6944873647584595489">"RUIM の企業をロック解除しました。"</string>
     <string name="PERSOSUBSTATE_RUIM_RUIM_SUCCESS" msgid="2526483514124121988">"RUIM をロック解除しました。"</string>
-    <string name="PERSOSUBSTATE_SIM_NETWORK_PUK_SUCCESS" msgid="7662200333621664621">"PUK をロック解除しました。"</string>
-    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_SUCCESS" msgid="2861223407953766632">"PUK をロック解除しました。"</string>
-    <string name="PERSOSUBSTATE_SIM_CORPORATE_PUK_SUCCESS" msgid="5345648571175243272">"PUK をロック解除しました。"</string>
-    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_SUCCESS" msgid="3725278343103422466">"PUK をロック解除しました。"</string>
-    <string name="PERSOSUBSTATE_SIM_SIM_PUK_SUCCESS" msgid="6998502547560297983">"PUK をロック解除しました。"</string>
-    <string name="PERSOSUBSTATE_RUIM_NETWORK1_PUK_SUCCESS" msgid="8555433771162560361">"PUK をロック解除しました。"</string>
-    <string name="PERSOSUBSTATE_RUIM_NETWORK2_PUK_SUCCESS" msgid="3555767296933606232">"PUK をロック解除しました。"</string>
-    <string name="PERSOSUBSTATE_RUIM_HRPD_PUK_SUCCESS" msgid="6778051818199974237">"PUK をロック解除しました。"</string>
-    <string name="PERSOSUBSTATE_RUIM_CORPORATE_PUK_SUCCESS" msgid="4080108758498911429">"PUK をロック解除しました。"</string>
-    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_SUCCESS" msgid="7873675303000794343">"PUK をロック解除しました。"</string>
-    <string name="PERSOSUBSTATE_RUIM_RUIM_PUK_SUCCESS" msgid="1763198215069819523">"PUK をロック解除しました。"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_PUK_SUCCESS" msgid="7662200333621664621">"PUK によりロックを解除しました。"</string>
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_SUCCESS" msgid="2861223407953766632">"PUK によりロックを解除しました。"</string>
+    <string name="PERSOSUBSTATE_SIM_CORPORATE_PUK_SUCCESS" msgid="5345648571175243272">"PUK によりロックを解除しました。"</string>
+    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_SUCCESS" msgid="3725278343103422466">"PUK によりロックを解除しました。"</string>
+    <string name="PERSOSUBSTATE_SIM_SIM_PUK_SUCCESS" msgid="6998502547560297983">"PUK によりロックを解除しました。"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_PUK_SUCCESS" msgid="8555433771162560361">"PUK によりロックを解除しました。"</string>
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_PUK_SUCCESS" msgid="3555767296933606232">"PUK によりロックを解除しました。"</string>
+    <string name="PERSOSUBSTATE_RUIM_HRPD_PUK_SUCCESS" msgid="6778051818199974237">"PUK によりロックを解除しました。"</string>
+    <string name="PERSOSUBSTATE_RUIM_CORPORATE_PUK_SUCCESS" msgid="4080108758498911429">"PUK によりロックを解除しました。"</string>
+    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_SUCCESS" msgid="7873675303000794343">"PUK によりロックを解除しました。"</string>
+    <string name="PERSOSUBSTATE_RUIM_RUIM_PUK_SUCCESS" msgid="1763198215069819523">"PUK によりロックを解除しました。"</string>
     <string name="PERSOSUBSTATE_SIM_SPN_SUCCESS" msgid="2053891977727320532">"SPN をロック解除しました。"</string>
     <string name="PERSOSUBSTATE_SIM_SP_EHPLMN_SUCCESS" msgid="8146602361895007345">"SP Equivalent Home PLMN をロック解除しました。"</string>
     <string name="PERSOSUBSTATE_SIM_ICCID_SUCCESS" msgid="8058678548991999545">"ICCID をロック解除しました。"</string>
     <string name="PERSOSUBSTATE_SIM_IMPI_SUCCESS" msgid="2545608067978550571">"IMPI をロック解除しました。"</string>
     <string name="PERSOSUBSTATE_SIM_NS_SP_SUCCESS" msgid="4352382949744625007">"ネットワーク サブセットのサービス プロバイダをロック解除しました。"</string>
+    <string name="config_pdp_reject_dialog_title" msgid="4072057179246785727"></string>
+    <string name="config_pdp_reject_user_authentication_failed" msgid="4531693033885744689"></string>
+    <string name="config_pdp_reject_service_not_subscribed" msgid="8190338397128671588"></string>
+    <string name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed" msgid="6024904218067254186"></string>
 </resources>
