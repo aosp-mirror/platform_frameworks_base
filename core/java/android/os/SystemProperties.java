@@ -60,7 +60,7 @@ public class SystemProperties {
      * uses reflection to read this whenever text is selected (http://b/36095274).
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage(trackingBug = 172649311)
     public static final int PROP_NAME_MAX = Integer.MAX_VALUE;
 
     /** @hide */
