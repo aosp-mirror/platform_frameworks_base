@@ -19,7 +19,11 @@ package android.uwb;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.SuppressLint;
+import android.annotation.SystemService;
+import android.content.Context;
+import android.os.IBinder;
 import android.os.PersistableBundle;
+import android.os.ServiceManager;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -36,7 +40,11 @@ import java.util.concurrent.Executor;
  *
  * @hide
  */
+@SystemService(Context.UWB_SERVICE)
 public final class UwbManager {
+    private IUwbAdapter mUwbAdapter;
+    private static final String SERVICE_NAME = "uwb";
+
     /**
      * Interface for receiving UWB adapter state changes
      */
@@ -96,10 +104,30 @@ public final class UwbManager {
 
     /**
      * Use <code>Context.getSystemService(UwbManager.class)</code> to get an instance.
+     *
+     * @param adapter an instance of an {@link android.uwb.IUwbAdapter}
      */
-    private UwbManager() {
-        throw new UnsupportedOperationException();
+    private UwbManager(IUwbAdapter adapter) {
+        mUwbAdapter = adapter;
     }
+
+    /**
+     * @hide
+     */
+    public static UwbManager getInstance() {
+        IBinder b = ServiceManager.getService(SERVICE_NAME);
+        if (b == null) {
+            return null;
+        }
+
+        IUwbAdapter adapter = IUwbAdapter.Stub.asInterface(b);
+        if (adapter == null) {
+            return null;
+        }
+
+        return new UwbManager(adapter);
+    }
+
     /**
      * Register an {@link AdapterStateCallback} to listen for UWB adapter state changes
      * <p>The provided callback will be invoked by the given {@link Executor}.
