@@ -19,8 +19,8 @@
         <shape android:shape="rectangle">
             <solid android:color="@color/magnification_switch_button_color" />
             <size
-                android:width="40dp"
-                android:height="40dp" />
+                android:width="48dp"
+                android:height="48dp" />
         </shape>
     </item>
 
