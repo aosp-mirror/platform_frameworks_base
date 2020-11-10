@@ -7583,6 +7583,11 @@ public class ActivityManagerService extends IActivityManager.Stub
                     mPackageManagerInt.getIncrementalStatesInfo(r.info.packageName, r.uid,
                             r.userId);
             isPackageLoading = incrementalStatesInfo.isLoading();
+            if (isPackageLoading) {
+                // Report in the main log that the package is still loading
+                Slog.e(TAG, "App crashed when package " + r.info.packageName + " is "
+                        + ((int) (incrementalStatesInfo.getProgress() * 100)) + "% loaded.");
+            }
         }
 
         EventLogTags.writeAmCrash(Binder.getCallingPid(),

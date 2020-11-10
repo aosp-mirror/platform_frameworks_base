@@ -1684,6 +1684,13 @@ class ProcessRecord implements WindowProcessListener {
             info.append("Parent: ").append(parentShortComponentName).append("\n");
         }
 
+        if (isPackageLoading) {
+            // Report in the main log that the package is still loading
+            final float loadingProgress = packageManagerInternal.getIncrementalStatesInfo(
+                    aInfo.packageName, uid, userId).getProgress();
+            info.append("Package is ").append((int) (loadingProgress * 100)).append("% loaded.\n");
+        }
+
         StringBuilder report = new StringBuilder();
         report.append(MemoryPressureUtil.currentPsiState());
         ProcessCpuTracker processCpuTracker = new ProcessCpuTracker(true);
