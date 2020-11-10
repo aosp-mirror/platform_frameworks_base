@@ -244,12 +244,12 @@ class InsetsSourceProvider {
         setServerVisible(mWin.wouldBeVisibleIfPolicyIgnored() && mWin.isVisibleByPolicy());
         updateSourceFrame();
         if (mControl != null) {
-            final Rect frame = mWin.getWindowFrames().mFrame;
-            if (mControl.setSurfacePosition(frame.left, frame.top) && mControlTarget != null) {
+            final Point position = getWindowFrameSurfacePosition();
+            if (mControl.setSurfacePosition(position.x, position.y) && mControlTarget != null) {
                 if (!mWin.getWindowFrames().didFrameSizeChange()) {
-                    updateLeashPosition(frame, -1 /* frameNumber */);
+                    updateLeashPosition(-1 /* frameNumber */);
                 } else if (mWin.mInRelayout) {
-                    updateLeashPosition(frame, mWin.getFrameNumber());
+                    updateLeashPosition(mWin.getFrameNumber());
                 } else {
                     mWin.mPendingPositionChanged = this;
                 }
@@ -258,18 +258,24 @@ class InsetsSourceProvider {
         }
     }
 
-    void updateLeashPosition(Rect frame, long frameNumber) {
+    void updateLeashPosition(long frameNumber) {
         if (mControl == null) {
             return;
         }
         final SurfaceControl leash = mControl.getLeash();
         if (leash != null) {
             final Transaction t = mDisplayContent.getPendingTransaction();
-            Point position = new Point();
-            mWin.transformFrameToSurfacePosition(frame.left, frame.top, position);
+            final Point position = mControl.getSurfacePosition();
             t.setPosition(leash, position.x, position.y);
             deferTransactionUntil(t, leash, frameNumber);
         }
+    }
+
+    private Point getWindowFrameSurfacePosition() {
+        final Rect frame = mWin.getFrame();
+        final Point position = new Point();
+        mWin.transformFrameToSurfacePosition(frame.left, frame.top, position);
+        return position;
     }
 
     private void deferTransactionUntil(Transaction t, SurfaceControl leash, long frameNumber) {
@@ -319,7 +325,8 @@ class InsetsSourceProvider {
             setClientVisible(InsetsState.getDefaultVisibility(mSource.getType()));
             return;
         }
-        mAdapter = new ControlAdapter();
+        final Point surfacePosition = getWindowFrameSurfacePosition();
+        mAdapter = new ControlAdapter(surfacePosition);
         if (getSource().getType() == ITYPE_IME) {
             setClientVisible(InsetsState.getDefaultVisibility(mSource.getType()));
         }
@@ -343,8 +350,7 @@ class InsetsSourceProvider {
         }
         mControlTarget = target;
         updateVisibility();
-        mControl = new InsetsSourceControl(mSource.getType(), leash,
-                new Point(mWin.getWindowFrames().mFrame.left, mWin.getWindowFrames().mFrame.top));
+        mControl = new InsetsSourceControl(mSource.getType(), leash, surfacePosition);
         ProtoLog.d(WM_DEBUG_IME,
                 "InsetsSource Control %s for target %s", mControl, mControlTarget);
     }
@@ -527,7 +533,12 @@ class InsetsSourceProvider {
 
     private class ControlAdapter implements AnimationAdapter {
 
+        private final Point mSurfacePosition;
         private SurfaceControl mCapturedLeash;
+
+        ControlAdapter(Point surfacePosition) {
+            mSurfacePosition = surfacePosition;
+        }
 
         @Override
         public boolean getShowWallpaper() {
@@ -549,11 +560,7 @@ class InsetsSourceProvider {
                     mControlTarget);
 
             mCapturedLeash = animationLeash;
-            final Rect frame = mWin.getWindowFrames().mFrame;
-            Point position = new Point();
-            mWin.transformFrameToSurfacePosition(frame.left, frame.top, position);
-
-            t.setPosition(mCapturedLeash, position.x, position.y);
+            t.setPosition(mCapturedLeash, mSurfacePosition.x, mSurfacePosition.y);
         }
 
         @Override

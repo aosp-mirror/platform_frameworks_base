@@ -2195,7 +2195,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
 
             if (win.mPendingPositionChanged != null) {
-                win.mPendingPositionChanged.updateLeashPosition(win.getFrame(), frameNumber);
+                win.mPendingPositionChanged.updateLeashPosition(frameNumber);
                 win.mPendingPositionChanged = null;
             }
 
