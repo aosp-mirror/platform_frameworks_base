@@ -16,6 +16,7 @@
 
 package android.uwb;
 
+import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.SuppressLint;
@@ -47,6 +48,8 @@ import java.util.concurrent.Executor;
 public final class UwbManager {
     private IUwbAdapter mUwbAdapter;
     private static final String SERVICE_NAME = "uwb";
+
+    private AdapterStateListener mAdapterStateListener;
 
     /**
      * Interface for receiving UWB adapter state changes
@@ -112,6 +115,7 @@ public final class UwbManager {
      */
     private UwbManager(IUwbAdapter adapter) {
         mUwbAdapter = adapter;
+        mAdapterStateListener = new AdapterStateListener(adapter);
     }
 
     /**
@@ -143,8 +147,9 @@ public final class UwbManager {
      * @param executor an {@link Executor} to execute given callback
      * @param callback user implementation of the {@link AdapterStateCallback}
      */
-    public void registerAdapterStateCallback(Executor executor, AdapterStateCallback callback) {
-        throw new UnsupportedOperationException();
+    public void registerAdapterStateCallback(@NonNull @CallbackExecutor Executor executor,
+            @NonNull AdapterStateCallback callback) {
+        mAdapterStateListener.register(executor, callback);
     }
 
     /**
@@ -156,8 +161,8 @@ public final class UwbManager {
      *
      * @param callback user implementation of the {@link AdapterStateCallback}
      */
-    public void unregisterAdapterStateCallback(AdapterStateCallback callback) {
-        throw new UnsupportedOperationException();
+    public void unregisterAdapterStateCallback(@NonNull AdapterStateCallback callback) {
+        mAdapterStateListener.unregister(callback);
     }
 
     /**
