@@ -846,6 +846,8 @@ public class AppOpsManager {
     @UnsupportedAppUsage
     public static final int OP_SEND_SMS = AppProtoEnums.APP_OP_SEND_SMS;
     /** @hide */
+    public static final int OP_MANAGE_ONGOING_CALLS = AppProtoEnums.APP_OP_MANAGE_ONGOING_CALLS;
+    /** @hide */
     @UnsupportedAppUsage
     public static final int OP_READ_ICC_SMS = AppProtoEnums.APP_OP_READ_ICC_SMS;
     /** @hide */
@@ -1134,7 +1136,7 @@ public class AppOpsManager {
 
     /** @hide */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    public static final int _NUM_OP = 103;
+    public static final int _NUM_OP = 104;
 
     /** Access to coarse location information. */
     public static final String OPSTR_COARSE_LOCATION = "android:coarse_location";
@@ -1446,6 +1448,15 @@ public class AppOpsManager {
     public static final String OPSTR_LOADER_USAGE_STATS = "android:loader_usage_stats";
 
     /**
+     * Grants an app access to the {@link android.telecom.InCallService} API to see
+     * information about ongoing calls and to enable control of calls.
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    public static final String OPSTR_MANAGE_ONGOING_CALLS = "android:manage_ongoing_calls";
+
+    /**
      * AppOp granted to apps that we are started via {@code am instrument -e --no-isolated-storage}
      *
      * @hide
@@ -1551,6 +1562,7 @@ public class AppOpsManager {
             OP_MANAGE_EXTERNAL_STORAGE,
             OP_INTERACT_ACROSS_PROFILES,
             OP_LOADER_USAGE_STATS,
+            OP_MANAGE_ONGOING_CALLS,
     };
 
     /**
@@ -1665,6 +1677,7 @@ public class AppOpsManager {
             OP_RESERVED_100,                    // OP_RESERVED_100
             OP_RESERVED_101,                    // OP_RESERVED_101
             OP_RESERVED_102,                    // OP_RESERVED_102
+            OP_MANAGE_ONGOING_CALLS,            // MANAGE_ONGOING_CALLS
     };
 
     /**
@@ -1774,6 +1787,7 @@ public class AppOpsManager {
             OPSTR_RESERVED_100,
             OPSTR_RESERVED_101,
             OPSTR_RESERVED_102,
+            OPSTR_MANAGE_ONGOING_CALLS,
     };
 
     /**
@@ -1884,6 +1898,7 @@ public class AppOpsManager {
             "RESERVED_100",
             "RESERVED_101",
             "RESERVED_102",
+            "MANAGE_ONGOING_CALLS",
     };
 
     /**
@@ -1995,6 +2010,7 @@ public class AppOpsManager {
             null, // OP_RESERVED_100
             null, // OP_RESERVED_101
             null, // OP_RESERVED_102
+            Manifest.permission.MANAGE_ONGOING_CALLS,
     };
 
     /**
@@ -2106,6 +2122,7 @@ public class AppOpsManager {
             null, // OP_RESERVED_100
             null, // OP_RESERVED_101
             null, // OP_RESERVED_102
+            null, // MANAGE_ONGOING_CALLS
     };
 
     /**
@@ -2216,6 +2233,7 @@ public class AppOpsManager {
             null, // OP_RESERVED_100
             null, // OP_RESERVED_101
             null, // OP_RESERVED_102
+            null, // MANAGE_ONGOING_CALLS
     };
 
     /**
@@ -2325,6 +2343,7 @@ public class AppOpsManager {
             AppOpsManager.MODE_ERRORED, // OP_RESERVED_100
             AppOpsManager.MODE_ERRORED, // OP_RESERVED_101
             AppOpsManager.MODE_ERRORED, // OP_RESERVED_102
+            AppOpsManager.MODE_DEFAULT, // MANAGE_ONGOING_CALLS
     };
 
     /**
@@ -2438,6 +2457,7 @@ public class AppOpsManager {
             false, // OP_RESERVED_100
             false, // OP_RESERVED_101
             false, // OP_RESERVED_102
+            true, // MANAGE_ONGOING_CALLS
     };
 
     /**
