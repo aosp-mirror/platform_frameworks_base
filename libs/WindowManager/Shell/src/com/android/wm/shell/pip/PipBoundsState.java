@@ -61,7 +61,13 @@ public final class PipBoundsState {
     private ComponentName mLastPipComponentName;
     private final DisplayInfo mDisplayInfo = new DisplayInfo();
     private final DisplayLayout mDisplayLayout = new DisplayLayout();
+    /** The current minimum edge size of PIP. */
+    private int mMinEdgeSize;
+    /** The preferred minimum (and default) size specified by apps. */
+    private Size mOverrideMinSize;
     private final @NonNull AnimatingBoundsState mAnimatingBoundsState = new AnimatingBoundsState();
+
+    private Runnable mOnMinimalSizeChangeCallback;
 
     public PipBoundsState(Context context) {
         mContext = context;
@@ -203,8 +209,47 @@ public final class PipBoundsState {
         mPipReentryState = null;
     }
 
+    /** Set the PIP minimum edge size. */
+    public void setMinEdgeSize(int minEdgeSize) {
+        mMinEdgeSize = minEdgeSize;
+    }
+
+    /** Returns the PIP's current minimum edge size. */
+    public int getMinEdgeSize() {
+        return mMinEdgeSize;
+    }
+
+    /**
+     * Sets the preferred size of PIP as specified by the activity in PIP mode.
+     */
+    public void setOverrideMinSize(Size overrideMinSize) {
+        final boolean changed = !Objects.equals(overrideMinSize, mOverrideMinSize);
+        mOverrideMinSize = overrideMinSize;
+        if (changed && mOnMinimalSizeChangeCallback != null) {
+            mOnMinimalSizeChangeCallback.run();
+        }
+    }
+
+    /** Returns the preferred minimal size specified by the activity in PIP. */
+    public Size getOverrideMinSize() {
+        return mOverrideMinSize;
+    }
+
+    /** Returns the minimum edge size of the override minimum size, or 0 if not set. */
+    public int getOverrideMinEdgeSize() {
+        if (mOverrideMinSize == null) return 0;
+        return Math.min(mOverrideMinSize.getWidth(), mOverrideMinSize.getHeight());
+    }
+
     public AnimatingBoundsState getAnimatingBoundsState() {
         return mAnimatingBoundsState;
+    }
+
+    /**
+     * Registers a callback when the minimal size of PIP that is set by the app changes.
+     */
+    public void setOnMinimalSizeChangeCallback(Runnable onMinimalSizeChangeCallback) {
+        mOnMinimalSizeChangeCallback = onMinimalSizeChangeCallback;
     }
 
     /** Source of truth for the current animation bounds of PIP. */
@@ -298,6 +343,8 @@ public final class PipBoundsState {
         pw.println(innerPrefix + "mDisplayLayout=" + mDisplayLayout);
         pw.println(innerPrefix + "mStashedState=" + mStashedState);
         pw.println(innerPrefix + "mStashOffset=" + mStashOffset);
+        pw.println(innerPrefix + "mMinEdgeSize=" + mMinEdgeSize);
+        pw.println(innerPrefix + "mOverrideMinSize=" + mOverrideMinSize);
         if (mPipReentryState == null) {
             pw.println(innerPrefix + "mPipReentryState=null");
         } else {

@@ -242,9 +242,16 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
             displayController.getDisplay(displayId).getDisplayInfo(newDisplayInfo);
             mPipBoundsState.setDisplayInfo(newDisplayInfo);
             updateMovementBounds(null /* toBounds */, false /* fromRotation */,
-                    false /* fromImeAdjustment */, false /* fromShelfAdustment */,
+                    false /* fromImeAdjustment */, false /* fromShelfAdjustment */,
                     null /* wct */);
         });
+        mPipBoundsState.setOnMinimalSizeChangeCallback(
+                () -> {
+                    // The minimal size drives the normal bounds, so they need to be recalculated.
+                    updateMovementBounds(null /* toBounds */, false /* fromRotation */,
+                            false /* fromImeAdjustment */, false /* fromShelfAdjustment */,
+                            null /* wct */);
+                });
         mMediaController = pipMediaController;
         mMenuController = pipMenuActivityController;
         mTouchHandler = pipTouchHandler;
