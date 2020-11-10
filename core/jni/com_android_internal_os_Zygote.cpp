@@ -804,10 +804,14 @@ static void PrepareDirIfNotPresent(const std::string& dir, mode_t mode, uid_t ui
   PrepareDir(dir, mode, uid, gid, fail_fn);
 }
 
+static bool BindMount(const std::string& source_dir, const std::string& target_dir) {
+  return !(TEMP_FAILURE_RETRY(mount(source_dir.c_str(), target_dir.c_str(), nullptr,
+                                    MS_BIND | MS_REC, nullptr)) == -1);
+}
+
 static void BindMount(const std::string& source_dir, const std::string& target_dir,
                       fail_fn_t fail_fn) {
-  if (TEMP_FAILURE_RETRY(mount(source_dir.c_str(), target_dir.c_str(), nullptr,
-                               MS_BIND | MS_REC, nullptr)) == -1) {
+  if (!BindMount(source_dir, target_dir)) {
     fail_fn(CREATE_ERROR("Failed to mount %s to %s: %s",
                          source_dir.c_str(), target_dir.c_str(), strerror(errno)));
   }
@@ -1194,9 +1198,9 @@ static pid_t ForkCommon(JNIEnv* env, bool is_system_server,
 
 // Create an app data directory over tmpfs overlayed CE / DE storage, and bind mount it
 // from the actual app data directory in data mirror.
-static void createAndMountAppData(std::string_view package_name,
+static bool createAndMountAppData(std::string_view package_name,
     std::string_view mirror_pkg_dir_name, std::string_view mirror_data_path,
-    std::string_view actual_data_path, fail_fn_t fail_fn) {
+    std::string_view actual_data_path, fail_fn_t fail_fn, bool call_fail_fn) {
 
   char mirrorAppDataPath[PATH_MAX];
   char actualAppDataPath[PATH_MAX];
@@ -1205,6 +1209,29 @@ static void createAndMountAppData(std::string_view package_name,
   snprintf(actualAppDataPath, PATH_MAX, "%s/%s", actual_data_path.data(), package_name.data());
 
   PrepareDir(actualAppDataPath, 0700, AID_ROOT, AID_ROOT, fail_fn);
+
+  // Bind mount from original app data directory in mirror.
+  if (call_fail_fn) {
+    BindMount(mirrorAppDataPath, actualAppDataPath, fail_fn);
+  } else if(!BindMount(mirrorAppDataPath, actualAppDataPath)) {
+    ALOGW("Failed to mount %s to %s: %s",
+          mirrorAppDataPath, actualAppDataPath, strerror(errno));
+    return false;
+  }
+  return true;
+}
+
+// There is an app data directory over tmpfs overlaid CE / DE storage
+// bind mount it from the actual app data directory in data mirror.
+static void mountAppData(std::string_view package_name,
+    std::string_view mirror_pkg_dir_name, std::string_view mirror_data_path,
+    std::string_view actual_data_path, fail_fn_t fail_fn) {
+
+  char mirrorAppDataPath[PATH_MAX];
+  char actualAppDataPath[PATH_MAX];
+  snprintf(mirrorAppDataPath, PATH_MAX, "%s/%s", mirror_data_path.data(),
+      mirror_pkg_dir_name.data());
+  snprintf(actualAppDataPath, PATH_MAX, "%s/%s", actual_data_path.data(), package_name.data());
 
   // Bind mount from original app data directory in mirror.
   BindMount(mirrorAppDataPath, actualAppDataPath, fail_fn);
@@ -1284,10 +1311,17 @@ static void isolateAppDataPerPackage(int userId, std::string_view package_name,
   snprintf(mirrorCePath, PATH_MAX, "%s/%d", mirrorCeParent, userId);
   snprintf(mirrorDePath, PATH_MAX, "/data_mirror/data_de/%s/%d", volume_uuid.data(), userId);
 
-  createAndMountAppData(package_name, package_name, mirrorDePath, actualDePath, fail_fn);
+  createAndMountAppData(package_name, package_name, mirrorDePath, actualDePath, fail_fn,
+                        true /*call_fail_fn*/);
 
   std::string ce_data_path = getAppDataDirName(mirrorCePath, package_name, ce_data_inode, fail_fn);
-  createAndMountAppData(package_name, ce_data_path, mirrorCePath, actualCePath, fail_fn);
+  if (!createAndMountAppData(package_name, ce_data_path, mirrorCePath, actualCePath, fail_fn,
+                             false /*call_fail_fn*/)) {
+    // CE might unlocks and the name is decrypted
+    // get the name and mount again
+    ce_data_path=getAppDataDirName(mirrorCePath, package_name, ce_data_inode, fail_fn);
+    mountAppData(package_name, ce_data_path, mirrorCePath, actualCePath, fail_fn);
+  }
 }
 
 // Relabel directory
