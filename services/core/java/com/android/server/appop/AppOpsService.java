@@ -3026,13 +3026,16 @@ public class AppOpsService extends IAppOpsService.Stub {
                 mContext.getContentResolver(), Settings.Secure.VOICE_INTERACTION_SERVICE);
 
         final String voiceRecognitionServicePackageName =
-                voiceRecognitionComponent != null ? ComponentName.unflattenFromString(
-                        voiceRecognitionComponent).getPackageName() : "";
+                getComponentPackageNameFromString(voiceRecognitionComponent);
         final String voiceInteractionServicePackageName =
-                voiceInteractionComponent != null ? ComponentName.unflattenFromString(
-                        voiceInteractionComponent).getPackageName() : "";
+                getComponentPackageNameFromString(voiceInteractionComponent);
         return Objects.equals(packageName, voiceRecognitionServicePackageName) && Objects.equals(
                 voiceRecognitionServicePackageName, voiceInteractionServicePackageName);
+    }
+
+    private String getComponentPackageNameFromString(String from) {
+        ComponentName componentName = from != null ? ComponentName.unflattenFromString(from) : null;
+        return componentName != null ? componentName.getPackageName() : "";
     }
 
     @Override
