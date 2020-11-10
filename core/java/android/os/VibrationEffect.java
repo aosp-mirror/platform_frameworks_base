@@ -413,7 +413,7 @@ public abstract class VibrationEffect implements Parcelable {
      *
      * @hide
      */
-    public abstract VibrationEffect resolve(int defaultAmplitude);
+    public abstract <T extends VibrationEffect> T resolve(int defaultAmplitude);
 
     /**
      * Scale the vibration effect intensity with the given constraints.
@@ -425,7 +425,7 @@ public abstract class VibrationEffect implements Parcelable {
      *
      * @hide
      */
-    public abstract VibrationEffect scale(float scaleFactor);
+    public abstract <T extends VibrationEffect> T scale(float scaleFactor);
 
     /**
      * Scale given vibration intensity by the given factor.
