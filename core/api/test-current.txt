@@ -1227,7 +1227,6 @@ package android.os {
   }
 
   public static final class StrictMode.VmPolicy.Builder {
-    method @NonNull public android.os.StrictMode.VmPolicy.Builder detectIncorrectContextUse();
     method @NonNull public android.os.StrictMode.VmPolicy.Builder permitIncorrectContextUse();
   }
 
