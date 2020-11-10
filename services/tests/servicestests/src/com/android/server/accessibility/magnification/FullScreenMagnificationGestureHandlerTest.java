@@ -123,7 +123,7 @@ public class FullScreenMagnificationGestureHandlerTest {
     private Context mContext;
     FullScreenMagnificationController mFullScreenMagnificationController;
     @Mock
-    MagnificationGestureHandler.ScaleChangedListener mMockScaleChangedListener;
+    MagnificationGestureHandler.Callback mMockCallback;
     @Mock
     MagnificationRequestObserver mMagnificationRequestObserver;
     @Mock
@@ -178,7 +178,7 @@ public class FullScreenMagnificationGestureHandlerTest {
     private FullScreenMagnificationGestureHandler newInstance(boolean detectTripleTap,
             boolean detectShortcutTrigger) {
         FullScreenMagnificationGestureHandler h = new FullScreenMagnificationGestureHandler(
-                mContext, mFullScreenMagnificationController, mMockScaleChangedListener,
+                mContext, mFullScreenMagnificationController, mMockCallback,
                 detectTripleTap, detectShortcutTrigger,
                 mWindowMagnificationPromptController, DISPLAY_0);
         mHandler = new TestHandler(h.mDetectingState, mClock) {

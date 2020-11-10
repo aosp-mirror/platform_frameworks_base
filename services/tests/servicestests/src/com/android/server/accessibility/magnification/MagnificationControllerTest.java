@@ -280,6 +280,72 @@ public class MagnificationControllerTest {
         verify(mWindowMagnificationManager).persistScale(eq(TEST_DISPLAY));
     }
 
+    @Test
+    public void onTouchInteractionStart_fullScreenAndCapabilitiesAll_showMagnificationButton()
+            throws RemoteException {
+        mMagnificationController.setMagnificationCapabilities(
+                Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_ALL);
+        setMagnificationEnabled(MODE_FULLSCREEN);
+
+        mMagnificationController.onTouchInteractionStart(TEST_DISPLAY, MODE_FULLSCREEN);
+
+        verify(mWindowMagnificationManager).showMagnificationButton(eq(TEST_DISPLAY),
+                eq(MODE_FULLSCREEN));
+    }
+
+    @Test
+    public void onTouchInteractionEnd_fullScreenAndCapabilitiesAll_showMagnificationButton()
+            throws RemoteException {
+        mMagnificationController.setMagnificationCapabilities(
+                Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_ALL);
+        setMagnificationEnabled(MODE_FULLSCREEN);
+
+        mMagnificationController.onTouchInteractionEnd(TEST_DISPLAY, MODE_FULLSCREEN);
+
+        verify(mWindowMagnificationManager).showMagnificationButton(eq(TEST_DISPLAY),
+                eq(MODE_FULLSCREEN));
+    }
+
+    @Test
+    public void onTouchInteractionStart_windowModeAndCapabilitiesAll_showMagnificationButton()
+            throws RemoteException {
+        mMagnificationController.setMagnificationCapabilities(
+                Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_ALL);
+        setMagnificationEnabled(MODE_WINDOW);
+
+        mMagnificationController.onTouchInteractionStart(TEST_DISPLAY, MODE_WINDOW);
+
+        verify(mWindowMagnificationManager).showMagnificationButton(eq(TEST_DISPLAY),
+                eq(MODE_WINDOW));
+    }
+
+    @Test
+    public void onTouchInteractionEnd_windowModeAndCapabilitiesAll_showMagnificationButton()
+            throws RemoteException {
+        mMagnificationController.setMagnificationCapabilities(
+                Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_ALL);
+        setMagnificationEnabled(MODE_WINDOW);
+
+        mMagnificationController.onTouchInteractionEnd(TEST_DISPLAY, MODE_WINDOW);
+
+        verify(mWindowMagnificationManager).showMagnificationButton(eq(TEST_DISPLAY),
+                eq(MODE_WINDOW));
+    }
+
+    @Test
+    public void onTouchInteractionChanged_notCapabilitiesAll_notShowMagnificationButton()
+            throws RemoteException {
+        mMagnificationController.setMagnificationCapabilities(
+                Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN);
+        setMagnificationEnabled(MODE_FULLSCREEN);
+
+        mMagnificationController.onTouchInteractionStart(TEST_DISPLAY, MODE_FULLSCREEN);
+        mMagnificationController.onTouchInteractionEnd(TEST_DISPLAY, MODE_FULLSCREEN);
+
+        verify(mWindowMagnificationManager, never()).showMagnificationButton(eq(TEST_DISPLAY),
+                eq(MODE_FULLSCREEN));
+    }
+
     private void setMagnificationEnabled(int mode) throws RemoteException {
 
         setMagnificationEnabled(mode, MAGNIFIED_CENTER_X, MAGNIFIED_CENTER_Y);

@@ -88,9 +88,9 @@ public class WindowMagnificationGestureHandler extends MagnificationGestureHandl
 
     public WindowMagnificationGestureHandler(Context context,
             WindowMagnificationManager windowMagnificationMgr,
-            ScaleChangedListener listener,
+            Callback callback,
             boolean detectTripleTap, boolean detectShortcutTrigger, int displayId) {
-        super(displayId, detectTripleTap, detectShortcutTrigger, listener);
+        super(displayId, detectTripleTap, detectShortcutTrigger, callback);
         if (DEBUG_ALL) {
             Slog.i(mLogTag,
                     "WindowMagnificationGestureHandler() , displayId = " + displayId + ")");

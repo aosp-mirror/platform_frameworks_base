@@ -74,7 +74,7 @@ public class WindowMagnificationGestureHandlerTest {
         mMockConnection = new MockWindowMagnificationConnection();
         mWindowMagnificationGestureHandler = new WindowMagnificationGestureHandler(
                 mContext, mWindowMagnificationManager, mock(
-                MagnificationGestureHandler.ScaleChangedListener.class),
+                MagnificationGestureHandler.Callback.class),
                 /** detectTripleTap= */true,   /** detectShortcutTrigger= */true, DISPLAY_0);
         mWindowMagnificationManager.setConnection(mMockConnection.getConnection());
         mWindowMagnificationGestureHandler.setNext(strictMock(EventStreamTransformation.class));

@@ -17,6 +17,8 @@
 package com.android.server.accessibility.magnification;
 
 import static android.view.InputDevice.SOURCE_TOUCHSCREEN;
+import static android.view.MotionEvent.ACTION_CANCEL;
+import static android.view.MotionEvent.ACTION_UP;
 
 import android.annotation.NonNull;
 import android.util.Log;
@@ -59,20 +61,34 @@ public abstract class MagnificationGestureHandler extends BaseEventStreamTransfo
      */
     protected final boolean mDetectTripleTap;
 
-    /** Interface for listening to the magnification scaling gesture. */
-    public interface ScaleChangedListener {
+    /** Callback interface to report that magnification is interactive with a user. */
+    public interface Callback {
+        /**
+         * Called when the touch interaction is started by a user.
+         *
+         * @param displayId The logical display id
+         * @param mode The magnification mode
+         */
+        void onTouchInteractionStart(int displayId, int mode);
 
+        /**
+         * Called when the touch interaction is ended by a user.
+         *
+         * @param displayId The logical display id
+         * @param mode The magnification mode
+         */
+        void onTouchInteractionEnd(int displayId, int mode);
     }
 
-    protected final ScaleChangedListener mListener;
+    protected final Callback mCallback;
 
     protected MagnificationGestureHandler(int displayId, boolean detectTripleTap,
             boolean detectShortcutTrigger,
-            @NonNull ScaleChangedListener listener) {
+            @NonNull Callback callback) {
         mDisplayId = displayId;
         mDetectTripleTap = detectTripleTap;
         mDetectShortcutTrigger = detectShortcutTrigger;
-        mListener = listener;
+        mCallback = callback;
 
         mDebugInputEventHistory = DEBUG_EVENT_STREAM ? new ArrayDeque<>() : null;
         mDebugOutputEventHistory = DEBUG_EVENT_STREAM ? new ArrayDeque<>() : null;
@@ -90,6 +106,13 @@ public abstract class MagnificationGestureHandler extends BaseEventStreamTransfo
             dispatchTransformedEvent(event, rawEvent, policyFlags);
         } else {
             onMotionEventInternal(event, rawEvent, policyFlags);
+
+            final int action = event.getAction();
+            if (action == MotionEvent.ACTION_DOWN) {
+                mCallback.onTouchInteractionStart(mDisplayId, getMode());
+            } else if (action == ACTION_UP || action == ACTION_CANCEL) {
+                mCallback.onTouchInteractionEnd(mDisplayId, getMode());
+            }
         }
     }
 
@@ -101,8 +124,7 @@ public abstract class MagnificationGestureHandler extends BaseEventStreamTransfo
         return false;
     }
 
-    final void dispatchTransformedEvent(MotionEvent event, MotionEvent rawEvent,
-            int policyFlags) {
+    final void dispatchTransformedEvent(MotionEvent event, MotionEvent rawEvent, int policyFlags) {
         if (DEBUG_EVENT_STREAM) {
             storeEventInto(mDebugOutputEventHistory, event);
             try {
