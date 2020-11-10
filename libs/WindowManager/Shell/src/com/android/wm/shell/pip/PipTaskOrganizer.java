@@ -495,7 +495,9 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             mOnDisplayIdChangeCallback.accept(info.displayId);
         }
 
-        mMenuActivityController.onTaskAppeared();
+        if (mMenuActivityController != null) {
+            mMenuActivityController.onTaskAppeared();
+        }
 
         if (mShouldIgnoreEnteringPipTransition) {
             final Rect destinationBounds = mPipBoundsState.getBounds();
@@ -668,7 +670,9 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         mPictureInPictureParams = null;
         mState = State.UNDEFINED;
         mPipUiEventLoggerLogger.setTaskInfo(null);
-        mMenuActivityController.onTaskVanished();
+        if (mMenuActivityController != null) {
+            mMenuActivityController.onTaskVanished();
+        }
     }
 
     @Override
