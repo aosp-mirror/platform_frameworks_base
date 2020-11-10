@@ -149,11 +149,8 @@ public class SoundTriggerMiddlewarePermission implements ISoundTriggerMiddleware
     private static void enforcePermissionForDataDelivery(@NonNull Context context,
             @NonNull Identity identity,
             @NonNull String permission, @NonNull String reason) {
-        // TODO(ytai): We're temporarily ignoring proc state until we have a proper permission that
-        //  represents being able to use the microphone in the background. Otherwise, some of our
-        //  existing use-cases would break.
-        final int status = PermissionUtil.checkPermissionForDataDeliveryIgnoreProcState(context,
-                identity, permission, reason);
+        final int status = PermissionUtil.checkPermissionForDataDelivery(context, identity,
+                permission, reason);
         if (status != PermissionChecker.PERMISSION_GRANTED) {
             throw new SecurityException(
                     String.format("Failed to obtain permission %s for identity %s", permission,
