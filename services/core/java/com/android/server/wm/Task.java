@@ -5870,11 +5870,7 @@ class Task extends WindowContainer<WindowContainer> {
         final TaskDisplayArea taskDisplayArea = getDisplayArea();
 
         // If the top activity is the resumed one, nothing to do.
-        // For devices that are not in fullscreen mode (e.g. freeform windows), it's possible
-        // we still want to proceed if the visibility of other windows have changed (e.g. bringing
-        // a fullscreen window forward to cover another freeform activity.)
         if (mResumedActivity == next && next.isState(RESUMED)
-                && taskDisplayArea.getWindowingMode() != WINDOWING_MODE_FREEFORM
                 && taskDisplayArea.allResumedActivitiesComplete()) {
             // Make sure we have executed any pending transitions, since there
             // should be nothing left to do at this point.
