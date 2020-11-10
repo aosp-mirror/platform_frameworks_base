@@ -242,7 +242,7 @@ public class PipBoundsHandlerTest extends ShellTestCase {
         mPipBoundsState.setAspectRatio(DEFAULT_ASPECT_RATIO);
         final Rect oldPosition = mPipBoundsHandler.getEntryDestinationBounds();
 
-        mPipBoundsHandler.setShelfHeight(true, shelfHeight);
+        mPipBoundsState.setShelfVisibility(true, shelfHeight);
         final Rect newPosition = mPipBoundsHandler.getEntryDestinationBounds();
 
         oldPosition.offset(0, -shelfHeight);
@@ -255,7 +255,7 @@ public class PipBoundsHandlerTest extends ShellTestCase {
         mPipBoundsState.setAspectRatio(DEFAULT_ASPECT_RATIO);
         final Rect oldPosition = mPipBoundsHandler.getEntryDestinationBounds();
 
-        mPipBoundsHandler.onImeVisibilityChanged(true, imeHeight);
+        mPipBoundsState.setImeVisibility(true, imeHeight);
         final Rect newPosition = mPipBoundsHandler.getEntryDestinationBounds();
 
         oldPosition.offset(0, -imeHeight);

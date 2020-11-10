@@ -184,7 +184,7 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
         @Override
         public void onImeVisibilityChanged(boolean imeVisible, int imeHeight) {
             mHandler.post(() -> {
-                mPipBoundsHandler.onImeVisibilityChanged(imeVisible, imeHeight);
+                mPipBoundsState.setImeVisibility(imeVisible, imeHeight);
                 if (mState == STATE_PIP) {
                     if (mImeVisible != imeVisible) {
                         if (imeVisible) {
