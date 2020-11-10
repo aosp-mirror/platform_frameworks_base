@@ -42,14 +42,6 @@ package android.content.rollback {
 
 }
 
-package android.graphics {
-
-  public final class Compatibility {
-    method public static void setTargetSdkVersion(int);
-  }
-
-}
-
 package android.media {
 
   public class AudioManager {
