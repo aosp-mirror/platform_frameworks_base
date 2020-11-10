@@ -112,7 +112,7 @@
     <string name="bluetooth_opp_profile_summary_use_for" msgid="461981154387015457">"ಫೈಲ್‌ ವರ್ಗಾವಣೆಗಾಗಿ ಬಳಸು"</string>
     <string name="bluetooth_hid_profile_summary_use_for" msgid="4289460627406490952">"ಇನ್‌ಪುಟ್‌ಗಾಗಿ ಬಳಸು"</string>
     <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="7689393730163320483">"ಶ್ರವಣ ಸಾಧನಗಳಿಗಾಗಿ ಬಳಸಿ"</string>
-    <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"ಜೋಡಿ"</string>
+    <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"ಜೋಡಿಸಿ"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="2734383073450506220">"ಜೋಡಿ ಮಾಡು"</string>
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"ರದ್ದುಮಾಡಿ"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"ಸಂಪರ್ಕಗೊಳಿಸಿದಾಗ, ಜೋಡಿಸುವಿಕೆಯು ನಿಮ್ಮ ಸಂಪರ್ಕಗಳು ಮತ್ತು ಕರೆ ಇತಿಹಾಸಕ್ಕೆ ಪ್ರವೇಶವನ್ನು ಅನುಮತಿಸುತ್ತದೆ."</string>
@@ -212,8 +212,7 @@
     <string name="adb_wireless_settings" msgid="2295017847215680229">"ವೈರ್‌ಲೆಸ್ ಡೀಬಗ್ ಮಾಡುವಿಕೆ"</string>
     <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"ಲಭ್ಯವಿರುವ ಸಾಧನಗಳನ್ನು ನೋಡಲು ಮತ್ತು ಬಳಸಲು, ವೈರ್‌ಲೆಸ್ ಡೀಬಗ್ ಮಾಡುವಿಕೆಯನ್ನು ಆನ್ ಮಾಡಿ"</string>
     <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"QR ಕೋಡ್ ಬಳಸಿ ಸಾಧನವನ್ನು ಜೋಡಿಸಿ"</string>
-    <!-- no translation found for adb_pair_method_qrcode_summary (7130694277228970888) -->
-    <skip />
+    <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"QR ಕೋಡ್ ಸ್ಕ್ಯಾನರ್ ಬಳಸಿ ಹೊಸ ಸಾಧನಗಳನ್ನು ಜೋಡಿಸಿ"</string>
     <string name="adb_pair_method_code_title" msgid="1122590300445142904">"ಜೋಡಿಸುವ ಕೋಡ್ ಬಳಸಿ ಸಾಧನವನ್ನು ಜೋಡಿಸಿ"</string>
     <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"ಆರು ಅಂಕಿಯ ಕೋಡ್ ಬಳಸಿ ಹೊಸ ಸಾಧನಗಳನ್ನು ಜೋಡಿಸಿ"</string>
     <string name="adb_paired_devices_title" msgid="5268997341526217362">"ಜೋಡಿಸಲಾದ ಸಾಧನಗಳು"</string>
@@ -232,8 +231,7 @@
     <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"ಸಾಧನವನ್ನು ಜೋಡಿಸಲು ವಿಫಲವಾಗಿದೆ. QR ಕೋಡ್ ತಪ್ಪಾಗಿದೆ ಅಥವಾ ಸಾಧನವು ಒಂದೇ ನೆಟ್‌ವರ್ಕ್‌ಗೆ ಕನೆಕ್ಟ್ ಆಗಿಲ್ಲ."</string>
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"IP ವಿಳಾಸ ಮತ್ತು ಪೋರ್ಟ್"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"QR ಕೋಡ್ ಸ್ಕ್ಯಾನ್ ಮಾಡಿ"</string>
-    <!-- no translation found for adb_wireless_qrcode_pairing_description (6014121407143607851) -->
-    <skip />
+    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"QR ಕೋಡ್ ಅನ್ನು ಸ್ಕ್ಯಾನ್ ಮಾಡುವ ಮೂಲಕ ವೈ-ಫೈನಲ್ಲಿ ಸಾಧನವನ್ನು ಜೋಡಿಸಿ"</string>
     <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"ವೈ-ಫೈ ನೆಟ್‌ವರ್ಕ್‌ಗೆ ಸಂಪರ್ಕಿಸಿ"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, ಡೀಬಗ್, dev"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"ದೋಷ ವರದಿಯ ಶಾರ್ಟ್‌ಕಟ್‌‌"</string>
@@ -253,12 +251,12 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"ವೈರ್‌ಲೆಸ್ ಪ್ರದರ್ಶನ ಪ್ರಮಾಣೀಕರಣ"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Wi‑Fi ವೆರ್ಬೋಸ್ ಲಾಗಿಂಗ್ ಸಕ್ರಿಯಗೊಳಿಸಿ"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"ವೈ-ಫೈ ಸ್ಕ್ಯಾನ್ ನಿರ್ಬಂಧಿಸಲಾಗುತ್ತಿದೆ"</string>
+    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"Wi‑Fi‑ವರ್ಧಿತ MAC ಯಾದೃಚ್ಛಿಕರಣ"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"ಮೊಬೈಲ್ ಡೇಟಾ ಯಾವಾಗಲೂ ಸಕ್ರಿಯ"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"ಟೆಥರಿಂಗ್‍‍ಗಾಗಿ ಹಾರ್ಡ್‍ವೇರ್ ವೇಗವರ್ಧನೆ"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"ಹೆಸರುಗಳಿಲ್ಲದ ಬ್ಲೂಟೂತ್ ಸಾಧನಗಳನ್ನು ತೋರಿಸಿ"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"ಸಂಪೂರ್ಣ ವಾಲ್ಯೂಮ್‌ ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಿ"</string>
     <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"Gabeldorsche ಅನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಿ"</string>
-    <string name="enhanced_connectivity" msgid="7201127377781666804">"ವರ್ಧಿತ ಸಂಪರ್ಕ"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="1710571610177659127">"ಬ್ಲೂಟೂತ್ AVRCP ಆವೃತ್ತಿ"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7846922290083709633">"ಬ್ಲೂಟೂತ್ AVRCP ಆವೃತ್ತಿಯನ್ನು ಆಯ್ಕೆ ಮಾಡಿ"</string>
     <string name="bluetooth_select_map_version_string" msgid="526308145174175327">"ಬ್ಲೂಟೂತ್ MAP ಆವೃತ್ತಿ"</string>
@@ -285,6 +283,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"ವೈರ್‌ಲೆಸ್‌‌‌ ಪ್ರದರ್ಶನ ಪ್ರಮಾಣೀಕರಣಕ್ಕಾಗಿ ಆಯ್ಕೆಗಳನ್ನು ತೋರಿಸು"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Wi‑Fi ಲಾಗಿಂಗ್ ಮಟ್ಟನ್ನು ಹೆಚ್ಚಿಸಿ, Wi‑Fi ಆಯ್ಕೆಯಲ್ಲಿ ಪ್ರತಿಯೊಂದು SSID RSSI ತೋರಿಸಿ"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"ಬ್ಯಾಟರಿ ಹೆಚ್ಚು ಬಾಳಿಕೆ ಬರುವಂತೆ ಮಾಡುತ್ತದೆ ಮತ್ತು ನೆಟ್‌ವರ್ಕ್‌ ಕಾರ್ಯಕ್ಷಮತೆಯನ್ನು ಸುಧಾರಿಸುತ್ತದೆ"</string>
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"ಈ ಮೋಡ್ ಅನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಿದಾಗ, ಪ್ರತಿ ಬಾರಿ MAC ಯಾದೃಚ್ಛಿಕರಣವನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಿದ ನೆಟ್‌ವರ್ಕ್‌ಗೆ ಕನೆಕ್ಟ್ ಮಾಡಿದಾಗ ಈ ಸಾಧನದ MAC ವಿಳಾಸವು ಬದಲಾಗಬಹುದು."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"ಮೀಟರ್ ಮಾಡಲಾಗಿದೆ"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"ಮೀಟರ್ ಮಾಡಲಾಗಿಲ್ಲ"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"ಲಾಗರ್ ಬಫರ್ ಗಾತ್ರಗಳು"</string>
@@ -307,7 +306,7 @@
     <string name="adb_keys_warning_message" msgid="2968555274488101220">"ನೀವು ಹಿಂದೆ ಅಧಿಕೃತಗೊಳಿಸಿದ ಎಲ್ಲ ಕಂಪ್ಯೂಟರ್‌ಗಳಿಂದ USB ಡೀಬಗ್‌ಗೆ ಪ್ರವೇಶವನ್ನು ರದ್ದುಗೊಳಿಸುವುದೇ?"</string>
     <string name="dev_settings_warning_title" msgid="8251234890169074553">"ಅಭಿವೃದ್ಧಿಯ ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ಅನುಮತಿಸುವುದೇ?"</string>
     <string name="dev_settings_warning_message" msgid="37741686486073668">"ಈ ಸೆಟ್ಟಿಂಗ್‌ಗಳು ಅಭಿವೃದ್ಧಿಯ ಬಳಕೆಗೆ ಮಾತ್ರ. ಅವುಗಳು ನಿಮ್ಮ ಸಾಧನ ಮತ್ತು ಅಪ್ಲಿಕೇಶನ್‌‌ಗಳಿಗೆ ಧಕ್ಕೆ ಮಾಡಬಹುದು ಅಥವಾ ಅವು ಸರಿಯಾಗಿ ಕಾರ್ಯನಿರ್ವಹಿಸದಿರುವಂತೆ ಮಾಡಬಹುದು."</string>
-    <string name="verify_apps_over_usb_title" msgid="6031809675604442636">"USB ಮೂಲಕ ಆಪ್‌ ಪರಿಶೀಲಿಸಿ"</string>
+    <string name="verify_apps_over_usb_title" msgid="6031809675604442636">"USB ಮೂಲಕ ಆ್ಯಪ್‌ ಪರಿಶೀಲಿಸಿ"</string>
     <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"ಹಾನಿಮಾಡುವಂತಹ ವರ್ತನೆಗಾಗಿ ADB/ADT ಮೂಲಕ ಸ್ಥಾಪಿಸಲಾದ ಅಪ್ಲಿಕೇಶನ್‌ಗಳನ್ನು ಪರಿಶೀಲಿಸಿ."</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"ಹೆಸರುಗಳಿಲ್ಲದ (ಕೇವಲ MAC ವಿಳಾಸಗಳು ಮಾತ್ರ) ಬ್ಲೂಟೂತ್ ಸಾಧನಗಳನ್ನು ಪ್ರದರ್ಶಿಸಲಾಗುತ್ತದೆ"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"ರಿಮೋಟ್ ಸಾಧನಗಳಲ್ಲಿ ಕಂಡುಬರುವ ಸ್ವೀಕಾರಾರ್ಹವಲ್ಲದ ಜೋರಾದ ವಾಲ್ಯೂಮ್ ಅಥವಾ ನಿಯಂತ್ರಣದ ಕೊರತೆಯಂತಹ ವಾಲ್ಯೂಮ್ ಸಮಸ್ಯೆಗಳಂತಹ ಸಂದರ್ಭದಲ್ಲಿ ಬ್ಲೂಟೂತ್‍ನ ನಿಚ್ಚಳ ವಾಲ್ಯೂಮ್ ವೈಶಿಷ್ಟ್ಯವನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸುತ್ತದೆ."</string>
@@ -373,10 +372,6 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"ಹಿನ್ನೆಲೆ ಅಪ್ಲಿಕೇಶನ್‌ಗಳಿಗಾಗಿ ಅಪ್ಲಿಕೇಶನ್ ಪ್ರತಿಕ್ರಿಯಿಸುತ್ತಿಲ್ಲ ಎಂಬ ಸಂಭಾಷಣೆ ತೋರಿಸಿ"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"ಅಧಿಸೂಚನೆ ಎಚ್ಚರಿಕೆ ತೋರಿಸಿ"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"ಅಮಾನ್ಯ ಚಾನಲ್ ಅಧಿಸೂಚನೆಗಾಗಿ ಪರದೆಯಲ್ಲಿ ಎಚ್ಚರಿಕೆ"</string>
-    <!-- no translation found for enforce_shortcuts_for_conversations (7040735163945040763) -->
-    <skip />
-    <!-- no translation found for enforce_shortcuts_for_conversations_summary (1860168037282467862) -->
-    <skip />
     <string name="force_allow_on_external" msgid="9187902444231637880">"ಬಾಹ್ಯವಾಗಿ ಅಪ್ಲಿಕೇಶನ್‌ಗಳನ್ನು ಒತ್ತಾಯವಾಗಿ ಅನುಮತಿಸಿ"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"ಮ್ಯಾನಿಫೆಸ್ಟ್ ಮೌಲ್ಯಗಳು ಯಾವುದೇ ಆಗಿದ್ದರೂ, ಬಾಹ್ಯ ಸಂಗ್ರಹಣೆಗೆ ಬರೆಯಲು ಯಾವುದೇ ಅಪ್ಲಿಕೇಶನ್‌ ಅನ್ನು ಅರ್ಹಗೊಳಿಸುತ್ತದೆ"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"ಚಟುವಟಿಕೆಗಳನ್ನು ಮರುಗಾತ್ರಗೊಳಿಸುವಂತೆ ಒತ್ತಾಯ ಮಾಡಿ"</string>
@@ -438,10 +433,10 @@
     <string name="power_discharge_by_only" msgid="92545648425937000">"<xliff:g id="TIME">%1$s</xliff:g> ಸಮಯದವರೆಗೆ ಫೋನ್‌ ರನ್‌ ಆಗಬೇಕು"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"<xliff:g id="TIME">%1$s</xliff:g> ರವರೆಗೆ"</string>
     <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"<xliff:g id="TIME">%1$s</xliff:g> ಗಳಲ್ಲಿ ಬ್ಯಾಟರಿ ಮುಕ್ತಾಯವಾಗಬಹುದು"</string>
-    <string name="power_remaining_less_than_duration_only" msgid="5802195288324091585">"<xliff:g id="THRESHOLD">%1$s</xliff:g> ನಿಮಿಷಕ್ಕಿಂತ ಕಡಿಮೆ ಸಮಯ ಉಳಿದಿದೆ"</string>
-    <string name="power_remaining_less_than_duration" msgid="1812668275239801236">"<xliff:g id="THRESHOLD">%1$s</xliff:g> ಕ್ಕಿಂತ ಕಡಿಮೆ (<xliff:g id="LEVEL">%2$s</xliff:g>) ಬಾಕಿ"</string>
-    <string name="power_remaining_more_than_subtext" msgid="7919119719242734848">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> ಕ್ಕಿಂತ ಹೆಚ್ಚು (<xliff:g id="LEVEL">%2$s</xliff:g>) ಬಾಕಿ"</string>
-    <string name="power_remaining_only_more_than_subtext" msgid="3274496164769110480">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> ಕ್ಕಿಂತ ಹೆಚ್ಚು ಸಮಯ ಉಳಿದಿದೆ"</string>
+    <string name="power_remaining_less_than_duration_only" msgid="8956656616031395152">"<xliff:g id="THRESHOLD">%1$s</xliff:g> ಕ್ಕಿಂತ ಕಡಿಮೆ ಸಮಯ ಉಳಿದಿದೆ"</string>
+    <string name="power_remaining_less_than_duration" msgid="318215464914990578">"<xliff:g id="THRESHOLD">%1$s</xliff:g> ಕ್ಕಿಂತ ಕಡಿಮೆ ಸಮಯ ಉಳಿದಿದೆ (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_more_than_subtext" msgid="446388082266121894">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> ಕ್ಕಿಂತ ಹೆಚ್ಚು ಸಮಯ ಉಳಿದಿದೆ (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_only_more_than_subtext" msgid="4873750633368888062">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> ಕ್ಕಿಂತ ಹೆಚ್ಚು ಸಮಯ ಉಳಿದಿದೆ"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="137330009791560774">"ಫೋನ್ ಶೀಘ್ರದಲ್ಲೇ ಶಟ್ ಡೌನ್ ಆಗಬಹುದು"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="145489081521468132">"ಟ್ಯಾಬ್ಲೆಟ್‌‌ ಶೀಘ್ರದಲ್ಲೇ ಶಟ್ ಡೌನ್ ಆಗಬಹುದು"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="1070562682853942350">"ಸಾಧನವು ಶೀಘ್ರದಲ್ಲೇ ಶಟ್ ಡೌನ್ ಆಗಬಹುದು"</string>
@@ -537,7 +532,7 @@
     <string name="user_add_user_title" msgid="5457079143694924885">"ಹೊಸ ಬಳಕೆದಾರರನ್ನು ಸೇರಿಸುವುದೇ?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"ನೀವು ಹೆಚ್ಚುವರಿ ಬಳಕೆದಾರರನ್ನು ರಚಿಸುವ ಮೂಲಕ ಇತರ ಜನರ ಜೊತೆಗೆ ಈ ಸಾಧನವನ್ನು ಹಂಚಿಕೊಳ್ಳಬಹುದು. ಪ್ರತಿ ಬಳಕೆದಾರರು ತಮ್ಮದೇ ಸ್ಥಳವನ್ನು ಹೊಂದಿರುತ್ತಾರೆ, ಇದರಲ್ಲಿ ಅವರು ತಮ್ಮದೇ ಅಪ್ಲಿಕೇಶನ್‌ಗಳು, ವಾಲ್‌ಪೇಪರ್ ಮತ್ತು ಮುಂತಾದವುಗಳ ಮೂಲಕ ಕಸ್ಟಮೈಸ್ ಮಾಡಿಕೊಳ್ಳಬಹುದು. ಎಲ್ಲರ ಮೇಲೂ ಪರಿಣಾಮ ಬೀರುವಂತೆ ವೈ-ಫೈ ರೀತಿಯ ಸಾಧನ ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ಬಳಕೆದಾರರು ಸರಿಹೊಂದಿಸಬಹುದು.\n\nನೀವು ಒಬ್ಬ ಹೊಸ ಬಳಕೆದಾರರನ್ನು ಸೇರಿಸಿದಾಗ, ಆ ವ್ಯಕ್ತಿಯು ಅವರ ಸ್ಥಳವನ್ನು ಹೊಂದಿಸಬೇಕಾಗುತ್ತದೆ.\n\nಯಾವುದೇ ಬಳಕೆದಾರರು ಎಲ್ಲಾ ಇತರೆ ಬಳಕೆದಾರರಿಗೆ ಅಪ್ಲಿಕೇಶನ್‌ಗಳನ್ನು ಅಪ್‌ಡೇಟ್‌ ಮಾಡಬಹುದು. ಪ್ರವೇಶಿಸುವಿಕೆ ಸೆಟ್ಟಿಂಗ್‌ಗಳು ಮತ್ತು ಸೇವೆಗಳು ಹೊಸ ಬಳಕೆದಾರರಿಗೆ ವರ್ಗಾವಣೆ ಆಗದಿರಬಹುದು."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"ನೀವು ಒಬ್ಬ ಹೊಸ ಬಳಕೆದಾರರನ್ನು ಸೇರಿಸಿದಾಗ, ಆ ವ್ಯಕ್ತಿಯು ಅವರ ಸ್ಥಳವನ್ನು ಸ್ಥಾಪಿಸಬೇಕಾಗುತ್ತದೆ.\n\nಯಾವುದೇ ಬಳಕೆದಾರರು ಎಲ್ಲಾ ಇತರೆ ಬಳಕೆದಾರರಿಗಾಗಿ ಅಪ್ಲಿಕೇಶನ್‌ಗಳನ್ನು ಅಪ್‌ಡೇಟ್‌ ಮಾಡಬಹುದು."</string>
-    <string name="user_setup_dialog_title" msgid="8037342066381939995">"ಈಗ ಬಳಕೆದಾರರನ್ನು ಸೆಟಪ್‌‌ ಮಾಡುವುದೇ?"</string>
+    <string name="user_setup_dialog_title" msgid="8037342066381939995">"ಈಗ ಬಳಕೆದಾರರನ್ನು ಸೆಟ್ ಮಾಡುವುದೇ?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"ಸಾಧನವನ್ನು ತೆಗೆದುಕೊಳ್ಳಲು ಮತ್ತು ಅದರ ಸ್ಥಳವನ್ನು ಹೊಂದಿಸಲು ವ್ಯಕ್ತಿಯು ಲಭ್ಯವಿದ್ದಾರೆಯೇ ಎಂಬುದನ್ನು ಖಚಿತಪಡಿಸಿಕೊಳ್ಳಿ"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"ಇದೀಗ ಪ್ರೊಫೈಲ್‌ ಅನ್ನು ಹೊಂದಿಸುವುದೇ?"</string>
     <string name="user_setup_button_setup_now" msgid="1708269547187760639">"ಇದೀಗ ಹೊಂದಿಸಿ"</string>
@@ -550,7 +545,19 @@
     <string name="user_need_lock_message" msgid="4311424336209509301">"ನೀವು ನಿರ್ಬಂಧಿತ ಪ್ರೊಫೈಲ್ ಅನ್ನು ರಚಿಸಬಹುದಾದರ ಮೊದಲು, ನಿಮ್ಮ ಅಪ್ಲಿಕೇಶನ್‌ಗಳು ಮತ್ತು ವೈಯಕ್ತಿಕ ಡೇಟಾವನ್ನು ರಕ್ಷಿಸಲು ನೀವು ಪರದೆಯ ಲಾಕ್‌ ಹೊಂದಿಸುವ ಅಗತ್ಯವಿದೆ."</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"ಲಾಕ್ ಹೊಂದಿಸಿ"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"<xliff:g id="USER_NAME">%s</xliff:g> ಗೆ ಬದಲಿಸಿ"</string>
+    <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"ಹೊಸ ಬಳಕೆದಾರರನ್ನು ರಚಿಸಲಾಗುತ್ತಿದೆ…"</string>
+    <string name="user_nickname" msgid="262624187455825083">"ಅಡ್ಡ ಹೆಸರು"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"ಅತಿಥಿಯನ್ನು ಸೇರಿಸಿ"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"ಅತಿಥಿಯನ್ನು ತೆಗೆದುಹಾಕಿ"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"ಅತಿಥಿ"</string>
+    <string name="user_image_take_photo" msgid="467512954561638530">"ಫೋಟೋ ತೆಗೆದುಕೊಳ್ಳಿ"</string>
+    <string name="user_image_choose_photo" msgid="1363820919146782908">"ಚಿತ್ರವನ್ನು ಆರಿಸಿ"</string>
+    <string name="user_image_photo_selector" msgid="433658323306627093">"ಫೋಟೋ ಆಯ್ಕೆಮಾಡಿ"</string>
+    <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"ಸಾಧನದ ಡೀಫಾಲ್ಟ್"</string>
+    <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ"</string>
+    <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"ಸಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ"</string>
+    <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"ಈ ಬದಲಾವಣೆ ಅನ್ವಯವಾಗಲು ನಿಮ್ಮ ಸಾಧನವನ್ನು ರೀಬೂಟ್ ಮಾಡಬೇಕು. ಇದೀಗ ರೀಬೂಟ್ ಮಾಡಿ ಅಥವಾ ರದ್ದುಗೊಳಿಸಿ."</string>
+    <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"ವೈಯರ್ ಹೊಂದಿರುವ ಹೆಡ್‌ಫೋನ್"</string>
+    <string name="wifi_hotspot_switch_on_text" msgid="9212273118217786155">"ಆನ್ ಆಗಿದೆ"</string>
+    <string name="wifi_hotspot_switch_off_text" msgid="7245567251496959764">"ಆಫ್ ಆಗಿದೆ"</string>
 </resources>
