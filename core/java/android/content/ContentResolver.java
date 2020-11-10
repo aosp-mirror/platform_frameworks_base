@@ -835,6 +835,7 @@ public abstract class ContentResolver implements ContentInterface {
     }
 
     /** @hide */
+    @SuppressWarnings("HiddenAbstractMethod")
     @UnsupportedAppUsage
     protected abstract IContentProvider acquireProvider(Context c, String name);
 
@@ -851,15 +852,19 @@ public abstract class ContentResolver implements ContentInterface {
     }
 
     /** @hide */
+    @SuppressWarnings("HiddenAbstractMethod")
     @UnsupportedAppUsage
     public abstract boolean releaseProvider(IContentProvider icp);
     /** @hide */
+    @SuppressWarnings("HiddenAbstractMethod")
     @UnsupportedAppUsage
     protected abstract IContentProvider acquireUnstableProvider(Context c, String name);
     /** @hide */
+    @SuppressWarnings("HiddenAbstractMethod")
     @UnsupportedAppUsage
     public abstract boolean releaseUnstableProvider(IContentProvider icp);
     /** @hide */
+    @SuppressWarnings("HiddenAbstractMethod")
     @UnsupportedAppUsage
     public abstract void unstableProviderDied(IContentProvider icp);
 
