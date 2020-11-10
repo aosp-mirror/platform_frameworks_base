@@ -38,6 +38,8 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Tests for {@link HdmiControlServiceBinderAPITest} class.
@@ -98,6 +100,21 @@ public class HdmiControlServiceBinderAPITest {
 
         protected void setCanGoToStandby(boolean canGoToStandby) {
             mCanGoToStandby = canGoToStandby;
+        }
+
+        @Override
+        protected int getRcProfile() {
+            return 0;
+        }
+
+        @Override
+        protected List<Integer> getRcFeatures() {
+            return Collections.emptyList();
+        }
+
+        @Override
+        protected List<Integer> getDeviceFeatures() {
+            return Collections.emptyList();
         }
     }
 

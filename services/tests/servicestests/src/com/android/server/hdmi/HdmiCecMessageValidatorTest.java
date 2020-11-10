@@ -353,6 +353,24 @@ public class HdmiCecMessageValidatorTest {
         assertMessageValidity("40:35:EE:52:4A").isEqualTo(ERROR_PARAMETER);
     }
 
+    @Test
+    public void isValid_giveFeatures() {
+        assertMessageValidity("40:A5").isEqualTo(OK);
+
+        assertMessageValidity("4F:A5").isEqualTo(ERROR_DESTINATION);
+        assertMessageValidity("F0:A5").isEqualTo(ERROR_SOURCE);
+    }
+
+    @Test
+    public void isValid_reportFeatures() {
+        assertMessageValidity("0F:A6:05:80:00:00").isEqualTo(OK);
+
+        assertMessageValidity("04:A6:05:80:00:00").isEqualTo(ERROR_DESTINATION);
+        assertMessageValidity("FF:A6:05:80:00:00").isEqualTo(ERROR_SOURCE);
+
+        assertMessageValidity("0F:A6").isEqualTo(ERROR_PARAMETER_SHORT);
+    }
+
     private IntegerSubject assertMessageValidity(String message) {
         return assertThat(mHdmiCecMessageValidator.isValid(buildMessage(message)));
     }
