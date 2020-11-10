@@ -44,7 +44,6 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.Log;
-import android.util.Pair;
 import android.view.DisplayInfo;
 
 import com.android.wm.shell.R;
@@ -57,7 +56,6 @@ import com.android.wm.shell.pip.PipBoundsHandler;
 import com.android.wm.shell.pip.PipBoundsState;
 import com.android.wm.shell.pip.PipMediaController;
 import com.android.wm.shell.pip.PipTaskOrganizer;
-import com.android.wm.shell.pip.PipUtils;
 
 import java.util.ArrayList;
 import java.util.List;
