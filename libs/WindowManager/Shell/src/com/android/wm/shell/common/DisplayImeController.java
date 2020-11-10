@@ -39,6 +39,8 @@ import android.view.WindowInsets;
 import android.view.animation.Interpolator;
 import android.view.animation.PathInterpolator;
 
+import androidx.annotation.BinderThread;
+
 import com.android.internal.view.IInputMethodManager;
 
 import java.util.ArrayList;
@@ -196,6 +198,7 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
             mRotation = initialRotation;
         }
 
+        @BinderThread
         @Override
         public void insetsChanged(InsetsState insetsState) {
             mExecutor.execute(() -> {
@@ -217,6 +220,7 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
             });
         }
 
+        @BinderThread
         @Override
         public void insetsControlChanged(InsetsState insetsState,
                 InsetsSourceControl[] activeControls) {
@@ -267,6 +271,7 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
             }
         }
 
+        @BinderThread
         @Override
         public void showInsets(int types, boolean fromIme) {
             if ((types & WindowInsets.Type.ime()) == 0) {
@@ -276,6 +281,7 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
             mExecutor.execute(() -> startAnimation(true /* show */, false /* forceRestart */));
         }
 
+        @BinderThread
         @Override
         public void hideInsets(int types, boolean fromIme) {
             if ((types & WindowInsets.Type.ime()) == 0) {
@@ -285,6 +291,7 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
             mExecutor.execute(() -> startAnimation(false /* show */, false /* forceRestart */));
         }
 
+        @BinderThread
         @Override
         public void topFocusedWindowChanged(String packageName) {
             // no-op

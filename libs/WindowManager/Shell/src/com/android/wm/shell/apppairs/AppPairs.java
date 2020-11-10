@@ -20,11 +20,14 @@ import android.app.ActivityManager;
 
 import androidx.annotation.NonNull;
 
+import com.android.wm.shell.common.annotations.ExternalThread;
+
 import java.io.PrintWriter;
 
 /**
  * Interface to engage app pairs feature.
  */
+@ExternalThread
 public interface AppPairs {
     /** Pairs indicated tasks. */
     boolean pair(int task1, int task2);

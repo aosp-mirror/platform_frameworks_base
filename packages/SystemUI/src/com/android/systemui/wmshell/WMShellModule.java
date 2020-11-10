@@ -34,6 +34,7 @@ import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.SystemWindows;
 import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.common.TransactionPool;
+import com.android.wm.shell.common.annotations.ShellMainThread;
 import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.pip.PipBoundsAlgorithm;
 import com.android.wm.shell.pip.PipBoundsState;
@@ -95,11 +96,12 @@ public class WMShellModule {
             PipBoundsState pipBoundsState, PipMediaController pipMediaController,
             PhonePipMenuController phonePipMenuController, PipTaskOrganizer pipTaskOrganizer,
             PipTouchHandler pipTouchHandler, WindowManagerShellWrapper windowManagerShellWrapper,
-            TaskStackListenerImpl taskStackListener, ShellExecutor mainExecutor) {
+            TaskStackListenerImpl taskStackListener,
+            @ShellMainThread ShellExecutor shellMainExecutor) {
         return Optional.ofNullable(PipController.create(context, displayController,
                 pipAppOpsListener, pipBoundsAlgorithm, pipBoundsState, pipMediaController,
                 phonePipMenuController, pipTaskOrganizer, pipTouchHandler,
-                windowManagerShellWrapper, taskStackListener, mainExecutor));
+                windowManagerShellWrapper, taskStackListener, shellMainExecutor));
     }
 
     @WMSingleton
@@ -129,9 +131,11 @@ public class WMShellModule {
             PipBoundsState pipBoundsState,
             PipTaskOrganizer pipTaskOrganizer,
             FloatingContentCoordinator floatingContentCoordinator,
-            PipUiEventLogger pipUiEventLogger) {
+            PipUiEventLogger pipUiEventLogger,
+            @ShellMainThread ShellExecutor shellMainExecutor) {
         return new PipTouchHandler(context, menuPhoneController, pipBoundsAlgorithm,
-                pipBoundsState, pipTaskOrganizer, floatingContentCoordinator, pipUiEventLogger);
+                pipBoundsState, pipTaskOrganizer, floatingContentCoordinator, pipUiEventLogger,
+                shellMainExecutor);
     }
 
     @WMSingleton

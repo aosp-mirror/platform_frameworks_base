@@ -20,15 +20,18 @@ import android.content.Context;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.RemoteException;
 import android.view.MagnificationSpec;
+import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityWindowInfo;
 import android.view.accessibility.IAccessibilityInteractionConnection;
 import android.view.accessibility.IAccessibilityInteractionConnectionCallback;
 
+import androidx.annotation.BinderThread;
+
 import com.android.wm.shell.R;
+import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.pip.PipBoundsState;
 import com.android.wm.shell.pip.PipSnapAlgorithm;
 import com.android.wm.shell.pip.PipTaskOrganizer;
@@ -40,8 +43,7 @@ import java.util.List;
  * Expose the touch actions to accessibility as if this object were a window with a single view.
  * That pseudo-view exposes all of the actions this object can perform.
  */
-public class PipAccessibilityInteractionConnection
-        extends IAccessibilityInteractionConnection.Stub {
+public class PipAccessibilityInteractionConnection {
 
     public interface AccessibilityCallbacks {
         void onAccessibilityShowMenu();
@@ -50,14 +52,15 @@ public class PipAccessibilityInteractionConnection
     private static final long ACCESSIBILITY_NODE_ID = 1;
     private List<AccessibilityNodeInfo> mAccessibilityNodeInfoList;
 
-    private Context mContext;
-    private Handler mHandler;
+    private final Context mContext;
+    private final ShellExecutor mShellMainExcutor;
     private final @NonNull PipBoundsState mPipBoundsState;
-    private PipMotionHelper mMotionHelper;
-    private PipTaskOrganizer mTaskOrganizer;
-    private PipSnapAlgorithm mSnapAlgorithm;
-    private Runnable mUpdateMovementBoundCallback;
-    private AccessibilityCallbacks mCallbacks;
+    private final PipMotionHelper mMotionHelper;
+    private final PipTaskOrganizer mTaskOrganizer;
+    private final PipSnapAlgorithm mSnapAlgorithm;
+    private final Runnable mUpdateMovementBoundCallback;
+    private final AccessibilityCallbacks mCallbacks;
+    private final IAccessibilityInteractionConnection mConnectionImpl;
 
     private final Rect mNormalBounds = new Rect();
     private final Rect mExpandedBounds = new Rect();
@@ -69,19 +72,23 @@ public class PipAccessibilityInteractionConnection
             @NonNull PipBoundsState pipBoundsState, PipMotionHelper motionHelper,
             PipTaskOrganizer taskOrganizer, PipSnapAlgorithm snapAlgorithm,
             AccessibilityCallbacks callbacks, Runnable updateMovementBoundCallback,
-            Handler handler) {
+            ShellExecutor shellMainExcutor) {
         mContext = context;
-        mHandler = handler;
+        mShellMainExcutor = shellMainExcutor;
         mPipBoundsState = pipBoundsState;
         mMotionHelper = motionHelper;
         mTaskOrganizer = taskOrganizer;
         mSnapAlgorithm = snapAlgorithm;
         mUpdateMovementBoundCallback = updateMovementBoundCallback;
         mCallbacks = callbacks;
+        mConnectionImpl = new PipAccessibilityInteractionConnectionImpl();
     }
 
-    @Override
-    public void findAccessibilityNodeInfoByAccessibilityId(long accessibilityNodeId,
+    public void register(AccessibilityManager am) {
+        am.setPictureInPictureActionReplacingConnection(mConnectionImpl);
+    }
+
+    private void findAccessibilityNodeInfoByAccessibilityId(long accessibilityNodeId,
             Region interactiveRegion, int interactionId,
             IAccessibilityInteractionConnectionCallback callback, int flags,
             int interrogatingPid, long interrogatingTid, MagnificationSpec spec, Bundle args) {
@@ -94,8 +101,7 @@ public class PipAccessibilityInteractionConnection
         }
     }
 
-    @Override
-    public void performAccessibilityAction(long accessibilityNodeId, int action,
+    private void performAccessibilityAction(long accessibilityNodeId, int action,
             Bundle arguments, int interactionId,
             IAccessibilityInteractionConnectionCallback callback, int flags,
             int interrogatingPid, long interrogatingTid) {
@@ -115,9 +121,7 @@ public class PipAccessibilityInteractionConnection
             } else {
                 switch (action) {
                     case AccessibilityNodeInfo.ACTION_CLICK:
-                        mHandler.post(() -> {
-                            mCallbacks.onAccessibilityShowMenu();
-                        });
+                        mCallbacks.onAccessibilityShowMenu();
                         result = true;
                         break;
                     case AccessibilityNodeInfo.ACTION_DISMISS:
@@ -172,8 +176,7 @@ public class PipAccessibilityInteractionConnection
         });
     }
 
-    @Override
-    public void findAccessibilityNodeInfosByViewId(long accessibilityNodeId,
+    private void findAccessibilityNodeInfosByViewId(long accessibilityNodeId,
             String viewId, Region interactiveRegion, int interactionId,
             IAccessibilityInteractionConnectionCallback callback, int flags,
             int interrogatingPid, long interrogatingTid, MagnificationSpec spec) {
@@ -185,8 +188,7 @@ public class PipAccessibilityInteractionConnection
         }
     }
 
-    @Override
-    public void findAccessibilityNodeInfosByText(long accessibilityNodeId, String text,
+    private void findAccessibilityNodeInfosByText(long accessibilityNodeId, String text,
             Region interactiveRegion, int interactionId,
             IAccessibilityInteractionConnectionCallback callback, int flags,
             int interrogatingPid, long interrogatingTid, MagnificationSpec spec) {
@@ -198,8 +200,7 @@ public class PipAccessibilityInteractionConnection
         }
     }
 
-    @Override
-    public void findFocus(long accessibilityNodeId, int focusType, Region interactiveRegion,
+    private void findFocus(long accessibilityNodeId, int focusType, Region interactiveRegion,
             int interactionId, IAccessibilityInteractionConnectionCallback callback, int flags,
             int interrogatingPid, long interrogatingTid, MagnificationSpec spec) {
         // We have no view that can take focus
@@ -210,8 +211,7 @@ public class PipAccessibilityInteractionConnection
         }
     }
 
-    @Override
-    public void focusSearch(long accessibilityNodeId, int direction, Region interactiveRegion,
+    private void focusSearch(long accessibilityNodeId, int direction, Region interactiveRegion,
             int interactionId, IAccessibilityInteractionConnectionCallback callback, int flags,
             int interrogatingPid, long interrogatingTid, MagnificationSpec spec) {
         // We have no view that can take focus
@@ -220,16 +220,6 @@ public class PipAccessibilityInteractionConnection
         } catch (RemoteException re) {
             /* best effort - ignore */
         }
-    }
-
-    @Override
-    public void clearAccessibilityFocus() {
-        // We should not be here.
-    }
-
-    @Override
-    public void notifyOutsideTouch() {
-        // Do nothing.
     }
 
     /**
@@ -270,5 +260,96 @@ public class PipAccessibilityInteractionConnection
         mAccessibilityNodeInfoList.clear();
         mAccessibilityNodeInfoList.add(info);
         return mAccessibilityNodeInfoList;
+    }
+
+    @BinderThread
+    private class PipAccessibilityInteractionConnectionImpl
+            extends IAccessibilityInteractionConnection.Stub {
+        @Override
+        public void findAccessibilityNodeInfoByAccessibilityId(long accessibilityNodeId,
+                Region bounds, int interactionId,
+                IAccessibilityInteractionConnectionCallback callback, int flags,
+                int interrogatingPid, long interrogatingTid, MagnificationSpec spec,
+                Bundle arguments) throws RemoteException {
+            mShellMainExcutor.execute(() -> {
+                PipAccessibilityInteractionConnection.this
+                        .findAccessibilityNodeInfoByAccessibilityId(accessibilityNodeId, bounds,
+                                interactionId, callback, flags, interrogatingPid, interrogatingTid,
+                                spec, arguments);
+            });
+        }
+
+        @Override
+        public void findAccessibilityNodeInfosByViewId(long accessibilityNodeId, String viewId,
+                Region bounds, int interactionId,
+                IAccessibilityInteractionConnectionCallback callback, int flags,
+                int interrogatingPid, long interrogatingTid, MagnificationSpec spec)
+                throws RemoteException {
+            mShellMainExcutor.execute(() -> {
+                PipAccessibilityInteractionConnection.this.findAccessibilityNodeInfosByViewId(
+                        accessibilityNodeId, viewId, bounds, interactionId, callback, flags,
+                        interrogatingPid, interrogatingTid, spec);
+            });
+        }
+
+        @Override
+        public void findAccessibilityNodeInfosByText(long accessibilityNodeId, String text,
+                Region bounds, int interactionId,
+                IAccessibilityInteractionConnectionCallback callback, int flags,
+                int interrogatingPid, long interrogatingTid, MagnificationSpec spec)
+                throws RemoteException {
+            mShellMainExcutor.execute(() -> {
+                PipAccessibilityInteractionConnection.this.findAccessibilityNodeInfosByText(
+                        accessibilityNodeId, text, bounds, interactionId, callback, flags,
+                        interrogatingPid, interrogatingTid, spec);
+            });
+        }
+
+        @Override
+        public void findFocus(long accessibilityNodeId, int focusType, Region bounds,
+                int interactionId, IAccessibilityInteractionConnectionCallback callback, int flags,
+                int interrogatingPid, long interrogatingTid, MagnificationSpec spec)
+                throws RemoteException {
+            mShellMainExcutor.execute(() -> {
+                PipAccessibilityInteractionConnection.this.findFocus(accessibilityNodeId, focusType,
+                        bounds, interactionId, callback, flags, interrogatingPid, interrogatingTid,
+                        spec);
+            });
+        }
+
+        @Override
+        public void focusSearch(long accessibilityNodeId, int direction, Region bounds,
+                int interactionId, IAccessibilityInteractionConnectionCallback callback, int flags,
+                int interrogatingPid, long interrogatingTid, MagnificationSpec spec)
+                throws RemoteException {
+            mShellMainExcutor.execute(() -> {
+                PipAccessibilityInteractionConnection.this.focusSearch(accessibilityNodeId,
+                        direction,
+                        bounds, interactionId, callback, flags, interrogatingPid, interrogatingTid,
+                        spec);
+            });
+        }
+
+        @Override
+        public void performAccessibilityAction(long accessibilityNodeId, int action,
+                Bundle arguments, int interactionId,
+                IAccessibilityInteractionConnectionCallback callback, int flags,
+                int interrogatingPid, long interrogatingTid) throws RemoteException {
+            mShellMainExcutor.execute(() -> {
+                PipAccessibilityInteractionConnection.this.performAccessibilityAction(
+                        accessibilityNodeId, action, arguments, interactionId, callback, flags,
+                        interrogatingPid, interrogatingTid);
+            });
+        }
+
+        @Override
+        public void clearAccessibilityFocus() throws RemoteException {
+            // Do nothing
+        }
+
+        @Override
+        public void notifyOutsideTouch() throws RemoteException {
+            // Do nothing
+        }
     }
 }

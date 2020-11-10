@@ -28,7 +28,10 @@ import android.view.Display;
 import android.view.IDisplayWindowListener;
 import android.view.IWindowManager;
 
+import androidx.annotation.BinderThread;
+
 import com.android.wm.shell.common.DisplayChangeController.OnDisplayChangingListener;
+import com.android.wm.shell.common.annotations.ShellMainThread;
 
 import java.util.ArrayList;
 
@@ -45,6 +48,7 @@ public class DisplayController {
     private final Context mContext;
     private final IWindowManager mWmService;
     private final DisplayChangeController mChangeController;
+    private final IDisplayWindowListener mDisplayContainerListener;
 
     private final SparseArray<DisplayRecord> mDisplays = new SparseArray<>();
     private final ArrayList<OnDisplaysChangedListener> mDisplayChangedListeners = new ArrayList<>();
@@ -57,119 +61,13 @@ public class DisplayController {
         return displayManager.getDisplay(displayId);
     }
 
-    private final IDisplayWindowListener mDisplayContainerListener =
-            new IDisplayWindowListener.Stub() {
-                @Override
-                public void onDisplayAdded(int displayId) {
-                    mHandler.post(() -> {
-                        synchronized (mDisplays) {
-                            if (mDisplays.get(displayId) != null) {
-                                return;
-                            }
-                            Display display = getDisplay(displayId);
-                            if (display == null) {
-                                // It's likely that the display is private to some app and thus not
-                                // accessible by system-ui.
-                                return;
-                            }
-                            DisplayRecord record = new DisplayRecord();
-                            record.mDisplayId = displayId;
-                            record.mContext = (displayId == Display.DEFAULT_DISPLAY) ? mContext
-                                    : mContext.createDisplayContext(display);
-                            record.mDisplayLayout = new DisplayLayout(record.mContext, display);
-                            mDisplays.put(displayId, record);
-                            for (int i = 0; i < mDisplayChangedListeners.size(); ++i) {
-                                mDisplayChangedListeners.get(i).onDisplayAdded(displayId);
-                            }
-                        }
-                    });
-                }
-
-                @Override
-                public void onDisplayConfigurationChanged(int displayId, Configuration newConfig) {
-                    mHandler.post(() -> {
-                        synchronized (mDisplays) {
-                            DisplayRecord dr = mDisplays.get(displayId);
-                            if (dr == null) {
-                                Slog.w(TAG, "Skipping Display Configuration change on non-added"
-                                        + " display.");
-                                return;
-                            }
-                            Display display = getDisplay(displayId);
-                            if (display == null) {
-                                Slog.w(TAG, "Skipping Display Configuration change on invalid"
-                                        + " display. It may have been removed.");
-                                return;
-                            }
-                            Context perDisplayContext = mContext;
-                            if (displayId != Display.DEFAULT_DISPLAY) {
-                                perDisplayContext = mContext.createDisplayContext(display);
-                            }
-                            dr.mContext = perDisplayContext.createConfigurationContext(newConfig);
-                            dr.mDisplayLayout = new DisplayLayout(dr.mContext, display);
-                            for (int i = 0; i < mDisplayChangedListeners.size(); ++i) {
-                                mDisplayChangedListeners.get(i).onDisplayConfigurationChanged(
-                                        displayId, newConfig);
-                            }
-                        }
-                    });
-                }
-
-                @Override
-                public void onDisplayRemoved(int displayId) {
-                    mHandler.post(() -> {
-                        synchronized (mDisplays) {
-                            if (mDisplays.get(displayId) == null) {
-                                return;
-                            }
-                            for (int i = mDisplayChangedListeners.size() - 1; i >= 0; --i) {
-                                mDisplayChangedListeners.get(i).onDisplayRemoved(displayId);
-                            }
-                            mDisplays.remove(displayId);
-                        }
-                    });
-                }
-
-                @Override
-                public void onFixedRotationStarted(int displayId, int newRotation) {
-                    mHandler.post(() -> {
-                        synchronized (mDisplays) {
-                            if (mDisplays.get(displayId) == null || getDisplay(displayId) == null) {
-                                Slog.w(TAG, "Skipping onFixedRotationStarted on unknown"
-                                        + " display, displayId=" + displayId);
-                                return;
-                            }
-                            for (int i = mDisplayChangedListeners.size() - 1; i >= 0; --i) {
-                                mDisplayChangedListeners.get(i).onFixedRotationStarted(
-                                        displayId, newRotation);
-                            }
-                        }
-                    });
-                }
-
-                @Override
-                public void onFixedRotationFinished(int displayId) {
-                    mHandler.post(() -> {
-                        synchronized (mDisplays) {
-                            if (mDisplays.get(displayId) == null || getDisplay(displayId) == null) {
-                                Slog.w(TAG, "Skipping onFixedRotationFinished on unknown"
-                                        + " display, displayId=" + displayId);
-                                return;
-                            }
-                            for (int i = mDisplayChangedListeners.size() - 1; i >= 0; --i) {
-                                mDisplayChangedListeners.get(i).onFixedRotationFinished(displayId);
-                            }
-                        }
-                    });
-                }
-            };
-
     public DisplayController(Context context, Handler handler,
             IWindowManager wmService) {
         mHandler = handler;
         mContext = context;
         mWmService = wmService;
         mChangeController = new DisplayChangeController(mHandler, mWmService);
+        mDisplayContainerListener = new DisplayWindowListenerImpl();
         try {
             mWmService.registerDisplayWindowListener(mDisplayContainerListener);
         } catch (RemoteException e) {
@@ -232,10 +130,137 @@ public class DisplayController {
         mChangeController.removeRotationListener(controller);
     }
 
+    private void onDisplayAdded(int displayId) {
+        synchronized (mDisplays) {
+            if (mDisplays.get(displayId) != null) {
+                return;
+            }
+            Display display = getDisplay(displayId);
+            if (display == null) {
+                // It's likely that the display is private to some app and thus not
+                // accessible by system-ui.
+                return;
+            }
+            DisplayRecord record = new DisplayRecord();
+            record.mDisplayId = displayId;
+            record.mContext = (displayId == Display.DEFAULT_DISPLAY) ? mContext
+                    : mContext.createDisplayContext(display);
+            record.mDisplayLayout = new DisplayLayout(record.mContext, display);
+            mDisplays.put(displayId, record);
+            for (int i = 0; i < mDisplayChangedListeners.size(); ++i) {
+                mDisplayChangedListeners.get(i).onDisplayAdded(displayId);
+            }
+        }
+    }
+
+    private void onDisplayConfigurationChanged(int displayId, Configuration newConfig) {
+        synchronized (mDisplays) {
+            DisplayRecord dr = mDisplays.get(displayId);
+            if (dr == null) {
+                Slog.w(TAG, "Skipping Display Configuration change on non-added"
+                        + " display.");
+                return;
+            }
+            Display display = getDisplay(displayId);
+            if (display == null) {
+                Slog.w(TAG, "Skipping Display Configuration change on invalid"
+                        + " display. It may have been removed.");
+                return;
+            }
+            Context perDisplayContext = mContext;
+            if (displayId != Display.DEFAULT_DISPLAY) {
+                perDisplayContext = mContext.createDisplayContext(display);
+            }
+            dr.mContext = perDisplayContext.createConfigurationContext(newConfig);
+            dr.mDisplayLayout = new DisplayLayout(dr.mContext, display);
+            for (int i = 0; i < mDisplayChangedListeners.size(); ++i) {
+                mDisplayChangedListeners.get(i).onDisplayConfigurationChanged(
+                        displayId, newConfig);
+            }
+        }
+    }
+
+    private void onDisplayRemoved(int displayId) {
+        synchronized (mDisplays) {
+            if (mDisplays.get(displayId) == null) {
+                return;
+            }
+            for (int i = mDisplayChangedListeners.size() - 1; i >= 0; --i) {
+                mDisplayChangedListeners.get(i).onDisplayRemoved(displayId);
+            }
+            mDisplays.remove(displayId);
+        }
+    }
+
+    private void onFixedRotationStarted(int displayId, int newRotation) {
+        synchronized (mDisplays) {
+            if (mDisplays.get(displayId) == null || getDisplay(displayId) == null) {
+                Slog.w(TAG, "Skipping onFixedRotationStarted on unknown"
+                        + " display, displayId=" + displayId);
+                return;
+            }
+            for (int i = mDisplayChangedListeners.size() - 1; i >= 0; --i) {
+                mDisplayChangedListeners.get(i).onFixedRotationStarted(
+                        displayId, newRotation);
+            }
+        }
+    }
+
+    private void onFixedRotationFinished(int displayId) {
+        synchronized (mDisplays) {
+            if (mDisplays.get(displayId) == null || getDisplay(displayId) == null) {
+                Slog.w(TAG, "Skipping onFixedRotationFinished on unknown"
+                        + " display, displayId=" + displayId);
+                return;
+            }
+            for (int i = mDisplayChangedListeners.size() - 1; i >= 0; --i) {
+                mDisplayChangedListeners.get(i).onFixedRotationFinished(displayId);
+            }
+        }
+    }
+
     private static class DisplayRecord {
         int mDisplayId;
         Context mContext;
         DisplayLayout mDisplayLayout;
+    }
+
+    @BinderThread
+    private class DisplayWindowListenerImpl extends IDisplayWindowListener.Stub {
+        @Override
+        public void onDisplayAdded(int displayId) {
+            mHandler.post(() -> {
+                DisplayController.this.onDisplayAdded(displayId);
+            });
+        }
+
+        @Override
+        public void onDisplayConfigurationChanged(int displayId, Configuration newConfig) {
+            mHandler.post(() -> {
+                DisplayController.this.onDisplayConfigurationChanged(displayId, newConfig);
+            });
+        }
+
+        @Override
+        public void onDisplayRemoved(int displayId) {
+            mHandler.post(() -> {
+                DisplayController.this.onDisplayRemoved(displayId);
+            });
+        }
+
+        @Override
+        public void onFixedRotationStarted(int displayId, int newRotation) {
+            mHandler.post(() -> {
+                DisplayController.this.onFixedRotationStarted(displayId, newRotation);
+            });
+        }
+
+        @Override
+        public void onFixedRotationFinished(int displayId) {
+            mHandler.post(() -> {
+                DisplayController.this.onFixedRotationFinished(displayId);
+            });
+        }
     }
 
     /**
@@ -244,6 +269,7 @@ public class DisplayController {
      *
      * @see IDisplayWindowListener
      */
+    @ShellMainThread
     public interface OnDisplaysChangedListener {
         /**
          * Called when a display has been added to the WM hierarchy.
