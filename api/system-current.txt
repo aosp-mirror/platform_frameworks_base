@@ -5408,6 +5408,7 @@ package android.media.tv.tuner.filter {
     method public int getMpuSequenceNumber();
     method public long getPts();
     method public int getScHevcIndexMask();
+    method public int getTsIndexMask();
   }
 
   public class PesEvent extends android.media.tv.tuner.filter.FilterEvent {
@@ -5436,6 +5437,11 @@ package android.media.tv.tuner.filter {
     field public static final int INDEX_TYPE_NONE = 0; // 0x0
     field public static final int INDEX_TYPE_SC = 1; // 0x1
     field public static final int INDEX_TYPE_SC_HEVC = 2; // 0x2
+    field public static final int MPT_INDEX_AUDIO = 262144; // 0x40000
+    field public static final int MPT_INDEX_MPT = 65536; // 0x10000
+    field public static final int MPT_INDEX_TIMESTAMP_TARGET_AUDIO = 1048576; // 0x100000
+    field public static final int MPT_INDEX_TIMESTAMP_TARGET_VIDEO = 524288; // 0x80000
+    field public static final int MPT_INDEX_VIDEO = 131072; // 0x20000
     field public static final int SC_HEVC_INDEX_AUD = 2; // 0x2
     field public static final int SC_HEVC_INDEX_SLICE_BLA_N_LP = 16; // 0x10
     field public static final int SC_HEVC_INDEX_SLICE_BLA_W_RADL = 8; // 0x8
@@ -5459,6 +5465,7 @@ package android.media.tv.tuner.filter {
     field public static final int TS_INDEX_CHANGE_TO_ODD_SCRAMBLED = 16; // 0x10
     field public static final int TS_INDEX_DISCONTINUITY_INDICATOR = 32; // 0x20
     field public static final int TS_INDEX_FIRST_PACKET = 1; // 0x1
+    field public static final int TS_INDEX_INVALID = 0; // 0x0
     field public static final int TS_INDEX_OPCR_FLAG = 512; // 0x200
     field public static final int TS_INDEX_PAYLOAD_UNIT_START_INDICATOR = 2; // 0x2
     field public static final int TS_INDEX_PCR_FLAG = 256; // 0x100
