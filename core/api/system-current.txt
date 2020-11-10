@@ -6400,6 +6400,19 @@ package android.net {
     method @NonNull public android.net.StaticIpConfiguration.Builder setIpAddress(@Nullable android.net.LinkAddress);
   }
 
+  public final class TcpKeepalivePacketData extends android.net.KeepalivePacketData implements android.os.Parcelable {
+    ctor public TcpKeepalivePacketData(@NonNull java.net.InetAddress, int, @NonNull java.net.InetAddress, int, @NonNull byte[], int, int, int, int, int, int) throws android.net.InvalidPacketException;
+    method public int describeContents();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.net.TcpKeepalivePacketData> CREATOR;
+    field public final int ipTos;
+    field public final int ipTtl;
+    field public final int tcpAck;
+    field public final int tcpSeq;
+    field public final int tcpWindow;
+    field public final int tcpWindowScale;
+  }
+
   public class TrafficStats {
     method public static void setThreadStatsTagApp();
     method public static void setThreadStatsTagBackup();

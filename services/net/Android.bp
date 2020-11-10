@@ -37,7 +37,6 @@ java_library {
         "java/android/net/util/NetworkConstants.java",
         "java/android/net/IpMemoryStore.java",
         "java/android/net/NetworkMonitorManager.java",
-        "java/android/net/TcpKeepalivePacketData.java",
     ],
     sdk_version: "module_current",
     min_sdk_version: "30",
