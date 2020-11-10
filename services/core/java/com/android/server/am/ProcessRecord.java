@@ -1252,7 +1252,6 @@ class ProcessRecord implements WindowProcessListener {
 
     void setHasForegroundActivities(boolean hasForegroundActivities) {
         mHasForegroundActivities = hasForegroundActivities;
-        mWindowProcessController.setHasForegroundActivities(hasForegroundActivities);
     }
 
     boolean hasForegroundActivities() {

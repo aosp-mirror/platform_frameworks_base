@@ -848,8 +848,9 @@ public class PipTouchHandler {
         mMotionHelper.setCurrentMovementBounds(mMovementBounds);
 
         boolean isMenuExpanded = mMenuState == MENU_STATE_FULL;
-        mPipBoundsHandler.setMinEdgeSize(
-                isMenuExpanded && willResizeMenu() ? mExpandedShortestEdgeSize : 0);
+        mPipBoundsState.setMinEdgeSize(
+                isMenuExpanded && willResizeMenu() ? mExpandedShortestEdgeSize
+                        : mPipBoundsHandler.getDefaultMinSize());
     }
 
     private Rect getMovementBounds(Rect curBounds) {

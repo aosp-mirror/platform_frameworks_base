@@ -151,6 +151,7 @@ class InsetsSourceProvider {
             // TODO: Ideally, we should wait for the animation to finish so previous window can
             // animate-out as new one animates-in.
             mWin.cancelAnimation();
+            mWin.mPendingPositionChanged = null;
         }
         ProtoLog.d(WM_DEBUG_IME, "InsetsSource setWin %s", win);
         mWin = win;
@@ -181,7 +182,9 @@ class InsetsSourceProvider {
      * window gets laid out.
      */
     void updateSourceFrame() {
-        if (mWin == null) {
+        if (mWin == null || mWin.mGivenInsetsPending) {
+            // If the given insets are pending, they are not reliable for now. The source frame
+            // should be updated after the new given insets are sent to window manager.
             return;
         }
 
@@ -238,16 +241,42 @@ class InsetsSourceProvider {
             return;
         }
 
-        setServerVisible(mWin.wouldBeVisibleIfPolicyIgnored() && mWin.isVisibleByPolicy()
-                && !mWin.mGivenInsetsPending);
+        setServerVisible(mWin.wouldBeVisibleIfPolicyIgnored() && mWin.isVisibleByPolicy());
         updateSourceFrame();
         if (mControl != null) {
             final Rect frame = mWin.getWindowFrames().mFrame;
             if (mControl.setSurfacePosition(frame.left, frame.top) && mControlTarget != null) {
-                // The leash has been stale, we need to create a new one for the client.
-                updateControlForTarget(mControlTarget, true /* force */);
+                if (!mWin.getWindowFrames().didFrameSizeChange()) {
+                    updateLeashPosition(frame, -1 /* frameNumber */);
+                } else if (mWin.mInRelayout) {
+                    updateLeashPosition(frame, mWin.getFrameNumber());
+                } else {
+                    mWin.mPendingPositionChanged = this;
+                }
                 mStateController.notifyControlChanged(mControlTarget);
             }
+        }
+    }
+
+    void updateLeashPosition(Rect frame, long frameNumber) {
+        if (mControl == null) {
+            return;
+        }
+        final SurfaceControl leash = mControl.getLeash();
+        if (leash != null) {
+            final Transaction t = mDisplayContent.getPendingTransaction();
+            Point position = new Point();
+            mWin.transformFrameToSurfacePosition(frame.left, frame.top, position);
+            t.setPosition(leash, position.x, position.y);
+            deferTransactionUntil(t, leash, frameNumber);
+        }
+    }
+
+    private void deferTransactionUntil(Transaction t, SurfaceControl leash, long frameNumber) {
+        if (frameNumber >= 0) {
+            final SurfaceControl barrier = mWin.getClientViewRootSurface();
+            t.deferTransactionUntil(mWin.getSurfaceControl(), barrier, frameNumber);
+            t.deferTransactionUntil(leash, barrier, frameNumber);
         }
     }
 
@@ -305,14 +334,12 @@ class InsetsSourceProvider {
         final SurfaceControl leash = mAdapter.mCapturedLeash;
         final long frameNumber = mFinishSeamlessRotateFrameNumber;
         mFinishSeamlessRotateFrameNumber = -1;
-        if (frameNumber >= 0 && mWin.mHasSurface && leash != null) {
+        if (mWin.mHasSurface && leash != null) {
             // We just finished the seamless rotation. We don't want to change the position or the
             // window crop of the surface controls (including the leash) until the client finishes
             // drawing the new frame of the new orientation. Although we cannot defer the reparent
             // operation, it is fine, because reparent won't cause any visual effect.
-            final SurfaceControl barrier = mWin.getClientViewRootSurface();
-            t.deferTransactionUntil(mWin.getSurfaceControl(), barrier, frameNumber);
-            t.deferTransactionUntil(leash, barrier, frameNumber);
+            deferTransactionUntil(t, leash, frameNumber);
         }
         mControlTarget = target;
         updateVisibility();

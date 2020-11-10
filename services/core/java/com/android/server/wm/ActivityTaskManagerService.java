@@ -161,9 +161,11 @@ import android.app.WindowConfiguration;
 import android.app.admin.DevicePolicyCache;
 import android.app.assist.AssistContent;
 import android.app.assist.AssistStructure;
+import android.app.compat.CompatChanges;
 import android.app.servertransaction.ClientTransaction;
 import android.app.servertransaction.EnterPipRequestedItem;
 import android.app.usage.UsageStatsManagerInternal;
+import android.compat.annotation.ChangeId;
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -214,6 +216,7 @@ import android.os.UserManager;
 import android.os.WorkSource;
 import android.os.storage.IStorageManager;
 import android.os.storage.StorageManager;
+import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.service.dreams.DreamActivity;
 import android.service.voice.IVoiceInteractionSession;
@@ -342,6 +345,12 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     /** This activity is being relaunched due to a free-resize operation. */
     public static final int RELAUNCH_REASON_FREE_RESIZE = 2;
 
+    /**
+     * Apps are blocked from starting activities in the foreground after the user presses home.
+     */
+    public static final String BLOCK_ACTIVITY_STARTS_AFTER_HOME_FLAG =
+            "am_block_activity_starts_after_home";
+
     Context mContext;
 
     /**
@@ -365,6 +374,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
     PendingIntentController mPendingIntentController;
     IntentFirewall mIntentFirewall;
+
+    final VisibleActivityProcessTracker mVisibleActivityProcessTracker;
 
     /* Global service lock used by the package the owns this service. */
     final WindowManagerGlobalLock mGlobalLock = new WindowManagerGlobalLock();
@@ -394,6 +405,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     volatile WindowProcessController mHeavyWeightProcess;
     boolean mHasHeavyWeightFeature;
     boolean mHasLeanbackFeature;
+    boolean mBlockActivityAfterHomeEnabled;
     /** The process of the top most activity. */
     volatile WindowProcessController mTopApp;
     /**
@@ -741,6 +753,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         mSystemThread = ActivityThread.currentActivityThread();
         mUiContext = mSystemThread.getSystemUiContext();
         mLifecycleManager = new ClientLifecycleManager();
+        mVisibleActivityProcessTracker = new VisibleActivityProcessTracker(this);
         mInternal = new LocalService();
         GL_ES_VERSION = SystemProperties.getInt("ro.opengles.version", GL_ES_VERSION_UNDEFINED);
         mWindowOrganizerController = new WindowOrganizerController(this);
@@ -756,6 +769,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             mVrController.onSystemReady();
             mRecentTasks.onSystemReadyLocked();
             mStackSupervisor.onSystemReady();
+            mBlockActivityAfterHomeEnabled = DeviceConfig.getBoolean(
+                    DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                    BLOCK_ACTIVITY_STARTS_AFTER_HOME_FLAG, false);
         }
     }
 
@@ -2627,8 +2643,35 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         throw new SecurityException(msg);
     }
 
+    /**
+     * Return true if app switch protection will be handled by background activity launch logic.
+     */
+    boolean getBalAppSwitchesProtectionEnabled() {
+         return mBlockActivityAfterHomeEnabled;
+    }
+
+    /**
+     * Return true if app switching is allowed.
+     */
+    boolean getBalAppSwitchesAllowed() {
+        if (getBalAppSwitchesProtectionEnabled()) {
+            // Apps no longer able to start BAL again until app switching is resumed.
+            return mAppSwitchesAllowedTime == 0;
+        } else {
+            // Legacy behavior, BAL logic won't block app switching.
+            return true;
+        }
+    }
+
     boolean checkAppSwitchAllowedLocked(int sourcePid, int sourceUid,
             int callingPid, int callingUid, String name) {
+
+        // Background activity launch logic replaces app switching protection, so allow
+        // apps to start activity here now.
+        if (getBalAppSwitchesProtectionEnabled()) {
+            return true;
+        }
+
         if (mAppSwitchesAllowedTime < SystemClock.uptimeMillis()) {
             return true;
         }
@@ -4663,7 +4706,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             mAppSwitchesAllowedTime = SystemClock.uptimeMillis() + APP_SWITCH_DELAY_TIME;
             mLastStopAppSwitchesTime = SystemClock.uptimeMillis();
             mDidAppSwitch = false;
-            getActivityStartController().schedulePendingActivityLaunches(APP_SWITCH_DELAY_TIME);
+            // If BAL app switching enabled, app switches are blocked not delayed.
+            if (!getBalAppSwitchesProtectionEnabled()) {
+                getActivityStartController().schedulePendingActivityLaunches(APP_SWITCH_DELAY_TIME);
+            }
         }
     }
 
@@ -6103,16 +6149,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
         @Override
         public boolean hasResumedActivity(int uid) {
-            synchronized (mGlobalLock) {
-                final ArraySet<WindowProcessController> processes = mProcessMap.getProcesses(uid);
-                for (int i = 0, n = processes.size(); i < n; i++) {
-                    final WindowProcessController process = processes.valueAt(i);
-                    if (process.hasResumedActivity()) {
-                        return true;
-                    }
-                }
-            }
-            return false;
+            return mVisibleActivityProcessTracker.hasResumedActivity(uid);
         }
 
         public void setBackgroundActivityStartCallback(

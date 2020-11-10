@@ -22,6 +22,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.app.PendingIntent;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.pm.ParceledListSlice;
 import android.media.AudioAttributes;
@@ -32,6 +33,7 @@ import android.media.VolumeProvider;
 import android.media.VolumeProvider.ControlType;
 import android.media.session.MediaSession.QueueItem;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -462,10 +464,11 @@ public final class MediaController {
     }
 
     /**
+     * @hide
      * Returns whether this and {@code other} media controller controls the same session.
-     * @deprecated Check equality of {@link #getSessionToken() tokens} instead.
      */
-    @Deprecated
+    @UnsupportedAppUsage(publicAlternatives = "Check equality of {@link #getSessionToken() tokens} "
+            + "instead.", maxTargetSdk = Build.VERSION_CODES.R)
     public boolean controlsSameSession(@Nullable MediaController other) {
         if (other == null) return false;
         return mToken.equals(other.mToken);

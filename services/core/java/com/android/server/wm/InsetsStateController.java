@@ -193,6 +193,8 @@ class InsetsStateController {
                 state.removeSource(ITYPE_STATUS_BAR);
                 state.removeSource(ITYPE_CLIMATE_BAR);
                 state.removeSource(ITYPE_CAPTION_BAR);
+                state.removeSource(ITYPE_NAVIGATION_BAR);
+                state.removeSource(ITYPE_EXTRA_NAVIGATION_BAR);
             }
 
             // Status bar doesn't get influenced by caption bar

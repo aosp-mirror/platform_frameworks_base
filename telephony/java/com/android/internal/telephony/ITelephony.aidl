@@ -1798,6 +1798,14 @@ interface ITelephony {
     boolean setCdmaRoamingMode(int subId, int mode);
 
     /**
+     * Gets the subscription mode for the CDMA phone with the subscription id {@code subId}.
+     *
+     * @param the subscription id.
+     * @return the subscription mode for CDMA phone.
+     */
+    int getCdmaSubscriptionMode(int subId);
+
+    /**
      * Sets the subscription mode for CDMA phone with the subscription {@code subId} to the given
      * subscription mode {@code mode}.
      *

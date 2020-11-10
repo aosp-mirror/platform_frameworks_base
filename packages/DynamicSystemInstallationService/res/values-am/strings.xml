@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="keyguard_description" msgid="8582605799129954556">"እባክዎ የእርስዎን የይለፍ ቃል ያስገቡ እና ወደ የተለዋዋጭ ሥርዓት ዝማኔዎች ይቀጥሉ"</string>
+    <string name="notification_install_completed" msgid="6252047868415172643">"የተለዋዋጭ ሥርዓት ዝግጁ ነው። እሱን መጠቀም ለመጀመር የእርስዎን መሣሪያ ዳግም ያስጀምሩ።"</string>
+    <string name="notification_install_inprogress" msgid="7383334330065065017">"ጭነት በሂደት ላይ ነው"</string>
+    <string name="notification_install_failed" msgid="4066039210317521404">"መጫን አልተሳካም"</string>
+    <string name="notification_image_validation_failed" msgid="2720357826403917016">"የምስል ማረጋገጫ አልተሳካም። ጭነትን አጨናግፍ።"</string>
+    <string name="notification_dynsystem_in_use" msgid="1053194595682188396">"የተለዋዋጭ ሥርዓትን አሁን ላይ በማስሄድ ላይ ኦርጂናሉን የAndroid ስሪት በመጠቀም ዳግም ያስጀምሩ።"</string>
+    <string name="notification_action_cancel" msgid="5929299408545961077">"ይቅር"</string>
+    <string name="notification_action_discard" msgid="1817481003134947493">"አስወግድ"</string>
+    <string name="notification_action_reboot_to_dynsystem" msgid="4015817159115912479">"ዳግም ጀምር"</string>
+    <string name="notification_action_reboot_to_origin" msgid="4013901243271889897">"ዳግም ጀምር"</string>
+    <string name="toast_dynsystem_discarded" msgid="1733249860276017050">"የተጣለ ተለዋዋጭ ሥርዓት"</string>
+    <string name="toast_failed_to_reboot_to_dynsystem" msgid="6336737274625452067">"ዳግም ማስጀመር አይቻልም ወይም ተለዋዋጭ ሥርዓትን ይስቀሉ"</string>
+    <string name="toast_failed_to_disable_dynsystem" msgid="3285742944977744413">"ተለዋዋጭ ስርዓትን ማሰናከል አልተሳካም"</string>
+</resources>

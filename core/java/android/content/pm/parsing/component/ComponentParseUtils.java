@@ -16,6 +16,8 @@
 
 package android.content.pm.parsing.component;
 
+import static android.content.pm.parsing.ParsingPackageUtils.validateName;
+
 import android.annotation.AttrRes;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -118,17 +120,19 @@ public class ComponentParseUtils {
                         + ": must be at least two characters");
             }
             String subName = proc.substring(1);
-            String nameError = PackageParser.validateName(subName, false, false);
-            if (nameError != null) {
+            final ParseResult<?> nameResult = validateName(input, subName, false, false);
+            if (nameResult.isError()) {
                 return input.error("Invalid " + type + " name " + proc + " in package " + pkg
-                        + ": " + nameError);
+                        + ": " + nameResult.getErrorMessage());
             }
             return input.success(pkg + proc);
         }
-        String nameError = PackageParser.validateName(proc, true, false);
-        if (nameError != null && !"system".equals(proc)) {
-            return input.error("Invalid " + type + " name " + proc + " in package " + pkg
-                    + ": " + nameError);
+        if (!"system".equals(proc)) {
+            final ParseResult<?> nameResult = validateName(input, proc, true, false);
+            if (nameResult.isError()) {
+                return input.error("Invalid " + type + " name " + proc + " in package " + pkg
+                        + ": " + nameResult.getErrorMessage());
+            }
         }
         return input.success(proc);
     }

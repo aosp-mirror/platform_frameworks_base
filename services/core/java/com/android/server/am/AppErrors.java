@@ -19,6 +19,8 @@ package com.android.server.am;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.content.pm.ApplicationInfo.FLAG_SYSTEM;
 
+import static com.android.server.am.ActivityManagerConstants.PROCESS_CRASH_COUNT_LIMIT;
+import static com.android.server.am.ActivityManagerConstants.PROCESS_CRASH_COUNT_RESET_INTERVAL;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.am.ActivityManagerService.MY_PID;
@@ -44,6 +46,7 @@ import android.provider.Settings;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.EventLog;
+import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.TimeUtils;
@@ -90,6 +93,12 @@ class AppErrors {
     private final ProcessMap<Long> mProcessCrashShowDialogTimes = new ProcessMap<>();
 
     /**
+     * A pairing between how many times various processes have crashed since a given time.
+     * Entry and exit conditions for this map are similar to mProcessCrashTimes.
+     */
+    private final ProcessMap<Pair<Long, Integer>> mProcessCrashCounts = new ProcessMap<>();
+
+    /**
      * Set of applications that we consider to be bad, and will reject
      * incoming broadcasts from (which the user has no control over).
      * Processes are added to this set when they have crashed twice within
@@ -118,6 +127,7 @@ class AppErrors {
         mProcessCrashTimes.clear();
         mProcessCrashTimesPersistent.clear();
         mProcessCrashShowDialogTimes.clear();
+        mProcessCrashCounts.clear();
         synchronized (mBadProcesses) {
             mBadProcesses.clear();
         }
@@ -196,9 +206,9 @@ class AppErrors {
     }
 
     boolean dumpLocked(FileDescriptor fd, PrintWriter pw, boolean needSep, String dumpPackage) {
+        final long now = SystemClock.uptimeMillis();
         if (!mProcessCrashTimes.getMap().isEmpty()) {
             boolean printed = false;
-            final long now = SystemClock.uptimeMillis();
             final ArrayMap<String, SparseArray<Long>> pmap = mProcessCrashTimes.getMap();
             final int processCount = pmap.size();
             for (int ip = 0; ip < processCount; ip++) {
@@ -223,6 +233,36 @@ class AppErrors {
                     pw.print(": last crashed ");
                     TimeUtils.formatDuration(now-uids.valueAt(i), pw);
                     pw.println(" ago");
+                }
+            }
+        }
+
+        if (!mProcessCrashCounts.getMap().isEmpty()) {
+            boolean printed = false;
+            final ArrayMap<String, SparseArray<Pair<Long, Integer>>> pmap =
+                    mProcessCrashCounts.getMap();
+            final int processCount = pmap.size();
+            for (int ip = 0; ip < processCount; ip++) {
+                final String pname = pmap.keyAt(ip);
+                final SparseArray<Pair<Long, Integer>> uids = pmap.valueAt(ip);
+                final int uidCount = uids.size();
+                for (int i = 0; i < uidCount; i++) {
+                    final int puid = uids.keyAt(i);
+                    final ProcessRecord r = mService.getProcessNames().get(pname, puid);
+                    if (dumpPackage != null && (r == null || !r.pkgList.containsKey(dumpPackage))) {
+                        continue;
+                    }
+                    if (!printed) {
+                        if (needSep) pw.println();
+                        needSep = true;
+                        pw.println("  First time processes crashed and counts:");
+                        printed = true;
+                    }
+                    pw.print("    Process "); pw.print(pname);
+                    pw.print(" uid "); pw.print(puid);
+                    pw.print(": first crashed ");
+                    TimeUtils.formatDuration(now - uids.valueAt(i).first, pw);
+                    pw.print(" ago; crashes since then: "); pw.println(uids.valueAt(i).second);
                 }
             }
         }
@@ -295,34 +335,50 @@ class AppErrors {
 
     void resetProcessCrashTimeLocked(final String processName, final int uid) {
         mProcessCrashTimes.remove(processName, uid);
+        mProcessCrashCounts.remove(processName, uid);
     }
 
     void resetProcessCrashTimeLocked(boolean resetEntireUser, int appId, int userId) {
-        final ArrayMap<String, SparseArray<Long>> pmap = mProcessCrashTimes.getMap();
-        for (int ip = pmap.size() - 1; ip >= 0; ip--) {
-            SparseArray<Long> ba = pmap.valueAt(ip);
-            for (int i = ba.size() - 1; i >= 0; i--) {
-                boolean remove = false;
-                final int entUid = ba.keyAt(i);
-                if (!resetEntireUser) {
-                    if (userId == UserHandle.USER_ALL) {
-                        if (UserHandle.getAppId(entUid) == appId) {
-                            remove = true;
-                        }
-                    } else {
-                        if (entUid == UserHandle.getUid(userId, appId)) {
-                            remove = true;
-                        }
-                    }
-                } else if (UserHandle.getUserId(entUid) == userId) {
-                    remove = true;
-                }
-                if (remove) {
-                    ba.removeAt(i);
-                }
-            }
+        final ArrayMap<String, SparseArray<Long>> pTimeMap = mProcessCrashTimes.getMap();
+        for (int ip = pTimeMap.size() - 1; ip >= 0; ip--) {
+            SparseArray<Long> ba = pTimeMap.valueAt(ip);
+            resetProcessCrashMapLocked(ba, resetEntireUser, appId, userId);
             if (ba.size() == 0) {
-                pmap.removeAt(ip);
+                pTimeMap.removeAt(ip);
+            }
+        }
+
+        final ArrayMap<String, SparseArray<Pair<Long, Integer>>> pCountMap =
+                                                                    mProcessCrashCounts.getMap();
+        for (int ip = pCountMap.size() - 1; ip >= 0; ip--) {
+            SparseArray<Pair<Long, Integer>> ba = pCountMap.valueAt(ip);
+            resetProcessCrashMapLocked(ba, resetEntireUser, appId, userId);
+            if (ba.size() == 0) {
+                pCountMap.removeAt(ip);
+            }
+        }
+    }
+
+    private void resetProcessCrashMapLocked(SparseArray<?> ba, boolean resetEntireUser,
+            int appId, int userId) {
+        for (int i = ba.size() - 1; i >= 0; i--) {
+            boolean remove = false;
+            final int entUid = ba.keyAt(i);
+            if (!resetEntireUser) {
+                if (userId == UserHandle.USER_ALL) {
+                    if (UserHandle.getAppId(entUid) == appId) {
+                        remove = true;
+                    }
+                } else {
+                    if (entUid == UserHandle.getUid(userId, appId)) {
+                        remove = true;
+                    }
+                }
+            } else if (UserHandle.getUserId(entUid) == userId) {
+                remove = true;
+            }
+            if (remove) {
+                ba.removeAt(i);
             }
         }
     }
@@ -567,12 +623,6 @@ class AppErrors {
             if (res == AppErrorDialog.FORCE_QUIT_AND_REPORT) {
                 appErrorIntent = createAppErrorIntentLocked(r, timeMillis, crashInfo);
             }
-            if (r != null && !r.isolated && res != AppErrorDialog.RESTART) {
-                // XXX Can't keep track of crash time for isolated processes,
-                // since they don't have a persistent identity.
-                mProcessCrashTimes.put(r.processName, r.uid,
-                        SystemClock.uptimeMillis());
-            }
         }
 
         if (appErrorIntent != null) {
@@ -742,11 +792,14 @@ class AppErrors {
             }
         }
 
-        if (crashTime != null && now < crashTime + ActivityManagerConstants.MIN_CRASH_INTERVAL) {
-            // The process crashed again very quickly. If it was a bound foreground service, let's
-            // try to restart again in a while, otherwise the process loses!
-            Slog.w(TAG, "Process " + app.processName
-                    + " has crashed too many times: killing!");
+        final boolean quickCrash = crashTime != null
+                && now < crashTime + ActivityManagerConstants.MIN_CRASH_INTERVAL;
+        if (quickCrash || isProcOverCrashLimit(app, now)) {
+            // The process either crashed again very quickly or has been crashing periodically in
+            // the last few hours. If it was a bound foreground service, let's try to restart again
+            // in a while, otherwise the process loses!
+            Slog.w(TAG, "Process " + app.processName + " has crashed too many times, killing!"
+                    + " Reason: " + (quickCrash ? "crashed quickly" : "over process crash limit"));
             EventLog.writeEvent(EventLogTags.AM_PROCESS_CRASHED_TOO_MUCH,
                     app.userId, app.processName, app.uid);
             mService.mAtmInternal.onHandleAppCrash(app.getWindowProcessController());
@@ -765,6 +818,7 @@ class AppErrors {
                                 new BadProcessInfo(now, shortMsg, longMsg, stackTrace));
                     }
                     mProcessCrashTimes.remove(app.processName, app.uid);
+                    mProcessCrashCounts.remove(app.processName, app.uid);
                 }
                 app.bad = true;
                 app.removed = true;
@@ -809,10 +863,28 @@ class AppErrors {
             // because they don't have a persistent identity.
             mProcessCrashTimes.put(app.processName, app.uid, now);
             mProcessCrashTimesPersistent.put(app.processName, app.uid, now);
+            updateProcessCrashCount(app.processName, app.uid, now);
         }
 
         if (app.crashHandler != null) mService.mHandler.post(app.crashHandler);
         return true;
+    }
+
+    private void updateProcessCrashCount(String processName, int uid, long now) {
+        Pair<Long, Integer> count = mProcessCrashCounts.get(processName, uid);
+        if (count == null || (count.first + PROCESS_CRASH_COUNT_RESET_INTERVAL) < now) {
+            count = new Pair<>(now, 1);
+        } else {
+            count = new Pair<>(count.first, count.second + 1);
+        }
+        mProcessCrashCounts.put(processName, uid, count);
+    }
+
+    private boolean isProcOverCrashLimit(ProcessRecord app, long now) {
+        final Pair<Long, Integer> crashCount = mProcessCrashCounts.get(app.processName, app.uid);
+        return !app.isolated && crashCount != null
+                && now < (crashCount.first + PROCESS_CRASH_COUNT_RESET_INTERVAL)
+                && crashCount.second >= PROCESS_CRASH_COUNT_LIMIT;
     }
 
     void handleShowAppErrorUi(Message msg) {

@@ -694,6 +694,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     private @Nullable InsetsSourceProvider mControllableInsetProvider;
     private final InsetsState mRequestedInsetsState = new InsetsState();
 
+    @Nullable InsetsSourceProvider mPendingPositionChanged;
+
     private static final float DEFAULT_DIM_AMOUNT_DEAD_WINDOW = 0.5f;
     private KeyInterceptionInfo mKeyInterceptionInfo;
 

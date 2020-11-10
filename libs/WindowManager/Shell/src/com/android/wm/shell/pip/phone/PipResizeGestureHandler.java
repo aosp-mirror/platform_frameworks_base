@@ -451,7 +451,9 @@ public class PipResizeGestureHandler {
                                 mDownPoint.x, mDownPoint.y, currentPipBounds, mCtrlType, mMinSize.x,
                                 mMinSize.y, mMaxSize, true,
                                 mLastDownBounds.width() > mLastDownBounds.height()));
-                        mPipBoundsHandler.transformBoundsToAspectRatio(mLastResizeBounds);
+                        mPipBoundsHandler.transformBoundsToAspectRatio(mLastResizeBounds,
+                                mPipBoundsState.getAspectRatio(), false /* useCurrentMinEdgeSize */,
+                                true /* useCurrentSize */);
                         mPipTaskOrganizer.scheduleUserResizePip(mLastDownBounds, mLastResizeBounds,
                                 null);
                     }

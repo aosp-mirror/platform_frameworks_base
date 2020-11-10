@@ -73,18 +73,26 @@ public class BrightnessSynchronizer {
         }
     };
 
-    public BrightnessSynchronizer(Context context) {
-        final BrightnessSyncObserver mBrightnessSyncObserver;
-        mContext = context;
-        mBrightnessSyncObserver = new BrightnessSyncObserver(mHandler);
-        mBrightnessSyncObserver.startObserving();
+    private float mPreferredSettingValue;
 
-        // It is possible for the system to start up with the int and float values not
-        // synchronized. So we force an update to the int value, since float is the source
-        // of truth. Fallback to int value, if float is invalid. If both are invalid, use default
-        // float value from config.
-        final float currentFloatBrightness = getScreenBrightnessFloat(context);
-        final int currentIntBrightness = getScreenBrightnessInt(context);
+    public BrightnessSynchronizer(Context context) {
+        mContext = context;
+    }
+
+    /**
+     * Starts brightnessSyncObserver to ensure that the float and int brightness values stay
+     * in sync.
+     * This also ensures that values are synchronized at system start up too.
+     * So we force an update to the int value, since float is the source of truth. Fallback to int
+     * value, if float is invalid. If both are invalid, use default float value from config.
+     */
+    public void startSynchronizing() {
+        final BrightnessSyncObserver brightnessSyncObserver;
+        brightnessSyncObserver = new BrightnessSyncObserver(mHandler);
+        brightnessSyncObserver.startObserving();
+
+        final float currentFloatBrightness = getScreenBrightnessFloat(mContext);
+        final int currentIntBrightness = getScreenBrightnessInt(mContext);
 
         if (!Float.isNaN(currentFloatBrightness)) {
             updateBrightnessIntFromFloat(currentFloatBrightness);
@@ -155,8 +163,6 @@ public class BrightnessSynchronizer {
                 Settings.System.SCREEN_BRIGHTNESS, PowerManager.BRIGHTNESS_INVALID,
                 UserHandle.USER_CURRENT);
     }
-
-    private float mPreferredSettingValue;
 
     /**
      * Updates the float setting based on a passed in int value. This is called whenever the int
