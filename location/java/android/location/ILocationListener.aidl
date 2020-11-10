@@ -16,7 +16,7 @@
 
 package android.location;
 
-import android.location.Location;
+import android.location.LocationResult;
 import android.os.IRemoteCallback;
 
 /**
@@ -24,6 +24,7 @@ import android.os.IRemoteCallback;
  */
 oneway interface ILocationListener
 {
-    void onLocationChanged(in Location location, in @nullable IRemoteCallback onCompleteCallback);
+    void onLocationChanged(in LocationResult locationResult, in @nullable IRemoteCallback onCompleteCallback);
     void onProviderEnabledChanged(String provider, boolean enabled);
+    void onFlushComplete(int requestCode);
 }

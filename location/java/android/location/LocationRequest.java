@@ -191,6 +191,7 @@ public final class LocationRequest implements Parcelable {
     private long mDurationMillis;
     private int mMaxUpdates;
     private float mMinUpdateDistanceMeters;
+    private final long mMaxUpdateDelayMillis;
     private boolean mHideFromAppOps;
     private boolean mLocationSettingsIgnored;
     private boolean mLowPower;
@@ -285,6 +286,7 @@ public final class LocationRequest implements Parcelable {
             int maxUpdates,
             long minUpdateIntervalMillis,
             float minUpdateDistanceMeters,
+            long maxUpdateDelayMillis,
             boolean hiddenFromAppOps,
             boolean locationSettingsIgnored,
             boolean lowPower,
@@ -297,6 +299,7 @@ public final class LocationRequest implements Parcelable {
         mDurationMillis = durationMillis;
         mMaxUpdates = maxUpdates;
         mMinUpdateDistanceMeters = minUpdateDistanceMeters;
+        mMaxUpdateDelayMillis = maxUpdateDelayMillis;
         mHideFromAppOps = hiddenFromAppOps;
         mLowPower = lowPower;
         mLocationSettingsIgnored = locationSettingsIgnored;
@@ -592,6 +595,24 @@ public final class LocationRequest implements Parcelable {
     }
 
     /**
+     * Returns the maximum time any location update may be delayed, and thus grouped with following
+     * updates to enable location batching. If the maximum update delay is equal to or greater than
+     * twice the interval, then location providers may provide batched results. The maximum batch
+     * size is the maximum update delay divided by the interval. Not all devices or location
+     * providers support batching, and use of this parameter does not guarantee that the client will
+     * see batched results, or that batched results will always be of the maximum size.
+     *
+     * When available, batching can provide substantial power savings to the device, and clients are
+     * encouraged to take advantage where appropriate for the use case.
+     *
+     * @see LocationListener#onLocationChanged(LocationResult)
+     * @return the maximum time by which a location update may be delayed
+     */
+    public @IntRange(from = 0) long getMaxUpdateDelayMillis() {
+        return mMaxUpdateDelayMillis;
+    }
+
+    /**
      * @hide
      * @deprecated LocationRequests should be treated as immutable.
      */
@@ -725,6 +746,7 @@ public final class LocationRequest implements Parcelable {
                             /* maxUpdates= */ in.readInt(),
                             /* minUpdateIntervalMillis= */ in.readLong(),
                             /* minUpdateDistanceMeters= */ in.readFloat(),
+                            /* maxUpdateDelayMillis= */ in.readLong(),
                             /* hiddenFromAppOps= */ in.readBoolean(),
                             /* locationSettingsIgnored= */ in.readBoolean(),
                             /* lowPower= */ in.readBoolean(),
@@ -752,6 +774,7 @@ public final class LocationRequest implements Parcelable {
         parcel.writeInt(mMaxUpdates);
         parcel.writeLong(mMinUpdateIntervalMillis);
         parcel.writeFloat(mMinUpdateDistanceMeters);
+        parcel.writeLong(mMaxUpdateDelayMillis);
         parcel.writeBoolean(mHideFromAppOps);
         parcel.writeBoolean(mLocationSettingsIgnored);
         parcel.writeBoolean(mLowPower);
@@ -775,6 +798,7 @@ public final class LocationRequest implements Parcelable {
                 && mMaxUpdates == that.mMaxUpdates
                 && mMinUpdateIntervalMillis == that.mMinUpdateIntervalMillis
                 && Float.compare(that.mMinUpdateDistanceMeters, mMinUpdateDistanceMeters) == 0
+                && mMaxUpdateDelayMillis == that.mMaxUpdateDelayMillis
                 && mHideFromAppOps == that.mHideFromAppOps
                 && mLocationSettingsIgnored == that.mLocationSettingsIgnored
                 && mLowPower == that.mLowPower
@@ -831,6 +855,10 @@ public final class LocationRequest implements Parcelable {
         if (mMinUpdateDistanceMeters > 0.0) {
             s.append(", minUpdateDistance=").append(mMinUpdateDistanceMeters);
         }
+        if (mMaxUpdateDelayMillis / 2 > mInterval) {
+            s.append(", maxUpdateDelay=");
+            TimeUtils.formatDuration(mMaxUpdateDelayMillis, s);
+        }
         if (mLowPower) {
             s.append(", lowPower");
         }
@@ -858,6 +886,7 @@ public final class LocationRequest implements Parcelable {
         private int mMaxUpdates;
         private long mMinUpdateIntervalMillis;
         private float mMinUpdateDistanceMeters;
+        private long mMaxUpdateDelayMillis;
         private boolean mHiddenFromAppOps;
         private boolean mLocationSettingsIgnored;
         private boolean mLowPower;
@@ -876,6 +905,7 @@ public final class LocationRequest implements Parcelable {
             mMaxUpdates = Integer.MAX_VALUE;
             mMinUpdateIntervalMillis = IMPLICIT_MIN_UPDATE_INTERVAL;
             mMinUpdateDistanceMeters = 0;
+            mMaxUpdateDelayMillis = 0;
             mHiddenFromAppOps = false;
             mLocationSettingsIgnored = false;
             mLowPower = false;
@@ -892,6 +922,7 @@ public final class LocationRequest implements Parcelable {
             mMaxUpdates = locationRequest.mMaxUpdates;
             mMinUpdateIntervalMillis = locationRequest.mMinUpdateIntervalMillis;
             mMinUpdateDistanceMeters = locationRequest.mMinUpdateDistanceMeters;
+            mMaxUpdateDelayMillis = locationRequest.mMaxUpdateDelayMillis;
             mHiddenFromAppOps = locationRequest.mHideFromAppOps;
             mLocationSettingsIgnored = locationRequest.mLocationSettingsIgnored;
             mLowPower = locationRequest.mLowPower;
@@ -1027,6 +1058,19 @@ public final class LocationRequest implements Parcelable {
         }
 
         /**
+         * Sets the maximum time any location update may be delayed, and thus grouped with following
+         * updates to enable location batching. If the maximum update delay is equal to or greater
+         * than twice the interval, then location providers may provide batched results. Defaults to
+         * 0, which represents no batching allowed.
+         */
+        public @NonNull Builder setMaxUpdateDelayMillis(
+                @IntRange(from = 0) long maxUpdateDelayMillis) {
+            mMaxUpdateDelayMillis = Preconditions.checkArgumentInRange(maxUpdateDelayMillis, 0,
+                    Long.MAX_VALUE, "maxUpdateDelayMillis");
+            return this;
+        }
+
+        /**
          * If set to true, indicates that app ops should not be updated with location usage due to
          * this request. This implies that someone else (usually the creator of the location
          * request) is responsible for updating app ops as appropriate. Defaults to false.
@@ -1121,6 +1165,7 @@ public final class LocationRequest implements Parcelable {
                     mMaxUpdates,
                     min(mMinUpdateIntervalMillis, mIntervalMillis),
                     mMinUpdateDistanceMeters,
+                    mMaxUpdateDelayMillis,
                     mHiddenFromAppOps,
                     mLocationSettingsIgnored,
                     mLowPower,

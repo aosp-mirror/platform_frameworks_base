@@ -26,6 +26,7 @@ import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationManager;
 import android.location.LocationRequest;
+import android.location.LocationResult;
 import android.os.ParcelFileDescriptor;
 import android.os.SystemClock;
 import android.os.WorkSource;
@@ -167,8 +168,15 @@ public class FusedLocationServiceTest {
         }
 
         @Override
-        public void onReportLocation(Location location) {
-            mLocations.add(location);
+        public void onReportLocation(LocationResult locationResult) {
+            for (int i = 0; i < locationResult.size(); i++) {
+                mLocations.add(locationResult.get(i));
+            }
+        }
+
+        @Override
+        public void onFlushComplete() {
+
         }
 
         public Location getNextLocation(long timeoutMs) throws InterruptedException {

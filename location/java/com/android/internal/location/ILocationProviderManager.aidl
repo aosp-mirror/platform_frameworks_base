@@ -16,7 +16,7 @@
 
 package com.android.internal.location;
 
-import android.location.Location;
+import android.location.LocationResult;
 
 import com.android.internal.location.ProviderProperties;
 
@@ -28,5 +28,6 @@ interface ILocationProviderManager {
     void onSetIdentity(@nullable String packageName, @nullable String attributionTag);
     void onSetAllowed(boolean allowed);
     void onSetProperties(in ProviderProperties properties);
-    void onReportLocation(in Location location);
+    void onReportLocation(in LocationResult locationResult);
+    void onFlushComplete();
 }

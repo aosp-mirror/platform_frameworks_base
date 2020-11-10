@@ -57,6 +57,14 @@ public final class ProviderRequestUnbundled {
     }
 
     /**
+     * The interval at which a provider should report location. Will return
+     * {@link #INTERVAL_DISABLED} for an inactive request.
+     */
+    public long getInterval() {
+        return mRequest.getIntervalMillis();
+    }
+
+    /**
      * The quality hint for this location request. The quality hint informs the provider how it
      * should attempt to manage any accuracy vs power tradeoffs while attempting to satisfy this
      * provider request.
@@ -67,11 +75,15 @@ public final class ProviderRequestUnbundled {
     }
 
     /**
-     * The interval at which a provider should report location. Will return
-     * {@link #INTERVAL_DISABLED} for an inactive request.
+     * The maximum time any location update may be delayed, and thus grouped with following updates
+     * to enable location batching. If the maximum update delay is equal to or greater than
+     * twice the interval, then the provider may provide batched results if possible. The maximum
+     * batch size a provider is allowed to return is the maximum update delay divided by the
+     * interval.
      */
-    public long getInterval() {
-        return mRequest.getIntervalMillis();
+    @RequiresApi(Build.VERSION_CODES.S)
+    public long getMaxUpdateDelayMillis() {
+        return mRequest.getMaxUpdateDelayMillis();
     }
 
     /**

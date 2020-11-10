@@ -22,6 +22,7 @@ import android.location.ILocationManager;
 import android.location.Location;
 import android.location.LocationManager;
 import android.location.LocationProvider;
+import android.location.LocationResult;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -59,6 +60,18 @@ import java.util.List;
  * of this package for more information.
  */
 public abstract class LocationProviderBase {
+
+    /**
+     * Callback to be invoked when a flush operation is complete and all flushed locations have been
+     * reported.
+     */
+    protected interface OnFlushCompleteCallback {
+
+        /**
+         * Should be invoked once the flush is complete.
+         */
+        void onFlushComplete();
+    }
 
     /**
      * Bundle key for a version of the location containing no GPS data.
@@ -235,23 +248,33 @@ public abstract class LocationProviderBase {
      * Reports a new location from this provider.
      */
     public void reportLocation(Location location) {
+        reportLocation(LocationResult.create(location));
+    }
+
+    /**
+     * Reports a new location from this provider.
+     */
+    public void reportLocation(LocationResult locationResult) {
         ILocationProviderManager manager = mManager;
         if (manager != null) {
-            // remove deprecated extras to save on serialization
-            Bundle extras = location.getExtras();
-            if (extras != null && (extras.containsKey("noGPSLocation")
-                    || extras.containsKey("coarseLocation"))) {
-                location = new Location(location);
-                extras = location.getExtras();
-                extras.remove("noGPSLocation");
-                extras.remove("coarseLocation");
-                if (extras.isEmpty()) {
-                    location.setExtras(null);
+            locationResult = locationResult.map(location -> {
+                // remove deprecated extras to save on serialization costs
+                Bundle extras = location.getExtras();
+                if (extras != null && (extras.containsKey("noGPSLocation")
+                        || extras.containsKey("coarseLocation"))) {
+                    location = new Location(location);
+                    extras = location.getExtras();
+                    extras.remove("noGPSLocation");
+                    extras.remove("coarseLocation");
+                    if (extras.isEmpty()) {
+                        location.setExtras(null);
+                    }
                 }
-            }
+                return location;
+            });
 
             try {
-                manager.onReportLocation(location);
+                manager.onReportLocation(locationResult);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             } catch (RuntimeException e) {
@@ -290,6 +313,16 @@ public abstract class LocationProviderBase {
      * locations, or to stop returning locations, depending on the parameters in the request.
      */
     protected abstract void onSetRequest(ProviderRequestUnbundled request, WorkSource source);
+
+    /**
+     * Requests a flush of any pending batched locations. The callback must always be invoked once
+     * per invocation, and should be invoked after {@link #reportLocation(LocationResult)} has been
+     * invoked with any flushed locations. The callback may be invoked immediately if no locations
+     * are flushed.
+     */
+    protected void onFlush(OnFlushCompleteCallback callback) {
+        callback.onFlushComplete();
+    }
 
     /**
      * @deprecated This callback will never be invoked on Android Q and above. This method may be
@@ -359,6 +392,24 @@ public abstract class LocationProviderBase {
         @Override
         public void setRequest(ProviderRequest request, WorkSource ws) {
             onSetRequest(new ProviderRequestUnbundled(request), ws);
+        }
+
+        @Override
+        public void flush() {
+            onFlush(this::onFlushComplete);
+        }
+
+        private void onFlushComplete() {
+            ILocationProviderManager manager = mManager;
+            if (manager != null) {
+                try {
+                    manager.onFlushComplete();
+                } catch (RemoteException e) {
+                    throw e.rethrowFromSystemServer();
+                } catch (RuntimeException e) {
+                    Log.w(mTag, e);
+                }
+            }
         }
 
         @Override

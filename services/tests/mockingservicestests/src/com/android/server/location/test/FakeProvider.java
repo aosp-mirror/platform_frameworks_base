@@ -34,6 +34,11 @@ public class FakeProvider extends AbstractLocationProvider {
     protected void onSetRequest(ProviderRequest request) {}
 
     @Override
+    protected void onFlush(Runnable callback) {
+        callback.run();
+    }
+
+    @Override
     protected void onExtraCommand(int uid, int pid, String command, Bundle extras) {}
 
     @Override
