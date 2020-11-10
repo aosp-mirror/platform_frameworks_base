@@ -706,7 +706,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     }
 
     boolean canShowStrictModeViolation(int pid) {
-        final WindowState win = getWindow((w) -> w.mSession.mPid == pid && w.isVisibleLw());
+        final WindowState win = getWindow((w) -> w.mSession.mPid == pid && w.isVisible());
         return win != null;
     }
 

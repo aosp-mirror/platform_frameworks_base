@@ -857,7 +857,7 @@ final class AccessibilityController {
             private void populateWindowsOnScreenLocked(SparseArray<WindowState> outWindows) {
                 mTempLayer = 0;
                 mDisplayContent.forAllWindows((w) -> {
-                    if (w.isOnScreen() && w.isVisibleLw()
+                    if (w.isOnScreen() && w.isVisible()
                             && (w.mAttrs.alpha != 0)) {
                         mTempLayer++;
                         outWindows.put(mTempLayer, w);
@@ -1517,7 +1517,7 @@ final class AccessibilityController {
             }
 
             dc.forAllWindows(w -> {
-                if (w.isVisibleLw()) {
+                if (w.isVisible()) {
                     tempWindowStatesList.add(w);
                 }
             }, false /* traverseTopToBottom */);
@@ -1529,7 +1529,7 @@ final class AccessibilityController {
                     return;
                 }
 
-                if (w.isVisibleLw() && tempWindowStatesList.contains(parentWindow)) {
+                if (w.isVisible() && tempWindowStatesList.contains(parentWindow)) {
                     tempWindowStatesList.add(tempWindowStatesList.lastIndexOf(parentWindow), w);
                 }
             }, false /* traverseTopToBottom */);

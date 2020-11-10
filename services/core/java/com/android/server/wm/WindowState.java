@@ -1728,11 +1728,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 && !mAnimatingExit && !mDestroying && (!mIsWallpaper || mWallpaperVisible);
     }
 
-    @Override
-    public boolean isVisibleLw() {
-        return isVisible();
-    }
-
     /**
      * Is this window visible, ignoring its app token? It is not visible if there is no surface,
      * or we are in the process of running an exit animation that will remove the surface.
@@ -4956,7 +4951,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     int relayoutVisibleWindow(int result, int attrChanges) {
-        final boolean wasVisible = isVisibleLw();
+        final boolean wasVisible = isVisible();
 
         result |= (!wasVisible || !isDrawn()) ? RELAYOUT_RES_FIRST_TIME : 0;
 
@@ -5451,8 +5446,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         super.assignLayer(t, layer);
     }
 
-    @Override
-    public boolean isDimming() {
+    boolean isDimming() {
         return mIsDimming;
     }
 

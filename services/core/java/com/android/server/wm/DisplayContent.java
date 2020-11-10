@@ -862,7 +862,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             }
         }
 
-        if (obscuredChanged && w.isVisibleLw() && mWallpaperController.isWallpaperTarget(w)) {
+        if (obscuredChanged && w.isVisible() && mWallpaperController.isWallpaperTarget(w)) {
             // This is the wallpaper target and its obscured state changed... make sure the
             // current wallpaper's visibility has been updated accordingly.
             mWallpaperController.updateWallpaperVisibility();
@@ -2584,7 +2584,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 return;
             }
 
-            if (w.isOnScreen() && w.isVisibleLw() && w.getFrame().contains(x, y)) {
+            if (w.isOnScreen() && w.isVisible() && w.getFrame().contains(x, y)) {
                 targetWindowType[0] = w.mAttrs.type;
                 return;
             }
@@ -2629,7 +2629,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 mTouchExcludeRegion.op(mTmpRect2, Region.Op.UNION);
             }
         }
-        if (mInputMethodWindow != null && mInputMethodWindow.isVisibleLw()) {
+        if (mInputMethodWindow != null && mInputMethodWindow.isVisible()) {
             // If the input method is visible and the user is typing, we don't want these touch
             // events to be intercepted and used to change focus. This would likely cause a
             // disappearance of the input method.
@@ -2638,7 +2638,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         }
         for (int i = mTapExcludedWindows.size() - 1; i >= 0; i--) {
             final WindowState win = mTapExcludedWindows.get(i);
-            if (!win.isVisibleLw()) {
+            if (!win.isVisible()) {
                 continue;
             }
             win.getTouchableRegion(mTmpRegion);
@@ -2781,7 +2781,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
     void adjustForImeIfNeeded() {
         final WindowState imeWin = mInputMethodWindow;
-        final boolean imeVisible = imeWin != null && imeWin.isVisibleLw()
+        final boolean imeVisible = imeWin != null && imeWin.isVisible()
                 && imeWin.isDisplayed();
         final int imeHeight = mDisplayFrames.getInputMethodWindowVisibleHeight();
         mPinnedStackControllerLocked.setAdjustedForIme(imeVisible, imeHeight);
@@ -3068,7 +3068,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         final int y = (int) yf;
         final WindowState touchedWin = getWindow(w -> {
             final int flags = w.mAttrs.flags;
-            if (!w.isVisibleLw()) {
+            if (!w.isVisible()) {
                 return false;
             }
             if ((flags & FLAG_NOT_TOUCHABLE) != 0) {

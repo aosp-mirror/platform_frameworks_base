@@ -207,22 +207,10 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
         public IApplicationToken getAppToken();
 
         /**
-         * Is this window visible?  It is not visible if there is no
-         * surface, or we are in the process of running an exit animation
-         * that will remove the surface.
-         */
-        boolean isVisibleLw();
-
-        /**
          * Return true if this window (or a window it is attached to, but not
          * considering its app token) is currently animating.
          */
         boolean isAnimatingLw();
-
-        /**
-         * Check whether the window is currently dimming.
-         */
-        public boolean isDimming();
 
         /**
          * Returns true if the window owner can add internal system windows.

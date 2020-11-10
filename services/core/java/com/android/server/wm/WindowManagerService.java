@@ -5610,7 +5610,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 final WindowState win = (WindowState) container.mWaitingForDrawn.get(j);
                 ProtoLog.i(WM_DEBUG_SCREEN_ON,
                         "Waiting for drawn %s: removed=%b visible=%b mHasSurface=%b drawState=%d",
-                        win, win.mRemoved, win.isVisibleLw(), win.mHasSurface,
+                        win, win.mRemoved, win.isVisible(), win.mHasSurface,
                         win.mWinAnimator.mDrawState);
                 if (win.mRemoved || !win.mHasSurface || !win.isVisibleByPolicy()) {
                     // Window has been removed or hidden; no draw will now happen, so stop waiting.
