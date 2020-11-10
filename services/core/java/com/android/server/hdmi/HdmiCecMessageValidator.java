@@ -148,9 +148,25 @@ public class HdmiCecMessageValidator {
         addValidationInfo(Constants.MESSAGE_SET_MENU_LANGUAGE,
                 new AsciiValidator(3), DEST_BROADCAST);
 
-        // TODO: Handle messages for the Deck Control.
+        ParameterValidator statusRequestValidator = new OneByteRangeValidator(0x01, 0x03);
+        addValidationInfo(
+                Constants.MESSAGE_DECK_CONTROL, new OneByteRangeValidator(0x01, 0x04), DEST_DIRECT);
+        addValidationInfo(
+                Constants.MESSAGE_DECK_STATUS, new OneByteRangeValidator(0x11, 0x1F), DEST_DIRECT);
+        addValidationInfo(Constants.MESSAGE_GIVE_DECK_STATUS, statusRequestValidator, DEST_DIRECT);
+        addValidationInfo(Constants.MESSAGE_PLAY, new PlayModeValidator(), DEST_DIRECT);
 
         // TODO: Handle messages for the Tuner Control.
+        addValidationInfo(
+                Constants.MESSAGE_GIVE_TUNER_DEVICE_STATUS, statusRequestValidator, DEST_DIRECT);
+        addValidationInfo(
+                Constants.MESSAGE_SELECT_ANALOG_SERVICE,
+                new SelectAnalogueServiceValidator(),
+                DEST_DIRECT);
+        addValidationInfo(
+                Constants.MESSAGE_SELECT_DIGITAL_SERVICE,
+                new SelectDigitalServiceValidator(),
+                DEST_DIRECT);
 
         // Messages for the Vendor Specific Commands.
         VariableLengthValidator maxLengthValidator = new VariableLengthValidator(0, 14);
@@ -176,9 +192,10 @@ public class HdmiCecMessageValidator {
                 Constants.MESSAGE_MENU_STATUS, new OneByteRangeValidator(0x00, 0x01), DEST_DIRECT);
 
         // Messages for the Remote Control Passthrough.
-        // TODO: Parse the first parameter and determine if it can have the next parameter.
-        addValidationInfo(Constants.MESSAGE_USER_CONTROL_PRESSED,
-                new VariableLengthValidator(1, 2), DEST_DIRECT);
+        addValidationInfo(
+                Constants.MESSAGE_USER_CONTROL_PRESSED,
+                new UserControlPressedValidator(),
+                DEST_DIRECT);
 
         // Messages for the Power Status.
         addValidationInfo(
@@ -515,6 +532,28 @@ public class HdmiCecMessageValidator {
     }
 
     /**
+     * Check if the given value is a valid Channel Identifier. A valid value is one which falls
+     * within the range description defined in CEC 1.4 Specification : Operand Descriptions (Section
+     * 17)
+     *
+     * @param params Channel Identifier parameters
+     * @param offset start offset of Channel Identifier
+     * @return true if the Channel Identifier is valid
+     */
+    private boolean isValidChannelIdentifier(byte[] params, int offset) {
+        // First 6 bits contain Channel Number Format
+        int channelNumberFormat = params[offset] & 0xFC;
+        if (channelNumberFormat == 0x04) {
+            // Validate it contains 1-part Channel Number data (16 bits)
+            return params.length - offset >= 3;
+        } else if (channelNumberFormat == 0x08) {
+            // Validate it contains Major Channel Number and Minor Channel Number (26 bits)
+            return params.length - offset >= 4;
+        }
+        return false;
+    }
+
+    /**
      * Check if the given value is a valid Digital Service Identification. A valid value is one
      * which falls within the range description defined in CEC 1.4 Specification : Operand
      * Descriptions (Section 17)
@@ -544,15 +583,7 @@ public class HdmiCecMessageValidator {
         } else if (serviceIdentificationMethod == 0x80) {
             // Services identified by Channel
             if (isValidDigitalBroadcastSystem(digitalBroadcastSystem)) {
-                // First 6 bits contain Channel Number Format
-                int channelNumberFormat = params[offset] & 0xFC;
-                if (channelNumberFormat == 0x04) {
-                    // Validate it contains 1-part Channel Number data (16 bits)
-                    return params.length - offset >= 3;
-                } else if (channelNumberFormat == 0x08) {
-                    // Validate it contains Major Channel Number and Minor Channel Number (26 bits)
-                    return params.length - offset >= 4;
-                }
+                return isValidChannelIdentifier(params, offset);
             }
         }
         return false;
@@ -630,6 +661,65 @@ public class HdmiCecMessageValidator {
             return (isValidDurationHours(params[offset]) && isValidMinute(params[offset + 1]));
         }
         return false;
+    }
+
+    /**
+     * Check if the given value is a valid Play mode. A valid value is one which falls within the
+     * range description defined in CEC 1.4 Specification : Operand Descriptions (Section 17)
+     *
+     * @param value Play mode
+     * @return true if the Play mode is valid
+     */
+    private boolean isValidPlayMode(int value) {
+        return (isWithinRange(value, 0x05, 0x07)
+                || isWithinRange(value, 0x09, 0x0B)
+                || isWithinRange(value, 0x15, 0x17)
+                || isWithinRange(value, 0x19, 0x1B)
+                || isWithinRange(value, 0x24, 0x25)
+                || (value == 0x20));
+    }
+
+    /**
+     * Check if the given value is a valid UI Broadcast type. A valid value is one which falls
+     * within the range description defined in CEC 1.4 Specification : Operand Descriptions (Section
+     * 17)
+     *
+     * @param value UI Broadcast type
+     * @return true if the UI Broadcast type is valid
+     */
+    private boolean isValidUiBroadcastType(int value) {
+        return ((value == 0x00)
+                || (value == 0x01)
+                || (value == 0x10)
+                || (value == 0x20)
+                || (value == 0x30)
+                || (value == 0x40)
+                || (value == 0x50)
+                || (value == 0x60)
+                || (value == 0x70)
+                || (value == 0x80)
+                || (value == 0x90)
+                || (value == 0x91)
+                || (value == 0xA0));
+    }
+
+    /**
+     * Check if the given value is a valid UI Sound Presenation Control. A valid value is one which
+     * falls within the range description defined in CEC 1.4 Specification : Operand Descriptions
+     * (Section 17)
+     *
+     * @param value UI Sound Presenation Control
+     * @return true if the UI Sound Presenation Control is valid
+     */
+    private boolean isValidUiSoundPresenationControl(int value) {
+        value = value & 0xFF;
+        return ((value == 0x20)
+                || (value == 0x30)
+                || (value == 0x80)
+                || (value == 0x90)
+                || (value == 0xA0)
+                || (isWithinRange(value, 0xB1, 0xB3))
+                || (isWithinRange(value, 0xC1, 0xC3)));
     }
 
     private class PhysicalAddressValidator implements ParameterValidator {
@@ -861,6 +951,80 @@ public class HdmiCecMessageValidator {
                 return ERROR_PARAMETER_SHORT;
             }
             return toErrorCode(isValidTimerStatusData(params, 0));
+        }
+    }
+
+    /**
+     * Check if the given play mode parameter is valid. A valid parameter should lie within the
+     * range description defined in CEC 1.4 Specification : Operand Descriptions (Section 17)
+     */
+    private class PlayModeValidator implements ParameterValidator {
+        @Override
+        public int isValid(byte[] params) {
+            if (params.length < 1) {
+                return ERROR_PARAMETER_SHORT;
+            }
+            return toErrorCode(isValidPlayMode(params[0]));
+        }
+    }
+
+    /**
+     * Check if the given select analogue service parameter is valid. A valid parameter should lie
+     * within the range description defined in CEC 1.4 Specification : Operand Descriptions
+     * (Section 17)
+     */
+    private class SelectAnalogueServiceValidator implements ParameterValidator {
+        @Override
+        public int isValid(byte[] params) {
+            if (params.length < 4) {
+                return ERROR_PARAMETER_SHORT;
+            }
+            return toErrorCode(isValidAnalogueBroadcastType(params[0])
+                    && isValidAnalogueFrequency(HdmiUtils.twoBytesToInt(params, 1))
+                    && isValidBroadcastSystem(params[3]));
+        }
+    }
+
+    /**
+     * Check if the given select digital service parameter is valid. A valid parameter should lie
+     * within the range description defined in CEC 1.4 Specification : Operand Descriptions
+     * (Section 17)
+     */
+    private class SelectDigitalServiceValidator implements ParameterValidator {
+        @Override
+        public int isValid(byte[] params) {
+            if (params.length < 4) {
+                return ERROR_PARAMETER_SHORT;
+            }
+            return toErrorCode(isValidDigitalServiceIdentification(params, 0));
+        }
+    }
+
+    /** Check if the given user control press parameter is valid. */
+    private class UserControlPressedValidator implements ParameterValidator {
+        @Override
+        public int isValid(byte[] params) {
+            if (params.length < 1) {
+                return ERROR_PARAMETER_SHORT;
+            }
+            if (params.length == 1) {
+                return OK;
+            }
+            int uiCommand = params[0];
+            switch (uiCommand) {
+                case HdmiCecKeycode.CEC_KEYCODE_PLAY_FUNCTION:
+                    return toErrorCode(isValidPlayMode(params[1]));
+                case HdmiCecKeycode.CEC_KEYCODE_TUNE_FUNCTION:
+                    return (params.length >= 4
+                            ? toErrorCode(isValidChannelIdentifier(params, 1))
+                            : ERROR_PARAMETER_SHORT);
+                case HdmiCecKeycode.CEC_KEYCODE_SELECT_BROADCAST_TYPE:
+                    return toErrorCode(isValidUiBroadcastType(params[1]));
+                case HdmiCecKeycode.CEC_KEYCODE_SELECT_SOUND_PRESENTATION:
+                    return toErrorCode(isValidUiSoundPresenationControl(params[1]));
+                default:
+                    return OK;
+            }
         }
     }
 }
