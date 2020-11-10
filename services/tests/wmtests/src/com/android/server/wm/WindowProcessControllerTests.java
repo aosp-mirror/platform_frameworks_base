@@ -22,6 +22,9 @@ import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.view.Display.INVALID_DISPLAY;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -168,11 +171,7 @@ public class WindowProcessControllerTests extends WindowTestsBase {
                 mAtm, applicationInfo, null, 0, -1, null, mMockListener);
         wpc.setThread(mock(IApplicationThread.class));
 
-        final ActivityRecord activity = new ActivityBuilder(mAtm)
-                .setCreateTask(true)
-                .setUseProcess(wpc)
-                .build();
-
+        final ActivityRecord activity = createActivityRecord(wpc);
         wpc.addActivityIfNeeded(activity);
         // System UI owned processes should not be registered for activity config changes.
         assertFalse(wpc.registeredForActivityConfigChanges());
@@ -185,11 +184,7 @@ public class WindowProcessControllerTests extends WindowTestsBase {
         // Notify WPC that this process has started an IME service.
         mWpc.onServiceStarted(serviceInfo);
 
-        final ActivityRecord activity = new ActivityBuilder(mAtm)
-                .setCreateTask(true)
-                .setUseProcess(mWpc)
-                .build();
-
+        final ActivityRecord activity = createActivityRecord(mWpc);
         mWpc.addActivityIfNeeded(activity);
         // IME processes should not be registered for activity config changes.
         assertFalse(mWpc.registeredForActivityConfigChanges());
@@ -202,11 +197,7 @@ public class WindowProcessControllerTests extends WindowTestsBase {
         // Notify WPC that this process has started an ally service.
         mWpc.onServiceStarted(serviceInfo);
 
-        final ActivityRecord activity = new ActivityBuilder(mAtm)
-                .setCreateTask(true)
-                .setUseProcess(mWpc)
-                .build();
-
+        final ActivityRecord activity = createActivityRecord(mWpc);
         mWpc.addActivityIfNeeded(activity);
         // Ally processes should not be registered for activity config changes.
         assertFalse(mWpc.registeredForActivityConfigChanges());
@@ -219,11 +210,7 @@ public class WindowProcessControllerTests extends WindowTestsBase {
         // Notify WPC that this process has started an voice interaction service.
         mWpc.onServiceStarted(serviceInfo);
 
-        final ActivityRecord activity = new ActivityBuilder(mAtm)
-                .setCreateTask(true)
-                .setUseProcess(mWpc)
-                .build();
-
+        final ActivityRecord activity = createActivityRecord(mWpc);
         mWpc.addActivityIfNeeded(activity);
         // Voice interaction service processes should not be registered for activity config changes.
         assertFalse(mWpc.registeredForActivityConfigChanges());
@@ -244,7 +231,7 @@ public class WindowProcessControllerTests extends WindowTestsBase {
         final int globalSeq = 100;
         mRootWindowContainer.getConfiguration().seq = globalSeq;
         invertOrientation(mWpc.getConfiguration());
-        new ActivityBuilder(mAtm).setCreateTask(true).setUseProcess(mWpc).build();
+        createActivityRecord(mWpc);
 
         assertTrue(mWpc.registeredForActivityConfigChanges());
         assertEquals("Config seq of process should not be affected by activity",
@@ -253,10 +240,7 @@ public class WindowProcessControllerTests extends WindowTestsBase {
 
     @Test
     public void testComputeOomAdjFromActivities() {
-        final ActivityRecord activity = new ActivityBuilder(mAtm)
-                .setCreateTask(true)
-                .setUseProcess(mWpc)
-                .build();
+        final ActivityRecord activity = createActivityRecord(mWpc);
         activity.mVisibleRequested = true;
         final int[] callbackResult = { 0 };
         final int visible = 1;
@@ -306,6 +290,41 @@ public class WindowProcessControllerTests extends WindowTestsBase {
         activity.setState(Task.ActivityState.STOPPED, "test");
         mWpc.computeOomAdjFromActivities(callback);
         assertEquals(other, callbackResult[0]);
+    }
+
+    @Test
+    public void testComputeProcessActivityState() {
+        final VisibleActivityProcessTracker tracker = mAtm.mVisibleActivityProcessTracker;
+        spyOn(tracker);
+        final ActivityRecord activity = createActivityRecord(mWpc);
+        activity.mVisibleRequested = true;
+        activity.setState(Task.ActivityState.STARTED, "test");
+
+        verify(tracker).onAnyActivityVisible(mWpc);
+        assertTrue(mWpc.hasVisibleActivities());
+
+        activity.setState(Task.ActivityState.RESUMED, "test");
+
+        verify(tracker).onActivityResumedWhileVisible(mWpc);
+        assertTrue(tracker.hasResumedActivity(mWpc.mUid));
+
+        activity.makeFinishingLocked();
+        activity.setState(Task.ActivityState.PAUSING, "test");
+
+        assertFalse(tracker.hasResumedActivity(mWpc.mUid));
+        assertTrue(mWpc.hasForegroundActivities());
+
+        activity.setVisibility(false);
+        activity.mVisibleRequested = false;
+        activity.setState(Task.ActivityState.STOPPED, "test");
+
+        verify(tracker).onAllActivitiesInvisible(mWpc);
+        assertFalse(mWpc.hasVisibleActivities());
+        assertFalse(mWpc.hasForegroundActivities());
+    }
+
+    private ActivityRecord createActivityRecord(WindowProcessController wpc) {
+        return new ActivityBuilder(mAtm).setCreateTask(true).setUseProcess(wpc).build();
     }
 
     private TestDisplayContent createTestDisplayContentInContainer() {
