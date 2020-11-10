@@ -17,7 +17,6 @@
 package com.android.wm.shell.pip;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import android.graphics.Rect;
@@ -51,8 +50,6 @@ public class PipBoundsHandlerTest extends ShellTestCase {
     private static final float DEFAULT_ASPECT_RATIO = 1f;
     private static final float MIN_ASPECT_RATIO = 0.5f;
     private static final float MAX_ASPECT_RATIO = 2f;
-    private static final Rect EMPTY_CURRENT_BOUNDS = null;
-    private static final Size EMPTY_MINIMAL_SIZE = null;
 
     private PipBoundsHandler mPipBoundsHandler;
     private DisplayInfo mDefaultDisplayInfo;
@@ -115,7 +112,7 @@ public class PipBoundsHandlerTest extends ShellTestCase {
     }
 
     @Test
-    public void getDestinationBounds_returnBoundsMatchesAspectRatio() {
+    public void getEntryDestinationBounds_returnBoundsMatchesAspectRatio() {
         final float[] aspectRatios = new float[] {
                 (MIN_ASPECT_RATIO + DEFAULT_ASPECT_RATIO) / 2,
                 DEFAULT_ASPECT_RATIO,
@@ -123,8 +120,7 @@ public class PipBoundsHandlerTest extends ShellTestCase {
         };
         for (float aspectRatio : aspectRatios) {
             mPipBoundsState.setAspectRatio(aspectRatio);
-            final Rect destinationBounds = mPipBoundsHandler.getDestinationBounds(
-                    EMPTY_CURRENT_BOUNDS);
+            final Rect destinationBounds = mPipBoundsHandler.getEntryDestinationBounds();
             final float actualAspectRatio =
                     destinationBounds.width() / (destinationBounds.height() * 1f);
             assertEquals("Destination bounds matches the given aspect ratio",
@@ -133,15 +129,14 @@ public class PipBoundsHandlerTest extends ShellTestCase {
     }
 
     @Test
-    public void getDestinationBounds_invalidAspectRatio_returnsDefaultAspectRatio() {
+    public void getEntryDestinationBounds_invalidAspectRatio_returnsDefaultAspectRatio() {
         final float[] invalidAspectRatios = new float[] {
                 MIN_ASPECT_RATIO / 2,
                 MAX_ASPECT_RATIO * 2
         };
         for (float aspectRatio : invalidAspectRatios) {
             mPipBoundsState.setAspectRatio(aspectRatio);
-            final Rect destinationBounds = mPipBoundsHandler.getDestinationBounds(
-                    EMPTY_CURRENT_BOUNDS);
+            final Rect destinationBounds = mPipBoundsHandler.getEntryDestinationBounds();
             final float actualAspectRatio =
                     destinationBounds.width() / (destinationBounds.height() * 1f);
             assertEquals("Destination bounds fallbacks to default aspect ratio",
@@ -151,13 +146,14 @@ public class PipBoundsHandlerTest extends ShellTestCase {
     }
 
     @Test
-    public void  getDestinationBounds_withCurrentBounds_returnBoundsMatchesAspectRatio() {
+    public void  getAdjustedDestinationBounds_returnBoundsMatchesAspectRatio() {
         final float aspectRatio = (DEFAULT_ASPECT_RATIO + MAX_ASPECT_RATIO) / 2;
         final Rect currentBounds = new Rect(0, 0, 0, 100);
         currentBounds.right = (int) (currentBounds.height() * aspectRatio) + currentBounds.left;
 
         mPipBoundsState.setAspectRatio(aspectRatio);
-        final Rect destinationBounds = mPipBoundsHandler.getDestinationBounds(currentBounds);
+        final Rect destinationBounds = mPipBoundsHandler.getAdjustedDestinationBounds(
+                currentBounds, aspectRatio);
 
         final float actualAspectRatio =
                 destinationBounds.width() / (destinationBounds.height() * 1f);
@@ -166,7 +162,7 @@ public class PipBoundsHandlerTest extends ShellTestCase {
     }
 
     @Test
-    public void getDestinationBounds_withMinSize_returnMinBounds() {
+    public void getEntryDestinationBounds_withMinSize_returnMinBounds() {
         final float[] aspectRatios = new float[] {
                 (MIN_ASPECT_RATIO + DEFAULT_ASPECT_RATIO) / 2,
                 DEFAULT_ASPECT_RATIO,
@@ -182,8 +178,7 @@ public class PipBoundsHandlerTest extends ShellTestCase {
             final Size minimalSize = minimalSizes[i];
             mPipBoundsState.setAspectRatio(aspectRatio);
             mPipBoundsState.setOverrideMinSize(minimalSize);
-            final Rect destinationBounds = mPipBoundsHandler.getDestinationBounds(
-                    EMPTY_CURRENT_BOUNDS);
+            final Rect destinationBounds = mPipBoundsHandler.getEntryDestinationBounds();
             assertTrue("Destination bounds is no smaller than minimal requirement",
                     (destinationBounds.width() == minimalSize.getWidth()
                             && destinationBounds.height() >= minimalSize.getHeight())
@@ -197,7 +192,7 @@ public class PipBoundsHandlerTest extends ShellTestCase {
     }
 
     @Test
-    public void getDestinationBounds_withCurrentBounds_ignoreMinBounds() {
+    public void getAdjustedDestinationBounds_ignoreMinBounds() {
         final float aspectRatio = (DEFAULT_ASPECT_RATIO + MAX_ASPECT_RATIO) / 2;
         final Rect currentBounds = new Rect(0, 0, 0, 100);
         currentBounds.right = (int) (currentBounds.height() * aspectRatio) + currentBounds.left;
@@ -205,8 +200,8 @@ public class PipBoundsHandlerTest extends ShellTestCase {
 
         mPipBoundsState.setAspectRatio(aspectRatio);
         mPipBoundsState.setOverrideMinSize(minSize);
-        final Rect destinationBounds = mPipBoundsHandler.getDestinationBounds(
-                currentBounds, true /* useCurrentMinEdgeSize */);
+        final Rect destinationBounds = mPipBoundsHandler.getAdjustedDestinationBounds(
+                currentBounds, aspectRatio);
 
         assertTrue("Destination bounds ignores minimal size",
                 destinationBounds.width() > minSize.getWidth()
@@ -214,33 +209,29 @@ public class PipBoundsHandlerTest extends ShellTestCase {
     }
 
     @Test
-    public void getDestinationBounds_reentryStateExists_restoreLastSize() {
+    public void getEntryDestinationBounds_reentryStateExists_restoreLastSize() {
         mPipBoundsState.setAspectRatio(DEFAULT_ASPECT_RATIO);
-        final Rect reentryBounds = mPipBoundsHandler.getDestinationBounds(
-                EMPTY_CURRENT_BOUNDS);
+        final Rect reentryBounds = mPipBoundsHandler.getEntryDestinationBounds();
         reentryBounds.scale(1.25f);
         final float reentrySnapFraction = mPipBoundsHandler.getSnapFraction(reentryBounds);
 
         mPipBoundsState.saveReentryState(reentryBounds, reentrySnapFraction);
-        final Rect destinationBounds = mPipBoundsHandler.getDestinationBounds(
-                EMPTY_CURRENT_BOUNDS);
+        final Rect destinationBounds = mPipBoundsHandler.getEntryDestinationBounds();
 
         assertEquals(reentryBounds.width(), destinationBounds.width());
         assertEquals(reentryBounds.height(), destinationBounds.height());
     }
 
     @Test
-    public void getDestinationBounds_reentryStateExists_restoreLastPosition() {
+    public void getEntryDestinationBounds_reentryStateExists_restoreLastPosition() {
         mPipBoundsState.setAspectRatio(DEFAULT_ASPECT_RATIO);
-        final Rect reentryBounds = mPipBoundsHandler.getDestinationBounds(
-                EMPTY_CURRENT_BOUNDS);
+        final Rect reentryBounds = mPipBoundsHandler.getEntryDestinationBounds();
         reentryBounds.offset(0, -100);
         final float reentrySnapFraction = mPipBoundsHandler.getSnapFraction(reentryBounds);
 
         mPipBoundsState.saveReentryState(reentryBounds, reentrySnapFraction);
 
-        final Rect destinationBounds = mPipBoundsHandler.getDestinationBounds(
-                EMPTY_CURRENT_BOUNDS);
+        final Rect destinationBounds = mPipBoundsHandler.getEntryDestinationBounds();
 
         assertBoundsInclusionWithMargin("restoreLastPosition", reentryBounds, destinationBounds);
     }
@@ -249,12 +240,10 @@ public class PipBoundsHandlerTest extends ShellTestCase {
     public void setShelfHeight_offsetBounds() {
         final int shelfHeight = 100;
         mPipBoundsState.setAspectRatio(DEFAULT_ASPECT_RATIO);
-        final Rect oldPosition = mPipBoundsHandler.getDestinationBounds(
-                EMPTY_CURRENT_BOUNDS);
+        final Rect oldPosition = mPipBoundsHandler.getEntryDestinationBounds();
 
         mPipBoundsHandler.setShelfHeight(true, shelfHeight);
-        final Rect newPosition = mPipBoundsHandler.getDestinationBounds(
-                EMPTY_CURRENT_BOUNDS);
+        final Rect newPosition = mPipBoundsHandler.getEntryDestinationBounds();
 
         oldPosition.offset(0, -shelfHeight);
         assertBoundsInclusionWithMargin("offsetBounds by shelf", oldPosition, newPosition);
@@ -264,27 +253,23 @@ public class PipBoundsHandlerTest extends ShellTestCase {
     public void onImeVisibilityChanged_offsetBounds() {
         final int imeHeight = 100;
         mPipBoundsState.setAspectRatio(DEFAULT_ASPECT_RATIO);
-        final Rect oldPosition = mPipBoundsHandler.getDestinationBounds(
-                EMPTY_CURRENT_BOUNDS);
+        final Rect oldPosition = mPipBoundsHandler.getEntryDestinationBounds();
 
         mPipBoundsHandler.onImeVisibilityChanged(true, imeHeight);
-        final Rect newPosition = mPipBoundsHandler.getDestinationBounds(
-                EMPTY_CURRENT_BOUNDS);
+        final Rect newPosition = mPipBoundsHandler.getEntryDestinationBounds();
 
         oldPosition.offset(0, -imeHeight);
         assertBoundsInclusionWithMargin("offsetBounds by IME", oldPosition, newPosition);
     }
 
     @Test
-    public void getDestinationBounds_noReentryState_useDefaultBounds() {
+    public void getEntryDestinationBounds_noReentryState_useDefaultBounds() {
         mPipBoundsState.setAspectRatio(DEFAULT_ASPECT_RATIO);
-        final Rect defaultBounds = mPipBoundsHandler.getDestinationBounds(
-                EMPTY_CURRENT_BOUNDS);
+        final Rect defaultBounds = mPipBoundsHandler.getEntryDestinationBounds();
 
         mPipBoundsState.clearReentryState();
 
-        final Rect actualBounds = mPipBoundsHandler.getDestinationBounds(
-                EMPTY_CURRENT_BOUNDS);
+        final Rect actualBounds = mPipBoundsHandler.getEntryDestinationBounds();
 
         assertBoundsInclusionWithMargin("useDefaultBounds", defaultBounds, actualBounds);
     }
@@ -295,15 +280,6 @@ public class PipBoundsHandlerTest extends ShellTestCase {
         assertTrue(from + ": expect " + expected
                 + " contains " + actual
                 + " with error margin " + ROUNDING_ERROR_MARGIN,
-                expectedWithMargin.contains(actual));
-    }
-
-    private void assertNonBoundsInclusionWithMargin(String from, Rect expected, Rect actual) {
-        final Rect expectedWithMargin = new Rect(expected);
-        expectedWithMargin.inset(-ROUNDING_ERROR_MARGIN, -ROUNDING_ERROR_MARGIN);
-        assertFalse(from + ": expect " + expected
-                        + " not contains " + actual
-                        + " with error margin " + ROUNDING_ERROR_MARGIN,
                 expectedWithMargin.contains(actual));
     }
 }

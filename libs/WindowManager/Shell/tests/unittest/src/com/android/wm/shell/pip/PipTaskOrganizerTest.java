@@ -18,7 +18,7 @@ package com.android.wm.shell.pip;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doNothing;
@@ -192,8 +192,8 @@ public class PipTaskOrganizerTest extends ShellTestCase {
     private void preparePipTaskOrg() {
         final DisplayInfo info = new DisplayInfo();
         mPipBoundsState.setDisplayInfo(info);
-        when(mMockPipBoundsHandler.getDestinationBounds(any())).thenReturn(new Rect());
-        when(mMockPipBoundsHandler.getDestinationBounds(any(), anyBoolean()))
+        when(mMockPipBoundsHandler.getEntryDestinationBounds()).thenReturn(new Rect());
+        when(mMockPipBoundsHandler.getAdjustedDestinationBounds(any(), anyFloat()))
                 .thenReturn(new Rect());
         mPipBoundsState.setDisplayInfo(info);
         mSpiedPipTaskOrganizer.setOneShotAnimationType(PipAnimationController.ANIM_TYPE_ALPHA);
