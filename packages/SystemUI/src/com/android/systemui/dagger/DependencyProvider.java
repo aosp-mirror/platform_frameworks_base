@@ -23,6 +23,7 @@ import android.annotation.SuppressLint;
 import android.app.INotificationManager;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.om.OverlayManager;
 import android.hardware.display.AmbientDisplayConfiguration;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -43,6 +44,7 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.ViewMediatorCallback;
 import com.android.settingslib.bluetooth.LocalBluetoothManager;
 import com.android.systemui.Prefs;
+import com.android.systemui.R;
 import com.android.systemui.accessibility.ModeSwitchesController;
 import com.android.systemui.accessibility.SystemActions;
 import com.android.systemui.assist.AssistManager;
@@ -78,6 +80,7 @@ import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.DataSaverController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.NetworkController;
+import com.android.systemui.theme.ThemeOverlayApplier;
 import com.android.systemui.util.leak.LeakDetector;
 import com.android.wm.shell.splitscreen.SplitScreen;
 
@@ -190,6 +193,17 @@ public class DependencyProvider {
     @SysUISingleton
     public PluginManager providePluginManager(Context context) {
         return new PluginManagerImpl(context, new PluginInitializerImpl());
+    }
+
+    /** */
+    @SysUISingleton
+    @Provides
+    static ThemeOverlayApplier provideThemeOverlayManager(Context context,
+            @Background Executor bgExecutor, OverlayManager overlayManager,
+            DumpManager dumpManager) {
+        return new ThemeOverlayApplier(overlayManager, bgExecutor,
+                context.getString(R.string.launcher_overlayable_package),
+                context.getString(R.string.themepicker_overlayable_package), dumpManager);
     }
 
     /** */

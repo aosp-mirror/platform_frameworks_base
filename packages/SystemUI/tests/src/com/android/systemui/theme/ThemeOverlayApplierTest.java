@@ -15,22 +15,24 @@
  */
 package com.android.systemui.theme;
 
-import static com.android.systemui.theme.ThemeOverlayManager.ANDROID_PACKAGE;
-import static com.android.systemui.theme.ThemeOverlayManager.OVERLAY_CATEGORY_COLOR;
-import static com.android.systemui.theme.ThemeOverlayManager.OVERLAY_CATEGORY_FONT;
-import static com.android.systemui.theme.ThemeOverlayManager.OVERLAY_CATEGORY_ICON_ANDROID;
-import static com.android.systemui.theme.ThemeOverlayManager.OVERLAY_CATEGORY_ICON_LAUNCHER;
-import static com.android.systemui.theme.ThemeOverlayManager.OVERLAY_CATEGORY_ICON_SETTINGS;
-import static com.android.systemui.theme.ThemeOverlayManager.OVERLAY_CATEGORY_ICON_SYSUI;
-import static com.android.systemui.theme.ThemeOverlayManager.OVERLAY_CATEGORY_ICON_THEME_PICKER;
-import static com.android.systemui.theme.ThemeOverlayManager.OVERLAY_CATEGORY_SHAPE;
-import static com.android.systemui.theme.ThemeOverlayManager.SETTINGS_PACKAGE;
-import static com.android.systemui.theme.ThemeOverlayManager.SYSTEM_USER_CATEGORIES;
-import static com.android.systemui.theme.ThemeOverlayManager.SYSUI_PACKAGE;
-import static com.android.systemui.theme.ThemeOverlayManager.THEME_CATEGORIES;
+import static com.android.systemui.theme.ThemeOverlayApplier.ANDROID_PACKAGE;
+import static com.android.systemui.theme.ThemeOverlayApplier.OVERLAY_CATEGORY_ACCENT_COLOR;
+import static com.android.systemui.theme.ThemeOverlayApplier.OVERLAY_CATEGORY_FONT;
+import static com.android.systemui.theme.ThemeOverlayApplier.OVERLAY_CATEGORY_ICON_ANDROID;
+import static com.android.systemui.theme.ThemeOverlayApplier.OVERLAY_CATEGORY_ICON_LAUNCHER;
+import static com.android.systemui.theme.ThemeOverlayApplier.OVERLAY_CATEGORY_ICON_SETTINGS;
+import static com.android.systemui.theme.ThemeOverlayApplier.OVERLAY_CATEGORY_ICON_SYSUI;
+import static com.android.systemui.theme.ThemeOverlayApplier.OVERLAY_CATEGORY_ICON_THEME_PICKER;
+import static com.android.systemui.theme.ThemeOverlayApplier.OVERLAY_CATEGORY_SHAPE;
+import static com.android.systemui.theme.ThemeOverlayApplier.OVERLAY_CATEGORY_SYSTEM_PALETTE;
+import static com.android.systemui.theme.ThemeOverlayApplier.SETTINGS_PACKAGE;
+import static com.android.systemui.theme.ThemeOverlayApplier.SYSTEM_USER_CATEGORIES;
+import static com.android.systemui.theme.ThemeOverlayApplier.SYSUI_PACKAGE;
+import static com.android.systemui.theme.ThemeOverlayApplier.THEME_CATEGORIES;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -44,6 +46,7 @@ import android.testing.TestableLooper;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.dump.DumpManager;
 
 import com.google.android.collect.Maps;
 import com.google.common.collect.Lists;
@@ -63,7 +66,7 @@ import java.util.Set;
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
-public class ThemeOverlayManagerTest extends SysuiTestCase {
+public class ThemeOverlayApplierTest extends SysuiTestCase {
     private static final String TEST_DISABLED_PREFIX = "com.example.";
     private static final String TEST_ENABLED_PREFIX = "com.example.enabled.";
 
@@ -82,26 +85,32 @@ public class ThemeOverlayManagerTest extends SysuiTestCase {
 
     @Mock
     OverlayManager mOverlayManager;
+    @Mock
+    DumpManager mDumpManager;
 
-    private ThemeOverlayManager mManager;
+    private ThemeOverlayApplier mManager;
 
     @Before
     public void setup() throws Exception {
         MockitoAnnotations.initMocks(this);
-        mManager = new ThemeOverlayManager(mOverlayManager, MoreExecutors.directExecutor(),
-                LAUNCHER_PACKAGE, THEMEPICKER_PACKAGE);
+        mManager = new ThemeOverlayApplier(mOverlayManager, MoreExecutors.directExecutor(),
+                LAUNCHER_PACKAGE, THEMEPICKER_PACKAGE, mDumpManager);
         when(mOverlayManager.getOverlayInfosForTarget(ANDROID_PACKAGE, UserHandle.SYSTEM))
                 .thenReturn(Lists.newArrayList(
-                        createOverlayInfo(TEST_DISABLED_PREFIX + OVERLAY_CATEGORY_COLOR,
-                                ANDROID_PACKAGE, OVERLAY_CATEGORY_COLOR, false),
+                        createOverlayInfo(TEST_DISABLED_PREFIX + OVERLAY_CATEGORY_ACCENT_COLOR,
+                                ANDROID_PACKAGE, OVERLAY_CATEGORY_ACCENT_COLOR, false),
+                        createOverlayInfo(TEST_DISABLED_PREFIX + OVERLAY_CATEGORY_SYSTEM_PALETTE,
+                                ANDROID_PACKAGE, OVERLAY_CATEGORY_SYSTEM_PALETTE, false),
                         createOverlayInfo(TEST_DISABLED_PREFIX + OVERLAY_CATEGORY_FONT,
                                 ANDROID_PACKAGE, OVERLAY_CATEGORY_FONT, false),
                         createOverlayInfo(TEST_DISABLED_PREFIX + OVERLAY_CATEGORY_SHAPE,
                                 ANDROID_PACKAGE, OVERLAY_CATEGORY_SHAPE, false),
                         createOverlayInfo(TEST_DISABLED_PREFIX + OVERLAY_CATEGORY_ICON_ANDROID,
                                 ANDROID_PACKAGE, OVERLAY_CATEGORY_ICON_ANDROID, false),
-                        createOverlayInfo(TEST_ENABLED_PREFIX + OVERLAY_CATEGORY_COLOR,
-                                ANDROID_PACKAGE, OVERLAY_CATEGORY_COLOR, true),
+                        createOverlayInfo(TEST_ENABLED_PREFIX + OVERLAY_CATEGORY_ACCENT_COLOR,
+                                ANDROID_PACKAGE, OVERLAY_CATEGORY_ACCENT_COLOR, true),
+                        createOverlayInfo(TEST_ENABLED_PREFIX + OVERLAY_CATEGORY_SYSTEM_PALETTE,
+                                ANDROID_PACKAGE, OVERLAY_CATEGORY_SYSTEM_PALETTE, true),
                         createOverlayInfo(TEST_ENABLED_PREFIX + OVERLAY_CATEGORY_FONT,
                                 ANDROID_PACKAGE, OVERLAY_CATEGORY_FONT, true),
                         createOverlayInfo(TEST_ENABLED_PREFIX + OVERLAY_CATEGORY_SHAPE,
@@ -132,6 +141,8 @@ public class ThemeOverlayManagerTest extends SysuiTestCase {
                                 THEMEPICKER_PACKAGE, OVERLAY_CATEGORY_ICON_THEME_PICKER, false),
                         createOverlayInfo(TEST_ENABLED_PREFIX + OVERLAY_CATEGORY_ICON_THEME_PICKER,
                                 THEMEPICKER_PACKAGE, OVERLAY_CATEGORY_ICON_THEME_PICKER, true)));
+        clearInvocations(mOverlayManager);
+        verify(mDumpManager).registerDumpable(any(), any());
     }
 
     @Test
