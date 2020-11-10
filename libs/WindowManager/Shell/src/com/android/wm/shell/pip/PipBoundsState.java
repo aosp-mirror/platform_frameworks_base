@@ -54,6 +54,8 @@ public final class PipBoundsState {
     private static final String TAG = PipBoundsState.class.getSimpleName();
 
     private final @NonNull Rect mBounds = new Rect();
+    private final @NonNull Rect mNormalBounds = new Rect();
+    private final @NonNull Rect mExpandedBounds = new Rect();
     private final Context mContext;
     private float mAspectRatio;
     private int mStashedState = STASH_TYPE_NONE;
@@ -92,9 +94,7 @@ public final class PipBoundsState {
                 .getDimensionPixelSize(R.dimen.pip_stash_offset);
     }
 
-    /**
-     * Set the current PIP bounds.
-     */
+    /** Set the current PIP bounds. */
     public void setBounds(@NonNull Rect bounds) {
         mBounds.set(bounds);
     }
@@ -102,6 +102,28 @@ public final class PipBoundsState {
     @NonNull
     public Rect getBounds() {
         return new Rect(mBounds);
+    }
+
+    /** Set the current normal PIP bounds. */
+    public void setNormalBounds(@NonNull Rect bounds) {
+        mNormalBounds.set(bounds);
+    }
+
+    /** Get the current normal PIP bounds. */
+    @NonNull
+    public Rect getNormalBounds() {
+        return mNormalBounds;
+    }
+
+    /** Set the expanded bounds of PIP. */
+    public void setExpandedBounds(@NonNull Rect bounds) {
+        mExpandedBounds.set(bounds);
+    }
+
+    /** Get the PIP expanded bounds. */
+    @NonNull
+    public Rect getExpandedBounds() {
+        return mExpandedBounds;
     }
 
     /**
@@ -389,6 +411,8 @@ public final class PipBoundsState {
         final String innerPrefix = prefix + "  ";
         pw.println(prefix + TAG);
         pw.println(innerPrefix + "mBounds=" + mBounds);
+        pw.println(innerPrefix + "mNormalBounds=" + mNormalBounds);
+        pw.println(innerPrefix + "mExpandedBounds=" + mExpandedBounds);
         pw.println(innerPrefix + "mLastPipComponentName=" + mLastPipComponentName);
         pw.println(innerPrefix + "mAspectRatio=" + mAspectRatio);
         pw.println(innerPrefix + "mDisplayInfo=" + mDisplayInfo);

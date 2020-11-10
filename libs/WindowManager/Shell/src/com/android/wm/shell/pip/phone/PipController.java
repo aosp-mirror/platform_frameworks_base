@@ -87,7 +87,6 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
 
     private final DisplayInfo mTmpDisplayInfo = new DisplayInfo();
     private final Rect mTmpInsetBounds = new Rect();
-    private final Rect mTmpNormalBounds = new Rect();
     protected final Rect mReentryBounds = new Rect();
 
     private boolean mIsInFixedRotation;
@@ -114,12 +113,12 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
         // TODO: Technically this should account for movement animation bounds as well
         Rect currentBounds = mPipTaskOrganizer.getCurrentOrAnimatingBounds();
         final boolean changed = onDisplayRotationChanged(mContext,
-                mTmpNormalBounds, currentBounds, mTmpInsetBounds, displayId, fromRotation,
-                toRotation, t);
+                mPipBoundsState.getNormalBounds(), currentBounds, mTmpInsetBounds, displayId,
+                fromRotation, toRotation, t);
         if (changed) {
             // If the pip was in the offset zone earlier, adjust the new bounds to the bottom of the
             // movement bounds
-            mTouchHandler.adjustBoundsForRotation(mTmpNormalBounds,
+            mTouchHandler.adjustBoundsForRotation(mPipBoundsState.getNormalBounds(),
                     mPipBoundsState.getBounds(), mTmpInsetBounds);
 
             // The bounds are being applied to a specific snap fraction, so reset any known offsets
@@ -134,7 +133,7 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
                 mTouchHandler.onImeVisibilityChanged(false, 0);
             }
 
-            updateMovementBounds(mTmpNormalBounds, true /* fromRotation */,
+            updateMovementBounds(mPipBoundsState.getNormalBounds(), true /* fromRotation */,
                     false /* fromImeAdjustment */, false /* fromShelfAdjustment */, t);
         }
     };
@@ -511,7 +510,7 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
         mTmpDisplayInfo.copyFrom(mPipBoundsState.getDisplayInfo());
 
         mPipBoundsAlgorithm.getInsetBounds(mTmpInsetBounds);
-        mTmpNormalBounds.set(mPipBoundsAlgorithm.getNormalBounds());
+        mPipBoundsState.setNormalBounds(mPipBoundsAlgorithm.getNormalBounds());
         if (outBounds.isEmpty()) {
             outBounds.set(mPipBoundsAlgorithm.getDefaultBounds());
         }
@@ -519,7 +518,7 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
         // mTouchHandler would rely on the bounds populated from mPipTaskOrganizer
         mPipTaskOrganizer.onMovementBoundsChanged(outBounds, fromRotation, fromImeAdjustment,
                 fromShelfAdjustment, wct);
-        mTouchHandler.onMovementBoundsChanged(mTmpInsetBounds, mTmpNormalBounds,
+        mTouchHandler.onMovementBoundsChanged(mTmpInsetBounds, mPipBoundsState.getNormalBounds(),
                 outBounds, fromImeAdjustment, fromShelfAdjustment,
                 mTmpDisplayInfo.rotation);
     }

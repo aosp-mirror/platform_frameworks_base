@@ -94,10 +94,7 @@ public class PipTouchHandler {
 
     // The reference inset bounds, used to determine the dismiss fraction
     private Rect mInsetBounds = new Rect();
-    // The reference bounds used to calculate the normal/expanded target bounds
-    private Rect mNormalBounds = new Rect();
     @VisibleForTesting public Rect mNormalMovementBounds = new Rect();
-    private Rect mExpandedBounds = new Rect();
     @VisibleForTesting public Rect mExpandedMovementBounds = new Rect();
     private int mExpandedShortestEdgeSize;
 
@@ -345,9 +342,8 @@ public class PipTouchHandler {
         }
 
         // Re-calculate the expanded bounds
-        mNormalBounds.set(normalBounds);
         Rect normalMovementBounds = new Rect();
-        mPipBoundsAlgorithm.getSnapAlgorithm().getMovementBounds(mNormalBounds, insetBounds,
+        mPipBoundsAlgorithm.getSnapAlgorithm().getMovementBounds(normalBounds, insetBounds,
                 normalMovementBounds, bottomOffset);
 
         if (mMovementBounds.isEmpty()) {
@@ -363,13 +359,16 @@ public class PipTouchHandler {
         mContext.getDisplay().getRealSize(displaySize);
         Size expandedSize = mPipBoundsAlgorithm.getSnapAlgorithm().getSizeForAspectRatio(
                 aspectRatio, mExpandedShortestEdgeSize, displaySize.x, displaySize.y);
-        mExpandedBounds.set(0, 0, expandedSize.getWidth(), expandedSize.getHeight());
+        mPipBoundsState.setExpandedBounds(
+                new Rect(0, 0, expandedSize.getWidth(), expandedSize.getHeight()));
         Rect expandedMovementBounds = new Rect();
-        mPipBoundsAlgorithm.getSnapAlgorithm().getMovementBounds(mExpandedBounds, insetBounds,
-                expandedMovementBounds, bottomOffset);
+        mPipBoundsAlgorithm.getSnapAlgorithm().getMovementBounds(
+                mPipBoundsState.getExpandedBounds(), insetBounds, expandedMovementBounds,
+                bottomOffset);
 
-        mPipResizeGestureHandler.updateMinSize(mNormalBounds.width(), mNormalBounds.height());
-        mPipResizeGestureHandler.updateMaxSize(mExpandedBounds.width(), mExpandedBounds.height());
+        mPipResizeGestureHandler.updateMinSize(normalBounds.width(), normalBounds.height());
+        mPipResizeGestureHandler.updateMaxSize(mPipBoundsState.getExpandedBounds().width(),
+                mPipBoundsState.getExpandedBounds().height());
 
         // The extra offset does not really affect the movement bounds, but are applied based on the
         // current state (ime showing, or shelf offset) when we need to actually shift
@@ -396,7 +395,7 @@ public class PipTouchHandler {
                         : toMovementBounds.bottom - extraOffset;
 
                 if (isExpanded) {
-                    curBounds.set(mExpandedBounds);
+                    curBounds.set(mPipBoundsState.getExpandedBounds());
                     mPipBoundsAlgorithm.getSnapAlgorithm().applySnapFraction(curBounds,
                             toMovementBounds, mSavedSnapFraction);
                 }
@@ -423,8 +422,8 @@ public class PipTouchHandler {
         mInsetBounds.set(insetBounds);
         updateMovementBounds();
         mMovementBoundsExtraOffsets = extraOffset;
-        mConnection.onMovementBoundsChanged(mNormalBounds, mExpandedBounds, mNormalMovementBounds,
-                mExpandedMovementBounds);
+        mConnection.onMovementBoundsChanged(normalBounds, mPipBoundsState.getExpandedBounds(),
+                mNormalMovementBounds, mExpandedMovementBounds);
 
         // If we have a deferred resize, apply it now
         if (mDeferResizeToNormalBoundsUntilRotation == displayRotation) {
@@ -653,7 +652,7 @@ public class PipTouchHandler {
     }
 
     private void animateToExpandedState(Runnable callback) {
-        Rect expandedBounds = new Rect(mExpandedBounds);
+        Rect expandedBounds = new Rect(mPipBoundsState.getExpandedBounds());
         mSavedSnapFraction = mMotionHelper.animateToExpandedState(expandedBounds,
                 mMovementBounds, mExpandedMovementBounds, callback);
     }
@@ -687,13 +686,6 @@ public class PipTouchHandler {
     @VisibleForTesting
     public void setPipMotionHelper(PipMotionHelper pipMotionHelper) {
         mMotionHelper = pipMotionHelper;
-    }
-
-    /**
-     * @return the unexpanded bounds.
-     */
-    public Rect getNormalBounds() {
-        return mNormalBounds;
     }
 
     Rect getUserResizeBounds() {
@@ -805,15 +797,17 @@ public class PipTouchHandler {
             } else if (mTouchState.isDoubleTap() && !mPipBoundsState.isStashed()) {
                 // If using pinch to zoom, double-tap functions as resizing between max/min size
                 if (mPipResizeGestureHandler.isUsingPinchToZoom()) {
-                    final boolean toExpand =
-                            mMotionHelper.getBounds().width() < mExpandedBounds.width()
-                            && mMotionHelper.getBounds().height() < mExpandedBounds.height();
-                    mPipResizeGestureHandler.setUserResizeBounds(toExpand ? mExpandedBounds
-                            : mNormalBounds);
+                    final boolean toExpand = mMotionHelper.getBounds().width()
+                            < mPipBoundsState.getExpandedBounds().width()
+                            && mMotionHelper.getBounds().height()
+                            < mPipBoundsState.getExpandedBounds().height();
+                    mPipResizeGestureHandler.setUserResizeBounds(toExpand
+                            ? mPipBoundsState.getExpandedBounds()
+                            : mPipBoundsState.getNormalBounds());
                     if (toExpand) {
                         animateToExpandedState(null);
                     } else {
-                        animateToUnexpandedState(mNormalBounds);
+                        animateToUnexpandedState(mPipBoundsState.getNormalBounds());
                     }
                 } else {
                     // Expand to fullscreen if this is a double tap
@@ -894,8 +888,10 @@ public class PipTouchHandler {
         if (!mEnableResize) {
             return false;
         }
-        return mExpandedBounds.width() != mNormalBounds.width()
-                || mExpandedBounds.height() != mNormalBounds.height();
+        return mPipBoundsState.getExpandedBounds().width()
+                != mPipBoundsState.getNormalBounds().width()
+                || mPipBoundsState.getExpandedBounds().height()
+                != mPipBoundsState.getNormalBounds().height();
     }
 
     /**
@@ -912,9 +908,7 @@ public class PipTouchHandler {
         final String innerPrefix = prefix + "  ";
         pw.println(prefix + TAG);
         pw.println(innerPrefix + "mMovementBounds=" + mMovementBounds);
-        pw.println(innerPrefix + "mNormalBounds=" + mNormalBounds);
         pw.println(innerPrefix + "mNormalMovementBounds=" + mNormalMovementBounds);
-        pw.println(innerPrefix + "mExpandedBounds=" + mExpandedBounds);
         pw.println(innerPrefix + "mExpandedMovementBounds=" + mExpandedMovementBounds);
         pw.println(innerPrefix + "mMenuState=" + mMenuState);
         pw.println(innerPrefix + "mIsImeShowing=" + mIsImeShowing);
