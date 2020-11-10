@@ -2590,7 +2590,7 @@ public class Activity extends ContextThemeWrapper
     protected void onStop() {
         if (DEBUG_LIFECYCLE) Slog.v(TAG, "onStop " + this);
         if (mActionBar != null) mActionBar.setShowHideAnimationEnabled(false);
-        mActivityTransitionState.onStop();
+        mActivityTransitionState.onStop(this);
         dispatchActivityStopped();
         mTranslucentCallback = null;
         mCalled = true;

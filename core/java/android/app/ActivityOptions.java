@@ -27,6 +27,8 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.TestApi;
+import android.app.ExitTransitionCoordinator.ActivityExitTransitionCallbacks;
+import android.app.ExitTransitionCoordinator.ExitTransitionCallbacks;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
@@ -44,8 +46,6 @@ import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.UserHandle;
-import android.transition.Transition;
-import android.transition.TransitionListenerAdapter;
 import android.transition.TransitionManager;
 import android.util.Pair;
 import android.util.Slog;
@@ -806,8 +806,11 @@ public class ActivityOptions {
     public static ActivityOptions makeSceneTransitionAnimation(Activity activity,
             Pair<View, String>... sharedElements) {
         ActivityOptions opts = new ActivityOptions();
-        makeSceneTransitionAnimation(activity, activity.getWindow(), opts,
-                activity.mExitTransitionListener, sharedElements);
+        ExitTransitionCoordinator exit = makeSceneTransitionAnimation(
+                new ActivityExitTransitionCallbacks(activity), activity.mExitTransitionListener,
+                activity.getWindow(), opts, sharedElements);
+        opts.mExitCoordinatorIndex =
+                activity.mActivityTransitionState.addExitTransitionCoordinator(exit);
         return opts;
     }
 
@@ -823,25 +826,19 @@ public class ActivityOptions {
      * @hide
      */
     @SafeVarargs
-    public static ActivityOptions startSharedElementAnimation(Window window,
+    public static Pair<ActivityOptions, ExitTransitionCoordinator> startSharedElementAnimation(
+            Window window, ExitTransitionCallbacks exitCallbacks, SharedElementCallback callback,
             Pair<View, String>... sharedElements) {
         ActivityOptions opts = new ActivityOptions();
-        final View decorView = window.getDecorView();
-        if (decorView == null) {
-            return opts;
-        }
-        final ExitTransitionCoordinator exit =
-                makeSceneTransitionAnimation(null, window, opts, null, sharedElements);
-        if (exit != null) {
-            HideWindowListener listener = new HideWindowListener(window, exit);
-            exit.setHideSharedElementsCallback(listener);
-            exit.startExit();
-        }
-        return opts;
+        ExitTransitionCoordinator exit = makeSceneTransitionAnimation(
+                exitCallbacks, callback, window, opts, sharedElements);
+        opts.mExitCoordinatorIndex = -1;
+        return Pair.create(opts, exit);
     }
 
     /**
-     * This method should be called when the {@link #startSharedElementAnimation(Window, Pair[])}
+     * This method should be called when the
+     * {@link #startSharedElementAnimation(Window, ExitTransitionCallbacks, Pair[])}
      * animation must be stopped and the Views reset. This can happen if there was an error
      * from startActivity or a springboard activity and the animation should stop and reset.
      *
@@ -864,9 +861,9 @@ public class ActivityOptions {
         }
     }
 
-    static ExitTransitionCoordinator makeSceneTransitionAnimation(Activity activity, Window window,
-            ActivityOptions opts, SharedElementCallback callback,
-            Pair<View, String>[] sharedElements) {
+    static ExitTransitionCoordinator makeSceneTransitionAnimation(
+            ExitTransitionCallbacks exitCallbacks, SharedElementCallback callback, Window window,
+            ActivityOptions opts, Pair<View, String>[] sharedElements) {
         if (!window.hasFeature(Window.FEATURE_ACTIVITY_TRANSITIONS)) {
             opts.mAnimationType = ANIM_DEFAULT;
             return null;
@@ -892,17 +889,11 @@ public class ActivityOptions {
             }
         }
 
-        ExitTransitionCoordinator exit = new ExitTransitionCoordinator(activity, window,
+        ExitTransitionCoordinator exit = new ExitTransitionCoordinator(exitCallbacks, window,
                 callback, names, names, views, false);
         opts.mTransitionReceiver = exit;
         opts.mSharedElementNames = names;
-        opts.mIsReturning = (activity == null);
-        if (activity == null) {
-            opts.mExitCoordinatorIndex = -1;
-        } else {
-            opts.mExitCoordinatorIndex =
-                    activity.mActivityTransitionState.addExitTransitionCoordinator(exit);
-        }
+        opts.mIsReturning = false;
         return exit;
     }
 
@@ -928,8 +919,12 @@ public class ActivityOptions {
         opts.mIsReturning = true;
         opts.mResultCode = resultCode;
         opts.mResultData = resultData;
-        opts.mExitCoordinatorIndex =
-                activity.mActivityTransitionState.addExitTransitionCoordinator(exitCoordinator);
+        if (activity == null) {
+            opts.mExitCoordinatorIndex = -1;
+        } else {
+            opts.mExitCoordinatorIndex =
+                    activity.mActivityTransitionState.addExitTransitionCoordinator(exitCoordinator);
+        }
         return opts;
     }
 
@@ -1866,67 +1861,6 @@ public class ActivityOptions {
         return "ActivityOptions(" + hashCode() + "), mPackageName=" + mPackageName
                 + ", mAnimationType=" + mAnimationType + ", mStartX=" + mStartX + ", mStartY="
                 + mStartY + ", mWidth=" + mWidth + ", mHeight=" + mHeight;
-    }
-
-    private static class HideWindowListener extends TransitionListenerAdapter
-        implements ExitTransitionCoordinator.HideSharedElementsCallback {
-        private final Window mWindow;
-        private final ExitTransitionCoordinator mExit;
-        private final boolean mWaitingForTransition;
-        private boolean mTransitionEnded;
-        private boolean mSharedElementHidden;
-        private ArrayList<View> mSharedElements;
-
-        public HideWindowListener(Window window, ExitTransitionCoordinator exit) {
-            mWindow = window;
-            mExit = exit;
-            mSharedElements = new ArrayList<>(exit.mSharedElements);
-            Transition transition = mWindow.getExitTransition();
-            if (transition != null) {
-                transition.addListener(this);
-                mWaitingForTransition = true;
-            } else {
-                mWaitingForTransition = false;
-            }
-            View decorView = mWindow.getDecorView();
-            if (decorView != null) {
-                if (decorView.getTag(com.android.internal.R.id.cross_task_transition) != null) {
-                    throw new IllegalStateException(
-                            "Cannot start a transition while one is running");
-                }
-                decorView.setTagInternal(com.android.internal.R.id.cross_task_transition, exit);
-            }
-        }
-
-        @Override
-        public void onTransitionEnd(Transition transition) {
-            mTransitionEnded = true;
-            hideWhenDone();
-            transition.removeListener(this);
-        }
-
-        @Override
-        public void hideSharedElements() {
-            mSharedElementHidden = true;
-            hideWhenDone();
-        }
-
-        private void hideWhenDone() {
-            if (mSharedElementHidden && (!mWaitingForTransition || mTransitionEnded)) {
-                mExit.resetViews();
-                int numSharedElements = mSharedElements.size();
-                for (int i = 0; i < numSharedElements; i++) {
-                    View view = mSharedElements.get(i);
-                    view.requestLayout();
-                }
-                View decorView = mWindow.getDecorView();
-                if (decorView != null) {
-                    decorView.setTagInternal(
-                            com.android.internal.R.id.cross_task_transition, null);
-                    decorView.setVisibility(View.GONE);
-                }
-            }
-        }
     }
 
     /**
