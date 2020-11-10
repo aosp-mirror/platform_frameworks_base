@@ -51,7 +51,9 @@ public class FrontendStatus {
             FRONTEND_STATUS_TYPE_TRANSMISSION_MODE, FRONTEND_STATUS_TYPE_UEC,
             FRONTEND_STATUS_TYPE_T2_SYSTEM_ID, FRONTEND_STATUS_TYPE_INTERLEAVINGS,
             FRONTEND_STATUS_TYPE_ISDBT_SEGMENTS, FRONTEND_STATUS_TYPE_TS_DATA_RATES,
-            FRONTEND_STATUS_TYPE_MODULATIONS_EXT})
+            FRONTEND_STATUS_TYPE_MODULATIONS_EXT, FRONTEND_STATUS_TYPE_ROLL_OFF,
+            FRONTEND_STATUS_TYPE_IS_MISO, FRONTEND_STATUS_TYPE_IS_LINEAR,
+            FRONTEND_STATUS_TYPE_IS_SHORT_FRAMES})
     @Retention(RetentionPolicy.SOURCE)
     public @interface FrontendStatusType {}
 
@@ -208,6 +210,26 @@ public class FrontendStatus {
      */
     public static final int FRONTEND_STATUS_TYPE_MODULATIONS_EXT =
             android.hardware.tv.tuner.V1_1.Constants.FrontendStatusTypeExt1_1.MODULATIONS;
+    /**
+     * Roll Off Type status of the frontend. Only supported in Tuner HAL 1.1 or higher.
+     */
+    public static final int FRONTEND_STATUS_TYPE_ROLL_OFF =
+            android.hardware.tv.tuner.V1_1.Constants.FrontendStatusTypeExt1_1.ROLL_OFF;
+    /**
+     * If the frontend currently supports MISO or not. Only supported in Tuner HAL 1.1 or higher.
+     */
+    public static final int FRONTEND_STATUS_TYPE_IS_MISO =
+            android.hardware.tv.tuner.V1_1.Constants.FrontendStatusTypeExt1_1.IS_MISO;
+    /**
+     * If the frontend code rate is linear or not. Only supported in Tuner HAL 1.1 or higher.
+     */
+    public static final int FRONTEND_STATUS_TYPE_IS_LINEAR =
+            android.hardware.tv.tuner.V1_1.Constants.FrontendStatusTypeExt1_1.IS_LINEAR;
+    /**
+     * If short frames is enabled or not. Only supported in Tuner HAL 1.1 or higher.
+     */
+    public static final int FRONTEND_STATUS_TYPE_IS_SHORT_FRAMES =
+            android.hardware.tv.tuner.V1_1.Constants.FrontendStatusTypeExt1_1.IS_SHORT_FRAMES;
 
     /** @hide */
     @IntDef(value = {
@@ -379,6 +401,22 @@ public class FrontendStatus {
     @Retention(RetentionPolicy.SOURCE)
     public @interface FrontendGuardInterval {}
 
+    /** @hide */
+    @IntDef(value = {
+            DvbsFrontendSettings.ROLLOFF_UNDEFINED,
+            DvbsFrontendSettings.ROLLOFF_0_35,
+            DvbsFrontendSettings.ROLLOFF_0_25,
+            DvbsFrontendSettings.ROLLOFF_0_20,
+            DvbsFrontendSettings.ROLLOFF_0_15,
+            DvbsFrontendSettings.ROLLOFF_0_10,
+            DvbsFrontendSettings.ROLLOFF_0_5,
+            Isdbs3FrontendSettings.ROLLOFF_UNDEFINED,
+            Isdbs3FrontendSettings.ROLLOFF_0_03,
+            IsdbsFrontendSettings.ROLLOFF_UNDEFINED,
+            IsdbsFrontendSettings.ROLLOFF_0_35})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface FrontendRollOff {}
+
     private Boolean mIsDemodLocked;
     private Integer mSnr;
     private Integer mBer;
@@ -412,6 +450,10 @@ public class FrontendStatus {
     private int[] mTsDataRate;
     private int[] mIsdbtSegment;
     private int[] mModulationsExt;
+    private Integer mRollOff;
+    private Boolean mIsMisoEnabled;
+    private Boolean mIsLinear;
+    private Boolean mIsShortFrames;
 
 
     // Constructed and fields set by JNI code.
@@ -814,6 +856,67 @@ public class FrontendStatus {
             throw new IllegalStateException();
         }
         return mModulationsExt;
+    }
+
+    /**
+     * Gets roll off status.
+     *
+     * <p>This status query is only supported by Tuner HAL 1.1 or higher. Use
+     * {@link TunerVersionChecker.getTunerVersion()} to check the version.
+     */
+    @FrontendRollOff
+    public int getRollOff() {
+        TunerVersionChecker.checkHigherOrEqualVersionTo(
+                TunerVersionChecker.TUNER_VERSION_1_1, "getRollOff status");
+        if (mRollOff == null) {
+            throw new IllegalStateException();
+        }
+        return mRollOff;
+    }
+
+    /**
+     * Gets is MISO enabled status.
+     *
+     * <p>This status query is only supported by Tuner HAL 1.1 or higher. Use
+     * {@link TunerVersionChecker.getTunerVersion()} to check the version.
+     */
+    public boolean isMisoEnabled() {
+        TunerVersionChecker.checkHigherOrEqualVersionTo(
+                TunerVersionChecker.TUNER_VERSION_1_1, "isMisoEnabled status");
+        if (mIsMisoEnabled == null) {
+            throw new IllegalStateException();
+        }
+        return mIsMisoEnabled;
+    }
+
+    /**
+     * Gets is the Code Rate of the frontend is linear or not status.
+     *
+     * <p>This status query is only supported by Tuner HAL 1.1 or higher. Use
+     * {@link TunerVersionChecker.getTunerVersion()} to check the version.
+     */
+    public boolean isLinear() {
+        TunerVersionChecker.checkHigherOrEqualVersionTo(
+                TunerVersionChecker.TUNER_VERSION_1_1, "isLinear status");
+        if (mIsLinear == null) {
+            throw new IllegalStateException();
+        }
+        return mIsLinear;
+    }
+
+    /**
+     * Gets is the Short Frames enabled or not status.
+     *
+     * <p>This status query is only supported by Tuner HAL 1.1 or higher. Use
+     * {@link TunerVersionChecker.getTunerVersion()} to check the version.
+     */
+    public boolean isShortFramesEnabled() {
+        TunerVersionChecker.checkHigherOrEqualVersionTo(
+                TunerVersionChecker.TUNER_VERSION_1_1, "isShortFramesEnabled status");
+        if (mIsShortFrames == null) {
+            throw new IllegalStateException();
+        }
+        return mIsShortFrames;
     }
 
     /**

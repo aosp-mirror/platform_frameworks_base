@@ -6113,6 +6113,7 @@ package android.media.tv.tuner.frontend {
     method public int getPer();
     method public int getPerBer();
     method public int getPlpId();
+    method public int getRollOff();
     method public int getSignalQuality();
     method public int getSignalStrength();
     method public int getSnr();
@@ -6124,8 +6125,11 @@ package android.media.tv.tuner.frontend {
     method public int getUec();
     method public boolean isDemodLocked();
     method public boolean isEwbs();
+    method public boolean isLinear();
     method public boolean isLnaOn();
+    method public boolean isMisoEnabled();
     method public boolean isRfLocked();
+    method public boolean isShortFramesEnabled();
     field public static final int FRONTEND_STATUS_TYPE_AGC = 14; // 0xe
     field public static final int FRONTEND_STATUS_TYPE_ATSC3_PLP_INFO = 21; // 0x15
     field public static final int FRONTEND_STATUS_TYPE_BANDWIDTH = 25; // 0x19
@@ -6140,6 +6144,9 @@ package android.media.tv.tuner.frontend {
     field public static final int FRONTEND_STATUS_TYPE_HIERARCHY = 19; // 0x13
     field public static final int FRONTEND_STATUS_TYPE_INTERLEAVINGS = 30; // 0x1e
     field public static final int FRONTEND_STATUS_TYPE_ISDBT_SEGMENTS = 31; // 0x1f
+    field public static final int FRONTEND_STATUS_TYPE_IS_LINEAR = 35; // 0x23
+    field public static final int FRONTEND_STATUS_TYPE_IS_MISO = 34; // 0x22
+    field public static final int FRONTEND_STATUS_TYPE_IS_SHORT_FRAMES = 36; // 0x24
     field public static final int FRONTEND_STATUS_TYPE_LAYER_ERROR = 16; // 0x10
     field public static final int FRONTEND_STATUS_TYPE_LNA = 15; // 0xf
     field public static final int FRONTEND_STATUS_TYPE_LNB_VOLTAGE = 11; // 0xb
@@ -6150,6 +6157,7 @@ package android.media.tv.tuner.frontend {
     field public static final int FRONTEND_STATUS_TYPE_PLP_ID = 12; // 0xc
     field public static final int FRONTEND_STATUS_TYPE_PRE_BER = 4; // 0x4
     field public static final int FRONTEND_STATUS_TYPE_RF_LOCK = 20; // 0x14
+    field public static final int FRONTEND_STATUS_TYPE_ROLL_OFF = 33; // 0x21
     field public static final int FRONTEND_STATUS_TYPE_SIGNAL_QUALITY = 5; // 0x5
     field public static final int FRONTEND_STATUS_TYPE_SIGNAL_STRENGTH = 6; // 0x6
     field public static final int FRONTEND_STATUS_TYPE_SNR = 1; // 0x1
