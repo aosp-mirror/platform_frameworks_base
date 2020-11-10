@@ -27,6 +27,7 @@ import android.hardware.soundtrigger.SoundTrigger.ModelParamRange;
 import android.hardware.soundtrigger.SoundTrigger.ModuleProperties;
 import android.hardware.soundtrigger.SoundTrigger.RecognitionConfig;
 import android.media.permission.Identity;
+import android.os.IBinder;
 
 import com.android.server.voiceinteraction.VoiceInteractionManagerService;
 
@@ -46,10 +47,12 @@ public interface SoundTriggerInternal {
     int STATUS_ERROR = SoundTrigger.STATUS_ERROR;
     int STATUS_OK = SoundTrigger.STATUS_OK;
 
-    Session attachAsOriginator(@NonNull Identity originatorIdentity);
+    Session attachAsOriginator(@NonNull Identity originatorIdentity,
+            @NonNull IBinder client);
 
     Session attachAsMiddleman(@NonNull Identity middlemanIdentity,
-            @NonNull Identity originatorIdentity);
+            @NonNull Identity originatorIdentity,
+            @NonNull IBinder client);
 
     /**
      * Dumps service-wide information.

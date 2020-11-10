@@ -226,33 +226,45 @@ public class SoundTriggerService extends SystemService {
 
     class SoundTriggerServiceStub extends ISoundTriggerService.Stub {
         @Override
-        public ISoundTriggerSession attachAsOriginator(Identity originatorIdentity) {
+        public ISoundTriggerSession attachAsOriginator(Identity originatorIdentity,
+                @NonNull IBinder client) {
             try (SafeCloseable ignored = PermissionUtil.establishIdentityDirect(
                     originatorIdentity)) {
-                return new SoundTriggerSessionStub(newSoundTriggerHelper());
+                return new SoundTriggerSessionStub(newSoundTriggerHelper(), client);
             }
         }
 
         @Override
         public ISoundTriggerSession attachAsMiddleman(Identity originatorIdentity,
-                Identity middlemanIdentity) {
+                Identity middlemanIdentity,
+                @NonNull IBinder client) {
             try (SafeCloseable ignored = PermissionUtil.establishIdentityIndirect(mContext,
                     SOUNDTRIGGER_DELEGATE_IDENTITY, middlemanIdentity,
                     originatorIdentity)) {
-                return new SoundTriggerSessionStub(newSoundTriggerHelper());
+                return new SoundTriggerSessionStub(newSoundTriggerHelper(), client);
             }
         }
     }
 
     class SoundTriggerSessionStub extends ISoundTriggerSession.Stub {
         private final SoundTriggerHelper mSoundTriggerHelper;
+        // Used to detect client death.
+        private final IBinder mClient;
         private final TreeMap<UUID, SoundModel> mLoadedModels = new TreeMap<>();
         private final Object mCallbacksLock = new Object();
         private final TreeMap<UUID, IRecognitionStatusCallback> mCallbacks = new TreeMap<>();
 
         SoundTriggerSessionStub(
-                SoundTriggerHelper soundTriggerHelper) {
+                SoundTriggerHelper soundTriggerHelper, @NonNull IBinder client) {
             mSoundTriggerHelper = soundTriggerHelper;
+            mClient = client;
+            try {
+                mClient.linkToDeath(() -> {
+                    clientDied();
+                }, 0);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Failed to register death listener.", e);
+            }
         }
 
         @Override
@@ -788,6 +800,13 @@ public class SoundTriggerService extends SystemService {
 
                 return mSoundTriggerHelper.queryParameter(soundModel.getUuid(), modelParam);
             }
+        }
+
+        private void clientDied() {
+            Slog.w(TAG, "Client died, cleaning up session.");
+            sEventLogger.log(new SoundTriggerLogger.StringEvent(
+                    "Client died, cleaning up session."));
+            mSoundTriggerHelper.detach();
         }
 
         /**
@@ -1457,10 +1476,19 @@ public class SoundTriggerService extends SystemService {
 
         private class SessionImpl implements Session {
             private final @NonNull SoundTriggerHelper mSoundTriggerHelper;
+            private final @NonNull IBinder mClient;
 
             private SessionImpl(
-                    @NonNull SoundTriggerHelper soundTriggerHelper) {
+                    @NonNull SoundTriggerHelper soundTriggerHelper, @NonNull IBinder client) {
                 mSoundTriggerHelper = soundTriggerHelper;
+                mClient = client;
+                try {
+                    mClient.linkToDeath(() -> {
+                        clientDied();
+                    }, 0);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Failed to register death listener.", e);
+                }
             }
 
             @Override
@@ -1507,22 +1535,31 @@ public class SoundTriggerService extends SystemService {
             public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
                 mSoundTriggerHelper.dump(fd, pw, args);
             }
+
+            private void clientDied() {
+                Slog.w(TAG, "Client died, cleaning up session.");
+                sEventLogger.log(new SoundTriggerLogger.StringEvent(
+                        "Client died, cleaning up session."));
+                mSoundTriggerHelper.detach();
+            }
         }
 
         @Override
-        public Session attachAsOriginator(@NonNull Identity originatorIdentity) {
+        public Session attachAsOriginator(@NonNull Identity originatorIdentity,
+                @NonNull IBinder client) {
             try (SafeCloseable ignored = PermissionUtil.establishIdentityDirect(
                     originatorIdentity)) {
-                return new SessionImpl(newSoundTriggerHelper());
+                return new SessionImpl(newSoundTriggerHelper(), client);
             }
         }
 
         @Override
         public Session attachAsMiddleman(@NonNull Identity middlemanIdentity,
-                @NonNull Identity originatorIdentity) {
+                @NonNull Identity originatorIdentity,
+                @NonNull IBinder client) {
             try (SafeCloseable ignored = PermissionUtil.establishIdentityIndirect(mContext,
                     SOUNDTRIGGER_DELEGATE_IDENTITY, middlemanIdentity, originatorIdentity)) {
-                return new SessionImpl(newSoundTriggerHelper());
+                return new SessionImpl(newSoundTriggerHelper(), client);
             }
         }
 

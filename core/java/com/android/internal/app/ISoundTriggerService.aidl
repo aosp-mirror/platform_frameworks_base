@@ -38,8 +38,12 @@ interface ISoundTriggerService {
      *
      * It is good practice to clear the binder calling identity prior to calling this, in case the
      * caller is ever in the same process as the callee.
+     *
+     * The binder object being passed is used by the server to keep track of client death, in order
+     * to clean-up whenever that happens.
      */
-    ISoundTriggerSession attachAsOriginator(in Identity originatorIdentity);
+    ISoundTriggerSession attachAsOriginator(in Identity originatorIdentity,
+                                            IBinder client);
 
     /**
      * Creates a new session.
@@ -54,7 +58,11 @@ interface ISoundTriggerService {
      *
      * It is good practice to clear the binder calling identity prior to calling this, in case the
      * caller is ever in the same process as the callee.
+     *
+     * The binder object being passed is used by the server to keep track of client death, in order
+     * to clean-up whenever that happens.
      */
     ISoundTriggerSession attachAsMiddleman(in Identity middlemanIdentity,
-                                           in Identity originatorIdentity);
+                                           in Identity originatorIdentity,
+                                           IBinder client);
 }
