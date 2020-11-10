@@ -19,6 +19,8 @@ package com.android.systemui.shared.pip;
 import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.view.Choreographer;
+import android.view.Surface;
 import android.view.SurfaceControl;
 
 /**
@@ -50,8 +52,32 @@ public class PipSurfaceTransactionHelper {
                 .setPosition(leash, left, top);
     }
 
-    public void reset(SurfaceControl.Transaction tx, SurfaceControl leash, Rect destinationBounds) {
+    public void scaleAndRotate(SurfaceControl.Transaction tx, SurfaceControl leash,
+            Rect sourceBounds, Rect destinationBounds, Rect insets,
+            float degree, float positionX, float positionY) {
+        mTmpSourceRectF.set(sourceBounds);
+        mTmpDestinationRect.set(sourceBounds);
+        mTmpDestinationRect.inset(insets);
+        // Scale by the shortest edge and offset such that the top/left of the scaled inset
+        // source rect aligns with the top/left of the destination bounds
+        final float scale = sourceBounds.width() <= sourceBounds.height()
+                ? (float) destinationBounds.width() / sourceBounds.width()
+                : (float) destinationBounds.height() / sourceBounds.height();
+        mTmpTransform.setRotate(degree, 0, 0);
+        mTmpTransform.postScale(scale, scale);
+        tx.setMatrix(leash, mTmpTransform, mTmpFloat9)
+                .setWindowCrop(leash, mTmpDestinationRect)
+                .setPosition(leash, positionX, positionY);
+    }
+
+    public void reset(SurfaceControl.Transaction tx, SurfaceControl leash, Rect destinationBounds,
+            @Surface.Rotation int rotation) {
         resetScale(tx, leash, destinationBounds);
+        if (rotation == Surface.ROTATION_90 || rotation == Surface.ROTATION_270) {
+            final int degree = (rotation == Surface.ROTATION_90) ? -90 : 90;
+            mTmpTransform.setRotate(degree, 0, 0);
+            tx.setMatrix(leash, mTmpTransform, mTmpFloat9);
+        }
         resetCornerRadius(tx, leash);
         crop(tx, leash, destinationBounds);
     }
@@ -70,5 +96,12 @@ public class PipSurfaceTransactionHelper {
             Rect destinationBounds) {
         tx.setWindowCrop(leash, destinationBounds.width(), destinationBounds.height())
                 .setPosition(leash, destinationBounds.left, destinationBounds.top);
+    }
+
+    /** @return {@link SurfaceControl.Transaction} instance with vsync-id */
+    public static SurfaceControl.Transaction newSurfaceControlTransaction() {
+        final SurfaceControl.Transaction tx = new SurfaceControl.Transaction();
+        tx.setFrameTimelineVsync(Choreographer.getSfInstance().getVsyncId());
+        return tx;
     }
 }
