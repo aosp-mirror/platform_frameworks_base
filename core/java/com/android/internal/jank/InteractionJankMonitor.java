@@ -348,6 +348,57 @@ public class InteractionJankMonitor {
     }
 
     /**
+     * A helper method to translate interaction type to CUJ name.
+     *
+     * @param interactionType the interaction type defined in AtomsProto.java
+     * @return the name of the interaction type
+     */
+    public static String getNameOfInteraction(int interactionType) {
+        // There is an offset amount of 1 between cujType and interactionType.
+        return getNameOfCuj(interactionType - 1);
+    }
+
+    private static String getNameOfCuj(int cujType) {
+        switch (cujType) {
+            case CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE:
+                return "SHADE_EXPAND_COLLAPSE";
+            case CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE_LOCK:
+                return "SHADE_EXPAND_COLLAPSE_LOCK";
+            case CUJ_NOTIFICATION_SHADE_SCROLL_FLING:
+                return "SHADE_SCROLL_FLING";
+            case CUJ_NOTIFICATION_SHADE_ROW_EXPAND:
+                return "SHADE_ROW_EXPAND";
+            case CUJ_NOTIFICATION_SHADE_ROW_SWIPE:
+                return "SHADE_ROW_SWIPE";
+            case CUJ_NOTIFICATION_SHADE_QS_EXPAND_COLLAPSE:
+                return "SHADE_QS_EXPAND_COLLAPSE";
+            case CUJ_NOTIFICATION_SHADE_QS_SCROLL_SWIPE:
+                return "SHADE_QS_SCROLL_SWIPE";
+            case CUJ_LAUNCHER_APP_LAUNCH_FROM_RECENTS:
+                return "LAUNCHER_APP_LAUNCH_FROM_RECENTS";
+            case CUJ_LAUNCHER_APP_LAUNCH_FROM_ICON:
+                return "LAUNCHER_APP_LAUNCH_FROM_ICON";
+            case CUJ_LAUNCHER_APP_CLOSE_TO_HOME:
+                return "LAUNCHER_APP_CLOSE_TO_HOME";
+            case CUJ_LAUNCHER_APP_CLOSE_TO_PIP:
+                return "LAUNCHER_APP_CLOSE_TO_PIP";
+            case CUJ_LAUNCHER_QUICK_SWITCH:
+                return "LAUNCHER_QUICK_SWITCH";
+            case CUJ_NOTIFICATION_HEADS_UP_APPEAR:
+                return "NOTIFICATION_HEADS_UP_APPEAR";
+            case CUJ_NOTIFICATION_HEADS_UP_DISAPPEAR:
+                return "NOTIFICATION_HEADS_UP_DISAPPEAR";
+            case CUJ_NOTIFICATION_ADD:
+                return "NOTIFICATION_ADD";
+            case CUJ_NOTIFICATION_REMOVE:
+                return "NOTIFICATION_REMOVE";
+            case CUJ_NOTIFICATION_APP_START:
+                return "NOTIFICATION_APP_START";
+        }
+        return "UNKNOWN";
+    }
+
+    /**
      * A class to represent a session.
      */
     public static class Session {
