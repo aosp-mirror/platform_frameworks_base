@@ -4200,15 +4200,18 @@ public class ActivityManager {
     }
 
     /**
-     * Updates mcc mnc configuration and applies changes to the entire system.
+     * Updates the MCC (Mobile Country Code) and MNC (Mobile Network Code) in the
+     * system configuration.
      *
-     * @param mcc mcc configuration to update.
-     * @param mnc mnc configuration to update.
+     * @param mcc The new MCC.
+     * @param mnc The new MNC.
      * @throws RemoteException; IllegalArgumentException if mcc or mnc is null;
      * @return Returns {@code true} if the configuration was updated successfully;
      *         {@code false} otherwise.
      * @hide
      */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @TestApi
     @RequiresPermission(android.Manifest.permission.CHANGE_CONFIGURATION)
     public boolean updateMccMncConfiguration(@NonNull String mcc, @NonNull String mnc) {
         if (mcc == null || mnc == null) {
