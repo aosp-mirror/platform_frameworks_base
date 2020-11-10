@@ -130,6 +130,12 @@ public class ParsingPackageUtils {
     private static final String TAG = ParsingUtils.TAG;
 
     /**
+     * For those names would be used as a part of the file name. Limits size to 223 and reserves 32
+     * for the OS.
+     */
+    private static final int MAX_FILE_NAME_SIZE = 223;
+
+    /**
      * @see #parseDefault(ParseInput, File, int, boolean)
      */
     @NonNull
@@ -2686,7 +2692,16 @@ public class ParsingPackageUtils {
         }
     }
 
-    private static ParseResult validateName(ParseInput input, String name, boolean requireSeparator,
+    /**
+     * Check if the given name is valid.
+     *
+     * @param name The name to check.
+     * @param requireSeparator {@code true} if the name requires containing a separator at least.
+     * @param requireFilename {@code true} to apply file name validation to the given name. It also
+     *                        limits length of the name to the {@link #MAX_FILE_NAME_SIZE}.
+     * @return Success if it's valid.
+     */
+    public static ParseResult validateName(ParseInput input, String name, boolean requireSeparator,
             boolean requireFilename) {
         final int N = name.length();
         boolean hasSep = false;
@@ -2709,8 +2724,12 @@ public class ParsingPackageUtils {
             }
             return input.error("bad character '" + c + "'");
         }
-        if (requireFilename && !FileUtils.isValidExtFilename(name)) {
-            return input.error("Invalid filename");
+        if (requireFilename) {
+            if (!FileUtils.isValidExtFilename(name)) {
+                return input.error("Invalid filename");
+            } else if (N > MAX_FILE_NAME_SIZE) {
+                return input.error("the length of the name is greater than " + MAX_FILE_NAME_SIZE);
+            }
         }
         return hasSep || !requireSeparator
                 ? input.success(null)
