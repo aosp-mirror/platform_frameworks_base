@@ -306,6 +306,8 @@
         <!-- Additional flag from base permission type: this permission will be granted to the
              recents app. -->
         <flag name="recents" value="0x2000000" />
+        <!-- Additional flag from base permission type: this permission is managed by role. -->
+        <flag name="role" value="0x4000000" />
     </attr>
 
     <!-- Flags indicating more context for a permission group. -->

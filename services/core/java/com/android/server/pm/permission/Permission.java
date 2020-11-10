@@ -335,6 +335,10 @@ public final class Permission {
         return (mPermissionInfo.protectionLevel & PermissionInfo.PROTECTION_FLAG_RECENTS) != 0;
     }
 
+    public boolean isRole() {
+        return (mPermissionInfo.protectionLevel & PermissionInfo.PROTECTION_FLAG_ROLE) != 0;
+    }
+
     public void transfer(@NonNull String oldPackageName, @NonNull String newPackageName) {
         if (!oldPackageName.equals(mPermissionInfo.packageName)) {
             return;

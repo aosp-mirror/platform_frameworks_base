@@ -160,6 +160,7 @@ import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -1550,18 +1551,24 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             throw new IllegalArgumentException("Unknown package: " + packageName);
         }
 
+        final boolean isRolePermission;
         final boolean isSoftRestrictedPermission;
         synchronized (mLock) {
             final Permission permission = mRegistry.getPermission(permName);
-            isSoftRestrictedPermission = permission != null && permission.isSoftRestricted();
+            if (permission == null) {
+                throw new IllegalArgumentException("Unknown permission: " + permName);
+            }
+            isRolePermission = permission.isRole();
+            isSoftRestrictedPermission = permission.isSoftRestricted();
         }
+        final boolean mayGrantRolePermission = isRolePermission
+                && mayManageRolePermission(callingUid);
         final boolean mayGrantSoftRestrictedPermission = isSoftRestrictedPermission
                 && SoftRestrictedPermissionPolicy.forPermission(mContext,
                         pkg.toAppInfoWithoutState(), pkg, UserHandle.of(userId), permName)
                         .mayGrantPermission();
 
         final boolean isRuntimePermission;
-        final boolean isDevelopmentPermission;
         final boolean permissionHasGids;
         synchronized (mLock) {
             final Permission bp = mRegistry.getPermission(permName);
@@ -1570,9 +1577,14 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             }
 
             isRuntimePermission = bp.isRuntime();
-            isDevelopmentPermission = bp.isDevelopment();
             permissionHasGids = bp.hasGids();
-            if (!(isRuntimePermission || isDevelopmentPermission)) {
+            if (isRuntimePermission || bp.isDevelopment()) {
+                // Good.
+            } else if (bp.isRole()) {
+                if (!mayGrantRolePermission) {
+                    throw new SecurityException("Permission " + permName + " is managed by role");
+                }
+            } else {
                 throw new SecurityException("Permission " + permName + " requested by "
                         + pkg.getPackageName() + " is not a changeable permission type");
             }
@@ -1623,7 +1635,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                 return;
             }
 
-            if (bp.isDevelopment()) {
+            if (bp.isDevelopment() || bp.isRole()) {
                 // Development permissions must be handled specially, since they are not
                 // normal runtime permissions.  For now they apply to all users.
                 // TODO(zhanghai): We are breaking the behavior above by making all permission state
@@ -1654,10 +1666,10 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
         final int uid = UserHandle.getUid(userId, pkg.getUid());
         if (callback != null) {
-            if (isDevelopmentPermission) {
-                callback.onInstallPermissionGranted();
-            } else {
+            if (isRuntimePermission) {
                 callback.onPermissionGranted(uid, userId);
+            } else {
+                callback.onInstallPermissionGranted();
             }
             if (permissionHasGids) {
                 callback.onGidsChanged(UserHandle.getAppId(pkg.getUid()), userId);
@@ -1715,8 +1727,18 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             throw new IllegalArgumentException("Unknown package: " + packageName);
         }
 
+        final boolean isRolePermission;
+        synchronized (mLock) {
+            final Permission permission = mRegistry.getPermission(permName);
+            if (permission == null) {
+                throw new IllegalArgumentException("Unknown permission: " + permName);
+            }
+            isRolePermission = permission.isRole();
+        }
+        final boolean mayRevokeRolePermission = isRolePermission
+                && mayManageRolePermission(callingUid);
+
         final boolean isRuntimePermission;
-        final boolean isDevelopmentPermission;
         synchronized (mLock) {
             final Permission bp = mRegistry.getPermission(permName);
             if (bp == null) {
@@ -1724,8 +1746,13 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             }
 
             isRuntimePermission = bp.isRuntime();
-            isDevelopmentPermission = bp.isDevelopment();
-            if (!(isRuntimePermission || isDevelopmentPermission)) {
+            if (isRuntimePermission || bp.isDevelopment()) {
+                // Good.
+            } else if (bp.isRole()) {
+                if (!mayRevokeRolePermission) {
+                    throw new SecurityException("Permission " + permName + " is managed by role");
+                }
+            } else {
                 throw new SecurityException("Permission " + permName + " requested by "
                         + pkg.getPackageName() + " is not a changeable permission type");
             }
@@ -1777,17 +1804,28 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         }
 
         if (callback != null) {
-            if (isDevelopmentPermission) {
-                mDefaultPermissionCallback.onInstallPermissionRevoked();
-            } else {
+            if (isRuntimePermission) {
                 callback.onPermissionRevoked(UserHandle.getUid(userId, pkg.getUid()), userId,
                         reason);
+            } else {
+                mDefaultPermissionCallback.onInstallPermissionRevoked();
             }
         }
 
         if (isRuntimePermission) {
             notifyRuntimePermissionStateChanged(packageName, userId);
         }
+    }
+
+    private boolean mayManageRolePermission(int uid) {
+        final PackageManager packageManager = mContext.getPackageManager();
+        final String[] packageNames = packageManager.getPackagesForUid(uid);
+        if (packageNames == null) {
+            return false;
+        }
+        final String permissionControllerPackageName =
+                packageManager.getPermissionControllerPackageName();
+        return Arrays.asList(packageNames).contains(permissionControllerPackageName);
     }
 
     @Override
@@ -2906,7 +2944,8 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
                     if ((bp.isNormal() && shouldGrantNormalPermission) || (bp.isSignature()
                             && (shouldGrantSignaturePermission.contains(permName)
-                            || (bp.isDevelopment() && origState.isPermissionGranted(permName))))) {
+                            || ((bp.isDevelopment() || bp.isRole())
+                            && origState.isPermissionGranted(permName))))) {
                         // Grant an install permission.
                         if (uidState.grantPermission(bp)) {
                             changedInstallPermission = true;
@@ -3472,12 +3511,12 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         //                  need a separate flag anymore. Hence we need to check which
         //                  permissions are needed by the permission controller
         if (!allowed && bp.isInstaller()
-                && ArrayUtils.contains(mPackageManagerInt.getKnownPackageNames(
+                && (ArrayUtils.contains(mPackageManagerInt.getKnownPackageNames(
                         PackageManagerInternal.PACKAGE_INSTALLER, UserHandle.USER_SYSTEM),
                 pkg.getPackageName()) || ArrayUtils.contains(
                         mPackageManagerInt.getKnownPackageNames(
                                 PackageManagerInternal.PACKAGE_PERMISSION_CONTROLLER,
-                UserHandle.USER_SYSTEM), pkg.getPackageName())) {
+                UserHandle.USER_SYSTEM), pkg.getPackageName()))) {
             // If this permission is to be granted to the system installer and
             // this app is an installer, then it gets the permission.
             allowed = true;
