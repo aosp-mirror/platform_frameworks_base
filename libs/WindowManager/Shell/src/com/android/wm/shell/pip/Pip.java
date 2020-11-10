@@ -184,4 +184,11 @@ public interface Pip {
     default void stopSwipePipToHome(ComponentName componentName, Rect destinationBounds) {
         return;
     }
+
+    /**
+     * Called by NavigationBar in order to listen in for PiP bounds change. This is mostly used
+     * for times where the PiP bounds could conflict with SystemUI elements, such as a stashed
+     * PiP and the Back-from-Edge gesture.
+     */
+    default void setPipExclusionBoundsChangeListener(Consumer<Rect> listener) { }
 }

@@ -472,6 +472,16 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
         mReentryBounds.set(reentryBounds);
     }
 
+    /**
+     * Set a listener to watch out for PiP bounds. This is mostly used by SystemUI's
+     * Back-gesture handler, to avoid conflicting with PiP when it's stashed.
+     */
+    @Override
+    public void setPipExclusionBoundsChangeListener(
+            Consumer<Rect> pipExclusionBoundsChangeListener) {
+        mTouchHandler.setPipExclusionBoundsChangeListener(pipExclusionBoundsChangeListener);
+    }
+
     @Override
     public void onPipTransitionFinished(ComponentName activity, int direction) {
         onPipTransitionFinishedOrCanceled(direction);

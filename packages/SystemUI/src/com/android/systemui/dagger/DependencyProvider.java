@@ -79,6 +79,7 @@ import com.android.systemui.statusbar.policy.DataSaverController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.util.leak.LeakDetector;
+import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.splitscreen.SplitScreen;
 
 import java.util.Optional;
@@ -208,6 +209,7 @@ public class DependencyProvider {
             SysUiState sysUiFlagsContainer,
             BroadcastDispatcher broadcastDispatcher,
             CommandQueue commandQueue,
+            Optional<Pip> pipOptional,
             Optional<SplitScreen> splitScreenOptional,
             Optional<Recents> recentsOptional,
             Lazy<StatusBar> statusBarLazy,
@@ -230,6 +232,7 @@ public class DependencyProvider {
                 sysUiFlagsContainer,
                 broadcastDispatcher,
                 commandQueue,
+                pipOptional,
                 splitScreenOptional,
                 recentsOptional,
                 statusBarLazy,
