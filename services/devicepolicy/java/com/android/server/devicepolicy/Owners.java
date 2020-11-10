@@ -30,7 +30,6 @@ import android.os.Environment;
 import android.os.Process;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.os.UserManagerInternal;
 import android.util.ArrayMap;
 import android.util.AtomicFile;
 import android.util.Log;
@@ -44,6 +43,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.LocalServices;
+import com.android.server.pm.UserManagerInternal;
 import com.android.server.wm.ActivityTaskManagerInternal;
 
 import libcore.io.IoUtils;

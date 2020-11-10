@@ -44,7 +44,6 @@ import android.os.FileUtils;
 import android.os.IProgressListener;
 import android.os.RemoteException;
 import android.os.UserManager;
-import android.os.UserManagerInternal;
 import android.os.storage.IStorageManager;
 import android.os.storage.StorageManager;
 import android.security.KeyStore;
@@ -57,6 +56,7 @@ import com.android.internal.widget.LockSettingsInternal;
 import com.android.internal.widget.LockscreenCredential;
 import com.android.server.LocalServices;
 import com.android.server.locksettings.recoverablekeystore.RecoverableKeyStoreManager;
+import com.android.server.pm.UserManagerInternal;
 import com.android.server.wm.WindowManagerInternal;
 
 import org.junit.After;

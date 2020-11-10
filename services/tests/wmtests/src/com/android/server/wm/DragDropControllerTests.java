@@ -46,7 +46,6 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.Parcelable;
 import android.os.UserHandle;
-import android.os.UserManagerInternal;
 import android.platform.test.annotations.Presubmit;
 import android.view.DragEvent;
 import android.view.IWindowSessionCallback;
@@ -59,6 +58,7 @@ import android.view.WindowManager;
 import androidx.test.filters.SmallTest;
 
 import com.android.server.LocalServices;
+import com.android.server.pm.UserManagerInternal;
 
 import org.junit.After;
 import org.junit.AfterClass;

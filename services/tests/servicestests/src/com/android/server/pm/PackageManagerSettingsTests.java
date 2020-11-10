@@ -47,7 +47,6 @@ import android.os.BaseBundle;
 import android.os.PersistableBundle;
 import android.os.Process;
 import android.os.UserHandle;
-import android.os.UserManagerInternal;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;

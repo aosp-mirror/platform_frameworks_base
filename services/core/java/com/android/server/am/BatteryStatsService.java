@@ -37,7 +37,6 @@ import android.os.Process;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
-import android.os.UserManagerInternal;
 import android.os.WorkSource;
 import android.os.connectivity.CellularBatteryStats;
 import android.os.connectivity.GpsBatteryStats;
@@ -66,6 +65,7 @@ import com.android.internal.util.ParseUtils;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.LocalServices;
 import com.android.server.Watchdog;
+import com.android.server.pm.UserManagerInternal;
 
 import java.io.File;
 import java.io.FileDescriptor;

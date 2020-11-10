@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package android.os;
+package com.android.server.pm;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -22,8 +22,8 @@ import android.annotation.UserIdInt;
 import android.content.Context;
 import android.content.pm.UserInfo;
 import android.graphics.Bitmap;
-
-import com.android.server.pm.RestrictionsSet;
+import android.os.Bundle;
+import android.os.UserManager;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

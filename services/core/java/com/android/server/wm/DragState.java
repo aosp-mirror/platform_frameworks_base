@@ -16,8 +16,6 @@
 
 package com.android.server.wm;
 
-import static android.Manifest.permission.MANAGE_ACTIVITY_STACKS;
-import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.IInputConstants.DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_INTERCEPT_GLOBAL_DRAG_AND_DROP;
 
@@ -46,7 +44,6 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.os.UserManagerInternal;
 import android.util.Slog;
 import android.view.Display;
 import android.view.DragEvent;
@@ -64,6 +61,7 @@ import android.view.animation.Interpolator;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.view.IDragAndDropPermissions;
 import com.android.server.LocalServices;
+import com.android.server.pm.UserManagerInternal;
 
 import java.util.ArrayList;
 

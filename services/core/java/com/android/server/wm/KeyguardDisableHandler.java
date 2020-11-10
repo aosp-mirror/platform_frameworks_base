@@ -26,10 +26,10 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Process;
 import android.os.UserHandle;
-import android.os.UserManagerInternal;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.LocalServices;
+import com.android.server.pm.UserManagerInternal;
 import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.utils.UserTokenWatcher;
 import com.android.server.wm.LockTaskController.LockTaskToken;
