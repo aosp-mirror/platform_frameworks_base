@@ -48,10 +48,6 @@ package android.graphics {
     method public static void setTargetSdkVersion(int);
   }
 
-  public final class ImageDecoder implements java.lang.AutoCloseable {
-    method @AnyThread @NonNull public static android.graphics.ImageDecoder.Source createSource(@NonNull android.content.ContentResolver, @NonNull android.net.Uri, @Nullable android.content.res.Resources);
-  }
-
 }
 
 package android.media {
