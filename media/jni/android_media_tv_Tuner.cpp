@@ -1242,10 +1242,10 @@ jobject JTuner::getAtscFrontendCaps(JNIEnv *env, FrontendInfo::FrontendCapabilit
 
 jobject JTuner::getDvbcFrontendCaps(JNIEnv *env, FrontendInfo::FrontendCapabilities& caps) {
     jclass clazz = env->FindClass("android/media/tv/tuner/frontend/DvbcFrontendCapabilities");
-    jmethodID capsInit = env->GetMethodID(clazz, "<init>", "(III)V");
+    jmethodID capsInit = env->GetMethodID(clazz, "<init>", "(IJI)V");
 
     jint modulationCap = caps.dvbcCaps().modulationCap;
-    jint fecCap = caps.dvbcCaps().fecCap;
+    jlong fecCap = caps.dvbcCaps().fecCap;
     jint annexCap = caps.dvbcCaps().annexCap;
 
     return env->NewObject(clazz, capsInit, modulationCap, fecCap, annexCap);
