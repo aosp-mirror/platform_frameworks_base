@@ -1,6 +1,17 @@
 // Signature format: 2.0
 package android.net.wifi {
 
+  public final class CoexUnsafeChannel implements android.os.Parcelable {
+    ctor public CoexUnsafeChannel(int, int);
+    ctor public CoexUnsafeChannel(int, int, int);
+    method public int getBand();
+    method public int getChannel();
+    method public int getPowerCapDbm();
+    method public boolean isPowerCapAvailable();
+    method public void setPowerCapDbm(int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.net.wifi.CoexUnsafeChannel> CREATOR;
+  }
+
   public abstract class EasyConnectStatusCallback {
     ctor public EasyConnectStatusCallback();
     method public abstract void onConfiguratorSuccess(int);
@@ -455,6 +466,8 @@ package android.net.wifi {
     method @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS) public void factoryReset();
     method @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_SETTINGS, android.Manifest.permission.NETWORK_SETUP_WIZARD, android.Manifest.permission.NETWORK_STACK}) public void forget(int, @Nullable android.net.wifi.WifiManager.ActionListener);
     method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_SETTINGS, android.Manifest.permission.NETWORK_SETUP_WIZARD}) public java.util.List<android.util.Pair<android.net.wifi.WifiConfiguration,java.util.Map<java.lang.Integer,java.util.List<android.net.wifi.ScanResult>>>> getAllMatchingWifiConfigs(@NonNull java.util.List<android.net.wifi.ScanResult>);
+    method @RequiresPermission(android.Manifest.permission.WIFI_ACCESS_COEX_UNSAFE_CHANNELS) public int getCoexRestrictions();
+    method @NonNull @RequiresPermission(android.Manifest.permission.WIFI_ACCESS_COEX_UNSAFE_CHANNELS) public java.util.Set<android.net.wifi.CoexUnsafeChannel> getCoexUnsafeChannels();
     method @Nullable @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS) public String getCountryCode();
     method @Nullable @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_SETTINGS, android.Manifest.permission.NETWORK_SETUP_WIZARD}) public android.net.Network getCurrentNetwork();
     method @NonNull @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS) public String[] getFactoryMacAddresses();
@@ -475,6 +488,7 @@ package android.net.wifi {
     method public boolean isVerboseLoggingEnabled();
     method @RequiresPermission(android.Manifest.permission.ACCESS_WIFI_STATE) public boolean isWifiApEnabled();
     method public boolean isWifiScannerSupported();
+    method @RequiresPermission(android.Manifest.permission.WIFI_ACCESS_COEX_UNSAFE_CHANNELS) public void registerCoexCallback(@NonNull java.util.concurrent.Executor, @NonNull android.net.wifi.WifiManager.CoexCallback);
     method @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS) public void registerNetworkRequestMatchCallback(@NonNull java.util.concurrent.Executor, @NonNull android.net.wifi.WifiManager.NetworkRequestMatchCallback);
     method @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS) public void registerSoftApCallback(@NonNull java.util.concurrent.Executor, @NonNull android.net.wifi.WifiManager.SoftApCallback);
     method @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS) public void registerTrafficStateCallback(@NonNull java.util.concurrent.Executor, @NonNull android.net.wifi.WifiManager.TrafficStateCallback);
@@ -486,6 +500,7 @@ package android.net.wifi {
     method @NonNull @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS) public byte[] retrieveSoftApBackupData();
     method @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_SETTINGS, android.Manifest.permission.NETWORK_SETUP_WIZARD, android.Manifest.permission.NETWORK_STACK}) public void save(@NonNull android.net.wifi.WifiConfiguration, @Nullable android.net.wifi.WifiManager.ActionListener);
     method @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS) public void setAutoWakeupEnabled(boolean);
+    method @RequiresPermission(android.Manifest.permission.WIFI_UPDATE_COEX_UNSAFE_CHANNELS) public void setCoexUnsafeChannels(@NonNull java.util.Set<android.net.wifi.CoexUnsafeChannel>, int);
     method @RequiresPermission(android.Manifest.permission.WIFI_SET_DEVICE_MOBILITY_STATE) public void setDeviceMobilityState(int);
     method @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS) public void setMacRandomizationSettingPasspointEnabled(@NonNull String, boolean);
     method @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS) public void setPasspointMeteredOverride(@NonNull String, int);
@@ -505,6 +520,7 @@ package android.net.wifi {
     method @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_SETTINGS, android.Manifest.permission.NETWORK_SETUP_WIZARD}) public void stopEasyConnectSession();
     method @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_STACK, android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK}) public boolean stopSoftAp();
     method @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS) public void stopTemporarilyDisablingAllNonCarrierMergedWifi();
+    method @RequiresPermission(android.Manifest.permission.WIFI_ACCESS_COEX_UNSAFE_CHANNELS) public void unregisterCoexCallback(@NonNull android.net.wifi.WifiManager.CoexCallback);
     method @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS) public void unregisterNetworkRequestMatchCallback(@NonNull android.net.wifi.WifiManager.NetworkRequestMatchCallback);
     method @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS) public void unregisterSoftApCallback(@NonNull android.net.wifi.WifiManager.SoftApCallback);
     method @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS) public void unregisterTrafficStateCallback(@NonNull android.net.wifi.WifiManager.TrafficStateCallback);
@@ -518,6 +534,9 @@ package android.net.wifi {
     field public static final int CHANGE_REASON_ADDED = 0; // 0x0
     field public static final int CHANGE_REASON_CONFIG_CHANGE = 2; // 0x2
     field public static final int CHANGE_REASON_REMOVED = 1; // 0x1
+    field public static final int COEX_RESTRICTION_SOFTAP = 2; // 0x2
+    field public static final int COEX_RESTRICTION_WIFI_AWARE = 4; // 0x4
+    field public static final int COEX_RESTRICTION_WIFI_DIRECT = 1; // 0x1
     field public static final String CONFIGURED_NETWORKS_CHANGED_ACTION = "android.net.wifi.CONFIGURED_NETWORKS_CHANGE";
     field public static final int DEVICE_MOBILITY_STATE_HIGH_MVMT = 1; // 0x1
     field public static final int DEVICE_MOBILITY_STATE_LOW_MVMT = 2; // 0x2
@@ -563,6 +582,11 @@ package android.net.wifi {
   public static interface WifiManager.ActionListener {
     method public void onFailure(int);
     method public void onSuccess();
+  }
+
+  public abstract static class WifiManager.CoexCallback {
+    ctor public WifiManager.CoexCallback();
+    method public abstract void onCoexUnsafeChannelsChanged();
   }
 
   public static interface WifiManager.NetworkRequestMatchCallback {
