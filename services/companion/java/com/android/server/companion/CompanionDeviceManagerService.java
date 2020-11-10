@@ -308,7 +308,7 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
                     AndroidFuture<Association> future = new AndroidFuture<>();
                     service.startDiscovery(request, callingPackage, callback, future);
                     return future;
-                }).whenComplete(uncheckExceptions((association, err) -> {
+                }).cancelTimeout().whenComplete(uncheckExceptions((association, err) -> {
                     if (err == null) {
                         addAssociation(association);
                     } else {
