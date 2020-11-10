@@ -135,17 +135,25 @@ public class DragLayout extends View {
         // visibility of the current region
         DragAndDropPolicy.Target target = mPolicy.getTargetAtLocation(
                 (int) event.getX(), (int) event.getY());
-        if (target != null && mCurrentTarget != target) {
+        if (mCurrentTarget != target) {
             ProtoLog.v(ShellProtoLogGroup.WM_SHELL_DRAG_AND_DROP, "Current target: %s", target);
-            Interpolator boundsInterpolator = FAST_OUT_SLOW_IN;
-            if (mCurrentTarget == null) {
+            if (target == null) {
+                // Animating to no target
+                mDropOutline.startVisibilityAnimation(false, LINEAR);
+                Rect finalBounds = new Rect(mCurrentTarget.drawRegion);
+                finalBounds.inset(mDisplayMargin, mDisplayMargin);
+                mDropOutline.startBoundsAnimation(finalBounds, FAST_OUT_LINEAR_IN);
+            } else if (mCurrentTarget == null) {
+                // Animating to first target
                 mDropOutline.startVisibilityAnimation(true, LINEAR);
                 Rect initialBounds = new Rect(target.drawRegion);
                 initialBounds.inset(mDisplayMargin, mDisplayMargin);
                 mDropOutline.setRegionBounds(initialBounds);
-                boundsInterpolator = LINEAR_OUT_SLOW_IN;
+                mDropOutline.startBoundsAnimation(target.drawRegion, LINEAR_OUT_SLOW_IN);
+            } else {
+                // Bounds change
+                mDropOutline.startBoundsAnimation(target.drawRegion, FAST_OUT_SLOW_IN);
             }
-            mDropOutline.startBoundsAnimation(target.drawRegion, boundsInterpolator);
             mCurrentTarget = target;
         }
     }

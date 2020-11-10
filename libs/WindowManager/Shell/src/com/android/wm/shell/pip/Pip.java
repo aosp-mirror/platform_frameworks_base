@@ -81,30 +81,6 @@ public interface Pip {
     }
 
     /**
-     * Called whenever an Activity is moved to the pinned stack from another stack.
-     */
-    default void onActivityPinned(String packageName) {
-    }
-
-    /**
-     * Called whenever an Activity is moved from the pinned stack to another stack
-     */
-    default void onActivityUnpinned(ComponentName topActivity) {
-    }
-
-    /**
-     * Called whenever IActivityManager.startActivity is called on an activity that is already
-     * running, but the task is either brought to the front or a new Intent is delivered to it.
-     *
-     * @param task        information about the task the activity was relaunched into
-     * @param clearedTask whether or not the launch activity also cleared the task as a part of
-     *                    starting
-     */
-    default void onActivityRestartAttempt(ActivityManager.RunningTaskInfo task,
-            boolean clearedTask) {
-    }
-
-    /**
      * Called when display size or font size of settings changed
      */
     default void onDensityOrFontScaleChanged() {
@@ -129,12 +105,6 @@ public interface Pip {
      * @param flag Current SysUI state.
      */
     default void onSystemUiStateChanged(boolean isSysUiStateValid, int flag) {
-    }
-
-    /**
-     * Called when task stack changed.
-     */
-    default void onTaskStackChanged() {
     }
 
     /**

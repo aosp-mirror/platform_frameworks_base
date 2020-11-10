@@ -30,6 +30,7 @@ import com.android.wm.shell.common.FloatingContentCoordinator;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.SystemWindows;
+import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.pip.PipBoundsHandler;
@@ -72,9 +73,10 @@ public class WMShellModule {
             DisplayController displayController, SystemWindows systemWindows,
             DisplayImeController displayImeController, @Main Handler handler,
             TransactionPool transactionPool, ShellTaskOrganizer shellTaskOrganizer,
-            SyncTransactionQueue syncQueue) {
+            SyncTransactionQueue syncQueue, TaskStackListenerImpl taskStackListener) {
         return new SplitScreenController(context, displayController, systemWindows,
-                displayImeController, handler, transactionPool, shellTaskOrganizer, syncQueue);
+                displayImeController, handler, transactionPool, shellTaskOrganizer, syncQueue,
+                taskStackListener);
     }
 
     @WMSingleton
@@ -84,11 +86,11 @@ public class WMShellModule {
             PipBoundsState pipBoundsState, PipMediaController pipMediaController,
             PipMenuActivityController pipMenuActivityController, PipTaskOrganizer pipTaskOrganizer,
             PipTouchHandler pipTouchHandler, WindowManagerShellWrapper windowManagerShellWrapper,
-            ShellExecutor mainExecutor) {
+            TaskStackListenerImpl taskStackListener, ShellExecutor mainExecutor) {
         return Optional.ofNullable(PipController.create(context, displayController,
                 pipAppOpsListener, pipBoundsHandler, pipBoundsState, pipMediaController,
                 pipMenuActivityController, pipTaskOrganizer, pipTouchHandler,
-                windowManagerShellWrapper, mainExecutor));
+                windowManagerShellWrapper, taskStackListener, mainExecutor));
     }
 
     @WMSingleton

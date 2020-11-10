@@ -19,6 +19,7 @@ package com.android.wm.shell.onehanded;
 import static android.os.UserHandle.USER_CURRENT;
 import static android.view.Display.DEFAULT_DISPLAY;
 
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.om.IOverlayManager;
 import android.content.om.OverlayInfo;
@@ -38,6 +39,8 @@ import androidx.annotation.VisibleForTesting;
 
 import com.android.wm.shell.common.DisplayChangeController;
 import com.android.wm.shell.common.DisplayController;
+import com.android.wm.shell.common.TaskStackListenerCallback;
+import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.onehanded.OneHandedGestureHandler.OneHandedGestureEventCallback;
 
 import java.io.PrintWriter;
@@ -164,7 +167,8 @@ public class OneHandedController implements OneHanded {
      */
     @Nullable
     public static OneHandedController create(
-            Context context, DisplayController displayController) {
+            Context context, DisplayController displayController,
+            TaskStackListenerImpl taskStackListener) {
         if (!SystemProperties.getBoolean(SUPPORT_ONE_HANDED_MODE, false)) {
             Slog.w(TAG, "Device doesn't support OneHanded feature");
             return null;
@@ -181,7 +185,7 @@ public class OneHandedController implements OneHanded {
         IOverlayManager overlayManager = IOverlayManager.Stub.asInterface(
                 ServiceManager.getService(Context.OVERLAY_SERVICE));
         return new OneHandedController(context, displayController, organizer, touchHandler,
-                tutorialHandler, gestureHandler, overlayManager);
+                tutorialHandler, gestureHandler, overlayManager, taskStackListener);
     }
 
     @VisibleForTesting
@@ -191,7 +195,8 @@ public class OneHandedController implements OneHanded {
             OneHandedTouchHandler touchHandler,
             OneHandedTutorialHandler tutorialHandler,
             OneHandedGestureHandler gestureHandler,
-            IOverlayManager overlayManager) {
+            IOverlayManager overlayManager,
+            TaskStackListenerImpl taskStackListener) {
         mContext = context;
         mDisplayAreaOrganizer = displayAreaOrganizer;
         mDisplayController = displayController;
@@ -216,6 +221,19 @@ public class OneHandedController implements OneHanded {
         setupTimeoutListener();
         setupGesturalOverlay();
         updateSettings();
+
+        taskStackListener.addListener(
+                new TaskStackListenerCallback() {
+                    @Override
+                    public void onTaskCreated(int taskId, ComponentName componentName) {
+                        stopOneHanded(OneHandedEvents.EVENT_ONE_HANDED_TRIGGER_APP_TAPS_OUT);
+                    }
+
+                    @Override
+                    public void onTaskMovedToFront(int taskId) {
+                        stopOneHanded(OneHandedEvents.EVENT_ONE_HANDED_TRIGGER_APP_TAPS_OUT);
+                    }
+                });
     }
 
     /**
