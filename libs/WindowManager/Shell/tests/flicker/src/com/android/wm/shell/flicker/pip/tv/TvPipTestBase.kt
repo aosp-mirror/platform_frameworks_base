@@ -18,6 +18,8 @@ package com.android.wm.shell.flicker.pip.tv
 
 import android.content.pm.PackageManager.FEATURE_LEANBACK
 import android.content.pm.PackageManager.FEATURE_LEANBACK_ONLY
+import android.view.Surface.ROTATION_0
+import android.view.Surface.rotationToString
 import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
 import com.android.wm.shell.flicker.pip.PipTestBase
 import org.junit.After
@@ -40,5 +42,14 @@ abstract class TvPipTestBase(rotationName: String, rotation: Int)
 
     @After
     open fun tearDown() {
+        testApp.forceStop()
+    }
+
+    protected fun fail(message: String): Nothing = throw AssertionError(message)
+
+    companion object {
+        @JvmStatic
+        protected val rotationParams: Collection<Array<Any>> =
+                listOf(arrayOf(rotationToString(ROTATION_0), ROTATION_0))
     }
 }

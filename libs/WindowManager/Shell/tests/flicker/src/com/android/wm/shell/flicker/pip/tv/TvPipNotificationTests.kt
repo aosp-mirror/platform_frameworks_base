@@ -20,7 +20,6 @@ import android.app.Notification
 import android.app.PendingIntent
 import android.os.Bundle
 import android.service.notification.StatusBarNotification
-import android.view.Surface
 import androidx.test.filters.RequiresDevice
 import com.android.wm.shell.flicker.NotificationListener.Companion.findNotification
 import com.android.wm.shell.flicker.NotificationListener.Companion.startNotificationListener
@@ -32,10 +31,8 @@ import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
-import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
 
 /**
@@ -44,7 +41,6 @@ import org.junit.runners.Parameterized
  */
 @RequiresDevice
 @RunWith(Parameterized::class)
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 class TvPipNotificationTests(rotationName: String, rotation: Int)
     : TvPipTestBase(rotationName, rotation) {
 
@@ -60,7 +56,6 @@ class TvPipNotificationTests(rotationName: String, rotation: Int)
     @After
     override fun tearDown() {
         stopNotificationListener()
-        testApp.forceStop()
         super.tearDown()
     }
 
@@ -108,7 +103,7 @@ class TvPipNotificationTests(rotationName: String, rotation: Int)
         notification.contentIntent?.send()
             ?: fail("Pip notification should contain `content_intent`")
 
-        assertTrue("Pip menu should have been shown after sending `content_intent`",
+        assertNotNull("Pip menu should have been shown after sending `content_intent`",
                 uiDevice.waitForTvPipMenu())
 
         uiDevice.pressBack()
@@ -156,18 +151,13 @@ class TvPipNotificationTests(rotationName: String, rotation: Int)
         testApp.closePipWindow()
     }
 
-    private fun fail(message: String): Nothing = throw AssertionError(message)
-
     companion object {
         private const val TITLE_MEDIA_SESSION_PLAYING = "TestApp media is playing"
         private const val TITLE_MEDIA_SESSION_PAUSED = "TestApp media is paused"
 
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
-        fun getParams(): Collection<Array<Any>> {
-            val supportedRotations = intArrayOf(Surface.ROTATION_0)
-            return supportedRotations.map { arrayOf(Surface.rotationToString(it), it) }
-        }
+        fun getParams(): Collection<Array<Any>> = rotationParams
     }
 }
 
