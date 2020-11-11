@@ -750,9 +750,9 @@ public final class HdmiCecConfigTest {
     }
 
     @Test
-    public void getIntValue_SystemProperty_BasicSanity() {
-        when(mStorageAdapter.retrieveSystemProperty(
-                  HdmiCecConfig.SYSPROP_SYSTEM_AUDIO_MODE_MUTING,
+    public void getIntValue_SharedPref_BasicSanity() {
+        when(mStorageAdapter.retrieveSharedPref(
+                  HdmiControlManager.CEC_SETTING_NAME_SYSTEM_AUDIO_MODE_MUTING,
                   Integer.toString(HdmiControlManager.SYSTEM_AUDIO_MODE_MUTING_ENABLED)))
                 .thenReturn(Integer.toString(HdmiControlManager.SYSTEM_AUDIO_MODE_MUTING_DISABLED));
         HdmiCecConfig hdmiCecConfig = HdmiCecConfig.createFromStrings(
@@ -997,7 +997,7 @@ public final class HdmiCecConfigTest {
     }
 
     @Test
-    public void setIntValue_SystemProperty_BasicSanity() {
+    public void setIntValue_SharedPref_BasicSanity() {
         HdmiCecConfig hdmiCecConfig = HdmiCecConfig.createFromStrings(
                 mContext, mStorageAdapter,
                 "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>"
@@ -1015,8 +1015,8 @@ public final class HdmiCecConfigTest {
         hdmiCecConfig.setIntValue(
                 HdmiControlManager.CEC_SETTING_NAME_SYSTEM_AUDIO_MODE_MUTING,
                 HdmiControlManager.SYSTEM_AUDIO_MODE_MUTING_DISABLED);
-        verify(mStorageAdapter).storeSystemProperty(
-                HdmiCecConfig.SYSPROP_SYSTEM_AUDIO_MODE_MUTING,
+        verify(mStorageAdapter).storeSharedPref(
+                HdmiControlManager.CEC_SETTING_NAME_SYSTEM_AUDIO_MODE_MUTING,
                 Integer.toString(HdmiControlManager.SYSTEM_AUDIO_MODE_MUTING_DISABLED));
     }
 }

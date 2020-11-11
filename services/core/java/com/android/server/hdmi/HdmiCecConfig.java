@@ -83,12 +83,6 @@ public class HdmiCecConfig {
     })
     private @interface ValueType {}
 
-    /**
-     * System property key for Audio Mode Muting.
-     */
-    public static final String SYSPROP_SYSTEM_AUDIO_MODE_MUTING =
-            "ro.hdmi.cec.audio.system_audio_mode_muting.enabled";
-
     @NonNull private final Context mContext;
     @NonNull private final StorageAdapter mStorageAdapter;
     @Nullable private final CecSettings mSystemConfig;
@@ -264,7 +258,7 @@ public class HdmiCecConfig {
             case HdmiControlManager.CEC_SETTING_NAME_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST:
                 return STORAGE_SHARED_PREFS;
             case HdmiControlManager.CEC_SETTING_NAME_SYSTEM_AUDIO_MODE_MUTING:
-                return STORAGE_SYSPROPS;
+                return STORAGE_SHARED_PREFS;
             default:
                 throw new RuntimeException("Invalid CEC setting '" + setting.getName()
                         + "' storage.");
@@ -282,7 +276,7 @@ public class HdmiCecConfig {
             case HdmiControlManager.CEC_SETTING_NAME_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST:
                 return setting.getName();
             case HdmiControlManager.CEC_SETTING_NAME_SYSTEM_AUDIO_MODE_MUTING:
-                return SYSPROP_SYSTEM_AUDIO_MODE_MUTING;
+                return setting.getName();
             default:
                 throw new RuntimeException("Invalid CEC setting '" + setting.getName()
                     + "' storage key.");
