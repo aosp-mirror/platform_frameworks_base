@@ -173,6 +173,7 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSFragment;
 import com.android.systemui.qs.QSPanelController;
 import com.android.systemui.recents.ScreenPinningRequest;
+import com.android.systemui.settings.brightness.BrightnessSlider;
 import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.shared.system.WindowManagerWrapper;
 import com.android.systemui.statusbar.AutoHideUiElement;
@@ -432,6 +433,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     private final NotificationViewHierarchyManager mViewHierarchyManager;
     private final KeyguardViewMediator mKeyguardViewMediator;
     protected final NotificationInterruptStateProvider mNotificationInterruptStateProvider;
+    private final BrightnessSlider.Factory mBrightnessSliderFactory;
 
     // for disabling the status bar
     private int mDisabled1 = 0;
@@ -744,7 +746,8 @@ public class StatusBar extends SystemUI implements DemoMode,
             DemoModeController demoModeController,
             Lazy<NotificationShadeDepthController> notificationShadeDepthControllerLazy,
             StatusBarTouchableRegionManager statusBarTouchableRegionManager,
-            NotificationIconAreaController notificationIconAreaController) {
+            NotificationIconAreaController notificationIconAreaController,
+            BrightnessSlider.Factory brightnessSliderFactory) {
         super(context);
         mNotificationsController = notificationsController;
         mLightBarController = lightBarController;
@@ -821,6 +824,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mDismissCallbackRegistry = dismissCallbackRegistry;
         mDemoModeController = demoModeController;
         mNotificationIconAreaController = notificationIconAreaController;
+        mBrightnessSliderFactory = brightnessSliderFactory;
 
         mBubbleExpandListener =
                 (isExpanding, key) -> {
@@ -1205,6 +1209,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                     mNotificationShadeWindowView,
                     mNotificationPanelViewController,
                     mNotificationShadeDepthControllerLazy.get(),
+                    mBrightnessSliderFactory,
                     (visible) -> {
                         mBrightnessMirrorVisible = visible;
                         updateScrimController();

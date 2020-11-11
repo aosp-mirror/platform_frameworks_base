@@ -17,13 +17,18 @@
 package com.android.systemui.statusbar.policy;
 
 import android.annotation.NonNull;
+import android.content.Context;
 import android.content.res.Resources;
+import android.graphics.drawable.Drawable;
 import android.util.ArraySet;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
 import com.android.systemui.R;
+import com.android.systemui.settings.brightness.BrightnessSlider;
+import com.android.systemui.settings.brightness.ToggleSlider;
 import com.android.systemui.statusbar.NotificationShadeDepthController;
 import com.android.systemui.statusbar.phone.NotificationPanelViewController;
 import com.android.systemui.statusbar.phone.NotificationShadeWindowView;
@@ -42,15 +47,20 @@ public class BrightnessMirrorController
     private final NotificationPanelViewController mNotificationPanel;
     private final NotificationShadeDepthController mDepthController;
     private final ArraySet<BrightnessMirrorListener> mBrightnessMirrorListeners = new ArraySet<>();
+    private final BrightnessSlider.Factory mToggleSliderFactory;
+    private BrightnessSlider mToggleSliderController;
     private final int[] mInt2Cache = new int[2];
-    private View mBrightnessMirror;
+    private FrameLayout mBrightnessMirror;
 
     public BrightnessMirrorController(NotificationShadeWindowView statusBarWindow,
             NotificationPanelViewController notificationPanelViewController,
             NotificationShadeDepthController notificationShadeDepthController,
+            BrightnessSlider.Factory factory,
             @NonNull Consumer<Boolean> visibilityCallback) {
         mStatusBarWindow = statusBarWindow;
+        mToggleSliderFactory = factory;
         mBrightnessMirror = statusBarWindow.findViewById(R.id.brightness_mirror);
+        mToggleSliderController = setMirrorLayout();
         mNotificationPanel = notificationPanelViewController;
         mDepthController = notificationShadeDepthController;
         mNotificationPanel.setPanelAlphaEndAction(() -> {
@@ -88,8 +98,8 @@ public class BrightnessMirrorController
         mBrightnessMirror.setTranslationY(originalY - mirrorY);
     }
 
-    public View getMirror() {
-        return mBrightnessMirror;
+    public ToggleSlider getToggleSlider() {
+        return mToggleSliderController;
     }
 
     public void updateResources() {
@@ -110,11 +120,33 @@ public class BrightnessMirrorController
         reinflate();
     }
 
+    private BrightnessSlider setMirrorLayout() {
+        Context context = mBrightnessMirror.getContext();
+        BrightnessSlider controller = mToggleSliderFactory.create(context, mBrightnessMirror);
+        controller.init();
+        Drawable mirrorBackground = context.getDrawable(R.drawable.brightness_mirror_background);
+
+        View rootView = controller.getRootView();
+        rootView.setBackground(mirrorBackground);
+
+        ViewGroup.MarginLayoutParams lp = (ViewGroup.MarginLayoutParams) rootView.getLayoutParams();
+        lp.height = ViewGroup.LayoutParams.MATCH_PARENT;
+        lp.width = ViewGroup.LayoutParams.MATCH_PARENT;
+        int margin = context.getResources()
+                .getDimensionPixelSize(R.dimen.notification_side_paddings);
+        lp.leftMargin = margin;
+        lp.rightMargin = margin;
+        mBrightnessMirror.addView(rootView, lp);
+
+        return controller;
+    }
+
     private void reinflate() {
         int index = mStatusBarWindow.indexOfChild(mBrightnessMirror);
         mStatusBarWindow.removeView(mBrightnessMirror);
-        mBrightnessMirror = LayoutInflater.from(mBrightnessMirror.getContext()).inflate(
-                R.layout.brightness_mirror, mStatusBarWindow, false);
+        mBrightnessMirror = (FrameLayout) LayoutInflater.from(mBrightnessMirror.getContext())
+                .inflate(R.layout.brightness_mirror, mStatusBarWindow, false);
+        mToggleSliderController = setMirrorLayout();
         mStatusBarWindow.addView(mBrightnessMirror, index);
 
         for (int i = 0; i < mBrightnessMirrorListeners.size(); i++) {

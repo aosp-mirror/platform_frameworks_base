@@ -43,6 +43,7 @@ import com.android.systemui.navigationbar.NavigationBarController;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.PluginDependencyProvider;
 import com.android.systemui.recents.ScreenPinningRequest;
+import com.android.systemui.settings.brightness.BrightnessSlider;
 import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.KeyguardIndicationController;
@@ -198,7 +199,8 @@ public interface StatusBarPhoneModule {
             Lazy<NotificationShadeDepthController> notificationShadeDepthController,
             DismissCallbackRegistry dismissCallbackRegistry,
             StatusBarTouchableRegionManager statusBarTouchableRegionManager,
-            NotificationIconAreaController notificationIconAreaController) {
+            NotificationIconAreaController notificationIconAreaController,
+            BrightnessSlider.Factory brightnessSliderFactory) {
         return new StatusBar(
                 context,
                 notificationsController,
@@ -276,6 +278,7 @@ public interface StatusBarPhoneModule {
                 demoModeController,
                 notificationShadeDepthController,
                 statusBarTouchableRegionManager,
-                notificationIconAreaController);
+                notificationIconAreaController,
+                brightnessSliderFactory);
     }
 }
