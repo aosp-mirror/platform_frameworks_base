@@ -319,6 +319,8 @@ import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
 import android.util.TimingsTraceLog;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 import android.util.Xml;
 import android.util.apk.ApkSignatureVerifier;
 import android.util.jar.StrictJarFile;
@@ -20682,7 +20684,7 @@ public class PackageManagerService extends IPackageManager.Stub
      * Common machinery for picking apart a restored XML blob and passing
      * it to a caller-supplied functor to be applied to the running system.
      */
-    private void restoreFromXml(XmlPullParser parser, int userId,
+    private void restoreFromXml(TypedXmlPullParser parser, int userId,
             String expectedStartTag, BlobXmlRestorer functor)
             throws IOException, XmlPullParserException {
         int type;
@@ -20710,7 +20712,8 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     private interface BlobXmlRestorer {
-        void apply(XmlPullParser parser, int userId) throws IOException, XmlPullParserException;
+        void apply(TypedXmlPullParser parser, int userId)
+                throws IOException, XmlPullParserException;
     }
 
     /**
@@ -20726,7 +20729,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
         ByteArrayOutputStream dataStream = new ByteArrayOutputStream();
         try {
-            final XmlSerializer serializer = new FastXmlSerializer();
+            final TypedXmlSerializer serializer = Xml.newFastSerializer();
             serializer.setOutput(dataStream, StandardCharsets.UTF_8.name());
             serializer.startDocument(null, true);
             serializer.startTag(null, TAG_PREFERRED_BACKUP);
@@ -20755,7 +20758,7 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         try {
-            final XmlPullParser parser = Xml.newPullParser();
+            final TypedXmlPullParser parser = Xml.newFastPullParser();
             parser.setInput(new ByteArrayInputStream(backup), StandardCharsets.UTF_8.name());
             restoreFromXml(parser, userId, TAG_PREFERRED_BACKUP,
                     (readParser, readUserId) -> {
@@ -20784,7 +20787,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
         ByteArrayOutputStream dataStream = new ByteArrayOutputStream();
         try {
-            final XmlSerializer serializer = new FastXmlSerializer();
+            final TypedXmlSerializer serializer = Xml.newFastSerializer();
             serializer.setOutput(dataStream, StandardCharsets.UTF_8.name());
             serializer.startDocument(null, true);
             serializer.startTag(null, TAG_DEFAULT_APPS);
@@ -20813,7 +20816,7 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         try {
-            final XmlPullParser parser = Xml.newPullParser();
+            final TypedXmlPullParser parser = Xml.newFastPullParser();
             parser.setInput(new ByteArrayInputStream(backup), StandardCharsets.UTF_8.name());
             restoreFromXml(parser, userId, TAG_DEFAULT_APPS,
                     (parser1, userId1) -> {
@@ -20842,7 +20845,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
         ByteArrayOutputStream dataStream = new ByteArrayOutputStream();
         try {
-            final XmlSerializer serializer = new FastXmlSerializer();
+            final TypedXmlSerializer serializer = Xml.newFastSerializer();
             serializer.setOutput(dataStream, StandardCharsets.UTF_8.name());
             serializer.startDocument(null, true);
             serializer.startTag(null, TAG_INTENT_FILTER_VERIFICATION);
@@ -20871,7 +20874,7 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         try {
-            final XmlPullParser parser = Xml.newPullParser();
+            final TypedXmlPullParser parser = Xml.newFastPullParser();
             parser.setInput(new ByteArrayInputStream(backup), StandardCharsets.UTF_8.name());
             restoreFromXml(parser, userId, TAG_INTENT_FILTER_VERIFICATION,
                     (parser1, userId1) -> {
@@ -22634,7 +22637,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 pw.flush();
                 FileOutputStream fout = new FileOutputStream(fd);
                 BufferedOutputStream str = new BufferedOutputStream(fout);
-                XmlSerializer serializer = new FastXmlSerializer();
+                TypedXmlSerializer serializer = Xml.newFastSerializer();
                 try {
                     serializer.setOutput(str, StandardCharsets.UTF_8.name());
                     serializer.startDocument(null, true);
