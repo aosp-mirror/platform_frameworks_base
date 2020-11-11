@@ -20,6 +20,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.StringDef;
+import android.security.KeyStore;
 import android.security.keymaster.KeymasterDefs;
 
 import libcore.util.EmptyArray;
@@ -857,4 +858,43 @@ public abstract class KeyProperties {
         }
     }
 
+    /**
+     * This value indicates the implicit keystore namespace of the calling application.
+     * It is used by default. Only select system components can choose a different namespace
+     * which it must be configured in SEPolicy.
+     * @hide
+     */
+    public static final int NAMESPACE_APPLICATION = -1;
+
+    /**
+     * For legacy support, translate namespaces into known UIDs.
+     * @hide
+     */
+    public static int namespaceToLegacyUid(int namespace) {
+        switch (namespace) {
+            case NAMESPACE_APPLICATION:
+                return KeyStore.UID_SELF;
+            // TODO Translate WIFI and VPN UIDs once the namespaces are defined.
+            //  b/171305388 and b/171305607
+            default:
+                throw new IllegalArgumentException("No UID corresponding to namespace "
+                        + namespace);
+        }
+    }
+
+    /**
+     * For legacy support, translate namespaces into known UIDs.
+     * @hide
+     */
+    public static int legacyUidToNamespace(int uid) {
+        switch (uid) {
+            case KeyStore.UID_SELF:
+                return NAMESPACE_APPLICATION;
+            // TODO Translate WIFI and VPN UIDs once the namespaces are defined.
+            //  b/171305388 and b/171305607
+            default:
+                throw new IllegalArgumentException("No namespace corresponding to uid "
+                        + uid);
+        }
+    }
 }
