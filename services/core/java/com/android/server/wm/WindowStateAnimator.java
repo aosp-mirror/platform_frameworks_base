@@ -532,7 +532,7 @@ class WindowStateAnimator {
     void destroySurfaceLocked() {
         final ActivityRecord activity = mWin.mActivityRecord;
         if (activity != null) {
-            if (mWin == activity.startingWindow) {
+            if (mWin == activity.mStartingWindow) {
                 activity.startingDisplayed = false;
             }
         }

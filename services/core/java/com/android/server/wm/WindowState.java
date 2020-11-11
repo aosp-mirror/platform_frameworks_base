@@ -1951,7 +1951,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                     // Unnecessary to redraw a drawn starting window.
                     return;
                 }
-            } else if (mActivityRecord.startingWindow != null) {
+            } else if (mActivityRecord.mStartingWindow != null) {
                 // If the activity has an active starting window, there is no need to wait for the
                 // main window.
                 return;
@@ -2797,13 +2797,13 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     void adjustStartingWindowFlags() {
         if (mAttrs.type == TYPE_BASE_APPLICATION && mActivityRecord != null
-                && mActivityRecord.startingWindow != null) {
+                && mActivityRecord.mStartingWindow != null) {
             // Special handling of starting window over the base
             // window of the app: propagate lock screen flags to it,
             // to provide the correct semantics while starting.
             final int mask = FLAG_SHOW_WHEN_LOCKED | FLAG_DISMISS_KEYGUARD
                     | FLAG_ALLOW_LOCK_WHILE_SCREEN_ON;
-            WindowManager.LayoutParams sa = mActivityRecord.startingWindow.mAttrs;
+            WindowManager.LayoutParams sa = mActivityRecord.mStartingWindow.mAttrs;
             sa.flags = (sa.flags & ~mask) | (mAttrs.flags & mask);
         }
     }
