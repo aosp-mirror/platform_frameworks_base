@@ -16,14 +16,11 @@
 
 package android.graphics;
 
-import android.annotation.SystemApi;
-
 /**
  * Helper class for graphics classes to retrieve the targetSdkVersion, as
  * specified by the app.
  * @hide
  */
-@SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
 public final class Compatibility {
     private Compatibility() {}
 
@@ -34,7 +31,6 @@ public final class Compatibility {
      * application. No other code should call this.
      * @hide
      */
-    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public static void setTargetSdkVersion(int targetSdkVersion) {
         sTargetSdkVersion = targetSdkVersion;
         Canvas.setCompatibilityVersion(targetSdkVersion);
