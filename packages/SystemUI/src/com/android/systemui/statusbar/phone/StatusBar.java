@@ -45,6 +45,7 @@ import static com.android.systemui.statusbar.phone.BarTransitions.MODE_TRANSLUCE
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_TRANSPARENT;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_WARNING;
 import static com.android.systemui.statusbar.phone.BarTransitions.TransitionMode;
+import static com.android.wm.shell.bubbles.BubbleController.TASKBAR_CHANGED_BROADCAST;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -561,6 +562,15 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
     };
 
+    BroadcastReceiver mTaskbarChangeReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (mBubblesOptional.isPresent()) {
+                mBubblesOptional.get().onTaskbarChanged(intent.getExtras());
+            }
+        }
+    };
+
     private Runnable mLaunchTransitionEndRunnable;
     private NotificationEntry mDraggedDownEntry;
     private boolean mLaunchCameraWhenFinishedWaking;
@@ -844,6 +854,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         mBypassHeadsUpNotifier.setUp();
         if (mBubblesOptional.isPresent()) {
             mBubblesOptional.get().setExpandListener(mBubbleExpandListener);
+            IntentFilter filter = new IntentFilter(TASKBAR_CHANGED_BROADCAST);
+            mBroadcastDispatcher.registerReceiver(mTaskbarChangeReceiver, filter);
         }
 
         mColorExtractor.addOnColorsChangedListener(this);
