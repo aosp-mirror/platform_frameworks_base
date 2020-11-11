@@ -1153,15 +1153,19 @@ public class DisplayPolicy {
                         });
                 mDisplayContent.setInsetProvider(ITYPE_LEFT_GESTURES, win,
                         (displayFrames, windowState, inOutFrame) -> {
+                            final int leftSafeInset =
+                                    Math.max(displayFrames.mDisplayCutoutSafe.left, 0);
                             inOutFrame.left = 0;
                             inOutFrame.top = 0;
                             inOutFrame.bottom = displayFrames.mDisplayHeight;
-                            inOutFrame.right = displayFrames.mUnrestricted.left + mLeftGestureInset;
+                            inOutFrame.right = leftSafeInset + mLeftGestureInset;
                         });
                 mDisplayContent.setInsetProvider(ITYPE_RIGHT_GESTURES, win,
                         (displayFrames, windowState, inOutFrame) -> {
-                            inOutFrame.left = displayFrames.mUnrestricted.right
-                                    - mRightGestureInset;
+                            final int rightSafeInset =
+                                    Math.min(displayFrames.mDisplayCutoutSafe.right,
+                                            displayFrames.mUnrestricted.right);
+                            inOutFrame.left = rightSafeInset - mRightGestureInset;
                             inOutFrame.top = 0;
                             inOutFrame.bottom = displayFrames.mDisplayHeight;
                             inOutFrame.right = displayFrames.mDisplayWidth;
