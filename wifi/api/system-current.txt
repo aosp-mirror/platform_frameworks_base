@@ -427,6 +427,7 @@ package android.net.wifi {
     method @Nullable public String getRequestingPackageName();
     method public double getRetriedTxPacketsPerSecond();
     method public int getScore();
+    method public int getSubscriptionId();
     method public double getSuccessfulRxPacketsPerSecond();
     method public double getSuccessfulTxPacketsPerSecond();
     method public boolean isCarrierMerged();

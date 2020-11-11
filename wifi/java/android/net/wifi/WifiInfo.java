@@ -25,6 +25,7 @@ import android.net.NetworkInfo.DetailedState;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.telephony.SubscriptionManager;
 import android.text.TextUtils;
 
 import com.android.modules.utils.build.SdkLevel;
@@ -196,6 +197,11 @@ public class WifiInfo implements Parcelable {
     private String mRequestingPackageName;
 
     /**
+     * Identify which Telephony subscription provides this network.
+     */
+    private int mSubscriptionId;
+
+    /**
      * Running total count of lost (not ACKed) transmitted unicast data packets.
      * @hide
      */
@@ -321,6 +327,7 @@ public class WifiInfo implements Parcelable {
         mRssi = INVALID_RSSI;
         mLinkSpeed = LINK_SPEED_UNKNOWN;
         mFrequency = -1;
+        mSubscriptionId = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
     }
 
     /** @hide */
@@ -347,6 +354,7 @@ public class WifiInfo implements Parcelable {
         setFQDN(null);
         setProviderFriendlyName(null);
         setPasspointUniqueId(null);
+        setSubscriptionId(SubscriptionManager.INVALID_SUBSCRIPTION_ID);
         txBad = 0;
         txSuccess = 0;
         rxSuccess = 0;
@@ -386,6 +394,7 @@ public class WifiInfo implements Parcelable {
             mOsuAp = source.mOsuAp;
             mFqdn = source.mFqdn;
             mProviderFriendlyName = source.mProviderFriendlyName;
+            mSubscriptionId = source.mSubscriptionId;
             txBad = source.txBad;
             txRetries = source.txRetries;
             txSuccess = source.txSuccess;
@@ -874,6 +883,28 @@ public class WifiInfo implements Parcelable {
         return mRequestingPackageName;
     }
 
+    /** {@hide} */
+    public void setSubscriptionId(int subId) {
+        mSubscriptionId = subId;
+    }
+
+    /**
+     * If this network is provisioned by a carrier, returns subscription Id corresponding to the
+     * associated SIM on the device. If this network is not provisioned by a carrier, returns
+     * {@link android.telephony.SubscriptionManager#INVALID_SUBSCRIPTION_ID}
+     *
+     * @see WifiNetworkSuggestion.Builder#setSubscriptionId(int)
+     * @see android.telephony.SubscriptionInfo#getSubscriptionId()
+     * {@hide}
+     */
+    @SystemApi
+    public int getSubscriptionId() {
+        if (!SdkLevel.isAtLeastS()) {
+            throw new UnsupportedOperationException();
+        }
+        return mSubscriptionId;
+    }
+
 
     /** @hide */
     @UnsupportedAppUsage
@@ -1064,6 +1095,7 @@ public class WifiInfo implements Parcelable {
         dest.writeInt(mMaxSupportedTxLinkSpeed);
         dest.writeInt(mMaxSupportedRxLinkSpeed);
         dest.writeString(mPasspointUniqueId);
+        dest.writeInt(mSubscriptionId);
     }
 
     /** Implement the Parcelable interface {@hide} */
@@ -1112,6 +1144,7 @@ public class WifiInfo implements Parcelable {
                 info.mMaxSupportedTxLinkSpeed = in.readInt();
                 info.mMaxSupportedRxLinkSpeed = in.readInt();
                 info.mPasspointUniqueId = in.readString();
+                info.mSubscriptionId = in.readInt();
                 return info;
             }
 
