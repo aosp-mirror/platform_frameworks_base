@@ -18,7 +18,7 @@ package com.android.wm.shell.pip;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doNothing;
@@ -30,12 +30,14 @@ import static org.mockito.Mockito.when;
 import android.app.ActivityManager;
 import android.app.PictureInPictureParams;
 import android.content.ComponentName;
+import android.content.pm.ActivityInfo;
 import android.graphics.Rect;
 import android.os.RemoteException;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.util.Rational;
+import android.util.Size;
 import android.view.DisplayInfo;
 import android.window.WindowContainerToken;
 
@@ -114,6 +116,15 @@ public class PipTaskOrganizerTest extends ShellTestCase {
     }
 
     @Test
+    public void startSwipePipToHome_updatesOverrideMinSize() {
+        final Size minSize = new Size(100, 80);
+
+        mSpiedPipTaskOrganizer.startSwipePipToHome(mComponent1, createActivityInfo(minSize), null);
+
+        assertEquals(minSize, mPipBoundsState.getOverrideMinSize());
+    }
+
+    @Test
     public void onTaskAppeared_updatesAspectRatio() {
         final Rational aspectRatio = new Rational(2, 1);
 
@@ -129,6 +140,17 @@ public class PipTaskOrganizerTest extends ShellTestCase {
                 null /* leash */);
 
         assertEquals(mComponent1, mPipBoundsState.getLastPipComponentName());
+    }
+
+    @Test
+    public void onTaskAppeared_updatesOverrideMinSize() {
+        final Size minSize = new Size(100, 80);
+
+        mSpiedPipTaskOrganizer.onTaskAppeared(
+                createTaskInfo(mComponent1, createPipParams(null), minSize),
+                null /* leash */);
+
+        assertEquals(minSize, mPipBoundsState.getOverrideMinSize());
     }
 
     @Test
@@ -155,11 +177,23 @@ public class PipTaskOrganizerTest extends ShellTestCase {
         assertEquals(mComponent2, mPipBoundsState.getLastPipComponentName());
     }
 
+    @Test
+    public void onTaskInfoChanged_updatesOverrideMinSize() {
+        mSpiedPipTaskOrganizer.onTaskAppeared(createTaskInfo(mComponent1,
+                createPipParams(null)), null /* leash */);
+
+        final Size minSize = new Size(100, 80);
+        mSpiedPipTaskOrganizer.onTaskInfoChanged(createTaskInfo(mComponent2,
+                createPipParams(null), minSize));
+
+        assertEquals(minSize, mPipBoundsState.getOverrideMinSize());
+    }
+
     private void preparePipTaskOrg() {
         final DisplayInfo info = new DisplayInfo();
         mPipBoundsState.setDisplayInfo(info);
-        when(mMockPipBoundsHandler.getDestinationBounds(any(), any())).thenReturn(new Rect());
-        when(mMockPipBoundsHandler.getDestinationBounds(any(), any(), anyBoolean()))
+        when(mMockPipBoundsHandler.getEntryDestinationBounds()).thenReturn(new Rect());
+        when(mMockPipBoundsHandler.getAdjustedDestinationBounds(any(), anyFloat()))
                 .thenReturn(new Rect());
         mPipBoundsState.setDisplayInfo(info);
         mSpiedPipTaskOrganizer.setOneShotAnimationType(PipAnimationController.ANIM_TYPE_ALPHA);
@@ -169,11 +203,26 @@ public class PipTaskOrganizerTest extends ShellTestCase {
 
     private static ActivityManager.RunningTaskInfo createTaskInfo(
             ComponentName componentName, PictureInPictureParams params) {
+        return createTaskInfo(componentName, params, null /* minSize */);
+    }
+
+    private static ActivityManager.RunningTaskInfo createTaskInfo(
+            ComponentName componentName, PictureInPictureParams params, Size minSize) {
         final ActivityManager.RunningTaskInfo info = new ActivityManager.RunningTaskInfo();
         info.token = mock(WindowContainerToken.class);
         info.pictureInPictureParams = params;
         info.topActivity = componentName;
+        if (minSize != null) {
+            info.topActivityInfo = createActivityInfo(minSize);
+        }
         return info;
+    }
+
+    private static ActivityInfo createActivityInfo(Size minSize) {
+        final ActivityInfo activityInfo = new ActivityInfo();
+        activityInfo.windowLayout = new ActivityInfo.WindowLayout(
+                0, 0, 0, 0, 0, minSize.getWidth(), minSize.getHeight());
+        return activityInfo;
     }
 
     private static PictureInPictureParams createPipParams(Rational aspectRatio) {

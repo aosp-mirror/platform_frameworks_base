@@ -23,7 +23,9 @@ import android.provider.Settings;
 import android.text.TextUtils;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Util class to get feature flag information.
@@ -70,6 +72,12 @@ public class FeatureFlagUtils {
         DEFAULT_FLAGS.put(SETTINGS_PROVIDER_MODEL, "false");
     }
 
+    private static final Set<String> PERSISTENT_FLAGS;
+    static {
+        PERSISTENT_FLAGS = new HashSet<>();
+        PERSISTENT_FLAGS.add(SETTINGS_PROVIDER_MODEL);
+    }
+
     /**
      * Whether or not a flag is enabled.
      *
@@ -89,8 +97,9 @@ public class FeatureFlagUtils {
             }
         }
 
-        // Step 2: check if feature flag has any override. Flag name: sys.fflag.override.<feature>
-        value = SystemProperties.get(FFLAG_OVERRIDE_PREFIX + feature);
+        // Step 2: check if feature flag has any override.
+        // Flag name: [persist.]sys.fflag.override.<feature>
+        value = SystemProperties.get(getSystemPropertyPrefix(feature) + feature);
         if (!TextUtils.isEmpty(value)) {
             return Boolean.parseBoolean(value);
         }
@@ -103,7 +112,8 @@ public class FeatureFlagUtils {
      * Override feature flag to new state.
      */
     public static void setEnabled(Context context, String feature, boolean enabled) {
-        SystemProperties.set(FFLAG_OVERRIDE_PREFIX + feature, enabled ? "true" : "false");
+        SystemProperties.set(getSystemPropertyPrefix(feature) + feature,
+                enabled ? "true" : "false");
     }
 
     /**
@@ -111,5 +121,9 @@ public class FeatureFlagUtils {
      */
     public static Map<String, String> getAllFeatureFlags() {
         return DEFAULT_FLAGS;
+    }
+
+    private static String getSystemPropertyPrefix(String feature) {
+        return PERSISTENT_FLAGS.contains(feature) ? PERSIST_PREFIX : FFLAG_OVERRIDE_PREFIX;
     }
 }

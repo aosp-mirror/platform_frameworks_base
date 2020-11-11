@@ -17,6 +17,7 @@
 #undef LOG_TAG
 #define LOG_TAG "Minikin"
 
+#include "Font.h"
 #include "SkData.h"
 #include "SkFont.h"
 #include "SkFontMetrics.h"
@@ -95,29 +96,14 @@ static jlong Font_Builder_build(JNIEnv* env, jobject clazz, jlong builderPtr, jo
     jobject fontRef = MakeGlobalRefOrDie(env, buffer);
     sk_sp<SkData> data(SkData::MakeWithProc(fontPtr, fontSize,
             release_global_ref, reinterpret_cast<void*>(fontRef)));
-
-    FatVector<SkFontArguments::VariationPosition::Coordinate, 2> skVariation;
-    for (const auto& axis : builder->axes) {
-        skVariation.push_back({axis.axisTag, axis.value});
-    }
-
-    std::unique_ptr<SkStreamAsset> fontData(new SkMemoryStream(std::move(data)));
-
-    SkFontArguments args;
-    args.setCollectionIndex(ttcIndex);
-    args.setVariationDesignPosition({skVariation.data(), static_cast<int>(skVariation.size())});
-
-    sk_sp<SkFontMgr> fm(SkFontMgr::RefDefault());
-    sk_sp<SkTypeface> face(fm->makeFromStream(std::move(fontData), args));
-    if (face == nullptr) {
+    std::shared_ptr<minikin::MinikinFont> minikinFont = fonts::createMinikinFontSkia(
+        std::move(data), std::string_view(fontPath.c_str(), fontPath.size()),
+        fontPtr, fontSize, ttcIndex, builder->axes);
+    if (minikinFont == nullptr) {
         jniThrowException(env, "java/lang/IllegalArgumentException",
                           "Failed to create internal object. maybe invalid font data.");
         return 0;
     }
-    std::shared_ptr<minikin::MinikinFont> minikinFont =
-            std::make_shared<MinikinFontSkia>(std::move(face), fontPtr, fontSize,
-                                              std::string_view(fontPath.c_str(), fontPath.size()),
-                                              ttcIndex, builder->axes);
     std::shared_ptr<minikin::Font> font = minikin::Font::Builder(minikinFont).setWeight(weight)
                     .setSlant(static_cast<minikin::FontStyle::Slant>(italic)).build();
     return reinterpret_cast<jlong>(new FontWrapper(std::move(font)));
@@ -312,4 +298,31 @@ int register_android_graphics_fonts_Font(JNIEnv* env) {
             gFontBufferHelperMethods, NELEM(gFontBufferHelperMethods));
 }
 
+namespace fonts {
+
+std::shared_ptr<minikin::MinikinFont> createMinikinFontSkia(
+        sk_sp<SkData>&& data, std::string_view fontPath, const void *fontPtr, size_t fontSize,
+        int ttcIndex, const std::vector<minikin::FontVariation>& axes) {
+    FatVector<SkFontArguments::VariationPosition::Coordinate, 2> skVariation;
+    for (const auto& axis : axes) {
+        skVariation.push_back({axis.axisTag, axis.value});
+    }
+
+    std::unique_ptr<SkStreamAsset> fontData(new SkMemoryStream(std::move(data)));
+
+    SkFontArguments args;
+    args.setCollectionIndex(ttcIndex);
+    args.setVariationDesignPosition({skVariation.data(), static_cast<int>(skVariation.size())});
+
+    sk_sp<SkFontMgr> fm(SkFontMgr::RefDefault());
+    sk_sp<SkTypeface> face(fm->makeFromStream(std::move(fontData), args));
+    if (face == nullptr) {
+        return nullptr;
+    }
+    return std::make_shared<MinikinFontSkia>(std::move(face), fontPtr, fontSize,
+                                             fontPath, ttcIndex, axes);
 }
+
+}  // namespace fonts
+
+}  // namespace android

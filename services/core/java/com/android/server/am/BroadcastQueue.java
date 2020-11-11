@@ -798,7 +798,10 @@ public final class BroadcastQueue {
                 mService.updateOomAdjPendingTargetsLocked(
                         OomAdjuster.OOM_ADJ_REASON_START_RECEIVER);
             }
+        } else if (filter.receiverList.app != null) {
+            mService.mOomAdjuster.mCachedAppOptimizer.unfreezeTemporarily(filter.receiverList.app);
         }
+
         try {
             if (DEBUG_BROADCAST_LIGHT) Slog.i(TAG_BROADCAST,
                     "Delivering to " + filter + " : " + r);
@@ -1132,6 +1135,10 @@ public final class BroadcastQueue {
                         }
                     }
                     if (sendResult) {
+                        if (r.callerApp != null) {
+                            mService.mOomAdjuster.mCachedAppOptimizer.unfreezeTemporarily(
+                                    r.callerApp);
+                        }
                         try {
                             if (DEBUG_BROADCAST) {
                                 Slog.i(TAG_BROADCAST, "Finishing broadcast [" + mQueueName + "] "

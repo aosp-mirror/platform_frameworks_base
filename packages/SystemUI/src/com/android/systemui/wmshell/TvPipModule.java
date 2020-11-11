@@ -22,6 +22,7 @@ import com.android.systemui.dagger.WMSingleton;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.WindowManagerShellWrapper;
 import com.android.wm.shell.common.DisplayController;
+import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.pip.PipBoundsHandler;
 import com.android.wm.shell.pip.PipBoundsState;
@@ -54,6 +55,7 @@ public abstract class TvPipModule {
             PipTaskOrganizer pipTaskOrganizer,
             PipMediaController pipMediaController,
             PipNotification pipNotification,
+            TaskStackListenerImpl taskStackListener,
             WindowManagerShellWrapper windowManagerShellWrapper) {
         return Optional.of(
                 new PipController(
@@ -63,6 +65,7 @@ public abstract class TvPipModule {
                         pipTaskOrganizer,
                         pipMediaController,
                         pipNotification,
+                        taskStackListener,
                         windowManagerShellWrapper));
     }
 

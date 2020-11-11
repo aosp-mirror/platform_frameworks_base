@@ -2191,6 +2191,11 @@ public class WindowManagerService extends IWindowManager.Stub
                 win.finishSeamlessRotation(false /* timeout */);
             }
 
+            if (win.mPendingPositionChanged != null) {
+                win.mPendingPositionChanged.updateLeashPosition(win.getFrame(), frameNumber);
+                win.mPendingPositionChanged = null;
+            }
+
             if (mUseBLASTSync && win.useBLASTSync()) {
                 result |= RELAYOUT_RES_BLAST_SYNC;
             }

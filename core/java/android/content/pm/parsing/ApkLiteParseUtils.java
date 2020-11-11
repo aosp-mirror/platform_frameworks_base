@@ -18,6 +18,7 @@ package android.content.pm.parsing;
 
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_BAD_PACKAGE_NAME;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
+import static android.content.pm.parsing.ParsingPackageUtils.validateName;
 import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
 
 import android.content.pm.PackageInfo;
@@ -501,10 +502,10 @@ public class ApkLiteParseUtils {
 
         final String packageName = attrs.getAttributeValue(null, "package");
         if (!"android".equals(packageName)) {
-            final String error = PackageParser.validateName(packageName, true, true);
-            if (error != null) {
+            final ParseResult<?> nameResult = validateName(input, packageName, true, true);
+            if (nameResult.isError()) {
                 return input.error(INSTALL_PARSE_FAILED_BAD_PACKAGE_NAME,
-                        "Invalid manifest package: " + error);
+                        "Invalid manifest package: " + nameResult.getErrorMessage());
             }
         }
 
@@ -513,10 +514,10 @@ public class ApkLiteParseUtils {
             if (splitName.length() == 0) {
                 splitName = null;
             } else {
-                final String error = PackageParser.validateName(splitName, false, false);
-                if (error != null) {
+                final ParseResult<?> nameResult = validateName(input, splitName, false, false);
+                if (nameResult.isError()) {
                     return input.error(INSTALL_PARSE_FAILED_BAD_PACKAGE_NAME,
-                            "Invalid manifest split: " + error);
+                            "Invalid manifest split: " + nameResult.getErrorMessage());
                 }
             }
         }

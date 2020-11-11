@@ -137,8 +137,6 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     private volatile String mRequiredAbi;
     // Running any services that are foreground?
     private volatile boolean mHasForegroundServices;
-    // Running any activities that are foreground?
-    private volatile boolean mHasForegroundActivities;
     // Are there any client services with activities?
     private volatile boolean mHasClientActivities;
     // Is this process currently showing a non-activity UI that the user is interacting with?
@@ -226,10 +224,12 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     private final BackgroundActivityStartCallback mBackgroundActivityStartCallback;
 
     // The bits used for mActivityStateFlags.
-    private static final int ACTIVITY_STATE_FLAG_IS_VISIBLE = 0x10000000;
-    private static final int ACTIVITY_STATE_FLAG_IS_PAUSING_OR_PAUSED = 0x20000000;
-    private static final int ACTIVITY_STATE_FLAG_IS_STOPPING = 0x40000000;
-    private static final int ACTIVITY_STATE_FLAG_IS_STOPPING_FINISHING = 0x80000000;
+    private static final int ACTIVITY_STATE_FLAG_IS_VISIBLE = 1 << 16;
+    private static final int ACTIVITY_STATE_FLAG_IS_PAUSING_OR_PAUSED = 1 << 17;
+    private static final int ACTIVITY_STATE_FLAG_IS_STOPPING = 1 << 18;
+    private static final int ACTIVITY_STATE_FLAG_IS_STOPPING_FINISHING = 1 << 19;
+    private static final int ACTIVITY_STATE_FLAG_IS_WINDOW_VISIBLE = 1 << 20;
+    private static final int ACTIVITY_STATE_FLAG_HAS_RESUMED = 1 << 21;
     private static final int ACTIVITY_STATE_FLAG_MASK_MIN_TASK_LAYER = 0x0000ffff;
 
     /**
@@ -281,6 +281,9 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
             // configuration will update when display is ready.
             if (thread != null) {
                 setLastReportedConfiguration(getConfiguration());
+            } else {
+                // The process is inactive.
+                mAtm.mVisibleActivityProcessTracker.removeProcess(this);
             }
         }
     }
@@ -349,12 +352,10 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         return mHasForegroundServices;
     }
 
-    public void setHasForegroundActivities(boolean hasForegroundActivities) {
-        mHasForegroundActivities = hasForegroundActivities;
-    }
-
     boolean hasForegroundActivities() {
-        return mHasForegroundActivities;
+        return mAtm.mTopApp == this || (mActivityStateFlags
+                & (ACTIVITY_STATE_FLAG_IS_VISIBLE | ACTIVITY_STATE_FLAG_IS_PAUSING_OR_PAUSED
+                        | ACTIVITY_STATE_FLAG_IS_STOPPING)) != 0;
     }
 
     public void setHasClientActivities(boolean hasClientActivities) {
@@ -515,29 +516,33 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         }
     }
 
-    boolean areBackgroundActivityStartsAllowed() {
-        // allow if any activity in the caller has either started or finished very recently, and
-        // it must be started or finished after last stop app switches time.
-        final long now = SystemClock.uptimeMillis();
-        if (now - mLastActivityLaunchTime < ACTIVITY_BG_START_GRACE_PERIOD_MS
-                || now - mLastActivityFinishTime < ACTIVITY_BG_START_GRACE_PERIOD_MS) {
-            // if activity is started and finished before stop app switch time, we should not
-            // let app to be able to start background activity even it's in grace period.
-            if (mLastActivityLaunchTime > mAtm.getLastStopAppSwitchesTime()
-                    || mLastActivityFinishTime > mAtm.getLastStopAppSwitchesTime()) {
-                if (DEBUG_ACTIVITY_STARTS) {
-                    Slog.d(TAG, "[WindowProcessController(" + mPid
-                            + ")] Activity start allowed: within "
-                            + ACTIVITY_BG_START_GRACE_PERIOD_MS + "ms grace period");
+    boolean areBackgroundActivityStartsAllowed(boolean appSwitchAllowed) {
+        // If app switching is not allowed, we ignore all the start activity grace period
+        // exception so apps cannot start itself in onPause() after pressing home button.
+        if (appSwitchAllowed) {
+            // allow if any activity in the caller has either started or finished very recently, and
+            // it must be started or finished after last stop app switches time.
+            final long now = SystemClock.uptimeMillis();
+            if (now - mLastActivityLaunchTime < ACTIVITY_BG_START_GRACE_PERIOD_MS
+                    || now - mLastActivityFinishTime < ACTIVITY_BG_START_GRACE_PERIOD_MS) {
+                // if activity is started and finished before stop app switch time, we should not
+                // let app to be able to start background activity even it's in grace period.
+                if (mLastActivityLaunchTime > mAtm.getLastStopAppSwitchesTime()
+                        || mLastActivityFinishTime > mAtm.getLastStopAppSwitchesTime()) {
+                    if (DEBUG_ACTIVITY_STARTS) {
+                        Slog.d(TAG, "[WindowProcessController(" + mPid
+                                + ")] Activity start allowed: within "
+                                + ACTIVITY_BG_START_GRACE_PERIOD_MS + "ms grace period");
+                    }
+                    return true;
                 }
-                return true;
-            }
-            if (DEBUG_ACTIVITY_STARTS) {
-                Slog.d(TAG, "[WindowProcessController(" + mPid + ")] Activity start within "
-                        + ACTIVITY_BG_START_GRACE_PERIOD_MS
-                        + "ms grace period but also within stop app switch window");
-            }
+                if (DEBUG_ACTIVITY_STARTS) {
+                    Slog.d(TAG, "[WindowProcessController(" + mPid + ")] Activity start within "
+                            + ACTIVITY_BG_START_GRACE_PERIOD_MS
+                            + "ms grace period but also within stop app switch window");
+                }
 
+            }
         }
         // allow if the proc is instrumenting with background activity starts privs
         if (mInstrumentingWithBackgroundActivityStartPrivileges) {
@@ -549,7 +554,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
             return true;
         }
         // allow if the caller has an activity in any foreground task
-        if (hasActivityInVisibleTask()) {
+        if (appSwitchAllowed && hasActivityInVisibleTask()) {
             if (DEBUG_ACTIVITY_STARTS) {
                 Slog.d(TAG, "[WindowProcessController(" + mPid
                         + ")] Activity start allowed: process has activity in foreground task");
@@ -892,15 +897,8 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     }
 
     boolean hasResumedActivity() {
-        for (int i = mActivities.size() - 1; i >= 0; --i) {
-            final ActivityRecord activity = mActivities.get(i);
-            if (activity.isState(RESUMED)) {
-                return true;
-            }
-        }
-        return false;
+        return (mActivityStateFlags & ACTIVITY_STATE_FLAG_HAS_RESUMED) != 0;
     }
-
 
     void updateIntentForHeavyWeightActivity(Intent intent) {
         if (mActivities.isEmpty()) {
@@ -1041,10 +1039,14 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         // Since there could be more than one activities in a process record, we don't need to
         // compute the OomAdj with each of them, just need to find out the activity with the
         // "best" state, the order would be visible, pausing, stopping...
-        Task.ActivityState best = DESTROYED;
-        boolean finishing = true;
+        Task.ActivityState bestInvisibleState = DESTROYED;
+        boolean allStoppingFinishing = true;
         boolean visible = false;
         int minTaskLayer = Integer.MAX_VALUE;
+        int stateFlags = 0;
+        final boolean wasResumed = hasResumedActivity();
+        final boolean wasAnyVisible = (mActivityStateFlags
+                & (ACTIVITY_STATE_FLAG_IS_VISIBLE | ACTIVITY_STATE_FLAG_IS_WINDOW_VISIBLE)) != 0;
         for (int i = mActivities.size() - 1; i >= 0; i--) {
             final ActivityRecord r = mActivities.get(i);
             if (r.app != this) {
@@ -1057,7 +1059,13 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
                     continue;
                 }
             }
+            if (r.isVisible()) {
+                stateFlags |= ACTIVITY_STATE_FLAG_IS_WINDOW_VISIBLE;
+            }
             if (r.mVisibleRequested) {
+                if (r.isState(RESUMED)) {
+                    stateFlags |= ACTIVITY_STATE_FLAG_HAS_RESUMED;
+                }
                 final Task task = r.getTask();
                 if (task != null && minTaskLayer > 0) {
                     final int layer = task.mLayerRank;
@@ -1069,29 +1077,39 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
                 // continue the loop, in case there are multiple visible activities in
                 // this process, we'd find out the one with the minimal layer, thus it'll
                 // get a higher adj score.
-            } else if (best != PAUSING && best != PAUSED) {
+            } else if (!visible && bestInvisibleState != PAUSING) {
                 if (r.isState(PAUSING, PAUSED)) {
-                    best = PAUSING;
+                    bestInvisibleState = PAUSING;
                 } else if (r.isState(STOPPING)) {
-                    best = STOPPING;
+                    bestInvisibleState = STOPPING;
                     // Not "finishing" if any of activity isn't finishing.
-                    finishing &= r.finishing;
+                    allStoppingFinishing &= r.finishing;
                 }
             }
         }
 
-        int stateFlags = minTaskLayer & ACTIVITY_STATE_FLAG_MASK_MIN_TASK_LAYER;
+        stateFlags |= minTaskLayer & ACTIVITY_STATE_FLAG_MASK_MIN_TASK_LAYER;
         if (visible) {
             stateFlags |= ACTIVITY_STATE_FLAG_IS_VISIBLE;
-        } else if (best == PAUSING) {
+        } else if (bestInvisibleState == PAUSING) {
             stateFlags |= ACTIVITY_STATE_FLAG_IS_PAUSING_OR_PAUSED;
-        } else if (best == STOPPING) {
+        } else if (bestInvisibleState == STOPPING) {
             stateFlags |= ACTIVITY_STATE_FLAG_IS_STOPPING;
-            if (finishing) {
+            if (allStoppingFinishing) {
                 stateFlags |= ACTIVITY_STATE_FLAG_IS_STOPPING_FINISHING;
             }
         }
         mActivityStateFlags = stateFlags;
+
+        final boolean anyVisible = (stateFlags
+                & (ACTIVITY_STATE_FLAG_IS_VISIBLE | ACTIVITY_STATE_FLAG_IS_WINDOW_VISIBLE)) != 0;
+        if (!wasAnyVisible && anyVisible) {
+            mAtm.mVisibleActivityProcessTracker.onAnyActivityVisible(this);
+        } else if (wasAnyVisible && !anyVisible) {
+            mAtm.mVisibleActivityProcessTracker.onAllActivitiesInvisible(this);
+        } else if (wasAnyVisible && !wasResumed && hasResumedActivity()) {
+            mAtm.mVisibleActivityProcessTracker.onActivityResumedWhileVisible(this);
+        }
     }
 
     /** Called when the process has some oom related changes and it is going to update oom-adj. */
@@ -1643,6 +1661,32 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         pw.println(prefix + " Configuration=" + getConfiguration());
         pw.println(prefix + " OverrideConfiguration=" + getRequestedOverrideConfiguration());
         pw.println(prefix + " mLastReportedConfiguration=" + mLastReportedConfiguration);
+
+        final int stateFlags = mActivityStateFlags;
+        if (stateFlags != ACTIVITY_STATE_FLAG_MASK_MIN_TASK_LAYER) {
+            pw.print(prefix + " mActivityStateFlags=");
+            if ((stateFlags & ACTIVITY_STATE_FLAG_IS_WINDOW_VISIBLE) != 0) {
+                pw.print("W|");
+            }
+            if ((stateFlags & ACTIVITY_STATE_FLAG_IS_VISIBLE) != 0) {
+                pw.print("V|");
+                if ((stateFlags & ACTIVITY_STATE_FLAG_HAS_RESUMED) != 0) {
+                    pw.print("R|");
+                }
+            } else if ((stateFlags & ACTIVITY_STATE_FLAG_IS_PAUSING_OR_PAUSED) != 0) {
+                pw.print("P|");
+            } else if ((stateFlags & ACTIVITY_STATE_FLAG_IS_STOPPING) != 0) {
+                pw.print("S|");
+                if ((stateFlags & ACTIVITY_STATE_FLAG_IS_STOPPING_FINISHING) != 0) {
+                    pw.print("F|");
+                }
+            }
+            final int taskLayer = stateFlags & ACTIVITY_STATE_FLAG_MASK_MIN_TASK_LAYER;
+            if (taskLayer != ACTIVITY_STATE_FLAG_MASK_MIN_TASK_LAYER) {
+                pw.print("taskLayer=" + taskLayer);
+            }
+            pw.println();
+        }
     }
 
     void dumpDebug(ProtoOutputStream proto, long fieldId) {

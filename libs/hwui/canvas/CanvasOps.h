@@ -20,6 +20,7 @@
 #include <SkCanvas.h>
 #include <SkPath.h>
 #include <log/log.h>
+#include "CanvasProperty.h"
 
 #include "CanvasOpTypes.h"
 
@@ -102,6 +103,36 @@ struct CanvasOp<CanvasOpType::ClipPath> {
 // ----------------------------------------------
 //   Drawing Ops
 //  ---------------------------------------------
+
+template<>
+struct CanvasOp<CanvasOpType::DrawRoundRectProperty> {
+    sp<uirenderer::CanvasPropertyPrimitive> left;
+    sp<uirenderer::CanvasPropertyPrimitive> top;
+    sp<uirenderer::CanvasPropertyPrimitive> right;
+    sp<uirenderer::CanvasPropertyPrimitive> bottom;
+    sp<uirenderer::CanvasPropertyPrimitive> rx;
+    sp<uirenderer::CanvasPropertyPrimitive> ry;
+    sp<uirenderer::CanvasPropertyPaint> paint;
+
+    void draw(SkCanvas* canvas) const {
+        SkRect rect = SkRect::MakeLTRB(left->value, top->value, right->value, bottom->value);
+        canvas->drawRoundRect(rect, rx->value, ry->value, paint->value);
+    }
+    ASSERT_DRAWABLE()
+};
+
+template<>
+struct CanvasOp<CanvasOpType::DrawCircleProperty> {
+    sp<uirenderer::CanvasPropertyPrimitive> x;
+    sp<uirenderer::CanvasPropertyPrimitive> y;
+    sp<uirenderer::CanvasPropertyPrimitive> radius;
+    sp<uirenderer::CanvasPropertyPaint> paint;
+
+    void draw(SkCanvas* canvas) const {
+        canvas->drawCircle(x->value, y->value, radius->value, paint->value);
+    }
+    ASSERT_DRAWABLE()
+};
 
 template <>
 struct CanvasOp<CanvasOpType::DrawColor> {

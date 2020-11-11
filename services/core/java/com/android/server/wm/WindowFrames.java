@@ -203,7 +203,7 @@ public class WindowFrames {
     /**
      * @return true if the width or height has changed since last reported to the client.
      */
-    private boolean didFrameSizeChange() {
+    boolean didFrameSizeChange() {
         return (mLastFrame.width() != mFrame.width()) || (mLastFrame.height() != mFrame.height());
     }
 

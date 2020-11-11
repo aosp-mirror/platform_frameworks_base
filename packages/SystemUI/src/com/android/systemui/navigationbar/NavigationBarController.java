@@ -64,6 +64,7 @@ import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
+import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.splitscreen.SplitScreen;
 
 import java.io.FileDescriptor;
@@ -96,6 +97,7 @@ public class NavigationBarController implements Callbacks,
     private final SysUiState mSysUiFlagsContainer;
     private final BroadcastDispatcher mBroadcastDispatcher;
     private final CommandQueue mCommandQueue;
+    private final Optional<Pip> mPipOptional;
     private final Optional<SplitScreen> mSplitScreenOptional;
     private final Optional<Recents> mRecentsOptional;
     private final Lazy<StatusBar> mStatusBarLazy;
@@ -130,6 +132,7 @@ public class NavigationBarController implements Callbacks,
             SysUiState sysUiFlagsContainer,
             BroadcastDispatcher broadcastDispatcher,
             CommandQueue commandQueue,
+            Optional<Pip> pipOptional,
             Optional<SplitScreen> splitScreenOptional,
             Optional<Recents> recentsOptional,
             Lazy<StatusBar> statusBarLazy,
@@ -152,6 +155,7 @@ public class NavigationBarController implements Callbacks,
         mSysUiFlagsContainer = sysUiFlagsContainer;
         mBroadcastDispatcher = broadcastDispatcher;
         mCommandQueue = commandQueue;
+        mPipOptional = pipOptional;
         mSplitScreenOptional = splitScreenOptional;
         mRecentsOptional = recentsOptional;
         mStatusBarLazy = statusBarLazy;
@@ -278,6 +282,7 @@ public class NavigationBarController implements Callbacks,
                 mSysUiFlagsContainer,
                 mBroadcastDispatcher,
                 mCommandQueue,
+                mPipOptional,
                 mSplitScreenOptional,
                 mRecentsOptional,
                 mStatusBarLazy,

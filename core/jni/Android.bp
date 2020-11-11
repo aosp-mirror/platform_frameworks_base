@@ -337,9 +337,6 @@ cc_library_shared {
                 "libhidlbase", // libhwbinder is in here
             ],
         },
-        windows: {
-            enabled: true,
-        },
     },
 
     product_variables: {

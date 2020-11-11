@@ -54,6 +54,8 @@ import com.android.wm.shell.pip.PipTaskOrganizer;
 import com.android.wm.shell.pip.PipUiEventLogger;
 
 import java.io.PrintWriter;
+import java.lang.ref.WeakReference;
+import java.util.function.Consumer;
 
 /**
  * Manages all the touch handling for PIP on the Phone, including moving, dismissing and expanding
@@ -78,6 +80,7 @@ public class PipTouchHandler {
 
     private PipResizeGestureHandler mPipResizeGestureHandler;
     private IPinnedStackController mPinnedStackController;
+    private WeakReference<Consumer<Rect>> mPipExclusionBoundsChangeListener;
 
     private final PipMenuActivityController mMenuController;
     private final AccessibilityManager mAccessibilityManager;
@@ -258,6 +261,11 @@ public class PipTouchHandler {
             mPipDismissTargetHandler.cleanUpDismissTarget();
 
             mFloatingContentCoordinator.onContentRemoved(mMotionHelper);
+        }
+        // Reset exclusion to none.
+        if (mPipExclusionBoundsChangeListener != null
+                && mPipExclusionBoundsChangeListener.get() != null) {
+            mPipExclusionBoundsChangeListener.get().accept(new Rect());
         }
         mPipResizeGestureHandler.onActivityUnpinned();
     }
@@ -788,7 +796,7 @@ public class PipTouchHandler {
                 if (mEnableStash
                         && (animatingBounds.right > mPipBoundsState.getDisplayBounds().right
                         || animatingBounds.left < mPipBoundsState.getDisplayBounds().left)) {
-                    mMotionHelper.stashToEdge(vel.x, vel.y, this::flingEndAction /* endAction */);
+                    mMotionHelper.stashToEdge(vel.x, vel.y, this::stashEndAction /* endAction */);
                 } else {
                     mMotionHelper.flingToSnapTarget(vel.x, vel.y,
                             this::flingEndAction /* endAction */);
@@ -829,13 +837,30 @@ public class PipTouchHandler {
             return true;
         }
 
+        private void stashEndAction() {
+            if (mPipExclusionBoundsChangeListener != null
+                    && mPipExclusionBoundsChangeListener.get() != null) {
+                mPipExclusionBoundsChangeListener.get().accept(mPipBoundsState.getBounds());
+            }
+        }
+
         private void flingEndAction() {
             if (mShouldHideMenuAfterFling) {
                 // If the menu is not visible, then we can still be showing the activity for the
                 // dismiss overlay, so just finish it after the animation completes
                 mMenuController.hideMenu();
             }
+            // Reset exclusion to none.
+            if (mPipExclusionBoundsChangeListener != null
+                    && mPipExclusionBoundsChangeListener.get() != null) {
+                mPipExclusionBoundsChangeListener.get().accept(new Rect());
+            }
         }
+    }
+
+    void setPipExclusionBoundsChangeListener(Consumer<Rect> pipExclusionBoundsChangeListener) {
+        mPipExclusionBoundsChangeListener = new WeakReference<>(pipExclusionBoundsChangeListener);
+        pipExclusionBoundsChangeListener.accept(mPipBoundsState.getBounds());
     }
 
     /**
@@ -848,8 +873,9 @@ public class PipTouchHandler {
         mMotionHelper.setCurrentMovementBounds(mMovementBounds);
 
         boolean isMenuExpanded = mMenuState == MENU_STATE_FULL;
-        mPipBoundsHandler.setMinEdgeSize(
-                isMenuExpanded && willResizeMenu() ? mExpandedShortestEdgeSize : 0);
+        mPipBoundsState.setMinEdgeSize(
+                isMenuExpanded && willResizeMenu() ? mExpandedShortestEdgeSize
+                        : mPipBoundsHandler.getDefaultMinSize());
     }
 
     private Rect getMovementBounds(Rect curBounds) {

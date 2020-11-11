@@ -499,15 +499,6 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable {
         return super.hasOverlappingRendering() && getActualHeight() <= getHeight();
     }
 
-    /**
-     * @return an amount between -1 and 1 of increased padding that this child needs. 1 means it
-     * needs a full increased padding while -1 means it needs no padding at all. For 0.0f the normal
-     * padding is applied.
-     */
-    public float getIncreasedPaddingAmount() {
-        return 0.0f;
-    }
-
     public boolean mustStayOnScreen() {
         return false;
     }

@@ -662,8 +662,8 @@ public class ActivityStarterTests extends WindowTestsBase {
         ai.uid = callingUid;
         ai.packageName = "com.android.test.package";
         final WindowProcessController callerApp =
-                new WindowProcessController(mAtm, ai, null, callingUid, -1, null, listener);
-        callerApp.setHasForegroundActivities(hasForegroundActivities);
+                spy(new WindowProcessController(mAtm, ai, null, callingUid, -1, null, listener));
+        doReturn(hasForegroundActivities).when(callerApp).hasForegroundActivities();
         doReturn(callerApp).when(mAtm).getProcessController(caller);
         // caller is recents
         RecentTasks recentTasks = mock(RecentTasks.class);

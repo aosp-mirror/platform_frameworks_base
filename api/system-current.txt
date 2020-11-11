@@ -5102,7 +5102,9 @@ package android.media.tv.tuner {
     field public static final int INVALID_FILTER_ID = -1; // 0xffffffff
     field public static final long INVALID_FILTER_ID_64BIT = -1L; // 0xffffffffffffffffL
     field public static final int INVALID_FIRST_MACROBLOCK_IN_SLICE = -1; // 0xffffffff
+    field public static final int INVALID_FRONTEND_ID = -1; // 0xffffffff
     field public static final int INVALID_FRONTEND_SETTING_FREQUENCY = -1; // 0xffffffff
+    field @NonNull public static final byte[] INVALID_KEYTOKEN;
     field public static final int INVALID_LTS_ID = -1; // 0xffffffff
     field public static final int INVALID_MMTP_RECORD_EVENT_MPT_SEQUENCE_NUM = -1; // 0xffffffff
     field public static final int INVALID_STREAM_ID = 65535; // 0xffff
@@ -5406,6 +5408,7 @@ package android.media.tv.tuner.filter {
     method public int getMpuSequenceNumber();
     method public long getPts();
     method public int getScHevcIndexMask();
+    method public int getTsIndexMask();
   }
 
   public class PesEvent extends android.media.tv.tuner.filter.FilterEvent {
@@ -5434,6 +5437,11 @@ package android.media.tv.tuner.filter {
     field public static final int INDEX_TYPE_NONE = 0; // 0x0
     field public static final int INDEX_TYPE_SC = 1; // 0x1
     field public static final int INDEX_TYPE_SC_HEVC = 2; // 0x2
+    field public static final int MPT_INDEX_AUDIO = 262144; // 0x40000
+    field public static final int MPT_INDEX_MPT = 65536; // 0x10000
+    field public static final int MPT_INDEX_TIMESTAMP_TARGET_AUDIO = 1048576; // 0x100000
+    field public static final int MPT_INDEX_TIMESTAMP_TARGET_VIDEO = 524288; // 0x80000
+    field public static final int MPT_INDEX_VIDEO = 131072; // 0x20000
     field public static final int SC_HEVC_INDEX_AUD = 2; // 0x2
     field public static final int SC_HEVC_INDEX_SLICE_BLA_N_LP = 16; // 0x10
     field public static final int SC_HEVC_INDEX_SLICE_BLA_W_RADL = 8; // 0x8
@@ -5457,6 +5465,7 @@ package android.media.tv.tuner.filter {
     field public static final int TS_INDEX_CHANGE_TO_ODD_SCRAMBLED = 16; // 0x10
     field public static final int TS_INDEX_DISCONTINUITY_INDICATOR = 32; // 0x20
     field public static final int TS_INDEX_FIRST_PACKET = 1; // 0x1
+    field public static final int TS_INDEX_INVALID = 0; // 0x0
     field public static final int TS_INDEX_OPCR_FLAG = 512; // 0x200
     field public static final int TS_INDEX_PAYLOAD_UNIT_START_INDICATOR = 2; // 0x2
     field public static final int TS_INDEX_PCR_FLAG = 256; // 0x100
@@ -5809,7 +5818,8 @@ package android.media.tv.tuner.frontend {
 
   public class DvbcFrontendCapabilities extends android.media.tv.tuner.frontend.FrontendCapabilities {
     method public int getAnnexCapability();
-    method public int getFecCapability();
+    method public long getCodeRateCapability();
+    method @Deprecated public int getFecCapability();
     method public int getModulationCapability();
   }
 
@@ -6170,6 +6180,7 @@ package android.media.tv.tuner.frontend {
     method public int getPer();
     method public int getPerBer();
     method public int getPlpId();
+    method public int getRollOff();
     method public int getSignalQuality();
     method public int getSignalStrength();
     method public int getSnr();
@@ -6181,8 +6192,11 @@ package android.media.tv.tuner.frontend {
     method public int getUec();
     method public boolean isDemodLocked();
     method public boolean isEwbs();
+    method public boolean isLinear();
     method public boolean isLnaOn();
+    method public boolean isMisoEnabled();
     method public boolean isRfLocked();
+    method public boolean isShortFramesEnabled();
     field public static final int FRONTEND_STATUS_TYPE_AGC = 14; // 0xe
     field public static final int FRONTEND_STATUS_TYPE_ATSC3_PLP_INFO = 21; // 0x15
     field public static final int FRONTEND_STATUS_TYPE_BANDWIDTH = 25; // 0x19
@@ -6197,6 +6211,9 @@ package android.media.tv.tuner.frontend {
     field public static final int FRONTEND_STATUS_TYPE_HIERARCHY = 19; // 0x13
     field public static final int FRONTEND_STATUS_TYPE_INTERLEAVINGS = 30; // 0x1e
     field public static final int FRONTEND_STATUS_TYPE_ISDBT_SEGMENTS = 31; // 0x1f
+    field public static final int FRONTEND_STATUS_TYPE_IS_LINEAR = 35; // 0x23
+    field public static final int FRONTEND_STATUS_TYPE_IS_MISO = 34; // 0x22
+    field public static final int FRONTEND_STATUS_TYPE_IS_SHORT_FRAMES = 36; // 0x24
     field public static final int FRONTEND_STATUS_TYPE_LAYER_ERROR = 16; // 0x10
     field public static final int FRONTEND_STATUS_TYPE_LNA = 15; // 0xf
     field public static final int FRONTEND_STATUS_TYPE_LNB_VOLTAGE = 11; // 0xb
@@ -6207,6 +6224,7 @@ package android.media.tv.tuner.frontend {
     field public static final int FRONTEND_STATUS_TYPE_PLP_ID = 12; // 0xc
     field public static final int FRONTEND_STATUS_TYPE_PRE_BER = 4; // 0x4
     field public static final int FRONTEND_STATUS_TYPE_RF_LOCK = 20; // 0x14
+    field public static final int FRONTEND_STATUS_TYPE_ROLL_OFF = 33; // 0x21
     field public static final int FRONTEND_STATUS_TYPE_SIGNAL_QUALITY = 5; // 0x5
     field public static final int FRONTEND_STATUS_TYPE_SIGNAL_STRENGTH = 6; // 0x6
     field public static final int FRONTEND_STATUS_TYPE_SNR = 1; // 0x1
@@ -10059,6 +10077,32 @@ package android.service.attention {
 
 }
 
+package android.service.attestation {
+
+  public abstract class ImpressionAttestationService extends android.app.Service {
+    ctor public ImpressionAttestationService();
+    method @NonNull public final android.os.IBinder onBind(@NonNull android.content.Intent);
+    method @Nullable public abstract android.service.attestation.ImpressionToken onGenerateImpressionToken(@NonNull android.hardware.HardwareBuffer, @NonNull android.graphics.Rect, @NonNull String);
+    method public abstract int onVerifyImpressionToken(@NonNull android.service.attestation.ImpressionToken);
+    field public static final int VERIFICATION_STATUS_APP_DECLARED = 2; // 0x2
+    field public static final int VERIFICATION_STATUS_OS_VERIFIED = 1; // 0x1
+    field public static final int VERIFICATION_STATUS_UNKNOWN = 0; // 0x0
+  }
+
+  public final class ImpressionToken implements android.os.Parcelable {
+    ctor public ImpressionToken(long, @NonNull android.graphics.Rect, @NonNull String, @NonNull byte[], @NonNull byte[]);
+    method public int describeContents();
+    method @NonNull public android.graphics.Rect getBoundsInWindow();
+    method @NonNull public String getHashingAlgorithm();
+    method @NonNull public byte[] getHmac();
+    method @NonNull public byte[] getImageHash();
+    method public long getScreenshotTimeMillis();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.service.attestation.ImpressionToken> CREATOR;
+  }
+
+}
+
 package android.service.autofill {
 
   public abstract class AutofillFieldClassificationService extends android.app.Service {
@@ -11813,6 +11857,8 @@ package android.telephony {
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public String getCdmaMin();
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public String getCdmaMin(int);
     method public String getCdmaPrlVersion();
+    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public int getCdmaRoamingMode();
+    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public int getCdmaSubscriptionMode();
     method public int getCurrentPhoneType();
     method public int getCurrentPhoneType(int);
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public int getDataActivationState();
@@ -11885,6 +11931,8 @@ package android.telephony {
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setCallWaitingEnabled(boolean, @Nullable java.util.concurrent.Executor, @Nullable java.util.function.Consumer<java.lang.Integer>);
     method @Deprecated @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setCarrierDataEnabled(boolean);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public int setCarrierRestrictionRules(@NonNull android.telephony.CarrierRestrictionRules);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setCdmaRoamingMode(int);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setCdmaSubscriptionMode(int);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setDataActivationState(int);
     method @Deprecated @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setDataEnabled(int, boolean);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setDataRoamingEnabled(boolean);
@@ -11930,6 +11978,9 @@ package android.telephony {
     field public static final int CARRIER_PRIVILEGE_STATUS_HAS_ACCESS = 1; // 0x1
     field public static final int CARRIER_PRIVILEGE_STATUS_NO_ACCESS = 0; // 0x0
     field public static final int CARRIER_PRIVILEGE_STATUS_RULES_NOT_LOADED = -1; // 0xffffffff
+    field public static final int CDMA_SUBSCRIPTION_NV = 1; // 0x1
+    field public static final int CDMA_SUBSCRIPTION_RUIM_SIM = 0; // 0x0
+    field public static final int CDMA_SUBSCRIPTION_UNKNOWN = -1; // 0xffffffff
     field public static final int ENABLE_NR_DUAL_CONNECTIVITY_INVALID_STATE = 4; // 0x4
     field public static final int ENABLE_NR_DUAL_CONNECTIVITY_NOT_SUPPORTED = 1; // 0x1
     field public static final int ENABLE_NR_DUAL_CONNECTIVITY_RADIO_ERROR = 3; // 0x3

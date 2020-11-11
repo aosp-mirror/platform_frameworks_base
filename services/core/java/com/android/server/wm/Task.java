@@ -162,7 +162,6 @@ import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManager.TaskDescription;
 import android.app.ActivityManager.TaskSnapshot;
-import android.app.ActivityManagerInternal;
 import android.app.ActivityOptions;
 import android.app.ActivityTaskManager;
 import android.app.AppGlobals;
@@ -4072,6 +4071,10 @@ class Task extends WindowContainer<WindowContainer> {
         info.taskDescription = new ActivityManager.TaskDescription(getTaskDescription());
         info.supportsSplitScreenMultiWindow = supportsSplitScreenWindowingMode();
         info.configuration.setTo(getConfiguration());
+        // Update to the task's current activity type and windowing mode which may differ from the
+        // window configuration
+        info.configuration.windowConfiguration.setActivityType(getActivityType());
+        info.configuration.windowConfiguration.setWindowingMode(getWindowingMode());
         info.token = mRemoteToken.toWindowContainerToken();
 
         //TODO (AM refactor): Just use local once updateEffectiveIntent is run during all child
@@ -5689,19 +5692,6 @@ class Task extends WindowContainer<WindowContainer> {
 
         if (prev != null) {
             prev.resumeKeyDispatchingLocked();
-
-            if (prev.hasProcess() && prev.cpuTimeAtResume > 0) {
-                final long diff = prev.app.getCpuTime() - prev.cpuTimeAtResume;
-                if (diff > 0) {
-                    final Runnable r = PooledLambda.obtainRunnable(
-                            ActivityManagerInternal::updateForegroundTimeIfOnBattery,
-                            mAtmService.mAmInternal, prev.info.packageName,
-                            prev.info.applicationInfo.uid,
-                            diff);
-                    mAtmService.mH.post(r);
-                }
-            }
-            prev.cpuTimeAtResume = 0; // reset it
         }
 
         mRootWindowContainer.ensureActivitiesVisible(resuming, 0, !PRESERVE_WINDOWS);

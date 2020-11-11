@@ -417,6 +417,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         mBlanker = blanker;
         mContext = context;
         mBrightnessSynchronizer = new BrightnessSynchronizer(context);
+        mBrightnessSynchronizer.startSynchronizing();
         mDisplayId = displayId;
 
         PowerManager pm =  context.getSystemService(PowerManager.class);

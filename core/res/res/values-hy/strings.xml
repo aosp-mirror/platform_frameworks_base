@@ -48,7 +48,7 @@
     <string name="invalidPin" msgid="7542498253319440408">"Մուտքագրեք PIN, որը 4-ից 8 թիվ է:"</string>
     <string name="invalidPuk" msgid="8831151490931907083">"Մուտքագրեք PUK, որն 8 կամ ավել թիվ ունի:"</string>
     <string name="needPuk" msgid="7321876090152422918">"Ձեր SIM քարտը PUK-ով կողպված է: Մուտքագրեք PUK կոդը այն ապակողպելու համար:"</string>
-    <string name="needPuk2" msgid="7032612093451537186">"Մուտքագրեք PUK2-ը` SIM քարտն արգելահանելու համար:"</string>
+    <string name="needPuk2" msgid="7032612093451537186">"Մուտքագրեք PUK2-ը՝ SIM քարտն արգելահանելու համար:"</string>
     <string name="enablePin" msgid="2543771964137091212">"Ձախողվեց: Միացրեք SIM/RUIM կողպումը:"</string>
     <plurals name="pinpuk_attempts" formatted="false" msgid="1619867269012213584">
       <item quantity="one">Մնաց <xliff:g id="NUMBER_1">%d</xliff:g> փորձ, որից հետո SIM քարտն արգելափակվելու է:</item>
@@ -191,8 +191,9 @@
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"Ադմինիստրատորը տրամադրել է սարքը անձնական օգտագործման համար"</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"Սարքը կառավարվում է"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"Ձեր կազմակերպությունը կառավարում է այս սարքը և կարող է վերահսկել ցանցի թրաֆիկը: Հպեք՝ մանրամասները դիտելու համար:"</string>
-    <string name="location_changed_notification_title" msgid="3620158742816699316">"Հավելվածներին կարող են հասանելի լինել ձեր գտնվելու վայրի մասին տվյալները"</string>
-    <string name="location_changed_notification_text" msgid="7158423339982706912">"Ավելին իմանալու համար դիմեք ձեր ՏՏ ադմինիստրատորին։"</string>
+    <string name="location_changed_notification_title" msgid="3620158742816699316">"Հավելվածներին հասանելի է ձեր տեղադրությունը"</string>
+    <string name="location_changed_notification_text" msgid="7158423339982706912">"Մանրամասներն իմացեք ՏՏ ադմինիստրատորից"</string>
+    <string name="geofencing_service" msgid="3826902410740315456">"Աշխարհագրական գոտեվորման ծառայություն"</string>
     <string name="country_detector" msgid="7023275114706088854">"Երկրի որոշում"</string>
     <string name="location_service" msgid="2439187616018455546">"Տեղորոշման ծառայություն"</string>
     <string name="gnss_service" msgid="8907781262179951385">"GNSS ծառայություն"</string>
@@ -201,10 +202,10 @@
     <string name="factory_reset_warning" msgid="6858705527798047809">"Ձեր սարքը ջնջվելու է"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"Հնարավոր չէ օգտագործել ադմինիստրատորի հավելվածը։ Ձեր սարքից բոլոր տվյալները կջնջվեն։\n\nՀարցեր ունենալու դեպքում դիմեք ձեր կազմակերպության ադմինիստրատորին։"</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"Տպումն անջատված է <xliff:g id="OWNER_APP">%s</xliff:g> հավելվածի կողմից։"</string>
-    <string name="personal_apps_suspended_title" msgid="4543693107104417750">"Արգելաբացեք անձնական հավելվածները"</string>
-    <string name="personal_apps_suspended_tomorrow_title" msgid="6414440257969874914">"Հավելվածները վաղը կարգելափակվեն"</string>
-    <string name="personal_apps_suspended_text" msgid="8954038765131038226">"Ձեր ՏՏ ադմինիստրատորը չի թույլատրում <xliff:g id="DAYS">%1$d</xliff:g> օրից ավել դադարեցնել աշխատանքային պրոֆիլը։"</string>
-    <string name="personal_apps_suspended_turn_profile_on" msgid="4278188538997940785">"Միացնել աշխատանքային պրոֆիլը"</string>
+    <string name="personal_apps_suspension_title" msgid="7561416677884286600">"Միացրեք աշխատանքային պորֆիլը"</string>
+    <string name="personal_apps_suspension_text" msgid="6115455688932935597">"Անձնական հավելվածներն արգելափակված կլինեն, մինչև չմիացնեք ձեր աշխատանքային պրոֆիլը"</string>
+    <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"Անձնական հավելվածները <xliff:g id="DATE">%1$s</xliff:g>-ին ժամը <xliff:g id="TIME">%2$s</xliff:g> կարգելափակվեն։ Ձեր ՏՏ ադմինիստրատորը չի թույլատրում, որ ձեր աշխատանքային պրոֆիլը <xliff:g id="NUMBER">%3$d</xliff:g> օրից ավել անջատված մնա։"</string>
+    <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"Միացնել"</string>
     <string name="me" msgid="6207584824693813140">"Իմ"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Պլանշետի ընտրանքները"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Android TV-ի կարգավորումներ"</string>
@@ -302,7 +303,7 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"օգտագործել օրացույցը"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"ուղարկել և դիտել SMS-ները"</string>
-    <string name="permgrouplab_storage" msgid="1938416135375282333">"Ֆայլեր և մեդիա"</string>
+    <string name="permgrouplab_storage" msgid="1938416135375282333">"Ֆայլեր և մեդիաֆայլեր"</string>
     <string name="permgroupdesc_storage" msgid="6351503740613026600">"օգտագործել լուսանկարները, մեդիա ֆայլերը և ձեր սարքում պահվող մյուս ֆայլերը"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Խոսափող"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"ձայնագրել"</string>
@@ -334,8 +335,8 @@
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Թույլ է տալիս հավելվածին անջատել կարգավիճակի գոտին կամ ավելացնել ու հեռացնել համակարգի պատկերակները:"</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"լինել կարգավիճակի գոտի"</string>
     <string name="permdesc_statusBarService" msgid="6652917399085712557">"Թույլ է տալիս հավելվածին կարգավիճակի գոտին լինել:"</string>
-    <string name="permlab_expandStatusBar" msgid="1184232794782141698">"ընդլայնել կամ ետ ծալել կարգավիճակի գոտին"</string>
-    <string name="permdesc_expandStatusBar" msgid="7180756900448498536">"Թույլ է տալիս ծրագրին ընդլայնել կամ ետ ծալել կարգավիճակի գոտին:"</string>
+    <string name="permlab_expandStatusBar" msgid="1184232794782141698">"ընդլայնել կամ հետ ծալել կարգավիճակի գոտին"</string>
+    <string name="permdesc_expandStatusBar" msgid="7180756900448498536">"Թույլ է տալիս ծրագրին ընդլայնել կամ հետ ծալել կարգավիճակի գոտին:"</string>
     <string name="permlab_install_shortcut" msgid="7451554307502256221">"տեղադրել դյուրանցումներ"</string>
     <string name="permdesc_install_shortcut" msgid="4476328467240212503">"Հավելվածին թույլ է տալիս ավելացնել գլխավոր էկրանի դյուրանցումներ՝ առանց օգտագործողի միջամտության:"</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"ապատեղադրել դյուրանցումները"</string>
@@ -410,7 +411,7 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="2657525794731690397">"Թույլ է տալիս հավելվածին փոփոխել ձեր պլանշետի զանգերի մատյանը, այդ թվում` մուտքային և ելքային զանգերի մասին տվյալները: Վնասարար հավելվածները կարող են սա օգտագործել` ձեր զանգերի մատյանը ջնջելու կամ փոփոխելու համար:"</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"Թույլ է տալիս հավելվածին փոփոխել Android TV սարքի զանգերի մատյանը, այդ թվում՝ մուտքային և ելքային զանգերի մասին տվյալները: Վնասարար հավելվածները կարող են սա օգտագործել՝ ձեր զանգերի մատյանը ջնջելու կամ փոփոխելու համար:"</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"Թույլ է տալիս հավելվածին փոփոխել ձեր հեռախոսի զանգերի մատյանը, այդ թվում` մուտքային և ելքային զանգերի մասին տվյալները: Վնասարար հավելվածները կարող են սա օգտագործել` ձեր զանգերի մատյանը ջնջելու կամ փոփոխելու համար:"</string>
-    <string name="permlab_bodySensors" msgid="3411035315357380862">"օգտագործել մարմնի սենսորները (օրինակ` սրտի կծկումների հաճախականության չափիչ)"</string>
+    <string name="permlab_bodySensors" msgid="3411035315357380862">"օգտագործել մարմնի սենսորները (օրինակ՝ սրտի կծկումների հաճախականության չափիչ)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="2365357960407973997">"Հավելվածին թույլ է տալիս մուտք ունենալ սենսորների տվյալներին, որոնք վերահսկում են ձեր ֆիզիկական վիճակը, օրինակ՝ ձեր սրտի զարկերը:"</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Կարդալ օրացույցի միջոցառումները և տվյալները"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Այս հավելվածը կարող է կարդալ օրացույցի՝ ձեր պլանշետում պահված բոլոր միջոցառումները, ինչպես նաև հրապարակել կամ պահել ձեր օրացույցի տվյալները:"</string>
@@ -429,15 +430,19 @@
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"տեղադրության մասին տվյալների հասանելիություն ֆոնային ռեժիմում"</string>
     <string name="permdesc_accessBackgroundLocation" msgid="8264885066095638105">"Այս հավելվածը ցանկացած ժամանակ կարող է տեսնել տեղադրության տվյալները, նույնիսկ երբ այն ակտիվ չէ։"</string>
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"փոխել ձեր աուդիո կարգավորումները"</string>
-    <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"Թույլ է տալիս հավելվածին փոփոխել ձայնանյութի գլոբալ կարգավորումները, ինչպես օրինակ` ձայնը և թե որ խոսափողն է օգտագործված արտածման համար:"</string>
+    <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"Թույլ է տալիս հավելվածին փոփոխել ձայնանյութի գլոբալ կարգավորումները, ինչպես օրինակ՝ ձայնը և թե որ խոսափողն է օգտագործված արտածման համար:"</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"ձայնագրել աուդիո ֆայլ"</string>
-    <string name="permdesc_recordAudio" msgid="3976213377904701093">"Այս հավելվածը ցանկացած պահի կարող է ձայնագրել խոսափողի օգնությամբ:"</string>
+    <string name="permdesc_recordAudio" msgid="5857246765327514062">"Այս հավելվածը կարող է օգտագործել խոսափողը՝ ձայնագրություններ անելու համար, միայն երբ հավելվածն ակտիվ է։"</string>
+    <string name="permlab_recordBackgroundAudio" msgid="5891032812308878254">"ձայնագրել ֆոնային ռեժիմում"</string>
+    <string name="permdesc_recordBackgroundAudio" msgid="1992623135737407516">"Այս հավելվածը կարող է ցանկացած ժամանակ օգտագործել խոսափողը՝ ձայնագրություններ անելու համար։"</string>
     <string name="permlab_sim_communication" msgid="176788115994050692">"ուղարկել հրամաններ SIM քարտին"</string>
     <string name="permdesc_sim_communication" msgid="4179799296415957960">"Թույլ է տալիս հավելվածին հրամաններ ուղարկել SIM-ին: Սա շատ վտանգավոր է:"</string>
     <string name="permlab_activityRecognition" msgid="1782303296053990884">"ֆիզիկական ակտիվության ճանաչում"</string>
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"Հավելվածը կարող է ճանաչել ձեր ֆիզիկական ակտիվությունը:"</string>
     <string name="permlab_camera" msgid="6320282492904119413">"լուսանկարել և տեսանկարել"</string>
-    <string name="permdesc_camera" msgid="1354600178048761499">"Այս հավելվածը կարող է ցանկացած պահի լուսանկարել և տեսագրել՝ օգտագործելով տեսախցիկը:"</string>
+    <string name="permdesc_camera" msgid="5240801376168647151">"Այս հավելվածը կարող է օգտագործել տեսախցիկը՝ լուսանկարելու և տեսագրելու համար, միայն երբ հավելվածն ակտիվ է։"</string>
+    <string name="permlab_backgroundCamera" msgid="7549917926079731681">"լուսանկարել և տեսագրել ֆոնային ռեժիմում"</string>
+    <string name="permdesc_backgroundCamera" msgid="1615291686191138250">"Այս հավելվածը կարող է ցանկացած ժամանակ օգտագործել տեսախցիկը՝ լուսանկարելու և տեսագրելու համար։"</string>
     <string name="permlab_systemCamera" msgid="3642917457796210580">"Թույլատրել որևէ հավելվածի կամ ծառայության օգտագործել համակարգի տեսախցիկները՝ լուսանկարելու և տեսանկարելու համար"</string>
     <string name="permdesc_systemCamera" msgid="5938360914419175986">"Այս արտոնյալ կամ համակարգային հավելվածը կարող է ցանկացած պահի լուսանկարել և տեսագրել՝ օգտագործելով համակարգի տեսախցիկները։ Հավելվածին նաև անհրաժեշտ է android.permission.CAMERA թույլտվությունը։"</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Թույլատրել հավելվածին կամ ծառայությանը հետզանգեր ստանալ՝ տեսախցիկների բացվելու և փակվելու դեպքում։"</string>
@@ -494,7 +499,7 @@
     <string name="permlab_changeTetherState" msgid="9079611809931863861">"փոխել միացված կապը"</string>
     <string name="permdesc_changeTetherState" msgid="3025129606422533085">"Թույլ է տալիս հավելվածին փոխել կապված ցանցի միացման կարգավիճակը:"</string>
     <string name="permlab_accessWifiState" msgid="5552488500317911052">"դիտել Wi-Fi կապերը"</string>
-    <string name="permdesc_accessWifiState" msgid="6913641669259483363">"Թույլ է տալիս հավելվածին տեսնել Wi-Fi ցանցի տեղեկություններ, ինչպես օրինակ` արդյոք Wi-Fi-ը միացված է, թե` ոչ, և միացված Wi-Fi սարքի անունը:"</string>
+    <string name="permdesc_accessWifiState" msgid="6913641669259483363">"Թույլ է տալիս հավելվածին տեսնել Wi-Fi ցանցի տեղեկություններ, ինչպես օրինակ՝ արդյոք Wi-Fi-ը միացված է, թե` ոչ, և միացված Wi-Fi սարքի անունը:"</string>
     <string name="permlab_changeWifiState" msgid="7947824109713181554">"միանալ Wi-Fi-ին և անջատվել դրանից"</string>
     <string name="permdesc_changeWifiState" msgid="7170350070554505384">"Թույլ է տալիս հավելվածին միանալ Wi-Fi մուտքի կետերին և անջատվել այդ կետերից, ինչպես նաև կատարել սարքի կարգավորման փոփոխություններ Wi-Fi ցանցերի համար:"</string>
     <string name="permlab_changeWifiMulticastState" msgid="285626875870754696">"թույլատրել Բազմասփյուռ Wi-Fi-ի ընդունումը"</string>
@@ -537,12 +542,13 @@
     <string name="permdesc_imagesWrite" msgid="5195054463269193317">"Թույլ է տալիս հավելվածին փոփոխել ձեր լուսանկարների հավաքածուն:"</string>
     <string name="permlab_mediaLocation" msgid="7368098373378598066">"ճանաչել տեղադրության մասին տվյալները մեդիա բովանդակության հավաքածուից"</string>
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"Թույլ է տալիս հավելվածին ճանաչել տեղադրության մասին տվյալները ձեր մեդիա բովանդակության հավաքածուից:"</string>
-    <string name="biometric_dialog_default_title" msgid="5284880398508155088">"Հաստատեք ձեր ինքնությունը"</string>
+    <string name="biometric_dialog_default_title" msgid="55026799173208210">"Հաստատեք ձեր ինքնությունը"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"Կենսաչափական սարքը հասանելի չէ"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"Նույնականացումը չեղարկվեց"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"Չհաջողվեց ճանաչել"</string>
     <string name="biometric_error_canceled" msgid="8266582404844179778">"Նույնականացումը չեղարկվեց"</string>
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"Ավելացրեք PIN կոդ, նախշ կամ գաղտնաբառ։"</string>
+    <string name="biometric_error_generic" msgid="6784371929985434439">"Չհաջողվեց նույնականացնել"</string>
     <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"Մատնահետքն ամբողջությամբ չի սկանավորվել: Փորձեք նորից:"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Չհաջողվեց մշակել մատնահետքը: Նորից փորձեք:"</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"Մատնահետքերի սենսորն աղտոտված է: Մաքրեք այն և փորձեք նորից:"</string>
@@ -613,7 +619,7 @@
   </string-array>
     <string name="face_icon_content_description" msgid="465030547475916280">"Դեմքի պատկերակ"</string>
     <string name="permlab_readSyncSettings" msgid="6250532864893156277">"կարդալ համաժամացման կարգավորումները"</string>
-    <string name="permdesc_readSyncSettings" msgid="1325658466358779298">"Թույլ է տալիս հավելվածին կարդալ համաժամացման կարգավորումները հաշվի համար: Օրինակ` այն կարող է որոշել, արդյոք Մարդիկ հավելվածը համաժամացված է հաշվի հետ:"</string>
+    <string name="permdesc_readSyncSettings" msgid="1325658466358779298">"Թույլ է տալիս հավելվածին կարդալ համաժամացման կարգավորումները հաշվի համար: Օրինակ՝ այն կարող է որոշել, արդյոք Մարդիկ հավելվածը համաժամացված է հաշվի հետ:"</string>
     <string name="permlab_writeSyncSettings" msgid="6583154300780427399">"համաժամացումը փոխարկել միացվածի և անջատվածի"</string>
     <string name="permdesc_writeSyncSettings" msgid="6029151549667182687">"Թույլ է տալիս հավելվածին փոփոխել համաժամացման կարգավորումները հաշվի համար: Օրինակ, այն կարող է օգտագործվել` միացնելու Մարդիկ հավելվածի համաժամացումը հաշվի հետ:"</string>
     <string name="permlab_readSyncStats" msgid="3747407238320105332">"կարդալ համաժամացման վիճակագրությունը"</string>
@@ -830,7 +836,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"Ապակողպելու կամ շտապ կանչ անելու համար սեղմեք «Ընտրացանկ»"</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"Ապակողպելու համար սեղմեք Ցանկը:"</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"Հավաքեք սխեման` ապակողպելու համար"</string>
-    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"Շտապ կանչ"</string>
+    <string name="lockscreen_emergency_call" msgid="7549683825868928636">"Շտապ կանչ"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"Վերադառնալ զանգին"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"Ճիշտ է:"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Կրկին փորձեք"</string>
@@ -874,7 +880,7 @@
     <string name="lockscreen_forgot_pattern_button_text" msgid="8362442730606839031">"Մոռացե՞լ եք սխեման:"</string>
     <string name="lockscreen_glogin_forgot_pattern" msgid="9218940117797602518">"Հաշվի ապակողպում"</string>
     <string name="lockscreen_glogin_too_many_attempts" msgid="3775904917743034195">"Չափից շատ սխեմայի փորձեր"</string>
-    <string name="lockscreen_glogin_instructions" msgid="4695162942525531700">"Ապակողպելու համար` մուտք գործեք ձեր Google հաշվով:"</string>
+    <string name="lockscreen_glogin_instructions" msgid="4695162942525531700">"Ապակողպելու համար՝ մուտք գործեք ձեր Google հաշվով:"</string>
     <string name="lockscreen_glogin_username_hint" msgid="6916101478673157045">"Օգտանուն (էլփոստ)"</string>
     <string name="lockscreen_glogin_password_hint" msgid="3031027901286812848">"Գաղտնաբառ"</string>
     <string name="lockscreen_glogin_submit_button" msgid="3590556636347843733">"Մուտք գործել"</string>
@@ -894,7 +900,7 @@
     <string name="keyguard_accessibility_add_widget" msgid="8245795023551343672">"Ավելացնել վիջեթ:"</string>
     <string name="keyguard_accessibility_widget_empty_slot" msgid="544239307077644480">"Դատարկ"</string>
     <string name="keyguard_accessibility_unlock_area_expanded" msgid="7768634718706488951">"Ապակողպման տարածքն ընդլայնված է:"</string>
-    <string name="keyguard_accessibility_unlock_area_collapsed" msgid="4729922043778400434">"Ապակողպման տարածքը ետ է ծալված:"</string>
+    <string name="keyguard_accessibility_unlock_area_collapsed" msgid="4729922043778400434">"Ապակողպման տարածքը հետ է ծալված:"</string>
     <string name="keyguard_accessibility_widget" msgid="6776892679715699875">"<xliff:g id="WIDGET_INDEX">%1$s</xliff:g> վիջեթ:"</string>
     <string name="keyguard_accessibility_user_selector" msgid="1466067610235696600">"Օգտատիրոջ ընտրիչ"</string>
     <string name="keyguard_accessibility_status" msgid="6792745049712397237">"Կարգավիճակ"</string>
@@ -1123,6 +1129,8 @@
     <string name="capital_off" msgid="7443704171014626777">"O"</string>
     <string name="checked" msgid="9179896827054513119">"նշված է"</string>
     <string name="not_checked" msgid="7972320087569023342">"նշված չէ"</string>
+    <string name="selected" msgid="6614607926197755875">"ընտրված է"</string>
+    <string name="not_selected" msgid="410652016565864475">"ընտրված չէ"</string>
     <string name="whichApplication" msgid="5432266899591255759">"Ավարտել գործողությունը` օգտագործելով"</string>
     <string name="whichApplicationNamed" msgid="6969946041713975681">"Եզրափակել գործողությունը՝ օգտագործելով %1$s"</string>
     <string name="whichApplicationLabel" msgid="7852182961472531728">"Ավարտել գործողությունը"</string>
@@ -1130,7 +1138,7 @@
     <string name="whichViewApplicationNamed" msgid="415164730629690105">"Բացել հավելվածով՝ %1$s"</string>
     <string name="whichViewApplicationLabel" msgid="7367556735684742409">"Բացել"</string>
     <string name="whichOpenHostLinksWith" msgid="7645631470199397485">"<xliff:g id="HOST">%1$s</xliff:g> տեսակի հղումները բացել…"</string>
-    <string name="whichOpenLinksWith" msgid="1120936181362907258">"Հղումները բացել…"</string>
+    <string name="whichOpenLinksWith" msgid="1120936181362907258">"Հղումները բացել այս հավելվածով…"</string>
     <string name="whichOpenLinksWithApp" msgid="6917864367861910086">"Հղումները բացել <xliff:g id="APPLICATION">%1$s</xliff:g> դիտարկիչում"</string>
     <string name="whichOpenHostLinksWithApp" msgid="2401668560768463004">"<xliff:g id="HOST">%1$s</xliff:g> տեսակի հղումները բացել <xliff:g id="APPLICATION">%2$s</xliff:g> դիտարկիչում"</string>
     <string name="whichGiveAccessToApplicationLabel" msgid="7805857277166106236">"Թույլատրել"</string>
@@ -1220,7 +1228,7 @@
     <string name="volume_music" msgid="7727274216734955095">"Մեդիա ձայնի բարձրություն"</string>
     <string name="volume_music_hint_playing_through_bluetooth" msgid="2614142915948898228">"Նվագարկում է Bluetooth-ի միջոցով"</string>
     <string name="volume_music_hint_silent_ringtone_selected" msgid="1514829655029062233">"Սահմանվել է անձայն զանգերանգ"</string>
-    <string name="volume_call" msgid="7625321655265747433">"Մուտքային զանգի ձայնի ուժգնությունը"</string>
+    <string name="volume_call" msgid="7625321655265747433">"Խոսակցություն"</string>
     <string name="volume_bluetooth_call" msgid="2930204618610115061">"Bluetooth-ի ներզանգի բարձրություն"</string>
     <string name="volume_alarm" msgid="4486241060751798448">"Զարթուցիչի ձայնը"</string>
     <string name="volume_notification" msgid="6864412249031660057">"Ծանուցումների ձայնի ուժգնությունը"</string>
@@ -1342,14 +1350,20 @@
     <string name="ext_media_checking_notification_title" msgid="8299199995416510094">"<xliff:g id="NAME">%s</xliff:g> հիշասարքի ստուգում…"</string>
     <string name="ext_media_checking_notification_message" msgid="2231566971425375542">"Բովանդակության ստուգում"</string>
     <string name="ext_media_new_notification_title" msgid="3517407571407687677">"Նոր հիշասարք (<xliff:g id="NAME">%s</xliff:g>)"</string>
+    <string name="ext_media_new_notification_title" product="automotive" msgid="9085349544984742727">"<xliff:g id="NAME">%s</xliff:g>ը չի աշխատում"</string>
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"Հպեք՝ կարգավորելու համար"</string>
+    <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"Կարող է պահանջվել, որ նորից ֆորմատավորեք սարքը։ Հպեք՝ հեռացնելու համար։"</string>
     <string name="ext_media_ready_notification_message" msgid="777258143284919261">"Լուսանկարներ և մեդիա ֆայլեր տեղափոխելու համար"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"<xliff:g id="NAME">%s</xliff:g> հիշասարքի հետ կապված խնդիր կա"</string>
+    <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"<xliff:g id="NAME">%s</xliff:g>ը չի աշխատում"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"Հպեք՝ շտկելու համար"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3003611129979934633">"<xliff:g id="NAME">%s</xliff:g>-ը վնասված է: Ընտրեք՝ շտկելու համար:"</string>
+    <string name="ext_media_unmountable_notification_message" product="automotive" msgid="2274596120715020680">"Կարող է պահանջվել, որ նորից ֆորմատավորեք սարքը։ Հպեք՝ հեռացնելու համար։"</string>
     <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"Չապահովվող <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"<xliff:g id="NAME">%s</xliff:g>ը չի աշխատում"</string>
     <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"Այս սարքը չի աջակցում այս <xliff:g id="NAME">%s</xliff:g>-ը: Հպեք՝ աջակցվող ձևաչափով կարգավորելու համար:"</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="7744945987775645685">"Այս սարքը չի աջակցում այս <xliff:g id="NAME">%s</xliff:g>-ը: Ընտրեք՝ աջակցվող ձևաչափով կարգավորելու համար:"</string>
+    <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"Կարող է պահանջվել, որ նորից ֆորմատավորեք սարքը"</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"<xliff:g id="NAME">%s</xliff:g>-ը հեռացվել է առանց անջատելու"</string>
     <string name="ext_media_badremoval_notification_message" msgid="1986514704499809244">"Տվյալներ չկորցնելու համար կրիչը հեռացնելուց առաջ անջատեք այն"</string>
     <string name="ext_media_nomedia_notification_title" msgid="742671636376975890">"<xliff:g id="NAME">%s</xliff:g> հիշասարքը հեռացվել է"</string>
@@ -1399,10 +1413,10 @@
     <string name="ime_action_done" msgid="6299921014822891569">"Պատրաստ է"</string>
     <string name="ime_action_previous" msgid="6548799326860401611">"Նախորդ"</string>
     <string name="ime_action_default" msgid="8265027027659800121">"Կատարել"</string>
-    <string name="dial_number_using" msgid="6060769078933953531">"Հավաքել հեռախոսահամարը`\nօգտագործելով <xliff:g id="NUMBER">%s</xliff:g>-ը"</string>
+    <string name="dial_number_using" msgid="6060769078933953531">"Հավաքել հեռախոսահամարը՝\nօգտագործելով <xliff:g id="NUMBER">%s</xliff:g>-ը"</string>
     <string name="create_contact_using" msgid="6200708808003692594">"Ստեղծել կոնտակտ`\nօգտագործելով <xliff:g id="NUMBER">%s</xliff:g>-ը"</string>
-    <string name="grant_credentials_permission_message_header" msgid="5365733888842570481">"Հետևյալ մեկ կամ ավել հավելվածներ մուտքի թույլտվության հարցում են անում` այժմ և հետագայում ձեր հաշվին մուտք ունենալու համար:"</string>
-    <string name="grant_credentials_permission_message_footer" msgid="1886710210516246461">"Ցանկանու՞մ եք թույլատրել այս հարցումը:"</string>
+    <string name="grant_credentials_permission_message_header" msgid="5365733888842570481">"Հետևյալ մեկ կամ մի քանի հավելվածներին թույլտվություն է անհրաժեշտ՝ այժմ և հետագայում ձեր հաշվի տվյալներն օգտագործելու համար։"</string>
+    <string name="grant_credentials_permission_message_footer" msgid="1886710210516246461">"Թույլատրե՞լ"</string>
     <string name="grant_permissions_header_text" msgid="3420736827804657201">"Մուտքի հարցում"</string>
     <string name="allow" msgid="6195617008611933762">"Թույլատրել"</string>
     <string name="deny" msgid="6632259981847676572">"Մերժել"</string>
@@ -1466,7 +1480,7 @@
     <string name="number_picker_increment_button" msgid="7621013714795186298">"Ավելացնել"</string>
     <string name="number_picker_decrement_button" msgid="5116948444762708204">"Նվազեցնել"</string>
     <string name="number_picker_increment_scroll_mode" msgid="8403893549806805985">"<xliff:g id="VALUE">%s</xliff:g> հպեք և պահեք:"</string>
-    <string name="number_picker_increment_scroll_action" msgid="8310191318914268271">"Սահեցրեք վերև` ավելացնելու համար, և ներքև` նվազեցնելու համար:"</string>
+    <string name="number_picker_increment_scroll_action" msgid="8310191318914268271">"Սահեցրեք վերև՝ ավելացնելու համար, և ներքև՝ նվազեցնելու համար:"</string>
     <string name="time_picker_increment_minute_button" msgid="7195870222945784300">"Աճեցնել րոպեն"</string>
     <string name="time_picker_decrement_minute_button" msgid="230925389943411490">"Նվազեցնել րոպեն"</string>
     <string name="time_picker_increment_hour_button" msgid="3063572723197178242">"Աճեցնել ժամը"</string>
@@ -1540,11 +1554,9 @@
     <string name="launchBrowserDefault" msgid="6328349989932924119">"Գործարկե՞լ դիտարկիչը:"</string>
     <string name="SetupCallDefault" msgid="5581740063237175247">"Ընդունե՞լ զանգը:"</string>
     <string name="activity_resolver_use_always" msgid="5575222334666843269">"Միշտ"</string>
-    <string name="activity_resolver_set_always" msgid="4142825808921411476">"Միշտ բացել"</string>
     <string name="activity_resolver_use_once" msgid="948462794469672658">"Միայն այս անգամ"</string>
-    <string name="activity_resolver_app_settings" msgid="6758823206817748026">"Կարգավորումներ"</string>
     <string name="activity_resolver_work_profiles_support" msgid="4071345609235361269">"%1$s-ը չի աջակցում աշխատանքային պրոֆիլներ"</string>
-    <string name="default_audio_route_name" product="tablet" msgid="367936735632195517">"Գրասալիկ"</string>
+    <string name="default_audio_route_name" product="tablet" msgid="367936735632195517">"Պլանշետ"</string>
     <string name="default_audio_route_name" product="tv" msgid="4908971385068087367">"Հեռուստացույց"</string>
     <string name="default_audio_route_name" product="default" msgid="9213546147739983977">"Հեռախոս"</string>
     <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"Դոկ-կայանի բարձրախոսներ"</string>
@@ -1556,7 +1568,7 @@
     <string name="wireless_display_route_description" msgid="8297563323032966831">"Անլար էկրան"</string>
     <string name="media_route_button_content_description" msgid="2299223698196869956">"Հեռարձակում"</string>
     <string name="media_route_chooser_title" msgid="6646594924991269208">"Միանալ սարքին"</string>
-    <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"Հեռարձակել էկրանը սարքի վրա"</string>
+    <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"Էկրանը հեռարձակել սարքին"</string>
     <string name="media_route_chooser_searching" msgid="6119673534251329535">"Որոնվում են սարքեր..."</string>
     <string name="media_route_chooser_extended_settings" msgid="2506352159381327741">"Կարգավորումներ"</string>
     <string name="media_route_controller_disconnect" msgid="7362617572732576959">"Անջատել"</string>
@@ -1592,7 +1604,7 @@
     <string name="kg_invalid_puk" msgid="4809502818518963344">"Վերամուտքագրեք ճիշտ PUK ծածկագիրը: Կրկնվող փորձերը ընդմիշտ կկասեցնեն SIM քարտը:"</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="4705368340409816254">"PIN ծածկագրերը չեն համընկնում"</string>
     <string name="kg_login_too_many_attempts" msgid="699292728290654121">"Չափից շատ սխեմայի փորձեր"</string>
-    <string name="kg_login_instructions" msgid="3619844310339066827">"Ապակողպելու համար` մուտք գործեք ձեր Google հաշվով:"</string>
+    <string name="kg_login_instructions" msgid="3619844310339066827">"Ապակողպելու համար՝ մուտք գործեք ձեր Google հաշվով:"</string>
     <string name="kg_login_username_hint" msgid="1765453775467133251">"Օգտանուն (էլփոստ)"</string>
     <string name="kg_login_password_hint" msgid="3330530727273164402">"Գաղտնաբառը"</string>
     <string name="kg_login_submit_button" msgid="893611277617096870">"Մուտք գործել"</string>
@@ -1613,19 +1625,18 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"Դուք <xliff:g id="NUMBER_0">%1$d</xliff:g> անգամ սխալ եք հավաքել ձեր ապակողպման նմուշը: <xliff:g id="NUMBER_1">%2$d</xliff:g> անգամից ավել անհաջող փորձերից հետո ձեզ կառաջարկվի ապակողպել ձեր հեռախոսը` օգտագործելով էլփոստի հաշիվ:\n\n Փորձեք կրկին <xliff:g id="NUMBER_2">%3$d</xliff:g> վայրկյանից:"</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Հեռացնել"</string>
-    <string name="allow_while_in_use_permission_in_fgs" msgid="4101339676785053656">"Ֆոնային ռեժիմում <xliff:g id="PACKAGENAME">%1$s</xliff:g>-ից գործարկված առաջին պլանի ծառայությունը հետագա R կառուցումներում թույլտվություն չի ունենա օգտագործման ընթացքում։ Անցեք go/r-bg-fgs-restriction էջ և հաղորդեք վրիպակի մասին։"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Ձայնը բարձրացնե՞լ խորհուրդ տրվող մակարդակից ավել:\n\nԵրկարատև բարձրաձայն լսելը կարող է վնասել ձեր լսողությունը:"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Օգտագործե՞լ Մատչելիության դյուրանցումը։"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Հատուկ գործառույթն օգտագործելու համար սեղմեք և 3 վայրկյան սեղմած պահեք ձայնի ուժգնության երկու կոճակները, երբ գործառույթը միացված է:"</string>
-    <string name="accessibility_shortcut_multiple_service_warning_title" msgid="8417489297036013065">"Միացնե՞լ հատուկ գործառույթները"</string>
+    <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Միացնե՞լ հատուկ գործառույթների դյուրանցումը"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Ձայնի կարգավորման երկու կոճակները մի քանի վայրկյան սեղմած պահելով կմիացնեք հատուկ գործառույթները։ Դրա արդյունքում սարքի աշխատաեղանակը կարող է փոխվել։\n\nԸնթացիկ գործառույթներ՝\n<xliff:g id="SERVICE">%1$s</xliff:g>\nԸնտրված գործառույթները փոխելու համար անցեք Կարգավորումներ &gt; Հատուկ գործառույթներ։"</string>
     <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
-    <string name="accessibility_shortcut_talkback_warning_title" msgid="3410100187167382427">"Միացնե՞լ TalkBack-ը"</string>
-    <string name="accessibility_shortcut_talkback_warning" msgid="8412954203626349109">"Ձայնի կարգավորման երկու կոճակները մի քանի վայրկյան սեղմած պահելով կմիացնեք TalkBack-ը, որը էկրանի ընթերցիչ է։ Այն օգտակար է կույր և տեսողական խնդիրներ ունեցող մարդկանց համար։ TalkBack-ն ամբողջությամբ կփոխի սարքի աշխատաեղանակը։\n\nԱյս դյուրանցումը մեկ այլ գործառույթով փոխելու համար անցեք Կարգավորումներ &gt; Հատուկ գործառույթներ։"</string>
-    <string name="accessibility_shortcut_single_service_warning_title" msgid="2819109500943271385">"Միացնե՞լ <xliff:g id="SERVICE">%1$s</xliff:g> ծառայությունը"</string>
+    <string name="accessibility_shortcut_single_service_warning_title" msgid="1909518473488345266">"Միացնե՞լ <xliff:g id="SERVICE">%1$s</xliff:g>-ի դյուրանցումը"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Ձայնի կարգավորման երկու կոճակները մի քանի վայրկյան սեղմած պահելով կմիացնեք <xliff:g id="SERVICE">%1$s</xliff:g> ծառայությունը, որը հատուկ գործառույթ է։ Դրա արդյունքում սարքի աշխատաեղանակը կարող է փոխվել։\n\nԱյս դյուրանցումը մեկ այլ գործառույթով փոխելու համար անցեք Կարգավորումներ &gt; Հատուկ գործառույթներ։"</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Միացնել"</string>
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"Չմիացնել"</string>
+    <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"ՄԻԱՑՎԱԾ"</string>
+    <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"ԱՆՋԱՏՎԱԾ"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Թույլատրե՞լ <xliff:g id="SERVICE">%1$s</xliff:g> ծառայությանը կառավարել ձեր սարքը"</string>
     <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"Եթե միացնեք <xliff:g id="SERVICE">%1$s</xliff:g> ծառայությունը, ձեր սարքը չի օգտագործի էկրանի կողպումը՝ տվյալների գաղտնագրումը բարելավելու համար:"</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"Ամբողջական վերահսկումն անհրաժեշտ է միայն այն հավելվածներին, որոնք օգնում են ձեզ հատուկ գործառույթներից օգտվելիս։"</string>
@@ -1787,10 +1798,10 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Թարմացվել է ձեր ադմինիստրատորի կողմից"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Ջնջվել է ձեր ադմինիստրատորի կողմից"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"Եղավ"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"Մարտկոցի աշխատաժամանակը երկարացնելու համար «Մարտկոցի տնտեսում» գործառույթը՝\n·միացնում է մուգ թեման,\n·անջատում կամ սահմանափակում է աշխատանքը ֆոնային ռեժիմում, որոշ տեսողական էֆեկտներ և այլ գործառույթներ, օրինակ «OK Google» հրահանգը:\n\n"<annotation id="url">"Իմանալ ավելին"</annotation></string>
-    <string name="battery_saver_description" msgid="7618492104632328184">"Մարտկոցի աշխատաժամանակը երկարացնելու համար «Մարտկոցի տնտեսում» գործառույթը՝\n·միացնում է մուգ թեման,\n·անջատում կամ սահմանափակում է աշխատանքը ֆոնային ռեժիմում, որոշ տեսողական էֆեկտներ և այլ գործառույթներ, օրինակ «OK Google» հրահանգը:"</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"Թրաֆիկի տնտեսման ռեժիմում որոշ հավելվածների համար ֆոնային փոխանցումն անջատված է։ Հավելվածը, որն օգտագործում եք, կարող է տվյալներ փոխանցել և ստանալ, սակայն ոչ այնքան հաճախ: Օրինակ՝ պատկերները կցուցադրվեն միայն դրանց վրա սեղմելուց հետո։"</string>
-    <string name="data_saver_enable_title" msgid="7080620065745260137">"Միացնե՞լ թրաֆիկի խնայումը:"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"Մարտկոցի աշխատաժամանակը երկարացնելու համար «Մարտկոցի տնտեսում» գործառույթը՝\n\n• Միացնում է մուգ թեման։\n• Անջատում կամ սահմանափակում է աշխատանքը ֆոնային ռեժիմում, որոշ վիզուալ էֆեկտներ և այլ գործառույթներ, օրինակ՝ «Ok Google» հրահանգը։\n\n"<annotation id="url">"Իմանալ ավելին"</annotation></string>
+    <string name="battery_saver_description" msgid="6794188153647295212">"Մարտկոցի աշխատաժամանակը երկարացնելու համար «Մարտկոցի տնտեսում» գործառույթը՝\n\n• Միացնում է մուգ թեման։\n• Անջատում կամ սահմանափակում է աշխատանքը ֆոնային ռեժիմում, որոշ վիզուալ էֆեկտներ և այլ գործառույթներ, օրինակ՝ «Ok Google» հրահանգը։"</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"Թրաֆիկի տնտեսման ռեժիմում որոշ հավելվածների համար տվյալների ֆոնային փոխանցումն անջատված է։ Հավելվածը, որն օգտագործում եք, կարող է տվյալներ փոխանցել և ստանալ, սակայն ոչ այնքան հաճախ: Օրինակ՝ պատկերները կցուցադրվեն միայն դրանց վրա սեղմելուց հետո։"</string>
+    <string name="data_saver_enable_title" msgid="7080620065745260137">"Միացնե՞լ թրաֆիկի տնտեսումը"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Միացնել"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
       <item quantity="one">%1$d րոպե (մինչև <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
@@ -1824,6 +1835,7 @@
       <item quantity="one">%d ժամով</item>
       <item quantity="other">%d ժամով</item>
     </plurals>
+    <string name="zen_mode_until_next_day" msgid="1403042784161725038">"Մինչև <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_until" msgid="2250286190237669079">"Մինչև <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"Մինչև ժ. <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>-ը (հաջորդ զարթուցիչը)"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"Մինչև չանջատեք"</string>
@@ -1835,7 +1847,7 @@
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"Աշխատանքային օր"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Շաբաթ-կիրակի"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"Միջոցառում"</string>
-    <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"Քնելիս"</string>
+    <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"Քնի ժամանակ"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g>-ն անջատում է որոշ ձայներ"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"Սարքում ներքին խնդիր է առաջացել և այն կարող է կրկնվել, մինչև չվերականգնեք գործարանային կարգավորումները:"</string>
     <string name="system_error_manufacturer" msgid="703545241070116315">"Սարքում ներքին խնդիր է առաջացել: Մանրամասների համար կապվեք արտադրողի հետ:"</string>
@@ -1882,14 +1894,14 @@
     <string name="app_suspended_more_details" msgid="211260942831587014">"Մանրամասն"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Չեղարկել դադարեցումը"</string>
     <string name="work_mode_off_title" msgid="5503291976647976560">"Միացնե՞լ աշխատանքային պրոֆիլը"</string>
-    <string name="work_mode_off_message" msgid="8417484421098563803">"Ձեր աշխատանքային հավելվածները, ծանուցումները, տվյալները և աշխատանքային պրոֆիլի մյուս գործառույթները կմիանան"</string>
+    <string name="work_mode_off_message" msgid="8417484421098563803">"Ձեր աշխատանքային հավելվածները, ծանուցումները, տվյալները և աշխատանքային պրոֆիլի մյուս գործառույթները կմիացվեն։"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Միացնել"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Հավելվածը հասանելի չէ"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> հավելվածն այս պահին հասանելի չէ։"</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Այս հավելվածը ստեղծվել է Android-ի ավելի հին տարբերակի համար և կարող է պատշաճ չաշխատել: Ստուգեք թարմացումների առկայությունը կամ դիմեք մշակողին:"</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Ստուգել նոր տարբերակի առկայությունը"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Դուք ունեք նոր հաղորդագրություններ"</string>
-    <string name="new_sms_notification_content" msgid="3197949934153460639">"Դիտելու համար բացել SMS հավելվածը"</string>
+    <string name="new_sms_notification_content" msgid="3197949934153460639">"Դիտելու համար բացել SMS-ների փոխանակման հավելվածը"</string>
     <string name="profile_encrypted_title" msgid="9001208667521266472">"Որոշ գործառույթներ կարող են չաշխատել"</string>
     <string name="profile_encrypted_detail" msgid="5279730442756849055">"Աշխատանքային պրոֆիլը կողպված է"</string>
     <string name="profile_encrypted_message" msgid="1128512616293157802">"Հպեք՝ այն ապակողպելու համար"</string>
@@ -1902,7 +1914,7 @@
     <string name="app_info" msgid="6113278084877079851">"Հավելվածի մասին"</string>
     <string name="negative_duration" msgid="1938335096972945232">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="demo_starting_message" msgid="6577581216125805905">"Ցուցադրական օգտատերը գործարկվում է…"</string>
-    <string name="demo_restarting_message" msgid="1160053183701746766">"Սարաքը վերակայվում է…"</string>
+    <string name="demo_restarting_message" msgid="1160053183701746766">"Սարքը վերակայվում է…"</string>
     <string name="suspended_widget_accessibility" msgid="6331451091851326101">"Անջատած <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="conference_call" msgid="5731633152336490471">"Կոնֆերանս զանգ"</string>
     <string name="tooltip_popup_title" msgid="7863719020269945722">"Հուշակ"</string>
@@ -1974,7 +1986,7 @@
     <string name="shortcut_restore_signature_mismatch" msgid="579345304221605479">"Չհաջողվեց վերականգնել դյուրանցումը, քանի որ հավելվածների ստորագրությունները տարբեր են"</string>
     <string name="shortcut_restore_unknown_issue" msgid="2478146134395982154">"Չհաջողվեց վերականգնել դյուրանցումը"</string>
     <string name="shortcut_disabled_reason_unknown" msgid="753074793553599166">"Դյուրանցումն անջատված է"</string>
-    <string name="harmful_app_warning_uninstall" msgid="6472912975664191772">"ՀԵՌԱՑՆԵԼ"</string>
+    <string name="harmful_app_warning_uninstall" msgid="6472912975664191772">"ԱՊԱՏԵՂԱԴՐԵԼ"</string>
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"ԲԱՑԵԼ"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"Հայտնաբերվել է վնասաբեր հավելված"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> հավելվածն ուզում է ցուցադրել հատվածներ <xliff:g id="APP_2">%2$s</xliff:g> հավելվածից"</string>
@@ -1992,8 +2004,9 @@
     <string name="notification_appops_camera_active" msgid="8177643089272352083">"Տեսախցիկ"</string>
     <string name="notification_appops_microphone_active" msgid="581333393214739332">"Խոսափող"</string>
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"ցուցադրվում է մյուս հավելվածների վրայից"</string>
+    <string name="notification_feedback_indicator" msgid="663476517711323016">"Կարծիք հայտնել"</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Ծանուցում լիցքավորման մասին"</string>
-    <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Մարտկոցի լիցքը կարող է սովորականից շուտ սպառվել"</string>
+    <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Մարտկոցը կարող է սովորականից շուտ սպառվել"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Մարտկոցի կյանքը երկարացնելու համար ակտիվացվել է մարտկոցի տնտեսման ռեժիմը"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"Մարտկոցի տնտեսում"</string>
     <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"Մարտկոցի տնտեսումն անջատված է"</string>
@@ -2024,7 +2037,7 @@
       <item quantity="one"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> ֆայլ</item>
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> ֆայլ</item>
     </plurals>
-    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Առաջարկվող օգտատերեր չկան, որոնց հետ կարող եք կիսվել"</string>
+    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Չկան օգտատերեր, որոնց հետ կարող եք կիսվել"</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"Հավելվածների ցանկ"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"Հավելվածը ձայնագրելու թույլտվություն չունի, սակայն կկարողանա գրանցել ձայնն այս USB սարքի միջոցով։"</string>
     <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"Սկիզբ"</string>
@@ -2033,15 +2046,18 @@
     <string name="accessibility_system_action_notifications_label" msgid="6083767351772162010">"Ծանուցումներ"</string>
     <string name="accessibility_system_action_quick_settings_label" msgid="4583900123506773783">"Արագ կարգավորումներ"</string>
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"Սնուցման պատուհան"</string>
-    <string name="accessibility_system_action_toggle_split_screen_label" msgid="6626177163849387748">"Միացնել/անջատել էկրանի տրոհումը"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"Կողպէկրան"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"Սքրինշոթ"</string>
-    <string name="accessibility_system_action_accessibility_menu_label" msgid="8436484650391125184">"Հատուկ գործառույթների ընտրացանկ"</string>
+    <string name="accessibility_system_action_on_screen_a11y_shortcut_label" msgid="8488701469459210309">"Հատուկ գործառույթների դյուրանցում"</string>
+    <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"Հատուկ գործառույթների դյուրանցման ընտրիչ"</string>
+    <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"Հատուկ գործառույթների դյուրանցում"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"<xliff:g id="APP_NAME">%1$s</xliff:g> հավելվածի ենթագրերի գոտին։"</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> փաթեթը գցվեց ՍԱՀՄԱՆԱՓԱԿՎԱԾ զամբյուղի մեջ"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>՝"</string>
-    <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"Նամակագրություն"</string>
-    <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"Խմբային նամակագրություն"</string>
+    <string name="conversation_single_line_image_placeholder" msgid="6983271082911936900">"օգտատերը պատկեր է ուղարկել"</string>
+    <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"Զրույց"</string>
+    <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"Խմբային զրույց"</string>
+    <string name="unread_convo_overflow" msgid="920517615597353833">"<xliff:g id="MAX_UNREAD_COUNT">%1$d</xliff:g>+"</string>
     <string name="resolver_personal_tab" msgid="2051260504014442073">"Անձնական"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"Աշխատանքային"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Անձնական"</string>
@@ -2060,8 +2076,6 @@
     <string name="resolver_no_work_apps_available_resolve" msgid="1244844292366099399">"Աշխատանքային հավելվածները չեն կարող բացել այս բովանդակությունը"</string>
     <string name="resolver_no_personal_apps_available_share" msgid="5639102815174748732">"Անձնական հավելվածները չեն կարող աջակցել այս բովանդակությունը"</string>
     <string name="resolver_no_personal_apps_available_resolve" msgid="5120671970531446978">"Անձնական հավելվածները չեն կարող բացել այս բովանդակությունը"</string>
-    <string name="permlab_accessCallAudio" msgid="1682957511874097664">"Հեռախոսային զանգերի ձայնագրում և նվագարկում"</string>
-    <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"Եթե այս հավելվածն ըստ կանխադրման օգտագործվում է զանգերի համար, այն կարող է ձայնագրել և նվագարկել հեռախոսային խոսակցությունները։"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"SIM Network քարտի ապակողպման PIN"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"SIM Network Subset քարտի ապակողպման PIN"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"SIM Corporate քարտի ապակողպման PIN"</string>
@@ -2170,4 +2184,8 @@
     <string name="PERSOSUBSTATE_SIM_ICCID_SUCCESS" msgid="8058678548991999545">"ICCID քարտի ապակողպումը հաջողվեց։"</string>
     <string name="PERSOSUBSTATE_SIM_IMPI_SUCCESS" msgid="2545608067978550571">"IMPI քարտի ապակողպումը հաջողվեց։"</string>
     <string name="PERSOSUBSTATE_SIM_NS_SP_SUCCESS" msgid="4352382949744625007">"Network subset service provider քարտի ապակողպումը հաջողվեց։"</string>
+    <string name="config_pdp_reject_dialog_title" msgid="4072057179246785727"></string>
+    <string name="config_pdp_reject_user_authentication_failed" msgid="4531693033885744689"></string>
+    <string name="config_pdp_reject_service_not_subscribed" msgid="8190338397128671588"></string>
+    <string name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed" msgid="6024904218067254186"></string>
 </resources>

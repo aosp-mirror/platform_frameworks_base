@@ -67,6 +67,8 @@ const char* getMimeType(SkEncodedImageFormat format) {
             return "image/webp";
         case SkEncodedImageFormat::kHEIF:
             return "image/heif";
+        case SkEncodedImageFormat::kAVIF:
+            return "image/avif";
         case SkEncodedImageFormat::kWBMP:
             return "image/vnd.wap.wbmp";
         case SkEncodedImageFormat::kDNG:

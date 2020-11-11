@@ -353,6 +353,10 @@ class ProcessRecord implements WindowProcessListener {
 
     long mKillTime; // The timestamp in uptime when this process was killed.
 
+    // If the proc state is PROCESS_STATE_BOUND_FOREGROUND_SERVICE or above, it can start FGS.
+    // It must obtain the proc state from a persistent/top process or FGS, not transitive.
+    int mAllowStartFgsState = PROCESS_STATE_NONEXISTENT;
+
     void setStartParams(int startUid, HostingRecord hostingRecord, String seInfo,
             long startTime) {
         this.startUid = startUid;
@@ -466,6 +470,8 @@ class ProcessRecord implements WindowProcessListener {
                 pw.print(" setCapability=");
                 ActivityManager.printCapabilitiesFull(pw, setCapability);
                 pw.println();
+        pw.print(prefix); pw.print("allowStartFgsState=");
+                pw.println(mAllowStartFgsState);
         if (hasShownUi || mPendingUiClean || hasAboveClient || treatLikeActivity) {
             pw.print(prefix); pw.print("hasShownUi="); pw.print(hasShownUi);
                     pw.print(" pendingUiClean="); pw.print(mPendingUiClean);
@@ -1252,7 +1258,6 @@ class ProcessRecord implements WindowProcessListener {
 
     void setHasForegroundActivities(boolean hasForegroundActivities) {
         mHasForegroundActivities = hasForegroundActivities;
-        mWindowProcessController.setHasForegroundActivities(hasForegroundActivities);
     }
 
     boolean hasForegroundActivities() {
@@ -1941,6 +1946,12 @@ class ProcessRecord implements WindowProcessListener {
 
     ErrorDialogController getDialogController() {
         return mDialogController;
+    }
+
+    void bumpAllowStartFgsState(int newProcState) {
+        if (newProcState < mAllowStartFgsState) {
+            mAllowStartFgsState = newProcState;
+        }
     }
 
     /** A controller to generate error dialogs in {@link ProcessRecord} */

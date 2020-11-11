@@ -1430,8 +1430,8 @@ public class QuotaControllerTest {
                 createTimingSession(now - (HOUR_IN_MILLIS), 3 * MINUTE_IN_MILLIS, 5));
         mQuotaController.saveTimingSession(0, "com.android.test",
                 createTimingSession(now - (5 * MINUTE_IN_MILLIS), 3 * MINUTE_IN_MILLIS, 5));
-        mQuotaController.incrementJobCount(0, "com.android.test", 5);
         synchronized (mQuotaController.mLock) {
+            mQuotaController.incrementJobCountLocked(0, "com.android.test", 5);
             assertTrue(mQuotaController.isWithinQuotaLocked(0, "com.android.test", WORKING_INDEX));
         }
     }
@@ -1445,8 +1445,8 @@ public class QuotaControllerTest {
                 createTimingSession(now - (HOUR_IN_MILLIS), 15 * MINUTE_IN_MILLIS, 25));
         mQuotaController.saveTimingSession(0, "com.android.test.spam",
                 createTimingSession(now - (5 * MINUTE_IN_MILLIS), 3 * MINUTE_IN_MILLIS, jobCount));
-        mQuotaController.incrementJobCount(0, "com.android.test.spam", jobCount);
         synchronized (mQuotaController.mLock) {
+            mQuotaController.incrementJobCountLocked(0, "com.android.test.spam", jobCount);
             assertFalse(mQuotaController.isWithinQuotaLocked(
                     0, "com.android.test.spam", WORKING_INDEX));
         }
@@ -1471,8 +1471,8 @@ public class QuotaControllerTest {
                 createTimingSession(now - (30 * MINUTE_IN_MILLIS), 3 * MINUTE_IN_MILLIS, 5));
         mQuotaController.saveTimingSession(0, "com.android.test",
                 createTimingSession(now - (5 * MINUTE_IN_MILLIS), 4 * MINUTE_IN_MILLIS, 5));
-        mQuotaController.incrementJobCount(0, "com.android.test", 5);
         synchronized (mQuotaController.mLock) {
+            mQuotaController.incrementJobCountLocked(0, "com.android.test", 5);
             assertFalse(mQuotaController.isWithinQuotaLocked(0, "com.android.test", WORKING_INDEX));
         }
     }
@@ -1486,8 +1486,8 @@ public class QuotaControllerTest {
                 createTimingSession(now - (HOUR_IN_MILLIS), 15 * MINUTE_IN_MILLIS, 25));
         mQuotaController.saveTimingSession(0, "com.android.test",
                 createTimingSession(now - (5 * MINUTE_IN_MILLIS), 3 * MINUTE_IN_MILLIS, jobCount));
-        mQuotaController.incrementJobCount(0, "com.android.test", jobCount);
         synchronized (mQuotaController.mLock) {
+            mQuotaController.incrementJobCountLocked(0, "com.android.test", jobCount);
             assertFalse(mQuotaController.isWithinQuotaLocked(0, "com.android.test", WORKING_INDEX));
         }
     }
@@ -1637,9 +1637,10 @@ public class QuotaControllerTest {
             mQuotaController.saveTimingSession(0, "com.android.test",
                     createTimingSession(now - ((10 - i) * MINUTE_IN_MILLIS), 30 * SECOND_IN_MILLIS,
                             2));
-            mQuotaController.incrementJobCount(0, "com.android.test", 2);
 
             synchronized (mQuotaController.mLock) {
+                mQuotaController.incrementJobCountLocked(0, "com.android.test", 2);
+
                 assertEquals("Rare has incorrect quota status with " + (i + 1) + " sessions",
                         i < 2,
                         mQuotaController.isWithinQuotaLocked(0, "com.android.test", RARE_INDEX));

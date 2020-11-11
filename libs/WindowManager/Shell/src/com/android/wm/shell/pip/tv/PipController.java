@@ -44,16 +44,20 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.Pair;
 import android.view.DisplayInfo;
 
 import com.android.wm.shell.R;
 import com.android.wm.shell.WindowManagerShellWrapper;
+import com.android.wm.shell.common.TaskStackListenerCallback;
+import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.pip.PinnedStackListenerForwarder;
 import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.pip.PipBoundsHandler;
 import com.android.wm.shell.pip.PipBoundsState;
 import com.android.wm.shell.pip.PipMediaController;
 import com.android.wm.shell.pip.PipTaskOrganizer;
+import com.android.wm.shell.pip.PipUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -225,6 +229,7 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
             PipTaskOrganizer pipTaskOrganizer,
             PipMediaController pipMediaController,
             PipNotification pipNotification,
+            TaskStackListenerImpl taskStackListener,
             WindowManagerShellWrapper windowManagerShellWrapper) {
         mContext = context;
         mPipBoundsState = pipBoundsState;
@@ -262,6 +267,27 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to register pinned stack listener", e);
         }
+
+        // Handle for system task stack changes.
+        taskStackListener.addListener(
+                new TaskStackListenerCallback() {
+                    @Override
+                    public void onTaskStackChanged() {
+                        PipController.this.onTaskStackChanged();
+                    }
+
+                    @Override
+                    public void onActivityPinned(String packageName, int userId, int taskId,
+                            int stackId) {
+                        PipController.this.onActivityPinned(packageName);
+                    }
+
+                    @Override
+                    public void onActivityRestartAttempt(ActivityManager.RunningTaskInfo task,
+                            boolean homeTaskVisible, boolean clearedTask, boolean wasVisible) {
+                        PipController.this.onActivityRestartAttempt(task, clearedTask);
+                    }
+                });
 
         // TODO(b/169395392) Refactor PipMenuActivity to PipMenuView
         PipMenuActivity.setPipController(this);
@@ -351,8 +377,7 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
         resizePinnedStack(STATE_NO_PIP);
     }
 
-    @Override
-    public void onActivityPinned(String packageName) {
+    private void onActivityPinned(String packageName) {
         if (DEBUG) Log.d(TAG, "onActivityPinned()");
 
         RootTaskInfo taskInfo = getPinnedTaskInfo();
@@ -371,11 +396,9 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
         }
     }
 
-    @Override
-    public void onActivityRestartAttempt(ActivityManager.RunningTaskInfo task,
+    private void onActivityRestartAttempt(ActivityManager.RunningTaskInfo task,
             boolean clearedTask) {
-        if (task.configuration.windowConfiguration.getWindowingMode()
-                != WINDOWING_MODE_PINNED) {
+        if (task.getWindowingMode() != WINDOWING_MODE_PINNED) {
             return;
         }
         if (DEBUG) Log.d(TAG, "onPinnedActivityRestartAttempt()");
@@ -384,8 +407,7 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
         movePipToFullscreen();
     }
 
-    @Override
-    public void onTaskStackChanged() {
+    private void onTaskStackChanged() {
         if (DEBUG) Log.d(TAG, "onTaskStackChanged()");
 
         if (getState() != STATE_NO_PIP) {
