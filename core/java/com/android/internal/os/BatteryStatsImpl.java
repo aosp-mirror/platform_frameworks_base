@@ -4014,7 +4014,7 @@ public class BatteryStatsImpl extends BatteryStats {
 
     /**
      * Schedules a read of the latest cpu times before removing the isolated UID.
-     * @see #removeIsolatedUidLocked(int)
+     * @see #removeIsolatedUidLocked(int, int, int)
      */
     public void scheduleRemoveIsolatedUidLocked(int isolatedUid, int appUid) {
         int curUid = mIsolatedUids.get(isolatedUid, -1);
@@ -4028,14 +4028,6 @@ public class BatteryStatsImpl extends BatteryStats {
     /**
      * This should only be called after the cpu times have been read.
      * @see #scheduleRemoveIsolatedUidLocked(int, int)
-     */
-    @GuardedBy("this")
-    public void removeIsolatedUidLocked(int isolatedUid) {
-        removeIsolatedUidLocked(isolatedUid, mClocks.elapsedRealtime(), mClocks.uptimeMillis());
-    }
-
-    /**
-     * @see #removeIsolatedUidLocked(int)
      */
     @GuardedBy("this")
     public void removeIsolatedUidLocked(int isolatedUid, long elapsedRealtimeMs, long uptimeMs) {
@@ -11429,13 +11421,6 @@ public class BatteryStatsImpl extends BatteryStats {
      * Distribute WiFi energy info and network traffic to apps.
      * @param info The energy information from the WiFi controller.
      */
-    public void updateWifiState(@Nullable final WifiActivityEnergyInfo info) {
-        updateWifiState(info, mClocks.elapsedRealtime(), mClocks.uptimeMillis());
-    }
-
-    /**
-     * @see #updateWifiState(WifiActivityEnergyInfo)
-     */
     public void updateWifiState(@Nullable final WifiActivityEnergyInfo info,
             long elapsedRealtimeMs, long uptimeMs) {
         if (DEBUG_ENERGY) {
@@ -11714,13 +11699,6 @@ public class BatteryStatsImpl extends BatteryStats {
     /**
      * Distribute Cell radio energy info and network traffic to apps.
      */
-    public void updateMobileRadioState(@Nullable final ModemActivityInfo activityInfo) {
-        updateMobileRadioState(activityInfo, mClocks.elapsedRealtime(), mClocks.uptimeMillis());
-    }
-
-    /**
-     * @see #updateMobileRadioState(ModemActivityInfo)
-     */
     public void updateMobileRadioState(@Nullable final ModemActivityInfo activityInfo,
             long elapsedRealtimeMs, long uptimeMs) {
         if (DEBUG_ENERGY) {
@@ -11954,13 +11932,6 @@ public class BatteryStatsImpl extends BatteryStats {
      *
      * @param info The energy information from the bluetooth controller.
      */
-    public void updateBluetoothStateLocked(@Nullable final BluetoothActivityEnergyInfo info) {
-        updateBluetoothStateLocked(info, mClocks.elapsedRealtime(), mClocks.uptimeMillis());
-    }
-
-    /**
-     * @see #updateBluetoothStateLocked(BluetoothActivityEnergyInfo)
-     */
     public void updateBluetoothStateLocked(@Nullable final BluetoothActivityEnergyInfo info,
             long elapsedRealtimeMs, long uptimeMs) {
         if (DEBUG_ENERGY) {
@@ -12137,13 +12108,6 @@ public class BatteryStatsImpl extends BatteryStats {
      * Read and record Resource Power Manager (RPM) state and voter times.
      * If RPM stats were fetched more recently than RPM_STATS_UPDATE_FREQ_MS ago, uses the old data
      * instead of fetching it anew.
-     */
-    public void updateRpmStatsLocked() {
-        updateRpmStatsLocked(mClocks.elapsedRealtime() * 1000);
-    }
-
-    /**
-     * @see #updateRpmStatsLocked()
      */
     public void updateRpmStatsLocked(long elapsedRealtimeUs) {
         if (mPlatformIdleStateCallback == null) return;
