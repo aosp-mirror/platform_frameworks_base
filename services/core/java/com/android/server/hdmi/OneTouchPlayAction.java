@@ -19,7 +19,6 @@ import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiPlaybackClient.OneTouchPlayCallback;
 import android.hardware.hdmi.IHdmiControlCallback;
 import android.os.RemoteException;
-import android.provider.Settings.Global;
 import android.util.Slog;
 
 import java.util.ArrayList;
@@ -166,8 +165,9 @@ final class OneTouchPlayAction extends HdmiCecFeatureAction {
         if (service.isAudioSystemDevice()) {
             return false;
         }
-        String sendStandbyOnSleep = service.readStringSetting(
-                Global.HDMI_CONTROL_SEND_STANDBY_ON_SLEEP, "");
+        @HdmiControlManager.StandbyBehavior String sendStandbyOnSleep =
+                service.getHdmiCecConfig().getStringValue(
+                        HdmiControlManager.CEC_SETTING_NAME_SEND_STANDBY_ON_SLEEP);
         return sendStandbyOnSleep.equals(HdmiControlManager.SEND_STANDBY_ON_SLEEP_BROADCAST);
     }
 }
