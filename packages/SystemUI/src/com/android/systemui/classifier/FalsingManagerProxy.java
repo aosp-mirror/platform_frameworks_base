@@ -19,10 +19,12 @@ package com.android.systemui.classifier;
 import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.BRIGHTLINE_FALSING_MANAGER_ENABLED;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.hardware.SensorManager;
 import android.net.Uri;
 import android.provider.DeviceConfig;
 import android.view.MotionEvent;
+import android.view.ViewConfiguration;
 
 import androidx.annotation.NonNull;
 
@@ -61,6 +63,8 @@ public class FalsingManagerProxy implements FalsingManager, Dumpable {
     private static final String PROXIMITY_SENSOR_TAG = "FalsingManager";
 
     private final ProximitySensor mProximitySensor;
+    private final Resources mResources;
+    private final ViewConfiguration mViewConfiguration;
     private final FalsingDataProvider mFalsingDataProvider;
     private FalsingManager mInternalFalsingManager;
     private DeviceConfig.OnPropertiesChangedListener mDeviceConfigListener;
@@ -79,12 +83,16 @@ public class FalsingManagerProxy implements FalsingManager, Dumpable {
             DumpManager dumpManager,
             @UiBackground Executor uiBgExecutor,
             StatusBarStateController statusBarStateController,
+            @Main Resources resources,
+            ViewConfiguration viewConfiguration,
             FalsingDataProvider falsingDataProvider) {
         mProximitySensor = proximitySensor;
         mDockManager = dockManager;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mUiBgExecutor = uiBgExecutor;
         mStatusBarStateController = statusBarStateController;
+        mResources = resources;
+        mViewConfiguration = viewConfiguration;
         mFalsingDataProvider = falsingDataProvider;
         mProximitySensor.setTag(PROXIMITY_SENSOR_TAG);
         mProximitySensor.setDelay(SensorManager.SENSOR_DELAY_GAME);
@@ -147,6 +155,8 @@ public class FalsingManagerProxy implements FalsingManager, Dumpable {
                     mKeyguardUpdateMonitor,
                     mProximitySensor,
                     mDeviceConfig,
+                    mResources,
+                    mViewConfiguration,
                     mDockManager,
                     mStatusBarStateController
             );
@@ -189,6 +199,17 @@ public class FalsingManagerProxy implements FalsingManager, Dumpable {
     @Override
     public boolean isFalseTouch(@Classifier.InteractionType int interactionType) {
         return mInternalFalsingManager.isFalseTouch(interactionType);
+    }
+
+
+    @Override
+    public boolean isFalseTap(boolean robustCheck) {
+        return mInternalFalsingManager.isFalseTap(robustCheck);
+    }
+
+    @Override
+    public boolean isFalseDoubleTap() {
+        return mInternalFalsingManager.isFalseDoubleTap();
     }
 
     @Override

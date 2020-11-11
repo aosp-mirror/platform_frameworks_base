@@ -20,21 +20,26 @@ import static com.android.systemui.classifier.FalsingManagerImpl.FALSING_REMAIN_
 import static com.android.systemui.classifier.FalsingManagerImpl.FALSING_SUCCESS;
 
 import android.app.ActivityManager;
+import android.content.res.Resources;
 import android.hardware.biometrics.BiometricSourceType;
 import android.net.Uri;
 import android.os.Build;
 import android.util.Log;
 import android.view.MotionEvent;
+import android.view.ViewConfiguration;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
+import com.android.systemui.R;
 import com.android.systemui.classifier.Classifier;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.StatusBarState;
+import com.android.systemui.statusbar.phone.NotificationTapHelper;
 import com.android.systemui.util.DeviceConfigProxy;
 import com.android.systemui.util.sensors.ProximitySensor;
 import com.android.systemui.util.sensors.ThresholdSensor;
@@ -64,6 +69,8 @@ public class BrightLineFalsingManager implements FalsingManager {
     private final ProximitySensor mProximitySensor;
     private final DockManager mDockManager;
     private final StatusBarStateController mStatusBarStateController;
+    private final SingleTapClassifier mSingleTapClassifier;
+    private final DoubleTapClassifier mDoubleTapClassifier;
     private boolean mSessionStarted;
     private MetricsLogger mMetricsLogger;
     private int mIsFalseTouchCalls;
@@ -106,8 +113,9 @@ public class BrightLineFalsingManager implements FalsingManager {
 
     public BrightLineFalsingManager(FalsingDataProvider falsingDataProvider,
             KeyguardUpdateMonitor keyguardUpdateMonitor, ProximitySensor proximitySensor,
-            DeviceConfigProxy deviceConfigProxy,
-            DockManager dockManager, StatusBarStateController statusBarStateController) {
+            DeviceConfigProxy deviceConfigProxy, @Main Resources resources,
+            ViewConfiguration viewConfiguration, DockManager dockManager,
+            StatusBarStateController statusBarStateController) {
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mDataProvider = falsingDataProvider;
         mProximitySensor = proximitySensor;
@@ -129,6 +137,12 @@ public class BrightLineFalsingManager implements FalsingManager {
         mClassifiers.add(distanceClassifier);
         mClassifiers.add(proximityClassifier);
         mClassifiers.add(new ZigZagClassifier(mDataProvider, deviceConfigProxy));
+
+        mSingleTapClassifier = new SingleTapClassifier(
+                mDataProvider, viewConfiguration.getScaledTouchSlop());
+        mDoubleTapClassifier = new DoubleTapClassifier(mDataProvider, mSingleTapClassifier,
+                resources.getDimension(R.dimen.double_tap_slop),
+                NotificationTapHelper.DOUBLE_TAP_TIMEOUT_MS);
     }
 
     private void registerSensors() {
@@ -234,6 +248,36 @@ public class BrightLineFalsingManager implements FalsingManager {
         }
 
         return mPreviousResult;
+    }
+
+    @Override
+    public boolean isFalseTap(boolean robustCheck) {
+        if (!mSingleTapClassifier.isTap(mDataProvider.getRecentMotionEvents())) {
+            logInfo(String.format(
+                    (Locale) null, "{classifier=%s}", mSingleTapClassifier.getClass().getName()));
+            String reason = mSingleTapClassifier.getReason();
+            if (reason != null) {
+                logInfo(reason);
+            }
+            return true;
+        }
+
+        // TODO(b/172655679): we always reject single-taps when doing a robust check for now.
+        return robustCheck;
+    }
+
+    @Override
+    public boolean isFalseDoubleTap() {
+        boolean result = mDoubleTapClassifier.isFalseTouch();
+        if (result) {
+            logInfo(String.format(
+                    (Locale) null, "{classifier=%s}", mDoubleTapClassifier.getClass().getName()));
+            String reason = mDoubleTapClassifier.getReason();
+            if (reason != null) {
+                logInfo(reason);
+            }
+        }
+        return result;
     }
 
     @Override

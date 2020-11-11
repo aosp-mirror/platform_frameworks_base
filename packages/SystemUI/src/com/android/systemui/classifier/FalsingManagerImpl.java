@@ -328,6 +328,16 @@ public class FalsingManagerImpl implements FalsingManager {
         return isFalse;
     }
 
+    @Override
+    public boolean isFalseTap(boolean robustCheck) {
+        return true;
+    }
+
+    @Override
+    public boolean isFalseDoubleTap() {
+        return false;
+    }
+
     private void clearPendingWtf() {
         if (mPendingWtf != null) {
             mHandler.removeCallbacks(mPendingWtf);

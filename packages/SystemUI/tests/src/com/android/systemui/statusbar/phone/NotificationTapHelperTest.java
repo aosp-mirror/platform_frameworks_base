@@ -16,17 +16,12 @@
 
 package com.android.systemui.statusbar.phone;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyFloat;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.res.Resources;
-import android.os.SystemClock;
 import android.testing.AndroidTestingRunner;
 import android.view.MotionEvent;
 import android.view.View;
@@ -36,48 +31,47 @@ import androidx.test.filters.SmallTest;
 
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.classifier.FalsingManagerFake;
+import com.android.systemui.util.concurrency.FakeExecutor;
+import com.android.systemui.util.time.FakeSystemClock;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
-public class DoubleTapHelperTest extends SysuiTestCase {
+public class NotificationTapHelperTest extends SysuiTestCase {
 
-    private DoubleTapHelper mDoubleTapHelper;
-    private int mTouchSlop;
-    private int mDoubleTouchSlop;
+    private NotificationTapHelper mNotificationTapHelper;
+    private final FakeSystemClock mFakeSystemClock = new FakeSystemClock();
+    private final FalsingManagerFake mFalsingManager = new FalsingManagerFake();
+    private final FakeExecutor mFakeExecutor = new FakeExecutor(mFakeSystemClock);
     @Mock private View mView;
-    @Mock private DoubleTapHelper.ActivationListener mActivationListener;
-    @Mock private DoubleTapHelper.DoubleTapListener mDoubleTapListener;
-    @Mock private DoubleTapHelper.SlideBackListener mSlideBackListener;
-    @Mock private DoubleTapHelper.DoubleTapLogListener mDoubleTapLogListener;
+    @Mock private NotificationTapHelper.ActivationListener mActivationListener;
+    @Mock private NotificationTapHelper.DoubleTapListener mDoubleTapListener;
+    @Mock private NotificationTapHelper.SlideBackListener mSlideBackListener;
     @Mock private Resources mResources;
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        mTouchSlop = ViewConfiguration.get(mContext).getScaledTouchSlop();
-        // The double tap slop has to be less than the regular slop, otherwise it has no effect.
-        mDoubleTouchSlop = mTouchSlop - 1;
         when(mView.getContext()).thenReturn(mContext);
         when(mView.getResources()).thenReturn(mResources);
         when(mResources.getDimension(R.dimen.double_tap_slop))
-                .thenReturn((float) mDoubleTouchSlop);
+                .thenReturn((float) ViewConfiguration.get(mContext).getScaledTouchSlop() - 1);
 
-        mDoubleTapHelper = new DoubleTapHelper(mView,
-                                               mActivationListener,
-                                               mDoubleTapListener,
-                                               mSlideBackListener, mDoubleTapLogListener);
+        mFalsingManager.setFalseRobustTap(true);  // Test double tapping most of the time.
+
+        mNotificationTapHelper = new NotificationTapHelper.Factory(mFalsingManager, mFakeExecutor)
+                .create(mActivationListener, mDoubleTapListener, mSlideBackListener);
     }
 
     @Test
     public void testDoubleTap_success() {
-        long downtimeA = SystemClock.uptimeMillis();
+        long downtimeA = 100;
         long downtimeB = downtimeA + 100;
 
         MotionEvent evDownA = MotionEvent.obtain(downtimeA,
@@ -105,16 +99,13 @@ public class DoubleTapHelperTest extends SysuiTestCase {
                                                1,
                                                0);
 
-        mDoubleTapHelper.onTouchEvent(evDownA);
-        mDoubleTapHelper.onTouchEvent(evUpA);
+        mNotificationTapHelper.onTouchEvent(evDownA);
+        mNotificationTapHelper.onTouchEvent(evUpA);
         verify(mActivationListener).onActiveChanged(true);
-        verify(mView).postDelayed(any(Runnable.class), anyLong());
-        verify(mDoubleTapLogListener, never()).onDoubleTapLog(anyBoolean(), anyFloat(), anyFloat());
         verify(mDoubleTapListener, never()).onDoubleTap();
 
-        mDoubleTapHelper.onTouchEvent(evDownB);
-        mDoubleTapHelper.onTouchEvent(evUpB);
-        verify(mDoubleTapLogListener).onDoubleTapLog(true, 0, 0);
+        mNotificationTapHelper.onTouchEvent(evDownB);
+        mNotificationTapHelper.onTouchEvent(evUpB);
         verify(mDoubleTapListener).onDoubleTap();
 
         evDownA.recycle();
@@ -125,7 +116,7 @@ public class DoubleTapHelperTest extends SysuiTestCase {
 
     @Test
     public void testSingleTap_timeout() {
-        long downtimeA = SystemClock.uptimeMillis();
+        long downtimeA = 100;
 
         MotionEvent evDownA = MotionEvent.obtain(downtimeA,
                                                  downtimeA,
@@ -140,21 +131,19 @@ public class DoubleTapHelperTest extends SysuiTestCase {
                                                1,
                                                0);
 
-        ArgumentCaptor<Runnable> runnableCaptor = ArgumentCaptor.forClass(Runnable.class);
-        mDoubleTapHelper.onTouchEvent(evDownA);
-        mDoubleTapHelper.onTouchEvent(evUpA);
+        mNotificationTapHelper.onTouchEvent(evDownA);
+        mNotificationTapHelper.onTouchEvent(evUpA);
         verify(mActivationListener).onActiveChanged(true);
-        verify(mView).postDelayed(runnableCaptor.capture(), anyLong());
-        runnableCaptor.getValue().run();
-        verify(mActivationListener).onActiveChanged(true);
+        drainExecutor();
+        verify(mActivationListener).onActiveChanged(false);
 
         evDownA.recycle();
         evUpA.recycle();
     }
 
     @Test
-    public void testSingleTap_slop() {
-        long downtimeA = SystemClock.uptimeMillis();
+    public void testSingleTap_falsed() {
+        long downtimeA = 100;
 
         MotionEvent evDownA = MotionEvent.obtain(downtimeA,
                                                  downtimeA,
@@ -165,13 +154,13 @@ public class DoubleTapHelperTest extends SysuiTestCase {
         MotionEvent evUpA = MotionEvent.obtain(downtimeA,
                                                downtimeA + 1,
                                                MotionEvent.ACTION_UP,
-                                               1 + mTouchSlop,
+                                               1,
                                                1,
                                                0);
 
-        ArgumentCaptor<Runnable> runnableCaptor = ArgumentCaptor.forClass(Runnable.class);
-        mDoubleTapHelper.onTouchEvent(evDownA);
-        mDoubleTapHelper.onTouchEvent(evUpA);
+        mFalsingManager.setFalseTap(true);
+        mNotificationTapHelper.onTouchEvent(evDownA);
+        mNotificationTapHelper.onTouchEvent(evUpA);
         verify(mActivationListener, never()).onActiveChanged(true);
         verify(mDoubleTapListener, never()).onDoubleTap();
 
@@ -180,8 +169,8 @@ public class DoubleTapHelperTest extends SysuiTestCase {
     }
 
     @Test
-    public void testDoubleTap_slop() {
-        long downtimeA = SystemClock.uptimeMillis();
+    public void testDoubleTap_falsed() {
+        long downtimeA = 100;
         long downtimeB = downtimeA + 100;
 
         MotionEvent evDownA = MotionEvent.obtain(downtimeA,
@@ -206,17 +195,17 @@ public class DoubleTapHelperTest extends SysuiTestCase {
                                                downtimeB + 1,
                                                MotionEvent.ACTION_UP,
                                                1,
-                                               1 + mDoubleTouchSlop,
+                                               1,
                                                0);
 
-        mDoubleTapHelper.onTouchEvent(evDownA);
-        mDoubleTapHelper.onTouchEvent(evUpA);
-        verify(mActivationListener).onActiveChanged(true);
-        verify(mView).postDelayed(any(Runnable.class), anyLong());
+        mFalsingManager.setFalseDoubleTap(true);
 
-        mDoubleTapHelper.onTouchEvent(evDownB);
-        mDoubleTapHelper.onTouchEvent(evUpB);
-        verify(mDoubleTapLogListener).onDoubleTapLog(false, 0, mDoubleTouchSlop);
+        mNotificationTapHelper.onTouchEvent(evDownA);
+        mNotificationTapHelper.onTouchEvent(evUpA);
+        verify(mActivationListener).onActiveChanged(true);
+
+        mNotificationTapHelper.onTouchEvent(evDownB);
+        mNotificationTapHelper.onTouchEvent(evUpB);
         verify(mActivationListener).onActiveChanged(false);
         verify(mDoubleTapListener, never()).onDoubleTap();
 
@@ -228,8 +217,7 @@ public class DoubleTapHelperTest extends SysuiTestCase {
 
     @Test
     public void testSlideBack() {
-        long downtimeA = SystemClock.uptimeMillis();
-        long downtimeB = downtimeA + 100;
+        long downtimeA = 100;
 
         MotionEvent evDownA = MotionEvent.obtain(downtimeA,
                                                  downtimeA,
@@ -243,42 +231,24 @@ public class DoubleTapHelperTest extends SysuiTestCase {
                                                1,
                                                1,
                                                0);
-        MotionEvent evDownB = MotionEvent.obtain(downtimeB,
-                                                 downtimeB,
-                                                 MotionEvent.ACTION_DOWN,
-                                                 1,
-                                                 1,
-                                                 0);
-        MotionEvent evUpB = MotionEvent.obtain(downtimeB,
-                                               downtimeB + 1,
-                                               MotionEvent.ACTION_UP,
-                                               1,
-                                               1,
-                                               0);
 
         when(mSlideBackListener.onSlideBack()).thenReturn(true);
 
-        mDoubleTapHelper.onTouchEvent(evDownA);
-        mDoubleTapHelper.onTouchEvent(evUpA);
+        mNotificationTapHelper.onTouchEvent(evDownA);
+        mNotificationTapHelper.onTouchEvent(evUpA);
         verify(mActivationListener, never()).onActiveChanged(true);
         verify(mActivationListener, never()).onActiveChanged(false);
         verify(mDoubleTapListener, never()).onDoubleTap();
-        mDoubleTapHelper.onTouchEvent(evDownB);
-        mDoubleTapHelper.onTouchEvent(evUpB);
-        verify(mActivationListener, never()).onActiveChanged(true);
-        verify(mActivationListener, never()).onActiveChanged(false);
-        verify(mDoubleTapListener, never()).onDoubleTap();
+        verify(mSlideBackListener).onSlideBack();
 
         evDownA.recycle();
         evUpA.recycle();
-        evDownB.recycle();
-        evUpB.recycle();
     }
 
 
     @Test
     public void testMoreThanTwoTaps() {
-        long downtimeA = SystemClock.uptimeMillis();
+        long downtimeA = 100;
         long downtimeB = downtimeA + 100;
         long downtimeC = downtimeB + 100;
         long downtimeD = downtimeC + 100;
@@ -332,38 +302,36 @@ public class DoubleTapHelperTest extends SysuiTestCase {
                                                1,
                                                0);
 
-        mDoubleTapHelper.onTouchEvent(evDownA);
-        mDoubleTapHelper.onTouchEvent(evUpA);
+        mNotificationTapHelper.onTouchEvent(evDownA);
+        mNotificationTapHelper.onTouchEvent(evUpA);
         verify(mActivationListener).onActiveChanged(true);
-        verify(mView).postDelayed(any(Runnable.class), anyLong());
-        verify(mDoubleTapLogListener, never()).onDoubleTapLog(anyBoolean(), anyFloat(), anyFloat());
         verify(mDoubleTapListener, never()).onDoubleTap();
 
-        mDoubleTapHelper.onTouchEvent(evDownB);
-        mDoubleTapHelper.onTouchEvent(evUpB);
-        verify(mDoubleTapLogListener).onDoubleTapLog(true, 0, 0);
+        mNotificationTapHelper.onTouchEvent(evDownB);
+        mNotificationTapHelper.onTouchEvent(evUpB);
         verify(mDoubleTapListener).onDoubleTap();
 
         reset(mView);
         reset(mActivationListener);
-        reset(mDoubleTapLogListener);
         reset(mDoubleTapListener);
 
-        mDoubleTapHelper.onTouchEvent(evDownC);
-        mDoubleTapHelper.onTouchEvent(evUpC);
+        mNotificationTapHelper.onTouchEvent(evDownC);
+        mNotificationTapHelper.onTouchEvent(evUpC);
         verify(mActivationListener).onActiveChanged(true);
-        verify(mView).postDelayed(any(Runnable.class), anyLong());
-        verify(mDoubleTapLogListener, never()).onDoubleTapLog(anyBoolean(), anyFloat(), anyFloat());
         verify(mDoubleTapListener, never()).onDoubleTap();
 
-        mDoubleTapHelper.onTouchEvent(evDownD);
-        mDoubleTapHelper.onTouchEvent(evUpD);
-        verify(mDoubleTapLogListener).onDoubleTapLog(true, 0, 0);
+        mNotificationTapHelper.onTouchEvent(evDownD);
+        mNotificationTapHelper.onTouchEvent(evUpD);
         verify(mDoubleTapListener).onDoubleTap();
 
         evDownA.recycle();
         evUpA.recycle();
         evDownB.recycle();
         evUpB.recycle();
+    }
+
+    private void drainExecutor() {
+        mFakeExecutor.advanceClockToLast();
+        mFakeExecutor.runAllReady();
     }
 }

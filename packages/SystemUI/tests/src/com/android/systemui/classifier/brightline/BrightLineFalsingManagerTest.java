@@ -20,14 +20,18 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
+import android.content.res.Resources;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.util.DisplayMetrics;
+import android.view.ViewConfiguration;
 
 import com.android.internal.logging.testing.UiEventLoggerFake;
 import com.android.keyguard.KeyguardUpdateMonitor;
+import com.android.systemui.R;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.dock.DockManagerFake;
 import com.android.systemui.statusbar.StatusBarState;
@@ -37,6 +41,7 @@ import com.android.systemui.util.DeviceConfigProxy;
 import com.android.systemui.util.DeviceConfigProxyFake;
 import com.android.systemui.util.sensors.ProximitySensor;
 import com.android.systemui.util.sensors.ThresholdSensor;
+import com.android.systemui.util.time.FakeSystemClock;
 import com.android.systemui.utils.leaks.FakeBatteryController;
 import com.android.systemui.utils.leaks.LeakCheckedTest;
 
@@ -56,6 +61,10 @@ public class BrightLineFalsingManagerTest extends LeakCheckedTest {
     private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     @Mock
     private ProximitySensor mProximitySensor;
+    @Mock
+    private Resources mResources;
+    @Mock
+    private ViewConfiguration mViewConfiguration;
     private SysuiStatusBarStateController mStatusBarStateController;
     private FalsingDataProvider mFalsingDataProvider;
     private FakeBatteryController mFakeBatteryController;
@@ -71,14 +80,17 @@ public class BrightLineFalsingManagerTest extends LeakCheckedTest {
         dm.ydpi = 100;
         dm.widthPixels = 100;
         dm.heightPixels = 100;
-        mFalsingDataProvider = new FalsingDataProvider(dm, mFakeBatteryController);
+        mFalsingDataProvider = new FalsingDataProvider(dm, mFakeBatteryController,
+                new FakeSystemClock());
         DeviceConfigProxy deviceConfigProxy = new DeviceConfigProxyFake();
         DockManager dockManager = new DockManagerFake();
         mStatusBarStateController = new StatusBarStateControllerImpl(new UiEventLoggerFake());
         mStatusBarStateController.setState(StatusBarState.KEYGUARD);
+        when(mResources.getDimension(R.dimen.double_tap_slop)).thenReturn(1f);
+        when(mViewConfiguration.getScaledTouchSlop()).thenReturn(1);
         mFalsingManager = new BrightLineFalsingManager(mFalsingDataProvider,
-                mKeyguardUpdateMonitor, mProximitySensor, deviceConfigProxy, dockManager,
-                mStatusBarStateController);
+                mKeyguardUpdateMonitor, mProximitySensor, deviceConfigProxy, mResources,
+                mViewConfiguration, dockManager, mStatusBarStateController);
     }
 
     @Test

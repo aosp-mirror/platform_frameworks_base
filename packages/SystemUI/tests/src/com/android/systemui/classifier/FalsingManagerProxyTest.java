@@ -21,9 +21,11 @@ import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.BRIGHT
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.junit.Assert.assertThat;
 
+import android.content.res.Resources;
 import android.provider.DeviceConfig;
 import android.testing.AndroidTestingRunner;
 import android.util.DisplayMetrics;
+import android.view.ViewConfiguration;
 
 import androidx.test.filters.SmallTest;
 
@@ -70,6 +72,8 @@ public class FalsingManagerProxyTest extends LeakCheckedTest {
     private DockManager mDockManager = new DockManagerFake();
     private StatusBarStateController mStatusBarStateController =
             new StatusBarStateControllerImpl(new UiEventLoggerFake());
+    @Mock private Resources mResources;
+    @Mock private ViewConfiguration mViewConfiguration;
 
     @Before
     public void setup() {
@@ -78,7 +82,8 @@ public class FalsingManagerProxyTest extends LeakCheckedTest {
         mDeviceConfig.setProperty(DeviceConfig.NAMESPACE_SYSTEMUI,
                 BRIGHTLINE_FALSING_MANAGER_ENABLED, "false", false);
         mFalsingDataProvider = new FalsingDataProvider(
-                new DisplayMetrics(), new FakeBatteryController(getLeakCheck()));
+                new DisplayMetrics(), new FakeBatteryController(getLeakCheck()),
+                new FakeSystemClock());
     }
 
     @After
@@ -92,7 +97,8 @@ public class FalsingManagerProxyTest extends LeakCheckedTest {
     public void test_brightLineFalsingManagerDisabled() {
         mProxy = new FalsingManagerProxy(getContext(), mPluginManager, mExecutor,
                 mProximitySensor, mDeviceConfig, mDockManager, mKeyguardUpdateMonitor,
-                mDumpManager, mUiBgExecutor, mStatusBarStateController, mFalsingDataProvider);
+                mDumpManager, mUiBgExecutor, mStatusBarStateController, mResources,
+                mViewConfiguration, mFalsingDataProvider);
         assertThat(mProxy.getInternalFalsingManager(), instanceOf(FalsingManagerImpl.class));
     }
 
@@ -103,7 +109,8 @@ public class FalsingManagerProxyTest extends LeakCheckedTest {
         mExecutor.runAllReady();
         mProxy = new FalsingManagerProxy(getContext(), mPluginManager, mExecutor,
                 mProximitySensor, mDeviceConfig, mDockManager, mKeyguardUpdateMonitor,
-                mDumpManager, mUiBgExecutor, mStatusBarStateController, mFalsingDataProvider);
+                mDumpManager, mUiBgExecutor, mStatusBarStateController, mResources,
+                mViewConfiguration, mFalsingDataProvider);
         assertThat(mProxy.getInternalFalsingManager(), instanceOf(BrightLineFalsingManager.class));
     }
 
@@ -111,7 +118,8 @@ public class FalsingManagerProxyTest extends LeakCheckedTest {
     public void test_brightLineFalsingManagerToggled() throws InterruptedException {
         mProxy = new FalsingManagerProxy(getContext(), mPluginManager, mExecutor,
                 mProximitySensor, mDeviceConfig, mDockManager, mKeyguardUpdateMonitor,
-                mDumpManager, mUiBgExecutor, mStatusBarStateController, mFalsingDataProvider);
+                mDumpManager, mUiBgExecutor, mStatusBarStateController, mResources,
+                mViewConfiguration, mFalsingDataProvider);
         assertThat(mProxy.getInternalFalsingManager(), instanceOf(FalsingManagerImpl.class));
 
         mDeviceConfig.setProperty(DeviceConfig.NAMESPACE_SYSTEMUI,

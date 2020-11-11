@@ -23,9 +23,13 @@ import android.view.MotionEvent.PointerProperties;
 
 import com.android.systemui.classifier.Classifier;
 import com.android.systemui.statusbar.policy.BatteryController;
+import com.android.systemui.util.time.SystemClock;
 
 import java.util.ArrayList;
+import java.util.Deque;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 
 import javax.inject.Inject;
 
@@ -35,18 +39,21 @@ import javax.inject.Inject;
 public class FalsingDataProvider {
 
     private static final long MOTION_EVENT_AGE_MS = 1000;
+    private static final long EXTENDED_MOTION_EVENT_AGE_MS = 30 * 1000;
     private static final float THREE_HUNDRED_SIXTY_DEG = (float) (2 * Math.PI);
 
     private final int mWidthPixels;
     private final int mHeightPixels;
     private final BatteryController mBatteryController;
+    private final SystemClock mSystemClock;
     private final float mXdpi;
     private final float mYdpi;
 
     private @Classifier.InteractionType int mInteractionType;
-    private final TimeLimitedMotionEventBuffer mRecentMotionEvents =
-            new TimeLimitedMotionEventBuffer(MOTION_EVENT_AGE_MS);
+    private final Deque<TimeLimitedMotionEventBuffer> mExtendedMotionEvents = new LinkedList<>();
 
+    private TimeLimitedMotionEventBuffer mRecentMotionEvents =
+            new TimeLimitedMotionEventBuffer(MOTION_EVENT_AGE_MS);
     private boolean mDirty = true;
 
     private float mAngle = 0;
@@ -55,12 +62,14 @@ public class FalsingDataProvider {
     private MotionEvent mLastMotionEvent;
 
     @Inject
-    public FalsingDataProvider(DisplayMetrics displayMetrics, BatteryController batteryController) {
+    public FalsingDataProvider(DisplayMetrics displayMetrics, BatteryController batteryController,
+            SystemClock systemClock) {
         mXdpi = displayMetrics.xdpi;
         mYdpi = displayMetrics.ydpi;
         mWidthPixels = displayMetrics.widthPixels;
         mHeightPixels = displayMetrics.heightPixels;
         mBatteryController = batteryController;
+        mSystemClock = systemClock;
 
         FalsingClassifier.logInfo("xdpi, ydpi: " + getXdpi() + ", " + getYdpi());
         FalsingClassifier.logInfo("width, height: " + getWidthPixels() + ", " + getHeightPixels());
@@ -81,7 +90,10 @@ public class FalsingDataProvider {
         }
 
         if (motionEvent.getActionMasked() == MotionEvent.ACTION_DOWN) {
-            mRecentMotionEvents.clear();
+            if (!mRecentMotionEvents.isEmpty()) {
+                mExtendedMotionEvents.addFirst(mRecentMotionEvents);
+                mRecentMotionEvents = new TimeLimitedMotionEventBuffer(MOTION_EVENT_AGE_MS);
+            }
         }
         mRecentMotionEvents.addAll(motionEvents);
 
@@ -110,6 +122,16 @@ public class FalsingDataProvider {
 
     List<MotionEvent> getRecentMotionEvents() {
         return mRecentMotionEvents;
+    }
+
+    /** Returns recent gestures, exclusive of the most recent gesture. Newer gestures come first. */
+    Queue<? extends List<MotionEvent>> getHistoricalMotionEvents() {
+        long nowMs = mSystemClock.uptimeMillis();
+
+        mExtendedMotionEvents.removeIf(
+                motionEvents -> motionEvents.isFullyExpired(nowMs - EXTENDED_MOTION_EVENT_AGE_MS));
+
+        return mExtendedMotionEvents;
     }
 
     /**
