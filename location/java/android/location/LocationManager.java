@@ -202,6 +202,7 @@ public class LocationManager {
      *
      * @hide
      */
+    @SystemApi
     @TestApi
     public static final String FUSED_PROVIDER = "fused";
 
