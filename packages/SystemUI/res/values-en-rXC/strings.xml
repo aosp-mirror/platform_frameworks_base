@@ -754,7 +754,7 @@
     <string name="notification_menu_snooze_description" msgid="4740133348901973244">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‎‎‎‏‏‏‎‎‏‎‎‎‎‏‎‏‎‏‏‎‎‎‏‎‏‎‏‎‏‎‏‎‎‎‎‏‎‏‎‎‏‎‎‎‏‏‏‎‏‏‎‎‏‏‏‏‏‏‎‎‎notification snooze options‎‏‎‎‏‎"</string>
     <string name="notification_menu_snooze_action" msgid="5415729610393475019">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‏‎‏‏‎‎‏‎‏‎‎‎‏‎‎‎‏‎‎‏‎‏‏‎‎‎‏‏‎‎‎‎‏‎‏‏‎‎‎‏‎‎‎‏‎‏‎‏‎‏‏‏‏‏‎‎‏‎‏‏‎Remind me‎‏‎‎‏‎"</string>
     <string name="notification_menu_settings_action" msgid="7085494017202764285">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‎‎‏‎‎‏‎‏‎‏‎‎‏‎‏‏‏‎‏‏‎‏‎‎‎‏‎‎‏‎‏‎‎‎‎‏‏‎‎‎‎‏‏‎‏‎‏‏‏‎‎‏‏‏‏‏‏‏‎‏‎Settings‎‏‎‎‏‎"</string>
-    <string name="snooze_undo" msgid="60890935148417175">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‎‎‎‏‏‎‏‏‎‎‎‎‏‎‏‎‎‏‏‏‏‏‏‏‎‏‏‏‎‎‏‏‏‏‏‏‎‎‏‎‎‎‎‎‎‎‏‎‎‎‎‏‎‎‏‎‏‏‏‎UNDO‎‏‎‎‏‎"</string>
+    <string name="snooze_undo" msgid="60890935148417175">"Undo"</string>
     <string name="snoozed_for_time" msgid="7586689374860469469">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‏‎‎‏‎‏‎‎‏‎‎‏‎‏‎‏‎‏‎‏‏‏‎‎‏‎‏‎‎‏‎‏‏‎‎‏‏‏‎‎‏‎‎‏‏‏‏‎‎‏‎‎‏‏‎‏‏‏‎‏‎Snoozed for ‎‏‎‎‏‏‎<xliff:g id="TIME_AMOUNT">%1$s</xliff:g>‎‏‎‎‏‏‏‎‎‏‎‎‏‎"</string>
     <plurals name="snoozeHourOptions" formatted="false" msgid="2066838694120718170">
       <item quantity="other">‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‏‏‎‎‏‎‏‎‏‏‏‎‏‏‏‎‎‎‏‎‏‏‎‏‎‏‏‏‎‏‏‏‏‎‏‏‎‎‎‏‏‎‎‎‏‏‏‏‏‏‏‏‎‏‎‏‏‎‏‎‎%d hours‎‏‎‎‏‎</item>
