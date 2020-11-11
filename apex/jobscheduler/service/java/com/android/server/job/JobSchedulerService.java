@@ -3139,7 +3139,9 @@ public class JobSchedulerService extends com.android.server.SystemService
     }
 
     void resetExecutionQuota(@NonNull String pkgName, int userId) {
-        mQuotaController.clearAppStats(userId, pkgName);
+        synchronized (mLock) {
+            mQuotaController.clearAppStatsLocked(userId, pkgName);
+        }
     }
 
     void resetScheduleQuota() {

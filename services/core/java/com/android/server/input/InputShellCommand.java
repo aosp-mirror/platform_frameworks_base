@@ -48,6 +48,8 @@ public class InputShellCommand extends ShellCommand {
     private static final float DEFAULT_PRECISION_X = 1.0f;
     private static final float DEFAULT_PRECISION_Y = 1.0f;
     private static final int DEFAULT_EDGE_FLAGS = 0;
+    private static final int DEFAULT_BUTTON_STATE = 0;
+    private static final int DEFAULT_FLAGS = 0;
 
     private static final Map<String, Integer> SOURCES = new HashMap<String, Integer>() {{
             put("keyboard", InputDevice.SOURCE_KEYBOARD);
@@ -110,15 +112,28 @@ public class InputShellCommand extends ShellCommand {
      */
     private void injectMotionEvent(int inputSource, int action, long downTime, long when,
             float x, float y, float pressure, int displayId) {
-        MotionEvent event = MotionEvent.obtain(downTime, when, action, x, y, pressure,
-                DEFAULT_SIZE, DEFAULT_META_STATE, DEFAULT_PRECISION_X, DEFAULT_PRECISION_Y,
-                getInputDeviceId(inputSource), DEFAULT_EDGE_FLAGS);
-        event.setSource(inputSource);
+        final int pointerCount = 1;
+        MotionEvent.PointerProperties[] pointerProperties =
+                new MotionEvent.PointerProperties[pointerCount];
+        MotionEvent.PointerCoords[] pointerCoords = new MotionEvent.PointerCoords[pointerCount];
+        for (int i = 0; i < pointerCount; i++) {
+            pointerProperties[i] = new MotionEvent.PointerProperties();
+            pointerProperties[i].id = i;
+            pointerProperties[i].toolType = getToolType(inputSource);
+            pointerCoords[i] = new MotionEvent.PointerCoords();
+            pointerCoords[i].x = x;
+            pointerCoords[i].y = y;
+            pointerCoords[i].pressure = pressure;
+            pointerCoords[i].size = DEFAULT_SIZE;
+        }
         if (displayId == INVALID_DISPLAY
                 && (inputSource & InputDevice.SOURCE_CLASS_POINTER) != 0) {
             displayId = DEFAULT_DISPLAY;
         }
-        event.setDisplayId(displayId);
+        MotionEvent event = MotionEvent.obtain(downTime, when, action, pointerCount,
+                pointerProperties, pointerCoords, DEFAULT_META_STATE, DEFAULT_BUTTON_STATE,
+                DEFAULT_PRECISION_X, DEFAULT_PRECISION_Y, getInputDeviceId(inputSource),
+                DEFAULT_EDGE_FLAGS, inputSource, displayId, DEFAULT_FLAGS);
         InputManager.getInstance().injectInputEvent(event,
                 InputManager.INJECT_INPUT_EVENT_MODE_WAIT_FOR_FINISH);
     }
@@ -129,6 +144,25 @@ public class InputShellCommand extends ShellCommand {
 
     private int getSource(int inputSource, int defaultSource) {
         return inputSource == InputDevice.SOURCE_UNKNOWN ? defaultSource : inputSource;
+    }
+
+    private int getToolType(int inputSource) {
+        switch(inputSource) {
+            case InputDevice.SOURCE_MOUSE:
+            case InputDevice.SOURCE_MOUSE_RELATIVE:
+            case InputDevice.SOURCE_TRACKBALL:
+                return MotionEvent.TOOL_TYPE_MOUSE;
+
+            case InputDevice.SOURCE_STYLUS:
+            case InputDevice.SOURCE_BLUETOOTH_STYLUS:
+                return MotionEvent.TOOL_TYPE_STYLUS;
+
+            case InputDevice.SOURCE_TOUCHPAD:
+            case InputDevice.SOURCE_TOUCHSCREEN:
+            case InputDevice.SOURCE_TOUCH_NAVIGATION:
+                return MotionEvent.TOOL_TYPE_FINGER;
+        }
+        return MotionEvent.TOOL_TYPE_UNKNOWN;
     }
 
     @Override

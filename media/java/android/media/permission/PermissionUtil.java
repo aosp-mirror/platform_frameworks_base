@@ -17,10 +17,8 @@
 package android.media.permission;
 
 import android.annotation.NonNull;
-import android.app.AppOpsManager;
 import android.content.Context;
 import android.content.PermissionChecker;
-import android.content.pm.PackageManager;
 import android.os.Binder;
 
 import java.util.Objects;
@@ -177,57 +175,6 @@ public class PermissionUtil {
         return PermissionChecker.checkPermissionForDataDelivery(context, permission,
                 identity.pid, identity.uid, identity.packageName, identity.attributionTag,
                 reason);
-    }
-
-    /**
-     * Checks whether the given identity has the given permission to receive data.
-     *
-     * This variant ignores the proc-state for the sake of the check, i.e. overrides any
-     * restrictions that apply specifically to apps running in the background.
-     *
-     * TODO(ytai): This is a temporary hack until we have permissions that are specifically intended
-     *  for background microphone access.
-     *
-     * @param context    A {@link Context}, used for permission checks.
-     * @param identity   The identity to check.
-     * @param permission The identifier of the permission we want to check.
-     * @param reason     The reason why we're requesting the permission, for auditing purposes.
-     * @return The permission check result which is either
-     * {@link PermissionChecker#PERMISSION_GRANTED}
-     * or {@link PermissionChecker#PERMISSION_SOFT_DENIED} or
-     * {@link PermissionChecker#PERMISSION_HARD_DENIED}.
-     */
-    public static int checkPermissionForDataDeliveryIgnoreProcState(@NonNull Context context,
-            @NonNull Identity identity,
-            @NonNull String permission,
-            @NonNull String reason) {
-        if (context.checkPermission(permission, identity.pid, identity.uid)
-                != PackageManager.PERMISSION_GRANTED) {
-            return PermissionChecker.PERMISSION_HARD_DENIED;
-        }
-
-        String appOpOfPermission = AppOpsManager.permissionToOp(permission);
-        if (appOpOfPermission == null) {
-            // not platform defined
-            return PermissionChecker.PERMISSION_GRANTED;
-        }
-
-        String packageName = identity.packageName;
-        if (packageName == null) {
-            String[] packageNames = context.getPackageManager().getPackagesForUid(identity.uid);
-            if (packageNames != null && packageNames.length > 0) {
-                packageName = packageNames[0];
-            }
-        }
-
-        final AppOpsManager appOpsManager = context.getSystemService(AppOpsManager.class);
-
-        int appOpMode = appOpsManager.unsafeCheckOpRawNoThrow(appOpOfPermission, identity.uid,
-                packageName);
-        if (appOpMode == AppOpsManager.MODE_ALLOWED) {
-            return PermissionChecker.PERMISSION_GRANTED;
-        }
-        return PermissionChecker.PERMISSION_SOFT_DENIED;
     }
 
     /**

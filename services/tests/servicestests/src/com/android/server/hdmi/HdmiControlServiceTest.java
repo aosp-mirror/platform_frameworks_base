@@ -54,6 +54,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * Tests for {@link HdmiControlService} class.
@@ -421,6 +422,42 @@ public class HdmiControlServiceTest {
         assertThat(mHdmiControlService.getCecVersion()).isEqualTo(Constants.VERSION_2_0);
     }
 
+    @Test
+    public void handleGiveFeatures_cec14_featureAbort() {
+        Settings.Global.putInt(mContextSpy.getContentResolver(), Settings.Global.HDMI_CEC_VERSION,
+                Constants.VERSION_1_4);
+        mHdmiControlService.setControlEnabled(true);
+        mTestLooper.dispatchAll();
+
+        mNativeWrapper.onCecMessage(HdmiCecMessageBuilder.buildGiveFeatures(Constants.ADDR_TV,
+                Constants.ADDR_PLAYBACK_1));
+        mTestLooper.dispatchAll();
+
+        HdmiCecMessage featureAbort = HdmiCecMessageBuilder.buildFeatureAbortCommand(
+                Constants.ADDR_PLAYBACK_1, Constants.ADDR_TV, Constants.MESSAGE_GIVE_FEATURES,
+                Constants.ABORT_UNRECOGNIZED_OPCODE);
+        assertThat(mNativeWrapper.getResultMessages()).contains(featureAbort);
+    }
+
+    @Test
+    public void handleGiveFeatures_cec20_reportsFeatures() {
+        Settings.Global.putInt(mContextSpy.getContentResolver(), Settings.Global.HDMI_CEC_VERSION,
+                Constants.VERSION_2_0);
+        mHdmiControlService.setControlEnabled(true);
+        mHdmiControlService.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
+        mTestLooper.dispatchAll();
+
+        mNativeWrapper.onCecMessage(HdmiCecMessageBuilder.buildGiveFeatures(Constants.ADDR_TV,
+                Constants.ADDR_PLAYBACK_1));
+        mTestLooper.dispatchAll();
+
+        HdmiCecMessage reportFeatures = HdmiCecMessageBuilder.buildReportFeatures(
+                Constants.ADDR_PLAYBACK_1, Constants.VERSION_2_0,
+                Arrays.asList(DEVICE_PLAYBACK, DEVICE_AUDIO_SYSTEM),
+                mMyPlaybackDevice.getRcProfile(), mMyPlaybackDevice.getRcFeatures(),
+                mMyPlaybackDevice.getDeviceFeatures());
+        assertThat(mNativeWrapper.getResultMessages()).contains(reportFeatures);
+    }
 
     private static class VolumeControlFeatureCallback extends
             IHdmiCecVolumeControlFeatureListener.Stub {

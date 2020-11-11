@@ -36,6 +36,8 @@ import android.app.IApplicationThread;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.IncrementalStatesInfo;
+import android.content.pm.PackageManagerInternal;
 import android.content.pm.ProcessInfo;
 import android.content.pm.ServiceInfo;
 import android.content.pm.VersionedPackage;
@@ -353,6 +355,10 @@ class ProcessRecord implements WindowProcessListener {
 
     long mKillTime; // The timestamp in uptime when this process was killed.
 
+    // If the proc state is PROCESS_STATE_BOUND_FOREGROUND_SERVICE or above, it can start FGS.
+    // It must obtain the proc state from a persistent/top process or FGS, not transitive.
+    int mAllowStartFgsState = PROCESS_STATE_NONEXISTENT;
+
     void setStartParams(int startUid, HostingRecord hostingRecord, String seInfo,
             long startTime) {
         this.startUid = startUid;
@@ -466,6 +472,8 @@ class ProcessRecord implements WindowProcessListener {
                 pw.print(" setCapability=");
                 ActivityManager.printCapabilitiesFull(pw, setCapability);
                 pw.println();
+        pw.print(prefix); pw.print("allowStartFgsState=");
+                pw.println(mAllowStartFgsState);
         if (hasShownUi || mPendingUiClean || hasAboveClient || treatLikeActivity) {
             pw.print(prefix); pw.print("hasShownUi="); pw.print(hasShownUi);
                     pw.print(" pendingUiClean="); pw.print(mPendingUiClean);
@@ -1646,6 +1654,19 @@ class ProcessRecord implements WindowProcessListener {
             }
         }
 
+        // Check if package is still being loaded
+        boolean isPackageLoading = false;
+        final PackageManagerInternal packageManagerInternal =
+                mService.getPackageManagerInternalLocked();
+        if (aInfo != null && aInfo.packageName != null) {
+            IncrementalStatesInfo incrementalStatesInfo =
+                    packageManagerInternal.getIncrementalStatesInfo(
+                            aInfo.packageName, uid, userId);
+            if (incrementalStatesInfo != null) {
+                isPackageLoading = incrementalStatesInfo.isLoading();
+            }
+        }
+
         // Log the ANR to the main log.
         StringBuilder info = new StringBuilder();
         info.setLength(0);
@@ -1661,6 +1682,13 @@ class ProcessRecord implements WindowProcessListener {
         if (parentShortComponentName != null
                 && parentShortComponentName.equals(activityShortComponentName)) {
             info.append("Parent: ").append(parentShortComponentName).append("\n");
+        }
+
+        if (isPackageLoading) {
+            // Report in the main log that the package is still loading
+            final float loadingProgress = packageManagerInternal.getIncrementalStatesInfo(
+                    aInfo.packageName, uid, userId).getProgress();
+            info.append("Package is ").append((int) (loadingProgress * 100)).append("% loaded.\n");
         }
 
         StringBuilder report = new StringBuilder();
@@ -1730,7 +1758,7 @@ class ProcessRecord implements WindowProcessListener {
                         ? FrameworkStatsLog.ANROCCURRED__FOREGROUND_STATE__FOREGROUND
                         : FrameworkStatsLog.ANROCCURRED__FOREGROUND_STATE__BACKGROUND,
                 getProcessClassEnum(),
-                (this.info != null) ? this.info.packageName : "");
+                (this.info != null) ? this.info.packageName : "", isPackageLoading);
         final ProcessRecord parentPr = parentProcess != null
                 ? (ProcessRecord) parentProcess.mOwner : null;
         mService.addErrorToDropBox("anr", this, processName, activityShortComponentName,
@@ -1765,8 +1793,7 @@ class ProcessRecord implements WindowProcessListener {
 
             // Notify package manager service to possibly update package state
             if (aInfo != null && aInfo.packageName != null) {
-                mService.getPackageManagerInternalLocked().notifyPackageCrashOrAnr(
-                        aInfo.packageName);
+                packageManagerInternal.notifyPackageCrashOrAnr(aInfo.packageName);
             }
 
             // mUiHandler can be null if the AMS is constructed with injector only. This will only
@@ -1940,6 +1967,12 @@ class ProcessRecord implements WindowProcessListener {
 
     ErrorDialogController getDialogController() {
         return mDialogController;
+    }
+
+    void bumpAllowStartFgsState(int newProcState) {
+        if (newProcState < mAllowStartFgsState) {
+            mAllowStartFgsState = newProcState;
+        }
     }
 
     /** A controller to generate error dialogs in {@link ProcessRecord} */

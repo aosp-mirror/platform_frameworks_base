@@ -84,13 +84,6 @@ public class CombinedVibrationEffectTest {
                 () -> CombinedVibrationEffect.startSequential()
                         .addNext(0, INVALID_EFFECT)
                         .combine());
-        assertThrows(IllegalArgumentException.class,
-                () -> new CombinedVibrationEffect.Sequential(
-                        Arrays.asList(CombinedVibrationEffect.startSequential()
-                                .addNext(CombinedVibrationEffect.createSynced(VALID_EFFECT))
-                                .combine()),
-                        Arrays.asList(0))
-                        .validate());
     }
 
     @Test

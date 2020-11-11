@@ -560,10 +560,12 @@ class ControllerImpl extends LocationTimeZoneProviderController {
     }
 
     /**
-     * Asynchronously passes a {@link SimulatedBinderProviderEvent] to the appropriate provider.
+     * Passes a {@link SimulatedBinderProviderEvent] to the appropriate provider.
      * If the provider name does not match a known provider, then the event is logged and discarded.
      */
     void simulateBinderProviderEvent(@NonNull SimulatedBinderProviderEvent event) {
+        mThreadingDomain.assertCurrentThread();
+
         String targetProviderName = event.getProviderName();
         LocationTimeZoneProvider targetProvider;
         if (Objects.equals(mPrimaryProvider.getName(), targetProviderName)) {

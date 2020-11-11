@@ -17,6 +17,7 @@
 package com.android.server.am;
 
 import static android.Manifest.permission.START_ACTIVITIES_FROM_BACKGROUND;
+import static android.app.ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MANIFEST;
 import static android.os.Process.NFC_UID;
@@ -145,7 +146,7 @@ public final class ActiveServices {
     private static final boolean SHOW_DUNGEON_NOTIFICATION = false;
 
     public static final int FGS_FEATURE_DENIED = 0;
-    public static final int FGS_FEATURE_ALLOWED_BY_PROC_STATE = 1;
+    public static final int FGS_FEATURE_ALLOWED_BY_UID_STATE = 1;
     public static final int FGS_FEATURE_ALLOWED_BY_UID_VISIBLE = 2;
     public static final int FGS_FEATURE_ALLOWED_BY_FLAG = 3;
     public static final int FGS_FEATURE_ALLOWED_BY_SYSTEM_UID = 4;
@@ -154,10 +155,12 @@ public final class ActiveServices {
     public static final int FGS_FEATURE_ALLOWED_BY_PERMISSION = 7;
     public static final int FGS_FEATURE_ALLOWED_BY_WHITELIST = 8;
     public static final int FGS_FEATURE_ALLOWED_BY_DEVICE_OWNER = 9;
+    public static final int FGS_FEATURE_ALLOWED_BY_PROC_STATE = 10;
+    public static final int FGS_FEATURE_ALLOWED_BY_DEVICE_IDLE_ALLOW_LIST = 11;
 
     @IntDef(flag = true, prefix = { "FGS_FEATURE_" }, value = {
             FGS_FEATURE_DENIED,
-            FGS_FEATURE_ALLOWED_BY_PROC_STATE,
+            FGS_FEATURE_ALLOWED_BY_UID_STATE,
             FGS_FEATURE_ALLOWED_BY_UID_VISIBLE,
             FGS_FEATURE_ALLOWED_BY_FLAG,
             FGS_FEATURE_ALLOWED_BY_SYSTEM_UID,
@@ -165,7 +168,9 @@ public final class ActiveServices {
             FGS_FEATURE_ALLOWED_BY_TOKEN,
             FGS_FEATURE_ALLOWED_BY_PERMISSION,
             FGS_FEATURE_ALLOWED_BY_WHITELIST,
-            FGS_FEATURE_ALLOWED_BY_DEVICE_OWNER
+            FGS_FEATURE_ALLOWED_BY_DEVICE_OWNER,
+            FGS_FEATURE_ALLOWED_BY_PROC_STATE,
+            FGS_FEATURE_ALLOWED_BY_DEVICE_IDLE_ALLOW_LIST
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface FgsFeatureRetCode {}
@@ -576,18 +581,11 @@ public final class ActiveServices {
                 if (r.mAllowStartForeground == FGS_FEATURE_DENIED
                         && (mAm.mConstants.mFlagFgsStartRestrictionEnabled
                         || isChangeEnabled(FGS_BG_START_RESTRICTION_CHANGE_ID, r))) {
-                    if (mAm.mConstants.mFlagFgsStartTempAllowListEnabled
-                            && mAm.isOnDeviceIdleWhitelistLocked(r.appInfo.uid, false)) {
-                        // uid is on DeviceIdleController's allowlist.
-                        Slog.d(TAG, "startForegroundService() mAllowStartForeground false "
-                                + "but allowlist true: service " + r.shortInstanceName);
-                    } else {
-                        Slog.w(TAG, "startForegroundService() not allowed due to "
-                                + "mAllowStartForeground false: service "
-                                + r.shortInstanceName);
-                        showFgsBgRestrictedNotificationLocked(r);
-                        return null;
-                    }
+                    Slog.w(TAG, "startForegroundService() not allowed due to "
+                            + "mAllowStartForeground false: service "
+                            + r.shortInstanceName);
+                    showFgsBgRestrictedNotificationLocked(r);
+                    return null;
                 }
             }
         }
@@ -1488,20 +1486,12 @@ public final class ActiveServices {
                         if (r.mAllowStartForeground == FGS_FEATURE_DENIED
                                 && (mAm.mConstants.mFlagFgsStartRestrictionEnabled
                                 || isChangeEnabled(FGS_BG_START_RESTRICTION_CHANGE_ID, r))) {
-                            if (mAm.mConstants.mFlagFgsStartTempAllowListEnabled
-                                    && mAm.isOnDeviceIdleWhitelistLocked(r.appInfo.uid, false)) {
-                                // uid is on DeviceIdleController's allowlist.
-                                Slog.d(TAG, "Service.startForeground() "
-                                        + "mAllowStartForeground false but allowlist true: service "
-                                        + r.shortInstanceName);
-                            } else {
-                                Slog.w(TAG, "Service.startForeground() not allowed due to "
-                                                + "mAllowStartForeground false: service "
-                                                + r.shortInstanceName);
-                                showFgsBgRestrictedNotificationLocked(r);
-                                updateServiceForegroundLocked(r.app, true);
-                                ignoreForeground = true;
-                            }
+                            Slog.w(TAG, "Service.startForeground() not allowed due to "
+                                            + "mAllowStartForeground false: service "
+                                            + r.shortInstanceName);
+                            showFgsBgRestrictedNotificationLocked(r);
+                            updateServiceForegroundLocked(r.app, true);
+                            ignoreForeground = true;
                         }
                     }
                 }
@@ -4944,38 +4934,39 @@ public final class ActiveServices {
             r.mAllowWhileInUsePermissionInFgs = true;
         }
 
-        if (!r.mAllowWhileInUsePermissionInFgs || (r.mAllowStartForeground == FGS_FEATURE_DENIED)) {
-            final @FgsFeatureRetCode int temp = shouldAllowFgsFeatureLocked(callingPackage,
-                    callingPid, callingUid, intent, r, allowBackgroundActivityStarts);
+        if (!r.mAllowWhileInUsePermissionInFgs
+                || (r.mAllowStartForeground == FGS_FEATURE_DENIED)) {
+            final @FgsFeatureRetCode int allowWhileInUse = shouldAllowFgsWhileInUsePermissionLocked(
+                    callingPackage, callingPid, callingUid, r, allowBackgroundActivityStarts);
             if (!r.mAllowWhileInUsePermissionInFgs) {
-                r.mAllowWhileInUsePermissionInFgs = (temp != FGS_FEATURE_DENIED);
+                r.mAllowWhileInUsePermissionInFgs = (allowWhileInUse != FGS_FEATURE_DENIED);
             }
             if (r.mAllowStartForeground == FGS_FEATURE_DENIED) {
-                r.mAllowStartForeground = temp;
+                r.mAllowStartForeground = shouldAllowFgsStartForegroundLocked(allowWhileInUse,
+                        callingPackage, callingPid, callingUid, intent, r,
+                        allowBackgroundActivityStarts);
             }
         }
     }
 
     /**
-     * Should allow FGS feature or not.
+     * Should allow while-in-use permissions in FGS or not.
+     * A typical BG started FGS is not allowed to have while-in-use permissions.
      * @param callingPackage caller app's package name.
      * @param callingUid caller app's uid.
-     * @param intent intent to start/bind service.
      * @param r the service to start.
      * @return {@link FgsFeatureRetCode}
      */
-    private @FgsFeatureRetCode int shouldAllowFgsFeatureLocked(String callingPackage,
-            int callingPid, int callingUid, Intent intent, ServiceRecord r,
+    private @FgsFeatureRetCode int shouldAllowFgsWhileInUsePermissionLocked(String callingPackage,
+            int callingPid, int callingUid, ServiceRecord r,
             boolean allowBackgroundActivityStarts) {
         int ret = FGS_FEATURE_DENIED;
 
-        final StringBuilder sb = new StringBuilder(64);
         final int uidState = mAm.getUidState(callingUid);
         if (ret == FGS_FEATURE_DENIED) {
             // Is the calling UID at PROCESS_STATE_TOP or above?
             if (uidState <= ActivityManager.PROCESS_STATE_TOP) {
-                sb.append("uidState=").append(uidState);
-                ret = FGS_FEATURE_ALLOWED_BY_PROC_STATE;
+                ret = FGS_FEATURE_ALLOWED_BY_UID_STATE;
             }
         }
 
@@ -5010,7 +5001,6 @@ public final class ActiveServices {
             }
 
             if (isCallerSystem) {
-                sb.append("callingUid=").append(callingAppId);
                 ret = FGS_FEATURE_ALLOWED_BY_SYSTEM_UID;
             }
         }
@@ -5049,6 +5039,53 @@ public final class ActiveServices {
                 ret = FGS_FEATURE_ALLOWED_BY_DEVICE_OWNER;
             }
         }
+        return ret;
+    }
+
+    /**
+     * Should allow the FGS to start (AKA startForeground()) or not.
+     * The check in this method is in addition to check in
+     * {@link #shouldAllowFgsWhileInUsePermissionLocked}
+     * @param allowWhileInUse the return code from {@link #shouldAllowFgsWhileInUsePermissionLocked}
+     * @param callingPackage caller app's package name.
+     * @param callingUid caller app's uid.
+     * @param intent intent to start/bind service.
+     * @param r the service to start.
+     * @return {@link FgsFeatureRetCode}
+     */
+    private @FgsFeatureRetCode int shouldAllowFgsStartForegroundLocked(
+            @FgsFeatureRetCode int allowWhileInUse, String callingPackage, int callingPid,
+            int callingUid, Intent intent, ServiceRecord r, boolean allowBackgroundActivityStarts) {
+        int ret = allowWhileInUse;
+
+        final StringBuilder sb = new StringBuilder(64);
+        final int uidState = mAm.getUidState(callingUid);
+        if (ret == FGS_FEATURE_DENIED) {
+            // Is the calling UID at PROCESS_STATE_TOP or above?
+            if (uidState <= ActivityManager.PROCESS_STATE_TOP) {
+                sb.append("uidState=").append(uidState);
+                ret = FGS_FEATURE_ALLOWED_BY_UID_STATE;
+            }
+        }
+
+        if (ret == FGS_FEATURE_DENIED) {
+            for (int i = mAm.mProcessList.mLruProcesses.size() - 1; i >= 0; i--) {
+                final ProcessRecord pr = mAm.mProcessList.mLruProcesses.get(i);
+                if (pr.uid == callingUid
+                        && pr.mAllowStartFgsState <= PROCESS_STATE_BOUND_FOREGROUND_SERVICE) {
+                    ret = FGS_FEATURE_ALLOWED_BY_PROC_STATE;
+                    break;
+                }
+            }
+        }
+
+        if (ret == FGS_FEATURE_DENIED) {
+            if (mAm.mConstants.mFlagFgsStartTempAllowListEnabled
+                    && mAm.isOnDeviceIdleWhitelistLocked(r.appInfo.uid, false)) {
+                // uid is on DeviceIdleController's allowlist.
+                ret = FGS_FEATURE_ALLOWED_BY_DEVICE_IDLE_ALLOW_LIST;
+            }
+        }
 
         final String debugInfo =
                 "[callingPackage: " + callingPackage
@@ -5071,8 +5108,8 @@ public final class ActiveServices {
         switch (code) {
             case FGS_FEATURE_DENIED:
                 return "DENIED";
-            case FGS_FEATURE_ALLOWED_BY_PROC_STATE:
-                return "ALLOWED_BY_PROC_STATE";
+            case FGS_FEATURE_ALLOWED_BY_UID_STATE:
+                return "ALLOWED_BY_UID_STATE";
             case FGS_FEATURE_ALLOWED_BY_UID_VISIBLE:
                 return "ALLOWED_BY_UID_VISIBLE";
             case FGS_FEATURE_ALLOWED_BY_FLAG:
@@ -5089,13 +5126,17 @@ public final class ActiveServices {
                 return "ALLOWED_BY_WHITELIST";
             case FGS_FEATURE_ALLOWED_BY_DEVICE_OWNER:
                 return "ALLOWED_BY_DEVICE_OWNER";
+            case FGS_FEATURE_ALLOWED_BY_PROC_STATE:
+                return "ALLOWED_BY_PROC_STATE";
+            case FGS_FEATURE_ALLOWED_BY_DEVICE_IDLE_ALLOW_LIST:
+                return "ALLOWED_BY_DEVICE_IDLE_ALLOW_LIST";
             default:
                 return "";
         }
     }
 
     private static boolean isFgsBgStart(@FgsFeatureRetCode int code) {
-        return code != FGS_FEATURE_ALLOWED_BY_PROC_STATE
+        return code != FGS_FEATURE_ALLOWED_BY_UID_STATE
                 && code != FGS_FEATURE_ALLOWED_BY_UID_VISIBLE;
     }
 

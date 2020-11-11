@@ -152,6 +152,27 @@ public class Tuner implements AutoCloseable  {
      */
     public static final int INVALID_FRONTEND_SETTING_FREQUENCY =
             android.hardware.tv.tuner.V1_1.Constants.Constant.INVALID_FRONTEND_SETTING_FREQUENCY;
+    /**
+     * Invalid frontend id.
+     */
+    public static final int INVALID_FRONTEND_ID =
+            android.hardware.tv.tuner.V1_1.Constants.Constant.INVALID_FRONTEND_ID;
+    /**
+     * Invalid LNB id.
+     *
+     * @hide
+     */
+    public static final int INVALID_LNB_ID =
+            android.hardware.tv.tuner.V1_1.Constants.Constant.INVALID_LNB_ID;
+    /**
+     * Invalid key token. It is used to remove the current key from descrambler.
+     *
+     * <p>If the current keyToken comes from a MediaCas session, App is recommended to
+     * to use this constant to remove current key before closing MediaCas session.
+     */
+    @NonNull
+    public static final byte[] INVALID_KEYTOKEN =
+            {android.hardware.tv.tuner.V1_1.Constants.Constant.INVALID_KEYTOKEN};
 
     /** @hide */
     @IntDef(prefix = "SCAN_TYPE_", value = {SCAN_TYPE_UNDEFINED, SCAN_TYPE_AUTO, SCAN_TYPE_BLIND})

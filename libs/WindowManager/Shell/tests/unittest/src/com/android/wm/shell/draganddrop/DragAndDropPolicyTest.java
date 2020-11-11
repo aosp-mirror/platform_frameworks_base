@@ -35,6 +35,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
@@ -68,10 +69,13 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.function.Consumer;
 
 /**
  * Tests for the drag and drop policy.
@@ -123,6 +127,12 @@ public class DragAndDropPolicyTest {
         doReturn(divider).when(mSplitScreen).getDividerView();
         doReturn(new Rect(50, 0, 100, 100)).when(divider)
                 .getNonMinimizedSplitScreenSecondaryBounds();
+
+        doAnswer((Answer<Void>) invocation -> {
+            Consumer<Boolean> callback = invocation.getArgument(0);
+            callback.accept(true);
+            return null;
+        }).when(mSplitScreen).registerInSplitScreenListener(any());
 
         mPolicy = new DragAndDropPolicy(mContext, mIActivityTaskManager, mSplitScreen, mStarter);
         mActivityClipData = createClipData(MIMETYPE_APPLICATION_ACTIVITY);

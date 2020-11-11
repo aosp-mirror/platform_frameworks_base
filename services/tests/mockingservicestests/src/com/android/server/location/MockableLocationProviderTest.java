@@ -21,12 +21,14 @@ import static com.android.internal.location.ProviderRequest.EMPTY_REQUEST;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import android.location.Criteria;
 import android.location.Location;
+import android.location.LocationResult;
 import android.location.util.identity.CallerIdentity;
 import android.platform.test.annotations.Presubmit;
 
@@ -117,6 +119,20 @@ public class MockableLocationProviderTest {
     }
 
     @Test
+    public void testFlush() {
+        Runnable listener = mock(Runnable.class);
+        mProvider.flush(listener);
+        verify(mRealProvider).onFlush(listener);
+        verify(listener).run();
+
+        listener = mock(Runnable.class);
+        mProvider.setMockProvider(mMockProvider);
+        mProvider.flush(listener);
+        verify(mMockProvider).onFlush(listener);
+        verify(listener).run();
+    }
+
+    @Test
     public void testSendExtraCommand() {
         mProvider.sendExtraCommand(0, 0, "command", null);
         verify(mRealProvider, times(1)).onExtraCommand(0, 0, "command", null);
@@ -158,15 +174,15 @@ public class MockableLocationProviderTest {
 
     @Test
     public void testReportLocation() {
-        Location realLocation = new Location("real");
-        Location mockLocation = new Location("mock");
+        LocationResult realLocation = LocationResult.create(new Location("real"));
+        LocationResult mockLocation = LocationResult.create(new Location("mock"));
 
         mRealProvider.reportLocation(realLocation);
-        assertThat(mListener.getNextLocation()).isEqualTo(realLocation);
+        assertThat(mListener.getNextLocationResult()).isEqualTo(realLocation);
 
         mProvider.setMockProvider(mMockProvider);
         mRealProvider.reportLocation(realLocation);
         mMockProvider.reportLocation(mockLocation);
-        assertThat(mListener.getNextLocation()).isEqualTo(mockLocation);
+        assertThat(mListener.getNextLocationResult()).isEqualTo(mockLocation);
     }
 }

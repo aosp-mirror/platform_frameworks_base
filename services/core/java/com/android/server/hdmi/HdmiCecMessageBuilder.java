@@ -16,10 +16,14 @@
 
 package com.android.server.hdmi;
 
+import android.hardware.hdmi.HdmiDeviceInfo;
+
 import com.android.server.hdmi.Constants.AudioCodec;
+import com.android.server.hdmi.Constants.CecVersion;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * A helper class to build {@link HdmiCecMessage} from various cec commands.
@@ -688,6 +692,40 @@ public class HdmiCecMessageBuilder {
         return buildCommand(src, dest, Constants.MESSAGE_CLEAR_EXTERNAL_TIMER, params);
     }
 
+    static HdmiCecMessage buildGiveFeatures(int src, int dest) {
+        return buildCommand(src, dest, Constants.MESSAGE_GIVE_FEATURES);
+    }
+
+    static HdmiCecMessage buildReportFeatures(int src, @CecVersion int cecVersion,
+            List<Integer> allDeviceTypes, int rcProfile, List<Integer> rcFeatures,
+            List<Integer> deviceFeatures) {
+        byte cecVersionByte = (byte) (cecVersion & 0xFF);
+        byte deviceTypes = 0;
+        for (Integer deviceType : allDeviceTypes) {
+            deviceTypes |= 1 << hdmiDeviceInfoDeviceTypeToShiftValue(deviceType);
+        }
+
+        byte rcProfileByte = 0;
+        rcProfileByte |= rcProfile << 6;
+        if (rcProfile == Constants.RC_PROFILE_SOURCE) {
+            for (Integer rcFeature : rcFeatures) {
+                rcProfileByte |= 1 << rcFeature;
+            }
+        } else {
+            byte rcProfileTv = (byte) (rcFeatures.get(0) & 0xFFFF);
+            rcProfileByte |= rcProfileTv;
+        }
+
+        byte deviceFeaturesByte = 0;
+        for (Integer deviceFeature : deviceFeatures) {
+            deviceFeaturesByte |= 1 << deviceFeature;
+        }
+
+        byte[] params = {cecVersionByte, deviceTypes, rcProfileByte, deviceFeaturesByte};
+        return buildCommand(src, Constants.ADDR_BROADCAST, Constants.MESSAGE_REPORT_FEATURES,
+                params);
+    }
+
     /***** Please ADD new buildXXX() methods above. ******/
 
     /**
@@ -737,5 +775,24 @@ public class HdmiCecMessageBuilder {
                 (byte) ((physicalAddress >> 8) & 0xFF),
                 (byte) (physicalAddress & 0xFF)
         };
+    }
+
+    private static int hdmiDeviceInfoDeviceTypeToShiftValue(int deviceType) {
+        switch (deviceType) {
+            case HdmiDeviceInfo.DEVICE_TV:
+                return Constants.ALL_DEVICE_TYPES_TV;
+            case HdmiDeviceInfo.DEVICE_RECORDER:
+                return Constants.ALL_DEVICE_TYPES_RECORDER;
+            case HdmiDeviceInfo.DEVICE_TUNER:
+                return Constants.ALL_DEVICE_TYPES_TUNER;
+            case HdmiDeviceInfo.DEVICE_PLAYBACK:
+                return Constants.ALL_DEVICE_TYPES_PLAYBACK;
+            case HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM:
+                return Constants.ALL_DEVICE_TYPES_AUDIO_SYSTEM;
+            case HdmiDeviceInfo.DEVICE_PURE_CEC_SWITCH:
+                return Constants.ALL_DEVICE_TYPES_SWITCH;
+            default:
+                throw new IllegalArgumentException("Unhandled device type: " + deviceType);
+        }
     }
 }

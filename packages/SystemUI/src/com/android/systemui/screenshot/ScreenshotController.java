@@ -221,6 +221,8 @@ public class ScreenshotController {
                 WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
         mWindowLayoutParams.setFitInsetsTypes(0 /* types */);
         mWindowLayoutParams.token = mWindowToken;
+        // This is needed to let touches pass through outside the touchable areas
+        mWindowLayoutParams.privateFlags |= WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY;
 
         mDisplayMetrics = new DisplayMetrics();
         mDisplay.getRealMetrics(mDisplayMetrics);

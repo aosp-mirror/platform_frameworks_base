@@ -59,11 +59,6 @@ public class PipBoundsHandler {
     private int mDefaultMinSize;
     private Point mScreenEdgeInsets;
 
-    private boolean mIsImeShowing;
-    private int mImeHeight;
-    private boolean mIsShelfShowing;
-    private int mShelfHeight;
-
     public PipBoundsHandler(Context context, @NonNull PipBoundsState pipBoundsState) {
         mPipBoundsState = pipBoundsState;
         mSnapAlgorithm = new PipSnapAlgorithm(context);
@@ -101,29 +96,6 @@ public class PipBoundsHandler {
     }
 
     /**
-     * Sets both shelf visibility and its height if applicable.
-     * @return {@code true} if the internal shelf state is changed, {@code false} otherwise.
-     */
-    public boolean setShelfHeight(boolean shelfVisible, int shelfHeight) {
-        final boolean shelfShowing = shelfVisible && shelfHeight > 0;
-        if (shelfShowing == mIsShelfShowing && shelfHeight == mShelfHeight) {
-            return false;
-        }
-
-        mIsShelfShowing = shelfVisible;
-        mShelfHeight = shelfHeight;
-        return true;
-    }
-
-    /**
-     * Responds to IPinnedStackListener on IME visibility change.
-     */
-    public void onImeVisibilityChanged(boolean imeVisible, int imeHeight) {
-        mIsImeShowing = imeVisible;
-        mImeHeight = imeHeight;
-    }
-
-    /**
      * Responds to IPinnedStackListener on movement bounds change.
      * Note that both inset and normal bounds will be calculated here rather than in the caller.
      */
@@ -156,41 +128,28 @@ public class PipBoundsHandler {
         reloadResources(context);
     }
 
-    /**
-     * See {@link #getDestinationBounds(Rect, boolean)}
-     */
-    public Rect getDestinationBounds(Rect bounds) {
-        return getDestinationBounds(bounds, false /* useCurrentMinEdgeSize */);
-    }
+    /** Returns the destination bounds to place the PIP window on entry. */
+    public Rect getEntryDestinationBounds() {
+        final PipBoundsState.PipReentryState reentryState = mPipBoundsState.getReentryState();
+        final boolean shouldRestoreReentryBounds = reentryState != null;
 
-    /**
-     * @return {@link Rect} of the destination PiP window bounds.
-     */
-    public Rect getDestinationBounds(Rect bounds, boolean useCurrentMinEdgeSize) {
-        boolean isReentryBounds = false;
-        final Rect destinationBounds;
-        if (bounds == null) {
-            // Calculating initial entry bounds
-            final PipBoundsState.PipReentryState state = mPipBoundsState.getReentryState();
+        final Rect destinationBounds = shouldRestoreReentryBounds
+                ? getDefaultBounds(reentryState.getSnapFraction(), reentryState.getSize())
+                : getDefaultBounds(INVALID_SNAP_FRACTION, null /* size */);
 
-            final Rect defaultBounds;
-            if (state != null) {
-                // Restore to reentry bounds.
-                defaultBounds = getDefaultBounds(state.getSnapFraction(), state.getSize());
-                isReentryBounds = true;
-            } else {
-                // Get actual default bounds.
-                defaultBounds = getDefaultBounds(INVALID_SNAP_FRACTION, null /* size */);
-            }
-
-            destinationBounds = new Rect(defaultBounds);
-        } else {
-            // Just adjusting bounds (e.g. on aspect ratio changed).
-            destinationBounds = new Rect(bounds);
-        }
         if (isValidPictureInPictureAspectRatio(mPipBoundsState.getAspectRatio())) {
             transformBoundsToAspectRatio(destinationBounds, mPipBoundsState.getAspectRatio(),
-                    useCurrentMinEdgeSize, isReentryBounds);
+                    false /* useCurrentMinEdgeSize */, shouldRestoreReentryBounds);
+        }
+        return destinationBounds;
+    }
+
+    /** Returns the current bounds adjusted to the new aspect ratio, if valid. */
+    public Rect getAdjustedDestinationBounds(Rect currentBounds, float newAspectRatio) {
+        final Rect destinationBounds = new Rect(currentBounds);
+        if (isValidPictureInPictureAspectRatio(newAspectRatio)) {
+            transformBoundsToAspectRatio(destinationBounds, newAspectRatio,
+                    true /* useCurrentMinEdgeSize */, false /* isReentryBounds */);
         }
         return destinationBounds;
     }
@@ -373,8 +332,10 @@ public class PipBoundsHandler {
                         mDefaultMinSize, displayInfo.logicalWidth, displayInfo.logicalHeight);
             }
             Gravity.apply(mDefaultStackGravity, defaultSize.getWidth(), defaultSize.getHeight(),
-                    insetBounds, 0, Math.max(mIsImeShowing ? mImeHeight : 0,
-                            mIsShelfShowing ? mShelfHeight : 0), defaultBounds);
+                    insetBounds, 0, Math.max(
+                            mPipBoundsState.isImeShowing() ? mPipBoundsState.getImeHeight() : 0,
+                            mPipBoundsState.isShelfShowing()
+                                    ? mPipBoundsState.getShelfHeight() : 0), defaultBounds);
         }
         return defaultBounds;
     }
@@ -409,7 +370,8 @@ public class PipBoundsHandler {
 
         // Apply the movement bounds adjustments based on the current state.
         mSnapAlgorithm.getMovementBounds(stackBounds, movementBounds, movementBounds,
-                (adjustForIme && mIsImeShowing) ? mImeHeight : 0);
+                (adjustForIme && mPipBoundsState.isImeShowing())
+                        ? mPipBoundsState.getImeHeight() : 0);
         return movementBounds;
     }
 
@@ -450,10 +412,6 @@ public class PipBoundsHandler {
         pw.println(innerPrefix + "mMinAspectRatio=" + mMinAspectRatio);
         pw.println(innerPrefix + "mMaxAspectRatio=" + mMaxAspectRatio);
         pw.println(innerPrefix + "mDefaultStackGravity=" + mDefaultStackGravity);
-        pw.println(innerPrefix + "mIsImeShowing=" + mIsImeShowing);
-        pw.println(innerPrefix + "mImeHeight=" + mImeHeight);
-        pw.println(innerPrefix + "mIsShelfShowing=" + mIsShelfShowing);
-        pw.println(innerPrefix + "mShelfHeight=" + mShelfHeight);
         pw.println(innerPrefix + "mSnapAlgorithm" + mSnapAlgorithm);
     }
 }

@@ -33,6 +33,7 @@ import android.view.Display;
 import androidx.test.filters.SmallTest;
 
 import com.android.wm.shell.common.DisplayController;
+import com.android.wm.shell.common.TaskStackListenerImpl;
 
 import org.junit.Before;
 import org.junit.Ignore;
@@ -64,6 +65,8 @@ public class OneHandedControllerTest extends OneHandedTestCase {
     OneHandedTimeoutHandler mMockTimeoutHandler;
     @Mock
     IOverlayManager mMockOverlayManager;
+    @Mock
+    TaskStackListenerImpl mMockTaskStackListener;
 
     @Before
     public void setUp() throws Exception {
@@ -76,7 +79,8 @@ public class OneHandedControllerTest extends OneHandedTestCase {
                 mMockTouchHandler,
                 mMockTutorialHandler,
                 mMockGestureHandler,
-                mMockOverlayManager);
+                mMockOverlayManager,
+                mMockTaskStackListener);
         mOneHandedController = Mockito.spy(oneHandedController);
         mTimeoutHandler = Mockito.spy(OneHandedTimeoutHandler.get());
 

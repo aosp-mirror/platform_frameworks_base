@@ -149,7 +149,7 @@
     <dimen name="notification_max_heads_up_height_increased">188dp</dimen>
 
     <!-- Side padding on the lockscreen on the side of notifications -->
-    <dimen name="notification_side_paddings">4dp</dimen>
+    <dimen name="notification_side_paddings">16dp</dimen>
 
     <!-- padding between the heads up and the statusbar -->
     <dimen name="heads_up_status_bar_padding">8dp</dimen>
@@ -169,6 +169,9 @@
 
     <!-- Minimum height of a notification to be interactable -->
     <dimen name="notification_min_interaction_height">40dp</dimen>
+
+    <!-- New radius for notifications. -->
+    <dimen name="notification_corner_radius">20dp</dimen>
 
     <!-- the padding of the shelf icon container -->
     <dimen name="shelf_icon_container_padding">13dp</dimen>
@@ -631,9 +634,6 @@
 
     <!-- The height of a notification header -->
     <dimen name="notification_header_height">53dp</dimen>
-
-    <!-- The height of the divider between the individual notifications when the notification wants it to be increased. This is currently the case for notification groups -->
-    <dimen name="notification_divider_height_increased">6dp</dimen>
 
     <!-- The height of the gap between adjacent notification sections. -->
     <dimen name="notification_section_divider_height">@dimen/notification_side_paddings</dimen>

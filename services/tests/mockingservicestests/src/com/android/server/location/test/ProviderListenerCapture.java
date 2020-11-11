@@ -18,18 +18,17 @@ package com.android.server.location.test;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import android.location.Location;
+import android.location.LocationResult;
 
 import com.android.server.location.AbstractLocationProvider;
 
 import java.util.LinkedList;
-import java.util.List;
 
 public class ProviderListenerCapture implements AbstractLocationProvider.Listener {
 
     private final Object mLock;
     private final LinkedList<AbstractLocationProvider.State> mNewStates = new LinkedList<>();
-    private final LinkedList<Location> mLocations = new LinkedList<>();
+    private final LinkedList<LocationResult> mLocations = new LinkedList<>();
 
     public ProviderListenerCapture(Object lock) {
         mLock = lock;
@@ -47,15 +46,12 @@ public class ProviderListenerCapture implements AbstractLocationProvider.Listene
     }
 
     @Override
-    public void onReportLocation(Location location) {
+    public void onReportLocation(LocationResult locationResult) {
         assertThat(Thread.holdsLock(mLock)).isTrue();
-        mLocations.add(location);
+        mLocations.add(locationResult);
     }
 
-    public Location getNextLocation() {
+    public LocationResult getNextLocationResult() {
         return mLocations.poll();
     }
-
-    @Override
-    public void onReportLocation(List<Location> locations) {}
 }

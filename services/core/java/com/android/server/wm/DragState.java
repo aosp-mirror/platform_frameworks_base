@@ -23,6 +23,7 @@ import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ORIENTATION;
 import static com.android.internal.protolog.ProtoLogGroup.WM_SHOW_TRANSACTIONS;
 import static com.android.server.wm.DragDropController.MSG_ANIMATION_END;
 import static com.android.server.wm.DragDropController.MSG_DRAG_END_TIMEOUT;
+import static com.android.server.wm.DragDropController.MSG_REMOVE_DRAG_SURFACE_TIMEOUT;
 import static com.android.server.wm.DragDropController.MSG_TEAR_DOWN_DRAG_AND_DROP_INPUT;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_DRAG;
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_LIGHT_TRANSACTIONS;
@@ -59,6 +60,7 @@ import android.view.WindowManager;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
 
+import com.android.internal.os.SomeArgs;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.view.IDragAndDropPermissions;
 import com.android.server.LocalServices;
@@ -248,6 +250,9 @@ class DragState {
         if (mSurfaceControl != null) {
             if (!mRelinquishDragSurface) {
                 mTransaction.reparent(mSurfaceControl, null).apply();
+            } else {
+                mDragDropController.sendTimeoutMessage(MSG_REMOVE_DRAG_SURFACE_TIMEOUT,
+                        mSurfaceControl);
             }
             mSurfaceControl = null;
         }

@@ -33,72 +33,72 @@ import java.util.List;
 /**
  * Detects denylist change and updates the denylist.
  */
-class GnssSatelliteBlacklistHelper {
+class GnssSatelliteBlocklistHelper {
 
-    private static final String TAG = "GnssBlacklistHelper";
-    private static final String BLACKLIST_DELIMITER = ",";
+    private static final String TAG = "GnssBlocklistHelper";
+    private static final String BLOCKLIST_DELIMITER = ",";
 
     private final Context mContext;
-    private final GnssSatelliteBlacklistCallback mCallback;
+    private final GnssSatelliteBlocklistCallback mCallback;
 
-    interface GnssSatelliteBlacklistCallback {
-        void onUpdateSatelliteBlacklist(int[] constellations, int[] svids);
+    interface GnssSatelliteBlocklistCallback {
+        void onUpdateSatelliteBlocklist(int[] constellations, int[] svids);
     }
 
-    GnssSatelliteBlacklistHelper(Context context, Looper looper,
-            GnssSatelliteBlacklistCallback callback) {
+    GnssSatelliteBlocklistHelper(Context context, Looper looper,
+            GnssSatelliteBlocklistCallback callback) {
         mContext = context;
         mCallback = callback;
         ContentObserver contentObserver = new ContentObserver(new Handler(looper)) {
             @Override
             public void onChange(boolean selfChange) {
-                updateSatelliteBlacklist();
+                updateSatelliteBlocklist();
             }
         };
         mContext.getContentResolver().registerContentObserver(
                 Settings.Global.getUriFor(
-                        Settings.Global.GNSS_SATELLITE_BLACKLIST),
+                        Settings.Global.GNSS_SATELLITE_BLOCKLIST),
                 true,
                 contentObserver, UserHandle.USER_ALL);
     }
 
-    void updateSatelliteBlacklist() {
+    void updateSatelliteBlocklist() {
         ContentResolver resolver = mContext.getContentResolver();
-        String blacklist = Settings.Global.getString(
+        String blocklist = Settings.Global.getString(
                 resolver,
-                Settings.Global.GNSS_SATELLITE_BLACKLIST);
-        if (blacklist == null) {
-            blacklist = "";
+                Settings.Global.GNSS_SATELLITE_BLOCKLIST);
+        if (blocklist == null) {
+            blocklist = "";
         }
-        Log.i(TAG, String.format("Update GNSS satellite blacklist: %s", blacklist));
+        Log.i(TAG, String.format("Update GNSS satellite blocklist: %s", blocklist));
 
-        List<Integer> blacklistValues;
+        List<Integer> blocklistValues;
         try {
-            blacklistValues = parseSatelliteBlacklist(blacklist);
+            blocklistValues = parseSatelliteBlocklist(blocklist);
         } catch (NumberFormatException e) {
-            Log.e(TAG, "Exception thrown when parsing blacklist string.", e);
+            Log.e(TAG, "Exception thrown when parsing blocklist string.", e);
             return;
         }
 
-        if (blacklistValues.size() % 2 != 0) {
-            Log.e(TAG, "blacklist string has odd number of values."
-                    + "Aborting updateSatelliteBlacklist");
+        if (blocklistValues.size() % 2 != 0) {
+            Log.e(TAG, "blocklist string has odd number of values."
+                    + "Aborting updateSatelliteBlocklist");
             return;
         }
 
-        int length = blacklistValues.size() / 2;
+        int length = blocklistValues.size() / 2;
         int[] constellations = new int[length];
         int[] svids = new int[length];
         for (int i = 0; i < length; i++) {
-            constellations[i] = blacklistValues.get(i * 2);
-            svids[i] = blacklistValues.get(i * 2 + 1);
+            constellations[i] = blocklistValues.get(i * 2);
+            svids[i] = blocklistValues.get(i * 2 + 1);
         }
-        mCallback.onUpdateSatelliteBlacklist(constellations, svids);
+        mCallback.onUpdateSatelliteBlocklist(constellations, svids);
     }
 
     @VisibleForTesting
-    static List<Integer> parseSatelliteBlacklist(String blacklist) throws NumberFormatException {
-        String[] strings = blacklist.split(BLACKLIST_DELIMITER);
+    static List<Integer> parseSatelliteBlocklist(String blocklist) throws NumberFormatException {
+        String[] strings = blocklist.split(BLOCKLIST_DELIMITER);
         List<Integer> parsed = new ArrayList<>(strings.length);
         for (String string : strings) {
             string = string.trim();

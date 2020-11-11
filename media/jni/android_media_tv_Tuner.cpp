@@ -156,6 +156,7 @@ using ::android::hardware::tv::tuner::V1_1::FrontendDtmbTransmissionMode;
 using ::android::hardware::tv::tuner::V1_1::FrontendGuardInterval;
 using ::android::hardware::tv::tuner::V1_1::FrontendInterleaveMode;
 using ::android::hardware::tv::tuner::V1_1::FrontendModulation;
+using ::android::hardware::tv::tuner::V1_1::FrontendRollOff;
 using ::android::hardware::tv::tuner::V1_1::FrontendSpectralInversion;
 using ::android::hardware::tv::tuner::V1_1::FrontendStatusExt1_1;
 using ::android::hardware::tv::tuner::V1_1::FrontendStatusTypeExt1_1;
@@ -639,10 +640,12 @@ jobjectArray FilterCallback::getMmtpRecordEvent(
         jlong firstMbInSlice = (eventsExt.size() > i)
                 ? static_cast<jint>(eventsExt[i].mmtpRecord().firstMbInSlice)
                 : static_cast<jint>(Constant::INVALID_FIRST_MACROBLOCK_IN_SLICE);
+        jlong tsIndexMask = (eventsExt.size() > i)
+                ? static_cast<jint>(eventsExt[i].mmtpRecord().tsIndexMask) : 0;
 
         jobject obj =
                 env->NewObject(eventClazz, eventInit, scHevcIndexMask, byteNumber,
-                        mpuSequenceNumber, pts, firstMbInSlice);
+                        mpuSequenceNumber, pts, firstMbInSlice, tsIndexMask);
         env->SetObjectArrayElement(arr, i, obj);
     }
     return arr;
@@ -1242,10 +1245,10 @@ jobject JTuner::getAtscFrontendCaps(JNIEnv *env, FrontendInfo::FrontendCapabilit
 
 jobject JTuner::getDvbcFrontendCaps(JNIEnv *env, FrontendInfo::FrontendCapabilities& caps) {
     jclass clazz = env->FindClass("android/media/tv/tuner/frontend/DvbcFrontendCapabilities");
-    jmethodID capsInit = env->GetMethodID(clazz, "<init>", "(III)V");
+    jmethodID capsInit = env->GetMethodID(clazz, "<init>", "(IJI)V");
 
     jint modulationCap = caps.dvbcCaps().modulationCap;
-    jint fecCap = caps.dvbcCaps().fecCap;
+    jlong fecCap = caps.dvbcCaps().fecCap;
     jint annexCap = caps.dvbcCaps().annexCap;
 
     return env->NewObject(clazz, capsInit, modulationCap, fecCap, annexCap);
@@ -2484,6 +2487,55 @@ jobject JTuner::getFrontendStatus(jintArray types) {
                 env->SetObjectField(statusObj, field, valObj);
                 break;
             }
+            case FrontendStatusExt1_1::hidl_discriminator::rollOff: {
+                jfieldID field = env->GetFieldID(clazz, "mRollOff", "Ljava/lang/Integer;");
+                auto rollOff = s.rollOff();
+                jint intRollOff;
+                bool valid = true;
+                switch(rollOff.getDiscriminator()) {
+                    case FrontendRollOff::hidl_discriminator::dvbs: {
+                        intRollOff = static_cast<jint>(rollOff.dvbs());
+                        break;
+                    }
+                    case FrontendRollOff::hidl_discriminator::isdbs: {
+                        intRollOff = static_cast<jint>(rollOff.isdbs());
+                        break;
+                    }
+                    case FrontendRollOff::hidl_discriminator::isdbs3: {
+                        intRollOff = static_cast<jint>(rollOff.isdbs3());
+                        break;
+                    }
+                    default:
+                        valid = false;
+                        break;
+                }
+                if (valid) {
+                    jobject newIntegerObj = env->NewObject(intClazz, initInt, intRollOff);
+                    env->SetObjectField(statusObj, field, newIntegerObj);
+                }
+                break;
+            }
+            case FrontendStatusExt1_1::hidl_discriminator::isMiso: {
+                jfieldID field = env->GetFieldID(clazz, "mIsMisoEnabled", "Ljava/lang/Boolean;");
+                jobject newBooleanObj = env->NewObject(
+                        booleanClazz, initBoolean, static_cast<jboolean>(s.isMiso()));
+                env->SetObjectField(statusObj, field, newBooleanObj);
+                break;
+            }
+            case FrontendStatusExt1_1::hidl_discriminator::isLinear: {
+                jfieldID field = env->GetFieldID(clazz, "mIsLinear", "Ljava/lang/Boolean;");
+                jobject newBooleanObj = env->NewObject(
+                        booleanClazz, initBoolean, static_cast<jboolean>(s.isLinear()));
+                env->SetObjectField(statusObj, field, newBooleanObj);
+                break;
+            }
+            case FrontendStatusExt1_1::hidl_discriminator::isShortFrames: {
+                jfieldID field = env->GetFieldID(clazz, "mIsShortFrames", "Ljava/lang/Boolean;");
+                jobject newBooleanObj = env->NewObject(
+                        booleanClazz, initBoolean, static_cast<jboolean>(s.isShortFrames()));
+                env->SetObjectField(statusObj, field, newBooleanObj);
+                break;
+            }
             default: {
                 break;
             }
@@ -2494,7 +2546,7 @@ jobject JTuner::getFrontendStatus(jintArray types) {
 
 bool JTuner::isV1_1ExtendedStatusType(int type) {
     return (type > static_cast<int>(FrontendStatusType::ATSC3_PLP_INFO)
-                && type <= static_cast<int>(FrontendStatusTypeExt1_1::TS_DATA_RATES));
+                && type <= static_cast<int>(FrontendStatusTypeExt1_1::IS_SHORT_FRAMES));
 }
 
 jint JTuner::closeFrontend() {

@@ -33,6 +33,7 @@ import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Objects;
+import java.util.function.BiConsumer;
 
 /**
  * Singleton source of truth for the current state of PIP bounds.
@@ -66,8 +67,13 @@ public final class PipBoundsState {
     /** The preferred minimum (and default) size specified by apps. */
     private Size mOverrideMinSize;
     private final @NonNull AnimatingBoundsState mAnimatingBoundsState = new AnimatingBoundsState();
+    private boolean mIsImeShowing;
+    private int mImeHeight;
+    private boolean mIsShelfShowing;
+    private int mShelfHeight;
 
     private Runnable mOnMinimalSizeChangeCallback;
+    private BiConsumer<Boolean, Integer> mOnShelfVisibilityChangeCallback;
 
     public PipBoundsState(Context context) {
         mContext = context;
@@ -245,11 +251,57 @@ public final class PipBoundsState {
         return mAnimatingBoundsState;
     }
 
+    /** Set whether the IME is currently showing and its height. */
+    public void setImeVisibility(boolean imeShowing, int imeHeight) {
+        mIsImeShowing = imeShowing;
+        mImeHeight = imeHeight;
+    }
+
+    /** Returns whether the IME is currently showing. */
+    public boolean isImeShowing() {
+        return mIsImeShowing;
+    }
+
+    /** Returns the IME height. */
+    public int getImeHeight() {
+        return mImeHeight;
+    }
+
+    /** Set whether the shelf is showing and its height. */
+    public void setShelfVisibility(boolean showing, int height) {
+        final boolean shelfShowing = showing && height > 0;
+        if (shelfShowing == mIsShelfShowing && height == mShelfHeight) {
+            return;
+        }
+
+        mIsShelfShowing = showing;
+        mShelfHeight = height;
+        if (mOnShelfVisibilityChangeCallback != null) {
+            mOnShelfVisibilityChangeCallback.accept(mIsShelfShowing, mShelfHeight);
+        }
+    }
+
+    /** Returns whether the shelf is currently showing. */
+    public boolean isShelfShowing() {
+        return mIsShelfShowing;
+    }
+
+    /** Returns the shelf height. */
+    public int getShelfHeight() {
+        return mShelfHeight;
+    }
+
     /**
      * Registers a callback when the minimal size of PIP that is set by the app changes.
      */
     public void setOnMinimalSizeChangeCallback(Runnable onMinimalSizeChangeCallback) {
         mOnMinimalSizeChangeCallback = onMinimalSizeChangeCallback;
+    }
+
+    /** Set a callback to be notified when the shelf visibility changes. */
+    public void setOnShelfVisibilityChangeCallback(
+            BiConsumer<Boolean, Integer> onShelfVisibilityChangeCallback) {
+        mOnShelfVisibilityChangeCallback = onShelfVisibilityChangeCallback;
     }
 
     /** Source of truth for the current animation bounds of PIP. */
@@ -345,6 +397,10 @@ public final class PipBoundsState {
         pw.println(innerPrefix + "mStashOffset=" + mStashOffset);
         pw.println(innerPrefix + "mMinEdgeSize=" + mMinEdgeSize);
         pw.println(innerPrefix + "mOverrideMinSize=" + mOverrideMinSize);
+        pw.println(innerPrefix + "mIsImeShowing=" + mIsImeShowing);
+        pw.println(innerPrefix + "mImeHeight=" + mImeHeight);
+        pw.println(innerPrefix + "mIsShelfShowing=" + mIsShelfShowing);
+        pw.println(innerPrefix + "mShelfHeight=" + mShelfHeight);
         if (mPipReentryState == null) {
             pw.println(innerPrefix + "mPipReentryState=null");
         } else {

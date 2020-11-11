@@ -62,7 +62,6 @@ public class WMShellTest extends SysuiTestCase {
     @Mock CommandQueue mCommandQueue;
     @Mock ConfigurationController mConfigurationController;
     @Mock KeyguardUpdateMonitor mKeyguardUpdateMonitor;
-    @Mock TaskStackChangeListeners mTaskStackChangeListeners;
     @Mock InputConsumerController mMockInputConsumerController;
     @Mock NavigationModeController mNavigationModeController;
     @Mock ScreenLifecycle mScreenLifecycle;
@@ -77,13 +76,11 @@ public class WMShellTest extends SysuiTestCase {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        mInputConsumerController = InputConsumerController.getPipInputConsumer();
 
         mWMShell = new WMShell(mContext, mCommandQueue, mConfigurationController,
-                mInputConsumerController, mKeyguardUpdateMonitor, mTaskStackChangeListeners,
-                mNavigationModeController, mScreenLifecycle, mSysUiState, Optional.of(mPip),
-                Optional.of(mSplitScreen), Optional.of(mOneHanded), mProtoTracer,
-                Optional.of(mShellDump));
+                mKeyguardUpdateMonitor, mNavigationModeController,
+                mScreenLifecycle, mSysUiState, Optional.of(mPip), Optional.of(mSplitScreen),
+                Optional.of(mOneHanded), mProtoTracer, Optional.of(mShellDump));
 
         when(mPip.getPipTouchHandler()).thenReturn(mPipTouchHandler);
     }
@@ -100,8 +97,6 @@ public class WMShellTest extends SysuiTestCase {
         mWMShell.initSplitScreen(mSplitScreen);
 
         verify(mKeyguardUpdateMonitor).registerCallback(any(KeyguardUpdateMonitorCallback.class));
-        verify(mTaskStackChangeListeners).registerTaskStackListener(
-                any(TaskStackChangeListener.class));
     }
 
     @Test
@@ -113,8 +108,6 @@ public class WMShellTest extends SysuiTestCase {
         verify(mScreenLifecycle).addObserver(any(ScreenLifecycle.Observer.class));
         verify(mNavigationModeController).addListener(
                 any(NavigationModeController.ModeChangedListener.class));
-        verify(mTaskStackChangeListeners).registerTaskStackListener(
-                any(TaskStackChangeListener.class));
 
         verify(mOneHanded).registerGestureCallback(any(
                 OneHandedGestureHandler.OneHandedGestureEventCallback.class));

@@ -61,4 +61,14 @@ public interface LegacyPermissionDataProvider {
      */
     @NonNull
     int[] getGidsForUid(int uid);
+
+    /**
+     * This method should be in PermissionManagerServiceInternal, however it is made available here
+     * as well to avoid serious performance regression in writePermissionSettings(), which seems to
+     * be a hot spot and we should delay calling this method until wre are actually writing the
+     * file, instead of every time an async write is requested.
+     *
+     * @see PermissionManagerServiceInternal#writeLegacyPermissionStateTEMP()
+     */
+    void writeLegacyPermissionStateTEMP();
 }

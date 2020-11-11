@@ -23,6 +23,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import android.content.Context;
 import android.hardware.hdmi.HdmiControlManager;
+import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.hdmi.HdmiPortInfo;
 import android.hardware.tv.cec.V1_0.SendMessageResult;
 import android.os.Handler;
@@ -135,5 +136,52 @@ public class HdmiCecLocalDeviceTvTest {
         HdmiCecMessage givePhysicalAddress = HdmiCecMessageBuilder.buildGivePhysicalAddress(ADDR_TV,
                 ADDR_PLAYBACK_1);
         assertThat(mNativeWrapper.getResultMessages()).contains(givePhysicalAddress);
+    }
+
+    @Test
+    public void getActiveSource_noActiveSource() {
+        mHdmiControlService.setActiveSource(Constants.ADDR_UNREGISTERED,
+                Constants.INVALID_PHYSICAL_ADDRESS, "HdmiControlServiceTest");
+        mHdmiCecLocalDeviceTv.setActivePath(HdmiDeviceInfo.PATH_INVALID);
+
+        assertThat(mHdmiControlService.getActiveSource()).isNull();
+    }
+
+    @Test
+    public void getActiveSource_deviceInNetworkIsActiveSource() {
+        HdmiDeviceInfo externalDevice = new HdmiDeviceInfo(Constants.ADDR_PLAYBACK_3, 0x1000, 0,
+                Constants.ADDR_PLAYBACK_1, 0, "Test Device");
+        mHdmiControlService.getHdmiCecNetwork().addCecDevice(externalDevice);
+        mTestLooper.dispatchAll();
+
+        mHdmiControlService.setActiveSource(externalDevice.getLogicalAddress(),
+                externalDevice.getPhysicalAddress(), "HdmiControlServiceTest");
+
+        assertThat(mHdmiControlService.getActiveSource()).isEqualTo(externalDevice);
+    }
+
+    @Test
+    public void getActiveSource_unknownLogicalAddressInNetworkIsActiveSource() {
+        HdmiDeviceInfo externalDevice = new HdmiDeviceInfo(0x1000, 1);
+
+        mHdmiControlService.setActiveSource(Constants.ADDR_UNREGISTERED,
+                externalDevice.getPhysicalAddress(), "HdmiControlServiceTest");
+        mHdmiCecLocalDeviceTv.setActivePath(0x1000);
+
+        assertThat(mHdmiControlService.getActiveSource()).isEqualTo(
+                externalDevice);
+    }
+
+    @Test
+    public void getActiveSource_unknownDeviceIsActiveSource() {
+        HdmiDeviceInfo externalDevice = new HdmiDeviceInfo(Constants.ADDR_PLAYBACK_3, 0x1000, 0,
+                Constants.ADDR_PLAYBACK_1, 0, "Test Device");
+
+        mHdmiControlService.setActiveSource(externalDevice.getLogicalAddress(),
+                externalDevice.getPhysicalAddress(), "HdmiControlServiceTest");
+        mHdmiCecLocalDeviceTv.setActivePath(0x1000);
+
+        assertThat(mHdmiControlService.getActiveSource().getPhysicalAddress()).isEqualTo(
+                externalDevice.getPhysicalAddress());
     }
 }

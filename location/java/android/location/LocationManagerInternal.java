@@ -21,8 +21,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.location.util.identity.CallerIdentity;
 
-import java.util.List;
-
 /**
  * Location manager local system service interface.
  *
@@ -82,10 +80,4 @@ public abstract class LocationManagerInternal {
      */
     // TODO: there is no reason for this to exist as part of any API. move all the logic into gnss
     public abstract void sendNiResponse(int notifId, int userResponse);
-
-    /**
-     * Should only be used by GNSS code.
-     */
-    // TODO: there is no reason for this to exist as part of any API. create a real batching API
-    public abstract void reportGnssBatchLocations(List<Location> locations);
 }

@@ -776,8 +776,10 @@ public class ArrayUtils {
 
         int matchesCount = 0;
         int size = size(items);
+        final boolean[] tests = new boolean[size];
         for (int i = 0; i < size; i++) {
-            if (predicate.test(items[i])) {
+            tests[i] = predicate.test(items[i]);
+            if (tests[i]) {
                 matchesCount++;
             }
         }
@@ -790,7 +792,7 @@ public class ArrayUtils {
         }
         int outIdx = 0;
         for (int i = 0; i < size; i++) {
-            if (predicate.test(items[i])) {
+            if (tests[i]) {
                 result[outIdx++] = items[i];
             }
         }

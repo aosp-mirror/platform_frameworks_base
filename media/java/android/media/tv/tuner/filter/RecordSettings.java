@@ -38,16 +38,22 @@ public class RecordSettings extends Settings {
      * @hide
      */
     @IntDef(flag = true,
-            prefix = "TS_INDEX_",
-            value = {TS_INDEX_FIRST_PACKET, TS_INDEX_PAYLOAD_UNIT_START_INDICATOR,
+            value = {TS_INDEX_INVALID, TS_INDEX_FIRST_PACKET, TS_INDEX_PAYLOAD_UNIT_START_INDICATOR,
                     TS_INDEX_CHANGE_TO_NOT_SCRAMBLED, TS_INDEX_CHANGE_TO_EVEN_SCRAMBLED,
                     TS_INDEX_CHANGE_TO_ODD_SCRAMBLED, TS_INDEX_DISCONTINUITY_INDICATOR,
                     TS_INDEX_RANDOM_ACCESS_INDICATOR, TS_INDEX_PRIORITY_INDICATOR,
                     TS_INDEX_PCR_FLAG, TS_INDEX_OPCR_FLAG, TS_INDEX_SPLICING_POINT_FLAG,
-                    TS_INDEX_PRIVATE_DATA, TS_INDEX_ADAPTATION_EXTENSION_FLAG})
+                    TS_INDEX_PRIVATE_DATA, TS_INDEX_ADAPTATION_EXTENSION_FLAG,
+                    MPT_INDEX_MPT, MPT_INDEX_VIDEO, MPT_INDEX_AUDIO,
+                    MPT_INDEX_TIMESTAMP_TARGET_VIDEO,
+                    MPT_INDEX_TIMESTAMP_TARGET_AUDIO})
     @Retention(RetentionPolicy.SOURCE)
     public @interface TsIndexMask {}
 
+    /**
+     * Invalid TS index.
+     */
+    public static final int TS_INDEX_INVALID = 0;
     /**
      * TS index FIRST_PACKET.
      */
@@ -108,6 +114,32 @@ public class RecordSettings extends Settings {
      */
     public static final int TS_INDEX_ADAPTATION_EXTENSION_FLAG =
             Constants.DemuxTsIndex.ADAPTATION_EXTENSION_FLAG;
+    /**
+     * Index the address of MPEG Media Transport Packet Table(MPT).
+     */
+    public static final int MPT_INDEX_MPT =
+            android.hardware.tv.tuner.V1_1.Constants.DemuxTsIndex.MPT_INDEX_MPT;
+    /**
+     * Index the address of Video.
+     */
+    public static final int MPT_INDEX_VIDEO =
+            android.hardware.tv.tuner.V1_1.Constants.DemuxTsIndex.MPT_INDEX_VIDEO;
+    /**
+     * Index the address of Audio.
+     */
+    public static final int MPT_INDEX_AUDIO =
+            android.hardware.tv.tuner.V1_1.Constants.DemuxTsIndex.MPT_INDEX_AUDIO;
+    /**
+     * Index to indicate this is a target of timestamp extraction for video.
+     */
+    public static final int MPT_INDEX_TIMESTAMP_TARGET_VIDEO =
+            android.hardware.tv.tuner.V1_1.Constants.DemuxTsIndex.MPT_INDEX_TIMESTAMP_TARGET_VIDEO;
+    /**
+     * Index to indicate this is a target of timestamp extraction for audio.
+     */
+    public static final int MPT_INDEX_TIMESTAMP_TARGET_AUDIO =
+            android.hardware.tv.tuner.V1_1.Constants.DemuxTsIndex.MPT_INDEX_TIMESTAMP_TARGET_AUDIO;
+
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)

@@ -2786,4 +2786,9 @@ enum PageId {
     // CATEGORY: SETTINGS
     // OS: S
     LOCATION_TIME_ZONE_DETECTION = 1854;
+
+    // OPEN: Settings > Developer options > Media transcode settings
+    // CATEGORY: SETTINGS
+    // OS: S
+    TRANSCODE_SETTINGS = 1855;
 }

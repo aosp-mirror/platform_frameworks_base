@@ -46,6 +46,29 @@ public interface LocationListener {
     void onLocationChanged(@NonNull Location location);
 
     /**
+     * Called when the location has changed and locations are being delivered in batches. The
+     * default implementation calls through to ({@link #onLocationChanged(Location)} with all
+     * locations in the batch, from earliest to latest.
+     *
+     * @see LocationRequest#getMaxUpdateDelayMillis()
+     * @param locationResult the location result list
+     */
+    default void onLocationChanged(@NonNull LocationResult locationResult) {
+        final int size = locationResult.size();
+        for (int i = 0; i < size; ++i) {
+            onLocationChanged(locationResult.get(i));
+        }
+    }
+
+    /**
+     * Invoked when a flush operation is complete and after flushed locations have been delivered.
+     *
+     * @param requestCode the request code passed into
+     *                    {@link LocationManager#requestFlush(String, LocationListener, int)}
+     */
+    default void onFlushComplete(int requestCode) {}
+
+    /**
      * This callback will never be invoked on Android Q and above, and providers can be considered
      * as always in the {@link LocationProvider#AVAILABLE} state.
      *

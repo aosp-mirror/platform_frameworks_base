@@ -51,6 +51,8 @@ import com.android.server.hdmi.DeviceDiscoveryAction.DeviceDiscoveryCallback;
 import com.android.server.hdmi.HdmiAnnotations.ServiceThreadOnly;
 import com.android.server.hdmi.HdmiControlService.SendMessageCallback;
 
+import com.google.android.collect.Lists;
+
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -1476,6 +1478,22 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     protected boolean handleMenuStatus(HdmiCecMessage message) {
         // Do nothing and just return true not to prevent from responding <Feature Abort>.
         return true;
+    }
+
+    @Override
+    protected int getRcProfile() {
+        return Constants.RC_PROFILE_TV;
+    }
+
+    @Override
+    protected List<Integer> getRcFeatures() {
+        return Lists.newArrayList(Constants.RC_PROFILE_TV_NONE);
+    }
+
+    @Override
+    protected List<Integer> getDeviceFeatures() {
+        return Lists.newArrayList(Constants.DEVICE_FEATURE_SINK_SUPPORTS_ARC_TX,
+                Constants.DEVICE_FEATURE_TV_SUPPORTS_RECORD_TV_SCREEN);
     }
 
     @Override

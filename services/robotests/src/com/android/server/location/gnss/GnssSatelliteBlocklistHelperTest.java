@@ -43,101 +43,101 @@ import java.util.Collection;
 import java.util.List;
 
 /**
- * Unit tests for {@link GnssSatelliteBlacklistHelper}.
+ * Unit tests for {@link GnssSatelliteBlocklistHelper}.
  */
 @RunWith(RobolectricTestRunner.class)
 @Presubmit
-public class GnssSatelliteBlacklistHelperTest {
+public class GnssSatelliteBlocklistHelperTest {
 
     private ContentResolver mContentResolver;
     @Mock
-    private GnssSatelliteBlacklistHelper.GnssSatelliteBlacklistCallback mCallback;
+    private GnssSatelliteBlocklistHelper.GnssSatelliteBlocklistCallback mCallback;
 
     /**
-     * Initialize mocks and create GnssSatelliteBlacklistHelper with callback.
+     * Initialize mocks and create GnssSatelliteBlocklistHelper with callback.
      */
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         Context context = RuntimeEnvironment.application;
         mContentResolver = context.getContentResolver();
-        new GnssSatelliteBlacklistHelper(context, Looper.myLooper(), mCallback);
+        new GnssSatelliteBlocklistHelper(context, Looper.myLooper(), mCallback);
     }
 
     /**
-     * Blacklist two satellites and verify callback is called.
+     * Blocklist two satellites and verify callback is called.
      */
     @Test
-    public void blacklistOf2Satellites_callbackIsCalled() {
-        String blacklist = "3,0,5,24";
-        updateBlacklistAndVerifyCallbackIsCalled(blacklist);
+    public void blocklistOf2Satellites_callbackIsCalled() {
+        String blocklist = "3,0,5,24";
+        updateBlocklistAndVerifyCallbackIsCalled(blocklist);
     }
 
     /**
-     * Blacklist one satellite with spaces in string and verify callback is called.
+     * Blocklist one satellite with spaces in string and verify callback is called.
      */
     @Test
-    public void blacklistWithSpaces_callbackIsCalled() {
-        String blacklist = "3, 11";
-        updateBlacklistAndVerifyCallbackIsCalled(blacklist);
+    public void blocklistWithSpaces_callbackIsCalled() {
+        String blocklist = "3, 11";
+        updateBlocklistAndVerifyCallbackIsCalled(blocklist);
     }
 
     /**
-     * Pass empty blacklist and verify callback is called.
+     * Pass empty blocklist and verify callback is called.
      */
     @Test
-    public void emptyBlacklist_callbackIsCalled() {
-        String blacklist = "";
-        updateBlacklistAndVerifyCallbackIsCalled(blacklist);
+    public void emptyBlocklist_callbackIsCalled() {
+        String blocklist = "";
+        updateBlocklistAndVerifyCallbackIsCalled(blocklist);
     }
 
     /**
-     * Pass blacklist string with odd number of values and verify callback is not called.
+     * Pass blocklist string with odd number of values and verify callback is not called.
      */
     @Test
-    public void blacklistWithOddNumberOfValues_callbackIsNotCalled() {
-        String blacklist = "3,0,5";
-        updateBlacklistAndNotifyContentObserver(blacklist);
-        verify(mCallback, never()).onUpdateSatelliteBlacklist(any(int[].class), any(int[].class));
+    public void blocklistWithOddNumberOfValues_callbackIsNotCalled() {
+        String blocklist = "3,0,5";
+        updateBlocklistAndNotifyContentObserver(blocklist);
+        verify(mCallback, never()).onUpdateSatelliteBlocklist(any(int[].class), any(int[].class));
     }
 
     /**
-     * Pass blacklist string with negative value and verify callback is not called.
+     * Pass blocklist string with negative value and verify callback is not called.
      */
     @Test
-    public void blacklistWithNegativeValue_callbackIsNotCalled() {
-        String blacklist = "3,-11";
-        updateBlacklistAndNotifyContentObserver(blacklist);
-        verify(mCallback, never()).onUpdateSatelliteBlacklist(any(int[].class), any(int[].class));
+    public void blocklistWithNegativeValue_callbackIsNotCalled() {
+        String blocklist = "3,-11";
+        updateBlocklistAndNotifyContentObserver(blocklist);
+        verify(mCallback, never()).onUpdateSatelliteBlocklist(any(int[].class), any(int[].class));
     }
 
     /**
-     * Pass blacklist string with non-digit characters and verify callback is not called.
+     * Pass blocklist string with non-digit characters and verify callback is not called.
      */
     @Test
-    public void blacklistWithNonDigitCharacter_callbackIsNotCalled() {
-        String blacklist = "3,1a,5,11";
-        updateBlacklistAndNotifyContentObserver(blacklist);
-        verify(mCallback, never()).onUpdateSatelliteBlacklist(any(int[].class), any(int[].class));
+    public void blocklistWithNonDigitCharacter_callbackIsNotCalled() {
+        String blocklist = "3,1a,5,11";
+        updateBlocklistAndNotifyContentObserver(blocklist);
+        verify(mCallback, never()).onUpdateSatelliteBlocklist(any(int[].class), any(int[].class));
     }
 
-    private void updateBlacklistAndNotifyContentObserver(String blacklist) {
+    private void updateBlocklistAndNotifyContentObserver(String blocklist) {
         Settings.Global.putString(mContentResolver,
-                Settings.Global.GNSS_SATELLITE_BLACKLIST, blacklist);
-        notifyContentObserverFor(Settings.Global.GNSS_SATELLITE_BLACKLIST);
+                Settings.Global.GNSS_SATELLITE_BLOCKLIST, blocklist);
+        notifyContentObserverFor(Settings.Global.GNSS_SATELLITE_BLOCKLIST);
     }
 
-    private void updateBlacklistAndVerifyCallbackIsCalled(String blacklist) {
-        updateBlacklistAndNotifyContentObserver(blacklist);
+    private void updateBlocklistAndVerifyCallbackIsCalled(String blocklist) {
+        updateBlocklistAndNotifyContentObserver(blocklist);
 
         ArgumentCaptor<int[]> constellationsCaptor = ArgumentCaptor.forClass(int[].class);
         ArgumentCaptor<int[]> svIdsCaptor = ArgumentCaptor.forClass(int[].class);
-        verify(mCallback).onUpdateSatelliteBlacklist(constellationsCaptor.capture(),
+        verify(mCallback).onUpdateSatelliteBlocklist(constellationsCaptor.capture(),
                 svIdsCaptor.capture());
 
         int[] constellations = constellationsCaptor.getValue();
         int[] svIds = svIdsCaptor.getValue();
-        List<Integer> values = GnssSatelliteBlacklistHelper.parseSatelliteBlacklist(blacklist);
+        List<Integer> values = GnssSatelliteBlocklistHelper.parseSatelliteBlocklist(blocklist);
         assertThat(values.size()).isEqualTo(constellations.length * 2);
         assertThat(svIds.length).isEqualTo(constellations.length);
         for (int i = 0; i < constellations.length; i++) {

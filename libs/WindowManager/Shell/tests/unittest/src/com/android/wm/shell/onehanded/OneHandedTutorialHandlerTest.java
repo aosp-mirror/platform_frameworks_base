@@ -25,6 +25,7 @@ import android.testing.TestableLooper;
 import androidx.test.filters.SmallTest;
 
 import com.android.wm.shell.common.DisplayController;
+import com.android.wm.shell.common.TaskStackListenerImpl;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -47,6 +48,8 @@ public class OneHandedTutorialHandlerTest extends OneHandedTestCase {
     OneHandedDisplayAreaOrganizer mMockDisplayAreaOrganizer;
     @Mock
     IOverlayManager mMockOverlayManager;
+    @Mock
+    TaskStackListenerImpl mMockTaskStackListener;
 
     @Before
     public void setUp() {
@@ -60,7 +63,8 @@ public class OneHandedTutorialHandlerTest extends OneHandedTestCase {
                 mTouchHandler,
                 mTutorialHandler,
                 mGestureHandler,
-                mMockOverlayManager);
+                mMockOverlayManager,
+                mMockTaskStackListener);
     }
 
     @Test

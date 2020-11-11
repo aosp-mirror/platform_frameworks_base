@@ -20,9 +20,11 @@ import static android.app.ActivityManager.LOCK_TASK_MODE_PINNED;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
+import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.view.Display.DEFAULT_DISPLAY;
 
+import android.app.ActivityManager;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityTaskManager;
 import android.content.Context;
@@ -48,12 +50,15 @@ import com.android.wm.shell.common.DisplayImeController;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.SystemWindows;
+import com.android.wm.shell.common.TaskStackListenerCallback;
+import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.common.TransactionPool;
 
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
@@ -81,8 +86,8 @@ public class SplitScreenController implements SplitScreen,
     private final WindowManagerProxy mWindowManagerProxy;
     private final TaskOrganizer mTaskOrganizer;
 
-    private final ArrayList<WeakReference<Consumer<Boolean>>> mDockedStackExistsListeners =
-            new ArrayList<>();
+    private final CopyOnWriteArrayList<WeakReference<Consumer<Boolean>>> mDockedStackExistsListeners
+            = new CopyOnWriteArrayList<>();
     private final ArrayList<WeakReference<BiConsumer<Rect, Rect>>> mBoundsChangedListeners =
             new ArrayList<>();
 
@@ -107,7 +112,8 @@ public class SplitScreenController implements SplitScreen,
     public SplitScreenController(Context context,
             DisplayController displayController, SystemWindows systemWindows,
             DisplayImeController imeController, Handler handler, TransactionPool transactionPool,
-            ShellTaskOrganizer shellTaskOrganizer, SyncTransactionQueue syncQueue) {
+            ShellTaskOrganizer shellTaskOrganizer, SyncTransactionQueue syncQueue,
+            TaskStackListenerImpl taskStackListener) {
         mContext = context;
         mDisplayController = displayController;
         mSystemWindows = systemWindows;
@@ -162,6 +168,40 @@ public class SplitScreenController implements SplitScreen,
         mWindowManager = new DividerWindowManager(mSystemWindows);
         mDisplayController.addDisplayWindowListener(this);
         // Don't initialize the divider or anything until we get the default display.
+
+        taskStackListener.addListener(
+                new TaskStackListenerCallback() {
+                    @Override
+                    public void onActivityRestartAttempt(ActivityManager.RunningTaskInfo task,
+                            boolean homeTaskVisible, boolean clearedTask, boolean wasVisible) {
+                        if (!wasVisible || task.getWindowingMode()
+                                != WINDOWING_MODE_SPLIT_SCREEN_PRIMARY
+                                || !mSplits.isSplitScreenSupported()) {
+                            return;
+                        }
+
+                        if (isMinimized()) {
+                            onUndockingTask();
+                        }
+                    }
+
+                    @Override
+                    public void onActivityForcedResizable(String packageName, int taskId,
+                            int reason) {
+                        mForcedResizableController.activityForcedResizable(packageName, taskId,
+                                reason);
+                    }
+
+                    @Override
+                    public void onActivityDismissingDockedStack() {
+                        mForcedResizableController.activityDismissingSplitScreen();
+                    }
+
+                    @Override
+                    public void onActivityLaunchOnSecondaryDisplayFailed() {
+                        mForcedResizableController.activityLaunchOnSecondaryDisplayFailed();
+                    }
+                });
     }
 
     void onSplitScreenSupported() {
@@ -170,11 +210,6 @@ public class SplitScreenController implements SplitScreen,
         int midPos = mSplitLayout.getSnapAlgorithm().getMiddleTarget().position;
         mSplitLayout.resizeSplits(midPos, tct);
         mTaskOrganizer.applyTransaction(tct);
-    }
-
-    @Override
-    public boolean isSplitScreenSupported() {
-        return mSplits.isSplitScreenSupported();
     }
 
     @Override
@@ -404,21 +439,6 @@ public class SplitScreenController implements SplitScreen,
     }
 
     @Override
-    public void onActivityForcedResizable(String packageName, int taskId, int reason) {
-        mForcedResizableController.activityForcedResizable(packageName, taskId, reason);
-    }
-
-    @Override
-    public void onActivityDismissingSplitScreen() {
-        mForcedResizableController.activityDismissingSplitScreen();
-    }
-
-    @Override
-    public void onActivityLaunchOnSecondaryDisplayFailed() {
-        mForcedResizableController.activityLaunchOnSecondaryDisplayFailed();
-    }
-
-    @Override
     public void onUndockingTask() {
         if (mView != null) {
             mView.onUndockingTask();
@@ -459,6 +479,17 @@ public class SplitScreenController implements SplitScreen,
     }
 
     @Override
+    public void unregisterInSplitScreenListener(Consumer<Boolean> listener) {
+        synchronized (mDockedStackExistsListeners) {
+            for (int i = mDockedStackExistsListeners.size() - 1; i >= 0; i--) {
+                if (mDockedStackExistsListeners.get(i) == listener) {
+                    mDockedStackExistsListeners.remove(i);
+                }
+            }
+        }
+    }
+
+    @Override
     public void registerBoundsChangeListener(BiConsumer<Rect, Rect> listener) {
         synchronized (mBoundsChangedListeners) {
             mBoundsChangedListeners.add(new WeakReference<>(listener));
@@ -481,9 +512,7 @@ public class SplitScreenController implements SplitScreen,
             }
             // Note: The set of running tasks from the system is ordered by recency.
             final RunningTaskInfo topRunningTask = runningTasks.get(0);
-
-            final int activityType = topRunningTask.configuration.windowConfiguration
-                    .getActivityType();
+            final int activityType = topRunningTask.getActivityType();
             if (activityType == ACTIVITY_TYPE_HOME || activityType == ACTIVITY_TYPE_RECENTS) {
                 return false;
             }

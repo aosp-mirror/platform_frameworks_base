@@ -5390,6 +5390,8 @@ public final class Settings {
             mHandler.removeMessages(userId);
             mWriteScheduled.delete(userId);
 
+            mPermissionDataProvider.writeLegacyPermissionStateTEMP();
+
             int version = mVersions.get(userId, INITIAL_VERSION);
 
             String fingerprint = mFingerprints.get(userId);
