@@ -5102,6 +5102,32 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         assertEquals(1, mService.mToastQueue.size());
     }
 
+    @Test
+    public void testLimitNumberOfQueuedToastsFromPackage() throws Exception {
+        final String testPackage = "testPackageName";
+        assertEquals(0, mService.mToastQueue.size());
+        mService.isSystemUid = false;
+
+        // package is not suspended
+        when(mPackageManager.isPackageSuspendedForUser(testPackage, UserHandle.getUserId(mUid)))
+                .thenReturn(false);
+
+        INotificationManager nmService = (INotificationManager) mService.mService;
+
+        // Trying to quickly enqueue more toast than allowed.
+        for (int i = 0; i < NotificationManagerService.MAX_PACKAGE_TOASTS + 1; i++) {
+            nmService.enqueueTextToast(
+                    testPackage,
+                    new Binder(),
+                    "Text",
+                    /* duration */ 2000,
+                    /* displayId */ 0,
+                    /* callback */ null);
+        }
+        // Only allowed number enqueued, rest ignored.
+        assertEquals(NotificationManagerService.MAX_PACKAGE_TOASTS, mService.mToastQueue.size());
+    }
+
     private void setAppInForegroundForToasts(int uid, boolean inForeground) {
         int importance = (inForeground) ? IMPORTANCE_FOREGROUND : IMPORTANCE_NONE;
         when(mActivityManager.getUidImportance(mUid)).thenReturn(importance);

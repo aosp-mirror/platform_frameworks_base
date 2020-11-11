@@ -330,6 +330,9 @@ public class NotificationManagerService extends SystemService {
     static final int MAX_PACKAGE_NOTIFICATIONS = 50;
     static final float DEFAULT_MAX_NOTIFICATION_ENQUEUE_RATE = 5f;
 
+    // To limit bad UX of seeing a toast many seconds after if was triggered.
+    static final int MAX_PACKAGE_TOASTS = 5;
+
     // message codes
     static final int MESSAGE_DURATION_REACHED = 2;
     // 3: removed to a different handler
@@ -2945,8 +2948,8 @@ public class NotificationManagerService extends SystemService {
                             final ToastRecord r = mToastQueue.get(i);
                             if (r.pkg.equals(pkg)) {
                                 count++;
-                                if (count >= MAX_PACKAGE_NOTIFICATIONS) {
-                                    Slog.e(TAG, "Package has already posted " + count
+                                if (count >= MAX_PACKAGE_TOASTS) {
+                                    Slog.e(TAG, "Package has already queued " + count
                                             + " toasts. Not showing more. Package=" + pkg);
                                     return;
                                 }
