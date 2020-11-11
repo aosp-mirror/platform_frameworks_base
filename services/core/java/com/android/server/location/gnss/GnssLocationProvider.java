@@ -16,11 +16,12 @@
 
 package com.android.server.location.gnss;
 
+import static com.android.internal.util.ConcurrentUtils.DIRECT_EXECUTOR;
+
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 import android.app.AlarmManager;
 import android.app.AppOpsManager;
-import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -45,10 +46,8 @@ import android.location.LocationResult;
 import android.location.util.identity.CallerIdentity;
 import android.os.AsyncTask;
 import android.os.BatteryStats;
-import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.HandlerExecutor;
 import android.os.Looper;
 import android.os.Message;
 import android.os.PersistableBundle;
@@ -77,9 +76,7 @@ import com.android.internal.location.ProviderProperties;
 import com.android.internal.location.ProviderRequest;
 import com.android.internal.location.gnssmetrics.GnssMetrics;
 import com.android.internal.util.FrameworkStatsLog;
-import com.android.server.DeviceIdleInternal;
 import com.android.server.FgThread;
-import com.android.server.LocalServices;
 import com.android.server.location.AbstractLocationProvider;
 import com.android.server.location.gnss.GnssSatelliteBlocklistHelper.GnssSatelliteBlocklistCallback;
 import com.android.server.location.gnss.NtpTimeHelper.InjectNtpTimeCallback;
@@ -91,6 +88,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -182,12 +180,9 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
     private static final int AGPS_SUPL_MODE_MSA = 0x02;
     private static final int AGPS_SUPL_MODE_MSB = 0x01;
 
-    private static final int UPDATE_LOW_POWER_MODE = 1;
-    private static final int SET_REQUEST = 3;
     private static final int INJECT_NTP_TIME = 5;
     // PSDS stands for Predicted Satellite Data Service
     private static final int DOWNLOAD_PSDS_DATA = 6;
-    private static final int INITIALIZE_HANDLER = 13;
     private static final int REQUEST_LOCATION = 16;
     private static final int REPORT_LOCATION = 17; // HAL reports location
     private static final int REPORT_SV_STATUS = 18; // HAL reports SV status
@@ -270,8 +265,6 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         }
     }
 
-    private final Object mLock = new Object();
-
     // stop trying if we do not receive a fix within 60 seconds
     private static final int NO_FIX_TIMEOUT = 60 * 1000;
 
@@ -293,6 +286,23 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
     private static final long DOWNLOAD_PSDS_DATA_TIMEOUT_MS = 60 * 1000;
     private static final long WAKELOCK_TIMEOUT_MILLIS = 30 * 1000;
 
+    // threshold for delay in GNSS engine turning off before warning & error
+    private static final long LOCATION_OFF_DELAY_THRESHOLD_WARN_MILLIS = 2 * 1000;
+    private static final long LOCATION_OFF_DELAY_THRESHOLD_ERROR_MILLIS = 15 * 1000;
+
+    private static final String DOWNLOAD_EXTRA_WAKELOCK_KEY = "GnssLocationProviderPsdsDownload";
+
+    // Set lower than the current ITAR limit of 600m/s to allow this to trigger even if GPS HAL
+    // stops output right at 600m/s, depriving this of the information of a device that reaches
+    // greater than 600m/s, and higher than the speed of sound to avoid impacting most use cases.
+    private static final float ITAR_SPEED_LIMIT_METERS_PER_SECOND = 400.0F;
+
+
+    private final Object mLock = new Object();
+
+    private final Context mContext;
+    private final Handler mHandler;
+
     @GuardedBy("mLock")
     private final ExponentialBackOff mPsdsBackOff = new ExponentialBackOff(RETRY_INTERVAL,
             MAX_RETRY_INTERVAL);
@@ -305,37 +315,16 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
     private boolean mBatchingEnabled;
 
     private boolean mShutdown;
-
-    @GuardedBy("mLock")
-    private Set<Integer> mPendingDownloadPsdsTypes = new HashSet<>();
-
-    // true if GPS is navigating
     private boolean mNavigating;
-
-    // requested frequency of fixes, in milliseconds
+    private boolean mStarted;
+    private boolean mBatchingStarted;
+    private long mStartedChangedElapsedRealtime;
     private int mFixInterval = 1000;
 
-    // true if low power mode for the GNSS chipset is part of the latest request.
-    private boolean mLowPowerMode = false;
+    private ProviderRequest mProviderRequest;
 
-    // true if we started navigation in the HAL, only change value of this in setStarted
-    private boolean mStarted;
-
-    // true if batching is being used
-    private boolean mBatchingStarted;
-
-    // for logging of latest change, and warning of ongoing location after a stop
-    private long mStartedChangedElapsedRealtime;
-
-    // threshold for delay in GNSS engine turning off before warning & error
-    private static final long LOCATION_OFF_DELAY_THRESHOLD_WARN_MILLIS = 2 * 1000;
-    private static final long LOCATION_OFF_DELAY_THRESHOLD_ERROR_MILLIS = 15 * 1000;
-
-    // capabilities reported through the top level IGnssCallback.hal
-    private volatile int mTopHalCapabilities;
-
-    // true if PSDS is supported
-    private boolean mSupportsPsds;
+    private int mPositionMode;
+    private GnssPositionMode mLastPositionMode;
 
     // for calculating time to first fix
     private long mFixRequestTime = 0;
@@ -344,25 +333,23 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
     // time we received our last fix
     private long mLastFixTime;
 
-    private int mPositionMode;
-    private GnssPositionMode mLastPositionMode;
+    private final WorkSource mClientSource = new WorkSource();
 
-    // Current request from underlying location clients.
-    private ProviderRequest mProviderRequest;
-    // True if gps should be disabled because of PowerManager controls
-    private boolean mDisableGpsForPowerManager = false;
+    // capabilities reported through the top level IGnssCallback.hal
+    private volatile int mTopHalCapabilities;
 
-    /**
-     * True if the device idle controller has determined that the device is stationary. This is only
-     * updated when the device enters idle mode.
-     */
-    private volatile boolean mIsDeviceStationary = false;
+    // true if PSDS is supported
+    private boolean mSupportsPsds;
+    @GuardedBy("mLock")
+    private final PowerManager.WakeLock mDownloadPsdsWakeLock;
+    @GuardedBy("mLock")
+    private final Set<Integer> mPendingDownloadPsdsTypes = new HashSet<>();
 
     /**
      * Properties loaded from PROPERTIES_FILE.
      * It must be accessed only inside {@link #mHandler}.
      */
-    private GnssConfiguration mGnssConfiguration;
+    private final GnssConfiguration mGnssConfiguration;
 
     private String mSuplServerHost;
     private int mSuplServerPort = TCP_MIN_PORT;
@@ -370,15 +357,12 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
     private int mC2KServerPort;
     private boolean mSuplEsEnabled = false;
 
-    private final Looper mLooper;
     private final LocationExtras mLocationExtras = new LocationExtras();
     private final GnssStatusProvider mGnssStatusListenerHelper;
     private final GnssMeasurementsProvider mGnssMeasurementsProvider;
     private final GnssMeasurementCorrectionsProvider mGnssMeasurementCorrectionsProvider;
     private final GnssAntennaInfoProvider mGnssAntennaInfoProvider;
     private final GnssNavigationMessageProvider mGnssNavigationMessageProvider;
-    private final LocationChangeListener mNetworkLocationListener = new NetworkLocationListener();
-    private final LocationChangeListener mFusedLocationListener = new FusedLocationListener();
     private final NtpTimeHelper mNtpTimeHelper;
     private final GnssGeofenceProvider mGnssGeofenceProvider;
     private final GnssCapabilitiesProvider mGnssCapabilitiesProvider;
@@ -387,34 +371,18 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
     // Available only on GNSS HAL 2.0 implementations and later.
     private GnssVisibilityControl mGnssVisibilityControl;
 
-    private final Context mContext;
-    private Handler mHandler;
-
     private final GnssNetworkConnectivityHandler mNetworkConnectivityHandler;
     private final GpsNetInitiatedHandler mNIHandler;
 
     // Wakelocks
-    private static final String WAKELOCK_KEY = "GnssLocationProvider";
     private final PowerManager.WakeLock mWakeLock;
-    private static final String DOWNLOAD_EXTRA_WAKELOCK_KEY = "GnssLocationProviderPsdsDownload";
-    @GuardedBy("mLock")
-    private final PowerManager.WakeLock mDownloadPsdsWakeLock;
 
-    // Alarms
-    private static final String ALARM_WAKEUP = "com.android.internal.location.ALARM_WAKEUP";
-    private static final String ALARM_TIMEOUT = "com.android.internal.location.ALARM_TIMEOUT";
-
-    private final PowerManager mPowerManager;
     private final AlarmManager mAlarmManager;
-    private final PendingIntent mWakeupIntent;
-    private final PendingIntent mTimeoutIntent;
+    private final AlarmManager.OnAlarmListener mWakeupListener = this::startNavigating;
+    private final AlarmManager.OnAlarmListener mTimeoutListener = this::hibernate;
 
     private final AppOpsManager mAppOps;
     private final IBatteryStats mBatteryStats;
-
-    // Current list of underlying location clients.
-    // only modified on handler thread
-    private WorkSource mClientSource = new WorkSource();
 
     private GeofenceHardwareImpl mGeofenceHardwareImpl;
 
@@ -422,18 +390,13 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
     private volatile int mHardwareYear = 0;
     private volatile String mHardwareModelName;
 
-    // Set lower than the current ITAR limit of 600m/s to allow this to trigger even if GPS HAL
-    // stops output right at 600m/s, depriving this of the information of a device that reaches
-    // greater than 600m/s, and higher than the speed of sound to avoid impacting most use cases.
-    private static final float ITAR_SPEED_LIMIT_METERS_PER_SECOND = 400.0F;
-
     private volatile boolean mItarSpeedLimitExceeded = false;
 
     @GuardedBy("mLock")
     private final ArrayList<Runnable> mFlushListeners = new ArrayList<>(0);
 
     // GNSS Metrics
-    private GnssMetrics mGnssMetrics;
+    private final GnssMetrics mGnssMetrics;
 
     public GnssStatusProvider getGnssStatusProvider() {
         return mGnssStatusListenerHelper;
@@ -458,51 +421,6 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
     public GnssNavigationMessageProvider getGnssNavigationMessageProvider() {
         return mGnssNavigationMessageProvider;
     }
-
-    private final DeviceIdleInternal.StationaryListener mDeviceIdleStationaryListener =
-            isStationary -> {
-                mIsDeviceStationary = isStationary;
-                // Call updateLowPowerMode on handler thread so it's always called from the same
-                // thread.
-                mHandler.sendEmptyMessage(UPDATE_LOW_POWER_MODE);
-            };
-
-    private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            if (DEBUG) Log.d(TAG, "receive broadcast intent, action: " + action);
-            if (action == null) {
-                return;
-            }
-
-            switch (action) {
-                case ALARM_WAKEUP:
-                    startNavigating();
-                    break;
-                case ALARM_TIMEOUT:
-                    hibernate();
-                    break;
-                case PowerManager.ACTION_DEVICE_IDLE_MODE_CHANGED:
-                    DeviceIdleInternal deviceIdleService = LocalServices.getService(
-                            DeviceIdleInternal.class);
-                    if (mPowerManager.isDeviceIdleMode()) {
-                        deviceIdleService.registerStationaryListener(mDeviceIdleStationaryListener);
-                    } else {
-                        deviceIdleService.unregisterStationaryListener(
-                                mDeviceIdleStationaryListener);
-                    }
-                    // Call updateLowPowerMode on handler thread so it's always called from the
-                    // same thread.
-                    mHandler.sendEmptyMessage(UPDATE_LOW_POWER_MODE);
-                    break;
-                case CarrierConfigManager.ACTION_CARRIER_CONFIG_CHANGED:
-                case TelephonyManager.ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED:
-                    subscriptionOrCarrierConfigChanged();
-                    break;
-            }
-        }
-    };
 
     /**
      * Implements {@link GnssSatelliteBlocklistCallback#onUpdateSatelliteBlocklist}.
@@ -553,16 +471,6 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         }
     }
 
-    private void updateLowPowerMode() {
-        // Disable GPS if we are in device idle mode and the device is stationary.
-        boolean disableGpsForPowerManager = mPowerManager.isDeviceIdleMode() && mIsDeviceStationary;
-        if (disableGpsForPowerManager != mDisableGpsForPowerManager) {
-            mDisableGpsForPowerManager = disableGpsForPowerManager;
-            updateEnabled();
-            updateRequirements();
-        }
-    }
-
     private void reloadGpsProperties() {
         mGnssConfiguration.reloadGpsProperties();
         setSuplHostPort();
@@ -581,23 +489,19 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         super(FgThread.getExecutor(), CallerIdentity.fromContext(context));
 
         mContext = context;
-        mLooper = FgThread.getHandler().getLooper();
 
         // Create a wake lock
-        mPowerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
-        mWakeLock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, WAKELOCK_KEY);
+        PowerManager powerManager = Objects.requireNonNull(
+                mContext.getSystemService(PowerManager.class));
+        mWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
         mWakeLock.setReferenceCounted(true);
 
         // Create a separate wake lock for psds downloader as it may be released due to timeout.
-        mDownloadPsdsWakeLock = mPowerManager.newWakeLock(
+        mDownloadPsdsWakeLock = powerManager.newWakeLock(
                 PowerManager.PARTIAL_WAKE_LOCK, DOWNLOAD_EXTRA_WAKELOCK_KEY);
         mDownloadPsdsWakeLock.setReferenceCounted(true);
 
         mAlarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
-        mWakeupIntent = PendingIntent.getBroadcast(mContext, 0, new Intent(ALARM_WAKEUP),
-                PendingIntent.FLAG_IMMUTABLE);
-        mTimeoutIntent = PendingIntent.getBroadcast(mContext, 0, new Intent(ALARM_TIMEOUT),
-                PendingIntent.FLAG_IMMUTABLE);
 
         // App ops service to keep track of who is accessing the GPS
         mAppOps = mContext.getSystemService(AppOpsManager.class);
@@ -607,7 +511,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
                 BatteryStats.SERVICE_NAME));
 
         // Construct internal handler
-        mHandler = new ProviderHandler(mLooper);
+        mHandler = new ProviderHandler(FgThread.getHandler().getLooper());
 
         // Load GPS configuration and register listeners in the background:
         // some operations, such as opening files and registering broadcast receivers, can take a
@@ -623,7 +527,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         // Trigger PSDS data download when the network comes up after booting.
         mPendingDownloadPsdsTypes.add(GnssPsdsDownloader.LONG_TERM_PSDS_SERVER_INDEX);
         mNetworkConnectivityHandler = new GnssNetworkConnectivityHandler(context,
-                GnssLocationProvider.this::onNetworkAvailable, mLooper, mNIHandler);
+                GnssLocationProvider.this::onNetworkAvailable, mHandler.getLooper(), mNIHandler);
 
         mGnssStatusListenerHelper = new GnssStatusProvider(injector);
         mGnssMeasurementsProvider = new GnssMeasurementsProvider(injector);
@@ -632,10 +536,10 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         mGnssNavigationMessageProvider = new GnssNavigationMessageProvider(injector);
 
         mGnssMetrics = new GnssMetrics(mContext, mBatteryStats);
-        mNtpTimeHelper = new NtpTimeHelper(mContext, mLooper, this);
+        mNtpTimeHelper = new NtpTimeHelper(mContext, mHandler.getLooper(), this);
         mGnssSatelliteBlocklistHelper =
                 new GnssSatelliteBlocklistHelper(mContext,
-                        mLooper, this);
+                        mHandler.getLooper(), this);
         mGnssGeofenceProvider = new GnssGeofenceProvider();
 
         setProperties(PROPERTIES);
@@ -664,8 +568,64 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
                     }
                 }, UserHandle.USER_ALL);
 
-        sendMessage(INITIALIZE_HANDLER, 0, null);
+        mHandler.post(this::handleInitialize);
         mHandler.post(mGnssSatelliteBlocklistHelper::updateSatelliteBlocklist);
+    }
+
+    private void handleInitialize() {
+        // it *appears* that native_init() needs to be called at least once before invoking any
+        // other gnss methods, so we cycle once on initialization.
+        native_init();
+        native_cleanup();
+
+        if (native_is_gnss_visibility_control_supported()) {
+            mGnssVisibilityControl = new GnssVisibilityControl(mContext, mHandler.getLooper(),
+                    mNIHandler);
+        }
+
+        // load default GPS configuration
+        // (this configuration might change in the future based on SIM changes)
+        reloadGpsProperties();
+
+        // listen for events
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(CarrierConfigManager.ACTION_CARRIER_CONFIG_CHANGED);
+        intentFilter.addAction(TelephonyManager.ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED);
+        mContext.registerReceiver(new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                String action = intent.getAction();
+                if (DEBUG) Log.d(TAG, "receive broadcast intent, action: " + action);
+                if (action == null) {
+                    return;
+                }
+
+                switch (action) {
+                    case CarrierConfigManager.ACTION_CARRIER_CONFIG_CHANGED:
+                    case TelephonyManager.ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED:
+                        subscriptionOrCarrierConfigChanged();
+                        break;
+                }
+            }
+        }, intentFilter, null, mHandler);
+
+        mNetworkConnectivityHandler.registerNetworkCallbacks();
+
+        // permanently passively listen to all network locations
+        LocationManager locationManager = Objects.requireNonNull(
+                mContext.getSystemService(LocationManager.class));
+        if (locationManager.getProvider(LocationManager.NETWORK_PROVIDER) != null) {
+            locationManager.requestLocationUpdates(
+                    LocationManager.NETWORK_PROVIDER,
+                    new LocationRequest.Builder(LocationRequest.PASSIVE_INTERVAL)
+                            .setMinUpdateIntervalMillis(0)
+                            .setHiddenFromAppOps(true)
+                            .build(),
+                    DIRECT_EXECUTOR,
+                    this::injectLocation);
+        }
+
+        updateEnabled();
     }
 
     /**
@@ -712,19 +672,20 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         LocationManager locationManager = (LocationManager) mContext.getSystemService(
                 Context.LOCATION_SERVICE);
         String provider;
-        LocationChangeListener locationListener;
+        LocationListener locationListener;
         LocationRequest.Builder locationRequest = new LocationRequest.Builder(
-                LOCATION_UPDATE_MIN_TIME_INTERVAL_MILLIS);
+                LOCATION_UPDATE_MIN_TIME_INTERVAL_MILLIS).setMaxUpdates(1);
 
         if (independentFromGnss) {
-            // For fast GNSS TTFF
+            // For fast GNSS TTFF - we use an empty listener because we will rely on the passive
+            // network listener to actually inject the location. this prevents double injection
             provider = LocationManager.NETWORK_PROVIDER;
-            locationListener = mNetworkLocationListener;
+            locationListener = location -> { };
             locationRequest.setQuality(LocationRequest.QUALITY_LOW_POWER);
         } else {
             // For Device-Based Hybrid (E911)
             provider = LocationManager.FUSED_PROVIDER;
-            locationListener = mFusedLocationListener;
+            locationListener = this::injectBestLocation;
             locationRequest.setQuality(LocationRequest.QUALITY_HIGH_ACCURACY);
         }
 
@@ -739,31 +700,26 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
             }
         }
 
+        locationRequest.setDurationMillis(durationMillis);
+
         Log.i(TAG,
                 String.format(
                         "GNSS HAL Requesting location updates from %s provider for %d millis.",
                         provider, durationMillis));
 
-        try {
-            locationManager.requestLocationUpdates(provider, locationRequest.build(),
-                    new HandlerExecutor(mHandler), locationListener);
-            locationListener.mNumLocationUpdateRequest++;
-            mHandler.postDelayed(() -> {
-                if (--locationListener.mNumLocationUpdateRequest == 0) {
-                    Log.i(TAG,
-                            String.format("Removing location updates from %s provider.", provider));
-                    locationManager.removeUpdates(locationListener);
-                }
-            }, durationMillis);
-        } catch (IllegalArgumentException e) {
-            Log.w(TAG, "Unable to request location.", e);
-        }
+        locationManager.requestLocationUpdates(provider, locationRequest.build(),
+                DIRECT_EXECUTOR, locationListener);
     }
 
     private void injectBestLocation(Location location) {
         if (DEBUG) {
             Log.d(TAG, "injectBestLocation: " + location);
         }
+
+        if (location.isFromMockProvider()) {
+            return;
+        }
+
         int gnssLocationFlags = LOCATION_HAS_LAT_LONG
                 | (location.hasAltitude() ? LOCATION_HAS_ALTITUDE : 0)
                 | (location.hasSpeed() ? LOCATION_HAS_SPEED : 0)
@@ -864,10 +820,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
     }
 
     private void injectLocation(Location location) {
-        if (location.hasAccuracy()) {
-            if (DEBUG) {
-                Log.d(TAG, "injectLocation: " + location);
-            }
+        if (location.hasAccuracy() && !location.isFromMockProvider()) {
             native_inject_location(location.getLatitude(), location.getLongitude(),
                     location.getAccuracy());
         }
@@ -954,6 +907,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
             mGnssVisibilityControl.onGpsEnabledChanged(/* isEnabled= */ false);
         }
         // do this before releasing wakelock
+        native_cleanup_batching();
         native_cleanup();
     }
 
@@ -962,10 +916,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         boolean enabled = mContext.getSystemService(LocationManager.class)
                 .isLocationEnabledForUser(UserHandle.CURRENT);
 
-        // ... but disable if PowerManager overrides
-        enabled &= !mDisableGpsForPowerManager;
-
-        // .. but enable anyway, if there's an active settings-ignored request
+        // .. but enable anyway, if there's an active settings-ignored request (e.g. ELS)
         enabled |= (mProviderRequest != null
                 && mProviderRequest.isActive()
                 && mProviderRequest.isLocationSettingsIgnored());
@@ -1016,10 +967,6 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
 
     @Override
     public void onSetRequest(ProviderRequest request) {
-        sendMessage(SET_REQUEST, 0, request);
-    }
-
-    private void handleSetRequest(ProviderRequest request) {
         mProviderRequest = request;
         updateEnabled();
         updateRequirements();
@@ -1037,7 +984,6 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
             updateClientUids(mProviderRequest.getWorkSource());
 
             mFixInterval = (int) mProviderRequest.getIntervalMillis();
-            mLowPowerMode = mProviderRequest.isLowPower();
             // check for overflow
             if (mFixInterval != mProviderRequest.getIntervalMillis()) {
                 Log.w(TAG, "interval overflow: " + mProviderRequest.getIntervalMillis());
@@ -1066,7 +1012,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
                 if (mStarted && hasCapability(GPS_CAPABILITY_SCHEDULING)) {
                     // change period and/or lowPowerMode
                     if (!setPositionMode(mPositionMode, GPS_POSITION_RECURRENCE_PERIODIC,
-                            mFixInterval, mLowPowerMode)) {
+                            mFixInterval, mProviderRequest.isLowPower())) {
                         Log.e(TAG, "set_position_mode failed in updateRequirements");
                     }
                 } else if (!mStarted) {
@@ -1074,18 +1020,18 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
                     startNavigating();
                 } else {
                     // GNSS Engine is already ON, but no GPS_CAPABILITY_SCHEDULING
-                    mAlarmManager.cancel(mTimeoutIntent);
+                    mAlarmManager.cancel(mTimeoutListener);
                     if (mFixInterval >= NO_FIX_TIMEOUT) {
                         // set timer to give up if we do not receive a fix within NO_FIX_TIMEOUT
                         // and our fix interval is not short
                         mAlarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP,
-                                SystemClock.elapsedRealtime() + NO_FIX_TIMEOUT, mTimeoutIntent);
+                                SystemClock.elapsedRealtime() + NO_FIX_TIMEOUT, TAG,
+                                mTimeoutListener, mHandler);
                     }
                 }
             }
         } else {
             updateClientUids(new WorkSource());
-
             stopNavigating();
             stopBatching();
         }
@@ -1123,6 +1069,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
 
         // (2) Inform AppOps service about the list of changes to UIDs.
 
+        // TODO: this doesn't seem correct, work chain attribution tag != package?
         List<WorkChain>[] diffs = WorkSource.diffChains(mClientSource, source);
         if (diffs != null) {
             List<WorkChain> newChains = diffs[0];
@@ -1146,6 +1093,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         }
 
         // Update the flat UIDs and names list and inform app-ops of all changes.
+        // TODO: why is GnssLocationProvider the only component using these deprecated APIs?
         WorkSource[] changes = mClientSource.setReturningDiffs(source);
         if (changes != null) {
             WorkSource newWork = changes[0];
@@ -1171,23 +1119,17 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
 
     @Override
     public void onExtraCommand(int uid, int pid, String command, Bundle extras) {
-
-        final long identity = Binder.clearCallingIdentity();
-        try {
-            if ("delete_aiding_data".equals(command)) {
-                deleteAidingData(extras);
-            } else if ("force_time_injection".equals(command)) {
-                requestUtcTime();
-            } else if ("force_psds_injection".equals(command)) {
-                if (mSupportsPsds) {
-                    downloadPsdsData(/* psdsType= */
-                            GnssPsdsDownloader.LONG_TERM_PSDS_SERVER_INDEX);
-                }
-            } else {
-                Log.w(TAG, "sendExtraCommand: unknown command " + command);
+        if ("delete_aiding_data".equals(command)) {
+            deleteAidingData(extras);
+        } else if ("force_time_injection".equals(command)) {
+            requestUtcTime();
+        } else if ("force_psds_injection".equals(command)) {
+            if (mSupportsPsds) {
+                downloadPsdsData(/* psdsType= */
+                        GnssPsdsDownloader.LONG_TERM_PSDS_SERVER_INDEX);
             }
-        } finally {
-            Binder.restoreCallingIdentity(identity);
+        } else {
+            Log.w(TAG, "sendExtraCommand: unknown command " + command);
         }
     }
 
@@ -1258,9 +1200,8 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
             }
 
             int interval = (hasCapability(GPS_CAPABILITY_SCHEDULING) ? mFixInterval : 1000);
-            mLowPowerMode = mProviderRequest.isLowPower();
             if (!setPositionMode(mPositionMode, GPS_POSITION_RECURRENCE_PERIODIC,
-                    interval, mLowPowerMode)) {
+                    interval, mProviderRequest.isLowPower())) {
                 setStarted(false);
                 Log.e(TAG, "set_position_mode failed in startNavigating()");
                 return;
@@ -1279,7 +1220,8 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
                 // and our fix interval is not short
                 if (mFixInterval >= NO_FIX_TIMEOUT) {
                     mAlarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP,
-                            SystemClock.elapsedRealtime() + NO_FIX_TIMEOUT, mTimeoutIntent);
+                            SystemClock.elapsedRealtime() + NO_FIX_TIMEOUT, TAG, mTimeoutListener,
+                            mHandler);
                 }
             }
         }
@@ -1297,8 +1239,8 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
             // reset SV count to zero
             mLocationExtras.reset();
         }
-        mAlarmManager.cancel(mTimeoutIntent);
-        mAlarmManager.cancel(mWakeupIntent);
+        mAlarmManager.cancel(mTimeoutListener);
+        mAlarmManager.cancel(mWakeupListener);
     }
 
     private void startBatching() {
@@ -1331,7 +1273,8 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         // stop GPS until our next fix interval arrives
         stopNavigating();
         long now = SystemClock.elapsedRealtime();
-        mAlarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, now + mFixInterval, mWakeupIntent);
+        mAlarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, now + mFixInterval, TAG,
+                mWakeupListener, mHandler);
     }
 
     private boolean hasCapability(int capability) {
@@ -1409,7 +1352,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
             // slow.
             // As we just recievied a location, we'll cancel that timer.
             if (!hasCapability(GPS_CAPABILITY_SCHEDULING) && mFixInterval < NO_FIX_TIMEOUT) {
-                mAlarmManager.cancel(mTimeoutIntent);
+                mAlarmManager.cancel(mTimeoutListener);
             }
         }
 
@@ -1428,11 +1371,10 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
             case GPS_STATUS_SESSION_BEGIN:
                 mNavigating = true;
                 break;
-            case GPS_STATUS_SESSION_END:
-                mNavigating = false;
-                break;
             case GPS_STATUS_ENGINE_ON:
                 break;
+            case GPS_STATUS_SESSION_END:
+                // fall through
             case GPS_STATUS_ENGINE_OFF:
                 mNavigating = false;
                 break;
@@ -1626,7 +1568,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
      * @hide
      */
     public GnssMetricsProvider getGnssMetricsProvider() {
-        return () -> mGnssMetrics.dumpGnssMetricsAsProtoString();
+        return mGnssMetrics::dumpGnssMetricsAsProtoString;
     }
 
     /**
@@ -1959,9 +1901,6 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         public void handleMessage(Message msg) {
             int message = msg.what;
             switch (message) {
-                case SET_REQUEST:
-                    handleSetRequest((ProviderRequest) msg.obj);
-                    break;
                 case INJECT_NTP_TIME:
                     mNtpTimeHelper.retrieveAndInjectNtpTime();
                     break;
@@ -1971,17 +1910,11 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
                 case DOWNLOAD_PSDS_DATA:
                     handleDownloadPsdsData(msg.arg1);
                     break;
-                case INITIALIZE_HANDLER:
-                    handleInitialize();
-                    break;
                 case REPORT_LOCATION:
                     handleReportLocation(msg.arg1 == 1, (Location) msg.obj);
                     break;
                 case REPORT_SV_STATUS:
                     handleReportSvStatus((GnssStatus) msg.obj);
-                    break;
-                case UPDATE_LOW_POWER_MODE:
-                    updateLowPowerMode();
                     break;
             }
             if (msg.arg2 == 1) {
@@ -1993,70 +1926,6 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
                 }
             }
         }
-
-        /**
-         * This method is bound to the constructor. It is in charge of loading properties and
-         * registering for events that will be posted to this handler.
-         */
-        private void handleInitialize() {
-            // it *appears* that native_init() needs to be called at least once before invoking any
-            // other gnss methods, so we cycle once on initialization.
-            native_init();
-            native_cleanup();
-
-            if (native_is_gnss_visibility_control_supported()) {
-                mGnssVisibilityControl = new GnssVisibilityControl(mContext, mLooper, mNIHandler);
-            }
-
-            // load default GPS configuration
-            // (this configuration might change in the future based on SIM changes)
-            reloadGpsProperties();
-
-            // listen for events
-            IntentFilter intentFilter = new IntentFilter();
-            intentFilter.addAction(ALARM_WAKEUP);
-            intentFilter.addAction(ALARM_TIMEOUT);
-            intentFilter.addAction(PowerManager.ACTION_DEVICE_IDLE_MODE_CHANGED);
-            intentFilter.addAction(CarrierConfigManager.ACTION_CARRIER_CONFIG_CHANGED);
-            intentFilter.addAction(TelephonyManager.ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED);
-            mContext.registerReceiver(mBroadcastReceiver, intentFilter, null, this);
-
-            mNetworkConnectivityHandler.registerNetworkCallbacks();
-
-            // listen for PASSIVE_PROVIDER updates
-            LocationManager locManager =
-                    (LocationManager) mContext.getSystemService(Context.LOCATION_SERVICE);
-            locManager.requestLocationUpdates(
-                    LocationManager.PASSIVE_PROVIDER,
-                    new LocationRequest.Builder(0)
-                            .setHiddenFromAppOps(true)
-                            .build(),
-                    new HandlerExecutor(this),
-                    new NetworkLocationListener());
-
-            updateEnabled();
-        }
-    }
-
-    private abstract static class LocationChangeListener implements LocationListener {
-        private int mNumLocationUpdateRequest;
-    }
-
-    private final class NetworkLocationListener extends LocationChangeListener {
-        @Override
-        public void onLocationChanged(Location location) {
-            // this callback happens on mHandler looper
-            if (LocationManager.NETWORK_PROVIDER.equals(location.getProvider())) {
-                injectLocation(location);
-            }
-        }
-    }
-
-    private final class FusedLocationListener extends LocationChangeListener {
-        @Override
-        public void onLocationChanged(Location location) {
-            injectBestLocation(location);
-        }
     }
 
     /**
@@ -2064,16 +1933,12 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
      */
     private String messageIdAsString(int message) {
         switch (message) {
-            case SET_REQUEST:
-                return "SET_REQUEST";
             case INJECT_NTP_TIME:
                 return "INJECT_NTP_TIME";
             case REQUEST_LOCATION:
                 return "REQUEST_LOCATION";
             case DOWNLOAD_PSDS_DATA:
                 return "DOWNLOAD_PSDS_DATA";
-            case INITIALIZE_HANDLER:
-                return "INITIALIZE_HANDLER";
             case REPORT_LOCATION:
                 return "REPORT_LOCATION";
             case REPORT_SV_STATUS:
@@ -2109,8 +1974,6 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         s.append("mBatchingStarted=").append(mBatchingStarted).append('\n');
         s.append("mBatchSize=").append(getBatchSize()).append('\n');
         s.append("mFixInterval=").append(mFixInterval).append('\n');
-        s.append("mLowPowerMode=").append(mLowPowerMode).append('\n');
-        s.append("mDisableGpsForPowerManager=").append(mDisableGpsForPowerManager).append('\n');
         s.append("mTopHalCapabilities=0x").append(Integer.toHexString(mTopHalCapabilities));
         s.append(" ( ");
         if (hasCapability(GPS_CAPABILITY_SCHEDULING)) s.append("SCHEDULING ");

@@ -324,6 +324,8 @@ public class LocationManagerService extends ILocationManager.Stub {
     }
 
     void onSystemThirdPartyAppsCanStart() {
+        // network provider should always be initialized before the gps provider since the gps
+        // provider has unfortunate hard dependencies on the network provider
         ProxyLocationProvider networkProvider = ProxyLocationProvider.createAndRegister(
                 mContext,
                 NETWORK_LOCATION_SERVICE_ACTION,
