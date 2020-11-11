@@ -10374,12 +10374,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         Preconditions.checkCallAuthorization(!isManagedProfile(caller.getUserId()),
                 "User %d is not allowed to call setSecondaryLockscreenEnabled",
                         caller.getUserId());
-        // Allow testOnly admins to bypass supervision config requirement.
-        Preconditions.checkCallAuthorization(isAdminTestOnlyLocked(who, caller.getUserId())
-                        || isDefaultSupervisor(caller), "Admin %s is not the "
-                + "default supervision component", caller.getComponentName());
 
         synchronized (getLockObject()) {
+            // Allow testOnly admins to bypass supervision config requirement.
+            Preconditions.checkCallAuthorization(isAdminTestOnlyLocked(who, caller.getUserId())
+                    || isDefaultSupervisor(caller), "Admin %s is not the "
+                    + "default supervision component", caller.getComponentName());
             DevicePolicyData policy = getUserData(caller.getUserId());
             policy.mSecondaryLockscreenEnabled = enabled;
             saveSettingsLocked(caller.getUserId());
