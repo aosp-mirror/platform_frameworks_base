@@ -22,12 +22,12 @@ import static org.mockito.Mockito.when;
 
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
-import android.testing.TestableResources;
 import android.view.View;
 import android.view.WindowManager;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.car.notification.CarNotificationTypeItem;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.car.CarDeviceProvisionedController;
 import com.android.systemui.car.CarSystemUiTest;
@@ -64,37 +64,41 @@ public class CarHeadsUpNotificationSystemContainerTest extends SysuiTestCase {
         when(mOverlayViewGlobalStateController.shouldShowHUN()).thenReturn(true);
         when(mCarDeviceProvisionedController.isCurrentUserFullySetup()).thenReturn(true);
 
-        TestableResources testableResources = mContext.getOrCreateTestableResources();
+        mContext.ensureTestableResources();
 
         mCarHeadsUpNotificationSystemContainer = new CarHeadsUpNotificationSystemContainer(mContext,
-                testableResources.getResources(), mCarDeviceProvisionedController, mWindowManager,
-                mOverlayViewGlobalStateController);
+                mCarDeviceProvisionedController, mWindowManager, mOverlayViewGlobalStateController);
     }
 
     @Test
     public void testDisplayNotification_firstNotification_isVisible() {
-        mCarHeadsUpNotificationSystemContainer.displayNotification(mNotificationView);
+        mCarHeadsUpNotificationSystemContainer.displayNotification(mNotificationView,
+                CarNotificationTypeItem.INBOX);
         assertThat(mCarHeadsUpNotificationSystemContainer.isVisible()).isTrue();
     }
 
     @Test
     public void testRemoveNotification_lastNotification_isInvisible() {
-        mCarHeadsUpNotificationSystemContainer.displayNotification(mNotificationView);
+        mCarHeadsUpNotificationSystemContainer.displayNotification(mNotificationView,
+                CarNotificationTypeItem.INBOX);
         mCarHeadsUpNotificationSystemContainer.removeNotification(mNotificationView);
         assertThat(mCarHeadsUpNotificationSystemContainer.isVisible()).isFalse();
     }
 
     @Test
     public void testRemoveNotification_nonLastNotification_isVisible() {
-        mCarHeadsUpNotificationSystemContainer.displayNotification(mNotificationView);
-        mCarHeadsUpNotificationSystemContainer.displayNotification(mNotificationView2);
+        mCarHeadsUpNotificationSystemContainer.displayNotification(mNotificationView,
+                CarNotificationTypeItem.INBOX);
+        mCarHeadsUpNotificationSystemContainer.displayNotification(mNotificationView2,
+                CarNotificationTypeItem.INBOX);
         mCarHeadsUpNotificationSystemContainer.removeNotification(mNotificationView);
         assertThat(mCarHeadsUpNotificationSystemContainer.isVisible()).isTrue();
     }
 
     @Test
     public void testDisplayNotification_userFullySetupTrue_isInvisible() {
-        mCarHeadsUpNotificationSystemContainer.displayNotification(mNotificationView);
+        mCarHeadsUpNotificationSystemContainer.displayNotification(mNotificationView,
+                CarNotificationTypeItem.INBOX);
         assertThat(mCarHeadsUpNotificationSystemContainer.isVisible()).isTrue();
 
     }
@@ -102,20 +106,23 @@ public class CarHeadsUpNotificationSystemContainerTest extends SysuiTestCase {
     @Test
     public void testDisplayNotification_userFullySetupFalse_isInvisible() {
         when(mCarDeviceProvisionedController.isCurrentUserFullySetup()).thenReturn(false);
-        mCarHeadsUpNotificationSystemContainer.displayNotification(mNotificationView);
+        mCarHeadsUpNotificationSystemContainer.displayNotification(mNotificationView,
+                CarNotificationTypeItem.INBOX);
         assertThat(mCarHeadsUpNotificationSystemContainer.isVisible()).isFalse();
     }
 
     @Test
     public void testDisplayNotification_overlayWindowStateShouldShowHUNFalse_isInvisible() {
         when(mOverlayViewGlobalStateController.shouldShowHUN()).thenReturn(false);
-        mCarHeadsUpNotificationSystemContainer.displayNotification(mNotificationView);
+        mCarHeadsUpNotificationSystemContainer.displayNotification(mNotificationView,
+                CarNotificationTypeItem.INBOX);
         assertThat(mCarHeadsUpNotificationSystemContainer.isVisible()).isFalse();
     }
 
     @Test
     public void testDisplayNotification_overlayWindowStateShouldShowHUNTrue_isVisible() {
-        mCarHeadsUpNotificationSystemContainer.displayNotification(mNotificationView);
+        mCarHeadsUpNotificationSystemContainer.displayNotification(mNotificationView,
+                CarNotificationTypeItem.INBOX);
         assertThat(mCarHeadsUpNotificationSystemContainer.isVisible()).isTrue();
     }
 }

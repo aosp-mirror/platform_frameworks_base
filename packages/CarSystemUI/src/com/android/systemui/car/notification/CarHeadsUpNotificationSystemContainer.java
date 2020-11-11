@@ -17,45 +17,41 @@
 package com.android.systemui.car.notification;
 
 import android.content.Context;
-import android.content.res.Resources;
 import android.graphics.PixelFormat;
 import android.view.Gravity;
-import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 
-import com.android.car.notification.R;
 import com.android.car.notification.headsup.CarHeadsUpNotificationContainer;
 import com.android.systemui.car.CarDeviceProvisionedController;
 import com.android.systemui.car.window.OverlayViewGlobalStateController;
 import com.android.systemui.dagger.SysUISingleton;
-import com.android.systemui.dagger.qualifiers.Main;
 
 import javax.inject.Inject;
 
 /**
  * A controller for SysUI's HUN display.
+ *
+ * Used to attach HUNs views to window and determine whether to show HUN panel.
  */
 @SysUISingleton
-public class CarHeadsUpNotificationSystemContainer implements CarHeadsUpNotificationContainer {
+public class CarHeadsUpNotificationSystemContainer extends CarHeadsUpNotificationContainer {
+    private static final String WINDOW_TITLE = "HeadsUpNotification";
     private final CarDeviceProvisionedController mCarDeviceProvisionedController;
     private final OverlayViewGlobalStateController mOverlayViewGlobalStateController;
 
-    private final ViewGroup mWindow;
-    private final ViewGroup mHeadsUpContentFrame;
-
     @Inject
     CarHeadsUpNotificationSystemContainer(Context context,
-            @Main Resources resources,
             CarDeviceProvisionedController deviceProvisionedController,
             WindowManager windowManager,
             OverlayViewGlobalStateController overlayViewGlobalStateController) {
+        super(context, windowManager);
         mCarDeviceProvisionedController = deviceProvisionedController;
         mOverlayViewGlobalStateController = overlayViewGlobalStateController;
+    }
 
-        boolean showOnBottom = resources.getBoolean(R.bool.config_showHeadsUpNotificationOnBottom);
-
+    @Override
+    protected WindowManager.LayoutParams getWindowManagerLayoutParams() {
         // Use TYPE_STATUS_BAR_SUB_PANEL window type since we need to find a window that is above
         // status bar but below navigation bar.
         WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
@@ -66,45 +62,15 @@ public class CarHeadsUpNotificationSystemContainer implements CarHeadsUpNotifica
                         | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
                 PixelFormat.TRANSLUCENT);
 
-        lp.gravity = showOnBottom ? Gravity.BOTTOM : Gravity.TOP;
-        lp.setTitle("HeadsUpNotification");
+        lp.gravity = getShowHunOnBottom() ? Gravity.BOTTOM : Gravity.TOP;
+        lp.setTitle(WINDOW_TITLE);
 
-        int layoutId = showOnBottom
-                ? R.layout.headsup_container_bottom
-                : R.layout.headsup_container;
-        mWindow = (ViewGroup) LayoutInflater.from(context).inflate(layoutId, null, false);
-        windowManager.addView(mWindow, lp);
-        mWindow.setVisibility(View.INVISIBLE);
-        mHeadsUpContentFrame = mWindow.findViewById(R.id.headsup_content);
-    }
-
-    private void animateShow() {
-        if (mCarDeviceProvisionedController.isCurrentUserFullySetup()
-                && mOverlayViewGlobalStateController.shouldShowHUN()) {
-            mWindow.setVisibility(View.VISIBLE);
-        }
-    }
-
-    private void animateHide() {
-        mWindow.setVisibility(View.INVISIBLE);
+        return lp;
     }
 
     @Override
-    public void displayNotification(View notificationView) {
-        mHeadsUpContentFrame.addView(notificationView);
-        animateShow();
-    }
-
-    @Override
-    public void removeNotification(View notificationView) {
-        mHeadsUpContentFrame.removeView(notificationView);
-        if (mHeadsUpContentFrame.getChildCount() == 0) {
-            animateHide();
-        }
-    }
-
-    @Override
-    public boolean isVisible() {
-        return mWindow.getVisibility() == View.VISIBLE;
+    public boolean shouldShowHunPanel() {
+        return mCarDeviceProvisionedController.isCurrentUserFullySetup()
+                && mOverlayViewGlobalStateController.shouldShowHUN();
     }
 }
