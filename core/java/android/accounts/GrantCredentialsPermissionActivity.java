@@ -47,6 +47,9 @@ public class GrantCredentialsPermissionActivity extends Activity implements View
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getWindow().addSystemFlags(
+                android.view.WindowManager.LayoutParams
+                        .SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS);
         setContentView(R.layout.grant_credentials_permission);
         setTitle(R.string.grant_permissions_header_text);
 
