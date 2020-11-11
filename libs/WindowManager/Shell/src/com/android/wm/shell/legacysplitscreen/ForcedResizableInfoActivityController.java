@@ -22,12 +22,12 @@ import static com.android.wm.shell.legacysplitscreen.ForcedResizableInfoActivity
 import android.app.ActivityOptions;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Handler;
 import android.os.UserHandle;
 import android.util.ArraySet;
 import android.widget.Toast;
 
 import com.android.wm.shell.R;
+import com.android.wm.shell.common.ShellExecutor;
 
 import java.util.function.Consumer;
 
@@ -40,7 +40,7 @@ final class ForcedResizableInfoActivityController implements DividerView.Divider
 
     private static final int TIMEOUT = 1000;
     private final Context mContext;
-    private final Handler mHandler = new Handler();
+    private final ShellExecutor mMainExecutor;
     private final ArraySet<PendingTaskRecord> mPendingTasks = new ArraySet<>();
     private final ArraySet<String> mPackagesShownInSession = new ArraySet<>();
     private boolean mDividerDragging;
@@ -69,15 +69,17 @@ final class ForcedResizableInfoActivityController implements DividerView.Divider
     }
 
     ForcedResizableInfoActivityController(Context context,
-            LegacySplitScreenController splitScreenController) {
+            LegacySplitScreenController splitScreenController,
+            ShellExecutor mainExecutor) {
         mContext = context;
+        mMainExecutor = mainExecutor;
         splitScreenController.registerInSplitScreenListener(mDockedStackExistsListener);
     }
 
     @Override
     public void onDraggingStart() {
         mDividerDragging = true;
-        mHandler.removeCallbacks(mTimeoutRunnable);
+        mMainExecutor.removeCallbacks(mTimeoutRunnable);
     }
 
     @Override
@@ -111,7 +113,7 @@ final class ForcedResizableInfoActivityController implements DividerView.Divider
     }
 
     private void showPending() {
-        mHandler.removeCallbacks(mTimeoutRunnable);
+        mMainExecutor.removeCallbacks(mTimeoutRunnable);
         for (int i = mPendingTasks.size() - 1; i >= 0; i--) {
             PendingTaskRecord pendingRecord = mPendingTasks.valueAt(i);
             Intent intent = new Intent(mContext, ForcedResizableInfoActivity.class);
@@ -127,8 +129,8 @@ final class ForcedResizableInfoActivityController implements DividerView.Divider
     }
 
     private void postTimeout() {
-        mHandler.removeCallbacks(mTimeoutRunnable);
-        mHandler.postDelayed(mTimeoutRunnable, TIMEOUT);
+        mMainExecutor.removeCallbacks(mTimeoutRunnable);
+        mMainExecutor.executeDelayed(mTimeoutRunnable, TIMEOUT);
     }
 
     private boolean debounce(String packageName) {

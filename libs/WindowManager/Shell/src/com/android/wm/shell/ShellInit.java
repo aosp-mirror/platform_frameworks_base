@@ -16,61 +16,15 @@
 
 package com.android.wm.shell;
 
-import static com.android.wm.shell.ShellTaskOrganizer.TASK_LISTENER_TYPE_FULLSCREEN;
-
-import com.android.wm.shell.apppairs.AppPairs;
-import com.android.wm.shell.common.DisplayImeController;
 import com.android.wm.shell.common.annotations.ExternalThread;
-import com.android.wm.shell.draganddrop.DragAndDropController;
-import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
-
-import java.util.Optional;
 
 /**
  * An entry point into the shell for initializing shell internal state.
  */
-public class ShellInit {
-
-    private final DisplayImeController mDisplayImeController;
-    private final DragAndDropController mDragAndDropController;
-    private final ShellTaskOrganizer mShellTaskOrganizer;
-    private final Optional<LegacySplitScreen> mLegacySplitScreenOptional;
-    private final Optional<AppPairs> mAppPairsOptional;
-    private final FullscreenTaskListener mFullscreenTaskListener;
-    private final Transitions mTransitions;
-
-    public ShellInit(DisplayImeController displayImeController,
-            DragAndDropController dragAndDropController,
-            ShellTaskOrganizer shellTaskOrganizer,
-            Optional<LegacySplitScreen> legacySplitScreenOptional,
-            Optional<AppPairs> appPairsOptional,
-            FullscreenTaskListener fullscreenTaskListener,
-            Transitions transitions) {
-        mDisplayImeController = displayImeController;
-        mDragAndDropController = dragAndDropController;
-        mShellTaskOrganizer = shellTaskOrganizer;
-        mLegacySplitScreenOptional = legacySplitScreenOptional;
-        mAppPairsOptional = appPairsOptional;
-        mFullscreenTaskListener = fullscreenTaskListener;
-        mTransitions = transitions;
-    }
-
-    @ExternalThread
-    public void init() {
-        // Start listening for display changes
-        mDisplayImeController.startMonitorDisplays();
-
-        mShellTaskOrganizer.addListenerForType(
-                mFullscreenTaskListener, TASK_LISTENER_TYPE_FULLSCREEN);
-        // Register the shell organizer
-        mShellTaskOrganizer.registerOrganizer();
-
-        mAppPairsOptional.ifPresent(AppPairs::onOrganizerRegistered);
-        // Bind the splitscreen impl to the drag drop controller
-        mDragAndDropController.setSplitScreenController(mLegacySplitScreenOptional);
-
-        if (Transitions.ENABLE_SHELL_TRANSITIONS) {
-            mTransitions.register(mShellTaskOrganizer);
-        }
-    }
+@ExternalThread
+public interface ShellInit {
+    /**
+     * Initializes the shell state.
+     */
+    void init();
 }

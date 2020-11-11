@@ -204,7 +204,7 @@ class LegacySplitScreenTaskListener implements ShellTaskOrganizer.TaskListener {
                 return;
             }
 
-            mSplitScreenController.post(() -> handleTaskInfoChanged(taskInfo));
+            handleTaskInfoChanged(taskInfo);
         }
     }
 
