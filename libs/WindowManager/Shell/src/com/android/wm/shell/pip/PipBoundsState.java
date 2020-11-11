@@ -54,8 +54,11 @@ public final class PipBoundsState {
     private static final String TAG = PipBoundsState.class.getSimpleName();
 
     private final @NonNull Rect mBounds = new Rect();
+    private final @NonNull Rect mMovementBounds = new Rect();
     private final @NonNull Rect mNormalBounds = new Rect();
     private final @NonNull Rect mExpandedBounds = new Rect();
+    private final @NonNull Rect mNormalMovementBounds = new Rect();
+    private final @NonNull Rect mExpandedMovementBounds = new Rect();
     private final Context mContext;
     private float mAspectRatio;
     private int mStashedState = STASH_TYPE_NONE;
@@ -104,6 +107,11 @@ public final class PipBoundsState {
         return new Rect(mBounds);
     }
 
+    /** Returns the current movement bounds. */
+    public Rect getMovementBounds() {
+        return mMovementBounds;
+    }
+
     /** Set the current normal PIP bounds. */
     public void setNormalBounds(@NonNull Rect bounds) {
         mNormalBounds.set(bounds);
@@ -124,6 +132,26 @@ public final class PipBoundsState {
     @NonNull
     public Rect getExpandedBounds() {
         return mExpandedBounds;
+    }
+
+    /** Set the normal movement bounds. */
+    public void setNormalMovementBounds(Rect bounds) {
+        mNormalMovementBounds.set(bounds);
+    }
+
+    /** Returns the normal movement bounds. */
+    public Rect getNormalMovementBounds() {
+        return mNormalMovementBounds;
+    }
+
+    /** Set the expanded movement bounds. */
+    public void setExpandedMovementBounds(Rect bounds) {
+        mExpandedMovementBounds.set(bounds);
+    }
+
+    /** Returns the expanded movement bounds. */
+    public Rect getExpandedMovementBounds() {
+        return mExpandedMovementBounds;
     }
 
     /**
@@ -413,6 +441,9 @@ public final class PipBoundsState {
         pw.println(innerPrefix + "mBounds=" + mBounds);
         pw.println(innerPrefix + "mNormalBounds=" + mNormalBounds);
         pw.println(innerPrefix + "mExpandedBounds=" + mExpandedBounds);
+        pw.println(innerPrefix + "mMovementBounds=" + mMovementBounds);
+        pw.println(innerPrefix + "mNormalMovementBounds=" + mNormalMovementBounds);
+        pw.println(innerPrefix + "mExpandedMovementBounds=" + mExpandedMovementBounds);
         pw.println(innerPrefix + "mLastPipComponentName=" + mLastPipComponentName);
         pw.println(innerPrefix + "mAspectRatio=" + mAspectRatio);
         pw.println(innerPrefix + "mDisplayInfo=" + mDisplayInfo);
