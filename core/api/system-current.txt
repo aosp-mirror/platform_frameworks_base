@@ -5032,6 +5032,7 @@ package android.media.tv.tuner {
     method public long getAvSyncTime(int);
     method @Nullable public android.media.tv.tuner.DemuxCapabilities getDemuxCapabilities();
     method @Nullable public android.media.tv.tuner.frontend.FrontendInfo getFrontendInfo();
+    method @Nullable public java.util.List<android.media.tv.tuner.frontend.FrontendInfo> getFrontendInfoList();
     method @Nullable public android.media.tv.tuner.frontend.FrontendStatus getFrontendStatus(@NonNull int[]);
     method public int linkFrontendToCiCam(int);
     method @Nullable @RequiresPermission(android.Manifest.permission.ACCESS_TV_DESCRAMBLER) public android.media.tv.tuner.Descrambler openDescrambler();
