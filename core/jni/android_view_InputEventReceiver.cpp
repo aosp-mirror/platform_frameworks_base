@@ -50,6 +50,7 @@ static struct {
 
     jmethodID dispatchInputEvent;
     jmethodID onFocusEvent;
+    jmethodID onPointerCaptureEvent;
     jmethodID onBatchedInputEventPending;
 } gInputEventReceiverClassInfo;
 
@@ -345,6 +346,19 @@ status_t NativeInputEventReceiver::consumeEvents(JNIEnv* env,
                 finishInputEvent(seq, true /* handled */);
                 continue;
             }
+            case AINPUT_EVENT_TYPE_CAPTURE: {
+                const CaptureEvent* captureEvent = static_cast<CaptureEvent*>(inputEvent);
+                if (kDebugDispatchCycle) {
+                    ALOGD("channel '%s' ~ Received capture event: pointerCaptureEnabled=%s",
+                          getInputChannelName().c_str(),
+                          toString(captureEvent->getPointerCaptureEnabled()));
+                }
+                env->CallVoidMethod(receiverObj.get(),
+                                    gInputEventReceiverClassInfo.onPointerCaptureEvent,
+                                    jboolean(captureEvent->getPointerCaptureEnabled()));
+                finishInputEvent(seq, true /* handled */);
+                continue;
+            }
 
             default:
                 assert(false); // InputConsumer should prevent this from ever happening
@@ -489,6 +503,9 @@ int register_android_view_InputEventReceiver(JNIEnv* env) {
             "dispatchInputEvent", "(ILandroid/view/InputEvent;)V");
     gInputEventReceiverClassInfo.onFocusEvent =
             GetMethodIDOrDie(env, gInputEventReceiverClassInfo.clazz, "onFocusEvent", "(ZZ)V");
+    gInputEventReceiverClassInfo.onPointerCaptureEvent =
+            GetMethodIDOrDie(env, gInputEventReceiverClassInfo.clazz, "onPointerCaptureEvent",
+                             "(Z)V");
     gInputEventReceiverClassInfo.onBatchedInputEventPending =
             GetMethodIDOrDie(env, gInputEventReceiverClassInfo.clazz, "onBatchedInputEventPending",
                              "(I)V");
