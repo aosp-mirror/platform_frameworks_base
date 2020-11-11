@@ -16,6 +16,7 @@
 package android.app.admin;
 
 import android.annotation.NonNull;
+import android.annotation.TestApi;
 import android.app.admin.DevicePolicyManager.DevicePolicyOperation;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -27,10 +28,7 @@ import android.os.Parcelable;
  * <p>For example, it can be thrown on
  * {@link android.content.pm.PackageManager#FEATURE_AUTOMOTIVE automotive devices} when the vehicle
  * is moving.
- *
- * @hide
  */
-// TODO(b/172376923): make it public
 @SuppressWarnings("serial")
 public final class UnsafeStateException extends IllegalStateException implements Parcelable {
 
@@ -44,7 +42,7 @@ public final class UnsafeStateException extends IllegalStateException implements
     }
 
     /** @hide */
-    // TODO(b/172376923): make it TestApi
+    @TestApi
     public @DevicePolicyOperation int getOperation() {
         return mOperation;
     }
