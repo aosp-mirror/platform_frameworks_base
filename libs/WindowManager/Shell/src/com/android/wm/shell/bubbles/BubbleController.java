@@ -171,7 +171,7 @@ public class BubbleController implements Bubbles {
             ShellTaskOrganizer organizer) {
         BubbleLogger logger = new BubbleLogger(uiEventLogger);
         BubblePositioner positioner = new BubblePositioner(context, windowManager);
-        BubbleData data = new BubbleData(context, logger);
+        BubbleData data = new BubbleData(context, logger, positioner);
         return new BubbleController(context, data, synchronizer, floatingContentCoordinator,
                 new BubbleDataRepository(context, launcherApps),
                 statusBarService, windowManager, windowManagerShellWrapper, launcherApps,
@@ -382,7 +382,6 @@ public class BubbleController implements Bubbles {
         if (mStackView == null) {
             mStackView = new BubbleStackView(
                     mContext, this, mBubbleData, mSurfaceSynchronizer, mFloatingContentCoordinator);
-            mStackView.addView(mBubbleScrim);
             mStackView.onOrientationChanged();
             if (mExpandListener != null) {
                 mStackView.setExpandListener(mExpandListener);
@@ -422,6 +421,8 @@ public class BubbleController implements Bubbles {
 
         try {
             mAddedToWindowManager = true;
+            mBubbleData.getOverflow().initialize(this);
+            mStackView.addView(mBubbleScrim);
             mWindowManager.addView(mStackView, mWmLayoutParams);
             // Position info is dependent on us being attached to a window
             mBubblePositioner.update(mOrientation);
@@ -446,7 +447,7 @@ public class BubbleController implements Bubbles {
             if (mStackView != null) {
                 mWindowManager.removeView(mStackView);
                 mStackView.removeView(mBubbleScrim);
-                mStackView = null;
+                mBubbleData.getOverflow().cleanUpExpandedState();
             } else {
                 Log.w(TAG, "StackView added to WindowManager, but was null when removing!");
             }
@@ -578,7 +579,7 @@ public class BubbleController implements Bubbles {
         if (mStackView == null) {
             return false;
         }
-        return mBubbleData.hasBubbles();
+        return mBubbleData.hasBubbles() || mBubbleData.isShowingOverflow();
     }
 
     @Override

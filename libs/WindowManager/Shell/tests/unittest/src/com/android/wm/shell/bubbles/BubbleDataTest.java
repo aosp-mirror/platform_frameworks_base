@@ -35,6 +35,7 @@ import android.service.notification.StatusBarNotification;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.util.Pair;
+import android.view.WindowManager;
 
 import androidx.test.filters.SmallTest;
 
@@ -135,8 +136,9 @@ public class BubbleDataTest extends ShellTestCase {
         mBubbleB2 = new Bubble(mEntryB2, mSuppressionListener, mPendingIntentCanceledListener);
         mBubbleB3 = new Bubble(mEntryB3, mSuppressionListener, mPendingIntentCanceledListener);
         mBubbleC1 = new Bubble(mEntryC1, mSuppressionListener, mPendingIntentCanceledListener);
-
-        mBubbleData = new BubbleData(getContext(), mBubbleLogger);
+        TestableBubblePositioner positioner = new TestableBubblePositioner(mContext,
+                mock(WindowManager.class));
+        mBubbleData = new BubbleData(getContext(), mBubbleLogger, positioner);
 
         // Used by BubbleData to set lastAccessedTime
         when(mTimeSource.currentTimeMillis()).thenReturn(1000L);

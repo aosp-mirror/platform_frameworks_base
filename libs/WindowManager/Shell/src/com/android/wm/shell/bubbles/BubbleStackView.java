@@ -227,7 +227,7 @@ public class BubbleStackView extends FrameLayout
      * once it collapses.
      */
     @Nullable
-    private Bubble mBubbleToExpandAfterFlyoutCollapse = null;
+    private BubbleViewProvider mBubbleToExpandAfterFlyoutCollapse = null;
 
     /** Layout change listener that moves the stack to the nearest valid position on rotation. */
     private OnLayoutChangeListener mOrientationChangedListener;
@@ -571,6 +571,16 @@ public class BubbleStackView extends FrameLayout
                 mBubbleContainer.setActiveController(mStackAnimationController);
                 hideFlyoutImmediate();
 
+                if (!mPositioner.showingInTaskbar()) {
+                    // Also, save the magnetized stack so we can dispatch touch events to it.
+                    mMagnetizedObject = mStackAnimationController.getMagnetizedStack(
+                            mMagneticTarget);
+                    mMagnetizedObject.setMagnetListener(mStackMagnetListener);
+                } else {
+                    // In taskbar, the stack isn't draggable so we shouldn't dispatch touch events.
+                    mMagnetizedObject = null;
+                }
+
                 // Also, save the magnetized stack so we can dispatch touch events to it.
                 mMagnetizedObject = mStackAnimationController.getMagnetizedStack(mMagneticTarget);
                 mMagnetizedObject.setMagnetListener(mStackMagnetListener);
@@ -592,7 +602,9 @@ public class BubbleStackView extends FrameLayout
         public void onMove(@NonNull View v, @NonNull MotionEvent ev, float viewInitialX,
                 float viewInitialY, float dx, float dy) {
             // If we're expanding or collapsing, ignore all touch events.
-            if (mIsExpansionAnimating) {
+            if (mIsExpansionAnimating
+                    // Also ignore events if we shouldn't be draggable.
+                    || (mPositioner.showingInTaskbar() && !mIsExpanded)) {
                 return;
             }
 
@@ -602,7 +614,7 @@ public class BubbleStackView extends FrameLayout
             // First, see if the magnetized object consumes the event - if so, we shouldn't move the
             // bubble since it's stuck to the target.
             if (!passEventToMagnetizedObject(ev)) {
-                if (mBubbleData.isExpanded()) {
+                if (mBubbleData.isExpanded() || mPositioner.showingInTaskbar()) {
                     mExpandedAnimationController.dragBubbleOut(
                             v, viewInitialX + dx, viewInitialY + dy);
                 } else {
@@ -743,7 +755,7 @@ public class BubbleStackView extends FrameLayout
         ta.recycle();
 
         final Runnable onBubbleAnimatedOut = () -> {
-            if (getBubbleCount() == 0) {
+            if (getBubbleCount() == 0 && !mBubbleData.isShowingOverflow()) {
                 mBubbleController.onAllBubblesAnimatedOut();
             }
         };
@@ -816,16 +828,16 @@ public class BubbleStackView extends FrameLayout
         setFocusable(true);
         mBubbleContainer.bringToFront();
 
-        mBubbleOverflow = new BubbleOverflow(getContext(), mPositioner);
-        mBubbleOverflow.initialize(mBubbleController);
+        mBubbleOverflow = mBubbleData.getOverflow();
         mBubbleContainer.addView(mBubbleOverflow.getIconView(),
                 mBubbleContainer.getChildCount() /* index */,
                 new FrameLayout.LayoutParams(mPositioner.getBubbleSize(),
                         mPositioner.getBubbleSize()));
         updateOverflow();
         mBubbleOverflow.getIconView().setOnClickListener((View v) -> {
-            setSelectedBubble(mBubbleOverflow);
-            showManageMenu(false);
+            mBubbleData.setShowingOverflow(true);
+            mBubbleData.setSelectedBubble(mBubbleOverflow);
+            mBubbleData.setExpanded(true);
         });
 
         setOnApplyWindowInsetsListener((View view, WindowInsets insets) -> {
@@ -996,11 +1008,12 @@ public class BubbleStackView extends FrameLayout
         mManageMenu.findViewById(R.id.bubble_manage_menu_settings_container).setOnClickListener(
                 view -> {
                     showManageMenu(false /* show */);
-                    final Bubble bubble = mBubbleData.getSelectedBubble();
+                    final BubbleViewProvider bubble = mBubbleData.getSelectedBubble();
                     if (bubble != null && mBubbleData.hasBubbleInStackWithKey(bubble.getKey())) {
-                        final Intent intent = bubble.getSettingsIntent(mContext);
+                        // If it's in the stack it's a proper Bubble.
+                        final Intent intent = ((Bubble) bubble).getSettingsIntent(mContext);
                         mBubbleData.setExpanded(false);
-                        mContext.startActivityAsUser(intent, bubble.getUser());
+                        mContext.startActivityAsUser(intent, ((Bubble) bubble).getUser());
                         logBubbleEvent(bubble,
                                 FrameworkStatsLog.BUBBLE_UICHANGED__ACTION__HEADER_GO_TO_SETTINGS);
                     }
@@ -1443,10 +1456,9 @@ public class BubbleStackView extends FrameLayout
     }
 
     private void updateOverflowVisibility() {
-        if (mBubbleOverflow == null) {
-            return;
-        }
-        mBubbleOverflow.setVisible(mIsExpanded ? VISIBLE : GONE);
+        mBubbleOverflow.setVisible((mIsExpanded || mBubbleData.isShowingOverflow())
+                ? VISIBLE
+                : GONE);
     }
 
     // via BubbleData.Listener
@@ -2128,7 +2140,7 @@ public class BubbleStackView extends FrameLayout
         }
     }
 
-    private void dismissBubbleIfExists(@Nullable Bubble bubble) {
+    private void dismissBubbleIfExists(@Nullable BubbleViewProvider bubble) {
         if (bubble != null && mBubbleData.hasBubbleInStackWithKey(bubble.getKey())) {
             mBubbleData.dismissBubbleWithKey(bubble.getKey(), Bubbles.DISMISS_USER_GESTURE);
         }
@@ -2337,7 +2349,7 @@ public class BubbleStackView extends FrameLayout
         }
 
         if (!mIsExpanded) {
-            if (getBubbleCount() > 0) {
+            if (getBubbleCount() > 0 || mBubbleData.isShowingOverflow()) {
                 mBubbleContainer.getChildAt(0).getBoundsOnScreen(outRect);
                 // Increase the touch target size of the bubble
                 outRect.top -= mBubbleTouchPadding;

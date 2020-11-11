@@ -96,6 +96,7 @@ import com.android.wm.shell.bubbles.BubbleData;
 import com.android.wm.shell.bubbles.BubbleDataRepository;
 import com.android.wm.shell.bubbles.BubbleEntry;
 import com.android.wm.shell.bubbles.BubbleLogger;
+import com.android.wm.shell.bubbles.BubbleOverflow;
 import com.android.wm.shell.bubbles.BubbleStackView;
 import com.android.wm.shell.bubbles.Bubbles;
 import com.android.wm.shell.common.FloatingContentCoordinator;
@@ -251,9 +252,8 @@ public class BubblesTest extends SysuiTestCase {
                 mSysUiStateBubblesExpanded =
                         (sysUiFlags & QuickStepContract.SYSUI_STATE_BUBBLES_EXPANDED) != 0);
 
-        mBubbleData = new BubbleData(mContext, mBubbleLogger);
-
         mPositioner = new TestableBubblePositioner(mContext, mWindowManager);
+        mBubbleData = new BubbleData(mContext, mBubbleLogger, mPositioner);
 
         TestableNotificationInterruptStateProviderImpl interruptionStateProvider =
                 new TestableNotificationInterruptStateProviderImpl(mContext.getContentResolver(),
@@ -578,7 +578,7 @@ public class BubblesTest extends SysuiTestCase {
     }
 
     @Test
-    public void testRemoveLastExpandedCollapses() {
+    public void testRemoveLastExpanded_selectsOverflow() {
         // Mark it as a bubble and add it explicitly
         mEntryListener.onPendingEntryAdded(mRow.getEntry());
         mEntryListener.onPendingEntryAdded(mRow2.getEntry());
@@ -618,10 +618,38 @@ public class BubblesTest extends SysuiTestCase {
                         stackView.getExpandedBubble().getKey()).getKey(),
                 Bubbles.DISMISS_USER_GESTURE);
 
-        // Make sure state changes and collapse happens
+        // Overflow should be selected
+        assertEquals(mBubbleData.getSelectedBubble().getKey(), BubbleOverflow.KEY);
+        verify(mBubbleExpandListener).onBubbleExpandChanged(true, BubbleOverflow.KEY);
+        assertTrue(mBubbleController.hasBubbles());
+        assertTrue(mSysUiStateBubblesExpanded);
+    }
+
+    @Test
+    public void testRemoveLastExpandedEmptyOverflow_collapses() {
+        // Mark it as a bubble and add it explicitly
+        mEntryListener.onPendingEntryAdded(mRow.getEntry());
+        mBubbleController.updateBubble(mBubbleEntry);
+
+        // Expand
+        BubbleStackView stackView = mBubbleController.getStackView();
+        mBubbleData.setExpanded(true);
+
+        assertTrue(mSysUiStateBubblesExpanded);
+        assertTrue(mBubbleController.isStackExpanded());
+        verify(mBubbleExpandListener).onBubbleExpandChanged(true, mRow.getEntry().getKey());
+
+        // Block the bubble so it won't be in the overflow
+        mBubbleController.removeBubble(
+                mBubbleData.getBubbleInStackWithKey(
+                        stackView.getExpandedBubble().getKey()).getKey(),
+                Bubbles.DISMISS_BLOCKED);
+
+        verify(mBubbleExpandListener).onBubbleExpandChanged(false, mRow.getEntry().getKey());
+
+        // We should be collapsed
         verify(mBubbleExpandListener).onBubbleExpandChanged(false, mRow.getEntry().getKey());
         assertFalse(mBubbleController.hasBubbles());
-
         assertFalse(mSysUiStateBubblesExpanded);
     }
 

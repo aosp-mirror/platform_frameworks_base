@@ -63,9 +63,15 @@ class BubbleOverflow(
         overflowBtn = null
     }
 
+    /** Call before use and again if cleanUpExpandedState was called.  */
     fun initialize(controller: BubbleController) {
         getExpandedView()?.initialize(controller, controller.stackView)
         getExpandedView()?.setOverflow(true)
+    }
+
+    fun cleanUpExpandedState() {
+        expandedView?.cleanUpExpandedState()
+        expandedView = null
     }
 
     fun update() {
@@ -130,11 +136,6 @@ class BubbleOverflow(
     fun setShowDot(show: Boolean) {
         showDot = show
         overflowBtn?.updateDotVisibility(true /* animate */)
-    }
-
-    fun cleanUpExpandedState() {
-        expandedView?.cleanUpExpandedState()
-        expandedView = null
     }
 
     override fun getExpandedView(): BubbleExpandedView? {
