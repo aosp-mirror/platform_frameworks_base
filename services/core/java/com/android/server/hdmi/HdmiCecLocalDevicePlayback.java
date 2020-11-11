@@ -66,13 +66,6 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
                     .playback_device_action_on_routing_control()
                     .orElse(HdmiProperties.playback_device_action_on_routing_control_values.NONE);
 
-    // Behaviour of the device when <Active Source> is lost in favor of another device.
-    @VisibleForTesting
-    protected HdmiProperties.power_state_change_on_active_source_lost_values
-            mPowerStateChangeOnActiveSourceLost = HdmiProperties
-                    .power_state_change_on_active_source_lost()
-                    .orElse(HdmiProperties.power_state_change_on_active_source_lost_values.NONE);
-
     HdmiCecLocalDevicePlayback(HdmiControlService service) {
         super(service, HdmiDeviceInfo.DEVICE_PLAYBACK);
 
@@ -279,11 +272,12 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
     @ServiceThreadOnly
     protected void onActiveSourceLost() {
         assertRunOnServiceThread();
-        switch (mPowerStateChangeOnActiveSourceLost) {
-            case STANDBY_NOW:
+        switch (mService.getHdmiCecConfig().getStringValue(
+                    HdmiControlManager.CEC_SETTING_NAME_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST)) {
+            case HdmiControlManager.POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST_STANDBY_NOW:
                 mService.standby();
                 return;
-            case NONE:
+            case HdmiControlManager.POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST_NONE:
                 return;
         }
     }
