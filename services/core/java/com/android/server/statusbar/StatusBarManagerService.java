@@ -24,15 +24,18 @@ import android.app.ActivityThread;
 import android.app.ITransientNotificationCallback;
 import android.app.Notification;
 import android.app.StatusBarManager;
+import android.app.compat.CompatChanges;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledSince;
 import android.content.ComponentName;
 import android.content.Context;
-import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.IBiometricSysuiReceiver;
 import android.hardware.biometrics.PromptInfo;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManager.DisplayListener;
 import android.net.Uri;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -83,6 +86,18 @@ import java.util.ArrayList;
 public class StatusBarManagerService extends IStatusBarService.Stub implements DisplayListener {
     private static final String TAG = "StatusBarManagerService";
     private static final boolean SPEW = false;
+
+    /**
+     * Apps targeting {@code Build.VERSION_CODES.S} or higher need {@link
+     * android.Manifest.permission#STATUS_BAR} permission to collapse the status bar panels due to
+     * security reasons.
+     *
+     * This was being exploited by malware to prevent the user from accessing critical
+     * notifications.
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.S)
+    private static final long LOCK_DOWN_COLLAPSE_STATUS_BAR = 173031413L;
 
     private final Context mContext;
 
@@ -605,7 +620,11 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
 
     @Override
     public void collapsePanels() {
-        enforceExpandStatusBar();
+        if (CompatChanges.isChangeEnabled(LOCK_DOWN_COLLAPSE_STATUS_BAR, Binder.getCallingUid())) {
+            enforceStatusBar();
+        } else {
+            enforceExpandStatusBar();
+        }
 
         if (mBar != null) {
             try {
