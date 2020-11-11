@@ -35,6 +35,7 @@ import org.junit.runner.RunWith;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
@@ -58,8 +59,7 @@ public class SystemServicePowerCalculatorTest {
                 .setKernelCpuUidFreqTimeReader(mMockCpuUidFreqTimeReader)
                 .setUserInfoProvider(new MockUserInfoProvider());
         mMockBatteryStats.getOnBatteryTimeBase().setRunning(true, 0, 0);
-        mSystemServicePowerCalculator =
-                new SystemServicePowerCalculator(mProfile, mMockBatteryStats);
+        mSystemServicePowerCalculator = new SystemServicePowerCalculator(mProfile);
     }
 
     @Test
@@ -105,14 +105,12 @@ public class SystemServicePowerCalculatorTest {
 
         BatterySipper app1 = new BatterySipper(BatterySipper.DrainType.APP,
                 mMockBatteryStats.getUidStatsLocked(workSourceUid1), 0);
-        mSystemServicePowerCalculator.calculateApp(app1, app1.uidObj, 0, 0,
-                BatteryStats.STATS_SINCE_CHARGED);
-        assertEquals(0.00016269, app1.systemServiceCpuPowerMah, 0.0000001);
-
         BatterySipper app2 = new BatterySipper(BatterySipper.DrainType.APP,
                 mMockBatteryStats.getUidStatsLocked(workSourceUid2), 0);
-        mSystemServicePowerCalculator.calculateApp(app2, app2.uidObj, 0, 0,
-                BatteryStats.STATS_SINCE_CHARGED);
+        mSystemServicePowerCalculator.calculate(List.of(app1, app2), mMockBatteryStats, 0, 0,
+                BatteryStats.STATS_SINCE_CHARGED, null);
+
+        assertEquals(0.00016269, app1.systemServiceCpuPowerMah, 0.0000001);
         assertEquals(0.00146426, app2.systemServiceCpuPowerMah, 0.0000001);
     }
 

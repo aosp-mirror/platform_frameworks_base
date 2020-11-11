@@ -30,7 +30,7 @@ public class CpuPowerCalculator extends PowerCalculator {
     }
 
     @Override
-    public void calculateApp(BatterySipper app, BatteryStats.Uid u, long rawRealtimeUs,
+    protected void calculateApp(BatterySipper app, BatteryStats.Uid u, long rawRealtimeUs,
             long rawUptimeUs, int statsType) {
         app.cpuTimeMs = (u.getUserCpuTimeUs(statsType) + u.getSystemCpuTimeUs(statsType)) / 1000;
         final int numClusters = mProfile.getNumCpuClusters();
@@ -45,7 +45,7 @@ public class CpuPowerCalculator extends PowerCalculator {
                 if (DEBUG) {
                     Log.d(TAG, "UID " + u.getUid() + ": CPU cluster #" + cluster + " step #"
                             + speed + " timeUs=" + timeUs + " power="
-                            + BatteryStatsHelper.makemAh(cpuSpeedStepPower / MICROSEC_IN_HR));
+                            + formatCharge(cpuSpeedStepPower / MICROSEC_IN_HR));
                 }
                 cpuPowerMaUs += cpuSpeedStepPower;
             }
@@ -62,7 +62,7 @@ public class CpuPowerCalculator extends PowerCalculator {
                     if (DEBUG) {
                         Log.d(TAG, "UID " + u.getUid() + ": CPU cluster #" + i + " clusterTimeUs="
                                 + cpuClusterTimes[i] + " power="
-                                + BatteryStatsHelper.makemAh(power / MICROSEC_IN_HR));
+                                + formatCharge(power / MICROSEC_IN_HR));
                     }
                 }
             } else {
@@ -74,7 +74,7 @@ public class CpuPowerCalculator extends PowerCalculator {
 
         if (DEBUG && (app.cpuTimeMs != 0 || app.cpuPowerMah != 0)) {
             Log.d(TAG, "UID " + u.getUid() + ": CPU time=" + app.cpuTimeMs + " ms power="
-                    + BatteryStatsHelper.makemAh(app.cpuPowerMah));
+                    + formatCharge(app.cpuPowerMah));
         }
 
         // Keep track of the package with highest drain.

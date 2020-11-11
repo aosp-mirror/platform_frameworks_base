@@ -28,7 +28,7 @@ public class FlashlightPowerCalculator extends PowerCalculator {
     }
 
     @Override
-    public void calculateApp(BatterySipper app, BatteryStats.Uid u, long rawRealtimeUs,
+    protected void calculateApp(BatterySipper app, BatteryStats.Uid u, long rawRealtimeUs,
                              long rawUptimeUs, int statsType) {
 
         // Calculate flashlight power usage.  Right now, this is based on the average power draw

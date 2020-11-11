@@ -54,9 +54,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
-import java.util.Locale;
 
 /**
  * A helper class for retrieving the power usage information for all applications and services.
@@ -77,6 +75,8 @@ public class BatteryStatsHelper {
     final private boolean mCollectBatteryBroadcast;
     final private boolean mWifiOnly;
 
+    private List<PowerCalculator> mPowerCalculators;
+
     @UnsupportedAppUsage
     private IBatteryStats mBatteryInfo;
     private BatteryStats mStats;
@@ -94,18 +94,6 @@ public class BatteryStatsHelper {
     @UnsupportedAppUsage
     private final List<BatterySipper> mUsageList = new ArrayList<>();
 
-    /**
-     * List of apps using wifi power.
-     */
-    private final List<BatterySipper> mWifiSippers = new ArrayList<>();
-
-    /**
-     * List of apps using bluetooth power.
-     */
-    private final List<BatterySipper> mBluetoothSippers = new ArrayList<>();
-
-    private final SparseArray<List<BatterySipper>> mUserSippers = new SparseArray<>();
-
     private final List<BatterySipper> mMobilemsppList = new ArrayList<>();
 
     private int mStatsType = BatteryStats.STATS_SINCE_CHARGED;
@@ -114,8 +102,6 @@ public class BatteryStatsHelper {
     long mRawUptimeUs;
     long mBatteryRealtimeUs;
     long mBatteryUptimeUs;
-    long mTypeBatteryRealtimeUs;
-    long mTypeBatteryUptimeUs;
     long mBatteryTimeRemainingUs;
     long mChargeTimeRemainingUs;
 
@@ -133,21 +119,6 @@ public class BatteryStatsHelper {
     private double mMinDrainedPower;
     private double mMaxDrainedPower;
 
-    PowerCalculator mCpuPowerCalculator;
-    SystemServicePowerCalculator mSystemServicePowerCalculator;
-    PowerCalculator mWakelockPowerCalculator;
-    MobileRadioPowerCalculator mMobileRadioPowerCalculator;
-    PowerCalculator mWifiPowerCalculator;
-    PowerCalculator mBluetoothPowerCalculator;
-    PowerCalculator mSensorPowerCalculator;
-    PowerCalculator mCameraPowerCalculator;
-    PowerCalculator mFlashlightPowerCalculator;
-    PowerCalculator mMemoryPowerCalculator;
-    PowerCalculator mMediaPowerCalculator;
-
-    boolean mHasWifiPowerReporting = false;
-    boolean mHasBluetoothPowerReporting = false;
-
     public static boolean checkWifiOnly(Context context) {
         ConnectivityManager cm = (ConnectivityManager) context.getSystemService(
                 Context.CONNECTIVITY_SERVICE);
@@ -155,21 +126,6 @@ public class BatteryStatsHelper {
             return false;
         }
         return !cm.isNetworkSupported(ConnectivityManager.TYPE_MOBILE);
-    }
-
-    public static boolean checkHasWifiPowerReporting(BatteryStats stats, PowerProfile profile) {
-        return stats.hasWifiActivityReporting() &&
-                profile.getAveragePower(PowerProfile.POWER_WIFI_CONTROLLER_IDLE) != 0 &&
-                profile.getAveragePower(PowerProfile.POWER_WIFI_CONTROLLER_RX) != 0 &&
-                profile.getAveragePower(PowerProfile.POWER_WIFI_CONTROLLER_TX) != 0;
-    }
-
-    public static boolean checkHasBluetoothPowerReporting(BatteryStats stats,
-            PowerProfile profile) {
-        return stats.hasBluetoothActivityReporting() &&
-                profile.getAveragePower(PowerProfile.POWER_BLUETOOTH_CONTROLLER_IDLE) != 0 &&
-                profile.getAveragePower(PowerProfile.POWER_BLUETOOTH_CONTROLLER_RX) != 0 &&
-                profile.getAveragePower(PowerProfile.POWER_BLUETOOTH_CONTROLLER_TX) != 0;
     }
 
     @UnsupportedAppUsage
@@ -308,31 +264,7 @@ public class BatteryStatsHelper {
     }
 
     public static String makemAh(double power) {
-        if (power == 0) return "0";
-
-        final String format;
-        if (power < .00001) {
-            format = "%.8f";
-        } else if (power < .0001) {
-            format = "%.7f";
-        } else if (power < .001) {
-            format = "%.6f";
-        } else if (power < .01) {
-            format = "%.5f";
-        } else if (power < .1) {
-            format = "%.4f";
-        } else if (power < 1) {
-            format = "%.3f";
-        } else if (power < 10) {
-            format = "%.2f";
-        } else if (power < 100) {
-            format = "%.1f";
-        } else {
-            format = "%.0f";
-        }
-
-        // Use English locale because this is never used in UI (only in checkin and dump).
-        return String.format(Locale.ENGLISH, format, power);
+        return PowerCalculator.formatCharge(power);
     }
 
     /**
@@ -384,97 +316,58 @@ public class BatteryStatsHelper {
         mTotalPower = 0;
 
         mUsageList.clear();
-        mWifiSippers.clear();
-        mBluetoothSippers.clear();
-        mUserSippers.clear();
         mMobilemsppList.clear();
 
         if (mStats == null) {
             return;
         }
 
-        if (mCpuPowerCalculator == null) {
-            mCpuPowerCalculator = new CpuPowerCalculator(mPowerProfile);
-        }
-        mCpuPowerCalculator.reset();
+        if (mPowerCalculators == null) {
+            mPowerCalculators = new ArrayList<>();
 
-        if (mSystemServicePowerCalculator == null) {
-            mSystemServicePowerCalculator = new SystemServicePowerCalculator(mPowerProfile, mStats);
-        }
-        mSystemServicePowerCalculator.reset();
+            // Power calculators are applied in the order of registration
+            mPowerCalculators.add(new CpuPowerCalculator(mPowerProfile));
+            mPowerCalculators.add(new MemoryPowerCalculator(mPowerProfile));
+            mPowerCalculators.add(new WakelockPowerCalculator(mPowerProfile));
+            if (!mWifiOnly) {
+                mPowerCalculators.add(new MobileRadioPowerCalculator(mPowerProfile));
+            }
+            mPowerCalculators.add(new WifiPowerCalculator(mPowerProfile));
+            mPowerCalculators.add(new BluetoothPowerCalculator(mPowerProfile));
+            mPowerCalculators.add(new SensorPowerCalculator(mPowerProfile,
+                    mContext.getSystemService(SensorManager.class)));
+            mPowerCalculators.add(new CameraPowerCalculator(mPowerProfile));
+            mPowerCalculators.add(new FlashlightPowerCalculator(mPowerProfile));
+            mPowerCalculators.add(new MediaPowerCalculator(mPowerProfile));
+            mPowerCalculators.add(new PhonePowerCalculator(mPowerProfile));
+            mPowerCalculators.add(new ScreenPowerCalculator(mPowerProfile));
+            mPowerCalculators.add(new AmbientDisplayPowerCalculator(mPowerProfile));
+            mPowerCalculators.add(new SystemServicePowerCalculator(mPowerProfile));
+            mPowerCalculators.add(new IdlePowerCalculator(mPowerProfile));
 
-        if (mMemoryPowerCalculator == null) {
-            mMemoryPowerCalculator = new MemoryPowerCalculator(mPowerProfile);
+            mPowerCalculators.add(new UserPowerCalculator());
         }
-        mMemoryPowerCalculator.reset();
 
-        if (mWakelockPowerCalculator == null) {
-            mWakelockPowerCalculator = new WakelockPowerCalculator(mPowerProfile);
+        for (int i = 0, size = mPowerCalculators.size(); i < size; i++) {
+            mPowerCalculators.get(i).reset();
         }
-        mWakelockPowerCalculator.reset();
-
-        if (mMobileRadioPowerCalculator == null) {
-            mMobileRadioPowerCalculator = new MobileRadioPowerCalculator(mPowerProfile, mStats);
-        }
-        mMobileRadioPowerCalculator.reset(mStats);
-
-        // checkHasWifiPowerReporting can change if we get energy data at a later point, so
-        // always check this field.
-        final boolean hasWifiPowerReporting = checkHasWifiPowerReporting(mStats, mPowerProfile);
-        if (mWifiPowerCalculator == null || hasWifiPowerReporting != mHasWifiPowerReporting) {
-            mWifiPowerCalculator = hasWifiPowerReporting ?
-                    new WifiPowerCalculator(mPowerProfile) :
-                    new WifiPowerEstimator(mPowerProfile);
-            mHasWifiPowerReporting = hasWifiPowerReporting;
-        }
-        mWifiPowerCalculator.reset();
-
-        final boolean hasBluetoothPowerReporting = checkHasBluetoothPowerReporting(mStats,
-                mPowerProfile);
-        if (mBluetoothPowerCalculator == null ||
-                hasBluetoothPowerReporting != mHasBluetoothPowerReporting) {
-            mBluetoothPowerCalculator = new BluetoothPowerCalculator(mPowerProfile);
-            mHasBluetoothPowerReporting = hasBluetoothPowerReporting;
-        }
-        mBluetoothPowerCalculator.reset();
-
-        mSensorPowerCalculator = new SensorPowerCalculator(mPowerProfile,
-                (SensorManager) mContext.getSystemService(Context.SENSOR_SERVICE),
-                mStats, rawRealtimeUs, statsType);
-        mSensorPowerCalculator.reset();
-
-        if (mCameraPowerCalculator == null) {
-            mCameraPowerCalculator = new CameraPowerCalculator(mPowerProfile);
-        }
-        mCameraPowerCalculator.reset();
-
-        if (mFlashlightPowerCalculator == null) {
-            mFlashlightPowerCalculator = new FlashlightPowerCalculator(mPowerProfile);
-        }
-        mFlashlightPowerCalculator.reset();
-
-        if (mMediaPowerCalculator == null) {
-            mMediaPowerCalculator = new MediaPowerCalculator(mPowerProfile);
-        }
-        mMediaPowerCalculator.reset();
 
         mStatsType = statsType;
         mRawUptimeUs = rawUptimeUs;
         mRawRealtimeUs = rawRealtimeUs;
         mBatteryUptimeUs = mStats.getBatteryUptime(rawUptimeUs);
         mBatteryRealtimeUs = mStats.getBatteryRealtime(rawRealtimeUs);
-        mTypeBatteryUptimeUs = mStats.computeBatteryUptime(rawUptimeUs, mStatsType);
-        mTypeBatteryRealtimeUs = mStats.computeBatteryRealtime(rawRealtimeUs, mStatsType);
         mBatteryTimeRemainingUs = mStats.computeBatteryTimeRemaining(rawRealtimeUs);
         mChargeTimeRemainingUs = mStats.computeChargeTimeRemaining(rawRealtimeUs);
+        mStatsPeriod = mStats.computeBatteryRealtime(rawRealtimeUs, mStatsType);
 
         if (DEBUG) {
             Log.d(TAG, "Raw time: realtime=" + (rawRealtimeUs / 1000) + " uptime="
                     + (rawUptimeUs / 1000));
             Log.d(TAG, "Battery time: realtime=" + (mBatteryRealtimeUs / 1000) + " uptime="
                     + (mBatteryUptimeUs / 1000));
-            Log.d(TAG, "Battery type time: realtime=" + (mTypeBatteryRealtimeUs / 1000) + " uptime="
-                    + (mTypeBatteryUptimeUs / 1000));
+            Log.d(TAG, "Battery type time: realtime=" + (mStatsPeriod / 1000) + " uptime="
+                    + (mStats.computeBatteryUptime(rawRealtimeUs, mStatsType) / 1000));
         }
         mMinDrainedPower = (mStats.getLowDischargeAmountSinceCharge()
                 * mPowerProfile.getBatteryCapacity()) / 100;
@@ -483,35 +376,10 @@ public class BatteryStatsHelper {
 
         processAppUsage(asUsers);
 
-        // Before aggregating apps in to users, collect all apps to sort by their ms per packet.
-        for (int i = 0; i < mUsageList.size(); i++) {
-            BatterySipper bs = mUsageList.get(i);
-            bs.computeMobilemspp();
-            if (bs.mobilemspp != 0) {
-                mMobilemsppList.add(bs);
-            }
-        }
-
-        for (int i = 0; i < mUserSippers.size(); i++) {
-            List<BatterySipper> user = mUserSippers.valueAt(i);
-            for (int j = 0; j < user.size(); j++) {
-                BatterySipper bs = user.get(j);
-                bs.computeMobilemspp();
-                if (bs.mobilemspp != 0) {
-                    mMobilemsppList.add(bs);
-                }
-            }
-        }
-        Collections.sort(mMobilemsppList, new Comparator<BatterySipper>() {
-            @Override
-            public int compare(BatterySipper lhs, BatterySipper rhs) {
-                return Double.compare(rhs.mobilemspp, lhs.mobilemspp);
-            }
-        });
-
-        processMiscUsage();
-
         Collections.sort(mUsageList);
+
+        Collections.sort(mMobilemsppList,
+                (lhs, rhs) -> Double.compare(rhs.mobilemspp, lhs.mobilemspp));
 
         // At this point, we've sorted the list so we are guaranteed the max values are at the top.
         // We have only added real powers so far.
@@ -524,8 +392,9 @@ public class BatteryStatsHelper {
         }
 
         if (DEBUG) {
-            Log.d(TAG, "Accuracy: total computed=" + makemAh(mComputedPower) + ", min discharge="
-                    + makemAh(mMinDrainedPower) + ", max discharge=" + makemAh(mMaxDrainedPower));
+            Log.d(TAG, "Accuracy: total computed=" + PowerCalculator.formatCharge(mComputedPower)
+                    + ", min discharge=" + PowerCalculator.formatCharge(mMinDrainedPower)
+                    + ", max discharge=" + PowerCalculator.formatCharge(mMaxDrainedPower));
         }
 
         mTotalPower = mComputedPower;
@@ -573,244 +442,43 @@ public class BatteryStatsHelper {
     }
 
     private void processAppUsage(SparseArray<UserHandle> asUsers) {
-        final boolean forAllUsers = (asUsers.get(UserHandle.USER_ALL) != null);
-        mStatsPeriod = mTypeBatteryRealtimeUs;
-
-        BatterySipper osSipper = null;
         final SparseArray<? extends Uid> uidStats = mStats.getUidStats();
-        final int NU = uidStats.size();
-        for (int iu = 0; iu < NU; iu++) {
+
+        final ArrayList<BatterySipper> sippers = new ArrayList<>(uidStats.size());
+
+        for (int iu = 0, size = uidStats.size(); iu < size; iu++) {
             final Uid u = uidStats.valueAt(iu);
-            final BatterySipper app = new BatterySipper(BatterySipper.DrainType.APP, u, 0);
+            sippers.add(new BatterySipper(DrainType.APP, u, 0));
+        }
 
-            mCpuPowerCalculator.calculateApp(app, u, mRawRealtimeUs, mRawUptimeUs, mStatsType);
-            mWakelockPowerCalculator.calculateApp(app, u, mRawRealtimeUs, mRawUptimeUs, mStatsType);
-            mMobileRadioPowerCalculator.calculateApp(app, u, mRawRealtimeUs, mRawUptimeUs,
-                    mStatsType);
-            mWifiPowerCalculator.calculateApp(app, u, mRawRealtimeUs, mRawUptimeUs, mStatsType);
-            mBluetoothPowerCalculator.calculateApp(app, u, mRawRealtimeUs, mRawUptimeUs,
-                    mStatsType);
-            mSensorPowerCalculator.calculateApp(app, u, mRawRealtimeUs, mRawUptimeUs, mStatsType);
-            mCameraPowerCalculator.calculateApp(app, u, mRawRealtimeUs, mRawUptimeUs, mStatsType);
-            mFlashlightPowerCalculator.calculateApp(app, u, mRawRealtimeUs, mRawUptimeUs,
-                    mStatsType);
-            mMediaPowerCalculator.calculateApp(app, u, mRawRealtimeUs, mRawUptimeUs, mStatsType);
-            mSystemServicePowerCalculator.calculateApp(app, u, mRawRealtimeUs, mRawUptimeUs,
-                    mStatsType);
+        for (int i = 0, size = mPowerCalculators.size(); i < size; i++) {
+            final PowerCalculator calculator = mPowerCalculators.get(i);
+            calculator.calculate(sippers, mStats, mRawRealtimeUs, mRawUptimeUs, mStatsType,
+                    asUsers);
+        }
 
-            final double totalPower = app.sumPower();
+        for (int i = sippers.size() - 1; i >= 0; i--) {
+            final BatterySipper sipper = sippers.get(i);
+            final double totalPower = sipper.sumPower();
             if (DEBUG && totalPower != 0) {
-                Log.d(TAG, String.format("UID %d: total power=%s", u.getUid(),
-                        makemAh(totalPower)));
+                Log.d(TAG, String.format("UID %d: total power=%s", sipper.getUid(),
+                        PowerCalculator.formatCharge(totalPower)));
             }
 
-            // Add the app to the list if it is consuming power.
-            if (totalPower != 0 || u.getUid() == 0) {
-                //
-                // Add the app to the app list, WiFi, Bluetooth, etc, or into "Other Users" list.
-                //
-                final int uid = app.getUid();
-                final int userId = UserHandle.getUserId(uid);
-                if (uid == Process.WIFI_UID) {
-                    mWifiSippers.add(app);
-                } else if (uid == Process.BLUETOOTH_UID) {
-                    mBluetoothSippers.add(app);
-                } else if (!forAllUsers && asUsers.get(userId) == null
-                        && UserHandle.getAppId(uid) >= Process.FIRST_APPLICATION_UID) {
-                    // We are told to just report this user's apps as one large entry.
-                    List<BatterySipper> list = mUserSippers.get(userId);
-                    if (list == null) {
-                        list = new ArrayList<>();
-                        mUserSippers.put(userId, list);
+            // Add the sipper to the list if it is consuming power.
+            if (totalPower != 0 || sipper.getUid() == 0) {
+                if (sipper.drainType == DrainType.APP) {
+                    sipper.computeMobilemspp();
+                    if (sipper.mobilemspp != 0) {
+                        mMobilemsppList.add(sipper);
                     }
-                    list.add(app);
-                } else {
-                    mUsageList.add(app);
                 }
 
-                if (uid == 0) {
-                    osSipper = app;
+                if (!sipper.isAggregated) {
+                    mUsageList.add(sipper);
                 }
             }
         }
-
-        if (osSipper != null) {
-            // The device has probably been awake for longer than the screen on
-            // time and application wake lock time would account for.  Assign
-            // this remainder to the OS, if possible.
-            mWakelockPowerCalculator.calculateRemaining(osSipper, mStats, mRawRealtimeUs,
-                    mRawUptimeUs, mStatsType);
-            osSipper.sumPower();
-        }
-    }
-
-    private void addPhoneUsage() {
-        long phoneOnTimeMs = mStats.getPhoneOnTime(mRawRealtimeUs, mStatsType) / 1000;
-        double phoneOnPower = mPowerProfile.getAveragePower(PowerProfile.POWER_RADIO_ACTIVE)
-                * phoneOnTimeMs / (60 * 60 * 1000);
-        if (phoneOnPower != 0) {
-            addEntry(BatterySipper.DrainType.PHONE, phoneOnTimeMs, phoneOnPower);
-        }
-    }
-
-    /**
-     * Screen power is the additional power the screen takes while the device is running.
-     */
-    private void addScreenUsage() {
-        double power = 0;
-        long screenOnTimeMs = mStats.getScreenOnTime(mRawRealtimeUs, mStatsType) / 1000;
-        power += screenOnTimeMs * mPowerProfile.getAveragePower(PowerProfile.POWER_SCREEN_ON);
-        final double screenFullPower =
-                mPowerProfile.getAveragePower(PowerProfile.POWER_SCREEN_FULL);
-        for (int i = 0; i < BatteryStats.NUM_SCREEN_BRIGHTNESS_BINS; i++) {
-            double screenBinPower = screenFullPower * (i + 0.5f)
-                    / BatteryStats.NUM_SCREEN_BRIGHTNESS_BINS;
-            long brightnessTime = mStats.getScreenBrightnessTime(i, mRawRealtimeUs, mStatsType)
-                    / 1000;
-            double p = screenBinPower * brightnessTime;
-            if (DEBUG && p != 0) {
-                Log.d(TAG, "Screen bin #" + i + ": time=" + brightnessTime
-                        + " power=" + makemAh(p / (60 * 60 * 1000)));
-            }
-            power += p;
-        }
-        power /= (60 * 60 * 1000); // To hours
-        if (power != 0) {
-            addEntry(BatterySipper.DrainType.SCREEN, screenOnTimeMs, power);
-        }
-    }
-
-    /**
-     * Ambient display power is the additional power the screen takes while in ambient display/
-     * screen doze/ always-on display (interchangeable terms) mode. Ambient display power should
-     * be hidden {@link #shouldHideSipper(BatterySipper)}, but should not be included in smearing
-     * {@link #removeHiddenBatterySippers(List)}.
-     */
-    private void addAmbientDisplayUsage() {
-        long ambientDisplayMs = mStats.getScreenDozeTime(mRawRealtimeUs, mStatsType) / 1000;
-        double power = mPowerProfile.getAveragePower(PowerProfile.POWER_AMBIENT_DISPLAY)
-                * ambientDisplayMs / (60 * 60 * 1000);
-        if (power > 0) {
-            addEntry(DrainType.AMBIENT_DISPLAY, ambientDisplayMs, power);
-        }
-    }
-
-    private void addRadioUsage() {
-        BatterySipper radio = new BatterySipper(BatterySipper.DrainType.CELL, null, 0);
-        mMobileRadioPowerCalculator.calculateRemaining(radio, mStats, mRawRealtimeUs, mRawUptimeUs,
-                mStatsType);
-        radio.sumPower();
-        if (radio.totalPowerMah > 0) {
-            mUsageList.add(radio);
-        }
-    }
-
-    private void aggregateSippers(BatterySipper bs, List<BatterySipper> from, String tag) {
-        for (int i = 0; i < from.size(); i++) {
-            BatterySipper wbs = from.get(i);
-            if (DEBUG) Log.d(TAG, tag + " adding sipper " + wbs + ": cpu=" + wbs.cpuTimeMs);
-            bs.add(wbs);
-        }
-        bs.computeMobilemspp();
-        bs.sumPower();
-    }
-
-    /**
-     * Calculate the baseline power usage for the device when it is in suspend and idle.
-     * The device is drawing POWER_CPU_SUSPEND power at its lowest power state.
-     * The device is drawing POWER_CPU_SUSPEND + POWER_CPU_IDLE power when a wakelock is held.
-     */
-    private void addIdleUsage() {
-        final double suspendPowerMaMs = (mTypeBatteryRealtimeUs / 1000) *
-                mPowerProfile.getAveragePower(PowerProfile.POWER_CPU_SUSPEND);
-        final double idlePowerMaMs = (mTypeBatteryUptimeUs / 1000) *
-                mPowerProfile.getAveragePower(PowerProfile.POWER_CPU_IDLE);
-        final double totalPowerMah = (suspendPowerMaMs + idlePowerMaMs) / (60 * 60 * 1000);
-        if (DEBUG && totalPowerMah != 0) {
-            Log.d(TAG, "Suspend: time=" + (mTypeBatteryRealtimeUs / 1000)
-                    + " power=" + makemAh(suspendPowerMaMs / (60 * 60 * 1000)));
-            Log.d(TAG, "Idle: time=" + (mTypeBatteryUptimeUs / 1000)
-                    + " power=" + makemAh(idlePowerMaMs / (60 * 60 * 1000)));
-        }
-
-        if (totalPowerMah != 0) {
-            addEntry(BatterySipper.DrainType.IDLE, mTypeBatteryRealtimeUs / 1000, totalPowerMah);
-        }
-    }
-
-    /**
-     * We do per-app blaming of WiFi activity. If energy info is reported from the controller,
-     * then only the WiFi process gets blamed here since we normalize power calculations and
-     * assign all the power drain to apps. If energy info is not reported, we attribute the
-     * difference between total running time of WiFi for all apps and the actual running time
-     * of WiFi to the WiFi subsystem.
-     */
-    private void addWiFiUsage() {
-        BatterySipper bs = new BatterySipper(DrainType.WIFI, null, 0);
-        mWifiPowerCalculator.calculateRemaining(bs, mStats, mRawRealtimeUs, mRawUptimeUs,
-                mStatsType);
-        aggregateSippers(bs, mWifiSippers, "WIFI");
-        if (bs.totalPowerMah > 0) {
-            mUsageList.add(bs);
-        }
-    }
-
-    /**
-     * Bluetooth usage is not attributed to any apps yet, so the entire blame goes to the
-     * Bluetooth Category.
-     */
-    private void addBluetoothUsage() {
-        BatterySipper bs = new BatterySipper(BatterySipper.DrainType.BLUETOOTH, null, 0);
-        mBluetoothPowerCalculator.calculateRemaining(bs, mStats, mRawRealtimeUs, mRawUptimeUs,
-                mStatsType);
-        aggregateSippers(bs, mBluetoothSippers, "Bluetooth");
-        if (bs.totalPowerMah > 0) {
-            mUsageList.add(bs);
-        }
-    }
-
-    private void addUserUsage() {
-        for (int i = 0; i < mUserSippers.size(); i++) {
-            final int userId = mUserSippers.keyAt(i);
-            BatterySipper bs = new BatterySipper(DrainType.USER, null, 0);
-            bs.userId = userId;
-            aggregateSippers(bs, mUserSippers.valueAt(i), "User");
-            mUsageList.add(bs);
-        }
-    }
-
-    private void addMemoryUsage() {
-        BatterySipper memory = new BatterySipper(DrainType.MEMORY, null, 0);
-        mMemoryPowerCalculator.calculateRemaining(memory, mStats, mRawRealtimeUs, mRawUptimeUs,
-                mStatsType);
-        memory.sumPower();
-        if (memory.totalPowerMah > 0) {
-            mUsageList.add(memory);
-        }
-    }
-
-    private void processMiscUsage() {
-        addUserUsage();
-        addPhoneUsage();
-        addScreenUsage();
-        addAmbientDisplayUsage();
-        addWiFiUsage();
-        addBluetoothUsage();
-        addMemoryUsage();
-        addIdleUsage(); // Not including cellular idle power
-        // Don't compute radio usage if it's a wifi-only device
-        if (!mWifiOnly) {
-            addRadioUsage();
-        }
-    }
-
-    private BatterySipper addEntry(DrainType drainType, long time, double power) {
-        BatterySipper bs = new BatterySipper(drainType, null, 0);
-        bs.usagePowerMah = power;
-        bs.usageTimeMs = time;
-        bs.sumPower();
-        mUsageList.add(bs);
-        return bs;
     }
 
     @UnsupportedAppUsage
