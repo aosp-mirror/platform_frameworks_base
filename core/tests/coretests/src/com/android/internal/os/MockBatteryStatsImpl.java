@@ -192,8 +192,8 @@ public class MockBatteryStatsImpl extends BatteryStatsImpl {
         }
 
         @Override
-        public Future<?> scheduleCpuSyncDueToScreenStateChange(
-                boolean onBattery, boolean onBatteryScreenOff) {
+        public Future<?> scheduleSyncDueToScreenStateChange(
+                int flag, boolean onBattery, boolean onBatteryScreenOff, int screenState) {
             return null;
         }
 

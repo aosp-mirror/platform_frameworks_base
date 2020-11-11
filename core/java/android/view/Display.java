@@ -1391,6 +1391,23 @@ public final class Display {
     }
 
     /**
+     * Returns true if the display is in an off state such as {@link #STATE_OFF}.
+     * @hide
+     */
+    public static boolean isOffState(int state) {
+        return state == STATE_OFF;
+    }
+
+    /**
+     * Returns true if the display is in an on state such as {@link #STATE_ON}
+     * or {@link #STATE_VR} or {@link #STATE_ON_SUSPEND}.
+     * @hide
+     */
+    public static boolean isOnState(int state) {
+        return state == STATE_ON || state == STATE_VR || state == STATE_ON_SUSPEND;
+    }
+
+    /**
      * A mode supported by a given display.
      *
      * @see Display#getSupportedModes()

@@ -98,6 +98,8 @@ import com.android.internal.os.KernelCpuUidTimeReader.KernelCpuUidActiveTimeRead
 import com.android.internal.os.KernelCpuUidTimeReader.KernelCpuUidClusterTimeReader;
 import com.android.internal.os.KernelCpuUidTimeReader.KernelCpuUidFreqTimeReader;
 import com.android.internal.os.KernelCpuUidTimeReader.KernelCpuUidUserSysTimeReader;
+import com.android.internal.power.MeasuredEnergyArray;
+import com.android.internal.power.MeasuredEnergyStats;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.FastXmlSerializer;
@@ -155,7 +157,7 @@ public class BatteryStatsImpl extends BatteryStats {
     private static final int MAGIC = 0xBA757475; // 'BATSTATS'
 
     // Current on-disk Parcel version
-    static final int VERSION = 189 + (USE_OLD_HISTORY ? 1000 : 0);
+    static final int VERSION = 190 + (USE_OLD_HISTORY ? 1000 : 0);
 
     // The maximum number of names wakelocks we will keep track of
     // per uid; once the limit is reached, we batch the remaining wakelocks
@@ -349,12 +351,20 @@ public class BatteryStatsImpl extends BatteryStats {
     }
 
     /** interface to update rail information for power monitor */
-    public interface RailEnergyDataCallback {
+    public interface MeasuredEnergyRetriever {
         /** Function to fill the map for the rail data stats
          * Used for power monitoring feature
          * @param railStats
          */
         void fillRailDataStats(RailStats railStats);
+        /**
+         * Function to get energy consumption data
+         *
+         * @return an array of measured energy (in microjoules) since boot, will be null if
+         * measured energy data is unavailable
+         */
+        @Nullable
+        MeasuredEnergyArray getEnergyConsumptionData();
     }
 
     public static abstract class UserInfoProvider {
@@ -391,7 +401,7 @@ public class BatteryStatsImpl extends BatteryStats {
         }
     };
 
-    public final RailEnergyDataCallback mRailEnergyDataCallback;
+    public final MeasuredEnergyRetriever mMeasuredEnergyRetriever;
 
     /**
      * This handler is running on {@link BackgroundThread}.
@@ -624,8 +634,10 @@ public class BatteryStatsImpl extends BatteryStats {
         int UPDATE_WIFI = 0x02;
         int UPDATE_RADIO = 0x04;
         int UPDATE_BT = 0x08;
-        int UPDATE_RPM = 0x10; // 16
-        int UPDATE_ALL = UPDATE_CPU | UPDATE_WIFI | UPDATE_RADIO | UPDATE_BT | UPDATE_RPM;
+        int UPDATE_RPM = 0x10;
+        int UPDATE_ENERGY = 0x20;
+        int UPDATE_ALL =
+                UPDATE_CPU | UPDATE_WIFI | UPDATE_RADIO | UPDATE_BT | UPDATE_RPM | UPDATE_ENERGY;
 
         Future<?> scheduleSync(String reason, int flags);
         Future<?> scheduleCpuSyncDueToRemovedUid(int uid);
@@ -633,8 +645,11 @@ public class BatteryStatsImpl extends BatteryStats {
                 long delayMillis);
         Future<?> scheduleCopyFromAllUidsCpuTimes(boolean onBattery, boolean onBatteryScreenOff);
         Future<?> scheduleCpuSyncDueToSettingChange();
-        Future<?> scheduleCpuSyncDueToScreenStateChange(boolean onBattery,
-                boolean onBatteryScreenOff);
+        /**
+         * Schedule a sync because of a screen state change.
+         */
+        Future<?> scheduleSyncDueToScreenStateChange(int flags, boolean onBattery,
+                boolean onBatteryScreenOff, int screenState);
         Future<?> scheduleCpuSyncDueToWakelockChange(long delayMillis);
         void cancelCpuSyncDueToWakelockChange();
         Future<?> scheduleSyncDueToBatteryLevelChange(long delayMillis);
@@ -932,6 +947,13 @@ public class BatteryStatsImpl extends BatteryStats {
     int mWifiRadioPowerState = DataConnectionRealTimeInfo.DC_POWER_STATE_LOW;
 
     /**
+     * Accumulated energy consumption of various consumers while on battery.
+     * If energy consumer data is unavailable this will be null.
+     */
+    @GuardedBy("this")
+    MeasuredEnergyStats mBatteryMeasuredEnergyStats;
+
+    /**
      * These provide time bases that discount the time the device is plugged
      * in to power.
      */
@@ -1123,7 +1145,7 @@ public class BatteryStatsImpl extends BatteryStats {
         mBatteryStatsHistory = null;
         mHandler = null;
         mPlatformIdleStateCallback = null;
-        mRailEnergyDataCallback = null;
+        mMeasuredEnergyRetriever = null;
         mUserInfoProvider = null;
         mConstants = new Constants(mHandler);
         clearHistoryLocked();
@@ -1424,7 +1446,8 @@ public class BatteryStatsImpl extends BatteryStats {
          * @param in the parcel to read from
          * @return the Counter or null.
          */
-        public static @Nullable Counter readCounterFromParcel(TimeBase timeBase, Parcel in) {
+        @Nullable
+        public static Counter readCounterFromParcel(TimeBase timeBase, Parcel in) {
             if (in.readInt() == 0) {
                 return null;
             }
@@ -3949,7 +3972,7 @@ public class BatteryStatsImpl extends BatteryStats {
     @GuardedBy("this")
     public void updateTimeBasesLocked(boolean unplugged, int screenState, long uptimeUs,
             long realtimeUs) {
-        final boolean screenOff = !isScreenOn(screenState);
+        final boolean screenOff = !Display.isOnState(screenState);
         final boolean updateOnBatteryTimeBase = unplugged != mOnBatteryTimeBase.isRunning();
         final boolean updateOnBatteryScreenOffTimeBase =
                 (unplugged && screenOff) != mOnBatteryScreenOffTimeBase.isRunning();
@@ -5012,16 +5035,16 @@ public class BatteryStatsImpl extends BatteryStats {
             }
 
             boolean updateHistory = false;
-            if (isScreenDoze(state) && !isScreenDoze(oldState)) {
+            if (Display.isDozeState(state) && !Display.isDozeState(oldState)) {
                 mHistoryCur.states |= HistoryItem.STATE_SCREEN_DOZE_FLAG;
                 mScreenDozeTimer.startRunningLocked(elapsedRealtimeMs);
                 updateHistory = true;
-            } else if (isScreenDoze(oldState) && !isScreenDoze(state)) {
+            } else if (Display.isDozeState(oldState) && !Display.isDozeState(state)) {
                 mHistoryCur.states &= ~HistoryItem.STATE_SCREEN_DOZE_FLAG;
                 mScreenDozeTimer.stopRunningLocked(elapsedRealtimeMs);
                 updateHistory = true;
             }
-            if (isScreenOn(state)) {
+            if (Display.isOnState(state)) {
                 mHistoryCur.states |= HistoryItem.STATE_SCREEN_ON_FLAG;
                 if (DEBUG_HISTORY) Slog.v(TAG, "Screen on to: "
                         + Integer.toHexString(mHistoryCur.states));
@@ -5031,7 +5054,7 @@ public class BatteryStatsImpl extends BatteryStats {
                             .startRunningLocked(elapsedRealtimeMs);
                 }
                 updateHistory = true;
-            } else if (isScreenOn(oldState)) {
+            } else if (Display.isOnState(oldState)) {
                 mHistoryCur.states &= ~HistoryItem.STATE_SCREEN_ON_FLAG;
                 if (DEBUG_HISTORY) Slog.v(TAG, "Screen off to: "
                         + Integer.toHexString(mHistoryCur.states));
@@ -5047,15 +5070,21 @@ public class BatteryStatsImpl extends BatteryStats {
                         + Display.stateToString(state));
                 addHistoryRecordLocked(elapsedRealtimeMs, uptimeMs);
             }
-            mExternalSync.scheduleCpuSyncDueToScreenStateChange(
-                    mOnBatteryTimeBase.isRunning(), mOnBatteryScreenOffTimeBase.isRunning());
-            if (isScreenOn(state)) {
+            int updateFlag = ExternalStatsSync.UPDATE_CPU;
+            if (mBatteryMeasuredEnergyStats != null && mBatteryMeasuredEnergyStats.hasSubsystem(
+                    MeasuredEnergyArray.SUBSYSTEM_DISPLAY)) {
+                updateFlag |= ExternalStatsSync.UPDATE_ENERGY;
+            }
+            mExternalSync.scheduleSyncDueToScreenStateChange(updateFlag,
+                    mOnBatteryTimeBase.isRunning(), mOnBatteryScreenOffTimeBase.isRunning(),
+                    mScreenState);
+            if (Display.isOnState(state)) {
                 updateTimeBasesLocked(mOnBatteryTimeBase.isRunning(), state,
                         uptimeMs * 1000, elapsedRealtimeMs * 1000);
                 // Fake a wake lock, so we consider the device waked as long as the screen is on.
                 noteStartWakeLocked(-1, -1, null, "screen", null, WAKE_TYPE_PARTIAL, false,
                         elapsedRealtimeMs, uptimeMs);
-            } else if (isScreenOn(oldState)) {
+            } else if (Display.isOnState(oldState)) {
                 noteStopWakeLocked(-1, -1, null, "screen", "screen", WAKE_TYPE_PARTIAL,
                         elapsedRealtimeMs, uptimeMs);
                 updateTimeBasesLocked(mOnBatteryTimeBase.isRunning(), state,
@@ -7037,6 +7066,26 @@ public class BatteryStatsImpl extends BatteryStats {
         } else {
             return 0;
         }
+    }
+
+    @Override
+    public long getScreenOnEnergy() {
+        if (mBatteryMeasuredEnergyStats == null || !mBatteryMeasuredEnergyStats.hasSubsystem(
+                MeasuredEnergyArray.SUBSYSTEM_DISPLAY)) {
+            return ENERGY_DATA_UNAVAILABLE;
+        }
+        return mBatteryMeasuredEnergyStats.getAccumulatedBucketEnergy(
+                MeasuredEnergyStats.ENERGY_BUCKET_SCREEN_ON);
+    }
+
+    @Override
+    public long getScreenDozeEnergy() {
+        if (mBatteryMeasuredEnergyStats == null || !mBatteryMeasuredEnergyStats.hasSubsystem(
+                MeasuredEnergyArray.SUBSYSTEM_DISPLAY)) {
+            return ENERGY_DATA_UNAVAILABLE;
+        }
+        return mBatteryMeasuredEnergyStats.getAccumulatedBucketEnergy(
+                MeasuredEnergyStats.ENERGY_BUCKET_SCREEN_DOZE);
     }
 
     @Override public long getStartClockTime() {
@@ -10457,12 +10506,12 @@ public class BatteryStatsImpl extends BatteryStats {
     }
 
     public BatteryStatsImpl(File systemDir, Handler handler, PlatformIdleStateCallback cb,
-            RailEnergyDataCallback railStatsCb, UserInfoProvider userInfoProvider) {
-        this(new SystemClocks(), systemDir, handler, cb, railStatsCb, userInfoProvider);
+            MeasuredEnergyRetriever energyStatsCb, UserInfoProvider userInfoProvider) {
+        this(new SystemClocks(), systemDir, handler, cb, energyStatsCb, userInfoProvider);
     }
 
     private BatteryStatsImpl(Clocks clocks, File systemDir, Handler handler,
-            PlatformIdleStateCallback cb, RailEnergyDataCallback railStatsCb,
+            PlatformIdleStateCallback cb, MeasuredEnergyRetriever energyStatsCb,
             UserInfoProvider userInfoProvider) {
         init(clocks);
 
@@ -10563,12 +10612,19 @@ public class BatteryStatsImpl extends BatteryStats {
         clearHistoryLocked();
         updateDailyDeadlineLocked();
         mPlatformIdleStateCallback = cb;
-        mRailEnergyDataCallback = railStatsCb;
+        mMeasuredEnergyRetriever = energyStatsCb;
         mUserInfoProvider = userInfoProvider;
 
         // Notify statsd that the system is initially not in doze.
         mDeviceIdleMode = DEVICE_IDLE_MODE_OFF;
         FrameworkStatsLog.write(FrameworkStatsLog.DEVICE_IDLE_MODE_STATE_CHANGED, mDeviceIdleMode);
+
+        final MeasuredEnergyArray energyStats = mMeasuredEnergyRetriever.getEnergyConsumptionData();
+        // If measured energy is not available, it is not supported and
+        // mBatteryMeasuredEnergyStats should be left null.
+        if (energyStats != null) {
+            mBatteryMeasuredEnergyStats = new MeasuredEnergyStats(energyStats, mScreenState);
+        }
     }
 
     @UnsupportedAppUsage
@@ -10588,7 +10644,7 @@ public class BatteryStatsImpl extends BatteryStats {
         mBatteryStatsHistory = new BatteryStatsHistory(this, mHistoryBuffer);
         readFromParcel(p);
         mPlatformIdleStateCallback = null;
-        mRailEnergyDataCallback = null;
+        mMeasuredEnergyRetriever = null;
     }
 
     public void setPowerProfileLocked(PowerProfile profile) {
@@ -11097,19 +11153,6 @@ public class BatteryStatsImpl extends BatteryStats {
         return mCharging;
     }
 
-    public boolean isScreenOn(int state) {
-        return state == Display.STATE_ON || state == Display.STATE_VR
-            || state == Display.STATE_ON_SUSPEND;
-    }
-
-    public boolean isScreenOff(int state) {
-        return state == Display.STATE_OFF;
-    }
-
-    public boolean isScreenDoze(int state) {
-        return state == Display.STATE_DOZE || state == Display.STATE_DOZE_SUSPEND;
-    }
-
     void initTimes(long uptimeUs, long realtimeUs) {
         mStartClockTimeMs = System.currentTimeMillis();
         mOnBatteryTimeBase.init(uptimeUs, realtimeUs);
@@ -11152,11 +11195,11 @@ public class BatteryStatsImpl extends BatteryStats {
         mOnBatteryTimeBase.reset(uptimeUs, realtimeUs);
         mOnBatteryScreenOffTimeBase.reset(uptimeUs, realtimeUs);
         if ((mHistoryCur.states&HistoryItem.STATE_BATTERY_PLUGGED_FLAG) == 0) {
-            if (isScreenOn(mScreenState)) {
+            if (Display.isOnState(mScreenState)) {
                 mDischargeScreenOnUnplugLevel = mHistoryCur.batteryLevel;
                 mDischargeScreenDozeUnplugLevel = 0;
                 mDischargeScreenOffUnplugLevel = 0;
-            } else if (isScreenDoze(mScreenState)) {
+            } else if (Display.isDozeState(mScreenState)) {
                 mDischargeScreenOnUnplugLevel = 0;
                 mDischargeScreenDozeUnplugLevel = mHistoryCur.batteryLevel;
                 mDischargeScreenOffUnplugLevel = 0;
@@ -11286,6 +11329,11 @@ public class BatteryStatsImpl extends BatteryStats {
 
         mTmpRailStats.reset();
 
+        if (mBatteryMeasuredEnergyStats != null) {
+            mBatteryMeasuredEnergyStats.reset();
+            mExternalSync.scheduleSync("reset", ExternalStatsSync.UPDATE_ENERGY);
+        }
+
         resetIfNotNull(mSystemServerCpuTimesUs, false, elapsedRealtimeUs);
         resetIfNotNull(mSystemServerThreadCpuTimesUs, false, elapsedRealtimeUs);
         resetIfNotNull(mBinderThreadCpuTimesUs, false, elapsedRealtimeUs);
@@ -11339,19 +11387,19 @@ public class BatteryStatsImpl extends BatteryStats {
     }
 
     private void updateOldDischargeScreenLevelLocked(int state) {
-        if (isScreenOn(state)) {
+        if (Display.isOnState(state)) {
             int diff = mDischargeScreenOnUnplugLevel - mDischargeCurrentLevel;
             if (diff > 0) {
                 mDischargeAmountScreenOn += diff;
                 mDischargeAmountScreenOnSinceCharge += diff;
             }
-        } else if (isScreenDoze(state)) {
+        } else if (Display.isDozeState(state)) {
             int diff = mDischargeScreenDozeUnplugLevel - mDischargeCurrentLevel;
             if (diff > 0) {
                 mDischargeAmountScreenDoze += diff;
                 mDischargeAmountScreenDozeSinceCharge += diff;
             }
-        } else if (isScreenOff(state)){
+        } else if (Display.isOffState(state)) {
             int diff = mDischargeScreenOffUnplugLevel - mDischargeCurrentLevel;
             if (diff > 0) {
                 mDischargeAmountScreenOff += diff;
@@ -11361,15 +11409,15 @@ public class BatteryStatsImpl extends BatteryStats {
     }
 
     private void updateNewDischargeScreenLevelLocked(int state) {
-        if (isScreenOn(state)) {
+        if (Display.isOnState(state)) {
             mDischargeScreenOnUnplugLevel = mDischargeCurrentLevel;
             mDischargeScreenOffUnplugLevel = 0;
             mDischargeScreenDozeUnplugLevel = 0;
-        } else if (isScreenDoze(state)){
+        } else if (Display.isDozeState(state)) {
             mDischargeScreenOnUnplugLevel = 0;
             mDischargeScreenDozeUnplugLevel = mDischargeCurrentLevel;
             mDischargeScreenOffUnplugLevel = 0;
-        } else if (isScreenOff(state)) {
+        } else if (Display.isOffState(state)) {
             mDischargeScreenOnUnplugLevel = 0;
             mDischargeScreenDozeUnplugLevel = 0;
             mDischargeScreenOffUnplugLevel = mDischargeCurrentLevel;
@@ -12163,10 +12211,25 @@ public class BatteryStatsImpl extends BatteryStats {
      * Read and record Rail Energy data.
      */
     public void updateRailStatsLocked() {
-        if (mRailEnergyDataCallback == null || !mTmpRailStats.isRailStatsAvailable()) {
+        if (mMeasuredEnergyRetriever == null || !mTmpRailStats.isRailStatsAvailable()) {
             return;
         }
-        mRailEnergyDataCallback.fillRailDataStats(mTmpRailStats);
+        mMeasuredEnergyRetriever.fillRailDataStats(mTmpRailStats);
+    }
+
+    /**
+     * Get energy consumed (in microjoules) by a set of subsystems from the {@link
+     * MeasuredEnergyRetriever}, if available.
+     *
+     * @return a SparseLongArray that maps consumer id to energy consumed. Returns null if data is
+     * unavailable.
+     */
+    @Nullable
+    public MeasuredEnergyArray getEnergyConsumptionDataLocked() {
+        if (mMeasuredEnergyRetriever == null) {
+            return null;
+        }
+        return mMeasuredEnergyRetriever.getEnergyConsumptionData();
     }
 
     /**
@@ -12424,6 +12487,21 @@ public class BatteryStatsImpl extends BatteryStats {
                     binderThreadTimeMs,
                     binderThreadTimeMs != 0
                             ? (double) binderThreadTimeMs * 100 / totalThreadTimeMs : 0));
+        }
+    }
+
+    /**
+     * Update energy consumption data with a new snapshot of energy data.
+     * Generally this should only be called from BatteryExternalStatsWorker.
+     *
+     * @param energyStats latest energy data to update with.
+     */
+    @GuardedBy("this")
+    public void updateMeasuredEnergyStatsLocked(@NonNull MeasuredEnergyArray energyStats,
+            int screenState) {
+        if (mBatteryMeasuredEnergyStats != null) {
+            mBatteryMeasuredEnergyStats.update(energyStats, screenState,
+                    mOnBatteryTimeBase.isRunning());
         }
     }
 
@@ -12919,11 +12997,11 @@ public class BatteryStatsImpl extends BatteryStats {
             }
             addHistoryRecordLocked(mSecRealtime, mSecUptime);
             mDischargeCurrentLevel = mDischargeUnplugLevel = level;
-            if (isScreenOn(screenState)) {
+            if (Display.isOnState(screenState)) {
                 mDischargeScreenOnUnplugLevel = level;
                 mDischargeScreenDozeUnplugLevel = 0;
                 mDischargeScreenOffUnplugLevel = 0;
-            } else if (isScreenDoze(screenState)) {
+            } else if (Display.isDozeState(screenState)) {
                 mDischargeScreenOnUnplugLevel = 0;
                 mDischargeScreenDozeUnplugLevel = level;
                 mDischargeScreenOffUnplugLevel = 0;
@@ -13079,7 +13157,7 @@ public class BatteryStatsImpl extends BatteryStats {
                 final long chargeDiff = mHistoryCur.batteryChargeUAh - chargeUAh;
                 mDischargeCounter.addCountLocked(chargeDiff);
                 mDischargeScreenOffCounter.addCountLocked(chargeDiff);
-                if (isScreenDoze(mScreenState)) {
+                if (Display.isDozeState(mScreenState)) {
                     mDischargeScreenDozeCounter.addCountLocked(chargeDiff);
                 }
                 if (mDeviceIdleMode == DEVICE_IDLE_MODE_LIGHT) {
@@ -13130,7 +13208,7 @@ public class BatteryStatsImpl extends BatteryStats {
                     final long chargeDiff = mHistoryCur.batteryChargeUAh - chargeUAh;
                     mDischargeCounter.addCountLocked(chargeDiff);
                     mDischargeScreenOffCounter.addCountLocked(chargeDiff);
-                    if (isScreenDoze(mScreenState)) {
+                    if (Display.isDozeState(mScreenState)) {
                         mDischargeScreenDozeCounter.addCountLocked(chargeDiff);
                     }
                     if (mDeviceIdleMode == DEVICE_IDLE_MODE_LIGHT) {
@@ -13584,7 +13662,7 @@ public class BatteryStatsImpl extends BatteryStats {
     public int getDischargeAmountScreenOn() {
         synchronized(this) {
             int val = mDischargeAmountScreenOn;
-            if (mOnBattery && isScreenOn(mScreenState)
+            if (mOnBattery && Display.isOnState(mScreenState)
                     && mDischargeCurrentLevel < mDischargeScreenOnUnplugLevel) {
                 val += mDischargeScreenOnUnplugLevel-mDischargeCurrentLevel;
             }
@@ -13596,7 +13674,7 @@ public class BatteryStatsImpl extends BatteryStats {
     public int getDischargeAmountScreenOnSinceCharge() {
         synchronized(this) {
             int val = mDischargeAmountScreenOnSinceCharge;
-            if (mOnBattery && isScreenOn(mScreenState)
+            if (mOnBattery && Display.isOnState(mScreenState)
                     && mDischargeCurrentLevel < mDischargeScreenOnUnplugLevel) {
                 val += mDischargeScreenOnUnplugLevel-mDischargeCurrentLevel;
             }
@@ -13609,7 +13687,7 @@ public class BatteryStatsImpl extends BatteryStats {
     public int getDischargeAmountScreenOff() {
         synchronized(this) {
             int val = mDischargeAmountScreenOff;
-            if (mOnBattery && isScreenOff(mScreenState)
+            if (mOnBattery && Display.isOffState(mScreenState)
                     && mDischargeCurrentLevel < mDischargeScreenOffUnplugLevel) {
                 val += mDischargeScreenOffUnplugLevel-mDischargeCurrentLevel;
             }
@@ -13622,7 +13700,7 @@ public class BatteryStatsImpl extends BatteryStats {
     public int getDischargeAmountScreenOffSinceCharge() {
         synchronized(this) {
             int val = mDischargeAmountScreenOffSinceCharge;
-            if (mOnBattery && isScreenOff(mScreenState)
+            if (mOnBattery && Display.isOffState(mScreenState)
                     && mDischargeCurrentLevel < mDischargeScreenOffUnplugLevel) {
                 val += mDischargeScreenOffUnplugLevel-mDischargeCurrentLevel;
             }
@@ -13635,7 +13713,7 @@ public class BatteryStatsImpl extends BatteryStats {
     public int getDischargeAmountScreenDoze() {
         synchronized(this) {
             int val = mDischargeAmountScreenDoze;
-            if (mOnBattery && isScreenDoze(mScreenState)
+            if (mOnBattery && Display.isDozeState(mScreenState)
                     && mDischargeCurrentLevel < mDischargeScreenDozeUnplugLevel) {
                 val += mDischargeScreenDozeUnplugLevel-mDischargeCurrentLevel;
             }
@@ -13647,7 +13725,7 @@ public class BatteryStatsImpl extends BatteryStats {
     public int getDischargeAmountScreenDozeSinceCharge() {
         synchronized(this) {
             int val = mDischargeAmountScreenDozeSinceCharge;
-            if (mOnBattery && isScreenDoze(mScreenState)
+            if (mOnBattery && Display.isDozeState(mScreenState)
                     && mDischargeCurrentLevel < mDischargeScreenDozeUnplugLevel) {
                 val += mDischargeScreenDozeUnplugLevel-mDischargeCurrentLevel;
             }
@@ -14129,6 +14207,19 @@ public class BatteryStatsImpl extends BatteryStats {
         }
     }
 
+    /**
+     * Dump measured energy stats
+     */
+    @GuardedBy("this")
+    public void dumpMeasuredEnergyStatsLocked(PrintWriter pw) {
+        if (mBatteryMeasuredEnergyStats == null) return;
+        final IndentingPrintWriter iPw = new IndentingPrintWriter(pw, "    ");
+        iPw.println("On battery measured energy stats:");
+        iPw.increaseIndent();
+        mBatteryMeasuredEnergyStats.dump(iPw);
+        iPw.decreaseIndent();
+    }
+
     final ReentrantLock mWriteLock = new ReentrantLock();
 
     public void writeAsyncLocked() {
@@ -14503,6 +14594,8 @@ public class BatteryStatsImpl extends BatteryStats {
         mNextMinDailyDeadlineMs = in.readLong();
         mNextMaxDailyDeadlineMs = in.readLong();
         mBatteryTimeToFullSeconds = in.readLong();
+
+        MeasuredEnergyStats.readSummaryFromParcel(mBatteryMeasuredEnergyStats, in);
 
         mStartCount++;
 
@@ -14996,6 +15089,8 @@ public class BatteryStatsImpl extends BatteryStats {
         out.writeLong(mNextMinDailyDeadlineMs);
         out.writeLong(mNextMaxDailyDeadlineMs);
         out.writeLong(mBatteryTimeToFullSeconds);
+
+        MeasuredEnergyStats.writeSummaryToParcel(mBatteryMeasuredEnergyStats, out);
 
         mScreenOnTimer.writeSummaryFromParcelLocked(out, NOWREAL_SYS);
         mScreenDozeTimer.writeSummaryFromParcelLocked(out, NOWREAL_SYS);
@@ -15581,6 +15676,10 @@ public class BatteryStatsImpl extends BatteryStats {
         mLastWriteTimeMs = in.readLong();
         mBatteryTimeToFullSeconds = in.readLong();
 
+        if (in.readInt() != 0) {
+            mBatteryMeasuredEnergyStats = new MeasuredEnergyStats(in);
+        }
+
         mRpmStats.clear();
         int NRPMS = in.readInt();
         for (int irpm = 0; irpm < NRPMS; irpm++) {
@@ -15782,6 +15881,13 @@ public class BatteryStatsImpl extends BatteryStats {
         mDischargeDeepDozeCounter.writeToParcel(out);
         out.writeLong(mLastWriteTimeMs);
         out.writeLong(mBatteryTimeToFullSeconds);
+
+        if (mBatteryMeasuredEnergyStats != null) {
+            out.writeInt(1);
+            mBatteryMeasuredEnergyStats.writeToParcel(out);
+        } else {
+            out.writeInt(0);
+        }
 
         out.writeInt(mRpmStats.size());
         for (Map.Entry<String, SamplingTimer> ent : mRpmStats.entrySet()) {
@@ -16036,5 +16142,8 @@ public class BatteryStatsImpl extends BatteryStats {
 
         pw.println();
         dumpConstantsLocked(pw);
+
+        pw.println();
+        dumpMeasuredEnergyStatsLocked(pw);
     }
 }
