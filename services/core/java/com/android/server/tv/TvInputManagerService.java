@@ -134,12 +134,15 @@ public final class TvInputManagerService extends SystemService {
     private final Object mLock = new Object();
 
     // ID of the current user.
+    @GuardedBy("mLock")
     private int mCurrentUserId = UserHandle.USER_SYSTEM;
 
     // A map from user id to UserState.
+    @GuardedBy("mLock")
     private final SparseArray<UserState> mUserStates = new SparseArray<>();
 
     // A map from session id to session state saved in userstate
+    @GuardedBy("mLock")
     private final Map<String, SessionState> mSessionIdToSessionStateMap = new HashMap<>();
 
     private final WatchLogHandler mWatchLogHandler;
@@ -280,7 +283,7 @@ public final class TvInputManagerService extends SystemService {
         return pm.checkPermission(android.Manifest.permission.TV_INPUT_HARDWARE,
                 component.getPackageName()) == PackageManager.PERMISSION_GRANTED;
     }
-
+    @GuardedBy("mLock")
     private void buildTvInputListLocked(int userId, String[] updatedPackages) {
         UserState userState = getOrCreateUserStateLocked(userId);
         userState.packageSet.clear();
@@ -368,6 +371,7 @@ public final class TvInputManagerService extends SystemService {
         userState.inputMap = inputMap;
     }
 
+    @GuardedBy("mLock")
     private void buildTvContentRatingSystemListLocked(int userId) {
         UserState userState = getOrCreateUserStateLocked(userId);
         userState.contentRatingSystemList.clear();
@@ -444,6 +448,7 @@ public final class TvInputManagerService extends SystemService {
         }
     }
 
+    @GuardedBy("mLock")
     private void clearSessionAndNotifyClientLocked(SessionState state) {
         if (state.client != null) {
             try {
@@ -528,6 +533,7 @@ public final class TvInputManagerService extends SystemService {
         return context.getContentResolver();
     }
 
+    @GuardedBy("mLock")
     private UserState getOrCreateUserStateLocked(int userId) {
         UserState userState = mUserStates.get(userId);
         if (userState == null) {
@@ -537,6 +543,7 @@ public final class TvInputManagerService extends SystemService {
         return userState;
     }
 
+    @GuardedBy("mLock")
     private ServiceState getServiceStateLocked(ComponentName component, int userId) {
         UserState userState = getOrCreateUserStateLocked(userId);
         ServiceState serviceState = userState.serviceStateMap.get(component);
@@ -546,12 +553,13 @@ public final class TvInputManagerService extends SystemService {
         }
         return serviceState;
     }
-
+    @GuardedBy("mLock")
     private SessionState getSessionStateLocked(IBinder sessionToken, int callingUid, int userId) {
         UserState userState = getOrCreateUserStateLocked(userId);
         return getSessionStateLocked(sessionToken, callingUid, userState);
     }
 
+    @GuardedBy("mLock")
     private SessionState getSessionStateLocked(IBinder sessionToken,
             int callingUid, UserState userState) {
         SessionState sessionState = userState.sessionStateMap.get(sessionToken);
@@ -566,10 +574,12 @@ public final class TvInputManagerService extends SystemService {
         return sessionState;
     }
 
+    @GuardedBy("mLock")
     private ITvInputSession getSessionLocked(IBinder sessionToken, int callingUid, int userId) {
         return getSessionLocked(getSessionStateLocked(sessionToken, callingUid, userId));
     }
 
+    @GuardedBy("mLock")
     private ITvInputSession getSessionLocked(SessionState sessionState) {
         ITvInputSession session = sessionState.session;
         if (session == null) {
@@ -585,6 +595,7 @@ public final class TvInputManagerService extends SystemService {
                 false, methodName, null);
     }
 
+    @GuardedBy("mLock")
     private void updateServiceConnectionLocked(ComponentName component, int userId) {
         UserState userState = getOrCreateUserStateLocked(userId);
         ServiceState serviceState = userState.serviceStateMap.get(component);
@@ -638,6 +649,7 @@ public final class TvInputManagerService extends SystemService {
         }
     }
 
+    @GuardedBy("mLock")
     private void abortPendingCreateSessionRequestsLocked(ServiceState serviceState,
             String inputId, int userId) {
         // Let clients know the create session requests are failed.
@@ -658,6 +670,7 @@ public final class TvInputManagerService extends SystemService {
         updateServiceConnectionLocked(serviceState.component, userId);
     }
 
+    @GuardedBy("mLock")
     private boolean createSessionInternalLocked(ITvInputService service, IBinder sessionToken,
             int userId) {
         UserState userState = getOrCreateUserStateLocked(userId);
@@ -691,6 +704,7 @@ public final class TvInputManagerService extends SystemService {
         return created;
     }
 
+    @GuardedBy("mLock")
     private void sendSessionTokenToClientLocked(ITvInputClient client, String inputId,
             IBinder sessionToken, InputChannel channel, int seq) {
         try {
@@ -700,6 +714,7 @@ public final class TvInputManagerService extends SystemService {
         }
     }
 
+    @GuardedBy("mLock")
     private void releaseSessionLocked(IBinder sessionToken, int callingUid, int userId) {
         SessionState sessionState = null;
         try {
@@ -725,6 +740,7 @@ public final class TvInputManagerService extends SystemService {
         removeSessionStateLocked(sessionToken, userId);
     }
 
+    @GuardedBy("mLock")
     private void removeSessionStateLocked(IBinder sessionToken, int userId) {
         UserState userState = getOrCreateUserStateLocked(userId);
         if (sessionToken == userState.mainSessionToken) {
@@ -767,6 +783,7 @@ public final class TvInputManagerService extends SystemService {
         mWatchLogHandler.obtainMessage(WatchLogHandler.MSG_LOG_WATCH_END, args).sendToTarget();
     }
 
+    @GuardedBy("mLock")
     private void setMainLocked(IBinder sessionToken, boolean isMain, int callingUid, int userId) {
         try {
             SessionState sessionState = getSessionStateLocked(sessionToken, callingUid, userId);
@@ -785,6 +802,7 @@ public final class TvInputManagerService extends SystemService {
         }
     }
 
+    @GuardedBy("mLock")
     private void notifyInputAddedLocked(UserState userState, String inputId) {
         if (DEBUG) {
             Slog.d(TAG, "notifyInputAddedLocked(inputId=" + inputId + ")");
@@ -800,6 +818,7 @@ public final class TvInputManagerService extends SystemService {
         userState.mCallbacks.finishBroadcast();
     }
 
+    @GuardedBy("mLock")
     private void notifyInputRemovedLocked(UserState userState, String inputId) {
         if (DEBUG) {
             Slog.d(TAG, "notifyInputRemovedLocked(inputId=" + inputId + ")");
@@ -815,6 +834,7 @@ public final class TvInputManagerService extends SystemService {
         userState.mCallbacks.finishBroadcast();
     }
 
+    @GuardedBy("mLock")
     private void notifyInputUpdatedLocked(UserState userState, String inputId) {
         if (DEBUG) {
             Slog.d(TAG, "notifyInputUpdatedLocked(inputId=" + inputId + ")");
@@ -830,6 +850,7 @@ public final class TvInputManagerService extends SystemService {
         userState.mCallbacks.finishBroadcast();
     }
 
+    @GuardedBy("mLock")
     private void notifyInputStateChangedLocked(UserState userState, String inputId,
             int state, ITvInputManagerCallback targetCallback) {
         if (DEBUG) {
@@ -855,6 +876,7 @@ public final class TvInputManagerService extends SystemService {
         }
     }
 
+    @GuardedBy("mLock")
     private void notifyCurrentChannelInfosUpdatedLocked(UserState userState) {
         if (DEBUG) {
             Slog.d(TAG, "notifyCurrentChannelInfosUpdatedLocked");
@@ -874,6 +896,7 @@ public final class TvInputManagerService extends SystemService {
         userState.mCallbacks.finishBroadcast();
     }
 
+    @GuardedBy("mLock")
     private void updateTvInputInfoLocked(UserState userState, TvInputInfo inputInfo) {
         if (DEBUG) {
             Slog.d(TAG, "updateTvInputInfoLocked(inputInfo=" + inputInfo + ")");
@@ -897,6 +920,7 @@ public final class TvInputManagerService extends SystemService {
         userState.mCallbacks.finishBroadcast();
     }
 
+    @GuardedBy("mLock")
     private void setStateLocked(String inputId, int state, int userId) {
         UserState userState = getOrCreateUserStateLocked(userId);
         TvInputState inputState = userState.inputMap.get(inputId);
@@ -2138,6 +2162,7 @@ public final class TvInputManagerService extends SystemService {
             mTvInputHardwareManager.onDeviceUnavailable(deviceId);
         }
 
+        @GuardedBy("mLock")
         private int getClientPidLocked(String sessionId)
                 throws IllegalStateException {
             if (mSessionIdToSessionStateMap.get(sessionId) == null) {
@@ -2277,6 +2302,7 @@ public final class TvInputManagerService extends SystemService {
         }
     }
 
+    @GuardedBy("mLock")
     private List<TunedInfo> getCurrentTunedInfosInternalLocked(
             UserState userState, int callingPid, int callingUid) {
         List<TunedInfo> channelInfos = new ArrayList<>();
@@ -2375,9 +2401,9 @@ public final class TvInputManagerService extends SystemService {
         // service.
         private final PersistentDataStore persistentDataStore;
 
-        @GuardedBy("mLock")
+        @GuardedBy("TvInputManagerService.this.mLock")
         private final Map<Integer, Integer> mAppTagMap = new HashMap<>();
-        @GuardedBy("mLock")
+        @GuardedBy("TvInputManagerService.this.mLock")
         private int mNextAppTag = 1;
 
         private UserState(Context context, int userId) {
@@ -2625,6 +2651,7 @@ public final class TvInputManagerService extends SystemService {
             }
         }
 
+        @GuardedBy("mLock")
         private void addHardwareInputLocked(TvInputInfo inputInfo) {
             ServiceState serviceState = getServiceStateLocked(mComponent, mUserId);
             serviceState.hardwareInputMap.put(inputInfo.getId(), inputInfo);
@@ -2694,6 +2721,7 @@ public final class TvInputManagerService extends SystemService {
             }
         }
 
+        @GuardedBy("mLock")
         private boolean addSessionTokenToClientStateLocked(ITvInputSession session) {
             try {
                 session.asBinder().linkToDeath(mSessionState, 0);
