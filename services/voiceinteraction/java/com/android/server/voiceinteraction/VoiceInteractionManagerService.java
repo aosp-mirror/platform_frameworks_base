@@ -257,12 +257,13 @@ public class VoiceInteractionManagerService extends SystemService {
 
         @Override
         public @NonNull IVoiceInteractionSoundTriggerSession createSoundTriggerSessionAsOriginator(
-                @NonNull Identity originatorIdentity) {
+                @NonNull Identity originatorIdentity, IBinder client) {
             Objects.requireNonNull(originatorIdentity);
             try (SafeCloseable ignored = PermissionUtil.establishIdentityDirect(
                     originatorIdentity)) {
                 SoundTriggerSession session = new SoundTriggerSession(
-                        mSoundTriggerInternal.attachAsOriginator(IdentityContext.getNonNull()));
+                        mSoundTriggerInternal.attachAsOriginator(IdentityContext.getNonNull(),
+                                client));
                 synchronized (mSessions) {
                     mSessions.add(new WeakReference<>(session));
                 }

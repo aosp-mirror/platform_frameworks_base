@@ -1140,6 +1140,25 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
     }
 
     /**
+     * Stops and unloads all models. This is intended as a clean-up call with the expectation that
+     * this instance is not used after.
+     * @hide
+     */
+    public void detach() {
+        synchronized (mLock) {
+            for (ModelData model : mModelDataMap.values()) {
+                forceStopAndUnloadModelLocked(model, null);
+            }
+            mModelDataMap.clear();
+            internalClearGlobalStateLocked();
+            if (mModule != null) {
+                mModule.detach();
+                mModule = null;
+            }
+        }
+    }
+
+    /**
      * Stops and unloads a sound model, and removes any reference to the model if successful.
      *
      * @param modelData The model data to remove.
@@ -1170,7 +1189,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
         }
         if (modelData.isModelStarted()) {
             Slog.d(TAG, "Stopping previously started dangling model " + modelData.getHandle());
-            if (mModule.stopRecognition(modelData.getHandle()) != STATUS_OK) {
+            if (mModule.stopRecognition(modelData.getHandle()) == STATUS_OK) {
                 modelData.setStopped();
                 modelData.setRequested(false);
             } else {

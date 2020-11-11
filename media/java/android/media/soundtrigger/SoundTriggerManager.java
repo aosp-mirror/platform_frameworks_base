@@ -41,6 +41,7 @@ import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.ParcelUuid;
 import android.os.RemoteException;
 import android.provider.Settings;
@@ -69,6 +70,7 @@ public final class SoundTriggerManager {
 
     private final Context mContext;
     private final ISoundTriggerSession mSoundTriggerSession;
+    private final IBinder mBinderToken = new Binder();
 
     // Stores a mapping from the sound model UUID to the SoundTriggerInstance created by
     // the createSoundTriggerDetector() call.
@@ -90,7 +92,8 @@ public final class SoundTriggerManager {
             originatorIdentity.packageName = ActivityThread.currentOpPackageName();
 
             try (SafeCloseable ignored = ClearCallingIdentityContext.create()) {
-                mSoundTriggerSession = soundTriggerService.attachAsOriginator(originatorIdentity);
+                mSoundTriggerSession = soundTriggerService.attachAsOriginator(originatorIdentity,
+                        mBinderToken);
             }
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
