@@ -1718,7 +1718,7 @@ public class DisplayPolicy {
 
         for (int i = mScreenDecorWindows.size() - 1; i >= 0; --i) {
             final WindowState w = mScreenDecorWindows.valueAt(i);
-            if (w.getDisplayId() != displayId || !w.isVisibleLw()) {
+            if (w.getDisplayId() != displayId || !w.isVisible()) {
                 // Skip if not on the same display or not visible.
                 continue;
             }
@@ -1824,7 +1824,7 @@ public class DisplayPolicy {
         boolean statusBarTranslucent = (appearance & APPEARANCE_OPAQUE_STATUS_BARS) == 0;
 
         // If the status bar is hidden, we don't want to cause windows behind it to scroll.
-        if (mStatusBar.isVisibleLw() && !statusBarTransient) {
+        if (mStatusBar.isVisible() && !statusBarTransient) {
             // Status bar may go away, so the screen area it occupies is available to apps but just
             // covering them when the status bar is visible.
             final Rect dockFrame = displayFrames.mDock;
@@ -2143,10 +2143,10 @@ public class DisplayPolicy {
         win.computeFrame(displayFrames);
         // Dock windows carve out the bottom of the screen, so normal windows
         // can't appear underneath them.
-        if (type == TYPE_INPUT_METHOD && win.isVisibleLw() && !win.mGivenInsetsPending) {
+        if (type == TYPE_INPUT_METHOD && win.isVisible() && !win.mGivenInsetsPending) {
             offsetInputMethodWindowLw(win, displayFrames);
         }
-        if (type == TYPE_VOICE_INTERACTION && win.isVisibleLw() && !win.mGivenInsetsPending) {
+        if (type == TYPE_VOICE_INTERACTION && win.isVisible() && !win.mGivenInsetsPending) {
             offsetVoiceInputWindowLw(win, displayFrames);
         }
     }
@@ -2219,7 +2219,7 @@ public class DisplayPolicy {
             WindowState attached, WindowState imeTarget) {
         final boolean affectsSystemUi = win.canAffectSystemUiFlags();
         if (DEBUG_LAYOUT) Slog.i(TAG, "Win " + win + ": affectsSystemUi=" + affectsSystemUi);
-        mService.mPolicy.applyKeyguardPolicyLw(win, imeTarget);
+        applyKeyguardPolicy(win, imeTarget);
         final int fl = attrs.flags;
         if (mTopFullscreenOpaqueWindowState == null && affectsSystemUi
                 && attrs.type == TYPE_INPUT_METHOD) {
@@ -2240,7 +2240,7 @@ public class DisplayPolicy {
             if (win.isDreamWindow()) {
                 // If the lockscreen was showing when the dream started then wait
                 // for the dream to draw before hiding the lockscreen.
-                if (!mDreamingLockscreen || (win.isVisibleLw() && win.hasDrawn())) {
+                if (!mDreamingLockscreen || (win.isVisible() && win.hasDrawn())) {
                     mShowingDream = true;
                     appWindow = true;
                 }
@@ -2384,6 +2384,55 @@ public class DisplayPolicy {
 
         mService.mPolicy.setAllowLockscreenWhenOn(getDisplayId(), mAllowLockscreenWhenOn);
         return changes;
+    }
+
+    /**
+     * Applies the keyguard policy to a specific window.
+     *
+     * @param win The window to apply the keyguard policy.
+     * @param imeTarget The current IME target window.
+     */
+    private void applyKeyguardPolicy(WindowState win, WindowState imeTarget) {
+        if (mService.mPolicy.canBeHiddenByKeyguardLw(win)) {
+            if (shouldBeHiddenByKeyguard(win, imeTarget)) {
+                win.hide(false /* doAnimation */, true /* requestAnim */);
+            } else {
+                win.show(false /* doAnimation */, true /* requestAnim */);
+            }
+        }
+    }
+
+    private boolean shouldBeHiddenByKeyguard(WindowState win, WindowState imeTarget) {
+        // If AOD is showing, the IME should be hidden. However, sometimes the AOD is considered
+        // hidden because it's in the process of hiding, but it's still being shown on screen.
+        // In that case, we want to continue hiding the IME until the windows have completed
+        // drawing. This way, we know that the IME can be safely shown since the other windows are
+        // now shown.
+        final boolean hideIme = win.mIsImWindow
+                && (mService.mAtmService.mKeyguardController.isAodShowing()
+                        || (mDisplayContent.isDefaultDisplay && !mWindowManagerDrawComplete));
+        if (hideIme) {
+            return true;
+        }
+
+        if (!mDisplayContent.isDefaultDisplay || !isKeyguardShowing()) {
+            return false;
+        }
+
+        // Show IME over the keyguard if the target allows it.
+        final boolean showImeOverKeyguard = imeTarget != null && imeTarget.isVisible()
+                && win.mIsImWindow && (imeTarget.canShowWhenLocked()
+                        || !mService.mPolicy.canBeHiddenByKeyguardLw(imeTarget));
+        if (showImeOverKeyguard) {
+            return false;
+        }
+
+        // Show SHOW_WHEN_LOCKED windows if keyguard is occluded.
+        final boolean allowShowWhenLocked = isKeyguardOccluded()
+                // Show error dialogs over apps that are shown on keyguard.
+                && (win.canShowWhenLocked()
+                        || (win.mAttrs.privateFlags & LayoutParams.PRIVATE_FLAG_SYSTEM_ERROR) != 0);
+        return !allowShowWhenLocked;
     }
 
     /**
@@ -3025,7 +3074,7 @@ public class DisplayPolicy {
         // If the IME window is visible and FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS is set, then IME
         // window can be navigation color window.
         final boolean imeWindowCanNavColorWindow = imeWindow != null
-                && imeWindow.isVisibleLw()
+                && imeWindow.isVisible()
                 && navBarPosition == NAV_BAR_BOTTOM
                 && (imeWindow.mAttrs.flags
                         & WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) != 0;
@@ -3294,8 +3343,8 @@ public class DisplayPolicy {
     public void takeScreenshot(int screenshotType, int source) {
         if (mScreenshotHelper != null) {
             mScreenshotHelper.takeScreenshot(screenshotType,
-                    getStatusBar() != null && getStatusBar().isVisibleLw(),
-                    getNavigationBar() != null && getNavigationBar().isVisibleLw(),
+                    getStatusBar() != null && getStatusBar().isVisible(),
+                    getNavigationBar() != null && getNavigationBar().isVisible(),
                     source, mHandler, null /* completionConsumer */);
         }
     }
@@ -3464,8 +3513,8 @@ public class DisplayPolicy {
 
     @VisibleForTesting
     static boolean isOverlappingWithNavBar(WindowState targetWindow, WindowState navBarWindow) {
-        if (navBarWindow == null || !navBarWindow.isVisibleLw()
-                || targetWindow.mActivityRecord == null || !targetWindow.isVisibleLw()) {
+        if (navBarWindow == null || !navBarWindow.isVisible()
+                || targetWindow.mActivityRecord == null || !targetWindow.isVisible()) {
             return false;
         }
 

@@ -760,7 +760,7 @@ public class AppTransitionController {
                 ProtoLog.v(WM_DEBUG_APP_TRANSITIONS,
                         "New transit away from wallpaper: %s",
                                 AppTransition.appTransitionOldToString(transit));
-            } else if (wallpaperTarget != null && wallpaperTarget.isVisibleLw()
+            } else if (wallpaperTarget != null && wallpaperTarget.isVisible()
                     && openingApps.contains(wallpaperTarget.mActivityRecord)
                     && topOpeningApp == wallpaperTarget.mActivityRecord
                     && transit != TRANSIT_OLD_TRANSLUCENT_ACTIVITY_CLOSE) {

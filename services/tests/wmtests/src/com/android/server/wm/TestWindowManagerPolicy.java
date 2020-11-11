@@ -173,10 +173,6 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     }
 
     @Override
-    public void applyKeyguardPolicyLw(WindowState win, WindowState imeTarget) {
-    }
-
-    @Override
     public void setAllowLockscreenWhenOn(int displayId, boolean allow) {
     }
 
@@ -394,10 +390,5 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     @Override
     public boolean canDismissBootAnimation() {
         return true;
-    }
-
-    @Override
-    public boolean setAodShowing(boolean aodShowing) {
-        return false;
     }
 }

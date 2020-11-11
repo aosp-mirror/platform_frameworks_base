@@ -178,9 +178,9 @@ public class WindowStateTests extends WindowTestsBase {
         final WindowState overlayWindow = spy(createWindow(null, TYPE_APPLICATION_OVERLAY,
                 "overlayWindow"));
         overlayWindow.setHiddenWhileSuspended(true);
-        verify(overlayWindow).hideLw(true, true);
+        verify(overlayWindow).hide(true /* doAnimation */, true /* requestAnim */);
         overlayWindow.setHiddenWhileSuspended(false);
-        verify(overlayWindow).showLw(true, true);
+        verify(overlayWindow).show(true /* doAnimation */, true /* requestAnim */);
     }
 
     @Test
@@ -205,7 +205,7 @@ public class WindowStateTests extends WindowTestsBase {
         final WindowState window = createWindow(null, TYPE_APPLICATION, "window");
         window.setHasSurface(true);
         assertTrue(window.isOnScreen());
-        window.hideLw(false /* doAnimation */);
+        window.hide(false /* doAnimation */, false /* requestAnim */);
         assertFalse(window.isOnScreen());
     }
 
@@ -242,8 +242,8 @@ public class WindowStateTests extends WindowTestsBase {
         appWindow.mActivityRecord.setWindowingMode(initialMode);
 
         // Make windows invisible
-        appWindow.hideLw(false /* doAnimation */);
-        imeWindow.hideLw(false /* doAnimation */);
+        appWindow.hide(false /* doAnimation */, false /* requestAnim */);
+        imeWindow.hide(false /* doAnimation */, false /* requestAnim */);
 
         // Invisible window can't be IME targets even if they have the right flags.
         assertFalse(appWindow.canBeImeTarget());
