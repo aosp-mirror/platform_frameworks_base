@@ -38,6 +38,7 @@ import android.content.ClipDescription;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.PixelFormat;
+import android.util.Slog;
 import android.util.SparseArray;
 import android.view.DragEvent;
 import android.view.LayoutInflater;
@@ -70,10 +71,6 @@ public class DragAndDropController implements DisplayController.OnDisplaysChange
 
     private final SparseArray<PerDisplay> mDisplayDropTargets = new SparseArray<>();
     private final SurfaceControl.Transaction mTransaction = new SurfaceControl.Transaction();
-
-    // A count of the number of active drags in progress to ensure that we only hide the window when
-    // all the drag animations have completed
-    private int mActiveDragCount;
 
     public DragAndDropController(Context context, DisplayController displayController) {
         mContext = context;
@@ -160,7 +157,11 @@ public class DragAndDropController implements DisplayController.OnDisplaysChange
 
         switch (event.getAction()) {
             case ACTION_DRAG_STARTED:
-                mActiveDragCount++;
+                if (pd.activeDragCount != 0) {
+                    Slog.w(TAG, "Unexpected drag start during an active drag");
+                    return false;
+                }
+                pd.activeDragCount++;
                 pd.dragLayout.prepare(mDisplayController.getDisplayLayout(displayId),
                         event.getClipData());
                 setDropTargetWindowVisibility(pd, View.VISIBLE);
@@ -184,9 +185,9 @@ public class DragAndDropController implements DisplayController.OnDisplaysChange
                 // TODO(b/169894807): Ensure sure it's not possible to get ENDED without DROP
                 // or EXITED
                 if (!pd.dragLayout.hasDropped()) {
-                    mActiveDragCount--;
+                    pd.activeDragCount--;
                     pd.dragLayout.hide(event, () -> {
-                        if (mActiveDragCount == 0) {
+                        if (pd.activeDragCount == 0) {
                             // Hide the window if another drag hasn't been started while animating
                             // the drag-end
                             setDropTargetWindowVisibility(pd, View.INVISIBLE);
@@ -203,9 +204,9 @@ public class DragAndDropController implements DisplayController.OnDisplaysChange
      */
     private boolean handleDrop(DragEvent event, PerDisplay pd) {
         final SurfaceControl dragSurface = event.getDragSurface();
-        mActiveDragCount--;
+        pd.activeDragCount--;
         return pd.dragLayout.drop(event, dragSurface, () -> {
-            if (mActiveDragCount == 0) {
+            if (pd.activeDragCount == 0) {
                 // Hide the window if another drag hasn't been started while animating the drop
                 setDropTargetWindowVisibility(pd, View.INVISIBLE);
             }
@@ -245,6 +246,9 @@ public class DragAndDropController implements DisplayController.OnDisplaysChange
         final DragLayout dragLayout;
 
         boolean isHandlingDrag;
+        // A count of the number of active drags in progress to ensure that we only hide the window
+        // when all the drag animations have completed
+        int activeDragCount;
 
         PerDisplay(int dispId, Context c, WindowManager w, FrameLayout rv, DragLayout dl) {
             displayId = dispId;
