@@ -2932,8 +2932,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         synchronized (getLockObject()) {
             final long now = System.currentTimeMillis();
 
-            List<ActiveAdmin> admins = getActiveAdminsForLockscreenPoliciesLocked(
-                    userHandle, /* parent */ false);
+            List<ActiveAdmin> admins = getActiveAdminsForLockscreenPoliciesLocked(userHandle);
             final int N = admins.size();
             for (int i = 0; i < N; i++) {
                 ActiveAdmin admin = admins.get(i);
@@ -3503,8 +3502,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             }
 
             // Return the strictest policy across all participating admins.
-            List<ActiveAdmin> admins =
-                    getActiveAdminsForLockscreenPoliciesLocked(userHandle, parent);
+            List<ActiveAdmin> admins = getActiveAdminsForLockscreenPoliciesLocked(
+                    getProfileParentUserIfRequested(userHandle, parent));
             final int N = admins.size();
             for (int i = 0; i < N; i++) {
                 ActiveAdmin admin = admins.get(i);
@@ -3516,16 +3515,13 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
     }
 
-    private List<ActiveAdmin> getActiveAdminsForLockscreenPoliciesLocked(
-            int userHandle, boolean parent) {
-        if (!parent && isSeparateProfileChallengeEnabled(userHandle)) {
+    private List<ActiveAdmin> getActiveAdminsForLockscreenPoliciesLocked(int userHandle) {
+        if (isSeparateProfileChallengeEnabled(userHandle)) {
             // If this user has a separate challenge, only return its restrictions.
             return getUserDataUnchecked(userHandle).mAdminList;
         }
-        // Either parent == true, or isSeparateProfileChallengeEnabled == false
-        // If parent is true, query the parent user of userHandle by definition,
-        // If isSeparateProfileChallengeEnabled is false, userHandle points to a managed profile
-        // with unified challenge so also need to query the parent user who owns the credential.
+        // If isSeparateProfileChallengeEnabled is false and userHandle points to a managed profile
+        // we need to query the parent user who owns the credential.
         return getActiveAdminsForUserAndItsManagedProfilesLocked(getProfileParentId(userHandle),
                 (user) -> !mLockPatternUtils.isSeparateProfileChallengeEnabled(user.id));
     }
@@ -3719,8 +3715,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             }
 
             // Return the strictest policy across all participating admins.
-            List<ActiveAdmin> admins =
-                    getActiveAdminsForLockscreenPoliciesLocked(userHandle, parent);
+            List<ActiveAdmin> admins = getActiveAdminsForLockscreenPoliciesLocked(
+                    getProfileParentUserIfRequested(userHandle, parent));
             final int N = admins.size();
             for (int i = 0; i < N; i++) {
                 ActiveAdmin admin = admins.get(i);
@@ -3837,7 +3833,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
 
         // Return the strictest policy across all participating admins.
-        List<ActiveAdmin> admins = getActiveAdminsForLockscreenPoliciesLocked(userHandle, parent);
+        List<ActiveAdmin> admins = getActiveAdminsForLockscreenPoliciesLocked(
+                getProfileParentUserIfRequested(userHandle, parent));
         final int N = admins.size();
         for (int i = 0; i < N; i++) {
             ActiveAdmin admin = admins.get(i);
@@ -4076,8 +4073,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             }
 
             int maxValue = 0;
-            final List<ActiveAdmin> admins =
-                    getActiveAdminsForLockscreenPoliciesLocked(userHandle, parent);
+            final List<ActiveAdmin> admins = getActiveAdminsForLockscreenPoliciesLocked(
+                    getProfileParentUserIfRequested(userHandle, parent));
             final int N = admins.size();
             for (int i = 0; i < N; i++) {
                 final ActiveAdmin admin = admins.get(i);
@@ -4098,6 +4095,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
      */
     @Override
     public PasswordMetrics getPasswordMinimumMetrics(@UserIdInt int userHandle) {
+        final CallerIdentity caller = getCallerIdentity();
+        Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(caller, userHandle));
         return getPasswordMinimumMetrics(userHandle, false /* parent */);
     }
 
@@ -4110,13 +4109,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
         Preconditions.checkArgumentNonnegative(userHandle, "Invalid userId");
 
-        final CallerIdentity caller = getCallerIdentity();
-        Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(caller, userHandle));
-
         ArrayList<PasswordMetrics> adminMetrics = new ArrayList<>();
         synchronized (getLockObject()) {
-            List<ActiveAdmin> admins =
-                    getActiveAdminsForLockscreenPoliciesLocked(userHandle, parent);
+            List<ActiveAdmin> admins = getActiveAdminsForLockscreenPoliciesLocked(
+                    getProfileParentUserIfRequested(userHandle, parent));
             for (ActiveAdmin admin : admins) {
                 adminMetrics.add(admin.mPasswordPolicy.getMinMetrics());
             }
@@ -4142,8 +4138,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             int credentialOwner = getCredentialOwner(userHandle, parent);
             DevicePolicyData policy = getUserDataUnchecked(credentialOwner);
             PasswordMetrics metrics = mLockSettingsInternal.getUserPasswordMetrics(credentialOwner);
+            final int userToCheck = getProfileParentUserIfRequested(userHandle, parent);
             boolean activePasswordSufficientForUserLocked = isActivePasswordSufficientForUserLocked(
-                    policy.mPasswordValidAtLastCheckpoint, metrics, userHandle, parent);
+                    policy.mPasswordValidAtLastCheckpoint, metrics, userToCheck);
             return activePasswordSufficientForUserLocked;
         }
     }
@@ -4182,7 +4179,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             DevicePolicyData policy = getUserDataUnchecked(credentialOwner);
             PasswordMetrics metrics = mLockSettingsInternal.getUserPasswordMetrics(credentialOwner);
             return isActivePasswordSufficientForUserLocked(
-                    policy.mPasswordValidAtLastCheckpoint, metrics, targetUser, false);
+                    policy.mPasswordValidAtLastCheckpoint, metrics, targetUser);
         }
     }
 
@@ -4219,7 +4216,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     private boolean isActivePasswordSufficientForUserLocked(
             boolean passwordValidAtLastCheckpoint, @Nullable PasswordMetrics metrics,
-            int userHandle, boolean parent) {
+            int userHandle) {
         if (!mInjector.storageManagerIsFileBasedEncryptionEnabled() && (metrics == null)) {
             // Before user enters their password for the first time after a reboot, return the
             // value of this flag, which tells us whether the password was valid the last time
@@ -4236,7 +4233,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             throw new IllegalStateException("isActivePasswordSufficient called on FBE-locked user");
         }
 
-        return isPasswordSufficientForUserWithoutCheckpointLocked(metrics, userHandle, parent);
+        return isPasswordSufficientForUserWithoutCheckpointLocked(metrics, userHandle, false);
     }
 
     /**
@@ -4382,7 +4379,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         ActiveAdmin strictestAdmin = null;
 
         // Return the strictest policy across all participating admins.
-        List<ActiveAdmin> admins = getActiveAdminsForLockscreenPoliciesLocked(userHandle, parent);
+        List<ActiveAdmin> admins = getActiveAdminsForLockscreenPoliciesLocked(
+                getProfileParentUserIfRequested(userHandle, parent));
         final int N = admins.size();
         for (int i = 0; i < N; i++) {
             ActiveAdmin admin = admins.get(i);
@@ -4591,7 +4589,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             // Update the device timeout
             final int parentId = getProfileParentId(userId);
             final long timeMs = getMaximumTimeToLockPolicyFromAdmins(
-                    getActiveAdminsForLockscreenPoliciesLocked(parentId, false));
+                    getActiveAdminsForLockscreenPoliciesLocked(parentId));
 
             final DevicePolicyData policy = getUserDataUnchecked(parentId);
             if (policy.mLastMaximumTimeToLock == timeMs) {
@@ -4613,7 +4611,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         final long timeMs;
         if (isSeparateProfileChallengeEnabled(userId)) {
             timeMs = getMaximumTimeToLockPolicyFromAdmins(
-                    getActiveAdminsForLockscreenPoliciesLocked(userId, false /* parent */));
+                    getActiveAdminsForLockscreenPoliciesLocked(userId));
         } else {
             timeMs = Long.MAX_VALUE;
         }
@@ -4646,7 +4644,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             }
             // Return the strictest policy across all participating admins.
             final List<ActiveAdmin> admins = getActiveAdminsForLockscreenPoliciesLocked(
-                    userHandle, parent);
+                    getProfileParentUserIfRequested(userHandle, parent));
             final long timeMs = getMaximumTimeToLockPolicyFromAdmins(admins);
             return timeMs == Long.MAX_VALUE ? 0 : timeMs;
         }
@@ -4730,7 +4728,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             }
 
             // Return the strictest policy across all participating admins.
-            List<ActiveAdmin> admins = getActiveAdminsForLockscreenPoliciesLocked(userId, parent);
+            List<ActiveAdmin> admins = getActiveAdminsForLockscreenPoliciesLocked(
+                    getProfileParentUserIfRequested(userId, parent));
 
             long strongAuthUnlockTimeout = DevicePolicyManager.DEFAULT_STRONG_AUTH_TIMEOUT_MS;
             for (int i = 0; i < admins.size(); i++) {
@@ -6157,8 +6156,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
      */
     private Set<Integer> updatePasswordExpirationsLocked(int userHandle) {
         final ArraySet<Integer> affectedUserIds = new ArraySet<>();
-        List<ActiveAdmin> admins = getActiveAdminsForLockscreenPoliciesLocked(
-                userHandle, /* parent */ false);
+        List<ActiveAdmin> admins = getActiveAdminsForLockscreenPoliciesLocked(userHandle);
         for (int i = 0; i < admins.size(); i++) {
             ActiveAdmin admin = admins.get(i);
             if (admin.info.usesPolicy(DeviceAdminInfo.USES_POLICY_EXPIRE_PASSWORD)) {
@@ -7162,7 +7160,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     admins = getUserDataUnchecked(userHandle).mAdminList;
                 } else {
                     // Otherwise return those set by admins in the user and its profiles.
-                    admins = getActiveAdminsForLockscreenPoliciesLocked(userHandle, parent);
+                    admins = getActiveAdminsForLockscreenPoliciesLocked(
+                            getProfileParentUserIfRequested(userHandle, parent));
                 }
 
                 int which = DevicePolicyManager.KEYGUARD_DISABLE_FEATURES_NONE;
@@ -8437,6 +8436,14 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         });
     }
 
+    private int getProfileParentUserIfRequested(int userHandle, boolean parent) {
+        if (parent) {
+            return getProfileParentId(userHandle);
+        }
+
+        return userHandle;
+    }
+
     private int getCredentialOwner(final int userHandle, final boolean parent) {
         return mInjector.binderWithCleanCallingIdentity(() -> {
             int effectiveUserHandle = userHandle;
@@ -8719,8 +8726,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             // Search through all admins that use KEYGUARD_DISABLE_TRUST_AGENTS and keep track
             // of the options. If any admin doesn't have options, discard options for the rest
             // and return null.
-            List<ActiveAdmin> admins =
-                    getActiveAdminsForLockscreenPoliciesLocked(userHandle, parent);
+            List<ActiveAdmin> admins = getActiveAdminsForLockscreenPoliciesLocked(
+                    getProfileParentUserIfRequested(userHandle, parent));
             boolean allAdminsHaveOptions = true;
             final int N = admins.size();
             for (int i = 0; i < N; i++) {
