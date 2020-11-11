@@ -32,10 +32,10 @@ public final class FaceAuthenticator extends IBiometricAuthenticator.Stub {
     private final IFaceService mFaceService;
     private final int mSensorId;
 
-    public FaceAuthenticator(IFaceService faceService, SensorConfig config)
+    public FaceAuthenticator(IFaceService faceService, int sensorId)
             throws RemoteException {
         mFaceService = faceService;
-        mSensorId = config.id;
+        mSensorId = sensorId;
     }
 
     @Override
