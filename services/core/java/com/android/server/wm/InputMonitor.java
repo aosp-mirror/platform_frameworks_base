@@ -516,7 +516,7 @@ final class InputMonitor {
             if (mAddRecentsAnimationInputConsumerHandle && shouldApplyRecentsInputConsumer) {
                 if (recentsAnimationController.updateInputConsumerForApp(
                         mRecentsAnimationInputConsumer.mWindowHandle)) {
-                    mRecentsAnimationInputConsumer.show(mInputTransaction, w);
+                    mRecentsAnimationInputConsumer.show(mInputTransaction, w.mActivityRecord);
                     mAddRecentsAnimationInputConsumerHandle = false;
                 }
             }

@@ -304,22 +304,24 @@ public class DisplayContentTests extends WindowTestsBase {
         assertEquals(startingWin, imeTarget);
         startingWin.mHidden = false;
 
-        // Verify that an app window launching behind the starting window becomes the target
+        // Verify that the starting window still be an ime target even an app window launching
+        // behind it.
         final WindowState appWin = createWindow(null, TYPE_BASE_APPLICATION, activity, "appWin");
         appWin.setHasSurface(true);
         assertTrue(appWin.canBeImeTarget());
 
         imeTarget = mDisplayContent.computeImeTarget(false /* updateImeTarget */);
-        assertEquals(appWin, imeTarget);
+        assertEquals(startingWin, imeTarget);
         appWin.mHidden = false;
 
-        // Verify that an child window can be an ime target even behind a launching app window
+        // Verify that the starting window still be an ime target even the child window behind a
+        // launching app window
         final WindowState childWin = createWindow(appWin,
                 TYPE_APPLICATION_ATTACHED_DIALOG, "childWin");
         childWin.setHasSurface(true);
         assertTrue(childWin.canBeImeTarget());
         imeTarget = mDisplayContent.computeImeTarget(false /* updateImeTarget */);
-        assertEquals(childWin, imeTarget);
+        assertEquals(startingWin, imeTarget);
     }
 
     @UseTestDisplay(addAllCommonWindows = true)

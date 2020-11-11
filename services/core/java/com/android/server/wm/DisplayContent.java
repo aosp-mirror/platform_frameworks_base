@@ -3536,7 +3536,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             if (updateImeTarget) {
                 if (DEBUG_INPUT_METHOD) Slog.w(TAG_WM, "Moving IM target from "
                         + mImeLayeringTarget + " to null since mInputMethodWindow is null");
-                setImeLayeringTarget(null, mImeLayeringTargetWaitingAnim);
+                setImeLayeringTargetInner(null);
             }
             return null;
         }
@@ -3553,40 +3553,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         mUpdateImeTarget = updateImeTarget;
         WindowState target = getWindow(mComputeImeTargetPredicate);
 
-        // Keeps the IME target with the last window while swiping up to recents to prevent
-        // flickering due to IME hide animation on top of recents.
-        // TODO(b/166736352): This logic should go away once we switch over target immediately
-        //  and do the screenshot to preserve IME on disappearing target
-        if (target != null && curTarget != null && target.isActivityTypeHome()
-                && curTarget.getInsetsState().getSource(ITYPE_IME).isVisible()) {
-            return curTarget;
-        }
-
-        // Yet more tricksyness!  If this window is a "starting" window, we do actually want
-        // to be on top of it, but it is not -really- where input will go. So look down below
-        // for a real window to target...
-        if (target != null && target.mAttrs.type == TYPE_APPLICATION_STARTING) {
-            final ActivityRecord activity = target.mActivityRecord;
-            if (activity != null) {
-                final WindowState betterTarget = activity.getImeTargetBelowWindow(target);
-                if (betterTarget != null) {
-                    target = betterTarget;
-                }
-            }
-        }
-
         if (DEBUG_INPUT_METHOD && updateImeTarget) Slog.v(TAG_WM,
                 "Proposed new IME target: " + target + " for display: " + getDisplayId());
-
-        // Now, a special case -- if the last target's window is in the process of exiting, but
-        // not removed, keep on the last target to avoid IME flicker. The exception is if the
-        // current target is home since we want opening apps to become the IME target right away.
-        if (curTarget != null && !curTarget.mRemoved && curTarget.isDisplayed()
-                && curTarget.isClosing() && !curTarget.isActivityTypeHome()) {
-            if (DEBUG_INPUT_METHOD) Slog.v(TAG_WM, "Not changing target till current window is"
-                    + " closing and not removed");
-            return curTarget;
-        }
 
         if (DEBUG_INPUT_METHOD) Slog.v(TAG_WM, "Desired input method target=" + target
                 + " updateImeTarget=" + updateImeTarget);
@@ -3596,42 +3564,16 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 if (DEBUG_INPUT_METHOD) Slog.w(TAG_WM, "Moving IM target from " + curTarget
                         + " to null." + (SHOW_STACK_CRAWLS ? " Callers="
                         + Debug.getCallers(4) : ""));
-                setImeLayeringTarget(null, mImeLayeringTargetWaitingAnim);
+                setImeLayeringTargetInner(null);
             }
 
             return null;
         }
 
         if (updateImeTarget) {
-            ActivityRecord activity = curTarget == null ? null : curTarget.mActivityRecord;
-            if (activity != null) {
-
-                // Now some fun for dealing with window animations that modify the Z order. We need
-                // to look at all windows below the current target that are in this app, finding the
-                // highest visible one in layering.
-                WindowState highestTarget = null;
-                if (activity.isAnimating(PARENTS | TRANSITION)) {
-                    highestTarget = activity.getHighestAnimLayerWindow(curTarget);
-                }
-
-                if (highestTarget != null) {
-                    if (DEBUG_INPUT_METHOD) {
-                        Slog.v(TAG_WM, mAppTransition + " " + highestTarget + " animating="
-                                + highestTarget.isAnimating(TRANSITION | PARENTS));
-                    }
-
-                    if (mAppTransition.isTransitionSet()) {
-                        // If we are currently setting up for an animation, hold everything until we
-                        // can find out what will happen.
-                        setImeLayeringTarget(highestTarget, true);
-                        return highestTarget;
-                    }
-                }
-            }
-
             if (DEBUG_INPUT_METHOD) Slog.w(TAG_WM, "Moving IM target from " + curTarget + " to "
                     + target + (SHOW_STACK_CRAWLS ? " Callers=" + Debug.getCallers(4) : ""));
-            setImeLayeringTarget(target, false);
+            setImeLayeringTargetInner(target);
         }
 
         return target;
@@ -3733,11 +3675,9 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      * Sets the window the IME is on top of.
      * @param target window to place the IME surface on top of. If {@code null}, the IME will be
      *               placed at its parent's surface.
-     * @param targetWaitingAnim if {@code true}, hold off on modifying the animation layer of
-     *                          the target.
      */
-    private void setImeLayeringTarget(@Nullable WindowState target, boolean targetWaitingAnim) {
-        if (target == mImeLayeringTarget && mImeLayeringTargetWaitingAnim == targetWaitingAnim) {
+    private void setImeLayeringTargetInner(@Nullable WindowState target) {
+        if (target == mImeLayeringTarget) {
             return;
         }
         // Prepare the IME screenshot for the last IME target when its task is applying app
@@ -3750,7 +3690,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
         ProtoLog.i(WM_DEBUG_IME, "setInputMethodTarget %s", target);
         mImeLayeringTarget = target;
-        mImeLayeringTargetWaitingAnim = targetWaitingAnim;
 
         // 1. Reparent the IME container window to the target root DA to get the correct bounds and
         // config. (Only happens when the target window is in a different root DA)
@@ -3762,13 +3701,12 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 targetRoot.placeImeContainer(mImeWindowsContainer);
             }
         }
-        // 2. Reparent the IME container surface to either the input target app, or the IME window
-        // parent.
-        updateImeParent();
-        // 3. Assign window layers based on the IME surface parent to make sure it is on top of the
+        // 2. Assign window layers based on the IME surface parent to make sure it is on top of the
         // app.
         assignWindowLayers(true /* setLayoutNeeded */);
-        // 4. Update the IME control target to apply any inset change and animation.
+        // 3. Update the IME control target to apply any inset change and animation.
+        // 4. Reparent the IME container surface to either the input target app, or the IME window
+        // parent.
         updateImeControlTarget();
     }
 
@@ -3898,8 +3836,14 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     }
 
     void updateImeControlTarget() {
+        InsetsControlTarget prevImeControlTarget = mImeControlTarget;
         mImeControlTarget = computeImeControlTarget();
         mInsetsStateController.onImeControlTargetChanged(mImeControlTarget);
+        // Update Ime parent when IME insets leash created, which is the best time that default
+        // IME visibility has been settled down after IME control target changed.
+        if (prevImeControlTarget != mImeControlTarget) {
+            updateImeParent();
+        }
 
         final WindowState win = InsetsControlTarget.asWindowOrNull(mImeControlTarget);
         final IBinder token = win != null ? win.mClient.asBinder() : null;
