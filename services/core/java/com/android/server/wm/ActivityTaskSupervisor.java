@@ -2207,6 +2207,7 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
         }
 
         if (!task.supportsSplitScreenWindowingMode() || forceNonResizable) {
+            if (mService.getTransitionController().getTransitionPlayer() != null) return;
             // Dismiss docked stack. If task appeared to be in docked stack but is not resizable -
             // we need to move it to top of fullscreen stack, otherwise it will be covered.
             final TaskDisplayArea taskDisplayArea = task.getDisplayArea();

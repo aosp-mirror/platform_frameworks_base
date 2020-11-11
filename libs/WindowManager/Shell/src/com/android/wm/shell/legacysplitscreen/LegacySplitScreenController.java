@@ -44,6 +44,7 @@ import android.window.WindowContainerTransaction;
 import com.android.internal.policy.DividerSnapAlgorithm;
 import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTaskOrganizer;
+import com.android.wm.shell.Transitions;
 import com.android.wm.shell.common.DisplayChangeController;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayImeController;
@@ -113,7 +114,7 @@ public class LegacySplitScreenController implements LegacySplitScreen,
             DisplayController displayController, SystemWindows systemWindows,
             DisplayImeController imeController, Handler handler, TransactionPool transactionPool,
             ShellTaskOrganizer shellTaskOrganizer, SyncTransactionQueue syncQueue,
-            TaskStackListenerImpl taskStackListener) {
+            TaskStackListenerImpl taskStackListener, Transitions transitions) {
         mContext = context;
         mDisplayController = displayController;
         mSystemWindows = systemWindows;
@@ -123,7 +124,8 @@ public class LegacySplitScreenController implements LegacySplitScreen,
         mTransactionPool = transactionPool;
         mWindowManagerProxy = new WindowManagerProxy(syncQueue, shellTaskOrganizer);
         mTaskOrganizer = shellTaskOrganizer;
-        mSplits = new LegacySplitScreenTaskListener(this, shellTaskOrganizer, syncQueue);
+        mSplits = new LegacySplitScreenTaskListener(this, shellTaskOrganizer, transitions,
+                syncQueue);
         mImePositionProcessor = new DividerImeController(mSplits, mTransactionPool, mHandler,
                 shellTaskOrganizer);
         mRotationController =
@@ -553,8 +555,36 @@ public class LegacySplitScreenController implements LegacySplitScreen,
         mHomeStackResizable = mWindowManagerProxy.applyEnterSplit(mSplits, mSplitLayout);
     }
 
+    void prepareEnterSplitTransition(WindowContainerTransaction outWct) {
+        // Set resizable directly here because buildEnterSplit already resizes home stack.
+        mHomeStackResizable = mWindowManagerProxy.buildEnterSplit(outWct, mSplits, mSplitLayout);
+    }
+
+    void finishEnterSplitTransition(boolean minimized) {
+        update(mDisplayController.getDisplayContext(
+                mContext.getDisplayId()).getResources().getConfiguration());
+        if (minimized) {
+            ensureMinimizedSplit();
+        } else {
+            ensureNormalSplit();
+        }
+    }
+
     void startDismissSplit(boolean toPrimaryTask) {
+        startDismissSplit(toPrimaryTask, false /* snapped */);
+    }
+
+    void startDismissSplit(boolean toPrimaryTask, boolean snapped) {
+        if (Transitions.ENABLE_SHELL_TRANSITIONS) {
+            mSplits.getSplitTransitions().dismissSplit(
+                    mSplits, mSplitLayout, !toPrimaryTask, snapped);
+        } else {
         mWindowManagerProxy.applyDismissSplit(mSplits, mSplitLayout, !toPrimaryTask);
+            onDismissSplit();
+        }
+    }
+
+    void onDismissSplit() {
         updateVisibility(false /* visible */);
         mMinimized = false;
         // Resets divider bar position to undefined, so new divider bar will apply default position

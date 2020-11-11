@@ -37,6 +37,7 @@ import static android.window.TransitionInfo.FLAG_TRANSLUCENT;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.app.ActivityManager;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Binder;
@@ -567,6 +568,10 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
                 tmpList.add(wc);
             }
             for (WindowContainer p = wc.getParent(); p != null; p = p.getParent()) {
+                if (!p.isAttached() || !changes.get(p).hasChanged(p)) {
+                    // Again, we're skipping no-ops
+                    break;
+                }
                 if (participants.contains(p)) {
                     topParent = p;
                     break;
@@ -695,6 +700,7 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
             final TransitionInfo.Change change = new TransitionInfo.Change(
                     target.mRemoteToken != null ? target.mRemoteToken.toWindowContainerToken()
                             : null, target.getSurfaceControl());
+            // TODO(shell-transitions): Use leash for non-organized windows.
             if (info.mParent != null) {
                 change.setParent(info.mParent.mRemoteToken.toWindowContainerToken());
             }
@@ -704,6 +710,12 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
             change.setEndRelOffset(target.getBounds().left - target.getParent().getBounds().left,
                     target.getBounds().top - target.getParent().getBounds().top);
             change.setFlags(info.getChangeFlags(target));
+            final Task task = target.asTask();
+            if (task != null) {
+                final ActivityManager.RunningTaskInfo tinfo = new ActivityManager.RunningTaskInfo();
+                task.fillTaskInfo(tinfo);
+                change.setTaskInfo(tinfo);
+            }
             out.addChange(change);
         }
 

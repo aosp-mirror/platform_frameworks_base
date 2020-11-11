@@ -21,6 +21,7 @@ import static android.view.WindowManager.TRANSIT_OPEN;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.ActivityManager;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
@@ -167,7 +168,8 @@ class TransitionController {
             // Make the collecting transition wait until this request is ready.
             mCollectingTransition.setReady(false);
         } else {
-            newTransition = requestStartTransition(createTransition(type, flags));
+            newTransition = requestStartTransition(createTransition(type, flags),
+                    trigger != null ? trigger.asTask() : null);
         }
         if (trigger != null) {
             if (isExistenceType(type)) {
@@ -181,11 +183,16 @@ class TransitionController {
 
     /** Asks the transition player (shell) to start a created but not yet started transition. */
     @NonNull
-    Transition requestStartTransition(@NonNull Transition transition) {
+    Transition requestStartTransition(@NonNull Transition transition, @Nullable Task startTask) {
         try {
             ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
                     "Requesting StartTransition: %s", transition);
-            mTransitionPlayer.requestStartTransition(transition.mType, transition);
+            ActivityManager.RunningTaskInfo info = null;
+            if (startTask != null) {
+                info = new ActivityManager.RunningTaskInfo();
+                startTask.fillTaskInfo(info);
+            }
+            mTransitionPlayer.requestStartTransition(transition.mType, transition, info);
         } catch (RemoteException e) {
             Slog.e(TAG, "Error requesting transition", e);
             transition.start();
