@@ -80,7 +80,7 @@ public:
 
     int drawPathCount = 0;
     void onDrawPath(const SkPath& path, const SkPaint& paint) override {
-        drawPaintCount++;
+        drawPathCount++;
     }
 
     int drawRegionCount = 0;
@@ -157,6 +157,12 @@ public:
     void onDrawPicture(const SkPicture* picture, const SkMatrix* matrix,
                        const SkPaint* paint) override {
         drawPictureCount++;
+    }
+
+    int drawVerticesCount = 0;
+    void onDrawVerticesObject (const SkVertices *vertices, SkBlendMode mode,
+                        const SkPaint &paint) override {
+        drawVerticesCount++;
     }
 
 private:
