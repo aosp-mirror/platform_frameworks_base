@@ -90,6 +90,14 @@ void recycleJavaParcelObject(JNIEnv* env, jobject parcelObj)
     env->CallVoidMethod(parcelObj, gParcelOffsets.recycle);
 }
 
+static void android_os_Parcel_markSensitive(jlong nativePtr)
+{
+    Parcel* parcel = reinterpret_cast<Parcel*>(nativePtr);
+    if (parcel) {
+        parcel->markSensitive();
+    }
+}
+
 static jint android_os_Parcel_dataSize(jlong nativePtr)
 {
     Parcel* parcel = reinterpret_cast<Parcel*>(nativePtr);
@@ -757,6 +765,8 @@ static jboolean android_os_Parcel_replaceCallingWorkSourceUid(jlong nativePtr, j
 // ----------------------------------------------------------------------------
 
 static const JNINativeMethod gParcelMethods[] = {
+    // @CriticalNative
+    {"nativeMarkSensitive",             "(J)V", (void*)android_os_Parcel_markSensitive},
     // @CriticalNative
     {"nativeDataSize",            "(J)I", (void*)android_os_Parcel_dataSize},
     // @CriticalNative
