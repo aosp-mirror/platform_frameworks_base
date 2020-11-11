@@ -83,11 +83,10 @@ public class PipTouchHandler {
     private boolean mShowPipMenuOnAnimationEnd = false;
 
     /**
-     * Whether PIP stash is enabled or not. When enabled, if at the time of fling-release the
-     * PIP bounds is outside the left/right edge of the screen, it will be shown in "stashed" mode,
-     * where PIP will only show partially.
+     * Whether PIP stash is enabled or not. When enabled, if the user flings toward the edge of the
+     * screen, it will be shown in "stashed" mode, where PIP will only show partially.
      */
-    private boolean mEnableStash = false;
+    private boolean mEnableStash = true;
 
     // The current movement bounds
     private Rect mMovementBounds = new Rect();
@@ -202,13 +201,13 @@ public class PipTouchHandler {
         mEnableStash = DeviceConfig.getBoolean(
                 DeviceConfig.NAMESPACE_SYSTEMUI,
                 PIP_STASHING,
-                /* defaultValue = */ false);
+                /* defaultValue = */ true);
         DeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_SYSTEMUI,
                 context.getMainExecutor(),
                 properties -> {
                     if (properties.getKeyset().contains(PIP_STASHING)) {
                         mEnableStash = properties.getBoolean(
-                                PIP_STASHING, /* defaultValue = */ false);
+                                PIP_STASHING, /* defaultValue = */ true);
                     }
                 });
     }
