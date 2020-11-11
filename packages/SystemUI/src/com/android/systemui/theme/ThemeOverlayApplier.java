@@ -21,11 +21,18 @@ import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
+
+import com.android.systemui.Dumpable;
+import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dump.DumpManager;
 
 import com.google.android.collect.Lists;
 import com.google.android.collect.Sets;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -34,9 +41,19 @@ import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
 
-class ThemeOverlayManager {
+/**
+ * Responsible for orchestrating overlays, based on user preferences and other inputs from
+ * {@link ThemeOverlayController}.
+ */
+@SysUISingleton
+public class ThemeOverlayApplier implements Dumpable {
     private static final String TAG = "ThemeOverlayManager";
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
+
+    @VisibleForTesting
+    static final String MONET_ACCENT_COLOR_PACKAGE = "com.android.theme.accentcolor.color";
+    @VisibleForTesting
+    static final String MONET_SYSTEM_PALETTE_PACKAGE = "com.android.theme.systemcolors.color";
 
     @VisibleForTesting
     static final String ANDROID_PACKAGE = "android";
@@ -46,7 +63,11 @@ class ThemeOverlayManager {
     static final String SYSUI_PACKAGE = "com.android.systemui";
 
     @VisibleForTesting
-    static final String OVERLAY_CATEGORY_COLOR = "android.theme.customization.accent_color";
+    static final String OVERLAY_CATEGORY_ACCENT_COLOR =
+            "android.theme.customization.accent_color";
+    @VisibleForTesting
+    static final String OVERLAY_CATEGORY_SYSTEM_PALETTE =
+            "android.theme.customization.system_palette";
     @VisibleForTesting
     static final String OVERLAY_CATEGORY_FONT = "android.theme.customization.font";
     @VisibleForTesting
@@ -73,23 +94,35 @@ class ThemeOverlayManager {
      * starts with launcher and grouped by target package.
      */
     static final List<String> THEME_CATEGORIES = Lists.newArrayList(
+            OVERLAY_CATEGORY_SYSTEM_PALETTE,
             OVERLAY_CATEGORY_ICON_LAUNCHER,
             OVERLAY_CATEGORY_SHAPE,
             OVERLAY_CATEGORY_FONT,
-            OVERLAY_CATEGORY_COLOR,
+            OVERLAY_CATEGORY_ACCENT_COLOR,
             OVERLAY_CATEGORY_ICON_ANDROID,
             OVERLAY_CATEGORY_ICON_SYSUI,
             OVERLAY_CATEGORY_ICON_SETTINGS,
             OVERLAY_CATEGORY_ICON_THEME_PICKER);
 
-    /* Categories that need to applied to the current user as well as the system user. */
+    /* Categories that need to be applied to the current user as well as the system user. */
     @VisibleForTesting
     static final Set<String> SYSTEM_USER_CATEGORIES = Sets.newHashSet(
-            OVERLAY_CATEGORY_COLOR,
+            OVERLAY_CATEGORY_SYSTEM_PALETTE,
+            OVERLAY_CATEGORY_ACCENT_COLOR,
             OVERLAY_CATEGORY_FONT,
             OVERLAY_CATEGORY_SHAPE,
             OVERLAY_CATEGORY_ICON_ANDROID,
             OVERLAY_CATEGORY_ICON_SYSUI);
+
+    /**
+     * List of main colors of Monet themes. These are extracted from overlays installed
+     * on the system.
+     */
+    private final ArrayList<Integer> mMainSystemColors = new ArrayList<>();
+    /**
+     * Same as above, but providing accent colors instead of a system palette.
+     */
+    private final ArrayList<Integer> mAccentColors = new ArrayList<>();
 
     /* Allowed overlay categories for each target package. */
     private final Map<String, Set<String>> mTargetPackageToCategories = new ArrayMap<>();
@@ -100,15 +133,15 @@ class ThemeOverlayManager {
     private final String mLauncherPackage;
     private final String mThemePickerPackage;
 
-    ThemeOverlayManager(OverlayManager overlayManager, Executor executor,
-            String launcherPackage, String themePickerPackage) {
+    public ThemeOverlayApplier(OverlayManager overlayManager, Executor executor,
+            String launcherPackage, String themePickerPackage, DumpManager dumpManager) {
         mOverlayManager = overlayManager;
         mExecutor = executor;
         mLauncherPackage = launcherPackage;
         mThemePickerPackage = themePickerPackage;
         mTargetPackageToCategories.put(ANDROID_PACKAGE, Sets.newHashSet(
-                OVERLAY_CATEGORY_COLOR, OVERLAY_CATEGORY_FONT,
-                OVERLAY_CATEGORY_SHAPE, OVERLAY_CATEGORY_ICON_ANDROID));
+                OVERLAY_CATEGORY_SYSTEM_PALETTE, OVERLAY_CATEGORY_ACCENT_COLOR,
+                OVERLAY_CATEGORY_FONT, OVERLAY_CATEGORY_SHAPE, OVERLAY_CATEGORY_ICON_ANDROID));
         mTargetPackageToCategories.put(SYSUI_PACKAGE,
                 Sets.newHashSet(OVERLAY_CATEGORY_ICON_SYSUI));
         mTargetPackageToCategories.put(SETTINGS_PACKAGE,
@@ -117,7 +150,7 @@ class ThemeOverlayManager {
                 Sets.newHashSet(OVERLAY_CATEGORY_ICON_LAUNCHER));
         mTargetPackageToCategories.put(mThemePickerPackage,
                 Sets.newHashSet(OVERLAY_CATEGORY_ICON_THEME_PICKER));
-        mCategoryToTargetPackage.put(OVERLAY_CATEGORY_COLOR, ANDROID_PACKAGE);
+        mCategoryToTargetPackage.put(OVERLAY_CATEGORY_ACCENT_COLOR, ANDROID_PACKAGE);
         mCategoryToTargetPackage.put(OVERLAY_CATEGORY_FONT, ANDROID_PACKAGE);
         mCategoryToTargetPackage.put(OVERLAY_CATEGORY_SHAPE, ANDROID_PACKAGE);
         mCategoryToTargetPackage.put(OVERLAY_CATEGORY_ICON_ANDROID, ANDROID_PACKAGE);
@@ -125,6 +158,54 @@ class ThemeOverlayManager {
         mCategoryToTargetPackage.put(OVERLAY_CATEGORY_ICON_SETTINGS, SETTINGS_PACKAGE);
         mCategoryToTargetPackage.put(OVERLAY_CATEGORY_ICON_LAUNCHER, mLauncherPackage);
         mCategoryToTargetPackage.put(OVERLAY_CATEGORY_ICON_THEME_PICKER, mThemePickerPackage);
+
+        collectMonetSystemOverlays();
+        dumpManager.registerDumpable(TAG, this);
+    }
+
+    /**
+     * List of accent colors available as Monet overlays.
+     */
+    List<Integer> getAvailableAccentColors() {
+        return mAccentColors;
+    }
+
+    /**
+     * List of main system colors available as Monet overlays.
+     */
+    List<Integer> getAvailableSystemColors() {
+        return mMainSystemColors;
+    }
+
+    private void collectMonetSystemOverlays() {
+        List<OverlayInfo> androidOverlays = mOverlayManager
+                .getOverlayInfosForTarget(ANDROID_PACKAGE, UserHandle.SYSTEM);
+        for (OverlayInfo overlayInfo : androidOverlays) {
+            String packageName = overlayInfo.packageName;
+            if (DEBUG) {
+                Log.d(TAG, "Processing overlay " + packageName);
+            }
+            if (OVERLAY_CATEGORY_SYSTEM_PALETTE.equals(overlayInfo.category)
+                    && packageName.startsWith(MONET_SYSTEM_PALETTE_PACKAGE)) {
+                try {
+                    String color = packageName.replace(MONET_SYSTEM_PALETTE_PACKAGE, "");
+                    mMainSystemColors.add(Integer.parseInt(color, 16));
+                } catch (NumberFormatException e) {
+                    Log.w(TAG, "Invalid package name for overlay " + packageName, e);
+                }
+            } else if (OVERLAY_CATEGORY_ACCENT_COLOR.equals(overlayInfo.category)
+                    && packageName.startsWith(MONET_ACCENT_COLOR_PACKAGE)) {
+                try {
+                    String color = packageName.replace(MONET_ACCENT_COLOR_PACKAGE, "");
+                    mAccentColors.add(Integer.parseInt(color, 16));
+                } catch (NumberFormatException e) {
+                    Log.w(TAG, "Invalid package name for overlay " + packageName, e);
+                }
+            } else if (DEBUG) {
+                Log.d(TAG, "Unknown overlay: " + packageName + " category: "
+                        + overlayInfo.category);
+            }
+        }
     }
 
     /**
@@ -183,5 +264,14 @@ class ThemeOverlayManager {
                         String.format("setEnabled failed: %s %s %b", pkg, userHandle, enabled), e);
             }
         });
+    }
+
+    /**
+     * @inherit
+     */
+    @Override
+    public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
+        pw.println("mMainSystemColors=" + mMainSystemColors.size());
+        pw.println("mAccentColors=" + mAccentColors.size());
     }
 }
