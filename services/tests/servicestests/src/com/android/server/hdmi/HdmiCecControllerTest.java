@@ -32,6 +32,7 @@ import static com.android.server.hdmi.Constants.ADDR_UNREGISTERED;
 import static junit.framework.Assert.assertEquals;
 
 import android.content.Context;
+import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.tv.cec.V1_0.SendMessageResult;
 import android.os.Looper;
 import android.os.test.TestLooper;
@@ -78,7 +79,7 @@ public class HdmiCecControllerTest {
     }
 
     private HdmiCecController mHdmiCecController;
-    private int mCecVersion = Constants.VERSION_1_4;
+    private int mCecVersion = HdmiControlManager.HDMI_CEC_VERSION_1_4_b;
     private int mLogicalAddress = 16;
     private AllocateAddressCallback mCallback =
             new AllocateAddressCallback() {
@@ -202,7 +203,7 @@ public class HdmiCecControllerTest {
 
     @Test
     public void testAllocateLogicalAddress_PlaybackNonPreferred_2_0_BackupOne() {
-        mCecVersion = Constants.VERSION_2_0;
+        mCecVersion = HdmiControlManager.HDMI_CEC_VERSION_2_0;
 
         mNativeWrapper.setPollAddressResponse(ADDR_PLAYBACK_1, SendMessageResult.SUCCESS);
         mNativeWrapper.setPollAddressResponse(ADDR_PLAYBACK_2, SendMessageResult.SUCCESS);
@@ -214,7 +215,7 @@ public class HdmiCecControllerTest {
 
     @Test
     public void testAllocateLogicalAddress_PlaybackNonPreferred_2_0_BackupTwo() {
-        mCecVersion = Constants.VERSION_2_0;
+        mCecVersion = HdmiControlManager.HDMI_CEC_VERSION_2_0;
 
         mNativeWrapper.setPollAddressResponse(ADDR_PLAYBACK_1, SendMessageResult.SUCCESS);
         mNativeWrapper.setPollAddressResponse(ADDR_PLAYBACK_2, SendMessageResult.SUCCESS);
@@ -245,7 +246,7 @@ public class HdmiCecControllerTest {
 
     @Test
     public void testAllocateLogicalAddress_PlaybackNonPreferred_2_0_AllOccupied() {
-        mCecVersion = Constants.VERSION_2_0;
+        mCecVersion = HdmiControlManager.HDMI_CEC_VERSION_2_0;
 
         mNativeWrapper.setPollAddressResponse(ADDR_PLAYBACK_1, SendMessageResult.SUCCESS);
         mNativeWrapper.setPollAddressResponse(ADDR_PLAYBACK_2, SendMessageResult.SUCCESS);

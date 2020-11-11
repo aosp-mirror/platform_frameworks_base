@@ -31,26 +31,35 @@ import java.io.IOException;
 import javax.xml.datatype.DatatypeConfigurationException;
 
 /**
- *  Fake class which loads default system configuration with user-configurable
- *  settings (useful for testing).
+ * Fake class which loads default system configuration with user-configurable
+ * settings (useful for testing).
  */
 final class FakeHdmiCecConfig extends HdmiCecConfig {
     private static final String TAG = "FakeHdmiCecConfig";
 
     private static final String SYSTEM_CONFIG_XML =
             "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>"
-                  + "<cec-settings>"
-                  + "  <setting name=\"send_standby_on_sleep\""
-                  + "           value-type=\"string\""
-                  + "           user-configurable=\"true\">"
-                  + "    <allowed-values>"
-                  + "      <value string-value=\"to_tv\" />"
-                  + "      <value string-value=\"broadcast\" />"
-                  + "      <value string-value=\"none\" />"
-                  + "    </allowed-values>"
-                  + "    <default-value string-value=\"to_tv\" />"
-                  + "  </setting>"
-                  + "</cec-settings>";
+                    + "<cec-settings>"
+                    + "  <setting name=\"send_standby_on_sleep\""
+                    + "           value-type=\"string\""
+                    + "           user-configurable=\"true\">"
+                    + "    <allowed-values>"
+                    + "      <value string-value=\"to_tv\" />"
+                    + "      <value string-value=\"broadcast\" />"
+                    + "      <value string-value=\"none\" />"
+                    + "    </allowed-values>"
+                    + "    <default-value string-value=\"to_tv\" />"
+                    + "  </setting>"
+                    + "  <setting name=\"hdmi_cec_version\""
+                    + "           value-type=\"int\""
+                    + "           user-configurable=\"true\">"
+                    + "    <allowed-values>"
+                    + "      <value int-value=\"0x05\" />"
+                    + "      <value int-value=\"0x06\" />"
+                    + "    </allowed-values>"
+                    + "    <default-value int-value=\"0x05\" />"
+                    + "  </setting>"
+                    + "</cec-settings>";
 
     FakeHdmiCecConfig(@NonNull Context context) {
         super(context, new StorageAdapter(), parseFromString(SYSTEM_CONFIG_XML), null);

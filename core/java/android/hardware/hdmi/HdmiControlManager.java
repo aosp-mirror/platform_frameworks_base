@@ -344,6 +344,29 @@ public final class HdmiControlManager {
     @Retention(RetentionPolicy.SOURCE)
     public @interface HdmiCecControl {}
 
+    // -- Supported HDM-CEC versions.
+    /**
+     * Version constant for HDMI-CEC v1.4b.
+     *
+     * @hide
+     */
+    public static final int HDMI_CEC_VERSION_1_4_b = 0x05;
+    /**
+     * Version constant for HDMI-CEC v2.0.
+     *
+     * @hide
+     */
+    public static final int HDMI_CEC_VERSION_2_0 = 0x06;
+    /**
+     * @hide
+     */
+    @IntDef({
+            HDMI_CEC_VERSION_1_4_b,
+            HDMI_CEC_VERSION_2_0
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface HdmiCecVersion {}
+
     // -- Which devices the playback device can send a <Standby> message to upon going to sleep.
     /**
      * Send <Standby> to TV only.
@@ -428,6 +451,12 @@ public final class HdmiControlManager {
      */
     public static final String CEC_SETTING_NAME_HDMI_CEC_ENABLED = "hdmi_cec_enabled";
     /**
+     * Name of a setting controlling the version of HDMI-CEC used.
+     *
+     * @hide
+     */
+    public static final String CEC_SETTING_NAME_HDMI_CEC_VERSION = "hdmi_cec_version";
+    /**
      * Name of a setting deciding on the Standby message behaviour on sleep.
      *
      * @hide
@@ -452,6 +481,7 @@ public final class HdmiControlManager {
      */
     @StringDef({
         CEC_SETTING_NAME_HDMI_CEC_ENABLED,
+        CEC_SETTING_NAME_HDMI_CEC_VERSION,
         CEC_SETTING_NAME_SEND_STANDBY_ON_SLEEP,
         CEC_SETTING_NAME_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST,
         CEC_SETTING_NAME_SYSTEM_AUDIO_MODE_MUTING,
@@ -1409,6 +1439,51 @@ public final class HdmiControlManager {
         }
         try {
             return mService.getCecSettingIntValue(CEC_SETTING_NAME_HDMI_CEC_ENABLED);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Set the 'hdmi_cec_version' option.
+     *
+     * @param value the desired value
+     * @throws IllegalArgumentException when the new value is not allowed.
+     * @throws RuntimeException when the HdmiControlService is not available.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.HDMI_CEC)
+    public void setHdmiCecVersion(@NonNull @HdmiCecVersion int value) {
+        if (mService == null) {
+            Log.e(TAG, "HdmiControlService is not available");
+            throw new RuntimeException("HdmiControlService is not available");
+        }
+        try {
+            mService.setCecSettingIntValue(CEC_SETTING_NAME_HDMI_CEC_VERSION, value);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Get the value of 'hdmi_cec_enabled' option.
+     *
+     * @return the current value.
+     * @throws RuntimeException when the HdmiControlService is not available.
+     *
+     * @hide
+     */
+    @NonNull
+    @HdmiCecVersion
+    @RequiresPermission(android.Manifest.permission.HDMI_CEC)
+    public int getHdmiCecVersion() {
+        if (mService == null) {
+            Log.e(TAG, "HdmiControlService is not available");
+            throw new RuntimeException("HdmiControlService is not available");
+        }
+        try {
+            return mService.getCecSettingIntValue(CEC_SETTING_NAME_HDMI_CEC_VERSION);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

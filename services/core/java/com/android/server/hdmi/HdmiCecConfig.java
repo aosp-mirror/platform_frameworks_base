@@ -229,6 +229,8 @@ public class HdmiCecConfig {
         switch (setting.getName()) {
             case HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_ENABLED:
                 return STORAGE_GLOBAL_SETTINGS;
+            case HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_VERSION:
+                return STORAGE_GLOBAL_SETTINGS;
             case HdmiControlManager.CEC_SETTING_NAME_SEND_STANDBY_ON_SLEEP:
                 return STORAGE_GLOBAL_SETTINGS;
             case HdmiControlManager.CEC_SETTING_NAME_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST:
@@ -237,7 +239,7 @@ public class HdmiCecConfig {
                 return STORAGE_SYSPROPS;
             default:
                 throw new RuntimeException("Invalid CEC setting '" + setting.getName()
-                    + "' storage.");
+                        + "' storage.");
         }
     }
 
@@ -245,6 +247,8 @@ public class HdmiCecConfig {
         switch (setting.getName()) {
             case HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_ENABLED:
                 return Global.HDMI_CONTROL_ENABLED;
+            case HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_VERSION:
+                return Global.HDMI_CEC_VERSION;
             case HdmiControlManager.CEC_SETTING_NAME_SEND_STANDBY_ON_SLEEP:
                 return Global.HDMI_CONTROL_SEND_STANDBY_ON_SLEEP;
             case HdmiControlManager.CEC_SETTING_NAME_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST:
