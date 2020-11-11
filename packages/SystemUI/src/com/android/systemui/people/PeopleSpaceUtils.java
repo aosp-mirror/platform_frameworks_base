@@ -31,6 +31,8 @@ import android.icu.util.MeasureUnit;
 import android.provider.Settings;
 import android.service.notification.ConversationChannelWrapper;
 
+import com.android.systemui.R;
+
 import java.time.Duration;
 import java.util.List;
 import java.util.Locale;
@@ -38,25 +40,24 @@ import java.util.stream.Collectors;
 
 /** Utils class for People Space. */
 public class PeopleSpaceUtils {
-    private static final String TAG = "PeopleSpaceUtils";
-
     /** Turns on debugging information about People Space. */
     public static final boolean DEBUG = true;
+    private static final String TAG = "PeopleSpaceUtils";
+    private static final int DAYS_IN_A_WEEK = 7;
+    private static final int MIN_HOUR = 1;
+    private static final int ONE_DAY = 1;
 
     /** Returns a list of {@link ShortcutInfo} corresponding to user's conversations. */
-    public static List<ShortcutInfo> getShortcutInfos(
-            Context context,
-            INotificationManager notificationManager,
-            IPeopleManager peopleManager
-    ) throws Exception {
+    public static List<ShortcutInfo> getShortcutInfos(Context context,
+            INotificationManager notificationManager, IPeopleManager peopleManager)
+            throws Exception {
         boolean showAllConversations = Settings.Global.getInt(context.getContentResolver(),
                 Settings.Global.PEOPLE_SPACE_CONVERSATION_TYPE, 0) == 0;
-        List<ConversationChannelWrapper> conversations =
-                notificationManager.getConversations(
-                        !showAllConversations /* priority only */).getList();
+        List<ConversationChannelWrapper> conversations = notificationManager.getConversations(
+                !showAllConversations /* priority only */).getList();
         List<ShortcutInfo> shortcutInfos = conversations.stream().filter(
-                c -> shouldKeepConversation(c)).map(
-                    c -> c.getShortcutInfo()).collect(Collectors.toList());
+                c -> shouldKeepConversation(c)).map(c -> c.getShortcutInfo()).collect(
+                Collectors.toList());
         if (showAllConversations) {
             List<ConversationChannel> recentConversations =
                     peopleManager.getRecentConversations().getList();
@@ -85,11 +86,8 @@ public class PeopleSpaceUtils {
             bitmap = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
             // Single color bitmap will be created of 1x1 pixel
         } else {
-            bitmap = Bitmap.createBitmap(
-                    drawable.getIntrinsicWidth(),
-                    drawable.getIntrinsicHeight(),
-                    Bitmap.Config.ARGB_8888
-            );
+            bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(),
+                    drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
         }
 
         Canvas canvas = new Canvas(bitmap);
@@ -98,28 +96,31 @@ public class PeopleSpaceUtils {
         return bitmap;
     }
 
-    /** Returns a readable representation of {@code lastInteraction}. */
-    public static String getLastInteractionString(long lastInteraction) {
+    /** Returns a readable status describing the {@code lastInteraction}. */
+    public static String getLastInteractionString(Context context, long lastInteraction) {
+        if (lastInteraction == 0L) {
+            return context.getString(R.string.basic_status);
+        }
         long now = System.currentTimeMillis();
-        Duration durationSinceLastInteraction = Duration.ofMillis(
-                now - lastInteraction);
+        Duration durationSinceLastInteraction = Duration.ofMillis(now - lastInteraction);
         MeasureFormat formatter = MeasureFormat.getInstance(Locale.getDefault(),
                 MeasureFormat.FormatWidth.WIDE);
-        if (durationSinceLastInteraction.toDays() >= 1) {
-            return
-                    formatter
-                            .formatMeasures(new Measure(durationSinceLastInteraction.toDays(),
-                                    MeasureUnit.DAY));
-        } else if (durationSinceLastInteraction.toHours() >= 1) {
-            return formatter.formatMeasures(new Measure(durationSinceLastInteraction.toHours(),
-                    MeasureUnit.HOUR));
-        } else if (durationSinceLastInteraction.toMinutes() >= 1) {
-            return formatter.formatMeasures(new Measure(durationSinceLastInteraction.toMinutes(),
-                    MeasureUnit.MINUTE));
+        if (durationSinceLastInteraction.toHours() < MIN_HOUR) {
+            return context.getString(R.string.last_interaction_status_less_than,
+                    formatter.formatMeasures(new Measure(MIN_HOUR, MeasureUnit.HOUR)));
+        } else if (durationSinceLastInteraction.toDays() < ONE_DAY) {
+            return context.getString(R.string.last_interaction_status, formatter.formatMeasures(
+                    new Measure(durationSinceLastInteraction.toHours(), MeasureUnit.HOUR)));
+        } else if (durationSinceLastInteraction.toDays() < DAYS_IN_A_WEEK) {
+            return context.getString(R.string.last_interaction_status, formatter.formatMeasures(
+                    new Measure(durationSinceLastInteraction.toDays(), MeasureUnit.DAY)));
         } else {
-            return formatter.formatMeasures(
-                    new Measure(durationSinceLastInteraction.toMillis() / 1000,
-                            MeasureUnit.SECOND));
+            return context.getString(durationSinceLastInteraction.toDays() == DAYS_IN_A_WEEK
+                            ? R.string.last_interaction_status :
+                            R.string.last_interaction_status_over,
+                    formatter.formatMeasures(
+                            new Measure(durationSinceLastInteraction.toDays() / DAYS_IN_A_WEEK,
+                                    MeasureUnit.WEEK)));
         }
     }
 
