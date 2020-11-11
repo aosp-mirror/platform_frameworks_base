@@ -300,6 +300,7 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
             mFindDeviceCallback = callback;
             mRequest = request;
             mCallingPackage = callingPackage;
+            request.setCallingPackage(callingPackage);
             callback.asBinder().linkToDeath(CompanionDeviceManagerService.this /* recipient */, 0);
 
             final long callingIdentity = Binder.clearCallingIdentity();
@@ -308,7 +309,7 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
                     AndroidFuture<Association> future = new AndroidFuture<>();
                     service.startDiscovery(request, callingPackage, callback, future);
                     return future;
-                }).whenComplete(uncheckExceptions((association, err) -> {
+                }).cancelTimeout().whenComplete(uncheckExceptions((association, err) -> {
                     if (err == null) {
                         addAssociation(association);
                     } else {
