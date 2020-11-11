@@ -774,6 +774,7 @@ public class WindowManagerService extends IWindowManager.Stub
     WindowManagerInternal.OnHardKeyboardStatusChangeListener mHardKeyboardStatusChangeListener;
     SettingsObserver mSettingsObserver;
     final EmbeddedWindowController mEmbeddedWindowController;
+    final AnrController mAnrController;
 
     @VisibleForTesting
     final class SettingsObserver extends ContentObserver {
@@ -1376,7 +1377,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 mContext.getResources());
 
         setGlobalShadowSettings();
-
+        mAnrController = new AnrController(this);
         mStartingSurfaceController = new StartingSurfaceController(this);
     }
 
@@ -4910,6 +4911,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         if (newFocus != null) {
+            mAnrController.onFocusChanged(newFocus);
             newFocus.reportFocusChangedSerialized(true);
             notifyFocusChanged();
         }

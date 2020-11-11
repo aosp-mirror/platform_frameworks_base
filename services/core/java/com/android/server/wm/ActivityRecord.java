@@ -5637,14 +5637,14 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     /**
-     * Called when the key dispatching to a window associated with the app window container
+     * Called when the input dispatching to a window associated with the app window container
      * timed-out.
      *
-     * @param reason The reason for the key dispatching time out.
-     * @param windowPid The pid of the window key dispatching timed out on.
+     * @param reason The reason for input dispatching time out.
+     * @param windowPid The pid of the window input dispatching timed out on.
      * @return True if input dispatching should be aborted.
      */
-    public boolean keyDispatchingTimedOut(String reason, int windowPid) {
+    public boolean inputDispatchingTimedOut(String reason, int windowPid) {
         ActivityRecord anrActivity;
         WindowProcessController anrApp;
         boolean windowFromSameProcessAsActivity;
