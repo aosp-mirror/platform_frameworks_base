@@ -70,7 +70,7 @@ public class CharsetUtilsPerfTest {
 
         final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
-            CharsetUtils.toUtf8Bytes(mValue, destPtr, 0, dest.length);
+            CharsetUtils.toModifiedUtf8Bytes(mValue, destPtr, 0, dest.length);
         }
     }
 
@@ -85,7 +85,7 @@ public class CharsetUtilsPerfTest {
 
         final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
-            CharsetUtils.toUtf8Bytes(mValue, destPtr, 0, dest.length);
+            CharsetUtils.toModifiedUtf8Bytes(mValue, destPtr, 0, dest.length);
        }
     }
 }
