@@ -31,6 +31,7 @@ import android.compat.Compatibility;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledAfter;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -52,6 +53,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserManager;
+import android.provider.Settings;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.LongSparseArray;
@@ -7619,8 +7621,9 @@ public class AppOpsManager {
                     collectNotedOpForSelf(op, proxiedAttributionTag);
                 } else if (collectionMode == COLLECT_SYNC
                         // Only collect app-ops when the proxy is trusted
-                        && mContext.checkPermission(Manifest.permission.UPDATE_APP_OPS_STATS, -1,
-                        myUid) == PackageManager.PERMISSION_GRANTED) {
+                        && (mContext.checkPermission(Manifest.permission.UPDATE_APP_OPS_STATS, -1,
+                        myUid) == PackageManager.PERMISSION_GRANTED
+                        || isTrustedVoiceServiceProxy(mContext, mContext.getOpPackageName(), op))) {
                     collectNotedOpSync(op, proxiedAttributionTag);
                 }
             }
@@ -7629,6 +7632,38 @@ public class AppOpsManager {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * Checks if the voice recognition service is a trust proxy.
+     *
+     * @return {@code true} if the package is a trust voice recognition service proxy
+     * @hide
+     */
+    public static boolean isTrustedVoiceServiceProxy(Context context, String packageName,
+            int code) {
+        // This is a workaround for R QPR, new API change is not allowed. We only allow the current
+        // voice recognizer is also the voice interactor to noteproxy op.
+        if (code != OP_RECORD_AUDIO) {
+            return false;
+        }
+        final String voiceRecognitionComponent = Settings.Secure.getString(
+                context.getContentResolver(), Settings.Secure.VOICE_RECOGNITION_SERVICE);
+        final String voiceInteractionComponent = Settings.Secure.getString(
+                context.getContentResolver(), Settings.Secure.VOICE_INTERACTION_SERVICE);
+
+        final String voiceRecognitionServicePackageName =
+                getComponentPackagenameFromString(voiceRecognitionComponent);
+        final String voiceInteractionServicePackageName =
+                getComponentPackagenameFromString(voiceInteractionComponent);
+
+        return Objects.equals(packageName, voiceRecognitionServicePackageName) && Objects.equals(
+                voiceRecognitionServicePackageName, voiceInteractionServicePackageName);
+    }
+
+    private static String getComponentPackagenameFromString(String from) {
+        ComponentName componentName = from != null ? ComponentName.unflattenFromString(from) : null;
+        return componentName != null ? componentName.getPackageName() : "";
     }
 
     /**
