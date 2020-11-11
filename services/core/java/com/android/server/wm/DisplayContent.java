@@ -5308,7 +5308,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
 
     void ensureActivitiesVisible(ActivityRecord starting, int configChanges,
-            boolean preserveWindows, boolean notifyClients) {
+            boolean preserveWindows, boolean notifyClients, boolean userLeaving) {
         if (mInEnsureActivitiesVisible) {
             // Don't do recursive work.
             return;
@@ -5317,7 +5317,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         try {
             forAllTaskDisplayAreas(taskDisplayArea -> {
                 taskDisplayArea.ensureActivitiesVisible(starting, configChanges,
-                        preserveWindows, notifyClients);
+                        preserveWindows, notifyClients, userLeaving);
             });
         } finally {
             mInEnsureActivitiesVisible = false;
