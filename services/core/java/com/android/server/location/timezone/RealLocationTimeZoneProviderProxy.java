@@ -78,10 +78,14 @@ class RealLocationTimeZoneProviderProxy extends LocationTimeZoneProviderProxy {
     }
 
     private boolean register() {
-        return mServiceWatcher.register();
+        boolean resolves = mServiceWatcher.checkServiceResolves();
+        if (resolves) {
+            mServiceWatcher.register();
+        }
+        return resolves;
     }
 
-    private void onBind(IBinder binder, ComponentName componentName) throws RemoteException {
+    private void onBind(IBinder binder, ComponentName componentName) {
         processServiceWatcherCallbackOnThreadingDomainThread(() -> onBindOnHandlerThread(binder));
     }
 
