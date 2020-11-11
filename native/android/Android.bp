@@ -36,6 +36,7 @@ cc_library_shared {
     defaults: ["libandroid_defaults"],
 
     srcs: [
+        "activity_manager.cpp",
         "asset_manager.cpp",
         "choreographer.cpp",
         "configuration.cpp",
@@ -94,6 +95,10 @@ cc_library_shared {
     export_static_lib_headers: ["libarect"],
 
     include_dirs: ["bionic/libc/dns/include"],
+
+    local_include_dirs: [ "include_platform", ],
+
+    export_include_dirs: [ "include_platform", ],
 
     version_script: "libandroid.map.txt",
     stubs: {
