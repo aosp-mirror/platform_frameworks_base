@@ -828,6 +828,9 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
 
     @VisibleForTesting
     public void show(@InsetsType int types, boolean fromIme) {
+        if ((types & ime()) != 0) {
+            Log.d(TAG, "show(ime(), fromIme=" + fromIme + ")");
+        }
         if (fromIme) {
             ImeTracing.getInstance().triggerDump();
             Trace.asyncTraceEnd(TRACE_TAG_VIEW, "IC.showRequestFromApiToImeReady", 0);
