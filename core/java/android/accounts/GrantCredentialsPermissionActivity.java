@@ -16,16 +16,23 @@
 package android.accounts;
 
 import android.app.Activity;
-import android.content.res.Resources;
-import android.os.Bundle;
-import android.widget.TextView;
-import android.widget.LinearLayout;
-import android.view.View;
-import android.view.LayoutInflater;
+import android.app.ActivityTaskManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
+import android.os.Bundle;
+import android.os.IBinder;
+import android.os.Process;
+import android.os.RemoteException;
+import android.os.UserHandle;
 import android.text.TextUtils;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+
 import com.android.internal.R;
 
 import java.io.IOException;
@@ -42,6 +49,7 @@ public class GrantCredentialsPermissionActivity extends Activity implements View
     private Account mAccount;
     private String mAuthTokenType;
     private int mUid;
+    private int mCallingUid;
     private Bundle mResultBundle = null;
     protected LayoutInflater mInflater;
 
@@ -72,6 +80,20 @@ public class GrantCredentialsPermissionActivity extends Activity implements View
 
         if (mAccount == null || mAuthTokenType == null || packages == null) {
             // we were somehow started with bad parameters. abort the activity.
+            setResult(Activity.RESULT_CANCELED);
+            finish();
+            return;
+        }
+
+        try {
+            IBinder activityToken = getActivityToken();
+            mCallingUid = ActivityTaskManager.getService().getLaunchedFromUid(activityToken);
+        } catch (RemoteException re) {
+            // Couldn't figure out caller details
+            Log.w(getClass().getSimpleName(), "Unable to get caller identity \n" + re);
+        }
+
+        if (!UserHandle.isSameApp(mCallingUid, Process.SYSTEM_UID) && mCallingUid != mUid) {
             setResult(Activity.RESULT_CANCELED);
             finish();
             return;
