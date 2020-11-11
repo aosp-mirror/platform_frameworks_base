@@ -170,6 +170,15 @@ public interface IBinder {
     int FLAG_ONEWAY             = 0x00000001;
 
     /**
+     * Flag to {@link #transact}: request binder driver to clear transaction data.
+     *
+     * Be very careful when using this flag in Java, since Java objects read from a Java
+     * Parcel may be non-trivial to clear.
+     * @hide
+     */
+    int FLAG_CLEAR_BUF          = 0x00000020;
+
+    /**
      * @hide
      */
     int FLAG_COLLECT_NOTED_APP_OPS = 0x00000002;
