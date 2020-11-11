@@ -13,9 +13,16 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:clipToPadding="false"
+    android:fillViewport="true">
+    <LinearLayout
+        android:id="@+id/actions_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:showDividers="middle"
         android:divider="@drawable/global_action_item_divider"
         android:orientation="vertical"/>
+</ScrollView>
