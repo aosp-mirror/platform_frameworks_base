@@ -131,8 +131,6 @@ import com.android.server.hdmi.HdmiControlService;
 import com.android.server.incident.IncidentCompanionService;
 import com.android.server.input.InputManagerService;
 import com.android.server.inputmethod.InputMethodManagerService;
-import com.android.server.inputmethod.InputMethodSystemProperty;
-import com.android.server.inputmethod.MultiClientInputMethodManagerService;
 import com.android.server.integrity.AppIntegrityManagerService;
 import com.android.server.lights.LightsService;
 import com.android.server.location.LocationManagerService;
@@ -1595,12 +1593,7 @@ public final class SystemServer implements Dumpable {
         // Bring up services needed for UI.
         if (mFactoryTestMode != FactoryTest.FACTORY_TEST_LOW_LEVEL) {
             t.traceBegin("StartInputMethodManagerLifecycle");
-            if (InputMethodSystemProperty.MULTI_CLIENT_IME_ENABLED) {
-                mSystemServiceManager.startService(
-                        MultiClientInputMethodManagerService.Lifecycle.class);
-            } else {
-                mSystemServiceManager.startService(InputMethodManagerService.Lifecycle.class);
-            }
+            mSystemServiceManager.startService(InputMethodManagerService.Lifecycle.class);
             t.traceEnd();
 
             t.traceBegin("StartAccessibilityManagerService");
