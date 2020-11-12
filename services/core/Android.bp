@@ -210,7 +210,6 @@ java_library {
         ":connectivity-service-srcs",
     ],
     installable: true,
-    jarjar_rules: "jarjar-rules.txt",
     libs: [
         "android.net.ipsec.ike",
         "services.core",
