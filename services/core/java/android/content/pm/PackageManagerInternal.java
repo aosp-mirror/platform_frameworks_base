@@ -1126,4 +1126,16 @@ public abstract class PackageManagerInternal {
      * Notifies that a package has crashed or ANR'd.
      */
     public abstract void notifyPackageCrashOrAnr(String packageName);
+
+    /**
+     * Requesting the checksums for APKs within a package.
+     * See {@link PackageManager#requestChecksums} for details.
+     *
+     * @param executor to use for digest calculations.
+     * @param handler to use for postponed calculations.
+     */
+    public abstract void requestChecksums(@NonNull String packageName, boolean includeSplits,
+            @Checksum.Type int optional, @Checksum.Type int required,
+            @Nullable List trustedInstallers, @NonNull IntentSender statusReceiver, int userId,
+            @NonNull Executor executor, @NonNull Handler handler);
 }
