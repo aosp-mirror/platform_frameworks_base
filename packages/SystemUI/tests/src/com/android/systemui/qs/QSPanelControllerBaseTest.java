@@ -88,9 +88,10 @@ public class QSPanelControllerBaseTest extends SysuiTestCase {
     /** Implementation needed to ensure we have a reflectively-available class name. */
     private class TestableQSPanelControllerBase extends QSPanelControllerBase<QSPanel> {
         protected TestableQSPanelControllerBase(QSPanel view, QSTileHost host,
-                QSCustomizerController qsCustomizerController, MetricsLogger metricsLogger,
-                UiEventLogger uiEventLogger, DumpManager dumpManager) {
-            super(view, host, qsCustomizerController, metricsLogger, uiEventLogger, dumpManager);
+                QSCustomizerController qsCustomizerController, MediaHost mediaHost,
+                MetricsLogger metricsLogger, UiEventLogger uiEventLogger, DumpManager dumpManager) {
+            super(view, host, qsCustomizerController, mediaHost,
+                    metricsLogger, uiEventLogger, dumpManager);
         }
 
         @Override
@@ -103,7 +104,6 @@ public class QSPanelControllerBaseTest extends SysuiTestCase {
     public void setup() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        when(mQSPanel.getMediaHost()).thenReturn(mMediaHost);
         when(mQSPanel.isAttachedToWindow()).thenReturn(true);
         when(mQSPanel.getDumpableTag()).thenReturn("QSPanel");
         when(mQSPanel.openPanelEvent()).thenReturn(QSEvent.QS_PANEL_EXPANDED);
@@ -115,8 +115,7 @@ public class QSPanelControllerBaseTest extends SysuiTestCase {
                 .thenReturn(mQSTileRevealController);
 
         mController = new TestableQSPanelControllerBase(mQSPanel, mQSTileHost,
-                mQSCustomizerController, mMetricsLogger,
-                mUiEventLogger, mDumpManager);
+                mQSCustomizerController, mMediaHost, mMetricsLogger, mUiEventLogger, mDumpManager);
 
         mController.init();
         reset(mQSTileRevealController);
@@ -127,8 +126,8 @@ public class QSPanelControllerBaseTest extends SysuiTestCase {
         mController.onViewDetached();
 
         QSPanelControllerBase<QSPanel> controller = new QSPanelControllerBase<QSPanel>(
-                mQSPanel, mQSTileHost, mQSCustomizerController, mMetricsLogger, mUiEventLogger,
-                mDumpManager) {
+                mQSPanel, mQSTileHost, mQSCustomizerController, mMediaHost, mMetricsLogger,
+                mUiEventLogger, mDumpManager) {
             @Override
             protected QSTileRevealController createTileRevealController() {
                 return mQSTileRevealController;
