@@ -282,7 +282,7 @@ package android.app {
   }
 
   public class StatusBarManager {
-    method public void collapsePanels();
+    method @RequiresPermission(android.Manifest.permission.STATUS_BAR) public void collapsePanels();
     method public void expandNotificationsPanel();
     method @RequiresPermission(android.Manifest.permission.STATUS_BAR) public void setExpansionDisabledForSimNetworkLock(boolean);
   }
