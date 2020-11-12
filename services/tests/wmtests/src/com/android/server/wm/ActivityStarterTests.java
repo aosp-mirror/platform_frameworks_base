@@ -31,12 +31,15 @@ import static android.app.ActivityManager.START_SWITCHES_CANCELED;
 import static android.app.ActivityManager.START_TASK_TO_FRONT;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 import static android.content.Intent.FLAG_ACTIVITY_LAUNCH_ADJACENT;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED;
 import static android.content.Intent.FLAG_ACTIVITY_SINGLE_TOP;
+import static android.content.pm.ActivityInfo.LAUNCH_MULTIPLE;
+import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_INSTANCE;
 import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_TASK;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.clearInvocations;
@@ -304,7 +307,12 @@ public class ActivityStarterTests extends WindowTestsBase {
     }
 
     private ActivityStarter prepareStarter(@Intent.Flags int launchFlags) {
-        return prepareStarter(launchFlags, true /* mockGetLaunchStack */);
+        return prepareStarter(launchFlags, true /* mockGetLaunchStack */, LAUNCH_MULTIPLE);
+    }
+
+    private ActivityStarter prepareStarter(@Intent.Flags int launchFlags,
+            boolean mockGetLaunchStack) {
+        return prepareStarter(launchFlags, mockGetLaunchStack, LAUNCH_MULTIPLE);
     }
 
     /**
@@ -318,7 +326,7 @@ public class ActivityStarterTests extends WindowTestsBase {
      * @return A {@link ActivityStarter} with default setup.
      */
     private ActivityStarter prepareStarter(@Intent.Flags int launchFlags,
-            boolean mockGetLaunchStack) {
+            boolean mockGetLaunchStack, int launchMode) {
         // always allow test to start activity.
         doReturn(true).when(mSupervisor).checkStartAnyActivityPermission(
                 any(), any(), any(), anyInt(), anyInt(), anyInt(), any(), any(),
@@ -362,6 +370,7 @@ public class ActivityStarterTests extends WindowTestsBase {
 
         info.applicationInfo = new ApplicationInfo();
         info.applicationInfo.packageName = ActivityBuilder.getDefaultComponent().getPackageName();
+        info.launchMode = launchMode;
 
         return new ActivityStarter(mController, mAtm,
                 mAtm.mStackSupervisor, mock(ActivityStartInterceptor.class))
@@ -416,7 +425,8 @@ public class ActivityStarterTests extends WindowTestsBase {
     @Test
     public void testSplitScreenDeliverToTop() {
         final ActivityStarter starter = prepareStarter(
-                FLAG_ACTIVITY_RESET_TASK_IF_NEEDED | FLAG_ACTIVITY_SINGLE_TOP, false);
+                FLAG_ACTIVITY_RESET_TASK_IF_NEEDED | FLAG_ACTIVITY_SINGLE_TOP,
+                false /* mockGetLaunchStack */);
         final ActivityRecord splitPrimaryFocusActivity =
                 new ActivityBuilder(mAtm).setCreateTask(true).build();
         final ActivityRecord splitSecondReusableActivity =
@@ -584,6 +594,12 @@ public class ActivityStarterTests extends WindowTestsBase {
                 UNIMPORTANT_UID, false, PROCESS_STATE_TOP + 1,
                 UNIMPORTANT_UID2, false, PROCESS_STATE_TOP + 1,
                 true, false, false, false, false);
+        runAndVerifyBackgroundActivityStartsSubtest(
+                "disallowed_pinned_singleinstance_aborted", true,
+                UNIMPORTANT_UID, false, PROCESS_STATE_TOP + 1,
+                UNIMPORTANT_UID2, false, PROCESS_STATE_TOP + 1,
+                false, false, false, false, false, true);
+
     }
 
     /**
@@ -647,11 +663,28 @@ public class ActivityStarterTests extends WindowTestsBase {
             boolean callerIsTempAllowed,
             boolean callerIsInstrumentingWithBackgroundActivityStartPrivileges,
             boolean isCallingUidDeviceOwner) {
+        runAndVerifyBackgroundActivityStartsSubtest(name, shouldHaveAborted, callingUid,
+                callingUidHasVisibleWindow, callingUidProcState, realCallingUid,
+                realCallingUidHasVisibleWindow, realCallingUidProcState,
+                hasForegroundActivities, callerIsRecents, callerIsTempAllowed,
+                callerIsInstrumentingWithBackgroundActivityStartPrivileges,
+                isCallingUidDeviceOwner, false /* isPinnedSingleInstance */);
+    }
+
+    private void runAndVerifyBackgroundActivityStartsSubtest(String name, boolean shouldHaveAborted,
+            int callingUid, boolean callingUidHasVisibleWindow, int callingUidProcState,
+            int realCallingUid, boolean realCallingUidHasVisibleWindow, int realCallingUidProcState,
+            boolean hasForegroundActivities, boolean callerIsRecents,
+            boolean callerIsTempAllowed,
+            boolean callerIsInstrumentingWithBackgroundActivityStartPrivileges,
+            boolean isCallingUidDeviceOwner,
+            boolean isPinnedSingleInstance) {
         // window visibility
         doReturn(callingUidHasVisibleWindow).when(mAtm.mWindowManager.mRoot)
                 .isAnyNonToastWindowVisibleForUid(callingUid);
         doReturn(realCallingUidHasVisibleWindow).when(mAtm.mWindowManager.mRoot)
                 .isAnyNonToastWindowVisibleForUid(realCallingUid);
+
         // process importance
         doReturn(callingUidProcState).when(mAtm).getUidState(callingUid);
         doReturn(realCallingUidProcState).when(mAtm).getUidState(realCallingUid);
@@ -679,9 +712,20 @@ public class ActivityStarterTests extends WindowTestsBase {
         // callingUid is the device owner
         doReturn(isCallingUidDeviceOwner).when(mAtm).isDeviceOwner(callingUid);
 
+        int launchMode = LAUNCH_MULTIPLE;
+        if (isPinnedSingleInstance) {
+            final ActivityRecord baseActivity =
+                    new ActivityBuilder(mAtm).setCreateTask(true).build();
+            baseActivity.getRootTask()
+                    .setWindowingMode(WINDOWING_MODE_PINNED);
+            doReturn(baseActivity).when(mRootWindowContainer).findTask(any(), any());
+            launchMode = LAUNCH_SINGLE_INSTANCE;
+        }
+
         final ActivityOptions options = spy(ActivityOptions.makeBasic());
         ActivityRecord[] outActivity = new ActivityRecord[1];
-        ActivityStarter starter = prepareStarter(FLAG_ACTIVITY_NEW_TASK)
+        ActivityStarter starter = prepareStarter(
+                FLAG_ACTIVITY_NEW_TASK, true, launchMode)
                 .setCallingPackage("com.whatever.dude")
                 .setCaller(caller)
                 .setCallingUid(callingUid)
