@@ -14,19 +14,6 @@
  * limitations under the License.
  */
 
-package android.telephony.ims.aidl;
+package android.telephony.ims;
 
-import android.telephony.ims.DelegateRequest;
-import android.telephony.ims.aidl.ISipDelegate;
-import android.telephony.ims.aidl.ISipDelegateMessageCallback;
-import android.telephony.ims.aidl.ISipDelegateStateCallback;
-
-/**
- * Interface for commands to the SIP Transport implementation.
- * {@hide}
- */
-oneway interface ISipTransport {
-    void createSipDelegate(in DelegateRequest request, ISipDelegateStateCallback dc,
-            ISipDelegateMessageCallback mc);
-    void destroySipDelegate(ISipDelegate delegate, int reason);
-}
+parcelable DelegateRegistrationState;
