@@ -469,7 +469,6 @@ public class QuickStatusBarHeader extends RelativeLayout implements LifecycleOwn
         return mLifecycle;
     }
 
-    /** */
     public void setContentMargins(int marginStart, int marginEnd) {
         mContentMarginStart = marginStart;
         mContentMarginEnd = marginEnd;

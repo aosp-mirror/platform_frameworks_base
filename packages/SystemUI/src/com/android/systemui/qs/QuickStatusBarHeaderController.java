@@ -366,6 +366,7 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
                 mZenModeController.getConsolidatedPolicy());
     }
 
+
     private static class ClockDemoModeReceiver implements DemoMode {
         private Clock mClockView;
 
