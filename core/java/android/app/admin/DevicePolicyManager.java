@@ -2454,7 +2454,7 @@ public class DevicePolicyManager {
     public @interface PersonalAppsSuspensionReason {}
 
     /** @hide */
-    // TODO(b/172376923): make it TestApi
+    @TestApi
     public static final int OPERATION_LOCK_NOW = 1;
 
     // TODO(b/172376923) - add all operations
