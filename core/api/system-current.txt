@@ -5438,6 +5438,10 @@ package android.media.tv.tuner.filter {
     method @NonNull public android.media.tv.tuner.filter.RecordSettings.Builder setTsIndexMask(int);
   }
 
+  public final class RestartEvent extends android.media.tv.tuner.filter.FilterEvent {
+    method public int getStartId();
+  }
+
   public final class ScramblingStatusEvent extends android.media.tv.tuner.filter.FilterEvent {
     method public int getScramblingStatus();
   }
