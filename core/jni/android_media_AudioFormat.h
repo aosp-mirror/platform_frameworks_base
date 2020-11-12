@@ -39,6 +39,8 @@
 #define ENCODING_E_AC3_JOC      18
 #define ENCODING_DOLBY_MAT      19
 #define ENCODING_OPUS           20
+#define ENCODING_PCM_24BIT_PACKED 21
+#define ENCODING_PCM_32BIT 22
 
 #define ENCODING_INVALID    0
 #define ENCODING_DEFAULT    1
@@ -92,6 +94,10 @@ static inline audio_format_t audioFormatToNative(int audioFormat)
         return AUDIO_FORMAT_MAT;
     case ENCODING_OPUS:
         return AUDIO_FORMAT_OPUS;
+    case ENCODING_PCM_24BIT_PACKED:
+        return AUDIO_FORMAT_PCM_24_BIT_PACKED;
+    case ENCODING_PCM_32BIT:
+        return AUDIO_FORMAT_PCM_32_BIT;
     default:
         return AUDIO_FORMAT_INVALID;
     }
@@ -107,10 +113,15 @@ static inline int audioFormatFromNative(audio_format_t nativeFormat)
     case AUDIO_FORMAT_PCM_FLOAT:
         return ENCODING_PCM_FLOAT;
 
-    // map these to ENCODING_PCM_FLOAT
-    case AUDIO_FORMAT_PCM_8_24_BIT:
+    // As of S, these extend integer precision formats now return more specific values
+    // than ENCODING_PCM_FLOAT.
     case AUDIO_FORMAT_PCM_24_BIT_PACKED:
+        return ENCODING_PCM_24BIT_PACKED;
     case AUDIO_FORMAT_PCM_32_BIT:
+        return ENCODING_PCM_32BIT;
+
+    // map this to ENCODING_PCM_FLOAT
+    case AUDIO_FORMAT_PCM_8_24_BIT:
         return ENCODING_PCM_FLOAT;
 
     case AUDIO_FORMAT_AC3:
