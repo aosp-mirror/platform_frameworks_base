@@ -23,12 +23,19 @@
     <uses-permission android:name="android.permission.DUMP" />
     <!-- Enable / Disable sv blast adapter !-->
     <uses-permission android:name="android.permission.WRITE_SECURE_SETTINGS" />
+    <!-- Readback virtual display output !-->
+    <uses-permission android:name="android.permission.CAPTURE_VIDEO_OUTPUT"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
+    <!-- Save failed test bitmap images !-->
+    <uses-permission android:name="android.Manifest.permission.WRITE_EXTERNAL_STORAGE"/>
 
     <application android:allowBackup="false"
          android:supportsRtl="true">
         <activity android:name=".MainActivity"
                   android:taskAffinity="com.android.test.MainActivity"
                   android:theme="@style/AppTheme"
+                  android:configChanges="orientation|screenSize"
                   android:label="SurfaceViewBufferTestApp"
                   android:exported="true">
             <intent-filter>
@@ -36,6 +43,10 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+        <service android:name="android.view.cts.surfacevalidator.LocalMediaProjectionService"
+                 android:foregroundServiceType="mediaProjection"
+                 android:enabled="true">
+        </service>
         <uses-library android:name="android.test.runner"/>
     </application>
 

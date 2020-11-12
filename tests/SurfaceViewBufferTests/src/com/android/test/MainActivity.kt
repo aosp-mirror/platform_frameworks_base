@@ -15,51 +15,80 @@
  */
 package com.android.test
 
-import android.app.Activity
 import android.content.Context
+import android.content.pm.ActivityInfo
+import android.content.res.Configuration.ORIENTATION_LANDSCAPE
 import android.graphics.Color
 import android.graphics.Paint
+import android.graphics.Point
 import android.graphics.Rect
 import android.os.Bundle
 import android.view.Gravity
 import android.view.Surface
 import android.view.SurfaceHolder
 import android.view.SurfaceView
+import android.view.View
+import android.view.WindowManager
+import android.view.cts.surfacevalidator.CapturedActivity
 import android.widget.FrameLayout
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
 
-class MainActivity : Activity() {
+class MainActivity : CapturedActivity() {
     val mSurfaceProxy = SurfaceProxy()
     private var mSurfaceHolder: SurfaceHolder? = null
     private val mDrawLock = ReentrantLock()
+    var mSurfaceView: SurfaceView? = null
 
     val surface: Surface? get() = mSurfaceHolder?.surface
 
-    public override fun onCreate(savedInstanceState: Bundle?) {
+    override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        addSurfaceView(Rect(0, 0, 500, 200))
+        addSurfaceView(Point(500, 200))
+        window.decorView.apply {
+            systemUiVisibility =
+                    View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or View.SYSTEM_UI_FLAG_FULLSCREEN
+        }
     }
 
-    fun addSurfaceView(size: Rect): CountDownLatch {
+    override fun getCaptureDurationMs(): Long {
+        return 30000
+    }
+
+    fun addSurfaceView(size: Point): CountDownLatch {
         val layout = findViewById<FrameLayout>(android.R.id.content)
         val surfaceReadyLatch = CountDownLatch(1)
-        val surfaceView = createSurfaceView(applicationContext, size, surfaceReadyLatch)
-        layout.addView(surfaceView,
-                FrameLayout.LayoutParams(size.width(), size.height(), Gravity.TOP or Gravity.LEFT)
+        mSurfaceView = createSurfaceView(applicationContext, size, surfaceReadyLatch)
+        layout.addView(mSurfaceView!!,
+                FrameLayout.LayoutParams(size.x, size.y, Gravity.TOP or Gravity.LEFT)
                         .also { it.setMargins(100, 100, 0, 0) })
+
         return surfaceReadyLatch
+    }
+
+    fun enableSeamlessRotation() {
+        val p: WindowManager.LayoutParams = window.attributes
+        p.rotationAnimation = WindowManager.LayoutParams.ROTATION_ANIMATION_SEAMLESS
+        window.attributes = p
+    }
+
+    fun rotate90() {
+        if (getResources().getConfiguration().orientation == ORIENTATION_LANDSCAPE) {
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
+        } else {
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE)
+        }
     }
 
     private fun createSurfaceView(
         context: Context,
-        size: Rect,
+        size: Point,
         surfaceReadyLatch: CountDownLatch
     ): SurfaceView {
         val surfaceView = SurfaceView(context)
         surfaceView.setWillNotDraw(false)
-        surfaceView.holder.setFixedSize(size.width(), size.height())
+        surfaceView.holder.setFixedSize(size.x, size.y)
         surfaceView.holder.addCallback(object : SurfaceHolder.Callback {
             override fun surfaceCreated(holder: SurfaceHolder) {
                 mDrawLock.withLock {
