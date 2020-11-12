@@ -16,6 +16,7 @@
 
 package com.android.server.wm.flicker
 
+import android.platform.helpers.IAppHelper
 import com.android.server.wm.flicker.dsl.EventLogAssertion
 import com.android.server.wm.flicker.dsl.LayersAssertion
 import com.android.server.wm.flicker.dsl.WmAssertion
@@ -24,6 +25,7 @@ import com.android.server.wm.flicker.helpers.WindowUtils
 const val NAVIGATION_BAR_WINDOW_TITLE = "NavigationBar"
 const val STATUS_BAR_WINDOW_TITLE = "StatusBar"
 const val DOCKED_STACK_DIVIDER = "DockedStackDivider"
+const val WALLPAPER_TITLE = "Wallpaper"
 
 @JvmOverloads
 fun WmAssertion.statusBarWindowIsAlwaysVisible(
@@ -51,6 +53,29 @@ fun WmAssertion.visibleWindowsShownMoreThanOneConsecutiveEntry(
 ) {
     all("visibleWindowShownMoreThanOneConsecutiveEntry", bugId, enabled) {
         this.visibleWindowsShownMoreThanOneConsecutiveEntry()
+    }
+}
+
+fun WmAssertion.launcherReplacesAppWindowAsTopWindow(
+    testApp: IAppHelper,
+    bugId: Int = 0,
+    enabled: Boolean = bugId == 0
+) {
+    all("launcherReplacesAppWindowAsTopWindow", bugId, enabled) {
+        this.showsAppWindowOnTop(testApp.getPackage())
+                .then()
+                .showsAppWindowOnTop("Launcher")
+    }
+}
+
+fun WmAssertion.wallpaperWindowBecomesVisible(
+    bugId: Int = 0,
+    enabled: Boolean = bugId == 0
+) {
+    all("wallpaperWindowBecomesVisible", bugId, enabled) {
+        this.hidesBelowAppWindow(WALLPAPER_TITLE)
+                .then()
+                .showsBelowAppWindow(WALLPAPER_TITLE)
     }
 }
 
@@ -174,6 +199,18 @@ fun LayersAssertion.visibleLayersShownMoreThanOneConsecutiveEntry(
 ) {
     all("visibleLayersShownMoreThanOneConsecutiveEntry", bugId, enabled) {
         this.visibleLayersShownMoreThanOneConsecutiveEntry()
+    }
+}
+
+fun LayersAssertion.wallpaperLayerReplacesAppLayer(
+    testApp: IAppHelper,
+    bugId: Int = 0,
+    enabled: Boolean = bugId == 0
+) {
+    all("appLayerReplacesWallpaperLayer", bugId, enabled) {
+        this.showsLayer(testApp.getPackage())
+                .then()
+                .replaceVisibleLayer(testApp.getPackage(), WALLPAPER_TITLE)
     }
 }
 
