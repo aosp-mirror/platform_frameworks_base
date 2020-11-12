@@ -59,12 +59,7 @@ message InputMethodClientsTraceProto {
     /* where the trace originated */
     optional string where = 2;
 
-    optional ClientsProto clients = 3;
-
-    // this wrapper helps to simplify the dumping logic
-    message ClientsProto {
-        repeated ClientSideProto client = 1;
-    }
+    optional ClientSideProto client = 3;
 
     /* groups together the dump from ime related client side classes */
     message ClientSideProto {

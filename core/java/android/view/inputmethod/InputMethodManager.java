@@ -24,7 +24,6 @@ import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodCl
 import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodClientsTraceProto.ClientSideProto.IME_INSETS_SOURCE_CONSUMER;
 import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodClientsTraceProto.ClientSideProto.INPUT_METHOD_MANAGER;
 import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodClientsTraceProto.ClientSideProto.VIEW_ROOT_IMPL;
-import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodClientsTraceProto.ClientsProto.CLIENT;
 import static android.view.inputmethod.InputMethodManagerProto.ACTIVE;
 import static android.view.inputmethod.InputMethodManagerProto.CUR_ID;
 import static android.view.inputmethod.InputMethodManagerProto.FULLSCREEN_MODE;
@@ -577,7 +576,7 @@ public final class InputMethodManager {
                 int windowFlags) {
             final View servedView;
             ImeTracing.getInstance().triggerClientDump(
-                    "InputMethodManager.DelegateImpl#startInput");
+                    "InputMethodManager.DelegateImpl#startInput", InputMethodManager.this);
             synchronized (mH) {
                 mCurrentTextBoxAttribute = null;
                 mCompletions = null;
@@ -1663,7 +1662,7 @@ public final class InputMethodManager {
      * {@link #RESULT_HIDDEN}.
      */
     public boolean showSoftInput(View view, int flags, ResultReceiver resultReceiver) {
-        ImeTracing.getInstance().triggerClientDump("InputMethodManager#showSoftInput");
+        ImeTracing.getInstance().triggerClientDump("InputMethodManager#showSoftInput", this);
         // Re-dispatch if there is a context mismatch.
         final InputMethodManager fallbackImm = getFallbackInputMethodManagerIfNecessary(view);
         if (fallbackImm != null) {
@@ -1771,7 +1770,8 @@ public final class InputMethodManager {
      */
     public boolean hideSoftInputFromWindow(IBinder windowToken, int flags,
             ResultReceiver resultReceiver) {
-        ImeTracing.getInstance().triggerClientDump("InputMethodManager#hideSoftInputFromWindow");
+        ImeTracing.getInstance().triggerClientDump("InputMethodManager#hideSoftInputFromWindow",
+                this);
         checkFocus();
         synchronized (mH) {
             final View servedView = getServedViewLocked();
@@ -3241,25 +3241,12 @@ public final class InputMethodManager {
         for (String arg : args) {
             if (arg.equals(PROTO_ARG)) {
                 final ProtoOutputStream proto = new ProtoOutputStream(fd);
-                dumpProto(proto);
+                dumpDebug(proto);
                 proto.flush();
                 return true;
             }
         }
         return false;
-    }
-
-    /**
-     * Write the proto dump for all displays associated with this client.
-     *
-     * @param proto The proto stream to which the dumps are written.
-     * @hide
-     */
-    public static void dumpProto(ProtoOutputStream proto) {
-        for (int i = sInstanceMap.size() - 1; i >= 0; i--) {
-            InputMethodManager imm = sInstanceMap.valueAt(i);
-            imm.dumpDebug(proto);
-        }
     }
 
     /**
@@ -3275,7 +3262,6 @@ public final class InputMethodManager {
             return;
         }
 
-        final long clientDumpToken = proto.start(CLIENT);
         proto.write(DISPLAY_ID, mDisplayId);
         final long token = proto.start(INPUT_METHOD_MANAGER);
         synchronized (mH) {
@@ -3294,6 +3280,5 @@ public final class InputMethodManager {
                 mImeInsetsConsumer.dumpDebug(proto, IME_INSETS_SOURCE_CONSUMER);
             }
         }
-        proto.end(clientDumpToken);
     }
 }

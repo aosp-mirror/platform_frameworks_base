@@ -25,6 +25,7 @@ import android.os.ServiceManager.ServiceNotFoundException;
 import android.os.ShellCommand;
 import android.util.Log;
 import android.util.proto.ProtoOutputStream;
+import android.view.inputmethod.InputMethodManager;
 
 import com.android.internal.view.IInputMethodManager;
 
@@ -105,8 +106,9 @@ public abstract class ImeTracing {
      * Starts a proto dump of the client side information.
      *
      * @param where Place where the trace was triggered.
+     * @param immInstance The {@link InputMethodManager} instance to dump.
      */
-    public abstract void triggerClientDump(String where);
+    public abstract void triggerClientDump(String where, InputMethodManager immInstance);
 
     /**
      * Starts a proto dump of the currently connected InputMethodService information.

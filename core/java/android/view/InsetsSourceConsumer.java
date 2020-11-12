@@ -25,7 +25,6 @@ import static android.view.InsetsSourceConsumerProto.IS_REQUESTED_VISIBLE;
 import static android.view.InsetsSourceConsumerProto.PENDING_FRAME;
 import static android.view.InsetsSourceConsumerProto.PENDING_VISIBLE_FRAME;
 import static android.view.InsetsSourceConsumerProto.SOURCE_CONTROL;
-import static android.view.InsetsState.ITYPE_IME;
 import static android.view.InsetsState.getDefaultVisibility;
 import static android.view.InsetsState.toPublicType;
 
@@ -35,7 +34,6 @@ import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.graphics.Rect;
 import android.util.Log;
-import android.util.imetracing.ImeTracing;
 import android.util.proto.ProtoOutputStream;
 import android.view.InsetsState.InternalInsetsType;
 import android.view.SurfaceControl.Transaction;
@@ -328,10 +326,6 @@ public class InsetsSourceConsumer {
 
     @VisibleForTesting(visibility = PACKAGE)
     public boolean notifyAnimationFinished() {
-        if (mType == ITYPE_IME) {
-            ImeTracing.getInstance().triggerClientDump(
-                    "InsetsSourceConsumer#notifyAnimationFinished");
-        }
         if (mPendingFrame != null) {
             InsetsSource source = mState.getSource(mType);
             source.setFrame(mPendingFrame);

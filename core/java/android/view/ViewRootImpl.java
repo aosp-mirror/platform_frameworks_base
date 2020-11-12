@@ -9221,10 +9221,11 @@ public final class ViewRootImpl implements ViewParent,
 
         @Override
         public void showInsets(@InsetsType int types, boolean fromIme) {
-            if (fromIme) {
-                ImeTracing.getInstance().triggerClientDump("ViewRootImpl.W#showInsets");
-            }
             final ViewRootImpl viewAncestor = mViewAncestor.get();
+            if (fromIme) {
+                ImeTracing.getInstance().triggerClientDump("ViewRootImpl.W#showInsets",
+                        viewAncestor.getInsetsController().getHost().getInputMethodManager());
+            }
             if (viewAncestor != null) {
                 viewAncestor.showInsets(types, fromIme);
             }
@@ -9232,10 +9233,12 @@ public final class ViewRootImpl implements ViewParent,
 
         @Override
         public void hideInsets(@InsetsType int types, boolean fromIme) {
-            if (fromIme) {
-                ImeTracing.getInstance().triggerClientDump("ViewRootImpl.W#hideInsets");
-            }
+
             final ViewRootImpl viewAncestor = mViewAncestor.get();
+            if (fromIme) {
+                ImeTracing.getInstance().triggerClientDump("ViewRootImpl.W#hideInsets",
+                        viewAncestor.getInsetsController().getHost().getInputMethodManager());
+            }
             if (viewAncestor != null) {
                 viewAncestor.hideInsets(types, fromIme);
             }

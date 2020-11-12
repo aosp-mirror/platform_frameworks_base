@@ -27,6 +27,7 @@ import android.util.proto.ProtoOutputStream;
 import android.view.inputmethod.InputMethodEditorTraceProto.InputMethodClientsTraceFileProto;
 import android.view.inputmethod.InputMethodEditorTraceProto.InputMethodManagerServiceTraceFileProto;
 import android.view.inputmethod.InputMethodEditorTraceProto.InputMethodServiceTraceFileProto;
+import android.view.inputmethod.InputMethodManager;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.TraceBuffer;
@@ -131,7 +132,7 @@ class ImeTracingServerImpl extends ImeTracing {
     }
 
     @Override
-    public void triggerClientDump(String where) {
+    public void triggerClientDump(String where, InputMethodManager immInstance) {
         // Intentionally left empty, this is implemented in ImeTracingClientImpl
     }
 

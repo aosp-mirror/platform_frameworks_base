@@ -4038,7 +4038,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 proto.write(InputMethodClientsTraceProto.ELAPSED_REALTIME_NANOS,
                         SystemClock.elapsedRealtimeNanos());
                 proto.write(InputMethodClientsTraceProto.WHERE, where);
-                proto.write(InputMethodClientsTraceProto.CLIENTS, protoDump);
+                proto.write(InputMethodClientsTraceProto.CLIENT, protoDump);
                 proto.end(client_token);
                 break;
             case ImeTracing.IME_TRACING_FROM_IMS:
