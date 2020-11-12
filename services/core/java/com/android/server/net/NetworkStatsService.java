@@ -1084,12 +1084,10 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             return nativeIfaceStats;
         } else {
             // When tethering offload is in use, nativeIfaceStats does not contain usage from
-            // offload, add it back here.
-            // When tethering offload is not in use, nativeIfaceStats contains tethering usage.
-            // this does not cause double-counting of tethering traffic, because
-            // NetdTetheringStatsProvider returns zero NetworkStats
-            // when called with STATS_PER_IFACE.
-            return nativeIfaceStats + getTetherStats(iface, type);
+            // offload, add it back here. Note that the included statistics might be stale
+            // since polling newest stats from hardware might impact system health and not
+            // suitable for TrafficStats API use cases.
+            return nativeIfaceStats + getProviderIfaceStats(iface, type);
         }
     }
 
@@ -1100,39 +1098,28 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             return nativeTotalStats;
         } else {
             // Refer to comment in getIfaceStats
-            return nativeTotalStats + getTetherStats(IFACE_ALL, type);
+            return nativeTotalStats + getProviderIfaceStats(IFACE_ALL, type);
         }
     }
 
-    private long getTetherStats(String iface, int type) {
-        final NetworkStats tetherSnapshot;
-        final long token = Binder.clearCallingIdentity();
-        try {
-            tetherSnapshot = getNetworkStatsTethering(STATS_PER_IFACE);
-        } catch (RemoteException e) {
-            Slog.w(TAG, "Error get TetherStats: " + e);
-            return 0;
-        } finally {
-            Binder.restoreCallingIdentity(token);
-        }
-        HashSet<String> limitIfaces;
+    private long getProviderIfaceStats(@Nullable String iface, int type) {
+        final NetworkStats providerSnapshot = getNetworkStatsFromProviders(STATS_PER_IFACE);
+        final HashSet<String> limitIfaces;
         if (iface == IFACE_ALL) {
             limitIfaces = null;
         } else {
-            limitIfaces = new HashSet<String>();
+            limitIfaces = new HashSet<>();
             limitIfaces.add(iface);
         }
-        NetworkStats.Entry entry = tetherSnapshot.getTotal(null, limitIfaces);
-        if (LOGD) Slog.d(TAG, "TetherStats: iface=" + iface + " type=" + type +
-                " entry=" + entry);
+        final NetworkStats.Entry entry = providerSnapshot.getTotal(null, limitIfaces);
         switch (type) {
-            case 0: // TYPE_RX_BYTES
+            case TrafficStats.TYPE_RX_BYTES:
                 return entry.rxBytes;
-            case 1: // TYPE_RX_PACKETS
+            case TrafficStats.TYPE_RX_PACKETS:
                 return entry.rxPackets;
-            case 2: // TYPE_TX_BYTES
+            case TrafficStats.TYPE_TX_BYTES:
                 return entry.txBytes;
-            case 3: // TYPE_TX_PACKETS
+            case TrafficStats.TYPE_TX_PACKETS:
                 return entry.txPackets;
             default:
                 return 0;
@@ -1429,14 +1416,6 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         final NetworkStats devSnapshot = readNetworkStatsSummaryDev();
         Trace.traceEnd(TRACE_TAG_NETWORK);
 
-        // Tethering snapshot for dev and xt stats. Counts per-interface data from tethering stats
-        // providers that isn't already counted by dev and XT stats.
-        Trace.traceBegin(TRACE_TAG_NETWORK, "snapshotTether");
-        final NetworkStats tetherSnapshot = getNetworkStatsTethering(STATS_PER_IFACE);
-        Trace.traceEnd(TRACE_TAG_NETWORK);
-        xtSnapshot.combineAllValues(tetherSnapshot);
-        devSnapshot.combineAllValues(tetherSnapshot);
-
         // Snapshot for dev/xt stats from all custom stats providers. Counts per-interface data
         // from stats providers that isn't already counted by dev and XT stats.
         Trace.traceBegin(TRACE_TAG_NETWORK, "snapshotStatsProvider");
@@ -1511,29 +1490,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         final boolean persistUid = (flags & FLAG_PERSIST_UID) != 0;
         final boolean persistForce = (flags & FLAG_PERSIST_FORCE) != 0;
 
-        // Request asynchronous stats update from all providers for next poll. And wait a bit of
-        // time to allow providers report-in given that normally binder call should be fast. Note
-        // that size of list might be changed because addition/removing at the same time. For
-        // addition, the stats of the missed provider can only be collected in next poll;
-        // for removal, wait might take up to MAX_STATS_PROVIDER_POLL_WAIT_TIME_MS
-        // once that happened.
-        // TODO: request with a valid token.
-        Trace.traceBegin(TRACE_TAG_NETWORK, "provider.requestStatsUpdate");
-        final int registeredCallbackCount = mStatsProviderCbList.size();
-        mStatsProviderSem.drainPermits();
-        invokeForAllStatsProviderCallbacks(
-                (cb) -> cb.mProvider.onRequestStatsUpdate(0 /* unused */));
-        try {
-            mStatsProviderSem.tryAcquire(registeredCallbackCount,
-                    MAX_STATS_PROVIDER_POLL_WAIT_TIME_MS, TimeUnit.MILLISECONDS);
-        } catch (InterruptedException e) {
-            // Strictly speaking it's possible a provider happened to deliver between the timeout
-            // and the log, and that doesn't matter too much as this is just a debug log.
-            Log.d(TAG, "requestStatsUpdate - providers responded "
-                    + mStatsProviderSem.availablePermits()
-                    + "/" + registeredCallbackCount + " : " + e);
-        }
-        Trace.traceEnd(TRACE_TAG_NETWORK);
+        performPollFromProvidersLocked();
 
         // TODO: consider marking "untrusted" times in historical stats
         final long currentTime = mClock.millis();
@@ -1575,6 +1532,33 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         // finally, dispatch updated event to any listeners
         mHandler.sendMessage(mHandler.obtainMessage(MSG_BROADCAST_NETWORK_STATS_UPDATED));
 
+        Trace.traceEnd(TRACE_TAG_NETWORK);
+    }
+
+    @GuardedBy("mStatsLock")
+    private void performPollFromProvidersLocked() {
+        // Request asynchronous stats update from all providers for next poll. And wait a bit of
+        // time to allow providers report-in given that normally binder call should be fast. Note
+        // that size of list might be changed because addition/removing at the same time. For
+        // addition, the stats of the missed provider can only be collected in next poll;
+        // for removal, wait might take up to MAX_STATS_PROVIDER_POLL_WAIT_TIME_MS
+        // once that happened.
+        // TODO: request with a valid token.
+        Trace.traceBegin(TRACE_TAG_NETWORK, "provider.requestStatsUpdate");
+        final int registeredCallbackCount = mStatsProviderCbList.size();
+        mStatsProviderSem.drainPermits();
+        invokeForAllStatsProviderCallbacks(
+                (cb) -> cb.mProvider.onRequestStatsUpdate(0 /* unused */));
+        try {
+            mStatsProviderSem.tryAcquire(registeredCallbackCount,
+                    MAX_STATS_PROVIDER_POLL_WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException e) {
+            // Strictly speaking it's possible a provider happened to deliver between the timeout
+            // and the log, and that doesn't matter too much as this is just a debug log.
+            Log.d(TAG, "requestStatsUpdate - providers responded "
+                    + mStatsProviderSem.availablePermits()
+                    + "/" + registeredCallbackCount + " : " + e);
+        }
         Trace.traceEnd(TRACE_TAG_NETWORK);
     }
 
@@ -1931,9 +1915,13 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     }
 
     /**
-     * Return snapshot of current tethering statistics. Will return empty
-     * {@link NetworkStats} if any problems are encountered.
+     * Return snapshot of current non-offloaded tethering statistics. Will return empty
+     * {@link NetworkStats} if any problems are encountered, or queried by {@code STATS_PER_IFACE}
+     * since it is already included by {@link #nativeGetIfaceStat}.
+     * See {@code OffloadTetheringStatsProvider} for offloaded tethering stats.
      */
+    // TODO: Remove this by implementing {@link NetworkStatsProvider} for non-offloaded
+    //  tethering stats.
     private NetworkStats getNetworkStatsTethering(int how) throws RemoteException {
         try {
             return mNetworkManager.getNetworkStatsTethering(how);
@@ -2225,13 +2213,6 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             return getGlobalLong(NETSTATS_UID_TAG_PERSIST_BYTES, def);
         }
     }
-
-    private static int TYPE_RX_BYTES;
-    private static int TYPE_RX_PACKETS;
-    private static int TYPE_TX_BYTES;
-    private static int TYPE_TX_PACKETS;
-    private static int TYPE_TCP_RX_PACKETS;
-    private static int TYPE_TCP_TX_PACKETS;
 
     private static native long nativeGetTotalStat(int type, boolean useBpfStats);
     private static native long nativeGetIfaceStat(String iface, int type, boolean useBpfStats);
