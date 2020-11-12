@@ -17692,12 +17692,12 @@ public class PackageManagerService extends IPackageManager.Stub
             final SparseArray<int[]> newBroadcastAllowList;
             final String codePath;
             synchronized (mLock) {
-                final PackageSetting ps = mSettings.mPackages.get(mPackageName);
+                final PackageSetting ps = mSettings.getPackageLPr(mPackageName);
                 if (ps == null) {
                     return;
                 }
                 newBroadcastAllowList = mAppsFilter.getVisibilityAllowList(
-                        ps, mInstalledUserIds, mSettings.mPackages);
+                        ps, mInstalledUserIds, mSettings.getPackagesLocked());
                 codePath = ps.getPathString();
             }
             Bundle extras = new Bundle();
@@ -17715,12 +17715,12 @@ public class PackageManagerService extends IPackageManager.Stub
         public void onPackageUnstartable(int reason) {
             final SparseArray<int[]> newBroadcastAllowList;
             synchronized (mLock) {
-                final PackageSetting ps = mSettings.mPackages.get(mPackageName);
+                final PackageSetting ps = mSettings.getPackageLPr(mPackageName);
                 if (ps == null) {
                     return;
                 }
                 newBroadcastAllowList = mAppsFilter.getVisibilityAllowList(
-                        ps, mInstalledUserIds, mSettings.mPackages);
+                        ps, mInstalledUserIds, mSettings.getPackagesLocked());
             }
             Bundle extras = new Bundle();
             extras.putInt(Intent.EXTRA_UID, mUid);
@@ -17737,12 +17737,12 @@ public class PackageManagerService extends IPackageManager.Stub
         public void onPackageStartable() {
             final SparseArray<int[]> newBroadcastAllowList;
             synchronized (mLock) {
-                final PackageSetting ps = mSettings.mPackages.get(mPackageName);
+                final PackageSetting ps = mSettings.getPackageLPr(mPackageName);
                 if (ps == null) {
                     return;
                 }
                 newBroadcastAllowList = mAppsFilter.getVisibilityAllowList(
-                        ps, mInstalledUserIds, mSettings.mPackages);
+                        ps, mInstalledUserIds, mSettings.getPackagesLocked());
             }
             Bundle extras = new Bundle();
             extras.putInt(Intent.EXTRA_UID, mUid);
@@ -17768,7 +17768,7 @@ public class PackageManagerService extends IPackageManager.Stub
         public void onPackageLoadingProgressChanged(float progress) {
             final PackageSetting ps;
             synchronized (mLock) {
-                ps = mSettings.mPackages.get(mPackageName);
+                ps = mSettings.getPackageLPr(mPackageName);
             }
             if (ps == null) {
                 return;
@@ -17791,7 +17791,7 @@ public class PackageManagerService extends IPackageManager.Stub
         public void onHealthStatus(int storageId, int status) throws RemoteException {
             final PackageSetting ps;
             synchronized (mLock) {
-                ps = mSettings.mPackages.get(mPackageName);
+                ps = mSettings.getPackageLPr(mPackageName);
             }
             if (ps == null) {
                 return;
@@ -17804,7 +17804,7 @@ public class PackageManagerService extends IPackageManager.Stub
             int userId) {
         final PackageSetting ps;
         synchronized (mLock) {
-            ps = mSettings.mPackages.get(packageName);
+            ps = mSettings.getPackageLPr(packageName);
             if (ps == null) {
                 Slog.w(TAG, "Failed to get package setting. Package " + packageName
                         + " is not installed");
@@ -24612,7 +24612,7 @@ public class PackageManagerService extends IPackageManager.Stub
             // which was uninstalled while keeping its data.
             AndroidPackage dataOwnerPkg = mPackages.get(packageName);
             if (dataOwnerPkg  == null) {
-                PackageSetting ps = mSettings.mPackages.get(packageName);
+                PackageSetting ps = mSettings.getPackageLPr(packageName);
                 if (ps != null) {
                     dataOwnerPkg = ps.pkg;
                 }
@@ -26059,7 +26059,7 @@ public class PackageManagerService extends IPackageManager.Stub
         public void notifyPackageCrashOrAnr(@NonNull String packageName) {
             final PackageSetting ps;
             synchronized (mLock) {
-                ps = mSettings.mPackages.get(packageName);
+                ps = mSettings.getPackageLPr(packageName);
                 if (ps == null) {
                     Slog.w(TAG, "Failed notifyPackageCrash. Package " + packageName
                             + " is not installed");
