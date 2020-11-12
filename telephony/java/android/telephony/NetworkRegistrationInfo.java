@@ -20,6 +20,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.telephony.AccessNetworkConstants.TransportType;
@@ -635,7 +636,8 @@ public final class NetworkRegistrationInfo implements Parcelable {
                 .append(" cellIdentity=").append(mCellIdentity)
                 .append(" voiceSpecificInfo=").append(mVoiceSpecificInfo)
                 .append(" dataSpecificInfo=").append(mDataSpecificInfo)
-                .append(" nrState=").append(nrStateToString(mNrState))
+                .append(" nrState=").append(Build.IS_DEBUGGABLE
+                        ? nrStateToString(mNrState) : "****")
                 .append(" rRplmn=").append(mRplmn)
                 .append(" isUsingCarrierAggregation=").append(mIsUsingCarrierAggregation)
                 .append("}").toString();
