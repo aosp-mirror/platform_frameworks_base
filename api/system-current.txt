@@ -5309,6 +5309,7 @@ package android.media.tv.tuner.filter {
   public class Filter implements java.lang.AutoCloseable {
     method public void close();
     method public int configure(@NonNull android.media.tv.tuner.filter.FilterConfiguration);
+    method public int configureScramblingStatusEvent(int);
     method public int flush();
     method public int getId();
     method public long getId64Bit();
@@ -5316,6 +5317,9 @@ package android.media.tv.tuner.filter {
     method public int setDataSource(@Nullable android.media.tv.tuner.filter.Filter);
     method public int start();
     method public int stop();
+    field public static final int SCRAMBLING_STATUS_NOT_SCRAMBLED = 2; // 0x2
+    field public static final int SCRAMBLING_STATUS_SCRAMBLED = 4; // 0x4
+    field public static final int SCRAMBLING_STATUS_UNKNOWN = 1; // 0x1
     field public static final int STATUS_DATA_READY = 1; // 0x1
     field public static final int STATUS_HIGH_WATER = 4; // 0x4
     field public static final int STATUS_LOW_WATER = 2; // 0x2
@@ -5492,6 +5496,10 @@ package android.media.tv.tuner.filter {
     method @NonNull public android.media.tv.tuner.filter.RecordSettings.Builder setScIndexMask(int);
     method @NonNull public android.media.tv.tuner.filter.RecordSettings.Builder setScIndexType(int);
     method @NonNull public android.media.tv.tuner.filter.RecordSettings.Builder setTsIndexMask(int);
+  }
+
+  public final class ScramblingStatusEvent extends android.media.tv.tuner.filter.FilterEvent {
+    method public int getScramblingStatus();
   }
 
   public class SectionEvent extends android.media.tv.tuner.filter.FilterEvent {
