@@ -21,6 +21,7 @@ import android.view.MotionEvent;
 
 import com.android.systemui.plugins.annotations.ProvidesInterface;
 
+import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
 /**
@@ -139,7 +140,8 @@ public interface FalsingManager {
 
     void onTouchEvent(MotionEvent ev, int width, int height);
 
-    void dump(PrintWriter pw);
+    /** From com.android.systemui.Dumpable. */
+    void dump(FileDescriptor fd, PrintWriter pw, String[] args);
 
     void cleanup();
 }

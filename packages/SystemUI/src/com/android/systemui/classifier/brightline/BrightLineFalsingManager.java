@@ -16,20 +16,22 @@
 
 package com.android.systemui.classifier.brightline;
 
-import static com.android.systemui.classifier.FalsingManagerImpl.FALSING_REMAIN_LOCKED;
-import static com.android.systemui.classifier.FalsingManagerImpl.FALSING_SUCCESS;
+import static com.android.systemui.classifier.FalsingManagerProxy.FALSING_REMAIN_LOCKED;
+import static com.android.systemui.classifier.FalsingManagerProxy.FALSING_SUCCESS;
 
 import android.app.ActivityManager;
 import android.content.res.Resources;
 import android.hardware.biometrics.BiometricSourceType;
 import android.net.Uri;
 import android.os.Build;
+import android.util.IndentingPrintWriter;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.ViewConfiguration;
 
+import androidx.annotation.NonNull;
+
 import com.android.internal.logging.MetricsLogger;
-import com.android.internal.util.IndentingPrintWriter;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.R;
@@ -44,6 +46,7 @@ import com.android.systemui.util.DeviceConfigProxy;
 import com.android.systemui.util.sensors.ProximitySensor;
 import com.android.systemui.util.sensors.ThresholdSensor;
 
+import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -457,7 +460,7 @@ public class BrightLineFalsingManager implements FalsingManager {
     }
 
     @Override
-    public void dump(PrintWriter pw) {
+    public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
         IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ");
         ipw.println("BRIGHTLINE FALSING MANAGER");
         ipw.print("classifierEnabled=");
