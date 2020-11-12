@@ -10684,7 +10684,6 @@ package android.telephony.ims {
     method public int getEmergencyServiceCategories();
     method @NonNull public java.util.List<java.lang.String> getEmergencyUrns();
     method public android.telephony.ims.ImsStreamMediaProfile getMediaProfile();
-    method @NonNull public java.util.Set<android.telephony.ims.RtpHeaderExtensionType> getOfferedRtpHeaderExtensionTypes();
     method @NonNull public android.os.Bundle getProprietaryCallExtras();
     method public int getRestrictCause();
     method public int getServiceType();
@@ -10706,7 +10705,6 @@ package android.telephony.ims {
     method public void setEmergencyServiceCategories(int);
     method public void setEmergencyUrns(@NonNull java.util.List<java.lang.String>);
     method public void setHasKnownUserIntentEmergency(boolean);
-    method public void setOfferedRtpHeaderExtensionTypes(@NonNull java.util.Set<android.telephony.ims.RtpHeaderExtensionType>);
     method public void updateCallExtras(android.telephony.ims.ImsCallProfile);
     method public void updateCallType(android.telephony.ims.ImsCallProfile);
     method public void updateMediaProfile(android.telephony.ims.ImsCallProfile);
@@ -11215,6 +11213,7 @@ package android.telephony.ims.feature {
   public class MmTelFeature extends android.telephony.ims.feature.ImsFeature {
     ctor public MmTelFeature();
     method public void changeEnabledCapabilities(@NonNull android.telephony.ims.feature.CapabilityChangeRequest, @NonNull android.telephony.ims.feature.ImsFeature.CapabilityCallbackProxy);
+    method public void changeOfferedRtpHeaderExtensionTypes(@NonNull java.util.Set<android.telephony.ims.RtpHeaderExtensionType>);
     method @Nullable public android.telephony.ims.ImsCallProfile createCallProfile(int, int);
     method @Nullable public android.telephony.ims.stub.ImsCallSessionImplBase createCallSession(@NonNull android.telephony.ims.ImsCallProfile);
     method @NonNull public android.telephony.ims.stub.ImsEcbmImplBase getEcbm();
