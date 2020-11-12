@@ -49,7 +49,6 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
     private final QSSecurityFooter mQsSecurityFooter;
     private final TunerService mTunerService;
     private final QSCustomizerController mQsCustomizerController;
-    private final QSTileRevealController.Factory mQsTileRevealControllerFactory;
     private final BrightnessController mBrightnessController;
     private final BrightnessSlider.Factory mBrightnessSliderFactory;
     private final BrightnessSlider mBrightnessSlider;
@@ -78,11 +77,11 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
             DumpManager dumpManager, MetricsLogger metricsLogger, UiEventLogger uiEventLogger,
             BrightnessController.Factory brightnessControllerFactory,
             BrightnessSlider.Factory brightnessSliderFactory) {
-        super(view, qstileHost, qsCustomizerController, metricsLogger, uiEventLogger, dumpManager);
+        super(view, qstileHost, qsCustomizerController, qsTileRevealControllerFactory,
+                metricsLogger, uiEventLogger, dumpManager);
         mQsSecurityFooter = qsSecurityFooter;
         mTunerService = tunerService;
         mQsCustomizerController = qsCustomizerController;
-        mQsTileRevealControllerFactory = qsTileRevealControllerFactory;
         mQsSecurityFooter.setHostEnvironment(qstileHost);
         mBrightnessSliderFactory = brightnessSliderFactory;
 
@@ -112,12 +111,6 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
         if (mBrightnessMirrorController != null) {
             mBrightnessMirrorController.addCallback(mBrightnessMirrorListener);
         }
-    }
-
-    @Override
-    protected QSTileRevealController createTileRevealController() {
-        return mQsTileRevealControllerFactory.create(
-                this, (PagedTileLayout) mView.createRegularTileLayout());
     }
 
     @Override
@@ -286,11 +279,6 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
     /** */
     public void setFooterPageIndicator(PageIndicator pageIndicator) {
         mView.setFooterPageIndicator(pageIndicator);
-    }
-
-    /** */
-    public boolean isExpanded() {
-        return mView.isExpanded();
     }
 }
 

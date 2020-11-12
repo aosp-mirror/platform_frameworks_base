@@ -107,8 +107,7 @@ public class QSPanelControllerTest extends SysuiTestCase {
                 .thenReturn(mBrightnessSlider);
         when(mBrightnessControllerFactory.create(any(ToggleSlider.class)))
                 .thenReturn(mBrightnessController);
-        when(mQSTileRevealControllerFactory.create(any(), any()))
-                .thenReturn(mQSTileRevealController);
+        when(mQSTileRevealControllerFactory.create(any())).thenReturn(mQSTileRevealController);
 
         mController = new QSPanelController(mQSPanel, mQSSecurityFooter, mTunerService,
                 mQSTileHost, mQSCustomizerController, mQSTileRevealControllerFactory, mDumpManager,

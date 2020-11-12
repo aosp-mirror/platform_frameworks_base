@@ -153,12 +153,6 @@ public class QuickStatusBarHeader extends RelativeLayout implements LifecycleOwn
         mBatteryRemainingIcon.setPercentShowMode(BatteryMeterView.MODE_ESTIMATE);
         mRingerModeTextView.setSelected(true);
         mNextAlarmTextView.setSelected(true);
-
-        int colorForeground = Utils.getColorAttrDefaultColor(getContext(),
-                android.R.attr.colorForeground);
-        float intensity = getColorIntensity(colorForeground);
-        int fillColor = mDualToneHandler.getSingleColor(intensity);
-        mBatteryRemainingIcon.onDarkChanged(tintArea, intensity, fillColor);
     }
 
     void onAttach(TintedIconManager iconManager) {
@@ -443,6 +437,18 @@ public class QuickStatusBarHeader extends RelativeLayout implements LifecycleOwn
 
     public void updateEverything() {
         post(() -> setClickable(!mExpanded));
+    }
+
+    public void setQSPanel(final QSPanel qsPanel) {
+        //host.setHeaderView(mExpandIndicator);
+        mHeaderQsPanel.setQSPanelAndHeader(qsPanel, this);
+
+        Rect tintArea = new Rect(0, 0, 0, 0);
+        int colorForeground = Utils.getColorAttrDefaultColor(getContext(),
+                android.R.attr.colorForeground);
+        float intensity = getColorIntensity(colorForeground);
+        int fillColor = mDualToneHandler.getSingleColor(intensity);
+        mBatteryRemainingIcon.onDarkChanged(tintArea, intensity, fillColor);
     }
 
     public void setCallback(Callback qsPanelCallback) {
