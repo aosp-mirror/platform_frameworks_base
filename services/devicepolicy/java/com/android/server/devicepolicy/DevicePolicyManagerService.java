@@ -60,6 +60,9 @@ import static android.app.admin.DevicePolicyManager.LOCK_TASK_FEATURE_HOME;
 import static android.app.admin.DevicePolicyManager.LOCK_TASK_FEATURE_NOTIFICATIONS;
 import static android.app.admin.DevicePolicyManager.LOCK_TASK_FEATURE_OVERVIEW;
 import static android.app.admin.DevicePolicyManager.NON_ORG_OWNED_PROFILE_KEYGUARD_FEATURES_AFFECT_OWNER;
+import static android.app.admin.DevicePolicyManager.PASSWORD_COMPLEXITY_HIGH;
+import static android.app.admin.DevicePolicyManager.PASSWORD_COMPLEXITY_LOW;
+import static android.app.admin.DevicePolicyManager.PASSWORD_COMPLEXITY_MEDIUM;
 import static android.app.admin.DevicePolicyManager.PASSWORD_COMPLEXITY_NONE;
 import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_ALPHABETIC;
 import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_ALPHANUMERIC;
@@ -3432,6 +3435,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 final PasswordPolicy passwordPolicy = ap.mPasswordPolicy;
                 if (passwordPolicy.quality != quality) {
                     passwordPolicy.quality = quality;
+                    ap.mPasswordComplexity = PASSWORD_COMPLEXITY_NONE;
                     resetInactivePasswordRequirementsIfRPlus(userId, ap);
                     updatePasswordValidityCheckpointLocked(userId, parent);
                     updatePasswordQualityCacheForUserGroup(userId);
@@ -3660,6 +3664,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     private void ensureMinimumQuality(
             int userId, ActiveAdmin admin, int minimumQuality, String operation) {
         mInjector.binderWithCleanCallingIdentity(() -> {
+            // This check will also take care of the case where the password requirements
+            // are specified as complexity rather than quality: When a password complexity
+            // is set, the quality is reset to "unspecified" which will be below any value
+            // of minimumQuality.
             if (admin.mPasswordPolicy.quality < minimumQuality
                     && passwordQualityInvocationOrderCheckEnabled(admin.info.getPackageName(),
                     userId)) {
@@ -4257,6 +4265,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             for (ActiveAdmin admin : admins) {
                 adminMetrics.add(admin.mPasswordPolicy.getMinMetrics());
             }
+            //TODO: Take complexity into account, would need to take complexity from all admins
+            //in the admins list.
             return PasswordMetrics.validatePasswordMetrics(PasswordMetrics.merge(adminMetrics),
                     PASSWORD_COMPLEXITY_NONE, false, metrics).isEmpty();
         }
@@ -4291,36 +4301,108 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
      */
     private boolean isPasswordSufficientForUserWithoutCheckpointLocked(
             @NonNull PasswordMetrics metrics, @UserIdInt int userId, boolean parent) {
+        final int complexity = getEffectivePasswordComplexityRequirementLocked(userId, parent);
         PasswordMetrics minMetrics = getPasswordMinimumMetrics(userId, parent);
         final List<PasswordValidationError> passwordValidationErrors =
                 PasswordMetrics.validatePasswordMetrics(
-                        minMetrics, PASSWORD_COMPLEXITY_NONE, false, metrics);
+                        minMetrics, complexity, false, metrics);
         return passwordValidationErrors.isEmpty();
     }
 
     @Override
     @PasswordComplexity
     public int getPasswordComplexity(boolean parent) {
+        final CallerIdentity caller = getNonPrivilegedOrAdminCallerIdentity(null);
         DevicePolicyEventLogger
                 .createEvent(DevicePolicyEnums.GET_USER_PASSWORD_COMPLEXITY_LEVEL)
                 .setStrings(parent ? CALLED_FROM_PARENT : NOT_CALLED_FROM_PARENT,
                         mInjector.getPackageManager().getPackagesForUid(
                                 mInjector.binderGetCallingUid()))
                 .write();
-        final CallerIdentity caller = getCallerIdentity();
 
         Preconditions.checkCallAuthorization(!parent || (isDeviceOwner(caller)
                         || isProfileOwner(caller) || isSystemUid(caller)),
                 "Only profile owner, device owner and system may call this method.");
         enforceUserUnlocked(caller.getUserId());
-        mContext.enforceCallingOrSelfPermission(
-                REQUEST_PASSWORD_COMPLEXITY,
-                "Must have " + REQUEST_PASSWORD_COMPLEXITY + " permission.");
+        Preconditions.checkCallAuthorization(
+                hasCallingOrSelfPermission(REQUEST_PASSWORD_COMPLEXITY)
+                        || isDeviceOwner(caller) || isProfileOwner(caller),
+                "Must have " + REQUEST_PASSWORD_COMPLEXITY
+                        + " permission, or be a profile owner or device owner.");
 
         synchronized (getLockObject()) {
             final int credentialOwner = getCredentialOwner(caller.getUserId(), parent);
             PasswordMetrics metrics = mLockSettingsInternal.getUserPasswordMetrics(credentialOwner);
             return metrics == null ? PASSWORD_COMPLEXITY_NONE : metrics.determineComplexity();
+        }
+    }
+
+    @Override
+    public void setRequiredPasswordComplexity(int passwordComplexity, boolean calledOnParent) {
+        if (!mHasFeature) {
+            return;
+        }
+        final Set<Integer> allowedModes = Set.of(PASSWORD_COMPLEXITY_NONE, PASSWORD_COMPLEXITY_LOW,
+                PASSWORD_COMPLEXITY_MEDIUM, PASSWORD_COMPLEXITY_HIGH);
+        Preconditions.checkArgument(allowedModes.contains(passwordComplexity),
+                "Provided complexity is not one of the allowed values.");
+
+        final CallerIdentity caller = getAdminCallerIdentity(null);
+        Preconditions.checkCallAuthorization(isDeviceOwner(caller) || isProfileOwner(caller));
+        Preconditions.checkArgument(!calledOnParent || isProfileOwner(caller));
+
+        synchronized (getLockObject()) {
+            final ActiveAdmin admin = getParentOfAdminIfRequired(
+                    getProfileOwnerOrDeviceOwnerLocked(caller), calledOnParent);
+            if (admin.mPasswordComplexity != passwordComplexity) {
+                mInjector.binderWithCleanCallingIdentity(() -> {
+                    admin.mPasswordComplexity = passwordComplexity;
+                    // Reset the password policy.
+                    admin.mPasswordPolicy = new PasswordPolicy();
+                    updatePasswordValidityCheckpointLocked(caller.getUserId(), calledOnParent);
+                    updatePasswordQualityCacheForUserGroup(caller.getUserId());
+                    saveSettingsLocked(caller.getUserId());
+                    //TODO: Log password complexity change if security logging is enabled.
+                });
+            }
+        }
+        //TODO: Log metrics.
+    }
+
+    private int getEffectivePasswordComplexityRequirementLocked(@UserIdInt int userHandle,
+            boolean parent) {
+        ensureLocked();
+        List<ActiveAdmin> admins = getActiveAdminsForLockscreenPoliciesLocked(
+                getProfileParentUserIfRequested(userHandle, parent));
+        int maxRequiredComplexity = PASSWORD_COMPLEXITY_NONE;
+        for (ActiveAdmin admin : admins) {
+            final ComponentName adminComponent = admin.info.getComponent();
+            final int adminUser = admin.getUserHandle().getIdentifier();
+            // Password complexity is only taken into account from DO/PO
+            if (isDeviceOwner(adminComponent, adminUser)
+                    || isProfileOwner(adminComponent, adminUser)) {
+                maxRequiredComplexity = Math.max(maxRequiredComplexity, admin.mPasswordComplexity);
+            }
+        }
+        return maxRequiredComplexity;
+    }
+
+    @Override
+    public int getRequiredPasswordComplexity(boolean calledOnParent) {
+        if (!mHasFeature) {
+            return PASSWORD_COMPLEXITY_NONE;
+        }
+
+        final CallerIdentity caller = getAdminCallerIdentity(null);
+        Preconditions.checkCallAuthorization(
+                isDeviceOwner(caller) || isProfileOwner(caller));
+
+        Preconditions.checkArgument(!calledOnParent || hasProfileOwner(caller.getUserId()));
+
+        synchronized (getLockObject()) {
+            final ActiveAdmin requiredAdmin = getParentOfAdminIfRequired(
+                    getDeviceOrProfileOwnerAdminLocked(caller.getUserId()), calledOnParent);
+            return requiredAdmin.mPasswordComplexity;
         }
     }
 
@@ -4514,15 +4596,17 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         synchronized (getLockObject()) {
             final PasswordMetrics minMetrics = getPasswordMinimumMetrics(userHandle);
             final List<PasswordValidationError> validationErrors;
+            final int complexity =
+                    getEffectivePasswordComplexityRequirementLocked(userHandle, false);
             // TODO: Consider changing validation API to take LockscreenCredential.
             if (password.isEmpty()) {
                 validationErrors = PasswordMetrics.validatePasswordMetrics(
-                        minMetrics, PASSWORD_COMPLEXITY_NONE, false /* isPin */,
+                        minMetrics, complexity, false /* isPin */,
                         new PasswordMetrics(CREDENTIAL_TYPE_NONE));
             } else {
                 // TODO(b/120484642): remove getBytes() below
                 validationErrors = PasswordMetrics.validatePassword(
-                        minMetrics, PASSWORD_COMPLEXITY_NONE, false, password.getBytes());
+                        minMetrics, complexity, false, password.getBytes());
             }
 
             if (!validationErrors.isEmpty()) {
@@ -7509,6 +7593,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
     }
 
+    private int getDeviceOwnerUserIdUncheckedLocked() {
+        return mOwners.hasDeviceOwner() ? mOwners.getDeviceOwnerUserId() : UserHandle.USER_NULL;
+    }
+
     @Override
     public int getDeviceOwnerUserId() {
         if (!mHasFeature) {
@@ -7517,7 +7605,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         Preconditions.checkCallAuthorization(canManageUsers(getCallerIdentity()));
 
         synchronized (getLockObject()) {
-            return mOwners.hasDeviceOwner() ? mOwners.getDeviceOwnerUserId() : UserHandle.USER_NULL;
+            return getDeviceOwnerUserIdUncheckedLocked();
         }
     }
 
@@ -8058,7 +8146,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
      */
     private @Nullable ActiveAdmin getDeviceOrProfileOwnerAdminLocked(int userHandle) {
         ActiveAdmin admin = getProfileOwnerAdminLocked(userHandle);
-        if (admin == null && getDeviceOwnerUserId() == userHandle) {
+        if (admin == null && getDeviceOwnerUserIdUncheckedLocked() == userHandle) {
             admin = getDeviceOwnerAdminLocked();
         }
         return admin;
