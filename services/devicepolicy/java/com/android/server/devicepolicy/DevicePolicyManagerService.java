@@ -135,9 +135,11 @@ import android.app.admin.DeviceAdminReceiver;
 import android.app.admin.DevicePolicyCache;
 import android.app.admin.DevicePolicyEventLogger;
 import android.app.admin.DevicePolicyManager;
+import android.app.admin.DevicePolicyManager.DevicePolicyOperation;
 import android.app.admin.DevicePolicyManager.PasswordComplexity;
 import android.app.admin.DevicePolicyManager.PersonalAppsSuspensionReason;
 import android.app.admin.DevicePolicyManagerInternal;
+import android.app.admin.DevicePolicySafetyChecker;
 import android.app.admin.DeviceStateCache;
 import android.app.admin.FactoryResetProtectionPolicy;
 import android.app.admin.NetworkEvent;
@@ -148,6 +150,7 @@ import android.app.admin.SecurityLog.SecurityEvent;
 import android.app.admin.StartInstallingUpdateCallback;
 import android.app.admin.SystemUpdateInfo;
 import android.app.admin.SystemUpdatePolicy;
+import android.app.admin.UnsafeStateException;
 import android.app.backup.IBackupManager;
 import android.app.trust.TrustManager;
 import android.app.usage.UsageStatsManagerInternal;
@@ -634,6 +637,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     @VisibleForTesting
     final TransferOwnershipMetadataManager mTransferOwnershipMetadataManager;
 
+    @Nullable
+    private DevicePolicySafetyChecker mSafetyChecker;
+
     public static final class Lifecycle extends SystemService {
         private BaseIDevicePolicyManager mService;
 
@@ -645,14 +651,19 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 dpmsClassName = DevicePolicyManagerService.class.getName();
             }
             try {
-                Class serviceClass = Class.forName(dpmsClassName);
-                Constructor constructor = serviceClass.getConstructor(Context.class);
+                Class<?> serviceClass = Class.forName(dpmsClassName);
+                Constructor<?> constructor = serviceClass.getConstructor(Context.class);
                 mService = (BaseIDevicePolicyManager) constructor.newInstance(context);
             } catch (Exception e) {
                 throw new IllegalStateException(
                     "Failed to instantiate DevicePolicyManagerService with class name: "
                     + dpmsClassName, e);
             }
+        }
+
+        /** Sets the {@link DevicePolicySafetyChecker}. */
+        public void setDevicePolicySafetyChecker(DevicePolicySafetyChecker safetyChecker) {
+            mService.setDevicePolicySafetyChecker(safetyChecker);
         }
 
         @Override
@@ -951,6 +962,38 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         } catch (RemoteException ignored) {
             // shouldn't happen.
         }
+    }
+
+    @Override
+    public void setDevicePolicySafetyChecker(DevicePolicySafetyChecker safetyChecker) {
+        Slog.i(LOG_TAG, "Setting DevicePolicySafetyChecker as " + safetyChecker.getClass());
+        mSafetyChecker = safetyChecker;
+    }
+
+    /**
+     * Checks if the feature is supported and it's safe to execute the given {@code operation}.
+     *
+     * <p>Typically called at the beginning of each API method as:
+     *
+     * <pre><code>
+     *
+     * if (!canExecute(operation, permission)) return;
+     *
+     * </code></pre>
+     *
+     * @return {@code true} when it's safe to execute, {@code false} when the feature is not
+     * supported or the caller does not have the given {@code requiredPermission}.
+     *
+     * @throws UnsafeStateException if it's not safe to execute the operation.
+     */
+    boolean canExecute(@DevicePolicyOperation int operation, @NonNull String requiredPermission) {
+        if (!mHasFeature && !hasCallingPermission(requiredPermission)) {
+            return false;
+        }
+        if (mSafetyChecker == null || mSafetyChecker.isDevicePolicyOperationSafe(operation)) {
+            return true;
+        }
+        throw mSafetyChecker.newUnsafeStateException(operation);
     }
 
     /**
@@ -4760,9 +4803,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @Override
     public void lockNow(int flags, boolean parent) {
-        if (!mHasFeature && !hasCallingPermission(permission.LOCK_DEVICE)) {
+        if (!canExecute(DevicePolicyManager.OPERATION_LOCK_NOW, permission.LOCK_DEVICE)) {
             return;
         }
+
         final CallerIdentity caller = getCallerIdentity();
 
         final int callingUserId = caller.getUserId();
@@ -8554,6 +8598,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         pw.printf("mIsWatch=%b\n", mIsWatch);
         pw.printf("mIsAutomotive=%b\n", mIsAutomotive);
         pw.printf("mHasTelephonyFeature=%b\n", mHasTelephonyFeature);
+        String safetyChecker = mSafetyChecker == null ? "N/A" : mSafetyChecker.getClass().getName();
+        pw.printf("mSafetyChecker=%b\n", safetyChecker);
         pw.decreaseIndent();
     }
 
