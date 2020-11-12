@@ -103,7 +103,6 @@ final class ServiceConnectionLeaked extends AndroidRuntimeException {
 public final class LoadedApk {
     static final String TAG = "LoadedApk";
     static final boolean DEBUG = false;
-    private static final String PROPERTY_NAME_APPEND_NATIVE = "pi.append_native_lib_paths";
 
     @UnsupportedAppUsage
     private final ActivityThread mActivityThread;
@@ -909,7 +908,7 @@ public final class LoadedApk {
             needToSetupJitProfiles = true;
         }
 
-        if (!libPaths.isEmpty() && SystemProperties.getBoolean(PROPERTY_NAME_APPEND_NATIVE, true)) {
+        if (!libPaths.isEmpty()) {
             // Temporarily disable logging of disk reads on the Looper thread as this is necessary
             StrictMode.ThreadPolicy oldPolicy = allowThreadDiskReads();
             try {
