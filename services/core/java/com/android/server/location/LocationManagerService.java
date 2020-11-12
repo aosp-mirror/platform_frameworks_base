@@ -87,26 +87,32 @@ import com.android.server.SystemService;
 import com.android.server.location.geofence.GeofenceManager;
 import com.android.server.location.geofence.GeofenceProxy;
 import com.android.server.location.gnss.GnssManagerService;
-import com.android.server.location.util.AlarmHelper;
-import com.android.server.location.util.AppForegroundHelper;
-import com.android.server.location.util.AppOpsHelper;
-import com.android.server.location.util.Injector;
-import com.android.server.location.util.LocationAttributionHelper;
-import com.android.server.location.util.LocationEventLog;
-import com.android.server.location.util.LocationPermissionsHelper;
-import com.android.server.location.util.LocationPowerSaveModeHelper;
-import com.android.server.location.util.LocationUsageLogger;
-import com.android.server.location.util.ScreenInteractiveHelper;
-import com.android.server.location.util.SettingsHelper;
-import com.android.server.location.util.SystemAlarmHelper;
-import com.android.server.location.util.SystemAppForegroundHelper;
-import com.android.server.location.util.SystemAppOpsHelper;
-import com.android.server.location.util.SystemLocationPermissionsHelper;
-import com.android.server.location.util.SystemLocationPowerSaveModeHelper;
-import com.android.server.location.util.SystemScreenInteractiveHelper;
-import com.android.server.location.util.SystemSettingsHelper;
-import com.android.server.location.util.SystemUserInfoHelper;
-import com.android.server.location.util.UserInfoHelper;
+import com.android.server.location.injector.AlarmHelper;
+import com.android.server.location.injector.AppForegroundHelper;
+import com.android.server.location.injector.AppOpsHelper;
+import com.android.server.location.injector.Injector;
+import com.android.server.location.injector.LocationAttributionHelper;
+import com.android.server.location.injector.LocationEventLog;
+import com.android.server.location.injector.LocationPermissionsHelper;
+import com.android.server.location.injector.LocationPowerSaveModeHelper;
+import com.android.server.location.injector.LocationUsageLogger;
+import com.android.server.location.injector.ScreenInteractiveHelper;
+import com.android.server.location.injector.SettingsHelper;
+import com.android.server.location.injector.SystemAlarmHelper;
+import com.android.server.location.injector.SystemAppForegroundHelper;
+import com.android.server.location.injector.SystemAppOpsHelper;
+import com.android.server.location.injector.SystemLocationPermissionsHelper;
+import com.android.server.location.injector.SystemLocationPowerSaveModeHelper;
+import com.android.server.location.injector.SystemScreenInteractiveHelper;
+import com.android.server.location.injector.SystemSettingsHelper;
+import com.android.server.location.injector.SystemUserInfoHelper;
+import com.android.server.location.injector.UserInfoHelper;
+import com.android.server.location.provider.AbstractLocationProvider;
+import com.android.server.location.provider.LocationProviderManager;
+import com.android.server.location.provider.MockLocationProvider;
+import com.android.server.location.provider.PassiveLocationProvider;
+import com.android.server.location.provider.PassiveLocationProviderManager;
+import com.android.server.location.provider.proxy.ProxyLocationProvider;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
 
 import java.io.FileDescriptor;
@@ -326,7 +332,7 @@ public class LocationManagerService extends ILocationManager.Stub {
     void onSystemThirdPartyAppsCanStart() {
         // network provider should always be initialized before the gps provider since the gps
         // provider has unfortunate hard dependencies on the network provider
-        ProxyLocationProvider networkProvider = ProxyLocationProvider.createAndRegister(
+        ProxyLocationProvider networkProvider = ProxyLocationProvider.create(
                 mContext,
                 NETWORK_LOCATION_SERVICE_ACTION,
                 com.android.internal.R.bool.config_enableNetworkLocationOverlay,
@@ -345,7 +351,7 @@ public class LocationManagerService extends ILocationManager.Stub {
                 MATCH_DIRECT_BOOT_AWARE | MATCH_SYSTEM_ONLY, UserHandle.USER_SYSTEM).isEmpty(),
                 "Unable to find a direct boot aware fused location provider");
 
-        ProxyLocationProvider fusedProvider = ProxyLocationProvider.createAndRegister(
+        ProxyLocationProvider fusedProvider = ProxyLocationProvider.create(
                 mContext,
                 FUSED_LOCATION_SERVICE_ACTION,
                 com.android.internal.R.bool.config_enableFusedLocationOverlay,

@@ -26,7 +26,7 @@ import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;
-import com.android.server.location.util.Injector;
+import com.android.server.location.injector.Injector;
 
 import java.util.Collection;
 import java.util.List;
