@@ -97,40 +97,8 @@ MetricsManager::MetricsManager(const ConfigKey& key, const StatsdConfig& config,
     for (const auto& annotation : config.annotation()) {
         mAnnotations.emplace_back(annotation.field_int64(), annotation.field_int32());
     }
-
-    // Guardrail. Reject the config if it's too big.
-    if (mAllMetricProducers.size() > StatsdStats::kMaxMetricCountPerConfig ||
-        mAllConditionTrackers.size() > StatsdStats::kMaxConditionCountPerConfig ||
-        mAllAtomMatchingTrackers.size() > StatsdStats::kMaxMatcherCountPerConfig) {
-        ALOGE("This config is too big! Reject!");
-        mConfigValid = false;
-    }
-    if (mAllAnomalyTrackers.size() > StatsdStats::kMaxAlertCountPerConfig) {
-        ALOGE("This config has too many alerts! Reject!");
-        mConfigValid = false;
-    }
-
-    mIsAlwaysActive = (mMetricIndexesWithActivation.size() != mAllMetricProducers.size()) ||
-            (mAllMetricProducers.size() == 0);
-    bool isActive = mIsAlwaysActive;
-    for (int metric : mMetricIndexesWithActivation) {
-        isActive |= mAllMetricProducers[metric]->isActive();
-    }
-    mIsActive = isActive;
-    VLOG("mIsActive is initialized to %d", mIsActive)
-
-    // no matter whether this config is valid, log it in the stats.
-    StatsdStats::getInstance().noteConfigReceived(
-            key, mAllMetricProducers.size(), mAllConditionTrackers.size(),
-            mAllAtomMatchingTrackers.size(), mAllAnomalyTrackers.size(), mAnnotations,
-            mConfigValid);
-    // Check active
-    for (const auto& metric : mAllMetricProducers) {
-        if (metric->isActive()) {
-            mIsActive = true;
-            break;
-        }
-    }
+    verifyGuardrailsAndUpdateStatsdStats();
+    initializeConfigActiveStatus();
 }
 
 MetricsManager::~MetricsManager() {
@@ -211,6 +179,9 @@ bool MetricsManager::updateConfig(const StatsdConfig& config, const int64_t time
     mPullAtomUids.clear();
     mPullAtomPackages.clear();
     createAllLogSourcesFromConfig(config);
+
+    verifyGuardrailsAndUpdateStatsdStats();
+    initializeConfigActiveStatus();
     return mConfigValid;
 }
 
@@ -270,6 +241,35 @@ void MetricsManager::createAllLogSourcesFromConfig(const StatsdConfig& config) {
     } else {
         initPullAtomSources();
     }
+}
+
+void MetricsManager::verifyGuardrailsAndUpdateStatsdStats() {
+    // Guardrail. Reject the config if it's too big.
+    if (mAllMetricProducers.size() > StatsdStats::kMaxMetricCountPerConfig ||
+        mAllConditionTrackers.size() > StatsdStats::kMaxConditionCountPerConfig ||
+        mAllAtomMatchingTrackers.size() > StatsdStats::kMaxMatcherCountPerConfig) {
+        ALOGE("This config is too big! Reject!");
+        mConfigValid = false;
+    }
+    if (mAllAnomalyTrackers.size() > StatsdStats::kMaxAlertCountPerConfig) {
+        ALOGE("This config has too many alerts! Reject!");
+        mConfigValid = false;
+    }
+    // no matter whether this config is valid, log it in the stats.
+    StatsdStats::getInstance().noteConfigReceived(
+            mConfigKey, mAllMetricProducers.size(), mAllConditionTrackers.size(),
+            mAllAtomMatchingTrackers.size(), mAllAnomalyTrackers.size(), mAnnotations,
+            mConfigValid);
+}
+
+void MetricsManager::initializeConfigActiveStatus() {
+    mIsAlwaysActive = (mMetricIndexesWithActivation.size() != mAllMetricProducers.size()) ||
+                      (mAllMetricProducers.size() == 0);
+    mIsActive = mIsAlwaysActive;
+    for (int metric : mMetricIndexesWithActivation) {
+        mIsActive |= mAllMetricProducers[metric]->isActive();
+    }
+    VLOG("mIsActive is initialized to %d", mIsActive);
 }
 
 void MetricsManager::initAllowedLogSources() {
