@@ -46,7 +46,6 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
@@ -425,6 +424,19 @@ public class BinderCallsStatsTest {
         bcs.callEnded(callSession, REQUEST_SIZE, REPLY_SIZE, WORKSOURCE_UID);
 
         assertEquals(0, bcs.getUidEntries().size());
+    }
+
+    @Test
+    public void testIgnoreBatteryStatusFlag() {
+        TestBinderCallsStats bcs = new TestBinderCallsStats();
+        mDeviceState.setCharging(true);
+        bcs.setIgnoreBatteryStatus(true);
+
+        Binder binder = new Binder();
+        CallSession callSession = bcs.callStarted(binder, 1, WORKSOURCE_UID);
+        bcs.callEnded(callSession, REQUEST_SIZE, REPLY_SIZE, WORKSOURCE_UID);
+
+        assertEquals(1, bcs.getExportedCallStats().size());
     }
 
     @Test

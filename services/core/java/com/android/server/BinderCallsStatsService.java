@@ -131,6 +131,7 @@ public class BinderCallsStatsService extends Binder {
         private static final String SETTINGS_TRACK_SCREEN_INTERACTIVE_KEY = "track_screen_state";
         private static final String SETTINGS_TRACK_DIRECT_CALLING_UID_KEY = "track_calling_uid";
         private static final String SETTINGS_MAX_CALL_STATS_KEY = "max_call_stats_count";
+        private static final String SETTINGS_IGNORE_BATTERY_STATUS_KEY = "ignore_battery_status";
 
         private boolean mEnabled;
         private final Uri mUri = Settings.Global.getUriFor(Settings.Global.BINDER_CALLS_STATS);
@@ -184,6 +185,9 @@ public class BinderCallsStatsService extends Binder {
             mBinderCallsStats.setTrackDirectCallerUid(
                     mParser.getBoolean(SETTINGS_TRACK_DIRECT_CALLING_UID_KEY,
                     BinderCallsStats.DEFAULT_TRACK_DIRECT_CALLING_UID));
+            mBinderCallsStats.setIgnoreBatteryStatus(
+                    mParser.getBoolean(SETTINGS_IGNORE_BATTERY_STATUS_KEY,
+                    BinderCallsStats.DEFAULT_IGNORE_BATTERY_STATUS));
 
 
             final boolean enabled =
