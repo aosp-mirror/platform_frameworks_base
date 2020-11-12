@@ -641,9 +641,7 @@ final class TaskDisplayArea extends DisplayArea<Task> {
     @Override
     int getOrientation(int candidate) {
         mLastOrientationSource = null;
-        // Only allow to specify orientation if this TDA is not set to ignore orientation request,
-        // and it has the focus.
-        if (mIgnoreOrientationRequest || !isLastFocused()) {
+        if (!canSpecifyOrientation()) {
             return SCREEN_ORIENTATION_UNSET;
         }
 
@@ -1918,10 +1916,14 @@ final class TaskDisplayArea extends DisplayArea<Task> {
         return lastReparentedStack;
     }
 
-    /** Whether this task display area is the last focused one on this logical display. */
+    /** Whether this task display area can request orientation. */
     @VisibleForTesting
-    boolean isLastFocused() {
-        return mDisplayContent.getLastFocusedTaskDisplayArea() == this;
+    boolean canSpecifyOrientation() {
+        // Only allow to specify orientation if this TDA is not set to ignore orientation request,
+        // and it is the last focused one on this logical display that can request orientation
+        // request.
+        return !mIgnoreOrientationRequest
+                && mDisplayContent.getOrientationRequestingTaskDisplayArea() == this;
     }
 
     @Override

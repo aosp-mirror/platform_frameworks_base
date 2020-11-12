@@ -61,7 +61,7 @@ public class DisplayAreaGroupTest extends WindowTestsBase {
         mTaskDisplayArea = new TaskDisplayArea(
                 mDisplayContent, mWm, "TDA1", FEATURE_VENDOR_FIRST + 1);
         mDisplayAreaGroup.addChild(mTaskDisplayArea, POSITION_TOP);
-        mDisplayContent.setLastFocusedTaskDisplayArea(mTaskDisplayArea);
+        mDisplayContent.onLastFocusedTaskDisplayAreaChanged(mTaskDisplayArea);
     }
 
     @Test

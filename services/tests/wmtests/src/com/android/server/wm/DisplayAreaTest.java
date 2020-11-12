@@ -458,8 +458,7 @@ public class DisplayAreaTest extends WindowTestsBase {
 
     @Test
     public void testSetIgnoreOrientationRequest_notCallSuperOnDescendantOrientationChanged() {
-        final TaskDisplayArea tda =
-                mDisplayContent.getDefaultTaskDisplayArea();
+        final TaskDisplayArea tda = mDisplayContent.getDefaultTaskDisplayArea();
         final Task stack =
                 new TaskBuilder(mSupervisor).setOnTop(!ON_TOP).setCreateActivity(true).build();
         final ActivityRecord activity = stack.getTopNonFinishingActivity();
@@ -476,6 +475,27 @@ public class DisplayAreaTest extends WindowTestsBase {
 
         verify(tda, times(2)).onDescendantOrientationChanged(any());
         verify(mDisplayContent).onDescendantOrientationChanged(any());
+    }
+
+    @Test
+    public void testSetIgnoreOrientationRequest_updateOrientationRequestingTaskDisplayArea() {
+        final TaskDisplayArea tda = mDisplayContent.getDefaultTaskDisplayArea();
+        final Task stack =
+                new TaskBuilder(mSupervisor).setOnTop(!ON_TOP).setCreateActivity(true).build();
+        final ActivityRecord activity = stack.getTopNonFinishingActivity();
+
+        mDisplayContent.setFocusedApp(activity);
+        assertThat(mDisplayContent.getOrientationRequestingTaskDisplayArea()).isEqualTo(tda);
+
+        // TDA is no longer handling orientation request, clear the last focused TDA.
+        tda.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
+
+        assertThat(mDisplayContent.getOrientationRequestingTaskDisplayArea()).isNull();
+
+        // TDA now handles orientation request, update last focused TDA based on the focused app.
+        tda.setIgnoreOrientationRequest(false /* ignoreOrientationRequest */);
+
+        assertThat(mDisplayContent.getOrientationRequestingTaskDisplayArea()).isEqualTo(tda);
     }
 
     private static class TestDisplayArea<T extends WindowContainer> extends DisplayArea<T> {
