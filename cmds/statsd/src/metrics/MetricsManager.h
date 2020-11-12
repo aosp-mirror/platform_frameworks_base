@@ -172,7 +172,7 @@ private:
     bool mVersionStringsInReport = false;
     bool mInstallerInReport = false;
 
-    const int64_t mTtlNs;
+    int64_t mTtlNs;
     int64_t mTtlEndNs;
 
     int64_t mLastReportTimeNs;
@@ -193,7 +193,7 @@ private:
     // To guard access to mAllowedLogSources
     mutable std::mutex mAllowedLogSourcesMutex;
 
-    const std::set<int32_t> mWhitelistedAtomIds;
+    std::set<int32_t> mWhitelistedAtomIds;
 
     // We can pull any atom from these uids.
     std::set<int32_t> mDefaultPullUids;
@@ -211,8 +211,7 @@ private:
     // Contains the annotations passed in with StatsdConfig.
     std::list<std::pair<const int64_t, const int32_t>> mAnnotations;
 
-    const bool mShouldPersistHistory;
-
+    bool mShouldPersistHistory;
 
     // All event tags that are interesting to my metrics.
     std::set<int> mTagIds;
@@ -327,6 +326,7 @@ private:
 
     FRIEND_TEST(AlarmE2eTest, TestMultipleAlarms);
     FRIEND_TEST(ConfigTtlE2eTest, TestCountMetric);
+    FRIEND_TEST(ConfigUpdateE2eTest, TestConfigTtl);
     FRIEND_TEST(MetricActivationE2eTest, TestCountMetric);
     FRIEND_TEST(MetricActivationE2eTest, TestCountMetricWithOneDeactivation);
     FRIEND_TEST(MetricActivationE2eTest, TestCountMetricWithTwoDeactivations);

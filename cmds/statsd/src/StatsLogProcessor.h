@@ -48,7 +48,7 @@ public:
     void OnLogEvent(LogEvent* event);
 
     void OnConfigUpdated(const int64_t timestampNs, const ConfigKey& key,
-                         const StatsdConfig& config);
+                         const StatsdConfig& config, bool modularUpdate = false);
     void OnConfigRemoved(const ConfigKey& key);
 
     size_t GetMetricsSize(const ConfigKey& key) const;
@@ -188,7 +188,7 @@ private:
     void resetIfConfigTtlExpiredLocked(const int64_t timestampNs);
 
     void OnConfigUpdatedLocked(const int64_t currentTimestampNs, const ConfigKey& key,
-                               const StatsdConfig& config, bool modularUpdate = false);
+                               const StatsdConfig& config, bool modularUpdate);
 
     void GetActiveConfigsLocked(const int uid, vector<int64_t>& outActiveConfigs);
 
@@ -337,6 +337,10 @@ private:
     FRIEND_TEST(MetricActivationE2eTest, TestCountMetricWithTwoDeactivations);
     FRIEND_TEST(MetricActivationE2eTest, TestCountMetricWithSameDeactivation);
     FRIEND_TEST(MetricActivationE2eTest, TestCountMetricWithTwoMetricsTwoDeactivations);
+
+    FRIEND_TEST(ConfigUpdateE2eTest, TestHashStrings);
+    FRIEND_TEST(ConfigUpdateE2eTest, TestUidMapVersionStringInstaller);
+    FRIEND_TEST(ConfigUpdateE2eTest, TestConfigTtl);
 
     FRIEND_TEST(CountMetricE2eTest, TestInitialConditionChanges);
     FRIEND_TEST(CountMetricE2eTest, TestSlicedState);
