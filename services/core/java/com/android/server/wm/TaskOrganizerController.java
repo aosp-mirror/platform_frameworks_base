@@ -116,6 +116,28 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
             return mTaskOrganizer.asBinder();
         }
 
+        void addStartingWindow(Task task, IBinder appToken) {
+            final RunningTaskInfo taskInfo = task.getTaskInfo();
+            mDeferTaskOrgCallbacksConsumer.accept(() -> {
+                try {
+                    mTaskOrganizer.addStartingWindow(taskInfo, appToken);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Exception sending onTaskStart callback", e);
+                }
+            });
+        }
+
+        void removeStartingWindow(Task task) {
+            final RunningTaskInfo taskInfo = task.getTaskInfo();
+            mDeferTaskOrgCallbacksConsumer.accept(() -> {
+                try {
+                    mTaskOrganizer.removeStartingWindow(taskInfo);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Exception sending onStartTaskFinished callback", e);
+                }
+            });
+        }
+
         SurfaceControl prepareLeash(Task task, boolean visible, String reason) {
             SurfaceControl outSurfaceControl = new SurfaceControl(task.getSurfaceControl(), reason);
             if (!task.mCreatedByOrganizer && !visible) {
@@ -216,6 +238,14 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
                 Slog.e(TAG, "TaskOrganizer failed to register death recipient");
             }
             mUid = uid;
+        }
+
+        void addStartingWindow(Task t, IBinder appToken) {
+            mOrganizer.addStartingWindow(t, appToken);
+        }
+
+        void removeStartingWindow(Task t) {
+            mOrganizer.removeStartingWindow(t);
         }
 
         /**
@@ -388,6 +418,27 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
 
     boolean isSupportedWindowingMode(int winMode) {
         return !ArrayUtils.contains(UNSUPPORTED_WINDOWING_MODES, winMode);
+    }
+
+    boolean addStartingWindow(Task task, IBinder appToken) {
+        final Task rootTask = task.getRootTask();
+        if (rootTask == null || rootTask.mTaskOrganizer == null) {
+            return false;
+        }
+        final TaskOrganizerState state =
+                mTaskOrganizerStates.get(rootTask.mTaskOrganizer.asBinder());
+        state.addStartingWindow(task, appToken);
+        return true;
+    }
+
+    void removeStartingWindow(Task task) {
+        final Task rootTask = task.getRootTask();
+        if (rootTask == null || rootTask.mTaskOrganizer == null) {
+            return;
+        }
+        final TaskOrganizerState state =
+                mTaskOrganizerStates.get(rootTask.mTaskOrganizer.asBinder());
+        state.removeStartingWindow(task);
     }
 
     void onTaskAppeared(ITaskOrganizer organizer, Task task) {

@@ -154,8 +154,8 @@ public class KeyguardSimPinViewController
                         }
                         mView.resetPasswordText(true /* animate */,
                                 /* announce */
-                                result.getType() != PinResult.PIN_RESULT_TYPE_SUCCESS);
-                        if (result.getType() == PinResult.PIN_RESULT_TYPE_SUCCESS) {
+                                result.getResult() != PinResult.PIN_RESULT_TYPE_SUCCESS);
+                        if (result.getResult() == PinResult.PIN_RESULT_TYPE_SUCCESS) {
                             mKeyguardUpdateMonitor.reportSimUnlocked(mSubId);
                             mRemainingAttempts = -1;
                             mShowDefaultMessage = true;
@@ -163,7 +163,7 @@ public class KeyguardSimPinViewController
                                     true, KeyguardUpdateMonitor.getCurrentUser());
                         } else {
                             mShowDefaultMessage = false;
-                            if (result.getType() == PinResult.PIN_RESULT_TYPE_INCORRECT) {
+                            if (result.getResult() == PinResult.PIN_RESULT_TYPE_INCORRECT) {
                                 if (result.getAttemptsRemaining() <= 2) {
                                     // this is getting critical - show dialog
                                     getSimRemainingAttemptsDialog(
@@ -289,20 +289,14 @@ public class KeyguardSimPinViewController
         @Override
         public void run() {
             if (DEBUG) {
-                Log.v(TAG, "call supplyPinReportResultForSubscriber(subid=" + mSubId + ")");
+                Log.v(TAG, "call supplyIccLockPin(subid=" + mSubId + ")");
             }
-            TelephonyManager telephonyManager =
-                    mTelephonyManager.createForSubscriptionId(mSubId);
-            final PinResult result = telephonyManager.supplyPinReportPinResult(mPin);
-            if (result == null) {
-                Log.e(TAG, "Error result for supplyPinReportResult.");
-                mView.post(() -> onSimCheckResponse(PinResult.getDefaultFailedResult()));
-            } else {
-                if (DEBUG) {
-                    Log.v(TAG, "supplyPinReportResult returned: " + result.toString());
-                }
-                mView.post(() -> onSimCheckResponse(result));
+            TelephonyManager telephonyManager = mTelephonyManager.createForSubscriptionId(mSubId);
+            final PinResult result = telephonyManager.supplyIccLockPin(mPin);
+            if (DEBUG) {
+                Log.v(TAG, "supplyIccLockPin returned: " + result.toString());
             }
+            mView.post(() -> onSimCheckResponse(result));
         }
     }
 

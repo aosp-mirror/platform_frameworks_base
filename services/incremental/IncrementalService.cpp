@@ -2341,17 +2341,16 @@ BootClockTsUs IncrementalService::DataLoaderStub::getOldestPendingReadTs() {
         return result;
     }
 
-    std::vector<incfs::ReadInfo> pendingReads;
-    if (mService.mIncFs->waitForPendingReads(control, 0ms, &pendingReads) !=
+    if (mService.mIncFs->waitForPendingReads(control, 0ms, &mLastPendingReads) !=
                 android::incfs::WaitResult::HaveData ||
-        pendingReads.empty()) {
+        mLastPendingReads.empty()) {
         return result;
     }
 
     LOG(DEBUG) << id() << ": pendingReads: " << control.pendingReads() << ", "
-               << pendingReads.size() << ": " << pendingReads.front().bootClockTsUs;
+               << mLastPendingReads.size() << ": " << mLastPendingReads.front().bootClockTsUs;
 
-    for (auto&& pendingRead : pendingReads) {
+    for (auto&& pendingRead : mLastPendingReads) {
         result = std::min(result, pendingRead.bootClockTsUs);
     }
     return result;
@@ -2400,6 +2399,18 @@ void IncrementalService::DataLoaderStub::setHealthListener(
     }
 }
 
+static std::string toHexString(const RawMetadata& metadata) {
+    int n = metadata.size();
+    std::string res(n * 2, '\0');
+    // Same as incfs::toString(fileId)
+    static constexpr char kHexChar[] = "0123456789abcdef";
+    for (int i = 0; i < n; ++i) {
+        res[i * 2] = kHexChar[(metadata[i] & 0xf0) >> 4];
+        res[i * 2 + 1] = kHexChar[(metadata[i] & 0x0f)];
+    }
+    return res;
+}
+
 void IncrementalService::DataLoaderStub::onDump(int fd) {
     dprintf(fd, "    dataLoader: {\n");
     dprintf(fd, "      currentStatus: %d\n", mCurrentStatus);
@@ -2415,6 +2426,15 @@ void IncrementalService::DataLoaderStub::onDump(int fd) {
     dprintf(fd, "        unhealthyTimeoutMs: %d\n", int(mHealthCheckParams.unhealthyTimeoutMs));
     dprintf(fd, "        unhealthyMonitoringMs: %d\n",
             int(mHealthCheckParams.unhealthyMonitoringMs));
+    dprintf(fd, "        lastPendingReads: \n");
+    const auto control = mService.mIncFs->openMount(mHealthPath);
+    for (auto&& pendingRead : mLastPendingReads) {
+        dprintf(fd, "          fileId: %s\n", mService.mIncFs->toString(pendingRead.id).c_str());
+        const auto metadata = mService.mIncFs->getMetadata(control, pendingRead.id);
+        dprintf(fd, "          metadataHex: %s\n", toHexString(metadata).c_str());
+        dprintf(fd, "          blockIndex: %d\n", pendingRead.block);
+        dprintf(fd, "          bootClockTsUs: %lld\n", (long long)pendingRead.bootClockTsUs);
+    }
     dprintf(fd, "      }\n");
     const auto& params = mParams;
     dprintf(fd, "      dataLoaderParams: {\n");

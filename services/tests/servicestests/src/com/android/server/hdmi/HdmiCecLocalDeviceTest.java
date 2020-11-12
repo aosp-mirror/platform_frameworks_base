@@ -42,6 +42,8 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 @SmallTest
 @Presubmit
@@ -80,6 +82,21 @@ public class HdmiCecLocalDeviceTest {
 
         @Override
         protected void setPreferredAddress(int addr) {}
+
+        @Override
+        protected int getRcProfile() {
+            return 0;
+        }
+
+        @Override
+        protected List<Integer> getRcFeatures() {
+            return Collections.emptyList();
+        }
+
+        @Override
+        protected List<Integer> getDeviceFeatures() {
+            return Collections.emptyList();
+        }
     }
 
     private MyHdmiCecLocalDevice mHdmiLocalDevice;

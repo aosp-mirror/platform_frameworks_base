@@ -20,6 +20,7 @@ import static com.android.internal.util.ConcurrentUtils.DIRECT_EXECUTOR;
 
 import android.annotation.Nullable;
 import android.location.Location;
+import android.location.LocationResult;
 import android.os.Bundle;
 
 import com.android.internal.annotations.GuardedBy;
@@ -28,7 +29,6 @@ import com.android.internal.util.Preconditions;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
-import java.util.List;
 
 /**
  * Represents a location provider that may switch between a mock implementation and a real
@@ -215,6 +215,17 @@ public class MockableLocationProvider extends AbstractLocationProvider {
     }
 
     @Override
+    protected void onFlush(Runnable callback) {
+        synchronized (mOwnerLock) {
+            if (mProvider != null) {
+                mProvider.flush(callback);
+            } else {
+                callback.run();
+            }
+        }
+    }
+
+    @Override
     protected void onExtraCommand(int uid, int pid, String command, Bundle extras) {
         synchronized (mOwnerLock) {
             if (mProvider != null) {
@@ -272,24 +283,13 @@ public class MockableLocationProvider extends AbstractLocationProvider {
         }
 
         @Override
-        public final void onReportLocation(Location location) {
+        public final void onReportLocation(LocationResult locationResult) {
             synchronized (mOwnerLock) {
                 if (mListenerProvider != mProvider) {
                     return;
                 }
 
-                reportLocation(location);
-            }
-        }
-
-        @Override
-        public final void onReportLocation(List<Location> locations) {
-            synchronized (mOwnerLock) {
-                if (mListenerProvider != mProvider) {
-                    return;
-                }
-
-                reportLocation(locations);
+                reportLocation(locationResult);
             }
         }
     }

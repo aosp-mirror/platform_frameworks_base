@@ -490,6 +490,7 @@ public class WindowManagerService extends IWindowManager.Stub
     final Map<IBinder, KeyInterceptionInfo> mKeyInterceptionInfoForToken =
             Collections.synchronizedMap(new ArrayMap<>());
 
+    final StartingSurfaceController mStartingSurfaceController;
 
     private final IVrStateCallbacks mVrStateCallbacks = new IVrStateCallbacks.Stub() {
         @Override
@@ -1375,6 +1376,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 mContext.getResources());
 
         setGlobalShadowSettings();
+
+        mStartingSurfaceController = new StartingSurfaceController(this);
     }
 
     private void setGlobalShadowSettings() {
@@ -1559,7 +1562,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     ProtoLog.w(WM_ERROR, "Attempted to add window with exiting application token "
                             + ".%s Aborting.", token);
                     return WindowManagerGlobal.ADD_APP_EXITING;
-                } else if (type == TYPE_APPLICATION_STARTING && activity.startingWindow != null) {
+                } else if (type == TYPE_APPLICATION_STARTING && activity.mStartingWindow != null) {
                     ProtoLog.w(WM_ERROR,
                             "Attempted to add starting window to token with already existing"
                                     + " starting window");
@@ -1708,7 +1711,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
             final ActivityRecord tokenActivity = token.asActivityRecord();
             if (type == TYPE_APPLICATION_STARTING && tokenActivity != null) {
-                tokenActivity.startingWindow = win;
+                tokenActivity.mStartingWindow = win;
                 ProtoLog.v(WM_DEBUG_STARTING_WINDOW, "addWindow: %s startingWindow=%s",
                         activity, win);
             }
@@ -5615,7 +5618,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 final WindowState win = (WindowState) container.mWaitingForDrawn.get(j);
                 ProtoLog.i(WM_DEBUG_SCREEN_ON,
                         "Waiting for drawn %s: removed=%b visible=%b mHasSurface=%b drawState=%d",
-                        win, win.mRemoved, win.isVisibleLw(), win.mHasSurface,
+                        win, win.mRemoved, win.isVisible(), win.mHasSurface,
                         win.mWinAnimator.mDrawState);
                 if (win.mRemoved || !win.mHasSurface || !win.isVisibleByPolicy()) {
                     // Window has been removed or hidden; no draw will now happen, so stop waiting.
@@ -7601,13 +7604,6 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         @Override
-        public boolean isStackVisibleLw(int windowingMode) {
-            // TODO(b/153090332): Support multiple task display areas & displays
-            final TaskDisplayArea tc = mRoot.getDefaultTaskDisplayArea();
-            return tc.isStackVisible(windowingMode);
-        }
-
-        @Override
         public void computeWindowsForAccessibility(int displayId) {
             final AccessibilityController accessibilityController;
             synchronized (mGlobalLock) {
@@ -7997,19 +7993,6 @@ public class WindowManagerService extends IWindowManager.Stub
                     DisplayPolicy::onLockTaskStateChangedLw, PooledLambda.__(), lockTaskState);
             mRoot.forAllDisplayPolicies(c);
             c.recycle();
-        }
-    }
-
-    /**
-     * Updates {@link WindowManagerPolicy} with new value about whether AOD  is showing. If AOD
-     * has changed, this will trigger a {@link WindowSurfacePlacer#performSurfacePlacement} to
-     * ensure the new value takes effect.
-     */
-    public void setAodShowing(boolean aodShowing) {
-        synchronized (mGlobalLock) {
-            if (mPolicy.setAodShowing(aodShowing)) {
-                mWindowPlacerLocked.performSurfacePlacement();
-            }
         }
     }
 

@@ -40,7 +40,9 @@ import android.hardware.soundtrigger.SoundTrigger.RecognitionConfig;
 import android.media.AudioFormat;
 import android.media.permission.Identity;
 import android.os.AsyncTask;
+import android.os.Binder;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Message;
 import android.os.RemoteException;
 import android.util.Slog;
@@ -246,6 +248,7 @@ public class AlwaysOnHotwordDetector {
     private final Callback mExternalCallback;
     private final Object mLock = new Object();
     private final Handler mHandler;
+    private final IBinder mBinder = new Binder();
 
     private int mAvailability = STATE_NOT_READY;
 
@@ -450,7 +453,7 @@ public class AlwaysOnHotwordDetector {
             Identity identity = new Identity();
             identity.packageName = ActivityThread.currentOpPackageName();
             mSoundTriggerSession = mModelManagementService.createSoundTriggerSessionAsOriginator(
-                    identity);
+                    identity, mBinder);
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }

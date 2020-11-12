@@ -284,28 +284,28 @@
     </family>
     <family lang="und-Ethi">
 	      <font weight="400" style="normal">NotoSansEthiopic-VF.ttf
-	          <axis tag="wght" stylevalue="400" />
+	          <axis tag="wght" stylevalue="400"/>
 	      </font>
 	      <font weight="500" style="normal">NotoSansEthiopic-VF.ttf
-	          <axis tag="wght" stylevalue="500" />
+	          <axis tag="wght" stylevalue="500"/>
 	      </font>
 	      <font weight="600" style="normal">NotoSansEthiopic-VF.ttf
-	          <axis tag="wght" stylevalue="600" />
+	          <axis tag="wght" stylevalue="600"/>
 	      </font>
 	      <font weight="700" style="normal">NotoSansEthiopic-VF.ttf
-	          <axis tag="wght" stylevalue="700" />
+	          <axis tag="wght" stylevalue="700"/>
 	      </font>
 	      <font weight="400" style="normal" fallbackFor="serif">NotoSerifEthiopic-VF.ttf
-	          <axis tag="wght" stylevalue="400" />
+	          <axis tag="wght" stylevalue="400"/>
 	      </font>
 	      <font weight="500" style="normal" fallbackFor="serif">NotoSerifEthiopic-VF.ttf
-	          <axis tag="wght" stylevalue="500" />
+	          <axis tag="wght" stylevalue="500"/>
 	      </font>
 	      <font weight="600" style="normal" fallbackFor="serif">NotoSerifEthiopic-VF.ttf
-	          <axis tag="wght" stylevalue="600" />
+	          <axis tag="wght" stylevalue="600"/>
 	      </font>
 	      <font weight="700" style="normal" fallbackFor="serif">NotoSerifEthiopic-VF.ttf
-	          <axis tag="wght" stylevalue="700" />
+	          <axis tag="wght" stylevalue="700"/>
 	      </font>
     </family>
     <family lang="und-Hebr">
@@ -326,54 +326,54 @@
     </family>
     <family lang="und-Armn">
         <font weight="400" style="normal">NotoSansArmenian-VF.ttf
-            <axis tag="wght" stylevalue="400" />
+            <axis tag="wght" stylevalue="400"/>
         </font>
         <font weight="500" style="normal">NotoSansArmenian-VF.ttf
-            <axis tag="wght" stylevalue="500" />
+            <axis tag="wght" stylevalue="500"/>
         </font>
         <font weight="600" style="normal">NotoSansArmenian-VF.ttf
-            <axis tag="wght" stylevalue="600" />
+            <axis tag="wght" stylevalue="600"/>
         </font>
         <font weight="700" style="normal">NotoSansArmenian-VF.ttf
-            <axis tag="wght" stylevalue="700" />
+            <axis tag="wght" stylevalue="700"/>
         </font>
         <font weight="400" style="normal" fallbackFor="serif">NotoSerifArmenian-VF.ttf
-            <axis tag="wght" stylevalue="400" />
+            <axis tag="wght" stylevalue="400"/>
         </font>
         <font weight="500" style="normal" fallbackFor="serif">NotoSerifArmenian-VF.ttf
-            <axis tag="wght" stylevalue="500" />
+            <axis tag="wght" stylevalue="500"/>
         </font>
         <font weight="600" style="normal" fallbackFor="serif">NotoSerifArmenian-VF.ttf
-            <axis tag="wght" stylevalue="600" />
+            <axis tag="wght" stylevalue="600"/>
         </font>
         <font weight="700" style="normal" fallbackFor="serif">NotoSerifArmenian-VF.ttf
-            <axis tag="wght" stylevalue="700" />
+            <axis tag="wght" stylevalue="700"/>
         </font>
     </family>
     <family lang="und-Geor,und-Geok">
         <font weight="400" style="normal">NotoSansGeorgian-VF.ttf
-            <axis tag="wght" stylevalue="400" />
+            <axis tag="wght" stylevalue="400"/>
         </font>
         <font weight="500" style="normal">NotoSansGeorgian-VF.ttf
-            <axis tag="wght" stylevalue="500" />
+            <axis tag="wght" stylevalue="500"/>
         </font>
         <font weight="600" style="normal">NotoSansGeorgian-VF.ttf
-            <axis tag="wght" stylevalue="600" />
+            <axis tag="wght" stylevalue="600"/>
         </font>
         <font weight="700" style="normal">NotoSansGeorgian-VF.ttf
-            <axis tag="wght" stylevalue="700" />
+            <axis tag="wght" stylevalue="700"/>
         </font>
         <font weight="400" style="normal" fallbackFor="serif">NotoSerifGeorgian-VF.ttf
-            <axis tag="wght" stylevalue="400" />
+            <axis tag="wght" stylevalue="400"/>
         </font>
         <font weight="500" style="normal" fallbackFor="serif">NotoSerifGeorgian-VF.ttf
-            <axis tag="wght" stylevalue="500" />
+            <axis tag="wght" stylevalue="500"/>
         </font>
         <font weight="600" style="normal" fallbackFor="serif">NotoSerifGeorgian-VF.ttf
-            <axis tag="wght" stylevalue="600" />
+            <axis tag="wght" stylevalue="600"/>
         </font>
         <font weight="700" style="normal" fallbackFor="serif">NotoSerifGeorgian-VF.ttf
-            <axis tag="wght" stylevalue="700" />
+            <axis tag="wght" stylevalue="700"/>
         </font>
     </family>
     <family lang="und-Deva" variant="elegant">
@@ -491,44 +491,44 @@
     </family>
     <family lang="und-Khmr" variant="elegant">
         <font weight="100" style="normal">NotoSansKhmer-VF.ttf
-            <axis tag="wdth" stylevalue="100.0" />
-            <axis tag="wght" stylevalue="26.0" />
+            <axis tag="wdth" stylevalue="100.0"/>
+            <axis tag="wght" stylevalue="26.0"/>
         </font>
         <font weight="200" style="normal">NotoSansKhmer-VF.ttf
-            <axis tag="wdth" stylevalue="100.0" />
-            <axis tag="wght" stylevalue="39.0" />
+            <axis tag="wdth" stylevalue="100.0"/>
+            <axis tag="wght" stylevalue="39.0"/>
         </font>
         <font weight="300" style="normal">NotoSansKhmer-VF.ttf
-            <axis tag="wdth" stylevalue="100.0" />
-            <axis tag="wght" stylevalue="58.0" />
+            <axis tag="wdth" stylevalue="100.0"/>
+            <axis tag="wght" stylevalue="58.0"/>
         </font>
         <font weight="400" style="normal">NotoSansKhmer-VF.ttf
-            <axis tag="wdth" stylevalue="100.0" />
-            <axis tag="wght" stylevalue="90.0" />
+            <axis tag="wdth" stylevalue="100.0"/>
+            <axis tag="wght" stylevalue="90.0"/>
         </font>
         <font weight="500" style="normal">NotoSansKhmer-VF.ttf
-            <axis tag="wdth" stylevalue="100.0" />
-            <axis tag="wght" stylevalue="108.0" />
+            <axis tag="wdth" stylevalue="100.0"/>
+            <axis tag="wght" stylevalue="108.0"/>
         </font>
         <font weight="600" style="normal">NotoSansKhmer-VF.ttf
-            <axis tag="wdth" stylevalue="100.0" />
-            <axis tag="wght" stylevalue="128.0" />
+            <axis tag="wdth" stylevalue="100.0"/>
+            <axis tag="wght" stylevalue="128.0"/>
         </font>
         <font weight="700" style="normal">NotoSansKhmer-VF.ttf
-            <axis tag="wdth" stylevalue="100.0" />
-            <axis tag="wght" stylevalue="151.0" />
+            <axis tag="wdth" stylevalue="100.0"/>
+            <axis tag="wght" stylevalue="151.0"/>
         </font>
         <font weight="800" style="normal">NotoSansKhmer-VF.ttf
-            <axis tag="wdth" stylevalue="100.0" />
-            <axis tag="wght" stylevalue="169.0" />
+            <axis tag="wdth" stylevalue="100.0"/>
+            <axis tag="wght" stylevalue="169.0"/>
         </font>
         <font weight="900" style="normal">NotoSansKhmer-VF.ttf
-            <axis tag="wdth" stylevalue="100.0" />
-            <axis tag="wght" stylevalue="190.0" />
+            <axis tag="wdth" stylevalue="100.0"/>
+            <axis tag="wght" stylevalue="190.0"/>
         </font>
         <font weight="400" style="normal" fallbackFor="serif">NotoSerifKhmer-Regular.otf</font>
         <font weight="700" style="normal" fallbackFor="serif">NotoSerifKhmer-Bold.otf</font>
-      </family>
+    </family>
     <family lang="und-Khmr" variant="compact">
         <font weight="400" style="normal">NotoSansKhmerUI-Regular.ttf</font>
         <font weight="700" style="normal">NotoSansKhmerUI-Bold.ttf</font>
@@ -568,16 +568,16 @@
     </family>
     <family lang="und-Adlm">
         <font weight="400" style="normal">NotoSansAdlam-VF.ttf
-            <axis tag="wght" stylevalue="400" />
+            <axis tag="wght" stylevalue="400"/>
         </font>
         <font weight="500" style="normal">NotoSansAdlam-VF.ttf
-            <axis tag="wght" stylevalue="500" />
+            <axis tag="wght" stylevalue="500"/>
         </font>
         <font weight="600" style="normal">NotoSansAdlam-VF.ttf
-            <axis tag="wght" stylevalue="600" />
+            <axis tag="wght" stylevalue="600"/>
         </font>
         <font weight="700" style="normal">NotoSansAdlam-VF.ttf
-            <axis tag="wght" stylevalue="700" />
+            <axis tag="wght" stylevalue="700"/>
         </font>
     </family>
     <family lang="und-Avst">
@@ -762,8 +762,18 @@
         <font weight="400" style="normal">NotoSansTaiViet-Regular.ttf</font>
     </family>
     <family lang="und-Tibt">
-        <font weight="400" style="normal">NotoSansTibetan-Regular.ttf</font>
-        <font weight="700" style="normal">NotoSansTibetan-Bold.ttf</font>
+        <font weight="400" style="normal">NotoSerifTibetan-VF.ttf
+            <axis tag="wght" stylevalue="400"/>
+        </font>
+        <font weight="500" style="normal">NotoSerifTibetan-VF.ttf
+            <axis tag="wght" stylevalue="500"/>
+        </font>
+        <font weight="600" style="normal">NotoSerifTibetan-VF.ttf
+            <axis tag="wght" stylevalue="600"/>
+        </font>
+        <font weight="700" style="normal">NotoSerifTibetan-VF.ttf
+            <axis tag="wght" stylevalue="700"/>
+        </font>
     </family>
     <family lang="und-Tfng">
         <font weight="400" style="normal">NotoSansTifinagh-Regular.otf</font>
@@ -892,5 +902,84 @@
     </family>
     <family lang="und-Wara">
         <font weight="400" style="normal">NotoSansWarangCiti-Regular.otf</font>
+    </family>
+    <family lang="und-Gran">
+        <font weight="400" style="normal">NotoSansGrantha-Regular.ttf</font>
+    </family>
+    <family lang="und-Modi">
+        <font weight="400" style="normal">NotoSansModi-Regular.ttf</font>
+    </family>
+    <family lang="und-Dogr">
+        <font weight="400" style="normal">NotoSerifDogra-Regular.ttf</font>
+    </family>
+    <family lang="und-Medf">
+        <font weight="400" style="normal">NotoSansMedefaidrin-VF.ttf
+            <axis tag="wght" stylevalue="400"/>
+        </font>
+        <font weight="500" style="normal">NotoSansMedefaidrin-VF.ttf
+            <axis tag="wght" stylevalue="500"/>
+        </font>
+        <font weight="600" style="normal">NotoSansMedefaidrin-VF.ttf
+            <axis tag="wght" stylevalue="600"/>
+        </font>
+        <font weight="700" style="normal">NotoSansMedefaidrin-VF.ttf
+            <axis tag="wght" stylevalue="700"/>
+        </font>
+    </family>
+    <family lang="und-Soyo">
+        <font weight="400" style="normal">NotoSansSoyombo-VF.ttf
+            <axis tag="wght" stylevalue="400"/>
+        </font>
+        <font weight="500" style="normal">NotoSansSoyombo-VF.ttf
+            <axis tag="wght" stylevalue="500"/>
+        </font>
+        <font weight="600" style="normal">NotoSansSoyombo-VF.ttf
+            <axis tag="wght" stylevalue="600"/>
+        </font>
+        <font weight="700" style="normal">NotoSansSoyombo-VF.ttf
+            <axis tag="wght" stylevalue="700"/>
+        </font>
+    </family>
+    <family lang="und-Takr">
+        <font weight="400" style="normal">NotoSansTakri-VF.ttf
+            <axis tag="wght" stylevalue="400"/>
+        </font>
+        <font weight="500" style="normal">NotoSansTakri-VF.ttf
+            <axis tag="wght" stylevalue="500"/>
+        </font>
+        <font weight="600" style="normal">NotoSansTakri-VF.ttf
+            <axis tag="wght" stylevalue="600"/>
+        </font>
+        <font weight="700" style="normal">NotoSansTakri-VF.ttf
+            <axis tag="wght" stylevalue="700"/>
+        </font>
+    </family>
+    <family lang="und-Hmnp">
+        <font weight="400" style="normal">NotoSerifNyiakengPuachueHmong-VF.ttf
+            <axis tag="wght" stylevalue="400"/>
+        </font>
+        <font weight="500" style="normal">NotoSerifNyiakengPuachueHmong-VF.ttf
+            <axis tag="wght" stylevalue="500"/>
+        </font>
+        <font weight="600" style="normal">NotoSerifNyiakengPuachueHmong-VF.ttf
+            <axis tag="wght" stylevalue="600"/>
+        </font>
+        <font weight="700" style="normal">NotoSerifNyiakengPuachueHmong-VF.ttf
+            <axis tag="wght" stylevalue="700"/>
+        </font>
+    </family>
+    <family lang="und-Yezi">
+        <font weight="400" style="normal">NotoSerifYezidi-VF.ttf
+            <axis tag="wght" stylevalue="400"/>
+        </font>
+        <font weight="500" style="normal">NotoSerifYezidi-VF.ttf
+            <axis tag="wght" stylevalue="500"/>
+        </font>
+        <font weight="600" style="normal">NotoSerifYezidi-VF.ttf
+            <axis tag="wght" stylevalue="600"/>
+        </font>
+        <font weight="700" style="normal">NotoSerifYezidi-VF.ttf
+            <axis tag="wght" stylevalue="700"/>
+        </font>
     </family>
 </familyset>

@@ -35,6 +35,7 @@ import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_ASL
 import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_AWAKE;
 import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_WAKING;
 import static com.android.systemui.shared.system.WindowManagerWrapper.NAV_BAR_POS_INVALID;
+import static com.android.systemui.statusbar.LightRevealScrimKt.getEnableLightReveal;
 import static com.android.systemui.statusbar.NotificationLockscreenUserManager.PERMISSION_SELF;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_LIGHTS_OUT;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_LIGHTS_OUT_TRANSPARENT;
@@ -172,6 +173,7 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSFragment;
 import com.android.systemui.qs.QSPanelController;
 import com.android.systemui.recents.ScreenPinningRequest;
+import com.android.systemui.settings.brightness.BrightnessSlider;
 import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.shared.system.WindowManagerWrapper;
 import com.android.systemui.statusbar.AutoHideUiElement;
@@ -181,6 +183,8 @@ import com.android.systemui.statusbar.CrossFadeHelper;
 import com.android.systemui.statusbar.GestureRecorder;
 import com.android.systemui.statusbar.KeyboardShortcuts;
 import com.android.systemui.statusbar.KeyguardIndicationController;
+import com.android.systemui.statusbar.LiftReveal;
+import com.android.systemui.statusbar.LightRevealScrim;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.NotificationPresenter;
@@ -367,6 +371,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     DozeServiceHost mDozeServiceHost;
     private boolean mWakeUpComingFromTouch;
     private PointF mWakeUpTouchLocation;
+    private LightRevealScrim mLightRevealScrim;
 
     private final Object mQueueLock = new Object();
 
@@ -428,6 +433,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     private final NotificationViewHierarchyManager mViewHierarchyManager;
     private final KeyguardViewMediator mKeyguardViewMediator;
     protected final NotificationInterruptStateProvider mNotificationInterruptStateProvider;
+    private final BrightnessSlider.Factory mBrightnessSliderFactory;
 
     // for disabling the status bar
     private int mDisabled1 = 0;
@@ -740,7 +746,8 @@ public class StatusBar extends SystemUI implements DemoMode,
             DemoModeController demoModeController,
             Lazy<NotificationShadeDepthController> notificationShadeDepthControllerLazy,
             StatusBarTouchableRegionManager statusBarTouchableRegionManager,
-            NotificationIconAreaController notificationIconAreaController) {
+            NotificationIconAreaController notificationIconAreaController,
+            BrightnessSlider.Factory brightnessSliderFactory) {
         super(context);
         mNotificationsController = notificationsController;
         mLightBarController = lightBarController;
@@ -817,6 +824,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mDismissCallbackRegistry = dismissCallbackRegistry;
         mDemoModeController = demoModeController;
         mNotificationIconAreaController = notificationIconAreaController;
+        mBrightnessSliderFactory = brightnessSliderFactory;
 
         mBubbleExpandListener =
                 (isExpanding, key) -> {
@@ -1155,6 +1163,13 @@ public class StatusBar extends SystemUI implements DemoMode,
         });
         mScrimController.attachViews(scrimBehind, scrimInFront, scrimForBubble);
 
+        mLightRevealScrim = mNotificationShadeWindowView.findViewById(R.id.light_reveal_scrim);
+
+        if (getEnableLightReveal()) {
+            mLightRevealScrim.setVisibility(View.VISIBLE);
+            mLightRevealScrim.setRevealEffect(LiftReveal.INSTANCE);
+        }
+
         mNotificationPanelViewController.initDependencies(
                 this,
                 mNotificationShelfController);
@@ -1194,6 +1209,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                     mNotificationShadeWindowView,
                     mNotificationPanelViewController,
                     mNotificationShadeDepthControllerLazy.get(),
+                    mBrightnessSliderFactory,
                     (visible) -> {
                         mBrightnessMirrorVisible = visible;
                         updateScrimController();
@@ -3616,6 +3632,13 @@ public class StatusBar extends SystemUI implements DemoMode,
         mPresenter.updateMediaMetaData(false, mState != StatusBarState.KEYGUARD);
         updateKeyguardState();
         Trace.endSection();
+    }
+
+    @Override
+    public void onDozeAmountChanged(float linear, float eased) {
+        if (getEnableLightReveal()) {
+            mLightRevealScrim.setRevealAmount(1f - linear);
+        }
     }
 
     @Override

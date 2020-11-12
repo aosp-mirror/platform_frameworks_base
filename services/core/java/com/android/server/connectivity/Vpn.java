@@ -33,7 +33,6 @@ import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
-import android.app.AppGlobals;
 import android.app.AppOpsManager;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -1333,16 +1332,17 @@ public class Vpn {
             // Restricted users are not allowed to create VPNs, they are tied to Owner
             enforceNotRestrictedUser();
 
-            ResolveInfo info = AppGlobals.getPackageManager().resolveService(intent,
-                    null, 0, mUserId);
+            final PackageManager packageManager = mUserIdContext.getPackageManager();
+            if (packageManager == null) {
+                throw new UnsupportedOperationException("Cannot get PackageManager.");
+            }
+            final ResolveInfo info = packageManager.resolveService(intent, 0 /* flags */);
             if (info == null) {
                 throw new SecurityException("Cannot find " + config.user);
             }
             if (!BIND_VPN_SERVICE.equals(info.serviceInfo.permission)) {
                 throw new SecurityException(config.user + " does not require " + BIND_VPN_SERVICE);
             }
-        } catch (RemoteException e) {
-            throw new SecurityException("Cannot find " + config.user);
         } finally {
             Binder.restoreCallingIdentity(token);
         }

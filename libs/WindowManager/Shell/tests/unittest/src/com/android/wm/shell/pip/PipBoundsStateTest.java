@@ -19,6 +19,9 @@ package com.android.wm.shell.pip;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 
 import android.content.ComponentName;
 import android.graphics.Rect;
@@ -33,6 +36,8 @@ import com.android.wm.shell.ShellTestCase;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import java.util.function.BiConsumer;
 
 /**
  * Tests for {@link PipBoundsState}.
@@ -108,5 +113,26 @@ public class PipBoundsStateTest extends ShellTestCase {
         mPipBoundsState.setLastPipComponentName(mTestComponentName2);
 
         assertNull(mPipBoundsState.getReentryState());
+    }
+
+    @Test
+    public void testSetShelfVisibility_changed_callbackInvoked() {
+        final BiConsumer<Boolean, Integer> callback = mock(BiConsumer.class);
+        mPipBoundsState.setOnShelfVisibilityChangeCallback(callback);
+
+        mPipBoundsState.setShelfVisibility(true, 100);
+
+        verify(callback).accept(true, 100);
+    }
+
+    @Test
+    public void testSetShelfVisibility_notChanged_callbackNotInvoked() {
+        final BiConsumer<Boolean, Integer> callback = mock(BiConsumer.class);
+        mPipBoundsState.setShelfVisibility(true, 100);
+        mPipBoundsState.setOnShelfVisibilityChangeCallback(callback);
+
+        mPipBoundsState.setShelfVisibility(true, 100);
+
+        verify(callback, never()).accept(true, 100);
     }
 }

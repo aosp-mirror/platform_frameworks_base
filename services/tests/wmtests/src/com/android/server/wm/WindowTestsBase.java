@@ -348,7 +348,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
             win.mRelayoutCalled = true;
             win.mHasSurface = true;
             win.mHidden = false;
-            win.showLw(false /* doAnimation */, false /* requestAnim */);
+            win.show(false /* doAnimation */, false /* requestAnim */);
         }
     }
 
@@ -1073,6 +1073,12 @@ class WindowTestsBase extends SystemServiceTestsBase {
         }
         public void setMoveToSecondaryOnEnter(boolean move) {
             mMoveToSecondaryOnEnter = move;
+        }
+        @Override
+        public void addStartingWindow(ActivityManager.RunningTaskInfo info, IBinder appToken) {
+        }
+        @Override
+        public void removeStartingWindow(ActivityManager.RunningTaskInfo info) {
         }
         @Override
         public void onTaskAppeared(ActivityManager.RunningTaskInfo info, SurfaceControl leash) {

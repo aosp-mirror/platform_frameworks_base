@@ -166,6 +166,7 @@ public:
     FileId getFileId(const Control& control, std::string_view path) const final {
         return incfs::getFileId(control, path);
     }
+    std::string toString(FileId fileId) const final { return incfs::toString(fileId); }
     std::pair<IncFsBlockIndex, IncFsBlockIndex> countFilledBlocks(
             const Control& control, std::string_view path) const final {
         const auto fileId = incfs::getFileId(control, path);

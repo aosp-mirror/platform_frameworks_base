@@ -19,6 +19,7 @@ package android.telephony;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -27,10 +28,16 @@ import com.android.internal.telephony.PhoneConstants;
 import java.util.Objects;
 
 /**
- * Holds the result from a pin attempt.
+ * Holds the result from a PIN attempt.
+ *
+ * @see TelephonyManager#supplyIccLockPin
+ * @see TelephonyManager#supplyIccLockPuk
+ * @see TelephonyManager#setIccLockEnabled
+ * @see TelephonyManager#changeIccLockPin
  *
  * @hide
  */
+@SystemApi
 public final class PinResult implements Parcelable {
     /** @hide */
     @IntDef({
@@ -64,24 +71,24 @@ public final class PinResult implements Parcelable {
     private static final PinResult sFailedResult =
             new PinResult(PinResult.PIN_RESULT_TYPE_FAILURE, -1);
 
-    private final @PinResultType int mType;
+    private final @PinResultType int mResult;
 
     private final int mAttemptsRemaining;
 
     /**
-     * Returns either success, incorrect or failure.
+     * Returns the result of the PIN attempt.
      *
-     * @see #PIN_RESULT_TYPE_SUCCESS
-     * @see #PIN_RESULT_TYPE_INCORRECT
-     * @see #PIN_RESULT_TYPE_FAILURE
-     * @return The result type of the pin attempt.
+     * @return The result of the PIN attempt.
      */
-    public @PinResultType int getType() {
-        return mType;
+    public @PinResultType int getResult() {
+        return mResult;
     }
 
     /**
-     * The number of pin attempts remaining.
+     * Returns the number of PIN attempts remaining.
+     * This will be set when {@link #getResult} is {@link #PIN_RESULT_TYPE_INCORRECT}.
+     * Indicates the number of attempts at entering the PIN before the SIM will be locked and
+     * require a PUK unlock to be performed.
      *
      * @return Number of attempts remaining.
      */
@@ -89,22 +96,32 @@ public final class PinResult implements Parcelable {
         return mAttemptsRemaining;
     }
 
+    /**
+     * Used to indicate a failed PIN attempt result.
+     *
+     * @return default PinResult for failure.
+     *
+     * @hide
+     */
     @NonNull
     public static PinResult getDefaultFailedResult() {
         return sFailedResult;
     }
 
     /**
-     * PinResult constructor
+     * PinResult constructor.
      *
-     * @param type The type of pin result.
+     * @param result The pin result value.
      * @see #PIN_RESULT_TYPE_SUCCESS
      * @see #PIN_RESULT_TYPE_INCORRECT
      * @see #PIN_RESULT_TYPE_FAILURE
+     * @see #PIN_RESULT_TYPE_ABORTED
      * @param attemptsRemaining Number of pin attempts remaining.
+     *
+     * @hide
      */
-    public PinResult(@PinResultType int type, int attemptsRemaining) {
-        mType = type;
+    public PinResult(@PinResultType int result, int attemptsRemaining) {
+        mResult = result;
         mAttemptsRemaining = attemptsRemaining;
     }
 
@@ -114,7 +131,7 @@ public final class PinResult implements Parcelable {
      * @hide
      */
     private PinResult(Parcel in) {
-        mType = in.readInt();
+        mResult = in.readInt();
         mAttemptsRemaining = in.readInt();
     }
 
@@ -124,11 +141,11 @@ public final class PinResult implements Parcelable {
     @NonNull
     @Override
     public String toString() {
-        return "type: " + getType() + ", attempts remaining: " + getAttemptsRemaining();
+        return "result: " + getResult() + ", attempts remaining: " + getAttemptsRemaining();
     }
 
     /**
-     * Required to be Parcelable
+     * Describe the contents of this object.
      */
     @Override
     public int describeContents() {
@@ -136,15 +153,17 @@ public final class PinResult implements Parcelable {
     }
 
     /**
-     * Required to be Parcelable
+     * Write this object to a Parcel.
      */
     @Override
     public void writeToParcel(@NonNull Parcel out, int flags) {
-        out.writeInt(mType);
+        out.writeInt(mResult);
         out.writeInt(mAttemptsRemaining);
     }
 
-    /** Required to be Parcelable */
+    /**
+     * Parcel creator class.
+     */
     public static final @NonNull Parcelable.Creator<PinResult> CREATOR = new Creator<PinResult>() {
         public PinResult createFromParcel(Parcel in) {
             return new PinResult(in);
@@ -156,7 +175,7 @@ public final class PinResult implements Parcelable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(mAttemptsRemaining, mType);
+        return Objects.hash(mAttemptsRemaining, mResult);
     }
 
     @Override
@@ -171,7 +190,7 @@ public final class PinResult implements Parcelable {
             return false;
         }
         PinResult other = (PinResult) obj;
-        return (mType == other.mType
+        return (mResult == other.mResult
                 && mAttemptsRemaining == other.mAttemptsRemaining);
     }
 }

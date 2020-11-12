@@ -3342,7 +3342,7 @@ public class SettingsProvider extends ContentProvider {
         }
 
         private final class UpgradeController {
-            private static final int SETTINGS_VERSION = 194;
+            private static final int SETTINGS_VERSION = 195;
 
             private final int mUserId;
 
@@ -4759,6 +4759,22 @@ public class SettingsProvider extends ContentProvider {
                     getSecureSettingsLocked(userId).deleteSettingLocked(
                             Secure.LOCATION_PROVIDERS_ALLOWED);
                     currentVersion = 194;
+                }
+
+                if (currentVersion == 194) {
+                    // Version 194: migrate the GNSS_SATELLITE_BLOCKLIST setting
+                    final SettingsState globalSettings = getGlobalSettingsLocked();
+                    final Setting newSetting = globalSettings.getSettingLocked(
+                            Global.GNSS_SATELLITE_BLOCKLIST);
+                    final String oldName = "gnss_satellite_blacklist";
+                    final Setting oldSetting = globalSettings.getSettingLocked(oldName);
+                    if (newSetting.isNull() && !oldSetting.isNull()) {
+                        globalSettings.insertSettingLocked(
+                                Global.GNSS_SATELLITE_BLOCKLIST, oldSetting.getValue(), null, true,
+                                SettingsState.SYSTEM_PACKAGE_NAME);
+                        globalSettings.deleteSettingLocked(oldName);
+                    }
+                    currentVersion = 195;
                 }
 
                 // vXXX: Add new settings above this point.

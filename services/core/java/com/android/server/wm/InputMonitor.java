@@ -556,7 +556,7 @@ final class InputMonitor {
             }
 
             if (mAddWallpaperInputConsumerHandle) {
-                if (w.mAttrs.type == TYPE_WALLPAPER && w.isVisibleLw()) {
+                if (w.mAttrs.type == TYPE_WALLPAPER && w.isVisible()) {
                     // Add the wallpaper input consumer above the first visible wallpaper.
                     mWallpaperInputConsumer.show(mInputTransaction, w);
                     mAddWallpaperInputConsumerHandle = false;

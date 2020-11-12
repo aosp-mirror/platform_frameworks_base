@@ -33,6 +33,7 @@ import android.annotation.RequiresFeature;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
@@ -65,8 +66,8 @@ import com.android.internal.util.Preconditions;
 
 import java.lang.ref.WeakReference;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.WeakHashMap;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
@@ -201,6 +202,7 @@ public class LocationManager {
      *
      * @hide
      */
+    @SystemApi
     @TestApi
     public static final String FUSED_PROVIDER = "fused";
 
@@ -236,6 +238,22 @@ public class LocationManager {
      * @see #requestLocationUpdates(String, LocationRequest, PendingIntent)
      */
     public static final String KEY_LOCATION_CHANGED = "location";
+
+    /**
+     * Key used for an extra holding a {@link LocationResult} value when a location change is sent
+     * using a PendingIntent.
+     *
+     * @see #requestLocationUpdates(String, LocationRequest, PendingIntent)
+     */
+    public static final String KEY_LOCATION_RESULT = "locationResult";
+
+    /**
+     * Key used for an extra holding an integer request code when location flush completion is sent
+     * using a PendingIntent.
+     *
+     * @see #requestFlush(String, PendingIntent, int)
+     */
+    public static final String KEY_FLUSH_COMPLETE = "flushComplete";
 
     /**
      * Broadcast intent action when the set of enabled location providers changes. To check the
@@ -375,9 +393,6 @@ public class LocationManager {
     @Nullable private GnssNavigationTransportMultiplexer mGnssNavigationTransportMultiplexer;
     @GuardedBy("mLock")
     @Nullable private GnssAntennaInfoTransportMultiplexer mGnssAntennaInfoTransportMultiplexer;
-
-    @GuardedBy("mLock")
-    @Nullable private BatchedLocationCallbackTransport mBatchedLocationCallbackTransport;
 
     /**
      * @hide
@@ -1432,8 +1447,70 @@ public class LocationManager {
     }
 
     /**
+     * Requests that the given provider flush any batched locations to listeners. The given listener
+     * (registered with the provider) will have {@link LocationListener#onFlushComplete(int)}
+     * invoked with the given result code after any locations that were flushed have been delivered.
+     * If {@link #removeUpdates(LocationListener)} is invoked before the flush callback is executed,
+     * then the flush callback will never be executed.
+     *
+     * @param provider    a provider listed by {@link #getAllProviders()}
+     * @param listener    a listener registered under the provider
+     * @param requestCode an arbitrary integer passed through to
+     *                    {@link LocationListener#onFlushComplete(int)}
+     *
+     * @throws IllegalArgumentException if provider is null or doesn't exist
+     * @throws IllegalArgumentException if listener is null or is not registered under the provider
+     */
+    @SuppressLint("SamShouldBeLast")
+    public void requestFlush(@NonNull String provider, @NonNull LocationListener listener,
+            @SuppressLint("ListenerLast") int requestCode) {
+        Preconditions.checkArgument(provider != null, "invalid null provider");
+        Preconditions.checkArgument(listener != null, "invalid null listener");
+
+        synchronized (sLocationListeners) {
+            WeakReference<LocationListenerTransport> ref = sLocationListeners.get(listener);
+            LocationListenerTransport transport = ref != null ? ref.get() : null;
+
+            Preconditions.checkArgument(transport != null,
+                    "unregistered listener cannot be flushed");
+
+            try {
+                mService.requestListenerFlush(provider, transport, requestCode);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
+     * Requests that the given provider flush any batched locations to listeners. The given
+     * PendingIntent (registered with the provider) will be sent with {@link #KEY_FLUSH_COMPLETE}
+     * present in the extra keys, and {@code requestCode} as the corresponding value.
+     *
+     * @param provider      a provider listed by {@link #getAllProviders()}
+     * @param pendingIntent a pendingIntent registered under the provider
+     * @param requestCode   an arbitrary integer that will be passed back as the extra value for
+     *                      {@link #KEY_FLUSH_COMPLETE}
+     *
+     * @throws IllegalArgumentException if provider is null or doesn't exist
+     * @throws IllegalArgumentException if pending intent is null or is not registered under the
+     *                                  provider
+     */
+    public void requestFlush(@NonNull String provider, @NonNull PendingIntent pendingIntent,
+            int requestCode) {
+        Preconditions.checkArgument(provider != null, "invalid null provider");
+        Preconditions.checkArgument(pendingIntent != null, "invalid null pending intent");
+
+        try {
+            mService.requestPendingIntentFlush(provider, pendingIntent, requestCode);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Removes location updates for the specified {@link LocationListener}. Following this call,
-     * the listener will no longer receive location updates.
+     * the listener will not receive any more invocations of any kind.
      *
      * @param listener listener that no longer needs location updates
      *
@@ -2435,10 +2512,11 @@ public class LocationManager {
      * interface.
      *
      * @return Maximum number of location objects that can be returned
+     * @deprecated Do not use
      * @hide
      */
+    @Deprecated
     @SystemApi
-    @RequiresPermission(Manifest.permission.LOCATION_HARDWARE)
     public int getGnssBatchSize() {
         try {
             return mService.getGnssBatchSize();
@@ -2458,48 +2536,47 @@ public class LocationManager {
      *
      * @param periodNanos Time interval, in nanoseconds, that the GNSS locations are requested
      *                    within the batch
-     * @param wakeOnFifoFull True if the hardware batching should flush the locations in a
-     *                       a callback to the listener, when it's internal buffer is full.  If
-     *                       set to false, the oldest location information is, instead,
-     *                       dropped when the buffer is full.
+     * @param wakeOnFifoFull ignored
      * @param callback The listener on which to return the batched locations
      * @param handler The handler on which to process the callback
      *
-     * @return True if batching was successfully started
+     * @return True always
+     * @deprecated Use {@link LocationRequest.Builder#setMaxUpdateDelayMillis(long)} instead.
      * @hide
      */
+    @Deprecated
     @SystemApi
-    @RequiresPermission(Manifest.permission.LOCATION_HARDWARE)
+    @RequiresPermission(allOf = {Manifest.permission.LOCATION_HARDWARE,
+            Manifest.permission.UPDATE_APP_OPS_STATS})
     public boolean registerGnssBatchedLocationCallback(long periodNanos, boolean wakeOnFifoFull,
             @NonNull BatchedLocationCallback callback, @Nullable Handler handler) {
         if (handler == null) {
             handler = new Handler();
         }
 
-        BatchedLocationCallbackTransport transport = new BatchedLocationCallbackTransport(callback,
-                handler);
-
-        synchronized (mLock) {
-            try {
-                mService.setGnssBatchingCallback(transport, mContext.getPackageName(),
-                        mContext.getAttributionTag());
-                mBatchedLocationCallbackTransport = transport;
-                mService.startGnssBatch(periodNanos, wakeOnFifoFull,
-                        mContext.getPackageName(), mContext.getFeatureId());
-                return true;
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
+        try {
+            mService.startGnssBatch(
+                    periodNanos,
+                    new BatchedLocationCallbackTransport(callback, handler),
+                    mContext.getPackageName(),
+                    mContext.getAttributionTag(),
+                    AppOpsManager.toReceiverId(callback));
+            return true;
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
     /**
-     * Flush the batched GNSS locations.
-     * All GNSS locations currently ready in the batch are returned via the callback sent in
-     * startGnssBatch(), and the buffer containing the batched locations is cleared.
+     * Flush the batched GNSS locations. All GNSS locations currently ready in the batch are
+     * returned via the callback sent in startGnssBatch(), and the buffer containing the batched
+     * locations is cleared.
      *
      * @hide
+     * @deprecated Use {@link #requestFlush(String, LocationListener, int)} or
+     *             {@link #requestFlush(String, PendingIntent, int)} instead.
      */
+    @Deprecated
     @SystemApi
     @RequiresPermission(Manifest.permission.LOCATION_HARDWARE)
     public void flushGnssBatch() {
@@ -2511,29 +2588,25 @@ public class LocationManager {
     }
 
     /**
-     * Stop batching locations. This API is primarily used when the AP is
-     * asleep and the device can batch locations in the hardware.
+     * Stop batching locations. This API is primarily used when the AP is asleep and the device can
+     * batch locations in the hardware.
      *
-     * @param callback the specific callback class to remove from the transport layer
+     * @param callback ignored
      *
      * @return True always
+     * @deprecated Use {@link LocationRequest.Builder#setMaxUpdateDelayMillis(long)} instead.
      * @hide
      */
+    @Deprecated
     @SystemApi
     @RequiresPermission(Manifest.permission.LOCATION_HARDWARE)
     public boolean unregisterGnssBatchedLocationCallback(
             @NonNull BatchedLocationCallback callback) {
-        synchronized (mLock) {
-            if (callback == mBatchedLocationCallbackTransport.getCallback()) {
-                try {
-                    mBatchedLocationCallbackTransport = null;
-                    mService.removeGnssBatchingCallback();
-                    mService.stopGnssBatch();
-                } catch (RemoteException e) {
-                    throw e.rethrowFromSystemServer();
-                }
-            }
+        try {
+            mService.stopGnssBatch();
             return true;
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2541,10 +2614,7 @@ public class LocationManager {
             ListenerExecutor, CancellationSignal.OnCancelListener {
 
         private final Executor mExecutor;
-
-        @GuardedBy("this")
-        @Nullable
-        private Consumer<Location> mConsumer;
+        private volatile @Nullable Consumer<Location> mConsumer;
 
         GetCurrentLocationTransport(Executor executor, Consumer<Location> consumer,
                 @Nullable CancellationSignal cancellationSignal) {
@@ -2560,20 +2630,22 @@ public class LocationManager {
 
         @Override
         public void onCancel() {
-            synchronized (this) {
-                mConsumer = null;
-            }
+            mConsumer = null;
         }
 
         @Override
         public void onLocation(@Nullable Location location) {
-            Consumer<Location> consumer;
-            synchronized (this) {
-                consumer = mConsumer;
-                mConsumer = null;
-            }
+            executeSafely(mExecutor, () -> mConsumer, new ListenerOperation<Consumer<Location>>() {
+                @Override
+                public void operate(Consumer<Location> consumer) {
+                    consumer.accept(location);
+                }
 
-            executeSafely(mExecutor, () -> consumer, listener -> listener.accept(location));
+                @Override
+                public void onPostExecute(boolean success) {
+                    mConsumer = null;
+                }
+            });
         }
     }
 
@@ -2581,7 +2653,7 @@ public class LocationManager {
             ListenerExecutor {
 
         private Executor mExecutor;
-        @Nullable private volatile LocationListener mListener;
+        private volatile @Nullable LocationListener mListener;
 
         LocationListenerTransport(LocationListener listener, Executor executor) {
             Preconditions.checkArgument(listener != null, "invalid null listener");
@@ -2603,12 +2675,12 @@ public class LocationManager {
         }
 
         @Override
-        public void onLocationChanged(Location location,
+        public void onLocationChanged(LocationResult locationResult,
                 @Nullable IRemoteCallback onCompleteCallback) {
             executeSafely(mExecutor, () -> mListener, new ListenerOperation<LocationListener>() {
                 @Override
                 public void operate(LocationListener listener) {
-                    listener.onLocationChanged(location);
+                    listener.onLocationChanged(locationResult);
                 }
 
                 @Override
@@ -2622,6 +2694,12 @@ public class LocationManager {
                     }
                 }
             });
+        }
+
+        @Override
+        public void onFlushComplete(int requestCode) {
+            executeSafely(mExecutor, () -> mListener,
+                    listener -> listener.onFlushComplete(requestCode));
         }
 
         @Override
@@ -2913,39 +2991,29 @@ public class LocationManager {
         }
     }
 
-    private static class BatchedLocationCallbackTransport extends IBatchedLocationCallback.Stub {
+    private static class BatchedLocationCallbackWrapper implements LocationListener {
 
-        private final Handler mHandler;
-        private volatile @Nullable BatchedLocationCallback mCallback;
+        private final BatchedLocationCallback mCallback;
 
-        BatchedLocationCallbackTransport(BatchedLocationCallback callback, Handler handler) {
-            mCallback = Objects.requireNonNull(callback);
-            mHandler = Objects.requireNonNull(handler);
-        }
-
-        @Nullable
-        public BatchedLocationCallback getCallback() {
-            return mCallback;
-        }
-
-        public void unregister() {
-            mCallback = null;
+        BatchedLocationCallbackWrapper(BatchedLocationCallback callback) {
+            mCallback = callback;
         }
 
         @Override
-        public void onLocationBatch(List<Location> locations) {
-            if (mCallback == null) {
-                return;
-            }
+        public void onLocationChanged(@NonNull Location location) {
+            mCallback.onLocationBatch(Collections.singletonList(location));
+        }
 
-            mHandler.post(() -> {
-                BatchedLocationCallback callback = mCallback;
-                if (callback == null) {
-                    return;
-                }
+        @Override
+        public void onLocationChanged(@NonNull LocationResult locationResult) {
+            mCallback.onLocationBatch(locationResult.asList());
+        }
+    }
 
-                callback.onLocationBatch(locations);
-            });
+    private static class BatchedLocationCallbackTransport extends LocationListenerTransport {
+
+        BatchedLocationCallbackTransport(BatchedLocationCallback callback, Handler handler) {
+            super(new BatchedLocationCallbackWrapper(callback), new HandlerExecutor(handler));
         }
     }
 

@@ -26,9 +26,13 @@ import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.SmallTest;
 
+import com.google.android.collect.Lists;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+
+import java.util.Collections;
 
 @SmallTest
 @Presubmit
@@ -88,6 +92,98 @@ public class HdmiCecMessageBuilderTest {
                 buildMessage("40:47:61:62:63:64:65:66:67:68:69:6A:6B:6C:6D:6E"));
     }
 
+    @Test
+    public void buildGiveFeatures() {
+        HdmiCecMessage message = HdmiCecMessageBuilder.buildGiveFeatures(ADDR_PLAYBACK_1, ADDR_TV);
+
+        assertThat(message).isEqualTo(buildMessage("40:A5"));
+    }
+
+    @Test
+    public void buildReportFeatures_basicTv_1_4() {
+        HdmiCecMessage message = HdmiCecMessageBuilder.buildReportFeatures(ADDR_TV,
+                Constants.VERSION_1_4,
+                Lists.newArrayList(HdmiDeviceInfo.DEVICE_TV), Constants.RC_PROFILE_TV,
+                Lists.newArrayList(Constants.RC_PROFILE_TV_NONE), Collections.emptyList());
+
+        assertThat(message).isEqualTo(buildMessage("0F:A6:05:80:00:00"));
+    }
+
+    @Test
+    public void buildReportFeatures_basicPlayback_1_4() {
+        HdmiCecMessage message = HdmiCecMessageBuilder.buildReportFeatures(ADDR_PLAYBACK_1,
+                Constants.VERSION_1_4,
+                Lists.newArrayList(HdmiDeviceInfo.DEVICE_PLAYBACK), Constants.RC_PROFILE_TV,
+                Lists.newArrayList(Constants.RC_PROFILE_TV_NONE), Collections.emptyList());
+
+        assertThat(message).isEqualTo(buildMessage("4F:A6:05:10:00:00"));
+    }
+
+    @Test
+    public void buildReportFeatures_basicPlaybackAudioSystem_1_4() {
+        HdmiCecMessage message = HdmiCecMessageBuilder.buildReportFeatures(ADDR_PLAYBACK_1,
+                Constants.VERSION_1_4,
+                Lists.newArrayList(HdmiDeviceInfo.DEVICE_PLAYBACK,
+                        HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM), Constants.RC_PROFILE_TV,
+                Lists.newArrayList(Constants.RC_PROFILE_TV_NONE), Collections.emptyList());
+
+        assertThat(message).isEqualTo(buildMessage("4F:A6:05:18:00:00"));
+    }
+
+    @Test
+    public void buildReportFeatures_basicTv_2_0() {
+        HdmiCecMessage message = HdmiCecMessageBuilder.buildReportFeatures(ADDR_TV,
+                Constants.VERSION_2_0,
+                Lists.newArrayList(HdmiDeviceInfo.DEVICE_TV), Constants.RC_PROFILE_TV,
+                Lists.newArrayList(Constants.RC_PROFILE_TV_NONE), Collections.emptyList());
+
+        assertThat(message).isEqualTo(buildMessage("0F:A6:06:80:00:00"));
+    }
+
+    @Test
+    public void buildReportFeatures_remoteControlTv_2_0() {
+        HdmiCecMessage message = HdmiCecMessageBuilder.buildReportFeatures(ADDR_TV,
+                Constants.VERSION_2_0,
+                Lists.newArrayList(HdmiDeviceInfo.DEVICE_TV), Constants.RC_PROFILE_TV,
+                Lists.newArrayList(Constants.RC_PROFILE_TV_ONE), Collections.emptyList());
+
+        assertThat(message).isEqualTo(buildMessage("0F:A6:06:80:02:00"));
+    }
+
+    @Test
+    public void buildReportFeatures_remoteControlPlayback_2_0() {
+        HdmiCecMessage message = HdmiCecMessageBuilder.buildReportFeatures(ADDR_TV,
+                Constants.VERSION_2_0,
+                Lists.newArrayList(HdmiDeviceInfo.DEVICE_PLAYBACK), Constants.RC_PROFILE_SOURCE,
+                Lists.newArrayList(Constants.RC_PROFILE_SOURCE_HANDLES_TOP_MENU,
+                        Constants.RC_PROFILE_SOURCE_HANDLES_SETUP_MENU), Collections.emptyList());
+
+        assertThat(message).isEqualTo(buildMessage("0F:A6:06:10:4A:00"));
+    }
+
+    @Test
+    public void buildReportFeatures_deviceFeaturesTv_2_0() {
+        HdmiCecMessage message = HdmiCecMessageBuilder.buildReportFeatures(ADDR_TV,
+                Constants.VERSION_2_0,
+                Lists.newArrayList(HdmiDeviceInfo.DEVICE_TV), Constants.RC_PROFILE_TV,
+                Lists.newArrayList(Constants.RC_PROFILE_TV_NONE),
+                Lists.newArrayList(Constants.DEVICE_FEATURE_TV_SUPPORTS_RECORD_TV_SCREEN));
+
+        assertThat(message).isEqualTo(buildMessage("0F:A6:06:80:00:40"));
+    }
+
+    @Test
+    public void buildReportFeatures_deviceFeaturesPlayback_2_0() {
+        HdmiCecMessage message = HdmiCecMessageBuilder.buildReportFeatures(ADDR_TV,
+                Constants.VERSION_2_0,
+                Lists.newArrayList(HdmiDeviceInfo.DEVICE_PLAYBACK), Constants.RC_PROFILE_SOURCE,
+                Lists.newArrayList(Constants.RC_PROFILE_SOURCE_HANDLES_TOP_MENU,
+                        Constants.RC_PROFILE_SOURCE_HANDLES_SETUP_MENU),
+                Lists.newArrayList(Constants.DEVICE_FEATURE_SUPPORTS_DECK_CONTROL));
+
+        assertThat(message).isEqualTo(buildMessage("0F:A6:06:10:4A:10"));
+    }
+
     /**
      * Build a CEC message from a hex byte string with bytes separated by {@code :}.
      *
@@ -100,7 +196,7 @@ public class HdmiCecMessageBuilderTest {
         int opcode = Integer.parseInt(parts[1], 16);
         byte[] params = new byte[parts.length - 2];
         for (int i = 0; i < params.length; i++) {
-            params[i] = Byte.parseByte(parts[i + 2], 16);
+            params[i] = (byte) Integer.parseInt(parts[i + 2], 16);
         }
         return new HdmiCecMessage(src, dest, opcode, params);
     }

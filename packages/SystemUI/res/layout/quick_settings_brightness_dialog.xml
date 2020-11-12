@@ -20,7 +20,7 @@
     android:layout_gravity="center_vertical"
     style="@style/BrightnessDialogContainer">
 
-    <com.android.systemui.settings.ToggleSliderView
+    <com.android.systemui.settings.brightness.BrightnessSliderView
         android:id="@+id/brightness_slider"
         android:layout_width="0dp"
         android:layout_height="48dp"
@@ -28,6 +28,54 @@
         android:layout_weight="1"
         android:contentDescription="@string/accessibility_brightness"
         android:importantForAccessibility="no"
-        systemui:text="@string/status_bar_settings_auto_brightness_label" />
+        systemui:text="@string/status_bar_settings_auto_brightness_label" >
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" >
+
+        <CheckBox
+            android:id="@+id/toggle"
+            android:layout_width="48dp"
+            android:layout_height="0dp"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentBottom="true"
+            android:button="@null"
+            android:background="@*android:drawable/switch_track_material"
+            android:visibility="gone"
+        />
+        <com.android.systemui.settings.brightness.ToggleSeekBar
+            android:id="@+id/slider"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_toEndOf="@id/toggle"
+            android:layout_centerVertical="true"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentEnd="true"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
+            android:paddingTop="16dp"
+            android:paddingBottom="16dp"
+            android:thumb="@drawable/ic_brightness_thumb"
+            android:progressDrawable="@drawable/brightness_progress_drawable"
+            android:splitTrack="false"
+        />
+        <TextView
+            android:id="@+id/label"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_alignStart="@id/toggle"
+            android:layout_alignEnd="@id/toggle"
+            android:layout_centerVertical="true"
+            android:gravity="center"
+            android:paddingTop="26dp"
+            android:textColor="#666666"
+            android:textSize="12sp"
+            android:visibility="gone"
+        />
+
+        </RelativeLayout>
+    </com.android.systemui.settings.brightness.BrightnessSliderView>
 
 </LinearLayout>

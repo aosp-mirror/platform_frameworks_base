@@ -5734,7 +5734,8 @@ class Task extends WindowContainer<WindowContainer> {
      */
     void ensureActivitiesVisible(@Nullable ActivityRecord starting, int configChanges,
             boolean preserveWindows) {
-        ensureActivitiesVisible(starting, configChanges, preserveWindows, true /* notifyClients */);
+        ensureActivitiesVisible(starting, configChanges, preserveWindows, true /* notifyClients */,
+                mStackSupervisor.mUserLeaving);
     }
 
     /**
@@ -5751,14 +5752,16 @@ class Task extends WindowContainer<WindowContainer> {
      * @param configChanges Parts of the configuration that changed for this activity for evaluating
      *                      if the screen should be frozen as part of
      *                      {@link mEnsureActivitiesVisibleHelper}.
+     * @param userLeaving Flag indicating whether a userLeaving callback should be issued in the
+     *                      case an activity is being set to invisible.
      */
     // TODO: Should be re-worked based on the fact that each task as a stack in most cases.
     void ensureActivitiesVisible(@Nullable ActivityRecord starting, int configChanges,
-            boolean preserveWindows, boolean notifyClients) {
+            boolean preserveWindows, boolean notifyClients, boolean userLeaving) {
         mStackSupervisor.beginActivityVisibilityUpdate();
         try {
             forAllLeafTasks(task -> task.mEnsureActivitiesVisibleHelper.process(
-                    starting, configChanges, preserveWindows, notifyClients),
+                    starting, configChanges, preserveWindows, notifyClients, userLeaving),
                     true /* traverseTopToBottom */);
 
             if (mTranslucentActivityWaiting != null &&
@@ -5940,17 +5943,20 @@ class Task extends WindowContainer<WindowContainer> {
         final TaskDisplayArea taskDisplayArea = getDisplayArea();
 
         // If the top activity is the resumed one, nothing to do.
-        // For devices that are not in fullscreen mode (e.g. freeform windows), it's possible
-        // we still want to proceed if the visibility of other windows have changed (e.g. bringing
-        // a fullscreen window forward to cover another freeform activity.)
         if (mResumedActivity == next && next.isState(RESUMED)
-                && taskDisplayArea.getWindowingMode() != WINDOWING_MODE_FREEFORM
                 && taskDisplayArea.allResumedActivitiesComplete()) {
             // The activity may be waiting for stop, but that is no longer appropriate for it.
             mStackSupervisor.mStoppingActivities.remove(next);
             // Make sure we have executed any pending transitions, since there
             // should be nothing left to do at this point.
             executeAppTransition(options);
+            // For devices that are not in fullscreen mode (e.g. freeform windows), it's possible
+            // we still want to check if the visibility of other windows have changed (e.g. bringing
+            // a fullscreen window forward to cover another freeform activity.)
+            if (taskDisplayArea.inMultiWindowMode()) {
+                taskDisplayArea.ensureActivitiesVisible(null /* starting */, 0 /* configChanges */,
+                        false /* preserveWindows */, true /* notifyClients */, userLeaving);
+            }
             ProtoLog.d(WM_DEBUG_STATES, "resumeTopActivityLocked: Top activity "
                     + "resumed %s", next);
             return false;

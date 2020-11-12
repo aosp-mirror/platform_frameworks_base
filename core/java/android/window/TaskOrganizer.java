@@ -85,6 +85,25 @@ public class TaskOrganizer extends WindowOrganizer {
     }
 
     /**
+     * Called when a Task is starting and the system would like to show a UI to indicate that an
+     * application is starting. The client is responsible to add/remove the starting window if it
+     * has create a starting window for the Task.
+     *
+     * @param taskInfo The information about the Task that's available
+     * @param appToken Token of the application being started.
+     *        context to for resources
+     */
+    @BinderThread
+    public void addStartingWindow(@NonNull ActivityManager.RunningTaskInfo taskInfo,
+            @NonNull IBinder appToken) {}
+
+    /**
+     * Called when the Task want to remove the starting window.
+     */
+    @BinderThread
+    public void removeStartingWindow(@NonNull ActivityManager.RunningTaskInfo taskInfo) {}
+
+    /**
      * Called when a task with the registered windowing mode can be controlled by this task
      * organizer. For non-root tasks, the leash may initially be hidden so it is up to the organizer
      * to show this task.
@@ -192,6 +211,15 @@ public class TaskOrganizer extends WindowOrganizer {
     }
 
     private final ITaskOrganizer mInterface = new ITaskOrganizer.Stub() {
+        @Override
+        public void addStartingWindow(ActivityManager.RunningTaskInfo taskInfo, IBinder appToken) {
+            TaskOrganizer.this.addStartingWindow(taskInfo, appToken);
+        }
+
+        @Override
+        public void removeStartingWindow(ActivityManager.RunningTaskInfo taskInfo) {
+            TaskOrganizer.this.removeStartingWindow(taskInfo);
+        }
 
         @Override
         public void onTaskAppeared(ActivityManager.RunningTaskInfo taskInfo, SurfaceControl leash) {

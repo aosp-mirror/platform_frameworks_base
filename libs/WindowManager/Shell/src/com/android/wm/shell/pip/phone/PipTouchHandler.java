@@ -64,11 +64,7 @@ import java.util.function.Consumer;
 public class PipTouchHandler {
     private static final String TAG = "PipTouchHandler";
 
-    /** Duration of the dismiss scrim fading in/out. */
-    private static final int DISMISS_TRANSITION_DURATION_MS = 200;
-
-    /* The multiplier to apply scale the target size by when applying the magnetic field radius */
-    private static final float MAGNETIC_FIELD_RADIUS_MULTIPLIER = 1.25f;
+    private static final float STASH_MINIMUM_VELOCITY_X = 3000.f;
 
     // Allow PIP to resize to a slightly bigger state upon touch
     private final boolean mEnableResize;
@@ -87,11 +83,10 @@ public class PipTouchHandler {
     private boolean mShowPipMenuOnAnimationEnd = false;
 
     /**
-     * Whether PIP stash is enabled or not. When enabled, if at the time of fling-release the
-     * PIP bounds is outside the left/right edge of the screen, it will be shown in "stashed" mode,
-     * where PIP will only show partially.
+     * Whether PIP stash is enabled or not. When enabled, if the user flings toward the edge of the
+     * screen, it will be shown in "stashed" mode, where PIP will only show partially.
      */
-    private boolean mEnableStash = false;
+    private boolean mEnableStash = true;
 
     // The current movement bounds
     private Rect mMovementBounds = new Rect();
@@ -206,13 +201,13 @@ public class PipTouchHandler {
         mEnableStash = DeviceConfig.getBoolean(
                 DeviceConfig.NAMESPACE_SYSTEMUI,
                 PIP_STASHING,
-                /* defaultValue = */ false);
+                /* defaultValue = */ true);
         DeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_SYSTEMUI,
                 context.getMainExecutor(),
                 properties -> {
                     if (properties.getKeyset().contains(PIP_STASHING)) {
                         mEnableStash = properties.getBoolean(
-                                PIP_STASHING, /* defaultValue = */ false);
+                                PIP_STASHING, /* defaultValue = */ true);
                     }
                 });
     }
@@ -710,6 +705,7 @@ public class PipTouchHandler {
         private final Point mStartPosition = new Point();
         private final PointF mDelta = new PointF();
         private boolean mShouldHideMenuAfterFling;
+        private float mDownSavedFraction = -1f;
 
         @Override
         public void onDown(PipTouchState touchState) {
@@ -722,6 +718,7 @@ public class PipTouchHandler {
             mStartPosition.set(bounds.left, bounds.top);
             mMovementWithinDismiss = touchState.getDownTouchPosition().y >= mMovementBounds.bottom;
             mMotionHelper.setSpringingToTouch(false);
+            mDownSavedFraction = mPipBoundsHandler.getSnapFraction(mPipBoundsState.getBounds());
 
             // If the menu is still visible then just poke the menu
             // so that it will timeout after the user stops touching it
@@ -790,13 +787,15 @@ public class PipTouchHandler {
 
                 // Reset the touch state on up before the fling settles
                 mTouchState.reset();
-                final Rect animatingBounds = getPossiblyAnimatingBounds();
-                // If User releases the PIP window while it's out of the display bounds, put
-                // PIP into stashed mode.
-                if (mEnableStash
-                        && (animatingBounds.right > mPipBoundsState.getDisplayBounds().right
-                        || animatingBounds.left < mPipBoundsState.getDisplayBounds().left)) {
-                    mMotionHelper.stashToEdge(vel.x, vel.y, this::stashEndAction /* endAction */);
+                // If user flings the PIP window above the minimum velocity, stash PIP.
+                // Only allow stashing to the edge if the user starts dragging the PIP from that
+                // edge.
+                if (mEnableStash && !mPipBoundsState.isStashed()
+                        && ((vel.x > STASH_MINIMUM_VELOCITY_X
+                        && mDownSavedFraction > 1f && mDownSavedFraction < 2f)
+                        || (vel.x < -STASH_MINIMUM_VELOCITY_X
+                        && mDownSavedFraction > 3f && mDownSavedFraction < 4f))) {
+                    mMotionHelper.stashToEdge(vel.x, this::stashEndAction /* endAction */);
                 } else {
                     mMotionHelper.flingToSnapTarget(vel.x, vel.y,
                             this::flingEndAction /* endAction */);
@@ -834,6 +833,7 @@ public class PipTouchHandler {
                     mTouchState.scheduleDoubleTapTimeoutCallback();
                 }
             }
+            mDownSavedFraction = -1f;
             return true;
         }
 

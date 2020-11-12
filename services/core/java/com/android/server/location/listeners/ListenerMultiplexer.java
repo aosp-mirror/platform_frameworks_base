@@ -79,8 +79,7 @@ import java.util.function.Predicate;
  * @param <TMergedRegistration> merged registration type
  */
 public abstract class ListenerMultiplexer<TKey, TListener,
-        TRegistration extends ListenerRegistration<TListener>,
-        TMergedRegistration> {
+        TRegistration extends ListenerRegistration<TListener>, TMergedRegistration> {
 
     @GuardedBy("mRegistrations")
     private final ArrayMap<TKey, TRegistration> mRegistrations = new ArrayMap<>();
@@ -480,6 +479,38 @@ public abstract class ListenerMultiplexer<TKey, TListener,
                         onRegistrationActiveChanged(registration);
                     }
                 }
+            }
+        }
+    }
+
+    /**
+     * Evaluates the predicate on a registration with the given key. The predicate should return
+     * true if the active state of the registration may have changed as a result. If the active
+     * state of the registration has changed, {@link #updateService()} will automatically be invoked
+     * to handle the resulting changes. Returns true if there is a registration with the given key
+     * (and thus the predicate was invoked), and false otherwise.
+     */
+    protected final boolean updateRegistration(@NonNull Object key,
+            @NonNull Predicate<TRegistration> predicate) {
+        synchronized (mRegistrations) {
+            // since updating a registration can invoke a variety of callbacks, we need to ensure
+            // those callbacks themselves do not re-enter, as this could lead to out-of-order
+            // callbacks. note that try-with-resources ordering is meaningful here as well. we want
+            // to close the reentrancy guard first, as this may generate additional service updates,
+            // then close the update service buffer.
+            try (UpdateServiceBuffer ignored1 = mUpdateServiceBuffer.acquire();
+                 ReentrancyGuard ignored2 = mReentrancyGuard.acquire()) {
+
+                int index = mRegistrations.indexOfKey(key);
+                if (index < 0) {
+                    return false;
+                }
+
+                TRegistration registration = mRegistrations.valueAt(index);
+                if (predicate.test(registration)) {
+                    onRegistrationActiveChanged(registration);
+                }
+                return true;
             }
         }
     }

@@ -18,6 +18,7 @@ package com.android.server.location;
 
 import android.annotation.Nullable;
 import android.location.Location;
+import android.location.LocationResult;
 import android.os.SystemClock;
 
 import com.android.internal.annotations.GuardedBy;
@@ -77,6 +78,11 @@ public class LocationFudger {
     @GuardedBy("this")
     @Nullable private Location mCachedCoarseLocation;
 
+    @GuardedBy("this")
+    @Nullable private LocationResult mCachedFineLocationResult;
+    @GuardedBy("this")
+    @Nullable private LocationResult mCachedCoarseLocationResult;
+
     public LocationFudger(float accuracyM) {
         this(accuracyM, SystemClock.elapsedRealtimeClock(), new SecureRandom());
     }
@@ -97,6 +103,28 @@ public class LocationFudger {
         mLatitudeOffsetM = nextRandomOffset();
         mLongitudeOffsetM = nextRandomOffset();
         mNextUpdateRealtimeMs = mClock.millis() + OFFSET_UPDATE_INTERVAL_MS;
+    }
+
+    /**
+     * Coarsens a LocationResult by coarsening every location within the location result with
+     * {@link #createCoarse(Location)}.
+     */
+    public LocationResult createCoarse(LocationResult fineLocationResult) {
+        synchronized (this) {
+            if (fineLocationResult == mCachedFineLocationResult
+                    || fineLocationResult == mCachedCoarseLocationResult) {
+                return mCachedCoarseLocationResult;
+            }
+        }
+
+        LocationResult coarseLocationResult = fineLocationResult.map(this::createCoarse);
+
+        synchronized (this) {
+            mCachedFineLocationResult = fineLocationResult;
+            mCachedCoarseLocationResult = coarseLocationResult;
+        }
+
+        return coarseLocationResult;
     }
 
     /**
@@ -154,7 +182,7 @@ public class LocationFudger {
             mCachedCoarseLocation = coarse;
         }
 
-        return mCachedCoarseLocation;
+        return coarse;
     }
 
     /**

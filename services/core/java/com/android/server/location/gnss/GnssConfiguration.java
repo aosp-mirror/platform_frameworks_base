@@ -207,8 +207,8 @@ class GnssConfiguration {
     /**
      * Updates the GNSS HAL satellite denylist.
      */
-    void setSatelliteBlacklist(int[] constellations, int[] svids) {
-        native_set_satellite_blacklist(constellations, svids);
+    void setSatelliteBlocklist(int[] constellations, int[] svids) {
+        native_set_satellite_blocklist(constellations, svids);
     }
 
     HalInterfaceVersion getHalInterfaceVersion() {
@@ -450,7 +450,7 @@ class GnssConfiguration {
 
     private static native boolean native_set_emergency_supl_pdn(int emergencySuplPdn);
 
-    private static native boolean native_set_satellite_blacklist(int[] constellations, int[] svIds);
+    private static native boolean native_set_satellite_blocklist(int[] constellations, int[] svIds);
 
     private static native boolean native_set_es_extension_sec(int emergencyExtensionSeconds);
 }

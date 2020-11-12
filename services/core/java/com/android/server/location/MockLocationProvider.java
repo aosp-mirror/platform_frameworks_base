@@ -20,6 +20,7 @@ import static com.android.internal.util.ConcurrentUtils.DIRECT_EXECUTOR;
 
 import android.annotation.Nullable;
 import android.location.Location;
+import android.location.LocationResult;
 import android.location.util.identity.CallerIdentity;
 import android.os.Bundle;
 
@@ -54,11 +55,16 @@ public class MockLocationProvider extends AbstractLocationProvider {
         Location location = new Location(l);
         location.setIsFromMockProvider(true);
         mLocation = location;
-        reportLocation(location);
+        reportLocation(LocationResult.wrap(location));
     }
 
     @Override
     public void onSetRequest(ProviderRequest request) {}
+
+    @Override
+    protected void onFlush(Runnable callback) {
+        callback.run();
+    }
 
     @Override
     protected void onExtraCommand(int uid, int pid, String command, Bundle extras) {}

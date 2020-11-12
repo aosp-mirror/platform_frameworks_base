@@ -69,12 +69,10 @@ public class PeopleSpaceActivity extends Activity {
      */
     private void setTileViewsWithPriorityConversations() {
         try {
-            List<ShortcutInfo> shortcutInfos =
-                    PeopleSpaceUtils.getShortcutInfos(
-                            mContext, mNotificationManager, mPeopleManager);
+            List<ShortcutInfo> shortcutInfos = PeopleSpaceUtils.getShortcutInfos(mContext,
+                    mNotificationManager, mPeopleManager);
             for (ShortcutInfo conversation : shortcutInfos) {
-                PeopleSpaceTileView tileView = new PeopleSpaceTileView(mContext,
-                        mPeopleSpaceLayout,
+                PeopleSpaceTileView tileView = new PeopleSpaceTileView(mContext, mPeopleSpaceLayout,
                         conversation.getId());
                 setTileView(tileView, conversation);
             }
@@ -84,20 +82,14 @@ public class PeopleSpaceActivity extends Activity {
     }
 
     /** Sets {@code tileView} with the data in {@code conversation}. */
-    private void setTileView(PeopleSpaceTileView tileView,
-            ShortcutInfo shortcutInfo) {
+    private void setTileView(PeopleSpaceTileView tileView, ShortcutInfo shortcutInfo) {
         try {
-            int userId = UserHandle.getUserHandleForUid(
-                    shortcutInfo.getUserId()).getIdentifier();
+            int userId = UserHandle.getUserHandleForUid(shortcutInfo.getUserId()).getIdentifier();
 
             String pkg = shortcutInfo.getPackage();
-            long lastInteraction = mPeopleManager.getLastInteraction(
-                    pkg, userId,
+            long lastInteraction = mPeopleManager.getLastInteraction(pkg, userId,
                     shortcutInfo.getId());
-            String status = lastInteraction != 0l ? mContext.getString(
-                    R.string.last_interaction_status,
-                    PeopleSpaceUtils.getLastInteractionString(
-                            lastInteraction)) : mContext.getString(R.string.basic_status);
+            String status = PeopleSpaceUtils.getLastInteractionString(mContext, lastInteraction);
             tileView.setStatus(status);
 
             tileView.setName(shortcutInfo.getLabel().toString());

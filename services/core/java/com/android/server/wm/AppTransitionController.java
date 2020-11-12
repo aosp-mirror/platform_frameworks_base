@@ -575,7 +575,7 @@ public class AppTransitionController {
             app.allDrawn = true;
             // Ensure that apps that are mid-starting are also scheduled to have their
             // starting windows removed after the animation is complete
-            if (app.startingWindow != null && !app.startingWindow.mAnimatingExit) {
+            if (app.mStartingWindow != null && !app.mStartingWindow.mAnimatingExit) {
                 app.removeStartingWindow();
             }
 
@@ -651,7 +651,7 @@ public class AppTransitionController {
                                 + "startingMoved=%b isRelaunching()=%b startingWindow=%s",
                         activity, activity.allDrawn, activity.startingDisplayed,
                         activity.startingMoved, activity.isRelaunching(),
-                        activity.startingWindow);
+                        activity.mStartingWindow);
 
 
                 final boolean allDrawn = activity.allDrawn && !activity.isRelaunching();
@@ -760,7 +760,7 @@ public class AppTransitionController {
                 ProtoLog.v(WM_DEBUG_APP_TRANSITIONS,
                         "New transit away from wallpaper: %s",
                                 AppTransition.appTransitionOldToString(transit));
-            } else if (wallpaperTarget != null && wallpaperTarget.isVisibleLw()
+            } else if (wallpaperTarget != null && wallpaperTarget.isVisible()
                     && openingApps.contains(wallpaperTarget.mActivityRecord)
                     && topOpeningApp == wallpaperTarget.mActivityRecord
                     && transit != TRANSIT_OLD_TRANSLUCENT_ACTIVITY_CLOSE) {

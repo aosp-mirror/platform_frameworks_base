@@ -353,6 +353,165 @@ public class HdmiCecMessageValidatorTest {
         assertMessageValidity("40:35:EE:52:4A").isEqualTo(ERROR_PARAMETER);
     }
 
+    @Test
+    public void isValid_giveFeatures() {
+        assertMessageValidity("40:A5").isEqualTo(OK);
+
+        assertMessageValidity("4F:A5").isEqualTo(ERROR_DESTINATION);
+        assertMessageValidity("F0:A5").isEqualTo(ERROR_SOURCE);
+    }
+
+    @Test
+    public void isValid_reportFeatures() {
+        assertMessageValidity("0F:A6:05:80:00:00").isEqualTo(OK);
+
+        assertMessageValidity("04:A6:05:80:00:00").isEqualTo(ERROR_DESTINATION);
+        assertMessageValidity("FF:A6:05:80:00:00").isEqualTo(ERROR_SOURCE);
+
+        assertMessageValidity("0F:A6").isEqualTo(ERROR_PARAMETER_SHORT);
+    }
+
+    @Test
+    public void isValid_deckControl() {
+        assertMessageValidity("40:42:01:6E").isEqualTo(OK);
+        assertMessageValidity("40:42:04").isEqualTo(OK);
+
+        assertMessageValidity("4F:42:01").isEqualTo(ERROR_DESTINATION);
+        assertMessageValidity("F0:42:04").isEqualTo(ERROR_SOURCE);
+        assertMessageValidity("40:42").isEqualTo(ERROR_PARAMETER_SHORT);
+        assertMessageValidity("40:42:05").isEqualTo(ERROR_PARAMETER);
+    }
+
+    @Test
+    public void isValid_deckStatus() {
+        assertMessageValidity("40:1B:11:58").isEqualTo(OK);
+        assertMessageValidity("40:1B:1F").isEqualTo(OK);
+
+        assertMessageValidity("4F:1B:11").isEqualTo(ERROR_DESTINATION);
+        assertMessageValidity("F0:1B:1F").isEqualTo(ERROR_SOURCE);
+        assertMessageValidity("40:1B").isEqualTo(ERROR_PARAMETER_SHORT);
+        assertMessageValidity("40:1B:10").isEqualTo(ERROR_PARAMETER);
+        assertMessageValidity("40:1B:20").isEqualTo(ERROR_PARAMETER);
+    }
+
+    @Test
+    public void isValid_statusRequest() {
+        assertMessageValidity("40:08:01").isEqualTo(OK);
+        assertMessageValidity("40:08:02:5C").isEqualTo(OK);
+        assertMessageValidity("40:1A:01:F8").isEqualTo(OK);
+        assertMessageValidity("40:1A:03").isEqualTo(OK);
+
+        assertMessageValidity("4F:08:01").isEqualTo(ERROR_DESTINATION);
+        assertMessageValidity("F0:08:03").isEqualTo(ERROR_SOURCE);
+        assertMessageValidity("4F:1A:01").isEqualTo(ERROR_DESTINATION);
+        assertMessageValidity("F0:1A:03").isEqualTo(ERROR_SOURCE);
+        assertMessageValidity("40:08").isEqualTo(ERROR_PARAMETER_SHORT);
+        assertMessageValidity("40:1A").isEqualTo(ERROR_PARAMETER_SHORT);
+        assertMessageValidity("40:08:00").isEqualTo(ERROR_PARAMETER);
+        assertMessageValidity("40:08:05").isEqualTo(ERROR_PARAMETER);
+        assertMessageValidity("40:1A:00").isEqualTo(ERROR_PARAMETER);
+        assertMessageValidity("40:1A:04").isEqualTo(ERROR_PARAMETER);
+    }
+
+    @Test
+    public void isValid_play() {
+        assertMessageValidity("40:41:16:E3").isEqualTo(OK);
+        assertMessageValidity("40:41:20").isEqualTo(OK);
+
+        assertMessageValidity("4F:41:16").isEqualTo(ERROR_DESTINATION);
+        assertMessageValidity("F0:41:20").isEqualTo(ERROR_SOURCE);
+        assertMessageValidity("40:41").isEqualTo(ERROR_PARAMETER_SHORT);
+        assertMessageValidity("40:41:04").isEqualTo(ERROR_PARAMETER);
+        assertMessageValidity("40:41:18").isEqualTo(ERROR_PARAMETER);
+        assertMessageValidity("40:41:23").isEqualTo(ERROR_PARAMETER);
+        assertMessageValidity("40:41:26").isEqualTo(ERROR_PARAMETER);
+    }
+
+    @Test
+    public void isValid_selectAnalogueService() {
+        assertMessageValidity("40:92:00:13:0F:00:96").isEqualTo(OK);
+        assertMessageValidity("40:92:02:EA:60:1F").isEqualTo(OK);
+
+        assertMessageValidity("4F:92:00:13:0F:00").isEqualTo(ERROR_DESTINATION);
+        assertMessageValidity("F0:92:02:EA:60:1F").isEqualTo(ERROR_SOURCE);
+        assertMessageValidity("40:92:00:13:0F").isEqualTo(ERROR_PARAMETER_SHORT);
+        // Invalid Analogue Broadcast type
+        assertMessageValidity("40:92:03:EA:60:1F").isEqualTo(ERROR_PARAMETER);
+        // Invalid Analogue Frequency
+        assertMessageValidity("40:92:00:FF:FF:00").isEqualTo(ERROR_PARAMETER);
+        // Invalid Broadcast system
+        assertMessageValidity("40:92:02:EA:60:20").isEqualTo(ERROR_PARAMETER);
+    }
+
+    @Test
+    public void isValid_selectDigitalService() {
+        assertMessageValidity("40:93:00:11:CE:90:0F:00:78").isEqualTo(OK);
+        assertMessageValidity("40:93:10:13:0B:34:38").isEqualTo(OK);
+        assertMessageValidity("40:93:9A:06:F9:D3:E6").isEqualTo(OK);
+        assertMessageValidity("40:93:91:09:F4:40:C8").isEqualTo(OK);
+
+        assertMessageValidity("4F:93:00:11:CE:90:0F:00:78").isEqualTo(ERROR_DESTINATION);
+        assertMessageValidity("F0:93:10:13:0B:34:38").isEqualTo(ERROR_SOURCE);
+        assertMessageValidity("40:93:9A:06:F9").isEqualTo(ERROR_PARAMETER_SHORT);
+        // Invalid Digital Broadcast System
+        assertMessageValidity("40:93:14:11:CE:90:0F:00:78").isEqualTo(ERROR_PARAMETER);
+        // Invalid Digital Broadcast System
+        assertMessageValidity("40:93:A0:07:95:F1").isEqualTo(ERROR_PARAMETER);
+        // Insufficient data for ARIB Broadcast system
+        assertMessageValidity("40:93:00:11:CE:90:0F:00").isEqualTo(ERROR_PARAMETER);
+        // Insufficient data for ATSC Broadcast system
+        assertMessageValidity("40:93:10:13:0B:34").isEqualTo(ERROR_PARAMETER);
+        // Insufficient data for DVB Broadcast system
+        assertMessageValidity("40:93:18:BE:77:00:7D:01").isEqualTo(ERROR_PARAMETER);
+        // Invalid channel number format
+        assertMessageValidity("40:93:9A:10:F9:D3").isEqualTo(ERROR_PARAMETER);
+        // Insufficient data for 2 part channel number
+        assertMessageValidity("40:93:91:09:F4:40").isEqualTo(ERROR_PARAMETER);
+    }
+
+    @Test
+    public void isValid_UserControlPressed() {
+        assertMessageValidity("40:44:07").isEqualTo(OK);
+        assertMessageValidity("40:44:52:A7").isEqualTo(OK);
+
+        assertMessageValidity("40:44:60").isEqualTo(OK);
+        assertMessageValidity("40:44:60:1A").isEqualTo(OK);
+
+        assertMessageValidity("40:44:67").isEqualTo(OK);
+        assertMessageValidity("40:44:67:04:00:B1").isEqualTo(OK);
+        assertMessageValidity("40:44:67:09:C8:72:C8").isEqualTo(OK);
+
+        assertMessageValidity("40:44:68").isEqualTo(OK);
+        assertMessageValidity("40:44:68:93").isEqualTo(OK);
+        assertMessageValidity("40:44:69").isEqualTo(OK);
+        assertMessageValidity("40:44:69:7C").isEqualTo(OK);
+        assertMessageValidity("40:44:6A").isEqualTo(OK);
+        assertMessageValidity("40:44:6A:B4").isEqualTo(OK);
+
+        assertMessageValidity("40:44:56").isEqualTo(OK);
+        assertMessageValidity("40:44:56:60").isEqualTo(OK);
+
+        assertMessageValidity("40:44:57").isEqualTo(OK);
+        assertMessageValidity("40:44:57:A0").isEqualTo(OK);
+
+        assertMessageValidity("4F:44:07").isEqualTo(ERROR_DESTINATION);
+        assertMessageValidity("F0:44:52:A7").isEqualTo(ERROR_SOURCE);
+        assertMessageValidity("40:44").isEqualTo(ERROR_PARAMETER_SHORT);
+        assertMessageValidity("40:44:67:04:B1").isEqualTo(ERROR_PARAMETER_SHORT);
+        // Invalid Play mode
+        assertMessageValidity("40:44:60:04").isEqualTo(ERROR_PARAMETER);
+        assertMessageValidity("40:44:60:08").isEqualTo(ERROR_PARAMETER);
+        assertMessageValidity("40:44:60:26").isEqualTo(ERROR_PARAMETER);
+        // Invalid Channel Identifier - Channel number format
+        assertMessageValidity("40:44:67:11:8A:42").isEqualTo(ERROR_PARAMETER);
+        // Insufficient data for 2 - part channel number
+        assertMessageValidity("40:44:67:09:C8:72").isEqualTo(ERROR_PARAMETER);
+        // Invalid UI Broadcast type
+        assertMessageValidity("40:44:56:11").isEqualTo(ERROR_PARAMETER);
+        // Invalid UI Sound Presentation Control
+        assertMessageValidity("40:44:57:40").isEqualTo(ERROR_PARAMETER);
+    }
+
     private IntegerSubject assertMessageValidity(String message) {
         return assertThat(mHdmiCecMessageValidator.isValid(buildMessage(message)));
     }

@@ -1,0 +1,20 @@
+
+java_binary {
+    name: "abx",
+    wrapper: "abx",
+    srcs: ["**/*.java"],
+    required: [
+        "abx2xml",
+        "xml2abx",
+    ],
+}
+
+sh_binary {
+    name: "abx2xml",
+    src: "abx2xml",
+}
+
+sh_binary {
+    name: "xml2abx",
+    src: "xml2abx",
+}

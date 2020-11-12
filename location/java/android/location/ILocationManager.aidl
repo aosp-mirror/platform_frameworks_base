@@ -23,7 +23,6 @@ import android.location.GeocoderParams;
 import android.location.Geofence;
 import android.location.GnssMeasurementCorrections;
 import android.location.GnssRequest;
-import android.location.IBatchedLocationCallback;
 import android.location.IGeocodeListener;
 import android.location.IGnssAntennaInfoListener;
 import android.location.IGnssMeasurementsListener;
@@ -53,9 +52,12 @@ interface ILocationManager
     void unregisterLocationListener(in ILocationListener listener);
 
     void registerLocationPendingIntent(String provider, in LocationRequest request, in PendingIntent pendingIntent, String packageName, String attributionTag);
-    void unregisterLocationPendingIntent(in PendingIntent intent);
+    void unregisterLocationPendingIntent(in PendingIntent pendingIntent);
 
     void injectLocation(in Location location);
+
+    void requestListenerFlush(String provider, in ILocationListener listener, int requestCode);
+    void requestPendingIntentFlush(String provider, in PendingIntent pendingIntent, int requestCode);
 
     void requestGeofence(in Geofence geofence, in PendingIntent intent, String packageName, String attributionTag);
     void removeGeofence(in PendingIntent intent);
@@ -86,9 +88,7 @@ interface ILocationManager
     void removeGnssNavigationMessageListener(in IGnssNavigationMessageListener listener);
 
     int getGnssBatchSize();
-    void setGnssBatchingCallback(in IBatchedLocationCallback callback, String packageName, String attributionTag);
-    void removeGnssBatchingCallback();
-    void startGnssBatch(long periodNanos, boolean wakeOnFifoFull, String packageName, String attributionTag);
+    void startGnssBatch(long periodNanos, in ILocationListener listener, String packageName, String attributionTag, String listenerId);
     void flushGnssBatch();
     void stopGnssBatch();
 

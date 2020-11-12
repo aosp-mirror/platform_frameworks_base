@@ -29,10 +29,10 @@ public final class GnssCapabilities {
     public static final long LOW_POWER_MODE                                     = 1L << 0;
 
     /**
-     * Bit mask indicating GNSS chipset supports blacklisting satellites.
+     * Bit mask indicating GNSS chipset supports blocklisting satellites.
      * @hide
      */
-    public static final long SATELLITE_BLACKLIST                                = 1L << 1;
+    public static final long SATELLITE_BLOCKLIST                                = 1L << 1;
 
     /**
      * Bit mask indicating GNSS chipset supports geofencing.
@@ -110,14 +110,27 @@ public final class GnssCapabilities {
     }
 
     /**
-     * Returns {@code true} if GNSS chipset supports blacklisting satellites, {@code false}
+     * Returns {@code true} if GNSS chipset supports blocklisting satellites, {@code false}
+     * otherwise.
+     *
+     * @hide
+     * @deprecated use {@link #hasSatelliteBlocklist} instead.
+     */
+    @SystemApi
+    @Deprecated
+    public boolean hasSatelliteBlacklist() {
+        return hasCapability(SATELLITE_BLOCKLIST);
+    }
+
+    /**
+     * Returns {@code true} if GNSS chipset supports blocklisting satellites, {@code false}
      * otherwise.
      *
      * @hide
      */
     @SystemApi
-    public boolean hasSatelliteBlacklist() {
-        return hasCapability(SATELLITE_BLACKLIST);
+    public boolean hasSatelliteBlocklist() {
+        return hasCapability(SATELLITE_BLOCKLIST);
     }
 
     /**

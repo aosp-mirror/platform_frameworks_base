@@ -257,6 +257,7 @@ private:
         } mHealthBase = {TimePoint::max(), kMaxBootClockTsUs};
         StorageHealthCheckParams mHealthCheckParams;
         int mStreamStatus = content::pm::IDataLoaderStatusListener::STREAM_HEALTHY;
+        std::vector<incfs::ReadInfo> mLastPendingReads;
     };
     using DataLoaderStubPtr = sp<DataLoaderStub>;
 

@@ -207,43 +207,10 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
         public IApplicationToken getAppToken();
 
         /**
-         * Is this window visible?  It is not visible if there is no
-         * surface, or we are in the process of running an exit animation
-         * that will remove the surface.
-         */
-        boolean isVisibleLw();
-
-        /**
          * Return true if this window (or a window it is attached to, but not
          * considering its app token) is currently animating.
          */
         boolean isAnimatingLw();
-
-        /**
-         * Can be called by the policy to force a window to be hidden,
-         * regardless of whether the client or window manager would like
-         * it shown.  Must be called with the window manager lock held.
-         * Returns true if {@link #showLw} was last called for the window.
-         */
-        public boolean hideLw(boolean doAnimation);
-
-        /**
-         * Can be called to undo the effect of {@link #hideLw}, allowing a
-         * window to be shown as long as the window manager and client would
-         * also like it to be shown.  Must be called with the window manager
-         * lock held.
-         * Returns true if {@link #hideLw} was last called for the window.
-         */
-        public boolean showLw(boolean doAnimation);
-
-        /**
-         * Check whether the window is currently dimming.
-         */
-        public boolean isDimming();
-
-        public boolean isInputMethodWindow();
-
-        public int getDisplayId();
 
         /**
          * Returns true if the window owner can add internal system windows.
@@ -788,14 +755,6 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
     void setTopFocusedDisplay(int displayId);
 
     /**
-     * Apply the keyguard policy to a specific window.
-     *
-     * @param win The window to apply the keyguard policy.
-     * @param imeTarget The current IME target window.
-     */
-    void applyKeyguardPolicyLw(WindowState win, WindowState imeTarget);
-
-    /**
      * Called when the state of allow-lockscreen-when-on of the display is changed. See
      * {@link WindowManager.LayoutParams#FLAG_ALLOW_LOCK_WHILE_SCREEN_ON}
      *
@@ -1210,11 +1169,4 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
      * A new window on default display has been focused.
      */
     default void onDefaultDisplayFocusChangedLw(WindowState newFocus) {}
-
-    /**
-     * Updates the flag about whether AOD is showing.
-     *
-     * @return whether the value was changed.
-     */
-    boolean setAodShowing(boolean aodShowing);
 }

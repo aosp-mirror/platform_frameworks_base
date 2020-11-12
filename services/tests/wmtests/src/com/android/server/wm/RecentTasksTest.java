@@ -294,7 +294,7 @@ public class RecentTasksTest extends WindowTestsBase {
         }).when(mSupervisor).endActivityVisibilityUpdate();
 
         mTaskContainer.ensureActivitiesVisible(null /* starting */, 0 /* configChanges */,
-                false /* preserveWindows */, false /* notifyClients */);
+                false /* preserveWindows */, false /* notifyClients */, false /* userLeaving */);
 
         assertFalse(mSupervisor.inActivityVisibilityUpdate());
         assertThat(mCallbacksRecorder.mAdded).hasSize(2);

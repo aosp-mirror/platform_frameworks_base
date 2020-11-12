@@ -16,18 +16,14 @@
 
 package com.android.server.location.gnss;
 
-import static android.location.LocationManager.GPS_PROVIDER;
-
 import android.Manifest;
 import android.annotation.Nullable;
-import android.app.AppOpsManager;
 import android.content.Context;
 import android.location.GnssAntennaInfo;
 import android.location.GnssMeasurementCorrections;
 import android.location.GnssMeasurementsEvent;
 import android.location.GnssNavigationMessage;
 import android.location.GnssRequest;
-import android.location.IBatchedLocationCallback;
 import android.location.IGnssAntennaInfoListener;
 import android.location.IGnssMeasurementsListener;
 import android.location.IGnssNavigationMessageListener;
@@ -37,12 +33,10 @@ import android.location.INetInitiatedListener;
 import android.location.Location;
 import android.location.LocationManagerInternal;
 import android.location.util.identity.CallerIdentity;
-import android.os.Binder;
 import android.os.RemoteException;
 import android.util.IndentingPrintWriter;
 import android.util.Log;
 
-import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;
 import com.android.server.LocalServices;
@@ -77,20 +71,8 @@ public class GnssManagerService implements GnssNative.Callbacks {
     private final GnssLocationProvider.GnssSystemInfoProvider mGnssSystemInfoProvider;
     private final GnssLocationProvider.GnssMetricsProvider mGnssMetricsProvider;
     private final GnssCapabilitiesProvider mGnssCapabilitiesProvider;
-    private final GnssBatchingProvider mGnssBatchingProvider;
     private final INetInitiatedListener mNetInitiatedListener;
     private final IGpsGeofenceHardware mGpsGeofenceProxy;
-
-    private final Object mGnssBatchingLock = new Object();
-
-    @GuardedBy("mGnssBatchingLock")
-    @Nullable private IBatchedLocationCallback mGnssBatchingCallback;
-    @GuardedBy("mGnssBatchingLock")
-    @Nullable private CallerIdentity mGnssBatchingIdentity;
-    @GuardedBy("mGnssBatchingLock")
-    @Nullable private Binder.DeathRecipient mGnssBatchingDeathRecipient;
-    @GuardedBy("mGnssBatchingLock")
-    private boolean mGnssBatchingInProgress = false;
 
     public GnssManagerService(Context context, Injector injector) {
         this(context, injector, null);
@@ -121,7 +103,6 @@ public class GnssManagerService implements GnssNative.Callbacks {
         mGnssSystemInfoProvider = mGnssLocationProvider.getGnssSystemInfoProvider();
         mGnssMetricsProvider = mGnssLocationProvider.getGnssMetricsProvider();
         mGnssCapabilitiesProvider = mGnssLocationProvider.getGnssCapabilitiesProvider();
-        mGnssBatchingProvider = mGnssLocationProvider.getGnssBatchingProvider();
         mNetInitiatedListener = mGnssLocationProvider.getNetInitiatedListener();
         mGpsGeofenceProxy = mGnssLocationProvider.getGpsGeofenceProxy();
 
@@ -171,108 +152,7 @@ public class GnssManagerService implements GnssNative.Callbacks {
      * Get size of GNSS batch (GNSS location results are batched together for power savings).
      */
     public int getGnssBatchSize() {
-        mContext.enforceCallingOrSelfPermission(Manifest.permission.LOCATION_HARDWARE, null);
-
-        synchronized (mGnssBatchingLock) {
-            return mGnssBatchingProvider.getBatchSize();
-        }
-    }
-
-    /**
-     * Starts GNSS batch collection. GNSS positions are collected in a batch before being delivered
-     * as a collection.
-     */
-    public boolean startGnssBatch(long periodNanos, boolean wakeOnFifoFull, String packageName,
-            String attributionTag) {
-        mContext.enforceCallingOrSelfPermission(Manifest.permission.LOCATION_HARDWARE, null);
-        mContext.enforceCallingOrSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION, null);
-
-        CallerIdentity identity = CallerIdentity.fromBinder(mContext, packageName, attributionTag);
-        if (!mAppOpsHelper.checkOpNoThrow(AppOpsManager.OP_FINE_LOCATION, identity)) {
-            return false;
-        }
-
-        synchronized (mGnssBatchingLock) {
-            if (mGnssBatchingInProgress) {
-                // Current design does not expect multiple starts to be called repeatedly
-                Log.e(TAG, "startGnssBatch unexpectedly called w/o stopping prior batch");
-                stopGnssBatch();
-            }
-
-            mGnssBatchingInProgress = true;
-            return mGnssBatchingProvider.start(periodNanos, wakeOnFifoFull);
-        }
-    }
-
-    /**
-     * Adds a GNSS batching callback for delivering GNSS location batch results.
-     */
-    public boolean setGnssBatchingCallback(IBatchedLocationCallback callback, String packageName,
-            @Nullable String attributionTag) {
-        mContext.enforceCallingOrSelfPermission(Manifest.permission.LOCATION_HARDWARE, null);
-        mContext.enforceCallingOrSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION, null);
-
-        CallerIdentity identity = CallerIdentity.fromBinder(mContext, packageName, attributionTag);
-
-        synchronized (mGnssBatchingLock) {
-            Binder.DeathRecipient deathRecipient = () -> {
-                synchronized (mGnssBatchingLock) {
-                    stopGnssBatch();
-                    removeGnssBatchingCallback();
-                }
-            };
-
-            try {
-                callback.asBinder().linkToDeath(mGnssBatchingDeathRecipient, 0);
-                mGnssBatchingCallback = callback;
-                mGnssBatchingIdentity = identity;
-                mGnssBatchingDeathRecipient = deathRecipient;
-                return true;
-            } catch (RemoteException e) {
-                return false;
-            }
-        }
-    }
-
-    /**
-     * Force flush GNSS location results from batch.
-     */
-    public void flushGnssBatch() {
-        mContext.enforceCallingOrSelfPermission(Manifest.permission.LOCATION_HARDWARE, null);
-
-        synchronized (mGnssBatchingLock) {
-            mGnssBatchingProvider.flush();
-        }
-    }
-
-    /**
-     * Removes GNSS batching callback.
-     */
-    public void removeGnssBatchingCallback() {
-        mContext.enforceCallingOrSelfPermission(Manifest.permission.LOCATION_HARDWARE, null);
-
-        synchronized (mGnssBatchingLock) {
-            if (mGnssBatchingCallback == null) {
-                return;
-            }
-
-            mGnssBatchingCallback.asBinder().unlinkToDeath(mGnssBatchingDeathRecipient, 0);
-            mGnssBatchingCallback = null;
-            mGnssBatchingIdentity = null;
-            mGnssBatchingDeathRecipient = null;
-        }
-    }
-
-    /**
-     * Stop GNSS batch collection.
-     */
-    public boolean stopGnssBatch() {
-        mContext.enforceCallingOrSelfPermission(Manifest.permission.LOCATION_HARDWARE, null);
-
-        synchronized (mGnssBatchingLock) {
-            mGnssBatchingInProgress = false;
-            return mGnssBatchingProvider.stop();
-        }
+        return mGnssLocationProvider.getBatchSize();
     }
 
     /**
@@ -377,34 +257,6 @@ public class GnssManagerService implements GnssNative.Callbacks {
     }
 
     /**
-     * Report location results to GNSS batching listener.
-     */
-    public void onReportLocation(List<Location> locations) {
-        IBatchedLocationCallback callback;
-        CallerIdentity identity;
-        synchronized (mGnssBatchingLock) {
-            callback = mGnssBatchingCallback;
-            identity = mGnssBatchingIdentity;
-        }
-
-        if (callback == null || identity == null) {
-            return;
-        }
-
-        if (!mLocationManagerInternal.isProviderEnabledForUser(GPS_PROVIDER,
-                identity.getUserId())) {
-            Log.w(TAG, "reportLocationBatch() called without user permission");
-            return;
-        }
-
-        try {
-            callback.onLocationBatch(locations);
-        } catch (RemoteException e) {
-            // ignore
-        }
-    }
-
-    /**
      * Dump info for debugging.
      */
     public void dump(FileDescriptor fd, IndentingPrintWriter ipw, String[] args) {
@@ -434,12 +286,6 @@ public class GnssManagerService implements GnssNative.Callbacks {
         ipw.increaseIndent();
         mGnssStatusProvider.dump(fd, ipw, args);
         ipw.decreaseIndent();
-
-        synchronized (mGnssBatchingLock) {
-            if (mGnssBatchingInProgress) {
-                ipw.println("GNSS batching in progress");
-            }
-        }
     }
 
     // all native callbacks - to be funneled to various locations as appropriate
