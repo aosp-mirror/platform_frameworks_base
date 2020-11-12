@@ -3065,7 +3065,7 @@ public class AppOpsService extends IAppOpsService.Stub {
         final int proxyMode = noteOperationUnchecked(code, proxyUid, resolveProxyPackageName,
                 proxyAttributionTag, Process.INVALID_UID, null, null, proxyFlags,
                 !isProxyTrusted, "proxy " + message, shouldCollectMessage);
-        if (proxyMode != AppOpsManager.MODE_ALLOWED || Binder.getCallingUid() == proxiedUid) {
+        if (proxyMode != AppOpsManager.MODE_ALLOWED) {
             return proxyMode;
         }
 
@@ -3550,8 +3550,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                 resolvedProxyPackageName, proxyAttributionTag, Process.INVALID_UID, null, null,
                 proxyFlags, startIfModeDefault, !isProxyTrusted, "proxy " + message,
                 shouldCollectMessage, false);
-        if (!shouldStartForMode(proxyMode, startIfModeDefault)
-                || Binder.getCallingUid() == proxiedUid) {
+        if (!shouldStartForMode(proxyMode, startIfModeDefault)) {
             return proxyMode;
         }
 
