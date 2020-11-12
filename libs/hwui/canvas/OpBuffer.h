@@ -156,7 +156,7 @@ private:
         using F_PTR = decltype(&f);
         using THUNK = void (*)(F_PTR, void*);
         static constexpr auto jump = std::array<THUNK, sizeof...(I)>{[](F_PTR fp, void* t) {
-            (*fp)(reinterpret_cast<ItemContainer<static_cast<ItemTypes>(I)>*>(t));
+            (*fp)(reinterpret_cast<const ItemContainer<static_cast<ItemTypes>(I)>*>(t));
         }...};
 
         // Do the actual iteration of each item
