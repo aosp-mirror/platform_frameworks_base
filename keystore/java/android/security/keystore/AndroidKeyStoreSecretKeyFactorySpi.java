@@ -211,7 +211,11 @@ public class AndroidKeyStoreSecretKeyFactorySpi extends SecretKeyFactorySpi {
                 userAuthenticationValidWhileOnBody,
                 trustedUserPresenceRequired,
                 invalidatedByBiometricEnrollment,
-                userConfirmationRequired);
+                userConfirmationRequired,
+                // Keystore 1.0 does not tell us the exact security level of the key
+                // so we report an unknown but secure security level.
+                insideSecureHardware ? KeyProperties.SECURITY_LEVEL_UNKNOWN_SECURE
+                        : KeyProperties.SECURITY_LEVEL_SOFTWARE);
     }
 
     private static BigInteger getGateKeeperSecureUserId() throws ProviderException {
