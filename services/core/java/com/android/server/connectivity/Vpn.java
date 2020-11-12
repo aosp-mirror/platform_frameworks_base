@@ -1601,7 +1601,7 @@ public class Vpn {
      */
     public synchronized void onUserStopped() {
         // Switch off networking lockdown (if it was enabled)
-        setVpnForcedLocked(false);
+        setLockdown(false);
         mAlwaysOn = false;
 
         // Quit any active connections

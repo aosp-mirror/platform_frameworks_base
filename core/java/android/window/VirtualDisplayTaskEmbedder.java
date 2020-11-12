@@ -19,7 +19,6 @@ package android.window;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_DESTROY_CONTENT_ON_REMOVAL;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC;
-import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_TRUSTED;
 import static android.view.Display.INVALID_DISPLAY;
 
 import android.app.ActivityManager;
@@ -64,7 +63,6 @@ public class VirtualDisplayTaskEmbedder extends TaskEmbedder {
     private int mDisplayDensityDpi;
     private final boolean mSingleTaskInstance;
     private final boolean mUsePublicVirtualDisplay;
-    private final boolean mUseTrustedDisplay;
     private VirtualDisplay mVirtualDisplay;
     private Insets mForwardedInsets;
     private DisplayMetrics mTmpDisplayMetrics;
@@ -79,12 +77,10 @@ public class VirtualDisplayTaskEmbedder extends TaskEmbedder {
      *                           only applicable if virtual displays are used
      */
     public VirtualDisplayTaskEmbedder(Context context, VirtualDisplayTaskEmbedder.Host host,
-            boolean singleTaskInstance, boolean usePublicVirtualDisplay,
-            boolean useTrustedDisplay) {
+            boolean singleTaskInstance, boolean usePublicVirtualDisplay) {
         super(context, host);
         mSingleTaskInstance = singleTaskInstance;
         mUsePublicVirtualDisplay = usePublicVirtualDisplay;
-        mUseTrustedDisplay = useTrustedDisplay;
     }
 
     /**
@@ -106,9 +102,6 @@ public class VirtualDisplayTaskEmbedder extends TaskEmbedder {
                 | VIRTUAL_DISPLAY_FLAG_DESTROY_CONTENT_ON_REMOVAL;
         if (mUsePublicVirtualDisplay) {
             virtualDisplayFlags |= VIRTUAL_DISPLAY_FLAG_PUBLIC;
-        }
-        if (mUseTrustedDisplay) {
-            virtualDisplayFlags |= VIRTUAL_DISPLAY_FLAG_TRUSTED;
         }
 
         mVirtualDisplay = displayManager.createVirtualDisplay(

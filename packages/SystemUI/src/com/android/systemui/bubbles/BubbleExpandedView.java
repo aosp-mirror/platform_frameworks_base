@@ -301,7 +301,7 @@ public class BubbleExpandedView extends LinearLayout {
 
         mActivityView = new ActivityView(mContext, null /* attrs */, 0 /* defStyle */,
                 true /* singleTaskInstance */, false /* usePublicVirtualDisplay*/,
-                true /* disableSurfaceViewBackgroundLayer */, true /* useTrustedDisplay */);
+                true /* disableSurfaceViewBackgroundLayer */);
 
         // Set ActivityView's alpha value as zero, since there is no view content to be shown.
         setContentVisibility(false);
