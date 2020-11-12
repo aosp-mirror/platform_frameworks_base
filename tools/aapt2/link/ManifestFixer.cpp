@@ -142,7 +142,8 @@ static bool AutoGenerateIsFeatureSplit(xml::Element* el, SourcePathDiagnostics* 
   return true;
 }
 
-static bool VerifyManifest(xml::Element* el, SourcePathDiagnostics* diag) {
+static bool VerifyManifest(xml::Element* el, xml::XmlActionExecutorPolicy policy,
+                           SourcePathDiagnostics* diag) {
   xml::Attribute* attr = el->FindAttribute({}, "package");
   if (!attr) {
     diag->Error(DiagMessage(el->line_number)
@@ -153,10 +154,16 @@ static bool VerifyManifest(xml::Element* el, SourcePathDiagnostics* diag) {
                 << "attribute 'package' in <manifest> tag must not be a reference");
     return false;
   } else if (!util::IsAndroidPackageName(attr->value)) {
-    diag->Error(DiagMessage(el->line_number)
-                << "attribute 'package' in <manifest> tag is not a valid Android package name: '"
-                << attr->value << "'");
-    return false;
+    DiagMessage error_msg(el->line_number);
+    error_msg << "attribute 'package' in <manifest> tag is not a valid Android package name: '"
+              << attr->value << "'";
+    if (policy == xml::XmlActionExecutorPolicy::kAllowListWarning) {
+      // Treat the error only as a warning.
+      diag->Warn(error_msg);
+    } else {
+      diag->Error(error_msg);
+      return false;
+    }
   }
 
   attr = el->FindAttribute({}, "split");
