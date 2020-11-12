@@ -73,12 +73,12 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
             };
 
     protected QSPanelControllerBase(T view, QSTileHost host,
-            QSCustomizerController qsCustomizerController,
+            QSCustomizerController qsCustomizerController, MediaHost mediaHost,
             MetricsLogger metricsLogger, UiEventLogger uiEventLogger, DumpManager dumpManager) {
         super(view);
         mHost = host;
         mQsCustomizerController = qsCustomizerController;
-        mMediaHost = mView.getMediaHost();
+        mMediaHost = mediaHost;
         mMetricsLogger = metricsLogger;
         mUiEventLogger = uiEventLogger;
         mDumpManager = dumpManager;
@@ -193,7 +193,6 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
                 .collect(Collectors.joining(","));
     }
 
-
     /** */
     public void setExpanded(boolean expanded) {
         mView.setExpanded(expanded);
@@ -235,7 +234,6 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
     boolean switchTileLayout(boolean force) {
         if (mView.switchTileLayout(force, mRecords)) {
             setTiles();
-            mView.reSetLayoutListening();
             return true;
         }
         return false;
