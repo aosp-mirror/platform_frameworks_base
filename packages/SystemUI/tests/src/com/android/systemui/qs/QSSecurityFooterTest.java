@@ -23,8 +23,9 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.content.Context;
 import android.content.pm.UserInfo;
+import android.os.Handler;
+import android.os.Looper;
 import android.provider.Settings;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
@@ -38,16 +39,18 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.policy.SecurityController;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 
 /*
  * Compile and run the whole SystemUI test suite:
@@ -73,22 +76,23 @@ public class QSSecurityFooterTest extends SysuiTestCase {
     private TextView mFooterText;
     private TestableImageView mFooterIcon;
     private QSSecurityFooter mFooter;
-    private SecurityController mSecurityController = mock(SecurityController.class);
+    @Mock
+    private SecurityController mSecurityController;
+    @Mock
     private UserTracker mUserTracker;
+    @Mock
+    private ActivityStarter mActivityStarter;
 
     @Before
     public void setUp() {
-        mDependency.injectTestDependency(SecurityController.class, mSecurityController);
-        mDependency.injectTestDependency(Dependency.BG_LOOPER,
-                TestableLooper.get(this).getLooper());
-        mUserTracker = mock(UserTracker.class);
+        MockitoAnnotations.initMocks(this);
+        Looper looper = TestableLooper.get(this).getLooper();
         when(mUserTracker.getUserInfo()).thenReturn(mock(UserInfo.class));
-        mContext.addMockSystemService(Context.LAYOUT_INFLATER_SERVICE,
-                new LayoutInflaterBuilder(mContext)
-                        .replace("ImageView", TestableImageView.class)
-                        .build());
-        mFooter = new QSSecurityFooter(null, mContext, mUserTracker);
-        mRootView = (ViewGroup) mFooter.getView();
+        mRootView = (ViewGroup) new LayoutInflaterBuilder(mContext)
+                .replace("ImageView", TestableImageView.class)
+                .build().inflate(R.layout.quick_settings_footer, null, false);
+        mFooter = new QSSecurityFooter(mRootView, mContext, mUserTracker, new Handler(looper),
+                mActivityStarter, mSecurityController, looper);
         mFooterText = mRootView.findViewById(R.id.footer_text);
         mFooterIcon = mRootView.findViewById(R.id.footer_icon);
         mFooter.setHostEnvironment(null);

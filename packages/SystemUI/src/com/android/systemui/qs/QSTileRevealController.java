@@ -22,7 +22,7 @@ public class QSTileRevealController {
     private static final long QS_REVEAL_TILES_DELAY = 500L;
 
     private final Context mContext;
-    private final QSPanel mQSPanel;
+    private final QSPanelController mQSPanelController;
     private final PagedTileLayout mPagedTileLayout;
     private final QSCustomizerController mQsCustomizerController;
     private final ArraySet<String> mTilesToReveal = new ArraySet<>();
@@ -32,17 +32,17 @@ public class QSTileRevealController {
         @Override
         public void run() {
             mPagedTileLayout.startTileReveal(mTilesToReveal, () -> {
-                if (mQSPanel.isExpanded()) {
+                if (mQSPanelController.isExpanded()) {
                     addTileSpecsToRevealed(mTilesToReveal);
                     mTilesToReveal.clear();
                 }
             });
         }
     };
-    QSTileRevealController(Context context, QSPanel qsPanel, PagedTileLayout pagedTileLayout,
-            QSCustomizerController qsCustomizerController) {
+    QSTileRevealController(Context context, QSPanelController qsPanelController,
+            PagedTileLayout pagedTileLayout, QSCustomizerController qsCustomizerController) {
         mContext = context;
-        mQSPanel = qsPanel;
+        mQSPanelController = qsPanelController;
         mPagedTileLayout = pagedTileLayout;
         mQsCustomizerController = qsCustomizerController;
     }
@@ -85,18 +85,17 @@ public class QSTileRevealController {
     @QSScope
     static class Factory {
         private final Context mContext;
-        private final QSPanel mQsPanel;
         private final QSCustomizerController mQsCustomizerController;
 
         @Inject
-        Factory(Context context, QSPanel qsPanel, QSCustomizerController qsCustomizerController) {
+        Factory(Context context, QSCustomizerController qsCustomizerController) {
             mContext = context;
-            mQsPanel = qsPanel;
             mQsCustomizerController = qsCustomizerController;
         }
 
-        QSTileRevealController create(PagedTileLayout pagedTileLayout) {
-            return new QSTileRevealController(mContext, mQsPanel, pagedTileLayout,
+        QSTileRevealController create(QSPanelController qsPanelController,
+                PagedTileLayout pagedTileLayout) {
+            return new QSTileRevealController(mContext, qsPanelController, pagedTileLayout,
                     mQsCustomizerController);
         }
     }
