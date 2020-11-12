@@ -64,8 +64,6 @@ class WindowSurfaceController {
     private float mLastDsdy = 0;
     private float mLastDtdy = 1;
 
-    private int mLastBackgroundBlurRadius = 0;
-
     private float mSurfaceAlpha = 0;
 
     private int mSurfaceLayer = 0;
@@ -239,26 +237,6 @@ class WindowSurfaceController {
         } finally {
             mService.closeSurfaceTransaction("setOpaqueLocked");
             if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG, "<<< CLOSE TRANSACTION setOpaqueLocked");
-        }
-    }
-
-    void setBackgroundBlurRadius(int radius) {
-        ProtoLog.i(WM_SHOW_TRANSACTIONS, "SURFACE backgroundBlur=%o: %s", radius, title);
-
-        if (mSurfaceControl == null || radius == mLastBackgroundBlurRadius) {
-            return;
-        }
-        mLastBackgroundBlurRadius = radius;
-
-        if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG, ">>> OPEN TRANSACTION setBackgroundBlurRadius");
-        mService.openSurfaceTransaction();
-        try {
-            getGlobalTransaction().setBackgroundBlurRadius(mSurfaceControl, radius);
-        } finally {
-            mService.closeSurfaceTransaction("setBackgroundBlurRadius");
-            if (SHOW_LIGHT_TRANSACTIONS) {
-                Slog.i(TAG, "<<< CLOSE TRANSACTION setBackgroundBlurRadius");
-            }
         }
     }
 
