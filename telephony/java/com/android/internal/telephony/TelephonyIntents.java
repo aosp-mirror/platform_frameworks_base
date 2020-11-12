@@ -321,4 +321,107 @@ public class TelephonyIntents {
      */
     public static final String ACTION_USER_ACTIVITY_NOTIFICATION =
             "android.intent.action.USER_ACTIVITY_NOTIFICATION";
+
+    /**
+     * Kept for backwards compatibility.
+     * @deprecated @see TelephonyManager#ACTION_CARRIER_SIGNAL_REDIRECTED
+     */
+    @Deprecated
+    public static final String ACTION_CARRIER_SIGNAL_REDIRECTED =
+            "com.android.internal.telephony.CARRIER_SIGNAL_REDIRECTED";
+
+    /**
+     * Kept for backwards compatibility.
+     * @deprecated @see TelephonyManager#ACTION_CARRIER_SIGNAL_REQUEST_NETWORK_FAILED
+     */
+    @Deprecated
+    public static final String ACTION_CARRIER_SIGNAL_REQUEST_NETWORK_FAILED =
+            "com.android.internal.telephony.CARRIER_SIGNAL_REQUEST_NETWORK_FAILED";
+
+    /**
+     * Kept for backwards compatibility.
+     * @deprecated @see TelephonyManager#ACTION_CARRIER_SIGNAL_PCO_VALUE
+     */
+    @Deprecated
+    public static final String ACTION_CARRIER_SIGNAL_PCO_VALUE =
+            "com.android.internal.telephony.CARRIER_SIGNAL_PCO_VALUE";
+
+    /**
+     * Kept for backwards compatibility.
+     * @deprecated @see TelephonyManager#ACTION_CARRIER_SIGNAL_DEFAULT_NETWORK_AVAILABLE
+     */
+    @Deprecated
+    public static final String ACTION_CARRIER_SIGNAL_DEFAULT_NETWORK_AVAILABLE =
+            "com.android.internal.telephony.CARRIER_SIGNAL_DEFAULT_NETWORK_AVAILABLE";
+
+    /**
+     * Kept for backwards compatibility.
+     * @deprecated @see TelephonyManager#ACTION_CARRIER_SIGNAL_RESET
+     */
+    @Deprecated
+    public static final String ACTION_CARRIER_SIGNAL_RESET =
+            "com.android.internal.telephony.CARRIER_SIGNAL_RESET";
+
+    /**
+     * Kept for backwards compatibility.
+     * @deprecated @see TelephonyManager#EXTRA_REDIRECTION_URL
+     */
+    @Deprecated
+    public static final String EXTRA_REDIRECTION_URL = "redirectionUrl";
+
+    /**
+     * Kept for backwards compatibility.
+     * @deprecated @see TelephonyManager#EXTRA_DATA_FAIL_CAUSE
+     */
+    @Deprecated
+    public static final String EXTRA_ERROR_CODE = "errorCode";
+
+    /**
+     * Kept for backwards compatibility.
+     * @deprecated @see TelephonyManager#EXTRA_APN_TYPE
+     */
+    @Deprecated
+    public static final String EXTRA_APN_TYPE = "apnType";
+
+    /**
+     * Kept for backwards compatibility.
+     * @deprecated @see TelephonyManager#EXTRA_APN_TYPE
+     */
+    @Deprecated
+    public static final String EXTRA_APN_TYPE_INT = "apnTypeInt";
+
+    /**
+     * Kept for backwards compatibility.
+     * @deprecated @see TelephonyManager#EXTRA_APN_PROTOCOL
+     */
+    @Deprecated
+    public static final String EXTRA_APN_PROTOCOL = "apnProto";
+
+    /**
+     * Kept for backwards compatibility.
+     * @deprecated @see TelephonyManager#EXTRA_APN_PROTOCOL
+     */
+    @Deprecated
+    public static final String EXTRA_APN_PROTOCOL_INT = "apnProtoInt";
+
+    /**
+     * Kept for backwards compatibility.
+     * @deprecated @see TelephonyManager#EXTRA_PCO_ID
+     */
+    @Deprecated
+    public static final String EXTRA_PCO_ID = "pcoId";
+
+    /**
+     * Kept for backwards compatibility.
+     * @deprecated @see TelephonyManager#EXTRA_PCO_VALUE
+     */
+    @Deprecated
+    public static final String EXTRA_PCO_VALUE = "pcoValue";
+
+    /**
+     * Kept for backwards compatibility.
+     * @deprecated @see TelephonyManager#EXTRA_DEFAULT_NETWORK_AVAILABLE
+     */
+    @Deprecated
+    public static final String EXTRA_DEFAULT_NETWORK_AVAILABLE = "defaultNetworkAvailable";
 }
