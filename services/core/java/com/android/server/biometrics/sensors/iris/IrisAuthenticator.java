@@ -31,10 +31,8 @@ import com.android.server.biometrics.sensors.LockoutTracker;
 public final class IrisAuthenticator extends IBiometricAuthenticator.Stub {
     private final IIrisService mIrisService;
 
-    public IrisAuthenticator(IIrisService irisService, SensorConfig config) throws
-            RemoteException {
+    public IrisAuthenticator(IIrisService irisService, int sensorId) throws RemoteException {
         mIrisService = irisService;
-        mIrisService.initializeConfiguration(config.id);
     }
 
     @Override

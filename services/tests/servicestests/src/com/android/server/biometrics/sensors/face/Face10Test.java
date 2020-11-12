@@ -16,21 +16,27 @@
 
 package com.android.server.biometrics.sensors.face;
 
+import static org.mockito.Mockito.when;
+
 import android.content.Context;
 import android.hardware.biometrics.BiometricManager;
 import android.os.Binder;
 import android.os.IBinder;
+import android.os.UserManager;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 
 import com.android.server.biometrics.sensors.LockoutResetDispatcher;
+import com.android.server.biometrics.sensors.face.hidl.Face10;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import java.util.ArrayList;
 
 @Presubmit
 @SmallTest
@@ -41,6 +47,8 @@ public class Face10Test {
 
     @Mock
     private Context mContext;
+    @Mock
+    private UserManager mUserManager;
 
     private LockoutResetDispatcher mLockoutResetDispatcher;
     private com.android.server.biometrics.sensors.face.hidl.Face10 mFace10;
@@ -54,10 +62,13 @@ public class Face10Test {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
 
+        when(mContext.getSystemService(Context.USER_SERVICE)).thenReturn(mUserManager);
+        when(mUserManager.getAliveUsers()).thenReturn(new ArrayList<>());
+
         mLockoutResetDispatcher = new LockoutResetDispatcher(mContext);
-        mFace10 = new com.android.server.biometrics.sensors.face.hidl.Face10(mContext, SENSOR_ID,
-                BiometricManager.Authenticators.BIOMETRIC_STRONG, mLockoutResetDispatcher,
-                false /* supportsSelfIllumination */, 1 /* maxTemplatesAllowed */);
+        mFace10 = new Face10(mContext, SENSOR_ID, BiometricManager.Authenticators.BIOMETRIC_STRONG,
+                mLockoutResetDispatcher, false /* supportsSelfIllumination */,
+                1 /* maxTemplatesAllowed */);
         mBinder = new Binder();
     }
 

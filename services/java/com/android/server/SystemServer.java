@@ -102,6 +102,7 @@ import com.android.server.attention.AttentionManagerService;
 import com.android.server.audio.AudioService;
 import com.android.server.biometrics.AuthService;
 import com.android.server.biometrics.BiometricService;
+import com.android.server.biometrics.sensors.BiometricServiceCallback;
 import com.android.server.biometrics.sensors.face.FaceService;
 import com.android.server.biometrics.sensors.fingerprint.FingerprintService;
 import com.android.server.biometrics.sensors.iris.IrisService;
@@ -196,8 +197,10 @@ import java.io.File;
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Locale;
 import java.util.Timer;
 import java.util.concurrent.CountDownLatch;
@@ -2093,9 +2096,12 @@ public final class SystemServer implements Dumpable {
             final boolean hasFeatureFingerprint
                     = mPackageManager.hasSystemFeature(PackageManager.FEATURE_FINGERPRINT);
 
+            final List<BiometricServiceCallback> biometricServiceCallback = new ArrayList<>();
             if (hasFeatureFace) {
                 t.traceBegin("StartFaceSensor");
-                mSystemServiceManager.startService(FaceService.class);
+                final FaceService faceService =
+                        mSystemServiceManager.startService(FaceService.class);
+                biometricServiceCallback.add(faceService);
                 t.traceEnd();
             }
 
@@ -2107,13 +2113,20 @@ public final class SystemServer implements Dumpable {
 
             if (hasFeatureFingerprint) {
                 t.traceBegin("StartFingerprintSensor");
-                mSystemServiceManager.startService(FingerprintService.class);
+                final FingerprintService fingerprintService =
+                        mSystemServiceManager.startService(FingerprintService.class);
+                biometricServiceCallback.add(fingerprintService);
                 t.traceEnd();
             }
 
-            // Start this service after all biometric services.
+            // Start this service after all biometric sensor services are started.
             t.traceBegin("StartBiometricService");
             mSystemServiceManager.startService(BiometricService.class);
+            for (BiometricServiceCallback service : biometricServiceCallback) {
+                Slog.d(TAG, "Notifying onBiometricServiceReady for: "
+                        + service.getClass().getSimpleName());
+                service.onBiometricServiceReady();
+            }
             t.traceEnd();
 
             t.traceBegin("StartAuthService");

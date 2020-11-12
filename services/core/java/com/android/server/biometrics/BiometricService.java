@@ -594,20 +594,6 @@ public class BiometricService extends SystemService {
                 }
             }
 
-            // This happens infrequently enough, not worth caching.
-            final String[] configs = mInjector.getConfiguration(getContext());
-            boolean idFound = false;
-            for (int i = 0; i < configs.length; i++) {
-                SensorConfig config = new SensorConfig(configs[i]);
-                if (config.id == id) {
-                    idFound = true;
-                    break;
-                }
-            }
-            if (!idFound) {
-                throw new IllegalStateException("Cannot register unknown id");
-            }
-
             mSensors.add(new BiometricSensor(id, modality, strength, authenticator) {
                 @Override
                 boolean confirmationAlwaysRequired(int userId) {
