@@ -105,6 +105,7 @@ public final class WMShell extends SystemUI
     private KeyguardUpdateMonitorCallback mSplitScreenKeyguardCallback;
     private KeyguardUpdateMonitorCallback mPipKeyguardCallback;
     private KeyguardUpdateMonitorCallback mOneHandedKeyguardCallback;
+    private KeyguardUpdateMonitorCallback mAppPairsKeyguardCallback;
 
     @Inject
     public WMShell(Context context, CommandQueue commandQueue,
@@ -144,6 +145,7 @@ public final class WMShell extends SystemUI
         mSplitScreenOptional.ifPresent(this::initSplitScreen);
         mOneHandedOptional.ifPresent(this::initOneHanded);
         mHideDisplayCutoutOptional.ifPresent(this::initHideDisplayCutout);
+        mAppPairsOptional.ifPresent(this::initAppPairs);
     }
 
     @VisibleForTesting
@@ -290,6 +292,16 @@ public final class WMShell extends SystemUI
                 hideDisplayCutout.onConfigurationChanged(newConfig);
             }
         });
+    }
+
+    void initAppPairs(AppPairs appPairs) {
+        mAppPairsKeyguardCallback = new KeyguardUpdateMonitorCallback() {
+            @Override
+            public void onKeyguardVisibilityChanged(boolean showing) {
+                appPairs.onKeyguardVisibilityChanged(showing);
+            }
+        };
+        mKeyguardUpdateMonitor.registerCallback(mAppPairsKeyguardCallback);
     }
 
     @Override

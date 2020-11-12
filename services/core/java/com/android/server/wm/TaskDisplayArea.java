@@ -657,6 +657,13 @@ final class TaskDisplayArea extends DisplayArea<Task> {
                 }
             }
             return SCREEN_ORIENTATION_UNSPECIFIED;
+        } else {
+            // Apps and their containers are not allowed to specify an orientation of full screen
+            // tasks created by organizer. The organizer handles the orientation instead.
+            final Task task = getTopStackInWindowingMode(WINDOWING_MODE_FULLSCREEN);
+            if (task != null && task.isVisible() && task.mCreatedByOrganizer) {
+                return SCREEN_ORIENTATION_UNSPECIFIED;
+            }
         }
 
         final int orientation = super.getOrientation(candidate);
