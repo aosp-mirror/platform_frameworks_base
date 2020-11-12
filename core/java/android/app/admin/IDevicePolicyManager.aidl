@@ -184,6 +184,7 @@ interface IDevicePolicyManager {
             in byte[] certBuffer, in byte[] certChainBuffer, String alias, boolean requestAccess,
             boolean isUserSelectable);
     boolean removeKeyPair(in ComponentName who, in String callerPackage, String alias);
+    boolean hasKeyPair(in String callerPackage, in String alias);
     boolean generateKeyPair(in ComponentName who, in String callerPackage, in String algorithm,
             in ParcelableKeyGenParameterSpec keySpec,
             in int idAttestationFlags, out KeymasterCertificateChain attestationChain);

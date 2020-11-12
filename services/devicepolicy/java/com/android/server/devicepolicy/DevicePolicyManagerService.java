@@ -5046,6 +5046,30 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     @Override
+    public boolean hasKeyPair(String callerPackage, String alias) {
+        final CallerIdentity caller = getCallerIdentity(callerPackage);
+        Preconditions.checkCallAuthorization(canManageCertificates(caller));
+
+        return mInjector.binderWithCleanCallingIdentity(() -> {
+            try (KeyChainConnection keyChainConnection =
+                         KeyChain.bindAsUser(mContext, caller.getUserHandle())) {
+                return keyChainConnection.getService().containsKeyPair(alias);
+            } catch (RemoteException e) {
+                Log.e(LOG_TAG, "Querying keypair", e);
+            } catch (InterruptedException e) {
+                Log.w(LOG_TAG, "Interrupted while querying keypair", e);
+                Thread.currentThread().interrupt();
+            }
+            return false;
+        });
+    }
+
+    private boolean canManageCertificates(CallerIdentity caller) {
+        return isProfileOwner(caller) || isDeviceOwner(caller)
+                || isCallerDelegate(caller, DELEGATION_CERT_INSTALL);
+    }
+
+    @Override
     public boolean setKeyGrantForApp(ComponentName who, String callerPackage, String alias,
             String packageName, boolean hasGrant) {
         Preconditions.checkStringNotEmpty(alias, "Alias to grant cannot be empty");
@@ -5123,9 +5147,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
          */
         if (hasProfileOwner(caller.getUserId())) {
             // Make sure that the caller is the profile owner or delegate.
-            Preconditions.checkCallAuthorization(
-                    isDeviceOwner(caller) || isProfileOwner(caller) || isCallerDelegate(
-                            caller, DELEGATION_CERT_INSTALL));
+            Preconditions.checkCallAuthorization(canManageCertificates(caller));
             // Verify that the managed profile is on an organization-owned device and as such
             // the profile owner can access Device IDs.
             if (isProfileOwnerOfOrganizationOwnedDevice(caller.getUserId())) {
