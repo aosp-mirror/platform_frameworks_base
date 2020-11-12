@@ -105,8 +105,8 @@ public class PipAccessibilityInteractionConnection
 
             // R constants are not final so this cannot be put in the switch-case.
             if (action == R.id.action_pip_resize) {
-                if (mMotionHelper.getBounds().width() == mNormalBounds.width()
-                        && mMotionHelper.getBounds().height() == mNormalBounds.height()) {
+                if (mPipBoundsState.getBounds().width() == mNormalBounds.width()
+                        && mPipBoundsState.getBounds().height() == mNormalBounds.height()) {
                     setToExpandedBounds();
                 } else {
                     setToNormalBounds();
@@ -130,7 +130,7 @@ public class PipAccessibilityInteractionConnection
                         int newY = arguments.getInt(
                                 AccessibilityNodeInfo.ACTION_ARGUMENT_MOVE_WINDOW_Y);
                         Rect pipBounds = new Rect();
-                        pipBounds.set(mMotionHelper.getBounds());
+                        pipBounds.set(mPipBoundsState.getBounds());
                         mTmpBounds.offsetTo(newX, newY);
                         mMotionHelper.movePip(mTmpBounds);
                         result = true;

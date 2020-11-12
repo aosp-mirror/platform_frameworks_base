@@ -348,10 +348,8 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
 
     /**
      * @return the PiP bounds.
-     *
-     * TODO(b/169373982): can be private, outside callers can use PipBoundsState directly.
      */
-    Rect getBounds() {
+    private Rect getBounds() {
         return mPipBoundsState.getBounds();
     }
 
