@@ -32,6 +32,7 @@ import android.util.ArrayMap;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.telephony.util.TelephonyUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -318,7 +319,7 @@ public final class CarrierAppUtils {
                 String[] packageNames = new String[enabledCarrierPackages.size()];
                 enabledCarrierPackages.toArray(packageNames);
                 permissionManager.grantDefaultPermissionsToEnabledCarrierApps(packageNames,
-                        UserHandle.of(userId), Runnable::run, isSuccess -> { });
+                        UserHandle.of(userId), TelephonyUtils.DIRECT_EXECUTOR, isSuccess -> { });
             }
         } catch (PackageManager.NameNotFoundException e) {
             Log.w(TAG, "Could not reach PackageManager", e);
