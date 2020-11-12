@@ -5356,7 +5356,7 @@ package android.media.tv.tuner.filter {
 
   public class MmtpRecordEvent extends android.media.tv.tuner.filter.FilterEvent {
     method public long getDataLength();
-    method public int getFirstMbInSlice();
+    method public int getFirstMacroblockInSlice();
     method public int getMpuSequenceNumber();
     method public long getPts();
     method public int getScHevcIndexMask();
@@ -5532,7 +5532,7 @@ package android.media.tv.tuner.filter {
 
   public class TsRecordEvent extends android.media.tv.tuner.filter.FilterEvent {
     method public long getDataLength();
-    method public int getFirstMbInSlice();
+    method public int getFirstMacroblockInSlice();
     method public int getPacketId();
     method public long getPts();
     method public int getScIndexMask();
