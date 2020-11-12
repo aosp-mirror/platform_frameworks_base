@@ -89,8 +89,6 @@ rule android.util.BackupUtils* com.android.wifi.x.@0
 rule android.util.LocalLog* com.android.wifi.x.@0
 rule android.util.Rational* com.android.wifi.x.@0
 
-rule android.os.BasicShellCommandHandler* com.android.wifi.x.@0
-
 # Use our statically linked bouncy castle library
 rule org.bouncycastle.** com.android.wifi.x.@0
 # Use our statically linked protobuf library
