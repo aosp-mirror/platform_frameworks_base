@@ -50,7 +50,6 @@ import com.android.keyguard.ViewMediatorCallback;
 import com.android.keyguard.dagger.KeyguardBouncerComponent;
 import com.android.systemui.DejankUtils;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.keyguard.DismissCallbackRegistry;
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
 import com.android.systemui.plugins.FalsingManager;
@@ -78,8 +77,6 @@ public class KeyguardBouncerTest extends SysuiTestCase {
     private ViewMediatorCallback mViewMediatorCallback;
     @Mock
     private DismissCallbackRegistry mDismissCallbackRegistry;
-    @Mock
-    private AuthController mAuthController;
     @Mock
     private KeyguardHostViewController mKeyguardHostViewController;
     @Mock
@@ -131,7 +128,7 @@ public class KeyguardBouncerTest extends SysuiTestCase {
 
         final ViewGroup container = new FrameLayout(getContext());
         mBouncer = new KeyguardBouncer.Factory(getContext(), mViewMediatorCallback,
-                mDismissCallbackRegistry, mFalsingManager, mAuthController,
+                mDismissCallbackRegistry, mFalsingManager,
                 mKeyguardStateController, mKeyguardUpdateMonitor,
                 mKeyguardBypassController, mHandler, mKeyguardSecurityModel,
                 mKeyguardBouncerComponentFactory)
@@ -210,12 +207,6 @@ public class KeyguardBouncerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testShow_notifiesAuthControllerStartingToShow() {
-        mBouncer.show(/* resetSecuritySelection */ false);
-        verify(mAuthController).onStartingToShow();
-    }
-
-    @Test
     public void testSetExpansion_notifiesFalsingManager() {
         mBouncer.ensureView();
         mBouncer.setExpansion(0.5f);
@@ -243,38 +234,6 @@ public class KeyguardBouncerTest extends SysuiTestCase {
         mBouncer.setExpansion(0);
         verify(mKeyguardHostViewController).onResume();
         verify(mRootView).announceForAccessibility(any());
-    }
-
-    @Test
-    public void testSetExpansion_notifiesAuthControllerFullyShown() {
-        mBouncer.ensureView();
-        mBouncer.setExpansion(0.1f);
-        mBouncer.setExpansion(0f);
-        verify(mAuthController).onFullyShown();
-    }
-
-    @Test
-    public void testSetExpansion_notifiesAuthControllerStartingToHide() {
-        mBouncer.ensureView();
-        mBouncer.setExpansion(0f);
-        mBouncer.setExpansion(0.1f);
-        verify(mAuthController).onStartingToHide();
-    }
-
-    @Test
-    public void testSetExpansion_notifiesAuthControllerFullyHidden() {
-        mBouncer.ensureView();
-        mBouncer.setExpansion(0.9f);
-        mBouncer.setExpansion(1f);
-        verify(mAuthController).onFullyHidden();
-    }
-
-    @Test
-    public void testSetExpansion_negativeAuthControllerStartingToShow() {
-        mBouncer.ensureView();
-        mBouncer.setExpansion(1f);
-        mBouncer.setExpansion(0.9f);
-        verify(mAuthController, never()).onStartingToShow();
     }
 
     @Test
