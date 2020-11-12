@@ -129,6 +129,16 @@ public class LauncherActivityInfo {
     }
 
     /**
+     * Returns the ActivityInfo of the activity.
+     *
+     * @return Activity Info
+     * @hide
+     */
+    public ActivityInfo getActivityInfo() {
+        return mInternal.getActivityInfo();
+    }
+
+    /**
      * Returns the application info for the appliction this activity belongs to.
      * @return
      */
