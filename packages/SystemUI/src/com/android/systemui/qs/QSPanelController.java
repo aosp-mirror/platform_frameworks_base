@@ -98,7 +98,7 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
 
     @Override
     public void onInit() {
-        super.init();
+        super.onInit();
         mQsCustomizerController.init();
         mBrightnessSlider.init();
     }
