@@ -60,7 +60,11 @@ public class GeocoderProxy {
     }
 
     private boolean register() {
-        return mServiceWatcher.register();
+        boolean resolves = mServiceWatcher.checkServiceResolves();
+        if (resolves) {
+            mServiceWatcher.register();
+        }
+        return resolves;
     }
 
     /**
