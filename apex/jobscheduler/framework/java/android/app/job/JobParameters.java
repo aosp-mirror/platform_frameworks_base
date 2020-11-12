@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ClipData;
 import android.net.Network;
+import android.net.NetworkRequest;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -242,8 +243,9 @@ public class JobParameters implements Parcelable {
      *
      * @return the network that should be used to perform any network requests
      *         for this job, or {@code null} if this job didn't set any required
-     *         network type.
+     *         network type or if the job executed when there was no available network to use.
      * @see JobInfo.Builder#setRequiredNetworkType(int)
+     * @see JobInfo.Builder#setRequiredNetwork(NetworkRequest)
      */
     public @Nullable Network getNetwork() {
         return network;
