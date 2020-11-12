@@ -1186,11 +1186,10 @@ public final class MediaParser {
             // TODO: For efficiency, the same implementation should be used, by providing a
             // clearBuffers() method, or similar.
             long resourceLength = seekableInputReader.getLength();
-            if (resourceLength == -1) {
-                mResourceByteCount = -1;
-            }
-            if (mResourceByteCount != -1) {
-                mResourceByteCount += resourceLength;
+            if (mResourceByteCount == 0) {
+                // For resource byte count metric collection, we only take into account the length
+                // of the first provided input reader.
+                mResourceByteCount = resourceLength;
             }
             mExtractorInput =
                     new DefaultExtractorInput(
