@@ -20,6 +20,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
+import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.IBiometricService;
 import android.os.Handler;
 import android.os.IBinder;
@@ -378,9 +379,20 @@ public class BiometricScheduler {
             return;
         }
         if (mCurrentOperation.state != Operation.STATE_WAITING_FOR_COOKIE) {
-            Slog.e(getTag(), "Operation is in the wrong state: " + mCurrentOperation
-                    + ", expected STATE_WAITING_FOR_COOKIE");
-            return;
+            if (mCurrentOperation.state == Operation.STATE_WAITING_IN_QUEUE_CANCELING) {
+                Slog.d(getTag(), "Operation was marked for cancellation, cancelling now: "
+                        + mCurrentOperation);
+                // This should trigger the internal onClientFinished callback, which clears the
+                // operation and starts the next one.
+                final Interruptable interruptable = (Interruptable) mCurrentOperation.clientMonitor;
+                interruptable.onError(BiometricConstants.BIOMETRIC_ERROR_CANCELED,
+                        0 /* vendorCode */);
+                return;
+            } else {
+                Slog.e(getTag(), "Operation is in the wrong state: " + mCurrentOperation
+                        + ", expected STATE_WAITING_FOR_COOKIE");
+                return;
+            }
         }
         if (mCurrentOperation.clientMonitor.getCookie() != cookie) {
             Slog.e(getTag(), "Mismatched cookie for operation: " + mCurrentOperation
@@ -461,6 +473,13 @@ public class BiometricScheduler {
             Slog.w(getTag(), "Cancel already invoked for operation: " + operation);
             return;
         }
+        if (operation.state == Operation.STATE_WAITING_FOR_COOKIE) {
+            Slog.w(getTag(), "Skipping cancellation for non-started operation: " + operation);
+            // We can set it to null immediately, since the HAL was never notified to start.
+            mCurrentOperation = null;
+            startNextOperationIfIdle();
+            return;
+        }
         Slog.d(getTag(), "[Cancelling] Current client: " + operation.clientMonitor);
         final Interruptable interruptable = (Interruptable) operation.clientMonitor;
         interruptable.cancel();
@@ -505,8 +524,9 @@ public class BiometricScheduler {
                 mCurrentOperation.clientMonitor instanceof AuthenticationConsumer;
         final boolean tokenMatches = mCurrentOperation.clientMonitor.getToken() == token;
         if (!isAuthenticating || !tokenMatches) {
-            Slog.w(getTag(), "Not cancelling authentication, isEnrolling: " + isAuthenticating
-                    + " tokenMatches: " + tokenMatches);
+            Slog.w(getTag(), "Not cancelling authentication"
+                    + ", current operation : " + mCurrentOperation
+                    + ", tokenMatches: " + tokenMatches);
             return;
         }
 

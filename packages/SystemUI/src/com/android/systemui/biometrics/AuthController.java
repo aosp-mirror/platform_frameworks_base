@@ -202,6 +202,20 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
     }
 
     @Override
+    public void onDialogAnimatedIn() {
+        if (mReceiver == null) {
+            Log.e(TAG, "onDialogAnimatedIn: Receiver is null");
+            return;
+        }
+
+        try {
+            mReceiver.onDialogAnimatedIn();
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException when sending onDialogAnimatedIn", e);
+        }
+    }
+
+    @Override
     public void onDismissed(@DismissedReason int reason, @Nullable byte[] credentialAttestation) {
         switch (reason) {
             case AuthDialogCallback.DISMISSED_USER_CANCELED:
