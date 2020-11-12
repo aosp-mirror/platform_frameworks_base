@@ -5350,6 +5350,12 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
     }
 
+    private void ensureAllNetworkRequestsHaveType(List<NetworkRequest> requests) {
+        for (int i = 0; i < requests.size(); i++) {
+            ensureNetworkRequestHasType(requests.get(i));
+        }
+    }
+
     private void ensureNetworkRequestHasType(NetworkRequest request) {
         if (request.type == NetworkRequest.Type.NONE) {
             throw new IllegalArgumentException(
@@ -5380,7 +5386,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         NetworkRequestInfo(NetworkRequest r, PendingIntent pi) {
             request = r;
             mRequests = initializeRequests(r);
-            ensureNetworkRequestHasType(request);
+            ensureAllNetworkRequestsHaveType(mRequests);
             mPendingIntent = pi;
             messenger = null;
             mBinder = null;
@@ -5394,7 +5400,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             messenger = m;
             request = r;
             mRequests = initializeRequests(r);
-            ensureNetworkRequestHasType(request);
+            ensureAllNetworkRequestsHaveType(mRequests);
             mBinder = binder;
             mPid = getCallingPid();
             mUid = getCallingUid();
@@ -5418,6 +5424,19 @@ public class ConnectivityService extends IConnectivityManager.Stub
             return Collections.unmodifiableList(tempRequests);
         }
 
+        private NetworkRequest getSatisfiedRequest() {
+            if (mSatisfier == null) {
+                return null;
+            }
+
+            for (NetworkRequest req : mRequests) {
+                if (mSatisfier.isSatisfyingRequest(req.requestId)) {
+                    return req;
+                }
+            }
+
+            return null;
+        }
 
         private void enforceRequestCountLimit() {
             synchronized (mUidToNetworkRequestCount) {
@@ -5436,14 +5455,16 @@ public class ConnectivityService extends IConnectivityManager.Stub
             }
         }
 
+        @Override
         public void binderDied() {
             log("ConnectivityService NetworkRequestInfo binderDied(" +
-                    request + ", " + mBinder + ")");
-            releaseNetworkRequest(request);
+                    mRequests + ", " + mBinder + ")");
+            releaseNetworkRequest(mRequests);
         }
 
+        @Override
         public String toString() {
-            return "uid/pid:" + mUid + "/" + mPid + " " + request
+            return "uid/pid:" + mUid + "/" + mPid + " " + mRequests
                     + (mPendingIntent == null ? "" : " to trigger " + mPendingIntent);
         }
     }
@@ -5761,6 +5782,12 @@ public class ConnectivityService extends IConnectivityManager.Stub
     /** Returns the next Network provider ID. */
     public final int nextNetworkProviderId() {
         return mNextNetworkProviderId.getAndIncrement();
+    }
+
+    private void releaseNetworkRequest(List<NetworkRequest> networkRequests) {
+        for (int i = 0; i < networkRequests.size(); i++) {
+            releaseNetworkRequest(networkRequests.get(i));
+        }
     }
 
     @Override
