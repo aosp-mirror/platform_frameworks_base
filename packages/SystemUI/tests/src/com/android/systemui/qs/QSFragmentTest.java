@@ -43,7 +43,6 @@ import com.android.systemui.SystemUIFactory;
 import com.android.systemui.SysuiBaseFragmentTest;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.media.MediaHost;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.dagger.QSFragmentComponent;
 import com.android.systemui.qs.logging.QSLogger;
@@ -83,10 +82,6 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
     private QSFragmentComponent mQsFragmentComponent;
     @Mock
     private QSPanelController mQSPanelController;
-    @Mock
-    private MediaHost mQSMediaHost;
-    @Mock
-    private MediaHost mQQSMediaHost;
 
     public QSFragmentTest() {
         super(QSFragment.class);
@@ -173,8 +168,6 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
                 mock(StatusBarStateController.class),
                 commandQueue,
                 new QSDetailDisplayer(),
-                mQSMediaHost,
-                mQQSMediaHost,
                 mQsComponentFactory);
     }
 }

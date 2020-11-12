@@ -16,13 +16,10 @@
 
 package com.android.systemui.qs;
 
-import static com.android.systemui.media.dagger.MediaModule.QUICK_QS_PANEL;
-
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.R;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.media.MediaHost;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.qs.customize.QSCustomizerController;
 import com.android.systemui.qs.dagger.QSScope;
@@ -31,7 +28,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 
 /** Controller for {@link QuickQSPanel}. */
 @QSScope
@@ -50,11 +46,11 @@ public class QuickQSPanelController extends QSPanelControllerBase<QuickQSPanel> 
     @Inject
     QuickQSPanelController(QuickQSPanel view, QSTileHost qsTileHost,
             QSCustomizerController qsCustomizerController,
-            @Named(QUICK_QS_PANEL) MediaHost mediaHost,
+            QSTileRevealController.Factory qsTileRevealControllerFactory,
             MetricsLogger metricsLogger, UiEventLogger uiEventLogger,
             DumpManager dumpManager) {
-        super(view, qsTileHost, qsCustomizerController, mediaHost, metricsLogger, uiEventLogger,
-                dumpManager);
+        super(view, qsTileHost, qsCustomizerController, qsTileRevealControllerFactory,
+                metricsLogger, uiEventLogger, dumpManager);
     }
 
     @Override

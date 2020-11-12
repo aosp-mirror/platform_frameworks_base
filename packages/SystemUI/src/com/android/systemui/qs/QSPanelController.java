@@ -16,7 +16,6 @@
 
 package com.android.systemui.qs;
 
-import static com.android.systemui.media.dagger.MediaModule.QS_PANEL;
 import static com.android.systemui.qs.QSPanel.QS_SHOW_BRIGHTNESS;
 
 import android.annotation.NonNull;
@@ -41,7 +40,6 @@ import com.android.systemui.tuner.TunerService;
 import java.util.function.Consumer;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 
 /**
  * Controller for {@link QSPanel}.
@@ -51,7 +49,6 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
     private final QSSecurityFooter mQsSecurityFooter;
     private final TunerService mTunerService;
     private final QSCustomizerController mQsCustomizerController;
-    private final QSTileRevealController.Factory mQsTileRevealControllerFactory;
     private final BrightnessController mBrightnessController;
     private final BrightnessSlider.Factory mBrightnessSliderFactory;
     private final BrightnessSlider mBrightnessSlider;
@@ -76,17 +73,15 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
     @Inject
     QSPanelController(QSPanel view, QSSecurityFooter qsSecurityFooter, TunerService tunerService,
             QSTileHost qstileHost, QSCustomizerController qsCustomizerController,
-            @Named(QS_PANEL) MediaHost mediaHost,
             QSTileRevealController.Factory qsTileRevealControllerFactory,
             DumpManager dumpManager, MetricsLogger metricsLogger, UiEventLogger uiEventLogger,
             BrightnessController.Factory brightnessControllerFactory,
             BrightnessSlider.Factory brightnessSliderFactory) {
-        super(view, qstileHost, qsCustomizerController, mediaHost, metricsLogger, uiEventLogger,
-                dumpManager);
+        super(view, qstileHost, qsCustomizerController, qsTileRevealControllerFactory,
+                metricsLogger, uiEventLogger, dumpManager);
         mQsSecurityFooter = qsSecurityFooter;
         mTunerService = tunerService;
         mQsCustomizerController = qsCustomizerController;
-        mQsTileRevealControllerFactory = qsTileRevealControllerFactory;
         mQsSecurityFooter.setHostEnvironment(qstileHost);
         mBrightnessSliderFactory = brightnessSliderFactory;
 
@@ -98,7 +93,6 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
 
     @Override
     public void onInit() {
-        super.init();
         mQsCustomizerController.init();
         mBrightnessSlider.init();
     }
@@ -117,12 +111,6 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
         if (mBrightnessMirrorController != null) {
             mBrightnessMirrorController.addCallback(mBrightnessMirrorListener);
         }
-    }
-
-    @Override
-    protected QSTileRevealController createTileRevealController() {
-        return mQsTileRevealControllerFactory.create(
-                this, (PagedTileLayout) mView.createRegularTileLayout());
     }
 
     @Override
@@ -168,6 +156,11 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
         } else {
             mBrightnessController.unregisterCallbacks();
         }
+    }
+
+    /** */
+    public MediaHost getMediaHost() {
+        return mView.getMediaHost();
     }
 
     /** */
@@ -286,11 +279,6 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
     /** */
     public void setFooterPageIndicator(PageIndicator pageIndicator) {
         mView.setFooterPageIndicator(pageIndicator);
-    }
-
-    /** */
-    public boolean isExpanded() {
-        return mView.isExpanded();
     }
 }
 

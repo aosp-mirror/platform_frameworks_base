@@ -48,6 +48,7 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
         implements Dumpable{
     protected final QSTileHost mHost;
     private final QSCustomizerController mQsCustomizerController;
+    private final QSTileRevealController.Factory mQsTileRevealControllerFactory;
     private final MediaHost mMediaHost;
     private final MetricsLogger mMetricsLogger;
     private final UiEventLogger mUiEventLogger;
@@ -73,12 +74,14 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
             };
 
     protected QSPanelControllerBase(T view, QSTileHost host,
-            QSCustomizerController qsCustomizerController, MediaHost mediaHost,
+            QSCustomizerController qsCustomizerController,
+            QSTileRevealController.Factory qsTileRevealControllerFactory,
             MetricsLogger metricsLogger, UiEventLogger uiEventLogger, DumpManager dumpManager) {
         super(view);
         mHost = host;
         mQsCustomizerController = qsCustomizerController;
-        mMediaHost = mediaHost;
+        mQsTileRevealControllerFactory = qsTileRevealControllerFactory;
+        mMediaHost = mView.getMediaHost();
         mMetricsLogger = metricsLogger;
         mUiEventLogger = uiEventLogger;
         mDumpManager = dumpManager;
@@ -86,8 +89,10 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
 
     @Override
     protected void onViewAttached() {
-        mQsTileRevealController = createTileRevealController();
-        if (mQsTileRevealController != null) {
+        QSPanel.QSTileLayout regularTileLayout = mView.createRegularTileLayout();
+        if (regularTileLayout instanceof PagedTileLayout) {
+            mQsTileRevealController = mQsTileRevealControllerFactory.create(
+                    (PagedTileLayout) regularTileLayout);
             mQsTileRevealController.setExpansion(mRevealExpansion);
         }
 
@@ -114,10 +119,6 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
         mDumpManager.unregisterDumpable(mView.getDumpableTag());
     }
 
-    protected QSTileRevealController createTileRevealController() {
-        return null;
-    }
-
     /** */
     public void setTiles() {
         setTiles(mHost.getTiles(), false);
@@ -125,11 +126,9 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
 
     /** */
     public void setTiles(Collection<QSTile> tiles, boolean collapsedView) {
-        // TODO(b/168904199): move this logic into QSPanelController.
-        if (!collapsedView && mQsTileRevealController != null) {
+        if (!collapsedView) {
             mQsTileRevealController.updateRevealedTiles(tiles);
         }
-
         for (QSPanelControllerBase.TileRecord record : mRecords) {
             mView.removeTile(record);
             record.tile.removeCallback(record.callback);
@@ -193,6 +192,7 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
                 .collect(Collectors.joining(","));
     }
 
+
     /** */
     public void setExpanded(boolean expanded) {
         mView.setExpanded(expanded);
@@ -234,6 +234,7 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
     boolean switchTileLayout(boolean force) {
         if (mView.switchTileLayout(force, mRecords)) {
             setTiles();
+            mView.reSetLayoutListening();
             return true;
         }
         return false;
