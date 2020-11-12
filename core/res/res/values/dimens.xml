@@ -308,7 +308,7 @@
     <dimen name="notification_headerless_min_height">56dp</dimen>
 
     <!-- Height of a small notification in the status bar -->
-    <dimen name="notification_min_height">106dp</dimen>
+    <dimen name="notification_min_height">76dp</dimen>
 
     <!-- The width of the big icons in notifications. -->
     <dimen name="notification_large_icon_width">64dp</dimen>

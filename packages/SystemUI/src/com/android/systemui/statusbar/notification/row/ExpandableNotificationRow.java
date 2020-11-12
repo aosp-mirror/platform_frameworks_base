@@ -35,7 +35,6 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.graphics.Color;
 import android.graphics.Path;
 import android.graphics.drawable.AnimatedVectorDrawable;
 import android.graphics.drawable.AnimationDrawable;
@@ -154,10 +153,12 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     private int mIconTransformContentShift;
     private int mMaxHeadsUpHeightBeforeN;
     private int mMaxHeadsUpHeightBeforeP;
+    private int mMaxHeadsUpHeightBeforeS;
     private int mMaxHeadsUpHeight;
     private int mMaxHeadsUpHeightIncreased;
     private int mNotificationMinHeightBeforeN;
     private int mNotificationMinHeightBeforeP;
+    private int mNotificationMinHeightBeforeS;
     private int mNotificationMinHeight;
     private int mNotificationMinHeightLarge;
     private int mNotificationMinHeightMedia;
@@ -647,6 +648,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                 != com.android.internal.R.id.status_bar_latest_event_content;
         boolean beforeN = mEntry.targetSdk < Build.VERSION_CODES.N;
         boolean beforeP = mEntry.targetSdk < Build.VERSION_CODES.P;
+        boolean beforeS = mEntry.targetSdk < Build.VERSION_CODES.S;
         int minHeight;
 
         View expandedView = layout.getExpandedChild();
@@ -654,8 +656,14 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                 && expandedView.findViewById(com.android.internal.R.id.media_actions) != null;
         boolean showCompactMediaSeekbar = mMediaManager.getShowCompactMediaSeekbar();
 
-        if (customView && beforeP && !mIsSummaryWithChildren) {
-            minHeight = beforeN ? mNotificationMinHeightBeforeN : mNotificationMinHeightBeforeP;
+        if (customView && beforeS && !mIsSummaryWithChildren) {
+            if (beforeN) {
+                minHeight = mNotificationMinHeightBeforeN;
+            } else if (beforeP) {
+                minHeight = mNotificationMinHeightBeforeP;
+            } else {
+                minHeight = mNotificationMinHeightBeforeS;
+            }
         } else if (isMediaLayout && showCompactMediaSeekbar) {
             minHeight = mNotificationMinHeightMedia;
         } else if (mUseIncreasedCollapsedHeight && layout == mPrivateLayout) {
@@ -667,8 +675,14 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                 layout.getHeadsUpChild().getId()
                         != com.android.internal.R.id.status_bar_latest_event_content;
         int headsUpHeight;
-        if (headsUpCustom && beforeP) {
-            headsUpHeight = beforeN ? mMaxHeadsUpHeightBeforeN : mMaxHeadsUpHeightBeforeP;
+        if (headsUpCustom && beforeS) {
+            if (beforeN) {
+                headsUpHeight = mMaxHeadsUpHeightBeforeN;
+            } else if (beforeP) {
+                headsUpHeight = mMaxHeadsUpHeightBeforeP;
+            } else {
+                headsUpHeight = mMaxHeadsUpHeightBeforeS;
+            }
         } else if (mUseIncreasedHeadsUpHeight && layout == mPrivateLayout) {
             headsUpHeight = mMaxHeadsUpHeightIncreased;
         } else {
@@ -1604,6 +1618,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                 R.dimen.notification_min_height_legacy);
         mNotificationMinHeightBeforeP = NotificationUtils.getFontScaledHeight(mContext,
                 R.dimen.notification_min_height_before_p);
+        mNotificationMinHeightBeforeS = NotificationUtils.getFontScaledHeight(mContext,
+                R.dimen.notification_min_height_before_s);
         mNotificationMinHeight = NotificationUtils.getFontScaledHeight(mContext,
                 R.dimen.notification_min_height);
         mNotificationMinHeightLarge = NotificationUtils.getFontScaledHeight(mContext,
@@ -1616,6 +1632,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                 R.dimen.notification_max_heads_up_height_legacy);
         mMaxHeadsUpHeightBeforeP = NotificationUtils.getFontScaledHeight(mContext,
                 R.dimen.notification_max_heads_up_height_before_p);
+        mMaxHeadsUpHeightBeforeS = NotificationUtils.getFontScaledHeight(mContext,
+                R.dimen.notification_max_heads_up_height_before_s);
         mMaxHeadsUpHeight = NotificationUtils.getFontScaledHeight(mContext,
                 R.dimen.notification_max_heads_up_height);
         mMaxHeadsUpHeightIncreased = NotificationUtils.getFontScaledHeight(mContext,
