@@ -28,7 +28,6 @@ import android.os.IBinder.DeathRecipient;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.os.SystemProperties;
 import android.os.UpdateEngine;
 import android.os.UpdateEngineCallback;
 import android.provider.DeviceConfig;
@@ -227,8 +226,8 @@ public final class ProfcollectForwardingService extends SystemService {
         }
 
         // Sample for a fraction of app launches.
-        int traceFrequency =
-                SystemProperties.getInt("persist.profcollectd.applaunch_trace_freq", 2);
+        int traceFrequency = DeviceConfig.getInt(DeviceConfig.NAMESPACE_PROFCOLLECT_NATIVE_BOOT,
+                "applaunch_trace_freq", 2);
         int randomNum = ThreadLocalRandom.current().nextInt(100);
         if (randomNum < traceFrequency) {
             try {
