@@ -27,6 +27,7 @@ import static org.mockito.Mockito.verify;
 import android.graphics.PointF;
 import android.testing.AndroidTestingRunner;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.FrameLayout;
 
 import androidx.dynamicanimation.animation.DynamicAnimation;
@@ -34,7 +35,7 @@ import androidx.dynamicanimation.animation.SpringForce;
 import androidx.test.filters.SmallTest;
 
 import com.android.wm.shell.R;
-import com.android.wm.shell.bubbles.BubblePositioner;
+import com.android.wm.shell.bubbles.TestableBubblePositioner;
 import com.android.wm.shell.common.FloatingContentCoordinator;
 
 import org.junit.Before;
@@ -310,7 +311,7 @@ public class StackAnimationControllerTest extends PhysicsAnimationLayoutTestCase
             super(floatingContentCoordinator,
                     bubbleCountSupplier,
                     onBubbleAnimatedOutAction,
-                    mock(BubblePositioner.class));
+                    new TestableBubblePositioner(mContext, mock(WindowManager.class)));
         }
 
         @Override

@@ -310,7 +310,7 @@ public class Bubble implements BubbleViewProvider {
      *
      * @param callback the callback to notify one the bubble is ready to be displayed.
      * @param context the context for the bubble.
-     * @param controller
+     * @param controller the bubble controller.
      * @param stackView the stackView the bubble is eventually added to.
      * @param iconFactory the iconfactory use to create badged images for the bubble.
      */

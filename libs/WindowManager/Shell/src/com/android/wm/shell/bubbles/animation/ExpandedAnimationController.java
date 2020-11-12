@@ -84,7 +84,11 @@ public class ExpandedAnimationController
     private float mBubbleSizePx;
     /** Max number of bubbles shown in row above expanded view. */
     private int mBubblesMaxRendered;
-
+    /** Max amount of space to have between bubbles when expanded. */
+    private int mBubblesMaxSpace;
+    /** Amount of space between the bubbles when expanded. */
+    private float mSpaceBetweenBubbles;
+    /** Whether the expand / collapse animation is running. */
     private boolean mAnimatingExpand = false;
 
     /**
@@ -205,8 +209,17 @@ public class ExpandedAnimationController
         mBubblePaddingTop = res.getDimensionPixelSize(R.dimen.bubble_padding_top);
         mStackOffsetPx = res.getDimensionPixelSize(R.dimen.bubble_stack_offset);
         mBubblePaddingTop = res.getDimensionPixelSize(R.dimen.bubble_padding_top);
-        mBubbleSizePx = res.getDimensionPixelSize(R.dimen.individual_bubble_size);
+        mBubbleSizePx = mPositioner.getBubbleSize();
         mBubblesMaxRendered = res.getInteger(R.integer.bubbles_max_rendered);
+        mBubblesMaxSpace = res.getDimensionPixelSize(R.dimen.bubble_max_spacing);
+        final float availableSpace = mPositioner.isLandscape()
+                ? mPositioner.getAvailableRect().height()
+                : mPositioner.getAvailableRect().width();
+        final float spaceForMaxBubbles = (mExpandedViewPadding * 2)
+                + (mBubblesMaxRendered + 1) * mBubbleSizePx;
+        float spaceBetweenBubbles =
+                (availableSpace - spaceForMaxBubbles) / mBubblesMaxRendered;
+        mSpaceBetweenBubbles = Math.min(spaceBetweenBubbles, mBubblesMaxSpace);
     }
 
     /**
@@ -250,13 +263,15 @@ public class ExpandedAnimationController
             final Path path = new Path();
             path.moveTo(bubble.getTranslationX(), bubble.getTranslationY());
 
-            final float expandedY = getExpandedY();
+            final float expandedY = mPositioner.showBubblesVertically()
+                    ? getBubbleXOrYForOrientation(index)
+                    : getExpandedY();
             if (expanding) {
                 // If we're expanding, first draw a line from the bubble's current position to the
                 // top of the screen.
                 path.lineTo(bubble.getTranslationX(), expandedY);
                 // Then, draw a line across the screen to the bubble's resting position.
-                if (mPositioner.getOrientation() == Configuration.ORIENTATION_LANDSCAPE) {
+                if (mPositioner.showBubblesVertically()) {
                     Rect availableRect = mPositioner.getAvailableRect();
                     boolean onLeft = mCollapsePoint != null
                             && mCollapsePoint.x < (availableRect.width() / 2f);
@@ -422,6 +437,9 @@ public class ExpandedAnimationController
      * bubbles to accommodate it if it was previously dragged out past the threshold.
      */
     public void snapBubbleBack(View bubbleView, float velX, float velY) {
+        if (mLayout == null) {
+            return;
+        }
         final int index = mLayout.indexOfChild(bubbleView);
 
         animationForChildAtIndex(index)
@@ -580,7 +598,7 @@ public class ExpandedAnimationController
                 return;
             }
 
-            if (mPositioner.getOrientation() == Configuration.ORIENTATION_LANDSCAPE) {
+            if (mPositioner.showBubblesVertically()) {
                 Rect availableRect = mPositioner.getAvailableRect();
                 boolean onLeft = mCollapsePoint != null
                         && mCollapsePoint.x < (availableRect.width() / 2f);
@@ -613,23 +631,15 @@ public class ExpandedAnimationController
         if (mLayout == null) {
             return 0;
         }
+        final float positionInBar = index * (mBubbleSizePx + mSpaceBetweenBubbles);
         Rect availableRect = mPositioner.getAvailableRect();
-        final boolean isLandscape =
-                mPositioner.getOrientation() == Configuration.ORIENTATION_LANDSCAPE;
-        final float availableSpace = isLandscape
-                ? availableRect.height()
-                : availableRect.width();
-        final float spaceForMaxBubbles = (mExpandedViewPadding * 2)
-                + (mBubblesMaxRendered + 1) * mBubbleSizePx;
-        final float spaceBetweenBubbles =
-                (availableSpace - spaceForMaxBubbles) / mBubblesMaxRendered;
+        final boolean isLandscape = mPositioner.showBubblesVertically();
         final float expandedStackSize = (mLayout.getChildCount() * mBubbleSizePx)
-                + ((mLayout.getChildCount() - 1) * spaceBetweenBubbles);
+                + ((mLayout.getChildCount() - 1) * mSpaceBetweenBubbles);
         final float centerPosition = isLandscape
                 ? availableRect.centerY()
                 : availableRect.centerX();
         final float rowStart = centerPosition - (expandedStackSize / 2f);
-        final float positionInBar = index * (mBubbleSizePx + spaceBetweenBubbles);
         return rowStart + positionInBar;
     }
 }

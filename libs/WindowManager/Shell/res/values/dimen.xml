@@ -99,12 +99,12 @@
     <dimen name="bubble_flyout_avatar_message_space">6dp</dimen>
     <!-- Padding between status bar and bubbles when displayed in expanded state -->
     <dimen name="bubble_padding_top">16dp</dimen>
+    <!-- Max amount of space between bubbles when expanded. -->
+    <dimen name="bubble_max_spacing">16dp</dimen>
     <!-- Size of individual bubbles. -->
     <dimen name="individual_bubble_size">60dp</dimen>
     <!-- Size of bubble bitmap. -->
     <dimen name="bubble_bitmap_size">52dp</dimen>
-    <!-- Size of bubble icon bitmap. -->
-    <dimen name="bubble_overflow_icon_bitmap_size">24dp</dimen>
     <!-- Extra padding added to the touchable rect for bubbles so they are easier to grab. -->
     <dimen name="bubble_touch_padding">12dp</dimen>
     <!-- Size of the circle around the bubbles when they're in the dismiss target. -->
@@ -136,6 +136,8 @@
     <dimen name="bubble_dismiss_slop">16dp</dimen>
     <!-- Height of button allowing users to adjust settings for bubbles. -->
     <dimen name="bubble_manage_button_height">48dp</dimen>
+    <!-- Height of an item in the bubble manage menu. -->
+    <dimen name="bubble_menu_item_height">60dp</dimen>
     <!-- Max width of the message bubble-->
     <dimen name="bubble_message_max_width">144dp</dimen>
     <!-- Min width of the message bubble -->

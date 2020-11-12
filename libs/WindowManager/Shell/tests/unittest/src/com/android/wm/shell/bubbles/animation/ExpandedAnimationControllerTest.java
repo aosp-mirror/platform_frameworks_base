@@ -64,7 +64,7 @@ public class ExpandedAnimationControllerTest extends PhysicsAnimationLayoutTestC
         super.setUp();
 
         BubblePositioner positioner = new BubblePositioner(getContext(), mock(WindowManager.class));
-        positioner.update(Configuration.ORIENTATION_PORTRAIT,
+        positioner.updateInternal(Configuration.ORIENTATION_PORTRAIT,
                 Insets.of(0, 0, 0, 0),
                 new Rect(0, 0, mDisplayWidth, mDisplayHeight));
         mExpandedController = new ExpandedAnimationController(positioner, mExpandedViewPadding,
