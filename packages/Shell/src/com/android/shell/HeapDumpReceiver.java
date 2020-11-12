@@ -180,7 +180,7 @@ public class HeapDumpReceiver extends BroadcastReceiver {
                 .setContentText(context.getText(
                         com.android.internal.R.string.dump_heap_notification_detail))
                 .setContentIntent(PendingIntent.getActivity(context, 2, shareIntent,
-                        PendingIntent.FLAG_UPDATE_CURRENT));
+                        PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE));
 
         Log.v(TAG, "Creating share heap dump notification");
         NotificationManager.from(context).notify(NOTIFICATION_ID, builder.build());
