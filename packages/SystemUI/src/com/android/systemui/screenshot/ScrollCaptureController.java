@@ -99,7 +99,7 @@ public class ScrollCaptureController {
                             mPicture = stackBelow(mPicture, result.image, result.captured.width(),
                                     result.captured.height());
                         }
-                        if (emptyFrame || mFrameCount > MAX_PAGES
+                        if (emptyFrame || mFrameCount >= MAX_PAGES
                                 || requestRect.bottom > MAX_HEIGHT) {
                             Uri uri = null;
                             if (mPicture != null) {
