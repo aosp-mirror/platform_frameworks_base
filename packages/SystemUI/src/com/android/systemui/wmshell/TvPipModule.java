@@ -24,7 +24,7 @@ import com.android.wm.shell.WindowManagerShellWrapper;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.pip.Pip;
-import com.android.wm.shell.pip.PipBoundsHandler;
+import com.android.wm.shell.pip.PipBoundsAlgorithm;
 import com.android.wm.shell.pip.PipBoundsState;
 import com.android.wm.shell.pip.PipMediaController;
 import com.android.wm.shell.pip.PipSurfaceTransactionHelper;
@@ -51,7 +51,7 @@ public abstract class TvPipModule {
     static Optional<Pip> providePip(
             Context context,
             PipBoundsState pipBoundsState,
-            PipBoundsHandler pipBoundsHandler,
+            PipBoundsAlgorithm pipBoundsAlgorithm,
             PipTaskOrganizer pipTaskOrganizer,
             PipMediaController pipMediaController,
             PipNotification pipNotification,
@@ -61,7 +61,7 @@ public abstract class TvPipModule {
                 new PipController(
                         context,
                         pipBoundsState,
-                        pipBoundsHandler,
+                        pipBoundsAlgorithm,
                         pipTaskOrganizer,
                         pipMediaController,
                         pipNotification,
@@ -91,9 +91,9 @@ public abstract class TvPipModule {
 
     @WMSingleton
     @Provides
-    static PipBoundsHandler providePipBoundsHandler(Context context,
+    static PipBoundsAlgorithm providePipBoundsHandler(Context context,
             PipBoundsState pipBoundsState) {
-        return new PipBoundsHandler(context, pipBoundsState);
+        return new PipBoundsAlgorithm(context, pipBoundsState);
     }
 
     @WMSingleton
@@ -106,11 +106,11 @@ public abstract class TvPipModule {
     @Provides
     static PipTaskOrganizer providePipTaskOrganizer(Context context,
             PipBoundsState pipBoundsState,
-            PipBoundsHandler pipBoundsHandler,
+            PipBoundsAlgorithm pipBoundsAlgorithm,
             PipSurfaceTransactionHelper pipSurfaceTransactionHelper,
             Optional<SplitScreen> splitScreenOptional, DisplayController displayController,
             PipUiEventLogger pipUiEventLogger, ShellTaskOrganizer shellTaskOrganizer) {
-        return new PipTaskOrganizer(context, pipBoundsState, pipBoundsHandler,
+        return new PipTaskOrganizer(context, pipBoundsState, pipBoundsAlgorithm,
                 null /* menuActivityController */, pipSurfaceTransactionHelper, splitScreenOptional,
                 displayController, pipUiEventLogger, shellTaskOrganizer);
     }
