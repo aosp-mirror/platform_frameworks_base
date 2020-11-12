@@ -144,7 +144,7 @@ public class TakeScreenshotService extends Service {
 
     @Override
     public boolean onUnbind(Intent intent) {
-        if (mScreenshot != null && !mScreenshot.isDismissing()) {
+        if (mScreenshot != null) {
             mScreenshot.dismissScreenshot(true);
         }
         unregisterReceiver(mBroadcastReceiver);
