@@ -16468,6 +16468,30 @@ public final class Settings {
              * @hide
              */
             public static final String SIDE_BUTTON = "side_button";
+
+            /**
+             * The android wear system version.
+             * @hide
+             */
+            public static final String ANDROID_WEAR_VERSION = "android_wear_version";
+
+            /**
+             * The wear system capabiltiies.
+             * @hide
+             */
+            public static final String SYSTEM_CAPABILITIES = "system_capabilities";
+
+            /**
+             * The android wear system edition.
+             * @hide
+             */
+            public static final String SYSTEM_EDITION = "android_wear_system_edition";
+
+            /**
+             * The Wear platform MR number.
+             * @hide
+             */
+            public static final String WEAR_PLATFORM_MR_NUMBER = "wear_platform_mr_number";
         }
     }
 

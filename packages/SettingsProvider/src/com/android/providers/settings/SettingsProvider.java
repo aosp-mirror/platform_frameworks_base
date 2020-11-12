@@ -85,6 +85,7 @@ import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.os.SELinux;
 import android.os.ServiceManager;
+import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.DeviceConfig;
@@ -135,7 +136,6 @@ import java.util.regex.Pattern;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
-
 
 /**
  * <p>
@@ -5273,6 +5273,26 @@ public class SettingsProvider extends ContentProvider {
                                 getContext()
                                         .getResources()
                                         .getBoolean(R.bool.def_wearable_sideButtonPresent));
+                        initGlobalSettingsDefaultValForWearLocked(
+                                Global.Wearable.ANDROID_WEAR_VERSION,
+                                Long.parseLong(
+                                        getContext()
+                                                .getResources()
+                                                .getString(
+                                                        R.string.def_wearable_androidWearVersion)));
+                        final int editionGlobal = 1;
+                        final int editionLocal = 2;
+                        boolean isLe =
+                                getContext().getPackageManager().hasSystemFeature("cn.google");
+                        initGlobalSettingsDefaultValForWearLocked(
+                                Global.Wearable.SYSTEM_EDITION,
+                                isLe ? editionLocal : editionGlobal);
+                        initGlobalSettingsDefaultValForWearLocked(
+                                Global.Wearable.SYSTEM_CAPABILITIES,
+                                getWearSystemCapabilities(isLe));
+                        initGlobalSettingsDefaultValForWearLocked(
+                                Global.Wearable.WEAR_PLATFORM_MR_NUMBER,
+                                SystemProperties.getInt("ro.cw_build.platform_mr", 0));
 
                         // TODO(b/164398026): add necessary initialization logic for all entries.
                         currentVersion = 204;
@@ -5318,6 +5338,33 @@ public class SettingsProvider extends ContentProvider {
                             true /* makeDefault */,
                             SettingsState.SYSTEM_PACKAGE_NAME);
                 }
+            }
+
+            private long getWearSystemCapabilities(boolean isLe) {
+                // Capability constants are imported from
+                // com.google.android.clockwork.common.system.WearableConstants.
+                final int capabilityCompanionLegacyCalling = 5;
+                final int capabilitySpeaker = 6;
+                final int capabilitySetupProtocommChannel = 7;
+                long capabilities =
+                        Long.parseLong(
+                                getContext().getResources()
+                                .getString(
+                                        isLe ? R.string.def_wearable_leSystemCapabilities
+                                                : R.string.def_wearable_systemCapabilities));
+                PackageManager pm = getContext().getPackageManager();
+                if (!pm.hasSystemFeature(PackageManager.FEATURE_TELEPHONY)) {
+                    capabilities |= getBitMask(capabilityCompanionLegacyCalling);
+                }
+                if (pm.hasSystemFeature(PackageManager.FEATURE_AUDIO_OUTPUT)) {
+                    capabilities |= getBitMask(capabilitySpeaker);
+                }
+                capabilities |= getBitMask(capabilitySetupProtocommChannel);
+                return capabilities;
+            }
+
+            private long getBitMask(int capability) {
+                return 1 << (capability - 1);
             }
         }
 

@@ -286,4 +286,23 @@
 
     <!-- Side button present -->
     <bool name="def_wearable_sideButtonPresent">true</bool>
+
+    <!-- Android wear version. This value is a string due to no long type in resources -->
+    <string name="def_wearable_androidWearVersion" translatable="false">2</string>
+
+    <!-- This value is the decimal representation of the capabilities bitmask as defined below:
+        0000001 - WIFI
+        0000010 - Accounts
+        0000100 - Phone
+        0001000 - Cell
+        0010000 - Companion Legacy Calling
+        0100000 - Speaker
+        1000000 - Setup Protocomm Channel
+
+        Note: These must match the positions in
+            com.google.android.clockwork.common.system.WearSystemConstants  -->
+    <string name="def_wearable_systemCapabilities" translatable="false">3</string>
+
+    <!-- This value is used for the default system capabilities used on LE device. -->
+    <string name="def_wearable_leSystemCapabilities" translatable="false">1</string>
 </resources>
