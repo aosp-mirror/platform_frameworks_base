@@ -7621,8 +7621,9 @@ public class AppOpsManager {
                 getComponentPackageNameFromString(voiceRecognitionComponent);
         final String voiceInteractionServicePackageName =
                 getComponentPackageNameFromString(voiceInteractionComponent);
-        return Objects.equals(packageName, voiceRecognitionServicePackageName) && Objects.equals(
-                voiceRecognitionServicePackageName, voiceInteractionServicePackageName);
+        return (Objects.equals(packageName, voiceRecognitionServicePackageName)) && (Objects.equals(
+                voiceRecognitionServicePackageName, voiceInteractionServicePackageName)
+                || voiceInteractionServicePackageName == null);
     }
 
     private String getComponentPackageNameFromString(String from) {
