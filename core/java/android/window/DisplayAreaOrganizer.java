@@ -78,6 +78,12 @@ public class DisplayAreaOrganizer extends WindowOrganizer {
     public static final int FEATURE_FULLSCREEN_MAGNIFICATION = FEATURE_SYSTEM_FIRST + 5;
 
     /**
+     * Display area for hiding display cutout feature
+     * @hide
+     */
+    public static final int FEATURE_HIDE_DISPLAY_CUTOUT = FEATURE_SYSTEM_FIRST + 6;
+
+    /**
      * The last boundary of display area for system features
      */
     public static final int FEATURE_SYSTEM_LAST = 10_000;

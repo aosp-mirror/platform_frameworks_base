@@ -4510,4 +4510,7 @@
          activity-level letterboxing (size-compat mode). Therefore this override can control the
          maximum screen area that can be occupied by the app in the letterbox mode. -->
     <item name="config_taskLetterboxAspectRatio" format="float" type="dimen">0.0</item>
+
+    <!-- If true, hide the display cutout with display area -->
+    <bool name="config_hideDisplayCutoutWithDisplayArea">false</bool>
 </resources>
