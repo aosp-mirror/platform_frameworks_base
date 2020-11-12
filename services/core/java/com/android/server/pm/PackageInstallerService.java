@@ -513,7 +513,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
             String installerAttributionTag, int userId)
             throws IOException {
         final int callingUid = Binder.getCallingUid();
-        mPermissionManager.enforceCrossUserPermission(
+        mPm.enforceCrossUserPermission(
                 callingUid, userId, true, true, "createSession");
 
         if (mPm.isUserRestricted(userId, UserManager.DISALLOW_INSTALL_APPS)) {
@@ -908,7 +908,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
     @Override
     public ParceledListSlice<SessionInfo> getAllSessions(int userId) {
         final int callingUid = Binder.getCallingUid();
-        mPermissionManager.enforceCrossUserPermission(
+        mPm.enforceCrossUserPermission(
                 callingUid, userId, true, false, "getAllSessions");
 
         final List<SessionInfo> result = new ArrayList<>();
@@ -926,7 +926,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
 
     @Override
     public ParceledListSlice<SessionInfo> getMySessions(String installerPackageName, int userId) {
-        mPermissionManager.enforceCrossUserPermission(
+        mPm.enforceCrossUserPermission(
                 Binder.getCallingUid(), userId, true, false, "getMySessions");
         mAppOps.checkPackage(Binder.getCallingUid(), installerPackageName);
 
@@ -950,7 +950,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
     public void uninstall(VersionedPackage versionedPackage, String callerPackageName, int flags,
                 IntentSender statusReceiver, int userId) {
         final int callingUid = Binder.getCallingUid();
-        mPermissionManager.enforceCrossUserPermission(callingUid, userId, true, true, "uninstall");
+        mPm.enforceCrossUserPermission(callingUid, userId, true, true, "uninstall");
         if ((callingUid != Process.SHELL_UID) && (callingUid != Process.ROOT_UID)) {
             mAppOps.checkPackage(callingUid, callerPackageName);
         }
@@ -1002,7 +1002,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
             String callerPackageName, IntentSender statusReceiver, int userId) {
         final int callingUid = Binder.getCallingUid();
         mContext.enforceCallingOrSelfPermission(Manifest.permission.DELETE_PACKAGES, null);
-        mPermissionManager.enforceCrossUserPermission(callingUid, userId, true, true, "uninstall");
+        mPm.enforceCrossUserPermission(callingUid, userId, true, true, "uninstall");
         if ((callingUid != Process.SHELL_UID) && (callingUid != Process.ROOT_UID)) {
             mAppOps.checkPackage(callingUid, callerPackageName);
         }
@@ -1033,7 +1033,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
 
     @Override
     public void registerCallback(IPackageInstallerCallback callback, int userId) {
-        mPermissionManager.enforceCrossUserPermission(
+        mPm.enforceCrossUserPermission(
                 Binder.getCallingUid(), userId, true, false, "registerCallback");
         registerCallback(callback, eventUserId -> userId == eventUserId);
     }

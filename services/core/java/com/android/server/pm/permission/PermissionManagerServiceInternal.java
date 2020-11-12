@@ -393,32 +393,6 @@ public abstract class PermissionManagerServiceInternal extends PermissionManager
     @NonNull
     public abstract String[] getAppOpPermissionPackages(@NonNull String permissionName);
 
-    /**
-     * Enforces the request is from the system or an app that has INTERACT_ACROSS_USERS
-     * or INTERACT_ACROSS_USERS_FULL permissions, if the {@code userid} is not for the caller.
-     * @param checkShell whether to prevent shell from access if there's a debugging restriction
-     * @param message the message to log on security exception
-     */
-    public abstract void enforceCrossUserPermission(int callingUid, int userId,
-            boolean requireFullPermission, boolean checkShell, @NonNull String message);
-
-    /**
-     * Similar to {@link #enforceCrossUserPermission(int, int, boolean, boolean, String)}
-     * but also allows INTERACT_ACROSS_PROFILES permission if calling user and {@code userId} are
-     * in the same profile group.
-     */
-    public abstract void enforceCrossUserOrProfilePermission(int callingUid, int userId,
-            boolean requireFullPermission, boolean checkShell, @NonNull String message);
-
-    /**
-     * @see #enforceCrossUserPermission(int, int, boolean, boolean, String)
-     * @param requirePermissionWhenSameUser When {@code true}, still require the cross user
-     * permission to be held even if the callingUid and userId reference the same user.
-     */
-    public abstract void enforceCrossUserPermission(int callingUid, int userId,
-            boolean requireFullPermission, boolean checkShell,
-            boolean requirePermissionWhenSameUser, @NonNull String message);
-
     /** HACK HACK methods to allow for partial migration of data to the PermissionManager class */
     @Nullable
     public abstract Permission getPermissionTEMP(@NonNull String permName);

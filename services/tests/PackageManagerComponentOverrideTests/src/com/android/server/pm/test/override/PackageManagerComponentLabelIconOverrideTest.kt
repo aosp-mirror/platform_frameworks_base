@@ -18,6 +18,7 @@ package com.android.server.pm.test.override
 
 import android.content.ComponentName
 import android.content.Context
+import android.content.pm.PackageManager
 import android.content.pm.parsing.component.ParsedActivity
 import android.os.Binder
 import android.os.UserHandle
@@ -31,7 +32,6 @@ import com.android.server.pm.UserManagerService
 import com.android.server.pm.parsing.pkg.AndroidPackage
 import com.android.server.pm.parsing.pkg.PackageImpl
 import com.android.server.pm.parsing.pkg.ParsedPackage
-import com.android.server.pm.permission.PermissionManagerServiceInternal
 import com.android.server.pm.test.override.PackageManagerComponentLabelIconOverrideTest.Companion.Params.AppType
 import com.android.server.testutils.TestHandler
 import com.android.server.testutils.mock
@@ -45,11 +45,8 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
-import org.mockito.Mockito
 import org.mockito.Mockito.any
-import org.mockito.Mockito.anyBoolean
 import org.mockito.Mockito.anyInt
-import org.mockito.Mockito.anyString
 import org.mockito.Mockito.clearInvocations
 import org.mockito.Mockito.intThat
 import org.mockito.Mockito.never
@@ -321,10 +318,6 @@ class PackageManagerComponentLabelIconOverrideTest {
             whenever(this.exists(intThat(matcher))) { true }
             whenever(this.isUserUnlockingOrUnlocked(intThat(matcher))) { true }
         }
-        val mockPermissionManagerService: PermissionManagerServiceInternal = mockThrowOnUnmocked {
-            whenever(this.enforceCrossUserPermission(anyInt(), anyInt(), anyBoolean(), anyBoolean(),
-                    anyString())) { }
-        }
         val mockActivityTaskManager: ActivityTaskManagerInternal = mockThrowOnUnmocked {
             whenever(this.isCallerRecents(anyInt())) { false }
         }
@@ -335,15 +328,19 @@ class PackageManagerComponentLabelIconOverrideTest {
         val mockContext: Context = mockThrowOnUnmocked {
             whenever(this.getString(
                     com.android.internal.R.string.config_overrideComponentUiPackage)) { VALID_PKG }
+            whenever(this.checkCallingOrSelfPermission(
+                    android.Manifest.permission.INTERACT_ACROSS_USERS_FULL)) {
+                PackageManager.PERMISSION_GRANTED
+            }
         }
         val mockInjector: PackageManagerService.Injector = mock {
             whenever(this.lock) { Object() }
             whenever(this.componentResolver) { mockComponentResolver }
             whenever(this.userManagerService) { mockUserManagerService }
-            whenever(this.permissionManagerServiceInternal) { mockPermissionManagerService }
             whenever(this.settings) { mockSettings }
             whenever(this.getLocalService(ActivityTaskManagerInternal::class.java)) {
-                mockActivityTaskManager}
+                mockActivityTaskManager
+            }
             whenever(this.appsFilter) { mockAppsFilter }
             whenever(this.context) { mockContext }
         }
