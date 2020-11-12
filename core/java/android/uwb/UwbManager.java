@@ -279,7 +279,10 @@ public final class UwbManager {
      * <p>An open {@link RangingSession} will be automatically closed if client application process
      * dies.
      *
-     * @param params {@link RangingParams} used to initialize this {@link RangingSession}
+     * <p>A UWB support library must be used in order to construct the {@code parameter}
+     * {@link PersistableBundle}.
+     *
+     * @param parameters the parameters that define the ranging session
      * @param executor {@link Executor} to run callbacks
      * @param callbacks {@link RangingSession.Callback} to associate with the
      *                  {@link RangingSession} that is being opened.
@@ -290,8 +293,9 @@ public final class UwbManager {
      *         {@link RangingSession.Callback#onOpenSuccess}.
      */
     @NonNull
-    public AutoCloseable openRangingSession(@NonNull RangingParams params,
-            @NonNull Executor executor, @NonNull RangingSession.Callback callbacks) {
+    public AutoCloseable openRangingSession(@NonNull PersistableBundle parameters,
+            @NonNull Executor executor,
+            @NonNull RangingSession.Callback callbacks) {
         throw new UnsupportedOperationException();
     }
 }
