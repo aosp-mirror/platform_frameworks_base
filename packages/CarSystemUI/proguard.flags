@@ -1,7 +1,0 @@
--keep class com.android.systemui.CarSystemUIFactory
--keep class com.android.car.notification.headsup.animationhelper.**
-
--keep class com.android.systemui.DaggerCarGlobalRootComponent { *; }
--keep class com.android.systemui.DaggerCarGlobalRootComponent$CarSysUIComponentImpl { *; }
-
--include ../SystemUI/proguard.flags

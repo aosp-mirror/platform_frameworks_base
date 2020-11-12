@@ -1972,6 +1972,7 @@ public class DevicePolicyManager {
     public static final int CODE_CANNOT_ADD_MANAGED_PROFILE = 11;
 
     /**
+     * TODO (b/137101239): clean up split system user codes
      * Result code for {@link #checkProvisioningPreCondition}.
      *
      * <p>Returned for {@link #ACTION_PROVISION_MANAGED_USER} and
@@ -1995,6 +1996,7 @@ public class DevicePolicyManager {
     public static final int CODE_DEVICE_ADMIN_NOT_SUPPORTED = 13;
 
     /**
+     * TODO (b/137101239): clean up split system user codes
      * Result code for {@link #checkProvisioningPreCondition}.
      *
      * <p>Returned for {@link #ACTION_PROVISION_MANAGED_PROFILE} when the device the user is a

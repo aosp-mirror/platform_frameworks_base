@@ -216,7 +216,11 @@ interface IVoiceInteractionManagerService {
      * Caller must provide an identity, used for permission tracking purposes.
      * The uid/pid elements of the identity will be ignored by the server and replaced with the ones
      * provided by binder.
+     *
+     * The client argument is any binder owned by the client, used for tracking is death and
+     * cleaning up in this event.
      */
     IVoiceInteractionSoundTriggerSession createSoundTriggerSessionAsOriginator(
-            in Identity originatorIdentity);
+            in Identity originatorIdentity,
+            IBinder client);
 }

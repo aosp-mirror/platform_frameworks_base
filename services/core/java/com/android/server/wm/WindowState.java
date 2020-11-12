@@ -309,7 +309,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     /**
      * The visibility flag of the window based on policy like {@link WindowManagerPolicy}.
-     * Normally set by calling {@link #showLw} and {@link #hideLw}.
+     * Normally set by calling {@link #show} and {@link #hide}.
      *
      * TODO: b/131253938 This will eventually be split into individual visibility policy flags.
      */
@@ -1546,8 +1546,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return state;
     }
 
-    @Override
-    public int getDisplayId() {
+    int getDisplayId() {
         final DisplayContent displayContent = getDisplayContent();
         if (displayContent == null) {
             return Display.INVALID_DISPLAY;
@@ -1729,11 +1728,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     boolean wouldBeVisibleIfPolicyIgnored() {
         return mHasSurface && !isParentWindowHidden()
                 && !mAnimatingExit && !mDestroying && (!mIsWallpaper || mWallpaperVisible);
-    }
-
-    @Override
-    public boolean isVisibleLw() {
-        return isVisible();
     }
 
     /**
@@ -1951,7 +1945,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                     // Unnecessary to redraw a drawn starting window.
                     return;
                 }
-            } else if (mActivityRecord.startingWindow != null) {
+            } else if (mActivityRecord.mStartingWindow != null) {
                 // If the activity has an active starting window, there is no need to wait for the
                 // main window.
                 return;
@@ -2797,13 +2791,13 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     void adjustStartingWindowFlags() {
         if (mAttrs.type == TYPE_BASE_APPLICATION && mActivityRecord != null
-                && mActivityRecord.startingWindow != null) {
+                && mActivityRecord.mStartingWindow != null) {
             // Special handling of starting window over the base
             // window of the app: propagate lock screen flags to it,
             // to provide the correct semantics while starting.
             final int mask = FLAG_SHOW_WHEN_LOCKED | FLAG_DISMISS_KEYGUARD
                     | FLAG_ALLOW_LOCK_WHILE_SCREEN_ON;
-            WindowManager.LayoutParams sa = mActivityRecord.startingWindow.mAttrs;
+            WindowManager.LayoutParams sa = mActivityRecord.mStartingWindow.mAttrs;
             sa.flags = (sa.flags & ~mask) | (mAttrs.flags & mask);
         }
     }
@@ -2962,12 +2956,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return mWinAnimator.mDrawState == WindowStateAnimator.HAS_DRAWN;
     }
 
-    @Override
-    public boolean showLw(boolean doAnimation) {
-        return showLw(doAnimation, true);
-    }
-
-    boolean showLw(boolean doAnimation, boolean requestAnim) {
+    /**
+     * Can be called to undo the effect of {@link #hide}, allowing a window to be shown as long
+     * as the client would also like it to be shown.
+     */
+    boolean show(boolean doAnimation, boolean requestAnim) {
         if (isLegacyPolicyVisibility() && mLegacyPolicyVisibilityAfterAnim) {
             // Already showing.
             return false;
@@ -3020,12 +3013,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return true;
     }
 
-    @Override
-    public boolean hideLw(boolean doAnimation) {
-        return hideLw(doAnimation, true);
-    }
-
-    boolean hideLw(boolean doAnimation, boolean requestAnim) {
+    /** Forces the window to be hidden, regardless of whether the client like it shown. */
+    boolean hide(boolean doAnimation, boolean requestAnim) {
         if (doAnimation) {
             if (!mToken.okToAnimate()) {
                 doAnimation = false;
@@ -3077,9 +3066,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
         mForceHideNonSystemOverlayWindow = forceHide;
         if (forceHide) {
-            hideLw(true /* doAnimation */, true /* requestAnim */);
+            hide(true /* doAnimation */, true /* requestAnim */);
         } else {
-            showLw(true /* doAnimation */, true /* requestAnim */);
+            show(true /* doAnimation */, true /* requestAnim */);
         }
     }
 
@@ -3093,9 +3082,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
         mHiddenWhileSuspended = hide;
         if (hide) {
-            hideLw(true, true);
+            hide(true /* doAnimation */, true /* requestAnim */);
         } else {
-            showLw(true, true);
+            show(true /* doAnimation */, true /* requestAnim */);
         }
     }
 
@@ -3109,9 +3098,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 // ops modifies they should only be hidden by policy due to the
                 // lock screen, and the user won't be changing this if locked.
                 // Plus it will quickly be fixed the next time we do a layout.
-                showLw(true, true);
+                show(true /* doAnimation */, true /* requestAnim */);
             } else {
-                hideLw(true, true);
+                hide(true /* doAnimation */, true /* requestAnim */);
             }
         }
     }
@@ -3165,7 +3154,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     public void hidePermanentlyLw() {
         if (!mPermanentlyHidden) {
             mPermanentlyHidden = true;
-            hideLw(true, true);
+            hide(true /* doAnimation */, true /* requestAnim */);
         }
     }
 
@@ -4437,11 +4426,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
     }
 
-    @Override
-    public boolean isInputMethodWindow() {
-        return mIsImWindow;
-    }
-
     // This must be called while inside a transaction.
     boolean performShowLocked() {
         if (!showToCurrentUser()) {
@@ -4969,7 +4953,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     int relayoutVisibleWindow(int result, int attrChanges) {
-        final boolean wasVisible = isVisibleLw();
+        final boolean wasVisible = isVisible();
 
         result |= (!wasVisible || !isDrawn()) ? RELAYOUT_RES_FIRST_TIME : 0;
 
@@ -5464,8 +5448,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         super.assignLayer(t, layer);
     }
 
-    @Override
-    public boolean isDimming() {
+    boolean isDimming() {
         return mIsDimming;
     }
 

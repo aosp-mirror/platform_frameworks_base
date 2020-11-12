@@ -133,12 +133,6 @@ public class StackAnimationController extends
     /** Whether or not the stack's start position has been set. */
     private boolean mStackMovedToStartPosition = false;
 
-    /**
-     * The stack's most recent position along the edge of the screen. This is saved when the last
-     * bubble is removed, so that the stack can be restored in its previous position.
-     */
-    private PointF mRestingStackPosition;
-
     /** The height of the most recently visible IME. */
     private float mImeHeight = 0f;
 
@@ -434,6 +428,9 @@ public class StackAnimationController extends
      * Where the stack would be if it were snapped to the nearest horizontal edge (left or right).
      */
     public PointF getStackPositionAlongNearestHorizontalEdge() {
+        if (mPositioner.showingInTaskbar()) {
+            return mPositioner.getRestingPosition();
+        }
         final PointF stackPos = getStackPosition();
         final boolean onLeft = mLayout.isFirstChildXLeftOfCenter(stackPos.x);
         final RectF bounds = getAllowableStackPositionRegion();
@@ -447,7 +444,7 @@ public class StackAnimationController extends
         pw.println("StackAnimationController state:");
         pw.print("  isActive:             "); pw.println(isActiveController());
         pw.print("  restingStackPos:      ");
-        pw.println(mRestingStackPosition != null ? mRestingStackPosition.toString() : "null");
+        pw.println(mPositioner.getRestingPosition().toString());
         pw.print("  currentStackPos:      "); pw.println(mStackPosition.toString());
         pw.print("  isMovingFromFlinging: "); pw.println(mIsMovingFromFlinging);
         pw.print("  withinDismiss:        "); pw.println(isStackStuckToTarget());
@@ -501,7 +498,7 @@ public class StackAnimationController extends
 
                 .addEndListener((animation, canceled, endValue, endVelocity) -> {
                     if (!canceled) {
-                        mRestingStackPosition.set(mStackPosition);
+                        mPositioner.setRestingPosition(mStackPosition);
 
                         springFirstBubbleWithStackFollowing(property, spring, endVelocity,
                                 finalPosition != null
@@ -679,7 +676,7 @@ public class StackAnimationController extends
                                 // resting position - the touch location is not a valid resting
                                 // position. We'll set this when the stack springs to the left or
                                 // right side of the screen after the touch gesture ends.
-                                mRestingStackPosition.set(mStackPosition);
+                                mPositioner.setRestingPosition(mStackPosition);
                             }
 
                             if (after != null) {
@@ -772,10 +769,9 @@ public class StackAnimationController extends
         if (getBubbleCount() > 0) {
             animationForChildAtIndex(0).translationX(mStackPosition.x).start();
         } else {
+            // TODO: still needed with positioner?
             // When all children are removed ensure stack position is sane
-            setStackPosition(mRestingStackPosition == null
-                    ? getStartPosition()
-                    : mRestingStackPosition);
+            mPositioner.setRestingPosition(mPositioner.getRestingPosition());
 
             // Remove the stack from the coordinator since we don't have any bubbles and aren't
             // visible.
@@ -848,8 +844,8 @@ public class StackAnimationController extends
         mSwapAnimationOffset = res.getDimensionPixelSize(R.dimen.bubble_swap_animation_offset);
         mMaxBubbles = res.getInteger(R.integer.bubbles_max_rendered);
         mElevation = res.getDimensionPixelSize(R.dimen.bubble_elevation);
-        mBubbleSize = res.getDimensionPixelSize(R.dimen.individual_bubble_size);
-        mBubbleBitmapSize = res.getDimensionPixelSize(R.dimen.bubble_bitmap_size);
+        mBubbleSize = mPositioner.getBubbleSize();
+        mBubbleBitmapSize = mPositioner.getBubbleBitmapSize();
         mBubblePaddingTop = res.getDimensionPixelSize(R.dimen.bubble_padding_top);
         mBubbleOffscreen = res.getDimensionPixelSize(R.dimen.bubble_stack_offscreen);
     }
@@ -873,9 +869,8 @@ public class StackAnimationController extends
         // Post to ensure that the layout's width and height have been calculated.
         mLayout.setVisibility(View.INVISIBLE);
         mLayout.post(() -> {
-            setStackPosition(mRestingStackPosition == null
-                    ? getStartPosition()
-                    : mRestingStackPosition);
+            setStackPosition(mPositioner.getRestingPosition());
+
             mStackMovedToStartPosition = true;
             mLayout.setVisibility(View.VISIBLE);
 
@@ -919,11 +914,7 @@ public class StackAnimationController extends
         Log.d(TAG, String.format("Setting position to (%f, %f).", pos.x, pos.y));
         mStackPosition.set(pos.x, pos.y);
 
-        if (mRestingStackPosition == null) {
-            mRestingStackPosition = new PointF();
-        }
-
-        mRestingStackPosition.set(mStackPosition);
+        mPositioner.setRestingPosition(mStackPosition);
 
         // If we're not the active controller, we don't want to physically move the bubble views.
         if (isActiveController()) {

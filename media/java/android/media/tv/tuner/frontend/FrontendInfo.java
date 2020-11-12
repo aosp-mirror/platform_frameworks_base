@@ -22,6 +22,9 @@ import android.media.tv.tuner.frontend.FrontendSettings.Type;
 import android.media.tv.tuner.frontend.FrontendStatus.FrontendStatusType;
 import android.util.Range;
 
+import java.util.Arrays;
+import java.util.Objects;
+
 /**
  * This class is used to specify meta information of a frontend.
  *
@@ -117,5 +120,31 @@ public class FrontendInfo {
     @NonNull
     public FrontendCapabilities getFrontendCapabilities() {
         return mFrontendCap;
+    }
+
+
+    /** @hide */
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || !(o instanceof FrontendInfo)) {
+            return false;
+        }
+        // TODO: compare FrontendCapabilities
+        FrontendInfo info = (FrontendInfo) o;
+        return mId == info.getId() && mType == info.getType()
+                && Objects.equals(mFrequencyRange, info.getFrequencyRange())
+                && Objects.equals(mSymbolRateRange, info.getSymbolRateRange())
+                && mAcquireRange == info.getAcquireRange()
+                && mExclusiveGroupId == info.getExclusiveGroupId()
+                && Arrays.equals(mStatusCaps, info.getStatusCapabilities());
+    }
+
+    /** @hide */
+    @Override
+    public int hashCode() {
+        return mId;
     }
 }

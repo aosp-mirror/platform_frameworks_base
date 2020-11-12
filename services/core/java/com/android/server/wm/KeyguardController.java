@@ -92,6 +92,10 @@ class KeyguardController {
         mRootWindowContainer = mService.mRootWindowContainer;
     }
 
+    boolean isAodShowing() {
+        return mAodShowing;
+    }
+
     /**
      * @return true if either Keyguard or AOD are showing, not going away, and not being occluded
      *         on the given display, false otherwise.
@@ -163,7 +167,10 @@ class KeyguardController {
                 "setKeyguardShown");
         mKeyguardShowing = keyguardShowing;
         mAodShowing = aodShowing;
-        mWindowManager.setAodShowing(aodShowing);
+        if (aodChanged) {
+            // Ensure the new state takes effect.
+            mWindowManager.mWindowPlacerLocked.performSurfacePlacement();
+        }
 
         if (keyguardChanged) {
             // Irrelevant to AOD.

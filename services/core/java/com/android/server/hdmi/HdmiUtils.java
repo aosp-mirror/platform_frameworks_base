@@ -21,6 +21,7 @@ import static com.android.server.hdmi.Constants.ADDR_BACKUP_2;
 import static com.android.server.hdmi.Constants.ADDR_TV;
 
 import android.annotation.Nullable;
+import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -134,7 +135,7 @@ final class HdmiUtils {
     static boolean isEligibleAddressForCecVersion(int cecVersion, int logicalAddress) {
         if (isValidAddress(logicalAddress)) {
             if (logicalAddress == ADDR_BACKUP_1 || logicalAddress == ADDR_BACKUP_2) {
-                return cecVersion == Constants.VERSION_2_0;
+                return cecVersion >= HdmiControlManager.HDMI_CEC_VERSION_2_0;
             }
             return true;
         }

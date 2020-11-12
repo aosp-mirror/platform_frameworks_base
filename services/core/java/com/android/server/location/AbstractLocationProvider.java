@@ -310,6 +310,7 @@ public abstract class AbstractLocationProvider {
      * Sets a new request and worksource for the provider.
      */
     public final void setRequest(ProviderRequest request) {
+        // TODO: do we want to hold a wakelock until onSetRequest is run?
         // all calls into the provider must be moved onto the provider thread to prevent deadlock
         mExecutor.execute(() -> onSetRequest(request));
     }

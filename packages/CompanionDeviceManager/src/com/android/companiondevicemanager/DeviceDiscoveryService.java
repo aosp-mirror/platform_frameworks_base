@@ -87,7 +87,9 @@ public class DeviceDiscoveryService extends Service {
     private BluetoothAdapter mBluetoothAdapter;
     private WifiManager mWifiManager;
     @Nullable private BluetoothLeScanner mBLEScanner;
-    private ScanSettings mDefaultScanSettings = new ScanSettings.Builder().build();
+    private ScanSettings mDefaultScanSettings = new ScanSettings.Builder()
+            .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
+            .build();
 
     private List<DeviceFilter<?>> mFilters;
     private List<BluetoothLeDeviceFilter> mBLEFilters;

@@ -47,9 +47,8 @@ import com.android.systemui.media.MediaHost;
 import com.android.systemui.plugins.qs.DetailAdapter;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.qs.logging.QSLogger;
-import com.android.systemui.settings.ToggleSliderView;
+import com.android.systemui.settings.brightness.BrightnessSlider;
 import com.android.systemui.statusbar.policy.BrightnessMirrorController;
-import com.android.systemui.statusbar.policy.BrightnessMirrorController.BrightnessMirrorListener;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerService.Tunable;
 import com.android.systemui.util.animation.DisappearParameters;
@@ -62,7 +61,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 /** View that represents the quick settings tile panel (when expanded/pulled down). **/
-public class QSPanel extends LinearLayout implements Tunable, BrightnessMirrorListener {
+public class QSPanel extends LinearLayout implements Tunable {
 
     public static final String QS_SHOW_BRIGHTNESS = "qs_show_brightness";
     public static final String QS_SHOW_HEADER = "qs_show_header";
@@ -75,10 +74,12 @@ public class QSPanel extends LinearLayout implements Tunable, BrightnessMirrorLi
     /**
      * The index where the content starts that needs to be moved between parents
      */
-    private final int mMovableContentStartIndex;
+    private int mMovableContentStartIndex;
 
     @Nullable
     protected View mBrightnessView;
+    @Nullable
+    protected BrightnessSlider mToggleSliderController;
 
     private final H mHandler = new H();
     private final MetricsLogger mMetricsLogger = Dependency.get(MetricsLogger.class);
@@ -153,7 +154,6 @@ public class QSPanel extends LinearLayout implements Tunable, BrightnessMirrorLi
 
         setOrientation(VERTICAL);
 
-        addViewsAboveTiles();
         mMovableContentStartIndex = getChildCount();
         mRegularTileLayout = createRegularTileLayout();
         mTileLayout = mRegularTileLayout;
@@ -191,10 +191,19 @@ public class QSPanel extends LinearLayout implements Tunable, BrightnessMirrorLi
         }
     }
 
-    protected void addViewsAboveTiles() {
-        mBrightnessView = LayoutInflater.from(mContext).inflate(
-            R.layout.quick_settings_brightness_dialog, this, false);
-        addView(mBrightnessView);
+    /**
+     * Add brightness view above the tile layout.
+     *
+     * Used to add the brightness slider after construction.
+     */
+    public void setBrightnessView(@NonNull View view) {
+        if (mBrightnessView != null) {
+            removeView(mBrightnessView);
+            mMovableContentStartIndex--;
+        }
+        addView(view, 0);
+        mBrightnessView = view;
+        mMovableContentStartIndex++;
     }
 
     /** */
@@ -321,22 +330,6 @@ public class QSPanel extends LinearLayout implements Tunable, BrightnessMirrorLi
         }
     }
 
-    public void setBrightnessMirror(BrightnessMirrorController c) {
-        if (mBrightnessMirrorController != null) {
-            mBrightnessMirrorController.removeCallback(this);
-        }
-        mBrightnessMirrorController = c;
-        if (mBrightnessMirrorController != null) {
-            mBrightnessMirrorController.addCallback(this);
-        }
-        updateBrightnessMirror();
-    }
-
-    @Override
-    public void onBrightnessMirrorReinflated(View brightnessMirror) {
-        updateBrightnessMirror();
-    }
-
     @Nullable
     View getBrightnessView() {
         return mBrightnessView;
@@ -415,8 +408,6 @@ public class QSPanel extends LinearLayout implements Tunable, BrightnessMirrorLi
         super.onConfigurationChanged(newConfig);
         mOnConfigurationChangedListeners.forEach(
                 listener -> listener.onConfigurationChange(newConfig));
-
-        updateBrightnessMirror();
     }
 
     @Override
@@ -575,16 +566,6 @@ public class QSPanel extends LinearLayout implements Tunable, BrightnessMirrorLi
             // carried in the parent of this view (to ensure correct vertical alignment)
             layoutParams.bottomMargin = !horizontal || displayMediaMarginsOnMedia()
                     ? mMediaTotalBottomMargin - getPaddingBottom() : 0;
-        }
-    }
-
-    public void updateBrightnessMirror() {
-        if (mBrightnessMirrorController != null) {
-            ToggleSliderView brightnessSlider = findViewById(R.id.brightness_slider);
-            ToggleSliderView mirrorSlider = mBrightnessMirrorController.getMirror()
-                    .findViewById(R.id.brightness_slider);
-            brightnessSlider.setMirror(mirrorSlider);
-            brightnessSlider.setMirrorController(mBrightnessMirrorController);
         }
     }
 

@@ -437,7 +437,7 @@ public class AppWindowTokenTests extends WindowTestsBase {
                 false /* newTask */, false /* keepCurTransition */, null /* options */);
         middle.makeFinishingLocked();
 
-        assertNull(mActivity.startingWindow);
+        assertNull(mActivity.mStartingWindow);
         assertHasStartingWindow(middle);
 
         final ActivityRecord top = new ActivityBuilder(mWm.mAtmService)
@@ -449,7 +449,7 @@ public class AppWindowTokenTests extends WindowTestsBase {
         mStack.startActivityLocked(top, null /* focusedTopActivity */,
                 false /* newTask */, false /* keepCurTransition */, null /* options */);
 
-        assertNull(middle.startingWindow);
+        assertNull(middle.mStartingWindow);
         assertHasStartingWindow(top);
         assertTrue(top.isVisible());
         // The activity was visible by mVisibleSetFromTransferredStartingWindow, so after its
@@ -573,14 +573,14 @@ public class AppWindowTokenTests extends WindowTestsBase {
     }
 
     private void assertHasStartingWindow(ActivityRecord atoken) {
-        assertNotNull(atoken.startingSurface);
+        assertNotNull(atoken.mStartingSurface);
         assertNotNull(atoken.mStartingData);
-        assertNotNull(atoken.startingWindow);
+        assertNotNull(atoken.mStartingWindow);
     }
 
     private void assertNoStartingWindow(ActivityRecord atoken) {
-        assertNull(atoken.startingSurface);
-        assertNull(atoken.startingWindow);
+        assertNull(atoken.mStartingSurface);
+        assertNull(atoken.mStartingWindow);
         assertNull(atoken.mStartingData);
         atoken.forAllWindows(windowState -> {
             assertFalse(windowState.getBaseType() == TYPE_APPLICATION_STARTING);

@@ -31,6 +31,7 @@ import android.app.role.RoleManager;
 import android.app.trust.TrustManager;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.om.OverlayManager;
 import android.content.pm.IPackageManager;
 import android.content.pm.LauncherApps;
 import android.content.pm.PackageManager;
@@ -351,7 +352,7 @@ public class FrameworkServicesModule {
 
     @Provides
     static WallpaperManager provideWallpaperManager(Context context) {
-        return (WallpaperManager) context.getSystemService(Context.WALLPAPER_SERVICE);
+        return context.getSystemService(WallpaperManager.class);
     }
 
     @Provides
@@ -359,6 +360,12 @@ public class FrameworkServicesModule {
     @Nullable
     static WifiManager provideWifiManager(Context context) {
         return context.getSystemService(WifiManager.class);
+    }
+
+    @Provides
+    @Singleton
+    static OverlayManager provideOverlayManager(Context context) {
+        return context.getSystemService(OverlayManager.class);
     }
 
     @Provides

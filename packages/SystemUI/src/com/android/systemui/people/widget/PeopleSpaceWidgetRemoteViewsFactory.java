@@ -46,7 +46,7 @@ public class PeopleSpaceWidgetRemoteViewsFactory implements RemoteViewsService.R
     private PackageManager mPackageManager;
     private LauncherApps mLauncherApps;
     private List<ShortcutInfo> mShortcutInfos = new ArrayList<>();
-    private Context mContext;
+    private final Context mContext;
 
     public PeopleSpaceWidgetRemoteViewsFactory(Context context, Intent intent) {
         this.mContext = context;
@@ -55,9 +55,8 @@ public class PeopleSpaceWidgetRemoteViewsFactory implements RemoteViewsService.R
     @Override
     public void onCreate() {
         if (DEBUG) Log.d(TAG, "onCreate called");
-        mNotificationManager =
-                INotificationManager.Stub.asInterface(
-                        ServiceManager.getService(Context.NOTIFICATION_SERVICE));
+        mNotificationManager = INotificationManager.Stub.asInterface(
+                ServiceManager.getService(Context.NOTIFICATION_SERVICE));
         mPackageManager = mContext.getPackageManager();
         mPeopleManager = IPeopleManager.Stub.asInterface(
                 ServiceManager.getService(Context.PEOPLE_SERVICE));
@@ -71,9 +70,8 @@ public class PeopleSpaceWidgetRemoteViewsFactory implements RemoteViewsService.R
      */
     private void setTileViewsWithPriorityConversations() {
         try {
-            mShortcutInfos =
-                    PeopleSpaceUtils.getShortcutInfos(
-                            mContext, mNotificationManager, mPeopleManager);
+            mShortcutInfos = PeopleSpaceUtils.getShortcutInfos(mContext, mNotificationManager,
+                    mPeopleManager);
         } catch (Exception e) {
             Log.e(TAG, "Couldn't retrieve conversations", e);
         }
@@ -99,21 +97,16 @@ public class PeopleSpaceWidgetRemoteViewsFactory implements RemoteViewsService.R
     public RemoteViews getViewAt(int i) {
         if (DEBUG) Log.d(TAG, "getViewAt called, index: " + i);
 
-        RemoteViews personView =
-                new RemoteViews(mContext.getPackageName(), R.layout.people_space_widget_item);
+        RemoteViews personView = new RemoteViews(mContext.getPackageName(),
+                R.layout.people_space_widget_item);
         try {
             ShortcutInfo shortcutInfo = mShortcutInfos.get(i);
-            int userId = UserHandle.getUserHandleForUid(
-                    shortcutInfo.getUserId()).getIdentifier();
+            int userId = UserHandle.getUserHandleForUid(shortcutInfo.getUserId()).getIdentifier();
             String pkg = shortcutInfo.getPackage();
-            long lastInteraction = mPeopleManager.getLastInteraction(
-                    pkg, userId,
+            long lastInteraction = mPeopleManager.getLastInteraction(pkg, userId,
                     shortcutInfo.getId());
 
-            String status = lastInteraction != 0L ? mContext.getString(
-                    R.string.last_interaction_status,
-                    PeopleSpaceUtils.getLastInteractionString(
-                            lastInteraction)) : mContext.getString(R.string.basic_status);
+            String status = PeopleSpaceUtils.getLastInteractionString(mContext, lastInteraction);
 
             personView.setTextViewText(R.id.status, status);
             personView.setTextViewText(R.id.name, shortcutInfo.getLabel().toString());

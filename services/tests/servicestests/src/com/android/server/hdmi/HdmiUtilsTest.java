@@ -20,6 +20,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.platform.test.annotations.Presubmit;
 import android.util.Slog;
@@ -533,69 +534,84 @@ public class HdmiUtilsTest {
 
     @Test
     public void isEligibleAddressForCecVersion_1_4() {
-        assertThat(HdmiUtils.isEligibleAddressForCecVersion(Constants.VERSION_1_4,
+        assertThat(HdmiUtils.isEligibleAddressForCecVersion(
+                HdmiControlManager.HDMI_CEC_VERSION_1_4_b,
                 Constants.ADDR_TV)).isTrue();
-        assertThat(HdmiUtils.isEligibleAddressForCecVersion(Constants.VERSION_1_4,
+        assertThat(HdmiUtils.isEligibleAddressForCecVersion(
+                HdmiControlManager.HDMI_CEC_VERSION_1_4_b,
                 Constants.ADDR_RECORDER_1)).isTrue();
-        assertThat(HdmiUtils.isEligibleAddressForCecVersion(Constants.VERSION_1_4,
+        assertThat(HdmiUtils.isEligibleAddressForCecVersion(
+                HdmiControlManager.HDMI_CEC_VERSION_1_4_b,
                 Constants.ADDR_RECORDER_2)).isTrue();
-        assertThat(HdmiUtils.isEligibleAddressForCecVersion(Constants.VERSION_1_4,
+        assertThat(HdmiUtils.isEligibleAddressForCecVersion(
+                HdmiControlManager.HDMI_CEC_VERSION_1_4_b,
                 Constants.ADDR_TUNER_1)).isTrue();
-        assertThat(HdmiUtils.isEligibleAddressForCecVersion(Constants.VERSION_1_4,
+        assertThat(HdmiUtils.isEligibleAddressForCecVersion(
+                HdmiControlManager.HDMI_CEC_VERSION_1_4_b,
                 Constants.ADDR_PLAYBACK_1)).isTrue();
-        assertThat(HdmiUtils.isEligibleAddressForCecVersion(Constants.VERSION_1_4,
+        assertThat(HdmiUtils.isEligibleAddressForCecVersion(
+                HdmiControlManager.HDMI_CEC_VERSION_1_4_b,
                 Constants.ADDR_AUDIO_SYSTEM)).isTrue();
-        assertThat(HdmiUtils.isEligibleAddressForCecVersion(Constants.VERSION_1_4,
+        assertThat(HdmiUtils.isEligibleAddressForCecVersion(
+                HdmiControlManager.HDMI_CEC_VERSION_1_4_b,
                 Constants.ADDR_TUNER_2)).isTrue();
-        assertThat(HdmiUtils.isEligibleAddressForCecVersion(Constants.VERSION_1_4,
+        assertThat(HdmiUtils.isEligibleAddressForCecVersion(
+                HdmiControlManager.HDMI_CEC_VERSION_1_4_b,
                 Constants.ADDR_TUNER_3)).isTrue();
-        assertThat(HdmiUtils.isEligibleAddressForCecVersion(Constants.VERSION_1_4,
+        assertThat(HdmiUtils.isEligibleAddressForCecVersion(
+                HdmiControlManager.HDMI_CEC_VERSION_1_4_b,
                 Constants.ADDR_PLAYBACK_2)).isTrue();
-        assertThat(HdmiUtils.isEligibleAddressForCecVersion(Constants.VERSION_1_4,
+        assertThat(HdmiUtils.isEligibleAddressForCecVersion(
+                HdmiControlManager.HDMI_CEC_VERSION_1_4_b,
                 Constants.ADDR_RECORDER_3)).isTrue();
-        assertThat(HdmiUtils.isEligibleAddressForCecVersion(Constants.VERSION_1_4,
+        assertThat(HdmiUtils.isEligibleAddressForCecVersion(
+                HdmiControlManager.HDMI_CEC_VERSION_1_4_b,
                 Constants.ADDR_TUNER_4)).isTrue();
-        assertThat(HdmiUtils.isEligibleAddressForCecVersion(Constants.VERSION_1_4,
+        assertThat(HdmiUtils.isEligibleAddressForCecVersion(
+                HdmiControlManager.HDMI_CEC_VERSION_1_4_b,
                 Constants.ADDR_PLAYBACK_3)).isTrue();
-        assertThat(HdmiUtils.isEligibleAddressForCecVersion(Constants.VERSION_1_4,
+        assertThat(HdmiUtils.isEligibleAddressForCecVersion(
+                HdmiControlManager.HDMI_CEC_VERSION_1_4_b,
                 Constants.ADDR_BACKUP_1)).isFalse();
-        assertThat(HdmiUtils.isEligibleAddressForCecVersion(Constants.VERSION_1_4,
+        assertThat(HdmiUtils.isEligibleAddressForCecVersion(
+                HdmiControlManager.HDMI_CEC_VERSION_1_4_b,
                 Constants.ADDR_BACKUP_2)).isFalse();
-        assertThat(HdmiUtils.isEligibleAddressForCecVersion(Constants.VERSION_1_4,
+        assertThat(HdmiUtils.isEligibleAddressForCecVersion(
+                HdmiControlManager.HDMI_CEC_VERSION_1_4_b,
                 Constants.ADDR_SPECIFIC_USE)).isTrue();
     }
 
     @Test
     public void isEligibleAddressForCecVersion_2_0() {
-        assertThat(HdmiUtils.isEligibleAddressForCecVersion(Constants.VERSION_2_0,
+        assertThat(HdmiUtils.isEligibleAddressForCecVersion(HdmiControlManager.HDMI_CEC_VERSION_2_0,
                 Constants.ADDR_TV)).isTrue();
-        assertThat(HdmiUtils.isEligibleAddressForCecVersion(Constants.VERSION_2_0,
+        assertThat(HdmiUtils.isEligibleAddressForCecVersion(HdmiControlManager.HDMI_CEC_VERSION_2_0,
                 Constants.ADDR_RECORDER_1)).isTrue();
-        assertThat(HdmiUtils.isEligibleAddressForCecVersion(Constants.VERSION_2_0,
+        assertThat(HdmiUtils.isEligibleAddressForCecVersion(HdmiControlManager.HDMI_CEC_VERSION_2_0,
                 Constants.ADDR_RECORDER_2)).isTrue();
-        assertThat(HdmiUtils.isEligibleAddressForCecVersion(Constants.VERSION_2_0,
+        assertThat(HdmiUtils.isEligibleAddressForCecVersion(HdmiControlManager.HDMI_CEC_VERSION_2_0,
                 Constants.ADDR_TUNER_1)).isTrue();
-        assertThat(HdmiUtils.isEligibleAddressForCecVersion(Constants.VERSION_2_0,
+        assertThat(HdmiUtils.isEligibleAddressForCecVersion(HdmiControlManager.HDMI_CEC_VERSION_2_0,
                 Constants.ADDR_PLAYBACK_1)).isTrue();
-        assertThat(HdmiUtils.isEligibleAddressForCecVersion(Constants.VERSION_2_0,
+        assertThat(HdmiUtils.isEligibleAddressForCecVersion(HdmiControlManager.HDMI_CEC_VERSION_2_0,
                 Constants.ADDR_AUDIO_SYSTEM)).isTrue();
-        assertThat(HdmiUtils.isEligibleAddressForCecVersion(Constants.VERSION_2_0,
+        assertThat(HdmiUtils.isEligibleAddressForCecVersion(HdmiControlManager.HDMI_CEC_VERSION_2_0,
                 Constants.ADDR_TUNER_2)).isTrue();
-        assertThat(HdmiUtils.isEligibleAddressForCecVersion(Constants.VERSION_2_0,
+        assertThat(HdmiUtils.isEligibleAddressForCecVersion(HdmiControlManager.HDMI_CEC_VERSION_2_0,
                 Constants.ADDR_TUNER_3)).isTrue();
-        assertThat(HdmiUtils.isEligibleAddressForCecVersion(Constants.VERSION_2_0,
+        assertThat(HdmiUtils.isEligibleAddressForCecVersion(HdmiControlManager.HDMI_CEC_VERSION_2_0,
                 Constants.ADDR_PLAYBACK_2)).isTrue();
-        assertThat(HdmiUtils.isEligibleAddressForCecVersion(Constants.VERSION_2_0,
+        assertThat(HdmiUtils.isEligibleAddressForCecVersion(HdmiControlManager.HDMI_CEC_VERSION_2_0,
                 Constants.ADDR_RECORDER_3)).isTrue();
-        assertThat(HdmiUtils.isEligibleAddressForCecVersion(Constants.VERSION_2_0,
+        assertThat(HdmiUtils.isEligibleAddressForCecVersion(HdmiControlManager.HDMI_CEC_VERSION_2_0,
                 Constants.ADDR_TUNER_4)).isTrue();
-        assertThat(HdmiUtils.isEligibleAddressForCecVersion(Constants.VERSION_2_0,
+        assertThat(HdmiUtils.isEligibleAddressForCecVersion(HdmiControlManager.HDMI_CEC_VERSION_2_0,
                 Constants.ADDR_PLAYBACK_3)).isTrue();
-        assertThat(HdmiUtils.isEligibleAddressForCecVersion(Constants.VERSION_2_0,
+        assertThat(HdmiUtils.isEligibleAddressForCecVersion(HdmiControlManager.HDMI_CEC_VERSION_2_0,
                 Constants.ADDR_BACKUP_1)).isTrue();
-        assertThat(HdmiUtils.isEligibleAddressForCecVersion(Constants.VERSION_2_0,
+        assertThat(HdmiUtils.isEligibleAddressForCecVersion(HdmiControlManager.HDMI_CEC_VERSION_2_0,
                 Constants.ADDR_BACKUP_2)).isTrue();
-        assertThat(HdmiUtils.isEligibleAddressForCecVersion(Constants.VERSION_2_0,
+        assertThat(HdmiUtils.isEligibleAddressForCecVersion(HdmiControlManager.HDMI_CEC_VERSION_2_0,
                 Constants.ADDR_SPECIFIC_USE)).isTrue();
     }
 }

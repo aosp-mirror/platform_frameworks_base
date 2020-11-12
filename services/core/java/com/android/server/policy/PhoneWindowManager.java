@@ -20,7 +20,6 @@ import static android.Manifest.permission.INTERNAL_SYSTEM_WINDOW;
 import static android.Manifest.permission.SYSTEM_ALERT_WINDOW;
 import static android.app.AppOpsManager.OP_SYSTEM_ALERT_WINDOW;
 import static android.app.AppOpsManager.OP_TOAST_WINDOW;
-import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.content.Context.CONTEXT_RESTRICTED;
 import static android.content.Context.WINDOW_SERVICE;
 import static android.content.pm.PackageManager.FEATURE_AUTOMOTIVE;
@@ -45,10 +44,8 @@ import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
 import static android.view.WindowManager.LayoutParams.LAST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.LAST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.LAST_SYSTEM_WINDOW;
-import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_SYSTEM_ERROR;
 import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
-import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
@@ -178,7 +175,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.WindowManager;
-import android.view.WindowManager.LayoutParams;
 import android.view.WindowManagerGlobal;
 import android.view.WindowManagerPolicyConstants;
 import android.view.accessibility.AccessibilityEvent;
@@ -602,8 +598,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             = new LogDecelerateInterpolator(100, 0);
 
     private final MutableBoolean mTmpBoolean = new MutableBoolean(false);
-
-    private boolean mAodShowing;
 
     private boolean mPerDisplayFocusEnabled = false;
     private volatile int mTopFocusedDisplayId = INVALID_DISPLAY;
@@ -2267,44 +2261,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
 
-    private boolean shouldBeHiddenByKeyguard(WindowState win, WindowState imeTarget) {
-        final LayoutParams attrs = win.getAttrs();
-
-        boolean hideDockDivider = attrs.type == TYPE_DOCK_DIVIDER
-                && !mWindowManagerInternal.isStackVisibleLw(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
-        if (hideDockDivider) {
-            return true;
-        }
-
-        // If AOD is showing, the IME should be hidden. However, sometimes the AOD is considered
-        // hidden because it's in the process of hiding, but it's still being shown on screen.
-        // In that case, we want to continue hiding the IME until the windows have completed
-        // drawing. This way, we know that the IME can be safely shown since the other windows are
-        // now shown.
-        final boolean hideIme = win.isInputMethodWindow()
-                && (mAodShowing || !mDefaultDisplayPolicy.isWindowManagerDrawComplete());
-        if (hideIme) {
-            return true;
-        }
-
-        final boolean showImeOverKeyguard = imeTarget != null && imeTarget.isVisibleLw()
-                && (imeTarget.canShowWhenLocked() || !canBeHiddenByKeyguardLw(imeTarget));
-
-        // Show IME over the keyguard if the target allows it
-        boolean allowWhenLocked = win.isInputMethodWindow() && showImeOverKeyguard;
-
-        final boolean isKeyguardShowing = mKeyguardDelegate.isShowing();
-
-        if (isKeyguardShowing && isKeyguardOccluded()) {
-            // Show SHOW_WHEN_LOCKED windows if Keyguard is occluded.
-            allowWhenLocked |= win.canShowWhenLocked()
-                    // Show error dialogs over apps that are shown on lockscreen
-                    || (attrs.privateFlags & PRIVATE_FLAG_SYSTEM_ERROR) != 0;
-        }
-
-        return isKeyguardShowing && !allowWhenLocked && win.getDisplayId() == DEFAULT_DISPLAY;
-    }
-
     /** {@inheritDoc} */
     @Override
     public StartingSurface addSplashScreen(IBinder appToken, String packageName, int theme,
@@ -3438,18 +3394,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     @Override
     public void setNavBarVirtualKeyHapticFeedbackEnabledLw(boolean enabled) {
         mNavBarVirtualKeyHapticFeedbackEnabled = enabled;
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void applyKeyguardPolicyLw(WindowState win, WindowState imeTarget) {
-        if (canBeHiddenByKeyguardLw(win)) {
-            if (shouldBeHiddenByKeyguard(win, imeTarget)) {
-                win.hideLw(false /* doAnimation */);
-            } else {
-                win.showLw(false /* doAnimation */);
-            }
-        }
     }
 
     /** {@inheritDoc} */
@@ -5634,15 +5578,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             default:
                 return Integer.toString(behavior);
         }
-    }
-
-    @Override
-    public boolean setAodShowing(boolean aodShowing) {
-        if (mAodShowing != aodShowing) {
-            mAodShowing = aodShowing;
-            return true;
-        }
-        return false;
     }
 
     private class HdmiVideoExtconUEventObserver extends ExtconStateObserver<Boolean> {

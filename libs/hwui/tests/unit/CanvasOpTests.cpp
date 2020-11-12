@@ -196,6 +196,40 @@ TEST(CanvasOp, simpleDrawPaint) {
     EXPECT_EQ(1, canvas.sumTotalDrawCalls());
 }
 
+TEST(CanvasOp, simpleDrawPoint) {
+    CanvasOpBuffer buffer;
+    EXPECT_EQ(buffer.size(), 0);
+    buffer.push(CanvasOp<Op::DrawPoint> {
+        .x = 12,
+        .y = 42,
+        .paint = SkPaint{}
+    });
+
+    CallCountingCanvas canvas;
+    EXPECT_EQ(0, canvas.sumTotalDrawCalls());
+    rasterizeCanvasBuffer(buffer, &canvas);
+    EXPECT_EQ(1, canvas.drawPoints);
+    EXPECT_EQ(1, canvas.sumTotalDrawCalls());
+}
+
+TEST(CanvasOp, simpleDrawLine) {
+    CanvasOpBuffer buffer;
+    EXPECT_EQ(buffer.size(), 0);
+    buffer.push(CanvasOp<Op::DrawLine> {
+        .startX = 16,
+        .startY = 28,
+        .endX = 12,
+        .endY = 30,
+        .paint = SkPaint{}
+    });
+
+    CallCountingCanvas canvas;
+    EXPECT_EQ(0, canvas.sumTotalDrawCalls());
+    rasterizeCanvasBuffer(buffer, &canvas);
+    EXPECT_EQ(1, canvas.drawPoints);
+    EXPECT_EQ(1, canvas.sumTotalDrawCalls());
+}
+
 TEST(CanvasOp, simpleDrawRect) {
     CanvasOpBuffer buffer;
     EXPECT_EQ(buffer.size(), 0);
@@ -208,6 +242,45 @@ TEST(CanvasOp, simpleDrawRect) {
     EXPECT_EQ(0, canvas.sumTotalDrawCalls());
     rasterizeCanvasBuffer(buffer, &canvas);
     EXPECT_EQ(1, canvas.drawRectCount);
+    EXPECT_EQ(1, canvas.sumTotalDrawCalls());
+}
+
+TEST(CanvasOp, simpleDrawRegionRect) {
+    CanvasOpBuffer buffer;
+    EXPECT_EQ(buffer.size(), 0);
+    SkRegion region;
+    region.setRect(SkIRect::MakeWH(12, 50));
+    buffer.push(CanvasOp<Op::DrawRegion> {
+        .paint = SkPaint{},
+        .region = region
+    });
+
+    CallCountingCanvas canvas;
+    EXPECT_EQ(0, canvas.sumTotalDrawCalls());
+    rasterizeCanvasBuffer(buffer, &canvas);
+    // If the region is a rectangle, drawRegion calls into drawRect as a fast path
+    EXPECT_EQ(1, canvas.drawRectCount);
+    EXPECT_EQ(1, canvas.sumTotalDrawCalls());
+}
+
+TEST(CanvasOp, simpleDrawRegionPath) {
+    CanvasOpBuffer buffer;
+    EXPECT_EQ(buffer.size(), 0);
+    SkPath path;
+    path.addCircle(50, 50, 50);
+    SkRegion clip;
+    clip.setRect(SkIRect::MakeWH(100, 100));
+    SkRegion region;
+    region.setPath(path, clip);
+    buffer.push(CanvasOp<Op::DrawRegion> {
+        .paint = SkPaint{},
+        .region = region
+    });
+
+    CallCountingCanvas canvas;
+    EXPECT_EQ(0, canvas.sumTotalDrawCalls());
+    rasterizeCanvasBuffer(buffer, &canvas);
+    EXPECT_EQ(1, canvas.drawRegionCount);
     EXPECT_EQ(1, canvas.sumTotalDrawCalls());
 }
 
@@ -225,6 +298,44 @@ TEST(CanvasOp, simpleDrawRoundRect) {
     EXPECT_EQ(0, canvas.sumTotalDrawCalls());
     rasterizeCanvasBuffer(buffer, &canvas);
     EXPECT_EQ(1, canvas.drawRRectCount);
+    EXPECT_EQ(1, canvas.sumTotalDrawCalls());
+}
+
+TEST(CanvasOp, simpleDrawDoubleRoundRect) {
+    CanvasOpBuffer buffer;
+    EXPECT_EQ(buffer.size(), 0);
+    SkRect outer = SkRect::MakeLTRB(0, 0, 100, 100);
+    SkRect inner = SkRect::MakeLTRB(20, 20, 80, 80);
+
+    const int numPts = 4;
+    SkRRect outerRRect;
+
+    auto outerPts = std::make_unique<SkVector[]>(numPts);
+    outerPts[0].set(32, 16);
+    outerPts[1].set(48, 48);
+    outerPts[2].set(16, 32);
+    outerPts[3].set(20, 20);
+    outerRRect.setRectRadii(outer, outerPts.get());
+    outerRRect.setRect(outer);
+
+    SkRRect innerRRect;
+    auto innerPts = std::make_unique<SkVector[]>(numPts);
+    innerPts[0].set(16, 8);
+    innerPts[1].set(24, 24);
+    innerPts[2].set(8, 16);
+    innerPts[3].set(10, 10);
+    innerRRect.setRectRadii(inner, innerPts.get());
+
+    buffer.push(CanvasOp<Op::DrawDoubleRoundRect> {
+        .outer = outerRRect,
+        .inner = innerRRect,
+        .paint = SkPaint{}
+    });
+
+    CallCountingCanvas canvas;
+    EXPECT_EQ(0, canvas.sumTotalDrawCalls());
+    rasterizeCanvasBuffer(buffer, &canvas);
+    EXPECT_EQ(1, canvas.drawDRRectCount);
     EXPECT_EQ(1, canvas.sumTotalDrawCalls());
 }
 
@@ -275,6 +386,23 @@ TEST(CanvasOp, simpleDrawArc) {
     EXPECT_EQ(0, canvas.sumTotalDrawCalls());
     rasterizeCanvasBuffer(buffer, &canvas);
     EXPECT_EQ(1, canvas.drawArcCount);
+    EXPECT_EQ(1, canvas.sumTotalDrawCalls());
+}
+
+TEST(CanvasOp, simpleDrawPath) {
+    CanvasOpBuffer buffer;
+    EXPECT_EQ(buffer.size(), 0);
+    SkPath path;
+    path.addCircle(50, 50, 30);
+    buffer.push(CanvasOp<Op::DrawPath> {
+        .path = path,
+        .paint = SkPaint{}
+    });
+
+    CallCountingCanvas canvas;
+    EXPECT_EQ(0, canvas.sumTotalDrawCalls());
+    rasterizeCanvasBuffer(buffer, &canvas);
+    EXPECT_EQ(1, canvas.drawPathCount);
     EXPECT_EQ(1, canvas.sumTotalDrawCalls());
 }
 
@@ -329,6 +457,27 @@ TEST(CanvasOp, simpleDrawCircleProperty) {
     EXPECT_EQ(0, canvas.sumTotalDrawCalls());
     rasterizeCanvasBuffer(buffer, &canvas);
     EXPECT_EQ(1, canvas.drawOvalCount);
+    EXPECT_EQ(1, canvas.sumTotalDrawCalls());
+}
+
+TEST(CanvasOp, simpleDrawVertices) {
+    CanvasOpBuffer buffer;
+    EXPECT_EQ(buffer.size(), 0);
+
+    SkPoint pts[3] = {{64, 32}, {0, 224}, {128, 224}};
+    SkColor colors[3] = {SK_ColorRED, SK_ColorBLUE, SK_ColorGREEN};
+    sk_sp<SkVertices> vertices = SkVertices::MakeCopy(SkVertices::kTriangles_VertexMode, 3, pts,
+            nullptr, colors);
+    buffer.push(CanvasOp<Op::DrawVertices> {
+        .vertices = vertices,
+        .mode = SkBlendMode::kSrcOver,
+        .paint = SkPaint{}
+    });
+
+    CallCountingCanvas canvas;
+    EXPECT_EQ(0, canvas.sumTotalDrawCalls());
+    rasterizeCanvasBuffer(buffer, &canvas);
+    EXPECT_EQ(1, canvas.drawVerticesCount);
     EXPECT_EQ(1, canvas.sumTotalDrawCalls());
 }
 

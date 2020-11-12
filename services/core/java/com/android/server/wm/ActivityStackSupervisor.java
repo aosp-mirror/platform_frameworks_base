@@ -2189,7 +2189,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                         .notifyActivityDismissingDockedStack();
                 taskDisplayArea.onSplitScreenModeDismissed(task);
                 taskDisplayArea.mDisplayContent.ensureActivitiesVisible(null, 0, PRESERVE_WINDOWS,
-                        true /* notifyClients */);
+                        true /* notifyClients */, mUserLeaving);
             }
             return;
         }

@@ -19,7 +19,9 @@ package com.android.wm.shell.bubbles;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotSame;
 
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.graphics.Color;
 import android.graphics.PointF;
@@ -36,7 +38,7 @@ import com.android.wm.shell.ShellTestCase;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mockito;
+import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 @SmallTest
@@ -48,10 +50,15 @@ public class BubbleFlyoutViewTest extends ShellTestCase {
     private TextView mSenderName;
     private float[] mDotCenter = new float[2];
     private Bubble.FlyoutMessage mFlyoutMessage;
+    @Mock
+    private BubblePositioner mPositioner;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
+
+        when(mPositioner.getBubbleBitmapSize()).thenReturn(40);
+        when(mPositioner.getBubbleSize()).thenReturn(60);
 
         mFlyoutMessage = new Bubble.FlyoutMessage();
         mFlyoutMessage.senderName = "Josh";
@@ -70,7 +77,8 @@ public class BubbleFlyoutViewTest extends ShellTestCase {
         mFlyout.setupFlyoutStartingAsDot(
                 mFlyoutMessage,
                 new PointF(100, 100), 500, true, Color.WHITE, null, null, mDotCenter,
-                false);
+                false,
+                mPositioner);
         mFlyout.setVisibility(View.VISIBLE);
 
         assertEquals("Hello", mFlyoutText.getText());
@@ -80,10 +88,11 @@ public class BubbleFlyoutViewTest extends ShellTestCase {
 
     @Test
     public void testFlyoutHide_runsCallback() {
-        Runnable after = Mockito.mock(Runnable.class);
+        Runnable after = mock(Runnable.class);
         mFlyout.setupFlyoutStartingAsDot(mFlyoutMessage,
                 new PointF(100, 100), 500, true, Color.WHITE, null, after, mDotCenter,
-                false);
+                false,
+                mPositioner);
         mFlyout.hideFlyout();
 
         verify(after).run();
@@ -93,7 +102,8 @@ public class BubbleFlyoutViewTest extends ShellTestCase {
     public void testSetCollapsePercent() {
         mFlyout.setupFlyoutStartingAsDot(mFlyoutMessage,
                 new PointF(100, 100), 500, true, Color.WHITE, null, null, mDotCenter,
-                false);
+                false,
+                mPositioner);
         mFlyout.setVisibility(View.VISIBLE);
 
         mFlyout.setCollapsePercent(1f);

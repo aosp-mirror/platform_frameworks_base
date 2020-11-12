@@ -2237,6 +2237,8 @@ public interface WindowManager extends ViewManager {
                 PRIVATE_FLAG_BEHAVIOR_CONTROLLED,
                 PRIVATE_FLAG_FIT_INSETS_CONTROLLED,
                 PRIVATE_FLAG_TRUSTED_OVERLAY,
+                PRIVATE_FLAG_INSET_PARENT_FRAME_BY_IME,
+                PRIVATE_FLAG_INTERCEPT_GLOBAL_DRAG_AND_DROP,
         })
         public @interface PrivateFlags {}
 
@@ -2346,6 +2348,10 @@ public interface WindowManager extends ViewManager {
                         mask = PRIVATE_FLAG_TRUSTED_OVERLAY,
                         equals = PRIVATE_FLAG_TRUSTED_OVERLAY,
                         name = "TRUSTED_OVERLAY"),
+                @ViewDebug.FlagToString(
+                        mask = PRIVATE_FLAG_INSET_PARENT_FRAME_BY_IME,
+                        equals = PRIVATE_FLAG_INSET_PARENT_FRAME_BY_IME,
+                        name = "INSET_PARENT_FRAME_BY_IME"),
                 @ViewDebug.FlagToString(
                         mask = PRIVATE_FLAG_INTERCEPT_GLOBAL_DRAG_AND_DROP,
                         equals = PRIVATE_FLAG_INTERCEPT_GLOBAL_DRAG_AND_DROP,

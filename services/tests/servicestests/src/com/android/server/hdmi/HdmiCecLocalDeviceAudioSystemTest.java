@@ -96,6 +96,9 @@ public class HdmiCecLocalDeviceAudioSystemTest {
         mMyLooper = mTestLooper.getLooper();
         PowerManager powerManager = new PowerManager(context, mIPowerManagerMock,
                 mIThermalServiceMock, new Handler(mMyLooper));
+
+        HdmiCecConfig hdmiCecConfig = new FakeHdmiCecConfig(context);
+
         mHdmiControlService =
             new HdmiControlService(InstrumentationRegistry.getTargetContext()) {
                 @Override
@@ -183,6 +186,11 @@ public class HdmiCecLocalDeviceAudioSystemTest {
                 @Override
                 PowerManager getPowerManager() {
                     return powerManager;
+                }
+
+                @Override
+                HdmiCecConfig getHdmiCecConfig() {
+                    return hdmiCecConfig;
                 }
             };
 

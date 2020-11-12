@@ -61,6 +61,7 @@ import com.android.internal.util.FrameworkStatsLog;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -367,6 +368,28 @@ public class Tuner implements AutoCloseable  {
             infos[i] = tunerFrontendInfo;
         }
         mTunerResourceManager.setFrontendInfoList(infos);
+    }
+
+    /**
+     * Get frontend info list from native and build them into a {@link FrontendInfo} list. Any
+     * {@code null} FrontendInfo element would be removed.
+     */
+    private FrontendInfo[] getFrontendInfoListInternal() {
+        List<Integer> ids = getFrontendIds();
+        if (ids == null) {
+            return null;
+        }
+        FrontendInfo[] infos = new FrontendInfo[ids.size()];
+        for (int i = 0; i < ids.size(); i++) {
+            int id = ids.get(i);
+            FrontendInfo frontendInfo = getFrontendInfoById(id);
+            if (frontendInfo == null) {
+                Log.e(TAG, "Failed to get a FrontendInfo on frontend id:" + id + "!");
+                continue;
+            }
+            infos[i] = frontendInfo;
+        }
+        return Arrays.stream(infos).filter(Objects::nonNull).toArray(FrontendInfo[]::new);
     }
 
     /** @hide */
@@ -932,7 +955,7 @@ public class Tuner implements AutoCloseable  {
     }
 
     /**
-     * Gets the frontend information.
+     * Gets the initialized frontend information.
      *
      * @return The frontend information. {@code null} if the operation failed.
      */
@@ -948,6 +971,16 @@ public class Tuner implements AutoCloseable  {
             mFrontendInfo = getFrontendInfoById(mFrontend.mId);
         }
         return mFrontendInfo;
+    }
+
+    /**
+     * Get a list all the existed frontend information.
+     *
+     * @return The list of all the frontend information. {@code null} if the operation failed.
+     */
+    @Nullable
+    public List<FrontendInfo> getFrontendInfoList() {
+        return Arrays.asList(getFrontendInfoListInternal());
     }
 
     /** @hide */

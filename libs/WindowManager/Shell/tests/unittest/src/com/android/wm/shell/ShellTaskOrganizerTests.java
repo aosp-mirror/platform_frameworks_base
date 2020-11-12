@@ -36,6 +36,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 import android.app.ActivityManager.RunningTaskInfo;
+import android.content.Context;
 import android.content.pm.ParceledListSlice;
 import android.graphics.Rect;
 import android.os.Binder;
@@ -71,6 +72,8 @@ public class ShellTaskOrganizerTests {
 
     @Mock
     private ITaskOrganizerController mTaskOrganizerController;
+    @Mock
+    private Context mContext;
 
     ShellTaskOrganizer mOrganizer;
     private final SyncTransactionQueue mSyncTransactionQueue = mock(SyncTransactionQueue.class);
@@ -106,7 +109,7 @@ public class ShellTaskOrganizerTests {
                     .when(mTaskOrganizerController).registerTaskOrganizer(any());
         } catch (RemoteException e) {}
         mOrganizer = spy(new ShellTaskOrganizer(mTaskOrganizerController, mSyncTransactionQueue,
-                mTransactionPool, mTestExecutor, mTestExecutor));
+                mTransactionPool, mTestExecutor, mTestExecutor, mContext));
     }
 
     @Test

@@ -22,6 +22,8 @@ import static android.os.PowerManager.LOCATION_MODE_GPS_DISABLED_WHEN_SCREEN_OFF
 import static android.os.PowerManager.LOCATION_MODE_NO_CHANGE;
 import static android.os.PowerManager.LOCATION_MODE_THROTTLE_REQUESTS_WHEN_SCREEN_OFF;
 
+import static com.android.server.location.LocationManagerService.D;
+
 import android.annotation.Nullable;
 import android.location.LocationRequest;
 import android.location.util.identity.CallerIdentity;
@@ -29,14 +31,13 @@ import android.os.Build;
 import android.os.PowerManager.LocationPowerSaveMode;
 
 import com.android.internal.location.ProviderRequest;
-import com.android.server.location.LocationManagerService;
 import com.android.server.utils.eventlog.LocalEventLog;
 
 /** In memory event log for location events. */
 public class LocationEventLog extends LocalEventLog {
 
     private static int getLogSize() {
-        if (Build.IS_DEBUGGABLE || LocationManagerService.D) {
+        if (Build.IS_DEBUGGABLE || D) {
             return 500;
         } else {
             return 200;
@@ -91,13 +92,17 @@ public class LocationEventLog extends LocalEventLog {
 
     /** Logs a new incoming location for a location provider. */
     public synchronized void logProviderReceivedLocations(String provider, int numLocations) {
-        addLogEvent(EVENT_PROVIDER_RECEIVE_LOCATION, provider, numLocations);
+        if (Build.IS_DEBUGGABLE || D) {
+            addLogEvent(EVENT_PROVIDER_RECEIVE_LOCATION, provider, numLocations);
+        }
     }
 
     /** Logs a location deliver for a client of a location provider. */
     public synchronized void logProviderDeliveredLocations(String provider, int numLocations,
             CallerIdentity identity) {
-        addLogEvent(EVENT_PROVIDER_DELIVER_LOCATION, provider, numLocations, identity);
+        if (Build.IS_DEBUGGABLE || D) {
+            addLogEvent(EVENT_PROVIDER_DELIVER_LOCATION, provider, numLocations, identity);
+        }
     }
 
     /** Logs that the location power save mode has changed. */

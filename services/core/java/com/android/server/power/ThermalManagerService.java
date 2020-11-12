@@ -514,6 +514,9 @@ public class ThermalManagerService extends SystemService {
                         pw.println("Current cooling devices from HAL:");
                         dumpItemsLocked(pw, "\t",
                                 mHalWrapper.getCurrentCoolingDevices(false, 0));
+                        pw.println("Temperature static thresholds from HAL:");
+                        dumpItemsLocked(pw, "\t",
+                                mHalWrapper.getTemperatureThresholds(false, 0));
                     }
                 }
             } finally {

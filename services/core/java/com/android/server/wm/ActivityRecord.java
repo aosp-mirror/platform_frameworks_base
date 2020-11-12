@@ -651,8 +651,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     // Information about an application starting window if displayed.
     // Note: these are de-referenced before the starting window animates away.
     StartingData mStartingData;
-    WindowState startingWindow;
-    WindowManagerPolicy.StartingSurface startingSurface;
+    WindowState mStartingWindow;
+    WindowManagerPolicy.StartingSurface mStartingSurface;
     boolean startingDisplayed;
     boolean startingMoved;
 
@@ -950,10 +950,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             pw.print(" firstWindowDrawn="); pw.print(firstWindowDrawn);
             pw.print(" mIsExiting="); pw.println(mIsExiting);
         }
-        if (startingWindow != null || startingSurface != null
+        if (mStartingWindow != null || mStartingSurface != null
                 || startingDisplayed || startingMoved || mVisibleSetFromTransferredStartingWindow) {
-            pw.print(prefix); pw.print("startingWindow="); pw.print(startingWindow);
-            pw.print(" startingSurface="); pw.print(startingSurface);
+            pw.print(prefix); pw.print("startingWindow="); pw.print(mStartingWindow);
+            pw.print(" startingSurface="); pw.print(mStartingSurface);
             pw.print(" startingDisplayed="); pw.print(startingDisplayed);
             pw.print(" startingMoved="); pw.print(startingMoved);
             pw.println(" mVisibleSetFromTransferredStartingWindow="
@@ -1896,16 +1896,16 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                         ProtoLog.v(WM_DEBUG_STARTING_WINDOW, "Aborted starting %s: startingData=%s",
                                 ActivityRecord.this, mStartingData);
 
-                        startingWindow = null;
+                        mStartingWindow = null;
                         mStartingData = null;
                         abort = true;
                     } else {
-                        startingSurface = surface;
+                        mStartingSurface = surface;
                     }
                     if (!abort) {
                         ProtoLog.v(WM_DEBUG_STARTING_WINDOW,
                                 "Added starting %s: startingWindow=%s startingView=%s",
-                                ActivityRecord.this, startingWindow, startingSurface);
+                                ActivityRecord.this, mStartingWindow, mStartingSurface);
                     }
                 }
                 if (abort) {
@@ -1957,7 +1957,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     void removeStartingWindow() {
-        if (startingWindow == null) {
+        if (mStartingWindow == null) {
             if (mStartingData != null) {
                 // Starting window has not been added yet, but it is scheduled to be added.
                 // Go ahead and cancel the request.
@@ -1969,10 +1969,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         final WindowManagerPolicy.StartingSurface surface;
         if (mStartingData != null) {
-            surface = startingSurface;
+            surface = mStartingSurface;
             mStartingData = null;
-            startingSurface = null;
-            startingWindow = null;
+            mStartingSurface = null;
+            mStartingWindow = null;
             startingDisplayed = false;
             if (surface == null) {
                 ProtoLog.v(WM_DEBUG_STARTING_WINDOW, "startingWindow was set but "
@@ -1988,7 +1988,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
 
         ProtoLog.v(WM_DEBUG_STARTING_WINDOW, "Schedule remove starting %s startingWindow=%s"
-                + " startingView=%s Callers=%s", this, startingWindow, startingSurface,
+                + " startingView=%s Callers=%s", this, mStartingWindow, mStartingSurface,
                 Debug.getCallers(5));
 
 
@@ -2738,7 +2738,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
             if (ensureVisibility) {
                 mDisplayContent.ensureActivitiesVisible(null /* starting */, 0 /* configChanges */,
-                        false /* preserveWindows */, true /* notifyClients */);
+                        false /* preserveWindows */, true /* notifyClients */,
+                        mStackSupervisor.mUserLeaving);
             }
         }
 
@@ -3443,8 +3444,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return false;
         }
 
-        final WindowState tStartingWindow = fromActivity.startingWindow;
-        if (tStartingWindow != null && fromActivity.startingSurface != null) {
+        final WindowState tStartingWindow = fromActivity.mStartingWindow;
+        if (tStartingWindow != null && fromActivity.mStartingSurface != null) {
             // In this case, the starting icon has already been displayed, so start
             // letting windows get shown immediately without any more transitions.
             getDisplayContent().mSkipAppTransitionAnimation = true;
@@ -3463,14 +3464,14 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
                 // Transfer the starting window over to the new token.
                 mStartingData = fromActivity.mStartingData;
-                startingSurface = fromActivity.startingSurface;
+                mStartingSurface = fromActivity.mStartingSurface;
                 startingDisplayed = fromActivity.startingDisplayed;
                 fromActivity.startingDisplayed = false;
-                startingWindow = tStartingWindow;
+                mStartingWindow = tStartingWindow;
                 reportedVisible = fromActivity.reportedVisible;
                 fromActivity.mStartingData = null;
-                fromActivity.startingSurface = null;
-                fromActivity.startingWindow = null;
+                fromActivity.mStartingSurface = null;
+                fromActivity.mStartingWindow = null;
                 fromActivity.startingMoved = true;
                 tStartingWindow.mToken = this;
                 tStartingWindow.mActivityRecord = this;
@@ -4320,9 +4321,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         } else {
             // If we are being set visible, and the starting window is not yet displayed,
             // then make sure it doesn't get displayed.
-            if (startingWindow != null && !startingWindow.isDrawn()) {
-                startingWindow.clearPolicyVisibilityFlag(LEGACY_POLICY_VISIBILITY);
-                startingWindow.mLegacyPolicyVisibilityAfterAnim = false;
+            if (mStartingWindow != null && !mStartingWindow.isDrawn()) {
+                mStartingWindow.clearPolicyVisibilityFlag(LEGACY_POLICY_VISIBILITY);
+                mStartingWindow.mLegacyPolicyVisibilityAfterAnim = false;
             }
             // We are becoming visible, so better freeze the screen with the windows that are
             // getting visible so we also wait for them.
@@ -4752,7 +4753,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         handleAlreadyVisible();
     }
 
-    void makeInvisible() {
+    void makeInvisible(boolean userLeaving) {
         if (!mVisibleRequested) {
             if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY, "Already invisible: " + this);
             return;
@@ -4793,9 +4794,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                     // If the app is capable of entering PIP, we should try pausing it now
                     // so it can PIP correctly.
                     if (deferHidingClient) {
-                        getRootTask().startPausingLocked(
-                                mStackSupervisor.mUserLeaving /* userLeaving */,
-                                false /* uiSleeping */, null /* resuming */, "makeInvisible");
+                        getRootTask().startPausingLocked(userLeaving, false /* uiSleeping */,
+                                null /* resuming */, "makeInvisible");
                         break;
                     }
                 case INITIALIZING:
@@ -5395,7 +5395,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // We now have a good window to show, remove dead placeholders
         removeDeadWindows();
 
-        if (startingWindow != null) {
+        if (mStartingWindow != null) {
             ProtoLog.v(WM_DEBUG_STARTING_WINDOW, "Finish starting %s"
                     + ": first real window is shown, no animation", win.mToken);
             // If this initial window is animating, stop it -- we will do an animation to reveal
@@ -5570,7 +5570,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     boolean updateDrawnWindowStates(WindowState w) {
         w.setDrawnStateEvaluated(true /*evaluated*/);
 
-        if (DEBUG_STARTING_WINDOW_VERBOSE && w == startingWindow) {
+        if (DEBUG_STARTING_WINDOW_VERBOSE && w == mStartingWindow) {
             Slog.d(TAG, "updateWindows: starting " + w + " isOnScreen=" + w.isOnScreen()
                     + " allDrawn=" + allDrawn + " freezingScreen=" + mFreezingScreen);
         }
@@ -5607,7 +5607,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 }
             }
 
-            if (w != startingWindow) {
+            if (w != mStartingWindow) {
                 if (w.isInteresting()) {
                     // Add non-main window as interesting since the main app has already been added
                     if (findMainWindow(false /* includeStartingApp */) != w) {
@@ -5847,7 +5847,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     void postWindowRemoveStartingWindowCleanup(WindowState win) {
         // TODO: Something smells about the code below...Is there a better way?
-        if (startingWindow == win) {
+        if (mStartingWindow == win) {
             ProtoLog.v(WM_DEBUG_STARTING_WINDOW, "Notify removed startingWindow %s", win);
             removeStartingWindow();
         } else if (mChildren.size() == 0) {
@@ -5861,7 +5861,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 // window in the token.
                 setVisible(false);
             }
-        } else if (mChildren.size() == 1 && startingSurface != null && !isRelaunching()) {
+        } else if (mChildren.size() == 1 && mStartingSurface != null && !isRelaunching()) {
             // If this is the last window except for a starting transition window,
             // we need to get rid of the starting transition.
             ProtoLog.v(WM_DEBUG_STARTING_WINDOW, "Last window, removing starting window %s", win);
@@ -7693,8 +7693,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         proto.write(NUM_DRAWN_WINDOWS, mNumDrawnWindows);
         proto.write(ALL_DRAWN, allDrawn);
         proto.write(LAST_ALL_DRAWN, mLastAllDrawn);
-        if (startingWindow != null) {
-            startingWindow.writeIdentifierToProto(proto, STARTING_WINDOW);
+        if (mStartingWindow != null) {
+            mStartingWindow.writeIdentifierToProto(proto, STARTING_WINDOW);
         }
         proto.write(STARTING_DISPLAYED, startingDisplayed);
         proto.write(STARTING_MOVED, startingMoved);

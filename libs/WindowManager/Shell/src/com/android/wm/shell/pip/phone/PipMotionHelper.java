@@ -368,12 +368,11 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
     }
 
     /**
-     * Stash PiP to the closest edge.
+     * Stash PiP to the closest edge. We set velocityY to 0 to limit pure horizontal motion.
      */
-    void stashToEdge(
-            float velocityX, float velocityY, @Nullable Runnable postBoundsUpdateCallback) {
+    void stashToEdge(float velocityX, @Nullable Runnable postBoundsUpdateCallback) {
         mPipBoundsState.setStashed(velocityX < 0 ? STASH_TYPE_LEFT : STASH_TYPE_RIGHT);
-        movetoTarget(velocityX, velocityY, postBoundsUpdateCallback, true /* isStash */);
+        movetoTarget(velocityX, 0 /* velocityY */, postBoundsUpdateCallback, true /* isStash */);
     }
 
     private void movetoTarget(

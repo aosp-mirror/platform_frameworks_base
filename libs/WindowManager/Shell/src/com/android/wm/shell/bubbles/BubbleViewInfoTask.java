@@ -134,6 +134,7 @@ public class BubbleViewInfoTask extends AsyncTask<Void, Void, BubbleViewInfoTask
                 LayoutInflater inflater = LayoutInflater.from(c);
                 info.imageView = (BadgedImageView) inflater.inflate(
                         R.layout.bubble_view, stackView, false /* attachToRoot */);
+                info.imageView.initialize(controller.getPositioner());
 
                 info.expandedView = (BubbleExpandedView) inflater.inflate(
                         R.layout.bubble_expanded_view, stackView, false /* attachToRoot */);

@@ -639,7 +639,9 @@ public class BubbleExpandedView extends LinearLayout {
     }
 
     /**
-     * Cleans up anything related to the task and TaskView.
+     * Cleans up anything related to the task and TaskView. If this view should be reused after this
+     * method is called, then {@link #initialize(BubbleController, BubbleStackView)} must be invoked
+     * first.
      */
     public void cleanUpExpandedState() {
         if (DEBUG_BUBBLE_EXPANDED_VIEW) {

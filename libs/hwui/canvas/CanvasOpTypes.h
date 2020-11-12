@@ -37,13 +37,19 @@ enum class CanvasOpType : int8_t {
     // Drawing ops
     DrawColor,
     DrawRect,
+    DrawRegion,
     DrawRoundRect,
     DrawRoundRectProperty,
+    DrawDoubleRoundRect,
     DrawCircleProperty,
     DrawCircle,
     DrawOval,
     DrawArc,
     DrawPaint,
+    DrawPoint,
+    DrawPath,
+    DrawLine,
+    DrawVertices,
 
 
     // TODO: Rest

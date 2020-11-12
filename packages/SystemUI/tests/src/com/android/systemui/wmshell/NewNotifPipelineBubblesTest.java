@@ -42,9 +42,6 @@ import android.app.INotificationManager;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.pm.LauncherApps;
-import android.content.res.Configuration;
-import android.graphics.Insets;
-import android.graphics.Rect;
 import android.hardware.display.AmbientDisplayConfiguration;
 import android.os.Handler;
 import android.os.PowerManager;
@@ -92,7 +89,7 @@ import com.android.wm.shell.bubbles.BubbleData;
 import com.android.wm.shell.bubbles.BubbleDataRepository;
 import com.android.wm.shell.bubbles.BubbleEntry;
 import com.android.wm.shell.bubbles.BubbleLogger;
-import com.android.wm.shell.bubbles.BubblePositioner;
+import com.android.wm.shell.bubbles.BubbleOverflow;
 import com.android.wm.shell.bubbles.BubbleStackView;
 import com.android.wm.shell.bubbles.Bubbles;
 import com.android.wm.shell.common.FloatingContentCoordinator;
@@ -188,8 +185,8 @@ public class NewNotifPipelineBubblesTest extends SysuiTestCase {
     private WindowManagerShellWrapper mWindowManagerShellWrapper;
     @Mock
     private BubbleLogger mBubbleLogger;
-    @Mock
-    private BubblePositioner mPositioner;
+
+    private TestableBubblePositioner mPositioner;
 
     private BubbleData mBubbleData;
 
@@ -224,12 +221,8 @@ public class NewNotifPipelineBubblesTest extends SysuiTestCase {
         mZenModeConfig.suppressedVisualEffects = 0;
         when(mZenModeController.getConfig()).thenReturn(mZenModeConfig);
 
-        mBubbleData = new BubbleData(mContext, mBubbleLogger);
-
-        Rect availableRect = new Rect(0, 0, 1000, 5000);
-        when(mPositioner.getAvailableRect()).thenReturn(availableRect);
-        when(mPositioner.getOrientation()).thenReturn(Configuration.ORIENTATION_PORTRAIT);
-        when(mPositioner.getInsets()).thenReturn(Insets.of(0, 0, 0, 0));
+        mPositioner = new TestableBubblePositioner(mContext, mWindowManager);
+        mBubbleData = new BubbleData(mContext, mBubbleLogger, mPositioner);
 
         TestableNotificationInterruptStateProviderImpl interruptionStateProvider =
                 new TestableNotificationInterruptStateProviderImpl(mContext.getContentResolver(),
@@ -516,7 +509,7 @@ public class NewNotifPipelineBubblesTest extends SysuiTestCase {
     }
 
     @Test
-    public void testRemoveLastExpandedCollapses() {
+    public void testRemoveLastExpanded_selectsOverflow() {
         // Mark it as a bubble and add it explicitly
         mEntryListener.onEntryAdded(mRow.getEntry());
         mEntryListener.onEntryAdded(mRow2.getEntry());
@@ -554,10 +547,38 @@ public class NewNotifPipelineBubblesTest extends SysuiTestCase {
                         stackView.getExpandedBubble().getKey()).getKey(),
                 Bubbles.DISMISS_USER_GESTURE);
 
-        // Make sure state changes and collapse happens
+        // Overflow should be selected
+        assertEquals(mBubbleData.getSelectedBubble().getKey(), BubbleOverflow.KEY);
+        verify(mBubbleExpandListener).onBubbleExpandChanged(true, BubbleOverflow.KEY);
+        assertTrue(mBubbleController.hasBubbles());
+    }
+
+    @Test
+    public void testRemoveLastExpandedEmptyOverflow_collapses() {
+        // Mark it as a bubble and add it explicitly
+        mEntryListener.onEntryAdded(mRow.getEntry());
+        mBubbleController.updateBubble(mBubbleEntry);
+
+        // Expand
+        BubbleStackView stackView = mBubbleController.getStackView();
+        mBubbleData.setExpanded(true);
+
+        assertTrue(mBubbleController.isStackExpanded());
+        verify(mBubbleExpandListener).onBubbleExpandChanged(true, mRow.getEntry().getKey());
+
+        // Block the bubble so it won't be in the overflow
+        mBubbleController.removeBubble(
+                mBubbleData.getBubbleInStackWithKey(
+                        stackView.getExpandedBubble().getKey()).getKey(),
+                Bubbles.DISMISS_BLOCKED);
+
+        verify(mBubbleExpandListener).onBubbleExpandChanged(false, mRow.getEntry().getKey());
+
+        // We should be collapsed
         verify(mBubbleExpandListener).onBubbleExpandChanged(false, mRow.getEntry().getKey());
         assertFalse(mBubbleController.hasBubbles());
     }
+
 
     @Test
     public void testAutoExpand_fails_noFlag() {

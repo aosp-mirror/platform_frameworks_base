@@ -19,6 +19,8 @@
 #include <SkAndroidFrameworkUtils.h>
 #include <SkCanvas.h>
 #include <SkPath.h>
+#include <SkRegion.h>
+#include <SkVertices.h>
 #include <log/log.h>
 #include "CanvasProperty.h"
 
@@ -150,10 +152,27 @@ struct CanvasOp<CanvasOpType::DrawPaint> {
 };
 
 template <>
+struct CanvasOp<CanvasOpType::DrawPoint> {
+    float x;
+    float y;
+    SkPaint paint;
+    void draw(SkCanvas* canvas) const { canvas->drawPoint(x, y, paint); }
+    ASSERT_DRAWABLE()
+};
+
+template <>
 struct CanvasOp<CanvasOpType::DrawRect> {
     SkRect rect;
     SkPaint paint;
     void draw(SkCanvas* canvas) const { canvas->drawRect(rect, paint); }
+    ASSERT_DRAWABLE()
+};
+
+template <>
+struct CanvasOp<CanvasOpType::DrawRegion> {
+    SkRegion region;
+    SkPaint paint;
+    void draw(SkCanvas* canvas) const { canvas->drawRegion(region, paint); }
     ASSERT_DRAWABLE()
 };
 
@@ -165,6 +184,17 @@ struct CanvasOp<CanvasOpType::DrawRoundRect> {
     SkPaint paint;
     void draw(SkCanvas* canvas) const {
         canvas->drawRoundRect(rect, rx, ry, paint);
+    }
+    ASSERT_DRAWABLE()
+};
+
+template<>
+struct CanvasOp<CanvasOpType::DrawDoubleRoundRect> {
+    SkRRect outer;
+    SkRRect inner;
+    SkPaint paint;
+    void draw(SkCanvas* canvas) const {
+        canvas->drawDRRect(outer, inner, paint);
     }
     ASSERT_DRAWABLE()
 };
@@ -201,6 +231,40 @@ struct CanvasOp<CanvasOpType::DrawArc> {
 
     void draw(SkCanvas* canvas) const {
         canvas->drawArc(oval, startAngle, sweepAngle, useCenter, paint);
+    }
+    ASSERT_DRAWABLE()
+};
+
+template<>
+struct CanvasOp<CanvasOpType::DrawPath> {
+    SkPath path;
+    SkPaint paint;
+
+    void draw(SkCanvas* canvas) const { canvas->drawPath(path, paint); }
+    ASSERT_DRAWABLE()
+};
+
+template<>
+struct CanvasOp<CanvasOpType::DrawLine> {
+    float startX;
+    float startY;
+    float endX;
+    float endY;
+    SkPaint paint;
+
+    void draw(SkCanvas* canvas) const {
+        canvas->drawLine(startX, startY, endX, endY, paint);
+    }
+    ASSERT_DRAWABLE()
+};
+
+template<>
+struct CanvasOp<CanvasOpType::DrawVertices> {
+    sk_sp<SkVertices> vertices;
+    SkBlendMode mode;
+    SkPaint paint;
+    void draw(SkCanvas* canvas) const {
+        canvas->drawVertices(vertices, mode, paint);
     }
     ASSERT_DRAWABLE()
 };

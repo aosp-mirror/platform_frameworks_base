@@ -171,9 +171,9 @@ public abstract class WMShellBaseModule {
     @WMSingleton
     @Provides
     static ShellTaskOrganizer provideShellTaskOrganizer(SyncTransactionQueue syncQueue,
-            ShellExecutor mainExecutor, TransactionPool transactionPool) {
+            ShellExecutor mainExecutor, TransactionPool transactionPool, Context context) {
         return new ShellTaskOrganizer(syncQueue, transactionPool,
-                mainExecutor, AnimationThread.instance().getExecutor());
+                mainExecutor, AnimationThread.instance().getExecutor(), context);
     }
 
     @WMSingleton
