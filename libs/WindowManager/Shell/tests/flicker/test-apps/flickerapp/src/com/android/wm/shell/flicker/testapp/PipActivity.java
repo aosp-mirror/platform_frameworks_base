@@ -17,7 +17,8 @@
 package com.android.wm.shell.flicker.testapp;
 
 import static android.media.MediaMetadata.METADATA_KEY_TITLE;
-import static android.media.session.PlaybackState.ACTION_PLAY_PAUSE;
+import static android.media.session.PlaybackState.ACTION_PAUSE;
+import static android.media.session.PlaybackState.ACTION_PLAY;
 import static android.media.session.PlaybackState.ACTION_STOP;
 import static android.media.session.PlaybackState.STATE_PAUSED;
 import static android.media.session.PlaybackState.STATE_PLAYING;
@@ -48,7 +49,7 @@ public class PipActivity extends Activity {
 
     private MediaSession mMediaSession;
     private final PlaybackState.Builder mPlaybackStateBuilder = new PlaybackState.Builder()
-            .setActions(ACTION_PLAY_PAUSE | ACTION_STOP)
+            .setActions(ACTION_PLAY | ACTION_PAUSE | ACTION_STOP)
             .setState(STATE_STOPPED, 0, 1f);
     private PlaybackState mPlaybackState = mPlaybackStateBuilder.build();
     private final MediaMetadata.Builder mMediaMetadataBuilder = new MediaMetadata.Builder();

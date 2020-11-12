@@ -16,9 +16,10 @@
 
 package com.android.wm.shell.flicker.pip.tv
 
-import android.os.SystemClock
 import androidx.test.filters.RequiresDevice
-import org.junit.Assert.assertNotNull
+import androidx.test.uiautomator.UiObject2
+import com.android.wm.shell.flicker.SYSTEM_UI_PACKAGE_NAME
+import com.android.wm.shell.flicker.wait
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -34,21 +35,27 @@ import org.junit.runners.Parameterized
 class TvPipMenuTests(rotationName: String, rotation: Int)
     : TvPipTestBase(rotationName, rotation) {
 
+    private val systemUiResources =
+            packageManager.getResourcesForApplication(SYSTEM_UI_PACKAGE_NAME)
+    private val playButtonDescription = systemUiResources.run {
+        getString(getIdentifier("pip_play", "string", SYSTEM_UI_PACKAGE_NAME))
+    }
+    private val pauseButtonDescription = systemUiResources.run {
+        getString(getIdentifier("pip_pause", "string", SYSTEM_UI_PACKAGE_NAME))
+    }
+
     @Before
     override fun setUp() {
         super.setUp()
         // Launch the app and go to PiP
         testApp.launchViaIntent()
-        testApp.clickEnterPipButton()
     }
 
     @Test
     fun pipMenu_open() {
-        // Pressing the Window key should bring up Pip menu
-        uiDevice.pressWindowKey()
-        val pipMenu = uiDevice.waitForTvPipMenu()
-                ?: fail("Pip notification should have been dismissed")
+        val pipMenu = enterPip_openMenu_assertShown()
 
+        // Make sure it's fullscreen
         assertTrue("Pip menu should be shown fullscreen", pipMenu.isFullscreen(uiDevice))
 
         testApp.closePipWindow()
@@ -56,22 +63,29 @@ class TvPipMenuTests(rotationName: String, rotation: Int)
 
     @Test
     fun pipMenu_backButton() {
-        // Pressing the Window key should bring up Pip menu
-        uiDevice.pressWindowKey()
-        assertNotNull("Pip notification should have been dismissed", uiDevice.waitForTvPipMenu())
+        enterPip_openMenu_assertShown()
 
         // Pressing the Back key should close the Pip menu
         uiDevice.pressBack()
-        assertTrue("Pip notification should have closed", uiDevice.waitForTvPipMenuToClose())
+        assertTrue("Pip menu should have closed", uiDevice.waitForTvPipMenuToClose())
+
+        testApp.closePipWindow()
+    }
+
+    @Test
+    fun pipMenu_homeButton() {
+        enterPip_openMenu_assertShown()
+
+        // Pressing the Home key should close the Pip menu
+        uiDevice.pressHome()
+        assertTrue("Pip menu should have closed", uiDevice.waitForTvPipMenuToClose())
 
         testApp.closePipWindow()
     }
 
     @Test
     fun pipMenu_closeButton() {
-        // Pressing the Window key should bring up Pip menu
-        uiDevice.pressWindowKey()
-        assertNotNull("Pip notification should have been dismissed", uiDevice.waitForTvPipMenu())
+        enterPip_openMenu_assertShown()
 
         // PiP menu should contain the Close button
         val closeButton = uiDevice.findTvPipMenuCloseButton()
@@ -84,24 +98,51 @@ class TvPipMenuTests(rotationName: String, rotation: Int)
 
     @Test
     fun pipMenu_fullscreenButton() {
-        // Pressing the Window key should bring up Pip menu
-        uiDevice.pressWindowKey()
-        assertNotNull("Pip notification should have been dismissed", uiDevice.waitForTvPipMenu())
+        enterPip_openMenu_assertShown()
 
         // PiP menu should contain the Fullscreen button
         val fullscreenButton = uiDevice.findTvPipMenuFullscreenButton()
                 ?: fail("\"Full screen\" button should be shown in Pip menu")
 
         // Clicking on the fullscreen button should return app to the fullscreen mode.
-        // Click, wait for 3 seconds, check the app is fullscreen
+        // Click, wait for the app to go fullscreen
         fullscreenButton.click()
-        SystemClock.sleep(3_000L)
         assertTrue("\"Full screen\" button should open the app fullscreen",
-                testApp.ui?.isFullscreen(uiDevice) ?: false)
+                wait { testApp.ui?.isFullscreen(uiDevice) ?: false })
 
         // Close the app
         uiDevice.pressBack()
         testApp.waitUntilClosed()
+    }
+
+    @Test
+    fun pipMenu_mediaPlayPauseButtons() {
+        // Start media session before entering PiP
+        testApp.clickStartMediaSessionButton()
+
+        enterPip_openMenu_assertShown()
+
+        // PiP menu should contain the Pause button
+        val pauseButton = uiDevice.findTvPipMenuElementWithDescription(pauseButtonDescription)
+                ?: fail("\"Pause\" button should be shown in Pip menu if there is an active " +
+                        "playing media session.")
+
+        // When we pause media, the button should change from Pause to Play
+        pauseButton.click()
+
+        // PiP menu should contain the Play button now
+        uiDevice.waitForTvPipMenuElementWithDescription(playButtonDescription)
+                ?: fail("\"Play\" button should be shown in Pip menu if there is an active " +
+                        "paused media session.")
+
+        testApp.closePipWindow()
+    }
+
+    private fun enterPip_openMenu_assertShown(): UiObject2 {
+        testApp.clickEnterPipButton()
+        // Pressing the Window key should bring up Pip menu
+        uiDevice.pressWindowKey()
+        return uiDevice.waitForTvPipMenu() ?: fail("Pip menu should have been shown")
     }
 
     companion object {
