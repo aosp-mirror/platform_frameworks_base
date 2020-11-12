@@ -18,6 +18,8 @@ package android.security.keystore;
 
 import libcore.util.EmptyArray;
 
+import java.util.function.Consumer;
+
 /**
  * @hide
  */
@@ -105,6 +107,18 @@ public abstract class ArrayUtils {
             System.arraycopy(arr1, 0, result, 0, arr1.length);
             System.arraycopy(arr2, 0, result, arr1.length, arr2.length);
             return result;
+        }
+    }
+
+    /**
+     * Runs {@code consumer.accept()} for each element of {@code array}.
+     * @param array
+     * @param consumer
+     * @hide
+     */
+    public static void forEach(int[] array, Consumer<Integer> consumer) {
+        for (int i : array) {
+            consumer.accept(i);
         }
     }
 }
