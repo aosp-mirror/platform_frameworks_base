@@ -22,6 +22,7 @@ import android.os.SystemClock;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executor;
 
 public class UwbTestUtils {
     private UwbTestUtils() {}
@@ -95,5 +96,14 @@ public class UwbTestUtils {
             addressBytes[i] = (byte) getDoubleInRange(1, 255);
         }
         return UwbAddress.fromBytes(addressBytes);
+    }
+
+    public static Executor getExecutor() {
+        return new Executor() {
+            @Override
+            public void execute(Runnable command) {
+                command.run();
+            }
+        };
     }
 }
