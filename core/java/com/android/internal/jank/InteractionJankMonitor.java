@@ -426,7 +426,7 @@ public class InteractionJankMonitor {
         }
 
         public String getName() {
-            return "Cuj<" + getCuj() + ">";
+            return "Cuj<" + getNameOfCuj(mCujType) + ">";
         }
     }
 }
