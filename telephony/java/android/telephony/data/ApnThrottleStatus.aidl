@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The Android Open Source Project
+ * Copyright 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,17 +14,7 @@
  * limitations under the License.
  */
 
+/** @hide */
 package android.telephony.data;
 
-import android.telephony.data.IQualifiedNetworksServiceCallback;
-import android.telephony.data.ApnThrottleStatus;
-
-/**
- * {@hide}
- */
-interface IQualifiedNetworksService
-{
-    oneway void createNetworkAvailabilityProvider(int slotId, IQualifiedNetworksServiceCallback callback);
-    oneway void removeNetworkAvailabilityProvider(int slotId);
-    oneway void reportApnThrottleStatusChanged(int slotId, in List<ApnThrottleStatus> statuses);
-}
+parcelable ApnThrottleStatus;

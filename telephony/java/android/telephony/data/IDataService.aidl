@@ -40,4 +40,6 @@ oneway interface IDataService
     void unregisterForDataCallListChanged(int slotId, IDataServiceCallback callback);
     void startHandover(int slotId, int cid, IDataServiceCallback callback);
     void cancelHandover(int slotId, int cid, IDataServiceCallback callback);
+    void registerForUnthrottleApn(int slotIndex, IDataServiceCallback callback);
+    void unregisterForUnthrottleApn(int slotIndex, IDataServiceCallback callback);
 }

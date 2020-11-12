@@ -107,6 +107,9 @@ public abstract class DataService extends Service {
     private static final int DATA_SERVICE_INDICATION_DATA_CALL_LIST_CHANGED            = 11;
     private static final int DATA_SERVICE_REQUEST_START_HANDOVER                       = 12;
     private static final int DATA_SERVICE_REQUEST_CANCEL_HANDOVER                      = 13;
+    private static final int DATA_SERVICE_REQUEST_REGISTER_APN_UNTHROTTLED             = 14;
+    private static final int DATA_SERVICE_REQUEST_UNREGISTER_APN_UNTHROTTLED           = 15;
+    private static final int DATA_SERVICE_INDICATION_APN_UNTHROTTLED                   = 16;
 
     private final HandlerThread mHandlerThread;
 
@@ -128,6 +131,8 @@ public abstract class DataService extends Service {
         private final int mSlotIndex;
 
         private final List<IDataServiceCallback> mDataCallListChangedCallbacks = new ArrayList<>();
+
+        private final List<IDataServiceCallback> mApnUnthrottledCallbacks = new ArrayList<>();
 
         /**
          * Constructor
@@ -326,6 +331,19 @@ public abstract class DataService extends Service {
             }
         }
 
+        private void registerForApnUnthrottled(IDataServiceCallback callback) {
+            synchronized (mApnUnthrottledCallbacks) {
+                mApnUnthrottledCallbacks.add(callback);
+            }
+        }
+
+        private void unregisterForApnUnthrottled(IDataServiceCallback callback) {
+            synchronized (mApnUnthrottledCallbacks) {
+                mApnUnthrottledCallbacks.remove(callback);
+            }
+        }
+
+
         /**
          * Notify the system that current data call list changed. Data service must invoke this
          * method whenever there is any data call status changed.
@@ -337,6 +355,21 @@ public abstract class DataService extends Service {
                 for (IDataServiceCallback callback : mDataCallListChangedCallbacks) {
                     mHandler.obtainMessage(DATA_SERVICE_INDICATION_DATA_CALL_LIST_CHANGED,
                             mSlotIndex, 0, new DataCallListChangedIndication(dataCallList,
+                                    callback)).sendToTarget();
+                }
+            }
+        }
+
+        /**
+         * Notify the system that a given APN was unthrottled.
+         *
+         * @param apn Access Point Name defined by the carrier.
+         */
+        public final void notifyApnUnthrottled(@NonNull String apn) {
+            synchronized (mApnUnthrottledCallbacks) {
+                for (IDataServiceCallback callback : mApnUnthrottledCallbacks) {
+                    mHandler.obtainMessage(DATA_SERVICE_INDICATION_APN_UNTHROTTLED,
+                            mSlotIndex, 0, new ApnUnthrottledIndication(apn,
                                     callback)).sendToTarget();
                 }
             }
@@ -425,6 +458,16 @@ public abstract class DataService extends Service {
         DataCallListChangedIndication(List<DataCallResponse> dataCallList,
                                       IDataServiceCallback callback) {
             this.dataCallList = dataCallList;
+            this.callback = callback;
+        }
+    }
+
+    private static final class ApnUnthrottledIndication {
+        public final String apn;
+        public final IDataServiceCallback callback;
+        ApnUnthrottledIndication(String apn,
+                IDataServiceCallback callback) {
+            this.apn = apn;
             this.callback = callback;
         }
     }
@@ -543,6 +586,26 @@ public abstract class DataService extends Service {
                     serviceProvider.cancelHandover(cReq.cid,
                             (cReq.callback != null)
                                     ? new DataServiceCallback(cReq.callback) : null);
+                    break;
+                case DATA_SERVICE_REQUEST_REGISTER_APN_UNTHROTTLED:
+                    if (serviceProvider == null) break;
+                    serviceProvider.registerForApnUnthrottled((IDataServiceCallback) message.obj);
+                    break;
+                case DATA_SERVICE_REQUEST_UNREGISTER_APN_UNTHROTTLED:
+                    if (serviceProvider == null) break;
+                    callback = (IDataServiceCallback) message.obj;
+                    serviceProvider.unregisterForApnUnthrottled(callback);
+                    break;
+                case DATA_SERVICE_INDICATION_APN_UNTHROTTLED:
+                    if (serviceProvider == null) break;
+                    ApnUnthrottledIndication apnUnthrottledIndication =
+                            (ApnUnthrottledIndication) message.obj;
+                    try {
+                        apnUnthrottledIndication.callback
+                                .onApnUnthrottled(apnUnthrottledIndication.apn);
+                    } catch (RemoteException e) {
+                        loge("Failed to call onApnUnthrottled. " + e);
+                    }
                     break;
             }
         }
@@ -694,6 +757,26 @@ public abstract class DataService extends Service {
             BeginCancelHandoverRequest req = new BeginCancelHandoverRequest(cid, callback);
             mHandler.obtainMessage(DATA_SERVICE_REQUEST_CANCEL_HANDOVER,
                     slotIndex, 0, req).sendToTarget();
+        }
+
+        @Override
+        public void registerForUnthrottleApn(int slotIndex, IDataServiceCallback callback) {
+            if (callback == null) {
+                loge("registerForUnthrottleApn: callback is null");
+                return;
+            }
+            mHandler.obtainMessage(DATA_SERVICE_REQUEST_REGISTER_APN_UNTHROTTLED, slotIndex,
+                    0, callback).sendToTarget();
+        }
+
+        @Override
+        public void unregisterForUnthrottleApn(int slotIndex, IDataServiceCallback callback) {
+            if (callback == null) {
+                loge("uregisterForUnthrottleApn: callback is null");
+                return;
+            }
+            mHandler.obtainMessage(DATA_SERVICE_REQUEST_UNREGISTER_APN_UNTHROTTLED,
+                    slotIndex, 0, callback).sendToTarget();
         }
     }
 
