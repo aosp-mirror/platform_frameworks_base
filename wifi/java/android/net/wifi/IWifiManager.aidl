@@ -275,4 +275,6 @@ interface IWifiManager
     void setAutoWakeupEnabled(boolean enable);
 
     boolean isAutoWakeupEnabled();
+
+    int getNetworkSuggestionUserApprovalStatus(String packageName);
 }
