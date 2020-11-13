@@ -75,9 +75,6 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
 
     private final Handler mMainHandler = new Handler(Looper.getMainLooper());
 
-    /** The bounds within which PIP's top-left coordinate is allowed to move. */
-    private final Rect mMovementBounds = new Rect();
-
     /** The region that all of PIP must stay within. */
     private final Rect mFloatingAllowedArea = new Rect();
 
@@ -339,13 +336,12 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
     }
 
     /** Sets the movement bounds to use to constrain PIP position animations. */
-    void setCurrentMovementBounds(Rect movementBounds) {
-        mMovementBounds.set(movementBounds);
+    void onMovementBoundsChanged() {
         rebuildFlingConfigs();
 
         // The movement bounds represent the area within which we can move PIP's top-left position.
         // The allowed area for all of PIP is those bounds plus PIP's width and height.
-        mFloatingAllowedArea.set(mMovementBounds);
+        mFloatingAllowedArea.set(mPipBoundsState.getMovementBounds());
         mFloatingAllowedArea.right += getBounds().width();
         mFloatingAllowedArea.bottom += getBounds().height();
     }
@@ -395,10 +391,10 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
 
         final float leftEdge = isStash
                 ? mPipBoundsState.getStashOffset() - mPipBoundsState.getBounds().width()
-                : mMovementBounds.left;
+                : mPipBoundsState.getMovementBounds().left;
         final float rightEdge = isStash
                 ?  mPipBoundsState.getDisplayBounds().right - mPipBoundsState.getStashOffset()
-                : mMovementBounds.right;
+                : mPipBoundsState.getMovementBounds().right;
 
         final float xEndValue = velocityX < 0 ? leftEdge : rightEdge;
 
@@ -433,7 +429,7 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
         // Animate off the bottom of the screen, then dismiss PIP.
         mTemporaryBoundsPhysicsAnimator
                 .spring(FloatProperties.RECT_Y,
-                        mMovementBounds.bottom + getBounds().height() * 2,
+                        mPipBoundsState.getMovementBounds().bottom + getBounds().height() * 2,
                         0,
                         mSpringConfig)
                 .withEndActions(this::dismissPip);
@@ -504,10 +500,12 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
 
     /** Set new fling configs whose min/max values respect the given movement bounds. */
     private void rebuildFlingConfigs() {
-        mFlingConfigX = new PhysicsAnimator.FlingConfig(
-                DEFAULT_FRICTION, mMovementBounds.left, mMovementBounds.right);
-        mFlingConfigY = new PhysicsAnimator.FlingConfig(
-                DEFAULT_FRICTION, mMovementBounds.top, mMovementBounds.bottom);
+        mFlingConfigX = new PhysicsAnimator.FlingConfig(DEFAULT_FRICTION,
+                mPipBoundsState.getMovementBounds().left,
+                mPipBoundsState.getMovementBounds().right);
+        mFlingConfigY = new PhysicsAnimator.FlingConfig(DEFAULT_FRICTION,
+                mPipBoundsState.getMovementBounds().top,
+                mPipBoundsState.getMovementBounds().bottom);
         mStashConfigX = new PhysicsAnimator.FlingConfig(
                 DEFAULT_FRICTION,
                 mPipBoundsState.getStashOffset() - mPipBoundsState.getBounds().width(),
