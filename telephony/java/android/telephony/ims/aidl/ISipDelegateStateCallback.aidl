@@ -16,17 +16,18 @@
 
 package android.telephony.ims.aidl;
 
-import android.telephony.ims.DelegateRequest;
+import android.telephony.ims.DelegateRegistrationState;
+import android.telephony.ims.FeatureTagState;
+import android.telephony.ims.SipDelegateImsConfiguration;
 import android.telephony.ims.aidl.ISipDelegate;
-import android.telephony.ims.aidl.ISipDelegateMessageCallback;
-import android.telephony.ims.aidl.ISipDelegateStateCallback;
 
 /**
- * Interface for commands to the SIP Transport implementation.
+ * See {@link SipDelegateStateCallback} for docs regarding this callback.
  * {@hide}
  */
-oneway interface ISipTransport {
-    void createSipDelegate(in DelegateRequest request, ISipDelegateStateCallback dc,
-            ISipDelegateMessageCallback mc);
-    void destroySipDelegate(ISipDelegate delegate, int reason);
+oneway interface ISipDelegateStateCallback {
+    void onCreated(ISipDelegate c, in List<FeatureTagState> deniedFeatureTags);
+    void onFeatureTagRegistrationChanged(in DelegateRegistrationState registrationState);
+    void onImsConfigurationChanged(in SipDelegateImsConfiguration registeredSipConfig);
+    void onDestroyed(int reason);
 }
