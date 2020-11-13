@@ -179,7 +179,9 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub implements Rollba
         mInstaller = new Installer(mContext);
         mInstaller.onStart();
 
-        mRollbackStore = new RollbackStore(new File(Environment.getDataDirectory(), "rollback"));
+        mRollbackStore = new RollbackStore(
+                new File(Environment.getDataDirectory(), "rollback"),
+                new File(Environment.getDataDirectory(), "rollback-history"));
 
         mPackageHealthObserver = new RollbackPackageHealthObserver(mContext);
         mAppDataRollbackHelper = new AppDataRollbackHelper(mInstaller);
@@ -201,7 +203,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub implements Rollba
             } else {
                 // Delete rollbacks when build fingerprint has changed.
                 for (Rollback rollback : mRollbacks) {
-                    rollback.delete(mAppDataRollbackHelper);
+                    deleteRollback(rollback);
                 }
                 mRollbacks.clear();
             }
@@ -271,7 +273,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub implements Rollba
                     Rollback rollback = getRollbackForSession(sessionId);
                     if (rollback != null && rollback.isEnabling()) {
                         mRollbacks.remove(rollback);
-                        rollback.delete(mAppDataRollbackHelper);
+                        deleteRollback(rollback);
                     }
                 }
             }
@@ -484,7 +486,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub implements Rollba
             Rollback rollback = iter.next();
             if (rollback.includesPackage(packageName)) {
                 iter.remove();
-                rollback.delete(mAppDataRollbackHelper);
+                deleteRollback(rollback);
             }
         }
     }
@@ -612,7 +614,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub implements Rollba
                         .getPackageInstaller().getSessionInfo(rollback.getStagedSessionId());
                 if (session == null || session.isStagedSessionFailed()) {
                     iter.remove();
-                    rollback.delete(mAppDataRollbackHelper);
+                    deleteRollback(rollback);
                     continue;
                 }
 
@@ -666,7 +668,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub implements Rollba
                     && rollback.includesPackageWithDifferentVersion(packageName,
                     installedVersion)) {
                 iter.remove();
-                rollback.delete(mAppDataRollbackHelper);
+                deleteRollback(rollback);
             }
         }
     }
@@ -720,7 +722,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub implements Rollba
             if (!now.isBefore(rollbackTimestamp.plusMillis(mRollbackLifetimeDurationInMillis))) {
                 Slog.i(TAG, "runExpiration id=" + rollback.info.getRollbackId());
                 iter.remove();
-                rollback.delete(mAppDataRollbackHelper);
+                deleteRollback(rollback);
             } else if (oldest == null || oldest.isAfter(rollbackTimestamp)) {
                 oldest = rollbackTimestamp;
             }
@@ -1132,7 +1134,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub implements Rollba
                     Slog.w(TAG, "Delete rollback id=" + rollback.info.getRollbackId()
                             + " for failed session id=" + sessionId);
                     mRollbacks.remove(rollback);
-                    rollback.delete(mAppDataRollbackHelper);
+                    deleteRollback(rollback);
                 }
             }
         }
@@ -1159,7 +1161,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub implements Rollba
         if (!rollback.allPackagesEnabled()) {
             Slog.e(TAG, "Failed to enable rollback for all packages in session.");
             mRollbacks.remove(rollback);
-            rollback.delete(mAppDataRollbackHelper);
+            deleteRollback(rollback);
             return false;
         }
 
@@ -1328,5 +1330,12 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub implements Rollba
             }
         }
         return null;
+    }
+
+    @WorkerThread
+    private void deleteRollback(Rollback rollback) {
+        assertInWorkerThread();
+        mRollbackStore.saveRollbackToHistory(rollback);
+        rollback.delete(mAppDataRollbackHelper);
     }
 }

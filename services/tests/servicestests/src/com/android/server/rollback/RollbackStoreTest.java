@@ -110,6 +110,8 @@ public class RollbackStoreTest {
 
     @Rule
     public TemporaryFolder mFolder = new TemporaryFolder();
+    @Rule
+    public TemporaryFolder mHistoryDir = new TemporaryFolder();
 
     private File mRollbackDir;
 
@@ -117,7 +119,7 @@ public class RollbackStoreTest {
 
     @Before
     public void setUp() throws Exception {
-        mRollbackStore = new RollbackStore(mFolder.getRoot());
+        mRollbackStore = new RollbackStore(mFolder.getRoot(), mHistoryDir.getRoot());
         mRollbackDir = mFolder.newFolder(ID + "");
         mFolder.newFile("rollback.json");
     }
@@ -324,10 +326,26 @@ public class RollbackStoreTest {
         assertThat(expectedFile.exists()).isFalse();
     }
 
-    private void assertRollbacksAreEquivalent(Rollback b, Rollback a) {
-        assertThat(b.info.getRollbackId()).isEqualTo(ID);
+    @Test
+    public void saveToHistoryAndLoad() {
+        Rollback origRb = mRollbackStore.createNonStagedRollback(
+                ID, USER, INSTALLER, null, new SparseIntArray(0));
+        mRollbackStore.saveRollbackToHistory(origRb);
 
+        List<Rollback> loadedRollbacks = mRollbackStore.loadHistorialRollbacks();
+        assertThat(loadedRollbacks).hasSize(1);
+        Rollback loadedRb = loadedRollbacks.get(0);
+
+        assertRollbacksAreEquivalentExcludingBackupDir(loadedRb, origRb);
+    }
+
+    private void assertRollbacksAreEquivalent(Rollback b, Rollback a) {
         assertThat(b.getBackupDir()).isEqualTo(a.getBackupDir());
+        assertRollbacksAreEquivalentExcludingBackupDir(b, a);
+    }
+
+    private void assertRollbacksAreEquivalentExcludingBackupDir(Rollback b, Rollback a) {
+        assertThat(b.info.getRollbackId()).isEqualTo(ID);
 
         assertThat(b.isRestoreUserDataInProgress())
                 .isEqualTo(a.isRestoreUserDataInProgress());
