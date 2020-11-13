@@ -28,6 +28,7 @@ import android.cts.install.lib.host.InstallUtilsHost;
 import com.android.ddmlib.Log;
 import com.android.tests.rollback.host.AbandonSessionsRule;
 import com.android.tests.util.ModuleTestUtils;
+import com.android.tradefed.device.DeviceNotAvailableException;
 import com.android.tradefed.testtype.DeviceJUnit4ClassRunner;
 import com.android.tradefed.testtype.junit4.BaseHostJUnit4Test;
 import com.android.tradefed.util.ProcessInfo;
@@ -39,6 +40,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.io.File;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RunWith(DeviceJUnit4ClassRunner.class)
 public class StagedInstallInternalTest extends BaseHostJUnit4Test {
@@ -180,6 +184,39 @@ public class StagedInstallInternalTest extends BaseHostJUnit4Test {
         sessionIds = getDevice().executeShellCommand(
                 "pm get-stagedsessions --only-ready --only-sessionid").split("\n");
         assertThat(sessionIds.length).isEqualTo(3);
+    }
+
+    @Test
+    public void testStagedInstallationShouldCleanUpOnValidationFailure() throws Exception {
+        List<String> before = getStagingDirectories();
+        runPhase("testStagedInstallationShouldCleanUpOnValidationFailure");
+        List<String> after = getStagingDirectories();
+        assertThat(after).isEqualTo(before);
+    }
+
+    @Test
+    public void testStagedInstallationShouldCleanUpOnValidationFailureMultiPackage()
+            throws Exception {
+        List<String> before = getStagingDirectories();
+        runPhase("testStagedInstallationShouldCleanUpOnValidationFailureMultiPackage");
+        List<String> after = getStagingDirectories();
+        assertThat(after).isEqualTo(before);
+    }
+
+    private List<String> getStagingDirectories() throws DeviceNotAvailableException {
+        String baseDir = "/data/app-staging";
+        try {
+            getDevice().enableAdbRoot();
+            return getDevice().getFileEntry(baseDir).getChildren(false)
+                    .stream().filter(entry -> entry.getName().matches("session_\\d+"))
+                    .map(entry -> entry.getName())
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            // Return an empty list if any error
+            return Collections.EMPTY_LIST;
+        } finally {
+            getDevice().disableAdbRoot();
+        }
     }
 
     private void restartSystemServer() throws Exception {
