@@ -715,7 +715,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub implements Rollba
         Iterator<Rollback> iter = mRollbacks.iterator();
         while (iter.hasNext()) {
             Rollback rollback = iter.next();
-            if (!rollback.isAvailable()) {
+            if (!rollback.isAvailable() && !rollback.isCommitted()) {
                 continue;
             }
             Instant rollbackTimestamp = rollback.getTimestamp();
