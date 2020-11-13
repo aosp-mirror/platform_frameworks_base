@@ -13783,6 +13783,15 @@ public class TelephonyManager {
     }
 
     /**
+     * Setup sITelephony for testing.
+     * @hide
+     */
+    @VisibleForTesting
+    public static void setupITelephonyForTest(ITelephony telephony) {
+        sITelephony = telephony;
+    }
+
+    /**
      * Whether device can connect to 5G network when two SIMs are active.
      * @hide
      * TODO b/153669716: remove or make system API.
