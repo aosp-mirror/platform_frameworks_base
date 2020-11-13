@@ -25,6 +25,7 @@ import android.hardware.power.stats.EnergyConsumerId;
 import android.hardware.power.stats.EnergyConsumerResult;
 import android.os.BatteryStats;
 import android.os.BatteryStatsInternal;
+import android.os.BatteryUsageStats;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -57,6 +58,7 @@ import android.util.Slog;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.os.BatteryStatsHelper;
 import com.android.internal.os.BatteryStatsImpl;
+import com.android.internal.os.BatteryUsageStatsProvider;
 import com.android.internal.os.BinderCallsStats;
 import com.android.internal.os.PowerProfile;
 import com.android.internal.os.RailStats;
@@ -105,6 +107,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
     private final BatteryStatsImpl.UserInfoProvider mUserManagerUserInfoProvider;
     private final Context mContext;
     private final BatteryExternalStatsWorker mWorker;
+    private final BatteryUsageStatsProvider mBatteryUsageStatsProvider;
 
     private native void getLowPowerStats(RpmStats rpmStats);
     private native int getPlatformLowPowerStats(ByteBuffer outBuffer);
@@ -258,6 +261,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         mStats.setRadioScanningTimeoutLocked(mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_radioScanningTimeout) * 1000L);
         mStats.setPowerProfileLocked(new PowerProfile(context));
+        mBatteryUsageStatsProvider = new BatteryUsageStatsProvider(context, mStats);
     }
 
     public void publish() {
@@ -549,6 +553,16 @@ public final class BatteryStatsService extends IBatteryStats.Stub
     }
 
     // Public interface...
+
+    /**
+     * Returns BatteryUsageStats, which contains power attribution data on a per-subsystem
+     * and per-UID basis.
+     */
+    public BatteryUsageStats getBatteryUsageStats() {
+        mContext.enforceCallingPermission(
+                android.Manifest.permission.BATTERY_STATS, null);
+        return mBatteryUsageStatsProvider.getBatteryUsageStats();
+    }
 
     public byte[] getStatistics() {
         mContext.enforceCallingPermission(

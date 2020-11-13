@@ -161,6 +161,22 @@ public final class BatteryStatsManager {
     }
 
     /**
+     * Returns BatteryUsageStats, which contains power attribution data on a per-subsystem
+     * and per-UID basis.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.BATTERY_STATS)
+    @NonNull
+    public BatteryUsageStats getBatteryUsageStats() {
+        try {
+            return mBatteryStats.getBatteryUsageStats();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Indicates that the wifi connection RSSI has changed.
      *
      * @param newRssi The new RSSI value.
