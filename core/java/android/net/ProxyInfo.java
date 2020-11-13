@@ -127,7 +127,7 @@ public class ProxyInfo implements Parcelable {
     }
 
     /**
-     * Only used in PacManager after Local Proxy is bound.
+     * Only used in PacProxyInstaller after Local Proxy is bound.
      * @hide
      */
     public ProxyInfo(@NonNull Uri pacFileUrl, int localProxyPort) {
