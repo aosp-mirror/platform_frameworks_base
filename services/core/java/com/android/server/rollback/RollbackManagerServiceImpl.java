@@ -1242,6 +1242,18 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub implements Rollba
                 rollback.dump(ipw);
             }
             ipw.println();
+
+            List<Rollback> historicalRollbacks = mRollbackStore.loadHistorialRollbacks();
+            if (!historicalRollbacks.isEmpty()) {
+                ipw.println("Historical rollbacks:");
+                ipw.increaseIndent();
+                for (Rollback rollback : historicalRollbacks) {
+                    rollback.dump(ipw);
+                }
+                ipw.decreaseIndent();
+                ipw.println();
+            }
+
             PackageWatchdog.getInstance(mContext).dump(ipw);
         });
     }
