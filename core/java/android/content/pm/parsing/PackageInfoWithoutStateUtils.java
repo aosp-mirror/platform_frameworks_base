@@ -419,7 +419,7 @@ public class PackageInfoWithoutStateUtils {
             return null;
         }
 
-        return generateActivityInfoUnchecked(a, applicationInfo);
+        return generateActivityInfoUnchecked(a, flags, applicationInfo);
     }
 
     /**
@@ -431,6 +431,7 @@ public class PackageInfoWithoutStateUtils {
      */
     @NonNull
     public static ActivityInfo generateActivityInfoUnchecked(@NonNull ParsedActivity a,
+            @PackageManager.ComponentInfoFlags int flags,
             @NonNull ApplicationInfo applicationInfo) {
         // Make shallow copies so we can store the metadata safely
         ActivityInfo ai = new ActivityInfo();
@@ -463,7 +464,9 @@ public class PackageInfoWithoutStateUtils {
         ai.rotationAnimation = a.getRotationAnimation();
         ai.colorMode = a.getColorMode();
         ai.windowLayout = a.getWindowLayout();
-        ai.metaData = a.getMetaData();
+        if ((flags & PackageManager.GET_META_DATA) != 0) {
+            ai.metaData = a.getMetaData();
+        }
         ai.applicationInfo = applicationInfo;
         return ai;
     }
@@ -489,7 +492,7 @@ public class PackageInfoWithoutStateUtils {
             return null;
         }
 
-        return generateServiceInfoUnchecked(s, applicationInfo);
+        return generateServiceInfoUnchecked(s, flags,  applicationInfo);
     }
 
     /**
@@ -501,17 +504,20 @@ public class PackageInfoWithoutStateUtils {
      */
     @NonNull
     public static ServiceInfo generateServiceInfoUnchecked(@NonNull ParsedService s,
+            @PackageManager.ComponentInfoFlags int flags,
             @NonNull ApplicationInfo applicationInfo) {
         // Make shallow copies so we can store the metadata safely
         ServiceInfo si = new ServiceInfo();
         assignSharedFieldsForComponentInfo(si, s);
         si.exported = s.isExported();
         si.flags = s.getFlags();
-        si.metaData = s.getMetaData();
         si.permission = s.getPermission();
         si.processName = s.getProcessName();
         si.mForegroundServiceType = s.getForegroundServiceType();
         si.applicationInfo = applicationInfo;
+        if ((flags & PackageManager.GET_META_DATA) != 0) {
+            si.metaData = s.getMetaData();
+        }
         return si;
     }
 
@@ -566,9 +572,11 @@ public class PackageInfoWithoutStateUtils {
         pi.initOrder = p.getInitOrder();
         pi.uriPermissionPatterns = p.getUriPermissionPatterns();
         pi.pathPermissions = p.getPathPermissions();
-        pi.metaData = p.getMetaData();
         if ((flags & PackageManager.GET_URI_PERMISSION_PATTERNS) == 0) {
             pi.uriPermissionPatterns = null;
+        }
+        if ((flags & PackageManager.GET_META_DATA) != 0) {
+            pi.metaData = p.getMetaData();
         }
         pi.applicationInfo = applicationInfo;
         return pi;

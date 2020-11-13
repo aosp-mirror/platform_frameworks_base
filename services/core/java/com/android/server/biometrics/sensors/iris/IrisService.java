@@ -42,7 +42,7 @@ public class IrisService extends SystemService {
      */
     private final class IrisServiceWrapper extends IIrisService.Stub {
         @Override // Binder call
-        public void initializeConfiguration(int sensorId) {
+        public void initializeConfiguration(int sensorId, int strength) {
             Utils.checkPermission(getContext(), USE_BIOMETRIC_INTERNAL);
         }
     }

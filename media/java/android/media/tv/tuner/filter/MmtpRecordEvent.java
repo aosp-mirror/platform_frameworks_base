@@ -94,7 +94,7 @@ public class MmtpRecordEvent extends FilterEvent {
      * {@link android.media.tv.tuner.TunerVersionChecker.getTunerVersion()} to get the version
      * information.
      */
-    public int getFirstMbInSlice() {
+    public int getFirstMacroblockInSlice() {
         return mFirstMbInSlice;
     }
 

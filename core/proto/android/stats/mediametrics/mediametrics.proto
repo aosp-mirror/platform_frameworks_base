@@ -237,3 +237,107 @@ message RecorderData {
     optional int32 video_bitrate = 20;
     optional int32 iframe_interval = 21;
 }
+
+enum StreamType {
+    STREAM_TYPE_UNKNOWN = 0;
+    STREAM_TYPE_OTHER = 1;
+    STREAM_TYPE_PROGRESSIVE = 2;
+    STREAM_TYPE_DASH = 3;
+    STREAM_TYPE_HLS = 4;
+    STREAM_TYPE_SS = 5;
+}
+
+enum DrmType {
+    DRM_TYPE_NONE = 0;
+    DRM_TYPE_OTHER = 1;
+    DRM_TYPE_PLAY_READY = 2;
+    DRM_TYPE_WV_L1 = 3;
+    DRM_TYPE_WV_L3 = 4;
+}
+
+enum PlaybackType {
+    PLAYBACK_TYPE_VOD = 0;
+    PLAYBACK_TYPE_LIVE = 1;
+    PLAYBACK_TYPE_OTHER = 2;
+}
+
+enum ContentType {
+    CONTENT_TYPE_MAIN = 0;
+    CONTENT_TYPE_AD = 1;
+    CONTENT_TYPE_OTHER = 2;
+}
+
+enum StreamSourceType {
+    STREAM_SOURCE_UNKNOWN = 0;
+    STREAM_SOURCE_NETWORK = 1;
+    STREAM_SOURCE_DEVICE = 2;
+    STREAM_SOURCE_MIXED = 3;
+}
+enum NetworkType {
+    NETWORK_TYPE_NONE = 0;
+    NETWORK_TYPE_OTHER = 1;
+    NETWORK_TYPE_WIFI = 2;
+    NETWORK_TYPE_ETHERNET = 3;
+    NETWORK_TYPE_2G = 4;
+    NETWORK_TYPE_3G = 5;
+    NETWORK_TYPE_4G = 6;
+    NETWORK_TYPE_5G_NSA = 7;
+    NETWORK_TYPE_5G_SA = 8;
+}
+
+enum PlaybackState {
+    // Playback has not started (initial state)
+    NOT_STARTED = 0;
+    // Playback is buffering in the background for initial playback start
+    JOINING_BACKGROUND = 1;
+    // Playback is buffering in the foreground for initial playback start
+    JOINING_FOREGROUND = 2;
+    // Playback is actively playing
+    PLAYING = 3;
+    // Playback is paused but ready to play
+    PAUSED = 4;
+    // Playback is handling a seek
+    SEEKING = 5;
+    // Playback is buffering to resume active playback
+    BUFFERING = 6;
+    // Playback is buffering while paused
+    PAUSED_BUFFERING = 7;
+    // Playback is suppressed (e.g. due to audio focus loss)
+    SUPPRESSED = 8;
+    // Playback is suppressed (e.g. due to audio focus loss) while buffering to resume a
+    // playback
+    SUPPRESSED_BUFFERING = 9;
+    // Playback has reached the end of the media
+    ENDED = 10;
+    // Playback is stopped and can be restarted
+    STOPPED = 11;
+    // Playback is stopped due a fatal error and can be retried
+    FAILED = 12;
+    // Playback is interrupted by an ad
+    INTERRUPTED_BY_AD = 13;
+    // Playback is abandoned before reaching the end of the media
+    ABANDONED = 14;
+}
+
+enum PlaybackErrorCode {
+    ERROR_CODE_UNKNOWN = 0;
+    ERROR_CODE_OTHER = 1;
+    ERROR_CODE_RUNTIME = 2;
+}
+
+enum TrackType {
+    AUDIO = 0;
+    VIDEO = 1;
+    TEXT = 2;
+}
+enum TrackState {
+    OFF = 0;
+    ON = 1;
+}
+enum TrackChangeReason {
+    REASON_UNKNOWN = 0;
+    REASON_OTHER = 1;
+    REASON_INITIAL = 2;
+    REASON_MANUAL = 3;
+    REASON_ADAPTIVE = 4;
+}

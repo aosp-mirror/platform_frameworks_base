@@ -20,6 +20,7 @@ import com.android.systemui.wmshell.WMShellModule;
 import com.android.wm.shell.ShellDump;
 import com.android.wm.shell.ShellInit;
 import com.android.wm.shell.bubbles.Bubbles;
+import com.android.wm.shell.hidedisplaycutout.HideDisplayCutout;
 import com.android.wm.shell.onehanded.OneHanded;
 import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.splitscreen.SplitScreen;
@@ -71,4 +72,7 @@ public interface WMComponent {
 
     @WMSingleton
     Optional<Bubbles> getBubbles();
+
+    @WMSingleton
+    Optional<HideDisplayCutout> getHideDisplayCutout();
 }

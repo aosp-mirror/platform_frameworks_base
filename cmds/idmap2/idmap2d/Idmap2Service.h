@@ -17,8 +17,6 @@
 #ifndef IDMAP2_IDMAP2D_IDMAP2SERVICE_H_
 #define IDMAP2_IDMAP2D_IDMAP2SERVICE_H_
 
-#include <string>
-
 #include <android-base/unique_fd.h>
 #include <binder/BinderService.h>
 

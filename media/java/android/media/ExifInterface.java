@@ -32,7 +32,6 @@ import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.FileUtils;
-import android.os.SystemProperties;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.system.OsConstants;
@@ -1528,8 +1527,7 @@ public class ExifInterface {
         if (fileDescriptor == null) {
             throw new NullPointerException("fileDescriptor cannot be null");
         }
-        boolean optimize = SystemProperties.getBoolean("fuse.sys.transcode_exif_optimize", false);
-        FileDescriptor modernFd = optimize ? FileUtils.convertToModernFd(fileDescriptor) : null;
+        FileDescriptor modernFd = FileUtils.convertToModernFd(fileDescriptor);
         if (modernFd != null) {
             fileDescriptor = modernFd;
         }
@@ -2549,9 +2547,7 @@ public class ExifInterface {
         mIsInputStream = false;
         try {
             in = new FileInputStream(filename);
-            boolean optimize = SystemProperties.getBoolean("fuse.sys.transcode_exif_optimize",
-                    false);
-            FileDescriptor modernFd = optimize ? FileUtils.convertToModernFd(in.getFD()) : null;
+            FileDescriptor modernFd = FileUtils.convertToModernFd(in.getFD());
             if (modernFd != null) {
                 legacyInputStream = in;
                 in = new FileInputStream(modernFd);

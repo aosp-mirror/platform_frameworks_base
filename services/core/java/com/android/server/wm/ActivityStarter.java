@@ -1866,7 +1866,14 @@ class ActivityStarter {
             }
         }
 
-        if (mRestrictedBgActivity && (newTask || !targetTask.isUidPresent(mCallingUid))
+        // Do not allow background activity start in new task or in a task that uid is not present.
+        // Also do not allow pinned window to start single instance activity in background,
+        // as it will recreate the window and makes it to foreground.
+        boolean blockBalInTask = (newTask
+                || !targetTask.isUidPresent(mCallingUid)
+                || (LAUNCH_SINGLE_INSTANCE == mLaunchMode && targetTask.inPinnedWindowingMode()));
+
+        if (mRestrictedBgActivity && blockBalInTask
                 && handleBackgroundActivityAbort(mStartActivity)) {
             Slog.e(TAG, "Abort background activity starts from " + mCallingUid);
             return START_ABORTED;

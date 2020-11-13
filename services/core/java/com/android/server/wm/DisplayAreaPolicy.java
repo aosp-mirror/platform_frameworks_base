@@ -22,8 +22,11 @@ import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_MAGNIFICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL;
+import static android.view.WindowManager.LayoutParams.TYPE_NOTIFICATION_SHADE;
+import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
 import static android.window.DisplayAreaOrganizer.FEATURE_DEFAULT_TASK_CONTAINER;
 import static android.window.DisplayAreaOrganizer.FEATURE_FULLSCREEN_MAGNIFICATION;
+import static android.window.DisplayAreaOrganizer.FEATURE_HIDE_DISPLAY_CUTOUT;
 import static android.window.DisplayAreaOrganizer.FEATURE_ONE_HANDED;
 import static android.window.DisplayAreaOrganizer.FEATURE_WINDOWED_MAGNIFICATION;
 
@@ -98,6 +101,12 @@ public abstract class DisplayAreaPolicy {
                             // Make the DA dimmable so that the magnify window also mirrors the dim
                             // layer
                             .setNewDisplayAreaSupplier(DisplayArea.Dimmable::new)
+                            .build())
+                    .addFeature(new Feature.Builder(wmService.mPolicy, "HideDisplayCutout",
+                            FEATURE_HIDE_DISPLAY_CUTOUT)
+                            .all()
+                            .except(TYPE_NAVIGATION_BAR, TYPE_NAVIGATION_BAR_PANEL, TYPE_STATUS_BAR,
+                                    TYPE_NOTIFICATION_SHADE)
                             .build())
                     .addFeature(new Feature.Builder(wmService.mPolicy, "OneHanded",
                             FEATURE_ONE_HANDED)

@@ -60,6 +60,7 @@ import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
+import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.R;
 import com.android.systemui.shared.system.QuickStepContract;
 
@@ -115,6 +116,10 @@ public class ScreenshotView extends FrameLayout implements
     private ScreenshotActionChip mEditChip;
     private ScreenshotActionChip mScrollChip;
 
+    private UiEventLogger mUiEventLogger;
+    private Runnable mOnDismissRunnable;
+    private Animator mDismissAnimation;
+
     private final ArrayList<ScreenshotActionChip> mSmartChips = new ArrayList<>();
     private PendingInteraction mPendingInteraction;
 
@@ -161,7 +166,7 @@ public class ScreenshotView extends FrameLayout implements
     public void showScrollChip(Runnable onClick) {
         mScrollChip.setVisibility(VISIBLE);
         mScrollChip.setOnClickListener((v) ->
-                onClick.run()
+                        onClick.run()
                 // TODO Logging, store event consumer to a field
                 //onElementTapped.accept(ScreenshotEvent.SCREENSHOT_SCROLL_TAPPED);
         );
@@ -248,6 +253,17 @@ public class ScreenshotView extends FrameLayout implements
         requestFocus();
     }
 
+    /**
+     * Set up the logger and callback on dismissal.
+     *
+     * Note: must be called before any other (non-constructor) method or null pointer exceptions
+     * may occur.
+     */
+    void init(UiEventLogger uiEventLogger, Runnable onDismissRunnable) {
+        mUiEventLogger = uiEventLogger;
+        mOnDismissRunnable = onDismissRunnable;
+    }
+
     void takePartialScreenshot(Consumer<Rect> onPartialScreenshotSelected) {
         mScreenshotSelectorView.setOnScreenshotSelected(onPartialScreenshotSelected);
         mScreenshotSelectorView.setVisibility(View.VISIBLE);
@@ -260,8 +276,7 @@ public class ScreenshotView extends FrameLayout implements
         mScreenshotPreview.setVisibility(View.INVISIBLE);
     }
 
-    AnimatorSet createScreenshotDropInAnimation(Rect bounds, boolean showFlash,
-            Consumer<ScreenshotEvent> onElementTapped) {
+    AnimatorSet createScreenshotDropInAnimation(Rect bounds, boolean showFlash) {
         mScreenshotPreview.setLayerType(View.LAYER_TYPE_HARDWARE, null);
         mScreenshotPreview.buildLayer();
 
@@ -362,8 +377,10 @@ public class ScreenshotView extends FrameLayout implements
             @Override
             public void onAnimationEnd(Animator animation) {
                 super.onAnimationEnd(animation);
-                mDismissButton.setOnClickListener(view ->
-                        onElementTapped.accept(ScreenshotEvent.SCREENSHOT_EXPLICIT_DISMISSAL));
+                mDismissButton.setOnClickListener(view -> {
+                    mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_EXPLICIT_DISMISSAL);
+                    animateDismissal();
+                });
                 mDismissButton.setAlpha(1);
                 float dismissOffset = mDismissButton.getWidth() / 2f;
                 float finalDismissX = mDirectionLTR
@@ -460,19 +477,25 @@ public class ScreenshotView extends FrameLayout implements
         return animator;
     }
 
-    void setChipIntents(ScreenshotController.SavedImageData imageData,
-            Consumer<ScreenshotEvent> onElementTapped) {
+    void setChipIntents(ScreenshotController.SavedImageData imageData) {
         mShareChip.setPendingIntent(imageData.shareAction.actionIntent,
-                () -> onElementTapped.accept(ScreenshotEvent.SCREENSHOT_SHARE_TAPPED));
+                () -> {
+                    mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_SHARE_TAPPED);
+                    animateDismissal();
+                });
         mEditChip.setPendingIntent(imageData.editAction.actionIntent,
-                () -> onElementTapped.accept(ScreenshotEvent.SCREENSHOT_EDIT_TAPPED));
+                () -> {
+                    mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_EDIT_TAPPED);
+                    animateDismissal();
+                });
         mScreenshotPreview.setOnClickListener(v -> {
             try {
                 imageData.editAction.actionIntent.send();
             } catch (PendingIntent.CanceledException e) {
                 Log.e(TAG, "Intent cancelled", e);
             }
-            onElementTapped.accept(ScreenshotEvent.SCREENSHOT_PREVIEW_TAPPED);
+            mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_PREVIEW_TAPPED);
+            animateDismissal();
         });
 
         if (mPendingInteraction != null) {
@@ -496,43 +519,49 @@ public class ScreenshotView extends FrameLayout implements
                 actionChip.setText(smartAction.title);
                 actionChip.setIcon(smartAction.getIcon(), false);
                 actionChip.setPendingIntent(smartAction.actionIntent,
-                        () -> onElementTapped.accept(
-                                ScreenshotEvent.SCREENSHOT_SMART_ACTION_TAPPED));
+                        () -> {
+                            mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_SMART_ACTION_TAPPED);
+                            animateDismissal();
+                        });
                 mActionsView.addView(actionChip);
                 mSmartChips.add(actionChip);
             }
         }
     }
 
+    boolean isDismissing() {
+        return (mDismissAnimation != null && mDismissAnimation.isRunning());
+    }
 
-    AnimatorSet createScreenshotDismissAnimation() {
-        ValueAnimator alphaAnim = ValueAnimator.ofFloat(0, 1);
-        alphaAnim.setStartDelay(SCREENSHOT_DISMISS_ALPHA_OFFSET_MS);
-        alphaAnim.setDuration(SCREENSHOT_DISMISS_ALPHA_DURATION_MS);
-        alphaAnim.addUpdateListener(animation -> {
-            setAlpha(1 - animation.getAnimatedFraction());
+    void animateDismissal() {
+        getViewTreeObserver().removeOnComputeInternalInsetsListener(this);
+        mDismissAnimation = createScreenshotDismissAnimation();
+        mDismissAnimation.addListener(new AnimatorListenerAdapter() {
+            private boolean mCancelled = false;
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+                super.onAnimationCancel(animation);
+                mCancelled = true;
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                super.onAnimationEnd(animation);
+                if (!mCancelled) {
+                    mOnDismissRunnable.run();
+                }
+            }
         });
-
-        ValueAnimator yAnim = ValueAnimator.ofFloat(0, 1);
-        yAnim.setInterpolator(mAccelerateInterpolator);
-        yAnim.setDuration(SCREENSHOT_DISMISS_Y_DURATION_MS);
-        float screenshotStartY = mScreenshotPreview.getTranslationY();
-        float dismissStartY = mDismissButton.getTranslationY();
-        yAnim.addUpdateListener(animation -> {
-            float yDelta = MathUtils.lerp(0, mDismissDeltaY, animation.getAnimatedFraction());
-            mScreenshotPreview.setTranslationY(screenshotStartY + yDelta);
-            mDismissButton.setTranslationY(dismissStartY + yDelta);
-            mActionsContainer.setTranslationY(yDelta);
-            mActionsContainerBackground.setTranslationY(yDelta);
-        });
-
-        AnimatorSet animSet = new AnimatorSet();
-        animSet.play(yAnim).with(alphaAnim);
-
-        return animSet;
+        mDismissAnimation.start();
     }
 
     void reset() {
+        if (mDismissAnimation != null && mDismissAnimation.isRunning()) {
+            mDismissAnimation.cancel();
+        }
+        // Make sure we clean up the view tree observer
+        getViewTreeObserver().removeOnComputeInternalInsetsListener(this);
         // Clear any references to the bitmap
         mScreenshotPreview.setImageDrawable(null);
         mActionsContainerBackground.setVisibility(View.GONE);
@@ -559,6 +588,33 @@ public class ScreenshotView extends FrameLayout implements
         mActionsContainerBackground.setTranslationY(0);
         mScreenshotPreview.setTranslationY(0);
         mScreenshotSelectorView.stop();
+    }
+
+    private AnimatorSet createScreenshotDismissAnimation() {
+        ValueAnimator alphaAnim = ValueAnimator.ofFloat(0, 1);
+        alphaAnim.setStartDelay(SCREENSHOT_DISMISS_ALPHA_OFFSET_MS);
+        alphaAnim.setDuration(SCREENSHOT_DISMISS_ALPHA_DURATION_MS);
+        alphaAnim.addUpdateListener(animation -> {
+            setAlpha(1 - animation.getAnimatedFraction());
+        });
+
+        ValueAnimator yAnim = ValueAnimator.ofFloat(0, 1);
+        yAnim.setInterpolator(mAccelerateInterpolator);
+        yAnim.setDuration(SCREENSHOT_DISMISS_Y_DURATION_MS);
+        float screenshotStartY = mScreenshotPreview.getTranslationY();
+        float dismissStartY = mDismissButton.getTranslationY();
+        yAnim.addUpdateListener(animation -> {
+            float yDelta = MathUtils.lerp(0, mDismissDeltaY, animation.getAnimatedFraction());
+            mScreenshotPreview.setTranslationY(screenshotStartY + yDelta);
+            mDismissButton.setTranslationY(dismissStartY + yDelta);
+            mActionsContainer.setTranslationY(yDelta);
+            mActionsContainerBackground.setTranslationY(yDelta);
+        });
+
+        AnimatorSet animSet = new AnimatorSet();
+        animSet.play(yAnim).with(alphaAnim);
+
+        return animSet;
     }
 
     /**

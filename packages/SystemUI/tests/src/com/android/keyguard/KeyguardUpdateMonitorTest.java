@@ -93,6 +93,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -102,7 +103,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
-
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
@@ -159,12 +159,15 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     private StatusBarStateController mStatusBarStateController;
     @Mock
     private AuthController mAuthController;
+    @Captor
+    private ArgumentCaptor<StatusBarStateController.StateListener> mStatusBarStateListenerCaptor;
     // Direct executor
     private Executor mBackgroundExecutor = Runnable::run;
     private TestableLooper mTestableLooper;
     private TestableKeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private TestableContext mSpiedContext;
     private MockitoSession mMockitoSession;
+    private StatusBarStateController.StateListener mStatusBarStateListener;
 
     @Before
     public void setup() {
@@ -221,6 +224,9 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         mTestableLooper = TestableLooper.get(this);
         allowTestableLooperAsMainThread();
         mKeyguardUpdateMonitor = new TestableKeyguardUpdateMonitor(mSpiedContext);
+
+        verify(mStatusBarStateController).addCallback(mStatusBarStateListenerCaptor.capture());
+        mStatusBarStateListener = mStatusBarStateListenerCaptor.getValue();
     }
 
     @After
@@ -475,8 +481,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
 
     @Test
     public void testTriesToAuthenticate_whenBouncer() {
-        mKeyguardUpdateMonitor.sendKeyguardBouncerChanged(true);
-        mTestableLooper.processAllMessages();
+        setKeyguardBouncerVisibility(true);
 
         verify(mFaceManager).authenticate(any(), any(), any(), any(), anyInt());
         verify(mFaceManager).isHardwareDetected();
@@ -493,10 +498,10 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
 
     @Test
     public void skipsAuthentication_whenStatusBarShadeLocked() {
-        when(mStatusBarStateController.getState()).thenReturn(StatusBarState.SHADE_LOCKED);
-
+        mStatusBarStateListener.onStateChanged(StatusBarState.SHADE_LOCKED);
         mKeyguardUpdateMonitor.dispatchStartedWakingUp();
         mTestableLooper.processAllMessages();
+
         mKeyguardUpdateMonitor.onKeyguardVisibilityChanged(true);
         verify(mFaceManager, never()).authenticate(any(), any(), any(), any(), anyInt());
     }
@@ -536,8 +541,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         verify(mFaceManager).authenticate(any(), any(), any(), any(), anyInt());
 
         // Stop scanning when bouncer becomes visible
-        mKeyguardUpdateMonitor.sendKeyguardBouncerChanged(true /* showingBouncer */);
-        mTestableLooper.processAllMessages();
+        setKeyguardBouncerVisibility(true);
         clearInvocations(mFaceManager);
         mKeyguardUpdateMonitor.requestFaceAuth();
         verify(mFaceManager, never()).authenticate(any(), any(), any(), any(), anyInt());
@@ -766,6 +770,85 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         orderVerify.verify(callback).onRingerModeChanged(AudioManager.RINGER_MODE_NORMAL);
         orderVerify.verify(callback).onRingerModeChanged(AudioManager.RINGER_MODE_SILENT);
         orderVerify.verify(callback).onRingerModeChanged(AudioManager.RINGER_MODE_VIBRATE);
+    }
+
+    @Test
+    public void testStartUdfpsServiceBeginsOnKeyguard() {
+        // GIVEN
+        // - bouncer isn't showing
+        // - status bar state is on the keyguard
+        // - user has authenticated since boot
+        setKeyguardBouncerVisibility(false /* isVisible */);
+        mStatusBarStateListener.onStateChanged(StatusBarState.KEYGUARD);
+        when(mStrongAuthTracker.hasUserAuthenticatedSinceBoot()).thenReturn(true);
+
+        // THEN we should listen for udfps
+        assertThat(mKeyguardUpdateMonitor.shouldListenForUdfps()).isEqualTo(true);
+    }
+
+    @Test
+    public void testStartUdfpsServiceOnShadeLocked() {
+        // GIVEN
+        // - bouncer isn't showing
+        // - user has authenticated since boot
+        setKeyguardBouncerVisibility(false /* isVisible */);
+        when(mStrongAuthTracker.hasUserAuthenticatedSinceBoot()).thenReturn(true);
+
+        // WHEN the status bar state changes to SHADE_LOCKED
+        mStatusBarStateListener.onStateChanged(StatusBarState.SHADE_LOCKED);
+
+        // THEN we shouldn't listen for udfps
+        assertThat(mKeyguardUpdateMonitor.shouldListenForUdfps()).isEqualTo(false);
+    }
+
+    @Test
+    public void testStartUdfpsServiceOnFullscreenUserSwitcher() {
+        // GIVEN
+        // - bouncer isn't showing
+        // - user has authenticated since boot
+        setKeyguardBouncerVisibility(false /* isVisible */);
+        when(mStrongAuthTracker.hasUserAuthenticatedSinceBoot()).thenReturn(true);
+
+        // WHEN the status bar state changes to FULLSCREEN_USER_SWITCHER
+        mStatusBarStateListener.onStateChanged(StatusBarState.FULLSCREEN_USER_SWITCHER);
+
+        // THEN we shouldn't listen for udfps
+        assertThat(mKeyguardUpdateMonitor.shouldListenForUdfps()).isEqualTo(false);
+    }
+
+    @Test
+    public void testStartUdfpsServiceNoAuthenticationSinceLastBoot() {
+        // GIVEN
+        // - bouncer isn't showing
+        // - status bar state is on the keyguard
+        setKeyguardBouncerVisibility(false /* isVisible */);
+        mStatusBarStateListener.onStateChanged(StatusBarState.KEYGUARD);
+
+        // WHEN user hasn't authenticated since last boot
+        when(mStrongAuthTracker.hasUserAuthenticatedSinceBoot()).thenReturn(false);
+
+        // THEN we shouldn't listen for udfps
+        assertThat(mKeyguardUpdateMonitor.shouldListenForUdfps()).isEqualTo(false);
+    }
+
+    @Test
+    public void testStartUdfpsServiceOnBouncerNotVisible() {
+        // GIVEN
+        // - status bar state is on the keyguard
+        // - user has authenticated since boot
+        mStatusBarStateListener.onStateChanged(StatusBarState.KEYGUARD);
+        when(mStrongAuthTracker.hasUserAuthenticatedSinceBoot()).thenReturn(true);
+
+        // WHEN the bouncer is showing
+        setKeyguardBouncerVisibility(true /* isVisible */);
+
+        // THEN we shouldn't listen for udfps
+        assertThat(mKeyguardUpdateMonitor.shouldListenForUdfps()).isEqualTo(false);
+    }
+
+    private void setKeyguardBouncerVisibility(boolean isVisible) {
+        mKeyguardUpdateMonitor.sendKeyguardBouncerChanged(isVisible);
+        mTestableLooper.processAllMessages();
     }
 
     private void setBroadcastReceiverPendingResult(BroadcastReceiver receiver) {

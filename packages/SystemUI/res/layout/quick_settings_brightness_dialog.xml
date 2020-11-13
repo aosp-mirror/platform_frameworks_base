@@ -23,7 +23,7 @@
     <com.android.systemui.settings.brightness.BrightnessSliderView
         android:id="@+id/brightness_slider"
         android:layout_width="0dp"
-        android:layout_height="48dp"
+        android:layout_height="@dimen/brightness_mirror_height"
         android:layout_gravity="center_vertical"
         android:layout_weight="1"
         android:contentDescription="@string/accessibility_brightness"

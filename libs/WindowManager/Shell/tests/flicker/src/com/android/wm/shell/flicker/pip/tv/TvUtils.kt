@@ -45,6 +45,19 @@ fun UiDevice.findTvPipMenuCloseButton(): UiObject2? = findObject(
 fun UiDevice.findTvPipMenuFullscreenButton(): UiObject2? = findObject(
         By.res(SYSTEM_UI_PACKAGE_NAME, TV_PIP_MENU_FULLSCREEN_BUTTON_ID))
 
+fun UiDevice.findTvPipMenuElementWithDescription(desc: String): UiObject2? {
+    val buttonSelector = By.desc(desc)
+    val menuWithButtonSelector = By.copy(tvPipMenuSelector).hasDescendant(buttonSelector)
+    return findObject(menuWithButtonSelector)?.findObject(buttonSelector)
+}
+
+fun UiDevice.waitForTvPipMenuElementWithDescription(desc: String): UiObject2? {
+    val buttonSelector = By.desc(desc)
+    val menuWithButtonSelector = By.copy(tvPipMenuSelector).hasDescendant(buttonSelector)
+    return wait(Until.findObject(menuWithButtonSelector), WAIT_TIME_MS)
+            ?.findObject(buttonSelector)
+}
+
 fun UiObject2.isFullscreen(uiDevice: UiDevice): Boolean = visibleBounds.run {
     height() == uiDevice.displayHeight && width() == uiDevice.displayWidth
 }

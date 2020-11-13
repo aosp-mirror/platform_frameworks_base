@@ -75,16 +75,16 @@ public final class GeofenceProxy {
     }
 
     private boolean register(Context context) {
-        if (mServiceWatcher.register()) {
+        boolean resolves = mServiceWatcher.checkServiceResolves();
+        if (resolves) {
+            mServiceWatcher.register();
             context.bindServiceAsUser(
                     new Intent(context, GeofenceHardwareService.class),
                     new GeofenceProxyServiceConnection(),
                     Context.BIND_AUTO_CREATE,
                     UserHandle.SYSTEM);
-            return true;
         }
-
-        return false;
+        return resolves;
     }
 
     private class GeofenceProxyServiceConnection implements ServiceConnection {

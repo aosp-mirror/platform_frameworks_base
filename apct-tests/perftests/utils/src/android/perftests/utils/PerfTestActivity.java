@@ -21,6 +21,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.WindowManager;
+import android.widget.EditText;
+import android.widget.LinearLayout;
 
 /**
  * A simple activity used for testing, e.g. performance of activity switching, or as a base
@@ -28,12 +30,23 @@ import android.view.WindowManager;
  */
 public class PerfTestActivity extends Activity {
     public static final String INTENT_EXTRA_KEEP_SCREEN_ON = "keep_screen_on";
+    public static final String INTENT_EXTRA_ADD_EDIT_TEXT = "add_edit_text";
+    public static final int ID_EDITOR = 3252356;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getIntent().getBooleanExtra(INTENT_EXTRA_KEEP_SCREEN_ON, false)) {
             getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        }
+        if (getIntent().getBooleanExtra(INTENT_EXTRA_ADD_EDIT_TEXT, false)) {
+            final LinearLayout layout = new LinearLayout(this);
+            layout.setOrientation(LinearLayout.VERTICAL);
+
+            final EditText editText = new EditText(this);
+            editText.setId(ID_EDITOR);
+            layout.addView(editText);
+            setContentView(layout);
         }
     }
 

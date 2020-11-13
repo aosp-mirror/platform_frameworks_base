@@ -61,6 +61,7 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
     private static final long DRAG_LENGTH = 100;
     private static final float DRAG_SCALE = 1.2f;
     public static final long MOVE_DURATION = 150;
+    public static final int NUM_COLUMNS = 4;
 
     private static final int TYPE_TILE = 0;
     private static final int TYPE_EDIT = 1;
@@ -600,7 +601,11 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
         @Override
         public int getSpanSize(int position) {
             final int type = getItemViewType(position);
-            return type == TYPE_EDIT || type == TYPE_DIVIDER || type == TYPE_HEADER ? 3 : 1;
+            if (type == TYPE_EDIT || type == TYPE_DIVIDER || type == TYPE_HEADER) {
+                return NUM_COLUMNS;
+            } else {
+                return 1;
+            }
         }
     };
 

@@ -141,6 +141,20 @@ TEST(CanvasOp, lifecycleCheckMove) {
     EXPECT_EQ(tracker.alive(), 0);
 }
 
+TEST(CanvasOp, verifyConst) {
+    CanvasOpBuffer buffer;
+    buffer.push<Op::DrawColor>({
+        .color = SkColors::kBlack,
+        .mode = SkBlendMode::kSrcOver,
+    });
+    buffer.for_each([](auto op) {
+        static_assert(std::is_const_v<std::remove_reference_t<decltype(*op)>>,
+                "Expected container to be const");
+        static_assert(std::is_const_v<std::remove_reference_t<decltype(op->op())>>,
+                "Expected op to be const");
+    });
+}
+
 TEST(CanvasOp, simplePush) {
     CanvasOpBuffer buffer;
     EXPECT_EQ(buffer.size(), 0);

@@ -185,8 +185,48 @@ public class ServiceWatcher implements ServiceConnection {
     private final Handler mHandler;
     private final Intent mIntent;
 
+    private final PackageMonitor mPackageMonitor = new PackageMonitor() {
+        @Override
+        public boolean onPackageChanged(String packageName, int uid, String[] components) {
+            return true;
+        }
+
+        @Override
+        public void onSomePackagesChanged() {
+            onBestServiceChanged(false);
+        }
+    };
+    private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if (action == null) {
+                return;
+            }
+            int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, UserHandle.USER_NULL);
+            if (userId == UserHandle.USER_NULL) {
+                return;
+            }
+
+            switch (action) {
+                case Intent.ACTION_USER_SWITCHED:
+                    onUserSwitched(userId);
+                    break;
+                case Intent.ACTION_USER_UNLOCKED:
+                    onUserUnlocked(userId);
+                    break;
+                default:
+                    break;
+            }
+
+        }
+    };
+
     @Nullable private final OnBindRunner mOnBind;
     @Nullable private final Runnable mOnUnbind;
+
+    // write from caller thread only, read anywhere
+    private volatile boolean mRegistered;
 
     // read/write from handler thread only
     private int mCurrentUserId;
@@ -225,77 +265,65 @@ public class ServiceWatcher implements ServiceConnection {
     }
 
     /**
-     * Register this class, which will start the process of determining the best matching service
-     * and maintaining a binding to it. Will return false and fail if there are no possible matching
-     * services at the time this functions is called.
+     * Returns true if there is at least one component that could satisfy the ServiceWatcher's
+     * constraints.
      */
-    public boolean register() {
-        if (mContext.getPackageManager().queryIntentServicesAsUser(mIntent,
+    public boolean checkServiceResolves() {
+        return !mContext.getPackageManager().queryIntentServicesAsUser(mIntent,
                 MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE | MATCH_SYSTEM_ONLY,
-                UserHandle.USER_SYSTEM).isEmpty()) {
-            return false;
-        }
+                UserHandle.USER_SYSTEM).isEmpty();
+    }
 
-        new PackageMonitor() {
-            @Override
-            public boolean onPackageChanged(String packageName, int uid, String[] components) {
-                return true;
-            }
+    /**
+     * Starts the process of determining the best matching service and maintaining a binding to it.
+     */
+    public void register() {
+        Preconditions.checkState(!mRegistered);
 
-            @Override
-            public void onSomePackagesChanged() {
-                onBestServiceChanged(false);
-            }
-        }.register(mContext, UserHandle.ALL, true, mHandler);
+        mPackageMonitor.register(mContext, UserHandle.ALL, true, mHandler);
 
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(Intent.ACTION_USER_SWITCHED);
         intentFilter.addAction(Intent.ACTION_USER_UNLOCKED);
-        mContext.registerReceiverAsUser(new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                String action = intent.getAction();
-                if (action == null) {
-                    return;
-                }
-                int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, UserHandle.USER_NULL);
-                if (userId == UserHandle.USER_NULL) {
-                    return;
-                }
-
-                switch (action) {
-                    case Intent.ACTION_USER_SWITCHED:
-                        onUserSwitched(userId);
-                        break;
-                    case Intent.ACTION_USER_UNLOCKED:
-                        onUserUnlocked(userId);
-                        break;
-                    default:
-                        break;
-                }
-
-            }
-        }, UserHandle.ALL, intentFilter, null, mHandler);
+        mContext.registerReceiverAsUser(mBroadcastReceiver, UserHandle.ALL, intentFilter, null,
+                mHandler);
 
         mCurrentUserId = ActivityManager.getCurrentUser();
 
+        mRegistered = true;
+
         mHandler.post(() -> onBestServiceChanged(false));
-        return true;
+    }
+
+    /**
+     * Stops the process of determining the best matching service and releases any binding.
+     */
+    public void unregister() {
+        Preconditions.checkState(mRegistered);
+
+        mRegistered = false;
+
+        mPackageMonitor.unregister();
+        mContext.unregisterReceiver(mBroadcastReceiver);
+
+        mHandler.post(() -> onBestServiceChanged(false));
     }
 
     private void onBestServiceChanged(boolean forceRebind) {
         Preconditions.checkState(Looper.myLooper() == mHandler.getLooper());
 
-        List<ResolveInfo> resolveInfos = mContext.getPackageManager().queryIntentServicesAsUser(
-                mIntent,
-                GET_META_DATA | MATCH_DIRECT_BOOT_AUTO | MATCH_SYSTEM_ONLY,
-                mCurrentUserId);
-
         ServiceInfo bestServiceInfo = ServiceInfo.NONE;
-        for (ResolveInfo resolveInfo : resolveInfos) {
-            ServiceInfo serviceInfo = new ServiceInfo(resolveInfo, mCurrentUserId);
-            if (serviceInfo.compareTo(bestServiceInfo) > 0) {
-                bestServiceInfo = serviceInfo;
+
+        if (mRegistered) {
+            List<ResolveInfo> resolveInfos = mContext.getPackageManager().queryIntentServicesAsUser(
+                    mIntent,
+                    GET_META_DATA | MATCH_DIRECT_BOOT_AUTO | MATCH_SYSTEM_ONLY,
+                    mCurrentUserId);
+            for (ResolveInfo resolveInfo : resolveInfos) {
+                ServiceInfo serviceInfo = new ServiceInfo(resolveInfo, mCurrentUserId);
+                if (serviceInfo.compareTo(bestServiceInfo) > 0) {
+                    bestServiceInfo = serviceInfo;
+                }
             }
         }
 

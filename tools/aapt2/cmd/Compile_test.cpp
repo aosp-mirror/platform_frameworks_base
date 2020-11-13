@@ -314,8 +314,10 @@ TEST_F(CompilerTest, RelativePathTest) {
   ASSERT_NE(content_values.find(relative_path_values_colors), -1);
   ASSERT_EQ(content_values.find(path_values_colors), -1);
 
-  Link({"-o", apk_path, "--manifest", GetDefaultManifest(), "--proto-format"},
-      compiled_files_dir,  &diag);
+  ASSERT_TRUE(Link({"-o", apk_path,
+                    "--manifest", GetDefaultManifest(),
+                    "--proto-format"},
+                    compiled_files_dir, &diag));
 
   std::unique_ptr<LoadedApk> apk = LoadedApk::LoadApkFromPath(apk_path, &diag);
   ResourceTable* resource_table = apk.get()->GetResourceTable();

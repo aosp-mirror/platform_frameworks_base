@@ -869,6 +869,14 @@ bool updateMetrics(const ConfigKey& key, const StatsdConfig& config, const int64
         newMetricProducers.push_back(producer.value());
     }
 
+    for (int i = 0; i < config.no_report_metric_size(); ++i) {
+        const int64_t noReportMetric = config.no_report_metric(i);
+        if (newMetricProducerMap.find(noReportMetric) == newMetricProducerMap.end()) {
+            ALOGW("no_report_metric %" PRId64 " not exist", noReportMetric);
+            return false;
+        }
+        noReportMetricIds.insert(noReportMetric);
+    }
     const set<int> atomsAllowedFromAnyUid(config.whitelisted_atom_ids().begin(),
                                           config.whitelisted_atom_ids().end());
     for (int i = 0; i < allMetricsCount; i++) {
@@ -887,6 +895,12 @@ bool updateMetrics(const ConfigKey& key, const StatsdConfig& config, const int64
         }
     }
 
+    // Init new/replaced metrics.
+    for (size_t i = 0; i < newMetricProducers.size(); i++) {
+        if (metricsToUpdate[i] == UPDATE_REPLACE || metricsToUpdate[i] == UPDATE_NEW) {
+            newMetricProducers[i]->prepareFirstBucket();
+        }
+    }
     return true;
 }
 

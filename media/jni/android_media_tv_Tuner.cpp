@@ -4024,6 +4024,28 @@ static jlong android_media_tv_Tuner_get_filter_64bit_id(JNIEnv* env, jobject fil
                     ::android::hardware::tv::tuner::V1_1::Constant64Bit::INVALID_FILTER_ID_64BIT);
 }
 
+static jint android_media_tv_Tuner_configure_scrambling_status_event(
+        JNIEnv* env, jobject filter, int scramblingStatusMask) {
+    sp<IFilter> iFilterSp = getFilter(env, filter)->getIFilter();
+    if (iFilterSp == NULL) {
+        ALOGD("Failed to configure scrambling event: filter not found");
+        return (jint) Result::NOT_INITIALIZED;
+    }
+
+    sp<::android::hardware::tv::tuner::V1_1::IFilter> iFilterSp_1_1;
+    iFilterSp_1_1 = ::android::hardware::tv::tuner::V1_1::IFilter::castFrom(iFilterSp);
+    Result res;
+
+    if (iFilterSp_1_1 != NULL) {
+        res = iFilterSp_1_1->configureScramblingEvent(scramblingStatusMask);
+    } else {
+        ALOGW("configureScramblingEvent is not supported with the current HAL implementation.");
+        return (jint) Result::INVALID_STATE;
+    }
+
+    return (jint) res;
+}
+
 static jint android_media_tv_Tuner_set_filter_data_source(
         JNIEnv* env, jobject filter, jobject srcFilter) {
     sp<IFilter> iFilterSp = getFilter(env, filter)->getIFilter();
@@ -4695,6 +4717,8 @@ static const JNINativeMethod gFilterMethods[] = {
     { "nativeGetId", "()I", (void *)android_media_tv_Tuner_get_filter_id },
     { "nativeGetId64Bit", "()J",
             (void *)android_media_tv_Tuner_get_filter_64bit_id },
+    { "nativeconfigureScramblingEvent", "(I)I",
+            (void *)android_media_tv_Tuner_configure_scrambling_status_event },
     { "nativeSetDataSource", "(Landroid/media/tv/tuner/filter/Filter;)I",
             (void *)android_media_tv_Tuner_set_filter_data_source },
     { "nativeStartFilter", "()I", (void *)android_media_tv_Tuner_start_filter },

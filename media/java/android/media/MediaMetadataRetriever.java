@@ -300,9 +300,7 @@ public class MediaMetadataRetriever implements AutoCloseable {
      */
     public void setDataSource(FileDescriptor fd, long offset, long length)
             throws IllegalArgumentException  {
-        boolean optimize = SystemProperties.getBoolean("fuse.sys.transcode_retriever_optimize",
-                false);
-        FileDescriptor modernFd = optimize ? FileUtils.convertToModernFd(fd) : null;
+        FileDescriptor modernFd = FileUtils.convertToModernFd(fd);
         if (modernFd == null) {
             _setDataSource(fd, offset, length);
         } else {

@@ -19,6 +19,7 @@ package com.android.server.biometrics.sensors.face;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS;
 import static android.Manifest.permission.MANAGE_BIOMETRIC;
 import static android.Manifest.permission.USE_BIOMETRIC_INTERNAL;
+import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FACE;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -26,6 +27,7 @@ import android.content.Context;
 import android.hardware.biometrics.BiometricManager;
 import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.IBiometricSensorReceiver;
+import android.hardware.biometrics.IBiometricService;
 import android.hardware.biometrics.IBiometricServiceLockoutResetCallback;
 import android.hardware.biometrics.face.IFace;
 import android.hardware.biometrics.face.SensorProps;
@@ -54,7 +56,9 @@ import com.android.server.biometrics.Utils;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.LockoutResetDispatcher;
 import com.android.server.biometrics.sensors.LockoutTracker;
+import com.android.server.biometrics.sensors.BiometricServiceCallback;
 import com.android.server.biometrics.sensors.face.aidl.FaceProvider;
+import com.android.server.biometrics.sensors.face.hidl.Face10;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -67,10 +71,11 @@ import java.util.List;
  * The service is responsible for maintaining a list of clients and dispatching all
  * face-related events.
  */
-public class FaceService extends SystemService {
+public class FaceService extends SystemService implements BiometricServiceCallback {
 
     protected static final String TAG = "FaceService";
 
+    private final FaceServiceWrapper mServiceWrapper;
     private final LockoutResetDispatcher mLockoutResetDispatcher;
     private final LockPatternUtils mLockPatternUtils;
     @NonNull
@@ -506,21 +511,23 @@ public class FaceService extends SystemService {
                 @BiometricManager.Authenticators.Types int strength) {
             Utils.checkPermission(getContext(), USE_BIOMETRIC_INTERNAL);
             mServiceProviders.add(
-                    new com.android.server.biometrics.sensors.face.hidl.Face10(getContext(),
-                            sensorId, strength, mLockoutResetDispatcher));
+                    new Face10(getContext(), sensorId, strength, mLockoutResetDispatcher));
         }
     }
 
     public FaceService(Context context) {
         super(context);
+        mServiceWrapper = new FaceServiceWrapper();
         mLockoutResetDispatcher = new LockoutResetDispatcher(context);
         mLockPatternUtils = new LockPatternUtils(context);
         mServiceProviders = new ArrayList<>();
-
-        initializeAidlHals();
     }
 
-    private void initializeAidlHals() {
+    @Override
+    public void onBiometricServiceReady() {
+        final IBiometricService biometricService = IBiometricService.Stub.asInterface(
+                ServiceManager.getService(Context.BIOMETRIC_SERVICE));
+
         final String[] instances = ServiceManager.getDeclaredInstances(IFace.DESCRIPTOR);
         if (instances == null || instances.length == 0) {
             return;
@@ -543,6 +550,23 @@ public class FaceService extends SystemService {
                     final FaceProvider provider = new FaceProvider(getContext(), props, instance,
                             mLockoutResetDispatcher);
                     mServiceProviders.add(provider);
+
+                    // Register each sensor individually with BiometricService
+                    for (SensorProps prop : props) {
+                        final int sensorId = prop.commonProps.sensorId;
+                        @BiometricManager.Authenticators.Types int strength =
+                                Utils.propertyStrengthToAuthenticatorStrength(
+                                        prop.commonProps.sensorStrength);
+                        final FaceAuthenticator authenticator =
+                                new FaceAuthenticator(mServiceWrapper, sensorId);
+                        try {
+                            biometricService.registerAuthenticator(sensorId, TYPE_FACE, strength,
+                                    authenticator);
+                        } catch (RemoteException e) {
+                            Slog.e(TAG, "Remote exception when registering sensorId: "
+                                    + sensorId);
+                        }
+                    }
                 } catch (RemoteException e) {
                     Slog.e(TAG, "Remote exception when initializing instance: " + fqName);
                 }
@@ -552,7 +576,7 @@ public class FaceService extends SystemService {
 
     @Override
     public void onStart() {
-        publishBinderService(Context.FACE_SERVICE, new FaceServiceWrapper());
+        publishBinderService(Context.FACE_SERVICE, mServiceWrapper);
     }
 
     private native NativeHandle convertSurfaceToNativeHandle(Surface surface);

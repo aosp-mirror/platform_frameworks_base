@@ -207,6 +207,11 @@ public class TouchState {
             case AccessibilityEvent.TYPE_GESTURE_DETECTION_START:
                 startGestureDetecting();
                 break;
+            case AccessibilityEvent.TYPE_GESTURE_DETECTION_END:
+                // Clear to make sure that we don't accidentally execute passthrough, and that we
+                // are ready for the next interaction.
+                clear();
+                break;
             default:
                 break;
         }

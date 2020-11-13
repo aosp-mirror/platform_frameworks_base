@@ -23,7 +23,8 @@
 #include <unordered_map>
 #include <unordered_set>
 
-#include "android-base/macros.h"
+#include <android-base/macros.h>
+#include <android-base/result.h>
 
 #include "androidfw/ByteBucketArray.h"
 #include "androidfw/Chunk.h"
@@ -49,7 +50,7 @@ struct TypeSpec {
   // Pointer to the mmapped data where flags are kept.
   // Flags denote whether the resource entry is public
   // and under which configurations it varies.
-  const ResTable_typeSpec* type_spec;
+  incfs::verified_map_ptr<ResTable_typeSpec> type_spec;
 
   // The number of types that follow this struct.
   // There is a type for each configuration that entries are defined for.
@@ -57,15 +58,17 @@ struct TypeSpec {
 
   // Trick to easily access a variable number of Type structs
   // proceeding this struct, and to ensure their alignment.
-  const ResTable_type* types[0];
+  incfs::verified_map_ptr<ResTable_type> types[0];
 
-  inline uint32_t GetFlagsForEntryIndex(uint16_t entry_index) const {
+  base::expected<uint32_t, NullOrIOError> GetFlagsForEntryIndex(uint16_t entry_index) const {
     if (entry_index >= dtohl(type_spec->entryCount)) {
-      return 0u;
+      return 0U;
     }
-
-    const uint32_t* flags = reinterpret_cast<const uint32_t*>(type_spec + 1);
-    return flags[entry_index];
+    const auto entry_flags_ptr = ((type_spec + 1).convert<uint32_t>() + entry_index);
+    if (!entry_flags_ptr) {
+      return base::unexpected(IOError::PAGES_MISSING);
+    }
+    return entry_flags_ptr.value();
   }
 };
 
@@ -161,13 +164,17 @@ class LoadedPackage {
   // the default policy in AAPT2 is to build UTF-8 string pools, this needs to change.
   // Returns a partial resource ID, with the package ID left as 0x00. The caller is responsible
   // for patching the correct package ID to the resource ID.
-  uint32_t FindEntryByName(const std::u16string& type_name, const std::u16string& entry_name) const;
+  base::expected<uint32_t, NullOrIOError> FindEntryByName(const std::u16string& type_name,
+                                                          const std::u16string& entry_name) const;
 
-  static const ResTable_entry* GetEntry(const ResTable_type* type_chunk, uint16_t entry_index);
+  static base::expected<incfs::map_ptr<ResTable_entry>, NullOrIOError> GetEntry(
+      incfs::verified_map_ptr<ResTable_type> type_chunk, uint16_t entry_index);
 
-  static uint32_t GetEntryOffset(const ResTable_type* type_chunk, uint16_t entry_index);
+  static base::expected<uint32_t, NullOrIOError> GetEntryOffset(
+      incfs::verified_map_ptr<ResTable_type> type_chunk, uint16_t entry_index);
 
-  static const ResTable_entry* GetEntryFromOffset(const ResTable_type* type_chunk, uint32_t offset);
+  static base::expected<incfs::map_ptr<ResTable_entry>, NullOrIOError> GetEntryFromOffset(
+      incfs::verified_map_ptr<ResTable_type> type_chunk, uint32_t offset);
 
   // Returns the string pool where type names are stored.
   inline const ResStringPool* GetTypeStringPool() const {
@@ -220,7 +227,8 @@ class LoadedPackage {
 
   // Populates a set of ResTable_config structs, possibly excluding configurations defined for
   // the mipmap type.
-  void CollectConfigurations(bool exclude_mipmap, std::set<ResTable_config>* out_configs) const;
+  base::expected<std::monostate, IOError> CollectConfigurations(
+      bool exclude_mipmap, std::set<ResTable_config>* out_configs) const;
 
   // Populates a set of strings representing locales.
   // If `canonicalize` is set to true, each locale is transformed into its canonical format
@@ -300,7 +308,8 @@ class LoadedArsc {
   // If `load_as_shared_library` is set to true, the application package (0x7f) is treated
   // as a shared library (0x00). When loaded into an AssetManager, the package will be assigned an
   // ID.
-  static std::unique_ptr<const LoadedArsc> Load(const StringPiece& data,
+  static std::unique_ptr<const LoadedArsc> Load(incfs::map_ptr<void> data,
+                                                size_t length,
                                                 const LoadedIdmap* loaded_idmap = nullptr,
                                                 package_property_t property_flags = 0U);
 
