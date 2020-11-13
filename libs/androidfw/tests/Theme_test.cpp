@@ -67,7 +67,10 @@ TEST_F(ThemeTest, EmptyTheme) {
   std::unique_ptr<Theme> theme = assetmanager.NewTheme();
   EXPECT_EQ(0u, theme->GetChangingConfigurations());
   EXPECT_EQ(&assetmanager, theme->GetAssetManager());
-  EXPECT_FALSE(theme->GetAttribute(app::R::attr::attr_one).has_value());
+
+  Res_value value;
+  uint32_t flags;
+  EXPECT_EQ(kInvalidCookie, theme->GetAttribute(app::R::attr::attr_one, &value, &flags));
 }
 
 TEST_F(ThemeTest, SingleThemeNoParent) {
@@ -75,19 +78,23 @@ TEST_F(ThemeTest, SingleThemeNoParent) {
   assetmanager.SetApkAssets({style_assets_.get()});
 
   std::unique_ptr<Theme> theme = assetmanager.NewTheme();
-  ASSERT_TRUE(theme->ApplyStyle(app::R::style::StyleOne).has_value());
+  ASSERT_TRUE(theme->ApplyStyle(app::R::style::StyleOne));
 
-  auto value = theme->GetAttribute(app::R::attr::attr_one);
-  ASSERT_TRUE(value);
-  EXPECT_EQ(Res_value::TYPE_INT_DEC, value->type);
-  EXPECT_EQ(1u, value->data);
-  EXPECT_EQ(static_cast<uint32_t>(ResTable_typeSpec::SPEC_PUBLIC), value->flags);
+  Res_value value;
+  uint32_t flags;
+  ApkAssetsCookie cookie;
 
-  value = theme->GetAttribute(app::R::attr::attr_two);
-  ASSERT_TRUE(value);
-  EXPECT_EQ(Res_value::TYPE_INT_DEC, value->type);
-  EXPECT_EQ(2u, value->data);
-  EXPECT_EQ(static_cast<uint32_t>(ResTable_typeSpec::SPEC_PUBLIC), value->flags);
+  cookie = theme->GetAttribute(app::R::attr::attr_one, &value, &flags);
+  ASSERT_NE(kInvalidCookie, cookie);
+  EXPECT_EQ(Res_value::TYPE_INT_DEC, value.dataType);
+  EXPECT_EQ(1u, value.data);
+  EXPECT_EQ(static_cast<uint32_t>(ResTable_typeSpec::SPEC_PUBLIC), flags);
+
+  cookie = theme->GetAttribute(app::R::attr::attr_two, &value, &flags);
+  ASSERT_NE(kInvalidCookie, cookie);
+  EXPECT_EQ(Res_value::TYPE_INT_DEC, value.dataType);
+  EXPECT_EQ(2u, value.data);
+  EXPECT_EQ(static_cast<uint32_t>(ResTable_typeSpec::SPEC_PUBLIC), flags);
 }
 
 TEST_F(ThemeTest, SingleThemeWithParent) {
@@ -95,28 +102,32 @@ TEST_F(ThemeTest, SingleThemeWithParent) {
   assetmanager.SetApkAssets({style_assets_.get()});
 
   std::unique_ptr<Theme> theme = assetmanager.NewTheme();
-  ASSERT_TRUE(theme->ApplyStyle(app::R::style::StyleTwo).has_value());
+  ASSERT_TRUE(theme->ApplyStyle(app::R::style::StyleTwo));
 
-  auto value = theme->GetAttribute(app::R::attr::attr_one);
-  ASSERT_TRUE(value);
-  EXPECT_EQ(Res_value::TYPE_INT_DEC, value->type);
-  EXPECT_EQ(1u, value->data);
-  EXPECT_EQ(static_cast<uint32_t>(ResTable_typeSpec::SPEC_PUBLIC), value->flags);
+  Res_value value;
+  uint32_t flags;
+  ApkAssetsCookie cookie;
 
-  value = theme->GetAttribute(app::R::attr::attr_two);
-  ASSERT_TRUE(value);
-  EXPECT_EQ(Res_value::TYPE_STRING, value->type);
-  EXPECT_EQ(0, value->cookie);
+  cookie = theme->GetAttribute(app::R::attr::attr_one, &value, &flags);
+  ASSERT_NE(kInvalidCookie, cookie);
+  EXPECT_EQ(Res_value::TYPE_INT_DEC, value.dataType);
+  EXPECT_EQ(1u, value.data);
+  EXPECT_EQ(static_cast<uint32_t>(ResTable_typeSpec::SPEC_PUBLIC), flags);
+
+  cookie = theme->GetAttribute(app::R::attr::attr_two, &value, &flags);
+  ASSERT_NE(kInvalidCookie, cookie);
+  EXPECT_EQ(Res_value::TYPE_STRING, value.dataType);
+  EXPECT_EQ(0, cookie);
   EXPECT_EQ(std::string("string"),
-            GetStringFromPool(assetmanager.GetStringPoolForCookie(0), value->data));
-  EXPECT_EQ(static_cast<uint32_t>(ResTable_typeSpec::SPEC_PUBLIC), value->flags);
+            GetStringFromPool(assetmanager.GetStringPoolForCookie(0), value.data));
+  EXPECT_EQ(static_cast<uint32_t>(ResTable_typeSpec::SPEC_PUBLIC), flags);
 
   // This attribute should point to an attr_indirect, so the result should be 3.
-  value = theme->GetAttribute(app::R::attr::attr_three);
-  ASSERT_TRUE(value);
-  EXPECT_EQ(Res_value::TYPE_INT_DEC, value->type);
-  EXPECT_EQ(3u, value->data);
-  EXPECT_EQ(static_cast<uint32_t>(ResTable_typeSpec::SPEC_PUBLIC), value->flags);
+  cookie = theme->GetAttribute(app::R::attr::attr_three, &value, &flags);
+  ASSERT_NE(kInvalidCookie, cookie);
+  EXPECT_EQ(Res_value::TYPE_INT_DEC, value.dataType);
+  EXPECT_EQ(3u, value.data);
+  EXPECT_EQ(static_cast<uint32_t>(ResTable_typeSpec::SPEC_PUBLIC), flags);
 }
 
 TEST_F(ThemeTest, TryToUseBadResourceId) {
@@ -124,8 +135,11 @@ TEST_F(ThemeTest, TryToUseBadResourceId) {
   assetmanager.SetApkAssets({style_assets_.get()});
 
   std::unique_ptr<Theme> theme = assetmanager.NewTheme();
-  ASSERT_TRUE(theme->ApplyStyle(app::R::style::StyleTwo).has_value());
-  ASSERT_FALSE(theme->GetAttribute(0x7f000001));
+  ASSERT_TRUE(theme->ApplyStyle(app::R::style::StyleTwo));
+
+  Res_value value;
+  uint32_t flags;
+  ASSERT_EQ(kInvalidCookie, theme->GetAttribute(0x7f000001, &value, &flags));
 }
 
 TEST_F(ThemeTest, MultipleThemesOverlaidNotForce) {
@@ -133,29 +147,33 @@ TEST_F(ThemeTest, MultipleThemesOverlaidNotForce) {
   assetmanager.SetApkAssets({style_assets_.get()});
 
   std::unique_ptr<Theme> theme = assetmanager.NewTheme();
-  ASSERT_TRUE(theme->ApplyStyle(app::R::style::StyleTwo).has_value());
-  ASSERT_TRUE(theme->ApplyStyle(app::R::style::StyleThree).has_value());
+  ASSERT_TRUE(theme->ApplyStyle(app::R::style::StyleTwo));
+  ASSERT_TRUE(theme->ApplyStyle(app::R::style::StyleThree));
+
+  Res_value value;
+  uint32_t flags;
+  ApkAssetsCookie cookie;
 
   // attr_one is still here from the base.
-  auto value = theme->GetAttribute(app::R::attr::attr_one);
-  ASSERT_TRUE(value);
-  EXPECT_EQ(Res_value::TYPE_INT_DEC, value->type);
-  EXPECT_EQ(1u, value->data);
-  EXPECT_EQ(static_cast<uint32_t>(ResTable_typeSpec::SPEC_PUBLIC), value->flags);
+  cookie = theme->GetAttribute(app::R::attr::attr_one, &value, &flags);
+  ASSERT_NE(kInvalidCookie, cookie);
+  EXPECT_EQ(Res_value::TYPE_INT_DEC, value.dataType);
+  EXPECT_EQ(1u, value.data);
+  EXPECT_EQ(static_cast<uint32_t>(ResTable_typeSpec::SPEC_PUBLIC), flags);
 
   // check for the new attr_six
-  value = theme->GetAttribute(app::R::attr::attr_six);
-  ASSERT_TRUE(value);
-  EXPECT_EQ(Res_value::TYPE_INT_DEC, value->type);
-  EXPECT_EQ(6u, value->data);
-  EXPECT_EQ(static_cast<uint32_t>(ResTable_typeSpec::SPEC_PUBLIC), value->flags);
+  cookie = theme->GetAttribute(app::R::attr::attr_six, &value, &flags);
+  ASSERT_NE(kInvalidCookie, cookie);
+  EXPECT_EQ(Res_value::TYPE_INT_DEC, value.dataType);
+  EXPECT_EQ(6u, value.data);
+  EXPECT_EQ(static_cast<uint32_t>(ResTable_typeSpec::SPEC_PUBLIC), flags);
 
   // check for the old attr_five (force=true was not used).
-  value = theme->GetAttribute(app::R::attr::attr_five);
-  ASSERT_TRUE(value);
-  EXPECT_EQ(Res_value::TYPE_REFERENCE, value->type);
-  EXPECT_EQ(app::R::string::string_one, value->data);
-  EXPECT_EQ(static_cast<uint32_t>(ResTable_typeSpec::SPEC_PUBLIC), value->flags);
+  cookie = theme->GetAttribute(app::R::attr::attr_five, &value, &flags);
+  ASSERT_NE(kInvalidCookie, cookie);
+  EXPECT_EQ(Res_value::TYPE_REFERENCE, value.dataType);
+  EXPECT_EQ(app::R::string::string_one, value.data);
+  EXPECT_EQ(static_cast<uint32_t>(ResTable_typeSpec::SPEC_PUBLIC), flags);
 }
 
 TEST_F(ThemeTest, MultipleThemesOverlaidForced) {
@@ -163,29 +181,33 @@ TEST_F(ThemeTest, MultipleThemesOverlaidForced) {
   assetmanager.SetApkAssets({style_assets_.get()});
 
   std::unique_ptr<Theme> theme = assetmanager.NewTheme();
-  ASSERT_TRUE(theme->ApplyStyle(app::R::style::StyleTwo).has_value());
-  ASSERT_TRUE(theme->ApplyStyle(app::R::style::StyleThree, true /* force */).has_value());
+  ASSERT_TRUE(theme->ApplyStyle(app::R::style::StyleTwo));
+  ASSERT_TRUE(theme->ApplyStyle(app::R::style::StyleThree, true /* force */));
+
+  Res_value value;
+  uint32_t flags;
+  ApkAssetsCookie cookie;
 
   // attr_one is still here from the base.
-  auto value = theme->GetAttribute(app::R::attr::attr_one);
-  ASSERT_TRUE(value);
-  EXPECT_EQ(Res_value::TYPE_INT_DEC, value->type);
-  EXPECT_EQ(1u, value->data);
-  EXPECT_EQ(static_cast<uint32_t>(ResTable_typeSpec::SPEC_PUBLIC), value->flags);
+  cookie = theme->GetAttribute(app::R::attr::attr_one, &value, &flags);
+  ASSERT_NE(kInvalidCookie, cookie);
+  EXPECT_EQ(Res_value::TYPE_INT_DEC, value.dataType);
+  EXPECT_EQ(1u, value.data);
+  EXPECT_EQ(static_cast<uint32_t>(ResTable_typeSpec::SPEC_PUBLIC), flags);
 
   // check for the new attr_six
-  value = theme->GetAttribute(app::R::attr::attr_six);
-  ASSERT_TRUE(value);
-  EXPECT_EQ(Res_value::TYPE_INT_DEC, value->type);
-  EXPECT_EQ(6u, value->data);
-  EXPECT_EQ(static_cast<uint32_t>(ResTable_typeSpec::SPEC_PUBLIC), value->flags);
+  cookie = theme->GetAttribute(app::R::attr::attr_six, &value, &flags);
+  ASSERT_NE(kInvalidCookie, cookie);
+  EXPECT_EQ(Res_value::TYPE_INT_DEC, value.dataType);
+  EXPECT_EQ(6u, value.data);
+  EXPECT_EQ(static_cast<uint32_t>(ResTable_typeSpec::SPEC_PUBLIC), flags);
 
   // check for the new attr_five (force=true was used).
-  value = theme->GetAttribute(app::R::attr::attr_five);
-  ASSERT_TRUE(value);
-  EXPECT_EQ(Res_value::TYPE_INT_DEC, value->type);
-  EXPECT_EQ(5u, value->data);
-  EXPECT_EQ(static_cast<uint32_t>(ResTable_typeSpec::SPEC_PUBLIC), value->flags);
+  cookie = theme->GetAttribute(app::R::attr::attr_five, &value, &flags);
+  ASSERT_NE(kInvalidCookie, cookie);
+  EXPECT_EQ(Res_value::TYPE_INT_DEC, value.dataType);
+  EXPECT_EQ(5u, value.data);
+  EXPECT_EQ(static_cast<uint32_t>(ResTable_typeSpec::SPEC_PUBLIC), flags);
 }
 
 TEST_F(ThemeTest, ResolveDynamicAttributesAndReferencesToSharedLibrary) {
@@ -194,24 +216,28 @@ TEST_F(ThemeTest, ResolveDynamicAttributesAndReferencesToSharedLibrary) {
       {lib_two_assets_.get(), lib_one_assets_.get(), libclient_assets_.get()});
 
   std::unique_ptr<Theme> theme = assetmanager.NewTheme();
-  ASSERT_TRUE(theme->ApplyStyle(libclient::R::style::Theme, false /*force*/).has_value());
+  ASSERT_TRUE(theme->ApplyStyle(libclient::R::style::Theme, false /*force*/));
+
+  Res_value value;
+  uint32_t flags;
+  ApkAssetsCookie cookie;
 
   // The attribute should be resolved to the final value.
-  auto value = theme->GetAttribute(libclient::R::attr::foo);
-  ASSERT_TRUE(value);
-  EXPECT_EQ(Res_value::TYPE_INT_DEC, value->type);
-  EXPECT_EQ(700u, value->data);
-  EXPECT_EQ(static_cast<uint32_t>(ResTable_typeSpec::SPEC_PUBLIC), value->flags);
+  cookie = theme->GetAttribute(libclient::R::attr::foo, &value, &flags);
+  ASSERT_NE(kInvalidCookie, cookie);
+  EXPECT_EQ(Res_value::TYPE_INT_DEC, value.dataType);
+  EXPECT_EQ(700u, value.data);
+  EXPECT_EQ(static_cast<uint32_t>(ResTable_typeSpec::SPEC_PUBLIC), flags);
 
   // The reference should be resolved to a TYPE_REFERENCE.
-  value = theme->GetAttribute(libclient::R::attr::bar);
-  ASSERT_TRUE(value);
-  EXPECT_EQ(Res_value::TYPE_REFERENCE, value->type);
+  cookie = theme->GetAttribute(libclient::R::attr::bar, &value, &flags);
+  ASSERT_NE(kInvalidCookie, cookie);
+  EXPECT_EQ(Res_value::TYPE_REFERENCE, value.dataType);
 
   // lib_one is assigned package ID 0x03.
-  EXPECT_EQ(3u, get_package_id(value->data));
-  EXPECT_EQ(get_type_id(lib_one::R::string::foo), get_type_id(value->data));
-  EXPECT_EQ(get_entry_id(lib_one::R::string::foo), get_entry_id(value->data));
+  EXPECT_EQ(3u, get_package_id(value.data));
+  EXPECT_EQ(get_type_id(lib_one::R::string::foo), get_type_id(value.data));
+  EXPECT_EQ(get_entry_id(lib_one::R::string::foo), get_entry_id(value.data));
 }
 
 TEST_F(ThemeTest, CopyThemeSameAssetManager) {
@@ -219,20 +245,24 @@ TEST_F(ThemeTest, CopyThemeSameAssetManager) {
   assetmanager.SetApkAssets({style_assets_.get()});
 
   std::unique_ptr<Theme> theme_one = assetmanager.NewTheme();
-  ASSERT_TRUE(theme_one->ApplyStyle(app::R::style::StyleOne).has_value());
+  ASSERT_TRUE(theme_one->ApplyStyle(app::R::style::StyleOne));
+
+  Res_value value;
+  uint32_t flags;
+  ApkAssetsCookie cookie;
 
   // attr_one is still here from the base.
-  auto value = theme_one->GetAttribute(app::R::attr::attr_one);
-  ASSERT_TRUE(value);
-  EXPECT_EQ(Res_value::TYPE_INT_DEC, value->type);
-  EXPECT_EQ(1u, value->data);
-  EXPECT_EQ(static_cast<uint32_t>(ResTable_typeSpec::SPEC_PUBLIC), value->flags);
+  cookie = theme_one->GetAttribute(app::R::attr::attr_one, &value, &flags);
+  ASSERT_NE(kInvalidCookie, cookie);
+  EXPECT_EQ(Res_value::TYPE_INT_DEC, value.dataType);
+  EXPECT_EQ(1u, value.data);
+  EXPECT_EQ(static_cast<uint32_t>(ResTable_typeSpec::SPEC_PUBLIC), flags);
 
   // attr_six is not here.
-  ASSERT_FALSE(theme_one->GetAttribute(app::R::attr::attr_six).has_value());
+  EXPECT_EQ(kInvalidCookie, theme_one->GetAttribute(app::R::attr::attr_six, &value, &flags));
 
   std::unique_ptr<Theme> theme_two = assetmanager.NewTheme();
-  ASSERT_TRUE(theme_two->ApplyStyle(app::R::style::StyleThree).has_value());
+  ASSERT_TRUE(theme_two->ApplyStyle(app::R::style::StyleThree));
 
   // Copy the theme to theme_one.
   theme_one->SetTo(*theme_two);
@@ -241,14 +271,14 @@ TEST_F(ThemeTest, CopyThemeSameAssetManager) {
   theme_two->Clear();
 
   // attr_one is now not here.
-  ASSERT_FALSE(theme_one->GetAttribute(app::R::attr::attr_one).has_value());
+  EXPECT_EQ(kInvalidCookie, theme_one->GetAttribute(app::R::attr::attr_one, &value, &flags));
 
   // attr_six is now here because it was copied.
-  value = theme_one->GetAttribute(app::R::attr::attr_six);
-  ASSERT_TRUE(value);
-  EXPECT_EQ(Res_value::TYPE_INT_DEC, value->type);
-  EXPECT_EQ(6u, value->data);
-  EXPECT_EQ(static_cast<uint32_t>(ResTable_typeSpec::SPEC_PUBLIC), value->flags);
+  cookie = theme_one->GetAttribute(app::R::attr::attr_six, &value, &flags);
+  ASSERT_NE(kInvalidCookie, cookie);
+  EXPECT_EQ(Res_value::TYPE_INT_DEC, value.dataType);
+  EXPECT_EQ(6u, value.data);
+  EXPECT_EQ(static_cast<uint32_t>(ResTable_typeSpec::SPEC_PUBLIC), flags);
 }
 
 TEST_F(ThemeTest, OnlyCopySameAssetsThemeWhenAssetManagersDiffer) {
@@ -261,43 +291,39 @@ TEST_F(ThemeTest, OnlyCopySameAssetsThemeWhenAssetManagersDiffer) {
                                  style_assets_.get()});
 
   auto theme_dst = assetmanager_dst.NewTheme();
-  ASSERT_TRUE(theme_dst->ApplyStyle(app::R::style::StyleOne).has_value());
+  ASSERT_TRUE(theme_dst->ApplyStyle(app::R::style::StyleOne));
 
   auto theme_src = assetmanager_src.NewTheme();
-  ASSERT_TRUE(theme_src->ApplyStyle(R::style::Theme_One).has_value());
-  ASSERT_TRUE(theme_src->ApplyStyle(app::R::style::StyleTwo).has_value());
+  ASSERT_TRUE(theme_src->ApplyStyle(R::style::Theme_One));
+  ASSERT_TRUE(theme_src->ApplyStyle(app::R::style::StyleTwo));
   ASSERT_TRUE(theme_src->ApplyStyle(fix_package_id(lib_one::R::style::Theme, 0x03),
-                                    false /*force*/).has_value());
+                                    false /*force*/));
   ASSERT_TRUE(theme_src->ApplyStyle(fix_package_id(lib_two::R::style::Theme, 0x02),
-                                    false /*force*/).has_value());
+                                    false /*force*/));
 
   theme_dst->SetTo(*theme_src);
 
+  Res_value value;
+  uint32_t flags;
+
   // System resources (present in destination asset manager).
-  auto value = theme_dst->GetAttribute(R::attr::foreground);
-  ASSERT_TRUE(value.has_value());
-  EXPECT_EQ(0, value->cookie);
+  EXPECT_EQ(0, theme_dst->GetAttribute(R::attr::foreground, &value, &flags));
 
   // The cookie of the style asset is 3 in the source and 2 in the destination.
   // Check that the cookie has been rewritten to the destination values.
-  value = theme_dst->GetAttribute(app::R::attr::attr_one);
-  ASSERT_TRUE(value.has_value());
-  EXPECT_EQ(2, value->cookie);
+  EXPECT_EQ(2, theme_dst->GetAttribute(app::R::attr::attr_one, &value, &flags));
 
   // The cookie of the lib_one asset is 2 in the source and 1 in the destination.
   // The package id of the lib_one package is 0x03 in the source and 0x02 in the destination
   // Check that the cookie and packages have been rewritten to the destination values.
-  value = theme_dst->GetAttribute(fix_package_id(lib_one::R::attr::attr1, 0x02));
-  ASSERT_TRUE(value.has_value());
-  EXPECT_EQ(1, value->cookie);
-
-  value = theme_dst->GetAttribute(fix_package_id(lib_one::R::attr::attr2, 0x02));
-  ASSERT_TRUE(value.has_value());
-  EXPECT_EQ(1, value->cookie);
+  EXPECT_EQ(1, theme_dst->GetAttribute(fix_package_id(lib_one::R::attr::attr1, 0x02), &value,
+                                       &flags));
+  EXPECT_EQ(1, theme_dst->GetAttribute(fix_package_id(lib_one::R::attr::attr2, 0x02), &value,
+                                       &flags));
 
   // attr2 references an attribute in lib_one. Check that the resolution of the attribute value is
   // correct after the value of attr2 had its package id rewritten to the destination package id.
-  EXPECT_EQ(700, value->data);
+  EXPECT_EQ(700, value.data);
 }
 
 TEST_F(ThemeTest, CopyNonReferencesWhenPackagesDiffer) {
@@ -309,32 +335,28 @@ TEST_F(ThemeTest, CopyNonReferencesWhenPackagesDiffer) {
 
   auto theme_dst = assetmanager_dst.NewTheme();
   auto theme_src = assetmanager_src.NewTheme();
-  ASSERT_TRUE(theme_src->ApplyStyle(app::R::style::StyleSeven).has_value());
+  ASSERT_TRUE(theme_src->ApplyStyle(app::R::style::StyleSeven));
   theme_dst->SetTo(*theme_src);
+
+  Res_value value;
+  uint32_t flags;
 
   // Allow inline resource values to be copied even if the source apk asset is not present in the
   // destination.
-  auto value = theme_dst->GetAttribute(0x0101021b /* android:versionCode */);
-  ASSERT_TRUE(value.has_value());
-  EXPECT_EQ(0, value->cookie);
+  EXPECT_EQ(0, theme_dst->GetAttribute(0x0101021b /* android:versionCode */, &value, &flags));
 
   // Do not copy strings since the data is an index into the values string pool of the source apk
   // asset.
-  EXPECT_FALSE(theme_dst->GetAttribute(0x01010001 /* android:label */).has_value());
+  EXPECT_EQ(-1, theme_dst->GetAttribute(0x01010001 /* android:label */, &value, &flags));
 
   // Do not copy values that reference another resource if the resource is not present in the
   // destination.
-  EXPECT_FALSE(theme_dst->GetAttribute(0x01010002 /* android:icon */).has_value());
-  EXPECT_FALSE(theme_dst->GetAttribute(0x010100d1 /* android:tag */).has_value());
+  EXPECT_EQ(-1, theme_dst->GetAttribute(0x01010002 /* android:icon */, &value, &flags));
+  EXPECT_EQ(-1, theme_dst->GetAttribute(0x010100d1 /* android:tag */, &value, &flags));
 
   // Allow @empty to and @null to be copied.
-  value = theme_dst->GetAttribute(0x010100d0 /* android:id */);
-  ASSERT_TRUE(value.has_value());
-  EXPECT_EQ(0, value->cookie);
-
-  value = theme_dst->GetAttribute(0x01010000 /* android:theme */);
-  ASSERT_TRUE(value.has_value());
-  EXPECT_EQ(0, value->cookie);
+  EXPECT_EQ(0, theme_dst->GetAttribute(0x010100d0 /* android:id */, &value, &flags));
+  EXPECT_EQ(0, theme_dst->GetAttribute(0x01010000 /* android:theme */, &value, &flags));
 }
 
 }  // namespace android

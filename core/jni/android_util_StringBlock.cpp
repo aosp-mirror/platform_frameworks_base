@@ -17,7 +17,6 @@
 
 #define LOG_TAG "StringBlock"
 
-#include "android_util_AssetManager_private.h"
 #include "jni.h"
 #include <nativehelper/JNIHelp.h>
 #include <utils/misc.h>
@@ -32,8 +31,10 @@ namespace android {
 
 // ----------------------------------------------------------------------------
 
-static jlong android_content_StringBlock_nativeCreate(JNIEnv* env, jobject clazz, jbyteArray bArray,
-                                                      jint off, jint len) {
+static jlong android_content_StringBlock_nativeCreate(JNIEnv* env, jobject clazz,
+                                                  jbyteArray bArray,
+                                                  jint off, jint len)
+{
     if (bArray == NULL) {
         jniThrowNullPointerException(env, NULL);
         return 0;
@@ -58,7 +59,9 @@ static jlong android_content_StringBlock_nativeCreate(JNIEnv* env, jobject clazz
     return reinterpret_cast<jlong>(osb);
 }
 
-static jint android_content_StringBlock_nativeGetSize(JNIEnv* env, jobject clazz, jlong token) {
+static jint android_content_StringBlock_nativeGetSize(JNIEnv* env, jobject clazz,
+                                                   jlong token)
+{
     ResStringPool* osb = reinterpret_cast<ResStringPool*>(token);
     if (osb == NULL) {
         jniThrowNullPointerException(env, NULL);
@@ -68,84 +71,76 @@ static jint android_content_StringBlock_nativeGetSize(JNIEnv* env, jobject clazz
     return osb->size();
 }
 
-static jstring android_content_StringBlock_nativeGetString(JNIEnv* env, jobject clazz, jlong token,
-                                                           jint idx) {
+static jstring android_content_StringBlock_nativeGetString(JNIEnv* env, jobject clazz,
+                                                        jlong token, jint idx)
+{
     ResStringPool* osb = reinterpret_cast<ResStringPool*>(token);
     if (osb == NULL) {
         jniThrowNullPointerException(env, NULL);
         return 0;
     }
 
-    auto str8 = osb->string8At(idx);
-    if (UNLIKELY(ThrowIfIOError(env, str8))) {
-        return 0;
-    } else if (str8.has_value()) {
-        return env->NewStringUTF(str8->data());
+    size_t len;
+    const char* str8 = osb->string8At(idx, &len);
+    if (str8 != NULL) {
+        return env->NewStringUTF(str8);
     }
 
-    auto str = osb->stringAt(idx);
-    if (UNLIKELY(ThrowIfIOError(env, str))) {
-        return 0;
-    } else if (UNLIKELY(!str.has_value())) {
+    const char16_t* str = osb->stringAt(idx, &len);
+    if (str == NULL) {
         jniThrowException(env, "java/lang/IndexOutOfBoundsException", NULL);
         return 0;
     }
 
-    return env->NewString((const jchar*)str->data(), str->size());
+    return env->NewString((const jchar*)str, len);
 }
 
-static jintArray android_content_StringBlock_nativeGetStyle(JNIEnv* env, jobject clazz, jlong token,
-                                                            jint idx) {
+static jintArray android_content_StringBlock_nativeGetStyle(JNIEnv* env, jobject clazz,
+                                                         jlong token, jint idx)
+{
     ResStringPool* osb = reinterpret_cast<ResStringPool*>(token);
     if (osb == NULL) {
         jniThrowNullPointerException(env, NULL);
         return NULL;
     }
 
-    auto spans = osb->styleAt(idx);
-    if (!spans.has_value()) {
-        ThrowIfIOError(env, spans);
+    const ResStringPool_span* spans = osb->styleAt(idx);
+    if (spans == NULL) {
         return NULL;
     }
 
-    jintArray array;
-    {
-        int num = 0;
-        auto pos = *spans;
-        while (true) {
-            if (UNLIKELY(!pos)) {
-                jniThrowException(env, kResourcesNotFound, kIOErrorMessage);
-                return NULL;
-            }
-            if (pos->name.index == ResStringPool_span::END) {
-                break;
-            }
-            num++;
-            pos++;
-        }
-
-        if (num == 0) {
-            return NULL;
-        }
-
-        array = env->NewIntArray((num * sizeof(ResStringPool_span)) / sizeof(jint));
-        if (array == NULL) { // NewIntArray already threw OutOfMemoryError.
-            return NULL;
-        }
+    const ResStringPool_span* pos = spans;
+    int num = 0;
+    while (pos->name.index != ResStringPool_span::END) {
+        num++;
+        pos++;
     }
-    {
-        int num = 0;
-        static const int numInts = sizeof(ResStringPool_span) / sizeof(jint);
-        while ((*spans)->name.index != ResStringPool_span::END) {
-            env->SetIntArrayRegion(array, num * numInts, numInts, (jint*)spans->unsafe_ptr());
-            (*spans)++;
-            num++;
-        }
+
+    if (num == 0) {
+        return NULL;
     }
+
+    jintArray array = env->NewIntArray((num*sizeof(ResStringPool_span))/sizeof(jint));
+    if (array == NULL) { // NewIntArray already threw OutOfMemoryError.
+        return NULL;
+    }
+
+    num = 0;
+    static const int numInts = sizeof(ResStringPool_span)/sizeof(jint);
+    while (spans->name.index != ResStringPool_span::END) {
+        env->SetIntArrayRegion(array,
+                                  num*numInts, numInts,
+                                  (jint*)spans);
+        spans++;
+        num++;
+    }
+
     return array;
 }
 
-static void android_content_StringBlock_nativeDestroy(JNIEnv* env, jobject clazz, jlong token) {
+static void android_content_StringBlock_nativeDestroy(JNIEnv* env, jobject clazz,
+                                                   jlong token)
+{
     ResStringPool* osb = reinterpret_cast<ResStringPool*>(token);
     if (osb == NULL) {
         jniThrowNullPointerException(env, NULL);

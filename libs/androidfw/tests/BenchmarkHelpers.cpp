@@ -71,9 +71,15 @@ void GetResourceBenchmark(const std::vector<std::string>& paths, const ResTable_
     assetmanager.SetConfiguration(*config);
   }
 
+  Res_value value;
+  ResTable_config selected_config;
+  uint32_t flags;
+  uint32_t last_id = 0u;
+
   while (state.KeepRunning()) {
-    auto value = assetmanager.GetResource(resid);
-    assetmanager.ResolveReference(*value);
+    ApkAssetsCookie cookie = assetmanager.GetResource(
+        resid, false /* may_be_bag */, 0u /* density_override */, &value, &selected_config, &flags);
+    assetmanager.ResolveReference(cookie, &value, &selected_config, &flags, &last_id);
   }
 }
 

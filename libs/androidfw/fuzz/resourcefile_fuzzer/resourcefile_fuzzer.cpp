@@ -31,6 +31,9 @@ using android::LoadedArsc;
 using android::StringPiece;
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
-  std::unique_ptr<const LoadedArsc> loaded_arsc = LoadedArsc::Load(data, size);
+
+  std::unique_ptr<const LoadedArsc> loaded_arsc =
+      LoadedArsc::Load(StringPiece(reinterpret_cast<const char*>(data), size));
+
   return 0;
 }

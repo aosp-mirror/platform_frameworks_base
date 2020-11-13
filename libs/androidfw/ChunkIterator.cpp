@@ -15,7 +15,6 @@
  */
 
 #include "androidfw/Chunk.h"
-#include "androidfw/Util.h"
 
 #include "android-base/logging.h"
 
@@ -24,11 +23,11 @@ namespace android {
 Chunk ChunkIterator::Next() {
   CHECK(len_ != 0) << "called Next() after last chunk";
 
-  const incfs::map_ptr<ResChunk_header> this_chunk = next_chunk_;
-  CHECK((bool) this_chunk) << "Next() called without verifying next chunk";
+  const ResChunk_header* this_chunk = next_chunk_;
 
   // We've already checked the values of this_chunk, so safely increment.
-  next_chunk_ = this_chunk.offset(dtohl(this_chunk->size)).convert<ResChunk_header>();
+  next_chunk_ = reinterpret_cast<const ResChunk_header*>(
+      reinterpret_cast<const uint8_t*>(this_chunk) + dtohl(this_chunk->size));
   len_ -= dtohl(this_chunk->size);
 
   if (len_ != 0) {
@@ -37,7 +36,7 @@ Chunk ChunkIterator::Next() {
       VerifyNextChunk();
     }
   }
-  return Chunk(this_chunk.verified());
+  return Chunk(this_chunk);
 }
 
 // TODO(b/111401637) remove this and have full resource file verification
@@ -48,13 +47,6 @@ bool ChunkIterator::VerifyNextChunkNonFatal() {
     last_error_was_fatal_ = false;
     return false;
   }
-
-  if (!next_chunk_) {
-    last_error_ = "failed to read chunk from data";
-    last_error_was_fatal_ = false;
-    return false;
-  }
-
   const size_t size = dtohl(next_chunk_->size);
   if (size > len_) {
     last_error_ = "chunk size is bigger than given data";
@@ -66,21 +58,18 @@ bool ChunkIterator::VerifyNextChunkNonFatal() {
 
 // Returns false if there was an error.
 bool ChunkIterator::VerifyNextChunk() {
+  const uintptr_t header_start = reinterpret_cast<uintptr_t>(next_chunk_);
+
   // This data must be 4-byte aligned, since we directly
   // access 32-bit words, which must be aligned on
   // certain architectures.
-  if (!util::IsFourByteAligned(next_chunk_)) {
+  if (header_start & 0x03) {
     last_error_ = "header not aligned on 4-byte boundary";
     return false;
   }
 
   if (len_ < sizeof(ResChunk_header)) {
     last_error_ = "not enough space for header";
-    return false;
-  }
-
-  if (!next_chunk_) {
-    last_error_ = "failed to read chunk from data";
     return false;
   }
 
@@ -101,7 +90,7 @@ bool ChunkIterator::VerifyNextChunk() {
     return false;
   }
 
-  if ((size | header_size) & 0x03U) {
+  if ((size | header_size) & 0x03) {
     last_error_ = "header sizes are not aligned on 4-byte boundary";
     return false;
   }
