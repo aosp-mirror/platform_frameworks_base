@@ -35,8 +35,7 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".AppPickerActivity"
-                  android:label="Power Stats - Select an App"/>
-
+        <activity android:name=".PowerConsumerPickerActivity"
+                  android:label="Select a power consumer"/>
     </application>
 </manifest>
