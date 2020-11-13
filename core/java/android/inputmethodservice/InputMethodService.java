@@ -600,6 +600,9 @@ public class InputMethodService extends AbstractInputMethodService {
         @MainThread
         @Override
         public void updateInputMethodDisplay(int displayId) {
+            if (getDisplayId() == displayId) {
+                return;
+            }
             // Update display for adding IME window to the right display.
             // TODO(b/111364446) Need to address context lifecycle issue if need to re-create
             // for update resources & configuration correctly when show soft input
@@ -764,12 +767,12 @@ public class InputMethodService extends AbstractInputMethodService {
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMS.showSoftInput");
             final boolean wasVisible = isInputViewShown();
             if (dispatchOnShowInputRequested(flags, false)) {
-
                 showWindow(true);
                 applyVisibilityInInsetsConsumerIfNecessary(true /* setVisible */);
+            } else {
+                // If user uses hard keyboard, IME button should always be shown.
+                setImeWindowStatus(mapToImeWindowStatus(), mBackDisposition);
             }
-            // If user uses hard keyboard, IME button should always be shown.
-            setImeWindowStatus(mapToImeWindowStatus(), mBackDisposition);
             final boolean isVisible = isInputViewShown();
             final boolean visibilityChanged = isVisible != wasVisible;
             if (resultReceiver != null) {
@@ -1232,6 +1235,9 @@ public class InputMethodService extends AbstractInputMethodService {
         super.onCreate();
         mImm = (InputMethodManager)getSystemService(INPUT_METHOD_SERVICE);
         mSettingsObserver = SettingsObserver.createAndRegister(this);
+        // cache preference so we don't have to read ContentProvider when IME is requested to be
+        // shown the first time (cold start).
+        mSettingsObserver.shouldShowImeWithHardKeyboard();
 
         mIsAutomotive = isAutomotive();
         mAutomotiveHideNavBarForKeyboard = getApplicationContext().getResources().getBoolean(
@@ -1301,13 +1307,7 @@ public class InputMethodService extends AbstractInputMethodService {
         mRootView = mInflater.inflate(
                 com.android.internal.R.layout.input_method, null);
         mWindow.setContentView(mRootView);
-        mRootView.getViewTreeObserver().removeOnComputeInternalInsetsListener(mInsetsComputer);
         mRootView.getViewTreeObserver().addOnComputeInternalInsetsListener(mInsetsComputer);
-        if (Settings.Global.getInt(getContentResolver(),
-                Settings.Global.FANCY_IME_ANIMATIONS, 0) != 0) {
-            mWindow.getWindow().setWindowAnimations(
-                    com.android.internal.R.style.Animation_InputMethodFancy);
-        }
         mFullscreenArea = mRootView.findViewById(com.android.internal.R.id.fullscreenArea);
         mExtractViewHidden = false;
         mExtractFrame = mRootView.findViewById(android.R.id.extractArea);
@@ -1371,6 +1371,7 @@ public class InputMethodService extends AbstractInputMethodService {
         int showFlags = mShowInputFlags;
         boolean showingInput = mShowInputRequested;
         CompletionInfo[] completions = mCurCompletions;
+        mRootView.getViewTreeObserver().removeOnComputeInternalInsetsListener(mInsetsComputer);
         initViews();
         mInputViewStarted = false;
         mCandidatesViewStarted = false;
