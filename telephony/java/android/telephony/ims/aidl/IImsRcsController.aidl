@@ -63,7 +63,7 @@ interface IImsRcsController {
 
     // SipDelegateManager
     boolean isSipDelegateSupported(int subId);
-    void createSipDelegate(int subId, in DelegateRequest request,
+    void createSipDelegate(int subId, in DelegateRequest request, String packageName,
             ISipDelegateConnectionStateCallback delegateState,
             ISipDelegateMessageCallback delegateMessage);
     void destroySipDelegate(int subId, ISipDelegate connection, int reason);
