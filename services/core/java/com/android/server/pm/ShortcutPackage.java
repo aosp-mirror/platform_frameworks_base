@@ -1683,7 +1683,7 @@ class ShortcutPackage extends ShortcutPackageItem {
                 if (cat != null && cat.size() > 0) {
                     out.startTag(null, TAG_CATEGORIES);
                     XmlUtils.writeStringArrayXml(cat.toArray(new String[cat.size()]),
-                            NAME_CATEGORIES, out);
+                            NAME_CATEGORIES, XmlUtils.makeTyped(out));
                     out.endTag(null, TAG_CATEGORIES);
                 }
             }
@@ -1904,7 +1904,7 @@ class ShortcutPackage extends ShortcutPackageItem {
                     if (NAME_CATEGORIES.equals(ShortcutService.parseStringAttribute(parser,
                             ATTR_NAME_XMLUTILS))) {
                         final String[] ar = XmlUtils.readThisStringArrayXml(
-                                parser, TAG_STRING_ARRAY_XMLUTILS, null);
+                                XmlUtils.makeTyped(parser), TAG_STRING_ARRAY_XMLUTILS, null);
                         categories = new ArraySet<>(ar.length);
                         for (int i = 0; i < ar.length; i++) {
                             categories.add(ar[i]);
