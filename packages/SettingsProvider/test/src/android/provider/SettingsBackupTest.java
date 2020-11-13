@@ -656,7 +656,9 @@ public class SettingsBackupTest {
                     Settings.Global.Wearable.COMPANION_OS_VERSION,
                     Settings.Global.Wearable.ENABLE_ALL_LANGUAGES,
                     Settings.Global.Wearable.SETUP_LOCALE,
-                    Settings.Global.Wearable.OEM_SETUP_VERSION);
+                    Settings.Global.Wearable.OEM_SETUP_VERSION,
+                    Settings.Global.Wearable.MASTER_GESTURES_ENABLED,
+                    Settings.Global.Wearable.UNGAZE_ENABLED);
 
     private static final Set<String> BACKUP_DENY_LIST_SECURE_SETTINGS =
              newHashSet(
