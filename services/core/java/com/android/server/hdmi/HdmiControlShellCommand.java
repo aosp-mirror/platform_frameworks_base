@@ -65,6 +65,11 @@ final class HdmiControlShellCommand extends ShellCommand {
         pw.println("      Print this help text.");
         pw.println("  onetouchplay, otp");
         pw.println("      Send the \"One Touch Play\" feature from a source to the TV");
+        pw.println("  vendorcommand --device_type <originating device type>");
+        pw.println("                --destination <destination device>");
+        pw.println("                --args <vendor specific arguments>");
+        pw.println("                [--id <true if vendor command should be sent with vendor id>]");
+        pw.println("      Send a Vendor Command to the given target device");
     }
 
     private int handleShellCommand(String cmd) throws RemoteException {
@@ -74,6 +79,8 @@ final class HdmiControlShellCommand extends ShellCommand {
             case "otp":
             case "onetouchplay":
                 return oneTouchPlay(pw);
+            case "vendorcommand":
+                return vendorCommand(pw);
         }
 
         getErrPrintWriter().println("Unhandled command: " + cmd);
@@ -103,5 +110,51 @@ final class HdmiControlShellCommand extends ShellCommand {
             Thread.currentThread().interrupt();
         }
         return cecResult.get() == HdmiControlManager.RESULT_SUCCESS ? 0 : 1;
+    }
+
+    private int vendorCommand(PrintWriter pw) throws RemoteException {
+        if (6 > getRemainingArgsCount()) {
+            throw new IllegalArgumentException("Expected 3 arguments.");
+        }
+
+        int deviceType = -1;
+        int destination = -1;
+        String parameters = "";
+        boolean hasVendorId = false;
+
+        String arg = getNextOption();
+        while (arg != null) {
+            switch (arg) {
+                case "-t":
+                case "--device_type":
+                    deviceType = Integer.parseInt(getNextArgRequired());
+                    break;
+                case "-d":
+                case "--destination":
+                    destination = Integer.parseInt(getNextArgRequired());
+                    break;
+                case "-a":
+                case "--args":
+                    parameters = getNextArgRequired();
+                    break;
+                case "-i":
+                case "--id":
+                    hasVendorId = Boolean.parseBoolean(getNextArgRequired());
+                    break;
+                default:
+                    throw new IllegalArgumentException("Unknown argument: " + arg);
+            }
+            arg = getNextArg();
+        }
+
+        String[] parts = parameters.split(":");
+        byte[] params = new byte[parts.length];
+        for (int i = 0; i < params.length; i++) {
+            params[i] = (byte) Integer.parseInt(parts[i], 16);
+        }
+
+        pw.println("Sending <Vendor Command>");
+        mBinderService.sendVendorCommand(deviceType, destination, params, hasVendorId);
+        return 0;
     }
 }
