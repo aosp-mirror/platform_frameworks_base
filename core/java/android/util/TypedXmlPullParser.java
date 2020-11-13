@@ -20,8 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 
 import org.xmlpull.v1.XmlPullParser;
-
-import java.io.IOException;
+import org.xmlpull.v1.XmlPullParserException;
 
 /**
  * Specialization of {@link XmlPullParser} which adds explicit methods to
@@ -31,67 +30,93 @@ import java.io.IOException;
  */
 public interface TypedXmlPullParser extends XmlPullParser {
     /**
-     * @return decoded strongly-typed {@link #getAttributeValue}, or
-     *         {@code null} if malformed or undefined
+     * @return decoded strongly-typed {@link #getAttributeValue}
+     * @throws XmlPullParserException if the value is malformed or undefined
      */
-    @Nullable byte[] getAttributeBytesHex(@Nullable String namespace, @NonNull String name)
-            throws IOException;
-
-    /**
-     * @return decoded strongly-typed {@link #getAttributeValue}, or
-     *         {@code null} if malformed or undefined
-     */
-    @Nullable byte[] getAttributeBytesBase64(@Nullable String namespace, @NonNull String name)
-            throws IOException;
+    @NonNull byte[] getAttributeBytesHex(@Nullable String namespace, @NonNull String name)
+            throws XmlPullParserException;
 
     /**
      * @return decoded strongly-typed {@link #getAttributeValue}
-     * @throws IOException if the value is malformed or undefined
+     * @throws XmlPullParserException if the value is malformed or undefined
+     */
+    @NonNull byte[] getAttributeBytesBase64(@Nullable String namespace, @NonNull String name)
+            throws XmlPullParserException;
+
+    /**
+     * @return decoded strongly-typed {@link #getAttributeValue}
+     * @throws XmlPullParserException if the value is malformed or undefined
      */
     int getAttributeInt(@Nullable String namespace, @NonNull String name)
-            throws IOException;
+            throws XmlPullParserException;
 
     /**
      * @return decoded strongly-typed {@link #getAttributeValue}
-     * @throws IOException if the value is malformed or undefined
+     * @throws XmlPullParserException if the value is malformed or undefined
      */
     int getAttributeIntHex(@Nullable String namespace, @NonNull String name)
-            throws IOException;
+            throws XmlPullParserException;
 
     /**
      * @return decoded strongly-typed {@link #getAttributeValue}
-     * @throws IOException if the value is malformed or undefined
+     * @throws XmlPullParserException if the value is malformed or undefined
      */
     long getAttributeLong(@Nullable String namespace, @NonNull String name)
-            throws IOException;
+            throws XmlPullParserException;
 
     /**
      * @return decoded strongly-typed {@link #getAttributeValue}
-     * @throws IOException if the value is malformed or undefined
+     * @throws XmlPullParserException if the value is malformed or undefined
      */
     long getAttributeLongHex(@Nullable String namespace, @NonNull String name)
-            throws IOException;
+            throws XmlPullParserException;
 
     /**
      * @return decoded strongly-typed {@link #getAttributeValue}
-     * @throws IOException if the value is malformed or undefined
+     * @throws XmlPullParserException if the value is malformed or undefined
      */
     float getAttributeFloat(@Nullable String namespace, @NonNull String name)
-            throws IOException;
+            throws XmlPullParserException;
 
     /**
      * @return decoded strongly-typed {@link #getAttributeValue}
-     * @throws IOException if the value is malformed or undefined
+     * @throws XmlPullParserException if the value is malformed or undefined
      */
     double getAttributeDouble(@Nullable String namespace, @NonNull String name)
-            throws IOException;
+            throws XmlPullParserException;
 
     /**
      * @return decoded strongly-typed {@link #getAttributeValue}
-     * @throws IOException if the value is malformed or undefined
+     * @throws XmlPullParserException if the value is malformed or undefined
      */
     boolean getAttributeBoolean(@Nullable String namespace, @NonNull String name)
-            throws IOException;
+            throws XmlPullParserException;
+
+    /**
+     * @return decoded strongly-typed {@link #getAttributeValue}, otherwise
+     *         default value if the value is malformed or undefined
+     */
+    default @Nullable byte[] getAttributeBytesHex(@Nullable String namespace,
+            @NonNull String name, @Nullable byte[] defaultValue) {
+        try {
+            return getAttributeBytesHex(namespace, name);
+        } catch (Exception ignored) {
+            return defaultValue;
+        }
+    }
+
+    /**
+     * @return decoded strongly-typed {@link #getAttributeValue}, otherwise
+     *         default value if the value is malformed or undefined
+     */
+    default @Nullable byte[] getAttributeBytesBase64(@Nullable String namespace,
+            @NonNull String name, @Nullable byte[] defaultValue) {
+        try {
+            return getAttributeBytesBase64(namespace, name);
+        } catch (Exception ignored) {
+            return defaultValue;
+        }
+    }
 
     /**
      * @return decoded strongly-typed {@link #getAttributeValue}, otherwise
