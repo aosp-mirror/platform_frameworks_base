@@ -1205,7 +1205,7 @@ public class DevicePolicyManager {
      * <ul>
      * <li>By the admin app when performing the admin-integrated
      * provisioning flow as a result of the {@link #ACTION_GET_PROVISIONING_MODE} activity</li>
-     * <li>With intent action {@link #ACTION_PROVISION_MANAGED_DEVICE}</li>
+     * <li>For managed account enrollment</li>
      * </ul>
      *
      * <p>If the education screens are skipped, it is the admin application's responsibility
@@ -1228,9 +1228,37 @@ public class DevicePolicyManager {
             "android.app.extra.PROVISIONING_USE_MOBILE_DATA";
 
     /**
+     * Possible values for {@link #EXTRA_PROVISIONING_TRIGGER}.
+     *
+     * @hide
+     */
+    @IntDef(prefix = { "PROVISIONING_TRIGGER_" }, value = {
+            PROVISIONING_TRIGGER_UNSPECIFIED,
+            PROVISIONING_TRIGGER_CLOUD_ENROLLMENT,
+            PROVISIONING_TRIGGER_QR_CODE,
+            PROVISIONING_TRIGGER_PERSISTENT_DEVICE_OWNER,
+            PROVISIONING_TRIGGER_MANAGED_ACCOUNT
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ProvisioningTrigger {}
+
+    /**
+     * Possible values for {@link #EXTRA_PROVISIONING_SUPPORTED_MODES}.
+     *
+     * @hide
+     */
+    @IntDef(prefix = { "SUPPORTED_MODES_" }, value = {
+            SUPPORTED_MODES_ORGANIZATION_OWNED,
+            SUPPORTED_MODES_PERSONALLY_OWNED,
+            SUPPORTED_MODES_ORGANIZATION_AND_PERSONALLY_OWNED
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ProvisioningConfiguration {}
+
+    /**
      * A String extra holding the provisioning trigger. It could be one of
      * {@link #PROVISIONING_TRIGGER_CLOUD_ENROLLMENT}, {@link #PROVISIONING_TRIGGER_QR_CODE},
-     * {@link #PROVISIONING_TRIGGER_PERSISTENT_DEVICE_OWNER} or {@link
+     * {@link #PROVISIONING_TRIGGER_MANAGED_ACCOUNT} or {@link
      * #PROVISIONING_TRIGGER_UNSPECIFIED}.
      *
      * <p>Use in an intent with action {@link
@@ -1246,7 +1274,7 @@ public class DevicePolicyManager {
      * trigger has not been specified.
      * @see #PROVISIONING_TRIGGER_CLOUD_ENROLLMENT
      * @see #PROVISIONING_TRIGGER_QR_CODE
-     * @see #PROVISIONING_TRIGGER_PERSISTENT_DEVICE_OWNER
+     * @see #PROVISIONING_TRIGGER_MANAGED_ACCOUNT
      * @hide
      */
     @SystemApi
@@ -1256,7 +1284,7 @@ public class DevicePolicyManager {
      * A value for {@link #EXTRA_PROVISIONING_TRIGGER} indicating that the provisioning
      * trigger is cloud enrollment.
      * @see #PROVISIONING_TRIGGER_QR_CODE
-     * @see #PROVISIONING_TRIGGER_PERSISTENT_DEVICE_OWNER
+     * @see #PROVISIONING_TRIGGER_MANAGED_ACCOUNT
      * @see #PROVISIONING_TRIGGER_UNSPECIFIED
      * @hide
      */
@@ -1267,7 +1295,7 @@ public class DevicePolicyManager {
      * A value for {@link #EXTRA_PROVISIONING_TRIGGER} indicating that the provisioning
      * trigger is the QR code scanner.
      * @see #PROVISIONING_TRIGGER_CLOUD_ENROLLMENT
-     * @see #PROVISIONING_TRIGGER_PERSISTENT_DEVICE_OWNER
+     * @see #PROVISIONING_TRIGGER_MANAGED_ACCOUNT
      * @see #PROVISIONING_TRIGGER_UNSPECIFIED
      * @hide
      */
@@ -1277,13 +1305,76 @@ public class DevicePolicyManager {
     /**
      * A value for {@link #EXTRA_PROVISIONING_TRIGGER} indicating that the provisioning
      * trigger is persistent device owner enrollment.
+     * @deprecated Use the broader {@link #PROVISIONING_TRIGGER_MANAGED_ACCOUNT} instead
      * @see #PROVISIONING_TRIGGER_CLOUD_ENROLLMENT
      * @see #PROVISIONING_TRIGGER_QR_CODE
      * @see #PROVISIONING_TRIGGER_UNSPECIFIED
      * @hide
      */
     @SystemApi
+    @Deprecated
     public static final int PROVISIONING_TRIGGER_PERSISTENT_DEVICE_OWNER = 3;
+
+    /**
+     * A value for {@link #EXTRA_PROVISIONING_TRIGGER} indicating that the provisioning
+     * trigger is managed account enrollment.
+     * @see #PROVISIONING_TRIGGER_CLOUD_ENROLLMENT
+     * @see #PROVISIONING_TRIGGER_QR_CODE
+     * @see #PROVISIONING_TRIGGER_UNSPECIFIED
+     * @hide
+     */
+    @SystemApi
+    public static final int PROVISIONING_TRIGGER_MANAGED_ACCOUNT = 4;
+
+    /**
+     * A value for {@link #EXTRA_PROVISIONING_SUPPORTED_MODES} indicating that provisioning is
+     * organization-owned.
+     *
+     * <p>Using this value will cause the admin app's {@link #ACTION_GET_PROVISIONING_MODE}
+     * activity to have the {@link #EXTRA_PROVISIONING_ALLOWED_PROVISIONING_MODES} array extra
+     * contain {@link #PROVISIONING_MODE_MANAGED_PROFILE} and {@link
+     * #PROVISIONING_MODE_FULLY_MANAGED_DEVICE}.
+     *
+     * <p>Also, if this value is set, the admin app's {@link #ACTION_GET_PROVISIONING_MODE} activity
+     * will not receive the {@link #EXTRA_PROVISIONING_IMEI} and {@link
+     * #EXTRA_PROVISIONING_SERIAL_NUMBER} extras.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int SUPPORTED_MODES_ORGANIZATION_OWNED = 1;
+
+    /**
+     * A value for {@link #EXTRA_PROVISIONING_SUPPORTED_MODES} indicating that provisioning is
+     * personally-owned.
+     *
+     * <p>Using this value will cause the admin app's {@link #ACTION_GET_PROVISIONING_MODE}
+     * activity to have the {@link #EXTRA_PROVISIONING_ALLOWED_PROVISIONING_MODES} array extra
+     * contain only {@link #PROVISIONING_MODE_MANAGED_PROFILE}.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int SUPPORTED_MODES_PERSONALLY_OWNED = 2;
+
+    /**
+     * A value for {@link #EXTRA_PROVISIONING_SUPPORTED_MODES} indicating that provisioning could
+     * be organization-owned or personally-owned.
+     *
+     * <p>Using this value will cause the admin app's {@link #ACTION_GET_PROVISIONING_MODE}
+     * activity to have the {@link #EXTRA_PROVISIONING_ALLOWED_PROVISIONING_MODES} array extra
+     * contain {@link
+     * #PROVISIONING_MODE_MANAGED_PROFILE}, {@link #PROVISIONING_MODE_FULLY_MANAGED_DEVICE} and
+     * {@link #PROVISIONING_MODE_MANAGED_PROFILE_ON_PERSONAL_DEVICE}.
+     *
+     * <p>Also, if this value is set, the admin app's {@link #ACTION_GET_PROVISIONING_MODE} activity
+     * will not receive the {@link #EXTRA_PROVISIONING_IMEI} and {@link
+     * #EXTRA_PROVISIONING_SERIAL_NUMBER} extras.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int SUPPORTED_MODES_ORGANIZATION_AND_PERSONALLY_OWNED = 3;
 
     /**
      * This MIME type is used for starting the device owner provisioning.
@@ -2378,14 +2469,55 @@ public class DevicePolicyManager {
 
     /**
      * An intent extra holding the provisioning mode returned by the administrator.
-     * The value for this extra should be one of the following:
-     * <ul>
-     *     <li>{@link #PROVISIONING_MODE_FULLY_MANAGED_DEVICE}</li>
-     *     <li>{@link #PROVISIONING_MODE_MANAGED_PROFILE}</li>
-     * </ul>
+     * The value of this extra must be one of the values provided in {@link
+     * #EXTRA_PROVISIONING_ALLOWED_PROVISIONING_MODES}, which is provided as an intent extra to
+     * the admin app's {@link #ACTION_GET_PROVISIONING_MODE} activity.
+     *
+     * @see #PROVISIONING_MODE_FULLY_MANAGED_DEVICE
+     * @see #PROVISIONING_MODE_MANAGED_PROFILE
      */
     public static final String EXTRA_PROVISIONING_MODE =
             "android.app.extra.PROVISIONING_MODE";
+
+    /**
+     * An integer extra indication what provisioning modes should be available for the admin app
+     * to pick.
+     *
+     * <p>The default value is {@link #SUPPORTED_MODES_ORGANIZATION_OWNED}.
+     *
+     * <p>The value of this extra will determine the contents of the {@link
+     * #EXTRA_PROVISIONING_ALLOWED_PROVISIONING_MODES} array that is passed to the admin app as an
+     * extra to its {@link #ACTION_GET_PROVISIONING_MODE} activity.
+     *
+     * <p>If one of the possible admin app choices is a personally-owned work profile, then the
+     * IMEI and serial number will not be passed to the admin app's {@link
+     * #ACTION_GET_PROVISIONING_MODE} activity via the {@link #EXTRA_PROVISIONING_IMEI} and {@link
+     * #EXTRA_PROVISIONING_SERIAL_NUMBER} respectively.
+     *
+     * <p>This extra is only respected when provided alongside the {@link
+     * #ACTION_PROVISION_MANAGED_DEVICE_FROM_TRUSTED_SOURCE} intent action.
+     *
+     * @see #SUPPORTED_MODES_ORGANIZATION_OWNED
+     * @see #SUPPORTED_MODES_PERSONALLY_OWNED
+     * @see #SUPPORTED_MODES_ORGANIZATION_AND_PERSONALLY_OWNED
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_PROVISIONING_SUPPORTED_MODES =
+            "android.app.extra.PROVISIONING_SUPPORTED_MODES";
+
+    /**
+     * An {@link ArrayList} of {@link Integer} extra specifying the allowed provisioning modes.
+     * <p>This extra will be passed to the admin app's {@link #ACTION_GET_PROVISIONING_MODE}
+     * activity, whose result intent must contain {@link #EXTRA_PROVISIONING_MODE} set to one of
+     * the values in this array.
+     * <p>If the value set to {@link #EXTRA_PROVISIONING_MODE} is not in the array,
+     * provisioning will fail.
+     * @see #PROVISIONING_MODE_MANAGED_PROFILE
+     * @see #PROVISIONING_MODE_FULLY_MANAGED_DEVICE
+     */
+    public static final String EXTRA_PROVISIONING_ALLOWED_PROVISIONING_MODES =
+            "android.app.extra.PROVISIONING_ALLOWED_PROVISIONING_MODES";
 
     /**
      * The provisioning mode for fully managed device.
@@ -2396,6 +2528,11 @@ public class DevicePolicyManager {
      * The provisioning mode for managed profile.
      */
     public static final int PROVISIONING_MODE_MANAGED_PROFILE = 2;
+
+    /**
+     * The provisioning mode for a work profile on a personal device.
+     */
+    public static final int PROVISIONING_MODE_MANAGED_PROFILE_ON_PERSONAL_DEVICE = 3;
 
     /**
      * Activity action: Starts the administrator to show policy compliance for the provisioning.
