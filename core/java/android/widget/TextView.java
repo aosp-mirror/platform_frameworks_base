@@ -17,10 +17,10 @@
 package android.widget;
 
 import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
-import static android.view.OnReceiveContentCallback.Payload.FLAG_CONVERT_TO_PLAIN_TEXT;
-import static android.view.OnReceiveContentCallback.Payload.SOURCE_AUTOFILL;
-import static android.view.OnReceiveContentCallback.Payload.SOURCE_CLIPBOARD;
-import static android.view.OnReceiveContentCallback.Payload.SOURCE_PROCESS_TEXT;
+import static android.view.OnReceiveContentListener.Payload.FLAG_CONVERT_TO_PLAIN_TEXT;
+import static android.view.OnReceiveContentListener.Payload.SOURCE_AUTOFILL;
+import static android.view.OnReceiveContentListener.Payload.SOURCE_CLIPBOARD;
+import static android.view.OnReceiveContentListener.Payload.SOURCE_PROCESS_TEXT;
 import static android.view.accessibility.AccessibilityNodeInfo.EXTRA_DATA_RENDERING_INFO_KEY;
 import static android.view.accessibility.AccessibilityNodeInfo.EXTRA_DATA_TEXT_CHARACTER_LOCATION_ARG_LENGTH;
 import static android.view.accessibility.AccessibilityNodeInfo.EXTRA_DATA_TEXT_CHARACTER_LOCATION_ARG_START_INDEX;
@@ -154,7 +154,7 @@ import android.view.InputDevice;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
-import android.view.OnReceiveContentCallback;
+import android.view.OnReceiveContentListener.Payload;
 import android.view.PointerIcon;
 import android.view.View;
 import android.view.ViewConfiguration;
@@ -2151,10 +2151,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 if (result != null) {
                     if (isTextEditable()) {
                         ClipData clip = ClipData.newPlainText("", result);
-                        OnReceiveContentCallback.Payload payload =
-                                new OnReceiveContentCallback.Payload.Builder(
-                                        clip, SOURCE_PROCESS_TEXT)
-                                        .build();
+                        Payload payload = new Payload.Builder(clip, SOURCE_PROCESS_TEXT).build();
                         onReceiveContent(payload);
                         if (mEditor != null) {
                             mEditor.refreshTextActionMode();
@@ -11858,8 +11855,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     + " cannot be autofilled into " + this);
             return;
         }
-        final OnReceiveContentCallback.Payload payload =
-                new OnReceiveContentCallback.Payload.Builder(clip, SOURCE_AUTOFILL).build();
+        final Payload payload = new Payload.Builder(clip, SOURCE_AUTOFILL).build();
         onReceiveContent(payload);
     }
 
@@ -12926,8 +12922,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         if (clip == null) {
             return;
         }
-        final OnReceiveContentCallback.Payload payload =
-                new OnReceiveContentCallback.Payload.Builder(clip, SOURCE_CLIPBOARD)
+        final Payload payload = new Payload.Builder(clip, SOURCE_CLIPBOARD)
                 .setFlags(withFormatting ? 0 : FLAG_CONVERT_TO_PLAIN_TEXT)
                 .build();
         onReceiveContent(payload);
@@ -13717,7 +13712,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     public void onInputConnectionOpenedInternal(@NonNull InputConnection ic,
             @NonNull EditorInfo editorInfo, @Nullable Handler handler) {
         if (mEditor != null) {
-            mEditor.getDefaultOnReceiveContentCallback().setInputConnectionInfo(ic, editorInfo);
+            mEditor.getDefaultOnReceiveContentListener().setInputConnectionInfo(this, ic,
+                    editorInfo);
         }
     }
 
@@ -13725,68 +13721,35 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     @Override
     public void onInputConnectionClosedInternal() {
         if (mEditor != null) {
-            mEditor.getDefaultOnReceiveContentCallback().clearInputConnectionInfo();
+            mEditor.getDefaultOnReceiveContentListener().clearInputConnectionInfo();
         }
     }
 
     /**
-     * Sets the callback to handle insertion of content into this view.
+     * Receives the given content. Clients wishing to provide custom behavior should configure a
+     * listener via {@link #setOnReceiveContentListener}.
      *
-     * <p>This callback will be invoked for the following scenarios:
-     * <ol>
-     *     <li>Paste from the clipboard (e.g. "Paste" or "Paste as plain text" action in the
-     *     insertion/selection menu)
-     *     <li>Content insertion from the keyboard (from {@link InputConnection#commitContent})
-     *     <li>Drag and drop (drop events from {@link #onDragEvent(DragEvent)})
-     *     <li>Autofill (from {@link #autofill(AutofillValue)})
-     *     <li>{@link Intent#ACTION_PROCESS_TEXT} replacement
-     * </ol>
+     * <p>If a listener is set, invokes the listener. If the listener returns a non-null result,
+     * executes the default platform handling for the portion of the content returned by the
+     * listener.
      *
-     * <p>This callback is only invoked for content whose MIME type matches a type specified via
-     * the {code mimeTypes} parameter. If the MIME type is not supported by the callback, the
-     * default platform handling will be executed instead (no-op for the default {@link View}).
-     *
-     * <p><em>Note: MIME type matching in the Android framework is case-sensitive, unlike formal RFC
-     * MIME types. As a result, you should always write your MIME types with lower case letters, or
-     * use {@link android.content.Intent#normalizeMimeType} to ensure that it is converted to lower
-     * case.</em>
-     *
-     * @param mimeTypes The type of content for which the callback should be invoked. This may use
-     * wildcards such as "text/*", "image/*", etc. This must not be null or empty if a non-null
-     * callback is passed in.
-     * @param callback The callback to use. This can be null to reset to the default behavior.
-     */
-    @SuppressWarnings("rawtypes")
-    @Override
-    public void setOnReceiveContentCallback(
-            @Nullable String[] mimeTypes,
-            @Nullable OnReceiveContentCallback callback) {
-        super.setOnReceiveContentCallback(mimeTypes, callback);
-    }
-
-    /**
-     * Receives the given content. The default implementation invokes the callback set via
-     * {@link #setOnReceiveContentCallback}. If no callback is set or if the callback does not
-     * support the given content (based on the MIME type), executes the default platform handling
-     * (e.g. coerces content to text if the source is
-     * {@link OnReceiveContentCallback.Payload#SOURCE_CLIPBOARD} and this is an editable
-     * {@link TextView}).
+     * <p>If no listener is set, executes the default platform behavior. For non-editable TextViews
+     * the default behavior is a no-op (returns the passed-in content without acting on it). For
+     * editable TextViews the default behavior coerces all content to text and inserts into the
+     * view.
      *
      * @param payload The content to insert and related metadata.
      *
-     * @return Returns true if the content was handled in some way, false otherwise. Actual
-     * insertion may be processed asynchronously in the background and may or may not succeed even
-     * if this method returns true. For example, an app may not end up inserting an item if it
-     * exceeds the app's size limit for that type of content.
+     * @return The portion of the passed-in content that was not handled (may be all, some, or none
+     * of the passed-in content).
      */
     @Override
-    public boolean onReceiveContent(@NonNull OnReceiveContentCallback.Payload payload) {
-        if (super.onReceiveContent(payload)) {
-            return true;
-        } else if (mEditor != null) {
-            return mEditor.getDefaultOnReceiveContentCallback().onReceiveContent(this, payload);
+    public @Nullable Payload onReceiveContent(@NonNull Payload payload) {
+        Payload remaining = super.onReceiveContent(payload);
+        if (remaining != null && mEditor != null) {
+            return mEditor.getDefaultOnReceiveContentListener().onReceiveContent(this, remaining);
         }
-        return false;
+        return remaining;
     }
 
     private static void logCursor(String location, @Nullable String msgFormat, Object ... msgArgs) {

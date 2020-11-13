@@ -19,7 +19,7 @@ package android.view.autofill;
 import static android.service.autofill.FillRequest.FLAG_MANUAL_REQUEST;
 import static android.service.autofill.FillRequest.FLAG_PASSWORD_INPUT_TYPE;
 import static android.service.autofill.FillRequest.FLAG_VIEW_NOT_FOCUSED;
-import static android.view.OnReceiveContentCallback.Payload.SOURCE_AUTOFILL;
+import static android.view.OnReceiveContentListener.Payload.SOURCE_AUTOFILL;
 import static android.view.autofill.Helper.sDebug;
 import static android.view.autofill.Helper.sVerbose;
 import static android.view.autofill.Helper.toList;
@@ -62,7 +62,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.view.Choreographer;
 import android.view.KeyEvent;
-import android.view.OnReceiveContentCallback;
+import android.view.OnReceiveContentListener.Payload;
 import android.view.View;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
@@ -2371,12 +2371,10 @@ public final class AutofillManager {
                 reportAutofillContentFailure(id);
                 return;
             }
-            OnReceiveContentCallback.Payload payload =
-                    new OnReceiveContentCallback.Payload.Builder(clip, SOURCE_AUTOFILL)
-                            .build();
-            boolean handled = view.onReceiveContent(payload);
-            if (!handled) {
-                Log.w(TAG, "autofillContent(): receiver returned false: id=" + id
+            Payload payload = new Payload.Builder(clip, SOURCE_AUTOFILL).build();
+            Payload result = view.onReceiveContent(payload);
+            if (result != null) {
+                Log.w(TAG, "autofillContent(): receiver could not insert content: id=" + id
                         + ", view=" + view + ", clip=" + clip);
                 reportAutofillContentFailure(id);
                 return;
