@@ -109,6 +109,19 @@ public class StagedInstallInternalTest extends BaseHostJUnit4Test {
         assertThat(after).isEqualTo(before);
     }
 
+    @Test
+    public void testOrphanedStagingDirectoryGetsCleanedUpOnReboot() throws Exception {
+        //create random directories in /data/app-staging folder
+        getDevice().enableAdbRoot();
+        getDevice().executeShellCommand("mkdir /data/app-staging/session_123");
+        getDevice().executeShellCommand("mkdir /data/app-staging/random_name");
+        getDevice().disableAdbRoot();
+
+        assertThat(getStagingDirectories()).isNotEmpty();
+        getDevice().reboot();
+        assertThat(getStagingDirectories()).isEmpty();
+    }
+
     private List<String> getStagingDirectories() throws DeviceNotAvailableException {
         String baseDir = "/data/app-staging";
         try {
