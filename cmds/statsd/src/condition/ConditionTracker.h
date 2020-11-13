@@ -135,9 +135,8 @@ public:
         return mProtoHash;
     }
 
-    virtual void getTrueSlicedDimensions(
-        const std::vector<sp<ConditionTracker>>& allConditions,
-        std::set<HashableDimensionKey>* dimensions) const = 0;
+    virtual const std::map<HashableDimensionKey, int>* getSlicedDimensionMap(
+            const std::vector<sp<ConditionTracker>>& allConditions) const = 0;
 
     virtual bool IsChangedDimensionTrackable() const = 0;
 
