@@ -33,6 +33,8 @@ import com.android.server.wm.flicker.navBarLayerIsAlwaysVisible
 import com.android.server.wm.flicker.navBarLayerRotatesAndScales
 import com.android.server.wm.flicker.navBarWindowIsAlwaysVisible
 import com.android.server.wm.flicker.noUncoveredRegions
+import com.android.server.wm.flicker.visibleWindowsShownMoreThanOneConsecutiveEntry
+import com.android.server.wm.flicker.visibleLayersShownMoreThanOneConsecutiveEntry
 import com.android.server.wm.flicker.repetitions
 import com.android.server.wm.flicker.startRotation
 import com.android.server.wm.flicker.statusBarLayerIsAlwaysVisible
@@ -95,6 +97,8 @@ class CloseImeWindowToHomeTest(
                         windowManagerTrace {
                             navBarWindowIsAlwaysVisible()
                             statusBarWindowIsAlwaysVisible()
+                            visibleWindowsShownMoreThanOneConsecutiveEntry(listOf(IME_WINDOW_TITLE))
+
                             imeWindowBecomesInvisible()
                             imeAppWindowBecomesInvisible(testApp)
                         }
@@ -106,10 +110,14 @@ class CloseImeWindowToHomeTest(
                                 Surface.ROTATION_0, bugId = 140855415)
                             statusBarLayerRotatesScales(configuration.startRotation,
                                 Surface.ROTATION_0)
-                            navBarLayerIsAlwaysVisible(enabled = false)
-                            statusBarLayerIsAlwaysVisible(enabled = false)
+                            navBarLayerIsAlwaysVisible(
+                                    enabled = Surface.ROTATION_0 == configuration.startRotation)
+                            statusBarLayerIsAlwaysVisible(
+                                    enabled = Surface.ROTATION_0 == configuration.startRotation)
+                            visibleLayersShownMoreThanOneConsecutiveEntry(listOf(IME_WINDOW_TITLE))
+
                             imeLayerBecomesInvisible(bugId = 153739621)
-                            imeAppLayerBecomesInvisible(testApp, bugId = 153739621)
+                            imeAppLayerBecomesInvisible(testApp)
                         }
                     }
                 }
