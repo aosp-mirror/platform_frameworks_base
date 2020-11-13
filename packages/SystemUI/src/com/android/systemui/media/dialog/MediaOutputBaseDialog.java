@@ -105,6 +105,7 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
         window.setAttributes(lp);
         window.setContentView(mDialogView);
         window.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        window.setWindowAnimations(R.style.Animation_MediaOutputDialog);
 
         mHeaderTitle = mDialogView.requireViewById(R.id.header_title);
         mHeaderSubtitle = mDialogView.requireViewById(R.id.header_subtitle);
