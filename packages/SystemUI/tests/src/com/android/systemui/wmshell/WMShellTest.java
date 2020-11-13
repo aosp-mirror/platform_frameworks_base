@@ -34,6 +34,7 @@ import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.tracing.ProtoTracer;
 import com.android.wm.shell.ShellDump;
+import com.android.wm.shell.apppairs.AppPairs;
 import com.android.wm.shell.hidedisplaycutout.HideDisplayCutout;
 import com.android.wm.shell.onehanded.OneHanded;
 import com.android.wm.shell.onehanded.OneHandedGestureHandler;
@@ -68,6 +69,7 @@ public class WMShellTest extends SysuiTestCase {
     @Mock HideDisplayCutout mHideDisplayCutout;
     @Mock ProtoTracer mProtoTracer;
     @Mock ShellDump mShellDump;
+    @Mock AppPairs mAppPairs;
 
     @Before
     public void setUp() {
@@ -77,7 +79,7 @@ public class WMShellTest extends SysuiTestCase {
                 mKeyguardUpdateMonitor, mNavigationModeController,
                 mScreenLifecycle, mSysUiState, Optional.of(mPip), Optional.of(mSplitScreen),
                 Optional.of(mOneHanded), Optional.of(mHideDisplayCutout), mProtoTracer,
-                Optional.of(mShellDump));
+                Optional.of(mShellDump), Optional.of(mAppPairs));
 
         when(mPip.getPipTouchHandler()).thenReturn(mPipTouchHandler);
     }
