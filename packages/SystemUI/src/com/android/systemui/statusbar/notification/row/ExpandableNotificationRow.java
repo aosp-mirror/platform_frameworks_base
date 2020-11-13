@@ -70,6 +70,7 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.util.ContrastColorUtil;
 import com.android.internal.widget.CachingIconView;
+import com.android.internal.widget.MessagingLayout;
 import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
@@ -654,6 +655,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         View expandedView = layout.getExpandedChild();
         boolean isMediaLayout = expandedView != null
                 && expandedView.findViewById(com.android.internal.R.id.media_actions) != null;
+        boolean isMessagingLayout = layout.getContractedChild() instanceof MessagingLayout;
         boolean showCompactMediaSeekbar = mMediaManager.getShowCompactMediaSeekbar();
 
         if (customView && beforeS && !mIsSummaryWithChildren) {
@@ -666,6 +668,12 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             }
         } else if (isMediaLayout && showCompactMediaSeekbar) {
             minHeight = mNotificationMinHeightMedia;
+        } else if (isMessagingLayout) {
+            // TODO(b/173204301): MessagingStyle notifications currently look broken when we enforce
+            //  the standard notification height, so we have to afford them more vertical space to
+            //  make sure we don't crop them terribly.  We actually need to revisit this and give
+            //  them a headerless design, then remove this hack.
+            minHeight = mNotificationMinHeightLarge;
         } else if (mUseIncreasedCollapsedHeight && layout == mPrivateLayout) {
             minHeight = mNotificationMinHeightLarge;
         } else {

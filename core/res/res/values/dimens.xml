@@ -734,7 +734,7 @@
     <!-- The maximum size of the grayscale icon -->
     <dimen name="notification_grayscale_icon_max_size">256dp</dimen>
 
-    <dimen name="messaging_avatar_size">@dimen/notification_right_icon_size</dimen>
+    <dimen name="messaging_avatar_size">36dp</dimen>
     <dimen name="conversation_avatar_size">52dp</dimen>
     <!-- start margin of the icon circle in the conversation's skin of the header -->
     <dimen name="conversation_icon_circle_start">28dp</dimen>
