@@ -200,6 +200,7 @@ public abstract class Image implements AutoCloseable {
      * @return The window transformation that needs to be applied for this frame.
      * @hide
      */
+    @SuppressWarnings("HiddenAbstractMethod")
     public abstract int getTransform();
 
     /**
@@ -207,6 +208,7 @@ public abstract class Image implements AutoCloseable {
      * @return The scaling mode that needs to be applied for this frame.
      * @hide
      */
+    @SuppressWarnings("HiddenAbstractMethod")
     public abstract int getScalingMode();
 
     /**
