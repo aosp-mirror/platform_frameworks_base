@@ -291,6 +291,13 @@ public final class DeviceConfig {
     public static final String NAMESPACE_ROLLBACK_BOOT = "rollback_boot";
 
     /**
+     * Namespace for Rotation Resolver Manager Service.
+     *
+     * @hide
+     */
+    public static final String NAMESPACE_ROTATION_RESOLVER = "rotation_resolver";
+
+    /**
      * Namespace for all runtime related features that don't require a reboot to become active.
      * There are no feature flags using NAMESPACE_RUNTIME.
      *

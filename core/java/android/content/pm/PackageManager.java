@@ -8637,6 +8637,16 @@ public abstract class PackageManager {
     }
 
     /**
+     * @return rotation resolver service's package name, or null if there's none.
+     *
+     * @hide
+     */
+    public String getRotationResolverPackageName() {
+        throw new UnsupportedOperationException(
+                "getRotationResolverPackageName not implemented in subclass");
+    }
+
+    /**
      * @return the wellbeing app package name, or null if it's not defined by the OEM.
      *
      * @hide

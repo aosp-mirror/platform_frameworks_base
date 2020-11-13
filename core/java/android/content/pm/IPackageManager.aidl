@@ -722,6 +722,8 @@ interface IPackageManager {
 
     String getAttentionServicePackageName();
 
+    String getRotationResolverPackageName();
+
     String getWellbeingPackageName();
 
     String getAppPredictionServicePackageName();

@@ -3497,6 +3497,7 @@
   <java-symbol type="string" name="config_defaultSearchUiService" />
   <java-symbol type="string" name="config_defaultMusicRecognitionService" />
   <java-symbol type="string" name="config_defaultAttentionService" />
+  <java-symbol type="string" name="config_defaultRotationResolverService" />
   <java-symbol type="string" name="config_defaultSystemCaptionsService" />
   <java-symbol type="string" name="config_defaultSystemCaptionsManagerService" />
   <java-symbol type="string" name="config_retailDemoPackage" />

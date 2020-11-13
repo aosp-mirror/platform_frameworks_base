@@ -3709,6 +3709,12 @@
     -->
     <string name="config_defaultAttentionService" translatable="false"></string>
 
+    <!-- The component name for the default system rotation resolver service.
+        This service must be trusted, as it can be activated without explicit consent of the user.
+        See android.service.rotationresolver.RotationResolverService.
+   -->
+    <string name="config_defaultRotationResolverService" translatable="false"></string>
+
     <!-- The component name for the system-wide captions service.
          This service must be trusted, as it controls part of the UI of the volume bar.
          Example: "com.android.captions/.SystemCaptionsService"

@@ -3262,6 +3262,15 @@ public class ApplicationPackageManager extends PackageManager {
     }
 
     @Override
+    public String getRotationResolverPackageName() {
+        try {
+            return mPM.getRotationResolverPackageName();
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+        }
+    }
+
+    @Override
     public String getWellbeingPackageName() {
         try {
             return mPM.getWellbeingPackageName();
