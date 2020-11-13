@@ -25,6 +25,9 @@ import android.view.MotionEvent;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.systemui.classifier.ClassifierTest;
+import com.android.systemui.classifier.FalsingDataProvider;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

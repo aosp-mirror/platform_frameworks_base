@@ -25,6 +25,7 @@ import android.graphics.Point;
 import android.provider.DeviceConfig;
 import android.view.MotionEvent;
 
+import com.android.systemui.classifier.FalsingDataProvider;
 import com.android.systemui.util.DeviceConfigProxy;
 
 import java.util.ArrayList;

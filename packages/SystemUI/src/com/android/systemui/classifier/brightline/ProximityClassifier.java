@@ -22,6 +22,7 @@ import static com.android.systemui.classifier.Classifier.QUICK_SETTINGS;
 import android.provider.DeviceConfig;
 import android.view.MotionEvent;
 
+import com.android.systemui.classifier.FalsingDataProvider;
 import com.android.systemui.util.DeviceConfigProxy;
 import com.android.systemui.util.sensors.ProximitySensor;
 

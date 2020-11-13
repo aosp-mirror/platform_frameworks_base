@@ -31,6 +31,7 @@ import com.android.systemui.ExpandHelper;
 import com.android.systemui.Gefingerpoken;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
+import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
 
@@ -46,6 +47,7 @@ public class DragDownHelper implements Gefingerpoken {
     private static final int SPRING_BACK_ANIMATION_LENGTH_MS = 375;
 
     private int mMinDragDistance;
+    private final FalsingManager mFalsingManager;
     private ExpandHelper.Callback mCallback;
     private float mInitialTouchX;
     private float mInitialTouchY;
@@ -58,20 +60,21 @@ public class DragDownHelper implements Gefingerpoken {
     private boolean mDraggedFarEnough;
     private ExpandableView mStartingChild;
     private float mLastHeight;
-    private FalsingManager mFalsingManager;
+    private FalsingCollector mFalsingCollector;
 
     public DragDownHelper(Context context, View host, ExpandHelper.Callback callback,
-            DragDownCallback dragDownCallback,
-            FalsingManager falsingManager) {
+            DragDownCallback dragDownCallback, FalsingManager falsingManager,
+            FalsingCollector falsingCollector) {
         mMinDragDistance = context.getResources().getDimensionPixelSize(
                 R.dimen.keyguard_drag_down_min_distance);
+        mFalsingManager = falsingManager;
         final ViewConfiguration configuration = ViewConfiguration.get(context);
         mTouchSlop = configuration.getScaledTouchSlop();
         mSlopMultiplier = configuration.getScaledAmbiguousGestureMultiplier();
         mCallback = callback;
         mDragDownCallback = dragDownCallback;
         mHost = host;
-        mFalsingManager = falsingManager;
+        mFalsingCollector = falsingCollector;
     }
 
     @Override
@@ -96,7 +99,7 @@ public class DragDownHelper implements Gefingerpoken {
                         ? mTouchSlop * mSlopMultiplier
                         : mTouchSlop;
                 if (h > touchSlop && h > Math.abs(x - mInitialTouchX)) {
-                    mFalsingManager.onNotificatonStartDraggingDown();
+                    mFalsingCollector.onNotificationStartDraggingDown();
                     mDraggingDown = true;
                     captureStartingChild(mInitialTouchX, mInitialTouchY);
                     mInitialTouchY = y;
@@ -229,7 +232,7 @@ public class DragDownHelper implements Gefingerpoken {
     }
 
     private void stopDragging() {
-        mFalsingManager.onNotificatonStopDraggingDown();
+        mFalsingCollector.onNotificationStopDraggingDown();
         if (mStartingChild != null) {
             cancelExpansion(mStartingChild);
             mStartingChild = null;

@@ -79,6 +79,7 @@ import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.classifier.Classifier;
+import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.dagger.qualifiers.DisplayId;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.doze.DozeLog;
@@ -364,7 +365,8 @@ public class NotificationPanelViewController extends PanelViewController {
     private boolean mHeadsUpAnimatingAway;
     private boolean mLaunchingAffordance;
     private boolean mAffordanceHasPreview;
-    private FalsingManager mFalsingManager;
+    private final FalsingManager mFalsingManager;
+    private final FalsingCollector mFalsingCollector;
     private String mLastCameraLaunchSource = KeyguardBottomAreaView.CAMERA_LAUNCH_SOURCE_AFFORDANCE;
 
     private Runnable mHeadsUpExistenceChangedRunnable = () -> {
@@ -502,7 +504,7 @@ public class NotificationPanelViewController extends PanelViewController {
             NotificationWakeUpCoordinator coordinator, PulseExpansionHandler pulseExpansionHandler,
             DynamicPrivacyController dynamicPrivacyController,
             KeyguardBypassController bypassController, FalsingManager falsingManager,
-            ShadeController shadeController,
+            FalsingCollector falsingCollector, ShadeController shadeController,
             NotificationLockscreenUserManager notificationLockscreenUserManager,
             NotificationEntryManager notificationEntryManager,
             KeyguardStateController keyguardStateController,
@@ -543,6 +545,7 @@ public class NotificationPanelViewController extends PanelViewController {
         mView.setWillNotDraw(!DEBUG);
         mInjectionInflationController = injectionInflationController;
         mFalsingManager = falsingManager;
+        mFalsingCollector = falsingCollector;
         mPowerManager = powerManager;
         mWakeUpCoordinator = coordinator;
         mAccessibilityManager = accessibilityManager;
@@ -1424,7 +1427,7 @@ public class NotificationPanelViewController extends PanelViewController {
     private void handleQsDown(MotionEvent event) {
         if (event.getActionMasked() == MotionEvent.ACTION_DOWN && shouldQuickSettingsIntercept(
                 event.getX(), event.getY(), -1)) {
-            mFalsingManager.onQsDown();
+            mFalsingCollector.onQsDown();
             mQsTracking = true;
             onQsExpansionStarted();
             mInitialHeightOnTouch = mQsExpansionHeight;
@@ -1604,7 +1607,7 @@ public class NotificationPanelViewController extends PanelViewController {
             mQsExpanded = expanded;
             updateQsState();
             requestPanelHeightUpdate();
-            mFalsingManager.setQsExpanded(expanded);
+            mFalsingCollector.setQsExpanded(expanded);
             mStatusBar.setQsExpanded(expanded);
             mNotificationContainerParent.setQsExpanded(expanded);
             mPulseExpansionHandler.setQsExpanded(expanded);
@@ -1741,7 +1744,7 @@ public class NotificationPanelViewController extends PanelViewController {
         }
 
         if (!mFalsingManager.isUnlockingDisabled() && mQsFullyExpanded
-                && mFalsingManager.shouldEnforceBouncer()) {
+                && mFalsingCollector.shouldEnforceBouncer()) {
             mStatusBar.executeRunnableDismissingKeyguard(null, null /* cancelAction */,
                     false /* dismissShade */, true /* afterKeyguardGone */, false /* deferred */);
         }
@@ -2402,7 +2405,7 @@ public class NotificationPanelViewController extends PanelViewController {
 
     @Override
     protected void onTrackingStarted() {
-        mFalsingManager.onTrackingStarted(!mKeyguardStateController.canDismissLockScreen());
+        mFalsingCollector.onTrackingStarted(!mKeyguardStateController.canDismissLockScreen());
         super.onTrackingStarted();
         if (mQsFullyExpanded) {
             mQsExpandImmediate = true;
@@ -2416,7 +2419,7 @@ public class NotificationPanelViewController extends PanelViewController {
 
     @Override
     protected void onTrackingStopped(boolean expand) {
-        mFalsingManager.onTrackingStopped();
+        mFalsingCollector.onTrackingStopped();
         super.onTrackingStopped(expand);
         if (expand) {
             mNotificationStackScrollLayoutController.setOverScrolledPixels(0.0f, true /* onTop */,
@@ -3363,8 +3366,8 @@ public class NotificationPanelViewController extends PanelViewController {
             if (start) {
                 mLockscreenGestureLogger.write(MetricsEvent.ACTION_LS_DIALER, lengthDp, velocityDp);
                 mLockscreenGestureLogger.log(LockscreenUiEvent.LOCKSCREEN_DIALER);
-                mFalsingManager.onLeftAffordanceOn();
-                if (mFalsingManager.shouldEnforceBouncer()) {
+                mFalsingCollector.onLeftAffordanceOn();
+                if (mFalsingCollector.shouldEnforceBouncer()) {
                     mStatusBar.executeRunnableDismissingKeyguard(
                             () -> mKeyguardBottomArea.launchLeftAffordance(), null,
                             true /* dismissShade */, false /* afterKeyguardGone */,
@@ -3379,8 +3382,8 @@ public class NotificationPanelViewController extends PanelViewController {
                             MetricsEvent.ACTION_LS_CAMERA, lengthDp, velocityDp);
                     mLockscreenGestureLogger.log(LockscreenUiEvent.LOCKSCREEN_CAMERA);
                 }
-                mFalsingManager.onCameraOn();
-                if (mFalsingManager.shouldEnforceBouncer()) {
+                mFalsingCollector.onCameraOn();
+                if (mFalsingCollector.shouldEnforceBouncer()) {
                     mStatusBar.executeRunnableDismissingKeyguard(
                             () -> mKeyguardBottomArea.launchCamera(mLastCameraLaunchSource), null,
                             true /* dismissShade */, false /* afterKeyguardGone */,
@@ -3411,7 +3414,7 @@ public class NotificationPanelViewController extends PanelViewController {
 
         @Override
         public void onSwipingStarted(boolean rightIcon) {
-            mFalsingManager.onAffordanceSwipingStarted(rightIcon);
+            mFalsingCollector.onAffordanceSwipingStarted(rightIcon);
             boolean
                     camera =
                     mView.getLayoutDirection() == View.LAYOUT_DIRECTION_RTL ? !rightIcon
@@ -3426,7 +3429,7 @@ public class NotificationPanelViewController extends PanelViewController {
 
         @Override
         public void onSwipingAborted() {
-            mFalsingManager.onAffordanceSwipingAborted();
+            mFalsingCollector.onAffordanceSwipingAborted();
             mKeyguardBottomArea.unbindCameraPrewarmService(false /* launched */);
         }
 

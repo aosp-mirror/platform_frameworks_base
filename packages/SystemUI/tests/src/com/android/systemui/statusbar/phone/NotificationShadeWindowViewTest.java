@@ -30,6 +30,7 @@ import androidx.test.filters.SmallTest;
 import com.android.systemui.R;
 import com.android.systemui.SystemUIFactory;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.classifier.FalsingCollectorFake;
 import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.doze.DozeLog;
@@ -111,6 +112,7 @@ public class NotificationShadeWindowViewTest extends SysuiTestCase {
                 mDynamicPrivacyController,
                 mBypassController,
                 new FalsingManagerFake(),
+                new FalsingCollectorFake(),
                 mPluginManager,
                 mTunerService,
                 mNotificationLockScreenUserManager,

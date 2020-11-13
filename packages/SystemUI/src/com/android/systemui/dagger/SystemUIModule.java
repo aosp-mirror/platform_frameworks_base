@@ -27,6 +27,7 @@ import com.android.systemui.BootCompleteCache;
 import com.android.systemui.BootCompleteCacheImpl;
 import com.android.systemui.appops.dagger.AppOpsModule;
 import com.android.systemui.assist.AssistModule;
+import com.android.systemui.classifier.FalsingModule;
 import com.android.systemui.controls.dagger.ControlsModule;
 import com.android.systemui.demomode.dagger.DemoModeModule;
 import com.android.systemui.doze.dagger.DozeComponent;
@@ -89,6 +90,7 @@ import dagger.Provides;
             AssistModule.class,
             ControlsModule.class,
             DemoModeModule.class,
+            FalsingModule.class,
             LogModule.class,
             PeopleHubModule.class,
             PowerModule.class,

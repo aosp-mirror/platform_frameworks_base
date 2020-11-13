@@ -36,6 +36,7 @@ import android.view.ViewGroup;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.ExpandHelper;
 import com.android.systemui.R;
+import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.doze.DozeLog;
 import com.android.systemui.plugins.FalsingManager;
@@ -73,6 +74,7 @@ public class NotificationShadeWindowViewController {
     private final KeyguardBypassController mBypassController;
     private final PluginManager mPluginManager;
     private final FalsingManager mFalsingManager;
+    private final FalsingCollector mFalsingCollector;
     private final TunerService mTunerService;
     private final NotificationLockscreenUserManager mNotificationLockscreenUserManager;
     private final NotificationEntryManager mNotificationEntryManager;
@@ -118,6 +120,7 @@ public class NotificationShadeWindowViewController {
             DynamicPrivacyController dynamicPrivacyController,
             KeyguardBypassController bypassController,
             FalsingManager falsingManager,
+            FalsingCollector falsingCollector,
             PluginManager pluginManager,
             TunerService tunerService,
             NotificationLockscreenUserManager notificationLockscreenUserManager,
@@ -140,6 +143,7 @@ public class NotificationShadeWindowViewController {
         mDynamicPrivacyController = dynamicPrivacyController;
         mBypassController = bypassController;
         mFalsingManager = falsingManager;
+        mFalsingCollector = falsingCollector;
         mPluginManager = pluginManager;
         mTunerService = tunerService;
         mNotificationLockscreenUserManager = notificationLockscreenUserManager;
@@ -234,7 +238,7 @@ public class NotificationShadeWindowViewController {
                 if (mTouchCancelled || mExpandAnimationRunning || mExpandAnimationPending) {
                     return false;
                 }
-                mFalsingManager.onTouchEvent(ev, mView.getWidth(), mView.getHeight());
+                mFalsingCollector.onTouchEvent(ev, mView.getWidth(), mView.getHeight());
                 mGestureDetector.onTouchEvent(ev);
                 if (mBrightnessMirror != null
                         && mBrightnessMirror.getVisibility() == View.VISIBLE) {
@@ -394,7 +398,7 @@ public class NotificationShadeWindowViewController {
         setDragDownHelper(
                 new DragDownHelper(
                         mView.getContext(), mView, expandHelperCallback,
-                        dragDownCallback, mFalsingManager));
+                        dragDownCallback, mFalsingManager, mFalsingCollector));
 
         mDepthController.setRoot(mView);
         mNotificationPanelViewController.addExpansionListener(mDepthController);

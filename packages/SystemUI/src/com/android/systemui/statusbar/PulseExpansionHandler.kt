@@ -31,6 +31,7 @@ import com.android.systemui.Gefingerpoken
 import com.android.systemui.Interpolators
 import com.android.systemui.R
 import com.android.systemui.classifier.Classifier.NOTIFICATION_DRAG_DOWN
+import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.plugins.statusbar.StatusBarStateController
@@ -57,7 +58,8 @@ constructor(
     private val headsUpManager: HeadsUpManagerPhone,
     private val roundnessManager: NotificationRoundnessManager,
     private val statusBarStateController: StatusBarStateController,
-    private val falsingManager: FalsingManager
+    private val falsingManager: FalsingManager,
+    private val falsingCollector: FalsingCollector
 ) : Gefingerpoken {
     companion object {
         private val RUBBERBAND_FACTOR_STATIC = 0.25f
@@ -148,7 +150,7 @@ constructor(
             MotionEvent.ACTION_MOVE -> {
                 val h = y - mInitialTouchY
                 if (h > mTouchSlop && h > Math.abs(x - mInitialTouchX)) {
-                    falsingManager.onStartExpandingFromPulse()
+                    falsingCollector.onStartExpandingFromPulse()
                     isExpanding = true
                     captureStartingChild(mInitialTouchX, mInitialTouchY)
                     mInitialTouchY = y
@@ -301,7 +303,7 @@ constructor(
 
     private fun cancelExpansion() {
         isExpanding = false
-        falsingManager.onExpansionFromPulseStopped()
+        falsingCollector.onExpansionFromPulseStopped()
         if (mStartingChild != null) {
             reset(mStartingChild!!)
             mStartingChild = null

@@ -23,6 +23,8 @@ import android.testing.AndroidTestingRunner;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.systemui.classifier.ClassifierTest;
+import com.android.systemui.classifier.FalsingDataProvider;
 import com.android.systemui.util.DeviceConfigProxyFake;
 
 import org.junit.After;

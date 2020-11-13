@@ -60,10 +60,10 @@ import com.android.keyguard.dagger.KeyguardStatusViewComponent;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.biometrics.AuthController;
+import com.android.systemui.classifier.FalsingCollectorFake;
 import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.doze.DozeLog;
 import com.android.systemui.media.MediaHierarchyManager;
-import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.qs.QSDetailDisplayer;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.KeyguardAffordanceView;
@@ -131,8 +131,6 @@ public class NotificationPanelViewTest extends SysuiTestCase {
     private PanelBar mPanelBar;
     @Mock
     private KeyguardUpdateMonitor mUpdateMonitor;
-    @Mock
-    private FalsingManager mFalsingManager;
     @Mock
     private KeyguardBypassController mKeyguardBypassController;
     @Mock
@@ -252,7 +250,7 @@ public class NotificationPanelViewTest extends SysuiTestCase {
                 mKeyguardBypassController, mHeadsUpManager,
                 mock(NotificationRoundnessManager.class),
                 mStatusBarStateController,
-                new FalsingManagerFake());
+                new FalsingManagerFake(), new FalsingCollectorFake());
         when(mKeyguardStatusViewComponentFactory.build(any()))
                 .thenReturn(mKeyguardStatusViewComponent);
         when(mKeyguardStatusViewComponent.getKeyguardClockSwitchController())
@@ -263,7 +261,7 @@ public class NotificationPanelViewTest extends SysuiTestCase {
                 mResources,
                 mInjectionInflationController,
                 coordinator, expansionHandler, mDynamicPrivacyController, mKeyguardBypassController,
-                mFalsingManager, mShadeController,
+                new FalsingManagerFake(), new FalsingCollectorFake(), mShadeController,
                 mNotificationLockscreenUserManager, mNotificationEntryManager,
                 mKeyguardStateController, mStatusBarStateController, mDozeLog,
                 mDozeParameters, mCommandQueue, mVibratorHelper,
