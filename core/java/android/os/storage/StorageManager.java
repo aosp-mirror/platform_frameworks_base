@@ -2215,7 +2215,7 @@ public class StorageManager {
     /** @hide */
     @SystemApi
     @WorkerThread
-    @SuppressLint("Doclava125")
+    @SuppressLint("RequiresPermission")
     public long getAllocatableBytes(@NonNull UUID storageUuid,
             @RequiresPermission @AllocateFlags int flags) throws IOException {
         try {
@@ -2264,7 +2264,7 @@ public class StorageManager {
     /** @hide */
     @SystemApi
     @WorkerThread
-    @SuppressLint("Doclava125")
+    @SuppressLint("RequiresPermission")
     public void allocateBytes(@NonNull UUID storageUuid, @BytesLong long bytes,
             @RequiresPermission @AllocateFlags int flags) throws IOException {
         try {
@@ -2314,7 +2314,7 @@ public class StorageManager {
     /** @hide */
     @SystemApi
     @WorkerThread
-    @SuppressLint("Doclava125")
+    @SuppressLint("RequiresPermission")
     public void allocateBytes(FileDescriptor fd, @BytesLong long bytes,
             @RequiresPermission @AllocateFlags int flags) throws IOException {
         final File file = ParcelFileDescriptor.getFile(fd);

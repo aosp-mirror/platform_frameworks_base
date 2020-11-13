@@ -299,7 +299,7 @@ public class UsbDeviceConnection {
      * @hide
      */
     @SystemApi
-    @SuppressLint("Doclava125")
+    @SuppressLint("RequiresPermission")
     public boolean resetDevice() {
         return native_reset_device();
     }

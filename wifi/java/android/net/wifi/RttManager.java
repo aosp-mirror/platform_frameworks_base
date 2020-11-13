@@ -173,7 +173,7 @@ public class RttManager {
 
     /** @deprecated Use the new {@link android.net.wifi.RttManager#getRttCapabilities()} API.*/
     @Deprecated
-    @SuppressLint("Doclava125")
+    @SuppressLint("RequiresPermission")
     public Capabilities getCapabilities() {
         throw new UnsupportedOperationException(
                 "getCapabilities is not supported in the adaptation layer");
