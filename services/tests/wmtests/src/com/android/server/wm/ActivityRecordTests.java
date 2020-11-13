@@ -71,6 +71,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.never;
 
@@ -373,6 +374,27 @@ public class ActivityRecordTests extends WindowTestsBase {
 
         assertEquals(ActivityTaskManagerService.RELAUNCH_REASON_NONE,
                 activity.mRelaunchReason);
+    }
+
+    @Test
+    public void testDestroyedActivityNotScheduleConfigChanged() throws RemoteException {
+        final ActivityRecord activity = new ActivityBuilder(mAtm)
+                .setCreateTask(true)
+                .setConfigChanges(CONFIG_ORIENTATION)
+                .build();
+        final Task task = activity.getTask();
+        activity.setState(DESTROYED, "Testing");
+
+        final Configuration newConfig = new Configuration(task.getConfiguration());
+        newConfig.orientation = newConfig.orientation == ORIENTATION_PORTRAIT
+                ? ORIENTATION_LANDSCAPE
+                : ORIENTATION_PORTRAIT;
+        task.onRequestedOverrideConfigurationChanged(newConfig);
+
+        ensureActivityConfiguration(activity);
+
+        verify(mAtm.getLifecycleManager(), never())
+                .scheduleTransaction(any(), any(), isA(ActivityConfigurationChangeItem.class));
     }
 
     @Test

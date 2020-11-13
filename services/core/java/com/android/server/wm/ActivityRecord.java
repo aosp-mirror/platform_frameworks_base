@@ -7081,6 +7081,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return true;
         }
 
+        if (isState(DESTROYED)) {
+            ProtoLog.v(WM_DEBUG_CONFIGURATION, "Skipping config check "
+                    + "in destroyed state %s", this);
+            return true;
+        }
+
         if (!ignoreVisibility && (mState == STOPPING || mState == STOPPED || !shouldBeVisible())) {
             ProtoLog.v(WM_DEBUG_CONFIGURATION, "Skipping config check "
                     + "invisible: %s", this);
