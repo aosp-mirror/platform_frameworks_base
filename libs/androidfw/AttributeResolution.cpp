@@ -39,7 +39,8 @@ class XmlAttributeFinder
     : public BackTrackingAttributeFinder<XmlAttributeFinder, size_t> {
  public:
   explicit XmlAttributeFinder(const ResXMLParser* parser)
-      : BackTrackingAttributeFinder(0, parser != nullptr ? parser->getAttributeCount() : 0),
+      : BackTrackingAttributeFinder(
+            0, parser != nullptr ? parser->getAttributeCount() : 0),
         parser_(parser) {}
 
   inline uint32_t GetAttribute(size_t index) const {
@@ -177,7 +178,7 @@ base::expected<std::monostate, IOError> ResolveAttrs(Theme* theme, uint32_t def_
         value = *attr_value;
         DEBUG_LOG("-> From theme: type=0x%x, data=0x%08x", value.type, value.data);
 
-        const auto result = assetmanager->ResolveReference(value, true /* cache_value */);
+        const auto result = assetmanager->ResolveReference(value);
         if (UNLIKELY(IsIOError(result))) {
           return base::unexpected(GetIOError(result.error()));
         }
@@ -309,7 +310,7 @@ base::expected<std::monostate, IOError> ApplyStyle(Theme* theme, ResXMLParser* x
         value = *attr_value;
         DEBUG_LOG("-> From theme: type=0x%x, data=0x%08x", value.type, value.data);
 
-        auto result = assetmanager->ResolveReference(value, true /* cache_value */);
+        auto result = assetmanager->ResolveReference(value);
         if (UNLIKELY(IsIOError(result))) {
           return base::unexpected(GetIOError(result.error()));
         }
