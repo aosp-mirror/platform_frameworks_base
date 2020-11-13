@@ -24,7 +24,6 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.content.type.DefaultMimeMapFactory;
 import android.os.Build;
 import android.os.DeadObjectException;
-import android.os.Debug;
 import android.os.IBinder;
 import android.os.Process;
 import android.os.SystemProperties;
@@ -256,18 +255,6 @@ public class RuntimeInit {
          * Wire socket tagging to traffic stats.
          */
         NetworkManagementSocketTagger.install();
-
-        /*
-         * If we're running in an emulator launched with "-trace", put the
-         * VM into emulator trace profiling mode so that the user can hit
-         * F9/F10 at any time to capture traces.  This has performance
-         * consequences, so it's not something you want to do always.
-         */
-        String trace = SystemProperties.get("ro.kernel.android.tracing");
-        if (trace.equals("1")) {
-            Slog.i(TAG, "NOTE: emulator trace profiling enabled");
-            Debug.enableEmulatorTraceOutput();
-        }
 
         initialized = true;
     }
