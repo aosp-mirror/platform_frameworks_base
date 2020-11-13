@@ -204,7 +204,7 @@ public final class AccessibilityGestureEvent implements Parcelable {
     @Override
     public String toString() {
         StringBuilder stringBuilder = new StringBuilder("AccessibilityGestureEvent[");
-        stringBuilder.append("gestureId: ").append(eventTypeToString(mGestureId));
+        stringBuilder.append("gestureId: ").append(gestureIdToString(mGestureId));
         stringBuilder.append(", ");
         stringBuilder.append("displayId: ").append(mDisplayId);
         stringBuilder.append(", ");
@@ -222,8 +222,12 @@ public final class AccessibilityGestureEvent implements Parcelable {
         return stringBuilder.toString();
     }
 
-    private static String eventTypeToString(int eventType) {
-        switch (eventType) {
+    /**
+     * Returns a string representation of the specified gesture id.
+     */
+    @NonNull
+    public static String gestureIdToString(int id) {
+        switch (id) {
             case GESTURE_UNKNOWN: return "GESTURE_UNKNOWN";
             case GESTURE_PASSTHROUGH: return "GESTURE_PASSTHROUGH";
             case GESTURE_TOUCH_EXPLORATION: return "GESTURE_TOUCH_EXPLORATION";
@@ -278,7 +282,7 @@ public final class AccessibilityGestureEvent implements Parcelable {
             case GESTURE_4_FINGER_SWIPE_LEFT: return "GESTURE_4_FINGER_SWIPE_LEFT";
             case GESTURE_4_FINGER_SWIPE_RIGHT: return "GESTURE_4_FINGER_SWIPE_RIGHT";
             case GESTURE_4_FINGER_SWIPE_UP: return "GESTURE_4_FINGER_SWIPE_UP";
-            default: return Integer.toHexString(eventType);
+            default: return Integer.toHexString(id);
         }
     }
 
