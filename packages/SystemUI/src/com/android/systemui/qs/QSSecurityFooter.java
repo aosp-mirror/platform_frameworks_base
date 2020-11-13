@@ -15,6 +15,8 @@
  */
 package com.android.systemui.qs;
 
+import static com.android.systemui.qs.dagger.QSFragmentModule.QS_SECURITY_FOOTER_VIEW;
+
 import android.app.AlertDialog;
 import android.app.admin.DeviceAdminInfo;
 import android.app.admin.DevicePolicyEventLogger;
@@ -44,9 +46,10 @@ import android.widget.TextView;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.util.FrameworkStatsLog;
-import com.android.systemui.Dependency;
 import com.android.systemui.FontSizeUtils;
 import com.android.systemui.R;
+import com.android.systemui.dagger.qualifiers.Background;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.qs.dagger.QSScope;
 import com.android.systemui.settings.UserTracker;
@@ -54,6 +57,7 @@ import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.statusbar.policy.SecurityController;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 
 @QSScope
 class QSSecurityFooter implements OnClickListener, DialogInterface.OnClickListener {
@@ -81,18 +85,19 @@ class QSSecurityFooter implements OnClickListener, DialogInterface.OnClickListen
     private int mFooterIconId;
 
     @Inject
-    public QSSecurityFooter(QSPanel qsPanel, Context context, UserTracker userTracker) {
-        mRootView = LayoutInflater.from(context)
-                .inflate(R.layout.quick_settings_footer, qsPanel, false);
+    QSSecurityFooter(@Named(QS_SECURITY_FOOTER_VIEW) View rootView, Context context,
+            UserTracker userTracker, @Main Handler mainHandler, ActivityStarter activityStarter,
+            SecurityController securityController, @Background Looper bgLooper) {
+        mRootView = rootView;
         mRootView.setOnClickListener(this);
         mFooterText = mRootView.findViewById(R.id.footer_text);
         mFooterIcon = mRootView.findViewById(R.id.footer_icon);
         mFooterIconId = R.drawable.ic_info_outline;
         mContext = context;
-        mMainHandler = new Handler(Looper.myLooper());
-        mActivityStarter = Dependency.get(ActivityStarter.class);
-        mSecurityController = Dependency.get(SecurityController.class);
-        mHandler = new H(Dependency.get(Dependency.BG_LOOPER));
+        mMainHandler = mainHandler;
+        mActivityStarter = activityStarter;
+        mSecurityController = securityController;
+        mHandler = new H(bgLooper);
         mUserTracker = userTracker;
     }
 
