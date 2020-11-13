@@ -86,16 +86,11 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"আবার স্ক্রিনশট নেওয়ার চেষ্টা করুন"</string>
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"বেশি জায়গা নেই তাই স্ক্রিনশটটি সেভ করা যাবে না৷"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"এই অ্যাপ বা আপনার প্রতিষ্ঠান স্ক্রিনশট নেওয়ার অনুমতি দেয়নি"</string>
-    <!-- no translation found for screenshot_edit_label (8754981973544133050) -->
-    <skip />
-    <!-- no translation found for screenshot_edit_description (3333092254706788906) -->
-    <skip />
-    <!-- no translation found for screenshot_scroll_label (7682877978685434621) -->
-    <skip />
-    <!-- no translation found for screenshot_scroll_description (7855773867093272175) -->
-    <skip />
-    <!-- no translation found for screenshot_dismiss_description (4702341245899508786) -->
-    <skip />
+    <string name="screenshot_edit_label" msgid="8754981973544133050">"এডিট করুন"</string>
+    <string name="screenshot_edit_description" msgid="3333092254706788906">"স্ক্রিনশট এডিট করুন"</string>
+    <string name="screenshot_scroll_label" msgid="7682877978685434621">"স্ক্রল করুন"</string>
+    <string name="screenshot_scroll_description" msgid="7855773867093272175">"স্ক্রিনশট স্ক্রল করুন"</string>
+    <string name="screenshot_dismiss_description" msgid="4702341245899508786">"স্ক্রিনশট বাতিল করুন"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"স্ক্রিনশটের প্রিভিউ"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"স্ক্রিন রেকর্ডার"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"স্ক্রিন রেকর্ডিং প্রসেস হচ্ছে"</string>
