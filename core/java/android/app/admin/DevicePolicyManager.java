@@ -122,6 +122,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 
+// TODO(b/172376923) - add CarDevicePolicyManager examples below (or remove reference to it).
 /**
  * Public interface for managing policies enforced on a device. Most clients of this class must be
  * registered with the system as a <a href="{@docRoot}guide/topics/admin/device-admin.html">device
@@ -130,6 +131,13 @@ import java.util.concurrent.Executor;
  * for that method specifies that it is restricted to either device or profile owners. Any
  * application calling an api may only pass as an argument a device administrator component it
  * owns. Otherwise, a {@link SecurityException} will be thrown.
+ *
+ * <p><b>Note: </b>on
+ * {@link android.content.pm.PackageManager#FEATURE_AUTOMOTIVE automotive builds}, some methods can
+ * throw an {@link UnsafeStateException} exception (for example, if the vehicle is moving), so
+ * callers running on automotive builds should wrap every method call under the methods provided by
+ * {@code android.car.admin.CarDevicePolicyManager}.
+ *
  * <div class="special reference">
  * <h3>Developer Guides</h3>
  * <p>
@@ -1972,6 +1980,7 @@ public class DevicePolicyManager {
     public static final int CODE_CANNOT_ADD_MANAGED_PROFILE = 11;
 
     /**
+     * TODO (b/137101239): clean up split system user codes
      * Result code for {@link #checkProvisioningPreCondition}.
      *
      * <p>Returned for {@link #ACTION_PROVISION_MANAGED_USER} and
@@ -1995,6 +2004,7 @@ public class DevicePolicyManager {
     public static final int CODE_DEVICE_ADMIN_NOT_SUPPORTED = 13;
 
     /**
+     * TODO (b/137101239): clean up split system user codes
      * Result code for {@link #checkProvisioningPreCondition}.
      *
      * <p>Returned for {@link #ACTION_PROVISION_MANAGED_PROFILE} when the device the user is a
@@ -2443,6 +2453,19 @@ public class DevicePolicyManager {
     @Retention(RetentionPolicy.SOURCE)
     public @interface PersonalAppsSuspensionReason {}
 
+    /** @hide */
+    @TestApi
+    public static final int OPERATION_LOCK_NOW = 1;
+
+    // TODO(b/172376923) - add all operations
+    /** @hide */
+    @IntDef(prefix = "OPERATION_", value = {
+            OPERATION_LOCK_NOW,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public static @interface DevicePolicyOperation {
+    }
+
     /**
      * Return true if the given administrator component is currently active (enabled) in the system.
      *
@@ -2728,6 +2751,9 @@ public class DevicePolicyManager {
      * This method can be called on the {@link DevicePolicyManager} instance returned by
      * {@link #getParentProfileInstance(ComponentName)} in order to set restrictions on the parent
      * profile.
+     *
+     * <p><strong>Note:</strong> Specifying password requirements using this method clears the
+     * password complexity requirements set using {@link #setRequiredPasswordComplexity(int)}.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param quality The new desired quality. One of {@link #PASSWORD_QUALITY_UNSPECIFIED},
@@ -3607,13 +3633,18 @@ public class DevicePolicyManager {
      * <p>Note that when called from a profile which uses an unified challenge with its parent, the
      * screen lock complexity of the parent will be returned.
      *
+     * <p>Apps need the {@link permission#REQUEST_PASSWORD_COMPLEXITY} permission to call this
+     * method. On Android {@link android.os.Build.VERSION_CODES#S} and above, the calling
+     * application does not need this permission if it is a device owner or a profile owner.
+     *
      * <p>This method can be called on the {@link DevicePolicyManager} instance
      * returned by {@link #getParentProfileInstance(ComponentName)} in order to retrieve
      * restrictions on the parent profile.
      *
      * @throws IllegalStateException if the user is not unlocked.
      * @throws SecurityException     if the calling application does not have the permission
-     *                               {@link permission#REQUEST_PASSWORD_COMPLEXITY}
+     *                               {@link permission#REQUEST_PASSWORD_COMPLEXITY}, and is not a
+     *                               device owner or a profile owner.
      */
     @PasswordComplexity
     @RequiresPermission(android.Manifest.permission.REQUEST_PASSWORD_COMPLEXITY)
@@ -3624,6 +3655,66 @@ public class DevicePolicyManager {
 
         try {
             return mService.getPasswordComplexity(mParentInstance);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Sets a password complexity requirement for the user's screen lock.
+     * The complexity level is one of the pre-defined levels.
+     *
+     * <p>Note that when called on a profile which uses an unified challenge with its parent, the
+     * complexity would apply to the unified challenge.
+     *
+     * <p>This method can be called on the {@link DevicePolicyManager} instance
+     * returned by {@link #getParentProfileInstance(ComponentName)} in order to set
+     * restrictions on the parent profile.
+     *
+     * <p><strong>Note:</strong> Specifying password requirements using this method clears any
+     * password requirements set using the obsolete {@link #setPasswordQuality(ComponentName, int)}
+     * and any of its associated methods.
+     *
+     * @throws SecurityException if the calling application is not a device owner or a profile
+     * owner.
+     * @throws IllegalArgumentException if the complexity level is not one of the four above.
+     */
+    public void setRequiredPasswordComplexity(@PasswordComplexity int passwordComplexity) {
+        if (mService == null) {
+            return;
+        }
+
+        try {
+            mService.setRequiredPasswordComplexity(passwordComplexity, mParentInstance);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+
+    /**
+     * Gets the password complexity requirement set by {@link #setRequiredPasswordComplexity(int)},
+     * for the current user.
+     *
+     * <p>The difference between this method and {@link #getPasswordComplexity()} is that this
+     * method simply returns the value set by {@link #setRequiredPasswordComplexity(int)} while
+     * {@link #getPasswordComplexity()} returns the complexity of the actual password.
+     *
+     * <p>This method can be called on the {@link DevicePolicyManager} instance
+     * returned by {@link #getParentProfileInstance(ComponentName)} in order to get
+     * restrictions on the parent profile.
+     *
+     * @throws SecurityException if the calling application is not a device owner or a profile
+     * owner.
+     */
+    @PasswordComplexity
+    public int getRequiredPasswordComplexity() {
+        if (mService == null) {
+            return PASSWORD_COMPLEXITY_NONE;
+        }
+
+        try {
+            return mService.getRequiredPasswordComplexity(mParentInstance);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -9987,6 +10078,8 @@ public class DevicePolicyManager {
      * <li>{@link #getRequiredStrongAuthTimeout}</li>
      * <li>{@link #setRequiredStrongAuthTimeout}</li>
      * <li>{@link #getAccountTypesWithManagementDisabled}</li>
+     * <li>{@link #setRequiredPasswordComplexity(int)} </li>
+     * <li>{@link #getRequiredPasswordComplexity()}</li>
      * </ul>
      * <p>
      * The following methods are supported for the parent instance but can only be called by the

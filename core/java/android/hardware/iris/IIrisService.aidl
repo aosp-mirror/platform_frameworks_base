@@ -22,5 +22,5 @@ package android.hardware.iris;
  */
 interface IIrisService {
     // Give IrisService its ID. See AuthService.java
-    void initializeConfiguration(int sensorId);
+    void initializeConfiguration(int sensorId, int strength);
 }

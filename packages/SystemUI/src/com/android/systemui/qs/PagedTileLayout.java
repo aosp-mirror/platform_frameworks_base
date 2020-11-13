@@ -63,7 +63,6 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
     private int mPageToRestore = -1;
     private int mLayoutOrientation;
     private int mLayoutDirection;
-    private int mHorizontalClipBound;
     private final Rect mClippingRect;
     private final UiEventLogger mUiEventLogger = QSEvents.INSTANCE.getQsUiEventsLogger();
     private int mExcessHeight;
@@ -333,7 +332,6 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
         // Update bottom padding, useful for removing extra space once the panel page indicator is
         // hidden.
         Resources res = getContext().getResources();
-        mHorizontalClipBound = res.getDimensionPixelSize(R.dimen.notification_side_paddings);
         setPadding(0, 0, 0,
                 getContext().getResources().getDimensionPixelSize(
                         R.dimen.qs_paged_tile_layout_padding_bottom));
@@ -351,7 +349,8 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         super.onLayout(changed, l, t, r, b);
-        mClippingRect.set(mHorizontalClipBound, 0, (r - l) - mHorizontalClipBound, b - t);
+        // Clip to margins
+        mClippingRect.set(0, 0, (r - l), b - t);
         setClipBounds(mClippingRect);
     }
 

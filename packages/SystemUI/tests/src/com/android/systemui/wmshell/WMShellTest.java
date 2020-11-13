@@ -20,7 +20,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.content.pm.PackageManager;
 import android.test.suitebuilder.annotation.SmallTest;
 
 import androidx.test.runner.AndroidJUnit4;
@@ -31,13 +30,11 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.navigationbar.NavigationModeController;
-import com.android.systemui.shared.system.InputConsumerController;
-import com.android.systemui.shared.system.TaskStackChangeListener;
-import com.android.systemui.shared.system.TaskStackChangeListeners;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.tracing.ProtoTracer;
 import com.android.wm.shell.ShellDump;
+import com.android.wm.shell.hidedisplaycutout.HideDisplayCutout;
 import com.android.wm.shell.onehanded.OneHanded;
 import com.android.wm.shell.onehanded.OneHandedGestureHandler;
 import com.android.wm.shell.onehanded.OneHandedTransitionCallback;
@@ -56,13 +53,11 @@ import java.util.Optional;
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class WMShellTest extends SysuiTestCase {
-    InputConsumerController mInputConsumerController;
     WMShell mWMShell;
 
     @Mock CommandQueue mCommandQueue;
     @Mock ConfigurationController mConfigurationController;
     @Mock KeyguardUpdateMonitor mKeyguardUpdateMonitor;
-    @Mock InputConsumerController mMockInputConsumerController;
     @Mock NavigationModeController mNavigationModeController;
     @Mock ScreenLifecycle mScreenLifecycle;
     @Mock SysUiState mSysUiState;
@@ -70,6 +65,7 @@ public class WMShellTest extends SysuiTestCase {
     @Mock PipTouchHandler mPipTouchHandler;
     @Mock SplitScreen mSplitScreen;
     @Mock OneHanded mOneHanded;
+    @Mock HideDisplayCutout mHideDisplayCutout;
     @Mock ProtoTracer mProtoTracer;
     @Mock ShellDump mShellDump;
 
@@ -80,7 +76,8 @@ public class WMShellTest extends SysuiTestCase {
         mWMShell = new WMShell(mContext, mCommandQueue, mConfigurationController,
                 mKeyguardUpdateMonitor, mNavigationModeController,
                 mScreenLifecycle, mSysUiState, Optional.of(mPip), Optional.of(mSplitScreen),
-                Optional.of(mOneHanded), mProtoTracer, Optional.of(mShellDump));
+                Optional.of(mOneHanded), Optional.of(mHideDisplayCutout), mProtoTracer,
+                Optional.of(mShellDump));
 
         when(mPip.getPipTouchHandler()).thenReturn(mPipTouchHandler);
     }
@@ -112,5 +109,13 @@ public class WMShellTest extends SysuiTestCase {
         verify(mOneHanded).registerGestureCallback(any(
                 OneHandedGestureHandler.OneHandedGestureEventCallback.class));
         verify(mOneHanded).registerTransitionCallback(any(OneHandedTransitionCallback.class));
+    }
+
+    @Test
+    public void initHideDisplayCutout_registersCallbacks() {
+        mWMShell.initHideDisplayCutout(mHideDisplayCutout);
+
+        verify(mConfigurationController).addCallback(
+                any(ConfigurationController.ConfigurationListener.class));
     }
 }

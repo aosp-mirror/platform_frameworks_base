@@ -46,7 +46,7 @@ import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.policy.TaskResizingAlgorithm;
 import com.android.wm.shell.R;
-import com.android.wm.shell.pip.PipBoundsHandler;
+import com.android.wm.shell.pip.PipBoundsAlgorithm;
 import com.android.wm.shell.pip.PipBoundsState;
 import com.android.wm.shell.pip.PipTaskOrganizer;
 import com.android.wm.shell.pip.PipUiEventLogger;
@@ -66,7 +66,7 @@ public class PipResizeGestureHandler {
     private static final float STARTING_SCALE_FACTOR = 1.0f;
 
     private final Context mContext;
-    private final PipBoundsHandler mPipBoundsHandler;
+    private final PipBoundsAlgorithm mPipBoundsAlgorithm;
     private final PipMotionHelper mMotionHelper;
     private final PipBoundsState mPipBoundsState;
     private final int mDisplayId;
@@ -108,7 +108,7 @@ public class PipResizeGestureHandler {
 
     private int mCtrlType;
 
-    public PipResizeGestureHandler(Context context, PipBoundsHandler pipBoundsHandler,
+    public PipResizeGestureHandler(Context context, PipBoundsAlgorithm pipBoundsAlgorithm,
             PipBoundsState pipBoundsState, PipMotionHelper motionHelper,
             PipTaskOrganizer pipTaskOrganizer, Function<Rect, Rect> movementBoundsSupplier,
             Runnable updateMovementBoundsRunnable, PipUiEventLogger pipUiEventLogger,
@@ -116,7 +116,7 @@ public class PipResizeGestureHandler {
         mContext = context;
         mDisplayId = context.getDisplayId();
         mMainExecutor = context.getMainExecutor();
-        mPipBoundsHandler = pipBoundsHandler;
+        mPipBoundsAlgorithm = pipBoundsAlgorithm;
         mPipBoundsState = pipBoundsState;
         mMotionHelper = motionHelper;
         mPipTaskOrganizer = pipTaskOrganizer;
@@ -451,7 +451,7 @@ public class PipResizeGestureHandler {
                                 mDownPoint.x, mDownPoint.y, currentPipBounds, mCtrlType, mMinSize.x,
                                 mMinSize.y, mMaxSize, true,
                                 mLastDownBounds.width() > mLastDownBounds.height()));
-                        mPipBoundsHandler.transformBoundsToAspectRatio(mLastResizeBounds,
+                        mPipBoundsAlgorithm.transformBoundsToAspectRatio(mLastResizeBounds,
                                 mPipBoundsState.getAspectRatio(), false /* useCurrentMinEdgeSize */,
                                 true /* useCurrentSize */);
                         mPipTaskOrganizer.scheduleUserResizePip(mLastDownBounds, mLastResizeBounds,

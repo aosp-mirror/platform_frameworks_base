@@ -30,7 +30,7 @@ import java.util.concurrent.Executor;
  * {@link RangingSession}.
  *
  * <p>To get an instance of {@link RangingSession}, first use
- * {@link UwbManager#openRangingSession(RangingParams, Executor, Callback)} to request to open a
+ * {@link UwbManager#openRangingSession(PersistableBundle, Executor, Callback)} to request to open a
  * session. Once the session is opened, a {@link RangingSession} object is provided through
  * {@link RangingSession.Callback#onOpenSuccess(RangingSession, PersistableBundle)}. If opening a
  * session fails, the failure is reported through {@link RangingSession.Callback#onClosed(int)} with
@@ -44,7 +44,7 @@ public final class RangingSession implements AutoCloseable {
      */
     public interface Callback {
         /**
-         * Invoked when {@link UwbManager#openRangingSession(RangingParams, Executor, Callback)}
+         * Invoked when {@link UwbManager#openRangingSession(PersistableBundle, Executor, Callback)}
          * is successful
          *
          * @param session the newly opened {@link RangingSession}
@@ -77,7 +77,7 @@ public final class RangingSession implements AutoCloseable {
 
         /**
          * Indicates that the session failed to open due to erroneous parameters passed
-         * to {@link UwbManager#openRangingSession(RangingParams, Executor, Callback)}
+         * to {@link UwbManager#openRangingSession(PersistableBundle, Executor, Callback)}
          */
         int CLOSE_REASON_LOCAL_BAD_PARAMETERS = 2;
 
@@ -137,8 +137,8 @@ public final class RangingSession implements AutoCloseable {
      * will still be invoked.
      *
      * <p>{@link Callback#onClosed(int)} will be invoked using the same callback
-     * object given to {@link UwbManager#openRangingSession(RangingParams, Executor, Callback)} when
-     * the {@link RangingSession} was opened. The callback will be invoked after each call to
+     * object given to {@link UwbManager#openRangingSession(PersistableBundle, Executor, Callback)}
+     * when the {@link RangingSession} was opened. The callback will be invoked after each call to
      * {@link #close()}, even if the {@link RangingSession} is already closed.
      */
     @Override

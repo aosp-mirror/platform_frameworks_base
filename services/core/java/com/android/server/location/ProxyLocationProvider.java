@@ -92,7 +92,11 @@ public class ProxyLocationProvider extends AbstractLocationProvider {
     }
 
     private boolean register() {
-        return mServiceWatcher.register();
+        boolean resolves = mServiceWatcher.checkServiceResolves();
+        if (resolves) {
+            mServiceWatcher.register();
+        }
+        return resolves;
     }
 
     private void onBind(IBinder binder, ComponentName service) throws RemoteException {

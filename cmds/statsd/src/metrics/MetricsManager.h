@@ -172,7 +172,7 @@ private:
     bool mVersionStringsInReport = false;
     bool mInstallerInReport = false;
 
-    const int64_t mTtlNs;
+    int64_t mTtlNs;
     int64_t mTtlEndNs;
 
     int64_t mLastReportTimeNs;
@@ -193,7 +193,7 @@ private:
     // To guard access to mAllowedLogSources
     mutable std::mutex mAllowedLogSourcesMutex;
 
-    const std::set<int32_t> mWhitelistedAtomIds;
+    std::set<int32_t> mWhitelistedAtomIds;
 
     // We can pull any atom from these uids.
     std::set<int32_t> mDefaultPullUids;
@@ -211,8 +211,7 @@ private:
     // Contains the annotations passed in with StatsdConfig.
     std::list<std::pair<const int64_t, const int32_t>> mAnnotations;
 
-    const bool mShouldPersistHistory;
-
+    bool mShouldPersistHistory;
 
     // All event tags that are interesting to my metrics.
     std::set<int> mTagIds;
@@ -293,6 +292,14 @@ private:
     // Calls initAllowedLogSources and initPullAtomSources. Sets mConfigValid to false on error.
     void createAllLogSourcesFromConfig(const StatsdConfig& config);
 
+    // Verifies the config meets guardrails and updates statsdStats.
+    // Sets mConfigValid to false on error. Should be called on config creation/update
+    void verifyGuardrailsAndUpdateStatsdStats();
+
+    // Initializes mIsAlwaysActive and mIsActive.
+    // Should be called on config creation/update.
+    void initializeConfigActiveStatus();
+
     // The metrics that don't need to be uploaded or even reported.
     std::set<int64_t> mNoReportMetricIds;
 
@@ -327,6 +334,7 @@ private:
 
     FRIEND_TEST(AlarmE2eTest, TestMultipleAlarms);
     FRIEND_TEST(ConfigTtlE2eTest, TestCountMetric);
+    FRIEND_TEST(ConfigUpdateE2eTest, TestConfigTtl);
     FRIEND_TEST(MetricActivationE2eTest, TestCountMetric);
     FRIEND_TEST(MetricActivationE2eTest, TestCountMetricWithOneDeactivation);
     FRIEND_TEST(MetricActivationE2eTest, TestCountMetricWithTwoDeactivations);

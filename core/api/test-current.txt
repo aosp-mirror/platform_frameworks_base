@@ -282,7 +282,7 @@ package android.app {
   }
 
   public class StatusBarManager {
-    method public void collapsePanels();
+    method @RequiresPermission(android.Manifest.permission.STATUS_BAR) public void collapsePanels();
     method public void expandNotificationsPanel();
     method @RequiresPermission(android.Manifest.permission.STATUS_BAR) public void setExpansionDisabledForSimNetworkLock(boolean);
   }
@@ -369,10 +369,15 @@ package android.app.admin {
     method public boolean isCurrentInputMethodSetByOwner();
     method public boolean isFactoryResetProtectionPolicySupported();
     field public static final String ACTION_DATA_SHARING_RESTRICTION_APPLIED = "android.app.action.DATA_SHARING_RESTRICTION_APPLIED";
+    field public static final int OPERATION_LOCK_NOW = 1; // 0x1
   }
 
   public static final class SecurityLog.SecurityEvent implements android.os.Parcelable {
     ctor public SecurityLog.SecurityEvent(long, byte[]);
+  }
+
+  public final class UnsafeStateException extends java.lang.IllegalStateException implements android.os.Parcelable {
+    method public int getOperation();
   }
 
 }

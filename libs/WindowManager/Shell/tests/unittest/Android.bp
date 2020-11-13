@@ -30,6 +30,7 @@ android_test {
         "mockito-target-extended-minus-junit4",
         "truth-prebuilt",
         "testables",
+        "platform-test-annotations",
     ],
 
     libs: [

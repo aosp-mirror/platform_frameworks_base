@@ -107,8 +107,6 @@ class UdfpsController implements DozeReceiver {
     private boolean mIsOverlayShowing;
     // Indicates whether the overlay has been requested.
     private boolean mIsOverlayRequested;
-    // Indicates whether the bouncer is showing. When it is showing, the overlay needs to be hidden.
-    private boolean mIsBouncerShowing;
 
     // The fingerprint AOD trigger doesn't provide an ACTION_UP/ACTION_CANCEL event to tell us when
     // to turn off high brightness mode. To get around this limitation, the state of the AOD
@@ -260,21 +258,8 @@ class UdfpsController implements DozeReceiver {
         updateOverlay();
     }
 
-    /**
-     * Call when the visibility of the bouncer changes.
-     *
-     * @param isShowing Whether or not the bouncer is showing
-     */
-    void setBouncerVisibility(boolean isShowing) {
-        if (isShowing == mIsBouncerShowing) {
-            return;
-        }
-        mIsBouncerShowing = isShowing;
-        updateOverlay();
-    }
-
     private void updateOverlay() {
-        if (mIsOverlayRequested && !mIsBouncerShowing) {
+        if (mIsOverlayRequested) {
             showUdfpsOverlay();
         } else {
             hideUdfpsOverlay();

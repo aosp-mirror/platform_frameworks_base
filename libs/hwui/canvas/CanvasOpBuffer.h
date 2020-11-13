@@ -46,6 +46,10 @@ public:
     const SkMatrix& transform() const { return mTransform; }
 
     CanvasOp<T>* operator->() noexcept { return &mImpl; }
+    const CanvasOp<T>* operator->() const noexcept { return &mImpl; }
+
+    CanvasOp<T>& op() noexcept { return mImpl; }
+    const CanvasOp<T>& op() const noexcept { return mImpl; }
 };
 
 extern template class OpBuffer<CanvasOpType, CanvasOpContainer>;

@@ -453,7 +453,7 @@ public class Utils {
      * {@link SensorPropertiesInternal} strength.
      */
     public static @SensorProperties.Strength int authenticatorStrengthToPropertyStrength(
-            @BiometricManager.Authenticators.Types int strength) {
+            @Authenticators.Types int strength) {
         switch (strength) {
             case BiometricManager.Authenticators.BIOMETRIC_CONVENIENCE:
                 return SensorProperties.STRENGTH_CONVENIENCE;
@@ -461,6 +461,20 @@ public class Utils {
                 return SensorProperties.STRENGTH_WEAK;
             case BiometricManager.Authenticators.BIOMETRIC_STRONG:
                 return SensorProperties.STRENGTH_STRONG;
+            default:
+                throw new IllegalArgumentException("Unknown strength: " + strength);
+        }
+    }
+
+    public static @Authenticators.Types int propertyStrengthToAuthenticatorStrength(
+            @SensorProperties.Strength int strength) {
+        switch (strength) {
+            case SensorProperties.STRENGTH_CONVENIENCE:
+                return Authenticators.BIOMETRIC_CONVENIENCE;
+            case SensorProperties.STRENGTH_WEAK:
+                return Authenticators.BIOMETRIC_WEAK;
+            case SensorProperties.STRENGTH_STRONG:
+                return Authenticators.BIOMETRIC_STRONG;
             default:
                 throw new IllegalArgumentException("Unknown strength: " + strength);
         }

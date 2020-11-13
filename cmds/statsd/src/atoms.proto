@@ -503,6 +503,11 @@ message Atom {
         TlsHandshakeReported tls_handshake_reported = 317 [(module) = "conscrypt"];
         TextClassifierApiUsageReported text_classifier_api_usage_reported = 318  [(module) = "textclassifier"];
         KilledAppStatsReported killed_app_stats_reported = 319 [(module) = "carwatchdogd"];
+        MediametricsPlaybackReported mediametrics_playback_reported = 320;
+        MediaNetworkInfoChanged media_network_info_changed = 321;
+        MediaPlaybackStateChanged media_playback_state_changed = 322;
+        MediaPlaybackErrorReported media_playback_error_reported = 323;
+        MediaPlaybackTrackChanged media_playback_track_changed = 324;
 
         // StatsdStats tracks platform atoms with ids upto 500.
         // Update StatsdStats::kMaxPushedAtomId when atom ids here approach that value.
@@ -12223,4 +12228,123 @@ message ProcessStat {
 
     // Resident set size in kb.
     optional uint64 vm_rss_kb = 7;
+}
+
+/*
+ * pushes Media playback information.
+ * Logged from
+ *   (WIP) frameworks/av/services/mediaanalytics/playback_statsd.cpp
+ */
+message MediametricsPlaybackReported {
+    optional int32 uid = 1 [(is_uid) = true];
+
+    //  Randomly generated playback ID. A Base64 encoded hex string representing a 128-bit integer
+    optional string playback_id = 2;
+    //  The total length of the media in milliseconds. 0 for live contents.
+    optional int64 media_duration_millis = 3;
+    //  Network, device, or mixed.
+    optional android.stats.mediametrics.StreamSourceType stream_source = 4;
+    //  Stream type. DASH, HLS, etc
+    optional android.stats.mediametrics.StreamType stream_type = 5;
+    //  Live, VOD, others
+    optional android.stats.mediametrics.PlaybackType playback_type = 6;
+    //  DRM type
+    optional android.stats.mediametrics.DrmType drm_type = 7;
+    //  Main, AD, others
+    optional android.stats.mediametrics.ContentType content_type = 8;
+    //  Player name. E.g. ExoPlayer
+    optional string player_name = 9;
+    //  Player version. E.g. 1.10.3e
+    optional string player_version = 10;
+    //  Player related experiment IDs
+    optional Experiments experiment_ids = 11 [(log_mode) = MODE_BYTES];
+    //  Number of frames played. Dropped frames included. -1 means unknown.
+    optional int32 video_frames_played = 12;
+    //  Number of frames dropped. -1 means unknown.
+    optional int32 video_frames_dropped = 13;
+    //  Number of audio underruns. -1 means unknown.
+    optional int32 audio_underrun_count = 14;
+    //  Total number of bytes read from the network
+    optional int64 network_bytes_read = 15;
+    //  Total number of bytes read from on-device sources
+    optional int64 local_bytes_read = 16;
+    //  Total transfer spent reading from the network in ms.
+    // For parallel requests, the overlapping time intervals are counted only once.
+    optional int64 network_transfer_duration_millis = 17;
+}
+
+message MediaNetworkInfoChanged {
+    //  Randomly generated playback ID. A Base64 encoded hex string representing a 128-bit integer
+    optional string playback_id = 1;
+    //  New network type
+    optional android.stats.mediametrics.NetworkType type = 2;
+    //  Network Start time, relative to playback creation time in millisecond.
+    //  It's in absolute time (e.g. always ticks even if the playback is paused).
+    optional int64 time_since_playback_created_millis = 3;
+}
+
+message MediaPlaybackStateChanged {
+    //  Randomly generated playback ID. A Base64 encoded hex string representing a 128-bit integer
+    optional string playback_id = 1;
+    //  New playback state
+    optional android.stats.mediametrics.PlaybackState playback_state = 2;
+    //  State change time, relative to playback creation time in millisecond.
+    //  It's in absolute time (e.g. always ticks even if the playback is paused).
+    optional int64 time_since_playback_created_millis = 3;
+}
+
+message MediaPlaybackErrorReported {
+    //  Randomly generated playback ID. A Base64 encoded hex string representing a 128-bit integer
+    optional string playback_id = 1;
+    //  A shortened call stack of the error
+    optional string exception_stack = 2;
+    //  Error code
+    optional android.stats.mediametrics.PlaybackErrorCode error_code = 3;
+    //  Sub-code of error type specified by the error code.
+    optional int32 sub_error_code = 4;
+    //  Error time, relative to playback creation time in millisecond.
+    //  It's in absolute time (e.g. always ticks even if the playback is paused).
+    optional int64 time_since_playback_created_millis = 5;
+}
+
+message MediaPlaybackTrackChanged {
+    //  Randomly generated playback ID. A Base64 encoded hex string representing a 128-bit integer
+    optional string playback_id = 1;
+    //  The track is on or off after the change
+    optional android.stats.mediametrics.TrackState state = 2;
+    //  The reason of the track change
+    optional android.stats.mediametrics.TrackChangeReason reason = 3;
+    //  The MIME type of the container. E.g. video/mp4
+    optional string container_mime_type = 4;
+    //  The sample MIME type of the track. E.g. video/avc
+    optional string sample_mime_type = 5;
+
+    //  Codec name
+    optional string codec_name = 6;
+    //  Bits per second. 0 means unknown.
+    optional int32 bitrate = 7;
+
+    //  Track change time, relative to playback creation time in millisecond.
+    //  It's in absolute time (e.g. always ticks even if the playback is paused).
+    optional int64 time_since_playback_created_millis = 8;
+
+    //  Track type. Audio, Video, Text
+    optional android.stats.mediametrics.TrackType type = 9;
+    //  2-letter ISO 639-1 language code.
+    optional string language = 10;
+    //  IETF BCP 47 optional language region subtag based on a two-letter country code
+    optional string language_region = 11;
+    //  Number of channels
+    optional int32 channel_count = 12;
+    //  Samples per second
+    optional int32 sample_rate = 13;
+    //  The width of the video in pixels.
+    optional int32 width = 14;
+    //  The height of the video in pixels.
+    optional int32 height = 15;
+}
+
+message Experiments {
+    // Experiment IDs sent by the player.
+    repeated int64 experiments = 1;
 }

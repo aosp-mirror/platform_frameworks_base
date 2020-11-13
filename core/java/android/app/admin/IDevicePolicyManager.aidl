@@ -87,6 +87,8 @@ interface IDevicePolicyManager {
     boolean isProfileActivePasswordSufficientForParent(int userHandle);
     boolean isPasswordSufficientAfterProfileUnification(int userHandle, int profileUser);
     int getPasswordComplexity(boolean parent);
+    void setRequiredPasswordComplexity(int passwordComplexity, boolean parent);
+    int getRequiredPasswordComplexity(boolean parent);
     boolean isUsingUnifiedPassword(in ComponentName admin);
     int getCurrentFailedPasswordAttempts(int userHandle, boolean parent);
     int getProfileWithMinimumFailedPasswordsForWipe(int userHandle, boolean parent);

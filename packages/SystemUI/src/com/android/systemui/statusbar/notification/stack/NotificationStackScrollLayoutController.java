@@ -48,6 +48,7 @@ import android.view.WindowInsets;
 import android.widget.FrameLayout;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.colorextraction.ColorExtractor;
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEvent;
@@ -176,6 +177,8 @@ public class NotificationStackScrollLayoutController {
 
     private final NotificationListContainerImpl mNotificationListContainer =
             new NotificationListContainerImpl();
+
+    private ColorExtractor.OnColorsChangedListener mOnColorsChangedListener;
 
     @VisibleForTesting
     final View.OnAttachStateChangeListener mOnAttachStateChangeListener =
@@ -703,10 +706,11 @@ public class NotificationStackScrollLayoutController {
                 Settings.Secure.NOTIFICATION_DISMISS_RTL,
                 Settings.Secure.NOTIFICATION_HISTORY_ENABLED);
 
-        mColorExtractor.addOnColorsChangedListener((colorExtractor, which) -> {
+        mOnColorsChangedListener = (colorExtractor, which) -> {
             final boolean useDarkText = mColorExtractor.getNeutralColors().supportsDarkText();
             mView.updateDecorViews(useDarkText);
-        });
+        };
+        mColorExtractor.addOnColorsChangedListener(mOnColorsChangedListener);
 
         mKeyguardMediaController.setVisibilityChangedListener(visible -> {
             mView.setKeyguardMediaControllorVisible(visible);

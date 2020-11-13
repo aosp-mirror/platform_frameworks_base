@@ -16,14 +16,16 @@
   -->
 <com.android.wm.shell.bubbles.BubbleMenuView
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_height="match_parent"
     android:layout_width="match_parent"
     android:background="#66000000"
     android:visibility="gone"
-    android:id="@+id/bubble_menu_container">
+    android:id="@+id/bubble_menu_container"
+    tools:ignore="MissingClass">
 
     <FrameLayout
-        android:layout_height="@dimen/individual_bubble_size"
+        android:layout_height="@dimen/bubble_menu_item_height"
         android:layout_width="wrap_content"
         android:background="#FFFFFF"
         android:id="@+id/bubble_menu_view">

@@ -1258,8 +1258,7 @@ public class MediaPlayer extends PlayerBase
      */
     public void setDataSource(FileDescriptor fd, long offset, long length)
             throws IOException, IllegalArgumentException, IllegalStateException {
-        boolean optimize = SystemProperties.getBoolean("fuse.sys.transcode_player_optimize", false);
-        FileDescriptor modernFd = optimize ? FileUtils.convertToModernFd(fd) : null;
+        FileDescriptor modernFd = FileUtils.convertToModernFd(fd);
         if (modernFd == null) {
             _setDataSource(fd, offset, length);
         } else {

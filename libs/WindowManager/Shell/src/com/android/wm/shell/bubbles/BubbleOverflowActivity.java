@@ -111,11 +111,11 @@ public class BubbleOverflowActivity extends Activity {
             IBinder binder = intent.getExtras().getBinder(EXTRA_BUBBLE_CONTROLLER);
             if (binder instanceof ObjectWrapper) {
                 mController = ((ObjectWrapper<BubbleController>) binder).get();
+                updateOverflow();
             }
         } else {
             Log.w(TAG, "Bubble overflow activity created without bubble controller!");
         }
-        updateOverflow();
     }
 
     void updateOverflow() {
@@ -138,7 +138,9 @@ public class BubbleOverflowActivity extends Activity {
         final int viewHeight = recyclerViewHeight / rows;
 
         mAdapter = new BubbleOverflowAdapter(getApplicationContext(), mOverflowBubbles,
-                mController::promoteBubbleFromOverflow, viewWidth, viewHeight);
+                mController::promoteBubbleFromOverflow,
+                mController.getPositioner(),
+                viewWidth, viewHeight);
         mRecyclerView.setAdapter(mAdapter);
 
         mOverflowBubbles.clear();
@@ -257,15 +259,20 @@ class BubbleOverflowAdapter extends RecyclerView.Adapter<BubbleOverflowAdapter.V
 
     private Context mContext;
     private Consumer<Bubble> mPromoteBubbleFromOverflow;
+    private BubblePositioner mPositioner;
     private List<Bubble> mBubbles;
     private int mWidth;
     private int mHeight;
 
-    public BubbleOverflowAdapter(Context context, List<Bubble> list, Consumer<Bubble> promoteBubble,
+    BubbleOverflowAdapter(Context context,
+            List<Bubble> list,
+            Consumer<Bubble> promoteBubble,
+            BubblePositioner positioner,
             int width, int height) {
         mContext = context;
         mBubbles = list;
         mPromoteBubbleFromOverflow = promoteBubble;
+        mPositioner = positioner;
         mWidth = width;
         mHeight = height;
     }
@@ -295,7 +302,7 @@ class BubbleOverflowAdapter extends RecyclerView.Adapter<BubbleOverflowAdapter.V
         TextView viewName = overflowView.findViewById(R.id.bubble_view_name);
         viewName.setTextColor(textColor);
 
-        return new ViewHolder(overflowView);
+        return new ViewHolder(overflowView, mPositioner);
     }
 
     @Override
@@ -348,9 +355,10 @@ class BubbleOverflowAdapter extends RecyclerView.Adapter<BubbleOverflowAdapter.V
         public BadgedImageView iconView;
         public TextView textView;
 
-        public ViewHolder(LinearLayout v) {
+        ViewHolder(LinearLayout v, BubblePositioner positioner) {
             super(v);
             iconView = v.findViewById(R.id.bubble_view);
+            iconView.initialize(positioner);
             textView = v.findViewById(R.id.bubble_view_name);
         }
     }

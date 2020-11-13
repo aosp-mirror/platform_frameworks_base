@@ -29,6 +29,7 @@ import static com.android.wm.shell.bubbles.BubbleOverflowActivity.EXTRA_BUBBLE_C
 import android.annotation.NonNull;
 import android.annotation.SuppressLint;
 import android.app.ActivityOptions;
+import android.app.ActivityTaskManager;
 import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
@@ -41,6 +42,7 @@ import android.graphics.Outline;
 import android.graphics.Rect;
 import android.graphics.drawable.ShapeDrawable;
 import android.os.Bundle;
+import android.os.RemoteException;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.SurfaceControl;
@@ -639,11 +641,20 @@ public class BubbleExpandedView extends LinearLayout {
     }
 
     /**
-     * Cleans up anything related to the task and TaskView.
+     * Cleans up anything related to the task and TaskView. If this view should be reused after this
+     * method is called, then {@link #initialize(BubbleController, BubbleStackView)} must be invoked
+     * first.
      */
     public void cleanUpExpandedState() {
         if (DEBUG_BUBBLE_EXPANDED_VIEW) {
             Log.d(TAG, "cleanUpExpandedState: bubble=" + getBubbleKey() + " task=" + mTaskId);
+        }
+        if (getTaskId() != INVALID_TASK_ID) {
+            try {
+                ActivityTaskManager.getService().removeTask(getTaskId());
+            } catch (RemoteException e) {
+                Log.w(TAG, e.getMessage());
+            }
         }
         if (mTaskView != null) {
             mTaskView.release();

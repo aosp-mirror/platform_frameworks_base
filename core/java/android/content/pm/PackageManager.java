@@ -40,7 +40,7 @@ import android.app.PropertyInvalidatedCache;
 import android.app.admin.DevicePolicyManager;
 import android.app.usage.StorageStatsManager;
 import android.compat.annotation.ChangeId;
-import android.compat.annotation.EnabledAfter;
+import android.compat.annotation.EnabledSince;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
@@ -3765,7 +3765,7 @@ public abstract class PackageManager {
      * @hide
      */
     @ChangeId
-    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.Q)
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.R)
     public static final long FILTER_APPLICATION_QUERY = 135549675L;
 
     /** {@hide} */

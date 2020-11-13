@@ -94,7 +94,8 @@ public class KeyguardUpdateMonitorCallback {
 
     /**
      * Called when the keyguard enters or leaves bouncer mode.
-     * @param bouncer if true, keyguard is now in bouncer mode.
+     * @param bouncer if true, keyguard is showing the bouncer or transitioning from/to bouncer
+     *                mode.
      */
     public void onKeyguardBouncerChanged(boolean bouncer) { }
 

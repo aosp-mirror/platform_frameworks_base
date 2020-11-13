@@ -25,6 +25,7 @@ import static android.app.admin.DevicePolicyManager.ID_TYPE_IMEI;
 import static android.app.admin.DevicePolicyManager.ID_TYPE_MEID;
 import static android.app.admin.DevicePolicyManager.ID_TYPE_SERIAL;
 import static android.app.admin.DevicePolicyManager.PASSWORD_COMPLEXITY_HIGH;
+import static android.app.admin.DevicePolicyManager.PASSWORD_COMPLEXITY_LOW;
 import static android.app.admin.DevicePolicyManager.PASSWORD_COMPLEXITY_MEDIUM;
 import static android.app.admin.DevicePolicyManager.PASSWORD_COMPLEXITY_NONE;
 import static android.app.admin.DevicePolicyManager.WIPE_EUICC;
@@ -6688,6 +6689,140 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         dpms.mMockInjector.setSystemCurrentTimeMillis(PROFILE_OFF_START);
         assertThat(dpm.getPersonalAppsSuspendedReasons(admin1))
                 .isEqualTo(DevicePolicyManager.PERSONAL_APPS_SUSPENDED_PROFILE_TIMEOUT);
+    }
+
+    @Test
+    public void testSetRequiredPasswordComplexity_UnauthorizedCallersOnDO() throws Exception {
+        mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
+        setupDeviceOwner();
+        // DO must be able to set it.
+        dpm.setRequiredPasswordComplexity(PASSWORD_COMPLEXITY_LOW);
+        // But not on the parent DPM.
+        assertExpectException(IllegalArgumentException.class, null,
+                () -> parentDpm.setRequiredPasswordComplexity(PASSWORD_COMPLEXITY_LOW));
+        // Another package must not be allowed to set password complexity.
+        mContext.binder.callingUid = DpmMockContext.ANOTHER_UID;
+        assertExpectException(SecurityException.class, null,
+                () -> dpm.setRequiredPasswordComplexity(PASSWORD_COMPLEXITY_LOW));
+    }
+
+    @Test
+    public void testSetRequiredPasswordComplexity_UnauthorizedCallersOnPO() throws Exception {
+        mContext.binder.callingUid = DpmMockContext.CALLER_UID;
+        setupProfileOwner();
+        // PO must be able to set it.
+        dpm.setRequiredPasswordComplexity(PASSWORD_COMPLEXITY_LOW);
+        // And on the parent profile DPM instance.
+        parentDpm.setRequiredPasswordComplexity(PASSWORD_COMPLEXITY_LOW);
+        // Another package must not be allowed to set password complexity.
+        mContext.binder.callingUid = DpmMockContext.ANOTHER_UID;
+        assertExpectException(SecurityException.class, null,
+                () -> dpm.setRequiredPasswordComplexity(PASSWORD_COMPLEXITY_LOW));
+    }
+
+    @Test
+    public void testSetRequiredPasswordComplexity_validValuesOnly() throws Exception {
+        mContext.binder.callingUid = DpmMockContext.CALLER_UID;
+        setupProfileOwner();
+
+        // Cannot set value other than password_complexity none/low/medium/high
+        assertExpectException(IllegalArgumentException.class, null, () ->
+                dpm.setRequiredPasswordComplexity(-1));
+        assertExpectException(IllegalArgumentException.class, null, () ->
+                dpm.setRequiredPasswordComplexity(7));
+        assertExpectException(IllegalArgumentException.class, null, () ->
+                dpm.setRequiredPasswordComplexity(PASSWORD_COMPLEXITY_HIGH + 1));
+
+        final Set<Integer> allowedModes = Set.of(PASSWORD_COMPLEXITY_NONE, PASSWORD_COMPLEXITY_LOW,
+                PASSWORD_COMPLEXITY_MEDIUM, PASSWORD_COMPLEXITY_HIGH);
+        for (int complexity : allowedModes) {
+            // Ensure exception is not thrown.
+            dpm.setRequiredPasswordComplexity(complexity);
+        }
+    }
+
+    @Test
+    public void testSetRequiredPasswordComplexity_setAndGet() throws Exception {
+        mContext.binder.callingUid = DpmMockContext.CALLER_UID;
+        setupProfileOwner();
+
+        final Set<Integer> allowedModes = Set.of(PASSWORD_COMPLEXITY_NONE, PASSWORD_COMPLEXITY_LOW,
+                PASSWORD_COMPLEXITY_MEDIUM, PASSWORD_COMPLEXITY_HIGH);
+        for (int complexity : allowedModes) {
+            dpm.setRequiredPasswordComplexity(complexity);
+            assertThat(dpm.getRequiredPasswordComplexity()).isEqualTo(complexity);
+        }
+    }
+
+    @Test
+    public void testSetRequiredPasswordComplexityOnParent_setAndGet() throws Exception {
+        final int managedProfileUserId = 15;
+        final int managedProfileAdminUid = UserHandle.getUid(managedProfileUserId, 19436);
+
+        addManagedProfile(admin1, managedProfileAdminUid, admin1);
+        mContext.binder.callingUid = managedProfileAdminUid;
+
+        final Set<Integer> allowedModes = Set.of(PASSWORD_COMPLEXITY_NONE, PASSWORD_COMPLEXITY_LOW,
+                PASSWORD_COMPLEXITY_MEDIUM, PASSWORD_COMPLEXITY_HIGH);
+        for (int complexity : allowedModes) {
+            dpm.getParentProfileInstance(admin1).setRequiredPasswordComplexity(complexity);
+            assertThat(dpm.getParentProfileInstance(admin1).getRequiredPasswordComplexity())
+                    .isEqualTo(complexity);
+            assertThat(dpm.getRequiredPasswordComplexity()).isEqualTo(PASSWORD_COMPLEXITY_NONE);
+        }
+    }
+
+    @Test
+    public void testSetRequiredPasswordComplexity_isSufficient() throws Exception {
+        mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
+        mContext.packageName = admin1.getPackageName();
+        setupDeviceOwner();
+
+        dpm.setRequiredPasswordComplexity(PASSWORD_COMPLEXITY_HIGH);
+        assertThat(dpm.getRequiredPasswordComplexity()).isEqualTo(PASSWORD_COMPLEXITY_HIGH);
+        when(getServices().packageManager.getPackagesForUid(
+                DpmMockContext.CALLER_SYSTEM_USER_UID)).thenReturn(new String[0]);
+        mServiceContext.permissions.add(permission.REQUEST_PASSWORD_COMPLEXITY);
+        assertThat(dpm.getPasswordComplexity()).isEqualTo(PASSWORD_COMPLEXITY_NONE);
+
+        reset(mContext.spiedContext);
+        PasswordMetrics passwordMetricsNoSymbols = computeForPassword("1234".getBytes());
+        setActivePasswordState(passwordMetricsNoSymbols);
+        assertThat(dpm.getPasswordComplexity()).isEqualTo(PASSWORD_COMPLEXITY_LOW);
+        assertThat(dpm.isActivePasswordSufficient()).isFalse();
+
+        reset(mContext.spiedContext);
+        passwordMetricsNoSymbols = computeForPassword("84125312943a".getBytes());
+        setActivePasswordState(passwordMetricsNoSymbols);
+        assertThat(dpm.getPasswordComplexity()).isEqualTo(PASSWORD_COMPLEXITY_HIGH);
+        // using isActivePasswordSufficient
+        assertThat(dpm.isActivePasswordSufficient()).isTrue();
+    }
+
+    @Test
+    public void testSetRequiredPasswordComplexity_resetBySettingQuality() throws Exception {
+        mContext.binder.callingUid = DpmMockContext.CALLER_UID;
+        setupProfileOwner();
+
+        // Test that calling setPasswordQuality resets complexity to none.
+        dpm.setRequiredPasswordComplexity(PASSWORD_COMPLEXITY_HIGH);
+        assertThat(dpm.getRequiredPasswordComplexity()).isEqualTo(PASSWORD_COMPLEXITY_HIGH);
+        dpm.setPasswordQuality(admin1, DevicePolicyManager.PASSWORD_QUALITY_NUMERIC_COMPLEX);
+        assertThat(dpm.getRequiredPasswordComplexity()).isEqualTo(PASSWORD_COMPLEXITY_NONE);
+    }
+
+    @Test
+    public void testSetRequiredPasswordComplexity_overridesQuality() throws Exception {
+        mContext.binder.callingUid = DpmMockContext.CALLER_UID;
+        setupProfileOwner();
+
+        // Test that calling setRequiredPasswordComplexity resets password quality.
+        dpm.setPasswordQuality(admin1, DevicePolicyManager.PASSWORD_QUALITY_NUMERIC_COMPLEX);
+        assertThat(dpm.getPasswordQuality(admin1)).isEqualTo(
+                DevicePolicyManager.PASSWORD_QUALITY_NUMERIC_COMPLEX);
+        dpm.setRequiredPasswordComplexity(PASSWORD_COMPLEXITY_HIGH);
+        assertThat(dpm.getPasswordQuality(admin1)).isEqualTo(
+                DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED);
     }
 
     private void setUserUnlocked(int userHandle, boolean unlocked) {

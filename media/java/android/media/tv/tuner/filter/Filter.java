@@ -25,6 +25,7 @@ import android.hardware.tv.tuner.V1_0.Constants;
 import android.media.tv.tuner.Tuner;
 import android.media.tv.tuner.Tuner.Result;
 import android.media.tv.tuner.TunerUtils;
+import android.media.tv.tuner.TunerVersionChecker;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -148,7 +149,6 @@ public class Filter implements AutoCloseable {
     public static final int SUBTYPE_PTP = 16;
 
 
-
     /** @hide */
     @IntDef(flag = true, prefix = "STATUS_", value = {STATUS_DATA_READY, STATUS_LOW_WATER,
             STATUS_HIGH_WATER, STATUS_OVERFLOW})
@@ -180,6 +180,31 @@ public class Filter implements AutoCloseable {
      */
     public static final int STATUS_OVERFLOW = Constants.DemuxFilterStatus.OVERFLOW;
 
+    /** @hide */
+    @IntDef(flag = true,
+            prefix = "SCRAMBLING_STATUS_",
+            value = {SCRAMBLING_STATUS_UNKNOWN, SCRAMBLING_STATUS_NOT_SCRAMBLED,
+                    SCRAMBLING_STATUS_SCRAMBLED})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ScramblingStatusMask {}
+
+    /**
+     * Content’s scrambling status is unknown
+     */
+    public static final int SCRAMBLING_STATUS_UNKNOWN =
+            android.hardware.tv.tuner.V1_1.Constants.ScramblingStatus.UNKNOWN;
+    /**
+     * Content is not scrambled.
+     */
+    public static final int SCRAMBLING_STATUS_NOT_SCRAMBLED =
+            android.hardware.tv.tuner.V1_1.Constants.ScramblingStatus.NOT_SCRAMBLED;
+    /**
+     * Content is scrambled.
+     */
+    public static final int SCRAMBLING_STATUS_SCRAMBLED =
+            android.hardware.tv.tuner.V1_1.Constants.ScramblingStatus.SCRAMBLED;
+
+
     private static final String TAG = "Filter";
 
     private long mNativeContext;
@@ -197,6 +222,7 @@ public class Filter implements AutoCloseable {
             int type, int subType, FilterConfiguration settings);
     private native int nativeGetId();
     private native long nativeGetId64Bit();
+    private native int nativeconfigureScramblingEvent(int scramblingStatusMask);
     private native int nativeSetDataSource(Filter source);
     private native int nativeStartFilter();
     private native int nativeStopFilter();
@@ -276,6 +302,38 @@ public class Filter implements AutoCloseable {
         synchronized (mLock) {
             TunerUtils.checkResourceState(TAG, mIsClosed);
             return nativeGetId64Bit();
+        }
+    }
+
+    /**
+     * Configure the Filter to monitor specific Scrambling Status through
+     * {@link ScramblingStatusEvent}.
+     *
+     * <p>{@link ScramblingStatusEvent} should be sent at the following two scenarios:
+     *
+     * <ul>
+     *   <li>When this method is called, the first detected scrambling status should be sent.
+     *   <li>When the filter transits into the monitored statuses configured in
+     *       {@code scramblingStatusMask}, event should be sent.
+     *     <ul/>
+     *
+     * <p>This configuration is only supported in Tuner 1.1 or higher version. Unsupported version
+     * will cause no-op. Use {@link TunerVersionChecker.getTunerVersion()} to get the version
+     * information.
+     *
+     * @param scramblingStatusMask Scrambling Statuses to be monitored. Set corresponding bit to
+     *                             monitor it. Reset to stop monitoring.
+     * @return result status of the operation.
+     */
+    @Result
+    public int configureScramblingStatusEvent(@ScramblingStatusMask int scramblingStatusMask) {
+        synchronized (mLock) {
+            TunerUtils.checkResourceState(TAG, mIsClosed);
+            if (!TunerVersionChecker.checkHigherOrEqualVersionTo(
+                    TunerVersionChecker.TUNER_VERSION_1_1, "configureScramblingStatusEvent")) {
+                return Tuner.RESULT_UNAVAILABLE;
+            }
+            return nativeconfigureScramblingEvent(scramblingStatusMask);
         }
     }
 

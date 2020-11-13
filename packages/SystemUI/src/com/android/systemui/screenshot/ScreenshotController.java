@@ -154,7 +154,6 @@ public class ScreenshotController {
     private SaveImageInBackgroundTask mSaveInBgTask;
 
     private Animator mScreenshotAnimation;
-    private Animator mDismissAnimation;
 
     private Runnable mOnCompleteRunnable;
     private boolean mInDarkMode;
@@ -168,7 +167,6 @@ public class ScreenshotController {
                 case MESSAGE_CORNER_TIMEOUT:
                     mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_INTERACTION_TIMEOUT);
                     ScreenshotController.this.dismissScreenshot(false);
-                    mOnCompleteRunnable.run();
                     break;
                 default:
                     break;
@@ -279,30 +277,22 @@ public class ScreenshotController {
                 rect -> takeScreenshotInternal(finisher, rect));
     }
 
-    boolean isDismissing() {
-        return (mDismissAnimation != null && mDismissAnimation.isRunning());
-    }
-
     /**
      * Clears current screenshot
      */
     void dismissScreenshot(boolean immediate) {
-        Log.v(TAG, "clearing screenshot");
+        // If we're already animating out, don't restart the animation
+        // (but do obey an immediate dismissal)
+        if (!immediate && mScreenshotView.isDismissing()) {
+            Log.v(TAG, "Already dismissing, ignoring duplicate command");
+            return;
+        }
+        Log.v(TAG, "Clearing screenshot");
         mScreenshotHandler.removeMessages(MESSAGE_CORNER_TIMEOUT);
-        mScreenshotView.getViewTreeObserver().removeOnComputeInternalInsetsListener(
-                mScreenshotView);
-        if (!immediate) {
-            mDismissAnimation = mScreenshotView.createScreenshotDismissAnimation();
-            mDismissAnimation.addListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    super.onAnimationEnd(animation);
-                    clearScreenshot();
-                }
-            });
-            mDismissAnimation.start();
+        if (immediate) {
+            resetScreenshotView();
         } else {
-            clearScreenshot();
+            mScreenshotView.animateDismissal();
         }
     }
 
@@ -373,6 +363,7 @@ public class ScreenshotController {
         // Inflate the screenshot layout
         mScreenshotView = (ScreenshotView)
                 LayoutInflater.from(mContext).inflate(R.layout.global_screenshot, null);
+        mScreenshotView.init(mUiEventLogger, this::resetScreenshotView);
 
         // TODO(159460485): Remove this when focus is handled properly in the system
         mScreenshotView.setOnTouchListener((v, event) -> {
@@ -438,10 +429,10 @@ public class ScreenshotController {
 
         if (mScreenshotView.isAttachedToWindow()) {
             // if we didn't already dismiss for another reason
-            if (mDismissAnimation == null || !mDismissAnimation.isRunning()) {
+            if (!mScreenshotView.isDismissing()) {
                 mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_REENTERED);
             }
-            dismissScreenshot(true);
+            mScreenshotView.reset();
         }
 
         mScreenBitmap = screenshot;
@@ -459,10 +450,6 @@ public class ScreenshotController {
 
         onConfigChanged(mContext.getResources().getConfiguration());
 
-        if (mDismissAnimation != null && mDismissAnimation.isRunning()) {
-            mDismissAnimation.cancel();
-        }
-
         // The window is focusable by default
         setWindowFocusable(true);
 
@@ -474,7 +461,8 @@ public class ScreenshotController {
             mScrollCaptureClient.request(DEFAULT_DISPLAY, (connection) ->
                     mScreenshotView.showScrollChip(() ->
                             runScrollCapture(connection,
-                                    () -> dismissScreenshot(true))));
+                                    () -> mScreenshotHandler.post(
+                                            () -> dismissScreenshot(false)))));
         }
     }
 
@@ -519,6 +507,7 @@ public class ScreenshotController {
      */
     private void startAnimation(final Consumer<Uri> finisher, Rect screenRect, Insets screenInsets,
             boolean showFlash) {
+        mScreenshotHandler.removeMessages(MESSAGE_CORNER_TIMEOUT);
         mScreenshotHandler.post(() -> {
             if (!mScreenshotView.isAttachedToWindow()) {
                 mWindowManager.addView(mScreenshotView, mWindowLayoutParams);
@@ -531,8 +520,7 @@ public class ScreenshotController {
                         mScreenshotView);
 
                 mScreenshotAnimation =
-                        mScreenshotView.createScreenshotDropInAnimation(screenRect, showFlash,
-                                this::onElementTapped);
+                        mScreenshotView.createScreenshotDropInAnimation(screenRect, showFlash);
 
                 saveScreenshotInWorkerThread(finisher,
                         new ScreenshotController.ActionsReadyListener() {
@@ -549,6 +537,14 @@ public class ScreenshotController {
                 mScreenshotAnimation.start();
             });
         });
+    }
+
+    private void resetScreenshotView() {
+        if (mScreenshotView.isAttachedToWindow()) {
+            mWindowManager.removeView(mScreenshotView);
+        }
+        mScreenshotView.reset();
+        mOnCompleteRunnable.run();
     }
 
     /**
@@ -590,7 +586,6 @@ public class ScreenshotController {
                 SCREENSHOT_CORNER_DEFAULT_TIMEOUT_MILLIS,
                 AccessibilityManager.FLAG_CONTENT_CONTROLS);
 
-        mScreenshotHandler.removeMessages(MESSAGE_CORNER_TIMEOUT);
         mScreenshotHandler.sendMessageDelayed(
                 mScreenshotHandler.obtainMessage(MESSAGE_CORNER_TIMEOUT),
                 timeoutMs);
@@ -602,22 +597,14 @@ public class ScreenshotController {
                         @Override
                         public void onAnimationEnd(Animator animation) {
                             super.onAnimationEnd(animation);
-                            mScreenshotView.setChipIntents(
-                                    imageData, event -> onElementTapped(event));
+                            mScreenshotView.setChipIntents(imageData);
                         }
                     });
                 } else {
-                    mScreenshotView.setChipIntents(
-                            imageData, this::onElementTapped);
+                    mScreenshotView.setChipIntents(imageData);
                 }
             });
         }
-    }
-
-    private void onElementTapped(ScreenshotEvent event) {
-        mUiEventLogger.log(event);
-        dismissScreenshot(false);
-        mOnCompleteRunnable.run();
     }
 
     /**
@@ -633,19 +620,10 @@ public class ScreenshotController {
         }
     }
 
-    private void clearScreenshot() {
-        if (mScreenshotView.isAttachedToWindow()) {
-            mWindowManager.removeView(mScreenshotView);
-        }
-
-        mScreenshotView.reset();
-    }
-
     private boolean isUserSetupComplete() {
         return Settings.Secure.getInt(mContext.getContentResolver(),
                 SETTINGS_SECURE_USER_SETUP_COMPLETE, 0) == 1;
     }
-
 
     /**
      * Updates the window focusability.  If the window is already showing, then it updates the

@@ -32,6 +32,7 @@ import android.app.Service;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
+import android.bluetooth.BluetoothProfile;
 import android.bluetooth.le.BluetoothLeScanner;
 import android.bluetooth.le.ScanCallback;
 import android.bluetooth.le.ScanFilter;
@@ -84,10 +85,13 @@ public class DeviceDiscoveryService extends Service {
 
     static DeviceDiscoveryService sInstance;
 
+    private BluetoothManager mBluetoothManager;
     private BluetoothAdapter mBluetoothAdapter;
     private WifiManager mWifiManager;
     @Nullable private BluetoothLeScanner mBLEScanner;
-    private ScanSettings mDefaultScanSettings = new ScanSettings.Builder().build();
+    private ScanSettings mDefaultScanSettings = new ScanSettings.Builder()
+            .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
+            .build();
 
     private List<DeviceFilter<?>> mFilters;
     private List<BluetoothLeDeviceFilter> mBLEFilters;
@@ -141,7 +145,8 @@ public class DeviceDiscoveryService extends Service {
 
         if (DEBUG) Log.i(LOG_TAG, "onCreate()");
 
-        mBluetoothAdapter = getSystemService(BluetoothManager.class).getAdapter();
+        mBluetoothManager = getSystemService(BluetoothManager.class);
+        mBluetoothAdapter = mBluetoothManager.getAdapter();
         mBLEScanner = mBluetoothAdapter.getBluetoothLeScanner();
         mWifiManager = getSystemService(WifiManager.class);
 
@@ -184,6 +189,14 @@ public class DeviceDiscoveryService extends Service {
         }
         if (singleMacAddressFilter != null) {
             for (BluetoothDevice dev : emptyIfNull(mBluetoothAdapter.getBondedDevices())) {
+                onDeviceFound(DeviceFilterPair.findMatch(dev, mBluetoothFilters));
+            }
+            for (BluetoothDevice dev : emptyIfNull(
+                    mBluetoothManager.getConnectedDevices(BluetoothProfile.GATT))) {
+                onDeviceFound(DeviceFilterPair.findMatch(dev, mBluetoothFilters));
+            }
+            for (BluetoothDevice dev : emptyIfNull(
+                    mBluetoothManager.getConnectedDevices(BluetoothProfile.GATT_SERVER))) {
                 onDeviceFound(DeviceFilterPair.findMatch(dev, mBluetoothFilters));
             }
         }

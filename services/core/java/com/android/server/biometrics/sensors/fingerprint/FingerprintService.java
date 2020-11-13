@@ -24,14 +24,17 @@ import static android.Manifest.permission.TEST_BIOMETRIC;
 import static android.Manifest.permission.USE_BIOMETRIC;
 import static android.Manifest.permission.USE_BIOMETRIC_INTERNAL;
 import static android.Manifest.permission.USE_FINGERPRINT;
+import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FINGERPRINT;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.AppOpsManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.hardware.biometrics.BiometricManager;
 import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.IBiometricSensorReceiver;
+import android.hardware.biometrics.IBiometricService;
 import android.hardware.biometrics.IBiometricServiceLockoutResetCallback;
 import android.hardware.biometrics.ITestSession;
 import android.hardware.biometrics.fingerprint.IFingerprint;
@@ -65,6 +68,7 @@ import com.android.server.biometrics.Utils;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.LockoutResetDispatcher;
 import com.android.server.biometrics.sensors.LockoutTracker;
+import com.android.server.biometrics.sensors.BiometricServiceCallback;
 import com.android.server.biometrics.sensors.fingerprint.aidl.FingerprintProvider;
 import com.android.server.biometrics.sensors.fingerprint.hidl.Fingerprint21;
 import com.android.server.biometrics.sensors.fingerprint.hidl.Fingerprint21UdfpsMock;
@@ -80,7 +84,7 @@ import java.util.List;
  * The service is responsible for maintaining a list of clients and dispatching all
  * fingerprint-related events.
  */
-public class FingerprintService extends SystemService {
+public class FingerprintService extends SystemService implements BiometricServiceCallback {
 
     protected static final String TAG = "FingerprintService";
 
@@ -88,6 +92,7 @@ public class FingerprintService extends SystemService {
     private final LockoutResetDispatcher mLockoutResetDispatcher;
     private final GestureAvailabilityDispatcher mGestureAvailabilityDispatcher;
     private final LockPatternUtils mLockPatternUtils;
+    private final FingerprintServiceWrapper mServiceWrapper;
     @NonNull private List<ServiceProvider> mServiceProviders;
 
     /**
@@ -572,7 +577,8 @@ public class FingerprintService extends SystemService {
         }
 
         @Override // Binder call
-        public void initializeConfiguration(int sensorId, int strength) {
+        public void initializeConfiguration(int sensorId,
+                @BiometricManager.Authenticators.Types int strength) {
             Utils.checkPermission(getContext(), USE_BIOMETRIC_INTERNAL);
 
             final Fingerprint21 fingerprint21;
@@ -626,16 +632,19 @@ public class FingerprintService extends SystemService {
 
     public FingerprintService(Context context) {
         super(context);
+        mServiceWrapper = new FingerprintServiceWrapper();
         mAppOps = context.getSystemService(AppOpsManager.class);
         mGestureAvailabilityDispatcher = new GestureAvailabilityDispatcher();
         mLockoutResetDispatcher = new LockoutResetDispatcher(context);
         mLockPatternUtils = new LockPatternUtils(context);
         mServiceProviders = new ArrayList<>();
-
-        initializeAidlHals();
     }
 
-    private void initializeAidlHals() {
+    @Override
+    public void onBiometricServiceReady() {
+        final IBiometricService biometricService = IBiometricService.Stub.asInterface(
+                        ServiceManager.getService(Context.BIOMETRIC_SERVICE));
+
         final String[] instances = ServiceManager.getDeclaredInstances(IFingerprint.DESCRIPTOR);
         if (instances == null || instances.length == 0) {
             return;
@@ -659,6 +668,23 @@ public class FingerprintService extends SystemService {
                             new FingerprintProvider(getContext(), props, instance,
                                     mLockoutResetDispatcher, mGestureAvailabilityDispatcher);
                     mServiceProviders.add(provider);
+
+                    // Register each sensor individually with BiometricService
+                    for (SensorProps prop : props) {
+                        final int sensorId = prop.commonProps.sensorId;
+                        @BiometricManager.Authenticators.Types int strength =
+                                Utils.propertyStrengthToAuthenticatorStrength(
+                                        prop.commonProps.sensorStrength);
+                        final FingerprintAuthenticator authenticator =
+                                new FingerprintAuthenticator(mServiceWrapper, sensorId);
+                        try {
+                            biometricService.registerAuthenticator(sensorId,
+                                    TYPE_FINGERPRINT, strength, authenticator);
+                        } catch (RemoteException e) {
+                            Slog.e(TAG, "Remote exception when registering sensorId: "
+                                    + sensorId);
+                        }
+                    }
                 } catch (RemoteException e) {
                     Slog.e(TAG, "Remote exception when initializing instance: " + fqName);
                 }
@@ -668,7 +694,7 @@ public class FingerprintService extends SystemService {
 
     @Override
     public void onStart() {
-        publishBinderService(Context.FINGERPRINT_SERVICE, new FingerprintServiceWrapper());
+        publishBinderService(Context.FINGERPRINT_SERVICE, mServiceWrapper);
     }
 
     @Nullable

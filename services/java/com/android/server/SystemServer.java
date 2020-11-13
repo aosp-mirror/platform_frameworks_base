@@ -34,6 +34,7 @@ import android.app.AppCompatCallbacks;
 import android.app.ApplicationErrorReport;
 import android.app.INotificationManager;
 import android.app.SystemServiceRegistry;
+import android.app.admin.DevicePolicySafetyChecker;
 import android.app.usage.UsageStatsManagerInternal;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -101,6 +102,7 @@ import com.android.server.attention.AttentionManagerService;
 import com.android.server.audio.AudioService;
 import com.android.server.biometrics.AuthService;
 import com.android.server.biometrics.BiometricService;
+import com.android.server.biometrics.sensors.BiometricServiceCallback;
 import com.android.server.biometrics.sensors.face.FaceService;
 import com.android.server.biometrics.sensors.fingerprint.FingerprintService;
 import com.android.server.biometrics.sensors.iris.IrisService;
@@ -195,8 +197,10 @@ import java.io.File;
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Locale;
 import java.util.Timer;
 import java.util.concurrent.CountDownLatch;
@@ -1468,7 +1472,10 @@ public final class SystemServer implements Dumpable {
         }
         t.traceEnd();
 
-        if (mFactoryTestMode != FactoryTest.FACTORY_TEST_LOW_LEVEL) {
+        final DevicePolicyManagerService.Lifecycle dpms;
+        if (mFactoryTestMode == FactoryTest.FACTORY_TEST_LOW_LEVEL) {
+            dpms = null;
+        } else {
             t.traceBegin("StartLockSettingsService");
             try {
                 mSystemServiceManager.startService(LOCK_SETTINGS_SERVICE_CLASS);
@@ -1505,7 +1512,7 @@ public final class SystemServer implements Dumpable {
             // Always start the Device Policy Manager, so that the API is compatible with
             // API8.
             t.traceBegin("StartDevicePolicyManager");
-            mSystemServiceManager.startService(DevicePolicyManagerService.Lifecycle.class);
+            dpms = mSystemServiceManager.startService(DevicePolicyManagerService.Lifecycle.class);
             t.traceEnd();
 
             if (!isWatch) {
@@ -2089,9 +2096,12 @@ public final class SystemServer implements Dumpable {
             final boolean hasFeatureFingerprint
                     = mPackageManager.hasSystemFeature(PackageManager.FEATURE_FINGERPRINT);
 
+            final List<BiometricServiceCallback> biometricServiceCallback = new ArrayList<>();
             if (hasFeatureFace) {
                 t.traceBegin("StartFaceSensor");
-                mSystemServiceManager.startService(FaceService.class);
+                final FaceService faceService =
+                        mSystemServiceManager.startService(FaceService.class);
+                biometricServiceCallback.add(faceService);
                 t.traceEnd();
             }
 
@@ -2103,13 +2113,20 @@ public final class SystemServer implements Dumpable {
 
             if (hasFeatureFingerprint) {
                 t.traceBegin("StartFingerprintSensor");
-                mSystemServiceManager.startService(FingerprintService.class);
+                final FingerprintService fingerprintService =
+                        mSystemServiceManager.startService(FingerprintService.class);
+                biometricServiceCallback.add(fingerprintService);
                 t.traceEnd();
             }
 
-            // Start this service after all biometric services.
+            // Start this service after all biometric sensor services are started.
             t.traceBegin("StartBiometricService");
             mSystemServiceManager.startService(BiometricService.class);
+            for (BiometricServiceCallback service : biometricServiceCallback) {
+                Slog.d(TAG, "Notifying onBiometricServiceReady for: "
+                        + service.getClass().getSimpleName());
+                service.onBiometricServiceReady();
+            }
             t.traceEnd();
 
             t.traceBegin("StartAuthService");
@@ -2426,6 +2443,9 @@ public final class SystemServer implements Dumpable {
                         .startService(CAR_SERVICE_HELPER_SERVICE_CLASS);
                 if (cshs instanceof Dumpable) {
                     mDumper.addDumpable((Dumpable) cshs);
+                }
+                if (cshs instanceof DevicePolicySafetyChecker) {
+                    dpms.setDevicePolicySafetyChecker((DevicePolicySafetyChecker) cshs);
                 }
                 t.traceEnd();
             }

@@ -333,7 +333,7 @@ public class AuthService extends SystemService {
                 // initialization from here. AIDL HALs are initialized by FingerprintService since
                 // the HAL interface provides ID, strength, and other configuration information.
                 fingerprintService.initializeConfiguration(config.id, config.strength);
-                authenticator = new FingerprintAuthenticator(fingerprintService, config);
+                authenticator = new FingerprintAuthenticator(fingerprintService, config.id);
                 break;
 
             case TYPE_FACE:
@@ -348,7 +348,7 @@ public class AuthService extends SystemService {
                 // initialization from here. AIDL HALs are initialized by FaceService since
                 // the HAL interface provides ID, strength, and other configuration information.
                 faceService.initializeConfiguration(config.id, config.strength);
-                authenticator = new FaceAuthenticator(faceService, config);
+                authenticator = new FaceAuthenticator(faceService, config.id);
                 break;
 
             case TYPE_IRIS:
@@ -359,7 +359,8 @@ public class AuthService extends SystemService {
                     return;
                 }
 
-                authenticator = new IrisAuthenticator(irisService, config);
+                irisService.initializeConfiguration(config.id, config.strength);
+                authenticator = new IrisAuthenticator(irisService, config.id);
                 break;
 
             default:

@@ -1456,16 +1456,6 @@ public class BiometricServiceTest {
                 mFingerprintAuthenticator);
     }
 
-    @Test(expected = IllegalStateException.class)
-    public void testRegistrationWithUnknownId_throwsIllegalStateException() throws Exception {
-        mBiometricService = new BiometricService(mContext, mInjector);
-        mBiometricService.onStart();
-
-        mBiometricService.mImpl.registerAuthenticator(
-                100 /* id */, 2 /* modality */, 15 /* strength */,
-                mFingerprintAuthenticator);
-    }
-
     @Test(expected = IllegalArgumentException.class)
     public void testRegistrationWithNullAuthenticator_throwsIllegalArgumentException()
             throws Exception {

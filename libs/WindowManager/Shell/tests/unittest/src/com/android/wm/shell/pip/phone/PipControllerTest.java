@@ -40,7 +40,7 @@ import com.android.wm.shell.WindowManagerShellWrapper;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.TaskStackListenerImpl;
-import com.android.wm.shell.pip.PipBoundsHandler;
+import com.android.wm.shell.pip.PipBoundsAlgorithm;
 import com.android.wm.shell.pip.PipBoundsState;
 import com.android.wm.shell.pip.PipMediaController;
 import com.android.wm.shell.pip.PipTaskOrganizer;
@@ -63,7 +63,7 @@ public class PipControllerTest extends ShellTestCase {
     @Mock private DisplayController mMockDisplayController;
     @Mock private PipMenuActivityController mMockPipMenuActivityController;
     @Mock private PipAppOpsListener mMockPipAppOpsListener;
-    @Mock private PipBoundsHandler mMockPipBoundsHandler;
+    @Mock private PipBoundsAlgorithm mMockPipBoundsAlgorithm;
     @Mock private PipMediaController mMockPipMediaController;
     @Mock private PipTaskOrganizer mMockPipTaskOrganizer;
     @Mock private PipTouchHandler mMockPipTouchHandler;
@@ -76,7 +76,7 @@ public class PipControllerTest extends ShellTestCase {
     public void setUp() throws RemoteException {
         MockitoAnnotations.initMocks(this);
         mPipController = new PipController(mContext, mMockDisplayController,
-                mMockPipAppOpsListener, mMockPipBoundsHandler, mMockPipBoundsState,
+                mMockPipAppOpsListener, mMockPipBoundsAlgorithm, mMockPipBoundsState,
                 mMockPipMediaController, mMockPipMenuActivityController, mMockPipTaskOrganizer,
                 mMockPipTouchHandler, mMockWindowManagerShellWrapper, mMockTaskStackListener,
                 mMockExecutor);
@@ -109,7 +109,7 @@ public class PipControllerTest extends ShellTestCase {
         when(spyContext.getPackageManager()).thenReturn(mockPackageManager);
 
         assertNull(PipController.create(spyContext, mMockDisplayController,
-                mMockPipAppOpsListener, mMockPipBoundsHandler, mMockPipBoundsState,
+                mMockPipAppOpsListener, mMockPipBoundsAlgorithm, mMockPipBoundsState,
                 mMockPipMediaController, mMockPipMenuActivityController, mMockPipTaskOrganizer,
                 mMockPipTouchHandler, mMockWindowManagerShellWrapper, mMockTaskStackListener,
                 mMockExecutor));

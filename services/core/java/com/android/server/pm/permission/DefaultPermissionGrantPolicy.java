@@ -820,7 +820,7 @@ public final class DefaultPermissionGrantPolicy {
                     CONTACTS_PERMISSIONS, STORAGE_PERMISSIONS);
         }
 
-        // Atthention Service
+        // Attention Service
         String attentionServicePackageName =
                 mContext.getPackageManager().getAttentionServicePackageName();
         if (!TextUtils.isEmpty(attentionServicePackageName)) {
