@@ -45,7 +45,8 @@ class ImeTracingClientImpl extends ImeTracing {
     }
 
     @Override
-    public void triggerClientDump(String where, @NonNull InputMethodManager immInstance) {
+    public void triggerClientDump(String where, @NonNull InputMethodManager immInstance,
+            ProtoOutputStream icProto) {
         if (!isEnabled() || !isAvailable()) {
             return;
         }
@@ -59,7 +60,7 @@ class ImeTracingClientImpl extends ImeTracing {
 
         try {
             ProtoOutputStream proto = new ProtoOutputStream();
-            immInstance.dumpDebug(proto);
+            immInstance.dumpDebug(proto, icProto);
             sendToService(proto.getBytes(), IME_TRACING_FROM_CLIENT, where);
         } catch (RemoteException e) {
             Log.e(TAG, "Exception while sending ime-related client dump to server", e);
@@ -69,7 +70,8 @@ class ImeTracingClientImpl extends ImeTracing {
     }
 
     @Override
-    public void triggerServiceDump(String where, @NonNull AbstractInputMethodService service) {
+    public void triggerServiceDump(String where, @NonNull AbstractInputMethodService service,
+            ProtoOutputStream icProto) {
         if (!isEnabled() || !isAvailable()) {
             return;
         }
@@ -83,7 +85,7 @@ class ImeTracingClientImpl extends ImeTracing {
 
         try {
             ProtoOutputStream proto = new ProtoOutputStream();
-            service.dumpProtoInternal(proto);
+            service.dumpProtoInternal(proto, icProto);
             sendToService(proto.getBytes(), IME_TRACING_FROM_IMS, where);
         } catch (RemoteException e) {
             Log.e(TAG, "Exception while sending ime-related service dump to server", e);
