@@ -672,5 +672,11 @@ public class TransactionParcelTests {
         public void notifyContentProviderPublishStatus(ContentProviderHolder holder, String auth,
                 int userId, boolean published) {
         }
+
+        @Override
+        public void instrumentWithoutRestart(ComponentName instrumentationName,
+                Bundle instrumentationArgs, IInstrumentationWatcher instrumentationWatcher,
+                IUiAutomationConnection instrumentationUiConnection, ApplicationInfo targetInfo) {
+        }
     }
 }
