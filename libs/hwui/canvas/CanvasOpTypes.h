@@ -50,7 +50,11 @@ enum class CanvasOpType : int8_t {
     DrawPath,
     DrawLine,
     DrawVertices,
-
+    DrawImage,
+    DrawImageRect,
+    // DrawImageLattice also used to draw 9 patches
+    DrawImageLattice,
+    DrawPicture,
 
     // TODO: Rest
 

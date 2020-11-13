@@ -22,7 +22,9 @@
 
 #include <tests/common/CallCountingCanvas.h>
 
+#include "SkPictureRecorder.h"
 #include "SkColor.h"
+#include "SkLatticeIter.h"
 #include "pipeline/skia/AnimatedDrawables.h"
 
 using namespace android;
@@ -198,7 +200,7 @@ TEST(CanvasOp, simplePush) {
 TEST(CanvasOp, simpleDrawPaint) {
     CanvasOpBuffer buffer;
     EXPECT_EQ(buffer.size(), 0);
-    buffer.push(CanvasOp<Op::DrawColor> {
+    buffer.push<Op::DrawColor> ({
         .color = SkColor4f{1, 1, 1, 1},
         .mode = SkBlendMode::kSrcIn
     });
@@ -213,7 +215,7 @@ TEST(CanvasOp, simpleDrawPaint) {
 TEST(CanvasOp, simpleDrawPoint) {
     CanvasOpBuffer buffer;
     EXPECT_EQ(buffer.size(), 0);
-    buffer.push(CanvasOp<Op::DrawPoint> {
+    buffer.push<Op::DrawPoint> ({
         .x = 12,
         .y = 42,
         .paint = SkPaint{}
@@ -229,7 +231,7 @@ TEST(CanvasOp, simpleDrawPoint) {
 TEST(CanvasOp, simpleDrawLine) {
     CanvasOpBuffer buffer;
     EXPECT_EQ(buffer.size(), 0);
-    buffer.push(CanvasOp<Op::DrawLine> {
+    buffer.push<Op::DrawLine> ({
         .startX = 16,
         .startY = 28,
         .endX = 12,
@@ -247,7 +249,7 @@ TEST(CanvasOp, simpleDrawLine) {
 TEST(CanvasOp, simpleDrawRect) {
     CanvasOpBuffer buffer;
     EXPECT_EQ(buffer.size(), 0);
-    buffer.push(CanvasOp<Op::DrawRect> {
+    buffer.push<Op::DrawRect> ({
         .paint = SkPaint{},
         .rect = SkRect::MakeEmpty()
     });
@@ -264,7 +266,7 @@ TEST(CanvasOp, simpleDrawRegionRect) {
     EXPECT_EQ(buffer.size(), 0);
     SkRegion region;
     region.setRect(SkIRect::MakeWH(12, 50));
-    buffer.push(CanvasOp<Op::DrawRegion> {
+    buffer.push<Op::DrawRegion> ({
         .paint = SkPaint{},
         .region = region
     });
@@ -286,7 +288,7 @@ TEST(CanvasOp, simpleDrawRegionPath) {
     clip.setRect(SkIRect::MakeWH(100, 100));
     SkRegion region;
     region.setPath(path, clip);
-    buffer.push(CanvasOp<Op::DrawRegion> {
+    buffer.push<Op::DrawRegion> ({
         .paint = SkPaint{},
         .region = region
     });
@@ -301,7 +303,7 @@ TEST(CanvasOp, simpleDrawRegionPath) {
 TEST(CanvasOp, simpleDrawRoundRect) {
     CanvasOpBuffer buffer;
     EXPECT_EQ(buffer.size(), 0);
-    buffer.push(CanvasOp<Op::DrawRoundRect> {
+    buffer.push<Op::DrawRoundRect> ({
         .paint = SkPaint{},
         .rect = SkRect::MakeEmpty(),
         .rx = 10,
@@ -340,7 +342,7 @@ TEST(CanvasOp, simpleDrawDoubleRoundRect) {
     innerPts[3].set(10, 10);
     innerRRect.setRectRadii(inner, innerPts.get());
 
-    buffer.push(CanvasOp<Op::DrawDoubleRoundRect> {
+    buffer.push<Op::DrawDoubleRoundRect> ({
         .outer = outerRRect,
         .inner = innerRRect,
         .paint = SkPaint{}
@@ -356,7 +358,7 @@ TEST(CanvasOp, simpleDrawDoubleRoundRect) {
 TEST(CanvasOp, simpleDrawCircle) {
     CanvasOpBuffer buffer;
     EXPECT_EQ(buffer.size(), 0);
-    buffer.push(CanvasOp<Op::DrawCircle> {
+    buffer.push<Op::DrawCircle>({
         .cx = 5,
         .cy = 7,
         .radius = 10,
@@ -373,7 +375,7 @@ TEST(CanvasOp, simpleDrawCircle) {
 TEST(CanvasOp, simpleDrawOval) {
     CanvasOpBuffer buffer;
     EXPECT_EQ(buffer.size(), 0);
-    buffer.push(CanvasOp<Op::DrawOval> {
+    buffer.push<Op::DrawOval> ({
         .oval = SkRect::MakeEmpty(),
         .paint = SkPaint{}
     });
@@ -388,7 +390,7 @@ TEST(CanvasOp, simpleDrawOval) {
 TEST(CanvasOp, simpleDrawArc) {
     CanvasOpBuffer buffer;
     EXPECT_EQ(buffer.size(), 0);
-    buffer.push(CanvasOp<Op::DrawArc> {
+    buffer.push<Op::DrawArc>({
         .oval = SkRect::MakeWH(100, 100),
         .startAngle = 120,
         .sweepAngle = 70,
@@ -408,7 +410,7 @@ TEST(CanvasOp, simpleDrawPath) {
     EXPECT_EQ(buffer.size(), 0);
     SkPath path;
     path.addCircle(50, 50, 30);
-    buffer.push(CanvasOp<Op::DrawPath> {
+    buffer.push<Op::DrawPath> ({
         .path = path,
         .paint = SkPaint{}
     });
@@ -433,7 +435,7 @@ TEST(CanvasOp, simpleDrawRoundRectProperty) {
     auto propertyPaint =
             sp<uirenderer::CanvasPropertyPaint>(new uirenderer::CanvasPropertyPaint(SkPaint{}));
 
-    buffer.push(CanvasOp<Op::DrawRoundRectProperty> {
+    buffer.push<Op::DrawRoundRectProperty> ({
         .left = left,
         .top = top,
         .right = right,
@@ -460,7 +462,7 @@ TEST(CanvasOp, simpleDrawCircleProperty) {
     auto propertyPaint =
             sp<uirenderer::CanvasPropertyPaint>(new uirenderer::CanvasPropertyPaint(SkPaint{}));
 
-    buffer.push(CanvasOp<Op::DrawCircleProperty> {
+    buffer.push<Op::DrawCircleProperty> ({
         .x = x,
         .y = y,
         .radius = radius,
@@ -482,7 +484,7 @@ TEST(CanvasOp, simpleDrawVertices) {
     SkColor colors[3] = {SK_ColorRED, SK_ColorBLUE, SK_ColorGREEN};
     sk_sp<SkVertices> vertices = SkVertices::MakeCopy(SkVertices::kTriangles_VertexMode, 3, pts,
             nullptr, colors);
-    buffer.push(CanvasOp<Op::DrawVertices> {
+    buffer.push<Op::DrawVertices> ({
         .vertices = vertices,
         .mode = SkBlendMode::kSrcOver,
         .paint = SkPaint{}
@@ -493,6 +495,110 @@ TEST(CanvasOp, simpleDrawVertices) {
     rasterizeCanvasBuffer(buffer, &canvas);
     EXPECT_EQ(1, canvas.drawVerticesCount);
     EXPECT_EQ(1, canvas.sumTotalDrawCalls());
+}
+
+TEST(CanvasOp, simpleDrawImage) {
+    CanvasOpBuffer buffer;
+    EXPECT_EQ(buffer.size(), 0);
+
+    SkImageInfo info =SkImageInfo::Make(5, 1,
+        kGray_8_SkColorType, kOpaque_SkAlphaType);
+    sk_sp<Bitmap> bitmap = Bitmap::allocateHeapBitmap(info);
+    buffer.push<Op::DrawImage> ({
+            bitmap,
+            7,
+            19,
+            SkPaint{}
+        }
+    );
+
+    CallCountingCanvas canvas;
+    EXPECT_EQ(0, canvas.sumTotalDrawCalls());
+    rasterizeCanvasBuffer(buffer, &canvas);
+    EXPECT_EQ(1, canvas.drawImageCount);
+    EXPECT_EQ(1, canvas.sumTotalDrawCalls());
+}
+
+TEST(CanvasOp, simpleDrawImageRect) {
+    CanvasOpBuffer buffer;
+    EXPECT_EQ(buffer.size(), 0);
+
+    SkImageInfo info = SkImageInfo::Make(5, 1,
+        kGray_8_SkColorType, kOpaque_SkAlphaType);
+
+    sk_sp<Bitmap> bitmap = Bitmap::allocateHeapBitmap(info);
+    buffer.push<Op::DrawImageRect> ({
+          bitmap, SkRect::MakeWH(100, 100),
+          SkRect::MakeLTRB(120, 110, 220, 210),
+          SkPaint{}
+        }
+    );
+
+    CallCountingCanvas canvas;
+    EXPECT_EQ(0, canvas.sumTotalDrawCalls());
+    rasterizeCanvasBuffer(buffer, &canvas);
+    EXPECT_EQ(1, canvas.drawImageRectCount);
+    EXPECT_EQ(1, canvas.sumTotalDrawCalls());
+}
+
+TEST(CanvasOp, simpleDrawImageLattice) {
+    CanvasOpBuffer buffer;
+    EXPECT_EQ(buffer.size(), 0);
+
+    SkBitmap skBitmap;
+    skBitmap.allocPixels(SkImageInfo::MakeN32Premul(60, 60));
+
+    const int xDivs[] = { 20, 50 };
+    const int yDivs[] = { 10, 40 };
+    SkCanvas::Lattice::RectType fillTypes[3][3];
+    memset(fillTypes, 0, sizeof(fillTypes));
+    fillTypes[1][1] = SkCanvas::Lattice::kTransparent;
+    SkColor colors[9];
+    SkCanvas::Lattice lattice = { xDivs, yDivs, fillTypes[0], 2,
+         2, nullptr, colors };
+    sk_sp<Bitmap> bitmap = Bitmap::allocateHeapBitmap(&skBitmap);
+    buffer.push<Op::DrawImageLattice>(
+        {
+            bitmap,
+            SkRect::MakeWH(5, 1),
+            lattice,
+            SkPaint{}
+        }
+    );
+
+    CallCountingCanvas canvas;
+    EXPECT_EQ(0, canvas.sumTotalDrawCalls());
+    rasterizeCanvasBuffer(buffer, &canvas);
+    EXPECT_EQ(1, canvas.drawImageLatticeCount);
+    EXPECT_EQ(1, canvas.sumTotalDrawCalls());
+}
+
+TEST(CanvasOp, simpleDrawPicture) {
+    CanvasOpBuffer buffer;
+    EXPECT_EQ(buffer.size(), 0);
+
+    SkPictureRecorder recorder;
+    SkCanvas* pictureCanvas = recorder.beginRecording({64, 64, 192, 192});
+    SkPaint paint;
+    pictureCanvas->drawRect(SkRect::MakeWH(200, 200), paint);
+    paint.setColor(SK_ColorWHITE);
+    pictureCanvas->drawRect(SkRect::MakeLTRB(20, 20, 180, 180), paint);
+    sk_sp<SkPicture> picture = recorder.finishRecordingAsPicture();
+    buffer.push<Op::DrawPicture> ({
+        .picture = picture
+    });
+
+    CallCountingCanvas canvas;
+    EXPECT_EQ(0, canvas.sumTotalDrawCalls());
+    rasterizeCanvasBuffer(buffer, &canvas);
+    // Note because we are explicitly issuing 2 drawRect calls
+    // in the picture recorder above, when it is played back into
+    // CallCountingCanvas we will see 2 calls to drawRect instead of 1
+    // call to drawPicture.
+    // This is because SkiaCanvas::drawPicture uses picture.playback(canvas)
+    // instead of canvas->drawPicture.
+    EXPECT_EQ(2, canvas.drawRectCount);
+    EXPECT_EQ(2, canvas.sumTotalDrawCalls());
 }
 
 TEST(CanvasOp, immediateRendering) {

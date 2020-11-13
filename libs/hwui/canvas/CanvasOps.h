@@ -21,12 +21,16 @@
 #include <SkPath.h>
 #include <SkRegion.h>
 #include <SkVertices.h>
+#include <SkImage.h>
+#include <SkPicture.h>
+#include <hwui/Bitmap.h>
 #include <log/log.h>
 #include "CanvasProperty.h"
 
 #include "CanvasOpTypes.h"
 
 #include <experimental/type_traits>
+#include <utility>
 
 namespace android::uirenderer {
 
@@ -267,6 +271,97 @@ struct CanvasOp<CanvasOpType::DrawVertices> {
         canvas->drawVertices(vertices, mode, paint);
     }
     ASSERT_DRAWABLE()
+};
+
+template<>
+struct CanvasOp<CanvasOpType::DrawImage> {
+
+    CanvasOp<CanvasOpType::DrawImageRect>(
+        const sk_sp<Bitmap>& bitmap,
+        float left,
+        float top,
+        SkPaint paint
+    ) : left(left),
+        top(top),
+        paint(std::move(paint)),
+        bitmap(bitmap),
+        image(bitmap->makeImage()) { }
+
+    float left;
+    float top;
+    SkPaint paint;
+    sk_sp<Bitmap> bitmap;
+    sk_sp<SkImage> image;
+
+    void draw(SkCanvas* canvas) const {
+        canvas->drawImage(image, left, top, &paint);
+    }
+    ASSERT_DRAWABLE()
+};
+
+template<>
+struct CanvasOp<CanvasOpType::DrawImageRect> {
+
+    CanvasOp<CanvasOpType::DrawImageRect>(
+        const sk_sp<Bitmap>& bitmap,
+        SkRect src,
+        SkRect dst,
+        SkPaint paint
+    ) : src(src),
+        dst(dst),
+        paint(std::move(paint)),
+        bitmap(bitmap),
+        image(bitmap->makeImage()) { }
+
+    SkRect src;
+    SkRect dst;
+    SkPaint paint;
+    sk_sp<Bitmap> bitmap;
+    sk_sp<SkImage> image;
+
+    void draw(SkCanvas* canvas) const {
+        canvas->drawImageRect(image,
+                src,
+                dst,
+                &paint,
+                SkCanvas::kFast_SrcRectConstraint
+        );
+    }
+    ASSERT_DRAWABLE()
+};
+
+template<>
+struct CanvasOp<CanvasOpType::DrawImageLattice> {
+
+    CanvasOp<CanvasOpType::DrawImageLattice>(
+        const sk_sp<Bitmap>& bitmap,
+        SkRect dst,
+        SkCanvas::Lattice lattice,
+        SkPaint  paint
+    ):  dst(dst),
+        lattice(lattice),
+        bitmap(bitmap),
+        image(bitmap->makeImage()),
+        paint(std::move(paint)) {}
+
+    SkRect dst;
+    SkCanvas::Lattice lattice;
+    const sk_sp<Bitmap> bitmap;
+    const sk_sp<SkImage> image;
+
+    SkPaint paint;
+    void draw(SkCanvas* canvas) const {
+        canvas->drawImageLattice(image.get(), lattice, dst, &paint);
+    }
+    ASSERT_DRAWABLE()
+};
+
+template<>
+struct CanvasOp<CanvasOpType::DrawPicture> {
+    sk_sp<SkPicture> picture;
+    void draw(SkCanvas* canvas) const {
+        picture->playback(canvas);
+    }
 };
 
 // cleanup our macros
