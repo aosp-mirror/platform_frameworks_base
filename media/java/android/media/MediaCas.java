@@ -20,7 +20,6 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
-import android.app.ActivityManager;
 import android.content.Context;
 import android.hardware.cas.V1_0.HidlCasPluginDescriptor;
 import android.hardware.cas.V1_0.ICas;
@@ -679,7 +678,7 @@ public final class MediaCas implements AutoCloseable {
     private void createPlugin(int casSystemId) throws UnsupportedCasException {
         try {
             mCasSystemId = casSystemId;
-            mUserId = ActivityManager.getCurrentUser();
+            mUserId = Process.myUid();
             IMediaCasService service = getService();
             android.hardware.cas.V1_2.IMediaCasService serviceV12 =
                     android.hardware.cas.V1_2.IMediaCasService.castFrom(service);
