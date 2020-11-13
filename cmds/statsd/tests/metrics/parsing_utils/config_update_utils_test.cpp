@@ -997,6 +997,57 @@ TEST_F(ConfigUpdateTest, TestUpdateConditions) {
     EXPECT_THAT(combinationTracker1->mSlicedChildren, IsEmpty());
 }
 
+TEST_F(ConfigUpdateTest, TestUpdateStates) {
+    StatsdConfig config;
+    // Add states.
+    // Will be replaced because we add a state map.
+    State state1 = CreateScreenState();
+    int64_t state1Id = state1.id();
+    *config.add_state() = state1;
+
+    // Will be preserved.
+    State state2 = CreateUidProcessState();
+    int64_t state2Id = state2.id();
+    *config.add_state() = state2;
+
+    // Will be replaced since the atom changes from overlay to screen.
+    State state3 = CreateOverlayState();
+    int64_t state3Id = state3.id();
+    *config.add_state() = state3;
+
+    EXPECT_TRUE(initConfig(config));
+
+    // Change definitions of state1 and state3.
+    int64_t screenOnId = 0x4321, screenOffId = 0x1234;
+    *state1.mutable_map() = CreateScreenStateSimpleOnOffMap(screenOnId, screenOffId);
+    state3.set_atom_id(util::SCREEN_STATE_CHANGED);
+
+    StatsdConfig newConfig;
+    *newConfig.add_state() = state3;
+    *newConfig.add_state() = state1;
+    *newConfig.add_state() = state2;
+
+    unordered_map<int64_t, int> stateAtomIdMap;
+    unordered_map<int64_t, unordered_map<int, int64_t>> allStateGroupMaps;
+    map<int64_t, uint64_t> newStateProtoHashes;
+    set<int64_t> replacedStates;
+    EXPECT_TRUE(updateStates(newConfig, oldStateHashes, stateAtomIdMap, allStateGroupMaps,
+                             newStateProtoHashes, replacedStates));
+    EXPECT_THAT(replacedStates, ContainerEq(set({state1Id, state3Id})));
+
+    unordered_map<int64_t, int> expectedStateAtomIdMap = {
+            {state1Id, util::SCREEN_STATE_CHANGED},
+            {state2Id, util::UID_PROCESS_STATE_CHANGED},
+            {state3Id, util::SCREEN_STATE_CHANGED}};
+    EXPECT_THAT(stateAtomIdMap, ContainerEq(expectedStateAtomIdMap));
+
+    unordered_map<int64_t, unordered_map<int, int64_t>> expectedStateGroupMaps = {
+            {state1Id,
+             {{android::view::DisplayStateEnum::DISPLAY_STATE_OFF, screenOffId},
+              {android::view::DisplayStateEnum::DISPLAY_STATE_ON, screenOnId}}}};
+    EXPECT_THAT(allStateGroupMaps, ContainerEq(expectedStateGroupMaps));
+}
+
 TEST_F(ConfigUpdateTest, TestEventMetricPreserve) {
     StatsdConfig config;
     AtomMatcher startMatcher = CreateScreenTurnedOnAtomMatcher();
