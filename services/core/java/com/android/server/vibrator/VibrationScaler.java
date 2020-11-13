@@ -31,7 +31,6 @@ public final class VibrationScaler {
 
     // Scale levels. Each level, except MUTE, is defined as the delta between the current setting
     // and the default intensity for that type of vibration (i.e. current - default).
-    private static final int SCALE_MUTE = IExternalVibratorService.SCALE_MUTE; // -100
     private static final int SCALE_VERY_LOW = IExternalVibratorService.SCALE_VERY_LOW; // -2
     private static final int SCALE_LOW = IExternalVibratorService.SCALE_LOW; // -1
     private static final int SCALE_NONE = IExternalVibratorService.SCALE_NONE; // 0
