@@ -516,9 +516,9 @@ final class InputMonitor {
             if (w.mInputChannelToken == null || w.mRemoved
                     || (!w.canReceiveTouchInput() && !shouldApplyRecentsInputConsumer)) {
                 if (w.mWinAnimator.hasSurface()) {
-                    // Assign an InputInfo with type to the overlay window which can't receive input
-                    // event. This is used to omit Surfaces from occlusion detection.
-                    populateOverlayInputInfo(inputWindowHandle, w.isVisible());
+                    // Make sure the input info can't receive input event. It may be omitted from
+                    // occlusion detection depending on the type or if it's a trusted overlay.
+                    populateOverlayInputInfo(inputWindowHandle, w);
                     setInputWindowInfoIfNeeded(mInputTransaction,
                             w.mWinAnimator.mSurfaceController.mSurfaceControl, inputWindowHandle);
                     return;
@@ -594,6 +594,12 @@ final class InputMonitor {
         if (inputWindowHandle.isChanged()) {
             inputWindowHandle.applyChangesToSurface(t, sc);
         }
+    }
+
+    static void populateOverlayInputInfo(InputWindowHandleWrapper inputWindowHandle,
+            WindowState w) {
+        populateOverlayInputInfo(inputWindowHandle, w.isVisible());
+        inputWindowHandle.setTouchOcclusionMode(w.getTouchOcclusionMode());
     }
 
     // This would reset InputWindowHandle fields to prevent it could be found by input event.

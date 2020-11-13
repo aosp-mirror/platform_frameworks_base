@@ -125,6 +125,7 @@ import static com.android.server.wm.IdentifierProto.USER_ID;
 import static com.android.server.wm.MoveAnimationSpecProto.DURATION_MS;
 import static com.android.server.wm.MoveAnimationSpecProto.FROM;
 import static com.android.server.wm.MoveAnimationSpecProto.TO;
+import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_ALL;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_WINDOW_ANIMATION;
 import static com.android.server.wm.WindowContainer.AnimationFlags.PARENTS;
 import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
@@ -962,6 +963,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             return TouchOcclusionMode.ALLOW;
         }
         if (WindowManager.LayoutParams.isSystemAlertWindowType(mAttrs.type)) {
+            return TouchOcclusionMode.USE_OPACITY;
+        }
+        if (isAnimating(PARENTS | TRANSITION, ANIMATION_TYPE_ALL)) {
             return TouchOcclusionMode.USE_OPACITY;
         }
         return TouchOcclusionMode.BLOCK_UNTRUSTED;
