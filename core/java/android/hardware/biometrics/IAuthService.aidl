@@ -28,6 +28,9 @@ import android.hardware.biometrics.PromptInfo;
  * @hide
  */
 interface IAuthService {
+    // Retrieve the package where BIometricOrompt's UI is implemented
+    String getUiPackage();
+
     // Requests authentication. The service choose the appropriate biometric to use, and show
     // the corresponding BiometricDialog.
     void authenticate(IBinder token, long sessionId, int userId,

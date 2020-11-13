@@ -223,6 +223,21 @@ public class BiometricManager {
     }
 
     /**
+     * Retrieves the package where BiometricPrompt's UI is implemented.
+     * @hide
+     */
+    @TestApi
+    @NonNull
+    @RequiresPermission(TEST_BIOMETRIC)
+    public String getUiPackage() {
+        try {
+            return mService.getUiPackage();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Determine if biometrics can be used. In other words, determine if
      * {@link BiometricPrompt} can be expected to be shown (hardware available, templates enrolled,
      * user-enabled). This is the equivalent of {@link #canAuthenticate(int)} with

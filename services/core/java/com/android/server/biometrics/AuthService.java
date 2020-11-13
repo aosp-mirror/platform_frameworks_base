@@ -20,6 +20,7 @@ package com.android.server.biometrics;
 // TODO(b/141025588): Create separate internal and external permissions for AuthService.
 // TODO(b/141025588): Get rid of the USE_FINGERPRINT permission.
 
+import static android.Manifest.permission.TEST_BIOMETRIC;
 import static android.Manifest.permission.USE_BIOMETRIC;
 import static android.Manifest.permission.USE_BIOMETRIC_INTERNAL;
 import static android.Manifest.permission.USE_FINGERPRINT;
@@ -136,6 +137,14 @@ public class AuthService extends SystemService {
     }
 
     private final class AuthServiceImpl extends IAuthService.Stub {
+        @Override
+        public String getUiPackage() {
+            Utils.checkPermission(getContext(), TEST_BIOMETRIC);
+
+            return getContext().getResources()
+                    .getString(R.string.config_biometric_prompt_ui_package);
+        }
+
         @Override
         public void authenticate(IBinder token, long sessionId, int userId,
                 IBiometricServiceReceiver receiver, String opPackageName, PromptInfo promptInfo)

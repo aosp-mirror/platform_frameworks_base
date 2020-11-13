@@ -2516,6 +2516,7 @@
   <java-symbol type="string" name="face_authenticated_confirmation_required" />
   <java-symbol type="string" name="face_error_security_update_required" />
 
+  <java-symbol type="string" name="config_biometric_prompt_ui_package" />
   <java-symbol type="array" name="config_biometric_sensors" />
   <java-symbol type="bool" name="allow_test_udfps" />
 
