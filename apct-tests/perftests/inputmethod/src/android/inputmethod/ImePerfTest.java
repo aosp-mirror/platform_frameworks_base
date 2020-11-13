@@ -23,11 +23,14 @@ import static android.view.WindowInsetsAnimation.Callback.DISPATCH_MODE_STOP;
 
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
+import static org.junit.Assert.assertTrue;
+
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
 import android.inputmethodservice.InputMethodService;
 import android.os.ParcelFileDescriptor;
+import android.os.Process;
 import android.os.SystemClock;
 import android.perftests.utils.ManualBenchmarkState;
 import android.perftests.utils.ManualBenchmarkState.ManualBenchmarkTest;
@@ -88,7 +91,7 @@ public class ImePerfTest extends ImePerfTestBase
             "ISC.onPostLayout"
     };
 
-     /** IMF show methods to log in trace. */
+    /** IMF show methods to log in trace. */
     private String[] mShowMethods = {
             "IC.showRequestFromIme",
             "IC.showRequestFromApi",
@@ -99,7 +102,23 @@ public class ImePerfTest extends ImePerfTestBase
             "IMMS.showSoftInput",
             "IMS.showSoftInput",
             "IMS.startInput",
-            "WMS.showImePostLayout"
+            "WMS.showImePostLayout",
+            "IMS.updateFullscreenMode",
+            "IMS.onComputeInsets",
+            "IMS.showWindow"
+    };
+
+    /** IMF show methods to log in trace. */
+    private String[] mShowMethodsCold = {
+            "IMS.bindInput",
+            "IMS.initializeInternal",
+            "IMS.restartInput",
+            "IMS.onCreate",
+            "IMS.initSoftInputWindow",
+            "IMS.resetStateForNewConfiguration",
+            "IMMS.onServiceConnected",
+            "IMMS.sessionCreated",
+            "IMMS.startInputOrWindowGainedFocus"
     };
 
     /** IMF hide lifecycle methods to log in trace. */
@@ -163,6 +182,7 @@ public class ImePerfTest extends ImePerfTestBase
     public static class BaselineIme extends InputMethodService {
 
         public static final int HEIGHT_DP = 100;
+        private static int sPid;
 
         @Override
         public View onCreateInputView() {
@@ -173,7 +193,12 @@ public class ImePerfTest extends ImePerfTestBase
             view.setPadding(0, 0, 0, 0);
             view.addView(inner, new FrameLayout.LayoutParams(MATCH_PARENT, height));
             inner.setBackgroundColor(0xff01fe10); // green
+            sPid = Process.myPid();
             return view;
+        }
+
+        static int getPid() {
+            return sPid;
         }
 
         static ComponentName getName(Context context) {
@@ -188,8 +213,8 @@ public class ImePerfTest extends ImePerfTestBase
                     flags = StatsReport.FLAG_ITERATION | StatsReport.FLAG_MEAN
                             | StatsReport.FLAG_MIN | StatsReport.FLAG_MAX
                             | StatsReport.FLAG_COEFFICIENT_VAR))
-    public void testShowIme() throws Throwable {
-        testShowOrHideIme(true /* show */);
+    public void testShowImeWarm() throws Throwable {
+        testShowOrHideImeWarm(true /* show */);
     }
 
     @Test
@@ -200,10 +225,65 @@ public class ImePerfTest extends ImePerfTestBase
                             | StatsReport.FLAG_MIN | StatsReport.FLAG_MAX
                             | StatsReport.FLAG_COEFFICIENT_VAR))
     public void testHideIme() throws Throwable {
-        testShowOrHideIme(false /* show */);
+        testShowOrHideImeWarm(false /* show */);
     }
 
-    private void testShowOrHideIme(final boolean show) throws Throwable {
+    @Test
+    @ManualBenchmarkTest(
+            targetTestDurationNs = 10 * TIME_1_S_IN_NS,
+            statsReport = @StatsReport(
+                    flags = StatsReport.FLAG_ITERATION | StatsReport.FLAG_MEAN
+                            | StatsReport.FLAG_MIN | StatsReport.FLAG_MAX
+                            | StatsReport.FLAG_COEFFICIENT_VAR))
+    public void testShowImeCold() throws Throwable {
+        mTraceMethods = new TraceMarkParser(
+                buildArray(mCommonMethods, mShowMethods, mShowMethodsCold));
+
+        final ManualBenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        state.setCustomizedIterations(getProfilingIterations(), this);
+        if (state.isWarmingUp()) {
+            // we don't need to warmup for cold start.
+            return;
+        }
+
+        long measuredTimeNs = 0;
+        while (state.keepRunning(measuredTimeNs)) {
+            killBaselineIme();
+            try (ImeSession imeSession = new ImeSession(BaselineIme.getName(
+                    getInstrumentation().getContext()))) {
+                final AtomicReference<CountDownLatch> latchStart = new AtomicReference<>();
+                final Activity activity = getActivityWithFocus();
+
+                setImeListener(activity, latchStart, null /* latchEnd */);
+                latchStart.set(new CountDownLatch(1));
+
+                if (!mIsTraceStarted) {
+                    startAsyncAtrace();
+                }
+
+                final WindowInsetsController controller =
+                        activity.getWindow().getDecorView().getWindowInsetsController();
+                AtomicLong startTime = new AtomicLong();
+                activity.runOnUiThread(() -> {
+                    startTime.set(SystemClock.elapsedRealtimeNanos());
+                    controller.show(WindowInsets.Type.ime());
+                });
+
+                measuredTimeNs = waitForAnimationStart(latchStart, startTime);
+                mActivityRule.finishActivity();
+            }
+        }
+        stopAsyncAtrace();
+        addResultToState(state);
+    }
+
+    private void killBaselineIme() {
+        assertTrue("PID of test and IME can't be same",
+                Process.myPid() != BaselineIme.getPid());
+        Process.killProcess(BaselineIme.getPid());
+    }
+
+    private void testShowOrHideImeWarm(final boolean show) throws Throwable {
         mTraceMethods = new TraceMarkParser(buildArray(
                 mCommonMethods, show ? mShowMethods : mHideMethods));
         final ManualBenchmarkState state = mPerfStatusReporter.getBenchmarkState();
