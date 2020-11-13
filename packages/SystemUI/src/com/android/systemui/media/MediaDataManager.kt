@@ -441,7 +441,8 @@ class MediaDataManager(
         val app = builder.loadHeaderAppName()
 
         // App Icon
-        val smallIconDrawable: Drawable = sbn.notification.smallIcon.loadDrawable(context)
+        val smallIconDrawable: Drawable = sbn.notification.smallIcon.loadDrawableAsUser(context,
+                sbn.user.identifier)
 
         // Song name
         var song: CharSequence? = metadata?.getString(MediaMetadata.METADATA_KEY_DISPLAY_TITLE)
