@@ -4203,11 +4203,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             int maxRequiredComplexity = PASSWORD_COMPLEXITY_NONE;
             for (ActiveAdmin admin : admins) {
                 adminMetrics.add(admin.mPasswordPolicy.getMinMetrics());
-                if (isDeviceOwner(admin) || isProfileOwnerUncheckedLocked(admin.info.getComponent(),
-                        admin.getUserHandle().getIdentifier())) {
-                    maxRequiredComplexity = Math.max(maxRequiredComplexity,
-                            admin.mPasswordComplexity);
-                }
+                maxRequiredComplexity = Math.max(maxRequiredComplexity, admin.mPasswordComplexity);
             }
             return PasswordMetrics.validatePasswordMetrics(PasswordMetrics.merge(adminMetrics),
                     maxRequiredComplexity, false, metrics).isEmpty();
@@ -4320,13 +4316,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         List<ActiveAdmin> admins = getActiveAdminsForLockscreenPoliciesLocked(userHandle);
         int maxRequiredComplexity = PASSWORD_COMPLEXITY_NONE;
         for (ActiveAdmin admin : admins) {
-            final ComponentName adminComponent = admin.info.getComponent();
-            final int adminUser = admin.getUserHandle().getIdentifier();
-            // Password complexity is only taken into account from DO/PO
-            if (isDeviceOwner(adminComponent, adminUser)
-                    || isProfileOwnerUncheckedLocked(adminComponent, adminUser)) {
-                maxRequiredComplexity = Math.max(maxRequiredComplexity, admin.mPasswordComplexity);
-            }
+            maxRequiredComplexity = Math.max(maxRequiredComplexity, admin.mPasswordComplexity);
         }
         return maxRequiredComplexity;
     }
@@ -4349,6 +4339,21 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return requiredAdmin.mPasswordComplexity;
         }
     }
+
+    @Override
+    public int getAggregatedPasswordComplexityForUser(int userId) {
+        if (!mHasFeature) {
+            return PASSWORD_COMPLEXITY_NONE;
+        }
+
+        final CallerIdentity caller = getCallerIdentity();
+        Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(caller, userId));
+
+        synchronized (getLockObject()) {
+            return getEffectivePasswordComplexityRequirementLocked(userId);
+        }
+    }
+
 
     @Override
     public int getCurrentFailedPasswordAttempts(int userHandle, boolean parent) {
