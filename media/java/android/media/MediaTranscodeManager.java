@@ -26,7 +26,6 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.AssetFileDescriptor;
 import android.net.Uri;
-import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -901,29 +900,19 @@ public final class MediaTranscodeManager {
 
             private MediaFormat mSrcVideoFormatHint;
             private MediaFormat mSrcAudioFormatHint;
-            private Bundle mClientCaps;
-
-            /**
-             * A key describing whether the client supports HEVC-encoded video.
-             *
-             * The value associated with this key is a boolean. If unspecified, it's up to
-             * the MediaFormatResolver to determine the default.
-             *
-             * @see #setClientCapabilities(Bundle)
-             */
-            public static final String CAPS_SUPPORTS_HEVC = "support-hevc";
+            private ApplicationMediaCapabilities mClientCaps;
 
             /**
              * Sets the abilities of the client consuming the media. Must be called
              * before {@link #shouldTranscode()} or {@link #resolveVideoFormat()}.
              *
-             * @param clientCaps A Bundle object containing the client's capabilities, such as
-             *                   {@link #CAPS_SUPPORTS_HEVC}.
+             * @param clientCaps An ApplicationMediaCapabilities object containing the client's
+             *                   capabilities.
              * @return the same VideoFormatResolver instance.
-             * @hide
              */
             @NonNull
-            public MediaFormatResolver setClientCapabilities(@NonNull Bundle clientCaps) {
+            public MediaFormatResolver setClientCapabilities(
+                    @NonNull ApplicationMediaCapabilities clientCaps) {
                 mClientCaps = clientCaps;
                 return this;
             }
@@ -964,7 +953,8 @@ public final class MediaTranscodeManager {
              * Returns whether the source content should be transcoded.
              *
              * @return true if the source should be transcoded.
-             * @throws UnsupportedOperationException if {@link #setClientCapabilities(Bundle)}
+             * @throws UnsupportedOperationException
+             *         if {@link #setClientCapabilities(ApplicationMediaCapabilities)}
              *         or {@link #setSourceVideoFormatHint(MediaFormat)} was not called.
              */
             public boolean shouldTranscode() {
@@ -977,7 +967,8 @@ public final class MediaTranscodeManager {
                     throw new UnsupportedOperationException(
                             "Source video format hint must be set!");
                 }
-                boolean supportHevc = mClientCaps.getBoolean(CAPS_SUPPORTS_HEVC, false);
+                boolean supportHevc = mClientCaps.isVideoMimeTypeSupported(
+                        MediaFormat.MIMETYPE_VIDEO_HEVC);
                 if (!supportHevc && MediaFormat.MIMETYPE_VIDEO_HEVC.equals(
                         mSrcVideoFormatHint.getString(MediaFormat.KEY_MIME))) {
                     return true;
@@ -992,7 +983,8 @@ public final class MediaTranscodeManager {
              *
              * @return the video track format to be used if transcoding should be performed,
              *         and null otherwise.
-             * @throws UnsupportedOperationException if {@link #setClientCapabilities(Bundle)}
+             * @throws UnsupportedOperationException
+             *         if {@link #setClientCapabilities(ApplicationMediaCapabilities)}
              *         or {@link #setSourceVideoFormatHint(MediaFormat)} was not called.
              */
             @Nullable
@@ -1013,7 +1005,8 @@ public final class MediaTranscodeManager {
              *
              * @return the audio track format to be used if transcoding should be performed, and
              *         null otherwise.
-             * @throws UnsupportedOperationException if {@link #setClientCapabilities(Bundle)}
+             * @throws UnsupportedOperationException
+             *         if {@link #setClientCapabilities(ApplicationMediaCapabilities)}
              *         or {@link #setSourceVideoFormatHint(MediaFormat)} was not called.
              * @hide
              */

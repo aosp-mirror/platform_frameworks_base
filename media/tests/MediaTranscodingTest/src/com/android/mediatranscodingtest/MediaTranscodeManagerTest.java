@@ -20,6 +20,7 @@ import static org.testng.Assert.assertThrows;
 
 import android.content.ContentResolver;
 import android.content.Context;
+import android.media.ApplicationMediaCapabilities;
 import android.media.MediaFormat;
 import android.media.MediaTranscodeManager;
 import android.media.MediaTranscodeManager.TranscodingRequest;
@@ -454,8 +455,8 @@ public class MediaTranscodeManagerTest
         Uri destinationUri = Uri.parse(ContentResolver.SCHEME_FILE + "://"
                 + mContext.getCacheDir().getAbsolutePath() + "/HevcTranscode.mp4");
 
-        Bundle clientCaps = new Bundle();
-        clientCaps.putBoolean(MediaFormatResolver.CAPS_SUPPORTS_HEVC, false);
+        ApplicationMediaCapabilities clientCaps =
+                new ApplicationMediaCapabilities.Builder().build();
         MediaFormatResolver resolver = new MediaFormatResolver()
                 .setSourceVideoFormatHint(MediaFormat.createVideoFormat(
                         MediaFormat.MIMETYPE_VIDEO_HEVC, WIDTH, HEIGHT))
