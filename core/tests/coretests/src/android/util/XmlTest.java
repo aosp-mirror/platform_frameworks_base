@@ -64,7 +64,7 @@ public class XmlTest {
      */
     private static void doLargeValues(TypedXmlSerializer out, TypedXmlPullParser in)
             throws Exception {
-        final char[] chars = new char[(1 << 16) - 1];
+        final char[] chars = new char[65_534];
         Arrays.fill(chars, '!');
 
         final String string = new String(chars);

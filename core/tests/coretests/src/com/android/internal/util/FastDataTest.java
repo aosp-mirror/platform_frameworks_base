@@ -30,6 +30,10 @@ import org.junit.runner.RunWith;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.DataInput;
+import java.io.DataInputStream;
+import java.io.DataOutput;
+import java.io.DataOutputStream;
 import java.io.EOFException;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -83,7 +87,7 @@ public class FastDataTest {
 
     @Test
     public void testUTF_Bounds() throws Exception {
-        final char[] buf = new char[65_535];
+        final char[] buf = new char[65_534];
         try (FastDataOutput out = new FastDataOutput(new ByteArrayOutputStream(), BOUNCE_SIZE)) {
             // Writing simple string will fit fine
             Arrays.fill(buf, '!');
@@ -97,6 +101,61 @@ public class FastDataTest {
             assertThrows(IOException.class, () -> out.writeUTF(complex));
             assertThrows(IOException.class, () -> out.writeInternedUTF(complex));
         }
+    }
+
+    @Test
+    public void testTranscode() throws Exception {
+        // Verify that upstream data can be read by fast
+        {
+            final ByteArrayOutputStream outStream = new ByteArrayOutputStream();
+            final DataOutputStream out = new DataOutputStream(outStream);
+            doTranscodeWrite(out);
+            out.flush();
+
+            final FastDataInput in = new FastDataInput(
+                    new ByteArrayInputStream(outStream.toByteArray()), BOUNCE_SIZE);
+            doTransodeRead(in);
+        }
+
+        // Verify that fast data can be read by upstream
+        {
+            final ByteArrayOutputStream outStream = new ByteArrayOutputStream();
+            final FastDataOutput out = new FastDataOutput(outStream, BOUNCE_SIZE);
+            doTranscodeWrite(out);
+            out.flush();
+
+            final DataInputStream in = new DataInputStream(
+                    new ByteArrayInputStream(outStream.toByteArray()));
+            doTransodeRead(in);
+        }
+    }
+
+    private static void doTranscodeWrite(DataOutput out) throws IOException {
+        out.writeBoolean(true);
+        out.writeBoolean(false);
+        out.writeByte(1);
+        out.writeShort(2);
+        out.writeInt(4);
+        out.writeUTF("foo\0bar");
+        out.writeUTF(TEST_SHORT_STRING);
+        out.writeUTF(TEST_LONG_STRING);
+        out.writeLong(8L);
+        out.writeFloat(16f);
+        out.writeDouble(32d);
+    }
+
+    private static void doTransodeRead(DataInput in) throws IOException {
+        assertEquals(true, in.readBoolean());
+        assertEquals(false, in.readBoolean());
+        assertEquals(1, in.readByte());
+        assertEquals(2, in.readShort());
+        assertEquals(4, in.readInt());
+        assertEquals("foo\0bar", in.readUTF());
+        assertEquals(TEST_SHORT_STRING, in.readUTF());
+        assertEquals(TEST_LONG_STRING, in.readUTF());
+        assertEquals(8L, in.readLong());
+        assertEquals(16f, in.readFloat(), 0.01);
+        assertEquals(32d, in.readDouble(), 0.01);
     }
 
     @Test
@@ -191,7 +250,7 @@ public class FastDataTest {
 
     @Test
     public void testBounce_UTF_Maximum() throws Exception {
-        final char[] expectedBuf = new char[65_535];
+        final char[] expectedBuf = new char[65_534];
         Arrays.fill(expectedBuf, '!');
         final String expected = new String(expectedBuf);
 
