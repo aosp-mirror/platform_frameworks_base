@@ -19,6 +19,7 @@ package com.android.systemui.dagger;
 import com.android.systemui.wmshell.WMShellModule;
 import com.android.wm.shell.ShellDump;
 import com.android.wm.shell.ShellInit;
+import com.android.wm.shell.apppairs.AppPairs;
 import com.android.wm.shell.bubbles.Bubbles;
 import com.android.wm.shell.hidedisplaycutout.HideDisplayCutout;
 import com.android.wm.shell.onehanded.OneHanded;
@@ -69,6 +70,9 @@ public interface WMComponent {
 
     @WMSingleton
     Optional<SplitScreen> getSplitScreen();
+
+    @WMSingleton
+    Optional<AppPairs> getAppPairs();
 
     @WMSingleton
     Optional<Bubbles> getBubbles();

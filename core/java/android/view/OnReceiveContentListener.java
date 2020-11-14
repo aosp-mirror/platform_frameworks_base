@@ -22,77 +22,91 @@ import android.annotation.Nullable;
 import android.content.ClipData;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.ArrayMap;
 
 import com.android.internal.util.Preconditions;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
+import java.util.Map;
 import java.util.Objects;
+import java.util.function.Predicate;
 
 /**
- * Callback for apps to implement handling for insertion of content. Content may be both text and
+ * Listener for apps to implement handling for insertion of content. Content may be both text and
  * non-text (plain/styled text, HTML, images, videos, audio files, etc).
  *
- * <p>This callback can be attached to different types of UI components using
- * {@link View#setOnReceiveContentCallback}.
+ * <p>This listener can be attached to different types of UI components using
+ * {@link View#setOnReceiveContentListener}.
  *
- * <p>For editable {@link android.widget.TextView} components, implementations can extend from
- * {@link android.widget.TextViewOnReceiveContentCallback} to reuse default platform behavior for
- * handling text.
- *
- * <p>Example implementation:<br>
+ * <p>Here is a sample implementation that handles content URIs and delegates the processing for
+ * text and everything else to the platform:<br>
  * <pre class="prettyprint">
- * // (1) Define the callback
- * public class MyOnReceiveContentCallback implements OnReceiveContentCallback&lt;TextView&gt; {
- *     public static final Set&lt;String&gt; MIME_TYPES = Collections.unmodifiableSet(
- *         Set.of("image/*", "video/*"));
+ * // (1) Define the listener
+ * public class MyReceiver implements OnReceiveContentListener {
+ *     public static final String[] MIME_TYPES = new String[] {"image/*", "video/*"};
  *
  *     &#64;Override
- *     public boolean onReceiveContent(@NonNull TextView view, @NonNull Payload payload) {
- *         // ... app-specific logic to handle the content in the payload ...
+ *     public Payload onReceiveContent(TextView view, Payload payload) {
+ *         Map&lt;Boolean, Payload&gt; split = payload.partition(item -&gt; item.getUri() != null);
+ *         if (split.get(true) != null) {
+ *             ClipData clip = payload.getClip();
+ *             for (int i = 0; i < clip.getItemCount(); i++) {
+ *                 Uri uri = clip.getItemAt(i).getUri();
+ *                 // ... app-specific logic to handle the URI ...
+ *             }
+ *         }
+ *         // Return anything that we didn't handle ourselves. This preserves the default platform
+ *         // behavior for text and anything else for which we are not implementing custom handling.
+ *         return split.get(false);
  *     }
  * }
  *
- * // (2) Register the callback
+ * // (2) Register the listener
  * public class MyActivity extends Activity {
  *     &#64;Override
  *     public void onCreate(Bundle savedInstanceState) {
  *         // ...
  *
  *         EditText myInput = findViewById(R.id.my_input);
- *         myInput.setOnReceiveContentCallback(
- *                 MyOnReceiveContentCallback.MIME_TYPES,
- *                 new MyOnReceiveContentCallback());
+ *         myInput.setOnReceiveContentListener(MyReceiver.MIME_TYPES, new MyReceiver());
  *     }
  * </pre>
- *
- * @param <T> The type of {@link View} with which this callback can be associated.
  */
-public interface OnReceiveContentCallback<T extends View> {
+public interface OnReceiveContentListener {
     /**
      * Receive the given content.
      *
-     * <p>This method is only invoked for content whose MIME type matches a type specified via
-     * {@link View#setOnReceiveContentCallback}.
+     * <p>Implementations should handle any content items of interest and return all unhandled
+     * items to preserve the default platform behavior for content that does not have app-specific
+     * handling. For example, an implementation may provide handling for content URIs (to provide
+     * support for inserting images, etc) and delegate the processing of text to the platform to
+     * preserve the common behavior for inserting text. See the class javadoc for a sample
+     * implementation and see {@link Payload#partition} for a convenient way to split the passed-in
+     * content.
      *
-     * <p>For text, if the view has a selection, the selection should be overwritten by the clip; if
-     * there's no selection, this method should insert the content at the current cursor position.
+     * <p>If implementing handling for text: if the view has a selection, the selection should
+     * be overwritten by the passed-in content; if there's no selection, the passed-in content
+     * should be inserted at the current cursor position.
      *
-     * <p>For non-text content (e.g. an image), the content may be inserted inline, or it may be
-     * added as an attachment (could potentially be shown in a completely separate view).
+     * <p>If implementing handling for non-text content (e.g. images): the content may be
+     * inserted inline, or it may be added as an attachment (could potentially be shown in a
+     * completely separate view).
      *
      * @param view The view where the content insertion was requested.
      * @param payload The content to insert and related metadata.
      *
-     * @return Returns true if the content was handled in some way, false otherwise. Actual
-     * insertion may be processed asynchronously in the background and may or may not succeed even
-     * if this method returns true. For example, an app may not end up inserting an item if it
-     * exceeds the app's size limit for that type of content.
+     * @return The portion of the passed-in content whose processing should be delegated to
+     * the platform. Return null if all content was handled in some way. Actual insertion of
+     * the content may be processed asynchronously in the background and may or may not
+     * succeed even if this method returns null. For example, an app may end up not inserting
+     * an item if it exceeds the app's size limit for that type of content.
      */
-    boolean onReceiveContent(@NonNull T view, @NonNull Payload payload);
+    @Nullable Payload onReceiveContent(@NonNull View view, @NonNull Payload payload);
 
     /**
-     * Holds all the relevant data for a request to {@link OnReceiveContentCallback}.
+     * Holds all the relevant data for a request to {@link OnReceiveContentListener}.
      */
     final class Payload {
 
@@ -206,7 +220,7 @@ public interface OnReceiveContentCallback<T extends View> {
         @Override
         public String toString() {
             return "Payload{"
-                    + "clip=" + mClip.getDescription()
+                    + "clip=" + mClip
                     + ", source=" + sourceToString(mSource)
                     + ", flags=" + flagsToString(mFlags)
                     + ", linkUri=" + mLinkUri
@@ -256,14 +270,72 @@ public interface OnReceiveContentCallback<T extends View> {
         }
 
         /**
+         * Partitions this payload based on the given predicate.
+         *
+         * <p>Similar to a
+         * {@link java.util.stream.Collectors#partitioningBy(Predicate) partitioning collector},
+         * this function classifies the content in this payload and organizes it into a map,
+         * grouping the content that matched vs didn't match the predicate.
+         *
+         * <p>Except for the {@link ClipData} items, the returned payloads will contain all the same
+         * metadata as the original payload.
+         *
+         * @param itemPredicate The predicate to test each {@link ClipData.Item} to determine which
+         * partition to place it into.
+         * @return A map containing the partitioned content. The map will contain a single entry if
+         * all items were classified into the same partition (all matched or all didn't match the
+         * predicate) or two entries (if there's at least one item that matched the predicate and at
+         * least one item that didn't match the predicate).
+         */
+        public @NonNull Map<Boolean, Payload> partition(
+                @NonNull Predicate<ClipData.Item> itemPredicate) {
+            if (mClip.getItemCount() == 1) {
+                Map<Boolean, Payload> result = new ArrayMap<>(1);
+                result.put(itemPredicate.test(mClip.getItemAt(0)), this);
+                return result;
+            }
+            ArrayList<ClipData.Item> accepted = new ArrayList<>();
+            ArrayList<ClipData.Item> remaining = new ArrayList<>();
+            for (int i = 0; i < mClip.getItemCount(); i++) {
+                ClipData.Item item = mClip.getItemAt(i);
+                if (itemPredicate.test(item)) {
+                    accepted.add(item);
+                } else {
+                    remaining.add(item);
+                }
+            }
+            Map<Boolean, Payload> result = new ArrayMap<>(2);
+            if (!accepted.isEmpty()) {
+                ClipData acceptedClip = new ClipData(mClip.getDescription(), accepted);
+                result.put(true, new Builder(this).setClip(acceptedClip).build());
+            }
+            if (!remaining.isEmpty()) {
+                ClipData remainingClip = new ClipData(mClip.getDescription(), remaining);
+                result.put(false, new Builder(this).setClip(remainingClip).build());
+            }
+            return result;
+        }
+
+        /**
          * Builder for {@link Payload}.
          */
         public static final class Builder {
-            @NonNull private final ClipData mClip;
-            private final @Source int mSource;
+            @NonNull private ClipData mClip;
+            private @Source int mSource;
             private @Flags int mFlags;
             @Nullable private Uri mLinkUri;
             @Nullable private Bundle mExtras;
+
+            /**
+             * Creates a new builder initialized with the data from the given builder.
+             */
+            public Builder(@NonNull Payload payload) {
+                mClip = payload.mClip;
+                mSource = payload.mSource;
+                mFlags = payload.mFlags;
+                mLinkUri = payload.mLinkUri;
+                mExtras = payload.mExtras;
+            }
 
             /**
              * Creates a new builder.
@@ -273,6 +345,28 @@ public interface OnReceiveContentCallback<T extends View> {
             public Builder(@NonNull ClipData clip, @Source int source) {
                 mClip = clip;
                 mSource = source;
+            }
+
+            /**
+             * Sets the data to be inserted.
+             * @param clip The data to insert.
+             * @return this builder
+             */
+            @NonNull
+            public Builder setClip(@NonNull ClipData clip) {
+                mClip = clip;
+                return this;
+            }
+
+            /**
+             * Sets the source of the operation.
+             * @param source The source of the operation. See {@code SOURCE_} constants.
+             * @return this builder
+             */
+            @NonNull
+            public Builder setSource(@Source int source) {
+                mSource = source;
+                return this;
             }
 
             /**

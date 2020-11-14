@@ -1,0 +1,12 @@
+android_test {
+    name: "FrameworksInProcessTests",
+    srcs: ["src/**/*.java"],
+    static_libs: [
+        "androidx.test.core",
+        "androidx.test.rules",
+        "services.core",
+        "truth-prebuilt",
+        "platform-test-annotations",
+    ],
+    test_suites: ["general-tests"],
+}

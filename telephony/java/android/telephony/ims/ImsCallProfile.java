@@ -450,8 +450,6 @@ public final class ImsCallProfile implements Parcelable {
     /** Indicates if we have known the intent of the user for the call is emergency */
     private boolean mHasKnownUserIntentEmergency = false;
 
-    private Set<RtpHeaderExtensionType> mOfferedRtpHeaderExtensionTypes = new ArraySet<>();
-
     private Set<RtpHeaderExtensionType> mAcceptedRtpHeaderExtensionTypes = new ArraySet<>();
 
     /**
@@ -692,7 +690,6 @@ public final class ImsCallProfile implements Parcelable {
         out.writeBoolean(mHasKnownUserIntentEmergency);
         out.writeInt(mRestrictCause);
         out.writeInt(mCallerNumberVerificationStatus);
-        out.writeArray(mOfferedRtpHeaderExtensionTypes.toArray());
         out.writeArray(mAcceptedRtpHeaderExtensionTypes.toArray());
     }
 
@@ -708,9 +705,6 @@ public final class ImsCallProfile implements Parcelable {
         mHasKnownUserIntentEmergency = in.readBoolean();
         mRestrictCause = in.readInt();
         mCallerNumberVerificationStatus = in.readInt();
-        Object[] offered = in.readArray(RtpHeaderExtensionType.class.getClassLoader());
-        mOfferedRtpHeaderExtensionTypes = Arrays.stream(offered)
-                .map(o -> (RtpHeaderExtensionType) o).collect(Collectors.toSet());
         Object[] accepted = in.readArray(RtpHeaderExtensionType.class.getClassLoader());
         mAcceptedRtpHeaderExtensionTypes = Arrays.stream(accepted)
                 .map(o -> (RtpHeaderExtensionType) o).collect(Collectors.toSet());
@@ -1106,46 +1100,13 @@ public final class ImsCallProfile implements Parcelable {
     }
 
     /**
-     * For an incoming or outgoing call, indicates the {@link RtpHeaderExtensionType}s which the
-     * caller is offering to make available.
-     * <p>
-     * For outgoing calls, an {@link ImsService} will reserve
-     * {@link RtpHeaderExtensionType#getLocalIdentifier()} identifiers the telephony stack has
-     * proposed to use and not use these same local identifiers.  The offered header extension
-     * types for an outgoing call can be found in the
-     * {@link ImsCallProfile#getOfferedRtpHeaderExtensionTypes()} and will be available to the
-     * {@link ImsService} in {@link MmTelFeature#createCallSession(ImsCallProfile)}.
-     * The {@link ImsService} sets the accepted {@link #setAcceptedRtpHeaderExtensionTypes(Set)}
-     * when the SDP offer/accept process has completed.
-     * <p>
-     * According to RFC8285, RTP header extensions available to a call are determined using the
-     * offer/accept phase of the SDP protocol (see RFC4566).
-     *
-     * @return the {@link RtpHeaderExtensionType}s which were offered by other end of the call.
-     */
-    public @NonNull Set<RtpHeaderExtensionType> getOfferedRtpHeaderExtensionTypes() {
-        return mOfferedRtpHeaderExtensionTypes;
-    }
-
-    /**
-     * Sets the offered {@link RtpHeaderExtensionType}s for this call.
-     * <p>
-     * According to RFC8285, RTP header extensions available to a call are determined using the
-     * offer/accept phase of the SDP protocol (see RFC4566).
-     *
-     * @param rtpHeaderExtensions the {@link RtpHeaderExtensionType}s which are offered.
-     */
-    public void setOfferedRtpHeaderExtensionTypes(@NonNull Set<RtpHeaderExtensionType>
-                    rtpHeaderExtensions) {
-        mOfferedRtpHeaderExtensionTypes.clear();
-        mOfferedRtpHeaderExtensionTypes.addAll(rtpHeaderExtensions);
-    }
-
-    /**
      * Gets the {@link RtpHeaderExtensionType}s which have been accepted by both ends of the call.
      * <p>
      * According to RFC8285, RTP header extensions available to a call are determined using the
      * offer/accept phase of the SDP protocol (see RFC4566).
+     * <p>
+     * The offered header extension types supported by the framework and exposed to the
+     * {@link ImsService} via {@link MmTelFeature#changeOfferedRtpHeaderExtensionTypes(Set)}.
      *
      * @return the {@link RtpHeaderExtensionType}s which were accepted by the other end of the call.
      */

@@ -32,6 +32,7 @@ import com.android.wm.shell.ShellDump;
 import com.android.wm.shell.ShellInit;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.WindowManagerShellWrapper;
+import com.android.wm.shell.apppairs.AppPairs;
 import com.android.wm.shell.bubbles.BubbleController;
 import com.android.wm.shell.bubbles.Bubbles;
 import com.android.wm.shell.common.AnimationThread;
@@ -75,11 +76,13 @@ public abstract class WMShellBaseModule {
     static ShellInit provideShellInit(DisplayImeController displayImeController,
             DragAndDropController dragAndDropController,
             ShellTaskOrganizer shellTaskOrganizer,
-            Optional<SplitScreen> splitScreenOptional) {
+            Optional<SplitScreen> splitScreenOptional,
+            Optional<AppPairs> appPairsOptional) {
         return new ShellInit(displayImeController,
                 dragAndDropController,
                 shellTaskOrganizer,
-                splitScreenOptional);
+                splitScreenOptional,
+                appPairsOptional);
     }
 
     /**
@@ -92,9 +95,10 @@ public abstract class WMShellBaseModule {
             Optional<SplitScreen> splitScreenOptional,
             Optional<Pip> pipOptional,
             Optional<OneHanded> oneHandedOptional,
-            Optional<HideDisplayCutout> hideDisplayCutout) {
+            Optional<HideDisplayCutout> hideDisplayCutout,
+            Optional<AppPairs> appPairsOptional) {
         return Optional.of(new ShellDump(shellTaskOrganizer, splitScreenOptional, pipOptional,
-                oneHandedOptional, hideDisplayCutout));
+                oneHandedOptional, hideDisplayCutout, appPairsOptional));
     }
 
     @WMSingleton
@@ -186,6 +190,9 @@ public abstract class WMShellBaseModule {
 
     @BindsOptionalOf
     abstract SplitScreen optionalSplitScreen();
+
+    @BindsOptionalOf
+    abstract AppPairs optionalAppPairs();
 
     @WMSingleton
     @Provides

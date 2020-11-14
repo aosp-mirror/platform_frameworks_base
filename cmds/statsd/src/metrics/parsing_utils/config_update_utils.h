@@ -126,6 +126,13 @@ bool updateConditions(const ConfigKey& key, const StatsdConfig& config,
                       std::vector<ConditionState>& conditionCache,
                       std::set<int64_t>& replacedConditions);
 
+bool updateStates(const StatsdConfig& config,
+                  const std::map<int64_t, uint64_t>& oldStateProtoHashes,
+                  std::unordered_map<int64_t, int>& stateAtomIdMap,
+                  std::unordered_map<int64_t, std::unordered_map<int, int64_t>>& allStateGroupMaps,
+                  std::map<int64_t, uint64_t>& newStateProtoHashes,
+                  std::set<int64_t>& replacedStates);
+
 // Function to determine the update status (preserve/replace/new) of all metrics in the config.
 // [config]: the input StatsdConfig
 // [oldMetricProducerMap]: metric id to index mapping in the existing MetricsManager

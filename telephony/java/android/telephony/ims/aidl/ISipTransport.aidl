@@ -16,9 +16,17 @@
 
 package android.telephony.ims.aidl;
 
+import android.telephony.ims.DelegateRequest;
+import android.telephony.ims.aidl.ISipDelegate;
+import android.telephony.ims.aidl.ISipDelegateMessageCallback;
+import android.telephony.ims.aidl.ISipDelegateStateCallback;
+
 /**
  * Interface for commands to the SIP Transport implementation.
  * {@hide}
  */
-interface ISipTransport {
+oneway interface ISipTransport {
+    void createSipDelegate(in DelegateRequest request, ISipDelegateStateCallback dc,
+            ISipDelegateMessageCallback mc);
+    void destroySipDelegate(ISipDelegate delegate, int reason);
 }

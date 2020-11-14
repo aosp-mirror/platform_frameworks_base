@@ -434,8 +434,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
 
         if (hop.isReparent()) {
             final boolean isNonOrganizedRootableTask =
-                    (task.isRootTask() && !task.mCreatedByOrganizer)
-                            || task.getParent().asTask().mCreatedByOrganizer;
+                    task.isRootTask() || task.getParent().asTask().mCreatedByOrganizer;
             if (isNonOrganizedRootableTask) {
                 WindowContainer newParent = hop.getNewParent() == null
                         ? dc.getDefaultTaskDisplayArea()

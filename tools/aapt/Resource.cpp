@@ -519,7 +519,7 @@ static int validateAttr(const String8& path, const ResTable& table,
                         String8(parser.getElementName(&len)).string(), attr);
                 return ATTR_NOT_FOUND;
             }
-            if ((str=pool->stringAt(value.data, &len)) == NULL) {
+            if ((str = UnpackOptionalString(pool->stringAt(value.data), &len)) == NULL) {
                 fprintf(stderr, "%s:%d: Tag <%s> attribute %s has corrupt string value.\n",
                         path.string(), parser.getLineNumber(),
                         String8(parser.getElementName(&len)).string(), attr);

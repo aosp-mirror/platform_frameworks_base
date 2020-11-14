@@ -275,8 +275,8 @@ public class PackageInfoUtils {
             return null;
         }
 
-        ActivityInfo info =
-                PackageInfoWithoutStateUtils.generateActivityInfoUnchecked(a, applicationInfo);
+        final ActivityInfo info = PackageInfoWithoutStateUtils.generateActivityInfoUnchecked(
+                a, flags, applicationInfo);
         assignSharedFieldsForComponentInfo(info, a, pkgSetting, userId);
         return info;
     }
@@ -310,8 +310,8 @@ public class PackageInfoUtils {
             return null;
         }
 
-        ServiceInfo info =
-                PackageInfoWithoutStateUtils.generateServiceInfoUnchecked(s, applicationInfo);
+        final ServiceInfo info = PackageInfoWithoutStateUtils.generateServiceInfoUnchecked(
+                s, flags, applicationInfo);
         assignSharedFieldsForComponentInfo(info, s, pkgSetting, userId);
         return info;
     }

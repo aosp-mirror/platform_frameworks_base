@@ -139,6 +139,38 @@ public class LatencyTracker {
         BackgroundThread.getHandler().post(this::readSettings);
     }
 
+    /**
+     * A helper method to translate action type to name.
+     *
+     * @param action the action type defined in AtomsProto.java
+     * @return the name of the action
+     */
+    public static String getNameOfAction(int action) {
+        // Defined in AtomsProto.java
+        switch (action) {
+            case 0:
+                return "UNKNOWN";
+            case 1:
+                return "ACTION_EXPAND_PANEL";
+            case 2:
+                return "ACTION_TOGGLE_RECENTS";
+            case 3:
+                return "ACTION_FINGERPRINT_WAKE_AND_UNLOCK";
+            case 4:
+                return "ACTION_CHECK_CREDENTIAL";
+            case 5:
+                return "ACTION_CHECK_CREDENTIAL_UNLOCKED";
+            case 6:
+                return "ACTION_TURN_ON_SCREEN";
+            case 7:
+                return "ACTION_ROTATE_SCREEN";
+            case 8:
+                return "ACTION_FACE_WAKE_AND_UNLOCK";
+            default:
+                throw new IllegalArgumentException("Invalid action");
+        }
+    }
+
     private void registerSettingsObserver() {
         Uri settingsUri = Settings.Global.getUriFor(Settings.Global.LATENCY_TRACKER);
         mContext.getContentResolver().registerContentObserver(

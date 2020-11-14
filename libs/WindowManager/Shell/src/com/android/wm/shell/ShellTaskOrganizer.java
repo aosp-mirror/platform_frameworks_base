@@ -26,7 +26,6 @@ import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_TASK_ORG
 
 import android.annotation.IntDef;
 import android.app.ActivityManager.RunningTaskInfo;
-import android.app.WindowConfiguration.WindowingMode;
 import android.content.Context;
 import android.os.Binder;
 import android.os.IBinder;
@@ -39,6 +38,7 @@ import android.window.TaskAppearedInfo;
 import android.window.TaskOrganizer;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.common.ProtoLog;
@@ -306,6 +306,15 @@ public class ShellTaskOrganizer extends TaskOrganizer {
             if (listener != null) {
                 listener.onTaskVanished(taskInfo);
             }
+        }
+    }
+
+    /** Gets running task by taskId. Returns {@code null} if no such task observed. */
+    @Nullable
+    public RunningTaskInfo getRunningTaskInfo(int taskId) {
+        synchronized (mLock) {
+            final TaskAppearedInfo info = mTasks.get(taskId);
+            return info != null ? info.getTaskInfo() : null;
         }
     }
 

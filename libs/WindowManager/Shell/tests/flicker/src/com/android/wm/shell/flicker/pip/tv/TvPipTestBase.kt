@@ -52,7 +52,7 @@ abstract class TvPipTestBase(rotationName: String, rotation: Int)
 
     @After
     open fun tearDown() {
-        Assume.assumeTrue(isTelevision)
+        if (!isTelevision) return
 
         testApp.forceStop()
 

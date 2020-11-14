@@ -112,6 +112,7 @@ import android.view.AccessibilityIterators.TextSegmentIterator;
 import android.view.AccessibilityIterators.WordTextSegmentIterator;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.InputDevice.InputSourceClass;
+import android.view.OnReceiveContentListener.Payload;
 import android.view.Window.OnContentApplyWindowInsetsListener;
 import android.view.WindowInsets.Type;
 import android.view.WindowInsetsAnimation.Bounds;
@@ -143,6 +144,7 @@ import android.widget.FrameLayout;
 import android.widget.ScrollBarDrawable;
 
 import com.android.internal.R;
+import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.Preconditions;
 import com.android.internal.view.ScrollCaptureInternal;
@@ -4713,6 +4715,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
          * Allows the application to implement custom scroll capture support.
          */
         ScrollCaptureCallback mScrollCaptureCallback;
+
+        @Nullable
+        private OnReceiveContentListener mOnReceiveContentListener;
     }
 
     @UnsupportedAppUsage
@@ -5246,8 +5251,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     @Nullable
     private String[] mOnReceiveContentMimeTypes;
-    @Nullable
-    private OnReceiveContentCallback mOnReceiveContentCallback;
 
     /**
      * Simple constructor to use when creating a view from code.
@@ -9005,72 +9008,92 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Sets the callback to handle insertion of content into this view.
+     * Sets the listener to be {@link #onReceiveContent used} to handle insertion of
+     * content into this view.
      *
-     * <p>Depending on the view, this callback may be invoked for scenarios such as content
-     * insertion from the IME, Autofill, etc.
+     * <p>Depending on the type of view, this listener may be invoked for different scenarios. For
+     * example, for editable TextViews, this listener will be invoked for the following scenarios:
+     * <ol>
+     *     <li>Paste from the clipboard (e.g. "Paste" or "Paste as plain text" action in the
+     *     insertion/selection menu)
+     *     <li>Content insertion from the keyboard (from {@link InputConnection#commitContent})
+     *     <li>Drag and drop (drop events from {@link #onDragEvent(DragEvent)})
+     *     <li>Autofill
+     *     <li>Selection replacement via {@link Intent#ACTION_PROCESS_TEXT}
+     * </ol>
      *
-     * <p>This callback is only invoked for content whose MIME type matches a type specified via
-     * the {code mimeTypes} parameter. If the MIME type is not supported by the callback, the
-     * default platform handling will be executed instead (no-op for the default {@link View}).
+     * <p>When setting a listener, clients should also declare the MIME types accepted by it.
+     * When invoked with other types of content, the listener may reject the content (defer to
+     * the default platform behavior) or execute some other fallback logic. The MIME types
+     * declared here allow different features to optionally alter their behavior. For example,
+     * the soft keyboard may choose to hide its UI for inserting GIFs for a particular input
+     * field if the MIME types set here for that field don't include "image/gif" or "image/*".
      *
-     * <p><em>Note: MIME type matching in the Android framework is case-sensitive, unlike formal RFC
-     * MIME types. As a result, you should always write your MIME types with lower case letters, or
-     * use {@link android.content.Intent#normalizeMimeType} to ensure that it is converted to lower
-     * case.</em>
+     * <p>Note: MIME type matching in the Android framework is case-sensitive, unlike formal RFC
+     * MIME types. As a result, you should always write your MIME types with lowercase letters,
+     * or use {@link android.content.Intent#normalizeMimeType} to ensure that it is converted to
+     * lowercase.
      *
-     * @param mimeTypes The type of content for which the callback should be invoked. This may use
-     * wildcards such as "text/*", "image/*", etc. This must not be null or empty if a non-null
-     * callback is passed in.
-     * @param callback The callback to use. This can be null to reset to the default behavior.
+     * @param mimeTypes The MIME types accepted by the given listener. These may use patterns
+     *                  such as "image/*", but may not start with a wildcard. This argument must
+     *                  not be null or empty if a non-null listener is passed in.
+     * @param listener The listener to use. This can be null to reset to the default behavior.
      */
     @SuppressWarnings("rawtypes")
-    public void setOnReceiveContentCallback(@Nullable String[] mimeTypes,
-            @Nullable OnReceiveContentCallback callback) {
-        if (callback != null) {
+    public void setOnReceiveContentListener(@Nullable String[] mimeTypes,
+            @Nullable OnReceiveContentListener listener) {
+        if (listener != null) {
             Preconditions.checkArgument(mimeTypes != null && mimeTypes.length > 0,
-                    "When the callback is set, MIME types must also be set");
+                    "When the listener is set, MIME types must also be set");
         }
-        mOnReceiveContentMimeTypes = mimeTypes;
-        mOnReceiveContentCallback = callback;
+        if (mimeTypes != null) {
+            Preconditions.checkArgument(Arrays.stream(mimeTypes).noneMatch(t -> t.startsWith("*")),
+                    "A MIME type set here must not start with *: " + Arrays.toString(mimeTypes));
+        }
+        mOnReceiveContentMimeTypes = ArrayUtils.isEmpty(mimeTypes) ? null : mimeTypes;
+        getListenerInfo().mOnReceiveContentListener = listener;
     }
 
     /**
-     * Receives the given content. The default implementation invokes the callback set via
-     * {@link #setOnReceiveContentCallback}. If no callback is set or if the callback does not
-     * support the given content (based on the MIME type), returns false.
+     * Receives the given content. Invokes the listener configured via
+     * {@link #setOnReceiveContentListener}; if no listener is set, the default implementation is a
+     * no-op (returns the passed-in content without acting on it).
      *
      * @param payload The content to insert and related metadata.
      *
-     * @return Returns true if the content was handled in some way, false otherwise. Actual
-     * insertion may be processed asynchronously in the background and may or may not succeed even
-     * if this method returns true. For example, an app may not end up inserting an item if it
-     * exceeds the app's size limit for that type of content.
+     * @return The portion of the passed-in content that was not accepted (may be all, some, or none
+     * of the passed-in content).
      */
-    public boolean onReceiveContent(@NonNull OnReceiveContentCallback.Payload payload) {
-        ClipDescription description = payload.getClip().getDescription();
-        if (mOnReceiveContentCallback != null && mOnReceiveContentMimeTypes != null
-                && description.hasMimeType(mOnReceiveContentMimeTypes)) {
-            return mOnReceiveContentCallback.onReceiveContent(this, payload);
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    public @Nullable Payload onReceiveContent(@NonNull Payload payload) {
+        final OnReceiveContentListener listener = (mListenerInfo == null) ? null
+                : getListenerInfo().mOnReceiveContentListener;
+        if (listener != null) {
+            return listener.onReceiveContent(this, payload);
         }
-        return false;
+        return payload;
     }
 
     /**
-     * Returns the MIME types that can be handled by {@link #onReceiveContent} for this view, as
-     * configured via {@link #setOnReceiveContentCallback}. By default returns null.
+     * Returns the MIME types accepted by {@link #onReceiveContent} for this view, as
+     * configured via {@link #setOnReceiveContentListener}. By default returns null.
      *
-     * <p>Different platform features (e.g. pasting from the clipboard, inserting stickers from the
-     * keyboard, etc) may use this function to conditionally alter their behavior. For example, the
-     * soft keyboard may choose to hide its UI for inserting GIFs for a particular input field if
-     * the MIME types returned here for that field don't include "image/gif".
+     * <p>Different features (e.g. pasting from the clipboard, inserting stickers from the soft
+     * keyboard, etc) may optionally use this metadata to conditionally alter their behavior. For
+     * example, a soft keyboard may choose to hide its UI for inserting GIFs for a particular
+     * input field if the MIME types returned here for that field don't include "image/gif" or
+     * "image/*".
      *
      * <p>Note: Comparisons of MIME types should be performed using utilities such as
      * {@link ClipDescription#compareMimeTypes} rather than simple string equality, in order to
-     * correctly handle patterns (e.g. "text/*").
+     * correctly handle patterns such as "text/*", "image/*", etc. Note that MIME type matching
+     * in the Android framework is case-sensitive, unlike formal RFC MIME types. As a result,
+     * you should always write your MIME types with lowercase letters, or use
+     * {@link android.content.Intent#normalizeMimeType} to ensure that it is converted to
+     * lowercase.
      *
-     * @return The MIME types supported by {@link #onReceiveContent} for this view. The returned
-     * MIME types may contain wildcards such as "text/*", "image/*", etc.
+     * @return The MIME types accepted by {@link #onReceiveContent} for this view (may
+     * include patterns such as "image/*").
      */
     public @Nullable String[] getOnReceiveContentMimeTypes() {
         return mOnReceiveContentMimeTypes;

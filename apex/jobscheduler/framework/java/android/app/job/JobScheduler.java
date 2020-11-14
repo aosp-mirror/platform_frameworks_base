@@ -169,6 +169,7 @@ public abstract class JobScheduler {
      * @param tag Debugging tag for dumps associated with this job (instead of the service class)
      * @hide
      */
+    @SuppressWarnings("HiddenAbstractMethod")
     @SystemApi
     @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS)
     public abstract @Result int scheduleAsPackage(@NonNull JobInfo job, @NonNull String packageName,
@@ -211,6 +212,7 @@ public abstract class JobScheduler {
      * Returns a list of all currently-executing jobs.
      * @hide
      */
+    @SuppressWarnings("HiddenAbstractMethod")
     public abstract List<JobInfo> getStartedJobs();
 
     /**
@@ -220,5 +222,6 @@ public abstract class JobScheduler {
      * <p class="note">This is a slow operation, so it should be called sparingly.
      * @hide
      */
+    @SuppressWarnings("HiddenAbstractMethod")
     public abstract List<JobSnapshot> getAllJobSnapshots();
 }

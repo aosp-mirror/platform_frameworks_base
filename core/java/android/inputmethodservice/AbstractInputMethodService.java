@@ -202,6 +202,7 @@ public abstract class AbstractInputMethodService extends Service
      * @param args The arguments passed to the dump method.
      * @hide
      */
+    @SuppressWarnings("HiddenAbstractMethod")
     abstract void dumpProtoInternal(FileDescriptor fd, String[] args);
 
     /**

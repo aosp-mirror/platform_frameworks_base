@@ -550,6 +550,7 @@ public class QSPanel extends LinearLayout implements Tunable {
         }
         boolean horizontal = shouldUseHorizontalLayout();
         ViewGroup host = mMediaHost.getHostView();
+
         ViewGroup newParent = horizontal ? mHorizontalLinearLayout : this;
         ViewGroup currentParent = (ViewGroup) host.getParent();
         if (currentParent != newParent) {
@@ -863,10 +864,6 @@ public class QSPanel extends LinearLayout implements Tunable {
             lp.setMarginEnd(end);
             view.setLayoutParams(lp);
         }
-    }
-
-    public MediaHost getMediaHost() {
-        return mMediaHost;
     }
 
     /**

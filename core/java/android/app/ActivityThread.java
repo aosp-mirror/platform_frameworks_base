@@ -381,6 +381,7 @@ public final class ActivityThread extends ClientTransactionHandler {
     String mInstrumentedAppDir = null;
     String[] mInstrumentedSplitAppDirs = null;
     String mInstrumentedLibDir = null;
+    boolean mInstrumentingWithoutRestart;
     boolean mSystemThread = false;
     boolean mSomeActivitiesChanged = false;
     /* package */ boolean mHiddenApiWarningShown = false;
@@ -1774,6 +1775,19 @@ public final class ActivityThread extends ClientTransactionHandler {
                 key.mLock.notifyAll();
             }
         }
+
+        @Override
+        public void instrumentWithoutRestart(ComponentName instrumentationName,
+                Bundle instrumentationArgs, IInstrumentationWatcher instrumentationWatcher,
+                IUiAutomationConnection instrumentationUiConnection, ApplicationInfo targetInfo) {
+            AppBindData data = new AppBindData();
+            data.instrumentationName = instrumentationName;
+            data.instrumentationArgs = instrumentationArgs;
+            data.instrumentationWatcher = instrumentationWatcher;
+            data.instrumentationUiAutomationConnection = instrumentationUiConnection;
+            data.appInfo = targetInfo;
+            sendMessage(H.INSTRUMENT_WITHOUT_RESTART, data);
+        }
     }
 
     private @NonNull SafeCancellationTransport createSafeCancellationTransport(
@@ -1879,6 +1893,9 @@ public final class ActivityThread extends ClientTransactionHandler {
         public static final int PURGE_RESOURCES = 161;
         public static final int ATTACH_STARTUP_AGENTS = 162;
 
+        public static final int INSTRUMENT_WITHOUT_RESTART = 170;
+        public static final int FINISH_INSTRUMENTATION_WITHOUT_RESTART = 171;
+
         String codeToString(int code) {
             if (DEBUG_MESSAGES) {
                 switch (code) {
@@ -1921,6 +1938,9 @@ public final class ActivityThread extends ClientTransactionHandler {
                     case RELAUNCH_ACTIVITY: return "RELAUNCH_ACTIVITY";
                     case PURGE_RESOURCES: return "PURGE_RESOURCES";
                     case ATTACH_STARTUP_AGENTS: return "ATTACH_STARTUP_AGENTS";
+                    case INSTRUMENT_WITHOUT_RESTART: return "INSTRUMENT_WITHOUT_RESTART";
+                    case FINISH_INSTRUMENTATION_WITHOUT_RESTART:
+                        return "FINISH_INSTRUMENTATION_WITHOUT_RESTART";
                 }
             }
             return Integer.toString(code);
@@ -2101,6 +2121,12 @@ public final class ActivityThread extends ClientTransactionHandler {
                     break;
                 case ATTACH_STARTUP_AGENTS:
                     handleAttachStartupAgents((String) msg.obj);
+                    break;
+                case INSTRUMENT_WITHOUT_RESTART:
+                    handleInstrumentWithoutRestart((AppBindData) msg.obj);
+                    break;
+                case FINISH_INSTRUMENTATION_WITHOUT_RESTART:
+                    handleFinishInstrumentationWithoutRestart();
                     break;
             }
             Object obj = msg.obj;
@@ -6500,32 +6526,7 @@ public final class ActivityThread extends ClientTransactionHandler {
         // setting up the app context.
         final InstrumentationInfo ii;
         if (data.instrumentationName != null) {
-            try {
-                ii = new ApplicationPackageManager(
-                        null, getPackageManager(), getPermissionManager())
-                        .getInstrumentationInfo(data.instrumentationName, 0);
-            } catch (PackageManager.NameNotFoundException e) {
-                throw new RuntimeException(
-                        "Unable to find instrumentation info for: " + data.instrumentationName);
-            }
-
-            // Warn of potential ABI mismatches.
-            if (!Objects.equals(data.appInfo.primaryCpuAbi, ii.primaryCpuAbi)
-                    || !Objects.equals(data.appInfo.secondaryCpuAbi, ii.secondaryCpuAbi)) {
-                Slog.w(TAG, "Package uses different ABI(s) than its instrumentation: "
-                        + "package[" + data.appInfo.packageName + "]: "
-                        + data.appInfo.primaryCpuAbi + ", " + data.appInfo.secondaryCpuAbi
-                        + " instrumentation[" + ii.packageName + "]: "
-                        + ii.primaryCpuAbi + ", " + ii.secondaryCpuAbi);
-            }
-
-            mInstrumentationPackageName = ii.packageName;
-            mInstrumentationAppDir = ii.sourceDir;
-            mInstrumentationSplitAppDirs = ii.splitSourceDirs;
-            mInstrumentationLibDir = getInstrumentationLibrary(data.appInfo, ii);
-            mInstrumentedAppDir = data.info.getAppDir();
-            mInstrumentedSplitAppDirs = data.info.getSplitAppDirs();
-            mInstrumentedLibDir = data.info.getLibDir();
+            ii = prepareInstrumentation(data);
         } else {
             ii = null;
         }
@@ -6554,48 +6555,7 @@ public final class ActivityThread extends ClientTransactionHandler {
 
         // Continue loading instrumentation.
         if (ii != null) {
-            ApplicationInfo instrApp;
-            try {
-                instrApp = getPackageManager().getApplicationInfo(ii.packageName, 0,
-                        UserHandle.myUserId());
-            } catch (RemoteException e) {
-                instrApp = null;
-            }
-            if (instrApp == null) {
-                instrApp = new ApplicationInfo();
-            }
-            ii.copyTo(instrApp);
-            instrApp.initForUser(UserHandle.myUserId());
-            final LoadedApk pi = getPackageInfo(instrApp, data.compatInfo,
-                    appContext.getClassLoader(), false, true, false);
-
-            // The test context's op package name == the target app's op package name, because
-            // the app ops manager checks the op package name against the real calling UID,
-            // which is what the target package name is associated with.
-            final ContextImpl instrContext = ContextImpl.createAppContext(this, pi,
-                    appContext.getOpPackageName());
-
-            try {
-                final ClassLoader cl = instrContext.getClassLoader();
-                mInstrumentation = (Instrumentation)
-                    cl.loadClass(data.instrumentationName.getClassName()).newInstance();
-            } catch (Exception e) {
-                throw new RuntimeException(
-                    "Unable to instantiate instrumentation "
-                    + data.instrumentationName + ": " + e.toString(), e);
-            }
-
-            final ComponentName component = new ComponentName(ii.packageName, ii.name);
-            mInstrumentation.init(this, instrContext, appContext, component,
-                    data.instrumentationWatcher, data.instrumentationUiAutomationConnection);
-
-            if (mProfiler.profileFile != null && !ii.handleProfiling
-                    && mProfiler.profileFd == null) {
-                mProfiler.handlingProfiling = true;
-                final File file = new File(mProfiler.profileFile);
-                file.getParentFile().mkdirs();
-                Debug.startMethodTracing(file.toString(), 8 * 1024 * 1024);
-            }
+            initInstrumentation(ii, data, appContext);
         } else {
             mInstrumentation = new Instrumentation();
             mInstrumentation.basicInit(this);
@@ -6686,6 +6646,120 @@ public final class ActivityThread extends ClientTransactionHandler {
         }
     }
 
+    private void handleInstrumentWithoutRestart(AppBindData data) {
+        try {
+            data.compatInfo = CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO;
+            data.info = getPackageInfoNoCheck(data.appInfo, data.compatInfo);
+            mInstrumentingWithoutRestart = true;
+            final InstrumentationInfo ii = prepareInstrumentation(data);
+            final ContextImpl appContext =
+                    ContextImpl.createAppContext(this, data.info);
+
+            initInstrumentation(ii, data, appContext);
+
+            try {
+                mInstrumentation.onCreate(data.instrumentationArgs);
+            } catch (Exception e) {
+                throw new RuntimeException(
+                        "Exception thrown in onCreate() of "
+                                + data.instrumentationName + ": " + e.toString(), e);
+            }
+
+        } catch (Exception e) {
+            Slog.e(TAG, "Error in handleInstrumentWithoutRestart", e);
+        }
+    }
+
+    private InstrumentationInfo prepareInstrumentation(AppBindData data) {
+        final InstrumentationInfo ii;
+        try {
+            ii = new ApplicationPackageManager(
+                    null, getPackageManager(), getPermissionManager())
+                    .getInstrumentationInfo(data.instrumentationName, 0);
+        } catch (PackageManager.NameNotFoundException e) {
+            throw new RuntimeException(
+                    "Unable to find instrumentation info for: " + data.instrumentationName);
+        }
+
+        // Warn of potential ABI mismatches.
+        if (!Objects.equals(data.appInfo.primaryCpuAbi, ii.primaryCpuAbi)
+                || !Objects.equals(data.appInfo.secondaryCpuAbi, ii.secondaryCpuAbi)) {
+            Slog.w(TAG, "Package uses different ABI(s) than its instrumentation: "
+                    + "package[" + data.appInfo.packageName + "]: "
+                    + data.appInfo.primaryCpuAbi + ", " + data.appInfo.secondaryCpuAbi
+                    + " instrumentation[" + ii.packageName + "]: "
+                    + ii.primaryCpuAbi + ", " + ii.secondaryCpuAbi);
+        }
+
+        mInstrumentationPackageName = ii.packageName;
+        mInstrumentationAppDir = ii.sourceDir;
+        mInstrumentationSplitAppDirs = ii.splitSourceDirs;
+        mInstrumentationLibDir = getInstrumentationLibrary(data.appInfo, ii);
+        mInstrumentedAppDir = data.info.getAppDir();
+        mInstrumentedSplitAppDirs = data.info.getSplitAppDirs();
+        mInstrumentedLibDir = data.info.getLibDir();
+
+        return ii;
+    }
+
+    private void initInstrumentation(
+            InstrumentationInfo ii, AppBindData data, ContextImpl appContext) {
+        ApplicationInfo instrApp;
+        try {
+            instrApp = getPackageManager().getApplicationInfo(ii.packageName, 0,
+                    UserHandle.myUserId());
+        } catch (RemoteException e) {
+            instrApp = null;
+        }
+        if (instrApp == null) {
+            instrApp = new ApplicationInfo();
+        }
+        ii.copyTo(instrApp);
+        instrApp.initForUser(UserHandle.myUserId());
+        final LoadedApk pi = getPackageInfo(instrApp, data.compatInfo,
+                appContext.getClassLoader(), false, true, false);
+
+        // The test context's op package name == the target app's op package name, because
+        // the app ops manager checks the op package name against the real calling UID,
+        // which is what the target package name is associated with.
+        final ContextImpl instrContext = ContextImpl.createAppContext(this, pi,
+                appContext.getOpPackageName());
+
+        try {
+            final ClassLoader cl = instrContext.getClassLoader();
+            mInstrumentation = (Instrumentation)
+                    cl.loadClass(data.instrumentationName.getClassName()).newInstance();
+        } catch (Exception e) {
+            throw new RuntimeException(
+                    "Unable to instantiate instrumentation "
+                            + data.instrumentationName + ": " + e.toString(), e);
+        }
+
+        final ComponentName component = new ComponentName(ii.packageName, ii.name);
+        mInstrumentation.init(this, instrContext, appContext, component,
+                data.instrumentationWatcher, data.instrumentationUiAutomationConnection);
+
+        if (mProfiler.profileFile != null && !ii.handleProfiling
+                && mProfiler.profileFd == null) {
+            mProfiler.handlingProfiling = true;
+            final File file = new File(mProfiler.profileFile);
+            file.getParentFile().mkdirs();
+            Debug.startMethodTracing(file.toString(), 8 * 1024 * 1024);
+        }
+    }
+
+    private void handleFinishInstrumentationWithoutRestart() {
+        mInstrumentation.onDestroy();
+        mInstrumentationPackageName = null;
+        mInstrumentationAppDir = null;
+        mInstrumentationSplitAppDirs = null;
+        mInstrumentationLibDir = null;
+        mInstrumentedAppDir = null;
+        mInstrumentedSplitAppDirs = null;
+        mInstrumentedLibDir = null;
+        mInstrumentingWithoutRestart = false;
+    }
+
     /*package*/ final void finishInstrumentation(int resultCode, Bundle results) {
         IActivityManager am = ActivityManager.getService();
         if (mProfiler.profileFile != null && mProfiler.handlingProfiling
@@ -6698,6 +6772,9 @@ public final class ActivityThread extends ClientTransactionHandler {
             am.finishInstrumentation(mAppThread, resultCode, results);
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
+        }
+        if (mInstrumentingWithoutRestart) {
+            sendMessage(H.FINISH_INSTRUMENTATION_WITHOUT_RESTART, null);
         }
     }
 

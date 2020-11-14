@@ -30,6 +30,8 @@ import com.android.server.wm.flicker.FlickerTestRunner
 import com.android.server.wm.flicker.FlickerTestRunnerFactory
 import com.android.server.wm.flicker.endRotation
 import com.android.server.wm.flicker.focusDoesNotChange
+import com.android.server.wm.flicker.windowAlwaysVisible
+import com.android.server.wm.flicker.layerAlwaysVisible
 import com.android.server.wm.flicker.helpers.WindowUtils
 import com.android.server.wm.flicker.helpers.buildTestTag
 import com.android.server.wm.flicker.helpers.setRotation
@@ -39,6 +41,8 @@ import com.android.server.wm.flicker.navBarLayerIsAlwaysVisible
 import com.android.server.wm.flicker.navBarLayerRotatesAndScales
 import com.android.server.wm.flicker.navBarWindowIsAlwaysVisible
 import com.android.server.wm.flicker.noUncoveredRegions
+import com.android.server.wm.flicker.visibleWindowsShownMoreThanOneConsecutiveEntry
+import com.android.server.wm.flicker.visibleLayersShownMoreThanOneConsecutiveEntry
 import com.android.server.wm.flicker.repetitions
 import com.android.server.wm.flicker.startRotation
 import com.android.server.wm.flicker.statusBarLayerIsAlwaysVisible
@@ -141,6 +145,8 @@ class SeamlessAppRotationTest(
                     windowManagerTrace {
                         navBarWindowIsAlwaysVisible(bugId = 140855415)
                         statusBarWindowIsAlwaysVisible(bugId = 140855415)
+                        visibleWindowsShownMoreThanOneConsecutiveEntry()
+                        windowAlwaysVisible(configuration.intentPackageName)
                     }
 
                     layersTrace {
@@ -152,6 +158,9 @@ class SeamlessAppRotationTest(
                             configuration.endRotation)
                         statusBarLayerRotatesScales(configuration.startRotation,
                             configuration.endRotation, enabled = false)
+                        visibleLayersShownMoreThanOneConsecutiveEntry(
+                                enabled = configuration.startRotation == configuration.endRotation)
+                        layerAlwaysVisible(configuration.intentPackageName)
                     }
 
                     layersTrace {

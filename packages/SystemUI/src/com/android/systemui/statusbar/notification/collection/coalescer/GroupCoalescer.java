@@ -19,6 +19,8 @@ package com.android.systemui.statusbar.notification.collection.coalescer;
 import static java.util.Objects.requireNonNull;
 
 import android.annotation.MainThread;
+import android.app.NotificationChannel;
+import android.os.UserHandle;
 import android.service.notification.NotificationListenerService.Ranking;
 import android.service.notification.NotificationListenerService.RankingMap;
 import android.service.notification.StatusBarNotification;
@@ -157,6 +159,15 @@ public class GroupCoalescer implements Dumpable {
         @Override
         public void onNotificationsInitialized() {
             mHandler.onNotificationsInitialized();
+        }
+
+        @Override
+        public void onNotificationChannelModified(
+                String pkgName,
+                UserHandle user,
+                NotificationChannel channel,
+                int modificationType) {
+            mHandler.onNotificationChannelModified(pkgName, user, channel, modificationType);
         }
     };
 

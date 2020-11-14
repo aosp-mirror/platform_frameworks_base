@@ -89,7 +89,7 @@
     <string name="screenshot_edit_label" msgid="8754981973544133050">"Editatu"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"Editatu pantaila-argazkia"</string>
     <string name="screenshot_scroll_label" msgid="7682877978685434621">"Egin gora eta behera"</string>
-    <string name="screenshot_scroll_description" msgid="7855773867093272175">"Pantaila-kaptura etengabea"</string>
+    <string name="screenshot_scroll_description" msgid="7855773867093272175">"Pantaila-argazki etengabea"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Baztertu pantaila-argazkia"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Pantaila-argazkiaren aurrebista"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Pantaila-grabagailua"</string>

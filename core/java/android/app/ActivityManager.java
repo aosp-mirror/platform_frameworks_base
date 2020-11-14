@@ -173,6 +173,12 @@ public class ActivityManager {
      */
     public static final int INSTR_FLAG_DISABLE_TEST_API_CHECKS = 1 << 2;
 
+    /**
+     * Do not restart the target process when starting or finishing instrumentation.
+     * @hide
+     */
+    public static final int INSTR_FLAG_NO_RESTART = 1 << 3;
+
     static final class UidObserver extends IUidObserver.Stub {
         final OnUidImportanceListener mListener;
         final Context mContext;

@@ -79,6 +79,16 @@ fun WmAssertion.wallpaperWindowBecomesVisible(
     }
 }
 
+fun WmAssertion.windowAlwaysVisible(
+    packageName: String,
+    bugId: Int = 0,
+    enabled: Boolean = bugId == 0
+) {
+    all("windowAlwaysVisible", bugId, enabled) {
+        this.showsAppWindowOnTop(packageName)
+    }
+}
+
 @JvmOverloads
 fun LayersAssertion.noUncoveredRegions(
     beginRotation: Int,
@@ -211,6 +221,16 @@ fun LayersAssertion.wallpaperLayerReplacesAppLayer(
         this.showsLayer(testApp.getPackage())
                 .then()
                 .replaceVisibleLayer(testApp.getPackage(), WALLPAPER_TITLE)
+    }
+}
+
+fun LayersAssertion.layerAlwaysVisible(
+    packageName: String,
+    bugId: Int = 0,
+    enabled: Boolean = bugId == 0
+) {
+    all("layerAlwaysVisible", bugId, enabled) {
+        this.showsLayer(packageName)
     }
 }
 

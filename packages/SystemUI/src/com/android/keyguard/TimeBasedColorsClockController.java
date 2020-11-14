@@ -71,12 +71,10 @@ public class TimeBasedColorsClockController extends ViewController<GradientTextC
     public void setDarkAmount(float darkAmount) {
         mDarkAmount = darkAmount;
 
-        // TODO: (b/170228350) currently this relayouts throughout the animation;
-        //  eventually this should use new Text APIs to animate the variable font weight
         refreshTime(System.currentTimeMillis());
 
         int weight = (int) MathUtils.lerp(200, 400, 1f - darkAmount);
-        mView.setFontVariationSettings("'wght' " + weight);
+        mView.setTextStyle(weight, -1 /* unchange text size */, true);
     }
 
     private int getTimeIndex(long timeInMillis) {

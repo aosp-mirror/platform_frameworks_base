@@ -88,8 +88,8 @@
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"La aplicación o tu organización no permiten realizar capturas de pantalla"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"Editar"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"Editar captura de pantalla"</string>
-    <string name="screenshot_scroll_label" msgid="7682877978685434621">"Desplazarse"</string>
-    <string name="screenshot_scroll_description" msgid="7855773867093272175">"Desplazarse por la captura de pantalla"</string>
+    <string name="screenshot_scroll_label" msgid="7682877978685434621">"Pantalla continua"</string>
+    <string name="screenshot_scroll_description" msgid="7855773867093272175">"Hacer captura de pantalla continua"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Cerrar captura de pantalla"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Vista previa de captura de pantalla"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Grabación de pantalla"</string>

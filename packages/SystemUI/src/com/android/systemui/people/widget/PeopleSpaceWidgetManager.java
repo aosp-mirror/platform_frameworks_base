@@ -16,9 +16,11 @@
 
 package com.android.systemui.people.widget;
 
+import android.app.NotificationChannel;
 import android.content.ComponentName;
 import android.content.Context;
 import android.os.ServiceManager;
+import android.os.UserHandle;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 import android.util.Log;
@@ -129,6 +131,18 @@ public class PeopleSpaceWidgetManager {
         public void onNotificationsInitialized() {
             if (DEBUG) Log.d(TAG, "onNotificationsInitialized");
             updateWidgets();
+        }
+
+        @Override
+        public void onNotificationChannelModified(
+                String pkgName,
+                UserHandle user,
+                NotificationChannel channel,
+                int modificationType) {
+            if (DEBUG) Log.d(TAG, "onNotificationChannelModified");
+            if (channel.isConversation()) {
+                updateWidgets();
+            }
         }
     };
 

@@ -2415,4 +2415,13 @@ public class WifiManagerTest {
         assertFalse(mWifiManager.isScanAlwaysAvailable());
         verify(mWifiService).isScanAlwaysAvailable();
     }
+
+    @Test
+    public void testGetNetworkSuggestionUserApprovalStatus() throws Exception {
+        when(mWifiService.getNetworkSuggestionUserApprovalStatus(TEST_PACKAGE_NAME))
+                .thenReturn(WifiManager.STATUS_SUGGESTION_APPROVAL_APPROVED_BY_USER);
+        assertEquals(WifiManager.STATUS_SUGGESTION_APPROVAL_APPROVED_BY_USER,
+                mWifiManager.getNetworkSuggestionUserApprovalStatus());
+        verify(mWifiService).getNetworkSuggestionUserApprovalStatus(TEST_PACKAGE_NAME);
+    }
 }
