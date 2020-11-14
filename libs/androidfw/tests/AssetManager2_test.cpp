@@ -446,9 +446,6 @@ TEST_F(AssetManager2Test, KeepLastReferenceIdUnmodifiedIfNoReferenceIsResolved) 
   AssetManager2 assetmanager;
   assetmanager.SetApkAssets({basic_assets_.get()});
 
-  ResTable_config selected_config;
-  memset(&selected_config, 0, sizeof(selected_config));
-
   // Create some kind of value that is NOT a reference.
   AssetManager2::SelectedValue value{};
   value.cookie = 1;
@@ -459,6 +456,41 @@ TEST_F(AssetManager2Test, KeepLastReferenceIdUnmodifiedIfNoReferenceIsResolved) 
   ASSERT_TRUE(result.has_value());
   EXPECT_EQ(1, value.cookie);
   EXPECT_EQ(basic::R::string::test1, value.resid);
+}
+
+TEST_F(AssetManager2Test, ResolveReferenceMissingResource) {
+  AssetManager2 assetmanager;
+  assetmanager.SetApkAssets({basic_assets_.get()});
+
+  const uint32_t kMissingResId = 0x8001ffff;
+  AssetManager2::SelectedValue value{};
+  value.type = Res_value::TYPE_REFERENCE;
+  value.data = kMissingResId;
+
+  auto result = assetmanager.ResolveReference(value);
+  ASSERT_FALSE(result.has_value());
+  EXPECT_EQ(Res_value::TYPE_REFERENCE, value.type);
+  EXPECT_EQ(kMissingResId, value.data);
+  EXPECT_EQ(kMissingResId, value.resid);
+  EXPECT_EQ(-1, value.cookie);
+  EXPECT_EQ(0, value.flags);
+}
+
+TEST_F(AssetManager2Test, ResolveReferenceMissingResourceLib) {
+  AssetManager2 assetmanager;
+  assetmanager.SetApkAssets({libclient_assets_.get()});
+
+  AssetManager2::SelectedValue value{};
+  value.type = Res_value::TYPE_REFERENCE;
+  value.data = libclient::R::string::foo_one;
+
+  auto result = assetmanager.ResolveReference(value);
+  ASSERT_TRUE(result.has_value());
+  EXPECT_EQ(Res_value::TYPE_DYNAMIC_REFERENCE, value.type);
+  EXPECT_EQ(lib_one::R::string::foo, value.data);
+  EXPECT_EQ(libclient::R::string::foo_one, value.resid);
+  EXPECT_EQ(0, value.cookie);
+  EXPECT_EQ(static_cast<uint32_t>(ResTable_typeSpec::SPEC_PUBLIC), value.flags);
 }
 
 static bool IsConfigurationPresent(const std::set<ResTable_config>& configurations,
