@@ -18,13 +18,13 @@ package com.google.errorprone.bugpatterns.android;
 
 import static com.google.errorprone.BugPattern.SeverityLevel.WARNING;
 import static com.google.errorprone.bugpatterns.android.TargetSdkChecker.binaryTreeExact;
-import static com.google.errorprone.matchers.FieldMatchers.anyFieldInClass;
-import static com.google.errorprone.matchers.FieldMatchers.staticField;
 import static com.google.errorprone.matchers.Matchers.allOf;
 import static com.google.errorprone.matchers.Matchers.anyOf;
 import static com.google.errorprone.matchers.Matchers.anything;
 import static com.google.errorprone.matchers.Matchers.kindIs;
 import static com.google.errorprone.matchers.Matchers.not;
+import static com.google.errorprone.matchers.android.FieldMatchers.anyFieldInClass;
+import static com.google.errorprone.matchers.android.FieldMatchers.staticField;
 
 import com.google.auto.service.AutoService;
 import com.google.errorprone.BugPattern;
