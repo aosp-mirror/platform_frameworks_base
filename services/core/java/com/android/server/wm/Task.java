@@ -5888,7 +5888,21 @@ class Task extends WindowContainer<WindowContainer> {
         try {
             // Protect against recursion.
             mInResumeTopActivity = true;
-            result = resumeTopActivityInnerLocked(prev, options);
+
+            // TODO(b/172885410): Allow the top activities of all visible leaf tasks to be resumed
+            if (mCreatedByOrganizer && !isLeafTask()
+                    && getConfiguration().windowConfiguration.getWindowingMode()
+                            == WINDOWING_MODE_FULLSCREEN) {
+                for (int i = mChildren.size() - 1; i >= 0; i--) {
+                    final Task child = (Task) getChildAt(i);
+                    if (!child.shouldBeVisible(null /* starting */)) {
+                        break;
+                    }
+                    result |= child.resumeTopActivityUncheckedLocked(prev, options);
+                }
+            } else {
+                result = resumeTopActivityInnerLocked(prev, options);
+            }
 
             // When resuming the top activity, it may be necessary to pause the top activity (for
             // example, returning to the lock screen. We suppress the normal pause logic in

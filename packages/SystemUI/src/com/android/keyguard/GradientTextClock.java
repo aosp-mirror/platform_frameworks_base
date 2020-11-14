@@ -16,11 +16,16 @@
 
 package com.android.keyguard;
 
+import android.annotation.FloatRange;
+import android.annotation.IntRange;
 import android.content.Context;
+import android.graphics.Canvas;
 import android.graphics.LinearGradient;
 import android.graphics.Shader;
 import android.util.AttributeSet;
 import android.widget.TextClock;
+
+import kotlin.Unit;
 
 /**
  * Displays the time with the hour positioned above the minutes. (ie: 09 above 30 is 9:30)
@@ -29,6 +34,8 @@ import android.widget.TextClock;
 public class GradientTextClock extends TextClock {
     private int[] mGradientColors;
     private float[] mPositions;
+
+    private TextAnimator mTextAnimator = null;
 
     public GradientTextClock(Context context) {
         this(context, null, 0, 0);
@@ -74,6 +81,24 @@ public class GradientTextClock extends TextClock {
         super.setFormat24Hour(FORMAT_24);
     }
 
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        if (mTextAnimator == null) {
+            mTextAnimator = new TextAnimator(getLayout(), () -> {
+                invalidate();
+                return Unit.INSTANCE;
+            });
+        } else {
+            mTextAnimator.updateLayout(getLayout());
+        }
+    }
+
+    @Override
+    protected void onDraw(Canvas canvas) {
+        mTextAnimator.draw(canvas);
+    }
+
     public void setGradientColors(int[] colors) {
         mGradientColors = colors;
         updatePaint();
@@ -83,11 +108,33 @@ public class GradientTextClock extends TextClock {
         mPositions = positions;
     }
 
+    /**
+     * Set text style with animation.
+     *
+     * By passing -1 to weight, the view preserve the current weight.
+     * By passing -1 to textSize, the view preserve the current text size.
+     *
+     * @param weight text weight.
+     * @param textSize font size.
+     * @param animate true for changing text style with animation, otherwise false.
+     */
+    public void setTextStyle(
+            @IntRange(from = 0, to = 1000) int weight,
+            @FloatRange(from = 0) float textSize,
+            boolean animate) {
+        if (mTextAnimator != null) {
+            mTextAnimator.setTextStyle(weight, textSize, animate, -1, null);
+        }
+    }
+
     private void updatePaint() {
-        getPaint().setShader(
-                new LinearGradient(
-                        getX(), getY(), getX(), getMeasuredHeight() + getY(),
-                        mGradientColors, mPositions, Shader.TileMode.REPEAT));
+        Shader shader = new LinearGradient(
+                getX(), getY(), getX(), getMeasuredHeight() + getY(), mGradientColors, mPositions,
+                Shader.TileMode.REPEAT);
+        getPaint().setShader(shader);
+        if (mTextAnimator != null) {
+            mTextAnimator.setShader(shader);
+        }
     }
 
     private final OnLayoutChangeListener mOnLayoutChangeListener =

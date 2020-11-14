@@ -27,6 +27,8 @@ import android.telecom.TelecomManager;
 import android.telephony.ims.ImsCallProfile;
 import android.telephony.ims.ImsCallSession;
 import android.telephony.ims.ImsReasonInfo;
+import android.telephony.ims.ImsService;
+import android.telephony.ims.RtpHeaderExtensionType;
 import android.telephony.ims.aidl.IImsCapabilityCallback;
 import android.telephony.ims.aidl.IImsMmTelFeature;
 import android.telephony.ims.aidl.IImsMmTelListener;
@@ -37,6 +39,7 @@ import android.telephony.ims.stub.ImsMultiEndpointImplBase;
 import android.telephony.ims.stub.ImsRegistrationImplBase;
 import android.telephony.ims.stub.ImsSmsImplBase;
 import android.telephony.ims.stub.ImsUtImplBase;
+import android.util.ArraySet;
 
 import com.android.ims.internal.IImsCallSession;
 import com.android.ims.internal.IImsEcbm;
@@ -45,6 +48,8 @@ import com.android.ims.internal.IImsUt;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Base implementation for Voice and SMS (IR-92) and Video (IR-94) IMS support.
@@ -86,6 +91,18 @@ public class MmTelFeature extends ImsFeature {
             synchronized (mLock) {
                 try {
                     return MmTelFeature.this.createCallProfile(callSessionType, callType);
+                } catch (Exception e) {
+                    throw new RemoteException(e.getMessage());
+                }
+            }
+        }
+
+        @Override
+        public void changeOfferedRtpHeaderExtensionTypes(List<RtpHeaderExtensionType> types)
+                throws RemoteException {
+            synchronized (mLock) {
+                try {
+                    MmTelFeature.this.changeOfferedRtpHeaderExtensionTypes(new ArraySet<>(types));
                 } catch (Exception e) {
                     throw new RemoteException(e.getMessage());
                 }
@@ -620,6 +637,24 @@ public class MmTelFeature extends ImsFeature {
     public @Nullable ImsCallProfile createCallProfile(int callSessionType, int callType) {
         // Base Implementation - Should be overridden
         return null;
+    }
+
+    /**
+     * Called by the framework to report a change to the RTP header extension types which should be
+     * offered during SDP negotiation (see RFC8285 for more information).
+     * <p>
+     * The {@link ImsService} should report the RTP header extensions which were accepted during
+     * SDP negotiation using {@link ImsCallProfile#setAcceptedRtpHeaderExtensionTypes(Set)}.
+     *
+     * @param extensionTypes The RTP header extensions the framework wishes to offer during
+     *                       outgoing and incoming call setup.  An empty list indicates that there
+     *                       are no framework defined RTP header extension types to offer.
+     * @hide
+     */
+    @SystemApi
+    public void changeOfferedRtpHeaderExtensionTypes(
+            @NonNull Set<RtpHeaderExtensionType> extensionTypes) {
+        // Base implementation - should be overridden if RTP header extension handling is supported.
     }
 
     /**

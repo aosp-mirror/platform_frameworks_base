@@ -86,16 +86,11 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"स्क्रीनशॉट पुन्हा घेण्याचा प्रयत्न करा"</string>
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"मर्यादित स्टोरेज जागेमुळे स्क्रीनशॉट सेव्ह करू शकत नाही"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"अ‍ॅप किंवा आपल्या संस्थेद्वारे स्क्रीनशॉट घेण्याची अनुमती नाही"</string>
-    <!-- no translation found for screenshot_edit_label (8754981973544133050) -->
-    <skip />
-    <!-- no translation found for screenshot_edit_description (3333092254706788906) -->
-    <skip />
-    <!-- no translation found for screenshot_scroll_label (7682877978685434621) -->
-    <skip />
-    <!-- no translation found for screenshot_scroll_description (7855773867093272175) -->
-    <skip />
-    <!-- no translation found for screenshot_dismiss_description (4702341245899508786) -->
-    <skip />
+    <string name="screenshot_edit_label" msgid="8754981973544133050">"संपादित करा"</string>
+    <string name="screenshot_edit_description" msgid="3333092254706788906">"स्क्रीनशॉट संपादित करा"</string>
+    <string name="screenshot_scroll_label" msgid="7682877978685434621">"स्क्रोल करा"</string>
+    <string name="screenshot_scroll_description" msgid="7855773867093272175">"स्क्रीनशॉटवर स्क्रोल करा"</string>
+    <string name="screenshot_dismiss_description" msgid="4702341245899508786">"स्क्रीनशॉट डिसमिस करा"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"स्क्रीनशॉटचे पूर्वावलोकन"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"स्क्रीन रेकॉर्डर"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"स्क्रीन रेकॉर्डिंग प्रोसेस सुरू"</string>

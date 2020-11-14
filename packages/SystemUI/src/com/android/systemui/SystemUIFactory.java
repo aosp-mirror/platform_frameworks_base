@@ -110,7 +110,8 @@ public class SystemUIFactory {
                     .setOneHanded(mWMComponent.getOneHanded())
                     .setBubbles(mWMComponent.getBubbles())
                     .setHideDisplayCutout(mWMComponent.getHideDisplayCutout())
-                    .setShellDump(mWMComponent.getShellDump());
+                    .setShellDump(mWMComponent.getShellDump())
+                    .setAppPairs(mWMComponent.getAppPairs());
         } else {
             // TODO: Call on prepareSysUIComponentBuilder but not with real components.
             builder = builder.setPip(Optional.ofNullable(null))
@@ -118,7 +119,8 @@ public class SystemUIFactory {
                     .setOneHanded(Optional.ofNullable(null))
                     .setBubbles(Optional.ofNullable(null))
                     .setHideDisplayCutout(Optional.ofNullable(null))
-                    .setShellDump(Optional.ofNullable(null));
+                    .setShellDump(Optional.ofNullable(null))
+                    .setAppPairs(Optional.ofNullable(null));
         }
         mSysUIComponent = builder.build();
         if (initializeComponents) {

@@ -16,6 +16,8 @@
 
 package com.android.systemui.people.widget;
 
+import static android.app.NotificationManager.IMPORTANCE_HIGH;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
@@ -26,8 +28,10 @@ import static org.mockito.Mockito.when;
 
 import static java.util.Objects.requireNonNull;
 
+import android.app.NotificationChannel;
 import android.content.Context;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.testing.AndroidTestingRunner;
 
 import androidx.test.filters.SmallTest;
@@ -56,6 +60,10 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
 
     private static final String TEST_PACKAGE_A = "com.test.package_a";
     private static final String TEST_PACKAGE_B = "com.test.package_b";
+    private static final String TEST_CHANNEL_ID = "channel_id";
+    private static final String TEST_CHANNEL_NAME = "channel_name";
+    private static final String TEST_PARENT_CHANNEL_ID = "parent_channel_id";
+    private static final String TEST_CONVERSATION_ID = "conversation_id";
 
     private PeopleSpaceWidgetManager mManager;
 
@@ -100,7 +108,7 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testNotifyAppWidgetIfWidgets() throws RemoteException {
+    public void testNotifyAppWidgetIfNotificationPosted() throws RemoteException {
         int[] widgetIdsArray = {1};
         when(mIAppWidgetService.getAppWidgetIds(any())).thenReturn(widgetIdsArray);
 
@@ -117,7 +125,7 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testNotifyAppWidgetTwiceIfTwoNotifications() throws RemoteException {
+    public void testNotifyAppWidgetTwiceIfTwoNotificationsPosted() throws RemoteException {
         int[] widgetIdsArray = {1, 2};
         when(mIAppWidgetService.getAppWidgetIds(any())).thenReturn(widgetIdsArray);
 
@@ -148,5 +156,41 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
         verify(mIAppWidgetService, times(2)).getAppWidgetIds(any());
         verify(mIAppWidgetService, times(2))
                 .notifyAppWidgetViewDataChanged(any(), eq(widgetIdsArray), anyInt());
+    }
+
+    @Test
+    public void testDoNotNotifyAppWidgetIfNonConversationChannelModified() throws RemoteException {
+        int[] widgetIdsArray = {1};
+        when(mIAppWidgetService.getAppWidgetIds(any())).thenReturn(widgetIdsArray);
+
+        NotificationChannel channel =
+                mNoMan.createNotificationChannel(TEST_CHANNEL_ID, TEST_CHANNEL_NAME);
+
+        mNoMan.issueChannelModification(TEST_PACKAGE_A,
+                UserHandle.getUserHandleForUid(0), channel, IMPORTANCE_HIGH);
+        mClock.advanceTime(MIN_LINGER_DURATION);
+
+        verify(mIAppWidgetService, never()).getAppWidgetIds(any());
+        verify(mIAppWidgetService, never()).notifyAppWidgetViewDataChanged(any(), any(), anyInt());
+
+    }
+
+    @Test
+    public void testNotifyAppWidgetIfConversationChannelModified() throws RemoteException {
+        int[] widgetIdsArray = {1};
+        when(mIAppWidgetService.getAppWidgetIds(any())).thenReturn(widgetIdsArray);
+
+        NotificationChannel channel =
+                mNoMan.createNotificationChannel(TEST_CHANNEL_ID, TEST_CHANNEL_NAME);
+        channel.setConversationId(TEST_PARENT_CHANNEL_ID, TEST_CONVERSATION_ID);
+
+        mNoMan.issueChannelModification(TEST_PACKAGE_A,
+                UserHandle.getUserHandleForUid(0), channel, IMPORTANCE_HIGH);
+        mClock.advanceTime(MIN_LINGER_DURATION);
+
+        verify(mIAppWidgetService, times(1)).getAppWidgetIds(any());
+        verify(mIAppWidgetService, times(1))
+                .notifyAppWidgetViewDataChanged(any(), eq(widgetIdsArray), anyInt());
+
     }
 }

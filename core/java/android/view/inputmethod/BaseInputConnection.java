@@ -16,7 +16,7 @@
 
 package android.view.inputmethod;
 
-import static android.view.OnReceiveContentCallback.Payload.SOURCE_INPUT_METHOD;
+import static android.view.OnReceiveContentListener.Payload.SOURCE_INPUT_METHOD;
 
 import android.annotation.CallSuper;
 import android.annotation.IntRange;
@@ -40,7 +40,7 @@ import android.util.Log;
 import android.util.LogPrinter;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
-import android.view.OnReceiveContentCallback;
+import android.view.OnReceiveContentListener;
 import android.view.View;
 
 class ComposingText implements NoCopySpan {
@@ -928,17 +928,14 @@ public class BaseInputConnection implements InputConnection {
 
     /**
      * Default implementation which invokes {@link View#onReceiveContent} on the target view if the
-     * MIME type of the content matches one of the MIME types returned by
-     * {@link View#getOnReceiveContentMimeTypes()}. If the MIME type of the content is not matched,
-     * returns false without any side effects.
+     * view {@link View#getOnReceiveContentMimeTypes allows} content insertion; otherwise returns
+     * false without any side effects.
      */
     public boolean commitContent(InputContentInfo inputContentInfo, int flags, Bundle opts) {
         ClipDescription description = inputContentInfo.getDescription();
-        final String[] viewMimeTypes = mTargetView.getOnReceiveContentMimeTypes();
-        if (viewMimeTypes == null || !description.hasMimeType(viewMimeTypes)) {
+        if (mTargetView.getOnReceiveContentMimeTypes() == null) {
             if (DEBUG) {
-                Log.d(TAG, "Can't insert content from IME; unsupported MIME type: content="
-                        + description + ", viewMimeTypes=" + viewMimeTypes);
+                Log.d(TAG, "Can't insert content from IME: content=" + description);
             }
             return false;
         }
@@ -950,13 +947,13 @@ public class BaseInputConnection implements InputConnection {
                 return false;
             }
         }
-        final ClipData clip = new ClipData(description,
+        final ClipData clip = new ClipData(inputContentInfo.getDescription(),
                 new ClipData.Item(inputContentInfo.getContentUri()));
-        final OnReceiveContentCallback.Payload payload =
-                new OnReceiveContentCallback.Payload.Builder(clip, SOURCE_INPUT_METHOD)
+        final OnReceiveContentListener.Payload payload =
+                new OnReceiveContentListener.Payload.Builder(clip, SOURCE_INPUT_METHOD)
                 .setLinkUri(inputContentInfo.getLinkUri())
                 .setExtras(opts)
                 .build();
-        return mTargetView.onReceiveContent(payload);
+        return mTargetView.onReceiveContent(payload) == null;
     }
 }

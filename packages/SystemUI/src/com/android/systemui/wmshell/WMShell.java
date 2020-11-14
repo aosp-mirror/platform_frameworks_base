@@ -53,6 +53,7 @@ import com.android.systemui.statusbar.policy.UserInfoController;
 import com.android.systemui.tracing.ProtoTracer;
 import com.android.systemui.tracing.nano.SystemUiTraceProto;
 import com.android.wm.shell.ShellDump;
+import com.android.wm.shell.apppairs.AppPairs;
 import com.android.wm.shell.hidedisplaycutout.HideDisplayCutout;
 import com.android.wm.shell.nano.WmShellTraceProto;
 import com.android.wm.shell.onehanded.OneHanded;
@@ -98,6 +99,7 @@ public final class WMShell extends SystemUI
     private final Optional<HideDisplayCutout> mHideDisplayCutoutOptional;
     private final ProtoTracer mProtoTracer;
     private final Optional<ShellDump> mShellDump;
+    private final Optional<AppPairs> mAppPairsOptional;
 
     private boolean mIsSysUiStateValid;
     private KeyguardUpdateMonitorCallback mSplitScreenKeyguardCallback;
@@ -116,7 +118,8 @@ public final class WMShell extends SystemUI
             Optional<OneHanded> oneHandedOptional,
             Optional<HideDisplayCutout> hideDisplayCutoutOptional,
             ProtoTracer protoTracer,
-            Optional<ShellDump> shellDump) {
+            Optional<ShellDump> shellDump,
+            Optional<AppPairs> appPairsOptional) {
         super(context);
         mCommandQueue = commandQueue;
         mConfigurationController = configurationController;
@@ -131,6 +134,7 @@ public final class WMShell extends SystemUI
         mProtoTracer = protoTracer;
         mProtoTracer.add(this);
         mShellDump = shellDump;
+        mAppPairsOptional = appPairsOptional;
     }
 
     @Override
@@ -333,6 +337,21 @@ public final class WMShell extends SystemUI
                     if (result == 0) {
                         pw.println("Stopping logging on groups: " + Arrays.toString(groups));
                     }
+                    return true;
+                }
+
+                case "pair": {
+                    String[] groups = Arrays.copyOfRange(args, i + 1, args.length);
+                    final int taskId1 = new Integer(groups[0]);
+                    final int taskId2 = new Integer(groups[1]);
+                    mAppPairsOptional.ifPresent(appPairs -> appPairs.pair(taskId1, taskId2));
+                    return true;
+                }
+
+                case "unpair": {
+                    String[] groups = Arrays.copyOfRange(args, i + 1, args.length);
+                    final int taskId = new Integer(groups[0]);
+                    mAppPairsOptional.ifPresent(appPairs -> appPairs.unpair(taskId));
                     return true;
                 }
             }

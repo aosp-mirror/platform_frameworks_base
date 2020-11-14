@@ -120,7 +120,7 @@ public class PipTouchHandlerTest extends ShellTestCase {
         mPipTouchHandler.onMovementBoundsChanged(mInsetBounds, mMinBounds, mCurBounds,
                 mFromImeAdjustment, mFromShelfAdjustment, mDisplayRotation);
 
-        assertEquals(expectedMinMovementBounds, mPipTouchHandler.mNormalMovementBounds);
+        assertEquals(expectedMinMovementBounds, mPipBoundsState.getNormalMovementBounds());
         verify(mPipResizeGestureHandler, times(1))
                 .updateMinSize(mMinBounds.width(), mMinBounds.height());
     }
@@ -139,7 +139,7 @@ public class PipTouchHandlerTest extends ShellTestCase {
         mPipTouchHandler.onMovementBoundsChanged(mInsetBounds, mMinBounds, mCurBounds,
                 mFromImeAdjustment, mFromShelfAdjustment, mDisplayRotation);
 
-        assertEquals(expectedMaxMovementBounds, mPipTouchHandler.mExpandedMovementBounds);
+        assertEquals(expectedMaxMovementBounds, mPipBoundsState.getExpandedMovementBounds());
         verify(mPipResizeGestureHandler, times(1))
                 .updateMaxSize(maxBounds.width(), maxBounds.height());
     }

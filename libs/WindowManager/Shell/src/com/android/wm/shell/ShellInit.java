@@ -16,6 +16,7 @@
 
 package com.android.wm.shell;
 
+import com.android.wm.shell.apppairs.AppPairs;
 import com.android.wm.shell.common.DisplayImeController;
 import com.android.wm.shell.draganddrop.DragAndDropController;
 import com.android.wm.shell.splitscreen.SplitScreen;
@@ -31,15 +32,18 @@ public class ShellInit {
     private final DragAndDropController mDragAndDropController;
     private final ShellTaskOrganizer mShellTaskOrganizer;
     private final Optional<SplitScreen> mSplitScreenOptional;
+    private final Optional<AppPairs> mAppPairsOptional;
 
     public ShellInit(DisplayImeController displayImeController,
             DragAndDropController dragAndDropController,
             ShellTaskOrganizer shellTaskOrganizer,
-            Optional<SplitScreen> splitScreenOptional) {
+            Optional<SplitScreen> splitScreenOptional,
+            Optional<AppPairs> appPairsOptional) {
         mDisplayImeController = displayImeController;
         mDragAndDropController = dragAndDropController;
         mShellTaskOrganizer = shellTaskOrganizer;
         mSplitScreenOptional = splitScreenOptional;
+        mAppPairsOptional = appPairsOptional;
     }
 
     public void init() {
@@ -47,6 +51,7 @@ public class ShellInit {
         mDisplayImeController.startMonitorDisplays();
         // Register the shell organizer
         mShellTaskOrganizer.registerOrganizer();
+        mAppPairsOptional.ifPresent(AppPairs::onOrganizerRegistered);
         // Bind the splitscreen impl to the drag drop controller
         mDragAndDropController.setSplitScreenController(mSplitScreenOptional);
     }

@@ -150,4 +150,9 @@ oneway interface IApplicationThread {
             in RemoteCallback resultCallback);
     void notifyContentProviderPublishStatus(in ContentProviderHolder holder, String auth,
             int userId, boolean published);
+    void instrumentWithoutRestart(in ComponentName instrumentationName,
+            in Bundle instrumentationArgs,
+            IInstrumentationWatcher instrumentationWatcher,
+            IUiAutomationConnection instrumentationUiConnection,
+            in ApplicationInfo targetInfo);
 }

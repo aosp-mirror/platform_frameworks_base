@@ -17,12 +17,10 @@
 package android.widget;
 
 import static android.content.ContentResolver.SCHEME_CONTENT;
-import static android.view.OnReceiveContentCallback.Payload.FLAG_CONVERT_TO_PLAIN_TEXT;
-import static android.view.OnReceiveContentCallback.Payload.SOURCE_AUTOFILL;
-import static android.view.OnReceiveContentCallback.Payload.SOURCE_DRAG_AND_DROP;
-import static android.view.OnReceiveContentCallback.Payload.SOURCE_INPUT_METHOD;
-
-import static java.util.Collections.singleton;
+import static android.view.OnReceiveContentListener.Payload.FLAG_CONVERT_TO_PLAIN_TEXT;
+import static android.view.OnReceiveContentListener.Payload.SOURCE_AUTOFILL;
+import static android.view.OnReceiveContentListener.Payload.SOURCE_DRAG_AND_DROP;
+import static android.view.OnReceiveContentListener.Payload.SOURCE_INPUT_METHOD;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -39,11 +37,10 @@ import android.text.Editable;
 import android.text.Selection;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
-import android.util.ArraySet;
 import android.util.Log;
-import android.view.OnReceiveContentCallback;
-import android.view.OnReceiveContentCallback.Payload.Flags;
-import android.view.OnReceiveContentCallback.Payload.Source;
+import android.view.OnReceiveContentListener;
+import android.view.OnReceiveContentListener.Payload.Flags;
+import android.view.OnReceiveContentListener.Payload.Source;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
@@ -54,42 +51,38 @@ import com.android.internal.annotations.VisibleForTesting;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Set;
 
 /**
- * Default implementation of {@link android.view.OnReceiveContentCallback} for editable
+ * Default implementation of {@link OnReceiveContentListener} for editable
  * {@link TextView} components. This class handles insertion of text (plain text, styled text, HTML,
- * etc) but not images or other content. This class can be used as a base class for an
- * implementation of {@link android.view.OnReceiveContentCallback} for a {@link TextView}, to
- * provide consistent behavior for insertion of text.
+ * etc) but not images or other content.
+ *
+ * @hide
  */
-public class TextViewOnReceiveContentCallback implements OnReceiveContentCallback<TextView> {
+@VisibleForTesting
+public final class TextViewOnReceiveContentListener implements OnReceiveContentListener {
     private static final String LOG_TAG = "OnReceiveContent";
 
-    private static final String MIME_TYPE_ALL_TEXT = "text/*";
-    private static final Set<String> MIME_TYPES_ALL_TEXT = singleton(MIME_TYPE_ALL_TEXT);
-
     @Nullable private InputConnectionInfo mInputConnectionInfo;
-    @Nullable private ArraySet<String> mCachedSupportedMimeTypes;
 
     @Override
-    public boolean onReceiveContent(@NonNull TextView view, @NonNull Payload payload) {
+    public @Nullable Payload onReceiveContent(@NonNull View view, @NonNull Payload payload) {
         if (Log.isLoggable(LOG_TAG, Log.DEBUG)) {
             Log.d(LOG_TAG, "onReceive: " + payload);
         }
-        ClipData clip = payload.getClip();
-        @Source int source = payload.getSource();
-        @Flags int flags = payload.getFlags();
+        final @Source int source = payload.getSource();
         if (source == SOURCE_INPUT_METHOD) {
             // InputConnection.commitContent() should only be used for non-text input which is not
             // supported by the default implementation.
-            return false;
+            return payload;
         }
         if (source == SOURCE_AUTOFILL) {
-            return onReceiveForAutofill(view, clip, flags);
+            onReceiveForAutofill((TextView) view, payload);
+            return null;
         }
         if (source == SOURCE_DRAG_AND_DROP) {
-            return onReceiveForDragAndDrop(view, clip, flags);
+            onReceiveForDragAndDrop((TextView) view, payload);
+            return null;
         }
 
         // The code here follows the original paste logic from TextView:
@@ -97,7 +90,9 @@ public class TextViewOnReceiveContentCallback implements OnReceiveContentCallbac
         // In particular, multiple items within the given ClipData will trigger separate calls to
         // replace/insert. This is to preserve the original behavior with respect to TextWatcher
         // notifications fired from SpannableStringBuilder when replace/insert is called.
-        final Editable editable = (Editable) view.getText();
+        final ClipData clip = payload.getClip();
+        final @Flags int flags = payload.getFlags();
+        final Editable editable = (Editable) ((TextView) view).getText();
         final Context context = view.getContext();
         boolean didFirst = false;
         for (int i = 0; i < clip.getItemCount(); i++) {
@@ -118,7 +113,7 @@ public class TextViewOnReceiveContentCallback implements OnReceiveContentCallbac
                 }
             }
         }
-        return didFirst;
+        return null;
     }
 
     private static void replaceSelection(@NonNull Editable editable,
@@ -131,37 +126,33 @@ public class TextViewOnReceiveContentCallback implements OnReceiveContentCallbac
         editable.replace(start, end, replacement);
     }
 
-    private boolean onReceiveForAutofill(@NonNull TextView view, @NonNull ClipData clip,
-            @Flags int flags) {
+    private void onReceiveForAutofill(@NonNull TextView view, @NonNull Payload payload) {
+        ClipData clip = payload.getClip();
         if (isUsageOfImeCommitContentEnabled(view)) {
             clip = handleNonTextViaImeCommitContent(clip);
             if (clip == null) {
                 if (Log.isLoggable(LOG_TAG, Log.VERBOSE)) {
                     Log.v(LOG_TAG, "onReceive: Handled via IME");
                 }
-                return true;
+                return;
             }
         }
-        final CharSequence text = coerceToText(clip, view.getContext(), flags);
+        final CharSequence text = coerceToText(clip, view.getContext(), payload.getFlags());
         // First autofill it...
         view.setText(text);
         // ...then move cursor to the end.
         final Editable editable = (Editable) view.getText();
         Selection.setSelection(editable, editable.length());
-        return true;
     }
 
-    private static boolean onReceiveForDragAndDrop(@NonNull TextView textView,
-            @NonNull ClipData clip, @Flags int flags) {
-        final CharSequence text = coerceToText(clip, textView.getContext(), flags);
-        if (text.length() == 0) {
-            return false;
-        }
-        replaceSelection((Editable) textView.getText(), text);
-        return true;
+    private static void onReceiveForDragAndDrop(@NonNull TextView view, @NonNull Payload payload) {
+        final CharSequence text = coerceToText(payload.getClip(), view.getContext(),
+                payload.getFlags());
+        replaceSelection((Editable) view.getText(), text);
     }
 
-    private static CharSequence coerceToText(ClipData clip, Context context, @Flags int flags) {
+    private static @NonNull CharSequence coerceToText(@NonNull ClipData clip,
+            @NonNull Context context, @Flags int flags) {
         SpannableStringBuilder ssb = new SpannableStringBuilder();
         for (int i = 0; i < clip.getItemCount(); i++) {
             CharSequence itemText;
@@ -183,17 +174,17 @@ public class TextViewOnReceiveContentCallback implements OnReceiveContentCallbac
      * augmented autofill framework (see
      * <a href="/guide/topics/text/autofill-services">autofill services</a>). In order for an app to
      * be able to handle these suggestions, it must normally implement the
-     * {@link android.view.OnReceiveContentCallback} API. To make the adoption of this smoother for
+     * {@link android.view.OnReceiveContentListener} API. To make the adoption of this smoother for
      * apps that have previously implemented the
      * {@link android.view.inputmethod.InputConnection#commitContent(InputContentInfo, int, Bundle)}
-     * API, we reuse that API as a fallback if {@link android.view.OnReceiveContentCallback} is not
+     * API, we reuse that API as a fallback if {@link android.view.OnReceiveContentListener} is not
      * yet implemented by the app. This fallback is only enabled on Android S. This change ID
      * disables the fallback, such that apps targeting Android T and above must implement the
-     * {@link android.view.OnReceiveContentCallback} API in order to accept non-text suggestions.
+     * {@link android.view.OnReceiveContentListener} API in order to accept non-text suggestions.
      */
     @ChangeId
     @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.S) // Enabled on Android T and higher
-    private static final long AUTOFILL_NON_TEXT_REQUIRES_ON_RECEIVE_CONTENT_CALLBACK = 163400105L;
+    private static final long AUTOFILL_NON_TEXT_REQUIRES_ON_RECEIVE_CONTENT_LISTENER = 163400105L;
 
     /**
      * Returns true if we can use the IME {@link InputConnection#commitContent} API in order handle
@@ -206,7 +197,7 @@ public class TextViewOnReceiveContentCallback implements OnReceiveContentCallbac
             }
             return false;
         }
-        if (Compatibility.isChangeEnabled(AUTOFILL_NON_TEXT_REQUIRES_ON_RECEIVE_CONTENT_CALLBACK)) {
+        if (Compatibility.isChangeEnabled(AUTOFILL_NON_TEXT_REQUIRES_ON_RECEIVE_CONTENT_LISTENER)) {
             if (Log.isLoggable(LOG_TAG, Log.VERBOSE)) {
                 Log.v(LOG_TAG, "Fallback to commitContent disabled (target SDK is above S)");
             }
@@ -238,10 +229,15 @@ public class TextViewOnReceiveContentCallback implements OnReceiveContentCallbac
      * Invoked by the platform when an {@link InputConnection} is successfully created for the view
      * that owns this callback instance.
      */
-    void setInputConnectionInfo(@NonNull InputConnection ic, @NonNull EditorInfo editorInfo) {
+    void setInputConnectionInfo(@NonNull TextView view, @NonNull InputConnection ic,
+            @NonNull EditorInfo editorInfo) {
         if (Log.isLoggable(LOG_TAG, Log.VERBOSE)) {
             Log.v(LOG_TAG, "setInputConnectionInfo: "
                     + Arrays.toString(editorInfo.contentMimeTypes));
+        }
+        if (!isUsageOfImeCommitContentEnabled(view)) {
+            mInputConnectionInfo = null;
+            return;
         }
         String[] contentMimeTypes = editorInfo.contentMimeTypes;
         if (contentMimeTypes == null || contentMimeTypes.length == 0) {
@@ -262,82 +258,26 @@ public class TextViewOnReceiveContentCallback implements OnReceiveContentCallbac
         mInputConnectionInfo = null;
     }
 
-    // TODO(b/168253885): Use this to populate the assist structure for Autofill
-
     /** @hide */
     @VisibleForTesting
-    public Set<String> getMimeTypes(TextView view) {
+    @Nullable
+    public String[] getEditorInfoMimeTypes(@NonNull TextView view) {
         if (!isUsageOfImeCommitContentEnabled(view)) {
-            return MIME_TYPES_ALL_TEXT;
+            return null;
         }
-        return getSupportedMimeTypesAugmentedWithImeCommitContentMimeTypes();
-    }
-
-    private Set<String> getSupportedMimeTypesAugmentedWithImeCommitContentMimeTypes() {
-        InputConnectionInfo icInfo = mInputConnectionInfo;
+        final InputConnectionInfo icInfo = mInputConnectionInfo;
         if (icInfo == null) {
             if (Log.isLoggable(LOG_TAG, Log.VERBOSE)) {
-                Log.v(LOG_TAG, "getSupportedMimeTypes: No usable EditorInfo/InputConnection");
+                Log.v(LOG_TAG, "getEditorInfoMimeTypes: No usable EditorInfo");
             }
-            return MIME_TYPES_ALL_TEXT;
+            return null;
         }
-        String[] editorInfoContentMimeTypes = icInfo.mEditorInfoContentMimeTypes;
+        final String[] editorInfoContentMimeTypes = icInfo.mEditorInfoContentMimeTypes;
         if (Log.isLoggable(LOG_TAG, Log.VERBOSE)) {
-            Log.v(LOG_TAG, "getSupportedMimeTypes: Augmenting with EditorInfo.contentMimeTypes: "
+            Log.v(LOG_TAG, "getEditorInfoMimeTypes: "
                     + Arrays.toString(editorInfoContentMimeTypes));
         }
-        ArraySet<String> supportedMimeTypes = mCachedSupportedMimeTypes;
-        if (canReuse(supportedMimeTypes, editorInfoContentMimeTypes)) {
-            return supportedMimeTypes;
-        }
-        supportedMimeTypes = new ArraySet<>(editorInfoContentMimeTypes);
-        supportedMimeTypes.add(MIME_TYPE_ALL_TEXT);
-        mCachedSupportedMimeTypes = supportedMimeTypes;
-        return supportedMimeTypes;
-    }
-
-    /**
-     * We want to avoid creating a new set on every invocation of
-     * {@link #getSupportedMimeTypesAugmentedWithImeCommitContentMimeTypes()}.
-     * This method will check if the cached set of MIME types matches the data in the given array
-     * from {@link EditorInfo} or if a new set should be created. The custom logic is needed for
-     * comparing the data because the set contains the additional "text/*" MIME type.
-     *
-     * @param cachedMimeTypes Previously cached set of MIME types.
-     * @param newEditorInfoMimeTypes MIME types from {@link EditorInfo}.
-     *
-     * @return Returns true if the data in the given cached set matches the data in the array.
-     *
-     * @hide
-     */
-    @VisibleForTesting
-    public static boolean canReuse(@Nullable ArraySet<String> cachedMimeTypes,
-            @NonNull String[] newEditorInfoMimeTypes) {
-        if (cachedMimeTypes == null) {
-            return false;
-        }
-        if (newEditorInfoMimeTypes.length != cachedMimeTypes.size()
-                && newEditorInfoMimeTypes.length != (cachedMimeTypes.size() - 1)) {
-            return false;
-        }
-        final boolean ignoreAllTextMimeType =
-                newEditorInfoMimeTypes.length == (cachedMimeTypes.size() - 1);
-        for (String mimeType : cachedMimeTypes) {
-            if (ignoreAllTextMimeType && mimeType.equals(MIME_TYPE_ALL_TEXT)) {
-                continue;
-            }
-            boolean present = false;
-            for (String editorInfoContentMimeType : newEditorInfoMimeTypes) {
-                if (editorInfoContentMimeType.equals(mimeType)) {
-                    present = true;
-                    break;
-                }
-            }
-            if (!present) {
-                return false;
-            }
-        }
-        return true;
+        return editorInfoContentMimeTypes;
     }
 
     /**

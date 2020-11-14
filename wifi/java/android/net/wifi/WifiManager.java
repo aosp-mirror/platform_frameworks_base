@@ -53,6 +53,7 @@ import android.os.Looper;
 import android.os.RemoteException;
 import android.os.WorkSource;
 import android.os.connectivity.WifiActivityEnergyInfo;
+import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.CloseGuard;
 import android.util.Log;
@@ -262,6 +263,44 @@ public class WifiManager {
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface SuggestionConnectionStatusCode {}
+
+    /**
+     * Status code if suggestion approval status is unknown, an App which hasn't made any
+     * suggestions will get this code.
+     */
+    public static final int STATUS_SUGGESTION_APPROVAL_UNKNOWN = 0;
+
+    /**
+     * Status code if the calling app is still pending user approval for suggestions.
+     */
+    public static final int STATUS_SUGGESTION_APPROVAL_PENDING = 1;
+
+    /**
+     * Status code if the calling app got the user approval for suggestions.
+     */
+    public static final int STATUS_SUGGESTION_APPROVAL_APPROVED_BY_USER = 2;
+
+    /**
+     * Status code if the calling app suggestions were rejected by the user.
+     */
+    public static final int STATUS_SUGGESTION_APPROVAL_REJECTED_BY_USER = 3;
+
+    /**
+     * Status code if the calling app was approved by virtue of being a carrier privileged app.
+     * @see TelephonyManager#hasCarrierPrivileges().
+     */
+    public static final int STATUS_SUGGESTION_APPROVAL_APPROVED_BY_CARRIER_PRIVILEGE = 4;
+
+    /** @hide */
+    @IntDef(prefix = {"STATUS_SUGGESTION_APPROVAL_"},
+            value = {STATUS_SUGGESTION_APPROVAL_UNKNOWN,
+                    STATUS_SUGGESTION_APPROVAL_PENDING,
+                    STATUS_SUGGESTION_APPROVAL_APPROVED_BY_USER,
+                    STATUS_SUGGESTION_APPROVAL_REJECTED_BY_USER,
+                    STATUS_SUGGESTION_APPROVAL_APPROVED_BY_CARRIER_PRIVILEGE
+            })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface SuggestionUserApprovalStatus {}
 
     /**
      * Broadcast intent action indicating whether Wi-Fi scanning is currently available.
@@ -2007,6 +2046,26 @@ public class WifiManager {
         return isLowRamDevice
                 ? NETWORK_SUGGESTIONS_MAX_PER_APP_LOW_RAM
                 : NETWORK_SUGGESTIONS_MAX_PER_APP_HIGH_RAM;
+    }
+
+    /**
+     * Get the Suggestion approval status of the calling app. When an app makes suggestions using
+     * the {@link #addNetworkSuggestions(List)} API they may trigger a user approval flow. This API
+     * provides the current approval status.
+     *
+     * @return Status code for the user approval. One of the STATUS_SUGGESTION_APPROVAL_ values.
+     * @throws {@link SecurityException} if the caller is missing required permissions.
+     */
+    @RequiresPermission(ACCESS_WIFI_STATE)
+    public @SuggestionUserApprovalStatus int getNetworkSuggestionUserApprovalStatus() {
+        if (!SdkLevel.isAtLeastS()) {
+            throw new UnsupportedOperationException();
+        }
+        try {
+            return mService.getNetworkSuggestionUserApprovalStatus(mContext.getOpPackageName());
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+        }
     }
 
     /**

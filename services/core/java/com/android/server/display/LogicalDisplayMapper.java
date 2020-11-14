@@ -17,6 +17,7 @@
 package com.android.server.display;
 
 import android.content.Context;
+import android.os.Process;
 import android.os.SystemProperties;
 import android.text.TextUtils;
 import android.util.Slog;
@@ -147,6 +148,10 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
             }
         }
         return null;
+    }
+
+    public int[] getDisplayIdsLocked() {
+        return getDisplayIdsLocked(Process.SYSTEM_UID);
     }
 
     public int[] getDisplayIdsLocked(int callingUid) {

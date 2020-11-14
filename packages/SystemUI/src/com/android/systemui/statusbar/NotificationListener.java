@@ -22,6 +22,7 @@ import static com.android.systemui.statusbar.phone.StatusBar.DEBUG;
 
 import android.annotation.NonNull;
 import android.annotation.SuppressLint;
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.ComponentName;
 import android.content.Context;
@@ -159,6 +160,19 @@ public class NotificationListener extends NotificationListenerWithPlugins {
     }
 
     @Override
+    public void onNotificationChannelModified(
+            String pkgName, UserHandle user, NotificationChannel channel, int modificationType) {
+        if (DEBUG) Log.d(TAG, "onNotificationChannelModified");
+        if (!onPluginNotificationChannelModified(pkgName, user, channel, modificationType)) {
+            mMainHandler.post(() -> {
+                for (NotificationHandler handler : mNotificationHandlers) {
+                    handler.onNotificationChannelModified(pkgName, user, channel, modificationType);
+                }
+            });
+        }
+    }
+
+    @Override
     public void onSilentStatusBarIconsVisibilityChanged(boolean hideSilentStatusIcons) {
         for (NotificationSettingsListener listener : mSettingsListeners) {
             listener.onStatusBarIconsBehaviorChanged(hideSilentStatusIcons);
@@ -228,6 +242,14 @@ public class NotificationListener extends NotificationListenerWithPlugins {
         void onNotificationRemoved(StatusBarNotification sbn, RankingMap rankingMap);
         void onNotificationRemoved(StatusBarNotification sbn, RankingMap rankingMap, int reason);
         void onNotificationRankingUpdate(RankingMap rankingMap);
+
+        /** Called after a notification channel is modified. */
+        default void onNotificationChannelModified(
+                String pkgName,
+                UserHandle user,
+                NotificationChannel channel,
+                int modificationType) {
+        }
 
         /**
          * Called after the listener has connected to NoMan and posted any current notifications.

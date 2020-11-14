@@ -24,6 +24,8 @@ import com.android.systemui.dagger.WMSingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.WindowManagerShellWrapper;
+import com.android.wm.shell.apppairs.AppPairs;
+import com.android.wm.shell.apppairs.AppPairsController;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayImeController;
 import com.android.wm.shell.common.FloatingContentCoordinator;
@@ -77,6 +79,13 @@ public class WMShellModule {
         return new SplitScreenController(context, displayController, systemWindows,
                 displayImeController, handler, transactionPool, shellTaskOrganizer, syncQueue,
                 taskStackListener);
+    }
+
+    @WMSingleton
+    @Provides
+    static AppPairs provideAppPairs(ShellTaskOrganizer shellTaskOrganizer,
+            SyncTransactionQueue syncQueue) {
+        return new AppPairsController(shellTaskOrganizer, syncQueue);
     }
 
     @WMSingleton
