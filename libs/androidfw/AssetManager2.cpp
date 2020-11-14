@@ -975,19 +975,23 @@ base::expected<std::monostate, NullOrIOError> AssetManager2::ResolveReference(
   for (uint32_t i = 0U;; i++) {
     auto result = GetResource(resolve_resid, true /*may_be_bag*/);
     if (!result.has_value()) {
+      value.resid = resolve_resid;
       return base::unexpected(result.error());
     }
+
+    // If resource resolution fails, the value should be set to the last reference that was able to
+    // be resolved successfully.
+    value = *result;
+    value.flags |= combined_flags;
 
     if (result->type != Res_value::TYPE_REFERENCE ||
         result->data == Res_value::DATA_NULL_UNDEFINED ||
         result->data == resolve_resid || i == kMaxIterations) {
       // This reference can't be resolved, so exit now and let the caller deal with it.
-      value = *result;
-      value.flags |= combined_flags;
       return {};
     }
 
-    combined_flags |= result->flags;
+    combined_flags = result->flags;
     resolve_resid = result->data;
   }
 }
