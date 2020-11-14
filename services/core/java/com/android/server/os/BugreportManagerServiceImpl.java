@@ -297,9 +297,8 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
         }
 
         @Override
-        public void onUiIntensiveBugreportDumpsFinished(String callingPackage)
-                throws RemoteException {
-            mListener.onUiIntensiveBugreportDumpsFinished(callingPackage);
+        public void onUiIntensiveBugreportDumpsFinished() throws RemoteException {
+            mListener.onUiIntensiveBugreportDumpsFinished();
         }
 
         @Override
