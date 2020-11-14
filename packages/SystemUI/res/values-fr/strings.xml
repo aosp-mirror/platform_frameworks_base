@@ -855,7 +855,7 @@
     <string name="right_icon" msgid="1103955040645237425">"Icône droite"</string>
     <string name="drag_to_add_tiles" msgid="8933270127508303672">"Sélectionnez et faites glisser les icônes pour les ajouter"</string>
     <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"Sélectionnez et faites glisser les icônes pour réorganiser"</string>
-    <string name="drag_to_remove_tiles" msgid="4682194717573850385">"Faites glisser les tuiles ici pour les supprimer."</string>
+    <string name="drag_to_remove_tiles" msgid="4682194717573850385">"Faites glisser les icônes ici pour les supprimer."</string>
     <string name="drag_to_remove_disabled" msgid="933046987838658850">"Au minimum <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> tuiles sont nécessaires"</string>
     <string name="qs_edit" msgid="5583565172803472437">"Modifier"</string>
     <string name="tuner_time" msgid="2450785840990529997">"Heure"</string>
