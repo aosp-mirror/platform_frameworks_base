@@ -5382,20 +5382,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         forAllTasks((t) -> { t.getRootTask().removeChild(t, "removeAllTasks"); });
     }
 
-    /**
-     * Similar to {@link RootWindowContainer#isAnyNonToastWindowVisibleForUid(int)}, but
-     * used for pid.
-     */
-    boolean isAnyNonToastWindowVisibleForPid(int pid) {
-        final PooledPredicate p = PooledLambda.obtainPredicate(
-                WindowState::isNonToastWindowVisibleForPid,
-                PooledLambda.__(WindowState.class), pid);
-
-        final WindowState w = getWindow(p);
-        p.recycle();
-        return w != null;
-    }
-
     Context getDisplayUiContext() {
         return mDisplayPolicy.getSystemUiContext();
     }

@@ -17,11 +17,6 @@
 package com.android.server.wm;
 
 import static android.view.Display.DEFAULT_DISPLAY;
-import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
-import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
-import static android.view.WindowManager.LayoutParams.TYPE_NOTIFICATION_SHADE;
-import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
-import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
@@ -35,7 +30,6 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 import android.app.WindowConfiguration;
 import android.content.ComponentName;
@@ -57,57 +51,6 @@ import org.junit.runner.RunWith;
 @Presubmit
 @RunWith(WindowTestRunner.class)
 public class RootWindowContainerTests extends WindowTestsBase {
-
-    private static final int FAKE_CALLING_UID = 667;
-
-    @Test
-    public void testIsAnyNonToastWindowVisibleForUid_oneToastOneAppStartOneNonToastBothVisible() {
-        final WindowState toastyToast = createWindow(null, TYPE_TOAST, "toast", FAKE_CALLING_UID);
-        final WindowState app = createWindow(null, TYPE_APPLICATION, "app", FAKE_CALLING_UID);
-        final WindowState appStart = createWindow(null, TYPE_APPLICATION_STARTING, "appStarting",
-                FAKE_CALLING_UID);
-        toastyToast.mHasSurface = true;
-        app.mHasSurface = true;
-        appStart.mHasSurface = true;
-
-        assertTrue(toastyToast.isVisibleNow());
-        assertTrue(app.isVisibleNow());
-        assertTrue(appStart.isVisibleNow());
-        assertTrue(mWm.mRoot.isAnyNonToastWindowVisibleForUid(FAKE_CALLING_UID));
-    }
-
-    @Test
-    public void testIsAnyNonToastWindowVisibleForUid_onlyToastVisible() {
-        final WindowState toastyToast = createWindow(null, TYPE_TOAST, "toast", FAKE_CALLING_UID);
-        toastyToast.mHasSurface = true;
-
-        assertTrue(toastyToast.isVisibleNow());
-        assertFalse(mWm.mRoot.isAnyNonToastWindowVisibleForUid(FAKE_CALLING_UID));
-    }
-
-    @Test
-    public void testIsAnyNonToastWindowVisibleForUid_onlyAppStartingVisible() {
-        final WindowState appStart = createWindow(null, TYPE_APPLICATION_STARTING, "appStarting",
-                FAKE_CALLING_UID);
-        appStart.mHasSurface = true;
-
-        assertTrue(appStart.isVisibleNow());
-        assertFalse(mWm.mRoot.isAnyNonToastWindowVisibleForUid(FAKE_CALLING_UID));
-    }
-
-    @Test
-    public void testIsAnyNonToastWindowVisibleForUid_aFewNonToastButNoneVisible() {
-        final WindowState statusBar =
-                createWindow(null, TYPE_STATUS_BAR, "statusBar", FAKE_CALLING_UID);
-        final WindowState notificationShade = createWindow(null, TYPE_NOTIFICATION_SHADE,
-                "notificationShade", FAKE_CALLING_UID);
-        final WindowState app = createWindow(null, TYPE_APPLICATION, "app", FAKE_CALLING_UID);
-
-        assertFalse(statusBar.isVisibleNow());
-        assertFalse(notificationShade.isVisibleNow());
-        assertFalse(app.isVisibleNow());
-        assertFalse(mWm.mRoot.isAnyNonToastWindowVisibleForUid(FAKE_CALLING_UID));
-    }
 
     @Test
     public void testUpdateDefaultDisplayWindowingModeOnSettingsRetrieved() {
