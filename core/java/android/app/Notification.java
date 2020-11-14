@@ -67,6 +67,7 @@ import android.os.Parcelable;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.text.BidiFormatter;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
@@ -5371,8 +5372,11 @@ public class Notification implements Parcelable
             big.setViewVisibility(R.id.notification_material_reply_text_3, View.GONE);
             big.setTextViewText(R.id.notification_material_reply_text_3, null);
 
+            final boolean snoozeEnabled = mContext.getContentResolver() != null
+                    && (Settings.Secure.getInt(mContext.getContentResolver(),
+                        Settings.Secure.SHOW_NOTIFICATION_SNOOZE, 0) == 1);
             big.setViewLayoutMarginBottomDimen(R.id.notification_action_list_margin_target,
-                    R.dimen.notification_content_margin);
+                    snoozeEnabled ? 0 : R.dimen.notification_content_margin);
         }
 
         private RemoteViews applyStandardTemplateWithActions(int layoutId,
