@@ -37,7 +37,7 @@ import android.os.RemoteException;
  * It may be possible at some point in the future to combine I<Sensor>ServiceReceivers to share
  * a common interface.
  */
-public final class ClientMonitorCallbackConverter {
+public class ClientMonitorCallbackConverter {
     private IBiometricSensorReceiver mSensorReceiver; // BiometricService
     private IFaceServiceReceiver mFaceServiceReceiver; // FaceManager
     private IFingerprintServiceReceiver mFingerprintServiceReceiver; // FingerprintManager

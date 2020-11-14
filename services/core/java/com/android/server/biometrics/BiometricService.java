@@ -39,6 +39,8 @@ import android.hardware.biometrics.IBiometricService;
 import android.hardware.biometrics.IBiometricServiceReceiver;
 import android.hardware.biometrics.IBiometricSysuiReceiver;
 import android.hardware.biometrics.PromptInfo;
+import android.hardware.fingerprint.FingerprintManager;
+import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.DeadObjectException;
@@ -90,6 +92,7 @@ public class BiometricService extends SystemService {
     private static final int MSG_ON_DEVICE_CREDENTIAL_PRESSED = 12;
     private static final int MSG_ON_SYSTEM_EVENT = 13;
     private static final int MSG_CLIENT_DIED = 14;
+    private static final int MSG_ON_DIALOG_ANIMATED_IN = 15;
 
     private final Injector mInjector;
     private final DevicePolicyManager mDevicePolicyManager;
@@ -218,6 +221,11 @@ public class BiometricService extends SystemService {
 
                 case MSG_CLIENT_DIED: {
                     handleClientDied();
+                    break;
+                }
+
+                case MSG_ON_DIALOG_ANIMATED_IN: {
+                    handleOnDialogAnimatedIn();
                     break;
                 }
 
@@ -450,6 +458,11 @@ public class BiometricService extends SystemService {
         @Override
         public void onSystemEvent(int event) {
             mHandler.obtainMessage(MSG_ON_SYSTEM_EVENT, event).sendToTarget();
+        }
+
+        @Override
+        public void onDialogAnimatedIn() {
+            mHandler.obtainMessage(MSG_ON_DIALOG_ANIMATED_IN).sendToTarget();
         }
     };
 
@@ -749,6 +762,16 @@ public class BiometricService extends SystemService {
         public DevicePolicyManager getDevicePolicyManager(Context context) {
             return context.getSystemService(DevicePolicyManager.class);
         }
+
+        public List<FingerprintSensorPropertiesInternal> getFingerprintSensorProperties(
+                Context context) {
+            final FingerprintManager fpm = context.getSystemService(FingerprintManager.class);
+            if (fpm != null) {
+                return fpm.getSensorPropertiesInternal();
+            } else {
+                return new ArrayList<>();
+            }
+        }
     }
 
     /**
@@ -932,7 +955,7 @@ public class BiometricService extends SystemService {
 
     private void handleClientDied() {
         if (mCurrentAuthSession == null) {
-            Slog.e(TAG, "Auth session null");
+            Slog.e(TAG, "handleClientDied: AuthSession is null");
             return;
         }
 
@@ -941,6 +964,15 @@ public class BiometricService extends SystemService {
         if (finished) {
             mCurrentAuthSession = null;
         }
+    }
+
+    private void handleOnDialogAnimatedIn() {
+        if (mCurrentAuthSession == null) {
+            Slog.e(TAG, "handleOnDialogAnimatedIn: AuthSession is null");
+            return;
+        }
+
+        mCurrentAuthSession.onDialogAnimatedIn();
     }
 
     /**
@@ -1026,7 +1058,8 @@ public class BiometricService extends SystemService {
         mCurrentAuthSession = new AuthSession(getContext(), mStatusBarService, mSysuiReceiver,
                 mKeyStore, mRandom, mClientDeathReceiver, preAuthInfo, token, operationId, userId,
                 mBiometricSensorReceiver, receiver, opPackageName, promptInfo, callingUid,
-                callingPid, callingUserId, debugEnabled);
+                callingPid, callingUserId, debugEnabled,
+                mInjector.getFingerprintSensorProperties(getContext()));
         try {
             mCurrentAuthSession.goToInitialState();
         } catch (RemoteException e) {
@@ -1053,5 +1086,12 @@ public class BiometricService extends SystemService {
             pw.println(" " + sensor);
         }
         pw.println("CurrentSession: " + mCurrentAuthSession);
+
+        final List<FingerprintSensorPropertiesInternal> fpProps =
+                mInjector.getFingerprintSensorProperties(getContext());
+        pw.println("FingerprintSensorProperties: " + fpProps.size());
+        for (FingerprintSensorPropertiesInternal prop : fpProps) {
+            pw.println(" " + prop);
+        }
     }
 }

@@ -28,4 +28,6 @@ oneway interface IBiometricSysuiReceiver {
     void onDeviceCredentialPressed();
     // Notifies the client that an internal event, e.g. back button has occurred.
     void onSystemEvent(int event);
+    // Notifies that the dialog has finished animating in.
+    void onDialogAnimatedIn();
 }

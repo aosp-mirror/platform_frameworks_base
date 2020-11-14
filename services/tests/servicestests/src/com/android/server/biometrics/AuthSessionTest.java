@@ -24,12 +24,16 @@ import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.annotation.NonNull;
 import android.app.admin.DevicePolicyManager;
 import android.app.trust.ITrustManager;
 import android.content.Context;
@@ -39,6 +43,9 @@ import android.hardware.biometrics.IBiometricSensorReceiver;
 import android.hardware.biometrics.IBiometricServiceReceiver;
 import android.hardware.biometrics.IBiometricSysuiReceiver;
 import android.hardware.biometrics.PromptInfo;
+import android.hardware.biometrics.SensorProperties;
+import android.hardware.fingerprint.FingerprintSensorProperties;
+import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -79,7 +86,8 @@ public class AuthSessionTest {
     private IBinder mToken;
 
     // Assume all tests can be done with the same set of sensors for now.
-    private List<BiometricSensor> mSensors;
+    @NonNull private List<BiometricSensor> mSensors;
+    @NonNull private List<FingerprintSensorPropertiesInternal> mFingerprintSensorProps;
 
     @Before
     public void setUp() throws Exception {
@@ -88,11 +96,12 @@ public class AuthSessionTest {
         mRandom = new Random();
         mToken = new Binder();
         mSensors = new ArrayList<>();
+        mFingerprintSensorProps = new ArrayList<>();
     }
 
     @Test
     public void testNewAuthSession_eligibleSensorsSetToStateUnknown() throws RemoteException {
-        setupFingerprint(0 /* id */);
+        setupFingerprint(0 /* id */, FingerprintSensorProperties.TYPE_REAR);
         setupFace(1 /* id */, false /* confirmationAlwaysRequired */);
 
         final AuthSession session = createAuthSession(mSensors,
@@ -110,10 +119,9 @@ public class AuthSessionTest {
     }
 
     @Test
-    public void testStartNewAuthSession()
-            throws RemoteException {
+    public void testStartNewAuthSession() throws RemoteException {
         setupFace(0 /* id */, false /* confirmationAlwaysRequired */);
-        setupFingerprint(1 /* id */);
+        setupFingerprint(1 /* id */, FingerprintSensorProperties.TYPE_REAR);
 
         final boolean requireConfirmation = true;
         final long operationId = 123;
@@ -175,6 +183,60 @@ public class AuthSessionTest {
         }
     }
 
+    @Test
+    public void testUdfpsAuth_sensorStartsAfterDialogAnimationCompletes() throws RemoteException {
+        // For UDFPS-only setups, ensure that the sensor does not start auth until after the
+        // BiometricPrompt UI is finished animating. Otherwise, the UDFPS affordance will be
+        // shown before the BiometricPrompt is shown.
+        setupFingerprint(0 /* id */, FingerprintSensorProperties.TYPE_UDFPS_OPTICAL);
+
+        final long operationId = 123;
+        final int userId = 10;
+        final int callingUid = 100;
+        final int callingPid = 1000;
+        final int callingUserId = 10000;
+
+        final AuthSession session = createAuthSession(mSensors,
+                false /* checkDevicePolicyManager */,
+                Authenticators.BIOMETRIC_STRONG,
+                operationId,
+                userId,
+                callingUid,
+                callingPid,
+                callingUserId);
+        assertEquals(mSensors.size(), session.mPreAuthInfo.eligibleSensors.size());
+
+        for (BiometricSensor sensor : session.mPreAuthInfo.eligibleSensors) {
+            assertEquals(BiometricSensor.STATE_UNKNOWN, sensor.getSensorState());
+            assertEquals(0, sensor.getCookie());
+        }
+
+        session.goToInitialState();
+
+        final int cookie1 = session.mPreAuthInfo.eligibleSensors.get(0).getCookie();
+        session.onCookieReceived(cookie1);
+        for (BiometricSensor sensor : session.mPreAuthInfo.eligibleSensors) {
+            if (cookie1 == sensor.getCookie()) {
+                assertEquals(BiometricSensor.STATE_COOKIE_RETURNED, sensor.getSensorState());
+            } else {
+                assertEquals(BiometricSensor.STATE_WAITING_FOR_COOKIE, sensor.getSensorState());
+            }
+        }
+        assertTrue(session.allCookiesReceived());
+
+        // UDFPS does not start even if all cookies are received
+        assertEquals(AuthSession.STATE_AUTH_STARTED, session.getState());
+        verify(mStatusBarService).showAuthenticationDialog(any(), any(), any(),
+                anyBoolean(), anyBoolean(), anyInt(), any(), anyLong());
+
+        // Notify AuthSession that the UI is shown. Then, UDFPS sensor should be started.
+        session.onDialogAnimatedIn();
+        assertEquals(AuthSession.STATE_AUTH_STARTED_UI_SHOWING, session.getState());
+        assertEquals(BiometricSensor.STATE_AUTHENTICATING,
+                session.mPreAuthInfo.eligibleSensors.get(0).getSensorState());
+
+    }
+
     private PreAuthInfo createPreAuthInfo(List<BiometricSensor> sensors, int userId,
             PromptInfo promptInfo, boolean checkDevicePolicyManager) throws RemoteException {
         return PreAuthInfo.create(mTrustManager,
@@ -197,11 +259,10 @@ public class AuthSessionTest {
 
         final PreAuthInfo preAuthInfo = createPreAuthInfo(sensors, userId, promptInfo,
                 checkDevicePolicyManager);
-
         return new AuthSession(mContext, mStatusBarService, mSysuiReceiver, mKeyStore,
                 mRandom, mClientDeathReceiver, preAuthInfo, mToken, operationId, userId,
                 mSensorReceiver, mClientReceiver, TEST_PACKAGE, promptInfo, callingUid,
-                callingPid, callingUserId, false /* debugEnabled */);
+                callingPid, callingUserId, false /* debugEnabled */, mFingerprintSensorProps);
     }
 
     private PromptInfo createPromptInfo(@Authenticators.Types int authenticators) {
@@ -210,8 +271,8 @@ public class AuthSessionTest {
         return promptInfo;
     }
 
-
-    private void setupFingerprint(int id) throws RemoteException {
+    private void setupFingerprint(int id, @FingerprintSensorProperties.SensorType int type)
+            throws RemoteException {
         IBiometricAuthenticator fingerprintAuthenticator = mock(IBiometricAuthenticator.class);
         when(fingerprintAuthenticator.isHardwareDetected(any())).thenReturn(true);
         when(fingerprintAuthenticator.hasEnrolledTemplates(anyInt(), any())).thenReturn(true);
@@ -229,6 +290,12 @@ public class AuthSessionTest {
                 return false; // fingerprint does not support confirmation
             }
         });
+
+        mFingerprintSensorProps.add(new FingerprintSensorPropertiesInternal(id,
+                SensorProperties.STRENGTH_STRONG,
+                5 /* maxEnrollmentsPerUser */,
+                type,
+                false /* resetLockoutRequiresHardwareAuthToken */));
     }
 
     private void setupFace(int id, boolean confirmationAlwaysRequired) throws RemoteException {

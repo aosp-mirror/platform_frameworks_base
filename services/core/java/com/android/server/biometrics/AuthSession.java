@@ -17,9 +17,11 @@
 package com.android.server.biometrics;
 
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FACE;
+import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FINGERPRINT;
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_NONE;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.hardware.biometrics.BiometricAuthenticator;
@@ -33,6 +35,8 @@ import android.hardware.biometrics.IBiometricSysuiReceiver;
 import android.hardware.biometrics.PromptInfo;
 import android.hardware.face.FaceManager;
 import android.hardware.fingerprint.FingerprintManager;
+import android.hardware.fingerprint.FingerprintSensorProperties;
+import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.security.KeyStore;
@@ -68,47 +72,54 @@ public final class AuthSession implements IBinder.DeathRecipient {
      */
     static final int STATE_AUTH_CALLED = 1;
     /**
-     * Authentication started, BiometricPrompt is showing and the hardware is authenticating.
+     * Authentication started, BiometricPrompt is showing and the hardware is authenticating. At
+     * this point, the BiometricPrompt UI has been requested, but is not necessarily done animating
+     * in yet.
      */
     static final int STATE_AUTH_STARTED = 2;
+    /**
+     * Same as {@link #STATE_AUTH_STARTED}, except the BiometricPrompt UI is done animating in.
+     */
+    static final int STATE_AUTH_STARTED_UI_SHOWING = 3;
     /**
      * Authentication is paused, waiting for the user to press "try again" button. Only
      * passive modalities such as Face or Iris should have this state. Note that for passive
      * modalities, the HAL enters the idle state after onAuthenticated(false) which differs from
      * fingerprint.
      */
-    static final int STATE_AUTH_PAUSED = 3;
+    static final int STATE_AUTH_PAUSED = 4;
     /**
      * Paused, but "try again" was pressed. Sensors have new cookies and we're now waiting for all
      * cookies to be returned.
      */
-    static final int STATE_AUTH_PAUSED_RESUMING = 4;
+    static final int STATE_AUTH_PAUSED_RESUMING = 5;
     /**
      * Authentication is successful, but we're waiting for the user to press "confirm" button.
      */
-    static final int STATE_AUTH_PENDING_CONFIRM = 5;
+    static final int STATE_AUTH_PENDING_CONFIRM = 6;
     /**
      * Biometric authenticated, waiting for SysUI to finish animation
      */
-    static final int STATE_AUTHENTICATED_PENDING_SYSUI = 6;
+    static final int STATE_AUTHENTICATED_PENDING_SYSUI = 7;
     /**
      * Biometric error, waiting for SysUI to finish animation
      */
-    static final int STATE_ERROR_PENDING_SYSUI = 7;
+    static final int STATE_ERROR_PENDING_SYSUI = 8;
     /**
      * Device credential in AuthController is showing
      */
-    static final int STATE_SHOWING_DEVICE_CREDENTIAL = 8;
+    static final int STATE_SHOWING_DEVICE_CREDENTIAL = 9;
     /**
      * The client binder died, and sensors were authenticating at the time. Cancel has been
      * requested and we're waiting for the HAL(s) to send ERROR_CANCELED.
      */
-    static final int STATE_CLIENT_DIED_CANCELLING = 9;
+    static final int STATE_CLIENT_DIED_CANCELLING = 10;
 
     @IntDef({
             STATE_AUTH_IDLE,
             STATE_AUTH_CALLED,
             STATE_AUTH_STARTED,
+            STATE_AUTH_STARTED_UI_SHOWING,
             STATE_AUTH_PAUSED,
             STATE_AUTH_PAUSED_RESUMING,
             STATE_AUTH_PENDING_CONFIRM,
@@ -150,6 +161,7 @@ public final class AuthSession implements IBinder.DeathRecipient {
     private final int mCallingPid;
     private final int mCallingUserId;
     private final boolean mDebugEnabled;
+    private final List<FingerprintSensorPropertiesInternal> mFingerprintSensorProperties;
 
     // The current state, which can be either idle, called, or started
     private @SessionState int mState = STATE_AUTH_IDLE;
@@ -165,12 +177,25 @@ public final class AuthSession implements IBinder.DeathRecipient {
     // Timestamp when hardware authentication occurred
     private long mAuthenticatedTimeMs;
 
-    AuthSession(Context context, IStatusBarService statusBarService,
-            IBiometricSysuiReceiver sysuiReceiver, KeyStore keystore, Random random,
-            ClientDeathReceiver clientDeathReceiver, PreAuthInfo preAuthInfo, IBinder token,
-            long operationId, int userId, IBiometricSensorReceiver sensorReceiver,
-            IBiometricServiceReceiver clientReceiver, String opPackageName, PromptInfo promptInfo,
-            int callingUid, int callingPid, int callingUserId, boolean debugEnabled) {
+    AuthSession(@NonNull Context context,
+            @NonNull IStatusBarService statusBarService,
+            @NonNull IBiometricSysuiReceiver sysuiReceiver,
+            @NonNull KeyStore keystore,
+            @NonNull Random random,
+            @NonNull ClientDeathReceiver clientDeathReceiver,
+            @NonNull PreAuthInfo preAuthInfo,
+            @NonNull IBinder token,
+            long operationId,
+            int userId,
+            @NonNull IBiometricSensorReceiver sensorReceiver,
+            @NonNull IBiometricServiceReceiver clientReceiver,
+            @NonNull String opPackageName,
+            @NonNull PromptInfo promptInfo,
+            int callingUid,
+            int callingPid,
+            int callingUserId,
+            boolean debugEnabled,
+            @NonNull List<FingerprintSensorPropertiesInternal> fingerprintSensorProperties) {
         mContext = context;
         mStatusBarService = statusBarService;
         mSysuiReceiver = sysuiReceiver;
@@ -189,6 +214,7 @@ public final class AuthSession implements IBinder.DeathRecipient {
         mCallingPid = callingPid;
         mCallingUserId = callingUserId;
         mDebugEnabled = debugEnabled;
+        mFingerprintSensorProperties = fingerprintSensorProperties;
 
         try {
             mClientReceiver.asBinder().linkToDeath(this, 0 /* flags */);
@@ -267,7 +293,10 @@ public final class AuthSession implements IBinder.DeathRecipient {
 
         if (allCookiesReceived()) {
             mStartTimeMs = System.currentTimeMillis();
-            startAllPreparedSensors();
+
+            // For UDFPS, do not start until BiometricPrompt UI is shown. Otherwise, the UDFPS
+            // affordance will be shown before the BP UI is finished animating in.
+            startAllPreparedSensorsExceptUdfps();
 
             // No need to request the UI if we're coming from the paused state.
             if (mState != STATE_AUTH_PAUSED_RESUMING) {
@@ -311,13 +340,41 @@ public final class AuthSession implements IBinder.DeathRecipient {
         return false;
     }
 
-    private void startAllPreparedSensors() {
+    private boolean isUdfpsSensor(@NonNull BiometricSensor sensor) {
+        if (sensor.modality != TYPE_FINGERPRINT) {
+            return false;
+        }
+
+        for (FingerprintSensorPropertiesInternal prop : mFingerprintSensorProperties) {
+            if (sensor.id == prop.sensorId && prop.isAnyUdfpsType()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void startAllPreparedSensorsExceptUdfps() {
         for (BiometricSensor sensor : mPreAuthInfo.eligibleSensors) {
+            if (isUdfpsSensor(sensor)) {
+                Slog.d(TAG, "Skipping UDFPS, sensorId: " + sensor.id);
+                continue;
+            }
             try {
                 sensor.startSensor();
             } catch (RemoteException e) {
-                Slog.e(TAG, "Unable to start prepared client, sensor ID: "
-                        + sensor.id, e);
+                Slog.e(TAG, "Unable to start prepared client, sensor: " + sensor, e);
+            }
+        }
+    }
+
+    private void startPreparedUdfpsSensors() {
+        for (BiometricSensor sensor : mPreAuthInfo.eligibleSensors) {
+            if (isUdfpsSensor(sensor)) {
+                try {
+                    sensor.startSensor();
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Unable to start UDFPS sensor: " + sensor, e);
+                }
             }
         }
     }
@@ -390,7 +447,8 @@ public final class AuthSession implements IBinder.DeathRecipient {
                 break;
             }
 
-            case STATE_AUTH_STARTED: {
+            case STATE_AUTH_STARTED:
+            case STATE_AUTH_STARTED_UI_SHOWING: {
                 final boolean errorLockout = error == BiometricConstants.BIOMETRIC_ERROR_LOCKOUT
                         || error == BiometricConstants.BIOMETRIC_ERROR_LOCKOUT_PERMANENT;
                 if (isAllowDeviceCredential() && errorLockout) {
@@ -461,6 +519,17 @@ public final class AuthSession implements IBinder.DeathRecipient {
         } catch (RemoteException e) {
             Slog.e(TAG, "RemoteException", e);
         }
+    }
+
+    void onDialogAnimatedIn() {
+        if (mState != STATE_AUTH_STARTED) {
+            Slog.w(TAG, "onDialogAnimatedIn, unexpected state: " + mState);
+        }
+
+        mState = STATE_AUTH_STARTED_UI_SHOWING;
+
+        // For UDFPS devices, we can now start the sensor.
+        startPreparedUdfpsSensors();
     }
 
     void onTryAgainPressed() {
@@ -543,13 +612,15 @@ public final class AuthSession implements IBinder.DeathRecipient {
      */
     boolean onClientDied() {
         try {
-            if (mState == STATE_AUTH_STARTED) {
-                mState = STATE_CLIENT_DIED_CANCELLING;
-                cancelAllSensors();
-                return false;
-            } else {
-                mStatusBarService.hideAuthenticationDialog();
-                return true;
+            switch (mState) {
+                case STATE_AUTH_STARTED:
+                case STATE_AUTH_STARTED_UI_SHOWING:
+                    mState = STATE_CLIENT_DIED_CANCELLING;
+                    cancelAllSensors();
+                    return false;
+                default:
+                    mStatusBarService.hideAuthenticationDialog();
+                    return true;
             }
         } catch (RemoteException e) {
             Slog.e(TAG, "Remote Exception: " + e);
@@ -676,7 +747,10 @@ public final class AuthSession implements IBinder.DeathRecipient {
      * @return true if this AuthSession is finished, e.g. should be set to null
      */
     boolean onCancelAuthSession(boolean force) {
-        if (mState == STATE_AUTH_STARTED && !force) {
+        final boolean authStarted = mState == STATE_AUTH_STARTED
+                || mState == STATE_AUTH_STARTED_UI_SHOWING;
+
+        if (authStarted && !force) {
             cancelAllSensors();
             // Wait for ERROR_CANCELED to be returned from the sensors
             return false;
@@ -705,7 +779,7 @@ public final class AuthSession implements IBinder.DeathRecipient {
      * {@link #STATE_SHOWING_DEVICE_CREDENTIAL} or dismissed.
      */
     private void cancelBiometricOnly() {
-        if (mState == STATE_AUTH_STARTED) {
+        if (mState == STATE_AUTH_STARTED || mState == STATE_AUTH_STARTED_UI_SHOWING) {
             cancelAllSensors();
         }
     }
