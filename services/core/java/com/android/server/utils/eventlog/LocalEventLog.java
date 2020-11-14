@@ -21,14 +21,14 @@ import android.util.TimeUtils;
 
 import com.android.internal.util.Preconditions;
 
-import java.util.ConcurrentModificationException;
 import java.util.ListIterator;
 import java.util.NoSuchElementException;
+import java.util.function.Consumer;
 
 /**
  * An in-memory event log to support historical event information.
  */
-public abstract class LocalEventLog implements Iterable<String> {
+public abstract class LocalEventLog {
 
     private interface Log {
         // true if this is a filler element that should not be queried
@@ -93,7 +93,6 @@ public abstract class LocalEventLog implements Iterable<String> {
     private final Log[] mLog;
     private int mLogSize;
     private int mLogEndIndex;
-    private int mModificationCount;
 
     // invalid if log is empty
     private long mStartRealtimeMs;
@@ -103,7 +102,6 @@ public abstract class LocalEventLog implements Iterable<String> {
         mLog = new Log[size];
         mLogSize = 0;
         mLogEndIndex = 0;
-        mModificationCount = 0;
 
         mStartRealtimeMs = -1;
         mLastLogRealtimeMs = -1;
@@ -128,7 +126,7 @@ public abstract class LocalEventLog implements Iterable<String> {
      * into {@link #createLogEvent(long, int, Object...)} in addition to a time delta, and should be
      * used to construct an appropriate {@link LogEvent} object.
      */
-    public void addLogEvent(int event, Object... args) {
+    public synchronized void addLogEvent(int event, Object... args) {
         long timeMs = SystemClock.elapsedRealtime();
 
         // calculate delta
@@ -175,28 +173,28 @@ public abstract class LocalEventLog implements Iterable<String> {
         mLog[mLogEndIndex] = event;
         mLogEndIndex = incrementIndex(mLogEndIndex);
         mLastLogRealtimeMs = mLastLogRealtimeMs + event.getTimeDeltaMs();
-
-        mModificationCount++;
     }
 
     /** Clears the log of all entries. */
-    public void clear() {
+    public synchronized void clear() {
         mLogEndIndex = 0;
         mLogSize = 0;
-        mModificationCount++;
 
         mStartRealtimeMs = -1;
         mLastLogRealtimeMs = -1;
     }
 
     // checks if the log is empty (if empty, times are invalid)
-    private boolean isEmpty() {
+    private synchronized boolean isEmpty() {
         return mLogSize == 0;
     }
 
-    @Override
-    public ListIterator<String> iterator() {
-        return new LogIterator();
+    /** Iterates over the event log, passing each log string to the given consumer. */
+    public synchronized void iterate(Consumer<String> consumer) {
+        LogIterator it = new LogIterator();
+        while (it.hasNext()) {
+            consumer.accept(it.next());
+        }
     }
 
     // returns the index of the first element
@@ -222,8 +220,6 @@ public abstract class LocalEventLog implements Iterable<String> {
 
     private class LogIterator implements ListIterator<String> {
 
-        private final int mModificationGuard;
-
         private final long mSystemTimeDeltaMs;
 
         private long mCurrentRealtimeMs;
@@ -231,7 +227,6 @@ public abstract class LocalEventLog implements Iterable<String> {
         private int mCount;
 
         LogIterator() {
-            mModificationGuard = mModificationCount;
             mSystemTimeDeltaMs = System.currentTimeMillis() - SystemClock.elapsedRealtime();
             mCurrentRealtimeMs = mStartRealtimeMs;
             mIndex = startIndex();
@@ -251,8 +246,6 @@ public abstract class LocalEventLog implements Iterable<String> {
         @Override
         // return then increment
         public String next() {
-            checkModifications();
-
             if (!hasNext()) {
                 throw new NoSuchElementException();
             }
@@ -276,8 +269,6 @@ public abstract class LocalEventLog implements Iterable<String> {
         @Override
         // decrement then return
         public String previous() {
-            checkModifications();
-
             Log log;
             long currentDeltaMs;
             long realtimeMs;
@@ -301,12 +292,6 @@ public abstract class LocalEventLog implements Iterable<String> {
             } while (mCount >= 0 && log.isFiller());
 
             return getTimePrefix(realtimeMs + mSystemTimeDeltaMs) + log.getLogString();
-        }
-
-        private void checkModifications() {
-            if (mModificationGuard != mModificationCount) {
-                throw new ConcurrentModificationException();
-            }
         }
 
         @Override

@@ -1212,9 +1212,7 @@ public class LocationManagerService extends ILocationManager.Stub {
 
         ipw.println("Event Log:");
         ipw.increaseIndent();
-        for (String log : mInjector.getLocationEventLog()) {
-            ipw.println(log);
-        }
+        mInjector.getLocationEventLog().iterate(ipw::println);
         ipw.decreaseIndent();
     }
 
