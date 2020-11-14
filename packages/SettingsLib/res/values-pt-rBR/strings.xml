@@ -399,6 +399,9 @@
     <string name="inactive_app_inactive_summary" msgid="3161222402614236260">"Inativo. Tocar para alternar."</string>
     <string name="inactive_app_active_summary" msgid="8047630990208722344">"Ativo. Tocar para alternar."</string>
     <string name="standby_bucket_summary" msgid="5128193447550429600">"Estado em espera do app:<xliff:g id="BUCKET"> %s</xliff:g>"</string>
+    <string name="transcode_settings_title" msgid="6700974145733932357">"Configurações de transcodificação de mídia"</string>
+    <string name="transcode_enable_all" msgid="4719796495995795404">"Ativar a transcodificação para todos os apps"</string>
+    <string name="transcode_skip_apps" msgid="5680997722349545778">"Desativar a transcodificação para apps"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"Serviços em execução"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"Visualizar e controlar os serviços em execução no momento"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"Implementação do WebView"</string>

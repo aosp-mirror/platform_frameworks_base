@@ -399,6 +399,9 @@
     <string name="inactive_app_inactive_summary" msgid="3161222402614236260">"बंद है. टॉगल करने के लिए टैप करें."</string>
     <string name="inactive_app_active_summary" msgid="8047630990208722344">"सक्रिय. टॉगल करने के लिए टैप करें."</string>
     <string name="standby_bucket_summary" msgid="5128193447550429600">"ऐप्लिकेशन स्टैंडबाय की स्थिति:<xliff:g id="BUCKET"> %s</xliff:g>"</string>
+    <string name="transcode_settings_title" msgid="6700974145733932357">"मीडिया फ़ाइलों को ट्रांसकोड करने से जुड़ी सेटिंग"</string>
+    <string name="transcode_enable_all" msgid="4719796495995795404">"सभी ऐप्लिकेशन के लिए ट्रांसकोडिंग चालू करें"</string>
+    <string name="transcode_skip_apps" msgid="5680997722349545778">"ऐप्लिकेशन के लिए ट्रांसकोडिंग बंद करें"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"चल रही सेवाएं"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"इस समय चल रही सेवाओं को देखें और नियंत्रित करें"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"वेबव्यू लागू करें"</string>
