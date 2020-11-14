@@ -917,7 +917,7 @@ Asset* AssetManager::openAssetFromFileLocked(const String8& pathName,
 Asset* AssetManager::openAssetFromZipLocked(const ZipFileRO* pZipFile,
     const ZipEntryRO entry, AccessMode mode, const String8& entryName)
 {
-    std::unique_ptr<Asset> pAsset;
+    Asset* pAsset = NULL;
 
     // TODO: look for previously-created shared memory slice?
     uint16_t method;
@@ -932,28 +932,28 @@ Asset* AssetManager::openAssetFromZipLocked(const ZipFileRO* pZipFile,
         return NULL;
     }
 
-    std::optional<incfs::IncFsFileMap> dataMap = pZipFile->createEntryIncFsFileMap(entry);
-    if (!dataMap.has_value()) {
+    FileMap* dataMap = pZipFile->createEntryFileMap(entry);
+    if (dataMap == NULL) {
         ALOGW("create map from entry failed\n");
         return NULL;
     }
 
     if (method == ZipFileRO::kCompressStored) {
-        pAsset = Asset::createFromUncompressedMap(std::move(*dataMap), mode);
+        pAsset = Asset::createFromUncompressedMap(dataMap, mode);
         ALOGV("Opened uncompressed entry %s in zip %s mode %d: %p", entryName.string(),
-                dataMap->file_name(), mode, pAsset.get());
+                dataMap->getFileName(), mode, pAsset);
     } else {
-        pAsset = Asset::createFromCompressedMap(std::move(*dataMap),
+        pAsset = Asset::createFromCompressedMap(dataMap,
             static_cast<size_t>(uncompressedLen), mode);
         ALOGV("Opened compressed entry %s in zip %s mode %d: %p", entryName.string(),
-                dataMap->file_name(), mode, pAsset.get());
+                dataMap->getFileName(), mode, pAsset);
     }
     if (pAsset == NULL) {
         /* unexpected */
         ALOGW("create from segment failed\n");
     }
 
-    return pAsset.release();
+    return pAsset;
 }
 
 /*

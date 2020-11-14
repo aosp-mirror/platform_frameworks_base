@@ -100,9 +100,10 @@ void PrettyPrintVisitor::visit(const IdmapData& data) {
     stream_ << TAB << base::StringPrintf("0x%08x -> ", target_entry.target_id)
             << utils::DataTypeToString(target_entry.value.data_type);
 
+    size_t unused;
     if (target_entry.value.data_type == Res_value::TYPE_STRING) {
-      auto str = string_pool.stringAt(target_entry.value.data_value - string_pool_offset);
-      stream_ << " \"" << str.value_or(StringPiece16(u"")) << "\"";
+      auto str = string_pool.stringAt(target_entry.value.data_value - string_pool_offset, &unused);
+      stream_ << " \"" << StringPiece16(str) << "\"";
     } else {
       stream_ << " " << base::StringPrintf("0x%08x", target_entry.value.data_value);
     }
