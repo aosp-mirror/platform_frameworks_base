@@ -23,6 +23,7 @@ import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertTrue;
 
 import android.os.Parcel;
+import android.telephony.SubscriptionManager;
 
 import androidx.test.filters.SmallTest;
 
@@ -50,6 +51,7 @@ public class WifiInfoTest {
     private static final int TEST_RSSI = -60;
     private static final int TEST_NETWORK_ID = 5;
     private static final int TEST_NETWORK_ID2 = 6;
+    private static final int TEST_SUB_ID = 1;
 
     /**
      *  Verify parcel write/read with WifiInfo.
@@ -64,6 +66,7 @@ public class WifiInfoTest {
         writeWifiInfo.setTrusted(true);
         writeWifiInfo.setOemPaid(true);
         writeWifiInfo.setOemPrivate(true);
+        writeWifiInfo.setCarrierMerged(true);
         writeWifiInfo.setOsuAp(true);
         writeWifiInfo.setFQDN(TEST_FQDN);
         writeWifiInfo.setProviderFriendlyName(TEST_PROVIDER_NAME);
@@ -71,6 +74,7 @@ public class WifiInfoTest {
         writeWifiInfo.setWifiStandard(TEST_WIFI_STANDARD);
         writeWifiInfo.setMaxSupportedTxLinkSpeedMbps(TEST_MAX_SUPPORTED_TX_LINK_SPEED_MBPS);
         writeWifiInfo.setMaxSupportedRxLinkSpeedMbps(TEST_MAX_SUPPORTED_RX_LINK_SPEED_MBPS);
+        writeWifiInfo.setSubscriptionId(TEST_SUB_ID);
 
         Parcel parcel = Parcel.obtain();
         writeWifiInfo.writeToParcel(parcel, 0);
@@ -86,6 +90,7 @@ public class WifiInfoTest {
         assertTrue(readWifiInfo.isTrusted());
         assertTrue(readWifiInfo.isOemPaid());
         assertTrue(readWifiInfo.isOemPrivate());
+        assertTrue(readWifiInfo.isCarrierMerged());
         assertTrue(readWifiInfo.isOsuAp());
         assertTrue(readWifiInfo.isPasspointAp());
         assertEquals(TEST_PACKAGE_NAME, readWifiInfo.getRequestingPackageName());
@@ -96,6 +101,7 @@ public class WifiInfoTest {
                 readWifiInfo.getMaxSupportedTxLinkSpeedMbps());
         assertEquals(TEST_MAX_SUPPORTED_RX_LINK_SPEED_MBPS,
                 readWifiInfo.getMaxSupportedRxLinkSpeedMbps());
+        assertEquals(TEST_SUB_ID, readWifiInfo.getSubscriptionId());
     }
 
     @Test
@@ -108,6 +114,7 @@ public class WifiInfoTest {
         writeWifiInfo.setTrusted(true);
         writeWifiInfo.setOemPaid(true);
         writeWifiInfo.setOemPrivate(true);
+        writeWifiInfo.setCarrierMerged(true);
         writeWifiInfo.setOsuAp(true);
         writeWifiInfo.setFQDN(TEST_FQDN);
         writeWifiInfo.setProviderFriendlyName(TEST_PROVIDER_NAME);
@@ -115,6 +122,7 @@ public class WifiInfoTest {
         writeWifiInfo.setWifiStandard(TEST_WIFI_STANDARD);
         writeWifiInfo.setMaxSupportedTxLinkSpeedMbps(TEST_MAX_SUPPORTED_TX_LINK_SPEED_MBPS);
         writeWifiInfo.setMaxSupportedRxLinkSpeedMbps(TEST_MAX_SUPPORTED_RX_LINK_SPEED_MBPS);
+        writeWifiInfo.setSubscriptionId(TEST_SUB_ID);
 
         WifiInfo readWifiInfo = new WifiInfo(writeWifiInfo);
 
@@ -125,6 +133,7 @@ public class WifiInfoTest {
         assertTrue(readWifiInfo.isTrusted());
         assertTrue(readWifiInfo.isOemPaid());
         assertTrue(readWifiInfo.isOemPrivate());
+        assertTrue(readWifiInfo.isCarrierMerged());
         assertTrue(readWifiInfo.isOsuAp());
         assertTrue(readWifiInfo.isPasspointAp());
         assertEquals(TEST_PACKAGE_NAME, readWifiInfo.getRequestingPackageName());
@@ -135,6 +144,7 @@ public class WifiInfoTest {
                 readWifiInfo.getMaxSupportedTxLinkSpeedMbps());
         assertEquals(TEST_MAX_SUPPORTED_RX_LINK_SPEED_MBPS,
                 readWifiInfo.getMaxSupportedRxLinkSpeedMbps());
+        assertEquals(TEST_SUB_ID, readWifiInfo.getSubscriptionId());
     }
 
     /**
@@ -154,6 +164,8 @@ public class WifiInfoTest {
         assertEquals(-1, wifiInfo.getNetworkId());
         assertFalse(wifiInfo.isOemPaid());
         assertFalse(wifiInfo.isOemPrivate());
+        assertFalse(wifiInfo.isCarrierMerged());
+        assertEquals(SubscriptionManager.INVALID_SUBSCRIPTION_ID, wifiInfo.getSubscriptionId());
     }
 
     /**

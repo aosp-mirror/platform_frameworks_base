@@ -345,6 +345,7 @@ package android.net.wifi {
     field @Deprecated public static final int RECENT_FAILURE_REFUSED_TEMPORARILY = 1002; // 0x3ea
     field @Deprecated public boolean allowAutojoin;
     field @Deprecated public int carrierId;
+    field @Deprecated public boolean carrierMerged;
     field @Deprecated public String creatorName;
     field @Deprecated public int creatorUid;
     field @Deprecated public boolean fromWifiNetworkSpecifier;
@@ -426,8 +427,10 @@ package android.net.wifi {
     method @Nullable public String getRequestingPackageName();
     method public double getRetriedTxPacketsPerSecond();
     method public int getScore();
+    method public int getSubscriptionId();
     method public double getSuccessfulRxPacketsPerSecond();
     method public double getSuccessfulTxPacketsPerSecond();
+    method public boolean isCarrierMerged();
     method public boolean isEphemeral();
     method public boolean isOemPaid();
     method public boolean isOemPrivate();

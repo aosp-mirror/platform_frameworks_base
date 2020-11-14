@@ -505,6 +505,7 @@ package android.net.wifi {
     method @Nullable public String getSsid();
     method public int getSubscriptionId();
     method public boolean isAppInteractionRequired();
+    method public boolean isCarrierMerged();
     method public boolean isCredentialSharedWithUser();
     method public boolean isEnhancedOpen();
     method public boolean isHiddenSsid();
@@ -520,6 +521,7 @@ package android.net.wifi {
     ctor public WifiNetworkSuggestion.Builder();
     method @NonNull public android.net.wifi.WifiNetworkSuggestion build();
     method @NonNull public android.net.wifi.WifiNetworkSuggestion.Builder setBssid(@NonNull android.net.MacAddress);
+    method @NonNull public android.net.wifi.WifiNetworkSuggestion.Builder setCarrierMerged(boolean);
     method @NonNull public android.net.wifi.WifiNetworkSuggestion.Builder setCredentialSharedWithUser(boolean);
     method @NonNull public android.net.wifi.WifiNetworkSuggestion.Builder setIsAppInteractionRequired(boolean);
     method @NonNull public android.net.wifi.WifiNetworkSuggestion.Builder setIsEnhancedMacRandomizationEnabled(boolean);

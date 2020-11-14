@@ -187,6 +187,11 @@ public final class WifiNetworkSuggestion implements Parcelable {
         private boolean mIsNetworkOemPrivate;
 
         /**
+         * Whether this network is a carrier merged network.
+         */
+        private boolean mIsCarrierMerged;
+
+        /**
          * Whether this network will use enhanced MAC randomization.
          */
         private boolean mIsEnhancedMacRandomizationEnabled;
@@ -214,6 +219,7 @@ public final class WifiNetworkSuggestion implements Parcelable {
             mIsNetworkUntrusted = false;
             mIsNetworkOemPaid = false;
             mIsNetworkOemPrivate = false;
+            mIsCarrierMerged = false;
             mPriorityGroup = 0;
             mIsEnhancedMacRandomizationEnabled = false;
             mSubscriptionId = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
@@ -775,6 +781,34 @@ public final class WifiNetworkSuggestion implements Parcelable {
             return this;
         }
 
+        /**
+         * Specifies whether the suggestion represents a carrier merged network. A carrier merged
+         * Wi-Fi network is treated as part of the mobile carrier network. Such configuration may
+         * impact the user interface and data usage accounting.
+         * <p>
+         * <li>A suggestion marked as carrier merged must be metered enterprise network with a valid
+         * subscription Id set.
+         * @see #setIsMetered(boolean)
+         * @see #setSubscriptionId(int)
+         * @see #setWpa2EnterpriseConfig(WifiEnterpriseConfig)
+         * @see #setWpa3Enterprise192BitModeConfig(WifiEnterpriseConfig)
+         * @see #setWpa3EnterpriseStandardModeConfig(WifiEnterpriseConfig)
+         * @see #setPasspointConfig(PasspointConfiguration)
+         * </li>
+         * <li>If not set, defaults to false (i.e. not a carrier merged network.)</li>
+         * </p>
+         * @param isCarrierMerged Boolean indicating whether the network is treated a carrier
+         *                               merged network (if true) or non-merged network (if false);
+         * @return Instance of {@link Builder} to enable chaining of the builder method.
+         */
+        public @NonNull Builder setCarrierMerged(boolean isCarrierMerged) {
+            if (!SdkLevel.isAtLeastS()) {
+                throw new UnsupportedOperationException();
+            }
+            mIsCarrierMerged = isCarrierMerged;
+            return this;
+        }
+
         private void setSecurityParamsInWifiConfiguration(
                 @NonNull WifiConfiguration configuration) {
             if (!TextUtils.isEmpty(mWpa2PskPassphrase)) { // WPA-PSK network.
@@ -843,6 +877,7 @@ public final class WifiNetworkSuggestion implements Parcelable {
             wifiConfiguration.trusted = !mIsNetworkUntrusted;
             wifiConfiguration.oemPaid = mIsNetworkOemPaid;
             wifiConfiguration.oemPrivate = mIsNetworkOemPrivate;
+            wifiConfiguration.carrierMerged = mIsCarrierMerged;
             wifiConfiguration.macRandomizationSetting = mIsEnhancedMacRandomizationEnabled
                     ? WifiConfiguration.RANDOMIZATION_ENHANCED
                     : WifiConfiguration.RANDOMIZATION_PERSISTENT;
@@ -877,6 +912,7 @@ public final class WifiNetworkSuggestion implements Parcelable {
             wifiConfiguration.trusted = !mIsNetworkUntrusted;
             wifiConfiguration.oemPaid = mIsNetworkOemPaid;
             wifiConfiguration.oemPrivate = mIsNetworkOemPrivate;
+            wifiConfiguration.carrierMerged = mIsCarrierMerged;
             wifiConfiguration.subscriptionId = mSubscriptionId;
             mPasspointConfiguration.setCarrierId(mCarrierId);
             mPasspointConfiguration.setSubscriptionId(mSubscriptionId);
@@ -1004,6 +1040,14 @@ public final class WifiNetworkSuggestion implements Parcelable {
                 }
                 mIsSharedWithUser = false;
             }
+            if (mIsCarrierMerged) {
+                if (mSubscriptionId == SubscriptionManager.INVALID_SUBSCRIPTION_ID
+                        || mMeteredOverride != WifiConfiguration.METERED_OVERRIDE_METERED
+                        || !isEnterpriseSuggestion()) {
+                    throw new IllegalStateException("A carrier merged network must be a metered, "
+                            + "enterprise network with valid subscription Id");
+                }
+            }
             return new WifiNetworkSuggestion(
                     wifiConfiguration,
                     mPasspointConfiguration,
@@ -1013,7 +1057,14 @@ public final class WifiNetworkSuggestion implements Parcelable {
                     mIsInitialAutojoinEnabled,
                     mPriorityGroup);
         }
+
+        private boolean isEnterpriseSuggestion() {
+            return !(mWpa2EnterpriseConfig == null && mWpa3EnterpriseConfig == null
+                    && mWapiEnterpriseConfig == null && mPasspointConfiguration == null);
+        }
     }
+
+
 
     /**
      * Network configuration for the provided network.
@@ -1172,6 +1223,7 @@ public final class WifiNetworkSuggestion implements Parcelable {
                 .append(", isUnTrusted=").append(!wifiConfiguration.trusted)
                 .append(", isOemPaid=").append(wifiConfiguration.oemPaid)
                 .append(", isOemPrivate=").append(wifiConfiguration.oemPrivate)
+                .append(", isCarrierMerged").append(wifiConfiguration.carrierMerged)
                 .append(", priorityGroup=").append(priorityGroup)
                 .append(" ]");
         return sb.toString();
@@ -1288,6 +1340,16 @@ public final class WifiNetworkSuggestion implements Parcelable {
             throw new UnsupportedOperationException();
         }
         return wifiConfiguration.oemPrivate;
+    }
+
+    /**
+     * @see Builder#setCarrierMerged(boolean)
+     */
+    public boolean isCarrierMerged() {
+        if (!SdkLevel.isAtLeastS()) {
+            throw new UnsupportedOperationException();
+        }
+        return wifiConfiguration.carrierMerged;
     }
 
     /**

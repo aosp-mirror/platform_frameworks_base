@@ -1414,4 +1414,90 @@ public class WifiNetworkSuggestionTest {
                 .setIsInitialAutojoinEnabled(false)
                 .build();
     }
+
+    /**
+     * Validate {@link WifiNetworkSuggestion.Builder#setCarrierMerged(boolean)} (boolean)} set the
+     * correct value to the WifiConfiguration.
+     */
+    @Test
+    public void testSetCarrierMergedNetwork() {
+        assumeTrue(SdkLevel.isAtLeastS());
+
+        WifiEnterpriseConfig enterpriseConfig = new WifiEnterpriseConfig();
+        enterpriseConfig.setEapMethod(WifiEnterpriseConfig.Eap.TLS);
+        enterpriseConfig.setCaCertificate(FakeKeys.CA_CERT0);
+        enterpriseConfig.setDomainSuffixMatch(TEST_DOMAIN_SUFFIX_MATCH);
+        WifiNetworkSuggestion suggestion = new WifiNetworkSuggestion.Builder()
+                .setSsid(TEST_SSID)
+                .setSubscriptionId(1)
+                .setWpa2EnterpriseConfig(enterpriseConfig)
+                .setCarrierMerged(true)
+                .setIsMetered(true)
+                .build();
+        assertTrue(suggestion.isCarrierMerged());
+        assertTrue(suggestion.wifiConfiguration.carrierMerged);
+    }
+
+    /**
+     * Ensure {@link WifiNetworkSuggestion.Builder#build()} throws an exception
+     * when set both {@link WifiNetworkSuggestion.Builder#setCarrierMerged(boolean)} (boolean)}
+     * to true on a network is not metered.
+     */
+    @Test(expected = IllegalStateException.class)
+    public void testSetCarrierMergedNetworkOnUnmeteredNetworkFail() {
+        assumeTrue(SdkLevel.isAtLeastS());
+
+        WifiEnterpriseConfig enterpriseConfig = new WifiEnterpriseConfig();
+        enterpriseConfig.setEapMethod(WifiEnterpriseConfig.Eap.TLS);
+        enterpriseConfig.setCaCertificate(FakeKeys.CA_CERT0);
+        enterpriseConfig.setDomainSuffixMatch(TEST_DOMAIN_SUFFIX_MATCH);
+        new WifiNetworkSuggestion.Builder()
+                .setSsid(TEST_SSID)
+                .setSubscriptionId(1)
+                .setWpa2EnterpriseConfig(enterpriseConfig)
+                .setCarrierMerged(true)
+                .build();
+    }
+
+    /**
+     * Ensure {@link WifiNetworkSuggestion.Builder#build()} throws an exception
+     * when set both {@link WifiNetworkSuggestion.Builder#setCarrierMerged(boolean)} (boolean)}
+     * to true on a network which {@link WifiNetworkSuggestion.Builder#setSubscriptionId(int)}
+     * is not set with a valid sub id.
+     */
+    @Test(expected = IllegalStateException.class)
+    public void testSetCarrierMergedNetworkWithoutValidSubscriptionIdFail() {
+        assumeTrue(SdkLevel.isAtLeastS());
+
+        WifiEnterpriseConfig enterpriseConfig = new WifiEnterpriseConfig();
+        enterpriseConfig.setEapMethod(WifiEnterpriseConfig.Eap.TLS);
+        enterpriseConfig.setCaCertificate(FakeKeys.CA_CERT0);
+        enterpriseConfig.setDomainSuffixMatch(TEST_DOMAIN_SUFFIX_MATCH);
+        WifiNetworkSuggestion suggestion = new WifiNetworkSuggestion.Builder()
+                .setSsid(TEST_SSID)
+                .setWpa2EnterpriseConfig(enterpriseConfig)
+                .setCarrierMerged(true)
+                .setIsMetered(true)
+                .build();
+        assertTrue(suggestion.isCarrierMerged());
+    }
+
+    /**
+     * Ensure {@link WifiNetworkSuggestion.Builder#build()} throws an exception
+     * when set both {@link WifiNetworkSuggestion.Builder#setCarrierMerged(boolean)} (boolean)}
+     * to true on a non enterprise network.
+     */
+    @Test(expected = IllegalStateException.class)
+    public void testSetCarrierMergedNetworkWithNonEnterpriseNetworkFail() {
+        assumeTrue(SdkLevel.isAtLeastS());
+
+        WifiNetworkSuggestion suggestion = new WifiNetworkSuggestion.Builder()
+                .setSsid(TEST_SSID)
+                .setSubscriptionId(1)
+                .setWpa2Passphrase(TEST_PRESHARED_KEY)
+                .setCarrierMerged(true)
+                .setIsMetered(true)
+                .build();
+        assertTrue(suggestion.isCarrierMerged());
+    }
 }
