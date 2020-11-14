@@ -46,6 +46,8 @@ import android.util.AtomicFile;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseLongArray;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -280,9 +282,8 @@ public class CacheQuotaStrategy implements RemoteCallback.OnResultListener {
     private void writeXmlToFile(List<CacheQuotaHint> processedRequests) {
         FileOutputStream fileStream = null;
         try {
-            XmlSerializer out = new FastXmlSerializer();
             fileStream = mPreviousValuesFile.startWrite();
-            out.setOutput(fileStream, StandardCharsets.UTF_8.name());
+            TypedXmlSerializer out = Xml.resolveSerializer(fileStream);
             saveToXml(out, processedRequests, 0);
             mPreviousValuesFile.finishWrite(fileStream);
         } catch (Exception e) {
@@ -342,8 +343,7 @@ public class CacheQuotaStrategy implements RemoteCallback.OnResultListener {
 
     protected static Pair<Long, List<CacheQuotaHint>> readFromXml(InputStream inputStream)
             throws XmlPullParserException, IOException {
-        XmlPullParser parser = Xml.newPullParser();
-        parser.setInput(inputStream, StandardCharsets.UTF_8.name());
+        TypedXmlPullParser parser = Xml.resolvePullParser(inputStream);
 
         int eventType = parser.getEventType();
         while (eventType != XmlPullParser.START_TAG &&

@@ -55,6 +55,8 @@ import android.os.UserManager;
 import android.provider.Settings;
 import android.util.AtomicFile;
 import android.util.Slog;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 import android.util.Xml;
 import android.view.Display;
 
@@ -536,8 +538,7 @@ public class BrightnessTracker {
     @VisibleForTesting
     @GuardedBy("mEventsLock")
     void writeEventsLocked(OutputStream stream) throws IOException {
-        XmlSerializer out = new FastXmlSerializer();
-        out.setOutput(stream, StandardCharsets.UTF_8.name());
+        TypedXmlSerializer out = Xml.resolveSerializer(stream);
         out.startDocument(null, true);
         out.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
 
@@ -607,8 +608,7 @@ public class BrightnessTracker {
     @GuardedBy("mEventsLock")
     void readEventsLocked(InputStream stream) throws IOException {
         try {
-            XmlPullParser parser = Xml.newPullParser();
-            parser.setInput(stream, StandardCharsets.UTF_8.name());
+            TypedXmlPullParser parser = Xml.resolvePullParser(stream);
 
             int type;
             while ((type = parser.next()) != XmlPullParser.END_DOCUMENT

@@ -24,6 +24,7 @@ import static org.junit.Assert.fail;
 import android.content.Context;
 import android.content.pm.PackageParser;
 import android.content.pm.Signature;
+import android.util.TypedXmlPullParser;
 import android.util.Xml;
 
 import androidx.test.InstrumentationRegistry;
@@ -38,7 +39,6 @@ import org.xmlpull.v1.XmlPullParser;
 
 import java.io.File;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -137,7 +137,7 @@ public class PackageSignaturesTest {
         // first call to readXml should return the list with the expected signature, then the second
         // call should reference this signature and complete successfully with no new entries in the
         // List.
-        XmlPullParser parser = getXMLFromResources("xml/one-signer.xml");
+        TypedXmlPullParser parser = getXMLFromResources("xml/one-signer.xml");
         ArrayList<Signature> signatures = new ArrayList<>();
         mPackageSetting.signatures.readXml(parser, signatures);
         Set<String> expectedSignatures = createSetOfSignatures(FIRST_EXPECTED_SIGNATURE);
@@ -164,7 +164,7 @@ public class PackageSignaturesTest {
         // If the cert tag key attribute does not contain a valid public key then a
         // CertificateException should be thrown when attempting to build the SigningDetails; in
         // this case the signing details should be set to UNKNOWN.
-        XmlPullParser parser = getXMLFromResources(
+        TypedXmlPullParser parser = getXMLFromResources(
                 "xml/one-signer-invalid-public-key-cert-key.xml");
         ArrayList<Signature> signatures = new ArrayList<>();
         mPackageSetting.signatures.readXml(parser, signatures);
@@ -351,7 +351,7 @@ public class PackageSignaturesTest {
         // When rotating the signing key a developer is able to specify the capabilities granted to
         // the apps signed with the previous key. This test verifies a previous signing certificate
         // with the flags set to 0 does not have any capabilities.
-        XmlPullParser parser = getXMLFromResources("xml/two-signers-in-lineage-no-caps.xml");
+        TypedXmlPullParser parser = getXMLFromResources("xml/two-signers-in-lineage-no-caps.xml");
         ArrayList<Signature> signatures = new ArrayList<>();
         mPackageSetting.signatures.readXml(parser, signatures);
         // obtain the Signature in the list matching the previous signing certificate
@@ -377,7 +377,7 @@ public class PackageSignaturesTest {
      */
     private void verifyReadXmlReturnsExpectedSignatures(String xmlFile, int expectedSchemeVersion,
             String... expectedSignatureValues) throws Exception {
-        XmlPullParser parser = getXMLFromResources(xmlFile);
+        TypedXmlPullParser parser = getXMLFromResources(xmlFile);
         ArrayList<Signature> signatures = new ArrayList<>();
         mPackageSetting.signatures.readXml(parser, signatures);
         Set<String> expectedSignatures = createSetOfSignatures(expectedSignatureValues);
@@ -394,7 +394,7 @@ public class PackageSignaturesTest {
      */
     private void verifyReadXmlReturnsExpectedSignaturesAndLineage(String xmlFile,
             int schemeVersion, String... expectedSignatureValues) throws Exception {
-        XmlPullParser parser = getXMLFromResources(xmlFile);
+        TypedXmlPullParser parser = getXMLFromResources(xmlFile);
         ArrayList<Signature> signatures = new ArrayList<>();
         mPackageSetting.signatures.readXml(parser, signatures);
         Set<String> expectedSignatures = createSetOfSignatures(expectedSignatureValues);
@@ -447,11 +447,10 @@ public class PackageSignaturesTest {
         return result;
     }
 
-    private XmlPullParser getXMLFromResources(String xmlFile) throws Exception {
+    private TypedXmlPullParser getXMLFromResources(String xmlFile) throws Exception {
         InputStream xmlStream = mContext.getResources().getAssets().open(
                 TEST_RESOURCES_FOLDER + "/" + xmlFile);
-        XmlPullParser result = Xml.newPullParser();
-        result.setInput(xmlStream, StandardCharsets.UTF_8.name());
+        TypedXmlPullParser result = Xml.resolvePullParser(xmlStream);
         int type;
         // advance the parser to the first tag
         while ((type = result.next()) != XmlPullParser.START_TAG

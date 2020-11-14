@@ -40,6 +40,8 @@ import android.util.AtomicFile;
 import android.util.LongArrayQueue;
 import android.util.MathUtils;
 import android.util.Slog;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import com.android.internal.annotations.GuardedBy;
@@ -934,8 +936,7 @@ public class PackageWatchdog {
         mAllObservers.clear();
         try {
             infile = mPolicyFile.openRead();
-            final XmlPullParser parser = Xml.newPullParser();
-            parser.setInput(infile, StandardCharsets.UTF_8.name());
+            final TypedXmlPullParser parser = Xml.resolvePullParser(infile);
             XmlUtils.beginDocument(parser, TAG_PACKAGE_WATCHDOG);
             int outerDepth = parser.getDepth();
             while (XmlUtils.nextElementWithin(parser, outerDepth)) {
@@ -1027,8 +1028,7 @@ public class PackageWatchdog {
             }
 
             try {
-                XmlSerializer out = new FastXmlSerializer();
-                out.setOutput(stream, StandardCharsets.UTF_8.name());
+                TypedXmlSerializer out = Xml.resolveSerializer(stream);
                 out.startDocument(null, true);
                 out.startTag(null, TAG_PACKAGE_WATCHDOG);
                 out.attribute(null, ATTR_VERSION, Integer.toString(DB_VERSION));

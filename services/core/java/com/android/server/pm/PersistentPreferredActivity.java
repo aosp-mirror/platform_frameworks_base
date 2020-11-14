@@ -19,12 +19,13 @@ package com.android.server.pm;
 import android.content.ComponentName;
 import android.content.IntentFilter;
 import android.util.Log;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 
 import com.android.internal.util.XmlUtils;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
 
 import java.io.IOException;
 
@@ -46,7 +47,8 @@ class PersistentPreferredActivity extends IntentFilter {
         mIsSetByDpm = isSetByDpm;
     }
 
-    PersistentPreferredActivity(XmlPullParser parser) throws XmlPullParserException, IOException {
+    PersistentPreferredActivity(TypedXmlPullParser parser)
+            throws XmlPullParserException, IOException {
         String shortComponent = parser.getAttributeValue(null, ATTR_NAME);
         mComponent = ComponentName.unflattenFromString(shortComponent);
         if (mComponent == null) {
@@ -86,7 +88,7 @@ class PersistentPreferredActivity extends IntentFilter {
         }
     }
 
-    public void writeToXml(XmlSerializer serializer) throws IOException {
+    public void writeToXml(TypedXmlSerializer serializer) throws IOException {
         serializer.attribute(null, ATTR_NAME, mComponent.flattenToShortString());
         serializer.attribute(null, ATTR_SET_BY_DPM, Boolean.toString(mIsSetByDpm));
         serializer.startTag(null, ATTR_FILTER);

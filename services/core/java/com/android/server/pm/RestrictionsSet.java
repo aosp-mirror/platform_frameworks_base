@@ -22,12 +22,13 @@ import android.annotation.UserIdInt;
 import android.os.Bundle;
 import android.os.UserManager;
 import android.util.SparseArray;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 
 import com.android.internal.annotations.VisibleForTesting;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -183,7 +184,7 @@ public class RestrictionsSet {
     /**
      * Serialize a given {@link RestrictionsSet} to XML.
      */
-    public void writeRestrictions(@NonNull XmlSerializer serializer, @NonNull String outerTag)
+    public void writeRestrictions(@NonNull TypedXmlSerializer serializer, @NonNull String outerTag)
             throws IOException {
         serializer.startTag(null, outerTag);
         for (int i = 0; i < mUserRestrictions.size(); i++) {
@@ -199,7 +200,7 @@ public class RestrictionsSet {
     /**
      * Read restrictions from XML.
      */
-    public static RestrictionsSet readRestrictions(@NonNull XmlPullParser parser,
+    public static RestrictionsSet readRestrictions(@NonNull TypedXmlPullParser parser,
             @NonNull String outerTag) throws IOException, XmlPullParserException {
         RestrictionsSet restrictionsSet = new RestrictionsSet();
         int userId = 0;
