@@ -399,6 +399,12 @@
     <string name="inactive_app_inactive_summary" msgid="3161222402614236260">"నిష్క్రియంగా ఉంది. టోగుల్ చేయడానికి నొక్కండి."</string>
     <string name="inactive_app_active_summary" msgid="8047630990208722344">"సక్రియంగా ఉంది. టోగుల్ చేయడానికి నొక్కండి."</string>
     <string name="standby_bucket_summary" msgid="5128193447550429600">"యాప్ స్టాండ్‌బై స్థితి:<xliff:g id="BUCKET"> %s</xliff:g>"</string>
+    <!-- no translation found for transcode_settings_title (6700974145733932357) -->
+    <skip />
+    <!-- no translation found for transcode_enable_all (4719796495995795404) -->
+    <skip />
+    <!-- no translation found for transcode_skip_apps (5680997722349545778) -->
+    <skip />
     <string name="runningservices_settings_title" msgid="6460099290493086515">"అమలులో ఉన్న సేవలు"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"ప్రస్తుతం అమలులో ఉన్న సేవలను వీక్షించండి మరియు నియంత్రించండి"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"వెబ్ వీక్షణ అమలు"</string>
@@ -472,7 +478,7 @@
     <string name="screen_zoom_summary_very_large" msgid="7317423942896999029">"చాలా పెద్దగా"</string>
     <string name="screen_zoom_summary_extremely_large" msgid="1438045624562358554">"అతి పెద్దగా"</string>
     <string name="screen_zoom_summary_custom" msgid="3468154096832912210">"అనుకూలం (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
-    <string name="content_description_menu_button" msgid="6254844309171779931">"మెను"</string>
+    <string name="content_description_menu_button" msgid="6254844309171779931">"మెనూ"</string>
     <string name="retail_demo_reset_message" msgid="5392824901108195463">"డెమో మోడ్‌లో ఫ్యాక్టరీ రీసెట్‌ను నిర్వహించడానికి పాస్‌వర్డ్‌ను నమోదు చేయండి"</string>
     <string name="retail_demo_reset_next" msgid="3688129033843885362">"తర్వాత"</string>
     <string name="retail_demo_reset_title" msgid="1866911701095959800">"పాస్‌వర్డ్ అవసరం"</string>

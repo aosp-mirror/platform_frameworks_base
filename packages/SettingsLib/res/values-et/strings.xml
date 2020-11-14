@@ -81,7 +81,7 @@
     <string name="bluetooth_battery_level" msgid="2893696778200201555">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> akut"</string>
     <string name="bluetooth_battery_level_untethered" msgid="4002282355111504349">"V: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> akut, P: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> akut"</string>
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"Aktiivne"</string>
-    <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Meedia heli"</string>
+    <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Meediaheli"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"Telefonikõned"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Failiedastus"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"Sisendseade"</string>
@@ -399,6 +399,12 @@
     <string name="inactive_app_inactive_summary" msgid="3161222402614236260">"Passiivne. Puudutage vahetamiseks."</string>
     <string name="inactive_app_active_summary" msgid="8047630990208722344">"Aktiivne. Puudutage vahetamiseks."</string>
     <string name="standby_bucket_summary" msgid="5128193447550429600">"Rakenduse ootelolek:<xliff:g id="BUCKET"> %s</xliff:g>"</string>
+    <!-- no translation found for transcode_settings_title (6700974145733932357) -->
+    <skip />
+    <!-- no translation found for transcode_enable_all (4719796495995795404) -->
+    <skip />
+    <!-- no translation found for transcode_skip_apps (5680997722349545778) -->
+    <skip />
     <string name="runningservices_settings_title" msgid="6460099290493086515">"Käitatud teenused"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"Praegu käitatud teenuste vaatamine ja juhtimine"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"WebView\' rakendamine"</string>

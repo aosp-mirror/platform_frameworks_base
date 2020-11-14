@@ -399,6 +399,12 @@
     <string name="inactive_app_inactive_summary" msgid="3161222402614236260">"សកម្ម។ ប៉ះដើម្បីបិទ/បើក។"</string>
     <string name="inactive_app_active_summary" msgid="8047630990208722344">"សកម្ម។ ប៉ះដើម្បីបិទ/បើក។"</string>
     <string name="standby_bucket_summary" msgid="5128193447550429600">"ស្ថាន​ភាព​មុខងារ​ផ្អាក​ដំណើរការ​កម្មវិធី៖<xliff:g id="BUCKET"> %s</xliff:g>"</string>
+    <!-- no translation found for transcode_settings_title (6700974145733932357) -->
+    <skip />
+    <!-- no translation found for transcode_enable_all (4719796495995795404) -->
+    <skip />
+    <!-- no translation found for transcode_skip_apps (5680997722349545778) -->
+    <skip />
     <string name="runningservices_settings_title" msgid="6460099290493086515">"សេវាកម្ម​កំពុង​ដំណើរការ"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"មើល និង​គ្រប់គ្រង​សេវាកម្ម​កំពុង​ដំណើរការ​បច្ចុប្បន្ន"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"ការអនុវត្ត WebView"</string>
