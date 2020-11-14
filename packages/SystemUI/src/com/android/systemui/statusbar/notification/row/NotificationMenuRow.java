@@ -294,6 +294,11 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
         } else {
             mMenuContainer = new FrameLayout(mContext);
         }
+        final boolean newFlowHideShelf = Settings.Global.getInt(mContext.getContentResolver(),
+                Settings.Global.SHOW_NEW_NOTIF_DISMISS, 0) == 1;
+        if (newFlowHideShelf) {
+            return;
+        }
         List<MenuItem> menuItems = mOnLeft ? mLeftMenuItems : mRightMenuItems;
         for (int i = 0; i < menuItems.size(); i++) {
             addMenuView(menuItems.get(i), mMenuContainer);
