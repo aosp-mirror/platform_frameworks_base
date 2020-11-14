@@ -6606,14 +6606,16 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     // NOTE: Can't remove due to unsupported app usage
+    @NonNull
     @Override
-    public String[] getAppOpPermissionPackages(String permName) {
-        try {
-            // Because this is accessed via the package manager service AIDL,
-            // go through the permission manager service AIDL
-            return mPermissionManagerService.getAppOpPermissionPackages(permName);
-        } catch (RemoteException ignore) { }
-        return null;
+    public String[] getAppOpPermissionPackages(String permissionName) {
+        if (permissionName == null) {
+            return EmptyArray.STRING;
+        }
+        if (getInstantAppPackageName(getCallingUid()) != null) {
+            return EmptyArray.STRING;
+        }
+        return mPermissionManager.getAppOpPermissionPackages(permissionName);
     }
 
     @Override
@@ -26121,26 +26123,28 @@ public class PackageManagerService extends IPackageManager.Stub
             throw new SecurityException(
                     "Caller uid " + callingUid + " does not own package " + packageName);
         }
-        ApplicationInfo info = getApplicationInfo(packageName, flags, userId);
-        if (info == null) {
-            return false;
-        }
-        if (info.targetSdkVersion < Build.VERSION_CODES.O) {
-            return false;
-        }
         if (isInstantApp(packageName, userId)) {
             return false;
         }
-        String appOpPermission = Manifest.permission.REQUEST_INSTALL_PACKAGES;
-        String[] packagesDeclaringPermission =
-                mPermissionManager.getAppOpPermissionPackages(appOpPermission, callingUid);
-        if (!ArrayUtils.contains(packagesDeclaringPermission, packageName)) {
-            if (throwIfPermNotDeclared) {
-                throw new SecurityException("Need to declare " + appOpPermission
-                        + " to call this api");
-            } else {
-                Slog.e(TAG, "Need to declare " + appOpPermission + " to call this api");
+        synchronized (mLock) {
+            final AndroidPackage pkg = mPackages.get(packageName);
+            if (pkg == null) {
                 return false;
+            }
+            if (pkg.getTargetSdkVersion() < Build.VERSION_CODES.O) {
+                return false;
+            }
+            if (!pkg.getRequestedPermissions().contains(
+                    android.Manifest.permission.REQUEST_INSTALL_PACKAGES)) {
+                final String message = "Need to declare "
+                        + android.Manifest.permission.REQUEST_INSTALL_PACKAGES
+                        + " to call this api";
+                if (throwIfPermNotDeclared) {
+                    throw new SecurityException(message);
+                } else {
+                    Slog.e(TAG, message);
+                    return false;
+                }
             }
         }
         if (mUserManager.hasUserRestriction(UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES, userId)

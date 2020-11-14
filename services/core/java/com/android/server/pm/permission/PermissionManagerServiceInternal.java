@@ -338,9 +338,15 @@ public abstract class PermissionManagerServiceInternal extends PermissionManager
     @Nullable
     public abstract int[] getPermissionGids(@NonNull String permissionName, @UserIdInt int userId);
 
-    /** Retrieve the packages that have requested the given app op permission */
-    public abstract @Nullable String[] getAppOpPermissionPackages(
-            @NonNull String permName, int callingUid);
+    /**
+     * Get the packages that have requested an app op permission.
+     *
+     * @param permissionName the name of the app op permission
+     * @return the names of the packages that have requested the app op permission
+     */
+    //@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
+    @NonNull
+    public abstract String[] getAppOpPermissionPackages(@NonNull String permissionName);
 
     /**
      * Enforces the request is from the system or an app that has INTERACT_ACROSS_USERS
