@@ -13937,7 +13937,7 @@ public class PackageManagerService extends IPackageManager.Stub
         synchronized (mLock) {
             final PackageSetting ps = mSettings.mPackages.get(packageName);
             if (ps == null) {
-                throw new IllegalArgumentException("Unknown target package: " + packageName);
+                return null;
             }
             final PackageUserState pus = ps.readUserState(userId);
             final Bundle allExtras = new Bundle();
