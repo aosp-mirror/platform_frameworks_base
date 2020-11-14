@@ -133,20 +133,16 @@ public class VibrationSettingsTest {
     public void shouldVibrateForRingtones_withVibrateWhenRinging_onlyIgnoreSettingsForSilentMode() {
         setUserSetting(Settings.System.VIBRATE_WHEN_RINGING, 1);
 
-        mAudioManager.setRingerModeInternal(AudioManager.RINGER_MODE_SILENT);
-        assertEquals(AudioManager.RINGER_MODE_SILENT, mAudioManager.getRingerMode());
+        setRingerMode(AudioManager.RINGER_MODE_SILENT);
         assertFalse(mVibrationSettings.shouldVibrateForRingtone());
 
-        mAudioManager.setRingerModeInternal(AudioManager.RINGER_MODE_MAX);
-        assertEquals(AudioManager.RINGER_MODE_MAX, mAudioManager.getRingerMode());
+        setRingerMode(AudioManager.RINGER_MODE_MAX);
         assertTrue(mVibrationSettings.shouldVibrateForRingtone());
 
-        mAudioManager.setRingerModeInternal(AudioManager.RINGER_MODE_NORMAL);
-        assertEquals(AudioManager.RINGER_MODE_NORMAL, mAudioManager.getRingerMode());
+        setRingerMode(AudioManager.RINGER_MODE_NORMAL);
         assertTrue(mVibrationSettings.shouldVibrateForRingtone());
 
-        mAudioManager.setRingerModeInternal(AudioManager.RINGER_MODE_VIBRATE);
-        assertEquals(AudioManager.RINGER_MODE_VIBRATE, mAudioManager.getRingerMode());
+        setRingerMode(AudioManager.RINGER_MODE_VIBRATE);
         assertTrue(mVibrationSettings.shouldVibrateForRingtone());
     }
 
@@ -155,20 +151,16 @@ public class VibrationSettingsTest {
         setUserSetting(Settings.System.VIBRATE_WHEN_RINGING, 0);
         setGlobalSetting(Settings.Global.APPLY_RAMPING_RINGER, 1);
 
-        mAudioManager.setRingerModeInternal(AudioManager.RINGER_MODE_SILENT);
-        assertEquals(AudioManager.RINGER_MODE_SILENT, mAudioManager.getRingerMode());
+        setRingerMode(AudioManager.RINGER_MODE_SILENT);
         assertFalse(mVibrationSettings.shouldVibrateForRingtone());
 
-        mAudioManager.setRingerModeInternal(AudioManager.RINGER_MODE_MAX);
-        assertEquals(AudioManager.RINGER_MODE_MAX, mAudioManager.getRingerMode());
+        setRingerMode(AudioManager.RINGER_MODE_MAX);
         assertTrue(mVibrationSettings.shouldVibrateForRingtone());
 
-        mAudioManager.setRingerModeInternal(AudioManager.RINGER_MODE_NORMAL);
-        assertEquals(AudioManager.RINGER_MODE_NORMAL, mAudioManager.getRingerMode());
+        setRingerMode(AudioManager.RINGER_MODE_NORMAL);
         assertTrue(mVibrationSettings.shouldVibrateForRingtone());
 
-        mAudioManager.setRingerModeInternal(AudioManager.RINGER_MODE_VIBRATE);
-        assertEquals(AudioManager.RINGER_MODE_VIBRATE, mAudioManager.getRingerMode());
+        setRingerMode(AudioManager.RINGER_MODE_VIBRATE);
         assertTrue(mVibrationSettings.shouldVibrateForRingtone());
     }
 
@@ -177,20 +169,16 @@ public class VibrationSettingsTest {
         setUserSetting(Settings.System.VIBRATE_WHEN_RINGING, 0);
         setGlobalSetting(Settings.Global.APPLY_RAMPING_RINGER, 0);
 
-        mAudioManager.setRingerModeInternal(AudioManager.RINGER_MODE_VIBRATE);
-        assertEquals(AudioManager.RINGER_MODE_VIBRATE, mAudioManager.getRingerMode());
+        setRingerMode(AudioManager.RINGER_MODE_VIBRATE);
         assertTrue(mVibrationSettings.shouldVibrateForRingtone());
 
-        mAudioManager.setRingerModeInternal(AudioManager.RINGER_MODE_SILENT);
-        assertEquals(AudioManager.RINGER_MODE_SILENT, mAudioManager.getRingerMode());
+        setRingerMode(AudioManager.RINGER_MODE_SILENT);
         assertFalse(mVibrationSettings.shouldVibrateForRingtone());
 
-        mAudioManager.setRingerModeInternal(AudioManager.RINGER_MODE_MAX);
-        assertEquals(AudioManager.RINGER_MODE_MAX, mAudioManager.getRingerMode());
+        setRingerMode(AudioManager.RINGER_MODE_MAX);
         assertFalse(mVibrationSettings.shouldVibrateForRingtone());
 
-        mAudioManager.setRingerModeInternal(AudioManager.RINGER_MODE_NORMAL);
-        assertEquals(AudioManager.RINGER_MODE_NORMAL, mAudioManager.getRingerMode());
+        setRingerMode(AudioManager.RINGER_MODE_NORMAL);
         assertFalse(mVibrationSettings.shouldVibrateForRingtone());
     }
 
@@ -294,6 +282,10 @@ public class VibrationSettingsTest {
         Settings.Global.putInt(mContextSpy.getContentResolver(), settingName, value);
         // FakeSettingsProvider don't support testing triggering ContentObserver yet.
         mVibrationSettings.updateSettings();
-        mAudioManager.reloadAudioSettings();
+    }
+
+    private void setRingerMode(int ringerMode) {
+        mAudioManager.setRingerModeInternal(ringerMode);
+        assertEquals(ringerMode, mAudioManager.getRingerModeInternal());
     }
 }
