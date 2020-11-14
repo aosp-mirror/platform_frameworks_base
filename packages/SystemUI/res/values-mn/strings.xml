@@ -92,7 +92,7 @@
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Дэлгэц бичлэг боловсруулж байна"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Дэлгэц бичих горимын үргэлжилж буй мэдэгдэл"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Бичлэгийг эхлүүлэх үү?"</string>
-    <string name="screenrecord_description" msgid="1123231719680353736">"Бичих үед Андройд систем нь таны дэлгэц дээр харагдах эсвэл төхөөрөмж дээрээ тоглуулсан аливаа эмзэг мэдээллийг авах боломжтой. Үүнд нууц үг, төлбөрийн мэдээлэл, зураг, зурвас болон аудио багтана."</string>
+    <string name="screenrecord_description" msgid="1123231719680353736">"Бичих үед Андройд систем нь таны дэлгэц дээр харагдах эсвэл төхөөрөмж дээрээ тоглуулсан аливаа эмзэг мэдээллийг авах боломжтой. Үүнд нууц үг, төлбөрийн мэдээлэл, зураг, мессеж болон аудио багтана."</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Аудио бичих"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Төхөөрөмжийн аудио"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Хөгжим, дуудлага болон хонхны ая зэрэг таны төхөөрөмжийн дуу"</string>
@@ -948,7 +948,7 @@
     <string name="notification_channel_alerts" msgid="3385787053375150046">"Сэрэмжлүүлэг"</string>
     <string name="notification_channel_battery" msgid="9219995638046695106">"Батарей"</string>
     <string name="notification_channel_screenshot" msgid="7665814998932211997">"Дэлгэцийн зураг дарах"</string>
-    <string name="notification_channel_general" msgid="4384774889645929705">"Энгийн зурвас"</string>
+    <string name="notification_channel_general" msgid="4384774889645929705">"Энгийн мессеж"</string>
     <string name="notification_channel_storage" msgid="2720725707628094977">"Хадгалах сан"</string>
     <string name="notification_channel_hints" msgid="7703783206000346876">"Заавар"</string>
     <string name="instant_apps" msgid="8337185853050247304">"Шуурхай апп"</string>
