@@ -198,5 +198,33 @@ TEST(DominatorTreeTest, NonZeroDensitiesMatch) {
   EXPECT_EQ(expected, printer.ToString(&tree));
 }
 
+TEST(DominatorTreeTest, MccMncIsPeertoLocale) {
+  const ConfigDescription default_config = {};
+  const ConfigDescription de_config = test::ParseConfigOrDie("de");
+  const ConfigDescription fr_config = test::ParseConfigOrDie("fr");
+  const ConfigDescription mcc_config = test::ParseConfigOrDie("mcc262");
+  const ConfigDescription mcc_fr_config = test::ParseConfigOrDie("mcc262-fr");
+  const ConfigDescription mnc_config = test::ParseConfigOrDie("mnc2");
+  const ConfigDescription mnc_fr_config = test::ParseConfigOrDie("mnc2-fr");
+  std::vector<std::unique_ptr<ResourceConfigValue>> configs;
+  configs.push_back(util::make_unique<ResourceConfigValue>(default_config, ""));
+  configs.push_back(util::make_unique<ResourceConfigValue>(de_config, ""));
+  configs.push_back(util::make_unique<ResourceConfigValue>(fr_config, ""));
+  configs.push_back(util::make_unique<ResourceConfigValue>(mcc_config, ""));
+  configs.push_back(util::make_unique<ResourceConfigValue>(mcc_fr_config, ""));
+  configs.push_back(util::make_unique<ResourceConfigValue>(mnc_config, ""));
+  configs.push_back(util::make_unique<ResourceConfigValue>(mnc_fr_config, ""));
+  DominatorTree tree(configs);
+  PrettyPrinter printer;
+  std::string expected =
+      "<default>\n"
+      "de\n"
+      "fr\n"
+      "mcc262\n"
+      "mcc262-fr\n"
+      "mnc2\n"
+      "mnc2-fr\n";
+  EXPECT_EQ(expected, printer.ToString(&tree));
+}
 
 }  // namespace aapt
