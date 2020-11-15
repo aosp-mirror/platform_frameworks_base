@@ -2562,14 +2562,10 @@ public class UserManagerService extends IUserManager.Stub {
 
             mNextSerialNumber = -1;
             if (parser.getName().equals(TAG_USERS)) {
-                String lastSerialNumber = parser.getAttributeValue(null, ATTR_NEXT_SERIAL_NO);
-                if (lastSerialNumber != null) {
-                    mNextSerialNumber = Integer.parseInt(lastSerialNumber);
-                }
-                String versionNumber = parser.getAttributeValue(null, ATTR_USER_VERSION);
-                if (versionNumber != null) {
-                    mUserVersion = Integer.parseInt(versionNumber);
-                }
+                mNextSerialNumber =
+                        parser.getAttributeInt(null, ATTR_NEXT_SERIAL_NO, mNextSerialNumber);
+                mUserVersion =
+                        parser.getAttributeInt(null, ATTR_USER_VERSION, mUserVersion);
             }
 
             // Pre-O global user restriction were stored as a single bundle (as opposed to per-user
@@ -2580,9 +2576,7 @@ public class UserManagerService extends IUserManager.Stub {
                 if (type == XmlPullParser.START_TAG) {
                     final String name = parser.getName();
                     if (name.equals(TAG_USER)) {
-                        String id = parser.getAttributeValue(null, ATTR_ID);
-
-                        UserData userData = readUserLP(Integer.parseInt(id));
+                        UserData userData = readUserLP(parser.getAttributeInt(null, ATTR_ID));
 
                         if (userData != null) {
                             synchronized (mUsersLock) {
@@ -2609,10 +2603,8 @@ public class UserManagerService extends IUserManager.Stub {
                     } else if (name.equals(TAG_DEVICE_OWNER_USER_ID)
                             // Legacy name, should only be encountered when upgrading from pre-O.
                             || name.equals(TAG_GLOBAL_RESTRICTION_OWNER_ID)) {
-                        String ownerUserId = parser.getAttributeValue(null, ATTR_ID);
-                        if (ownerUserId != null) {
-                            mDeviceOwnerUserId = Integer.parseInt(ownerUserId);
-                        }
+                        mDeviceOwnerUserId =
+                                parser.getAttributeInt(null, ATTR_ID, mDeviceOwnerUserId);
                     } else if (name.equals(TAG_DEVICE_POLICY_RESTRICTIONS)) {
                         // Should only happen when upgrading from pre-O (version < 7).
                         oldDevicePolicyGlobalUserRestrictions =
@@ -3093,24 +3085,24 @@ public class UserManagerService extends IUserManager.Stub {
         }
 
         if (type == XmlPullParser.START_TAG && parser.getName().equals(TAG_USER)) {
-            int storedId = readIntAttribute(parser, ATTR_ID, -1);
+            int storedId = parser.getAttributeInt(null, ATTR_ID, -1);
             if (storedId != id) {
                 Slog.e(LOG_TAG, "User id does not match the file name");
                 return null;
             }
-            serialNumber = readIntAttribute(parser, ATTR_SERIAL_NO, id);
-            flags = readIntAttribute(parser, ATTR_FLAGS, 0);
+            serialNumber = parser.getAttributeInt(null, ATTR_SERIAL_NO, id);
+            flags = parser.getAttributeInt(null, ATTR_FLAGS, 0);
             userType = parser.getAttributeValue(null, ATTR_TYPE);
             userType = userType != null ? userType.intern() : null;
             iconPath = parser.getAttributeValue(null, ATTR_ICON_PATH);
-            creationTime = readLongAttribute(parser, ATTR_CREATION_TIME, 0);
-            lastLoggedInTime = readLongAttribute(parser, ATTR_LAST_LOGGED_IN_TIME, 0);
+            creationTime = parser.getAttributeLong(null, ATTR_CREATION_TIME, 0);
+            lastLoggedInTime = parser.getAttributeLong(null, ATTR_LAST_LOGGED_IN_TIME, 0);
             lastLoggedInFingerprint = parser.getAttributeValue(null,
                     ATTR_LAST_LOGGED_IN_FINGERPRINT);
-            profileGroupId = readIntAttribute(parser, ATTR_PROFILE_GROUP_ID,
+            profileGroupId = parser.getAttributeInt(null, ATTR_PROFILE_GROUP_ID,
                     UserInfo.NO_PROFILE_GROUP_ID);
-            profileBadge = readIntAttribute(parser, ATTR_PROFILE_BADGE, 0);
-            restrictedProfileParentId = readIntAttribute(parser,
+            profileBadge = parser.getAttributeInt(null, ATTR_PROFILE_BADGE, 0);
+            restrictedProfileParentId = parser.getAttributeInt(null,
                     ATTR_RESTRICTED_PROFILE_PARENT_ID, UserInfo.NO_PROFILE_GROUP_ID);
             String valueString = parser.getAttributeValue(null, ATTR_PARTIAL);
             if ("true".equals(valueString)) {
@@ -3216,26 +3208,6 @@ public class UserManagerService extends IUserManager.Stub {
             }
         }
         return userData;
-    }
-
-    private int readIntAttribute(TypedXmlPullParser parser, String attr, int defaultValue) {
-        String valueString = parser.getAttributeValue(null, attr);
-        if (valueString == null) return defaultValue;
-        try {
-            return Integer.parseInt(valueString);
-        } catch (NumberFormatException nfe) {
-            return defaultValue;
-        }
-    }
-
-    private long readLongAttribute(TypedXmlPullParser parser, String attr, long defaultValue) {
-        String valueString = parser.getAttributeValue(null, attr);
-        if (valueString == null) return defaultValue;
-        try {
-            return Long.parseLong(valueString);
-        } catch (NumberFormatException nfe) {
-            return defaultValue;
-        }
     }
 
     /**

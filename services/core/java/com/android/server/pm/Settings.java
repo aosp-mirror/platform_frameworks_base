@@ -1570,12 +1570,10 @@ public final class Settings {
 
                     // For backwards compatibility with the previous name of "blocked", which
                     // now means hidden, read the old attribute as well.
-                    final String blockedStr = parser.getAttributeValue(null, ATTR_BLOCKED);
-                    boolean hidden = blockedStr == null
-                            ? false : Boolean.parseBoolean(blockedStr);
-                    final String hiddenStr = parser.getAttributeValue(null, ATTR_HIDDEN);
-                    hidden = hiddenStr == null
-                            ? hidden : Boolean.parseBoolean(hiddenStr);
+                    boolean hidden = parser.getAttributeBoolean(null, ATTR_HIDDEN, false);
+                    if (!hidden) {
+                        hidden = parser.getAttributeBoolean(null, ATTR_BLOCKED, false);
+                    }
 
                     final int distractionFlags = parser.getAttributeInt(null, ATTR_DISTRACTION_FLAGS, 0);
                     final boolean suspended = parser.getAttributeBoolean(null, ATTR_SUSPENDED, false);
@@ -2112,12 +2110,8 @@ public final class Settings {
             String tagName = parser.getName();
             if (tagName.equals(TAG_ITEM)) {
                 String name = parser.getAttributeValue(null, ATTR_NAME);
-                String grantedStr = parser.getAttributeValue(null, ATTR_GRANTED);
-                final boolean granted = grantedStr == null
-                        || Boolean.parseBoolean(grantedStr);
-                String flagsStr = parser.getAttributeValue(null, ATTR_FLAGS);
-                final int flags = (flagsStr != null)
-                        ? Integer.parseInt(flagsStr, 16) : 0;
+                final boolean granted = parser.getAttributeBoolean(null, ATTR_GRANTED, true);
+                final int flags = parser.getAttributeIntHex(null, ATTR_FLAGS, 0);
                 permissionsState.putInstallPermissionState(new PermissionState(name, granted,
                         flags));
             } else {
@@ -2138,7 +2132,7 @@ public final class Settings {
 
         for (PermissionState permissionState : permissionStates) {
             serializer.startTag(null, TAG_ITEM);
-            serializer.attribute(null, ATTR_NAME, permissionState.getName());
+            serializer.attributeInterned(null, ATTR_NAME, permissionState.getName());
             serializer.attributeBoolean(null, ATTR_GRANTED, permissionState.isGranted());
             serializer.attributeIntHex(null, ATTR_FLAGS, permissionState.getFlags());
             serializer.endTag(null, TAG_ITEM);
@@ -2150,14 +2144,7 @@ public final class Settings {
     void readUsesStaticLibLPw(TypedXmlPullParser parser, PackageSetting outPs)
             throws IOException, XmlPullParserException {
         String libName = parser.getAttributeValue(null, ATTR_NAME);
-        String libVersionStr = parser.getAttributeValue(null, ATTR_VERSION);
-
-        long libVersion = -1;
-        try {
-            libVersion = Long.parseLong(libVersionStr);
-        } catch (NumberFormatException e) {
-            // ignore
-        }
+        long libVersion = parser.getAttributeLong(null, ATTR_VERSION, -1);
 
         if (libName != null && libVersion >= 0) {
             outPs.usesStaticLibraries = ArrayUtils.appendElement(String.class,
@@ -3450,14 +3437,7 @@ public final class Settings {
             primaryCpuAbiStr = legacyCpuAbiStr;
         }
 
-        String version = parser.getAttributeValue(null, "version");
-        long versionCode = 0;
-        if (version != null) {
-            try {
-                versionCode = Long.parseLong(version);
-            } catch (NumberFormatException e) {
-            }
-        }
+        long versionCode = parser.getAttributeLong(null, "version", 0);
 
         int pkgFlags = 0;
         int pkgPrivateFlags = 0;
@@ -3468,42 +3448,16 @@ public final class Settings {
         PackageSetting ps = new PackageSetting(name, realName, new File(codePathStr),
                 legacyNativeLibraryPathStr, primaryCpuAbiStr, secondaryCpuAbiStr, cpuAbiOverrideStr,
                 versionCode, pkgFlags, pkgPrivateFlags, 0 /*sharedUserId*/, null, null, null);
-        String timeStampStr = parser.getAttributeValue(null, "ft");
-        if (timeStampStr != null) {
-            try {
-                long timeStamp = Long.parseLong(timeStampStr, 16);
-                ps.setTimeStamp(timeStamp);
-            } catch (NumberFormatException e) {
-            }
-        } else {
-            timeStampStr = parser.getAttributeValue(null, "ts");
-            if (timeStampStr != null) {
-                try {
-                    long timeStamp = Long.parseLong(timeStampStr);
-                    ps.setTimeStamp(timeStamp);
-                } catch (NumberFormatException e) {
-                }
-            }
+        long timeStamp = parser.getAttributeLongHex(null, "ft", 0);
+        if (timeStamp == 0) {
+            timeStamp = parser.getAttributeLong(null, "ts", 0);
         }
-        timeStampStr = parser.getAttributeValue(null, "it");
-        if (timeStampStr != null) {
-            try {
-                ps.firstInstallTime = Long.parseLong(timeStampStr, 16);
-            } catch (NumberFormatException e) {
-            }
-        }
-        timeStampStr = parser.getAttributeValue(null, "ut");
-        if (timeStampStr != null) {
-            try {
-                ps.lastUpdateTime = Long.parseLong(timeStampStr, 16);
-            } catch (NumberFormatException e) {
-            }
-        }
-        String idStr = parser.getAttributeValue(null, "userId");
-        ps.appId = idStr != null ? Integer.parseInt(idStr) : 0;
+        ps.setTimeStamp(timeStamp);
+        ps.firstInstallTime = parser.getAttributeLongHex(null, "it", 0);
+        ps.lastUpdateTime = parser.getAttributeLongHex(null, "ut", 0);
+        ps.appId = parser.getAttributeInt(null, "userId", 0);
         if (ps.appId <= 0) {
-            String sharedIdStr = parser.getAttributeValue(null, "sharedUserId");
-            ps.appId = sharedIdStr != null ? Integer.parseInt(sharedIdStr) : 0;
+            ps.appId = parser.getAttributeInt(null, "sharedUserId", 0);
         }
 
         int outerDepth = parser.getDepth();
@@ -3536,8 +3490,8 @@ public final class Settings {
             throws XmlPullParserException, IOException {
         String name = null;
         String realName = null;
-        String idStr = null;
-        String sharedIdStr = null;
+        int userId = 0;
+        int sharedUserId = 0;
         String codePathStr = null;
         String legacyCpuAbiString = null;
         String legacyNativeLibraryPathStr = null;
@@ -3552,7 +3506,6 @@ public final class Settings {
         String installInitiatingPackageName = null;
         String installInitiatorUninstalled = null;
         String volumeUuid = null;
-        String categoryHintString = null;
         String updateAvailable = null;
         int categoryHint = ApplicationInfo.CATEGORY_UNDEFINED;
         String uidError = null;
@@ -3562,7 +3515,6 @@ public final class Settings {
         long firstInstallTime = 0;
         long lastUpdateTime = 0;
         PackageSetting packageSetting = null;
-        String version = null;
         long versionCode = 0;
         String installedForceQueryable = null;
         String isStartable = null;
@@ -3570,9 +3522,9 @@ public final class Settings {
         try {
             name = parser.getAttributeValue(null, ATTR_NAME);
             realName = parser.getAttributeValue(null, "realName");
-            idStr = parser.getAttributeValue(null, "userId");
+            userId = parser.getAttributeInt(null, "userId", 0);
             uidError = parser.getAttributeValue(null, "uidError");
-            sharedIdStr = parser.getAttributeValue(null, "sharedUserId");
+            sharedUserId = parser.getAttributeInt(null, "sharedUserId", 0);
             codePathStr = parser.getAttributeValue(null, "codePath");
 
             legacyCpuAbiString = parser.getAttributeValue(null, "requiredCpuAbi");
@@ -3590,13 +3542,7 @@ public final class Settings {
                 primaryCpuAbiString = legacyCpuAbiString;
             }
 
-            version = parser.getAttributeValue(null, "version");
-            if (version != null) {
-                try {
-                    versionCode = Long.parseLong(version);
-                } catch (NumberFormatException e) {
-                }
-            }
+            versionCode = parser.getAttributeLong(null, "version", 0);
             installerPackageName = parser.getAttributeValue(null, "installer");
             installerAttributionTag = parser.getAttributeValue(null, "installerAttributionTag");
             isOrphaned = parser.getAttributeValue(null, "isOrphaned");
@@ -3605,13 +3551,8 @@ public final class Settings {
             installInitiatorUninstalled = parser.getAttributeValue(null,
                     "installInitiatorUninstalled");
             volumeUuid = parser.getAttributeValue(null, "volumeUuid");
-            categoryHintString = parser.getAttributeValue(null, "categoryHint");
-            if (categoryHintString != null) {
-                try {
-                    categoryHint = Integer.parseInt(categoryHintString);
-                } catch (NumberFormatException e) {
-                }
-            }
+            categoryHint = parser.getAttributeInt(null, "categoryHint",
+                    ApplicationInfo.CATEGORY_UNDEFINED);
 
             systemStr = parser.getAttributeValue(null, "publicFlags");
             if (systemStr != null) {
@@ -3659,40 +3600,15 @@ public final class Settings {
                     }
                 }
             }
-            String timeStampStr = parser.getAttributeValue(null, "ft");
-            if (timeStampStr != null) {
-                try {
-                    timeStamp = Long.parseLong(timeStampStr, 16);
-                } catch (NumberFormatException e) {
-                }
-            } else {
-                timeStampStr = parser.getAttributeValue(null, "ts");
-                if (timeStampStr != null) {
-                    try {
-                        timeStamp = Long.parseLong(timeStampStr);
-                    } catch (NumberFormatException e) {
-                    }
-                }
+            timeStamp = parser.getAttributeLongHex(null, "ft", 0);
+            if (timeStamp == 0) {
+                timeStamp = parser.getAttributeLong(null, "ts", 0);
             }
-            timeStampStr = parser.getAttributeValue(null, "it");
-            if (timeStampStr != null) {
-                try {
-                    firstInstallTime = Long.parseLong(timeStampStr, 16);
-                } catch (NumberFormatException e) {
-                }
-            }
-            timeStampStr = parser.getAttributeValue(null, "ut");
-            if (timeStampStr != null) {
-                try {
-                    lastUpdateTime = Long.parseLong(timeStampStr, 16);
-                } catch (NumberFormatException e) {
-                }
-            }
+            firstInstallTime = parser.getAttributeLongHex(null, "it", 0);
+            lastUpdateTime = parser.getAttributeLongHex(null, "ut", 0);
             if (PackageManagerService.DEBUG_SETTINGS)
-                Log.v(PackageManagerService.TAG, "Reading package: " + name + " userId=" + idStr
-                        + " sharedUserId=" + sharedIdStr);
-            final int userId = idStr != null ? Integer.parseInt(idStr) : 0;
-            final int sharedUserId = sharedIdStr != null ? Integer.parseInt(sharedIdStr) : 0;
+                Log.v(PackageManagerService.TAG, "Reading package: " + name + " userId=" + userId
+                        + " sharedUserId=" + sharedUserId);
             if (realName != null) {
                 realName = realName.intern();
             }
@@ -3722,7 +3638,7 @@ public final class Settings {
                     packageSetting.firstInstallTime = firstInstallTime;
                     packageSetting.lastUpdateTime = lastUpdateTime;
                 }
-            } else if (sharedIdStr != null) {
+            } else if (sharedUserId != 0) {
                 if (sharedUserId > 0) {
                     packageSetting = new PackageSetting(name.intern(), realName,
                             new File(codePathStr), legacyNativeLibraryPathStr,
@@ -3741,18 +3657,18 @@ public final class Settings {
                 } else {
                     PackageManagerService.reportSettingsProblem(Log.WARN,
                             "Error in package manager settings: package " + name
-                                    + " has bad sharedId " + sharedIdStr + " at "
+                                    + " has bad sharedId " + sharedUserId + " at "
                                     + parser.getPositionDescription());
                 }
             } else {
                 PackageManagerService.reportSettingsProblem(Log.WARN,
                         "Error in package manager settings: package " + name + " has bad userId "
-                                + idStr + " at " + parser.getPositionDescription());
+                                + userId + " at " + parser.getPositionDescription());
             }
         } catch (NumberFormatException e) {
             PackageManagerService.reportSettingsProblem(Log.WARN,
                     "Error in package manager settings: package " + name + " has bad userId "
-                            + idStr + " at " + parser.getPositionDescription());
+                            + userId + " at " + parser.getPositionDescription());
         }
         if (packageSetting != null) {
             packageSetting.uidError = "true".equals(uidError);
@@ -3785,7 +3701,7 @@ public final class Settings {
                     } else {
                         PackageManagerService.reportSettingsProblem(Log.WARN,
                                 "Error in package manager settings: package " + name
-                                        + " has bad enabled value: " + idStr + " at "
+                                        + " has bad enabled value: " + enabledStr + " at "
                                         + parser.getPositionDescription());
                     }
                 }
@@ -3993,14 +3909,12 @@ public final class Settings {
     private void readSharedUserLPw(TypedXmlPullParser parser)
             throws XmlPullParserException, IOException {
         String name = null;
-        String idStr = null;
         int pkgFlags = 0;
         int pkgPrivateFlags = 0;
         SharedUserSetting su = null;
-        try {
+        {
             name = parser.getAttributeValue(null, ATTR_NAME);
-            idStr = parser.getAttributeValue(null, "userId");
-            int userId = idStr != null ? Integer.parseInt(idStr) : 0;
+            int userId = parser.getAttributeInt(null, "userId", 0);
             if ("true".equals(parser.getAttributeValue(null, "system"))) {
                 pkgFlags |= ApplicationInfo.FLAG_SYSTEM;
             }
@@ -4011,7 +3925,7 @@ public final class Settings {
             } else if (userId == 0) {
                 PackageManagerService.reportSettingsProblem(Log.WARN,
                         "Error in package manager settings: shared-user " + name
-                                + " has bad userId " + idStr + " at "
+                                + " has bad userId " + userId + " at "
                                 + parser.getPositionDescription());
             } else {
                 if ((su = addSharedUserLPw(name.intern(), userId, pkgFlags, pkgPrivateFlags))
@@ -4021,10 +3935,6 @@ public final class Settings {
                                     + parser.getPositionDescription());
                 }
             }
-        } catch (NumberFormatException e) {
-            PackageManagerService.reportSettingsProblem(Log.WARN,
-                    "Error in package manager settings: package " + name + " has bad userId "
-                            + idStr + " at " + parser.getPositionDescription());
         }
 
         if (su != null) {
@@ -5603,12 +5513,10 @@ public final class Settings {
                 switch (parser.getName()) {
                     case TAG_ITEM: {
                         String name = parser.getAttributeValue(null, ATTR_NAME);
-                        String grantedStr = parser.getAttributeValue(null, ATTR_GRANTED);
-                        final boolean granted = grantedStr == null
-                                || Boolean.parseBoolean(grantedStr);
-                        String flagsStr = parser.getAttributeValue(null, ATTR_FLAGS);
-                        final int flags = (flagsStr != null)
-                                ? Integer.parseInt(flagsStr, 16) : 0;
+                        final boolean granted =
+                                parser.getAttributeBoolean(null, ATTR_GRANTED, true);
+                        final int flags =
+                                parser.getAttributeIntHex(null, ATTR_FLAGS, 0);
                         permissionsState.putRuntimePermissionState(new PermissionState(name,
                                 granted, flags), userId);
                     }
