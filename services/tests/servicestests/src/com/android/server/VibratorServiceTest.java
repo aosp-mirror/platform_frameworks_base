@@ -806,7 +806,7 @@ public class VibratorServiceTest {
     private void setRingerMode(int ringerMode) {
         AudioManager audioManager = mContextSpy.getSystemService(AudioManager.class);
         audioManager.setRingerModeInternal(ringerMode);
-        assertEquals(ringerMode, audioManager.getRingerMode());
+        assertEquals(ringerMode, audioManager.getRingerModeInternal());
     }
 
     private void setUserSetting(String settingName, int value) {

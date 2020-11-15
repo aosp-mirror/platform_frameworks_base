@@ -16,21 +16,27 @@
 
 package com.android.server.appsearch.external.localstorage;
 
+import android.os.Bundle;
 import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
 import android.annotation.WorkerThread;
 import android.app.appsearch.AppSearchResult;
+import android.app.appsearch.AppSearchSchema;
+import android.app.appsearch.GenericDocument;
+import android.app.appsearch.SearchResultPage;
+import android.app.appsearch.SearchSpec;
 import android.app.appsearch.exceptions.AppSearchException;
 import com.android.internal.util.Preconditions;
+import com.android.server.appsearch.external.localstorage.converter.GenericDocumentToProtoConverter;
+import com.android.server.appsearch.external.localstorage.converter.SchemaToProtoConverter;
+import com.android.server.appsearch.external.localstorage.converter.SearchResultToProtoConverter;
+import com.android.server.appsearch.external.localstorage.converter.SearchSpecToProtoConverter;
 
 import com.google.android.icing.IcingSearchEngine;
-import com.google.android.icing.proto.DeleteByNamespaceResultProto;
-import com.google.android.icing.proto.DeleteBySchemaTypeResultProto;
 import com.google.android.icing.proto.DeleteResultProto;
 import com.google.android.icing.proto.DocumentProto;
 import com.google.android.icing.proto.GetAllNamespacesResultProto;
@@ -54,8 +60,10 @@ import com.google.android.icing.proto.SetSchemaResultProto;
 import com.google.android.icing.proto.StatusProto;
 
 import java.io.File;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -89,12 +97,14 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  * </ul>
  *
  * <p>This class is thread safe.
+ *
  * @hide
  */
 
 @WorkerThread
 public final class AppSearchImpl {
     private static final String TAG = "AppSearchImpl";
+    private static final char DATABASE_DELIMITER = '/';
 
     @VisibleForTesting
     static final int OPTIMIZE_THRESHOLD_DOC_COUNT = 1000;
@@ -173,20 +183,27 @@ public final class AppSearchImpl {
      * <p>This method belongs to mutate group.
      *
      * @param databaseName  The name of the database where this schema lives.
-     * @param origSchema    The schema to set for this app.
+     * @param schemas       Schemas to set for this app.
      * @param forceOverride Whether to force-apply the schema even if it is incompatible. Documents
      *                      which do not comply with the new schema will be deleted.
      * @throws AppSearchException on IcingSearchEngine error.
      */
-    public void setSchema(@NonNull String databaseName, @NonNull SchemaProto origSchema,
+    public void setSchema(@NonNull String databaseName, @NonNull Set<AppSearchSchema> schemas,
             boolean forceOverride) throws AppSearchException {
         SchemaProto schemaProto = getSchemaProto();
 
         SchemaProto.Builder existingSchemaBuilder = schemaProto.toBuilder();
 
+        SchemaProto.Builder newSchemaBuilder = SchemaProto.newBuilder();
+        for (AppSearchSchema schema : schemas) {
+            SchemaTypeConfigProto schemaTypeProto = SchemaToProtoConverter.convert(schema);
+            newSchemaBuilder.addTypes(schemaTypeProto);
+        }
+
         // Combine the existing schema (which may have types from other databases) with this
         // database's new schema. Modifies the existingSchemaBuilder.
-        Set<String> newTypeNames = rewriteSchema(databaseName, existingSchemaBuilder, origSchema);
+        Set<String> newTypeNames = rewriteSchema(databaseName, existingSchemaBuilder,
+                newSchemaBuilder.build());
 
         SetSchemaResultProto setSchemaResultProto;
         mReadWriteLock.writeLock().lock();
@@ -220,7 +237,7 @@ public final class AppSearchImpl {
             if (setSchemaResultProto.getDeletedSchemaTypesCount() > 0
                     || (setSchemaResultProto.getIncompatibleSchemaTypesCount() > 0
                     && forceOverride)) {
-                // Any existing schemas which is not in origSchema will be deleted, and all
+                // Any existing schemas which is not in 'schemas' will be deleted, and all
                 // documents of these types were also deleted. And so well if we force override
                 // incompatible schemas.
                 checkForOptimize(/* force= */true);
@@ -239,10 +256,11 @@ public final class AppSearchImpl {
      * @param document     The document to index.
      * @throws AppSearchException on IcingSearchEngine error.
      */
-    public void putDocument(@NonNull String databaseName, @NonNull DocumentProto document)
+    public void putDocument(@NonNull String databaseName, @NonNull GenericDocument document)
             throws AppSearchException {
-        DocumentProto.Builder documentBuilder = document.toBuilder();
-        rewriteDocumentTypes(getDatabasePrefix(databaseName), documentBuilder, /*add=*/ true);
+        DocumentProto.Builder documentBuilder = GenericDocumentToProtoConverter.convert(
+                document).toBuilder();
+        addPrefixToDocument(documentBuilder, getDatabasePrefix(databaseName));
 
         PutResultProto putResultProto;
         mReadWriteLock.writeLock().lock();
@@ -266,11 +284,11 @@ public final class AppSearchImpl {
      * @param databaseName The databaseName this document resides in.
      * @param namespace    The namespace this document resides in.
      * @param uri          The URI of the document to get.
-     * @return The Document contents, or {@code null} if no such URI exists in the system.
+     * @return The Document contents
      * @throws AppSearchException on IcingSearchEngine error.
      */
-    @Nullable
-    public DocumentProto getDocument(@NonNull String databaseName, @NonNull String namespace,
+    @NonNull
+    public GenericDocument getDocument(@NonNull String databaseName, @NonNull String namespace,
             @NonNull String uri) throws AppSearchException {
         GetResultProto getResultProto;
         mReadWriteLock.readLock().lock();
@@ -283,8 +301,8 @@ public final class AppSearchImpl {
         checkSuccess(getResultProto.getStatus());
 
         DocumentProto.Builder documentBuilder = getResultProto.getDocument().toBuilder();
-        rewriteDocumentTypes(getDatabasePrefix(databaseName), documentBuilder, /*add=*/ false);
-        return documentBuilder.build();
+        removeDatabasesFromDocument(documentBuilder);
+        return GenericDocumentToProtoConverter.convert(documentBuilder.build());
     }
 
     /**
@@ -292,33 +310,60 @@ public final class AppSearchImpl {
      *
      * <p>This method belongs to query group.
      *
-     * @param databaseName The databaseName this query for.
-     * @param searchSpec   Defines what and how to search
-     * @param resultSpec   Defines what results to show
-     * @param scoringSpec  Defines how to order results
-     * @return The results of performing this search  The proto might have no {@code results} if no
-     * documents matched the query.
+     * @param databaseName    The databaseName this query for.
+     * @param queryExpression Query String to search.
+     * @param searchSpec      Spec for setting filters, raw query etc.
+     * @return The results of performing this search. It may contain an empty list of results if
+     * no documents matched the query.
      * @throws AppSearchException on IcingSearchEngine error.
      */
     @NonNull
-    public SearchResultProto query(
+    public SearchResultPage query(
             @NonNull String databaseName,
-            @NonNull SearchSpecProto searchSpec,
-            @NonNull ResultSpecProto resultSpec,
-            @NonNull ScoringSpecProto scoringSpec) throws AppSearchException {
-        SearchSpecProto.Builder searchSpecBuilder = searchSpec.toBuilder();
+            @NonNull String queryExpression,
+            @NonNull SearchSpec searchSpec) throws AppSearchException {
+        return doQuery(Collections.singleton(databaseName), queryExpression, searchSpec);
+    }
+
+    /**
+     * Executes a global query, i.e. over all permitted databases, against the AppSearch index and
+     * returns results.
+     *
+     * <p>This method belongs to query group.
+     *
+     * @param queryExpression Query String to search.
+     * @param searchSpec      Spec for setting filters, raw query etc.
+     * @return The results of performing this search. It may contain an empty list of results if
+     * no documents matched the query.
+     * @throws AppSearchException on IcingSearchEngine error.
+     */
+    @NonNull
+    public SearchResultPage globalQuery(
+            @NonNull String queryExpression,
+            @NonNull SearchSpec searchSpec) throws AppSearchException {
+        return doQuery(mNamespaceMap.keySet(), queryExpression, searchSpec);
+    }
+
+    private SearchResultPage doQuery(
+            @NonNull Set<String> databases, @NonNull String queryExpression,
+            @NonNull SearchSpec searchSpec)
+            throws AppSearchException {
+        SearchSpecProto searchSpecProto =
+                SearchSpecToProtoConverter.toSearchSpecProto(searchSpec);
+        SearchSpecProto.Builder searchSpecBuilder = searchSpecProto.toBuilder()
+                .setQuery(queryExpression);
+
+        ResultSpecProto resultSpec = SearchSpecToProtoConverter.toResultSpecProto(searchSpec);
+        ScoringSpecProto scoringSpec = SearchSpecToProtoConverter.toScoringSpecProto(searchSpec);
         SearchResultProto searchResultProto;
         mReadWriteLock.readLock().lock();
         try {
-            // Only rewrite SearchSpec for non empty database.
-            // rewriteSearchSpecForNonEmptyDatabase will return false for empty database, we
-            // should just return an empty SearchResult and skip sending request to Icing.
-            if (!rewriteSearchSpecForNonEmptyDatabase(databaseName, searchSpecBuilder)) {
-                return SearchResultProto.newBuilder()
-                        .setStatus(StatusProto.newBuilder()
-                                .setCode(StatusProto.Code.OK)
-                                .build())
-                        .build();
+            // rewriteSearchSpecForDatabases will return false if none of the databases have
+            // documents, so we can return an empty SearchResult and skip sending request to Icing.
+            // We use the mNamespaceMap.keySet here because it's the smaller set of valid databases
+            // that could exist.
+            if (!rewriteSearchSpecForDatabases(searchSpecBuilder, databases)) {
+                return new SearchResultPage(Bundle.EMPTY);
             }
             searchResultProto = mIcingSearchEngine.search(
                     searchSpecBuilder.build(), scoringSpec, resultSpec);
@@ -326,34 +371,32 @@ public final class AppSearchImpl {
             mReadWriteLock.readLock().unlock();
         }
         checkSuccess(searchResultProto.getStatus());
-        if (searchResultProto.getResultsCount() == 0) {
-            return searchResultProto;
-        }
-        return rewriteSearchResultProto(databaseName, searchResultProto);
+        return rewriteSearchResultProto(searchResultProto);
     }
 
     /**
      * Fetches the next page of results of a previously executed query. Results can be empty if
      * next-page token is invalid or all pages have been returned.
      *
-     * @param databaseName The databaseName of the previously executed query.
+     * <p>This method belongs to query group.
+     *
      * @param nextPageToken The token of pre-loaded results of previously executed query.
      * @return The next page of results of previously executed query.
      * @throws AppSearchException on IcingSearchEngine error.
      */
     @NonNull
-    public SearchResultProto getNextPage(@NonNull String databaseName, long nextPageToken)
+    public SearchResultPage getNextPage(long nextPageToken)
             throws AppSearchException {
         SearchResultProto searchResultProto = mIcingSearchEngine.getNextPage(nextPageToken);
         checkSuccess(searchResultProto.getStatus());
-        if (searchResultProto.getResultsCount() == 0) {
-            return searchResultProto;
-        }
-        return rewriteSearchResultProto(databaseName, searchResultProto);
+        return rewriteSearchResultProto(searchResultProto);
     }
 
     /**
      * Invalidates the next-page token so that no more results of the related query can be returned.
+     *
+     * <p>This method belongs to query group.
+     *
      * @param nextPageToken The token of pre-loaded results of previously executed query to be
      *                      Invalidated.
      */
@@ -386,93 +429,43 @@ public final class AppSearchImpl {
     }
 
     /**
-     * Removes all documents having the given {@code schemaType} in given database.
+     * Removes documents by given query.
      *
      * <p>This method belongs to mutate group.
      *
-     * @param databaseName The databaseName that contains documents of schemaType.
-     * @param schemaType   The schemaType of documents to remove.
+     * @param databaseName    The databaseName the document is in.
+     * @param queryExpression Query String to search.
+     * @param searchSpec      Defines what and how to remove
      * @throws AppSearchException on IcingSearchEngine error.
      */
-    public void removeByType(@NonNull String databaseName, @NonNull String schemaType)
+    public void removeByQuery(@NonNull String databaseName, @NonNull String queryExpression,
+            @NonNull SearchSpec searchSpec)
             throws AppSearchException {
-        String qualifiedType = getDatabasePrefix(databaseName) + schemaType;
-        DeleteBySchemaTypeResultProto deleteBySchemaTypeResultProto;
-        mReadWriteLock.writeLock().lock();
-        try {
-            Set<String> existingSchemaTypes = mSchemaMap.get(databaseName);
-            if (existingSchemaTypes == null || !existingSchemaTypes.contains(qualifiedType)) {
-                return;
-            }
-            deleteBySchemaTypeResultProto = mIcingSearchEngine.deleteBySchemaType(qualifiedType);
-            checkForOptimize(/* force= */true);
-        } finally {
-            mReadWriteLock.writeLock().unlock();
-        }
-        checkSuccess(deleteBySchemaTypeResultProto.getStatus());
-    }
 
-    /**
-     * Removes all documents having the given {@code namespace} in given database.
-     *
-     * <p>This method belongs to mutate group.
-     *
-     * @param databaseName The databaseName that contains documents of namespace.
-     * @param namespace    The namespace of documents to remove.
-     * @throws AppSearchException on IcingSearchEngine error.
-     */
-    public void removeByNamespace(@NonNull String databaseName, @NonNull String namespace)
-            throws AppSearchException {
-        String qualifiedNamespace = getDatabasePrefix(databaseName) + namespace;
-        DeleteByNamespaceResultProto deleteByNamespaceResultProto;
+        SearchSpecProto searchSpecProto =
+                SearchSpecToProtoConverter.toSearchSpecProto(searchSpec);
+        SearchSpecProto.Builder searchSpecBuilder = searchSpecProto.toBuilder()
+                .setQuery(queryExpression);
+        DeleteResultProto deleteResultProto;
         mReadWriteLock.writeLock().lock();
         try {
-            Set<String> existingNamespaces = mNamespaceMap.get(databaseName);
-            if (existingNamespaces == null || !existingNamespaces.contains(qualifiedNamespace)) {
+            // Only rewrite SearchSpec for non empty database.
+            // rewriteSearchSpecForNonEmptyDatabase will return false for empty database, we
+            // should skip sending request to Icing and return in here.
+            if (!rewriteSearchSpecForDatabases(searchSpecBuilder,
+                    Collections.singleton(databaseName))) {
                 return;
             }
-            deleteByNamespaceResultProto = mIcingSearchEngine.deleteByNamespace(qualifiedNamespace);
+            deleteResultProto = mIcingSearchEngine.deleteByQuery(
+                    searchSpecBuilder.build());
             checkForOptimize(/* force= */true);
         } finally {
             mReadWriteLock.writeLock().unlock();
         }
-        checkSuccess(deleteByNamespaceResultProto.getStatus());
-    }
-
-    /**
-     * Clears the given database by removing all documents and types.
-     *
-     * <p>The schemas will remain. To clear everything including schemas, please call
-     * {@link #setSchema} with an empty schema and {@code forceOverride} set to true.
-     *
-     * <p>This method belongs to mutate group.
-     *
-     * @param databaseName The databaseName to remove all documents from.
-     * @throws AppSearchException on IcingSearchEngine error.
-     */
-    public void removeAll(@NonNull String databaseName)
-            throws AppSearchException {
-        mReadWriteLock.writeLock().lock();
-        try {
-            Set<String> existingNamespaces = mNamespaceMap.get(databaseName);
-            if (existingNamespaces == null) {
-                return;
-            }
-            for (String namespace : existingNamespaces) {
-                DeleteByNamespaceResultProto deleteByNamespaceResultProto =
-                        mIcingSearchEngine.deleteByNamespace(namespace);
-                // There's no way for AppSearch to know that all documents in a particular
-                // namespace have been deleted, but if you try to delete an empty namespace, Icing
-                // returns NOT_FOUND. Just ignore that code.
-                checkCodeOneOf(
-                        deleteByNamespaceResultProto.getStatus(),
-                        StatusProto.Code.OK, StatusProto.Code.NOT_FOUND);
-            }
-            mNamespaceMap.remove(databaseName);
-            checkForOptimize(/* force= */true);
-        } finally {
-            mReadWriteLock.writeLock().unlock();
-        }
+        // It seems that the caller wants to get success if the data matching the query is not in
+        // the DB because it was not there or was successfully deleted.
+        checkCodeOneOf(deleteResultProto.getStatus(),
+                StatusProto.Code.OK, StatusProto.Code.NOT_FOUND);
     }
 
     /**
@@ -565,36 +558,63 @@ public final class AppSearchImpl {
     }
 
     /**
-     * Rewrites all types and namespaces mentioned anywhere in {@code documentBuilder} to prepend
-     * or remove {@code prefix}.
+     * Prepends {@code prefix} to all types and namespaces mentioned anywhere in
+     * {@code documentBuilder}.
      *
-     * @param prefix          The prefix to add or remove
      * @param documentBuilder The document to mutate
-     * @param add             Whether to add prefix to the types and namespaces. If {@code false},
-     *                        prefix will be removed.
-     * @throws IllegalStateException If {@code add=false} and the document has a type or namespace
-     *                               that doesn't start with {@code prefix}.
+     * @param prefix          The prefix to add
      */
     @VisibleForTesting
-    void rewriteDocumentTypes(
-            @NonNull String prefix,
+    void addPrefixToDocument(
             @NonNull DocumentProto.Builder documentBuilder,
-            boolean add) {
+            @NonNull String prefix) {
         // Rewrite the type name to include/remove the prefix.
-        String newSchema;
-        if (add) {
-            newSchema = prefix + documentBuilder.getSchema();
-        } else {
-            newSchema = removePrefix(prefix, "schemaType", documentBuilder.getSchema());
-        }
+        String newSchema = prefix + documentBuilder.getSchema();
         documentBuilder.setSchema(newSchema);
 
         // Rewrite the namespace to include/remove the prefix.
-        if (add) {
-            documentBuilder.setNamespace(prefix + documentBuilder.getNamespace());
-        } else {
-            documentBuilder.setNamespace(
-                    removePrefix(prefix, "namespace", documentBuilder.getNamespace()));
+        documentBuilder.setNamespace(prefix + documentBuilder.getNamespace());
+
+        // Recurse into derived documents
+        for (int propertyIdx = 0;
+                propertyIdx < documentBuilder.getPropertiesCount();
+                propertyIdx++) {
+            int documentCount = documentBuilder.getProperties(propertyIdx).getDocumentValuesCount();
+            if (documentCount > 0) {
+                PropertyProto.Builder propertyBuilder =
+                        documentBuilder.getProperties(propertyIdx).toBuilder();
+                for (int documentIdx = 0; documentIdx < documentCount; documentIdx++) {
+                    DocumentProto.Builder derivedDocumentBuilder =
+                            propertyBuilder.getDocumentValues(documentIdx).toBuilder();
+                    addPrefixToDocument(derivedDocumentBuilder, prefix);
+                    propertyBuilder.setDocumentValues(documentIdx, derivedDocumentBuilder);
+                }
+                documentBuilder.setProperties(propertyIdx, propertyBuilder);
+            }
+        }
+    }
+
+    /**
+     * Removes any database names from types and namespaces mentioned anywhere in
+     * {@code documentBuilder}.
+     *
+     * @param documentBuilder The document to mutate
+     */
+    @VisibleForTesting
+    void removeDatabasesFromDocument(@NonNull DocumentProto.Builder documentBuilder) {
+        int delimiterIndex;
+        if ((delimiterIndex = documentBuilder.getSchema().indexOf(DATABASE_DELIMITER)) != -1) {
+            // Rewrite the type name to remove the prefix.
+            // Add 1 to include the char size of the DATABASE_DELIMITER
+            String newSchema = documentBuilder.getSchema().substring(delimiterIndex + 1);
+            documentBuilder.setSchema(newSchema);
+        }
+
+        if ((delimiterIndex = documentBuilder.getNamespace().indexOf(DATABASE_DELIMITER)) != -1) {
+            // Rewrite the namespace to remove the prefix.
+            // Add 1 to include the char size of the DATABASE_DELIMITER
+            String newNamespace = documentBuilder.getNamespace().substring(delimiterIndex + 1);
+            documentBuilder.setNamespace(newNamespace);
         }
 
         // Recurse into derived documents
@@ -608,7 +628,7 @@ public final class AppSearchImpl {
                 for (int documentIdx = 0; documentIdx < documentCount; documentIdx++) {
                     DocumentProto.Builder derivedDocumentBuilder =
                             propertyBuilder.getDocumentValues(documentIdx).toBuilder();
-                    rewriteDocumentTypes(prefix, derivedDocumentBuilder, add);
+                    removeDatabasesFromDocument(derivedDocumentBuilder);
                     propertyBuilder.setDocumentValues(documentIdx, derivedDocumentBuilder);
                 }
                 documentBuilder.setProperties(propertyIdx, propertyBuilder);
@@ -617,51 +637,68 @@ public final class AppSearchImpl {
     }
 
     /**
-     * Rewrites searchSpec by adding schemaTypeFilter and namespacesFilter
+     * Rewrites the schemaTypeFilters and namespacesFilters that exist in {@code databaseNames}.
      *
-     * <p>If user input empty filter lists, will look up {@link #mSchemaMap} and
-     * {@link #mNamespaceMap} and put all values belong to current database to narrow down Icing
-     * search area.
+     * <p>If the searchSpec has empty filter lists, all existing databases from
+     * {@code databaseNames} will be added.
      * <p>This method should be only called in query methods and get the READ lock to keep thread
      * safety.
-     * @return false if the current database is brand new and contains nothing. We should just
-     * return an empty query result to user.
+     *
+     * @return false if none of the requested databases exist.
      */
     @VisibleForTesting
     @GuardedBy("mReadWriteLock")
-    boolean rewriteSearchSpecForNonEmptyDatabase(@NonNull String databaseName,
-            @NonNull SearchSpecProto.Builder searchSpecBuilder) {
-        Set<String> existingSchemaTypes = mSchemaMap.get(databaseName);
-        Set<String> existingNamespaces = mNamespaceMap.get(databaseName);
-        if (existingSchemaTypes == null || existingSchemaTypes.isEmpty()
-                || existingNamespaces == null || existingNamespaces.isEmpty()) {
+    boolean rewriteSearchSpecForDatabases(
+            @NonNull SearchSpecProto.Builder searchSpecBuilder,
+            @NonNull Set<String> databaseNames) {
+        // Create a copy since retainAll() modifies the original set.
+        Set<String> existingDatabases = new HashSet<>(mNamespaceMap.keySet());
+        existingDatabases.retainAll(databaseNames);
+
+        if (existingDatabases.isEmpty()) {
+            // None of the databases exist, empty query.
             return false;
         }
-        // Rewrite any existing schema types specified in the searchSpec, or add schema types to
-        // limit the search to this database instance.
-        if (searchSpecBuilder.getSchemaTypeFiltersCount() > 0) {
-            for (int i = 0; i < searchSpecBuilder.getSchemaTypeFiltersCount(); i++) {
-                String qualifiedType = getDatabasePrefix(databaseName)
-                        + searchSpecBuilder.getSchemaTypeFilters(i);
-                if (existingSchemaTypes.contains(qualifiedType)) {
-                    searchSpecBuilder.setSchemaTypeFilters(i, qualifiedType);
+
+        // Cache the schema type filters and namespaces before clearing everything.
+        List<String> schemaTypeFilters = searchSpecBuilder.getSchemaTypeFiltersList();
+        searchSpecBuilder.clearSchemaTypeFilters();
+
+        List<String> namespaceFilters = searchSpecBuilder.getNamespaceFiltersList();
+        searchSpecBuilder.clearNamespaceFilters();
+
+        // Rewrite filters to include a database prefix.
+        for (String databaseName : existingDatabases) {
+            Set<String> existingSchemaTypes = mSchemaMap.get(databaseName);
+            if (schemaTypeFilters.isEmpty()) {
+                // Include all schema types
+                searchSpecBuilder.addAllSchemaTypeFilters(existingSchemaTypes);
+            } else {
+                // Qualify the given schema types
+                for (String schemaType : schemaTypeFilters) {
+                    String qualifiedType = getDatabasePrefix(databaseName) + schemaType;
+                    if (existingSchemaTypes.contains(qualifiedType)) {
+                        searchSpecBuilder.addSchemaTypeFilters(qualifiedType);
+                    }
+
                 }
             }
-        } else {
-            searchSpecBuilder.addAllSchemaTypeFilters(existingSchemaTypes);
+
+            Set<String> existingNamespaces = mNamespaceMap.get(databaseName);
+            if (namespaceFilters.isEmpty()) {
+                // Include all namespaces
+                searchSpecBuilder.addAllNamespaceFilters(existingNamespaces);
+            } else {
+                // Qualify the given namespaces.
+                for (String namespace : namespaceFilters) {
+                    String qualifiedNamespace = getDatabasePrefix(databaseName) + namespace;
+                    if (existingNamespaces.contains(qualifiedNamespace)) {
+                        searchSpecBuilder.addNamespaceFilters(qualifiedNamespace);
+                    }
+                }
+            }
         }
 
-        // Rewrite any existing namespaces specified in the searchSpec, or add namespaces to
-        // limit the search to this database instance.
-        if (searchSpecBuilder.getNamespaceFiltersCount() > 0) {
-            for (int i = 0; i < searchSpecBuilder.getNamespaceFiltersCount(); i++) {
-                String qualifiedNamespace = getDatabasePrefix(databaseName)
-                        + searchSpecBuilder.getNamespaceFilters(i);
-                searchSpecBuilder.setNamespaceFilters(i, qualifiedNamespace);
-            }
-        } else {
-            searchSpecBuilder.addAllNamespaceFilters(existingNamespaces);
-        }
         return true;
     }
 
@@ -676,28 +713,18 @@ public final class AppSearchImpl {
 
     @NonNull
     private String getDatabasePrefix(@NonNull String databaseName) {
-        return databaseName + "/";
+        // TODO(b/170370381): Reconsider the way we separate database names for security reasons.
+        return databaseName + DATABASE_DELIMITER;
     }
 
     @NonNull
     private String getDatabaseName(@NonNull String prefixedValue) throws AppSearchException {
-        int delimiterIndex = prefixedValue.indexOf('/');
+        int delimiterIndex = prefixedValue.indexOf(DATABASE_DELIMITER);
         if (delimiterIndex == -1) {
             throw new AppSearchException(AppSearchResult.RESULT_UNKNOWN_ERROR,
                     "The databaseName prefixed value doesn't contains a valid database name.");
         }
         return prefixedValue.substring(0, delimiterIndex);
-    }
-
-    @NonNull
-    private static String removePrefix(@NonNull String prefix, @NonNull String inputType,
-            @NonNull String input) {
-        if (!input.startsWith(prefix)) {
-            throw new IllegalStateException(
-                    "Unexpected " + inputType + " \"" + input
-                            + "\" does not start with \"" + prefix + "\"");
-        }
-        return input.substring(prefix.length());
     }
 
     @GuardedBy("mReadWriteLock")
@@ -733,7 +760,7 @@ public final class AppSearchImpl {
         }
 
         if (statusProto.getCode() == StatusProto.Code.WARNING_DATA_LOSS) {
-            // TODO: May want to propagate WARNING_DATA_LOSS up to AppSearchManager so they can
+            // TODO: May want to propagate WARNING_DATA_LOSS up to AppSearchSession so they can
             //  choose to log the error or potentially pass it on to clients.
             Log.w(TAG, "Encountered WARNING_DATA_LOSS: " + statusProto.getMessage());
             return;
@@ -776,22 +803,21 @@ public final class AppSearchImpl {
         }
     }
 
-    /** Remove the rewritten schema types from any result documents.*/
-    private SearchResultProto rewriteSearchResultProto(@NonNull String databaseName,
+    /** Remove the rewritten schema types from any result documents. */
+    private SearchResultPage rewriteSearchResultProto(
             @NonNull SearchResultProto searchResultProto) {
-        SearchResultProto.Builder searchResultsBuilder = searchResultProto.toBuilder();
-        for (int i = 0; i < searchResultsBuilder.getResultsCount(); i++) {
+        SearchResultProto.Builder resultsBuilder = searchResultProto.toBuilder();
+        for (int i = 0; i < searchResultProto.getResultsCount(); i++) {
             if (searchResultProto.getResults(i).hasDocument()) {
                 SearchResultProto.ResultProto.Builder resultBuilder =
-                        searchResultsBuilder.getResults(i).toBuilder();
+                        searchResultProto.getResults(i).toBuilder();
                 DocumentProto.Builder documentBuilder = resultBuilder.getDocument().toBuilder();
-                rewriteDocumentTypes(
-                        getDatabasePrefix(databaseName), documentBuilder, /*add=*/false);
+                removeDatabasesFromDocument(documentBuilder);
                 resultBuilder.setDocument(documentBuilder);
-                searchResultsBuilder.setResults(i, resultBuilder);
+                resultsBuilder.setResults(i, resultBuilder);
             }
         }
-        return searchResultsBuilder.build();
+        return SearchResultToProtoConverter.convertToSearchResultPage(resultsBuilder);
     }
 
     @VisibleForTesting

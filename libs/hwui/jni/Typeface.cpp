@@ -217,6 +217,20 @@ static jlongArray Typeface_readTypefaces(JNIEnv *env, jobject, jobject buffer) {
     return result;
 }
 
+
+static void Typeface_forceSetStaticFinalField(JNIEnv *env, jclass cls, jstring fieldName,
+        jobject typeface) {
+    ScopedUtfChars fieldNameChars(env, fieldName);
+    jfieldID fid =
+            env->GetStaticFieldID(cls, fieldNameChars.c_str(), "Landroid/graphics/Typeface;");
+    if (fid == 0) {
+        jniThrowRuntimeException(env, "Unable to find field");
+        return;
+    }
+    env->SetStaticObjectField(cls, fid, typeface);
+}
+
+
 ///////////////////////////////////////////////////////////////////////////////
 
 static const JNINativeMethod gTypefaceMethods[] = {
@@ -237,6 +251,8 @@ static const JNINativeMethod gTypefaceMethods[] = {
           (void*)Typeface_registerGenericFamily },
     { "nativeWriteTypefaces", "(Ljava/nio/ByteBuffer;[J)I", (void*)Typeface_writeTypefaces},
     { "nativeReadTypefaces", "(Ljava/nio/ByteBuffer;)[J", (void*)Typeface_readTypefaces},
+    { "nativeForceSetStaticFinalField", "(Ljava/lang/String;Landroid/graphics/Typeface;)V",
+          (void*)Typeface_forceSetStaticFinalField },
 };
 
 int register_android_graphics_Typeface(JNIEnv* env)

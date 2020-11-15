@@ -88,7 +88,8 @@
             android:layout_width="8dp"
             android:layout_height="match_parent"
             android:visibility="visible" />
-        <!-- Negative Button -->
+
+        <!-- Negative Button, reserved for app -->
         <Button android:id="@+id/button_negative"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -97,13 +98,32 @@
             android:ellipsize="end"
             android:maxLines="2"
             android:maxWidth="@dimen/biometric_dialog_button_negative_max_width"/>
+        <!-- Cancel Button, replaces negative button when biometric is accepted -->
+        <Button android:id="@+id/button_cancel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="@*android:style/Widget.DeviceDefault.Button.Borderless.Colored"
+            android:layout_gravity="center_vertical"
+            android:maxWidth="@dimen/biometric_dialog_button_negative_max_width"
+            android:text="@string/cancel"
+            android:visibility="gone"/>
+        <!-- "Use Credential" Button, replaces if device credential is allowed -->
+        <Button android:id="@+id/button_use_credential"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="@*android:style/Widget.DeviceDefault.Button.Borderless.Colored"
+            android:layout_gravity="center_vertical"
+            android:maxWidth="@dimen/biometric_dialog_button_negative_max_width"
+            android:visibility="gone"/>
+
         <Space android:id="@+id/middleSpacer"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:visibility="visible"/>
+
         <!-- Positive Button -->
-        <Button android:id="@+id/button_positive"
+        <Button android:id="@+id/button_confirm"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             style="@*android:style/Widget.DeviceDefault.Button.Colored"
@@ -124,6 +144,7 @@
             android:maxWidth="@dimen/biometric_dialog_button_positive_max_width"
             android:text="@string/biometric_dialog_try_again"
             android:visibility="gone"/>
+
         <Space android:id="@+id/rightSpacer"
             android:layout_width="8dp"
             android:layout_height="match_parent"

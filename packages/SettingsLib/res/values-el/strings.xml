@@ -399,6 +399,9 @@
     <string name="inactive_app_inactive_summary" msgid="3161222402614236260">"Ανενεργό. Πατήστε για εναλλαγή."</string>
     <string name="inactive_app_active_summary" msgid="8047630990208722344">"Ενεργό. Πατήστε για εναλλαγή."</string>
     <string name="standby_bucket_summary" msgid="5128193447550429600">"Κατάσταση αναμονής εφαρμογής:<xliff:g id="BUCKET"> %s</xliff:g>"</string>
+    <string name="transcode_settings_title" msgid="6700974145733932357">"Ρυθμίσεις διακωδικοποίησης μέσων"</string>
+    <string name="transcode_enable_all" msgid="4719796495995795404">"Ενεργοποίηση διακωδικοποίησης για όλες τις εφαρμογές"</string>
+    <string name="transcode_skip_apps" msgid="5680997722349545778">"Απενεργοποίηση της διακωδικοποίησης για εφαρμογές"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"Υπηρεσίες που εκτελούνται"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"Προβολή και έλεγχος των εφαρμογών που εκτελούνται αυτή τη στιγμή"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"Υλοποίηση WebView"</string>

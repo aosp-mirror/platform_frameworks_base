@@ -16,15 +16,15 @@
 
 package com.android.server.pm;
 
-import com.android.internal.util.XmlUtils;
-
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
-
 import android.content.ComponentName;
 import android.content.IntentFilter;
 import android.util.Log;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
+
+import com.android.internal.util.XmlUtils;
+
+import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 
@@ -41,19 +41,19 @@ class PreferredActivity extends IntentFilter implements PreferredComponent.Callb
         mPref = new PreferredComponent(this, match, set, activity, always);
     }
 
-    PreferredActivity(XmlPullParser parser) throws XmlPullParserException, IOException {
+    PreferredActivity(TypedXmlPullParser parser) throws XmlPullParserException, IOException {
         mPref = new PreferredComponent(this, parser);
     }
 
-    public void writeToXml(XmlSerializer serializer, boolean full) throws IOException {
+    public void writeToXml(TypedXmlSerializer serializer, boolean full) throws IOException {
         mPref.writeToXml(serializer, full);
         serializer.startTag(null, "filter");
             super.writeToXml(serializer);
         serializer.endTag(null, "filter");
     }
 
-    public boolean onReadTag(String tagName, XmlPullParser parser) throws XmlPullParserException,
-            IOException {
+    public boolean onReadTag(String tagName, TypedXmlPullParser parser)
+            throws XmlPullParserException, IOException {
         if (tagName.equals("filter")) {
             if (DEBUG_FILTERS) {
                 Log.i(TAG, "Starting to parse filter...");

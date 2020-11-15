@@ -25,6 +25,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseLongArray;
 import android.util.TimeUtils;
+import android.util.TypedXmlSerializer;
 import android.util.Xml;
 import android.view.Display;
 
@@ -323,8 +324,7 @@ final class PersistentDataStore {
 
         XmlPullParser parser;
         try {
-            parser = Xml.newPullParser();
-            parser.setInput(new BufferedInputStream(is), StandardCharsets.UTF_8.name());
+            parser = Xml.resolvePullParser(is);
             loadFromXml(parser);
         } catch (IOException ex) {
             Slog.w(TAG, "Failed to load display manager persistent store data.", ex);
@@ -343,8 +343,7 @@ final class PersistentDataStore {
             os = mInjector.startWrite();
             boolean success = false;
             try {
-                XmlSerializer serializer = new FastXmlSerializer();
-                serializer.setOutput(new BufferedOutputStream(os), StandardCharsets.UTF_8.name());
+                TypedXmlSerializer serializer = Xml.resolveSerializer(os);
                 saveToXml(serializer);
                 serializer.flush();
                 success = true;

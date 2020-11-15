@@ -74,6 +74,7 @@ import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.storage.StorageManager;
+import android.os.storage.VolumeInfo;
 import android.service.pm.PackageServiceDumpProto;
 import android.text.TextUtils;
 import android.util.ArrayMap;
@@ -88,6 +89,8 @@ import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
 import android.util.SparseLongArray;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 import android.util.Xml;
 import android.util.proto.ProtoOutputStream;
 
@@ -96,13 +99,13 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.CollectionUtils;
-import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.JournaledFile;
 import com.android.internal.util.XmlUtils;
 import com.android.permission.persistence.RuntimePermissionsPersistence;
 import com.android.permission.persistence.RuntimePermissionsState;
 import com.android.server.LocalServices;
+import com.android.server.backup.PreferredActivityBackupHelper;
 import com.android.server.pm.Installer.InstallerException;
 import com.android.server.pm.parsing.PackageInfoUtils;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
@@ -117,10 +120,7 @@ import libcore.io.IoUtils;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
@@ -1297,7 +1297,7 @@ public final class Settings {
      *
      * @see PreferredActivityBackupHelper
      */
-    void readPreferredActivitiesLPw(XmlPullParser parser, int userId)
+    void readPreferredActivitiesLPw(TypedXmlPullParser parser, int userId)
             throws XmlPullParserException, IOException {
         int outerDepth = parser.getDepth();
         int type;
@@ -1330,7 +1330,7 @@ public final class Settings {
         }
     }
 
-    private void readPersistentPreferredActivitiesLPw(XmlPullParser parser, int userId)
+    private void readPersistentPreferredActivitiesLPw(TypedXmlPullParser parser, int userId)
             throws XmlPullParserException, IOException {
         int outerDepth = parser.getDepth();
         int type;
@@ -1352,7 +1352,7 @@ public final class Settings {
         }
     }
 
-    private void readCrossProfileIntentFiltersLPw(XmlPullParser parser, int userId)
+    private void readCrossProfileIntentFiltersLPw(TypedXmlPullParser parser, int userId)
             throws XmlPullParserException, IOException {
         int outerDepth = parser.getDepth();
         int type;
@@ -1374,8 +1374,8 @@ public final class Settings {
         }
     }
 
-    private void readDomainVerificationLPw(XmlPullParser parser, PackageSettingBase packageSetting)
-            throws XmlPullParserException, IOException {
+    private void readDomainVerificationLPw(TypedXmlPullParser parser,
+            PackageSettingBase packageSetting) throws XmlPullParserException, IOException {
         IntentFilterVerificationInfo ivi = new IntentFilterVerificationInfo(parser);
         packageSetting.setIntentFilterVerificationInfo(ivi);
         if (DEBUG_PARSER) {
@@ -1383,7 +1383,7 @@ public final class Settings {
         }
     }
 
-    private void readRestoredIntentFilterVerifications(XmlPullParser parser)
+    private void readRestoredIntentFilterVerifications(TypedXmlPullParser parser)
             throws XmlPullParserException, IOException {
         int outerDepth = parser.getDepth();
         int type;
@@ -1407,7 +1407,7 @@ public final class Settings {
         }
     }
 
-    void readDefaultAppsLPw(XmlPullParser parser, int userId)
+    void readDefaultAppsLPw(TypedXmlPullParser parser, int userId)
             throws XmlPullParserException, IOException {
         int outerDepth = parser.getDepth();
         int type;
@@ -1431,7 +1431,7 @@ public final class Settings {
         }
     }
 
-    void readBlockUninstallPackagesLPw(XmlPullParser parser, int userId)
+    void readBlockUninstallPackagesLPw(TypedXmlPullParser parser, int userId)
             throws XmlPullParserException, IOException {
         int outerDepth = parser.getDepth();
         int type;
@@ -1521,8 +1521,7 @@ public final class Settings {
                 str = new FileInputStream(userPackagesStateFile);
                 if (DEBUG_MU) Log.i(TAG, "Reading " + userPackagesStateFile);
             }
-            final XmlPullParser parser = Xml.newPullParser();
-            parser.setInput(str, StandardCharsets.UTF_8.name());
+            final TypedXmlPullParser parser = Xml.resolvePullParser(str);
 
             int type;
             while ((type=parser.next()) != XmlPullParser.START_TAG
@@ -1752,7 +1751,7 @@ public final class Settings {
         return packages.contains(packageName);
     }
 
-    private ArraySet<String> readComponentsLPr(XmlPullParser parser)
+    private ArraySet<String> readComponentsLPr(TypedXmlPullParser parser)
             throws IOException, XmlPullParserException {
         ArraySet<String> components = null;
         int type;
@@ -1784,7 +1783,7 @@ public final class Settings {
      * for recording packages.xml internally and for supporting backup/restore of the
      * preferred activity configuration.
      */
-    void writePreferredActivitiesLPr(XmlSerializer serializer, int userId, boolean full)
+    void writePreferredActivitiesLPr(TypedXmlSerializer serializer, int userId, boolean full)
             throws IllegalArgumentException, IllegalStateException, IOException {
         serializer.startTag(null, "preferred-activities");
         PreferredIntentResolver pir = mPreferredActivities.get(userId);
@@ -1798,7 +1797,7 @@ public final class Settings {
         serializer.endTag(null, "preferred-activities");
     }
 
-    void writePersistentPreferredActivitiesLPr(XmlSerializer serializer, int userId)
+    void writePersistentPreferredActivitiesLPr(TypedXmlSerializer serializer, int userId)
             throws IllegalArgumentException, IllegalStateException, IOException {
         serializer.startTag(null, TAG_PERSISTENT_PREFERRED_ACTIVITIES);
         PersistentPreferredIntentResolver ppir = mPersistentPreferredActivities.get(userId);
@@ -1812,7 +1811,7 @@ public final class Settings {
         serializer.endTag(null, TAG_PERSISTENT_PREFERRED_ACTIVITIES);
     }
 
-    void writeCrossProfileIntentFiltersLPr(XmlSerializer serializer, int userId)
+    void writeCrossProfileIntentFiltersLPr(TypedXmlSerializer serializer, int userId)
             throws IllegalArgumentException, IllegalStateException, IOException {
         serializer.startTag(null, TAG_CROSS_PROFILE_INTENT_FILTERS);
         CrossProfileIntentResolver cpir = mCrossProfileIntentResolvers.get(userId);
@@ -1826,7 +1825,7 @@ public final class Settings {
         serializer.endTag(null, TAG_CROSS_PROFILE_INTENT_FILTERS);
     }
 
-    void writeDomainVerificationsLPr(XmlSerializer serializer,
+    void writeDomainVerificationsLPr(TypedXmlSerializer serializer,
                                      IntentFilterVerificationInfo verificationInfo)
             throws IllegalArgumentException, IllegalStateException, IOException {
         if (verificationInfo != null && verificationInfo.getPackageName() != null) {
@@ -1841,7 +1840,7 @@ public final class Settings {
     }
 
     // Specifically for backup/restore
-    void writeAllDomainVerificationsLPr(XmlSerializer serializer, int userId)
+    void writeAllDomainVerificationsLPr(TypedXmlSerializer serializer, int userId)
             throws IllegalArgumentException, IllegalStateException, IOException {
         serializer.startTag(null, TAG_ALL_INTENT_FILTER_VERIFICATION);
         final int N = mPackages.size();
@@ -1856,7 +1855,7 @@ public final class Settings {
     }
 
     // Specifically for backup/restore
-    void readAllDomainVerificationsLPr(XmlPullParser parser, int userId)
+    void readAllDomainVerificationsLPr(TypedXmlPullParser parser, int userId)
             throws XmlPullParserException, IOException {
         mRestoredIntentFilterVerifications.clear();
 
@@ -1896,7 +1895,7 @@ public final class Settings {
         }
     }
 
-    void writeDefaultAppsLPr(XmlSerializer serializer, int userId)
+    void writeDefaultAppsLPr(TypedXmlSerializer serializer, int userId)
             throws IllegalArgumentException, IllegalStateException, IOException {
         serializer.startTag(null, TAG_DEFAULT_APPS);
         String defaultBrowser = mDefaultBrowserApp.get(userId);
@@ -1908,7 +1907,7 @@ public final class Settings {
         serializer.endTag(null, TAG_DEFAULT_APPS);
     }
 
-    void writeBlockUninstallPackagesLPr(XmlSerializer serializer, int userId)
+    void writeBlockUninstallPackagesLPr(TypedXmlSerializer serializer, int userId)
             throws IOException  {
         ArraySet<String> packages = mBlockUninstallPackages.get(userId);
         if (packages != null) {
@@ -1955,10 +1954,7 @@ public final class Settings {
 
         try {
             final FileOutputStream fstr = new FileOutputStream(userPackagesStateFile);
-            final BufferedOutputStream str = new BufferedOutputStream(fstr);
-
-            final XmlSerializer serializer = new FastXmlSerializer();
-            serializer.setOutput(str, StandardCharsets.UTF_8.name());
+            final TypedXmlSerializer serializer = Xml.resolveSerializer(fstr);
             serializer.startDocument(null, true);
             serializer.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
 
@@ -2076,9 +2072,9 @@ public final class Settings {
 
             serializer.endDocument();
 
-            str.flush();
+            fstr.flush();
             FileUtils.sync(fstr);
-            str.close();
+            fstr.close();
 
             // New settings successfully written, old ones are no longer
             // needed.
@@ -2108,7 +2104,7 @@ public final class Settings {
         }
     }
 
-    void readInstallPermissionsLPr(XmlPullParser parser,
+    void readInstallPermissionsLPr(TypedXmlPullParser parser,
             LegacyPermissionState permissionsState) throws IOException, XmlPullParserException {
         int outerDepth = parser.getDepth();
         int type;
@@ -2138,7 +2134,7 @@ public final class Settings {
         }
     }
 
-    void writePermissionsLPr(XmlSerializer serializer, Collection<PermissionState> permissionStates)
+    void writePermissionsLPr(TypedXmlSerializer serializer, Collection<PermissionState> permissionStates)
             throws IOException {
         if (permissionStates.isEmpty()) {
             return;
@@ -2157,7 +2153,7 @@ public final class Settings {
         serializer.endTag(null, TAG_PERMISSIONS);
     }
 
-    void readUsesStaticLibLPw(XmlPullParser parser, PackageSetting outPs)
+    void readUsesStaticLibLPw(TypedXmlPullParser parser, PackageSetting outPs)
             throws IOException, XmlPullParserException {
         String libName = parser.getAttributeValue(null, ATTR_NAME);
         String libVersionStr = parser.getAttributeValue(null, ATTR_VERSION);
@@ -2179,7 +2175,7 @@ public final class Settings {
         XmlUtils.skipCurrentTag(parser);
     }
 
-    void writeUsesStaticLibLPw(XmlSerializer serializer, String[] usesStaticLibraries,
+    void writeUsesStaticLibLPw(TypedXmlSerializer serializer, String[] usesStaticLibraries,
             long[] usesStaticLibraryVersions) throws IOException {
         if (ArrayUtils.isEmpty(usesStaticLibraries) || ArrayUtils.isEmpty(usesStaticLibraryVersions)
                 || usesStaticLibraries.length != usesStaticLibraryVersions.length) {
@@ -2236,8 +2232,7 @@ public final class Settings {
                 }
                 str = new FileInputStream(mStoppedPackagesFilename);
             }
-            final XmlPullParser parser = Xml.newPullParser();
-            parser.setInput(str, null);
+            final TypedXmlPullParser parser = Xml.resolvePullParser(str);
 
             int type;
             while ((type=parser.next()) != XmlPullParser.START_TAG
@@ -2334,12 +2329,8 @@ public final class Settings {
         mPastSignatures.clear();
 
         try {
-            FileOutputStream fstr = new FileOutputStream(mSettingsFilename);
-            BufferedOutputStream str = new BufferedOutputStream(fstr);
-
-            //XmlSerializer serializer = XmlUtils.serializerInstance();
-            XmlSerializer serializer = new FastXmlSerializer();
-            serializer.setOutput(str, StandardCharsets.UTF_8.name());
+            final FileOutputStream fstr = new FileOutputStream(mSettingsFilename);
+            final TypedXmlSerializer serializer = Xml.resolveSerializer(fstr);
             serializer.startDocument(null, true);
             serializer.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
 
@@ -2429,9 +2420,9 @@ public final class Settings {
 
             serializer.endDocument();
 
-            str.flush();
+            fstr.flush();
             FileUtils.sync(fstr);
-            str.close();
+            fstr.close();
 
             // New settings successfully written, old ones are no longer
             // needed.
@@ -2685,7 +2676,7 @@ public final class Settings {
         }
     }
 
-    void writeDisabledSysPackageLPr(XmlSerializer serializer, final PackageSetting pkg)
+    void writeDisabledSysPackageLPr(TypedXmlSerializer serializer, final PackageSetting pkg)
             throws java.io.IOException {
         serializer.startTag(null, "updated-package");
         serializer.attribute(null, ATTR_NAME, pkg.name);
@@ -2727,7 +2718,7 @@ public final class Settings {
         serializer.endTag(null, "updated-package");
     }
 
-    void writePackageLPr(XmlSerializer serializer, final PackageSetting pkg)
+    void writePackageLPr(TypedXmlSerializer serializer, final PackageSetting pkg)
             throws java.io.IOException {
         serializer.startTag(null, "package");
         serializer.attribute(null, ATTR_NAME, pkg.name);
@@ -2823,7 +2814,7 @@ public final class Settings {
         serializer.endTag(null, "package");
     }
 
-    void writeSigningKeySetLPr(XmlSerializer serializer,
+    void writeSigningKeySetLPr(TypedXmlSerializer serializer,
             PackageKeySetData data) throws IOException {
         serializer.startTag(null, "proper-signing-keyset");
         serializer.attribute(null, "identifier",
@@ -2831,7 +2822,7 @@ public final class Settings {
         serializer.endTag(null, "proper-signing-keyset");
     }
 
-    void writeUpgradeKeySetsLPr(XmlSerializer serializer,
+    void writeUpgradeKeySetsLPr(TypedXmlSerializer serializer,
             PackageKeySetData data) throws IOException {
         if (data.isUsingUpgradeKeySets()) {
             for (long id : data.getUpgradeKeySets()) {
@@ -2842,7 +2833,7 @@ public final class Settings {
         }
     }
 
-    void writeKeySetAliasesLPr(XmlSerializer serializer,
+    void writeKeySetAliasesLPr(TypedXmlSerializer serializer,
             PackageKeySetData data) throws IOException {
         for (Map.Entry<String, Long> e: data.getAliases().entrySet()) {
             serializer.startTag(null, "defined-keyset");
@@ -2892,8 +2883,7 @@ public final class Settings {
                 }
                 str = new FileInputStream(mSettingsFilename);
             }
-            XmlPullParser parser = Xml.newPullParser();
-            parser.setInput(str, StandardCharsets.UTF_8.name());
+            final TypedXmlPullParser parser = Xml.resolvePullParser(str);
 
             int type;
             while ((type = parser.next()) != XmlPullParser.START_TAG
@@ -3147,9 +3137,8 @@ public final class Settings {
                     Log.d(TAG, "Reading default preferred " + f);
                 }
 
-                try (InputStream str = new BufferedInputStream(new FileInputStream(f))) {
-                    XmlPullParser parser = Xml.newPullParser();
-                    parser.setInput(str, null);
+                try (InputStream str = new FileInputStream(f)) {
+                    final TypedXmlPullParser parser = Xml.resolvePullParser(str);
 
                     int type;
                     while ((type = parser.next()) != XmlPullParser.START_TAG
@@ -3420,7 +3409,7 @@ public final class Settings {
         }
     }
 
-    private void readDefaultPreferredActivitiesLPw(XmlPullParser parser, int userId)
+    private void readDefaultPreferredActivitiesLPw(TypedXmlPullParser parser, int userId)
             throws XmlPullParserException, IOException {
         final PackageManagerInternal pmInternal =
                 LocalServices.getService(PackageManagerInternal.class);
@@ -3452,8 +3441,8 @@ public final class Settings {
         }
     }
 
-    private void readDisabledSysPackageLPw(XmlPullParser parser) throws XmlPullParserException,
-            IOException {
+    private void readDisabledSysPackageLPw(TypedXmlPullParser parser)
+            throws XmlPullParserException, IOException {
         String name = parser.getAttributeValue(null, ATTR_NAME);
         String realName = parser.getAttributeValue(null, "realName");
         String codePathStr = parser.getAttributeValue(null, "codePath");
@@ -3551,7 +3540,8 @@ public final class Settings {
     private static int PRE_M_APP_INFO_FLAG_CANT_SAVE_STATE = 1<<28;
     private static int PRE_M_APP_INFO_FLAG_PRIVILEGED = 1<<30;
 
-    private void readPackageLPw(XmlPullParser parser) throws XmlPullParserException, IOException {
+    private void readPackageLPw(TypedXmlPullParser parser)
+            throws XmlPullParserException, IOException {
         String name = null;
         String realName = null;
         String idStr = null;
@@ -3891,7 +3881,7 @@ public final class Settings {
         }
     }
 
-    private Map<String, ArraySet<String>> readMimeGroupLPw(XmlPullParser parser,
+    private Map<String, ArraySet<String>> readMimeGroupLPw(TypedXmlPullParser parser,
             Map<String, ArraySet<String>> mimeGroups) throws XmlPullParserException, IOException {
         String groupName = parser.getAttributeValue(null, ATTR_NAME);
         if (groupName == null) {
@@ -3932,7 +3922,7 @@ public final class Settings {
         return mimeGroups;
     }
 
-    private void writeMimeGroupLPr(XmlSerializer serializer,
+    private void writeMimeGroupLPr(TypedXmlSerializer serializer,
             Map<String, ArraySet<String>> mimeGroups) throws IOException {
         if (mimeGroups == null) {
             return;
@@ -3952,8 +3942,8 @@ public final class Settings {
         }
     }
 
-    private void readDisabledComponentsLPw(PackageSettingBase packageSetting, XmlPullParser parser,
-            int userId) throws IOException, XmlPullParserException {
+    private void readDisabledComponentsLPw(PackageSettingBase packageSetting,
+            TypedXmlPullParser parser, int userId) throws IOException, XmlPullParserException {
         int outerDepth = parser.getDepth();
         int type;
         while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
@@ -3980,8 +3970,8 @@ public final class Settings {
         }
     }
 
-    private void readEnabledComponentsLPw(PackageSettingBase packageSetting, XmlPullParser parser,
-            int userId) throws IOException, XmlPullParserException {
+    private void readEnabledComponentsLPw(PackageSettingBase packageSetting,
+            TypedXmlPullParser parser, int userId) throws IOException, XmlPullParserException {
         int outerDepth = parser.getDepth();
         int type;
         while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
@@ -4008,7 +3998,8 @@ public final class Settings {
         }
     }
 
-    private void readSharedUserLPw(XmlPullParser parser) throws XmlPullParserException,IOException {
+    private void readSharedUserLPw(TypedXmlPullParser parser)
+            throws XmlPullParserException, IOException {
         String name = null;
         String idStr = null;
         int pkgFlags = 0;
@@ -5547,8 +5538,7 @@ public final class Settings {
             }
 
             try {
-                XmlPullParser parser = Xml.newPullParser();
-                parser.setInput(in, null);
+                final TypedXmlPullParser parser = Xml.resolvePullParser(in);
                 parseRuntimePermissionsLPr(parser, userId);
 
             } catch (XmlPullParserException | IOException e) {
@@ -5562,7 +5552,7 @@ public final class Settings {
         // Private internals
 
         @GuardedBy("Settings.this.mLock")
-        private void parseRuntimePermissionsLPr(XmlPullParser parser, int userId)
+        private void parseRuntimePermissionsLPr(TypedXmlPullParser parser, int userId)
                 throws IOException, XmlPullParserException {
             final int outerDepth = parser.getDepth();
             int type;
@@ -5608,7 +5598,7 @@ public final class Settings {
             }
         }
 
-        private void parsePermissionsLPr(XmlPullParser parser,
+        private void parsePermissionsLPr(TypedXmlPullParser parser,
                 LegacyPermissionState permissionsState, int userId)
                 throws IOException, XmlPullParserException {
             final int outerDepth = parser.getDepth();

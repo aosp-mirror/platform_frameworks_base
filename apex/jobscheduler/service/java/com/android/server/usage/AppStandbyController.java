@@ -2390,7 +2390,8 @@ public class AppStandbyController implements AppStandbyInternal {
                     false, this);
             mInjector.registerDeviceConfigPropertiesChangedListener(this);
             // Load all the constants.
-            onPropertiesChanged(mInjector.getDeviceConfigProperties());
+            // postOneTimeCheckIdleStates() doesn't need to be called on boot.
+            processProperties(mInjector.getDeviceConfigProperties());
             updateSettings();
         }
 
@@ -2402,6 +2403,11 @@ public class AppStandbyController implements AppStandbyInternal {
 
         @Override
         public void onPropertiesChanged(DeviceConfig.Properties properties) {
+            processProperties(properties);
+            postOneTimeCheckIdleStates();
+        }
+
+        private void processProperties(DeviceConfig.Properties properties) {
             boolean timeThresholdsUpdated = false;
             synchronized (mAppIdleLock) {
                 for (String name : properties.getKeyset()) {
@@ -2482,7 +2488,6 @@ public class AppStandbyController implements AppStandbyInternal {
                     }
                 }
             }
-            postOneTimeCheckIdleStates();
         }
 
         private void updateTimeThresholds() {

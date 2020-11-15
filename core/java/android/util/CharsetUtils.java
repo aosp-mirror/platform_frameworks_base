@@ -31,34 +31,48 @@ import dalvik.annotation.optimization.FastNative;
  */
 public class CharsetUtils {
     /**
-     * Attempt to encode the given string as UTF-8 into the destination byte
-     * array without making any new allocations.
+     * Attempt to encode the given string as modified UTF-8 into the destination
+     * byte array without making any new allocations.
      *
      * @param src string value to be encoded
      * @param dest destination byte array to encode into
      * @param destOff offset into destination where encoding should begin
      * @param destLen length of destination
-     * @return the number of bytes written to the destination when encoded
-     *         successfully, otherwise {@code -1} if not large enough
+     * @return positive value when encoding succeeded, or negative value when
+     *         failed; the magnitude of the value is the number of bytes
+     *         required to encode the string.
      */
-    public static int toUtf8Bytes(@NonNull String src,
+    public static int toModifiedUtf8Bytes(@NonNull String src,
             long dest, int destOff, int destLen) {
-        return toUtf8Bytes(src, src.length(), dest, destOff, destLen);
+        return toModifiedUtf8Bytes(src, src.length(), dest, destOff, destLen);
     }
 
     /**
-     * Attempt to encode the given string as UTF-8 into the destination byte
-     * array without making any new allocations.
+     * Attempt to encode the given string as modified UTF-8 into the destination
+     * byte array without making any new allocations.
      *
      * @param src string value to be encoded
      * @param srcLen exact length of string to be encoded
      * @param dest destination byte array to encode into
      * @param destOff offset into destination where encoding should begin
      * @param destLen length of destination
-     * @return the number of bytes written to the destination when encoded
-     *         successfully, otherwise {@code -1} if not large enough
+     * @return positive value when encoding succeeded, or negative value when
+     *         failed; the magnitude of the value is the number of bytes
+     *         required to encode the string.
      */
     @FastNative
-    private static native int toUtf8Bytes(@NonNull String src, int srcLen,
+    private static native int toModifiedUtf8Bytes(@NonNull String src, int srcLen,
             long dest, int destOff, int destLen);
+
+    /**
+     * Attempt to decode a modified UTF-8 string from the source byte array.
+     *
+     * @param src source byte array to decode from
+     * @param srcOff offset into source where decoding should begin
+     * @param srcLen length of source that should be decoded
+     * @return the successfully decoded string
+     */
+    @FastNative
+    public static native @NonNull String fromModifiedUtf8Bytes(
+            long src, int srcOff, int srcLen);
 }

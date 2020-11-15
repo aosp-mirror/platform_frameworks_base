@@ -60,6 +60,7 @@ import android.util.ArraySet;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.TypedXmlPullParser;
 import android.util.Xml;
 
 import com.android.internal.util.ArrayUtils;
@@ -1410,7 +1411,7 @@ public final class DefaultPermissionGrantPolicy {
             try (
                 InputStream str = new BufferedInputStream(new FileInputStream(file))
             ) {
-                XmlPullParser parser = Xml.newPullParser();
+                TypedXmlPullParser parser = Xml.newFastPullParser();
                 parser.setInput(str, null);
                 parse(pm, parser, grantExceptions);
             } catch (XmlPullParserException | IOException e) {
@@ -1421,7 +1422,7 @@ public final class DefaultPermissionGrantPolicy {
         return grantExceptions;
     }
 
-    private void parse(PackageManagerWrapper pm, XmlPullParser parser,
+    private void parse(PackageManagerWrapper pm, TypedXmlPullParser parser,
             Map<String, List<DefaultPermissionGrant>> outGrantExceptions)
             throws IOException, XmlPullParserException {
         final int outerDepth = parser.getDepth();
@@ -1439,7 +1440,7 @@ public final class DefaultPermissionGrantPolicy {
         }
     }
 
-    private void parseExceptions(PackageManagerWrapper pm, XmlPullParser parser,
+    private void parseExceptions(PackageManagerWrapper pm, TypedXmlPullParser parser,
             Map<String, List<DefaultPermissionGrant>> outGrantExceptions)
             throws IOException, XmlPullParserException {
         final int outerDepth = parser.getDepth();
@@ -1488,7 +1489,7 @@ public final class DefaultPermissionGrantPolicy {
         }
     }
 
-    private void parsePermission(XmlPullParser parser, List<DefaultPermissionGrant>
+    private void parsePermission(TypedXmlPullParser parser, List<DefaultPermissionGrant>
             outPackageExceptions) throws IOException, XmlPullParserException {
         final int outerDepth = parser.getDepth();
         int type;

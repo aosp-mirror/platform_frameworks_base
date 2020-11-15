@@ -41,8 +41,11 @@ import android.telephony.SubscriptionManager;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 
 import com.android.internal.util.Preconditions;
+import com.android.internal.util.XmlUtils;
 import com.android.server.LocalServices;
 
 import com.google.android.collect.Sets;
@@ -327,6 +330,11 @@ public class UserRestrictionsUtils {
 
     public static void writeRestrictions(@NonNull XmlSerializer serializer,
             @Nullable Bundle restrictions, @NonNull String tag) throws IOException {
+        writeRestrictions(XmlUtils.makeTyped(serializer), restrictions, tag);
+    }
+
+    public static void writeRestrictions(@NonNull TypedXmlSerializer serializer,
+            @Nullable Bundle restrictions, @NonNull String tag) throws IOException {
         if (restrictions == null) {
             return;
         }
@@ -348,6 +356,10 @@ public class UserRestrictionsUtils {
     }
 
     public static void readRestrictions(XmlPullParser parser, Bundle restrictions) {
+        readRestrictions(XmlUtils.makeTyped(parser), restrictions);
+    }
+
+    public static void readRestrictions(TypedXmlPullParser parser, Bundle restrictions) {
         restrictions.clear();
         for (String key : USER_RESTRICTIONS) {
             final String value = parser.getAttributeValue(null, key);
@@ -358,6 +370,10 @@ public class UserRestrictionsUtils {
     }
 
     public static Bundle readRestrictions(XmlPullParser parser) {
+        return readRestrictions(XmlUtils.makeTyped(parser));
+    }
+
+    public static Bundle readRestrictions(TypedXmlPullParser parser) {
         final Bundle result = new Bundle();
         readRestrictions(parser, result);
         return result;

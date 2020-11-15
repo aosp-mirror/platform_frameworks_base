@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.policy;
 
+import android.annotation.ColorInt;
 import android.app.StatusBarManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -35,6 +36,7 @@ import android.text.format.DateFormat;
 import android.text.style.CharacterStyle;
 import android.text.style.RelativeSizeSpan;
 import android.util.AttributeSet;
+import android.view.ContextThemeWrapper;
 import android.view.Display;
 import android.view.View;
 import android.widget.TextView;
@@ -96,7 +98,6 @@ public class Clock extends TextView implements
     private static final int AM_PM_STYLE_GONE    = 2;
 
     private final int mAmPmStyle;
-    private final boolean mShowDark;
     private boolean mShowSeconds;
     private Handler mSecondsHandler;
 
@@ -126,7 +127,6 @@ public class Clock extends TextView implements
                 0, 0);
         try {
             mAmPmStyle = a.getInt(R.styleable.Clock_amPmStyle, AM_PM_STYLE_GONE);
-            mShowDark = a.getBoolean(R.styleable.Clock_showDark, true);
             mNonAdaptedColor = getCurrentTextColor();
         } finally {
             a.recycle();
@@ -196,9 +196,6 @@ public class Clock extends TextView implements
             Dependency.get(TunerService.class).addTunable(this, CLOCK_SECONDS,
                     StatusBarIconController.ICON_HIDE_LIST);
             mCommandQueue.addCallback(this);
-            if (mShowDark) {
-                Dependency.get(DarkIconDispatcher.class).addDarkReceiver(this);
-            }
             mCurrentUserTracker.startTracking();
             mCurrentUserId = mCurrentUserTracker.getCurrentUserId();
         }
@@ -229,9 +226,6 @@ public class Clock extends TextView implements
             mAttached = false;
             Dependency.get(TunerService.class).removeTunable(this);
             mCommandQueue.removeCallback(this);
-            if (mShowDark) {
-                Dependency.get(DarkIconDispatcher.class).removeDarkReceiver(this);
-            }
             mCurrentUserTracker.stopTracking();
         }
     }
@@ -332,6 +326,13 @@ public class Clock extends TextView implements
         if (!mUseWallpaperTextColor) {
             setTextColor(mNonAdaptedColor);
         }
+    }
+
+    // Update text color based when shade scrim changes color.
+    public void onColorsChanged(boolean lightTheme) {
+        final Context context = new ContextThemeWrapper(mContext,
+                lightTheme ? R.style.Theme_SystemUI_Light : R.style.Theme_SystemUI);
+        setTextColor(Utils.getColorAttrDefaultColor(context, R.attr.wallpaperTextColor));
     }
 
     @Override

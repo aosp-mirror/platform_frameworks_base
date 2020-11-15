@@ -29,6 +29,8 @@ import android.view.Surface;
 import android.hardware.input.TouchCalibration;
 import android.util.AtomicFile;
 import android.util.Slog;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import java.io.BufferedInputStream;
@@ -214,10 +216,9 @@ final class PersistentDataStore {
             return;
         }
 
-        XmlPullParser parser;
+        TypedXmlPullParser parser;
         try {
-            parser = Xml.newPullParser();
-            parser.setInput(new BufferedInputStream(is), StandardCharsets.UTF_8.name());
+            parser = Xml.resolvePullParser(is);
             loadFromXml(parser);
         } catch (IOException ex) {
             Slog.w(InputManagerService.TAG, "Failed to load input manager persistent store data.", ex);
@@ -236,8 +237,7 @@ final class PersistentDataStore {
             os = mAtomicFile.startWrite();
             boolean success = false;
             try {
-                XmlSerializer serializer = new FastXmlSerializer();
-                serializer.setOutput(new BufferedOutputStream(os), StandardCharsets.UTF_8.name());
+                TypedXmlSerializer serializer = Xml.resolveSerializer(os);
                 saveToXml(serializer);
                 serializer.flush();
                 success = true;

@@ -19,13 +19,14 @@
 
 namespace android {
 
-static jint android_util_CharsetUtils_toUtf8Bytes(JNIEnv *env, jobject clazz,
+static jint android_util_CharsetUtils_toModifiedUtf8Bytes(JNIEnv *env, jobject clazz,
         jstring src, jint srcLen, jlong dest, jint destOff, jint destLen) {
     char *destPtr = reinterpret_cast<char*>(dest);
 
     // Quickly check if destination has plenty of room for worst-case
     // 4-bytes-per-char encoded size
-    if (destOff >= 0 && destOff + (srcLen * 4) < destLen) {
+    const size_t worstLen = (srcLen * 4);
+    if (destOff >= 0 && destOff + worstLen < destLen) {
         env->GetStringUTFRegion(src, 0, srcLen, destPtr + destOff);
         return strlen(destPtr + destOff + srcLen) + srcLen;
     }
@@ -38,13 +39,29 @@ static jint android_util_CharsetUtils_toUtf8Bytes(JNIEnv *env, jobject clazz,
         return encodedLen;
     }
 
-    return -1;
+    return -encodedLen;
+}
+
+static jstring android_util_CharsetUtils_fromModifiedUtf8Bytes(JNIEnv *env, jobject clazz,
+        jlong src, jint srcOff, jint srcLen) {
+    char *srcPtr = reinterpret_cast<char*>(src);
+
+    // This is funky, but we need to temporarily swap a null byte so that
+    // JNI knows where the string ends; we'll put it back, we promise
+    char tmp = srcPtr[srcOff + srcLen];
+    srcPtr[srcOff + srcLen] = '\0';
+    jstring res = env->NewStringUTF(srcPtr + srcOff);
+    srcPtr[srcOff + srcLen] = tmp;
+    return res;
 }
 
 static const JNINativeMethod methods[] = {
     // @FastNative
-    {"toUtf8Bytes",      "(Ljava/lang/String;IJII)I",
-            (void*)android_util_CharsetUtils_toUtf8Bytes},
+    {"toModifiedUtf8Bytes",      "(Ljava/lang/String;IJII)I",
+            (void*)android_util_CharsetUtils_toModifiedUtf8Bytes},
+    // @FastNative
+    {"fromModifiedUtf8Bytes",    "(JII)Ljava/lang/String;",
+            (void*)android_util_CharsetUtils_fromModifiedUtf8Bytes},
 };
 
 int register_android_util_CharsetUtils(JNIEnv *env) {

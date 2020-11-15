@@ -22,6 +22,8 @@ import android.hardware.display.AmbientBrightnessDayStats;
 import android.os.SystemClock;
 import android.os.UserManager;
 import android.util.Slog;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -165,8 +167,7 @@ public class AmbientBrightnessStatsTracker {
         }
 
         public void writeToXML(OutputStream stream) throws IOException {
-            XmlSerializer out = new FastXmlSerializer();
-            out.setOutput(stream, StandardCharsets.UTF_8.name());
+            TypedXmlSerializer out = Xml.resolveSerializer(stream);
             out.startDocument(null, true);
             out.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
 
@@ -206,8 +207,7 @@ public class AmbientBrightnessStatsTracker {
         public void readFromXML(InputStream stream) throws IOException {
             try {
                 Map<Integer, Deque<AmbientBrightnessDayStats>> parsedStats = new HashMap<>();
-                XmlPullParser parser = Xml.newPullParser();
-                parser.setInput(stream, StandardCharsets.UTF_8.name());
+                TypedXmlPullParser parser = Xml.resolvePullParser(stream);
 
                 int type;
                 while ((type = parser.next()) != XmlPullParser.END_DOCUMENT

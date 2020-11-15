@@ -196,7 +196,7 @@ public class AuthBiometricFaceView extends AuthBiometricView {
     public void onAuthenticationFailed(String failureReason) {
         if (getSize() == AuthDialog.SIZE_MEDIUM) {
             mTryAgainButton.setVisibility(View.VISIBLE);
-            mPositiveButton.setVisibility(View.GONE);
+            mConfirmButton.setVisibility(View.GONE);
         }
 
         // Do this last since wa want to know if the button is being animated (in the case of

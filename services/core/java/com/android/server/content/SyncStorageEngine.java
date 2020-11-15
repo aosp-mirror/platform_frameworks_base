@@ -50,6 +50,8 @@ import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 import android.util.Xml;
 import android.util.proto.ProtoInputStream;
 import android.util.proto.ProtoOutputStream;
@@ -1635,8 +1637,7 @@ public class SyncStorageEngine {
             if (Log.isLoggable(TAG_FILE, Log.VERBOSE)) {
                 Slog.v(TAG_FILE, "Reading " + mAccountInfoFile.getBaseFile());
             }
-            XmlPullParser parser = Xml.newPullParser();
-            parser.setInput(fis, StandardCharsets.UTF_8.name());
+            TypedXmlPullParser parser = Xml.resolvePullParser(fis);
             int eventType = parser.getEventType();
             while (eventType != XmlPullParser.START_TAG &&
                     eventType != XmlPullParser.END_DOCUMENT) {
@@ -1988,8 +1989,7 @@ public class SyncStorageEngine {
 
         try {
             fos = mAccountInfoFile.startWrite();
-            XmlSerializer out = new FastXmlSerializer();
-            out.setOutput(fos, StandardCharsets.UTF_8.name());
+            TypedXmlSerializer out = Xml.resolveSerializer(fos);
             out.startDocument(null, true);
             out.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
 

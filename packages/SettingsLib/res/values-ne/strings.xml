@@ -399,6 +399,12 @@
     <string name="inactive_app_inactive_summary" msgid="3161222402614236260">"निष्क्रिय। टगल गर्न ट्याप गर्नुहोस्।"</string>
     <string name="inactive_app_active_summary" msgid="8047630990208722344">"सक्रिय। टगल गर्न ट्याप गर्नुहोस्।"</string>
     <string name="standby_bucket_summary" msgid="5128193447550429600">"एपको स्ट्यान्डबाई अवस्था:<xliff:g id="BUCKET"> %s</xliff:g>"</string>
+    <!-- no translation found for transcode_settings_title (6700974145733932357) -->
+    <skip />
+    <!-- no translation found for transcode_enable_all (4719796495995795404) -->
+    <skip />
+    <!-- no translation found for transcode_skip_apps (5680997722349545778) -->
+    <skip />
     <string name="runningservices_settings_title" msgid="6460099290493086515">"चलिरहेका सेवाहरू"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"हाल चालु भइरहेका सेवाहरू हेर्नुहोस् र नियन्त्रण गर्नुहोस्"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"WebView कार्यान्वयन"</string>
@@ -558,8 +564,6 @@
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"सक्षम पारिएको छ"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"यो परिवर्तन लागू गर्न तपाईंको यन्त्र अनिवार्य रूपमा रिबुट गर्नु पर्छ। अहिले रिबुट गर्नुहोस् वा रद्द गर्नुहोस्।"</string>
     <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"तारसहितको हेडफोन"</string>
-    <!-- no translation found for wifi_hotspot_switch_on_text (9212273118217786155) -->
-    <skip />
-    <!-- no translation found for wifi_hotspot_switch_off_text (7245567251496959764) -->
-    <skip />
+    <string name="wifi_hotspot_switch_on_text" msgid="9212273118217786155">"अन छ"</string>
+    <string name="wifi_hotspot_switch_off_text" msgid="7245567251496959764">"अफ छ"</string>
 </resources>

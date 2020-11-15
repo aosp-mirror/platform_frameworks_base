@@ -26,12 +26,13 @@ import android.util.ArraySet;
 import android.util.Base64;
 import android.util.LongSparseArray;
 import android.util.Slog;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -671,7 +672,7 @@ public class KeySetManagerService {
         }
     }
 
-    void writeKeySetManagerServiceLPr(XmlSerializer serializer) throws IOException {
+    void writeKeySetManagerServiceLPr(TypedXmlSerializer serializer) throws IOException {
         serializer.startTag(null, "keyset-settings");
         serializer.attribute(null, "version", Integer.toString(CURRENT_VERSION));
         writePublicKeysLPr(serializer);
@@ -685,7 +686,7 @@ public class KeySetManagerService {
         serializer.endTag(null, "keyset-settings");
     }
 
-    void writePublicKeysLPr(XmlSerializer serializer) throws IOException {
+    void writePublicKeysLPr(TypedXmlSerializer serializer) throws IOException {
         serializer.startTag(null, "keys");
         for (int pKeyIndex = 0; pKeyIndex < mPublicKeys.size(); pKeyIndex++) {
             long id = mPublicKeys.keyAt(pKeyIndex);
@@ -699,7 +700,7 @@ public class KeySetManagerService {
         serializer.endTag(null, "keys");
     }
 
-    void writeKeySetsLPr(XmlSerializer serializer) throws IOException {
+    void writeKeySetsLPr(TypedXmlSerializer serializer) throws IOException {
         serializer.startTag(null, "keysets");
         for (int keySetIndex = 0; keySetIndex < mKeySetMapping.size(); keySetIndex++) {
             long id = mKeySetMapping.keyAt(keySetIndex);
@@ -716,7 +717,7 @@ public class KeySetManagerService {
         serializer.endTag(null, "keysets");
     }
 
-    void readKeySetsLPw(XmlPullParser parser, ArrayMap<Long, Integer> keySetRefCounts)
+    void readKeySetsLPw(TypedXmlPullParser parser, ArrayMap<Long, Integer> keySetRefCounts)
             throws XmlPullParserException, IOException {
         int type;
         long currentKeySetId = 0;
@@ -757,7 +758,7 @@ public class KeySetManagerService {
         addRefCountsFromSavedPackagesLPw(keySetRefCounts);
     }
 
-    void readKeysLPw(XmlPullParser parser)
+    void readKeysLPw(TypedXmlPullParser parser)
             throws XmlPullParserException, IOException {
         int outerDepth = parser.getDepth();
         int type;
@@ -773,7 +774,7 @@ public class KeySetManagerService {
         }
     }
 
-    void readKeySetListLPw(XmlPullParser parser)
+    void readKeySetListLPw(TypedXmlPullParser parser)
             throws XmlPullParserException, IOException {
         int outerDepth = parser.getDepth();
         int type;
@@ -798,7 +799,7 @@ public class KeySetManagerService {
         }
     }
 
-    void readPublicKeyLPw(XmlPullParser parser)
+    void readPublicKeyLPw(TypedXmlPullParser parser)
             throws XmlPullParserException {
         String encodedID = parser.getAttributeValue(null, "identifier");
         long identifier = Long.parseLong(encodedID);

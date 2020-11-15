@@ -39,6 +39,8 @@ import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -735,8 +737,7 @@ class Owners {
             FileOutputStream outputStream = null;
             try {
                 outputStream = f.startWrite();
-                final XmlSerializer out = new FastXmlSerializer();
-                out.setOutput(outputStream, StandardCharsets.UTF_8.name());
+                final TypedXmlSerializer out = Xml.resolveSerializer(outputStream);
 
                 // Root tag
                 out.startDocument(null, true);
@@ -776,8 +777,7 @@ class Owners {
             InputStream input = null;
             try {
                 input = f.openRead();
-                final XmlPullParser parser = Xml.newPullParser();
-                parser.setInput(input, StandardCharsets.UTF_8.name());
+                final TypedXmlPullParser parser = Xml.resolvePullParser(input);
 
                 int type;
                 int depth = 0;

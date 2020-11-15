@@ -356,6 +356,8 @@ applications that come with the platform
         <!-- Needed for test only -->
         <permission name="android.permission.READ_PRECISE_PHONE_STATE" />
         <permission name="android.permission.READ_PRIVILEGED_PHONE_STATE"/>
+        <!-- Permission required for UiModeManager CTS test -->
+        <permission name="android.permission.READ_PROJECTION_STATE"/>
         <permission name="android.permission.READ_WIFI_CREDENTIAL"/>
         <permission name="android.permission.REAL_GET_TASKS"/>
         <permission name="android.permission.READ_PRIVILEGED_PHONE_STATE"/>
@@ -376,7 +378,7 @@ applications that come with the platform
         <permission name="android.permission.STOP_APP_SWITCHES"/>
         <permission name="android.permission.SUBSTITUTE_NOTIFICATION_APP_NAME"/>
         <permission name="android.permission.SUSPEND_APPS" />
-        <!-- Permissions required for UiModeManager and Telecom car mode CTS tests -->
+        <!-- Permission required for UiModeManager and Telecom car mode CTS tests -->
         <permission name="android.permission.TOGGLE_AUTOMOTIVE_PROJECTION" />
         <permission name="android.permission.UPDATE_APP_OPS_STATS"/>
         <permission name="android.permission.USE_RESERVED_DISK"/>

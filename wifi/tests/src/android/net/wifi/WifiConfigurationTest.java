@@ -75,6 +75,7 @@ public class WifiConfigurationTest {
         config.trusted = false;
         config.oemPaid = true;
         config.oemPrivate = true;
+        config.carrierMerged = true;
         config.updateIdentifier = "1234";
         config.fromWifiNetworkSpecifier = true;
         config.fromWifiNetworkSuggestion = true;
@@ -101,6 +102,7 @@ public class WifiConfigurationTest {
         assertTrue(reconfig.fromWifiNetworkSuggestion);
         assertTrue(reconfig.oemPaid);
         assertTrue(reconfig.oemPrivate);
+        assertTrue(reconfig.carrierMerged);
 
         Parcel parcelWW = Parcel.obtain();
         reconfig.writeToParcel(parcelWW, 0);
@@ -116,6 +118,7 @@ public class WifiConfigurationTest {
         config.trusted = false;
         config.oemPaid = true;
         config.oemPrivate = true;
+        config.carrierMerged = true;
         config.updateIdentifier = "1234";
         config.fromWifiNetworkSpecifier = true;
         config.fromWifiNetworkSuggestion = true;
@@ -134,6 +137,7 @@ public class WifiConfigurationTest {
         assertTrue(reconfig.fromWifiNetworkSuggestion);
         assertTrue(reconfig.oemPaid);
         assertTrue(reconfig.oemPrivate);
+        assertTrue(reconfig.carrierMerged);
     }
 
     @Test

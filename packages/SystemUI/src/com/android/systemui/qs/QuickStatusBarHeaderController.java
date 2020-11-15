@@ -34,8 +34,10 @@ import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.LifecycleRegistry;
 
+import com.android.internal.colorextraction.ColorExtractor;
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.R;
+import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.demomode.DemoMode;
 import com.android.systemui.demomode.DemoModeController;
 import com.android.systemui.plugins.ActivityStarter;
@@ -99,6 +101,9 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
     private boolean mMicCameraIndicatorsEnabled;
     private boolean mLocationIndicatorsEnabled;
     private boolean mPrivacyChipLogged;
+
+    private SysuiColorExtractor mColorExtractor;
+    private ColorExtractor.OnColorsChangedListener mOnColorsChangedListener;
     private int mRingerMode = AudioManager.RINGER_MODE_NORMAL;
 
     private final ZenModeController.Callback mZenModeControllerCallback = new Callback() {
@@ -216,7 +221,8 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
             CommandQueue commandQueue, DemoModeController demoModeController,
             UserTracker userTracker, QuickQSPanelController quickQSPanelController,
             QSCarrierGroupController.Builder qsCarrierGroupControllerBuilder,
-            PrivacyLogger privacyLogger) {
+            PrivacyLogger privacyLogger,
+            SysuiColorExtractor colorExtractor) {
         super(view);
         mZenModeController = zenModeController;
         mNextAlarmController = nextAlarmController;
@@ -246,6 +252,12 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
 
         mIconManager = new StatusBarIconController.TintedIconManager(mIconContainer, mCommandQueue);
         mDemoModeReceiver = new ClockDemoModeReceiver(mClockView);
+        mColorExtractor = colorExtractor;
+        mOnColorsChangedListener = (extractor, which) -> {
+            final boolean lightTheme = mColorExtractor.getNeutralColors().supportsDarkText();
+            mClockView.onColorsChanged(lightTheme);
+        };
+        mColorExtractor.addOnColorsChangedListener(mOnColorsChangedListener);
     }
 
     @Override
@@ -281,6 +293,7 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
     protected void onViewDetached() {
         mRingerModeTracker.getRingerModeInternal().removeObservers(mLifecycleOwner);
         mClockView.setOnClickListener(null);
+        mColorExtractor.removeOnColorsChangedListener(mOnColorsChangedListener);
         mNextAlarmContainer.setOnClickListener(null);
         mRingerContainer.setOnClickListener(null);
         mPrivacyChip.setOnClickListener(null);

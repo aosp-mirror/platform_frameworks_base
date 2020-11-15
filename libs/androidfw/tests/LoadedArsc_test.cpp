@@ -50,8 +50,7 @@ TEST(LoadedArscTest, LoadSinglePackageArsc) {
   ASSERT_TRUE(ReadFileFromZipToString(GetTestDataPath() + "/styles/styles.apk", "resources.arsc",
                                       &contents));
 
-  auto loaded_arsc = LoadedArsc::Load(reinterpret_cast<const void*>(contents.data()),
-                                                                    contents.length());
+  std::unique_ptr<const LoadedArsc> loaded_arsc = LoadedArsc::Load(StringPiece(contents));
   ASSERT_THAT(loaded_arsc, NotNull());
 
   const LoadedPackage* package =
@@ -67,8 +66,9 @@ TEST(LoadedArscTest, LoadSinglePackageArsc) {
   ASSERT_THAT(type_spec, NotNull());
   ASSERT_THAT(type_spec->type_count, Ge(1u));
 
-  auto type = type_spec->types[0];
-  ASSERT_TRUE(LoadedPackage::GetEntry(type, entry_index).has_value());
+  const ResTable_type* type = type_spec->types[0];
+  ASSERT_THAT(type, NotNull());
+  ASSERT_THAT(LoadedPackage::GetEntry(type, entry_index), NotNull());
 }
 
 TEST(LoadedArscTest, LoadSparseEntryApp) {
@@ -76,8 +76,7 @@ TEST(LoadedArscTest, LoadSparseEntryApp) {
   ASSERT_TRUE(ReadFileFromZipToString(GetTestDataPath() + "/sparse/sparse.apk", "resources.arsc",
                                       &contents));
 
-  std::unique_ptr<const LoadedArsc> loaded_arsc = LoadedArsc::Load(contents.data(),
-                                                                   contents.length());
+  std::unique_ptr<const LoadedArsc> loaded_arsc = LoadedArsc::Load(StringPiece(contents));
   ASSERT_THAT(loaded_arsc, NotNull());
 
   const LoadedPackage* package =
@@ -91,8 +90,9 @@ TEST(LoadedArscTest, LoadSparseEntryApp) {
   ASSERT_THAT(type_spec, NotNull());
   ASSERT_THAT(type_spec->type_count, Ge(1u));
 
-  auto type = type_spec->types[0];
-  ASSERT_TRUE(LoadedPackage::GetEntry(type, entry_index).has_value());
+  const ResTable_type* type = type_spec->types[0];
+  ASSERT_THAT(type, NotNull());
+  ASSERT_THAT(LoadedPackage::GetEntry(type, entry_index), NotNull());
 }
 
 TEST(LoadedArscTest, LoadSharedLibrary) {
@@ -100,8 +100,7 @@ TEST(LoadedArscTest, LoadSharedLibrary) {
   ASSERT_TRUE(ReadFileFromZipToString(GetTestDataPath() + "/lib_one/lib_one.apk", "resources.arsc",
                                       &contents));
 
-  std::unique_ptr<const LoadedArsc> loaded_arsc = LoadedArsc::Load(contents.data(),
-                                                                   contents.length());
+  std::unique_ptr<const LoadedArsc> loaded_arsc = LoadedArsc::Load(StringPiece(contents));
   ASSERT_THAT(loaded_arsc, NotNull());
 
   const auto& packages = loaded_arsc->GetPackages();
@@ -121,8 +120,7 @@ TEST(LoadedArscTest, LoadAppLinkedAgainstSharedLibrary) {
   ASSERT_TRUE(ReadFileFromZipToString(GetTestDataPath() + "/libclient/libclient.apk",
                                       "resources.arsc", &contents));
 
-  std::unique_ptr<const LoadedArsc> loaded_arsc = LoadedArsc::Load(contents.data(),
-                                                                   contents.length());
+  std::unique_ptr<const LoadedArsc> loaded_arsc = LoadedArsc::Load(StringPiece(contents));
   ASSERT_THAT(loaded_arsc, NotNull());
 
   const auto& packages = loaded_arsc->GetPackages();
@@ -147,10 +145,8 @@ TEST(LoadedArscTest, LoadAppAsSharedLibrary) {
   ASSERT_TRUE(ReadFileFromZipToString(GetTestDataPath() + "/appaslib/appaslib.apk",
                                       "resources.arsc", &contents));
 
-  std::unique_ptr<const LoadedArsc> loaded_arsc = LoadedArsc::Load(contents.data(),
-                                                                   contents.length(),
-                                                                   nullptr /* loaded_idmap */,
-                                                                   PROPERTY_DYNAMIC);
+  std::unique_ptr<const LoadedArsc> loaded_arsc =
+      LoadedArsc::Load(StringPiece(contents), nullptr /* loaded_idmap */, PROPERTY_DYNAMIC);
   ASSERT_THAT(loaded_arsc, NotNull());
 
   const auto& packages = loaded_arsc->GetPackages();
@@ -163,8 +159,7 @@ TEST(LoadedArscTest, LoadFeatureSplit) {
   std::string contents;
   ASSERT_TRUE(ReadFileFromZipToString(GetTestDataPath() + "/feature/feature.apk", "resources.arsc",
                                       &contents));
-  std::unique_ptr<const LoadedArsc> loaded_arsc = LoadedArsc::Load(contents.data(),
-                                                                   contents.length());
+  std::unique_ptr<const LoadedArsc> loaded_arsc = LoadedArsc::Load(StringPiece(contents));
   ASSERT_THAT(loaded_arsc, NotNull());
 
   const LoadedPackage* package =
@@ -177,12 +172,15 @@ TEST(LoadedArscTest, LoadFeatureSplit) {
   const TypeSpec* type_spec = package->GetTypeSpecByTypeIndex(type_index);
   ASSERT_THAT(type_spec, NotNull());
   ASSERT_THAT(type_spec->type_count, Ge(1u));
+  ASSERT_THAT(type_spec->types[0], NotNull());
 
-  auto type_name16 = package->GetTypeStringPool()->stringAt(type_spec->type_spec->id - 1);
-  ASSERT_TRUE(type_name16.has_value());
-  EXPECT_THAT(util::Utf16ToUtf8(*type_name16), StrEq("string"));
+  size_t len;
+  const char16_t* type_name16 =
+      package->GetTypeStringPool()->stringAt(type_spec->type_spec->id - 1, &len);
+  ASSERT_THAT(type_name16, NotNull());
+  EXPECT_THAT(util::Utf16ToUtf8(StringPiece16(type_name16, len)), StrEq("string"));
 
-  ASSERT_TRUE(LoadedPackage::GetEntry(type_spec->types[0], entry_index).has_value());
+  ASSERT_THAT(LoadedPackage::GetEntry(type_spec->types[0], entry_index), NotNull());
 }
 
 // AAPT(2) generates resource tables with chunks in a certain order. The rule is that
@@ -207,8 +205,7 @@ TEST(LoadedArscTest, LoadOutOfOrderTypeSpecs) {
       ReadFileFromZipToString(GetTestDataPath() + "/out_of_order_types/out_of_order_types.apk",
                               "resources.arsc", &contents));
 
-  std::unique_ptr<const LoadedArsc> loaded_arsc = LoadedArsc::Load(contents.data(),
-                                                                   contents.length());
+  std::unique_ptr<const LoadedArsc> loaded_arsc = LoadedArsc::Load(StringPiece(contents));
   ASSERT_THAT(loaded_arsc, NotNull());
 
   ASSERT_THAT(loaded_arsc->GetPackages(), SizeIs(1u));
@@ -218,10 +215,12 @@ TEST(LoadedArscTest, LoadOutOfOrderTypeSpecs) {
   const TypeSpec* type_spec = package->GetTypeSpecByTypeIndex(0);
   ASSERT_THAT(type_spec, NotNull());
   ASSERT_THAT(type_spec->type_count, Ge(1u));
+  ASSERT_THAT(type_spec->types[0], NotNull());
 
   type_spec = package->GetTypeSpecByTypeIndex(1);
   ASSERT_THAT(type_spec, NotNull());
   ASSERT_THAT(type_spec->type_count, Ge(1u));
+  ASSERT_THAT(type_spec->types[0], NotNull());
 }
 
 TEST(LoadedArscTest, LoadOverlayable) {
@@ -229,8 +228,7 @@ TEST(LoadedArscTest, LoadOverlayable) {
   ASSERT_TRUE(ReadFileFromZipToString(GetTestDataPath() + "/overlayable/overlayable.apk",
                                       "resources.arsc", &contents));
 
-  std::unique_ptr<const LoadedArsc> loaded_arsc = LoadedArsc::Load(contents.data(),
-                                                                   contents.length());
+  std::unique_ptr<const LoadedArsc> loaded_arsc = LoadedArsc::Load(StringPiece(contents));
 
   ASSERT_THAT(loaded_arsc, NotNull());
   const LoadedPackage* package = loaded_arsc->GetPackageById(
@@ -274,8 +272,7 @@ TEST(LoadedArscTest, ResourceIdentifierIterator) {
   ASSERT_TRUE(
       ReadFileFromZipToString(GetTestDataPath() + "/basic/basic.apk", "resources.arsc", &contents));
 
-  std::unique_ptr<const LoadedArsc> loaded_arsc = LoadedArsc::Load(contents.data(),
-                                                                   contents.length());
+  std::unique_ptr<const LoadedArsc> loaded_arsc = LoadedArsc::Load(StringPiece(contents));
   ASSERT_NE(nullptr, loaded_arsc);
 
   const std::vector<std::unique_ptr<const LoadedPackage>>& packages = loaded_arsc->GetPackages();
@@ -323,8 +320,7 @@ TEST(LoadedArscTest, GetOverlayableMap) {
   ASSERT_TRUE(ReadFileFromZipToString(GetTestDataPath() + "/overlayable/overlayable.apk",
                                       "resources.arsc", &contents));
 
-  std::unique_ptr<const LoadedArsc> loaded_arsc = LoadedArsc::Load(contents.data(),
-                                                                   contents.length());
+  std::unique_ptr<const LoadedArsc> loaded_arsc = LoadedArsc::Load(StringPiece(contents));
   ASSERT_NE(nullptr, loaded_arsc);
 
   const std::vector<std::unique_ptr<const LoadedPackage>>& packages = loaded_arsc->GetPackages();
@@ -349,7 +345,7 @@ TEST(LoadedArscTest, LoadCustomLoader) {
       asset->getLength());
 
   std::unique_ptr<const LoadedArsc> loaded_arsc =
-      LoadedArsc::Load(data.data(), data.length(), nullptr, PROPERTY_LOADER);
+      LoadedArsc::Load(data, nullptr, PROPERTY_LOADER);
   ASSERT_THAT(loaded_arsc, NotNull());
 
   const LoadedPackage* package =
@@ -365,8 +361,9 @@ TEST(LoadedArscTest, LoadCustomLoader) {
   ASSERT_THAT(type_spec, NotNull());
   ASSERT_THAT(type_spec->type_count, Ge(1u));
 
-  auto type = type_spec->types[0];
-  ASSERT_TRUE(LoadedPackage::GetEntry(type, entry_index).has_value());
+  const ResTable_type* type = type_spec->types[0];
+  ASSERT_THAT(type, NotNull());
+  ASSERT_THAT(LoadedPackage::GetEntry(type, entry_index), NotNull());
 }
 
 // structs with size fields (like Res_value, ResTable_entry) should be

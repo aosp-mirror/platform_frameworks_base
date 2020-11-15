@@ -23,6 +23,8 @@ import static org.junit.Assert.assertTrue;
 import android.content.Context;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
+import android.graphics.fonts.SystemFonts;
+import android.os.SharedMemory;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.LargeTest;
@@ -35,9 +37,9 @@ import com.android.frameworks.coretests.R;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.nio.ByteBuffer;
-import java.util.Arrays;
-import java.util.List;
+import java.nio.ByteOrder;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 
 @RunWith(AndroidJUnit4.class)
@@ -54,6 +56,10 @@ public class TypefaceTest {
         Typeface.create(Typeface.MONOSPACE, 0)
     };
 
+    private static final int[] STYLES = {
+        Typeface.NORMAL, Typeface.BOLD, Typeface.ITALIC, Typeface.BOLD_ITALIC,
+    };
+
     @SmallTest
     @Test
     public void testBasic() throws Exception {
@@ -62,6 +68,16 @@ public class TypefaceTest {
         assertTrue("basic", Typeface.SANS_SERIF != null);
         assertTrue("basic", Typeface.SERIF != null);
         assertTrue("basic", Typeface.MONOSPACE != null);
+    }
+
+    @SmallTest
+    @Test
+    public void testDefaults() {
+        for (int style : STYLES) {
+            String msg = "style = " + style;
+            assertNotNull(msg, Typeface.defaultFromStyle(style));
+            assertEquals(msg, style, Typeface.defaultFromStyle(style).getStyle());
+        }
     }
 
     @SmallTest
@@ -178,19 +194,55 @@ public class TypefaceTest {
     @SmallTest
     @Test
     public void testSerialize() throws Exception {
-        int size = Typeface.writeTypefaces(null, Arrays.asList(mFaces));
-        ByteBuffer buffer = ByteBuffer.allocateDirect(size);
-        Typeface.writeTypefaces(buffer, Arrays.asList(mFaces));
-        List<Typeface> copiedTypefaces = Typeface.readTypefaces(buffer);
-        assertNotNull(copiedTypefaces);
-        assertEquals(mFaces.length, copiedTypefaces.size());
-        for (int i = 0; i < mFaces.length; i++) {
-            Typeface original = mFaces[i];
-            Typeface copied = copiedTypefaces.get(i);
+        HashMap<String, Typeface> systemFontMap = new HashMap<>();
+        Typeface.initSystemDefaultTypefaces(systemFontMap, SystemFonts.getRawSystemFallbackMap(),
+                SystemFonts.getAliases());
+        SharedMemory sharedMemory = Typeface.serializeFontMap(systemFontMap);
+        Map<String, Typeface> copiedFontMap =
+                Typeface.deserializeFontMap(sharedMemory.mapReadOnly().order(ByteOrder.BIG_ENDIAN));
+        assertEquals(systemFontMap.size(), copiedFontMap.size());
+        for (String key : systemFontMap.keySet()) {
+            assertTrue(copiedFontMap.containsKey(key));
+            Typeface original = systemFontMap.get(key);
+            Typeface copied = copiedFontMap.get(key);
             assertEquals(original.getStyle(), copied.getStyle());
             assertEquals(original.getWeight(), copied.getWeight());
             assertEquals(measureText(original, "hello"), measureText(copied, "hello"), 1e-6);
         }
+    }
+
+    @SmallTest
+    @Test
+    public void testSetSystemFontMap() throws Exception {
+        Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
+        Resources res = context.getResources();
+        Map<String, Typeface> fontMap = Map.of(
+                "sans-serif", Typeface.create(res.getFont(R.font.samplefont), Typeface.NORMAL),
+                "serif", Typeface.create(res.getFont(R.font.samplefont2), Typeface.NORMAL),
+                "monospace", Typeface.create(res.getFont(R.font.samplefont3), Typeface.NORMAL),
+                "sample", Typeface.create(res.getFont(R.font.samplefont4), Typeface.NORMAL),
+                "sample-italic", Typeface.create(res.getFont(R.font.samplefont4), Typeface.ITALIC));
+        Typeface.setSystemFontMap(fontMap);
+
+        // Test public static final fields
+        assertEquals(fontMap.get("sans-serif"), Typeface.DEFAULT);
+        assertEquals(Typeface.BOLD, Typeface.DEFAULT_BOLD.getStyle());
+        assertEquals(fontMap.get("sans-serif"), Typeface.SANS_SERIF);
+        assertEquals(fontMap.get("serif"), Typeface.SERIF);
+        assertEquals(fontMap.get("monospace"), Typeface.MONOSPACE);
+
+        // Test defaults
+        assertEquals(fontMap.get("sans-serif"), Typeface.defaultFromStyle(Typeface.NORMAL));
+        for (int style : STYLES) {
+            String msg = "style = " + style;
+            assertNotNull(msg, Typeface.defaultFromStyle(style));
+            assertEquals(msg, style, Typeface.defaultFromStyle(style).getStyle());
+        }
+
+        // Test create()
+        assertEquals(fontMap.get("sample"), Typeface.create("sample", Typeface.NORMAL));
+        assertEquals(
+                fontMap.get("sample-italic"), Typeface.create("sample-italic", Typeface.ITALIC));
     }
 
     private static float measureText(Typeface typeface, String text) {

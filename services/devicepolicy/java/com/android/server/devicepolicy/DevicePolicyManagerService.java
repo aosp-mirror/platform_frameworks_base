@@ -255,6 +255,8 @@ import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 import android.util.Xml;
 import android.view.IWindowManager;
 import android.view.accessibility.AccessibilityManager;
@@ -14204,8 +14206,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 return null;
             }
             try (FileInputStream stream = new FileInputStream(bundleFile)) {
-                XmlPullParser parser = Xml.newPullParser();
-                parser.setInput(stream, null);
+                TypedXmlPullParser parser = Xml.resolvePullParser(stream);
                 parser.next();
                 return PersistableBundle.restoreFromXml(parser);
             } catch (IOException | XmlPullParserException | IllegalArgumentException e) {
@@ -14358,8 +14359,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         FileOutputStream stream = null;
         try {
             stream = atomicFile.startWrite();
-            final XmlSerializer serializer = new FastXmlSerializer();
-            serializer.setOutput(stream, StandardCharsets.UTF_8.name());
+            final TypedXmlSerializer serializer = Xml.resolveSerializer(stream);
             serializer.startDocument(null, true);
             serializer.startTag(null, TAG_TRANSFER_OWNERSHIP_BUNDLE);
             bundle.saveToXml(serializer);

@@ -640,6 +640,7 @@ public class AuthContainerView extends LinearLayout
         }
         mContainerState = STATE_SHOWING;
         if (mBiometricView != null) {
+            mConfig.mCallback.onDialogAnimatedIn();
             mBiometricView.onDialogAnimatedIn();
         }
     }

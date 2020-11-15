@@ -25,11 +25,13 @@
 #include "android-base/unique_fd.h"
 #include "android-base/utf8.h"
 #include "utils/Compat.h"
+#include "utils/FileMap.h"
 #include "ziparchive/zip_archive.h"
 
 #include "androidfw/Asset.h"
 #include "androidfw/Idmap.h"
 #include "androidfw/misc.h"
+#include "androidfw/ResourceTypes.h"
 #include "androidfw/Util.h"
 
 namespace android {
@@ -159,46 +161,50 @@ class ZipAssetsProvider : public AssetsProvider {
     }
 
     const int fd = ::GetFileDescriptor(zip_handle_.get());
-    const off64_t fd_offset = ::GetFileDescriptorOffset(zip_handle_.get());
-    incfs::IncFsFileMap asset_map;
+     const off64_t fd_offset = ::GetFileDescriptorOffset(zip_handle_.get());
     if (entry.method == kCompressDeflated) {
-      if (!asset_map.Create(fd, entry.offset + fd_offset, entry.compressed_length, GetPath())) {
+      std::unique_ptr<FileMap> map = util::make_unique<FileMap>();
+      if (!map->create(GetPath(), fd, entry.offset + fd_offset, entry.compressed_length,
+                       true /*readOnly*/)) {
         LOG(ERROR) << "Failed to mmap file '" << path << "' in APK '" << friendly_name_ << "'";
         return {};
       }
 
       std::unique_ptr<Asset> asset =
-          Asset::createFromCompressedMap(std::move(asset_map), entry.uncompressed_length, mode);
+          Asset::createFromCompressedMap(std::move(map), entry.uncompressed_length, mode);
       if (asset == nullptr) {
         LOG(ERROR) << "Failed to decompress '" << path << "' in APK '" << friendly_name_ << "'";
         return {};
       }
       return asset;
-    }
-
-    if (!asset_map.Create(fd, entry.offset + fd_offset, entry.uncompressed_length, GetPath())) {
-      LOG(ERROR) << "Failed to mmap file '" << path << "' in APK '" << friendly_name_ << "'";
-      return {};
-    }
-
-    unique_fd ufd;
-    if (!GetPath()) {
-      // If the `path` is not set, create a new `fd` for the new Asset to own in order to create
-      // new file descriptors using Asset::openFileDescriptor. If the path is set, it will be used
-      // to create new file descriptors.
-      ufd = unique_fd(dup(fd));
-      if (!ufd.ok()) {
-        LOG(ERROR) << "Unable to dup fd '" << path << "' in APK '" << friendly_name_ << "'";
+    } else {
+      std::unique_ptr<FileMap> map = util::make_unique<FileMap>();
+      if (!map->create(GetPath(), fd, entry.offset + fd_offset, entry.uncompressed_length,
+                       true /*readOnly*/)) {
+        LOG(ERROR) << "Failed to mmap file '" << path << "' in APK '" << friendly_name_ << "'";
         return {};
       }
-    }
 
-    auto asset = Asset::createFromUncompressedMap(std::move(asset_map), mode, std::move(ufd));
-    if (asset == nullptr) {
-      LOG(ERROR) << "Failed to mmap file '" << path << "' in APK '" << friendly_name_ << "'";
-      return {};
+      unique_fd ufd;
+      if (!GetPath()) {
+        // If the `path` is not set, create a new `fd` for the new Asset to own in order to create
+        // new file descriptors using Asset::openFileDescriptor. If the path is set, it will be used
+        // to create new file descriptors.
+        ufd = unique_fd(dup(fd));
+        if (!ufd.ok()) {
+          LOG(ERROR) << "Unable to dup fd '" << path << "' in APK '" << friendly_name_ << "'";
+          return {};
+        }
+      }
+
+      std::unique_ptr<Asset> asset = Asset::createFromUncompressedMap(std::move(map),
+          std::move(ufd), mode);
+      if (asset == nullptr) {
+        LOG(ERROR) << "Failed to mmap file '" << path << "' in APK '" << friendly_name_ << "'";
+        return {};
+      }
+      return asset;
     }
-    return asset;
   }
 
  private:
@@ -440,8 +446,8 @@ std::unique_ptr<Asset> ApkAssets::CreateAssetFromFd(base::unique_fd fd,
     }
   }
 
-  incfs::IncFsFileMap file_map;
-  if (!file_map.Create(fd, offset, static_cast<size_t>(length), path)) {
+  std::unique_ptr<FileMap> file_map = util::make_unique<FileMap>();
+  if (!file_map->create(path, fd, offset, static_cast<size_t>(length), true /*readOnly*/)) {
     LOG(ERROR) << "Failed to mmap file '" << ((path) ? path : "anon") << "': "
                << SystemErrorCodeToString(errno);
     return {};
@@ -450,8 +456,8 @@ std::unique_ptr<Asset> ApkAssets::CreateAssetFromFd(base::unique_fd fd,
   // If `path` is set, do not pass ownership of the `fd` to the new Asset since
   // Asset::openFileDescriptor can use `path` to create new file descriptors.
   return Asset::createFromUncompressedMap(std::move(file_map),
-                                          Asset::AccessMode::ACCESS_RANDOM,
-                                          (path) ? base::unique_fd(-1) : std::move(fd));
+                                          (path) ? base::unique_fd(-1) : std::move(fd),
+                                          Asset::AccessMode::ACCESS_RANDOM);
 }
 
 std::unique_ptr<const ApkAssets> ApkAssets::LoadImpl(
@@ -487,14 +493,15 @@ std::unique_ptr<const ApkAssets> ApkAssets::LoadImpl(
   loaded_apk->idmap_asset_ = std::move(idmap_asset);
   loaded_apk->loaded_idmap_ = std::move(idmap);
 
-  const auto data = loaded_apk->resources_asset_->getIncFsBuffer(true /* aligned */);
-  const size_t length = loaded_apk->resources_asset_->getLength();
-  if (!data || length == 0) {
+  const StringPiece data(
+      reinterpret_cast<const char*>(loaded_apk->resources_asset_->getBuffer(true /*wordAligned*/)),
+      loaded_apk->resources_asset_->getLength());
+  if (data.data() == nullptr || data.empty()) {
     LOG(ERROR) << "Failed to read '" << kResourcesArsc << "' data in APK '" << path << "'.";
     return {};
   }
 
-  loaded_apk->loaded_arsc_ = LoadedArsc::Load(data, length, loaded_apk->loaded_idmap_.get(),
+  loaded_apk->loaded_arsc_ = LoadedArsc::Load(data, loaded_apk->loaded_idmap_.get(),
                                               property_flags);
   if (!loaded_apk->loaded_arsc_) {
     LOG(ERROR) << "Failed to load '" << kResourcesArsc << "' in APK '" << path << "'.";
@@ -518,15 +525,15 @@ std::unique_ptr<const ApkAssets> ApkAssets::LoadTableImpl(
       new ApkAssets(std::move(assets), path, last_mod_time, property_flags));
   loaded_apk->resources_asset_ = std::move(resources_asset);
 
-  const auto data = loaded_apk->resources_asset_->getIncFsBuffer(true /* aligned */);
-  const size_t length = loaded_apk->resources_asset_->getLength();
-  if (!data || length == 0) {
+  const StringPiece data(
+      reinterpret_cast<const char*>(loaded_apk->resources_asset_->getBuffer(true /*wordAligned*/)),
+      loaded_apk->resources_asset_->getLength());
+  if (data.data() == nullptr || data.empty()) {
     LOG(ERROR) << "Failed to read resources table data in '" << path << "'.";
     return {};
   }
 
-  loaded_apk->loaded_arsc_ = LoadedArsc::Load(data, length, nullptr /* loaded_idmap */,
-                                              property_flags);
+  loaded_apk->loaded_arsc_ = LoadedArsc::Load(data, nullptr, property_flags);
   if (loaded_apk->loaded_arsc_ == nullptr) {
     LOG(ERROR) << "Failed to read resources table in '" << path << "'.";
     return {};
@@ -543,6 +550,7 @@ bool ApkAssets::IsUpToDate() const {
   }
   return (!loaded_idmap_ || loaded_idmap_->IsUpToDate()) &&
       last_mod_time_ == getFileModDate(path_.c_str());
+
 }
 
 }  // namespace android
