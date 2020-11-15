@@ -1836,8 +1836,8 @@ public class PermissionManagerService extends IPermissionManager.Stub {
      * @param pkg The package for which to reset.
      * @param userId The device user for which to do a reset.
      */
-    private void resetRuntimePermissionsInternal(final AndroidPackage pkg,
-            final int userId) {
+    private void resetRuntimePermissionsInternal(@NonNull AndroidPackage pkg,
+            @UserIdInt int userId) {
         final String packageName = pkg.getPackageName();
 
         // These are flags that can change base on user actions.
@@ -2658,7 +2658,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
     }
 
     @NonNull
-    private Set<String> getGrantedPermissions(@NonNull String packageName,
+    private Set<String> getGrantedPermissionsInternal(@NonNull String packageName,
             @UserIdInt int userId) {
         final PackageSetting ps = mPackageManagerInt.getPackageSetting(packageName);
         if (ps == null) {
@@ -2697,7 +2697,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
     }
 
     @NonNull
-    private int[] getPermissionGids(@NonNull String permissionName, @UserIdInt int userId) {
+    private int[] getPermissionGidsInternal(@NonNull String permissionName, @UserIdInt int userId) {
         synchronized (mLock) {
             Permission permission = mRegistry.getPermission(permissionName);
             if (permission == null) {
@@ -5068,12 +5068,16 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         @Override
         public Set<String> getGrantedPermissions(@NonNull String packageName,
                 @UserIdInt int userId) {
-            return PermissionManagerService.this.getGrantedPermissions(packageName, userId);
+            Objects.requireNonNull(packageName, "packageName");
+            Preconditions.checkArgumentNonNegative(userId, "userId");
+            return getGrantedPermissionsInternal(packageName, userId);
         }
         @NonNull
         @Override
         public int[] getPermissionGids(@NonNull String permissionName, @UserIdInt int userId) {
-            return PermissionManagerService.this.getPermissionGids(permissionName, userId);
+            Objects.requireNonNull(permissionName, "permissionName");
+            Preconditions.checkArgumentNonNegative(userId, "userId");
+            return getPermissionGidsInternal(permissionName, userId);
         }
         @NonNull
         @Override
@@ -5114,13 +5118,15 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                     .updateAllPermissions(volumeUuid, sdkUpdated, mDefaultPermissionCallback);
         }
         @Override
-        public void resetRuntimePermissions(AndroidPackage pkg, int userId) {
-            PermissionManagerService.this.resetRuntimePermissionsInternal(pkg, userId);
+        public void resetRuntimePermissions(@NonNull AndroidPackage pkg, @UserIdInt int userId) {
+            Objects.requireNonNull(pkg, "pkg");
+            Preconditions.checkArgumentNonNegative(userId, "userId");
+            resetRuntimePermissionsInternal(pkg, userId);
         }
         @Override
-        public void resetAllRuntimePermissions(final int userId) {
-            mPackageManagerInt.forEachPackage(
-                    (AndroidPackage pkg) -> resetRuntimePermissionsInternal(pkg, userId));
+        public void resetAllRuntimePermissions(@UserIdInt int userId) {
+            Preconditions.checkArgumentNonNegative(userId, "userId");
+            mPackageManagerInt.forEachPackage(pkg -> resetRuntimePermissionsInternal(pkg, userId));
         }
         @Override
         public void enforceCrossUserPermission(int callingUid, int userId,
@@ -5352,12 +5358,6 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         public void grantDefaultPermissionsToDefaultUseOpenWifiApp(String packageName, int userId) {
             mDefaultPermissionGrantPolicy.grantDefaultPermissionsToDefaultUseOpenWifiApp(
                     packageName, userId);
-        }
-
-        @Override
-        public void grantDefaultPermissionsToDefaultBrowser(String packageName, int userId) {
-            mDefaultPermissionGrantPolicy.grantDefaultPermissionsToDefaultBrowser(packageName,
-                    userId);
         }
 
         @Override
