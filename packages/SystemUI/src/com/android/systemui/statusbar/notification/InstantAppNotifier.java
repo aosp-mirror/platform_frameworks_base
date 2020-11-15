@@ -364,18 +364,13 @@ public class InstantAppNotifier extends SystemUI
 
     @Nullable
     private Intent getTaskIntent(int taskId, int userId) {
-        try {
-            final List<ActivityManager.RecentTaskInfo> tasks =
-                    ActivityTaskManager.getService()
-                            .getRecentTasks(NUM_TASKS_FOR_INSTANT_APP_INFO, 0, userId)
-                            .getList();
-            for (int i = 0; i < tasks.size(); i++) {
-                if (tasks.get(i).id == taskId) {
-                    return tasks.get(i).baseIntent;
-                }
+        final List<ActivityManager.RecentTaskInfo> tasks =
+                ActivityTaskManager.getInstance().getRecentTasks(
+                        NUM_TASKS_FOR_INSTANT_APP_INFO, 0, userId);
+        for (int i = 0; i < tasks.size(); i++) {
+            if (tasks.get(i).id == taskId) {
+                return tasks.get(i).baseIntent;
             }
-        } catch (RemoteException e) {
-            // Fall through
         }
         return null;
     }

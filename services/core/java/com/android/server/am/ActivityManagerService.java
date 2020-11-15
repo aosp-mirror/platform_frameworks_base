@@ -5644,7 +5644,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @Override
     public List<RunningTaskInfo> getTasks(int maxNum) {
-        return mActivityTaskManager.getTasks(maxNum);
+        return mActivityTaskManager.getTasks(maxNum, false /* filterForVisibleRecents */);
     }
 
     @Override

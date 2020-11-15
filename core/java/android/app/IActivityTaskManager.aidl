@@ -83,6 +83,15 @@ import java.util.List;
  *
  * {@hide}
  */
+// TODO(b/174040395): Make this interface private to ActivityTaskManager.java and have external
+// caller go through that call instead. This would help us better separate and control the API
+// surface exposed.
+// TODO(b/174041144): Move callback methods from Activity (Things that take param 'IBinder token')
+// to a separate interface that is only available to the Activity.
+// TODO(b/174041603): Create a builder interface for things like startActivityXXX(...) to reduce
+// interface duplication.
+// TODO(b/174040691): Clean-up/remove all obsolete or unused interfaces like things that should be
+// going through task organizer now.
 interface IActivityTaskManager {
     int startActivity(in IApplicationThread caller, in String callingPackage,
             in String callingFeatureId, in Intent intent, in String resolvedType,
@@ -154,9 +163,7 @@ interface IActivityTaskManager {
     void setFocusedTask(int taskId);
     boolean removeTask(int taskId);
     void removeAllVisibleRecentTasks();
-    List<ActivityManager.RunningTaskInfo> getTasks(int maxNum);
-    List<ActivityManager.RunningTaskInfo> getFilteredTasks(int maxNum,
-            boolean filterOnlyVisibleRecents);
+    List<ActivityManager.RunningTaskInfo> getTasks(int maxNum, boolean filterOnlyVisibleRecents);
     boolean shouldUpRecreateTask(in IBinder token, in String destAffinity);
     boolean navigateUpTo(in IBinder token, in Intent target, int resultCode,
             in Intent resultData);

@@ -20,6 +20,7 @@ import static android.app.ActivityManager.LOCK_TASK_MODE_LOCKED;
 import static android.app.ActivityManager.LOCK_TASK_MODE_NONE;
 import static android.app.ActivityManager.LOCK_TASK_MODE_PINNED;
 import static android.app.ActivityManager.RECENT_IGNORE_UNAVAILABLE;
+import static android.app.ActivityTaskManager.getService;
 
 import android.annotation.NonNull;
 import android.app.Activity;
@@ -53,7 +54,6 @@ import com.android.internal.app.IVoiceInteractionManagerService;
 import com.android.systemui.shared.recents.model.Task;
 import com.android.systemui.shared.recents.model.ThumbnailData;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -70,6 +70,7 @@ public class ActivityManagerWrapper {
     // Should match the value in AssistManager
     private static final String INVOCATION_TIME_MS_KEY = "invocation_time_ms";
 
+    private final ActivityTaskManager mAtm = ActivityTaskManager.getInstance();
     private ActivityManagerWrapper() { }
 
     public static ActivityManagerWrapper getInstance() {
@@ -102,29 +103,19 @@ public class ActivityManagerWrapper {
      */
     public ActivityManager.RunningTaskInfo getRunningTask(boolean filterOnlyVisibleRecents) {
         // Note: The set of running tasks from the system is ordered by recency
-        try {
-            List<ActivityManager.RunningTaskInfo> tasks =
-                    ActivityTaskManager.getService().getFilteredTasks(1, filterOnlyVisibleRecents);
-            if (tasks.isEmpty()) {
-                return null;
-            }
-            return tasks.get(0);
-        } catch (RemoteException e) {
+        List<ActivityManager.RunningTaskInfo> tasks =
+                mAtm.getTasks(1, filterOnlyVisibleRecents);
+        if (tasks.isEmpty()) {
             return null;
         }
+        return tasks.get(0);
     }
 
     /**
      * @return a list of the recents tasks.
      */
     public List<RecentTaskInfo> getRecentTasks(int numTasks, int userId) {
-        try {
-            return ActivityTaskManager.getService().getRecentTasks(numTasks,
-                            RECENT_IGNORE_UNAVAILABLE, userId).getList();
-        } catch (RemoteException e) {
-            Log.e(TAG, "Failed to get recent tasks", e);
-            return new ArrayList<>();
-        }
+        return mAtm.getRecentTasks(numTasks, RECENT_IGNORE_UNAVAILABLE, userId);
     }
 
     /**
@@ -133,7 +124,7 @@ public class ActivityManagerWrapper {
     public @NonNull ThumbnailData getTaskThumbnail(int taskId, boolean isLowResolution) {
         ActivityManager.TaskSnapshot snapshot = null;
         try {
-            snapshot = ActivityTaskManager.getService().getTaskSnapshot(taskId, isLowResolution);
+            snapshot = getService().getTaskSnapshot(taskId, isLowResolution);
         } catch (RemoteException e) {
             Log.w(TAG, "Failed to retrieve task snapshot", e);
         }
@@ -149,8 +140,7 @@ public class ActivityManagerWrapper {
      */
     public void invalidateHomeTaskSnapshot(final Activity homeActivity) {
         try {
-            ActivityTaskManager.getService().invalidateHomeTaskSnapshot(
-                    homeActivity.getActivityToken());
+            getService().invalidateHomeTaskSnapshot(homeActivity.getActivityToken());
         } catch (RemoteException e) {
             Log.w(TAG, "Failed to invalidate home snapshot", e);
         }
@@ -208,7 +198,7 @@ public class ActivityManagerWrapper {
                     }
                 };
             }
-            ActivityTaskManager.getService().startRecentsActivity(intent, eventTime, runner);
+            getService().startRecentsActivity(intent, eventTime, runner);
             return true;
         } catch (Exception e) {
             return false;
@@ -220,7 +210,7 @@ public class ActivityManagerWrapper {
      */
     public void cancelRecentsAnimation(boolean restoreHomeRootTaskPosition) {
         try {
-            ActivityTaskManager.getService().cancelRecentsAnimation(restoreHomeRootTaskPosition);
+            getService().cancelRecentsAnimation(restoreHomeRootTaskPosition);
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to cancel recents animation", e);
         }
@@ -259,7 +249,7 @@ public class ActivityManagerWrapper {
     public boolean startActivityFromRecents(int taskId, ActivityOptions options) {
         try {
             Bundle optsBundle = options == null ? null : options.toBundle();
-            ActivityTaskManager.getService().startActivityFromRecents(taskId, optsBundle);
+            getService().startActivityFromRecents(taskId, optsBundle);
             return true;
         } catch (Exception e) {
             return false;
@@ -296,7 +286,7 @@ public class ActivityManagerWrapper {
      */
     public void removeTask(final int taskId) {
         try {
-            ActivityTaskManager.getService().removeTask(taskId);
+            getService().removeTask(taskId);
         } catch (RemoteException e) {
             Log.w(TAG, "Failed to remove task=" + taskId, e);
         }
@@ -307,7 +297,7 @@ public class ActivityManagerWrapper {
      */
     public void removeAllRecentTasks() {
         try {
-            ActivityTaskManager.getService().removeAllVisibleRecentTasks();
+            getService().removeAllVisibleRecentTasks();
         } catch (RemoteException e) {
             Log.w(TAG, "Failed to remove all tasks", e);
         }
@@ -318,7 +308,7 @@ public class ActivityManagerWrapper {
      */
     public boolean isScreenPinningActive() {
         try {
-            return ActivityTaskManager.getService().getLockTaskModeState() == LOCK_TASK_MODE_PINNED;
+            return getService().getLockTaskModeState() == LOCK_TASK_MODE_PINNED;
         } catch (RemoteException e) {
             return false;
         }
@@ -337,7 +327,7 @@ public class ActivityManagerWrapper {
      */
     public boolean isLockToAppActive() {
         try {
-            return ActivityTaskManager.getService().getLockTaskModeState() != LOCK_TASK_MODE_NONE;
+            return getService().getLockTaskModeState() != LOCK_TASK_MODE_NONE;
         } catch (RemoteException e) {
             return false;
         }
@@ -348,7 +338,7 @@ public class ActivityManagerWrapper {
      */
     public boolean isLockTaskKioskModeActive() {
         try {
-            return ActivityTaskManager.getService().getLockTaskModeState() == LOCK_TASK_MODE_LOCKED;
+            return getService().getLockTaskModeState() == LOCK_TASK_MODE_LOCKED;
         } catch (RemoteException e) {
             return false;
         }

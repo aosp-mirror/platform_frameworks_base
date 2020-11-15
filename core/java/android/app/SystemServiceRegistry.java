@@ -284,8 +284,7 @@ public final class SystemServiceRegistry {
                 new CachedServiceFetcher<ActivityTaskManager>() {
             @Override
             public ActivityTaskManager createService(ContextImpl ctx) {
-                return new ActivityTaskManager(
-                        ctx.getOuterContext(), ctx.mMainThread.getHandler());
+                return ActivityTaskManager.getInstance();
             }});
 
         registerService(Context.URI_GRANTS_SERVICE, UriGrantsManager.class,

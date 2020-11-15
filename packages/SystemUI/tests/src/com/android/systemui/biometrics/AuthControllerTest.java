@@ -33,6 +33,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.ActivityManager;
+import android.app.ActivityTaskManager;
 import android.app.IActivityTaskManager;
 import android.content.ComponentName;
 import android.content.Context;
@@ -92,7 +93,7 @@ public class AuthControllerTest extends SysuiTestCase {
     @Mock
     private StatusBarStateController mStatusBarStateController;
     @Mock
-    private IActivityTaskManager mActivityTaskManager;
+    private ActivityTaskManager mActivityTaskManager;
     @Mock
     private FingerprintManager mFingerprintManager;
     @Mock
@@ -553,7 +554,7 @@ public class AuthControllerTest extends SysuiTestCase {
 
         TestableAuthController(Context context, CommandQueue commandQueue,
                 StatusBarStateController statusBarStateController,
-                IActivityTaskManager activityTaskManager,
+                ActivityTaskManager activityTaskManager,
                 FingerprintManager fingerprintManager,
                 FaceManager faceManager,
                 Provider<UdfpsController> udfpsControllerFactory) {

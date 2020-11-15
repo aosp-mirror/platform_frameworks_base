@@ -1854,16 +1854,12 @@ public class ActivityManager {
      * the recent tasks.
      */
     @Deprecated
-    public List<RecentTaskInfo> getRecentTasks(int maxNum, int flags)
-            throws SecurityException {
-        try {
-            if (maxNum < 0) {
-                throw new IllegalArgumentException("The requested number of tasks should be >= 0");
-            }
-            return getTaskService().getRecentTasks(maxNum, flags, mContext.getUserId()).getList();
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
+    public List<RecentTaskInfo> getRecentTasks(int maxNum, int flags) throws SecurityException {
+        if (maxNum < 0) {
+            throw new IllegalArgumentException("The requested number of tasks should be >= 0");
         }
+        return ActivityTaskManager.getInstance().getRecentTasks(
+                maxNum, flags, mContext.getUserId());
     }
 
     /**
@@ -2084,11 +2080,7 @@ public class ActivityManager {
     @Deprecated
     public List<RunningTaskInfo> getRunningTasks(int maxNum)
             throws SecurityException {
-        try {
-            return getTaskService().getTasks(maxNum);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        return ActivityTaskManager.getInstance().getTasks(maxNum);
     }
 
     /**

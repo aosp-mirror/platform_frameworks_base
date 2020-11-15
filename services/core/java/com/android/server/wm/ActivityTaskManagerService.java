@@ -2738,9 +2738,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
     }
 
-    @Override
-    public List<ActivityManager.RunningTaskInfo> getTasks(int maxNum) {
-        return getFilteredTasks(maxNum, false /* filterForVisibleRecents */);
+    List<ActivityManager.RunningTaskInfo> getTasks(int maxNum) {
+        return getTasks(maxNum, false /* filterForVisibleRecents */);
     }
 
     /**
@@ -2748,7 +2747,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
      *                                 be visible in the recent task list in systemui
      */
     @Override
-    public List<ActivityManager.RunningTaskInfo> getFilteredTasks(int maxNum,
+    public List<ActivityManager.RunningTaskInfo> getTasks(int maxNum,
             boolean filterOnlyVisibleRecents) {
         final int callingUid = Binder.getCallingUid();
         final int callingPid = Binder.getCallingPid();

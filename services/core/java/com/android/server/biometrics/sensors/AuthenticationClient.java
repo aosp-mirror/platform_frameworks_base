@@ -49,7 +49,7 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
 
     private final boolean mIsStrongBiometric;
     private final boolean mRequireConfirmation;
-    private final IActivityTaskManager mActivityTaskManager;
+    private final ActivityTaskManager mActivityTaskManager;
     @Nullable private final TaskStackListener mTaskStackListener;
     private final LockoutTracker mLockoutTracker;
     private final boolean mIsRestricted;
@@ -71,7 +71,7 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
         mIsStrongBiometric = isStrongBiometric;
         mOperationId = operationId;
         mRequireConfirmation = requireConfirmation;
-        mActivityTaskManager = ActivityTaskManager.getService();
+        mActivityTaskManager = ActivityTaskManager.getInstance();
         mTaskStackListener = taskStackListener;
         mLockoutTracker = lockoutTracker;
         mIsRestricted = restricted;
@@ -146,29 +146,24 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
             // Ensure authentication only succeeds if the client activity is on top or is keyguard.
             boolean isBackgroundAuth = false;
             if (authenticated && !Utils.isKeyguard(getContext(), getOwnerString())) {
-                try {
-                    final List<ActivityManager.RunningTaskInfo> tasks =
-                            mActivityTaskManager.getTasks(1);
-                    if (tasks == null || tasks.isEmpty()) {
-                        Slog.e(TAG, "No running tasks reported");
+                final List<ActivityManager.RunningTaskInfo> tasks =
+                        mActivityTaskManager.getTasks(1);
+                if (tasks == null || tasks.isEmpty()) {
+                    Slog.e(TAG, "No running tasks reported");
+                    isBackgroundAuth = true;
+                } else {
+                    final ComponentName topActivity = tasks.get(0).topActivity;
+                    if (topActivity == null) {
+                        Slog.e(TAG, "Unable to get top activity");
                         isBackgroundAuth = true;
                     } else {
-                        final ComponentName topActivity = tasks.get(0).topActivity;
-                        if (topActivity == null) {
-                            Slog.e(TAG, "Unable to get top activity");
+                        final String topPackage = topActivity.getPackageName();
+                        if (!topPackage.contentEquals(getOwnerString())) {
+                            Slog.e(TAG, "Background authentication detected, top: " + topPackage
+                                    + ", client: " + this);
                             isBackgroundAuth = true;
-                        } else {
-                            final String topPackage = topActivity.getPackageName();
-                            if (!topPackage.contentEquals(getOwnerString())) {
-                                Slog.e(TAG, "Background authentication detected, top: " + topPackage
-                                        + ", client: " + this);
-                                isBackgroundAuth = true;
-                            }
                         }
                     }
-                } catch (RemoteException e) {
-                    Slog.e(TAG, "Unable to get running tasks", e);
-                    isBackgroundAuth = true;
                 }
             }
 
@@ -198,11 +193,7 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
                 }
 
                 if (mTaskStackListener != null) {
-                    try {
-                        mActivityTaskManager.unregisterTaskStackListener(mTaskStackListener);
-                    } catch (RemoteException e) {
-                        Slog.e(TAG, "Could not unregister task stack listener", e);
-                    }
+                    mActivityTaskManager.unregisterTaskStackListener(mTaskStackListener);
                 }
 
                 final byte[] byteToken = new byte[hardwareAuthToken.size()];
@@ -290,11 +281,7 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
         }
 
         if (mTaskStackListener != null) {
-            try {
-                mActivityTaskManager.registerTaskStackListener(mTaskStackListener);
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Could not register task stack listener", e);
-            }
+            mActivityTaskManager.registerTaskStackListener(mTaskStackListener);
         }
 
         if (DEBUG) Slog.w(TAG, "Requesting auth for " + getOwnerString());
@@ -309,11 +296,7 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
         super.cancel();
 
         if (mTaskStackListener != null) {
-            try {
-                mActivityTaskManager.unregisterTaskStackListener(mTaskStackListener);
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Could not unregister task stack listener", e);
-            }
+            mActivityTaskManager.unregisterTaskStackListener(mTaskStackListener);
         }
     }
 }
