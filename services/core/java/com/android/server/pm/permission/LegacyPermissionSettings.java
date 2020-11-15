@@ -21,6 +21,8 @@ import android.annotation.Nullable;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.XmlUtils;
@@ -99,14 +101,14 @@ public class LegacyPermissionSettings {
         }
     }
 
-    public void readPermissions(@NonNull XmlPullParser parser) throws IOException,
+    public void readPermissions(@NonNull TypedXmlPullParser parser) throws IOException,
             XmlPullParserException {
         synchronized (mLock) {
             readPermissions(mPermissions, parser);
         }
     }
 
-    public void readPermissionTrees(@NonNull XmlPullParser parser) throws IOException,
+    public void readPermissionTrees(@NonNull TypedXmlPullParser parser) throws IOException,
             XmlPullParserException {
         synchronized (mLock) {
             readPermissions(mPermissionTrees, parser);
@@ -114,7 +116,7 @@ public class LegacyPermissionSettings {
     }
 
     public static void readPermissions(@NonNull ArrayMap<String, LegacyPermission> out,
-            @NonNull XmlPullParser parser) throws IOException, XmlPullParserException {
+            @NonNull TypedXmlPullParser parser) throws IOException, XmlPullParserException {
         int outerDepth = parser.getDepth();
         int type;
         while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
@@ -132,7 +134,7 @@ public class LegacyPermissionSettings {
         }
     }
 
-    public void writePermissions(@NonNull XmlSerializer serializer) throws IOException {
+    public void writePermissions(@NonNull TypedXmlSerializer serializer) throws IOException {
         synchronized (mLock) {
             for (LegacyPermission bp : mPermissions.values()) {
                 bp.write(serializer);
@@ -140,7 +142,7 @@ public class LegacyPermissionSettings {
         }
     }
 
-    public void writePermissionTrees(@NonNull XmlSerializer serializer) throws IOException {
+    public void writePermissionTrees(@NonNull TypedXmlSerializer serializer) throws IOException {
         synchronized (mLock) {
             for (LegacyPermission bp : mPermissionTrees.values()) {
                 bp.write(serializer);

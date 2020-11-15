@@ -21,14 +21,13 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.pm.PermissionInfo;
 import android.util.Log;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 
 import com.android.server.pm.DumpState;
 import com.android.server.pm.PackageManagerService;
 
 import libcore.util.EmptyArray;
-
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlSerializer;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -133,7 +132,7 @@ public final class LegacyPermission {
      * @hide
      */
     public static boolean read(@NonNull Map<String, LegacyPermission> out,
-            @NonNull XmlPullParser parser) {
+            @NonNull TypedXmlPullParser parser) {
         final String tagName = parser.getName();
         if (!tagName.equals(TAG_ITEM)) {
             return false;
@@ -166,7 +165,7 @@ public final class LegacyPermission {
         return true;
     }
 
-    private static int readInt(@NonNull XmlPullParser parser, @Nullable String namespace,
+    private static int readInt(@NonNull TypedXmlPullParser parser, @Nullable String namespace,
             @NonNull String name, int defaultValue) {
         final String value = parser.getAttributeValue(namespace, name);
         if (value == null) {
@@ -186,7 +185,7 @@ public final class LegacyPermission {
     /**
      * @hide
      */
-    public void write(@NonNull XmlSerializer serializer) throws IOException {
+    public void write(@NonNull TypedXmlSerializer serializer) throws IOException {
         if (mPermissionInfo.packageName == null) {
             return;
         }

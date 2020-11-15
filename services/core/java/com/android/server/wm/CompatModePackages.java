@@ -35,6 +35,8 @@ import android.os.RemoteException;
 import android.util.AtomicFile;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import com.android.internal.protolog.common.ProtoLog;
@@ -93,8 +95,7 @@ public final class CompatModePackages {
         FileInputStream fis = null;
         try {
             fis = mFile.openRead();
-            XmlPullParser parser = Xml.newPullParser();
-            parser.setInput(fis, StandardCharsets.UTF_8.name());
+            TypedXmlPullParser parser = Xml.resolvePullParser(fis);
             int eventType = parser.getEventType();
             while (eventType != XmlPullParser.START_TAG &&
                     eventType != XmlPullParser.END_DOCUMENT) {
@@ -362,8 +363,7 @@ public final class CompatModePackages {
 
         try {
             fos = mFile.startWrite();
-            XmlSerializer out = new FastXmlSerializer();
-            out.setOutput(fos, StandardCharsets.UTF_8.name());
+            TypedXmlSerializer out = Xml.resolveSerializer(fos);
             out.startDocument(null, true);
             out.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
             out.startTag(null, "compat-packages");

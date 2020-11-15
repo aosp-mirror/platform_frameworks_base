@@ -27,6 +27,8 @@ import android.os.Message;
 import android.util.AtomicFile;
 import android.util.DisplayMetrics;
 import android.util.Slog;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import com.android.internal.util.FastXmlSerializer;
@@ -477,8 +479,7 @@ class AppWarnings {
         try {
             fos = mConfigFile.startWrite();
 
-            final XmlSerializer out = new FastXmlSerializer();
-            out.setOutput(fos, StandardCharsets.UTF_8.name());
+            final TypedXmlSerializer out = Xml.resolveSerializer(fos);
             out.startDocument(null, true);
             out.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
             out.startTag(null, "packages");
@@ -519,8 +520,7 @@ class AppWarnings {
         try {
             fis = mConfigFile.openRead();
 
-            final XmlPullParser parser = Xml.newPullParser();
-            parser.setInput(fis, StandardCharsets.UTF_8.name());
+            final TypedXmlPullParser parser = Xml.resolvePullParser(fis);
 
             int eventType = parser.getEventType();
             while (eventType != XmlPullParser.START_TAG &&

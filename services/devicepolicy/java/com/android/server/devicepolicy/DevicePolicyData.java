@@ -25,6 +25,8 @@ import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import com.android.internal.util.FastXmlSerializer;
@@ -154,8 +156,7 @@ class DevicePolicyData {
         FileOutputStream stream = null;
         try {
             stream = new FileOutputStream(file.chooseForWrite(), false);
-            XmlSerializer out = new FastXmlSerializer();
-            out.setOutput(stream, StandardCharsets.UTF_8.name());
+            TypedXmlSerializer out = Xml.resolveSerializer(stream);
             out.startDocument(null, true);
 
             out.startTag(null, "policies");
@@ -372,8 +373,7 @@ class DevicePolicyData {
         boolean needsRewrite = false;
         try {
             stream = new FileInputStream(file);
-            XmlPullParser parser = Xml.newPullParser();
-            parser.setInput(stream, StandardCharsets.UTF_8.name());
+            TypedXmlPullParser parser = Xml.resolvePullParser(stream);
 
             int type;
             while ((type = parser.next()) != XmlPullParser.END_DOCUMENT

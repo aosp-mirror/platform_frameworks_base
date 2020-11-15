@@ -399,6 +399,12 @@
     <string name="inactive_app_inactive_summary" msgid="3161222402614236260">"ନିଷ୍କ୍ରିୟ। ଟୋଗଲ୍‌ କରିବାକୁ ଟାପ୍‌ କରନ୍ତୁ।"</string>
     <string name="inactive_app_active_summary" msgid="8047630990208722344">"ସକ୍ରିୟ। ବଦଳାଇବା ପାଇଁ ଟାପ୍‌ କରନ୍ତୁ"</string>
     <string name="standby_bucket_summary" msgid="5128193447550429600">"ଆପ୍ ଷ୍ଟାଣ୍ଡବାଏ ଅବସ୍ଥା:<xliff:g id="BUCKET"> %s</xliff:g>"</string>
+    <!-- no translation found for transcode_settings_title (6700974145733932357) -->
+    <skip />
+    <!-- no translation found for transcode_enable_all (4719796495995795404) -->
+    <skip />
+    <!-- no translation found for transcode_skip_apps (5680997722349545778) -->
+    <skip />
     <string name="runningservices_settings_title" msgid="6460099290493086515">"ଚାଲୁଥିବା ସେବାଗୁଡ଼ିକ"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"ଏବେ ଚାଲୁଥିବା ସେବାଗୁଡ଼ିକୁ ଦେଖନ୍ତୁ ଓ ନିୟନ୍ତ୍ରଣ କରନ୍ତୁ"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"ୱେବ୍‌ଭ୍ୟୁ ପ୍ରୟୋଗ"</string>

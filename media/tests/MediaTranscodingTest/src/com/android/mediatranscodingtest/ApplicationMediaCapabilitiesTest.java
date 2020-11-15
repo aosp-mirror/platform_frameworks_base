@@ -34,6 +34,8 @@ package com.android.mediatranscodingtest;
 import static org.testng.Assert.assertThrows;
 
 import android.media.ApplicationMediaCapabilities;
+import android.media.MediaFeature;
+import android.media.MediaFormat;
 import android.test.ActivityInstrumentationTestCase2;
 
 import org.junit.Test;
@@ -49,37 +51,39 @@ public class ApplicationMediaCapabilitiesTest extends
     @Test
     public void testSetSupportHevc() throws Exception {
         ApplicationMediaCapabilities capability =
-                new ApplicationMediaCapabilities.Builder().setHevcSupported(true).build();
-        assertTrue(capability.isHevcSupported());
+                new ApplicationMediaCapabilities.Builder().addSupportedVideoMimeType(
+                        MediaFormat.MIMETYPE_VIDEO_HEVC).build();
+        assertTrue(capability.isVideoMimeTypeSupported(MediaFormat.MIMETYPE_VIDEO_HEVC));
 
         ApplicationMediaCapabilities capability2 =
-                new ApplicationMediaCapabilities.Builder().setHevcSupported(false).build();
-        assertFalse(capability2.isHevcSupported());
+                new ApplicationMediaCapabilities.Builder().build();
+        assertFalse(capability2.isVideoMimeTypeSupported(MediaFormat.MIMETYPE_VIDEO_HEVC));
     }
 
     @Test
     public void testSetSupportHdr() throws Exception {
         ApplicationMediaCapabilities capability =
-                new ApplicationMediaCapabilities.Builder().setHdrSupported(true).setHevcSupported(
-                        true).build();
-        assertEquals(true, capability.isHdrSupported());
+                new ApplicationMediaCapabilities.Builder().addSupportedHdrType(
+                        MediaFeature.HdrType.HDR10_PLUS).addSupportedVideoMimeType(
+                        MediaFormat.MIMETYPE_VIDEO_HEVC).build();
+        assertEquals(true, capability.isHdrTypeSupported(MediaFeature.HdrType.HDR10_PLUS));
     }
 
     @Test
     public void testSetSupportSlowMotion() throws Exception {
         ApplicationMediaCapabilities capability =
-                new ApplicationMediaCapabilities.Builder().setSlowMotionSupported(
-                        true).build();
+                new ApplicationMediaCapabilities.Builder().setSlowMotionSupported(true).build();
         assertTrue(capability.isSlowMotionSupported());
     }
 
     @Test
     public void testBuilder() throws Exception {
         ApplicationMediaCapabilities capability =
-                new ApplicationMediaCapabilities.Builder().setHdrSupported(
-                        true).setHevcSupported(true).setSlowMotionSupported(true).build();
-        assertTrue(capability.isHdrSupported());
-        assertTrue(capability.isSlowMotionSupported());
+                new ApplicationMediaCapabilities.Builder().addSupportedVideoMimeType(
+                        MediaFormat.MIMETYPE_VIDEO_HEVC).addSupportedHdrType(
+                        MediaFeature.HdrType.HDR10_PLUS).setSlowMotionSupported(true).build();
+        assertTrue(capability.isVideoMimeTypeSupported(MediaFormat.MIMETYPE_VIDEO_HEVC));
+        assertTrue(capability.isHdrTypeSupported(MediaFeature.HdrType.HDR10_PLUS));
         assertTrue(capability.isSlowMotionSupported());
     }
 
@@ -87,8 +91,8 @@ public class ApplicationMediaCapabilitiesTest extends
     public void testSupportHdrWithoutSupportHevc() throws Exception {
         assertThrows(UnsupportedOperationException.class, () -> {
             ApplicationMediaCapabilities capability =
-                    new ApplicationMediaCapabilities.Builder().setHdrSupported(
-                            true).setHevcSupported(false).build();
+                    new ApplicationMediaCapabilities.Builder().addSupportedHdrType(
+                            MediaFeature.HdrType.HDR10_PLUS).build();
         });
     }
 }

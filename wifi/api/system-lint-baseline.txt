@@ -7,5 +7,7 @@ MissingNullability: android.net.wifi.rtt.RangingRequest.Builder#addResponder(and
 
 
 
+MutableBareField: android.net.wifi.WifiConfiguration#carrierMerged:
+
 MutableBareField: android.net.wifi.WifiConfiguration#subscriptionId:
     Bare field subscriptionId must be marked final, or moved behind accessors if mutable

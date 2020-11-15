@@ -1163,9 +1163,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
      */
     @Nullable
     public NotificationMenuRowPlugin createMenu() {
-        final boolean removeShelf = Settings.Global.getInt(mContext.getContentResolver(),
-                Settings.Global.SHOW_NEW_NOTIF_DISMISS, 0 /* show shelf by default */) == 1;
-        if (mMenuRow == null || removeShelf) {
+        if (mMenuRow == null) {
             return null;
         }
         if (mMenuRow.getMenuView() == null) {

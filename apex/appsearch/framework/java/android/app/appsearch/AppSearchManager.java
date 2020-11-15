@@ -267,14 +267,14 @@ public class AppSearchManager {
             searchResultsFuture.completeExceptionally(e);
         }
 
-        // Translate the list of Bundle into a list of SearchResult
-        AppSearchResult<SearchResults> searchResultsResult = getFutureOrThrow(searchResultsFuture);
-        if (!searchResultsResult.isSuccess()) {
-            return AppSearchResult.newFailedResult(
-                    searchResultsResult.getResultCode(), searchResultsResult.getErrorMessage());
+        // Translate the Bundle into a searchResultPage.
+        AppSearchResult<Bundle> bundleResult = getFutureOrThrow(searchResultsFuture);
+        if (!bundleResult.isSuccess()) {
+            return AppSearchResult.newFailedResult(bundleResult.getResultCode(),
+                    bundleResult.getErrorMessage());
         }
-        SearchResults searchResults = searchResultsResult.getResultValue();
-        return AppSearchResult.newSuccessfulResult(searchResults.mResults);
+        SearchResultPage searchResultPage = new SearchResultPage(bundleResult.getResultValue());
+        return AppSearchResult.newSuccessfulResult(searchResultPage.getResults());
     }
 
     /**
@@ -294,39 +294,7 @@ public class AppSearchManager {
         List<String> uris = new ArrayList<>(request.getUris());
         AndroidFuture<AppSearchBatchResult> future = new AndroidFuture<>();
         try {
-            mService.delete(DEFAULT_DATABASE, request.getNamespace(), uris, future);
-        } catch (RemoteException e) {
-            future.completeExceptionally(e);
-        }
-        return getFutureOrThrow(future);
-    }
-
-    /**
-     * Deletes {@link android.app.appsearch.GenericDocument}s by schema type.
-     *
-     * <p>You should not call this method directly; instead, use the
-     * {@code AppSearch#deleteByType()} API provided by JetPack.
-     *
-     * @param schemaTypes Schema types whose documents to delete.
-     * @return An {@link AppSearchBatchResult} mapping each schema type to a {@code null} success if
-     *     deletion was successful, to a {@code null} failure if the type did not exist, or to a
-     *     {@code throwable} failure if deletion failed for another reason.
-     */
-    public AppSearchBatchResult<String, Void> deleteByTypes(@NonNull List<String> schemaTypes) {
-        AndroidFuture<AppSearchBatchResult> future = new AndroidFuture<>();
-        try {
-            mService.deleteByTypes(DEFAULT_DATABASE, schemaTypes, future);
-        } catch (RemoteException e) {
-            future.completeExceptionally(e);
-        }
-        return getFutureOrThrow(future);
-    }
-
-    /** Deletes all documents owned by the calling app. */
-    public AppSearchResult<Void> deleteAll() {
-        AndroidFuture<AppSearchResult> future = new AndroidFuture<>();
-        try {
-            mService.deleteAll(DEFAULT_DATABASE, future);
+            mService.removeByUri(DEFAULT_DATABASE, request.getNamespace(), uris, future);
         } catch (RemoteException e) {
             future.completeExceptionally(e);
         }

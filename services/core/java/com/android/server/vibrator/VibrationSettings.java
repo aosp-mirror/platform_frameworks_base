@@ -152,8 +152,8 @@ public final class VibrationSettings {
     /**
      * Return {@code true} if the device should vibrate for ringtones.
      *
-     * <p>This checks the current {@link AudioManager#getRingerMode()} against user settings for
-     * vibrations while ringing.
+     * <p>This checks the current {@link AudioManager#getRingerModeInternal()} against user settings
+     * for vibrations while ringing.
      */
     public boolean shouldVibrateForRingtone() {
         int ringerMode = mAudioManager.getRingerModeInternal();

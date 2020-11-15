@@ -75,6 +75,8 @@ import android.util.ArrayMap;
 import android.util.AtomicFile;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import com.android.internal.annotations.GuardedBy;
@@ -657,8 +659,7 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
         FileInputStream fis = null;
         try {
             fis = mGrantFile.openRead();
-            final XmlPullParser in = Xml.newPullParser();
-            in.setInput(fis, StandardCharsets.UTF_8.name());
+            final TypedXmlPullParser in = Xml.resolvePullParser(fis);
 
             int type;
             while ((type = in.next()) != END_DOCUMENT) {
@@ -1313,8 +1314,7 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
         try {
             fos = mGrantFile.startWrite(startTime);
 
-            XmlSerializer out = new FastXmlSerializer();
-            out.setOutput(fos, StandardCharsets.UTF_8.name());
+            TypedXmlSerializer out = Xml.resolveSerializer(fos);
             out.startDocument(null, true);
             out.startTag(null, TAG_URI_GRANTS);
             for (UriPermission.Snapshot perm : persist) {

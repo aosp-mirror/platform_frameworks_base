@@ -25,6 +25,8 @@ import org.xmlpull.v1.XmlSerializer;
 
 import android.util.AtomicFile;
 import android.util.Slog;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import java.io.File;
@@ -265,8 +267,7 @@ final class PackageStatusStorage {
     private static XmlPullParser parseToPackageStatusTag(FileInputStream fis)
             throws ParseException {
         try {
-            XmlPullParser parser = Xml.newPullParser();
-            parser.setInput(fis, StandardCharsets.UTF_8.name());
+            TypedXmlPullParser parser = Xml.resolvePullParser(fis);
             int type;
             while ((type = parser.next()) != END_DOCUMENT) {
                 final String tag = parser.getName();
@@ -315,8 +316,7 @@ final class PackageStatusStorage {
         FileOutputStream fos = null;
         try {
             fos = mPackageStatusFile.startWrite();
-            XmlSerializer serializer = new FastXmlSerializer();
-            serializer.setOutput(fos, StandardCharsets.UTF_8.name());
+            TypedXmlSerializer serializer = Xml.resolveSerializer(fos);
             serializer.startDocument(null /* encoding */, true /* standalone */);
             final String namespace = null;
             serializer.startTag(namespace, TAG_PACKAGE_STATUS);

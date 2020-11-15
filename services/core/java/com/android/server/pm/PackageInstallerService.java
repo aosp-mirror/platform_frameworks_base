@@ -71,6 +71,8 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import com.android.internal.R;
@@ -78,7 +80,6 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.content.PackageHelper;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.notification.SystemNotificationChannels;
-import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.ImageUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.IoThread;
@@ -91,9 +92,7 @@ import com.android.server.pm.permission.PermissionManagerServiceInternal;
 
 import libcore.io.IoUtils;
 
-import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
 
 import java.io.CharArrayWriter;
 import java.io.File;
@@ -102,7 +101,6 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -383,8 +381,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         FileInputStream fis = null;
         try {
             fis = mSessionsFile.openRead();
-            final XmlPullParser in = Xml.newPullParser();
-            in.setInput(fis, StandardCharsets.UTF_8.name());
+            final TypedXmlPullParser in = Xml.resolvePullParser(fis);
 
             int type;
             while ((type = in.next()) != END_DOCUMENT) {
@@ -467,8 +464,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         try {
             fos = mSessionsFile.startWrite();
 
-            XmlSerializer out = new FastXmlSerializer();
-            out.setOutput(fos, StandardCharsets.UTF_8.name());
+            final TypedXmlSerializer out = Xml.resolveSerializer(fos);
             out.startDocument(null, true);
             out.startTag(null, TAG_SESSIONS);
             final int size = mSessions.size();

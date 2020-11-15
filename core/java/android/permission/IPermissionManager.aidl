@@ -29,8 +29,6 @@ import android.permission.IOnPermissionsChangeListener;
  * @hide
  */
 interface IPermissionManager {
-    String[] getAppOpPermissionPackages(String permName);
-
     ParceledListSlice getAllPermissionGroups(int flags);
 
     PermissionGroupInfo getPermissionGroupInfo(String groupName, int flags);

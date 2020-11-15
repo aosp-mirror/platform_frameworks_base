@@ -29,6 +29,8 @@ import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ResolveInfo;
 import android.util.Slog;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -57,7 +59,7 @@ public class PreferredComponent {
     private final String mSetupWizardPackageName;
 
     public interface Callbacks {
-        public boolean onReadTag(String tagName, XmlPullParser parser)
+        public boolean onReadTag(String tagName, TypedXmlPullParser parser)
                 throws XmlPullParserException, IOException;
     }
 
@@ -97,7 +99,7 @@ public class PreferredComponent {
         }
     }
 
-    public PreferredComponent(Callbacks callbacks, XmlPullParser parser)
+    public PreferredComponent(Callbacks callbacks, TypedXmlPullParser parser)
             throws XmlPullParserException, IOException {
         mCallbacks = callbacks;
         mShortComponent = parser.getAttributeValue(null, ATTR_NAME);
@@ -182,7 +184,7 @@ public class PreferredComponent {
         return mParseError;
     }
 
-    public void writeToXml(XmlSerializer serializer, boolean full) throws IOException {
+    public void writeToXml(TypedXmlSerializer serializer, boolean full) throws IOException {
         final int NS = mSetClasses != null ? mSetClasses.length : 0;
         serializer.attribute(null, ATTR_NAME, mShortComponent);
         if (full) {

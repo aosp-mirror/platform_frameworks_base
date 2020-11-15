@@ -27,12 +27,13 @@ import android.content.pm.PackageInstaller;
 import android.platform.test.annotations.Presubmit;
 import android.util.AtomicFile;
 import android.util.Slog;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.os.BackgroundThread;
-import com.android.internal.util.FastXmlSerializer;
 
 import libcore.io.IoUtils;
 
@@ -43,16 +44,13 @@ import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -200,8 +198,7 @@ public class PackageInstallerSessionTest {
         try {
             fos = mSessionsFile.startWrite();
 
-            XmlSerializer out = new FastXmlSerializer();
-            out.setOutput(fos, StandardCharsets.UTF_8.name());
+            TypedXmlSerializer out = Xml.resolveSerializer(fos);
             out.startDocument(null, true);
             out.startTag(null, TAG_SESSIONS);
             for (PackageInstallerSession session : sessions) {
@@ -227,8 +224,7 @@ public class PackageInstallerSessionTest {
         FileInputStream fis = null;
         try {
             fis = mSessionsFile.openRead();
-            final XmlPullParser in = Xml.newPullParser();
-            in.setInput(fis, StandardCharsets.UTF_8.name());
+            TypedXmlPullParser in = Xml.resolvePullParser(fis);
 
             int type;
             while ((type = in.next()) != END_DOCUMENT) {

@@ -399,6 +399,12 @@
     <string name="inactive_app_inactive_summary" msgid="3161222402614236260">"নিষ্ক্ৰিয়। ট\'গল কৰিবলৈ টিপক।"</string>
     <string name="inactive_app_active_summary" msgid="8047630990208722344">"সক্ৰিয়। ট\'গল কৰিবলৈ টিপক।"</string>
     <string name="standby_bucket_summary" msgid="5128193447550429600">"এপ্ ষ্টেণ্ডবাই অৱস্থাত আছে:<xliff:g id="BUCKET"> %s</xliff:g>"</string>
+    <!-- no translation found for transcode_settings_title (6700974145733932357) -->
+    <skip />
+    <!-- no translation found for transcode_enable_all (4719796495995795404) -->
+    <skip />
+    <!-- no translation found for transcode_skip_apps (5680997722349545778) -->
+    <skip />
     <string name="runningservices_settings_title" msgid="6460099290493086515">"চলিত সেৱা"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"বৰ্তমান চলি থকা সেৱাসমূহ চাওক আৰু নিয়ন্ত্ৰণ কৰক"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"ৱেবভিউ প্ৰয়োগ"</string>

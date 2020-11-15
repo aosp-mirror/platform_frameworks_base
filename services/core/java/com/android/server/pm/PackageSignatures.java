@@ -21,6 +21,8 @@ import android.content.pm.PackageParser;
 import android.content.pm.PackageParser.SigningDetails.SignatureSchemeVersion;
 import android.content.pm.Signature;
 import android.util.Log;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 
 import com.android.internal.util.XmlUtils;
 
@@ -52,7 +54,7 @@ class PackageSignatures {
         mSigningDetails = PackageParser.SigningDetails.UNKNOWN;
     }
 
-    void writeXml(XmlSerializer serializer, String tagName,
+    void writeXml(TypedXmlSerializer serializer, String tagName,
             ArrayList<Signature> writtenSignatures) throws IOException {
         if (mSigningDetails.signatures == null) {
             return;
@@ -75,8 +77,9 @@ class PackageSignatures {
         serializer.endTag(null, tagName);
     }
 
-    private void writeCertsListXml(XmlSerializer serializer, ArrayList<Signature> writtenSignatures,
-            Signature[] signatures, boolean isPastSigs) throws IOException {
+    private void writeCertsListXml(TypedXmlSerializer serializer,
+            ArrayList<Signature> writtenSignatures, Signature[] signatures, boolean isPastSigs)
+            throws IOException {
         for (int i=0; i<signatures.length; i++) {
             serializer.startTag(null, "cert");
             final Signature sig = signatures[i];
@@ -104,7 +107,7 @@ class PackageSignatures {
         }
     }
 
-    void readXml(XmlPullParser parser, ArrayList<Signature> readSignatures)
+    void readXml(TypedXmlPullParser parser, ArrayList<Signature> readSignatures)
             throws IOException, XmlPullParserException {
         PackageParser.SigningDetails.Builder builder =
                 new PackageParser.SigningDetails.Builder();
@@ -150,7 +153,7 @@ class PackageSignatures {
         }
     }
 
-    private int readCertsListXml(XmlPullParser parser, ArrayList<Signature> readSignatures,
+    private int readCertsListXml(TypedXmlPullParser parser, ArrayList<Signature> readSignatures,
             ArrayList<Signature> signatures, int count, boolean isPastSigs,
             PackageParser.SigningDetails.Builder builder)
             throws IOException, XmlPullParserException {

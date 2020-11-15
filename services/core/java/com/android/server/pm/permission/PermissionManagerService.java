@@ -582,21 +582,15 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         }
     }
 
-    @Override
-    public String[] getAppOpPermissionPackages(String permName) {
-        return getAppOpPermissionPackagesInternal(permName, getCallingUid());
-    }
-
-    private String[] getAppOpPermissionPackagesInternal(String permName, int callingUid) {
-        if (mPackageManagerInt.getInstantAppPackageName(callingUid) != null) {
-            return null;
-        }
+    @NonNull
+    private String[] getAppOpPermissionPackagesInternal(@NonNull String permissionName) {
         synchronized (mLock) {
-            final ArraySet<String> pkgs = mRegistry.getAppOpPermissionPackages(permName);
-            if (pkgs == null) {
-                return null;
+            final ArraySet<String> packageNames = mRegistry.getAppOpPermissionPackages(
+                    permissionName);
+            if (packageNames == null) {
+                return EmptyArray.STRING;
             }
-            return pkgs.toArray(new String[pkgs.size()]);
+            return packageNames.toArray(new String[0]);
         }
     }
 
@@ -5062,6 +5056,12 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         public int[] getPermissionGids(@NonNull String permissionName, @UserIdInt int userId) {
             return PermissionManagerService.this.getPermissionGids(permissionName, userId);
         }
+        @NonNull
+        @Override
+        public String[] getAppOpPermissionPackages(@NonNull String permissionName) {
+            Objects.requireNonNull(permissionName, "permissionName");
+            return PermissionManagerService.this.getAppOpPermissionPackagesInternal(permissionName);
+        }
         @Override
         public void grantRequestedRuntimePermissions(AndroidPackage pkg, int[] userIds,
                 String[] grantedPermissions, int callingUid) {
@@ -5105,11 +5105,6 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         public void resetAllRuntimePermissions(final int userId) {
             mPackageManagerInt.forEachPackage(
                     (AndroidPackage pkg) -> resetRuntimePermissionsInternal(pkg, userId));
-        }
-        @Override
-        public String[] getAppOpPermissionPackages(String permName, int callingUid) {
-            return PermissionManagerService.this
-                    .getAppOpPermissionPackagesInternal(permName, callingUid);
         }
         @Override
         public void enforceCrossUserPermission(int callingUid, int userId,

@@ -40,37 +40,47 @@ public class CharsetUtilsTest {
     }
 
     @Test
-    public void testUtf8_Empty() {
-        assertEquals(0, CharsetUtils.toUtf8Bytes("", destPtr, 0, dest.length));
+    public void testModifiedUtf8_Empty() {
+        assertEquals(0, CharsetUtils.toModifiedUtf8Bytes("", destPtr, 0, dest.length));
         assertEquals("0000000000000000", HexDump.toHexString(dest));
+        assertEquals("", CharsetUtils.fromModifiedUtf8Bytes(destPtr, 0, 0));
     }
 
     @Test
-    public void testUtf8_Simple() {
-        assertEquals(7, CharsetUtils.toUtf8Bytes("example", destPtr, 0, dest.length));
+    public void testModifiedUtf8_Null() {
+        assertEquals(4, CharsetUtils.toModifiedUtf8Bytes("!\0!", destPtr, 0, dest.length));
+        assertEquals("21C0802100000000", HexDump.toHexString(dest));
+        assertEquals("!\0!", CharsetUtils.fromModifiedUtf8Bytes(destPtr, 0, 4));
+    }
+
+    @Test
+    public void testModifiedUtf8_Simple() {
+        assertEquals(7, CharsetUtils.toModifiedUtf8Bytes("example", destPtr, 0, dest.length));
         assertEquals("6578616D706C6500", HexDump.toHexString(dest));
+        assertEquals("example", CharsetUtils.fromModifiedUtf8Bytes(destPtr, 0, 7));
     }
 
     @Test
-    public void testUtf8_Complex() {
-        assertEquals(3, CharsetUtils.toUtf8Bytes("☃", destPtr, 4, dest.length));
+    public void testModifiedUtf8_Complex() {
+        assertEquals(3, CharsetUtils.toModifiedUtf8Bytes("☃", destPtr, 4, dest.length));
         assertEquals("00000000E2988300", HexDump.toHexString(dest));
+        assertEquals("☃", CharsetUtils.fromModifiedUtf8Bytes(destPtr, 4, 3));
     }
 
     @Test
-    public void testUtf8_Bounds() {
-        assertEquals(-1, CharsetUtils.toUtf8Bytes("foo", destPtr, 0, 0));
-        assertEquals(-1, CharsetUtils.toUtf8Bytes("foo", destPtr, 0, 2));
-        assertEquals(-1, CharsetUtils.toUtf8Bytes("foo", destPtr, -2, 8));
-        assertEquals(-1, CharsetUtils.toUtf8Bytes("foo", destPtr, 6, 8));
-        assertEquals(-1, CharsetUtils.toUtf8Bytes("foo", destPtr, 10, 8));
+    public void testModifiedUtf8_Bounds() {
+        assertEquals(-3, CharsetUtils.toModifiedUtf8Bytes("foo", destPtr, 0, 0));
+        assertEquals(-3, CharsetUtils.toModifiedUtf8Bytes("foo", destPtr, 0, 2));
+        assertEquals(-3, CharsetUtils.toModifiedUtf8Bytes("foo", destPtr, -2, 8));
+        assertEquals(-3, CharsetUtils.toModifiedUtf8Bytes("foo", destPtr, 6, 8));
+        assertEquals(-3, CharsetUtils.toModifiedUtf8Bytes("foo", destPtr, 10, 8));
     }
 
     @Test
-    public void testUtf8_Overwrite() {
-        assertEquals(5, CharsetUtils.toUtf8Bytes("!!!!!", destPtr, 0, dest.length));
-        assertEquals(3, CharsetUtils.toUtf8Bytes("...", destPtr, 0, dest.length));
-        assertEquals(1, CharsetUtils.toUtf8Bytes("?", destPtr, 0, dest.length));
+    public void testModifiedUtf8_Overwrite() {
+        assertEquals(5, CharsetUtils.toModifiedUtf8Bytes("!!!!!", destPtr, 0, dest.length));
+        assertEquals(3, CharsetUtils.toModifiedUtf8Bytes("...", destPtr, 0, dest.length));
+        assertEquals(1, CharsetUtils.toModifiedUtf8Bytes("?", destPtr, 0, dest.length));
         assertEquals("3F002E0021000000", HexDump.toHexString(dest));
     }
 }
