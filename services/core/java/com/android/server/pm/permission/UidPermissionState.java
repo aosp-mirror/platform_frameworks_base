@@ -308,7 +308,7 @@ public final class UidPermissionState {
         return anyChanged;
     }
 
-    public boolean isPermissionReviewRequired() {
+    public boolean isPermissionsReviewRequired() {
         if (mPermissions == null) {
             return false;
         }

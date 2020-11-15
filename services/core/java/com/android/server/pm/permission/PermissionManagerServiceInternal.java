@@ -179,22 +179,52 @@ public abstract class PermissionManagerServiceInternal extends PermissionManager
 
     public abstract void systemReady();
 
-    public abstract boolean isPermissionsReviewRequired(@NonNull AndroidPackage pkg,
+    /**
+     * Get whether permission review is required for a package.
+     *
+     * @param packageName the name of the package
+     * @param userId the user ID
+     * @return whether permission review is required
+     */
+    //@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
+    public abstract boolean isPermissionsReviewRequired(@NonNull String packageName,
             @UserIdInt int userId);
 
-    public abstract void grantRequestedRuntimePermissions(
-            @NonNull AndroidPackage pkg, @NonNull int[] userIds,
-            @NonNull String[] grantedPermissions, int callingUid);
-    public abstract void setWhitelistedRestrictedPermissions(
-            @NonNull AndroidPackage pkg, @NonNull int[] userIds,
-            @NonNull List<String> permissions, int callingUid,
-            @PackageManager.PermissionWhitelistFlags int whitelistFlags);
-    /** Sets the allowlisted, restricted permissions for the given package. */
-    public abstract void setWhitelistedRestrictedPermissions(
-            @NonNull String packageName, @NonNull List<String> permissions,
-            @PackageManager.PermissionWhitelistFlags int flags, int userId);
-    public abstract void setAutoRevokeWhitelisted(
-            @NonNull String packageName, boolean whitelisted, int userId);
+    /**
+     * Grant the requested runtime permissions for a package, or an explicit subset of them.
+     *
+     * @param pkg the package
+     * @param permissions the names of the subset of permissions to be granted, or {@code null} for
+     *                    granting all the requested permissions
+     * @param userIds the user IDs
+     */
+    //@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
+    public abstract void grantRequestedRuntimePermissions(@NonNull AndroidPackage pkg,
+            @Nullable List<String> permissions, @NonNull int[] userIds);
+
+    /**
+     * Set the allowlisted restricted permissions for a package, or an explicit subset of them.
+     *
+     * @param pkg the package
+     * @param permissions the names of the subset of permissions to be allowlisted, or {@code null}
+     *                    for allowlisting all the requested restricted permissions
+     * @param userIds the user IDs
+     */
+    //@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
+    public abstract void setAllowlistedRestrictedPermissions(
+            @NonNull AndroidPackage pkg, @Nullable List<String> permissions,
+            @PackageManager.PermissionWhitelistFlags int allowlistFlags, @NonNull int[] userIds);
+
+    /**
+     * Set whether a package is exempted from auto revoke.
+     *
+     * @param pkg the package
+     * @param exempted whether the package is exempted from auto revoke
+     * @param userIds the user IDs
+     */
+    //@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
+    public abstract void setAutoRevokeExempted(@NonNull AndroidPackage pkg, boolean exempted,
+            @NonNull int[] userIds);
 
     /**
      * Update permissions when a package changed.
