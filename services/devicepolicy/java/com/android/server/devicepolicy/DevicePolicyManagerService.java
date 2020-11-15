@@ -275,7 +275,6 @@ import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.telephony.SmsApplication;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
-import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.FunctionalUtils.ThrowingRunnable;
 import com.android.internal.util.FunctionalUtils.ThrowingSupplier;
 import com.android.internal.util.JournaledFile;
@@ -303,9 +302,7 @@ import com.android.server.wm.ActivityTaskManagerInternal;
 
 import com.google.android.collect.Sets;
 
-import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -314,7 +311,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.Constructor;
-import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -3501,8 +3497,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         PasswordMetrics metrics = mLockSettingsInternal.getUserPasswordMetrics(credentialOwner);
         // Update the checkpoint only if the user's password metrics is known
         if (metrics != null) {
+            final int userToCheck = getProfileParentUserIfRequested(userHandle, parent);
             final boolean newCheckpoint = isPasswordSufficientForUserWithoutCheckpointLocked(
-                    metrics, userHandle, parent);
+                    metrics, userToCheck);
             if (newCheckpoint != policy.mPasswordValidAtLastCheckpoint) {
                 policy.mPasswordValidAtLastCheckpoint = newCheckpoint;
                 affectedUserIds.add(credentialOwner);
@@ -4155,13 +4152,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     public PasswordMetrics getPasswordMinimumMetrics(@UserIdInt int userHandle) {
         final CallerIdentity caller = getCallerIdentity();
         Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(caller, userHandle));
-        return getPasswordMinimumMetrics(userHandle, false /* parent */);
-    }
-
-    /**
-     * Calculates strictest (maximum) value for a given password property enforced by admin[s].
-     */
-    private PasswordMetrics getPasswordMinimumMetrics(@UserIdInt int userHandle, boolean parent) {
         if (!mHasFeature) {
             new PasswordMetrics(CREDENTIAL_TYPE_NONE);
         }
@@ -4169,8 +4159,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         ArrayList<PasswordMetrics> adminMetrics = new ArrayList<>();
         synchronized (getLockObject()) {
-            List<ActiveAdmin> admins = getActiveAdminsForLockscreenPoliciesLocked(
-                    getProfileParentUserIfRequested(userHandle, parent));
+            List<ActiveAdmin> admins = getActiveAdminsForLockscreenPoliciesLocked(userHandle);
             for (ActiveAdmin admin : admins) {
                 adminMetrics.add(admin.mPasswordPolicy.getMinMetrics());
             }
@@ -4293,18 +4282,18 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             throw new IllegalStateException("isActivePasswordSufficient called on FBE-locked user");
         }
 
-        return isPasswordSufficientForUserWithoutCheckpointLocked(metrics, userHandle, false);
+        return isPasswordSufficientForUserWithoutCheckpointLocked(metrics, userHandle);
     }
 
     /**
      * Returns {@code true} if the password represented by the {@code metrics} argument
      * sufficiently fulfills the password requirements for the user corresponding to
-     * {@code userId} (or its parent, if {@code parent} is set to {@code true}).
+     * {@code userId}.
      */
     private boolean isPasswordSufficientForUserWithoutCheckpointLocked(
-            @NonNull PasswordMetrics metrics, @UserIdInt int userId, boolean parent) {
-        final int complexity = getEffectivePasswordComplexityRequirementLocked(userId, parent);
-        PasswordMetrics minMetrics = getPasswordMinimumMetrics(userId, parent);
+            @NonNull PasswordMetrics metrics, @UserIdInt int userId) {
+        final int complexity = getEffectivePasswordComplexityRequirementLocked(userId);
+        PasswordMetrics minMetrics = getPasswordMinimumMetrics(userId);
         final List<PasswordValidationError> passwordValidationErrors =
                 PasswordMetrics.validatePasswordMetrics(
                         minMetrics, complexity, false, metrics);
@@ -4371,11 +4360,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         //TODO: Log metrics.
     }
 
-    private int getEffectivePasswordComplexityRequirementLocked(@UserIdInt int userHandle,
-            boolean parent) {
+    private int getEffectivePasswordComplexityRequirementLocked(@UserIdInt int userHandle) {
         ensureLocked();
-        List<ActiveAdmin> admins = getActiveAdminsForLockscreenPoliciesLocked(
-                getProfileParentUserIfRequested(userHandle, parent));
+        List<ActiveAdmin> admins = getActiveAdminsForLockscreenPoliciesLocked(userHandle);
         int maxRequiredComplexity = PASSWORD_COMPLEXITY_NONE;
         for (ActiveAdmin admin : admins) {
             final ComponentName adminComponent = admin.info.getComponent();
@@ -4598,8 +4585,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         synchronized (getLockObject()) {
             final PasswordMetrics minMetrics = getPasswordMinimumMetrics(userHandle);
             final List<PasswordValidationError> validationErrors;
-            final int complexity =
-                    getEffectivePasswordComplexityRequirementLocked(userHandle, false);
+            final int complexity = getEffectivePasswordComplexityRequirementLocked(userHandle);
             // TODO: Consider changing validation API to take LockscreenCredential.
             if (password.isEmpty()) {
                 validationErrors = PasswordMetrics.validatePasswordMetrics(
