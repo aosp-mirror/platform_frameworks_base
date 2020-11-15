@@ -2697,10 +2697,16 @@ public class ConnectivityService extends IConnectivityManager.Stub
     /**
      * Return an array of all current NetworkRequest sorted by request id.
      */
-    private NetworkRequestInfo[] requestsSortedById() {
+    @VisibleForTesting
+    protected NetworkRequestInfo[] requestsSortedById() {
         NetworkRequestInfo[] requests = new NetworkRequestInfo[0];
         requests = mNetworkRequests.values().toArray(requests);
-        Arrays.sort(requests, Comparator.comparingInt(nri -> nri.request.requestId));
+        // Sort the array based off the NRI containing the min requestId in its requests.
+        Arrays.sort(requests,
+                Comparator.comparingInt(nri -> Collections.min(nri.mRequests,
+                        Comparator.comparingInt(req -> req.requestId)).requestId
+                )
+        );
         return requests;
     }
 
@@ -5367,7 +5373,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
      * Tracks info about the requester.
      * Also used to notice when the calling process dies so we can self-expire
      */
-    private class NetworkRequestInfo implements IBinder.DeathRecipient {
+    @VisibleForTesting
+    protected class NetworkRequestInfo implements IBinder.DeathRecipient {
         final List<NetworkRequest> mRequests;
         final NetworkRequest request;
 
