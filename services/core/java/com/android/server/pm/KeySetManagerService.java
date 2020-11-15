@@ -674,14 +674,14 @@ public class KeySetManagerService {
 
     void writeKeySetManagerServiceLPr(TypedXmlSerializer serializer) throws IOException {
         serializer.startTag(null, "keyset-settings");
-        serializer.attribute(null, "version", Integer.toString(CURRENT_VERSION));
+        serializer.attributeInt(null, "version", CURRENT_VERSION);
         writePublicKeysLPr(serializer);
         writeKeySetsLPr(serializer);
         serializer.startTag(null, "lastIssuedKeyId");
-        serializer.attribute(null, "value", Long.toString(lastIssuedKeyId));
+        serializer.attributeLong(null, "value", lastIssuedKeyId);
         serializer.endTag(null, "lastIssuedKeyId");
         serializer.startTag(null, "lastIssuedKeySetId");
-        serializer.attribute(null, "value", Long.toString(lastIssuedKeySetId));
+        serializer.attributeLong(null, "value", lastIssuedKeySetId);
         serializer.endTag(null, "lastIssuedKeySetId");
         serializer.endTag(null, "keyset-settings");
     }
@@ -693,7 +693,7 @@ public class KeySetManagerService {
             PublicKeyHandle pkh = mPublicKeys.valueAt(pKeyIndex);
             String encodedKey = encodePublicKey(pkh.getKey());
             serializer.startTag(null, "public-key");
-            serializer.attribute(null, "identifier", Long.toString(id));
+            serializer.attributeLong(null, "identifier", id);
             serializer.attribute(null, "value", encodedKey);
             serializer.endTag(null, "public-key");
         }
@@ -706,10 +706,10 @@ public class KeySetManagerService {
             long id = mKeySetMapping.keyAt(keySetIndex);
             ArraySet<Long> keys = mKeySetMapping.valueAt(keySetIndex);
             serializer.startTag(null, "keyset");
-            serializer.attribute(null, "identifier", Long.toString(id));
+            serializer.attributeLong(null, "identifier", id);
             for (long keyId : keys) {
                 serializer.startTag(null, "key-id");
-                serializer.attribute(null, "identifier", Long.toString(keyId));
+                serializer.attributeLong(null, "identifier", keyId);
                 serializer.endTag(null, "key-id");
             }
             serializer.endTag(null, "keyset");
@@ -749,9 +749,9 @@ public class KeySetManagerService {
             } else if (tagName.equals("keysets")) {
                 readKeySetListLPw(parser);
             } else if (tagName.equals("lastIssuedKeyId")) {
-                lastIssuedKeyId = Long.parseLong(parser.getAttributeValue(null, "value"));
+                lastIssuedKeyId = parser.getAttributeLong(null, "value");
             } else if (tagName.equals("lastIssuedKeySetId")) {
-                lastIssuedKeySetId = Long.parseLong(parser.getAttributeValue(null, "value"));
+                lastIssuedKeySetId = parser.getAttributeLong(null, "value");
             }
         }
 

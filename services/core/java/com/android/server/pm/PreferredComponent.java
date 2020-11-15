@@ -189,10 +189,10 @@ public class PreferredComponent {
         serializer.attribute(null, ATTR_NAME, mShortComponent);
         if (full) {
             if (mMatch != 0) {
-                serializer.attribute(null, ATTR_MATCH, Integer.toHexString(mMatch));
+                serializer.attributeIntHex(null, ATTR_MATCH, mMatch);
             }
-            serializer.attribute(null, ATTR_ALWAYS, Boolean.toString(mAlways));
-            serializer.attribute(null, ATTR_SET, Integer.toString(NS));
+            serializer.attributeBoolean(null, ATTR_ALWAYS, mAlways);
+            serializer.attributeInt(null, ATTR_SET, NS);
             for (int s=0; s<NS; s++) {
                 serializer.startTag(null, TAG_SET);
                 serializer.attribute(null, ATTR_NAME, mSetComponents[s]);

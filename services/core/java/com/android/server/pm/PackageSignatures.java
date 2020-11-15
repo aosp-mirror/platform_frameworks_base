@@ -60,16 +60,14 @@ class PackageSignatures {
             return;
         }
         serializer.startTag(null, tagName);
-        serializer.attribute(null, "count", Integer.toString(mSigningDetails.signatures.length));
-        serializer.attribute(null, "schemeVersion",
-                Integer.toString(mSigningDetails.signatureSchemeVersion));
+        serializer.attributeInt(null, "count", mSigningDetails.signatures.length);
+        serializer.attributeInt(null, "schemeVersion", mSigningDetails.signatureSchemeVersion);
         writeCertsListXml(serializer, writtenSignatures, mSigningDetails.signatures, false);
 
         // if we have past signer certificate information, write it out
         if (mSigningDetails.pastSigningCertificates != null) {
             serializer.startTag(null, "pastSigs");
-            serializer.attribute(null, "count",
-                    Integer.toString(mSigningDetails.pastSigningCertificates.length));
+            serializer.attributeInt(null, "count", mSigningDetails.pastSigningCertificates.length);
             writeCertsListXml(serializer, writtenSignatures,
                     mSigningDetails.pastSigningCertificates, true);
             serializer.endTag(null, "pastSigs");
@@ -89,19 +87,19 @@ class PackageSignatures {
             for (j=0; j<numWritten; j++) {
                 Signature writtenSig = writtenSignatures.get(j);
                 if (writtenSig.hashCode() == sigHash && writtenSig.equals(sig)) {
-                    serializer.attribute(null, "index", Integer.toString(j));
+                    serializer.attributeInt(null, "index", j);
                     break;
                 }
             }
             if (j >= numWritten) {
                 writtenSignatures.add(sig);
-                serializer.attribute(null, "index", Integer.toString(numWritten));
+                serializer.attributeInt(null, "index", numWritten);
                 serializer.attribute(null, "key", sig.toCharsString());
             }
             // The flags attribute is only written for previous signatures to represent the
             // capabilities the developer wants to grant to the previous signing certificates.
             if (isPastSigs) {
-                serializer.attribute(null, "flags", Integer.toString(sig.getFlags()));
+                serializer.attributeInt(null, "flags", sig.getFlags());
             }
             serializer.endTag(null, "cert");
         }

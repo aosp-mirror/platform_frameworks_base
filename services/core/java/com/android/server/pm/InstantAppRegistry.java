@@ -1108,7 +1108,7 @@ class InstantAppRegistry {
             if (TAG_PERMISSION.equals(parser.getName())) {
                 String permission = XmlUtils.readStringAttribute(parser, ATTR_NAME);
                 outRequestedPermissions.add(permission);
-                if (XmlUtils.readBooleanAttribute(parser, ATTR_GRANTED)) {
+                if (parser.getAttributeBoolean(null, ATTR_GRANTED, false)) {
                     outGrantedPermissions.add(permission);
                 }
             }
@@ -1143,7 +1143,7 @@ class InstantAppRegistry {
                 serializer.startTag(null, TAG_PERMISSION);
                 serializer.attribute(null, ATTR_NAME, permission);
                 if (ArrayUtils.contains(instantApp.getGrantedPermissions(), permission)) {
-                    serializer.attribute(null, ATTR_GRANTED, String.valueOf(true));
+                    serializer.attributeBoolean(null, ATTR_GRANTED, true);
                 }
                 serializer.endTag(null, TAG_PERMISSION);
             }

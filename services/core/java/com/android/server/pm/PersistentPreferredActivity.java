@@ -57,7 +57,7 @@ class PersistentPreferredActivity extends IntentFilter {
                             "Bad activity name " + shortComponent +
                             " at " + parser.getPositionDescription());
         }
-        mIsSetByDpm = Boolean.parseBoolean(parser.getAttributeValue(null, ATTR_SET_BY_DPM));
+        mIsSetByDpm = parser.getAttributeBoolean(null, ATTR_SET_BY_DPM, false);
 
         int outerDepth = parser.getDepth();
         String tagName = parser.getName();
@@ -90,7 +90,7 @@ class PersistentPreferredActivity extends IntentFilter {
 
     public void writeToXml(TypedXmlSerializer serializer) throws IOException {
         serializer.attribute(null, ATTR_NAME, mComponent.flattenToShortString());
-        serializer.attribute(null, ATTR_SET_BY_DPM, Boolean.toString(mIsSetByDpm));
+        serializer.attributeBoolean(null, ATTR_SET_BY_DPM, mIsSetByDpm);
         serializer.startTag(null, ATTR_FILTER);
             super.writeToXml(serializer);
         serializer.endTag(null, ATTR_FILTER);

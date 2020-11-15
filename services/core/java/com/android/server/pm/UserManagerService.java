@@ -2896,13 +2896,12 @@ public class UserManagerService extends IUserManager.Stub {
 
         final UserInfo userInfo = userData.info;
         serializer.startTag(null, TAG_USER);
-        serializer.attribute(null, ATTR_ID, Integer.toString(userInfo.id));
-        serializer.attribute(null, ATTR_SERIAL_NO, Integer.toString(userInfo.serialNumber));
-        serializer.attribute(null, ATTR_FLAGS, Integer.toString(userInfo.flags));
+        serializer.attributeInt(null, ATTR_ID, userInfo.id);
+        serializer.attributeInt(null, ATTR_SERIAL_NO, userInfo.serialNumber);
+        serializer.attributeInt(null, ATTR_FLAGS, userInfo.flags);
         serializer.attribute(null, ATTR_TYPE, userInfo.userType);
-        serializer.attribute(null, ATTR_CREATION_TIME, Long.toString(userInfo.creationTime));
-        serializer.attribute(null, ATTR_LAST_LOGGED_IN_TIME,
-                Long.toString(userInfo.lastLoggedInTime));
+        serializer.attributeLong(null, ATTR_CREATION_TIME, userInfo.creationTime);
+        serializer.attributeLong(null, ATTR_LAST_LOGGED_IN_TIME, userInfo.lastLoggedInTime);
         if (userInfo.lastLoggedInFingerprint != null) {
             serializer.attribute(null, ATTR_LAST_LOGGED_IN_FINGERPRINT,
                     userInfo.lastLoggedInFingerprint);
@@ -2923,14 +2922,12 @@ public class UserManagerService extends IUserManager.Stub {
             serializer.attribute(null, ATTR_GUEST_TO_REMOVE, "true");
         }
         if (userInfo.profileGroupId != UserInfo.NO_PROFILE_GROUP_ID) {
-            serializer.attribute(null, ATTR_PROFILE_GROUP_ID,
-                    Integer.toString(userInfo.profileGroupId));
+            serializer.attributeInt(null, ATTR_PROFILE_GROUP_ID, userInfo.profileGroupId);
         }
-        serializer.attribute(null, ATTR_PROFILE_BADGE,
-                Integer.toString(userInfo.profileBadge));
+        serializer.attributeInt(null, ATTR_PROFILE_BADGE, userInfo.profileBadge);
         if (userInfo.restrictedProfileParentId != UserInfo.NO_PROFILE_GROUP_ID) {
-            serializer.attribute(null, ATTR_RESTRICTED_PROFILE_PARENT_ID,
-                    Integer.toString(userInfo.restrictedProfileParentId));
+            serializer.attributeInt(null, ATTR_RESTRICTED_PROFILE_PARENT_ID,
+                    userInfo.restrictedProfileParentId);
         }
         // Write seed data
         if (userData.persistSeedData) {
@@ -3001,8 +2998,8 @@ public class UserManagerService extends IUserManager.Stub {
             serializer.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
 
             serializer.startTag(null, TAG_USERS);
-            serializer.attribute(null, ATTR_NEXT_SERIAL_NO, Integer.toString(mNextSerialNumber));
-            serializer.attribute(null, ATTR_USER_VERSION, Integer.toString(mUserVersion));
+            serializer.attributeInt(null, ATTR_NEXT_SERIAL_NO, mNextSerialNumber);
+            serializer.attributeInt(null, ATTR_USER_VERSION, mUserVersion);
 
             serializer.startTag(null, TAG_GUEST_RESTRICTIONS);
             synchronized (mGuestRestrictions) {
@@ -3011,7 +3008,7 @@ public class UserManagerService extends IUserManager.Stub {
             }
             serializer.endTag(null, TAG_GUEST_RESTRICTIONS);
             serializer.startTag(null, TAG_DEVICE_OWNER_USER_ID);
-            serializer.attribute(null, ATTR_ID, Integer.toString(mDeviceOwnerUserId));
+            serializer.attributeInt(null, ATTR_ID, mDeviceOwnerUserId);
             serializer.endTag(null, TAG_DEVICE_OWNER_USER_ID);
             int[] userIdsToWrite;
             synchronized (mUsersLock) {
@@ -3023,7 +3020,7 @@ public class UserManagerService extends IUserManager.Stub {
             }
             for (int id : userIdsToWrite) {
                 serializer.startTag(null, TAG_USER);
-                serializer.attribute(null, ATTR_ID, Integer.toString(id));
+                serializer.attributeInt(null, ATTR_ID, id);
                 serializer.endTag(null, TAG_USER);
             }
 
@@ -4386,7 +4383,7 @@ public class UserManagerService extends IUserManager.Stub {
             } else {
                 serializer.attribute(null, ATTR_VALUE_TYPE, ATTR_TYPE_STRING_ARRAY);
                 String[] values = (String[]) value;
-                serializer.attribute(null, ATTR_MULTIPLE, Integer.toString(values.length));
+                serializer.attributeInt(null, ATTR_MULTIPLE, values.length);
                 for (String choice : values) {
                     serializer.startTag(null, TAG_VALUE);
                     serializer.text(choice != null ? choice : "");

@@ -1559,14 +1559,14 @@ public final class Settings {
                         continue;
                     }
 
-                    final long ceDataInode = XmlUtils.readLongAttribute(parser, ATTR_CE_DATA_INODE,
-                            0);
-                    final boolean installed = XmlUtils.readBooleanAttribute(parser, ATTR_INSTALLED,
-                            true);
-                    final boolean stopped = XmlUtils.readBooleanAttribute(parser, ATTR_STOPPED,
-                            false);
-                    final boolean notLaunched = XmlUtils.readBooleanAttribute(parser,
-                            ATTR_NOT_LAUNCHED, false);
+                    final long ceDataInode =
+                            parser.getAttributeLong(null, ATTR_CE_DATA_INODE, 0);
+                    final boolean installed =
+                            parser.getAttributeBoolean(null, ATTR_INSTALLED, true);
+                    final boolean stopped =
+                            parser.getAttributeBoolean(null, ATTR_STOPPED, false);
+                    final boolean notLaunched =
+                            parser.getAttributeBoolean(null, ATTR_NOT_LAUNCHED, false);
 
                     // For backwards compatibility with the previous name of "blocked", which
                     // now means hidden, read the old attribute as well.
@@ -1577,10 +1577,8 @@ public final class Settings {
                     hidden = hiddenStr == null
                             ? hidden : Boolean.parseBoolean(hiddenStr);
 
-                    final int distractionFlags = XmlUtils.readIntAttribute(parser,
-                            ATTR_DISTRACTION_FLAGS, 0);
-                    final boolean suspended = XmlUtils.readBooleanAttribute(parser, ATTR_SUSPENDED,
-                            false);
+                    final int distractionFlags = parser.getAttributeInt(null, ATTR_DISTRACTION_FLAGS, 0);
+                    final boolean suspended = parser.getAttributeBoolean(null, ATTR_SUSPENDED, false);
                     String oldSuspendingPackage = parser.getAttributeValue(null,
                             ATTR_SUSPENDING_PACKAGE);
                     final String dialogMessage = parser.getAttributeValue(null,
@@ -1589,30 +1587,30 @@ public final class Settings {
                         oldSuspendingPackage = PLATFORM_PACKAGE_NAME;
                     }
 
-                    final boolean blockUninstall = XmlUtils.readBooleanAttribute(parser,
-                            ATTR_BLOCK_UNINSTALL, false);
-                    final boolean instantApp = XmlUtils.readBooleanAttribute(parser,
-                            ATTR_INSTANT_APP, false);
-                    final boolean virtualPreload = XmlUtils.readBooleanAttribute(parser,
-                            ATTR_VIRTUAL_PRELOAD, false);
-                    final int enabled = XmlUtils.readIntAttribute(parser, ATTR_ENABLED,
+                    final boolean blockUninstall =
+                            parser.getAttributeBoolean(null, ATTR_BLOCK_UNINSTALL, false);
+                    final boolean instantApp =
+                            parser.getAttributeBoolean(null, ATTR_INSTANT_APP, false);
+                    final boolean virtualPreload =
+                            parser.getAttributeBoolean(null, ATTR_VIRTUAL_PRELOAD, false);
+                    final int enabled = parser.getAttributeInt(null, ATTR_ENABLED,
                             COMPONENT_ENABLED_STATE_DEFAULT);
                     final String enabledCaller = parser.getAttributeValue(null,
                             ATTR_ENABLED_CALLER);
                     final String harmfulAppWarning =
                             parser.getAttributeValue(null, ATTR_HARMFUL_APP_WARNING);
-                    final int verifState = XmlUtils.readIntAttribute(parser,
+                    final int verifState = parser.getAttributeInt(null,
                             ATTR_DOMAIN_VERIFICATON_STATE,
                             PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED);
-                    final int linkGeneration = XmlUtils.readIntAttribute(parser,
-                            ATTR_APP_LINK_GENERATION, 0);
+                    final int linkGeneration =
+                            parser.getAttributeInt(null, ATTR_APP_LINK_GENERATION, 0);
                     if (linkGeneration > maxAppLinkGeneration) {
                         maxAppLinkGeneration = linkGeneration;
                     }
-                    final int installReason = XmlUtils.readIntAttribute(parser,
-                            ATTR_INSTALL_REASON, PackageManager.INSTALL_REASON_UNKNOWN);
-                    final int uninstallReason = XmlUtils.readIntAttribute(parser,
-                            ATTR_UNINSTALL_REASON, PackageManager.UNINSTALL_REASON_UNKNOWN);
+                    final int installReason = parser.getAttributeInt(null, ATTR_INSTALL_REASON,
+                            PackageManager.INSTALL_REASON_UNKNOWN);
+                    final int uninstallReason = parser.getAttributeInt(null, ATTR_UNINSTALL_REASON,
+                            PackageManager.UNINSTALL_REASON_UNKNOWN);
 
                     ArraySet<String> enabledComponents = null;
                     ArraySet<String> disabledComponents = null;
@@ -1971,7 +1969,7 @@ public final class Settings {
                 serializer.startTag(null, TAG_PACKAGE);
                 serializer.attribute(null, ATTR_NAME, pkg.name);
                 if (ustate.ceDataInode != 0) {
-                    XmlUtils.writeLongAttribute(serializer, ATTR_CE_DATA_INODE, ustate.ceDataInode);
+                    serializer.attributeLong(null, ATTR_CE_DATA_INODE, ustate.ceDataInode);
                 }
                 if (!ustate.installed) {
                     serializer.attribute(null, ATTR_INSTALLED, "false");
@@ -1986,8 +1984,7 @@ public final class Settings {
                     serializer.attribute(null, ATTR_HIDDEN, "true");
                 }
                 if (ustate.distractionFlags != 0) {
-                    serializer.attribute(null, ATTR_DISTRACTION_FLAGS,
-                            Integer.toString(ustate.distractionFlags));
+                    serializer.attributeInt(null, ATTR_DISTRACTION_FLAGS, ustate.distractionFlags);
                 }
                 if (ustate.suspended) {
                     serializer.attribute(null, ATTR_SUSPENDED, "true");
@@ -1999,8 +1996,7 @@ public final class Settings {
                     serializer.attribute(null, ATTR_VIRTUAL_PRELOAD, "true");
                 }
                 if (ustate.enabled != COMPONENT_ENABLED_STATE_DEFAULT) {
-                    serializer.attribute(null, ATTR_ENABLED,
-                            Integer.toString(ustate.enabled));
+                    serializer.attributeInt(null, ATTR_ENABLED, ustate.enabled);
                     if (ustate.lastDisableAppCaller != null) {
                         serializer.attribute(null, ATTR_ENABLED_CALLER,
                                 ustate.lastDisableAppCaller);
@@ -2008,20 +2004,18 @@ public final class Settings {
                 }
                 if (ustate.domainVerificationStatus !=
                         PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED) {
-                    XmlUtils.writeIntAttribute(serializer, ATTR_DOMAIN_VERIFICATON_STATE,
+                    serializer.attributeInt(null, ATTR_DOMAIN_VERIFICATON_STATE,
                             ustate.domainVerificationStatus);
                 }
                 if (ustate.appLinkGeneration != 0) {
-                    XmlUtils.writeIntAttribute(serializer, ATTR_APP_LINK_GENERATION,
+                    serializer.attributeInt(null, ATTR_APP_LINK_GENERATION,
                             ustate.appLinkGeneration);
                 }
                 if (ustate.installReason != PackageManager.INSTALL_REASON_UNKNOWN) {
-                    serializer.attribute(null, ATTR_INSTALL_REASON,
-                            Integer.toString(ustate.installReason));
+                    serializer.attributeInt(null, ATTR_INSTALL_REASON, ustate.installReason);
                 }
                 if (ustate.uninstallReason != PackageManager.UNINSTALL_REASON_UNKNOWN) {
-                    serializer.attribute(null, ATTR_UNINSTALL_REASON,
-                            Integer.toString(ustate.uninstallReason));
+                    serializer.attributeInt(null, ATTR_UNINSTALL_REASON, ustate.uninstallReason);
                 }
                 if (ustate.harmfulAppWarning != null) {
                     serializer.attribute(null, ATTR_HARMFUL_APP_WARNING,
@@ -2145,8 +2139,8 @@ public final class Settings {
         for (PermissionState permissionState : permissionStates) {
             serializer.startTag(null, TAG_ITEM);
             serializer.attribute(null, ATTR_NAME, permissionState.getName());
-            serializer.attribute(null, ATTR_GRANTED, String.valueOf(permissionState.isGranted()));
-            serializer.attribute(null, ATTR_FLAGS, Integer.toHexString(permissionState.getFlags()));
+            serializer.attributeBoolean(null, ATTR_GRANTED, permissionState.isGranted());
+            serializer.attributeIntHex(null, ATTR_FLAGS, permissionState.getFlags());
             serializer.endTag(null, TAG_ITEM);
         }
 
@@ -2187,7 +2181,7 @@ public final class Settings {
             final long libVersion = usesStaticLibraryVersions[i];
             serializer.startTag(null, TAG_USES_STATIC_LIB);
             serializer.attribute(null, ATTR_NAME, libName);
-            serializer.attribute(null, ATTR_VERSION, Long.toString(libVersion));
+            serializer.attributeLong(null, ATTR_VERSION, libVersion);
             serializer.endTag(null, TAG_USES_STATIC_LIB);
         }
     }
@@ -2342,8 +2336,8 @@ public final class Settings {
 
                 serializer.startTag(null, TAG_VERSION);
                 XmlUtils.writeStringAttribute(serializer, ATTR_VOLUME_UUID, volumeUuid);
-                XmlUtils.writeIntAttribute(serializer, ATTR_SDK_VERSION, ver.sdkVersion);
-                XmlUtils.writeIntAttribute(serializer, ATTR_DATABASE_VERSION, ver.databaseVersion);
+                serializer.attributeInt(null, ATTR_SDK_VERSION, ver.sdkVersion);
+                serializer.attributeInt(null, ATTR_DATABASE_VERSION, ver.databaseVersion);
                 XmlUtils.writeStringAttribute(serializer, ATTR_FINGERPRINT, ver.fingerprint);
                 serializer.endTag(null, TAG_VERSION);
             }
@@ -2380,8 +2374,7 @@ public final class Settings {
             for (final SharedUserSetting usr : mSharedUsers.values()) {
                 serializer.startTag(null, "shared-user");
                 serializer.attribute(null, ATTR_NAME, usr.name);
-                serializer.attribute(null, "userId",
-                        Integer.toString(usr.userId));
+                serializer.attributeInt(null, "userId", usr.userId);
                 usr.signatures.writeXml(serializer, "sigs", mPastSignatures);
                 writePermissionsLPr(serializer, usr.getLegacyPermissionState()
                         .getInstallPermissionStates());
@@ -2684,10 +2677,10 @@ public final class Settings {
             serializer.attribute(null, "realName", pkg.realName);
         }
         serializer.attribute(null, "codePath", pkg.getPathString());
-        serializer.attribute(null, "ft", Long.toHexString(pkg.timeStamp));
-        serializer.attribute(null, "it", Long.toHexString(pkg.firstInstallTime));
-        serializer.attribute(null, "ut", Long.toHexString(pkg.lastUpdateTime));
-        serializer.attribute(null, "version", String.valueOf(pkg.versionCode));
+        serializer.attributeLongHex(null, "ft", pkg.timeStamp);
+        serializer.attributeLongHex(null, "it", pkg.firstInstallTime);
+        serializer.attributeLongHex(null, "ut", pkg.lastUpdateTime);
+        serializer.attributeLong(null, "version", pkg.versionCode);
         if (pkg.legacyNativeLibraryPathString != null) {
             serializer.attribute(null, "nativeLibraryPath", pkg.legacyNativeLibraryPathString);
         }
@@ -2702,9 +2695,9 @@ public final class Settings {
         }
 
         if (pkg.sharedUser == null) {
-            serializer.attribute(null, "userId", Integer.toString(pkg.appId));
+            serializer.attributeInt(null, "userId", pkg.appId);
         } else {
-            serializer.attribute(null, "sharedUserId", Integer.toString(pkg.appId));
+            serializer.attributeInt(null, "sharedUserId", pkg.appId);
         }
 
         writeUsesStaticLibLPw(serializer, pkg.usesStaticLibraries, pkg.usesStaticLibrariesVersions);
@@ -2740,16 +2733,16 @@ public final class Settings {
             serializer.attribute(null, "cpuAbiOverride", pkg.cpuAbiOverrideString);
         }
 
-        serializer.attribute(null, "publicFlags", Integer.toString(pkg.pkgFlags));
-        serializer.attribute(null, "privateFlags", Integer.toString(pkg.pkgPrivateFlags));
-        serializer.attribute(null, "ft", Long.toHexString(pkg.timeStamp));
-        serializer.attribute(null, "it", Long.toHexString(pkg.firstInstallTime));
-        serializer.attribute(null, "ut", Long.toHexString(pkg.lastUpdateTime));
-        serializer.attribute(null, "version", String.valueOf(pkg.versionCode));
+        serializer.attributeInt(null, "publicFlags", pkg.pkgFlags);
+        serializer.attributeInt(null, "privateFlags", pkg.pkgPrivateFlags);
+        serializer.attributeLongHex(null, "ft", pkg.timeStamp);
+        serializer.attributeLongHex(null, "it", pkg.firstInstallTime);
+        serializer.attributeLongHex(null, "ut", pkg.lastUpdateTime);
+        serializer.attributeLong(null, "version", pkg.versionCode);
         if (pkg.sharedUser == null) {
-            serializer.attribute(null, "userId", Integer.toString(pkg.appId));
+            serializer.attributeInt(null, "userId", pkg.appId);
         } else {
-            serializer.attribute(null, "sharedUserId", Integer.toString(pkg.appId));
+            serializer.attributeInt(null, "sharedUserId", pkg.appId);
         }
         if (pkg.uidError) {
             serializer.attribute(null, "uidError", "true");
@@ -2778,7 +2771,7 @@ public final class Settings {
             serializer.attribute(null, "volumeUuid", pkg.volumeUuid);
         }
         if (pkg.categoryHint != ApplicationInfo.CATEGORY_UNDEFINED) {
-            serializer.attribute(null, "categoryHint", Integer.toString(pkg.categoryHint));
+            serializer.attributeInt(null, "categoryHint", pkg.categoryHint);
         }
         if (pkg.updateAvailable) {
             serializer.attribute(null, "updateAvailable", "true");
@@ -2817,8 +2810,7 @@ public final class Settings {
     void writeSigningKeySetLPr(TypedXmlSerializer serializer,
             PackageKeySetData data) throws IOException {
         serializer.startTag(null, "proper-signing-keyset");
-        serializer.attribute(null, "identifier",
-                Long.toString(data.getProperSigningKeySet()));
+        serializer.attributeLong(null, "identifier", data.getProperSigningKeySet());
         serializer.endTag(null, "proper-signing-keyset");
     }
 
@@ -2827,7 +2819,7 @@ public final class Settings {
         if (data.isUsingUpgradeKeySets()) {
             for (long id : data.getUpgradeKeySets()) {
                 serializer.startTag(null, "upgrade-keyset");
-                serializer.attribute(null, "identifier", Long.toString(id));
+                serializer.attributeLong(null, "identifier", id);
                 serializer.endTag(null, "upgrade-keyset");
             }
         }
@@ -2838,7 +2830,7 @@ public final class Settings {
         for (Map.Entry<String, Long> e: data.getAliases().entrySet()) {
             serializer.startTag(null, "defined-keyset");
             serializer.attribute(null, "alias", e.getKey());
-            serializer.attribute(null, "identifier", Long.toString(e.getValue()));
+            serializer.attributeLong(null, "identifier", e.getValue());
             serializer.endTag(null, "defined-keyset");
         }
     }
@@ -2949,8 +2941,8 @@ public final class Settings {
                     final VersionInfo external = findOrCreateVersion(
                             StorageManager.UUID_PRIMARY_PHYSICAL);
 
-                    internal.sdkVersion = XmlUtils.readIntAttribute(parser, "internal", 0);
-                    external.sdkVersion = XmlUtils.readIntAttribute(parser, "external", 0);
+                    internal.sdkVersion = parser.getAttributeInt(null, "internal", 0);
+                    external.sdkVersion = parser.getAttributeInt(null, "external", 0);
                     internal.fingerprint = external.fingerprint =
                             XmlUtils.readStringAttribute(parser, "fingerprint");
 
@@ -2961,8 +2953,8 @@ public final class Settings {
                     final VersionInfo external = findOrCreateVersion(
                             StorageManager.UUID_PRIMARY_PHYSICAL);
 
-                    internal.databaseVersion = XmlUtils.readIntAttribute(parser, "internal", 0);
-                    external.databaseVersion = XmlUtils.readIntAttribute(parser, "external", 0);
+                    internal.databaseVersion = parser.getAttributeInt(null, "internal", 0);
+                    external.databaseVersion = parser.getAttributeInt(null, "external", 0);
 
                 } else if (tagName.equals("verifier")) {
                     final String deviceIdentity = parser.getAttributeValue(null, "device");
@@ -2982,8 +2974,8 @@ public final class Settings {
                     final String volumeUuid = XmlUtils.readStringAttribute(parser,
                             ATTR_VOLUME_UUID);
                     final VersionInfo ver = findOrCreateVersion(volumeUuid);
-                    ver.sdkVersion = XmlUtils.readIntAttribute(parser, ATTR_SDK_VERSION);
-                    ver.databaseVersion = XmlUtils.readIntAttribute(parser, ATTR_DATABASE_VERSION);
+                    ver.sdkVersion = parser.getAttributeInt(null, ATTR_SDK_VERSION);
+                    ver.databaseVersion = parser.getAttributeInt(null, ATTR_DATABASE_VERSION);
                     ver.fingerprint = XmlUtils.readStringAttribute(parser, ATTR_FINGERPRINT);
                 } else {
                     Slog.w(PackageManagerService.TAG, "Unknown element under <packages>: "
@@ -3824,7 +3816,7 @@ public final class Settings {
                             packageSetting.getLegacyPermissionState());
                     packageSetting.installPermissionsFixed = true;
                 } else if (tagName.equals("proper-signing-keyset")) {
-                    long id = Long.parseLong(parser.getAttributeValue(null, "identifier"));
+                    long id = parser.getAttributeLong(null, "identifier");
                     Integer refCt = mKeySetRefs.get(id);
                     if (refCt != null) {
                         mKeySetRefs.put(id, refCt + 1);
@@ -3835,10 +3827,10 @@ public final class Settings {
                 } else if (tagName.equals("signing-keyset")) {
                     // from v1 of keysetmanagerservice - no longer used
                 } else if (tagName.equals("upgrade-keyset")) {
-                    long id = Long.parseLong(parser.getAttributeValue(null, "identifier"));
+                    long id = parser.getAttributeLong(null, "identifier");
                     packageSetting.keySetData.addUpgradeKeySetById(id);
                 } else if (tagName.equals("defined-keyset")) {
-                    long id = Long.parseLong(parser.getAttributeValue(null, "identifier"));
+                    long id = parser.getAttributeLong(null, "identifier");
                     String alias = parser.getAttributeValue(null, "alias");
                     Integer refCt = mKeySetRefs.get(id);
                     if (refCt != null) {
@@ -5566,8 +5558,7 @@ public final class Settings {
                     case TAG_RUNTIME_PERMISSIONS: {
                         // If the permisions settings file exists but the version is not set this is
                         // an upgrade from P->Q. Hence mark it with the special UPGRADE_VERSION
-                        int version = XmlUtils.readIntAttribute(parser, ATTR_VERSION,
-                                UPGRADE_VERSION);
+                        int version = parser.getAttributeInt(null, ATTR_VERSION, UPGRADE_VERSION);
                         mVersions.put(userId, version);
                         String fingerprint = parser.getAttributeValue(null, ATTR_FINGERPRINT);
                         mFingerprints.put(userId, fingerprint);
