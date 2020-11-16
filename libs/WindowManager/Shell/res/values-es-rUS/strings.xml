@@ -28,8 +28,7 @@
     <string name="pip_skip_to_next" msgid="8403429188794867653">"Siguiente"</string>
     <string name="pip_skip_to_prev" msgid="7172158111196394092">"Anterior"</string>
     <string name="accessibility_action_pip_resize" msgid="4623966104749543182">"Cambiar el tamaño"</string>
-    <!-- no translation found for dock_forced_resizable (1749750436092293116) -->
-    <skip />
+    <string name="dock_forced_resizable" msgid="1749750436092293116">"Es posible que la app no funcione en el modo de pantalla dividida."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"La app no es compatible con la función de pantalla dividida."</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"Es posible que la app no funcione en una pantalla secundaria."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"La app no puede iniciarse en pantallas secundarias."</string>
@@ -44,14 +43,10 @@
     <string name="accessibility_action_divider_top_50" msgid="8649582798829048946">"Superior: 50%"</string>
     <string name="accessibility_action_divider_top_30" msgid="3572788224908570257">"Superior: 30%"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="2831868345092314060">"Pantalla inferior completa"</string>
-    <!-- no translation found for one_handed_tutorial_title (4583241688067426350) -->
-    <skip />
-    <!-- no translation found for one_handed_tutorial_description (3486582858591353067) -->
-    <skip />
-    <!-- no translation found for accessibility_action_start_one_handed (5070337354072861426) -->
-    <skip />
-    <!-- no translation found for accessibility_action_stop_one_handed (1369940261782179442) -->
-    <skip />
+    <string name="one_handed_tutorial_title" msgid="4583241688067426350">"Cómo usar el modo de una mano"</string>
+    <string name="one_handed_tutorial_description" msgid="3486582858591353067">"Para salir, desliza el dedo hacia arriba desde la parte inferior de la pantalla o presiona cualquier parte arriba de la app"</string>
+    <string name="accessibility_action_start_one_handed" msgid="5070337354072861426">"Iniciar el modo de una mano"</string>
+    <string name="accessibility_action_stop_one_handed" msgid="1369940261782179442">"Salir del modo de una mano"</string>
     <string name="bubbles_settings_button_description" msgid="1301286017420516912">"Configuración para burbujas de <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="bubble_overflow_button_content_description" msgid="8160974472718594382">"Menú ampliado"</string>
     <string name="bubble_accessibility_action_add_back" msgid="1830101076853540953">"Volver a agregar a la pila"</string>
@@ -68,8 +63,7 @@
     <string name="bubbles_user_education_description" msgid="4215862563054175407">"Las conversaciones nuevas aparecen como elementos flotantes o burbujas. Presiona para abrir la burbuja. Arrástrala para moverla."</string>
     <string name="bubbles_user_education_manage_title" msgid="7042699946735628035">"Controla las burbujas"</string>
     <string name="bubbles_user_education_manage" msgid="3460756219946517198">"Presiona Administrar para desactivar las burbujas de esta app"</string>
-    <!-- no translation found for bubbles_user_education_got_it (3382046149225428296) -->
-    <skip />
+    <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"Entendido"</string>
     <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"No hay burbujas recientes"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"Las burbujas recientes y las que se descartaron aparecerán aquí"</string>
     <string name="notification_bubble_title" msgid="6082910224488253378">"Cuadro"</string>

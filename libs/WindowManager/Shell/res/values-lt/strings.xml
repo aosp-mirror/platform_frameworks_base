@@ -28,8 +28,7 @@
     <string name="pip_skip_to_next" msgid="8403429188794867653">"Praleisti ir eiti į kitą"</string>
     <string name="pip_skip_to_prev" msgid="7172158111196394092">"Praleisti ir eiti į ankstesnį"</string>
     <string name="accessibility_action_pip_resize" msgid="4623966104749543182">"Pakeisti dydį"</string>
-    <!-- no translation found for dock_forced_resizable (1749750436092293116) -->
-    <skip />
+    <string name="dock_forced_resizable" msgid="1749750436092293116">"Programa gali neveikti naudojant išskaidyto ekrano režimą."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"Programoje nepalaikomas skaidytas ekranas."</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"Programa gali neveikti antriniame ekrane."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"Programa nepalaiko paleisties antriniuose ekranuose."</string>
@@ -44,14 +43,10 @@
     <string name="accessibility_action_divider_top_50" msgid="8649582798829048946">"Viršutinis ekranas 50 %"</string>
     <string name="accessibility_action_divider_top_30" msgid="3572788224908570257">"Viršutinis ekranas 30 %"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="2831868345092314060">"Apatinis ekranas viso ekrano režimu"</string>
-    <!-- no translation found for one_handed_tutorial_title (4583241688067426350) -->
-    <skip />
-    <!-- no translation found for one_handed_tutorial_description (3486582858591353067) -->
-    <skip />
-    <!-- no translation found for accessibility_action_start_one_handed (5070337354072861426) -->
-    <skip />
-    <!-- no translation found for accessibility_action_stop_one_handed (1369940261782179442) -->
-    <skip />
+    <string name="one_handed_tutorial_title" msgid="4583241688067426350">"Vienos rankos režimo naudojimas"</string>
+    <string name="one_handed_tutorial_description" msgid="3486582858591353067">"Jei norite išeiti, perbraukite aukštyn nuo ekrano apačios arba palieskite bet kur virš programos"</string>
+    <string name="accessibility_action_start_one_handed" msgid="5070337354072861426">"Pradėti vienos rankos režimą"</string>
+    <string name="accessibility_action_stop_one_handed" msgid="1369940261782179442">"Išeiti iš vienos rankos režimo"</string>
     <string name="bubbles_settings_button_description" msgid="1301286017420516912">"„<xliff:g id="APP_NAME">%1$s</xliff:g>“ burbulų nustatymai"</string>
     <string name="bubble_overflow_button_content_description" msgid="8160974472718594382">"Perpildymas"</string>
     <string name="bubble_accessibility_action_add_back" msgid="1830101076853540953">"Pridėti atgal į krūvą"</string>
@@ -68,8 +63,7 @@
     <string name="bubbles_user_education_description" msgid="4215862563054175407">"Nauji pokalbiai rodomi kaip slankiosios piktogramos arba burbulai. Palieskite, kad atidarytumėte burbulą. Vilkite, kad perkeltumėte."</string>
     <string name="bubbles_user_education_manage_title" msgid="7042699946735628035">"Bet kada valdyti burbulus"</string>
     <string name="bubbles_user_education_manage" msgid="3460756219946517198">"Palieskite „Tvarkyti“, kad išjungtumėte burbulus šioje programoje"</string>
-    <!-- no translation found for bubbles_user_education_got_it (3382046149225428296) -->
-    <skip />
+    <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"Supratau"</string>
     <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"Nėra naujausių burbulų"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"Naujausi ir atsisakyti burbulai bus rodomi čia"</string>
     <string name="notification_bubble_title" msgid="6082910224488253378">"Debesėlis"</string>
