@@ -57,6 +57,53 @@
       ]
     },
     {
+      "name": "FrameworksServicesTests",
+      "file_patterns": ["(/|^)ShortcutService\\.java"],
+      "options": [
+        {
+          "include-filter": "com.android.server.pm.ShortcutManagerTest1"
+        },
+        {
+          "include-filter": "com.android.server.pm.ShortcutManagerTest2"
+        },
+        {
+          "include-filter": "com.android.server.pm.ShortcutManagerTest3"
+        },
+        {
+          "include-filter": "com.android.server.pm.ShortcutManagerTest4"
+        },
+        {
+          "include-filter": "com.android.server.pm.ShortcutManagerTest5"
+        },
+        {
+          "include-filter": "com.android.server.pm.ShortcutManagerTest6"
+        },
+        {
+          "include-filter": "com.android.server.pm.ShortcutManagerTest7"
+        },
+        {
+          "include-filter": "com.android.server.pm.ShortcutManagerTest8"
+        },
+        {
+          "include-filter": "com.android.server.pm.ShortcutManagerTest9"
+        },
+        {
+          "include-filter": "com.android.server.pm.ShortcutManagerTest10"
+        },
+        {
+          "include-filter": "com.android.server.pm.ShortcutManagerTest11"
+        }
+      ]
+    },
+    {
+      "name": "CtsShortcutHostTestCases",
+      "file_patterns": ["(/|^)ShortcutService\\.java"]
+    },
+    {
+      "name": "CtsShortcutManagerTestCases",
+      "file_patterns": ["(/|^)ShortcutService\\.java"]
+    },
+    {
       "name": "CtsContentTestCases",
       "options": [
         {
