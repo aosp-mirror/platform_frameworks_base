@@ -67,6 +67,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
+import android.graphics.Rect;
 import android.hardware.display.DisplayManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -1161,7 +1162,8 @@ class WindowTestsBase extends SystemServiceTestsBase {
         public void addStartingWindow(StartingWindowInfo info, IBinder appToken) {
         }
         @Override
-        public void removeStartingWindow(int taskId) {
+        public void removeStartingWindow(int taskId, SurfaceControl leash, Rect frame,
+                boolean playRevealAnimation) {
         }
         @Override
         public void copySplashScreenView(int taskId) {

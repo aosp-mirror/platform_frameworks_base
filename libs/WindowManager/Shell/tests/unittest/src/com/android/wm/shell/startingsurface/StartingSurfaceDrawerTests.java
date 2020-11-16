@@ -33,11 +33,12 @@ import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.graphics.Rect;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.testing.TestableContext;
-import android.view.Choreographer;
+import android.view.SurfaceControl;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.WindowMetrics;
@@ -49,6 +50,7 @@ import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.wm.shell.common.HandlerExecutor;
 import com.android.wm.shell.common.ShellExecutor;
+import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.startingsurface.StartingSurfaceDrawer;
 
 import org.junit.Before;
@@ -68,7 +70,7 @@ public class StartingSurfaceDrawerTests {
     @Mock
     private WindowManager mMockWindowManager;
     @Mock
-    private static Choreographer sFakeChoreographer;
+    private TransactionPool mTransactionPool;
 
     TestStartingSurfaceDrawer mStartingSurfaceDrawer;
 
@@ -76,13 +78,9 @@ public class StartingSurfaceDrawerTests {
         int mAddWindowForTask = 0;
         int mViewThemeResId;
 
-        TestStartingSurfaceDrawer(Context context, ShellExecutor executor) {
-            super(context, executor);
-        }
-
-        @Override
-        protected void initChoreographer() {
-            mChoreographer = sFakeChoreographer;
+        TestStartingSurfaceDrawer(Context context, ShellExecutor animExecutor,
+                TransactionPool pool) {
+            super(context, animExecutor, pool);
         }
 
         @Override
@@ -95,7 +93,8 @@ public class StartingSurfaceDrawerTests {
         }
 
         @Override
-        protected void removeWindowSynced(int taskId) {
+        protected void removeWindowSynced(int taskId, SurfaceControl leash, Rect frame,
+                boolean playRevealAnimation) {
             // listen for removeView
             if (mAddWindowForTask == taskId) {
                 mAddWindowForTask = 0;
@@ -123,7 +122,8 @@ public class StartingSurfaceDrawerTests {
         doNothing().when(mMockWindowManager).addView(any(), any());
 
         mStartingSurfaceDrawer = spy(new TestStartingSurfaceDrawer(context,
-                new HandlerExecutor(new Handler(Looper.getMainLooper()))));
+                new HandlerExecutor(new Handler(Looper.getMainLooper())),
+                mTransactionPool));
     }
 
     @Test
@@ -137,9 +137,9 @@ public class StartingSurfaceDrawerTests {
         verify(mStartingSurfaceDrawer).postAddWindow(eq(taskId), eq(mBinder), any(), any(), any());
         assertEquals(mStartingSurfaceDrawer.mAddWindowForTask, taskId);
 
-        mStartingSurfaceDrawer.removeStartingWindow(windowInfo.taskInfo.taskId);
+        mStartingSurfaceDrawer.removeStartingWindow(windowInfo.taskInfo.taskId, null, null, false);
         waitHandlerIdle(mainLoop);
-        verify(mStartingSurfaceDrawer).removeWindowSynced(eq(taskId));
+        verify(mStartingSurfaceDrawer).removeWindowSynced(eq(taskId), any(), any(), eq(false));
         assertEquals(mStartingSurfaceDrawer.mAddWindowForTask, 0);
     }
 

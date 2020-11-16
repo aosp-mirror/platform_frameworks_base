@@ -2114,7 +2114,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                     }
                 }
                 if (abort) {
-                    surface.remove();
+                    surface.remove(false /* prepareAnimation */);
                 }
             } else {
                 ProtoLog.v(WM_DEBUG_STARTING_WINDOW, "Surface returned was null: %s",
@@ -2179,7 +2179,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                         + ActivityRecord.this + " state " + mTransferringSplashScreenState);
                 if (isTransferringSplashScreen()) {
                     mTransferringSplashScreenState = TRANSFER_SPLASH_SCREEN_FINISH;
-                    // TODO show default exit splash screen animation
                     removeStartingWindow();
                 }
             }
@@ -2196,6 +2195,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     private boolean transferSplashScreenIfNeeded() {
+        if (!mWmService.mStartingSurfaceController.DEBUG_ENABLE_SHELL_DRAWER) {
+            return false;
+        }
         if (!mHandleExitSplashScreen || mStartingSurface == null || mStartingWindow == null
                 || mTransferringSplashScreenState == TRANSFER_SPLASH_SCREEN_FINISH) {
             return false;
@@ -2265,10 +2267,14 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
         // no matter what, remove the starting window.
         mTransferringSplashScreenState = TRANSFER_SPLASH_SCREEN_FINISH;
-        removeStartingWindow();
+        removeStartingWindowAnimation(false /* prepareAnimation */);
     }
 
     void removeStartingWindow() {
+        removeStartingWindowAnimation(true /* prepareAnimation */);
+    }
+
+    void removeStartingWindowAnimation(boolean prepareAnimation) {
         if (transferSplashScreenIfNeeded()) {
             return;
         }
@@ -2313,7 +2319,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         mWmService.mAnimationHandler.post(() -> {
             ProtoLog.v(WM_DEBUG_STARTING_WINDOW, "Removing startingView=%s", surface);
             try {
-                surface.remove();
+                surface.remove(prepareAnimation);
             } catch (Exception e) {
                 Slog.w(TAG_WM, "Exception when removing starting window", e);
             }
@@ -6190,7 +6196,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             // Remove orphaned starting window.
             if (DEBUG_VISIBILITY) Slog.w(TAG_VISIBILITY, "Found orphaned starting window " + this);
             mStartingWindowState = STARTING_WINDOW_REMOVED;
-            removeStartingWindow();
+            removeStartingWindowAnimation(false /* prepareAnimation */);
         }
         if (isState(INITIALIZING) && !shouldBeVisible(
                 true /* behindFullscreenActivity */, true /* ignoringKeyguard */)) {

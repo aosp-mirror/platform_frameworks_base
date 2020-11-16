@@ -32,6 +32,7 @@ import android.app.WindowConfiguration;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ParceledListSlice;
+import android.graphics.Rect;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.Parcel;
@@ -131,10 +132,28 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
             });
         }
 
-        void removeStartingWindow(Task task) {
+        void removeStartingWindow(Task task, boolean prepareAnimation) {
             mDeferTaskOrgCallbacksConsumer.accept(() -> {
+                SurfaceControl firstWindowLeash = null;
+                Rect mainFrame = null;
+                // TODO enable shift up animation once we fix flicker test
+//                final boolean playShiftUpAnimation = !task.inMultiWindowMode();
+//                if (prepareAnimation && playShiftUpAnimation) {
+//                    final ActivityRecord topActivity = task.topActivityWithStartingWindow();
+//                    if (topActivity != null) {
+//                        final WindowState mainWindow =
+//                                topActivity.findMainWindow(false/* includeStartingApp */);
+//                        if (mainWindow != null) {
+                // TODO create proper leash instead of the copied SC
+//                            firstWindowLeash = new SurfaceControl(mainWindow.getSurfaceControl(),
+//                                    "TaskOrganizerController.removeStartingWindow");
+//                            mainFrame = mainWindow.getRelativeFrame();
+//                        }
+//                    }
+//                }
                 try {
-                    mTaskOrganizer.removeStartingWindow(task.mTaskId);
+                    mTaskOrganizer.removeStartingWindow(task.mTaskId, firstWindowLeash, mainFrame,
+                            prepareAnimation);
                 } catch (RemoteException e) {
                     Slog.e(TAG, "Exception sending onStartTaskFinished callback", e);
                 }
@@ -249,8 +268,8 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
             mOrganizer.addStartingWindow(t, appToken, launchTheme);
         }
 
-        void removeStartingWindow(Task t) {
-            mOrganizer.removeStartingWindow(t);
+        void removeStartingWindow(Task t, boolean prepareAnimation) {
+            mOrganizer.removeStartingWindow(t, prepareAnimation);
         }
 
         void copySplashScreenView(Task t) {
@@ -495,14 +514,14 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
         return true;
     }
 
-    void removeStartingWindow(Task task) {
+    void removeStartingWindow(Task task, boolean prepareAnimation) {
         final Task rootTask = task.getRootTask();
         if (rootTask == null || rootTask.mTaskOrganizer == null) {
             return;
         }
         final TaskOrganizerState state =
                 mTaskOrganizerStates.get(rootTask.mTaskOrganizer.asBinder());
-        state.removeStartingWindow(task);
+        state.removeStartingWindow(task, prepareAnimation);
     }
 
     boolean copySplashScreenView(Task task) {
