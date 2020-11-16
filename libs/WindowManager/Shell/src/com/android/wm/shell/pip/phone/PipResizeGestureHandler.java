@@ -296,7 +296,7 @@ public class PipResizeGestureHandler {
      * |_|_|         |_|_|
      */
     public boolean isWithinTouchRegion(int x, int y) {
-        final Rect currentPipBounds = mMotionHelper.getBounds();
+        final Rect currentPipBounds = mPipBoundsState.getBounds();
         if (currentPipBounds == null) {
             return false;
         }
@@ -349,8 +349,8 @@ public class PipResizeGestureHandler {
     }
 
     private void setCtrlTypeForPinchToZoom() {
-        final Rect currentPipBounds = mMotionHelper.getBounds();
-        mLastDownBounds.set(mMotionHelper.getBounds());
+        final Rect currentPipBounds = mPipBoundsState.getBounds();
+        mLastDownBounds.set(mPipBoundsState.getBounds());
 
         Rect movementBounds = mMovementBoundsSupplier.apply(currentPipBounds);
         mDisplayBounds.set(movementBounds.left,
@@ -372,7 +372,7 @@ public class PipResizeGestureHandler {
     }
 
     private void setCtrlType(int x, int y) {
-        final Rect currentPipBounds = mMotionHelper.getBounds();
+        final Rect currentPipBounds = mPipBoundsState.getBounds();
 
         Rect movementBounds = mMovementBoundsSupplier.apply(currentPipBounds);
         mDisplayBounds.set(movementBounds.left,
@@ -413,13 +413,13 @@ public class PipResizeGestureHandler {
         float x = ev.getX();
         float y = ev.getY();
         if (action == MotionEvent.ACTION_DOWN) {
-            final Rect currentPipBounds = mMotionHelper.getBounds();
+            final Rect currentPipBounds = mPipBoundsState.getBounds();
             mLastResizeBounds.setEmpty();
             mAllowGesture = isInValidSysUiState() && isWithinTouchRegion((int) x, (int) y);
             if (mAllowGesture) {
                 setCtrlType((int) x, (int) y);
                 mDownPoint.set(x, y);
-                mLastDownBounds.set(mMotionHelper.getBounds());
+                mLastDownBounds.set(mPipBoundsState.getBounds());
             }
             if (!currentPipBounds.contains((int) ev.getX(), (int) ev.getY())
                     && mPipMenuActivityController.isMenuVisible()) {
@@ -446,7 +446,7 @@ public class PipResizeGestureHandler {
                             mPipMenuActivityController.hideMenuWithoutResize();
                             mPipMenuActivityController.hideMenu();
                         }
-                        final Rect currentPipBounds = mMotionHelper.getBounds();
+                        final Rect currentPipBounds = mPipBoundsState.getBounds();
                         mLastResizeBounds.set(TaskResizingAlgorithm.resizeDrag(x, y,
                                 mDownPoint.x, mDownPoint.y, currentPipBounds, mCtrlType, mMinSize.x,
                                 mMinSize.y, mMaxSize, true,
