@@ -1180,7 +1180,8 @@ public final class WifiNetworkSuggestion implements Parcelable {
     @Override
     public int hashCode() {
         return Objects.hash(wifiConfiguration.SSID, wifiConfiguration.BSSID,
-                wifiConfiguration.allowedKeyManagement, wifiConfiguration.getKey(),
+                wifiConfiguration.getDefaultSecurityType(),
+                wifiConfiguration.getPasspointUniqueId(),
                 wifiConfiguration.subscriptionId, wifiConfiguration.carrierId);
     }
 
@@ -1202,10 +1203,10 @@ public final class WifiNetworkSuggestion implements Parcelable {
 
         return TextUtils.equals(this.wifiConfiguration.SSID, lhs.wifiConfiguration.SSID)
                 && TextUtils.equals(this.wifiConfiguration.BSSID, lhs.wifiConfiguration.BSSID)
-                && Objects.equals(this.wifiConfiguration.allowedKeyManagement,
-                lhs.wifiConfiguration.allowedKeyManagement)
-                && TextUtils.equals(this.wifiConfiguration.getKey(),
-                lhs.wifiConfiguration.getKey())
+                && TextUtils.equals(this.wifiConfiguration.getDefaultSecurityType(),
+                lhs.wifiConfiguration.getDefaultSecurityType())
+                && TextUtils.equals(this.wifiConfiguration.getPasspointUniqueId(),
+                lhs.wifiConfiguration.getPasspointUniqueId())
                 && this.wifiConfiguration.carrierId == lhs.wifiConfiguration.carrierId
                 && this.wifiConfiguration.subscriptionId == lhs.wifiConfiguration.subscriptionId;
     }
