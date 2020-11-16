@@ -16,6 +16,7 @@
 
 package android.media;
 
+import android.annotation.CallbackExecutor;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.graphics.GraphicBuffer;
@@ -24,6 +25,7 @@ import android.graphics.ImageFormat.Format;
 import android.graphics.Rect;
 import android.hardware.HardwareBuffer;
 import android.hardware.HardwareBuffer.Usage;
+import android.hardware.camera2.MultiResolutionImageReader;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -36,7 +38,9 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.NioUtils;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -134,7 +138,8 @@ public class ImageReader implements AutoCloseable {
         // If the format is private don't default to USAGE_CPU_READ_OFTEN since it may not
         // work, and is inscrutable anyway
         return new ImageReader(width, height, format, maxImages,
-                format == ImageFormat.PRIVATE ? 0 : HardwareBuffer.USAGE_CPU_READ_OFTEN);
+                format == ImageFormat.PRIVATE ? 0 : HardwareBuffer.USAGE_CPU_READ_OFTEN,
+                /*parent*/ null);
     }
 
     /**
@@ -250,18 +255,37 @@ public class ImageReader implements AutoCloseable {
 //            throw new IllegalArgumentException("The given format=" + Integer.toHexString(format)
 //                + " & usage=" + Long.toHexString(usage) + " is not supported");
 //        }
-        return new ImageReader(width, height, format, maxImages, usage);
+        return new ImageReader(width, height, format, maxImages, usage, /*parent*/ null);
     }
+
+     /**
+      * @hide
+      */
+     public static @NonNull ImageReader newInstance(
+            @IntRange(from = 1) int width,
+            @IntRange(from = 1) int height,
+            @Format             int format,
+            @IntRange(from = 1) int maxImages,
+            @NonNull            MultiResolutionImageReader parent) {
+        // If the format is private don't default to USAGE_CPU_READ_OFTEN since it may not
+        // work, and is inscrutable anyway
+        return new ImageReader(width, height, format, maxImages,
+                format == ImageFormat.PRIVATE ? 0 : HardwareBuffer.USAGE_CPU_READ_OFTEN,
+                parent);
+    }
+
 
     /**
      * @hide
      */
-    protected ImageReader(int width, int height, int format, int maxImages, long usage) {
+    protected ImageReader(int width, int height, int format, int maxImages, long usage,
+            MultiResolutionImageReader parent) {
         mWidth = width;
         mHeight = height;
         mFormat = format;
         mUsage = usage;
         mMaxImages = maxImages;
+        mParent = parent;
 
         if (width < 1 || height < 1) {
             throw new IllegalArgumentException(
@@ -433,6 +457,9 @@ public class ImageReader implements AutoCloseable {
             if (image != null) {
                 image.close();
             }
+            if (mParent != null) {
+                mParent.flushOther(this);
+            }
         }
     }
 
@@ -584,12 +611,38 @@ public class ImageReader implements AutoCloseable {
                 }
                 if (mListenerHandler == null || mListenerHandler.getLooper() != looper) {
                     mListenerHandler = new ListenerHandler(looper);
+                    mListenerExecutor = new HandlerExecutor(mListenerHandler);
                 }
-                mListener = listener;
             } else {
-                mListener = null;
                 mListenerHandler = null;
+                mListenerExecutor = null;
             }
+            mListener = listener;
+        }
+    }
+
+    /**
+     * Register a listener to be invoked when a new image becomes available
+     * from the ImageReader.
+     *
+     * @param listener
+     *            The listener that will be run.
+     * @param executor
+     *            The executor which will be used to invoke the listener.
+     * @throws IllegalArgumentException
+     *            If no handler specified and the calling thread has no looper.
+     *
+     * @hide
+     */
+    public void setOnImageAvailableListenerWithExecutor(@NonNull OnImageAvailableListener listener,
+            @NonNull Executor executor) {
+        if (executor == null) {
+            throw new IllegalArgumentException("executor must not be null");
+        }
+
+        synchronized (mListenerLock) {
+            mListenerExecutor = executor;
+            mListener = listener;
         }
     }
 
@@ -763,12 +816,27 @@ public class ImageReader implements AutoCloseable {
             return;
         }
 
-        final Handler handler;
+        final Executor executor;
+        final OnImageAvailableListener listener;
         synchronized (ir.mListenerLock) {
-            handler = ir.mListenerHandler;
+            executor = ir.mListenerExecutor;
+            listener = ir.mListener;
         }
-        if (handler != null) {
-            handler.sendEmptyMessage(0);
+        final boolean isReaderValid;
+        synchronized (ir.mCloseLock) {
+            isReaderValid = ir.mIsReaderValid;
+        }
+
+        // It's dangerous to fire onImageAvailable() callback when the ImageReader
+        // is being closed, as application could acquire next image in the
+        // onImageAvailable() callback.
+        if (executor != null && listener != null && isReaderValid) {
+            executor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    listener.onImageAvailable(ir);
+                }
+            });
         }
     }
 
@@ -785,10 +853,15 @@ public class ImageReader implements AutoCloseable {
     private final Object mCloseLock = new Object();
     private boolean mIsReaderValid = false;
     private OnImageAvailableListener mListener;
+    private Executor mListenerExecutor;
     private ListenerHandler mListenerHandler;
     // Keep track of the successfully acquired Images. This need to be thread safe as the images
     // could be closed by different threads (e.g., application thread and GC thread).
     private List<Image> mAcquiredImages = new CopyOnWriteArrayList<>();
+
+    // Applicable if this isn't a standalone ImageReader, but belongs to a
+    // MultiResolutionImageReader.
+    private final MultiResolutionImageReader mParent;
 
     /**
      * This field is used by native code, do not access or modify.
@@ -802,23 +875,22 @@ public class ImageReader implements AutoCloseable {
         public ListenerHandler(Looper looper) {
             super(looper, null, true /*async*/);
         }
+    }
+
+    /**
+     * An adapter {@link Executor} that posts all executed tasks onto the
+     * given {@link Handler}.
+     **/
+    private final class HandlerExecutor implements Executor {
+        private final Handler mHandler;
+
+        public HandlerExecutor(@NonNull Handler handler) {
+            mHandler = Objects.requireNonNull(handler);
+        }
 
         @Override
-        public void handleMessage(Message msg) {
-            OnImageAvailableListener listener;
-            synchronized (mListenerLock) {
-                listener = mListener;
-            }
-
-            // It's dangerous to fire onImageAvailable() callback when the ImageReader is being
-            // closed, as application could acquire next image in the onImageAvailable() callback.
-            boolean isReaderValid = false;
-            synchronized (mCloseLock) {
-                isReaderValid = mIsReaderValid;
-            }
-            if (listener != null && isReaderValid) {
-                listener.onImageAvailable(ImageReader.this);
-            }
+        public void execute(Runnable command) {
+            mHandler.post(command);
         }
     }
 

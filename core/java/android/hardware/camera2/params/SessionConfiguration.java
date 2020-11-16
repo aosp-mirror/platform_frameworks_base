@@ -130,11 +130,13 @@ public final class SessionConfiguration implements Parcelable {
         int inputWidth = source.readInt();
         int inputHeight = source.readInt();
         int inputFormat = source.readInt();
+        boolean isInputMultiResolution = source.readBoolean();
         ArrayList<OutputConfiguration> outConfigs = new ArrayList<OutputConfiguration>();
         source.readTypedList(outConfigs, OutputConfiguration.CREATOR);
 
         if ((inputWidth > 0) && (inputHeight > 0) && (inputFormat != -1)) {
-            mInputConfig = new InputConfiguration(inputWidth, inputHeight, inputFormat);
+            mInputConfig = new InputConfiguration(inputWidth, inputHeight,
+                    inputFormat, isInputMultiResolution);
         }
         mSessionType = sessionType;
         mOutputConfigurations = outConfigs;
@@ -169,10 +171,12 @@ public final class SessionConfiguration implements Parcelable {
             dest.writeInt(mInputConfig.getWidth());
             dest.writeInt(mInputConfig.getHeight());
             dest.writeInt(mInputConfig.getFormat());
+            dest.writeBoolean(mInputConfig.isMultiResolution());
         } else {
             dest.writeInt(/*inputWidth*/ 0);
             dest.writeInt(/*inputHeight*/ 0);
             dest.writeInt(/*inputFormat*/ -1);
+            dest.writeBoolean(/*isMultiResolution*/ false);
         }
         dest.writeTypedList(mOutputConfigurations);
     }
