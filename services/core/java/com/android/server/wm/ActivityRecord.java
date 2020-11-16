@@ -1009,9 +1009,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             if (info.minAspectRatio != 0) {
                 pw.println(prefix + "minAspectRatio=" + info.minAspectRatio);
             }
-            if (info.supportsSizeChanges) {
-                pw.println(prefix + "supportsSizeChanges=true");
-            }
+            pw.println(prefix + "supportsSizeChanges="
+                    + ActivityInfo.sizeChangesSupportModeToString(info.supportsSizeChanges()));
             if (info.configChanges != 0) {
                 pw.println(prefix + "configChanges=0x" + Integer.toHexString(info.configChanges));
             }
@@ -6539,7 +6538,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      *         aspect ratio.
      */
     boolean shouldUseSizeCompatMode() {
-        if (info.supportsSizeChanges) {
+        if (info.supportsSizeChanges() != ActivityInfo.SIZE_CHANGES_UNSUPPORTED) {
             return false;
         }
         if (inMultiWindowMode() || getWindowConfiguration().hasWindowDecorCaption()) {
