@@ -631,7 +631,8 @@ public class StorageNotification extends SystemUI {
 
         final int requestKey = disk.getId().hashCode();
         return PendingIntent.getActivityAsUser(mContext, requestKey, intent,
-                PendingIntent.FLAG_CANCEL_CURRENT, null, UserHandle.CURRENT);
+                PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE,
+                null, UserHandle.CURRENT);
     }
 
     private PendingIntent buildInitPendingIntent(VolumeInfo vol) {
@@ -650,7 +651,8 @@ public class StorageNotification extends SystemUI {
 
         final int requestKey = vol.getId().hashCode();
         return PendingIntent.getActivityAsUser(mContext, requestKey, intent,
-                PendingIntent.FLAG_CANCEL_CURRENT, null, UserHandle.CURRENT);
+                PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE,
+                null, UserHandle.CURRENT);
     }
 
     private PendingIntent buildUnmountPendingIntent(VolumeInfo vol) {
@@ -662,7 +664,8 @@ public class StorageNotification extends SystemUI {
 
             final int requestKey = vol.getId().hashCode();
             return PendingIntent.getActivityAsUser(mContext, requestKey, intent,
-                    PendingIntent.FLAG_CANCEL_CURRENT, null, UserHandle.CURRENT);
+                    PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE,
+                    null, UserHandle.CURRENT);
         } else if (isAutomotive()) {
             intent.setClassName("com.android.car.settings",
                     "com.android.car.settings.storage.StorageUnmountReceiver");
@@ -670,7 +673,8 @@ public class StorageNotification extends SystemUI {
 
             final int requestKey = vol.getId().hashCode();
             return PendingIntent.getBroadcastAsUser(mContext, requestKey, intent,
-                    PendingIntent.FLAG_CANCEL_CURRENT, UserHandle.CURRENT);
+                    PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE,
+                    UserHandle.CURRENT);
         } else {
             intent.setClassName("com.android.settings",
                     "com.android.settings.deviceinfo.StorageUnmountReceiver");
@@ -678,7 +682,8 @@ public class StorageNotification extends SystemUI {
 
             final int requestKey = vol.getId().hashCode();
             return PendingIntent.getBroadcastAsUser(mContext, requestKey, intent,
-                    PendingIntent.FLAG_CANCEL_CURRENT, UserHandle.CURRENT);
+                    PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE,
+                    UserHandle.CURRENT);
         }
     }
 
@@ -689,7 +694,8 @@ public class StorageNotification extends SystemUI {
 
             final int requestKey = vol.getId().hashCode();
             return PendingIntent.getActivityAsUser(mContext, requestKey, intent,
-                    PendingIntent.FLAG_CANCEL_CURRENT, null, UserHandle.CURRENT);
+                    PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE,
+                    null, UserHandle.CURRENT);
         } finally {
             StrictMode.setVmPolicy(oldPolicy);
         }
@@ -721,7 +727,8 @@ public class StorageNotification extends SystemUI {
 
         final int requestKey = vol.getId().hashCode();
         return PendingIntent.getActivityAsUser(mContext, requestKey, intent,
-                PendingIntent.FLAG_CANCEL_CURRENT, null, UserHandle.CURRENT);
+                PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE,
+                null, UserHandle.CURRENT);
     }
 
     private PendingIntent buildSnoozeIntent(String fsUuid) {
@@ -730,7 +737,8 @@ public class StorageNotification extends SystemUI {
 
         final int requestKey = fsUuid.hashCode();
         return PendingIntent.getBroadcastAsUser(mContext, requestKey, intent,
-                PendingIntent.FLAG_CANCEL_CURRENT, UserHandle.CURRENT);
+                PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE,
+                UserHandle.CURRENT);
     }
 
     private PendingIntent buildForgetPendingIntent(VolumeRecord rec) {
@@ -742,7 +750,8 @@ public class StorageNotification extends SystemUI {
 
         final int requestKey = rec.getFsUuid().hashCode();
         return PendingIntent.getActivityAsUser(mContext, requestKey, intent,
-                PendingIntent.FLAG_CANCEL_CURRENT, null, UserHandle.CURRENT);
+                PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE,
+                null, UserHandle.CURRENT);
     }
 
     private PendingIntent buildWizardMigratePendingIntent(MoveInfo move) {
@@ -764,7 +773,8 @@ public class StorageNotification extends SystemUI {
             intent.putExtra(VolumeInfo.EXTRA_VOLUME_ID, vol.getId());
         }
         return PendingIntent.getActivityAsUser(mContext, move.moveId, intent,
-                PendingIntent.FLAG_CANCEL_CURRENT, null, UserHandle.CURRENT);
+                PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE,
+                null, UserHandle.CURRENT);
     }
 
     private PendingIntent buildWizardMovePendingIntent(MoveInfo move) {
@@ -782,7 +792,8 @@ public class StorageNotification extends SystemUI {
         intent.putExtra(PackageManager.EXTRA_MOVE_ID, move.moveId);
 
         return PendingIntent.getActivityAsUser(mContext, move.moveId, intent,
-                PendingIntent.FLAG_CANCEL_CURRENT, null, UserHandle.CURRENT);
+                PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE,
+                null, UserHandle.CURRENT);
     }
 
     private PendingIntent buildWizardReadyPendingIntent(DiskInfo disk) {
@@ -801,7 +812,8 @@ public class StorageNotification extends SystemUI {
 
         final int requestKey = disk.getId().hashCode();
         return PendingIntent.getActivityAsUser(mContext, requestKey, intent,
-                PendingIntent.FLAG_CANCEL_CURRENT, null, UserHandle.CURRENT);
+                PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE,
+                null, UserHandle.CURRENT);
     }
 
     private boolean isAutomotive() {
