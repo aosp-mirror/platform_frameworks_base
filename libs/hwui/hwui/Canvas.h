@@ -178,10 +178,8 @@ public:
     virtual void restoreToCount(int saveCount) = 0;
     virtual void restoreUnclippedLayer(int saveCount, const SkPaint& paint) = 0;
 
-    virtual int saveLayer(float left, float top, float right, float bottom, const SkPaint* paint,
-                          SaveFlags::Flags flags) = 0;
-    virtual int saveLayerAlpha(float left, float top, float right, float bottom, int alpha,
-                               SaveFlags::Flags flags) = 0;
+    virtual int saveLayer(float left, float top, float right, float bottom, const SkPaint* paint) = 0;
+    virtual int saveLayerAlpha(float left, float top, float right, float bottom, int alpha) = 0;
     virtual int saveUnclippedLayer(int, int, int, int) = 0;
 
     // Matrix

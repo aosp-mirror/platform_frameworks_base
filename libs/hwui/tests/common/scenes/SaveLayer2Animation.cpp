@@ -47,8 +47,7 @@ public:
 
         // interleave drawText and drawRect with saveLayer ops
         for (int i = 0; i < regions; i++, top += smallRectHeight) {
-            canvas.saveLayer(bounds.fLeft, top, bounds.fRight, top + padding, &mBluePaint,
-                             SaveFlags::ClipToLayer | SaveFlags::MatrixClip);
+            canvas.saveLayer(bounds.fLeft, top, bounds.fRight, top + padding, &mBluePaint);
             canvas.drawColor(SkColorSetARGB(255, 255, 255, 0), SkBlendMode::kSrcOver);
             std::string stri = std::to_string(i);
             std::string offscreen = "offscreen line " + stri;
