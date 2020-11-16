@@ -47,7 +47,9 @@ import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.MathUtils;
+import android.view.GestureDetector;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewOutlineProvider;
 import android.view.ViewTreeObserver;
@@ -394,6 +396,7 @@ public class ScreenshotView extends FrameLayout implements
                 mScreenshotPreview.setX(finalPos.x - bounds.width() * cornerScale / 2f);
                 mScreenshotPreview.setY(finalPos.y - bounds.height() * cornerScale / 2f);
                 requestLayout();
+                mScreenshotPreview.setOnTouchListener(new SwipeDismissHandler());
                 createScreenshotActionsShadeAnimation().start();
             }
         });
@@ -534,8 +537,12 @@ public class ScreenshotView extends FrameLayout implements
     }
 
     void animateDismissal() {
+        animateDismissal(createScreenshotDismissAnimation());
+    }
+
+    private void animateDismissal(Animator dismissAnimation) {
         getViewTreeObserver().removeOnComputeInternalInsetsListener(this);
-        mDismissAnimation = createScreenshotDismissAnimation();
+        mDismissAnimation = dismissAnimation;
         mDismissAnimation.addListener(new AnimatorListenerAdapter() {
             private boolean mCancelled = false;
 
@@ -570,6 +577,8 @@ public class ScreenshotView extends FrameLayout implements
         mDismissButton.setVisibility(View.GONE);
         mScreenshotPreview.setVisibility(View.GONE);
         mScreenshotPreview.setLayerType(View.LAYER_TYPE_NONE, null);
+        mScreenshotPreview.setTranslationX(0);
+        mScreenshotPreview.setTranslationY(0);
         mScreenshotPreview.setContentDescription(
                 mContext.getResources().getString(R.string.screenshot_preview_description));
         mScreenshotPreview.setOnClickListener(null);
@@ -586,7 +595,6 @@ public class ScreenshotView extends FrameLayout implements
         mDismissButton.setTranslationY(0);
         mActionsContainer.setTranslationY(0);
         mActionsContainerBackground.setTranslationY(0);
-        mScreenshotPreview.setTranslationY(0);
         mScreenshotSelectorView.stop();
     }
 
@@ -650,4 +658,113 @@ public class ScreenshotView extends FrameLayout implements
         }
     }
 
+    class SwipeDismissHandler implements OnTouchListener {
+
+        // if distance moved on ACTION_UP is less than this, register a click
+        // otherwise, run return animator
+        private static final float CLICK_MOVEMENT_THRESHOLD_DP = 1;
+        // distance needed to register a dismissal
+        private static final float DISMISS_DISTANCE_THRESHOLD_DP = 30;
+
+        private final GestureDetector mGestureDetector;
+        private final float mDismissStartX;
+
+        private float mStartX;
+        private float mStartY;
+        private float mTranslationX = 0;
+
+        SwipeDismissHandler() {
+            GestureDetector.OnGestureListener gestureListener = new SwipeDismissGestureListener();
+            mGestureDetector = new GestureDetector(mContext, gestureListener);
+            mDismissStartX = mDismissButton.getX();
+        }
+
+        @Override
+        public boolean onTouch(View v, MotionEvent event) {
+            if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
+                mStartX = event.getRawX();
+                mStartY = event.getRawY();
+            } else if (event.getActionMasked() == MotionEvent.ACTION_UP) {
+                if (isPastDismissThreshold()
+                        && (mDismissAnimation == null || !mDismissAnimation.isRunning())) {
+                    mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_SWIPE_DISMISSED);
+                    animateDismissal(createSwipeDismissAnimation());
+                    return true;
+                } else if (MathUtils.dist(mStartX, mStartY, event.getRawX(), event.getRawY())
+                        > dpToPx(CLICK_MOVEMENT_THRESHOLD_DP)) {
+                    // if we've moved a non-negligible distance (but not past the threshold),
+                    // start the return animation
+                    if ((mDismissAnimation == null || !mDismissAnimation.isRunning())) {
+                        createSwipeReturnAnimation().start();
+                    }
+                    return true;
+                }
+            }
+            return mGestureDetector.onTouchEvent(event);
+        }
+
+        class SwipeDismissGestureListener extends GestureDetector.SimpleOnGestureListener {
+
+            @Override
+            public boolean onScroll(
+                    MotionEvent ev1, MotionEvent ev2, float distanceX, float distanceY) {
+                mTranslationX = ev2.getRawX() - ev1.getRawX();
+                mScreenshotPreview.setTranslationX(mTranslationX);
+                mDismissButton.setX(mDismissStartX + mTranslationX);
+                return true;
+            }
+        }
+
+        private boolean isPastDismissThreshold() {
+            if (mDirectionLTR) {
+                return mTranslationX <= -1 * dpToPx(DISMISS_DISTANCE_THRESHOLD_DP);
+            } else {
+                return mTranslationX >= dpToPx(DISMISS_DISTANCE_THRESHOLD_DP);
+            }
+        }
+
+        private ValueAnimator createSwipeDismissAnimation() {
+            ValueAnimator anim = ValueAnimator.ofFloat(0, 1);
+            float startX = mTranslationX;
+            float finalX = mDirectionLTR
+                    ? -1 * (mDismissStartX + mDismissButton.getWidth())
+                    : mDisplayMetrics.widthPixels;
+
+            anim.addUpdateListener(animation -> {
+                float translation = MathUtils.lerp(startX, finalX, animation.getAnimatedFraction());
+                mScreenshotPreview.setTranslationX(translation);
+                mDismissButton.setX(mDismissStartX + translation);
+
+                float yDelta = MathUtils.lerp(0, mDismissDeltaY, animation.getAnimatedFraction());
+
+                mActionsContainer.setTranslationY(yDelta);
+                mActionsContainerBackground.setTranslationY(yDelta);
+
+                setAlpha(1 - animation.getAnimatedFraction());
+            });
+            anim.setDuration(400);
+
+            return anim;
+        }
+
+        private ValueAnimator createSwipeReturnAnimation() {
+            ValueAnimator anim = ValueAnimator.ofFloat(0, 1);
+            float startX = mTranslationX;
+            float finalX = 0;
+            mTranslationX = 0;
+
+            anim.addUpdateListener(animation -> {
+                float translation = MathUtils.lerp(
+                        startX, finalX, animation.getAnimatedFraction());
+                mScreenshotPreview.setTranslationX(translation);
+                mDismissButton.setX(mDismissStartX + translation);
+            });
+
+            return anim;
+        }
+
+        private float dpToPx(float dp) {
+            return dp * mDisplayMetrics.densityDpi / (float) DisplayMetrics.DENSITY_DEFAULT;
+        }
+    }
 }
