@@ -198,7 +198,7 @@ public class ShortcutManagerTestUtils {
         final String POSTFIX = "}";
         final List<String> result = runShortcutCommandForSuccess(
                 instrumentation, "get-default-launcher --user "
-                + instrumentation.getContext().getUserId());
+                        + instrumentation.getContext().getUserId());
         for (String s : result) {
             if (s.startsWith(PREFIX) && s.endsWith(POSTFIX)) {
                 return s.substring(PREFIX.length(), s.length() - POSTFIX.length());
@@ -211,9 +211,6 @@ public class ShortcutManagerTestUtils {
     public static void setDefaultLauncher(Instrumentation instrumentation, String component) {
         runCommand(instrumentation, "cmd package set-home-activity --user "
                 + instrumentation.getContext().getUserId() + " " + component,
-                result -> result.contains("Success"));
-        runCommand(instrumentation, "cmd shortcut clear-default-launcher --user "
-                        + instrumentation.getContext().getUserId(),
                 result -> result.contains("Success"));
     }
 
