@@ -1603,7 +1603,7 @@
     <integer name="config_timeZoneRulesCheckRetryCount">5</integer>
 
     <!-- Whether the geolocation time zone detection feature is enabled. -->
-    <bool name="config_enableGeolocationTimeZoneDetection" translatable="false">false</bool>
+    <bool name="config_enableGeolocationTimeZoneDetection" translatable="false">true</bool>
 
     <!-- Whether to enable primary location time zone provider overlay which allows the primary
          location time zone provider to be replaced by an app at run-time. When disabled, only the
