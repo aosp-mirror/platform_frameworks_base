@@ -1236,7 +1236,7 @@ public class TelecomManager {
      * @hide
      */
     @SystemApi
-    @SuppressLint("Doclava125")
+    @SuppressLint("RequiresPermission")
     public List<PhoneAccountHandle> getPhoneAccountsForPackage() {
         try {
             if (isServiceConnected()) {
@@ -1364,7 +1364,7 @@ public class TelecomManager {
      * @hide
      */
     @SystemApi
-    @SuppressLint("Doclava125")
+    @SuppressLint("RequiresPermission")
     public void clearPhoneAccounts() {
         clearAccounts();
     }
@@ -1374,7 +1374,7 @@ public class TelecomManager {
      * @hide
      */
     @SystemApi
-    @SuppressLint("Doclava125")
+    @SuppressLint("RequiresPermission")
     public void clearAccounts() {
         try {
             if (isServiceConnected()) {
@@ -1406,7 +1406,7 @@ public class TelecomManager {
      * @hide
      */
     @SystemApi
-    @SuppressLint("Doclava125")
+    @SuppressLint("RequiresPermission")
     public ComponentName getDefaultPhoneApp() {
         try {
             if (isServiceConnected()) {

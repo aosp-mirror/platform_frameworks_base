@@ -4792,7 +4792,7 @@ public class CarrierConfigManager {
      */
     @NonNull
     @SystemApi
-    @SuppressLint("Doclava125")
+    @SuppressLint("RequiresPermission")
     public static PersistableBundle getDefaultConfig() {
         return new PersistableBundle(sDefaults);
     }

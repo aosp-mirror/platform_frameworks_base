@@ -6680,7 +6680,7 @@ public class DevicePolicyManager {
      * @hide
      */
     @SystemApi
-    @SuppressLint("Doclava125")
+    @SuppressLint("RequiresPermission")
     public boolean isDeviceManaged() {
         try {
             return mService.hasDeviceOwner();
@@ -10392,7 +10392,7 @@ public class DevicePolicyManager {
      * @hide
      */
     @SystemApi
-    @SuppressLint("Doclava125")
+    @SuppressLint("RequiresPermission")
     public @Nullable CharSequence getDeviceOwnerOrganizationName() {
         try {
             return mService.getDeviceOwnerOrganizationName();
