@@ -336,6 +336,7 @@ public class ConnectivityServiceTest {
     private INetworkPolicyListener mPolicyListener;
     private WrappedMultinetworkPolicyTracker mPolicyTracker;
     private HandlerThread mAlarmManagerThread;
+    private TestNetIdManager mNetIdManager;
 
     @Mock IIpConnectivityMetrics mIpConnectivityMetrics;
     @Mock IpConnectivityMetrics.Logger mMetricsService;
@@ -1194,6 +1195,8 @@ public class ConnectivityServiceTest {
 
     @Before
     public void setUp() throws Exception {
+        mNetIdManager = new TestNetIdManager();
+
         mContext = InstrumentationRegistry.getContext();
 
         MockitoAnnotations.initMocks(this);
@@ -1264,7 +1267,7 @@ public class ConnectivityServiceTest {
 
         final ConnectivityService.Dependencies deps = mock(ConnectivityService.Dependencies.class);
         doReturn(mCsHandlerThread).when(deps).makeHandlerThread();
-        doReturn(new TestNetIdManager()).when(deps).makeNetIdManager();
+        doReturn(mNetIdManager).when(deps).makeNetIdManager();
         doReturn(mNetworkStack).when(deps).getNetworkStack();
         doReturn(systemProperties).when(deps).getSystemProperties();
         doReturn(mock(ProxyTracker.class)).when(deps).makeProxyTracker(any(), any());
@@ -5184,6 +5187,58 @@ public class ConnectivityServiceTest {
         LinkProperties lp = (LinkProperties) callbackObj;
         assertEquals(dnsServers.size(), lp.getDnsServers().size());
         assertTrue(lp.getDnsServers().containsAll(dnsServers));
+    }
+
+    @Test
+    public void testVpnConnectDisconnectUnderlyingNetwork() throws Exception {
+        final TestNetworkCallback callback = new TestNetworkCallback();
+        final NetworkRequest request = new NetworkRequest.Builder()
+                .removeCapability(NET_CAPABILITY_NOT_VPN).build();
+
+        mCm.registerNetworkCallback(request, callback);
+
+        // Bring up a VPN that specifies an underlying network that does not exist yet.
+        // Note: it's sort of meaningless for a VPN app to declare a network that doesn't exist yet,
+        // (and doing so is difficult without using reflection) but it's good to test that the code
+        // behaves approximately correctly.
+        final int uid = Process.myUid();
+        final TestNetworkAgentWrapper
+                vpnNetworkAgent = new TestNetworkAgentWrapper(TRANSPORT_VPN);
+        final ArraySet<UidRange> ranges = new ArraySet<>();
+        ranges.add(new UidRange(uid, uid));
+
+        final Network wifiNetwork = new Network(mNetIdManager.peekNextNetId());
+        mMockVpn.setNetworkAgent(vpnNetworkAgent);
+        mMockVpn.setUids(ranges);
+        mMockVpn.setUnderlyingNetworks(new Network[]{wifiNetwork});
+        vpnNetworkAgent.connect(false);
+        mMockVpn.connect();
+        callback.expectAvailableCallbacksUnvalidated(vpnNetworkAgent);
+        assertTrue(mCm.getNetworkCapabilities(vpnNetworkAgent.getNetwork())
+                .hasTransport(TRANSPORT_VPN));
+        assertFalse(mCm.getNetworkCapabilities(vpnNetworkAgent.getNetwork())
+                .hasTransport(TRANSPORT_WIFI));
+
+        // Make that underlying network connect, and expect to see its capabilities immediately
+        // reflected in the VPN's capabilities.
+        mWiFiNetworkAgent = new TestNetworkAgentWrapper(TRANSPORT_WIFI);
+        assertEquals(wifiNetwork, mWiFiNetworkAgent.getNetwork());
+        mWiFiNetworkAgent.connect(false);
+        callback.expectAvailableCallbacksUnvalidated(mWiFiNetworkAgent);
+        callback.expectCallback(CallbackEntry.NETWORK_CAPS_UPDATED, vpnNetworkAgent);
+        assertTrue(mCm.getNetworkCapabilities(vpnNetworkAgent.getNetwork())
+                .hasTransport(TRANSPORT_VPN));
+        assertTrue(mCm.getNetworkCapabilities(vpnNetworkAgent.getNetwork())
+                .hasTransport(TRANSPORT_WIFI));
+
+        // Disconnect the network, and expect to see the VPN capabilities change accordingly.
+        mWiFiNetworkAgent.disconnect();
+        callback.expectCallback(CallbackEntry.LOST, mWiFiNetworkAgent);
+        callback.expectCapabilitiesThat(vpnNetworkAgent, (nc) ->
+                nc.getTransportTypes().length == 1 && nc.hasTransport(TRANSPORT_VPN));
+
+        vpnNetworkAgent.disconnect();
+        mCm.unregisterNetworkCallback(callback);
     }
 
     @Test
