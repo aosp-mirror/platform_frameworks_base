@@ -452,22 +452,15 @@ public class VibratorServiceTest {
                 new long[]{10, 10, 10}, new int[]{100, 200, 50}, -1);
         vibrate(service, effect);
 
-        verify(mNativeWrapperMock).vibratorOff();
-
-        // Wait for VibrateThread to turn vibrator ON with total timing and no callback.
-        Thread.sleep(5);
-        verify(mNativeWrapperMock).vibratorOn(eq(30L), anyLong());
-
-        // First amplitude set right away.
-        verify(mNativeWrapperMock).vibratorSetAmplitude(eq(100));
-
-        // Second amplitude set after first timing is finished.
-        Thread.sleep(10);
-        verify(mNativeWrapperMock).vibratorSetAmplitude(eq(200));
-
-        // Third amplitude set after second timing is finished.
-        Thread.sleep(10);
-        verify(mNativeWrapperMock).vibratorSetAmplitude(eq(50));
+        // Wait for VibrateThread to finish: 10ms 100, 10ms 200, 10ms 50.
+        Thread.sleep(40);
+        InOrder inOrderVerifier = inOrder(mNativeWrapperMock);
+        inOrderVerifier.verify(mNativeWrapperMock).vibratorOff();
+        inOrderVerifier.verify(mNativeWrapperMock).vibratorOn(eq(30L), anyLong());
+        inOrderVerifier.verify(mNativeWrapperMock).vibratorSetAmplitude(eq(100));
+        inOrderVerifier.verify(mNativeWrapperMock).vibratorSetAmplitude(eq(200));
+        inOrderVerifier.verify(mNativeWrapperMock).vibratorSetAmplitude(eq(50));
+        inOrderVerifier.verify(mNativeWrapperMock).vibratorOff();
     }
 
     @Test
@@ -696,7 +689,7 @@ public class VibratorServiceTest {
                 HAPTIC_FEEDBACK_ATTRS);
 
         // Waveform effect runs on a separate thread.
-        Thread.sleep(5);
+        Thread.sleep(15);
 
         // Alarm vibration is never scaled.
         verify(mNativeWrapperMock).vibratorSetAmplitude(eq(100));
