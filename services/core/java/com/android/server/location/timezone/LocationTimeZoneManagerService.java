@@ -79,8 +79,8 @@ public class LocationTimeZoneManagerService extends Binder {
 
         @Override
         public void onStart() {
-            if (TimeZoneDetectorService.GEOLOCATION_TIME_ZONE_DETECTION_ENABLED) {
-                Context context = getContext();
+            Context context = getContext();
+            if (TimeZoneDetectorService.isGeoLocationTimeZoneDetectionEnabled(context)) {
                 mService = new LocationTimeZoneManagerService(context);
 
                 // The service currently exposes no LocalService or Binder API, but it extends
@@ -93,7 +93,8 @@ public class LocationTimeZoneManagerService extends Binder {
 
         @Override
         public void onBootPhase(int phase) {
-            if (TimeZoneDetectorService.GEOLOCATION_TIME_ZONE_DETECTION_ENABLED) {
+            Context context = getContext();
+            if (TimeZoneDetectorService.isGeoLocationTimeZoneDetectionEnabled(context)) {
                 if (phase == PHASE_SYSTEM_SERVICES_READY) {
                     // The location service must be functioning after this boot phase.
                     mService.onSystemReady();
