@@ -92,6 +92,26 @@ fun LayersAssertion.navBarLayerIsAlwaysVisible(
 }
 
 @JvmOverloads
+fun LayersAssertion.appPairsDividerIsVisible(
+    bugId: Int = 0,
+    enabled: Boolean = bugId == 0
+) {
+    end("appPairsDividerIsVisible", bugId, enabled) {
+        this.showsLayer(FlickerTestBase.APP_PAIRS_DIVIDER)
+    }
+}
+
+@JvmOverloads
+fun LayersAssertion.appPairsDividerIsInvisible(
+    bugId: Int = 0,
+    enabled: Boolean = bugId == 0
+) {
+    end("appPairsDividerIsInVisible", bugId, enabled) {
+        this.hasNotLayer(FlickerTestBase.APP_PAIRS_DIVIDER)
+    }
+}
+
+@JvmOverloads
 fun LayersAssertion.dockedStackDividerIsVisible(
     bugId: Int = 0,
     enabled: Boolean = bugId == 0
