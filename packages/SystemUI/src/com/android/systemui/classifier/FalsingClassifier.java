@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,10 @@
  * limitations under the License.
  */
 
-package com.android.systemui.classifier.brightline;
+package com.android.systemui.classifier;
 
 import android.view.MotionEvent;
 
-import com.android.systemui.classifier.Classifier;
-import com.android.systemui.classifier.FalsingDataProvider;
 import com.android.systemui.util.sensors.ProximitySensor;
 
 import java.util.List;

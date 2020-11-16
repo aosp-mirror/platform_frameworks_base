@@ -14,14 +14,18 @@
  * limitations under the License.
  */
 
-package com.android.systemui.classifier.brightline;
+package com.android.systemui.classifier;
+
+import static com.android.systemui.classifier.FalsingModule.DOUBLE_TAP_TIMEOUT_MS;
+import static com.android.systemui.classifier.FalsingModule.DOUBLE_TAP_TOUCH_SLOP;
 
 import android.view.MotionEvent;
 
-import com.android.systemui.classifier.FalsingDataProvider;
-
 import java.util.List;
 import java.util.Queue;
+
+import javax.inject.Inject;
+import javax.inject.Named;
 
 /**
  * Returns a false touch if the most two recent gestures are not taps or are too far apart.
@@ -34,8 +38,10 @@ public class DoubleTapClassifier extends FalsingClassifier {
 
     private StringBuilder mReason = new StringBuilder();
 
+    @Inject
     DoubleTapClassifier(FalsingDataProvider dataProvider, SingleTapClassifier singleTapClassifier,
-            float doubleTapSlop, long doubleTapTimeMs) {
+            @Named(DOUBLE_TAP_TOUCH_SLOP) float doubleTapSlop,
+            @Named(DOUBLE_TAP_TIMEOUT_MS) long doubleTapTimeMs) {
         super(dataProvider);
         mSingleTapClassifier = singleTapClassifier;
         mDoubleTapSlop = doubleTapSlop;

@@ -16,11 +16,13 @@
 
 package com.android.systemui.dagger;
 
+import android.app.ActivityManager;
 import android.content.Context;
 import android.util.DisplayMetrics;
 
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.UiEventLoggerImpl;
+import com.android.systemui.dagger.qualifiers.TestHarness;
 import com.android.systemui.util.concurrency.GlobalConcurrencyModule;
 import com.android.wm.shell.animation.FlingAnimationUtils;
 
@@ -65,5 +67,11 @@ public class GlobalModule {
     @Singleton
     static UiEventLogger provideUiEventLogger() {
         return new UiEventLoggerImpl();
+    }
+
+    @Provides
+    @TestHarness
+    static boolean provideIsTestHarness() {
+        return ActivityManager.isRunningInUserTestHarness();
     }
 }

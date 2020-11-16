@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.classifier.brightline;
+package com.android.systemui.classifier;
 
 import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.BRIGHTLINE_FALSING_DIAGONAL_HORIZONTAL_ANGLE_RANGE;
 import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.BRIGHTLINE_FALSING_DIAGONAL_VERTICAL_ANGLE_RANGE;
@@ -23,10 +23,11 @@ import static com.android.systemui.classifier.Classifier.RIGHT_AFFORDANCE;
 
 import android.provider.DeviceConfig;
 
-import com.android.systemui.classifier.FalsingDataProvider;
 import com.android.systemui.util.DeviceConfigProxy;
 
 import java.util.Locale;
+
+import javax.inject.Inject;
 
 /**
  * False on swipes that are too close to 45 degrees.
@@ -47,6 +48,7 @@ class DiagonalClassifier extends FalsingClassifier {
     private final float mHorizontalAngleRange;
     private final float mVerticalAngleRange;
 
+    @Inject
     DiagonalClassifier(FalsingDataProvider dataProvider, DeviceConfigProxy deviceConfigProxy) {
         super(dataProvider);
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-package com.android.systemui.classifier.brightline;
+package com.android.systemui.classifier;
 
 import static com.android.systemui.classifier.Classifier.NOTIFICATION_DRAG_DOWN;
 import static com.android.systemui.classifier.Classifier.QUICK_SETTINGS;
 
 import android.view.MotionEvent;
 
-import com.android.systemui.classifier.FalsingDataProvider;
-
 import java.util.Locale;
+
+import javax.inject.Inject;
 
 /**
  * False touch if more than one finger touches the screen.
@@ -37,6 +37,7 @@ class PointerCountClassifier extends FalsingClassifier {
     private static final int MAX_ALLOWED_POINTERS_SWIPE_DOWN = 2;
     private int mMaxPointerCount;
 
+    @Inject
     PointerCountClassifier(FalsingDataProvider dataProvider) {
         super(dataProvider);
     }

@@ -21,9 +21,6 @@ import android.view.MotionEvent;
 import android.view.MotionEvent.PointerCoords;
 import android.view.MotionEvent.PointerProperties;
 
-import com.android.systemui.classifier.brightline.BrightLineFalsingManager;
-import com.android.systemui.classifier.brightline.FalsingClassifier;
-import com.android.systemui.classifier.brightline.TimeLimitedMotionEventBuffer;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.util.time.SystemClock;
