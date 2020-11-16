@@ -123,6 +123,7 @@ public class ActivityStarterTests extends WindowTestsBase {
     private static final String FAKE_CALLING_PACKAGE = "com.whatever.dude";
     private static final int UNIMPORTANT_UID = 12345;
     private static final int UNIMPORTANT_UID2 = 12346;
+    private static final int CURRENT_IME_UID = 12347;
 
     @Before
     public void setUp() throws Exception {
@@ -305,6 +306,12 @@ public class ActivityStarterTests extends WindowTestsBase {
 
     private ActivityStarter prepareStarter(@Intent.Flags int launchFlags) {
         return prepareStarter(launchFlags, true /* mockGetLaunchStack */);
+    }
+
+    private void setupImeWindow() {
+        final WindowState imeWindow = createWindow(null, W_INPUT_METHOD,
+                "mImeWindow", CURRENT_IME_UID);
+        mDisplayContent.mInputMethodWindow = imeWindow;
     }
 
     /**
@@ -638,6 +645,14 @@ public class ActivityStarterTests extends WindowTestsBase {
                 UNIMPORTANT_UID, false, PROCESS_STATE_TOP + 1,
                 UNIMPORTANT_UID2, false, PROCESS_STATE_TOP + 1,
                 false, false, false, false, true);
+
+        setupImeWindow();
+        runAndVerifyBackgroundActivityStartsSubtest(
+                "disallowed_callingPackageNameIsIme_notAborted", false,
+                CURRENT_IME_UID, false, PROCESS_STATE_TOP + 1,
+                UNIMPORTANT_UID2, false, PROCESS_STATE_TOP + 1,
+                false, false, false, false, false);
+
     }
 
     private void runAndVerifyBackgroundActivityStartsSubtest(String name, boolean shouldHaveAborted,
