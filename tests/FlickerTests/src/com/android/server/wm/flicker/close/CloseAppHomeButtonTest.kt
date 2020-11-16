@@ -20,12 +20,25 @@ import android.view.Surface
 import androidx.test.filters.RequiresDevice
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.server.wm.flicker.Flicker
+import com.android.server.wm.flicker.endRotation
 import com.android.server.wm.flicker.FlickerTestRunnerFactory
 import com.android.server.wm.flicker.FlickerTestRunner
+import com.android.server.wm.flicker.navBarWindowIsAlwaysVisible
+import com.android.server.wm.flicker.statusBarWindowIsAlwaysVisible
+import com.android.server.wm.flicker.navBarLayerIsAlwaysVisible
+import com.android.server.wm.flicker.statusBarLayerIsAlwaysVisible
+import com.android.server.wm.flicker.launcherReplacesAppWindowAsTopWindow
+import com.android.server.wm.flicker.wallpaperWindowBecomesVisible
+import com.android.server.wm.flicker.wallpaperLayerReplacesAppLayer
+import com.android.server.wm.flicker.noUncoveredRegions
+import com.android.server.wm.flicker.navBarLayerRotatesAndScales
+import com.android.server.wm.flicker.statusBarLayerRotatesScales
+import com.android.server.wm.flicker.visibleWindowsShownMoreThanOneConsecutiveEntry
+import com.android.server.wm.flicker.visibleLayersShownMoreThanOneConsecutiveEntry
+import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
 import com.android.server.wm.flicker.helpers.StandardAppHelper
 import com.android.server.wm.flicker.helpers.buildTestTag
 import com.android.server.wm.flicker.helpers.setRotation
-import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
 import com.android.server.wm.flicker.helpers.waitUntilGone
 import com.android.server.wm.flicker.repetitions
 import com.android.server.wm.flicker.startRotation
@@ -75,6 +88,32 @@ class CloseAppHomeButtonTest(
                             }
                             test {
                                 testApp.exit()
+                            }
+                        }
+                        assertions {
+                            windowManagerTrace {
+                                navBarWindowIsAlwaysVisible()
+                                statusBarWindowIsAlwaysVisible()
+                                visibleWindowsShownMoreThanOneConsecutiveEntry()
+
+                                launcherReplacesAppWindowAsTopWindow(testApp)
+                                wallpaperWindowBecomesVisible()
+                            }
+
+                            layersTrace {
+                                noUncoveredRegions(configuration.startRotation,
+                                        Surface.ROTATION_0, bugId = 141361128)
+                                navBarLayerRotatesAndScales(configuration.startRotation,
+                                        Surface.ROTATION_0)
+                                statusBarLayerRotatesScales(configuration.startRotation,
+                                        Surface.ROTATION_0)
+                                navBarLayerIsAlwaysVisible(
+                                        enabled = Surface.ROTATION_0 == configuration.endRotation)
+                                statusBarLayerIsAlwaysVisible(
+                                        enabled = Surface.ROTATION_0 == configuration.endRotation)
+                                visibleLayersShownMoreThanOneConsecutiveEntry()
+
+                                wallpaperLayerReplacesAppLayer(testApp)
                             }
                         }
                     }
