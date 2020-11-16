@@ -3542,8 +3542,8 @@ public class AudioManager {
      * @deprecated use {@link #abandonAudioFocusRequest(AudioFocusRequest)}
      */
     @SystemApi
-    @SuppressLint("Doclava125") // no permission enforcement, but only "undoes" what would have been
-                                // done by a matching requestAudioFocus
+    @SuppressLint("RequiresPermission") // no permission enforcement, but only "undoes" what would
+    // have been done by a matching requestAudioFocus
     public int abandonAudioFocus(OnAudioFocusChangeListener l, AudioAttributes aa) {
         int status = AUDIOFOCUS_REQUEST_FAILED;
         unregisterAudioFocusRequest(l);
@@ -5146,7 +5146,7 @@ public class AudioManager {
      * @hide
      */
     @SystemApi
-    @SuppressLint("Doclava125") // FIXME is this still used?
+    @SuppressLint("RequiresPermission") // FIXME is this still used?
     public boolean isHdmiSystemAudioSupported() {
         try {
             return getService().isHdmiSystemAudioSupported();

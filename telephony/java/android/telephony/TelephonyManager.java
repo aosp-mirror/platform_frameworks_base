@@ -4656,7 +4656,7 @@ public class TelephonyManager {
      * be implemented instead.
      */
     @SystemApi
-    @SuppressLint("Doclava125")
+    @SuppressLint("RequiresPermission")
     public void setVisualVoicemailEnabled(PhoneAccountHandle phoneAccountHandle, boolean enabled){
     }
 
@@ -4671,7 +4671,7 @@ public class TelephonyManager {
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
-    @SuppressLint("Doclava125")
+    @SuppressLint("RequiresPermission")
     public boolean isVisualVoicemailEnabled(PhoneAccountHandle phoneAccountHandle){
         return false;
     }
@@ -4690,7 +4690,7 @@ public class TelephonyManager {
      * @hide
      */
     @SystemApi
-    @SuppressLint("Doclava125")
+    @SuppressLint("RequiresPermission")
     @Nullable
     public Bundle getVisualVoicemailSettings(){
         try {
@@ -8524,7 +8524,7 @@ public class TelephonyManager {
 
     /** @hide */
     @SystemApi
-    @SuppressLint("Doclava125")
+    @SuppressLint("RequiresPermission")
     public int checkCarrierPrivilegesForPackage(String pkgName) {
         try {
             ITelephony telephony = getITelephony();
@@ -8540,7 +8540,7 @@ public class TelephonyManager {
 
     /** @hide */
     @SystemApi
-    @SuppressLint("Doclava125")
+    @SuppressLint("RequiresPermission")
     public int checkCarrierPrivilegesForPackageAnyPhone(String pkgName) {
         try {
             ITelephony telephony = getITelephony();
@@ -8616,7 +8616,7 @@ public class TelephonyManager {
 
     /** @hide */
     @SystemApi
-    @SuppressLint("Doclava125")
+    @SuppressLint("RequiresPermission")
     public void dial(String number) {
         try {
             ITelephony telephony = getITelephony();
@@ -8675,7 +8675,7 @@ public class TelephonyManager {
      */
     @Deprecated
     @SystemApi
-    @SuppressLint("Doclava125")
+    @SuppressLint("RequiresPermission")
     public void silenceRinger() {
         // No-op
     }
