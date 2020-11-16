@@ -73,11 +73,6 @@ public class KeyguardClockSwitch extends RelativeLayout {
     private TextClock mClockViewBold;
 
     /**
-     * Gradient clock for usage when mode != KeyguardUpdateMonitor.LOCK_SCREEN_MODE_NORMAL.
-     */
-    private TimeBasedColorsClockController mNewLockscreenClockViewController;
-
-    /**
      * Frame for clock when mode != KeyguardUpdateMonitor.LOCK_SCREEN_MODE_NORMAL.
      */
     private FrameLayout mNewLockscreenClockFrame;
@@ -157,7 +152,6 @@ public class KeyguardClockSwitch extends RelativeLayout {
             setPaddingRelative(startEndPadding, 0, startEndPadding, 0);
             mSmallClockFrame.setVisibility(GONE);
             mNewLockscreenClockFrame.setVisibility(VISIBLE);
-            mNewLockscreenClockViewController.init();
 
             statusAreaLP.removeRule(RelativeLayout.BELOW);
             statusAreaLP.addRule(RelativeLayout.LEFT_OF, R.id.new_lockscreen_clock_view);
@@ -181,8 +175,6 @@ public class KeyguardClockSwitch extends RelativeLayout {
         mClockView = findViewById(R.id.default_clock_view);
         mClockViewBold = findViewById(R.id.default_clock_view_bold);
         mNewLockscreenClockFrame = findViewById(R.id.new_lockscreen_clock_view);
-        mNewLockscreenClockViewController =
-                new TimeBasedColorsClockController(findViewById(R.id.gradient_clock_view));
         mSmallClockFrame = findViewById(R.id.clock_view);
         mKeyguardStatusArea = findViewById(R.id.keyguard_status_area);
     }
@@ -305,7 +297,6 @@ public class KeyguardClockSwitch extends RelativeLayout {
         if (mClockPlugin != null) {
             mClockPlugin.setDarkAmount(darkAmount);
         }
-        mNewLockscreenClockViewController.setDarkAmount(darkAmount);
         updateBigClockAlpha();
     }
 
@@ -356,7 +347,6 @@ public class KeyguardClockSwitch extends RelativeLayout {
      * Refresh the time of the clock, due to either time tick broadcast or doze time tick alarm.
      */
     public void refresh() {
-        mNewLockscreenClockViewController.refreshTime(System.currentTimeMillis());
         mClockView.refreshTime();
         mClockViewBold.refreshTime();
         if (mClockPlugin != null) {

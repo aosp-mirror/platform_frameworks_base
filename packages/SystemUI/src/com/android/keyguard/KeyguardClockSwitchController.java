@@ -55,7 +55,12 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     private final ClockManager mClockManager;
     private final KeyguardSliceViewController mKeyguardSliceViewController;
     private final NotificationIconAreaController mNotificationIconAreaController;
-    private FrameLayout mNewLockscreenClockFrame;
+
+    /**
+     * Gradient clock for usage when mode != KeyguardUpdateMonitor.LOCK_SCREEN_MODE_NORMAL.
+     */
+    private AnimatableClockController mNewLockScreenClockViewController;
+    private FrameLayout mNewLockScreenClockFrame;
 
     private int mLockScreenMode = KeyguardUpdateMonitor.LOCK_SCREEN_MODE_NORMAL;
 
@@ -119,7 +124,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         mColorExtractor.addOnColorsChangedListener(mColorsListener);
         mView.updateColors(getGradientColors());
         updateAodIcons();
-        mNewLockscreenClockFrame = mView.findViewById(R.id.new_lockscreen_clock_view);
+        mNewLockScreenClockFrame = mView.findViewById(R.id.new_lockscreen_clock_view);
     }
 
     @Override
@@ -182,6 +187,10 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
      * Refresh clock. Called in response to TIME_TICK broadcasts.
      */
     void refresh() {
+        if (mNewLockScreenClockViewController != null) {
+            mNewLockScreenClockViewController.refreshTime();
+        }
+
         mView.refresh();
     }
 
@@ -192,8 +201,8 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
      */
     void updatePosition(int x, AnimationProperties props, boolean animate) {
         x = Math.abs(x);
-        if (mNewLockscreenClockFrame != null) {
-            PropertyAnimator.setProperty(mNewLockscreenClockFrame, AnimatableProperty.TRANSLATION_X,
+        if (mNewLockScreenClockFrame != null) {
+            PropertyAnimator.setProperty(mNewLockScreenClockFrame, AnimatableProperty.TRANSLATION_X,
                     -x, props, animate);
         }
         mKeyguardSliceViewController.updatePosition(x, props, animate);
@@ -205,6 +214,17 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
      */
     void updateLockScreenMode(int mode) {
         mLockScreenMode = mode;
+        if (mode == KeyguardUpdateMonitor.LOCK_SCREEN_MODE_LAYOUT_1) {
+            if (mNewLockScreenClockViewController == null) {
+                mNewLockScreenClockViewController =
+                        new AnimatableClockController(
+                                mView.findViewById(R.id.animatable_clock_view),
+                                mStatusBarStateController);
+                mNewLockScreenClockViewController.init();
+            }
+        } else {
+            mNewLockScreenClockViewController = null;
+        }
         mView.updateLockScreenMode(mLockScreenMode);
         updateAodIcons();
     }
