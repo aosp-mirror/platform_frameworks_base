@@ -232,10 +232,10 @@ interface IDevicePolicyManager {
     List getPermittedAccessibilityServicesForUser(int userId);
     boolean isAccessibilityServicePermittedByAdmin(in ComponentName admin, String packageName, int userId);
 
-    boolean setPermittedInputMethods(in ComponentName admin,in List packageList);
-    List getPermittedInputMethods(in ComponentName admin);
+    boolean setPermittedInputMethods(in ComponentName admin,in List packageList, boolean parent);
+    List getPermittedInputMethods(in ComponentName admin, boolean parent);
     List getPermittedInputMethodsForCurrentUser();
-    boolean isInputMethodPermittedByAdmin(in ComponentName admin, String packageName, int userId);
+    boolean isInputMethodPermittedByAdmin(in ComponentName admin, String packageName, int userId, boolean parent);
 
     boolean setPermittedCrossProfileNotificationListeners(in ComponentName admin, in List<String> packageList);
     List<String> getPermittedCrossProfileNotificationListeners(in ComponentName admin);

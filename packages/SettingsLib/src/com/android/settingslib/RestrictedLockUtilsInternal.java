@@ -267,19 +267,28 @@ public class RestrictedLockUtilsInternal extends RestrictedLockUtils {
             permitted = dpm.isInputMethodPermittedByAdmin(admin.component,
                     packageName, userId);
         }
+
+        boolean permittedByParentAdmin = true;
+        EnforcedAdmin profileAdmin = null;
         int managedProfileId = getManagedProfileId(context, userId);
-        EnforcedAdmin profileAdmin = getProfileOrDeviceOwner(context,
-                getUserHandleOf(managedProfileId));
-        boolean permittedByProfileAdmin = true;
-        if (profileAdmin != null) {
-            permittedByProfileAdmin = dpm.isInputMethodPermittedByAdmin(profileAdmin.component,
-                    packageName, managedProfileId);
+        if (managedProfileId != UserHandle.USER_NULL) {
+            profileAdmin = getProfileOrDeviceOwner(context, getUserHandleOf(managedProfileId));
+            // If the device is an organization-owned device with a managed profile, the
+            // managedProfileId will be used instead of the affected userId. This is because
+            // isInputMethodPermittedByAdmin is called on the parent DPM instance, which will
+            // return results affecting the personal profile.
+            if (profileAdmin != null && dpm.isOrganizationOwnedDeviceWithManagedProfile()) {
+                DevicePolicyManager parentDpm = sProxy.getParentProfileInstance(dpm,
+                        UserManager.get(context).getUserInfo(managedProfileId));
+                permittedByParentAdmin = parentDpm.isInputMethodPermittedByAdmin(
+                        profileAdmin.component, packageName, managedProfileId);
+            }
         }
-        if (!permitted && !permittedByProfileAdmin) {
+        if (!permitted && !permittedByParentAdmin) {
             return EnforcedAdmin.MULTIPLE_ENFORCED_ADMIN;
         } else if (!permitted) {
             return admin;
-        } else if (!permittedByProfileAdmin) {
+        } else if (!permittedByParentAdmin) {
             return profileAdmin;
         }
         return null;
