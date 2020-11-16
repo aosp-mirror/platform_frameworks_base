@@ -43,6 +43,27 @@ package android.content.rollback {
 
 }
 
+package android.hardware.usb {
+
+  public class UsbManager {
+    method @RequiresPermission(android.Manifest.permission.MANAGE_USB) public int getGadgetHalVersion();
+    method public int getUsbBandwidth();
+    field public static final int GADGET_HAL_NOT_SUPPORTED = -1; // 0xffffffff
+    field public static final int GADGET_HAL_V1_0 = 10; // 0xa
+    field public static final int GADGET_HAL_V1_1 = 11; // 0xb
+    field public static final int GADGET_HAL_V1_2 = 12; // 0xc
+    field public static final int USB_DATA_TRANSFER_RATE_10G = 10240; // 0x2800
+    field public static final int USB_DATA_TRANSFER_RATE_20G = 20480; // 0x5000
+    field public static final int USB_DATA_TRANSFER_RATE_40G = 40960; // 0xa000
+    field public static final int USB_DATA_TRANSFER_RATE_5G = 5120; // 0x1400
+    field public static final int USB_DATA_TRANSFER_RATE_FULL_SPEED = 12; // 0xc
+    field public static final int USB_DATA_TRANSFER_RATE_HIGH_SPEED = 480; // 0x1e0
+    field public static final int USB_DATA_TRANSFER_RATE_LOW_SPEED = 2; // 0x2
+    field public static final int USB_DATA_TRANSFER_RATE_UNKNOWN = -1; // 0xffffffff
+  }
+
+}
+
 package android.media {
 
   public class AudioManager {

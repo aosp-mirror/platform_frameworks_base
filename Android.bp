@@ -515,6 +515,8 @@ java_library {
         "android.hardware.usb-V1.1-java-constants",
         "android.hardware.usb-V1.2-java-constants",
         "android.hardware.usb.gadget-V1.0-java",
+        "android.hardware.usb.gadget-V1.1-java",
+        "android.hardware.usb.gadget-V1.2-java",
         "android.hardware.vibrator-V1.0-java",
         "android.hardware.vibrator-V1.1-java",
         "android.hardware.vibrator-V1.2-java",

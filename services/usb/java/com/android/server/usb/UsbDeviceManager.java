@@ -55,8 +55,9 @@ import android.hardware.usb.UsbPort;
 import android.hardware.usb.UsbPortStatus;
 import android.hardware.usb.gadget.V1_0.GadgetFunction;
 import android.hardware.usb.gadget.V1_0.IUsbGadget;
-import android.hardware.usb.gadget.V1_0.IUsbGadgetCallback;
 import android.hardware.usb.gadget.V1_0.Status;
+import android.hardware.usb.gadget.V1_2.IUsbGadgetCallback;
+import android.hardware.usb.gadget.V1_2.UsbSpeed;
 import android.hidl.manager.V1_0.IServiceManager;
 import android.hidl.manager.V1_0.IServiceNotification;
 import android.os.BatteryManager;
@@ -166,6 +167,8 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
     private static final int MSG_RESET_USB_GADGET = 19;
     private static final int MSG_ACCESSORY_HANDSHAKE_TIMEOUT = 20;
     private static final int MSG_INCREASE_SENDSTRING_COUNT = 21;
+    private static final int MSG_UPDATE_USB_SPEED = 22;
+    private static final int MSG_UPDATE_HAL_VERSION = 23;
 
     private static final int AUDIO_MODE_SOURCE = 1;
 
@@ -532,6 +535,8 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
         protected SharedPreferences mSettings;
         protected int mCurrentUser;
         protected boolean mCurrentUsbFunctionsReceived;
+        protected int mUsbSpeed;
+        protected int mCurrentGadgetHalVersion;
 
         /**
          * The persistent property which stores whether adb is enabled or not.
@@ -902,6 +907,7 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
                     } else {
                         mPendingBootBroadcast = true;
                     }
+                    updateUsbSpeed();
                     break;
                 case MSG_UPDATE_PORT_STATE:
                     SomeArgs args = (SomeArgs) msg.obj;
@@ -1117,6 +1123,26 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
             return mCurrentAccessory;
         }
 
+        protected void updateUsbGadgetHalVersion() {
+            sendMessage(MSG_UPDATE_HAL_VERSION, null);
+        }
+
+        protected void updateUsbSpeed() {
+            if (mCurrentGadgetHalVersion < UsbManager.GADGET_HAL_V1_0) {
+                mUsbSpeed = UsbSpeed.UNKNOWN;
+                return;
+            }
+
+            if (mConnected && mConfigured) {
+                sendMessage(MSG_UPDATE_USB_SPEED, null);
+            } else {
+                // clear USB speed due to disconnected
+                mUsbSpeed = UsbSpeed.UNKNOWN;
+            }
+
+            return;
+        }
+
         protected void updateUsbNotification(boolean force) {
             if (mNotificationManager == null || !mUseUsbNotification
                     || ("0".equals(getSystemProperty("persist.charging.notify", "")))) {
@@ -1324,6 +1350,14 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
             return mScreenUnlockedFunctions;
         }
 
+        public int getUsbSpeed() {
+            return mUsbSpeed;
+        }
+
+        public int getGadgetHalVersion() {
+            return mCurrentGadgetHalVersion;
+        }
+
         /**
          * Dump a functions mask either as proto-enums (if dumping to proto) or a string (if dumping
          * to a print writer)
@@ -1449,6 +1483,9 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
                 }
                 mCurrentFunctions = UsbManager.FUNCTION_NONE;
                 mCurrentUsbFunctionsReceived = true;
+
+                mUsbSpeed = UsbSpeed.UNKNOWN;
+                mCurrentGadgetHalVersion = UsbManager.GADGET_HAL_NOT_SUPPORTED;
 
                 String state = FileUtils.readTextFile(new File(STATE_PATH), 0, null).trim();
                 updateState(state);
@@ -1826,10 +1863,13 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
                             USB_GADGET_HAL_DEATH_COOKIE);
                     mCurrentFunctions = UsbManager.FUNCTION_NONE;
                     mCurrentUsbFunctionsRequested = true;
+                    mUsbSpeed = UsbSpeed.UNKNOWN;
+                    mCurrentGadgetHalVersion = UsbManager.GADGET_HAL_V1_0;
                     mGadgetProxy.getCurrentUsbFunctions(new UsbGadgetCallback());
                 }
                 String state = FileUtils.readTextFile(new File(STATE_PATH), 0, null).trim();
                 updateState(state);
+                updateUsbGadgetHalVersion();
             } catch (NoSuchElementException e) {
                 Slog.e(TAG, "Usb gadget hal not found", e);
             } catch (RemoteException e) {
@@ -1935,6 +1975,48 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
                         }
                     }
                     break;
+                case MSG_UPDATE_USB_SPEED:
+                    synchronized (mGadgetProxyLock) {
+                        if (mGadgetProxy == null) {
+                            Slog.e(TAG, "mGadgetProxy is null");
+                            break;
+                        }
+
+                        try {
+                            android.hardware.usb.gadget.V1_2.IUsbGadget gadgetProxy =
+                                    android.hardware.usb.gadget.V1_2.IUsbGadget
+                                            .castFrom(mGadgetProxy);
+                            if (gadgetProxy != null) {
+                                gadgetProxy.getUsbSpeed(new UsbGadgetCallback());
+                            }
+                        } catch (RemoteException e) {
+                            Slog.e(TAG, "get UsbSpeed failed", e);
+                        }
+                    }
+                    break;
+                case MSG_UPDATE_HAL_VERSION:
+                    synchronized (mGadgetProxyLock) {
+                        if (mGadgetProxy == null) {
+                            Slog.e(TAG, "mGadgetProxy is null");
+                            break;
+                        }
+
+                        android.hardware.usb.gadget.V1_2.IUsbGadget gadgetProxy =
+                                android.hardware.usb.gadget.V1_2.IUsbGadget.castFrom(mGadgetProxy);
+                        if (gadgetProxy == null) {
+                            android.hardware.usb.gadget.V1_1.IUsbGadget gadgetProxyV1By1 =
+                                    android.hardware.usb.gadget.V1_1.IUsbGadget
+                                            .castFrom(mGadgetProxy);
+                            if (gadgetProxyV1By1 == null) {
+                                mCurrentGadgetHalVersion = UsbManager.GADGET_HAL_V1_0;
+                                break;
+                            }
+                            mCurrentGadgetHalVersion = UsbManager.GADGET_HAL_V1_1;
+                            break;
+                        }
+                        mCurrentGadgetHalVersion = UsbManager.GADGET_HAL_V1_2;
+                    }
+                    break;
                 default:
                     super.handleMessage(msg);
             }
@@ -1981,6 +2063,11 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
                     int status) {
                 sendMessage(MSG_GET_CURRENT_USB_FUNCTIONS, functions,
                         status == Status.FUNCTIONS_APPLIED);
+            }
+
+            @Override
+            public void getUsbSpeedCb(int speed) {
+                mUsbSpeed = speed;
             }
         }
 
@@ -2088,6 +2175,14 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
 
     public long getCurrentFunctions() {
         return mHandler.getEnabledFunctions();
+    }
+
+    public int getCurrentUsbSpeed() {
+        return mHandler.getUsbSpeed();
+    }
+
+    public int getGadgetHalVersion() {
+        return mHandler.getGadgetHalVersion();
     }
 
     /**
