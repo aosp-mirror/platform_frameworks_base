@@ -16,6 +16,9 @@
 
 package android.graphics.drawable;
 
+import static android.content.Context.CONTEXT_INCLUDE_CODE;
+import static android.content.Context.CONTEXT_RESTRICTED;
+
 import android.annotation.ColorInt;
 import android.annotation.DrawableRes;
 import android.annotation.IdRes;
@@ -39,6 +42,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.Process;
 import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -442,8 +446,19 @@ public final class Icon implements Parcelable {
                 resPackage = context.getPackageName();
             }
             if (getResources() == null && !(getResPackage().equals("android"))) {
-                final PackageManager pm = context.createContextAsUser(
-                        UserHandle.of(userId), /* flags */ 0).getPackageManager();
+                // TODO(b/173307037): Move CONTEXT_INCLUDE_CODE to ContextImpl.createContextAsUser
+                final Context userContext;
+                if (context.getUserId() == userId) {
+                    userContext = context;
+                } else {
+                    final boolean sameAppWithProcess =
+                            UserHandle.isSameApp(context.getApplicationInfo().uid, Process.myUid());
+                    final int flags = (sameAppWithProcess ? CONTEXT_INCLUDE_CODE : 0)
+                            | CONTEXT_RESTRICTED;
+                    userContext = context.createContextAsUser(UserHandle.of(userId), flags);
+                }
+
+                final PackageManager pm = userContext.getPackageManager();
                 try {
                     // assign getResources() as the correct user
                     mObj1 = pm.getResourcesForApplication(resPackage);
