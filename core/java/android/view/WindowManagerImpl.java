@@ -250,8 +250,8 @@ public final class WindowManagerImpl implements WindowManager {
         // Initialize params which used for obtaining all system insets.
         final WindowManager.LayoutParams params = new WindowManager.LayoutParams();
         params.flags = FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR;
-        params.token = (mParentWindow != null) ? mParentWindow.getContext().getActivityToken()
-                : mContext.getActivityToken();
+        final Context context = (mParentWindow != null) ? mParentWindow.getContext() : mContext;
+        params.token = Context.getToken(context);
         params.systemUiVisibility = SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
                 | SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION;
         params.setFitInsetsTypes(0);

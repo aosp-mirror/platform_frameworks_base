@@ -227,7 +227,7 @@ public class InputMethodMenuController {
                     WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG, null /* options */);
             mSettingsContext = new ContextThemeWrapper(
                     windowContext, com.android.internal.R.style.Theme_DeviceDefault_Settings);
-            mSwitchingDialogToken = mSettingsContext.getActivityToken();
+            mSwitchingDialogToken = mSettingsContext.getWindowContextToken();
         }
         // TODO(b/159767464): register the listener to another display again if window token is not
         // yet created.

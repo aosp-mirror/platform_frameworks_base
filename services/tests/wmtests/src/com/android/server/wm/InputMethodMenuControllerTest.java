@@ -63,8 +63,8 @@ public class InputMethodMenuControllerTest extends WindowTestsBase {
                 mDisplayContent.getDisplayId());
 
         assertImeSwitchContextMetricsValidity(contextOnSecondaryDisplay, mDisplayContent);
-        assertThat(contextOnDefaultDisplay.getActivityToken())
-                .isEqualTo(contextOnSecondaryDisplay.getActivityToken());
+        assertThat(contextOnDefaultDisplay.getWindowContextToken())
+                .isEqualTo(contextOnSecondaryDisplay.getWindowContextToken());
     }
 
     private void assertImeSwitchContextMetricsValidity(Context context, DisplayContent dc) {
