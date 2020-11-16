@@ -77,10 +77,10 @@ import com.android.internal.location.ProviderRequest;
 import com.android.internal.location.gnssmetrics.GnssMetrics;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.FgThread;
-import com.android.server.location.AbstractLocationProvider;
 import com.android.server.location.gnss.GnssSatelliteBlocklistHelper.GnssSatelliteBlocklistCallback;
 import com.android.server.location.gnss.NtpTimeHelper.InjectNtpTimeCallback;
-import com.android.server.location.util.Injector;
+import com.android.server.location.injector.Injector;
+import com.android.server.location.provider.AbstractLocationProvider;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
