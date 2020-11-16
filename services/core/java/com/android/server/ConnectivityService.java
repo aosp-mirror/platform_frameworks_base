@@ -6814,7 +6814,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             }
 
             public String toString() {
-                return mRequest.request.requestId + " : "
+                return mRequest.mRequests.get(0).requestId + " : "
                         + (null != mOldNetwork ? mOldNetwork.network.netId : "null")
                         + " → " + (null != mNewNetwork ? mNewNetwork.network.netId : "null");
             }
