@@ -90,7 +90,7 @@ public class PersistentDataBlockManager {
      *
      * @param data the data to write
      */
-    @SuppressLint("Doclava125")
+    @SuppressLint("RequiresPermission")
     public int write(byte[] data) {
         try {
             return sService.write(data);
@@ -102,7 +102,7 @@ public class PersistentDataBlockManager {
     /**
      * Returns the data block stored on the persistent partition.
      */
-    @SuppressLint("Doclava125")
+    @SuppressLint("RequiresPermission")
     public byte[] read() {
         try {
             return sService.read();
@@ -130,7 +130,7 @@ public class PersistentDataBlockManager {
      *
      * Returns -1 on error.
      */
-    @SuppressLint("Doclava125")
+    @SuppressLint("RequiresPermission")
     public long getMaximumDataBlockSize() {
         try {
             return sService.getMaximumDataBlockSize();
