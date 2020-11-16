@@ -32,8 +32,7 @@ import org.junit.Assert.assertFalse
 import org.junit.Assume
 import org.junit.Before
 
-abstract class TvPipTestBase(rotationName: String, rotation: Int)
-    : PipTestBase(rotationName, rotation) {
+abstract class TvPipTestBase : PipTestBase(rotationToString(ROTATION_0), ROTATION_0) {
 
     private val isTelevision: Boolean
         get() = packageManager.run {
@@ -93,9 +92,5 @@ abstract class TvPipTestBase(rotationName: String, rotation: Int)
 
     companion object {
         private const val AFTER_TEXT_PROCESS_CHECK_DELAY = 1_000L // 1 sec
-
-        @JvmStatic
-        protected val rotationParams: Collection<Array<Any>> =
-                listOf(arrayOf(rotationToString(ROTATION_0), ROTATION_0))
     }
 }

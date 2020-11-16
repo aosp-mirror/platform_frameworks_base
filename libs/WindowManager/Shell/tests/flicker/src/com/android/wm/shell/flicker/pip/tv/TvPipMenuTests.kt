@@ -23,17 +23,13 @@ import com.android.wm.shell.flicker.wait
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.junit.runners.Parameterized
 
 /**
  * Test Pip Menu on TV.
  * To run this test: `atest WMShellFlickerTests:TvPipMenuTests`
  */
 @RequiresDevice
-@RunWith(Parameterized::class)
-class TvPipMenuTests(rotationName: String, rotation: Int)
-    : TvPipTestBase(rotationName, rotation) {
+class TvPipMenuTests : TvPipTestBase() {
 
     private val systemUiResources =
             packageManager.getResourcesForApplication(SYSTEM_UI_PACKAGE_NAME)
@@ -143,11 +139,5 @@ class TvPipMenuTests(rotationName: String, rotation: Int)
         // Pressing the Window key should bring up Pip menu
         uiDevice.pressWindowKey()
         return uiDevice.waitForTvPipMenu() ?: fail("Pip menu should have been shown")
-    }
-
-    companion object {
-        @Parameterized.Parameters(name = "{0}")
-        @JvmStatic
-        fun getParams(): Collection<Array<Any>> = rotationParams
     }
 }
