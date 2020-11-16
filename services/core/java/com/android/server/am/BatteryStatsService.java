@@ -519,16 +519,24 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         return data;
     }
 
-    public ParcelFileDescriptor getStatisticsStream() {
+    /**
+     * Returns parceled BatteryStats as a MemoryFile.
+     *
+     * @param forceUpdate If true, runs a sync to get fresh battery stats. Otherwise,
+     *                  returns the current values.
+     */
+    public ParcelFileDescriptor getStatisticsStream(boolean forceUpdate) {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.BATTERY_STATS, null);
         //Slog.i("foo", "SENDING BATTERY INFO:");
         //mStats.dumpLocked(new LogPrinter(Log.INFO, "foo", Log.LOG_ID_SYSTEM));
         Parcel out = Parcel.obtain();
-        // Drain the handler queue to make sure we've handled all pending works, so we'll get
-        // an accurate stats.
-        awaitCompletion();
-        syncStats("get-stats", BatteryExternalStatsWorker.UPDATE_ALL);
+        if (forceUpdate) {
+            // Drain the handler queue to make sure we've handled all pending works, so we'll get
+            // an accurate stats.
+            awaitCompletion();
+            syncStats("get-stats", BatteryExternalStatsWorker.UPDATE_ALL);
+        }
         synchronized (mStats) {
             mStats.writeToParcel(out, 0);
         }
