@@ -38,7 +38,7 @@
 #include "androidfw/ResourceUtils.h"
 #include "androidfw/Util.h"
 
-using ::android::base::StringPrintf;
+using android::base::StringPrintf;
 
 namespace android {
 
@@ -51,17 +51,17 @@ namespace {
 // the Type structs.
 class TypeSpecPtrBuilder {
  public:
-  explicit TypeSpecPtrBuilder(const ResTable_typeSpec* header)
+  explicit TypeSpecPtrBuilder(incfs::verified_map_ptr<ResTable_typeSpec> header)
       : header_(header) {
   }
 
-  void AddType(const ResTable_type* type) {
+  void AddType(incfs::verified_map_ptr<ResTable_type> type) {
     types_.push_back(type);
   }
 
   TypeSpecPtr Build() {
     // Check for overflow.
-    using ElementType = const ResTable_type*;
+    using ElementType = incfs::verified_map_ptr<ResTable_type>;
     if ((std::numeric_limits<size_t>::max() - sizeof(TypeSpec)) / sizeof(ElementType) <
         types_.size()) {
       return {};
@@ -77,8 +77,8 @@ class TypeSpecPtrBuilder {
  private:
   DISALLOW_COPY_AND_ASSIGN(TypeSpecPtrBuilder);
 
-  const ResTable_typeSpec* header_;
-  std::vector<const ResTable_type*> types_;
+  incfs::verified_map_ptr<ResTable_typeSpec> header_;
+  std::vector<incfs::verified_map_ptr<ResTable_type>> types_;
 };
 
 }  // namespace
@@ -88,7 +88,7 @@ LoadedPackage::~LoadedPackage() = default;
 
 // Precondition: The header passed in has already been verified, so reading any fields and trusting
 // the ResChunk_header is safe.
-static bool VerifyResTableType(const ResTable_type* header) {
+static bool VerifyResTableType(incfs::map_ptr<ResTable_type> header) {
   if (header->id == 0) {
     LOG(ERROR) << "RES_TABLE_TYPE_TYPE has invalid ID 0.";
     return false;
@@ -115,89 +115,99 @@ static bool VerifyResTableType(const ResTable_type* header) {
     return false;
   }
 
-  if (entries_offset & 0x03) {
+  if (entries_offset & 0x03U) {
     LOG(ERROR) << "RES_TABLE_TYPE_TYPE entries start at unaligned address.";
     return false;
   }
   return true;
 }
 
-static bool VerifyResTableEntry(const ResTable_type* type, uint32_t entry_offset) {
+static base::expected<std::monostate, NullOrIOError> VerifyResTableEntry(
+    incfs::verified_map_ptr<ResTable_type> type, uint32_t entry_offset) {
   // Check that the offset is aligned.
-  if (entry_offset & 0x03) {
+  if (UNLIKELY(entry_offset & 0x03U)) {
     LOG(ERROR) << "Entry at offset " << entry_offset << " is not 4-byte aligned.";
-    return false;
+    return base::unexpected(std::nullopt);
   }
 
   // Check that the offset doesn't overflow.
-  if (entry_offset > std::numeric_limits<uint32_t>::max() - dtohl(type->entriesStart)) {
+  if (UNLIKELY(entry_offset > std::numeric_limits<uint32_t>::max() - dtohl(type->entriesStart))) {
     // Overflow in offset.
     LOG(ERROR) << "Entry at offset " << entry_offset << " is too large.";
-    return false;
+    return base::unexpected(std::nullopt);
   }
 
   const size_t chunk_size = dtohl(type->header.size);
 
   entry_offset += dtohl(type->entriesStart);
-  if (entry_offset > chunk_size - sizeof(ResTable_entry)) {
+  if (UNLIKELY(entry_offset > chunk_size - sizeof(ResTable_entry))) {
     LOG(ERROR) << "Entry at offset " << entry_offset
                << " is too large. No room for ResTable_entry.";
-    return false;
+    return base::unexpected(std::nullopt);
   }
 
-  const ResTable_entry* entry = reinterpret_cast<const ResTable_entry*>(
-      reinterpret_cast<const uint8_t*>(type) + entry_offset);
+  auto entry = type.offset(entry_offset).convert<ResTable_entry>();
+  if (UNLIKELY(!entry)) {
+    return base::unexpected(IOError::PAGES_MISSING);
+  }
 
   const size_t entry_size = dtohs(entry->size);
-  if (entry_size < sizeof(*entry)) {
+  if (UNLIKELY(entry_size < sizeof(entry.value()))) {
     LOG(ERROR) << "ResTable_entry size " << entry_size << " at offset " << entry_offset
                << " is too small.";
-    return false;
+    return base::unexpected(std::nullopt);
   }
 
-  if (entry_size > chunk_size || entry_offset > chunk_size - entry_size) {
+  if (UNLIKELY(entry_size > chunk_size || entry_offset > chunk_size - entry_size)) {
     LOG(ERROR) << "ResTable_entry size " << entry_size << " at offset " << entry_offset
                << " is too large.";
-    return false;
+    return base::unexpected(std::nullopt);
   }
 
   if (entry_size < sizeof(ResTable_map_entry)) {
     // There needs to be room for one Res_value struct.
-    if (entry_offset + entry_size > chunk_size - sizeof(Res_value)) {
+    if (UNLIKELY(entry_offset + entry_size > chunk_size - sizeof(Res_value))) {
       LOG(ERROR) << "No room for Res_value after ResTable_entry at offset " << entry_offset
                  << " for type " << (int)type->id << ".";
-      return false;
+      return base::unexpected(std::nullopt);
     }
 
-    const Res_value* value =
-        reinterpret_cast<const Res_value*>(reinterpret_cast<const uint8_t*>(entry) + entry_size);
+    auto value = entry.offset(entry_size).convert<Res_value>();
+    if (UNLIKELY(!value)) {
+       return base::unexpected(IOError::PAGES_MISSING);
+    }
+
     const size_t value_size = dtohs(value->size);
-    if (value_size < sizeof(Res_value)) {
+    if (UNLIKELY(value_size < sizeof(Res_value))) {
       LOG(ERROR) << "Res_value at offset " << entry_offset << " is too small.";
-      return false;
+      return base::unexpected(std::nullopt);
     }
 
-    if (value_size > chunk_size || entry_offset + entry_size > chunk_size - value_size) {
+    if (UNLIKELY(value_size > chunk_size || entry_offset + entry_size > chunk_size - value_size)) {
       LOG(ERROR) << "Res_value size " << value_size << " at offset " << entry_offset
                  << " is too large.";
-      return false;
+      return base::unexpected(std::nullopt);
     }
   } else {
-    const ResTable_map_entry* map = reinterpret_cast<const ResTable_map_entry*>(entry);
+    auto map = entry.convert<ResTable_map_entry>();
+    if (UNLIKELY(!map)) {
+      return base::unexpected(IOError::PAGES_MISSING);
+    }
+
     const size_t map_entry_count = dtohl(map->count);
     size_t map_entries_start = entry_offset + entry_size;
-    if (map_entries_start & 0x03) {
+    if (UNLIKELY(map_entries_start & 0x03U)) {
       LOG(ERROR) << "Map entries at offset " << entry_offset << " start at unaligned offset.";
-      return false;
+      return base::unexpected(std::nullopt);
     }
 
     // Each entry is sizeof(ResTable_map) big.
-    if (map_entry_count > ((chunk_size - map_entries_start) / sizeof(ResTable_map))) {
+    if (UNLIKELY(map_entry_count > ((chunk_size - map_entries_start) / sizeof(ResTable_map)))) {
       LOG(ERROR) << "Too many map entries in ResTable_map_entry at offset " << entry_offset << ".";
-      return false;
+      return base::unexpected(std::nullopt);
     }
   }
-  return true;
+  return {};
 }
 
 LoadedPackage::iterator::iterator(const LoadedPackage* lp, size_t ti, size_t ei)
@@ -233,99 +243,125 @@ uint32_t LoadedPackage::iterator::operator*() const {
           entryIndex_);
 }
 
-const ResTable_entry* LoadedPackage::GetEntry(const ResTable_type* type_chunk,
-                                              uint16_t entry_index) {
-  uint32_t entry_offset = GetEntryOffset(type_chunk, entry_index);
-  if (entry_offset == ResTable_type::NO_ENTRY) {
-    return nullptr;
+base::expected<incfs::map_ptr<ResTable_entry>, NullOrIOError> LoadedPackage::GetEntry(
+    incfs::verified_map_ptr<ResTable_type> type_chunk, uint16_t entry_index) {
+  base::expected<uint32_t, NullOrIOError> entry_offset = GetEntryOffset(type_chunk, entry_index);
+  if (UNLIKELY(!entry_offset.has_value())) {
+    return base::unexpected(entry_offset.error());
   }
-  return GetEntryFromOffset(type_chunk, entry_offset);
+  return GetEntryFromOffset(type_chunk, entry_offset.value());
 }
 
-uint32_t LoadedPackage::GetEntryOffset(const ResTable_type* type_chunk, uint16_t entry_index) {
+base::expected<uint32_t, NullOrIOError> LoadedPackage::GetEntryOffset(
+    incfs::verified_map_ptr<ResTable_type> type_chunk, uint16_t entry_index) {
   // The configuration matches and is better than the previous selection.
   // Find the entry value if it exists for this configuration.
   const size_t entry_count = dtohl(type_chunk->entryCount);
   const size_t offsets_offset = dtohs(type_chunk->header.headerSize);
 
   // Check if there is the desired entry in this type.
-
   if (type_chunk->flags & ResTable_type::FLAG_SPARSE) {
     // This is encoded as a sparse map, so perform a binary search.
-    const ResTable_sparseTypeEntry* sparse_indices =
-        reinterpret_cast<const ResTable_sparseTypeEntry*>(
-            reinterpret_cast<const uint8_t*>(type_chunk) + offsets_offset);
-    const ResTable_sparseTypeEntry* sparse_indices_end = sparse_indices + entry_count;
-    const ResTable_sparseTypeEntry* result =
-        std::lower_bound(sparse_indices, sparse_indices_end, entry_index,
-                         [](const ResTable_sparseTypeEntry& entry, uint16_t entry_idx) {
-                           return dtohs(entry.idx) < entry_idx;
-                         });
+    bool error = false;
+    auto sparse_indices = type_chunk.offset(offsets_offset)
+                                    .convert<ResTable_sparseTypeEntry>().iterator();
+    auto sparse_indices_end = sparse_indices + entry_count;
+    auto result = std::lower_bound(sparse_indices, sparse_indices_end, entry_index,
+                                   [&error](const incfs::map_ptr<ResTable_sparseTypeEntry>& entry,
+                                            uint16_t entry_idx) {
+      if (UNLIKELY(!entry)) {
+        return error = true;
+      }
+      return dtohs(entry->idx) < entry_idx;
+    });
 
-    if (result == sparse_indices_end || dtohs(result->idx) != entry_index) {
+    if (result == sparse_indices_end) {
       // No entry found.
-      return ResTable_type::NO_ENTRY;
+      return base::unexpected(std::nullopt);
+    }
+
+    const incfs::verified_map_ptr<ResTable_sparseTypeEntry> entry = (*result).verified();
+    if (dtohs(entry->idx) != entry_index) {
+      if (error) {
+        return base::unexpected(IOError::PAGES_MISSING);
+      }
+      return base::unexpected(std::nullopt);
     }
 
     // Extract the offset from the entry. Each offset must be a multiple of 4 so we store it as
     // the real offset divided by 4.
-    return uint32_t{dtohs(result->offset)} * 4u;
+    return uint32_t{dtohs(entry->offset)} * 4u;
   }
 
   // This type is encoded as a dense array.
   if (entry_index >= entry_count) {
     // This entry cannot be here.
-    return ResTable_type::NO_ENTRY;
+    return base::unexpected(std::nullopt);
   }
 
-  const uint32_t* entry_offsets = reinterpret_cast<const uint32_t*>(
-      reinterpret_cast<const uint8_t*>(type_chunk) + offsets_offset);
-  return dtohl(entry_offsets[entry_index]);
-}
-
-const ResTable_entry* LoadedPackage::GetEntryFromOffset(const ResTable_type* type_chunk,
-                                                        uint32_t offset) {
-  if (UNLIKELY(!VerifyResTableEntry(type_chunk, offset))) {
-    return nullptr;
+  const auto entry_offset_ptr = type_chunk.offset(offsets_offset).convert<uint32_t>() + entry_index;
+  if (UNLIKELY(!entry_offset_ptr)) {
+    return base::unexpected(IOError::PAGES_MISSING);
   }
-  return reinterpret_cast<const ResTable_entry*>(reinterpret_cast<const uint8_t*>(type_chunk) +
-                                                 offset + dtohl(type_chunk->entriesStart));
+
+  const uint32_t value = dtohl(entry_offset_ptr.value());
+  if (value == ResTable_type::NO_ENTRY) {
+    return base::unexpected(std::nullopt);
+  }
+
+  return value;
 }
 
-void LoadedPackage::CollectConfigurations(bool exclude_mipmap,
-                                          std::set<ResTable_config>* out_configs) const {
-  const static std::u16string kMipMap = u"mipmap";
+base::expected<incfs::map_ptr<ResTable_entry>, NullOrIOError> LoadedPackage::GetEntryFromOffset(
+    incfs::verified_map_ptr<ResTable_type> type_chunk, uint32_t offset) {
+  auto valid = VerifyResTableEntry(type_chunk, offset);
+  if (UNLIKELY(!valid.has_value())) {
+    return base::unexpected(valid.error());
+  }
+  return type_chunk.offset(offset + dtohl(type_chunk->entriesStart)).convert<ResTable_entry>();
+}
+
+base::expected<std::monostate, IOError> LoadedPackage::CollectConfigurations(
+    bool exclude_mipmap, std::set<ResTable_config>* out_configs) const {
   const size_t type_count = type_specs_.size();
   for (size_t i = 0; i < type_count; i++) {
     const TypeSpecPtr& type_spec = type_specs_[i];
-    if (type_spec != nullptr) {
-      if (exclude_mipmap) {
-        const int type_idx = type_spec->type_spec->id - 1;
-        size_t type_name_len;
-        const char16_t* type_name16 = type_string_pool_.stringAt(type_idx, &type_name_len);
-        if (type_name16 != nullptr) {
-          if (kMipMap.compare(0, std::u16string::npos, type_name16, type_name_len) == 0) {
-            // This is a mipmap type, skip collection.
-            continue;
-          }
-        }
-        const char* type_name = type_string_pool_.string8At(type_idx, &type_name_len);
-        if (type_name != nullptr) {
-          if (strncmp(type_name, "mipmap", type_name_len) == 0) {
-            // This is a mipmap type, skip collection.
-            continue;
-          }
+    if (type_spec == nullptr) {
+      continue;
+    }
+    if (exclude_mipmap) {
+      const int type_idx = type_spec->type_spec->id - 1;
+      const auto type_name16 = type_string_pool_.stringAt(type_idx);
+      if (UNLIKELY(IsIOError(type_name16))) {
+        return base::unexpected(GetIOError(type_name16.error()));
+      }
+      if (type_name16.has_value()) {
+        if (strncmp16(type_name16->data(), u"mipmap", type_name16->size()) == 0) {
+          // This is a mipmap type, skip collection.
+          continue;
         }
       }
 
-      const auto iter_end = type_spec->types + type_spec->type_count;
-      for (auto iter = type_spec->types; iter != iter_end; ++iter) {
-        ResTable_config config;
-        config.copyFromDtoH((*iter)->config);
-        out_configs->insert(config);
+      const auto type_name = type_string_pool_.string8At(type_idx);
+      if (UNLIKELY(IsIOError(type_name))) {
+        return base::unexpected(GetIOError(type_name.error()));
+      }
+      if (type_name.has_value()) {
+        if (strncmp(type_name->data(), "mipmap", type_name->size()) == 0) {
+          // This is a mipmap type, skip collection.
+          continue;
+        }
       }
     }
+
+    const auto iter_end = type_spec->types + type_spec->type_count;
+    for (auto iter = type_spec->types; iter != iter_end; ++iter) {
+      ResTable_config config;
+      config.copyFromDtoH((*iter)->config);
+      out_configs->insert(config);
+    }
   }
+  return {};
 }
 
 void LoadedPackage::CollectLocales(bool canonicalize, std::set<std::string>* out_locales) const {
@@ -348,43 +384,53 @@ void LoadedPackage::CollectLocales(bool canonicalize, std::set<std::string>* out
   }
 }
 
-uint32_t LoadedPackage::FindEntryByName(const std::u16string& type_name,
-                                        const std::u16string& entry_name) const {
-  ssize_t type_idx = type_string_pool_.indexOfString(type_name.data(), type_name.size());
-  if (type_idx < 0) {
-    return 0u;
+base::expected<uint32_t, NullOrIOError> LoadedPackage::FindEntryByName(
+    const std::u16string& type_name, const std::u16string& entry_name) const {
+  const base::expected<size_t, NullOrIOError> type_idx = type_string_pool_.indexOfString(
+      type_name.data(), type_name.size());
+  if (!type_idx.has_value()) {
+    return base::unexpected(type_idx.error());
   }
 
-  ssize_t key_idx = key_string_pool_.indexOfString(entry_name.data(), entry_name.size());
-  if (key_idx < 0) {
-    return 0u;
+  const base::expected<size_t, NullOrIOError> key_idx = key_string_pool_.indexOfString(
+      entry_name.data(), entry_name.size());
+  if (!key_idx.has_value()) {
+    return base::unexpected(key_idx.error());
   }
 
-  const TypeSpec* type_spec = type_specs_[type_idx].get();
+  const TypeSpec* type_spec = type_specs_[*type_idx].get();
   if (type_spec == nullptr) {
-    return 0u;
+    return base::unexpected(std::nullopt);
   }
 
   const auto iter_end = type_spec->types + type_spec->type_count;
   for (auto iter = type_spec->types; iter != iter_end; ++iter) {
-    const ResTable_type* type = *iter;
+    const incfs::verified_map_ptr<ResTable_type>& type = *iter;
+
     size_t entry_count = dtohl(type->entryCount);
     for (size_t entry_idx = 0; entry_idx < entry_count; entry_idx++) {
-      const uint32_t* entry_offsets = reinterpret_cast<const uint32_t*>(
-          reinterpret_cast<const uint8_t*>(type) + dtohs(type->header.headerSize));
-      const uint32_t offset = dtohl(entry_offsets[entry_idx]);
+      auto entry_offset_ptr = type.offset(dtohs(type->header.headerSize)).convert<uint32_t>() +
+          entry_idx;
+      if (!entry_offset_ptr) {
+        return base::unexpected(IOError::PAGES_MISSING);
+      }
+
+      auto offset = dtohl(entry_offset_ptr.value());
       if (offset != ResTable_type::NO_ENTRY) {
-        const ResTable_entry* entry = reinterpret_cast<const ResTable_entry*>(
-            reinterpret_cast<const uint8_t*>(type) + dtohl(type->entriesStart) + offset);
-        if (dtohl(entry->key.index) == static_cast<uint32_t>(key_idx)) {
+        auto entry = type.offset(dtohl(type->entriesStart) + offset).convert<ResTable_entry>();
+        if (!entry) {
+          return base::unexpected(IOError::PAGES_MISSING);
+        }
+
+        if (dtohl(entry->key.index) == static_cast<uint32_t>(*key_idx)) {
           // The package ID will be overridden by the caller (due to runtime assignment of package
           // IDs for shared libraries).
-          return make_resid(0x00, type_idx + type_id_offset_ + 1, entry_idx);
+          return make_resid(0x00, *type_idx + type_id_offset_ + 1, entry_idx);
         }
       }
     }
   }
-  return 0u;
+  return base::unexpected(std::nullopt);
 }
 
 const LoadedPackage* LoadedArsc::GetPackageById(uint8_t package_id) const {
@@ -405,8 +451,8 @@ std::unique_ptr<const LoadedPackage> LoadedPackage::Load(const Chunk& chunk,
   // was added.
   constexpr size_t kMinPackageSize =
       sizeof(ResTable_package) - sizeof(ResTable_package::typeIdOffset);
-  const ResTable_package* header = chunk.header<ResTable_package, kMinPackageSize>();
-  if (header == nullptr) {
+  const incfs::map_ptr<ResTable_package> header = chunk.header<ResTable_package, kMinPackageSize>();
+  if (!header) {
     LOG(ERROR) << "RES_TABLE_PACKAGE_TYPE too small.";
     return {};
   }
@@ -453,10 +499,13 @@ std::unique_ptr<const LoadedPackage> LoadedPackage::Load(const Chunk& chunk,
     const Chunk child_chunk = iter.Next();
     switch (child_chunk.type()) {
       case RES_STRING_POOL_TYPE: {
-        const uintptr_t pool_address =
-            reinterpret_cast<uintptr_t>(child_chunk.header<ResChunk_header>());
-        const uintptr_t header_address = reinterpret_cast<uintptr_t>(header);
-        if (pool_address == header_address + dtohl(header->typeStrings)) {
+        const auto pool_address = child_chunk.header<ResChunk_header>();
+        if (!pool_address) {
+          LOG(ERROR) << "RES_STRING_POOL_TYPE is incomplete due to incremental installation.";
+          return {};
+        }
+
+        if (pool_address == header.offset(dtohl(header->typeStrings)).convert<ResChunk_header>()) {
           // This string pool is the type string pool.
           status_t err = loaded_package->type_string_pool_.setTo(
               child_chunk.header<ResStringPool_header>(), child_chunk.size());
@@ -464,7 +513,8 @@ std::unique_ptr<const LoadedPackage> LoadedPackage::Load(const Chunk& chunk,
             LOG(ERROR) << "RES_STRING_POOL_TYPE for types corrupt.";
             return {};
           }
-        } else if (pool_address == header_address + dtohl(header->keyStrings)) {
+        } else if (pool_address == header.offset(dtohl(header->keyStrings))
+                                         .convert<ResChunk_header>()) {
           // This string pool is the key string pool.
           status_t err = loaded_package->key_string_pool_.setTo(
               child_chunk.header<ResStringPool_header>(), child_chunk.size());
@@ -478,8 +528,8 @@ std::unique_ptr<const LoadedPackage> LoadedPackage::Load(const Chunk& chunk,
       } break;
 
       case RES_TABLE_TYPE_SPEC_TYPE: {
-        const ResTable_typeSpec* type_spec = child_chunk.header<ResTable_typeSpec>();
-        if (type_spec == nullptr) {
+        const auto type_spec = child_chunk.header<ResTable_typeSpec>();
+        if (!type_spec) {
           LOG(ERROR) << "RES_TABLE_TYPE_SPEC_TYPE too small.";
           return {};
         }
@@ -514,7 +564,7 @@ std::unique_ptr<const LoadedPackage> LoadedPackage::Load(const Chunk& chunk,
 
         std::unique_ptr<TypeSpecPtrBuilder>& builder_ptr = type_builder_map[type_spec->id - 1];
         if (builder_ptr == nullptr) {
-          builder_ptr = util::make_unique<TypeSpecPtrBuilder>(type_spec);
+          builder_ptr = util::make_unique<TypeSpecPtrBuilder>(type_spec.verified());
           loaded_package->resource_ids_.set(type_spec->id, entry_count);
         } else {
           LOG(WARNING) << StringPrintf("RES_TABLE_TYPE_SPEC_TYPE already defined for ID %02x",
@@ -523,8 +573,8 @@ std::unique_ptr<const LoadedPackage> LoadedPackage::Load(const Chunk& chunk,
       } break;
 
       case RES_TABLE_TYPE_TYPE: {
-        const ResTable_type* type = child_chunk.header<ResTable_type, kResTableTypeMinSize>();
-        if (type == nullptr) {
+        const auto type = child_chunk.header<ResTable_type, kResTableTypeMinSize>();
+        if (!type) {
           LOG(ERROR) << "RES_TABLE_TYPE_TYPE too small.";
           return {};
         }
@@ -536,7 +586,7 @@ std::unique_ptr<const LoadedPackage> LoadedPackage::Load(const Chunk& chunk,
         // Type chunks must be preceded by their TypeSpec chunks.
         std::unique_ptr<TypeSpecPtrBuilder>& builder_ptr = type_builder_map[type->id - 1];
         if (builder_ptr != nullptr) {
-          builder_ptr->AddType(type);
+          builder_ptr->AddType(type.verified());
         } else {
           LOG(ERROR) << StringPrintf(
               "RES_TABLE_TYPE_TYPE with ID %02x found without preceding RES_TABLE_TYPE_SPEC_TYPE.",
@@ -546,8 +596,8 @@ std::unique_ptr<const LoadedPackage> LoadedPackage::Load(const Chunk& chunk,
       } break;
 
       case RES_TABLE_LIBRARY_TYPE: {
-        const ResTable_lib_header* lib = child_chunk.header<ResTable_lib_header>();
-        if (lib == nullptr) {
+        const auto lib = child_chunk.header<ResTable_lib_header>();
+        if (!lib) {
           LOG(ERROR) << "RES_TABLE_LIBRARY_TYPE too small.";
           return {};
         }
@@ -559,10 +609,13 @@ std::unique_ptr<const LoadedPackage> LoadedPackage::Load(const Chunk& chunk,
 
         loaded_package->dynamic_package_map_.reserve(dtohl(lib->count));
 
-        const ResTable_lib_entry* const entry_begin =
-            reinterpret_cast<const ResTable_lib_entry*>(child_chunk.data_ptr());
-        const ResTable_lib_entry* const entry_end = entry_begin + dtohl(lib->count);
+        const auto entry_begin = child_chunk.data_ptr().convert<ResTable_lib_entry>();
+        const auto entry_end = entry_begin + dtohl(lib->count);
         for (auto entry_iter = entry_begin; entry_iter != entry_end; ++entry_iter) {
+          if (!entry_iter) {
+            return {};
+          }
+
           std::string package_name;
           util::ReadUtf16StringFromDevice(entry_iter->packageName,
                                           arraysize(entry_iter->packageName), &package_name);
@@ -580,17 +633,16 @@ std::unique_ptr<const LoadedPackage> LoadedPackage::Load(const Chunk& chunk,
       } break;
 
       case RES_TABLE_OVERLAYABLE_TYPE: {
-        const ResTable_overlayable_header* header =
-            child_chunk.header<ResTable_overlayable_header>();
-        if (header == nullptr) {
+        const auto overlayable = child_chunk.header<ResTable_overlayable_header>();
+        if (!overlayable) {
           LOG(ERROR) << "RES_TABLE_OVERLAYABLE_TYPE too small.";
           return {};
         }
 
         std::string name;
-        util::ReadUtf16StringFromDevice(header->name, arraysize(header->name), &name);
+        util::ReadUtf16StringFromDevice(overlayable->name, arraysize(overlayable->name), &name);
         std::string actor;
-        util::ReadUtf16StringFromDevice(header->actor, arraysize(header->actor), &actor);
+        util::ReadUtf16StringFromDevice(overlayable->actor, arraysize(overlayable->actor), &actor);
 
         if (loaded_package->overlayable_map_.find(name) !=
             loaded_package->overlayable_map_.end()) {
@@ -606,9 +658,9 @@ std::unique_ptr<const LoadedPackage> LoadedPackage::Load(const Chunk& chunk,
 
           switch (overlayable_child_chunk.type()) {
             case RES_TABLE_OVERLAYABLE_POLICY_TYPE: {
-              const ResTable_overlayable_policy_header* policy_header =
+              const auto policy_header =
                   overlayable_child_chunk.header<ResTable_overlayable_policy_header>();
-              if (policy_header == nullptr) {
+              if (!policy_header) {
                 LOG(ERROR) << "RES_TABLE_OVERLAYABLE_POLICY_TYPE too small.";
                 return {};
               }
@@ -621,10 +673,12 @@ std::unique_ptr<const LoadedPackage> LoadedPackage::Load(const Chunk& chunk,
 
               // Retrieve all the resource ids belonging to this policy chunk
               std::unordered_set<uint32_t> ids;
-              const auto ids_begin =
-                  reinterpret_cast<const ResTable_ref*>(overlayable_child_chunk.data_ptr());
+              const auto ids_begin = overlayable_child_chunk.data_ptr().convert<ResTable_ref>();
               const auto ids_end = ids_begin + dtohl(policy_header->entry_count);
               for (auto id_iter = ids_begin; id_iter != ids_end; ++id_iter) {
+                if (!id_iter) {
+                  return {};
+                }
                 ids.insert(dtohl(id_iter->ident));
               }
 
@@ -633,7 +687,7 @@ std::unique_ptr<const LoadedPackage> LoadedPackage::Load(const Chunk& chunk,
               overlayable_info.name = name;
               overlayable_info.actor = actor;
               overlayable_info.policy_flags = policy_header->policy_flags;
-              loaded_package->overlayable_infos_.push_back(std::make_pair(overlayable_info, ids));
+              loaded_package->overlayable_infos_.emplace_back(overlayable_info, ids);
               loaded_package->defines_overlayable_ = true;
               break;
             }
@@ -683,8 +737,8 @@ std::unique_ptr<const LoadedPackage> LoadedPackage::Load(const Chunk& chunk,
 
 bool LoadedArsc::LoadTable(const Chunk& chunk, const LoadedIdmap* loaded_idmap,
                            package_property_t property_flags) {
-  const ResTable_header* header = chunk.header<ResTable_header>();
-  if (header == nullptr) {
+  incfs::map_ptr<ResTable_header> header = chunk.header<ResTable_header>();
+  if (!header) {
     LOG(ERROR) << "RES_TABLE_TYPE too small.";
     return false;
   }
@@ -747,7 +801,8 @@ bool LoadedArsc::LoadTable(const Chunk& chunk, const LoadedIdmap* loaded_idmap,
   return true;
 }
 
-std::unique_ptr<const LoadedArsc> LoadedArsc::Load(const StringPiece& data,
+std::unique_ptr<const LoadedArsc> LoadedArsc::Load(incfs::map_ptr<void> data,
+                                                   const size_t length,
                                                    const LoadedIdmap* loaded_idmap,
                                                    const package_property_t property_flags) {
   ATRACE_NAME("LoadedArsc::Load");
@@ -755,7 +810,7 @@ std::unique_ptr<const LoadedArsc> LoadedArsc::Load(const StringPiece& data,
   // Not using make_unique because the constructor is private.
   std::unique_ptr<LoadedArsc> loaded_arsc(new LoadedArsc());
 
-  ChunkIterator iter(data.data(), data.size());
+  ChunkIterator iter(data, length);
   while (iter.HasNext()) {
     const Chunk chunk = iter.Next();
     switch (chunk.type()) {
