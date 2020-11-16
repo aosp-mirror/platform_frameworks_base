@@ -28,8 +28,7 @@
     <string name="pip_skip_to_next" msgid="8403429188794867653">"Дараагийн медиад очих"</string>
     <string name="pip_skip_to_prev" msgid="7172158111196394092">"Өмнөх медиад очих"</string>
     <string name="accessibility_action_pip_resize" msgid="4623966104749543182">"Хэмжээг өөрчлөх"</string>
-    <!-- no translation found for dock_forced_resizable (1749750436092293116) -->
-    <skip />
+    <string name="dock_forced_resizable" msgid="1749750436092293116">"Апп хуваагдсан дэлгэц дээр ажиллахгүй байж болзошгүй."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"Энэ апп нь дэлгэц хуваах тохиргоог дэмждэггүй."</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"Апп хоёрдогч дэлгэцэд ажиллахгүй."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"Аппыг хоёрдогч дэлгэцэд эхлүүлэх боломжгүй."</string>
@@ -44,14 +43,10 @@
     <string name="accessibility_action_divider_top_50" msgid="8649582798829048946">"Дээд 50%"</string>
     <string name="accessibility_action_divider_top_30" msgid="3572788224908570257">"Дээд 30%"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="2831868345092314060">"Доод бүтэн дэлгэц"</string>
-    <!-- no translation found for one_handed_tutorial_title (4583241688067426350) -->
-    <skip />
-    <!-- no translation found for one_handed_tutorial_description (3486582858591353067) -->
-    <skip />
-    <!-- no translation found for accessibility_action_start_one_handed (5070337354072861426) -->
-    <skip />
-    <!-- no translation found for accessibility_action_stop_one_handed (1369940261782179442) -->
-    <skip />
+    <string name="one_handed_tutorial_title" msgid="4583241688067426350">"Нэг гарын горимыг ашиглаж байна"</string>
+    <string name="one_handed_tutorial_description" msgid="3486582858591353067">"Гарахын тулд дэлгэцийн доод хэсгээс дээш шударч эсвэл апп дээр хүссэн газраа товшино уу"</string>
+    <string name="accessibility_action_start_one_handed" msgid="5070337354072861426">"Нэг гарын горимыг эхлүүлэх"</string>
+    <string name="accessibility_action_stop_one_handed" msgid="1369940261782179442">"Нэг гарын горимоос гарах"</string>
     <string name="bubbles_settings_button_description" msgid="1301286017420516912">"<xliff:g id="APP_NAME">%1$s</xliff:g>-н бөмбөлгүүдийн тохиргоо"</string>
     <string name="bubble_overflow_button_content_description" msgid="8160974472718594382">"Халих"</string>
     <string name="bubble_accessibility_action_add_back" msgid="1830101076853540953">"Өрөлтөд буцааж нэмэх"</string>
@@ -68,8 +63,7 @@
     <string name="bubbles_user_education_description" msgid="4215862563054175407">"Шинэ харилцан яриа нь хөвөгч дүрс тэмдэг эсвэл бөмбөлөг хэлбэрээр харагддаг. Бөмбөлгийг нээхийн тулд товшино уу. Түүнийг зөөхийн тулд чирнэ үү."</string>
     <string name="bubbles_user_education_manage_title" msgid="7042699946735628035">"Дурын үед бөмбөлгийг хянаарай"</string>
     <string name="bubbles_user_education_manage" msgid="3460756219946517198">"Энэ аппын бөмбөлгүүдийг унтраахын тулд Удирдах дээр товшино уу"</string>
-    <!-- no translation found for bubbles_user_education_got_it (3382046149225428296) -->
-    <skip />
+    <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"Ойлголоо"</string>
     <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"Саяхны бөмбөлөг алга байна"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"Саяхны бөмбөлгүүд болон үл хэрэгссэн бөмбөлгүүд энд харагдана"</string>
     <string name="notification_bubble_title" msgid="6082910224488253378">"Бөмбөлөг"</string>
