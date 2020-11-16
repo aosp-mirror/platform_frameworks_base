@@ -301,7 +301,7 @@ public class TrafficStats {
      * Changes only take effect during subsequent calls to
      * {@link #tagSocket(Socket)}.
      */
-    @SuppressLint("Doclava125")
+    @SuppressLint("RequiresPermission")
     public static void setThreadStatsUid(int uid) {
         NetworkManagementSocketTagger.setThreadSocketStatsUid(uid);
     }
@@ -339,7 +339,7 @@ public class TrafficStats {
      *
      * @see #setThreadStatsUid(int)
      */
-    @SuppressLint("Doclava125")
+    @SuppressLint("RequiresPermission")
     public static void clearThreadStatsUid() {
         NetworkManagementSocketTagger.setThreadSocketStatsUid(-1);
     }
