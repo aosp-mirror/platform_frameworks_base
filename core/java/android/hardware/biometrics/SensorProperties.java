@@ -81,4 +81,12 @@ public class SensorProperties {
     public int getSensorStrength() {
         return mSensorStrength;
     }
+
+    /**
+     * Constructs a {@link SensorProperties} from the internal parcelable representation.
+     * @hide
+     */
+    public static SensorProperties from(SensorPropertiesInternal internalProp) {
+        return new SensorProperties(internalProp.sensorId, internalProp.sensorStrength);
+    }
 }

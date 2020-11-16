@@ -39,10 +39,10 @@ import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.biometrics.HardwareAuthTokenUtils;
+import com.android.server.biometrics.SensorServiceStateProto;
+import com.android.server.biometrics.SensorStateProto;
+import com.android.server.biometrics.UserStateProto;
 import com.android.server.biometrics.Utils;
-import com.android.server.biometrics.fingerprint.FingerprintServiceStateProto;
-import com.android.server.biometrics.fingerprint.SensorStateProto;
-import com.android.server.biometrics.fingerprint.UserStateProto;
 import com.android.server.biometrics.sensors.AcquisitionClient;
 import com.android.server.biometrics.sensors.AuthenticationConsumer;
 import com.android.server.biometrics.sensors.BiometricScheduler;
@@ -491,7 +491,7 @@ class Sensor implements IBinder.DeathRecipient {
     }
 
     void dumpProtoState(int sensorId, @NonNull ProtoOutputStream proto) {
-        final long sensorToken = proto.start(FingerprintServiceStateProto.SENSOR_STATES);
+        final long sensorToken = proto.start(SensorServiceStateProto.SENSOR_STATES);
 
         proto.write(SensorStateProto.SENSOR_ID, mSensorProperties.sensorId);
         proto.write(SensorStateProto.IS_BUSY, mScheduler.getCurrentClient() != null);

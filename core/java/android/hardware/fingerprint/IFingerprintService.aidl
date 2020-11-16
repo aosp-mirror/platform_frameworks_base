@@ -34,8 +34,14 @@ interface IFingerprintService {
     // Creates a test session with the specified sensorId
     ITestSession createTestSession(int sensorId, String opPackageName);
 
+    // Requests a proto dump of the service to the specified fd
+    byte[] dumpSensorServiceStateProto();
+
     // Retrieve static sensor properties for all fingerprint sensors
     List<FingerprintSensorPropertiesInternal> getSensorPropertiesInternal(String opPackageName);
+
+    // Retrieve static sensor properties for the specified sensor
+    FingerprintSensorPropertiesInternal getSensorProperties(int sensorId, String opPackageName);
 
     // Authenticate the given sessionId with a fingerprint. This is protected by
     // USE_FINGERPRINT/USE_BIOMETRIC permission. This is effectively deprecated, since it only comes
@@ -54,8 +60,7 @@ interface IFingerprintService {
     // by BiometricService. To start authentication after the clients are ready, use
     // startPreparedClient().
     void prepareForAuthentication(int sensorId, IBinder token, long operationId, int userId,
-            IBiometricSensorReceiver sensorReceiver, String opPackageName, int cookie,
-            int callingUid, int callingPid, int callingUserId);
+            IBiometricSensorReceiver sensorReceiver, String opPackageName, int cookie);
 
     // Starts authentication with the previously prepared client.
     void startPreparedClient(int sensorId, int cookie);
@@ -68,8 +73,7 @@ interface IFingerprintService {
 
     // Same as above, except this is protected by the MANAGE_BIOMETRIC signature permission. Takes
     // an additional uid, pid, userid.
-    void cancelAuthenticationFromService(int sensorId, IBinder token, String opPackageName,
-            int callingUid, int callingPid, int callingUserId);
+    void cancelAuthenticationFromService(int sensorId, IBinder token, String opPackageName);
 
     // Start fingerprint enrollment
     void enroll(IBinder token, in byte [] hardwareAuthToken, int userId, IFingerprintServiceReceiver receiver,

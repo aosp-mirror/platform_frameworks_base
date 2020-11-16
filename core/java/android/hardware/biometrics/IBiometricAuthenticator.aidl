@@ -18,6 +18,8 @@ package android.hardware.biometrics;
 
 import android.hardware.biometrics.IBiometricSensorReceiver;
 import android.hardware.biometrics.IBiometricServiceLockoutResetCallback;
+import android.hardware.biometrics.ITestSession;
+import android.hardware.biometrics.SensorPropertiesInternal;
 import android.hardware.face.IFaceServiceReceiver;
 import android.hardware.face.Face;
 
@@ -28,6 +30,15 @@ import android.hardware.face.Face;
  */
 interface IBiometricAuthenticator {
 
+    // Creates a test session
+    ITestSession createTestSession(String opPackageName);
+
+    // Retrieve static sensor properties
+    SensorPropertiesInternal getSensorProperties(String opPackageName);
+
+    // Requests a proto dump of the service. See biometrics.proto
+    byte[] dumpSensorServiceStateProto();
+
     // This method prepares the service to start authenticating, but doesn't start authentication.
     // This is protected by the MANAGE_BIOMETRIC signature permission. This method should only be
     // called from BiometricService. The additional uid, pid, userId arguments should be determined
@@ -35,14 +46,13 @@ interface IBiometricAuthenticator {
     // startPreparedClient().
     void prepareForAuthentication(boolean requireConfirmation, IBinder token, long operationId,
             int userId, IBiometricSensorReceiver sensorReceiver, String opPackageName,
-            int cookie, int callingUid, int callingPid, int callingUserId);
+            int cookie);
 
     // Starts authentication with the previously prepared client.
     void startPreparedClient(int cookie);
 
     // Cancels authentication.
-    void cancelAuthenticationFromService(IBinder token, String opPackageName,
-            int callingUid, int callingPid, int callingUserId);
+    void cancelAuthenticationFromService(IBinder token, String opPackageName);
 
     // Determine if HAL is loaded and ready
     boolean isHardwareDetected(String opPackageName);
