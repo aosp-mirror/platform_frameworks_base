@@ -458,6 +458,37 @@ TEST_F(AssetManager2Test, KeepLastReferenceIdUnmodifiedIfNoReferenceIsResolved) 
   EXPECT_EQ(basic::R::string::test1, value.resid);
 }
 
+TEST_F(AssetManager2Test, ResolveReferenceMissingResourceDoNotCacheFlags) {
+  AssetManager2 assetmanager;
+  assetmanager.SetApkAssets({basic_assets_.get()});
+  {
+    AssetManager2::SelectedValue value{};
+    value.data = basic::R::string::test1;
+    value.type = Res_value::TYPE_REFERENCE;
+    value.flags = ResTable_config::CONFIG_KEYBOARD;
+
+    auto result = assetmanager.ResolveReference(value);
+    ASSERT_TRUE(result.has_value());
+    EXPECT_EQ(Res_value::TYPE_STRING, value.type);
+    EXPECT_EQ(0, value.cookie);
+    EXPECT_EQ(basic::R::string::test1, value.resid);
+    EXPECT_EQ(ResTable_typeSpec::SPEC_PUBLIC | ResTable_config::CONFIG_KEYBOARD, value.flags);
+  }
+  {
+    AssetManager2::SelectedValue value{};
+    value.data = basic::R::string::test1;
+    value.type = Res_value::TYPE_REFERENCE;
+    value.flags = ResTable_config::CONFIG_COLOR_MODE;
+
+    auto result = assetmanager.ResolveReference(value);
+    ASSERT_TRUE(result.has_value());
+    EXPECT_EQ(Res_value::TYPE_STRING, value.type);
+    EXPECT_EQ(0, value.cookie);
+    EXPECT_EQ(basic::R::string::test1, value.resid);
+    EXPECT_EQ(ResTable_typeSpec::SPEC_PUBLIC | ResTable_config::CONFIG_COLOR_MODE, value.flags);
+  }
+}
+
 TEST_F(AssetManager2Test, ResolveReferenceMissingResource) {
   AssetManager2 assetmanager;
   assetmanager.SetApkAssets({basic_assets_.get()});

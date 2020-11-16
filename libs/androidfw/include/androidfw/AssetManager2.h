@@ -264,11 +264,14 @@ class AssetManager2 {
   // Resolves the resource referenced in `value` if the type is Res_value::TYPE_REFERENCE.
   //
   // If the data type is not Res_value::TYPE_REFERENCE, no work is done. Configuration flags of the
-  // values pointed to by the reference are OR'd into `value.flags`.
+  // values pointed to by the reference are OR'd into `value.flags`. If `cache_value` is true, then
+  // the resolved value will be cached and used when attempting to resolve the resource id specified
+  // in `value`.
   //
   // Returns a null error if the resource could not be resolved, or an I/O error if reading
   // resource data failed.
-  base::expected<std::monostate, NullOrIOError> ResolveReference(SelectedValue& value) const;
+  base::expected<std::monostate, NullOrIOError> ResolveReference(SelectedValue& value,
+                                                                 bool cache_value = false) const;
 
   // Retrieves the best matching bag/map resource with ID `resid`.
   //
@@ -446,13 +449,14 @@ class AssetManager2 {
   // a number of times for each view during View inspection.
   mutable std::unordered_map<uint32_t, std::vector<uint32_t>> cached_bag_resid_stacks_;
 
+  // Cached set of resolved resource values.
+  mutable std::unordered_map<uint32_t, SelectedValue> cached_resolved_values_;
+
   // Whether or not to save resource resolution steps
   bool resource_resolution_logging_enabled_ = false;
 
   struct Resolution {
-
     struct Step {
-
       enum class Type {
         INITIAL,
         BETTER_MATCH,
