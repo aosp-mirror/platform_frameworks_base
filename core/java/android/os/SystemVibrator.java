@@ -38,6 +38,7 @@ public class SystemVibrator extends Vibrator {
     private static final String TAG = "Vibrator";
 
     private final IVibratorService mService;
+    private final IVibratorManagerService mManagerService;
     private final Binder mToken = new Binder();
     private final Context mContext;
 
@@ -49,6 +50,8 @@ public class SystemVibrator extends Vibrator {
     public SystemVibrator() {
         mContext = null;
         mService = IVibratorService.Stub.asInterface(ServiceManager.getService("vibrator"));
+        mManagerService = IVibratorManagerService.Stub.asInterface(
+                ServiceManager.getService("vibrator_manager"));
     }
 
     @UnsupportedAppUsage
@@ -56,6 +59,8 @@ public class SystemVibrator extends Vibrator {
         super(context);
         mContext = context;
         mService = IVibratorService.Stub.asInterface(ServiceManager.getService("vibrator"));
+        mManagerService = IVibratorManagerService.Stub.asInterface(
+                ServiceManager.getService("vibrator_manager"));
     }
 
     @Override
@@ -207,13 +212,14 @@ public class SystemVibrator extends Vibrator {
     @Override
     public boolean setAlwaysOnEffect(int uid, String opPkg, int alwaysOnId, VibrationEffect effect,
             AudioAttributes attributes) {
-        if (mService == null) {
+        if (mManagerService == null) {
             Log.w(TAG, "Failed to set always-on effect; no vibrator service.");
             return false;
         }
         try {
             VibrationAttributes atr = new VibrationAttributes.Builder(attributes, effect).build();
-            return mService.setAlwaysOnEffect(uid, opPkg, alwaysOnId, effect, atr);
+            CombinedVibrationEffect combinedEffect = CombinedVibrationEffect.createSynced(effect);
+            return mManagerService.setAlwaysOnEffect(uid, opPkg, alwaysOnId, combinedEffect, atr);
         } catch (RemoteException e) {
             Log.w(TAG, "Failed to set always-on effect.", e);
         }
@@ -254,7 +260,6 @@ public class SystemVibrator extends Vibrator {
             throw e.rethrowAsRuntimeException();
         }
     }
-
 
     @Override
     public void cancel() {

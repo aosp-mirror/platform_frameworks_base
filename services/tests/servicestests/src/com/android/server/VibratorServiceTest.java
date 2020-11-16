@@ -288,43 +288,6 @@ public class VibratorServiceTest {
     }
 
     @Test
-    public void setAlwaysOnEffect_withCapabilityAndValidEffect_enablesAlwaysOnEffect() {
-        mockVibratorCapabilities(IVibrator.CAP_ALWAYS_ON_CONTROL);
-
-        assertTrue(createService().setAlwaysOnEffect(UID, PACKAGE_NAME, 1,
-                VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK), ALARM_ATTRS));
-        verify(mNativeWrapperMock).alwaysOnEnable(
-                eq(1L), eq((long) VibrationEffect.EFFECT_CLICK),
-                eq((long) VibrationEffect.EFFECT_STRENGTH_STRONG));
-    }
-
-    @Test
-    public void setAlwaysOnEffect_withNonPrebakedEffect_ignoresEffect() {
-        mockVibratorCapabilities(IVibrator.CAP_ALWAYS_ON_CONTROL);
-
-        assertFalse(createService().setAlwaysOnEffect(UID, PACKAGE_NAME, 1,
-                VibrationEffect.createOneShot(100, 255), ALARM_ATTRS));
-        verify(mNativeWrapperMock, never()).alwaysOnDisable(anyLong());
-        verify(mNativeWrapperMock, never()).alwaysOnEnable(anyLong(), anyLong(), anyLong());
-    }
-
-    @Test
-    public void setAlwaysOnEffect_withNullEffect_disablesAlwaysOnEffect() {
-        mockVibratorCapabilities(IVibrator.CAP_ALWAYS_ON_CONTROL);
-
-        assertTrue(createService().setAlwaysOnEffect(UID, PACKAGE_NAME, 1, null, ALARM_ATTRS));
-        verify(mNativeWrapperMock).alwaysOnDisable(eq(1L));
-    }
-
-    @Test
-    public void setAlwaysOnEffect_withoutCapability_ignoresEffect() {
-        assertFalse(createService().setAlwaysOnEffect(UID, PACKAGE_NAME, 1,
-                VibrationEffect.get(VibrationEffect.EFFECT_CLICK), ALARM_ATTRS));
-        verify(mNativeWrapperMock, never()).alwaysOnDisable(anyLong());
-        verify(mNativeWrapperMock, never()).alwaysOnEnable(anyLong(), anyLong(), anyLong());
-    }
-
-    @Test
     public void vibrate_withRingtone_usesRingtoneSettings() {
         setRingerMode(AudioManager.RINGER_MODE_NORMAL);
         setUserSetting(Settings.System.VIBRATE_WHEN_RINGING, 0);

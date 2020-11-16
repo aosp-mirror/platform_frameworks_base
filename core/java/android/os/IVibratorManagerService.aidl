@@ -22,6 +22,8 @@ import android.os.VibrationAttributes;
 /** {@hide} */
 interface IVibratorManagerService {
     int[] getVibratorIds();
+    boolean setAlwaysOnEffect(int uid, String opPkg, int alwaysOnId,
+            in CombinedVibrationEffect effect, in VibrationAttributes attributes);
     void vibrate(int uid, String opPkg, in CombinedVibrationEffect effect,
             in VibrationAttributes attributes, String reason, IBinder token);
     void cancelVibrate(IBinder token);

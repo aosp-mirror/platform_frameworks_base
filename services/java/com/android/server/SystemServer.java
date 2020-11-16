@@ -1252,6 +1252,10 @@ public final class SystemServer implements Dumpable {
             mSystemServiceManager.startService(DropBoxManagerService.class);
             t.traceEnd();
 
+            t.traceBegin("StartVibratorManagerService");
+            mSystemServiceManager.startService(VibratorManagerService.Lifecycle.class);
+            t.traceEnd();
+
             t.traceBegin("StartVibratorService");
             vibrator = new VibratorService(context);
             ServiceManager.addService("vibrator", vibrator);

@@ -47,7 +47,7 @@ public class Vibration {
         FINISHED,
         FORWARDED_TO_INPUT_DEVICES,
         CANCELLED,
-        ERROR_APP_OPS,
+        IGNORED_ERROR_APP_OPS,
         IGNORED,
         IGNORED_APP_OPS,
         IGNORED_BACKGROUND,
