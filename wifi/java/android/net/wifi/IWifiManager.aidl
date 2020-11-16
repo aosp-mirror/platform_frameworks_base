@@ -277,4 +277,8 @@ interface IWifiManager
     boolean isAutoWakeupEnabled();
 
     int getNetworkSuggestionUserApprovalStatus(String packageName);
+
+    void startTemporarilyDisablingAllNonCarrierMergedWifi(int subId);
+
+    void stopTemporarilyDisablingAllNonCarrierMergedWifi();
 }
