@@ -62,10 +62,10 @@ class IdmapTest : public ::testing::Test {
   std::unique_ptr<const ApkAssets> overlayable_assets_;
 };
 
-std::string GetStringFromApkAssets(const AssetManager2& asset_manager, const Res_value& value,
-                                   ApkAssetsCookie cookie) {
+std::string GetStringFromApkAssets(const AssetManager2& asset_manager,
+                                   const AssetManager2::SelectedValue& value) {
   auto assets = asset_manager.GetApkAssets();
-  const ResStringPool* string_pool = assets[cookie]->GetLoadedArsc()->GetStringPool();
+  const ResStringPool* string_pool = assets[value.cookie]->GetLoadedArsc()->GetStringPool();
   return GetStringFromPool(string_pool, value.data);
 }
 
@@ -75,117 +75,88 @@ TEST_F(IdmapTest, OverlayOverridesResourceValue) {
   AssetManager2 asset_manager;
   asset_manager.SetApkAssets({system_assets_.get(), overlayable_assets_.get(),
                               overlay_assets_.get()});
-  Res_value val;
-  ResTable_config config;
-  uint32_t flags;
-  ApkAssetsCookie cookie = asset_manager.GetResource(overlayable::R::string::overlayable5,
-                                                    false /* may_be_bag */,
-                                                    0 /* density_override */, &val, &config,
-                                                    &flags);
-  ASSERT_EQ(cookie, 2U);
-  ASSERT_EQ(val.dataType, Res_value::TYPE_STRING);
-  ASSERT_EQ(GetStringFromApkAssets(asset_manager, val, cookie), "Overlay One");
+
+  auto value = asset_manager.GetResource(overlayable::R::string::overlayable5);
+  ASSERT_TRUE(value.has_value());
+  ASSERT_EQ(value->cookie, 2U);
+  ASSERT_EQ(value->type, Res_value::TYPE_STRING);
+  ASSERT_EQ("Overlay One", GetStringFromApkAssets(asset_manager, *value));
 }
 
 TEST_F(IdmapTest, OverlayOverridesResourceValueUsingDifferentPackage) {
   AssetManager2 asset_manager;
   asset_manager.SetApkAssets({system_assets_.get(), overlayable_assets_.get(),
                               overlay_assets_.get()});
-  Res_value val;
-  ResTable_config config;
-  uint32_t flags;
-  ApkAssetsCookie cookie = asset_manager.GetResource(overlayable::R::string::overlayable10,
-                                                    false /* may_be_bag */,
-                                                    0 /* density_override */, &val, &config,
-                                                    &flags);
-  ASSERT_EQ(cookie, 0U);
-  ASSERT_EQ(val.dataType, Res_value::TYPE_STRING);
-  ASSERT_EQ(GetStringFromApkAssets(asset_manager, val, cookie), "yes");
+
+  auto value = asset_manager.GetResource(overlayable::R::string::overlayable10);
+  ASSERT_TRUE(value.has_value());
+  ASSERT_EQ(value->cookie, 0U);
+  ASSERT_EQ(value->type, Res_value::TYPE_STRING);
+  ASSERT_EQ("yes", GetStringFromApkAssets(asset_manager, *value));
 }
 
 TEST_F(IdmapTest, OverlayOverridesResourceValueUsingInternalResource) {
   AssetManager2 asset_manager;
   asset_manager.SetApkAssets({system_assets_.get(), overlayable_assets_.get(),
                               overlay_assets_.get()});
-  Res_value val;
-  ResTable_config config;
-  uint32_t flags;
-  ApkAssetsCookie cookie = asset_manager.GetResource(overlayable::R::string::overlayable8,
-                                                    false /* may_be_bag */,
-                                                    0 /* density_override */, &val, &config,
-                                                    &flags);
-  ASSERT_EQ(cookie, 2U);
-  ASSERT_EQ(val.dataType, Res_value::TYPE_REFERENCE);
-  ASSERT_EQ(val.data, (overlay::R::string::internal & 0x00ffffff) | (0x02 << 24));
+
+  auto value = asset_manager.GetResource(overlayable::R::string::overlayable8);
+  ASSERT_TRUE(value.has_value());
+  ASSERT_EQ(value->cookie, 2U);
+  ASSERT_EQ(value->type, Res_value::TYPE_REFERENCE);
+  ASSERT_EQ(value->data, (overlay::R::string::internal & 0x00ffffffU) | (0x02U << 24));
 }
 
 TEST_F(IdmapTest, OverlayOverridesResourceValueUsingInlineInteger) {
   AssetManager2 asset_manager;
   asset_manager.SetApkAssets({system_assets_.get(), overlayable_assets_.get(),
                               overlay_assets_.get()});
-  Res_value val;
-  ResTable_config config;
-  uint32_t flags;
-  ApkAssetsCookie cookie = asset_manager.GetResource(overlayable::R::integer::config_integer,
-                                                  false /* may_be_bag */,
-                                                  0 /* density_override */, &val, &config,
-                                                  &flags);
-  ASSERT_EQ(cookie, 2U);
-  ASSERT_EQ(val.dataType, Res_value::TYPE_INT_DEC);
-  ASSERT_EQ(val.data, 42);
+
+  auto value = asset_manager.GetResource(overlayable::R::integer::config_integer);
+  ASSERT_TRUE(value.has_value());
+  ASSERT_EQ(value->cookie, 2U);
+  ASSERT_EQ(value->type, Res_value::TYPE_INT_DEC);
+  ASSERT_EQ(value->data, 42);
 }
 
 TEST_F(IdmapTest, OverlayOverridesResourceValueUsingInlineString) {
   AssetManager2 asset_manager;
   asset_manager.SetApkAssets({system_assets_.get(), overlayable_assets_.get(),
                               overlay_assets_.get()});
-  Res_value val;
-  ResTable_config config;
-  uint32_t flags;
 
-  ApkAssetsCookie cookie = asset_manager.GetResource(overlayable::R::string::overlayable11,
-                                                  false /* may_be_bag */,
-                                                  0 /* density_override */, &val, &config,
-                                                  &flags);
-  ASSERT_EQ(cookie, 2U);
-  ASSERT_EQ(val.dataType, Res_value::TYPE_STRING);
-  ASSERT_EQ(GetStringFromApkAssets(asset_manager, val, cookie), "Hardcoded string");
+  auto value = asset_manager.GetResource(overlayable::R::string::overlayable11);
+  ASSERT_TRUE(value.has_value());
+  ASSERT_EQ(value->cookie, 2U);
+  ASSERT_EQ(value->type, Res_value::TYPE_STRING);
+  ASSERT_EQ("Hardcoded string", GetStringFromApkAssets(asset_manager, *value));
 }
 
 TEST_F(IdmapTest, OverlayOverridesResourceValueUsingOverlayingResource) {
   AssetManager2 asset_manager;
   asset_manager.SetApkAssets({system_assets_.get(), overlayable_assets_.get(),
                               overlay_assets_.get()});
-  Res_value val;
-  ResTable_config config;
-  uint32_t flags;
-  ApkAssetsCookie cookie = asset_manager.GetResource(overlayable::R::string::overlayable9,
-                                                    false /* may_be_bag */,
-                                                    0 /* density_override */, &val, &config,
-                                                    &flags);
-  ASSERT_EQ(cookie, 2U);
-  ASSERT_EQ(val.dataType, Res_value::TYPE_REFERENCE);
-  ASSERT_EQ(val.data, overlayable::R::string::overlayable7);
+
+  auto value = asset_manager.GetResource(overlayable::R::string::overlayable9);
+  ASSERT_TRUE(value.has_value());
+  ASSERT_EQ(value->cookie, 2U);
+  ASSERT_EQ(value->type, Res_value::TYPE_REFERENCE);
+  ASSERT_EQ(value->data, overlayable::R::string::overlayable7);
 }
 
 TEST_F(IdmapTest, OverlayOverridesXmlParser) {
   AssetManager2 asset_manager;
   asset_manager.SetApkAssets({system_assets_.get(), overlayable_assets_.get(),
                               overlay_assets_.get()});
-  Res_value val;
-  ResTable_config config;
-  uint32_t flags;
-  ApkAssetsCookie cookie = asset_manager.GetResource(overlayable::R::layout::hello_view,
-                                                    false /* may_be_bag */,
-                                                    0 /* density_override */, &val, &config,
-                                                    &flags);
-  ASSERT_EQ(cookie, 2U);
-  ASSERT_EQ(val.dataType, Res_value::TYPE_STRING);
-  ASSERT_EQ(GetStringFromApkAssets(asset_manager, val, cookie), "res/layout/hello_view.xml");
 
-  auto asset = asset_manager.OpenNonAsset("res/layout/hello_view.xml", cookie,
+  auto value = asset_manager.GetResource(overlayable::R::layout::hello_view);
+  ASSERT_TRUE(value.has_value());
+  ASSERT_EQ(value->cookie, 2U);
+  ASSERT_EQ(value->type, Res_value::TYPE_STRING);
+  ASSERT_EQ("res/layout/hello_view.xml", GetStringFromApkAssets(asset_manager, *value));
+
+  auto asset = asset_manager.OpenNonAsset("res/layout/hello_view.xml", value->cookie,
                                           Asset::ACCESS_RANDOM);
-  auto dynamic_ref_table = asset_manager.GetDynamicRefTableForCookie(cookie);
+  auto dynamic_ref_table = asset_manager.GetDynamicRefTableForCookie(value->cookie);
   auto xml_tree = util::make_unique<ResXMLTree>(std::move(dynamic_ref_table));
   status_t err = xml_tree->setTo(asset->getBuffer(true), asset->getLength(), false);
   ASSERT_EQ(err, NO_ERROR);
@@ -216,32 +187,24 @@ TEST_F(IdmapTest, OverlaidResourceHasSameName) {
   asset_manager.SetApkAssets({system_assets_.get(), overlayable_assets_.get(),
                               overlay_assets_.get()});
 
-  AssetManager2::ResourceName name;
-  ASSERT_TRUE(asset_manager.GetResourceName(overlayable::R::string::overlayable9, &name));
-  ASSERT_EQ(std::string(name.package), "com.android.overlayable");
-  ASSERT_EQ(String16(name.type16), u"string");
-  ASSERT_EQ(std::string(name.entry), "overlayable9");
+  auto name = asset_manager.GetResourceName(overlayable::R::string::overlayable9);
+  ASSERT_TRUE(name.has_value());
+  ASSERT_EQ("com.android.overlayable", std::string(name->package));
+  ASSERT_EQ(std::u16string(u"string"), std::u16string(name->type16));
+  ASSERT_EQ("overlayable9", std::string(name->entry));
 }
 
 TEST_F(IdmapTest, OverlayLoaderInterop) {
-  std::string contents;
   auto loader_assets = ApkAssets::LoadTable("loader/resources.arsc", PROPERTY_LOADER);
-
   AssetManager2 asset_manager;
   asset_manager.SetApkAssets({overlayable_assets_.get(), loader_assets.get(),
                               overlay_assets_.get()});
 
-  Res_value val;
-  ResTable_config config;
-  uint32_t flags;
-  ApkAssetsCookie cookie = asset_manager.GetResource(overlayable::R::string::overlayable11,
-                                                    false /* may_be_bag */,
-                                                    0 /* density_override */, &val, &config,
-                                                    &flags);
-  std::cout << asset_manager.GetLastResourceResolution();
-  ASSERT_EQ(cookie, 1U);
-  ASSERT_EQ(val.dataType, Res_value::TYPE_STRING);
-  ASSERT_EQ(GetStringFromApkAssets(asset_manager, val, cookie), "loader");
+  auto value = asset_manager.GetResource(overlayable::R::string::overlayable11);
+  ASSERT_TRUE(value.has_value());
+  ASSERT_EQ(1U, value->cookie);
+  ASSERT_EQ(Res_value::TYPE_STRING, value->type);
+  ASSERT_EQ("loader", GetStringFromApkAssets(asset_manager, *value));
 }
 
 TEST_F(IdmapTest, OverlayAssetsIsUpToDate) {

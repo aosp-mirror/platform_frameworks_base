@@ -25,6 +25,8 @@
 #include <stdio.h>
 #include <time.h>
 
+#include "util/map_ptr.h"
+
 namespace android {
 
 /*
@@ -40,8 +42,8 @@ public:
         long compressedLen);
     static bool inflateToBuffer(int fd, void* buf, long uncompressedLen,
         long compressedLen);
-    static bool inflateToBuffer(const void *in, void* buf, long uncompressedLen,
-        long compressedLen);
+    static bool inflateToBuffer(incfs::map_ptr<void> in, void* buf,
+        long uncompressedLen, long compressedLen);
 
     /*
      * Someday we might want to make this generic and handle bzip2 ".bz2"

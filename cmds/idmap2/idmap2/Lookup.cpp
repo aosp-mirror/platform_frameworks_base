@@ -45,11 +45,8 @@ using android::ApkAssets;
 using android::ApkAssetsCookie;
 using android::AssetManager2;
 using android::ConfigDescription;
-using android::is_valid_resid;
-using android::kInvalidCookie;
 using android::Res_value;
 using android::ResStringPool;
-using android::ResTable_config;
 using android::StringPiece16;
 using android::base::StringPrintf;
 using android::idmap2::CommandLineOptions;
@@ -59,7 +56,6 @@ using android::idmap2::ResourceId;
 using android::idmap2::Result;
 using android::idmap2::Unit;
 using android::idmap2::utils::ExtractOverlayManifestInfo;
-using android::util::Utf16ToUtf8;
 
 namespace {
 
@@ -69,25 +65,23 @@ Result<ResourceId> WARN_UNUSED ParseResReference(const AssetManager2& am, const 
 
   // first, try to parse as a hex number
   char* endptr = nullptr;
-  ResourceId resid;
-  resid = strtol(res.c_str(), &endptr, kBaseHex);
+  const ResourceId parsed_resid = strtol(res.c_str(), &endptr, kBaseHex);
   if (*endptr == '\0') {
-    return resid;
+    return parsed_resid;
   }
 
   // next, try to parse as a package:type/name string
-  resid = am.GetResourceId(res, "", fallback_package);
-  if (is_valid_resid(resid)) {
-    return resid;
+  if (auto resid = am.GetResourceId(res, "", fallback_package)) {
+    return *resid;
   }
 
   // end of the road: res could not be parsed
   return Error("failed to obtain resource id for %s", res.c_str());
 }
 
-void PrintValue(AssetManager2* const am, const Res_value& value, const ApkAssetsCookie& cookie,
+void PrintValue(AssetManager2* const am, const AssetManager2::SelectedValue& value,
                 std::string* const out) {
-  switch (value.dataType) {
+  switch (value.type) {
     case Res_value::TYPE_INT_DEC:
       out->append(StringPrintf("%d", value.data));
       break;
@@ -98,30 +92,21 @@ void PrintValue(AssetManager2* const am, const Res_value& value, const ApkAssets
       out->append(value.data != 0 ? "true" : "false");
       break;
     case Res_value::TYPE_STRING: {
-      const ResStringPool* pool = am->GetStringPoolForCookie(cookie);
+      const ResStringPool* pool = am->GetStringPoolForCookie(value.cookie);
       out->append("\"");
-      size_t len;
-      if (pool->isUTF8()) {
-        const char* str = pool->string8At(value.data, &len);
-        out->append(str, len);
-      } else {
-        const char16_t* str16 = pool->stringAt(value.data, &len);
-        out->append(Utf16ToUtf8(StringPiece16(str16, len)));
+      if (auto str = pool->string8ObjectAt(value.data)) {
+        out->append(*str);
       }
-      out->append("\"");
     } break;
     default:
-      out->append(StringPrintf("dataType=0x%02x data=0x%08x", value.dataType, value.data));
+      out->append(StringPrintf("dataType=0x%02x data=0x%08x", value.type, value.data));
       break;
   }
 }
 
 Result<std::string> WARN_UNUSED GetValue(AssetManager2* const am, ResourceId resid) {
-  Res_value value;
-  ResTable_config config;
-  uint32_t flags;
-  ApkAssetsCookie cookie = am->GetResource(resid, true, 0, &value, &config, &flags);
-  if (cookie == kInvalidCookie) {
+  auto value = am->GetResource(resid);
+  if (!value.has_value()) {
     return Error("no resource 0x%08x in asset manager", resid);
   }
 
@@ -129,41 +114,35 @@ Result<std::string> WARN_UNUSED GetValue(AssetManager2* const am, ResourceId res
 
   // TODO(martenkongstad): use optional parameter GetResource(..., std::string*
   // stacktrace = NULL) instead
-  out.append(StringPrintf("cookie=%d ", cookie));
+  out.append(StringPrintf("cookie=%d ", value->cookie));
 
   out.append("config='");
-  out.append(config.toString().c_str());
+  out.append(value->config.toString().c_str());
   out.append("' value=");
 
-  if (value.dataType == Res_value::TYPE_REFERENCE) {
-    const android::ResolvedBag* bag = am->GetBag(static_cast<uint32_t>(value.data));
-    if (bag == nullptr) {
-      out.append(StringPrintf("dataType=0x%02x data=0x%08x", value.dataType, value.data));
+  if (value->type == Res_value::TYPE_REFERENCE) {
+    auto bag_result = am->GetBag(static_cast<uint32_t>(value->data));
+    if (!bag_result.has_value()) {
+      out.append(StringPrintf("dataType=0x%02x data=0x%08x", value->type, value->data));
       return out;
     }
+
     out.append("[");
-    Res_value bag_val;
-    ResTable_config selected_config;
-    uint32_t flags;
-    uint32_t ref;
-    ApkAssetsCookie bag_cookie;
+    const android::ResolvedBag* bag = bag_result.value();
     for (size_t i = 0; i < bag->entry_count; ++i) {
-      const android::ResolvedBag::Entry& entry = bag->entries[i];
-      bag_val = entry.value;
-      bag_cookie = am->ResolveReference(entry.cookie, &bag_val, &selected_config, &flags, &ref);
-      if (bag_cookie == kInvalidCookie) {
-        out.append(
-            StringPrintf("Error: dataType=0x%02x data=0x%08x", bag_val.dataType, bag_val.data));
+      AssetManager2::SelectedValue entry(bag, bag->entries[i]);
+      if (am->ResolveReference(entry).has_value()) {
+        out.append(StringPrintf("Error: dataType=0x%02x data=0x%08x", entry.type, entry.data));
         continue;
       }
-      PrintValue(am, bag_val, bag_cookie, &out);
+      PrintValue(am, entry, &out);
       if (i != bag->entry_count - 1) {
         out.append(", ");
       }
     }
     out.append("]");
   } else {
-    PrintValue(am, value, cookie, &out);
+    PrintValue(am, *value, &out);
   }
 
   return out;
