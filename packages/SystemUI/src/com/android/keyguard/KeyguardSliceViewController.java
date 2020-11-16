@@ -26,6 +26,7 @@ import android.provider.Settings;
 import android.util.Log;
 import android.view.Display;
 import android.view.View;
+import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
@@ -146,6 +147,12 @@ public class KeyguardSliceViewController extends ViewController<KeyguardSliceVie
         mDumpManager.unregisterDumpable(
                 TAG + "@" + Integer.toHexString(
                         KeyguardSliceViewController.this.hashCode()));
+    }
+
+    void updateTopMargin(float clockTopTextPadding) {
+        ViewGroup.MarginLayoutParams lp = (ViewGroup.MarginLayoutParams) mView.getLayoutParams();
+        lp.topMargin = (int) clockTopTextPadding;
+        mView.setLayoutParams(lp);
     }
 
     /**

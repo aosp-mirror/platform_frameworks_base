@@ -221,6 +221,7 @@ public class NotificationPanelViewController extends PanelViewController {
 
                 @Override
                 public void onLockScreenModeChanged(int mode) {
+                    mLockScreenMode = mode;
                     mClockPositionAlgorithm.onLockScreenModeChanged(mode);
                 }
 
@@ -471,6 +472,8 @@ public class NotificationPanelViewController extends PanelViewController {
     private boolean mAnimatingQS;
     private int mOldLayoutDirection;
     private NotificationShelfController mNotificationShelfController;
+
+    private int mLockScreenMode = KeyguardUpdateMonitor.LOCK_SCREEN_MODE_NORMAL;
 
     private View.AccessibilityDelegate mAccessibilityDelegate = new View.AccessibilityDelegate() {
         @Override
@@ -872,8 +875,10 @@ public class NotificationPanelViewController extends PanelViewController {
                     mNotificationStackScrollLayoutController.getIntrinsicContentHeight(),
                     getExpandedFraction(),
                     totalHeight,
-                    (int) (mKeyguardStatusViewController.getHeight()
-                            - mShelfHeight / 2.0f - mDarkIconSize / 2.0f),
+                    mLockScreenMode == KeyguardUpdateMonitor.LOCK_SCREEN_MODE_LAYOUT_1
+                            ? mKeyguardStatusViewController.getHeight()
+                            : (int) (mKeyguardStatusViewController.getHeight()
+                                    - mShelfHeight / 2.0f - mDarkIconSize / 2.0f),
                     clockPreferredY, hasCustomClock(),
                     hasVisibleNotifications, mInterpolatedDarkAmount, mEmptyDragAmount,
                     bypassEnabled, getUnlockedStackScrollerPadding(),

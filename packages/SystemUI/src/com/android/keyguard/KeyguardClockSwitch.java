@@ -232,6 +232,11 @@ public class KeyguardClockSwitch extends RelativeLayout {
         }
     }
 
+    float getClockTextTopPadding() {
+        Paint.FontMetrics fm = mClockView.getPaint().getFontMetrics();
+        return fm.ascent - fm.top;
+    }
+
     /**
      * Set container for big clock face appearing behind NSSL and KeyguardStatusView.
      */
