@@ -353,7 +353,7 @@ public class PipTouchHandler {
         float aspectRatio = (float) normalBounds.width() / normalBounds.height();
         Point displaySize = new Point();
         mContext.getDisplay().getRealSize(displaySize);
-        Size expandedSize = mPipBoundsAlgorithm.getSnapAlgorithm().getSizeForAspectRatio(
+        Size expandedSize = mPipBoundsAlgorithm.getSizeForAspectRatio(
                 aspectRatio, mExpandedShortestEdgeSize, displaySize.x, displaySize.y);
         mPipBoundsState.setExpandedBounds(
                 new Rect(0, 0, expandedSize.getWidth(), expandedSize.getHeight()));

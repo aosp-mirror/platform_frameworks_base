@@ -50,6 +50,7 @@ public class PipBoundsAlgorithmTest extends ShellTestCase {
     private static final float DEFAULT_ASPECT_RATIO = 1f;
     private static final float MIN_ASPECT_RATIO = 0.5f;
     private static final float MAX_ASPECT_RATIO = 2f;
+    private static final int DEFAULT_MIN_EDGE_SIZE = 100;
 
     private PipBoundsAlgorithm mPipBoundsAlgorithm;
     private DisplayInfo mDefaultDisplayInfo;
@@ -73,7 +74,8 @@ public class PipBoundsAlgorithmTest extends ShellTestCase {
                 com.android.internal.R.integer.config_defaultPictureInPictureGravity,
                 Gravity.END | Gravity.BOTTOM);
         res.addOverride(
-                com.android.internal.R.dimen.default_minimal_size_pip_resizable_task, 100);
+                com.android.internal.R.dimen.default_minimal_size_pip_resizable_task,
+                DEFAULT_MIN_EDGE_SIZE);
         res.addOverride(
                 com.android.internal.R.string.config_defaultPictureInPictureScreenEdgeInsets,
                 "16x16");
@@ -112,6 +114,127 @@ public class PipBoundsAlgorithmTest extends ShellTestCase {
     }
 
     @Test
+    public void getDefaultBounds_noOverrideMinSize_matchesDefaultSizeAndAspectRatio() {
+        final Size defaultSize = mPipBoundsAlgorithm.getSizeForAspectRatio(DEFAULT_ASPECT_RATIO,
+                DEFAULT_MIN_EDGE_SIZE, mDefaultDisplayInfo.logicalWidth,
+                mDefaultDisplayInfo.logicalHeight);
+
+        mPipBoundsState.setOverrideMinSize(null);
+        final Rect defaultBounds = mPipBoundsAlgorithm.getDefaultBounds();
+
+        assertEquals(defaultSize, new Size(defaultBounds.width(), defaultBounds.height()));
+        assertEquals(DEFAULT_ASPECT_RATIO, getRectAspectRatio(defaultBounds),
+                ASPECT_RATIO_ERROR_MARGIN);
+    }
+
+    @Test
+    public void getDefaultBounds_widerOverrideMinSize_matchesMinSizeWidthAndDefaultAspectRatio() {
+        overrideDefaultAspectRatio(1.0f);
+        // The min size's aspect ratio is greater than the default aspect ratio.
+        final Size overrideMinSize = new Size(150, 120);
+
+        mPipBoundsState.setOverrideMinSize(overrideMinSize);
+        final Rect defaultBounds = mPipBoundsAlgorithm.getDefaultBounds();
+
+        // The default aspect ratio should trump the min size aspect ratio.
+        assertEquals(DEFAULT_ASPECT_RATIO, getRectAspectRatio(defaultBounds),
+                ASPECT_RATIO_ERROR_MARGIN);
+        // The width of the min size is still used with the default aspect ratio.
+        assertEquals(overrideMinSize.getWidth(), defaultBounds.width());
+    }
+
+    @Test
+    public void getDefaultBounds_tallerOverrideMinSize_matchesMinSizeHeightAndDefaultAspectRatio() {
+        overrideDefaultAspectRatio(1.0f);
+        // The min size's aspect ratio is greater than the default aspect ratio.
+        final Size overrideMinSize = new Size(120, 150);
+
+        mPipBoundsState.setOverrideMinSize(overrideMinSize);
+        final Rect defaultBounds = mPipBoundsAlgorithm.getDefaultBounds();
+
+        // The default aspect ratio should trump the min size aspect ratio.
+        assertEquals(DEFAULT_ASPECT_RATIO, getRectAspectRatio(defaultBounds),
+                ASPECT_RATIO_ERROR_MARGIN);
+        // The height of the min size is still used with the default aspect ratio.
+        assertEquals(overrideMinSize.getHeight(), defaultBounds.height());
+    }
+
+    @Test
+    public void getDefaultBounds_imeShowing_offsetByImeHeight() {
+        final int imeHeight = 30;
+        mPipBoundsState.setImeVisibility(false, 0);
+        final Rect defaultBounds = mPipBoundsAlgorithm.getDefaultBounds();
+
+        mPipBoundsState.setImeVisibility(true, imeHeight);
+        final Rect defaultBoundsWithIme = mPipBoundsAlgorithm.getDefaultBounds();
+
+        assertEquals(imeHeight, defaultBounds.top - defaultBoundsWithIme.top);
+    }
+
+    @Test
+    public void getDefaultBounds_shelfShowing_offsetByShelfHeight() {
+        final int shelfHeight = 30;
+        mPipBoundsState.setShelfVisibility(false, 0);
+        final Rect defaultBounds = mPipBoundsAlgorithm.getDefaultBounds();
+
+        mPipBoundsState.setShelfVisibility(true, shelfHeight);
+        final Rect defaultBoundsWithShelf = mPipBoundsAlgorithm.getDefaultBounds();
+
+        assertEquals(shelfHeight, defaultBounds.top - defaultBoundsWithShelf.top);
+    }
+
+    @Test
+    public void getDefaultBounds_imeAndShelfShowing_offsetByTallest() {
+        final int imeHeight = 30;
+        final int shelfHeight = 40;
+        mPipBoundsState.setImeVisibility(false, 0);
+        mPipBoundsState.setShelfVisibility(false, 0);
+        final Rect defaultBounds = mPipBoundsAlgorithm.getDefaultBounds();
+
+        mPipBoundsState.setImeVisibility(true, imeHeight);
+        mPipBoundsState.setShelfVisibility(true, shelfHeight);
+        final Rect defaultBoundsWithIme = mPipBoundsAlgorithm.getDefaultBounds();
+
+        assertEquals(shelfHeight, defaultBounds.top - defaultBoundsWithIme.top);
+    }
+
+    @Test
+    public void getDefaultBounds_boundsAtDefaultGravity() {
+        final Rect insetBounds = new Rect();
+        mPipBoundsAlgorithm.getInsetBounds(insetBounds);
+        overrideDefaultStackGravity(Gravity.END | Gravity.BOTTOM);
+
+        final Rect defaultBounds = mPipBoundsAlgorithm.getDefaultBounds();
+
+        assertEquals(insetBounds.bottom, defaultBounds.bottom);
+        assertEquals(insetBounds.right, defaultBounds.right);
+    }
+
+    @Test
+    public void getNormalBounds_invalidAspectRatio_returnsDefaultBounds() {
+        final Rect defaultBounds = mPipBoundsAlgorithm.getDefaultBounds();
+
+        // Set an invalid current aspect ratio.
+        mPipBoundsState.setAspectRatio(MIN_ASPECT_RATIO / 2);
+        final Rect normalBounds = mPipBoundsAlgorithm.getNormalBounds();
+
+        assertEquals(defaultBounds, normalBounds);
+    }
+
+    @Test
+    public void getNormalBounds_validAspectRatio_returnsAdjustedDefaultBounds() {
+        final Rect defaultBoundsAdjustedToAspectRatio = mPipBoundsAlgorithm.getDefaultBounds();
+        mPipBoundsAlgorithm.transformBoundsToAspectRatio(defaultBoundsAdjustedToAspectRatio,
+                MIN_ASPECT_RATIO, false /* useCurrentMinEdgeSize */, false /* useCurrentSize */);
+
+        // Set a valid current aspect ratio different that the default.
+        mPipBoundsState.setAspectRatio(MIN_ASPECT_RATIO);
+        final Rect normalBounds = mPipBoundsAlgorithm.getNormalBounds();
+
+        assertEquals(defaultBoundsAdjustedToAspectRatio, normalBounds);
+    }
+
+    @Test
     public void getEntryDestinationBounds_returnBoundsMatchesAspectRatio() {
         final float[] aspectRatios = new float[] {
                 (MIN_ASPECT_RATIO + DEFAULT_ASPECT_RATIO) / 2,
@@ -121,8 +244,7 @@ public class PipBoundsAlgorithmTest extends ShellTestCase {
         for (float aspectRatio : aspectRatios) {
             mPipBoundsState.setAspectRatio(aspectRatio);
             final Rect destinationBounds = mPipBoundsAlgorithm.getEntryDestinationBounds();
-            final float actualAspectRatio =
-                    destinationBounds.width() / (destinationBounds.height() * 1f);
+            final float actualAspectRatio = getRectAspectRatio(destinationBounds);
             assertEquals("Destination bounds matches the given aspect ratio",
                     aspectRatio, actualAspectRatio, ASPECT_RATIO_ERROR_MARGIN);
         }
@@ -274,6 +396,22 @@ public class PipBoundsAlgorithmTest extends ShellTestCase {
         assertBoundsInclusionWithMargin("useDefaultBounds", defaultBounds, actualBounds);
     }
 
+    private void overrideDefaultAspectRatio(float aspectRatio) {
+        final TestableResources res = mContext.getOrCreateTestableResources();
+        res.addOverride(
+                com.android.internal.R.dimen.config_pictureInPictureDefaultAspectRatio,
+                aspectRatio);
+        mPipBoundsAlgorithm.onConfigurationChanged(mContext);
+    }
+
+    private void overrideDefaultStackGravity(int stackGravity) {
+        final TestableResources res = mContext.getOrCreateTestableResources();
+        res.addOverride(
+                com.android.internal.R.integer.config_defaultPictureInPictureGravity,
+                stackGravity);
+        mPipBoundsAlgorithm.onConfigurationChanged(mContext);
+    }
+
     private void assertBoundsInclusionWithMargin(String from, Rect expected, Rect actual) {
         final Rect expectedWithMargin = new Rect(expected);
         expectedWithMargin.inset(-ROUNDING_ERROR_MARGIN, -ROUNDING_ERROR_MARGIN);
@@ -281,5 +419,9 @@ public class PipBoundsAlgorithmTest extends ShellTestCase {
                 + " contains " + actual
                 + " with error margin " + ROUNDING_ERROR_MARGIN,
                 expectedWithMargin.contains(actual));
+    }
+
+    private static float getRectAspectRatio(Rect rect) {
+        return rect.width() / (rect.height() * 1f);
     }
 }
