@@ -27,6 +27,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.util.AttributeSet;
+import android.widget.FrameLayout;
 import android.widget.RemoteViews;
 
 import com.android.internal.R;
@@ -41,15 +42,14 @@ import java.util.ArrayList;
  * @hide
  */
 @RemoteViews.RemoteView
-public class NotificationHeaderView extends ViewGroup {
-    private final int mChildMinWidth;
+public class NotificationHeaderView extends FrameLayout {
     private final int mContentEndMargin;
+    private final int mHeadingEndMargin;
     private OnClickListener mExpandClickListener;
     private HeaderTouchListener mTouchListener = new HeaderTouchListener();
     private NotificationTopLineView mTopLineView;
     private NotificationExpandButton mExpandButton;
     private CachingIconView mIcon;
-    private int mHeaderTextMarginEnd;
     private Drawable mBackground;
     private boolean mEntireHeaderClickable;
     private boolean mExpandOnlyOnButton;
@@ -82,8 +82,8 @@ public class NotificationHeaderView extends ViewGroup {
             int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
         Resources res = getResources();
-        mChildMinWidth = res.getDimensionPixelSize(R.dimen.notification_header_shrink_min_width);
         mContentEndMargin = res.getDimensionPixelSize(R.dimen.notification_content_margin_end);
+        mHeadingEndMargin = res.getDimensionPixelSize(R.dimen.notification_heading_margin_end);
         mEntireHeaderClickable = res.getBoolean(R.bool.config_notificationHeaderClickableForExpand);
     }
 
@@ -94,108 +94,6 @@ public class NotificationHeaderView extends ViewGroup {
         mTopLineView = findViewById(R.id.notification_top_line);
         mExpandButton = findViewById(R.id.expand_button);
         setClipToPadding(false);
-    }
-
-    @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        final int givenWidth = MeasureSpec.getSize(widthMeasureSpec);
-        final int givenHeight = MeasureSpec.getSize(heightMeasureSpec);
-        int wrapContentWidthSpec = MeasureSpec.makeMeasureSpec(givenWidth,
-                MeasureSpec.AT_MOST);
-        int wrapContentHeightSpec = MeasureSpec.makeMeasureSpec(givenHeight,
-                MeasureSpec.AT_MOST);
-        int totalWidth = getPaddingStart();
-        int iconWidth = getPaddingEnd();
-        for (int i = 0; i < getChildCount(); i++) {
-            final View child = getChildAt(i);
-            if (child.getVisibility() == GONE) {
-                // We'll give it the rest of the space in the end
-                continue;
-            }
-            final MarginLayoutParams lp = (MarginLayoutParams) child.getLayoutParams();
-            int childWidthSpec = getChildMeasureSpec(wrapContentWidthSpec,
-                    lp.leftMargin + lp.rightMargin, lp.width);
-            int childHeightSpec = getChildMeasureSpec(wrapContentHeightSpec,
-                    lp.topMargin + lp.bottomMargin, lp.height);
-            child.measure(childWidthSpec, childHeightSpec);
-            // Icons that should go at the end
-            if (child == mExpandButton) {
-                iconWidth += lp.leftMargin + lp.rightMargin + child.getMeasuredWidth();
-            } else {
-                totalWidth += lp.leftMargin + lp.rightMargin + child.getMeasuredWidth();
-            }
-        }
-
-        // Ensure that there is at least enough space for the icons
-        int endMargin = Math.max(mHeaderTextMarginEnd, iconWidth);
-        if (totalWidth > givenWidth - endMargin) {
-            int overFlow = totalWidth - givenWidth + endMargin;
-            // We are overflowing; shrink the top line
-            shrinkViewForOverflow(wrapContentHeightSpec, overFlow, mTopLineView,
-                    mChildMinWidth);
-        }
-        setMeasuredDimension(givenWidth, givenHeight);
-    }
-
-    private int shrinkViewForOverflow(int heightSpec, int overFlow, View targetView,
-            int minimumWidth) {
-        final int oldWidth = targetView.getMeasuredWidth();
-        if (overFlow > 0 && targetView.getVisibility() != GONE && oldWidth > minimumWidth) {
-            // we're still too big
-            int newSize = Math.max(minimumWidth, oldWidth - overFlow);
-            int childWidthSpec = MeasureSpec.makeMeasureSpec(newSize, MeasureSpec.AT_MOST);
-            targetView.measure(childWidthSpec, heightSpec);
-            overFlow -= oldWidth - newSize;
-        }
-        return overFlow;
-    }
-
-    @Override
-    protected void onLayout(boolean changed, int l, int t, int r, int b) {
-        int left = getPaddingStart();
-        int end = getMeasuredWidth();
-        int childCount = getChildCount();
-        int ownHeight = getMeasuredHeight() - getPaddingTop() - getPaddingBottom();
-        for (int i = 0; i < childCount; i++) {
-            View child = getChildAt(i);
-            if (child.getVisibility() == GONE) {
-                continue;
-            }
-            int childHeight = child.getMeasuredHeight();
-            MarginLayoutParams params = (MarginLayoutParams) child.getLayoutParams();
-            int layoutLeft;
-            int layoutRight;
-            int top = (int) (getPaddingTop() + (ownHeight - childHeight) / 2.0f);
-            int bottom = top + childHeight;
-            // Icons that should go at the end
-            if (child == mExpandButton) {
-                if (end == getMeasuredWidth()) {
-                    layoutRight = end - mContentEndMargin;
-                } else {
-                    layoutRight = end - params.getMarginEnd();
-                }
-                layoutLeft = layoutRight - child.getMeasuredWidth();
-                end = layoutLeft - params.getMarginStart();
-            } else {
-                left += params.getMarginStart();
-                int right = left + child.getMeasuredWidth();
-                layoutLeft = left;
-                layoutRight = right;
-                left = right + params.getMarginEnd();
-            }
-            if (getLayoutDirection() == LAYOUT_DIRECTION_RTL) {
-                int ltrLeft = layoutLeft;
-                layoutLeft = getWidth() - layoutRight;
-                layoutRight = getWidth() - ltrLeft;
-            }
-            child.layout(layoutLeft, top, layoutRight, bottom);
-        }
-        updateTouchListener();
-    }
-
-    @Override
-    public LayoutParams generateLayoutParams(AttributeSet attrs) {
-        return new MarginLayoutParams(getContext(), attrs);
     }
 
     /**
@@ -252,23 +150,34 @@ public class NotificationHeaderView extends ViewGroup {
     }
 
     /**
-     * Sets the margin end for the text portion of the header, excluding right-aligned elements
-     * @param headerTextMarginEnd margin size
+     * Sets the extra margin at the end of the top line of left-aligned text + icons.
+     * This value will have the margin required to accommodate the expand button added to it.
+     *
+     * @param extraMarginEnd extra margin
      */
     @RemotableViewMethod
-    public void setHeaderTextMarginEnd(int headerTextMarginEnd) {
-        if (mHeaderTextMarginEnd != headerTextMarginEnd) {
-            mHeaderTextMarginEnd = headerTextMarginEnd;
-            requestLayout();
-        }
+    public void setTopLineExtraMarginEnd(int extraMarginEnd) {
+        mTopLineView.setHeaderTextMarginEnd(extraMarginEnd + mHeadingEndMargin);
     }
 
     /**
-     * Get the current margin end value for the header text
-     * @return margin size
+     * Get the current margin end value for the header text.
+     * Add this to {@link #getTopLineBaseMarginEnd()} to get the total margin of the top line.
+     *
+     * @return extra margin
      */
-    public int getHeaderTextMarginEnd() {
-        return mHeaderTextMarginEnd;
+    public int getTopLineExtraMarginEnd() {
+        return mTopLineView.getHeaderTextMarginEnd() - mHeadingEndMargin;
+    }
+
+    /**
+     * Get the base margin at the end of the top line view.
+     * Add this to {@link #getTopLineExtraMarginEnd()} to get the total margin of the top line.
+     *
+     * @return base margin
+     */
+    public int getTopLineBaseMarginEnd() {
+        return mHeadingEndMargin;
     }
 
     /**

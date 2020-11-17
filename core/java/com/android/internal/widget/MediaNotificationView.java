@@ -98,12 +98,14 @@ public class MediaNotificationView extends FrameLayout {
                 mMainColumn.setLayoutParams(params);
                 reMeasure = true;
             }
+            // TODO(b/172652345): validate all this logic (especially positioning of expand button)
             // margin for the entire header line
             int headerMarginEnd = imageEndMargin;
             // margin for the header text (not including the expand button and other icons)
-            int headerTextMarginEnd = size + imageEndMargin;
-            if (headerTextMarginEnd != mHeader.getHeaderTextMarginEnd()) {
-                mHeader.setHeaderTextMarginEnd(headerTextMarginEnd);
+            int headerExtraMarginEnd = Math.max(0,
+                    size + imageEndMargin - mHeader.getTopLineBaseMarginEnd());
+            if (headerExtraMarginEnd != mHeader.getTopLineExtraMarginEnd()) {
+                mHeader.setTopLineExtraMarginEnd(headerExtraMarginEnd);
                 reMeasure = true;
             }
             params = (MarginLayoutParams) mHeader.getLayoutParams();

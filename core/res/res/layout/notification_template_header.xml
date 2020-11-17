@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   ~ Copyright (C) 2015 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,40 +13,66 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License
   -->
-<!-- extends ViewGroup -->
+<!-- extends FrameLayout -->
 <NotificationHeaderView
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:theme="@style/Theme.DeviceDefault.Notification"
     android:id="@+id/notification_header"
-    android:orientation="horizontal"
     android:layout_width="wrap_content"
-    android:layout_height="@dimen/notification_header_height"
+    android:layout_height="@dimen/notification_header_solo_height"
+    android:layout_marginBottom="@dimen/notification_header_margin_bottom"
     android:clipChildren="false"
-    style="?attr/notificationHeaderStyle">
-    <!-- Wrapper used to expand the width of the "space" containing the icon programmatically -->
-    <FrameLayout
-        android:id="@+id/header_icon_container"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:theme="@style/Theme.DeviceDefault.Notification"
+    >
 
-        <com.android.internal.widget.CachingIconView
-            android:id="@+id/icon"
-            android:layout_width="?attr/notificationHeaderIconSize"
-            android:layout_height="?attr/notificationHeaderIconSize"
-            android:layout_marginEnd="@dimen/notification_header_icon_margin_end"
-            android:layout_gravity="center"
+    <com.android.internal.widget.CachingIconView
+        android:id="@+id/icon"
+        android:layout_width="@dimen/notification_icon_circle_size"
+        android:layout_height="@dimen/notification_icon_circle_size"
+        android:layout_gravity="center_vertical|start"
+        android:layout_marginStart="@dimen/notification_icon_circle_start"
+        android:background="@drawable/notification_icon_circle"
+        android:padding="@dimen/notification_icon_circle_padding"
         />
-    </FrameLayout>
-    <include layout="@layout/notification_template_top_line" />
+
+    <!-- extends ViewGroup -->
+    <NotificationTopLineView
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/notification_top_line"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_gravity="center_vertical"
+        android:clipChildren="false"
+        android:gravity="center_vertical"
+        android:paddingEnd="@dimen/notification_heading_margin_end"
+        android:paddingStart="@dimen/notification_content_margin_start"
+        android:theme="@style/Theme.DeviceDefault.Notification"
+        >
+
+        <TextView
+            android:id="@+id/app_name_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/notification_header_separating_margin"
+            android:singleLine="true"
+            android:textAppearance="?attr/notificationHeaderTextAppearance"
+            android:visibility="?attr/notificationHeaderAppNameVisibility"
+            />
+
+        <include layout="@layout/notification_top_line_views" />
+
+    </NotificationTopLineView>
+
     <com.android.internal.widget.NotificationExpandButton
         android:id="@+id/expand_button"
-        android:background="@null"
         android:layout_width="@dimen/notification_header_expand_icon_size"
         android:layout_height="@dimen/notification_header_expand_icon_size"
-        android:layout_marginStart="4dp"
-        android:paddingTop="@dimen/notification_expand_button_padding_top"
-        android:visibility="gone"
+        android:layout_gravity="center_vertical|end"
         android:contentDescription="@string/expand_button_content_description_collapsed"
+        android:paddingTop="@dimen/notification_expand_button_padding_top"
+        android:scaleType="center"
+        android:visibility="gone"
         />
-</NotificationHeaderView>
 
+</NotificationHeaderView>

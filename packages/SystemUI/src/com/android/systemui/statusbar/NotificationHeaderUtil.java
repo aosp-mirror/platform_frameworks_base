@@ -33,6 +33,7 @@ import com.android.systemui.statusbar.notification.row.NotificationContentView;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * A Util to manage {@link android.view.NotificationHeaderView} objects and their redundancies.
@@ -324,13 +325,15 @@ public class NotificationHeaderUtil {
         @Override
         public boolean compare(View parent, View child, Object parentData, Object childData) {
             TextView parentView = (TextView) parent;
+            CharSequence parentText = parentView == null ? "" : parentView.getText();
             TextView childView = (TextView) child;
-            return parentView.getText().equals(childView.getText());
+            CharSequence childText = childView == null ? "" : childView.getText();
+            return Objects.equals(parentText, childText);
         }
 
         @Override
         public boolean isEmpty(View view) {
-            return TextUtils.isEmpty(((TextView) view).getText());
+            return view == null || TextUtils.isEmpty(((TextView) view).getText());
         }
     }
 
@@ -369,7 +372,9 @@ public class NotificationHeaderUtil {
 
         @Override
         public void apply(View parent, View view, boolean apply, boolean reset) {
-            view.setVisibility(apply ? View.GONE : View.VISIBLE);
+            if (view != null) {
+                view.setVisibility(apply ? View.GONE : View.VISIBLE);
+            }
         }
     }
 

@@ -26,9 +26,6 @@ import android.widget.RemoteViews;
 
 import com.android.internal.R;
 
-import java.util.Arrays;
-import java.util.List;
-
 /**
  * The top line of content in a notification view.
  * This includes the text views and badges but excludes the icon and the expander.
@@ -39,16 +36,14 @@ import java.util.List;
 public class NotificationTopLineView extends ViewGroup {
     private final int mGravityY;
     private final int mChildMinWidth;
-    private final int mContentEndMargin;
-    private View mAppName;
+    @Nullable private View mAppName;
+    @Nullable private View mTitle;
     private View mHeaderText;
     private View mSecondaryHeaderText;
     private OnClickListener mFeedbackListener;
     private HeaderTouchListener mTouchListener = new HeaderTouchListener();
-    private View mProfileBadge;
     private View mFeedbackIcon;
     private int mHeaderTextMarginEnd;
-    private List<View> mIconsAtEnd;
 
     private int mMaxAscent;
     private int mMaxDescent;
@@ -71,7 +66,6 @@ public class NotificationTopLineView extends ViewGroup {
         super(context, attrs, defStyleAttr, defStyleRes);
         Resources res = getResources();
         mChildMinWidth = res.getDimensionPixelSize(R.dimen.notification_header_shrink_min_width);
-        mContentEndMargin = res.getDimensionPixelSize(R.dimen.notification_content_margin_end);
 
         // NOTE: Implementation only supports TOP, BOTTOM, and CENTER_VERTICAL gravities,
         // with CENTER_VERTICAL being the default.
@@ -92,11 +86,10 @@ public class NotificationTopLineView extends ViewGroup {
     protected void onFinishInflate() {
         super.onFinishInflate();
         mAppName = findViewById(R.id.app_name_text);
+        mTitle = findViewById(R.id.title);
         mHeaderText = findViewById(R.id.header_text);
         mSecondaryHeaderText = findViewById(R.id.header_text_secondary);
-        mProfileBadge = findViewById(R.id.profile_badge);
         mFeedbackIcon = findViewById(R.id.feedback);
-        mIconsAtEnd = Arrays.asList(mProfileBadge, mFeedbackIcon);
     }
 
     @Override
@@ -109,7 +102,6 @@ public class NotificationTopLineView extends ViewGroup {
         int wrapContentHeightSpec = MeasureSpec.makeMeasureSpec(givenHeight,
                 MeasureSpec.AT_MOST);
         int totalWidth = getPaddingStart();
-        int iconWidth = getPaddingEnd();
         int maxChildHeight = -1;
         mMaxAscent = -1;
         mMaxDescent = -1;
@@ -125,12 +117,7 @@ public class NotificationTopLineView extends ViewGroup {
             int childHeightSpec = getChildMeasureSpec(wrapContentHeightSpec,
                     lp.topMargin + lp.bottomMargin, lp.height);
             child.measure(childWidthSpec, childHeightSpec);
-            // Icons that should go at the end
-            if (mIconsAtEnd.contains(child)) {
-                iconWidth += lp.leftMargin + lp.rightMargin + child.getMeasuredWidth();
-            } else {
-                totalWidth += lp.leftMargin + lp.rightMargin + child.getMeasuredWidth();
-            }
+            totalWidth += lp.leftMargin + lp.rightMargin + child.getMeasuredWidth();
             int childBaseline = child.getBaseline();
             int childHeight = child.getMeasuredHeight();
             if (childBaseline != -1) {
@@ -141,12 +128,20 @@ public class NotificationTopLineView extends ViewGroup {
         }
 
         // Ensure that there is at least enough space for the icons
-        int endMargin = Math.max(mHeaderTextMarginEnd, iconWidth);
+        int endMargin = Math.max(mHeaderTextMarginEnd, getPaddingEnd());
         if (totalWidth > givenWidth - endMargin) {
             int overFlow = totalWidth - givenWidth + endMargin;
-            // We are overflowing, lets shrink the app name first
-            overFlow = shrinkViewForOverflow(wrapContentHeightSpec, overFlow, mAppName,
-                    mChildMinWidth);
+            if (mAppName != null) {
+                // We are overflowing, lets shrink the app name first
+                overFlow = shrinkViewForOverflow(wrapContentHeightSpec, overFlow, mAppName,
+                        mChildMinWidth);
+            }
+
+            if (mTitle != null) {
+                // still overflowing, we shrink the title text
+                overFlow = shrinkViewForOverflow(wrapContentHeightSpec, overFlow, mTitle,
+                        mChildMinWidth);
+            }
 
             // still overflowing, we shrink the header text
             overFlow = shrinkViewForOverflow(wrapContentHeightSpec, overFlow, mHeaderText, 0);
@@ -174,7 +169,6 @@ public class NotificationTopLineView extends ViewGroup {
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         int left = getPaddingStart();
-        int end = getMeasuredWidth();
         int childCount = getChildCount();
         int ownHeight = b - t;
         int childSpace = ownHeight - mPaddingTop - mPaddingBottom;
@@ -228,22 +222,12 @@ public class NotificationTopLineView extends ViewGroup {
                     childTop = mPaddingTop;
             }
 
-            // Icons that should go at the end
-            if (mIconsAtEnd.contains(child)) {
-                if (end == getMeasuredWidth()) {
-                    layoutRight = end - mContentEndMargin;
-                } else {
-                    layoutRight = end - params.getMarginEnd();
-                }
-                layoutLeft = layoutRight - child.getMeasuredWidth();
-                end = layoutLeft - params.getMarginStart();
-            } else {
-                left += params.getMarginStart();
-                int right = left + child.getMeasuredWidth();
-                layoutLeft = left;
-                layoutRight = right;
-                left = right + params.getMarginEnd();
-            }
+            left += params.getMarginStart();
+            int right = left + child.getMeasuredWidth();
+            layoutLeft = left;
+            layoutRight = right;
+            left = right + params.getMarginEnd();
+
             if (getLayoutDirection() == LAYOUT_DIRECTION_RTL) {
                 int ltrLeft = layoutLeft;
                 layoutLeft = getWidth() - layoutRight;
@@ -296,6 +280,13 @@ public class NotificationTopLineView extends ViewGroup {
      */
     public int getHeaderTextMarginEnd() {
         return mHeaderTextMarginEnd;
+    }
+
+    /**
+     * Set padding at the start of the view.
+     */
+    public void setPaddingStart(int paddingStart) {
+        setPaddingRelative(paddingStart, getPaddingTop(), getPaddingEnd(), getPaddingBottom());
     }
 
     private class HeaderTouchListener implements OnTouchListener {

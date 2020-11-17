@@ -318,30 +318,13 @@ public class NotificationContentView extends FrameLayout {
         // We need to update the expanded and the collapsed header to have exactly the same with to
         // have the expand buttons laid out at the same location.
         NotificationHeaderView contractedHeader = mContractedWrapper.getNotificationHeader();
-        if (contractedHeader != null) {
-            if (mExpandedChild != null
-                    && mExpandedWrapper.getNotificationHeader() != null) {
-                NotificationHeaderView expandedHeader = mExpandedWrapper.getNotificationHeader();
-
-                int headerTextMargin = expandedHeader.getHeaderTextMarginEnd();
-                if (headerTextMargin != contractedHeader.getHeaderTextMarginEnd()) {
-                    contractedHeader.setHeaderTextMarginEnd(headerTextMargin);
-                    return true;
-                }
-            } else {
-                int paddingEnd = mNotificationContentMarginEnd;
-                if (contractedHeader.getPaddingEnd() != paddingEnd) {
-                    contractedHeader.setPadding(
-                            contractedHeader.isLayoutRtl()
-                                    ? paddingEnd
-                                    : contractedHeader.getPaddingLeft(),
-                            contractedHeader.getPaddingTop(),
-                            contractedHeader.isLayoutRtl()
-                                    ? contractedHeader.getPaddingLeft()
-                                    : paddingEnd,
-                            contractedHeader.getPaddingBottom());
-                    return true;
-                }
+        if (contractedHeader != null && mExpandedWrapper != null
+                && mExpandedWrapper.getNotificationHeader() != null) {
+            NotificationHeaderView expandedHeader = mExpandedWrapper.getNotificationHeader();
+            int headerTextMargin = expandedHeader.getTopLineExtraMarginEnd();
+            if (headerTextMargin != contractedHeader.getTopLineExtraMarginEnd()) {
+                contractedHeader.setTopLineExtraMarginEnd(headerTextMargin);
+                return true;
             }
         }
         return false;
