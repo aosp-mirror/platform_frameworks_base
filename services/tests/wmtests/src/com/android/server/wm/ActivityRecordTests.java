@@ -173,7 +173,7 @@ public class ActivityRecordTests extends WindowTestsBase {
 
     @Test
     public void testNoCleanupMovingActivityInSameStack() {
-        final Task newTask = new TaskBuilder(mAtm.mStackSupervisor).setParentTask(mStack).build();
+        final Task newTask = new TaskBuilder(mAtm.mTaskSupervisor).setParentTask(mStack).build();
         mActivity.reparent(newTask, 0, null /*reason*/);
         verify(mStack, times(0)).cleanUpActivityReferences(any());
     }
@@ -263,7 +263,7 @@ public class ActivityRecordTests extends WindowTestsBase {
 
         // Set options for two ActivityRecords in separate Tasks. Apply one ActivityRecord options.
         // Pending options should be cleared for only ActivityRecord that was applied
-        Task task2 = new TaskBuilder(mAtm.mStackSupervisor).setParentTask(mStack).build();
+        Task task2 = new TaskBuilder(mAtm.mTaskSupervisor).setParentTask(mStack).build();
         activity2 = new ActivityBuilder(mAtm).setTask(task2).build();
         activity2.updateOptionsLocked(activityOptions);
         mActivity.updateOptionsLocked(activityOptions);
@@ -1015,7 +1015,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         assertEquals("Activity must be stopped to make next one visible", STOPPING,
                 topActivity.getState());
         assertTrue("Activity must be stopped to make next one visible",
-                topActivity.mStackSupervisor.mStoppingActivities.contains(topActivity));
+                topActivity.mTaskSupervisor.mStoppingActivities.contains(topActivity));
         verify(topActivity, never()).destroyIfPossible(anyString());
     }
 
@@ -1145,7 +1145,7 @@ public class ActivityRecordTests extends WindowTestsBase {
     @Test
     public void testCompleteFinishing_showWhenLocked() {
         // Make keyguard locked and set the top activity show-when-locked.
-        KeyguardController keyguardController = mActivity.mStackSupervisor.getKeyguardController();
+        KeyguardController keyguardController = mActivity.mTaskSupervisor.getKeyguardController();
         doReturn(true).when(keyguardController).isKeyguardLocked();
         final ActivityRecord topActivity = new ActivityBuilder(mAtm).setTask(mTask).build();
         topActivity.mVisibleRequested = true;
@@ -1248,7 +1248,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         // instead.
         verify(mActivity, never()).destroyImmediately(anyString());
         assertEquals(FINISHING, mActivity.getState());
-        assertTrue(mActivity.mStackSupervisor.mFinishingActivities.contains(mActivity));
+        assertTrue(mActivity.mTaskSupervisor.mFinishingActivities.contains(mActivity));
     }
 
     /**
@@ -1273,7 +1273,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         // Verify that the activity is not destroyed immediately, but waits for next one to come up.
         verify(mActivity, never()).destroyImmediately(anyString());
         assertEquals(FINISHING, mActivity.getState());
-        assertTrue(mActivity.mStackSupervisor.mFinishingActivities.contains(mActivity));
+        assertTrue(mActivity.mTaskSupervisor.mFinishingActivities.contains(mActivity));
     }
 
     /**

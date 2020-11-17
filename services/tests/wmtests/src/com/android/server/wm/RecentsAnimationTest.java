@@ -201,7 +201,7 @@ public class RecentsAnimationTest extends WindowTestsBase {
         startRecentsActivity();
 
         // Recents activity must be restarted, but not be resumed while running recents animation.
-        verify(mRootWindowContainer.mStackSupervisor).startSpecificActivity(
+        verify(mRootWindowContainer.mTaskSupervisor).startSpecificActivity(
                 eq(recentActivity), eq(false), anyBoolean());
         assertThat(recentActivity.getState()).isEqualTo(PAUSED);
     }

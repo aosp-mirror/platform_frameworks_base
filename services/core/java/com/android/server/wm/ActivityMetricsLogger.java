@@ -139,7 +139,7 @@ class ActivityMetricsLogger {
 
     private int mWindowState = WINDOW_STATE_STANDARD;
     private long mLastLogTimeSecs;
-    private final ActivityStackSupervisor mSupervisor;
+    private final ActivityTaskSupervisor mSupervisor;
     private final MetricsLogger mMetricsLogger = new MetricsLogger();
 
     /** All active transitions. */
@@ -402,7 +402,7 @@ class ActivityMetricsLogger {
         }
     }
 
-    ActivityMetricsLogger(ActivityStackSupervisor supervisor, Looper looper) {
+    ActivityMetricsLogger(ActivityTaskSupervisor supervisor, Looper looper) {
         mLastLogTimeSecs = SystemClock.elapsedRealtime() / 1000;
         mSupervisor = supervisor;
         mLaunchObserver = new LaunchObserverRegistryImpl(looper);

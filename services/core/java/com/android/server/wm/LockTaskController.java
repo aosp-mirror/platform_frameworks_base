@@ -139,7 +139,7 @@ public class LockTaskController {
     static final int LOCK_TASK_AUTH_LAUNCHABLE_PRIV = 4;
 
     private final IBinder mToken = new LockTaskToken();
-    private final ActivityStackSupervisor mSupervisor;
+    private final ActivityTaskSupervisor mSupervisor;
     private final Context mContext;
 
     // The following system services cannot be final, because they do not exist when this class
@@ -188,7 +188,7 @@ public class LockTaskController {
     private volatile int mLockTaskModeState = LOCK_TASK_MODE_NONE;
 
     /**
-     * This is ActivityStackSupervisor's Handler.
+     * This is ActivityTaskSupervisor's Handler.
      */
     private final Handler mHandler;
 
@@ -203,7 +203,7 @@ public class LockTaskController {
      */
     private int mPendingDisableFromDismiss = UserHandle.USER_NULL;
 
-    LockTaskController(Context context, ActivityStackSupervisor supervisor,
+    LockTaskController(Context context, ActivityTaskSupervisor supervisor,
             Handler handler) {
         mContext = context;
         mSupervisor = supervisor;

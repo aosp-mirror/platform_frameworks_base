@@ -59,9 +59,9 @@ import static android.view.WindowManager.TRANSIT_OPEN;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_CONFIGURATION;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_TASKS;
-import static com.android.server.wm.ActivityStackSupervisor.DEFER_RESUME;
-import static com.android.server.wm.ActivityStackSupervisor.ON_TOP;
-import static com.android.server.wm.ActivityStackSupervisor.PRESERVE_WINDOWS;
+import static com.android.server.wm.ActivityTaskSupervisor.DEFER_RESUME;
+import static com.android.server.wm.ActivityTaskSupervisor.ON_TOP;
+import static com.android.server.wm.ActivityTaskSupervisor.PRESERVE_WINDOWS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_ACTIVITY_STARTS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_PERMISSIONS_REVIEW;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_RESULTS;
@@ -122,7 +122,7 @@ import com.android.server.pm.InstantAppResolver;
 import com.android.server.power.ShutdownCheckPoints;
 import com.android.server.uri.NeededUriGrants;
 import com.android.server.wm.ActivityMetricsLogger.LaunchingState;
-import com.android.server.wm.ActivityStackSupervisor.PendingActivityLaunch;
+import com.android.server.wm.ActivityTaskSupervisor.PendingActivityLaunch;
 import com.android.server.wm.LaunchParamsController.LaunchParams;
 
 import java.io.PrintWriter;
@@ -145,7 +145,7 @@ class ActivityStarter {
 
     private final ActivityTaskManagerService mService;
     private final RootWindowContainer mRootWindowContainer;
-    private final ActivityStackSupervisor mSupervisor;
+    private final ActivityTaskSupervisor mSupervisor;
     private final ActivityStartInterceptor mInterceptor;
     private final ActivityStartController mController;
 
@@ -258,14 +258,14 @@ class ActivityStarter {
 
         private ActivityStartController mController;
         private ActivityTaskManagerService mService;
-        private ActivityStackSupervisor mSupervisor;
+        private ActivityTaskSupervisor mSupervisor;
         private ActivityStartInterceptor mInterceptor;
 
         private SynchronizedPool<ActivityStarter> mStarterPool =
                 new SynchronizedPool<>(MAX_STARTER_COUNT);
 
         DefaultFactory(ActivityTaskManagerService service,
-                ActivityStackSupervisor supervisor, ActivityStartInterceptor interceptor) {
+                ActivityTaskSupervisor supervisor, ActivityStartInterceptor interceptor) {
             mService = service;
             mSupervisor = supervisor;
             mInterceptor = interceptor;
@@ -443,7 +443,7 @@ class ActivityStarter {
         /**
          * Resolve activity from the given intent for this launch.
          */
-        void resolveActivity(ActivityStackSupervisor supervisor) {
+        void resolveActivity(ActivityTaskSupervisor supervisor) {
             if (realCallingPid == Request.DEFAULT_REAL_CALLING_PID) {
                 realCallingPid = Binder.getCallingPid();
             }
@@ -534,7 +534,7 @@ class ActivityStarter {
     }
 
     ActivityStarter(ActivityStartController controller, ActivityTaskManagerService service,
-            ActivityStackSupervisor supervisor, ActivityStartInterceptor interceptor) {
+            ActivityTaskSupervisor supervisor, ActivityStartInterceptor interceptor) {
         mController = controller;
         mService = service;
         mRootWindowContainer = service.mRootWindowContainer;
@@ -1878,7 +1878,7 @@ class ActivityStarter {
         }
 
         // Do not start home activity if it cannot be launched on preferred display. We are not
-        // doing this in ActivityStackSupervisor#canPlaceEntityOnDisplay because it might
+        // doing this in ActivityTaskSupervisor#canPlaceEntityOnDisplay because it might
         // fallback to launch on other displays.
         if (r.isActivityTypeHome()) {
             if (!mRootWindowContainer.canStartHomeOnDisplayArea(r.info, mPreferredTaskDisplayArea,
@@ -1992,7 +1992,7 @@ class ActivityStarter {
         // At this point we are certain we want the task moved to the front. If we need to dismiss
         // any other always-on-top stacks, now is the time to do it.
         if (targetTaskTop.canTurnScreenOn() && mService.mInternal.isDreaming()) {
-            targetTaskTop.mStackSupervisor.wakeUp("recycleTask#turnScreenOnFlag");
+            targetTaskTop.mTaskSupervisor.wakeUp("recycleTask#turnScreenOnFlag");
         }
 
         if (mMovedToFront) {

@@ -1029,7 +1029,7 @@ class UserController implements Handler.Callback {
 
         if (stopped) {
             mInjector.systemServiceManagerOnUserStopped(userId);
-            mInjector.stackSupervisorRemoveUser(userId);
+            mInjector.taskSupervisorRemoveUser(userId);
 
             // Remove the user if it is ephemeral.
             if (userInfo.isEphemeral() && !userInfo.preCreated) {
@@ -1801,11 +1801,11 @@ class UserController implements Handler.Callback {
     }
 
     private void moveUserToForeground(UserState uss, int oldUserId, int newUserId) {
-        boolean homeInFront = mInjector.stackSupervisorSwitchUser(newUserId, uss);
+        boolean homeInFront = mInjector.taskSupervisorSwitchUser(newUserId, uss);
         if (homeInFront) {
             mInjector.startHomeActivity(newUserId, "moveUserToForeground");
         } else {
-            mInjector.stackSupervisorResumeFocusedStackTopActivity();
+            mInjector.taskSupervisorResumeFocusedStackTopActivity();
         }
         EventLogTags.writeAmSwitchUser(newUserId);
         sendUserSwitchBroadcasts(oldUserId, newUserId);
@@ -2913,15 +2913,15 @@ class UserController implements Handler.Callback {
             }
         }
 
-        void stackSupervisorRemoveUser(@UserIdInt int userId) {
+        void taskSupervisorRemoveUser(@UserIdInt int userId) {
             mService.mAtmInternal.removeUser(userId);
         }
 
-        protected boolean stackSupervisorSwitchUser(@UserIdInt int userId, UserState uss) {
+        protected boolean taskSupervisorSwitchUser(@UserIdInt int userId, UserState uss) {
             return mService.mAtmInternal.switchUser(userId, uss);
         }
 
-        protected void stackSupervisorResumeFocusedStackTopActivity() {
+        protected void taskSupervisorResumeFocusedStackTopActivity() {
             mService.mAtmInternal.resumeTopActivities(false /* scheduleIdle */);
         }
 

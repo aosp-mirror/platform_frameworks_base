@@ -327,7 +327,7 @@ public class ActivityStackTests extends WindowTestsBase {
                 targetActivity);
         final ComponentName alias = new ComponentName(DEFAULT_COMPONENT_PACKAGE_NAME,
                 aliasActivity);
-        final Task task = new TaskBuilder(mAtm.mStackSupervisor).setParentTask(mStack).build();
+        final Task task = new TaskBuilder(mAtm.mTaskSupervisor).setParentTask(mStack).build();
         task.origActivity = alias;
         task.realActivity = target;
         new ActivityBuilder(mAtm).setComponent(target).setTask(task).setTargetActivity(
@@ -1279,7 +1279,7 @@ public class ActivityStackTests extends WindowTestsBase {
     public void testNavigateUpTo() {
         final ActivityStartController controller = mock(ActivityStartController.class);
         final ActivityStarter starter = new ActivityStarter(controller,
-                mAtm, mAtm.mStackSupervisor, mock(ActivityStartInterceptor.class));
+                mAtm, mAtm.mTaskSupervisor, mock(ActivityStartInterceptor.class));
         doReturn(controller).when(mAtm).getActivityStartController();
         spyOn(starter);
         doReturn(ActivityManager.START_SUCCESS).when(starter).execute();

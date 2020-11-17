@@ -100,14 +100,14 @@ public class SafeActivityOptions {
      * @param r The record of the being started activity.
      */
     ActivityOptions getOptions(ActivityRecord r) throws SecurityException {
-        return getOptions(r.intent, r.info, r.app, r.mStackSupervisor);
+        return getOptions(r.intent, r.info, r.app, r.mTaskSupervisor);
     }
 
     /**
      * Performs permission check and retrieves the options when options are not being used to launch
      * a specific activity (i.e. a task is moved to front).
      */
-    ActivityOptions getOptions(ActivityStackSupervisor supervisor) throws SecurityException {
+    ActivityOptions getOptions(ActivityTaskSupervisor supervisor) throws SecurityException {
         return getOptions(null, null, null, supervisor);
     }
 
@@ -120,7 +120,7 @@ public class SafeActivityOptions {
      */
     ActivityOptions getOptions(@Nullable Intent intent, @Nullable ActivityInfo aInfo,
             @Nullable WindowProcessController callerApp,
-            ActivityStackSupervisor supervisor) throws SecurityException {
+            ActivityTaskSupervisor supervisor) throws SecurityException {
         if (mOriginalOptions != null) {
             checkPermissions(intent, aInfo, callerApp, supervisor, mOriginalOptions,
                     mOriginalCallingPid, mOriginalCallingUid);
@@ -199,7 +199,7 @@ public class SafeActivityOptions {
     }
 
     private void checkPermissions(@Nullable Intent intent, @Nullable ActivityInfo aInfo,
-            @Nullable WindowProcessController callerApp, ActivityStackSupervisor supervisor,
+            @Nullable WindowProcessController callerApp, ActivityTaskSupervisor supervisor,
             ActivityOptions options, int callingPid, int callingUid) {
         // If a launch task id is specified, then ensure that the caller is the recents
         // component or has the START_TASKS_FROM_RECENTS permission

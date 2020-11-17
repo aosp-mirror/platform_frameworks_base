@@ -553,7 +553,7 @@ public class RecentsAnimationController implements DeathRecipient {
         if (mTargetActivityRecord != null) {
             final ArrayMap<WindowContainer, Integer> reasons = new ArrayMap<>(1);
             reasons.put(mTargetActivityRecord, APP_TRANSITION_RECENTS_ANIM);
-            mService.mAtmService.mStackSupervisor.getActivityMetricsLogger()
+            mService.mAtmService.mTaskSupervisor.getActivityMetricsLogger()
                     .notifyTransitionStarting(reasons);
         }
     }

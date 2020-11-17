@@ -35,7 +35,7 @@ import static android.view.WindowManagerPolicyConstants.KEYGUARD_GOING_AWAY_FLAG
 import static android.view.WindowManagerPolicyConstants.KEYGUARD_GOING_AWAY_FLAG_TO_SHADE;
 import static android.view.WindowManagerPolicyConstants.KEYGUARD_GOING_AWAY_FLAG_WITH_WALLPAPER;
 
-import static com.android.server.wm.ActivityStackSupervisor.PRESERVE_WINDOWS;
+import static com.android.server.wm.ActivityTaskSupervisor.PRESERVE_WINDOWS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.KeyguardControllerProto.AOD_SHOWING;
@@ -67,7 +67,7 @@ class KeyguardController {
 
     private static final String TAG = TAG_WITH_CLASS_NAME ? "KeyguardController" : TAG_ATM;
 
-    private final ActivityStackSupervisor mStackSupervisor;
+    private final ActivityTaskSupervisor mTaskSupervisor;
     private WindowManagerService mWindowManager;
     private boolean mKeyguardShowing;
     private boolean mAodShowing;
@@ -81,9 +81,9 @@ class KeyguardController {
 
 
     KeyguardController(ActivityTaskManagerService service,
-            ActivityStackSupervisor stackSupervisor) {
+            ActivityTaskSupervisor taskSupervisor) {
         mService = service;
-        mStackSupervisor = stackSupervisor;
+        mTaskSupervisor = taskSupervisor;
         mSleepTokenAcquirer = mService.new SleepTokenAcquirerImpl("keyguard");
     }
 
@@ -241,7 +241,7 @@ class KeyguardController {
         // If the client has requested to dismiss the keyguard and the Activity has the flag to
         // turn the screen on, wakeup the screen if it's the top Activity.
         if (activityRecord.getTurnScreenOnFlag() && activityRecord.isTopRunningActivity()) {
-            mStackSupervisor.wakeUp("dismissKeyguard");
+            mTaskSupervisor.wakeUp("dismissKeyguard");
         }
 
         mWindowManager.dismissKeyguard(callback, message);
@@ -323,7 +323,7 @@ class KeyguardController {
     /**
      * Makes sure to update lockscreen occluded/dismiss/turnScreenOn state if needed before
      * completing set all visibility
-     * ({@link ActivityStackSupervisor#beginActivityVisibilityUpdate}).
+     * ({@link ActivityTaskSupervisor#beginActivityVisibilityUpdate}).
      */
     void updateVisibility() {
         boolean requestDismissKeyguard = false;
@@ -413,7 +413,7 @@ class KeyguardController {
             return;
         }
 
-        mStackSupervisor.wakeUp("handleTurnScreenOn");
+        mTaskSupervisor.wakeUp("handleTurnScreenOn");
         if (mKeyguardShowing && canDismissKeyguard()) {
             mWindowManager.dismissKeyguard(null /* callback */, null /* message */);
             mDismissalRequested = true;

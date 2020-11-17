@@ -220,7 +220,7 @@ class EnsureActivitiesVisibleHelper {
             r.setVisibility(true);
         }
         if (r != starting) {
-            mTask.mStackSupervisor.startSpecificActivity(r, andResume, true /* checkConfig */);
+            mTask.mTaskSupervisor.startSpecificActivity(r, andResume, true /* checkConfig */);
         }
     }
 }

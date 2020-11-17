@@ -180,7 +180,7 @@ public class TaskTests extends WindowTestsBase {
 
         task.removeChild(activity1);
 
-        verify(task.mStackSupervisor).removeTask(any(), anyBoolean(), anyBoolean(), anyString());
+        verify(task.mTaskSupervisor).removeTask(any(), anyBoolean(), anyBoolean(), anyString());
         assertEquals(2, task.getChildCount());
         task.forAllActivities((r) -> {
             assertTrue(r.finishing);

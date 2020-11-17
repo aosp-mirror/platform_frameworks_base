@@ -83,13 +83,13 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
     // We always want to step by at least this.
     private static final int MINIMAL_STEP = 1;
 
-    private final ActivityStackSupervisor mSupervisor;
+    private final ActivityTaskSupervisor mSupervisor;
     private final Rect mTmpBounds = new Rect();
     private final int[] mTmpDirections = new int[2];
 
     private StringBuilder mLogBuilder;
 
-    TaskLaunchParamsModifier(ActivityStackSupervisor supervisor) {
+    TaskLaunchParamsModifier(ActivityTaskSupervisor supervisor) {
         mSupervisor = supervisor;
     }
 
