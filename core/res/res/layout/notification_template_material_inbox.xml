@@ -39,7 +39,6 @@
             android:layout_gravity="top"
             android:paddingStart="@dimen/notification_content_margin_start"
             android:paddingEnd="@dimen/notification_content_margin_end"
-            android:minHeight="@dimen/notification_min_content_height"
             android:layout_weight="1"
             android:clipToPadding="false"
             android:orientation="vertical"
