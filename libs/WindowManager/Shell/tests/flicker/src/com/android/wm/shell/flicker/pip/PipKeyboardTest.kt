@@ -76,12 +76,12 @@ class PipKeyboardTest(
             }
             teardown {
                 test {
-                    keyboardApp.exit()
+                    keyboardApp.forceStop()
 
                     if (device.hasPipWindow()) {
                         device.closePipWindow()
                     }
-                    testApp.exit()
+                    testApp.forceStop()
                     this.setRotation(Surface.ROTATION_0)
                 }
             }
