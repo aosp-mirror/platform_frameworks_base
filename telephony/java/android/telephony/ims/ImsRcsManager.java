@@ -26,6 +26,7 @@ import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.os.ServiceSpecificException;
 import android.provider.Settings;
 import android.telephony.AccessNetworkConstants;
 import android.telephony.BinderCacheManager;
@@ -198,6 +199,8 @@ public class ImsRcsManager {
         c.setExecutor(executor);
         try {
             imsRcsController.registerImsRegistrationCallback(mSubId, c.getBinder());
+        } catch (ServiceSpecificException e) {
+            throw new ImsException(e.toString(), e.errorCode);
         } catch (RemoteException | IllegalStateException e) {
             throw new ImsException(e.getMessage(), ImsException.CODE_ERROR_SERVICE_UNAVAILABLE);
         }
@@ -333,6 +336,9 @@ public class ImsRcsManager {
         c.setExecutor(executor);
         try {
             imsRcsController.registerRcsAvailabilityCallback(mSubId, c.getBinder());
+
+        } catch (ServiceSpecificException e) {
+            throw new ImsException(e.toString(), e.errorCode);
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling IImsRcsController#registerRcsAvailabilityCallback", e);
             throw new ImsException("Remote IMS Service is not available",
