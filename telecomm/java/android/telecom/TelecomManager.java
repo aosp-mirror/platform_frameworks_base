@@ -32,6 +32,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -42,6 +43,7 @@ import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.telecom.ITelecomService;
 
 import java.lang.annotation.Retention;
@@ -942,6 +944,15 @@ public class TelecomManager {
     public @interface Presentation {}
 
     private static final String TAG = "TelecomManager";
+
+
+    /** Cached service handles, cleared by resetServiceCache() at death */
+    private static final Object CACHE_LOCK = new Object();
+
+    @GuardedBy("CACHE_LOCK")
+    private static ITelecomService sTelecomService;
+    @GuardedBy("CACHE_LOCK")
+    private static final DeathRecipient SERVICE_DEATH = new DeathRecipient();
 
     private final Context mContext;
 
@@ -2472,11 +2483,36 @@ public class TelecomManager {
         if (mTelecomServiceOverride != null) {
             return mTelecomServiceOverride;
         }
-        ITelecomService service = ITelecomService.Stub.asInterface(
-                ServiceManager.getService(Context.TELECOM_SERVICE));
-        if (service == null) {
-            Log.w(TAG, "Telecom Service not found.");
+        if (sTelecomService == null) {
+            ITelecomService temp = ITelecomService.Stub.asInterface(
+                    ServiceManager.getService(Context.TELECOM_SERVICE));
+            synchronized (CACHE_LOCK) {
+                if (sTelecomService == null && temp != null) {
+                    try {
+                        sTelecomService = temp;
+                        sTelecomService.asBinder().linkToDeath(SERVICE_DEATH, 0);
+                    } catch (Exception e) {
+                        sTelecomService = null;
+                    }
+                }
+            }
         }
-        return service;
+        return sTelecomService;
+    }
+
+    private static class DeathRecipient implements IBinder.DeathRecipient {
+        @Override
+        public void binderDied() {
+            resetServiceCache();
+        }
+    }
+
+    private static void resetServiceCache() {
+        synchronized (CACHE_LOCK) {
+            if (sTelecomService != null) {
+                sTelecomService.asBinder().unlinkToDeath(SERVICE_DEATH, 0);
+                sTelecomService = null;
+            }
+        }
     }
 }
