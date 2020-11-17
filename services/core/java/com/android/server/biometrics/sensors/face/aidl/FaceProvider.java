@@ -580,6 +580,9 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
     }
 
     @Override
+    public void dumpHal(int sensorId, @NonNull FileDescriptor fd, @NonNull String[] args) {}
+
+    @Override
     public void binderDied() {
         Slog.e(getTag(), "HAL died");
         mHandler.post(() -> {
