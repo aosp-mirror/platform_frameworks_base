@@ -28,8 +28,7 @@
     <string name="pip_skip_to_next" msgid="8403429188794867653">"దాటవేసి తర్వాత దానికి వెళ్లు"</string>
     <string name="pip_skip_to_prev" msgid="7172158111196394092">"దాటవేసి మునుపటి దానికి వెళ్లు"</string>
     <string name="accessibility_action_pip_resize" msgid="4623966104749543182">"పరిమాణం మార్చు"</string>
-    <!-- no translation found for dock_forced_resizable (1749750436092293116) -->
-    <skip />
+    <string name="dock_forced_resizable" msgid="1749750436092293116">"స్క్రీన్ విభజనతో యాప్‌ పని చేయకపోవచ్చు."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"అనువర్తనంలో స్క్రీన్ విభజనకు మద్దతు లేదు."</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"ప్రత్యామ్నాయ డిస్‌ప్లేలో యాప్ పని చేయకపోవచ్చు."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"ప్రత్యామ్నాయ డిస్‌ప్లేల్లో ప్రారంభానికి యాప్ మద్దతు లేదు."</string>
@@ -44,14 +43,10 @@
     <string name="accessibility_action_divider_top_50" msgid="8649582798829048946">"ఎగువ 50%"</string>
     <string name="accessibility_action_divider_top_30" msgid="3572788224908570257">"ఎగువ 30%"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="2831868345092314060">"దిగువ పూర్తి స్క్రీన్"</string>
-    <!-- no translation found for one_handed_tutorial_title (4583241688067426350) -->
-    <skip />
-    <!-- no translation found for one_handed_tutorial_description (3486582858591353067) -->
-    <skip />
-    <!-- no translation found for accessibility_action_start_one_handed (5070337354072861426) -->
-    <skip />
-    <!-- no translation found for accessibility_action_stop_one_handed (1369940261782179442) -->
-    <skip />
+    <string name="one_handed_tutorial_title" msgid="4583241688067426350">"వన్-హ్యాండెడ్ మోడ్‌ను ఉపయోగించడం"</string>
+    <string name="one_handed_tutorial_description" msgid="3486582858591353067">"నిష్క్రమించడానికి, స్క్రీన్ కింది భాగం నుండి పైకి స్వైప్ చేయండి లేదా యాప్ పైన ఎక్కడైనా ట్యాప్ చేయండి"</string>
+    <string name="accessibility_action_start_one_handed" msgid="5070337354072861426">"వన్-హ్యాండెడ్ మోడ్‌ను ప్రారంభిస్తుంది"</string>
+    <string name="accessibility_action_stop_one_handed" msgid="1369940261782179442">"వన్-హ్యాండెడ్ మోడ్ నుండి నిష్క్రమింపజేస్తుంది"</string>
     <string name="bubbles_settings_button_description" msgid="1301286017420516912">"<xliff:g id="APP_NAME">%1$s</xliff:g> బబుల్స్ సెట్టింగ్‌లు"</string>
     <string name="bubble_overflow_button_content_description" msgid="8160974472718594382">"ఓవర్‌ఫ్లో"</string>
     <string name="bubble_accessibility_action_add_back" msgid="1830101076853540953">"స్ట్యాక్‌కు తిరిగి జోడించండి"</string>
@@ -68,8 +63,7 @@
     <string name="bubbles_user_education_description" msgid="4215862563054175407">"కొత్త సంభాషణలు తేలియాడే చిహ్నాలుగా లేదా బబుల్స్ లాగా కనిపిస్తాయి. బబుల్‌ని తెరవడానికి నొక్కండి. తరలించడానికి లాగండి."</string>
     <string name="bubbles_user_education_manage_title" msgid="7042699946735628035">"బబుల్స్‌ను ఎప్పుడైనా నియంత్రించండి"</string>
     <string name="bubbles_user_education_manage" msgid="3460756219946517198">"ఈ యాప్ నుండి వచ్చే బబుల్స్‌ను ఆఫ్ చేయడానికి మేనేజ్ బటన్‌ను ట్యాప్ చేయండి"</string>
-    <!-- no translation found for bubbles_user_education_got_it (3382046149225428296) -->
-    <skip />
+    <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"అర్థమైంది"</string>
     <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"ఇటీవలి బబుల్స్ ఏవీ లేవు"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"ఇటీవలి బబుల్స్ మరియు తీసివేసిన బబుల్స్ ఇక్కడ కనిపిస్తాయి"</string>
     <string name="notification_bubble_title" msgid="6082910224488253378">"బబుల్"</string>

@@ -44,8 +44,8 @@
     <string name="accessibility_action_divider_top_30" msgid="3572788224908570257">"頂部 30%"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="2831868345092314060">"底部全螢幕"</string>
     <string name="one_handed_tutorial_title" msgid="4583241688067426350">"使用單手模式"</string>
-    <string name="one_handed_tutorial_description" msgid="3486582858591353067">"如要退出，請從螢幕底部向上滑動，或輕觸應用程式上的任何位置"</string>
-    <string name="accessibility_action_start_one_handed" msgid="5070337354072861426">"啟動單手模式"</string>
+    <string name="one_handed_tutorial_description" msgid="3486582858591353067">"如要退出，請從螢幕底部向上滑動，或輕按應用程式上方的任何位置"</string>
+    <string name="accessibility_action_start_one_handed" msgid="5070337354072861426">"開始單手模式"</string>
     <string name="accessibility_action_stop_one_handed" msgid="1369940261782179442">"結束單手模式"</string>
     <string name="bubbles_settings_button_description" msgid="1301286017420516912">"「<xliff:g id="APP_NAME">%1$s</xliff:g>」小視窗設定"</string>
     <string name="bubble_overflow_button_content_description" msgid="8160974472718594382">"顯示更多"</string>
@@ -63,7 +63,7 @@
     <string name="bubbles_user_education_description" msgid="4215862563054175407">"新對話會以浮動圖示 (小視窗) 顯示。輕按即可開啟小視窗。拖曳即可移動小視窗。"</string>
     <string name="bubbles_user_education_manage_title" msgid="7042699946735628035">"隨時控制小視窗設定"</string>
     <string name="bubbles_user_education_manage" msgid="3460756219946517198">"輕按「管理」即可關閉此應用程式的小視窗"</string>
-    <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"我知道了"</string>
+    <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"知道了"</string>
     <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"沒有最近曾使用的小視窗"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"最近使用和關閉的小視窗會在這裡顯示"</string>
     <string name="notification_bubble_title" msgid="6082910224488253378">"氣泡"</string>
