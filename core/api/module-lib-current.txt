@@ -11,6 +11,11 @@ package android.app {
     field public static final String OPSTR_NO_ISOLATED_STORAGE = "android:no_isolated_storage";
   }
 
+  public class BroadcastOptions {
+    method public int getMaxManifestReceiverApiLevel();
+    method public void setMaxManifestReceiverApiLevel(int);
+  }
+
   public abstract class HomeVisibilityListener {
     ctor public HomeVisibilityListener();
     method public abstract void onHomeVisibilityChanged(boolean);
