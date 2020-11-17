@@ -512,6 +512,7 @@ message Atom {
         WifiScanReported wifi_scan_reported = 325 [(module) = "wifi"];
         WifiPnoScanReported wifi_pno_scan_reported = 326  [(module) = "wifi"];
         TifTuneStateChanged tif_tune_changed = 327 [(module) = "framework"];
+        AutoRotateReported auto_rotate_reported = 328 [(module) = "framework"];
 
         // StatsdStats tracks platform atoms with ids upto 500.
         // Update StatsdStats::kMaxPushedAtomId when atom ids here approach that value.
@@ -12111,6 +12112,33 @@ message HdmiCecMessageReported {
 
     // The reason for the feature abort.
     optional android.stats.hdmi.FeatureAbortReason feature_abort_reason = 9;
+}
+
+/**
+ * Logs when an auto rotate event occurs while smart auto rotate is enabled.
+ */
+message AutoRotateReported {
+    enum Orientation {
+        UNKNOWN = 1;
+        ROTATION_0 = 2;
+        ROTATION_90 = 3;
+        ROTATION_180 = 4;
+        ROTATION_270 = 5;
+        DISABLED = 6;
+        UNAVAILABLE = 7;
+        FAILURE = 8;
+    }
+
+    // Orientation of the device when a rotation was detected.
+    optional Orientation current_orientation = 1;
+    // The orientation of the phone after rotation before going through the recommendation service.
+    optional Orientation proposed_orientation = 2;
+    // Orientation recommended by the smart autorotate service component outside of the platform. It
+    // may or may not match the proposed_orientation. Can be disabled or unavailable if the
+    // recommendation service is disabled or unavailable. Will be unknown if the service failed.
+    optional Orientation recommended_orientation = 3;
+    // Time taken to calculate the rotation recommendation.
+    optional int64 recommendation_process_duration_millis = 4;
 }
 
 /**
