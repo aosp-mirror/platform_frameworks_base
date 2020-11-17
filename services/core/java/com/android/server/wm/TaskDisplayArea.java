@@ -1189,6 +1189,12 @@ final class TaskDisplayArea extends DisplayArea<Task> {
             return;
         }
 
+        // Clear last paused activity if focused root task changed while sleeping, so that the
+        // top activity of current focused task can be resumed.
+        if (mDisplayContent.isSleeping()) {
+            currentFocusedTask.mLastPausedActivity = null;
+        }
+
         mLastFocusedStack = prevFocusedTask;
         EventLogTags.writeWmFocusedStack(mRootWindowContainer.mCurrentUser,
                 mDisplayContent.mDisplayId,
