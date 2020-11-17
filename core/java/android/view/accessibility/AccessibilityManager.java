@@ -19,9 +19,11 @@ package android.view.accessibility;
 import static android.accessibilityservice.AccessibilityServiceInfo.FLAG_ENABLE_ACCESSIBILITY_VOLUME;
 
 import android.Manifest;
+import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.accessibilityservice.AccessibilityServiceInfo.FeedbackType;
 import android.accessibilityservice.AccessibilityShortcutInfo;
+import android.annotation.ColorInt;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -59,6 +61,7 @@ import android.view.IWindow;
 import android.view.View;
 import android.view.accessibility.AccessibilityEvent.EventType;
 
+import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.IntPair;
 
@@ -232,6 +235,11 @@ public final class AccessibilityManager {
     AccessibilityPolicy mAccessibilityPolicy;
 
     private int mPerformingAction = 0;
+
+    /** The stroke width of the focus rectangle in pixels */
+    private int mFocusStrokeWidth;
+    /** The color of the focus rectangle */
+    private int mFocusColor;
 
     @UnsupportedAppUsage
     private final ArrayMap<AccessibilityStateChangeListener, Handler>
@@ -410,6 +418,13 @@ public final class AccessibilityManager {
         public void setRelevantEventTypes(int eventTypes) {
             mRelevantEventTypes = eventTypes;
         }
+
+        @Override
+        public void setFocusAppearance(int strokeWidth, int color) {
+            synchronized (mLock) {
+                updateFocusAppearanceLocked(strokeWidth, color);
+            }
+        }
     };
 
     /**
@@ -457,6 +472,7 @@ public final class AccessibilityManager {
         mHandler = new Handler(context.getMainLooper(), mCallback);
         mUserId = userId;
         synchronized (mLock) {
+            initialFocusAppearanceLocked(context.getResources());
             tryConnectToServiceLocked(service);
         }
     }
@@ -464,18 +480,26 @@ public final class AccessibilityManager {
     /**
      * Create an instance.
      *
+     * @param context A {@link Context}.
      * @param handler The handler to use
      * @param service An interface to the backing service.
      * @param userId User id under which to run.
+     * @param serviceConnect {@code true} to connect the service or
+     *                       {@code false} not to connect the service.
      *
      * @hide
      */
-    public AccessibilityManager(Handler handler, IAccessibilityManager service, int userId) {
+    @VisibleForTesting
+    public AccessibilityManager(Context context, Handler handler, IAccessibilityManager service,
+            int userId, boolean serviceConnect) {
         mCallback = new MyCallback();
         mHandler = handler;
         mUserId = userId;
         synchronized (mLock) {
-            tryConnectToServiceLocked(service);
+            initialFocusAppearanceLocked(context.getResources());
+            if (serviceConnect) {
+                tryConnectToServiceLocked(service);
+            }
         }
     }
 
@@ -951,6 +975,32 @@ public final class AccessibilityManager {
             recommendedTimeout = Math.max(recommendedTimeout, mNonInteractiveUiTimeout);
         }
         return recommendedTimeout;
+    }
+
+    /**
+     * Gets the strokeWidth of the focus rectangle. This value can be set by
+     * {@link AccessibilityService}.
+     *
+     * @return The strokeWidth of the focus rectangle in pixels.
+     *
+     */
+    public int getAccessibilityFocusStrokeWidth() {
+        synchronized (mLock) {
+            return mFocusStrokeWidth;
+        }
+    }
+
+    /**
+     * Gets the color of the focus rectangle. This value can be set by
+     * {@link AccessibilityService}.
+     *
+     * @return The color of the focus rectangle.
+     *
+     */
+    public @ColorInt int getAccessibilityFocusColor() {
+        synchronized (mLock) {
+            return mFocusColor;
+        }
     }
 
     /**
@@ -1551,6 +1601,7 @@ public final class AccessibilityManager {
             setStateLocked(IntPair.first(userStateAndRelevantEvents));
             mRelevantEventTypes = IntPair.second(userStateAndRelevantEvents);
             updateUiTimeout(service.getRecommendedTimeoutMillis());
+            updateFocusAppearanceLocked(service.getFocusStrokeWidth(), service.getFocusColor());
             mService = service;
         } catch (RemoteException re) {
             Log.e(LOG_TAG, "AccessibilityManagerService is dead", re);
@@ -1632,6 +1683,40 @@ public final class AccessibilityManager {
     private void updateUiTimeout(long uiTimeout) {
         mInteractiveUiTimeout = IntPair.first(uiTimeout);
         mNonInteractiveUiTimeout = IntPair.second(uiTimeout);
+    }
+
+    /**
+     * Updates the stroke width and color of the focus rectangle.
+     *
+     * @param strokeWidth The strokeWidth of the focus rectangle.
+     * @param color The color of the focus rectangle.
+     */
+    private void updateFocusAppearanceLocked(int strokeWidth, int color) {
+        if (mFocusStrokeWidth == strokeWidth && mFocusColor == color) {
+            return;
+        }
+        mFocusStrokeWidth = strokeWidth;
+        mFocusColor = color;
+    }
+
+    /**
+     * Sets the stroke width and color of the focus rectangle to default value.
+     *
+     * @param resource The resources.
+     */
+    private void initialFocusAppearanceLocked(Resources resource) {
+        try {
+            mFocusStrokeWidth = resource.getDimensionPixelSize(
+                    R.dimen.accessibility_focus_highlight_stroke_width);
+            mFocusColor = resource.getColor(R.color.accessibility_focus_highlight_color);
+        } catch (Resources.NotFoundException re) {
+            // Sets the stroke width and color to default value by hardcoded for making
+            // the Talkback can work normally.
+            mFocusStrokeWidth = (int) (4 * resource.getDisplayMetrics().density);
+            mFocusColor = 0xbf39b500;
+            Log.e(LOG_TAG, "Error while initialing the focus appearance data then setting to"
+                    + " default value by hardcoded", re);
+        }
     }
 
     /**

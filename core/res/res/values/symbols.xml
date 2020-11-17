@@ -4115,4 +4115,9 @@
 
   <!-- Component with platform query permissions for AppSearch -->
   <java-symbol type="string" name="config_defaultAppSearchPlatformQuerierComponent" />
+
+  <!-- Color used by the accessibility focus rectangle -->
+  <java-symbol type="color" name="accessibility_focus_highlight_color" />
+  <!-- Width of the outline stroke used by the accessibility focus rectangle -->
+  <java-symbol type="dimen" name="accessibility_focus_highlight_stroke_width" />
 </resources>

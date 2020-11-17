@@ -115,4 +115,6 @@ interface IAccessibilityServiceConnection {
     void setGestureDetectionPassthroughRegion(int displayId, in Region region);
 
     void setTouchExplorationPassthroughRegion(int displayId, in Region region);
+
+    void setFocusAppearance(int strokeWidth, int color);
 }

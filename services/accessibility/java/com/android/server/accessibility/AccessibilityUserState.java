@@ -45,6 +45,7 @@ import android.util.Slog;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.IAccessibilityManagerClient;
 
+import com.android.internal.R;
 import com.android.internal.accessibility.AccessibilityShortcutController;
 
 import java.io.FileDescriptor;
@@ -122,6 +123,15 @@ class AccessibilityUserState {
     // The magnification capabilities used to know magnification mode could be switched.
     private int mMagnificationCapabilities = ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN;
 
+    /** The stroke width of the focus rectangle in pixels */
+    private int mFocusStrokeWidth;
+    /** The color of the focus rectangle */
+    private int mFocusColor;
+    // The default value of the focus stroke width.
+    private final int mFocusStrokeWidthDefaultValue;
+    // The default value of the focus color.
+    private final int mFocusColorDefaultValue;
+
     private Context mContext;
 
     @SoftKeyboardShowMode
@@ -140,6 +150,12 @@ class AccessibilityUserState {
         mUserId = userId;
         mContext = context;
         mServiceInfoChangeListener = serviceInfoChangeListener;
+        mFocusStrokeWidthDefaultValue = mContext.getResources().getDimensionPixelSize(
+                R.dimen.accessibility_focus_highlight_stroke_width);
+        mFocusColorDefaultValue = mContext.getResources().getColor(
+                R.color.accessibility_focus_highlight_color);
+        mFocusStrokeWidth = mFocusStrokeWidthDefaultValue;
+        mFocusColor = mFocusColorDefaultValue;
     }
 
     boolean isHandlingAccessibilityEventsLocked() {
@@ -178,6 +194,7 @@ class AccessibilityUserState {
         mUserNonInteractiveUiTimeout = 0;
         mUserInteractiveUiTimeout = 0;
         mMagnificationMode = ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN;
+        resetFocusAppearanceLocked();
     }
 
     void addServiceLocked(AccessibilityServiceConnection serviceConnection) {
@@ -879,5 +896,41 @@ class AccessibilityUserState {
             }
         }
         return false;
+    }
+
+    /**
+     * Gets the stroke width of the focus rectangle.
+     * @return The stroke width.
+     */
+    public int getFocusStrokeWidthLocked() {
+        return mFocusStrokeWidth;
+    }
+
+    /**
+     * Gets the color of the focus rectangle.
+     * @return The color.
+     */
+    public int getFocusColorLocked() {
+        return mFocusColor;
+    }
+
+    /**
+     * Sets the stroke width and color of the focus rectangle.
+     *
+     * @param strokeWidth The strokeWidth of the focus rectangle.
+     * @param color The color of the focus rectangle.
+     */
+    public void setFocusAppearanceLocked(int strokeWidth, int color) {
+        mFocusStrokeWidth = strokeWidth;
+        mFocusColor = color;
+    }
+
+    /**
+     * Resets the stroke width and color of the focus rectangle to the default value.
+     *
+     */
+    public void resetFocusAppearanceLocked() {
+        mFocusStrokeWidth = mFocusStrokeWidthDefaultValue;
+        mFocusColor = mFocusColorDefaultValue;
     }
 }

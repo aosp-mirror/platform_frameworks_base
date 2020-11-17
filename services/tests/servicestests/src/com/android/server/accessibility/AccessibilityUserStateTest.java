@@ -42,11 +42,16 @@ import static org.mockito.Mockito.when;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.res.Resources;
+import android.graphics.Color;
 import android.provider.Settings;
 import android.test.mock.MockContentResolver;
 import android.testing.DexmakerShareClassLoaderRule;
 import android.util.ArraySet;
 
+import androidx.test.InstrumentationRegistry;
+
+import com.android.internal.R;
 import com.android.internal.util.test.FakeSettingsProvider;
 
 import org.junit.After;
@@ -90,8 +95,13 @@ public class AccessibilityUserStateTest {
 
     private AccessibilityUserState mUserState;
 
+    private int mFocusStrokeWidthDefaultValue;
+    private int mFocusColorDefaultValue;
+
     @Before
     public void setUp() {
+        final Resources resources = InstrumentationRegistry.getContext().getResources();
+
         MockitoAnnotations.initMocks(this);
         FakeSettingsProvider.clearSettingsProvider();
         mMockResolver = new MockContentResolver();
@@ -99,6 +109,11 @@ public class AccessibilityUserStateTest {
         when(mMockContext.getContentResolver()).thenReturn(mMockResolver);
         when(mMockServiceInfo.getComponentName()).thenReturn(COMPONENT_NAME);
         when(mMockConnection.getServiceInfo()).thenReturn(mMockServiceInfo);
+        when(mMockContext.getResources()).thenReturn(resources);
+
+        mFocusStrokeWidthDefaultValue =
+                resources.getDimensionPixelSize(R.dimen.accessibility_focus_highlight_stroke_width);
+        mFocusColorDefaultValue = resources.getColor(R.color.accessibility_focus_highlight_color);
 
         mUserState = new AccessibilityUserState(USER_ID, mMockContext, mMockListener);
     }
@@ -129,6 +144,7 @@ public class AccessibilityUserStateTest {
         mUserState.setUserNonInteractiveUiTimeoutLocked(30);
         mUserState.setUserInteractiveUiTimeoutLocked(30);
         mUserState.setMagnificationModeLocked(ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW);
+        mUserState.setFocusAppearanceLocked(20, Color.BLUE);
 
         mUserState.onSwitchToAnotherUserLocked();
 
@@ -150,6 +166,8 @@ public class AccessibilityUserStateTest {
         assertEquals(0, mUserState.getUserInteractiveUiTimeoutLocked());
         assertEquals(ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN,
                 mUserState.getMagnificationModeLocked());
+        assertEquals(mFocusStrokeWidthDefaultValue, mUserState.getFocusStrokeWidthLocked());
+        assertEquals(mFocusColorDefaultValue, mUserState.getFocusColorLocked());
     }
 
     @Test
@@ -348,6 +366,21 @@ public class AccessibilityUserStateTest {
 
         assertEquals(ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW,
                 mUserState.getMagnificationModeLocked());
+    }
+
+    @Test
+    public void setFocusAppearanceData_returnExpectedFocusAppearanceData() {
+        final int focusStrokeWidthValue = 100;
+        final int focusColorValue = Color.BLUE;
+
+        assertEquals(mFocusStrokeWidthDefaultValue, mUserState.getFocusStrokeWidthLocked());
+        assertEquals(mFocusColorDefaultValue, mUserState.getFocusColorLocked());
+
+        mUserState.setFocusAppearanceLocked(focusStrokeWidthValue, focusColorValue);
+
+        assertEquals(focusStrokeWidthValue, mUserState.getFocusStrokeWidthLocked());
+        assertEquals(focusColorValue, mUserState.getFocusColorLocked());
+
     }
 
     private int getSecureIntForUser(String key, int userId) {
