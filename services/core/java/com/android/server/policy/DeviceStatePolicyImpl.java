@@ -17,6 +17,7 @@
 package com.android.server.policy;
 
 import android.annotation.NonNull;
+import android.content.Context;
 
 import com.android.server.devicestate.DeviceStatePolicy;
 import com.android.server.devicestate.DeviceStateProvider;
@@ -27,10 +28,12 @@ import com.android.server.devicestate.DeviceStateProvider;
  * @see DeviceStateProviderImpl
  */
 public final class DeviceStatePolicyImpl implements DeviceStatePolicy {
+    private final Context mContext;
     private final DeviceStateProvider mProvider;
 
-    public DeviceStatePolicyImpl() {
-        mProvider = DeviceStateProviderImpl.create();
+    public DeviceStatePolicyImpl(Context context) {
+        mContext = context;
+        mProvider = DeviceStateProviderImpl.create(mContext);
     }
 
     public DeviceStateProvider getDeviceStateProvider() {

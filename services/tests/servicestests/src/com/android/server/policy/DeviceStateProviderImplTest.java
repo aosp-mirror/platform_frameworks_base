@@ -17,15 +17,23 @@
 package com.android.server.policy;
 
 
+import static android.content.Context.SENSOR_SERVICE;
+
 import static com.android.server.policy.DeviceStateProviderImpl.DEFAULT_DEVICE_STATE;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.annotation.Nullable;
+import android.content.Context;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorManager;
 import android.hardware.input.InputManagerInternal;
 
 import androidx.annotation.NonNull;
@@ -38,10 +46,13 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
+import org.mockito.internal.util.reflection.FieldSetter;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Constructor;
+import java.util.List;
 
 /**
  * Unit tests for {@link DeviceStateProviderImpl}.
@@ -52,9 +63,16 @@ public final class DeviceStateProviderImplTest {
     private final ArgumentCaptor<int[]> mIntArrayCaptor = ArgumentCaptor.forClass(int[].class);
     private final ArgumentCaptor<Integer> mIntegerCaptor = ArgumentCaptor.forClass(Integer.class);
 
+    private Context mContext;
+    private SensorManager mSensorManager;
+
     @Before
     public void setup() {
         LocalServices.addService(InputManagerInternal.class, mock(InputManagerInternal.class));
+        mContext = mock(Context.class);
+        mSensorManager = mock(SensorManager.class);
+        when(mContext.getSystemServiceName(eq(SensorManager.class))).thenReturn(SENSOR_SERVICE);
+        when(mContext.getSystemService(eq(SENSOR_SERVICE))).thenReturn(mSensorManager);
     }
 
     @After
@@ -95,7 +113,8 @@ public final class DeviceStateProviderImplTest {
 
     private void assertDefaultProviderValues(
             @Nullable DeviceStateProviderImpl.ReadableConfig config) {
-        DeviceStateProviderImpl provider = DeviceStateProviderImpl.createFromConfig(config);
+        DeviceStateProviderImpl provider = DeviceStateProviderImpl.createFromConfig(mContext,
+                config);
 
         DeviceStateProvider.Listener listener = mock(DeviceStateProvider.Listener.class);
         provider.setListener(listener);
@@ -128,7 +147,8 @@ public final class DeviceStateProviderImplTest {
                 + "    </device-state>\n"
                 + "</device-state-config>\n";
         DeviceStateProviderImpl.ReadableConfig config = new TestReadableConfig(configString);
-        DeviceStateProviderImpl provider = DeviceStateProviderImpl.createFromConfig(config);
+        DeviceStateProviderImpl provider = DeviceStateProviderImpl.createFromConfig(mContext,
+                config);
 
         DeviceStateProvider.Listener listener = mock(DeviceStateProvider.Listener.class);
         provider.setListener(listener);
@@ -146,6 +166,110 @@ public final class DeviceStateProviderImplTest {
         verify(listener, never()).onSupportedDeviceStatesChanged(mIntArrayCaptor.capture());
         verify(listener).onStateChanged(mIntegerCaptor.capture());
         assertEquals(1, mIntegerCaptor.getValue().intValue());
+    }
+
+    @Test
+    public void create_sensor() throws Exception {
+        Sensor sensor = newSensor("sensor", Sensor.TYPE_HINGE_ANGLE);
+        when(mSensorManager.getSensorList(eq(sensor.getType()))).thenReturn(List.of(sensor));
+
+        String configString = "<device-state-config>\n"
+                + "    <device-state>\n"
+                + "        <identifier>1</identifier>\n"
+                + "        <conditions>\n"
+                + "            <sensor>\n"
+                + "                <name>" + sensor.getName() + "</name>\n"
+                + "                <type>" + sensor.getType() + "</type>\n"
+                + "                <value>\n"
+                + "                    <max>90</max>\n"
+                + "                </value>\n"
+                + "            </sensor>\n"
+                + "        </conditions>\n"
+                + "    </device-state>\n"
+                + "    <device-state>\n"
+                + "        <identifier>2</identifier>\n"
+                + "        <conditions>\n"
+                + "            <sensor>\n"
+                + "                <name>" + sensor.getName() + "</name>\n"
+                + "                <type>" + sensor.getType() + "</type>\n"
+                + "                <value>\n"
+                + "                    <min-inclusive>90</min-inclusive>\n"
+                + "                    <max>180</max>\n"
+                + "                </value>\n"
+                + "            </sensor>\n"
+                + "        </conditions>\n"
+                + "    </device-state>\n"
+                + "    <device-state>\n"
+                + "        <identifier>3</identifier>\n"
+                + "        <conditions>\n"
+                + "            <sensor>\n"
+                + "                <name>" + sensor.getName() + "</name>\n"
+                + "                <type>" + sensor.getType() + "</type>\n"
+                + "                <value>\n"
+                + "                    <min-inclusive>180</min-inclusive>\n"
+                + "                </value>\n"
+                + "            </sensor>\n"
+                + "        </conditions>\n"
+                + "    </device-state>\n"
+                + "</device-state-config>\n";
+        DeviceStateProviderImpl.ReadableConfig config = new TestReadableConfig(configString);
+        DeviceStateProviderImpl provider = DeviceStateProviderImpl.createFromConfig(mContext,
+                config);
+
+        DeviceStateProvider.Listener listener = mock(DeviceStateProvider.Listener.class);
+        provider.setListener(listener);
+
+        verify(listener).onSupportedDeviceStatesChanged(mIntArrayCaptor.capture());
+        assertArrayEquals(new int[] { 1, 2, 3 }, mIntArrayCaptor.getValue());
+
+        verify(listener).onStateChanged(mIntegerCaptor.capture());
+        assertEquals(1, mIntegerCaptor.getValue().intValue());
+
+        Mockito.clearInvocations(listener);
+
+        SensorEvent event0 = mock(SensorEvent.class);
+        event0.sensor = sensor;
+        FieldSetter.setField(event0, event0.getClass().getField("values"), new float[] { 180 });
+
+        provider.onSensorChanged(event0);
+
+        verify(listener, never()).onSupportedDeviceStatesChanged(mIntArrayCaptor.capture());
+        verify(listener).onStateChanged(mIntegerCaptor.capture());
+        assertEquals(3, mIntegerCaptor.getValue().intValue());
+
+        Mockito.clearInvocations(listener);
+
+        SensorEvent event1 = mock(SensorEvent.class);
+        event1.sensor = sensor;
+        FieldSetter.setField(event1, event1.getClass().getField("values"), new float[] { 90 });
+
+        provider.onSensorChanged(event1);
+
+        verify(listener, never()).onSupportedDeviceStatesChanged(mIntArrayCaptor.capture());
+        verify(listener).onStateChanged(mIntegerCaptor.capture());
+        assertEquals(2, mIntegerCaptor.getValue().intValue());
+
+        Mockito.clearInvocations(listener);
+
+        SensorEvent event2 = mock(SensorEvent.class);
+        event2.sensor = sensor;
+        FieldSetter.setField(event2, event2.getClass().getField("values"), new float[] { 0 });
+
+        provider.onSensorChanged(event2);
+
+        verify(listener, never()).onSupportedDeviceStatesChanged(mIntArrayCaptor.capture());
+        verify(listener).onStateChanged(mIntegerCaptor.capture());
+        assertEquals(1, mIntegerCaptor.getValue().intValue());
+    }
+
+    private static Sensor newSensor(String name, int type) throws Exception {
+        Constructor<Sensor> constructor = Sensor.class.getDeclaredConstructor();
+        constructor.setAccessible(true);
+
+        Sensor sensor = constructor.newInstance();
+        FieldSetter.setField(sensor, Sensor.class.getDeclaredField("mName"), name);
+        FieldSetter.setField(sensor, Sensor.class.getDeclaredField("mType"), type);
+        return sensor;
     }
 
     private static final class TestReadableConfig implements

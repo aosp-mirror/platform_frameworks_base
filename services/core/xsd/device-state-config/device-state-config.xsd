@@ -45,6 +45,7 @@
     <xs:complexType name="conditions">
         <xs:sequence>
             <xs:element name="lid-switch" type="lidSwitchCondition" minOccurs="0" />
+            <xs:element name="sensor" type="sensorCondition" minOccurs="0" maxOccurs="unbounded" />
         </xs:sequence>
     </xs:complexType>
 
@@ -54,4 +55,24 @@
         </xs:sequence>
     </xs:complexType>
 
+    <xs:complexType name="sensorCondition">
+        <xs:sequence>
+            <xs:element name="name" type="xs:string" />
+            <xs:element name="type" type="xs:positiveInteger" />
+            <xs:element name="value" type="numericRange" maxOccurs="unbounded" />
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="numericRange">
+        <xs:sequence>
+            <xs:choice minOccurs="0">
+                <xs:element name="min" type="xs:decimal" />
+                <xs:element name="min-inclusive" type="xs:decimal" />
+            </xs:choice>
+            <xs:choice minOccurs="0">
+                <xs:element name="max" type="xs:decimal" />
+                <xs:element name="max-inclusive" type="xs:decimal"/>
+            </xs:choice>
+        </xs:sequence>
+    </xs:complexType>
 </xs:schema>

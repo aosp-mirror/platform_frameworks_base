@@ -4,6 +4,7 @@ package com.android.server.policy.devicestate.config {
   public class Conditions {
     ctor public Conditions();
     method public com.android.server.policy.devicestate.config.LidSwitchCondition getLidSwitch();
+    method public java.util.List<com.android.server.policy.devicestate.config.SensorCondition> getSensor();
     method public void setLidSwitch(com.android.server.policy.devicestate.config.LidSwitchCondition);
   }
 
@@ -26,6 +27,27 @@ package com.android.server.policy.devicestate.config {
     ctor public LidSwitchCondition();
     method public boolean getOpen();
     method public void setOpen(boolean);
+  }
+
+  public class NumericRange {
+    ctor public NumericRange();
+    method public java.math.BigDecimal getMaxInclusive_optional();
+    method public java.math.BigDecimal getMax_optional();
+    method public java.math.BigDecimal getMinInclusive_optional();
+    method public java.math.BigDecimal getMin_optional();
+    method public void setMaxInclusive_optional(java.math.BigDecimal);
+    method public void setMax_optional(java.math.BigDecimal);
+    method public void setMinInclusive_optional(java.math.BigDecimal);
+    method public void setMin_optional(java.math.BigDecimal);
+  }
+
+  public class SensorCondition {
+    ctor public SensorCondition();
+    method public String getName();
+    method public java.math.BigInteger getType();
+    method public java.util.List<com.android.server.policy.devicestate.config.NumericRange> getValue();
+    method public void setName(String);
+    method public void setType(java.math.BigInteger);
   }
 
   public class XmlParser {
