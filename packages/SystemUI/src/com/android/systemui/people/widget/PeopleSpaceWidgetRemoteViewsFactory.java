@@ -24,7 +24,6 @@ import android.content.pm.LauncherApps;
 import android.content.pm.PackageManager;
 import android.content.pm.ShortcutInfo;
 import android.os.ServiceManager;
-import android.os.UserHandle;
 import android.util.Log;
 import android.widget.RemoteViews;
 import android.widget.RemoteViewsService;
@@ -35,6 +34,7 @@ import com.android.systemui.people.PeopleSpaceUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /** People Space Widget RemoteViewsFactory class. */
 public class PeopleSpaceWidgetRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory {
@@ -45,8 +45,8 @@ public class PeopleSpaceWidgetRemoteViewsFactory implements RemoteViewsService.R
     private INotificationManager mNotificationManager;
     private PackageManager mPackageManager;
     private LauncherApps mLauncherApps;
-    private List<ShortcutInfo> mShortcutInfos = new ArrayList<>();
-    private final Context mContext;
+    private List<Map.Entry<Long, ShortcutInfo>> mShortcutInfos = new ArrayList<>();
+    private Context mContext;
 
     public PeopleSpaceWidgetRemoteViewsFactory(Context context, Intent intent) {
         this.mContext = context;
@@ -100,11 +100,9 @@ public class PeopleSpaceWidgetRemoteViewsFactory implements RemoteViewsService.R
         RemoteViews personView = new RemoteViews(mContext.getPackageName(),
                 R.layout.people_space_widget_item);
         try {
-            ShortcutInfo shortcutInfo = mShortcutInfos.get(i);
-            int userId = UserHandle.getUserHandleForUid(shortcutInfo.getUserId()).getIdentifier();
-            String pkg = shortcutInfo.getPackage();
-            long lastInteraction = mPeopleManager.getLastInteraction(pkg, userId,
-                    shortcutInfo.getId());
+            Map.Entry<Long, ShortcutInfo> entry = mShortcutInfos.get(i);
+            ShortcutInfo shortcutInfo = entry.getValue();
+            long lastInteraction = entry.getKey();
 
             String status = PeopleSpaceUtils.getLastInteractionString(mContext, lastInteraction);
 
@@ -114,7 +112,7 @@ public class PeopleSpaceWidgetRemoteViewsFactory implements RemoteViewsService.R
             personView.setImageViewBitmap(
                     R.id.package_icon,
                     PeopleSpaceUtils.convertDrawableToBitmap(
-                            mPackageManager.getApplicationIcon(pkg)
+                            mPackageManager.getApplicationIcon(shortcutInfo.getPackage())
                     )
             );
             personView.setImageViewBitmap(
