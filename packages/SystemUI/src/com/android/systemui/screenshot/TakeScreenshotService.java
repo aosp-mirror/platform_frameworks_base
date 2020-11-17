@@ -125,9 +125,9 @@ public class TakeScreenshotService extends Service {
     };
 
     @Inject
-    public TakeScreenshotService(ScreenshotController globalScreenshot, UserManager userManager,
+    public TakeScreenshotService(ScreenshotController screenshotController, UserManager userManager,
             UiEventLogger uiEventLogger) {
-        mScreenshot = globalScreenshot;
+        mScreenshot = screenshotController;
         mUserManager = userManager;
         mUiEventLogger = uiEventLogger;
     }
