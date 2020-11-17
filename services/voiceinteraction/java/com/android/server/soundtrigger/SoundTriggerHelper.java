@@ -60,7 +60,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
-import java.util.function.BiFunction;
 
 /**
  * Helper for {@link SoundTrigger} APIs. Supports two types of models:
@@ -118,8 +117,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
 
     private PowerSaveModeListener mPowerSaveModeListener;
 
-    private final BiFunction<Integer, SoundTrigger.StatusListener, SoundTriggerModule>
-            mModuleProvider;
+    private final SoundTriggerModuleProvider mModuleProvider;
 
     // Handler to process call state changes will delay to allow time for the audio
     // and sound trigger HALs to process the end of call notifications
@@ -128,12 +126,32 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
     private static final int MSG_CALL_STATE_CHANGED = 0;
     private static final int CALL_INACTIVE_MSG_DELAY_MS = 1000;
 
-    SoundTriggerHelper(Context context,
-            @NonNull BiFunction<Integer, SoundTrigger.StatusListener,
-                    SoundTriggerModule> moduleProvider) {
+    /**
+     * Provider interface for retrieving SoundTriggerModule instances
+     */
+    public interface SoundTriggerModuleProvider {
+        /**
+         * Populate module properties for all available modules
+         *
+         * @param modules List of ModuleProperties to be populated
+         * @return Status int 0 on success.
+         */
+        int listModuleProperties(@NonNull ArrayList<SoundTrigger.ModuleProperties> modules);
+
+        /**
+         * Get SoundTriggerModule based on {@link SoundTrigger.ModuleProperties#getId()}
+         *
+         * @param moduleId Module ID
+         * @param statusListener Client listener to be associated with the returned module
+         * @return Module associated with moduleId
+         */
+        SoundTriggerModule getModule(int moduleId, SoundTrigger.StatusListener statusListener);
+    }
+
+    SoundTriggerHelper(Context context, SoundTriggerModuleProvider moduleProvider) {
         ArrayList <ModuleProperties> modules = new ArrayList<>();
         mModuleProvider = moduleProvider;
-        int status = SoundTrigger.listModules(modules);
+        int status = mModuleProvider.listModuleProperties(modules);
         mContext = context;
         mTelephonyManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
         mPowerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
@@ -272,7 +290,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
 
     private int prepareForRecognition(ModelData modelData) {
         if (mModule == null) {
-            mModule = mModuleProvider.apply(mModuleProperties.getId(), this);
+            mModule = mModuleProvider.getModule(mModuleProperties.getId(), this);
             if (mModule == null) {
                 Slog.w(TAG, "prepareForRecognition: cannot attach to sound trigger module");
                 return STATUS_ERROR;
