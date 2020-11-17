@@ -3560,28 +3560,56 @@ public class ConnectivityService extends IConnectivityManager.Stub
             return false;
         }
         for (NetworkRequestInfo nri : mNetworkRequests.values()) {
-            if (reason == UnneededFor.LINGER && nri.request.isBackgroundRequest()) {
+            if (reason == UnneededFor.LINGER
+                    && !nri.isMultilayerRequest()
+                    && nri.mRequests.get(0).isBackgroundRequest()) {
                 // Background requests don't affect lingering.
                 continue;
             }
 
-            // If this Network is already the highest scoring Network for a request, or if
-            // there is hope for it to become one if it validated, then it is needed.
-            if (nri.request.isRequest() && nai.satisfies(nri.request) &&
-                    (nai.isSatisfyingRequest(nri.request.requestId) ||
-                    // Note that this catches two important cases:
-                    // 1. Unvalidated cellular will not be reaped when unvalidated WiFi
-                    //    is currently satisfying the request.  This is desirable when
-                    //    cellular ends up validating but WiFi does not.
-                    // 2. Unvalidated WiFi will not be reaped when validated cellular
-                    //    is currently satisfying the request.  This is desirable when
-                    //    WiFi ends up validating and out scoring cellular.
-                    nri.mSatisfier.getCurrentScore()
-                            < nai.getCurrentScoreAsValidated())) {
+            if (isNetworkPotentialSatisfier(nai, nri)) {
                 return false;
             }
         }
         return true;
+    }
+
+    private boolean isNetworkPotentialSatisfier(
+            @NonNull final NetworkAgentInfo candidate, @NonNull final NetworkRequestInfo nri) {
+        // listen requests won't keep up a network satisfying it. If this is not a multilayer
+        // request, we can return immediately. For multilayer requests, we have to check to see if
+        // any of the multilayer requests may have a potential satisfier.
+        if (!nri.isMultilayerRequest() && nri.mRequests.get(0).isListen()) {
+            return false;
+        }
+        for (final NetworkRequest req : nri.mRequests) {
+            // As non-multilayer listen requests have already returned, the below would only happen
+            // for a multilayer request therefore continue to the next request if available.
+            if (req.isListen()) {
+                continue;
+            }
+            // If this Network is already the highest scoring Network for a request, or if
+            // there is hope for it to become one if it validated, then it is needed.
+            if (candidate.satisfies(req)) {
+                // As soon as a network is found that satisfies a request, return. Specifically for
+                // multilayer requests, returning as soon as a NetworkAgentInfo satisfies a request
+                // is important so as to not evaluate lower priority requests further in
+                // nri.mRequests.
+                final boolean isNetworkNeeded = candidate.isSatisfyingRequest(req.requestId)
+                        // Note that this catches two important cases:
+                        // 1. Unvalidated cellular will not be reaped when unvalidated WiFi
+                        //    is currently satisfying the request.  This is desirable when
+                        //    cellular ends up validating but WiFi does not.
+                        // 2. Unvalidated WiFi will not be reaped when validated cellular
+                        //    is currently satisfying the request.  This is desirable when
+                        //    WiFi ends up validating and out scoring cellular.
+                        || nri.mSatisfier.getCurrentScore()
+                        < candidate.getCurrentScoreAsValidated();
+                return isNetworkNeeded;
+            }
+        }
+
+        return false;
     }
 
     private NetworkRequestInfo getNriForAppRequest(
@@ -5449,6 +5477,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
         NetworkRequestInfo(NetworkRequest r) {
             this(r, null);
+        }
+
+        boolean isMultilayerRequest() {
+            return mRequests.size() > 1;
         }
 
         private List<NetworkRequest> initializeRequests(NetworkRequest r) {
