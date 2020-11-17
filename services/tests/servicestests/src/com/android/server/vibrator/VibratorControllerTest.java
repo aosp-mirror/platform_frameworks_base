@@ -16,7 +16,6 @@
 
 package com.android.server.vibrator;
 
-import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -38,7 +37,6 @@ import android.hardware.vibrator.IVibrator;
 import android.os.IBinder;
 import android.os.IVibratorStateListener;
 import android.os.VibrationEffect;
-import android.os.Vibrator;
 import android.os.test.TestLooper;
 import android.platform.test.annotations.Presubmit;
 
@@ -100,7 +98,7 @@ public class VibratorControllerTest {
     public void createController_initializesNativeWrapper() {
         int vibratorId = 13;
         VibratorController controller = createController(vibratorId);
-        assertEquals(vibratorId, controller.getVibratorId());
+        assertEquals(vibratorId, controller.getVibratorInfo().getId());
         verify(mNativeWrapperMock).init(eq(vibratorId), notNull());
     }
 
@@ -129,59 +127,6 @@ public class VibratorControllerTest {
         assertFalse(createController().hasCapability(IVibrator.CAP_COMPOSE_EFFECTS));
         assertFalse(createController().hasCapability(IVibrator.CAP_EXTERNAL_CONTROL));
         assertFalse(createController().hasCapability(IVibrator.CAP_ON_CALLBACK));
-    }
-
-    @Test
-    public void areEffectsSupported_withNullResultFromNative_returnsSupportUnknown() {
-        when(mNativeWrapperMock.getSupportedEffects()).thenReturn(null);
-        assertArrayEquals(new int[]{Vibrator.VIBRATION_EFFECT_SUPPORT_UNKNOWN},
-                createController().areEffectsSupported(new int[]{VibrationEffect.EFFECT_CLICK}));
-    }
-
-    @Test
-    public void areEffectsSupported_withSomeEffectsSupported_returnsSupportYesAndNoForEffects() {
-        int[] effects = new int[]{VibrationEffect.EFFECT_CLICK, VibrationEffect.EFFECT_TICK};
-
-        when(mNativeWrapperMock.getSupportedEffects())
-                .thenReturn(new int[]{VibrationEffect.EFFECT_CLICK});
-        assertArrayEquals(
-                new int[]{Vibrator.VIBRATION_EFFECT_SUPPORT_YES,
-                        Vibrator.VIBRATION_EFFECT_SUPPORT_NO},
-                createController().areEffectsSupported(effects));
-    }
-
-    @Test
-    public void arePrimitivesSupported_withoutComposeCapability_returnsAlwaysFalse() {
-        assertArrayEquals(new boolean[]{false, false},
-                createController().arePrimitivesSupported(new int[]{
-                        VibrationEffect.Composition.PRIMITIVE_CLICK,
-                        VibrationEffect.Composition.PRIMITIVE_TICK
-                }));
-    }
-
-    @Test
-    public void arePrimitivesSupported_withNullResultFromNative_returnsAlwaysFalse() {
-        mockVibratorCapabilities(IVibrator.CAP_COMPOSE_EFFECTS);
-        when(mNativeWrapperMock.getSupportedPrimitives()).thenReturn(null);
-
-        assertArrayEquals(new boolean[]{false, false},
-                createController().arePrimitivesSupported(new int[]{
-                        VibrationEffect.Composition.PRIMITIVE_CLICK,
-                        VibrationEffect.Composition.PRIMITIVE_QUICK_RISE
-                }));
-    }
-
-    @Test
-    public void arePrimitivesSupported_withSomeSupportedPrimitives_returnsBasedOnNativeResult() {
-        mockVibratorCapabilities(IVibrator.CAP_COMPOSE_EFFECTS);
-        when(mNativeWrapperMock.getSupportedPrimitives())
-                .thenReturn(new int[]{VibrationEffect.Composition.PRIMITIVE_CLICK});
-
-        assertArrayEquals(new boolean[]{true, false},
-                createController().arePrimitivesSupported(new int[]{
-                        VibrationEffect.Composition.PRIMITIVE_CLICK,
-                        VibrationEffect.Composition.PRIMITIVE_QUICK_RISE
-                }));
     }
 
     @Test

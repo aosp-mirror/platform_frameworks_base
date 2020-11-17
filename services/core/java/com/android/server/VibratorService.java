@@ -51,6 +51,7 @@ import android.os.Trace;
 import android.os.VibrationAttributes;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
+import android.os.VibratorInfo;
 import android.os.WorkSource;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -344,6 +345,11 @@ public class VibratorService extends IVibratorService.Stub {
     }
 
     @Override // Binder call
+    public VibratorInfo getVibratorInfo() {
+        return mVibratorController.getVibratorInfo();
+    }
+
+    @Override // Binder call
     public boolean registerVibratorStateListener(IVibratorStateListener listener) {
         if (!hasPermission(android.Manifest.permission.ACCESS_VIBRATOR_STATE)) {
             throw new SecurityException("Requires ACCESS_VIBRATOR_STATE permission");
@@ -365,16 +371,6 @@ public class VibratorService extends IVibratorService.Stub {
         // Input device vibrators always support amplitude controls.
         return mInputDeviceDelegate.isAvailable()
                 || mVibratorController.hasCapability(IVibrator.CAP_AMPLITUDE_CONTROL);
-    }
-
-    @Override // Binder call
-    public int[] areEffectsSupported(int[] effectIds) {
-        return mVibratorController.areEffectsSupported(effectIds);
-    }
-
-    @Override // Binder call
-    public boolean[] arePrimitivesSupported(int[] primitiveIds) {
-        return mVibratorController.arePrimitivesSupported(primitiveIds);
     }
 
     private void verifyIncomingUid(int uid) {

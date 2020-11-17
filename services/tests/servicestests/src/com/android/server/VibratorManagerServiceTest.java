@@ -19,7 +19,10 @@ package com.android.server;
 import static com.android.server.testutils.TestUtils.assertExpectException;
 
 import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
@@ -38,6 +41,8 @@ import android.os.PowerSaveState;
 import android.os.Process;
 import android.os.VibrationAttributes;
 import android.os.VibrationEffect;
+import android.os.Vibrator;
+import android.os.VibratorInfo;
 import android.os.test.TestLooper;
 import android.platform.test.annotations.Presubmit;
 
@@ -134,17 +139,48 @@ public class VibratorManagerServiceTest {
 
     @Test
     public void getVibratorIds_withNonEmptyResultFromNative_returnsSameArray() {
-        mNativeWrappers.put(1, mockVibrator(0));
-        mNativeWrappers.put(2, mockVibrator(0));
+        mNativeWrappers.put(1, mockVibrator(/* capabilities= */ 0));
+        mNativeWrappers.put(2, mockVibrator(/* capabilities= */ 0));
         when(mNativeWrapperMock.getVibratorIds()).thenReturn(new int[]{2, 1});
         assertArrayEquals(new int[]{2, 1}, createService().getVibratorIds());
     }
 
     @Test
+    public void getVibratorInfo_withMissingVibratorId_returnsNull() {
+        mockVibrators(mockVibrator(/* capabilities= */ 0));
+        assertNull(createService().getVibratorInfo(2));
+    }
+
+    @Test
+    public void getVibratorInfo_withExistingVibratorId_returnsHalInfoForVibrator() {
+        VibratorController.NativeWrapper vibratorMock = mockVibrator(
+                IVibrator.CAP_COMPOSE_EFFECTS | IVibrator.CAP_AMPLITUDE_CONTROL);
+        when(vibratorMock.getSupportedEffects()).thenReturn(
+                new int[]{VibrationEffect.EFFECT_CLICK});
+        when(vibratorMock.getSupportedPrimitives()).thenReturn(
+                new int[]{VibrationEffect.Composition.PRIMITIVE_CLICK});
+        mNativeWrappers.put(1, vibratorMock);
+        when(mNativeWrapperMock.getVibratorIds()).thenReturn(new int[]{1});
+        VibratorInfo info = createService().getVibratorInfo(1);
+
+        assertNotNull(info);
+        assertEquals(1, info.getId());
+        assertTrue(info.hasAmplitudeControl());
+        assertTrue(info.hasCapability(IVibrator.CAP_COMPOSE_EFFECTS));
+        assertFalse(info.hasCapability(IVibrator.CAP_ON_CALLBACK));
+        assertEquals(Vibrator.VIBRATION_EFFECT_SUPPORT_YES,
+                info.isEffectSupported(VibrationEffect.EFFECT_CLICK));
+        assertEquals(Vibrator.VIBRATION_EFFECT_SUPPORT_NO,
+                info.isEffectSupported(VibrationEffect.EFFECT_TICK));
+        assertTrue(info.isPrimitiveSupported(VibrationEffect.Composition.PRIMITIVE_CLICK));
+        assertFalse(info.isPrimitiveSupported(VibrationEffect.Composition.PRIMITIVE_TICK));
+    }
+
+    @Test
     public void setAlwaysOnEffect_withMono_enablesAlwaysOnEffectToAllVibratorsWithCapability() {
-        VibratorController.NativeWrapper[] vibratorMocks = new VibratorController.NativeWrapper[] {
+        VibratorController.NativeWrapper[] vibratorMocks = new VibratorController.NativeWrapper[]{
                 mockVibrator(IVibrator.CAP_ALWAYS_ON_CONTROL),
-                mockVibrator(0),
+                mockVibrator(/* capabilities= */ 0),
                 mockVibrator(IVibrator.CAP_ALWAYS_ON_CONTROL),
         };
         mockVibrators(vibratorMocks);

@@ -23,17 +23,13 @@ import android.os.IVibratorStateListener;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.VibrationEffect;
-import android.os.Vibrator;
+import android.os.VibratorInfo;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 
 import libcore.util.NativeAllocationRegistry;
-
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
 
 /** Controls a single vibrator. */
 // TODO(b/159207608): Make this package-private once vibrator services are moved to this package
@@ -42,12 +38,7 @@ public final class VibratorController {
 
     private final Object mLock = new Object();
     private final NativeWrapper mNativeWrapper;
-    private final int mVibratorId;
-    private final long mCapabilities;
-    @Nullable
-    private final Set<Integer> mSupportedEffects;
-    @Nullable
-    private final Set<Integer> mSupportedPrimitives;
+    private final VibratorInfo mVibratorInfo;
 
     @GuardedBy("mLock")
     private final RemoteCallbackList<IVibratorStateListener> mVibratorStateListeners =
@@ -115,13 +106,11 @@ public final class VibratorController {
     @VisibleForTesting
     public VibratorController(int vibratorId, OnVibrationCompleteListener listener,
             NativeWrapper nativeWrapper) {
-        mVibratorId = vibratorId;
         mNativeWrapper = nativeWrapper;
+        mNativeWrapper.init(vibratorId, listener);
 
-        nativeWrapper.init(vibratorId, listener);
-        mCapabilities = nativeWrapper.getCapabilities();
-        mSupportedEffects = asSet(nativeWrapper.getSupportedEffects());
-        mSupportedPrimitives = asSet(nativeWrapper.getSupportedPrimitives());
+        mVibratorInfo = new VibratorInfo(vibratorId, nativeWrapper.getCapabilities(),
+                nativeWrapper.getSupportedEffects(), nativeWrapper.getSupportedPrimitives());
     }
 
     /** Register state listener for this vibrator. */
@@ -153,9 +142,9 @@ public final class VibratorController {
         }
     }
 
-    /** Return the id of the vibrator controlled by this instance. */
-    public int getVibratorId() {
-        return mVibratorId;
+    /** Return the {@link VibratorInfo} representing the vibrator controlled by this instance. */
+    public VibratorInfo getVibratorInfo() {
+        return mVibratorInfo;
     }
 
     /**
@@ -184,43 +173,7 @@ public final class VibratorController {
      * @return true if this vibrator has this capability, false otherwise
      */
     public boolean hasCapability(long capability) {
-        return (mCapabilities & capability) == capability;
-    }
-
-    /**
-     * Check against this vibrator supported effects.
-     *
-     * @param effectIds list of effects, one of VibrationEffect.EFFECT_*
-     * @return one entry per requested effectId, with one of Vibrator.VIBRATION_EFFECT_SUPPORT_*
-     */
-    public int[] areEffectsSupported(int[] effectIds) {
-        int[] supported = new int[effectIds.length];
-        if (mSupportedEffects == null) {
-            Arrays.fill(supported, Vibrator.VIBRATION_EFFECT_SUPPORT_UNKNOWN);
-        } else {
-            for (int i = 0; i < effectIds.length; i++) {
-                supported[i] = mSupportedEffects.contains(effectIds[i])
-                        ? Vibrator.VIBRATION_EFFECT_SUPPORT_YES
-                        : Vibrator.VIBRATION_EFFECT_SUPPORT_NO;
-            }
-        }
-        return supported;
-    }
-
-    /**
-     * Check against this vibrator supported primitives.
-     *
-     * @param primitiveIds list of primitives, one of VibrationEffect.Composition.EFFECT_*
-     * @return one entry per requested primitiveId, with true if it is supported
-     */
-    public boolean[] arePrimitivesSupported(int[] primitiveIds) {
-        boolean[] supported = new boolean[primitiveIds.length];
-        if (mSupportedPrimitives != null && hasCapability(IVibrator.CAP_COMPOSE_EFFECTS)) {
-            for (int i = 0; i < primitiveIds.length; i++) {
-                supported[i] = mSupportedPrimitives.contains(primitiveIds[i]);
-            }
-        }
-        return supported;
+        return mVibratorInfo.hasCapability(capability);
     }
 
     /** Return {@code true} if the underlying vibrator is currently available, false otherwise. */
@@ -234,7 +187,7 @@ public final class VibratorController {
      * <p>This will affect the state of {@link #isUnderExternalControl()}.
      */
     public void setExternalControl(boolean externalControl) {
-        if (!hasCapability(IVibrator.CAP_EXTERNAL_CONTROL)) {
+        if (!mVibratorInfo.hasCapability(IVibrator.CAP_EXTERNAL_CONTROL)) {
             return;
         }
         synchronized (mLock) {
@@ -248,7 +201,7 @@ public final class VibratorController {
      * if given {@code effect} is {@code null}.
      */
     public void updateAlwaysOn(int id, @Nullable VibrationEffect.Prebaked effect) {
-        if (!hasCapability(IVibrator.CAP_ALWAYS_ON_CONTROL)) {
+        if (!mVibratorInfo.hasCapability(IVibrator.CAP_ALWAYS_ON_CONTROL)) {
             return;
         }
         synchronized (mLock) {
@@ -263,7 +216,7 @@ public final class VibratorController {
     /** Set the vibration amplitude. This will NOT affect the state of {@link #isVibrating()}. */
     public void setAmplitude(int amplitude) {
         synchronized (mLock) {
-            if (hasCapability(IVibrator.CAP_AMPLITUDE_CONTROL)) {
+            if (mVibratorInfo.hasCapability(IVibrator.CAP_AMPLITUDE_CONTROL)) {
                 mNativeWrapper.setAmplitude(amplitude);
             }
         }
@@ -306,7 +259,7 @@ public final class VibratorController {
      * <p>This will affect the state of {@link #isVibrating()}.
      */
     public void on(VibrationEffect.Composed effect, long vibrationId) {
-        if (!hasCapability(IVibrator.CAP_COMPOSE_EFFECTS)) {
+        if (!mVibratorInfo.hasCapability(IVibrator.CAP_COMPOSE_EFFECTS)) {
             return;
         }
         synchronized (mLock) {
@@ -327,10 +280,7 @@ public final class VibratorController {
     @Override
     public String toString() {
         return "VibratorController{"
-                + "mVibratorId=" + mVibratorId
-                + ", mCapabilities=" + mCapabilities
-                + ", mSupportedEffects=" + mSupportedEffects
-                + ", mSupportedPrimitives=" + mSupportedPrimitives
+                + "mVibratorInfo=" + mVibratorInfo
                 + ", mIsVibrating=" + mIsVibrating
                 + ", mIsUnderExternalControl=" + mIsUnderExternalControl
                 + ", mVibratorStateListeners count="
@@ -373,18 +323,6 @@ public final class VibratorController {
         } catch (RemoteException | RuntimeException e) {
             Slog.e(TAG, "Vibrator state listener failed to call", e);
         }
-    }
-
-    @Nullable
-    private static Set<Integer> asSet(int[] values) {
-        if (values == null) {
-            return null;
-        }
-        HashSet<Integer> set = new HashSet<>();
-        for (int value : values) {
-            set.add(value);
-        }
-        return set;
     }
 
     /** Wrapper around the static-native methods of {@link VibratorController} for tests. */
