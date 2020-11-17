@@ -927,9 +927,9 @@ public class BaseInputConnection implements InputConnection {
     }
 
     /**
-     * Default implementation which invokes {@link View#onReceiveContent} on the target view if the
-     * view {@link View#getOnReceiveContentMimeTypes allows} content insertion; otherwise returns
-     * false without any side effects.
+     * Default implementation which invokes {@link View#performReceiveContent} on the target
+     * view if the view {@link View#getOnReceiveContentMimeTypes allows} content insertion;
+     * otherwise returns false without any side effects.
      */
     public boolean commitContent(InputContentInfo inputContentInfo, int flags, Bundle opts) {
         ClipDescription description = inputContentInfo.getDescription();
@@ -954,6 +954,6 @@ public class BaseInputConnection implements InputConnection {
                 .setLinkUri(inputContentInfo.getLinkUri())
                 .setExtras(opts)
                 .build();
-        return mTargetView.onReceiveContent(payload) == null;
+        return mTargetView.performReceiveContent(payload) == null;
     }
 }

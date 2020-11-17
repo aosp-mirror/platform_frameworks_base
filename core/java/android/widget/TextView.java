@@ -2152,7 +2152,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     if (isTextEditable()) {
                         ClipData clip = ClipData.newPlainText("", result);
                         Payload payload = new Payload.Builder(clip, SOURCE_PROCESS_TEXT).build();
-                        onReceiveContent(payload);
+                        performReceiveContent(payload);
                         if (mEditor != null) {
                             mEditor.refreshTextActionMode();
                         }
@@ -11858,7 +11858,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             return;
         }
         final Payload payload = new Payload.Builder(clip, SOURCE_AUTOFILL).build();
-        onReceiveContent(payload);
+        performReceiveContent(payload);
     }
 
     @Override
@@ -12927,7 +12927,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         final Payload payload = new Payload.Builder(clip, SOURCE_CLIPBOARD)
                 .setFlags(withFormatting ? 0 : FLAG_CONVERT_TO_PLAIN_TEXT)
                 .build();
-        onReceiveContent(payload);
+        performReceiveContent(payload);
         sLastCutCopyOrTextChangedTime = 0;
     }
 
@@ -13728,17 +13728,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
-     * Receives the given content. Clients wishing to provide custom behavior should configure a
-     * listener via {@link #setOnReceiveContentListener}.
+     * Default {@link TextView} implementation for receiving content. Apps wishing to provide
+     * custom behavior should configure a listener via {@link #setOnReceiveContentListener}.
      *
-     * <p>If a listener is set, invokes the listener. If the listener returns a non-null result,
-     * executes the default platform handling for the portion of the content returned by the
-     * listener.
-     *
-     * <p>If no listener is set, executes the default platform behavior. For non-editable TextViews
-     * the default behavior is a no-op (returns the passed-in content without acting on it). For
-     * editable TextViews the default behavior coerces all content to text and inserts into the
-     * view.
+     * <p>For non-editable TextViews the default behavior is a no-op (returns the passed-in
+     * content without acting on it). For editable TextViews the default behavior coerces all
+     * content to text and inserts into the view.
      *
      * @param payload The content to insert and related metadata.
      *
@@ -13747,11 +13742,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      */
     @Override
     public @Nullable Payload onReceiveContent(@NonNull Payload payload) {
-        Payload remaining = super.onReceiveContent(payload);
-        if (remaining != null && mEditor != null) {
-            return mEditor.getDefaultOnReceiveContentListener().onReceiveContent(this, remaining);
+        if (mEditor != null) {
+            return mEditor.getDefaultOnReceiveContentListener().onReceiveContent(this, payload);
         }
-        return remaining;
+        return payload;
     }
 
     private static void logCursor(String location, @Nullable String msgFormat, Object ... msgArgs) {

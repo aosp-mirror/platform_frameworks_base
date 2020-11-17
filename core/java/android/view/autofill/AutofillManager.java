@@ -2372,7 +2372,7 @@ public final class AutofillManager {
                 return;
             }
             Payload payload = new Payload.Builder(clip, SOURCE_AUTOFILL).build();
-            Payload result = view.onReceiveContent(payload);
+            Payload result = view.performReceiveContent(payload);
             if (result != null) {
                 Log.w(TAG, "autofillContent(): receiver could not insert content: id=" + id
                         + ", view=" + view + ", clip=" + clip);
