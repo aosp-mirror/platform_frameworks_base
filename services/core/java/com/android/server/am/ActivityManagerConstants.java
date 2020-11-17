@@ -173,6 +173,27 @@ final class ActivityManagerConstants extends ContentObserver {
     private static final String KEY_DEFAULT_FGS_STARTS_TEMP_ALLOWLIST_ENABLED =
             "default_fgs_starts_temp_allowlist_enabled";
 
+    /**
+     * Whether FGS notification display is deferred following the transition into
+     * the foreground state.  Default behavior is {@code true} unless overridden.
+     */
+    private static final String KEY_DEFERRED_FGS_NOTIFICATIONS_ENABLED =
+            "deferred_fgs_notifications_enabled";
+
+    /** Whether FGS notification deferral applies only to those apps targeting
+     * API version S or higher.  Default is {@code true} unless overidden.
+     */
+    private static final String KEY_DEFERRED_FGS_NOTIFICATIONS_API_GATED =
+            "deferred_fgs_notifications_api_gated";
+
+    /**
+     * Time in milliseconds to defer display of FGS notifications following the
+     * transition into the foreground state.  Default is 10_000 (ten seconds)
+     * unless overridden.
+     */
+    private static final String KEY_DEFERRED_FGS_NOTIFICATION_INTERVAL =
+            "deferred_fgs_notification_interval";
+
     // Maximum number of cached processes we will allow.
     public int MAX_CACHED_PROCESSES = DEFAULT_MAX_CACHED_PROCESSES;
 
@@ -355,6 +376,19 @@ final class ActivityManagerConstants extends ContentObserver {
     // DeviceIdleController's Temp AllowList is allowed to bypass the restriction.
     volatile boolean mFlagFgsStartTempAllowListEnabled = false;
 
+    // Whether we defer FGS notifications a few seconds following their transition to
+    // the foreground state.  Applies only to S+ apps; enabled by default.
+    volatile boolean mFlagFgsNotificationDeferralEnabled = true;
+
+    // Restrict FGS notification deferral policy to only those apps that target
+    // API version S or higher.  Enabled by default; set to "false" to defer FGS
+    // notifications from legacy apps as well.
+    volatile boolean mFlagFgsNotificationDeferralApiGated = true;
+
+    // Time in milliseconds to defer FGS notifications after their transition to
+    // the foreground state.
+    volatile long mFgsNotificationDeferralInterval = 10_000;
+
     private final ActivityManagerService mService;
     private ContentResolver mResolver;
     private final KeyValueListParser mParser = new KeyValueListParser(',');
@@ -508,6 +542,15 @@ final class ActivityManagerConstants extends ContentObserver {
                                 break;
                             case KEY_DEFAULT_FGS_STARTS_TEMP_ALLOWLIST_ENABLED:
                                 updateFgsStartsTempAllowList();
+                                break;
+                            case KEY_DEFERRED_FGS_NOTIFICATIONS_ENABLED:
+                                updateFgsNotificationDeferralEnable();
+                                break;
+                            case KEY_DEFERRED_FGS_NOTIFICATIONS_API_GATED:
+                                updateFgsNotificationDeferralApiGated();
+                                break;
+                            case KEY_DEFERRED_FGS_NOTIFICATION_INTERVAL:
+                                updateFgsNotificationDeferralInterval();
                                 break;
                             case KEY_OOMADJ_UPDATE_POLICY:
                                 updateOomAdjUpdatePolicy();
@@ -771,6 +814,27 @@ final class ActivityManagerConstants extends ContentObserver {
                 DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                 KEY_DEFAULT_FGS_STARTS_TEMP_ALLOWLIST_ENABLED,
                 /*defaultValue*/ false);
+    }
+
+    private void updateFgsNotificationDeferralEnable() {
+        mFlagFgsNotificationDeferralEnabled = DeviceConfig.getBoolean(
+                DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                KEY_DEFERRED_FGS_NOTIFICATIONS_ENABLED,
+                /*default value*/ true);
+    }
+
+    private void updateFgsNotificationDeferralApiGated() {
+        mFlagFgsNotificationDeferralApiGated = DeviceConfig.getBoolean(
+                DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                KEY_DEFERRED_FGS_NOTIFICATIONS_API_GATED,
+                /*default value*/ true);
+    }
+
+    private void updateFgsNotificationDeferralInterval() {
+        mFgsNotificationDeferralInterval = DeviceConfig.getLong(
+                DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                KEY_DEFERRED_FGS_NOTIFICATION_INTERVAL,
+                /*default value*/ 10_000L);
     }
 
     private void updateOomAdjUpdatePolicy() {
