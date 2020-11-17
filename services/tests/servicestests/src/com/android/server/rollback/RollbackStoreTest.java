@@ -204,6 +204,8 @@ public class RollbackStoreTest {
         origRb.info.getPackages().add(pkgInfo1);
         origRb.info.getPackages().add(pkgInfo2);
 
+        origRb.setState(Rollback.ROLLBACK_STATE_AVAILABLE, "hello world");
+
         RollbackStore.saveRollback(origRb);
 
         List<Rollback> loadedRollbacks = mRollbackStore.loadRollbacks();
@@ -355,6 +357,7 @@ public class RollbackStoreTest {
         assertThat(b.isEnabling()).isEqualTo(a.isEnabling());
         assertThat(b.isAvailable()).isEqualTo(a.isAvailable());
         assertThat(b.isCommitted()).isEqualTo(a.isCommitted());
+        assertThat(b.getStateDescription()).isEqualTo(a.getStateDescription());
 
         assertThat(b.isStaged()).isEqualTo(a.isStaged());
 

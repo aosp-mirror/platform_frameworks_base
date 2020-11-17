@@ -278,6 +278,7 @@ class RollbackStore {
             dataJson.put("timestamp", rollback.getTimestamp().toString());
             dataJson.put("stagedSessionId", rollback.getStagedSessionId());
             dataJson.put("state", rollback.getStateAsString());
+            dataJson.put("stateDescription", rollback.getStateDescription());
             dataJson.put("restoreUserDataInProgress", rollback.isRestoreUserDataInProgress());
             dataJson.put("userId", rollback.getUserId());
             dataJson.putOpt("installerPackageName", rollback.getInstallerPackageName());
@@ -302,7 +303,7 @@ class RollbackStore {
     }
 
     /**
-     * Saves the rollback to mRollbackHistoryDir/ROLLBACKID-HEX for debugging purpose.
+     * Saves the rollback to $mRollbackHistoryDir/ROLLBACKID-HEX for debugging purpose.
      */
     void saveRollbackToHistory(Rollback rollback) {
         // The same id might be allocated to different historical rollbacks.
@@ -345,6 +346,7 @@ class RollbackStore {
                 Instant.parse(dataJson.getString("timestamp")),
                 dataJson.getInt("stagedSessionId"),
                 rollbackStateFromString(dataJson.getString("state")),
+                dataJson.optString("stateDescription"),
                 dataJson.getBoolean("restoreUserDataInProgress"),
                 dataJson.optInt("userId", UserHandle.SYSTEM.getIdentifier()),
                 dataJson.optString("installerPackageName", ""),
