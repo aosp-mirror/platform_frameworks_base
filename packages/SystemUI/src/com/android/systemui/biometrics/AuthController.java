@@ -581,6 +581,10 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
                     promptInfo.setAuthenticators(Authenticators.DEVICE_CREDENTIAL);
                 }
 
+                if (mUdfpsController != null) {
+                    mUdfpsController.onConfigurationChanged();
+                }
+
                 showDialog(mCurrentDialogArgs, true /* skipAnimation */, savedState);
             }
         }

@@ -32,6 +32,7 @@ import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.MathUtils;
+import android.view.Surface;
 import android.view.View;
 import android.view.ViewTreeObserver;
 
@@ -121,6 +122,8 @@ public class UdfpsView extends View implements DozeReceiver,
         mDebugTextPaint.setTextSize(DEBUG_TEXT_SIZE_PX);
 
         mTouchableRegion = new Rect();
+        // When the device is rotated, it's important that mTouchableRegion is updated before
+        // this listener is called. This listener is usually called shortly after onLayout.
         mInsetsListener = internalInsetsInfo -> {
             internalInsetsInfo.setTouchableInsets(
                     ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_REGION);
@@ -157,22 +160,50 @@ public class UdfpsView extends View implements DozeReceiver,
         postInvalidate();
     }
 
-    @Override
-    protected void onAttachedToWindow() {
-        super.onAttachedToWindow();
-        Log.v(TAG, "onAttachedToWindow");
-
-        final int h = getLayoutParams().height;
-        final int w = getLayoutParams().width;
-        mScrimRect.set(0 /* left */, 0 /* top */, w, h);
+    // The "h" and "w" are the display's height and width relative to its current rotation.
+    private void updateSensorRect(int h, int w) {
+        // mSensorProps coordinates assume portrait mode.
         mSensorRect.set(mSensorProps.sensorLocationX - mSensorProps.sensorRadius,
                 mSensorProps.sensorLocationY - mSensorProps.sensorRadius,
                 mSensorProps.sensorLocationX + mSensorProps.sensorRadius,
                 mSensorProps.sensorLocationY + mSensorProps.sensorRadius);
 
-        // Sets mTouchableRegion with rounded up values from mSensorRect.
-        mSensorRect.roundOut(mTouchableRegion);
+        // Transform mSensorRect if the device is in landscape mode.
+        switch (mContext.getDisplay().getRotation()) {
+            case Surface.ROTATION_90:
+                mSensorRect.set(mSensorRect.top, h - mSensorRect.right, mSensorRect.bottom,
+                        h - mSensorRect.left);
+                break;
+            case Surface.ROTATION_270:
+                mSensorRect.set(w - mSensorRect.bottom, mSensorRect.left, w - mSensorRect.top,
+                        mSensorRect.right);
+                break;
+            default:
+                // Do nothing to stay in portrait mode.
+        }
+    }
 
+    @Override
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        super.onLayout(changed, left, top, right, bottom);
+        // Always re-compute the layout regardless of whether "changed" is true. It is usually false
+        // when the device goes from landscape to seascape and vice versa, but mSensorRect and
+        // its dependencies need to be recalculated to stay at the same physical location on the
+        // screen.
+        final int w = getLayoutParams().width;
+        final int h = getLayoutParams().height;
+        mScrimRect.set(0 /* left */, 0 /* top */, w, h);
+        updateSensorRect(h, w);
+        // Update mTouchableRegion with the rounded up values from mSensorRect. After "onLayout"
+        // is finished, mTouchableRegion will be used by mInsetsListener to compute the touch
+        // insets.
+        mSensorRect.roundOut(mTouchableRegion);
+    }
+
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        Log.v(TAG, "onAttachedToWindow");
         getViewTreeObserver().addOnComputeInternalInsetsListener(mInsetsListener);
     }
 
@@ -216,14 +247,17 @@ public class UdfpsView extends View implements DozeReceiver,
     }
 
     boolean isValidTouch(float x, float y, float pressure) {
-        return x > (mSensorProps.sensorLocationX
-                - mSensorProps.sensorRadius * mSensorTouchAreaCoefficient)
-                && x < (mSensorProps.sensorLocationX
-                + mSensorProps.sensorRadius * mSensorTouchAreaCoefficient)
-                && y > (mSensorProps.sensorLocationY
-                - mSensorProps.sensorRadius * mSensorTouchAreaCoefficient)
-                && y < (mSensorProps.sensorLocationY
-                + mSensorProps.sensorRadius * mSensorTouchAreaCoefficient);
+        // The X and Y coordinates of the sensor's center.
+        final float cx = mSensorRect.centerX();
+        final float cy = mSensorRect.centerY();
+        // Radii along the X and Y axes.
+        final float rx = (mSensorRect.right - mSensorRect.left) / 2.0f;
+        final float ry = (mSensorRect.bottom - mSensorRect.top) / 2.0f;
+
+        return x > (cx - rx * mSensorTouchAreaCoefficient)
+                && x < (cx + rx * mSensorTouchAreaCoefficient)
+                && y > (cy - ry * mSensorTouchAreaCoefficient)
+                && y < (cy + ry * mSensorTouchAreaCoefficient);
     }
 
     void setScrimAlpha(int alpha) {
