@@ -16,7 +16,6 @@
 
 package android.inputmethodservice;
 
-import static android.graphics.Color.TRANSPARENT;
 import static android.inputmethodservice.InputMethodServiceProto.CANDIDATES_VIEW_STARTED;
 import static android.inputmethodservice.InputMethodServiceProto.CANDIDATES_VISIBILITY;
 import static android.inputmethodservice.InputMethodServiceProto.CONFIGURATION;
@@ -50,6 +49,7 @@ import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 import static android.view.WindowInsets.Type.navigationBars;
+import static android.view.WindowInsets.Type.statusBars;
 import static android.view.WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
 
 import static java.lang.annotation.RetentionPolicy.SOURCE;
@@ -1244,13 +1244,8 @@ public class InputMethodService extends AbstractInputMethodService {
                 Context.LAYOUT_INFLATER_SERVICE);
         mWindow = new SoftInputWindow(this, "InputMethod", mTheme, null, null, mDispatcherState,
                 WindowManager.LayoutParams.TYPE_INPUT_METHOD, Gravity.BOTTOM, false);
-        mWindow.getWindow().getAttributes().setFitInsetsTypes(navigationBars());
+        mWindow.getWindow().getAttributes().setFitInsetsTypes(statusBars() | navigationBars());
         mWindow.getWindow().getAttributes().setFitInsetsSides(Side.all() & ~Side.BOTTOM);
-        mWindow.getWindow().getAttributes().setFitInsetsIgnoringVisibility(true);
-
-        // Our window will extend into the status bar area no matter the bar is visible or not.
-        // We don't want the ColorView to be visible when status bar is shown.
-        mWindow.getWindow().setStatusBarColor(TRANSPARENT);
 
         // Automotive devices may request the navigation bar to be hidden when the IME shows up
         // (controlled via config_automotiveHideNavBarForKeyboard) in order to maximize the visible
