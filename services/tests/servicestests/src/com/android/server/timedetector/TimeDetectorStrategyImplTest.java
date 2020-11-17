@@ -16,6 +16,9 @@
 
 package com.android.server.timedetector;
 
+import static com.android.server.timedetector.TimeDetectorStrategy.ORIGIN_NETWORK;
+import static com.android.server.timedetector.TimeDetectorStrategy.ORIGIN_TELEPHONY;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
@@ -28,6 +31,8 @@ import android.app.timedetector.TelephonyTimeSuggestion;
 import android.os.TimestampedValue;
 
 import androidx.test.runner.AndroidJUnit4;
+
+import com.android.server.timedetector.TimeDetectorStrategy.Origin;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -47,6 +52,9 @@ public class TimeDetectorStrategyImplTest {
             new TimestampedValue<>(
                     123456789L /* realtimeClockMillis */,
                     createUtcTime(2010, 5, 23, 12, 0, 0));
+
+    // This is the traditional ordering for time detection on Android.
+    private static final @Origin int [] PROVIDERS_PRIORITY = { ORIGIN_TELEPHONY, ORIGIN_NETWORK };
 
     /**
      * An arbitrary time, very different from the {@link #ARBITRARY_CLOCK_INITIALIZATION_INFO}
@@ -488,11 +496,8 @@ public class TimeDetectorStrategyImplTest {
                 .assertLatestTelephonySuggestion(slotIndex, telephonyTimeSuggestion);
     }
 
-    /**
-     * Manual suggestions should be ignored if auto time is enabled.
-     */
     @Test
-    public void testSuggestManualTime_autoTimeEnabled() {
+    public void manualTimeSuggestion_isIgnored_whenAutoTimeEnabled() {
         mScript.pokeFakeClocks(ARBITRARY_CLOCK_INITIALIZATION_INFO)
                 .pokeAutoTimeDetectionEnabled(true);
 
@@ -505,7 +510,7 @@ public class TimeDetectorStrategyImplTest {
     }
 
     @Test
-    public void suggestManualTime_ignoresTimeLowerBound() {
+    public void manualTimeSuggestion_ignoresTimeLowerBound() {
         mScript.pokeFakeClocks(ARBITRARY_CLOCK_INITIALIZATION_INFO)
                 .pokeAutoTimeDetectionEnabled(false);
         Instant suggestedTime = TIME_LOWER_BOUND.minus(Duration.ofDays(1));
@@ -658,6 +663,73 @@ public class TimeDetectorStrategyImplTest {
                 .assertLatestNetworkSuggestion(null);
     }
 
+    @Test
+    public void whenAllTimeSuggestionsAreAvailable_higherPriorityWins_lowerPriorityComesFirst() {
+        mScript.pokeFakeClocks(ARBITRARY_CLOCK_INITIALIZATION_INFO)
+                .pokeAutoTimeDetectionEnabled(true);
+
+        Instant networkTime = ARBITRARY_TEST_TIME;
+        Instant telephonyTime = ARBITRARY_TEST_TIME.plus(Duration.ofDays(30));
+
+        NetworkTimeSuggestion networkTimeSuggestion =
+                mScript.generateNetworkTimeSuggestion(networkTime);
+        TelephonyTimeSuggestion telephonyTimeSuggestion =
+                mScript.generateTelephonyTimeSuggestion(ARBITRARY_SLOT_INDEX, telephonyTime);
+
+        mScript.simulateNetworkTimeSuggestion(networkTimeSuggestion)
+                .simulateTelephonyTimeSuggestion(telephonyTimeSuggestion)
+                .assertLatestNetworkSuggestion(networkTimeSuggestion)
+                .assertLatestTelephonySuggestion(ARBITRARY_SLOT_INDEX, telephonyTimeSuggestion)
+                .verifySystemClockWasSetAndResetCallTracking(telephonyTime.toEpochMilli());
+    }
+
+    @Test
+    public void whenAllTimeSuggestionsAreAvailable_higherPriorityWins_higherPriorityComesFirst() {
+        mScript.pokeFakeClocks(ARBITRARY_CLOCK_INITIALIZATION_INFO)
+                .pokeAutoTimeDetectionEnabled(true);
+
+        Instant networkTime = ARBITRARY_TEST_TIME;
+        Instant telephonyTime = ARBITRARY_TEST_TIME.plus(Duration.ofDays(30));
+
+        NetworkTimeSuggestion networkTimeSuggestion =
+                mScript.generateNetworkTimeSuggestion(networkTime);
+        TelephonyTimeSuggestion telephonyTimeSuggestion =
+                mScript.generateTelephonyTimeSuggestion(ARBITRARY_SLOT_INDEX, telephonyTime);
+
+        mScript.simulateTelephonyTimeSuggestion(telephonyTimeSuggestion)
+                .simulateNetworkTimeSuggestion(networkTimeSuggestion)
+                .assertLatestNetworkSuggestion(networkTimeSuggestion)
+                .assertLatestTelephonySuggestion(ARBITRARY_SLOT_INDEX, telephonyTimeSuggestion)
+                .verifySystemClockWasSetAndResetCallTracking(telephonyTime.toEpochMilli());
+    }
+
+    @Test
+    public void whenHighestPrioritySuggestionIsNotAvailable_fallbacksToNext() {
+        mScript.pokeFakeClocks(ARBITRARY_CLOCK_INITIALIZATION_INFO)
+                .pokeAutoTimeDetectionEnabled(true);
+
+        NetworkTimeSuggestion timeSuggestion =
+                mScript.generateNetworkTimeSuggestion(ARBITRARY_TEST_TIME);
+
+        mScript.simulateNetworkTimeSuggestion(timeSuggestion)
+                .assertLatestNetworkSuggestion(timeSuggestion)
+                .verifySystemClockWasSetAndResetCallTracking(ARBITRARY_TEST_TIME.toEpochMilli());
+    }
+
+    @Test
+    public void suggestionsFromSourceNotListedInPrioritiesList_areIgnored() {
+        mScript.pokeFakeClocks(ARBITRARY_CLOCK_INITIALIZATION_INFO)
+                .pokeAutoTimeDetectionEnabled(true)
+                .pokeAutoOriginPriorities(new int[]{ORIGIN_TELEPHONY});
+
+        NetworkTimeSuggestion timeSuggestion = mScript.generateNetworkTimeSuggestion(
+                ARBITRARY_TEST_TIME);
+
+        mScript.simulateNetworkTimeSuggestion(timeSuggestion)
+                .assertLatestNetworkSuggestion(timeSuggestion)
+                .verifySystemClockWasNotSetAndResetCallTracking();
+    }
+
     /**
      * A fake implementation of TimeDetectorStrategy.Callback. Besides tracking changes and behaving
      * like the real thing should, it also asserts preconditions.
@@ -668,6 +740,7 @@ public class TimeDetectorStrategyImplTest {
         private long mElapsedRealtimeMillis;
         private long mSystemClockMillis;
         private int mSystemClockUpdateThresholdMillis = 2000;
+        private int[] mAutoOriginPriorities = PROVIDERS_PRIORITY;
 
         // Tracking operations.
         private boolean mSystemClockWasSet;
@@ -685,6 +758,11 @@ public class TimeDetectorStrategyImplTest {
         @Override
         public Instant autoTimeLowerBound() {
             return TIME_LOWER_BOUND;
+        }
+
+        @Override
+        public int[] getAutoOriginPriorities() {
+            return mAutoOriginPriorities;
         }
 
         @Override
@@ -734,6 +812,10 @@ public class TimeDetectorStrategyImplTest {
 
         void pokeAutoTimeDetectionEnabled(boolean enabled) {
             mAutoTimeDetectionEnabled = enabled;
+        }
+
+        void pokeAutoOriginPriorities(@Origin int[] autoOriginPriorities) {
+            mAutoOriginPriorities = autoOriginPriorities;
         }
 
         long peekElapsedRealtimeMillis() {
@@ -804,6 +886,11 @@ public class TimeDetectorStrategyImplTest {
             return this;
         }
 
+        Script pokeAutoOriginPriorities(@Origin int[] autoOriginPriorites) {
+            mFakeCallback.pokeAutoOriginPriorities(autoOriginPriorites);
+            return this;
+        }
+
         long peekElapsedRealtimeMillis() {
             return mFakeCallback.peekElapsedRealtimeMillis();
         }
@@ -836,7 +923,7 @@ public class TimeDetectorStrategyImplTest {
 
         Script simulateAutoTimeDetectionToggle() {
             mFakeCallback.simulateAutoTimeZoneDetectionToggle();
-            mTimeDetectorStrategy.handleAutoTimeDetectionChanged();
+            mTimeDetectorStrategy.handleAutoTimeConfigChanged();
             return this;
         }
 
@@ -870,7 +957,7 @@ public class TimeDetectorStrategyImplTest {
         Script assertLatestTelephonySuggestion(int slotIndex, TelephonyTimeSuggestion expected) {
             assertEquals(
                     "Expected to see " + expected + " at slotIndex=" + slotIndex + ", but got "
-                        + mTimeDetectorStrategy.getLatestTelephonySuggestion(slotIndex),
+                            + mTimeDetectorStrategy.getLatestTelephonySuggestion(slotIndex),
                     expected, mTimeDetectorStrategy.getLatestTelephonySuggestion(slotIndex));
             return this;
         }
