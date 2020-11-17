@@ -19,6 +19,7 @@ package com.android.systemui.biometrics;
 import static com.android.systemui.doze.util.BurnInHelperKt.getBurnInOffset;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
@@ -51,20 +52,26 @@ public class UdfpsView extends View implements DozeReceiver,
 
     private static final int DEBUG_TEXT_SIZE_PX = 32;
 
-    private final Rect mScrimRect;
-    private final Paint mScrimPaint;
-    private final Paint mDebugTextPaint;
+    @NonNull private final Rect mScrimRect;
+    @NonNull private final Paint mScrimPaint;
+    @NonNull private final Paint mDebugTextPaint;
 
-    private final RectF mSensorRect;
-    private final Paint mSensorPaint;
+    @NonNull private final RectF mSensorRect;
+    @NonNull private final Paint mSensorPaint;
     private final float mSensorTouchAreaCoefficient;
     private final int mMaxBurnInOffsetX;
     private final int mMaxBurnInOffsetY;
 
-    private final Rect mTouchableRegion;
-    private final ViewTreeObserver.OnComputeInternalInsetsListener mInsetsListener;
+    // Stores rounded up values from mSensorRect. Necessary for APIs that only take Rect (not RecF).
+    @NonNull private final Rect mTouchableRegion;
+    // mInsetsListener is used to set the touchable region for our window. Our window covers the
+    // whole screen, and by default its touchable region is the whole screen. We use
+    // mInsetsListener to restrict the touchable region and allow the touches outside of the sensor
+    // to propagate to the rest of the UI.
+    @NonNull private final ViewTreeObserver.OnComputeInternalInsetsListener mInsetsListener;
 
-    @NonNull private FingerprintSensorPropertiesInternal mProps;
+    // Used to obtain the sensor location.
+    @NonNull private FingerprintSensorPropertiesInternal mSensorProps;
 
     // AOD anti-burn-in offsets
     private float mInterpolatedDarkAmount;
@@ -72,8 +79,8 @@ public class UdfpsView extends View implements DozeReceiver,
     private float mBurnInOffsetY;
 
     private boolean mIsScrimShowing;
-    private boolean mHbmSupported;
-    private String mDebugMessage;
+    private boolean mIsHbmSupported;
+    @Nullable private String mDebugMessage;
 
     public UdfpsView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -107,7 +114,6 @@ public class UdfpsView extends View implements DozeReceiver,
         mSensorPaint.setStyle(Paint.Style.STROKE);
         mSensorPaint.setStrokeWidth(SENSOR_OUTLINE_WIDTH);
         mSensorPaint.setShadowLayer(SENSOR_SHADOW_RADIUS, 0, 0, Color.BLACK);
-        mSensorPaint.setAntiAlias(true);
 
         mDebugTextPaint = new Paint();
         mDebugTextPaint.setAntiAlias(true);
@@ -125,7 +131,7 @@ public class UdfpsView extends View implements DozeReceiver,
     }
 
     void setSensorProperties(@NonNull FingerprintSensorPropertiesInternal properties) {
-        mProps = properties;
+        mSensorProps = properties;
     }
 
     @Override
@@ -159,10 +165,10 @@ public class UdfpsView extends View implements DozeReceiver,
         final int h = getLayoutParams().height;
         final int w = getLayoutParams().width;
         mScrimRect.set(0 /* left */, 0 /* top */, w, h);
-        mSensorRect.set(mProps.sensorLocationX - mProps.sensorRadius,
-                mProps.sensorLocationY - mProps.sensorRadius,
-                mProps.sensorLocationX + mProps.sensorRadius,
-                mProps.sensorLocationY + mProps.sensorRadius);
+        mSensorRect.set(mSensorProps.sensorLocationX - mSensorProps.sensorRadius,
+                mSensorProps.sensorLocationY - mSensorProps.sensorRadius,
+                mSensorProps.sensorLocationX + mSensorProps.sensorRadius,
+                mSensorProps.sensorLocationY + mSensorProps.sensorRadius);
 
         // Sets mTouchableRegion with rounded up values from mSensorRect.
         mSensorRect.roundOut(mTouchableRegion);
@@ -181,7 +187,7 @@ public class UdfpsView extends View implements DozeReceiver,
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
-        if (mIsScrimShowing && mHbmSupported) {
+        if (mIsScrimShowing && mIsHbmSupported) {
             // Only draw the scrim if HBM is supported.
             canvas.drawRect(mScrimRect, mScrimPaint);
         }
@@ -200,8 +206,8 @@ public class UdfpsView extends View implements DozeReceiver,
         return new RectF(mSensorRect);
     }
 
-    void setHbmSupported(boolean hbmSupported) {
-        mHbmSupported = hbmSupported;
+    void setHbmSupported(boolean value) {
+        mIsHbmSupported = value;
     }
 
     void setDebugMessage(String message) {
@@ -210,10 +216,14 @@ public class UdfpsView extends View implements DozeReceiver,
     }
 
     boolean isValidTouch(float x, float y, float pressure) {
-        return x > (mProps.sensorLocationX - mProps.sensorRadius * mSensorTouchAreaCoefficient)
-                && x < (mProps.sensorLocationX + mProps.sensorRadius * mSensorTouchAreaCoefficient)
-                && y > (mProps.sensorLocationY - mProps.sensorRadius * mSensorTouchAreaCoefficient)
-                && y < (mProps.sensorLocationY + mProps.sensorRadius * mSensorTouchAreaCoefficient);
+        return x > (mSensorProps.sensorLocationX
+                - mSensorProps.sensorRadius * mSensorTouchAreaCoefficient)
+                && x < (mSensorProps.sensorLocationX
+                + mSensorProps.sensorRadius * mSensorTouchAreaCoefficient)
+                && y > (mSensorProps.sensorLocationY
+                - mSensorProps.sensorRadius * mSensorTouchAreaCoefficient)
+                && y < (mSensorProps.sensorLocationY
+                + mSensorProps.sensorRadius * mSensorTouchAreaCoefficient);
     }
 
     void setScrimAlpha(int alpha) {
