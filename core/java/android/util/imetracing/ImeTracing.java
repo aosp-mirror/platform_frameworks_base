@@ -18,12 +18,14 @@ package android.util.imetracing;
 
 import android.app.ActivityThread;
 import android.content.Context;
+import android.inputmethodservice.AbstractInputMethodService;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.ServiceManager.ServiceNotFoundException;
 import android.os.ShellCommand;
 import android.util.Log;
 import android.util.proto.ProtoOutputStream;
+import android.view.inputmethod.InputMethodManager;
 
 import com.android.internal.view.IInputMethodManager;
 
@@ -40,9 +42,17 @@ public abstract class ImeTracing {
     static final String TAG = "imeTracing";
     public static final String PROTO_ARG = "--proto-com-android-imetracing";
 
+    /* Constants describing the component type that triggered a dump. */
+    public static final int IME_TRACING_FROM_CLIENT = 0;
+    public static final int IME_TRACING_FROM_IMS = 1;
+    public static final int IME_TRACING_FROM_IMMS = 2;
+
     private static ImeTracing sInstance;
     static boolean sEnabled = false;
     IInputMethodManager mService;
+
+    protected boolean mDumpInProgress;
+    protected final Object mDumpInProgressLock = new Object();
 
     ImeTracing() throws ServiceNotFoundException {
         mService = IInputMethodManager.Stub.asInterface(
@@ -69,21 +79,50 @@ public abstract class ImeTracing {
     }
 
     /**
-     * Sends request to start proto dump to {@link ImeTracingServerImpl} when called from a
-     * server process and to {@link ImeTracingClientImpl} when called from a client process.
+     * Transmits the information from client or InputMethodService side to the server, in order to
+     * be stored persistently to the current IME tracing dump.
+     *
+     * @param protoDump client or service side information to be stored by the server
+     * @param source where the information is coming from, refer to {@see #IME_TRACING_FROM_CLIENT}
+     * and {@see #IME_TRACING_FROM_IMS}
+     * @param where
      */
-    public abstract void triggerDump();
+    public void sendToService(byte[] protoDump, int source, String where) throws RemoteException {
+        mService.startProtoDump(protoDump, source, where);
+    }
 
     /**
      * @param proto dump to be added to the buffer
      */
-    public abstract void addToBuffer(ProtoOutputStream proto);
+    public abstract void addToBuffer(ProtoOutputStream proto, int source);
 
     /**
      * @param shell The shell command to process
      * @return {@code 0} if the command was successfully processed, {@code -1} otherwise
      */
     public abstract int onShellCommand(ShellCommand shell);
+
+    /**
+     * Starts a proto dump of the client side information.
+     *
+     * @param where Place where the trace was triggered.
+     * @param immInstance The {@link InputMethodManager} instance to dump.
+     */
+    public abstract void triggerClientDump(String where, InputMethodManager immInstance);
+
+    /**
+     * Starts a proto dump of the currently connected InputMethodService information.
+     *
+     * @param where Place where the trace was triggered.
+     */
+    public abstract void triggerServiceDump(String where, AbstractInputMethodService service);
+
+    /**
+     * Starts a proto dump of the InputMethodManagerService information.
+     *
+     * @param where Place where the trace was triggered.
+     */
+    public abstract void triggerManagerServiceDump(String where);
 
     /**
      * Sets whether ime tracing is enabled.

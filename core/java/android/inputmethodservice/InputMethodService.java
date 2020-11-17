@@ -90,6 +90,7 @@ import android.text.method.MovementMethod;
 import android.util.Log;
 import android.util.PrintWriterPrinter;
 import android.util.Printer;
+import android.util.imetracing.ImeTracing;
 import android.util.proto.ProtoOutputStream;
 import android.view.Gravity;
 import android.view.KeyCharacterMap;
@@ -116,6 +117,7 @@ import android.view.inputmethod.InputBinding;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputContentInfo;
 import android.view.inputmethod.InputMethod;
+import android.view.inputmethod.InputMethodEditorTraceProto.InputMethodServiceTraceProto;
 import android.view.inputmethod.InputMethodManager;
 import android.view.inputmethod.InputMethodSubtype;
 import android.widget.FrameLayout;
@@ -708,6 +710,8 @@ public class InputMethodService extends AbstractInputMethodService {
                         + " Use requestHideSelf(int) itself");
                 return;
             }
+            ImeTracing.getInstance().triggerServiceDump(
+                    "InputMethodService.InputMethodImpl#hideSoftInput", InputMethodService.this);
             final boolean wasVisible = isInputViewShown();
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMS.hideSoftInput");
 
@@ -762,6 +766,8 @@ public class InputMethodService extends AbstractInputMethodService {
                 Binder.disableTracing();
             }
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMS.showSoftInput");
+            ImeTracing.getInstance().triggerServiceDump(
+                    "InputMethodService.InputMethodImpl#showSoftInput", InputMethodService.this);
             final boolean wasVisible = isInputViewShown();
             if (dispatchOnShowInputRequested(flags, false)) {
 
@@ -2133,6 +2139,8 @@ public class InputMethodService extends AbstractInputMethodService {
             return;
         }
 
+        ImeTracing.getInstance().triggerServiceDump("InputMethodService#showWindow", this);
+
         mDecorViewWasVisible = mDecorViewVisible;
         mInShowWindow = true;
         final int previousImeWindowStatus =
@@ -2207,6 +2215,8 @@ public class InputMethodService extends AbstractInputMethodService {
      * @param setVisible {@code true} to make it visible, false to hide it.
      */
     private void applyVisibilityInInsetsConsumerIfNecessary(boolean setVisible) {
+        ImeTracing.getInstance().triggerServiceDump(
+                "InputMethodService#applyVisibilityInInsetsConsumerIfNecessary", this);
         mPrivOps.applyImeVisibility(setVisible
                 ? mCurShowInputToken : mCurHideInputToken, setVisible);
     }
@@ -2231,6 +2241,7 @@ public class InputMethodService extends AbstractInputMethodService {
 
     public void hideWindow() {
         if (DEBUG) Log.v(TAG, "CALL: hideWindow");
+        ImeTracing.getInstance().triggerServiceDump("InputMethodService#hideWindow", this);
         mWindowVisible = false;
         finishViews(false /* finishingInput */);
         if (mDecorViewVisible) {
@@ -2301,6 +2312,7 @@ public class InputMethodService extends AbstractInputMethodService {
     
     void doFinishInput() {
         if (DEBUG) Log.v(TAG, "CALL: doFinishInput");
+        ImeTracing.getInstance().triggerServiceDump("InputMethodService#doFinishInput", this);
         finishViews(true /* finishingInput */);
         if (mInputStarted) {
             mInlineSuggestionSessionController.notifyOnFinishInput();
@@ -2316,6 +2328,7 @@ public class InputMethodService extends AbstractInputMethodService {
         if (!restarting) {
             doFinishInput();
         }
+        ImeTracing.getInstance().triggerServiceDump("InputMethodService#doStartInput", this);
         mInputStarted = true;
         mStartedInputConnection = ic;
         mInputEditorInfo = attribute;
@@ -2474,6 +2487,7 @@ public class InputMethodService extends AbstractInputMethodService {
      * @param flags Provides additional operating flags.
      */
     public void requestHideSelf(int flags) {
+        ImeTracing.getInstance().triggerServiceDump("InputMethodService#requestHideSelf", this);
         mPrivOps.hideMySoftInput(flags);
     }
 
@@ -2486,6 +2500,7 @@ public class InputMethodService extends AbstractInputMethodService {
      * @param flags Provides additional operating flags.
      */
     public final void requestShowSelf(int flags) {
+        ImeTracing.getInstance().triggerServiceDump("InputMethodService#requestShowSelf", this);
         mPrivOps.showMySoftInput(flags);
     }
 
@@ -3305,8 +3320,8 @@ public class InputMethodService extends AbstractInputMethodService {
      * @hide
      */
     @Override
-    final void dumpProtoInternal(FileDescriptor fd, String[] args) {
-        final ProtoOutputStream proto = new ProtoOutputStream(fd);
+    public final void dumpProtoInternal(ProtoOutputStream proto) {
+        final long token = proto.start(InputMethodServiceTraceProto.INPUT_METHOD_SERVICE);
         mWindow.dumpDebug(proto, SOFT_INPUT_WINDOW);
         proto.write(VIEWS_CREATED, mViewsCreated);
         proto.write(DECOR_VIEW_VISIBLE, mDecorViewVisible);
@@ -3334,6 +3349,6 @@ public class InputMethodService extends AbstractInputMethodService {
         proto.write(STATUS_ICON, mStatusIcon);
         mTmpInsets.dumpDebug(proto, LAST_COMPUTED_INSETS);
         proto.write(SETTINGS_OBSERVER, Objects.toString(mSettingsObserver));
-        proto.flush();
+        proto.end(token);
     }
 }
