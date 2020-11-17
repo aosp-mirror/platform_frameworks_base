@@ -560,9 +560,18 @@ void ASurfaceTransaction_setColor(ASurfaceTransaction* aSurfaceTransaction,
 void ASurfaceTransaction_setFrameRate(ASurfaceTransaction* aSurfaceTransaction,
                                       ASurfaceControl* aSurfaceControl, float frameRate,
                                       int8_t compatibility) {
+    ASurfaceTransaction_setFrameRateWithSeamlessness(aSurfaceTransaction, aSurfaceControl,
+                                                     frameRate, compatibility,
+                                                     /*shouldBeSeamless*/ true);
+}
+
+void ASurfaceTransaction_setFrameRateWithSeamlessness(ASurfaceTransaction* aSurfaceTransaction,
+                                                      ASurfaceControl* aSurfaceControl,
+                                                      float frameRate, int8_t compatibility,
+                                                      bool shouldBeSeamless) {
     CHECK_NOT_NULL(aSurfaceTransaction);
     CHECK_NOT_NULL(aSurfaceControl);
     Transaction* transaction = ASurfaceTransaction_to_Transaction(aSurfaceTransaction);
     sp<SurfaceControl> surfaceControl = ASurfaceControl_to_SurfaceControl(aSurfaceControl);
-    transaction->setFrameRate(surfaceControl, frameRate, compatibility);
+    transaction->setFrameRate(surfaceControl, frameRate, compatibility, shouldBeSeamless);
 }
