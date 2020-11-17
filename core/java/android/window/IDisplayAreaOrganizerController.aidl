@@ -19,6 +19,7 @@ package android.window;
 import android.content.pm.ParceledListSlice;
 import android.window.DisplayAreaAppearedInfo;
 import android.window.IDisplayAreaOrganizer;
+import android.window.WindowContainerToken;
 
 /** @hide */
 interface IDisplayAreaOrganizerController {
@@ -37,4 +38,28 @@ interface IDisplayAreaOrganizerController {
      * Unregisters a previously registered display area organizer.
      */
     void unregisterOrganizer(in IDisplayAreaOrganizer organizer);
+
+    /**
+     * Creates a persistent task display area. It will be added to be the top most task display area
+     * in the root.
+     *
+     * The new created TDA is organized by the organizer, and will be deleted on calling
+     * {@link #deleteTaskDisplayArea(WindowContainerToken)} or {@link #unregisterOrganizer()}.
+     *
+     * @param displayId the display to create the new task display area in.
+     * @param rootFeatureId the root display area to create the new task display area in. Caller can
+     *                      use {@link #FEATURE_ROOT} as the root of the logical display.
+     * @param name the name for the new task display area.
+     * @return the new created task display area.
+     * @throws IllegalArgumentException if failed to create a new task display area.
+     */
+    DisplayAreaAppearedInfo createTaskDisplayArea(in IDisplayAreaOrganizer organizer, int displayId,
+        int rootFeatureId, in String name);
+
+    /**
+     * Deletes a persistent task display area. It can only be one that created by an organizer.
+     *
+     * @throws IllegalArgumentException if failed to delete the task display area.
+     */
+    void deleteTaskDisplayArea(in WindowContainerToken taskDisplayArea);
 }

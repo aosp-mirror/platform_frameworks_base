@@ -961,6 +961,12 @@
       "group": "WM_DEBUG_WINDOW_ORGANIZER",
       "at": "com\/android\/server\/wm\/TaskOrganizerController.java"
     },
+    "-948446688": {
+      "message": "Create TaskDisplayArea uid=%d",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_ORGANIZER",
+      "at": "com\/android\/server\/wm\/DisplayAreaOrganizerController.java"
+    },
     "-937498525": {
       "message": "Executing finish of failed to pause activity: %s",
       "level": "VERBOSE",
@@ -1273,6 +1279,12 @@
       "group": "WM_DEBUG_STATES",
       "at": "com\/android\/server\/wm\/Task.java"
     },
+    "-597091183": {
+      "message": "Delete TaskDisplayArea uid=%d",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_ORGANIZER",
+      "at": "com\/android\/server\/wm\/DisplayAreaOrganizerController.java"
+    },
     "-593535526": {
       "message": "Binding proc %s with config %s",
       "level": "VERBOSE",
@@ -1494,12 +1506,6 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_APP_TRANSITIONS",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
-    },
-    "-371630969": {
-      "message": "New wallpaper target=%s, oldWallpaper=%s, openingApps=%s, closingApps=%s",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_APP_TRANSITIONS",
-      "at": "com\/android\/server\/wm\/AppTransitionController.java"
     },
     "-354571697": {
       "message": "Existence Changed in transition %d: %s",
@@ -2100,12 +2106,6 @@
       "level": "DEBUG",
       "group": "WM_DEBUG_ORIENTATION",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
-    },
-    "355940361": {
-      "message": "Config is destroying non-running %s",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_CONFIGURATION",
-      "at": "com\/android\/server\/wm\/ActivityRecord.java"
     },
     "371173718": {
       "message": "finishSync cancel=%b for %s",

@@ -382,6 +382,13 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
 
     @Nullable
     @Override
+    <R> R getItemFromDisplayAreas(Function<DisplayArea, R> callback) {
+        final R item = super.getItemFromDisplayAreas(callback);
+        return item != null ? item : callback.apply(this);
+    }
+
+    @Nullable
+    @Override
     <R> R getItemFromTaskDisplayAreas(Function<TaskDisplayArea, R> callback,
             boolean traverseTopToBottom) {
         // Only DisplayArea of Type.ANY may contain TaskDisplayArea as children.
