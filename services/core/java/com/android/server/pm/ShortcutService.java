@@ -95,6 +95,8 @@ import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
 import android.util.SparseLongArray;
 import android.util.TypedValue;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 import android.util.Xml;
 import android.view.IWindowManager;
 
@@ -104,7 +106,6 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.DumpUtils;
-import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.StatLogger;
 import com.android.server.LocalServices;
@@ -119,10 +120,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -799,31 +797,31 @@ public class ShortcutService extends IShortcutService.Stub {
     // === Persisting ===
 
     @Nullable
-    static String parseStringAttribute(XmlPullParser parser, String attribute) {
+    static String parseStringAttribute(TypedXmlPullParser parser, String attribute) {
         return parser.getAttributeValue(null, attribute);
     }
 
-    static boolean parseBooleanAttribute(XmlPullParser parser, String attribute) {
+    static boolean parseBooleanAttribute(TypedXmlPullParser parser, String attribute) {
         return parseLongAttribute(parser, attribute) == 1;
     }
 
-    static boolean parseBooleanAttribute(XmlPullParser parser, String attribute, boolean def) {
+    static boolean parseBooleanAttribute(TypedXmlPullParser parser, String attribute, boolean def) {
         return parseLongAttribute(parser, attribute, (def ? 1 : 0)) == 1;
     }
 
-    static int parseIntAttribute(XmlPullParser parser, String attribute) {
+    static int parseIntAttribute(TypedXmlPullParser parser, String attribute) {
         return (int) parseLongAttribute(parser, attribute);
     }
 
-    static int parseIntAttribute(XmlPullParser parser, String attribute, int def) {
+    static int parseIntAttribute(TypedXmlPullParser parser, String attribute, int def) {
         return (int) parseLongAttribute(parser, attribute, def);
     }
 
-    static long parseLongAttribute(XmlPullParser parser, String attribute) {
+    static long parseLongAttribute(TypedXmlPullParser parser, String attribute) {
         return parseLongAttribute(parser, attribute, 0);
     }
 
-    static long parseLongAttribute(XmlPullParser parser, String attribute, long def) {
+    static long parseLongAttribute(TypedXmlPullParser parser, String attribute, long def) {
         final String value = parseStringAttribute(parser, attribute);
         if (TextUtils.isEmpty(value)) {
             return def;
@@ -837,7 +835,7 @@ public class ShortcutService extends IShortcutService.Stub {
     }
 
     @Nullable
-    static ComponentName parseComponentNameAttribute(XmlPullParser parser, String attribute) {
+    static ComponentName parseComponentNameAttribute(TypedXmlPullParser parser, String attribute) {
         final String value = parseStringAttribute(parser, attribute);
         if (TextUtils.isEmpty(value)) {
             return null;
@@ -846,7 +844,7 @@ public class ShortcutService extends IShortcutService.Stub {
     }
 
     @Nullable
-    static Intent parseIntentAttributeNoDefault(XmlPullParser parser, String attribute) {
+    static Intent parseIntentAttributeNoDefault(TypedXmlPullParser parser, String attribute) {
         final String value = parseStringAttribute(parser, attribute);
         Intent parsed = null;
         if (!TextUtils.isEmpty(value)) {
@@ -860,7 +858,7 @@ public class ShortcutService extends IShortcutService.Stub {
     }
 
     @Nullable
-    static Intent parseIntentAttribute(XmlPullParser parser, String attribute) {
+    static Intent parseIntentAttribute(TypedXmlPullParser parser, String attribute) {
         Intent parsed = parseIntentAttributeNoDefault(parser, attribute);
         if (parsed == null) {
             // Default intent.
@@ -869,7 +867,7 @@ public class ShortcutService extends IShortcutService.Stub {
         return parsed;
     }
 
-    static void writeTagValue(XmlSerializer out, String tag, String value) throws IOException {
+    static void writeTagValue(TypedXmlSerializer out, String tag, String value) throws IOException {
         if (TextUtils.isEmpty(value)) return;
 
         out.startTag(null, tag);
@@ -877,16 +875,17 @@ public class ShortcutService extends IShortcutService.Stub {
         out.endTag(null, tag);
     }
 
-    static void writeTagValue(XmlSerializer out, String tag, long value) throws IOException {
+    static void writeTagValue(TypedXmlSerializer out, String tag, long value) throws IOException {
         writeTagValue(out, tag, Long.toString(value));
     }
 
-    static void writeTagValue(XmlSerializer out, String tag, ComponentName name) throws IOException {
+    static void writeTagValue(TypedXmlSerializer out, String tag, ComponentName name)
+            throws IOException {
         if (name == null) return;
         writeTagValue(out, tag, name.flattenToString());
     }
 
-    static void writeTagExtra(XmlSerializer out, String tag, PersistableBundle bundle)
+    static void writeTagExtra(TypedXmlSerializer out, String tag, PersistableBundle bundle)
             throws IOException, XmlPullParserException {
         if (bundle == null) return;
 
@@ -895,17 +894,18 @@ public class ShortcutService extends IShortcutService.Stub {
         out.endTag(null, tag);
     }
 
-    static void writeAttr(XmlSerializer out, String name, CharSequence value) throws IOException {
+    static void writeAttr(TypedXmlSerializer out, String name, CharSequence value)
+            throws IOException {
         if (TextUtils.isEmpty(value)) return;
 
         out.attribute(null, name, value.toString());
     }
 
-    static void writeAttr(XmlSerializer out, String name, long value) throws IOException {
+    static void writeAttr(TypedXmlSerializer out, String name, long value) throws IOException {
         writeAttr(out, name, String.valueOf(value));
     }
 
-    static void writeAttr(XmlSerializer out, String name, boolean value) throws IOException {
+    static void writeAttr(TypedXmlSerializer out, String name, boolean value) throws IOException {
         if (value) {
             writeAttr(out, name, "1");
         } else {
@@ -913,12 +913,13 @@ public class ShortcutService extends IShortcutService.Stub {
         }
     }
 
-    static void writeAttr(XmlSerializer out, String name, ComponentName comp) throws IOException {
+    static void writeAttr(TypedXmlSerializer out, String name, ComponentName comp)
+            throws IOException {
         if (comp == null) return;
         writeAttr(out, name, comp.flattenToString());
     }
 
-    static void writeAttr(XmlSerializer out, String name, Intent intent) throws IOException {
+    static void writeAttr(TypedXmlSerializer out, String name, Intent intent) throws IOException {
         if (intent == null) return;
 
         writeAttr(out, name, intent.toUri(/* flags =*/ 0));
@@ -937,8 +938,7 @@ public class ShortcutService extends IShortcutService.Stub {
             outs = file.startWrite();
 
             // Write to XML
-            XmlSerializer out = new FastXmlSerializer();
-            out.setOutput(outs, StandardCharsets.UTF_8.name());
+            TypedXmlSerializer out = Xml.resolveSerializer(outs);
             out.startDocument(null, true);
             out.startTag(null, TAG_ROOT);
 
@@ -966,8 +966,7 @@ public class ShortcutService extends IShortcutService.Stub {
             Slog.d(TAG, "Loading from " + file.getBaseFile());
         }
         try (FileInputStream in = file.openRead()) {
-            XmlPullParser parser = Xml.newPullParser();
-            parser.setInput(in, StandardCharsets.UTF_8.name());
+            TypedXmlPullParser parser = Xml.resolvePullParser(in);
 
             int type;
             while ((type = parser.next()) != XmlPullParser.END_DOCUMENT) {
@@ -1043,18 +1042,20 @@ public class ShortcutService extends IShortcutService.Stub {
     private void saveUserInternalLocked(@UserIdInt int userId, OutputStream os,
             boolean forBackup) throws IOException, XmlPullParserException {
 
-        final BufferedOutputStream bos = new BufferedOutputStream(os);
-
         // Write to XML
-        XmlSerializer out = new FastXmlSerializer();
-        out.setOutput(bos, StandardCharsets.UTF_8.name());
+        final TypedXmlSerializer out;
+        if (forBackup) {
+            out = Xml.newFastSerializer();
+            out.setOutput(os, StandardCharsets.UTF_8.name());
+        } else {
+            out = Xml.resolveSerializer(os);
+        }
         out.startDocument(null, true);
 
         getUserShortcutsLocked(userId).saveToXml(out, forBackup);
 
         out.endDocument();
 
-        bos.flush();
         os.flush();
     }
 
@@ -1098,11 +1099,14 @@ public class ShortcutService extends IShortcutService.Stub {
             boolean fromBackup) throws XmlPullParserException, IOException,
             InvalidFileFormatException {
 
-        final BufferedInputStream bis = new BufferedInputStream(is);
-
         ShortcutUser ret = null;
-        XmlPullParser parser = Xml.newPullParser();
-        parser.setInput(bis, StandardCharsets.UTF_8.name());
+        TypedXmlPullParser parser;
+        if (fromBackup) {
+            parser = Xml.newFastPullParser();
+            parser.setInput(is, StandardCharsets.UTF_8.name());
+        } else {
+            parser = Xml.resolvePullParser(is);
+        }
 
         int type;
         while ((type = parser.next()) != XmlPullParser.END_DOCUMENT) {

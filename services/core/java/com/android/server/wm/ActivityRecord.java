@@ -277,6 +277,8 @@ import android.util.Log;
 import android.util.MergedConfiguration;
 import android.util.Slog;
 import android.util.TimeUtils;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 import android.util.proto.ProtoOutputStream;
 import android.view.AppTransitionAnimationSpec;
 import android.view.DisplayCutout;
@@ -7464,7 +7466,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 || (info.flags & FLAG_NO_HISTORY) != 0;
     }
 
-    void saveToXml(XmlSerializer out) throws IOException, XmlPullParserException {
+    void saveToXml(TypedXmlSerializer out) throws IOException, XmlPullParserException {
         out.attribute(null, ATTR_ID, String.valueOf(createTime));
         out.attribute(null, ATTR_LAUNCHEDFROMUID, String.valueOf(launchedFromUid));
         if (launchedFromPackage != null) {
@@ -7494,7 +7496,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
     }
 
-    static ActivityRecord restoreFromXml(XmlPullParser in,
+    static ActivityRecord restoreFromXml(TypedXmlPullParser in,
             ActivityTaskSupervisor taskSupervisor) throws IOException, XmlPullParserException {
         Intent intent = null;
         PersistableBundle persistentState = null;

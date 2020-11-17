@@ -335,7 +335,7 @@ class DisplayWindowSettingsProvider implements SettingsProvider {
         return fileData;
     }
 
-    private static int getIntAttribute(XmlPullParser parser, String name, int defaultValue) {
+    private static int getIntAttribute(TypedXmlPullParser parser, String name, int defaultValue) {
         try {
             final String str = parser.getAttributeValue(null, name);
             return str != null ? Integer.parseInt(str) : defaultValue;
@@ -346,7 +346,7 @@ class DisplayWindowSettingsProvider implements SettingsProvider {
     }
 
     @Nullable
-    private static Integer getIntegerAttribute(XmlPullParser parser, String name,
+    private static Integer getIntegerAttribute(TypedXmlPullParser parser, String name,
             @Nullable Integer defaultValue) {
         try {
             final String str = parser.getAttributeValue(null, name);
@@ -358,13 +358,13 @@ class DisplayWindowSettingsProvider implements SettingsProvider {
     }
 
     @Nullable
-    private static Boolean getBooleanAttribute(XmlPullParser parser, String name,
+    private static Boolean getBooleanAttribute(TypedXmlPullParser parser, String name,
             @Nullable Boolean defaultValue) {
         final String str = parser.getAttributeValue(null, name);
         return str != null ? Boolean.valueOf(str) : defaultValue;
     }
 
-    private static void readDisplay(XmlPullParser parser, FileData fileData)
+    private static void readDisplay(TypedXmlPullParser parser, FileData fileData)
             throws NumberFormatException, XmlPullParserException, IOException {
         String name = parser.getAttributeValue(null, "name");
         if (name != null) {
@@ -407,7 +407,7 @@ class DisplayWindowSettingsProvider implements SettingsProvider {
         XmlUtils.skipCurrentTag(parser);
     }
 
-    private static void readConfig(XmlPullParser parser, FileData fileData)
+    private static void readConfig(TypedXmlPullParser parser, FileData fileData)
             throws NumberFormatException,
             XmlPullParserException, IOException {
         fileData.mIdentifierType = getIntAttribute(parser, "identifier",

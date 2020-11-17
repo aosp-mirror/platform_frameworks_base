@@ -4388,7 +4388,7 @@ public class AppOpsService extends IAppOpsService.Stub {
         scheduleFastWriteLocked();
     }
 
-    private void readUidOps(XmlPullParser parser) throws NumberFormatException,
+    private void readUidOps(TypedXmlPullParser parser) throws NumberFormatException,
             XmlPullParserException, IOException {
         final int uid = Integer.parseInt(parser.getAttributeValue(null, "n"));
         int outerDepth = parser.getDepth();
@@ -4412,7 +4412,7 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
     }
 
-    private void readPackage(XmlPullParser parser)
+    private void readPackage(TypedXmlPullParser parser)
             throws NumberFormatException, XmlPullParserException, IOException {
         String pkgName = parser.getAttributeValue(null, "n");
         int outerDepth = parser.getDepth();
@@ -4434,7 +4434,7 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
     }
 
-    private void readUid(XmlPullParser parser, String pkgName)
+    private void readUid(TypedXmlPullParser parser, String pkgName)
             throws NumberFormatException, XmlPullParserException, IOException {
         int uid = Integer.parseInt(parser.getAttributeValue(null, "n"));
         final UidState uidState = getUidStateLocked(uid, true);
@@ -4457,7 +4457,7 @@ public class AppOpsService extends IAppOpsService.Stub {
         uidState.evalForegroundOps(mOpModeWatchers);
     }
 
-    private void readAttributionOp(XmlPullParser parser, @NonNull Op parent,
+    private void readAttributionOp(TypedXmlPullParser parser, @NonNull Op parent,
             @Nullable String attribution) throws NumberFormatException, IOException {
         final AttributedOp attributedOp = parent.getOrCreateAttribution(parent, attribution);
 
@@ -4481,9 +4481,9 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
     }
 
-    private void readOp(XmlPullParser parser, @NonNull UidState uidState, @NonNull String pkgName)
-            throws NumberFormatException,
-        XmlPullParserException, IOException {
+    private void readOp(TypedXmlPullParser parser,
+            @NonNull UidState uidState, @NonNull String pkgName)
+            throws NumberFormatException, XmlPullParserException, IOException {
         int opCode = Integer.parseInt(parser.getAttributeValue(null, "n"));
         Op op = new Op(uidState, pkgName, opCode, uidState.uid);
 

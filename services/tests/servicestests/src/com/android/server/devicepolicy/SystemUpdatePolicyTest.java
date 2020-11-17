@@ -29,6 +29,8 @@ import static org.junit.Assert.fail;
 import android.app.admin.FreezePeriod;
 import android.app.admin.SystemUpdatePolicy;
 import android.os.Parcel;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import androidx.test.runner.AndroidJUnit4;
@@ -471,7 +473,7 @@ public final class SystemUpdatePolicyTest {
 
         // Test XML serialization
         ByteArrayOutputStream outStream = new ByteArrayOutputStream();
-        final XmlSerializer outXml = new FastXmlSerializer();
+        final TypedXmlSerializer outXml = Xml.newFastSerializer();
         outXml.setOutput(outStream, StandardCharsets.UTF_8.name());
         outXml.startDocument(null, true);
         outXml.startTag(null, "ota");
@@ -481,7 +483,7 @@ public final class SystemUpdatePolicyTest {
         outXml.flush();
 
         ByteArrayInputStream inStream = new ByteArrayInputStream(outStream.toByteArray());
-        XmlPullParser parser = Xml.newPullParser();
+        TypedXmlPullParser parser = Xml.newFastPullParser();
         parser.setInput(new InputStreamReader(inStream));
         assertThat(parser.next()).isEqualTo(XmlPullParser.START_TAG);
         checkFreezePeriods(SystemUpdatePolicy.restoreFromXml(parser), expectedPeriods);

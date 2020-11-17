@@ -1107,7 +1107,7 @@ public class PackageWatchdog {
          * Does not persist any package failure thresholds.
          */
         @GuardedBy("mLock")
-        public boolean writeLocked(XmlSerializer out) {
+        public boolean writeLocked(TypedXmlSerializer out) {
             try {
                 out.startTag(null, TAG_OBSERVER);
                 out.attribute(null, ATTR_NAME, name);
@@ -1225,7 +1225,7 @@ public class PackageWatchdog {
          * #loadFromFile which in turn is only called on construction of the
          * singleton PackageWatchdog.
          **/
-        public static ObserverInternal read(XmlPullParser parser, PackageWatchdog watchdog) {
+        public static ObserverInternal read(TypedXmlPullParser parser, PackageWatchdog watchdog) {
             String observerName = null;
             if (TAG_OBSERVER.equals(parser.getName())) {
                 observerName = parser.getAttributeValue(null, ATTR_NAME);
@@ -1364,7 +1364,7 @@ public class PackageWatchdog {
 
         /** Writes the salient fields to disk using {@code out}. */
         @GuardedBy("mLock")
-        public void writeLocked(XmlSerializer out) throws IOException {
+        public void writeLocked(TypedXmlSerializer out) throws IOException {
             out.startTag(null, TAG_PACKAGE);
             out.attribute(null, ATTR_NAME, getName());
             out.attribute(null, ATTR_DURATION, String.valueOf(mDurationMs));

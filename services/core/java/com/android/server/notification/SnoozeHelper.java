@@ -32,6 +32,8 @@ import android.util.ArrayMap;
 import android.util.IntArray;
 import android.util.Log;
 import android.util.Slog;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
@@ -547,7 +549,7 @@ public class SnoozeHelper {
         }
     }
 
-    protected void writeXml(XmlSerializer out) throws IOException {
+    protected void writeXml(TypedXmlSerializer out) throws IOException {
         synchronized (mLock) {
             final long currentTime = System.currentTimeMillis();
             out.startTag(null, XML_TAG_NAME);
@@ -573,7 +575,7 @@ public class SnoozeHelper {
         void insert(T t) throws IOException;
     }
 
-    private <T> void writeXml(XmlSerializer out,
+    private <T> void writeXml(TypedXmlSerializer out,
             ArrayMap<String, ArrayMap<String, T>> targets, String tag,
             Inserter<T> attributeInserter)
             throws IOException {
@@ -610,7 +612,7 @@ public class SnoozeHelper {
         }
     }
 
-    protected void readXml(XmlPullParser parser, long currentTime)
+    protected void readXml(TypedXmlPullParser parser, long currentTime)
             throws XmlPullParserException, IOException {
         int type;
         while ((type = parser.next()) != XmlPullParser.END_DOCUMENT) {

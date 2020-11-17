@@ -319,7 +319,7 @@ public class CacheQuotaStrategy implements RemoteCallback.OnResultListener {
     }
 
     @VisibleForTesting
-    static void saveToXml(XmlSerializer out,
+    static void saveToXml(TypedXmlSerializer out,
             List<CacheQuotaHint> requests, long bytesWhenCalculated) throws IOException {
         out.startDocument(null, true);
         out.startTag(null, CACHE_INFO_TAG);
@@ -389,7 +389,7 @@ public class CacheQuotaStrategy implements RemoteCallback.OnResultListener {
     }
 
     @VisibleForTesting
-    static CacheQuotaHint getRequestFromXml(XmlPullParser parser) {
+    static CacheQuotaHint getRequestFromXml(TypedXmlPullParser parser) {
         try {
             String uuid = parser.getAttributeValue(null, ATTR_UUID);
             int uid = Integer.parseInt(parser.getAttributeValue(null, ATTR_UID));

@@ -28,6 +28,7 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;
 import android.util.Slog;
+import android.util.TypedXmlPullParser;
 import android.util.Xml;
 
 import com.android.internal.annotations.GuardedBy;
@@ -391,8 +392,7 @@ public class RoleUserState {
     private void readLegacyFileLocked() {
         File file = getFile(mUserId);
         try (FileInputStream in = new AtomicFile(file).openRead()) {
-            XmlPullParser parser = Xml.newPullParser();
-            parser.setInput(in, null);
+            TypedXmlPullParser parser = Xml.resolvePullParser(in);
             parseXmlLocked(parser);
             Slog.i(LOG_TAG, "Read roles.xml successfully");
         } catch (FileNotFoundException e) {
@@ -402,7 +402,7 @@ public class RoleUserState {
         }
     }
 
-    private void parseXmlLocked(@NonNull XmlPullParser parser) throws IOException,
+    private void parseXmlLocked(@NonNull TypedXmlPullParser parser) throws IOException,
             XmlPullParserException {
         int type;
         int depth;
@@ -421,7 +421,7 @@ public class RoleUserState {
         Slog.w(LOG_TAG, "Missing <" + TAG_ROLES + "> in roles.xml");
     }
 
-    private void parseRolesLocked(@NonNull XmlPullParser parser) throws IOException,
+    private void parseRolesLocked(@NonNull TypedXmlPullParser parser) throws IOException,
             XmlPullParserException {
         mVersion = Integer.parseInt(parser.getAttributeValue(null, ATTRIBUTE_VERSION));
         mPackagesHash = parser.getAttributeValue(null, ATTRIBUTE_PACKAGES_HASH);
@@ -445,7 +445,7 @@ public class RoleUserState {
     }
 
     @NonNull
-    private ArraySet<String> parseRoleHoldersLocked(@NonNull XmlPullParser parser)
+    private ArraySet<String> parseRoleHoldersLocked(@NonNull TypedXmlPullParser parser)
             throws IOException, XmlPullParserException {
         ArraySet<String> roleHolders = new ArraySet<>();
 

@@ -2085,7 +2085,7 @@ class StorageManagerService extends IStorageManager.Stub
         }
     }
 
-    public static VolumeRecord readVolumeRecord(XmlPullParser in) throws IOException {
+    public static VolumeRecord readVolumeRecord(TypedXmlPullParser in) throws IOException {
         final int type = readIntAttribute(in, ATTR_TYPE);
         final String fsUuid = readStringAttribute(in, ATTR_FS_UUID);
         final VolumeRecord meta = new VolumeRecord(type, fsUuid);
@@ -2099,7 +2099,8 @@ class StorageManagerService extends IStorageManager.Stub
         return meta;
     }
 
-    public static void writeVolumeRecord(XmlSerializer out, VolumeRecord rec) throws IOException {
+    public static void writeVolumeRecord(TypedXmlSerializer out, VolumeRecord rec)
+            throws IOException {
         out.startTag(null, TAG_VOLUME);
         writeIntAttribute(out, ATTR_TYPE, rec.type);
         writeStringAttribute(out, ATTR_FS_UUID, rec.fsUuid);

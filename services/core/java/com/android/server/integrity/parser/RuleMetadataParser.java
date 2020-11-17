@@ -17,6 +17,7 @@
 package com.android.server.integrity.parser;
 
 import android.annotation.Nullable;
+import android.util.TypedXmlPullParser;
 import android.util.Xml;
 
 import com.android.server.integrity.model.RuleMetadata;
@@ -26,7 +27,6 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 
 /** Helper class for parsing rule metadata. */
 public class RuleMetadataParser {
@@ -42,8 +42,7 @@ public class RuleMetadataParser {
         String ruleProvider = "";
         String version = "";
 
-        XmlPullParser xmlPullParser = Xml.newPullParser();
-        xmlPullParser.setInput(inputStream, StandardCharsets.UTF_8.name());
+        TypedXmlPullParser xmlPullParser = Xml.resolvePullParser(inputStream);
 
         int eventType;
         while ((eventType = xmlPullParser.next()) != XmlPullParser.END_DOCUMENT) {

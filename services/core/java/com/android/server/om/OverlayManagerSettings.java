@@ -445,8 +445,8 @@ final class OverlayManagerSettings {
             }
         }
 
-        private static SettingsItem restoreRow(@NonNull final XmlPullParser parser, final int depth)
-                throws IOException {
+        private static SettingsItem restoreRow(@NonNull final TypedXmlPullParser parser,
+                final int depth) throws IOException {
             final String packageName = XmlUtils.readStringAttribute(parser, ATTR_PACKAGE_NAME);
             final int userId = XmlUtils.readIntAttribute(parser, ATTR_USER_ID);
             final String targetPackageName = XmlUtils.readStringAttribute(parser,

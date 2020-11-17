@@ -26,6 +26,7 @@ import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.AtomicFile;
 import android.util.Slog;
+import android.util.TypedXmlPullParser;
 import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
@@ -166,7 +167,7 @@ final class PersistentDataStore {
             return;
         }
 
-        XmlPullParser parser;
+        TypedXmlPullParser parser;
         try {
             parser = Xml.resolvePullParser(is);
             loadFromXml(parser);
@@ -237,7 +238,7 @@ final class PersistentDataStore {
     private static final String ATTR_STRING = "string";
     private static final String ATTR_ENABLED = "enabled";
 
-    private void loadFromXml(XmlPullParser parser)
+    private void loadFromXml(TypedXmlPullParser parser)
             throws IOException, XmlPullParserException {
         XmlUtils.beginDocument(parser, TAG_TV_INPUT_MANAGER_STATE);
         final int outerDepth = parser.getDepth();
@@ -255,7 +256,7 @@ final class PersistentDataStore {
         }
     }
 
-    private void loadBlockedRatingsFromXml(XmlPullParser parser)
+    private void loadBlockedRatingsFromXml(TypedXmlPullParser parser)
             throws IOException, XmlPullParserException {
         final int outerDepth = parser.getDepth();
         while (XmlUtils.nextElementWithin(parser, outerDepth)) {
@@ -270,7 +271,7 @@ final class PersistentDataStore {
         }
     }
 
-    private void saveToXml(XmlSerializer serializer) throws IOException {
+    private void saveToXml(TypedXmlSerializer serializer) throws IOException {
         serializer.startDocument(null, true);
         serializer.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
         serializer.startTag(null, TAG_TV_INPUT_MANAGER_STATE);

@@ -20,6 +20,8 @@ import android.content.Context;
 import android.hardware.fingerprint.Fingerprint;
 import android.util.AtomicFile;
 import android.util.Slog;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import com.android.internal.annotations.GuardedBy;
@@ -29,7 +31,6 @@ import libcore.io.IoUtils;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -88,8 +89,7 @@ public class FingerprintUserState extends BiometricUserState<Fingerprint> {
         try {
             out = destination.startWrite();
 
-            XmlSerializer serializer = Xml.newSerializer();
-            serializer.setOutput(out, "utf-8");
+            TypedXmlSerializer serializer = Xml.resolveSerializer(out);
             serializer.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
             serializer.startDocument(null, true);
             serializer.startTag(null, TAG_FINGERPRINTS);
@@ -121,7 +121,7 @@ public class FingerprintUserState extends BiometricUserState<Fingerprint> {
 
     @GuardedBy("this")
     @Override
-    protected void parseBiometricsLocked(XmlPullParser parser)
+    protected void parseBiometricsLocked(TypedXmlPullParser parser)
             throws IOException, XmlPullParserException {
 
         final int outerDepth = parser.getDepth();

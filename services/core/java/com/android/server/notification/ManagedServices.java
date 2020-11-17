@@ -60,6 +60,8 @@ import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.GuardedBy;
@@ -443,7 +445,7 @@ abstract public class ManagedServices {
         }
     }
 
-    void writeDefaults(XmlSerializer out) throws IOException {
+    void writeDefaults(TypedXmlSerializer out) throws IOException {
         synchronized (mDefaultsLock) {
             List<String> componentStrings = new ArrayList<>(mDefaultComponents.size());
             for (int i = 0; i < mDefaultComponents.size(); i++) {
@@ -454,7 +456,7 @@ abstract public class ManagedServices {
         }
     }
 
-    public void writeXml(XmlSerializer out, boolean forBackup, int userId) throws IOException {
+    public void writeXml(TypedXmlSerializer out, boolean forBackup, int userId) throws IOException {
         out.startTag(null, getConfig().xmlTag);
 
         out.attribute(null, ATT_VERSION, String.valueOf(DB_VERSION));
@@ -516,23 +518,23 @@ abstract public class ManagedServices {
     /**
      * Writes extra xml attributes to {@link #TAG_MANAGED_SERVICES} tag.
      */
-    protected void writeExtraAttributes(XmlSerializer out, int userId) throws IOException {}
+    protected void writeExtraAttributes(TypedXmlSerializer out, int userId) throws IOException {}
 
     /**
      * Writes extra xml tags within the parent tag specified in {@link Config#xmlTag}.
      */
-    protected void writeExtraXmlTags(XmlSerializer out) throws IOException {}
+    protected void writeExtraXmlTags(TypedXmlSerializer out) throws IOException {}
 
     /**
      * This is called to process tags other than {@link #TAG_MANAGED_SERVICES}.
      */
-    protected void readExtraTag(String tag, XmlPullParser parser) throws IOException {}
+    protected void readExtraTag(String tag, TypedXmlPullParser parser) throws IOException {}
 
     protected void migrateToXml() {
         loadAllowedComponentsFromSettings();
     }
 
-    void readDefaults(XmlPullParser parser) {
+    void readDefaults(TypedXmlPullParser parser) {
         String defaultComponents = XmlUtils.readStringAttribute(parser, ATT_DEFAULTS);
 
         if (!TextUtils.isEmpty(defaultComponents)) {
@@ -554,7 +556,7 @@ abstract public class ManagedServices {
     }
 
     public void readXml(
-            XmlPullParser parser,
+            TypedXmlPullParser parser,
             TriPredicate<String, Integer, String> allowedManagedServicePackages,
             boolean forRestore,
             int userId)
@@ -631,7 +633,7 @@ abstract public class ManagedServices {
     /**
      * Read extra attributes in the {@link #TAG_MANAGED_SERVICES} tag.
      */
-    protected void readExtraAttributes(String tag, XmlPullParser parser, int userId)
+    protected void readExtraAttributes(String tag, TypedXmlPullParser parser, int userId)
             throws IOException {}
 
     protected abstract String getRequiredPermission();

@@ -1804,7 +1804,7 @@ public class SyncStorageEngine {
         return writeNeeded;
     }
 
-    private void parseListenForTickles(XmlPullParser parser) {
+    private void parseListenForTickles(TypedXmlPullParser parser) {
         String user = parser.getAttributeValue(null, XML_ATTR_USER);
         int userId = 0;
         try {
@@ -1819,7 +1819,7 @@ public class SyncStorageEngine {
         mMasterSyncAutomatically.put(userId, listen);
     }
 
-    private AuthorityInfo parseAuthority(XmlPullParser parser, int version,
+    private AuthorityInfo parseAuthority(TypedXmlPullParser parser, int version,
             AccountAuthorityValidator validator) {
         AuthorityInfo authority = null;
         int id = -1;
@@ -1912,7 +1912,7 @@ public class SyncStorageEngine {
     /**
      * Parse a periodic sync from accounts.xml. Sets the bundle to be empty.
      */
-    private PeriodicSync parsePeriodicSync(XmlPullParser parser, AuthorityInfo authorityInfo) {
+    private PeriodicSync parsePeriodicSync(TypedXmlPullParser parser, AuthorityInfo authorityInfo) {
         Bundle extras = new Bundle(); // Gets filled in later.
         String periodValue = parser.getAttributeValue(null, "period");
         String flexValue = parser.getAttributeValue(null, "flex");
@@ -1949,7 +1949,7 @@ public class SyncStorageEngine {
         return periodicSync;
     }
 
-    private void parseExtra(XmlPullParser parser, Bundle extras) {
+    private void parseExtra(TypedXmlPullParser parser, Bundle extras) {
         String name = parser.getAttributeValue(null, "name");
         String type = parser.getAttributeValue(null, "type");
         String value1 = parser.getAttributeValue(null, "value1");

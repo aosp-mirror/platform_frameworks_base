@@ -27,6 +27,8 @@ import static org.junit.Assert.fail;
 
 import android.content.om.OverlayInfo;
 import android.text.TextUtils;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import androidx.test.runner.AndroidJUnit4;
@@ -403,7 +405,7 @@ public class OverlayManagerSettingsTests {
 
     private int countXmlTags(String xml, String tagToLookFor) throws Exception {
         int count = 0;
-        XmlPullParser parser = Xml.newPullParser();
+        TypedXmlPullParser parser = Xml.newFastPullParser();
         parser.setInput(new StringReader(xml));
         int event = parser.getEventType();
         while (event != XmlPullParser.END_DOCUMENT) {
@@ -418,7 +420,7 @@ public class OverlayManagerSettingsTests {
     private int countXmlAttributesWhere(String xml, String tag, String attr, String value)
             throws Exception {
         int count = 0;
-        XmlPullParser parser = Xml.newPullParser();
+        TypedXmlPullParser parser = Xml.newFastPullParser();
         parser.setInput(new StringReader(xml));
         int event = parser.getEventType();
         while (event != XmlPullParser.END_DOCUMENT) {

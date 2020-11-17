@@ -25,6 +25,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseLongArray;
 import android.util.TimeUtils;
+import android.util.TypedXmlPullParser;
 import android.util.TypedXmlSerializer;
 import android.util.Xml;
 import android.view.Display;
@@ -322,7 +323,7 @@ final class PersistentDataStore {
             return;
         }
 
-        XmlPullParser parser;
+        TypedXmlPullParser parser;
         try {
             parser = Xml.resolvePullParser(is);
             loadFromXml(parser);
@@ -355,7 +356,7 @@ final class PersistentDataStore {
         }
     }
 
-    private void loadFromXml(XmlPullParser parser)
+    private void loadFromXml(TypedXmlPullParser parser)
             throws IOException, XmlPullParserException {
         XmlUtils.beginDocument(parser, TAG_DISPLAY_MANAGER_STATE);
         final int outerDepth = parser.getDepth();
@@ -375,7 +376,7 @@ final class PersistentDataStore {
         }
     }
 
-    private void loadRememberedWifiDisplaysFromXml(XmlPullParser parser)
+    private void loadRememberedWifiDisplaysFromXml(TypedXmlPullParser parser)
             throws IOException, XmlPullParserException {
         final int outerDepth = parser.getDepth();
         while (XmlUtils.nextElementWithin(parser, outerDepth)) {
@@ -399,7 +400,7 @@ final class PersistentDataStore {
         }
     }
 
-    private void loadDisplaysFromXml(XmlPullParser parser)
+    private void loadDisplaysFromXml(TypedXmlPullParser parser)
             throws IOException, XmlPullParserException {
         final int outerDepth = parser.getDepth();
         while (XmlUtils.nextElementWithin(parser, outerDepth)) {
@@ -420,7 +421,7 @@ final class PersistentDataStore {
         }
     }
 
-    private void saveToXml(XmlSerializer serializer) throws IOException {
+    private void saveToXml(TypedXmlSerializer serializer) throws IOException {
         serializer.startDocument(null, true);
         serializer.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
         serializer.startTag(null, TAG_DISPLAY_MANAGER_STATE);
@@ -491,7 +492,7 @@ final class PersistentDataStore {
             return mColorMode;
         }
 
-        public void loadFromXml(XmlPullParser parser)
+        public void loadFromXml(TypedXmlPullParser parser)
                 throws IOException, XmlPullParserException {
             final int outerDepth = parser.getDepth();
 
@@ -503,7 +504,7 @@ final class PersistentDataStore {
             }
         }
 
-        public void saveToXml(XmlSerializer serializer) throws IOException {
+        public void saveToXml(TypedXmlSerializer serializer) throws IOException {
             serializer.startTag(null, TAG_COLOR_MODE);
             serializer.text(Integer.toString(mColorMode));
             serializer.endTag(null, TAG_COLOR_MODE);
@@ -531,7 +532,8 @@ final class PersistentDataStore {
             return false;
         }
 
-        public void loadFromXml(XmlPullParser parser) throws IOException, XmlPullParserException {
+        public void loadFromXml(TypedXmlPullParser parser)
+                throws IOException, XmlPullParserException {
             final int outerDepth = parser.getDepth();
             while (XmlUtils.nextElementWithin(parser, outerDepth)) {
                 switch (parser.getName()) {
@@ -545,7 +547,7 @@ final class PersistentDataStore {
             }
         }
 
-        private static int loadIntValue(XmlPullParser parser)
+        private static int loadIntValue(TypedXmlPullParser parser)
             throws IOException, XmlPullParserException {
             try {
                 String value = parser.nextText();
@@ -555,7 +557,7 @@ final class PersistentDataStore {
             }
         }
 
-        public void saveToXml(XmlSerializer serializer) throws IOException {
+        public void saveToXml(TypedXmlSerializer serializer) throws IOException {
             if (mWidth > 0 && mHeight > 0) {
                 serializer.startTag(null, TAG_STABLE_DISPLAY_WIDTH);
                 serializer.text(Integer.toString(mWidth));
@@ -612,7 +614,8 @@ final class PersistentDataStore {
             return mConfigurations.get(userSerial);
         }
 
-        public void loadFromXml(XmlPullParser parser) throws IOException, XmlPullParserException {
+        public void loadFromXml(TypedXmlPullParser parser)
+                throws IOException, XmlPullParserException {
             final int outerDepth = parser.getDepth();
             while (XmlUtils.nextElementWithin(parser, outerDepth)) {
                 if (TAG_BRIGHTNESS_CONFIGURATION.equals(parser.getName())) {
@@ -655,7 +658,7 @@ final class PersistentDataStore {
             }
         }
 
-        public void saveToXml(XmlSerializer serializer) throws IOException {
+        public void saveToXml(TypedXmlSerializer serializer) throws IOException {
             for (int i = 0; i < mConfigurations.size(); i++) {
                 final int userSerial = mConfigurations.keyAt(i);
                 final BrightnessConfiguration config = mConfigurations.valueAt(i);

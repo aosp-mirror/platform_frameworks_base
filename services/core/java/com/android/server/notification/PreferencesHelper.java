@@ -56,6 +56,8 @@ import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseBooleanArray;
 import android.util.StatsEvent;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.R;
@@ -195,7 +197,7 @@ public class PreferencesHelper implements RankingConfig {
         syncChannelsBypassingDnd(mContext.getUserId());
     }
 
-    public void readXml(XmlPullParser parser, boolean forRestore, int userId)
+    public void readXml(TypedXmlPullParser parser, boolean forRestore, int userId)
             throws XmlPullParserException, IOException {
         int type = parser.getEventType();
         if (type != XmlPullParser.START_TAG) return;
@@ -502,7 +504,7 @@ public class PreferencesHelper implements RankingConfig {
         return true;
     }
 
-    public void writeXml(XmlSerializer out, boolean forBackup, int userId) throws IOException {
+    public void writeXml(TypedXmlSerializer out, boolean forBackup, int userId) throws IOException {
         out.startTag(null, TAG_RANKING);
         out.attribute(null, ATT_VERSION, Integer.toString(XML_VERSION));
         if (mHideSilentStatusBarIcons != DEFAULT_HIDE_SILENT_STATUS_BAR_ICONS

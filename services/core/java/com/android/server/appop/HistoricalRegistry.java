@@ -49,6 +49,8 @@ import android.util.ArraySet;
 import android.util.LongSparseArray;
 import android.util.Slog;
 import android.util.TimeUtils;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import com.android.internal.annotations.GuardedBy;
@@ -1184,8 +1186,7 @@ final class HistoricalRegistry {
             }
             List<HistoricalOps> allOps = null;
             try (FileInputStream stream = new FileInputStream(file)) {
-                final XmlPullParser parser = Xml.newPullParser();
-                parser.setInput(stream, StandardCharsets.UTF_8.name());
+                final TypedXmlPullParser parser = Xml.resolvePullParser(stream);
                 XmlUtils.beginDocument(parser, TAG_HISTORY);
 
                 // We haven't released version 1 and have more detailed
@@ -1235,7 +1236,8 @@ final class HistoricalRegistry {
         }
 
         private @Nullable HistoricalOps readeHistoricalOpsDLocked(
-                @NonNull XmlPullParser parser, int filterUid, @Nullable String filterPackageName,
+                @NonNull TypedXmlPullParser parser, int filterUid,
+                @Nullable String filterPackageName,
                 @Nullable String filterAttributionTag, @Nullable String[] filterOpNames,
                 @HistoricalOpsRequestFilter int filter, long filterBeginTimeMillis,
                 long filterEndTimeMillis, @OpFlags int filterFlags,
@@ -1280,7 +1282,7 @@ final class HistoricalRegistry {
         }
 
         private @Nullable HistoricalOps readHistoricalUidOpsDLocked(
-                @Nullable HistoricalOps ops, @NonNull XmlPullParser parser, int filterUid,
+                @Nullable HistoricalOps ops, @NonNull TypedXmlPullParser parser, int filterUid,
                 @Nullable String filterPackageName, @Nullable String filterAttributionTag,
                 @Nullable String[] filterOpNames, @HistoricalOpsRequestFilter int filter,
                 @OpFlags int filterFlags, double filterScale)
@@ -1305,7 +1307,7 @@ final class HistoricalRegistry {
         }
 
         private @Nullable HistoricalOps readHistoricalPackageOpsDLocked(
-                @Nullable HistoricalOps ops, int uid, @NonNull XmlPullParser parser,
+                @Nullable HistoricalOps ops, int uid, @NonNull TypedXmlPullParser parser,
                 @Nullable String filterPackageName, @Nullable String filterAttributionTag,
                 @Nullable String[] filterOpNames, @HistoricalOpsRequestFilter int filter,
                 @OpFlags int filterFlags, double filterScale)
@@ -1331,7 +1333,7 @@ final class HistoricalRegistry {
 
         private @Nullable HistoricalOps readHistoricalAttributionOpsDLocked(
                 @Nullable HistoricalOps ops, int uid, String packageName,
-                @NonNull XmlPullParser parser, @Nullable String filterAttributionTag,
+                @NonNull TypedXmlPullParser parser, @Nullable String filterAttributionTag,
                 @Nullable String[] filterOpNames, @HistoricalOpsRequestFilter int filter,
                 @OpFlags int filterFlags, double filterScale)
                 throws IOException, XmlPullParserException {
@@ -1357,7 +1359,7 @@ final class HistoricalRegistry {
 
         private @Nullable HistoricalOps readHistoricalOpDLocked(@Nullable HistoricalOps ops,
                 int uid, @NonNull String packageName, @Nullable String attributionTag,
-                @NonNull XmlPullParser parser, @Nullable String[] filterOpNames,
+                @NonNull TypedXmlPullParser parser, @Nullable String[] filterOpNames,
                 @HistoricalOpsRequestFilter int filter, @OpFlags int filterFlags,
                 double filterScale)
                 throws IOException, XmlPullParserException {
@@ -1382,7 +1384,7 @@ final class HistoricalRegistry {
 
         private @Nullable HistoricalOps readStateDLocked(@Nullable HistoricalOps ops,
                 int uid, @NonNull String packageName, @Nullable String attributionTag, int op,
-                @NonNull XmlPullParser parser, @OpFlags int filterFlags, double filterScale)
+                @NonNull TypedXmlPullParser parser, @OpFlags int filterFlags, double filterScale)
                 throws IOException {
             final long key = XmlUtils.readLongAttribute(parser, ATTR_NAME);
             final int flags = AppOpsManager.extractFlagsFromKey(key) & filterFlags;
@@ -1433,8 +1435,7 @@ final class HistoricalRegistry {
                 long intervalOverflowMillis, @NonNull File file) throws IOException {
             final FileOutputStream output = sHistoricalAppOpsDir.openWrite(file);
             try {
-                final XmlSerializer serializer = Xml.newSerializer();
-                serializer.setOutput(output, StandardCharsets.UTF_8.name());
+                final TypedXmlSerializer serializer = Xml.resolveSerializer(output);
                 serializer.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output",
                         true);
                 serializer.startDocument(null, true);
@@ -1461,7 +1462,7 @@ final class HistoricalRegistry {
         }
 
         private void writeHistoricalOpDLocked(@NonNull HistoricalOps ops,
-                @NonNull XmlSerializer serializer) throws IOException {
+                @NonNull TypedXmlSerializer serializer) throws IOException {
             serializer.startTag(null, TAG_OPS);
             serializer.attribute(null, ATTR_BEGIN_TIME, Long.toString(ops.getBeginTimeMillis()));
             serializer.attribute(null, ATTR_END_TIME, Long.toString(ops.getEndTimeMillis()));
@@ -1474,7 +1475,7 @@ final class HistoricalRegistry {
         }
 
         private void writeHistoricalUidOpsDLocked(@NonNull HistoricalUidOps uidOps,
-                @NonNull XmlSerializer serializer) throws IOException {
+                @NonNull TypedXmlSerializer serializer) throws IOException {
             serializer.startTag(null, TAG_UID);
             serializer.attribute(null, ATTR_NAME, Integer.toString(uidOps.getUid()));
             final int packageCount = uidOps.getPackageCount();
@@ -1486,7 +1487,7 @@ final class HistoricalRegistry {
         }
 
         private void writeHistoricalPackageOpsDLocked(@NonNull HistoricalPackageOps packageOps,
-                @NonNull XmlSerializer serializer) throws IOException {
+                @NonNull TypedXmlSerializer serializer) throws IOException {
             serializer.startTag(null, TAG_PACKAGE);
             serializer.attribute(null, ATTR_NAME, packageOps.getPackageName());
             final int numAttributions = packageOps.getAttributedOpsCount();
@@ -1499,7 +1500,7 @@ final class HistoricalRegistry {
 
         private void writeHistoricalAttributionOpsDLocked(
                 @NonNull AppOpsManager.AttributedHistoricalOps attributionOps,
-                @NonNull XmlSerializer serializer) throws IOException {
+                @NonNull TypedXmlSerializer serializer) throws IOException {
             serializer.startTag(null, TAG_ATTRIBUTION);
             XmlUtils.writeStringAttribute(serializer, ATTR_NAME, attributionOps.getTag());
             final int opCount = attributionOps.getOpCount();
@@ -1511,7 +1512,7 @@ final class HistoricalRegistry {
         }
 
         private void writeHistoricalOpDLocked(@NonNull HistoricalOp op,
-                @NonNull XmlSerializer serializer) throws IOException {
+                @NonNull TypedXmlSerializer serializer) throws IOException {
             final LongSparseArray keys = op.collectKeys();
             if (keys == null || keys.size() <= 0) {
                 return;
@@ -1526,7 +1527,7 @@ final class HistoricalRegistry {
         }
 
         private void writeStateOnLocked(@NonNull HistoricalOp op, long key,
-                @NonNull XmlSerializer serializer) throws IOException {
+                @NonNull TypedXmlSerializer serializer) throws IOException {
             final int uidState = AppOpsManager.extractUidStateFromKey(key);
             final int flags = AppOpsManager.extractFlagsFromKey(key);
 

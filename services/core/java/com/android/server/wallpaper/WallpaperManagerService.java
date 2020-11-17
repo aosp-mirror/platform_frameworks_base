@@ -100,12 +100,12 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.DumpUtils;
-import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.JournaledFile;
 import com.android.server.EventLogTags;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
+import com.android.server.SystemService.TargetUser;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.utils.TimingsTraceAndSlog;
 import com.android.server.wm.WindowManagerInternal;
@@ -114,7 +114,6 @@ import libcore.io.IoUtils;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -125,7 +124,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -2909,11 +2907,9 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
     private void saveSettingsLocked(int userId) {
         JournaledFile journal = makeJournaledFile(userId);
         FileOutputStream fstream = null;
-        BufferedOutputStream stream = null;
         try {
             fstream = new FileOutputStream(journal.chooseForWrite(), false);
-            stream = new BufferedOutputStream(fstream);
-            TypedXmlSerializer out = Xml.resolveSerializer(stream);
+            TypedXmlSerializer out = Xml.resolveSerializer(fstream);
             out.startDocument(null, true);
 
             WallpaperData wallpaper;
@@ -2929,17 +2925,18 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
 
             out.endDocument();
 
-            stream.flush(); // also flushes fstream
+            fstream.flush();
             FileUtils.sync(fstream);
-            stream.close(); // also closes fstream
+            fstream.close();
             journal.commit();
         } catch (IOException e) {
-            IoUtils.closeQuietly(stream);
+            IoUtils.closeQuietly(fstream);
             journal.rollback();
         }
     }
 
-    private void writeWallpaperAttributes(XmlSerializer out, String tag, WallpaperData wallpaper)
+    private void writeWallpaperAttributes(TypedXmlSerializer out, String tag,
+            WallpaperData wallpaper)
             throws IllegalArgumentException, IllegalStateException, IOException {
         if (DEBUG) {
             Slog.v(TAG, "writeWallpaperAttributes id=" + wallpaper.wallpaperId);
@@ -3028,7 +3025,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         }
     }
 
-    private int getAttributeInt(XmlPullParser parser, String name, int defValue) {
+    private int getAttributeInt(TypedXmlPullParser parser, String name, int defValue) {
         String value = parser.getAttributeValue(null, name);
         if (value == null) {
             return defValue;
@@ -3213,7 +3210,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         }
     }
 
-    private void parseWallpaperAttributes(XmlPullParser parser, WallpaperData wallpaper,
+    private void parseWallpaperAttributes(TypedXmlPullParser parser, WallpaperData wallpaper,
             boolean keepDimensionHints) {
         final String idString = parser.getAttributeValue(null, "id");
         if (idString != null) {

@@ -196,6 +196,8 @@ import android.util.ArraySet;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Slog;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 import android.util.proto.ProtoOutputStream;
 import android.view.DisplayInfo;
 import android.view.RemoteAnimationAdapter;
@@ -4483,7 +4485,7 @@ class Task extends WindowContainer<WindowContainer> {
     /**
      * Saves this {@link Task} to XML using given serializer.
      */
-    void saveToXml(XmlSerializer out) throws Exception {
+    void saveToXml(TypedXmlSerializer out) throws Exception {
         if (DEBUG_RECENTS) Slog.i(TAG_RECENTS, "Saving task=" + this);
 
         out.attribute(null, ATTR_TASKID, String.valueOf(mTaskId));
@@ -4564,7 +4566,7 @@ class Task extends WindowContainer<WindowContainer> {
     }
 
     private static boolean saveActivityToXml(
-            ActivityRecord r, ActivityRecord first, XmlSerializer out) {
+            ActivityRecord r, ActivityRecord first, TypedXmlSerializer out) {
         if (r.info.persistableMode == ActivityInfo.PERSIST_ROOT_ONLY || !r.isPersistable()
                 || ((r.intent.getFlags() & FLAG_ACTIVITY_NEW_DOCUMENT
                 | FLAG_ACTIVITY_RETAIN_IN_RECENTS) == FLAG_ACTIVITY_NEW_DOCUMENT)
@@ -4583,7 +4585,7 @@ class Task extends WindowContainer<WindowContainer> {
         }
     }
 
-    static Task restoreFromXml(XmlPullParser in, ActivityTaskSupervisor taskSupervisor)
+    static Task restoreFromXml(TypedXmlPullParser in, ActivityTaskSupervisor taskSupervisor)
             throws IOException, XmlPullParserException {
         Intent intent = null;
         Intent affinityIntent = null;

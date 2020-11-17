@@ -27,26 +27,24 @@ import android.util.ArraySet;
 import android.util.AtomicFile;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 import android.util.Xml;
 import android.view.DisplayInfo;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.FastXmlSerializer;
 import com.android.server.LocalServices;
 import com.android.server.pm.PackageList;
 import com.android.server.wm.LaunchParamsController.LaunchParams;
 
-import libcore.io.IoUtils;
-
 import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlSerializer;
 
-import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
-import java.io.StringWriter;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -195,12 +193,9 @@ class LaunchParamsPersister {
                 continue;
             }
 
-            BufferedReader reader = null;
-            try {
-                reader = new BufferedReader(new FileReader(paramsFile));
+            try (InputStream in = new FileInputStream(paramsFile)) {
                 final PersistableLaunchParams params = new PersistableLaunchParams();
-                final XmlPullParser parser = Xml.newPullParser();
-                parser.setInput(reader);
+                final TypedXmlPullParser parser = Xml.resolvePullParser(in);
                 int event;
                 while ((event = parser.next()) != XmlPullParser.END_DOCUMENT
                         && event != XmlPullParser.END_TAG) {
@@ -223,8 +218,6 @@ class LaunchParamsPersister {
             } catch (Exception e) {
                 Slog.w(TAG, "Failed to restore launch params for " + name, e);
                 filesToDelete.add(paramsFile);
-            } finally {
-                IoUtils.closeQuietly(reader);
             }
         }
 
@@ -410,12 +403,11 @@ class LaunchParamsPersister {
             mLaunchParams = launchParams;
         }
 
-        private StringWriter saveParamsToXml() {
-            final StringWriter writer = new StringWriter();
-            final XmlSerializer serializer = new FastXmlSerializer();
-
+        private byte[] saveParamsToXml() {
             try {
-                serializer.setOutput(writer);
+                final ByteArrayOutputStream os = new ByteArrayOutputStream();
+                final TypedXmlSerializer serializer = Xml.resolveSerializer(os);
+
                 serializer.startDocument(/* encoding */ null, /* standalone */ true);
                 serializer.startTag(null, TAG_LAUNCH_PARAMS);
 
@@ -425,7 +417,7 @@ class LaunchParamsPersister {
                 serializer.endDocument();
                 serializer.flush();
 
-                return writer;
+                return os.toByteArray();
             } catch (IOException e) {
                 return null;
             }
@@ -433,7 +425,7 @@ class LaunchParamsPersister {
 
         @Override
         public void process() {
-            final StringWriter writer = saveParamsToXml();
+            final byte[] data = saveParamsToXml();
 
             final File launchParamFolder = getLaunchParamFolder(mUserId);
             if (!launchParamFolder.isDirectory() && !launchParamFolder.mkdirs()) {
@@ -447,7 +439,7 @@ class LaunchParamsPersister {
             FileOutputStream stream = null;
             try {
                 stream = atomicFile.startWrite();
-                stream.write(writer.toString().getBytes());
+                stream.write(data);
             } catch (Exception e) {
                 Slog.e(TAG, "Failed to write param file for " + mComponentName, e);
                 if (stream != null) {
@@ -513,7 +505,7 @@ class LaunchParamsPersister {
          */
         long mTimestamp;
 
-        void saveToXml(XmlSerializer serializer) throws IOException {
+        void saveToXml(TypedXmlSerializer serializer) throws IOException {
             serializer.attribute(null, ATTR_DISPLAY_UNIQUE_ID, mDisplayUniqueId);
             serializer.attribute(null, ATTR_WINDOWING_MODE,
                     Integer.toString(mWindowingMode));
@@ -523,7 +515,7 @@ class LaunchParamsPersister {
             }
         }
 
-        void restore(File xmlFile, XmlPullParser parser) {
+        void restore(File xmlFile, TypedXmlPullParser parser) {
             for (int i = 0; i < parser.getAttributeCount(); ++i) {
                 final String attrValue = parser.getAttributeValue(i);
                 switch (parser.getAttributeName(i)) {

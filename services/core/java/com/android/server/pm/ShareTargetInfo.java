@@ -17,10 +17,11 @@ package com.android.server.pm;
 
 import android.annotation.NonNull;
 import android.text.TextUtils;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -123,7 +124,7 @@ class ShareTargetInfo {
         return strBuilder.toString();
     }
 
-    void saveToXml(@NonNull XmlSerializer out) throws IOException {
+    void saveToXml(@NonNull TypedXmlSerializer out) throws IOException {
         out.startTag(null, TAG_SHARE_TARGET);
 
         ShortcutService.writeAttr(out, ATTR_TARGET_CLASS, mTargetClass);
@@ -149,7 +150,7 @@ class ShareTargetInfo {
         out.endTag(null, TAG_SHARE_TARGET);
     }
 
-    static ShareTargetInfo loadFromXml(XmlPullParser parser)
+    static ShareTargetInfo loadFromXml(TypedXmlPullParser parser)
             throws IOException, XmlPullParserException {
         final String targetClass = ShortcutService.parseStringAttribute(parser, ATTR_TARGET_CLASS);
         final ArrayList<ShareTargetInfo.TargetData> targetData = new ArrayList<>();
@@ -178,7 +179,7 @@ class ShareTargetInfo {
                 targetClass, categories.toArray(new String[categories.size()]));
     }
 
-    private static ShareTargetInfo.TargetData parseTargetData(XmlPullParser parser) {
+    private static ShareTargetInfo.TargetData parseTargetData(TypedXmlPullParser parser) {
         final String scheme = ShortcutService.parseStringAttribute(parser, ATTR_SCHEME);
         final String host = ShortcutService.parseStringAttribute(parser, ATTR_HOST);
         final String port = ShortcutService.parseStringAttribute(parser, ATTR_PORT);

@@ -23,6 +23,8 @@ import static org.mockito.Mockito.when;
 
 import android.app.admin.FactoryResetProtectionPolicy;
 import android.os.Parcel;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import androidx.test.runner.AndroidJUnit4;
@@ -98,7 +100,7 @@ public class FactoryResetProtectionPolicyTest {
             throws Exception {
         ByteArrayOutputStream outStream = serialize(policy);
         ByteArrayInputStream inStream = new ByteArrayInputStream(outStream.toByteArray());
-        XmlPullParser parser = Xml.newPullParser();
+        TypedXmlPullParser parser = Xml.newFastPullParser();
         parser.setInput(new InputStreamReader(inStream));
         assertThat(parser.next()).isEqualTo(XmlPullParser.START_TAG);
 
@@ -109,7 +111,7 @@ public class FactoryResetProtectionPolicyTest {
             throws Exception {
         ByteArrayOutputStream outStream = serialize(policy);
         ByteArrayInputStream inStream = new ByteArrayInputStream(outStream.toByteArray());
-        XmlPullParser parser = mock(XmlPullParser.class);
+        TypedXmlPullParser parser = mock(TypedXmlPullParser.class);
         when(parser.next()).thenThrow(XmlPullParserException.class);
         parser.setInput(new InputStreamReader(inStream));
 
@@ -120,7 +122,7 @@ public class FactoryResetProtectionPolicyTest {
     private ByteArrayOutputStream serialize(FactoryResetProtectionPolicy policy)
             throws IOException {
         ByteArrayOutputStream outStream = new ByteArrayOutputStream();
-        final XmlSerializer outXml = new FastXmlSerializer();
+        final TypedXmlSerializer outXml = Xml.newFastSerializer();
         outXml.setOutput(outStream, StandardCharsets.UTF_8.name());
         outXml.startDocument(null, true);
         outXml.startTag(null, TAG_FACTORY_RESET_PROTECTION_POLICY);

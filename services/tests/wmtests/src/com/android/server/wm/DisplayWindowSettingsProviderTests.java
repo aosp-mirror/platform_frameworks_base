@@ -27,6 +27,8 @@ import static org.junit.Assert.assertTrue;
 
 import android.annotation.Nullable;
 import android.platform.test.annotations.Presubmit;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 import android.util.Xml;
 import android.view.Display;
 import android.view.DisplayAddress;
@@ -245,7 +247,7 @@ public class DisplayWindowSettingsProviderTests extends WindowTestsBase {
     private String getStoredDisplayAttributeValue(TestStorage storage, String attr)
             throws Exception {
         try (InputStream stream = storage.openRead()) {
-            XmlPullParser parser = Xml.newPullParser();
+            TypedXmlPullParser parser = Xml.newFastPullParser();
             parser.setInput(stream, StandardCharsets.UTF_8.name());
             int type;
             while ((type = parser.next()) != XmlPullParser.START_TAG
