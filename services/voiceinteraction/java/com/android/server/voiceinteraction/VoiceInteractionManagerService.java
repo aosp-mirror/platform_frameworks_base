@@ -262,8 +262,7 @@ public class VoiceInteractionManagerService extends SystemService {
             try (SafeCloseable ignored = PermissionUtil.establishIdentityDirect(
                     originatorIdentity)) {
                 SoundTriggerSession session = new SoundTriggerSession(
-                        mSoundTriggerInternal.attachAsOriginator(IdentityContext.getNonNull(),
-                                client));
+                        mSoundTriggerInternal.attach(client));
                 synchronized (mSessions) {
                     mSessions.add(new WeakReference<>(session));
                 }

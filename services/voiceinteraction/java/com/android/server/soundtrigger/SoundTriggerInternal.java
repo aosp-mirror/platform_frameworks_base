@@ -47,12 +47,7 @@ public interface SoundTriggerInternal {
     int STATUS_ERROR = SoundTrigger.STATUS_ERROR;
     int STATUS_OK = SoundTrigger.STATUS_OK;
 
-    Session attachAsOriginator(@NonNull Identity originatorIdentity,
-            @NonNull IBinder client);
-
-    Session attachAsMiddleman(@NonNull Identity middlemanIdentity,
-            @NonNull Identity originatorIdentity,
-            @NonNull IBinder client);
+    Session attach(@NonNull IBinder client);
 
     /**
      * Dumps service-wide information.
