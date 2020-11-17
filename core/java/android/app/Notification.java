@@ -4922,8 +4922,6 @@ public class Notification implements Parcelable
                 contentView.setViewVisibility(textId, View.VISIBLE);
             }
 
-            setContentMinHeight(contentView, showProgress || mN.hasLargeIcon());
-
             return contentView;
         }
 
@@ -5079,21 +5077,6 @@ public class Notification implements Parcelable
                 contentView.setInt(R.id.status_bar_latest_event_content, "setBackgroundResource",
                         0);
             }
-        }
-
-        /**
-         * @param remoteView the remote view to update the minheight in
-         * @param hasMinHeight does it have a mimHeight
-         * @hide
-         */
-        void setContentMinHeight(RemoteViews remoteView, boolean hasMinHeight) {
-            int minHeight = 0;
-            if (hasMinHeight) {
-                // we need to set the minHeight of the notification
-                minHeight = mContext.getResources().getDimensionPixelSize(
-                        com.android.internal.R.dimen.notification_min_content_height);
-            }
-            remoteView.setInt(R.id.notification_main_column, "setMinimumHeight", minHeight);
         }
 
         private boolean handleProgressBar(RemoteViews contentView, Bundle ex,
@@ -6942,7 +6925,6 @@ public class Notification implements Parcelable
                 mBuilder.setTextViewColorSecondary(contentView, R.id.text, p);
                 contentView.setViewVisibility(R.id.text, View.VISIBLE);
             }
-            mBuilder.setContentMinHeight(contentView, mBuilder.mN.hasLargeIcon());
 
             if (mBigLargeIconSet) {
                 mBuilder.mN.mLargeIcon = oldLargeIcon;
@@ -8710,7 +8692,7 @@ public class Notification implements Parcelable
             RemoteViews remoteViews = mBuilder.applyStandardTemplateWithActions(
                     mBuilder.getHeadsUpBaseLayoutResource(),
                     StandardTemplateParams.VIEW_TYPE_HEADS_UP, result);
-            buildIntoRemoteViewContent(remoteViews, headsUpContentView, result, false);
+            buildIntoRemoteViewContent(remoteViews, headsUpContentView, result, true);
             return remoteViews;
         }
 
@@ -8755,8 +8737,7 @@ public class Notification implements Parcelable
                 Resources resources = mBuilder.mContext.getResources();
                 int endMargin = resources.getDimensionPixelSize(
                         R.dimen.notification_content_margin_end) + result.getTitleMarginEnd();
-                remoteViews.setViewLayoutMarginEnd(R.id.notification_main_column,
-                        endMargin);
+                remoteViews.setViewLayoutMarginEnd(R.id.notification_main_column, endMargin);
             }
         }
 

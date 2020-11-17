@@ -40,7 +40,6 @@
             android:layout_weight="1"
             android:layout_marginStart="@dimen/notification_content_margin_start"
             android:layout_marginEnd="@dimen/notification_content_margin_end"
-            android:minHeight="@dimen/notification_min_content_height"
             android:orientation="vertical"
             >
             <com.android.internal.widget.MessagingLinearLayout
