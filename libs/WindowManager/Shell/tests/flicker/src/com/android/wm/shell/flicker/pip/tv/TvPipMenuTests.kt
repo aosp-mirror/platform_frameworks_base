@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.flicker.pip.tv
 
+import android.graphics.Rect
 import androidx.test.filters.RequiresDevice
 import androidx.test.uiautomator.UiObject2
 import com.android.wm.shell.flicker.SYSTEM_UI_PACKAGE_NAME
@@ -33,6 +34,10 @@ class TvPipMenuTests : TvPipTestBase() {
 
     private val systemUiResources =
             packageManager.getResourcesForApplication(SYSTEM_UI_PACKAGE_NAME)
+    private val pipBoundsWhileInMenu: Rect = systemUiResources.run {
+        val bounds = getString(getIdentifier("pip_menu_bounds", "string", SYSTEM_UI_PACKAGE_NAME))
+        Rect.unflattenFromString(bounds) ?: error("Could not retrieve PiP menu bounds")
+    }
     private val playButtonDescription = systemUiResources.run {
         getString(getIdentifier("pip_play", "string", SYSTEM_UI_PACKAGE_NAME))
     }
@@ -48,11 +53,17 @@ class TvPipMenuTests : TvPipTestBase() {
     }
 
     @Test
-    fun pipMenu_open() {
+    fun pipMenu_correctPosition() {
         val pipMenu = enterPip_openMenu_assertShown()
 
         // Make sure it's fullscreen
         assertTrue("Pip menu should be shown fullscreen", pipMenu.isFullscreen(uiDevice))
+
+        // Make sure the PiP task is positioned where it should be.
+        val activityBounds: Rect = testApp.ui?.visibleBounds
+                ?: error("Could not retrieve PiP Activity bounds")
+        assertTrue("Pip Activity is positioned correctly while Pip menu is shown",
+                pipBoundsWhileInMenu == activityBounds)
 
         testApp.closePipWindow()
     }
