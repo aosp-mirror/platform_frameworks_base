@@ -543,6 +543,10 @@ public class BiometricScheduler {
         return mCurrentOperation.clientMonitor;
     }
 
+    public int getCurrentPendingCount() {
+        return mPendingOperations.size();
+    }
+
     public void recordCrashState() {
         if (mCrashStates.size() >= CrashState.NUM_ENTRIES) {
             mCrashStates.removeFirst();
@@ -567,5 +571,14 @@ public class BiometricScheduler {
         for (CrashState crashState : mCrashStates) {
             pw.println("Crash State " + crashState);
         }
+    }
+
+    /**
+     * Clears the scheduler of anything work-related. This should be used for example when the
+     * HAL dies.
+     */
+    public void reset() {
+        mPendingOperations.clear();
+        mCurrentOperation = null;
     }
 }

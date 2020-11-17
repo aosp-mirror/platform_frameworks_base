@@ -333,16 +333,17 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
     }
 
     @VisibleForTesting
-    public Face10(@NonNull Context context, int sensorId,
+    Face10(@NonNull Context context, int sensorId,
             @BiometricManager.Authenticators.Types int strength,
             @NonNull LockoutResetDispatcher lockoutResetDispatcher,
-            boolean supportsSelfIllumination, int maxTemplatesAllowed) {
+            boolean supportsSelfIllumination, int maxTemplatesAllowed,
+            @NonNull BiometricScheduler scheduler) {
         mSensorProperties = new FaceSensorPropertiesInternal(sensorId,
                 Utils.authenticatorStrengthToPropertyStrength(strength),
                 maxTemplatesAllowed, false /* supportsFaceDetect */, supportsSelfIllumination);
         mContext = context;
         mSensorId = sensorId;
-        mScheduler = new BiometricScheduler(TAG, null /* gestureAvailabilityTracker */);
+        mScheduler = scheduler;
         mHandler = new Handler(Looper.getMainLooper());
         mUsageStats = new UsageStats(context);
         mAuthenticatorIds = new HashMap<>();
@@ -369,7 +370,8 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
             @NonNull LockoutResetDispatcher lockoutResetDispatcher) {
         this(context, sensorId, strength, lockoutResetDispatcher,
                 context.getResources().getBoolean(R.bool.config_faceAuthSupportsSelfIllumination),
-                context.getResources().getInteger(R.integer.config_faceMaxTemplatesPerUser));
+                context.getResources().getInteger(R.integer.config_faceMaxTemplatesPerUser),
+                new BiometricScheduler(TAG, null /* gestureAvailabilityTracker */));
     }
 
     @Override
@@ -388,12 +390,13 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
                 interruptable.onError(BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE,
                         0 /* vendorCode */);
 
-                mScheduler.recordCrashState();
-
                 FrameworkStatsLog.write(FrameworkStatsLog.BIOMETRIC_SYSTEM_HEALTH_ISSUE_DETECTED,
                         BiometricsProtoEnums.MODALITY_FACE,
                         BiometricsProtoEnums.ISSUE_HAL_DEATH);
             }
+
+            mScheduler.recordCrashState();
+            mScheduler.reset();
         });
     }
 

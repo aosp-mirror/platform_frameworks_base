@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.server.biometrics.sensors.face;
+package com.android.server.biometrics.sensors.face.hidl;
 
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
@@ -28,8 +29,8 @@ import android.platform.test.annotations.Presubmit;
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 
+import com.android.server.biometrics.sensors.BiometricScheduler;
 import com.android.server.biometrics.sensors.LockoutResetDispatcher;
-import com.android.server.biometrics.sensors.face.hidl.Face10;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -49,6 +50,8 @@ public class Face10Test {
     private Context mContext;
     @Mock
     private UserManager mUserManager;
+    @Mock
+    private BiometricScheduler mScheduler;
 
     private LockoutResetDispatcher mLockoutResetDispatcher;
     private com.android.server.biometrics.sensors.face.hidl.Face10 mFace10;
@@ -68,7 +71,7 @@ public class Face10Test {
         mLockoutResetDispatcher = new LockoutResetDispatcher(mContext);
         mFace10 = new Face10(mContext, SENSOR_ID, BiometricManager.Authenticators.BIOMETRIC_STRONG,
                 mLockoutResetDispatcher, false /* supportsSelfIllumination */,
-                1 /* maxTemplatesAllowed */);
+                1 /* maxTemplatesAllowed */, mScheduler);
         mBinder = new Binder();
     }
 
@@ -77,5 +80,14 @@ public class Face10Test {
         mFace10.scheduleRevokeChallenge(0 /* sensorId */, 0 /* userId */, mBinder, TAG,
                 0 /* challenge */);
         waitForIdle();
+    }
+
+    @Test
+    public void halServiceDied_resetsScheduler() {
+        // It's difficult to test the linkToDeath --> serviceDied path, so let's just invoke
+        // serviceDied directly.
+        mFace10.serviceDied(0 /* cookie */);
+        waitForIdle();
+        verify(mScheduler).reset();
     }
 }

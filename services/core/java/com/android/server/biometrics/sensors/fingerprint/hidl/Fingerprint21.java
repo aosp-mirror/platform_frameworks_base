@@ -386,12 +386,13 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
                 interruptable.onError(BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE,
                         0 /* vendorCode */);
 
-                mScheduler.recordCrashState();
-
                 FrameworkStatsLog.write(FrameworkStatsLog.BIOMETRIC_SYSTEM_HEALTH_ISSUE_DETECTED,
                         BiometricsProtoEnums.MODALITY_FINGERPRINT,
                         BiometricsProtoEnums.ISSUE_HAL_DEATH);
             }
+
+            mScheduler.recordCrashState();
+            mScheduler.reset();
         });
     }
 
