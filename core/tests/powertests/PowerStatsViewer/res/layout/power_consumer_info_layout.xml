@@ -52,7 +52,7 @@
             android:textAppearance="?android:attr/textAppearanceListItem"/>
 
         <TextView
-            android:id="@+id/uid"
+            android:id="@+id/details"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:ellipsize="marquee"

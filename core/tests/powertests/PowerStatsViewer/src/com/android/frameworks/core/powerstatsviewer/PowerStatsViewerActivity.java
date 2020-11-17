@@ -20,7 +20,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.BatteryStats;
 import android.os.Bundle;
-import android.os.Process;
+import android.os.UserHandle;
 import android.os.UserManager;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -46,15 +46,15 @@ import java.util.Locale;
 
 public class PowerStatsViewerActivity extends ComponentActivity {
     private static final int POWER_STATS_REFRESH_RATE_MILLIS = 60 * 1000;
-    public static final String PREF_SELECTED_UID = "selectedUid";
-    private static final String LOADER_ARG_UID = "uid";
+    public static final String PREF_SELECTED_POWER_CONSUMER = "powerConsumerId";
+    private static final String LOADER_ARG_POWER_CONSUMER_ID = "powerConsumerId";
 
     private PowerStatsDataAdapter mPowerStatsDataAdapter;
     private Runnable mPowerStatsRefresh = this::periodicPowerStatsRefresh;
     private SharedPreferences mSharedPref;
-    private int mUid = Process.INVALID_UID;
+    private String mPowerConsumerId;
     private TextView mTitleView;
-    private TextView mUidView;
+    private TextView mDetailsView;
     private ImageView mIconView;
     private TextView mPackagesView;
     private RecyclerView mPowerStatsDataView;
@@ -73,7 +73,7 @@ public class PowerStatsViewerActivity extends ComponentActivity {
         appCard.setOnClickListener((e) -> startAppPicker());
 
         mTitleView = findViewById(android.R.id.title);
-        mUidView = findViewById(R.id.uid);
+        mDetailsView = findViewById(R.id.details);
         mIconView = findViewById(android.R.id.icon);
         mPackagesView = findViewById(R.id.packages);
 
@@ -85,9 +85,9 @@ public class PowerStatsViewerActivity extends ComponentActivity {
         mLoadingView = findViewById(R.id.loading_view);
         mEmptyView = findViewById(R.id.empty_view);
 
-        mUid = mSharedPref.getInt(PREF_SELECTED_UID, Process.INVALID_UID);
+        mPowerConsumerId = mSharedPref.getString(PREF_SELECTED_POWER_CONSUMER, null);
         loadPowerStats();
-        if (mUid == Process.INVALID_UID) {
+        if (mPowerConsumerId == null) {
             startAppPicker();
         }
     }
@@ -105,18 +105,18 @@ public class PowerStatsViewerActivity extends ComponentActivity {
     }
 
     private void startAppPicker() {
-        registerForActivityResult(AppPickerActivity.CONTRACT, this::onApplicationSelected)
+        registerForActivityResult(PowerConsumerPickerActivity.CONTRACT, this::onApplicationSelected)
                 .launch(null);
     }
 
-    private void onApplicationSelected(int uid) {
-        if (uid == -1) {
-            if (mUid == Process.INVALID_UID) {
+    private void onApplicationSelected(String powerConsumerId) {
+        if (powerConsumerId == null) {
+            if (mPowerConsumerId == null) {
                 finish();
             }
         } else {
-            mUid = uid;
-            mSharedPref.edit().putInt(PREF_SELECTED_UID, mUid).apply();
+            mPowerConsumerId = powerConsumerId;
+            mSharedPref.edit().putString(PREF_SELECTED_POWER_CONSUMER, mPowerConsumerId).apply();
             mLoadingView.setVisibility(View.VISIBLE);
             loadPowerStats();
         }
@@ -129,18 +129,18 @@ public class PowerStatsViewerActivity extends ComponentActivity {
 
     private void loadPowerStats() {
         Bundle args = new Bundle();
-        args.putInt(LOADER_ARG_UID, mUid);
+        args.putString(LOADER_ARG_POWER_CONSUMER_ID, mPowerConsumerId);
         LoaderManager.getInstance(this).restartLoader(0, args, new PowerStatsDataLoaderCallbacks());
     }
 
     private static class PowerStatsDataLoader extends AsyncLoaderCompat<PowerStatsData> {
-        private final int mUid;
+        private final String mPowerConsumerId;
         private final BatteryStatsHelper mBatteryStatsHelper;
         private final UserManager mUserManager;
 
-        PowerStatsDataLoader(Context context, int uid) {
+        PowerStatsDataLoader(Context context, String powerConsumerId) {
             super(context);
-            mUid = uid;
+            mPowerConsumerId = powerConsumerId;
             mUserManager = context.getSystemService(UserManager.class);
             mBatteryStatsHelper = new BatteryStatsHelper(context,
                     false /* collectBatteryBroadcast */);
@@ -151,8 +151,8 @@ public class PowerStatsViewerActivity extends ComponentActivity {
         @Override
         public PowerStatsData loadInBackground() {
             mBatteryStatsHelper.refreshStats(BatteryStats.STATS_SINCE_CHARGED,
-                    mUserManager.getUserProfiles());
-            return new PowerStatsData(getContext(), mBatteryStatsHelper, mUid);
+                    UserHandle.myUserId());
+            return new PowerStatsData(getContext(), mBatteryStatsHelper, mPowerConsumerId);
         }
 
         @Override
@@ -165,27 +165,38 @@ public class PowerStatsViewerActivity extends ComponentActivity {
         @Override
         public Loader<PowerStatsData> onCreateLoader(int id, Bundle args) {
             return new PowerStatsDataLoader(PowerStatsViewerActivity.this,
-                    args.getInt(LOADER_ARG_UID, Process.INVALID_UID));
+                    args.getString(LOADER_ARG_POWER_CONSUMER_ID));
         }
 
         @Override
         public void onLoadFinished(@NonNull Loader<PowerStatsData> loader,
                 PowerStatsData powerStatsData) {
 
-            AppInfoHelper.AppInfo appInfo = powerStatsData.getAppInfo();
-            mTitleView.setText(appInfo.label);
-            mUidView.setText(String.format(Locale.getDefault(), "UID: %d", appInfo.uid));
-            mIconView.setImageDrawable(appInfo.iconInfo.loadIcon(getPackageManager()));
-
-            if (appInfo.packages != null) {
-                mPackagesView.setText(appInfo.packages);
-                mPackagesView.setVisibility(View.VISIBLE);
-            } else {
+            PowerConsumerInfoHelper.PowerConsumerInfo
+                    powerConsumerInfo = powerStatsData.getPowerConsumerInfo();
+            if (powerConsumerInfo == null) {
+                mTitleView.setText("Power consumer not found");
                 mPackagesView.setVisibility(View.GONE);
+            } else {
+                mTitleView.setText(powerConsumerInfo.label);
+                if (powerConsumerInfo.details != null) {
+                    mDetailsView.setText(powerConsumerInfo.details);
+                    mDetailsView.setVisibility(View.VISIBLE);
+                } else {
+                    mDetailsView.setVisibility(View.GONE);
+                }
+                mIconView.setImageDrawable(
+                        powerConsumerInfo.iconInfo.loadIcon(getPackageManager()));
+
+                if (powerConsumerInfo.packages != null) {
+                    mPackagesView.setText(powerConsumerInfo.packages);
+                    mPackagesView.setVisibility(View.VISIBLE);
+                } else {
+                    mPackagesView.setVisibility(View.GONE);
+                }
             }
 
             mPowerStatsDataAdapter.setEntries(powerStatsData.getEntries());
-
             if (powerStatsData.getEntries().isEmpty()) {
                 mEmptyView.setVisibility(View.VISIBLE);
                 mPowerStatsDataView.setVisibility(View.GONE);
