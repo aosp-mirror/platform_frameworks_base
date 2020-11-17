@@ -513,23 +513,6 @@ public class HdmiCecMessageValidatorTest {
     }
 
     private IntegerSubject assertMessageValidity(String message) {
-        return assertThat(mHdmiCecMessageValidator.isValid(buildMessage(message)));
-    }
-
-    /**
-     * Build a CEC message from a hex byte string with bytes separated by {@code :}.
-     *
-     * <p>This format is used by both cec-client and www.cec-o-matic.com
-     */
-    private static HdmiCecMessage buildMessage(String message) {
-        String[] parts = message.split(":");
-        int src = Integer.parseInt(parts[0].substring(0, 1), 16);
-        int dest = Integer.parseInt(parts[0].substring(1, 2), 16);
-        int opcode = Integer.parseInt(parts[1], 16);
-        byte[] params = new byte[parts.length - 2];
-        for (int i = 0; i < params.length; i++) {
-            params[i] = (byte) Integer.parseInt(parts[i + 2], 16);
-        }
-        return new HdmiCecMessage(src, dest, opcode, params);
+        return assertThat(mHdmiCecMessageValidator.isValid(HdmiUtils.buildMessage(message)));
     }
 }

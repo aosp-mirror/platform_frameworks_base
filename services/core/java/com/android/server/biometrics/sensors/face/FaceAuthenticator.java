@@ -16,8 +16,11 @@
 
 package com.android.server.biometrics.sensors.face;
 
+import android.annotation.NonNull;
 import android.hardware.biometrics.IBiometricAuthenticator;
 import android.hardware.biometrics.IBiometricSensorReceiver;
+import android.hardware.biometrics.ITestSession;
+import android.hardware.biometrics.SensorPropertiesInternal;
 import android.hardware.face.IFaceService;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -32,20 +35,34 @@ public final class FaceAuthenticator extends IBiometricAuthenticator.Stub {
     private final IFaceService mFaceService;
     private final int mSensorId;
 
-    public FaceAuthenticator(IFaceService faceService, int sensorId)
-            throws RemoteException {
+    public FaceAuthenticator(IFaceService faceService, int sensorId) throws RemoteException {
         mFaceService = faceService;
         mSensorId = sensorId;
     }
 
     @Override
+    public ITestSession createTestSession(@NonNull String opPackageName) throws RemoteException {
+        return mFaceService.createTestSession(mSensorId, opPackageName);
+    }
+
+    @Override
+    public SensorPropertiesInternal getSensorProperties(@NonNull String opPackageName)
+            throws RemoteException {
+        return mFaceService.getSensorProperties(mSensorId, opPackageName);
+    }
+
+    @Override
+    public byte[] dumpSensorServiceStateProto() throws RemoteException {
+        return mFaceService.dumpSensorServiceStateProto();
+    }
+
+    @Override
     public void prepareForAuthentication(boolean requireConfirmation, IBinder token,
             long operationId, int userId, IBiometricSensorReceiver sensorReceiver,
-            String opPackageName, int cookie, int callingUid, int callingPid, int callingUserId)
+            String opPackageName, int cookie)
             throws RemoteException {
         mFaceService.prepareForAuthentication(mSensorId, requireConfirmation, token, operationId,
-                userId, sensorReceiver, opPackageName, cookie, callingUid, callingPid,
-                callingUserId);
+                userId, sensorReceiver, opPackageName, cookie);
     }
 
     @Override
@@ -54,10 +71,9 @@ public final class FaceAuthenticator extends IBiometricAuthenticator.Stub {
     }
 
     @Override
-    public void cancelAuthenticationFromService(IBinder token, String opPackageName, int callingUid,
-            int callingPid, int callingUserId) throws RemoteException {
-        mFaceService.cancelAuthenticationFromService(mSensorId, token, opPackageName, callingUid,
-                callingPid, callingUserId);
+    public void cancelAuthenticationFromService(IBinder token, String opPackageName)
+            throws RemoteException {
+        mFaceService.cancelAuthenticationFromService(mSensorId, token, opPackageName);
     }
 
     @Override

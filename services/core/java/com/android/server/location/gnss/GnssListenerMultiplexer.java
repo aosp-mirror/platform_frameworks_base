@@ -34,14 +34,14 @@ import android.util.ArraySet;
 
 import com.android.internal.util.Preconditions;
 import com.android.server.LocalServices;
+import com.android.server.location.injector.AppForegroundHelper;
+import com.android.server.location.injector.Injector;
+import com.android.server.location.injector.LocationPermissionsHelper;
+import com.android.server.location.injector.SettingsHelper;
+import com.android.server.location.injector.UserInfoHelper;
+import com.android.server.location.injector.UserInfoHelper.UserListener;
 import com.android.server.location.listeners.BinderListenerRegistration;
 import com.android.server.location.listeners.ListenerMultiplexer;
-import com.android.server.location.util.AppForegroundHelper;
-import com.android.server.location.util.Injector;
-import com.android.server.location.util.LocationPermissionsHelper;
-import com.android.server.location.util.SettingsHelper;
-import com.android.server.location.util.UserInfoHelper;
-import com.android.server.location.util.UserInfoHelper.UserListener;
 
 import java.util.Collection;
 import java.util.Objects;

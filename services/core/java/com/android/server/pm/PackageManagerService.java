@@ -2535,8 +2535,20 @@ public class PackageManagerService extends IPackageManager.Stub
             @Checksum.Type int optional,
             @Checksum.Type int required, @Nullable List trustedInstallers,
             @NonNull IntentSender statusReceiver, int userId) {
+        requestChecksumsInternal(packageName, includeSplits, optional, required, trustedInstallers,
+                statusReceiver, userId, mInjector.getBackgroundExecutor(),
+                mInjector.getBackgroundHandler());
+    }
+
+    private void requestChecksumsInternal(@NonNull String packageName, boolean includeSplits,
+            @Checksum.Type int optional,
+            @Checksum.Type int required, @Nullable List trustedInstallers,
+            @NonNull IntentSender statusReceiver, int userId, @NonNull Executor executor,
+            @NonNull Handler handler) {
         Objects.requireNonNull(packageName);
         Objects.requireNonNull(statusReceiver);
+        Objects.requireNonNull(executor);
+        Objects.requireNonNull(handler);
 
         final ApplicationInfo applicationInfo = getApplicationInfoInternal(packageName, 0,
                 Binder.getCallingUid(), userId);
@@ -2560,10 +2572,10 @@ public class PackageManagerService extends IPackageManager.Stub
         final Certificate[] trustedCerts = (trustedInstallers != null) ? decodeCertificates(
                 trustedInstallers) : null;
 
-        mInjector.getBackgroundExecutor().execute(() -> {
+        executor.execute(() -> {
             ApkChecksums.Injector injector = new ApkChecksums.Injector(
                     () -> mContext,
-                    () -> mInjector.getBackgroundHandler(),
+                    () -> handler,
                     () -> mInjector.getIncrementalManager());
             ApkChecksums.getChecksums(filesToChecksum, optional, required, trustedCerts,
                     statusReceiver, injector);
@@ -25911,6 +25923,14 @@ public class PackageManagerService extends IPackageManager.Stub
             }
             ps.setStatesOnCrashOrAnr();
         }
+
+        public void requestChecksums(@NonNull String packageName, boolean includeSplits,
+                @Checksum.Type int optional, @Checksum.Type int required,
+                @Nullable List trustedInstallers, @NonNull IntentSender statusReceiver, int userId,
+                @NonNull Executor executor, @NonNull Handler handler) {
+            requestChecksumsInternal(packageName, includeSplits, optional, required,
+                    trustedInstallers, statusReceiver, userId, executor, handler);
+        }
     }
 
 
@@ -26060,8 +26080,8 @@ public class PackageManagerService extends IPackageManager.Stub
         if (!SecurityLog.isLoggingEnabled()) {
             return;
         }
-        mProcessLoggingHandler.logAppProcessStart(mContext, this, apkFile, packageName, processName,
-                uid, seinfo, pid);
+        mProcessLoggingHandler.logAppProcessStart(mContext, mPmInternal, apkFile, packageName,
+                processName, uid, seinfo, pid);
     }
 
     public CompilerStats.PackageStats getCompilerPackageStats(String pkgName) {

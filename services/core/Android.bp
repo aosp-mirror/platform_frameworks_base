@@ -156,7 +156,7 @@ java_library_host {
 
 prebuilt_etc {
     name: "gps_debug.conf",
-    src: "java/com/android/server/location/gps_debug.conf",
+    src: "java/com/android/server/location/gnss/gps_debug.conf",
 }
 
 genrule {

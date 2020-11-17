@@ -20,6 +20,8 @@ import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FACE;
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FINGERPRINT;
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_NONE;
 
+import static com.android.server.biometrics.BiometricServiceStateProto.*;
+
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -48,7 +50,6 @@ import com.android.internal.util.FrameworkStatsLog;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -61,60 +62,11 @@ public final class AuthSession implements IBinder.DeathRecipient {
     private static final String TAG = "BiometricService/AuthSession";
     private static final boolean DEBUG = false;
 
-    /**
-     * Authentication either just called and we have not transitioned to the CALLED state, or
-     * authentication terminated (success or error).
-     */
-    static final int STATE_AUTH_IDLE = 0;
-    /**
-     * Authentication was called and we are waiting for the <Biometric>Services to return their
-     * cookies before starting the hardware and showing the BiometricPrompt.
-     */
-    static final int STATE_AUTH_CALLED = 1;
-    /**
-     * Authentication started, BiometricPrompt is showing and the hardware is authenticating. At
-     * this point, the BiometricPrompt UI has been requested, but is not necessarily done animating
-     * in yet.
-     */
-    static final int STATE_AUTH_STARTED = 2;
-    /**
-     * Same as {@link #STATE_AUTH_STARTED}, except the BiometricPrompt UI is done animating in.
-     */
-    static final int STATE_AUTH_STARTED_UI_SHOWING = 3;
-    /**
-     * Authentication is paused, waiting for the user to press "try again" button. Only
-     * passive modalities such as Face or Iris should have this state. Note that for passive
-     * modalities, the HAL enters the idle state after onAuthenticated(false) which differs from
-     * fingerprint.
-     */
-    static final int STATE_AUTH_PAUSED = 4;
-    /**
-     * Paused, but "try again" was pressed. Sensors have new cookies and we're now waiting for all
-     * cookies to be returned.
-     */
-    static final int STATE_AUTH_PAUSED_RESUMING = 5;
-    /**
-     * Authentication is successful, but we're waiting for the user to press "confirm" button.
-     */
-    static final int STATE_AUTH_PENDING_CONFIRM = 6;
-    /**
-     * Biometric authenticated, waiting for SysUI to finish animation
-     */
-    static final int STATE_AUTHENTICATED_PENDING_SYSUI = 7;
-    /**
-     * Biometric error, waiting for SysUI to finish animation
-     */
-    static final int STATE_ERROR_PENDING_SYSUI = 8;
-    /**
-     * Device credential in AuthController is showing
-     */
-    static final int STATE_SHOWING_DEVICE_CREDENTIAL = 9;
-    /**
-     * The client binder died, and sensors were authenticating at the time. Cancel has been
-     * requested and we're waiting for the HAL(s) to send ERROR_CANCELED.
-     */
-    static final int STATE_CLIENT_DIED_CANCELLING = 10;
 
+
+    /*
+     * Defined in biometrics.proto
+     */
     @IntDef({
             STATE_AUTH_IDLE,
             STATE_AUTH_CALLED,
@@ -157,9 +109,6 @@ public final class AuthSession implements IBinder.DeathRecipient {
     // Original receiver from BiometricPrompt.
     private final IBiometricServiceReceiver mClientReceiver;
     private final String mOpPackageName;
-    private final int mCallingUid;
-    private final int mCallingPid;
-    private final int mCallingUserId;
     private final boolean mDebugEnabled;
     private final List<FingerprintSensorPropertiesInternal> mFingerprintSensorProperties;
 
@@ -191,9 +140,6 @@ public final class AuthSession implements IBinder.DeathRecipient {
             @NonNull IBiometricServiceReceiver clientReceiver,
             @NonNull String opPackageName,
             @NonNull PromptInfo promptInfo,
-            int callingUid,
-            int callingPid,
-            int callingUserId,
             boolean debugEnabled,
             @NonNull List<FingerprintSensorPropertiesInternal> fingerprintSensorProperties) {
         mContext = context;
@@ -210,9 +156,6 @@ public final class AuthSession implements IBinder.DeathRecipient {
         mClientReceiver = clientReceiver;
         mOpPackageName = opPackageName;
         mPromptInfo = promptInfo;
-        mCallingUid = callingUid;
-        mCallingPid = callingPid;
-        mCallingUserId = callingUserId;
         mDebugEnabled = debugEnabled;
         mFingerprintSensorProperties = fingerprintSensorProperties;
 
@@ -254,8 +197,7 @@ public final class AuthSession implements IBinder.DeathRecipient {
             final int cookie = mRandom.nextInt(Integer.MAX_VALUE - 1) + 1;
             final boolean requireConfirmation = isConfirmationRequired(sensor);
             sensor.goToStateWaitingForCookie(requireConfirmation, mToken, mOperationId,
-                    mUserId, mSensorReceiver, mOpPackageName, cookie, mCallingUid, mCallingPid,
-                    mCallingUserId);
+                    mUserId, mSensorReceiver, mOpPackageName, cookie);
         }
     }
 
@@ -264,7 +206,7 @@ public final class AuthSession implements IBinder.DeathRecipient {
             // Only device credential should be shown. In this case, we don't need to wait,
             // since LockSettingsService/Gatekeeper is always ready to check for credential.
             // SystemUI invokes that path.
-            mState = AuthSession.STATE_SHOWING_DEVICE_CREDENTIAL;
+            mState = STATE_SHOWING_DEVICE_CREDENTIAL;
 
             mStatusBarService.showAuthenticationDialog(
                     mPromptInfo,
@@ -278,7 +220,7 @@ public final class AuthSession implements IBinder.DeathRecipient {
         } else if (!mPreAuthInfo.eligibleSensors.isEmpty()) {
             // Some combination of biometric or biometric|credential is requested
             setSensorsToStateWaitingForCookie();
-            mState = AuthSession.STATE_AUTH_CALLED;
+            mState = STATE_AUTH_CALLED;
         } else {
             // No authenticators requested. This should never happen - an exception should have
             // been thrown earlier in the pipeline.
@@ -386,8 +328,7 @@ public final class AuthSession implements IBinder.DeathRecipient {
         // sending the final error callback to the application.
         for (BiometricSensor sensor : mPreAuthInfo.eligibleSensors) {
             try {
-                sensor.goToStateCancelling(mToken, mOpPackageName, mCallingUid, mCallingPid,
-                        mCallingUserId);
+                sensor.goToStateCancelling(mToken, mOpPackageName);
             } catch (RemoteException e) {
                 Slog.e(TAG, "Unable to cancel authentication");
             }
@@ -429,7 +370,7 @@ public final class AuthSession implements IBinder.DeathRecipient {
                     authenticators = Utils.removeBiometricBits(authenticators);
                     mPromptInfo.setAuthenticators(authenticators);
 
-                    mState = AuthSession.STATE_SHOWING_DEVICE_CREDENTIAL;
+                    mState = STATE_SHOWING_DEVICE_CREDENTIAL;
 
                     mStatusBarService.showAuthenticationDialog(
                             mPromptInfo,
@@ -453,7 +394,7 @@ public final class AuthSession implements IBinder.DeathRecipient {
                         || error == BiometricConstants.BIOMETRIC_ERROR_LOCKOUT_PERMANENT;
                 if (isAllowDeviceCredential() && errorLockout) {
                     // SystemUI handles transition from biometric to device credential.
-                    mState = AuthSession.STATE_SHOWING_DEVICE_CREDENTIAL;
+                    mState = STATE_SHOWING_DEVICE_CREDENTIAL;
                     mStatusBarService.onBiometricError(modality, error, vendorCode);
                 } else if (error == BiometricConstants.BIOMETRIC_ERROR_CANCELED) {
                     mStatusBarService.hideAuthenticationDialog();
@@ -463,7 +404,7 @@ public final class AuthSession implements IBinder.DeathRecipient {
                     mClientReceiver.onError(modality, error, vendorCode);
                     return true;
                 } else {
-                    mState = AuthSession.STATE_ERROR_PENDING_SYSUI;
+                    mState = STATE_ERROR_PENDING_SYSUI;
                     mStatusBarService.onBiometricError(modality, error, vendorCode);
                 }
                 break;
@@ -582,7 +523,7 @@ public final class AuthSession implements IBinder.DeathRecipient {
             if (hasPausableBiometric()) {
                 // Pause authentication. onBiometricAuthenticated(false) causes the
                 // dialog to show a "try again" button for passive modalities.
-                mState = AuthSession.STATE_AUTH_PAUSED;
+                mState = STATE_AUTH_PAUSED;
             }
 
             mClientReceiver.onAuthenticationFailed();

@@ -60,7 +60,7 @@ public class WindowContextTest {
         final WindowContext windowContext = new WindowContext(context, TYPE_APPLICATION_OVERLAY,
                 null /* options */);
 
-        final IBinder token = windowContext.getActivityToken();
+        final IBinder token = windowContext.getWindowContextToken();
 
         final IWindowManager wms = WindowManagerGlobal.getWindowManagerService();
         assertTrue("Token must be registered to WMS", wms.isWindowToken(token));

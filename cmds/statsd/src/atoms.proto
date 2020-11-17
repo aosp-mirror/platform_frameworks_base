@@ -10581,6 +10581,32 @@ message VoiceCallSession {
 
     // A random number used as the dimension field to pull multiple atoms.
     optional int32 dimension = 25;
+
+    // Signal strength at the end of the call. This value is applicable to both cellular and WiFi.
+    optional android.telephony.SignalStrengthEnum signal_strength_at_end = 26;
+
+    // Band at the end of the call. Value 0 is used if the band is unknown.
+    // See GeranBands, UtranBands and EutranBands in IRadio interface, depending on the RAT at
+    // the end of the call.
+    optional int32 band_at_end = 27;
+
+    // Time spent setting up the call in milliseconds.
+    // The time is measured from dial to ringing for outgoing calls, and from answer to connected
+    // for incoming calls.
+    optional int32 setup_duration_millis = 28;
+
+    // Main codec quality. The codec quality was equal to or greater than this value for at least
+    // 70% of the call.
+    optional android.telephony.CodecQuality main_codec_quality = 29;
+
+    // Whether video was enabled at any point during the call.
+    optional bool video_enabled = 30;
+
+    // Radio access technology (RAT) used when call is connected.
+    optional android.telephony.NetworkTypeEnum rat_at_connected = 31;
+
+    // Whether the call was a conference call (applicable only for calls over IMS).
+    optional bool is_multiparty = 32;
 }
 
 /**

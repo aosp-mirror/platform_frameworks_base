@@ -4292,6 +4292,45 @@ public class WifiManager {
     }
 
     /**
+     * Temporarily disable autojoin for all currently visible and provisioned (saved, suggested)
+     * wifi networks except merged carrier networks from the provided subscription ID.
+     *
+     * Disabled networks will get automatically re-enabled when they are out of range for a period
+     * of time, or after the maximum disable duration specified in the framework.
+     *
+     * Calling {@link #stopTemporarilyDisablingAllNonCarrierMergedWifi()} will immediately re-enable
+     * autojoin on all disabled networks.
+     *
+     * @param subscriptionId the subscription ID of the carrier whose merged wifi networks won't be
+     *                       disabled {@link android.telephony.SubscriptionInfo#getSubscriptionId()}
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
+    public void startTemporarilyDisablingAllNonCarrierMergedWifi(int subscriptionId) {
+        try {
+            mService.startTemporarilyDisablingAllNonCarrierMergedWifi(subscriptionId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Re-enable autojoin for all non carrier merged wifi networks temporarily disconnected by
+     * {@link #startTemporarilyDisablingAllNonCarrierMergedWifi(int)}.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
+    public void stopTemporarilyDisablingAllNonCarrierMergedWifi() {
+        try {
+            mService.stopTemporarilyDisablingAllNonCarrierMergedWifi();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Save the given network to the list of configured networks for the
      * foreground user. If the network already exists, the configuration
      * is updated. Any new network is enabled by default.

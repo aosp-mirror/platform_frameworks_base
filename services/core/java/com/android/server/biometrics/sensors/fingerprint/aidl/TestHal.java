@@ -78,7 +78,7 @@ public class TestHal extends IFingerprint.Stub {
             }
 
             @Override
-            public void invalidateAuthenticatorId(int cookie, HardwareAuthToken hat) {
+            public void invalidateAuthenticatorId(int cookie) {
 
             }
 

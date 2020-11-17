@@ -45,6 +45,7 @@ import android.app.ActivityManagerInternal;
 import android.app.IUidObserver;
 import android.app.Person;
 import android.app.admin.DevicePolicyManager;
+import android.app.role.OnRoleHoldersChangedListener;
 import android.app.usage.UsageStatsManagerInternal;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
@@ -150,6 +151,10 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
                     return mMockUserManager;
                 case Context.DEVICE_POLICY_SERVICE:
                     return mMockDevicePolicyManager;
+                case Context.ROLE_SERVICE:
+                    // RoleManager is final and cannot be mocked, so we only override the inject
+                    // accessor methods in ShortcutService.
+                    return getTestContext().getSystemService(name);
             }
             throw new UnsupportedOperationException("Couldn't find system service: " + name);
         }
@@ -355,10 +360,24 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         }
 
         @Override
-        ComponentName getDefaultLauncher(@UserIdInt int userId) {
-            final ComponentName activity = mDefaultLauncher.get(userId);
-            if (activity != null) {
-                return activity;
+        void injectRegisterRoleHoldersListener(OnRoleHoldersChangedListener listener) {
+            // Do nothing.
+        }
+
+        @Override
+        String injectGetHomeRoleHolderAsUser(@UserIdInt int userId) {
+            final String packageName = mHomeRoleHolderAsUser.get(userId);
+            if (packageName != null) {
+                return packageName;
+            }
+            return super.injectGetHomeRoleHolderAsUser(userId);
+        }
+
+        @Override
+        String getDefaultLauncher(@UserIdInt int userId) {
+            final String packageName = mDefaultLauncher.get(userId);
+            if (packageName != null) {
+                return packageName;
             }
             return super.getDefaultLauncher(userId);
         }
@@ -642,6 +661,7 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
 
     protected UriPermissionOwner mUriPermissionOwner;
 
+
     protected static final String CALLING_PACKAGE_1 = "com.android.test.1";
     protected static final int CALLING_UID_1 = 10001;
 
@@ -708,7 +728,7 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
             LAUNCHER_1.equals(callingPackage) || LAUNCHER_2.equals(callingPackage)
             || LAUNCHER_3.equals(callingPackage) || LAUNCHER_4.equals(callingPackage);
 
-    private final Map<Integer, ComponentName> mDefaultLauncher = new ArrayMap<>();
+    private final Map<Integer, String> mDefaultLauncher = new ArrayMap<>();
 
     protected BiPredicate<ComponentName, Integer> mMainActivityChecker =
             (activity, userId) -> true;
@@ -760,6 +780,8 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
     protected boolean mInjectCheckAccessShortcutsPermission = false;
 
     protected boolean mInjectHasUnlimitedShortcutsApiCallsPermission = false;
+
+    private final Map<Integer, String> mHomeRoleHolderAsUser = new ArrayMap<>();
 
     static {
         QUERY_ALL.setQueryFlags(
@@ -1293,7 +1315,7 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
     /**
      * This controls {@link ShortcutService#hasShortcutHostPermission}, but
      * not {@link ShortcutService#getDefaultLauncher(int)}.  To control the later, use
-     * {@link #setDefaultLauncher(int, ComponentName)}.
+     * {@link #setDefaultLauncher(int, String)}.
      */
     protected void setDefaultLauncherChecker(BiPredicate<String, Integer> p) {
         mDefaultLauncherChecker = p;
@@ -1303,13 +1325,13 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
      * Set the default launcher.  This will update {@link #mDefaultLauncherChecker} set by
      * {@link #setDefaultLauncherChecker} too.
      */
-    protected void setDefaultLauncher(int userId, ComponentName launcherActivity) {
-        mDefaultLauncher.put(userId, launcherActivity);
+    protected void setDefaultLauncher(int userId, String launcherPackage) {
+        mDefaultLauncher.put(userId, launcherPackage);
 
         final BiPredicate<String, Integer> oldChecker = mDefaultLauncherChecker;
         mDefaultLauncherChecker = (checkPackageName, checkUserId) -> {
-            if ((checkUserId == userId) && (launcherActivity !=  null)) {
-                return launcherActivity.getPackageName().equals(checkPackageName);
+            if ((checkUserId == userId) && (launcherPackage !=  null)) {
+                return launcherPackage.equals(checkPackageName);
             }
             return oldChecker.test(checkPackageName, checkUserId);
         };
@@ -2267,6 +2289,12 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         return sb.toString();
     }
 
+    protected void prepareGetRoleHoldersAsUser(String homeRoleHolder, int userId) {
+        mHomeRoleHolderAsUser.put(userId, homeRoleHolder);
+        mService.handleOnDefaultLauncherChanged(userId);
+    }
+
+    // Used for get-default-launcher command which is deprecated. Will remove later.
     protected void prepareGetHomeActivitiesAsUser(ComponentName preferred,
             List<ResolveInfo> candidates, int userId) {
         doAnswer(inv -> {

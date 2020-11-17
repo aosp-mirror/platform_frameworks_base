@@ -99,7 +99,7 @@ enum RoamingTypeEnum {
     ROAMING_TYPE_ROAMING_INTERNATIONAL = 3;
 }
 
-// Signal strength levels, primarily used by android/telephony/SignalStrength.java.
+// Signal strength levels, as defined in android/telephony/SignalStrength.java.
 enum SignalStrengthEnum {
     SIGNAL_STRENGTH_NONE_OR_UNKNOWN = 0;
     SIGNAL_STRENGTH_POOR = 1;
@@ -267,4 +267,22 @@ enum DataStallRecoveryActionEnum {
     RECOVERY_ACTION_CLEANUP = 1;
     RECOVERY_ACTION_REREGISTER = 2;
     RECOVERY_ACTION_RADIO_RESTART = 3;
+}
+
+// Codec quality
+enum CodecQuality {
+    /** Codec quality: unknown */
+    CODEC_QUALITY_UNKNOWN = 0;
+
+    /** Codec quality: narrowband */
+    CODEC_QUALITY_NARROWBAND = 1;
+
+    /** Codec quality: wideband */
+    CODEC_QUALITY_WIDEBAND = 2;
+
+    /** Codec quality: super-wideband */
+    CODEC_QUALITY_SUPER_WIDEBAND = 3;
+
+    /** Codec quality: fullband */
+    CODEC_QUALITY_FULLBAND = 4;
 }

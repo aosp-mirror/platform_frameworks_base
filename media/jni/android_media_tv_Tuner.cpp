@@ -714,6 +714,34 @@ jobjectArray FilterCallback::getTemiEvent(
     return arr;
 }
 
+jobjectArray FilterCallback::getScramblingStatusEvent(
+        jobjectArray& arr, const std::vector<DemuxFilterEventExt::Event>& eventsExt) {
+    JNIEnv *env = AndroidRuntime::getJNIEnv();
+    jclass eventClazz = env->FindClass("android/media/tv/tuner/filter/ScramblingStatusEvent");
+    jmethodID eventInit = env->GetMethodID(eventClazz, "<init>", "(I)V");
+
+    for (int i = 0; i < eventsExt.size(); i++) {
+        auto scramblingStatus = eventsExt[i].scramblingStatus();
+        jobject obj = env->NewObject(eventClazz, eventInit, static_cast<jint>(scramblingStatus));
+        env->SetObjectArrayElement(arr, i, obj);
+    }
+    return arr;
+}
+
+jobjectArray FilterCallback::getRestartEvent(
+        jobjectArray& arr, const std::vector<DemuxFilterEventExt::Event>& eventsExt) {
+    JNIEnv *env = AndroidRuntime::getJNIEnv();
+    jclass eventClazz = env->FindClass("android/media/tv/tuner/filter/RestartEvent");
+    jmethodID eventInit = env->GetMethodID(eventClazz, "<init>", "(I)V");
+
+    for (int i = 0; i < eventsExt.size(); i++) {
+        auto startId = eventsExt[i].startId();
+        jobject obj = env->NewObject(eventClazz, eventInit, static_cast<jint>(startId));
+        env->SetObjectArrayElement(arr, i, obj);
+    }
+    return arr;
+}
+
 Return<void> FilterCallback::onFilterEvent_1_1(const DemuxFilterEvent& filterEvent,
         const DemuxFilterEventExt& filterEventExt) {
     ALOGD("FilterCallback::onFilterEvent_1_1");
@@ -724,6 +752,23 @@ Return<void> FilterCallback::onFilterEvent_1_1(const DemuxFilterEvent& filterEve
     std::vector<DemuxFilterEventExt::Event> eventsExt = filterEventExt.events;
     jclass eventClazz = env->FindClass("android/media/tv/tuner/filter/FilterEvent");
     jobjectArray array = env->NewObjectArray(events.size(), eventClazz, NULL);
+
+    if (events.empty() && !eventsExt.empty()) {
+        auto eventExt = eventsExt[0];
+        switch (eventExt.getDiscriminator()) {
+            case DemuxFilterEventExt::Event::hidl_discriminator::scramblingStatus: {
+                array = getScramblingStatusEvent(array, eventsExt);
+                break;
+            }
+            case DemuxFilterEventExt::Event::hidl_discriminator::startId: {
+                array = getRestartEvent(array, eventsExt);
+                break;
+            }
+            default: {
+                break;
+            }
+        }
+    }
 
     if (!events.empty()) {
         auto event = events[0];

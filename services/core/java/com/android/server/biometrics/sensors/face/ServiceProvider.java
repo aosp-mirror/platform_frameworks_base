@@ -18,7 +18,9 @@ package com.android.server.biometrics.sensors.face;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.hardware.biometrics.ITestSession;
 import android.hardware.face.Face;
+import android.hardware.face.FaceManager;
 import android.hardware.face.FaceSensorPropertiesInternal;
 import android.hardware.face.IFaceServiceReceiver;
 import android.os.IBinder;
@@ -59,6 +61,9 @@ public interface ServiceProvider {
 
     @NonNull
     List<FaceSensorPropertiesInternal> getSensorProperties();
+
+    @NonNull
+    FaceSensorPropertiesInternal getSensorProperties(int sensorId);
 
     @NonNull
     List<Face> getEnrolledFaces(int sensorId, int userId);
@@ -110,4 +115,7 @@ public interface ServiceProvider {
     void dumpProtoMetrics(int sensorId, @NonNull FileDescriptor fd);
 
     void dumpInternal(int sensorId, @NonNull PrintWriter pw);
+
+    @NonNull
+    ITestSession createTestSession(int sensorId, @NonNull String opPackageName);
 }

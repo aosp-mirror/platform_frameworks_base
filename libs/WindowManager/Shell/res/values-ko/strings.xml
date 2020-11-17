@@ -28,8 +28,7 @@
     <string name="pip_skip_to_next" msgid="8403429188794867653">"다음으로 건너뛰기"</string>
     <string name="pip_skip_to_prev" msgid="7172158111196394092">"이전으로 건너뛰기"</string>
     <string name="accessibility_action_pip_resize" msgid="4623966104749543182">"크기 조절"</string>
-    <!-- no translation found for dock_forced_resizable (1749750436092293116) -->
-    <skip />
+    <string name="dock_forced_resizable" msgid="1749750436092293116">"앱이 분할 화면에서 작동하지 않을 수 있습니다."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"앱이 화면 분할을 지원하지 않습니다."</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"앱이 보조 디스플레이에서 작동하지 않을 수도 있습니다."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"앱이 보조 디스플레이에서의 실행을 지원하지 않습니다."</string>
@@ -44,14 +43,10 @@
     <string name="accessibility_action_divider_top_50" msgid="8649582798829048946">"위쪽 화면 50%"</string>
     <string name="accessibility_action_divider_top_30" msgid="3572788224908570257">"위쪽 화면 30%"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="2831868345092314060">"아래쪽 화면 전체화면"</string>
-    <!-- no translation found for one_handed_tutorial_title (4583241688067426350) -->
-    <skip />
-    <!-- no translation found for one_handed_tutorial_description (3486582858591353067) -->
-    <skip />
-    <!-- no translation found for accessibility_action_start_one_handed (5070337354072861426) -->
-    <skip />
-    <!-- no translation found for accessibility_action_stop_one_handed (1369940261782179442) -->
-    <skip />
+    <string name="one_handed_tutorial_title" msgid="4583241688067426350">"한 손 사용 모드 사용하기"</string>
+    <string name="one_handed_tutorial_description" msgid="3486582858591353067">"화면 하단에서 위로 스와이프하거나 앱 상단을 탭하여 종료합니다."</string>
+    <string name="accessibility_action_start_one_handed" msgid="5070337354072861426">"한 손 사용 모드 시작"</string>
+    <string name="accessibility_action_stop_one_handed" msgid="1369940261782179442">"한 손 사용 모드 종료"</string>
     <string name="bubbles_settings_button_description" msgid="1301286017420516912">"<xliff:g id="APP_NAME">%1$s</xliff:g> 대화창 설정"</string>
     <string name="bubble_overflow_button_content_description" msgid="8160974472718594382">"더보기"</string>
     <string name="bubble_accessibility_action_add_back" msgid="1830101076853540953">"스택에 다시 추가"</string>
@@ -68,8 +63,7 @@
     <string name="bubbles_user_education_description" msgid="4215862563054175407">"새로운 대화가 플로팅 아이콘인 대화창으로 표시됩니다. 대화창을 열려면 탭하세요. 드래그하여 이동할 수 있습니다."</string>
     <string name="bubbles_user_education_manage_title" msgid="7042699946735628035">"언제든지 대화창을 제어하세요"</string>
     <string name="bubbles_user_education_manage" msgid="3460756219946517198">"이 앱에서 대화창을 사용 중지하려면 관리를 탭하세요."</string>
-    <!-- no translation found for bubbles_user_education_got_it (3382046149225428296) -->
-    <skip />
+    <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"확인"</string>
     <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"최근 대화창 없음"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"최근 대화창과 내가 닫은 대화창이 여기에 표시됩니다."</string>
     <string name="notification_bubble_title" msgid="6082910224488253378">"버블"</string>

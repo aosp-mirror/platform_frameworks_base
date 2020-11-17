@@ -50,6 +50,15 @@ final class FakeHdmiCecConfig extends HdmiCecConfig {
                     + "    </allowed-values>"
                     + "    <default-value string-value=\"to_tv\" />"
                     + "  </setting>"
+                    + "  <setting name=\"power_state_change_on_active_source_lost\""
+                    + "           value-type=\"string\""
+                    + "           user-configurable=\"true\">"
+                    + "    <allowed-values>"
+                    + "      <value string-value=\"none\" />"
+                    + "      <value string-value=\"standby_now\" />"
+                    + "    </allowed-values>"
+                    + "    <default-value string-value=\"none\" />"
+                    + "  </setting>"
                     + "  <setting name=\"hdmi_cec_version\""
                     + "           value-type=\"int\""
                     + "           user-configurable=\"true\">"
@@ -59,10 +68,19 @@ final class FakeHdmiCecConfig extends HdmiCecConfig {
                     + "    </allowed-values>"
                     + "    <default-value int-value=\"0x05\" />"
                     + "  </setting>"
+                    + "  <setting name=\"system_audio_mode_muting\""
+                    + "           value-type=\"int\""
+                    + "           user-configurable=\"true\">"
+                    + "    <allowed-values>"
+                    + "      <value int-value=\"0\" />"
+                    + "      <value int-value=\"1\" />"
+                    + "    </allowed-values>"
+                    + "    <default-value int-value=\"1\" />"
+                    + "  </setting>"
                     + "</cec-settings>";
 
     FakeHdmiCecConfig(@NonNull Context context) {
-        super(context, new StorageAdapter(), parseFromString(SYSTEM_CONFIG_XML), null);
+        super(context, new StorageAdapter(context), parseFromString(SYSTEM_CONFIG_XML), null);
     }
 
     private static CecSettings parseFromString(@NonNull String configXml) {

@@ -186,6 +186,10 @@ private:
             jobjectArray& arr, const std::vector<DemuxFilterEvent::Event>& events);
     jobjectArray getTemiEvent(
             jobjectArray& arr, const std::vector<DemuxFilterEvent::Event>& events);
+    jobjectArray getScramblingStatusEvent(
+            jobjectArray& arr, const std::vector<DemuxFilterEventExt::Event>& eventsExt);
+    jobjectArray getRestartEvent(
+            jobjectArray& arr, const std::vector<DemuxFilterEventExt::Event>& eventsExt);
 };
 
 struct FrontendCallback : public IFrontendCallback {

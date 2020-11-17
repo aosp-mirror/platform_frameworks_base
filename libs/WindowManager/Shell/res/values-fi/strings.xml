@@ -28,8 +28,7 @@
     <string name="pip_skip_to_next" msgid="8403429188794867653">"Siirry seuraavaan"</string>
     <string name="pip_skip_to_prev" msgid="7172158111196394092">"Siirry edelliseen"</string>
     <string name="accessibility_action_pip_resize" msgid="4623966104749543182">"Muuta kokoa"</string>
-    <!-- no translation found for dock_forced_resizable (1749750436092293116) -->
-    <skip />
+    <string name="dock_forced_resizable" msgid="1749750436092293116">"Sovellus ei ehkä toimi jaetulla näytöllä."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"Sovellus ei tue jaetun näytön tilaa."</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"Sovellus ei ehkä toimi toissijaisella näytöllä."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"Sovellus ei tue käynnistämistä toissijaisilla näytöillä."</string>
@@ -44,14 +43,10 @@
     <string name="accessibility_action_divider_top_50" msgid="8649582798829048946">"Yläosa 50 %"</string>
     <string name="accessibility_action_divider_top_30" msgid="3572788224908570257">"Yläosa 30 %"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="2831868345092314060">"Alaosa koko näytölle"</string>
-    <!-- no translation found for one_handed_tutorial_title (4583241688067426350) -->
-    <skip />
-    <!-- no translation found for one_handed_tutorial_description (3486582858591353067) -->
-    <skip />
-    <!-- no translation found for accessibility_action_start_one_handed (5070337354072861426) -->
-    <skip />
-    <!-- no translation found for accessibility_action_stop_one_handed (1369940261782179442) -->
-    <skip />
+    <string name="one_handed_tutorial_title" msgid="4583241688067426350">"Yhden käden moodin käyttö"</string>
+    <string name="one_handed_tutorial_description" msgid="3486582858591353067">"Poistu pyyhkäisemällä ylös näytön alareunasta tai napauttamalla sovelluksen yllä"</string>
+    <string name="accessibility_action_start_one_handed" msgid="5070337354072861426">"Käynnistä yhden käden moodi"</string>
+    <string name="accessibility_action_stop_one_handed" msgid="1369940261782179442">"Poistu yhden käden moodista"</string>
     <string name="bubbles_settings_button_description" msgid="1301286017420516912">"Kuplien asetukset: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="bubble_overflow_button_content_description" msgid="8160974472718594382">"Ylivuoto"</string>
     <string name="bubble_accessibility_action_add_back" msgid="1830101076853540953">"Lisää takaisin pinoon"</string>
@@ -68,8 +63,7 @@
     <string name="bubbles_user_education_description" msgid="4215862563054175407">"Uudet keskustelut näkyvät kelluvina kuvakkeina tai kuplina. Avaa kupla napauttamalla. Siirrä sitä vetämällä."</string>
     <string name="bubbles_user_education_manage_title" msgid="7042699946735628035">"Muuta kuplien asetuksia milloin tahansa"</string>
     <string name="bubbles_user_education_manage" msgid="3460756219946517198">"Valitse Ylläpidä, jos haluat poistaa kuplat käytöstä tästä sovelluksesta"</string>
-    <!-- no translation found for bubbles_user_education_got_it (3382046149225428296) -->
-    <skip />
+    <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"Okei"</string>
     <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"Ei viimeaikaisia kuplia"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"Viimeaikaiset ja äskettäin ohitetut kuplat näkyvät täällä"</string>
     <string name="notification_bubble_title" msgid="6082910224488253378">"Kupla"</string>

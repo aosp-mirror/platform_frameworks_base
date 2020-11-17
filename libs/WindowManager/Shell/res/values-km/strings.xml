@@ -28,8 +28,7 @@
     <string name="pip_skip_to_next" msgid="8403429188794867653">"រំលងទៅបន្ទាប់"</string>
     <string name="pip_skip_to_prev" msgid="7172158111196394092">"រំលងទៅក្រោយ"</string>
     <string name="accessibility_action_pip_resize" msgid="4623966104749543182">"ប្ដូរ​ទំហំ"</string>
-    <!-- no translation found for dock_forced_resizable (1749750436092293116) -->
-    <skip />
+    <string name="dock_forced_resizable" msgid="1749750436092293116">"កម្មវិធី​អាចនឹងមិន​ដំណើរការ​ជាមួយ​មុខងារបំបែកអេក្រង់​ទេ។"</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"កម្មវិធីមិនគាំទ្រអេក្រង់បំបែកជាពីរទេ"</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"កម្មវិធីនេះ​ប្រហែល​ជាមិនដំណើរការ​នៅលើ​អេក្រង់បន្ទាប់បន្សំទេ។"</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"កម្មវិធី​នេះមិន​អាច​ចាប់ផ្តើម​នៅលើ​អេក្រង់បន្ទាប់បន្សំបានទេ។"</string>
@@ -44,14 +43,10 @@
     <string name="accessibility_action_divider_top_50" msgid="8649582798829048946">"ខាងលើ 50%"</string>
     <string name="accessibility_action_divider_top_30" msgid="3572788224908570257">"ខាងលើ 30%"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="2831868345092314060">"អេក្រង់ពេញខាងក្រោម"</string>
-    <!-- no translation found for one_handed_tutorial_title (4583241688067426350) -->
-    <skip />
-    <!-- no translation found for one_handed_tutorial_description (3486582858591353067) -->
-    <skip />
-    <!-- no translation found for accessibility_action_start_one_handed (5070337354072861426) -->
-    <skip />
-    <!-- no translation found for accessibility_action_stop_one_handed (1369940261782179442) -->
-    <skip />
+    <string name="one_handed_tutorial_title" msgid="4583241688067426350">"កំពុងប្រើ​មុខងារប្រើដៃម្ខាង"</string>
+    <string name="one_handed_tutorial_description" msgid="3486582858591353067">"ដើម្បីចាកចេញ សូមអូសឡើងលើ​ពីផ្នែកខាងក្រោមអេក្រង់ ឬចុចផ្នែកណាមួយ​នៅខាងលើកម្មវិធី"</string>
+    <string name="accessibility_action_start_one_handed" msgid="5070337354072861426">"ចាប់ផ្ដើម​មុខងារប្រើដៃម្ខាង"</string>
+    <string name="accessibility_action_stop_one_handed" msgid="1369940261782179442">"ចាកចេញពី​មុខងារប្រើដៃម្ខាង"</string>
     <string name="bubbles_settings_button_description" msgid="1301286017420516912">"ការកំណត់​សម្រាប់​ពពុះ <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="bubble_overflow_button_content_description" msgid="8160974472718594382">"ម៉ឺនុយបន្ថែម"</string>
     <string name="bubble_accessibility_action_add_back" msgid="1830101076853540953">"បញ្ចូល​ទៅក្នុង​គំនរវិញ"</string>
@@ -68,8 +63,7 @@
     <string name="bubbles_user_education_description" msgid="4215862563054175407">"ការសន្ទនាថ្មីៗ​បង្ហាញជា​​ពពុះ ឬរូបអណ្ដែត។ ចុច ដើម្បីបើក​ពពុះ។ អូស ដើម្បី​ផ្លាស់ទី​ពពុះនេះ។"</string>
     <string name="bubbles_user_education_manage_title" msgid="7042699946735628035">"គ្រប់គ្រង​​ពពុះ​បានគ្រប់ពេល"</string>
     <string name="bubbles_user_education_manage" msgid="3460756219946517198">"ចុច \"គ្រប់គ្រង\" ដើម្បីបិទ​ពពុះពីកម្មវិធីនេះ"</string>
-    <!-- no translation found for bubbles_user_education_got_it (3382046149225428296) -->
-    <skip />
+    <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"យល់ហើយ"</string>
     <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"មិនមាន​ពពុះ​ថ្មីៗ​ទេ"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"ពពុះថ្មីៗ​ និង​ពពុះដែលបានបិទ​​នឹង​បង្ហាញ​នៅទីនេះ"</string>
     <string name="notification_bubble_title" msgid="6082910224488253378">"ពពុះ"</string>

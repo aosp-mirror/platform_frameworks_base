@@ -28,8 +28,7 @@
     <string name="pip_skip_to_next" msgid="8403429188794867653">"Chuyển tới mục tiếp theo"</string>
     <string name="pip_skip_to_prev" msgid="7172158111196394092">"Chuyển về mục trước"</string>
     <string name="accessibility_action_pip_resize" msgid="4623966104749543182">"Đổi kích thước"</string>
-    <!-- no translation found for dock_forced_resizable (1749750436092293116) -->
-    <skip />
+    <string name="dock_forced_resizable" msgid="1749750436092293116">"Ứng dụng có thể không hoạt động với tính năng chia đôi màn hình."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"Ứng dụng không hỗ trợ chia đôi màn hình."</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"Ứng dụng có thể không hoạt động trên màn hình phụ."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"Ứng dụng không hỗ trợ khởi chạy trên màn hình phụ."</string>
@@ -44,14 +43,10 @@
     <string name="accessibility_action_divider_top_50" msgid="8649582798829048946">"Trên 50%"</string>
     <string name="accessibility_action_divider_top_30" msgid="3572788224908570257">"Trên 30%"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="2831868345092314060">"Toàn màn hình phía dưới"</string>
-    <!-- no translation found for one_handed_tutorial_title (4583241688067426350) -->
-    <skip />
-    <!-- no translation found for one_handed_tutorial_description (3486582858591353067) -->
-    <skip />
-    <!-- no translation found for accessibility_action_start_one_handed (5070337354072861426) -->
-    <skip />
-    <!-- no translation found for accessibility_action_stop_one_handed (1369940261782179442) -->
-    <skip />
+    <string name="one_handed_tutorial_title" msgid="4583241688067426350">"Cách dùng chế độ một tay"</string>
+    <string name="one_handed_tutorial_description" msgid="3486582858591353067">"Để thoát, hãy vuốt lên từ cuối màn hình hoặc nhấn vào vị trí bất kỳ phía trên ứng dụng"</string>
+    <string name="accessibility_action_start_one_handed" msgid="5070337354072861426">"Bắt đầu chế độ một tay"</string>
+    <string name="accessibility_action_stop_one_handed" msgid="1369940261782179442">"Thoát khỏi chế độ một tay"</string>
     <string name="bubbles_settings_button_description" msgid="1301286017420516912">"Tùy chọn cài đặt cho bong bóng trò chuyện <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="bubble_overflow_button_content_description" msgid="8160974472718594382">"Trình đơn mục bổ sung"</string>
     <string name="bubble_accessibility_action_add_back" msgid="1830101076853540953">"Thêm lại vào ngăn xếp"</string>
@@ -68,8 +63,7 @@
     <string name="bubbles_user_education_description" msgid="4215862563054175407">"Các cuộc trò chuyện mới sẽ xuất hiện dưới dạng biểu tượng nổi hoặc bong bóng trò chuyện. Nhấn để mở bong bóng trò chuyện. Kéo để di chuyển bong bóng trò chuyện."</string>
     <string name="bubbles_user_education_manage_title" msgid="7042699946735628035">"Kiểm soát bong bóng bất cứ lúc nào"</string>
     <string name="bubbles_user_education_manage" msgid="3460756219946517198">"Nhấn vào nút Quản lý để tắt bong bóng trò chuyện từ ứng dụng này"</string>
-    <!-- no translation found for bubbles_user_education_got_it (3382046149225428296) -->
-    <skip />
+    <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"Đã hiểu"</string>
     <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"Không có bong bóng trò chuyện nào gần đây"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"Bong bóng trò chuyện đã đóng và bong bóng trò chuyện gần đây sẽ xuất hiện ở đây"</string>
     <string name="notification_bubble_title" msgid="6082910224488253378">"Bong bóng"</string>

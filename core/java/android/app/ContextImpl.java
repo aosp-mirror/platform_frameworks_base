@@ -258,14 +258,48 @@ class ContextImpl extends Context {
     private ContentCaptureOptions mContentCaptureOptions = null;
 
     private final Object mSync = new Object();
-
     /**
-     * Whether this is created from {@link #createSystemContext(ActivityThread)} or
-     * {@link #createSystemUiContext(ContextImpl, int)} or any {@link Context} that system UI uses.
+     * Indicates this {@link Context} can not handle UI components properly and is not associated
+     * with a {@link Display} instance.
      */
-    private boolean mIsSystemOrSystemUiContext;
-    private boolean mIsUiContext;
-    private boolean mIsAssociatedWithDisplay;
+    private static final int CONTEXT_TYPE_NON_UI = 0;
+    /**
+     * Indicates this {@link Context} is associated with a {@link Display} instance but should not
+     * be handled UI components properly because it doesn't receive configuration changes
+     * regardless of display property updates.
+     */
+    private static final int CONTEXT_TYPE_DISPLAY_CONTEXT = 1;
+    /**
+     * Indicates this {@link Context} is an {@link Activity} or {@link Activity} derived
+     * {@link Context}.
+     */
+    private static final int CONTEXT_TYPE_ACTIVITY = 2;
+    /**
+     * Indicates this {@link Context} is a {@link WindowContext} or {@link WindowContext} derived
+     * {@link Context}.
+     */
+    private static final int CONTEXT_TYPE_WINDOW_CONTEXT = 3;
+
+    // TODO(b/170369943): Remove after WindowContext migration
+    /**
+     * Indicates this {@link Context} is created from {@link #createSystemContext(ActivityThread)}
+     * or {@link #createSystemUiContext(ContextImpl, int)} or any {@link Context} that system UI
+     * uses.
+     */
+    private static final int CONTEXT_TYPE_SYSTEM_OR_SYSTEM_UI = 4;
+
+    @IntDef(prefix = "CONTEXT_TYPE_", value = {
+            CONTEXT_TYPE_NON_UI,
+            CONTEXT_TYPE_DISPLAY_CONTEXT,
+            CONTEXT_TYPE_ACTIVITY,
+            CONTEXT_TYPE_WINDOW_CONTEXT,
+            CONTEXT_TYPE_SYSTEM_OR_SYSTEM_UI
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    private @interface ContextType {}
+
+    @ContextType
+    private int mContextType;
 
     @GuardedBy("mSync")
     private File mDatabasesDir;
@@ -1912,7 +1946,7 @@ class ContextImpl extends Context {
     public Object getSystemService(String name) {
         if (vmIncorrectContextUseEnabled()) {
             // Check incorrect Context usage.
-            if (isUiComponent(name) && !isSelfOrOuterUiContext()) {
+            if (isUiComponent(name) && !isUiContext()) {
                 final String errorMessage = "Tried to access visual service "
                         + SystemServiceRegistry.getSystemServiceClassName(name)
                         + " from a non-visual Context:" + getOuterContext();
@@ -1934,16 +1968,21 @@ class ContextImpl extends Context {
         return SystemServiceRegistry.getSystemServiceName(serviceClass);
     }
 
-    // TODO(b/149463653): check if we still need this method after migrating IMS to WindowContext.
-    private boolean isSelfOrOuterUiContext() {
-        // We may override outer context's isUiContext
-        return isUiContext() || getOuterContext() != null && getOuterContext().isUiContext();
-    }
-
     /** @hide */
     @Override
     public boolean isUiContext() {
-        return mIsSystemOrSystemUiContext || mIsUiContext;
+        switch (mContextType) {
+            case CONTEXT_TYPE_ACTIVITY:
+            case CONTEXT_TYPE_WINDOW_CONTEXT:
+            case CONTEXT_TYPE_SYSTEM_OR_SYSTEM_UI:
+                return true;
+            case CONTEXT_TYPE_DISPLAY_CONTEXT:
+            case CONTEXT_TYPE_NON_UI: {
+                return false;
+            }
+            default:
+                return false;
+        }
     }
 
     /**
@@ -2423,16 +2462,11 @@ class ContextImpl extends Context {
                 overrideConfig, display.getDisplayAdjustments().getCompatibilityInfo(),
                 mResources.getLoaders()));
         context.mDisplay = display;
-        context.mIsAssociatedWithDisplay = true;
+        context.mContextType = CONTEXT_TYPE_DISPLAY_CONTEXT;
         // Display contexts and any context derived from a display context should always override
         // the display that would otherwise be inherited from mToken (or the global configuration if
         // mToken is null).
         context.mForceDisplayOverrideInResources = true;
-        // Note that even if a display context is derived from an UI context, it should not be
-        // treated as UI context because it does not handle configuration changes from the server
-        // side. If the context does need to handle configuration changes, please use
-        // Context#createWindowContext(int, Bundle).
-        context.mIsUiContext = false;
         return context;
     }
 
@@ -2449,11 +2483,10 @@ class ContextImpl extends Context {
     ContextImpl createBaseWindowContext(IBinder token) {
         ContextImpl context = new ContextImpl(this, mMainThread, mPackageInfo, mAttributionTag,
                 mSplitName, token, mUser, mFlags, mClassLoader, null);
-        context.mIsUiContext = true;
-        context.mIsAssociatedWithDisplay = true;
         // Window contexts receive configurations directly from the server and as such do not
         // need to override their display in ResourcesManager.
         context.mForceDisplayOverrideInResources = false;
+        context.mContextType = CONTEXT_TYPE_WINDOW_CONTEXT;
         return context;
     }
 
@@ -2520,7 +2553,7 @@ class ContextImpl extends Context {
 
     @Override
     public Display getDisplay() {
-        if (!mIsSystemOrSystemUiContext && !mIsAssociatedWithDisplay && !isSelfOrOuterUiContext()) {
+        if (!isAssociatedWithDisplay()) {
             throw new UnsupportedOperationException("Tried to obtain display from a Context not "
                     + "associated with one. Only visual Contexts (such as Activity or one created "
                     + "with Context#createWindowContext) or ones created with "
@@ -2529,6 +2562,19 @@ class ContextImpl extends Context {
                     + "arbitrary display.");
         }
         return getDisplayNoVerify();
+    }
+
+    private boolean isAssociatedWithDisplay() {
+        switch (mContextType) {
+            case CONTEXT_TYPE_DISPLAY_CONTEXT:
+            case CONTEXT_TYPE_ACTIVITY:
+            case CONTEXT_TYPE_WINDOW_CONTEXT:
+            // TODO(b/170369943): Remove after WindowContext migration
+            case CONTEXT_TYPE_SYSTEM_OR_SYSTEM_UI:
+                return true;
+            default:
+                return false;
+        }
     }
 
     @Override
@@ -2550,7 +2596,9 @@ class ContextImpl extends Context {
     @Override
     public void updateDisplay(int displayId) {
         mDisplay = mResourcesManager.getAdjustedDisplay(displayId, mResources);
-        mIsAssociatedWithDisplay = true;
+        if (mContextType == CONTEXT_TYPE_NON_UI) {
+            mContextType = CONTEXT_TYPE_DISPLAY_CONTEXT;
+        }
     }
 
     @Override
@@ -2655,7 +2703,7 @@ class ContextImpl extends Context {
         context.setResources(packageInfo.getResources());
         context.mResources.updateConfiguration(context.mResourcesManager.getConfiguration(),
                 context.mResourcesManager.getDisplayMetrics());
-        context.mIsSystemOrSystemUiContext = true;
+        context.mContextType = CONTEXT_TYPE_SYSTEM_OR_SYSTEM_UI;
         return context;
     }
 
@@ -2673,7 +2721,7 @@ class ContextImpl extends Context {
         context.setResources(createResources(null, packageInfo, null, displayId, null,
                 packageInfo.getCompatibilityInfo(), null));
         context.updateDisplay(displayId);
-        context.mIsSystemOrSystemUiContext = true;
+        context.mContextType = CONTEXT_TYPE_SYSTEM_OR_SYSTEM_UI;
         return context;
     }
 
@@ -2696,7 +2744,8 @@ class ContextImpl extends Context {
         ContextImpl context = new ContextImpl(null, mainThread, packageInfo, null, null, null, null,
                 0, null, opPackageName);
         context.setResources(packageInfo.getResources());
-        context.mIsSystemOrSystemUiContext = isSystemOrSystemUI(context);
+        context.mContextType = isSystemOrSystemUI(context) ? CONTEXT_TYPE_SYSTEM_OR_SYSTEM_UI
+                : CONTEXT_TYPE_NON_UI;
         return context;
     }
 
@@ -2724,9 +2773,7 @@ class ContextImpl extends Context {
 
         ContextImpl context = new ContextImpl(null, mainThread, packageInfo, null,
                 activityInfo.splitName, activityToken, null, 0, classLoader, null);
-        context.mIsUiContext = true;
-        context.mIsAssociatedWithDisplay = true;
-        context.mIsSystemOrSystemUiContext = isSystemOrSystemUI(context);
+        context.mContextType = CONTEXT_TYPE_ACTIVITY;
 
         // Clamp display ID to DEFAULT_DISPLAY if it is INVALID_DISPLAY.
         displayId = (displayId != Display.INVALID_DISPLAY) ? displayId : Display.DEFAULT_DISPLAY;
@@ -2757,7 +2804,7 @@ class ContextImpl extends Context {
 
     private ContextImpl(@Nullable ContextImpl container, @NonNull ActivityThread mainThread,
             @NonNull LoadedApk packageInfo, @Nullable String attributionTag,
-            @Nullable String splitName, @Nullable IBinder activityToken, @Nullable UserHandle user,
+            @Nullable String splitName, @Nullable IBinder token, @Nullable UserHandle user,
             int flags, @Nullable ClassLoader classLoader, @Nullable String overrideOpPackageName) {
         mOuterContext = this;
 
@@ -2774,7 +2821,7 @@ class ContextImpl extends Context {
         }
 
         mMainThread = mainThread;
-        mToken = activityToken;
+        mToken = token;
         mFlags = flags;
 
         if (user == null) {
@@ -2794,10 +2841,8 @@ class ContextImpl extends Context {
             opPackageName = container.mOpPackageName;
             setResources(container.mResources);
             mDisplay = container.mDisplay;
-            mIsAssociatedWithDisplay = container.mIsAssociatedWithDisplay;
-            mIsSystemOrSystemUiContext = container.mIsSystemOrSystemUiContext;
             mForceDisplayOverrideInResources = container.mForceDisplayOverrideInResources;
-            mIsUiContext = container.isSelfOrOuterUiContext();
+            mContextType = container.mContextType;
         } else {
             mBasePackageName = packageInfo.mPackageName;
             ApplicationInfo ainfo = packageInfo.getApplicationInfo();
@@ -2847,8 +2892,13 @@ class ContextImpl extends Context {
     }
 
     @UnsupportedAppUsage
-    final void setOuterContext(Context context) {
+    final void setOuterContext(@NonNull Context context) {
         mOuterContext = context;
+        // TODO(b/149463653): check if we still need this method after migrating IMS to
+        //  WindowContext.
+        if (mOuterContext.isUiContext() && mContextType <= CONTEXT_TYPE_DISPLAY_CONTEXT) {
+            mContextType = CONTEXT_TYPE_WINDOW_CONTEXT;
+        }
     }
 
     @UnsupportedAppUsage
@@ -2859,7 +2909,12 @@ class ContextImpl extends Context {
     @Override
     @UnsupportedAppUsage
     public IBinder getActivityToken() {
-        return mToken;
+        return mContextType == CONTEXT_TYPE_ACTIVITY ? mToken : null;
+    }
+
+    @Override
+    public IBinder getWindowContextToken() {
+        return mContextType == CONTEXT_TYPE_WINDOW_CONTEXT ? mToken : null;
     }
 
     private void checkMode(int mode) {

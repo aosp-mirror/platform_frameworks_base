@@ -4019,15 +4019,13 @@ public class UserManagerService extends IUserManager.Stub {
                     if (removeUser(userId)) {
                         return UserManager.REMOVE_RESULT_REMOVED;
                     }
-
-                    Slog.w(LOG_TAG, "Unable to immediately remove non-current user: " + userId
-                            + ". User is still set as ephemeral and will be removed on user "
-                            + "switch or reboot.");
                 }
-
                 // If the user was not immediately removed, make sure it is marked as ephemeral.
                 // Don't mark as disabled since, per UserInfo.FLAG_DISABLED documentation, an
                 // ephemeral user should only be marked as disabled when its removal is in progress.
+                Slog.i(LOG_TAG, "Unable to immediately remove user " + userId + " (current user is "
+                        + currentUser + "). User is set as ephemeral and will be removed on user "
+                        + "switch or reboot.");
                 userData.info.flags |= UserInfo.FLAG_EPHEMERAL;
                 writeUserLP(userData);
 

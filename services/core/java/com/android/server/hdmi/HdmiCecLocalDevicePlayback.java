@@ -66,13 +66,6 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
                     .playback_device_action_on_routing_control()
                     .orElse(HdmiProperties.playback_device_action_on_routing_control_values.NONE);
 
-    // Behaviour of the device when <Active Source> is lost in favor of another device.
-    @VisibleForTesting
-    protected HdmiProperties.power_state_change_on_active_source_lost_values
-            mPowerStateChangeOnActiveSourceLost = HdmiProperties
-                    .power_state_change_on_active_source_lost()
-                    .orElse(HdmiProperties.power_state_change_on_active_source_lost_values.NONE);
-
     HdmiCecLocalDevicePlayback(HdmiControlService service) {
         super(service, HdmiDeviceInfo.DEVICE_PLAYBACK);
 
@@ -81,14 +74,6 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
         // The option is false by default. Update settings db as well to have the right
         // initial setting on UI.
         mService.writeBooleanSetting(Global.HDMI_CONTROL_AUTO_DEVICE_OFF_ENABLED, mAutoTvOff);
-
-        // Initialize settings database with System Property value. This will be the initial
-        // setting on the UI. If no System Property is set, the option is set to to_tv by default.
-        mService.writeStringSetting(Global.HDMI_CONTROL_SEND_STANDBY_ON_SLEEP,
-                mService.readStringSetting(Global.HDMI_CONTROL_SEND_STANDBY_ON_SLEEP,
-                        HdmiProperties.send_standby_on_sleep().orElse(
-                                HdmiProperties.send_standby_on_sleep_values.TO_TV).name()
-                                .toLowerCase()));
     }
 
     @Override
@@ -195,11 +180,8 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
             case HdmiControlService.STANDBY_SCREEN_OFF:
                 // Get latest setting value
                 @HdmiControlManager.StandbyBehavior
-                String sendStandbyOnSleep = mService.readStringSetting(
-                        Global.HDMI_CONTROL_SEND_STANDBY_ON_SLEEP,
-                        HdmiProperties.send_standby_on_sleep().orElse(
-                                HdmiProperties.send_standby_on_sleep_values.TO_TV).name()
-                                .toLowerCase());
+                String sendStandbyOnSleep = mService.getHdmiCecConfig().getStringValue(
+                        HdmiControlManager.CEC_SETTING_NAME_SEND_STANDBY_ON_SLEEP);
                 switch (sendStandbyOnSleep) {
                     case HdmiControlManager.SEND_STANDBY_ON_SLEEP_TO_TV:
                         mService.sendCecCommand(
@@ -290,11 +272,12 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
     @ServiceThreadOnly
     protected void onActiveSourceLost() {
         assertRunOnServiceThread();
-        switch (mPowerStateChangeOnActiveSourceLost) {
-            case STANDBY_NOW:
+        switch (mService.getHdmiCecConfig().getStringValue(
+                    HdmiControlManager.CEC_SETTING_NAME_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST)) {
+            case HdmiControlManager.POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST_STANDBY_NOW:
                 mService.standby();
                 return;
-            case NONE:
+            case HdmiControlManager.POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST_NONE:
                 return;
         }
     }

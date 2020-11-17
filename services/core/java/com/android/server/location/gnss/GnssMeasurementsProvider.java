@@ -31,11 +31,11 @@ import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;
-import com.android.server.location.util.AppOpsHelper;
-import com.android.server.location.util.Injector;
-import com.android.server.location.util.LocationAttributionHelper;
-import com.android.server.location.util.LocationUsageLogger;
-import com.android.server.location.util.SettingsHelper;
+import com.android.server.location.injector.AppOpsHelper;
+import com.android.server.location.injector.Injector;
+import com.android.server.location.injector.LocationAttributionHelper;
+import com.android.server.location.injector.LocationUsageLogger;
+import com.android.server.location.injector.SettingsHelper;
 
 import java.util.Collection;
 import java.util.Objects;

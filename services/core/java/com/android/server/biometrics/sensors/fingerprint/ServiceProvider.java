@@ -64,6 +64,9 @@ public interface ServiceProvider {
     @NonNull
     List<FingerprintSensorPropertiesInternal> getSensorProperties();
 
+    @NonNull
+    FingerprintSensorPropertiesInternal getSensorProperties(int sensorId);
+
     void scheduleResetLockout(int sensorId, int userId, @Nullable byte[] hardwareAuthToken);
 
     void scheduleGenerateChallenge(int sensorId, int userId, @NonNull IBinder token,

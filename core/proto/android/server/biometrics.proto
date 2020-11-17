@@ -1,0 +1,130 @@
+/*
+ * Copyright (C) 2020 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto2";
+package com.android.server.biometrics;
+
+import "frameworks/base/core/proto/android/privacy.proto";
+
+option java_multiple_files = true;
+option java_outer_classname = "BiometricsProto";
+
+// Overall state of BiometricService (and not <Biometric>Service), including any
+// <Biomteric>Service(s), for example FingerprintService or FaceService.
+message BiometricServiceStateProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    enum AuthSessionState {
+        /**
+         * Authentication either just called and we have not transitioned to the CALLED state, or
+         * authentication terminated (success or error).
+         */
+        STATE_AUTH_IDLE = 0;
+
+        /**
+         * Authentication was called and we are waiting for the <Biometric>Services to return their
+         * cookies before starting the hardware and showing the BiometricPrompt.
+         */
+        STATE_AUTH_CALLED = 1;
+
+        /**
+         * Authentication started, BiometricPrompt is showing and the hardware is authenticating.
+         */
+        STATE_AUTH_STARTED = 2;
+
+        /**
+         * Same as {@link #STATE_AUTH_STARTED}, except the BiometricPrompt UI is done animating in.
+         */
+        STATE_AUTH_STARTED_UI_SHOWING = 3;
+
+        /**
+         * Authentication is paused, waiting for the user to press "try again" button. Only
+         * passive modalities such as Face or Iris should have this state. Note that for passive
+         * modalities, the HAL enters the idle state after onAuthenticated(false) which differs from
+         * fingerprint.
+         */
+        STATE_AUTH_PAUSED = 4;
+
+        /**
+         * Paused, but "try again" was pressed. Sensors have new cookies and we're now waiting for
+         * all cookies to be returned.
+         */
+        STATE_AUTH_PAUSED_RESUMING = 5;
+
+        /**
+         * Authentication is successful, but we're waiting for the user to press "confirm" button.
+         */
+        STATE_AUTH_PENDING_CONFIRM = 6;
+
+        /**
+         * Biometric authenticated, waiting for SysUI to finish animation
+         */
+        STATE_AUTHENTICATED_PENDING_SYSUI = 7;
+
+        /**
+         * Biometric error, waiting for SysUI to finish animation
+         */
+        STATE_ERROR_PENDING_SYSUI = 8;
+
+        /**
+         * Device credential in AuthController is showing
+         */
+        STATE_SHOWING_DEVICE_CREDENTIAL = 9;
+
+        /**
+         * The client binder died, and sensors were authenticating at the time. Cancel has been
+         * requested and we're waiting for the HAL(s) to send ERROR_CANCELED.
+         */
+        STATE_CLIENT_DIED_CANCELLING = 10;
+    }
+
+    repeated SensorServiceStateProto sensor_service_states = 1;
+
+    optional AuthSessionState auth_session_state = 2;
+}
+
+// Overall state for an instance of a <Biometric>Service, for example FingerprintService or
+// FaceService. Note that a single service may provide multiple sensors.
+message SensorServiceStateProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    repeated SensorStateProto sensor_states = 1;
+}
+
+// State of a single sensor.
+message SensorStateProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    // Unique sensorId
+    optional int32 sensor_id = 1;
+
+    // State of the sensor's scheduler. True if currently handling an operation, false if idle.
+    optional bool is_busy = 2;
+
+    // User states for this sensor.
+    repeated UserStateProto user_states = 3;
+}
+
+// State of a specific user for a specific sensor.
+message UserStateProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    // Android user ID
+    optional int32 user_id = 1;
+
+    // Number of fingerprints enrolled
+    optional int32 num_enrolled = 2;
+}

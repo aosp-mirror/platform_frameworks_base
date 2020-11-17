@@ -118,6 +118,12 @@ interface IUsbManager
     /* Gets the current USB functions. */
     long getCurrentFunctions();
 
+    /* Gets the current USB Speed. */
+    int getCurrentUsbSpeed();
+
+    /* Gets the Gadget Hal Version. */
+    int getGadgetHalVersion();
+
     /* Sets the screen unlocked USB function(s), which will be set automatically
      * when the screen is unlocked.
      */

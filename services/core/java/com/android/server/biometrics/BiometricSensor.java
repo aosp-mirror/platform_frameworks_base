@@ -16,6 +16,8 @@
 
 package com.android.server.biometrics;
 
+import static android.hardware.biometrics.BiometricManager.Authenticators;
+
 import android.annotation.IntDef;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricManager;
@@ -61,11 +63,11 @@ public abstract class BiometricSensor {
     @interface SensorState {}
 
     public final int id;
-    public final int oemStrength; // strength as configured by the OEM
+    public final @Authenticators.Types int oemStrength; // strength as configured by the OEM
     public final int modality;
     public final IBiometricAuthenticator impl;
 
-    private int mUpdatedStrength; // strength updated by BiometricStrengthController
+    private @Authenticators.Types int mUpdatedStrength; // updated by BiometricStrengthController
     private @SensorState int mSensorState;
     private @BiometricConstants.Errors int mError;
 
@@ -82,7 +84,7 @@ public abstract class BiometricSensor {
      */
     abstract boolean confirmationSupported();
 
-    BiometricSensor(int id, int modality, int strength,
+    BiometricSensor(int id, int modality, @Authenticators.Types int strength,
             IBiometricAuthenticator impl) {
         this.id = id;
         this.modality = modality;
@@ -101,12 +103,11 @@ public abstract class BiometricSensor {
 
     void goToStateWaitingForCookie(boolean requireConfirmation, IBinder token, long sessionId,
             int userId, IBiometricSensorReceiver sensorReceiver, String opPackageName,
-            int cookie, int callingUid, int callingPid, int callingUserId)
+            int cookie)
             throws RemoteException {
         mCookie = cookie;
         impl.prepareForAuthentication(requireConfirmation, token,
-                sessionId, userId, sensorReceiver, opPackageName, mCookie,
-                callingUid, callingPid, callingUserId);
+                sessionId, userId, sensorReceiver, opPackageName, mCookie);
         mSensorState = STATE_WAITING_FOR_COOKIE;
     }
 
@@ -122,10 +123,8 @@ public abstract class BiometricSensor {
         mSensorState = STATE_AUTHENTICATING;
     }
 
-    void goToStateCancelling(IBinder token, String opPackageName, int callingUid,
-            int callingPid, int callingUserId) throws RemoteException {
-        impl.cancelAuthenticationFromService(token, opPackageName, callingUid, callingPid,
-                callingUserId);
+    void goToStateCancelling(IBinder token, String opPackageName) throws RemoteException {
+        impl.cancelAuthenticationFromService(token, opPackageName);
         mSensorState = STATE_CANCELING;
     }
 
@@ -143,7 +142,7 @@ public abstract class BiometricSensor {
      * strength.
      * @return a bitfield, see {@link BiometricManager.Authenticators}
      */
-    int getCurrentStrength() {
+    @Authenticators.Types int getCurrentStrength() {
         return oemStrength | mUpdatedStrength;
     }
 
@@ -160,7 +159,7 @@ public abstract class BiometricSensor {
      * is checked.
      * @param newStrength
      */
-    void updateStrength(int newStrength) {
+    void updateStrength(@Authenticators.Types int newStrength) {
         String log = "updateStrength: Before(" + toString() + ")";
         mUpdatedStrength = newStrength;
         log += " After(" + toString() + ")";

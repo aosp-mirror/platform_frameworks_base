@@ -80,7 +80,7 @@ class TestSession extends ISession.Stub {
     }
 
     @Override
-    public void invalidateAuthenticatorId(int cookie, HardwareAuthToken hat) {
+    public void invalidateAuthenticatorId(int cookie) {
 
     }
 

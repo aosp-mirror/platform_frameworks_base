@@ -5438,6 +5438,10 @@ package android.media.tv.tuner.filter {
     method @NonNull public android.media.tv.tuner.filter.RecordSettings.Builder setTsIndexMask(int);
   }
 
+  public final class RestartEvent extends android.media.tv.tuner.filter.FilterEvent {
+    method public int getStartId();
+  }
+
   public final class ScramblingStatusEvent extends android.media.tv.tuner.filter.FilterEvent {
     method public int getScramblingStatus();
   }
@@ -11044,6 +11048,7 @@ package android.telephony.data {
     method public int getMtuV4();
     method public int getMtuV6();
     method @NonNull public java.util.List<java.net.InetAddress> getPcscfAddresses();
+    method public int getPduSessionId();
     method public int getProtocolType();
     method public long getRetryDurationMillis();
     method @Deprecated public int getSuggestedRetryTime();
@@ -11058,6 +11063,7 @@ package android.telephony.data {
     field public static final int LINK_STATUS_DORMANT = 1; // 0x1
     field public static final int LINK_STATUS_INACTIVE = 0; // 0x0
     field public static final int LINK_STATUS_UNKNOWN = -1; // 0xffffffff
+    field public static final int PDU_SESSION_ID_NOT_SET = 0; // 0x0
     field public static final int RETRY_DURATION_UNDEFINED = -1; // 0xffffffff
   }
 
@@ -11076,6 +11082,7 @@ package android.telephony.data {
     method @NonNull public android.telephony.data.DataCallResponse.Builder setMtuV4(int);
     method @NonNull public android.telephony.data.DataCallResponse.Builder setMtuV6(int);
     method @NonNull public android.telephony.data.DataCallResponse.Builder setPcscfAddresses(@NonNull java.util.List<java.net.InetAddress>);
+    method @NonNull public android.telephony.data.DataCallResponse.Builder setPduSessionId(int);
     method @NonNull public android.telephony.data.DataCallResponse.Builder setProtocolType(int);
     method @NonNull public android.telephony.data.DataCallResponse.Builder setRetryDurationMillis(long);
     method @Deprecated @NonNull public android.telephony.data.DataCallResponse.Builder setSuggestedRetryTime(int);
@@ -11140,6 +11147,7 @@ package android.telephony.data {
 
   public abstract class DataService.DataServiceProvider implements java.lang.AutoCloseable {
     ctor public DataService.DataServiceProvider(int);
+    method public void cancelHandover(int, @NonNull android.telephony.data.DataServiceCallback);
     method public abstract void close();
     method public void deactivateDataCall(int, int, @Nullable android.telephony.data.DataServiceCallback);
     method public final int getSlotIndex();
@@ -11148,11 +11156,15 @@ package android.telephony.data {
     method public void setDataProfile(@NonNull java.util.List<android.telephony.data.DataProfile>, boolean, @NonNull android.telephony.data.DataServiceCallback);
     method public void setInitialAttachApn(@NonNull android.telephony.data.DataProfile, boolean, @NonNull android.telephony.data.DataServiceCallback);
     method public void setupDataCall(int, @NonNull android.telephony.data.DataProfile, boolean, boolean, int, @Nullable android.net.LinkProperties, @NonNull android.telephony.data.DataServiceCallback);
+    method public void setupDataCall(int, @NonNull android.telephony.data.DataProfile, boolean, boolean, int, @Nullable android.net.LinkProperties, @IntRange(from=0, to=15) int, @NonNull android.telephony.data.DataServiceCallback);
+    method public void startHandover(int, @NonNull android.telephony.data.DataServiceCallback);
   }
 
   public class DataServiceCallback {
     method public void onDataCallListChanged(@NonNull java.util.List<android.telephony.data.DataCallResponse>);
     method public void onDeactivateDataCallComplete(int);
+    method public void onHandoverCancelled(int);
+    method public void onHandoverStarted(int);
     method public void onRequestDataCallListComplete(int, @NonNull java.util.List<android.telephony.data.DataCallResponse>);
     method public void onSetDataProfileComplete(int);
     method public void onSetInitialAttachApnComplete(int);
