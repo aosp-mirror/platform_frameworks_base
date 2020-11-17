@@ -26,9 +26,7 @@ import static com.android.server.wm.WindowManagerService.H.ON_POINTER_DOWN_OUTSI
 import android.annotation.NonNull;
 import android.os.Debug;
 import android.os.IBinder;
-import android.os.RemoteException;
 import android.util.Slog;
-import android.view.IWindow;
 import android.view.InputApplicationHandle;
 import android.view.KeyEvent;
 import android.view.WindowManager;
@@ -37,7 +35,6 @@ import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.input.InputManagerService;
 
 import java.io.PrintWriter;
-import java.util.concurrent.atomic.AtomicReference;
 
 final class InputManagerCallback implements InputManagerService.WindowManagerCallbacks {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "InputManagerCallback" : TAG_WM;
@@ -59,13 +56,6 @@ final class InputManagerCallback implements InputManagerService.WindowManagerCal
     // Initially false, so that input does not get dispatched until boot is finished at
     // which point the ActivityManager will enable dispatching.
     private boolean mInputDispatchEnabled;
-
-    // TODO(b/141749603)) investigate if this can be part of client focus change dispatch
-    // Tracks the currently focused window used to update pointer capture state in clients
-    private AtomicReference<IWindow> mFocusedWindow = new AtomicReference<>();
-
-    // Tracks focused window pointer capture state
-    private boolean mFocusedWindowHasCapture;
 
     public InputManagerCallback(WindowManagerService service) {
         mService = service;
@@ -234,59 +224,9 @@ final class InputManagerCallback implements InputManagerService.WindowManagerCal
     }
 
     @Override
-    public boolean notifyFocusChanged(IBinder oldToken, IBinder newToken) {
-        boolean requestRefreshConfiguration = false;
-        final IWindow newFocusedWindow;
-        final WindowState win;
-
-        // TODO(b/141749603) investigate if this can be part of client focus change dispatch
-        synchronized (mService.mGlobalLock) {
-            win = mService.mInputToWindowMap.get(newToken);
-        }
-        newFocusedWindow = (win != null) ? win.mClient : null;
-
-        final IWindow focusedWindow = mFocusedWindow.get();
-        if (focusedWindow != null) {
-            if (newFocusedWindow != null
-                    && newFocusedWindow.asBinder() == focusedWindow.asBinder()) {
-                Slog.w(TAG, "notifyFocusChanged called with unchanged mFocusedWindow="
-                        + focusedWindow);
-                return false;
-            }
-            requestRefreshConfiguration = dispatchPointerCaptureChanged(focusedWindow, false);
-        }
-        mFocusedWindow.set(newFocusedWindow);
-        mService.mH.sendMessage(PooledLambda.obtainMessage(mService::reportFocusChanged,
-                oldToken, newToken));
-        return requestRefreshConfiguration;
-    }
-
-    @Override
-    public boolean requestPointerCapture(IBinder windowToken, boolean enabled) {
-        final IWindow focusedWindow = mFocusedWindow.get();
-        if (focusedWindow == null || focusedWindow.asBinder() != windowToken) {
-            Slog.e(TAG, "requestPointerCapture called for a window that has no focus: "
-                    + windowToken);
-            return false;
-        }
-        if (mFocusedWindowHasCapture == enabled) {
-            Slog.i(TAG, "requestPointerCapture: already " + (enabled ? "enabled" : "disabled"));
-            return false;
-        }
-        return dispatchPointerCaptureChanged(focusedWindow, enabled);
-    }
-
-    private boolean dispatchPointerCaptureChanged(IWindow focusedWindow, boolean enabled) {
-        if (mFocusedWindowHasCapture != enabled) {
-            mFocusedWindowHasCapture = enabled;
-            try {
-                focusedWindow.dispatchPointerCaptureChanged(enabled);
-            } catch (RemoteException ex) {
-                /* ignore */
-            }
-            return true;
-        }
-        return false;
+    public void notifyFocusChanged(IBinder oldToken, IBinder newToken) {
+        mService.mH.sendMessage(PooledLambda.obtainMessage(
+                mService::reportFocusChanged, oldToken, newToken));
     }
 
     /** Waits until the built-in input devices have been configured. */

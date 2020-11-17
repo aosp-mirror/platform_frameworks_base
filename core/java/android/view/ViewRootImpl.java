@@ -8665,7 +8665,7 @@ public final class ViewRootImpl implements ViewParent,
                 MSG_REQUEST_KEYBOARD_SHORTCUTS, deviceId, 0, receiver).sendToTarget();
     }
 
-    public void dispatchPointerCaptureChanged(boolean on) {
+    private void dispatchPointerCaptureChanged(boolean on) {
         final int what = MSG_POINTER_CAPTURE_CHANGED;
         mHandler.removeMessages(what);
         Message msg = mHandler.obtainMessage(what);
@@ -9434,14 +9434,6 @@ public final class ViewRootImpl implements ViewParent,
             ViewRootImpl viewAncestor = mViewAncestor.get();
             if (viewAncestor != null) {
                 viewAncestor.dispatchRequestKeyboardShortcuts(receiver, deviceId);
-            }
-        }
-
-        @Override
-        public void dispatchPointerCaptureChanged(boolean hasCapture) {
-            final ViewRootImpl viewAncestor = mViewAncestor.get();
-            if (viewAncestor != null) {
-                viewAncestor.dispatchPointerCaptureChanged(hasCapture);
             }
         }
 

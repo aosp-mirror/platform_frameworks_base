@@ -339,9 +339,6 @@ public class SystemWindows {
         public void requestAppKeyboardShortcuts(IResultReceiver receiver, int deviceId) {}
 
         @Override
-        public void dispatchPointerCaptureChanged(boolean hasCapture) {}
-
-        @Override
         public void requestScrollCapture(IScrollCaptureCallbacks callbacks) {
             try {
                 callbacks.onUnavailable();

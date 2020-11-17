@@ -2588,17 +2588,8 @@ public class InputManagerService extends IInputManager.Stub
 
         /**
          * Called when the focused window has changed.
-         *
-         * @return true if we want to request a configuration refresh.
          */
-        boolean notifyFocusChanged(IBinder oldToken, IBinder newToken);
-
-        /**
-         * Called by the client to request pointer capture.
-         *
-         * @return true if we want to request a configuration refresh.
-         */
-        boolean requestPointerCapture(IBinder windowToken, boolean enabled);
+        void notifyFocusChanged(IBinder oldToken, IBinder newToken);
     }
 
     /**

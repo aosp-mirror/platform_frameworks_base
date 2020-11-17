@@ -130,11 +130,6 @@ oneway interface IWindow {
     void requestAppKeyboardShortcuts(IResultReceiver receiver, int deviceId);
 
     /**
-     * Tell the window that it is either gaining or losing pointer capture.
-     */
-    void dispatchPointerCaptureChanged(boolean hasCapture);
-
-    /**
      * Called when Scroll Capture support is requested for a window.
      *
      * @param callbacks to receive responses
