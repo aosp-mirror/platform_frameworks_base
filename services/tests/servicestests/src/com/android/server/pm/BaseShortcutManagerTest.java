@@ -568,7 +568,7 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
 
         @Override
         boolean injectHasAccessShortcutsPermission(int callingPid, int callingUid) {
-            return true;
+            return mInjectCheckAccessShortcutsPermission;
         }
 
         @Override

@@ -775,6 +775,9 @@ public class LauncherAppsService extends SystemService {
                 throw new IllegalArgumentException(
                         "To query by locus ID, package name must also be set");
             }
+            if ((query.getQueryFlags() & ShortcutQuery.FLAG_GET_PERSONS_DATA) != 0) {
+                ensureStrictAccessShortcutsPermission(callingPackage);
+            }
 
             // TODO(b/29399275): Eclipse compiler requires explicit List<ShortcutInfo> cast below.
             return new ParceledListSlice<>((List<ShortcutInfo>)
