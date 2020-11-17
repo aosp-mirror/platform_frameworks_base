@@ -564,6 +564,11 @@ public class BiometricScheduler {
 
     public void dump(PrintWriter pw) {
         pw.println("Dump of BiometricScheduler " + getTag());
+        pw.println("Current operation: " + mCurrentOperation);
+        pw.println("Pending operations: " + mPendingOperations.size());
+        for (Operation operation : mPendingOperations) {
+            pw.println("Pending operation: " + operation);
+        }
         for (CrashState crashState : mCrashStates) {
             pw.println("Crash State " + crashState);
         }

@@ -61,6 +61,11 @@ public class FaceResetLockoutClient extends ClientMonitor<ISession> {
         // Nothing to do here
     }
 
+    public void start(@NonNull Callback callback) {
+        super.start(callback);
+        startHalOperation();
+    }
+
     @Override
     protected void startHalOperation() {
         try {
