@@ -1227,6 +1227,7 @@ public class PackageInstaller {
          *                  {@link PackageManager#requestChecksums}.
          * @throws SecurityException if called after the session has been
          *                           committed or abandoned.
+         * @throws IllegalStateException if checksums for this file have already been added.
          * @deprecated  do not use installer-provided checksums,
          *              use platform-enforced checksums
          *              e.g. {@link Checksum#TYPE_WHOLE_MERKLE_ROOT_4K_SHA256}
