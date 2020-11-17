@@ -18,7 +18,7 @@ package com.android.server.net;
 
 import static android.provider.Settings.ACTION_VPN_SETTINGS;
 
-import static com.android.server.connectivity.NetworkNotificationManager.NOTIFICATION_VPN;
+import static com.android.server.connectivity.NetworkNotificationManager.NOTIFICATION_CHANNEL_VPN;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -257,7 +257,7 @@ public class LockdownVpnTracker {
 
     private void showNotification(int titleRes, int iconRes) {
         final Notification.Builder builder =
-                new Notification.Builder(mContext, NOTIFICATION_VPN)
+                new Notification.Builder(mContext, NOTIFICATION_CHANNEL_VPN)
                         .setWhen(0)
                         .setSmallIcon(iconRes)
                         .setContentTitle(mContext.getString(titleRes))
