@@ -352,6 +352,11 @@ public abstract class ActivityManagerInternal {
     public abstract boolean inputDispatchingTimedOut(Object proc, String activityShortComponentName,
             ApplicationInfo aInfo, String parentShortComponentName, Object parentProc,
             boolean aboveSystem, String reason);
+    /**
+     * App started responding to input events. This signal can be used to abort the ANR process and
+     * hide the ANR dialog.
+     */
+    public abstract void inputDispatchingResumed(int pid);
 
     /**
      * Sends {@link android.content.Intent#ACTION_CONFIGURATION_CHANGED} with all the appropriate
