@@ -25,7 +25,48 @@
         android:id="@+id/enter_pip"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Enter PIP"/>
+        android:text="Enter PIP"
+        android:onClick="enterPip"/>
+
+    <RadioGroup
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:checkedButton="@id/ratio_default">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Ratio"/>
+
+        <RadioButton
+            android:id="@+id/ratio_default"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Default"
+            android:onClick="onRatioSelected"/>
+
+        <RadioButton
+            android:id="@+id/ratio_square"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Square [1:1]"
+            android:onClick="onRatioSelected"/>
+
+        <RadioButton
+            android:id="@+id/ratio_wide"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Wide [2:1]"
+            android:onClick="onRatioSelected"/>
+
+        <RadioButton
+            android:id="@+id/ratio_tall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Tall [1:2]"
+            android:onClick="onRatioSelected"/>
+    </RadioGroup>
 
     <TextView
         android:layout_width="wrap_content"

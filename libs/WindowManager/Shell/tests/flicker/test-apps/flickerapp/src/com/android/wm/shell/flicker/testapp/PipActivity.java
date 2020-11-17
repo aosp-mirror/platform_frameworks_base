@@ -26,12 +26,12 @@ import static android.media.session.PlaybackState.STATE_STOPPED;
 
 import android.app.Activity;
 import android.app.PictureInPictureParams;
-import android.graphics.Rect;
 import android.media.MediaMetadata;
 import android.media.session.MediaSession;
 import android.media.session.PlaybackState;
 import android.os.Bundle;
 import android.util.Rational;
+import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 
@@ -47,6 +47,12 @@ public class PipActivity extends Activity {
      */
     private static final String TITLE_STATE_PAUSED = "TestApp media is paused";
 
+    private static final Rational RATIO_DEFAULT = null;
+    private static final Rational RATIO_SQUARE = new Rational(1, 1);
+    private static final Rational RATIO_WIDE = new Rational(2, 1);
+    private static final Rational RATIO_TALL = new Rational(1, 2);
+
+    private PictureInPictureParams.Builder mPipParamsBuilder;
     private MediaSession mMediaSession;
     private final PlaybackState.Builder mPlaybackStateBuilder = new PlaybackState.Builder()
             .setActions(ACTION_PLAY | ACTION_PAUSE | ACTION_STOP)
@@ -66,11 +72,8 @@ public class PipActivity extends Activity {
 
         setContentView(R.layout.activity_pip);
 
-        final PictureInPictureParams pipParams = new PictureInPictureParams.Builder()
-                .setAspectRatio(new Rational(1, 1))
-                .setSourceRectHint(new Rect(0, 0, 100, 100))
-                .build();
-        findViewById(R.id.enter_pip).setOnClickListener(v -> enterPictureInPictureMode(pipParams));
+        mPipParamsBuilder = new PictureInPictureParams.Builder()
+                .setAspectRatio(RATIO_DEFAULT);
 
         findViewById(R.id.media_session_start)
                 .setOnClickListener(v -> updateMediaSessionState(STATE_PLAYING));
@@ -95,6 +98,30 @@ public class PipActivity extends Activity {
                 updateMediaSessionState(STATE_STOPPED);
             }
         });
+    }
+
+    public void enterPip(View v) {
+        enterPictureInPictureMode(mPipParamsBuilder.build());
+    }
+
+    public void onRatioSelected(View v) {
+        switch (v.getId()) {
+            case R.id.ratio_default:
+                mPipParamsBuilder.setAspectRatio(RATIO_DEFAULT);
+                break;
+
+            case R.id.ratio_square:
+                mPipParamsBuilder.setAspectRatio(RATIO_SQUARE);
+                break;
+
+            case R.id.ratio_wide:
+                mPipParamsBuilder.setAspectRatio(RATIO_WIDE);
+                break;
+
+            case R.id.ratio_tall:
+                mPipParamsBuilder.setAspectRatio(RATIO_TALL);
+                break;
+        }
     }
 
     private void updateMediaSessionState(int newState) {
