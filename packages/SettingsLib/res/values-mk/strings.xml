@@ -81,7 +81,7 @@
     <string name="bluetooth_battery_level" msgid="2893696778200201555">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> батерија"</string>
     <string name="bluetooth_battery_level_untethered" msgid="4002282355111504349">"Л: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> батерија, Д: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> батерија"</string>
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"Активен"</string>
-    <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Аудио на медиуми"</string>
+    <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Звук на аудио/видео"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"Телефонски повици"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Пренос на датотека"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"Влезен уред"</string>

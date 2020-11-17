@@ -81,7 +81,7 @@
     <string name="bluetooth_battery_level" msgid="2893696778200201555">"Узровень зараду: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_battery_level_untethered" msgid="4002282355111504349">"Л: акумулятар: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, П: акумулятар: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>"</string>
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"Уключана"</string>
-    <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Аўдыё медыяпрылады"</string>
+    <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Аўдыя медыяфайлаў"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"Тэлефонныя выклікі"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Перадача файлаў"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"Прылада ўводу"</string>
@@ -399,12 +399,9 @@
     <string name="inactive_app_inactive_summary" msgid="3161222402614236260">"Неактыўная. Краніце, каб пераключыць."</string>
     <string name="inactive_app_active_summary" msgid="8047630990208722344">"Актыўная. Краніце, каб пераключыць."</string>
     <string name="standby_bucket_summary" msgid="5128193447550429600">"Стан праграмы ў рэжыме чакання: <xliff:g id="BUCKET"> %s</xliff:g>"</string>
-    <!-- no translation found for transcode_settings_title (6700974145733932357) -->
-    <skip />
-    <!-- no translation found for transcode_enable_all (4719796495995795404) -->
-    <skip />
-    <!-- no translation found for transcode_skip_apps (5680997722349545778) -->
-    <skip />
+    <string name="transcode_settings_title" msgid="6700974145733932357">"Налады перакадзіравання мультымедыя"</string>
+    <string name="transcode_enable_all" msgid="4719796495995795404">"Дазволіць перакадзіраванне для ўсіх праграм"</string>
+    <string name="transcode_skip_apps" msgid="5680997722349545778">"Адключыць перакадзіраванне для праграм"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"Запушчаныя службы"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"Прагляд запушчаных службаў i кіраванне iмi"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"Рэалізацыя WebView"</string>
