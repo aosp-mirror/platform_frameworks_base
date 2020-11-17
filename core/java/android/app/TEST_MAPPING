@@ -92,6 +92,54 @@
                 }
             ],
             "file_patterns": ["(/|^)Activity.java"]
+        },
+        {
+            "name": "CtsContentTestCases",
+            "options": [
+                {
+                    "exclude-annotation": "androidx.test.filters.FlakyTest"
+                },
+                {
+                    "exclude-annotation": "org.junit.Ignore"
+                },
+                {
+                    "include-filter": "android.content.wm.cts"
+                }
+            ],
+            "file_patterns": ["(/|^)ContextImpl.java"]
+        },
+        {
+            "name": "CtsOsTestCases",
+            "options": [
+                {
+                    "include-annotation": "android.platform.test.annotations.Presubmit"
+                },
+                {
+                    "exclude-annotation": "androidx.test.filters.FlakyTest"
+                },
+                {
+                    "exclude-annotation": "org.junit.Ignore"
+                },
+                {
+                    "include-filter": "android.os.cts.StrictModeTest"
+                }
+            ],
+            "file_patterns": ["(/|^)ContextImpl.java"]
+        },
+        {
+            "name": "FrameworksCoreTests",
+            "options": [
+                {
+                    "exclude-annotation": "androidx.test.filters.FlakyTest"
+                },
+                {
+                    "exclude-annotation": "org.junit.Ignore"
+                },
+                {
+                    "include-filter": "android.content.ContextTest"
+                }
+            ],
+            "file_patterns": ["(/|^)ContextImpl.java"]
         }
     ],
     "postsubmit": [
