@@ -63,7 +63,7 @@
     <string name="printer_info_desc" msgid="7181988788991581654">"Повеќе информации за овој печатач"</string>
     <string name="notification_channel_progress" msgid="872788690775721436">"Тековни работи за печатење"</string>
     <string name="notification_channel_failure" msgid="9042250774797916414">"Неуспешни работи за печатење"</string>
-    <string name="could_not_create_file" msgid="3425025039427448443">"Не можеше да се создаде датотека"</string>
+    <string name="could_not_create_file" msgid="3425025039427448443">"Не може да се создаде датотека"</string>
     <string name="print_services_disabled_toast" msgid="9089060734685174685">"Некои услуги за печатење се оневозможени"</string>
     <string name="print_searching_for_printers" msgid="6550424555079932867">"Пребарување печатачи"</string>
     <string name="print_no_print_services" msgid="8561247706423327966">"Нема овозможени услуги за печатење"</string>
@@ -102,7 +102,7 @@
     <item msgid="4061931020926489228">"Портрет"</item>
     <item msgid="3199660090246166812">"Пејзаж"</item>
   </string-array>
-    <string name="print_write_error_message" msgid="5787642615179572543">"Не можеше да се напише во датотеката"</string>
+    <string name="print_write_error_message" msgid="5787642615179572543">"Не може да се напише во датотеката"</string>
     <string name="print_error_default_message" msgid="8602678405502922346">"За жал, тоа не успеа. Обидете се повторно."</string>
     <string name="print_error_retry" msgid="1426421728784259538">"Обиди се повторно"</string>
     <string name="print_error_printer_unavailable" msgid="8985614415253203381">"Овој печатач не е достапен во моментов."</string>
