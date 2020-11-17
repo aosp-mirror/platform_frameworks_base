@@ -448,7 +448,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         mKeyguardUpdateMonitor.dispatchStartedGoingToSleep(0 /* why */);
         mTestableLooper.processAllMessages();
 
-        verify(mFingerprintManager).authenticate(any(), any(), any(), any(), anyInt());
+        verify(mFingerprintManager).authenticate(any(), any(), any(), any(), anyInt(), anyInt());
         verify(mFingerprintManager, never()).detectFingerprint(any(), any(), anyInt());
     }
 

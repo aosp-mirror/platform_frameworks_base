@@ -46,7 +46,7 @@ interface IFingerprintService {
     // Authenticate the given sessionId with a fingerprint. This is protected by
     // USE_FINGERPRINT/USE_BIOMETRIC permission. This is effectively deprecated, since it only comes
     // through FingerprintManager now.
-    void authenticate(IBinder token, long operationId, int userId,
+    void authenticate(IBinder token, long operationId, int sensorId, int userId,
             IFingerprintServiceReceiver receiver, String opPackageName);
 
     // Uses the fingerprint hardware to detect for the presence of a finger, without giving details
