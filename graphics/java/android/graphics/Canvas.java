@@ -550,8 +550,7 @@ public class Canvas extends BaseCanvas {
             @Saveflags int saveFlags) {
         checkValidSaveFlags(saveFlags);
         return nSaveLayer(mNativeCanvasWrapper, left, top, right, bottom,
-                paint != null ? paint.getNativeInstance() : 0,
-                ALL_SAVE_FLAG);
+                paint != null ? paint.getNativeInstance() : 0);
     }
 
     /**
@@ -626,8 +625,7 @@ public class Canvas extends BaseCanvas {
             @Saveflags int saveFlags) {
         checkValidSaveFlags(saveFlags);
         alpha = Math.min(255, Math.max(0, alpha));
-        return nSaveLayerAlpha(mNativeCanvasWrapper, left, top, right, bottom,
-                                     alpha, ALL_SAVE_FLAG);
+        return nSaveLayerAlpha(mNativeCanvasWrapper, left, top, right, bottom, alpha);
     }
 
     /**
@@ -1420,10 +1418,10 @@ public class Canvas extends BaseCanvas {
     private static native int nSave(long canvasHandle, int saveFlags);
     @CriticalNative
     private static native int nSaveLayer(long nativeCanvas, float l, float t, float r, float b,
-            long nativePaint, int layerFlags);
+            long nativePaint);
     @CriticalNative
     private static native int nSaveLayerAlpha(long nativeCanvas, float l, float t, float r, float b,
-            int alpha, int layerFlags);
+            int alpha);
     @CriticalNative
     private static native int nSaveUnclippedLayer(long nativeCanvas, int l, int t, int r, int b);
     @CriticalNative

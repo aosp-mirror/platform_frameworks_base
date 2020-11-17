@@ -93,16 +93,14 @@ static jint save(CRITICAL_JNI_PARAMS_COMMA jlong canvasHandle, jint flagsHandle)
 }
 
 static jint saveLayer(CRITICAL_JNI_PARAMS_COMMA jlong canvasHandle, jfloat l, jfloat t,
-                      jfloat r, jfloat b, jlong paintHandle, jint flagsHandle) {
+                      jfloat r, jfloat b, jlong paintHandle) {
     Paint* paint  = reinterpret_cast<Paint*>(paintHandle);
-    SaveFlags::Flags flags = static_cast<SaveFlags::Flags>(flagsHandle);
-    return static_cast<jint>(get_canvas(canvasHandle)->saveLayer(l, t, r, b, paint, flags));
+    return static_cast<jint>(get_canvas(canvasHandle)->saveLayer(l, t, r, b, paint));
 }
 
 static jint saveLayerAlpha(CRITICAL_JNI_PARAMS_COMMA jlong canvasHandle, jfloat l, jfloat t,
-                           jfloat r, jfloat b, jint alpha, jint flagsHandle) {
-    SaveFlags::Flags flags = static_cast<SaveFlags::Flags>(flagsHandle);
-    return static_cast<jint>(get_canvas(canvasHandle)->saveLayerAlpha(l, t, r, b, alpha, flags));
+                           jfloat r, jfloat b, jint alpha) {
+    return static_cast<jint>(get_canvas(canvasHandle)->saveLayerAlpha(l, t, r, b, alpha));
 }
 
 static jint saveUnclippedLayer(CRITICAL_JNI_PARAMS_COMMA jlong canvasHandle, jint l, jint t, jint r, jint b) {
@@ -688,8 +686,8 @@ static const JNINativeMethod gMethods[] = {
     {"nGetWidth","(J)I", (void*) CanvasJNI::getWidth},
     {"nGetHeight","(J)I", (void*) CanvasJNI::getHeight},
     {"nSave","(JI)I", (void*) CanvasJNI::save},
-    {"nSaveLayer","(JFFFFJI)I", (void*) CanvasJNI::saveLayer},
-    {"nSaveLayerAlpha","(JFFFFII)I", (void*) CanvasJNI::saveLayerAlpha},
+    {"nSaveLayer","(JFFFFJ)I", (void*) CanvasJNI::saveLayer},
+    {"nSaveLayerAlpha","(JFFFFI)I", (void*) CanvasJNI::saveLayerAlpha},
     {"nSaveUnclippedLayer","(JIIII)I", (void*) CanvasJNI::saveUnclippedLayer},
     {"nRestoreUnclippedLayer","(JIJ)V", (void*) CanvasJNI::restoreUnclippedLayer},
     {"nGetSaveCount","(J)I", (void*) CanvasJNI::getSaveCount},
