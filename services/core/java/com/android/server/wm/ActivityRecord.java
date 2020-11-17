@@ -2997,6 +2997,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (stopped) {
             clearOptionsLocked();
         }
+        mAtmService.getTransitionController().requestTransitionIfNeeded(TRANSIT_CLOSE, this);
     }
 
     /**

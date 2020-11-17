@@ -55,6 +55,7 @@ import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_TOP;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.Process.INVALID_UID;
 import static android.view.Display.DEFAULT_DISPLAY;
+import static android.view.WindowManager.TRANSIT_OPEN;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_CONFIGURATION;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_TASKS;
@@ -1566,6 +1567,15 @@ class ActivityStarter {
                 boolean restrictedBgActivity, NeededUriGrants intentGrants) {
         int result = START_CANCELED;
         final Task startedActivityStack;
+
+        // Create a transition now to record the original intent of actions taken within
+        // startActivityInner. Otherwise, logic in startActivityInner could start a different
+        // transition based on a sub-action.
+        // Only do the create here (and defer requestStart) since startActivityInner might abort.
+        final Transition newTransition = (!mService.getTransitionController().isCollecting()
+                && mService.getTransitionController().getTransitionPlayer() != null)
+                ? mService.getTransitionController().createTransition(TRANSIT_OPEN) : null;
+        mService.getTransitionController().collect(r);
         try {
             mService.deferWindowLayout();
             Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "startActivityInner");
@@ -1575,6 +1585,18 @@ class ActivityStarter {
             Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
             startedActivityStack = handleStartResult(r, result);
             mService.continueWindowLayout();
+
+            // Transition housekeeping
+            if (!ActivityManager.isStartResultSuccessful(result)) {
+                if (newTransition != null) {
+                    newTransition.abort();
+                }
+            } else if (newTransition != null) {
+                mService.getTransitionController().requestStartTransition(newTransition);
+            } else {
+                // Make the collecting transition wait until this request is ready.
+                mService.getTransitionController().setReady(false);
+            }
         }
 
         postStartActivityProcessing(r, result, startedActivityStack);
@@ -2607,6 +2629,7 @@ class ActivityStarter {
                 mNewTaskInfo != null ? mNewTaskInfo : mStartActivity.info,
                 mNewTaskIntent != null ? mNewTaskIntent : mIntent, mVoiceSession,
                 mVoiceInteractor, toTop, mStartActivity, mSourceRecord, mOptions);
+        mService.getTransitionController().collect(task);
         addOrReparentStartingActivity(task, "setTaskFromReuseOrCreateNewTask - mReuseTask");
 
         ProtoLog.v(WM_DEBUG_TASKS, "Starting new activity %s in new task %s",

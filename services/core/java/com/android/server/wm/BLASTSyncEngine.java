@@ -100,6 +100,10 @@ class BLASTSyncEngine {
                     return;
                 }
             }
+            finishNow();
+        }
+
+        private void finishNow() {
             ProtoLog.v(WM_DEBUG_SYNC_ENGINE, "SyncGroup %d: Finished!", mSyncId);
             SurfaceControl.Transaction merged = mWm.mTransactionFactory.get();
             if (mOrphanTransaction != null) {
@@ -112,9 +116,10 @@ class BLASTSyncEngine {
             mActiveSyncs.remove(mSyncId);
         }
 
-        private void setReady() {
+        private void setReady(boolean ready) {
             ProtoLog.v(WM_DEBUG_SYNC_ENGINE, "SyncGroup %d: Set ready", mSyncId);
-            mReady = true;
+            mReady = ready;
+            if (!ready) return;
             mWm.mWindowPlacerLocked.requestTraversal();
         }
 
@@ -153,8 +158,19 @@ class BLASTSyncEngine {
         mActiveSyncs.get(id).addToSync(wc);
     }
 
+    void setReady(int id, boolean ready) {
+        mActiveSyncs.get(id).setReady(ready);
+    }
+
     void setReady(int id) {
-        mActiveSyncs.get(id).setReady();
+        setReady(id, true);
+    }
+
+    /**
+     * Aborts the sync (ie. it doesn't wait for ready or anything to finish)
+     */
+    void abort(int id) {
+        mActiveSyncs.get(id).finishNow();
     }
 
     void onSurfacePlacement() {

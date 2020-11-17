@@ -215,7 +215,7 @@ class KeyguardController {
                             false /* alwaysKeepCurrent */, convertTransitFlags(flags),
                             false /* forceOverride */);
             mRootWindowContainer.getDefaultDisplay()
-                    .prepareAppTransition(TRANSIT_KEYGUARD_GOING_AWAY,
+                    .requestTransitionAndLegacyPrepare(TRANSIT_KEYGUARD_GOING_AWAY,
                             convertTransitFlags(flags));
             updateKeyguardSleepToken();
 

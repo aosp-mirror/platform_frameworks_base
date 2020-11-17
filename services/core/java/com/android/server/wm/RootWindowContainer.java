@@ -2803,7 +2803,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         r.detachFromProcess();
         r.mDisplayContent.prepareAppTransitionOld(TRANSIT_OLD_CRASHING_ACTIVITY_CLOSE,
                 false /* alwaysKeepCurrent */);
-        r.mDisplayContent.prepareAppTransition(TRANSIT_CLOSE, TRANSIT_FLAG_APP_CRASHED);
+        r.mDisplayContent.requestTransitionAndLegacyPrepare(TRANSIT_CLOSE,
+                TRANSIT_FLAG_APP_CRASHED);
         r.destroyIfPossible("handleAppCrashed");
     }
 
