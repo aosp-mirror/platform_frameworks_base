@@ -71,14 +71,20 @@ public class AndroidKeyStoreProvider extends Provider {
     private static final String DESEDE_SYSTEM_PROPERTY =
             "ro.hardware.keystore_desede";
 
-    /** @hide **/
+    /** @hide */
     public AndroidKeyStoreProvider() {
-        super(PROVIDER_NAME, 1.0, "Android KeyStore security provider");
+        this(PROVIDER_NAME);
+    }
+
+    /** @hide **/
+    public AndroidKeyStoreProvider(String providerName) {
+        super(providerName, 1.0, "Android KeyStore security provider");
 
         boolean supports3DES = "true".equals(android.os.SystemProperties.get(DESEDE_SYSTEM_PROPERTY));
 
         // java.security.KeyStore
         put("KeyStore.AndroidKeyStore", PACKAGE_NAME + ".AndroidKeyStoreSpi");
+        put("alg.alias.KeyStore.AndroidKeyStoreLegacy", "AndroidKeyStore");
 
         // java.security.KeyPairGenerator
         put("KeyPairGenerator.EC", PACKAGE_NAME + ".AndroidKeyStoreKeyPairGeneratorSpi$EC");
@@ -438,8 +444,12 @@ public class AndroidKeyStoreProvider extends Provider {
     @NonNull
     public static java.security.KeyStore getKeyStoreForUid(int uid)
             throws KeyStoreException, NoSuchProviderException {
+        String providerName = PROVIDER_NAME;
+        if (android.security.keystore2.AndroidKeyStoreProvider.isInstalled()) {
+            providerName = "AndroidKeyStoreLegacy";
+        }
         java.security.KeyStore result =
-                java.security.KeyStore.getInstance("AndroidKeyStore", PROVIDER_NAME);
+                java.security.KeyStore.getInstance(providerName);
         try {
             result.load(new AndroidKeyStoreLoadStoreParameter(uid));
         } catch (NoSuchAlgorithmException | CertificateException | IOException e) {
