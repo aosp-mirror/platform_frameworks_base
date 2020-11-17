@@ -19,28 +19,48 @@ package com.android.server.location.test;
 import android.os.Bundle;
 
 import com.android.internal.location.ProviderRequest;
-import com.android.server.location.AbstractLocationProvider;
+import com.android.server.location.provider.AbstractLocationProvider;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
 public class FakeProvider extends AbstractLocationProvider {
 
-    public FakeProvider() {
+    public interface FakeProviderInterface {
+
+        void onSetRequest(ProviderRequest request);
+
+        void onFlush(Runnable callback);
+
+        void onExtraCommand(int uid, int pid, String command, Bundle extras);
+
+        void dump(FileDescriptor fd, PrintWriter pw, String[] args);
+    }
+
+    private final FakeProviderInterface mFakeInterface;
+
+    public FakeProvider(FakeProviderInterface fakeInterface) {
         super(Runnable::run);
+        mFakeInterface = fakeInterface;
     }
 
     @Override
-    protected void onSetRequest(ProviderRequest request) {}
+    protected void onSetRequest(ProviderRequest request) {
+        mFakeInterface.onSetRequest(request);
+    }
 
     @Override
     protected void onFlush(Runnable callback) {
-        callback.run();
+        mFakeInterface.onFlush(callback);
     }
 
     @Override
-    protected void onExtraCommand(int uid, int pid, String command, Bundle extras) {}
+    protected void onExtraCommand(int uid, int pid, String command, Bundle extras) {
+        mFakeInterface.onExtraCommand(uid, pid, command, extras);
+    }
 
     @Override
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {}
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        mFakeInterface.dump(fd, pw, args);
+    }
 }

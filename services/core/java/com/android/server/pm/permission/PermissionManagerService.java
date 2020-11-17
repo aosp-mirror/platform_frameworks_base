@@ -3372,16 +3372,28 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                 SystemConfig.getInstance().getSplitPermissions());
     }
 
+    @NonNull
     private OneTimePermissionUserManager getOneTimePermissionUserManager(@UserIdInt int userId) {
         OneTimePermissionUserManager oneTimePermissionUserManager;
         synchronized (mLock) {
-            oneTimePermissionUserManager =
-                    mOneTimePermissionUserManagers.get(userId);
+            oneTimePermissionUserManager = mOneTimePermissionUserManagers.get(userId);
             if (oneTimePermissionUserManager != null) {
                 return oneTimePermissionUserManager;
             }
-            oneTimePermissionUserManager = new OneTimePermissionUserManager(
-                    mContext.createContextAsUser(UserHandle.of(userId), /*flags*/ 0));
+        }
+        // We cannot create a new instance of OneTimePermissionUserManager while holding our own
+        // lock, which may lead to a deadlock with the package manager lock. So we do it in a
+        // retry-like way, and just discard the newly created instance if someone else managed to be
+        // a little bit faster than us when we dropped our own lock.
+        final OneTimePermissionUserManager newOneTimePermissionUserManager =
+                new OneTimePermissionUserManager(mContext.createContextAsUser(UserHandle.of(userId),
+                        /*flags*/ 0));
+        synchronized (mLock) {
+            oneTimePermissionUserManager = mOneTimePermissionUserManagers.get(userId);
+            if (oneTimePermissionUserManager != null) {
+                return oneTimePermissionUserManager;
+            }
+            oneTimePermissionUserManager = newOneTimePermissionUserManager;
             mOneTimePermissionUserManagers.put(userId, oneTimePermissionUserManager);
         }
         oneTimePermissionUserManager.registerUninstallListener();

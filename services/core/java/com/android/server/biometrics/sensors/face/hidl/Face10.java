@@ -28,6 +28,7 @@ import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricFaceConstants;
 import android.hardware.biometrics.BiometricManager;
 import android.hardware.biometrics.BiometricsProtoEnums;
+import android.hardware.biometrics.ITestSession;
 import android.hardware.biometrics.face.V1_0.IBiometricsFace;
 import android.hardware.biometrics.face.V1_0.IBiometricsFaceClientCallback;
 import android.hardware.face.Face;
@@ -51,6 +52,9 @@ import android.util.proto.ProtoOutputStream;
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.FrameworkStatsLog;
+import com.android.server.biometrics.SensorServiceStateProto;
+import com.android.server.biometrics.SensorStateProto;
+import com.android.server.biometrics.UserStateProto;
 import com.android.server.biometrics.Utils;
 import com.android.server.biometrics.sensors.AcquisitionClient;
 import com.android.server.biometrics.sensors.AuthenticationConsumer;
@@ -67,6 +71,7 @@ import com.android.server.biometrics.sensors.face.FaceUtils;
 import com.android.server.biometrics.sensors.face.LockoutHalImpl;
 import com.android.server.biometrics.sensors.face.ServiceProvider;
 import com.android.server.biometrics.sensors.face.UsageStats;
+import com.android.server.biometrics.sensors.fingerprint.FingerprintUtils;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -93,6 +98,8 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
     static final String NOTIFICATION_TAG = "FaceService";
     static final int NOTIFICATION_ID = 1;
 
+    private boolean mTestHalEnabled;
+
     @NonNull private final FaceSensorPropertiesInternal mSensorProperties;
     @NonNull private final Context mContext;
     @NonNull private final BiometricScheduler mScheduler;
@@ -104,6 +111,7 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
     @NonNull private final NotificationManager mNotificationManager;
     @NonNull private final Map<Integer, Long> mAuthenticatorIds;
     @Nullable private IBiometricsFace mDaemon;
+    @NonNull private final HalResultController mHalResultController;
     // If a challenge is generated, keep track of its owner. Since IBiometricsFace@1.0 only
     // supports a single in-flight challenge, we must notify the interrupted owner that its
     // challenge is no longer valid. The interrupted owner will be notified when the interrupter
@@ -122,174 +130,207 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
         }
     };
 
-    private final IBiometricsFaceClientCallback mDaemonCallback =
-            new IBiometricsFaceClientCallback.Stub() {
-                @Override
-                public void onEnrollResult(long deviceId, int faceId, int userId, int remaining) {
-                    mHandler.post(() -> {
-                        final CharSequence name = FaceUtils.getInstance()
-                                .getUniqueName(mContext, userId);
-                        final Face face = new Face(name, faceId, deviceId);
+    public static class HalResultController extends IBiometricsFaceClientCallback.Stub {
+        /**
+         * Interface to sends results to the HalResultController's owner.
+         */
+        public interface Callback {
+            /**
+             * Invoked when the HAL sends ERROR_HW_UNAVAILABLE.
+             */
+            void onHardwareUnavailable();
+        }
 
-                        final ClientMonitor<?> client = mScheduler.getCurrentClient();
-                        if (!(client instanceof FaceEnrollClient)) {
-                            Slog.e(TAG, "onEnrollResult for non-enroll client: "
-                                    + Utils.getClientName(client));
-                            return;
-                        }
+        private final int mSensorId;
+        @NonNull private final Context mContext;
+        @NonNull private final Handler mHandler;
+        @NonNull private final BiometricScheduler mScheduler;
+        @Nullable private Callback mCallback;
+        @NonNull private final LockoutHalImpl mLockoutTracker;
+        @NonNull private final LockoutResetDispatcher mLockoutResetDispatcher;
 
-                        final FaceEnrollClient enrollClient = (FaceEnrollClient) client;
-                        enrollClient.onEnrollResult(face, remaining);
-                    });
+        HalResultController(int sensorId, @NonNull Context context, @NonNull Handler handler,
+                @NonNull BiometricScheduler scheduler, @NonNull LockoutHalImpl lockoutTracker,
+                @NonNull LockoutResetDispatcher lockoutResetDispatcher) {
+            mSensorId = sensorId;
+            mContext = context;
+            mHandler = handler;
+            mScheduler = scheduler;
+            mLockoutTracker = lockoutTracker;
+            mLockoutResetDispatcher = lockoutResetDispatcher;
+        }
+
+        public void setCallback(@Nullable Callback callback) {
+            mCallback = callback;
+        }
+
+        @Override
+        public void onEnrollResult(long deviceId, int faceId, int userId, int remaining) {
+            mHandler.post(() -> {
+                final CharSequence name = FaceUtils.getInstance()
+                        .getUniqueName(mContext, userId);
+                final Face face = new Face(name, faceId, deviceId);
+
+                final ClientMonitor<?> client = mScheduler.getCurrentClient();
+                if (!(client instanceof FaceEnrollClient)) {
+                    Slog.e(TAG, "onEnrollResult for non-enroll client: "
+                            + Utils.getClientName(client));
+                    return;
                 }
 
-                @Override
-                public void onAuthenticated(long deviceId, int faceId, int userId,
-                        ArrayList<Byte> token) {
-                    mHandler.post(() -> {
-                        final ClientMonitor<?> client = mScheduler.getCurrentClient();
-                        if (!(client instanceof AuthenticationConsumer)) {
-                            Slog.e(TAG, "onAuthenticated for non-authentication consumer: "
-                                    + Utils.getClientName(client));
-                            return;
-                        }
+                final FaceEnrollClient enrollClient = (FaceEnrollClient) client;
+                enrollClient.onEnrollResult(face, remaining);
+            });
+        }
 
-                        final AuthenticationConsumer authenticationConsumer =
-                                (AuthenticationConsumer) client;
-                        final boolean authenticated = faceId != 0;
-                        final Face face = new Face("", faceId, deviceId);
-                        authenticationConsumer.onAuthenticated(face, authenticated, token);
-                    });
+        @Override
+        public void onAuthenticated(long deviceId, int faceId, int userId,
+                ArrayList<Byte> token) {
+            mHandler.post(() -> {
+                final ClientMonitor<?> client = mScheduler.getCurrentClient();
+                if (!(client instanceof AuthenticationConsumer)) {
+                    Slog.e(TAG, "onAuthenticated for non-authentication consumer: "
+                            + Utils.getClientName(client));
+                    return;
                 }
 
-                @Override
-                public void onAcquired(long deviceId, int userId, int acquiredInfo,
-                        int vendorCode) {
-                    mHandler.post(() -> {
-                        final ClientMonitor<?> client = mScheduler.getCurrentClient();
-                        if (!(client instanceof AcquisitionClient)) {
-                            Slog.e(TAG, "onAcquired for non-acquire client: "
-                                    + Utils.getClientName(client));
-                            return;
-                        }
+                final AuthenticationConsumer authenticationConsumer =
+                        (AuthenticationConsumer) client;
+                final boolean authenticated = faceId != 0;
+                final Face face = new Face("", faceId, deviceId);
+                authenticationConsumer.onAuthenticated(face, authenticated, token);
+            });
+        }
 
-                        final AcquisitionClient<?> acquisitionClient =
-                                (AcquisitionClient<?>) client;
-                        acquisitionClient.onAcquired(acquiredInfo, vendorCode);
-                    });
+        @Override
+        public void onAcquired(long deviceId, int userId, int acquiredInfo,
+                int vendorCode) {
+            mHandler.post(() -> {
+                final ClientMonitor<?> client = mScheduler.getCurrentClient();
+                if (!(client instanceof AcquisitionClient)) {
+                    Slog.e(TAG, "onAcquired for non-acquire client: "
+                            + Utils.getClientName(client));
+                    return;
                 }
 
-                @Override
-                public void onError(long deviceId, int userId, int error, int vendorCode) {
-                    mHandler.post(() -> {
-                        final ClientMonitor<?> client = mScheduler.getCurrentClient();
-                        Slog.d(TAG, "handleError"
-                                + ", client: " + (client != null ? client.getOwnerString() : null)
-                                + ", error: " + error
-                                + ", vendorCode: " + vendorCode);
-                        if (!(client instanceof Interruptable)) {
-                            Slog.e(TAG, "onError for non-error consumer: " + Utils.getClientName(
-                                    client));
-                            return;
-                        }
+                final AcquisitionClient<?> acquisitionClient =
+                        (AcquisitionClient<?>) client;
+                acquisitionClient.onAcquired(acquiredInfo, vendorCode);
+            });
+        }
 
-                        final Interruptable interruptable = (Interruptable) client;
-                        interruptable.onError(error, vendorCode);
-
-                        if (error == BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE) {
-                            Slog.e(TAG, "Got ERROR_HW_UNAVAILABLE");
-                            mDaemon = null;
-                            mCurrentUserId = UserHandle.USER_NULL;
-                        }
-                    });
+        @Override
+        public void onError(long deviceId, int userId, int error, int vendorCode) {
+            mHandler.post(() -> {
+                final ClientMonitor<?> client = mScheduler.getCurrentClient();
+                Slog.d(TAG, "handleError"
+                        + ", client: " + (client != null ? client.getOwnerString() : null)
+                        + ", error: " + error
+                        + ", vendorCode: " + vendorCode);
+                if (!(client instanceof Interruptable)) {
+                    Slog.e(TAG, "onError for non-error consumer: " + Utils.getClientName(
+                            client));
+                    return;
                 }
 
-                @Override
-                public void onRemoved(long deviceId, ArrayList<Integer> removed, int userId) {
-                    mHandler.post(() -> {
-                        final ClientMonitor<?> client = mScheduler.getCurrentClient();
-                        if (!(client instanceof RemovalConsumer)) {
-                            Slog.e(TAG, "onRemoved for non-removal consumer: "
-                                    + Utils.getClientName(client));
-                            return;
-                        }
+                final Interruptable interruptable = (Interruptable) client;
+                interruptable.onError(error, vendorCode);
 
-                        final RemovalConsumer removalConsumer = (RemovalConsumer) client;
+                if (error == BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE) {
+                    Slog.e(TAG, "Got ERROR_HW_UNAVAILABLE");
+                    if (mCallback != null) {
+                        mCallback.onHardwareUnavailable();
+                    }
+                }
+            });
+        }
 
-                        if (!removed.isEmpty()) {
-                            // Convert to old fingerprint-like behavior, where remove() receives
-                            // one removal
-                            // at a time. This way, remove can share some more common code.
-                            for (int i = 0; i < removed.size(); i++) {
-                                final int id = removed.get(i);
-                                final Face face = new Face("", id, deviceId);
-                                final int remaining = removed.size() - i - 1;
-                                Slog.d(TAG, "Removed, faceId: " + id + ", remaining: " + remaining);
-                                removalConsumer.onRemoved(face, remaining);
-                            }
-                        } else {
-                            removalConsumer.onRemoved(null, 0 /* remaining */);
-                        }
-
-                        Settings.Secure.putIntForUser(mContext.getContentResolver(),
-                                Settings.Secure.FACE_UNLOCK_RE_ENROLL, 0, UserHandle.USER_CURRENT);
-                    });
+        @Override
+        public void onRemoved(long deviceId, ArrayList<Integer> removed, int userId) {
+            mHandler.post(() -> {
+                final ClientMonitor<?> client = mScheduler.getCurrentClient();
+                if (!(client instanceof RemovalConsumer)) {
+                    Slog.e(TAG, "onRemoved for non-removal consumer: "
+                            + Utils.getClientName(client));
+                    return;
                 }
 
-                @Override
-                public void onEnumerate(long deviceId, ArrayList<Integer> faceIds, int userId) {
-                    mHandler.post(() -> {
-                        final ClientMonitor<?> client = mScheduler.getCurrentClient();
-                        if (!(client instanceof EnumerateConsumer)) {
-                            Slog.e(TAG, "onEnumerate for non-enumerate consumer: "
-                                    + Utils.getClientName(client));
-                            return;
-                        }
+                final RemovalConsumer removalConsumer = (RemovalConsumer) client;
 
-                        final EnumerateConsumer enumerateConsumer = (EnumerateConsumer) client;
-
-                        if (!faceIds.isEmpty()) {
-                            // Convert to old fingerprint-like behavior, where enumerate()
-                            // receives one
-                            // template at a time. This way, enumerate can share some more common
-                            // code.
-                            for (int i = 0; i < faceIds.size(); i++) {
-                                final Face face = new Face("", faceIds.get(i), deviceId);
-                                enumerateConsumer.onEnumerationResult(face, faceIds.size() - i - 1);
-                            }
-                        } else {
-                            // For face, the HIDL contract is to receive an empty list when there
-                            // are no
-                            // templates enrolled. Send a null identifier since we don't consume
-                            // them
-                            // anywhere, and send remaining == 0 so this code can be shared with
-                            // Fingerprint@2.1
-                            enumerateConsumer.onEnumerationResult(null /* identifier */, 0);
-                        }
-                    });
+                if (!removed.isEmpty()) {
+                    // Convert to old fingerprint-like behavior, where remove() receives
+                    // one removal
+                    // at a time. This way, remove can share some more common code.
+                    for (int i = 0; i < removed.size(); i++) {
+                        final int id = removed.get(i);
+                        final Face face = new Face("", id, deviceId);
+                        final int remaining = removed.size() - i - 1;
+                        Slog.d(TAG, "Removed, faceId: " + id + ", remaining: " + remaining);
+                        removalConsumer.onRemoved(face, remaining);
+                    }
+                } else {
+                    removalConsumer.onRemoved(null, 0 /* remaining */);
                 }
 
-                @Override
-                public void onLockoutChanged(long duration) {
-                    mHandler.post(() -> {
-                        Slog.d(TAG, "onLockoutChanged: " + duration);
-                        final @LockoutTracker.LockoutMode int lockoutMode;
-                        if (duration == 0) {
-                            lockoutMode = LockoutTracker.LOCKOUT_NONE;
-                        } else if (duration == -1 || duration == Long.MAX_VALUE) {
-                            lockoutMode = LockoutTracker.LOCKOUT_PERMANENT;
-                        } else {
-                            lockoutMode = LockoutTracker.LOCKOUT_TIMED;
-                        }
+                Settings.Secure.putIntForUser(mContext.getContentResolver(),
+                        Settings.Secure.FACE_UNLOCK_RE_ENROLL, 0, UserHandle.USER_CURRENT);
+            });
+        }
 
-                        mLockoutTracker.setCurrentUserLockoutMode(lockoutMode);
-
-                        if (duration == 0) {
-                            mLockoutResetDispatcher.notifyLockoutResetCallbacks(mSensorId);
-                        }
-                    });
+        @Override
+        public void onEnumerate(long deviceId, ArrayList<Integer> faceIds, int userId) {
+            mHandler.post(() -> {
+                final ClientMonitor<?> client = mScheduler.getCurrentClient();
+                if (!(client instanceof EnumerateConsumer)) {
+                    Slog.e(TAG, "onEnumerate for non-enumerate consumer: "
+                            + Utils.getClientName(client));
+                    return;
                 }
-            };
+
+                final EnumerateConsumer enumerateConsumer = (EnumerateConsumer) client;
+
+                if (!faceIds.isEmpty()) {
+                    // Convert to old fingerprint-like behavior, where enumerate()
+                    // receives one
+                    // template at a time. This way, enumerate can share some more common
+                    // code.
+                    for (int i = 0; i < faceIds.size(); i++) {
+                        final Face face = new Face("", faceIds.get(i), deviceId);
+                        enumerateConsumer.onEnumerationResult(face, faceIds.size() - i - 1);
+                    }
+                } else {
+                    // For face, the HIDL contract is to receive an empty list when there
+                    // are no
+                    // templates enrolled. Send a null identifier since we don't consume
+                    // them
+                    // anywhere, and send remaining == 0 so this code can be shared with
+                    // Fingerprint@2.1
+                    enumerateConsumer.onEnumerationResult(null /* identifier */, 0);
+                }
+            });
+        }
+
+        @Override
+        public void onLockoutChanged(long duration) {
+            mHandler.post(() -> {
+                Slog.d(TAG, "onLockoutChanged: " + duration);
+                final @LockoutTracker.LockoutMode int lockoutMode;
+                if (duration == 0) {
+                    lockoutMode = LockoutTracker.LOCKOUT_NONE;
+                } else if (duration == -1 || duration == Long.MAX_VALUE) {
+                    lockoutMode = LockoutTracker.LOCKOUT_PERMANENT;
+                } else {
+                    lockoutMode = LockoutTracker.LOCKOUT_TIMED;
+                }
+
+                mLockoutTracker.setCurrentUserLockoutMode(lockoutMode);
+
+                if (duration == 0) {
+                    mLockoutResetDispatcher.notifyLockoutResetCallbacks(mSensorId);
+                }
+            });
+        }
+    }
 
     @VisibleForTesting
     public Face10(@NonNull Context context, int sensorId,
@@ -309,6 +350,12 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
         mNotificationManager = mContext.getSystemService(NotificationManager.class);
         mLockoutTracker = new LockoutHalImpl();
         mLockoutResetDispatcher = lockoutResetDispatcher;
+        mHalResultController = new HalResultController(sensorId, context, mHandler, mScheduler,
+                mLockoutTracker, lockoutResetDispatcher);
+        mHalResultController.setCallback(() -> {
+            mDaemon = null;
+            mCurrentUserId = UserHandle.USER_NULL;
+        });
 
         try {
             ActivityManager.getService().registerUserSwitchObserver(mUserSwitchObserver, TAG);
@@ -351,6 +398,12 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
     }
 
     private synchronized IBiometricsFace getDaemon() {
+        if (mTestHalEnabled) {
+            final TestHal testHal = new TestHal();
+            testHal.setCallback(mHalResultController);
+            return testHal;
+        }
+
         if (mDaemon != null) {
             return mDaemon;
         }
@@ -378,7 +431,7 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
         // successfully set.
         long halId = 0;
         try {
-            halId = mDaemon.setCallback(mDaemonCallback).value;
+            halId = mDaemon.setCallback(mHalResultController).value;
         } catch (RemoteException e) {
             Slog.e(TAG, "Failed to set callback for face HAL", e);
             mDaemon = null;
@@ -411,6 +464,12 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
         final List<FaceSensorPropertiesInternal> properties = new ArrayList<>();
         properties.add(mSensorProperties);
         return properties;
+    }
+
+    @NonNull
+    @Override
+    public FaceSensorPropertiesInternal getSensorProperties(int sensorId) {
+        return mSensorProperties;
     }
 
     @Override
@@ -712,6 +771,22 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
 
     @Override
     public void dumpProtoState(int sensorId, ProtoOutputStream proto) {
+        final long sensorToken = proto.start(SensorServiceStateProto.SENSOR_STATES);
+
+        proto.write(SensorStateProto.SENSOR_ID, mSensorProperties.sensorId);
+        proto.write(SensorStateProto.IS_BUSY, mScheduler.getCurrentClient() != null);
+
+        for (UserInfo user : UserManager.get(mContext).getUsers()) {
+            final int userId = user.getUserHandle().getIdentifier();
+
+            final long userToken = proto.start(SensorStateProto.USER_STATES);
+            proto.write(UserStateProto.USER_ID, userId);
+            proto.write(UserStateProto.NUM_ENROLLED, FaceUtils.getInstance()
+                    .getBiometricsForUser(mContext, userId).size());
+            proto.end(userToken);
+        }
+
+        proto.end(sensorToken);
     }
 
     @Override
@@ -843,5 +918,15 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
                 }
             }
         }
+    }
+
+    void setTestHalEnabled(boolean enabled) {
+        mTestHalEnabled = enabled;
+    }
+
+    @NonNull
+    @Override
+    public ITestSession createTestSession(int sensorId, @NonNull String opPackageName) {
+        return new BiometricTestSessionImpl(mContext, mSensorId, this, mHalResultController);
     }
 }

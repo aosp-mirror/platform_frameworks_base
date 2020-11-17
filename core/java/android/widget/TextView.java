@@ -742,8 +742,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private boolean mLocalesChanged = false;
     private int mTextSizeUnit = -1;
 
-    // True if force bold text feature is enabled. This feature makes all text bolder.
-    private boolean mForceBoldTextEnabled;
+    // This is used to reflect the current user preference for changing font weight and making text
+    // more bold.
+    private int mFontWeightAdjustment;
     private Typeface mOriginalTypeface;
 
     // True if setKeyListener() has been explicitly called
@@ -1647,8 +1648,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             attributes.mTypefaceIndex = MONOSPACE;
         }
 
-        mForceBoldTextEnabled = getContext().getResources().getConfiguration().forceBoldText
-                == Configuration.FORCE_BOLD_TEXT_YES;
+        mFontWeightAdjustment = getContext().getResources().getConfiguration().fontWeightAdjustment;
         applyTextAppearance(attributes);
 
         if (isPassword) {
@@ -4273,12 +4273,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 invalidate();
             }
         }
-        if (newConfig.forceBoldText == Configuration.FORCE_BOLD_TEXT_YES) {
-            mForceBoldTextEnabled = true;
-            setTypeface(getTypeface());
-        } else  if (newConfig.forceBoldText == Configuration.FORCE_BOLD_TEXT_NO
-                || newConfig.forceBoldText == Configuration.FORCE_BOLD_TEXT_UNDEFINED) {
-            mForceBoldTextEnabled = false;
+        if (mFontWeightAdjustment != newConfig.fontWeightAdjustment) {
+            mFontWeightAdjustment = newConfig.fontWeightAdjustment;
             setTypeface(getTypeface());
         }
     }
@@ -4433,12 +4429,18 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      */
     public void setTypeface(@Nullable Typeface tf) {
         mOriginalTypeface = tf;
-        if (mForceBoldTextEnabled) {
-            int newWeight = tf != null ? tf.getWeight() + 300 : 400;
-            newWeight = Math.min(newWeight, 1000);
-            int typefaceStyle = tf != null ? tf.getStyle() : 0;
-            boolean italic = (typefaceStyle & Typeface.ITALIC) != 0;
-            tf = Typeface.create(tf, newWeight, italic);
+        if (mFontWeightAdjustment != 0
+                && mFontWeightAdjustment != Configuration.FONT_WEIGHT_ADJUSTMENT_UNDEFINED) {
+            if (tf == null) {
+                tf = Typeface.DEFAULT;
+            } else {
+                int newWeight = Math.min(
+                        Math.max(tf.getWeight() + mFontWeightAdjustment, FontStyle.FONT_WEIGHT_MIN),
+                        FontStyle.FONT_WEIGHT_MAX);
+                int typefaceStyle = tf != null ? tf.getStyle() : 0;
+                boolean italic = (typefaceStyle & Typeface.ITALIC) != 0;
+                tf = Typeface.create(tf, newWeight, italic);
+            }
         }
         if (mTextPaint.getTypeface() != tf) {
             mTextPaint.setTypeface(tf);

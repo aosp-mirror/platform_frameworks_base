@@ -27,9 +27,9 @@ import android.os.IBinder;
 import android.stats.location.LocationStatsEnums;
 import android.util.Log;
 
-import com.android.server.location.util.AppOpsHelper;
-import com.android.server.location.util.Injector;
-import com.android.server.location.util.LocationUsageLogger;
+import com.android.server.location.injector.AppOpsHelper;
+import com.android.server.location.injector.Injector;
+import com.android.server.location.injector.LocationUsageLogger;
 
 import java.util.Collection;
 

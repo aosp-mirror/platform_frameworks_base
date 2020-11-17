@@ -287,7 +287,8 @@ class InsetsPolicy {
         if (mShowingTransientTypes.indexOf(ITYPE_STATUS_BAR) != -1) {
             return mDummyControlTarget;
         }
-        if (focusedWin == mPolicy.getNotificationShade()) {
+        final WindowState notificationShade = mPolicy.getNotificationShade();
+        if (focusedWin == notificationShade) {
             // Notification shade has control anyways, no reason to force anything.
             return focusedWin;
         }
@@ -308,9 +309,10 @@ class InsetsPolicy {
             // fake control to the client, so that it can re-show the bar during this scenario.
             return mDummyControlTarget;
         }
-        if (!canBeTopFullscreenOpaqueWindow(focusedWin) && mPolicy.topAppHidesStatusBar()) {
+        if (!canBeTopFullscreenOpaqueWindow(focusedWin) && mPolicy.topAppHidesStatusBar()
+                && (notificationShade == null || !notificationShade.canReceiveKeys())) {
             // Non-fullscreen focused window should not break the state that the top-fullscreen-app
-            // window hides status bar.
+            // window hides status bar, unless the notification shade can receive keys.
             return mPolicy.getTopFullscreenOpaqueWindow();
         }
         return focusedWin;

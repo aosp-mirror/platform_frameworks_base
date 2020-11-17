@@ -20,7 +20,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import android.location.LocationResult;
 
-import com.android.server.location.AbstractLocationProvider;
+import com.android.server.location.provider.AbstractLocationProvider;
 
 import java.util.LinkedList;
 

@@ -1071,6 +1071,14 @@ public class ContextWrapper extends Context {
      * @hide
      */
     @Override
+    public IBinder getWindowContextToken() {
+        return mBase != null ? mBase.getWindowContextToken() : null;
+    }
+
+    /**
+     * @hide
+     */
+    @Override
     public IServiceConnection getServiceDispatcher(ServiceConnection conn, Handler handler,
             int flags) {
         return mBase.getServiceDispatcher(conn, handler, flags);

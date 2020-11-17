@@ -35,7 +35,6 @@ import android.os.Looper;
 import android.os.PowerManager;
 import android.os.test.TestLooper;
 import android.platform.test.annotations.Presubmit;
-import android.provider.Settings.Global;
 import android.sysprop.HdmiProperties;
 import android.view.KeyEvent;
 
@@ -116,16 +115,16 @@ public class HdmiCecLocalDevicePlaybackTest {
                         return false;
                     }
 
-                @Override
-                PowerManager getPowerManager() {
-                    return powerManager;
-                }
+                    @Override
+                    PowerManager getPowerManager() {
+                        return powerManager;
+                    }
 
-                @Override
-                HdmiCecConfig getHdmiCecConfig() {
-                    return hdmiCecConfig;
-                }
-            };
+                    @Override
+                    HdmiCecConfig getHdmiCecConfig() {
+                        return hdmiCecConfig;
+                    }
+                };
 
         mHdmiCecLocalDevicePlayback = new HdmiCecLocalDevicePlayback(mHdmiControlService);
         mHdmiCecLocalDevicePlayback.init();
@@ -283,8 +282,9 @@ public class HdmiCecLocalDevicePlaybackTest {
 
     @Test
     public void handleRoutingChange_otherDevice_None() {
-        mHdmiCecLocalDevicePlayback.mPowerStateChangeOnActiveSourceLost =
-                HdmiProperties.power_state_change_on_active_source_lost_values.NONE;
+        mHdmiCecLocalDevicePlayback.mService.getHdmiCecConfig().setStringValue(
+                HdmiControlManager.CEC_SETTING_NAME_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST,
+                HdmiControlManager.POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST_NONE);
         mHdmiCecLocalDevicePlayback.setActiveSource(mPlaybackLogicalAddress,
                 mPlaybackPhysicalAddress, "HdmiCecLocalDevicePlaybackTest");
         mStandby = false;
@@ -301,8 +301,9 @@ public class HdmiCecLocalDevicePlaybackTest {
 
     @Test
     public void handleRoutingChange_sameDevice_None_ActiveSource() {
-        mHdmiCecLocalDevicePlayback.mPowerStateChangeOnActiveSourceLost =
-                HdmiProperties.power_state_change_on_active_source_lost_values.NONE;
+        mHdmiCecLocalDevicePlayback.mService.getHdmiCecConfig().setStringValue(
+                HdmiControlManager.CEC_SETTING_NAME_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST,
+                HdmiControlManager.POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST_NONE);
         mHdmiCecLocalDevicePlayback.setActiveSource(mPlaybackLogicalAddress,
                 mPlaybackPhysicalAddress, "HdmiCecLocalDevicePlaybackTest");
         mStandby = false;
@@ -320,8 +321,9 @@ public class HdmiCecLocalDevicePlaybackTest {
 
     @Test
     public void handleRoutingChange_sameDevice_None_InactiveSource() {
-        mHdmiCecLocalDevicePlayback.mPowerStateChangeOnActiveSourceLost =
-                HdmiProperties.power_state_change_on_active_source_lost_values.NONE;
+        mHdmiCecLocalDevicePlayback.mService.getHdmiCecConfig().setStringValue(
+                HdmiControlManager.CEC_SETTING_NAME_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST,
+                HdmiControlManager.POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST_NONE);
         mHdmiCecLocalDevicePlayback.setActiveSource(ADDR_TV, 0x0000,
                 "HdmiCecLocalDevicePlaybackTest");
         mStandby = false;
@@ -339,8 +341,9 @@ public class HdmiCecLocalDevicePlaybackTest {
 
     @Test
     public void handleRoutingChange_otherDevice_StandbyNow() {
-        mHdmiCecLocalDevicePlayback.mPowerStateChangeOnActiveSourceLost =
-                HdmiProperties.power_state_change_on_active_source_lost_values.STANDBY_NOW;
+        mHdmiCecLocalDevicePlayback.mService.getHdmiCecConfig().setStringValue(
+                HdmiControlManager.CEC_SETTING_NAME_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST,
+                HdmiControlManager.POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST_STANDBY_NOW);
         mHdmiCecLocalDevicePlayback.setActiveSource(mPlaybackLogicalAddress,
                 mPlaybackPhysicalAddress, "HdmiCecLocalDevicePlaybackTest");
         mStandby = false;
@@ -353,8 +356,9 @@ public class HdmiCecLocalDevicePlaybackTest {
 
     @Test
     public void handleRoutingChange_otherDevice_StandbyNow_InactiveSource() {
-        mHdmiCecLocalDevicePlayback.mPowerStateChangeOnActiveSourceLost =
-                HdmiProperties.power_state_change_on_active_source_lost_values.STANDBY_NOW;
+        mHdmiCecLocalDevicePlayback.mService.getHdmiCecConfig().setStringValue(
+                HdmiControlManager.CEC_SETTING_NAME_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST,
+                HdmiControlManager.POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST_STANDBY_NOW);
         mHdmiCecLocalDevicePlayback.setActiveSource(ADDR_TV, 0x0000,
                 "HdmiCecLocalDevicePlaybackTest");
         mStandby = false;
@@ -367,8 +371,9 @@ public class HdmiCecLocalDevicePlaybackTest {
 
     @Test
     public void handleRoutingChange_sameDevice_StandbyNow_ActiveSource() {
-        mHdmiCecLocalDevicePlayback.mPowerStateChangeOnActiveSourceLost =
-                HdmiProperties.power_state_change_on_active_source_lost_values.STANDBY_NOW;
+        mHdmiCecLocalDevicePlayback.mService.getHdmiCecConfig().setStringValue(
+                HdmiControlManager.CEC_SETTING_NAME_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST,
+                HdmiControlManager.POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST_STANDBY_NOW);
         mHdmiCecLocalDevicePlayback.setActiveSource(mPlaybackLogicalAddress,
                 mPlaybackPhysicalAddress, "HdmiCecLocalDevicePlaybackTest");
         mStandby = false;
@@ -382,8 +387,9 @@ public class HdmiCecLocalDevicePlaybackTest {
 
     @Test
     public void handleRoutingInformation_otherDevice_None() {
-        mHdmiCecLocalDevicePlayback.mPowerStateChangeOnActiveSourceLost =
-                HdmiProperties.power_state_change_on_active_source_lost_values.NONE;
+        mHdmiCecLocalDevicePlayback.mService.getHdmiCecConfig().setStringValue(
+                HdmiControlManager.CEC_SETTING_NAME_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST,
+                HdmiControlManager.POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST_NONE);
         mHdmiCecLocalDevicePlayback.setActiveSource(mPlaybackLogicalAddress,
                 mPlaybackPhysicalAddress, "HdmiCecLocalDevicePlaybackTest");
         mStandby = false;
@@ -399,8 +405,9 @@ public class HdmiCecLocalDevicePlaybackTest {
 
     @Test
     public void handleRoutingInformation_sameDevice_None_ActiveSource() {
-        mHdmiCecLocalDevicePlayback.mPowerStateChangeOnActiveSourceLost =
-                HdmiProperties.power_state_change_on_active_source_lost_values.NONE;
+        mHdmiCecLocalDevicePlayback.mService.getHdmiCecConfig().setStringValue(
+                HdmiControlManager.CEC_SETTING_NAME_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST,
+                HdmiControlManager.POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST_NONE);
         mHdmiCecLocalDevicePlayback.setActiveSource(mPlaybackLogicalAddress,
                 mPlaybackPhysicalAddress, "HdmiCecLocalDevicePlaybackTest");
         mStandby = false;
@@ -418,8 +425,9 @@ public class HdmiCecLocalDevicePlaybackTest {
 
     @Test
     public void handleRoutingInformation_sameDevice_None_InactiveSource() {
-        mHdmiCecLocalDevicePlayback.mPowerStateChangeOnActiveSourceLost =
-                HdmiProperties.power_state_change_on_active_source_lost_values.NONE;
+        mHdmiCecLocalDevicePlayback.mService.getHdmiCecConfig().setStringValue(
+                HdmiControlManager.CEC_SETTING_NAME_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST,
+                HdmiControlManager.POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST_NONE);
         mHdmiCecLocalDevicePlayback.setActiveSource(ADDR_TV, 0x0000,
                 "HdmiCecLocalDevicePlaybackTest");
         mStandby = false;
@@ -437,8 +445,9 @@ public class HdmiCecLocalDevicePlaybackTest {
 
     @Test
     public void handleRoutingInformation_otherDevice_StandbyNow() {
-        mHdmiCecLocalDevicePlayback.mPowerStateChangeOnActiveSourceLost =
-                HdmiProperties.power_state_change_on_active_source_lost_values.STANDBY_NOW;
+        mHdmiCecLocalDevicePlayback.mService.getHdmiCecConfig().setStringValue(
+                HdmiControlManager.CEC_SETTING_NAME_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST,
+                HdmiControlManager.POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST_STANDBY_NOW);
         mHdmiCecLocalDevicePlayback.setActiveSource(mPlaybackLogicalAddress,
                 mPlaybackPhysicalAddress, "HdmiCecLocalDevicePlaybackTest");
         mStandby = false;
@@ -451,8 +460,9 @@ public class HdmiCecLocalDevicePlaybackTest {
 
     @Test
     public void handleRoutingInformation_otherDevice_StandbyNow_InactiveSource() {
-        mHdmiCecLocalDevicePlayback.mPowerStateChangeOnActiveSourceLost =
-                HdmiProperties.power_state_change_on_active_source_lost_values.STANDBY_NOW;
+        mHdmiCecLocalDevicePlayback.mService.getHdmiCecConfig().setStringValue(
+                HdmiControlManager.CEC_SETTING_NAME_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST,
+                HdmiControlManager.POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST_STANDBY_NOW);
         mHdmiCecLocalDevicePlayback.setActiveSource(ADDR_TV, 0x0000,
                 "HdmiCecLocalDevicePlaybackTest");
         mStandby = false;
@@ -465,8 +475,9 @@ public class HdmiCecLocalDevicePlaybackTest {
 
     @Test
     public void handleRoutingInformation_sameDevice_StandbyNow_ActiveSource() {
-        mHdmiCecLocalDevicePlayback.mPowerStateChangeOnActiveSourceLost =
-                HdmiProperties.power_state_change_on_active_source_lost_values.STANDBY_NOW;
+        mHdmiCecLocalDevicePlayback.mService.getHdmiCecConfig().setStringValue(
+                HdmiControlManager.CEC_SETTING_NAME_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST,
+                HdmiControlManager.POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST_STANDBY_NOW);
         mHdmiCecLocalDevicePlayback.setActiveSource(mPlaybackLogicalAddress,
                 mPlaybackPhysicalAddress, "HdmiCecLocalDevicePlaybackTest");
         mStandby = false;
@@ -536,8 +547,8 @@ public class HdmiCecLocalDevicePlaybackTest {
 
     @Test
     public void handleOnStandby_ScreenOff_NotActiveSource_ToTv() {
-        mHdmiCecLocalDevicePlayback.mService.writeStringSetting(
-                Global.HDMI_CONTROL_SEND_STANDBY_ON_SLEEP,
+        mHdmiCecLocalDevicePlayback.mService.getHdmiCecConfig().setStringValue(
+                HdmiControlManager.CEC_SETTING_NAME_SEND_STANDBY_ON_SLEEP,
                 HdmiControlManager.SEND_STANDBY_ON_SLEEP_TO_TV);
         mHdmiCecLocalDevicePlayback.setActiveSource(ADDR_TV, 0x0000,
                 "HdmiCecLocalDevicePlaybackTest");
@@ -556,8 +567,8 @@ public class HdmiCecLocalDevicePlaybackTest {
 
     @Test
     public void handleOnStandby_ScreenOff_NotActiveSource_Broadcast() {
-        mHdmiCecLocalDevicePlayback.mService.writeStringSetting(
-                Global.HDMI_CONTROL_SEND_STANDBY_ON_SLEEP,
+        mHdmiCecLocalDevicePlayback.mService.getHdmiCecConfig().setStringValue(
+                HdmiControlManager.CEC_SETTING_NAME_SEND_STANDBY_ON_SLEEP,
                 HdmiControlManager.SEND_STANDBY_ON_SLEEP_BROADCAST);
         mHdmiCecLocalDevicePlayback.setActiveSource(ADDR_TV, 0x0000,
                 "HdmiCecLocalDevicePlaybackTest");
@@ -576,8 +587,8 @@ public class HdmiCecLocalDevicePlaybackTest {
 
     @Test
     public void handleOnStandby_ScreenOff_NotActiveSource_None() {
-        mHdmiCecLocalDevicePlayback.mService.writeStringSetting(
-                Global.HDMI_CONTROL_SEND_STANDBY_ON_SLEEP,
+        mHdmiCecLocalDevicePlayback.mService.getHdmiCecConfig().setStringValue(
+                HdmiControlManager.CEC_SETTING_NAME_SEND_STANDBY_ON_SLEEP,
                 HdmiControlManager.SEND_STANDBY_ON_SLEEP_NONE);
         mHdmiCecLocalDevicePlayback.setActiveSource(ADDR_TV, 0x0000,
                 "HdmiCecLocalDevicePlaybackTest");
@@ -596,8 +607,8 @@ public class HdmiCecLocalDevicePlaybackTest {
 
     @Test
     public void handleOnStandby_ScreenOff_ActiveSource_ToTv() {
-        mHdmiCecLocalDevicePlayback.mService.writeStringSetting(
-                Global.HDMI_CONTROL_SEND_STANDBY_ON_SLEEP,
+        mHdmiCecLocalDevicePlayback.mService.getHdmiCecConfig().setStringValue(
+                HdmiControlManager.CEC_SETTING_NAME_SEND_STANDBY_ON_SLEEP,
                 HdmiControlManager.SEND_STANDBY_ON_SLEEP_TO_TV);
         mHdmiCecLocalDevicePlayback.setActiveSource(mPlaybackLogicalAddress,
                 mPlaybackPhysicalAddress, "HdmiCecLocalDevicePlaybackTest");
@@ -616,8 +627,8 @@ public class HdmiCecLocalDevicePlaybackTest {
 
     @Test
     public void handleOnStandby_ScreenOff_ActiveSource_Broadcast() {
-        mHdmiCecLocalDevicePlayback.mService.writeStringSetting(
-                Global.HDMI_CONTROL_SEND_STANDBY_ON_SLEEP,
+        mHdmiCecLocalDevicePlayback.mService.getHdmiCecConfig().setStringValue(
+                HdmiControlManager.CEC_SETTING_NAME_SEND_STANDBY_ON_SLEEP,
                 HdmiControlManager.SEND_STANDBY_ON_SLEEP_BROADCAST);
         mHdmiCecLocalDevicePlayback.setActiveSource(mPlaybackLogicalAddress,
                 mPlaybackPhysicalAddress, "HdmiCecLocalDevicePlaybackTest");
@@ -636,8 +647,8 @@ public class HdmiCecLocalDevicePlaybackTest {
 
     @Test
     public void handleOnStandby_ScreenOff_ActiveSource_None() {
-        mHdmiCecLocalDevicePlayback.mService.writeStringSetting(
-                Global.HDMI_CONTROL_SEND_STANDBY_ON_SLEEP,
+        mHdmiCecLocalDevicePlayback.mService.getHdmiCecConfig().setStringValue(
+                HdmiControlManager.CEC_SETTING_NAME_SEND_STANDBY_ON_SLEEP,
                 HdmiControlManager.SEND_STANDBY_ON_SLEEP_NONE);
         mHdmiCecLocalDevicePlayback.setActiveSource(mPlaybackLogicalAddress,
                 mPlaybackPhysicalAddress, "HdmiCecLocalDevicePlaybackTest");
@@ -741,8 +752,9 @@ public class HdmiCecLocalDevicePlaybackTest {
 
     @Test
     public void handleActiveSource_ActiveSource_None() {
-        mHdmiCecLocalDevicePlayback.mPowerStateChangeOnActiveSourceLost =
-                HdmiProperties.power_state_change_on_active_source_lost_values.NONE;
+        mHdmiCecLocalDevicePlayback.mService.getHdmiCecConfig().setStringValue(
+                HdmiControlManager.CEC_SETTING_NAME_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST,
+                HdmiControlManager.POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST_NONE);
         mStandby = false;
         HdmiCecMessage message = HdmiCecMessageBuilder.buildActiveSource(mPlaybackLogicalAddress,
                 mPlaybackPhysicalAddress);
@@ -758,8 +770,9 @@ public class HdmiCecLocalDevicePlaybackTest {
 
     @Test
     public void handleActiveSource_notActiveSource_None() {
-        mHdmiCecLocalDevicePlayback.mPowerStateChangeOnActiveSourceLost =
-                HdmiProperties.power_state_change_on_active_source_lost_values.NONE;
+        mHdmiCecLocalDevicePlayback.mService.getHdmiCecConfig().setStringValue(
+                HdmiControlManager.CEC_SETTING_NAME_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST,
+                HdmiControlManager.POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST_NONE);
         mStandby = false;
         HdmiCecMessage message = HdmiCecMessageBuilder.buildActiveSource(ADDR_TV, 0x0000);
         assertThat(mHdmiCecLocalDevicePlayback.handleActiveSource(message)).isTrue();
@@ -774,8 +787,9 @@ public class HdmiCecLocalDevicePlaybackTest {
 
     @Test
     public void handleActiveSource_ActiveSource_StandbyNow() {
-        mHdmiCecLocalDevicePlayback.mPowerStateChangeOnActiveSourceLost =
-                HdmiProperties.power_state_change_on_active_source_lost_values.STANDBY_NOW;
+        mHdmiCecLocalDevicePlayback.mService.getHdmiCecConfig().setStringValue(
+                HdmiControlManager.CEC_SETTING_NAME_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST,
+                HdmiControlManager.POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST_STANDBY_NOW);
         mStandby = false;
         HdmiCecMessage message = HdmiCecMessageBuilder.buildActiveSource(mPlaybackLogicalAddress,
                 mPlaybackPhysicalAddress);
@@ -787,8 +801,9 @@ public class HdmiCecLocalDevicePlaybackTest {
 
     @Test
     public void handleActiveSource_notActiveSource_StandbyNow() {
-        mHdmiCecLocalDevicePlayback.mPowerStateChangeOnActiveSourceLost =
-                HdmiProperties.power_state_change_on_active_source_lost_values.STANDBY_NOW;
+        mHdmiCecLocalDevicePlayback.mService.getHdmiCecConfig().setStringValue(
+                HdmiControlManager.CEC_SETTING_NAME_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST,
+                HdmiControlManager.POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST_STANDBY_NOW);
         mStandby = false;
         HdmiCecMessage message = HdmiCecMessageBuilder.buildActiveSource(ADDR_TV, 0x0000);
         assertThat(mHdmiCecLocalDevicePlayback.handleActiveSource(message)).isTrue();
@@ -1027,8 +1042,9 @@ public class HdmiCecLocalDevicePlaybackTest {
 
     @Test
     public void handleSetStreamPath_otherDevice_None() {
-        mHdmiCecLocalDevicePlayback.mPowerStateChangeOnActiveSourceLost =
-                HdmiProperties.power_state_change_on_active_source_lost_values.NONE;
+        mHdmiCecLocalDevicePlayback.mService.getHdmiCecConfig().setStringValue(
+                HdmiControlManager.CEC_SETTING_NAME_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST,
+                HdmiControlManager.POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST_NONE);
         mHdmiCecLocalDevicePlayback.setActiveSource(mPlaybackLogicalAddress,
                 mPlaybackPhysicalAddress, "HdmiCecLocalDevicePlaybackTest");
         mStandby = false;
@@ -1045,8 +1061,9 @@ public class HdmiCecLocalDevicePlaybackTest {
 
     @Test
     public void handleSetStreamPath_otherDevice_StandbyNow() {
-        mHdmiCecLocalDevicePlayback.mPowerStateChangeOnActiveSourceLost =
-                HdmiProperties.power_state_change_on_active_source_lost_values.STANDBY_NOW;
+        mHdmiCecLocalDevicePlayback.mService.getHdmiCecConfig().setStringValue(
+                HdmiControlManager.CEC_SETTING_NAME_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST,
+                HdmiControlManager.POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST_STANDBY_NOW);
         mHdmiCecLocalDevicePlayback.setActiveSource(mPlaybackLogicalAddress,
                 mPlaybackPhysicalAddress, "HdmiCecLocalDevicePlaybackTest");
         mStandby = false;
@@ -1059,8 +1076,9 @@ public class HdmiCecLocalDevicePlaybackTest {
 
     @Test
     public void handleSetStreamPath_otherDevice_StandbyNow_InactiveSource() {
-        mHdmiCecLocalDevicePlayback.mPowerStateChangeOnActiveSourceLost =
-                HdmiProperties.power_state_change_on_active_source_lost_values.STANDBY_NOW;
+        mHdmiCecLocalDevicePlayback.mService.getHdmiCecConfig().setStringValue(
+                HdmiControlManager.CEC_SETTING_NAME_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST,
+                HdmiControlManager.POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST_STANDBY_NOW);
         mHdmiCecLocalDevicePlayback.setActiveSource(ADDR_TV, 0x0000,
                 "HdmiCecLocalDevicePlaybackTest");
         mStandby = false;
@@ -1073,8 +1091,8 @@ public class HdmiCecLocalDevicePlaybackTest {
 
     @Test
     public void oneTouchPlay_SendStandbyOnSleepToTv() {
-        mHdmiCecLocalDevicePlayback.mService.writeStringSetting(
-                Global.HDMI_CONTROL_SEND_STANDBY_ON_SLEEP,
+        mHdmiCecLocalDevicePlayback.mService.getHdmiCecConfig().setStringValue(
+                HdmiControlManager.CEC_SETTING_NAME_SEND_STANDBY_ON_SLEEP,
                 HdmiControlManager.SEND_STANDBY_ON_SLEEP_TO_TV);
         mHdmiControlService.oneTouchPlay(new IHdmiControlCallback.Stub() {
             @Override
@@ -1096,8 +1114,8 @@ public class HdmiCecLocalDevicePlaybackTest {
 
     @Test
     public void oneTouchPlay_SendStandbyOnSleepBroadcast() {
-        mHdmiCecLocalDevicePlayback.mService.writeStringSetting(
-                Global.HDMI_CONTROL_SEND_STANDBY_ON_SLEEP,
+        mHdmiCecLocalDevicePlayback.mService.getHdmiCecConfig().setStringValue(
+                HdmiControlManager.CEC_SETTING_NAME_SEND_STANDBY_ON_SLEEP,
                 HdmiControlManager.SEND_STANDBY_ON_SLEEP_BROADCAST);
         mHdmiControlService.oneTouchPlay(new IHdmiControlCallback.Stub() {
             @Override
@@ -1119,8 +1137,8 @@ public class HdmiCecLocalDevicePlaybackTest {
 
     @Test
     public void oneTouchPlay_SendStandbyOnSleepNone() {
-        mHdmiCecLocalDevicePlayback.mService.writeStringSetting(
-                Global.HDMI_CONTROL_SEND_STANDBY_ON_SLEEP,
+        mHdmiCecLocalDevicePlayback.mService.getHdmiCecConfig().setStringValue(
+                HdmiControlManager.CEC_SETTING_NAME_SEND_STANDBY_ON_SLEEP,
                 HdmiControlManager.SEND_STANDBY_ON_SLEEP_NONE);
         mHdmiControlService.oneTouchPlay(new IHdmiControlCallback.Stub() {
             @Override

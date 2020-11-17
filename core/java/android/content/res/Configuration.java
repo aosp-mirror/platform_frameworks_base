@@ -19,7 +19,7 @@ package android.content.res;
 import static android.content.ConfigurationProto.COLOR_MODE;
 import static android.content.ConfigurationProto.DENSITY_DPI;
 import static android.content.ConfigurationProto.FONT_SCALE;
-import static android.content.ConfigurationProto.FORCE_BOLD_TEXT;
+import static android.content.ConfigurationProto.FONT_WEIGHT_ADJUSTMENT;
 import static android.content.ConfigurationProto.HARD_KEYBOARD_HIDDEN;
 import static android.content.ConfigurationProto.KEYBOARD;
 import static android.content.ConfigurationProto.KEYBOARD_HIDDEN;
@@ -51,6 +51,7 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.content.LocaleProto;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ActivityInfo.Config;
+import android.graphics.Typeface;
 import android.os.Build;
 import android.os.LocaleList;
 import android.os.Parcel;
@@ -333,24 +334,22 @@ public final class Configuration implements Parcelable, Comparable<Configuration
     public int screenLayout;
 
     /**
-     * An undefined forceBoldText.
+     * An undefined fontWeightAdjustment.
      */
-    public static final int FORCE_BOLD_TEXT_UNDEFINED = 0;
+    public static final int FONT_WEIGHT_ADJUSTMENT_UNDEFINED = Integer.MAX_VALUE;
 
     /**
-     * Text is not bold.
+     * Adjustment in text font weight. Used to reflect the current user preference for increasing
+     * font weight.
+     *
+     * <p> If the text font weight is less than the minimum of 1, 1 will be used. If the font weight
+     * exceeds the maximum of 1000, 1000 will be used.
+     *
+     * @see android.graphics.Typeface#create(Typeface, int, boolean)
+     * @see android.graphics.fonts.FontStyle#FONT_WEIGHT_MIN
+     * @see android.graphics.fonts.FontStyle#FONT_WEIGHT_MAX
      */
-    public static final int FORCE_BOLD_TEXT_NO = 1;
-
-    /**
-     * Text is bold.
-     */
-    public static final int FORCE_BOLD_TEXT_YES = 2;
-
-    /**
-     * Current user preference for displaying all text in bold.
-     */
-    public int forceBoldText;
+    public int fontWeightAdjustment;
 
     /**
      * Configuration relating to the windowing state of the object associated with this
@@ -488,7 +487,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         if ((diff & ActivityInfo.CONFIG_WINDOW_CONFIGURATION) != 0) {
             list.add("CONFIG_WINDOW_CONFIGURATION");
         }
-        if ((diff & ActivityInfo.CONFIG_FORCE_BOLD_TEXT) != 0) {
+        if ((diff & ActivityInfo.CONFIG_FONT_WEIGHT_ADJUSTMENT) != 0) {
             list.add("CONFIG_AUTO_BOLD_TEXT");
         }
         StringBuilder builder = new StringBuilder("{");
@@ -981,7 +980,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         assetsSeq = o.assetsSeq;
         seq = o.seq;
         windowConfiguration.setTo(o.windowConfiguration);
-        forceBoldText = o.forceBoldText;
+        fontWeightAdjustment = o.fontWeightAdjustment;
     }
 
     public String toString() {
@@ -1137,11 +1136,11 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         if (seq != 0) {
             sb.append(" s.").append(seq);
         }
-        if (forceBoldText != FORCE_BOLD_TEXT_UNDEFINED) {
-            sb.append(" boldText=");
-            sb.append(forceBoldText);
+        if (fontWeightAdjustment != FONT_WEIGHT_ADJUSTMENT_UNDEFINED) {
+            sb.append(" fontWeightAdjustment=");
+            sb.append(fontWeightAdjustment);
         } else {
-            sb.append(" ?boldText");
+            sb.append(" ?fontWeightAdjustment");
         }
         sb.append('}');
         return sb.toString();
@@ -1183,7 +1182,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
             if (!persisted && windowConfiguration != null) {
                 windowConfiguration.dumpDebug(protoOutputStream, WINDOW_CONFIGURATION);
             }
-            protoOutputStream.write(FORCE_BOLD_TEXT, forceBoldText);
+            protoOutputStream.write(FONT_WEIGHT_ADJUSTMENT, fontWeightAdjustment);
         }
         protoOutputStream.write(ORIENTATION, orientation);
         protoOutputStream.write(SCREEN_WIDTH_DP, screenWidthDp);
@@ -1347,8 +1346,8 @@ public final class Configuration implements Parcelable, Comparable<Configuration
                             Slog.e(TAG, "error parsing locale list in configuration.", e);
                         }
                         break;
-                    case (int) FORCE_BOLD_TEXT:
-                        forceBoldText = protoInputStream.readInt(FORCE_BOLD_TEXT);
+                    case (int) FONT_WEIGHT_ADJUSTMENT:
+                        fontWeightAdjustment = protoInputStream.readInt(FONT_WEIGHT_ADJUSTMENT);
                         break;
                 }
             }
@@ -1445,7 +1444,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         assetsSeq = ASSETS_SEQ_UNDEFINED;
         seq = 0;
         windowConfiguration.setToDefaults();
-        forceBoldText = FORCE_BOLD_TEXT_UNDEFINED;
+        fontWeightAdjustment = FONT_WEIGHT_ADJUSTMENT_UNDEFINED;
     }
 
     /**
@@ -1643,10 +1642,10 @@ public final class Configuration implements Parcelable, Comparable<Configuration
             changed |= ActivityInfo.CONFIG_WINDOW_CONFIGURATION;
         }
 
-        if (delta.forceBoldText != FORCE_BOLD_TEXT_UNDEFINED
-                && delta.forceBoldText != forceBoldText) {
-            changed |= ActivityInfo.CONFIG_FORCE_BOLD_TEXT;
-            forceBoldText = delta.forceBoldText;
+        if (delta.fontWeightAdjustment != FONT_WEIGHT_ADJUSTMENT_UNDEFINED
+                && delta.fontWeightAdjustment != fontWeightAdjustment) {
+            changed |= ActivityInfo.CONFIG_FONT_WEIGHT_ADJUSTMENT;
+            fontWeightAdjustment = delta.fontWeightAdjustment;
         }
 
         return changed;
@@ -1727,8 +1726,8 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         if ((mask & ActivityInfo.CONFIG_WINDOW_CONFIGURATION) != 0) {
             windowConfiguration.setTo(delta.windowConfiguration, windowMask);
         }
-        if ((mask & ActivityInfo.CONFIG_FORCE_BOLD_TEXT) != 0) {
-            forceBoldText = delta.forceBoldText;
+        if ((mask & ActivityInfo.CONFIG_FONT_WEIGHT_ADJUSTMENT) != 0) {
+            fontWeightAdjustment = delta.fontWeightAdjustment;
         }
     }
 
@@ -1762,8 +1761,8 @@ public final class Configuration implements Parcelable, Comparable<Configuration
      * PackageManager.ActivityInfo.CONFIG_SMALLEST_SCREEN_SIZE}.
      * {@link android.content.pm.ActivityInfo#CONFIG_LAYOUT_DIRECTION
      * PackageManager.ActivityInfo.CONFIG_LAYOUT_DIRECTION}.
-     * {@link android.content.pm.ActivityInfo#CONFIG_FORCE_BOLD_TEXT
-     *  PackageManager.ActivityInfo.CONFIG_FORCE_BOLD_TEXT.
+     * {@link android.content.pm.ActivityInfo#CONFIG_FONT_WEIGHT_ADJUSTMENT
+     *  PackageManager.ActivityInfo.CONFIG_FONT_WEIGHT_ADJUSTMENT.
      */
     public int diff(Configuration delta) {
         return diff(delta, false /* compareUndefined */, false /* publicOnly */);
@@ -1887,9 +1886,9 @@ public final class Configuration implements Parcelable, Comparable<Configuration
             changed |= ActivityInfo.CONFIG_WINDOW_CONFIGURATION;
         }
 
-        if ((compareUndefined || delta.forceBoldText != FORCE_BOLD_TEXT_UNDEFINED)
-                && forceBoldText != delta.forceBoldText) {
-            changed |= ActivityInfo.CONFIG_FORCE_BOLD_TEXT;
+        if ((compareUndefined || delta.fontWeightAdjustment != FONT_WEIGHT_ADJUSTMENT_UNDEFINED)
+                && fontWeightAdjustment != delta.fontWeightAdjustment) {
+            changed |= ActivityInfo.CONFIG_FONT_WEIGHT_ADJUSTMENT;
         }
         return changed;
     }
@@ -1984,7 +1983,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         dest.writeValue(windowConfiguration);
         dest.writeInt(assetsSeq);
         dest.writeInt(seq);
-        dest.writeInt(forceBoldText);
+        dest.writeInt(fontWeightAdjustment);
     }
 
     public void readFromParcel(Parcel source) {
@@ -2016,7 +2015,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         windowConfiguration.setTo((WindowConfiguration) source.readValue(null));
         assetsSeq = source.readInt();
         seq = source.readInt();
-        forceBoldText = source.readInt();
+        fontWeightAdjustment = source.readInt();
     }
 
     public static final @android.annotation.NonNull Parcelable.Creator<Configuration> CREATOR
@@ -2115,7 +2114,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         if (n != 0) return n;
         n = windowConfiguration.compareTo(that.windowConfiguration);
         if (n != 0) return n;
-        n = this.forceBoldText - that.forceBoldText;
+        n = this.fontWeightAdjustment - that.fontWeightAdjustment;
         if (n != 0) return n;
 
         // if (n != 0) return n;
@@ -2157,7 +2156,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         result = 31 * result + smallestScreenWidthDp;
         result = 31 * result + densityDpi;
         result = 31 * result + assetsSeq;
-        result = 31 * result + forceBoldText;
+        result = 31 * result + fontWeightAdjustment;
         return result;
     }
 
@@ -2731,8 +2730,8 @@ public final class Configuration implements Parcelable, Comparable<Configuration
             delta.windowConfiguration.setTo(change.windowConfiguration);
         }
 
-        if (base.forceBoldText != change.forceBoldText) {
-            delta.forceBoldText = change.forceBoldText;
+        if (base.fontWeightAdjustment != change.fontWeightAdjustment) {
+            delta.fontWeightAdjustment = change.fontWeightAdjustment;
         }
         return delta;
     }
@@ -2757,7 +2756,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
     private static final String XML_ATTR_SMALLEST_WIDTH = "sw";
     private static final String XML_ATTR_DENSITY = "density";
     private static final String XML_ATTR_APP_BOUNDS = "app_bounds";
-    private static final String XML_ATTR_FORCE_BOLD_TEXT = "forceBoldText";
+    private static final String XML_ATTR_FONT_WEIGHT_ADJUSTMENT = "fontWeightAdjustment";
 
     /**
      * Reads the attributes corresponding to Configuration member fields from the Xml parser.
@@ -2807,8 +2806,8 @@ public final class Configuration implements Parcelable, Comparable<Configuration
                         SMALLEST_SCREEN_WIDTH_DP_UNDEFINED);
         configOut.densityDpi = XmlUtils.readIntAttribute(parser, XML_ATTR_DENSITY,
                 DENSITY_DPI_UNDEFINED);
-        configOut.forceBoldText = XmlUtils.readIntAttribute(parser, XML_ATTR_FORCE_BOLD_TEXT,
-                FORCE_BOLD_TEXT_UNDEFINED);
+        configOut.fontWeightAdjustment = XmlUtils.readIntAttribute(parser,
+                XML_ATTR_FONT_WEIGHT_ADJUSTMENT, FONT_WEIGHT_ADJUSTMENT_UNDEFINED);
 
         // For persistence, we don't care about assetsSeq and WindowConfiguration, so do not read it
         // out.

@@ -16,8 +16,11 @@
 
 package com.android.server.biometrics.sensors.fingerprint;
 
+import android.annotation.NonNull;
 import android.hardware.biometrics.IBiometricAuthenticator;
 import android.hardware.biometrics.IBiometricSensorReceiver;
+import android.hardware.biometrics.ITestSession;
+import android.hardware.biometrics.SensorPropertiesInternal;
 import android.hardware.fingerprint.IFingerprintService;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -39,12 +42,28 @@ public final class FingerprintAuthenticator extends IBiometricAuthenticator.Stub
     }
 
     @Override
+    public ITestSession createTestSession(@NonNull String opPackageName) throws RemoteException {
+        return mFingerprintService.createTestSession(mSensorId, opPackageName);
+    }
+
+    @Override
+    public SensorPropertiesInternal getSensorProperties(@NonNull String opPackageName)
+            throws RemoteException {
+        return mFingerprintService.getSensorProperties(mSensorId, opPackageName);
+    }
+
+    @Override
+    public byte[] dumpSensorServiceStateProto() throws RemoteException {
+        return mFingerprintService.dumpSensorServiceStateProto();
+    }
+
+    @Override
     public void prepareForAuthentication(boolean requireConfirmation, IBinder token,
             long operationId, int userId, IBiometricSensorReceiver sensorReceiver,
-            String opPackageName, int cookie, int callingUid, int callingPid, int callingUserId)
+            String opPackageName, int cookie)
             throws RemoteException {
         mFingerprintService.prepareForAuthentication(mSensorId, token, operationId, userId,
-                sensorReceiver, opPackageName, cookie, callingUid, callingPid, callingUserId);
+                sensorReceiver, opPackageName, cookie);
     }
 
     @Override
@@ -53,10 +72,9 @@ public final class FingerprintAuthenticator extends IBiometricAuthenticator.Stub
     }
 
     @Override
-    public void cancelAuthenticationFromService(IBinder token, String opPackageName, int callingUid,
-            int callingPid, int callingUserId) throws RemoteException {
-        mFingerprintService.cancelAuthenticationFromService(mSensorId, token, opPackageName,
-                callingUid, callingPid, callingUserId);
+    public void cancelAuthenticationFromService(IBinder token, String opPackageName)
+            throws RemoteException {
+        mFingerprintService.cancelAuthenticationFromService(mSensorId, token, opPackageName);
     }
 
     @Override

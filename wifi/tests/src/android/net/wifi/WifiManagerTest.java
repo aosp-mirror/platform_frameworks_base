@@ -1634,6 +1634,24 @@ public class WifiManagerTest {
     }
 
     /**
+     * Verify the call to startTemporarilyDisablingAllNonCarrierMergedWifi goes to WifiServiceImpl.
+     */
+    @Test
+    public void testStartTemporarilyDisablingAllNonCarrierMergedWifi() throws Exception {
+        mWifiManager.startTemporarilyDisablingAllNonCarrierMergedWifi(1);
+        verify(mWifiService).startTemporarilyDisablingAllNonCarrierMergedWifi(1);
+    }
+
+    /**
+     * Verify the call to stopTemporarilyDisablingAllNonCarrierMergedWifi goes to WifiServiceImpl.
+     */
+    @Test
+    public void testStopTemporarilyDisablingAllNonCarrierMergedWifi() throws Exception {
+        mWifiManager.stopTemporarilyDisablingAllNonCarrierMergedWifi();
+        verify(mWifiService).stopTemporarilyDisablingAllNonCarrierMergedWifi();
+    }
+
+    /**
      * Verify the call to addOnWifiUsabilityStatsListener goes to WifiServiceImpl.
      */
     @Test

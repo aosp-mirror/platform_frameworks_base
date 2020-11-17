@@ -638,6 +638,31 @@ public class UsbService extends IUsbManager.Stub {
     }
 
     @Override
+    public int getCurrentUsbSpeed() {
+        Preconditions.checkNotNull(mDeviceManager, "DeviceManager must not be null");
+
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            return mDeviceManager.getCurrentUsbSpeed();
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    @Override
+    public int getGadgetHalVersion() {
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);
+        Preconditions.checkNotNull(mDeviceManager, "DeviceManager must not be null");
+
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            return mDeviceManager.getGadgetHalVersion();
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    @Override
     public void resetUsbGadget() {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);
         Preconditions.checkNotNull(mDeviceManager, "DeviceManager must not be null");

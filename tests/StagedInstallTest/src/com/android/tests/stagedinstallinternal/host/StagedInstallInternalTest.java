@@ -30,6 +30,7 @@ import com.android.compatibility.common.tradefed.build.CompatibilityBuildHelper;
 import com.android.ddmlib.Log;
 import com.android.tests.rollback.host.AbandonSessionsRule;
 import com.android.tests.util.ModuleTestUtils;
+import com.android.tradefed.device.DeviceNotAvailableException;
 import com.android.tradefed.testtype.DeviceJUnit4ClassRunner;
 import com.android.tradefed.testtype.junit4.BaseHostJUnit4Test;
 import com.android.tradefed.util.CommandResult;
@@ -250,9 +251,40 @@ public class StagedInstallInternalTest extends BaseHostJUnit4Test {
         assertThat(after).isEqualTo(before);
     }
 
-    private List<String> getStagingDirectories() {
+    @Test
+    public void testStagedInstallationShouldCleanUpOnValidationFailure() throws Exception {
+        List<String> before = getStagingDirectories();
+        runPhase("testStagedInstallationShouldCleanUpOnValidationFailure");
+        List<String> after = getStagingDirectories();
+        assertThat(after).isEqualTo(before);
+    }
+
+    @Test
+    public void testStagedInstallationShouldCleanUpOnValidationFailureMultiPackage()
+            throws Exception {
+        List<String> before = getStagingDirectories();
+        runPhase("testStagedInstallationShouldCleanUpOnValidationFailureMultiPackage");
+        List<String> after = getStagingDirectories();
+        assertThat(after).isEqualTo(before);
+    }
+
+    @Test
+    public void testOrphanedStagingDirectoryGetsCleanedUpOnReboot() throws Exception {
+        //create random directories in /data/app-staging folder
+        getDevice().enableAdbRoot();
+        getDevice().executeShellCommand("mkdir /data/app-staging/session_123");
+        getDevice().executeShellCommand("mkdir /data/app-staging/random_name");
+        getDevice().disableAdbRoot();
+
+        assertThat(getStagingDirectories()).isNotEmpty();
+        getDevice().reboot();
+        assertThat(getStagingDirectories()).isEmpty();
+    }
+
+    private List<String> getStagingDirectories() throws DeviceNotAvailableException {
         String baseDir = "/data/app-staging";
         try {
+            getDevice().enableAdbRoot();
             return getDevice().getFileEntry(baseDir).getChildren(false)
                     .stream().filter(entry -> entry.getName().matches("session_\\d+"))
                     .map(entry -> entry.getName())
@@ -260,6 +292,8 @@ public class StagedInstallInternalTest extends BaseHostJUnit4Test {
         } catch (Exception e) {
             // Return an empty list if any error
             return Collections.EMPTY_LIST;
+        } finally {
+            getDevice().disableAdbRoot();
         }
     }
 

@@ -226,6 +226,12 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
         return props;
     }
 
+    @NonNull
+    @Override
+    public FingerprintSensorPropertiesInternal getSensorProperties(int sensorId) {
+        return mSensors.get(sensorId).getSensorProperties();
+    }
+
     private void scheduleLoadAuthenticatorIds(int sensorId) {
         for (UserInfo user : UserManager.get(mContext).getAliveUsers()) {
             scheduleLoadAuthenticatorIdsForUser(sensorId, user.id);

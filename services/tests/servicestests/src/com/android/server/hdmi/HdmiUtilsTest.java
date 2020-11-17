@@ -19,6 +19,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.testng.Assert.assertThrows;
 
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiDeviceInfo;
@@ -613,5 +614,52 @@ public class HdmiUtilsTest {
                 Constants.ADDR_BACKUP_2)).isTrue();
         assertThat(HdmiUtils.isEligibleAddressForCecVersion(HdmiControlManager.HDMI_CEC_VERSION_2_0,
                 Constants.ADDR_SPECIFIC_USE)).isTrue();
+    }
+
+    @Test
+    public void testBuildMessage_validation() {
+        assertThrows(IllegalArgumentException.class, () -> HdmiUtils.buildMessage("04"));
+        assertThrows(IllegalArgumentException.class, () -> HdmiUtils.buildMessage("041"));
+        assertThrows(IllegalArgumentException.class, () -> HdmiUtils.buildMessage("041:00"));
+        assertThrows(IllegalArgumentException.class, () -> HdmiUtils.buildMessage("04:000"));
+        assertThrows(IllegalArgumentException.class, () -> HdmiUtils.buildMessage("04:00:000"));
+        assertThrows(IllegalArgumentException.class, () -> HdmiUtils.buildMessage("04:00:00:000"));
+
+        assertThrows(NumberFormatException.class, () -> HdmiUtils.buildMessage("G0:00"));
+        assertThrows(NumberFormatException.class, () -> HdmiUtils.buildMessage("0G:00"));
+        assertThrows(NumberFormatException.class, () -> HdmiUtils.buildMessage("04:G0"));
+        assertThrows(NumberFormatException.class, () -> HdmiUtils.buildMessage("04:00:G0"));
+        assertThrows(NumberFormatException.class, () -> HdmiUtils.buildMessage("04:00:0G"));
+    }
+
+    @Test
+    public void testBuildMessage_source() {
+        assertThat(HdmiUtils.buildMessage("04:00").getSource()).isEqualTo(Constants.ADDR_TV);
+        assertThat(HdmiUtils.buildMessage("40:00").getSource()).isEqualTo(
+                Constants.ADDR_PLAYBACK_1);
+    }
+
+    @Test
+    public void testBuildMessage_destination() {
+        assertThat(HdmiUtils.buildMessage("04:00").getDestination()).isEqualTo(
+                Constants.ADDR_PLAYBACK_1);
+        assertThat(HdmiUtils.buildMessage("40:00").getDestination()).isEqualTo(Constants.ADDR_TV);
+    }
+
+    @Test
+    public void testBuildMessage_opcode() {
+        assertThat(HdmiUtils.buildMessage("04:00").getOpcode()).isEqualTo(
+                Constants.MESSAGE_FEATURE_ABORT);
+        assertThat(HdmiUtils.buildMessage("04:36").getOpcode()).isEqualTo(
+                Constants.MESSAGE_STANDBY);
+        assertThat(HdmiUtils.buildMessage("04:FF").getOpcode()).isEqualTo(
+                Integer.parseInt("FF", 16));
+    }
+
+    @Test
+    public void testBuildMessage_params() {
+        assertThat(HdmiUtils.buildMessage("04:00:00").getParams()).isEqualTo(new byte[]{0x00});
+        assertThat(HdmiUtils.buildMessage("40:32:65:6E:67").getParams()).isEqualTo(
+                new byte[]{0x65, 0x6E, 0x67});
     }
 }

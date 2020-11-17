@@ -63,7 +63,7 @@ import com.android.server.LocalServices;
 import com.android.server.location.gnss.GnssAntennaInfoProvider.GnssAntennaInfoProviderNative;
 import com.android.server.location.gnss.GnssMeasurementsProvider.GnssMeasurementProviderNative;
 import com.android.server.location.gnss.GnssNavigationMessageProvider.GnssNavigationMessageProviderNative;
-import com.android.server.location.util.TestInjector;
+import com.android.server.location.injector.TestInjector;
 
 import org.junit.After;
 import org.junit.Before;

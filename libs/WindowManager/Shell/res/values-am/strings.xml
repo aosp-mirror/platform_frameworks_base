@@ -28,8 +28,7 @@
     <string name="pip_skip_to_next" msgid="8403429188794867653">"ወደ ቀጣይ ዝለል"</string>
     <string name="pip_skip_to_prev" msgid="7172158111196394092">"ወደ ቀዳሚ ዝለል"</string>
     <string name="accessibility_action_pip_resize" msgid="4623966104749543182">"መጠን ይቀይሩ"</string>
-    <!-- no translation found for dock_forced_resizable (1749750436092293116) -->
-    <skip />
+    <string name="dock_forced_resizable" msgid="1749750436092293116">"መተግበሪያ ከተከፈለ ማያ ገጽ ጋር ላይሠራ ይችላል"</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"መተግበሪያው የተከፈለ ማያ ገጽን አይደግፍም።"</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"መተግበሪያ በሁለተኛ ማሳያ ላይ ላይሠራ ይችላል።"</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"መተግበሪያ በሁለተኛ ማሳያዎች ላይ ማስጀመርን አይደግፍም።"</string>
@@ -44,14 +43,10 @@
     <string name="accessibility_action_divider_top_50" msgid="8649582798829048946">"ከላይ 50%"</string>
     <string name="accessibility_action_divider_top_30" msgid="3572788224908570257">"ከላይ 30%"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="2831868345092314060">"የታች ሙሉ ማያ ገጽ"</string>
-    <!-- no translation found for one_handed_tutorial_title (4583241688067426350) -->
-    <skip />
-    <!-- no translation found for one_handed_tutorial_description (3486582858591353067) -->
-    <skip />
-    <!-- no translation found for accessibility_action_start_one_handed (5070337354072861426) -->
-    <skip />
-    <!-- no translation found for accessibility_action_stop_one_handed (1369940261782179442) -->
-    <skip />
+    <string name="one_handed_tutorial_title" msgid="4583241688067426350">"ባለአንድ እጅ ሁነታን በመጠቀም ላይ"</string>
+    <string name="one_handed_tutorial_description" msgid="3486582858591353067">"ለመውጣት ከማያው ግርጌ ወደ ላይ ይጥረጉ ወይም ከመተግበሪያው በላይ ማንኛውም ቦታ ላይ መታ ያድርጉ"</string>
+    <string name="accessibility_action_start_one_handed" msgid="5070337354072861426">"ባለአንድ እጅ ሁነታ ጀምር"</string>
+    <string name="accessibility_action_stop_one_handed" msgid="1369940261782179442">"ከአንድ እጅ ሁነታ ውጣ"</string>
     <string name="bubbles_settings_button_description" msgid="1301286017420516912">"ቅንብሮች ለ <xliff:g id="APP_NAME">%1$s</xliff:g> አረፋዎች"</string>
     <string name="bubble_overflow_button_content_description" msgid="8160974472718594382">"ትርፍ ፍሰት"</string>
     <string name="bubble_accessibility_action_add_back" msgid="1830101076853540953">"ወደ ቁልል መልሰው ያክሉ"</string>
@@ -68,8 +63,7 @@
     <string name="bubbles_user_education_description" msgid="4215862563054175407">"አዲስ ውይይቶች እንደ ተንሳፋፊ አዶዎች ወይም አረፋዎች ሆነው ይታያሉ። አረፋን ለመክፈት መታ ያድርጉ። ለመውሰድ ይጎትቱት።"</string>
     <string name="bubbles_user_education_manage_title" msgid="7042699946735628035">"በማንኛውም ጊዜ አረፋዎችን ይቆጣጠሩ"</string>
     <string name="bubbles_user_education_manage" msgid="3460756219946517198">"የዚህ መተግበሪያ አረፋዎችን ለማጥፋት አቀናብርን መታ ያድርጉ"</string>
-    <!-- no translation found for bubbles_user_education_got_it (3382046149225428296) -->
-    <skip />
+    <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"ገባኝ"</string>
     <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"ምንም የቅርብ ጊዜ አረፋዎች የሉም"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"የቅርብ ጊዜ አረፋዎች እና የተሰናበቱ አረፋዎች እዚህ ብቅ ይላሉ"</string>
     <string name="notification_bubble_title" msgid="6082910224488253378">"አረፋ"</string>

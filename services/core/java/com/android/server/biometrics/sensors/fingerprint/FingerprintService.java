@@ -100,21 +100,37 @@ public class FingerprintService extends SystemService implements BiometricServic
      */
     private final class FingerprintServiceWrapper extends IFingerprintService.Stub {
         @Override
-        public ITestSession createTestSession(int sensorId, String opPackageName) {
+        public ITestSession createTestSession(int sensorId, @NonNull String opPackageName) {
             Utils.checkPermission(getContext(), TEST_BIOMETRIC);
 
-            for (ServiceProvider provider : mServiceProviders) {
-                if (provider.containsSensor(sensorId)) {
-                    return provider.createTestSession(sensorId, opPackageName);
-                }
+            final ServiceProvider provider = getProviderForSensor(sensorId);
+
+            if (provider == null) {
+                Slog.w(TAG, "Null provider for createTestSession, sensorId: " + sensorId);
+                return null;
             }
 
-            return null;
+            return provider.createTestSession(sensorId, opPackageName);
+        }
+
+        @Override
+        public byte[] dumpSensorServiceStateProto() {
+            Utils.checkPermission(getContext(), USE_BIOMETRIC_INTERNAL);
+
+            final ProtoOutputStream proto = new ProtoOutputStream();
+            for (ServiceProvider provider : mServiceProviders) {
+                for (FingerprintSensorPropertiesInternal props
+                        : provider.getSensorProperties()) {
+                    provider.dumpProtoState(props.sensorId, proto);
+                }
+            }
+            proto.flush();
+            return proto.getBytes();
         }
 
         @Override // Binder call
         public List<FingerprintSensorPropertiesInternal> getSensorPropertiesInternal(
-                String opPackageName) {
+                @NonNull String opPackageName) {
             if (getContext().checkCallingOrSelfPermission(USE_BIOMETRIC_INTERNAL)
                     != PackageManager.PERMISSION_GRANTED) {
                 Utils.checkPermission(getContext(), TEST_BIOMETRIC);
@@ -126,6 +142,20 @@ public class FingerprintService extends SystemService implements BiometricServic
             Slog.d(TAG, "Retrieved sensor properties for: " + opPackageName
                     + ", sensors: " + properties.size());
             return properties;
+        }
+
+        @Override
+        public FingerprintSensorPropertiesInternal getSensorProperties(int sensorId,
+                @NonNull String opPackageName) {
+            Utils.checkPermission(getContext(), USE_BIOMETRIC_INTERNAL);
+
+            final ServiceProvider provider = getProviderForSensor(sensorId);
+            if (provider == null) {
+                Slog.w(TAG, "No matching sensor for getSensorProperties, sensorId: " + sensorId
+                        + ", caller: " + opPackageName);
+                return null;
+            }
+            return provider.getSensorProperties(sensorId);
         }
 
         @Override // Binder call
@@ -262,7 +292,7 @@ public class FingerprintService extends SystemService implements BiometricServic
         @Override // Binder call
         public void prepareForAuthentication(int sensorId, IBinder token, long operationId,
                 int userId, IBiometricSensorReceiver sensorReceiver, String opPackageName,
-                int cookie, int callingUid, int callingPid, int callingUserId) {
+                int cookie) {
             Utils.checkPermission(getContext(), MANAGE_BIOMETRIC);
 
             final ServiceProvider provider = getProviderForSensor(sensorId);
@@ -334,7 +364,7 @@ public class FingerprintService extends SystemService implements BiometricServic
 
         @Override // Binder call
         public void cancelAuthenticationFromService(final int sensorId, final IBinder token,
-                final String opPackageName, int callingUid, int callingPid, int callingUserId) {
+                final String opPackageName) {
             Utils.checkPermission(getContext(), MANAGE_BIOMETRIC);
 
             final ServiceProvider provider = getProviderForSensor(sensorId);

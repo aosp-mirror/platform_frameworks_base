@@ -698,8 +698,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     private final class SettingObserver extends ContentObserver {
         private final Uri mFontScaleUri = Settings.System.getUriFor(FONT_SCALE);
         private final Uri mHideErrorDialogsUri = Settings.Global.getUriFor(HIDE_ERROR_DIALOGS);
-        private final Uri mForceBoldTextUri = Settings.Secure.getUriFor(
-                Settings.Secure.FORCE_BOLD_TEXT);
+        private final Uri mFontWeightAdjustmentUri = Settings.Secure.getUriFor(
+                Settings.Secure.FONT_WEIGHT_ADJUSTMENT);
 
         SettingObserver() {
             super(mH);
@@ -707,7 +707,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             resolver.registerContentObserver(mFontScaleUri, false, this, UserHandle.USER_ALL);
             resolver.registerContentObserver(mHideErrorDialogsUri, false, this,
                     UserHandle.USER_ALL);
-            resolver.registerContentObserver(mForceBoldTextUri, false, this, UserHandle.USER_ALL);
+            resolver.registerContentObserver(
+                    mFontWeightAdjustmentUri, false, this, UserHandle.USER_ALL);
         }
 
         @Override
@@ -720,8 +721,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     synchronized (mGlobalLock) {
                         updateShouldShowDialogsLocked(getGlobalConfiguration());
                     }
-                } else if (mForceBoldTextUri.equals(uri)) {
-                    updateForceBoldTextIfNeeded(userId);
+                } else if (mFontWeightAdjustmentUri.equals(uri)) {
+                    updateFontWeightAdjustmentIfNeeded(userId);
                 }
             }
         }
@@ -5422,16 +5423,22 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
     }
 
-    private void updateForceBoldTextIfNeeded(@UserIdInt int userId) {
-        final int forceBoldTextConfig = Settings.Secure.getIntForUser(mContext.getContentResolver(),
-                Settings.Secure.FORCE_BOLD_TEXT, Configuration.FORCE_BOLD_TEXT_UNDEFINED, userId);
+    private void updateFontWeightAdjustmentIfNeeded(@UserIdInt int userId) {
+        final int fontWeightAdjustment =
+                Settings.Secure.getIntForUser(
+                        mContext.getContentResolver(),
+                        Settings.Secure.FONT_WEIGHT_ADJUSTMENT,
+                        Configuration.FONT_WEIGHT_ADJUSTMENT_UNDEFINED,
+                        userId);
+
         synchronized (mGlobalLock) {
-            if (getGlobalConfiguration().forceBoldText == forceBoldTextConfig) {
+            if (getGlobalConfiguration().fontWeightAdjustment == fontWeightAdjustment) {
                 return;
             }
+
             final Configuration configuration =
                     mWindowManager.computeNewConfiguration(DEFAULT_DISPLAY);
-            configuration.forceBoldText = forceBoldTextConfig;
+            configuration.fontWeightAdjustment = fontWeightAdjustment;
             updatePersistentConfiguration(configuration, userId);
         }
     }

@@ -47,7 +47,6 @@ import androidx.test.filters.SmallTest;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.AdditionalMatchers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -170,10 +169,7 @@ public class AuthServiceTest {
                 eq(userId),
                 eq(mReceiver),
                 eq(TEST_OP_PACKAGE_NAME),
-                eq(promptInfo),
-                eq(Binder.getCallingUid()),
-                eq(Binder.getCallingPid()),
-                eq(UserHandle.getCallingUserId()));
+                eq(promptInfo));
     }
 
     @Test
@@ -202,10 +198,7 @@ public class AuthServiceTest {
                 eq(userId),
                 eq(mReceiver),
                 eq(TEST_OP_PACKAGE_NAME),
-                eq(promptInfo),
-                eq(Binder.getCallingUid()),
-                eq(Binder.getCallingPid()),
-                eq(UserHandle.getCallingUserId()));
+                eq(promptInfo));
     }
 
     @Test

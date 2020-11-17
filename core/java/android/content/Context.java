@@ -6142,10 +6142,40 @@ public abstract class Context {
     public abstract boolean canLoadUnsafeResources();
 
     /**
+     * Returns token if the {@link Context} is a {@link android.app.Activity}. Returns
+     * {@code null} otherwise.
+     *
      * @hide
      */
+    @Nullable
     public IBinder getActivityToken() {
         throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
+
+    /**
+     * Returns token if the {@link Context} is a {@link android.app.WindowContext}. Returns
+     * {@code null} otherwise.
+     *
+     * @hide
+     */
+    @Nullable
+    public IBinder getWindowContextToken() {
+        throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
+
+    /**
+     * Returns the proper token of a {@link Context}.
+     *
+     * If the {@link Context} is an {@link android.app.Activity}, returns
+     * {@link #getActivityToken()}. If the {@lijnk Context} is a {@link android.app.WindowContext},
+     * returns {@link #getWindowContextToken()}. Returns {@code null}, otherwise.
+     *
+     * @hide
+     */
+    @Nullable
+    public static IBinder getToken(@NonNull Context context) {
+        return context.getActivityToken() != null ? context.getActivityToken()
+                : context.getWindowContextToken();
     }
 
     /**

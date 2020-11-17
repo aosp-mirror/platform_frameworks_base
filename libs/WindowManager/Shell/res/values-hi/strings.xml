@@ -28,8 +28,7 @@
     <string name="pip_skip_to_next" msgid="8403429188794867653">"अगले पर जाएं"</string>
     <string name="pip_skip_to_prev" msgid="7172158111196394092">"पिछले पर जाएं"</string>
     <string name="accessibility_action_pip_resize" msgid="4623966104749543182">"आकार बदलें"</string>
-    <!-- no translation found for dock_forced_resizable (1749750436092293116) -->
-    <skip />
+    <string name="dock_forced_resizable" msgid="1749750436092293116">"ऐप्लिकेशन शायद स्प्लिट स्क्रीन मोड में काम न करे."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"ऐप विभाजित स्‍क्रीन का समर्थन नहीं करता है."</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"हो सकता है कि ऐप प्राइमरी (मुख्य) डिस्प्ले के अलावा बाकी दूसरे डिस्प्ले पर काम न करे."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"प्राइमरी (मुख्य) डिस्प्ले के अलावा बाकी दूसरे डिस्प्ले पर ऐप लॉन्च नहीं किया जा सकता."</string>
@@ -44,14 +43,10 @@
     <string name="accessibility_action_divider_top_50" msgid="8649582798829048946">"ऊपर की स्क्रीन को 50% बनाएं"</string>
     <string name="accessibility_action_divider_top_30" msgid="3572788224908570257">"ऊपर की स्क्रीन को 30% बनाएं"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="2831868345092314060">"नीचे की स्क्रीन को फ़ुल स्क्रीन बनाएं"</string>
-    <!-- no translation found for one_handed_tutorial_title (4583241688067426350) -->
-    <skip />
-    <!-- no translation found for one_handed_tutorial_description (3486582858591353067) -->
-    <skip />
-    <!-- no translation found for accessibility_action_start_one_handed (5070337354072861426) -->
-    <skip />
-    <!-- no translation found for accessibility_action_stop_one_handed (1369940261782179442) -->
-    <skip />
+    <string name="one_handed_tutorial_title" msgid="4583241688067426350">"वन-हैंडेड मोड का इस्तेमाल करना"</string>
+    <string name="one_handed_tutorial_description" msgid="3486582858591353067">"इस मोड से बाहर निकलने के लिए, स्क्रीन के सबसे निचले हिस्से से ऊपर की ओर स्वाइप करें या ऐप्लिकेशन के बाहर कहीं भी टैप करें"</string>
+    <string name="accessibility_action_start_one_handed" msgid="5070337354072861426">"वन-हैंडेड मोड चालू करें"</string>
+    <string name="accessibility_action_stop_one_handed" msgid="1369940261782179442">"वन-हैंडेड मोड से बाहर निकलें"</string>
     <string name="bubbles_settings_button_description" msgid="1301286017420516912">"<xliff:g id="APP_NAME">%1$s</xliff:g> बबल्स की सेटिंग"</string>
     <string name="bubble_overflow_button_content_description" msgid="8160974472718594382">"ओवरफ़्लो"</string>
     <string name="bubble_accessibility_action_add_back" msgid="1830101076853540953">"स्टैक में वापस जोड़ें"</string>
@@ -68,8 +63,7 @@
     <string name="bubbles_user_education_description" msgid="4215862563054175407">"नई बातचीत फ़्लोटिंग आइकॉन या बबल्स की तरह दिखेंगी. बबल को खोलने के लिए टैप करें. इसे एक जगह से दूसरी जगह ले जाने के लिए खींचें और छोड़ें."</string>
     <string name="bubbles_user_education_manage_title" msgid="7042699946735628035">"जब चाहें, बबल्स को कंट्रोल करें"</string>
     <string name="bubbles_user_education_manage" msgid="3460756219946517198">"इस ऐप्लिकेशन पर बबल्स को बंद करने के लिए \'प्रबंधित करें\' पर टैप करें"</string>
-    <!-- no translation found for bubbles_user_education_got_it (3382046149225428296) -->
-    <skip />
+    <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"ठीक है"</string>
     <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"हाल ही के बबल्स मौजूद नहीं हैं"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"हाल ही के बबल्स और हटाए गए बबल्स यहां दिखेंगे"</string>
     <string name="notification_bubble_title" msgid="6082910224488253378">"बबल"</string>

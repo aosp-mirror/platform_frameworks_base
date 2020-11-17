@@ -26,13 +26,12 @@ import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.ApkChecksum;
 import android.content.pm.Checksum;
-import android.content.pm.IPackageManager;
+import android.content.pm.PackageManagerInternal;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.HandlerExecutor;
 import android.os.IBinder;
-import android.os.Message;
 import android.os.Parcelable;
-import android.os.RemoteException;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Slog;
@@ -42,11 +41,10 @@ import com.android.internal.os.BackgroundThread;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.Executor;
 
 public final class ProcessLoggingHandler extends Handler {
     private static final String TAG = "ProcessLoggingHandler";
-
-    private static final int LOG_APP_PROCESS_START_MSG = 1;
 
     private static final int CHECKSUM_TYPE = Checksum.TYPE_WHOLE_SHA256;
 
@@ -55,6 +53,9 @@ public final class ProcessLoggingHandler extends Handler {
         public List<Bundle> pendingLogEntries = new ArrayList<>();
     }
 
+    // Executor to handle checksum calculations.
+    private final Executor mExecutor = new HandlerExecutor(this);
+
     // Apk path to logging info map.
     private final ArrayMap<String, LoggingInfo> mLoggingInfo = new ArrayMap<>();
 
@@ -62,25 +63,7 @@ public final class ProcessLoggingHandler extends Handler {
         super(BackgroundThread.getHandler().getLooper());
     }
 
-    @Override
-    public void handleMessage(Message msg) {
-        switch (msg.what) {
-            case LOG_APP_PROCESS_START_MSG: {
-                Bundle bundle = msg.getData();
-                long startTimestamp = bundle.getLong("startTimestamp");
-                String processName = bundle.getString("processName");
-                int uid = bundle.getInt("uid");
-                String seinfo = bundle.getString("seinfo");
-                int pid = bundle.getInt("pid");
-                String apkHash = bundle.getString("apkHash");
-                SecurityLog.writeEvent(SecurityLog.TAG_APP_PROCESS_START, processName,
-                        startTimestamp, uid, pid, seinfo, apkHash);
-                break;
-            }
-        }
-    }
-
-    void logAppProcessStart(Context context, IPackageManager pms, String apkFile,
+    void logAppProcessStart(Context context, PackageManagerInternal pmi, String apkFile,
             String packageName, String processName, int uid, String seinfo, int pid) {
         Bundle data = new Bundle();
         data.putLong("startTimestamp", System.currentTimeMillis());
@@ -125,7 +108,7 @@ public final class ProcessLoggingHandler extends Handler {
         // Request base checksums when first added entry.
         // Capturing local loggingInfo to still log even if hash was invalidated.
         try {
-            pms.requestChecksums(packageName, false, 0, CHECKSUM_TYPE, null,
+            pmi.requestChecksums(packageName, false, 0, CHECKSUM_TYPE, null,
                     new IntentSender((IIntentSender) new IIntentSender.Stub() {
                         @Override
                         public void send(int code, Intent intent, String resolvedType,
@@ -133,10 +116,10 @@ public final class ProcessLoggingHandler extends Handler {
                                 String requiredPermission, Bundle options) {
                             processChecksums(loggingInfo, intent);
                         }
-                    }), context.getUserId());
-        } catch (RemoteException e) {
-            Slog.e(TAG, "requestChecksums() failed", e);
-            processChecksums(loggingInfo, null);
+                    }), context.getUserId(), mExecutor, this);
+        } catch (Throwable t) {
+            Slog.e(TAG, "requestChecksums() failed", t);
+            enqueueProcessChecksum(loggingInfo, null);
         }
     }
 
@@ -148,9 +131,16 @@ public final class ProcessLoggingHandler extends Handler {
         for (ApkChecksum checksum : checksums) {
             if (checksum.getType() == CHECKSUM_TYPE) {
                 processChecksum(loggingInfo, checksum.getValue());
-                break;
+                return;
             }
         }
+
+        Slog.e(TAG, "requestChecksums() failed to return SHA256, see logs for details.");
+        processChecksum(loggingInfo, null);
+    }
+
+    void enqueueProcessChecksum(final LoggingInfo loggingInfo, final byte[] hash) {
+        this.post(() -> processChecksum(loggingInfo, null));
     }
 
     void processChecksum(final LoggingInfo loggingInfo, final byte[] hash) {
@@ -178,22 +168,28 @@ public final class ProcessLoggingHandler extends Handler {
 
         if (pendingLogEntries != null) {
             for (Bundle data : pendingLogEntries) {
-                enqueueSecurityLogEvent(data, apkHash);
+                logSecurityLogEvent(data, apkHash);
             }
         }
-    }
-
-    void enqueueSecurityLogEvent(Bundle data, String apkHash) {
-        data.putString("apkHash", apkHash);
-
-        Message msg = this.obtainMessage(LOG_APP_PROCESS_START_MSG);
-        msg.setData(data);
-        this.sendMessage(msg);
     }
 
     void invalidateBaseApkHash(String apkFile) {
         synchronized (mLoggingInfo) {
             mLoggingInfo.remove(apkFile);
         }
+    }
+
+    void enqueueSecurityLogEvent(Bundle data, String apkHash) {
+        this.post(() -> logSecurityLogEvent(data, apkHash));
+    }
+
+    void logSecurityLogEvent(Bundle bundle, String apkHash) {
+        long startTimestamp = bundle.getLong("startTimestamp");
+        String processName = bundle.getString("processName");
+        int uid = bundle.getInt("uid");
+        String seinfo = bundle.getString("seinfo");
+        int pid = bundle.getInt("pid");
+        SecurityLog.writeEvent(SecurityLog.TAG_APP_PROCESS_START, processName,
+                startTimestamp, uid, pid, seinfo, apkHash);
     }
 }

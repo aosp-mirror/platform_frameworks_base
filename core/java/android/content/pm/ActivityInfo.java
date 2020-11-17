@@ -834,13 +834,13 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
 
     /**
      * Bit in {@link #configChanges} that indicates that the activity
-     * can itself handle changes to bold text.  Set from the
+     * can itself handle changes to font weight.  Set from the
      * {@link android.R.attr#configChanges} attribute.  This is
      * not a core resource configuration, but a higher-level value, so its
      * constant starts at the high bits.
      */
 
-    public static final int CONFIG_FORCE_BOLD_TEXT = 0x10000000;
+    public static final int CONFIG_FONT_WEIGHT_ADJUSTMENT = 0x10000000;
 
     /** @hide
      * Unfortunately the constants for config changes in native code are

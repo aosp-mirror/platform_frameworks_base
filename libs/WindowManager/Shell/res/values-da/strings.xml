@@ -28,8 +28,7 @@
     <string name="pip_skip_to_next" msgid="8403429188794867653">"Gå videre til næste"</string>
     <string name="pip_skip_to_prev" msgid="7172158111196394092">"Gå til forrige"</string>
     <string name="accessibility_action_pip_resize" msgid="4623966104749543182">"Rediger størrelse"</string>
-    <!-- no translation found for dock_forced_resizable (1749750436092293116) -->
-    <skip />
+    <string name="dock_forced_resizable" msgid="1749750436092293116">"Appen fungerer muligvis ikke i opdelt skærm."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"Appen understøtter ikke opdelt skærm."</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"Appen fungerer muligvis ikke på sekundære skærme."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"Appen kan ikke åbnes på sekundære skærme."</string>
@@ -44,14 +43,10 @@
     <string name="accessibility_action_divider_top_50" msgid="8649582798829048946">"Øverste 50 %"</string>
     <string name="accessibility_action_divider_top_30" msgid="3572788224908570257">"Øverste 30 %"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="2831868345092314060">"Vis nederste del i fuld skærm"</string>
-    <!-- no translation found for one_handed_tutorial_title (4583241688067426350) -->
-    <skip />
-    <!-- no translation found for one_handed_tutorial_description (3486582858591353067) -->
-    <skip />
-    <!-- no translation found for accessibility_action_start_one_handed (5070337354072861426) -->
-    <skip />
-    <!-- no translation found for accessibility_action_stop_one_handed (1369940261782179442) -->
-    <skip />
+    <string name="one_handed_tutorial_title" msgid="4583241688067426350">"Brug af enhåndstilstand"</string>
+    <string name="one_handed_tutorial_description" msgid="3486582858591353067">"Du kan afslutte ved at stryge opad fra bunden af skærmen eller trykke et vilkårligt sted over appen"</string>
+    <string name="accessibility_action_start_one_handed" msgid="5070337354072861426">"Start enhåndstilstand"</string>
+    <string name="accessibility_action_stop_one_handed" msgid="1369940261782179442">"Afslut enhåndstilstand"</string>
     <string name="bubbles_settings_button_description" msgid="1301286017420516912">"Indstillinger for <xliff:g id="APP_NAME">%1$s</xliff:g>-bobler"</string>
     <string name="bubble_overflow_button_content_description" msgid="8160974472718594382">"Overløb"</string>
     <string name="bubble_accessibility_action_add_back" msgid="1830101076853540953">"Føj til stak igen"</string>
@@ -68,8 +63,7 @@
     <string name="bubbles_user_education_description" msgid="4215862563054175407">"Nye samtaler vises som svævende ikoner eller bobler. Tryk for at åbne boblen. Træk for at flytte den."</string>
     <string name="bubbles_user_education_manage_title" msgid="7042699946735628035">"Styr bobler når som helst"</string>
     <string name="bubbles_user_education_manage" msgid="3460756219946517198">"Tryk på Administrer for at deaktivere bobler fra denne app"</string>
-    <!-- no translation found for bubbles_user_education_got_it (3382046149225428296) -->
-    <skip />
+    <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"OK"</string>
     <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"Ingen seneste bobler"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"Nye bobler og afviste bobler vises her"</string>
     <string name="notification_bubble_title" msgid="6082910224488253378">"Boble"</string>
