@@ -75,10 +75,11 @@ public class NetworkNotificationManager {
     private static final boolean DBG = true;
 
     // Notification channels used by ConnectivityService mainline module, it should be aligned with
-    // SystemNotificationChannels.
-    public static final String NOTIFICATION_NETWORK_STATUS = "NETWORK_STATUS";
-    public static final String NOTIFICATION_NETWORK_ALERTS = "NETWORK_ALERTS";
-    public static final String NOTIFICATION_VPN = "VPN";
+    // SystemNotificationChannels so the channels are the same as the ones used as the system
+    // server.
+    public static final String NOTIFICATION_CHANNEL_NETWORK_STATUS = "NETWORK_STATUS";
+    public static final String NOTIFICATION_CHANNEL_NETWORK_ALERTS = "NETWORK_ALERTS";
+    public static final String NOTIFICATION_CHANNEL_VPN = "VPN";
 
     // The context is for the current user (system server)
     private final Context mContext;
@@ -263,7 +264,7 @@ public class NetworkNotificationManager {
         // the tag.
         final boolean hasPreviousNotification = previousNotifyType != null;
         final String channelId = (highPriority && !hasPreviousNotification)
-                ? NOTIFICATION_NETWORK_ALERTS : NOTIFICATION_NETWORK_STATUS;
+                ? NOTIFICATION_CHANNEL_NETWORK_ALERTS : NOTIFICATION_CHANNEL_NETWORK_STATUS;
         Notification.Builder builder = new Notification.Builder(mContext, channelId)
                 .setWhen(System.currentTimeMillis())
                 .setShowWhen(notifyType == NotificationType.NETWORK_SWITCH)
