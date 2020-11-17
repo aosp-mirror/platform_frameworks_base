@@ -72,7 +72,7 @@ public final class AppSearchSchema {
 
     /** Returns the name of this schema type, e.g. Email. */
     @NonNull
-    public String getSchemaTypeName() {
+    public String getSchemaType() {
         return mBundle.getString(SCHEMA_TYPE_FIELD, "");
     }
 

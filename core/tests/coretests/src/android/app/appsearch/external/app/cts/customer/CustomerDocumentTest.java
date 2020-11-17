@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package android.app.appsearch.customer;
+package android.app.appsearch.cts.customer;
+
+import static com.google.common.truth.Truth.assertThat;
 
 import android.annotation.NonNull;
 import android.app.appsearch.GenericDocument;
-
-import static com.google.common.truth.Truth.assertThat;
 
 import org.junit.Test;
 
@@ -32,13 +32,13 @@ import org.junit.Test;
  */
 public class CustomerDocumentTest {
 
-    private static byte[] sByteArray1 = new byte[]{(byte) 1, (byte) 2, (byte) 3};
-    private static byte[] sByteArray2 = new byte[]{(byte) 4, (byte) 5, (byte) 6};
-    private static GenericDocument sDocumentProperties1 = new GenericDocument
-            .Builder("sDocumentProperties1", "sDocumentPropertiesSchemaType1")
+    private static final byte[] BYTE_ARRAY1 = new byte[]{(byte) 1, (byte) 2, (byte) 3};
+    private static final byte[] BYTE_ARRAY2 = new byte[]{(byte) 4, (byte) 5, (byte) 6};
+    private static final GenericDocument DOCUMENT_PROPERTIES1 = new GenericDocument
+            .Builder<>("sDocumentProperties1", "sDocumentPropertiesSchemaType1")
             .build();
-    private static GenericDocument sDocumentProperties2 = new GenericDocument
-            .Builder("sDocumentProperties2", "sDocumentPropertiesSchemaType2")
+    private static final GenericDocument DOCUMENT_PROPERTIES2 = new GenericDocument
+            .Builder<>("sDocumentProperties2", "sDocumentPropertiesSchemaType2")
             .build();
 
     @Test
@@ -50,8 +50,8 @@ public class CustomerDocumentTest {
                 .setPropertyDouble("doubleKey1", 1.0, 2.0, 3.0)
                 .setPropertyBoolean("booleanKey1", true, false, true)
                 .setPropertyString("stringKey1", "test-value1", "test-value2", "test-value3")
-                .setPropertyBytes("byteKey1", sByteArray1, sByteArray2)
-                .setPropertyDocument("documentKey1", sDocumentProperties1, sDocumentProperties2)
+                .setPropertyBytes("byteKey1", BYTE_ARRAY1, BYTE_ARRAY2)
+                .setPropertyDocument("documentKey1", DOCUMENT_PROPERTIES1, DOCUMENT_PROPERTIES2)
                 .build();
 
         assertThat(customerDocument.getUri()).isEqualTo("uri1");
@@ -67,9 +67,9 @@ public class CustomerDocumentTest {
         assertThat(customerDocument.getPropertyStringArray("stringKey1")).asList()
                 .containsExactly("test-value1", "test-value2", "test-value3");
         assertThat(customerDocument.getPropertyBytesArray("byteKey1")).asList()
-                .containsExactly(sByteArray1, sByteArray2);
+                .containsExactly(BYTE_ARRAY1, BYTE_ARRAY2);
         assertThat(customerDocument.getPropertyDocumentArray("documentKey1")).asList()
-                .containsExactly(sDocumentProperties1, sDocumentProperties2);
+                .containsExactly(DOCUMENT_PROPERTIES1, DOCUMENT_PROPERTIES2);
     }
 
     /**

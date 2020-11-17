@@ -21,9 +21,9 @@ import android.annotation.NonNull;
 import android.app.appsearch.AppSearchSchema;
 import com.android.internal.util.Preconditions;
 
-import com.google.android.icing.proto.IndexingConfig;
 import com.google.android.icing.proto.PropertyConfigProto;
 import com.google.android.icing.proto.SchemaTypeConfigProto;
+import com.google.android.icing.proto.StringIndexingConfig;
 import com.google.android.icing.proto.TermMatchType;
 
 import java.util.List;
@@ -44,7 +44,7 @@ public final class SchemaToProtoConverter {
     public static SchemaTypeConfigProto convert(@NonNull AppSearchSchema schema) {
         Preconditions.checkNotNull(schema);
         SchemaTypeConfigProto.Builder protoBuilder =
-                SchemaTypeConfigProto.newBuilder().setSchemaType(schema.getSchemaTypeName());
+                SchemaTypeConfigProto.newBuilder().setSchemaType(schema.getSchemaType());
         List<AppSearchSchema.PropertyConfig> properties = schema.getProperties();
         for (int i = 0; i < properties.size(); i++) {
             PropertyConfigProto propertyProto = convertProperty(properties.get(i));
@@ -59,7 +59,7 @@ public final class SchemaToProtoConverter {
         Preconditions.checkNotNull(property);
         PropertyConfigProto.Builder propertyConfigProto = PropertyConfigProto.newBuilder()
                 .setPropertyName(property.getName());
-        IndexingConfig.Builder indexingConfig = IndexingConfig.newBuilder();
+        StringIndexingConfig.Builder indexingConfig = StringIndexingConfig.newBuilder();
 
         // Set dataType
         @AppSearchSchema.PropertyConfig.DataType int dataType = property.getDataType();
@@ -106,15 +106,15 @@ public final class SchemaToProtoConverter {
         // Set tokenizerType
         @AppSearchSchema.PropertyConfig.TokenizerType int tokenizerType =
                 property.getTokenizerType();
-        IndexingConfig.TokenizerType.Code tokenizerTypeProto =
-                IndexingConfig.TokenizerType.Code.forNumber(tokenizerType);
+        StringIndexingConfig.TokenizerType.Code tokenizerTypeProto =
+                StringIndexingConfig.TokenizerType.Code.forNumber(tokenizerType);
         if (tokenizerTypeProto == null) {
             throw new IllegalArgumentException("Invalid tokenizerType: " + tokenizerType);
         }
         indexingConfig.setTokenizerType(tokenizerTypeProto);
 
         // Build!
-        propertyConfigProto.setIndexingConfig(indexingConfig);
+        propertyConfigProto.setStringIndexingConfig(indexingConfig);
         return propertyConfigProto.build();
     }
 }

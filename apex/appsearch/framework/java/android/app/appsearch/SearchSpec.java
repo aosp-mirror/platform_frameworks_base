@@ -154,12 +154,12 @@ public final class SearchSpec {
      * <p>If empty, the query will search over all schema types.
      */
     @NonNull
-    public List<String> getSchemas() {
-        List<String> schemas = mBundle.getStringArrayList(SCHEMA_TYPE_FIELD);
-        if (schemas == null) {
+    public List<String> getSchemaTypes() {
+        List<String> schemaTypes = mBundle.getStringArrayList(SCHEMA_TYPE_FIELD);
+        if (schemaTypes == null) {
             return Collections.emptyList();
         }
-        return Collections.unmodifiableList(schemas);
+        return Collections.unmodifiableList(schemaTypes);
     }
 
     /**
@@ -241,10 +241,10 @@ public final class SearchSpec {
          * <p>If unset, the query will search over all schema types.
          */
         @NonNull
-        public Builder addSchema(@NonNull String... schemaTypes) {
+        public Builder addSchemaType(@NonNull String... schemaTypes) {
             Preconditions.checkNotNull(schemaTypes);
             Preconditions.checkState(!mBuilt, "Builder has already been used");
-            return addSchema(Arrays.asList(schemaTypes));
+            return addSchemaType(Arrays.asList(schemaTypes));
         }
 
         /**
@@ -254,7 +254,7 @@ public final class SearchSpec {
          * <p>If unset, the query will search over all schema types.
          */
         @NonNull
-        public Builder addSchema(@NonNull Collection<String> schemaTypes) {
+        public Builder addSchemaType(@NonNull Collection<String> schemaTypes) {
             Preconditions.checkNotNull(schemaTypes);
             Preconditions.checkState(!mBuilt, "Builder has already been used");
             mSchemaTypes.addAll(schemaTypes);
@@ -341,8 +341,7 @@ public final class SearchSpec {
 
         /**
          * Sets {@code snippetCountPerProperty}. Only the first {@code snippetCountPerProperty}
-         * snippets for a every property of {@link GenericDocument} will contain snippet
-         * information.
+         * snippets for each property of {@link GenericDocument} will contain snippet information.
          *
          * <p>If set to 0, snippeting is disabled and {@link SearchResult#getMatches}
          * will return {@code null} for that result.
