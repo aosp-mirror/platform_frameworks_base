@@ -16,6 +16,7 @@
 
 package android.util.imetracing;
 
+import android.annotation.Nullable;
 import android.app.ActivityThread;
 import android.content.Context;
 import android.inputmethodservice.AbstractInputMethodService;
@@ -28,6 +29,8 @@ import android.util.proto.ProtoOutputStream;
 import android.view.inputmethod.InputMethodManager;
 
 import com.android.internal.view.IInputMethodManager;
+
+import java.io.PrintWriter;
 
 /**
  *
@@ -147,7 +150,43 @@ public abstract class ImeTracing {
         return mService != null;
     }
 
+    /**
+     * Writes the current tracing data to the specific output proto file.
+     */
+    public abstract void writeTracesToFiles();
+
+    /**
+     * Starts a new IME trace if one is not already started.
+     *
+     * @param pw Print writer
+     */
+    public abstract void startTrace(@Nullable PrintWriter pw);
+
+    /**
+     * Stops the IME trace if one was previously started and writes the current buffers to disk.
+     *
+     * @param pw Print writer
+     */
+    public abstract void stopTrace(@Nullable PrintWriter pw);
+
+    /**
+     * Stops the IME trace if one was previously started.
+     *
+     * @param pw Print writer
+     * @param writeToFile If the current buffer should be written to disk or not
+     */
+    public abstract void stopTrace(@Nullable PrintWriter pw, boolean writeToFile);
+
     private static boolean isSystemProcess() {
         return ActivityThread.isSystem();
     }
+
+    protected void logAndPrintln(@Nullable PrintWriter pw, String msg) {
+        Log.i(TAG, msg);
+        if (pw != null) {
+            pw.println(msg);
+            pw.flush();
+        }
+    }
+
 }

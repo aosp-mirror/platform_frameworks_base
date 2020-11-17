@@ -15,6 +15,8 @@
 
 package com.android.server.inputmethod;
 
+import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_CRITICAL;
+import static android.os.IServiceManager.DUMP_FLAG_PROTO;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.server.inputmethod.InputMethodManagerServiceProto.ACCESSIBILITY_REQUESTING_NO_SOFT_KEYBOARD;
 import static android.server.inputmethod.InputMethodManagerServiceProto.BACK_DISPOSITION;
@@ -161,6 +163,7 @@ import com.android.internal.inputmethod.StartInputReason;
 import com.android.internal.inputmethod.UnbindReason;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.notification.SystemNotificationChannels;
+import com.android.internal.os.BackgroundThread;
 import com.android.internal.os.HandlerCaller;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.os.TransferPipe;
@@ -208,6 +211,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         implements ServiceConnection, Handler.Callback {
     static final boolean DEBUG = false;
     static final String TAG = "InputMethodManagerService";
+    public static final String PROTO_ARG = "--proto";
 
     @Retention(SOURCE)
     @IntDef({ShellCommandResult.SUCCESS, ShellCommandResult.FAILURE})
@@ -1574,7 +1578,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         public void onStart() {
             LocalServices.addService(InputMethodManagerInternal.class,
                     new LocalServiceImpl(mService));
-            publishBinderService(Context.INPUT_METHOD_SERVICE, mService);
+            publishBinderService(Context.INPUT_METHOD_SERVICE, mService, false /*allowIsolated*/,
+                    DUMP_FLAG_PRIORITY_CRITICAL | DUMP_FLAG_PROTO);
         }
 
         @Override
@@ -5094,7 +5099,36 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        boolean asProto = false;
+        for (int argIndex = 0; argIndex < args.length; argIndex++) {
+            if (args[argIndex].equals(PROTO_ARG)) {
+                asProto = true;
+                break;
+            }
+        }
+
+        if (asProto) {
+            final ImeTracing imeTracing = ImeTracing.getInstance();
+            if (imeTracing.isEnabled()) {
+                imeTracing.stopTrace(null, false /* writeToFile */);
+                BackgroundThread.getHandler().post(() -> {
+                    imeTracing.writeTracesToFiles();
+                    imeTracing.startTrace(null);
+                });
+            }
+        }
+        doDump(fd, pw, args, asProto);
+    }
+
+    private void doDump(FileDescriptor fd, PrintWriter pw, String[] args, boolean useProto) {
         if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
+
+        if (useProto) {
+            final ProtoOutputStream proto = new ProtoOutputStream(fd);
+            dumpDebug(proto, InputMethodManagerServiceTraceProto.INPUT_METHOD_MANAGER_SERVICE);
+            proto.flush();
+            return;
+        }
 
         IInputMethod method;
         ClientState client;

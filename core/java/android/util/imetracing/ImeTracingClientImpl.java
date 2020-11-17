@@ -25,6 +25,8 @@ import android.util.Log;
 import android.util.proto.ProtoOutputStream;
 import android.view.inputmethod.InputMethodManager;
 
+import java.io.PrintWriter;
+
 /**
  * @hide
  */
@@ -93,5 +95,21 @@ class ImeTracingClientImpl extends ImeTracing {
     @Override
     public void triggerManagerServiceDump(String where) {
         // Intentionally left empty, this is implemented in ImeTracingServerImpl
+    }
+
+    @Override
+    public void writeTracesToFiles() {
+    }
+
+    @Override
+    public void startTrace(PrintWriter pw) {
+    }
+
+    @Override
+    public void stopTrace(PrintWriter pw) {
+    }
+
+    @Override
+    public void stopTrace(PrintWriter pw, boolean writeToFile) {
     }
 }
