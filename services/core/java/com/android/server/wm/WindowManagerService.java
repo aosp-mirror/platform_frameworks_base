@@ -2575,7 +2575,7 @@ public class WindowManagerService extends IWindowManager.Stub
         WindowSurfaceController surfaceController;
         try {
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "createSurfaceControl");
-            surfaceController = winAnimator.createSurfaceLocked(win.mAttrs.type, win.mOwnerUid);
+            surfaceController = winAnimator.createSurfaceLocked(win.mAttrs.type);
         } finally {
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         }
