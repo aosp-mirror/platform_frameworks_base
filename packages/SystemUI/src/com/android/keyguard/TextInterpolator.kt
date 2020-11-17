@@ -22,21 +22,28 @@ import android.graphics.text.PositionedGlyphs
 import android.graphics.text.TextRunShaper
 import android.text.Layout
 import android.util.MathUtils
+import com.android.internal.graphics.ColorUtils
 import java.lang.Math.max
 
 /**
  * Provide text style linear interpolation for plain text.
  */
-class TextInterpolator(layout: Layout) {
+class TextInterpolator(
+    layout: Layout,
+    lines: Int = 1
+) {
+
     /**
      * Returns base paint used for interpolation.
      *
      * Once you modified the style parameters, you have to call reshapeText to recalculate base text
      * layout.
      *
-     * @return a paint object.
+     * @return an array list of paint objects representing one paint per line of text. If this
+     * list has a smaller size than the number of lines, all extra lines will use the Paint an
+     * index 0.
      */
-    val basePaint = Paint(layout.paint)
+    val basePaint = createDefaultPaint(layout.paint, lines)
 
     /**
      * Returns target paint used for interpolation.
@@ -44,9 +51,18 @@ class TextInterpolator(layout: Layout) {
      * Once you modified the style parameters, you have to call reshapeText to recalculate target
      * text layout.
      *
-     * @return a paint object
+     * @return an array list of paint objects representing one paint per line of text. If this
+     * list has a smaller size than the number of lines, all extra lines will use the Paint an
+     * index 0.
      */
-    val targetPaint = Paint(layout.paint)
+    val targetPaint = createDefaultPaint(layout.paint, lines)
+
+    private fun createDefaultPaint(paint: Paint, lines: Int): ArrayList<Paint> {
+        val paintList = ArrayList<Paint>()
+        for (i in 0 until lines)
+            paintList.add(Paint(paint))
+        return paintList
+    }
 
     /**
      * A class represents a single font run.
@@ -78,7 +94,7 @@ class TextInterpolator(layout: Layout) {
     private val fontInterpolator = FontInterpolator()
 
     // Recycling object for glyph drawing. Will be extended for the longest font run if needed.
-    private val tmpDrawPaint = Paint()
+    private val tmpDrawPaints = ArrayList<Paint>()
     private var tmpPositionArray = FloatArray(20)
 
     /**
@@ -115,8 +131,8 @@ class TextInterpolator(layout: Layout) {
     /**
      * Recalculate internal text layout for interpolation.
      *
-     * Whenever you modifies target paint, you have to call this method to recalculate internal text
-     * layout used for interpolation.
+     * Whenever the target paint is modified, call this method to recalculate internal
+     * text layout used for interpolation.
      */
     fun onTargetPaintModified() {
         updatePositionsAndFonts(shapeText(layout, targetPaint), updateBase = false)
@@ -125,8 +141,8 @@ class TextInterpolator(layout: Layout) {
     /**
      * Recalculate internal text layout for interpolation.
      *
-     * Whenever you modifies base paint, you have to call this method to recalculate internal text
-     * layout used for interpolation.
+     * Whenever the base paint is modified, call this method to recalculate internal
+     * text layout used for interpolation.
      */
     fun onBasePaintModified() {
         updatePositionsAndFonts(shapeText(layout, basePaint), updateBase = true)
@@ -192,10 +208,10 @@ class TextInterpolator(layout: Layout) {
         if (progress == 0f) {
             return
         } else if (progress == 1f) {
-            basePaint.set(targetPaint)
+            updatePaint(basePaint, targetPaint)
         } else {
-            lerp(basePaint, targetPaint, progress, tmpDrawPaint)
-            basePaint.set(tmpDrawPaint)
+            lerp(basePaint, targetPaint, progress, tmpDrawPaints)
+            updatePaint(basePaint, tmpDrawPaints)
         }
 
         lines.forEach { line ->
@@ -211,13 +227,21 @@ class TextInterpolator(layout: Layout) {
         progress = 0f
     }
 
+    companion object {
+        fun updatePaint(toUpdate: ArrayList<Paint>, newValues: ArrayList<Paint>) {
+            toUpdate.clear()
+            for (paint in newValues)
+                toUpdate.add(Paint(paint))
+        }
+    }
+
     /**
      * Draws interpolated text at the given progress.
      *
      * @param canvas a canvas.
      */
     fun draw(canvas: Canvas) {
-        lerp(basePaint, targetPaint, progress, tmpDrawPaint)
+        lerp(basePaint, targetPaint, progress, tmpDrawPaints)
         lines.forEachIndexed { lineNo, line ->
             canvas.save()
             try {
@@ -226,7 +250,10 @@ class TextInterpolator(layout: Layout) {
                 canvas.translate(origin, layout.getLineBaseline(lineNo).toFloat())
 
                 line.fontRuns.forEach { run ->
-                    drawFontRun(canvas, line, run, tmpDrawPaint)
+                    if (lineNo >= tmpDrawPaints.size)
+                        drawFontRun(canvas, line, run, tmpDrawPaints[0])
+                    else
+                        drawFontRun(canvas, line, run, tmpDrawPaints[lineNo])
                 }
             } finally {
                 canvas.restore()
@@ -384,15 +411,25 @@ class TextInterpolator(layout: Layout) {
     }
 
     // Linear interpolate the paint.
-    private fun lerp(from: Paint, to: Paint, t: Float, out: Paint) {
-        // Currently only font size is interpolated.
+    private fun lerp(
+        from: ArrayList<Paint>,
+        to: ArrayList<Paint>,
+        progress: Float,
+        out: ArrayList<Paint>
+    ) {
+        out.clear()
+        // Currently only font size & colors are interpolated.
         // TODO(172943390): Add other interpolation or support custom interpolator.
-        out.set(from)
-        out.textSize = MathUtils.lerp(from.textSize, to.textSize, t)
+        for (index in from.indices) {
+            val paint = Paint(from[index])
+            paint.textSize = MathUtils.lerp(from[index].textSize, to[index].textSize, progress)
+            paint.color = ColorUtils.blendARGB(from[index].color, to[index].color, progress)
+            out.add(paint)
+        }
     }
 
     // Shape the text and stores the result to out argument.
-    private fun shapeText(layout: Layout, paint: Paint): List<PositionedGlyphs> {
+    private fun shapeText(layout: Layout, paints: ArrayList<Paint>): List<PositionedGlyphs> {
         val out = mutableListOf<PositionedGlyphs>()
         for (lineNo in 0 until layout.lineCount) { // Shape all lines.
             val lineStart = layout.getLineStart(lineNo)
@@ -403,7 +440,7 @@ class TextInterpolator(layout: Layout) {
                     lineStart, count, // shape context = shape range.
                     0f, 0f, // the layout offset. Not changed.
                     layout.getParagraphDirection(lineNo) == Layout.DIR_RIGHT_TO_LEFT,
-                    paint)) // Use given paint instead of layout's paint for style interpolation.
+                    paints[lineNo])) // Use given paint instead of layout's for style interpolation.
         }
         return out
     }

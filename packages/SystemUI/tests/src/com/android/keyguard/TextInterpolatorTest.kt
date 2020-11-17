@@ -18,6 +18,7 @@ package com.android.keyguard
 
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.graphics.Paint
 import android.testing.AndroidTestingRunner
 import android.text.Layout
 import android.text.StaticLayout
@@ -37,13 +38,13 @@ private val PAINT = TextPaint().apply {
     textSize = 32f
 }
 
-private val START_PAINT = TextPaint(PAINT).apply {
+private val START_PAINT = arrayListOf<Paint>(TextPaint(PAINT).apply {
     fontVariationSettings = "'wght' 400"
-}
+})
 
-private val END_PAINT = TextPaint(PAINT).apply {
+private val END_PAINT = arrayListOf<Paint>(TextPaint(PAINT).apply {
     fontVariationSettings = "'wght' 700"
-}
+})
 
 @RunWith(AndroidTestingRunner::class)
 @SmallTest
@@ -59,16 +60,16 @@ class TextInterpolatorTest : SysuiTestCase() {
         val layout = makeLayout(TEXT, PAINT)
 
         val interp = TextInterpolator(layout)
-        interp.basePaint.set(START_PAINT)
+        TextInterpolator.updatePaint(interp.basePaint, START_PAINT)
         interp.onBasePaintModified()
 
-        interp.targetPaint.set(END_PAINT)
+        TextInterpolator.updatePaint(interp.targetPaint, END_PAINT)
         interp.onTargetPaintModified()
 
         // Just after created TextInterpolator, it should have 0 progress.
         assertThat(interp.progress).isEqualTo(0f)
         val actual = interp.toBitmap(BMP_WIDTH, BMP_HEIGHT)
-        val expected = makeLayout(TEXT, START_PAINT).toBitmap(BMP_WIDTH, BMP_HEIGHT)
+        val expected = makeLayout(TEXT, START_PAINT[0] as TextPaint).toBitmap(BMP_WIDTH, BMP_HEIGHT)
 
         assertThat(expected.sameAs(actual)).isTrue()
     }
@@ -78,15 +79,15 @@ class TextInterpolatorTest : SysuiTestCase() {
         val layout = makeLayout(TEXT, PAINT)
 
         val interp = TextInterpolator(layout)
-        interp.basePaint.set(START_PAINT)
+        TextInterpolator.updatePaint(interp.basePaint, START_PAINT)
         interp.onBasePaintModified()
 
-        interp.targetPaint.set(END_PAINT)
+        TextInterpolator.updatePaint(interp.targetPaint, END_PAINT)
         interp.onTargetPaintModified()
 
         interp.progress = 1f
         val actual = interp.toBitmap(BMP_WIDTH, BMP_HEIGHT)
-        val expected = makeLayout(TEXT, END_PAINT).toBitmap(BMP_WIDTH, BMP_HEIGHT)
+        val expected = makeLayout(TEXT, END_PAINT[0] as TextPaint).toBitmap(BMP_WIDTH, BMP_HEIGHT)
 
         assertThat(expected.sameAs(actual)).isTrue()
     }
@@ -96,10 +97,10 @@ class TextInterpolatorTest : SysuiTestCase() {
         val layout = makeLayout(TEXT, PAINT)
 
         val interp = TextInterpolator(layout)
-        interp.basePaint.set(START_PAINT)
+        TextInterpolator.updatePaint(interp.basePaint, START_PAINT)
         interp.onBasePaintModified()
 
-        interp.targetPaint.set(END_PAINT)
+        TextInterpolator.updatePaint(interp.targetPaint, END_PAINT)
         interp.onTargetPaintModified()
 
         // We cannot expect exact text layout of the middle position since we don't use text shaping
@@ -107,10 +108,10 @@ class TextInterpolatorTest : SysuiTestCase() {
         // end state.
         interp.progress = 0.5f
         val actual = interp.toBitmap(BMP_WIDTH, BMP_HEIGHT)
-        assertThat(actual.sameAs(makeLayout(TEXT, START_PAINT).toBitmap(BMP_WIDTH, BMP_HEIGHT)))
-                .isFalse()
-        assertThat(actual.sameAs(makeLayout(TEXT, END_PAINT).toBitmap(BMP_WIDTH, BMP_HEIGHT)))
-                .isFalse()
+        assertThat(actual.sameAs(makeLayout(TEXT, START_PAINT[0] as TextPaint)
+            .toBitmap(BMP_WIDTH, BMP_HEIGHT))).isFalse()
+        assertThat(actual.sameAs(makeLayout(TEXT, END_PAINT[0] as TextPaint)
+            .toBitmap(BMP_WIDTH, BMP_HEIGHT))).isFalse()
     }
 
     @Test
@@ -118,10 +119,10 @@ class TextInterpolatorTest : SysuiTestCase() {
         val layout = makeLayout(TEXT, PAINT)
 
         val interp = TextInterpolator(layout)
-        interp.basePaint.set(START_PAINT)
+        TextInterpolator.updatePaint(interp.basePaint, START_PAINT)
         interp.onBasePaintModified()
 
-        interp.targetPaint.set(END_PAINT)
+        TextInterpolator.updatePaint(interp.targetPaint, END_PAINT)
         interp.onTargetPaintModified()
 
         interp.progress = 0.5f
