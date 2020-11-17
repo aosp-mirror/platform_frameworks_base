@@ -301,7 +301,7 @@ class ToggleRangeBehavior : Behavior {
     }
 
     fun findNearestStep(value: Float): Float {
-        var minDiff = 1000f
+        var minDiff = Float.MAX_VALUE
 
         var f = rangeTemplate.getMinValue()
         while (f <= rangeTemplate.getMaxValue()) {
