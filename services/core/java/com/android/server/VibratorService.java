@@ -119,11 +119,17 @@ public class VibratorService extends IVibratorService.Stub {
     private final class VibrationCallbacks implements VibrationThread.VibrationCallbacks {
 
         @Override
-        public void prepareSyncedVibration(int requiredCapabilities, int[] vibratorIds) {
+        public boolean prepareSyncedVibration(long requiredCapabilities, int[] vibratorIds) {
+            return false;
         }
 
         @Override
-        public void triggerSyncedVibration(long vibrationId) {
+        public boolean triggerSyncedVibration(long vibrationId) {
+            return false;
+        }
+
+        @Override
+        public void cancelSyncedVibration() {
         }
 
         @Override
