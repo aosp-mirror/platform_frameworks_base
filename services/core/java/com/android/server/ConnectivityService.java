@@ -4730,10 +4730,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
             if (mLockdownEnabled) {
                 return new VpnInfo[0];
             }
-
             List<VpnInfo> infoList = new ArrayList<>();
-            for (int i = 0; i < mVpns.size(); i++) {
-                VpnInfo info = createVpnInfo(mVpns.valueAt(i));
+            for (NetworkAgentInfo nai : mNetworkAgentInfos.values()) {
+                VpnInfo info = createVpnInfo(nai);
                 if (info != null) {
                     infoList.add(info);
                 }
@@ -4746,13 +4745,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
      * @return VPN information for accounting, or null if we can't retrieve all required
      *         information, e.g underlying ifaces.
      */
-    @Nullable
-    private VpnInfo createVpnInfo(Vpn vpn) {
-        VpnInfo info = vpn.getVpnInfo();
-        if (info == null) {
-            return null;
-        }
-        Network[] underlyingNetworks = vpn.getUnderlyingNetworks();
+    private VpnInfo createVpnInfo(NetworkAgentInfo nai) {
+        if (!nai.isVPN()) return null;
+
+        Network[] underlyingNetworks = nai.declaredUnderlyingNetworks;
         // see VpnService.setUnderlyingNetworks()'s javadoc about how to interpret
         // the underlyingNetworks list.
         if (underlyingNetworks == null) {
@@ -4761,23 +4757,33 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 underlyingNetworks = new Network[] { defaultNai.network };
             }
         }
-        if (underlyingNetworks != null && underlyingNetworks.length > 0) {
-            List<String> interfaces = new ArrayList<>();
-            for (Network network : underlyingNetworks) {
-                LinkProperties lp = getLinkProperties(network);
-                if (lp != null) {
-                    for (String iface : lp.getAllInterfaceNames()) {
-                        if (!TextUtils.isEmpty(iface)) {
-                            interfaces.add(iface);
-                        }
-                    }
+
+        if (ArrayUtils.isEmpty(underlyingNetworks)) return null;
+
+        List<String> interfaces = new ArrayList<>();
+        for (Network network : underlyingNetworks) {
+            NetworkAgentInfo underlyingNai = getNetworkAgentInfoForNetwork(network);
+            if (underlyingNai == null) continue;
+            LinkProperties lp = underlyingNai.linkProperties;
+            for (String iface : lp.getAllInterfaceNames()) {
+                if (!TextUtils.isEmpty(iface)) {
+                    interfaces.add(iface);
                 }
             }
-            if (!interfaces.isEmpty()) {
-                info.underlyingIfaces = interfaces.toArray(new String[interfaces.size()]);
-            }
         }
-        return info.underlyingIfaces == null ? null : info;
+
+        if (interfaces.isEmpty()) return null;
+
+        VpnInfo info = new VpnInfo();
+        info.ownerUid = nai.networkCapabilities.getOwnerUid();
+        info.vpnIface = nai.linkProperties.getInterfaceName();
+        // Must be non-null or NetworkStatsService will crash.
+        // Cannot happen in production code because Vpn only registers the NetworkAgent after the
+        // tun or ipsec interface is created.
+        if (info.vpnIface == null) return null;
+        info.underlyingIfaces = interfaces.toArray(new String[0]);
+
+        return info;
     }
 
     /**
