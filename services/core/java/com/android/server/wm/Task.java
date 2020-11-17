@@ -4089,6 +4089,7 @@ class Task extends WindowContainer<WindowContainer> {
         // assigning bounds from ActivityRecord#layoutLetterbox when they are ready.
         info.letterboxActivityBounds = Rect.copyOrNull(mLetterboxActivityBounds);
         info.positionInParent = getRelativePosition();
+        info.parentBounds = getParentBounds();
 
         info.pictureInPictureParams = getPictureInPictureParams();
         info.topActivityInfo = mReuseActivitiesReport.top != null
@@ -4125,6 +4126,11 @@ class Task extends WindowContainer<WindowContainer> {
             mAtmService.mTaskOrganizerController.dispatchTaskInfoChanged(
                         this, /* force= */ true);
         }
+    }
+
+    private Rect getParentBounds() {
+        final WindowContainer parent = getParent();
+        return parent != null ? new Rect(parent.getBounds()) : new Rect();
     }
 
     /**

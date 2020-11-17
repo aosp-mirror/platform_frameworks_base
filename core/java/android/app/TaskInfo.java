@@ -213,6 +213,13 @@ public class TaskInfo {
      */
     public int parentTaskId;
 
+
+    /**
+     * Parent bounds.
+     * @hide
+     */
+    public Rect parentBounds;
+
     TaskInfo() {
         // Do nothing
     }
@@ -311,6 +318,7 @@ public class TaskInfo {
         letterboxActivityBounds = source.readTypedObject(Rect.CREATOR);
         positionInParent = source.readTypedObject(Point.CREATOR);
         parentTaskId = source.readInt();
+        parentBounds = source.readTypedObject(Rect.CREATOR);
     }
 
     /**
@@ -345,6 +353,7 @@ public class TaskInfo {
         dest.writeTypedObject(letterboxActivityBounds, flags);
         dest.writeTypedObject(positionInParent, flags);
         dest.writeInt(parentTaskId);
+        dest.writeTypedObject(parentBounds, flags);
     }
 
     @Override
@@ -368,6 +377,7 @@ public class TaskInfo {
                 + " letterboxActivityBounds=" + letterboxActivityBounds
                 + " positionInParent=" + positionInParent
                 + " parentTaskId: " + parentTaskId
+                + " parentBounds: " + parentBounds
                 + "}";
     }
 }
