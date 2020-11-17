@@ -18,11 +18,14 @@ package android.net.vcn;
 import static java.util.Objects.requireNonNull;
 
 import android.annotation.NonNull;
+import android.annotation.RequiresPermission;
 import android.annotation.SystemService;
 import android.content.Context;
+import android.os.ParcelUuid;
+import android.os.RemoteException;
 
 /**
- * VcnManager publishes APIs for applications to configure and manage Virtual Carrier Networks
+ * VcnManager publishes APIs for applications to configure and manage Virtual Carrier Networks.
  *
  * @hide
  */
@@ -44,5 +47,57 @@ public final class VcnManager {
     public VcnManager(@NonNull Context ctx, @NonNull IVcnManagementService service) {
         mContext = requireNonNull(ctx, "missing context");
         mService = requireNonNull(service, "missing service");
+    }
+
+    // TODO: Make setVcnConfig(), clearVcnConfig() Public API
+    /**
+     * Sets the VCN configuration for a given subscription group.
+     *
+     * <p>An app that has carrier privileges for any of the subscriptions in the given group may set
+     * a VCN configuration. If a configuration already exists for the given subscription group, it
+     * will be overridden. Any active VCN(s) may be forced to restart to use the new configuration.
+     *
+     * <p>This API is ONLY permitted for callers running as the primary user.
+     *
+     * @param subscriptionGroup the subscription group that the configuration should be applied to
+     * @param config the configuration parameters for the VCN
+     * @throws SecurityException if the caller does not have carrier privileges, or is not running
+     *     as the primary user
+     * @hide
+     */
+    @RequiresPermission("carrier privileges") // TODO (b/72967236): Define a system-wide constant
+    public void setVcnConfig(@NonNull ParcelUuid subscriptionGroup, @NonNull VcnConfig config) {
+        requireNonNull(subscriptionGroup, "subscriptionGroup was null");
+        requireNonNull(config, "config was null");
+
+        try {
+            mService.setVcnConfig(subscriptionGroup, config);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    // TODO: Make setVcnConfig(), clearVcnConfig() Public API
+    /**
+     * Clears the VCN configuration for a given subscription group.
+     *
+     * <p>An app that has carrier privileges for any of the subscriptions in the given group may
+     * clear a VCN configuration. This API is ONLY permitted for callers running as the primary
+     * user. Any active VCN will be torn down.
+     *
+     * @param subscriptionGroup the subscription group that the configuration should be applied to
+     * @throws SecurityException if the caller does not have carrier privileges, or is not running
+     *     as the primary user
+     * @hide
+     */
+    @RequiresPermission("carrier privileges") // TODO (b/72967236): Define a system-wide constant
+    public void clearVcnConfig(@NonNull ParcelUuid subscriptionGroup) {
+        requireNonNull(subscriptionGroup, "subscriptionGroup was null");
+
+        try {
+            mService.clearVcnConfig(subscriptionGroup);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 }
