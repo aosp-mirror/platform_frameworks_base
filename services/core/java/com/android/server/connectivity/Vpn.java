@@ -27,7 +27,7 @@ import static android.net.RouteInfo.RTN_UNREACHABLE;
 
 import static com.android.internal.util.Preconditions.checkArgument;
 import static com.android.internal.util.Preconditions.checkNotNull;
-import static com.android.server.connectivity.NetworkNotificationManager.NOTIFICATION_VPN;
+import static com.android.server.connectivity.NetworkNotificationManager.NOTIFICATION_CHANNEL_VPN;
 
 import android.Manifest;
 import android.annotation.NonNull;
@@ -1945,7 +1945,7 @@ public class Vpn {
             final PendingIntent configIntent = mSystemServices.pendingIntentGetActivityAsUser(
                     intent, PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT, user);
             final Notification.Builder builder =
-                    new Notification.Builder(mContext, NOTIFICATION_VPN)
+                    new Notification.Builder(mContext, NOTIFICATION_CHANNEL_VPN)
                             .setSmallIcon(R.drawable.vpn_connected)
                             .setContentTitle(mContext.getString(R.string.vpn_lockdown_disconnected))
                             .setContentText(mContext.getString(R.string.vpn_lockdown_config))
