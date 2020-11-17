@@ -1119,7 +1119,8 @@ public class Instrumentation {
         }
         try {
             WindowManagerGlobal.getWindowManagerService().injectInputAfterTransactionsApplied(event,
-                    InputManager.INJECT_INPUT_EVENT_MODE_WAIT_FOR_FINISH);
+                    InputManager.INJECT_INPUT_EVENT_MODE_WAIT_FOR_FINISH,
+                    true /* waitForAnimations */);
         } catch (RemoteException e) {
         }
     }

@@ -695,6 +695,9 @@ public final class UiAutomation {
 
     /**
      * A method for injecting an arbitrary input event.
+     *
+     * This method waits for all window container animations and surface operations to complete.
+     *
      * <p>
      * <strong>Note:</strong> It is caller's responsibility to recycle the event.
      * </p>
@@ -704,12 +707,34 @@ public final class UiAutomation {
      * @return Whether event injection succeeded.
      */
     public boolean injectInputEvent(InputEvent event, boolean sync) {
+        return injectInputEvent(event, sync, true /* waitForAnimations */);
+    }
+
+    /**
+     * A method for injecting an arbitrary input event, optionally waiting for window animations to
+     * complete.
+     * <p>
+     * <strong>Note:</strong> It is caller's responsibility to recycle the event.
+     * </p>
+     *
+     * @param event The event to inject.
+     * @param sync  Whether to inject the event synchronously.
+     * @param waitForAnimations Whether to wait for all window container animations and surface
+     *   operations to complete.
+     * @return Whether event injection succeeded.
+     *
+     * @hide
+     */
+    @TestApi
+    public boolean injectInputEvent(@NonNull InputEvent event, boolean sync,
+            boolean waitForAnimations) {
         try {
             if (DEBUG) {
-                Log.i(LOG_TAG, "Injecting: " + event + " sync: " + sync);
+                Log.i(LOG_TAG, "Injecting: " + event + " sync: " + sync + " waitForAnimations: "
+                        + waitForAnimations);
             }
             // Calling out without a lock held.
-            return mUiAutomationConnection.injectInputEvent(event, sync);
+            return mUiAutomationConnection.injectInputEvent(event, sync, waitForAnimations);
         } catch (RemoteException re) {
             Log.e(LOG_TAG, "Error while injecting input event!", re);
         }
@@ -726,7 +751,26 @@ public final class UiAutomation {
     public void syncInputTransactions() {
         try {
             // Calling out without a lock held.
-            mUiAutomationConnection.syncInputTransactions();
+            mUiAutomationConnection.syncInputTransactions(true /* waitForAnimations */);
+        } catch (RemoteException re) {
+            Log.e(LOG_TAG, "Error while syncing input transactions!", re);
+        }
+    }
+
+    /**
+     * A request for WindowManagerService to wait until all input information has been sent from
+     * WindowManager to native InputManager and optionally wait for animations to complete.
+     *
+     * @param waitForAnimations Whether to wait for all window container animations and surface
+     *   operations to complete.
+     *
+     * @hide
+     */
+    @TestApi
+    public void syncInputTransactions(boolean waitForAnimations) {
+        try {
+            // Calling out without a lock held.
+            mUiAutomationConnection.syncInputTransactions(waitForAnimations);
         } catch (RemoteException re) {
             Log.e(LOG_TAG, "Error while syncing input transactions!", re);
         }

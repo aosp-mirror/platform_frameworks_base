@@ -2998,7 +2998,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         displayContent, true /* includingParents */);
             }
         }
-        syncInputTransactions();
+        syncInputTransactions(true /* waitForAnimations */);
     }
 
     /**
@@ -7999,7 +7999,8 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     @Override
-    public boolean injectInputAfterTransactionsApplied(InputEvent ev, int mode) {
+    public boolean injectInputAfterTransactionsApplied(InputEvent ev, int mode,
+            boolean waitForAnimations) {
         boolean isDown;
         boolean isUp;
 
@@ -8018,21 +8019,23 @@ public class WindowManagerService extends IWindowManager.Stub
         // For all mouse events, also sync before injecting.
         // For ACTION_UP, sync after injecting.
         if (isDown || isMouseEvent) {
-            syncInputTransactions();
+            syncInputTransactions(waitForAnimations);
         }
         final boolean result =
                 LocalServices.getService(InputManagerInternal.class).injectInputEvent(ev, mode);
         if (isUp) {
-            syncInputTransactions();
+            syncInputTransactions(waitForAnimations);
         }
         return result;
     }
 
     @Override
-    public void syncInputTransactions() {
+    public void syncInputTransactions(boolean waitForAnimations) {
         final long token = Binder.clearCallingIdentity();
         try {
-            waitForAnimationsToComplete();
+            if (waitForAnimations) {
+                waitForAnimationsToComplete();
+            }
 
             // Collect all input transactions from all displays to make sure we could sync all input
             // windows at same time.
