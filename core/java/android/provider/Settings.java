@@ -8412,6 +8412,14 @@ public final class Settings {
                 "emergency_gesture_sound_enabled";
 
         /**
+         * The default number to call in emergency gesture
+         *
+         * @hide
+         */
+        public static final String EMERGENCY_GESTURE_CALL_NUMBER =
+                "emergency_gesture_call_number";
+
+        /**
          * Whether the camera launch gesture to double tap the power button when the screen is off
          * should be disabled.
          *

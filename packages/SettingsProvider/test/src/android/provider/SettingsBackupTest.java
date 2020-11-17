@@ -743,6 +743,7 @@ public class SettingsBackupTest {
                  Settings.Secure.SKIP_GESTURE,
                  Settings.Secure.SILENCE_GESTURE,
                  Settings.Secure.DOZE_WAKE_LOCK_SCREEN_GESTURE,
+                 Settings.Secure.EMERGENCY_GESTURE_CALL_NUMBER,
                  Settings.Secure.DOZE_WAKE_DISPLAY_GESTURE,
                  Settings.Secure.FACE_UNLOCK_RE_ENROLL,
                  Settings.Secure.TAP_GESTURE,
