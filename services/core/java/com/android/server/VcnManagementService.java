@@ -21,6 +21,8 @@ import static java.util.Objects.requireNonNull;
 import android.annotation.NonNull;
 import android.content.Context;
 import android.net.vcn.IVcnManagementService;
+import android.net.vcn.VcnConfig;
+import android.os.ParcelUuid;
 
 /**
  * VcnManagementService manages Virtual Carrier Network profiles and lifecycles.
@@ -98,6 +100,33 @@ public class VcnManagementService extends IVcnManagementService.Stub {
 
     private static class Dependencies {}
 
-    /** Notifies the VcnManagementService that external dependencies can be set up */
-    public void systemReady() {}
+    /** Notifies the VcnManagementService that external dependencies can be set up. */
+    public void systemReady() {
+        // TODO: Retrieve existing profiles from KeyStore
+    }
+
+    /**
+     * Sets a VCN config for a given subscription group.
+     *
+     * <p>Implements the IVcnManagementService Binder interface.
+     */
+    @Override
+    public void setVcnConfig(@NonNull ParcelUuid subscriptionGroup, @NonNull VcnConfig config) {
+        requireNonNull(subscriptionGroup, "subscriptionGroup was null");
+        requireNonNull(config, "config was null");
+
+        // TODO: Store VCN configuration, trigger startup as necessary
+    }
+
+    /**
+     * Clears the VcnManagementService for a given subscription group.
+     *
+     * <p>Implements the IVcnManagementService Binder interface.
+     */
+    @Override
+    public void clearVcnConfig(@NonNull ParcelUuid subscriptionGroup) {
+        requireNonNull(subscriptionGroup, "subscriptionGroup was null");
+
+        // TODO: Clear VCN configuration, trigger teardown as necessary
+    }
 }
