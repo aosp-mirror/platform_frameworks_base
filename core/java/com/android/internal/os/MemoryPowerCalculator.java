@@ -1,8 +1,12 @@
 package com.android.internal.os;
 
 import android.os.BatteryStats;
+import android.os.UserHandle;
 import android.util.Log;
 import android.util.LongSparseArray;
+import android.util.SparseArray;
+
+import java.util.List;
 
 public class MemoryPowerCalculator extends PowerCalculator {
 
@@ -22,11 +26,17 @@ public class MemoryPowerCalculator extends PowerCalculator {
     }
 
     @Override
-    public void calculateApp(BatterySipper app, BatteryStats.Uid u, long rawRealtimeUs,
-            long rawUptimeUs, int statsType) {}
+    public void calculate(List<BatterySipper> sippers, BatteryStats batteryStats,
+            long rawRealtimeUs, long rawUptimeUs, int statsType, SparseArray<UserHandle> asUsers) {
+        BatterySipper memory = new BatterySipper(BatterySipper.DrainType.MEMORY, null, 0);
+        calculateRemaining(memory, batteryStats, rawRealtimeUs, rawUptimeUs, statsType);
+        memory.sumPower();
+        if (memory.totalPowerMah > 0) {
+            sippers.add(memory);
+        }
+    }
 
-    @Override
-    public void calculateRemaining(BatterySipper app, BatteryStats stats, long rawRealtimeUs,
+    private void calculateRemaining(BatterySipper app, BatteryStats stats, long rawRealtimeUs,
             long rawUptimeUs, int statsType) {
         double totalMah = 0;
         long totalTimeMs = 0;
