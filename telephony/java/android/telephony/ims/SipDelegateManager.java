@@ -54,7 +54,6 @@ public class SipDelegateManager {
      * The SIP message has failed being sent or received for an unknown reason.
      * <p>
      * The caller should retry a message that failed with this response.
-     * @hide
      */
     public static final int MESSAGE_FAILURE_REASON_UNKNOWN = 0;
 
@@ -64,47 +63,40 @@ public class SipDelegateManager {
      * <p>
      * This is considered a permanent error and the system will automatically begin the teardown and
      * destruction of the SipDelegate. No further messages should be sent on this transport.
-     * @hide
      */
     public static final int MESSAGE_FAILURE_REASON_DELEGATE_DEAD = 1;
 
     /**
      * The message has not been sent/received because the delegate is in the process of closing and
      * has become unavailable. No further messages should be sent/received on this delegate.
-     * @hide
      */
     public static final int MESSAGE_FAILURE_REASON_DELEGATE_CLOSED = 2;
 
     /**
      * The SIP message has an invalid start line and the message can not be sent.
-     * @hide
      */
     public static final int MESSAGE_FAILURE_REASON_INVALID_START_LINE = 3;
 
     /**
      * One or more of the header fields in the header section of the outgoing SIP message is invalid
      * and the SIP message can not be sent.
-     * @hide
      */
     public static final int MESSAGE_FAILURE_REASON_INVALID_HEADER_FIELDS = 4;
 
     /**
      * The body content of the SIP message is invalid and the message can not be sent.
-     * @hide
      */
     public static final int MESSAGE_FAILURE_REASON_INVALID_BODY_CONTENT = 5;
 
     /**
      * The feature tag associated with the outgoing message does not match any known feature tags
      * and this message can not be sent.
-     * @hide
      */
     public static final int MESSAGE_FAILURE_REASON_INVALID_FEATURE_TAG = 6;
 
     /**
      * The feature tag associated with the outgoing message is not enabled for the associated
      * SipDelegateConnection and can not be sent.
-     * @hide
      */
     public static final int MESSAGE_FAILURE_REASON_TAG_NOT_ENABLED_FOR_DELEGATE = 7;
 
@@ -113,7 +105,6 @@ public class SipDelegateManager {
      * <p>
      * This message should be retried when connectivity to the network is re-established. See
      * {@link android.net.ConnectivityManager.NetworkCallback} for how this can be determined.
-     * @hide
      */
     public static final int MESSAGE_FAILURE_REASON_NETWORK_NOT_AVAILABLE = 8;
 
@@ -124,7 +115,6 @@ public class SipDelegateManager {
      * This is considered a temporary failure, the message should not be retried until an IMS
      * registration change callback is received via
      * {@link DelegateConnectionStateCallback#onFeatureTagStatusChanged}
-     * @hide
      */
     public static final int MESSAGE_FAILURE_REASON_NOT_REGISTERED = 9;
 
@@ -135,7 +125,6 @@ public class SipDelegateManager {
      * <p>
      * The @link SipMessage} should be recreated using the newest
      * {@link SipDelegateImsConfiguration} and sent again.
-     * @hide
      */
     public static final int MESSAGE_FAILURE_REASON_STALE_IMS_CONFIGURATION = 10;
 
@@ -146,7 +135,6 @@ public class SipDelegateManager {
      * This is considered a temporary error and the {@link SipDelegateConnection} should resend the
      * message once {@link DelegateRegistrationState#DEREGISTERING_REASON_FEATURE_TAGS_CHANGING} is
      * no longer reported.
-     * @hide
      */
     public static final int MESSAGE_FAILURE_REASON_INTERNAL_DELEGATE_STATE_TRANSITION = 11;
 
@@ -171,7 +159,6 @@ public class SipDelegateManager {
 
     /**
      * Access to use this feature tag has been denied for an unknown reason.
-     * @hide
      */
     public static final int DENIED_REASON_UNKNOWN = 0;
 
@@ -179,14 +166,12 @@ public class SipDelegateManager {
      * This feature tag is allowed to be used by this SipDelegateConnection, but it is in use by
      * another SipDelegateConnection and can not be associated with this delegate. The feature tag
      * will stay in this state until the feature tag is release by the other application.
-     * @hide
      */
     public static final int DENIED_REASON_IN_USE_BY_ANOTHER_DELEGATE = 1;
 
     /**
      * Access to use this feature tag has been denied because this application does not have the
      * permissions required to access this feature tag.
-     * @hide
      */
     public static final int DENIED_REASON_NOT_ALLOWED = 2;
 
@@ -194,14 +179,12 @@ public class SipDelegateManager {
      * Access to use this feature tag has been denied because single registration is not allowed by
      * the carrier at this time. The application should fall back to dual registration if
      * applicable.
-     * @hide
      */
     public static final int DENIED_REASON_SINGLE_REGISTRATION_NOT_ALLOWED = 3;
 
     /**
      * This feature tag is not recognized as a valid feature tag by the SipDelegate and has been
      * denied.
-     * @hide
      */
     public static final int DENIED_REASON_INVALID = 4;
 
@@ -218,33 +201,28 @@ public class SipDelegateManager {
 
     /**
      * The SipDelegate has closed due to an unknown reason.
-     * @hide
      */
     public static final int SIP_DELEGATE_DESTROY_REASON_UNKNOWN = 0;
 
     /**
      * The SipDelegate has closed because the IMS service has died unexpectedly.
-     * @hide
      */
     public static final int SIP_DELEGATE_DESTROY_REASON_SERVICE_DEAD = 1;
 
     /**
      * The SipDelegate has closed because the IMS application has requested that the connection be
      * destroyed.
-     * @hide
      */
     public static final int SIP_DELEGATE_DESTROY_REASON_REQUESTED_BY_APP = 2;
 
     /**
      * The SipDelegate has been closed due to the user disabling RCS.
-     * @hide
      */
     public static final int SIP_DELEGATE_DESTROY_REASON_USER_DISABLED_RCS = 3;
 
     /**
      * The SipDelegate has been closed due to the subscription associated with this delegate being
      * torn down.
-     * @hide
      */
     public static final int SIP_DELEGATE_DESTROY_REASON_SUBSCRIPTION_TORN_DOWN = 4;
 
@@ -331,7 +309,6 @@ public class SipDelegateManager {
      *           SipDelegateConnection.
      * @throws ImsException Thrown if there was a problem communicating with the ImsService
      * associated with this SipDelegateManager. See {@link ImsException#getCode()}.
-     * @hide
      */
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
     public void createSipDelegate(@NonNull DelegateRequest request, @NonNull Executor executor,
@@ -366,7 +343,6 @@ public class SipDelegateManager {
      * This will also clean up all related callbacks in the associated ImsService.
      * @param delegateConnection The SipDelegateConnection to destroy.
      * @param reason The reason for why this SipDelegateConnection was destroyed.
-     * @hide
      */
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
     public void destroySipDelegate(@NonNull SipDelegateConnection delegateConnection,
