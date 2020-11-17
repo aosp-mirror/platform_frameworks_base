@@ -85,7 +85,7 @@
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"ការហៅ​ទូរសព្ទ"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"ផ្ទេរ​ឯកសារ"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"ឧបករណ៍​បញ្ចូល"</string>
-    <string name="bluetooth_profile_pan" msgid="1006235139308318188">"ចូល​អ៊ីនធឺណិត"</string>
+    <string name="bluetooth_profile_pan" msgid="1006235139308318188">"ការចូលប្រើ​អ៊ីនធឺណិត"</string>
     <string name="bluetooth_profile_pbap" msgid="7064307749579335765">"ការ​ចែករំលែក​​ទំនាក់ទំនង"</string>
     <string name="bluetooth_profile_pbap_summary" msgid="2955819694801952056">"ប្រើ​សម្រាប់​ការ​ចែករំលែក​ទំនាក់ទំនង"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"ចែករំលែក​ការ​តភ្ជាប់​អ៊ីនធឺណិត"</string>
@@ -399,12 +399,9 @@
     <string name="inactive_app_inactive_summary" msgid="3161222402614236260">"សកម្ម។ ប៉ះដើម្បីបិទ/បើក។"</string>
     <string name="inactive_app_active_summary" msgid="8047630990208722344">"សកម្ម។ ប៉ះដើម្បីបិទ/បើក។"</string>
     <string name="standby_bucket_summary" msgid="5128193447550429600">"ស្ថាន​ភាព​មុខងារ​ផ្អាក​ដំណើរការ​កម្មវិធី៖<xliff:g id="BUCKET"> %s</xliff:g>"</string>
-    <!-- no translation found for transcode_settings_title (6700974145733932357) -->
-    <skip />
-    <!-- no translation found for transcode_enable_all (4719796495995795404) -->
-    <skip />
-    <!-- no translation found for transcode_skip_apps (5680997722349545778) -->
-    <skip />
+    <string name="transcode_settings_title" msgid="6700974145733932357">"ការកំណត់​ការបំប្លែង​កូដមេឌៀ"</string>
+    <string name="transcode_enable_all" msgid="4719796495995795404">"បើក​ការបំប្លែងកូដ​សម្រាប់​កម្មវិធីទាំងអស់"</string>
+    <string name="transcode_skip_apps" msgid="5680997722349545778">"បិទ​ការបំប្លែងកូដ​សម្រាប់​កម្មវិធី"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"សេវាកម្ម​កំពុង​ដំណើរការ"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"មើល និង​គ្រប់គ្រង​សេវាកម្ម​កំពុង​ដំណើរការ​បច្ចុប្បន្ន"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"ការអនុវត្ត WebView"</string>

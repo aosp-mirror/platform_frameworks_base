@@ -399,12 +399,9 @@
     <string name="inactive_app_inactive_summary" msgid="3161222402614236260">"నిష్క్రియంగా ఉంది. టోగుల్ చేయడానికి నొక్కండి."</string>
     <string name="inactive_app_active_summary" msgid="8047630990208722344">"సక్రియంగా ఉంది. టోగుల్ చేయడానికి నొక్కండి."</string>
     <string name="standby_bucket_summary" msgid="5128193447550429600">"యాప్ స్టాండ్‌బై స్థితి:<xliff:g id="BUCKET"> %s</xliff:g>"</string>
-    <!-- no translation found for transcode_settings_title (6700974145733932357) -->
-    <skip />
-    <!-- no translation found for transcode_enable_all (4719796495995795404) -->
-    <skip />
-    <!-- no translation found for transcode_skip_apps (5680997722349545778) -->
-    <skip />
+    <string name="transcode_settings_title" msgid="6700974145733932357">"మీడియా ట్రాన్స్‌కోడింగ్ సెట్టింగ్‌లు"</string>
+    <string name="transcode_enable_all" msgid="4719796495995795404">"అన్ని యాప్‌ల కోసం ట్రాన్స్‌కోడింగ్‌ని ఎనేబుల్ చేయండి"</string>
+    <string name="transcode_skip_apps" msgid="5680997722349545778">"యాప్‌ల కోసం ట్రాన్స్‌కోడింగ్‌ని డిజేబుల్ చేయండి"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"అమలులో ఉన్న సేవలు"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"ప్రస్తుతం అమలులో ఉన్న సేవలను వీక్షించండి మరియు నియంత్రించండి"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"వెబ్ వీక్షణ అమలు"</string>

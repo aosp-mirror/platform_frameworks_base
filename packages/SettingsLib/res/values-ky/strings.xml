@@ -112,7 +112,7 @@
     <string name="bluetooth_opp_profile_summary_use_for" msgid="461981154387015457">"Файл өткөрүү үчүн колдонулсун"</string>
     <string name="bluetooth_hid_profile_summary_use_for" msgid="4289460627406490952">"Киргизүү үчүн колдонулсун"</string>
     <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="7689393730163320483">"Угуу аппараттары үчүн колдонуу"</string>
-    <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"Жупташтыруу"</string>
+    <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"Байланыштыруу"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="2734383073450506220">"ЖУПТАШТЫРУУ"</string>
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Жок"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"Жупташканда байланыштарыңыз менен чалуу таржымалыңызды пайдалана аласыз."</string>
@@ -223,7 +223,7 @@
     <string name="adb_wireless_connection_failed_title" msgid="664211177427438438">"Байланышкан жок"</string>
     <string name="adb_wireless_connection_failed_message" msgid="9213896700171602073">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> туура тармакка туташып турганын текшериңиз"</string>
     <string name="adb_pairing_device_dialog_title" msgid="7141739231018530210">"Түзмөктү жупташтыруу"</string>
-    <string name="adb_pairing_device_dialog_pairing_code_label" msgid="3639239786669722731">"Wi‑Fi жупташтыруучу коду"</string>
+    <string name="adb_pairing_device_dialog_pairing_code_label" msgid="3639239786669722731">"Wi‑Fi аркылуу байланыштыруу коду"</string>
     <string name="adb_pairing_device_dialog_failed_title" msgid="3426758947882091735">"Туташкан жок"</string>
     <string name="adb_pairing_device_dialog_failed_msg" msgid="6611097519661997148">"Түзмөк бир тармакка туташып турушу керек."</string>
     <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"QR кодун скандап, түзмөктү Wi‑Fi аркылуу жупташтырыңыз"</string>
@@ -399,12 +399,9 @@
     <string name="inactive_app_inactive_summary" msgid="3161222402614236260">"Иштеген жок. Күйгүзүү үчүн басып коюңуз."</string>
     <string name="inactive_app_active_summary" msgid="8047630990208722344">"Иштеп турат. Өчүрүү үчүн басып коюңуз."</string>
     <string name="standby_bucket_summary" msgid="5128193447550429600">"Көшүү режиминдеги колдонмонун абалы:<xliff:g id="BUCKET"> %s</xliff:g>"</string>
-    <!-- no translation found for transcode_settings_title (6700974145733932357) -->
-    <skip />
-    <!-- no translation found for transcode_enable_all (4719796495995795404) -->
-    <skip />
-    <!-- no translation found for transcode_skip_apps (5680997722349545778) -->
-    <skip />
+    <string name="transcode_settings_title" msgid="6700974145733932357">"Медианы транскоддоо жөндөөлөрү"</string>
+    <string name="transcode_enable_all" msgid="4719796495995795404">"Бардык колдонмолор үчүн транскоддоону иштетүү"</string>
+    <string name="transcode_skip_apps" msgid="5680997722349545778">"Бардык колдонмолор үчүн транскоддоону өчүрүү"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"Иштеп жаткан кызматтар"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"Учурда иштеп жаткан кызматтарды көрүп, көзөмөлдөп турасыз"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"WebView кызматы"</string>

@@ -287,7 +287,7 @@
     <string name="wifi_metered_label" msgid="8737187690304098638">"Хязгаартай"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Хязгааргүй"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Логгерын буферын хэмжээ"</string>
-    <string name="select_logd_size_dialog_title" msgid="2105401994681013578">"Лог буфер бүрт ногдох логгерын хэмжээг сонгоно уу"</string>
+    <string name="select_logd_size_dialog_title" msgid="2105401994681013578">"Лог буфер бүрд ногдох логгерын хэмжээг сонгоно уу"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="8631859265777337991">"Нэвтрэгчийн тогтмол санг устгах уу?"</string>
     <string name="dev_logpersist_clear_warning_message" msgid="6447590867594287413">"Бид байнгын логоор хянаагүй үед таны төхөөрөмжтэй холбоотой нэвтрэгч өгөгдлийг устгах шаардлагатай."</string>
     <string name="select_logpersist_title" msgid="447071974007104196">"Төхөөрөмжид тогтмол нэвтрэгчийн өгөгдлийн сан"</string>
@@ -399,12 +399,9 @@
     <string name="inactive_app_inactive_summary" msgid="3161222402614236260">"Идэвхгүй байна. Унтраах/асаахын тулд дарна уу."</string>
     <string name="inactive_app_active_summary" msgid="8047630990208722344">"Идэвхтэй байна. Унтраах/асаахын тулд дарна уу."</string>
     <string name="standby_bucket_summary" msgid="5128193447550429600">"Апп зогсолтын горимын төлөв:<xliff:g id="BUCKET"> %s</xliff:g>"</string>
-    <!-- no translation found for transcode_settings_title (6700974145733932357) -->
-    <skip />
-    <!-- no translation found for transcode_enable_all (4719796495995795404) -->
-    <skip />
-    <!-- no translation found for transcode_skip_apps (5680997722349545778) -->
-    <skip />
+    <string name="transcode_settings_title" msgid="6700974145733932357">"Медиагийн хөрвүүлгийн тохиргоо"</string>
+    <string name="transcode_enable_all" msgid="4719796495995795404">"Бүх аппад хөрвүүлгийг идэвхжүүлэх"</string>
+    <string name="transcode_skip_apps" msgid="5680997722349545778">"Аппуудад хөрвүүлгийг идэвхгүй болгох"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"Ажиллаж байгаа үйлчилгээнүүд"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"Одоо ажиллаж байгаа үйлчилгээнүүдийг харах болон хянах"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"WebView хэрэгжилт"</string>

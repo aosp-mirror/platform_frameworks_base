@@ -81,7 +81,7 @@
     <string name="bluetooth_battery_level" msgid="2893696778200201555">"Mức pin <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_battery_level_untethered" msgid="4002282355111504349">"Trái: Mức pin <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, Phải: Mức pin <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>"</string>
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"Đang hoạt động"</string>
-    <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Âm thanh của phương tiện"</string>
+    <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Âm thanh nội dung nghe nhìn"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"Cuộc gọi điện thoại"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Chuyển tệp"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"Thiết bị đầu vào"</string>
@@ -95,7 +95,7 @@
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"Âm thanh HD"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"Thiết bị trợ thính"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"Đã kết nối với Thiết bị trợ thính"</string>
-    <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"Đã kết nối với âm thanh phương tiện"</string>
+    <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"Đã kết nối với âm thanh nội dung nghe nhìn"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"Đã kết nối với âm thanh điện thoại"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2393521801478157362">"Đã kết nối với máy chủ chuyển tệp"</string>
     <string name="bluetooth_map_profile_summary_connected" msgid="4141725591784669181">"Đã kết nối với bản đồ"</string>
@@ -107,7 +107,7 @@
     <string name="bluetooth_pan_profile_summary_use_for" msgid="7422039765025340313">"Sử dụng để truy cập Internet"</string>
     <string name="bluetooth_map_profile_summary_use_for" msgid="4453622103977592583">"Sử dụng cho bản đồ"</string>
     <string name="bluetooth_sap_profile_summary_use_for" msgid="6204902866176714046">"Sử dụng để truy cập SIM"</string>
-    <string name="bluetooth_a2dp_profile_summary_use_for" msgid="7324694226276491807">"Sử dụng cho âm thanh phương tiện"</string>
+    <string name="bluetooth_a2dp_profile_summary_use_for" msgid="7324694226276491807">"Sử dụng cho âm thanh nội dung nghe nhìn"</string>
     <string name="bluetooth_headset_profile_summary_use_for" msgid="808970643123744170">"Sử dụng cho âm thanh điện thoại"</string>
     <string name="bluetooth_opp_profile_summary_use_for" msgid="461981154387015457">"Sử dụng để chuyển tệp"</string>
     <string name="bluetooth_hid_profile_summary_use_for" msgid="4289460627406490952">"Sử dụng để nhập"</string>
@@ -399,12 +399,9 @@
     <string name="inactive_app_inactive_summary" msgid="3161222402614236260">"Không hoạt động. Nhấn để chuyển đổi."</string>
     <string name="inactive_app_active_summary" msgid="8047630990208722344">"Hiện hoạt. Nhấn để chuyển đổi."</string>
     <string name="standby_bucket_summary" msgid="5128193447550429600">"Trạng thái chờ ứng dụng:<xliff:g id="BUCKET"> %s</xliff:g>"</string>
-    <!-- no translation found for transcode_settings_title (6700974145733932357) -->
-    <skip />
-    <!-- no translation found for transcode_enable_all (4719796495995795404) -->
-    <skip />
-    <!-- no translation found for transcode_skip_apps (5680997722349545778) -->
-    <skip />
+    <string name="transcode_settings_title" msgid="6700974145733932357">"Tùy chọn chuyển mã ứng dụng"</string>
+    <string name="transcode_enable_all" msgid="4719796495995795404">"Bật tùy chọn chuyển mã cho tất cả ứng dụng"</string>
+    <string name="transcode_skip_apps" msgid="5680997722349545778">"Tắt tùy chọn chuyển mã cho ứng dụng"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"Các dịch vụ đang chạy"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"Xem và kiểm soát các dịch vụ đang chạy"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"Triển khai WebView"</string>
