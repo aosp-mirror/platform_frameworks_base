@@ -17718,6 +17718,17 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
+    /*
+     * Cannot properly check CANNOT_INSTALL_WITH_BAD_PERMISSION_GROUPS using CompatChanges
+     * as this only works for packages that are installed
+     *
+     * TODO: Move logic for permission group compatibility into PermissionManagerService
+     */
+    @SuppressWarnings("AndroidFrameworkCompatChange")
+    private static boolean cannotInstallWithBadPermissionGroups(ParsedPackage parsedPackage) {
+        return parsedPackage.getTargetSdkVersion() >= Build.VERSION_CODES.S;
+    }
+
     @GuardedBy("mInstallLock")
     private PrepareResult preparePackageLI(InstallArgs args, PackageInstalledInfo res)
             throws PrepareFailure {
@@ -17760,7 +17771,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 | (onExternal ? PackageParser.PARSE_EXTERNAL_STORAGE : 0);
 
         Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "parsePackage");
-        ParsedPackage parsedPackage;
+        final ParsedPackage parsedPackage;
         try (PackageParser2 pp = new PackageParser2(mSeparateProcesses, false, mMetrics, null,
                 mPackageParserCallback)) {
             parsedPackage = pp.parsePackage(tmpPackageFile, parseFlags, false);
@@ -17876,15 +17887,6 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
             }
 
-            /*
-             * Cannot properly check CANNOT_INSTALL_WITH_BAD_PERMISSION_GROUPS using CompatChanges
-             * as this only works for packages that are installed
-             *
-             * TODO: Move logic for permission group compatibility into PermissionManagerService
-             */
-            boolean cannotInstallWithBadPermissionGroups =
-                    parsedPackage.getTargetSdkVersion() >= Build.VERSION_CODES.S;
-
             PackageSetting ps = mSettings.mPackages.get(pkgName);
             if (ps != null) {
                 if (DEBUG_INSTALL) Slog.d(TAG, "Existing package: " + ps);
@@ -17942,7 +17944,8 @@ public class PackageManagerService extends IPackageManager.Stub
                         parsedPackage.getPermissionGroups().get(groupNum);
                 final PermissionGroupInfo sourceGroup = getPermissionGroupInfo(group.getName(), 0);
 
-                if (sourceGroup != null && cannotInstallWithBadPermissionGroups) {
+                if (sourceGroup != null
+                        && cannotInstallWithBadPermissionGroups(parsedPackage)) {
                     final String sourcePackageName = sourceGroup.packageName;
 
                     if ((replace || !parsedPackage.getPackageName().equals(sourcePackageName))
@@ -18017,7 +18020,8 @@ public class PackageManagerService extends IPackageManager.Stub
                     }
                 }
 
-                if (perm.getGroup() != null && cannotInstallWithBadPermissionGroups) {
+                if (perm.getGroup() != null
+                        && cannotInstallWithBadPermissionGroups(parsedPackage)) {
                     boolean isPermGroupDefinedByPackage = false;
                     for (int groupNum = 0; groupNum < numGroups; groupNum++) {
                         if (parsedPackage.getPermissionGroups().get(groupNum).getName()

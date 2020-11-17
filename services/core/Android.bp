@@ -61,6 +61,7 @@ genrule {
 
 java_library_static {
     name: "services.core.unboosted",
+    defaults: ["platform_service_defaults"],
     srcs: [
         ":services.core.protologsrc",
         ":dumpstate_aidl",
@@ -146,7 +147,6 @@ java_genrule {
 
 java_library {
     name: "services.core",
-    defaults: ["platform_service_defaults"],
     static_libs: ["services.core.priorityboosted"],
 }
 
