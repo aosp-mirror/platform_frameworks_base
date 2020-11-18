@@ -272,21 +272,7 @@ java_library_static {
         "framework-wifi.stubs",
         "private-stub-annotations-jar",
     ],
-    defaults: [
-        "android_defaults_stubs_current",
-        "android_stubs_dists_default",
-    ],
-    dist: {
-        dir: "apistubs/android/system",
-    },
-    dists: [
-        {
-            // Legacy dist path
-            targets: ["sdk", "win_sdk"],
-            tag: ".jar",
-            dest: "android_system.jar",
-        },
-    ],
+    defaults: ["android_defaults_stubs_current"],
 }
 
 java_library_static {
@@ -303,7 +289,21 @@ java_library_static {
         "framework-wifi.stubs.system",
         "private-stub-annotations-jar",
     ],
-    defaults: ["android_defaults_stubs_current"],
+    defaults: [
+        "android_defaults_stubs_current",
+        "android_stubs_dists_default",
+    ],
+    dist: {
+        dir: "apistubs/android/system",
+    },
+    dists: [
+        {
+            // Legacy dist path
+            targets: ["sdk", "win_sdk"],
+            tag: ".jar",
+            dest: "android_system.jar",
+        },
+    ],
 }
 
 java_library_static {
