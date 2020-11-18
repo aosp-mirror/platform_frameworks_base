@@ -28,8 +28,6 @@ import static android.app.ActivityManager.START_RETURN_LOCK_TASK_MODE_VIOLATION;
 import static android.app.ActivityManager.START_SUCCESS;
 import static android.app.ActivityManager.START_TASK_TO_FRONT;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
-import static android.app.WaitResult.LAUNCH_STATE_COLD;
-import static android.app.WaitResult.LAUNCH_STATE_HOT;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
@@ -819,8 +817,6 @@ class ActivityStarter {
                 break;
             }
             case START_TASK_TO_FRONT: {
-                mRequest.waitResult.launchState =
-                        r.attachedToProcess() ? LAUNCH_STATE_HOT : LAUNCH_STATE_COLD;
                 // ActivityRecord may represent a different activity, but it should not be
                 // in the resumed state.
                 if (r.nowVisible && r.isState(RESUMED)) {

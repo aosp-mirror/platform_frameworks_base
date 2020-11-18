@@ -31,6 +31,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.timeout;
 
 import android.app.ActivityOptions;
@@ -53,6 +54,7 @@ import org.mockito.ArgumentMatcher;
 
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
+import java.util.function.ToIntFunction;
 
 /**
  * Tests for the {@link ActivityMetricsLaunchObserver} class.
@@ -158,6 +160,41 @@ public class ActivityMetricsLaunchObserverTests extends WindowTestsBase {
         verifyNoMoreInteractions(mLaunchObserver);
     }
 
+    @Test
+    public void testLaunchState() {
+        final ToIntFunction<Boolean> launchTemplate = doRelaunch -> {
+            clearInvocations(mLaunchObserver);
+            onActivityLaunched(mTopActivity);
+            notifyTransitionStarting(mTopActivity);
+            if (doRelaunch) {
+                mActivityMetricsLogger.notifyActivityRelaunched(mTopActivity);
+            }
+            final ActivityMetricsLogger.TransitionInfoSnapshot info =
+                    notifyWindowsDrawn(mTopActivity);
+            verifyOnActivityLaunchFinished(mTopActivity);
+            return info.getLaunchState();
+        };
+
+        final WindowProcessController app = mTopActivity.app;
+        // Assume that the process is started (ActivityBuilder has mocked the returned value of
+        // ATMS#getProcessController) but the activity has not attached process.
+        mTopActivity.app = null;
+        assertWithMessage("Warm launch").that(launchTemplate.applyAsInt(false /* doRelaunch */))
+                .isEqualTo(WaitResult.LAUNCH_STATE_WARM);
+
+        mTopActivity.app = app;
+        assertWithMessage("Hot launch").that(launchTemplate.applyAsInt(false /* doRelaunch */))
+                .isEqualTo(WaitResult.LAUNCH_STATE_HOT);
+
+        assertWithMessage("Relaunch").that(launchTemplate.applyAsInt(true /* doRelaunch */))
+                .isEqualTo(WaitResult.LAUNCH_STATE_RELAUNCH);
+
+        mTopActivity.app = null;
+        doReturn(null).when(mAtm).getProcessController(app.mName, app.mUid);
+        assertWithMessage("Cold launch").that(launchTemplate.applyAsInt(false /* doRelaunch */))
+                .isEqualTo(WaitResult.LAUNCH_STATE_COLD);
+    }
+
     private void onActivityLaunched(ActivityRecord activity) {
         onIntentStarted(activity.intent);
         notifyActivityLaunched(START_SUCCESS, activity);
@@ -168,15 +205,10 @@ public class ActivityMetricsLaunchObserverTests extends WindowTestsBase {
 
     @Test
     public void testOnActivityLaunchFinished() {
-        // Assume that the process is started (ActivityBuilder has mocked the returned value of
-        // ATMS#getProcessController) but the activity has not attached process.
-        mTopActivity.app = null;
         onActivityLaunched(mTopActivity);
 
         notifyTransitionStarting(mTopActivity);
-        final ActivityMetricsLogger.TransitionInfoSnapshot info = notifyWindowsDrawn(mTopActivity);
-        assertWithMessage("Warm launch").that(info.getLaunchState())
-                .isEqualTo(WaitResult.LAUNCH_STATE_WARM);
+        notifyWindowsDrawn(mTopActivity);
 
         verifyOnActivityLaunchFinished(mTopActivity);
         verifyNoMoreInteractions(mLaunchObserver);
@@ -231,8 +263,6 @@ public class ActivityMetricsLaunchObserverTests extends WindowTestsBase {
         assertWithMessage("Record start source").that(info.sourceType)
                 .isEqualTo(SourceInfo.TYPE_LAUNCHER);
         assertWithMessage("Record event time").that(info.sourceEventDelayMs).isAtLeast(10);
-        assertWithMessage("Hot launch").that(info.getLaunchState())
-                .isEqualTo(WaitResult.LAUNCH_STATE_HOT);
 
         verifyAsync(mLaunchObserver).onReportFullyDrawn(eqProto(mTopActivity), anyLong());
         verifyOnActivityLaunchFinished(mTopActivity);

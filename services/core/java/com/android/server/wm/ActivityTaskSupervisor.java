@@ -553,14 +553,16 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
         // down to the max limit while they are still waiting to finish.
         mFinishingActivities.remove(r);
 
-        stopWaitingForActivityVisible(r, WaitResult.INVALID_DELAY);
+        stopWaitingForActivityVisible(r);
     }
 
+    /** There is no valid launch time, just stop waiting. */
     void stopWaitingForActivityVisible(ActivityRecord r) {
-        stopWaitingForActivityVisible(r, getActivityMetricsLogger().getLastDrawnDelayMs(r));
+        stopWaitingForActivityVisible(r, WaitResult.INVALID_DELAY, WaitResult.LAUNCH_STATE_UNKNOWN);
     }
 
-    void stopWaitingForActivityVisible(ActivityRecord r, long totalTime) {
+    void stopWaitingForActivityVisible(ActivityRecord r, long totalTime,
+            @WaitResult.LaunchState int launchState) {
         boolean changed = false;
         for (int i = mWaitingForActivityVisible.size() - 1; i >= 0; --i) {
             final WaitInfo w = mWaitingForActivityVisible.get(i);
@@ -570,6 +572,7 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
                 result.timeout = false;
                 result.who = w.getComponent();
                 result.totalTime = totalTime;
+                result.launchState = launchState;
                 mWaitingForActivityVisible.remove(w);
             }
         }

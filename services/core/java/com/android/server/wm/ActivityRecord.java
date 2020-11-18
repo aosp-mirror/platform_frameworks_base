@@ -226,7 +226,7 @@ import android.app.ActivityOptions;
 import android.app.PendingIntent;
 import android.app.PictureInPictureParams;
 import android.app.ResultInfo;
-import android.app.WaitResult.LaunchState;
+import android.app.WaitResult;
 import android.app.servertransaction.ActivityConfigurationChangeItem;
 import android.app.servertransaction.ActivityLifecycleItem;
 import android.app.servertransaction.ActivityRelaunchItem;
@@ -3131,6 +3131,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     void finishRelaunching() {
+        mTaskSupervisor.getActivityMetricsLogger().notifyActivityRelaunched(this);
         unfreezeBounds();
 
         if (mPendingRelaunchCount > 0) {
@@ -5436,14 +5437,15 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 .getActivityMetricsLogger().notifyWindowsDrawn(this, timestampNs);
         final boolean validInfo = info != null;
         final int windowsDrawnDelayMs = validInfo ? info.windowsDrawnDelayMs : INVALID_DELAY;
-        final @LaunchState int launchState = validInfo ? info.getLaunchState() : -1;
+        final @WaitResult.LaunchState int launchState =
+                validInfo ? info.getLaunchState() : WaitResult.LAUNCH_STATE_UNKNOWN;
         // The activity may have been requested to be invisible (another activity has been launched)
         // so there is no valid info. But if it is the current top activity (e.g. sleeping), the
         // invalid state is still reported to make sure the waiting result is notified.
         if (validInfo || this == getDisplayArea().topRunningActivity()) {
             mTaskSupervisor.reportActivityLaunchedLocked(false /* timeout */, this,
                     windowsDrawnDelayMs, launchState);
-            mTaskSupervisor.stopWaitingForActivityVisible(this, windowsDrawnDelayMs);
+            mTaskSupervisor.stopWaitingForActivityVisible(this, windowsDrawnDelayMs, launchState);
         }
         finishLaunchTickingLocked();
         if (task != null) {
@@ -7156,11 +7158,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             } else {
                 mRelaunchReason = RELAUNCH_REASON_NONE;
             }
-            if (!attachedToProcess()) {
-                ProtoLog.v(WM_DEBUG_CONFIGURATION,
-                        "Config is destroying non-running %s", this);
-                destroyImmediately("config");
-            } else if (mState == PAUSING) {
+            if (mState == PAUSING) {
                 // A little annoying: we are waiting for this activity to finish pausing. Let's not
                 // do anything now, but just flag that it needs to be restarted when done pausing.
                 ProtoLog.v(WM_DEBUG_CONFIGURATION,
