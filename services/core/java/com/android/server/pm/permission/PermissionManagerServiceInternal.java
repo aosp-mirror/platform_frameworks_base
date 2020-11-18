@@ -276,42 +276,6 @@ public abstract class PermissionManagerServiceInternal extends PermissionManager
     //@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
     public abstract void resetAllRuntimePermissions(@UserIdInt int userId);
 
-    /**
-     * We might auto-grant permissions if any permission of the group is already granted. Hence if
-     * the group of a granted permission changes we need to revoke it to avoid having permissions of
-     * the new group auto-granted.
-     *
-     * @param newPackage The new package that was installed
-     * @param oldPackage The old package that was updated
-     * @param allPackageNames All packages
-     */
-    public abstract void revokeRuntimePermissionsIfGroupChanged(
-            @NonNull AndroidPackage newPackage,
-            @NonNull AndroidPackage oldPackage,
-            @NonNull ArrayList<String> allPackageNames);
-
-    /**
-     * Some permissions might have been owned by a non-system package, and the system then defined
-     * said permission. Some other permissions may one have been install permissions, but are now
-     * runtime or higher. These permissions should be revoked.
-     *
-     * @param permissionsToRevoke A list of permission names to revoke
-     * @param allPackageNames All packages
-     */
-    public abstract void revokeRuntimePermissionsIfPermissionDefinitionChanged(
-            @NonNull List<String> permissionsToRevoke,
-            @NonNull ArrayList<String> allPackageNames);
-
-    /**
-     * Add all permissions in the given package.
-     * <p>
-     * NOTE: argument {@code groupTEMP} is temporary until mPermissionGroups is moved to
-     * the permission settings.
-     *
-     * @return A list of BasePermissions that were updated, and need to be revoked from packages
-     */
-    public abstract List<String> addAllPermissions(@NonNull AndroidPackage pkg, boolean chatty);
-    public abstract void addAllPermissionGroups(@NonNull AndroidPackage pkg, boolean chatty);
     public abstract void removeAllPermissions(@NonNull AndroidPackage pkg, boolean chatty);
 
     /**
@@ -578,10 +542,15 @@ public abstract class PermissionManagerServiceInternal extends PermissionManager
             @NonNull LegacyPermissionSettings legacyPermissionSettings);
 
     /**
-     * Transfers ownership of permissions from one package to another.
+     * Callback when a package has been added.
+     *
+     * @param pkg the added package
+     * @param isInstantApp whether the added package is an instant app
+     * @param oldPkg the old package, or {@code null} if none
      */
-    public abstract void transferPermissions(@NonNull String oldPackageName,
-            @NonNull String newPackageName);
+    //@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
+    public abstract void onPackageAdded(@NonNull AndroidPackage pkg, boolean isInstantApp,
+            @Nullable AndroidPackage oldPkg);
 
     /**
      * Check whether a permission can be propagated to instant app.
