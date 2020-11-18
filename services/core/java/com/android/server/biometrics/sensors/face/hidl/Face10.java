@@ -874,7 +874,10 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
         });
     }
 
-    public void dumpHal(@NonNull FileDescriptor fd, @NonNull String[] args) {
+    /**
+     * Sends a debug message to the HAL with the provided FileDescriptor and arguments.
+     */
+    public void dumpHal(int sensorId, @NonNull FileDescriptor fd, @NonNull String[] args) {
         // WARNING: CDD restricts image data from leaving TEE unencrypted on
         //          production devices:
         // [C-1-10] MUST not allow unencrypted access to identifiable biometric
