@@ -30,6 +30,7 @@ import android.view.IWindow;
 import android.view.InputChannel;
 import android.view.MagnificationSpec;
 import android.view.WindowInfo;
+import android.view.WindowManager.DisplayImePolicy;
 
 import com.android.internal.policy.KeyInterceptionInfo;
 import com.android.server.input.InputManagerService;
@@ -506,12 +507,12 @@ public abstract class WindowManagerInternal {
     public abstract boolean shouldShowSystemDecorOnDisplay(int displayId);
 
     /**
-     * Indicates that the display should show IME.
+     * Indicates the policy for how the display should show IME.
      *
      * @param displayId The id of the display.
-     * @return {@code true} if the display should show IME when an input field become focused on it.
+     * @return The policy for how the display should show IME.
      */
-    public abstract boolean shouldShowIme(int displayId);
+    public abstract @DisplayImePolicy int getDisplayImePolicy(int displayId);
 
     /**
      * Show IME on imeTargetWindow once IME has finished layout.

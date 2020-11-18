@@ -45,6 +45,8 @@ import static android.server.inputmethod.InputMethodManagerServiceProto.SYSTEM_R
 import static android.util.imetracing.ImeTracing.IME_TRACING_FROM_IMMS;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
+import static android.view.WindowManager.DISPLAY_IME_POLICY_HIDE;
+import static android.view.WindowManager.DISPLAY_IME_POLICY_LOCAL;
 
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
@@ -131,6 +133,8 @@ import android.view.DisplayInfo;
 import android.view.IWindowManager;
 import android.view.InputChannel;
 import android.view.View;
+import android.view.WindowManager;
+import android.view.WindowManager.DisplayImePolicy;
 import android.view.WindowManager.LayoutParams;
 import android.view.WindowManager.LayoutParams.SoftInputModeFlags;
 import android.view.autofill.AutofillId;
@@ -529,6 +533,13 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
      * a new bind performed.
      */
     int mCurSeq;
+
+    /**
+     * {@code true} if the Ime policy has been set to {@link WindowManager#DISPLAY_IME_POLICY_HIDE}.
+     *
+     * This prevents the IME from showing when it otherwise may have shown.
+     */
+    boolean mImeHiddenByDisplayPolicy;
 
     /**
      * The client that is currently bound to an input method.
@@ -1658,7 +1669,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         mPackageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
         mInputManagerInternal = LocalServices.getService(InputManagerInternal.class);
         mDisplayManagerInternal = LocalServices.getService(DisplayManagerInternal.class);
-        mImeDisplayValidator = displayId -> mWindowManagerInternal.shouldShowIme(displayId);
+        mImeDisplayValidator = displayId -> mWindowManagerInternal.getDisplayImePolicy(displayId);
         mCaller = new HandlerCaller(context, null, new HandlerCaller.Callback() {
             @Override
             public void executeMessage(Message msg) {
@@ -2438,6 +2449,12 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         final int displayIdToShowIme = computeImeDisplayIdForTarget(cs.selfReportedDisplayId,
                 mImeDisplayValidator);
 
+        if (displayIdToShowIme == INVALID_DISPLAY) {
+            mImeHiddenByDisplayPolicy = true;
+            return InputBindResult.NO_IME;
+        }
+        mImeHiddenByDisplayPolicy = false;
+
         if (mCurClient != cs) {
             // Was the keyguard locked when switching over to the new client?
             mCurClientInKeyguard = isKeyguardLocked();
@@ -2549,7 +2566,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     @FunctionalInterface
     interface ImeDisplayValidator {
-        boolean displayCanShowIme(int displayId);
+        @DisplayImePolicy int getDisplayImePolicy(int displayId);
     }
 
     /**
@@ -2558,7 +2575,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
      * @param displayId the ID of the display where the IME client target is.
      * @param checker instance of {@link ImeDisplayValidator} which is used for
      *                checking display config to adjust the final target display.
-     * @return The ID of the display where the IME should be shown.
+     * @return The ID of the display where the IME should be shown or
+     *         {@link android.view.Display#INVALID_DISPLAY} if the display has an ImePolicy of
+     *         {@link WindowManager#DISPLAY_IME_POLICY_HIDE}.
      */
     static int computeImeDisplayIdForTarget(int displayId, @NonNull ImeDisplayValidator checker) {
         if (displayId == DEFAULT_DISPLAY || displayId == INVALID_DISPLAY) {
@@ -2567,7 +2586,14 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
         // Show IME window on fallback display when the display doesn't support system decorations
         // or the display is virtual and isn't owned by system for security concern.
-        return checker.displayCanShowIme(displayId) ? displayId : FALLBACK_DISPLAY_ID;
+        final int result = checker.getDisplayImePolicy(displayId);
+        if (result == DISPLAY_IME_POLICY_LOCAL) {
+            return displayId;
+        } else if (result == DISPLAY_IME_POLICY_HIDE) {
+            return INVALID_DISPLAY;
+        } else {
+            return FALLBACK_DISPLAY_ID;
+        }
     }
 
     @AnyThread
@@ -5181,6 +5207,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             p.println("  mInFullscreenMode=" + mInFullscreenMode);
             p.println("  mSystemReady=" + mSystemReady + " mInteractive=" + mIsInteractive);
             p.println("  mSettingsObserver=" + mSettingsObserver);
+            p.println("  mImeHiddenByDisplayPolicy=" + mImeHiddenByDisplayPolicy);
             p.println("  mSwitchingController:");
             mSwitchingController.dump(p);
             p.println("  mSettings:");

@@ -206,9 +206,10 @@ message DisplayContentProto {
     optional WindowStateProto input_method_control_target = 29;
     optional WindowStateProto current_focus = 30;
     optional ImeInsetsSourceProviderProto ime_insets_source_provider = 31;
-    optional bool can_show_ime = 32;
+    optional bool can_show_ime = 32 [deprecated=true];
 
     optional DisplayRotationProto display_rotation = 33;
+    optional int32 ime_policy = 34;
 }
 
 /* represents DisplayArea object */

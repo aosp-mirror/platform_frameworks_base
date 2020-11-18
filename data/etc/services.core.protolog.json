@@ -1561,6 +1561,12 @@
       "group": "WM_DEBUG_WINDOW_TRANSITIONS",
       "at": "com\/android\/server\/wm\/Transition.java"
     },
+    "-292790591": {
+      "message": "Attempted to set IME policy to a display that does not exist: %d",
+      "level": "WARN",
+      "group": "WM_ERROR",
+      "at": "com\/android\/server\/wm\/WindowManagerService.java"
+    },
     "-279436615": {
       "message": "Moving to PAUSING: %s",
       "level": "VERBOSE",
@@ -1819,12 +1825,6 @@
       "group": "WM_DEBUG_TASKS",
       "at": "com\/android\/server\/wm\/ActivityTaskManagerService.java"
     },
-    "91350919": {
-      "message": "Attempted to set IME flag to a display that does not exist: %d",
-      "level": "WARN",
-      "group": "WM_ERROR",
-      "at": "com\/android\/server\/wm\/WindowManagerService.java"
-    },
     "94402792": {
       "message": "Moving to RESUMED: %s (in existing)",
       "level": "VERBOSE",
@@ -1835,12 +1835,6 @@
       "message": "hideIme target: %s ",
       "level": "DEBUG",
       "group": "WM_DEBUG_IME",
-      "at": "com\/android\/server\/wm\/WindowManagerService.java"
-    },
-    "95281111": {
-      "message": "Attempted to get IME flag of a display that does not exist: %d",
-      "level": "WARN",
-      "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
     "95902367": {
@@ -2748,6 +2742,12 @@
       "level": "INFO",
       "group": "WM_SHOW_SURFACE_ALLOC",
       "at": "com\/android\/server\/wm\/ScreenRotationAnimation.java"
+    },
+    "1100065297": {
+      "message": "Attempted to get IME policy of a display that does not exist: %d",
+      "level": "WARN",
+      "group": "WM_ERROR",
+      "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
     "1112047265": {
       "message": "finishDrawingWindow: %s mDrawState=%s",

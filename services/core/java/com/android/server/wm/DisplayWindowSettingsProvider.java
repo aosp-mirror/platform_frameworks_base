@@ -16,7 +16,9 @@
 
 package com.android.server.wm;
 
+import static android.view.WindowManager.DISPLAY_IME_POLICY_LOCAL;
 import static android.view.WindowManager.REMOVE_CONTENT_MODE_UNDEFINED;
+import static android.view.WindowManager.DISPLAY_IME_POLICY_FALLBACK_DISPLAY;
 
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
@@ -35,13 +37,11 @@ import android.view.DisplayAddress;
 import android.view.DisplayInfo;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.XmlUtils;
 import com.android.server.wm.DisplayWindowSettings.SettingsProvider;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -49,7 +49,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -390,8 +389,15 @@ class DisplayWindowSettingsProvider implements SettingsProvider {
                     "shouldShowWithInsecureKeyguard", null /* defaultValue */);
             settingsEntry.mShouldShowSystemDecors = getBooleanAttribute(parser,
                     "shouldShowSystemDecors", null /* defaultValue */);
-            settingsEntry.mShouldShowIme = getBooleanAttribute(parser, "shouldShowIme",
+            final Boolean shouldShowIme = getBooleanAttribute(parser, "shouldShowIme",
                     null /* defaultValue */);
+            if (shouldShowIme != null) {
+                settingsEntry.mImePolicy = shouldShowIme ? DISPLAY_IME_POLICY_LOCAL
+                        : DISPLAY_IME_POLICY_FALLBACK_DISPLAY;
+            } else {
+                settingsEntry.mImePolicy = getIntegerAttribute(parser, "imePolicy",
+                        null /* defaultValue */);
+            }
             settingsEntry.mFixedToUserRotation = getIntegerAttribute(parser, "fixedToUserRotation",
                     null /* defaultValue */);
             settingsEntry.mIgnoreOrientationRequest = getBooleanAttribute(parser,
@@ -478,9 +484,8 @@ class DisplayWindowSettingsProvider implements SettingsProvider {
                     out.attribute(null, "shouldShowSystemDecors",
                             settingsEntry.mShouldShowSystemDecors.toString());
                 }
-                if (settingsEntry.mShouldShowIme != null) {
-                    out.attribute(null, "shouldShowIme",
-                            settingsEntry.mShouldShowIme.toString());
+                if (settingsEntry.mImePolicy != null) {
+                    out.attributeInt(null, "imePolicy", settingsEntry.mImePolicy);
                 }
                 if (settingsEntry.mFixedToUserRotation != null) {
                     out.attribute(null, "fixedToUserRotation",
