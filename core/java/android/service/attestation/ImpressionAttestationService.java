@@ -71,6 +71,14 @@ public abstract class ImpressionAttestationService extends Service {
     public static final String SERVICE_META_DATA_KEY_AVAILABLE_ALGORITHMS =
             "android.attestation.available_algorithms";
 
+    /**
+     * The {@link Intent} action that must be declared as handled by a service in its manifest
+     * for the system to recognize it as an impression attestation providing service.
+     * @hide
+     */
+    public static final String SERVICE_INTERFACE =
+            "android.service.attestation.ImpressionAttestationService";
+
     private ImpressionAttestationServiceWrapper mWrapper;
     private Handler mHandler;
 
