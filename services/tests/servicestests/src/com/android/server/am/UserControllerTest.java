@@ -71,7 +71,6 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.UserHandle;
-import android.os.UserManagerInternal;
 import android.os.storage.IStorageManager;
 import android.platform.test.annotations.Presubmit;
 import android.util.Log;
@@ -80,6 +79,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.server.FgThread;
 import com.android.server.am.UserState.KeyEvictedCallback;
+import com.android.server.pm.UserManagerInternal;
 import com.android.server.pm.UserManagerService;
 import com.android.server.wm.WindowManagerService;
 

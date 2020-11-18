@@ -62,7 +62,6 @@ import android.os.ServiceManager;
 import android.os.ShellCallback;
 import android.os.ShellCommand;
 import android.os.UserHandle;
-import android.os.UserManagerInternal;
 import android.provider.Settings;
 import android.provider.SettingsStringUtil.ComponentNameSet;
 import android.text.BidiFormatter;
@@ -88,6 +87,7 @@ import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
+import com.android.server.pm.UserManagerInternal;
 import com.android.server.wm.ActivityTaskManagerInternal;
 
 import org.xmlpull.v1.XmlPullParser;

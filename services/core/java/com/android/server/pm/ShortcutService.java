@@ -83,7 +83,6 @@ import android.os.ShellCallback;
 import android.os.ShellCommand;
 import android.os.SystemClock;
 import android.os.UserHandle;
-import android.os.UserManagerInternal;
 import android.text.TextUtils;
 import android.text.format.TimeMigrationUtils;
 import android.util.ArraySet;

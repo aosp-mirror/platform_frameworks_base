@@ -41,10 +41,10 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.hardware.HardwareBuffer;
 import android.os.UserManager;
-import android.os.UserManagerInternal;
 import android.view.Surface;
 
 import com.android.server.LocalServices;
+import com.android.server.pm.UserManagerInternal;
 
 import org.junit.After;
 import org.junit.AfterClass;
