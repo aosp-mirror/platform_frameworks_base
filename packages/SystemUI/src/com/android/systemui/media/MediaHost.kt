@@ -62,6 +62,10 @@ class MediaHost constructor(
         visibleChangedListeners.add(listener)
     }
 
+    fun removeVisibilityChangeListener(listener: (Boolean) -> Unit) {
+        visibleChangedListeners.remove(listener)
+    }
+
     /**
      * Initialize this MediaObject and create a host view.
      * All state should already be set on this host before calling this method in order to avoid
