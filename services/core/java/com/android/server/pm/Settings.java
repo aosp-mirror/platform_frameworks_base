@@ -1410,7 +1410,8 @@ public final class Settings {
                 PreferredActivity pa = new PreferredActivity(parser);
                 if (pa.mPref.getParseError() == null) {
                     final PreferredIntentResolver resolver = editPreferredActivitiesLPw(userId);
-                    if (resolver.shouldAddPreferredActivity(pa)) {
+                    ArrayList<PreferredActivity> pal = resolver.findFilters(pa);
+                    if (pal == null || pal.size() == 0 || pa.mPref.mAlways) {
                         resolver.addFilter(pa);
                     }
                 } else {
