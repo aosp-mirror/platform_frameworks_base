@@ -311,6 +311,8 @@ public abstract class PackageManager {
         public void writeToParcel(@NonNull Parcel dest, int flags) {
             dest.writeString(mName);
             dest.writeInt(mType);
+            dest.writeString(mPackageName);
+            dest.writeString(mClassName);
             if (mType == TYPE_BOOLEAN) {
                 dest.writeBoolean(mBooleanValue);
             } else if (mType == TYPE_FLOAT) {
@@ -322,8 +324,6 @@ public abstract class PackageManager {
             } else if (mType == TYPE_STRING) {
                 dest.writeString(mStringValue);
             }
-            dest.writeString(mPackageName);
-            dest.writeString(mClassName);
         }
 
         @NonNull
@@ -369,6 +369,41 @@ public abstract class PackageManager {
          */
         public void onPermissionsChanged(int uid);
     }
+
+    /** @hide */
+    public static final int TYPE_UNKNOWN = 0;
+    /** @hide */
+    public static final int TYPE_ACTIVITY = 1;
+    /** @hide */
+    public static final int TYPE_RECEIVER = 2;
+    /** @hide */
+    public static final int TYPE_SERVICE = 3;
+    /** @hide */
+    public static final int TYPE_PROVIDER = 4;
+    /** @hide */
+    public static final int TYPE_APPLICATION = 5;
+    /** @hide */
+    @IntDef(prefix = { "TYPE_" }, value = {
+            TYPE_UNKNOWN,
+            TYPE_ACTIVITY,
+            TYPE_RECEIVER,
+            TYPE_SERVICE,
+            TYPE_PROVIDER,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ComponentType {}
+
+    /** @hide */
+    @IntDef(prefix = { "TYPE_" }, value = {
+            TYPE_UNKNOWN,
+            TYPE_ACTIVITY,
+            TYPE_RECEIVER,
+            TYPE_SERVICE,
+            TYPE_PROVIDER,
+            TYPE_APPLICATION,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface PropertyLocation {}
 
     /**
      * As a guiding principle:
@@ -8601,6 +8636,88 @@ public abstract class PackageManager {
         throw new UnsupportedOperationException(
                 "getMimeGroup not implemented in subclass");
     }
+
+    /**
+     * Returns the property defined in the given package's &lt;appliction&gt; tag.
+     *
+     * @throws NameNotFoundException if either the given package is not installed or if the
+     * given property is not defined within the &lt;application&gt; tag.
+     */
+    @NonNull
+    public Property getProperty(@NonNull String propertyName, @NonNull String packageName)
+            throws NameNotFoundException {
+        throw new UnsupportedOperationException(
+                "getProperty not implemented in subclass");
+    }
+
+    /**
+     * Returns the property defined in the given component declaration.
+     *
+     * @throws NameNotFoundException if either the given component does not exist or if the
+     * given property is not defined within the component declaration.
+     */
+    @NonNull
+    public Property getProperty(@NonNull String propertyName, @NonNull ComponentName component)
+            throws NameNotFoundException {
+        throw new UnsupportedOperationException(
+                "getProperty not implemented in subclass");
+    }
+
+    /**
+     * Returns the property definition for all &lt;application&gt; tags.
+     * <p>If the property is not defined with any &lt;application&gt; tag,
+     * returns and empty list.
+     */
+    @NonNull
+    public List<Property> queryApplicationProperty(@NonNull String propertyName) {
+        throw new UnsupportedOperationException(
+                "qeuryApplicationProperty not implemented in subclass");
+    }
+
+    /**
+     * Returns the property definition for all &lt;activity&gt; and &lt;activity-alias&gt; tags.
+     * <p>If the property is not defined with any &lt;activity&gt; and &lt;activity-alias&gt; tag,
+     * returns and empty list.
+     */
+    @NonNull
+    public List<Property> queryActivityProperty(@NonNull String propertyName) {
+        throw new UnsupportedOperationException(
+                "qeuryActivityProperty not implemented in subclass");
+    }
+
+    /**
+     * Returns the property definition for all &lt;provider&gt; tags.
+     * <p>If the property is not defined with any &lt;provider&gt; tag,
+     * returns and empty list.
+     */
+    @NonNull
+    public List<Property> queryProviderProperty(@NonNull String propertyName) {
+        throw new UnsupportedOperationException(
+                "qeuryProviderProperty not implemented in subclass");
+    }
+
+    /**
+     * Returns the property definition for all &lt;receiver&gt; tags.
+     * <p>If the property is not defined with any &lt;receiver&gt; tag,
+     * returns and empty list.
+     */
+    @NonNull
+    public List<Property> queryReceiverProperty(@NonNull String propertyName) {
+        throw new UnsupportedOperationException(
+                "qeuryReceiverProperty not implemented in subclass");
+    }
+
+    /**
+     * Returns the property definition for all &lt;service&gt; tags.
+     * <p>If the property is not defined with any &lt;service&gt; tag,
+     * returns and empty list.
+     */
+    @NonNull
+    public List<Property> queryServiceProperty(@NonNull String propertyName) {
+        throw new UnsupportedOperationException(
+                "qeuryServiceProperty not implemented in subclass");
+    }
+
     /**
      * Grants implicit visibility of the package that provides an authority to a querying UID.
      *
