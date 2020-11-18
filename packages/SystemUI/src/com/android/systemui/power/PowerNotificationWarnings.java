@@ -16,6 +16,8 @@
 
 package com.android.systemui.power;
 
+import static android.app.PendingIntent.FLAG_IMMUTABLE;
+
 import android.app.KeyguardManager;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -334,10 +336,14 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
     }
 
     private PendingIntent pendingBroadcast(String action) {
-        return PendingIntent.getBroadcastAsUser(mContext, 0,
-                new Intent(action).setPackage(mContext.getPackageName())
-                    .setFlags(Intent.FLAG_RECEIVER_FOREGROUND),
-                0, UserHandle.CURRENT);
+        return PendingIntent.getBroadcastAsUser(
+                mContext,
+                0 /* request code */,
+                new Intent(action)
+                        .setPackage(mContext.getPackageName())
+                        .setFlags(Intent.FLAG_RECEIVER_FOREGROUND),
+                FLAG_IMMUTABLE /* flags */,
+                UserHandle.CURRENT);
     }
 
     private static Intent settings(String action) {
