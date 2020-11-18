@@ -28,6 +28,10 @@ import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.util.DisplayMetrics.DENSITY_DEFAULT;
 import static android.view.Display.DEFAULT_DISPLAY;
+import static android.view.InsetsState.ITYPE_CLIMATE_BAR;
+import static android.view.InsetsState.ITYPE_EXTRA_NAVIGATION_BAR;
+import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
+import static android.view.InsetsState.ITYPE_STATUS_BAR;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
@@ -36,6 +40,8 @@ import static com.android.server.wm.LaunchParamsController.LaunchParamsModifier.
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 
 import android.app.ActivityOptions;
 import android.content.pm.ActivityInfo;
@@ -45,6 +51,7 @@ import android.graphics.Rect;
 import android.os.Build;
 import android.platform.test.annotations.Presubmit;
 import android.view.Gravity;
+import android.view.InsetsState;
 
 import androidx.test.filters.SmallTest;
 
@@ -1114,8 +1121,9 @@ public class TaskLaunchParamsModifierTests extends WindowTestsBase {
 
         // This test case requires a relatively big app bounds to ensure the default size calculated
         // by letterbox won't be too small to hold the minimum width/height.
-        freeformDisplay.mDisplayContent.mDisplayFrames.mStable.set(/* left */ 10, /* top */ 10,
-                /* right */ 1910, /* top */ 1070);
+        configInsetsState(
+                freeformDisplay.getInsetsStateController().getRawInsetsState(),
+                DISPLAY_BOUNDS, new Rect(10, 10, 1910, 1070));
 
         final ActivityOptions options = ActivityOptions.makeBasic();
         options.setLaunchDisplayId(freeformDisplay.mDisplayId);
@@ -1339,13 +1347,43 @@ public class TaskLaunchParamsModifierTests extends WindowTestsBase {
         display.setBounds(DISPLAY_BOUNDS);
         display.getConfiguration().densityDpi = DENSITY_DEFAULT;
         display.getConfiguration().orientation = ORIENTATION_LANDSCAPE;
-        display.mDisplayContent.mDisplayFrames.mStable.set(DISPLAY_STABLE_BOUNDS);
-        spyOn(display.mDisplayContent.mDisplayFrames);
+        configInsetsState(display.getInsetsStateController().getRawInsetsState(),
+                DISPLAY_BOUNDS, DISPLAY_STABLE_BOUNDS);
 
         // We didn't set up the overall environment for this test, so we need to mute the side
         // effect of layout passes that loosen the stable frame.
-        doNothing().when(display.mDisplayContent.mDisplayFrames).onBeginLayout();
+        final DisplayPolicy policy = display.getDisplayPolicy();
+        spyOn(policy);
+        doNothing().when(policy).beginLayoutLw(any(), anyInt());
         return display;
+    }
+
+    /**
+     * Creates insets sources so that we can get the expected stable frame.
+     */
+    private static void configInsetsState(InsetsState state, Rect displayFrame, Rect stableFrame) {
+        final int dl = displayFrame.left;
+        final int dt = displayFrame.top;
+        final int dr = displayFrame.right;
+        final int db = displayFrame.bottom;
+        final int sl = stableFrame.left;
+        final int st = stableFrame.top;
+        final int sr = stableFrame.right;
+        final int sb = stableFrame.bottom;
+
+        state.setDisplayFrame(displayFrame);
+        if (sl > dl) {
+            state.getSource(ITYPE_CLIMATE_BAR).setFrame(dl, dt, sl, db);
+        }
+        if (st > dt) {
+            state.getSource(ITYPE_STATUS_BAR).setFrame(dl, dt, dr, st);
+        }
+        if (sr < dr) {
+            state.getSource(ITYPE_EXTRA_NAVIGATION_BAR).setFrame(sr, dt, dr, db);
+        }
+        if (sb < db) {
+            state.getSource(ITYPE_NAVIGATION_BAR).setFrame(dl, sb, dr, db);
+        }
     }
 
     private ActivityRecord createSourceActivity(TestDisplayContent display) {

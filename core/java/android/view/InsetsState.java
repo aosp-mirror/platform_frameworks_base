@@ -238,6 +238,22 @@ public class InsetsState implements Parcelable {
                 (legacySystemUiFlags & SYSTEM_UI_FLAG_LAYOUT_STABLE) != 0);
     }
 
+    public Rect calculateInsets(Rect frame, @InsetsType int types, boolean ignoreVisibility) {
+        Insets insets = Insets.NONE;
+        for (int type = FIRST_TYPE; type <= LAST_TYPE; type++) {
+            InsetsSource source = mSources[type];
+            if (source == null) {
+                continue;
+            }
+            int publicType = InsetsState.toPublicType(type);
+            if ((publicType & types) == 0) {
+                continue;
+            }
+            insets = Insets.max(source.calculateInsets(frame, ignoreVisibility), insets);
+        }
+        return insets.toRect();
+    }
+
     public Rect calculateVisibleInsets(Rect frame, @SoftInputModeFlags int softInputMode) {
         Insets insets = Insets.NONE;
         for (int type = FIRST_TYPE; type <= LAST_TYPE; type++) {

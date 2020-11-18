@@ -43,7 +43,6 @@ import static com.android.internal.policy.DecorView.NAVIGATION_BAR_COLOR_VIEW_AT
 import static com.android.internal.policy.DecorView.STATUS_BAR_COLOR_VIEW_ATTRIBUTES;
 import static com.android.internal.policy.DecorView.getNavigationBarRect;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_STARTING_WINDOW;
-import static com.android.server.wm.TaskSnapshotController.getInsetsStateWithVisibilityOverride;
 import static com.android.server.wm.TaskSnapshotController.getSystemBarInsets;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
@@ -246,7 +245,7 @@ class TaskSnapshotSurface implements StartingSurface {
             task.getBounds(taskBounds);
             currentOrientation = topFullscreenOpaqueWindow.getConfiguration().orientation;
             activityType = activity.getActivityType();
-            insetsState = getInsetsStateWithVisibilityOverride(topFullscreenOpaqueWindow);
+            insetsState = topFullscreenOpaqueWindow.getInsetsStateWithVisibilityOverride();
 
         }
         int displayId = activity.getDisplayContent().getDisplayId();

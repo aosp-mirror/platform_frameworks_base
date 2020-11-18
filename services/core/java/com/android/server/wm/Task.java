@@ -448,6 +448,7 @@ class Task extends WindowContainer<WindowContainer> {
     private final Rect mTmpBounds = new Rect();
     private final Rect mTmpInsets = new Rect();
     private final Rect mTmpFullBounds = new Rect();
+    private static final Rect sTmpBounds = new Rect();
 
     // Last non-fullscreen bounds the task was launched in or resized to.
     // The information is persisted and used to determine the appropriate stack to launch the
@@ -3418,8 +3419,7 @@ class Task extends WindowContainer<WindowContainer> {
      * a dialog that's different in size from the activity below, in which case we should
      * be dimming the entire task area behind the dialog.
      *
-     * @param out Rect containing the max visible bounds.
-     * @return true if the task has some visible app windows; false otherwise.
+     * @param out the union of visible bounds.
      */
     private static void getMaxVisibleBounds(ActivityRecord token, Rect out, boolean[] foundTop) {
         // skip hidden (or about to hide) apps
@@ -3435,7 +3435,11 @@ class Task extends WindowContainer<WindowContainer> {
             out.setEmpty();
         }
 
-        win.getMaxVisibleBounds(out);
+        final Rect visibleFrame = sTmpBounds;
+        visibleFrame.set(win.getFrame());
+        visibleFrame.inset(win.getInsetsStateWithVisibilityOverride().calculateVisibleInsets(
+                visibleFrame, win.mAttrs.softInputMode));
+        out.union(visibleFrame);
     }
 
     /** Bounds of the task to be used for dimming, as well as touch related tests. */

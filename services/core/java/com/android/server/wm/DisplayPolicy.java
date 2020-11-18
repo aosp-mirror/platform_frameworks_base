@@ -68,9 +68,6 @@ import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_INSET_PARENT_
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_INTERCEPT_GLOBAL_DRAG_AND_DROP;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_IS_SCREEN_DECOR;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY;
-import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING;
-import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
-import static android.view.WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
@@ -323,7 +320,6 @@ public class DisplayPolicy {
 
     private boolean mLastImmersiveMode;
 
-    private StatusBarManagerInternal mStatusBarInternal;
     private final BarController mStatusBarController;
     private final BarController mNavigationBarController;
 
@@ -332,12 +328,6 @@ public class DisplayPolicy {
     private WindowState mLastFocusedWindow;
 
     private WindowState mSystemUiControllingWindow;
-
-    // The states of decor windows from the last layout. These are used to generate another display
-    // layout in different bounds but with the same states.
-    private boolean mLastNavVisible;
-    private boolean mLastNavTranslucent;
-    private boolean mLastNavAllowedHidden;
 
     private int mLastDisableFlags;
     private int mLastAppearance;
@@ -1568,18 +1558,14 @@ public class DisplayPolicy {
             simulateLayoutDecorWindow(mNavigationBar, displayFrames, insetsState,
                     simulatedWindowFrames, barContentFrames,
                     contentFrame -> layoutNavigationBar(displayFrames,
-                            mDisplayContent.getConfiguration().uiMode, mLastNavVisible,
-                            mLastNavTranslucent, mLastNavAllowedHidden,
-                            contentFrame));
+                            mDisplayContent.getConfiguration().uiMode, contentFrame));
         }
         if (mStatusBar != null) {
             simulateLayoutDecorWindow(mStatusBar, displayFrames, insetsState,
                     simulatedWindowFrames, barContentFrames,
-                    contentFrame -> layoutStatusBar(displayFrames, mLastAppearance,
-                            contentFrame));
+                    contentFrame -> layoutStatusBar(displayFrames, contentFrame));
         }
         layoutScreenDecorWindows(displayFrames, simulatedWindowFrames);
-        postAdjustDisplayFrames(displayFrames);
     }
 
     /**
@@ -1596,35 +1582,11 @@ public class DisplayPolicy {
         mSystemGestures.screenWidth = displayFrames.mUnrestricted.width();
         mSystemGestures.screenHeight = displayFrames.mUnrestricted.height();
 
-        // For purposes of putting out fake window up to steal focus, we will
-        // drive nav being hidden only by whether it is requested.
-        final int appearance = mLastAppearance;
-        final int behavior = mLastBehavior;
-        final InsetsSourceProvider provider =
-                mDisplayContent.getInsetsStateController().peekSourceProvider(ITYPE_NAVIGATION_BAR);
-        boolean navVisible = provider != null ? provider.isClientVisible()
-                : InsetsState.getDefaultVisibility(ITYPE_NAVIGATION_BAR);
-        boolean navTranslucent = (appearance & APPEARANCE_OPAQUE_NAVIGATION_BARS) == 0;
-        boolean immersive = (behavior & BEHAVIOR_SHOW_BARS_BY_SWIPE) != 0;
-        boolean immersiveSticky = (behavior & BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE) != 0;
-        boolean navAllowedHidden = immersive || immersiveSticky;
-        navTranslucent &= !immersiveSticky;  // transient trumps translucent
-
         updateHideNavInputEventReceiver();
 
-        // For purposes of positioning and showing the nav bar, if we have decided that it can't
-        // be hidden (because of the screen aspect ratio), then take that into account.
-        navVisible |= !canHideNavigationBar();
-
-        layoutNavigationBar(displayFrames, uiMode, navVisible,
-                navTranslucent, navAllowedHidden, null /* simulatedContentFrame */);
-        if (DEBUG_LAYOUT) Slog.i(TAG, "mDock rect:" + displayFrames.mDock);
-        layoutStatusBar(displayFrames, appearance, null /* simulatedContentFrame */);
+        layoutNavigationBar(displayFrames, uiMode, null /* simulatedContentFrame */);
+        layoutStatusBar(displayFrames, null /* simulatedContentFrame */);
         layoutScreenDecorWindows(displayFrames, null /* simulatedFrames */);
-        postAdjustDisplayFrames(displayFrames);
-        mLastNavVisible = navVisible;
-        mLastNavTranslucent = navTranslucent;
-        mLastNavAllowedHidden = navAllowedHidden;
     }
 
     void updateHideNavInputEventReceiver() {
@@ -1679,26 +1641,6 @@ public class DisplayPolicy {
         state.getSource(ITYPE_BOTTOM_DISPLAY_CUTOUT).setFrame(u.left, s.bottom, u.right, u.bottom);
     }
 
-    /** Enforces the last layout policy for display frames. */
-    private void postAdjustDisplayFrames(DisplayFrames displayFrames) {
-        if (displayFrames.mDisplayCutoutSafe.top > displayFrames.mUnrestricted.top) {
-            // Make sure that the zone we're avoiding for the cutout is at least as tall as the
-            // status bar; otherwise fullscreen apps will end up cutting halfway into the status
-            // bar.
-            displayFrames.mDisplayCutoutSafe.top = Math.max(displayFrames.mDisplayCutoutSafe.top,
-                    displayFrames.mStable.top);
-        }
-
-        // In case this is a virtual display, and the host display has insets that overlap this
-        // virtual display, apply the insets of the overlapped area onto the current and content
-        // frame of this virtual display. This let us layout windows in the virtual display as
-        // expected when the window needs to avoid overlap with the system windows.
-        // TODO: Generalize the forwarded insets, so that we can handle system windows other than
-        // IME.
-        displayFrames.mCurrent.inset(mForwardedInsets);
-        displayFrames.mContent.inset(mForwardedInsets);
-    }
-
     /**
      * Layout the decor windows with {@link #PRIVATE_FLAG_IS_SCREEN_DECOR}.
      *
@@ -1714,9 +1656,6 @@ public class DisplayPolicy {
 
         sTmpRect.setEmpty();
         final int displayId = displayFrames.mDisplayId;
-        final Rect dockFrame = displayFrames.mDock;
-        final int displayHeight = displayFrames.mDisplayHeight;
-        final int displayWidth = displayFrames.mDisplayWidth;
 
         for (int i = mScreenDecorWindows.size() - 1; i >= 0; --i) {
             final WindowState w = mScreenDecorWindows.valueAt(i);
@@ -1732,10 +1671,7 @@ public class DisplayPolicy {
             getRotatedWindowBounds(displayFrames, w, sTmpScreenDecorFrame);
             final WindowFrames windowFrames = w.getLayoutingWindowFrames();
             windowFrames.setFrames(sTmpScreenDecorFrame /* parentFrame */,
-                    sTmpScreenDecorFrame /* displayFrame */,
-                    sTmpScreenDecorFrame /* contentFrame */,
-                    sTmpScreenDecorFrame /* visibleFrame */, sTmpRect /* decorFrame */,
-                    sTmpScreenDecorFrame /* stableFrame */);
+                    sTmpScreenDecorFrame /* displayFrame */);
             try {
                 w.computeFrame(displayFrames);
             } finally {
@@ -1743,128 +1679,61 @@ public class DisplayPolicy {
                     w.setSimulatedWindowFrames(null);
                 }
             }
-            final Rect frame = windowFrames.mFrame;
-
-            if (frame.left <= 0 && frame.top <= 0) {
-                // Docked at left or top.
-                if (frame.bottom >= displayHeight) {
-                    // Docked left.
-                    dockFrame.left = Math.max(frame.right, dockFrame.left);
-                } else if (frame.right >= displayWidth) {
-                    // Docked top.
-                    dockFrame.top = Math.max(frame.bottom, dockFrame.top);
-                } else {
-                    Slog.w(TAG, "layoutScreenDecorWindows: Ignoring decor win=" + w
-                            + " not docked on left or top of display. frame=" + frame
-                            + " displayWidth=" + displayWidth + " displayHeight=" + displayHeight);
-                }
-            } else if (frame.right >= displayWidth && frame.bottom >= displayHeight) {
-                // Docked at right or bottom.
-                if (frame.top <= 0) {
-                    // Docked right.
-                    dockFrame.right = Math.min(frame.left, dockFrame.right);
-                } else if (frame.left <= 0) {
-                    // Docked bottom.
-                    dockFrame.bottom = Math.min(frame.top, dockFrame.bottom);
-                } else {
-                    Slog.w(TAG, "layoutScreenDecorWindows: Ignoring decor win=" + w
-                            + " not docked on right or bottom" + " of display. frame=" + frame
-                            + " displayWidth=" + displayWidth + " displayHeight=" + displayHeight);
-                }
-            } else {
-                // Screen decor windows are required to be docked on one of the sides of the screen.
-                Slog.w(TAG, "layoutScreenDecorWindows: Ignoring decor win=" + w
-                        + " not docked on one of the sides of the display. frame=" + frame
-                        + " displayWidth=" + displayWidth + " displayHeight=" + displayHeight);
-            }
         }
-
-        displayFrames.mRestricted.set(dockFrame);
-        displayFrames.mCurrent.set(dockFrame);
-        displayFrames.mVoiceContent.set(dockFrame);
-        displayFrames.mSystem.set(dockFrame);
-        displayFrames.mContent.set(dockFrame);
     }
 
-    private void layoutStatusBar(DisplayFrames displayFrames, int appearance,
-            Rect simulatedContentFrame) {
+    private void layoutStatusBar(DisplayFrames displayFrames, Rect simulatedContentFrame) {
         // decide where the status bar goes ahead of time
         if (mStatusBar == null) {
             return;
         }
         // apply any status bar insets
         getRotatedWindowBounds(displayFrames, mStatusBar, sTmpStatusFrame);
-        sTmpRect.setEmpty();
         final WindowFrames windowFrames = mStatusBar.getLayoutingWindowFrames();
         windowFrames.setFrames(sTmpStatusFrame /* parentFrame */,
-                sTmpStatusFrame /* displayFrame */, sTmpStatusFrame /* contentFrame */,
-                sTmpStatusFrame /* visibleFrame */, sTmpRect /* decorFrame */,
-                sTmpStatusFrame /* stableFrame */);
+                sTmpStatusFrame /* displayFrame */);
         // Let the status bar determine its size.
         mStatusBar.computeFrame(displayFrames);
 
         // For layout, the status bar is always at the top with our fixed height.
-        displayFrames.mStable.top = displayFrames.mUnrestricted.top
+        int statusBarBottom = displayFrames.mUnrestricted.top
                 + mStatusBarHeightForRotation[displayFrames.mRotation];
         // Make sure the status bar covers the entire cutout height
-        displayFrames.mStable.top = Math.max(displayFrames.mStable.top,
-                displayFrames.mDisplayCutoutSafe.top);
+        statusBarBottom = Math.max(statusBarBottom, displayFrames.mDisplayCutoutSafe.top);
+
+        if (displayFrames.mDisplayCutoutSafe.top > displayFrames.mUnrestricted.top) {
+            // Make sure that the zone we're avoiding for the cutout is at least as tall as the
+            // status bar; otherwise fullscreen apps will end up cutting halfway into the status
+            // bar.
+            displayFrames.mDisplayCutoutSafe.top = Math.max(displayFrames.mDisplayCutoutSafe.top,
+                    statusBarBottom);
+        }
 
         // Tell the bar controller where the collapsed status bar content is.
-        sTmpRect.set(windowFrames.mContentFrame);
+        sTmpRect.set(windowFrames.mFrame);
         sTmpRect.intersect(displayFrames.mDisplayCutoutSafe);
-        sTmpRect.top = windowFrames.mContentFrame.top; // Ignore top display cutout inset
-        sTmpRect.bottom = displayFrames.mStable.top; // Use collapsed status bar size
+        sTmpRect.top = windowFrames.mFrame.top; // Ignore top display cutout inset
+        sTmpRect.bottom = statusBarBottom; // Use collapsed status bar size
         if (simulatedContentFrame != null) {
             simulatedContentFrame.set(sTmpRect);
         } else {
             mStatusBarController.setContentFrame(sTmpRect);
         }
-
-        boolean statusBarTransient =
-                mDisplayContent.getInsetsPolicy().isTransient(ITYPE_STATUS_BAR);
-        boolean statusBarTranslucent = (appearance & APPEARANCE_OPAQUE_STATUS_BARS) == 0;
-
-        // If the status bar is hidden, we don't want to cause windows behind it to scroll.
-        if (mStatusBar.isVisible() && !statusBarTransient) {
-            // Status bar may go away, so the screen area it occupies is available to apps but just
-            // covering them when the status bar is visible.
-            final Rect dockFrame = displayFrames.mDock;
-            dockFrame.top = displayFrames.mStable.top;
-            displayFrames.mContent.set(dockFrame);
-            displayFrames.mVoiceContent.set(dockFrame);
-            displayFrames.mCurrent.set(dockFrame);
-
-            if (DEBUG_LAYOUT) Slog.v(TAG, "Status bar: " + String.format(
-                    "dock=%s content=%s cur=%s", dockFrame.toString(),
-                    displayFrames.mContent.toString(), displayFrames.mCurrent.toString()));
-
-            if (!statusBarTranslucent && !mStatusBar.isAnimatingLw()) {
-
-                // If the opaque status bar is currently requested to be visible, and not in the
-                // process of animating on or off, then we can tell the app that it is covered by
-                // it.
-                displayFrames.mSystem.top = displayFrames.mStable.top;
-            }
-        }
     }
 
-    private void layoutNavigationBar(DisplayFrames displayFrames, int uiMode, boolean navVisible,
-            boolean navTranslucent, boolean navAllowedHidden, Rect simulatedContentFrame) {
+    private void layoutNavigationBar(DisplayFrames displayFrames, int uiMode,
+            Rect simulatedContentFrame) {
         if (mNavigationBar == null) {
             return;
         }
 
         final Rect navigationFrame = sTmpNavFrame;
-        boolean navBarTransient =
-                mDisplayContent.getInsetsPolicy().isTransient(ITYPE_NAVIGATION_BAR);
         // Force the navigation bar to its appropriate place and size. We need to do this directly,
         // instead of relying on it to bubble up from the nav bar, because this needs to change
         // atomically with screen rotations.
         final int rotation = displayFrames.mRotation;
         final int displayHeight = displayFrames.mDisplayHeight;
         final int displayWidth = displayFrames.mDisplayWidth;
-        final Rect dockFrame = displayFrames.mDock;
         final int navBarPosition = navigationBarPosition(displayWidth, displayHeight, rotation);
 
         getRotatedWindowBounds(displayFrames, mNavigationBar, navigationFrame);
@@ -1875,73 +1744,31 @@ public class DisplayPolicy {
 
         if (navBarPosition == NAV_BAR_BOTTOM) {
             // It's a system nav bar or a portrait screen; nav bar goes on bottom.
-            final int topNavBar = Math.min(cutoutSafeUnrestricted.bottom, navigationFrame.bottom)
+            navigationFrame.top = Math.min(cutoutSafeUnrestricted.bottom, navigationFrame.bottom)
                     - getNavigationBarFrameHeight(rotation, uiMode);
-            final int top = mNavButtonForcedVisible ? topNavBar :
-                    Math.min(cutoutSafeUnrestricted.bottom, navigationFrame.bottom)
-                            - getNavigationBarHeight(rotation, uiMode);
-            navigationFrame.top = topNavBar;
-            displayFrames.mStable.bottom = displayFrames.mStableFullscreen.bottom = top;
-            if (navVisible && !navBarTransient) {
-                dockFrame.bottom = displayFrames.mRestricted.bottom = top;
-            }
-            if (navVisible && !navTranslucent && !navAllowedHidden
-                    && !mNavigationBar.isAnimatingLw()) {
-                // If the opaque nav bar is currently requested to be visible and not in the process
-                // of animating on or off, then we can tell the app that it is covered by it.
-                displayFrames.mSystem.bottom = top;
-            }
         } else if (navBarPosition == NAV_BAR_RIGHT) {
             // Landscape screen; nav bar goes to the right.
-            final int left = Math.min(cutoutSafeUnrestricted.right, navigationFrame.right)
+            navigationFrame.left = Math.min(cutoutSafeUnrestricted.right, navigationFrame.right)
                     - getNavigationBarWidth(rotation, uiMode);
-            navigationFrame.left = left;
-            displayFrames.mStable.right = displayFrames.mStableFullscreen.right = left;
-            if (navVisible && !navBarTransient) {
-                dockFrame.right = displayFrames.mRestricted.right = left;
-            }
-            if (navVisible && !navTranslucent && !navAllowedHidden
-                    && !mNavigationBar.isAnimatingLw()) {
-                // If the nav bar is currently requested to be visible, and not in the process of
-                // animating on or off, then we can tell the app that it is covered by it.
-                displayFrames.mSystem.right = left;
-            }
         } else if (navBarPosition == NAV_BAR_LEFT) {
             // Seascape screen; nav bar goes to the left.
-            final int right = Math.max(cutoutSafeUnrestricted.left, navigationFrame.left)
+            navigationFrame.right = Math.max(cutoutSafeUnrestricted.left, navigationFrame.left)
                     + getNavigationBarWidth(rotation, uiMode);
-            navigationFrame.right = right;
-            displayFrames.mStable.left = displayFrames.mStableFullscreen.left = right;
-            if (navVisible && !navBarTransient) {
-                dockFrame.left = displayFrames.mRestricted.left = right;
-            }
-            if (navVisible && !navTranslucent && !navAllowedHidden
-                    && !mNavigationBar.isAnimatingLw()) {
-                // If the nav bar is currently requested to be visible, and not in the process of
-                // animating on or off, then we can tell the app that it is covered by it.
-                displayFrames.mSystem.left = right;
-            }
         }
 
-        // Make sure the content and current rectangles are updated to account for the restrictions
-        // from the navigation bar.
-        displayFrames.mCurrent.set(dockFrame);
-        displayFrames.mVoiceContent.set(dockFrame);
-        displayFrames.mContent.set(dockFrame);
-        // And compute the final frame.
-        sTmpRect.setEmpty();
+        // Compute the final frame.
         final WindowFrames windowFrames = mNavigationBar.getLayoutingWindowFrames();
         windowFrames.setFrames(navigationFrame /* parentFrame */,
-                navigationFrame /* displayFrame */,
-                displayFrames.mDisplayCutoutSafe /* contentFrame */,
-                navigationFrame /* visibleFrame */, sTmpRect /* decorFrame */,
-                navigationFrame /* stableFrame */);
+                navigationFrame /* displayFrame */);
         mNavigationBar.computeFrame(displayFrames);
+        final Rect contentFrame =  sTmpRect;
+        contentFrame.set(windowFrames.mFrame);
+        contentFrame.intersect(displayFrames.mDisplayCutoutSafe);
         if (simulatedContentFrame != null) {
-            simulatedContentFrame.set(windowFrames.mContentFrame);
+            simulatedContentFrame.set(contentFrame);
         } else {
             mNavigationBarPosition = navBarPosition;
-            mNavigationBarController.setContentFrame(windowFrames.mContentFrame);
+            mNavigationBarController.setContentFrame(contentFrame);
         }
 
         if (DEBUG_LAYOUT) Slog.i(TAG, "mNavigationBar frame: " + navigationFrame);
@@ -2010,21 +1837,12 @@ public class DisplayPolicy {
         sTmpLastParentFrame.set(windowFrames.mParentFrame);
         final Rect pf = windowFrames.mParentFrame;
         final Rect df = windowFrames.mDisplayFrame;
-        final Rect cf = windowFrames.mContentFrame;
-        final Rect vf = windowFrames.mVisibleFrame;
-        final Rect dcf = windowFrames.mDecorFrame;
-        final Rect sf = windowFrames.mStableFrame;
-        dcf.setEmpty();
         windowFrames.setParentFrameWasClippedByDisplayCutout(false);
-
-        final int adjust = sim & SOFT_INPUT_MASK_ADJUST;
 
         final boolean layoutInScreen = (fl & FLAG_LAYOUT_IN_SCREEN) == FLAG_LAYOUT_IN_SCREEN;
         final boolean layoutInsetDecor = (fl & FLAG_LAYOUT_INSET_DECOR) == FLAG_LAYOUT_INSET_DECOR;
 
-        sf.set(displayFrames.mStable);
-
-        final InsetsState state = mDisplayContent.getInsetsPolicy().getInsetsForWindow(win);
+        final InsetsState state = win.getInsetsState();
         computeWindowBounds(attrs, state, df);
         if (attached == null) {
             pf.set(df);
@@ -2034,15 +1852,9 @@ public class DisplayPolicy {
                     pf.inset(source.calculateInsets(pf, false /* ignoreVisibility */));
                 }
             }
-            vf.set(adjust != SOFT_INPUT_ADJUST_NOTHING
-                    ? displayFrames.mCurrent : displayFrames.mDock);
         } else {
             pf.set((fl & FLAG_LAYOUT_IN_SCREEN) == 0 ? attached.getFrame() : df);
-            vf.set(attached.getVisibleFrame());
         }
-        cf.set(adjust != SOFT_INPUT_ADJUST_RESIZE
-                ? displayFrames.mDock : displayFrames.mContent);
-        dcf.set(displayFrames.mSystem);
 
         final int cutoutMode = attrs.layoutInDisplayCutoutMode;
         // Ensure that windows with a DEFAULT or NEVER display cutout mode are laid out in
@@ -2114,75 +1926,25 @@ public class DisplayPolicy {
             df.intersectUnchecked(displayCutoutSafeExceptMaybeBars);
         }
 
-        // Content should never appear in the cutout.
-        cf.intersectUnchecked(displayFrames.mDisplayCutoutSafe);
-
         // TYPE_SYSTEM_ERROR is above the NavigationBar so it can't be allowed to extend over it.
         // Also, we don't allow windows in multi-window mode to extend out of the screen.
         if ((fl & FLAG_LAYOUT_NO_LIMITS) != 0 && type != TYPE_SYSTEM_ERROR
                 && !win.inMultiWindowMode()) {
             df.left = df.top = -10000;
             df.right = df.bottom = 10000;
-            if (type != TYPE_WALLPAPER) {
-                cf.left = cf.top = vf.left = vf.top = -10000;
-                cf.right = cf.bottom = vf.right = vf.bottom = 10000;
-            }
         }
 
         if (DEBUG_LAYOUT) Slog.v(TAG, "Compute frame " + attrs.getTitle()
                 + ": sim=#" + Integer.toHexString(sim)
                 + " attach=" + attached + " type=" + type
                 + String.format(" flags=0x%08x", fl)
-                + " pf=" + pf.toShortString() + " df=" + df.toShortString()
-                + " cf=" + cf.toShortString() + " vf=" + vf.toShortString()
-                + " dcf=" + dcf.toShortString()
-                + " sf=" + sf.toShortString());
+                + " pf=" + pf.toShortString() + " df=" + df.toShortString());
 
         if (!sTmpLastParentFrame.equals(pf)) {
             windowFrames.setContentChanged(true);
         }
 
         win.computeFrame(displayFrames);
-        // Dock windows carve out the bottom of the screen, so normal windows
-        // can't appear underneath them.
-        if (type == TYPE_INPUT_METHOD && win.isVisible() && !win.mGivenInsetsPending) {
-            offsetInputMethodWindowLw(win, displayFrames);
-        }
-        if (type == TYPE_VOICE_INTERACTION && win.isVisible() && !win.mGivenInsetsPending) {
-            offsetVoiceInputWindowLw(win, displayFrames);
-        }
-    }
-
-    private void offsetInputMethodWindowLw(WindowState win, DisplayFrames displayFrames) {
-        final int rotation = displayFrames.mRotation;
-        final int navBarPosition = navigationBarPosition(displayFrames.mDisplayWidth,
-                displayFrames.mDisplayHeight, rotation);
-
-        int top = Math.max(win.getDisplayFrame().top, win.getContentFrame().top);
-        top += win.mGivenContentInsets.top;
-        displayFrames.mContent.bottom = Math.min(displayFrames.mContent.bottom, top);
-        if (navBarPosition == NAV_BAR_BOTTOM) {
-            // Always account for the nav bar frame height on the bottom since in all navigation
-            // modes we make room to show the dismiss-ime button, even if the IME does not report
-            // insets (ie. when floating)
-            final int uimode = mService.mPolicy.getUiMode();
-            final int navFrameHeight = getNavigationBarFrameHeight(rotation, uimode);
-            displayFrames.mContent.bottom = Math.min(displayFrames.mContent.bottom,
-                    displayFrames.mUnrestricted.bottom - navFrameHeight);
-        }
-        displayFrames.mVoiceContent.bottom = Math.min(displayFrames.mVoiceContent.bottom, top);
-        top = win.getVisibleFrame().top;
-        top += win.mGivenVisibleInsets.top;
-        displayFrames.mCurrent.bottom = Math.min(displayFrames.mCurrent.bottom, top);
-        if (DEBUG_LAYOUT) Slog.v(TAG, "Input method: mDockBottom="
-                + displayFrames.mDock.bottom + " mContentBottom="
-                + displayFrames.mContent.bottom + " mCurBottom=" + displayFrames.mCurrent.bottom);
-    }
-
-    private void offsetVoiceInputWindowLw(WindowState win, DisplayFrames displayFrames) {
-        int top = Math.max(win.getDisplayFrame().top, win.getContentFrame().top);
-        top += win.mGivenContentInsets.top;
-        displayFrames.mVoiceContent.bottom = Math.min(displayFrames.mVoiceContent.bottom, top);
     }
 
     WindowState getTopFullscreenOpaqueWindow() {

@@ -433,10 +433,10 @@ public final class Rect implements Parcelable {
 
     /**
      * Insets the rectangle on all sides specified by the dimensions of {@code insets}.
-     * @hide
+     *
      * @param insets The insets to inset the rect by.
      */
-    public void inset(Insets insets) {
+    public void inset(@NonNull Insets insets) {
         left += insets.left;
         top += insets.top;
         right -= insets.right;
@@ -445,7 +445,7 @@ public final class Rect implements Parcelable {
 
     /**
      * Insets the rectangle on all sides specified by the insets.
-     * @hide
+     *
      * @param left The amount to add from the rectangle's left
      * @param top The amount to add from the rectangle's top
      * @param right The amount to subtract from the rectangle's right

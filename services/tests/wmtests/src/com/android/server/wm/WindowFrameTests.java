@@ -21,9 +21,10 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 import static android.view.DisplayCutout.BOUNDS_POSITION_TOP;
 import static android.view.DisplayCutout.fromBoundingRect;
+import static android.view.InsetsState.ITYPE_IME;
+import static android.view.InsetsState.ITYPE_STATUS_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 
@@ -34,6 +35,8 @@ import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
 import android.view.DisplayInfo;
 import android.view.Gravity;
+import android.view.InsetsSource;
+import android.view.InsetsState;
 import android.view.WindowManager;
 
 import androidx.test.filters.FlakyTest;
@@ -57,7 +60,6 @@ import org.mockito.Mockito;
 @RunWith(WindowTestRunner.class)
 public class WindowFrameTests extends WindowTestsBase {
 
-    private final Rect mEmptyRect = new Rect();
     private DisplayContent mTestDisplayContent;
 
     @Before
@@ -76,18 +78,6 @@ public class WindowFrameTests extends WindowTestsBase {
         assertEquals(bottom, rect.bottom);
     }
 
-    private void assertContentInset(WindowState w, int left, int top, int right, int bottom) {
-        assertRect(w.getContentInsets(), left, top, right, bottom);
-    }
-
-    private void assertVisibleInset(WindowState w, int left, int top, int right, int bottom) {
-        assertRect(w.getVisibleInsets(), left, top, right, bottom);
-    }
-
-    private void assertStableInset(WindowState w, int left, int top, int right, int bottom) {
-        assertRect(w.getStableInsets(), left, top, right, bottom);
-    }
-
     private void assertFrame(WindowState w, Rect frame) {
         assertEquals(w.getFrame(), frame);
     }
@@ -100,82 +90,8 @@ public class WindowFrameTests extends WindowTestsBase {
         assertRect(w.getRelativeFrame(), left, top, right, bottom);
     }
 
-    private void assertContentFrame(WindowState w, Rect expectedRect) {
-        assertRect(w.getContentFrame(), expectedRect.left, expectedRect.top, expectedRect.right,
-                expectedRect.bottom);
-    }
-
-    private void assertVisibleFrame(WindowState w, Rect expectedRect) {
-        assertRect(w.getVisibleFrame(), expectedRect.left, expectedRect.top, expectedRect.right,
-                expectedRect.bottom);
-    }
-
-    private void assertStableFrame(WindowState w, Rect expectedRect) {
-        assertRect(w.getStableFrame(), expectedRect.left, expectedRect.top, expectedRect.right,
-                expectedRect.bottom);
-    }
-
     @Test
-    public void testLayoutInFullscreenTaskInsets() {
-        // fullscreen task doesn't use bounds for computeFrame
-        WindowState w = createWindow();
-        w.mAttrs.gravity = Gravity.LEFT | Gravity.TOP;
-
-        final int bottomContentInset = 100;
-        final int topContentInset = 50;
-        final int bottomVisibleInset = 30;
-        final int topVisibleInset = 70;
-        final int leftStableInset = 20;
-        final int rightStableInset = 90;
-
-        // With no insets or system decor all the frames incoming from PhoneWindowManager
-        // are identical.
-        final Rect pf = new Rect(0, 0, 1000, 1000);
-        final Rect df = pf;
-        final Rect of = df;
-        final Rect cf = new Rect(pf);
-        // Produce some insets
-        cf.top += 50;
-        cf.bottom -= 100;
-        final Rect vf = new Rect(pf);
-        vf.top += topVisibleInset;
-        vf.bottom -= bottomVisibleInset;
-        final Rect sf = new Rect(pf);
-        sf.left += leftStableInset;
-        sf.right -= rightStableInset;
-
-        final Rect dcf = pf;
-        // When mFrame extends past cf, the content insets are
-        // the difference between mFrame and ContentFrame. Visible
-        // and stable frames work the same way.
-        w.getWindowFrames().setFrames(pf, df, cf, vf, dcf, sf);
-        w.computeFrame();
-        assertFrame(w, 0, 0, 1000, 1000);
-        assertRelFrame(w, 0, 0, 1000, 1000);
-        assertContentInset(w, 0, topContentInset, 0, bottomContentInset);
-        assertVisibleInset(w, 0, topVisibleInset, 0, bottomVisibleInset);
-        assertStableInset(w, leftStableInset, 0, rightStableInset, 0);
-        assertContentFrame(w, cf);
-        assertVisibleFrame(w, vf);
-        assertStableFrame(w, sf);
-        // On the other hand getFrame() doesn't extend past cf we won't get any insets
-        w.mAttrs.x = 100;
-        w.mAttrs.y = 100;
-        w.mAttrs.width = 100; w.mAttrs.height = 100; //have to clear MATCH_PARENT
-        w.mRequestedWidth = 100;
-        w.mRequestedHeight = 100;
-        w.computeFrame();
-        assertFrame(w, 100, 100, 200, 200);
-        assertRelFrame(w, 100, 100, 200, 200);
-        assertContentInset(w, 0, 0, 0, 0);
-        // In this case the frames are shrunk to the window frame.
-        assertContentFrame(w, w.getFrame());
-        assertVisibleFrame(w, w.getFrame());
-        assertStableFrame(w, w.getFrame());
-    }
-
-    @Test
-    public void testLayoutInFullscreenTaskNoInsets() {
+    public void testLayoutInFullscreenTask() {
         // fullscreen task doesn't use bounds for computeFrame
         WindowState w = createWindow();
         w.mAttrs.gravity = Gravity.LEFT | Gravity.TOP;
@@ -186,7 +102,7 @@ public class WindowFrameTests extends WindowTestsBase {
 
         // Here the window has FILL_PARENT, FILL_PARENT
         // so we expect it to fill the entire available frame.
-        w.getWindowFrames().setFrames(pf, pf, pf, pf, pf, pf);
+        w.getWindowFrames().setFrames(pf, pf);
         w.computeFrame();
         assertFrame(w, 0, 0, 1000, 1000);
         assertRelFrame(w, 0, 0, 1000, 1000);
@@ -278,76 +194,24 @@ public class WindowFrameTests extends WindowTestsBase {
 
         final Rect pf = new Rect(0, 0, logicalWidth, logicalHeight);
         final WindowFrames windowFrames = w.getWindowFrames();
-        windowFrames.setFrames(pf, pf, pf, pf, pf, pf);
+        windowFrames.setFrames(pf, pf);
         w.computeFrame();
         // For non fullscreen tasks the containing frame is based off the
         // task bounds not the parent frame.
         assertEquals(resolvedTaskBounds, w.getFrame());
         assertEquals(0, w.getRelativeFrame().left);
         assertEquals(0, w.getRelativeFrame().top);
-        assertContentFrame(w, resolvedTaskBounds);
-        assertContentInset(w, 0, 0, 0, 0);
 
         pf.set(0, 0, logicalWidth, logicalHeight);
         // We still produce insets against the containing frame the same way.
         final int cfRight = logicalWidth / 2;
         final int cfBottom = logicalHeight / 2;
         final Rect cf = new Rect(0, 0, cfRight, cfBottom);
-        windowFrames.setFrames(pf, pf, cf, cf, pf, cf);
+        windowFrames.setFrames(pf, pf);
         w.computeFrame();
         assertEquals(resolvedTaskBounds, w.getFrame());
         assertEquals(0, w.getRelativeFrame().left);
         assertEquals(0, w.getRelativeFrame().top);
-        int contentInsetRight = resolvedTaskBounds.right - cfRight;
-        int contentInsetBottom = resolvedTaskBounds.bottom - cfBottom;
-        assertContentInset(w, 0, 0, contentInsetRight, contentInsetBottom);
-        assertContentFrame(w, new Rect(resolvedTaskBounds.left, resolvedTaskBounds.top,
-                resolvedTaskBounds.right - contentInsetRight,
-                resolvedTaskBounds.bottom - contentInsetBottom));
-    }
-
-    @Test
-    @FlakyTest(bugId = 130388666)
-    public void testCalculatePolicyCrop() {
-        final WindowState w = createWindow();
-        w.mAttrs.gravity = Gravity.LEFT | Gravity.TOP;
-
-        final DisplayInfo displayInfo = w.getDisplayContent().getDisplayInfo();
-        final int logicalWidth = displayInfo.logicalWidth;
-        final int logicalHeight = displayInfo.logicalHeight;
-        final Rect pf = new Rect(0, 0, logicalWidth, logicalHeight);
-        final Rect df = pf;
-        final Rect cf = new Rect(pf);
-        // Produce some insets
-        cf.top += displayInfo.logicalWidth / 10;
-        cf.bottom -= displayInfo.logicalWidth / 5;
-        final Rect vf = cf;
-        final Rect sf = vf;
-        // We use a decor content frame with insets to produce cropping.
-        Rect dcf = new Rect(cf);
-
-        final WindowFrames windowFrames = w.getWindowFrames();
-        windowFrames.setFrames(pf, df, cf, vf, dcf, sf);
-        w.computeFrame();
-
-        windowFrames.mDecorFrame.setEmpty();
-        // Likewise with no decor frame we would get no crop
-        w.computeFrame();
-
-        // Now we set up a window which doesn't fill the entire decor frame.
-        // Normally it would be cropped to it's frame but in the case of docked resizing
-        // we need to account for the fact the windows surface will be made
-        // fullscreen and thus also make the crop fullscreen.
-
-        windowFrames.setFrames(pf, pf, pf, pf, pf, pf);
-        w.mAttrs.gravity = Gravity.LEFT | Gravity.TOP;
-        w.mAttrs.width = logicalWidth / 2;
-        w.mAttrs.height = logicalHeight / 2;
-        w.mRequestedWidth = logicalWidth / 2;
-        w.mRequestedHeight = logicalHeight / 2;
-        w.computeFrame();
-
-        doReturn(true).when(w).isDockedResizing();
     }
 
     @Test
@@ -372,13 +236,11 @@ public class WindowFrameTests extends WindowTestsBase {
 
         final Rect pf = new Rect(0, 0, logicalWidth, logicalHeight);
         final WindowFrames windowFrames = w.getWindowFrames();
-        windowFrames.setFrames(pf, pf, pf, pf, pf, pf);
+        windowFrames.setFrames(pf, pf);
         w.computeFrame();
         // For non fullscreen tasks the containing frame is based off the
         // task bounds not the parent frame.
         assertFrame(w, taskLeft, taskTop, taskRight, taskBottom);
-        assertContentFrame(w, taskBounds);
-        assertContentInset(w, 0, 0, 0, 0);
 
         // Now simulate switch to fullscreen for letterboxed app.
         final int xInset = logicalWidth / 10;
@@ -390,11 +252,9 @@ public class WindowFrameTests extends WindowTestsBase {
         pf.set(0, 0, logicalWidth, logicalHeight);
         task.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
         task.setBounds(null);
-        windowFrames.setFrames(pf, pf, cf, cf, pf, cf);
+        windowFrames.setFrames(pf, pf);
         w.computeFrame();
         assertFrame(w, cf);
-        assertContentFrame(w, cf);
-        assertContentInset(w, 0, 0, 0, 0);
     }
 
     @Test
@@ -411,7 +271,7 @@ public class WindowFrameTests extends WindowTestsBase {
                 pf.width(), pf.height());
 
         final WindowFrames windowFrames = w.getWindowFrames();
-        windowFrames.setFrames(pf, pf, pf, pf, pf, pf);
+        windowFrames.setFrames(pf, pf);
         windowFrames.setDisplayCutout(cutout);
         w.computeFrame();
 
@@ -430,51 +290,52 @@ public class WindowFrameTests extends WindowTestsBase {
         w.mAttrs.gravity = Gravity.LEFT | Gravity.TOP;
         task.setWindowingMode(WINDOWING_MODE_FREEFORM);
 
-        DisplayContent dc = mTestDisplayContent;
+        // Make IME attach to the window and can produce insets.
+        final DisplayContent dc = mTestDisplayContent;
         dc.mInputMethodTarget = w;
         WindowState mockIme = mock(WindowState.class);
         Mockito.doReturn(true).when(mockIme).isVisibleNow();
         dc.mInputMethodWindow = mockIme;
+        final InsetsState state = dc.getInsetsStateController().getRawInsetsState();
+        final InsetsSource imeSource = state.getSource(ITYPE_IME);
+        final Rect imeFrame = new Rect(state.getDisplayFrame());
+        imeFrame.top = 400;
+        imeSource.setFrame(imeFrame);
+        imeSource.setVisible(true);
+        w.updateRequestedVisibility(state);
+        w.mBehindIme = true;
 
         // With no insets or system decor all the frames incoming from PhoneWindowManager
         // are identical.
         final Rect pf = new Rect(0, 0, 1000, 800);
-        final Rect df = pf;
-        final Rect of = df;
-        final Rect cf = new Rect(pf);
-        cf.bottom -= 400;
-        final Rect vf = new Rect(cf);
-        final Rect sf = new Rect(pf);
-        final Rect dcf = pf;
 
         // First check that it only gets moved up enough to show window.
         final Rect winRect = new Rect(200, 200, 300, 500);
-
         task.setBounds(winRect);
-        w.getWindowFrames().setFrames(pf, df, cf, vf, dcf, sf);
+        w.getWindowFrames().setFrames(pf, pf);
         w.computeFrame();
+        assertFrame(w, winRect.left, imeFrame.top - winRect.height(), winRect.right, imeFrame.top);
 
-        final Rect expected = new Rect(winRect.left, cf.bottom - winRect.height(),
-                winRect.right, cf.bottom);
-        assertEquals(expected, w.getFrame());
-        assertEquals(expected, w.getContentFrame());
-        assertEquals(expected, w.getVisibleFrame());
-
-        // Now check that it won't get moved beyond the top and then has appropriate insets
-        winRect.bottom = 600;
+        // Now check that it won't get moved beyond the top
+        winRect.bottom = 650;
         task.setBounds(winRect);
         w.setBounds(winRect);
-        w.getWindowFrames().setFrames(pf, df, cf, vf, dcf, sf);
+        w.getWindowFrames().setFrames(pf, pf);
         w.computeFrame();
-
         assertFrame(w, winRect.left, 0, winRect.right, winRect.height());
-        expected.top = 0;
-        expected.bottom = cf.bottom;
-        assertContentFrame(w, expected);
-        assertVisibleFrame(w, expected);
+
+        // Now we have status bar. Check that it won't go into the status bar area.
+        final Rect statusBarFrame = new Rect(state.getDisplayFrame());
+        statusBarFrame.bottom = 60;
+        state.getSource(ITYPE_STATUS_BAR).setFrame(statusBarFrame);
+        w.getWindowFrames().setFrames(pf, pf);
+        w.computeFrame();
+        assertFrame(w, winRect.left, statusBarFrame.bottom, winRect.right,
+                statusBarFrame.bottom + winRect.height());
 
         // Check that it's moved back without ime insets
-        w.getWindowFrames().setFrames(pf, df, pf, pf, dcf, sf);
+        state.removeSource(ITYPE_IME);
+        w.getWindowFrames().setFrames(pf, pf);
         w.computeFrame();
         assertEquals(winRect, w.getFrame());
     }

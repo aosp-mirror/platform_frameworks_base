@@ -1344,6 +1344,9 @@ public final class WindowInsets {
             if ((types & NAVIGATION_BARS) != 0) {
                 result.append("navigationBars |");
             }
+            if ((types & CAPTION_BAR) != 0) {
+                result.append("captionBar |");
+            }
             if ((types & IME) != 0) {
                 result.append("ime |");
             }
