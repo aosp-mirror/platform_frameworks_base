@@ -512,8 +512,7 @@ public class VibratorServiceTest {
 
         InOrder inOrderVerifier = inOrder(mNativeWrapperMock);
         inOrderVerifier.verify(mNativeWrapperMock).vibratorOff();
-        inOrderVerifier.verify(mNativeWrapperMock).vibratorOn(eq(100L),
-                gt(0L));
+        inOrderVerifier.verify(mNativeWrapperMock).vibratorOn(eq(100L), gt(0L));
         inOrderVerifier.verify(mNativeWrapperMock).vibratorOff();
     }
 
@@ -540,9 +539,13 @@ public class VibratorServiceTest {
     }
 
     @Test
-    public void vibrate_withWaveformAndNativeCallback_callbackCannotBeTriggeredByNative()
+    public void vibrate_withWaveformAndNativeCallback_callbackIgnoredAndWaveformPlaysCompletely()
             throws Exception {
         VibratorService service = createService();
+        doAnswer(invocation -> {
+            service.onVibrationComplete(invocation.getArgument(1));
+            return null;
+        }).when(mNativeWrapperMock).vibratorOn(anyLong(), anyLong());
         Mockito.clearInvocations(mNativeWrapperMock);
 
         VibrationEffect effect = VibrationEffect.createWaveform(new long[]{1, 3, 1, 2}, -1);
@@ -551,8 +554,9 @@ public class VibratorServiceTest {
         // Wait for VibrateThread to finish: 1ms OFF, 3ms ON, 1ms OFF, 2ms ON.
         Thread.sleep(15);
         InOrder inOrderVerifier = inOrder(mNativeWrapperMock);
-        inOrderVerifier.verify(mNativeWrapperMock).vibratorOff();
+        inOrderVerifier.verify(mNativeWrapperMock, times(2)).vibratorOff();
         inOrderVerifier.verify(mNativeWrapperMock).vibratorOn(eq(3L), anyLong());
+        inOrderVerifier.verify(mNativeWrapperMock).vibratorOff();
         inOrderVerifier.verify(mNativeWrapperMock).vibratorOn(eq(2L), anyLong());
         inOrderVerifier.verify(mNativeWrapperMock).vibratorOff();
     }
