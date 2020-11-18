@@ -69,7 +69,7 @@ public final class BinaryXmlSerializer implements TypedXmlSerializer {
      * {@code ABX_}, representing "Android Binary XML." The final byte is a
      * version number which may be incremented as the protocol changes.
      */
-    static final byte[] PROTOCOL_MAGIC_VERSION_0 = new byte[] { 0x41, 0x42, 0x58, 0x00 };
+    public static final byte[] PROTOCOL_MAGIC_VERSION_0 = new byte[] { 0x41, 0x42, 0x58, 0x00 };
 
     /**
      * Internal token which represents an attribute associated with the most

@@ -18,6 +18,8 @@ package android.util;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.system.ErrnoException;
+import android.system.Os;
 
 import com.android.internal.util.BinaryXmlPullParser;
 import com.android.internal.util.BinaryXmlSerializer;
@@ -35,7 +37,7 @@ import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
 import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -43,6 +45,7 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 
 /**
  * XML utility methods.
@@ -57,6 +60,12 @@ public class Xml {
      *  specification</a>
      */
     public static String FEATURE_RELAXED = "http://xmlpull.org/v1/doc/features.html#relaxed";
+
+    /**
+     * Feature flag: when set, {@link #resolveSerializer(OutputStream)} will
+     * emit binary XML by default.
+     */
+    private static final boolean ENABLE_BINARY_DEFAULT = false;
 
     /**
      * Parses the given xml string and fires events on the given SAX handler.
@@ -151,8 +160,28 @@ public class Xml {
      */
     public static @NonNull TypedXmlPullParser resolvePullParser(@NonNull InputStream in)
             throws IOException {
-        // TODO: add support for binary format
-        final TypedXmlPullParser xml = newFastPullParser();
+        final byte[] magic = new byte[4];
+        if (in instanceof FileInputStream) {
+            try {
+                Os.pread(((FileInputStream) in).getFD(), magic, 0, magic.length, 0);
+            } catch (ErrnoException e) {
+                throw e.rethrowAsIOException();
+            }
+        } else {
+            if (!in.markSupported()) {
+                in = new BufferedInputStream(in);
+            }
+            in.mark(4);
+            in.read(magic);
+            in.reset();
+        }
+
+        final TypedXmlPullParser xml;
+        if (Arrays.equals(magic, BinaryXmlSerializer.PROTOCOL_MAGIC_VERSION_0)) {
+            xml = newBinaryPullParser();
+        } else {
+            xml = newFastPullParser();
+        }
         try {
             xml.setInput(in, StandardCharsets.UTF_8.name());
         } catch (XmlPullParserException e) {
@@ -209,8 +238,12 @@ public class Xml {
      */
     public static @NonNull TypedXmlSerializer resolveSerializer(@NonNull OutputStream out)
             throws IOException {
-        // TODO: add support for binary format
-        final TypedXmlSerializer xml = newFastSerializer();
+        final TypedXmlSerializer xml;
+        if (ENABLE_BINARY_DEFAULT) {
+            xml = newBinarySerializer();
+        } else {
+            xml = newFastSerializer();
+        }
         xml.setOutput(out, StandardCharsets.UTF_8.name());
         return xml;
     }
