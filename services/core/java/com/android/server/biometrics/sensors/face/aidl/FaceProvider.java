@@ -41,6 +41,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.proto.ProtoOutputStream;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.biometrics.Utils;
 import com.android.server.biometrics.sensors.AuthenticationClient;
 import com.android.server.biometrics.sensors.ClientMonitor;
@@ -71,7 +72,8 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
 
     @NonNull private final Context mContext;
     @NonNull private final String mHalInstanceName;
-    @NonNull private final SparseArray<Sensor> mSensors; // Map of sensors that this HAL supports
+    @NonNull @VisibleForTesting
+    final SparseArray<Sensor> mSensors; // Map of sensors that this HAL supports
     @NonNull private final ClientMonitor.LazyDaemon<IFace> mLazyDaemon;
     @NonNull private final Handler mHandler;
     @NonNull private final LockoutResetDispatcher mLockoutResetDispatcher;
@@ -596,8 +598,11 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
         mHandler.post(() -> {
             mDaemon = null;
             for (int i = 0; i < mSensors.size(); i++) {
+                final Sensor sensor = mSensors.valueAt(i);
                 final int sensorId = mSensors.keyAt(i);
                 PerformanceTracker.getInstanceForSensorId(sensorId).incrementHALDeathCount();
+                sensor.getScheduler().recordCrashState();
+                sensor.getScheduler().reset();
             }
         });
     }
