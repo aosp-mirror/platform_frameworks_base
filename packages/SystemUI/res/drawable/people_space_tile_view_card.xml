@@ -15,14 +15,5 @@
   -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android">
     <solid android:color="@android:color/white" />
-    <padding
-        android:left="1dp"
-        android:top="1dp"
-        android:right="1dp"
-        android:bottom="1dp" />
-    <corners
-        android:bottomRightRadius="7dp"
-        android:bottomLeftRadius="7dp"
-        android:topRightRadius="7dp"
-        android:topLeftRadius="7dp" />
+    <corners android:radius="@dimen/people_space_widget_radius" />
 </shape>

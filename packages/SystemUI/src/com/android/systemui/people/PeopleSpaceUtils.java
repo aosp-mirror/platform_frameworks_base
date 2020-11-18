@@ -28,15 +28,19 @@ import android.graphics.drawable.Drawable;
 import android.icu.text.MeasureFormat;
 import android.icu.util.Measure;
 import android.icu.util.MeasureUnit;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.notification.ConversationChannelWrapper;
+import android.util.Log;
 
 import com.android.systemui.R;
 
 import java.time.Duration;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /** Utils class for People Space. */
 public class PeopleSpaceUtils {
@@ -47,25 +51,48 @@ public class PeopleSpaceUtils {
     private static final int MIN_HOUR = 1;
     private static final int ONE_DAY = 1;
 
-    /** Returns a list of {@link ShortcutInfo} corresponding to user's conversations. */
-    public static List<ShortcutInfo> getShortcutInfos(Context context,
+
+    /** Returns a list of map entries corresponding to user's conversations. */
+    public static List<Map.Entry<Long, ShortcutInfo>> getShortcutInfos(Context context,
             INotificationManager notificationManager, IPeopleManager peopleManager)
             throws Exception {
         boolean showAllConversations = Settings.Global.getInt(context.getContentResolver(),
                 Settings.Global.PEOPLE_SPACE_CONVERSATION_TYPE, 0) == 0;
         List<ConversationChannelWrapper> conversations = notificationManager.getConversations(
-                !showAllConversations /* priority only */).getList();
-        List<ShortcutInfo> shortcutInfos = conversations.stream().filter(
-                c -> shouldKeepConversation(c)).map(c -> c.getShortcutInfo()).collect(
-                Collectors.toList());
+                true).getList();
+        List<Map.Entry<Long, ShortcutInfo>> shortcutInfos = getSortedShortcutInfos(peopleManager,
+                conversations.stream().map(c -> c.getShortcutInfo()));
         if (showAllConversations) {
             List<ConversationChannel> recentConversations =
                     peopleManager.getRecentConversations().getList();
-            List<ShortcutInfo> recentShortcuts = recentConversations.stream().map(
-                    c -> c.getShortcutInfo()).collect(Collectors.toList());
-            shortcutInfos.addAll(recentShortcuts);
+            List<Map.Entry<Long, ShortcutInfo>> recentShortcutInfos = getSortedShortcutInfos(
+                    peopleManager, recentConversations.stream().map(c -> c.getShortcutInfo()));
+            shortcutInfos.addAll(recentShortcutInfos);
         }
         return shortcutInfos;
+    }
+
+    /** Returns a list sorted by ascending last interaction time from {@code stream}. */
+    private static List<Map.Entry<Long, ShortcutInfo>> getSortedShortcutInfos(
+            IPeopleManager peopleManager, Stream<ShortcutInfo> stream) {
+        return stream
+                .filter(c -> shouldKeepConversation(c))
+                .map(c -> Map.entry(getLastInteraction(peopleManager, c), c))
+                .sorted((c1, c2) -> (c2.getKey().compareTo(c1.getKey())))
+                .collect(Collectors.toList());
+    }
+
+    /** Returns the last interaction time with the user specified by {@code shortcutInfo}. */
+    private static Long getLastInteraction(IPeopleManager peopleManager,
+            ShortcutInfo shortcutInfo) {
+        try {
+            int userId = UserHandle.getUserHandleForUid(shortcutInfo.getUserId()).getIdentifier();
+            String pkg = shortcutInfo.getPackage();
+            return peopleManager.getLastInteraction(pkg, userId, shortcutInfo.getId());
+        } catch (Exception e) {
+            Log.e(TAG, "Couldn't retrieve last interaction time", e);
+            return 0L;
+        }
     }
 
     /** Converts {@code drawable} to a {@link Bitmap}. */
@@ -99,6 +126,7 @@ public class PeopleSpaceUtils {
     /** Returns a readable status describing the {@code lastInteraction}. */
     public static String getLastInteractionString(Context context, long lastInteraction) {
         if (lastInteraction == 0L) {
+            Log.e(TAG, "Could not get valid last interaction");
             return context.getString(R.string.basic_status);
         }
         long now = System.currentTimeMillis();
@@ -134,8 +162,7 @@ public class PeopleSpaceUtils {
      *     </ul>
      * </li>
      */
-    public static boolean shouldKeepConversation(ConversationChannelWrapper conversation) {
-        ShortcutInfo shortcutInfo = conversation.getShortcutInfo();
+    public static boolean shouldKeepConversation(ShortcutInfo shortcutInfo) {
         return shortcutInfo != null && shortcutInfo.getLabel().length() != 0;
     }
 

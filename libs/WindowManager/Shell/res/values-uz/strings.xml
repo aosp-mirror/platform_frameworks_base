@@ -28,7 +28,7 @@
     <string name="pip_skip_to_next" msgid="8403429188794867653">"Keyingisiga o‘tish"</string>
     <string name="pip_skip_to_prev" msgid="7172158111196394092">"Avvalgisiga qaytish"</string>
     <string name="accessibility_action_pip_resize" msgid="4623966104749543182">"Oʻlchamini oʻzgartirish"</string>
-    <string name="dock_forced_resizable" msgid="1749750436092293116">"Ilova ekranni ikkiga bo‘lish rejimini qo‘llab-quvvatlamaydi."</string>
+    <string name="dock_forced_resizable" msgid="1749750436092293116">"Bu ilova ekranni ikkiga ajratish rejimini dastaklamaydi."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"Bu ilova ekranni bo‘lish xususiyatini qo‘llab-quvvatlamaydi."</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"Bu ilova qo‘shimcha ekranda ishlamasligi mumkin."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"Bu ilova qo‘shimcha ekranlarda ishga tushmaydi."</string>
@@ -43,7 +43,7 @@
     <string name="accessibility_action_divider_top_50" msgid="8649582798829048946">"Tepada 50%"</string>
     <string name="accessibility_action_divider_top_30" msgid="3572788224908570257">"Tepada 30%"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="2831868345092314060">"Pastda to‘liq ekran"</string>
-    <string name="one_handed_tutorial_title" msgid="4583241688067426350">"Ixcham rejimdan foydalaning"</string>
+    <string name="one_handed_tutorial_title" msgid="4583241688067426350">"Ixcham rejimdan foydalanish"</string>
     <string name="one_handed_tutorial_description" msgid="3486582858591353067">"Chiqish uchun ekran pastidan tepaga suring yoki ilovaning tepasidagi istalgan joyga bosing."</string>
     <string name="accessibility_action_start_one_handed" msgid="5070337354072861426">"Ixcham rejimni ishga tushirish"</string>
     <string name="accessibility_action_stop_one_handed" msgid="1369940261782179442">"Ixcham rejimdan chiqish"</string>

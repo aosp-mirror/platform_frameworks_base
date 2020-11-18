@@ -28,7 +28,8 @@ import com.android.internal.logging.UiEventLogger;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.dagger.WMSingleton;
 import com.android.systemui.dagger.qualifiers.Main;
-import com.android.wm.shell.ShellDump;
+import com.android.wm.shell.FullscreenTaskListener;
+import com.android.wm.shell.ShellCommandHandler;
 import com.android.wm.shell.ShellInit;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.WindowManagerShellWrapper;
@@ -48,6 +49,8 @@ import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.draganddrop.DragAndDropController;
 import com.android.wm.shell.hidedisplaycutout.HideDisplayCutout;
 import com.android.wm.shell.hidedisplaycutout.HideDisplayCutoutController;
+import com.android.wm.shell.letterbox.LetterboxConfigController;
+import com.android.wm.shell.letterbox.LetterboxTaskListener;
 import com.android.wm.shell.onehanded.OneHanded;
 import com.android.wm.shell.onehanded.OneHandedController;
 import com.android.wm.shell.pip.Pip;
@@ -77,12 +80,16 @@ public abstract class WMShellBaseModule {
             DragAndDropController dragAndDropController,
             ShellTaskOrganizer shellTaskOrganizer,
             Optional<SplitScreen> splitScreenOptional,
-            Optional<AppPairs> appPairsOptional) {
+            Optional<AppPairs> appPairsOptional,
+            LetterboxTaskListener letterboxTaskListener,
+            FullscreenTaskListener fullscreenTaskListener) {
         return new ShellInit(displayImeController,
                 dragAndDropController,
                 shellTaskOrganizer,
                 splitScreenOptional,
-                appPairsOptional);
+                appPairsOptional,
+                letterboxTaskListener,
+                fullscreenTaskListener);
     }
 
     /**
@@ -91,14 +98,17 @@ public abstract class WMShellBaseModule {
      */
     @WMSingleton
     @Provides
-    static Optional<ShellDump> provideShellDump(ShellTaskOrganizer shellTaskOrganizer,
+    static Optional<ShellCommandHandler> provideShellCommandHandler(
+            ShellTaskOrganizer shellTaskOrganizer,
             Optional<SplitScreen> splitScreenOptional,
             Optional<Pip> pipOptional,
             Optional<OneHanded> oneHandedOptional,
             Optional<HideDisplayCutout> hideDisplayCutout,
-            Optional<AppPairs> appPairsOptional) {
-        return Optional.of(new ShellDump(shellTaskOrganizer, splitScreenOptional, pipOptional,
-                oneHandedOptional, hideDisplayCutout, appPairsOptional));
+            Optional<AppPairs> appPairsOptional,
+            LetterboxConfigController letterboxConfigController) {
+        return Optional.of(new ShellCommandHandler(shellTaskOrganizer, splitScreenOptional,
+                pipOptional, oneHandedOptional, hideDisplayCutout, appPairsOptional,
+                letterboxConfigController));
     }
 
     @WMSingleton
@@ -178,8 +188,8 @@ public abstract class WMShellBaseModule {
     @Provides
     static ShellTaskOrganizer provideShellTaskOrganizer(SyncTransactionQueue syncQueue,
             ShellExecutor mainExecutor, TransactionPool transactionPool, Context context) {
-        return new ShellTaskOrganizer(syncQueue, transactionPool,
-                mainExecutor, AnimationThread.instance().getExecutor(), context);
+        return new ShellTaskOrganizer(syncQueue, transactionPool, mainExecutor,
+                AnimationThread.instance().getExecutor(), context);
     }
 
     @WMSingleton
@@ -230,4 +240,27 @@ public abstract class WMShellBaseModule {
             DisplayController displayController) {
         return Optional.ofNullable(HideDisplayCutoutController.create(context, displayController));
     }
+
+    @WMSingleton
+    @Provides
+    static FullscreenTaskListener provideFullscreenTaskListener(
+            SyncTransactionQueue syncQueue) {
+        return new FullscreenTaskListener(syncQueue);
+    }
+
+    @WMSingleton
+    @Provides
+    static LetterboxTaskListener provideLetterboxTaskListener(
+            SyncTransactionQueue syncQueue,
+            LetterboxConfigController letterboxConfigController,
+            WindowManager windowManager) {
+        return new LetterboxTaskListener(syncQueue, letterboxConfigController, windowManager);
+    }
+
+    @WMSingleton
+    @Provides
+    static LetterboxConfigController provideLetterboxConfigController(Context context) {
+        return new LetterboxConfigController(context);
+    }
+
 }

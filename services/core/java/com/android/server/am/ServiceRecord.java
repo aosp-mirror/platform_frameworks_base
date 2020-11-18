@@ -109,6 +109,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
     boolean isForeground;   // is service currently in foreground mode?
     int foregroundId;       // Notification ID of last foreground req.
     Notification foregroundNoti; // Notification record of foreground state.
+    long fgDisplayTime;     // time at which the FGS notification should become visible
     int foregroundServiceType; // foreground service types.
     long lastActivity;      // last time there was some activity on the service.
     long startingBgTimeout;  // time at which we scheduled this for a delayed start.

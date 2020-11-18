@@ -17,6 +17,7 @@
 package com.android.server.wm;
 
 import static android.view.WindowManagerPolicyConstants.APPLICATION_LAYER;
+import static android.window.DisplayAreaOrganizer.FEATURE_IME_PLACEHOLDER;
 
 import static com.android.server.wm.DisplayAreaPolicyBuilder.Feature;
 
@@ -39,7 +40,7 @@ class RootDisplayArea extends DisplayArea<DisplayArea> {
      * Mapping from policy supported {@link Feature} to list of {@link DisplayArea} created to cover
      * all the window types that the {@link Feature} will be applied to.
      */
-    Map<Feature, List<DisplayArea<? extends WindowContainer>>> mFeatureToDisplayAreas;
+    Map<Feature, List<DisplayArea<WindowContainer>>> mFeatureToDisplayAreas;
 
     /** Mapping from window layer to {@link DisplayArea.Tokens} that holds windows on that layer. */
     private DisplayArea.Tokens[] mAreaForLayer;
@@ -61,6 +62,35 @@ class RootDisplayArea extends DisplayArea<DisplayArea> {
         return false;
     }
 
+    /**
+     * Places the IME container below this root, so that it's bounds and config will be updated to
+     * match the root.
+     */
+    void placeImeContainer(DisplayArea.Tokens imeContainer) {
+        if (imeContainer.getRootDisplayArea() == this) {
+            // No need to reparent if IME container is below the same root.
+            return;
+        }
+
+        List<Feature> features = mFeatures;
+        for (int i = 0; i < features.size(); i++) {
+            Feature feature = features.get(i);
+            if (feature.getId() == FEATURE_IME_PLACEHOLDER) {
+                List<DisplayArea<WindowContainer>> imeDisplayAreas =
+                        mFeatureToDisplayAreas.get(feature);
+                if (imeDisplayAreas.size() != 1) {
+                    throw new IllegalStateException("There must be exactly one DisplayArea for the "
+                            + "FEATURE_IME_PLACEHOLDER");
+                }
+
+                imeContainer.reparent(imeDisplayAreas.get(0), POSITION_TOP);
+                return;
+            }
+        }
+        throw new IllegalStateException(
+                "There is no FEATURE_IME_PLACEHOLDER in this root to place the IME container");
+    }
+
     /** Finds the {@link DisplayArea.Tokens} that this type of window should be attached to. */
     DisplayArea.Tokens findAreaForToken(WindowToken token) {
         int windowLayerFromType = token.getWindowLayerFromType();
@@ -75,7 +105,7 @@ class RootDisplayArea extends DisplayArea<DisplayArea> {
 
     /** Callback after {@link DisplayArea} hierarchy has been built. */
     void onHierarchyBuilt(ArrayList<Feature> features, DisplayArea.Tokens[] areaForLayer,
-            Map<Feature, List<DisplayArea<? extends WindowContainer>>> featureToDisplayAreas) {
+            Map<Feature, List<DisplayArea<WindowContainer>>> featureToDisplayAreas) {
         if (mHasBuiltHierarchy) {
             throw new IllegalStateException("Root should only build the hierarchy once");
         }

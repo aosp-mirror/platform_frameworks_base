@@ -297,6 +297,15 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
             mLockScreenMode = mode;
             mKeyguardClockSwitchController.updateLockScreenMode(mode);
             mKeyguardSliceViewController.updateLockScreenMode(mode);
+            if (mLockScreenMode == KeyguardUpdateMonitor.LOCK_SCREEN_MODE_LAYOUT_1) {
+                // align the top of keyguard_status_area with the top of the clock text instead
+                // of the top of the view
+                mKeyguardSliceViewController.updateTopMargin(
+                        mKeyguardClockSwitchController.getClockTextTopPadding());
+            } else {
+                // reset margin
+                mKeyguardSliceViewController.updateTopMargin(0);
+            }
             updateAodIcons();
         }
 

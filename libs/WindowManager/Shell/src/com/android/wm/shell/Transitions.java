@@ -109,13 +109,10 @@ public class Transitions extends ITransitionPlayer.Stub {
         mAnimExecutor.execute(va::start);
     }
 
-    private static boolean isOpeningType(@WindowManager.TransitionOldType int legacyType) {
-        // TODO(shell-transitions): consider providing and using z-order vs the global type for
-        //                          this determination.
-        return legacyType == WindowManager.TRANSIT_OLD_TASK_OPEN
-                || legacyType == WindowManager.TRANSIT_OLD_TASK_TO_FRONT
-                || legacyType == WindowManager.TRANSIT_OLD_TASK_OPEN_BEHIND
-                || legacyType == WindowManager.TRANSIT_OLD_KEYGUARD_GOING_AWAY;
+    private static boolean isOpeningType(@WindowManager.TransitionType int type) {
+        return type == WindowManager.TRANSIT_OPEN
+                || type == WindowManager.TRANSIT_TO_FRONT
+                || type == WindowManager.TRANSIT_KEYGUARD_GOING_AWAY;
     }
 
     @Override

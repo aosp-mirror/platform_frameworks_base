@@ -19,13 +19,19 @@ package android.net
 import android.net.wifi.aware.DiscoverySession
 import android.net.wifi.aware.PeerHandle
 import android.net.wifi.aware.WifiAwareNetworkSpecifier
+import android.os.Build
 import androidx.test.filters.SmallTest
 import androidx.test.runner.AndroidJUnit4
 
 import com.android.testutils.assertParcelSane
+import com.android.testutils.DevSdkIgnoreRule
+import com.android.testutils.DevSdkIgnoreRule.IgnoreAfter
+import com.android.testutils.DevSdkIgnoreRule.IgnoreUpTo
 
 import java.lang.IllegalStateException
 
+import org.junit.Assert.assertFalse
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito
@@ -33,18 +39,32 @@ import org.mockito.Mockito
 @RunWith(AndroidJUnit4::class)
 @SmallTest
 class MatchAllNetworkSpecifierTest {
+    @Rule @JvmField
+    val ignoreRule: DevSdkIgnoreRule = DevSdkIgnoreRule()
+
+    private val specifier = MatchAllNetworkSpecifier()
+    private val discoverySession = Mockito.mock(DiscoverySession::class.java)
+    private val peerHandle = Mockito.mock(PeerHandle::class.java)
+    private val wifiAwareNetworkSpecifier = WifiAwareNetworkSpecifier.Builder(discoverySession,
+            peerHandle).build()
+
     @Test
     fun testParcel() {
         assertParcelSane(MatchAllNetworkSpecifier(), 0)
     }
 
+    @Test @IgnoreAfter(Build.VERSION_CODES.R)
+    fun testCanBeSatisfiedBy_BeforeS() {
+        // MatchAllNetworkSpecifier didn't follow its parent class to change the satisfiedBy() to
+        // canBeSatisfiedBy(), so if a caller calls MatchAllNetworkSpecifier#canBeSatisfiedBy(), the
+        // NetworkSpecifier#canBeSatisfiedBy() will be called actually, and false will be returned.
+        // Although it's not meeting the expectation, the behavior still needs to be verified.
+        assertFalse(specifier.canBeSatisfiedBy(wifiAwareNetworkSpecifier))
+    }
+
     @Test(expected = IllegalStateException::class)
+    @IgnoreUpTo(Build.VERSION_CODES.R)
     fun testCanBeSatisfiedBy() {
-        val specifier = MatchAllNetworkSpecifier()
-        val discoverySession = Mockito.mock(DiscoverySession::class.java)
-        val peerHandle = Mockito.mock(PeerHandle::class.java)
-        val wifiAwareNetworkSpecifier = WifiAwareNetworkSpecifier.Builder(discoverySession,
-                peerHandle).build()
         specifier.canBeSatisfiedBy(wifiAwareNetworkSpecifier)
     }
 }

@@ -22,7 +22,7 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="wifi_fail_to_scan" msgid="2333336097603822490">"Tarmoqlarni tekshirib chiqishni iloji bo‘lmadi"</string>
     <string name="wifi_security_none" msgid="7392696451280611452">"Hech qanday"</string>
-    <string name="wifi_remembered" msgid="3266709779723179188">"Saqlandi"</string>
+    <string name="wifi_remembered" msgid="3266709779723179188">"Saqlangan"</string>
     <string name="wifi_disconnected" msgid="7054450256284661757">"Ulanmagan"</string>
     <string name="wifi_disabled_generic" msgid="2651916945380294607">"Yoqilmagan"</string>
     <string name="wifi_disabled_network_failure" msgid="2660396183242399585">"IP manzilini sozlab bo‘lmadi"</string>
@@ -81,11 +81,11 @@
     <string name="bluetooth_battery_level" msgid="2893696778200201555">"Batareya quvvati: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_battery_level_untethered" msgid="4002282355111504349">"L: batareya quvvati: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, R: batareya quvvati: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>"</string>
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"Faol"</string>
-    <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Media audio"</string>
+    <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"A2DP profili"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"Telefon chaqiruvlari"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Fayl uzatish"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"Kiritish qurilmasi"</string>
-    <string name="bluetooth_profile_pan" msgid="1006235139308318188">"Internetga kirish"</string>
+    <string name="bluetooth_profile_pan" msgid="1006235139308318188">"Internetga ulanish"</string>
     <string name="bluetooth_profile_pbap" msgid="7064307749579335765">"Kontaktlarni ulashish"</string>
     <string name="bluetooth_profile_pbap_summary" msgid="2955819694801952056">"Kontaktlarni ulashish uchun ishlatilsin"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"Internet aloqasi ulashmasi"</string>
@@ -112,7 +112,7 @@
     <string name="bluetooth_opp_profile_summary_use_for" msgid="461981154387015457">"Fayl almashinish uchun foydalanish"</string>
     <string name="bluetooth_hid_profile_summary_use_for" msgid="4289460627406490952">"Kiritish qurilmasi sifatida foydalanish"</string>
     <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="7689393730163320483">"Eshitish apparatlari uchun foydalanish"</string>
-    <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"Biriktirish"</string>
+    <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"OK"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="2734383073450506220">"ULANISH"</string>
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Bekor qilish"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"Agar ulanishga ruxsat bersangiz, ulangan vaqtda kontakt va qo‘ng‘iroqlaringiz tarixiga kirishi mumkin."</string>
@@ -399,12 +399,9 @@
     <string name="inactive_app_inactive_summary" msgid="3161222402614236260">"Nofaol. O‘zgartirish uchun bu yerga bosing."</string>
     <string name="inactive_app_active_summary" msgid="8047630990208722344">"Faol. O‘zgartirish uchun bu yerga bosing."</string>
     <string name="standby_bucket_summary" msgid="5128193447550429600">"Kutish rejimi holati: <xliff:g id="BUCKET"> %s</xliff:g>"</string>
-    <!-- no translation found for transcode_settings_title (6700974145733932357) -->
-    <skip />
-    <!-- no translation found for transcode_enable_all (4719796495995795404) -->
-    <skip />
-    <!-- no translation found for transcode_skip_apps (5680997722349545778) -->
-    <skip />
+    <string name="transcode_settings_title" msgid="6700974145733932357">"Media transkripsiya sozlamalari"</string>
+    <string name="transcode_enable_all" msgid="4719796495995795404">"Barcha ilovalar transkripsiyasini yoqish"</string>
+    <string name="transcode_skip_apps" msgid="5680997722349545778">"Barcha ilovalar transkripsiyasini faolsizlantirish"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"Ishlab turgan ilovalar"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"Ishlab turgan ilovalarni ko‘rish va boshqarish"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"WebView ta’minotchisi"</string>

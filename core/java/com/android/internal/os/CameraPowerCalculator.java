@@ -30,7 +30,7 @@ public class CameraPowerCalculator extends PowerCalculator {
     }
 
     @Override
-    public void calculateApp(BatterySipper app, BatteryStats.Uid u, long rawRealtimeUs,
+    protected void calculateApp(BatterySipper app, BatteryStats.Uid u, long rawRealtimeUs,
                              long rawUptimeUs, int statsType) {
 
         // Calculate camera power usage.  Right now, this is a (very) rough estimate based on the

@@ -334,6 +334,11 @@ public class GnssManagerService implements GnssNative.Callbacks {
     }
 
     @Override
+    public void reportGnssPowerStats(GnssPowerStats powerStats) {
+        mGnssLocationProvider.reportGnssPowerStats(powerStats);
+    }
+
+    @Override
     public void setTopHalCapabilities(int topHalCapabilities) {
         mGnssLocationProvider.setTopHalCapabilities(topHalCapabilities);
     }
@@ -341,6 +346,11 @@ public class GnssManagerService implements GnssNative.Callbacks {
     @Override
     public void setSubHalMeasurementCorrectionsCapabilities(int subHalCapabilities) {
         mGnssLocationProvider.setSubHalMeasurementCorrectionsCapabilities(subHalCapabilities);
+    }
+
+    @Override
+    public void setSubHalPowerIndicationCapabilities(int subHalCapabilities) {
+        mGnssLocationProvider.setSubHalPowerIndicationCapabilities(subHalCapabilities);
     }
 
     @Override

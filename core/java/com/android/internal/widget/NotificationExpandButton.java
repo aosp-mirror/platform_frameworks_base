@@ -23,6 +23,7 @@ import android.content.Context;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.RemotableViewMethod;
+import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -36,31 +37,56 @@ import com.android.internal.R;
 @RemoteViews.RemoteView
 public class NotificationExpandButton extends ImageView {
 
+    private final int mMinTouchTargetSize;
     private boolean mExpanded;
     private int mOriginalNotificationColor;
 
     public NotificationExpandButton(Context context) {
-        super(context);
+        this(context, null, 0, 0);
     }
 
     public NotificationExpandButton(Context context, @Nullable AttributeSet attrs) {
-        super(context, attrs);
+        this(context, attrs, 0, 0);
     }
 
     public NotificationExpandButton(Context context, @Nullable AttributeSet attrs,
             int defStyleAttr) {
-        super(context, attrs, defStyleAttr);
+        this(context, attrs, defStyleAttr, 0);
     }
 
     public NotificationExpandButton(Context context, @Nullable AttributeSet attrs, int defStyleAttr,
             int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
+        mMinTouchTargetSize = (int) (getResources().getDisplayMetrics().density * 48 + 0.5);
     }
 
+    /**
+     * Show the touchable area of the view for a11y.
+     * If the parent is the touch container, then that view's bounds are the touchable area.
+     */
     @Override
     public void getBoundsOnScreen(Rect outRect, boolean clipToParent) {
-        super.getBoundsOnScreen(outRect, clipToParent);
+        ViewGroup parent = (ViewGroup) getParent();
+        if (parent != null && parent.getId() == R.id.expand_button_touch_container) {
+            parent.getBoundsOnScreen(outRect, clipToParent);
+        } else {
+            super.getBoundsOnScreen(outRect, clipToParent);
+        }
         extendRectToMinTouchSize(outRect);
+    }
+
+    /**
+     * Determined if the given point should be touchable.
+     * If the parent is the touch container, then any point in that view should be touchable.
+     */
+    @Override
+    public boolean pointInView(float localX, float localY, float slop) {
+        ViewGroup parent = (ViewGroup) getParent();
+        if (parent != null && parent.getId() == R.id.expand_button_touch_container) {
+            // If our parent is checking with us, then the point must be within its bounds.
+            return true;
+        }
+        return super.pointInView(localX, localY, slop);
     }
 
     @RemotableViewMethod
@@ -81,11 +107,14 @@ public class NotificationExpandButton extends ImageView {
     }
 
     private void extendRectToMinTouchSize(Rect rect) {
-        int touchTargetSize = (int) (getResources().getDisplayMetrics().density * 48);
-        rect.left = rect.centerX() - touchTargetSize / 2;
-        rect.right = rect.left + touchTargetSize;
-        rect.top = rect.centerY() - touchTargetSize / 2;
-        rect.bottom = rect.top + touchTargetSize;
+        if (rect.width() < mMinTouchTargetSize) {
+            rect.left = rect.centerX() - mMinTouchTargetSize / 2;
+            rect.right = rect.left + mMinTouchTargetSize;
+        }
+        if (rect.height() < mMinTouchTargetSize) {
+            rect.top = rect.centerY() - mMinTouchTargetSize / 2;
+            rect.bottom = rect.top + mMinTouchTargetSize;
+        }
     }
 
     @Override

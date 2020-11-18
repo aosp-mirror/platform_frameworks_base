@@ -28,8 +28,7 @@
     <string name="pip_skip_to_next" msgid="8403429188794867653">"ਅਗਲੇ \'ਤੇ ਜਾਓ"</string>
     <string name="pip_skip_to_prev" msgid="7172158111196394092">"ਪਿਛਲੇ \'ਤੇ ਜਾਓ"</string>
     <string name="accessibility_action_pip_resize" msgid="4623966104749543182">"ਆਕਾਰ ਬਦਲੋ"</string>
-    <!-- no translation found for dock_forced_resizable (1749750436092293116) -->
-    <skip />
+    <string name="dock_forced_resizable" msgid="1749750436092293116">"ਹੋ ਸਕਦਾ ਹੈ ਕਿ ਐਪ ਸਪਲਿਟ-ਸਕ੍ਰੀਨ ਨਾਲ ਕੰਮ ਨਾ ਕਰੇ।"</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"ਐਪ ਸਪਲਿਟ-ਸਕ੍ਰੀਨ ਨੂੰ ਸਮਰਥਨ ਨਹੀਂ ਕਰਦੀ।"</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"ਹੋ ਸਕਦਾ ਹੈ ਕਿ ਐਪ ਸੈਕੰਡਰੀ ਡਿਸਪਲੇ \'ਤੇ ਕੰਮ ਨਾ ਕਰੇ।"</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"ਐਪ ਸੈਕੰਡਰੀ ਡਿਸਪਲੇਆਂ \'ਤੇ ਲਾਂਚ ਕਰਨ ਦਾ ਸਮਰਥਨ ਨਹੀਂ ਕਰਦੀ"</string>
@@ -44,14 +43,10 @@
     <string name="accessibility_action_divider_top_50" msgid="8649582798829048946">"ਉੱਪਰ 50%"</string>
     <string name="accessibility_action_divider_top_30" msgid="3572788224908570257">"ਉੱਪਰ 30%"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="2831868345092314060">"ਹੇਠਾਂ ਪੂਰੀ ਸਕ੍ਰੀਨ"</string>
-    <!-- no translation found for one_handed_tutorial_title (4583241688067426350) -->
-    <skip />
-    <!-- no translation found for one_handed_tutorial_description (3486582858591353067) -->
-    <skip />
-    <!-- no translation found for accessibility_action_start_one_handed (5070337354072861426) -->
-    <skip />
-    <!-- no translation found for accessibility_action_stop_one_handed (1369940261782179442) -->
-    <skip />
+    <string name="one_handed_tutorial_title" msgid="4583241688067426350">"ਇੱਕ ਹੱਥ ਮੋਡ ਵਰਤਣਾ"</string>
+    <string name="one_handed_tutorial_description" msgid="3486582858591353067">"ਬਾਹਰ ਜਾਣ ਲਈ, ਸਕ੍ਰੀਨ ਦੇ ਹੇਠਾਂ ਤੋਂ ਉੱਪਰ ਵੱਲ ਸਵਾਈਪ ਕਰੋ ਜਾਂ ਐਪ \'ਤੇ ਕਿਤੇ ਵੀ ਟੈਪ ਕਰੋ"</string>
+    <string name="accessibility_action_start_one_handed" msgid="5070337354072861426">"ਇੱਕ ਹੱਥ ਮੋਡ ਸ਼ੁਰੂ ਕਰੋ"</string>
+    <string name="accessibility_action_stop_one_handed" msgid="1369940261782179442">"ਇੱਕ ਹੱਥ ਮੋਡ ਤੋਂ ਬਾਹਰ ਜਾਓ"</string>
     <string name="bubbles_settings_button_description" msgid="1301286017420516912">"<xliff:g id="APP_NAME">%1$s</xliff:g> ਬਬਲ ਲਈ ਸੈਟਿੰਗਾਂ"</string>
     <string name="bubble_overflow_button_content_description" msgid="8160974472718594382">"ਓਵਰਫ਼ਲੋ"</string>
     <string name="bubble_accessibility_action_add_back" msgid="1830101076853540953">"ਸਟੈਕ ਵਿੱਚ ਵਾਪਸ ਸ਼ਾਮਲ ਕਰੋ"</string>
@@ -68,8 +63,7 @@
     <string name="bubbles_user_education_description" msgid="4215862563054175407">"ਨਵੀਆਂ ਗੱਲਾਂਬਾਤਾਂ ਫਲੋਟਿੰਗ ਪ੍ਰਤੀਕਾਂ ਜਾਂ ਬਬਲ ਦੇ ਰੂਪ ਵਿੱਚ ਦਿਸਦੀਆਂ ਹਨ। ਬਬਲ ਨੂੰ ਖੋਲ੍ਹਣ ਲਈ ਟੈਪ ਕਰੋ। ਇਸਨੂੰ ਲਿਜਾਣ ਲਈ ਘਸੀਟੋ।"</string>
     <string name="bubbles_user_education_manage_title" msgid="7042699946735628035">"ਬਬਲ ਨੂੰ ਕਿਸੇ ਵੇਲੇ ਵੀ ਕੰਟਰੋਲ ਕਰੋ"</string>
     <string name="bubbles_user_education_manage" msgid="3460756219946517198">"ਇਸ ਐਪ \'ਤੇ ਬਬਲ ਬੰਦ ਕਰਨ ਲਈ \'ਪ੍ਰਬੰਧਨ ਕਰੋ\' \'ਤੇ ਟੈਪ ਕਰੋ"</string>
-    <!-- no translation found for bubbles_user_education_got_it (3382046149225428296) -->
-    <skip />
+    <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"ਸਮਝ ਲਿਆ"</string>
     <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"ਕੋਈ ਹਾਲੀਆ ਬਬਲ ਨਹੀਂ"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"ਹਾਲੀਆ ਬਬਲ ਅਤੇ ਖਾਰਜ ਕੀਤੇ ਬਬਲ ਇੱਥੇ ਦਿਸਣਗੇ"</string>
     <string name="notification_bubble_title" msgid="6082910224488253378">"ਬੁਲਬੁਲਾ"</string>

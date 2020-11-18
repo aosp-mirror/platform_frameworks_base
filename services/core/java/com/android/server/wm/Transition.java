@@ -22,13 +22,14 @@ import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_NO_ANI
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_SUBTLE_ANIMATION;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_TO_SHADE;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_WITH_WALLPAPER;
-import static android.view.WindowManager.TRANSIT_OLD_KEYGUARD_GOING_AWAY;
-import static android.view.WindowManager.TRANSIT_OLD_KEYGUARD_GOING_AWAY_ON_WALLPAPER;
+import static android.view.WindowManager.TRANSIT_KEYGUARD_GOING_AWAY;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
@@ -41,6 +42,8 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.ProtoLogGroup;
 import com.android.internal.protolog.common.ProtoLog;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Map;
 
@@ -65,17 +68,32 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
      */
     private static final int STATE_PLAYING = 2;
 
-    final @WindowManager.TransitionOldType int mType;
+    /**
+     * This transition is aborting or has aborted. No animation will play nor will anything get
+     * sent to the player.
+     */
+    private static final int STATE_ABORT = 3;
+
+    @IntDef(prefix = { "STATE_" }, value = {
+            STATE_COLLECTING,
+            STATE_STARTED,
+            STATE_PLAYING,
+            STATE_ABORT
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    @interface TransitionState {}
+
+    final @WindowManager.TransitionType int mType;
     private int mSyncId;
     private @WindowManager.TransitionFlags int mFlags;
     private final TransitionController mController;
     private final BLASTSyncEngine mSyncEngine;
     final ArrayMap<WindowContainer, ChangeInfo> mParticipants = new ArrayMap<>();
-    private int mState = STATE_COLLECTING;
+    private @TransitionState int mState = STATE_COLLECTING;
     private boolean mReadyCalled = false;
 
-    Transition(@WindowManager.TransitionOldType int type,
-            @WindowManager.TransitionFlags int flags, TransitionController controller) {
+    Transition(@WindowManager.TransitionType int type, @WindowManager.TransitionFlags int flags,
+            TransitionController controller) {
         mType = type;
         mFlags = flags;
         mController = controller;
@@ -116,15 +134,20 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
      *
      * If this is called before the transition is started, it will be deferred until start.
      */
-    void setReady() {
+    void setReady(boolean ready) {
         if (mSyncId < 0) return;
         if (mState < STATE_STARTED) {
-            mReadyCalled = true;
+            mReadyCalled = ready;
             return;
         }
         ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
-                "Finish collecting in transition %d", mSyncId);
-        mSyncEngine.setReady(mSyncId);
+                "Set transition ready=%b %d", ready, mSyncId);
+        mSyncEngine.setReady(mSyncId, ready);
+    }
+
+    /** @see #setReady . This calls with parameter true. */
+    void setReady() {
+        setReady(true);
     }
 
     /** The transition has finished animating and is ready to finalize WM state */
@@ -143,20 +166,40 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         }
     }
 
+    void abort() {
+        // This calls back into itself via controller.abort, so just early return here.
+        if (mState == STATE_ABORT) return;
+        if (mState != STATE_COLLECTING) {
+            throw new IllegalStateException("Too late to abort.");
+        }
+        mState = STATE_ABORT;
+        // Syncengine abort will call through to onTransactionReady()
+        mSyncEngine.abort(mSyncId);
+    }
+
     @Override
     public void onTransactionReady(int syncId, SurfaceControl.Transaction transaction) {
         if (syncId != mSyncId) {
             Slog.e(TAG, "Unexpected Sync ID " + syncId + ". Expected " + mSyncId);
             return;
         }
+        int displayId = DEFAULT_DISPLAY;
+        for (WindowContainer container : mParticipants.keySet()) {
+            if (container.mDisplayContent == null) continue;
+            displayId = container.mDisplayContent.getDisplayId();
+        }
+
+        if (mState == STATE_ABORT) {
+            mController.abort(this);
+            mController.mAtm.mRootWindowContainer.getDisplayContent(displayId)
+                    .getPendingTransaction().merge(transaction);
+            mSyncId = -1;
+            return;
+        }
+
         mState = STATE_PLAYING;
         mController.moveToPlaying(this);
         final TransitionInfo info = calculateTransitionInfo(mType, mParticipants);
-
-        int displayId = DEFAULT_DISPLAY;
-        for (WindowContainer container : mParticipants.keySet()) {
-            displayId = container.mDisplayContent.getDisplayId();
-        }
 
         handleNonAppWindowsInTransition(displayId, mType, mFlags);
 
@@ -176,13 +219,14 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         mSyncId = -1;
     }
 
-    private void handleNonAppWindowsInTransition(int displayId, int transit, int flags) {
+    private void handleNonAppWindowsInTransition(int displayId,
+            @WindowManager.TransitionType int transit, int flags) {
         final DisplayContent dc =
                 mController.mAtm.mRootWindowContainer.getDisplayContent(displayId);
         if (dc == null) {
             return;
         }
-        if (transit == TRANSIT_OLD_KEYGUARD_GOING_AWAY) {
+        if (transit == TRANSIT_KEYGUARD_GOING_AWAY) {
             if ((flags & TRANSIT_FLAG_KEYGUARD_GOING_AWAY_WITH_WALLPAPER) != 0
                     && (flags & TRANSIT_FLAG_KEYGUARD_GOING_AWAY_NO_ANIMATION) == 0
                     && (flags & TRANSIT_FLAG_KEYGUARD_GOING_AWAY_SUBTLE_ANIMATION) == 0) {
@@ -196,13 +240,13 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
                 }
             }
         }
-        if (transit == TRANSIT_OLD_KEYGUARD_GOING_AWAY
-                || transit == TRANSIT_OLD_KEYGUARD_GOING_AWAY_ON_WALLPAPER) {
+        if (transit == TRANSIT_KEYGUARD_GOING_AWAY) {
             dc.startKeyguardExitOnNonAppWindows(
-                    transit == TRANSIT_OLD_KEYGUARD_GOING_AWAY_ON_WALLPAPER,
+                    (flags & TRANSIT_FLAG_KEYGUARD_GOING_AWAY_WITH_WALLPAPER) != 0,
                     (flags & TRANSIT_FLAG_KEYGUARD_GOING_AWAY_TO_SHADE) != 0,
                     (flags & TRANSIT_FLAG_KEYGUARD_GOING_AWAY_SUBTLE_ANIMATION) != 0);
-            mController.mAtm.mWindowManager.mPolicy.startKeyguardExitAnimation(transit, 0);
+            mController.mAtm.mWindowManager.mPolicy.startKeyguardExitAnimation(
+                    SystemClock.uptimeMillis(), 0 /* duration */);
         }
     }
 
@@ -447,7 +491,8 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
             final WindowContainer target = targets.keyAt(i);
             final ChangeInfo info = targets.valueAt(i);
             final TransitionInfo.Change change = new TransitionInfo.Change(
-                    target.mRemoteToken.toWindowContainerToken(), target.getSurfaceControl());
+                    target.mRemoteToken != null ? target.mRemoteToken.toWindowContainerToken()
+                            : null, target.getSurfaceControl());
             if (info.mParent != null) {
                 change.setParent(info.mParent.mRemoteToken.toWindowContainerToken());
             }

@@ -380,6 +380,7 @@ filegroup {
         // etc.
         ":framework-javastream-protos",
         ":statslog-framework-java-gen", // FrameworkStatsLog.java
+        ":audio_policy_configuration_V7_0",
     ],
 }
 
@@ -1363,6 +1364,7 @@ filegroup {
 metalava_framework_docs_args = "--manifest $(location core/res/AndroidManifest.xml) " +
     "--ignore-classes-on-classpath " +
     "--hide-package com.android.server " +
+    "--hide-package android.audio.policy.configuration.V7_0 " +
     "--error UnhiddenSystemApi " +
     "--hide RequiresPermission " +
     "--hide CallbackInterface " +

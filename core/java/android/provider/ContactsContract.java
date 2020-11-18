@@ -6769,20 +6769,8 @@ public final class ContactsContract {
          * <td>{@link #DATA5}</td>
          * <td>
          * <p>
-         * Allowed values:
-         * <ul>
-         * <li>{@link #PROTOCOL_CUSTOM}. Also provide the actual protocol name
-         * as {@link #CUSTOM_PROTOCOL}.</li>
-         * <li>{@link #PROTOCOL_AIM}</li>
-         * <li>{@link #PROTOCOL_MSN}</li>
-         * <li>{@link #PROTOCOL_YAHOO}</li>
-         * <li>{@link #PROTOCOL_SKYPE}</li>
-         * <li>{@link #PROTOCOL_QQ}</li>
-         * <li>{@link #PROTOCOL_GOOGLE_TALK}</li>
-         * <li>{@link #PROTOCOL_ICQ}</li>
-         * <li>{@link #PROTOCOL_JABBER}</li>
-         * <li>{@link #PROTOCOL_NETMEETING}</li>
-         * </ul>
+         * Allowed value: {@link #PROTOCOL_CUSTOM}. Also provide the actual protocol name
+         * as {@link #CUSTOM_PROTOCOL}.
          * </p>
          * </td>
          * </tr>
@@ -6808,10 +6796,9 @@ public final class ContactsContract {
             public static final int TYPE_OTHER = 3;
 
             /**
-             * This column should be populated with one of the defined
-             * constants, e.g. {@link #PROTOCOL_YAHOO}. If the value of this
-             * column is {@link #PROTOCOL_CUSTOM}, the {@link #CUSTOM_PROTOCOL}
-             * should contain the name of the custom protocol.
+             * This column should always be set to {@link #PROTOCOL_CUSTOM} and
+             * the {@link #CUSTOM_PROTOCOL} should contain the name of the custom protocol.
+             * The other predefined protocols are deprecated and should not be used.
              */
             public static final String PROTOCOL = DATA5;
 
@@ -6821,14 +6808,50 @@ public final class ContactsContract {
              * The predefined IM protocol types.
              */
             public static final int PROTOCOL_CUSTOM = -1;
+            /**
+             * @deprecated Use {@link #PROTOCOL_CUSTOM} with {@link #CUSTOM_PROTOCOL}.
+             */
+            @Deprecated
             public static final int PROTOCOL_AIM = 0;
+            /**
+             * @deprecated Use {@link #PROTOCOL_CUSTOM} with {@link #CUSTOM_PROTOCOL}.
+             */
+            @Deprecated
             public static final int PROTOCOL_MSN = 1;
+            /**
+             * @deprecated Use {@link #PROTOCOL_CUSTOM} with {@link #CUSTOM_PROTOCOL}.
+             */
+            @Deprecated
             public static final int PROTOCOL_YAHOO = 2;
+            /**
+             * @deprecated Use {@link #PROTOCOL_CUSTOM} with {@link #CUSTOM_PROTOCOL}.
+             */
+            @Deprecated
             public static final int PROTOCOL_SKYPE = 3;
+            /**
+             * @deprecated Use {@link #PROTOCOL_CUSTOM} with {@link #CUSTOM_PROTOCOL}.
+             */
+            @Deprecated
             public static final int PROTOCOL_QQ = 4;
+            /**
+             * @deprecated Use {@link #PROTOCOL_CUSTOM} with {@link #CUSTOM_PROTOCOL}.
+             */
+            @Deprecated
             public static final int PROTOCOL_GOOGLE_TALK = 5;
+            /**
+             * @deprecated Use {@link #PROTOCOL_CUSTOM} with {@link #CUSTOM_PROTOCOL}.
+             */
+            @Deprecated
             public static final int PROTOCOL_ICQ = 6;
+            /**
+             * @deprecated Use {@link #PROTOCOL_CUSTOM} with {@link #CUSTOM_PROTOCOL}.
+             */
+            @Deprecated
             public static final int PROTOCOL_JABBER = 7;
+            /**
+             * @deprecated Use {@link #PROTOCOL_CUSTOM} with {@link #CUSTOM_PROTOCOL}.
+             */
+            @Deprecated
             public static final int PROTOCOL_NETMEETING = 8;
 
             /**

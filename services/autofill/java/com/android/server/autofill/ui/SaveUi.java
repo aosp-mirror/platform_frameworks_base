@@ -198,9 +198,9 @@ final class SaveUi {
                 }
                 intent.putExtra(AutofillManager.EXTRA_RESTORE_CROSS_ACTIVITY, true);
 
-                PendingIntent p = PendingIntent.getActivityAsUser(
-                        this, /* requestCode= */ 0, intent, /* flags= */ 0, /* options= */ null,
-                                UserHandle.CURRENT);
+                PendingIntent p = PendingIntent.getActivityAsUser(this, /* requestCode= */ 0,
+                        intent, PendingIntent.FLAG_MUTABLE, /* options= */ null,
+                        UserHandle.CURRENT);
                 if (sDebug) {
                     Slog.d(TAG, "startActivity add save UI restored with intent=" + intent);
                 }

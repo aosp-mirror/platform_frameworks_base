@@ -51,6 +51,7 @@ java_defaults {
         "SettingsLibRadioButtonPreference",
         "SettingsLibDisplayDensityUtils",
         "SettingsLibUtils",
+        "SettingsLibTopIntroPreference",
     ],
 }
 

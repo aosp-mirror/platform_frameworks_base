@@ -212,8 +212,8 @@ public final class SurfaceControl implements Parcelable {
     private static native void nativeSetGlobalShadowSettings(@Size(4) float[] ambientColor,
             @Size(4) float[] spotColor, float lightPosY, float lightPosZ, float lightRadius);
 
-    private static native void nativeSetFrameRate(
-            long transactionObj, long nativeObject, float frameRate, int compatibility);
+    private static native void nativeSetFrameRate(long transactionObj, long nativeObject,
+            float frameRate, int compatibility, boolean shouldBeSeamless);
     private static native long nativeGetHandle(long nativeObject);
 
     private static native long nativeAcquireFrameRateFlexibilityToken();
@@ -3256,6 +3256,19 @@ public final class SurfaceControl implements Parcelable {
         }
 
         /**
+         * Sets the intended frame rate for this surface. Any switching of refresh rates is
+         * most probably going to be seamless.
+         *
+         * @see #setFrameRate(SurfaceControl, float, int, boolean)
+         */
+        @NonNull
+        public Transaction setFrameRate(@NonNull SurfaceControl sc,
+                @FloatRange(from = 0.0) float frameRate,
+                @Surface.FrameRateCompatibility int compatibility) {
+            return setFrameRate(sc, frameRate, compatibility, /*shouldBeSeamless*/ true);
+        }
+
+        /**
          * Sets the intended frame rate for the surface {@link SurfaceControl}.
          * <p>
          * On devices that are capable of running the display at different refresh rates, the system
@@ -3275,14 +3288,22 @@ public final class SurfaceControl implements Parcelable {
          * @param compatibility The frame rate compatibility of this surface. The compatibility
          *                      value may influence the system's choice of display frame rate. See
          *                      the Surface.FRAME_RATE_COMPATIBILITY_* values for more info.
+         * @param shouldBeSeamless Whether display refresh rate transitions should be seamless. A
+         *                         seamless transition is one that doesn't have any visual
+         *                         interruptions, such as a black screen for a second or two. True
+         *                         indicates that any frame rate changes caused by this request
+         *                         should be seamless. False indicates that non-seamless refresh
+         *                         rates are also acceptable.
          * @return This transaction object.
          */
         @NonNull
         public Transaction setFrameRate(@NonNull SurfaceControl sc,
                 @FloatRange(from = 0.0) float frameRate,
-                @Surface.FrameRateCompatibility int compatibility) {
+                @Surface.FrameRateCompatibility int compatibility,
+                boolean shouldBeSeamless) {
             checkPreconditions(sc);
-            nativeSetFrameRate(mNativeObject, sc.mNativeObject, frameRate, compatibility);
+            nativeSetFrameRate(mNativeObject, sc.mNativeObject, frameRate, compatibility,
+                    shouldBeSeamless);
             return this;
         }
 

@@ -283,7 +283,7 @@ class DisplayAreaPolicyBuilder {
             final int maxWindowLayerCount = policy.getMaxWindowLayer();
             final DisplayArea.Tokens[] displayAreaForLayer =
                     new DisplayArea.Tokens[maxWindowLayerCount];
-            final Map<Feature, List<DisplayArea<? extends WindowContainer>>> featureAreas =
+            final Map<Feature, List<DisplayArea<WindowContainer>>> featureAreas =
                     new ArrayMap<>(mFeatures.size());
             for (int i = 0; i < mFeatures.size(); i++) {
                 featureAreas.put(mFeatures.get(i), new ArrayList<>());
@@ -678,7 +678,7 @@ class DisplayAreaPolicyBuilder {
         }
 
         void instantiateChildren(DisplayArea<DisplayArea> parent, DisplayArea.Tokens[] areaForLayer,
-                int level, Map<Feature, List<DisplayArea<? extends WindowContainer>>> areas) {
+                int level, Map<Feature, List<DisplayArea<WindowContainer>>> areas) {
             mChildren.sort(Comparator.comparingInt(pendingArea -> pendingArea.mMinLayer));
             for (int i = 0; i < mChildren.size(); i++) {
                 final PendingArea child = mChildren.get(i);

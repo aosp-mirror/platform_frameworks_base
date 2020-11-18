@@ -1545,22 +1545,8 @@ public class SoundTriggerService extends SystemService {
         }
 
         @Override
-        public Session attachAsOriginator(@NonNull Identity originatorIdentity,
-                @NonNull IBinder client) {
-            try (SafeCloseable ignored = PermissionUtil.establishIdentityDirect(
-                    originatorIdentity)) {
-                return new SessionImpl(newSoundTriggerHelper(), client);
-            }
-        }
-
-        @Override
-        public Session attachAsMiddleman(@NonNull Identity middlemanIdentity,
-                @NonNull Identity originatorIdentity,
-                @NonNull IBinder client) {
-            try (SafeCloseable ignored = PermissionUtil.establishIdentityIndirect(mContext,
-                    SOUNDTRIGGER_DELEGATE_IDENTITY, middlemanIdentity, originatorIdentity)) {
-                return new SessionImpl(newSoundTriggerHelper(), client);
-            }
+        public Session attach(@NonNull IBinder client) {
+            return new SessionImpl(newSoundTriggerHelper(), client);
         }
 
         @Override

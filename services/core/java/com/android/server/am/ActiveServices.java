@@ -217,6 +217,11 @@ public final class ActiveServices {
      */
     final ArrayList<ServiceRecord> mDestroyingServices = new ArrayList<>();
 
+    /**
+     * List of services for which display of the FGS notification has been deferred.
+     */
+    final ArrayList<ServiceRecord> mPendingFgsNotifications = new ArrayList<>();
+
     /** Temporary list for holding the results of calls to {@link #collectPackageServicesLocked} */
     private ArrayList<ServiceRecord> mTmpCollectionResults = null;
 
@@ -1551,7 +1556,7 @@ public final class ActiveServices {
                         registerAppOpCallbackLocked(r);
                         mAm.updateForegroundServiceUsageStats(r.name, r.userId, true);
                     }
-                    r.postNotification();
+                    postFgsNotificationLocked(r);
                     if (r.app != null) {
                         updateServiceForegroundLocked(r.app, true);
                     }
@@ -1608,6 +1613,9 @@ public final class ActiveServices {
                     updateServiceForegroundLocked(r.app, true);
                 }
             }
+            // Leave the time-to-display as already set: re-entering foreground mode will
+            // only resume the previous quiet timeout, or will display immediately if the
+            // deferral period had already passed.
             if ((flags & Service.STOP_FOREGROUND_REMOVE) != 0) {
                 cancelForegroundNotificationLocked(r);
                 r.foregroundId = 0;
@@ -1621,6 +1629,105 @@ public final class ActiveServices {
             }
         }
     }
+
+    private void postFgsNotificationLocked(ServiceRecord r) {
+        boolean showNow = !mAm.mConstants.mFlagFgsNotificationDeferralEnabled;
+        if (!showNow) {
+            // Legacy apps' FGS notifications are not deferred unless the relevant
+            // DeviceConfig element has been set
+            showNow = mAm.mConstants.mFlagFgsNotificationDeferralApiGated
+                    && r.appInfo.targetSdkVersion < Build.VERSION_CODES.S;
+        }
+        if (!showNow) {
+            // is the notification such that it should show right away?
+            showNow = r.foregroundNoti.shouldShowForegroundImmediately();
+            // or is this an type of FGS that always shows immediately?
+            if (!showNow) {
+                switch (r.foregroundServiceType) {
+                    case ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK:
+                    case ServiceInfo.FOREGROUND_SERVICE_TYPE_PHONE_CALL:
+                    case ServiceInfo.FOREGROUND_SERVICE_TYPE_CONNECTED_DEVICE:
+                    case ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION:
+                        if (DEBUG_FOREGROUND_SERVICE) {
+                            Slog.d(TAG_SERVICE, "FGS " + r
+                                    + " type gets immediate display");
+                        }
+                        showNow = true;
+                }
+            }
+        }
+
+        if (showNow) {
+            if (DEBUG_FOREGROUND_SERVICE) {
+                Slog.d(TAG_SERVICE, "FGS " + r + " non-deferred notification");
+            }
+            r.postNotification();
+            return;
+        }
+
+        // schedule the actual notification post
+        final int uid = r.appInfo.uid;
+        final long now = SystemClock.uptimeMillis();
+        long when = now + mAm.mConstants.mFgsNotificationDeferralInterval;
+        // If there are already deferred FGS notifications for this app,
+        // inherit that deferred-show timestamp
+        for (int i = 0; i < mPendingFgsNotifications.size(); i++) {
+            final ServiceRecord pending = mPendingFgsNotifications.get(i);
+            if (pending == r) {
+                // Already pending; no need to reschedule
+                if (DEBUG_FOREGROUND_SERVICE) {
+                    Slog.d(TAG_SERVICE, "FGS " + r
+                            + " already pending notification display");
+                }
+                return;
+            }
+            if (uid == pending.appInfo.uid) {
+                when = Math.min(when, pending.fgDisplayTime);
+            }
+        }
+        r.fgDisplayTime = when;
+        mPendingFgsNotifications.add(r);
+        if (DEBUG_FOREGROUND_SERVICE) {
+            Slog.d(TAG_SERVICE, "FGS " + r
+                    + " notification in " + (when - now) + " ms");
+        }
+        mAm.mHandler.postAtTime(mPostDeferredFGSNotifications, when);
+    }
+
+    private final Runnable mPostDeferredFGSNotifications = new Runnable() {
+        @Override
+        public void run() {
+            if (DEBUG_FOREGROUND_SERVICE) {
+                Slog.d(TAG_SERVICE, "+++ evaluating deferred FGS notifications +++");
+            }
+            final long now = SystemClock.uptimeMillis();
+            synchronized (mAm) {
+                // post all notifications whose time has come
+                for (int i = mPendingFgsNotifications.size() - 1; i >= 0; i--) {
+                    final ServiceRecord r = mPendingFgsNotifications.get(i);
+                    if (r.fgDisplayTime <= now) {
+                        if (DEBUG_FOREGROUND_SERVICE) {
+                            Slog.d(TAG_SERVICE, "FGS " + r
+                                    + " handling deferred notification now");
+                        }
+                        mPendingFgsNotifications.remove(i);
+                        // The service might have been stopped or exited foreground state
+                        // in the interval, so we lazy check whether we still need to show
+                        // the notification.
+                        if (r.isForeground) {
+                            r.postNotification();
+                        } else if (DEBUG_FOREGROUND_SERVICE) {
+                            Slog.d(TAG_SERVICE, "  - service no longer running/fg, ignoring");
+                        }
+                    }
+                }
+                if (DEBUG_FOREGROUND_SERVICE) {
+                    Slog.d(TAG_SERVICE, "Done evaluating deferred FGS notifications; "
+                            + mPendingFgsNotifications.size() + " remaining");
+                }
+            }
+        }
+    };
 
     /** Registers an AppOpCallback for monitoring special AppOps for this foreground service. */
     private void registerAppOpCallbackLocked(@NonNull ServiceRecord r) {

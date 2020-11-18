@@ -27,7 +27,7 @@ import static android.net.RouteInfo.RTN_UNREACHABLE;
 
 import static com.android.internal.util.Preconditions.checkArgument;
 import static com.android.internal.util.Preconditions.checkNotNull;
-import static com.android.server.connectivity.NetworkNotificationManager.NOTIFICATION_VPN;
+import static com.android.server.connectivity.NetworkNotificationManager.NOTIFICATION_CHANNEL_VPN;
 
 import android.Manifest;
 import android.annotation.NonNull;
@@ -1945,7 +1945,7 @@ public class Vpn {
             final PendingIntent configIntent = mSystemServices.pendingIntentGetActivityAsUser(
                     intent, PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT, user);
             final Notification.Builder builder =
-                    new Notification.Builder(mContext, NOTIFICATION_VPN)
+                    new Notification.Builder(mContext, NOTIFICATION_CHANNEL_VPN)
                             .setSmallIcon(R.drawable.vpn_connected)
                             .setContentTitle(mContext.getString(R.string.vpn_lockdown_disconnected))
                             .setContentText(mContext.getString(R.string.vpn_lockdown_config))
@@ -2407,7 +2407,14 @@ public class Vpn {
                         .addTransportType(NetworkCapabilities.TRANSPORT_TEST)
                         .build();
             } else {
-                req = cm.getDefaultRequest();
+                // Basically, the request here is referring to the default request which is defined
+                // in ConnectivityService. Ideally, ConnectivityManager should provide an new API
+                // which can provide the status of physical network even though there is a virtual
+                // network. b/147280869 is used for tracking the new API.
+                // TODO: Use the new API to register default physical network.
+                req = new NetworkRequest.Builder()
+                        .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+                        .build();
             }
 
             cm.requestNetwork(req, mNetworkCallback);

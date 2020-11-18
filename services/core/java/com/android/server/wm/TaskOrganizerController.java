@@ -542,11 +542,9 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
                 || mTmpTaskInfo.topActivityType != lastInfo.topActivityType
                 || mTmpTaskInfo.isResizeable != lastInfo.isResizeable
                 || !Objects.equals(
-                        mTmpTaskInfo.letterboxActivityBounds,
-                        lastInfo.letterboxActivityBounds)
-                || !Objects.equals(
                         mTmpTaskInfo.positionInParent,
                         lastInfo.positionInParent)
+                || isLetterboxInfoChanged(lastInfo, mTmpTaskInfo)
                 || mTmpTaskInfo.pictureInPictureParams != lastInfo.pictureInPictureParams
                 || mTmpTaskInfo.getWindowingMode() != lastInfo.getWindowingMode()
                 || !TaskDescription.equals(mTmpTaskInfo.taskDescription, lastInfo.taskDescription);
@@ -582,6 +580,20 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
                 state.mOrganizer.onTaskInfoChanged(task, newInfo);
             }
         }
+    }
+
+    private boolean isLetterboxInfoChanged(
+                final RunningTaskInfo lastInfo, final RunningTaskInfo currentInfo) {
+        return !Objects.equals(
+                        currentInfo.letterboxActivityBounds,
+                        lastInfo.letterboxActivityBounds)
+                || !Objects.equals(
+                        currentInfo.getConfiguration().windowConfiguration.getBounds(),
+                        lastInfo.getConfiguration().windowConfiguration.getBounds())
+                || !Objects.equals(
+                        currentInfo.getConfiguration().windowConfiguration.getMaxBounds(),
+                        lastInfo.getConfiguration().windowConfiguration.getMaxBounds())
+                || !Objects.equals(currentInfo.parentBounds, lastInfo.parentBounds);
     }
 
     @Override

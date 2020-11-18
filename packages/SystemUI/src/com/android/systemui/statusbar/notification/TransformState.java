@@ -456,9 +456,6 @@ public class TransformState {
         if (view instanceof ImageView) {
             ImageTransformState result = ImageTransformState.obtain();
             result.initFrom(view, transformInfo);
-            if (view.getId() == com.android.internal.R.id.reply_icon_action) {
-                ((TransformState) result).setIsSameAsAnyView(true);
-            }
             return result;
         }
         if (view instanceof ProgressBar) {

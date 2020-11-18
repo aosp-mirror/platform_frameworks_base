@@ -43,6 +43,8 @@ import static android.os.PowerManager.PARTIAL_WAKE_LOCK;
 import static android.os.Process.INVALID_UID;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.Display.DEFAULT_DISPLAY;
+import static android.view.WindowManager.TRANSIT_CLOSE;
+import static android.view.WindowManager.TRANSIT_TO_FRONT;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_STATES;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_TASKS;
@@ -1349,6 +1351,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
             mUserLeaving = true;
         }
 
+        mService.getTransitionController().requestTransitionIfNeeded(TRANSIT_TO_FRONT, task);
         reason = reason + " findTaskToMoveToFront";
         boolean reparented = false;
         if (task.isResizeable() && canUseActivityOptionsLaunchBounds(options)) {
@@ -1516,6 +1519,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
             // Prevent recursion.
             return;
         }
+        mService.getTransitionController().requestTransitionIfNeeded(TRANSIT_CLOSE, task);
         task.mInRemoveTask = true;
         try {
             task.performClearTask(reason);

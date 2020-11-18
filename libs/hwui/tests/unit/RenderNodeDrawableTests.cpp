@@ -198,7 +198,7 @@ TEST(RenderNodeDrawable, saveLayerClipAndMatrixRestore) {
                 EXPECT_TRUE(getRecorderMatrix(recorder).isIdentity());
 
                 // note we don't pass SaveFlags::MatrixClip, but matrix and clip will be saved
-                recorder.saveLayer(0, 0, 400, 400, &layerPaint, SaveFlags::ClipToLayer);
+                recorder.saveLayer(0, 0, 400, 400, &layerPaint);
                 ASSERT_EQ(SkRect::MakeLTRB(0, 0, 400, 400), getRecorderClipBounds(recorder));
                 EXPECT_TRUE(getRecorderMatrix(recorder).isIdentity());
 

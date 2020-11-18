@@ -16,9 +16,10 @@
 
 package com.android.server.net;
 
+import static android.net.ConnectivityManager.TYPE_NONE;
 import static android.provider.Settings.ACTION_VPN_SETTINGS;
 
-import static com.android.server.connectivity.NetworkNotificationManager.NOTIFICATION_VPN;
+import static com.android.server.connectivity.NetworkNotificationManager.NOTIFICATION_CHANNEL_VPN;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -27,7 +28,6 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.net.ConnectivityManager;
 import android.net.LinkAddress;
 import android.net.LinkProperties;
 import android.net.NetworkInfo;
@@ -125,12 +125,11 @@ public class LockdownVpnTracker {
         final boolean egressChanged = egressProp == null
                 || !TextUtils.equals(mAcceptedEgressIface, egressProp.getInterfaceName());
 
-        final String egressTypeName = (egressInfo == null) ?
-                null : ConnectivityManager.getNetworkTypeName(egressInfo.getType());
+        final int egressType = (egressInfo == null) ? TYPE_NONE : egressInfo.getType();
         final String egressIface = (egressProp == null) ?
                 null : egressProp.getInterfaceName();
-        Slog.d(TAG, "handleStateChanged: egress=" + egressTypeName +
-                " " + mAcceptedEgressIface + "->" + egressIface);
+        Slog.d(TAG, "handleStateChanged: egress=" + egressType
+                + " " + mAcceptedEgressIface + "->" + egressIface);
 
         if (egressDisconnected || egressChanged) {
             mAcceptedEgressIface = null;
@@ -141,7 +140,6 @@ public class LockdownVpnTracker {
             return;
         }
 
-        final int egressType = egressInfo.getType();
         if (vpnInfo.getDetailedState() == DetailedState.FAILED) {
             EventLogTags.writeLockdownVpnError(egressType);
         }
@@ -257,7 +255,7 @@ public class LockdownVpnTracker {
 
     private void showNotification(int titleRes, int iconRes) {
         final Notification.Builder builder =
-                new Notification.Builder(mContext, NOTIFICATION_VPN)
+                new Notification.Builder(mContext, NOTIFICATION_CHANNEL_VPN)
                         .setWhen(0)
                         .setSmallIcon(iconRes)
                         .setContentTitle(mContext.getString(titleRes))

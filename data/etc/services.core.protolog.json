@@ -1027,6 +1027,12 @@
       "group": "WM_DEBUG_TASKS",
       "at": "com\/android\/server\/wm\/ResetTargetTaskHelper.java"
     },
+    "-874888131": {
+      "message": "Set transition ready=%b %d",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_TRANSITIONS",
+      "at": "com\/android\/server\/wm\/Transition.java"
+    },
     "-874446906": {
       "message": "showBootMessage: msg=%s always=%b mAllowBootMessages=%b mShowingBootMessages=%b mSystemBooted=%b. %s",
       "level": "INFO",
@@ -2508,12 +2514,6 @@
       "level": "WARN",
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowToken.java"
-    },
-    "849147756": {
-      "message": "Finish collecting in transition %d",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_WINDOW_TRANSITIONS",
-      "at": "com\/android\/server\/wm\/Transition.java"
     },
     "853091290": {
       "message": "Moved stack=%s behind stack=%s",

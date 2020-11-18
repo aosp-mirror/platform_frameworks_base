@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2014 The Android Open Source Project
+<?xml version="1.0" encoding="utf-8"?><!-- Copyright (C) 2014 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -14,50 +13,54 @@
      limitations under the License.
 -->
 
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        android:id="@+id/actions_container"
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/actions_container"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="@dimen/notification_action_list_margin_top"
+    android:layout_gravity="bottom"
+    >
+
+    <LinearLayout
+        android:id="@+id/actions_container_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/notification_action_list_margin_top"
-        android:layout_gravity="bottom">
+        android:gravity="end"
+        android:orientation="horizontal"
+        android:paddingEnd="@dimen/bubble_gone_padding_end"
+        android:background="@color/notification_action_list_background_color"
+        >
 
-        <LinearLayout
-            android:id="@+id/actions_container_layout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="end"
+        <com.android.internal.widget.NotificationActionListLayout
+            android:id="@+id/actions"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="@dimen/notification_action_list_height"
             android:orientation="horizontal"
-            android:paddingEnd="@dimen/bubble_gone_padding_end"
-            android:background="@color/notification_action_list_background_color"
+            android:gravity="center_vertical"
+            android:paddingStart="@dimen/notification_actions_padding_start"
+            android:visibility="gone"
             >
+            <!-- actions will be added here -->
+        </com.android.internal.widget.NotificationActionListLayout>
 
-            <com.android.internal.widget.NotificationActionListLayout
-                android:id="@+id/actions"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="@dimen/notification_action_list_height"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:visibility="gone"
-                >
-                <!-- actions will be added here -->
-            </com.android.internal.widget.NotificationActionListLayout>
+        <ImageView
+            android:id="@+id/snooze_button"
+            android:layout_width="@dimen/notification_actions_icon_size"
+            android:layout_height="@dimen/notification_actions_icon_size"
+            android:layout_gravity="center_vertical|end"
+            android:visibility="gone"
+            android:scaleType="centerInside"
+            />
 
-            <ImageView
-                android:id="@+id/snooze_button"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:layout_gravity="center_vertical|end"
-                android:visibility="gone"
-                android:scaleType="centerInside"
-                />
-            <ImageView
-                android:id="@+id/bubble_button"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:layout_gravity="center_vertical|end"
-                android:visibility="gone"
-                android:scaleType="centerInside"
-                />
+        <ImageView
+            android:id="@+id/bubble_button"
+            android:layout_width="@dimen/notification_actions_icon_size"
+            android:layout_height="@dimen/notification_actions_icon_size"
+            android:layout_gravity="center_vertical|end"
+            android:visibility="gone"
+            android:scaleType="centerInside"
+            />
     </LinearLayout>
 </FrameLayout>

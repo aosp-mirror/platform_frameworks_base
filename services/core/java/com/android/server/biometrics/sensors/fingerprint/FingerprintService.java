@@ -40,6 +40,7 @@ import android.hardware.biometrics.ITestSession;
 import android.hardware.biometrics.fingerprint.IFingerprint;
 import android.hardware.biometrics.fingerprint.SensorProps;
 import android.hardware.fingerprint.Fingerprint;
+import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.hardware.fingerprint.IFingerprintClientActiveCallback;
 import android.hardware.fingerprint.IFingerprintService;
@@ -215,8 +216,10 @@ public class FingerprintService extends SystemService implements BiometricServic
             provider.second.cancelEnrollment(provider.first, token);
         }
 
+        @SuppressWarnings("deprecation")
         @Override // Binder call
-        public void authenticate(final IBinder token, final long operationId, final int userId,
+        public void authenticate(final IBinder token, final long operationId,
+                @FingerprintManager.SensorId final int sensorId, final int userId,
                 final IFingerprintServiceReceiver receiver, final String opPackageName) {
             final int callingUid = Binder.getCallingUid();
             final int callingPid = Binder.getCallingPid();
@@ -251,7 +254,13 @@ public class FingerprintService extends SystemService implements BiometricServic
             final int statsClient = isKeyguard ? BiometricsProtoEnums.CLIENT_KEYGUARD
                     : BiometricsProtoEnums.CLIENT_FINGERPRINT_MANAGER;
 
-            final Pair<Integer, ServiceProvider> provider = getSingleProvider();
+            final Pair<Integer, ServiceProvider> provider;
+            if (sensorId == FingerprintManager.SENSOR_ID_ANY) {
+                provider = getSingleProvider();
+            } else {
+                Utils.checkPermission(getContext(), USE_BIOMETRIC_INTERNAL);
+                provider = new Pair<>(sensorId, getProviderForSensor(sensorId));
+            }
             if (provider == null) {
                 Slog.w(TAG, "Null provider for authenticate");
                 return;

@@ -886,4 +886,78 @@ TEST_F(ManifestFixerTest, UsesLibraryMustHaveNonEmptyName) {
   EXPECT_THAT(Verify(input), NotNull());
 }
 
+TEST_F(ManifestFixerTest, ApplicationPropertyAttributeRequired) {
+  std::string input = R"(
+      <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          package="android">
+        <application>
+          <property android:name="" />
+        </application>
+      </manifest>)";
+  EXPECT_THAT(Verify(input), IsNull());
+}
+
+TEST_F(ManifestFixerTest, ApplicationPropertyOnlyOneAttributeDefined) {
+  std::string input = R"(
+      <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          package="android">
+        <application>
+          <property android:name="" android:value="" android:resource="" />
+        </application>
+      </manifest>)";
+  EXPECT_THAT(Verify(input), IsNull());
+
+  input = R"(
+      <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          package="android">
+        <application>
+          <property android:name="" android:resource="" />
+        </application>
+      </manifest>)";
+  EXPECT_THAT(Verify(input), NotNull());
+
+  input = R"(
+      <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          package="android">
+        <application>
+          <property android:name="" android:value="" />
+        </application>
+      </manifest>)";
+  EXPECT_THAT(Verify(input), NotNull());
+}
+
+TEST_F(ManifestFixerTest, ComponentPropertyOnlyOneAttributeDefined) {
+  std::string input = R"(
+      <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          package="android">
+        <application>
+          <activity android:name=".MyActivity">
+            <property android:name="" android:value="" android:resource="" />
+          </activity>
+        </application>
+      </manifest>)";
+  EXPECT_THAT(Verify(input), IsNull());
+
+  input = R"(
+      <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          package="android">
+        <application>
+          <activity android:name=".MyActivity">
+            <property android:name="" android:value="" />
+          </activity>
+        </application>
+      </manifest>)";
+  EXPECT_THAT(Verify(input), NotNull());
+
+  input = R"(
+      <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          package="android">
+        <application>
+          <activity android:name=".MyActivity">
+            <property android:name="" android:resource="" />
+          </activity>
+        </application>
+      </manifest>)";
+  EXPECT_THAT(Verify(input), NotNull());
+}
 }  // namespace aapt

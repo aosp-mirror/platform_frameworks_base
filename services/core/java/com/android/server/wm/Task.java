@@ -4089,6 +4089,7 @@ class Task extends WindowContainer<WindowContainer> {
         // assigning bounds from ActivityRecord#layoutLetterbox when they are ready.
         info.letterboxActivityBounds = Rect.copyOrNull(mLetterboxActivityBounds);
         info.positionInParent = getRelativePosition();
+        info.parentBounds = getParentBounds();
 
         info.pictureInPictureParams = getPictureInPictureParams();
         info.topActivityInfo = mReuseActivitiesReport.top != null
@@ -4125,6 +4126,11 @@ class Task extends WindowContainer<WindowContainer> {
             mAtmService.mTaskOrganizerController.dispatchTaskInfoChanged(
                         this, /* force= */ true);
         }
+    }
+
+    private Rect getParentBounds() {
+        final WindowContainer parent = getParent();
+        return parent != null ? new Rect(parent.getBounds()) : new Rect();
     }
 
     /**
@@ -6431,6 +6437,7 @@ class Task extends WindowContainer<WindowContainer> {
             final DisplayContent dc = mDisplayContent;
             if (DEBUG_TRANSITION) Slog.v(TAG_TRANSITION,
                     "Prepare open transition: starting " + r);
+            // TODO(shell-transitions): record NO_ANIMATION flag somewhere.
             if ((r.intent.getFlags() & Intent.FLAG_ACTIVITY_NO_ANIMATION) != 0) {
                 dc.prepareAppTransitionOld(TRANSIT_OLD_NONE, keepCurTransition);
                 dc.prepareAppTransition(TRANSIT_NONE);
@@ -6452,16 +6459,8 @@ class Task extends WindowContainer<WindowContainer> {
                         transit = TRANSIT_OLD_TASK_OPEN;
                     }
                 }
-                if (mAtmService.getTransitionController().isShellTransitionsEnabled()
-                        // TODO(shell-transitions): eventually all transitions.
-                        && transit == TRANSIT_OLD_TASK_OPEN) {
-                    Transition transition =
-                            mAtmService.getTransitionController().requestTransition(transit);
-                    transition.collect(task);
-                } else {
-                    dc.prepareAppTransitionOld(transit, keepCurTransition);
-                    dc.prepareAppTransition(TRANSIT_OPEN);
-                }
+                dc.prepareAppTransitionOld(transit, keepCurTransition);
+                dc.prepareAppTransition(TRANSIT_OPEN);
                 mStackSupervisor.mNoAnimActivities.remove(r);
             }
             boolean doShow = true;
@@ -6601,7 +6600,7 @@ class Task extends WindowContainer<WindowContainer> {
         Task finishedTask = r.getTask();
         mDisplayContent.prepareAppTransitionOld(
                 TRANSIT_OLD_CRASHING_ACTIVITY_CLOSE, false /* alwaysKeepCurrent */);
-        mDisplayContent.prepareAppTransition(TRANSIT_CLOSE, TRANSIT_FLAG_APP_CRASHED);
+        mDisplayContent.requestTransitionAndLegacyPrepare(TRANSIT_CLOSE, TRANSIT_FLAG_APP_CRASHED);
         r.finishIfPossible(reason, false /* oomAdj */);
 
         // Also terminate any activities below it that aren't yet stopped, to avoid a situation
@@ -6979,7 +6978,7 @@ class Task extends WindowContainer<WindowContainer> {
 
         mDisplayContent.prepareAppTransitionOld(TRANSIT_OLD_TASK_TO_BACK,
                 false /* alwaysKeepCurrent */);
-        mDisplayContent.prepareAppTransition(TRANSIT_TO_BACK);
+        mDisplayContent.requestTransitionAndLegacyPrepare(TRANSIT_TO_BACK, tr);
         moveToBack("moveTaskToBackLocked", tr);
 
         if (inPinnedWindowingMode()) {

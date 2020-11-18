@@ -4152,14 +4152,18 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     public PasswordMetrics getPasswordMinimumMetrics(@UserIdInt int userHandle) {
         final CallerIdentity caller = getCallerIdentity();
         Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(caller, userHandle));
+        return getPasswordMinimumMetricsUnchecked(userHandle);
+    }
+
+    private PasswordMetrics getPasswordMinimumMetricsUnchecked(@UserIdInt int userId) {
         if (!mHasFeature) {
             new PasswordMetrics(CREDENTIAL_TYPE_NONE);
         }
-        Preconditions.checkArgumentNonnegative(userHandle, "Invalid userId");
+        Preconditions.checkArgumentNonnegative(userId, "Invalid userId");
 
         ArrayList<PasswordMetrics> adminMetrics = new ArrayList<>();
         synchronized (getLockObject()) {
-            List<ActiveAdmin> admins = getActiveAdminsForLockscreenPoliciesLocked(userHandle);
+            List<ActiveAdmin> admins = getActiveAdminsForLockscreenPoliciesLocked(userId);
             for (ActiveAdmin admin : admins) {
                 adminMetrics.add(admin.mPasswordPolicy.getMinMetrics());
             }
@@ -4293,7 +4297,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     private boolean isPasswordSufficientForUserWithoutCheckpointLocked(
             @NonNull PasswordMetrics metrics, @UserIdInt int userId) {
         final int complexity = getEffectivePasswordComplexityRequirementLocked(userId);
-        PasswordMetrics minMetrics = getPasswordMinimumMetrics(userId);
+        PasswordMetrics minMetrics = getPasswordMinimumMetricsUnchecked(userId);
         final List<PasswordValidationError> passwordValidationErrors =
                 PasswordMetrics.validatePasswordMetrics(
                         minMetrics, complexity, false, metrics);
@@ -4583,7 +4587,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         final int callingUid = caller.getUid();
         final int userHandle = UserHandle.getUserId(callingUid);
         synchronized (getLockObject()) {
-            final PasswordMetrics minMetrics = getPasswordMinimumMetrics(userHandle);
+            final PasswordMetrics minMetrics = getPasswordMinimumMetricsUnchecked(userHandle);
             final List<PasswordValidationError> validationErrors;
             final int complexity = getEffectivePasswordComplexityRequirementLocked(userHandle);
             // TODO: Consider changing validation API to take LockscreenCredential.

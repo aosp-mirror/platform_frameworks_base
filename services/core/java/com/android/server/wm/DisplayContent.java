@@ -3573,7 +3573,14 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         return mWmService.mForceDesktopModeOnExternalDisplays && !isDefaultDisplay && !isPrivate();
     }
 
-    private void setInputMethodTarget(WindowState target, boolean targetWaitingAnim) {
+    /**
+     * Sets the window the IME is on top of.
+     * @param target window to place the IME surface on top of. If {@code null}, the IME will be
+     *               placed at its parent's surface.
+     * @param targetWaitingAnim if {@code true}, hold off on modifying the animation layer of
+     *                          the target.
+     */
+    private void setInputMethodTarget(@Nullable WindowState target, boolean targetWaitingAnim) {
         if (target == mInputMethodTarget && mInputMethodTargetWaitingAnim == targetWaitingAnim) {
             return;
         }
@@ -3581,6 +3588,14 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         mInputMethodTarget = target;
         mInputMethodTargetWaitingAnim = targetWaitingAnim;
         assignWindowLayers(true /* setLayoutNeeded */);
+        if (target != null) {
+            RootDisplayArea targetRoot = target.getRootDisplayArea();
+            if (targetRoot != null) {
+                // Reposition the IME container to the target root to get the correct bounds and
+                // config.
+                targetRoot.placeImeContainer(mImeWindowsContainers);
+            }
+        }
         updateImeParent();
         updateImeControlTarget();
     }
@@ -4539,6 +4554,28 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         }
     }
 
+    /**
+     * Helper that both requests a transition (using the new transition system) and prepares
+     * the legacy transition system. Use this when both systems have the same start-point.
+     *
+     * @see TransitionController#requestTransitionIfNeeded(int, int, WindowContainer)
+     * @see AppTransition#prepareAppTransition
+     */
+    void requestTransitionAndLegacyPrepare(@WindowManager.TransitionType int transit,
+            @WindowManager.TransitionFlags int flags) {
+        prepareAppTransition(transit, flags);
+        mAtmService.getTransitionController().requestTransitionIfNeeded(transit, flags,
+                null /* trigger */);
+    }
+
+    /** @see #requestTransitionAndLegacyPrepare(int, int) */
+    void requestTransitionAndLegacyPrepare(@WindowManager.TransitionType int transit,
+            @Nullable WindowContainer trigger) {
+        prepareAppTransition(transit);
+        mAtmService.getTransitionController().requestTransitionIfNeeded(transit, 0 /* flags */,
+                trigger);
+    }
+
     void executeAppTransition() {
         mAtmService.getTransitionController().setReady();
         if (mAppTransition.isTransitionSet()) {
@@ -4699,7 +4736,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     }
 
     @VisibleForTesting
-    WindowContainer<?> getImeContainer() {
+    DisplayArea.Tokens getImeContainer() {
         return mImeWindowsContainers;
     }
 

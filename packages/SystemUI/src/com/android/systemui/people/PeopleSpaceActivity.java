@@ -25,20 +25,20 @@ import android.content.pm.PackageManager;
 import android.content.pm.ShortcutInfo;
 import android.os.Bundle;
 import android.os.ServiceManager;
-import android.os.UserHandle;
 import android.util.Log;
 import android.view.ViewGroup;
 
 import com.android.systemui.R;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Shows the user their tiles for their priority People (go/live-status).
  */
 public class PeopleSpaceActivity extends Activity {
 
-    private static String sTAG = "PeopleSpaceActivity";
+    private static final String TAG = "PeopleSpaceActivity";
 
     private ViewGroup mPeopleSpaceLayout;
     private IPeopleManager mPeopleManager;
@@ -53,9 +53,8 @@ public class PeopleSpaceActivity extends Activity {
         setContentView(R.layout.people_space_activity);
         mPeopleSpaceLayout = findViewById(R.id.people_space_layout);
         mContext = getApplicationContext();
-        mNotificationManager =
-                INotificationManager.Stub.asInterface(
-                        ServiceManager.getService(Context.NOTIFICATION_SERVICE));
+        mNotificationManager = INotificationManager.Stub.asInterface(
+                ServiceManager.getService(Context.NOTIFICATION_SERVICE));
         mPackageManager = getPackageManager();
         mPeopleManager = IPeopleManager.Stub.asInterface(
                 ServiceManager.getService(Context.PEOPLE_SERVICE));
@@ -69,27 +68,26 @@ public class PeopleSpaceActivity extends Activity {
      */
     private void setTileViewsWithPriorityConversations() {
         try {
-            List<ShortcutInfo> shortcutInfos = PeopleSpaceUtils.getShortcutInfos(mContext,
-                    mNotificationManager, mPeopleManager);
-            for (ShortcutInfo conversation : shortcutInfos) {
+            List<Map.Entry<Long, ShortcutInfo>> shortcutInfos = PeopleSpaceUtils.getShortcutInfos(
+                    mContext, mNotificationManager, mPeopleManager);
+            for (Map.Entry<Long, ShortcutInfo> entry : shortcutInfos) {
+                ShortcutInfo shortcutInfo = entry.getValue();
                 PeopleSpaceTileView tileView = new PeopleSpaceTileView(mContext, mPeopleSpaceLayout,
-                        conversation.getId());
-                setTileView(tileView, conversation);
+                        shortcutInfo.getId());
+                setTileView(tileView, shortcutInfo, entry.getKey());
             }
         } catch (Exception e) {
-            Log.e(sTAG, "Couldn't retrieve conversations", e);
+            Log.e(TAG, "Couldn't retrieve conversations", e);
         }
     }
 
     /** Sets {@code tileView} with the data in {@code conversation}. */
-    private void setTileView(PeopleSpaceTileView tileView, ShortcutInfo shortcutInfo) {
+    private void setTileView(PeopleSpaceTileView tileView, ShortcutInfo shortcutInfo,
+            long lastInteraction) {
         try {
-            int userId = UserHandle.getUserHandleForUid(shortcutInfo.getUserId()).getIdentifier();
-
             String pkg = shortcutInfo.getPackage();
-            long lastInteraction = mPeopleManager.getLastInteraction(pkg, userId,
-                    shortcutInfo.getId());
-            String status = PeopleSpaceUtils.getLastInteractionString(mContext, lastInteraction);
+            String status =
+                    PeopleSpaceUtils.getLastInteractionString(mContext, lastInteraction);
             tileView.setStatus(status);
 
             tileView.setName(shortcutInfo.getLabel().toString());
@@ -97,7 +95,7 @@ public class PeopleSpaceActivity extends Activity {
             tileView.setPersonIcon(mLauncherApps.getShortcutIconDrawable(shortcutInfo, 0));
             tileView.setOnClickListener(mLauncherApps, shortcutInfo);
         } catch (Exception e) {
-            Log.e(sTAG, "Couldn't retrieve shortcut information", e);
+            Log.e(TAG, "Couldn't retrieve shortcut information", e);
         }
     }
 

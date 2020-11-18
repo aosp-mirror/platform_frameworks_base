@@ -2379,6 +2379,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                         }
                         return resumed;
                     }, false /* initValue */);
+            result |= resumedOnDisplay;
             if (!resumedOnDisplay) {
                 // In cases when there are no valid activities (e.g. device just booted or launcher
                 // crashed) it's possible that nothing was resumed on a display. Requesting resume
@@ -2802,7 +2803,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         r.detachFromProcess();
         r.mDisplayContent.prepareAppTransitionOld(TRANSIT_OLD_CRASHING_ACTIVITY_CLOSE,
                 false /* alwaysKeepCurrent */);
-        r.mDisplayContent.prepareAppTransition(TRANSIT_CLOSE, TRANSIT_FLAG_APP_CRASHED);
+        r.mDisplayContent.requestTransitionAndLegacyPrepare(TRANSIT_CLOSE,
+                TRANSIT_FLAG_APP_CRASHED);
         r.destroyIfPossible("handleAppCrashed");
     }
 

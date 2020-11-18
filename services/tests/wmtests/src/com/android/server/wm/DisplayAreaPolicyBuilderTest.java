@@ -27,6 +27,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 import static android.view.WindowManagerPolicyConstants.APPLICATION_LAYER;
 import static android.window.DisplayAreaOrganizer.FEATURE_DEFAULT_TASK_CONTAINER;
 import static android.window.DisplayAreaOrganizer.FEATURE_FULLSCREEN_MAGNIFICATION;
+import static android.window.DisplayAreaOrganizer.FEATURE_IME_PLACEHOLDER;
 import static android.window.DisplayAreaOrganizer.FEATURE_ONE_HANDED;
 import static android.window.DisplayAreaOrganizer.FEATURE_ROOT;
 import static android.window.DisplayAreaOrganizer.FEATURE_VENDOR_FIRST;
@@ -210,6 +211,22 @@ public class DisplayAreaPolicyBuilderTest {
         }
 
         assertThat(hasFullscreenMagnificationFeature).isTrue();
+    }
+
+    @Test
+    public void testBuilder_defaultPolicy_hasImePlaceholderFeature() {
+        final DisplayAreaPolicy.Provider defaultProvider = DisplayAreaPolicy.Provider.fromResources(
+                resourcesWithProvider(""));
+        final DisplayAreaPolicyBuilder.Result defaultPolicy =
+                (DisplayAreaPolicyBuilder.Result) defaultProvider.instantiate(mWms, mDisplayContent,
+                        mRoot, mImeContainer);
+        final List<Feature> features = defaultPolicy.getFeatures();
+        boolean hasImePlaceholderFeature = false;
+        for (Feature feature : features) {
+            hasImePlaceholderFeature |= feature.getId() == FEATURE_IME_PLACEHOLDER;
+        }
+
+        assertThat(hasImePlaceholderFeature).isTrue();
     }
 
     @Test

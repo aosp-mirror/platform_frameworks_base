@@ -27,7 +27,7 @@ import javax.inject.Inject;
 @SysUISingleton
 public class BrightnessControllerSettings {
 
-    private static final String THICK_BRIGHTNESS_SLIDER = "sysui_thick_brighthness";
+    private static final String THICK_BRIGHTNESS_SLIDER = "sysui_thick_brightness";
     private final boolean mUseThickSlider;
     private final boolean mUseMirrorOnThickSlider;
 

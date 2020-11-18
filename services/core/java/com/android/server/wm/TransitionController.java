@@ -16,14 +16,6 @@
 
 package com.android.server.wm;
 
-import static android.view.WindowManager.TRANSIT_OLD_CRASHING_ACTIVITY_CLOSE;
-import static android.view.WindowManager.TRANSIT_OLD_KEYGUARD_GOING_AWAY;
-import static android.view.WindowManager.TRANSIT_OLD_TASK_CLOSE;
-import static android.view.WindowManager.TRANSIT_OLD_TASK_OPEN;
-import static android.view.WindowManager.TRANSIT_OLD_TASK_OPEN_BEHIND;
-import static android.view.WindowManager.TRANSIT_OLD_TASK_TO_BACK;
-import static android.view.WindowManager.TRANSIT_OLD_TASK_TO_FRONT;
-
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.IBinder;
@@ -36,20 +28,12 @@ import com.android.internal.protolog.ProtoLogGroup;
 import com.android.internal.protolog.common.ProtoLog;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 /**
  * Handles all the aspects of recording and synchronizing transitions.
  */
 class TransitionController {
     private static final String TAG = "TransitionController";
-
-    private static final int[] SUPPORTED_LEGACY_TRANSIT_TYPES = {TRANSIT_OLD_TASK_OPEN,
-            TRANSIT_OLD_TASK_CLOSE, TRANSIT_OLD_TASK_TO_FRONT, TRANSIT_OLD_TASK_TO_BACK,
-            TRANSIT_OLD_TASK_OPEN_BEHIND, TRANSIT_OLD_KEYGUARD_GOING_AWAY};
-    static {
-        Arrays.sort(SUPPORTED_LEGACY_TRANSIT_TYPES);
-    }
 
     private ITransitionPlayer mTransitionPlayer;
     private final IBinder.DeathRecipient mTransitionPlayerDeath = () -> mTransitionPlayer = null;
@@ -81,6 +65,9 @@ class TransitionController {
     @NonNull
     Transition createTransition(@WindowManager.TransitionOldType int type,
             @WindowManager.TransitionFlags int flags) {
+        if (mTransitionPlayer == null) {
+            throw new IllegalStateException("Shell Transitions not enabled");
+        }
         if (mCollectingTransition != null) {
             throw new IllegalStateException("Simultaneous transitions not supported yet.");
         }
@@ -111,6 +98,14 @@ class TransitionController {
         return mTransitionPlayer != null;
     }
 
+    /**
+     * @return {@code true} if transition is actively collecting changes. This is {@code false}
+     * once a transition is playing
+     */
+    boolean isCollecting() {
+        return mCollectingTransition != null;
+    }
+
     /** @return {@code true} if a transition is running */
     boolean inTransition() {
         // TODO(shell-transitions): eventually properly support multiple
@@ -133,60 +128,51 @@ class TransitionController {
     }
 
     /**
-     * Creates a transition and asks the TransitionPlayer (Shell) to start it.
-     * @return the created transition. Collection can start immediately.
+     * @see #requestTransitionIfNeeded(int, int)
      */
-    @NonNull
-    Transition requestTransition(@WindowManager.TransitionOldType int type) {
-        return requestTransition(type, 0 /* flags */);
+    @Nullable
+    Transition requestTransitionIfNeeded(@WindowManager.TransitionType int type,
+            @Nullable WindowContainer trigger) {
+        return requestTransitionIfNeeded(type, 0 /* flags */, trigger);
     }
 
-    /** @see #requestTransition */
-    @NonNull
-    Transition requestTransition(@WindowManager.TransitionOldType int type,
-            @WindowManager.TransitionFlags int flags) {
+    /**
+     * If a transition isn't requested yet, creates one and asks the TransitionPlayer (Shell) to
+     * start it. Collection can start immediately.
+     * @param trigger if non-null, this is the first container that will be collected
+     * @return the created transition if created or null otherwise.
+     */
+    @Nullable
+    Transition requestTransitionIfNeeded(@WindowManager.TransitionType int type,
+            @WindowManager.TransitionFlags int flags, @Nullable WindowContainer trigger) {
         if (mTransitionPlayer == null) {
-            throw new IllegalStateException("Shell Transitions not enabled");
+            return null;
         }
-        final Transition transition = createTransition(type, flags);
+        Transition newTransition = null;
+        if (isCollecting()) {
+            // Make the collecting transition wait until this request is ready.
+            mCollectingTransition.setReady(false);
+        } else {
+            newTransition = requestStartTransition(createTransition(type, flags));
+        }
+        if (trigger != null) {
+            collect(trigger);
+        }
+        return newTransition;
+    }
+
+    /** Asks the transition player (shell) to start a created but not yet started transition. */
+    @NonNull
+    Transition requestStartTransition(@NonNull Transition transition) {
         try {
             ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
                     "Requesting StartTransition: %s", transition);
-            mTransitionPlayer.requestStartTransition(type, transition);
+            mTransitionPlayer.requestStartTransition(transition.mType, transition);
         } catch (RemoteException e) {
             Slog.e(TAG, "Error requesting transition", e);
             transition.start();
         }
         return transition;
-    }
-
-    /**
-     * Temporary adapter that converts the legacy AppTransition's prepareAppTransition call into
-     * a Shell transition request. If shell transitions are enabled, this will take priority in
-     * handling transition types that it supports. All other transitions will be ignored and thus
-     * be handled by the legacy apptransition system. This allows both worlds to live in tandem
-     * during migration.
-     *
-     * @return {@code true} if the transition is handled.
-     */
-    boolean adaptLegacyPrepare(@WindowManager.TransitionOldType int transit,
-            @WindowManager.TransitionFlags int flags, boolean forceOverride) {
-        if (!isShellTransitionsEnabled()
-                || Arrays.binarySearch(SUPPORTED_LEGACY_TRANSIT_TYPES, transit) < 0) {
-            return false;
-        }
-        if (inTransition()) {
-            if (AppTransition.isKeyguardTransit(transit)) {
-                // TODO(shell-transitions): add to flags
-            } else if (forceOverride) {
-                // TODO(shell-transitions): sort out these flags
-            } else if (transit == TRANSIT_OLD_CRASHING_ACTIVITY_CLOSE) {
-                // TODO(shell-transitions): record crashing
-            }
-        } else {
-            requestTransition(transit, flags);
-        }
-        return true;
     }
 
     /** @see Transition#collect */
@@ -196,9 +182,14 @@ class TransitionController {
     }
 
     /** @see Transition#setReady */
-    void setReady() {
+    void setReady(boolean ready) {
         if (mCollectingTransition == null) return;
-        mCollectingTransition.setReady();
+        mCollectingTransition.setReady(ready);
+    }
+
+    /** @see Transition#setReady */
+    void setReady() {
+        setReady(true);
     }
 
     /** @see Transition#finishTransition */
@@ -219,6 +210,14 @@ class TransitionController {
         }
         mCollectingTransition = null;
         mPlayingTransitions.add(transition);
+    }
+
+    void abort(Transition transition) {
+        if (transition != mCollectingTransition) {
+            throw new IllegalStateException("Too late to abort.");
+        }
+        transition.abort();
+        mCollectingTransition = null;
     }
 
 }

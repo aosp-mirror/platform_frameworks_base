@@ -16461,6 +16461,12 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         @Override
+        public void inputDispatchingResumed(int pid) {
+            // TODO (b/171218828)
+            return;
+        }
+
+        @Override
         public void broadcastGlobalConfigurationChanged(int changes, boolean initLocale) {
             synchronized (ActivityManagerService.this) {
                 Intent intent = new Intent(Intent.ACTION_CONFIGURATION_CHANGED);

@@ -29,6 +29,7 @@ import com.android.wm.shell.flicker.SYSTEM_UI_PACKAGE_NAME
 import com.android.wm.shell.flicker.TEST_APP_PIP_ACTIVITY_COMPONENT_NAME
 import com.android.wm.shell.flicker.TEST_APP_PIP_ACTIVITY_LABEL
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.fail
 
 class PipAppHelper(
     instrumentation: Instrumentation
@@ -46,11 +47,12 @@ class PipAppHelper(
             it.packageName == packageName
         }
 
+    fun clickButton(resourceId: String) =
+            uiDevice.findObject(By.res(packageName, resourceId))?.click()
+                ?: fail("$resourceId button is not found")
+
     fun clickEnterPipButton() {
-        val enterPipButton = uiDevice.findObject(By.res(packageName, "enter_pip"))
-        assertNotNull("Pip button not found, this usually happens when the device " +
-                "was left in an unknown state (e.g. in split screen)", enterPipButton)
-        enterPipButton.click()
+        clickButton("enter_pip")
 
         // TODO(b/172321238): remove this check once hasPipWindow is fixed on TVs
         if (!isTelevision) {

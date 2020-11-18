@@ -17,6 +17,5 @@
 runtime_resource_overlay {
     name: "IconPackKaiThemePickerOverlay",
     theme: "IconPackKaiThemePicker",
-    certificate: "platform",
     product_specific: true,
 }

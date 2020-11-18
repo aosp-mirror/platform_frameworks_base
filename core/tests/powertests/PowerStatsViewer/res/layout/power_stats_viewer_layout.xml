@@ -42,7 +42,7 @@
                 android:paddingStart="10dp"
                 android:paddingEnd="10dp">
 
-                <include layout="@layout/app_info_layout"/>
+                <include layout="@layout/power_consumer_info_layout"/>
 
             </LinearLayout>
         </androidx.cardview.widget.CardView>

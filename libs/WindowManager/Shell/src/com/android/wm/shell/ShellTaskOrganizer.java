@@ -118,8 +118,6 @@ public class ShellTaskOrganizer extends TaskOrganizer {
             SyncTransactionQueue syncQueue, TransactionPool transactionPool,
             ShellExecutor mainExecutor, ShellExecutor animExecutor, Context context) {
         super(taskOrganizerController, mainExecutor);
-        addListenerForType(new FullscreenTaskListener(syncQueue), TASK_LISTENER_TYPE_FULLSCREEN);
-        addListenerForType(new LetterboxTaskListener(syncQueue), TASK_LISTENER_TYPE_LETTERBOX);
         mTransitions = new Transitions(this, transactionPool, mainExecutor, animExecutor);
         if (Transitions.ENABLE_SHELL_TRANSITIONS) registerTransitionPlayer(mTransitions);
         // TODO(b/131727939) temporarily live here, the starting surface drawer should be controlled

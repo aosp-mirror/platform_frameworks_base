@@ -32,14 +32,17 @@ import com.android.wm.shell.protolog.ShellProtoLogGroup;
 
 import java.io.PrintWriter;
 
-class FullscreenTaskListener implements ShellTaskOrganizer.TaskListener {
+/**
+  * Organizes tasks presented in {@link android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN}.
+  */
+public class FullscreenTaskListener implements ShellTaskOrganizer.TaskListener {
     private static final String TAG = "FullscreenTaskListener";
 
     private final SyncTransactionQueue mSyncQueue;
 
     private final ArraySet<Integer> mTasks = new ArraySet<>();
 
-    FullscreenTaskListener(SyncTransactionQueue syncQueue) {
+    public FullscreenTaskListener(SyncTransactionQueue syncQueue) {
         mSyncQueue = syncQueue;
     }
 

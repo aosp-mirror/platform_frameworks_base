@@ -17,6 +17,5 @@
 runtime_resource_overlay {
     name: "IconPackRoundedThemePickerOverlay",
     theme: "IconPackRoundedTheme",
-    certificate: "platform",
     product_specific: true,
 }
