@@ -32,18 +32,13 @@ import android.widget.FrameLayout;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.internal.logging.MetricsLogger;
-import com.android.internal.logging.testing.UiEventLoggerFake;
 import com.android.systemui.Dependency;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.media.MediaHost;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.qs.QSTileView;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.statusbar.policy.SecurityController;
-import com.android.systemui.util.animation.DisappearParameters;
-import com.android.systemui.util.animation.UniqueObjectHostView;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -58,7 +53,6 @@ import java.util.Collections;
 @SmallTest
 public class QSPanelTest extends SysuiTestCase {
 
-    private MetricsLogger mMetricsLogger;
     private TestableLooper mTestableLooper;
     private QSPanel mQsPanel;
     @Mock
@@ -75,10 +69,7 @@ public class QSPanelTest extends SysuiTestCase {
     @Mock
     private QSTileView mQSTileView;
     @Mock
-    private MediaHost mMediaHost;
-    @Mock
     private ActivityStarter mActivityStarter;
-    private UiEventLoggerFake mUiEventLogger;
 
     @Before
     public void setup() throws Exception {
@@ -90,15 +81,11 @@ public class QSPanelTest extends SysuiTestCase {
         mDependency.injectMockDependency(SecurityController.class);
         mDependency.injectTestDependency(Dependency.BG_LOOPER, mTestableLooper.getLooper());
         mContext.addMockSystemService(Context.USER_SERVICE, mock(UserManager.class));
-        when(mMediaHost.getHostView()).thenReturn(new UniqueObjectHostView(getContext()));
-        when(mMediaHost.getDisappearParameters()).thenReturn(new DisappearParameters());
         mDndTileRecord.tile = dndTile;
         mDndTileRecord.tileView = mQSTileView;
 
-        mUiEventLogger = new UiEventLoggerFake();
         mTestableLooper.runWithLooper(() -> {
-            mMetricsLogger = mDependency.injectMockDependency(MetricsLogger.class);
-            mQsPanel = new QSPanel(mContext, null, mQSLogger, mMediaHost, mUiEventLogger);
+            mQsPanel = new QSPanel(mContext, null, mQSLogger);
             mQsPanel.onFinishInflate();
             // Provides a parent with non-zero size for QSPanel
             mParentView = new FrameLayout(mContext);
@@ -128,15 +115,6 @@ public class QSPanelTest extends SysuiTestCase {
         mTestableLooper.processAllMessages();
 
         verify(mCallback).onShowingDetail(any(), anyInt(), anyInt());
-    }
-
-    @Test
-    public void setListening() {
-        mQsPanel.setListening(true, "dnd");
-        verify(mQSLogger).logAllTilesChangeListening(true, mQsPanel.getDumpableTag(), "dnd");
-
-        mQsPanel.setListening(false, "dnd");
-        verify(mQSLogger).logAllTilesChangeListening(false, mQsPanel.getDumpableTag(), "dnd");
     }
 
     @Test

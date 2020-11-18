@@ -51,8 +51,6 @@ import com.android.systemui.BatteryMeterView;
 import com.android.systemui.DualToneHandler;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
-import com.android.systemui.plugins.DarkIconDispatcher;
-import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
 import com.android.systemui.privacy.OngoingPrivacyChip;
 import com.android.systemui.qs.QSDetail.Callback;
 import com.android.systemui.statusbar.phone.StatusBarIconController.TintedIconManager;
@@ -466,14 +464,15 @@ public class QuickStatusBarHeader extends RelativeLayout implements LifecycleOwn
     }
 
     /** */
-    public void setContentMargins(int marginStart, int marginEnd) {
+    public void setContentMargins(int marginStart, int marginEnd,
+            QuickQSPanelController quickQSPanelController) {
         mContentMarginStart = marginStart;
         mContentMarginEnd = marginEnd;
         for (int i = 0; i < getChildCount(); i++) {
             View view = getChildAt(i);
             if (view == mHeaderQsPanel) {
                 // QS panel doesn't lays out some of its content full width
-                mHeaderQsPanel.setContentMargins(marginStart, marginEnd);
+                quickQSPanelController.setContentMargins(marginStart, marginEnd);
             } else {
                 MarginLayoutParams lp = (MarginLayoutParams) view.getLayoutParams();
                 lp.setMarginStart(marginStart);

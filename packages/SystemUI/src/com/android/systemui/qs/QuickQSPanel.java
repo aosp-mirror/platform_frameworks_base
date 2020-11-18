@@ -16,7 +16,6 @@
 
 package com.android.systemui.qs;
 
-import static com.android.systemui.media.dagger.MediaModule.QUICK_QS_PANEL;
 import static com.android.systemui.util.InjectionInflationController.VIEW_CONTEXT;
 
 import android.content.Context;
@@ -29,7 +28,6 @@ import android.widget.LinearLayout;
 
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.R;
-import com.android.systemui.media.MediaHost;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.qs.QSTile.SignalState;
 import com.android.systemui.plugins.qs.QSTile.State;
@@ -57,9 +55,8 @@ public class QuickQSPanel extends QSPanel {
             @Named(VIEW_CONTEXT) Context context,
             AttributeSet attrs,
             QSLogger qsLogger,
-            @Named(QUICK_QS_PANEL) MediaHost mediaHost,
             UiEventLogger uiEventLogger) {
-        super(context, attrs, qsLogger, mediaHost, uiEventLogger);
+        super(context, attrs, qsLogger);
         mMaxTiles = Math.min(DEFAULT_MAX_TILES,
                 getResources().getInteger(R.integer.quick_qs_panel_max_columns));
         applyBottomMargin((View) mRegularTileLayout);
@@ -79,12 +76,12 @@ public class QuickQSPanel extends QSPanel {
 
     @Override
     public TileLayout createRegularTileLayout() {
-        return new QuickQSPanel.HeaderTileLayout(mContext, mUiEventLogger);
+        return new QuickQSPanel.HeaderTileLayout(mContext);
     }
 
     @Override
     protected QSTileLayout createHorizontalTileLayout() {
-        return new DoubleLineTileLayout(mContext, mUiEventLogger);
+        return new DoubleLineTileLayout(mContext);
     }
 
     @Override
@@ -198,13 +195,10 @@ public class QuickQSPanel extends QSPanel {
 
     private static class HeaderTileLayout extends TileLayout {
 
-        private final UiEventLogger mUiEventLogger;
-
         private Rect mClippingBounds = new Rect();
 
-        public HeaderTileLayout(Context context, UiEventLogger uiEventLogger) {
+        HeaderTileLayout(Context context) {
             super(context);
-            mUiEventLogger = uiEventLogger;
             setClipChildren(false);
             setClipToPadding(false);
             LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT,
@@ -332,14 +326,14 @@ public class QuickQSPanel extends QSPanel {
         }
 
         @Override
-        public void setListening(boolean listening) {
+        public void setListening(boolean listening, UiEventLogger uiEventLogger) {
             boolean startedListening = !mListening && listening;
-            super.setListening(listening);
+            super.setListening(listening, uiEventLogger);
             if (startedListening) {
                 // getNumVisibleTiles() <= mRecords.size()
                 for (int i = 0; i < getNumVisibleTiles(); i++) {
                     QSTile tile = mRecords.get(i).tile;
-                    mUiEventLogger.logWithInstanceId(QSEvent.QQS_TILE_VISIBLE, 0,
+                    uiEventLogger.logWithInstanceId(QSEvent.QQS_TILE_VISIBLE, 0,
                             tile.getMetricsSpec(), tile.getInstanceId());
                 }
             }
