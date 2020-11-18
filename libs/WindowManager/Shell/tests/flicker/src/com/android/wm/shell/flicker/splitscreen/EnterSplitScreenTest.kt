@@ -60,8 +60,8 @@ class EnterSplitScreenTest(
             }
             teardown {
                 eachRun {
-                    splitScreenApp.forceStop()
-                    secondaryApp.forceStop()
+                    splitScreenApp.exit()
+                    secondaryApp.exit()
                 }
             }
             assertions {

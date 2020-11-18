@@ -65,8 +65,8 @@ class ExitSplitScreenTest(
             }
             teardown {
                 eachRun {
-                    splitScreenApp.forceStop()!!
-                    secondaryApp.forceStop()!!
+                    splitScreenApp.exit()
+                    secondaryApp.exit()
                 }
             }
         }
