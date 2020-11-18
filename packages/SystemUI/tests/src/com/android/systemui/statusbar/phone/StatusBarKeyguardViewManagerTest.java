@@ -33,6 +33,7 @@ import android.testing.TestableLooper;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewPropertyAnimator;
+import android.widget.FrameLayout;
 
 import androidx.test.filters.SmallTest;
 
@@ -103,6 +104,7 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
         when(mLockIconContainer.getParent()).thenReturn(mock(ViewGroup.class));
         when(mLockIconContainer.animate()).thenReturn(mock(ViewPropertyAnimator.class,
                 RETURNS_DEEP_STUBS));
+        when(mLockIconContainer.getLayoutParams()).thenReturn(mock(FrameLayout.LayoutParams.class));
 
         when(mKeyguardBouncerFactory.create(
                 any(ViewGroup.class),

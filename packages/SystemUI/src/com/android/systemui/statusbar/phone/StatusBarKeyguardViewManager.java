@@ -26,13 +26,17 @@ import static com.android.systemui.statusbar.phone.BiometricUnlockController.MOD
 import android.content.ComponentCallbacks2;
 import android.content.Context;
 import android.content.res.ColorStateList;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.SystemClock;
+import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewRootImpl;
 import android.view.WindowManagerGlobal;
+import android.widget.FrameLayout;
 
 import androidx.annotation.VisibleForTesting;
 
@@ -160,6 +164,8 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     private boolean mPulsing;
     private boolean mGesturalNav;
     private boolean mIsDocked;
+    private boolean mIsPortraitMode;
+    private int mScreenWidthDp;
 
     protected boolean mFirstUpdate = true;
     protected boolean mLastShowing;
@@ -174,6 +180,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     private boolean mLastPulsing;
     private int mLastBiometricMode;
     private boolean mLastLockVisible;
+    private boolean mLastLockOrientationIsPortrait;
 
     private OnDismissAction mAfterKeyguardGoneAction;
     private Runnable mKeyguardGoneCancelAction;
@@ -263,12 +270,27 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         mKeyguardUpdateManager.registerCallback(mUpdateMonitorCallback);
         mStatusBarStateController.addCallback(this);
         mConfigurationController.addCallback(this);
+        mIsPortraitMode = mContext.getResources().getConfiguration().orientation
+                == Configuration.ORIENTATION_PORTRAIT;
+        mScreenWidthDp = mContext.getResources().getConfiguration().screenWidthDp;
         mGesturalNav = QuickStepContract.isGesturalMode(
                 mNavigationModeController.addListener(this));
         if (mDockManager != null) {
             mDockManager.addListener(mDockEventListener);
             mIsDocked = mDockManager.isDocked();
         }
+    }
+
+    @Override
+    public void onDensityOrFontScaleChanged() {
+        hideBouncer(true /* destroyView */);
+    }
+
+    @Override
+    public void onConfigChanged(Configuration newConfig) {
+        mIsPortraitMode = newConfig.orientation == Configuration.ORIENTATION_PORTRAIT;
+        mScreenWidthDp = newConfig.screenWidthDp;
+        updateLockIcon();
     }
 
     @Override
@@ -317,14 +339,32 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         if (mLockIconContainer == null) {
             return;
         }
+
         boolean keyguardWithoutQs = mStatusBarStateController.getState() == StatusBarState.KEYGUARD
                 && !mNotificationPanelViewController.isQsExpanded();
         boolean lockVisible = (mBouncer.isShowing() || keyguardWithoutQs)
                 && !mBouncer.isAnimatingAway() && !mKeyguardStateController.isKeyguardFadingAway();
+        boolean orientationChange =
+                lockVisible && (mLastLockOrientationIsPortrait != mIsPortraitMode);
 
-        if (mLastLockVisible != lockVisible) {
+        if (mLastLockVisible != lockVisible || orientationChange) {
             mLastLockVisible = lockVisible;
+            mLastLockOrientationIsPortrait = mIsPortraitMode;
             if (lockVisible) {
+                FrameLayout.LayoutParams lp =
+                        (FrameLayout.LayoutParams) mLockIconContainer.getLayoutParams();
+                if (mIsPortraitMode) {
+                    lp.gravity = Gravity.TOP | Gravity.CENTER_HORIZONTAL;
+                } else {
+                    final int width = (int) TypedValue.applyDimension(
+                            TypedValue.COMPLEX_UNIT_DIP,
+                            mScreenWidthDp,
+                            mContext.getResources().getDisplayMetrics()) / 3;
+                    mLockIconContainer.setMinimumWidth(width);
+                    lp.gravity = Gravity.TOP | Gravity.LEFT;
+                }
+                mLockIconContainer.setLayoutParams(lp);
+
                 CrossFadeHelper.fadeIn(mLockIconContainer,
                         AppearAnimationUtils.DEFAULT_APPEAR_DURATION /* duration */,
                         0 /* delay */);
@@ -682,11 +722,6 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
                 || mBiometricUnlockController.getMode() == MODE_WAKE_AND_UNLOCK_PULSING
                 || mBiometricUnlockController.getMode() == MODE_WAKE_AND_UNLOCK)
                 && mBypassController.getBypassEnabled();
-    }
-
-    @Override
-    public void onDensityOrFontScaleChanged() {
-        hideBouncer(true /* destroyView */);
     }
 
     @Override
