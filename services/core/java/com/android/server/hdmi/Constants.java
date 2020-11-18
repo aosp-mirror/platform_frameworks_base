@@ -501,15 +501,6 @@ final class Constants {
     static final int DISABLED = 0;
     static final int ENABLED = 1;
 
-    @IntDef({
-            VERSION_1_4,
-            VERSION_2_0
-    })
-    @interface CecVersion {}
-    static final int VERSION_1_3 = 0x04;
-    static final int VERSION_1_4 = 0x05;
-    static final int VERSION_2_0 = 0x06;
-
     static final int ALL_DEVICE_TYPES_TV = 7;
     static final int ALL_DEVICE_TYPES_RECORDER = 6;
     static final int ALL_DEVICE_TYPES_TUNER = 5;
