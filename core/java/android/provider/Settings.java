@@ -9797,12 +9797,13 @@ public final class Settings {
                 "use_blast_adapter_sv";
 
         /**
-         * If {@code true}, vendor provided window manager display settings will be ignored.
-         * (0 = false, 1 = true)
+         * Path to the WindowManager display settings file. If unset, the default file path will
+         * be used.
+         *
          * @hide
          */
-        public static final String DEVELOPMENT_IGNORE_VENDOR_DISPLAY_SETTINGS =
-                "ignore_vendor_display_settings";
+        public static final String DEVELOPMENT_WM_DISPLAY_SETTINGS_PATH =
+                "wm_display_settings_path";
 
        /**
         * Whether user has enabled development settings.

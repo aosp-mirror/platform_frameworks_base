@@ -299,6 +299,7 @@ public class SystemServicesTestRule implements TestRule {
         doNothing().when(mWmService.mRoot).ensureActivitiesVisible(any(),
                 anyInt(), anyBoolean(), anyBoolean(), anyBoolean());
         spyOn(mWmService.mDisplayWindowSettings);
+        spyOn(mWmService.mDisplayWindowSettingsProvider);
 
         // Setup factory classes to prevent calls to native code.
         mTransaction = spy(StubTransaction.class);
