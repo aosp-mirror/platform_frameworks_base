@@ -791,6 +791,13 @@ public class SubscriptionManager {
     public static final String IMS_RCS_UCE_ENABLED = SimInfo.COLUMN_IMS_RCS_UCE_ENABLED;
 
     /**
+     * Determines if the user has enabled cross SIM calling for this subscription.
+     *
+     * @hide
+     */
+    public static final String CROSS_SIM_CALLING_ENABLED = SimInfo.COLUMN_CROSS_SIM_CALLING_ENABLED;
+
+    /**
      * TelephonyProvider column name for whether a subscription is opportunistic, that is,
      * whether the network it connects to is limited in functionality or coverage.
      * For example, CBRS.
