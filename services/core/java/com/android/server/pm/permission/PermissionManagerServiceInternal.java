@@ -254,12 +254,26 @@ public abstract class PermissionManagerServiceInternal extends PermissionManager
             @NonNull ArrayList<String> allPackageNames);
 
     /**
+     * Some permissions might have been owned by a non-system package, and the system then defined
+     * said permission. Some other permissions may one have been install permissions, but are now
+     * runtime or higher. These permissions should be revoked.
+     *
+     * @param permissionsToRevoke A list of permission names to revoke
+     * @param allPackageNames All packages
+     */
+    public abstract void revokeRuntimePermissionsIfPermissionDefinitionChanged(
+            @NonNull List<String> permissionsToRevoke,
+            @NonNull ArrayList<String> allPackageNames);
+
+    /**
      * Add all permissions in the given package.
      * <p>
      * NOTE: argument {@code groupTEMP} is temporary until mPermissionGroups is moved to
      * the permission settings.
+     *
+     * @return A list of BasePermissions that were updated, and need to be revoked from packages
      */
-    public abstract void addAllPermissions(@NonNull AndroidPackage pkg, boolean chatty);
+    public abstract List<String> addAllPermissions(@NonNull AndroidPackage pkg, boolean chatty);
     public abstract void addAllPermissionGroups(@NonNull AndroidPackage pkg, boolean chatty);
     public abstract void removeAllPermissions(@NonNull AndroidPackage pkg, boolean chatty);
 
