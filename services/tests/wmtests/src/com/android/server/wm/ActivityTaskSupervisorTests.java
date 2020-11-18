@@ -49,20 +49,20 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 /**
- * Tests for the {@link ActivityStackSupervisor} class.
+ * Tests for the {@link ActivityTaskSupervisor} class.
  *
  * Build/Install/Run:
- *  atest WmTests:ActivityStackSupervisorTests
+ *  atest WmTests:ActivityTaskSupervisorTests
  */
 @MediumTest
 @Presubmit
 @RunWith(WindowTestRunner.class)
-public class ActivityStackSupervisorTests extends WindowTestsBase {
-    private Task mFullscreenStack;
+public class ActivityTaskSupervisorTests extends WindowTestsBase {
+    private Task mFullscreenTask;
 
     @Before
     public void setUp() throws Exception {
-        mFullscreenStack = mRootWindowContainer.getDefaultTaskDisplayArea().createStack(
+        mFullscreenTask = mRootWindowContainer.getDefaultTaskDisplayArea().createStack(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
     }
 
@@ -72,7 +72,7 @@ public class ActivityStackSupervisorTests extends WindowTestsBase {
     @Test
     public void testStoppingActivityRemovedWhenResumed() {
         final ActivityRecord firstActivity = new ActivityBuilder(mAtm)
-                .setTask(mFullscreenStack).build();
+                .setTask(mFullscreenTask).build();
         mSupervisor.mStoppingActivities.add(firstActivity);
 
         firstActivity.completeResumeLocked();
@@ -86,7 +86,7 @@ public class ActivityStackSupervisorTests extends WindowTestsBase {
     @Test
     public void testReportWaitingActivityLaunchedIfNeeded() {
         final ActivityRecord firstActivity = new ActivityBuilder(mAtm)
-                .setTask(mFullscreenStack).build();
+                .setTask(mFullscreenTask).build();
 
         final WaitResult taskToFrontWait = new WaitResult();
         mSupervisor.mWaitingActivityLaunched.add(taskToFrontWait);
@@ -153,7 +153,7 @@ public class ActivityStackSupervisorTests extends WindowTestsBase {
     @Test
     public void testNotifyTaskFocusChanged() {
         final ActivityRecord fullScreenActivityA = new ActivityBuilder(mAtm).setCreateTask(true)
-                .setParentTask(mFullscreenStack).build();
+                .setParentTask(mFullscreenTask).build();
         final Task taskA = fullScreenActivityA.getTask();
 
         final TaskChangeNotificationController taskChangeNotifier =
@@ -166,7 +166,7 @@ public class ActivityStackSupervisorTests extends WindowTestsBase {
         reset(taskChangeNotifier);
 
         final ActivityRecord fullScreenActivityB = new ActivityBuilder(mAtm).setCreateTask(true)
-                .setParentTask(mFullscreenStack).build();
+                .setParentTask(mFullscreenTask).build();
         final Task taskB = fullScreenActivityB.getTask();
 
         mAtm.setResumedActivityUncheckLocked(fullScreenActivityB, "resumeB");

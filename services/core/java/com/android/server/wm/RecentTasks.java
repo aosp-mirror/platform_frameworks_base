@@ -36,7 +36,7 @@ import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.os.Process.SYSTEM_UID;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_TASKS;
-import static com.android.server.wm.ActivityStackSupervisor.REMOVE_FROM_RECENTS;
+import static com.android.server.wm.ActivityTaskSupervisor.REMOVE_FROM_RECENTS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_RECENTS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_RECENTS_TRIM_TASKS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_RECENTS;
@@ -150,7 +150,7 @@ class RecentTasks {
      */
     private final TaskPersister mTaskPersister;
     private final ActivityTaskManagerService mService;
-    private final ActivityStackSupervisor mSupervisor;
+    private final ActivityTaskSupervisor mSupervisor;
 
     /**
      * Keeps track of the static recents package/component which is granted additional permissions
@@ -232,20 +232,20 @@ class RecentTasks {
     @VisibleForTesting
     RecentTasks(ActivityTaskManagerService service, TaskPersister taskPersister) {
         mService = service;
-        mSupervisor = mService.mStackSupervisor;
+        mSupervisor = mService.mTaskSupervisor;
         mTaskPersister = taskPersister;
         mGlobalMaxNumTasks = ActivityTaskManager.getMaxRecentTasksStatic();
         mHasVisibleRecentTasks = true;
         mTaskNotificationController = service.getTaskChangeNotificationController();
     }
 
-    RecentTasks(ActivityTaskManagerService service, ActivityStackSupervisor stackSupervisor) {
+    RecentTasks(ActivityTaskManagerService service, ActivityTaskSupervisor taskSupervisor) {
         final File systemDir = Environment.getDataSystemDirectory();
         final Resources res = service.mContext.getResources();
         mService = service;
-        mSupervisor = mService.mStackSupervisor;
-        mTaskPersister = new TaskPersister(systemDir, stackSupervisor, service, this,
-                stackSupervisor.mPersisterQueue);
+        mSupervisor = mService.mTaskSupervisor;
+        mTaskPersister = new TaskPersister(systemDir, taskSupervisor, service, this,
+                taskSupervisor.mPersisterQueue);
         mGlobalMaxNumTasks = ActivityTaskManager.getMaxRecentTasksStatic();
         mTaskNotificationController = service.getTaskChangeNotificationController();
         mHasVisibleRecentTasks = res.getBoolean(com.android.internal.R.bool.config_hasRecents);

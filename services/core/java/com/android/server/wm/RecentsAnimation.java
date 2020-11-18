@@ -25,7 +25,7 @@ import static android.content.Intent.FLAG_ACTIVITY_NO_ANIMATION;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_RECENTS_ANIMATIONS;
-import static com.android.server.wm.ActivityStackSupervisor.PRESERVE_WINDOWS;
+import static com.android.server.wm.ActivityTaskSupervisor.PRESERVE_WINDOWS;
 import static com.android.server.wm.RecentsAnimationController.REORDER_KEEP_IN_PLACE;
 import static com.android.server.wm.RecentsAnimationController.REORDER_MOVE_TO_ORIGINAL_POSITION;
 import static com.android.server.wm.RecentsAnimationController.REORDER_MOVE_TO_TOP;
@@ -55,7 +55,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
     private static final String TAG = RecentsAnimation.class.getSimpleName();
 
     private final ActivityTaskManagerService mService;
-    private final ActivityStackSupervisor mStackSupervisor;
+    private final ActivityTaskSupervisor mTaskSupervisor;
     private final ActivityStartController mActivityStartController;
     private final WindowManagerService mWindowManager;
     private final TaskDisplayArea mDefaultTaskDisplayArea;
@@ -77,12 +77,12 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
     // The stack to restore the target stack behind when the animation is finished
     private Task mRestoreTargetBehindStack;
 
-    RecentsAnimation(ActivityTaskManagerService atm, ActivityStackSupervisor stackSupervisor,
+    RecentsAnimation(ActivityTaskManagerService atm, ActivityTaskSupervisor taskSupervisor,
             ActivityStartController activityStartController, WindowManagerService wm,
             Intent targetIntent, ComponentName recentsComponent, @Nullable String recentsFeatureId,
             int recentsUid, @Nullable WindowProcessController caller) {
         mService = atm;
-        mStackSupervisor = stackSupervisor;
+        mTaskSupervisor = taskSupervisor;
         mDefaultTaskDisplayArea = mService.mRootWindowContainer.getDefaultTaskDisplayArea();
         mActivityStartController = activityStartController;
         mWindowManager = wm;
@@ -138,7 +138,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
 
         if (!targetActivity.attachedToProcess()) {
             ProtoLog.d(WM_DEBUG_RECENTS_ANIMATIONS, "Real start recents");
-            mStackSupervisor.startSpecificActivity(targetActivity, false /* andResume */,
+            mTaskSupervisor.startSpecificActivity(targetActivity, false /* andResume */,
                     false /* checkConfig */);
             // Make sure the activity won't be involved in transition.
             if (targetActivity.getDisplayContent() != null) {
@@ -187,7 +187,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
         }
 
         final LaunchingState launchingState =
-                mStackSupervisor.getActivityMetricsLogger().notifyActivityLaunching(mTargetIntent);
+                mTaskSupervisor.getActivityMetricsLogger().notifyActivityLaunching(mTargetIntent);
 
         if (mCaller != null) {
             mCaller.setRunningRecentsAnimation(true);
@@ -242,7 +242,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
                     "startRecentsActivity");
             mWindowManager.initializeRecentsAnimation(mTargetActivityType, recentsAnimationRunner,
                     this, mDefaultTaskDisplayArea.getDisplayId(),
-                    mStackSupervisor.mRecentTasks.getRecentTaskIds(), targetActivity);
+                    mTaskSupervisor.mRecentTasks.getRecentTaskIds(), targetActivity);
 
             // If we updated the launch-behind state, update the visibility of the activities after
             // we fetch the visible tasks to be controlled by the animation
@@ -253,7 +253,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
                 options = ActivityOptions.makeBasic();
                 options.setSourceInfo(ActivityOptions.SourceInfo.TYPE_RECENTS_ANIMATION, eventTime);
             }
-            mStackSupervisor.getActivityMetricsLogger().notifyActivityLaunched(launchingState,
+            mTaskSupervisor.getActivityMetricsLogger().notifyActivityLaunched(launchingState,
                     START_TASK_TO_FRONT, targetActivity, options);
 
             // Register for stack order changes
@@ -323,11 +323,11 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
 
                     if (reorderMode == REORDER_MOVE_TO_TOP) {
                         // Bring the target stack to the front
-                        mStackSupervisor.mNoAnimActivities.add(targetActivity);
+                        mTaskSupervisor.mNoAnimActivities.add(targetActivity);
 
                         if (sendUserLeaveHint) {
                             // Setting this allows the previous app to PiP.
-                            mStackSupervisor.mUserLeaving = true;
+                            mTaskSupervisor.mUserLeaving = true;
                             targetStack.moveTaskToFront(targetActivity.getTask(),
                                     true /* noAnimation */, null /* activityOptions */,
                                     targetActivity.appTimeTracker,

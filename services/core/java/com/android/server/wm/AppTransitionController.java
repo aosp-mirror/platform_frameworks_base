@@ -213,7 +213,7 @@ public class AppTransitionController {
 
         mDisplayContent.computeImeTarget(true /* updateImeTarget */);
 
-        mService.mAtmService.mStackSupervisor.getActivityMetricsLogger().notifyTransitionStarting(
+        mService.mAtmService.mTaskSupervisor.getActivityMetricsLogger().notifyTransitionStarting(
                 mTempTransitionReasons);
 
         Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);

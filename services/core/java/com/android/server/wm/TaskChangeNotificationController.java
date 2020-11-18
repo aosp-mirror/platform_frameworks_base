@@ -66,7 +66,7 @@ class TaskChangeNotificationController {
 
     // Global lock used by the service the instantiate objects of this class.
     private final Object mServiceLock;
-    private final ActivityStackSupervisor mStackSupervisor;
+    private final ActivityTaskSupervisor mTaskSupervisor;
     private final Handler mHandler;
 
     // Task stack change listeners in a remote process.
@@ -193,7 +193,7 @@ class TaskChangeNotificationController {
             switch (msg.what) {
                 case LOG_STACK_STATE_MSG: {
                     synchronized (mServiceLock) {
-                        mStackSupervisor.logStackState();
+                        mTaskSupervisor.logStackState();
                     }
                     break;
                 }
@@ -277,9 +277,9 @@ class TaskChangeNotificationController {
     }
 
     public TaskChangeNotificationController(Object serviceLock,
-            ActivityStackSupervisor stackSupervisor, Handler handler) {
+            ActivityTaskSupervisor taskSupervisor, Handler handler) {
         mServiceLock = serviceLock;
-        mStackSupervisor = stackSupervisor;
+        mTaskSupervisor = taskSupervisor;
         mHandler = new MainHandler(handler.getLooper());
     }
 

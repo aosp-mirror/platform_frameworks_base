@@ -3161,7 +3161,7 @@ public class WindowManagerService extends IWindowManager.Stub
             throw new SecurityException("Requires CONTROL_KEYGUARD permission");
         }
         if (mAtmInternal.isDreaming()) {
-            mAtmService.mStackSupervisor.wakeUp("dismissKeyguard");
+            mAtmService.mTaskSupervisor.wakeUp("dismissKeyguard");
         }
         synchronized (mGlobalLock) {
             mPolicy.dismissKeyguardLw(callback, message);

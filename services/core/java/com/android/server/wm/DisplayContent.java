@@ -5263,7 +5263,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         mRemoving = true;
         Task lastReparentedStack;
 
-        mRootWindowContainer.mStackSupervisor.beginDeferResume();
+        mRootWindowContainer.mTaskSupervisor.beginDeferResume();
         try {
             lastReparentedStack = reduceOnAllTaskDisplayAreas((taskDisplayArea, stack) -> {
                 final Task lastReparentedStackFromArea = taskDisplayArea.remove();
@@ -5273,7 +5273,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 return stack;
             }, null /* initValue */, false /* traverseTopToBottom */);
         } finally {
-            mRootWindowContainer.mStackSupervisor.endDeferResume();
+            mRootWindowContainer.mTaskSupervisor.endDeferResume();
         }
         mRemoved = true;
 
@@ -5314,7 +5314,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             });
         } else if (getTopStack() == null) {
             removeIfPossible();
-            mRootWindowContainer.mStackSupervisor
+            mRootWindowContainer.mTaskSupervisor
                     .getKeyguardController().onDisplayRemoved(mDisplayId);
         }
     }

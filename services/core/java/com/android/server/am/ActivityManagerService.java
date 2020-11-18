@@ -1997,7 +1997,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         mProcessStats = null;
         mCpHelper = new ContentProviderHelper(this, false);
         // For the usage of {@link ActiveServices#cleanUpServices} that may be invoked from
-        // {@link ActivityStackSupervisor#cleanUpRemovedTaskLocked}.
+        // {@link ActivityTaskSupervisor#cleanUpRemovedTaskLocked}.
         mServices = hasHandlerThread ? new ActiveServices(this) : null;
         mSystemThread = null;
         mUiHandler = injector.getUiHandler(null /* service */);

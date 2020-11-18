@@ -78,7 +78,7 @@ public class ActivityMetricsLaunchObserverTests extends WindowTestsBase {
     public void setUpAMLO() {
         mLaunchObserver = mock(ActivityMetricsLaunchObserver.class);
 
-        // ActivityStackSupervisor always creates its own instance of ActivityMetricsLogger.
+        // ActivityTaskSupervisor always creates its own instance of ActivityMetricsLogger.
         mActivityMetricsLogger = mSupervisor.getActivityMetricsLogger();
 
         mLaunchObserverRegistry = mActivityMetricsLogger.getLaunchObserverRegistry();

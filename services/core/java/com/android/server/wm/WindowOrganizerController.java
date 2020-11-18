@@ -19,7 +19,7 @@ package com.android.server.wm;
 import static android.Manifest.permission.READ_FRAME_BUFFER;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_WINDOW_ORGANIZER;
-import static com.android.server.wm.ActivityStackSupervisor.PRESERVE_WINDOWS;
+import static com.android.server.wm.ActivityTaskSupervisor.PRESERVE_WINDOWS;
 import static com.android.server.wm.ActivityTaskManagerService.LAYOUT_REASON_CONFIG_CHANGED;
 import static com.android.server.wm.Task.FLAG_FORCE_HIDDEN_FOR_TASK_ORG;
 import static com.android.server.wm.WindowContainer.POSITION_BOTTOM;
@@ -390,7 +390,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
 
         Rect enterPipBounds = c.getEnterPipBounds();
         if (enterPipBounds != null) {
-            mService.mStackSupervisor.updatePictureInPictureMode(tr, enterPipBounds, true);
+            mService.mTaskSupervisor.updatePictureInPictureMode(tr, enterPipBounds, true);
         }
 
         return effects;

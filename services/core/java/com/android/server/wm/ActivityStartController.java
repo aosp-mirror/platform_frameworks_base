@@ -22,7 +22,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.os.FactoryTest.FACTORY_TEST_LOW_LEVEL;
 
-import static com.android.server.wm.ActivityStackSupervisor.ON_TOP;
+import static com.android.server.wm.ActivityTaskSupervisor.ON_TOP;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
 
@@ -53,7 +53,7 @@ import com.android.internal.util.ArrayUtils;
 import com.android.server.am.ActivityManagerService;
 import com.android.server.am.PendingIntentRecord;
 import com.android.server.uri.NeededUriGrants;
-import com.android.server.wm.ActivityStackSupervisor.PendingActivityLaunch;
+import com.android.server.wm.ActivityTaskSupervisor.PendingActivityLaunch;
 import com.android.server.wm.ActivityStarter.DefaultFactory;
 import com.android.server.wm.ActivityStarter.Factory;
 
@@ -76,7 +76,7 @@ public class ActivityStartController {
     private static final int DO_PENDING_ACTIVITY_LAUNCHES_MSG = 1;
 
     private final ActivityTaskManagerService mService;
-    private final ActivityStackSupervisor mSupervisor;
+    private final ActivityTaskSupervisor mSupervisor;
 
     /** Last home activity record we attempted to start. */
     private ActivityRecord mLastHomeActivityStartRecord;
@@ -88,7 +88,7 @@ public class ActivityStartController {
     private int mLastHomeActivityStartResult;
 
     /** A list of activities that are waiting to launch. */
-    private final ArrayList<ActivityStackSupervisor.PendingActivityLaunch>
+    private final ArrayList<ActivityTaskSupervisor.PendingActivityLaunch>
             mPendingActivityLaunches = new ArrayList<>();
 
     private final Factory mFactory;
@@ -124,13 +124,13 @@ public class ActivityStartController {
     private ActivityStarter mLastStarter;
 
     ActivityStartController(ActivityTaskManagerService service) {
-        this(service, service.mStackSupervisor,
-                new DefaultFactory(service, service.mStackSupervisor,
-                    new ActivityStartInterceptor(service, service.mStackSupervisor)));
+        this(service, service.mTaskSupervisor,
+                new DefaultFactory(service, service.mTaskSupervisor,
+                    new ActivityStartInterceptor(service, service.mTaskSupervisor)));
     }
 
     @VisibleForTesting
-    ActivityStartController(ActivityTaskManagerService service, ActivityStackSupervisor supervisor,
+    ActivityStartController(ActivityTaskManagerService service, ActivityTaskSupervisor supervisor,
             Factory factory) {
         mService = service;
         mSupervisor = supervisor;

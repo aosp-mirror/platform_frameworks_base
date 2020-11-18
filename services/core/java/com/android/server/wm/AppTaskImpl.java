@@ -16,7 +16,7 @@
 
 package com.android.server.wm;
 
-import static com.android.server.wm.ActivityStackSupervisor.REMOVE_FROM_RECENTS;
+import static com.android.server.wm.ActivityTaskSupervisor.REMOVE_FROM_RECENTS;
 import static com.android.server.wm.RootWindowContainer.MATCH_ATTACHED_TASK_OR_RECENT_TASKS;
 
 import android.app.ActivityManager;
@@ -61,7 +61,7 @@ class AppTaskImpl extends IAppTask.Stub {
             final long origId = Binder.clearCallingIdentity();
             try {
                 // We remove the task from recents to preserve backwards
-                if (!mService.mStackSupervisor.removeTaskById(mTaskId, false,
+                if (!mService.mTaskSupervisor.removeTaskById(mTaskId, false,
                         REMOVE_FROM_RECENTS, "finish-and-remove-task")) {
                     throw new IllegalArgumentException("Unable to find task ID " + mTaskId);
                 }
@@ -117,7 +117,7 @@ class AppTaskImpl extends IAppTask.Stub {
                         return;
                     }
                 }
-                mService.mStackSupervisor.startActivityFromRecents(callingPid,
+                mService.mTaskSupervisor.startActivityFromRecents(callingPid,
                         callingUid, mTaskId, null);
             }
         } finally {
