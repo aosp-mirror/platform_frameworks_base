@@ -1,4 +1,13 @@
 // Signature format: 2.0
+package android.app {
+
+  public class BroadcastOptions {
+    method public int getMaxManifestReceiverApiLevel();
+    method public void setMaxManifestReceiverApiLevel(int);
+  }
+
+}
+
 package android.os {
 
   public class Binder implements android.os.IBinder {
