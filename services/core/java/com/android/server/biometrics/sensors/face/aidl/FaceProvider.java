@@ -65,7 +65,6 @@ import java.util.List;
  * Provider for a single instance of the {@link IFace} HAL.
  */
 public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
-    private static final String TAG = "FaceProvider";
     private static final int ENROLL_TIMEOUT_SEC = 75;
 
     private boolean mTestHalEnabled;
@@ -88,7 +87,7 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
         public void onTaskStackChanged() {
             mHandler.post(() -> {
                 for (int i = 0; i < mSensors.size(); i++) {
-                    final ClientMonitor<?> client = mSensors.get(i).getScheduler()
+                    final ClientMonitor<?> client = mSensors.valueAt(i).getScheduler()
                             .getCurrentClient();
                     if (!(client instanceof AuthenticationClient)) {
                         Slog.e(getTag(), "Task stack changed for client: " + client);
@@ -108,7 +107,7 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
                                     && !client.isAlreadyDone()) {
                                 Slog.e(getTag(), "Stopping background authentication, top: "
                                         + topPackage + " currentClient: " + client);
-                                mSensors.get(i).getScheduler()
+                                mSensors.valueAt(i).getScheduler()
                                         .cancelAuthentication(client.getToken());
                             }
                         }
@@ -550,12 +549,13 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
 
         JSONObject dump = new JSONObject();
         try {
-            dump.put("service", "Face Manager");
+            dump.put("service", getTag());
 
             JSONArray sets = new JSONArray();
             for (UserInfo user : UserManager.get(mContext).getUsers()) {
                 final int userId = user.getUserHandle().getIdentifier();
-                final int c = FaceUtils.getInstance().getBiometricsForUser(mContext, userId).size();
+                final int c = FaceUtils.getInstance(sensorId)
+                        .getBiometricsForUser(mContext, userId).size();
                 JSONObject set = new JSONObject();
                 set.put("id", userId);
                 set.put("count", c);
@@ -574,7 +574,7 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
 
             dump.put("prints", sets);
         } catch (JSONException e) {
-            Slog.e(TAG, "dump formatting failure", e);
+            Slog.e(getTag(), "dump formatting failure", e);
         }
         pw.println(dump);
         pw.println("HAL deaths since last reboot: " + performanceTracker.getHALDeathCount());

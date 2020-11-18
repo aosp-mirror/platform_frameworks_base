@@ -71,7 +71,6 @@ import com.android.server.biometrics.sensors.face.FaceUtils;
 import com.android.server.biometrics.sensors.face.LockoutHalImpl;
 import com.android.server.biometrics.sensors.face.ServiceProvider;
 import com.android.server.biometrics.sensors.face.UsageStats;
-import com.android.server.biometrics.sensors.fingerprint.FingerprintUtils;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -803,7 +802,7 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
 
         JSONObject dump = new JSONObject();
         try {
-            dump.put("service", "Face Manager");
+            dump.put("service", TAG);
 
             JSONArray sets = new JSONArray();
             for (UserInfo user : UserManager.get(mContext).getUsers()) {
