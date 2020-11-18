@@ -2066,6 +2066,10 @@ package android.content.pm {
     field @NonNull public static final android.os.Parcelable.Creator<android.content.pm.LauncherApps.AppUsageLimit> CREATOR;
   }
 
+  public static class LauncherApps.ShortcutQuery {
+    field public static final int FLAG_GET_PERSONS_DATA = 2048; // 0x800
+  }
+
   public class PackageInstaller {
     method @RequiresPermission(android.Manifest.permission.INSTALL_PACKAGES) public void setPermissionsResult(int, boolean);
     field public static final int DATA_LOADER_TYPE_INCREMENTAL = 2; // 0x2
