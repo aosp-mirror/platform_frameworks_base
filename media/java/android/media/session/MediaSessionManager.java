@@ -23,7 +23,6 @@ import android.annotation.RequiresPermission;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
-import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ParceledListSlice;
@@ -32,7 +31,6 @@ import android.media.IRemoteVolumeControllerCallback;
 import android.media.MediaFrameworkInitializer;
 import android.media.MediaSession2;
 import android.media.Session2Token;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.RemoteException;
@@ -210,10 +208,7 @@ public final class MediaSessionManager {
      * @return A list of controllers for ongoing sessions.
      * @hide
      */
-    // TODO: Remove @UnsupportedAppUsage
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, publicAlternatives = "Should only be"
-            + " used by system apps, since non-system apps cannot get other users' sessions."
-            + " Use {@link #getActiveSessions} instead.")
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public @NonNull List<MediaController> getActiveSessionsForUser(
             @Nullable ComponentName notificationListener, int userId) {
         ArrayList<MediaController> controllers = new ArrayList<MediaController>();
