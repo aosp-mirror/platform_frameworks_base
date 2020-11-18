@@ -87,12 +87,8 @@ public class ModeSwitchesController {
      */
     @MainThread
     void onConfigurationChanged(int configDiff) {
-        for (int i = 0; i < mSwitchSupplier.getSize(); i++) {
-            final MagnificationModeSwitch magnificationModeSwitch = mSwitchSupplier.valueAt(i);
-            if (magnificationModeSwitch != null) {
-                magnificationModeSwitch.onConfigurationChanged(configDiff);
-            }
-        }
+        mSwitchSupplier.forEach(
+                switchController -> switchController.onConfigurationChanged(configDiff));
     }
 
     private static class SwitchSupplier extends DisplayIdIndexSupplier<MagnificationModeSwitch> {
