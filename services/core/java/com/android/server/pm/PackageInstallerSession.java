@@ -991,12 +991,14 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             assertCallerIsOwnerOrRootLocked();
             assertPreparedAndNotCommittedOrDestroyedLocked("addChecksums");
 
+            if (mChecksums.containsKey(name)) {
+                throw new IllegalStateException("Duplicate checksums.");
+            }
+
+            List<CertifiedChecksum> fileChecksums = new ArrayList<>();
+            mChecksums.put(name, fileChecksums);
+
             for (Checksum checksum : checksums) {
-                List<CertifiedChecksum> fileChecksums = mChecksums.get(name);
-                if (fileChecksums == null) {
-                    fileChecksums = new ArrayList<>();
-                    mChecksums.put(name, fileChecksums);
-                }
                 fileChecksums.add(new CertifiedChecksum(checksum, initiatingPackageName,
                         mainCertificateBytes));
             }
