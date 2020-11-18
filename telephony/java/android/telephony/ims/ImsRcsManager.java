@@ -390,6 +390,7 @@ public class ImsRcsManager {
      * @param capability The RCS capability to query.
      * @param radioTech The radio tech that this capability failed for, defined as
      * {@link ImsRegistrationImplBase#REGISTRATION_TECH_LTE} or
+     * {@link ImsRegistrationImplBase#REGISTRATION_TECH_CROSS_SIM} or
      * {@link ImsRegistrationImplBase#REGISTRATION_TECH_IWLAN}.
      * @return true if the RCS capability is capable for this subscription, false otherwise. This
      * does not necessarily mean that we are registered for IMS and the capability is available, but

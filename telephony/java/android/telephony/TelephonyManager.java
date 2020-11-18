@@ -9953,6 +9953,8 @@ public class TelephonyManager {
      * Valid return results are:
      *  - {@link ImsRegistrationImplBase#REGISTRATION_TECH_LTE} for LTE registration,
      *  - {@link ImsRegistrationImplBase#REGISTRATION_TECH_IWLAN} for IWLAN registration, or
+     *  - {@link ImsRegistrationImplBase#REGISTRATION_TECH_CROSS_SIM} for registration over
+     *  other sim's internet, or
      *  - {@link ImsRegistrationImplBase#REGISTRATION_TECH_NONE} if we are not registered or the
      *  result is unavailable.
      *  Use {@link ImsMmTelManager.RegistrationCallback} instead.

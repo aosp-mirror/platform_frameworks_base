@@ -716,6 +716,7 @@ public class ImsMmTelManager implements RegistrationManager {
      *
      * @param imsRegTech The IMS registration technology, can be one of the following:
      *         {@link ImsRegistrationImplBase#REGISTRATION_TECH_LTE},
+     *         {@link ImsRegistrationImplBase#REGISTRATION_TECH_CROSS_SIM},
      *         {@link ImsRegistrationImplBase#REGISTRATION_TECH_IWLAN}
      * @param capability The IMS MmTel capability to query, can be one of the following:
      *         {@link MmTelFeature.MmTelCapabilities#CAPABILITY_TYPE_VOICE},
@@ -750,6 +751,7 @@ public class ImsMmTelManager implements RegistrationManager {
      *
      * @param imsRegTech The IMS registration technology, can be one of the following:
      *         {@link ImsRegistrationImplBase#REGISTRATION_TECH_LTE},
+     *         {@link ImsRegistrationImplBase#REGISTRATION_TECH_CROSS_SIM},
      *         {@link ImsRegistrationImplBase#REGISTRATION_TECH_IWLAN}
      * @param capability The IMS MmTel capability to query, can be one of the following:
      *         {@link MmTelFeature.MmTelCapabilities#CAPABILITY_TYPE_VOICE},

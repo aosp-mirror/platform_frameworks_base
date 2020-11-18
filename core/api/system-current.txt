@@ -12150,6 +12150,7 @@ package android.telephony.ims {
     field public static final String EXTRA_EXTENDING_TO_CONFERENCE_SUPPORTED = "android.telephony.ims.extra.EXTENDING_TO_CONFERENCE_SUPPORTED";
     field public static final String EXTRA_FORWARDED_NUMBER = "android.telephony.ims.extra.FORWARDED_NUMBER";
     field public static final String EXTRA_IS_CALL_PULL = "CallPull";
+    field public static final String EXTRA_IS_CROSS_SIM_CALL = "android.telephony.ims.extra.IS_CROSS_SIM_CALL";
     field public static final String EXTRA_LOCATION = "android.telephony.ims.extra.LOCATION";
     field public static final String EXTRA_OI = "oi";
     field public static final String EXTRA_OIR = "oir";
@@ -12292,6 +12293,8 @@ package android.telephony.ims {
 
   @Deprecated public static class ImsMmTelManager.RegistrationCallback extends android.telephony.ims.RegistrationManager.RegistrationCallback {
     ctor @Deprecated public ImsMmTelManager.RegistrationCallback();
+    method @Deprecated public void onRegistered(int);
+    method @Deprecated public void onRegistering(int);
   }
 
   public final class ImsReasonInfo implements android.os.Parcelable {
@@ -12931,6 +12934,7 @@ package android.telephony.ims.stub {
     method public void triggerFullNetworkRegistration(@IntRange(from=100, to=699) int, @Nullable String);
     method public void triggerSipDelegateDeregistration();
     method public void updateSipDelegateRegistration();
+    field public static final int REGISTRATION_TECH_CROSS_SIM = 2; // 0x2
     field public static final int REGISTRATION_TECH_IWLAN = 1; // 0x1
     field public static final int REGISTRATION_TECH_LTE = 0; // 0x0
     field public static final int REGISTRATION_TECH_NONE = -1; // 0xffffffff

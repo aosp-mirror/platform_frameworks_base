@@ -607,6 +607,11 @@ public final class Call {
          */
         public static final int PROPERTY_IS_ADHOC_CONFERENCE = 0x00002000;
 
+        /**
+         * Connection is using Cross SIM Calling.
+         */
+        public static final int PROPERTY_CROSS_SIM = 0x00004000;
+
         //******************************************************************************************
         // Next PROPERTY value: 0x00004000
         //******************************************************************************************
@@ -797,6 +802,9 @@ public final class Call {
             }
             if (hasProperty(properties, PROPERTY_IS_ADHOC_CONFERENCE)) {
                 builder.append(" PROPERTY_IS_ADHOC_CONFERENCE");
+            }
+            if (hasProperty(properties, PROPERTY_CROSS_SIM)) {
+                builder.append(" PROPERTY_CROSS_SIM");
             }
             builder.append("]");
             return builder.toString();
