@@ -20,6 +20,8 @@
 
 #include "android_os_HwBinder.h"
 
+#include "android_util_Binder.h" // for binder_report_exception
+
 #include "android_os_HwParcel.h"
 #include "android_os_HwRemoteBinder.h"
 
@@ -183,15 +185,7 @@ status_t JHwBinder::onTransact(
         env->ExceptionDescribe();
         env->ExceptionClear();
 
-        // It is illegal to call IsInstanceOf if there is a pending exception.
-        // Attempting to do so results in a JniAbort which crashes the entire process.
-        if (env->IsInstanceOf(excep, gErrorClass)) {
-            /* It's an error */
-            LOG(ERROR) << "Forcefully exiting";
-            _exit(1);
-        } else {
-            LOG(ERROR) << "Uncaught exception!";
-        }
+        binder_report_exception(env, excep, "Uncaught error or exception in hwbinder!");
 
         env->DeleteLocalRef(excep);
     }
