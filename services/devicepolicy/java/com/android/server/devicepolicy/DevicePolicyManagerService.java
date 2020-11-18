@@ -641,6 +641,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     final boolean mIsWatch;
 
     /**
+     * Whether or not this device is an automotive.
+     */
+    private final boolean mIsAutomotive;
+
+    /**
      * Whether this device has the telephony feature.
      */
     final boolean mHasTelephonyFeature;
@@ -2567,6 +2572,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 .hasSystemFeature(PackageManager.FEATURE_WATCH);
         mHasTelephonyFeature = mInjector.getPackageManager()
                 .hasSystemFeature(PackageManager.FEATURE_TELEPHONY);
+        mIsAutomotive = mInjector.getPackageManager()
+                .hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE);
         mBackgroundHandler = BackgroundThread.getHandler();
 
         // Needed when mHasFeature == false, because it controls the certificate warning text.
@@ -6080,9 +6087,16 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
                 // Require authentication for the device or profile
                 if (userToLock == UserHandle.USER_ALL) {
-                    // Power off the display
-                    mInjector.powerManagerGoToSleep(SystemClock.uptimeMillis(),
-                            PowerManager.GO_TO_SLEEP_REASON_DEVICE_ADMIN, 0);
+                    if (mIsAutomotive) {
+                        if (VERBOSE_LOG) {
+                            Slog.v(LOG_TAG, "lockNow(): not powering off display on automotive"
+                                    + " build");
+                        }
+                    } else {
+                        // Power off the display
+                        mInjector.powerManagerGoToSleep(SystemClock.uptimeMillis(),
+                                PowerManager.GO_TO_SLEEP_REASON_DEVICE_ADMIN, 0);
+                    }
                     mInjector.getIWindowManager().lockNow(null);
                 } else {
                     mInjector.getTrustManager().setDeviceLockedForUser(userToLock, true);
