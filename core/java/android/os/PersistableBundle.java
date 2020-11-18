@@ -21,14 +21,15 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.util.ArrayMap;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
+import android.util.Xml;
 import android.util.proto.ProtoOutputStream;
 
-import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.XmlUtils;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlPullParserFactory;
 import org.xmlpull.v1.XmlSerializer;
 
 import java.io.IOException;
@@ -234,7 +235,7 @@ public final class PersistableBundle extends BaseBundle implements Cloneable, Pa
 
     /** @hide */
     @Override
-    public void writeUnknownObject(Object v, String name, XmlSerializer out)
+    public void writeUnknownObject(Object v, String name, TypedXmlSerializer out)
             throws XmlPullParserException, IOException {
         if (v instanceof PersistableBundle) {
             out.startTag(null, TAG_PERSISTABLEMAP);
@@ -248,6 +249,11 @@ public final class PersistableBundle extends BaseBundle implements Cloneable, Pa
 
     /** @hide */
     public void saveToXml(XmlSerializer out) throws IOException, XmlPullParserException {
+        saveToXml(XmlUtils.makeTyped(out));
+    }
+
+    /** @hide */
+    public void saveToXml(TypedXmlSerializer out) throws IOException, XmlPullParserException {
         unparcel();
         XmlUtils.writeMapXml(mMap, out, this);
     }
@@ -255,7 +261,7 @@ public final class PersistableBundle extends BaseBundle implements Cloneable, Pa
     /** @hide */
     static class MyReadMapCallback implements  XmlUtils.ReadMapCallback {
         @Override
-        public Object readThisUnknownObjectXml(XmlPullParser in, String tag)
+        public Object readThisUnknownObjectXml(TypedXmlPullParser in, String tag)
                 throws XmlPullParserException, IOException {
             if (TAG_PERSISTABLEMAP.equals(tag)) {
                 return restoreFromXml(in);
@@ -289,6 +295,12 @@ public final class PersistableBundle extends BaseBundle implements Cloneable, Pa
 
     /** @hide */
     public static PersistableBundle restoreFromXml(XmlPullParser in) throws IOException,
+            XmlPullParserException {
+        return restoreFromXml(XmlUtils.makeTyped(in));
+    }
+
+    /** @hide */
+    public static PersistableBundle restoreFromXml(TypedXmlPullParser in) throws IOException,
             XmlPullParserException {
         final int outerDepth = in.getDepth();
         final String startTag = in.getName();
@@ -355,7 +367,7 @@ public final class PersistableBundle extends BaseBundle implements Cloneable, Pa
      * @see #readFromStream
      */
     public void writeToStream(@NonNull OutputStream outputStream) throws IOException {
-        FastXmlSerializer serializer = new FastXmlSerializer();
+        TypedXmlSerializer serializer = Xml.newFastSerializer();
         serializer.setOutput(outputStream, UTF_8.name());
         serializer.startTag(null, "bundle");
         try {
@@ -378,7 +390,7 @@ public final class PersistableBundle extends BaseBundle implements Cloneable, Pa
     public static PersistableBundle readFromStream(@NonNull InputStream inputStream)
             throws IOException {
         try {
-            XmlPullParser parser = XmlPullParserFactory.newInstance().newPullParser();
+            TypedXmlPullParser parser = Xml.newFastPullParser();
             parser.setInput(inputStream, UTF_8.name());
             parser.next();
             return PersistableBundle.restoreFromXml(parser);

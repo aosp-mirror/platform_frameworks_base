@@ -418,13 +418,14 @@ public final class BinaryXmlPullParser implements TypedXmlPullParser {
      * Search through the pool of currently allocated {@link Attribute}
      * instances for one that matches the given name.
      */
-    private @NonNull Attribute findAttribute(@NonNull String name) throws IOException {
+    private @NonNull Attribute findAttribute(@NonNull String name)
+            throws XmlPullParserException {
         for (int i = 0; i < mAttributeCount; i++) {
             if (Objects.equals(mAttributes[i].name, name)) {
                 return mAttributes[i];
             }
         }
-        throw new IOException("Missing attribute " + name);
+        throw new XmlPullParserException("Missing attribute " + name);
     }
 
     @Override
@@ -432,7 +433,7 @@ public final class BinaryXmlPullParser implements TypedXmlPullParser {
         if (namespace != null && !namespace.isEmpty()) throw illegalNamespace();
         try {
             return findAttribute(name).getValueString();
-        } catch (IOException e) {
+        } catch (XmlPullParserException e) {
             // Missing attributes default to null
             return null;
         }
@@ -444,55 +445,64 @@ public final class BinaryXmlPullParser implements TypedXmlPullParser {
     }
 
     @Override
-    public byte[] getAttributeBytesHex(String namespace, String name) throws IOException {
+    public byte[] getAttributeBytesHex(String namespace, String name)
+            throws XmlPullParserException {
         if (namespace != null && !namespace.isEmpty()) throw illegalNamespace();
         return findAttribute(name).getValueBytesHex();
     }
 
     @Override
-    public byte[] getAttributeBytesBase64(String namespace, String name) throws IOException {
+    public byte[] getAttributeBytesBase64(String namespace, String name)
+            throws XmlPullParserException {
         if (namespace != null && !namespace.isEmpty()) throw illegalNamespace();
         return findAttribute(name).getValueBytesBase64();
     }
 
     @Override
-    public int getAttributeInt(String namespace, String name) throws IOException {
+    public int getAttributeInt(String namespace, String name)
+            throws XmlPullParserException {
         if (namespace != null && !namespace.isEmpty()) throw illegalNamespace();
         return findAttribute(name).getValueInt();
     }
 
     @Override
-    public int getAttributeIntHex(String namespace, String name) throws IOException {
+    public int getAttributeIntHex(String namespace, String name)
+            throws XmlPullParserException {
         if (namespace != null && !namespace.isEmpty()) throw illegalNamespace();
         return findAttribute(name).getValueIntHex();
     }
 
     @Override
-    public long getAttributeLong(String namespace, String name) throws IOException {
+    public long getAttributeLong(String namespace, String name)
+            throws XmlPullParserException {
         if (namespace != null && !namespace.isEmpty()) throw illegalNamespace();
         return findAttribute(name).getValueLong();
     }
 
     @Override
-    public long getAttributeLongHex(String namespace, String name) throws IOException {
+    public long getAttributeLongHex(String namespace, String name)
+            throws XmlPullParserException {
         if (namespace != null && !namespace.isEmpty()) throw illegalNamespace();
         return findAttribute(name).getValueLongHex();
     }
 
     @Override
-    public float getAttributeFloat(String namespace, String name) throws IOException {
+    public float getAttributeFloat(String namespace, String name)
+            throws XmlPullParserException {
         if (namespace != null && !namespace.isEmpty()) throw illegalNamespace();
         return findAttribute(name).getValueFloat();
     }
 
     @Override
-    public double getAttributeDouble(String namespace, String name) throws IOException {
+    public double getAttributeDouble(String namespace, String name)
+            throws XmlPullParserException {
         if (namespace != null && !namespace.isEmpty()) throw illegalNamespace();
         return findAttribute(name).getValueDouble();
     }
 
     @Override
-    public boolean getAttributeBoolean(String namespace, String name) throws IOException {
+    public boolean getAttributeBoolean(String namespace, String name)
+            throws XmlPullParserException {
         if (namespace != null && !namespace.isEmpty()) throw illegalNamespace();
         return findAttribute(name).getValueBoolean();
     }
@@ -742,7 +752,7 @@ public final class BinaryXmlPullParser implements TypedXmlPullParser {
             }
         }
 
-        public @Nullable byte[] getValueBytesHex() throws IOException {
+        public @Nullable byte[] getValueBytesHex() throws XmlPullParserException {
             switch (type) {
                 case TYPE_NULL:
                     return null;
@@ -750,13 +760,18 @@ public final class BinaryXmlPullParser implements TypedXmlPullParser {
                 case TYPE_BYTES_BASE64:
                     return valueBytes;
                 case TYPE_STRING:
-                    return hexStringToBytes(valueString);
+                case TYPE_STRING_INTERNED:
+                    try {
+                        return hexStringToBytes(valueString);
+                    } catch (Exception e) {
+                        throw new XmlPullParserException("Invalid attribute " + name + ": " + e);
+                    }
                 default:
-                    throw new IOException("Invalid conversion from " + type);
+                    throw new XmlPullParserException("Invalid conversion from " + type);
             }
         }
 
-        public @Nullable byte[] getValueBytesBase64() throws IOException {
+        public @Nullable byte[] getValueBytesBase64() throws XmlPullParserException {
             switch (type) {
                 case TYPE_NULL:
                     return null;
@@ -764,98 +779,135 @@ public final class BinaryXmlPullParser implements TypedXmlPullParser {
                 case TYPE_BYTES_BASE64:
                     return valueBytes;
                 case TYPE_STRING:
-                    return Base64.decode(valueString, Base64.NO_WRAP);
+                case TYPE_STRING_INTERNED:
+                    try {
+                        return Base64.decode(valueString, Base64.NO_WRAP);
+                    } catch (Exception e) {
+                        throw new XmlPullParserException("Invalid attribute " + name + ": " + e);
+                    }
                 default:
-                    throw new IOException("Invalid conversion from " + type);
+                    throw new XmlPullParserException("Invalid conversion from " + type);
             }
         }
 
-        public int getValueInt() throws IOException {
+        public int getValueInt() throws XmlPullParserException {
             switch (type) {
                 case TYPE_INT:
                 case TYPE_INT_HEX:
                     return valueInt;
                 case TYPE_STRING:
-                    return Integer.parseInt(valueString);
+                case TYPE_STRING_INTERNED:
+                    try {
+                        return Integer.parseInt(valueString);
+                    } catch (Exception e) {
+                        throw new XmlPullParserException("Invalid attribute " + name + ": " + e);
+                    }
                 default:
-                    throw new IOException("Invalid conversion from " + type);
+                    throw new XmlPullParserException("Invalid conversion from " + type);
             }
         }
 
-        public int getValueIntHex() throws IOException {
+        public int getValueIntHex() throws XmlPullParserException {
             switch (type) {
                 case TYPE_INT:
                 case TYPE_INT_HEX:
                     return valueInt;
                 case TYPE_STRING:
-                    return Integer.parseInt(valueString, 16);
+                case TYPE_STRING_INTERNED:
+                    try {
+                        return Integer.parseInt(valueString, 16);
+                    } catch (Exception e) {
+                        throw new XmlPullParserException("Invalid attribute " + name + ": " + e);
+                    }
                 default:
-                    throw new IOException("Invalid conversion from " + type);
+                    throw new XmlPullParserException("Invalid conversion from " + type);
             }
         }
 
-        public long getValueLong() throws IOException {
+        public long getValueLong() throws XmlPullParserException {
             switch (type) {
                 case TYPE_LONG:
                 case TYPE_LONG_HEX:
                     return valueLong;
                 case TYPE_STRING:
-                    return Long.parseLong(valueString);
+                case TYPE_STRING_INTERNED:
+                    try {
+                        return Long.parseLong(valueString);
+                    } catch (Exception e) {
+                        throw new XmlPullParserException("Invalid attribute " + name + ": " + e);
+                    }
                 default:
-                    throw new IOException("Invalid conversion from " + type);
+                    throw new XmlPullParserException("Invalid conversion from " + type);
             }
         }
 
-        public long getValueLongHex() throws IOException {
+        public long getValueLongHex() throws XmlPullParserException {
             switch (type) {
                 case TYPE_LONG:
                 case TYPE_LONG_HEX:
                     return valueLong;
                 case TYPE_STRING:
-                    return Long.parseLong(valueString, 16);
+                case TYPE_STRING_INTERNED:
+                    try {
+                        return Long.parseLong(valueString, 16);
+                    } catch (Exception e) {
+                        throw new XmlPullParserException("Invalid attribute " + name + ": " + e);
+                    }
                 default:
-                    throw new IOException("Invalid conversion from " + type);
+                    throw new XmlPullParserException("Invalid conversion from " + type);
             }
         }
 
-        public float getValueFloat() throws IOException {
+        public float getValueFloat() throws XmlPullParserException {
             switch (type) {
                 case TYPE_FLOAT:
                     return valueFloat;
                 case TYPE_STRING:
-                    return Float.parseFloat(valueString);
+                case TYPE_STRING_INTERNED:
+                    try {
+                        return Float.parseFloat(valueString);
+                    } catch (Exception e) {
+                        throw new XmlPullParserException("Invalid attribute " + name + ": " + e);
+                    }
                 default:
-                    throw new IOException("Invalid conversion from " + type);
+                    throw new XmlPullParserException("Invalid conversion from " + type);
             }
         }
 
-        public double getValueDouble() throws IOException {
+        public double getValueDouble() throws XmlPullParserException {
             switch (type) {
                 case TYPE_DOUBLE:
                     return valueDouble;
                 case TYPE_STRING:
-                    return Double.parseDouble(valueString);
+                case TYPE_STRING_INTERNED:
+                    try {
+                        return Double.parseDouble(valueString);
+                    } catch (Exception e) {
+                        throw new XmlPullParserException("Invalid attribute " + name + ": " + e);
+                    }
                 default:
-                    throw new IOException("Invalid conversion from " + type);
+                    throw new XmlPullParserException("Invalid conversion from " + type);
             }
         }
 
-        public boolean getValueBoolean() throws IOException {
+        public boolean getValueBoolean() throws XmlPullParserException {
             switch (type) {
                 case TYPE_BOOLEAN_TRUE:
                     return true;
                 case TYPE_BOOLEAN_FALSE:
                     return false;
                 case TYPE_STRING:
+                case TYPE_STRING_INTERNED:
                     if ("true".equalsIgnoreCase(valueString)) {
                         return true;
                     } else if ("false".equalsIgnoreCase(valueString)) {
                         return false;
                     } else {
-                        throw new IOException("Invalid boolean: " + valueString);
+                        throw new XmlPullParserException(
+                                "Invalid attribute " + name + ": " + valueString);
                     }
                 default:
-                    throw new IOException("Invalid conversion from " + type);
+                    throw new XmlPullParserException("Invalid conversion from " + type);
             }
         }
     }
@@ -865,11 +917,11 @@ public final class BinaryXmlPullParser implements TypedXmlPullParser {
     private final static char[] HEX_DIGITS =
             { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
 
-    private static int toByte(char c) throws IOException {
+    private static int toByte(char c) {
         if (c >= '0' && c <= '9') return (c - '0');
         if (c >= 'A' && c <= 'F') return (c - 'A' + 10);
         if (c >= 'a' && c <= 'f') return (c - 'a' + 10);
-        throw new IOException("Invalid hex char '" + c + "'");
+        throw new IllegalArgumentException("Invalid hex char '" + c + "'");
     }
 
     static String bytesToHexString(byte[] value) {
@@ -884,10 +936,10 @@ public final class BinaryXmlPullParser implements TypedXmlPullParser {
         return new String(buf);
     }
 
-    static byte[] hexStringToBytes(String value) throws IOException {
+    static byte[] hexStringToBytes(String value) {
         final int length = value.length();
         if (length % 2 != 0) {
-            throw new IOException("Invalid hex length " + length);
+            throw new IllegalArgumentException("Invalid hex length " + length);
         }
         byte[] buffer = new byte[length / 2];
         for (int i = 0; i < length; i += 2) {
