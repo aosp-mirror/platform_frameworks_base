@@ -18,12 +18,12 @@ package android.security.keystore2;
 
 import android.annotation.CallSuper;
 import android.annotation.NonNull;
+import android.hardware.keymint.KeyParameter;
 import android.security.KeyStoreException;
 import android.security.KeyStoreOperation;
 import android.security.keymaster.KeymasterDefs;
 import android.security.keystore.ArrayUtils;
 import android.security.keystore.KeyStoreCryptoOperation;
-import android.system.keystore2.KeyParameter;
 
 import libcore.util.EmptyArray;
 
