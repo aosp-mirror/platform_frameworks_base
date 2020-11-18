@@ -152,14 +152,14 @@ public class RecentsAnimationController implements DeathRecipient {
      */
     final AppTransitionListener mAppTransitionListener = new AppTransitionListener() {
         @Override
-        public int onAppTransitionStartingLocked(int transit, long duration,
+        public int onAppTransitionStartingLocked(boolean keyguardGoingAway, long duration,
                 long statusBarAnimationStartTime, long statusBarAnimationDuration) {
             continueDeferredCancel();
             return 0;
         }
 
         @Override
-        public void onAppTransitionCancelledLocked(int transit) {
+        public void onAppTransitionCancelledLocked(boolean keyguardGoingAway) {
             continueDeferredCancel();
         }
 

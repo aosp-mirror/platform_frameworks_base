@@ -241,12 +241,6 @@
       "group": "WM_DEBUG_STATES",
       "at": "com\/android\/server\/wm\/Task.java"
     },
-    "-1847087163": {
-      "message": "TRANSIT_TASK_OPEN_BEHIND,  adding %s to mOpeningApps",
-      "level": "DEBUG",
-      "group": "WM_DEBUG_APP_TRANSITIONS",
-      "at": "com\/android\/server\/wm\/ActivityRecord.java"
-    },
     "-1844540996": {
       "message": "  Initial targets: %s",
       "level": "VERBOSE",
@@ -270,6 +264,12 @@
       "level": "WARN",
       "group": "WM_DEBUG_CONFIGURATION",
       "at": "com\/android\/server\/wm\/ActivityTaskManagerService.java"
+    },
+    "-1800899273": {
+      "message": "applyAnimation: anim=%s transit=%s Callers=%s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_APP_TRANSITIONS_ANIM",
+      "at": "com\/android\/server\/wm\/AppTransition.java"
     },
     "-1792633344": {
       "message": "Register task organizer=%s uid=%d",
@@ -913,12 +913,6 @@
       "group": "WM_DEBUG_FOCUS",
       "at": "com\/android\/server\/wm\/WindowState.java"
     },
-    "-1044506655": {
-      "message": "New transit away from wallpaper: %s",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_APP_TRANSITIONS",
-      "at": "com\/android\/server\/wm\/AppTransitionController.java"
-    },
     "-1042574499": {
       "message": "Attempted to add Accessibility overlay window with unknown token %s.  Aborting.",
       "level": "WARN",
@@ -984,12 +978,6 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_CONFIGURATION",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
-    },
-    "-928291778": {
-      "message": "applyAnimation: anim=%s nextAppTransition=%d transit=%s Callers=%s",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_APP_TRANSITIONS_ANIM",
-      "at": "com\/android\/server\/wm\/AppTransition.java"
     },
     "-927199900": {
       "message": "Updating global configuration to: %s",
@@ -1117,12 +1105,6 @@
       "group": "WM_DEBUG_CONFIGURATION",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
     },
-    "-793346159": {
-      "message": "New transit into wallpaper: %s",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_APP_TRANSITIONS",
-      "at": "com\/android\/server\/wm\/AppTransitionController.java"
-    },
     "-784959154": {
       "message": "Attempted to add private presentation window to a non-private display.  Aborting.",
       "level": "WARN",
@@ -1194,6 +1176,12 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_WINDOW_TRANSITIONS",
       "at": "com\/android\/server\/wm\/Transition.java"
+    },
+    "-701167286": {
+      "message": "applyAnimation: transit=%s, enter=%b, wc=%s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_APP_TRANSITIONS_ANIM",
+      "at": "com\/android\/server\/wm\/WindowContainer.java"
     },
     "-694710814": {
       "message": "Pausing rotation during drag",
@@ -1597,6 +1585,12 @@
       "group": "WM_DEBUG_ORIENTATION",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
     },
+    "-240296576": {
+      "message": "handleAppTransitionReady: displayId=%d appTransition={%s} openingApps=[%s] closingApps=[%s] transit=%s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_APP_TRANSITIONS",
+      "at": "com\/android\/server\/wm\/AppTransitionController.java"
+    },
     "-235225312": {
       "message": "Skipping config check for initializing activity: %s",
       "level": "VERBOSE",
@@ -1656,12 +1650,6 @@
       "level": "WARN",
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
-    },
-    "-129722369": {
-      "message": "New transit: %s",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_APP_TRANSITIONS",
-      "at": "com\/android\/server\/wm\/AppTransitionController.java"
     },
     "-118786523": {
       "message": "Resume failed; resetting state to %s: %s",
@@ -3289,6 +3277,12 @@
       "group": "WM_DEBUG_STATES",
       "at": "com\/android\/server\/wm\/RootWindowContainer.java"
     },
+    "1810019902": {
+      "message": "TRANSIT_FLAG_OPEN_BEHIND,  adding %s to mOpeningApps",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_APP_TRANSITIONS",
+      "at": "com\/android\/server\/wm\/ActivityRecord.java"
+    },
     "1822843721": {
       "message": "Aborted starting %s: startingData=%s",
       "level": "VERBOSE",
@@ -3432,12 +3426,6 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_CONFIGURATION",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
-    },
-    "2016061474": {
-      "message": "Prepare app transition: transit=%s %s alwaysKeepCurrent=%b displayId=%d Callers=%s",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_APP_TRANSITIONS",
-      "at": "com\/android\/server\/wm\/AppTransition.java"
     },
     "2018454757": {
       "message": "WS.removeImmediately: %s Already removed...",

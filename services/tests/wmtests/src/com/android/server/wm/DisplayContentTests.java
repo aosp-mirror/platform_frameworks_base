@@ -1186,8 +1186,7 @@ public class DisplayContentTests extends WindowTestsBase {
 
         final ActivityRecord app = mAppWindow.mActivityRecord;
         app.setVisible(false);
-        mDisplayContent.prepareAppTransitionOld(WindowManager.TRANSIT_OLD_ACTIVITY_OPEN,
-                false /* alwaysKeepCurrent */);
+        mDisplayContent.prepareAppTransition(WindowManager.TRANSIT_OPEN);
         mDisplayContent.mOpeningApps.add(app);
         final int newOrientation = getRotatedOrientation(mDisplayContent);
         app.setRequestedOrientation(newOrientation);
@@ -1370,8 +1369,7 @@ public class DisplayContentTests extends WindowTestsBase {
         final ActivityRecord app = new ActivityBuilder(mAtm).setCreateTask(true).build();
         app.setVisible(false);
         app.setState(Task.ActivityState.RESUMED, "test");
-        mDisplayContent.prepareAppTransitionOld(WindowManager.TRANSIT_OLD_ACTIVITY_OPEN,
-                false /* alwaysKeepCurrent */);
+        mDisplayContent.prepareAppTransition(WindowManager.TRANSIT_OPEN);
         mDisplayContent.mOpeningApps.add(app);
         final int newOrientation = getRotatedOrientation(mDisplayContent);
         app.setRequestedOrientation(newOrientation);

@@ -81,6 +81,7 @@ import android.view.SurfaceControl;
 import android.view.SurfaceControl.Builder;
 import android.view.SurfaceSession;
 import android.view.WindowManager;
+import android.view.WindowManager.TransitionOldType;
 import android.view.animation.Animation;
 import android.window.IWindowContainerToken;
 import android.window.WindowContainerToken;
@@ -250,10 +251,9 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     boolean mLaunchTaskBehind;
 
     /**
-     * If we are running an animation, this determines the transition type. Must be one of
-     * {@link AppTransition#TransitionFlags}.
+     * If we are running an animation, this determines the transition type.
      */
-    int mTransit;
+    @TransitionOldType int mTransit;
 
     /**
      * If we are running an animation, this determines the flags during this animation. Must be a
@@ -2399,8 +2399,9 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      *
      * @see #getAnimationAdapter
      */
-    boolean applyAnimation(WindowManager.LayoutParams lp, int transit, boolean enter,
-            boolean isVoiceInteraction, @Nullable ArrayList<WindowContainer> sources) {
+    boolean applyAnimation(WindowManager.LayoutParams lp, @TransitionOldType int transit,
+            boolean enter, boolean isVoiceInteraction,
+            @Nullable ArrayList<WindowContainer> sources) {
         if (mWmService.mDisableTransitionAnimation) {
             ProtoLog.v(WM_DEBUG_APP_TRANSITIONS_ANIM,
                     "applyAnimation: transition animation is disabled or skipped. "
@@ -2415,6 +2416,9 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         try {
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "WC#applyAnimation");
             if (okToAnimate()) {
+                ProtoLog.v(WM_DEBUG_APP_TRANSITIONS_ANIM,
+                        "applyAnimation: transit=%s, enter=%b, wc=%s",
+                        AppTransition.appTransitionOldToString(transit), enter, this);
                 applyAnimationUnchecked(lp, enter, transit, isVoiceInteraction, sources);
             } else {
                 cancelAnimation();
@@ -2437,7 +2441,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      * @See LocalAnimationAdapter
      */
     Pair<AnimationAdapter, AnimationAdapter> getAnimationAdapter(WindowManager.LayoutParams lp,
-            int transit, boolean enter, boolean isVoiceInteraction) {
+            @TransitionOldType int transit, boolean enter, boolean isVoiceInteraction) {
         final Pair<AnimationAdapter, AnimationAdapter> resultAdapters;
         final int appStackClipMode = getDisplayContent().mAppTransition.getAppStackClipMode();
 
@@ -2449,7 +2453,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
 
         final RemoteAnimationController controller =
                 getDisplayContent().mAppTransition.getRemoteAnimationController();
-        final boolean isChanging = AppTransition.isChangeTransit(transit) && enter
+        final boolean isChanging = AppTransition.isChangeTransitOld(transit) && enter
                 && isChangingAppTransition();
 
         // Delaying animation start isn't compatible with remote animations at all.
@@ -2497,7 +2501,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
 
                 resultAdapters = new Pair<>(adapter, null);
                 mNeedsZBoost = a.getZAdjustment() == Animation.ZORDER_TOP
-                        || AppTransition.isClosingTransit(transit);
+                        || AppTransition.isClosingTransitOld(transit);
                 mTransit = transit;
                 mTransitFlags = getDisplayContent().mAppTransition.getTransitFlags();
             } else {
@@ -2508,7 +2512,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     }
 
     protected void applyAnimationUnchecked(WindowManager.LayoutParams lp, boolean enter,
-            int transit, boolean isVoiceInteraction,
+            @TransitionOldType int transit, boolean isVoiceInteraction,
             @Nullable ArrayList<WindowContainer> sources) {
         final Pair<AnimationAdapter, AnimationAdapter> adapters = getAnimationAdapter(lp,
                 transit, enter, isVoiceInteraction);

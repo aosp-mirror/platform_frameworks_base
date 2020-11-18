@@ -73,9 +73,8 @@ import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_ERROR;
 import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
-import static android.view.WindowManager.TRANSIT_OLD_ACTIVITY_OPEN;
-import static android.view.WindowManager.TRANSIT_OLD_TASK_OPEN;
-import static android.view.WindowManager.TRANSIT_OLD_TASK_TO_FRONT;
+import static android.view.WindowManager.TRANSIT_OPEN;
+import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import static android.window.DisplayAreaOrganizer.FEATURE_ROOT;
 import static android.window.DisplayAreaOrganizer.FEATURE_WINDOWED_MAGNIFICATION;
 
@@ -4547,22 +4546,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         }
     }
 
-    void prepareAppTransitionOld(@WindowManager.TransitionOldType int transit,
-            boolean alwaysKeepCurrent) {
-        prepareAppTransitionOld(transit, alwaysKeepCurrent, 0 /* flags */,
-                false /* forceOverride */);
-    }
-
-    void prepareAppTransitionOld(@WindowManager.TransitionOldType int transit,
-            boolean alwaysKeepCurrent, @WindowManager.TransitionFlags int flags,
-            boolean forceOverride) {
-        final boolean prepared = mAppTransition.prepareAppTransitionOld(
-                transit, alwaysKeepCurrent, flags, forceOverride);
-        if (prepared && okToAnimate()) {
-            mSkipAppTransitionAnimation = false;
-        }
-    }
-
     void prepareAppTransition(@WindowManager.TransitionType int transit) {
         prepareAppTransition(transit, 0 /* flags */);
     }
@@ -4641,10 +4624,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
     /** Check if pending app transition is for activity / task launch. */
     boolean isNextTransitionForward() {
-        final int transit = mAppTransition.getAppTransitionOld();
-        return transit == TRANSIT_OLD_ACTIVITY_OPEN
-                || transit == TRANSIT_OLD_TASK_OPEN
-                || transit == TRANSIT_OLD_TASK_TO_FRONT;
+        return mAppTransition.containsTransitRequest(TRANSIT_OPEN)
+                || mAppTransition.containsTransitRequest(TRANSIT_TO_FRONT);
     }
 
     /**
@@ -5607,7 +5588,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         }
 
         @Override
-        public void onAppTransitionCancelledLocked(int transit) {
+        public void onAppTransitionCancelledLocked(boolean keyguardGoingAway) {
             continueUpdateOrientationForDiffOrienLaunchingApp();
         }
 

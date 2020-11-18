@@ -601,7 +601,7 @@ public class DisplayPolicy {
             }
 
             @Override
-            public int onAppTransitionStartingLocked(int transit, long duration,
+            public int onAppTransitionStartingLocked(boolean keyguardGoingAway, long duration,
                     long statusBarAnimationStartTime, long statusBarAnimationDuration) {
                 mHandler.post(() -> {
                     StatusBarManagerInternal statusBar = getStatusBarManagerInternal();
@@ -614,7 +614,7 @@ public class DisplayPolicy {
             }
 
             @Override
-            public void onAppTransitionCancelledLocked(int transit) {
+            public void onAppTransitionCancelledLocked(boolean keyguardGoingAway) {
                 mHandler.post(mAppTransitionCancelled);
             }
 

@@ -79,7 +79,6 @@ import static android.view.WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 import static android.view.WindowManager.REMOVE_CONTENT_MODE_UNDEFINED;
 import static android.view.WindowManager.TRANSIT_NONE;
-import static android.view.WindowManager.TRANSIT_OLD_NONE;
 import static android.view.WindowManager.TRANSIT_RELAUNCH;
 import static android.view.WindowManagerGlobal.ADD_OKAY;
 import static android.view.WindowManagerGlobal.ADD_TOO_MANY_TOKENS;
@@ -421,16 +420,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
     static boolean sEnableTripleBuffering = !SystemProperties.getBoolean(
             DISABLE_TRIPLE_BUFFERING_PROPERTY, false);
-
-    /**
-     * Use new app transit framework.
-     */
-    private static final String USE_NEW_APP_TRANSIT =
-            "persist.wm.use_new_app_transit";
-    /**
-     * @see #USE_NEW_APP_TRANSIT
-     */
-    static boolean sUseNewAppTransit = SystemProperties.getBoolean(USE_NEW_APP_TRANSIT, false);
 
     /**
      * Allows a fullscreen windowing mode activity to launch in its desired orientation directly
@@ -1111,7 +1100,7 @@ public class WindowManagerService extends IWindowManager.Stub
             = new WindowManagerInternal.AppTransitionListener() {
 
         @Override
-        public void onAppTransitionCancelledLocked(int transit) {
+        public void onAppTransitionCancelledLocked(boolean keyguardGoingAway) {
         }
 
         @Override
@@ -1923,8 +1912,6 @@ public class WindowManagerService extends IWindowManager.Stub
         // animation and piggy-back on existing transition animation infrastructure.
         final DisplayContent dc = activity.getDisplayContent();
         dc.mOpeningApps.add(activity);
-        dc.prepareAppTransitionOld(WindowManager.TRANSIT_OLD_ACTIVITY_RELAUNCH,
-                ALWAYS_KEEP_CURRENT, 0 /* flags */, false /* forceOverride */);
         dc.prepareAppTransition(TRANSIT_RELAUNCH);
         dc.mAppTransition.overridePendingAppTransitionClipReveal(frame.left, frame.top,
                 frame.width(), frame.height());
@@ -1940,8 +1927,6 @@ public class WindowManagerService extends IWindowManager.Stub
         final DisplayContent dc = activity.getDisplayContent();
         if (mDisplayFrozen && !dc.mOpeningApps.contains(activity) && activity.isRelaunching()) {
             dc.mOpeningApps.add(activity);
-            dc.prepareAppTransitionOld(TRANSIT_OLD_NONE, !ALWAYS_KEEP_CURRENT, 0 /* flags */,
-                    false /* forceOverride */);
             dc.prepareAppTransition(TRANSIT_NONE);
             dc.executeAppTransition();
         }
@@ -2827,9 +2812,6 @@ public class WindowManagerService extends IWindowManager.Stub
         if (!checkCallingPermission(MANAGE_APP_TOKENS, "prepareAppTransition()")) {
             throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
         }
-        getDefaultDisplayContentLocked().prepareAppTransitionOld(TRANSIT_OLD_NONE,
-                false /* alwaysKeepCurrent */,
-                0 /* flags */, false /* forceOverride */);
         getDefaultDisplayContentLocked().prepareAppTransition(TRANSIT_NONE);
     }
 
