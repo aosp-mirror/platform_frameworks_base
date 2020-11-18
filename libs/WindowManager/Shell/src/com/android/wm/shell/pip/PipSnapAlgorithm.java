@@ -22,6 +22,8 @@ import static com.android.wm.shell.pip.PipBoundsState.STASH_TYPE_RIGHT;
 
 import android.graphics.Rect;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 /**
  * Calculates the snap targets and the snap position for the PIP given a position and a velocity.
  * All bounds are relative to the display top/left.
@@ -119,25 +121,11 @@ public class PipSnapAlgorithm {
     }
 
     /**
-     * Adjusts {@param movementBoundsOut} so that it is the movement bounds for the given
-     * {@param stackBounds}.
-     */
-    public void getMovementBounds(Rect stackBounds, Rect insetBounds, Rect movementBoundsOut,
-            int bottomOffset) {
-        // Adjust the right/bottom to ensure the stack bounds never goes offscreen
-        movementBoundsOut.set(insetBounds);
-        movementBoundsOut.right = Math.max(insetBounds.left, insetBounds.right -
-                stackBounds.width());
-        movementBoundsOut.bottom = Math.max(insetBounds.top, insetBounds.bottom -
-                stackBounds.height());
-        movementBoundsOut.bottom -= bottomOffset;
-    }
-
-    /**
      * Snaps the {@param stackBounds} to the closest edge of the {@param movementBounds} and writes
      * the new bounds out to {@param boundsOut}.
      */
-    public void snapRectToClosestEdge(Rect stackBounds, Rect movementBounds, Rect boundsOut,
+    @VisibleForTesting
+    void snapRectToClosestEdge(Rect stackBounds, Rect movementBounds, Rect boundsOut,
             @PipBoundsState.StashType int stashType) {
         int leftEdge = stackBounds.left;
         if (stashType == STASH_TYPE_LEFT) {

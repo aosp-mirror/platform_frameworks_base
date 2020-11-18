@@ -115,7 +115,8 @@ public class PipTouchHandlerTest extends ShellTestCase {
     @Test
     public void updateMovementBounds_minBounds() {
         Rect expectedMinMovementBounds = new Rect();
-        mPipSnapAlgorithm.getMovementBounds(mMinBounds, mInsetBounds, expectedMinMovementBounds, 0);
+        mPipBoundsAlgorithm.getMovementBounds(mMinBounds, mInsetBounds, expectedMinMovementBounds,
+                0);
 
         mPipTouchHandler.onMovementBoundsChanged(mInsetBounds, mMinBounds, mCurBounds,
                 mFromImeAdjustment, mFromShelfAdjustment, mDisplayRotation);
@@ -134,7 +135,8 @@ public class PipTouchHandlerTest extends ShellTestCase {
                         R.dimen.pip_expanded_shortest_edge_size), displaySize.x, displaySize.y);
         Rect maxBounds = new Rect(0, 0, maxSize.getWidth(), maxSize.getHeight());
         Rect expectedMaxMovementBounds = new Rect();
-        mPipSnapAlgorithm.getMovementBounds(maxBounds, mInsetBounds, expectedMaxMovementBounds, 0);
+        mPipBoundsAlgorithm.getMovementBounds(maxBounds, mInsetBounds, expectedMaxMovementBounds,
+                0);
 
         mPipTouchHandler.onMovementBoundsChanged(mInsetBounds, mMinBounds, mCurBounds,
                 mFromImeAdjustment, mFromShelfAdjustment, mDisplayRotation);

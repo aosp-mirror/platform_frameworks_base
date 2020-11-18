@@ -279,10 +279,25 @@ public class PipBoundsAlgorithm {
         getInsetBounds(movementBounds);
 
         // Apply the movement bounds adjustments based on the current state.
-        mSnapAlgorithm.getMovementBounds(stackBounds, movementBounds, movementBounds,
+        getMovementBounds(stackBounds, movementBounds, movementBounds,
                 (adjustForIme && mPipBoundsState.isImeShowing())
                         ? mPipBoundsState.getImeHeight() : 0);
+
         return movementBounds;
+    }
+
+    /**
+     * Adjusts movementBoundsOut so that it is the movement bounds for the given stackBounds.
+     */
+    public void getMovementBounds(Rect stackBounds, Rect insetBounds, Rect movementBoundsOut,
+            int bottomOffset) {
+        // Adjust the right/bottom to ensure the stack bounds never goes offscreen
+        movementBoundsOut.set(insetBounds);
+        movementBoundsOut.right = Math.max(insetBounds.left, insetBounds.right
+                - stackBounds.width());
+        movementBoundsOut.bottom = Math.max(insetBounds.top, insetBounds.bottom
+                - stackBounds.height());
+        movementBoundsOut.bottom -= bottomOffset;
     }
 
     /**
