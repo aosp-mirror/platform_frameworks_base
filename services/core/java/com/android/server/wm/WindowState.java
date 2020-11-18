@@ -176,7 +176,6 @@ import static com.android.server.wm.WindowStateProto.REQUESTED_WIDTH;
 import static com.android.server.wm.WindowStateProto.STACK_ID;
 import static com.android.server.wm.WindowStateProto.SURFACE_INSETS;
 import static com.android.server.wm.WindowStateProto.SURFACE_POSITION;
-import static com.android.server.wm.WindowStateProto.SYSTEM_UI_VISIBILITY;
 import static com.android.server.wm.WindowStateProto.VIEW_VISIBILITY;
 import static com.android.server.wm.WindowStateProto.WINDOW_CONTAINER;
 import static com.android.server.wm.WindowStateProto.WINDOW_FRAMES;
@@ -231,6 +230,7 @@ import android.view.Surface.Rotation;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 import android.view.View;
+import android.view.ViewDebug;
 import android.view.ViewTreeObserver;
 import android.view.WindowInfo;
 import android.view.WindowInsets.Type.InsetsType;
@@ -307,7 +307,14 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     final boolean mIsWallpaper;
     private final boolean mIsFloatingLayer;
     int mViewVisibility;
-    int mSystemUiVisibility;
+
+    /**
+     * Flags to disable system UI functions. This can only be set by the one which has the
+     * status bar permission.
+     *
+     * @see View.SystemUiVisibility
+     */
+    int mDisableFlags;
 
     /**
      * The visibility flag of the window based on policy like {@link WindowManagerPolicy}.
@@ -1284,9 +1291,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return mAttrs;
     }
 
-    /** Retrieves the current system UI visibility flags associated with this window. */
-    int getSystemUiVisibility() {
-        return mSystemUiVisibility;
+    /** Retrieves the flags used to disable system UI functions. */
+    int getDisableFlags() {
+        return mDisableFlags;
     }
 
     /** Gets the layer at which this window's surface will be Z-ordered. */
@@ -3889,7 +3896,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         proto.write(REQUESTED_WIDTH, mRequestedWidth);
         proto.write(REQUESTED_HEIGHT, mRequestedHeight);
         proto.write(VIEW_VISIBILITY, mViewVisibility);
-        proto.write(SYSTEM_UI_VISIBILITY, mSystemUiVisibility);
         proto.write(HAS_SURFACE, mHasSurface);
         proto.write(IS_READY_FOR_DISPLAY, isReadyForDisplay());
         proto.write(REMOVE_ON_EXIT, mRemoveOnExit);
@@ -3965,8 +3971,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             pw.println(prefix + "mViewVisibility=0x" + Integer.toHexString(mViewVisibility)
                     + " mHaveFrame=" + mHaveFrame
                     + " mObscured=" + mObscured);
-            pw.println(prefix
-                    + " mSystemUiVisibility=0x" + Integer.toHexString(mSystemUiVisibility));
+            if (mDisableFlags != 0) {
+                pw.println(prefix + "mDisableFlags=" + ViewDebug.flagsToString(
+                        View.class, "mSystemUiVisibility", mDisableFlags));
+            }
         }
         if (!isVisibleByPolicy() || !mLegacyPolicyVisibilityAfterAnim || !mAppOpVisibility
                 || isParentWindowHidden() || mPermanentlyHidden || mForceHideNonSystemOverlayWindow
