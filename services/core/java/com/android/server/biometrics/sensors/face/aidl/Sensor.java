@@ -207,7 +207,7 @@ public class Sensor implements IBinder.DeathRecipient {
         }
 
         @Override
-        public void onChallengeGenerated(int sensorId, int userId, long challenge) {
+        public void onChallengeGenerated(long challenge) {
             mHandler.post(() -> {
                 final ClientMonitor<?> client = mScheduler.getCurrentClient();
                 if (!(client instanceof FaceGenerateChallengeClient)) {
@@ -223,7 +223,7 @@ public class Sensor implements IBinder.DeathRecipient {
         }
 
         @Override
-        public void onChallengeRevoked(int sensorId, int userId, long challenge) {
+        public void onChallengeRevoked(long challenge) {
             mHandler.post(() -> {
                 final ClientMonitor<?> client = mScheduler.getCurrentClient();
                 if (!(client instanceof FaceRevokeChallengeClient)) {
