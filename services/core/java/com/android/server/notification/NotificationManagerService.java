@@ -872,7 +872,7 @@ public class NotificationManagerService extends SystemService {
         }
         out.startDocument(null, true);
         out.startTag(null, TAG_NOTIFICATION_POLICY);
-        out.attribute(null, ATTR_VERSION, Integer.toString(DB_VERSION));
+        out.attributeInt(null, ATTR_VERSION, DB_VERSION);
         mZenModeHelper.writeXml(out, forBackup, null, userId);
         mPreferencesHelper.writeXml(out, forBackup, userId);
         mListeners.writeXml(out, forBackup, userId);
@@ -9118,7 +9118,7 @@ public class NotificationManagerService extends SystemService {
         @Override
         protected void readExtraAttributes(String tag, TypedXmlPullParser parser, int userId)
                 throws IOException {
-            boolean userSet = XmlUtils.readBooleanAttribute(parser, ATT_USER_SET, false);
+            boolean userSet = parser.getAttributeBoolean(null, ATT_USER_SET, false);
             setUserSet(userId, userSet);
         }
 
@@ -10120,8 +10120,8 @@ public class NotificationManagerService extends SystemService {
 
     private void writeSecureNotificationsPolicy(TypedXmlSerializer out) throws IOException {
         out.startTag(null, LOCKSCREEN_ALLOW_SECURE_NOTIFICATIONS_TAG);
-        out.attribute(null, LOCKSCREEN_ALLOW_SECURE_NOTIFICATIONS_VALUE,
-                Boolean.toString(mLockScreenAllowSecureNotifications));
+        out.attributeBoolean(null, LOCKSCREEN_ALLOW_SECURE_NOTIFICATIONS_VALUE,
+                mLockScreenAllowSecureNotifications);
         out.endTag(null, LOCKSCREEN_ALLOW_SECURE_NOTIFICATIONS_TAG);
     }
 

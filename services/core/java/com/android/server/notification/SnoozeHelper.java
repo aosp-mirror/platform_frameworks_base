@@ -629,11 +629,11 @@ public class SnoozeHelper {
                 try {
                     final String key = parser.getAttributeValue(null, XML_SNOOZED_NOTIFICATION_KEY);
                     final String pkg = parser.getAttributeValue(null, XML_SNOOZED_NOTIFICATION_PKG);
-                    final int userId = XmlUtils.readIntAttribute(
-                            parser, XML_SNOOZED_NOTIFICATION_USER_ID, UserHandle.USER_ALL);
+                    final int userId = parser.getAttributeInt(
+                            null, XML_SNOOZED_NOTIFICATION_USER_ID, UserHandle.USER_ALL);
                     if (tag.equals(XML_SNOOZED_NOTIFICATION)) {
-                        final Long time = XmlUtils.readLongAttribute(
-                                parser, XML_SNOOZED_NOTIFICATION_TIME, 0);
+                        final Long time = parser.getAttributeLong(
+                                null, XML_SNOOZED_NOTIFICATION_TIME, 0);
                         if (time > currentTime) { //only read new stuff
                             synchronized (mLock) {
                                 storeRecordLocked(

@@ -668,22 +668,22 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
                     if (TAG_URI_GRANT.equals(tag)) {
                         final int sourceUserId;
                         final int targetUserId;
-                        final int userHandle = readIntAttribute(in,
-                                ATTR_USER_HANDLE, UserHandle.USER_NULL);
+                        final int userHandle = in.getAttributeInt(null, ATTR_USER_HANDLE,
+                                UserHandle.USER_NULL);
                         if (userHandle != UserHandle.USER_NULL) {
                             // For backwards compatibility.
                             sourceUserId = userHandle;
                             targetUserId = userHandle;
                         } else {
-                            sourceUserId = readIntAttribute(in, ATTR_SOURCE_USER_ID);
-                            targetUserId = readIntAttribute(in, ATTR_TARGET_USER_ID);
+                            sourceUserId = in.getAttributeInt(null, ATTR_SOURCE_USER_ID);
+                            targetUserId = in.getAttributeInt(null, ATTR_TARGET_USER_ID);
                         }
                         final String sourcePkg = in.getAttributeValue(null, ATTR_SOURCE_PKG);
                         final String targetPkg = in.getAttributeValue(null, ATTR_TARGET_PKG);
                         final Uri uri = Uri.parse(in.getAttributeValue(null, ATTR_URI));
-                        final boolean prefix = readBooleanAttribute(in, ATTR_PREFIX);
-                        final int modeFlags = readIntAttribute(in, ATTR_MODE_FLAGS);
-                        final long createdTime = readLongAttribute(in, ATTR_CREATED_TIME, now);
+                        final boolean prefix = in.getAttributeBoolean(null, ATTR_PREFIX, false);
+                        final int modeFlags = in.getAttributeInt(null, ATTR_MODE_FLAGS);
+                        final long createdTime = in.getAttributeLong(null, ATTR_CREATED_TIME, now);
 
                         // Validity check that provider still belongs to source package
                         // Both direct boot aware and unaware packages are fine as we
@@ -1319,14 +1319,14 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
             out.startTag(null, TAG_URI_GRANTS);
             for (UriPermission.Snapshot perm : persist) {
                 out.startTag(null, TAG_URI_GRANT);
-                writeIntAttribute(out, ATTR_SOURCE_USER_ID, perm.uri.sourceUserId);
-                writeIntAttribute(out, ATTR_TARGET_USER_ID, perm.targetUserId);
+                out.attributeInt(null, ATTR_SOURCE_USER_ID, perm.uri.sourceUserId);
+                out.attributeInt(null, ATTR_TARGET_USER_ID, perm.targetUserId);
                 out.attribute(null, ATTR_SOURCE_PKG, perm.sourcePkg);
                 out.attribute(null, ATTR_TARGET_PKG, perm.targetPkg);
                 out.attribute(null, ATTR_URI, String.valueOf(perm.uri.uri));
                 writeBooleanAttribute(out, ATTR_PREFIX, perm.uri.prefix);
-                writeIntAttribute(out, ATTR_MODE_FLAGS, perm.persistedModeFlags);
-                writeLongAttribute(out, ATTR_CREATED_TIME, perm.persistedCreateTime);
+                out.attributeInt(null, ATTR_MODE_FLAGS, perm.persistedModeFlags);
+                out.attributeLong(null, ATTR_CREATED_TIME, perm.persistedCreateTime);
                 out.endTag(null, TAG_URI_GRANT);
             }
             out.endTag(null, TAG_URI_GRANTS);

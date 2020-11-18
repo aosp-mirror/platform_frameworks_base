@@ -555,22 +555,22 @@ public class BrightnessTracker {
             if (userSerialNo != -1 && toWrite[i].timeStamp > timeCutOff) {
                 mEvents.append(toWrite[i]);
                 out.startTag(null, TAG_EVENT);
-                out.attribute(null, ATTR_NITS, Float.toString(toWrite[i].brightness));
-                out.attribute(null, ATTR_TIMESTAMP, Long.toString(toWrite[i].timeStamp));
+                out.attributeFloat(null, ATTR_NITS, toWrite[i].brightness);
+                out.attributeLong(null, ATTR_TIMESTAMP, toWrite[i].timeStamp);
                 out.attribute(null, ATTR_PACKAGE_NAME, toWrite[i].packageName);
-                out.attribute(null, ATTR_USER, Integer.toString(userSerialNo));
-                out.attribute(null, ATTR_BATTERY_LEVEL, Float.toString(toWrite[i].batteryLevel));
-                out.attribute(null, ATTR_NIGHT_MODE, Boolean.toString(toWrite[i].nightMode));
-                out.attribute(null, ATTR_COLOR_TEMPERATURE, Integer.toString(
-                        toWrite[i].colorTemperature));
-                out.attribute(null, ATTR_LAST_NITS,
-                        Float.toString(toWrite[i].lastBrightness));
-                out.attribute(null, ATTR_DEFAULT_CONFIG,
-                        Boolean.toString(toWrite[i].isDefaultBrightnessConfig));
-                out.attribute(null, ATTR_POWER_SAVE,
-                        Float.toString(toWrite[i].powerBrightnessFactor));
-                out.attribute(null, ATTR_USER_POINT,
-                        Boolean.toString(toWrite[i].isUserSetBrightness));
+                out.attributeInt(null, ATTR_USER, userSerialNo);
+                out.attributeFloat(null, ATTR_BATTERY_LEVEL, toWrite[i].batteryLevel);
+                out.attributeBoolean(null, ATTR_NIGHT_MODE, toWrite[i].nightMode);
+                out.attributeInt(null, ATTR_COLOR_TEMPERATURE,
+                        toWrite[i].colorTemperature);
+                out.attributeFloat(null, ATTR_LAST_NITS,
+                        toWrite[i].lastBrightness);
+                out.attributeBoolean(null, ATTR_DEFAULT_CONFIG,
+                        toWrite[i].isDefaultBrightnessConfig);
+                out.attributeFloat(null, ATTR_POWER_SAVE,
+                        toWrite[i].powerBrightnessFactor);
+                out.attributeBoolean(null, ATTR_USER_POINT,
+                        toWrite[i].isUserSetBrightness);
                 StringBuilder luxValues = new StringBuilder();
                 StringBuilder luxTimestamps = new StringBuilder();
                 for (int j = 0; j < toWrite[i].luxValues.length; ++j) {
@@ -585,8 +585,8 @@ public class BrightnessTracker {
                 out.attribute(null, ATTR_LUX_TIMESTAMPS, luxTimestamps.toString());
                 if (toWrite[i].colorValueBuckets != null
                         && toWrite[i].colorValueBuckets.length > 0) {
-                    out.attribute(null, ATTR_COLOR_SAMPLE_DURATION,
-                            Long.toString(toWrite[i].colorSampleDuration));
+                    out.attributeLong(null, ATTR_COLOR_SAMPLE_DURATION,
+                            toWrite[i].colorSampleDuration);
                     StringBuilder buckets = new StringBuilder();
                     for (int j = 0; j < toWrite[i].colorValueBuckets.length; ++j) {
                         if (j > 0) {

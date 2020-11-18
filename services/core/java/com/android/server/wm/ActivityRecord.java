@@ -7467,8 +7467,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     void saveToXml(TypedXmlSerializer out) throws IOException, XmlPullParserException {
-        out.attribute(null, ATTR_ID, String.valueOf(createTime));
-        out.attribute(null, ATTR_LAUNCHEDFROMUID, String.valueOf(launchedFromUid));
+        out.attributeLong(null, ATTR_ID, createTime);
+        out.attributeInt(null, ATTR_LAUNCHEDFROMUID, launchedFromUid);
         if (launchedFromPackage != null) {
             out.attribute(null, ATTR_LAUNCHEDFROMPACKAGE, launchedFromPackage);
         }
@@ -7478,8 +7478,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (resolvedType != null) {
             out.attribute(null, ATTR_RESOLVEDTYPE, resolvedType);
         }
-        out.attribute(null, ATTR_COMPONENTSPECIFIED, String.valueOf(componentSpecified));
-        out.attribute(null, ATTR_USERID, String.valueOf(mUserId));
+        out.attributeBoolean(null, ATTR_COMPONENTSPECIFIED, componentSpecified);
+        out.attributeInt(null, ATTR_USERID, mUserId);
 
         if (taskDescription != null) {
             taskDescription.saveToXml(out);

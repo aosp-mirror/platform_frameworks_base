@@ -324,7 +324,7 @@ public class CacheQuotaStrategy implements RemoteCallback.OnResultListener {
         out.startDocument(null, true);
         out.startTag(null, CACHE_INFO_TAG);
         int requestSize = requests.size();
-        out.attribute(null, ATTR_PREVIOUS_BYTES, Long.toString(bytesWhenCalculated));
+        out.attributeLong(null, ATTR_PREVIOUS_BYTES, bytesWhenCalculated);
 
         for (int i = 0; i < requestSize; i++) {
             CacheQuotaHint request = requests.get(i);
@@ -333,8 +333,8 @@ public class CacheQuotaStrategy implements RemoteCallback.OnResultListener {
             if (uuid != null) {
                 out.attribute(null, ATTR_UUID, request.getVolumeUuid());
             }
-            out.attribute(null, ATTR_UID, Integer.toString(request.getUid()));
-            out.attribute(null, ATTR_QUOTA_IN_BYTES, Long.toString(request.getQuota()));
+            out.attributeInt(null, ATTR_UID, request.getUid());
+            out.attributeLong(null, ATTR_QUOTA_IN_BYTES, request.getQuota());
             out.endTag(null, TAG_QUOTA);
         }
         out.endTag(null, CACHE_INFO_TAG);
@@ -364,8 +364,7 @@ public class CacheQuotaStrategy implements RemoteCallback.OnResultListener {
         final List<CacheQuotaHint> quotas = new ArrayList<>();
         long previousBytes;
         try {
-            previousBytes = Long.parseLong(parser.getAttributeValue(
-                    null, ATTR_PREVIOUS_BYTES));
+            previousBytes = parser.getAttributeLong(null, ATTR_PREVIOUS_BYTES);
         } catch (NumberFormatException e) {
             throw new IllegalStateException(
                     "Previous bytes formatted incorrectly; aborting quota read.");
@@ -392,8 +391,8 @@ public class CacheQuotaStrategy implements RemoteCallback.OnResultListener {
     static CacheQuotaHint getRequestFromXml(TypedXmlPullParser parser) {
         try {
             String uuid = parser.getAttributeValue(null, ATTR_UUID);
-            int uid = Integer.parseInt(parser.getAttributeValue(null, ATTR_UID));
-            long bytes = Long.parseLong(parser.getAttributeValue(null, ATTR_QUOTA_IN_BYTES));
+            int uid = parser.getAttributeInt(null, ATTR_UID);
+            long bytes = parser.getAttributeLong(null, ATTR_QUOTA_IN_BYTES);
             return new CacheQuotaHint.Builder()
                     .setVolumeUuid(uuid).setUid(uid).setQuota(bytes).build();
         } catch (NumberFormatException e) {

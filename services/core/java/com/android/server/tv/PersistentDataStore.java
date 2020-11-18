@@ -285,7 +285,7 @@ final class PersistentDataStore {
         }
         serializer.endTag(null, TAG_BLOCKED_RATINGS);
         serializer.startTag(null, TAG_PARENTAL_CONTROLS);
-        serializer.attribute(null, ATTR_ENABLED, Boolean.toString(mParentalControlsEnabled));
+        serializer.attributeBoolean(null, ATTR_ENABLED, mParentalControlsEnabled);
         serializer.endTag(null, TAG_PARENTAL_CONTROLS);
         serializer.endTag(null, TAG_TV_INPUT_MANAGER_STATE);
         serializer.endDocument();

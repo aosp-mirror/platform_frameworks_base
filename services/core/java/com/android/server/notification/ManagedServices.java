@@ -459,7 +459,7 @@ abstract public class ManagedServices {
     public void writeXml(TypedXmlSerializer out, boolean forBackup, int userId) throws IOException {
         out.startTag(null, getConfig().xmlTag);
 
-        out.attribute(null, ATT_VERSION, String.valueOf(DB_VERSION));
+        out.attributeInt(null, ATT_VERSION, DB_VERSION);
 
         writeDefaults(out);
 
@@ -487,8 +487,8 @@ abstract public class ManagedServices {
                                     : String.join(ENABLED_SERVICES_SEPARATOR, approved);
                             out.startTag(null, TAG_MANAGED_SERVICES);
                             out.attribute(null, ATT_APPROVED_LIST, allowedItems);
-                            out.attribute(null, ATT_USER_ID, Integer.toString(approvedUserId));
-                            out.attribute(null, ATT_IS_PRIMARY, Boolean.toString(isPrimary));
+                            out.attributeInt(null, ATT_USER_ID, approvedUserId);
+                            out.attributeBoolean(null, ATT_IS_PRIMARY, isPrimary);
                             if (userSet != null) {
                                 String userSetItems =
                                         String.join(ENABLED_SERVICES_SEPARATOR, userSet);
@@ -579,9 +579,9 @@ abstract public class ManagedServices {
                     final String approved = XmlUtils.readStringAttribute(parser, ATT_APPROVED_LIST);
                     // Ignore parser's user id for restore.
                     final int resolvedUserId = forRestore
-                            ? userId : XmlUtils.readIntAttribute(parser, ATT_USER_ID, 0);
+                            ? userId : parser.getAttributeInt(null, ATT_USER_ID, 0);
                     final boolean isPrimary =
-                            XmlUtils.readBooleanAttribute(parser, ATT_IS_PRIMARY, true);
+                            parser.getAttributeBoolean(null, ATT_IS_PRIMARY, true);
                     final String userSet = XmlUtils.readStringAttribute(parser, ATT_USER_SET);
                     readExtraAttributes(tag, parser, resolvedUserId);
                     if (allowedManagedServicePackages == null || allowedManagedServicePackages.test(

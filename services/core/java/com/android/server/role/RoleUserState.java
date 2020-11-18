@@ -423,7 +423,7 @@ public class RoleUserState {
 
     private void parseRolesLocked(@NonNull TypedXmlPullParser parser) throws IOException,
             XmlPullParserException {
-        mVersion = Integer.parseInt(parser.getAttributeValue(null, ATTRIBUTE_VERSION));
+        mVersion = parser.getAttributeInt(null, ATTRIBUTE_VERSION);
         mPackagesHash = parser.getAttributeValue(null, ATTRIBUTE_PACKAGES_HASH);
         mRoles.clear();
 

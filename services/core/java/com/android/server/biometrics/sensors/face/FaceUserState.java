@@ -97,9 +97,9 @@ public class FaceUserState extends BiometricUserState<Face> {
             for (int i = 0; i < count; i++) {
                 Face f = faces.get(i);
                 serializer.startTag(null, TAG_FACE);
-                serializer.attribute(null, ATTR_FACE_ID, Integer.toString(f.getBiometricId()));
+                serializer.attributeInt(null, ATTR_FACE_ID, f.getBiometricId());
                 serializer.attribute(null, ATTR_NAME, f.getName().toString());
-                serializer.attribute(null, ATTR_DEVICE_ID, Long.toString(f.getDeviceId()));
+                serializer.attributeLong(null, ATTR_DEVICE_ID, f.getDeviceId());
                 serializer.endTag(null, TAG_FACE);
             }
 

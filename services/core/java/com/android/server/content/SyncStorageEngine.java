@@ -1824,7 +1824,7 @@ public class SyncStorageEngine {
         AuthorityInfo authority = null;
         int id = -1;
         try {
-            id = Integer.parseInt(parser.getAttributeValue(null, "id"));
+            id = parser.getAttributeInt(null, "id");
         } catch (NumberFormatException e) {
             Slog.e(TAG, "error parsing the id of the authority", e);
         } catch (NullPointerException e) {
@@ -1994,9 +1994,9 @@ public class SyncStorageEngine {
             out.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
 
             out.startTag(null, "accounts");
-            out.attribute(null, "version", Integer.toString(ACCOUNTS_VERSION));
-            out.attribute(null, XML_ATTR_NEXT_AUTHORITY_ID, Integer.toString(mNextAuthorityId));
-            out.attribute(null, XML_ATTR_SYNC_RANDOM_OFFSET, Integer.toString(mSyncRandomOffset));
+            out.attributeInt(null, "version", ACCOUNTS_VERSION);
+            out.attributeInt(null, XML_ATTR_NEXT_AUTHORITY_ID, mNextAuthorityId);
+            out.attributeInt(null, XML_ATTR_SYNC_RANDOM_OFFSET, mSyncRandomOffset);
 
             // Write the Sync Automatically flags for each user
             final int M = mMasterSyncAutomatically.size();
@@ -2004,8 +2004,8 @@ public class SyncStorageEngine {
                 int userId = mMasterSyncAutomatically.keyAt(m);
                 Boolean listen = mMasterSyncAutomatically.valueAt(m);
                 out.startTag(null, XML_TAG_LISTEN_FOR_TICKLES);
-                out.attribute(null, XML_ATTR_USER, Integer.toString(userId));
-                out.attribute(null, XML_ATTR_ENABLED, Boolean.toString(listen));
+                out.attributeInt(null, XML_ATTR_USER, userId);
+                out.attributeBoolean(null, XML_ATTR_ENABLED, listen);
                 out.endTag(null, XML_TAG_LISTEN_FOR_TICKLES);
             }
 
@@ -2014,13 +2014,13 @@ public class SyncStorageEngine {
                 AuthorityInfo authority = mAuthorities.valueAt(i);
                 EndPoint info = authority.target;
                 out.startTag(null, "authority");
-                out.attribute(null, "id", Integer.toString(authority.ident));
-                out.attribute(null, XML_ATTR_USER, Integer.toString(info.userId));
-                out.attribute(null, XML_ATTR_ENABLED, Boolean.toString(authority.enabled));
+                out.attributeInt(null, "id", authority.ident);
+                out.attributeInt(null, XML_ATTR_USER, info.userId);
+                out.attributeBoolean(null, XML_ATTR_ENABLED, authority.enabled);
                 out.attribute(null, "account", info.account.name);
                 out.attribute(null, "type", info.account.type);
                 out.attribute(null, "authority", info.provider);
-                out.attribute(null, "syncable", Integer.toString(authority.syncable));
+                out.attributeInt(null, "syncable", authority.syncable);
                 out.endTag(null, "authority");
             }
             out.endTag(null, "accounts");

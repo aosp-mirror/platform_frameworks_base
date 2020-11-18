@@ -1043,7 +1043,7 @@ public class PackageWatchdog {
                 TypedXmlSerializer out = Xml.resolveSerializer(stream);
                 out.startDocument(null, true);
                 out.startTag(null, TAG_PACKAGE_WATCHDOG);
-                out.attribute(null, ATTR_VERSION, Integer.toString(DB_VERSION));
+                out.attributeInt(null, ATTR_VERSION, DB_VERSION);
                 for (int oIndex = 0; oIndex < mAllObservers.size(); oIndex++) {
                     mAllObservers.valueAt(oIndex).writeLocked(out);
                 }
@@ -1240,14 +1240,14 @@ public class PackageWatchdog {
                 while (XmlUtils.nextElementWithin(parser, innerDepth)) {
                     if (TAG_PACKAGE.equals(parser.getName())) {
                         try {
-                            String packageName = parser.getAttributeValue(null, ATTR_NAME);
-                            long duration = Long.parseLong(
-                                    parser.getAttributeValue(null, ATTR_DURATION));
-                            long healthCheckDuration = Long.parseLong(
-                                    parser.getAttributeValue(null,
-                                            ATTR_EXPLICIT_HEALTH_CHECK_DURATION));
-                            boolean hasPassedHealthCheck = Boolean.parseBoolean(
-                                    parser.getAttributeValue(null, ATTR_PASSED_HEALTH_CHECK));
+                            String packageName = parser.getAttributeValue(
+                                    null, ATTR_NAME);
+                            long duration = parser.getAttributeLong(
+                                    null, ATTR_DURATION);
+                            long healthCheckDuration = parser.getAttributeLong(
+                                    null, ATTR_EXPLICIT_HEALTH_CHECK_DURATION);
+                            boolean hasPassedHealthCheck = parser.getAttributeBoolean(
+                                    null, ATTR_PASSED_HEALTH_CHECK, false);
                             MonitoredPackage pkg = watchdog.newMonitoredPackage(packageName,
                                     duration, healthCheckDuration, hasPassedHealthCheck);
                             if (pkg != null) {
@@ -1367,11 +1367,9 @@ public class PackageWatchdog {
         public void writeLocked(TypedXmlSerializer out) throws IOException {
             out.startTag(null, TAG_PACKAGE);
             out.attribute(null, ATTR_NAME, getName());
-            out.attribute(null, ATTR_DURATION, String.valueOf(mDurationMs));
-            out.attribute(null, ATTR_EXPLICIT_HEALTH_CHECK_DURATION,
-                    String.valueOf(mHealthCheckDurationMs));
-            out.attribute(null, ATTR_PASSED_HEALTH_CHECK,
-                    String.valueOf(mHasPassedHealthCheck));
+            out.attributeLong(null, ATTR_DURATION, mDurationMs);
+            out.attributeLong(null, ATTR_EXPLICIT_HEALTH_CHECK_DURATION, mHealthCheckDurationMs);
+            out.attributeBoolean(null, ATTR_PASSED_HEALTH_CHECK, mHasPassedHealthCheck);
             out.endTag(null, TAG_PACKAGE);
         }
 

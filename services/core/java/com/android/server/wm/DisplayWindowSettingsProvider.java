@@ -432,8 +432,7 @@ class DisplayWindowSettingsProvider implements SettingsProvider {
             out.startTag(null, "display-settings");
 
             out.startTag(null, "config");
-            out.attribute(null, "identifier",
-                    Integer.toString(data.mIdentifierType));
+            out.attributeInt(null, "identifier", data.mIdentifierType);
             out.endTag(null, "config");
 
             for (Map.Entry<String, SettingsEntry> entry
@@ -447,8 +446,7 @@ class DisplayWindowSettingsProvider implements SettingsProvider {
                 out.startTag(null, "display");
                 out.attribute(null, "name", displayIdentifier);
                 if (settingsEntry.mWindowingMode != WindowConfiguration.WINDOWING_MODE_UNDEFINED) {
-                    out.attribute(null, "windowingMode",
-                            Integer.toString(settingsEntry.mWindowingMode));
+                    out.attributeInt(null, "windowingMode", settingsEntry.mWindowingMode);
                 }
                 if (settingsEntry.mUserRotationMode != null) {
                     out.attribute(null, "userRotationMode",
@@ -459,22 +457,18 @@ class DisplayWindowSettingsProvider implements SettingsProvider {
                             settingsEntry.mUserRotation.toString());
                 }
                 if (settingsEntry.mForcedWidth != 0 && settingsEntry.mForcedHeight != 0) {
-                    out.attribute(null, "forcedWidth",
-                            Integer.toString(settingsEntry.mForcedWidth));
-                    out.attribute(null, "forcedHeight",
-                            Integer.toString(settingsEntry.mForcedHeight));
+                    out.attributeInt(null, "forcedWidth", settingsEntry.mForcedWidth);
+                    out.attributeInt(null, "forcedHeight", settingsEntry.mForcedHeight);
                 }
                 if (settingsEntry.mForcedDensity != 0) {
-                    out.attribute(null, "forcedDensity",
-                            Integer.toString(settingsEntry.mForcedDensity));
+                    out.attributeInt(null, "forcedDensity", settingsEntry.mForcedDensity);
                 }
                 if (settingsEntry.mForcedScalingMode != null) {
                     out.attribute(null, "forcedScalingMode",
                             settingsEntry.mForcedScalingMode.toString());
                 }
                 if (settingsEntry.mRemoveContentMode != REMOVE_CONTENT_MODE_UNDEFINED) {
-                    out.attribute(null, "removeContentMode",
-                            Integer.toString(settingsEntry.mRemoveContentMode));
+                    out.attributeInt(null, "removeContentMode", settingsEntry.mRemoveContentMode);
                 }
                 if (settingsEntry.mShouldShowWithInsecureKeyguard != null) {
                     out.attribute(null, "shouldShowWithInsecureKeyguard",

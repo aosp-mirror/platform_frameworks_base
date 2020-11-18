@@ -179,7 +179,7 @@ public class AmbientBrightnessStatsTracker {
                             entry.getKey());
                     if (userSerialNumber != -1 && userDayStats.getLocalDate().isAfter(cutOffDate)) {
                         out.startTag(null, TAG_AMBIENT_BRIGHTNESS_DAY_STATS);
-                        out.attribute(null, ATTR_USER, Integer.toString(userSerialNumber));
+                        out.attributeInt(null, ATTR_USER, userSerialNumber);
                         out.attribute(null, ATTR_LOCAL_DATE,
                                 userDayStats.getLocalDate().toString());
                         StringBuilder bucketBoundariesValues = new StringBuilder();

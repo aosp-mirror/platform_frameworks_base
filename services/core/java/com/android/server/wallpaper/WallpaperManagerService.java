@@ -2943,39 +2943,38 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         }
         final DisplayData wpdData = getDisplayDataOrCreate(DEFAULT_DISPLAY);
         out.startTag(null, tag);
-        out.attribute(null, "id", Integer.toString(wallpaper.wallpaperId));
-        out.attribute(null, "width", Integer.toString(wpdData.mWidth));
-        out.attribute(null, "height", Integer.toString(wpdData.mHeight));
+        out.attributeInt(null, "id", wallpaper.wallpaperId);
+        out.attributeInt(null, "width", wpdData.mWidth);
+        out.attributeInt(null, "height", wpdData.mHeight);
 
-        out.attribute(null, "cropLeft", Integer.toString(wallpaper.cropHint.left));
-        out.attribute(null, "cropTop", Integer.toString(wallpaper.cropHint.top));
-        out.attribute(null, "cropRight", Integer.toString(wallpaper.cropHint.right));
-        out.attribute(null, "cropBottom", Integer.toString(wallpaper.cropHint.bottom));
+        out.attributeInt(null, "cropLeft", wallpaper.cropHint.left);
+        out.attributeInt(null, "cropTop", wallpaper.cropHint.top);
+        out.attributeInt(null, "cropRight", wallpaper.cropHint.right);
+        out.attributeInt(null, "cropBottom", wallpaper.cropHint.bottom);
 
         if (wpdData.mPadding.left != 0) {
-            out.attribute(null, "paddingLeft", Integer.toString(wpdData.mPadding.left));
+            out.attributeInt(null, "paddingLeft", wpdData.mPadding.left);
         }
         if (wpdData.mPadding.top != 0) {
-            out.attribute(null, "paddingTop", Integer.toString(wpdData.mPadding.top));
+            out.attributeInt(null, "paddingTop", wpdData.mPadding.top);
         }
         if (wpdData.mPadding.right != 0) {
-            out.attribute(null, "paddingRight", Integer.toString(wpdData.mPadding.right));
+            out.attributeInt(null, "paddingRight", wpdData.mPadding.right);
         }
         if (wpdData.mPadding.bottom != 0) {
-            out.attribute(null, "paddingBottom", Integer.toString(wpdData.mPadding.bottom));
+            out.attributeInt(null, "paddingBottom", wpdData.mPadding.bottom);
         }
 
         if (wallpaper.primaryColors != null) {
             int colorsCount = wallpaper.primaryColors.getMainColors().size();
-            out.attribute(null, "colorsCount", Integer.toString(colorsCount));
+            out.attributeInt(null, "colorsCount", colorsCount);
             if (colorsCount > 0) {
                 for (int i = 0; i < colorsCount; i++) {
                     final Color wc = wallpaper.primaryColors.getMainColors().get(i);
-                    out.attribute(null, "colorValue"+i, Integer.toString(wc.toArgb()));
+                    out.attributeInt(null, "colorValue" + i, wc.toArgb());
                 }
             }
-            out.attribute(null, "colorHints",
-                    Integer.toString(wallpaper.primaryColors.getColorHints()));
+            out.attributeInt(null, "colorHints", wallpaper.primaryColors.getColorHints());
         }
 
         out.attribute(null, "name", wallpaper.name);
@@ -3225,8 +3224,8 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         final DisplayData wpData = getDisplayDataOrCreate(DEFAULT_DISPLAY);
 
         if (!keepDimensionHints) {
-            wpData.mWidth = Integer.parseInt(parser.getAttributeValue(null, "width"));
-            wpData.mHeight = Integer.parseInt(parser.getAttributeValue(null, "height"));
+            wpData.mWidth = parser.getAttributeInt(null, "width");
+            wpData.mHeight = parser.getAttributeInt(null, "height");
         }
         wallpaper.cropHint.left = getAttributeInt(parser, "cropLeft", 0);
         wallpaper.cropHint.top = getAttributeInt(parser, "cropTop", 0);

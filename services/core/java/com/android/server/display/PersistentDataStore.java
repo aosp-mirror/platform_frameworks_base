@@ -621,8 +621,7 @@ final class PersistentDataStore {
                 if (TAG_BRIGHTNESS_CONFIGURATION.equals(parser.getName())) {
                     int userSerial;
                     try {
-                        userSerial = Integer.parseInt(
-                                parser.getAttributeValue(null, ATTR_USER_SERIAL));
+                        userSerial = parser.getAttributeInt(null, ATTR_USER_SERIAL);
                     } catch (NumberFormatException nfe) {
                         userSerial = -1;
                         Slog.e(TAG, "Failed to read in brightness configuration", nfe);
@@ -664,14 +663,14 @@ final class PersistentDataStore {
                 final BrightnessConfiguration config = mConfigurations.valueAt(i);
 
                 serializer.startTag(null, TAG_BRIGHTNESS_CONFIGURATION);
-                serializer.attribute(null, ATTR_USER_SERIAL, Integer.toString(userSerial));
+                serializer.attributeInt(null, ATTR_USER_SERIAL, userSerial);
                 String packageName = mPackageNames.get(userSerial);
                 if (packageName != null) {
                     serializer.attribute(null, ATTR_PACKAGE_NAME, packageName);
                 }
                 long timestamp = mTimeStamps.get(userSerial, -1);
                 if (timestamp != -1) {
-                    serializer.attribute(null, ATTR_TIME_STAMP, Long.toString(timestamp));
+                    serializer.attributeLong(null, ATTR_TIME_STAMP, timestamp);
                 }
                 config.saveToXml(serializer);
                 serializer.endTag(null, TAG_BRIGHTNESS_CONFIGURATION);

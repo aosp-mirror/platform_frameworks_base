@@ -1191,13 +1191,13 @@ final class HistoricalRegistry {
 
                 // We haven't released version 1 and have more detailed
                 // accounting - just nuke the current state
-                final int version = XmlUtils.readIntAttribute(parser, ATTR_VERSION);
+                final int version = parser.getAttributeInt(null, ATTR_VERSION);
                 if (CURRENT_VERSION == 2 && version < CURRENT_VERSION) {
                     throw new IllegalStateException("Dropping unsupported history "
                             + "version 1 for file:" + file);
                 }
 
-                final long overflowMillis = XmlUtils.readLongAttribute(parser, ATTR_OVERFLOW, 0);
+                final long overflowMillis = parser.getAttributeLong(null, ATTR_OVERFLOW, 0);
                 final int depth = parser.getDepth();
                 while (XmlUtils.nextElementWithin(parser, depth)) {
                     if (TAG_OPS.equals(parser.getName())) {
@@ -1243,9 +1243,9 @@ final class HistoricalRegistry {
                 long filterEndTimeMillis, @OpFlags int filterFlags,
                 @Nullable long[] cumulativeOverflowMillis)
                 throws IOException, XmlPullParserException {
-            final long beginTimeMillis = XmlUtils.readLongAttribute(parser, ATTR_BEGIN_TIME, 0)
+            final long beginTimeMillis = parser.getAttributeLong(null, ATTR_BEGIN_TIME, 0)
                     + (cumulativeOverflowMillis != null ? cumulativeOverflowMillis[0] : 0);
-            final long endTimeMillis = XmlUtils.readLongAttribute(parser, ATTR_END_TIME, 0)
+            final long endTimeMillis = parser.getAttributeLong(null, ATTR_END_TIME, 0)
                     + (cumulativeOverflowMillis != null ? cumulativeOverflowMillis[0] : 0);
             // Keep reading as subsequent records may start matching
             if (filterEndTimeMillis < beginTimeMillis) {
@@ -1287,7 +1287,7 @@ final class HistoricalRegistry {
                 @Nullable String[] filterOpNames, @HistoricalOpsRequestFilter int filter,
                 @OpFlags int filterFlags, double filterScale)
                 throws IOException, XmlPullParserException {
-            final int uid = XmlUtils.readIntAttribute(parser, ATTR_NAME);
+            final int uid = parser.getAttributeInt(null, ATTR_NAME);
             if ((filter & FILTER_BY_UID) != 0 && filterUid != uid) {
                 XmlUtils.skipCurrentTag(parser);
                 return null;
@@ -1363,7 +1363,7 @@ final class HistoricalRegistry {
                 @HistoricalOpsRequestFilter int filter, @OpFlags int filterFlags,
                 double filterScale)
                 throws IOException, XmlPullParserException {
-            final int op = XmlUtils.readIntAttribute(parser, ATTR_NAME);
+            final int op = parser.getAttributeInt(null, ATTR_NAME);
             if ((filter & FILTER_BY_OP_NAMES) != 0 && !ArrayUtils.contains(filterOpNames,
                     AppOpsManager.opToPublicName(op))) {
                 XmlUtils.skipCurrentTag(parser);
@@ -1386,13 +1386,13 @@ final class HistoricalRegistry {
                 int uid, @NonNull String packageName, @Nullable String attributionTag, int op,
                 @NonNull TypedXmlPullParser parser, @OpFlags int filterFlags, double filterScale)
                 throws IOException {
-            final long key = XmlUtils.readLongAttribute(parser, ATTR_NAME);
+            final long key = parser.getAttributeLong(null, ATTR_NAME);
             final int flags = AppOpsManager.extractFlagsFromKey(key) & filterFlags;
             if (flags == 0) {
                 return null;
             }
             final int uidState = AppOpsManager.extractUidStateFromKey(key);
-            long accessCount = XmlUtils.readLongAttribute(parser, ATTR_ACCESS_COUNT, 0);
+            long accessCount = parser.getAttributeLong(null, ATTR_ACCESS_COUNT, 0);
             if (accessCount > 0) {
                 if (!Double.isNaN(filterScale)) {
                     accessCount = (long) HistoricalOps.round(
@@ -1404,7 +1404,7 @@ final class HistoricalRegistry {
                 ops.increaseAccessCount(op, uid, packageName, attributionTag, uidState, flags,
                         accessCount);
             }
-            long rejectCount = XmlUtils.readLongAttribute(parser, ATTR_REJECT_COUNT, 0);
+            long rejectCount = parser.getAttributeLong(null, ATTR_REJECT_COUNT, 0);
             if (rejectCount > 0) {
                 if (!Double.isNaN(filterScale)) {
                     rejectCount = (long) HistoricalOps.round(
@@ -1416,7 +1416,7 @@ final class HistoricalRegistry {
                 ops.increaseRejectCount(op, uid, packageName, attributionTag, uidState, flags,
                         rejectCount);
             }
-            long accessDuration =  XmlUtils.readLongAttribute(parser, ATTR_ACCESS_DURATION, 0);
+            long accessDuration =  parser.getAttributeLong(null, ATTR_ACCESS_DURATION, 0);
             if (accessDuration > 0) {
                 if (!Double.isNaN(filterScale)) {
                     accessDuration = (long) HistoricalOps.round(
@@ -1440,10 +1440,9 @@ final class HistoricalRegistry {
                         true);
                 serializer.startDocument(null, true);
                 serializer.startTag(null, TAG_HISTORY);
-                serializer.attribute(null, ATTR_VERSION, String.valueOf(CURRENT_VERSION));
+                serializer.attributeInt(null, ATTR_VERSION, CURRENT_VERSION);
                 if (intervalOverflowMillis != 0) {
-                    serializer.attribute(null, ATTR_OVERFLOW,
-                            Long.toString(intervalOverflowMillis));
+                    serializer.attributeLong(null, ATTR_OVERFLOW, intervalOverflowMillis);
                 }
                 if (allOps != null) {
                     final int opsCount = allOps.size();
@@ -1464,8 +1463,8 @@ final class HistoricalRegistry {
         private void writeHistoricalOpDLocked(@NonNull HistoricalOps ops,
                 @NonNull TypedXmlSerializer serializer) throws IOException {
             serializer.startTag(null, TAG_OPS);
-            serializer.attribute(null, ATTR_BEGIN_TIME, Long.toString(ops.getBeginTimeMillis()));
-            serializer.attribute(null, ATTR_END_TIME, Long.toString(ops.getEndTimeMillis()));
+            serializer.attributeLong(null, ATTR_BEGIN_TIME, ops.getBeginTimeMillis());
+            serializer.attributeLong(null, ATTR_END_TIME, ops.getEndTimeMillis());
             final int uidCount = ops.getUidCount();
             for (int i = 0; i < uidCount; i++) {
                 final HistoricalUidOps uidOp = ops.getUidOpsAt(i);
@@ -1477,7 +1476,7 @@ final class HistoricalRegistry {
         private void writeHistoricalUidOpsDLocked(@NonNull HistoricalUidOps uidOps,
                 @NonNull TypedXmlSerializer serializer) throws IOException {
             serializer.startTag(null, TAG_UID);
-            serializer.attribute(null, ATTR_NAME, Integer.toString(uidOps.getUid()));
+            serializer.attributeInt(null, ATTR_NAME, uidOps.getUid());
             final int packageCount = uidOps.getPackageCount();
             for (int i = 0; i < packageCount; i++) {
                 final HistoricalPackageOps packageOps = uidOps.getPackageOpsAt(i);
@@ -1518,7 +1517,7 @@ final class HistoricalRegistry {
                 return;
             }
             serializer.startTag(null, TAG_OP);
-            serializer.attribute(null, ATTR_NAME, Integer.toString(op.getOpCode()));
+            serializer.attributeInt(null, ATTR_NAME, op.getOpCode());
             final int keyCount = keys.size();
             for (int i = 0; i < keyCount; i++) {
                 writeStateOnLocked(op, keys.keyAt(i), serializer);
@@ -1540,15 +1539,15 @@ final class HistoricalRegistry {
             }
 
             serializer.startTag(null, TAG_STATE);
-            serializer.attribute(null, ATTR_NAME, Long.toString(key));
+            serializer.attributeLong(null, ATTR_NAME, key);
             if (accessCount > 0) {
-                serializer.attribute(null, ATTR_ACCESS_COUNT, Long.toString(accessCount));
+                serializer.attributeLong(null, ATTR_ACCESS_COUNT, accessCount);
             }
             if (rejectCount > 0) {
-                serializer.attribute(null, ATTR_REJECT_COUNT, Long.toString(rejectCount));
+                serializer.attributeLong(null, ATTR_REJECT_COUNT, rejectCount);
             }
             if (accessDuration > 0) {
-                serializer.attribute(null, ATTR_ACCESS_DURATION, Long.toString(accessDuration));
+                serializer.attributeLong(null, ATTR_ACCESS_DURATION, accessDuration);
             }
             serializer.endTag(null, TAG_STATE);
         }

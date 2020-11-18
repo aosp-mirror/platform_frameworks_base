@@ -507,8 +507,7 @@ class LaunchParamsPersister {
 
         void saveToXml(TypedXmlSerializer serializer) throws IOException {
             serializer.attribute(null, ATTR_DISPLAY_UNIQUE_ID, mDisplayUniqueId);
-            serializer.attribute(null, ATTR_WINDOWING_MODE,
-                    Integer.toString(mWindowingMode));
+            serializer.attributeInt(null, ATTR_WINDOWING_MODE, mWindowingMode);
             serializer.attribute(null, ATTR_BOUNDS, mBounds.flattenToString());
             if (mWindowLayoutAffinity != null) {
                 serializer.attribute(null, ATTR_WINDOW_LAYOUT_AFFINITY, mWindowLayoutAffinity);

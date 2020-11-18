@@ -396,7 +396,7 @@ public final class CompatModePackages {
                 }
                 out.startTag(null, "pkg");
                 out.attribute(null, "name", pkg);
-                out.attribute(null, "mode", Integer.toString(mode));
+                out.attributeInt(null, "mode", mode);
                 out.endTag(null, "pkg");
             }
 

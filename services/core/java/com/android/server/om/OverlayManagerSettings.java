@@ -411,7 +411,7 @@ final class OverlayManagerSettings {
                 table.clear();
                 final TypedXmlPullParser parser = Xml.resolvePullParser(is);
                 XmlUtils.beginDocument(parser, TAG_OVERLAYS);
-                int version = XmlUtils.readIntAttribute(parser, ATTR_VERSION);
+                int version = parser.getAttributeInt(null, ATTR_VERSION);
                 if (version != CURRENT_VERSION) {
                     upgrade(version);
                 }
@@ -448,16 +448,16 @@ final class OverlayManagerSettings {
         private static SettingsItem restoreRow(@NonNull final TypedXmlPullParser parser,
                 final int depth) throws IOException {
             final String packageName = XmlUtils.readStringAttribute(parser, ATTR_PACKAGE_NAME);
-            final int userId = XmlUtils.readIntAttribute(parser, ATTR_USER_ID);
+            final int userId = parser.getAttributeInt(null, ATTR_USER_ID);
             final String targetPackageName = XmlUtils.readStringAttribute(parser,
                     ATTR_TARGET_PACKAGE_NAME);
             final String targetOverlayableName = XmlUtils.readStringAttribute(parser,
                     ATTR_TARGET_OVERLAYABLE_NAME);
             final String baseCodePath = XmlUtils.readStringAttribute(parser, ATTR_BASE_CODE_PATH);
-            final int state = XmlUtils.readIntAttribute(parser, ATTR_STATE);
-            final boolean isEnabled = XmlUtils.readBooleanAttribute(parser, ATTR_IS_ENABLED);
-            final boolean isStatic = XmlUtils.readBooleanAttribute(parser, ATTR_IS_STATIC);
-            final int priority = XmlUtils.readIntAttribute(parser, ATTR_PRIORITY);
+            final int state = parser.getAttributeInt(null, ATTR_STATE);
+            final boolean isEnabled = parser.getAttributeBoolean(null, ATTR_IS_ENABLED, false);
+            final boolean isStatic = parser.getAttributeBoolean(null, ATTR_IS_STATIC, false);
+            final int priority = parser.getAttributeInt(null, ATTR_PRIORITY);
             final String category = XmlUtils.readStringAttribute(parser, ATTR_CATEGORY);
 
             return new SettingsItem(packageName, userId, targetPackageName, targetOverlayableName,
@@ -470,7 +470,7 @@ final class OverlayManagerSettings {
             xml.startDocument(null, true);
             xml.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
             xml.startTag(null, TAG_OVERLAYS);
-            XmlUtils.writeIntAttribute(xml, ATTR_VERSION, CURRENT_VERSION);
+            xml.attributeInt(null, ATTR_VERSION, CURRENT_VERSION);
 
             final int n = table.size();
             for (int i = 0; i < n; i++) {
@@ -485,15 +485,15 @@ final class OverlayManagerSettings {
                 @NonNull final SettingsItem item) throws IOException {
             xml.startTag(null, TAG_ITEM);
             XmlUtils.writeStringAttribute(xml, ATTR_PACKAGE_NAME, item.mPackageName);
-            XmlUtils.writeIntAttribute(xml, ATTR_USER_ID, item.mUserId);
+            xml.attributeInt(null, ATTR_USER_ID, item.mUserId);
             XmlUtils.writeStringAttribute(xml, ATTR_TARGET_PACKAGE_NAME, item.mTargetPackageName);
             XmlUtils.writeStringAttribute(xml, ATTR_TARGET_OVERLAYABLE_NAME,
                     item.mTargetOverlayableName);
             XmlUtils.writeStringAttribute(xml, ATTR_BASE_CODE_PATH, item.mBaseCodePath);
-            XmlUtils.writeIntAttribute(xml, ATTR_STATE, item.mState);
+            xml.attributeInt(null, ATTR_STATE, item.mState);
             XmlUtils.writeBooleanAttribute(xml, ATTR_IS_ENABLED, item.mIsEnabled);
             XmlUtils.writeBooleanAttribute(xml, ATTR_IS_STATIC, !item.mIsMutable);
-            XmlUtils.writeIntAttribute(xml, ATTR_PRIORITY, item.mPriority);
+            xml.attributeInt(null, ATTR_PRIORITY, item.mPriority);
             XmlUtils.writeStringAttribute(xml, ATTR_CATEGORY, item.mCategory);
             xml.endTag(null, TAG_ITEM);
         }

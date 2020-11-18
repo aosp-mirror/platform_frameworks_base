@@ -158,20 +158,17 @@ final class AdditionalSubtypeUtils {
                     final InputMethodSubtype subtype = subtypesList.get(i);
                     out.startTag(null, NODE_SUBTYPE);
                     if (subtype.hasSubtypeId()) {
-                        out.attribute(null, ATTR_IME_SUBTYPE_ID,
-                                String.valueOf(subtype.getSubtypeId()));
+                        out.attributeInt(null, ATTR_IME_SUBTYPE_ID, subtype.getSubtypeId());
                     }
-                    out.attribute(null, ATTR_ICON, String.valueOf(subtype.getIconResId()));
-                    out.attribute(null, ATTR_LABEL, String.valueOf(subtype.getNameResId()));
+                    out.attributeInt(null, ATTR_ICON, subtype.getIconResId());
+                    out.attributeInt(null, ATTR_LABEL, subtype.getNameResId());
                     out.attribute(null, ATTR_IME_SUBTYPE_LOCALE, subtype.getLocale());
                     out.attribute(null, ATTR_IME_SUBTYPE_LANGUAGE_TAG,
                             subtype.getLanguageTag());
                     out.attribute(null, ATTR_IME_SUBTYPE_MODE, subtype.getMode());
                     out.attribute(null, ATTR_IME_SUBTYPE_EXTRA_VALUE, subtype.getExtraValue());
-                    out.attribute(null, ATTR_IS_AUXILIARY,
-                            String.valueOf(subtype.isAuxiliary() ? 1 : 0));
-                    out.attribute(null, ATTR_IS_ASCII_CAPABLE,
-                            String.valueOf(subtype.isAsciiCapable() ? 1 : 0));
+                    out.attributeInt(null, ATTR_IS_AUXILIARY, subtype.isAuxiliary() ? 1 : 0);
+                    out.attributeInt(null, ATTR_IS_ASCII_CAPABLE, subtype.isAsciiCapable() ? 1 : 0);
                     out.endTag(null, NODE_SUBTYPE);
                 }
                 out.endTag(null, NODE_IMI);
@@ -243,10 +240,8 @@ final class AdditionalSubtypeUtils {
                         Slog.w(TAG, "IME uninstalled or not valid.: " + currentImiId);
                         continue;
                     }
-                    final int icon = Integer.parseInt(
-                            parser.getAttributeValue(null, ATTR_ICON));
-                    final int label = Integer.parseInt(
-                            parser.getAttributeValue(null, ATTR_LABEL));
+                    final int icon = parser.getAttributeInt(null, ATTR_ICON);
+                    final int label = parser.getAttributeInt(null, ATTR_LABEL);
                     final String imeSubtypeLocale =
                             parser.getAttributeValue(null, ATTR_IME_SUBTYPE_LOCALE);
                     final String languageTag =

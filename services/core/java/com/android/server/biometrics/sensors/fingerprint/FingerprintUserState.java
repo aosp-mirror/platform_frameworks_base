@@ -98,10 +98,10 @@ public class FingerprintUserState extends BiometricUserState<Fingerprint> {
             for (int i = 0; i < count; i++) {
                 Fingerprint fp = fingerprints.get(i);
                 serializer.startTag(null, TAG_FINGERPRINT);
-                serializer.attribute(null, ATTR_FINGER_ID, Integer.toString(fp.getBiometricId()));
+                serializer.attributeInt(null, ATTR_FINGER_ID, fp.getBiometricId());
                 serializer.attribute(null, ATTR_NAME, fp.getName().toString());
-                serializer.attribute(null, ATTR_GROUP_ID, Integer.toString(fp.getGroupId()));
-                serializer.attribute(null, ATTR_DEVICE_ID, Long.toString(fp.getDeviceId()));
+                serializer.attributeInt(null, ATTR_GROUP_ID, fp.getGroupId());
+                serializer.attributeLong(null, ATTR_DEVICE_ID, fp.getDeviceId());
                 serializer.endTag(null, TAG_FINGERPRINT);
             }
 
