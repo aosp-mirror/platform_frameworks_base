@@ -2041,9 +2041,7 @@ class Task extends WindowContainer<WindowContainer> {
             }
         }
 
-        if (isOrganized()) {
-            mAtmService.mTaskOrganizerController.dispatchTaskInfoChanged(this, false /* force */);
-        }
+        dispatchTaskInfoChangedIfNeeded(false /* force */);
     }
 
     private static boolean setTaskDescriptionFromActivityAboveRoot(
@@ -2272,8 +2270,8 @@ class Task extends WindowContainer<WindowContainer> {
         }
         // If the task organizer has changed, then it will already be receiving taskAppeared with
         // the latest task-info thus the task-info won't have changed.
-        if (!taskOrgChanged && isOrganized()) {
-            mAtmService.mTaskOrganizerController.dispatchTaskInfoChanged(this, false /* force */);
+        if (!taskOrgChanged) {
+            dispatchTaskInfoChangedIfNeeded(false /* force */);
         }
     }
 
@@ -4100,6 +4098,7 @@ class Task extends WindowContainer<WindowContainer> {
         info.parentTaskId = rootTask == getParent() && rootTask.mCreatedByOrganizer
                 ? rootTask.mTaskId
                 : INVALID_TASK_ID;
+        info.isFocused = isFocused();
     }
 
     @Nullable PictureInPictureParams getPictureInPictureParams() {
@@ -4120,8 +4119,7 @@ class Task extends WindowContainer<WindowContainer> {
                     letterboxActivityBounds)) {
             mLetterboxActivityBounds = Rect.copyOrNull(letterboxActivityBounds);
             // Forcing update to reduce visual jank during the transition.
-            mAtmService.mTaskOrganizerController.dispatchTaskInfoChanged(
-                        this, /* force= */ true);
+            dispatchTaskInfoChangedIfNeeded(true /* force */);
         }
     }
 
@@ -5067,12 +5065,11 @@ class Task extends WindowContainer<WindowContainer> {
      */
     void onWindowFocusChanged(boolean hasFocus) {
         updateShadowsRadius(hasFocus, getSyncTransaction());
+        dispatchTaskInfoChangedIfNeeded(false /* force */);
     }
 
     void onPictureInPictureParamsChanged() {
-        if (isOrganized()) {
-            mAtmService.mTaskOrganizerController.dispatchTaskInfoChanged(this, true /* force */);
-        }
+        dispatchTaskInfoChangedIfNeeded(true /* force */);
     }
 
     /**
@@ -7447,9 +7444,7 @@ class Task extends WindowContainer<WindowContainer> {
 
     @Override
     void onChildPositionChanged(WindowContainer child) {
-        if (isOrganized()) {
-            mAtmService.mTaskOrganizerController.dispatchTaskInfoChanged(this, false /* force */);
-        }
+        dispatchTaskInfoChangedIfNeeded(false /* force */);
 
         if (!mChildren.contains(child)) {
             return;
@@ -7602,6 +7597,12 @@ class Task extends WindowContainer<WindowContainer> {
 
     private Rect getRawBounds() {
         return super.getBounds();
+    }
+
+    void dispatchTaskInfoChangedIfNeeded(boolean force) {
+        if (isOrganized()) {
+            mAtmService.mTaskOrganizerController.dispatchTaskInfoChanged(this, force);
+        }
     }
 
     @Override
