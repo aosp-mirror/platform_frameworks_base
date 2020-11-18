@@ -17,9 +17,9 @@
 package android.security.keystore2;
 
 import android.annotation.NonNull;
+import android.hardware.keymint.KeyParameter;
 import android.security.keymaster.KeymasterDefs;
 import android.security.keystore.KeyProperties;
-import android.system.keystore2.KeyParameter;
 
 import java.security.InvalidKeyException;
 import java.security.SignatureSpi;
