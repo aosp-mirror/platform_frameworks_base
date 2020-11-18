@@ -463,7 +463,7 @@ public class NotificationStackScrollLayoutController {
 
                 @Override
                 public void onChildSnappedBack(View animView, float targetLeft) {
-                    mView.addDraggedView(animView);
+                    mView.removeDraggedView(animView);
                     mView.updateContinuousShadowDrawing();
                     mView.updateContinuousBackgroundDrawing();
                     if (animView instanceof ExpandableNotificationRow) {
