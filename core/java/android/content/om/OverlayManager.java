@@ -23,7 +23,7 @@ import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.compat.Compatibility;
 import android.compat.annotation.ChangeId;
-import android.compat.annotation.EnabledAfter;
+import android.compat.annotation.EnabledSince;
 import android.content.Context;
 import android.os.Build;
 import android.os.Process;
@@ -90,7 +90,7 @@ public class OverlayManager {
      * java.lang.IllegalStateException}, which existed in the source prior to R.
      */
     @ChangeId
-    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.Q)
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.R)
     private static final long THROW_SECURITY_EXCEPTIONS = 147340954;
 
     /**
