@@ -4373,7 +4373,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             final int adminUser = admin.getUserHandle().getIdentifier();
             // Password complexity is only taken into account from DO/PO
             if (isDeviceOwner(adminComponent, adminUser)
-                    || isProfileOwner(adminComponent, adminUser)) {
+                    || isProfileOwnerUncheckedLocked(adminComponent, adminUser)) {
                 maxRequiredComplexity = Math.max(maxRequiredComplexity, admin.mPasswordComplexity);
             }
         }
@@ -6216,7 +6216,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
         Preconditions.checkArgumentNonnegative(userHandle, "Invalid userId");
 
-        final CallerIdentity caller = getAdminCallerIdentity(comp);
+        final CallerIdentity caller = getCallerIdentity();
         Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(caller, userHandle));
         Preconditions.checkCallAuthorization(hasCallingOrSelfPermission(BIND_DEVICE_ADMIN));
 
@@ -7484,6 +7484,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     public boolean isProfileOwner(ComponentName who, int userId) {
         final ComponentName profileOwner = getProfileOwnerAsUser(userId);
+        return who != null && who.equals(profileOwner);
+    }
+
+    private boolean isProfileOwnerUncheckedLocked(ComponentName who, int userId) {
+        ensureLocked();
+        final ComponentName profileOwner = mOwners.getProfileOwnerComponent(userId);
         return who != null && who.equals(profileOwner);
     }
 
