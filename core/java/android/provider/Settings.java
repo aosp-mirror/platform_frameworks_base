@@ -16512,6 +16512,67 @@ public final class Settings {
              * @hide
              */
             public static final String MOBILE_SIGNAL_DETECTOR = "mobile_signal_detector";
+
+
+            /**
+             * Whether ambient is currently enabled.
+             * @hide
+             */
+            public static final String AMBIENT_ENABLED = "ambient_enabled";
+
+            /**
+             * Whether ambient tilt to wake is enabled.
+             * @hide
+             */
+            public static final String AMBIENT_TILT_TO_WAKE = "ambient_tilt_to_wake";
+
+            /**
+             * Whether ambient low bit mode is enabled by developer options.
+             * @hide
+             */
+            public static final String AMBIENT_LOW_BIT_ENABLED_DEV = "ambient_low_bit_enabled_dev";
+
+            /**
+             * Whether ambient touch to wake is enabled.
+             * @hide
+             */
+            public static final String AMBIENT_TOUCH_TO_WAKE = "ambient_touch_to_wake";
+
+            /**
+             * Whether ambient tilt to bright is enabled.
+             * @hide
+             */
+            public static final String AMBIENT_TILT_TO_BRIGHT = "ambient_tilt_to_bright";
+
+            /**
+             * Whether the current watchface is decomposable.
+             * @hide
+             */
+            public static final String DECOMPOSABLE_WATCHFACE = "current_watchface_decomposable";
+
+            /**
+             * Whether to force ambient when docked.
+             * @hide
+             */
+            public static final String AMBIENT_FORCE_WHEN_DOCKED = "ambient_force_when_docked";
+
+            /**
+             * The id of the gesture sensor.
+             * @hide
+             */
+            public static final String AMBIENT_GESTURE_SENSOR_ID = "ambient_gesture_sensor_id";
+
+            /**
+             * Whether the ambient low bit mode is enabled.
+             * @hide
+             */
+            public static final String AMBIENT_LOW_BIT_ENABLED = "ambient_low_bit_enabled";
+
+            /**
+             * The timeout duration in minutes of ambient mode when plugged in.
+             * @hide
+             */
+            public static final String AMBIENT_PLUGGED_TIMEOUT_MIN = "ambient_plugged_timeout_min";
         }
     }
 

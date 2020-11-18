@@ -5317,6 +5317,42 @@ public class SettingsProvider extends ContentProvider {
                                         .getResources()
                                         .getBoolean(
                                                 R.bool.def_wearable_mobileSignalDetectorAllowed));
+                        initGlobalSettingsDefaultValForWearLocked(
+                                Global.Wearable.AMBIENT_ENABLED,
+                                getContext()
+                                        .getResources()
+                                        .getBoolean(R.bool.def_wearable_ambientEnabled));
+                        initGlobalSettingsDefaultValForWearLocked(
+                                Global.Wearable.AMBIENT_TILT_TO_WAKE,
+                                getContext()
+                                        .getResources()
+                                        .getBoolean(R.bool.def_wearable_tiltToWakeEnabled));
+                        initGlobalSettingsDefaultValForWearLocked(
+                                Global.Wearable.AMBIENT_LOW_BIT_ENABLED_DEV, false);
+                        initGlobalSettingsDefaultValForWearLocked(
+                                Global.Wearable.AMBIENT_TOUCH_TO_WAKE,
+                                getContext()
+                                        .getResources()
+                                        .getBoolean(R.bool.def_wearable_touchToWakeEnabled));
+                        initGlobalSettingsDefaultValForWearLocked(
+                                Global.Wearable.AMBIENT_TILT_TO_BRIGHT,
+                                getContext()
+                                        .getResources()
+                                        .getBoolean(R.bool.def_wearable_tiltToBrightEnabled));
+                        initGlobalSettingsDefaultValForWearLocked(
+                                Global.Wearable.DECOMPOSABLE_WATCHFACE, false);
+                        initGlobalSettingsDefaultValForWearLocked(
+                                Settings.Global.Wearable.AMBIENT_FORCE_WHEN_DOCKED,
+                                SystemProperties.getBoolean("ro.ambient.force_when_docked", false));
+                        initGlobalSettingsDefaultValForWearLocked(
+                                Settings.Global.Wearable.AMBIENT_GESTURE_SENSOR_ID,
+                                SystemProperties.getInt("ro.ambient.gesture_sensor_id", 0));
+                        initGlobalSettingsDefaultValForWearLocked(
+                                Settings.Global.Wearable.AMBIENT_LOW_BIT_ENABLED,
+                                SystemProperties.getBoolean("ro.ambient.low_bit_enabled", false));
+                        initGlobalSettingsDefaultValForWearLocked(
+                                Settings.Global.Wearable.AMBIENT_PLUGGED_TIMEOUT_MIN,
+                                SystemProperties.getInt("ro.ambient.plugged_timeout_min", -1));
 
                         // TODO(b/164398026): add necessary initialization logic for all entries.
                         currentVersion = 204;
