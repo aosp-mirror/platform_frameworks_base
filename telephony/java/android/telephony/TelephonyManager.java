@@ -123,10 +123,12 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
@@ -14799,5 +14801,18 @@ public class TelephonyManager {
             Log.e(TAG, "Error calling ITelephony#bootstrapAuthenticationRequest", exception);
             e.execute(() -> callback.onAuthenticationFailure(GBA_FAILURE_REASON_FEATURE_NOT_READY));
         }
+    }
+
+    /**
+     * The network type is valid or not.
+     *
+     * @param networkType The network type {@link NetworkType}.
+     * @return {@code true} if valid, {@code false} otherwise.
+     *
+     * @hide
+     */
+    public static boolean isNetworkTypeValid(@NetworkType int networkType) {
+        return networkType >= TelephonyManager.NETWORK_TYPE_UNKNOWN &&
+                networkType <= TelephonyManager.NETWORK_TYPE_NR;
     }
 }
