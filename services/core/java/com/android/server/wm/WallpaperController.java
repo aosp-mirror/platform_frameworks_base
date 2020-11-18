@@ -56,6 +56,7 @@ import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.window.ScreenCapture;
 
+import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.ProtoLogImpl;
 import com.android.internal.protolog.common.ProtoLog;
@@ -91,9 +92,11 @@ class WallpaperController {
     private float mLastWallpaperZoomOut = 0;
     private int mLastWallpaperDisplayOffsetX = Integer.MIN_VALUE;
     private int mLastWallpaperDisplayOffsetY = Integer.MIN_VALUE;
-    private final float mMaxWallpaperScale;
     // Whether COMMAND_FREEZE was dispatched.
     private boolean mLastFrozen = false;
+
+    private float mMinWallpaperScale;
+    private float mMaxWallpaperScale;
 
     // This is set when we are waiting for a wallpaper to tell us it is done
     // changing its scroll position.
@@ -240,20 +243,32 @@ class WallpaperController {
     WallpaperController(WindowManagerService service, DisplayContent displayContent) {
         mService = service;
         mDisplayContent = displayContent;
+        mIsLockscreenLiveWallpaperEnabled =
+                SystemProperties.getBoolean("persist.wm.debug.lockscreen_live_wallpaper", true);
+
         Resources resources = service.mContext.getResources();
-        mMaxWallpaperScale =
-                resources.getFloat(com.android.internal.R.dimen.config_wallpaperMaxScale);
+        mMinWallpaperScale =
+                resources.getFloat(com.android.internal.R.dimen.config_wallpaperMinScale);
+        mMaxWallpaperScale = resources.getFloat(R.dimen.config_wallpaperMaxScale);
         mShouldOffsetWallpaperCenter =
                 resources.getBoolean(
                         com.android.internal.R.bool.config_offsetWallpaperToCenterOfLargestDisplay);
-        mIsLockscreenLiveWallpaperEnabled =
-                SystemProperties.getBoolean("persist.wm.debug.lockscreen_live_wallpaper", true);
     }
 
     void resetLargestDisplay(Display display) {
         if (display != null && display.getType() == Display.TYPE_INTERNAL) {
             mLargestDisplaySize = null;
         }
+    }
+
+    @VisibleForTesting
+    void setMinWallpaperScale(float minScale) {
+        mMinWallpaperScale = minScale;
+    }
+
+    @VisibleForTesting
+    void setMaxWallpaperScale(float maxScale) {
+        mMaxWallpaperScale = maxScale;
     }
 
     @VisibleForTesting void setShouldOffsetWallpaperCenter(boolean shouldOffset) {
@@ -1038,8 +1053,8 @@ class WallpaperController {
         }
     }
 
-    private float zoomOutToScale(float zoom) {
-        return MathUtils.lerp(1, mMaxWallpaperScale, 1 - zoom);
+    private float zoomOutToScale(float zoomOut) {
+        return MathUtils.lerp(mMinWallpaperScale, mMaxWallpaperScale, 1 - zoomOut);
     }
 
     void dump(PrintWriter pw, String prefix) {
