@@ -36,7 +36,6 @@ import java.util.List;
  *
  * @hide
  */
-@TestApi
 @SystemApi
 @SystemService(Context.APP_INTEGRITY_SERVICE)
 public class AppIntegrityManager {

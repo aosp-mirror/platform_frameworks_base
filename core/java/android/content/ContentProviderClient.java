@@ -21,7 +21,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
-import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.res.AssetFileDescriptor;
 import android.database.CrossProcessCursorWrapper;
@@ -123,7 +122,6 @@ public class ContentProviderClient implements ContentInterface, AutoCloseable {
      * @hide
      */
     @SystemApi
-    @TestApi
     @RequiresPermission(android.Manifest.permission.REMOVE_TASKS)
     public void setDetectNotResponding(@DurationMillisLong long timeoutMillis) {
         synchronized (ContentProviderClient.class) {

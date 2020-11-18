@@ -20,7 +20,6 @@ import static android.service.autofill.augmented.AugmentedAutofillService.sDebug
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
-import android.annotation.TestApi;
 import android.os.Bundle;
 import android.service.autofill.Dataset;
 import android.service.autofill.augmented.AugmentedAutofillService.AutofillProxy;
@@ -34,7 +33,6 @@ import java.util.List;
  * @hide
  */
 @SystemApi
-@TestApi
 public final class FillCallback {
 
     private static final String TAG = FillCallback.class.getSimpleName();

@@ -33,7 +33,7 @@ apex_defaults {
     prebuilts: ["com.android.os.statsd.init.rc"],
     name: "com.android.os.statsd-defaults",
     updatable: true,
-    min_sdk_version: "R",
+    min_sdk_version: "30",
     key: "com.android.os.statsd.key",
     certificate: ":com.android.os.statsd.certificate",
 }

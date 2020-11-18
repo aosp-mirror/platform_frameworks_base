@@ -25,7 +25,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
-import android.annotation.TestApi;
 import android.app.Notification;
 import android.bluetooth.BluetoothDevice;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -307,7 +306,6 @@ public abstract class Connection extends Conferenceable {
      * @hide
      */
     @SystemApi
-    @TestApi
     public static final int CAPABILITY_SPEED_UP_MT_AUDIO = 0x00040000;
 
     /**
@@ -345,7 +343,6 @@ public abstract class Connection extends Conferenceable {
      * @hide
      */
     @SystemApi
-    @TestApi
     public static final int CAPABILITY_CONFERENCE_HAS_NO_CHILDREN = 0x00200000;
 
     /**
@@ -415,7 +412,6 @@ public abstract class Connection extends Conferenceable {
      * @hide
      */
     @SystemApi
-    @TestApi
     public static final int PROPERTY_EMERGENCY_CALLBACK_MODE = 1<<0;
 
     /**
@@ -426,7 +422,6 @@ public abstract class Connection extends Conferenceable {
      * @hide
      */
     @SystemApi
-    @TestApi
     public static final int PROPERTY_GENERIC_CONFERENCE = 1<<1;
 
     /**
@@ -478,7 +473,6 @@ public abstract class Connection extends Conferenceable {
      * @hide
      */
     @SystemApi
-    @TestApi
     public static final int PROPERTY_IS_DOWNGRADED_CONFERENCE = 1<<6;
 
     /**
@@ -522,7 +516,6 @@ public abstract class Connection extends Conferenceable {
      * @hide
      */
     @SystemApi
-    @TestApi
     public static final int PROPERTY_REMOTELY_HOSTED = 1 << 11;
 
     /**
@@ -701,7 +694,6 @@ public abstract class Connection extends Conferenceable {
      * @hide
      */
     @SystemApi
-    @TestApi
     public static final String EXTRA_DISABLE_ADD_CALL =
             "android.telecom.extra.DISABLE_ADD_CALL";
 
@@ -2053,7 +2045,6 @@ public abstract class Connection extends Conferenceable {
      * @hide
      */
     @SystemApi
-    @TestApi
     public final @Nullable String getTelecomCallId() {
         return mTelecomCallId;
     }
@@ -2170,7 +2161,6 @@ public abstract class Connection extends Conferenceable {
      * @hide
      */
     @SystemApi
-    @TestApi
     public final @IntRange(from = 0) long getConnectTimeMillis() {
         return mConnectTimeMillis;
     }
@@ -2195,7 +2185,6 @@ public abstract class Connection extends Conferenceable {
      * @hide
      */
     @SystemApi
-    @TestApi
     public final @ElapsedRealtimeLong long getConnectionStartElapsedRealtimeMillis() {
         return mConnectElapsedTimeMillis;
     }
@@ -2278,7 +2267,6 @@ public abstract class Connection extends Conferenceable {
      * @hide
      */
     @SystemApi
-    @TestApi
     public void setTelecomCallId(@NonNull String callId) {
         mTelecomCallId = callId;
     }
@@ -2627,7 +2615,6 @@ public abstract class Connection extends Conferenceable {
      * @hide
      */
     @SystemApi
-    @TestApi
     @RequiresPermission(MODIFY_PHONE_STATE)
     public final void setConnectTimeMillis(@IntRange(from = 0) long connectTimeMillis) {
         mConnectTimeMillis = connectTimeMillis;
@@ -2650,7 +2637,6 @@ public abstract class Connection extends Conferenceable {
      * @hide
      */
     @SystemApi
-    @TestApi
     @RequiresPermission(MODIFY_PHONE_STATE)
     public final void setConnectionStartElapsedRealtimeMillis(
             @ElapsedRealtimeLong long connectElapsedTimeMillis) {
@@ -2721,7 +2707,6 @@ public abstract class Connection extends Conferenceable {
      * @hide
      */
     @SystemApi
-    @TestApi
     public final void resetConnectionTime() {
         for (Listener l : mListeners) {
             l.onConnectionTimeReset(this);
@@ -3505,7 +3490,6 @@ public abstract class Connection extends Conferenceable {
      * @hide
      */
     @SystemApi
-    @TestApi
     public void setPhoneAccountHandle(@NonNull PhoneAccountHandle phoneAccountHandle) {
         if (mPhoneAccountHandle != phoneAccountHandle) {
             mPhoneAccountHandle = phoneAccountHandle;
@@ -3524,7 +3508,6 @@ public abstract class Connection extends Conferenceable {
      * @hide
      */
     @SystemApi
-    @TestApi
     public @Nullable PhoneAccountHandle getPhoneAccountHandle() {
         return mPhoneAccountHandle;
     }
@@ -3590,7 +3573,6 @@ public abstract class Connection extends Conferenceable {
      * @hide
      */
     @SystemApi
-    @TestApi
     public void setCallDirection(@Call.Details.CallDirection int callDirection) {
         mCallDirection = callDirection;
     }

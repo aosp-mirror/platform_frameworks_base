@@ -111,9 +111,7 @@ public class SlicePermissionActivity extends Activity implements OnClickListener
         final String providerPkg = getIntent().getStringExtra("provider_pkg");
         if (providerPkg == null || mProviderPkg.equals(providerPkg)) return;
         final String callingPkg = getCallingPkg();
-        EventLog.writeEvent(0x534e4554, "159145361", getUid(callingPkg), String.format(
-                "pkg %s (disguised as %s) attempted to request permission to show %s slices in %s",
-                callingPkg, providerPkg, mProviderPkg, mCallingPkg));
+        EventLog.writeEvent(0x534e4554, "159145361", getUid(callingPkg));
     }
 
     @Nullable

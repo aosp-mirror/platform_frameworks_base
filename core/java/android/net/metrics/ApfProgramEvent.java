@@ -20,7 +20,6 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
-import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -40,7 +39,6 @@ import java.util.List;
  * the APF program in place with a new APF program.
  * {@hide}
  */
-@TestApi
 @SystemApi
 public final class ApfProgramEvent implements IpConnectivityLog.Event {
 

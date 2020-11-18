@@ -500,7 +500,7 @@ java_library {
         // TODO(b/147128803) remove the below lines
         "//frameworks/base/apex/blobstore/framework",
         "//frameworks/base/apex/jobscheduler/framework",
-        "//frameworks/base/packages/Tethering/tests/unit",
+        "//packages/modules/Connectivity/Tethering/tests/unit",
     ],
 }
 
@@ -655,6 +655,7 @@ filegroup {
         "core/java/android/annotation/RequiresPermission.java",
         "core/java/android/annotation/SdkConstant.java",
         "core/java/android/annotation/StringDef.java",
+        "core/java/android/annotation/SuppressLint.java",
         "core/java/android/annotation/SystemApi.java",
         "core/java/android/annotation/SystemService.java",
         "core/java/android/annotation/TestApi.java",

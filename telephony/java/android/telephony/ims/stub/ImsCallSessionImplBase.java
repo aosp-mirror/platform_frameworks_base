@@ -18,7 +18,6 @@ package android.telephony.ims.stub;
 
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
-import android.annotation.TestApi;
 import android.os.Message;
 import android.os.RemoteException;
 import android.telephony.ims.ImsCallProfile;
@@ -39,7 +38,6 @@ import com.android.ims.internal.IImsVideoCallProvider;
  * @hide
  */
 @SystemApi
-@TestApi
 // DO NOT remove or change the existing APIs, only add new ones to this Base implementation or you
 // will break other implementations of ImsCallSession maintained by other ImsServices.
 public class ImsCallSessionImplBase implements AutoCloseable {

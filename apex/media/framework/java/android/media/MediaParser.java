@@ -75,6 +75,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.Function;
 
 /**
  * Parses media container formats and extracts contained media samples and metadata.
@@ -882,6 +884,7 @@ public final class MediaParser {
     // Private constants.
 
     private static final String TAG = "MediaParser";
+    private static final String JNI_LIBRARY_NAME = "mediaparser-jni";
     private static final Map<String, ExtractorFactory> EXTRACTOR_FACTORIES_BY_NAME;
     private static final Map<String, Class> EXPECTED_TYPE_BY_PARAMETER_NAME;
     private static final String TS_MODE_SINGLE_PMT = "single_pmt";
@@ -889,6 +892,14 @@ public final class MediaParser {
     private static final String TS_MODE_HLS = "hls";
     private static final int BYTES_PER_SUBSAMPLE_ENCRYPTION_ENTRY = 6;
     private static final byte[] EMPTY_BYTE_ARRAY = new byte[0];
+    private static final String MEDIAMETRICS_ELEMENT_SEPARATOR = "|";
+    private static final int MEDIAMETRICS_MAX_STRING_SIZE = 200;
+    private static final int MEDIAMETRICS_PARAMETER_LIST_MAX_LENGTH;
+    /**
+     * Intentional error introduced to reported metrics to prevent identification of the parsed
+     * media. Note: Increasing this value may cause older hostside CTS tests to fail.
+     */
+    private static final float MEDIAMETRICS_DITHER = .02f;
 
     @IntDef(
             value = {
@@ -920,7 +931,7 @@ public final class MediaParser {
             @NonNull @ParserName String name, @NonNull OutputConsumer outputConsumer) {
         String[] nameAsArray = new String[] {name};
         assertValidNames(nameAsArray);
-        return new MediaParser(outputConsumer, /* sniff= */ false, name);
+        return new MediaParser(outputConsumer, /* createdByName= */ true, name);
     }
 
     /**
@@ -940,7 +951,7 @@ public final class MediaParser {
         if (parserNames.length == 0) {
             parserNames = EXTRACTOR_FACTORIES_BY_NAME.keySet().toArray(new String[0]);
         }
-        return new MediaParser(outputConsumer, /* sniff= */ true, parserNames);
+        return new MediaParser(outputConsumer, /* createdByName= */ false, parserNames);
     }
 
     // Misc static methods.
@@ -1052,6 +1063,14 @@ public final class MediaParser {
     private long mPendingSeekPosition;
     private long mPendingSeekTimeMicros;
     private boolean mLoggedSchemeInitDataCreationException;
+    private boolean mReleased;
+
+    // MediaMetrics fields.
+    private final boolean mCreatedByName;
+    private final SparseArray<Format> mTrackFormats;
+    private String mLastObservedExceptionName;
+    private long mDurationMillis;
+    private long mResourceByteCount;
 
     // Public methods.
 
@@ -1166,11 +1185,15 @@ public final class MediaParser {
         if (mExtractorInput == null) {
             // TODO: For efficiency, the same implementation should be used, by providing a
             // clearBuffers() method, or similar.
+            long resourceLength = seekableInputReader.getLength();
+            if (mResourceByteCount == 0) {
+                // For resource byte count metric collection, we only take into account the length
+                // of the first provided input reader.
+                mResourceByteCount = resourceLength;
+            }
             mExtractorInput =
                     new DefaultExtractorInput(
-                            mExoDataReader,
-                            seekableInputReader.getPosition(),
-                            seekableInputReader.getLength());
+                            mExoDataReader, seekableInputReader.getPosition(), resourceLength);
         }
         mExoDataReader.mInputReader = seekableInputReader;
 
@@ -1195,7 +1218,10 @@ public final class MediaParser {
                     }
                 }
                 if (mExtractor == null) {
-                    throw UnrecognizedInputFormatException.createForExtractors(mParserNamesPool);
+                    UnrecognizedInputFormatException exception =
+                            UnrecognizedInputFormatException.createForExtractors(mParserNamesPool);
+                    mLastObservedExceptionName = exception.getClass().getName();
+                    throw exception;
                 }
                 return true;
             }
@@ -1223,8 +1249,13 @@ public final class MediaParser {
         int result;
         try {
             result = mExtractor.read(mExtractorInput, mPositionHolder);
-        } catch (ParserException e) {
-            throw new ParsingException(e);
+        } catch (Exception e) {
+            mLastObservedExceptionName = e.getClass().getName();
+            if (e instanceof ParserException) {
+                throw new ParsingException((ParserException) e);
+            } else {
+                throw e;
+            }
         }
         if (result == Extractor.RESULT_END_OF_INPUT) {
             mExtractorInput = null;
@@ -1264,21 +1295,64 @@ public final class MediaParser {
      * invoked.
      */
     public void release() {
-        // TODO: Dump media metrics here.
         mExtractorInput = null;
         mExtractor = null;
+        if (mReleased) {
+            // Nothing to do.
+            return;
+        }
+        mReleased = true;
+
+        String trackMimeTypes = buildMediaMetricsString(format -> format.sampleMimeType);
+        String trackCodecs = buildMediaMetricsString(format -> format.codecs);
+        int videoWidth = -1;
+        int videoHeight = -1;
+        for (int i = 0; i < mTrackFormats.size(); i++) {
+            Format format = mTrackFormats.valueAt(i);
+            if (format.width != Format.NO_VALUE && format.height != Format.NO_VALUE) {
+                videoWidth = format.width;
+                videoHeight = format.height;
+                break;
+            }
+        }
+
+        String alteredParameters =
+                String.join(
+                        MEDIAMETRICS_ELEMENT_SEPARATOR,
+                        mParserParameters.keySet().toArray(new String[0]));
+        alteredParameters =
+                alteredParameters.substring(
+                        0,
+                        Math.min(
+                                alteredParameters.length(),
+                                MEDIAMETRICS_PARAMETER_LIST_MAX_LENGTH));
+
+        nativeSubmitMetrics(
+                mParserName,
+                mCreatedByName,
+                String.join(MEDIAMETRICS_ELEMENT_SEPARATOR, mParserNamesPool),
+                mLastObservedExceptionName,
+                addDither(mResourceByteCount),
+                addDither(mDurationMillis),
+                trackMimeTypes,
+                trackCodecs,
+                alteredParameters,
+                videoWidth,
+                videoHeight);
     }
 
     // Private methods.
 
-    private MediaParser(OutputConsumer outputConsumer, boolean sniff, String... parserNamesPool) {
+    private MediaParser(
+            OutputConsumer outputConsumer, boolean createdByName, String... parserNamesPool) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
             throw new UnsupportedOperationException("Android version must be R or greater.");
         }
         mParserParameters = new HashMap<>();
         mOutputConsumer = outputConsumer;
         mParserNamesPool = parserNamesPool;
-        mParserName = sniff ? PARSER_NAME_UNKNOWN : parserNamesPool[0];
+        mCreatedByName = createdByName;
+        mParserName = createdByName ? parserNamesPool[0] : PARSER_NAME_UNKNOWN;
         mPositionHolder = new PositionHolder();
         mExoDataReader = new InputReadingDataReader();
         removePendingSeek();
@@ -1286,6 +1360,24 @@ public final class MediaParser {
         mScratchParsableByteArrayAdapter = new ParsableByteArrayAdapter();
         mSchemeInitDataConstructor = getSchemeInitDataConstructor();
         mMuxedCaptionFormats = new ArrayList<>();
+
+        // MediaMetrics.
+        mTrackFormats = new SparseArray<>();
+        mLastObservedExceptionName = "";
+        mDurationMillis = -1;
+    }
+
+    private String buildMediaMetricsString(Function<Format, String> formatFieldGetter) {
+        StringBuilder stringBuilder = new StringBuilder();
+        for (int i = 0; i < mTrackFormats.size(); i++) {
+            if (i > 0) {
+                stringBuilder.append(MEDIAMETRICS_ELEMENT_SEPARATOR);
+            }
+            String fieldValue = formatFieldGetter.apply(mTrackFormats.valueAt(i));
+            stringBuilder.append(fieldValue != null ? fieldValue : "");
+        }
+        return stringBuilder.substring(
+                0, Math.min(stringBuilder.length(), MEDIAMETRICS_MAX_STRING_SIZE));
     }
 
     private void setMuxedCaptionFormats(List<MediaFormat> mediaFormats) {
@@ -1528,6 +1620,10 @@ public final class MediaParser {
 
         @Override
         public void seekMap(com.google.android.exoplayer2.extractor.SeekMap exoplayerSeekMap) {
+            long durationUs = exoplayerSeekMap.getDurationUs();
+            if (durationUs != C.TIME_UNSET) {
+                mDurationMillis = C.usToMs(durationUs);
+            }
             if (mExposeChunkIndexAsMediaFormat && exoplayerSeekMap instanceof ChunkIndex) {
                 ChunkIndex chunkIndex = (ChunkIndex) exoplayerSeekMap;
                 MediaFormat mediaFormat = new MediaFormat();
@@ -1575,6 +1671,7 @@ public final class MediaParser {
 
         @Override
         public void format(Format format) {
+            mTrackFormats.put(mTrackIndex, format);
             mOutputConsumer.onTrackDataFound(
                     mTrackIndex,
                     new TrackData(
@@ -2031,6 +2128,20 @@ public final class MediaParser {
         return new SeekPoint(exoPlayerSeekPoint.timeUs, exoPlayerSeekPoint.position);
     }
 
+    /**
+     * Introduces random error to the given metric value in order to prevent the identification of
+     * the parsed media.
+     */
+    private static long addDither(long value) {
+        // Generate a random in [0, 1].
+        double randomDither = ThreadLocalRandom.current().nextFloat();
+        // Clamp the random number to [0, 2 * MEDIAMETRICS_DITHER].
+        randomDither *= 2 * MEDIAMETRICS_DITHER;
+        // Translate the random number to [1 - MEDIAMETRICS_DITHER, 1 + MEDIAMETRICS_DITHER].
+        randomDither += 1 - MEDIAMETRICS_DITHER;
+        return value != -1 ? (long) (value * randomDither) : -1;
+    }
+
     private static void assertValidNames(@NonNull String[] names) {
         for (String name : names) {
             if (!EXTRACTOR_FACTORIES_BY_NAME.containsKey(name)) {
@@ -2070,9 +2181,26 @@ public final class MediaParser {
         }
     }
 
+    // Native methods.
+
+    private native void nativeSubmitMetrics(
+            String parserName,
+            boolean createdByName,
+            String parserPool,
+            String lastObservedExceptionName,
+            long resourceByteCount,
+            long durationMillis,
+            String trackMimeTypes,
+            String trackCodecs,
+            String alteredParameters,
+            int videoWidth,
+            int videoHeight);
+
     // Static initialization.
 
     static {
+        System.loadLibrary(JNI_LIBRARY_NAME);
+
         // Using a LinkedHashMap to keep the insertion order when iterating over the keys.
         LinkedHashMap<String, ExtractorFactory> extractorFactoriesByName = new LinkedHashMap<>();
         // Parsers are ordered to match ExoPlayer's DefaultExtractorsFactory extractor ordering,
@@ -2125,6 +2253,15 @@ public final class MediaParser {
         // We do not check PARAMETER_EXPOSE_CAPTION_FORMATS here, and we do it in setParameters
         // instead. Checking that the value is a List is insufficient to catch wrong parameter
         // value types.
+        int sumOfParameterNameLengths =
+                expectedTypeByParameterName.keySet().stream()
+                        .map(String::length)
+                        .reduce(0, Integer::sum);
+        sumOfParameterNameLengths += PARAMETER_EXPOSE_CAPTION_FORMATS.length();
+        // Add space for any required separators.
+        MEDIAMETRICS_PARAMETER_LIST_MAX_LENGTH =
+                sumOfParameterNameLengths + expectedTypeByParameterName.size();
+
         EXPECTED_TYPE_BY_PARAMETER_NAME = Collections.unmodifiableMap(expectedTypeByParameterName);
     }
 }

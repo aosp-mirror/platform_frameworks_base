@@ -18,7 +18,6 @@ package android.hardware.hdmi;
 import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
-import android.annotation.TestApi;
 import android.hardware.hdmi.HdmiControlManager.ControlCallbackResult;
 import android.os.Binder;
 import android.os.RemoteException;
@@ -39,7 +38,6 @@ import java.util.concurrent.Executor;
  * @hide
  */
 @SystemApi
-@TestApi
 public class HdmiSwitchClient extends HdmiClient {
 
     private static final String TAG = "HdmiSwitchClient";

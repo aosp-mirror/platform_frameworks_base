@@ -18,7 +18,6 @@ package android.telephony.ims.feature;
 
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
-import android.annotation.TestApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.telephony.ims.stub.ImsRegistrationImplBase;
@@ -34,7 +33,6 @@ import java.util.Set;
  * {@hide}
  */
 @SystemApi
-@TestApi
 public final class CapabilityChangeRequest implements Parcelable {
 
     /**

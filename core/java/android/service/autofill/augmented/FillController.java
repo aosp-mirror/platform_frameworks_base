@@ -19,7 +19,6 @@ import static android.service.autofill.augmented.AugmentedAutofillService.sDebug
 
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
-import android.annotation.TestApi;
 import android.os.RemoteException;
 import android.service.autofill.augmented.AugmentedAutofillService.AutofillProxy;
 import android.util.Log;
@@ -37,7 +36,6 @@ import java.util.List;
  * @hide
  */
 @SystemApi
-@TestApi
 public final class FillController {
     private static final String TAG = FillController.class.getSimpleName();
 

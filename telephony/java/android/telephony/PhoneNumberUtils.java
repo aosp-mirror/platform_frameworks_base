@@ -2239,7 +2239,6 @@ public class PhoneNumberUtils {
      * @hide
      */
     @SystemApi
-    @TestApi
     public static boolean isVoiceMailNumber(@NonNull Context context, int subId,
             @Nullable String number) {
         String vmNumber, mdn;
@@ -2728,7 +2727,6 @@ public class PhoneNumberUtils {
      * @return true if number contains @
      */
     @SystemApi
-    @TestApi
     public static boolean isUriNumber(@Nullable String number) {
         // Note we allow either "@" or "%40" to indicate a URI, in case
         // the passed-in string is URI-escaped.  (Neither "@" nor "%40"
@@ -2747,7 +2745,6 @@ public class PhoneNumberUtils {
      * @hide
      */
     @SystemApi
-    @TestApi
     public static @NonNull String getUsernameFromUriNumber(@NonNull String number) {
         // The delimiter between username and domain name can be
         // either "@" or "%40" (the URI-escaped equivalent.)

@@ -19,7 +19,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.StringDef;
 import android.annotation.SystemApi;
-import android.annotation.TestApi;
 import android.app.Notification;
 import android.os.Bundle;
 import android.os.Parcel;
@@ -42,7 +41,6 @@ import java.lang.annotation.RetentionPolicy;
  * @hide
  */
 @SystemApi
-@TestApi
 public final class Adjustment implements Parcelable {
     private final String mPackage;
     private final String mKey;
@@ -148,7 +146,6 @@ public final class Adjustment implements Parcelable {
      * @hide
      */
     @SystemApi
-    @TestApi
     public Adjustment(String pkg, String key, Bundle signals, CharSequence explanation, int user) {
         mPackage = pkg;
         mKey = key;
@@ -232,7 +229,6 @@ public final class Adjustment implements Parcelable {
 
     /** @hide */
     @SystemApi
-    @TestApi
     public int getUser() {
         return mUser;
     }

@@ -19,7 +19,6 @@ package android.service.contentcapture;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
-import android.annotation.TestApi;
 import android.app.usage.UsageEvents.Event;
 import android.content.ComponentName;
 import android.os.Parcel;
@@ -34,7 +33,6 @@ import java.lang.annotation.RetentionPolicy;
  * @hide
  */
 @SystemApi
-@TestApi
 public final class ActivityEvent implements Parcelable {
 
     /**

@@ -19,7 +19,6 @@ package android.net.metrics;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
-import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -29,7 +28,6 @@ import android.os.Parcelable;
  * {@hide}
  */
 @SystemApi
-@TestApi
 public final class ApfStats implements IpConnectivityLog.Event {
 
     /**
@@ -126,7 +124,6 @@ public final class ApfStats implements IpConnectivityLog.Event {
      * @hide
      */
     @SystemApi
-    @TestApi
     public static final class Builder {
         private long mDurationMs;
         private int mReceivedRas;

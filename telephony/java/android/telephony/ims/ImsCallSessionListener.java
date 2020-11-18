@@ -19,7 +19,6 @@ package android.telephony.ims;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
-import android.annotation.TestApi;
 import android.os.RemoteException;
 import android.telephony.Annotation;
 import android.telephony.CallQuality;
@@ -40,7 +39,6 @@ import com.android.ims.internal.IImsCallSession;
 // TODO: APIs in here do not conform to API guidelines yet. This can be changed if
 // ImsCallSessionListenerConverter is also changed.
 @SystemApi
-@TestApi
 public class ImsCallSessionListener {
 
     private final IImsCallSessionListener mListener;

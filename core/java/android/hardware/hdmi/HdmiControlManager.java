@@ -29,7 +29,6 @@ import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
-import android.annotation.TestApi;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Binder;
@@ -58,7 +57,6 @@ import java.util.concurrent.Executor;
  * @hide
  */
 @SystemApi
-@TestApi
 @SystemService(Context.HDMI_CONTROL_SERVICE)
 @RequiresFeature(PackageManager.FEATURE_HDMI_CEC)
 public final class HdmiControlManager {

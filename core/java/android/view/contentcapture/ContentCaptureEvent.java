@@ -22,7 +22,6 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
-import android.annotation.TestApi;
 import android.graphics.Insets;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -39,7 +38,6 @@ import java.util.List;
 
 /** @hide */
 @SystemApi
-@TestApi
 public final class ContentCaptureEvent implements Parcelable {
 
     private static final String TAG = ContentCaptureEvent.class.getSimpleName();

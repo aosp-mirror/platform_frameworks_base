@@ -850,7 +850,6 @@ public final class NetworkCapabilities implements Parcelable {
      * @return an array of transport type values for this instance.
      * @hide
      */
-    @TestApi
     @SystemApi
     @NonNull public @Transport int[] getTransportTypes() {
         return BitUtils.unpackBits(mTransportTypes);
@@ -1025,7 +1024,6 @@ public final class NetworkCapabilities implements Parcelable {
      */
     @NonNull
     @SystemApi
-    @TestApi
     public int[] getAdministratorUids() {
         return Arrays.copyOf(mAdministratorUids, mAdministratorUids.length);
     }
@@ -1506,7 +1504,6 @@ public final class NetworkCapabilities implements Parcelable {
      * @hide
      */
     @SystemApi
-    @TestApi
     public @Nullable String getSsid() {
         return mSSID;
     }
@@ -1590,7 +1587,6 @@ public final class NetworkCapabilities implements Parcelable {
      *
      * @hide
      */
-    @TestApi
     @SystemApi
     public boolean satisfiedByNetworkCapabilities(@Nullable NetworkCapabilities nc) {
         return satisfiedByNetworkCapabilities(nc, false);
@@ -2136,7 +2132,6 @@ public final class NetworkCapabilities implements Parcelable {
      * @hide
      */
     @SystemApi
-    @TestApi
     public static final class Builder {
         private final NetworkCapabilities mCaps;
 

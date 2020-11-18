@@ -1337,7 +1337,6 @@ public class NotificationManager {
      * @hide
      */
     @SystemApi
-    @TestApi
     public boolean isNotificationAssistantAccessGranted(@NonNull ComponentName assistant) {
         INotificationManager service = getService();
         try {
@@ -1373,7 +1372,6 @@ public class NotificationManager {
      * @hide
      */
     @SystemApi
-    @TestApi
     public @NonNull @Adjustment.Keys List<String> getAllowedAssistantAdjustments() {
         INotificationManager service = getService();
         try {
@@ -1506,7 +1504,6 @@ public class NotificationManager {
      * @hide
      */
     @SystemApi
-    @TestApi
     public void setNotificationAssistantAccessGranted(@Nullable ComponentName assistant,
             boolean granted) {
         INotificationManager service = getService();
@@ -1529,7 +1526,6 @@ public class NotificationManager {
 
     /** @hide */
     @SystemApi
-    @TestApi
     public @Nullable ComponentName getAllowedNotificationAssistant() {
         INotificationManager service = getService();
         try {

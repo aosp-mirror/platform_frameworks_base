@@ -235,7 +235,6 @@ public class Environment {
      * @hide
      */
     @SystemApi
-    @TestApi
     public static @NonNull File getOemDirectory() {
         return DIR_OEM_ROOT;
     }
@@ -247,7 +246,6 @@ public class Environment {
      * @hide
      */
     @SystemApi
-    @TestApi
     public static @NonNull File getOdmDirectory() {
         return DIR_ODM_ROOT;
     }
@@ -258,7 +256,6 @@ public class Environment {
      * @hide
      */
     @SystemApi
-    @TestApi
     public static @NonNull File getVendorDirectory() {
         return DIR_VENDOR_ROOT;
     }
@@ -270,7 +267,6 @@ public class Environment {
      * @hide
      */
     @SystemApi
-    @TestApi
     public static @NonNull File getProductDirectory() {
         return DIR_PRODUCT_ROOT;
     }
@@ -297,7 +293,6 @@ public class Environment {
      * @hide
      */
     @SystemApi
-    @TestApi
     public static @NonNull File getSystemExtDirectory() {
         return DIR_SYSTEM_EXT_ROOT;
     }

@@ -8508,13 +8508,13 @@ public class TelephonyManager {
     /**
      * Values used to return status for hasCarrierPrivileges call.
      */
-    /** @hide */ @SystemApi @TestApi
+    /** @hide */ @SystemApi
     public static final int CARRIER_PRIVILEGE_STATUS_HAS_ACCESS = 1;
-    /** @hide */ @SystemApi @TestApi
+    /** @hide */ @SystemApi
     public static final int CARRIER_PRIVILEGE_STATUS_NO_ACCESS = 0;
-    /** @hide */ @SystemApi @TestApi
+    /** @hide */ @SystemApi
     public static final int CARRIER_PRIVILEGE_STATUS_RULES_NOT_LOADED = -1;
-    /** @hide */ @SystemApi @TestApi
+    /** @hide */ @SystemApi
     public static final int CARRIER_PRIVILEGE_STATUS_ERROR_LOADING_RULES = -2;
 
     /**
@@ -8716,7 +8716,6 @@ public class TelephonyManager {
 
     /** @hide */
     @SystemApi
-    @TestApi
     @SuppressLint("Doclava125")
     public int checkCarrierPrivilegesForPackage(String pkgName) {
         try {
@@ -8749,7 +8748,6 @@ public class TelephonyManager {
 
     /** @hide */
     @SystemApi
-    @TestApi
     public List<String> getCarrierPackageNamesForIntent(Intent intent) {
         return getCarrierPackageNamesForIntentAndPhone(intent, getPhoneId());
     }
@@ -10258,7 +10256,6 @@ public class TelephonyManager {
      * @hide
      */
     @SystemApi
-    @TestApi
     @RequiresPermission(Manifest.permission.INTERACT_ACROSS_USERS)
     public @Nullable ComponentName getAndUpdateDefaultRespondViaMessageApplication() {
         return SmsApplication.getDefaultRespondViaMessageApplication(mContext, true);
@@ -10271,7 +10268,6 @@ public class TelephonyManager {
      * @hide
      */
     @SystemApi
-    @TestApi
     @RequiresPermission(Manifest.permission.INTERACT_ACROSS_USERS)
     public @Nullable ComponentName getDefaultRespondViaMessageApplication() {
         return SmsApplication.getDefaultRespondViaMessageApplication(mContext, false);
@@ -11886,7 +11882,6 @@ public class TelephonyManager {
      *
      * @hide
      */
-    @TestApi
     @SystemApi
     public static final int INVALID_EMERGENCY_NUMBER_DB_VERSION = -1;
 
@@ -11926,7 +11921,6 @@ public class TelephonyManager {
      */
     @RequiresPermission(android.Manifest.permission.READ_ACTIVE_EMERGENCY_SESSION)
     @SystemApi
-    @TestApi
     public void updateOtaEmergencyNumberDbFilePath(
             @NonNull ParcelFileDescriptor otaParcelFileDescriptor) {
         try {
@@ -11952,7 +11946,6 @@ public class TelephonyManager {
      */
     @RequiresPermission(android.Manifest.permission.READ_ACTIVE_EMERGENCY_SESSION)
     @SystemApi
-    @TestApi
     public void resetOtaEmergencyNumberDbFilePath() {
         try {
             ITelephony telephony = getITelephony();
@@ -12173,7 +12166,6 @@ public class TelephonyManager {
      *
      * @hide
      */
-    @TestApi
     @SystemApi
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public int getEmergencyNumberDbVersion() {
@@ -12901,7 +12893,6 @@ public class TelephonyManager {
      * @hide
      */
     @SystemApi
-    @TestApi
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     public void setSystemSelectionChannels(@NonNull List<RadioAccessSpecifier> specifiers,
             @NonNull @CallbackExecutor Executor executor,
@@ -12919,7 +12910,6 @@ public class TelephonyManager {
      * @hide
      */
     @SystemApi
-    @TestApi
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     public void setSystemSelectionChannels(@NonNull List<RadioAccessSpecifier> specifiers) {
         Objects.requireNonNull(specifiers, "Specifiers must not be null.");

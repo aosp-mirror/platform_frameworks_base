@@ -17,7 +17,6 @@
 package android.telephony.ims;
 
 import android.annotation.SystemApi;
-import android.annotation.TestApi;
 import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
@@ -92,7 +91,6 @@ import com.android.internal.annotations.VisibleForTesting;
  * @hide
  */
 @SystemApi
-@TestApi
 public class ImsService extends Service {
 
     private static final String LOG_TAG = "ImsService";

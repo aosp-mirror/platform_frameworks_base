@@ -22,7 +22,6 @@ import static android.system.OsConstants.SO_BINDTODEVICE;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
-import android.annotation.TestApi;
 import android.net.NetworkUtils;
 import android.system.ErrnoException;
 import android.system.NetlinkSocketAddress;
@@ -40,7 +39,6 @@ import java.net.SocketAddress;
  * @hide
  */
 @SystemApi
-@TestApi
 public final class SocketUtils {
     /**
      * Create a raw datagram socket that is bound to an interface.
