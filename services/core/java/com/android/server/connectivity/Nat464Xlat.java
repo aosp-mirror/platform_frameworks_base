@@ -21,7 +21,7 @@ import android.net.ConnectivityManager;
 import android.net.IDnsResolver;
 import android.net.INetd;
 import android.net.InetAddresses;
-import android.net.InterfaceConfiguration;
+import android.net.InterfaceConfigurationParcel;
 import android.net.IpPrefix;
 import android.net.LinkAddress;
 import android.net.LinkProperties;
@@ -447,9 +447,10 @@ public class Nat464Xlat extends BaseNetworkObserver {
 
     private LinkAddress getLinkAddress(String iface) {
         try {
-            InterfaceConfiguration config = mNMService.getInterfaceConfig(iface);
-            return config.getLinkAddress();
-        } catch (RemoteException | IllegalStateException e) {
+            final InterfaceConfigurationParcel config = mNetd.interfaceGetCfg(iface);
+            return new LinkAddress(
+                    InetAddresses.parseNumericAddress(config.ipv4Addr), config.prefixLength);
+        } catch (IllegalArgumentException | RemoteException | ServiceSpecificException e) {
             Slog.e(TAG, "Error getting link properties: " + e);
             return null;
         }
