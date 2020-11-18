@@ -117,7 +117,8 @@ class ResourceMapping {
   static Result<ResourceMapping> CreateResourceMappingLegacy(const AssetManager2* target_am,
                                                              const AssetManager2* overlay_am,
                                                              const LoadedPackage* target_package,
-                                                             const LoadedPackage* overlay_package);
+                                                             const LoadedPackage* overlay_package,
+                                                             LogInfo& log_info);
 
   // Removes resources that do not pass policy or overlayable checks of the target package.
   void FilterOverlayableResources(const AssetManager2* target_am,

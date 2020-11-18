@@ -40,7 +40,7 @@ class FileReader : public zip_archive::Reader {
     explicit FileReader(FILE* fp) : Reader(), mFp(fp), mCurrentOffset(0) {
     }
 
-    bool ReadAtOffset(uint8_t* buf, size_t len, off64_t offset) const {
+    bool ReadAtOffset(uint8_t* buf, size_t len, off64_t offset) const override {
         // Data is usually requested sequentially, so this helps avoid pointless
         // fseeks every time we perform a read. There's an impedence mismatch
         // here because the original API was designed around pread and pwrite.
@@ -71,7 +71,7 @@ class FdReader : public zip_archive::Reader {
     explicit FdReader(int fd) : mFd(fd) {
     }
 
-    bool ReadAtOffset(uint8_t* buf, size_t len, off64_t offset) const {
+    bool ReadAtOffset(uint8_t* buf, size_t len, off64_t offset) const override {
       return android::base::ReadFullyAtOffset(mFd, buf, len, offset);
     }
 
@@ -81,22 +81,27 @@ class FdReader : public zip_archive::Reader {
 
 class BufferReader : public zip_archive::Reader {
   public:
-    BufferReader(const void* input, size_t inputSize) : Reader(),
-        mInput(reinterpret_cast<const uint8_t*>(input)),
+    BufferReader(incfs::map_ptr<void> input, size_t inputSize) : Reader(),
+        mInput(input.convert<uint8_t>()),
         mInputSize(inputSize) {
     }
 
-    bool ReadAtOffset(uint8_t* buf, size_t len, off64_t offset) const {
+    bool ReadAtOffset(uint8_t* buf, size_t len, off64_t offset) const override {
         if (mInputSize < len || offset > mInputSize - len) {
             return false;
         }
 
-        memcpy(buf, mInput + offset, len);
+        const incfs::map_ptr<uint8_t> pos = mInput.offset(offset);
+        if (!pos.verify(len)) {
+          return false;
+        }
+
+        memcpy(buf, pos.unsafe_ptr(), len);
         return true;
     }
 
   private:
-    const uint8_t* mInput;
+    const incfs::map_ptr<uint8_t> mInput;
     const size_t mInputSize;
 };
 
@@ -138,7 +143,7 @@ class BufferWriter : public zip_archive::Writer {
     return (zip_archive::Inflate(reader, compressedLen, uncompressedLen, &writer, nullptr) == 0);
 }
 
-/*static*/ bool ZipUtils::inflateToBuffer(const void* in, void* buf,
+/*static*/ bool ZipUtils::inflateToBuffer(incfs::map_ptr<void> in, void* buf,
     long uncompressedLen, long compressedLen)
 {
     BufferReader reader(in, compressedLen);

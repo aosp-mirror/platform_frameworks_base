@@ -52,22 +52,22 @@ OverlayStringPool::~OverlayStringPool() {
   uninit();
 }
 
-const char16_t* OverlayStringPool::stringAt(size_t idx, size_t* outLen) const {
+base::expected<StringPiece16, NullOrIOError> OverlayStringPool::stringAt(size_t idx) const {
   const size_t offset = dtohl(data_header_->string_pool_index_offset);
   if (idmap_string_pool_ != nullptr && idx >= ResStringPool::size() && idx >= offset) {
-    return idmap_string_pool_->stringAt(idx - offset, outLen);
+    return idmap_string_pool_->stringAt(idx - offset);
   }
 
-  return ResStringPool::stringAt(idx, outLen);
+  return ResStringPool::stringAt(idx);
 }
 
-const char* OverlayStringPool::string8At(size_t idx, size_t* outLen) const {
+base::expected<StringPiece, NullOrIOError> OverlayStringPool::string8At(size_t idx) const {
   const size_t offset = dtohl(data_header_->string_pool_index_offset);
   if (idmap_string_pool_ != nullptr && idx >= ResStringPool::size() && idx >= offset) {
-    return idmap_string_pool_->string8At(idx - offset, outLen);
+    return idmap_string_pool_->string8At(idx - offset);
   }
 
-  return ResStringPool::string8At(idx, outLen);
+  return ResStringPool::string8At(idx);
 }
 
 size_t OverlayStringPool::size() const {
