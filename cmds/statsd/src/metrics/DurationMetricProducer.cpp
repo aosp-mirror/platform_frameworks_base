@@ -107,6 +107,12 @@ DurationMetricProducer::DurationMetricProducer(
         ALOGE("Position ANY in dimension_in_what not supported.");
     }
 
+    // Dimensions in what must be subset of internal dimensions
+    if (!subsetDimensions(mDimensionsInWhat, mInternalDimensions)) {
+        ALOGE("Dimensions in what must be a subset of the internal dimensions");
+        mValid = false;
+    }
+
     mSliceByPositionALL = HasPositionALL(metric.dimensions_in_what());
 
     if (metric.links().size() > 0) {
@@ -115,6 +121,10 @@ DurationMetricProducer::DurationMetricProducer(
             mc.conditionId = link.condition();
             translateFieldMatcher(link.fields_in_what(), &mc.metricFields);
             translateFieldMatcher(link.fields_in_condition(), &mc.conditionFields);
+            if (!subsetDimensions(mc.metricFields, mInternalDimensions)) {
+                ALOGE(("Condition links must be a subset of the internal dimensions"));
+                mValid = false;
+            }
             mMetric2ConditionLinks.push_back(mc);
         }
         mConditionSliced = true;
@@ -126,6 +136,10 @@ DurationMetricProducer::DurationMetricProducer(
         ms.stateAtomId = stateLink.state_atom_id();
         translateFieldMatcher(stateLink.fields_in_what(), &ms.metricFields);
         translateFieldMatcher(stateLink.fields_in_state(), &ms.stateFields);
+        if (!subsetDimensions(ms.metricFields, mInternalDimensions)) {
+            ALOGE(("State links must be a subset of the dimensions in what  internal dimensions"));
+            mValid = false;
+        }
         mMetric2StateLinks.push_back(ms);
     }
 

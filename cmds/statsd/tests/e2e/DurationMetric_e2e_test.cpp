@@ -486,11 +486,11 @@ TEST(DurationMetricE2eTest, TestWithSlicedCondition) {
     // Links between wakelock state atom and condition of app is in background.
     auto links = durationMetric->add_links();
     links->set_condition(isInBackgroundPredicate.id());
-    auto dimensionWhat = links->mutable_fields_in_what();
-    dimensionWhat->set_field(util::WAKELOCK_STATE_CHANGED);
-    dimensionWhat->add_child()->set_field(1);  // uid field.
-    *links->mutable_fields_in_condition() = CreateAttributionUidDimensions(
-            util::ACTIVITY_FOREGROUND_STATE_CHANGED, {Position::FIRST});
+    *links->mutable_fields_in_what() =
+            CreateAttributionUidDimensions(util::WAKELOCK_STATE_CHANGED, {Position::FIRST});
+    auto dimensionCondition = links->mutable_fields_in_condition();
+    dimensionCondition->set_field(util::ACTIVITY_FOREGROUND_STATE_CHANGED);
+    dimensionCondition->add_child()->set_field(1);  // uid field.
 
     ConfigKey cfgKey;
     uint64_t bucketStartTimeNs = 10000000000;
@@ -591,11 +591,11 @@ TEST(DurationMetricE2eTest, TestWithActivationAndSlicedCondition) {
     // Links between wakelock state atom and condition of app is in background.
     auto links = durationMetric->add_links();
     links->set_condition(isInBackgroundPredicate.id());
-    auto dimensionWhat = links->mutable_fields_in_what();
-    dimensionWhat->set_field(util::WAKELOCK_STATE_CHANGED);
-    dimensionWhat->add_child()->set_field(1);  // uid field.
-    *links->mutable_fields_in_condition() = CreateAttributionUidDimensions(
-            util::ACTIVITY_FOREGROUND_STATE_CHANGED, {Position::FIRST});
+    *links->mutable_fields_in_what() =
+            CreateAttributionUidDimensions(util::WAKELOCK_STATE_CHANGED, {Position::FIRST});
+    auto dimensionCondition = links->mutable_fields_in_condition();
+    dimensionCondition->set_field(util::ACTIVITY_FOREGROUND_STATE_CHANGED);
+    dimensionCondition->add_child()->set_field(1);  // uid field.
 
     auto metric_activation1 = config.add_metric_activation();
     metric_activation1->set_metric_id(durationMetric->id());
@@ -1228,6 +1228,9 @@ TEST(DurationMetricE2eTest, TestWithSlicedStatePrimaryFieldsSubset) {
     *config.add_atom_matcher() = CreateReleaseWakelockAtomMatcher();
 
     auto holdingWakelockPredicate = CreateHoldingWakelockPredicate();
+    *(holdingWakelockPredicate.mutable_simple_predicate()->mutable_dimensions()) =
+            CreateAttributionUidAndOtherDimensions(util::WAKELOCK_STATE_CHANGED, {Position::FIRST},
+                                                   {3 /* tag */});
     *config.add_predicate() = holdingWakelockPredicate;
 
     auto uidProcessState = CreateUidProcessState();
