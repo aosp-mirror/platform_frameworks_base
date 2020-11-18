@@ -247,7 +247,7 @@ class DisplayAreaPolicyBuilder {
         private final ArrayList<DisplayAreaPolicyBuilder.Feature> mFeatures = new ArrayList<>();
         private final ArrayList<TaskDisplayArea> mTaskDisplayAreas = new ArrayList<>();
         @Nullable
-        private DisplayArea<? extends WindowContainer> mImeContainer;
+        private DisplayArea.Tokens mImeContainer;
 
         HierarchyBuilder(RootDisplayArea root) {
             mRoot = root;
@@ -270,7 +270,7 @@ class DisplayAreaPolicyBuilder {
         }
 
         /** Sets IME container as a child of this hierarchy root. */
-        HierarchyBuilder setImeContainer(DisplayArea<? extends WindowContainer> imeContainer) {
+        HierarchyBuilder setImeContainer(DisplayArea.Tokens imeContainer) {
             mImeContainer = imeContainer;
             return this;
         }
@@ -706,6 +706,10 @@ class DisplayAreaPolicyBuilder {
         private DisplayArea createArea(DisplayArea<DisplayArea> parent,
                 DisplayArea.Tokens[] areaForLayer) {
             if (mExisting != null) {
+                if (mExisting.asTokens() != null) {
+                    // Store the WindowToken container for layers
+                    fillAreaForLayers(mExisting.asTokens(), areaForLayer);
+                }
                 return mExisting;
             }
             if (mSkipTokens) {
@@ -722,13 +726,17 @@ class DisplayAreaPolicyBuilder {
             if (mFeature == null) {
                 final DisplayArea.Tokens leaf = new DisplayArea.Tokens(parent.mWmService, type,
                         "Leaf:" + mMinLayer + ":" + mMaxLayer);
-                for (int i = mMinLayer; i <= mMaxLayer; i++) {
-                    areaForLayer[i] = leaf;
-                }
+                fillAreaForLayers(leaf, areaForLayer);
                 return leaf;
             } else {
                 return mFeature.mNewDisplayAreaSupplier.create(parent.mWmService, type,
                         mFeature.mName + ":" + mMinLayer + ":" + mMaxLayer, mFeature.mId);
+            }
+        }
+
+        private void fillAreaForLayers(DisplayArea.Tokens leaf, DisplayArea.Tokens[] areaForLayer) {
+            for (int i = mMinLayer; i <= mMaxLayer; i++) {
+                areaForLayer[i] = leaf;
             }
         }
     }

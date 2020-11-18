@@ -20,6 +20,7 @@ import static android.os.Process.INVALID_UID;
 import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
+import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_PRESENTATION;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
@@ -82,7 +83,7 @@ public class DisplayAreaPolicyBuilderTest {
     private TestWindowManagerPolicy mPolicy = new TestWindowManagerPolicy(null, null);
     private WindowManagerService mWms;
     private RootDisplayArea mRoot;
-    private DisplayArea<WindowContainer> mImeContainer;
+    private DisplayArea.Tokens mImeContainer;
     private DisplayContent mDisplayContent;
     private TaskDisplayArea mDefaultTaskDisplayArea;
     private List<TaskDisplayArea> mTaskDisplayAreaList;
@@ -95,7 +96,7 @@ public class DisplayAreaPolicyBuilderTest {
     public void setup() {
         mWms = mSystemServices.getWindowManagerService();
         mRoot = new SurfacelessDisplayAreaRoot(mWms);
-        mImeContainer = new DisplayArea<>(mWms, ABOVE_TASKS, "Ime");
+        mImeContainer = new DisplayArea.Tokens(mWms, ABOVE_TASKS, "ImeContainer");
         mDisplayContent = mock(DisplayContent.class);
         mDefaultTaskDisplayArea = new TaskDisplayArea(mDisplayContent, mWms, "Tasks",
                 FEATURE_DEFAULT_TASK_CONTAINER);
@@ -148,6 +149,10 @@ public class DisplayAreaPolicyBuilderTest {
         // The IME is below both foo and bar.
         assertThat(fooDescendantMatcher.matches(mImeContainer)).isTrue();
         assertThat(barDescendantMatcher.matches(mImeContainer)).isTrue();
+        assertThat(policy.findAreaForToken(tokenOfType(TYPE_INPUT_METHOD)))
+                .isEqualTo(mImeContainer);
+        assertThat(policy.findAreaForToken(tokenOfType(TYPE_INPUT_METHOD_DIALOG)))
+                .isEqualTo(mImeContainer);
 
         List<DisplayArea<?>> actualOrder = collectLeafAreas(mRoot);
         Map<DisplayArea<?>, Set<Integer>> zSets = calculateZSets(policy, mImeContainer,
@@ -547,7 +552,7 @@ public class DisplayAreaPolicyBuilderTest {
 
     private Map<DisplayArea<?>, Set<Integer>> calculateZSets(
             DisplayAreaPolicyBuilder.Result policy,
-            DisplayArea<WindowContainer> ime,
+            DisplayArea.Tokens ime,
             DisplayArea<Task> tasks) {
         Map<DisplayArea<?>, Set<Integer>> zSets = new HashMap<>();
         int[] types = {TYPE_STATUS_BAR, TYPE_NAVIGATION_BAR, TYPE_PRESENTATION,

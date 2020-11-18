@@ -86,7 +86,7 @@ public abstract class DisplayAreaPolicy {
         @Override
         public DisplayAreaPolicy instantiate(WindowManagerService wmService,
                 DisplayContent content, RootDisplayArea root,
-                DisplayArea<? extends WindowContainer> imeContainer) {
+                DisplayArea.Tokens imeContainer) {
             final TaskDisplayArea defaultTaskDisplayArea = new TaskDisplayArea(content, wmService,
                     "DefaultTaskDisplayArea", FEATURE_DEFAULT_TASK_CONTAINER);
             final List<TaskDisplayArea> tdaList = new ArrayList<>();
@@ -151,7 +151,7 @@ public abstract class DisplayAreaPolicy {
          * @see DisplayAreaPolicy#DisplayAreaPolicy
          */
         DisplayAreaPolicy instantiate(WindowManagerService wmService, DisplayContent content,
-                RootDisplayArea root, DisplayArea<? extends WindowContainer> imeContainer);
+                RootDisplayArea root, DisplayArea.Tokens imeContainer);
 
         /**
          * Instantiates the device-specific {@link Provider}.
