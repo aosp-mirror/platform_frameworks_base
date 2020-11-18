@@ -14,21 +14,21 @@
  * limitations under the License.
  */
 
-package com.android.server.biometrics.sensors.fingerprint.aidl;
+package com.android.server.biometrics.sensors.face.aidl;
 
 import static android.Manifest.permission.TEST_BIOMETRIC;
 
 import android.annotation.NonNull;
 import android.content.Context;
 import android.hardware.biometrics.ITestSession;
-import android.hardware.fingerprint.Fingerprint;
-import android.hardware.fingerprint.IFingerprintServiceReceiver;
+import android.hardware.face.Face;
+import android.hardware.face.IFaceServiceReceiver;
 import android.os.Binder;
 import android.util.Slog;
 
 import com.android.server.biometrics.HardwareAuthTokenUtils;
 import com.android.server.biometrics.Utils;
-import com.android.server.biometrics.sensors.fingerprint.FingerprintUtils;
+import com.android.server.biometrics.sensors.face.FaceUtils;
 
 import java.util.HashSet;
 import java.util.List;
@@ -36,16 +36,16 @@ import java.util.Random;
 import java.util.Set;
 
 /**
- * A test session implementation for {@link FingerprintProvider}. See
+ * A test session implementation for {@link FaceProvider}. See
  * {@link android.hardware.biometrics.BiometricTestSession}.
  */
-class BiometricTestSessionImpl extends ITestSession.Stub {
+public class BiometricTestSessionImpl extends ITestSession.Stub {
 
     private static final String TAG = "BiometricTestSessionImpl";
 
     @NonNull private final Context mContext;
     private final int mSensorId;
-    @NonNull private final FingerprintProvider mProvider;
+    @NonNull private final FaceProvider mProvider;
     @NonNull private final Sensor mSensor;
     @NonNull private final Set<Integer> mEnrollmentIds;
     @NonNull private final Random mRandom;
@@ -53,27 +53,26 @@ class BiometricTestSessionImpl extends ITestSession.Stub {
     /**
      * Internal receiver currently only used for enroll. Results do not need to be forwarded to the
      * test, since enrollment is a platform-only API. The authentication path is tested through
-     * the public FingerprintManager APIs and does not use this receiver.
+     * the public BiometricPrompt APIs and does not use this receiver.
      */
-    private final IFingerprintServiceReceiver mReceiver = new IFingerprintServiceReceiver.Stub() {
+    private final IFaceServiceReceiver mReceiver = new IFaceServiceReceiver.Stub() {
         @Override
-        public void onEnrollResult(Fingerprint fp, int remaining) {
+        public void onEnrollResult(Face face, int remaining) {
 
         }
 
         @Override
-        public void onAcquired(int acquiredInfo, int vendorCode) {
+        public void onAcquired(int acquireInfo, int vendorCode) {
 
         }
 
         @Override
-        public void onAuthenticationSucceeded(Fingerprint fp, int userId,
-                boolean isStrongBiometric) {
+        public void onAuthenticationSucceeded(Face face, int userId, boolean isStrongBiometric) {
 
         }
 
         @Override
-        public void onFingerprintDetected(int sensorId, int userId, boolean isStrongBiometric) {
+        public void onFaceDetected(int sensorId, int userId, boolean isStrongBiometric) {
 
         }
 
@@ -88,7 +87,17 @@ class BiometricTestSessionImpl extends ITestSession.Stub {
         }
 
         @Override
-        public void onRemoved(Fingerprint fp, int remaining) {
+        public void onRemoved(Face face, int remaining) {
+
+        }
+
+        @Override
+        public void onFeatureSet(boolean success, int feature) {
+
+        }
+
+        @Override
+        public void onFeatureGet(boolean success, int feature, boolean value) {
 
         }
 
@@ -96,10 +105,20 @@ class BiometricTestSessionImpl extends ITestSession.Stub {
         public void onChallengeGenerated(int sensorId, long challenge) {
 
         }
+
+        @Override
+        public void onChallengeInterrupted(int sensorId) {
+
+        }
+
+        @Override
+        public void onChallengeInterruptFinished(int sensorId) {
+
+        }
     };
 
     BiometricTestSessionImpl(@NonNull Context context, int sensorId,
-            @NonNull FingerprintProvider provider, @NonNull Sensor sensor) {
+            @NonNull FaceProvider provider, @NonNull Sensor sensor) {
         mContext = context;
         mSensorId = sensorId;
         mProvider = provider;
@@ -121,7 +140,7 @@ class BiometricTestSessionImpl extends ITestSession.Stub {
         Utils.checkPermission(mContext, TEST_BIOMETRIC);
 
         mProvider.scheduleEnroll(mSensorId, new Binder(), new byte[69], userId, mReceiver,
-                mContext.getOpPackageName());
+                mContext.getOpPackageName(), new int[0] /* disabledFeatures */, null /* surface */);
     }
 
     @Override
@@ -142,14 +161,14 @@ class BiometricTestSessionImpl extends ITestSession.Stub {
     public void acceptAuthentication(int userId)  {
         Utils.checkPermission(mContext, TEST_BIOMETRIC);
 
-        // Fake authentication with any of the existing fingers
-        List<Fingerprint> fingerprints = FingerprintUtils.getInstance(mSensorId)
+        // Fake authentication with any of the existing faces
+        List<Face> faces = FaceUtils.getInstance(mSensorId)
                 .getBiometricsForUser(mContext, userId);
-        if (fingerprints.isEmpty()) {
-            Slog.w(TAG, "No fingerprints, returning");
+        if (faces.isEmpty()) {
+            Slog.w(TAG, "No faces, returning");
             return;
         }
-        final int fid = fingerprints.get(0).getBiometricId();
+        final int fid = faces.get(0).getBiometricId();
         mSensor.getSessionForUser(userId).mHalSessionCallback.onAuthenticationSucceeded(fid,
                 HardwareAuthTokenUtils.toHardwareAuthToken(new byte[69]));
     }

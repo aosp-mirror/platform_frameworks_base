@@ -67,6 +67,8 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
     private static final String TAG = "FaceProvider";
     private static final int ENROLL_TIMEOUT_SEC = 75;
 
+    private boolean mTestHalEnabled;
+
     @NonNull private final Context mContext;
     @NonNull private final String mHalInstanceName;
     @NonNull private final SparseArray<Sensor> mSensors; // Map of sensors that this HAL supports
@@ -150,6 +152,10 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
 
     @Nullable
     private synchronized IFace getHalInstance() {
+        if (mTestHalEnabled) {
+            return new TestHal();
+        }
+
         if (mDaemon != null) {
             return mDaemon;
         }
@@ -525,7 +531,9 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
 
     @Override
     public void dumpProtoState(int sensorId, @NonNull ProtoOutputStream proto) {
-
+        if (mSensors.contains(sensorId)) {
+            mSensors.get(sensorId).dumpProtoState(sensorId, proto);
+        }
     }
 
     @Override
@@ -576,7 +584,7 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
     @NonNull
     @Override
     public ITestSession createTestSession(int sensorId, @NonNull String opPackageName) {
-        return null; // TODO
+        return mSensors.get(sensorId).createTestSession();
     }
 
     @Override
@@ -592,5 +600,9 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
                 PerformanceTracker.getInstanceForSensorId(sensorId).incrementHALDeathCount();
             }
         });
+    }
+
+    void setTestHalEnabled(boolean enabled) {
+        mTestHalEnabled = enabled;
     }
 }

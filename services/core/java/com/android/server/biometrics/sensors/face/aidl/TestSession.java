@@ -14,22 +14,26 @@
  * limitations under the License.
  */
 
-package com.android.server.biometrics.sensors.fingerprint.aidl;
+package com.android.server.biometrics.sensors.face.aidl;
 
 import android.annotation.NonNull;
 import android.hardware.biometrics.common.ICancellationSignal;
-import android.hardware.biometrics.fingerprint.ISession;
+import android.hardware.biometrics.face.Error;
+import android.hardware.biometrics.face.ISession;
+import android.hardware.common.NativeHandle;
 import android.hardware.keymaster.HardwareAuthToken;
-import android.util.Slog;
+import android.os.Binder;
+import android.os.IBinder;
+import android.os.RemoteException;
 
 /**
  * Test session that provides mostly no-ops.
  */
-class TestSession extends ISession.Stub {
-
+public class TestSession extends ISession.Stub {
     private static final String TAG = "TestSession";
 
-    @NonNull private final Sensor.HalSessionCallback mHalSessionCallback;
+    @NonNull
+    private final Sensor.HalSessionCallback mHalSessionCallback;
 
     TestSession(@NonNull Sensor.HalSessionCallback halSessionCallback) {
         mHalSessionCallback = halSessionCallback;
@@ -37,24 +41,33 @@ class TestSession extends ISession.Stub {
 
     @Override
     public void generateChallenge(int cookie, int timeoutSec) {
-
+        mHalSessionCallback.onChallengeGenerated(0 /* challenge */);
     }
 
     @Override
     public void revokeChallenge(int cookie, long challenge) {
-
+        mHalSessionCallback.onChallengeRevoked(challenge);
     }
 
     @Override
-    public ICancellationSignal enroll(int cookie, HardwareAuthToken hat) {
-        Slog.d(TAG, "enroll");
+    public ICancellationSignal enroll(int cookie, HardwareAuthToken hat,
+            NativeHandle previewSurface) {
         return null;
     }
 
     @Override
     public ICancellationSignal authenticate(int cookie, long operationId) {
-        Slog.d(TAG, "authenticate");
-        return null;
+        return new ICancellationSignal() {
+            @Override
+            public void cancel() throws RemoteException {
+                mHalSessionCallback.onError(Error.CANCELED, 0 /* vendorCode */);
+            }
+
+            @Override
+            public IBinder asBinder() {
+                return new Binder();
+            }
+        };
     }
 
     @Override
@@ -64,18 +77,16 @@ class TestSession extends ISession.Stub {
 
     @Override
     public void enumerateEnrollments(int cookie) {
-        Slog.d(TAG, "enumerate");
+
     }
 
     @Override
     public void removeEnrollments(int cookie, int[] enrollmentIds) {
-        Slog.d(TAG, "remove");
+
     }
 
     @Override
     public void getAuthenticatorId(int cookie) {
-        Slog.d(TAG, "getAuthenticatorId");
-        // Immediately return a value so the framework can continue with subsequent requests.
         mHalSessionCallback.onAuthenticatorIdRetrieved(0);
     }
 
@@ -86,21 +97,6 @@ class TestSession extends ISession.Stub {
 
     @Override
     public void resetLockout(int cookie, HardwareAuthToken hat) {
-
-    }
-
-    @Override
-    public void onPointerDown(int pointerId, int x, int y, float minor, float major) {
-
-    }
-
-    @Override
-    public void onPointerUp(int pointerId) {
-
-    }
-
-    @Override
-    public void onUiReady() {
-
+        mHalSessionCallback.onLockoutCleared();
     }
 }
