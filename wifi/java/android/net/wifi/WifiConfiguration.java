@@ -3255,7 +3255,11 @@ public class WifiConfiguration implements Parcelable {
         return key;
     }
 
-    private String getDefaultSecurityType() {
+    /**
+     * Get the default security type string.
+     * @hide
+     */
+    public String getDefaultSecurityType() {
         String key;
         if (allowedKeyManagement.get(KeyMgmt.WPA_PSK)) {
             key = KeyMgmt.strings[KeyMgmt.WPA_PSK];

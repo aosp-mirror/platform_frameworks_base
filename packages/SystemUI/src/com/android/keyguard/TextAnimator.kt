@@ -21,11 +21,10 @@ import android.animation.AnimatorListenerAdapter
 import android.animation.TimeInterpolator
 import android.animation.ValueAnimator
 import android.graphics.Canvas
-import android.graphics.Shader
 import android.text.Layout
 
 private const val TAG_WGHT = "wght"
-private const val DEFAULT_ANIMATION_DURATION: Long = 1000
+private const val DEFAULT_ANIMATION_DURATION: Long = 300
 
 /**
  * This class provides text animation between two styles.
@@ -53,9 +52,13 @@ private const val DEFAULT_ANIMATION_DURATION: Long = 1000
  * </code>
  * </pre>
  */
-class TextAnimator(layout: Layout, private val invalidateCallback: () -> Unit) {
+class TextAnimator(
+    layout: Layout,
+    private val invalidateCallback: () -> Unit,
+    private val numLines: Int = 1
+) {
     // Following two members are for mutable for testing purposes.
-    internal var textInterpolator: TextInterpolator = TextInterpolator(layout)
+    internal var textInterpolator: TextInterpolator = TextInterpolator(layout, numLines)
     internal var animator: ValueAnimator = ValueAnimator.ofFloat(1f).apply {
         duration = DEFAULT_ANIMATION_DURATION
         addUpdateListener {
@@ -72,19 +75,6 @@ class TextAnimator(layout: Layout, private val invalidateCallback: () -> Unit) {
         textInterpolator.layout = layout
     }
 
-    var shader: Shader
-        get() = textInterpolator.basePaint.shader.also {
-            require(it === textInterpolator.targetPaint.shader) {
-                "base and target paint has different shader. Usually shader is not interpolatable."
-            }
-        }
-        set(value) {
-            textInterpolator.basePaint.shader = value
-            textInterpolator.targetPaint.shader = value
-            // Shader doesn't change the text layout, so no need to call onTargetPaintModified or
-            // onBasePaintModified
-        }
-
     fun draw(c: Canvas) = textInterpolator.draw(c)
 
     /**
@@ -97,6 +87,8 @@ class TextAnimator(layout: Layout, private val invalidateCallback: () -> Unit) {
      *
      * @param weight an optional text weight.
      * @param textSize an optional font size.
+     * @param colors an optional colors array that must be the same size as numLines passed to
+     *  the TextInterpolator
      * @param animate an optional boolean indicating true for showing style transition as animation,
      *                false for immediate style transition. True by default.
      * @param duration an optional animation duration in milliseconds. This is ignored if animate is
@@ -107,6 +99,7 @@ class TextAnimator(layout: Layout, private val invalidateCallback: () -> Unit) {
     fun setTextStyle(
         weight: Int = -1,
         textSize: Float = -1f,
+        colors: IntArray? = null,
         animate: Boolean = true,
         duration: Long = -1L,
         interpolator: TimeInterpolator? = null
@@ -117,10 +110,21 @@ class TextAnimator(layout: Layout, private val invalidateCallback: () -> Unit) {
         }
 
         if (textSize >= 0) {
-            textInterpolator.targetPaint.textSize = textSize
+            for (targetPaint in textInterpolator.targetPaint)
+                targetPaint.textSize = textSize
         }
         if (weight >= 0) {
-            textInterpolator.targetPaint.fontVariationSettings = "'$TAG_WGHT' $weight"
+            for (targetPaint in textInterpolator.targetPaint)
+                targetPaint.fontVariationSettings = "'$TAG_WGHT' $weight"
+        }
+        if (colors != null) {
+            require(colors.size == textInterpolator.targetPaint.size) {
+                "colors size (${colors.size}) must be the same size as" +
+                    " targetPaints size (${textInterpolator.targetPaint.size})," +
+                    " which was initialized as numLines ($numLines)"
+            }
+            for ((index, targetPaint) in textInterpolator.targetPaint.withIndex())
+                targetPaint.color = colors[index]
         }
         textInterpolator.onTargetPaintModified()
 

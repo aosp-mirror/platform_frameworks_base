@@ -1635,7 +1635,7 @@
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Al mantener pulsadas ambas teclas de volumen durante unos segundos se activa <xliff:g id="SERVICE">%1$s</xliff:g>, una función de accesibilidad. Esta función puede modificar el funcionamiento del dispositivo.\n\nPuedes asignar este acceso directo a otra función en Ajustes &gt; Accesibilidad."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Activar"</string>
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"No activar"</string>
-    <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"SÍ"</string>
+    <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"ACTIVADO"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"NO"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"¿Permitir que <xliff:g id="SERVICE">%1$s</xliff:g> pueda controlar totalmente tu dispositivo?"</string>
     <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"Si activas <xliff:g id="SERVICE">%1$s</xliff:g>, el dispositivo no utilizará el bloqueo de pantalla para mejorar el cifrado de datos."</string>

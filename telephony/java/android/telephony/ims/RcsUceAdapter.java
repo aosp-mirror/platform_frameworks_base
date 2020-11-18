@@ -27,6 +27,7 @@ import android.net.Uri;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.os.ServiceSpecificException;
 import android.telephony.TelephonyFrameworkInitializer;
 import android.telephony.ims.aidl.IImsRcsController;
 import android.telephony.ims.aidl.IRcsUceControllerCallback;
@@ -463,6 +464,8 @@ public class RcsUceAdapter {
         try {
             imsRcsController.requestCapabilities(mSubId, mContext.getOpPackageName(),
                     mContext.getAttributionTag(), contactNumbers, internalCallback);
+        } catch (ServiceSpecificException e) {
+            throw new ImsException(e.toString(), e.errorCode);
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling IImsRcsController#requestCapabilities", e);
             throw new ImsException("Remote IMS Service is not available",
@@ -545,6 +548,8 @@ public class RcsUceAdapter {
         try {
             imsRcsController.requestNetworkAvailability(mSubId, mContext.getOpPackageName(),
                     mContext.getAttributionTag(), contactNumber, internalCallback);
+        } catch (ServiceSpecificException e) {
+            throw new ImsException(e.toString(), e.errorCode);
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling IImsRcsController#requestNetworkAvailability", e);
             throw new ImsException("Remote IMS Service is not available",
@@ -574,7 +579,7 @@ public class RcsUceAdapter {
 
         try {
             return imsRcsController.getUcePublishState(mSubId);
-        } catch (android.os.ServiceSpecificException e) {
+        } catch (ServiceSpecificException e) {
             throw new ImsException(e.getMessage(), e.errorCode);
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling IImsRcsController#getUcePublishState", e);
@@ -621,7 +626,7 @@ public class RcsUceAdapter {
         c.setExecutor(executor);
         try {
             imsRcsController.registerUcePublishStateCallback(mSubId, c.getBinder());
-        } catch (android.os.ServiceSpecificException e) {
+        } catch (ServiceSpecificException e) {
             throw new ImsException(e.getMessage(), e.errorCode);
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling IImsRcsController#registerUcePublishStateCallback", e);

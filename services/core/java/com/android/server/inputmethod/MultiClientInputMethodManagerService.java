@@ -1808,12 +1808,12 @@ public final class MultiClientInputMethodManagerService {
 
         @BinderThread
         @Override
-        public void startProtoDump(byte[] clientProtoDump) throws RemoteException {
+        public void startProtoDump(byte[] clientProtoDump, int source, String where) {
         }
 
         @BinderThread
         @Override
-        public boolean isImeTraceEnabled() throws RemoteException {
+        public boolean isImeTraceEnabled() {
             return false;
         }
     }

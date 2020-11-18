@@ -213,9 +213,10 @@ public class ShortcutManagerTest7 extends BaseShortcutManagerTest {
         });
     }
 
+    // This command is deprecated. Will remove the test later.
     public void testLauncherCommands() throws Exception {
         prepareGetHomeActivitiesAsUser(
-                /* preferred */ null,
+                /* preferred */ getSystemLauncher().activityInfo.getComponentName(),
                 list(getSystemLauncher(), getFallbackLauncher()),
                 USER_0);
 
@@ -227,10 +228,7 @@ public class ShortcutManagerTest7 extends BaseShortcutManagerTest {
                 ),
                 USER_10);
 
-        assertTrue(mService.hasShortcutHostPermissionInner(PACKAGE_SYSTEM_LAUNCHER, USER_0));
-
         // First, test "get".
-
         mRunningUsers.put(USER_10, true);
         mUnlockedUsers.put(USER_10, true);
         mInjectedCallingUid = Process.SHELL_UID;
@@ -242,23 +240,10 @@ public class ShortcutManagerTest7 extends BaseShortcutManagerTest {
                 assertSuccess(callShellCommand("get-default-launcher", "--user", "10")),
                 "Launcher: ComponentInfo{com.android.test.2/name}");
 
-        // Next, test "clear".
-        assertSuccess(callShellCommand("clear-default-launcher", "--user", "10"));
-
-        // User-10's launcher should be cleared.
-        assertEquals(null, mService.getUserShortcutsLocked(USER_10).getLastKnownLauncher());
-        assertEquals(null, mService.getUserShortcutsLocked(USER_10).getCachedLauncher());
-
-        // but user'0's shouldn't.
-        assertEquals(cn(PACKAGE_SYSTEM_LAUNCHER, PACKAGE_SYSTEM_LAUNCHER_NAME),
-                mService.getUserShortcutsLocked(USER_0).getCachedLauncher());
-
         // Change user-0's launcher.
         prepareGetHomeActivitiesAsUser(
                 /* preferred */ cn(CALLING_PACKAGE_1, "name"),
-                list(
-                        ri(CALLING_PACKAGE_1, "name", false, 0)
-                ),
+                list(ri(CALLING_PACKAGE_1, "name", false, 0)),
                 USER_0);
         assertContains(
                 assertSuccess(callShellCommand("get-default-launcher")),

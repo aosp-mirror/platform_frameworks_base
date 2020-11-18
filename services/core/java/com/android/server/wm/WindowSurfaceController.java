@@ -82,7 +82,7 @@ class WindowSurfaceController {
     boolean mChildrenDetached;
 
     WindowSurfaceController(String name, int w, int h, int format,
-            int flags, WindowStateAnimator animator, int windowType, int ownerUid) {
+            int flags, WindowStateAnimator animator, int windowType) {
         mAnimator = animator;
 
         mSurfaceW = w;
@@ -104,7 +104,7 @@ class WindowSurfaceController {
                 .setFormat(format)
                 .setFlags(flags)
                 .setMetadata(METADATA_WINDOW_TYPE, windowType)
-                .setMetadata(METADATA_OWNER_UID, ownerUid)
+                .setMetadata(METADATA_OWNER_UID, mWindowSession.mUid)
                 .setMetadata(METADATA_OWNER_PID, mWindowSession.mPid)
                 .setCallsite("WindowSurfaceController");
 

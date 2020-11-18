@@ -47,7 +47,6 @@ import android.util.Log;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.util.SparseSetArray;
-import android.util.imetracing.ImeTracing;
 import android.util.proto.ProtoOutputStream;
 import android.view.InsetsState.InternalInsetsSide;
 import android.view.SyncRtSurfaceTransactionApplier.SurfaceParams;
@@ -136,10 +135,6 @@ public class InsetsAnimationControlImpl implements WindowInsetsAnimationControll
         mTranslator = translator;
         mController.startAnimation(this, listener, types, mAnimation,
                 new Bounds(mHiddenInsets, mShownInsets));
-
-        if ((mTypes & WindowInsets.Type.ime()) != 0) {
-            ImeTracing.getInstance().triggerDump();
-        }
     }
 
     private boolean calculatePerceptible(Insets currentInsets, float currentAlpha) {

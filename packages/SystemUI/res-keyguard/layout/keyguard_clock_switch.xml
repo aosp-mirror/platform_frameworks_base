@@ -69,8 +69,8 @@
         android:layout_alignParentTop="true"
         android:layout_marginBottom="24dp"
         android:visibility="gone">
-        <com.android.keyguard.GradientTextClock
-            android:id="@+id/gradient_clock_view"
+        <com.android.keyguard.AnimatableClockView
+            android:id="@+id/animatable_clock_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="80dp"

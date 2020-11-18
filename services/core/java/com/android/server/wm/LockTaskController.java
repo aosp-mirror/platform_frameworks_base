@@ -729,7 +729,7 @@ public class LockTaskController {
             return LOCK_TASK_AUTH_PINNABLE;
         }
 
-        final String pkg = (task == null || task.realActivity == null) ? null
+        final String pkg = (task == null || task.realActivity == null) ? rootActivity.packageName
                 : task.realActivity.getPackageName();
         final int userId = task != null ? task.mUserId : rootActivity.mUserId;
         int lockTaskAuth = LOCK_TASK_AUTH_DONT_LOCK;

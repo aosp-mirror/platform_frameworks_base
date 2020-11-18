@@ -18,7 +18,6 @@ package com.android.server.pm;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
-import android.content.ComponentName;
 import android.content.pm.ShortcutManager;
 import android.metrics.LogMaker;
 import android.os.FileUtils;
@@ -119,15 +118,8 @@ class ShortcutUser {
 
     private final ArrayMap<PackageWithUser, ShortcutLauncher> mLaunchers = new ArrayMap<>();
 
-    /**
-     * Last known launcher.  It's used when the default launcher isn't set in PM -- i.e.
-     * when getHomeActivitiesAsUser() return null.  We need it so that in this situation the
-     * previously default launcher can still access shortcuts.
-     */
-    private ComponentName mLastKnownLauncher;
-
     /** In-memory-cached default launcher. */
-    private ComponentName mCachedLauncher;
+    private String mCachedLauncher;
 
     private String mKnownLocales;
 
@@ -350,8 +342,6 @@ class ShortcutUser {
                     mLastAppScanOsFingerprint);
             ShortcutService.writeAttr(out, ATTR_RESTORE_SOURCE_FINGERPRINT,
                     mRestoreFromOsFingerprint);
-
-            ShortcutService.writeTagValue(out, TAG_LAUNCHER, mLastKnownLauncher);
         } else {
             ShortcutService.writeAttr(out, ATTR_RESTORE_SOURCE_FINGERPRINT,
                     mService.injectBuildFingerprint());
@@ -448,11 +438,6 @@ class ShortcutUser {
 
                 if (depth == outerDepth + 1) {
                     switch (tag) {
-                        case TAG_LAUNCHER: {
-                            ret.mLastKnownLauncher = ShortcutService.parseComponentNameAttribute(
-                                    parser, ATTR_VALUE);
-                            continue;
-                        }
                         case ShortcutPackage.TAG_ROOT: {
                             final ShortcutPackage shortcuts = ShortcutPackage.loadFromXml(
                                     s, ret, parser, fromBackup);
@@ -515,41 +500,11 @@ class ShortcutUser {
         }
     }
 
-    public ComponentName getLastKnownLauncher() {
-        return mLastKnownLauncher;
+    public void setCachedLauncher(String launcher) {
+        mCachedLauncher = launcher;
     }
 
-    public void setLauncher(ComponentName launcherComponent) {
-        setLauncher(launcherComponent, /* allowPurgeLastKnown */ false);
-    }
-
-    /** Clears the launcher information without clearing the last known one */
-    public void clearLauncher() {
-        setLauncher(null);
-    }
-
-    /**
-     * Clears the launcher information *with(* clearing the last known one; we do this witl
-     * "cmd shortcut clear-default-launcher".
-     */
-    public void forceClearLauncher() {
-        setLauncher(null, /* allowPurgeLastKnown */ true);
-    }
-
-    private void setLauncher(ComponentName launcherComponent, boolean allowPurgeLastKnown) {
-        mCachedLauncher = launcherComponent; // Always update the in-memory cache.
-
-        if (Objects.equals(mLastKnownLauncher, launcherComponent)) {
-            return;
-        }
-        if (!allowPurgeLastKnown && launcherComponent == null) {
-            return;
-        }
-        mLastKnownLauncher = launcherComponent;
-        mService.scheduleSaveUser(mUserId);
-    }
-
-    public ComponentName getCachedLauncher() {
+    public String getCachedLauncher() {
         return mCachedLauncher;
     }
 
@@ -640,15 +595,9 @@ class ShortcutUser {
             pw.print(mRestoreFromOsFingerprint);
             pw.println();
 
-
             pw.print(prefix);
             pw.print("Cached launcher: ");
             pw.print(mCachedLauncher);
-            pw.println();
-
-            pw.print(prefix);
-            pw.print("Last known launcher: ");
-            pw.print(mLastKnownLauncher);
             pw.println();
         }
 

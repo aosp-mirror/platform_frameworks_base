@@ -3810,9 +3810,6 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
             assertEquals(2, mManager.getRemainingCallCount());
         });
 
-        mService.getShortcutsForTest().get(UserHandle.USER_SYSTEM).setLauncher(
-                new ComponentName("pkg1", "class"));
-
         // Restore.
         mService.saveDirtyInfo();
         initService();
@@ -3843,9 +3840,6 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
             assertEquals("title2-2", getCallerShortcut("s2").getTitle());
         });
 
-        assertEquals("pkg1", mService.getShortcutsForTest().get(UserHandle.USER_SYSTEM)
-                .getLastKnownLauncher().getPackageName());
-
         // Start another user
         mService.handleUnlockUser(USER_10);
 
@@ -3860,7 +3854,6 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
             assertEquals("title10-1-1", getCallerShortcut("s1").getTitle());
             assertEquals("title10-1-2", getCallerShortcut("s2").getTitle());
         });
-        assertNull(mService.getShortcutsForTest().get(USER_10).getLastKnownLauncher());
 
         // Try stopping the user
         mService.handleStopUser(USER_10);
@@ -6440,7 +6433,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
             });
 
             // Prepare for requestPinShortcut().
-            setDefaultLauncher(USER_0, mMainActivityFetcher.apply(LAUNCHER_1, USER_0));
+            setDefaultLauncher(USER_0, LAUNCHER_1);
             mPinConfirmActivityFetcher = (packageName, userId) ->
                     new ComponentName(packageName, PIN_CONFIRM_ACTIVITY_CLASS);
 
@@ -6465,7 +6458,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
             });
 
             // Now, change the launcher to launcher2, and request pin again.
-            setDefaultLauncher(USER_0, mMainActivityFetcher.apply(LAUNCHER_2, USER_0));
+            setDefaultLauncher(USER_0, LAUNCHER_2);
 
             reset(mServiceContext);
 
@@ -8514,10 +8507,9 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
     }
 
     public void testIsForegroundDefaultLauncher_true() {
-        final ComponentName defaultLauncher = new ComponentName("default", "launcher");
         final int uid = 1024;
 
-        setDefaultLauncher(UserHandle.USER_SYSTEM, defaultLauncher);
+        setDefaultLauncher(UserHandle.USER_SYSTEM, "default");
         makeUidForeground(uid);
 
         assertTrue(mInternal.isForegroundDefaultLauncher("default", uid));
@@ -8525,20 +8517,18 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
 
 
     public void testIsForegroundDefaultLauncher_defaultButNotForeground() {
-        final ComponentName defaultLauncher = new ComponentName("default", "launcher");
         final int uid = 1024;
 
-        setDefaultLauncher(UserHandle.USER_SYSTEM, defaultLauncher);
+        setDefaultLauncher(UserHandle.USER_SYSTEM, "default");
         makeUidBackground(uid);
 
         assertFalse(mInternal.isForegroundDefaultLauncher("default", uid));
     }
 
     public void testIsForegroundDefaultLauncher_foregroundButNotDefault() {
-        final ComponentName defaultLauncher = new ComponentName("default", "launcher");
         final int uid = 1024;
 
-        setDefaultLauncher(UserHandle.USER_SYSTEM, defaultLauncher);
+        setDefaultLauncher(UserHandle.USER_SYSTEM, "default");
         makeUidForeground(uid);
 
         assertFalse(mInternal.isForegroundDefaultLauncher("another", uid));

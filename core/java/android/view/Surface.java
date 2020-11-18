@@ -97,7 +97,7 @@ public class Surface implements Parcelable {
     private static native int nativeSetAutoRefreshEnabled(long nativeObject, boolean enabled);
 
     private static native int nativeSetFrameRate(
-            long nativeObject, float frameRate, int compatibility);
+            long nativeObject, float frameRate, int compatibility, boolean shouldBeSeamless);
 
     public static final @android.annotation.NonNull Parcelable.Creator<Surface> CREATOR =
             new Parcelable.Creator<Surface>() {
@@ -915,19 +915,37 @@ public class Surface implements Parcelable {
      * compatibility value may influence the system's choice of display frame rate. See
      * the FRAME_RATE_COMPATIBILITY_* values for more info.
      *
+     * @param shouldBeSeamless Whether display refresh rate transitions should be seamless. A
+     * seamless transition is one that doesn't have any visual interruptions, such as a black
+     * screen for a second or two. True indicates that any frame rate changes caused by this
+     * request should be seamless. False indicates that non-seamless refresh rates are also
+     * acceptable.
+     *
      * @throws IllegalArgumentException If frameRate or compatibility are invalid.
      */
-    public void setFrameRate(
-            @FloatRange(from = 0.0) float frameRate, @FrameRateCompatibility int compatibility) {
+    public void setFrameRate(@FloatRange(from = 0.0) float frameRate,
+            @FrameRateCompatibility int compatibility, boolean shouldBeSeamless) {
         synchronized (mLock) {
             checkNotReleasedLocked();
-            int error = nativeSetFrameRate(mNativeObject, frameRate, compatibility);
+            int error = nativeSetFrameRate(mNativeObject, frameRate, compatibility,
+                    shouldBeSeamless);
             if (error == -EINVAL) {
                 throw new IllegalArgumentException("Invalid argument to Surface.setFrameRate()");
             } else if (error != 0) {
                 throw new RuntimeException("Failed to set frame rate on Surface");
             }
         }
+    }
+
+    /**
+     * Sets the intended frame rate for this surface. Any switching of refresh rates is
+     * most probably going to be seamless.
+     *
+     * @see #setFrameRate(float, int, boolean)
+     */
+    public void setFrameRate(
+            @FloatRange(from = 0.0) float frameRate, @FrameRateCompatibility int compatibility) {
+        setFrameRate(frameRate, compatibility, /* shouldBeSeamless = */ true);
     }
 
     /**

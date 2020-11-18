@@ -17,7 +17,6 @@
 package com.android.server.input;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -2100,14 +2099,36 @@ public class InputManagerService extends IInputManager.Stub
     }
 
     // Native callback.
-    private long notifyANR(InputApplicationHandle inputApplicationHandle, IBinder token,
-            String reason) {
+    private void notifyNoFocusedWindowAnr(InputApplicationHandle inputApplicationHandle) {
+        mWindowManagerCallbacks.notifyNoFocusedWindowAnr(inputApplicationHandle);
+    }
+
+    // Native callback
+    private void notifyConnectionUnresponsive(IBinder token, String reason) {
         Integer gestureMonitorPid;
         synchronized (mGestureMonitorPidsLock) {
             gestureMonitorPid = mGestureMonitorPidsByToken.get(token);
         }
-        return mWindowManagerCallbacks.notifyANR(inputApplicationHandle, token, gestureMonitorPid,
-                reason);
+        if (gestureMonitorPid != null) {
+            mWindowManagerCallbacks.notifyGestureMonitorUnresponsive(gestureMonitorPid, reason);
+            return;
+        }
+        // If we couldn't find a gesture monitor for this token, it's a window
+        mWindowManagerCallbacks.notifyWindowUnresponsive(token, reason);
+    }
+
+    // Native callback
+    private void notifyConnectionResponsive(IBinder token) {
+        Integer gestureMonitorPid;
+        synchronized (mGestureMonitorPidsLock) {
+            gestureMonitorPid = mGestureMonitorPidsByToken.get(token);
+        }
+        if (gestureMonitorPid != null) {
+            mWindowManagerCallbacks.notifyGestureMonitorResponsive(gestureMonitorPid);
+            return;
+        }
+        // If we couldn't find a gesture monitor for this token, it's a window
+        mWindowManagerCallbacks.notifyWindowResponsive(token);
     }
 
     // Native callback.
@@ -2354,29 +2375,58 @@ public class InputManagerService extends IInputManager.Stub
      */
     public interface WindowManagerCallbacks extends LidSwitchCallback {
         /**
-         * This callback is invoked when the confuguration changes.
+         * This callback is invoked when the configuration changes.
          */
-        public void notifyConfigurationChanged();
+        void notifyConfigurationChanged();
 
         /**
          * This callback is invoked when the camera lens cover switch changes state.
          * @param whenNanos the time when the change occurred
          * @param lensCovered true is the lens is covered
          */
-        public void notifyCameraLensCoverSwitchChanged(long whenNanos, boolean lensCovered);
+        void notifyCameraLensCoverSwitchChanged(long whenNanos, boolean lensCovered);
 
         /**
          * This callback is invoked when an input channel is closed unexpectedly.
          * @param token the connection token of the broken channel
          */
-        public void notifyInputChannelBroken(IBinder token);
+        void notifyInputChannelBroken(IBinder token);
 
         /**
-         * Notify the window manager about an application that is not responding.
-         * Return a new timeout to continue waiting in nanoseconds, or 0 to abort dispatch.
+         * Notify the window manager about the focused application that does not have any focused
+         * window and is unable to respond to focused input events.
          */
-        long notifyANR(InputApplicationHandle inputApplicationHandle, IBinder token,
-                @Nullable Integer pid, String reason);
+        void notifyNoFocusedWindowAnr(InputApplicationHandle applicationHandle);
+
+        /**
+         * Notify the window manager about a gesture monitor that is unresponsive.
+         *
+         * @param pid the pid of the gesture monitor process
+         * @param reason the reason why this connection is unresponsive
+         */
+        void notifyGestureMonitorUnresponsive(int pid, @NonNull String reason);
+
+        /**
+         * Notify the window manager about a window that is unresponsive.
+         *
+         * @param token the token that can be used to look up the window
+         * @param reason the reason why this connection is unresponsive
+         */
+        void notifyWindowUnresponsive(@NonNull IBinder token, @NonNull String reason);
+
+        /**
+         * Notify the window manager about a gesture monitor that has become responsive.
+         *
+         * @param pid the pid of the gesture monitor process
+         */
+        void notifyGestureMonitorResponsive(int pid);
+
+        /**
+         * Notify the window manager about a window that has become responsive.
+         *
+         * @param token the token that can be used to look up the window
+         */
+        void notifyWindowResponsive(@NonNull IBinder token);
 
         /**
          * This callback is invoked when an event first arrives to InputDispatcher and before it is
@@ -2415,9 +2465,9 @@ public class InputManagerService extends IInputManager.Stub
          */
         KeyEvent dispatchUnhandledKey(IBinder token, KeyEvent event, int policyFlags);
 
-        public int getPointerLayer();
+        int getPointerLayer();
 
-        public int getPointerDisplayId();
+        int getPointerDisplayId();
 
         /**
          * Notifies window manager that a {@link android.view.MotionEvent#ACTION_DOWN} pointer event

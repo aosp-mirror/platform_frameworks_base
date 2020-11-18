@@ -88,5 +88,6 @@ class LocationShellCommand extends BasicShellCommandHandler {
         pw.println("      force_time_injection - requests NTP time injection to chipset");
         pw.println("      force_psds_injection - "
                 + "requests predictive aiding data injection to chipset");
+        pw.println("      request_power_stats - requests GNSS power stats update from chipset");
     }
 }

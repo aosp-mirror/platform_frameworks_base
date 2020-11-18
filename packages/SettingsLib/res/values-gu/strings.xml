@@ -81,7 +81,7 @@
     <string name="bluetooth_battery_level" msgid="2893696778200201555">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> બૅટરી"</string>
     <string name="bluetooth_battery_level_untethered" msgid="4002282355111504349">"L: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> બૅટરી, R: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> બૅટરી"</string>
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"સક્રિય"</string>
-    <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"મીડિયા ઑડિઓ"</string>
+    <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"મીડિયા ઑડિયો"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"ફોન કૉલ"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"ફાઇલ સ્થાનાંતરણ"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"ઇનપુટ ઉપકરણ"</string>
@@ -113,7 +113,7 @@
     <string name="bluetooth_hid_profile_summary_use_for" msgid="4289460627406490952">"ઇનપુટ માટે ઉપયોગ કરો"</string>
     <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="7689393730163320483">"શ્રવણ યંત્રો માટે ઉપયોગ કરો"</string>
     <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"જોડી"</string>
-    <string name="bluetooth_pairing_accept_all_caps" msgid="2734383073450506220">"જોડાણ બનાવો"</string>
+    <string name="bluetooth_pairing_accept_all_caps" msgid="2734383073450506220">"જોડી કરો"</string>
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"રદ કરો"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"એ કનેક્ટ કરેલ હોય ત્યારે જોડાણ બનાવવાથી તમારા સંપર્કો અને કૉલ ઇતિહાસનો અ‍ૅક્સેસ મળે છે."</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> સાથે જોડી કરી શક્યાં નહીં."</string>
@@ -399,12 +399,9 @@
     <string name="inactive_app_inactive_summary" msgid="3161222402614236260">"નિષ્ક્રિય. ટોગલ કરવા માટે ટૅપ કરો."</string>
     <string name="inactive_app_active_summary" msgid="8047630990208722344">"સક્રિય. ટોગલ કરવા માટે ટૅપ કરો."</string>
     <string name="standby_bucket_summary" msgid="5128193447550429600">"ઍપ સ્ટૅન્ડબાયની સ્થિતિ:<xliff:g id="BUCKET"> %s</xliff:g>"</string>
-    <!-- no translation found for transcode_settings_title (6700974145733932357) -->
-    <skip />
-    <!-- no translation found for transcode_enable_all (4719796495995795404) -->
-    <skip />
-    <!-- no translation found for transcode_skip_apps (5680997722349545778) -->
-    <skip />
+    <string name="transcode_settings_title" msgid="6700974145733932357">"મીડિયાનું ફૉર્મેટ બદલવાની પ્રક્રિયાના સેટિંગ"</string>
+    <string name="transcode_enable_all" msgid="4719796495995795404">"બધી ઍપ માટે ફૉર્મેટ બદલવાની પ્રક્રિયા ચાલુ કરો"</string>
+    <string name="transcode_skip_apps" msgid="5680997722349545778">"ઍપ માટે ફૉર્મેટ બદલવાની પ્રક્રિયા બંધ કરો"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"ચાલુ સેવાઓ"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"હાલમાં ચાલતી સેવાઓ જુઓ અને નિયંત્રિત કરો"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"WebView અમલીકરણ"</string>

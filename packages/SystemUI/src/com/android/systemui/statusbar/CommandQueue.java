@@ -1206,6 +1206,7 @@ public class CommandQueue extends IStatusBar.Stub implements CallbackController<
                     for (int i = 0; i < mCallbacks.size(); i++) {
                         mCallbacks.get(i).onEmergencyActionLaunchGestureDetected();
                     }
+                    break;
                 case MSG_SHOW_PICTURE_IN_PICTURE_MENU:
                     for (int i = 0; i < mCallbacks.size(); i++) {
                         mCallbacks.get(i).showPictureInPictureMenu();

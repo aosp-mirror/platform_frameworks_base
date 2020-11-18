@@ -825,14 +825,14 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         return mDisplayContent;
     }
 
-    /** Get the first node of type {@link DisplayArea} above or at this node. */
+    /** Returns the first node of type {@link DisplayArea} above or at this node. */
     @Nullable
     DisplayArea getDisplayArea() {
         WindowContainer parent = getParent();
         return parent != null ? parent.getDisplayArea() : null;
     }
 
-    /** Get the first node of type {@link RootDisplayArea} above or at this node. */
+    /** Returns the first node of type {@link RootDisplayArea} above or at this node. */
     @Nullable
     RootDisplayArea getRootDisplayArea() {
         WindowContainer parent = getParent();

@@ -28,8 +28,7 @@
     <string name="pip_skip_to_next" msgid="8403429188794867653">"এগিয়ে যাওয়ার জন্য এড়িয়ে যান"</string>
     <string name="pip_skip_to_prev" msgid="7172158111196394092">"পিছনে যাওয়ার জন্য এড়িয়ে যান"</string>
     <string name="accessibility_action_pip_resize" msgid="4623966104749543182">"রিসাইজ করুন"</string>
-    <!-- no translation found for dock_forced_resizable (1749750436092293116) -->
-    <skip />
+    <string name="dock_forced_resizable" msgid="1749750436092293116">"অ্যাপটি স্প্লিট স্ক্রিনে কাজ নাও করতে পারে।"</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"অ্যাপ্লিকেশান বিভক্ত-স্ক্রিন সমর্থন করে না৷"</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"সেকেন্ডারি ডিসপ্লেতে অ্যাপটি কাজ নাও করতে পারে।"</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"সেকেন্ডারি ডিসপ্লেতে অ্যাপ লঞ্চ করা যাবে না।"</string>
@@ -44,14 +43,10 @@
     <string name="accessibility_action_divider_top_50" msgid="8649582798829048946">"শীর্ষ ৫০%"</string>
     <string name="accessibility_action_divider_top_30" msgid="3572788224908570257">"শীর্ষ ৩০%"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="2831868345092314060">"নীচের অংশ নিয়ে পূর্ণ স্ক্রিন"</string>
-    <!-- no translation found for one_handed_tutorial_title (4583241688067426350) -->
-    <skip />
-    <!-- no translation found for one_handed_tutorial_description (3486582858591353067) -->
-    <skip />
-    <!-- no translation found for accessibility_action_start_one_handed (5070337354072861426) -->
-    <skip />
-    <!-- no translation found for accessibility_action_stop_one_handed (1369940261782179442) -->
-    <skip />
+    <string name="one_handed_tutorial_title" msgid="4583241688067426350">"\'এক হাতে ব্যবহার করার মোড\'-এর ব্যবহার"</string>
+    <string name="one_handed_tutorial_description" msgid="3486582858591353067">"বেরিয়ে আসার জন্য, স্ক্রিনের নিচ থেকে উপরের দিকে সোয়াইপ করুন অথবা অ্যাপ আইকনের উপরে যেকোনও জায়গায় ট্যাপ করুন"</string>
+    <string name="accessibility_action_start_one_handed" msgid="5070337354072861426">"\'এক হাতে ব্যবহার করার মোড\' শুরু করুন"</string>
+    <string name="accessibility_action_stop_one_handed" msgid="1369940261782179442">"\'এক হাতে ব্যবহার করার মোড\' থেকে বেরিয়ে আসুন"</string>
     <string name="bubbles_settings_button_description" msgid="1301286017420516912">"<xliff:g id="APP_NAME">%1$s</xliff:g> বাবলের জন্য সেটিংস"</string>
     <string name="bubble_overflow_button_content_description" msgid="8160974472718594382">"ওভারফ্লো"</string>
     <string name="bubble_accessibility_action_add_back" msgid="1830101076853540953">"স্ট্যাকে আবার যোগ করুন"</string>
@@ -68,8 +63,7 @@
     <string name="bubbles_user_education_description" msgid="4215862563054175407">"নতুন কথোপকথন ভেসে থাকা আইকন বা বাবল হিসেবে দেখানো হয়। বাবল খুলতে ট্যাপ করুন। সেটি সরাতে ধরে টেনে আনুন।"</string>
     <string name="bubbles_user_education_manage_title" msgid="7042699946735628035">"যেকোনও সময় বাবল নিয়ন্ত্রণ করুন"</string>
     <string name="bubbles_user_education_manage" msgid="3460756219946517198">"এই অ্যাপ থেকে বাবল বন্ধ করতে \'ম্যানেজ করুন\' বিকল্প ট্যাপ করুন"</string>
-    <!-- no translation found for bubbles_user_education_got_it (3382046149225428296) -->
-    <skip />
+    <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"বুঝেছি"</string>
     <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"কোনও সাম্প্রতিক বাবল নেই"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"সাম্প্রতিক ও বাতিল করা বাবল এখানে দেখা যাবে"</string>
     <string name="notification_bubble_title" msgid="6082910224488253378">"বাবল"</string>

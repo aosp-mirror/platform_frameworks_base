@@ -16,8 +16,13 @@
 
 package android.net.vcn;
 
+import android.net.vcn.VcnConfig;
+import android.os.ParcelUuid;
+
 /**
  * @hide
  */
 interface IVcnManagementService {
+    void setVcnConfig(in ParcelUuid subscriptionGroup, in VcnConfig config);
+    void clearVcnConfig(in ParcelUuid subscriptionGroup);
 }

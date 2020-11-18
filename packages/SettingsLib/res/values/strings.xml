@@ -992,14 +992,14 @@
     <string name="standby_bucket_summary">App standby
         state:<xliff:g id="bucket"> %s</xliff:g></string>
 
-    <!-- Settings item title for transcode settings for apps. [CHAR LIMIT=85] -->
-    <string name="transcode_settings_title">Media transcode settings</string>
+    <!-- Settings item title for media transcoding settings. [CHAR LIMIT=85] -->
+    <string name="transcode_settings_title">Media transcoding settings</string>
 
-    <!-- Settings item title to enable or disable transcoding for all apps. [CHAR LIMIT=85] -->
-    <string name="transcode_enable_all">Enable transcoding for all apps</string>
+    <!-- Settings item title to disable transcoding globally. [CHAR LIMIT=85] -->
+    <string name="transcode_enable_all">Disable transcoding</string>
 
-    <!-- Settings category title for selecting apps to be skipped from transcoding. [CHAR LIMIT=85] -->
-    <string name="transcode_skip_apps">Disable transcoding for apps</string>
+    <!-- Settings category title for selecting apps to be enabled for transcoding. [CHAR LIMIT=85] -->
+    <string name="transcode_skip_apps">Enable transcoding for apps</string>
 
     <!-- Services settings screen, setting option name for the user to go to the screen to view running services -->
     <string name="runningservices_settings_title">Running services</string>

@@ -16,12 +16,12 @@
 //
 // raw source files --(metalava)--> stub source files --(javac)--> stub jar files
 //
-// The metalava conversion is done by droidstub modules *-api-stubs-docs.
-// The javac compilation is done by java_library modules android_*_stubs_current.
+// - The metalava conversion is done by droidstub modules
+// - The javac compilation is done by java_library modules
+//
 // The metalava conversion is also responsible for creating API signature files
-// and comparing them against the last API signature in api/*-current.txt files
-// and also against the latest frozen API signature in prebuilts/sdk/*/*/api/android.txt
-// files.
+// and comparing them against the checked in API signature, and also checking compatibility
+// with the latest frozen API signature.
 
 /////////////////////////////////////////////////////////////////////
 // Common metalava configs
@@ -41,7 +41,7 @@ packages_to_document = [
 ]
 
 stubs_defaults {
-    name: "metalava-base-api-stubs-default",
+    name: "metalava-non-updatable-api-stubs-default",
     srcs: [
         ":framework-non-updatable-sources",
         "core/java/**/*.logtags",
@@ -51,11 +51,14 @@ stubs_defaults {
         ":android_icu4j_public_api_files",
         "**/package.html",
     ],
+    sdk_version: "core_platform",
+    arg_files: ["core/res/AndroidManifest.xml"],
     // TODO(b/147699819, b/169090544): remove below aidl includes.
     aidl: {
         local_include_dirs: [
-            "telephony/java",
+            "apex/media/aidl/stable",
             "media/aidl",
+            "telephony/java",
         ],
         include_dirs: ["frameworks/av/aidl"],
     },
@@ -77,6 +80,12 @@ stubs_defaults {
         "android.hardware.usb.gadget-V1.0-java",
         "android.hardware.vibrator-V1.3-java",
         "framework-protos",
+        // There are a few classes from modules used as type arguments that
+        // need to be resolved by metalava. For now, we can use a previously
+        // finalized stub library to resolve them. If a new class gets added,
+        // this may be need to be revisited to use a manually maintained stub
+        // library with empty classes in order to resolve those references.
+        "sdk_system_30_android",
     ],
     high_mem: true, // Lots of sources => high memory use, see b/170701554
     installable: false,
@@ -89,31 +98,6 @@ stubs_defaults {
     filter_packages: packages_to_document,
 }
 
-stubs_defaults {
-    name: "metalava-full-api-stubs-default",
-    defaults: ["metalava-base-api-stubs-default"],
-    srcs: [
-        ":conscrypt.module.public.api{.public.stubs.source}",
-        ":framework-updatable-sources",
-    ],
-    sdk_version: "core_platform",
-}
-
-stubs_defaults {
-    name: "metalava-non-updatable-api-stubs-default",
-    defaults: ["metalava-base-api-stubs-default"],
-    sdk_version: "core_platform",
-    // There are a few classes from modules used as type arguments that
-    // need to be resolved by metalava. For now, we can use a previously
-    // finalized stub library to resolve them. If a new class gets added,
-    // this may be need to be revisited to use a manually maintained stub
-    // library with empty classes in order to resolve those references.
-    libs: ["sdk_system_30_android"],
-    aidl: {
-        local_include_dirs: ["apex/media/aidl/stable"],
-    },
-}
-
 /////////////////////////////////////////////////////////////////////
 // These modules provide source files for the stub libraries
 /////////////////////////////////////////////////////////////////////
@@ -121,7 +105,6 @@ stubs_defaults {
 droidstubs {
     name: "api-stubs-docs-non-updatable",
     defaults: ["metalava-non-updatable-api-stubs-default"],
-    arg_files: ["core/res/AndroidManifest.xml"],
     args: metalava_framework_docs_args,
     check_api: {
         current: {
@@ -140,23 +123,26 @@ droidstubs {
     },
 }
 
-priv_apps = " " +
-    "--show-annotation android.annotation.SystemApi\\(" +
-        "client=android.annotation.SystemApi.Client.PRIVILEGED_APPS" +
-    "\\) "
-
-module_libs = " " +
+priv_apps =
     " --show-annotation android.annotation.SystemApi\\(" +
-        "client=android.annotation.SystemApi.Client.MODULE_LIBRARIES" +
-    "\\)" +
+        "client=android.annotation.SystemApi.Client.PRIVILEGED_APPS" +
+    "\\)"
+
+priv_apps_in_stubs =
     " --show-for-stub-purposes-annotation android.annotation.SystemApi\\(" +
         "client=android.annotation.SystemApi.Client.PRIVILEGED_APPS" +
-    "\\) "
+    "\\)"
+
+test = " --show-annotation android.annotation.TestApi"
+
+module_libs =
+    " --show-annotation android.annotation.SystemApi\\(" +
+        "client=android.annotation.SystemApi.Client.MODULE_LIBRARIES" +
+    "\\)"
 
 droidstubs {
     name: "system-api-stubs-docs-non-updatable",
     defaults: ["metalava-non-updatable-api-stubs-default"],
-    arg_files: ["core/res/AndroidManifest.xml"],
     args: metalava_framework_docs_args + priv_apps,
     check_api: {
         current: {
@@ -179,14 +165,7 @@ droidstubs {
 droidstubs {
     name: "test-api-stubs-docs-non-updatable",
     defaults: ["metalava-non-updatable-api-stubs-default"],
-    arg_files: [
-        "core/res/AndroidManifest.xml",
-    ],
-    args: metalava_framework_docs_args
-        + " --show-annotation android.annotation.TestApi"
-        + " --show-for-stub-purposes-annotation android.annotation.SystemApi\\("
-        +     "client=android.annotation.SystemApi.Client.PRIVILEGED_APPS"
-        + "\\)",
+    args: metalava_framework_docs_args + test + priv_apps_in_stubs,
     check_api: {
         current: {
             api_file: "core/api/test-current.txt",
@@ -204,16 +183,10 @@ droidstubs {
     },
 }
 
-/////////////////////////////////////////////////////////////////////
-// Following droidstub module for extra APIs for modules,
-// namely @SystemApi(client=MODULE_LIBRARIES) APIs.
-/////////////////////////////////////////////////////////////////////
-
 droidstubs {
     name: "module-lib-api-stubs-docs-non-updatable",
     defaults: ["metalava-non-updatable-api-stubs-default"],
-    arg_files: ["core/res/AndroidManifest.xml"],
-    args: metalava_framework_docs_args + priv_apps + module_libs,
+    args: metalava_framework_docs_args + priv_apps_in_stubs + module_libs,
     check_api: {
         current: {
             api_file: "core/api/module-lib-current.txt",
@@ -232,7 +205,7 @@ droidstubs {
 
 /////////////////////////////////////////////////////////////////////
 // android_*_stubs_current modules are the stubs libraries compiled
-// from *-api-stubs-docs
+// from stub sources
 /////////////////////////////////////////////////////////////////////
 
 java_defaults {
