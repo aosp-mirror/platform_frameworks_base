@@ -4285,10 +4285,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                         throw new IllegalStateException("no start tag found");
                     }
 
-                    final String versionString = parser.getAttributeValue(null, "v");
-                    if (versionString != null) {
-                        oldVersion = Integer.parseInt(versionString);
-                    }
+                    oldVersion = parser.getAttributeInt(null, "v", NO_VERSION);
 
                     int outerDepth = parser.getDepth();
                     while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
@@ -4458,7 +4455,8 @@ public class AppOpsService extends IAppOpsService.Stub {
     }
 
     private void readAttributionOp(TypedXmlPullParser parser, @NonNull Op parent,
-            @Nullable String attribution) throws NumberFormatException, IOException {
+            @Nullable String attribution)
+            throws NumberFormatException, IOException, XmlPullParserException {
         final AttributedOp attributedOp = parent.getOrCreateAttribution(parent, attribution);
 
         final long key = parser.getAttributeLong(null, "n");

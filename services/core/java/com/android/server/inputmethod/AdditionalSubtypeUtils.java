@@ -31,17 +31,13 @@ import android.util.Xml;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodSubtype;
 
-import com.android.internal.util.FastXmlSerializer;
-
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -264,10 +260,10 @@ final class AdditionalSubtypeUtils {
                             .setSubtypeExtraValue(imeSubtypeExtraValue)
                             .setIsAuxiliary(isAuxiliary)
                             .setIsAsciiCapable(isAsciiCapable);
-                    final String subtypeIdString =
-                            parser.getAttributeValue(null, ATTR_IME_SUBTYPE_ID);
-                    if (subtypeIdString != null) {
-                        builder.setSubtypeId(Integer.parseInt(subtypeIdString));
+                    final int subtypeId = parser.getAttributeInt(null, ATTR_IME_SUBTYPE_ID,
+                            InputMethodSubtype.SUBTYPE_ID_NONE);
+                    if (subtypeId != InputMethodSubtype.SUBTYPE_ID_NONE) {
+                        builder.setSubtypeId(subtypeId);
                     }
                     tempSubtypesArray.add(builder.build());
                 }

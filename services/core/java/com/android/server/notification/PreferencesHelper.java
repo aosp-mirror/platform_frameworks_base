@@ -204,14 +204,8 @@ public class PreferencesHelper implements RankingConfig {
         String tag = parser.getName();
         if (!TAG_RANKING.equals(tag)) return;
 
-        boolean upgradeForBubbles = false;
-        if (parser.getAttributeCount() > 0) {
-            String attribute = parser.getAttributeName(0);
-            if (ATT_VERSION.equals(attribute)) {
-                int xmlVersion = Integer.parseInt(parser.getAttributeValue(0));
-                upgradeForBubbles = xmlVersion == XML_VERSION_BUBBLES_UPGRADE;
-            }
-        }
+        final int xmlVersion = parser.getAttributeInt(null, ATT_VERSION, -1);
+        boolean upgradeForBubbles = xmlVersion == XML_VERSION_BUBBLES_UPGRADE;
         synchronized (mPackagePreferences) {
             while ((type = parser.next()) != XmlPullParser.END_DOCUMENT) {
                 tag = parser.getName();

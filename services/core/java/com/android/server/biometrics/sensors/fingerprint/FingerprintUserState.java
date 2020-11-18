@@ -135,11 +135,10 @@ public class FingerprintUserState extends BiometricUserState<Fingerprint> {
             String tagName = parser.getName();
             if (tagName.equals(TAG_FINGERPRINT)) {
                 String name = parser.getAttributeValue(null, ATTR_NAME);
-                String groupId = parser.getAttributeValue(null, ATTR_GROUP_ID);
-                String fingerId = parser.getAttributeValue(null, ATTR_FINGER_ID);
-                String deviceId = parser.getAttributeValue(null, ATTR_DEVICE_ID);
-                mBiometrics.add(new Fingerprint(name, Integer.parseInt(groupId),
-                        Integer.parseInt(fingerId), Long.parseLong(deviceId)));
+                int groupId = parser.getAttributeInt(null, ATTR_GROUP_ID);
+                int fingerId = parser.getAttributeInt(null, ATTR_FINGER_ID);
+                long deviceId = parser.getAttributeLong(null, ATTR_DEVICE_ID);
+                mBiometrics.add(new Fingerprint(name, groupId, fingerId, deviceId));
             }
         }
     }

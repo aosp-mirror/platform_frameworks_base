@@ -1385,7 +1385,7 @@ final class HistoricalRegistry {
         private @Nullable HistoricalOps readStateDLocked(@Nullable HistoricalOps ops,
                 int uid, @NonNull String packageName, @Nullable String attributionTag, int op,
                 @NonNull TypedXmlPullParser parser, @OpFlags int filterFlags, double filterScale)
-                throws IOException {
+                throws IOException, XmlPullParserException {
             final long key = parser.getAttributeLong(null, ATTR_NAME);
             final int flags = AppOpsManager.extractFlagsFromKey(key) & filterFlags;
             if (flags == 0) {

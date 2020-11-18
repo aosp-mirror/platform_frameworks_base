@@ -58,12 +58,10 @@ import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
-import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.IntPair;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -71,7 +69,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -1650,37 +1647,23 @@ public class SyncStorageEngine {
 
             String tagName = parser.getName();
             if ("accounts".equals(tagName)) {
-                String listen = parser.getAttributeValue(null, XML_ATTR_LISTEN_FOR_TICKLES);
-                String versionString = parser.getAttributeValue(null, "version");
-                int version;
-                try {
-                    version = (versionString == null) ? 0 : Integer.parseInt(versionString);
-                } catch (NumberFormatException e) {
-                    version = 0;
-                }
+                boolean listen = parser.getAttributeBoolean(
+                        null, XML_ATTR_LISTEN_FOR_TICKLES, true);
+                int version = parser.getAttributeInt(null, "version", 0);
 
                 if (version < 3) {
                     mGrantSyncAdaptersAccountAccess = true;
                 }
 
-                String nextIdString = parser.getAttributeValue(null, XML_ATTR_NEXT_AUTHORITY_ID);
-                try {
-                    int id = (nextIdString == null) ? 0 : Integer.parseInt(nextIdString);
-                    mNextAuthorityId = Math.max(mNextAuthorityId, id);
-                } catch (NumberFormatException e) {
-                    // don't care
-                }
-                String offsetString = parser.getAttributeValue(null, XML_ATTR_SYNC_RANDOM_OFFSET);
-                try {
-                    mSyncRandomOffset = (offsetString == null) ? 0 : Integer.parseInt(offsetString);
-                } catch (NumberFormatException e) {
-                    mSyncRandomOffset = 0;
-                }
+                int nextId = parser.getAttributeInt(null, XML_ATTR_NEXT_AUTHORITY_ID, 0);
+                mNextAuthorityId = Math.max(mNextAuthorityId, nextId);
+
+                mSyncRandomOffset = parser.getAttributeInt(null, XML_ATTR_SYNC_RANDOM_OFFSET, 0);
                 if (mSyncRandomOffset == 0) {
                     Random random = new Random(System.currentTimeMillis());
                     mSyncRandomOffset = random.nextInt(86400);
                 }
-                mMasterSyncAutomatically.put(0, listen == null || Boolean.parseBoolean(listen));
+                mMasterSyncAutomatically.put(0, listen);
                 eventType = parser.next();
                 AuthorityInfo authority = null;
                 PeriodicSync periodicSync = null;
@@ -1805,22 +1788,18 @@ public class SyncStorageEngine {
     }
 
     private void parseListenForTickles(TypedXmlPullParser parser) {
-        String user = parser.getAttributeValue(null, XML_ATTR_USER);
         int userId = 0;
         try {
-            userId = Integer.parseInt(user);
-        } catch (NumberFormatException e) {
+            parser.getAttributeInt(null, XML_ATTR_USER);
+        } catch (XmlPullParserException e) {
             Slog.e(TAG, "error parsing the user for listen-for-tickles", e);
-        } catch (NullPointerException e) {
-            Slog.e(TAG, "the user in listen-for-tickles is null", e);
         }
-        String enabled = parser.getAttributeValue(null, XML_ATTR_ENABLED);
-        boolean listen = enabled == null || Boolean.parseBoolean(enabled);
+        boolean listen = parser.getAttributeBoolean(null, XML_ATTR_ENABLED, true);
         mMasterSyncAutomatically.put(userId, listen);
     }
 
     private AuthorityInfo parseAuthority(TypedXmlPullParser parser, int version,
-            AccountAuthorityValidator validator) {
+            AccountAuthorityValidator validator) throws XmlPullParserException {
         AuthorityInfo authority = null;
         int id = -1;
         try {
@@ -1832,14 +1811,13 @@ public class SyncStorageEngine {
         }
         if (id >= 0) {
             String authorityName = parser.getAttributeValue(null, "authority");
-            String enabled = parser.getAttributeValue(null, XML_ATTR_ENABLED);
+            boolean enabled = parser.getAttributeBoolean(null, XML_ATTR_ENABLED, true);
             String syncable = parser.getAttributeValue(null, "syncable");
             String accountName = parser.getAttributeValue(null, "account");
             String accountType = parser.getAttributeValue(null, "type");
-            String user = parser.getAttributeValue(null, XML_ATTR_USER);
+            int userId = parser.getAttributeInt(null, XML_ATTR_USER, 0);
             String packageName = parser.getAttributeValue(null, "package");
             String className = parser.getAttributeValue(null, "class");
-            int userId = user == null ? 0 : Integer.parseInt(user);
             if (accountType == null && packageName == null) {
                 accountType = "com.google";
                 syncable = String.valueOf(AuthorityInfo.NOT_INITIALIZED);
@@ -1884,7 +1862,7 @@ public class SyncStorageEngine {
                 }
             }
             if (authority != null) {
-                authority.enabled = enabled == null || Boolean.parseBoolean(enabled);
+                authority.enabled = enabled;
                 try {
                     authority.syncable = (syncable == null) ?
                             AuthorityInfo.NOT_INITIALIZED : Integer.parseInt(syncable);
@@ -1914,30 +1892,20 @@ public class SyncStorageEngine {
      */
     private PeriodicSync parsePeriodicSync(TypedXmlPullParser parser, AuthorityInfo authorityInfo) {
         Bundle extras = new Bundle(); // Gets filled in later.
-        String periodValue = parser.getAttributeValue(null, "period");
-        String flexValue = parser.getAttributeValue(null, "flex");
-        final long period;
+        long period;
         long flextime;
         try {
-            period = Long.parseLong(periodValue);
-        } catch (NumberFormatException e) {
+            period = parser.getAttributeLong(null, "period");
+        } catch (XmlPullParserException e) {
             Slog.e(TAG, "error parsing the period of a periodic sync", e);
-            return null;
-        } catch (NullPointerException e) {
-            Slog.e(TAG, "the period of a periodic sync is null", e);
             return null;
         }
         try {
-            flextime = Long.parseLong(flexValue);
-        } catch (NumberFormatException e) {
+            flextime = parser.getAttributeLong(null, "flex");
+        } catch (XmlPullParserException e) {
             flextime = calculateDefaultFlexTime(period);
-            Slog.e(TAG, "Error formatting value parsed for periodic sync flex: " + flexValue
-                    + ", using default: "
-                    + flextime);
-        } catch (NullPointerException expected) {
-            flextime = calculateDefaultFlexTime(period);
-            Slog.d(TAG, "No flex time specified for this sync, using a default. period: "
-                    + period + " flex: " + flextime);
+            Slog.e(TAG, "Error formatting value parsed for periodic sync flex, using default: "
+                    + flextime, e);
         }
         PeriodicSync periodicSync;
         periodicSync =

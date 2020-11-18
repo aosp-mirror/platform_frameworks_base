@@ -336,23 +336,15 @@ class DisplayWindowSettingsProvider implements SettingsProvider {
     }
 
     private static int getIntAttribute(TypedXmlPullParser parser, String name, int defaultValue) {
-        try {
-            final String str = parser.getAttributeValue(null, name);
-            return str != null ? Integer.parseInt(str) : defaultValue;
-        } catch (NumberFormatException e) {
-            Slog.w(TAG, "Failed to parse display window settings attribute: " + name, e);
-            return defaultValue;
-        }
+        return parser.getAttributeInt(null, name, defaultValue);
     }
 
     @Nullable
     private static Integer getIntegerAttribute(TypedXmlPullParser parser, String name,
             @Nullable Integer defaultValue) {
         try {
-            final String str = parser.getAttributeValue(null, name);
-            return str != null ? Integer.valueOf(str) : defaultValue;
-        } catch (NumberFormatException e) {
-            Slog.w(TAG, "Failed to parse display window settings attribute: " + name, e);
+            return parser.getAttributeInt(null, name);
+        } catch (Exception ignored) {
             return defaultValue;
         }
     }
@@ -360,8 +352,11 @@ class DisplayWindowSettingsProvider implements SettingsProvider {
     @Nullable
     private static Boolean getBooleanAttribute(TypedXmlPullParser parser, String name,
             @Nullable Boolean defaultValue) {
-        final String str = parser.getAttributeValue(null, name);
-        return str != null ? Boolean.valueOf(str) : defaultValue;
+        try {
+            return parser.getAttributeBoolean(null, name);
+        } catch (Exception ignored) {
+            return defaultValue;
+        }
     }
 
     private static void readDisplay(TypedXmlPullParser parser, FileData fileData)

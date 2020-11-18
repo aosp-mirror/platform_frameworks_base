@@ -59,7 +59,7 @@ import java.util.Set;
  * NotificationManagerService helper for handling snoozed notifications.
  */
 public class SnoozeHelper {
-    public static final String XML_SNOOZED_NOTIFICATION_VERSION = "1";
+    public static final int XML_SNOOZED_NOTIFICATION_VERSION = 1;
 
     protected static final String XML_TAG_NAME = "snoozed-notifications";
 
@@ -598,14 +598,11 @@ public class SnoozeHelper {
 
                 attributeInserter.insert(value);
 
-                out.attribute(null, XML_SNOOZED_NOTIFICATION_VERSION_LABEL,
+                out.attributeInt(null, XML_SNOOZED_NOTIFICATION_VERSION_LABEL,
                         XML_SNOOZED_NOTIFICATION_VERSION);
                 out.attribute(null, XML_SNOOZED_NOTIFICATION_KEY, key);
-
-
                 out.attribute(null, XML_SNOOZED_NOTIFICATION_PKG, pkg);
-                out.attribute(null, XML_SNOOZED_NOTIFICATION_USER_ID,
-                        String.valueOf(userId));
+                out.attributeInt(null, XML_SNOOZED_NOTIFICATION_USER_ID, userId);
 
                 out.endTag(null, tag);
             }
@@ -624,8 +621,8 @@ public class SnoozeHelper {
             if (type == XmlPullParser.START_TAG
                     && (XML_SNOOZED_NOTIFICATION.equals(tag)
                         || tag.equals(XML_SNOOZED_NOTIFICATION_CONTEXT))
-                    && parser.getAttributeValue(null, XML_SNOOZED_NOTIFICATION_VERSION_LABEL)
-                        .equals(XML_SNOOZED_NOTIFICATION_VERSION)) {
+                    && parser.getAttributeInt(null, XML_SNOOZED_NOTIFICATION_VERSION_LABEL, -1)
+                        == XML_SNOOZED_NOTIFICATION_VERSION) {
                 try {
                     final String key = parser.getAttributeValue(null, XML_SNOOZED_NOTIFICATION_KEY);
                     final String pkg = parser.getAttributeValue(null, XML_SNOOZED_NOTIFICATION_PKG);

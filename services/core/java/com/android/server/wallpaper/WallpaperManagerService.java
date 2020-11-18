@@ -3025,11 +3025,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
     }
 
     private int getAttributeInt(TypedXmlPullParser parser, String name, int defValue) {
-        String value = parser.getAttributeValue(null, name);
-        if (value == null) {
-            return defValue;
-        }
-        return Integer.parseInt(value);
+        return parser.getAttributeInt(null, name, defValue);
     }
 
     /**
@@ -3210,10 +3206,10 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
     }
 
     private void parseWallpaperAttributes(TypedXmlPullParser parser, WallpaperData wallpaper,
-            boolean keepDimensionHints) {
-        final String idString = parser.getAttributeValue(null, "id");
-        if (idString != null) {
-            final int id = wallpaper.wallpaperId = Integer.parseInt(idString);
+            boolean keepDimensionHints) throws XmlPullParserException {
+        final int id = parser.getAttributeInt(null, "id", -1);
+        if (id != -1) {
+            wallpaper.wallpaperId = id;
             if (id > mWallpaperId) {
                 mWallpaperId = id;
             }

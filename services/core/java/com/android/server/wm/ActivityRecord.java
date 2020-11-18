@@ -18,7 +18,6 @@ package com.android.server.wm;
 
 import static android.app.ActivityManager.LOCK_TASK_MODE_NONE;
 import static android.app.ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND;
-import static android.app.ActivityManager.TaskDescription.ATTR_TASKDESCRIPTION_PREFIX;
 import static android.app.ActivityOptions.ANIM_CLIP_REVEAL;
 import static android.app.ActivityOptions.ANIM_CUSTOM;
 import static android.app.ActivityOptions.ANIM_NONE;
@@ -96,18 +95,18 @@ import static android.view.Display.COLOR_MODE_DEFAULT;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.view.Surface.ROTATION_270;
 import static android.view.Surface.ROTATION_90;
+import static android.view.WindowManager.TRANSIT_CLOSE;
+import static android.view.WindowManager.TRANSIT_OLD_ACTIVITY_CLOSE;
+import static android.view.WindowManager.TRANSIT_OLD_TASK_CLOSE;
+import static android.view.WindowManager.TRANSIT_OLD_TASK_OPEN_BEHIND;
+import static android.view.WindowManager.TRANSIT_OLD_UNSET;
 import static android.view.WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
-import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_FLAG_OPEN_BEHIND;
-import static android.view.WindowManager.TRANSIT_OLD_ACTIVITY_CLOSE;
-import static android.view.WindowManager.TRANSIT_OLD_TASK_CLOSE;
-import static android.view.WindowManager.TRANSIT_OLD_UNSET;
-import static android.view.WindowManager.TransitionOldType;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ADD_REMOVE;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_APP_TRANSITIONS;
@@ -183,6 +182,7 @@ import static com.android.server.wm.IdentifierProto.USER_ID;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_APP_TRANSITION;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_RECENTS;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_WINDOW_ANIMATION;
+import static com.android.server.wm.Task.TASK_VISIBILITY_VISIBLE;
 import static com.android.server.wm.Task.ActivityState.DESTROYED;
 import static com.android.server.wm.Task.ActivityState.DESTROYING;
 import static com.android.server.wm.Task.ActivityState.FINISHING;
@@ -194,7 +194,6 @@ import static com.android.server.wm.Task.ActivityState.RESUMED;
 import static com.android.server.wm.Task.ActivityState.STARTED;
 import static com.android.server.wm.Task.ActivityState.STOPPED;
 import static com.android.server.wm.Task.ActivityState.STOPPING;
-import static com.android.server.wm.Task.TASK_VISIBILITY_VISIBLE;
 import static com.android.server.wm.TaskPersister.DEBUG;
 import static com.android.server.wm.TaskPersister.IMAGE_EXTENSION;
 import static com.android.server.wm.WindowContainer.AnimationFlags.CHILDREN;
@@ -293,6 +292,7 @@ import android.view.SurfaceControl.Transaction;
 import android.view.WindowInsets.Type;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
+import android.view.WindowManager.TransitionOldType;
 import android.view.animation.Animation;
 import android.window.WindowContainerToken;
 
@@ -322,9 +322,7 @@ import com.android.server.wm.utils.InsetUtils;
 
 import com.google.android.collect.Sets;
 
-import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
 
 import java.io.File;
 import java.io.IOException;
@@ -7500,39 +7498,16 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             ActivityTaskSupervisor taskSupervisor) throws IOException, XmlPullParserException {
         Intent intent = null;
         PersistableBundle persistentState = null;
-        int launchedFromUid = 0;
-        String launchedFromPackage = null;
-        String launchedFromFeature = null;
-        String resolvedType = null;
-        boolean componentSpecified = false;
-        int userId = 0;
-        long createTime = -1;
+        int launchedFromUid = in.getAttributeInt(null, ATTR_LAUNCHEDFROMUID, 0);
+        String launchedFromPackage = in.getAttributeValue(null, ATTR_LAUNCHEDFROMPACKAGE);
+        String launchedFromFeature = in.getAttributeValue(null, ATTR_LAUNCHEDFROMFEATURE);
+        String resolvedType = in.getAttributeValue(null, ATTR_RESOLVEDTYPE);
+        boolean componentSpecified = in.getAttributeBoolean(null, ATTR_COMPONENTSPECIFIED, false);
+        int userId = in.getAttributeInt(null, ATTR_USERID, 0);
+        long createTime = in.getAttributeLong(null, ATTR_ID, -1);
         final int outerDepth = in.getDepth();
-        TaskDescription taskDescription = new TaskDescription();
 
-        for (int attrNdx = in.getAttributeCount() - 1; attrNdx >= 0; --attrNdx) {
-            final String attrName = in.getAttributeName(attrNdx);
-            final String attrValue = in.getAttributeValue(attrNdx);
-            if (DEBUG) Slog.d(TaskPersister.TAG,
-                        "ActivityRecord: attribute name=" + attrName + " value=" + attrValue);
-            if (ATTR_ID.equals(attrName)) {
-                createTime = Long.parseLong(attrValue);
-            } else if (ATTR_LAUNCHEDFROMUID.equals(attrName)) {
-                launchedFromUid = Integer.parseInt(attrValue);
-            } else if (ATTR_LAUNCHEDFROMPACKAGE.equals(attrName)) {
-                launchedFromPackage = attrValue;
-            } else if (ATTR_LAUNCHEDFROMFEATURE.equals(attrName)) {
-                launchedFromFeature = attrValue;
-            } else if (ATTR_RESOLVEDTYPE.equals(attrName)) {
-                resolvedType = attrValue;
-            } else if (ATTR_COMPONENTSPECIFIED.equals(attrName)) {
-                componentSpecified = Boolean.parseBoolean(attrValue);
-            } else if (ATTR_USERID.equals(attrName)) {
-                userId = Integer.parseInt(attrValue);
-            } else if (!attrName.startsWith(ATTR_TASKDESCRIPTION_PREFIX)) {
-                Log.d(TAG, "Unknown ActivityRecord attribute=" + attrName);
-            }
-        }
+        TaskDescription taskDescription = new TaskDescription();
         taskDescription.restoreFromXml(in);
 
         int event;

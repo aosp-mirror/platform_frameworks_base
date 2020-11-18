@@ -51,13 +51,10 @@ import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.FastXmlSerializer;
-import com.android.internal.util.Preconditions;
 import com.android.server.pm.Installer;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -65,7 +62,6 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -395,7 +391,7 @@ public class CacheQuotaStrategy implements RemoteCallback.OnResultListener {
             long bytes = parser.getAttributeLong(null, ATTR_QUOTA_IN_BYTES);
             return new CacheQuotaHint.Builder()
                     .setVolumeUuid(uuid).setUid(uid).setQuota(bytes).build();
-        } catch (NumberFormatException e) {
+        } catch (XmlPullParserException e) {
             Slog.e(TAG, "Invalid cache quota request, skipping.");
             return null;
         }

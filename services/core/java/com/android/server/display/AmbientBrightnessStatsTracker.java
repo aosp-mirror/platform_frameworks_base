@@ -27,17 +27,14 @@ import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.FastXmlSerializer;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayDeque;
@@ -229,7 +226,7 @@ public class AmbientBrightnessStatsTracker {
                     }
                     tag = parser.getName();
                     if (TAG_AMBIENT_BRIGHTNESS_DAY_STATS.equals(tag)) {
-                        String userSerialNumber = parser.getAttributeValue(null, ATTR_USER);
+                        int userSerialNumber = parser.getAttributeInt(null, ATTR_USER);
                         LocalDate localDate = LocalDate.parse(
                                 parser.getAttributeValue(null, ATTR_LOCAL_DATE));
                         String[] bucketBoundaries = parser.getAttributeValue(null,
@@ -246,8 +243,7 @@ public class AmbientBrightnessStatsTracker {
                             parsedBucketBoundaries[i] = Float.parseFloat(bucketBoundaries[i]);
                             parsedBucketStats[i] = Float.parseFloat(bucketStats[i]);
                         }
-                        int userId = mInjector.getUserId(mUserManager,
-                                Integer.parseInt(userSerialNumber));
+                        int userId = mInjector.getUserId(mUserManager, userSerialNumber);
                         if (userId != -1 && localDate.isAfter(cutOffDate)) {
                             Deque<AmbientBrightnessDayStats> userStats = getOrCreateUserStats(
                                     parsedStats, userId);
