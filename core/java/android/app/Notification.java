@@ -5520,12 +5520,22 @@ public class Notification implements Parcelable
                 result = mStyle.makeBigContentView();
                 hideLine1Text(result);
             }
-            if (result == null) {
+            if (result == null && bigContentViewRequired()) {
                 result = applyStandardTemplateWithActions(getBigBaseLayoutResource(),
                         StandardTemplateParams.VIEW_TYPE_BIG, null /* result */);
             }
             makeHeaderExpanded(result);
             return result;
+        }
+
+        private boolean bigContentViewRequired() {
+            // If the big content view has no content, we can exempt the app from having to show it.
+            // TODO(b/173550917): add an UNDO style then force this requirement on apps targeting S
+            boolean exempt = mN.contentView != null && mN.bigContentView == null
+                    && mStyle == null && mActions.size() == 0
+                    && mN.extras.getCharSequence(EXTRA_TITLE) == null
+                    && mN.extras.getCharSequence(EXTRA_TEXT) == null;
+            return !exempt;
         }
 
         /**
