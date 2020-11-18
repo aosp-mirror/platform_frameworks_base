@@ -353,31 +353,24 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     private boolean mContinuousShadowUpdate;
     private boolean mContinuousBackgroundUpdate;
     private ViewTreeObserver.OnPreDrawListener mShadowUpdater
-            = new ViewTreeObserver.OnPreDrawListener() {
-
-        @Override
-        public boolean onPreDraw() {
-            updateViewShadows();
-            return true;
-        }
-    };
+            = () -> {
+                updateViewShadows();
+                return true;
+            };
     private ViewTreeObserver.OnPreDrawListener mBackgroundUpdater = () -> {
                 updateBackground();
                 return true;
             };
-    private Comparator<ExpandableView> mViewPositionComparator = new Comparator<ExpandableView>() {
-        @Override
-        public int compare(ExpandableView view, ExpandableView otherView) {
-            float endY = view.getTranslationY() + view.getActualHeight();
-            float otherEndY = otherView.getTranslationY() + otherView.getActualHeight();
-            if (endY < otherEndY) {
-                return -1;
-            } else if (endY > otherEndY) {
-                return 1;
-            } else {
-                // The two notifications end at the same location
-                return 0;
-            }
+    private Comparator<ExpandableView> mViewPositionComparator = (view, otherView) -> {
+        float endY = view.getTranslationY() + view.getActualHeight();
+        float otherEndY = otherView.getTranslationY() + otherView.getActualHeight();
+        if (endY < otherEndY) {
+            return -1;
+        } else if (endY > otherEndY) {
+            return 1;
+        } else {
+            // The two notifications end at the same location
+            return 0;
         }
     };
     private final ViewOutlineProvider mOutlineProvider = new ViewOutlineProvider() {
@@ -414,8 +407,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
      * How fast the background scales in the X direction as a factor of the Y expansion.
      */
     private float mBackgroundXFactor = 1f;
-
-    private boolean mSwipingInProgress;
 
     private boolean mUsingLightTheme;
     private boolean mQsExpanded;
@@ -2557,7 +2548,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             if (child.getVisibility() != View.GONE
                     && !(child instanceof StackScrollerDecorView)
                     && child != mShelf
-                    && !mAmbientState.getDraggedViews().contains(child)) {
+                    && mSwipeHelper.getSwipedView() != child) {
                 children.add(child);
             }
         }
@@ -3578,7 +3569,10 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     @Override
     @ShadeViewRefactor(RefactorComponent.INPUT)
     public boolean onGenericMotionEvent(MotionEvent event) {
-        if (!isScrollingEnabled() || !mIsExpanded || mSwipingInProgress || mExpandingNotification
+        if (!isScrollingEnabled()
+                || !mIsExpanded
+                || mSwipeHelper.isSwiping()
+                || mExpandingNotification
                 || mDisallowScrollingInThisMotion) {
             return false;
         }
@@ -4078,14 +4072,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         return false;
     }
 
-    @ShadeViewRefactor(RefactorComponent.INPUT)
-    void setSwipingInProgress(boolean swiping) {
-        mSwipingInProgress = swiping;
-        if (swiping) {
-            requestDisallowInterceptTouchEvent(true);
-        }
-    }
-
     @Override
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     public void onWindowFocusChanged(boolean hasWindowFocus) {
@@ -4128,9 +4114,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             mStatusBar.resetUserExpandedStates();
             clearTemporaryViews();
             clearUserLockedViews();
-            ArrayList<View> draggedViews = mAmbientState.getDraggedViews();
-            if (draggedViews.size() > 0) {
-                draggedViews.clear();
+            if (mSwipeHelper.isSwiping()) {
+                mSwipeHelper.resetSwipeState();
                 updateContinuousShadowDrawing();
             }
         }
@@ -5197,15 +5182,11 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             ExpandableView child = (ExpandableView) getTransientView(i);
             child.dump(fd, pw, args);
         }
-        ArrayList<View> draggedViews = mAmbientState.getDraggedViews();
-        int draggedCount = draggedViews.size();
-        pw.println("  Dragged Views: " + draggedCount);
-        for (int i = 0; i < draggedCount; i++) {
-            View view = draggedViews.get(i);
-            if (view instanceof ExpandableView) {
-                ExpandableView expandableView = (ExpandableView) view;
-                expandableView.dump(fd, pw, args);
-            }
+        View swipedView = mSwipeHelper.getSwipedView();
+        pw.println("  Swiped view: " + swipedView);
+        if (swipedView instanceof ExpandableView) {
+            ExpandableView expandableView = (ExpandableView) swipedView;
+            expandableView.dump(fd, pw, args);
         }
     }
 
@@ -5523,13 +5504,15 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         mSwipedOutViews.add(v);
     }
 
-    void addDraggedView(View view) {
-        mAmbientState.onBeginDrag(view);
+    void onSwipeBegin() {
+        requestDisallowInterceptTouchEvent(true);
         updateFirstAndLastBackgroundViews();
+        updateContinuousShadowDrawing();
+        updateContinuousBackgroundDrawing();
+        requestChildrenUpdate();
     }
 
-    void removeDraggedView(View view) {
-        mAmbientState.onDragFinished(view);
+    void onSwipeEnd() {
         updateFirstAndLastBackgroundViews();
     }
 
@@ -5540,10 +5523,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     void setNumHeadsUp(long numHeadsUp) {
         mNumHeadsUp = numHeadsUp;
         mAmbientState.setHasAlertEntries(numHeadsUp > 0);
-    }
-
-    boolean getSwipingInProgress() {
-        return mSwipingInProgress;
     }
 
     public boolean getIsExpanded() {
@@ -5584,10 +5563,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
 
     void setTouchHandler(NotificationStackScrollLayoutController.TouchHandler touchHandler) {
         mTouchHandler = touchHandler;
-    }
-
-    boolean isSwipingInProgress() {
-        return mSwipingInProgress;
     }
 
     boolean getCheckSnoozeLeaveBehind() {
@@ -5664,9 +5639,17 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         mSectionsManager.updateSectionBoundaries(reason);
     }
 
+    boolean isSilkDismissEnabled() {
+        return Settings.Global.getInt(mContext.getContentResolver(),
+                Settings.Global.SHOW_NEW_NOTIF_DISMISS, 1 /* enabled by default */) == 1;
+    }
+
     void updateContinuousBackgroundDrawing() {
+        if (isSilkDismissEnabled()) {
+            return;
+        }
         boolean continuousBackground = !mAmbientState.isFullyAwake()
-                && !mAmbientState.getDraggedViews().isEmpty();
+                && mSwipeHelper.isSwiping();
         if (continuousBackground != mContinuousBackgroundUpdate) {
             mContinuousBackgroundUpdate = continuousBackground;
             if (continuousBackground) {
@@ -5680,7 +5663,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     void updateContinuousShadowDrawing() {
         boolean continuousShadowUpdate = mAnimationRunning
-                || !mAmbientState.getDraggedViews().isEmpty();
+                || mSwipeHelper.isSwiping();
         if (continuousShadowUpdate != mContinuousShadowUpdate) {
             if (continuousShadowUpdate) {
                 getViewTreeObserver().addOnPreDrawListener(mShadowUpdater);
