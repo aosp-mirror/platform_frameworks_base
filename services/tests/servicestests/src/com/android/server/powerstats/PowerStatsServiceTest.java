@@ -209,7 +209,7 @@ public class PowerStatsServiceTest {
         }
 
         @Override
-        public boolean initialize() {
+        public boolean isInitialized() {
             return true;
         }
     }

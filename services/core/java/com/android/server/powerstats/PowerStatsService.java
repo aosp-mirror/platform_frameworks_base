@@ -29,7 +29,6 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.DumpUtils;
 import com.android.server.SystemService;
 import com.android.server.powerstats.PowerStatsHALWrapper.IPowerStatsHALWrapper;
-import com.android.server.powerstats.PowerStatsHALWrapper.PowerStatsHALWrapperImpl;
 import com.android.server.powerstats.ProtoStreamUtils.ChannelInfoUtils;
 import com.android.server.powerstats.ProtoStreamUtils.EnergyConsumerIdUtils;
 import com.android.server.powerstats.ProtoStreamUtils.PowerEntityInfoUtils;
@@ -78,7 +77,7 @@ public class PowerStatsService extends SystemService {
         }
 
         IPowerStatsHALWrapper createPowerStatsHALWrapperImpl() {
-            return new PowerStatsHALWrapperImpl();
+            return PowerStatsHALWrapper.getPowerStatsHalImpl();
         }
 
         PowerStatsLogger createPowerStatsLogger(Context context, File dataStoragePath,
@@ -143,7 +142,7 @@ public class PowerStatsService extends SystemService {
     private void onSystemServiceReady() {
         mPowerStatsHALWrapper = mInjector.createPowerStatsHALWrapperImpl();
 
-        if (mPowerStatsHALWrapper.initialize()) {
+        if (mPowerStatsHALWrapper.isInitialized()) {
             if (DEBUG) Slog.d(TAG, "Starting PowerStatsService");
 
             // Only start logger and triggers if initialization is successful.
