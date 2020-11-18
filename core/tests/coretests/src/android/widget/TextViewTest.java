@@ -16,6 +16,9 @@
 
 package android.widget;
 
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
+
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
@@ -30,6 +33,7 @@ import android.text.GetChars;
 import android.text.Layout;
 import android.text.PrecomputedText;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.TextView.BufferType;
 
 import androidx.test.InstrumentationRegistry;
@@ -252,6 +256,24 @@ public class TextViewTest {
         // Check that mText and mTransformed are empty string instead of null.
         assertEquals("", mTextView.getText().toString());
         assertEquals("", mTextView.getTransformed().toString());
+    }
+
+    @Test
+    @UiThreadTest
+    public void testPortraitDoesntSupportFullscreenIme() {
+        mActivity.setRequestedOrientation(SCREEN_ORIENTATION_PORTRAIT);
+        mTextView = new NullSetTextTextView(mActivity);
+        mTextView.requestFocus();
+        assertEquals("IME_FLAG_NO_FULLSCREEN should be set",
+                mTextView.getImeOptions(),
+                mTextView.getImeOptions() & EditorInfo.IME_FLAG_NO_FULLSCREEN);
+
+        mTextView.clearFocus();
+        mActivity.setRequestedOrientation(SCREEN_ORIENTATION_LANDSCAPE);
+        mTextView = new NullSetTextTextView(mActivity);
+        mTextView.requestFocus();
+        assertEquals("IME_FLAG_NO_FULLSCREEN should not be set",
+                0, mTextView.getImeOptions() & EditorInfo.IME_FLAG_NO_FULLSCREEN);
     }
 
     private String createLongText() {
