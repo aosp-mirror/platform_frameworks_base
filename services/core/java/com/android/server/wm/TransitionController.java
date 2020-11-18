@@ -16,6 +16,9 @@
 
 package com.android.server.wm;
 
+import static android.view.WindowManager.TRANSIT_CLOSE;
+import static android.view.WindowManager.TRANSIT_OPEN;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.IBinder;
@@ -71,7 +74,7 @@ class TransitionController {
         if (mCollectingTransition != null) {
             throw new IllegalStateException("Simultaneous transitions not supported yet.");
         }
-        mCollectingTransition = new Transition(type, flags, this);
+        mCollectingTransition = new Transition(type, flags, this, mAtm.mWindowManager.mSyncEngine);
         ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS, "Creating Transition: %s",
                 mCollectingTransition);
         return mCollectingTransition;
@@ -114,12 +117,12 @@ class TransitionController {
 
     /** @return {@code true} if wc is in a participant subtree */
     boolean inTransition(@NonNull WindowContainer wc) {
-        if (mCollectingTransition != null && mCollectingTransition.mParticipants.containsKey(wc)) {
+        if (mCollectingTransition != null && mCollectingTransition.mParticipants.contains(wc)) {
             return true;
         }
         for (int i = mPlayingTransitions.size() - 1; i >= 0; --i) {
             for (WindowContainer p = wc; p != null; p = p.getParent()) {
-                if (mPlayingTransitions.get(i).mParticipants.containsKey(p)) {
+                if (mPlayingTransitions.get(i).mParticipants.contains(p)) {
                     return true;
                 }
             }
@@ -136,6 +139,9 @@ class TransitionController {
         return requestTransitionIfNeeded(type, 0 /* flags */, trigger);
     }
 
+    private static boolean isExistenceType(@WindowManager.TransitionType int type) {
+        return type == TRANSIT_OPEN || type == TRANSIT_CLOSE;
+    }
     /**
      * If a transition isn't requested yet, creates one and asks the TransitionPlayer (Shell) to
      * start it. Collection can start immediately.
@@ -156,7 +162,11 @@ class TransitionController {
             newTransition = requestStartTransition(createTransition(type, flags));
         }
         if (trigger != null) {
-            collect(trigger);
+            if (isExistenceType(type)) {
+                collectExistenceChange(trigger);
+            } else {
+                collect(trigger);
+            }
         }
         return newTransition;
     }
@@ -179,6 +189,12 @@ class TransitionController {
     void collect(@NonNull WindowContainer wc) {
         if (mCollectingTransition == null) return;
         mCollectingTransition.collect(wc);
+    }
+
+    /** @see Transition#collectExistenceChange  */
+    void collectExistenceChange(@NonNull WindowContainer wc) {
+        if (mCollectingTransition == null) return;
+        mCollectingTransition.collectExistenceChange(wc);
     }
 
     /** @see Transition#setReady */

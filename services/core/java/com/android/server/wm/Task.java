@@ -2358,7 +2358,6 @@ class Task extends WindowContainer<WindowContainer> {
         mDisplayContent.prepareAppTransitionOld(TRANSIT_OLD_TASK_CHANGE_WINDOWING_MODE,
                 false /* alwaysKeepCurrent */, 0, false /* forceOverride */);
         mDisplayContent.prepareAppTransition(TRANSIT_CHANGE_WINDOWING_MODE);
-        mAtmService.getTransitionController().collect(this);
         mDisplayContent.mChangingContainers.add(this);
 
         mSurfaceFreezer.freeze(getPendingTransaction(), startBounds);

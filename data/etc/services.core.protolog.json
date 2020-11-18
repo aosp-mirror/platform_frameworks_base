@@ -1507,6 +1507,12 @@
       "group": "WM_DEBUG_APP_TRANSITIONS",
       "at": "com\/android\/server\/wm\/AppTransitionController.java"
     },
+    "-354571697": {
+      "message": "Existence Changed in transition %d: %s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_TRANSITIONS",
+      "at": "com\/android\/server\/wm\/Transition.java"
+    },
     "-344488673": {
       "message": "Finishing drawing window %s: mDrawState=%s",
       "level": "VERBOSE",
