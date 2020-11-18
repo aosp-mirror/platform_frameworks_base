@@ -18,13 +18,13 @@ package android.security.keystore2;
 
 import android.annotation.NonNull;
 import android.hardware.biometrics.BiometricManager;
+import android.hardware.keymint.KeyParameter;
+import android.hardware.keymint.SecurityLevel;
 import android.security.GateKeeper;
 import android.security.keymaster.KeymasterDefs;
 import android.security.keystore.KeyProperties;
 import android.security.keystore.UserAuthArgs;
 import android.system.keystore2.Authorization;
-import android.system.keystore2.KeyParameter;
-import android.system.keystore2.SecurityLevel;
 
 import java.security.ProviderException;
 import java.util.ArrayList;
