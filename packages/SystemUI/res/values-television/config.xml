@@ -43,9 +43,6 @@
         <item>com.android.systemui.toast.ToastUI</item>
     </string-array>
 
-    <!-- Disable KeyguardService -->
-    <bool name="config_enableKeyguardService">false</bool>
-
     <!-- Svelte specific logic, see RecentsConfiguration.SVELTE_* constants. -->
     <integer name="recents_svelte_level">3</integer>
 </resources>
