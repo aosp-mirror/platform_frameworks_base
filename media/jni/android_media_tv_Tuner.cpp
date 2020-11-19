@@ -604,11 +604,16 @@ jobjectArray FilterCallback::getTsRecordEvent(
 
         jlong byteNumber = static_cast<jlong>(tsRecordEvent.byteNumber);
 
-        jlong pts = (eventsExt.size() > i) ? static_cast<jlong>(eventsExt[i].tsRecord().pts)
-                : static_cast<jlong>(Constant64Bit::INVALID_PRESENTATION_TIME_STAMP);
-        jlong firstMbInSlice = (eventsExt.size() > i)
-                ? static_cast<jint>(eventsExt[i].tsRecord().firstMbInSlice)
-                : static_cast<jint>(Constant::INVALID_FIRST_MACROBLOCK_IN_SLICE);
+        jlong pts;
+        jlong firstMbInSlice;
+        if (eventsExt.size() > i && eventsExt[i].getDiscriminator() ==
+                    DemuxFilterEventExt::Event::hidl_discriminator::tsRecord) {
+            pts = static_cast<jlong>(eventsExt[i].tsRecord().pts);
+            firstMbInSlice = static_cast<jint>(eventsExt[i].tsRecord().firstMbInSlice);
+        } else {
+            pts = static_cast<jlong>(Constant64Bit::INVALID_PRESENTATION_TIME_STAMP);
+            firstMbInSlice = static_cast<jint>(Constant::INVALID_FIRST_MACROBLOCK_IN_SLICE);
+        }
 
         jobject obj =
                 env->NewObject(eventClazz, eventInit, jpid, ts, sc, byteNumber,
@@ -632,16 +637,25 @@ jobjectArray FilterCallback::getMmtpRecordEvent(
 
         jint scHevcIndexMask = static_cast<jint>(mmtpRecordEvent.scHevcIndexMask);
         jlong byteNumber = static_cast<jlong>(mmtpRecordEvent.byteNumber);
-        jint mpuSequenceNumber = (eventsExt.size() > i)
-                ? static_cast<jint>(eventsExt[i].mmtpRecord().mpuSequenceNumber)
-                : static_cast<jint>(Constant::INVALID_MMTP_RECORD_EVENT_MPT_SEQUENCE_NUM);
-        jlong pts = (eventsExt.size() > i) ? static_cast<jlong>(eventsExt[i].mmtpRecord().pts)
-                : static_cast<jlong>(Constant64Bit::INVALID_PRESENTATION_TIME_STAMP);
-        jlong firstMbInSlice = (eventsExt.size() > i)
-                ? static_cast<jint>(eventsExt[i].mmtpRecord().firstMbInSlice)
-                : static_cast<jint>(Constant::INVALID_FIRST_MACROBLOCK_IN_SLICE);
-        jlong tsIndexMask = (eventsExt.size() > i)
-                ? static_cast<jint>(eventsExt[i].mmtpRecord().tsIndexMask) : 0;
+
+        jint mpuSequenceNumber;
+        jlong pts;
+        jlong firstMbInSlice;
+        jlong tsIndexMask;
+
+        if (eventsExt.size() > i && eventsExt[i].getDiscriminator() ==
+                    DemuxFilterEventExt::Event::hidl_discriminator::mmtpRecord) {
+            mpuSequenceNumber = static_cast<jint>(eventsExt[i].mmtpRecord().mpuSequenceNumber);
+            pts = static_cast<jlong>(eventsExt[i].mmtpRecord().pts);
+            firstMbInSlice = static_cast<jint>(eventsExt[i].mmtpRecord().firstMbInSlice);
+            tsIndexMask = static_cast<jint>(eventsExt[i].mmtpRecord().tsIndexMask);
+        } else {
+            mpuSequenceNumber =
+                    static_cast<jint>(Constant::INVALID_MMTP_RECORD_EVENT_MPT_SEQUENCE_NUM);
+            pts = static_cast<jlong>(Constant64Bit::INVALID_PRESENTATION_TIME_STAMP);
+            firstMbInSlice = static_cast<jint>(Constant::INVALID_FIRST_MACROBLOCK_IN_SLICE);
+            tsIndexMask = 0;
+        }
 
         jobject obj =
                 env->NewObject(eventClazz, eventInit, scHevcIndexMask, byteNumber,
@@ -720,11 +734,21 @@ jobjectArray FilterCallback::getScramblingStatusEvent(
     jclass eventClazz = env->FindClass("android/media/tv/tuner/filter/ScramblingStatusEvent");
     jmethodID eventInit = env->GetMethodID(eventClazz, "<init>", "(I)V");
 
-    for (int i = 0; i < eventsExt.size(); i++) {
-        auto scramblingStatus = eventsExt[i].scramblingStatus();
-        jobject obj = env->NewObject(eventClazz, eventInit, static_cast<jint>(scramblingStatus));
-        env->SetObjectArrayElement(arr, i, obj);
-    }
+    auto scramblingStatus = eventsExt[0].monitorEvent().scramblingStatus();
+    jobject obj = env->NewObject(eventClazz, eventInit, static_cast<jint>(scramblingStatus));
+    env->SetObjectArrayElement(arr, 0, obj);
+    return arr;
+}
+
+jobjectArray FilterCallback::getIpCidChangeEvent(
+        jobjectArray& arr, const std::vector<DemuxFilterEventExt::Event>& eventsExt) {
+    JNIEnv *env = AndroidRuntime::getJNIEnv();
+    jclass eventClazz = env->FindClass("android/media/tv/tuner/filter/IpCidChangeEvent");
+    jmethodID eventInit = env->GetMethodID(eventClazz, "<init>", "(I)V");
+
+    auto cid = eventsExt[0].monitorEvent().cid();
+    jobject obj = env->NewObject(eventClazz, eventInit, static_cast<jint>(cid));
+    env->SetObjectArrayElement(arr, 0, obj);
     return arr;
 }
 
@@ -734,11 +758,9 @@ jobjectArray FilterCallback::getRestartEvent(
     jclass eventClazz = env->FindClass("android/media/tv/tuner/filter/RestartEvent");
     jmethodID eventInit = env->GetMethodID(eventClazz, "<init>", "(I)V");
 
-    for (int i = 0; i < eventsExt.size(); i++) {
-        auto startId = eventsExt[i].startId();
-        jobject obj = env->NewObject(eventClazz, eventInit, static_cast<jint>(startId));
-        env->SetObjectArrayElement(arr, i, obj);
-    }
+    auto startId = eventsExt[0].startId();
+    jobject obj = env->NewObject(eventClazz, eventInit, static_cast<jint>(startId));
+    env->SetObjectArrayElement(arr, 0, obj);
     return arr;
 }
 
@@ -747,17 +769,31 @@ Return<void> FilterCallback::onFilterEvent_1_1(const DemuxFilterEvent& filterEve
     ALOGD("FilterCallback::onFilterEvent_1_1");
 
     JNIEnv *env = AndroidRuntime::getJNIEnv();
+    jobjectArray array;
 
     std::vector<DemuxFilterEvent::Event> events = filterEvent.events;
     std::vector<DemuxFilterEventExt::Event> eventsExt = filterEventExt.events;
     jclass eventClazz = env->FindClass("android/media/tv/tuner/filter/FilterEvent");
-    jobjectArray array = env->NewObjectArray(events.size(), eventClazz, NULL);
 
     if (events.empty() && !eventsExt.empty()) {
+        // Monitor event should be sent with one DemuxFilterMonitorEvent in DemuxFilterEventExt.
+        array = env->NewObjectArray(1, eventClazz, NULL);
         auto eventExt = eventsExt[0];
         switch (eventExt.getDiscriminator()) {
-            case DemuxFilterEventExt::Event::hidl_discriminator::scramblingStatus: {
-                array = getScramblingStatusEvent(array, eventsExt);
+            case DemuxFilterEventExt::Event::hidl_discriminator::monitorEvent: {
+                switch (eventExt.monitorEvent().getDiscriminator()) {
+                    case DemuxFilterMonitorEvent::hidl_discriminator::scramblingStatus: {
+                        array = getScramblingStatusEvent(array, eventsExt);
+                        break;
+                    }
+                    case DemuxFilterMonitorEvent::hidl_discriminator::cid: {
+                        array = getIpCidChangeEvent(array, eventsExt);
+                        break;
+                    }
+                    default: {
+                        break;
+                    }
+                }
                 break;
             }
             case DemuxFilterEventExt::Event::hidl_discriminator::startId: {
@@ -771,6 +807,7 @@ Return<void> FilterCallback::onFilterEvent_1_1(const DemuxFilterEvent& filterEve
     }
 
     if (!events.empty()) {
+        array = env->NewObjectArray(events.size(), eventClazz, NULL);
         auto event = events[0];
         switch (event.getDiscriminator()) {
             case DemuxFilterEvent::Event::hidl_discriminator::media: {
@@ -4069,8 +4106,8 @@ static jlong android_media_tv_Tuner_get_filter_64bit_id(JNIEnv* env, jobject fil
                     ::android::hardware::tv::tuner::V1_1::Constant64Bit::INVALID_FILTER_ID_64BIT);
 }
 
-static jint android_media_tv_Tuner_configure_scrambling_status_event(
-        JNIEnv* env, jobject filter, int scramblingStatusMask) {
+static jint android_media_tv_Tuner_configure_monitor_event(
+        JNIEnv* env, jobject filter, int monitorEventType) {
     sp<IFilter> iFilterSp = getFilter(env, filter)->getIFilter();
     if (iFilterSp == NULL) {
         ALOGD("Failed to configure scrambling event: filter not found");
@@ -4082,7 +4119,7 @@ static jint android_media_tv_Tuner_configure_scrambling_status_event(
     Result res;
 
     if (iFilterSp_1_1 != NULL) {
-        res = iFilterSp_1_1->configureScramblingEvent(scramblingStatusMask);
+        res = iFilterSp_1_1->configureMonitorEvent(monitorEventType);
     } else {
         ALOGW("configureScramblingEvent is not supported with the current HAL implementation.");
         return (jint) Result::INVALID_STATE;
@@ -4762,8 +4799,8 @@ static const JNINativeMethod gFilterMethods[] = {
     { "nativeGetId", "()I", (void *)android_media_tv_Tuner_get_filter_id },
     { "nativeGetId64Bit", "()J",
             (void *)android_media_tv_Tuner_get_filter_64bit_id },
-    { "nativeconfigureScramblingEvent", "(I)I",
-            (void *)android_media_tv_Tuner_configure_scrambling_status_event },
+    { "nativeConfigureMonitorEvent", "(I)I",
+            (void *)android_media_tv_Tuner_configure_monitor_event },
     { "nativeSetDataSource", "(Landroid/media/tv/tuner/filter/Filter;)I",
             (void *)android_media_tv_Tuner_set_filter_data_source },
     { "nativeStartFilter", "()I", (void *)android_media_tv_Tuner_start_filter },

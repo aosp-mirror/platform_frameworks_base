@@ -19,7 +19,7 @@ package android.media.tv.tuner.filter;
 import android.annotation.SystemApi;
 
 /**
- * Scrambling Status event sent from {@link Filter} objects with Scrambling Status type.
+ * Ip Cid Change event sent from {@link Filter} objects new ip cid.
  *
  * <p>This event is only sent in Tuner 1.1 or higher version. Use
  * {@link TunerVersionChecker.getTunerVersion()} to get the version information.
@@ -27,21 +27,20 @@ import android.annotation.SystemApi;
  * @hide
  */
 @SystemApi
-public final class ScramblingStatusEvent extends FilterEvent {
-    private final int mScramblingStatus;
+public final class IpCidChangeEvent extends FilterEvent {
+    private final int mCid;
 
-    private ScramblingStatusEvent(@Filter.ScramblingStatus int scramblingStatus) {
-        mScramblingStatus = scramblingStatus;
+    private IpCidChangeEvent(int cid) {
+        mCid = cid;
     }
 
     /**
-     * Gets Scrambling Status Type.
+     * Gets ip cid.
      *
-     * <p>This event field is only sent in Tuner 1.1 or higher version. Use
+     * <p>This event is only sent in Tuner 1.1 or higher version. Use
      * {@link TunerVersionChecker.getTunerVersion()} to get the version information.
      */
-    @Filter.ScramblingStatus
-    public int getScramblingStatus() {
-        return mScramblingStatus;
+    public int getIpCid() {
+        return mCid;
     }
 }

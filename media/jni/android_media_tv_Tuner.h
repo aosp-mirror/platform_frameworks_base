@@ -44,7 +44,6 @@ using ::android::hardware::hidl_handle;
 using ::android::hardware::hidl_vec;
 using ::android::hardware::kSynchronizedReadWrite;
 using ::android::hardware::tv::tuner::V1_0::DemuxFilterEvent;
-using ::android::hardware::tv::tuner::V1_1::DemuxFilterEventExt;
 using ::android::hardware::tv::tuner::V1_0::DemuxFilterStatus;
 using ::android::hardware::tv::tuner::V1_0::DemuxFilterType;
 using ::android::hardware::tv::tuner::V1_0::DemuxPid;
@@ -73,6 +72,8 @@ using ::android::hardware::tv::tuner::V1_0::LnbId;
 using ::android::hardware::tv::tuner::V1_0::PlaybackStatus;
 using ::android::hardware::tv::tuner::V1_0::RecordStatus;
 using ::android::hardware::tv::tuner::V1_0::Result;
+using ::android::hardware::tv::tuner::V1_1::DemuxFilterEventExt;
+using ::android::hardware::tv::tuner::V1_1::DemuxFilterMonitorEvent;
 using ::android::hardware::tv::tuner::V1_1::FrontendScanMessageExt1_1;
 using ::android::hardware::tv::tuner::V1_1::FrontendScanMessageTypeExt1_1;
 using ::android::hardware::tv::tuner::V1_1::IFrontendCallback;
@@ -187,6 +188,8 @@ private:
     jobjectArray getTemiEvent(
             jobjectArray& arr, const std::vector<DemuxFilterEvent::Event>& events);
     jobjectArray getScramblingStatusEvent(
+            jobjectArray& arr, const std::vector<DemuxFilterEventExt::Event>& eventsExt);
+    jobjectArray getIpCidChangeEvent(
             jobjectArray& arr, const std::vector<DemuxFilterEventExt::Event>& eventsExt);
     jobjectArray getRestartEvent(
             jobjectArray& arr, const std::vector<DemuxFilterEventExt::Event>& eventsExt);
