@@ -150,8 +150,8 @@ public final class CallerIdentity {
         return mListenerId;
     }
 
-    /** Returns true if this represents a system identity. */
-    public boolean isSystem() {
+    /** Returns true if this represents a system server identity. */
+    public boolean isSystemServer() {
         return mUid == Process.SYSTEM_UID;
     }
 
