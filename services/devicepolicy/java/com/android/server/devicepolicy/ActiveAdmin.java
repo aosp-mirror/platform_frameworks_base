@@ -98,6 +98,8 @@ class ActiveAdmin {
     private static final String TAG_PASSWORD_HISTORY_LENGTH = "password-history-length";
     private static final String TAG_MIN_PASSWORD_LENGTH = "min-password-length";
     private static final String TAG_PASSWORD_QUALITY = "password-quality";
+    private static final String TAG_PASSWORD_QUALITY_APPLIES_TO_PARENT =
+            "password-quality-applies-parent";
     private static final String TAG_POLICIES = "policies";
     private static final String TAG_CROSS_PROFILE_WIDGET_PROVIDERS =
             "cross-profile-widget-providers";
@@ -143,6 +145,7 @@ class ActiveAdmin {
 
     @NonNull
     PasswordPolicy mPasswordPolicy = new PasswordPolicy();
+    boolean mPasswordPolicyAppliesToParent = true;
 
     @DevicePolicyManager.PasswordComplexity
     int mPasswordComplexity = PASSWORD_COMPLEXITY_NONE;
@@ -333,6 +336,9 @@ class ActiveAdmin {
                 writeAttributeValueToXml(
                         out, TAG_MIN_PASSWORD_NONLETTER, mPasswordPolicy.nonLetter);
             }
+
+            writeAttributeValueToXml(out, TAG_PASSWORD_QUALITY_APPLIES_TO_PARENT,
+                    mPasswordPolicyAppliesToParent);
         }
         if (passwordHistoryLength != DEF_PASSWORD_HISTORY_LENGTH) {
             writeAttributeValueToXml(
@@ -625,6 +631,9 @@ class ActiveAdmin {
                         parser.getAttributeValue(null, ATTR_VALUE));
             } else if (TAG_MIN_PASSWORD_NONLETTER.equals(tag)) {
                 mPasswordPolicy.nonLetter = Integer.parseInt(
+                        parser.getAttributeValue(null, ATTR_VALUE));
+            } else if (TAG_PASSWORD_QUALITY_APPLIES_TO_PARENT.equals(tag)) {
+                mPasswordPolicyAppliesToParent = Boolean.parseBoolean(
                         parser.getAttributeValue(null, ATTR_VALUE));
             } else if (TAG_MAX_TIME_TO_UNLOCK.equals(tag)) {
                 maximumTimeToUnlock = Long.parseLong(
@@ -994,6 +1003,9 @@ class ActiveAdmin {
 
         pw.print("minimumPasswordNonLetter=");
         pw.println(mPasswordPolicy.nonLetter);
+
+        pw.print("passwordPolicyAppliesToParent=");
+        pw.println(mPasswordPolicyAppliesToParent);
 
         pw.print("maximumTimeToUnlock=");
         pw.println(maximumTimeToUnlock);

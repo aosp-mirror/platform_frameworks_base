@@ -155,10 +155,12 @@ import android.app.admin.SystemUpdateInfo;
 import android.app.admin.SystemUpdatePolicy;
 import android.app.admin.UnsafeStateException;
 import android.app.backup.IBackupManager;
+import android.app.compat.CompatChanges;
 import android.app.trust.TrustManager;
 import android.app.usage.UsageStatsManagerInternal;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledAfter;
+import android.compat.annotation.EnabledSince;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -526,6 +528,19 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     @ChangeId
     @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.Q)
     private static final long USE_SET_LOCATION_ENABLED = 117835097L;
+
+    /**
+     * Admin apps targeting Android S+ may not use
+     * {@link android.app.admin.DevicePolicyManager#setPasswordQuality} to set password quality
+     * on the {@code DevicePolicyManager} instance obtained by calling
+     * {@link android.app.admin.DevicePolicyManager#getParentProfileInstance}.
+     * Instead, they should use
+     * {@link android.app.admin.DevicePolicyManager#setRequiredPasswordComplexity} to set
+     * coarse-grained password requirements device-wide.
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.S)
+    private static final long PREVENT_SETTING_PASSWORD_QUALITY_ON_PARENT = 165573442L;
 
     final Context mContext;
     final Injector mInjector;
@@ -1395,6 +1410,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         public long systemCurrentTimeMillis() {
             return System.currentTimeMillis();
+        }
+
+        public boolean isChangeEnabled(long changeId, String packageName, int userId) {
+            return CompatChanges.isChangeEnabled(changeId, packageName, UserHandle.of(userId));
         }
     }
 
@@ -3417,6 +3436,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 getTargetSdk(profileOwner.getPackageName(), userHandle) > Build.VERSION_CODES.M;
     }
 
+    private boolean canSetPasswordQualityOnParent(String packageName, int userId) {
+        return !mInjector.isChangeEnabled(
+                PREVENT_SETTING_PASSWORD_QUALITY_ON_PARENT, packageName, userId);
+    }
+
     @Override
     public void setPasswordQuality(ComponentName who, int quality, boolean parent) {
         if (!mHasFeature) {
@@ -3425,7 +3449,18 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         Objects.requireNonNull(who, "ComponentName is null");
         validateQualityConstant(quality);
 
-        final int userId = mInjector.userHandleGetCallingUserId();
+        final CallerIdentity caller = getCallerIdentity(who);
+        Preconditions.checkCallAuthorization(
+                isProfileOwner(caller) || isDeviceOwner(caller) || isSystemUid(caller));
+
+        final boolean qualityMayApplyToParent =
+                canSetPasswordQualityOnParent(who.getPackageName(), caller.getUserId());
+        if (!qualityMayApplyToParent) {
+            Preconditions.checkArgument(!parent,
+                    "Profile Owner may not apply password quality requirements device-wide");
+        }
+
+        final int userId = caller.getUserId();
         synchronized (getLockObject()) {
             ActiveAdmin ap = getActiveAdminForCallerLocked(
                     who, DeviceAdminInfo.USES_POLICY_LIMIT_PASSWORD, parent);
@@ -3434,6 +3469,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 if (passwordPolicy.quality != quality) {
                     passwordPolicy.quality = quality;
                     ap.mPasswordComplexity = PASSWORD_COMPLEXITY_NONE;
+                    ap.mPasswordPolicyAppliesToParent = qualityMayApplyToParent;
                     resetInactivePasswordRequirementsIfRPlus(userId, ap);
                     updatePasswordValidityCheckpointLocked(userId, parent);
                     updatePasswordQualityCacheForUserGroup(userId);
@@ -4165,7 +4201,16 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         synchronized (getLockObject()) {
             List<ActiveAdmin> admins = getActiveAdminsForLockscreenPoliciesLocked(userId);
             for (ActiveAdmin admin : admins) {
-                adminMetrics.add(admin.mPasswordPolicy.getMinMetrics());
+                final boolean isAdminOfUser = userId == admin.getUserHandle().getIdentifier();
+                // Use the password metrics from the admin in one of three cases:
+                // (1) The admin is of the user we're getting the minimum metrics for. The admin
+                //     always affects the user it's managing. This applies also to the parent
+                //     ActiveAdmin instance: It'd have the same user handle.
+                // (2) The mPasswordPolicyAppliesToParent field is true: That indicates the
+                //     call to setPasswordQuality was made by an admin that may affect the parent.
+                if (isAdminOfUser || admin.mPasswordPolicyAppliesToParent) {
+                    adminMetrics.add(admin.mPasswordPolicy.getMinMetrics());
+                }
             }
         }
         return PasswordMetrics.merge(adminMetrics);
@@ -4257,13 +4302,17 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     /* shouldIncludeProfileAdmins */ (user) -> user.id == profileUser
                     || !mLockPatternUtils.isSeparateProfileChallengeEnabled(user.id));
             ArrayList<PasswordMetrics> adminMetrics = new ArrayList<>(admins.size());
+            int maxRequiredComplexity = PASSWORD_COMPLEXITY_NONE;
             for (ActiveAdmin admin : admins) {
                 adminMetrics.add(admin.mPasswordPolicy.getMinMetrics());
+                if (isDeviceOwner(admin) || isProfileOwnerUncheckedLocked(admin.info.getComponent(),
+                        admin.getUserHandle().getIdentifier())) {
+                    maxRequiredComplexity = Math.max(maxRequiredComplexity,
+                            admin.mPasswordComplexity);
+                }
             }
-            //TODO: Take complexity into account, would need to take complexity from all admins
-            //in the admins list.
             return PasswordMetrics.validatePasswordMetrics(PasswordMetrics.merge(adminMetrics),
-                    PASSWORD_COMPLEXITY_NONE, false, metrics).isEmpty();
+                    maxRequiredComplexity, false, metrics).isEmpty();
         }
     }
 
@@ -4354,6 +4403,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     admin.mPasswordComplexity = passwordComplexity;
                     // Reset the password policy.
                     admin.mPasswordPolicy = new PasswordPolicy();
+                    admin.mPasswordPolicyAppliesToParent = true;
                     updatePasswordValidityCheckpointLocked(caller.getUserId(), calledOnParent);
                     updatePasswordQualityCacheForUserGroup(caller.getUserId());
                     saveSettingsLocked(caller.getUserId());

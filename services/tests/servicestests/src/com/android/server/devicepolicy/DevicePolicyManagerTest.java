@@ -5090,11 +5090,11 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         doReturn(true).when(getServices().lockPatternUtils)
                 .isSeparateProfileChallengeEnabled(managedProfileUserId);
 
-        dpm.setPasswordQuality(admin1, DevicePolicyManager.PASSWORD_QUALITY_ALPHABETIC);
-        parentDpm.setPasswordQuality(admin1, DevicePolicyManager.PASSWORD_QUALITY_NUMERIC);
+        dpm.setRequiredPasswordComplexity(PASSWORD_COMPLEXITY_HIGH);
+        parentDpm.setRequiredPasswordComplexity(PASSWORD_COMPLEXITY_MEDIUM);
 
         when(getServices().lockSettingsInternal.getUserPasswordMetrics(UserHandle.USER_SYSTEM))
-                .thenReturn(computeForPassword("1234".getBytes()));
+                .thenReturn(computeForPassword("184342".getBytes()));
 
         // Numeric password is compliant with current requirement (QUALITY_NUMERIC set explicitly
         // on the parent admin)
@@ -5105,6 +5105,68 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         // unification.
         assertThat(dpm.isPasswordSufficientAfterProfileUnification(UserHandle.USER_SYSTEM,
         managedProfileUserId)).isFalse();
+    }
+
+    @Test
+    public void testCanSetPasswordRequirementOnParentPreS() throws Exception {
+        final int managedProfileUserId = CALLER_USER_HANDLE;
+        final int managedProfileAdminUid =
+                UserHandle.getUid(managedProfileUserId, DpmMockContext.SYSTEM_UID);
+        mContext.binder.callingUid = managedProfileAdminUid;
+        addManagedProfile(admin1, managedProfileAdminUid, admin1, VERSION_CODES.R);
+        dpms.mMockInjector.setChangeEnabledForPackage(165573442L, false,
+                admin1.getPackageName(), managedProfileUserId);
+
+        parentDpm.setPasswordQuality(admin1, DevicePolicyManager.PASSWORD_QUALITY_COMPLEX);
+        assertThat(parentDpm.getPasswordQuality(admin1))
+                .isEqualTo(DevicePolicyManager.PASSWORD_QUALITY_COMPLEX);
+    }
+
+    @Test
+    public void testCannotSetPasswordRequirementOnParent() throws Exception {
+        final int managedProfileUserId = CALLER_USER_HANDLE;
+        final int managedProfileAdminUid =
+                UserHandle.getUid(managedProfileUserId, DpmMockContext.SYSTEM_UID);
+        mContext.binder.callingUid = managedProfileAdminUid;
+        addManagedProfile(admin1, managedProfileAdminUid, admin1);
+        dpms.mMockInjector.setChangeEnabledForPackage(165573442L, true,
+                admin1.getPackageName(), managedProfileUserId);
+
+        try {
+            assertExpectException(IllegalArgumentException.class, null, () ->
+                    parentDpm.setPasswordQuality(
+                            admin1, DevicePolicyManager.PASSWORD_QUALITY_COMPLEX));
+        } finally {
+            dpms.mMockInjector.clearEnabledChanges();
+        }
+    }
+
+    @Test
+    public void testPasswordQualityAppliesToParentPreS() throws Exception {
+        final int managedProfileUserId = CALLER_USER_HANDLE;
+        final int managedProfileAdminUid =
+                UserHandle.getUid(managedProfileUserId, DpmMockContext.SYSTEM_UID);
+        mContext.binder.callingUid = managedProfileAdminUid;
+        addManagedProfile(admin1, managedProfileAdminUid, admin1, VERSION_CODES.R);
+        when(getServices().userManager.getProfileParent(CALLER_USER_HANDLE))
+                .thenReturn(new UserInfo(UserHandle.USER_SYSTEM, "user system", 0));
+
+        dpm.setPasswordQuality(admin1, DevicePolicyManager.PASSWORD_QUALITY_COMPLEX);
+        assertThat(parentDpm.getPasswordQuality(null))
+                .isEqualTo(DevicePolicyManager.PASSWORD_QUALITY_COMPLEX);
+    }
+
+    @Test
+    public void testPasswordQualityDoesNotApplyToParentPostS() throws Exception {
+        final int managedProfileUserId = CALLER_USER_HANDLE;
+        final int managedProfileAdminUid =
+                UserHandle.getUid(managedProfileUserId, DpmMockContext.SYSTEM_UID);
+        mContext.binder.callingUid = managedProfileAdminUid;
+        addManagedProfile(admin1, managedProfileAdminUid, admin1, VERSION_CODES.R);
+
+        dpm.setPasswordQuality(admin1, DevicePolicyManager.PASSWORD_QUALITY_COMPLEX);
+        assertThat(parentDpm.getPasswordQuality(admin1))
+                .isEqualTo(DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED);
     }
 
     private void setActivePasswordState(PasswordMetrics passwordMetrics)
@@ -7014,17 +7076,29 @@ public class DevicePolicyManagerTest extends DpmTestBase {
      * @param adminUid uid of the admin package.
      * @param copyFromAdmin package information for {@code admin} will be built based on this
      *     component's information.
+     * @param appTargetSdk admin's target SDK level
      */
     private void addManagedProfile(
-            ComponentName admin, int adminUid, ComponentName copyFromAdmin) throws Exception {
+            ComponentName admin, int adminUid, ComponentName copyFromAdmin, int appTargetSdk)
+            throws Exception {
         final int userId = UserHandle.getUserId(adminUid);
         getServices().addUser(userId, 0, UserManager.USER_TYPE_PROFILE_MANAGED,
                 UserHandle.USER_SYSTEM);
         mContext.callerPermissions.addAll(OWNER_SETUP_PERMISSIONS);
-        setUpPackageManagerForFakeAdmin(admin, adminUid, copyFromAdmin);
+        setUpPackageManagerForFakeAdmin(admin, adminUid, /* enabledSetting= */ null,
+                appTargetSdk, copyFromAdmin);
         dpm.setActiveAdmin(admin, false, userId);
         assertThat(dpm.setProfileOwner(admin, null, userId)).isTrue();
         mContext.callerPermissions.removeAll(OWNER_SETUP_PERMISSIONS);
+    }
+
+    /**
+     * Same as {@code addManagedProfile} above, except using development API level as the API
+     * level of the admin.
+     */
+    private void addManagedProfile(
+            ComponentName admin, int adminUid, ComponentName copyFromAdmin) throws Exception {
+        addManagedProfile(admin, adminUid, copyFromAdmin, VERSION_CODES.CUR_DEVELOPMENT);
     }
 
     /**
