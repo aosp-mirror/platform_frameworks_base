@@ -43,6 +43,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.IBinder.DeathRecipient;
 import android.os.RemoteException;
+import android.text.TextUtils;
 import android.util.LocalLog;
 import android.util.Log;
 import android.util.TimeUtils;
@@ -334,15 +335,22 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
         if (!mEvents.isEmpty() && eventType == TYPE_VIEW_TEXT_CHANGED) {
             final ContentCaptureEvent lastEvent = mEvents.get(mEvents.size() - 1);
 
-            // TODO(b/121045053): check if flags match
+            // We merge two consecutive text change event, unless one of them clears the text.
             if (lastEvent.getType() == TYPE_VIEW_TEXT_CHANGED
                     && lastEvent.getId().equals(event.getId())) {
-                if (sVerbose) {
+                boolean bothNonEmpty = !TextUtils.isEmpty(lastEvent.getText())
+                        && !TextUtils.isEmpty(event.getText());
+                boolean equalContent = TextUtils.equals(lastEvent.getText(), event.getText());
+                if (equalContent) {
+                    addEvent = false;
+                } else if (bothNonEmpty) {
+                    lastEvent.mergeEvent(event);
+                    addEvent = false;
+                }
+                if (!addEvent && sVerbose) {
                     Log.v(TAG, "Buffering VIEW_TEXT_CHANGED event, updated text="
                             + getSanitizedString(event.getText()));
                 }
-                lastEvent.mergeEvent(event);
-                addEvent = false;
             }
         }
 
