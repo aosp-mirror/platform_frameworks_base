@@ -6285,4 +6285,19 @@ public abstract class Context {
     public boolean isUiContext() {
         throw new RuntimeException("Not implemented. Must override in a subclass.");
     }
+
+    /**
+     * Returns {@code true} if the context is a UI context which can access UI components such as
+     * {@link WindowManager}, {@link android.view.LayoutInflater LayoutInflater} or
+     * {@link android.app.WallpaperManager WallpaperManager}.
+     * <p>
+     * Examples of UI contexts are
+     * an {@link android.app.Activity Activity}, a context created from
+     * {@link #createWindowContext(int, Bundle)} or
+     * {@link android.inputmethodservice.InputMethodService InputMethodService}
+     * </p>
+     */
+    public static boolean isUiContext(@NonNull Context context) {
+        return context.isUiContext();
+    }
 }
