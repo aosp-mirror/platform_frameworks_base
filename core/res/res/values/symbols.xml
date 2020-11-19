@@ -2647,6 +2647,7 @@
   <java-symbol type="bool" name="config_defaultWindowFeatureContextMenu" />
   <java-symbol type="bool" name="config_overrideRemoteViewsActivityTransition" />
   <java-symbol type="attr" name="colorProgressBackgroundNormal" />
+  <java-symbol type="bool" name="config_allow_pin_storage_for_unattended_reboot" />
 
   <java-symbol type="layout" name="simple_account_item" />
   <java-symbol type="string" name="prohibit_manual_network_selection_in_gobal_mode" />
