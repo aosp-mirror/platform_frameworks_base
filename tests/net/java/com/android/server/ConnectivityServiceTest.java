@@ -18,6 +18,8 @@ package com.android.server;
 
 import static android.Manifest.permission.CHANGE_NETWORK_STATE;
 import static android.Manifest.permission.CONNECTIVITY_USE_RESTRICTED_NETWORKS;
+import static android.content.Intent.ACTION_USER_ADDED;
+import static android.content.Intent.ACTION_USER_REMOVED;
 import static android.content.pm.PackageInfo.REQUESTED_PERMISSION_GRANTED;
 import static android.content.pm.PackageManager.GET_PERMISSIONS;
 import static android.content.pm.PackageManager.MATCH_ANY_USER;
@@ -5878,6 +5880,75 @@ public class ConnectivityServiceTest {
                 && !caps.hasCapability(NET_CAPABILITY_NOT_METERED));
 
         mMockVpn.disconnect();
+    }
+
+    @Test
+    public void testVpnRestrictedUsers() throws Exception {
+        // NETWORK_SETTINGS is necessary to see the UID ranges in NetworkCapabilities.
+        mServiceContext.setPermission(Manifest.permission.NETWORK_SETTINGS,
+                PERMISSION_GRANTED);
+
+        final NetworkRequest request = new NetworkRequest.Builder()
+                .removeCapability(NET_CAPABILITY_NOT_VPN)
+                .build();
+        final TestNetworkCallback callback = new TestNetworkCallback();
+        mCm.registerNetworkCallback(request, callback);
+
+        // Bring up a VPN
+        mMockVpn.establishForMyUid();
+        callback.expectAvailableThenValidatedCallbacks(mMockVpn);
+        callback.assertNoCallback();
+
+        final int uid = Process.myUid();
+        NetworkCapabilities nc = mCm.getNetworkCapabilities(mMockVpn.getNetwork());
+        assertNotNull("nc=" + nc, nc.getUids());
+        assertEquals(nc.getUids(), uidRangesForUid(uid));
+
+        // Set an underlying network and expect to see the VPN transports change.
+        mWiFiNetworkAgent = new TestNetworkAgentWrapper(TRANSPORT_WIFI);
+        mWiFiNetworkAgent.connect(true);
+        callback.expectAvailableCallbacksUnvalidated(mWiFiNetworkAgent);
+        callback.expectCapabilitiesThat(mMockVpn, (caps)
+                -> caps.hasTransport(TRANSPORT_VPN)
+                && caps.hasTransport(TRANSPORT_WIFI));
+        callback.expectCapabilitiesThat(mWiFiNetworkAgent, (caps)
+                -> caps.hasCapability(NET_CAPABILITY_VALIDATED));
+
+        // Create a fake restricted profile whose parent is our user ID.
+        final int userId = UserHandle.getUserId(uid);
+        final int restrictedUserId = userId + 1;
+        final UserInfo info = new UserInfo(restrictedUserId, "user", UserInfo.FLAG_RESTRICTED);
+        info.restrictedProfileParentId = userId;
+        assertTrue(info.isRestricted());
+        when(mUserManager.getUserInfo(restrictedUserId)).thenReturn(info);
+        final Intent addedIntent = new Intent(ACTION_USER_ADDED);
+        addedIntent.putExtra(Intent.EXTRA_USER_HANDLE, restrictedUserId);
+
+        // Send a USER_ADDED broadcast for it.
+        // The BroadcastReceiver for this broadcast checks that is being run on the handler thread.
+        final Handler handler = new Handler(mCsHandlerThread.getLooper());
+        handler.post(() -> mServiceContext.sendBroadcast(addedIntent));
+
+        // Expect that the VPN UID ranges contain both |uid| and the UID range for the newly-added
+        // restricted user.
+        callback.expectCapabilitiesThat(mMockVpn, (caps)
+                -> caps.getUids().size() == 2
+                && caps.getUids().contains(new UidRange(uid, uid))
+                && caps.getUids().contains(UidRange.createForUser(restrictedUserId))
+                && caps.hasTransport(TRANSPORT_VPN)
+                && caps.hasTransport(TRANSPORT_WIFI));
+
+        // Send a USER_REMOVED broadcast and expect to lose the UID range for the restricted user.
+        final Intent removedIntent = new Intent(ACTION_USER_REMOVED);
+        removedIntent.putExtra(Intent.EXTRA_USER_HANDLE, restrictedUserId);
+        handler.post(() -> mServiceContext.sendBroadcast(removedIntent));
+
+        // Expect that the VPN gains the UID range for the restricted user.
+        callback.expectCapabilitiesThat(mMockVpn, (caps)
+                -> caps.getUids().size() == 1
+                && caps.getUids().contains(new UidRange(uid, uid))
+                && caps.hasTransport(TRANSPORT_VPN)
+                && caps.hasTransport(TRANSPORT_WIFI));
     }
 
     @Test
