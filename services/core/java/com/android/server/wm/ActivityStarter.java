@@ -1297,9 +1297,8 @@ class ActivityStarter {
         final boolean appSwitchAllowed = mService.getBalAppSwitchesAllowed();
 
         // don't abort if the callingUid has a visible window or is a persistent system process
-        final int callingUidProcState = mService.getUidState(callingUid);
-        final boolean callingUidHasAnyVisibleWindow =
-                mService.mWindowManager.mRoot.isAnyNonToastWindowVisibleForUid(callingUid);
+        final int callingUidProcState = mService.mActiveUids.getUidState(callingUid);
+        final boolean callingUidHasAnyVisibleWindow = mService.hasActiveVisibleWindow(callingUid);
         final boolean isCallingUidForeground = callingUidHasAnyVisibleWindow
                 || callingUidProcState == ActivityManager.PROCESS_STATE_TOP
                 || callingUidProcState == ActivityManager.PROCESS_STATE_BOUND_TOP;
@@ -1317,10 +1316,10 @@ class ActivityStarter {
         // take realCallingUid into consideration
         final int realCallingUidProcState = (callingUid == realCallingUid)
                 ? callingUidProcState
-                : mService.getUidState(realCallingUid);
+                : mService.mActiveUids.getUidState(realCallingUid);
         final boolean realCallingUidHasAnyVisibleWindow = (callingUid == realCallingUid)
                 ? callingUidHasAnyVisibleWindow
-                : mService.mWindowManager.mRoot.isAnyNonToastWindowVisibleForUid(realCallingUid);
+                : mService.hasActiveVisibleWindow(realCallingUid);
         final boolean isRealCallingUidForeground = (callingUid == realCallingUid)
                 ? isCallingUidForeground
                 : realCallingUidHasAnyVisibleWindow

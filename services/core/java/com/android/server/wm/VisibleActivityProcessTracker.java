@@ -21,7 +21,9 @@ import android.util.ArrayMap;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.BackgroundThread;
 
+import java.io.PrintWriter;
 import java.util.concurrent.Executor;
+import java.util.function.Predicate;
 
 /**
  * A quick lookup for all processes with visible activities. It also tracks the CPU usage of
@@ -70,10 +72,22 @@ class VisibleActivityProcessTracker {
     }
 
     boolean hasResumedActivity(int uid) {
+        return match(uid, WindowProcessController::hasResumedActivity);
+    }
+
+    /**
+     * Returns {@code true} if the uid has a process that contains an activity with
+     * {@link ActivityRecord#mVisibleRequested} or {@link ActivityRecord#isVisible()} is true.
+     */
+    boolean hasVisibleActivity(int uid) {
+        return match(uid, null /* predicate */);
+    }
+
+    private boolean match(int uid, Predicate<WindowProcessController> predicate) {
         synchronized (mProcMap) {
             for (int i = mProcMap.size() - 1; i >= 0; i--) {
                 final WindowProcessController wpc = mProcMap.keyAt(i);
-                if (wpc.mUid == uid && wpc.hasResumedActivity()) {
+                if (wpc.mUid == uid && (predicate == null || predicate.test(wpc))) {
                     return true;
                 }
             }
@@ -85,6 +99,16 @@ class VisibleActivityProcessTracker {
         synchronized (mProcMap) {
             return mProcMap.remove(wpc);
         }
+    }
+
+    void dump(PrintWriter pw, String prefix) {
+        pw.print(prefix + "VisibleActivityProcess:[");
+        synchronized (mProcMap) {
+            for (int i = mProcMap.size() - 1; i >= 0; i--) {
+                pw.print(" " + mProcMap.keyAt(i));
+            }
+        }
+        pw.println("]");
     }
 
     /**

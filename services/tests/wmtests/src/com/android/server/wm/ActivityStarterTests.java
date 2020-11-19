@@ -695,14 +695,11 @@ public class ActivityStarterTests extends WindowTestsBase {
             boolean isCallingUidDeviceOwner,
             boolean isPinnedSingleInstance) {
         // window visibility
-        doReturn(callingUidHasVisibleWindow).when(mAtm.mWindowManager.mRoot)
-                .isAnyNonToastWindowVisibleForUid(callingUid);
-        doReturn(realCallingUidHasVisibleWindow).when(mAtm.mWindowManager.mRoot)
-                .isAnyNonToastWindowVisibleForUid(realCallingUid);
-
+        doReturn(callingUidHasVisibleWindow).when(mAtm).hasActiveVisibleWindow(callingUid);
+        doReturn(realCallingUidHasVisibleWindow).when(mAtm).hasActiveVisibleWindow(realCallingUid);
         // process importance
-        doReturn(callingUidProcState).when(mAtm).getUidState(callingUid);
-        doReturn(realCallingUidProcState).when(mAtm).getUidState(realCallingUid);
+        mAtm.mActiveUids.onUidActive(callingUid, callingUidProcState);
+        mAtm.mActiveUids.onUidActive(realCallingUid, realCallingUidProcState);
         // foreground activities
         final IApplicationThread caller = mock(IApplicationThread.class);
         final WindowProcessListener listener = mock(WindowProcessListener.class);

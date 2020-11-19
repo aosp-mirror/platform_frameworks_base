@@ -607,7 +607,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
 
     private boolean isBoundByForegroundUid() {
         for (int i = mBoundClientUids.size() - 1; i >= 0; --i) {
-            if (mAtm.isUidForeground(mBoundClientUids.valueAt(i))) {
+            if (mAtm.hasActiveVisibleWindow(mBoundClientUids.valueAt(i))) {
                 return true;
             }
         }
@@ -1049,16 +1049,6 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
                 & (ACTIVITY_STATE_FLAG_IS_VISIBLE | ACTIVITY_STATE_FLAG_IS_WINDOW_VISIBLE)) != 0;
         for (int i = mActivities.size() - 1; i >= 0; i--) {
             final ActivityRecord r = mActivities.get(i);
-            if (r.app != this) {
-                Slog.e(TAG, "Found activity " + r + " in proc activity list using " + r.app
-                        + " instead of expected " + this);
-                if (r.app == null || (r.app.mUid == mUid)) {
-                    // Only fix things up when they look valid.
-                    r.setProcess(this);
-                } else {
-                    continue;
-                }
-            }
             if (r.isVisible()) {
                 stateFlags |= ACTIVITY_STATE_FLAG_IS_WINDOW_VISIBLE;
             }
@@ -1115,6 +1105,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     /** Called when the process has some oom related changes and it is going to update oom-adj. */
     private void prepareOomAdjustment() {
         mAtm.mRootWindowContainer.rankTaskLayersIfNeeded();
+        mAtm.mTaskSupervisor.computeProcessActivityStateBatch();
     }
 
     public int computeRelaunchReason() {

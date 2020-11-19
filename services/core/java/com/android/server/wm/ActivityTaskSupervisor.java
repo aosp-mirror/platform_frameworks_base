@@ -254,6 +254,12 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
     private LaunchParamsController mLaunchParamsController;
 
     /**
+     * The processes with changed states that should eventually call
+     * {@link WindowProcessController#computeProcessActivityState}.
+     */
+    private final ArrayList<WindowProcessController> mActivityStateChangedProcs = new ArrayList<>();
+
+    /**
      * Maps the task identifier that activities are currently being started in to the userId of the
      * task. Each time a new task is created, the entry for the userId of the task is incremented
      */
@@ -2310,11 +2316,42 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
     /** Ends a batch of visibility updates. */
     void endActivityVisibilityUpdate() {
         mVisibilityTransactionDepth--;
+        if (mVisibilityTransactionDepth == 0) {
+            computeProcessActivityStateBatch();
+        }
     }
 
     /** Returns {@code true} if the caller is on the path to update visibility. */
     boolean inActivityVisibilityUpdate() {
         return mVisibilityTransactionDepth > 0;
+    }
+
+    /**
+     * Called when the state or visibility of an attached activity is changed.
+     *
+     * @param wpc The process who owns the activity.
+     * @param forceBatch Whether to put the changed record to a pending list. If the caller is not
+     *                   in the path of visibility update ({@link #inActivityVisibilityUpdate}), it
+     *                   must call {@link #computeProcessActivityStateBatch} manually.
+     */
+    void onProcessActivityStateChanged(WindowProcessController wpc, boolean forceBatch) {
+        if (forceBatch || inActivityVisibilityUpdate()) {
+            if (!mActivityStateChangedProcs.contains(wpc)) {
+                mActivityStateChangedProcs.add(wpc);
+            }
+            return;
+        }
+        wpc.computeProcessActivityState();
+    }
+
+    void computeProcessActivityStateBatch() {
+        if (mActivityStateChangedProcs.isEmpty()) {
+            return;
+        }
+        for (int i = mActivityStateChangedProcs.size() - 1; i >= 0; i--) {
+            mActivityStateChangedProcs.get(i).computeProcessActivityState();
+        }
+        mActivityStateChangedProcs.clear();
     }
 
     /**

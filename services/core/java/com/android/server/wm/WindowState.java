@@ -3286,6 +3286,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             logExclusionRestrictions(EXCLUSION_LEFT);
             logExclusionRestrictions(EXCLUSION_RIGHT);
         }
+        // Exclude toast because legacy apps may show toast window by themselves, so the misused
+        // apps won't always be considered as foreground state.
+        if (mAttrs.type >= FIRST_SYSTEM_WINDOW && mAttrs.type != TYPE_TOAST) {
+            mWmService.mAtmService.mActiveUids.onNonAppSurfaceVisibilityChanged(mOwnerUid, shown);
+        }
     }
 
     private void logExclusionRestrictions(int side) {
@@ -5622,23 +5627,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 false /* ignoreVisibility */));
         outStableInsets.set(state.calculateInsets(outFrame, systemBars(),
                 true /* ignoreVisibility */));
-    }
-
-    /**
-     * Returns {@code true} if this window is not {@link WindowManager.LayoutParams#TYPE_TOAST}
-     * or {@link WindowManager.LayoutParams#TYPE_APPLICATION_STARTING},
-     * since this window doesn't belong to apps.
-     */
-    boolean isNonToastOrStarting() {
-        return mAttrs.type != TYPE_TOAST && mAttrs.type != TYPE_APPLICATION_STARTING;
-    }
-
-    boolean isNonToastWindowVisibleForUid(int callingUid) {
-        return getOwningUid() == callingUid && isNonToastOrStarting() && isVisibleNow();
-    }
-
-    boolean isNonToastWindowVisibleForPid(int pid) {
-        return mSession.mPid == pid && isNonToastOrStarting() && isVisibleNow();
     }
 
     void setViewVisibility(int viewVisibility) {

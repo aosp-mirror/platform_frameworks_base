@@ -52,9 +52,8 @@ final class ActiveUids {
 
     void clear() {
         mActiveUids.clear();
-        if (mPostChangesToAtm) {
-            mService.mAtmInternal.onActiveUidsCleared();
-        }
+        // It is only called for a temporal container with mPostChangesToAtm == false or test case.
+        // So there is no need to notify activity task manager.
     }
 
     UidRecord get(int uid) {

@@ -1558,10 +1558,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             }
         }
 
-        // Application tokens start out hidden.
-        setVisible(false);
-        mVisibleRequested = false;
-
         ColorDisplayService.ColorDisplayServiceInternal cds = LocalServices.getService(
                 ColorDisplayService.ColorDisplayServiceInternal.class);
         cds.attachColorTransformController(packageName, mUserId,
@@ -3507,7 +3503,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 }
                 if (fromActivity.isVisible()) {
                     setVisible(true);
-                    mVisibleRequested = true;
+                    setVisibleRequested(true);
                     mVisibleSetFromTransferredStartingWindow = true;
                 }
                 setClientVisible(fromActivity.mClientVisible);
@@ -4123,7 +4119,24 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     void setVisible(boolean visible) {
         if (visible != mVisible) {
             mVisible = visible;
+            if (app != null) {
+                mTaskSupervisor.onProcessActivityStateChanged(app, false /* forceBatch */);
+            }
             scheduleAnimation();
+        }
+    }
+
+    /**
+     * This is the only place that writes {@link #mVisibleRequested} (except unit test). The caller
+     * outside of this class should use {@link #setVisibility}.
+     */
+    private void setVisibleRequested(boolean visible) {
+        if (visible == mVisibleRequested) {
+            return;
+        }
+        mVisibleRequested = visible;
+        if (app != null) {
+            mTaskSupervisor.onProcessActivityStateChanged(app, false /* forceBatch */);
         }
     }
 
@@ -4190,7 +4203,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         displayContent.mOpeningApps.remove(this);
         displayContent.mClosingApps.remove(this);
         waitingToShow = false;
-        mVisibleRequested = visible;
+        setVisibleRequested(visible);
         mLastDeferHidingClient = deferHidingClient;
 
         if (!visible) {
@@ -4332,7 +4345,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                     ANIMATION_TYPE_APP_TRANSITION));
         }
         setVisible(visible);
-        mVisibleRequested = visible;
+        setVisibleRequested(visible);
         if (!visible) {
             stopFreezingScreen(true, true);
         } else {
@@ -4520,7 +4533,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             detachChildren();
         }
         if (app != null) {
-            app.computeProcessActivityState();
+            mTaskSupervisor.onProcessActivityStateChanged(app, false /* forceBatch */);
         }
 
         switch (state) {
