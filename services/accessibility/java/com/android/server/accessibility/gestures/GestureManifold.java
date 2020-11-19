@@ -104,9 +104,9 @@ class GestureManifold implements GestureMatcher.StateChangeListener {
     // Shared state information.
     private TouchState mState;
 
-    GestureManifold(Context context, Listener listener, TouchState state) {
+    GestureManifold(Context context, Listener listener, TouchState state, Handler handler) {
         mContext = context;
-        mHandler = new Handler(context.getMainLooper());
+        mHandler = handler;
         mListener = listener;
         mState = state;
         mMultiFingerGesturesEnabled = false;

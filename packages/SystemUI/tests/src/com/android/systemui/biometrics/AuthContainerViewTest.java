@@ -204,6 +204,16 @@ public class AuthContainerViewTest extends SysuiTestCase {
     }
 
     @Test
+    public void testOnDialogAnimatedIn_sendsCancelReason_whenPendingDismiss() {
+        initializeContainer(Authenticators.BIOMETRIC_WEAK);
+        mAuthContainer.mContainerState = AuthContainerView.STATE_PENDING_DISMISS;
+        mAuthContainer.onDialogAnimatedIn();
+        verify(mCallback).onDismissed(
+                eq(AuthDialogCallback.DISMISSED_USER_CANCELED),
+                eq(null) /* credentialAttestation */);
+    }
+
+    @Test
     public void testLayoutParams_hasSecureWindowFlag() {
         final IBinder windowToken = mock(IBinder.class);
         final WindowManager.LayoutParams layoutParams =
