@@ -408,6 +408,9 @@ public final class SmsManager {
      *  <code>RESULT_RIL_NO_RESOURCES</code><br>
      *  <code>RESULT_RIL_CANCELLED</code><br>
      *  <code>RESULT_RIL_SIM_ABSENT</code><br>
+     *  <code>RESULT_RIL_SIMULTANEOUS_SMS_AND_CALL_NOT_ALLOWED</code><br>
+     *  <code>RESULT_RIL_ACCESS_BARRED</code><br>
+     *  <code>RESULT_RIL_BLOCKED_DUE_TO_CALL</code><br>
      *  For <code>RESULT_ERROR_GENERIC_FAILURE</code> or any of the RESULT_RIL errors,
      *  the sentIntent may include the extra "errorCode" containing a radio technology specific
      *  value, generally only useful for troubleshooting.<br>
@@ -520,6 +523,9 @@ public final class SmsManager {
      *  <code>RESULT_RIL_NO_RESOURCES</code><br>
      *  <code>RESULT_RIL_CANCELLED</code><br>
      *  <code>RESULT_RIL_SIM_ABSENT</code><br>
+     *  <code>RESULT_RIL_SIMULTANEOUS_SMS_AND_CALL_NOT_ALLOWED</code><br>
+     *  <code>RESULT_RIL_ACCESS_BARRED</code><br>
+     *  <code>RESULT_RIL_BLOCKED_DUE_TO_CALL</code><br>
      *  For <code>RESULT_ERROR_GENERIC_FAILURE</code> or any of the RESULT_RIL errors,
      *  the sentIntent may include the extra "errorCode" containing a radio technology specific
      *  value, generally only useful for troubleshooting.<br>
@@ -921,6 +927,9 @@ public final class SmsManager {
      *  <code>RESULT_RIL_NO_RESOURCES</code><br>
      *  <code>RESULT_RIL_CANCELLED</code><br>
      *  <code>RESULT_RIL_SIM_ABSENT</code><br>
+     *  <code>RESULT_RIL_SIMULTANEOUS_SMS_AND_CALL_NOT_ALLOWED</code><br>
+     *  <code>RESULT_RIL_ACCESS_BARRED</code><br>
+     *  <code>RESULT_RIL_BLOCKED_DUE_TO_CALL</code><br>
      *  For <code>RESULT_ERROR_GENERIC_FAILURE</code> or any of the RESULT_RIL errors,
      *  the sentIntent may include the extra "errorCode" containing a radio technology specific
      *  value, generally only useful for troubleshooting.<br>
@@ -1179,6 +1188,9 @@ public final class SmsManager {
      *  <code>RESULT_RIL_NO_RESOURCES</code><br>
      *  <code>RESULT_RIL_CANCELLED</code><br>
      *  <code>RESULT_RIL_SIM_ABSENT</code><br>
+     *  <code>RESULT_RIL_SIMULTANEOUS_SMS_AND_CALL_NOT_ALLOWED</code><br>
+     *  <code>RESULT_RIL_ACCESS_BARRED</code><br>
+     *  <code>RESULT_RIL_BLOCKED_DUE_TO_CALL</code><br>
      *  For <code>RESULT_ERROR_GENERIC_FAILURE</code> or any of the RESULT_RIL errors,
      *  the sentIntent may include the extra "errorCode" containing a radio technology specific
      *  value, generally only useful for troubleshooting.<br>
@@ -1378,6 +1390,9 @@ public final class SmsManager {
      *  <code>RESULT_RIL_NO_RESOURCES</code><br>
      *  <code>RESULT_RIL_CANCELLED</code><br>
      *  <code>RESULT_RIL_SIM_ABSENT</code><br>
+     *  <code>RESULT_RIL_SIMULTANEOUS_SMS_AND_CALL_NOT_ALLOWED</code><br>
+     *  <code>RESULT_RIL_ACCESS_BARRED</code><br>
+     *  <code>RESULT_RIL_BLOCKED_DUE_TO_CALL</code><br>
      *  For <code>RESULT_ERROR_GENERIC_FAILURE</code> or any of the RESULT_RIL errors,
      *  the sentIntent may include the extra "errorCode" containing a radio technology specific
      *  value, generally only useful for troubleshooting.<br>
@@ -2208,7 +2223,10 @@ public final class SmsManager {
             RESULT_RIL_OPERATION_NOT_ALLOWED,
             RESULT_RIL_NO_RESOURCES,
             RESULT_RIL_CANCELLED,
-            RESULT_RIL_SIM_ABSENT
+            RESULT_RIL_SIM_ABSENT,
+            RESULT_RIL_SIMULTANEOUS_SMS_AND_CALL_NOT_ALLOWED,
+            RESULT_RIL_ACCESS_BARRED,
+            RESULT_RIL_BLOCKED_DUE_TO_CALL
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Result {}
@@ -2472,6 +2490,21 @@ public final class SmsManager {
      * can be retrieved because the SIM or RUIM is absent.
      */
     public static final int RESULT_RIL_SIM_ABSENT = 120;
+
+    /**
+     * 1X voice and SMS are not allowed simulteneously.
+     */
+    public static final int RESULT_RIL_SIMULTANEOUS_SMS_AND_CALL_NOT_ALLOWED = 121;
+
+    /**
+     * Access is barred.
+     */
+    public static final int RESULT_RIL_ACCESS_BARRED = 122;
+
+    /**
+     * SMS is blocked due to call control, e.g., resource unavailable in the SMR entity.
+     */
+    public static final int RESULT_RIL_BLOCKED_DUE_TO_CALL = 123;
 
     // SMS receiving results sent as a "result" extra in {@link Intents.SMS_REJECTED_ACTION}
 
