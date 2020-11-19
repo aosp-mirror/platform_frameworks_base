@@ -85,8 +85,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Deque;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -1045,22 +1043,22 @@ public final class StrictMode {
             /**
              * Detect attempts to invoke a method on a {@link Context} that is not suited for such
              * operation.
-             * <p>An example of this is trying to obtain an instance of visual service (e.g.
+             * <p>An example of this is trying to obtain an instance of UI service (e.g.
              * {@link android.view.WindowManager}) from a non-visual {@link Context}. This is not
              * allowed, since a non-visual {@link Context} is not adjusted to any visual area, and
              * therefore can report incorrect metrics or resources.
              * @see Context#getDisplay()
              * @see Context#getSystemService(String)
-             * @hide
              */
-            @TestApi
             public @NonNull Builder detectIncorrectContextUse() {
                 return enable(DETECT_VM_INCORRECT_CONTEXT_USE);
             }
 
             /**
              * Disable detection of incorrect context use.
-             * TODO(b/149790106): Fix usages and remove.
+             *
+             * @see #detectIncorrectContextUse()
+             *
              * @hide
              */
             @TestApi
