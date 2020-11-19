@@ -1686,11 +1686,24 @@ public class HdmiControlService extends SystemService {
         public void oneTouchPlay(final IHdmiControlCallback callback) {
             enforceAccessPermission();
             int pid = Binder.getCallingPid();
-            Slog.d(TAG, "Proccess pid: " + pid + " is calling oneTouchPlay.");
+            Slog.d(TAG, "Process pid: " + pid + " is calling oneTouchPlay.");
             runOnServiceThread(new Runnable() {
                 @Override
                 public void run() {
                     HdmiControlService.this.oneTouchPlay(callback);
+                }
+            });
+        }
+
+        @Override
+        public void toggleAndFollowTvPower() {
+            enforceAccessPermission();
+            int pid = Binder.getCallingPid();
+            Slog.d(TAG, "Process pid: " + pid + " is calling toggleAndFollowTvPower.");
+            runOnServiceThread(new Runnable() {
+                @Override
+                public void run() {
+                    HdmiControlService.this.toggleAndFollowTvPower();
                 }
             });
         }
@@ -2362,7 +2375,23 @@ public class HdmiControlService extends SystemService {
     }
 
     @ServiceThreadOnly
-    private void queryDisplayStatus(final IHdmiControlCallback callback) {
+    @VisibleForTesting
+    protected void toggleAndFollowTvPower() {
+        assertRunOnServiceThread();
+        HdmiCecLocalDeviceSource source = playback();
+        if (source == null) {
+            source = audioSystem();
+        }
+
+        if (source == null) {
+            Slog.w(TAG, "Local source device not available");
+            return;
+        }
+        source.toggleAndFollowTvPower();
+    }
+
+    @ServiceThreadOnly
+    protected void queryDisplayStatus(final IHdmiControlCallback callback) {
         assertRunOnServiceThread();
         if (!mAddressAllocated) {
             mDisplayStatusCallback = callback;

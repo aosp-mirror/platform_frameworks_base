@@ -87,10 +87,14 @@ abstract class HdmiCecLocalDeviceSource extends HdmiCecLocalDevice {
     @ServiceThreadOnly
     protected void sendStandby(int deviceId) {
         assertRunOnServiceThread();
-
-        // Send standby to TV only for now
-        int targetAddress = Constants.ADDR_TV;
-        mService.sendCecCommand(HdmiCecMessageBuilder.buildStandby(mAddress, targetAddress));
+        String sendStandbyOnSleep = mService.getHdmiCecConfig().getStringValue(
+                HdmiControlManager.CEC_SETTING_NAME_SEND_STANDBY_ON_SLEEP);
+        if (sendStandbyOnSleep.equals(HdmiControlManager.SEND_STANDBY_ON_SLEEP_BROADCAST)) {
+            mService.sendCecCommand(
+                    HdmiCecMessageBuilder.buildStandby(mAddress, Constants.ADDR_BROADCAST));
+            return;
+        }
+        mService.sendCecCommand(HdmiCecMessageBuilder.buildStandby(mAddress, Constants.ADDR_TV));
     }
 
     @ServiceThreadOnly
@@ -110,6 +114,44 @@ abstract class HdmiCecLocalDeviceSource extends HdmiCecLocalDevice {
             return;
         }
         addAndStartAction(action);
+    }
+
+    @ServiceThreadOnly
+    void toggleAndFollowTvPower() {
+        assertRunOnServiceThread();
+        // Wake up Android framework to take over CEC control from the microprocessor.
+        mService.wakeUp();
+        mService.queryDisplayStatus(new IHdmiControlCallback.Stub() {
+            @Override
+            public void onComplete(int status) {
+                if (status == HdmiControlManager.POWER_STATUS_UNKNOWN) {
+                    Slog.i(TAG, "TV power toggle: TV power status unknown");
+                    sendUserControlPressedAndReleased(Constants.ADDR_TV,
+                            HdmiCecKeycode.CEC_KEYCODE_POWER_TOGGLE_FUNCTION);
+                    // Source device remains awake.
+                } else if (status == HdmiControlManager.POWER_STATUS_ON
+                        || status == HdmiControlManager.POWER_STATUS_TRANSIENT_TO_ON) {
+                    Slog.i(TAG, "TV power toggle: turning off TV");
+                    sendStandby(0 /*unused */);
+                    // Source device goes to standby, to follow the toggled TV power state.
+                    mService.standby();
+                } else if (status == HdmiControlManager.POWER_STATUS_STANDBY
+                        || status == HdmiControlManager.POWER_STATUS_TRANSIENT_TO_STANDBY) {
+                    Slog.i(TAG, "TV power toggle: turning on TV");
+                    oneTouchPlay(new IHdmiControlCallback.Stub() {
+                        @Override
+                        public void onComplete(int result) {
+                            if (result != HdmiControlManager.RESULT_SUCCESS) {
+                                Slog.w(TAG, "Failed to complete One Touch Play. result=" + result);
+                                sendUserControlPressedAndReleased(Constants.ADDR_TV,
+                                        HdmiCecKeycode.CEC_KEYCODE_POWER_TOGGLE_FUNCTION);
+                            }
+                        }
+                    });
+                    // Source device remains awake, to follow the toggled TV power state.
+                }
+            }
+        });
     }
 
     @ServiceThreadOnly
