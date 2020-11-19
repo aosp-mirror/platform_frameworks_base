@@ -30,7 +30,7 @@ import java.io.PrintWriter;
  */
 @ProvidesInterface(version = FalsingManager.VERSION)
 public interface FalsingManager {
-    int VERSION = 5;
+    int VERSION = 6;
 
     void onSuccessfulUnlock();
 
@@ -44,6 +44,42 @@ public interface FalsingManager {
 
     /** Returns true if the gesture should be rejected. */
     boolean isFalseTouch(int interactionType);
+
+    /**
+     * Returns true if the FalsingManager thinks the last gesure was not a valid tap.
+     *
+     * Accepts one parameter, robustCheck, that distinctly changes behavior. When set to false,
+     * this method simply looks at the last gesture and returns whether it is a tap or not, (as
+     * opposed to a swipe or other non-tap gesture). When set to true, a more thorough analysis
+     * is performed that can include historical interactions and other contextual cues to see
+     * if the tap looks accidental.
+     *
+     * Set robustCheck to true if you want to validate a tap for launching an action, like opening
+     * a notification. Set to false if you simply want to know if the last gesture looked like a
+     * tap.
+     */
+    boolean isFalseTap(boolean robustCheck);
+
+    /**
+     * Returns true if the last two gestures do not look like a double tap.
+     *
+     * Only works on data that has already been reported to the FalsingManager. Be sure that
+     * {@link #onTouchEvent(MotionEvent, int, int)} has already been called for all of the
+     * taps you want considered.
+     *
+     * This looks at the last two gestures on the screen, ensuring that they meet the following
+     * criteria:
+     *
+     *   a) There are at least two gestures.
+     *   b) The last two gestures look like taps.
+     *   c) The last two gestures look like a double tap taken together.
+     *
+     *   This method is _not_ context aware. That is to say, if two taps occur on two neighboring
+     *   views, but are otherwise close to one another, this will report a successful double tap.
+     *   It is up to the caller to decide
+     * @return
+     */
+    boolean isFalseDoubleTap();
 
     void onNotificatonStopDraggingDown();
 
