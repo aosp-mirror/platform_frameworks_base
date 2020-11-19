@@ -134,7 +134,7 @@ public class ScreenRecordTile extends QSTileImpl<QSTile.BooleanState>
         getHost().collapsePanels();
         Intent intent = mController.getPromptIntent();
         ActivityStarter.OnDismissAction dismissAction = () -> {
-            mContext.startActivity(intent);
+            mHost.getUserContext().startActivity(intent);
             return false;
         };
         mKeyguardDismissUtil.executeWhenUnlocked(dismissAction, false);
