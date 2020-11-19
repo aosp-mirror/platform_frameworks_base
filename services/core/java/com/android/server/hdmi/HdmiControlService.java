@@ -2400,9 +2400,13 @@ public class HdmiControlService extends SystemService {
             return;
         }
 
-        HdmiCecLocalDevicePlayback source = playback();
+        HdmiCecLocalDeviceSource source = playback();
         if (source == null) {
-            Slog.w(TAG, "Local playback device not available");
+            source = audioSystem();
+        }
+
+        if (source == null) {
+            Slog.w(TAG, "Local source device not available");
             invokeCallback(callback, HdmiControlManager.RESULT_SOURCE_NOT_AVAILABLE);
             return;
         }

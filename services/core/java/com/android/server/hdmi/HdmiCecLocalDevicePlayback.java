@@ -128,25 +128,6 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
                 String.valueOf(addr));
     }
 
-    @ServiceThreadOnly
-    void queryDisplayStatus(IHdmiControlCallback callback) {
-        assertRunOnServiceThread();
-        List<DevicePowerStatusAction> actions = getActions(DevicePowerStatusAction.class);
-        if (!actions.isEmpty()) {
-            Slog.i(TAG, "queryDisplayStatus already in progress");
-            actions.get(0).addCallback(callback);
-            return;
-        }
-        DevicePowerStatusAction action = DevicePowerStatusAction.create(this, Constants.ADDR_TV,
-                callback);
-        if (action == null) {
-            Slog.w(TAG, "Cannot initiate queryDisplayStatus");
-            invokeCallback(callback, HdmiControlManager.RESULT_EXCEPTION);
-            return;
-        }
-        addAndStartAction(action);
-    }
-
     @Override
     @ServiceThreadOnly
     void onHotplug(int portId, boolean connected) {

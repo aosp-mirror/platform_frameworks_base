@@ -1250,6 +1250,20 @@ public class HdmiCecLocalDevicePlaybackTest {
     }
 
     @Test
+    public void queryDisplayStatus() {
+        mHdmiControlService.queryDisplayStatus(new IHdmiControlCallback.Stub() {
+            @Override
+            public void onComplete(int result) {
+            }
+        });
+        mTestLooper.dispatchAll();
+
+        HdmiCecMessage expectedMessage = HdmiCecMessageBuilder.buildGiveDevicePowerStatus(
+                mPlaybackLogicalAddress, Constants.ADDR_TV);
+        assertThat(mNativeWrapper.getResultMessages()).contains(expectedMessage);
+    }
+
+    @Test
     public void toggleAndFollowTvPower_ToTv_TvStatusOn() {
         mHdmiCecLocalDevicePlayback.mService.getHdmiCecConfig().setStringValue(
                 HdmiControlManager.CEC_SETTING_NAME_SEND_STANDBY_ON_SLEEP,
