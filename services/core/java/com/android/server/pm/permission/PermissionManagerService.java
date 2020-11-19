@@ -3635,6 +3635,13 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             // Special permission granted only to the OEM specified retail demo app
             allowed = true;
         }
+        if (!allowed && bp.isRecents()
+                && ArrayUtils.contains(mPackageManagerInt.getKnownPackageNames(
+                PackageManagerInternal.PACKAGE_RECENTS, UserHandle.USER_SYSTEM),
+                pkg.getPackageName())) {
+            // Special permission for the recents app.
+            allowed = true;
+        }
         return allowed;
     }
 

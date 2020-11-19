@@ -137,6 +137,7 @@ import android.annotation.AppIdInt;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.StringRes;
 import android.annotation.UserIdInt;
 import android.annotation.WorkerThread;
 import android.app.ActivityManager;
@@ -342,7 +343,6 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.ConcurrentUtils;
 import com.android.internal.util.DumpUtils;
-import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
@@ -397,7 +397,6 @@ import libcore.util.HexEncoding;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
 
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
@@ -1215,6 +1214,7 @@ public class PackageManagerService extends IPackageManager.Stub
         public ViewCompiler viewCompiler;
         public @Nullable String wellbeingPackage;
         public @Nullable String retailDemoPackage;
+        public @Nullable String recentsPackage;
         public ComponentName resolveComponentName;
         public ArrayMap<String, AndroidPackage> packages;
         public boolean enableFreeCacheV2;
@@ -1747,6 +1747,7 @@ public class PackageManagerService extends IPackageManager.Stub
     final @Nullable String mSharedSystemSharedLibraryPackageName;
     final @Nullable String mRetailDemoPackage;
     final @Nullable String mOverlayConfigSignaturePackage;
+    final @Nullable String mRecentsPackage;
 
     private final PackageUsage mPackageUsage = new PackageUsage();
     private final CompilerStats mCompilerStats = new CompilerStats();
@@ -2990,6 +2991,7 @@ public class PackageManagerService extends IPackageManager.Stub
         mSystemTextClassifierPackageName = testParams.systemTextClassifierPackage;
         mWellbeingPackage = testParams.wellbeingPackage;
         mRetailDemoPackage = testParams.retailDemoPackage;
+        mRecentsPackage = testParams.recentsPackage;
         mDocumenterPackage = testParams.documenterPackage;
         mConfiguratorPackage = testParams.configuratorPackage;
         mAppPredictionServicePackage = testParams.appPredictionServicePackage;
@@ -3574,6 +3576,7 @@ public class PackageManagerService extends IPackageManager.Stub
             mIncidentReportApproverPackage = getIncidentReportApproverPackageName();
             mRetailDemoPackage = getRetailDemoPackageName();
             mOverlayConfigSignaturePackage = getOverlayConfigSignaturePackageName();
+            mRecentsPackage = getRecentsPackageName();
 
             // Now that we know all of the shared libraries, update all clients to have
             // the correct library paths.
@@ -21239,15 +21242,8 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @Override
     public @Nullable String getAttentionServicePackageName() {
-        final String flattenedComponentName =
-                mContext.getString(R.string.config_defaultAttentionService);
-        if (flattenedComponentName != null) {
-            ComponentName componentName = ComponentName.unflattenFromString(flattenedComponentName);
-            if (componentName != null && componentName.getPackageName() != null) {
-                return ensureSystemPackageName(componentName.getPackageName());
-            }
-        }
-        return null;
+        return ensureSystemPackageName(
+                getPackageFromComponentString(R.string.config_defaultAttentionService));
     }
 
     private @Nullable String getDocumenterPackageName() {
@@ -21282,17 +21278,8 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @Override
     public String getAppPredictionServicePackageName() {
-        String flattenedAppPredictionServiceComponentName =
-                mContext.getString(R.string.config_defaultAppPredictionService);
-        if (flattenedAppPredictionServiceComponentName == null) {
-            return null;
-        }
-        ComponentName appPredictionServiceComponentName =
-                ComponentName.unflattenFromString(flattenedAppPredictionServiceComponentName);
-        if (appPredictionServiceComponentName == null) {
-            return null;
-        }
-        return ensureSystemPackageName(appPredictionServiceComponentName.getPackageName());
+        return ensureSystemPackageName(
+                getPackageFromComponentString(R.string.config_defaultAppPredictionService));
     }
 
     private @NonNull String[] dropNonSystemPackages(@NonNull String[] pkgNames) {
@@ -21309,19 +21296,8 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @Override
     public String getSystemCaptionsServicePackageName() {
-        String flattenedSystemCaptionsServiceComponentName =
-                mContext.getString(R.string.config_defaultSystemCaptionsService);
-
-        if (TextUtils.isEmpty(flattenedSystemCaptionsServiceComponentName)) {
-            return null;
-        }
-
-        ComponentName systemCaptionsServiceComponentName =
-                ComponentName.unflattenFromString(flattenedSystemCaptionsServiceComponentName);
-        if (systemCaptionsServiceComponentName == null) {
-            return null;
-        }
-        return ensureSystemPackageName(systemCaptionsServiceComponentName.getPackageName());
+        return ensureSystemPackageName(
+                getPackageFromComponentString(R.string.config_defaultSystemCaptionsService));
     }
 
     @Override
@@ -21339,19 +21315,8 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @Override
     public String getContentCaptureServicePackageName() {
-        final String flattenedContentCaptureService =
-                mContext.getString(R.string.config_defaultContentCaptureService);
-
-        if (TextUtils.isEmpty(flattenedContentCaptureService)) {
-            return null;
-        }
-
-        final ComponentName contentCaptureServiceComponentName =
-                ComponentName.unflattenFromString(flattenedContentCaptureService);
-        if (contentCaptureServiceComponentName == null) {
-            return null;
-        }
-        return ensureSystemPackageName(contentCaptureServiceComponentName.getPackageName());
+        return ensureSystemPackageName(
+                getPackageFromComponentString(R.string.config_defaultContentCaptureService));
     }
 
     public String getOverlayConfigSignaturePackageName() {
@@ -21392,6 +21357,26 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         return null;
+    }
+
+    @Nullable
+    private String getRecentsPackageName() {
+        return ensureSystemPackageName(
+                getPackageFromComponentString(R.string.config_recentsComponentName));
+
+    }
+
+    @Nullable
+    private String getPackageFromComponentString(@StringRes int stringResId) {
+        final String componentString = mContext.getString(stringResId);
+        if (TextUtils.isEmpty(componentString)) {
+            return null;
+        }
+        final ComponentName component = ComponentName.unflattenFromString(componentString);
+        if (component == null) {
+            return null;
+        }
+        return component.getPackageName();
     }
 
     @Nullable
@@ -25002,6 +24987,8 @@ public class PackageManagerService extends IPackageManager.Stub
                             : new String[] {mRetailDemoPackage};
                 case PackageManagerInternal.PACKAGE_OVERLAY_CONFIG_SIGNATURE:
                     return filterOnlySystemPackages(getOverlayConfigSignaturePackageName());
+                case PackageManagerInternal.PACKAGE_RECENTS:
+                    return filterOnlySystemPackages(mRecentsPackage);
                 default:
                     return ArrayUtils.emptyArray(String.class);
             }

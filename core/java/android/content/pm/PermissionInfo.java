@@ -251,6 +251,16 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
     @SystemApi
     public static final int PROTECTION_FLAG_RETAIL_DEMO = 0x1000000;
 
+    /**
+     * Additional flag for {@link #protectionLevel}, corresponding
+     * to the <code>recents</code> value of
+     * {@link android.R.attr#protectionLevel}.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int PROTECTION_FLAG_RECENTS = 0x2000000;
+
     /** @hide */
     @IntDef(flag = true, prefix = { "PROTECTION_FLAG_" }, value = {
             PROTECTION_FLAG_PRIVILEGED,
@@ -274,6 +284,7 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
             PROTECTION_FLAG_APP_PREDICTOR,
             PROTECTION_FLAG_COMPANION,
             PROTECTION_FLAG_RETAIL_DEMO,
+            PROTECTION_FLAG_RECENTS,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ProtectionFlags {}
@@ -531,6 +542,9 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
         }
         if ((level & PermissionInfo.PROTECTION_FLAG_RETAIL_DEMO) != 0) {
             protLevel.append("|retailDemo");
+        }
+        if ((level & PermissionInfo.PROTECTION_FLAG_RECENTS) != 0) {
+            protLevel.append("|recents");
         }
         return protLevel.toString();
     }

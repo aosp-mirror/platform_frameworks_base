@@ -303,6 +303,9 @@
         <!-- Additional flag from base permission type: this permission will be granted to the
              retail demo app, as defined by the OEM. -->
         <flag name="retailDemo" value="0x1000000" />
+        <!-- Additional flag from base permission type: this permission will be granted to the
+             recents app. -->
+        <flag name="recents" value="0x2000000" />
     </attr>
 
     <!-- Flags indicating more context for a permission group. -->
