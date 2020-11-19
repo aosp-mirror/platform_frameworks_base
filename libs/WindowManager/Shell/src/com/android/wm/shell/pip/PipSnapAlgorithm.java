@@ -20,30 +20,15 @@ import static com.android.wm.shell.pip.PipBoundsState.STASH_TYPE_LEFT;
 import static com.android.wm.shell.pip.PipBoundsState.STASH_TYPE_NONE;
 import static com.android.wm.shell.pip.PipBoundsState.STASH_TYPE_RIGHT;
 
-import android.content.Context;
-import android.content.res.Resources;
-import android.graphics.PointF;
 import android.graphics.Rect;
-import android.util.Size;
+
+import com.android.internal.annotations.VisibleForTesting;
 
 /**
  * Calculates the snap targets and the snap position for the PIP given a position and a velocity.
  * All bounds are relative to the display top/left.
  */
 public class PipSnapAlgorithm {
-
-    private final float mDefaultSizePercent;
-    private final float mMinAspectRatioForMinSize;
-    private final float mMaxAspectRatioForMinSize;
-
-    public PipSnapAlgorithm(Context context) {
-        Resources res = context.getResources();
-        mDefaultSizePercent = res.getFloat(
-                com.android.internal.R.dimen.config_pictureInPictureDefaultSizePercent);
-        mMaxAspectRatioForMinSize = res.getFloat(
-                com.android.internal.R.dimen.config_pictureInPictureAspectRatioLimitForMinSize);
-        mMinAspectRatioForMinSize = 1f / mMaxAspectRatioForMinSize;
-    }
 
     /**
      * Returns a fraction that describes where the PiP bounds is.
@@ -136,81 +121,11 @@ public class PipSnapAlgorithm {
     }
 
     /**
-     * Adjusts {@param movementBoundsOut} so that it is the movement bounds for the given
-     * {@param stackBounds}.
-     */
-    public void getMovementBounds(Rect stackBounds, Rect insetBounds, Rect movementBoundsOut,
-            int bottomOffset) {
-        // Adjust the right/bottom to ensure the stack bounds never goes offscreen
-        movementBoundsOut.set(insetBounds);
-        movementBoundsOut.right = Math.max(insetBounds.left, insetBounds.right -
-                stackBounds.width());
-        movementBoundsOut.bottom = Math.max(insetBounds.top, insetBounds.bottom -
-                stackBounds.height());
-        movementBoundsOut.bottom -= bottomOffset;
-    }
-
-    /**
-     * @return the size of the PiP at the given {@param aspectRatio}, ensuring that the minimum edge
-     * is at least {@param minEdgeSize}.
-     */
-    public Size getSizeForAspectRatio(float aspectRatio, float minEdgeSize, int displayWidth,
-            int displayHeight) {
-        final int smallestDisplaySize = Math.min(displayWidth, displayHeight);
-        final int minSize = (int) Math.max(minEdgeSize, smallestDisplaySize * mDefaultSizePercent);
-
-        final int width;
-        final int height;
-        if (aspectRatio <= mMinAspectRatioForMinSize || aspectRatio > mMaxAspectRatioForMinSize) {
-            // Beyond these points, we can just use the min size as the shorter edge
-            if (aspectRatio <= 1) {
-                // Portrait, width is the minimum size
-                width = minSize;
-                height = Math.round(width / aspectRatio);
-            } else {
-                // Landscape, height is the minimum size
-                height = minSize;
-                width = Math.round(height * aspectRatio);
-            }
-        } else {
-            // Within these points, we ensure that the bounds fit within the radius of the limits
-            // at the points
-            final float widthAtMaxAspectRatioForMinSize = mMaxAspectRatioForMinSize * minSize;
-            final float radius = PointF.length(widthAtMaxAspectRatioForMinSize, minSize);
-            height = (int) Math.round(Math.sqrt((radius * radius) /
-                    (aspectRatio * aspectRatio + 1)));
-            width = Math.round(height * aspectRatio);
-        }
-        return new Size(width, height);
-    }
-
-    /**
-     * @return the adjusted size so that it conforms to the given aspectRatio, ensuring that the
-     * minimum edge is at least minEdgeSize.
-     */
-    public Size getSizeForAspectRatio(Size size, float aspectRatio, float minEdgeSize) {
-        final int smallestSize = Math.min(size.getWidth(), size.getHeight());
-        final int minSize = (int) Math.max(minEdgeSize, smallestSize);
-
-        final int width;
-        final int height;
-        if (aspectRatio <= 1) {
-            // Portrait, width is the minimum size.
-            width = minSize;
-            height = Math.round(width / aspectRatio);
-        } else {
-            // Landscape, height is the minimum size
-            height = minSize;
-            width = Math.round(height * aspectRatio);
-        }
-        return new Size(width, height);
-    }
-
-    /**
      * Snaps the {@param stackBounds} to the closest edge of the {@param movementBounds} and writes
      * the new bounds out to {@param boundsOut}.
      */
-    public void snapRectToClosestEdge(Rect stackBounds, Rect movementBounds, Rect boundsOut,
+    @VisibleForTesting
+    void snapRectToClosestEdge(Rect stackBounds, Rect movementBounds, Rect boundsOut,
             @PipBoundsState.StashType int stashType) {
         int leftEdge = stackBounds.left;
         if (stashType == STASH_TYPE_LEFT) {

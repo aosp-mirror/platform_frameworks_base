@@ -22,6 +22,7 @@ import android.annotation.NonNull;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Point;
+import android.graphics.PointF;
 import android.graphics.Rect;
 import android.util.DisplayMetrics;
 import android.util.Size;
@@ -42,6 +43,9 @@ public class PipBoundsAlgorithm {
     private final @NonNull PipBoundsState mPipBoundsState;
     private final PipSnapAlgorithm mSnapAlgorithm;
 
+    private float mDefaultSizePercent;
+    private float mMinAspectRatioForMinSize;
+    private float mMaxAspectRatioForMinSize;
     private float mDefaultAspectRatio;
     private float mMinAspectRatio;
     private float mMaxAspectRatio;
@@ -51,7 +55,7 @@ public class PipBoundsAlgorithm {
 
     public PipBoundsAlgorithm(Context context, @NonNull PipBoundsState pipBoundsState) {
         mPipBoundsState = pipBoundsState;
-        mSnapAlgorithm = new PipSnapAlgorithm(context);
+        mSnapAlgorithm = new PipSnapAlgorithm();
         reloadResources(context);
         // Initialize the aspect ratio to the default aspect ratio.  Don't do this in reload
         // resources as it would clobber mAspectRatio when entering PiP from fullscreen which
@@ -83,6 +87,11 @@ public class PipBoundsAlgorithm {
                 com.android.internal.R.dimen.config_pictureInPictureMinAspectRatio);
         mMaxAspectRatio = res.getFloat(
                 com.android.internal.R.dimen.config_pictureInPictureMaxAspectRatio);
+        mDefaultSizePercent = res.getFloat(
+                com.android.internal.R.dimen.config_pictureInPictureDefaultSizePercent);
+        mMaxAspectRatioForMinSize = res.getFloat(
+                com.android.internal.R.dimen.config_pictureInPictureAspectRatioLimitForMinSize);
+        mMinAspectRatioForMinSize = 1f / mMaxAspectRatioForMinSize;
     }
 
     /**
@@ -174,7 +183,7 @@ public class PipBoundsAlgorithm {
             final int minEdgeSize = useCurrentMinEdgeSize ? mPipBoundsState.getMinEdgeSize()
                     : defaultMinEdgeSize;
             // Use the existing size but adjusted to the aspect ratio and min edge size.
-            size = mSnapAlgorithm.getSizeForAspectRatio(
+            size = getSizeForAspectRatio(
                     new Size(stackBounds.width(), stackBounds.height()), aspectRatio, minEdgeSize);
         } else {
             if (overrideMinSize != null) {
@@ -184,7 +193,7 @@ public class PipBoundsAlgorithm {
             } else {
                 // Calculate the default size using the display size and default min edge size.
                 final DisplayInfo displayInfo = mPipBoundsState.getDisplayInfo();
-                size = mSnapAlgorithm.getSizeForAspectRatio(aspectRatio, mDefaultMinSize,
+                size = getSizeForAspectRatio(aspectRatio, mDefaultMinSize,
                         displayInfo.logicalWidth, displayInfo.logicalHeight);
             }
         }
@@ -229,7 +238,7 @@ public class PipBoundsAlgorithm {
                 defaultSize = adjustSizeToAspectRatio(overrideMinSize, mDefaultAspectRatio);
             } else {
                 // Calculate the default size using the display size and default min edge size.
-                defaultSize = mSnapAlgorithm.getSizeForAspectRatio(mDefaultAspectRatio,
+                defaultSize = getSizeForAspectRatio(mDefaultAspectRatio,
                         mDefaultMinSize, displayInfo.logicalWidth, displayInfo.logicalHeight);
             }
             Gravity.apply(mDefaultStackGravity, defaultSize.getWidth(), defaultSize.getHeight(),
@@ -270,10 +279,25 @@ public class PipBoundsAlgorithm {
         getInsetBounds(movementBounds);
 
         // Apply the movement bounds adjustments based on the current state.
-        mSnapAlgorithm.getMovementBounds(stackBounds, movementBounds, movementBounds,
+        getMovementBounds(stackBounds, movementBounds, movementBounds,
                 (adjustForIme && mPipBoundsState.isImeShowing())
                         ? mPipBoundsState.getImeHeight() : 0);
+
         return movementBounds;
+    }
+
+    /**
+     * Adjusts movementBoundsOut so that it is the movement bounds for the given stackBounds.
+     */
+    public void getMovementBounds(Rect stackBounds, Rect insetBounds, Rect movementBoundsOut,
+            int bottomOffset) {
+        // Adjust the right/bottom to ensure the stack bounds never goes offscreen
+        movementBoundsOut.set(insetBounds);
+        movementBoundsOut.right = Math.max(insetBounds.left, insetBounds.right
+                - stackBounds.width());
+        movementBoundsOut.bottom = Math.max(insetBounds.top, insetBounds.bottom
+                - stackBounds.height());
+        movementBoundsOut.bottom -= bottomOffset;
     }
 
     /**
@@ -301,6 +325,62 @@ public class PipBoundsAlgorithm {
      */
     private int dpToPx(float dpValue, DisplayMetrics dm) {
         return (int) TypedValue.applyDimension(COMPLEX_UNIT_DIP, dpValue, dm);
+    }
+
+    /**
+     * @return the size of the PiP at the given aspectRatio, ensuring that the minimum edge
+     * is at least minEdgeSize.
+     */
+    public Size getSizeForAspectRatio(float aspectRatio, float minEdgeSize, int displayWidth,
+            int displayHeight) {
+        final int smallestDisplaySize = Math.min(displayWidth, displayHeight);
+        final int minSize = (int) Math.max(minEdgeSize, smallestDisplaySize * mDefaultSizePercent);
+
+        final int width;
+        final int height;
+        if (aspectRatio <= mMinAspectRatioForMinSize || aspectRatio > mMaxAspectRatioForMinSize) {
+            // Beyond these points, we can just use the min size as the shorter edge
+            if (aspectRatio <= 1) {
+                // Portrait, width is the minimum size
+                width = minSize;
+                height = Math.round(width / aspectRatio);
+            } else {
+                // Landscape, height is the minimum size
+                height = minSize;
+                width = Math.round(height * aspectRatio);
+            }
+        } else {
+            // Within these points, we ensure that the bounds fit within the radius of the limits
+            // at the points
+            final float widthAtMaxAspectRatioForMinSize = mMaxAspectRatioForMinSize * minSize;
+            final float radius = PointF.length(widthAtMaxAspectRatioForMinSize, minSize);
+            height = (int) Math.round(Math.sqrt((radius * radius)
+                    / (aspectRatio * aspectRatio + 1)));
+            width = Math.round(height * aspectRatio);
+        }
+        return new Size(width, height);
+    }
+
+    /**
+     * @return the adjusted size so that it conforms to the given aspectRatio, ensuring that the
+     * minimum edge is at least minEdgeSize.
+     */
+    public Size getSizeForAspectRatio(Size size, float aspectRatio, float minEdgeSize) {
+        final int smallestSize = Math.min(size.getWidth(), size.getHeight());
+        final int minSize = (int) Math.max(minEdgeSize, smallestSize);
+
+        final int width;
+        final int height;
+        if (aspectRatio <= 1) {
+            // Portrait, width is the minimum size.
+            width = minSize;
+            height = Math.round(width / aspectRatio);
+        } else {
+            // Landscape, height is the minimum size
+            height = minSize;
+            width = Math.round(height * aspectRatio);
+        }
+        return new Size(width, height);
     }
 
     /**
