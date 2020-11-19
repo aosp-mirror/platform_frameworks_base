@@ -645,7 +645,14 @@ public class SettingsBackupTest {
                     Settings.Global.Wearable.AMBIENT_FORCE_WHEN_DOCKED,
                     Settings.Global.Wearable.AMBIENT_GESTURE_SENSOR_ID,
                     Settings.Global.Wearable.AMBIENT_LOW_BIT_ENABLED,
-                    Settings.Global.Wearable.AMBIENT_PLUGGED_TIMEOUT_MIN);
+                    Settings.Global.Wearable.AMBIENT_PLUGGED_TIMEOUT_MIN,
+                    Settings.Global.Wearable.COMPANION_ADDRESS,
+                    Settings.Global.Wearable.BLUETOOTH_MODE,
+                    Settings.Global.Wearable.COMPANION_BLE_ROLE,
+                    Settings.Global.Wearable.COMPANION_NAME,
+                    Settings.Global.Wearable.USER_HFP_CLIENT_SETTING,
+                    Settings.Global.Wearable.HFP_CLIENT_PROFILE_ENABLED,
+                    Settings.Global.Wearable.COMPANION_OS_VERSION);
 
     private static final Set<String> BACKUP_DENY_LIST_SECURE_SETTINGS =
              newHashSet(

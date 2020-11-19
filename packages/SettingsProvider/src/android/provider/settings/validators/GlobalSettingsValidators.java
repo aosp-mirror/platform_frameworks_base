@@ -265,6 +265,31 @@ public class GlobalSettingsValidators {
         VALIDATORS.put(Global.Wearable.AMBIENT_LOW_BIT_ENABLED, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Global.Wearable.AMBIENT_PLUGGED_TIMEOUT_MIN, ANY_INTEGER_VALIDATOR);
         VALIDATORS.put(Global.Wearable.AMBIENT_TILT_TO_BRIGHT, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(
+                Global.Wearable.BLUETOOTH_MODE,
+                new DiscreteValueValidator(
+                        new String[] {
+                            String.valueOf(Global.Wearable.BLUETOOTH_MODE_UNKNOWN),
+                            String.valueOf(Global.Wearable.BLUETOOTH_MODE_ALT),
+                            String.valueOf(Global.Wearable.BLUETOOTH_MODE_NON_ALT)
+                        }));
+        VALIDATORS.put(
+                Global.Wearable.COMPANION_BLE_ROLE,
+                new DiscreteValueValidator(
+                        new String[] {
+                            String.valueOf(Global.Wearable.BLUETOOTH_ROLE_CENTRAL),
+                            String.valueOf(Global.Wearable.BLUETOOTH_ROLE_PERIPHERAL)
+                        }));
+        VALIDATORS.put(
+                Global.Wearable.USER_HFP_CLIENT_SETTING,
+                new DiscreteValueValidator(
+                        new String[] {
+                            String.valueOf(Global.Wearable.HFP_CLIENT_UNSET),
+                            String.valueOf(Global.Wearable.HFP_CLIENT_ENABLED),
+                            String.valueOf(Global.Wearable.HFP_CLIENT_DISABLED)
+                        }));
+        VALIDATORS.put(Global.Wearable.HFP_CLIENT_PROFILE_ENABLED, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(Global.Wearable.COMPANION_OS_VERSION, ANY_INTEGER_VALIDATOR);
     }
 }
 

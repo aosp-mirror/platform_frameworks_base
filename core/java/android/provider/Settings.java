@@ -16573,6 +16573,74 @@ public final class Settings {
              * @hide
              */
             public static final String AMBIENT_PLUGGED_TIMEOUT_MIN = "ambient_plugged_timeout_min";
+
+            /**
+             * The companion device's bluetooth address.
+             * @hide
+             */
+            public static final String COMPANION_ADDRESS = "companion_address";
+
+            /**
+             * What bluetooth mode we are in.
+             * @hide
+             */
+            public static final String BLUETOOTH_MODE = "bluetooth_mode";
+
+            // Possible values of BLUETOOTH_MODE
+            /** @hide */
+            public static final int BLUETOOTH_MODE_UNKNOWN = 0;
+            /** @hide */
+            public static final int BLUETOOTH_MODE_NON_ALT = 1;
+            /** @hide */
+            public static final int BLUETOOTH_MODE_ALT = 2;
+
+            /**
+             * The bluetooth settings selected BLE role for the companion.
+             * @hide
+             */
+            public static final String COMPANION_BLE_ROLE = "companion_ble_role";
+
+            // Possible values of COMPANION_BLE_ROLE
+            /** @hide */
+            public static final int BLUETOOTH_ROLE_CENTRAL = 1;
+            /** @hide */
+            public static final int BLUETOOTH_ROLE_PERIPHERAL = 2;
+
+            /**
+             * The bluetooth settings stored companion device name.
+             * @hide
+             */
+            public static final String COMPANION_NAME = "companion_bt_name";
+
+            /**
+             * The user's last setting for hfp client.
+             * @hide
+             */
+            public static final String USER_HFP_CLIENT_SETTING = "user_hfp_client_setting";
+
+            // Possible hfp client user setting values
+            /** @hide */
+            public static final int HFP_CLIENT_UNSET = 0;
+            /** @hide */
+            public static final int HFP_CLIENT_ENABLED = 1;
+            /** @hide */
+            public static final int HFP_CLIENT_DISABLED = 2;
+
+            /**
+             * The current HFP client profile setting.
+             * @hide
+             */
+            public static final String HFP_CLIENT_PROFILE_ENABLED = "hfp_client_profile_enabled";
+
+            /**
+             * The companion phone's android version.
+             * @hide
+             */
+            public static final String COMPANION_OS_VERSION = "wear_companion_os_version";
+
+            // Companion os version constants
+            /** @hide */
+            public static final int COMPANION_OS_VERSION_UNDEFINED = -1;
         }
     }
 
