@@ -60,6 +60,7 @@ import "frameworks/base/core/proto/android/stats/storage/storage_enums.proto";
 import "frameworks/base/core/proto/android/stats/style/style_enums.proto";
 import "frameworks/base/core/proto/android/stats/sysui/notification_enums.proto";
 import "frameworks/base/core/proto/android/stats/tls/enums.proto";
+import "frameworks/base/core/proto/android/stats/tv/tif_enums.proto";
 import "frameworks/base/core/proto/android/telecomm/enums.proto";
 import "frameworks/base/core/proto/android/telephony/enums.proto";
 import "frameworks/base/core/proto/android/view/enums.proto";
@@ -510,6 +511,7 @@ message Atom {
         MediaPlaybackTrackChanged media_playback_track_changed = 324;
         WifiScanReported wifi_scan_reported = 325 [(module) = "wifi"];
         WifiPnoScanReported wifi_pno_scan_reported = 326  [(module) = "wifi"];
+        TifTuneStateChanged tif_tune_changed = 327 [(module) = "framework"];
 
         // StatsdStats tracks platform atoms with ids upto 500.
         // Update StatsdStats::kMaxPushedAtomId when atom ids here approach that value.
@@ -10349,6 +10351,39 @@ message CellBroadcastMessageError {
 
     // Exception message (or log message) associated with the error (max 1000 chars)
     optional string exception_message = 2;
+}
+
+/**
+ * Logs when a TV Input Service Session changes tune state
+ * This is atom ID 327.
+ *
+ * Logged from:
+ *   frameworks/base/services/core/java/com/android/server/tv/TvInputManagerService.java
+ */
+message TifTuneStateChanged {
+
+    // Tv Input Service uid, TV Player uid
+    repeated AttributionNode attribution_node = 1 [
+        (state_field_option).primary_field_first_uid = true
+    ];
+    optional android.stats.tv.TifTuneState state = 2 [
+        (state_field_option).exclusive_state = true,
+        (state_field_option).default_state_value = 0,
+        (state_field_option).nested = false
+    ];
+    // This a globally unique 128 bit random number created by TvInputManagerService when
+    // android.media.tv.TvInputManager#createSession is called.
+    // It is has no device or user association.
+    // See android.media.tv.TvInputService.onCreateSession(java.lang.String, java.lang.String)
+    // WARNING: Any changes to this field should be carefully reviewed for privacy.
+    //          Inspect the code at
+    //          framework/base/cmds/statsd/src/atoms.proto
+    //               TifTuneState
+    //          frameworks/base/services/core/java/com/android/server/tv/TvInputManagerService.java
+    //              logTuneStateChanged
+    //              BinderService.createSession
+    //              SessionState.sessionId
+    optional string tif_session_id = 3 [(state_field_option).primary_field = true];
 }
 
 /**
