@@ -2554,12 +2554,13 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         int childCount = getChildCount();
         for (int i = 0; i < childCount; i++) {
             ExpandableView child = (ExpandableView) getChildAt(i);
-            if (child.getVisibility() != View.GONE && !(child instanceof StackScrollerDecorView)
-                    && child != mShelf) {
+            if (child.getVisibility() != View.GONE
+                    && !(child instanceof StackScrollerDecorView)
+                    && child != mShelf
+                    && !mAmbientState.getDraggedViews().contains(child)) {
                 children.add(child);
             }
         }
-
         return children;
     }
 
@@ -5524,10 +5525,12 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
 
     void addDraggedView(View view) {
         mAmbientState.onBeginDrag(view);
+        updateFirstAndLastBackgroundViews();
     }
 
     void removeDraggedView(View view) {
         mAmbientState.onDragFinished(view);
+        updateFirstAndLastBackgroundViews();
     }
 
     void setTopHeadsUpEntry(NotificationEntry topEntry) {
