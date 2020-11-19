@@ -69,6 +69,6 @@ oneway interface IPhoneStateListener {
     void onRegistrationFailed(in CellIdentity cellIdentity,
              String chosenPlmn, int domain, int causeCode, int additionalCauseCode);
     void onBarringInfoChanged(in BarringInfo barringInfo);
-    void onPhysicalChannelConfigChanged(in List<PhysicalChannelConfig> configs);
-    void onDataEnabledChanged(boolean enabled, int reason);
+    void onPhysicalChannelConfigurationChanged(in List<PhysicalChannelConfig> configs);
+
 }
