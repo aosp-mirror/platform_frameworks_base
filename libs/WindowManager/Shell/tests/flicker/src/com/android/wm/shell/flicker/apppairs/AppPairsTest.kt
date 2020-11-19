@@ -70,8 +70,8 @@ class AppPairsTest(
                 eachRun {
                     executeShellCommand(composePairsCommand(
                             primaryTaskId, secondaryTaskId, false /* pair */))
-                    primaryApp.forceStop()
-                    secondaryApp.forceStop()
+                    primaryApp.exit()
+                    secondaryApp.exit()
                 }
             }
             assertions {

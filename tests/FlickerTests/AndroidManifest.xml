@@ -27,6 +27,8 @@
     <uses-permission android:name="android.permission.ACCESS_SURFACE_FLINGER" />
     <!-- Enable / Disable tracing !-->
     <uses-permission android:name="android.permission.DUMP" />
+    <!-- Force-stop test apps -->
+    <uses-permission android:name="android.permission.FORCE_STOP_PACKAGES"/>
     <!-- Run layers trace -->
     <uses-permission android:name="android.permission.HARDWARE_TEST"/>
     <!-- Workaround grant runtime permission exception from b/152733071 -->
