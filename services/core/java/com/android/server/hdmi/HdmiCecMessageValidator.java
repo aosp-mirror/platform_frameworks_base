@@ -201,7 +201,7 @@ public class HdmiCecMessageValidator {
         addValidationInfo(
                 Constants.MESSAGE_REPORT_POWER_STATUS,
                 new OneByteRangeValidator(0x00, 0x03),
-                DEST_DIRECT);
+                DEST_DIRECT | DEST_BROADCAST);
 
         // Messages for the General Protocol.
         addValidationInfo(Constants.MESSAGE_FEATURE_ABORT,
