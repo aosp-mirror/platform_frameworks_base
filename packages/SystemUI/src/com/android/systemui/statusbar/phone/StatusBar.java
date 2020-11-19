@@ -147,7 +147,6 @@ import com.android.systemui.SystemUI;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.charging.WirelessChargingAnimation;
-import com.android.systemui.classifier.FalsingLog;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.dagger.qualifiers.UiBackground;
 import com.android.systemui.demomode.DemoMode;
@@ -1249,10 +1248,6 @@ public class StatusBar extends SystemUI implements DemoMode,
                 message.write("\nSerial number: ");
                 message.write(SystemProperties.get("ro.serialno"));
                 message.write("\n");
-
-                PrintWriter falsingPw = new PrintWriter(message);
-                FalsingLog.dump(falsingPw);
-                falsingPw.flush();
 
                 startActivityDismissingKeyguard(Intent.createChooser(new Intent(Intent.ACTION_SEND)
                                 .setType("*/*")
@@ -2675,9 +2670,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         if (mLightBarController != null) {
             mLightBarController.dump(fd, pw, args);
         }
-
-        mFalsingManager.dump(pw);
-        FalsingLog.dump(pw);
 
         pw.println("SharedPreferences:");
         for (Map.Entry<String, ?> entry : Prefs.getAll(mContext).entrySet()) {

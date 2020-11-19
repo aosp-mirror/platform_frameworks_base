@@ -22,6 +22,7 @@ import android.view.MotionEvent;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.plugins.FalsingManager;
 
+import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
 /**
@@ -261,8 +262,7 @@ public class FalsingManagerFake implements FalsingManager {
     }
 
     @Override
-    public void dump(PrintWriter pw) {
-
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
     }
 
     @Override
