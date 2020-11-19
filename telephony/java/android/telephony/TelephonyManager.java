@@ -5603,27 +5603,78 @@ public class TelephonyManager {
         }
     }
 
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = {"ERI_"}, value = {
+            ERI_ON,
+            ERI_OFF,
+            ERI_FLASH
+    })
+    public @interface EriIconIndex {}
+
     /**
-     * Get the CDMA ERI (Enhanced Roaming Indicator) information
+     * ERI (Enhanced Roaming Indicator) is ON i.e value 0 defined by
+     * 3GPP2 C.R1001-H v1.0 Table 8.1-1.
+     */
+    public static final int ERI_ON = 0;
+
+    /**
+     * ERI (Enhanced Roaming Indicator) is OFF i.e value 1 defined by
+     * 3GPP2 C.R1001-H v1.0 Table 8.1-1.
+     */
+    public static final int ERI_OFF = 1;
+
+    /**
+     * ERI (Enhanced Roaming Indicator) is FLASH i.e value 2 defined by
+     * 3GPP2 C.R1001-H v1.0 Table 8.1-1.
+     */
+    public static final int ERI_FLASH = 2;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = {"ERI_ICON_MODE_"}, value = {
+            ERI_ICON_MODE_NORMAL,
+            ERI_ICON_MODE_FLASH
+    })
+    public @interface EriIconMode {}
+
+    /**
+     * ERI (Enhanced Roaming Indicator) icon mode is normal. This constant represents that
+     * the ERI icon should be displayed normally.
      *
-     * Returns {@link android.telephony#CdmaEriInformation}
-     *
+     * Note: ERI is defined 3GPP2 C.R1001-H Table 8.1-1
      * @hide
      */
+    public static final int ERI_ICON_MODE_NORMAL = 0;
+
+    /**
+     * ERI (Enhanced Roaming Indicator) icon mode flash. This constant represents that
+     * the ERI icon should be flashing.
+     *
+     * Note: ERI is defined 3GPP2 C.R1001-H Table 8.1-1
+     * @hide
+     */
+    public static final int ERI_ICON_MODE_FLASH = 1;
+
+    /**
+     * Returns the CDMA ERI icon index to display. The number is assigned by
+     * 3GPP2 C.R1001-H v1.0 Table 8.1-1. Additionally carriers define their own ERI icon index.
+     * Defined values are {@link #ERI_ON}, {@link #ERI_OFF}, and {@link #ERI_FLASH}.
+     * @hide
+     */
+    @SystemApi
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
-    @NonNull
-    public CdmaEriInformation getCdmaEriInformation() {
-        return new CdmaEriInformation(
-               getCdmaEriIconIndex(getSubId()), getCdmaEriIconMode(getSubId()));
+    public @EriIconIndex int getCdmaEnhancedRoamingIndicatorIconIndex() {
+        return getCdmaEriIconIndex(getSubId());
     }
 
     /**
-     * Returns the CDMA ERI icon index to display for a subscription
+     * Returns the CDMA ERI icon index to display for a subscription.
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     @UnsupportedAppUsage
-    public int getCdmaEriIconIndex(int subId) {
+    public @EriIconIndex int getCdmaEriIconIndex(int subId) {
         try {
             ITelephony telephony = getITelephony();
             if (telephony == null)
@@ -5647,7 +5698,7 @@ public class TelephonyManager {
      */
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     @UnsupportedAppUsage
-    public int getCdmaEriIconMode(int subId) {
+    public @EriIconMode int getCdmaEriIconMode(int subId) {
         try {
             ITelephony telephony = getITelephony();
             if (telephony == null)
