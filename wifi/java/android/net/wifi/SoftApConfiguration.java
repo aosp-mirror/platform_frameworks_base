@@ -538,7 +538,7 @@ public final class SoftApConfiguration implements Parcelable {
         if (!SdkLevel.isAtLeastS()) {
             throw new UnsupportedOperationException();
         }
-        return mChannels;
+        return mChannels.clone();
     }
 
     /**
