@@ -1501,7 +1501,8 @@ public class NotificationManager {
     }
 
     /** @hide */
-    public boolean isNotificationPolicyAccessGrantedForPackage(String pkg) {
+    @TestApi
+    public boolean isNotificationPolicyAccessGrantedForPackage(@NonNull String pkg) {
         INotificationManager service = getService();
         try {
             return service.isNotificationPolicyAccessGrantedForPackage(pkg);

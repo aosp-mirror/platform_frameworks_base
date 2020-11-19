@@ -9462,6 +9462,13 @@ public class NotificationManagerService extends SystemService {
             return null;
         }
 
+        @Override
+        protected boolean shouldReflectToSettings() {
+            // androidx has a public method that reads the approved set of listeners from
+            // Settings so we have to continue writing this list for this type of service
+            return true;
+        }
+
         @GuardedBy("mNotificationLock")
         public void setOnNotificationPostedTrimLocked(ManagedServiceInfo info, int trim) {
             if (trim == TRIM_LIGHT) {
