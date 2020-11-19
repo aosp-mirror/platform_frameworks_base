@@ -42,6 +42,7 @@ import android.database.ContentObserver;
 import android.hardware.SensorManager;
 import android.hardware.SystemSensorManager;
 import android.hardware.display.AmbientDisplayConfiguration;
+import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManagerInternal;
 import android.hardware.display.DisplayManagerInternal.DisplayPowerRequest;
 import android.hardware.power.Boost;
@@ -348,9 +349,9 @@ public final class PowerManagerService extends SystemService
     // A bitfield that summarizes the effect of the user activity timer.
     private int mUserActivitySummary;
 
-    // The desired display power state.  The actual state may lag behind the
+    // Manages the desired power state of displays. The actual state may lag behind the
     // requested because it is updated asynchronously by the display power controller.
-    private final DisplayPowerRequest mDisplayPowerRequest = new DisplayPowerRequest();
+    private DisplayPowerRequestMapper mDisplayPowerRequestMapper;
 
     // True if the display power state has been fully applied, which means the display
     // is actually on or actually off or whatever was requested.
@@ -1054,6 +1055,8 @@ public final class PowerManagerService extends SystemService
             mPolicy = getLocalService(WindowManagerPolicy.class);
             mBatteryManagerInternal = getLocalService(BatteryManagerInternal.class);
             mAttentionDetector.systemReady(mContext);
+            mDisplayPowerRequestMapper = new DisplayPowerRequestMapper(mContext.getSystemService(
+                    DisplayManager.class), mDisplayManagerInternal, mHandler);
 
             SensorManager sensorManager = new SystemSensorManager(mContext, mHandler.getLooper());
 
@@ -2296,10 +2299,12 @@ public final class PowerManagerService extends SystemService
                         && mLastUserActivityTimeNoChangeLights >= mLastWakeTime) {
                     nextTimeout = mLastUserActivityTimeNoChangeLights + screenOffTimeout;
                     if (now < nextTimeout) {
-                        if (mDisplayPowerRequest.policy == DisplayPowerRequest.POLICY_BRIGHT
-                                || mDisplayPowerRequest.policy == DisplayPowerRequest.POLICY_VR) {
+                        final DisplayPowerRequest displayPowerRequest =
+                                mDisplayPowerRequestMapper.get(Display.DEFAULT_DISPLAY);
+                        if (displayPowerRequest.policy == DisplayPowerRequest.POLICY_BRIGHT
+                                || displayPowerRequest.policy == DisplayPowerRequest.POLICY_VR) {
                             mUserActivitySummary = USER_ACTIVITY_SCREEN_BRIGHT;
-                        } else if (mDisplayPowerRequest.policy == DisplayPowerRequest.POLICY_DIM) {
+                        } else if (displayPowerRequest.policy == DisplayPowerRequest.POLICY_DIM) {
                             mUserActivitySummary = USER_ACTIVITY_SCREEN_DIM;
                         }
                     }
@@ -2771,11 +2776,13 @@ public final class PowerManagerService extends SystemService
      * Returns true if the device is allowed to dream in its current state.
      */
     private boolean canDreamLocked() {
+        final DisplayPowerRequest displayPowerRequest =
+                mDisplayPowerRequestMapper.get(Display.DEFAULT_DISPLAY);
         if (getWakefulnessLocked() != WAKEFULNESS_DREAMING
                 || !mDreamsSupportedConfig
                 || !mDreamsEnabledSetting
-                || !mDisplayPowerRequest.isBrightOrDim()
-                || mDisplayPowerRequest.isVr()
+                || !displayPowerRequest.isBrightOrDim()
+                || displayPowerRequest.isVr()
                 || (mUserActivitySummary & (USER_ACTIVITY_SCREEN_BRIGHT
                         | USER_ACTIVITY_SCREEN_DIM | USER_ACTIVITY_SCREEN_DREAM)) == 0
                 || !mBootCompleted) {
@@ -2826,7 +2833,9 @@ public final class PowerManagerService extends SystemService
                 sQuiescent = false;
             }
 
-            mDisplayPowerRequest.policy = getDesiredScreenPolicyLocked();
+            final DisplayPowerRequest displayPowerRequest = mDisplayPowerRequestMapper.get(
+                    Display.DEFAULT_DISPLAY);
+            displayPowerRequest.policy = getDesiredScreenPolicyLocked();
 
             // Determine appropriate screen brightness and auto-brightness adjustments.
             final boolean autoBrightness;
@@ -2846,39 +2855,39 @@ public final class PowerManagerService extends SystemService
             }
 
             // Update display power request.
-            mDisplayPowerRequest.screenBrightnessOverride = screenBrightnessOverride;
-            mDisplayPowerRequest.useAutoBrightness = autoBrightness;
-            mDisplayPowerRequest.useProximitySensor = shouldUseProximitySensorLocked();
-            mDisplayPowerRequest.boostScreenBrightness = shouldBoostScreenBrightness();
+            displayPowerRequest.screenBrightnessOverride = screenBrightnessOverride;
+            displayPowerRequest.useAutoBrightness = autoBrightness;
+            displayPowerRequest.useProximitySensor = shouldUseProximitySensorLocked();
+            displayPowerRequest.boostScreenBrightness = shouldBoostScreenBrightness();
 
-            updatePowerRequestFromBatterySaverPolicy(mDisplayPowerRequest);
+            updatePowerRequestFromBatterySaverPolicy(displayPowerRequest);
 
-            if (mDisplayPowerRequest.policy == DisplayPowerRequest.POLICY_DOZE) {
-                mDisplayPowerRequest.dozeScreenState = mDozeScreenStateOverrideFromDreamManager;
+            if (displayPowerRequest.policy == DisplayPowerRequest.POLICY_DOZE) {
+                displayPowerRequest.dozeScreenState = mDozeScreenStateOverrideFromDreamManager;
                 if ((mWakeLockSummary & WAKE_LOCK_DRAW) != 0
                         && !mDrawWakeLockOverrideFromSidekick) {
-                    if (mDisplayPowerRequest.dozeScreenState == Display.STATE_DOZE_SUSPEND) {
-                        mDisplayPowerRequest.dozeScreenState = Display.STATE_DOZE;
+                    if (displayPowerRequest.dozeScreenState == Display.STATE_DOZE_SUSPEND) {
+                        displayPowerRequest.dozeScreenState = Display.STATE_DOZE;
                     }
-                    if (mDisplayPowerRequest.dozeScreenState == Display.STATE_ON_SUSPEND) {
-                        mDisplayPowerRequest.dozeScreenState = Display.STATE_ON;
+                    if (displayPowerRequest.dozeScreenState == Display.STATE_ON_SUSPEND) {
+                        displayPowerRequest.dozeScreenState = Display.STATE_ON;
                     }
                 }
-                mDisplayPowerRequest.dozeScreenBrightness =
+                displayPowerRequest.dozeScreenBrightness =
                         mDozeScreenBrightnessOverrideFromDreamManagerFloat;
             } else {
-                mDisplayPowerRequest.dozeScreenState = Display.STATE_UNKNOWN;
-                mDisplayPowerRequest.dozeScreenBrightness =
+                displayPowerRequest.dozeScreenState = Display.STATE_UNKNOWN;
+                displayPowerRequest.dozeScreenBrightness =
                         PowerManager.BRIGHTNESS_INVALID_FLOAT;
             }
 
-            mDisplayReady = mDisplayManagerInternal.requestPowerState(mDisplayPowerRequest,
+            mDisplayReady = mDisplayManagerInternal.requestPowerState(displayPowerRequest,
                     mRequestWaitForNegativeProximity);
             mRequestWaitForNegativeProximity = false;
 
             if (DEBUG_SPEW) {
                 Slog.d(TAG, "updateDisplayPowerStateLocked: mDisplayReady=" + mDisplayReady
-                        + ", policy=" + mDisplayPowerRequest.policy
+                        + ", policy=" + displayPowerRequest.policy
                         + ", mWakefulness=" + getWakefulnessLocked()
                         + ", mWakeLockSummary=0x" + Integer.toHexString(mWakeLockSummary)
                         + ", mUserActivitySummary=0x" + Integer.toHexString(mUserActivitySummary)
@@ -3049,7 +3058,9 @@ public final class PowerManagerService extends SystemService
         final boolean needWakeLockSuspendBlocker = ((mWakeLockSummary & WAKE_LOCK_CPU) != 0);
         final boolean needDisplaySuspendBlocker = needDisplaySuspendBlockerLocked();
         final boolean autoSuspend = !needDisplaySuspendBlocker;
-        final boolean interactive = mDisplayPowerRequest.isBrightOrDim();
+        final DisplayPowerRequest displayPowerRequest = mDisplayPowerRequestMapper.get(
+                Display.DEFAULT_DISPLAY);
+        final boolean interactive = displayPowerRequest.isBrightOrDim();
 
         // Disable auto-suspend if needed.
         // FIXME We should consider just leaving auto-suspend enabled forever since
@@ -3108,19 +3119,21 @@ public final class PowerManagerService extends SystemService
         if (!mDisplayReady) {
             return true;
         }
-        if (mDisplayPowerRequest.isBrightOrDim()) {
+        final DisplayPowerRequest displayPowerRequest = mDisplayPowerRequestMapper.get(
+                Display.DEFAULT_DISPLAY);
+        if (displayPowerRequest.isBrightOrDim()) {
             // If we asked for the screen to be on but it is off due to the proximity
             // sensor then we may suspend but only if the configuration allows it.
             // On some hardware it may not be safe to suspend because the proximity
             // sensor may not be correctly configured as a wake-up source.
-            if (!mDisplayPowerRequest.useProximitySensor || !mProximityPositive
+            if (!displayPowerRequest.useProximitySensor || !mProximityPositive
                     || !mSuspendWhenScreenOffDueToProximityConfig) {
                 return true;
             }
         }
 
-        if (mDisplayPowerRequest.policy == DisplayPowerRequest.POLICY_DOZE
-                && mDisplayPowerRequest.dozeScreenState == Display.STATE_ON) {
+        if (displayPowerRequest.policy == DisplayPowerRequest.POLICY_DOZE
+                && displayPowerRequest.dozeScreenState == Display.STATE_ON) {
             // Although we are in DOZE and would normally allow the device to suspend,
             // the doze service has explicitly requested the display to remain in the ON
             // state which means we should hold the display suspend blocker.
@@ -5575,7 +5588,10 @@ public final class PowerManagerService extends SystemService
             // DisplayPowerController only reports proximity positive (near) if it's
             // positive and the proximity wasn't already being ignored. So it reliably
             // also tells us that we're not already ignoring the proximity sensor.
-            if (mDisplayPowerRequest.useProximitySensor && mProximityPositive) {
+
+            final DisplayPowerRequest displayPowerRequest =
+                    mDisplayPowerRequestMapper.get(Display.DEFAULT_DISPLAY);
+            if (displayPowerRequest.useProximitySensor && mProximityPositive) {
                 mDisplayManagerInternal.ignoreProximitySensorUntilChanged();
                 return true;
             }

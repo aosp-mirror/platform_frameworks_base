@@ -2536,6 +2536,13 @@ public final class DisplayManagerService extends SystemService {
         }
 
         @Override
+        public int getDisplayGroupId(int displayId) {
+            synchronized (mSyncRoot) {
+                return mLogicalDisplayMapper.getDisplayGroupIdLocked(displayId);
+            }
+        }
+
+        @Override
         public SurfaceControl.ScreenshotHardwareBuffer systemScreenshot(int displayId) {
             return systemScreenshotInternal(displayId);
         }

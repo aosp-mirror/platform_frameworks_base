@@ -22,10 +22,22 @@ import java.util.List;
 /**
  * Represents a collection of {@link LogicalDisplay}s which act in unison for certain behaviors and
  * operations.
+ * @hide
  */
 public class DisplayGroup {
 
-    final List<LogicalDisplay> mDisplays = new ArrayList<>();
+    public static final int DEFAULT = 0;
+
+    private final List<LogicalDisplay> mDisplays = new ArrayList<>();
+    private final int mGroupId;
+
+    DisplayGroup(int groupId) {
+        mGroupId = groupId;
+    }
+
+    int getGroupId() {
+        return mGroupId;
+    }
 
     void addDisplay(LogicalDisplay display) {
         if (!mDisplays.contains(display)) {
