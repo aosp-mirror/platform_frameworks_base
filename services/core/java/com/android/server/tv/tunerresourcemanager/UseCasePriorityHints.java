@@ -192,8 +192,9 @@ public class UseCasePriorityHints {
         }
     }
 
-    private int readAttributeToInt(String attributeName, TypedXmlPullParser parser) {
-        return Integer.valueOf(parser.getAttributeValue(null, attributeName));
+    private int readAttributeToInt(String attributeName, TypedXmlPullParser parser)
+            throws XmlPullParserException {
+        return parser.getAttributeInt(null, attributeName);
     }
 
     private void addNewUseCasePriority(int useCase, int fgPriority, int bgPriority) {

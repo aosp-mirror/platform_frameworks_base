@@ -128,6 +128,7 @@ public class Xml {
      *
      * @hide
      */
+    @SuppressWarnings("AndroidFrameworkEfficientXml")
     public static @NonNull TypedXmlPullParser newFastPullParser() {
         return XmlUtils.makeTyped(newPullParser());
     }
@@ -206,6 +207,7 @@ public class Xml {
      *
      * @hide
      */
+    @SuppressWarnings("AndroidFrameworkEfficientXml")
     public static @NonNull TypedXmlSerializer newFastSerializer() {
         return XmlUtils.makeTyped(new FastXmlSerializer());
     }
