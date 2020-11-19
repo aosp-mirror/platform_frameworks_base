@@ -71,6 +71,15 @@ public class KeyguardSecurityViewFlipperController
         }
     }
 
+    /**
+     * Reload colors of ui elements upon theme change.
+     */
+    public void reloadColors() {
+        for (KeyguardInputViewController<KeyguardInputView> child : mChildren) {
+            child.reloadColors();
+        }
+    }
+
     @VisibleForTesting
     KeyguardInputViewController<KeyguardInputView> getSecurityView(SecurityMode securityMode,
             KeyguardSecurityCallback keyguardSecurityCallback) {

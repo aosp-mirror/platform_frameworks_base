@@ -65,7 +65,6 @@
                     android:layout_centerHorizontal="true"
                     android:layout_marginRight="72dp"
                     androidprv:scaledTextSize="@integer/scaled_password_text_size"
-                    android:textColor="?attr/wallpaperTextColor"
                     android:contentDescription="@string/keyguard_accessibility_sim_puk_area"
                     />
             <View

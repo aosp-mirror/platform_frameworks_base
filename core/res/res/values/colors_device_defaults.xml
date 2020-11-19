@@ -37,10 +37,10 @@
     <color name="accent_device_default_dark">@color/accent_material_dark</color>
     <color name="accent_device_default">@color/accent_device_default_light</color>
 
-    <color name="background_device_default_dark">@color/background_material_dark</color>
-    <color name="background_device_default_light">@color/background_material_light</color>
-    <color name="background_floating_device_default_dark">@color/background_floating_material_dark</color>
-    <color name="background_floating_device_default_light">@color/background_floating_material_light</color>
+    <color name="background_device_default_dark">#1A1A1A</color>
+    <color name="background_device_default_light">#F2F2F2</color>
+    <color name="background_floating_device_default_dark">#0D0D0D</color>
+    <color name="background_floating_device_default_light">#CCCCCC</color>
 
     <!-- Error color -->
     <color name="error_color_device_default_dark">@color/error_color_material_dark</color>

@@ -47,6 +47,7 @@ import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
 import com.android.keyguard.dagger.KeyguardBouncerScope;
 import com.android.settingslib.utils.ThreadUtils;
 import com.android.systemui.shared.system.SysUiStatsLog;
+import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.ViewController;
 
@@ -69,6 +70,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
     private final KeyguardStateController mKeyguardStateController;
     private final KeyguardSecurityViewFlipperController mSecurityViewFlipperController;
     private final SecurityCallback mSecurityCallback;
+    private final ConfigurationController mConfigurationController;
 
     private SecurityMode mCurrentSecurityMode = SecurityMode.Invalid;
 
@@ -144,6 +146,18 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
             }
         }
     };
+    private ConfigurationController.ConfigurationListener mConfigurationListener =
+            new ConfigurationController.ConfigurationListener() {
+                @Override
+                public void onOverlayChanged() {
+                    mSecurityViewFlipperController.reloadColors();
+                }
+
+                @Override
+                public void onUiModeChanged() {
+                    mSecurityViewFlipperController.reloadColors();
+                }
+            };
 
     private KeyguardSecurityContainerController(KeyguardSecurityContainer view,
             AdminSecondaryLockScreenController.Factory adminSecondaryLockScreenControllerFactory,
@@ -154,7 +168,8 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
             UiEventLogger uiEventLogger,
             KeyguardStateController keyguardStateController,
             SecurityCallback securityCallback,
-            KeyguardSecurityViewFlipperController securityViewFlipperController) {
+            KeyguardSecurityViewFlipperController securityViewFlipperController,
+            ConfigurationController configurationController) {
         super(view);
         mLockPatternUtils = lockPatternUtils;
         mUpdateMonitor = keyguardUpdateMonitor;
@@ -166,6 +181,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
         mSecurityViewFlipperController = securityViewFlipperController;
         mAdminSecondaryLockScreenController = adminSecondaryLockScreenControllerFactory.create(
                 mKeyguardSecurityCallback);
+        mConfigurationController = configurationController;
     }
 
     @Override
@@ -176,10 +192,12 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
     @Override
     protected void onViewAttached() {
         mView.setSwipeListener(mSwipeListener);
+        mConfigurationController.addCallback(mConfigurationListener);
     }
 
     @Override
     protected void onViewDetached() {
+        mConfigurationController.removeCallback(mConfigurationListener);
     }
 
     /** */
@@ -459,6 +477,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
         private final UiEventLogger mUiEventLogger;
         private final KeyguardStateController mKeyguardStateController;
         private final KeyguardSecurityViewFlipperController mSecurityViewFlipperController;
+        private final ConfigurationController mConfigurationController;
 
         @Inject
         Factory(KeyguardSecurityContainer view,
@@ -470,7 +489,8 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
                 MetricsLogger metricsLogger,
                 UiEventLogger uiEventLogger,
                 KeyguardStateController keyguardStateController,
-                KeyguardSecurityViewFlipperController securityViewFlipperController) {
+                KeyguardSecurityViewFlipperController securityViewFlipperController,
+                ConfigurationController configurationController) {
             mView = view;
             mAdminSecondaryLockScreenControllerFactory = adminSecondaryLockScreenControllerFactory;
             mLockPatternUtils = lockPatternUtils;
@@ -480,6 +500,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
             mUiEventLogger = uiEventLogger;
             mKeyguardStateController = keyguardStateController;
             mSecurityViewFlipperController = securityViewFlipperController;
+            mConfigurationController = configurationController;
         }
 
         public KeyguardSecurityContainerController create(
@@ -487,7 +508,8 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
             return new KeyguardSecurityContainerController(mView,
                     mAdminSecondaryLockScreenControllerFactory, mLockPatternUtils,
                     mKeyguardUpdateMonitor, mKeyguardSecurityModel, mMetricsLogger, mUiEventLogger,
-                    mKeyguardStateController, securityCallback, mSecurityViewFlipperController);
+                    mKeyguardStateController, securityCallback, mSecurityViewFlipperController,
+                    mConfigurationController);
         }
 
     }

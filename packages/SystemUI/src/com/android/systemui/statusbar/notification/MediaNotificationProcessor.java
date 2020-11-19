@@ -29,7 +29,7 @@ import androidx.annotation.VisibleForTesting;
 import androidx.palette.graphics.Palette;
 
 import com.android.internal.util.ContrastColorUtil;
-import com.android.systemui.R;
+import com.android.settingslib.Utils;
 
 import java.util.List;
 
@@ -143,7 +143,8 @@ public class MediaNotificationProcessor {
                 int foregroundColor = selectForegroundColor(backgroundColor, palette);
                 builder.setColorPalette(backgroundColor, foregroundColor);
             } else {
-                backgroundColor = mContext.getColor(R.color.notification_material_background_color);
+                backgroundColor = Utils.getColorAttr(mContext, android.R.attr.colorBackground)
+                        .getDefaultColor();
             }
             Bitmap colorized = mColorizer.colorize(drawable, backgroundColor,
                     mContext.getResources().getConfiguration().getLayoutDirection() ==

@@ -162,7 +162,6 @@ public class NotificationStackScrollLayoutController {
     private final KeyguardMediaController mKeyguardMediaController;
     private final SysuiStatusBarStateController mStatusBarStateController;
     private final KeyguardBypassController mKeyguardBypassController;
-    private final SysuiColorExtractor mColorExtractor;
     private final NotificationLockscreenUserManager mLockscreenUserManager;
     // TODO: StatusBar should be encapsulated behind a Controller
     private final StatusBar mStatusBar;
@@ -224,12 +223,14 @@ public class NotificationStackScrollLayoutController {
         public void onOverlayChanged() {
             updateShowEmptyShadeView();
             mView.updateCornerRadius();
+            mView.updateBgColor();
             mView.reinflateViews();
         }
 
         @Override
         public void onUiModeChanged() {
             mView.updateBgColor();
+            mView.updateDecorViews();
         }
 
         @Override
@@ -577,7 +578,6 @@ public class NotificationStackScrollLayoutController {
         mKeyguardMediaController = keyguardMediaController;
         mKeyguardBypassController = keyguardBypassController;
         mZenModeController = zenModeController;
-        mColorExtractor = colorExtractor;
         mLockscreenUserManager = lockscreenUserManager;
         mMetricsLogger = metricsLogger;
         mFalsingCollector = falsingCollector;
@@ -688,12 +688,6 @@ public class NotificationStackScrollLayoutController {
                 HIGH_PRIORITY,
                 Settings.Secure.NOTIFICATION_DISMISS_RTL,
                 Settings.Secure.NOTIFICATION_HISTORY_ENABLED);
-
-        mOnColorsChangedListener = (colorExtractor, which) -> {
-            final boolean useDarkText = mColorExtractor.getNeutralColors().supportsDarkText();
-            mView.updateDecorViews(useDarkText);
-        };
-        mColorExtractor.addOnColorsChangedListener(mOnColorsChangedListener);
 
         mKeyguardMediaController.setVisibilityChangedListener(visible -> {
             mView.setKeyguardMediaControllorVisible(visible);

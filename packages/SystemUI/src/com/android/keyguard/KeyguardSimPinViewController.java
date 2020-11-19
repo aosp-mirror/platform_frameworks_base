@@ -309,7 +309,7 @@ public class KeyguardSimPinViewController
         Resources rez = mView.getResources();
         String msg;
         TypedArray array = mView.getContext().obtainStyledAttributes(
-                new int[] { R.attr.wallpaperTextColor });
+                new int[] { android.R.attr.textColor });
         int color = array.getColor(0, Color.WHITE);
         array.recycle();
         if (count < 2) {

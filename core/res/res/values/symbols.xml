@@ -3002,7 +3002,6 @@
   <java-symbol type="string" name="usb_mtp_launch_notification_description" />
 
   <java-symbol type="color" name="notification_action_list" />
-  <java-symbol type="color" name="notification_material_background_color" />
 
   <!-- Resolver target actions -->
   <java-symbol type="array" name="resolver_target_actions_pin" />
