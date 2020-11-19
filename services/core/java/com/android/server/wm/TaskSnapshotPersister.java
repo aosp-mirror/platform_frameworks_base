@@ -28,7 +28,6 @@ import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.os.Process;
 import android.os.SystemClock;
-import android.os.UserManagerInternal;
 import android.util.ArraySet;
 import android.util.AtomicFile;
 import android.util.Slog;
@@ -36,6 +35,7 @@ import android.util.Slog;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.LocalServices;
+import com.android.server.pm.UserManagerInternal;
 import com.android.server.wm.nano.WindowManagerProtos.TaskSnapshotProto;
 
 import java.io.File;
@@ -382,7 +382,7 @@ class TaskSnapshotPersister {
             proto.insetBottom = mSnapshot.getContentInsets().bottom;
             proto.isRealSnapshot = mSnapshot.isRealSnapshot();
             proto.windowingMode = mSnapshot.getWindowingMode();
-            proto.systemUiVisibility = mSnapshot.getSystemUiVisibility();
+            proto.appearance = mSnapshot.getAppearance();
             proto.isTranslucent = mSnapshot.isTranslucent();
             proto.topActivityComponent = mSnapshot.getTopActivityComponent().flattenToString();
             proto.id = mSnapshot.getId();

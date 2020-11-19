@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS;
 import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.FLAG_SECURE;
 
@@ -41,7 +42,6 @@ import android.graphics.Rect;
 import android.hardware.HardwareBuffer;
 import android.platform.test.annotations.Presubmit;
 import android.util.ArraySet;
-import android.view.View;
 
 import androidx.test.filters.SmallTest;
 
@@ -135,7 +135,7 @@ public class TaskSnapshotControllerTest extends WindowTestsBase {
         final long id = 1234L;
         final ComponentName activityComponent = new ComponentName("package", ".Class");
         final int windowingMode = WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
-        final int systemUiVisibility = View.SYSTEM_UI_FLAG_FULLSCREEN;
+        final int appearance = APPEARANCE_LIGHT_STATUS_BARS;
         final int pixelFormat = PixelFormat.RGBA_8888;
         final int orientation = Configuration.ORIENTATION_PORTRAIT;
         final float scaleFraction = 0.25f;
@@ -147,7 +147,7 @@ public class TaskSnapshotControllerTest extends WindowTestsBase {
                     new ActivityManager.TaskSnapshot.Builder();
             builder.setId(id);
             builder.setTopActivityComponent(activityComponent);
-            builder.setSystemUiVisibility(systemUiVisibility);
+            builder.setAppearance(appearance);
             builder.setWindowingMode(windowingMode);
             builder.setColorSpace(sRGB);
             builder.setOrientation(orientation);
@@ -164,7 +164,7 @@ public class TaskSnapshotControllerTest extends WindowTestsBase {
             ActivityManager.TaskSnapshot snapshot = builder.build();
             assertEquals(id, snapshot.getId());
             assertEquals(activityComponent, snapshot.getTopActivityComponent());
-            assertEquals(systemUiVisibility, snapshot.getSystemUiVisibility());
+            assertEquals(appearance, snapshot.getAppearance());
             assertEquals(windowingMode, snapshot.getWindowingMode());
             assertEquals(sRGB, snapshot.getColorSpace());
             // Snapshots created with the Builder class are always high-res. The only way to get a

@@ -91,7 +91,7 @@ public class PipTouchHandlerTest extends ShellTestCase {
         mPipBoundsState = new PipBoundsState(mContext);
         mPipBoundsAlgorithm = new PipBoundsAlgorithm(mContext, mPipBoundsState);
         mPipSnapAlgorithm = mPipBoundsAlgorithm.getSnapAlgorithm();
-        mPipSnapAlgorithm = new PipSnapAlgorithm(mContext);
+        mPipSnapAlgorithm = new PipSnapAlgorithm();
         mPipTouchHandler = new PipTouchHandler(mContext, mPipMenuActivityController,
                 mPipBoundsAlgorithm, mPipBoundsState, mPipTaskOrganizer,
                 mFloatingContentCoordinator, mPipUiEventLogger);
@@ -115,7 +115,8 @@ public class PipTouchHandlerTest extends ShellTestCase {
     @Test
     public void updateMovementBounds_minBounds() {
         Rect expectedMinMovementBounds = new Rect();
-        mPipSnapAlgorithm.getMovementBounds(mMinBounds, mInsetBounds, expectedMinMovementBounds, 0);
+        mPipBoundsAlgorithm.getMovementBounds(mMinBounds, mInsetBounds, expectedMinMovementBounds,
+                0);
 
         mPipTouchHandler.onMovementBoundsChanged(mInsetBounds, mMinBounds, mCurBounds,
                 mFromImeAdjustment, mFromShelfAdjustment, mDisplayRotation);
@@ -129,12 +130,13 @@ public class PipTouchHandlerTest extends ShellTestCase {
     public void updateMovementBounds_maxBounds() {
         Point displaySize = new Point();
         mContext.getDisplay().getRealSize(displaySize);
-        Size maxSize = mPipSnapAlgorithm.getSizeForAspectRatio(1,
+        Size maxSize = mPipBoundsAlgorithm.getSizeForAspectRatio(1,
                 mContext.getResources().getDimensionPixelSize(
                         R.dimen.pip_expanded_shortest_edge_size), displaySize.x, displaySize.y);
         Rect maxBounds = new Rect(0, 0, maxSize.getWidth(), maxSize.getHeight());
         Rect expectedMaxMovementBounds = new Rect();
-        mPipSnapAlgorithm.getMovementBounds(maxBounds, mInsetBounds, expectedMaxMovementBounds, 0);
+        mPipBoundsAlgorithm.getMovementBounds(maxBounds, mInsetBounds, expectedMaxMovementBounds,
+                0);
 
         mPipTouchHandler.onMovementBoundsChanged(mInsetBounds, mMinBounds, mCurBounds,
                 mFromImeAdjustment, mFromShelfAdjustment, mDisplayRotation);

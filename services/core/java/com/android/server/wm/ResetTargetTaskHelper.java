@@ -260,7 +260,7 @@ class ResetTargetTaskHelper {
                 targetTask.affinityIntent = r.intent;
             }
             r.reparent(targetTask, 0 /* position */, "resetTargetTaskIfNeeded");
-            atmService.mStackSupervisor.mRecentTasks.add(targetTask);
+            atmService.mTaskSupervisor.mRecentTasks.add(targetTask);
         }
     }
 

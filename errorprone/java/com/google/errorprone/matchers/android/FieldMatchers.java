@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-package com.google.errorprone.matchers;
+package com.google.errorprone.matchers.android;
 
 import com.google.errorprone.VisitorState;
+import com.google.errorprone.matchers.Matcher;
 import com.google.errorprone.util.ASTHelpers;
 import com.sun.source.tree.ExpressionTree;
 import com.sun.source.tree.ImportTree;

@@ -130,7 +130,7 @@ public class RunningTasksTest extends WindowTestsBase {
      */
     private Task createTask(Task stack, String className, int taskId,
             int lastActiveTime, Bundle extras) {
-        final Task task = new TaskBuilder(mAtm.mStackSupervisor)
+        final Task task = new TaskBuilder(mAtm.mTaskSupervisor)
                 .setComponent(new ComponentName(mContext.getPackageName(), className))
                 .setTaskId(taskId)
                 .setParentTask(stack)

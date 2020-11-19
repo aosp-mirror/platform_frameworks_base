@@ -285,7 +285,7 @@ public class LaunchParamsControllerTests extends WindowTestsBase {
         final TaskDisplayArea preferredTaskDisplayArea = display.getDefaultTaskDisplayArea();
         params.mPreferredTaskDisplayArea = preferredTaskDisplayArea;
         final InstrumentedPositioner positioner = new InstrumentedPositioner(RESULT_DONE, params);
-        final Task task = new TaskBuilder(mAtm.mStackSupervisor).build();
+        final Task task = new TaskBuilder(mAtm.mTaskSupervisor).build();
 
         mController.registerModifier(positioner);
 
@@ -306,7 +306,7 @@ public class LaunchParamsControllerTests extends WindowTestsBase {
         final int windowingMode = WINDOWING_MODE_FREEFORM;
         params.mWindowingMode = windowingMode;
         final InstrumentedPositioner positioner = new InstrumentedPositioner(RESULT_DONE, params);
-        final Task task = new TaskBuilder(mAtm.mStackSupervisor).build();
+        final Task task = new TaskBuilder(mAtm.mTaskSupervisor).build();
 
         mController.registerModifier(positioner);
 
@@ -328,7 +328,7 @@ public class LaunchParamsControllerTests extends WindowTestsBase {
         final int windowingMode = WINDOWING_MODE_FREEFORM;
         params.mWindowingMode = windowingMode;
         final InstrumentedPositioner positioner = new InstrumentedPositioner(RESULT_DONE, params);
-        final Task task = new TaskBuilder(mAtm.mStackSupervisor).setCreateParentTask(true).build();
+        final Task task = new TaskBuilder(mAtm.mTaskSupervisor).setCreateParentTask(true).build();
         task.getRootTask().setWindowingMode(WINDOWING_MODE_SPLIT_SCREEN_SECONDARY);
 
         mController.registerModifier(positioner);
@@ -354,7 +354,7 @@ public class LaunchParamsControllerTests extends WindowTestsBase {
         params.mWindowingMode = WINDOWING_MODE_FREEFORM;
         params.mBounds.set(expected);
         final InstrumentedPositioner positioner = new InstrumentedPositioner(RESULT_DONE, params);
-        final Task task = new TaskBuilder(mAtm.mStackSupervisor).build();
+        final Task task = new TaskBuilder(mAtm.mTaskSupervisor).build();
 
         mController.registerModifier(positioner);
 
@@ -379,7 +379,7 @@ public class LaunchParamsControllerTests extends WindowTestsBase {
         params.mWindowingMode = WINDOWING_MODE_FULLSCREEN;
         params.mBounds.set(expected);
         final InstrumentedPositioner positioner = new InstrumentedPositioner(RESULT_DONE, params);
-        final Task task = new TaskBuilder(mAtm.mStackSupervisor).build();
+        final Task task = new TaskBuilder(mAtm.mTaskSupervisor).build();
 
         mController.registerModifier(positioner);
 

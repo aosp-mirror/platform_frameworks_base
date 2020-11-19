@@ -70,11 +70,8 @@ static void BM_ThemeGetAttribute(benchmark::State& state) {
   auto theme = assets.NewTheme();
   theme->ApplyStyle(kStyleId, false /* force */);
 
-  Res_value value;
-  uint32_t flags;
-
   while (state.KeepRunning()) {
-    theme->GetAttribute(kAttrId, &value, &flags);
+    theme->GetAttribute(kAttrId);
   }
 }
 BENCHMARK(BM_ThemeGetAttribute);

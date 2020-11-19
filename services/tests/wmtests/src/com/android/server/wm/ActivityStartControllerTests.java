@@ -33,7 +33,7 @@ import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.server.wm.ActivityStackSupervisor.PendingActivityLaunch;
+import com.android.server.wm.ActivityTaskSupervisor.PendingActivityLaunch;
 import com.android.server.wm.ActivityStarter.Factory;
 
 import org.junit.Before;
@@ -59,9 +59,9 @@ public class ActivityStartControllerTests extends WindowTestsBase {
     @Before
     public void setUp() throws Exception {
         mFactory = mock(Factory.class);
-        mController = new ActivityStartController(mAtm, mAtm.mStackSupervisor, mFactory);
+        mController = new ActivityStartController(mAtm, mAtm.mTaskSupervisor, mFactory);
         mStarter = spy(new ActivityStarter(mController, mAtm,
-                mAtm.mStackSupervisor, mock(ActivityStartInterceptor.class)));
+                mAtm.mTaskSupervisor, mock(ActivityStartInterceptor.class)));
         doReturn(mStarter).when(mFactory).obtain();
     }
 
@@ -102,7 +102,7 @@ public class ActivityStartControllerTests extends WindowTestsBase {
     public void testRecycling() {
         final Intent intent = new Intent();
         final ActivityStarter optionStarter = new ActivityStarter(mController, mAtm,
-                mAtm.mStackSupervisor, mock(ActivityStartInterceptor.class));
+                mAtm.mTaskSupervisor, mock(ActivityStartInterceptor.class));
         optionStarter
                 .setIntent(intent)
                 .setReason("Test")

@@ -142,7 +142,7 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
     }
 
     @Override
-    public void setListening(boolean listening) {
+    public void setListening(boolean listening, UiEventLogger uiEventLogger) {
         if (mListening == listening) return;
         mListening = listening;
         updateListening();
@@ -150,7 +150,7 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
 
     private void updateListening() {
         for (TilePage tilePage : mPages) {
-            tilePage.setListening(tilePage.getParent() == null ? false : mListening);
+            tilePage.setListening(tilePage.getParent() != null && mListening);
         }
     }
 

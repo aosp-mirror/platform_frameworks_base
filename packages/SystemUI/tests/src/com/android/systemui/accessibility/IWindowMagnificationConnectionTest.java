@@ -23,6 +23,7 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.verify;
 
 import android.content.Context;
+import android.hardware.display.DisplayManager;
 import android.os.RemoteException;
 import android.provider.Settings;
 import android.testing.AndroidTestingRunner;
@@ -84,8 +85,9 @@ public class IWindowMagnificationConnectionTest extends SysuiTestCase {
         mWindowMagnification = new WindowMagnification(getContext(),
                 getContext().getMainThreadHandler(), mCommandQueue, mModeSwitchesController,
                 mNavigationModeController);
-        mWindowMagnification.mWindowMagnificationAnimationController =
-                mWindowMagnificationAnimationController;
+        mWindowMagnification.mAnimationControllerSupplier = new FakeAnimationControllerSupplier(
+                mContext.getSystemService(DisplayManager.class));
+
         mWindowMagnification.requestWindowMagnificationConnection(true);
         assertNotNull(mIWindowMagnificationConnection);
         mIWindowMagnificationConnection.setConnectionCallback(mConnectionCallback);
@@ -143,6 +145,19 @@ public class IWindowMagnificationConnectionTest extends SysuiTestCase {
         waitForIdleSync();
 
         verify(mModeSwitchesController).removeButton(TEST_DISPLAY);
+    }
+
+    private class FakeAnimationControllerSupplier extends
+            DisplayIdIndexSupplier<WindowMagnificationAnimationController> {
+
+        FakeAnimationControllerSupplier(DisplayManager displayManager) {
+            super(displayManager);
+        }
+
+        @Override
+        protected WindowMagnificationAnimationController createInstance(Display display) {
+            return mWindowMagnificationAnimationController;
+        }
     }
 }
 

@@ -2872,7 +2872,7 @@ public class Editor {
             final OnReceiveContentListener.Payload payload =
                     new OnReceiveContentListener.Payload.Builder(clip, SOURCE_DRAG_AND_DROP)
                     .build();
-            mTextView.onReceiveContent(payload);
+            mTextView.performReceiveContent(payload);
             if (dragDropIntoItself) {
                 deleteSourceAfterLocalDrop(dragLocalState, offset, originalLength);
             }

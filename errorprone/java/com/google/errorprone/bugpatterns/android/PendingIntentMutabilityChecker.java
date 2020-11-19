@@ -17,12 +17,11 @@
 package com.google.errorprone.bugpatterns.android;
 
 import static com.google.errorprone.BugPattern.SeverityLevel.WARNING;
-import static com.google.errorprone.matchers.FieldMatchers.staticField;
 import static com.google.errorprone.matchers.Matchers.anyOf;
 import static com.google.errorprone.matchers.Matchers.contains;
 import static com.google.errorprone.matchers.Matchers.methodInvocation;
 import static com.google.errorprone.matchers.Matchers.staticMethod;
-
+import static com.google.errorprone.matchers.android.FieldMatchers.staticField;
 
 import com.google.auto.service.AutoService;
 import com.google.errorprone.BugPattern;

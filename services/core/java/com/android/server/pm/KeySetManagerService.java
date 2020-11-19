@@ -596,6 +596,7 @@ public class KeySetManagerService {
         return;
     }
 
+    @Deprecated
     public String encodePublicKey(PublicKey k) throws IOException {
         return new String(Base64.encode(k.getEncoded(), Base64.NO_WRAP));
     }
@@ -674,14 +675,14 @@ public class KeySetManagerService {
 
     void writeKeySetManagerServiceLPr(TypedXmlSerializer serializer) throws IOException {
         serializer.startTag(null, "keyset-settings");
-        serializer.attribute(null, "version", Integer.toString(CURRENT_VERSION));
+        serializer.attributeInt(null, "version", CURRENT_VERSION);
         writePublicKeysLPr(serializer);
         writeKeySetsLPr(serializer);
         serializer.startTag(null, "lastIssuedKeyId");
-        serializer.attribute(null, "value", Long.toString(lastIssuedKeyId));
+        serializer.attributeLong(null, "value", lastIssuedKeyId);
         serializer.endTag(null, "lastIssuedKeyId");
         serializer.startTag(null, "lastIssuedKeySetId");
-        serializer.attribute(null, "value", Long.toString(lastIssuedKeySetId));
+        serializer.attributeLong(null, "value", lastIssuedKeySetId);
         serializer.endTag(null, "lastIssuedKeySetId");
         serializer.endTag(null, "keyset-settings");
     }
@@ -691,10 +692,9 @@ public class KeySetManagerService {
         for (int pKeyIndex = 0; pKeyIndex < mPublicKeys.size(); pKeyIndex++) {
             long id = mPublicKeys.keyAt(pKeyIndex);
             PublicKeyHandle pkh = mPublicKeys.valueAt(pKeyIndex);
-            String encodedKey = encodePublicKey(pkh.getKey());
             serializer.startTag(null, "public-key");
-            serializer.attribute(null, "identifier", Long.toString(id));
-            serializer.attribute(null, "value", encodedKey);
+            serializer.attributeLong(null, "identifier", id);
+            serializer.attributeBytesBase64(null, "value", pkh.getKey().getEncoded());
             serializer.endTag(null, "public-key");
         }
         serializer.endTag(null, "keys");
@@ -706,10 +706,10 @@ public class KeySetManagerService {
             long id = mKeySetMapping.keyAt(keySetIndex);
             ArraySet<Long> keys = mKeySetMapping.valueAt(keySetIndex);
             serializer.startTag(null, "keyset");
-            serializer.attribute(null, "identifier", Long.toString(id));
+            serializer.attributeLong(null, "identifier", id);
             for (long keyId : keys) {
                 serializer.startTag(null, "key-id");
-                serializer.attribute(null, "identifier", Long.toString(keyId));
+                serializer.attributeLong(null, "identifier", keyId);
                 serializer.endTag(null, "key-id");
             }
             serializer.endTag(null, "keyset");
@@ -720,7 +720,6 @@ public class KeySetManagerService {
     void readKeySetsLPw(TypedXmlPullParser parser, ArrayMap<Long, Integer> keySetRefCounts)
             throws XmlPullParserException, IOException {
         int type;
-        long currentKeySetId = 0;
         int outerDepth = parser.getDepth();
         String recordedVersionStr = parser.getAttributeValue(null, "version");
         if (recordedVersionStr == null) {
@@ -737,7 +736,6 @@ public class KeySetManagerService {
             }
             return;
         }
-        int recordedVersion = Integer.parseInt(recordedVersionStr);
         while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
                && (type != XmlPullParser.END_TAG || parser.getDepth() > outerDepth)) {
             if (type == XmlPullParser.END_TAG || type == XmlPullParser.TEXT) {
@@ -749,9 +747,9 @@ public class KeySetManagerService {
             } else if (tagName.equals("keysets")) {
                 readKeySetListLPw(parser);
             } else if (tagName.equals("lastIssuedKeyId")) {
-                lastIssuedKeyId = Long.parseLong(parser.getAttributeValue(null, "value"));
+                lastIssuedKeyId = parser.getAttributeLong(null, "value");
             } else if (tagName.equals("lastIssuedKeySetId")) {
-                lastIssuedKeySetId = Long.parseLong(parser.getAttributeValue(null, "value"));
+                lastIssuedKeySetId = parser.getAttributeLong(null, "value");
             }
         }
 
@@ -786,14 +784,12 @@ public class KeySetManagerService {
             }
             final String tagName = parser.getName();
             if (tagName.equals("keyset")) {
-                String encodedID = parser.getAttributeValue(null, "identifier");
-                currentKeySetId = Long.parseLong(encodedID);
+                currentKeySetId = parser.getAttributeLong(null, "identifier");
                 int refCount = 0;
                 mKeySets.put(currentKeySetId, new KeySetHandle(currentKeySetId, refCount));
                 mKeySetMapping.put(currentKeySetId, new ArraySet<Long>());
             } else if (tagName.equals("key-id")) {
-                String encodedID = parser.getAttributeValue(null, "identifier");
-                long id = Long.parseLong(encodedID);
+                long id = parser.getAttributeLong(null, "identifier");
                 mKeySetMapping.get(currentKeySetId).add(id);
             }
         }
@@ -801,11 +797,10 @@ public class KeySetManagerService {
 
     void readPublicKeyLPw(TypedXmlPullParser parser)
             throws XmlPullParserException {
-        String encodedID = parser.getAttributeValue(null, "identifier");
-        long identifier = Long.parseLong(encodedID);
+        long identifier = parser.getAttributeLong(null, "identifier");
         int refCount = 0;
-        String encodedPublicKey = parser.getAttributeValue(null, "value");
-        PublicKey pub = PackageParser.parsePublicKey(encodedPublicKey);
+        byte[] publicKey = parser.getAttributeBytesBase64(null, "value", null);
+        PublicKey pub = PackageParser.parsePublicKey(publicKey);
         if (pub != null) {
             PublicKeyHandle pkh = new PublicKeyHandle(identifier, refCount, pub);
             mPublicKeys.put(identifier, pkh);

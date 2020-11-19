@@ -991,12 +991,14 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             assertCallerIsOwnerOrRootLocked();
             assertPreparedAndNotCommittedOrDestroyedLocked("addChecksums");
 
+            if (mChecksums.containsKey(name)) {
+                throw new IllegalStateException("Duplicate checksums.");
+            }
+
+            List<CertifiedChecksum> fileChecksums = new ArrayList<>();
+            mChecksums.put(name, fileChecksums);
+
             for (Checksum checksum : checksums) {
-                List<CertifiedChecksum> fileChecksums = mChecksums.get(name);
-                if (fileChecksums == null) {
-                    fileChecksums = new ArrayList<>();
-                    mChecksums.put(name, fileChecksums);
-                }
                 fileChecksums.add(new CertifiedChecksum(checksum, initiatingPackageName,
                         mainCertificateBytes));
             }
@@ -3975,7 +3977,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private static void writeAutoRevokePermissionsMode(@NonNull TypedXmlSerializer out, int mode)
             throws IOException {
         out.startTag(null, TAG_AUTO_REVOKE_PERMISSIONS_MODE);
-        writeIntAttribute(out, ATTR_MODE, mode);
+        out.attributeInt(null, ATTR_MODE, mode);
         out.endTag(null, TAG_AUTO_REVOKE_PERMISSIONS_MODE);
     }
 
@@ -3998,19 +4000,19 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
             out.startTag(null, TAG_SESSION);
 
-            writeIntAttribute(out, ATTR_SESSION_ID, sessionId);
-            writeIntAttribute(out, ATTR_USER_ID, userId);
+            out.attributeInt(null, ATTR_SESSION_ID, sessionId);
+            out.attributeInt(null, ATTR_USER_ID, userId);
             writeStringAttribute(out, ATTR_INSTALLER_PACKAGE_NAME,
                     mInstallSource.installerPackageName);
             writeStringAttribute(out, ATTR_INSTALLER_ATTRIBUTION_TAG,
                     mInstallSource.installerAttributionTag);
-            writeIntAttribute(out, ATTR_INSTALLER_UID, mInstallerUid);
+            out.attributeInt(null, ATTR_INSTALLER_UID, mInstallerUid);
             writeStringAttribute(out, ATTR_INITIATING_PACKAGE_NAME,
                     mInstallSource.initiatingPackageName);
             writeStringAttribute(out, ATTR_ORIGINATING_PACKAGE_NAME,
                     mInstallSource.originatingPackageName);
-            writeLongAttribute(out, ATTR_CREATED_MILLIS, createdMillis);
-            writeLongAttribute(out, ATTR_UPDATED_MILLIS, updatedMillis);
+            out.attributeLong(null, ATTR_CREATED_MILLIS, createdMillis);
+            out.attributeLong(null, ATTR_UPDATED_MILLIS, updatedMillis);
             if (stageDir != null) {
                 writeStringAttribute(out, ATTR_SESSION_STAGE_DIR,
                         stageDir.getAbsolutePath());
@@ -4028,29 +4030,29 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             writeBooleanAttribute(out, ATTR_IS_READY, mStagedSessionReady);
             writeBooleanAttribute(out, ATTR_IS_FAILED, mStagedSessionFailed);
             writeBooleanAttribute(out, ATTR_IS_APPLIED, mStagedSessionApplied);
-            writeIntAttribute(out, ATTR_STAGED_SESSION_ERROR_CODE, mStagedSessionErrorCode);
+            out.attributeInt(null, ATTR_STAGED_SESSION_ERROR_CODE, mStagedSessionErrorCode);
             writeStringAttribute(out, ATTR_STAGED_SESSION_ERROR_MESSAGE,
                     mStagedSessionErrorMessage);
             // TODO(patb,109941548): avoid writing to xml and instead infer / validate this after
             //                       we've read all sessions.
-            writeIntAttribute(out, ATTR_PARENT_SESSION_ID, mParentSessionId);
-            writeIntAttribute(out, ATTR_MODE, params.mode);
-            writeIntAttribute(out, ATTR_INSTALL_FLAGS, params.installFlags);
-            writeIntAttribute(out, ATTR_INSTALL_LOCATION, params.installLocation);
-            writeLongAttribute(out, ATTR_SIZE_BYTES, params.sizeBytes);
+            out.attributeInt(null, ATTR_PARENT_SESSION_ID, mParentSessionId);
+            out.attributeInt(null, ATTR_MODE, params.mode);
+            out.attributeInt(null, ATTR_INSTALL_FLAGS, params.installFlags);
+            out.attributeInt(null, ATTR_INSTALL_LOCATION, params.installLocation);
+            out.attributeLong(null, ATTR_SIZE_BYTES, params.sizeBytes);
             writeStringAttribute(out, ATTR_APP_PACKAGE_NAME, params.appPackageName);
             writeStringAttribute(out, ATTR_APP_LABEL, params.appLabel);
             writeUriAttribute(out, ATTR_ORIGINATING_URI, params.originatingUri);
-            writeIntAttribute(out, ATTR_ORIGINATING_UID, params.originatingUid);
+            out.attributeInt(null, ATTR_ORIGINATING_UID, params.originatingUid);
             writeUriAttribute(out, ATTR_REFERRER_URI, params.referrerUri);
             writeStringAttribute(out, ATTR_ABI_OVERRIDE, params.abiOverride);
             writeStringAttribute(out, ATTR_VOLUME_UUID, params.volumeUuid);
-            writeIntAttribute(out, ATTR_INSTALL_REASON, params.installReason);
+            out.attributeInt(null, ATTR_INSTALL_REASON, params.installReason);
 
             final boolean isDataLoader = params.dataLoaderParams != null;
             writeBooleanAttribute(out, ATTR_IS_DATALOADER, isDataLoader);
             if (isDataLoader) {
-                writeIntAttribute(out, ATTR_DATALOADER_TYPE, params.dataLoaderParams.getType());
+                out.attributeInt(null, ATTR_DATALOADER_TYPE, params.dataLoaderParams.getType());
                 writeStringAttribute(out, ATTR_DATALOADER_PACKAGE_NAME,
                         params.dataLoaderParams.getComponentName().getPackageName());
                 writeStringAttribute(out, ATTR_DATALOADER_CLASS_NAME,
@@ -4086,16 +4088,16 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             final int[] childSessionIds = getChildSessionIdsLocked();
             for (int childSessionId : childSessionIds) {
                 out.startTag(null, TAG_CHILD_SESSION);
-                writeIntAttribute(out, ATTR_SESSION_ID, childSessionId);
+                out.attributeInt(null, ATTR_SESSION_ID, childSessionId);
                 out.endTag(null, TAG_CHILD_SESSION);
             }
 
             final InstallationFile[] files = getInstallationFilesLocked();
             for (InstallationFile file : files) {
                 out.startTag(null, TAG_SESSION_FILE);
-                writeIntAttribute(out, ATTR_LOCATION, file.getLocation());
+                out.attributeInt(null, ATTR_LOCATION, file.getLocation());
                 writeStringAttribute(out, ATTR_NAME, file.getName());
-                writeLongAttribute(out, ATTR_LENGTH_BYTES, file.getLengthBytes());
+                out.attributeLong(null, ATTR_LENGTH_BYTES, file.getLengthBytes());
                 writeByteArrayAttribute(out, ATTR_METADATA, file.getMetadata());
                 writeByteArrayAttribute(out, ATTR_SIGNATURE, file.getSignature());
                 out.endTag(null, TAG_SESSION_FILE);
@@ -4108,7 +4110,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     CertifiedChecksum checksum = checksums.get(j);
                     out.startTag(null, TAG_SESSION_CHECKSUM);
                     writeStringAttribute(out, ATTR_NAME, fileName);
-                    writeIntAttribute(out, ATTR_CHECKSUM_KIND, checksum.getChecksum().getType());
+                    out.attributeInt(null, ATTR_CHECKSUM_KIND, checksum.getChecksum().getType());
                     writeByteArrayAttribute(out, ATTR_CHECKSUM_VALUE,
                             checksum.getChecksum().getValue());
                     writeStringAttribute(out, ATTR_CHECKSUM_PACKAGE, checksum.getPackageName());
@@ -4151,51 +4153,51 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             @NonNull StagingManager stagingManager, @NonNull File sessionsDir,
             @NonNull PackageSessionProvider sessionProvider)
             throws IOException, XmlPullParserException {
-        final int sessionId = readIntAttribute(in, ATTR_SESSION_ID);
-        final int userId = readIntAttribute(in, ATTR_USER_ID);
+        final int sessionId = in.getAttributeInt(null, ATTR_SESSION_ID);
+        final int userId = in.getAttributeInt(null, ATTR_USER_ID);
         final String installerPackageName = readStringAttribute(in, ATTR_INSTALLER_PACKAGE_NAME);
         final String installerAttributionTag = readStringAttribute(in,
                 ATTR_INSTALLER_ATTRIBUTION_TAG);
-        final int installerUid = readIntAttribute(in, ATTR_INSTALLER_UID, pm.getPackageUid(
+        final int installerUid = in.getAttributeInt(null, ATTR_INSTALLER_UID, pm.getPackageUid(
                 installerPackageName, PackageManager.MATCH_UNINSTALLED_PACKAGES, userId));
         final String installInitiatingPackageName =
                 readStringAttribute(in, ATTR_INITIATING_PACKAGE_NAME);
         final String installOriginatingPackageName =
                 readStringAttribute(in, ATTR_ORIGINATING_PACKAGE_NAME);
-        final long createdMillis = readLongAttribute(in, ATTR_CREATED_MILLIS);
-        long updatedMillis = readLongAttribute(in, ATTR_UPDATED_MILLIS);
+        final long createdMillis = in.getAttributeLong(null, ATTR_CREATED_MILLIS);
+        long updatedMillis = in.getAttributeLong(null, ATTR_UPDATED_MILLIS);
         final String stageDirRaw = readStringAttribute(in, ATTR_SESSION_STAGE_DIR);
         final File stageDir = (stageDirRaw != null) ? new File(stageDirRaw) : null;
         final String stageCid = readStringAttribute(in, ATTR_SESSION_STAGE_CID);
-        final boolean prepared = readBooleanAttribute(in, ATTR_PREPARED, true);
-        final boolean committed = readBooleanAttribute(in, ATTR_COMMITTED);
-        final boolean destroyed = readBooleanAttribute(in, ATTR_DESTROYED);
-        final boolean sealed = readBooleanAttribute(in, ATTR_SEALED);
-        final int parentSessionId = readIntAttribute(in, ATTR_PARENT_SESSION_ID,
+        final boolean prepared = in.getAttributeBoolean(null, ATTR_PREPARED, true);
+        final boolean committed = in.getAttributeBoolean(null, ATTR_COMMITTED, false);
+        final boolean destroyed = in.getAttributeBoolean(null, ATTR_DESTROYED, false);
+        final boolean sealed = in.getAttributeBoolean(null, ATTR_SEALED, false);
+        final int parentSessionId = in.getAttributeInt(null, ATTR_PARENT_SESSION_ID,
                 SessionInfo.INVALID_ID);
 
         final SessionParams params = new SessionParams(
                 SessionParams.MODE_INVALID);
-        params.isMultiPackage = readBooleanAttribute(in, ATTR_MULTI_PACKAGE, false);
-        params.isStaged = readBooleanAttribute(in, ATTR_STAGED_SESSION, false);
-        params.mode = readIntAttribute(in, ATTR_MODE);
-        params.installFlags = readIntAttribute(in, ATTR_INSTALL_FLAGS);
-        params.installLocation = readIntAttribute(in, ATTR_INSTALL_LOCATION);
-        params.sizeBytes = readLongAttribute(in, ATTR_SIZE_BYTES);
+        params.isMultiPackage = in.getAttributeBoolean(null, ATTR_MULTI_PACKAGE, false);
+        params.isStaged = in.getAttributeBoolean(null, ATTR_STAGED_SESSION, false);
+        params.mode = in.getAttributeInt(null, ATTR_MODE);
+        params.installFlags = in.getAttributeInt(null, ATTR_INSTALL_FLAGS);
+        params.installLocation = in.getAttributeInt(null, ATTR_INSTALL_LOCATION);
+        params.sizeBytes = in.getAttributeLong(null, ATTR_SIZE_BYTES);
         params.appPackageName = readStringAttribute(in, ATTR_APP_PACKAGE_NAME);
         params.appIcon = readBitmapAttribute(in, ATTR_APP_ICON);
         params.appLabel = readStringAttribute(in, ATTR_APP_LABEL);
         params.originatingUri = readUriAttribute(in, ATTR_ORIGINATING_URI);
         params.originatingUid =
-                readIntAttribute(in, ATTR_ORIGINATING_UID, SessionParams.UID_UNKNOWN);
+                in.getAttributeInt(null, ATTR_ORIGINATING_UID, SessionParams.UID_UNKNOWN);
         params.referrerUri = readUriAttribute(in, ATTR_REFERRER_URI);
         params.abiOverride = readStringAttribute(in, ATTR_ABI_OVERRIDE);
         params.volumeUuid = readStringAttribute(in, ATTR_VOLUME_UUID);
-        params.installReason = readIntAttribute(in, ATTR_INSTALL_REASON);
+        params.installReason = in.getAttributeInt(null, ATTR_INSTALL_REASON);
 
-        if (readBooleanAttribute(in, ATTR_IS_DATALOADER)) {
+        if (in.getAttributeBoolean(null, ATTR_IS_DATALOADER, false)) {
             params.dataLoaderParams = new DataLoaderParams(
-                    readIntAttribute(in, ATTR_DATALOADER_TYPE),
+                    in.getAttributeInt(null, ATTR_DATALOADER_TYPE),
                     new ComponentName(
                             readStringAttribute(in, ATTR_DATALOADER_PACKAGE_NAME),
                             readStringAttribute(in, ATTR_DATALOADER_CLASS_NAME)),
@@ -4207,10 +4209,10 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             params.appIcon = BitmapFactory.decodeFile(appIconFile.getAbsolutePath());
             params.appIconLastModified = appIconFile.lastModified();
         }
-        final boolean isReady = readBooleanAttribute(in, ATTR_IS_READY);
-        final boolean isFailed = readBooleanAttribute(in, ATTR_IS_FAILED);
-        final boolean isApplied = readBooleanAttribute(in, ATTR_IS_APPLIED);
-        final int stagedSessionErrorCode = readIntAttribute(in, ATTR_STAGED_SESSION_ERROR_CODE,
+        final boolean isReady = in.getAttributeBoolean(null, ATTR_IS_READY, false);
+        final boolean isFailed = in.getAttributeBoolean(null, ATTR_IS_FAILED, false);
+        final boolean isApplied = in.getAttributeBoolean(null, ATTR_IS_APPLIED, false);
+        final int stagedSessionErrorCode = in.getAttributeInt(null, ATTR_STAGED_SESSION_ERROR_CODE,
                 SessionInfo.STAGED_SESSION_NO_ERROR);
         final String stagedSessionErrorMessage = readStringAttribute(in,
                 ATTR_STAGED_SESSION_ERROR_MESSAGE);
@@ -4246,23 +4248,24 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
             }
             if (TAG_AUTO_REVOKE_PERMISSIONS_MODE.equals(in.getName())) {
-                autoRevokePermissionsMode = readIntAttribute(in, ATTR_MODE);
+                autoRevokePermissionsMode = in.getAttributeInt(null, ATTR_MODE);
             }
             if (TAG_CHILD_SESSION.equals(in.getName())) {
-                childSessionIds.add(readIntAttribute(in, ATTR_SESSION_ID, SessionInfo.INVALID_ID));
+                childSessionIds.add(in.getAttributeInt(null, ATTR_SESSION_ID,
+                        SessionInfo.INVALID_ID));
             }
             if (TAG_SESSION_FILE.equals(in.getName())) {
                 files.add(new InstallationFile(
-                        readIntAttribute(in, ATTR_LOCATION, 0),
+                        in.getAttributeInt(null, ATTR_LOCATION, 0),
                         readStringAttribute(in, ATTR_NAME),
-                        readLongAttribute(in, ATTR_LENGTH_BYTES, -1),
+                        in.getAttributeLong(null, ATTR_LENGTH_BYTES, -1),
                         readByteArrayAttribute(in, ATTR_METADATA),
                         readByteArrayAttribute(in, ATTR_SIGNATURE)));
             }
             if (TAG_SESSION_CHECKSUM.equals(in.getName())) {
                 final String fileName = readStringAttribute(in, ATTR_NAME);
                 final CertifiedChecksum certifiedChecksum = new CertifiedChecksum(
-                        new Checksum(readIntAttribute(in, ATTR_CHECKSUM_KIND, 0),
+                        new Checksum(in.getAttributeInt(null, ATTR_CHECKSUM_KIND, 0),
                                 readByteArrayAttribute(in, ATTR_CHECKSUM_VALUE)),
                         readStringAttribute(in, ATTR_CHECKSUM_PACKAGE),
                         readByteArrayAttribute(in, ATTR_CHECKSUM_CERTIFICATE));

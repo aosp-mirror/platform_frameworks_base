@@ -113,7 +113,7 @@ public class LockTaskControllerTest {
     public final DexmakerShareClassLoaderRule mDexmakerShareClassLoaderRule =
             new DexmakerShareClassLoaderRule();
 
-    @Mock private ActivityStackSupervisor mSupervisor;
+    @Mock private ActivityTaskSupervisor mSupervisor;
     @Mock private RootWindowContainer mRootWindowContainer;
     @Mock private IDevicePolicyManager mDevicePolicyManager;
     @Mock private IStatusBarService mStatusBarService;

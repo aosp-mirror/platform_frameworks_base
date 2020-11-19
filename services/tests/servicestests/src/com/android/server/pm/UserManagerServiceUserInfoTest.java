@@ -44,7 +44,6 @@ import android.content.pm.UserInfo.UserInfoFlag;
 import android.os.Looper;
 import android.os.Parcel;
 import android.os.UserHandle;
-import android.os.UserManagerInternal;
 import android.text.TextUtils;
 
 import androidx.test.InstrumentationRegistry;

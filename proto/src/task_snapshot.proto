@@ -29,7 +29,7 @@
      int32 inset_bottom = 5;
      bool is_real_snapshot = 6;
      int32 windowing_mode = 7;
-     int32 system_ui_visibility = 8;
+     int32 system_ui_visibility = 8 [deprecated=true];
      bool is_translucent = 9;
      string top_activity_component = 10;
      // deprecated because original width and height are stored now instead of the scale.
@@ -40,4 +40,5 @@
      int32 task_width = 14;
      // The task height when the snapshot was taken
      int32 task_height = 15;
+     int32 appearance = 16;
  }

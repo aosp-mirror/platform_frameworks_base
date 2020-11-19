@@ -9008,7 +9008,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Sets the listener to be {@link #onReceiveContent used} to handle insertion of
+     * Sets the listener to be {@link #performReceiveContent used} to handle insertion of
      * content into this view.
      *
      * <p>Depending on the type of view, this listener may be invoked for different scenarios. For
@@ -9039,7 +9039,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *                  not be null or empty if a non-null listener is passed in.
      * @param listener The listener to use. This can be null to reset to the default behavior.
      */
-    @SuppressWarnings("rawtypes")
     public void setOnReceiveContentListener(@Nullable String[] mimeTypes,
             @Nullable OnReceiveContentListener listener) {
         if (listener != null) {
@@ -9055,27 +9054,46 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Receives the given content. Invokes the listener configured via
-     * {@link #setOnReceiveContentListener}; if no listener is set, the default implementation is a
-     * no-op (returns the passed-in content without acting on it).
+     * Receives the given content. If no listener is set, invokes {@link #onReceiveContent}. If a
+     * listener is {@link #setOnReceiveContentListener set}, invokes the listener instead; if the
+     * listener returns a non-null result, invokes {@link #onReceiveContent} to handle it.
      *
      * @param payload The content to insert and related metadata.
      *
      * @return The portion of the passed-in content that was not accepted (may be all, some, or none
      * of the passed-in content).
      */
-    @SuppressWarnings({"rawtypes", "unchecked"})
-    public @Nullable Payload onReceiveContent(@NonNull Payload payload) {
+    public @Nullable Payload performReceiveContent(@NonNull Payload payload) {
         final OnReceiveContentListener listener = (mListenerInfo == null) ? null
                 : getListenerInfo().mOnReceiveContentListener;
         if (listener != null) {
-            return listener.onReceiveContent(this, payload);
+            final Payload remaining = listener.onReceiveContent(this, payload);
+            return (remaining == null) ? null : onReceiveContent(remaining);
         }
+        return onReceiveContent(payload);
+    }
+
+    /**
+     * Implements the default behavior for receiving content for this type of view. The default
+     * view implementation is a no-op (returns the passed-in content without acting on it).
+     *
+     * <p>Widgets should override this method to define their default behavior for receiving
+     * content. Apps should {@link #setOnReceiveContentListener set a listener} to provide
+     * app-specific handling for receiving content.
+     *
+     * <p>See {@link #setOnReceiveContentListener} and {@link #performReceiveContent} for more info.
+     *
+     * @param payload The content to insert and related metadata.
+     *
+     * @return The portion of the passed-in content that was not handled (may be all, some, or none
+     * of the passed-in content).
+     */
+    public @Nullable Payload onReceiveContent(@NonNull Payload payload) {
         return payload;
     }
 
     /**
-     * Returns the MIME types accepted by {@link #onReceiveContent} for this view, as
+     * Returns the MIME types accepted by {@link #performReceiveContent} for this view, as
      * configured via {@link #setOnReceiveContentListener}. By default returns null.
      *
      * <p>Different features (e.g. pasting from the clipboard, inserting stickers from the soft
@@ -9092,7 +9110,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * {@link android.content.Intent#normalizeMimeType} to ensure that it is converted to
      * lowercase.
      *
-     * @return The MIME types accepted by {@link #onReceiveContent} for this view (may
+     * @return The MIME types accepted by {@link #performReceiveContent} for this view (may
      * include patterns such as "image/*").
      */
     public @Nullable String[] getOnReceiveContentMimeTypes() {

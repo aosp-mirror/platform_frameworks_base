@@ -30,7 +30,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.clearInvoca
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.never;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
-import static com.android.server.wm.ActivityStackSupervisor.ON_TOP;
+import static com.android.server.wm.ActivityTaskSupervisor.ON_TOP;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
 
 import static org.junit.Assert.assertEquals;
@@ -89,7 +89,7 @@ public class ActivityDisplayTests extends WindowTestsBase {
         // Create a pinned stack and move to front.
         final Task pinnedStack = mRootWindowContainer.getDefaultTaskDisplayArea()
                 .createStack(WINDOWING_MODE_PINNED, ACTIVITY_TYPE_STANDARD, ON_TOP);
-        final Task pinnedTask = new TaskBuilder(mAtm.mStackSupervisor)
+        final Task pinnedTask = new TaskBuilder(mAtm.mTaskSupervisor)
                 .setParentTask(pinnedStack).build();
         new ActivityBuilder(mAtm).setActivityFlags(FLAG_ALWAYS_FOCUSABLE)
                 .setTask(pinnedTask).build();
@@ -162,7 +162,7 @@ public class ActivityDisplayTests extends WindowTestsBase {
     private Task createFullscreenStackWithSimpleActivityAt(DisplayContent display) {
         final Task fullscreenStack = display.getDefaultTaskDisplayArea().createStack(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, ON_TOP);
-        final Task fullscreenTask = new TaskBuilder(mAtm.mStackSupervisor)
+        final Task fullscreenTask = new TaskBuilder(mAtm.mTaskSupervisor)
                 .setParentTask(fullscreenStack).build();
         new ActivityBuilder(mAtm).setTask(fullscreenTask).build();
         return fullscreenStack;
@@ -320,10 +320,10 @@ public class ActivityDisplayTests extends WindowTestsBase {
                 ACTIVITY_TYPE_STANDARD, ON_TOP);
         final Task stack4 = taskDisplayArea.createStack(WINDOWING_MODE_FULLSCREEN,
                 ACTIVITY_TYPE_STANDARD, ON_TOP);
-        final Task task1 = new TaskBuilder(mAtm.mStackSupervisor).setParentTask(stack1).build();
-        final Task task2 = new TaskBuilder(mAtm.mStackSupervisor).setParentTask(stack2).build();
-        final Task task3 = new TaskBuilder(mAtm.mStackSupervisor).setParentTask(stack3).build();
-        final Task task4 = new TaskBuilder(mAtm.mStackSupervisor).setParentTask(stack4).build();
+        final Task task1 = new TaskBuilder(mAtm.mTaskSupervisor).setParentTask(stack1).build();
+        final Task task2 = new TaskBuilder(mAtm.mTaskSupervisor).setParentTask(stack2).build();
+        final Task task3 = new TaskBuilder(mAtm.mTaskSupervisor).setParentTask(stack3).build();
+        final Task task4 = new TaskBuilder(mAtm.mTaskSupervisor).setParentTask(stack4).build();
 
         // Reordering stacks while removing stacks.
         doAnswer(invocation -> {

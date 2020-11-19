@@ -9,6 +9,7 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSPanel.QSTileLayout;
 import com.android.systemui.qs.QSPanelControllerBase.TileRecord;
@@ -59,8 +60,12 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
         return getTop();
     }
 
-    @Override
     public void setListening(boolean listening) {
+        setListening(listening, null);
+    }
+
+    @Override
+    public void setListening(boolean listening, UiEventLogger uiEventLogger) {
         if (mListening == listening) return;
         mListening = listening;
         for (TileRecord record : mRecords) {

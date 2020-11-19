@@ -769,7 +769,6 @@ public class StackAnimationController extends
         if (getBubbleCount() > 0) {
             animationForChildAtIndex(0).translationX(mStackPosition.x).start();
         } else {
-            // TODO: still needed with positioner?
             // When all children are removed ensure stack position is sane
             mPositioner.setRestingPosition(mPositioner.getRestingPosition());
 
@@ -937,45 +936,6 @@ public class StackAnimationController extends
 
     public void setStackPosition(BubbleStackView.RelativeStackPosition position) {
         setStackPosition(position.getAbsolutePositionInRegion(getAllowableStackPositionRegion()));
-    }
-
-    public BubbleStackView.RelativeStackPosition getRelativeStackPosition() {
-        return new BubbleStackView.RelativeStackPosition(
-                mStackPosition, getAllowableStackPositionRegion());
-    }
-
-    /**
-     * Sets the starting position for the stack, where it will be located when the first bubble is
-     * added.
-     */
-    public void setStackStartPosition(BubbleStackView.RelativeStackPosition position) {
-        mStackStartPosition = position;
-    }
-
-    /**
-     * Returns the starting stack position. If {@link #setStackStartPosition} was called, this will
-     * return that position - otherwise, a reasonable default will be returned.
-     */
-    @Nullable public PointF getStartPosition() {
-        if (mLayout == null) {
-            return null;
-        }
-
-        if (mStackStartPosition == null) {
-            // Start on the left if we're in LTR, right otherwise.
-            final boolean startOnLeft =
-                    mLayout.getResources().getConfiguration().getLayoutDirection()
-                            != View.LAYOUT_DIRECTION_RTL;
-
-            final float startingVerticalOffset = mLayout.getResources().getDimensionPixelOffset(
-                    R.dimen.bubble_stack_starting_offset_y);
-
-            mStackStartPosition = new BubbleStackView.RelativeStackPosition(
-                    startOnLeft,
-                    startingVerticalOffset / getAllowableStackPositionRegion().height());
-        }
-
-        return mStackStartPosition.getAbsolutePositionInRegion(getAllowableStackPositionRegion());
     }
 
     private boolean isStackPositionSet() {

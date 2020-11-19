@@ -37,6 +37,7 @@
                 <category android:name="android.intent.category.LEANBACK_LAUNCHER"/>
             </intent-filter>
         </activity>
+
         <activity android:name=".ImeActivity"
              android:taskAffinity="com.android.wm.shell.flicker.testapp.ImeActivity"
              android:label="ImeApp"
@@ -48,6 +49,28 @@
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LEANBACK_LAUNCHER"/>
+            </intent-filter>
+        </activity>
+
+        <activity android:name=".SplitScreenActivity"
+                  android:resizeableActivity="true"
+                  android:taskAffinity="com.android.wm.shell.flicker.testapp.SplitScreenActivity"
+                  android:label="SplitScreenPrimaryApp"
+                  android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+
+        <activity android:name=".SplitScreenSecondaryActivity"
+                  android:resizeableActivity="true"
+                  android:taskAffinity="com.android.wm.shell.flicker.testapp.SplitScreenSecondaryActivity"
+                  android:label="SplitScreenSecondaryApp"
+                  android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
     </application>

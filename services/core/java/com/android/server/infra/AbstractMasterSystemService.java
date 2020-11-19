@@ -31,7 +31,6 @@ import android.os.Binder;
 import android.os.Handler;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.os.UserManagerInternal;
 import android.provider.Settings;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -43,7 +42,7 @@ import com.android.internal.infra.AbstractRemoteService;
 import com.android.internal.os.BackgroundThread;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
-import com.android.server.SystemService.TargetUser;
+import com.android.server.pm.UserManagerInternal;
 
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;

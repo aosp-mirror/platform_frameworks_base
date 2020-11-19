@@ -16,21 +16,20 @@
 
 package com.android.server.pm;
 
-import android.content.pm.PackageManagerInternal;
-import com.android.internal.util.XmlUtils;
-
-import com.android.server.LocalServices;
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
-
 import android.content.ComponentName;
 import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManagerInternal;
 import android.content.pm.ResolveInfo;
 import android.util.Slog;
 import android.util.TypedXmlPullParser;
 import android.util.TypedXmlSerializer;
+
+import com.android.internal.util.XmlUtils;
+import com.android.server.LocalServices;
+
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -107,12 +106,9 @@ public class PreferredComponent {
         if (mComponent == null) {
             mParseError = "Bad activity name " + mShortComponent;
         }
-        String matchStr = parser.getAttributeValue(null, ATTR_MATCH);
-        mMatch = matchStr != null ? Integer.parseInt(matchStr, 16) : 0;
-        String setCountStr = parser.getAttributeValue(null, ATTR_SET);
-        int setCount = setCountStr != null ? Integer.parseInt(setCountStr) : 0;
-        String alwaysStr = parser.getAttributeValue(null, ATTR_ALWAYS);
-        mAlways = alwaysStr != null ? Boolean.parseBoolean(alwaysStr) : true;
+        mMatch = parser.getAttributeIntHex(null, ATTR_MATCH, 0);
+        int setCount = parser.getAttributeInt(null, ATTR_SET, 0);
+        mAlways = parser.getAttributeBoolean(null, ATTR_ALWAYS, true);
 
         String[] myPackages = setCount > 0 ? new String[setCount] : null;
         String[] myClasses = setCount > 0 ? new String[setCount] : null;
@@ -189,10 +185,10 @@ public class PreferredComponent {
         serializer.attribute(null, ATTR_NAME, mShortComponent);
         if (full) {
             if (mMatch != 0) {
-                serializer.attribute(null, ATTR_MATCH, Integer.toHexString(mMatch));
+                serializer.attributeIntHex(null, ATTR_MATCH, mMatch);
             }
-            serializer.attribute(null, ATTR_ALWAYS, Boolean.toString(mAlways));
-            serializer.attribute(null, ATTR_SET, Integer.toString(NS));
+            serializer.attributeBoolean(null, ATTR_ALWAYS, mAlways);
+            serializer.attributeInt(null, ATTR_SET, NS);
             for (int s=0; s<NS; s++) {
                 serializer.startTag(null, TAG_SET);
                 serializer.attribute(null, ATTR_NAME, mSetComponents[s]);
@@ -254,43 +250,6 @@ public class PreferredComponent {
             if (!good) return false;
         }
         return numMatch == NS;
-    }
-
-    public boolean sameSet(PreferredComponent pc) {
-        if (mSetPackages == null || pc == null || pc.mSetPackages == null
-                || !sameComponent(pc.mComponent)) {
-            return false;
-        }
-        final int otherPackageCount = pc.mSetPackages.length;
-        final int packageCount = mSetPackages.length;
-        int numMatch = 0;
-        for (int i = 0; i < otherPackageCount; i++) {
-            boolean good = false;
-            for (int j = 0; j < packageCount; j++) {
-                if (mSetPackages[j].equals(pc.mSetPackages[j])
-                        && mSetClasses[j].equals(pc.mSetClasses[j])) {
-                    numMatch++;
-                    good = true;
-                    break;
-                }
-            }
-            if (!good) {
-                return false;
-            }
-        }
-        return numMatch == packageCount;
-    }
-
-    /** Returns true if the preferred component represents the provided ComponentName. */
-    private boolean sameComponent(ComponentName comp) {
-        if (mComponent == null || comp == null) {
-            return false;
-        }
-        if (mComponent.getPackageName().equals(comp.getPackageName())
-                && mComponent.getClassName().equals(comp.getClassName())) {
-            return true;
-        }
-        return false;
     }
 
     public boolean isSuperset(List<ResolveInfo> query, boolean excludeSetupWizardPackage) {

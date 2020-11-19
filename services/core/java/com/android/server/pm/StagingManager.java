@@ -49,7 +49,6 @@ import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.os.UserHandle;
-import android.os.UserManagerInternal;
 import android.os.storage.IStorageManager;
 import android.os.storage.StorageManager;
 import android.text.TextUtils;

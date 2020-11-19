@@ -46,7 +46,6 @@ import android.content.pm.parsing.ParsingPackage;
 import android.content.res.TypedArray;
 import android.os.Environment;
 import android.os.UserHandle;
-import android.os.UserManagerInternal;
 import android.platform.test.annotations.Presubmit;
 import android.util.Pair;
 

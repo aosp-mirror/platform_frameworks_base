@@ -69,9 +69,9 @@ class CrossProfileIntentFilter extends IntentFilter {
     }
 
     CrossProfileIntentFilter(TypedXmlPullParser parser) throws XmlPullParserException, IOException {
-        mTargetUserId = getIntFromXml(parser, ATTR_TARGET_USER_ID, UserHandle.USER_NULL);
+        mTargetUserId = parser.getAttributeInt(null, ATTR_TARGET_USER_ID, UserHandle.USER_NULL);
         mOwnerPackage = getStringFromXml(parser, ATTR_OWNER_PACKAGE, "");
-        mFlags = getIntFromXml(parser, ATTR_FLAGS, 0);
+        mFlags = parser.getAttributeInt(null, ATTR_FLAGS, 0);
 
         int outerDepth = parser.getDepth();
         String tagName = parser.getName();
@@ -115,17 +115,9 @@ class CrossProfileIntentFilter extends IntentFilter {
         }
     }
 
-    int getIntFromXml(TypedXmlPullParser parser, String attribute, int defaultValue) {
-        String stringValue = getStringFromXml(parser, attribute, null);
-        if (stringValue != null) {
-            return Integer.parseInt(stringValue);
-        }
-        return defaultValue;
-    }
-
     public void writeToXml(TypedXmlSerializer serializer) throws IOException {
-        serializer.attribute(null, ATTR_TARGET_USER_ID, Integer.toString(mTargetUserId));
-        serializer.attribute(null, ATTR_FLAGS, Integer.toString(mFlags));
+        serializer.attributeInt(null, ATTR_TARGET_USER_ID, mTargetUserId);
+        serializer.attributeInt(null, ATTR_FLAGS, mFlags);
         serializer.attribute(null, ATTR_OWNER_PACKAGE, mOwnerPackage);
         serializer.startTag(null, ATTR_FILTER);
             super.writeToXml(serializer);

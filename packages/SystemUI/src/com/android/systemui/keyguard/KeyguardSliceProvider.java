@@ -329,7 +329,7 @@ public class KeyguardSliceProvider extends SliceProvider implements
                     Method injectMethod = rootComponent.getClass()
                             .getMethod("inject", getClass());
                     injectMethod.invoke(rootComponent, this);
-                    Log.w("TAG", "mMediaManager is now: " + mMediaManager);
+                    Log.w(TAG, "mMediaManager is now: " + mMediaManager);
                 } catch (NoSuchMethodException ex) {
                     Log.e(TAG, "Failed to find inject method for KeyguardSliceProvider", ex);
                 } catch (IllegalAccessException | InvocationTargetException ex) {

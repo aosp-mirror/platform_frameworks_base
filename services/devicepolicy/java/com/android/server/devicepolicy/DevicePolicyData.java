@@ -29,20 +29,17 @@ import android.util.TypedXmlPullParser;
 import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
-import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.JournaledFile;
 import com.android.internal.util.XmlUtils;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -80,6 +77,8 @@ class DevicePolicyData {
     private static final String ATTR_DEVICE_PROVISIONING_CONFIG_APPLIED =
             "device-provisioning-config-applied";
     private static final String ATTR_DEVICE_PAIRED = "device-paired";
+    private static final String TAG = DevicePolicyManagerService.LOG_TAG;
+    private static final boolean VERBOSE_LOG = false; // DO NOT SUBMIT WITH TRUE
 
     int mFailedPasswordAttempts = 0;
     boolean mPasswordValidAtLastCheckpoint = true;
@@ -155,7 +154,12 @@ class DevicePolicyData {
     static boolean store(DevicePolicyData policyData, JournaledFile file, boolean isFdeDevice) {
         FileOutputStream stream = null;
         try {
-            stream = new FileOutputStream(file.chooseForWrite(), false);
+            File chooseForWrite = file.chooseForWrite();
+            if (VERBOSE_LOG) {
+                Slog.v(TAG, "Storing data for user " + policyData.mUserHandle + " on "
+                        + chooseForWrite);
+            }
+            stream = new FileOutputStream(chooseForWrite, false);
             TypedXmlSerializer out = Xml.resolveSerializer(stream);
             out.startDocument(null, true);
 
@@ -165,6 +169,7 @@ class DevicePolicyData {
                         policyData.mRestrictionsProvider.flattenToString());
             }
             if (policyData.mUserSetupComplete) {
+                if (VERBOSE_LOG) Slog.v(TAG, "setting " + ATTR_SETUP_COMPLETE + " to true");
                 out.attribute(null, ATTR_SETUP_COMPLETE,
                         Boolean.toString(true));
             }
@@ -348,7 +353,7 @@ class DevicePolicyData {
             file.commit();
             return true;
         } catch (XmlPullParserException | IOException e) {
-            Slog.w(DevicePolicyManagerService.LOG_TAG, "failed writing file", e);
+            Slog.w(TAG, "failed writing file", e);
             try {
                 if (stream != null) {
                     stream.close();
@@ -370,6 +375,9 @@ class DevicePolicyData {
             ComponentName ownerComponent) {
         FileInputStream stream = null;
         File file = journaledFile.chooseForRead();
+        if (VERBOSE_LOG) {
+            Slog.v(TAG, "Loading data for user " + policy.mUserHandle + " from " + file);
+        }
         boolean needsRewrite = false;
         try {
             stream = new FileInputStream(file);
@@ -393,6 +401,7 @@ class DevicePolicyData {
             }
             String userSetupComplete = parser.getAttributeValue(null, ATTR_SETUP_COMPLETE);
             if (Boolean.toString(true).equals(userSetupComplete)) {
+                if (VERBOSE_LOG) Slog.v(TAG, "setting mUserSetupComplete to true");
                 policy.mUserSetupComplete = true;
             }
             String paired = parser.getAttributeValue(null, ATTR_DEVICE_PAIRED);
@@ -443,8 +452,7 @@ class DevicePolicyData {
                             policy.mAdminMap.put(ap.info.getComponent(), ap);
                         }
                     } catch (RuntimeException e) {
-                        Slog.w(DevicePolicyManagerService.LOG_TAG,
-                                "Failed loading admin " + name, e);
+                        Slog.w(TAG, "Failed loading admin " + name, e);
                     }
                 } else if ("delegation".equals(tag)) {
                     // Parse delegation info.
@@ -524,7 +532,7 @@ class DevicePolicyData {
                     policy.mAppsSuspended =
                             Boolean.parseBoolean(parser.getAttributeValue(null, ATTR_VALUE));
                 } else {
-                    Slog.w(DevicePolicyManagerService.LOG_TAG, "Unknown tag: " + tag);
+                    Slog.w(TAG, "Unknown tag: " + tag);
                     XmlUtils.skipCurrentTag(parser);
                 }
             }
@@ -532,7 +540,7 @@ class DevicePolicyData {
             // Don't be noisy, this is normal if we haven't defined any policies.
         } catch (NullPointerException | NumberFormatException | XmlPullParserException | IOException
                 | IndexOutOfBoundsException e) {
-            Slog.w(DevicePolicyManagerService.LOG_TAG, "failed parsing " + file, e);
+            Slog.w(TAG, "failed parsing " + file, e);
         }
         try {
             if (stream != null) {
@@ -557,8 +565,8 @@ class DevicePolicyData {
                 }
             }
             if (!haveOwner) {
-                Slog.w(DevicePolicyManagerService.LOG_TAG, "Previous password owner "
-                        + mPasswordOwner + " no longer active; disabling");
+                Slog.w(TAG, "Previous password owner " + mPasswordOwner
+                        + " no longer active; disabling");
                 mPasswordOwner = -1;
             }
         }

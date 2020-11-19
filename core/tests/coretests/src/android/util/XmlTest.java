@@ -135,6 +135,10 @@ public class XmlTest {
         outer.putDoubleArray("double[]", new double[] { 43d, 44d, 45d });
         outer.putStringArray("string[]", new String[] { "foo", "bar", "baz" });
 
+        outer.putString("nullString", null);
+        outer.putObject("nullObject", null);
+        outer.putIntArray("nullArray", null);
+
         final PersistableBundle nested = new PersistableBundle();
         nested.putString("nested_key", "nested_value");
         outer.putPersistableBundle("nested", nested);
@@ -197,7 +201,9 @@ public class XmlTest {
     }
 
     private static final String TEST_STRING = "com.example";
+    private static final String TEST_STRING_EMPTY = "";
     private static final byte[] TEST_BYTES = new byte[] { 0, 1, 2, 3, 4, 3, 2, 1, 0 };
+    private static final byte[] TEST_BYTES_EMPTY = new byte[0];
 
     private static void doVerifyWrite(TypedXmlSerializer out) throws Exception {
         out.startDocument(StandardCharsets.UTF_8.name(), true);
@@ -206,9 +212,11 @@ public class XmlTest {
             out.startTag(null, "two");
             {
                 out.attribute(null, "string", TEST_STRING);
-                out.attribute(null, "stringNumber", "49");
+                out.attribute(null, "stringEmpty", TEST_STRING_EMPTY);
                 out.attributeBytesHex(null, "bytesHex", TEST_BYTES);
+                out.attributeBytesHex(null, "bytesHexEmpty", TEST_BYTES_EMPTY);
                 out.attributeBytesBase64(null, "bytesBase64", TEST_BYTES);
+                out.attributeBytesBase64(null, "bytesBase64Empty", TEST_BYTES_EMPTY);
                 out.attributeInt(null, "int", 43);
                 out.attributeIntHex(null, "intHex", 44);
                 out.attributeLong(null, "long", 45L);
@@ -216,6 +224,7 @@ public class XmlTest {
                 out.attributeFloat(null, "float", 47f);
                 out.attributeDouble(null, "double", 48d);
                 out.attributeBoolean(null, "boolean", true);
+                out.attribute(null, "stringNumber", "49");
             }
             out.endTag(null, "two");
 
@@ -241,10 +250,20 @@ public class XmlTest {
         {
             assertNext(in, START_TAG, "two", 2);
             {
-                assertEquals(11, in.getAttributeCount());
-                assertEquals(TEST_STRING, in.getAttributeValue(null, "string"));
-                assertArrayEquals(TEST_BYTES, in.getAttributeBytesHex(null, "bytesHex"));
-                assertArrayEquals(TEST_BYTES, in.getAttributeBytesBase64(null, "bytesBase64"));
+                assertEquals(14, in.getAttributeCount());
+                assertEquals(TEST_STRING,
+                        in.getAttributeValue(null, "string"));
+                assertEquals(TEST_STRING_EMPTY,
+                        in.getAttributeValue(null, "stringEmpty"));
+                assertArrayEquals(TEST_BYTES,
+                        in.getAttributeBytesHex(null, "bytesHex"));
+                assertArrayEquals(TEST_BYTES_EMPTY,
+                        in.getAttributeBytesHex(null, "bytesHexEmpty"));
+                assertArrayEquals(TEST_BYTES,
+                        in.getAttributeBytesBase64(null, "bytesBase64"));
+                assertArrayEquals(TEST_BYTES_EMPTY,
+                        in.getAttributeBytesBase64(null, "bytesBase64Empty"));
+
                 assertEquals(43, in.getAttributeInt(null, "int"));
                 assertEquals(44, in.getAttributeIntHex(null, "intHex"));
                 assertEquals(45L, in.getAttributeLong(null, "long"));

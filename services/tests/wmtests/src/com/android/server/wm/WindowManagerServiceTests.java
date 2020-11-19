@@ -177,9 +177,9 @@ public class WindowManagerServiceTests extends WindowTestsBase {
         doReturn(true).when(mWm).checkCallingPermission(anyString(), anyString());
         spyOn(mWm.mAtmInternal);
         doReturn(true).when(mWm.mAtmInternal).isDreaming();
-        doNothing().when(mWm.mAtmService.mStackSupervisor).wakeUp(anyString());
+        doNothing().when(mWm.mAtmService.mTaskSupervisor).wakeUp(anyString());
         mWm.dismissKeyguard(null, "test-dismiss-keyguard");
-        verify(mWm.mAtmService.mStackSupervisor).wakeUp(anyString());
+        verify(mWm.mAtmService.mTaskSupervisor).wakeUp(anyString());
     }
 
     @Test

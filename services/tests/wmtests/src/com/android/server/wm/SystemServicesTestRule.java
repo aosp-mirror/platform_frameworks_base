@@ -466,9 +466,9 @@ public class SystemServicesTestRule implements TestRule {
     }
 
     protected class TestActivityTaskManagerService extends ActivityTaskManagerService {
-        // ActivityStackSupervisor may be created more than once while setting up AMS and ATMS.
+        // ActivityTaskSupervisor may be created more than once while setting up AMS and ATMS.
         // We keep the reference in order to prevent creating it twice.
-        ActivityStackSupervisor mTestStackSupervisor;
+        ActivityTaskSupervisor mTestTaskSupervisor;
 
         TestActivityTaskManagerService(Context context, ActivityManagerService ams) {
             super(context);
@@ -522,21 +522,21 @@ public class SystemServicesTestRule implements TestRule {
         }
 
         @Override
-        protected ActivityStackSupervisor createStackSupervisor() {
-            if (mTestStackSupervisor == null) {
-                mTestStackSupervisor = new TestActivityStackSupervisor(this, mH.getLooper());
+        protected ActivityTaskSupervisor createTaskSupervisor() {
+            if (mTestTaskSupervisor == null) {
+                mTestTaskSupervisor = new TestActivityTaskSupervisor(this, mH.getLooper());
             }
-            return mTestStackSupervisor;
+            return mTestTaskSupervisor;
         }
     }
 
     /**
-     * An {@link ActivityStackSupervisor} which stubs out certain methods that depend on
+     * An {@link ActivityTaskSupervisor} which stubs out certain methods that depend on
      * setup not available in the test environment. Also specifies an injector for
      */
-    protected class TestActivityStackSupervisor extends ActivityStackSupervisor {
+    protected class TestActivityTaskSupervisor extends ActivityTaskSupervisor {
 
-        TestActivityStackSupervisor(ActivityTaskManagerService service, Looper looper) {
+        TestActivityTaskSupervisor(ActivityTaskManagerService service, Looper looper) {
             super(service, looper);
             spyOn(this);
 

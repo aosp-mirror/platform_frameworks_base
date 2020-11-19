@@ -79,7 +79,6 @@ import static android.view.WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 import static android.view.WindowManager.REMOVE_CONTENT_MODE_UNDEFINED;
 import static android.view.WindowManager.TRANSIT_NONE;
-import static android.view.WindowManager.TRANSIT_OLD_NONE;
 import static android.view.WindowManager.TRANSIT_RELAUNCH;
 import static android.view.WindowManagerGlobal.ADD_OKAY;
 import static android.view.WindowManagerGlobal.ADD_TOO_MANY_TOKENS;
@@ -421,16 +420,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
     static boolean sEnableTripleBuffering = !SystemProperties.getBoolean(
             DISABLE_TRIPLE_BUFFERING_PROPERTY, false);
-
-    /**
-     * Use new app transit framework.
-     */
-    private static final String USE_NEW_APP_TRANSIT =
-            "persist.wm.use_new_app_transit";
-    /**
-     * @see #USE_NEW_APP_TRANSIT
-     */
-    static boolean sUseNewAppTransit = SystemProperties.getBoolean(USE_NEW_APP_TRANSIT, false);
 
     /**
      * Allows a fullscreen windowing mode activity to launch in its desired orientation directly
@@ -1111,7 +1100,7 @@ public class WindowManagerService extends IWindowManager.Stub
             = new WindowManagerInternal.AppTransitionListener() {
 
         @Override
-        public void onAppTransitionCancelledLocked(int transit) {
+        public void onAppTransitionCancelledLocked(boolean keyguardGoingAway) {
         }
 
         @Override
@@ -1916,13 +1905,13 @@ public class WindowManagerService extends IWindowManager.Stub
         }
         // We use the visible frame, because we want the animation to morph the window from what
         // was visible to the user to the final destination of the new window.
-        Rect frame = replacedWindow.getVisibleFrame();
+        final Rect frame = new Rect(replacedWindow.getFrame());
+        frame.inset(replacedWindow.getInsetsStateWithVisibilityOverride().calculateVisibleInsets(
+                frame, replacedWindow.mAttrs.softInputMode));
         // We treat this as if this activity was opening, so we can trigger the app transition
         // animation and piggy-back on existing transition animation infrastructure.
         final DisplayContent dc = activity.getDisplayContent();
         dc.mOpeningApps.add(activity);
-        dc.prepareAppTransitionOld(WindowManager.TRANSIT_OLD_ACTIVITY_RELAUNCH,
-                ALWAYS_KEEP_CURRENT, 0 /* flags */, false /* forceOverride */);
         dc.prepareAppTransition(TRANSIT_RELAUNCH);
         dc.mAppTransition.overridePendingAppTransitionClipReveal(frame.left, frame.top,
                 frame.width(), frame.height());
@@ -1938,8 +1927,6 @@ public class WindowManagerService extends IWindowManager.Stub
         final DisplayContent dc = activity.getDisplayContent();
         if (mDisplayFrozen && !dc.mOpeningApps.contains(activity) && activity.isRelaunching()) {
             dc.mOpeningApps.add(activity);
-            dc.prepareAppTransitionOld(TRANSIT_OLD_NONE, !ALWAYS_KEEP_CURRENT, 0 /* flags */,
-                    false /* forceOverride */);
             dc.prepareAppTransition(TRANSIT_NONE);
             dc.executeAppTransition();
         }
@@ -2210,15 +2197,12 @@ public class WindowManagerService extends IWindowManager.Stub
             if (attrs != null) {
                 displayPolicy.adjustWindowParamsLw(win, attrs, pid, uid);
                 win.mToken.adjustWindowParams(win, attrs);
-                int systemUiVisibility = attrs.systemUiVisibility
-                        | attrs.subtreeSystemUiVisibility;
-                if ((systemUiVisibility & DISABLE_MASK) != 0) {
-                    // if they don't have the permission, mask out the status bar bits
-                    if (!hasStatusBarPermission(pid, uid)) {
-                        systemUiVisibility &= ~DISABLE_MASK;
-                    }
+                int disableFlags =
+                        (attrs.systemUiVisibility | attrs.subtreeSystemUiVisibility) & DISABLE_MASK;
+                if (disableFlags != 0 && !hasStatusBarPermission(pid, uid)) {
+                    disableFlags = 0;
                 }
-                win.mSystemUiVisibility = systemUiVisibility;
+                win.mDisableFlags = disableFlags;
                 if (win.mAttrs.type != attrs.type) {
                     throw new IllegalArgumentException(
                             "Window type can not be changed after the window is added.");
@@ -2460,12 +2444,11 @@ public class WindowManagerService extends IWindowManager.Stub
 
             win.setLastReportedMergedConfiguration(mergedConfiguration);
 
-            // Update the last inset values here because the values are sent back to the client.
-            // The last inset values represent the last client state
-            win.updateLastInsetValues();
+            // Set resize-handled here because the values are sent back to the client.
+            win.onResizeHandled();
 
             win.fillClientWindowFrames(outFrames);
-            outInsetsState.set(win.getInsetsState(), win.isClientLocal());
+            outInsetsState.set(win.getCompatInsetsState(), win.isClientLocal());
             if (DEBUG) {
                 Slog.v(TAG_WM, "Relayout given client " + client.asBinder()
                         + ", requestedWidth=" + requestedWidth
@@ -2829,9 +2812,6 @@ public class WindowManagerService extends IWindowManager.Stub
         if (!checkCallingPermission(MANAGE_APP_TOKENS, "prepareAppTransition()")) {
             throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
         }
-        getDefaultDisplayContentLocked().prepareAppTransitionOld(TRANSIT_OLD_NONE,
-                false /* alwaysKeepCurrent */,
-                0 /* flags */, false /* forceOverride */);
         getDefaultDisplayContentLocked().prepareAppTransition(TRANSIT_NONE);
     }
 
@@ -3161,7 +3141,7 @@ public class WindowManagerService extends IWindowManager.Stub
             throw new SecurityException("Requires CONTROL_KEYGUARD permission");
         }
         if (mAtmInternal.isDreaming()) {
-            mAtmService.mStackSupervisor.wakeUp("dismissKeyguard");
+            mAtmService.mTaskSupervisor.wakeUp("dismissKeyguard");
         }
         synchronized (mGlobalLock) {
             mPolicy.dismissKeyguardLw(callback, message);
@@ -7564,7 +7544,7 @@ public class WindowManagerService extends IWindowManager.Stub
         public int getInputMethodWindowVisibleHeight(int displayId) {
             synchronized (mGlobalLock) {
                 final DisplayContent dc = mRoot.getDisplayContent(displayId);
-                return dc.mDisplayFrames.getInputMethodWindowVisibleHeight();
+                return dc.getInputMethodWindowVisibleHeight();
             }
         }
 

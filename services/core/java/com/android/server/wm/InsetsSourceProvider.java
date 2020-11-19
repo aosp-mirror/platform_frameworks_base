@@ -548,8 +548,7 @@ class InsetsSourceProvider {
         @Override
         public void startAnimation(SurfaceControl animationLeash, Transaction t,
                 @AnimationType int type, OnAnimationFinishedCallback finishCallback) {
-            // TODO(b/118118435): We can remove the type check when implementing the transient bar
-            //                    animation.
+            // TODO(b/166736352): Check if we still need to control the IME visibility here.
             if (mSource.getType() == ITYPE_IME) {
                 // TODO: use 0 alpha and remove t.hide() once b/138459974 is fixed.
                 t.setAlpha(animationLeash, 1 /* alpha */);

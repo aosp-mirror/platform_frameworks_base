@@ -1023,6 +1023,15 @@ public final class ViewRootImpl implements ViewParent,
                 }
                 mForceDecorViewVisibility = (mWindowAttributes.privateFlags
                         & PRIVATE_FLAG_FORCE_DECOR_VIEW_VISIBILITY) != 0;
+
+                if (mView instanceof RootViewSurfaceTaker) {
+                    PendingInsetsController pendingInsetsController =
+                            ((RootViewSurfaceTaker) mView).providePendingInsetsController();
+                    if (pendingInsetsController != null) {
+                        pendingInsetsController.replayAndAttach(mInsetsController);
+                    }
+                }
+
                 try {
                     mOrigWindowType = mWindowAttributes.type;
                     mAttachInfo.mRecomputeGlobalAttributes = true;
@@ -1160,14 +1169,6 @@ public final class ViewRootImpl implements ViewParent,
                 mFirstInputStage = nativePreImeStage;
                 mFirstPostImeInputStage = earlyPostImeStage;
                 mPendingInputEventQueueLengthCounterName = "aq:pending:" + counterSuffix;
-
-                if (mView instanceof RootViewSurfaceTaker) {
-                    PendingInsetsController pendingInsetsController =
-                            ((RootViewSurfaceTaker) mView).providePendingInsetsController();
-                    if (pendingInsetsController != null) {
-                        pendingInsetsController.replayAndAttach(mInsetsController);
-                    }
-                }
             }
         }
     }

@@ -543,6 +543,10 @@ public class BiometricScheduler {
         return mCurrentOperation.clientMonitor;
     }
 
+    public int getCurrentPendingCount() {
+        return mPendingOperations.size();
+    }
+
     public void recordCrashState() {
         if (mCrashStates.size() >= CrashState.NUM_ENTRIES) {
             mCrashStates.removeFirst();
@@ -564,8 +568,22 @@ public class BiometricScheduler {
 
     public void dump(PrintWriter pw) {
         pw.println("Dump of BiometricScheduler " + getTag());
+        pw.println("Current operation: " + mCurrentOperation);
+        pw.println("Pending operations: " + mPendingOperations.size());
+        for (Operation operation : mPendingOperations) {
+            pw.println("Pending operation: " + operation);
+        }
         for (CrashState crashState : mCrashStates) {
             pw.println("Crash State " + crashState);
         }
+    }
+
+    /**
+     * Clears the scheduler of anything work-related. This should be used for example when the
+     * HAL dies.
+     */
+    public void reset() {
+        mPendingOperations.clear();
+        mCurrentOperation = null;
     }
 }

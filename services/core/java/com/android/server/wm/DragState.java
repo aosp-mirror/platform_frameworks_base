@@ -45,7 +45,6 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.os.UserManagerInternal;
 import android.util.Slog;
 import android.view.Display;
 import android.view.DragEvent;
@@ -64,6 +63,7 @@ import com.android.internal.os.SomeArgs;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.view.IDragAndDropPermissions;
 import com.android.server.LocalServices;
+import com.android.server.pm.UserManagerInternal;
 
 import java.util.ArrayList;
 

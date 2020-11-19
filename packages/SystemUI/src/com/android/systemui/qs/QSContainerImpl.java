@@ -17,7 +17,6 @@
 package com.android.systemui.qs;
 
 import static android.app.StatusBarManager.DISABLE2_QUICK_SETTINGS;
-import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 
 import android.content.Context;
 import android.content.res.Configuration;
@@ -184,7 +183,8 @@ public class QSContainerImpl extends FrameLayout {
         mBackground.setVisibility(mQsDisabled ? View.GONE : View.VISIBLE);
     }
 
-    void updateResources(QSPanelController qsPanelController) {
+    void updateResources(QSPanelController qsPanelController,
+            QuickStatusBarHeaderController quickStatusBarHeaderController) {
         LayoutParams layoutParams = (LayoutParams) mQSPanelContainer.getLayoutParams();
         layoutParams.topMargin = mContext.getResources().getDimensionPixelSize(
                 com.android.internal.R.dimen.quick_qs_offset_height);
@@ -196,7 +196,7 @@ public class QSContainerImpl extends FrameLayout {
         boolean marginsChanged = padding != mContentPadding;
         mContentPadding = padding;
         if (marginsChanged) {
-            updatePaddingsAndMargins(qsPanelController);
+            updatePaddingsAndMargins(qsPanelController, quickStatusBarHeaderController);
         }
     }
 
@@ -252,7 +252,8 @@ public class QSContainerImpl extends FrameLayout {
         updateExpansion();
     }
 
-    private void updatePaddingsAndMargins(QSPanelController qsPanelController) {
+    private void updatePaddingsAndMargins(QSPanelController qsPanelController,
+            QuickStatusBarHeaderController quickStatusBarHeaderController) {
         for (int i = 0; i < getChildCount(); i++) {
             View view = getChildAt(i);
             if (view == mQSCustomizer) {
@@ -271,7 +272,7 @@ public class QSContainerImpl extends FrameLayout {
             } else if (view == mHeader) {
                 // The header contains the QQS panel which needs to have special padding, to
                 // visually align them.
-                mHeader.setContentMargins(mContentPadding, mContentPadding);
+                quickStatusBarHeaderController.setContentMargins(mContentPadding, mContentPadding);
             } else {
                 view.setPaddingRelative(
                         mContentPadding,

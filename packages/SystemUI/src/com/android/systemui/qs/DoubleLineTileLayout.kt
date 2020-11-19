@@ -25,8 +25,7 @@ import com.android.systemui.R
 import com.android.systemui.qs.TileLayout.exactly
 
 class DoubleLineTileLayout(
-    context: Context,
-    private val uiEventLogger: UiEventLogger
+    context: Context
 ) : ViewGroup(context), QSPanel.QSTileLayout {
 
     companion object {
@@ -84,7 +83,7 @@ class DoubleLineTileLayout(
         return false
     }
 
-    override fun setListening(listening: Boolean) {
+    override fun setListening(listening: Boolean, uiEventLogger: UiEventLogger) {
         if (_listening == listening) return
         _listening = listening
         for (record in mRecords) {

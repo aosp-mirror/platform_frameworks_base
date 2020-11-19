@@ -73,7 +73,6 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.os.UserManagerInternal;
 import android.provider.Settings;
 import android.util.Log;
 import android.util.Pair;
@@ -774,6 +773,9 @@ public class LauncherAppsService extends SystemService {
             if (locusIds != null && packageName == null) {
                 throw new IllegalArgumentException(
                         "To query by locus ID, package name must also be set");
+            }
+            if ((query.getQueryFlags() & ShortcutQuery.FLAG_GET_PERSONS_DATA) != 0) {
+                ensureStrictAccessShortcutsPermission(callingPackage);
             }
 
             // TODO(b/29399275): Eclipse compiler requires explicit List<ShortcutInfo> cast below.
