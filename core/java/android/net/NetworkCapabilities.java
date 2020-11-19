@@ -1802,20 +1802,26 @@ public final class NetworkCapabilities implements Parcelable {
             sb.append(" OwnerUid: ").append(mOwnerUid);
         }
 
-        if (mAdministratorUids.length == 0) {
-            sb.append(" AdministratorUids: ").append(Arrays.toString(mAdministratorUids));
+        if (!ArrayUtils.isEmpty(mAdministratorUids)) {
+            sb.append(" AdminUids: ").append(Arrays.toString(mAdministratorUids));
+        }
+
+        if (mRequestorUid != Process.INVALID_UID) {
+            sb.append(" RequestorUid: ").append(mRequestorUid);
+        }
+
+        if (mRequestorPackageName != null) {
+            sb.append(" RequestorPkg: ").append(mRequestorPackageName);
         }
 
         if (null != mSSID) {
             sb.append(" SSID: ").append(mSSID);
         }
 
-        if (mPrivateDnsBroken) {
-            sb.append(" Private DNS is broken");
-        }
 
-        sb.append(" RequestorUid: ").append(mRequestorUid);
-        sb.append(" RequestorPackageName: ").append(mRequestorPackageName);
+        if (mPrivateDnsBroken) {
+            sb.append(" PrivateDnsBroken");
+        }
 
         sb.append("]");
         return sb.toString();
