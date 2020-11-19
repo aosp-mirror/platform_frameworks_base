@@ -3768,6 +3768,7 @@ message AppStartOccurred {
         WARM = 1;
         HOT = 2;
         COLD = 3;
+        RELAUNCH = 4;
     }
     // The transition type.
     optional TransitionType type = 3;
@@ -3829,6 +3830,7 @@ message AppStartCanceled {
         WARM = 1;
         HOT = 2;
         COLD = 3;
+        RELAUNCH = 4;
     }
     // The transition type.
     optional TransitionType type = 3;
