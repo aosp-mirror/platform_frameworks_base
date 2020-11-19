@@ -36,8 +36,8 @@ import android.os.ParcelFileDescriptor;
 interface IUiAutomationConnection {
     void connect(IAccessibilityServiceClient client, int flags);
     void disconnect();
-    boolean injectInputEvent(in InputEvent event, boolean sync);
-    void syncInputTransactions();
+    boolean injectInputEvent(in InputEvent event, boolean sync, boolean waitForAnimations);
+    void syncInputTransactions(boolean waitForAnimations);
     boolean setRotation(int rotation);
     Bitmap takeScreenshot(in Rect crop);
     boolean clearWindowContentFrameStats(int windowId);

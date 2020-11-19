@@ -124,7 +124,7 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
     }
 
     @Override
-    public boolean injectInputEvent(InputEvent event, boolean sync) {
+    public boolean injectInputEvent(InputEvent event, boolean sync, boolean waitForAnimations) {
         synchronized (mLock) {
             throwIfCalledByNotTrustedUidLocked();
             throwIfShutdownLocked();
@@ -134,7 +134,8 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
                 : InputManager.INJECT_INPUT_EVENT_MODE_ASYNC;
         final long identity = Binder.clearCallingIdentity();
         try {
-            return mWindowManager.injectInputAfterTransactionsApplied(event, mode);
+            return mWindowManager.injectInputAfterTransactionsApplied(event, mode,
+                    waitForAnimations);
         } catch (RemoteException e) {
         } finally {
             Binder.restoreCallingIdentity(identity);
@@ -143,7 +144,7 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
     }
 
     @Override
-    public void syncInputTransactions() {
+    public void syncInputTransactions(boolean waitForAnimations) {
         synchronized (mLock) {
             throwIfCalledByNotTrustedUidLocked();
             throwIfShutdownLocked();
@@ -151,11 +152,10 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
         }
 
         try {
-            mWindowManager.syncInputTransactions();
+            mWindowManager.syncInputTransactions(waitForAnimations);
         } catch (RemoteException e) {
         }
     }
-
 
     @Override
     public boolean setRotation(int rotation) {
