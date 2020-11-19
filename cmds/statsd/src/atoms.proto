@@ -42,6 +42,7 @@ import "frameworks/base/core/proto/android/server/job/enums.proto";
 import "frameworks/base/core/proto/android/server/location/enums.proto";
 import "frameworks/base/core/proto/android/service/procstats_enum.proto";
 import "frameworks/base/core/proto/android/service/usb.proto";
+import "frameworks/base/core/proto/android/stats/camera/camera.proto";
 import "frameworks/base/core/proto/android/stats/connectivity/network_stack.proto";
 import "frameworks/base/core/proto/android/stats/connectivity/tethering.proto";
 import "frameworks/base/core/proto/android/stats/dnsresolver/dns_resolver.proto";
@@ -9950,10 +9951,12 @@ message DisplayJankReported {
  *   frameworks/base/services/core/java/com/android/server/camera/CameraServiceProxy.java
  */
 message CameraActionEvent {
-    // Camera session duration
+    // Camera session duration in milliseconds if action is SESSION.
+    // 0 if action is OPEN or CLOSE.
     optional int64 duration_millis = 1;
 
-    // Camera API level used
+    // Camera API level used.
+    // 1 for camera1 API, and 2 for camera2 API.
     optional int32 api_level = 2;
 
     // Name of client package
@@ -9967,6 +9970,56 @@ message CameraActionEvent {
         EXTERNAL = 3;
     }
     optional Facing facing = 4;
+
+    // Camera ID
+    optional string camera_id = 5;
+
+    // Camera action type
+    enum Action {
+        UNKNOWN_ACTION = 0;
+        OPEN = 1;
+        CLOSE = 2;
+        SESSION = 3;
+    }
+    optional Action action = 6;
+
+    // Whether the client is accessing camera using ndk
+    optional bool is_ndk = 7;
+
+    // Action OPEN: Open latency
+    // Action CLOSE: Close latency
+    // Action SESSION: Camera session creation duration.
+    //                 If this entry is reusing an existing session, the value is -1.
+    optional int32 latency_millis = 8;
+
+    // session type: 0 for normal mode, 1 for constrained high speed mode
+    optional int32 operating_mode = 9;
+
+    // If actioh is SESSION: number of internal reconfigurations
+    // Else: 0
+    optional int32 internal_reconfig = 10;
+
+    // Number of requests for this capture session. Only applicable to SESSION
+    // action.
+    optional int64 request_count = 11;
+    // Number of result errors. Only applicable to SESSION action.
+    optional int64 result_error_count = 12;
+    // Whether the device runs into error state.
+    optional bool device_error = 13;
+
+    // If action is SESSION: Stream states
+    // Else: stream_count = 0
+    optional int32 stream_count = 14;
+    optional android.stats.camera.CameraStreamProto stream_1 = 15
+    [(android.os.statsd.log_mode) = MODE_BYTES];
+    optional android.stats.camera.CameraStreamProto stream_2 = 16
+    [(android.os.statsd.log_mode) = MODE_BYTES];
+    optional android.stats.camera.CameraStreamProto stream_3 = 17
+    [(android.os.statsd.log_mode) = MODE_BYTES];
+    optional android.stats.camera.CameraStreamProto stream_4 = 18
+    [(android.os.statsd.log_mode) = MODE_BYTES];
+    optional android.stats.camera.CameraStreamProto stream_5 = 19
+    [(android.os.statsd.log_mode) = MODE_BYTES];
 }
 
 /**

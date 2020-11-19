@@ -22,6 +22,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.hardware.CameraSessionStats;
+import android.hardware.CameraStreamStats;
 import android.hardware.ICameraService;
 import android.hardware.ICameraServiceProxy;
 import android.media.AudioManager;
@@ -36,11 +38,13 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserManager;
+import android.stats.camera.nano.CameraStreamProto;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.framework.protobuf.nano.MessageNano;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.util.FrameworkStatsLog;
@@ -97,7 +101,10 @@ public class CameraServiceProxy extends SystemService
     @interface DeviceStateFlags {}
 
     // Maximum entries to keep in usage history before dumping out
-    private static final int MAX_USAGE_HISTORY = 100;
+    private static final int MAX_USAGE_HISTORY = 20;
+    // Number of stream statistics being dumped for each camera session
+    // Must be equal to number of CameraStreamProto in CameraActionEvent
+    private static final int MAX_STREAM_STATISTICS = 5;
 
     private final Context mContext;
     private final ServiceThread mHandlerThread;
@@ -123,7 +130,6 @@ public class CameraServiceProxy extends SystemService
     private final ArrayMap<String, CameraUsageEvent> mActiveCameraUsage = new ArrayMap<>();
     private final List<CameraUsageEvent> mCameraUsageHistory = new ArrayList<>();
 
-    private final MetricsLogger mLogger = new MetricsLogger();
     private static final String NFC_NOTIFICATION_PROP = "ro.camera.notify_nfc";
     private static final String NFC_SERVICE_BINDER_NAME = "nfc";
     private static final IBinder nfcInterfaceToken = new Binder();
@@ -137,27 +143,50 @@ public class CameraServiceProxy extends SystemService
      * Structure to track camera usage
      */
     private static class CameraUsageEvent {
+        public final String mCameraId;
         public final int mCameraFacing;
         public final String mClientName;
         public final int mAPILevel;
+        public final boolean mIsNdk;
+        public final int mAction;
+        public final int mLatencyMs;
+        public final int mOperatingMode;
 
         private boolean mCompleted;
+        public int mInternalReconfigure;
+        public long mRequestCount;
+        public long mResultErrorCount;
+        public boolean mDeviceError;
+        public List<CameraStreamStats> mStreamStats;
         private long mDurationOrStartTimeMs;  // Either start time, or duration once completed
 
-        public CameraUsageEvent(int facing, String clientName, int apiLevel) {
+        CameraUsageEvent(String cameraId, int facing, String clientName, int apiLevel,
+                boolean isNdk, int action, int latencyMs, int operatingMode) {
+            mCameraId = cameraId;
             mCameraFacing = facing;
             mClientName = clientName;
             mAPILevel = apiLevel;
             mDurationOrStartTimeMs = SystemClock.elapsedRealtime();
             mCompleted = false;
+            mIsNdk = isNdk;
+            mAction = action;
+            mLatencyMs = latencyMs;
+            mOperatingMode = operatingMode;
         }
 
-        public void markCompleted() {
+        public void markCompleted(int internalReconfigure, long requestCount,
+                long resultErrorCount, boolean deviceError,
+                List<CameraStreamStats>  streamStats) {
             if (mCompleted) {
                 return;
             }
             mCompleted = true;
             mDurationOrStartTimeMs = SystemClock.elapsedRealtime() - mDurationOrStartTimeMs;
+            mInternalReconfigure = internalReconfigure;
+            mRequestCount = requestCount;
+            mResultErrorCount = resultErrorCount;
+            mDeviceError = deviceError;
+            mStreamStats = streamStats;
             if (CameraServiceProxy.DEBUG) {
                 Slog.v(TAG, "A camera facing " + cameraFacingToString(mCameraFacing) +
                         " was in use by " + mClientName + " for " +
@@ -211,19 +240,22 @@ public class CameraServiceProxy extends SystemService
         }
 
         @Override
-        public void notifyCameraState(String cameraId, int newCameraState, int facing,
-                String clientName, int apiLevel) {
+        public void notifyCameraState(CameraSessionStats cameraState) {
             if (Binder.getCallingUid() != Process.CAMERASERVER_UID) {
                 Slog.e(TAG, "Calling UID: " + Binder.getCallingUid() + " doesn't match expected " +
                         " camera service UID!");
                 return;
             }
-            String state = cameraStateToString(newCameraState);
-            String facingStr = cameraFacingToString(facing);
-            if (DEBUG) Slog.v(TAG, "Camera " + cameraId + " facing " + facingStr + " state now " +
-                    state + " for client " + clientName + " API Level " + apiLevel);
+            String state = cameraStateToString(cameraState.getNewCameraState());
+            String facingStr = cameraFacingToString(cameraState.getFacing());
+            if (DEBUG) {
+                Slog.v(TAG, "Camera " + cameraState.getCameraId()
+                        + " facing " + facingStr + " state now " + state
+                        + " for client " + cameraState.getClientName()
+                        + " API Level " + cameraState.getApiLevel());
+            }
 
-            updateActivityCount(cameraId, newCameraState, facing, clientName, apiLevel);
+            updateActivityCount(cameraState);
         }
     };
 
@@ -385,20 +417,80 @@ public class CameraServiceProxy extends SystemService
         private void logCameraUsageEvent(CameraUsageEvent e) {
             int facing = FrameworkStatsLog.CAMERA_ACTION_EVENT__FACING__UNKNOWN;
             switch(e.mCameraFacing) {
-                case ICameraServiceProxy.CAMERA_FACING_BACK:
+                case CameraSessionStats.CAMERA_FACING_BACK:
                     facing = FrameworkStatsLog.CAMERA_ACTION_EVENT__FACING__BACK;
                     break;
-                case ICameraServiceProxy.CAMERA_FACING_FRONT:
+                case CameraSessionStats.CAMERA_FACING_FRONT:
                     facing = FrameworkStatsLog.CAMERA_ACTION_EVENT__FACING__FRONT;
                     break;
-                case ICameraServiceProxy.CAMERA_FACING_EXTERNAL:
+                case CameraSessionStats.CAMERA_FACING_EXTERNAL:
                     facing = FrameworkStatsLog.CAMERA_ACTION_EVENT__FACING__EXTERNAL;
                     break;
                 default:
                     Slog.w(TAG, "Unknown camera facing: " + e.mCameraFacing);
             }
+
+            int streamCount = 0;
+            if (e.mStreamStats != null) {
+                streamCount = e.mStreamStats.size();
+            }
+            if (CameraServiceProxy.DEBUG) {
+                Slog.v(TAG, "CAMERA_ACTION_EVENT: action " + e.mAction
+                        + " clientName " + e.mClientName
+                        + ", duration " + e.getDuration()
+                        + ", APILevel " + e.mAPILevel
+                        + ", cameraId " + e.mCameraId
+                        + ", facing " + facing
+                        + ", isNdk " + e.mIsNdk
+                        + ", latencyMs " + e.mLatencyMs
+                        + ", operatingMode " + e.mOperatingMode
+                        + ", internalReconfigure " + e.mInternalReconfigure
+                        + ", requestCount " + e.mRequestCount
+                        + ", resultErrorCount " + e.mResultErrorCount
+                        + ", deviceError " + e.mDeviceError
+                        + ", streamCount is " + streamCount);
+            }
+            // Convert from CameraStreamStats to CameraStreamProto
+            CameraStreamProto[] streamProtos = new CameraStreamProto[MAX_STREAM_STATISTICS];
+            for (int i = 0; i < MAX_STREAM_STATISTICS; i++) {
+                streamProtos[i] = new CameraStreamProto();
+                if (i < streamCount) {
+                    CameraStreamStats streamStats = e.mStreamStats.get(i);
+                    streamProtos[i].width = streamStats.getWidth();
+                    streamProtos[i].height = streamStats.getHeight();
+                    streamProtos[i].format = streamStats.getFormat();
+                    streamProtos[i].dataSpace = streamStats.getDataSpace();
+                    streamProtos[i].usage = streamStats.getUsage();
+                    streamProtos[i].requestCount = streamStats.getRequestCount();
+                    streamProtos[i].errorCount = streamStats.getErrorCount();
+                    streamProtos[i].firstCaptureLatencyMillis = streamStats.getStartLatencyMs();
+                    streamProtos[i].maxHalBuffers = streamStats.getMaxHalBuffers();
+                    streamProtos[i].maxAppBuffers = streamStats.getMaxAppBuffers();
+
+                    if (CameraServiceProxy.DEBUG) {
+                        Slog.v(TAG, "Stream " + i + ": width " + streamProtos[i].width
+                                + ", height " + streamProtos[i].height
+                                + ", format " + streamProtos[i].format
+                                + ", dataSpace " + streamProtos[i].dataSpace
+                                + ", usage " + streamProtos[i].usage
+                                + ", requestCount " + streamProtos[i].requestCount
+                                + ", errorCount " + streamProtos[i].errorCount
+                                + ", firstCaptureLatencyMillis "
+                                + streamProtos[i].firstCaptureLatencyMillis
+                                + ", maxHalBuffers " + streamProtos[i].maxHalBuffers
+                                + ", maxAppBuffers " + streamProtos[i].maxAppBuffers);
+                    }
+                }
+            }
             FrameworkStatsLog.write(FrameworkStatsLog.CAMERA_ACTION_EVENT, e.getDuration(),
-                    e.mAPILevel, e.mClientName, facing);
+                    e.mAPILevel, e.mClientName, facing, e.mCameraId, e.mAction, e.mIsNdk,
+                    e.mLatencyMs, e.mOperatingMode, e.mInternalReconfigure,
+                    e.mRequestCount, e.mResultErrorCount, e.mDeviceError,
+                    streamCount, MessageNano.toByteArray(streamProtos[0]),
+                    MessageNano.toByteArray(streamProtos[1]),
+                    MessageNano.toByteArray(streamProtos[2]),
+                    MessageNano.toByteArray(streamProtos[3]),
+                    MessageNano.toByteArray(streamProtos[4]));
         }
     }
 
@@ -410,35 +502,6 @@ public class CameraServiceProxy extends SystemService
         synchronized(mLock) {
             // Randomize order of events so that it's not meaningful
             Collections.shuffle(mCameraUsageHistory);
-            for (CameraUsageEvent e : mCameraUsageHistory) {
-                if (DEBUG) {
-                    Slog.v(TAG, "Camera: " + e.mClientName + " used a camera facing " +
-                            cameraFacingToString(e.mCameraFacing) + " for " +
-                            e.getDuration() + " ms");
-                }
-                int subtype = 0;
-                switch(e.mCameraFacing) {
-                    case ICameraServiceProxy.CAMERA_FACING_BACK:
-                        subtype = MetricsEvent.CAMERA_BACK_USED;
-                        break;
-                    case ICameraServiceProxy.CAMERA_FACING_FRONT:
-                        subtype = MetricsEvent.CAMERA_FRONT_USED;
-                        break;
-                    case ICameraServiceProxy.CAMERA_FACING_EXTERNAL:
-                        subtype = MetricsEvent.CAMERA_EXTERNAL_USED;
-                        break;
-                    default:
-                        continue;
-                }
-                LogMaker l = new LogMaker(MetricsEvent.ACTION_CAMERA_EVENT)
-                        .setType(MetricsEvent.TYPE_ACTION)
-                        .setSubtype(subtype)
-                        .setLatency(e.getDuration())
-                        .addTaggedData(MetricsEvent.FIELD_CAMERA_API_LEVEL, e.mAPILevel)
-                        .setPackageName(e.mClientName);
-                mLogger.write(l);
-            }
-
             mLogWriterService.execute(new EventWriterTask(
                         new ArrayList<CameraUsageEvent>(mCameraUsageHistory)));
 
@@ -569,13 +632,25 @@ public class CameraServiceProxy extends SystemService
         return true;
     }
 
-    private void updateActivityCount(String cameraId, int newCameraState, int facing,
-            String clientName, int apiLevel) {
+    private void updateActivityCount(CameraSessionStats cameraState) {
+        String cameraId = cameraState.getCameraId();
+        int newCameraState = cameraState.getNewCameraState();
+        int facing = cameraState.getFacing();
+        String clientName = cameraState.getClientName();
+        int apiLevel = cameraState.getApiLevel();
+        boolean isNdk = cameraState.isNdk();
+        int sessionType = cameraState.getSessionType();
+        int internalReconfigureCount = cameraState.getInternalReconfigureCount();
+        int latencyMs = cameraState.getLatencyMs();
+        long requestCount = cameraState.getRequestCount();
+        long resultErrorCount = cameraState.getResultErrorCount();
+        boolean deviceError = cameraState.getDeviceErrorFlag();
+        List<CameraStreamStats> streamStats = cameraState.getStreamStats();
         synchronized(mLock) {
             // Update active camera list and notify NFC if necessary
             boolean wasEmpty = mActiveCameraUsage.isEmpty();
             switch (newCameraState) {
-                case ICameraServiceProxy.CAMERA_STATE_OPEN:
+                case CameraSessionStats.CAMERA_STATE_OPEN:
                     // Notify the audio subsystem about the facing of the most-recently opened
                     // camera This can be used to select the best audio tuning in case video
                     // recording with that camera will happen.  Since only open events are used, if
@@ -584,13 +659,18 @@ public class CameraServiceProxy extends SystemService
                     AudioManager audioManager = getContext().getSystemService(AudioManager.class);
                     if (audioManager != null) {
                         // Map external to front for audio tuning purposes
-                        String facingStr = (facing == ICameraServiceProxy.CAMERA_FACING_BACK) ?
+                        String facingStr = (facing == CameraSessionStats.CAMERA_FACING_BACK) ?
                                 "back" : "front";
                         String facingParameter = "cameraFacing=" + facingStr;
                         audioManager.setParameters(facingParameter);
                     }
+                    CameraUsageEvent openEvent = new CameraUsageEvent(
+                            cameraId, facing, clientName, apiLevel, isNdk,
+                            FrameworkStatsLog.CAMERA_ACTION_EVENT__ACTION__OPEN,
+                            latencyMs, sessionType);
+                    mCameraUsageHistory.add(openEvent);
                     break;
-                case ICameraServiceProxy.CAMERA_STATE_ACTIVE:
+                case CameraSessionStats.CAMERA_STATE_ACTIVE:
                     // Check current active camera IDs to see if this package is already talking to
                     // some camera
                     boolean alreadyActivePackage = false;
@@ -609,40 +689,55 @@ public class CameraServiceProxy extends SystemService
                     }
 
                     // Update activity events
-                    CameraUsageEvent newEvent = new CameraUsageEvent(facing, clientName, apiLevel);
+                    CameraUsageEvent newEvent = new CameraUsageEvent(
+                            cameraId, facing, clientName, apiLevel, isNdk,
+                            FrameworkStatsLog.CAMERA_ACTION_EVENT__ACTION__SESSION,
+                            latencyMs, sessionType);
                     CameraUsageEvent oldEvent = mActiveCameraUsage.put(cameraId, newEvent);
                     if (oldEvent != null) {
                         Slog.w(TAG, "Camera " + cameraId + " was already marked as active");
-                        oldEvent.markCompleted();
+                        oldEvent.markCompleted(/*internalReconfigure*/0, /*requestCount*/0,
+                                /*resultErrorCount*/0, /*deviceError*/false, streamStats);
                         mCameraUsageHistory.add(oldEvent);
                     }
                     break;
-                case ICameraServiceProxy.CAMERA_STATE_IDLE:
-                case ICameraServiceProxy.CAMERA_STATE_CLOSED:
+                case CameraSessionStats.CAMERA_STATE_IDLE:
+                case CameraSessionStats.CAMERA_STATE_CLOSED:
                     CameraUsageEvent doneEvent = mActiveCameraUsage.remove(cameraId);
-                    if (doneEvent == null) break;
+                    if (doneEvent != null) {
 
-                    doneEvent.markCompleted();
-                    mCameraUsageHistory.add(doneEvent);
-                    if (mCameraUsageHistory.size() > MAX_USAGE_HISTORY) {
-                        dumpUsageEvents();
-                    }
+                        doneEvent.markCompleted(internalReconfigureCount, requestCount,
+                                resultErrorCount, deviceError, streamStats);
+                        mCameraUsageHistory.add(doneEvent);
 
-                    // Check current active camera IDs to see if this package is still talking to
-                    // some camera
-                    boolean stillActivePackage = false;
-                    for (int i = 0; i < mActiveCameraUsage.size(); i++) {
-                        if (mActiveCameraUsage.valueAt(i).mClientName.equals(clientName)) {
-                            stillActivePackage = true;
-                            break;
+                        // Check current active camera IDs to see if this package is still
+                        // talking to some camera
+                        boolean stillActivePackage = false;
+                        for (int i = 0; i < mActiveCameraUsage.size(); i++) {
+                            if (mActiveCameraUsage.valueAt(i).mClientName.equals(clientName)) {
+                                stillActivePackage = true;
+                                break;
+                            }
+                        }
+                        // If not longer active, notify window manager about this package being done
+                        // with camera
+                        if (!stillActivePackage) {
+                            WindowManagerInternal wmi =
+                                    LocalServices.getService(WindowManagerInternal.class);
+                            wmi.removeNonHighRefreshRatePackage(clientName);
                         }
                     }
-                    // If not longer active, notify window manager about this package being done
-                    // with camera
-                    if (!stillActivePackage) {
-                        WindowManagerInternal wmi =
-                                LocalServices.getService(WindowManagerInternal.class);
-                        wmi.removeNonHighRefreshRatePackage(clientName);
+
+                    if (newCameraState == CameraSessionStats.CAMERA_STATE_CLOSED) {
+                        CameraUsageEvent closeEvent = new CameraUsageEvent(
+                                cameraId, facing, clientName, apiLevel, isNdk,
+                                FrameworkStatsLog.CAMERA_ACTION_EVENT__ACTION__CLOSE,
+                                latencyMs, sessionType);
+                        mCameraUsageHistory.add(closeEvent);
+                    }
+
+                    if (mCameraUsageHistory.size() > MAX_USAGE_HISTORY) {
+                        dumpUsageEvents();
                     }
 
                     break;
@@ -683,10 +778,10 @@ public class CameraServiceProxy extends SystemService
 
     private static String cameraStateToString(int newCameraState) {
         switch (newCameraState) {
-            case ICameraServiceProxy.CAMERA_STATE_OPEN: return "CAMERA_STATE_OPEN";
-            case ICameraServiceProxy.CAMERA_STATE_ACTIVE: return "CAMERA_STATE_ACTIVE";
-            case ICameraServiceProxy.CAMERA_STATE_IDLE: return "CAMERA_STATE_IDLE";
-            case ICameraServiceProxy.CAMERA_STATE_CLOSED: return "CAMERA_STATE_CLOSED";
+            case CameraSessionStats.CAMERA_STATE_OPEN: return "CAMERA_STATE_OPEN";
+            case CameraSessionStats.CAMERA_STATE_ACTIVE: return "CAMERA_STATE_ACTIVE";
+            case CameraSessionStats.CAMERA_STATE_IDLE: return "CAMERA_STATE_IDLE";
+            case CameraSessionStats.CAMERA_STATE_CLOSED: return "CAMERA_STATE_CLOSED";
             default: break;
         }
         return "CAMERA_STATE_UNKNOWN";
@@ -694,9 +789,9 @@ public class CameraServiceProxy extends SystemService
 
     private static String cameraFacingToString(int cameraFacing) {
         switch (cameraFacing) {
-            case ICameraServiceProxy.CAMERA_FACING_BACK: return "CAMERA_FACING_BACK";
-            case ICameraServiceProxy.CAMERA_FACING_FRONT: return "CAMERA_FACING_FRONT";
-            case ICameraServiceProxy.CAMERA_FACING_EXTERNAL: return "CAMERA_FACING_EXTERNAL";
+            case CameraSessionStats.CAMERA_FACING_BACK: return "CAMERA_FACING_BACK";
+            case CameraSessionStats.CAMERA_FACING_FRONT: return "CAMERA_FACING_FRONT";
+            case CameraSessionStats.CAMERA_FACING_EXTERNAL: return "CAMERA_FACING_EXTERNAL";
             default: break;
         }
         return "CAMERA_FACING_UNKNOWN";
