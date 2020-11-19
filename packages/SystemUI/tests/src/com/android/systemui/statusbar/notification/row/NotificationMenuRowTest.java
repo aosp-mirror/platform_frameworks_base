@@ -15,6 +15,7 @@
 package com.android.systemui.statusbar.notification.row;
 
 import static android.provider.Settings.Secure.SHOW_NOTIFICATION_SNOOZE;
+import static android.provider.Settings.Global.SHOW_NEW_NOTIF_DISMISS;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
@@ -96,6 +97,7 @@ public class NotificationMenuRowTest extends LeakCheckedTest {
     @Test
     public void testNoAppOpsInSlowSwipe() {
         Settings.Secure.putInt(mContext.getContentResolver(), SHOW_NOTIFICATION_SNOOZE, 0);
+        Settings.Global.putInt(mContext.getContentResolver(), SHOW_NEW_NOTIF_DISMISS, 0);
 
         NotificationMenuRow row = new NotificationMenuRow(mContext, mPeopleNotificationIdentifier);
         row.createMenu(mRow, null);
@@ -108,6 +110,7 @@ public class NotificationMenuRowTest extends LeakCheckedTest {
     @Test
     public void testNoSnoozeInSlowSwipe() {
         Settings.Secure.putInt(mContext.getContentResolver(), SHOW_NOTIFICATION_SNOOZE, 0);
+        Settings.Global.putInt(mContext.getContentResolver(), SHOW_NEW_NOTIF_DISMISS, 0);
 
         NotificationMenuRow row = new NotificationMenuRow(mContext, mPeopleNotificationIdentifier);
         row.createMenu(mRow, null);
@@ -120,6 +123,7 @@ public class NotificationMenuRowTest extends LeakCheckedTest {
     @Test
     public void testSnoozeInSlowSwipe() {
         Settings.Secure.putInt(mContext.getContentResolver(), SHOW_NOTIFICATION_SNOOZE, 1);
+        Settings.Global.putInt(mContext.getContentResolver(), SHOW_NEW_NOTIF_DISMISS, 0);
 
         NotificationMenuRow row = new NotificationMenuRow(mContext, mPeopleNotificationIdentifier);
         row.createMenu(mRow, null);
@@ -127,6 +131,19 @@ public class NotificationMenuRowTest extends LeakCheckedTest {
         ViewGroup container = (ViewGroup) row.getMenuView();
         // one for snooze and one for noti blocking
         assertEquals(2, container.getChildCount());
+    }
+
+    @Test
+    public void testSlowSwipe_newDismiss() {
+        Settings.Secure.putInt(mContext.getContentResolver(), SHOW_NOTIFICATION_SNOOZE, 1);
+        Settings.Global.putInt(mContext.getContentResolver(), SHOW_NEW_NOTIF_DISMISS, 1);
+
+        NotificationMenuRow row = new NotificationMenuRow(mContext, mPeopleNotificationIdentifier);
+        row.createMenu(mRow, null);
+
+        ViewGroup container = (ViewGroup) row.getMenuView();
+        // Clear menu
+        assertEquals(0, container.getChildCount());
     }
 
     @Test
