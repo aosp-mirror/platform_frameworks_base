@@ -52,7 +52,7 @@ import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.UserInfoController;
 import com.android.systemui.tracing.ProtoTracer;
 import com.android.systemui.tracing.nano.SystemUiTraceProto;
-import com.android.wm.shell.ShellDump;
+import com.android.wm.shell.ShellCommandHandler;
 import com.android.wm.shell.apppairs.AppPairs;
 import com.android.wm.shell.hidedisplaycutout.HideDisplayCutout;
 import com.android.wm.shell.nano.WmShellTraceProto;
@@ -98,13 +98,14 @@ public final class WMShell extends SystemUI
     private final Optional<OneHanded> mOneHandedOptional;
     private final Optional<HideDisplayCutout> mHideDisplayCutoutOptional;
     private final ProtoTracer mProtoTracer;
-    private final Optional<ShellDump> mShellDump;
+    private final Optional<ShellCommandHandler> mShellCommandHandler;
     private final Optional<AppPairs> mAppPairsOptional;
 
     private boolean mIsSysUiStateValid;
     private KeyguardUpdateMonitorCallback mSplitScreenKeyguardCallback;
     private KeyguardUpdateMonitorCallback mPipKeyguardCallback;
     private KeyguardUpdateMonitorCallback mOneHandedKeyguardCallback;
+    private KeyguardUpdateMonitorCallback mAppPairsKeyguardCallback;
 
     @Inject
     public WMShell(Context context, CommandQueue commandQueue,
@@ -118,7 +119,7 @@ public final class WMShell extends SystemUI
             Optional<OneHanded> oneHandedOptional,
             Optional<HideDisplayCutout> hideDisplayCutoutOptional,
             ProtoTracer protoTracer,
-            Optional<ShellDump> shellDump,
+            Optional<ShellCommandHandler> shellCommandHandler,
             Optional<AppPairs> appPairsOptional) {
         super(context);
         mCommandQueue = commandQueue;
@@ -133,7 +134,7 @@ public final class WMShell extends SystemUI
         mHideDisplayCutoutOptional = hideDisplayCutoutOptional;
         mProtoTracer = protoTracer;
         mProtoTracer.add(this);
-        mShellDump = shellDump;
+        mShellCommandHandler = shellCommandHandler;
         mAppPairsOptional = appPairsOptional;
     }
 
@@ -144,6 +145,7 @@ public final class WMShell extends SystemUI
         mSplitScreenOptional.ifPresent(this::initSplitScreen);
         mOneHandedOptional.ifPresent(this::initOneHanded);
         mHideDisplayCutoutOptional.ifPresent(this::initHideDisplayCutout);
+        mAppPairsOptional.ifPresent(this::initAppPairs);
     }
 
     @VisibleForTesting
@@ -292,6 +294,16 @@ public final class WMShell extends SystemUI
         });
     }
 
+    void initAppPairs(AppPairs appPairs) {
+        mAppPairsKeyguardCallback = new KeyguardUpdateMonitorCallback() {
+            @Override
+            public void onKeyguardVisibilityChanged(boolean showing) {
+                appPairs.onKeyguardVisibilityChanged(showing);
+            }
+        };
+        mKeyguardUpdateMonitor.registerCallback(mAppPairsKeyguardCallback);
+    }
+
     @Override
     public void writeToProto(SystemUiTraceProto proto) {
         if (proto.wmShell == null) {
@@ -304,11 +316,17 @@ public final class WMShell extends SystemUI
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         // Handle commands if provided
+        if (mShellCommandHandler.isPresent()
+                && mShellCommandHandler.get().handleCommand(args, pw)) {
+            return;
+        }
+        // Handle logging commands if provided
         if (handleLoggingCommand(args, pw)) {
             return;
         }
         // Dump WMShell stuff here if no commands were handled
-        mShellDump.ifPresent((shellDump) -> shellDump.dump(pw));
+        mShellCommandHandler.ifPresent(
+                shellCommandHandler -> shellCommandHandler.dump(pw));
     }
 
     @Override
@@ -337,21 +355,6 @@ public final class WMShell extends SystemUI
                     if (result == 0) {
                         pw.println("Stopping logging on groups: " + Arrays.toString(groups));
                     }
-                    return true;
-                }
-
-                case "pair": {
-                    String[] groups = Arrays.copyOfRange(args, i + 1, args.length);
-                    final int taskId1 = new Integer(groups[0]);
-                    final int taskId2 = new Integer(groups[1]);
-                    mAppPairsOptional.ifPresent(appPairs -> appPairs.pair(taskId1, taskId2));
-                    return true;
-                }
-
-                case "unpair": {
-                    String[] groups = Arrays.copyOfRange(args, i + 1, args.length);
-                    final int taskId = new Integer(groups[0]);
-                    mAppPairsOptional.ifPresent(appPairs -> appPairs.unpair(taskId));
                     return true;
                 }
             }

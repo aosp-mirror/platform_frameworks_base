@@ -77,7 +77,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.PermissionChecker;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -96,6 +95,7 @@ import android.content.pm.permission.SplitPermissionInfoParcelable;
 import android.metrics.LogMaker;
 import android.os.Binder;
 import android.os.Build;
+import android.os.Debug;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
@@ -107,7 +107,6 @@ import android.os.ServiceManager;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.os.UserManagerInternal;
 import android.os.storage.StorageManager;
 import android.permission.IOnPermissionsChangeListener;
 import android.permission.IPermissionManager;
@@ -147,6 +146,7 @@ import com.android.server.pm.ApexManager;
 import com.android.server.pm.PackageManagerServiceUtils;
 import com.android.server.pm.PackageSetting;
 import com.android.server.pm.SharedUserSetting;
+import com.android.server.pm.UserManagerInternal;
 import com.android.server.pm.UserManagerService;
 import com.android.server.pm.parsing.PackageInfoUtils;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
@@ -754,7 +754,6 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         enforceCrossUserPermission(callingUid, userId,
                 true,  // requireFullPermission
                 false, // checkShell
-                false, // requirePermissionWhenSameUser
                 "getPermissionFlags");
 
         final AndroidPackage pkg = mPackageManagerInt.getPackage(packageName);
@@ -841,7 +840,6 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         enforceCrossUserPermission(callingUid, userId,
                 true,  // requireFullPermission
                 true,  // checkShell
-                false, // requirePermissionWhenSameUser
                 "updatePermissionFlags");
 
         if ((flagMask & FLAG_PERMISSION_POLICY_FIXED) != 0 && !overridePolicy) {
@@ -951,7 +949,6 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         enforceCrossUserPermission(callingUid, userId,
                 true,  // requireFullPermission
                 true,  // checkShell
-                false, // requirePermissionWhenSameUser
                 "updatePermissionFlagsForAllApps");
 
         // Only the system can change system fixed flags.
@@ -1555,7 +1552,6 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         enforceCrossUserPermission(callingUid, userId,
                 true,  // requireFullPermission
                 true,  // checkShell
-                false, // requirePermissionWhenSameUser
                 "grantRuntimePermission");
 
         final AndroidPackage pkg = mPackageManagerInt.getPackage(packageName);
@@ -1722,7 +1718,6 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         enforceCrossUserPermission(callingUid, userId,
                 true,  // requireFullPermission
                 true,  // checkShell
-                false, // requirePermissionWhenSameUser
                 "revokeRuntimePermission");
 
         final AndroidPackage pkg = mPackageManagerInt.getPackage(packageName);
@@ -4494,25 +4489,22 @@ public class PermissionManagerService extends IPermissionManager.Stub {
     }
 
     /**
-     * Checks if the request is from the system or an app that has INTERACT_ACROSS_USERS
-     * or INTERACT_ACROSS_USERS_FULL permissions, if the userid is not for the caller.
+     * Enforces the request is from the system or an app that has INTERACT_ACROSS_USERS
+     * or INTERACT_ACROSS_USERS_FULL permissions, if the {@code userId} is not for the caller.
+     *
      * @param checkShell whether to prevent shell from access if there's a debugging restriction
      * @param message the message to log on security exception
      */
     private void enforceCrossUserPermission(int callingUid, @UserIdInt int userId,
-            boolean requireFullPermission, boolean checkShell,
-            boolean requirePermissionWhenSameUser, String message) {
+            boolean requireFullPermission, boolean checkShell, @Nullable String message) {
         if (userId < 0) {
             throw new IllegalArgumentException("Invalid userId " + userId);
         }
         if (checkShell) {
-            PackageManagerServiceUtils.enforceShellRestriction(mUserManagerInt,
-                    UserManager.DISALLOW_DEBUGGING_FEATURES, callingUid, userId);
+            enforceShellRestriction(UserManager.DISALLOW_DEBUGGING_FEATURES, callingUid, userId);
         }
         final int callingUserId = UserHandle.getUserId(callingUid);
-        if (hasCrossUserPermission(
-                callingUid, callingUserId, userId, requireFullPermission,
-                requirePermissionWhenSameUser)) {
+        if (checkCrossUserPermission(callingUid, callingUserId, userId, requireFullPermission)) {
             return;
         }
         String errorMessage = buildInvalidCrossUserPermissionMessage(
@@ -4522,82 +4514,45 @@ public class PermissionManagerService extends IPermissionManager.Stub {
     }
 
     /**
-     * Checks if the request is from the system or an app that has the appropriate cross-user
-     * permissions defined as follows:
-     * <ul>
-     * <li>INTERACT_ACROSS_USERS_FULL if {@code requireFullPermission} is true.</li>
-     * <li>INTERACT_ACROSS_USERS if the given {@userId} is in a different profile group
-     * to the caller.</li>
-     * <li>Otherwise, INTERACT_ACROSS_PROFILES if the given {@userId} is in the same profile group
-     * as the caller.</li>
-     * </ul>
-     *
-     * @param checkShell whether to prevent shell from access if there's a debugging restriction
-     * @param message the message to log on security exception
+     *  Enforces that if the caller is shell, it does not have the provided user restriction.
      */
-    private void enforceCrossUserOrProfilePermission(int callingUid, @UserIdInt int userId,
-            boolean requireFullPermission, boolean checkShell,
-            String message) {
-        if (userId < 0) {
-            throw new IllegalArgumentException("Invalid userId " + userId);
+    private void enforceShellRestriction(@NonNull String restriction, int callingUid,
+            @UserIdInt int userId) {
+        if (callingUid == Process.SHELL_UID) {
+            if (userId >= 0 && mUserManagerInt.hasUserRestriction(restriction, userId)) {
+                throw new SecurityException("Shell does not have permission to access user "
+                        + userId);
+            } else if (userId < 0) {
+                Slog.e(LOG_TAG, "Unable to check shell permission for user "
+                        + userId + "\n\t" + Debug.getCallers(3));
+            }
         }
-        if (checkShell) {
-            PackageManagerServiceUtils.enforceShellRestriction(mUserManagerInt,
-                    UserManager.DISALLOW_DEBUGGING_FEATURES, callingUid, userId);
-        }
-        final int callingUserId = UserHandle.getUserId(callingUid);
-        if (hasCrossUserPermission(callingUid, callingUserId, userId, requireFullPermission,
-                /*requirePermissionWhenSameUser= */ false)) {
-            return;
-        }
-        final boolean isSameProfileGroup = isSameProfileGroup(callingUserId, userId);
-        if (isSameProfileGroup && PermissionChecker.checkPermissionForPreflight(
-                mContext,
-                android.Manifest.permission.INTERACT_ACROSS_PROFILES,
-                PermissionChecker.PID_UNKNOWN,
-                callingUid,
-                mPackageManagerInt.getPackage(callingUid).getPackageName())
-                == PermissionChecker.PERMISSION_GRANTED) {
-            return;
-        }
-        String errorMessage = buildInvalidCrossUserOrProfilePermissionMessage(
-                callingUid, userId, message, requireFullPermission, isSameProfileGroup);
-        Slog.w(TAG, errorMessage);
-        throw new SecurityException(errorMessage);
     }
 
-    private boolean hasCrossUserPermission(
-            int callingUid, int callingUserId, int userId, boolean requireFullPermission,
-            boolean requirePermissionWhenSameUser) {
-        if (!requirePermissionWhenSameUser && userId == callingUserId) {
+    private boolean checkCrossUserPermission(int callingUid, @UserIdInt int callingUserId,
+            @UserIdInt int userId, boolean requireFullPermission) {
+        if (userId == callingUserId) {
             return true;
         }
         if (callingUid == Process.SYSTEM_UID || callingUid == Process.ROOT_UID) {
             return true;
         }
         if (requireFullPermission) {
-            return hasPermission(Manifest.permission.INTERACT_ACROSS_USERS_FULL);
+            return checkCallingOrSelfPermission(
+                    android.Manifest.permission.INTERACT_ACROSS_USERS_FULL);
         }
-        return hasPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL)
-                || hasPermission(Manifest.permission.INTERACT_ACROSS_USERS);
+        return checkCallingOrSelfPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL)
+                || checkCallingOrSelfPermission(android.Manifest.permission.INTERACT_ACROSS_USERS);
     }
 
-    private boolean hasPermission(String permission) {
+    private boolean checkCallingOrSelfPermission(String permission) {
         return mContext.checkCallingOrSelfPermission(permission)
                 == PackageManager.PERMISSION_GRANTED;
     }
 
-    private boolean isSameProfileGroup(@UserIdInt int callerUserId, @UserIdInt int userId) {
-        final long identity = Binder.clearCallingIdentity();
-        try {
-            return UserManagerService.getInstance().isSameProfileGroup(callerUserId, userId);
-        } finally {
-            Binder.restoreCallingIdentity(identity);
-        }
-    }
-
+    @NonNull
     private static String buildInvalidCrossUserPermissionMessage(int callingUid,
-            @UserIdInt int userId, String message, boolean requireFullPermission) {
+            @UserIdInt int userId, @Nullable String message, boolean requireFullPermission) {
         StringBuilder builder = new StringBuilder();
         if (message != null) {
             builder.append(message);
@@ -4613,31 +4568,6 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         }
         builder.append(" to access user ");
         builder.append(userId);
-        builder.append(".");
-        return builder.toString();
-    }
-
-    private static String buildInvalidCrossUserOrProfilePermissionMessage(int callingUid,
-            @UserIdInt int userId, String message, boolean requireFullPermission,
-            boolean isSameProfileGroup) {
-        StringBuilder builder = new StringBuilder();
-        if (message != null) {
-            builder.append(message);
-            builder.append(": ");
-        }
-        builder.append("UID ");
-        builder.append(callingUid);
-        builder.append(" requires ");
-        builder.append(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL);
-        if (!requireFullPermission) {
-            builder.append(" or ");
-            builder.append(android.Manifest.permission.INTERACT_ACROSS_USERS);
-            if (isSameProfileGroup) {
-                builder.append(" or ");
-                builder.append(android.Manifest.permission.INTERACT_ACROSS_PROFILES);
-            }
-        }
-        builder.append(" to access user ");
         builder.append(".");
         return builder.toString();
     }
@@ -5139,30 +5069,6 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         public void resetAllRuntimePermissions(@UserIdInt int userId) {
             Preconditions.checkArgumentNonNegative(userId, "userId");
             mPackageManagerInt.forEachPackage(pkg -> resetRuntimePermissionsInternal(pkg, userId));
-        }
-        @Override
-        public void enforceCrossUserPermission(int callingUid, int userId,
-                boolean requireFullPermission, boolean checkShell, String message) {
-            PermissionManagerService.this.enforceCrossUserPermission(callingUid, userId,
-                    requireFullPermission, checkShell, false, message);
-        }
-        @Override
-        public void enforceCrossUserPermission(int callingUid, int userId,
-                boolean requireFullPermission, boolean checkShell,
-                boolean requirePermissionWhenSameUser, String message) {
-            PermissionManagerService.this.enforceCrossUserPermission(callingUid, userId,
-                    requireFullPermission, checkShell, requirePermissionWhenSameUser, message);
-        }
-
-        @Override
-        public void enforceCrossUserOrProfilePermission(int callingUid, int userId,
-                boolean requireFullPermission, boolean checkShell, String message) {
-            PermissionManagerService.this.enforceCrossUserOrProfilePermission(
-                    callingUid,
-                    userId,
-                    requireFullPermission,
-                    checkShell,
-                    message);
         }
 
         @Override

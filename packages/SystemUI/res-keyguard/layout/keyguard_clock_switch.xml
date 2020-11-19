@@ -67,20 +67,18 @@
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
         android:layout_alignParentTop="true"
-        android:layout_marginBottom="24dp"
         android:visibility="gone">
         <com.android.keyguard.AnimatableClockView
             android:id="@+id/animatable_clock_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:gravity="right"
             android:textSize="80dp"
             android:letterSpacing="0.02"
             android:lineSpacingMultiplier=".8"
             android:includeFontPadding="false"
             android:fontFamily="@font/clock"
             android:typeface="monospace"
-            android:format12Hour="hh\nmm"
-            android:format24Hour="HH\nmm"
             android:elegantTextHeight="false"
         />
     </FrameLayout>

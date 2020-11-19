@@ -20,17 +20,27 @@ import android.content.ComponentName
 
 const val IME_WINDOW_NAME = "InputMethod"
 const val PIP_WINDOW_NAME = "PipMenuActivity"
+const val SPLITSCREEN_PRIMARY_WINDOW_NAME = "SplitScreenActivity"
+const val SPLITSCREEN_SECONDARY_WINDOW_NAME = "SplitScreenSecondaryActivity"
 
-// Test App
+const val SYSTEM_UI_PACKAGE_NAME = "com.android.systemui"
 const val TEST_APP_PACKAGE_NAME = "com.android.wm.shell.flicker.testapp"
+
 // Test App > Pip Activity
 val TEST_APP_PIP_ACTIVITY_COMPONENT_NAME: ComponentName = ComponentName.createRelative(
         TEST_APP_PACKAGE_NAME, ".PipActivity")
 const val TEST_APP_PIP_ACTIVITY_LABEL = "PipApp"
 const val TEST_APP_PIP_ACTIVITY_WINDOW_NAME = "PipActivity"
+
 // Test App > Ime Activity
 val TEST_APP_IME_ACTIVITY_COMPONENT_NAME: ComponentName = ComponentName.createRelative(
         TEST_APP_PACKAGE_NAME, ".ImeActivity")
 const val TEST_APP_IME_ACTIVITY_LABEL = "ImeApp"
 
-const val SYSTEM_UI_PACKAGE_NAME = "com.android.systemui"
+// Test App > SplitScreen Activity
+val TEST_APP_SPLITSCREEN_PRIMARY_COMPONENT_NAME: ComponentName = ComponentName.createRelative(
+        TEST_APP_PACKAGE_NAME, ".$SPLITSCREEN_PRIMARY_WINDOW_NAME")
+val TEST_APP_SPLITSCREEN_SECONDARY_COMPONENT_NAME: ComponentName = ComponentName.createRelative(
+        TEST_APP_PACKAGE_NAME, ".$SPLITSCREEN_SECONDARY_WINDOW_NAME")
+const val TEST_APP_SPLITSCREEN_PRIMARY_LABEL = "SplitScreenPrimaryApp"
+const val TEST_APP_SPLITSCREEN_SECONDARY_LABEL = "SplitScreenSecondaryApp"

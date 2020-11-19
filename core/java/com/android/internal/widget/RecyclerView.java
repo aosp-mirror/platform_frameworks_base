@@ -2799,6 +2799,7 @@ public class RecyclerView extends ViewGroup implements ScrollingView, NestedScro
                 if (index < 0) {
                     Log.e(TAG, "Error processing scroll; pointer index for id "
                             + mScrollPointerId + " not found. Did any MotionEvents get skipped?");
+                    vtev.recycle();
                     return false;
                 }
 

@@ -16,7 +16,12 @@
 package com.android.internal.os;
 
 import android.os.BatteryStats;
+import android.os.Process;
+import android.os.UserHandle;
 import android.util.Log;
+import android.util.SparseArray;
+
+import java.util.List;
 
 /**
  * WiFi power calculator for when BatteryStats supports energy reporting
@@ -28,18 +33,65 @@ public class WifiPowerCalculator extends PowerCalculator {
     private final double mIdleCurrentMa;
     private final double mTxCurrentMa;
     private final double mRxCurrentMa;
+    private final PowerProfile mPowerProfile;
+    private final boolean mHasWifiPowerController;
     private double mTotalAppPowerDrain = 0;
     private long mTotalAppRunningTime = 0;
+    private WifiPowerEstimator mWifiPowerEstimator;
+    private boolean mHasWifiPowerReporting;
 
     public WifiPowerCalculator(PowerProfile profile) {
+        mPowerProfile = profile;
+
         mIdleCurrentMa = profile.getAveragePower(PowerProfile.POWER_WIFI_CONTROLLER_IDLE);
         mTxCurrentMa = profile.getAveragePower(PowerProfile.POWER_WIFI_CONTROLLER_TX);
         mRxCurrentMa = profile.getAveragePower(PowerProfile.POWER_WIFI_CONTROLLER_RX);
+
+        mHasWifiPowerController = mIdleCurrentMa != 0 && mTxCurrentMa != 0 && mRxCurrentMa != 0;
+        mWifiPowerEstimator = new WifiPowerEstimator(mPowerProfile);
+    }
+
+    /**
+     * We do per-app blaming of WiFi activity. If energy info is reported from the controller,
+     * then only the WiFi process gets blamed here since we normalize power calculations and
+     * assign all the power drain to apps. If energy info is not reported, we attribute the
+     * difference between total running time of WiFi for all apps and the actual running time
+     * of WiFi to the WiFi subsystem.
+     */
+    @Override
+    public void calculate(List<BatterySipper> sippers, BatteryStats batteryStats,
+            long rawRealtimeUs, long rawUptimeUs, int statsType, SparseArray<UserHandle> asUsers) {
+
+        // batteryStats.hasWifiActivityReporting can change if we get energy data at a later point,
+        // so always check this field.
+        mHasWifiPowerReporting = mHasWifiPowerController && batteryStats.hasWifiActivityReporting();
+
+        super.calculate(sippers, batteryStats, rawRealtimeUs, rawUptimeUs, statsType, asUsers);
+
+        BatterySipper bs = new BatterySipper(BatterySipper.DrainType.WIFI, null, 0);
+        calculateRemaining(bs, batteryStats, rawRealtimeUs, rawUptimeUs, statsType);
+
+        for (int i = sippers.size() - 1; i >= 0; i--) {
+            BatterySipper app = sippers.get(i);
+            if (app.getUid() == Process.WIFI_UID) {
+                if (DEBUG) Log.d(TAG, "WiFi adding sipper " + app + ": cpu=" + app.cpuTimeMs);
+                app.isAggregated = true;
+                bs.add(app);
+            }
+        }
+        if (bs.sumPower() > 0) {
+            sippers.add(bs);
+        }
     }
 
     @Override
-    public void calculateApp(BatterySipper app, BatteryStats.Uid u, long rawRealtimeUs,
-                             long rawUptimeUs, int statsType) {
+    protected void calculateApp(BatterySipper app, BatteryStats.Uid u, long rawRealtimeUs,
+            long rawUptimeUs, int statsType) {
+        if (!mHasWifiPowerReporting) {
+            mWifiPowerEstimator.calculateApp(app, u, rawRealtimeUs, rawUptimeUs, statsType);
+            return;
+        }
+
         final BatteryStats.ControllerActivityCounter counter = u.getWifiControllerActivity();
         if (counter == null) {
             return;
@@ -53,7 +105,7 @@ public class WifiPowerCalculator extends PowerCalculator {
 
         app.wifiPowerMah =
                 ((idleTime * mIdleCurrentMa) + (txTime * mTxCurrentMa) + (rxTime * mRxCurrentMa))
-                / (1000*60*60);
+                        / (1000 * 60 * 60);
         mTotalAppPowerDrain += app.wifiPowerMah;
 
         app.wifiRxPackets = u.getNetworkActivityPackets(BatteryStats.NETWORK_WIFI_RX_DATA,
@@ -67,13 +119,18 @@ public class WifiPowerCalculator extends PowerCalculator {
 
         if (DEBUG && app.wifiPowerMah != 0) {
             Log.d(TAG, "UID " + u.getUid() + ": idle=" + idleTime + "ms rx=" + rxTime + "ms tx=" +
-                    txTime + "ms power=" + BatteryStatsHelper.makemAh(app.wifiPowerMah));
+                    txTime + "ms power=" + formatCharge(app.wifiPowerMah));
         }
     }
 
-    @Override
-    public void calculateRemaining(BatterySipper app, BatteryStats stats, long rawRealtimeUs,
-                                   long rawUptimeUs, int statsType) {
+    private void calculateRemaining(BatterySipper app, BatteryStats stats, long rawRealtimeUs,
+            long rawUptimeUs, int statsType) {
+        if (!mHasWifiPowerReporting) {
+            mWifiPowerEstimator.calculateRemaining(app, stats, rawRealtimeUs, rawUptimeUs,
+                    statsType);
+            return;
+        }
+
         final BatteryStats.ControllerActivityCounter counter = stats.getWifiControllerActivity();
 
         final long idleTimeMs = counter.getIdleTimeCounter().getCountLocked(statsType);
@@ -84,16 +141,16 @@ public class WifiPowerCalculator extends PowerCalculator {
                 (idleTimeMs + rxTimeMs + txTimeMs) - mTotalAppRunningTime);
 
         double powerDrainMah = counter.getPowerCounter().getCountLocked(statsType)
-                / (double)(1000*60*60);
+                / (double) (1000 * 60 * 60);
         if (powerDrainMah == 0) {
             // Some controllers do not report power drain, so we can calculate it here.
             powerDrainMah = ((idleTimeMs * mIdleCurrentMa) + (txTimeMs * mTxCurrentMa)
-                    + (rxTimeMs * mRxCurrentMa)) / (1000*60*60);
+                    + (rxTimeMs * mRxCurrentMa)) / (1000 * 60 * 60);
         }
         app.wifiPowerMah = Math.max(0, powerDrainMah - mTotalAppPowerDrain);
 
         if (DEBUG) {
-            Log.d(TAG, "left over WiFi power: " + BatteryStatsHelper.makemAh(app.wifiPowerMah));
+            Log.d(TAG, "left over WiFi power: " + formatCharge(app.wifiPowerMah));
         }
     }
 
@@ -101,5 +158,6 @@ public class WifiPowerCalculator extends PowerCalculator {
     public void reset() {
         mTotalAppPowerDrain = 0;
         mTotalAppRunningTime = 0;
+        mWifiPowerEstimator.reset();
     }
 }

@@ -17,6 +17,8 @@
 package com.android.keyguard;
 
 import android.graphics.Color;
+import android.graphics.Paint;
+import android.util.MathUtils;
 
 import com.android.settingslib.Utils;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -52,6 +54,11 @@ public class AnimatableClockController extends ViewController<AnimatableClockVie
     @Override
     protected void onViewDetached() {
         mStatusBarStateController.removeCallback(mStatusBarStateListener);
+    }
+
+    float getClockTextTopPadding() {
+        Paint.FontMetrics fm = mView.getPaint().getFontMetrics();
+        return MathUtils.abs(fm.ascent - fm.top);
     }
 
     /**

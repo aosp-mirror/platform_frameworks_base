@@ -30,7 +30,6 @@ import android.os.Build;
 import android.os.LocaleList;
 import android.os.RemoteException;
 import android.os.UserHandle;
-import android.os.UserManagerInternal;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.ArrayMap;
@@ -46,6 +45,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.inputmethod.StartInputFlags;
 import com.android.server.LocalServices;
+import com.android.server.pm.UserManagerInternal;
 import com.android.server.textservices.TextServicesManagerInternal;
 
 import java.io.PrintWriter;

@@ -15,15 +15,11 @@
 package com.android.internal.util;
 
 import android.content.Context;
-import android.database.ContentObserver;
-import android.net.Uri;
 import android.os.Build;
 import android.os.SystemClock;
 import android.os.Trace;
-import android.os.UserHandle;
-import android.provider.Settings;
+import android.provider.DeviceConfig;
 import android.util.EventLog;
-import android.util.KeyValueListParser;
 import android.util.Log;
 import android.util.SparseLongArray;
 
@@ -135,8 +131,16 @@ public class LatencyTracker {
         mSamplingInterval = DEFAULT_SAMPLING_INTERVAL;
 
         // Post initialization to the background in case we're running on the main thread.
-        BackgroundThread.getHandler().post(this::registerSettingsObserver);
-        BackgroundThread.getHandler().post(this::readSettings);
+        BackgroundThread.getHandler().post(() -> this.updateProperties(
+                DeviceConfig.getProperties(DeviceConfig.NAMESPACE_LATENCY_TRACKER)));
+        DeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_LATENCY_TRACKER,
+                BackgroundThread.getExecutor(), this::updateProperties);
+    }
+
+    private void updateProperties(DeviceConfig.Properties properties) {
+        mSamplingInterval = properties.getInt(SETTINGS_SAMPLING_INTERVAL_KEY,
+                DEFAULT_SAMPLING_INTERVAL);
+        mEnabled = properties.getBoolean(SETTINGS_ENABLED_KEY, DEFAULT_ENABLED);
     }
 
     /**
@@ -168,28 +172,6 @@ public class LatencyTracker {
                 return "ACTION_FACE_WAKE_AND_UNLOCK";
             default:
                 throw new IllegalArgumentException("Invalid action");
-        }
-    }
-
-    private void registerSettingsObserver() {
-        Uri settingsUri = Settings.Global.getUriFor(Settings.Global.LATENCY_TRACKER);
-        mContext.getContentResolver().registerContentObserver(
-                settingsUri, false, new SettingsObserver(this), UserHandle.myUserId());
-    }
-
-    private void readSettings() {
-        KeyValueListParser parser = new KeyValueListParser(',');
-        String settingsValue = Settings.Global.getString(mContext.getContentResolver(),
-                Settings.Global.LATENCY_TRACKER);
-
-        try {
-            parser.setString(settingsValue);
-            mSamplingInterval = parser.getInt(SETTINGS_SAMPLING_INTERVAL_KEY,
-                    DEFAULT_SAMPLING_INTERVAL);
-            mEnabled = parser.getBoolean(SETTINGS_ENABLED_KEY, DEFAULT_ENABLED);
-        } catch (IllegalArgumentException e) {
-            Log.e(TAG, "Incorrect settings format", e);
-            mEnabled = false;
         }
     }
 
@@ -236,8 +218,8 @@ public class LatencyTracker {
     /**
      * Logs an action that has started and ended. This needs to be called from the main thread.
      *
-     * @param action          The action to end. One of the ACTION_* values.
-     * @param duration        The duration of the action in ms.
+     * @param action   The action to end. One of the ACTION_* values.
+     * @param duration The duration of the action in ms.
      */
     public void logAction(int action, int duration) {
         boolean shouldSample = ThreadLocalRandom.current().nextInt() % mSamplingInterval == 0;
@@ -258,20 +240,6 @@ public class LatencyTracker {
         if (writeToStatsLog) {
             FrameworkStatsLog.write(
                     FrameworkStatsLog.UI_ACTION_LATENCY_REPORTED, STATSD_ACTION[action], duration);
-        }
-    }
-
-    private static class SettingsObserver extends ContentObserver {
-        private final LatencyTracker mThisTracker;
-
-        SettingsObserver(LatencyTracker thisTracker) {
-            super(BackgroundThread.getHandler());
-            mThisTracker = thisTracker;
-        }
-
-        @Override
-        public void onChange(boolean selfChange, Uri uri, int userId) {
-            mThisTracker.readSettings();
         }
     }
 }

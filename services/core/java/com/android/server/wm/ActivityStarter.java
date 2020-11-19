@@ -55,12 +55,13 @@ import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_TOP;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.Process.INVALID_UID;
 import static android.view.Display.DEFAULT_DISPLAY;
+import static android.view.WindowManager.TRANSIT_OPEN;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_CONFIGURATION;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_TASKS;
-import static com.android.server.wm.ActivityStackSupervisor.DEFER_RESUME;
-import static com.android.server.wm.ActivityStackSupervisor.ON_TOP;
-import static com.android.server.wm.ActivityStackSupervisor.PRESERVE_WINDOWS;
+import static com.android.server.wm.ActivityTaskSupervisor.DEFER_RESUME;
+import static com.android.server.wm.ActivityTaskSupervisor.ON_TOP;
+import static com.android.server.wm.ActivityTaskSupervisor.PRESERVE_WINDOWS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_ACTIVITY_STARTS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_PERMISSIONS_REVIEW;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_RESULTS;
@@ -121,7 +122,7 @@ import com.android.server.pm.InstantAppResolver;
 import com.android.server.power.ShutdownCheckPoints;
 import com.android.server.uri.NeededUriGrants;
 import com.android.server.wm.ActivityMetricsLogger.LaunchingState;
-import com.android.server.wm.ActivityStackSupervisor.PendingActivityLaunch;
+import com.android.server.wm.ActivityTaskSupervisor.PendingActivityLaunch;
 import com.android.server.wm.LaunchParamsController.LaunchParams;
 
 import java.io.PrintWriter;
@@ -144,7 +145,7 @@ class ActivityStarter {
 
     private final ActivityTaskManagerService mService;
     private final RootWindowContainer mRootWindowContainer;
-    private final ActivityStackSupervisor mSupervisor;
+    private final ActivityTaskSupervisor mSupervisor;
     private final ActivityStartInterceptor mInterceptor;
     private final ActivityStartController mController;
 
@@ -257,14 +258,14 @@ class ActivityStarter {
 
         private ActivityStartController mController;
         private ActivityTaskManagerService mService;
-        private ActivityStackSupervisor mSupervisor;
+        private ActivityTaskSupervisor mSupervisor;
         private ActivityStartInterceptor mInterceptor;
 
         private SynchronizedPool<ActivityStarter> mStarterPool =
                 new SynchronizedPool<>(MAX_STARTER_COUNT);
 
         DefaultFactory(ActivityTaskManagerService service,
-                ActivityStackSupervisor supervisor, ActivityStartInterceptor interceptor) {
+                ActivityTaskSupervisor supervisor, ActivityStartInterceptor interceptor) {
             mService = service;
             mSupervisor = supervisor;
             mInterceptor = interceptor;
@@ -442,7 +443,7 @@ class ActivityStarter {
         /**
          * Resolve activity from the given intent for this launch.
          */
-        void resolveActivity(ActivityStackSupervisor supervisor) {
+        void resolveActivity(ActivityTaskSupervisor supervisor) {
             if (realCallingPid == Request.DEFAULT_REAL_CALLING_PID) {
                 realCallingPid = Binder.getCallingPid();
             }
@@ -533,7 +534,7 @@ class ActivityStarter {
     }
 
     ActivityStarter(ActivityStartController controller, ActivityTaskManagerService service,
-            ActivityStackSupervisor supervisor, ActivityStartInterceptor interceptor) {
+            ActivityTaskSupervisor supervisor, ActivityStartInterceptor interceptor) {
         mController = controller;
         mService = service;
         mRootWindowContainer = service.mRootWindowContainer;
@@ -1566,6 +1567,15 @@ class ActivityStarter {
                 boolean restrictedBgActivity, NeededUriGrants intentGrants) {
         int result = START_CANCELED;
         final Task startedActivityStack;
+
+        // Create a transition now to record the original intent of actions taken within
+        // startActivityInner. Otherwise, logic in startActivityInner could start a different
+        // transition based on a sub-action.
+        // Only do the create here (and defer requestStart) since startActivityInner might abort.
+        final Transition newTransition = (!mService.getTransitionController().isCollecting()
+                && mService.getTransitionController().getTransitionPlayer() != null)
+                ? mService.getTransitionController().createTransition(TRANSIT_OPEN) : null;
+        mService.getTransitionController().collect(r);
         try {
             mService.deferWindowLayout();
             Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "startActivityInner");
@@ -1575,6 +1585,25 @@ class ActivityStarter {
             Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
             startedActivityStack = handleStartResult(r, result);
             mService.continueWindowLayout();
+
+            // Transition housekeeping
+            if (!ActivityManager.isStartResultSuccessful(result)) {
+                if (newTransition != null) {
+                    newTransition.abort();
+                }
+            } else {
+                if (result == START_SUCCESS || result == START_TASK_TO_FRONT) {
+                    // The activity is started new rather than just brought forward, so record
+                    // it as an existence change.
+                    mService.getTransitionController().collectExistenceChange(r);
+                }
+                if (newTransition != null) {
+                    mService.getTransitionController().requestStartTransition(newTransition);
+                } else {
+                    // Make the collecting transition wait until this request is ready.
+                    mService.getTransitionController().setReady(false);
+                }
+            }
         }
 
         postStartActivityProcessing(r, result, startedActivityStack);
@@ -1856,7 +1885,7 @@ class ActivityStarter {
         }
 
         // Do not start home activity if it cannot be launched on preferred display. We are not
-        // doing this in ActivityStackSupervisor#canPlaceEntityOnDisplay because it might
+        // doing this in ActivityTaskSupervisor#canPlaceEntityOnDisplay because it might
         // fallback to launch on other displays.
         if (r.isActivityTypeHome()) {
             if (!mRootWindowContainer.canStartHomeOnDisplayArea(r.info, mPreferredTaskDisplayArea,
@@ -1970,7 +1999,7 @@ class ActivityStarter {
         // At this point we are certain we want the task moved to the front. If we need to dismiss
         // any other always-on-top stacks, now is the time to do it.
         if (targetTaskTop.canTurnScreenOn() && mService.mInternal.isDreaming()) {
-            targetTaskTop.mStackSupervisor.wakeUp("recycleTask#turnScreenOnFlag");
+            targetTaskTop.mTaskSupervisor.wakeUp("recycleTask#turnScreenOnFlag");
         }
 
         if (mMovedToFront) {
@@ -2607,6 +2636,7 @@ class ActivityStarter {
                 mNewTaskInfo != null ? mNewTaskInfo : mStartActivity.info,
                 mNewTaskIntent != null ? mNewTaskIntent : mIntent, mVoiceSession,
                 mVoiceInteractor, toTop, mStartActivity, mSourceRecord, mOptions);
+        mService.getTransitionController().collectExistenceChange(task);
         addOrReparentStartingActivity(task, "setTaskFromReuseOrCreateNewTask - mReuseTask");
 
         ProtoLog.v(WM_DEBUG_TASKS, "Starting new activity %s in new task %s",

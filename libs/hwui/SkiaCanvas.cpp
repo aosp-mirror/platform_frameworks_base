@@ -160,32 +160,20 @@ void SkiaCanvas::restoreToCount(int restoreCount) {
     }
 }
 
-static inline SkCanvas::SaveLayerFlags layerFlags(SaveFlags::Flags flags) {
-    SkCanvas::SaveLayerFlags layerFlags = 0;
-
-    if (!(flags & SaveFlags::ClipToLayer)) {
-        layerFlags |= SkCanvasPriv::kDontClipToLayer_SaveLayerFlag;
-    }
-
-    return layerFlags;
-}
-
-int SkiaCanvas::saveLayer(float left, float top, float right, float bottom, const SkPaint* paint,
-                          SaveFlags::Flags flags) {
+int SkiaCanvas::saveLayer(float left, float top, float right, float bottom, const SkPaint* paint) {
     const SkRect bounds = SkRect::MakeLTRB(left, top, right, bottom);
-    const SkCanvas::SaveLayerRec rec(&bounds, paint, layerFlags(flags));
+    const SkCanvas::SaveLayerRec rec(&bounds, paint);
 
     return mCanvas->saveLayer(rec);
 }
 
-int SkiaCanvas::saveLayerAlpha(float left, float top, float right, float bottom, int alpha,
-                               SaveFlags::Flags flags) {
+int SkiaCanvas::saveLayerAlpha(float left, float top, float right, float bottom, int alpha) {
     if (static_cast<unsigned>(alpha) < 0xFF) {
         SkPaint alphaPaint;
         alphaPaint.setAlpha(alpha);
-        return this->saveLayer(left, top, right, bottom, &alphaPaint, flags);
+        return this->saveLayer(left, top, right, bottom, &alphaPaint);
     }
-    return this->saveLayer(left, top, right, bottom, nullptr, flags);
+    return this->saveLayer(left, top, right, bottom, nullptr);
 }
 
 int SkiaCanvas::saveUnclippedLayer(int left, int top, int right, int bottom) {

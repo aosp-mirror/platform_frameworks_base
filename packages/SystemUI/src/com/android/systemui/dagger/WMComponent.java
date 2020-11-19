@@ -17,7 +17,7 @@
 package com.android.systemui.dagger;
 
 import com.android.systemui.wmshell.WMShellModule;
-import com.android.wm.shell.ShellDump;
+import com.android.wm.shell.ShellCommandHandler;
 import com.android.wm.shell.ShellInit;
 import com.android.wm.shell.apppairs.AppPairs;
 import com.android.wm.shell.bubbles.Bubbles;
@@ -58,7 +58,7 @@ public interface WMComponent {
 
     // Gets the Shell dump instance
     @WMSingleton
-    Optional<ShellDump> getShellDump();
+    Optional<ShellCommandHandler> getShellCommandHandler();
 
     // TODO(b/162923491): We currently pass the instances through to SysUI, but that may change
     //                    depending on the threading mechanism we go with

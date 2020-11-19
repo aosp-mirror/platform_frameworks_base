@@ -75,15 +75,15 @@ class UdfpsController implements DozeReceiver {
     private static final float DISPLAY_GAMMA = 2.2f;
     private static final long AOD_INTERRUPT_TIMEOUT_MILLIS = 1000;
 
+    private final Context mContext;
     private final FingerprintManager mFingerprintManager;
-    // Currently the UdfpsController supports a single UDFPS sensor. If devices have multiple
-    // sensors, this, in addition to a lot of the code here, will be updated.
-    @VisibleForTesting
-    final FingerprintSensorPropertiesInternal mSensorProps;
     private final WindowManager mWindowManager;
     private final SystemSettings mSystemSettings;
     private final DelayableExecutor mFgExecutor;
-    private final WindowManager.LayoutParams mLayoutParams;
+    // Currently the UdfpsController supports a single UDFPS sensor. If devices have multiple
+    // sensors, this, in addition to a lot of the code here, will be updated.
+    @VisibleForTesting final FingerprintSensorPropertiesInternal mSensorProps;
+    private final WindowManager.LayoutParams mCoreLayoutParams;
     private final UdfpsView mView;
     // Debugfs path to control the high-brightness mode.
     private final String mHbmPath;
@@ -171,17 +171,28 @@ class UdfpsController implements DozeReceiver {
             SystemSettings systemSettings,
             @NonNull StatusBarStateController statusBarStateController,
             @Main DelayableExecutor fgExecutor) {
+        mContext = context;
         // The fingerprint manager is queried for UDFPS before this class is constructed, so the
         // fingerprint manager should never be null.
         mFingerprintManager = checkNotNull(fingerprintManager);
         mWindowManager = windowManager;
         mSystemSettings = systemSettings;
         mFgExecutor = fgExecutor;
-        mLayoutParams = createLayoutParams(context);
 
         mSensorProps = findFirstUdfps();
         // At least one UDFPS sensor exists
         checkArgument(mSensorProps != null);
+
+        mCoreLayoutParams = new WindowManager.LayoutParams(
+                // TODO(b/152419866): Use the UDFPS window type when it becomes available.
+                WindowManager.LayoutParams.TYPE_BOOT_PROGRESS,
+                WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
+                        | WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR
+                        | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
+                        | WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED,
+                PixelFormat.TRANSLUCENT);
+        mCoreLayoutParams.setTitle(TAG);
+        mCoreLayoutParams.setFitInsetsTypes(0);
 
         mView = (UdfpsView) inflater.inflate(R.layout.udfps_view, null, false);
         mView.setSensorProperties(mSensorProps);
@@ -266,12 +277,34 @@ class UdfpsController implements DozeReceiver {
         }
     }
 
+    private WindowManager.LayoutParams computeLayoutParams() {
+        Point p = new Point();
+        // Gets the size based on the current rotation of the display.
+        mContext.getDisplay().getRealSize(p);
+        mCoreLayoutParams.width = p.x;
+        mCoreLayoutParams.x = p.x;
+        mCoreLayoutParams.height = p.y;
+        mCoreLayoutParams.y = p.y;
+        return mCoreLayoutParams;
+    }
+
+    void onConfigurationChanged() {
+        // When the configuration changes it's almost always necessary to destroy and re-create
+        // the overlay's window to pass it the new LayoutParams.
+        // Hiding the overlay will destroy its window. It's safe to hide the overlay regardless
+        // of whether it is already hidden.
+        hideUdfpsOverlay();
+        // If the overlay needs to be shown, this will re-create and show the overlay with the
+        // updated LayoutParams. Otherwise, the overlay will remain hidden.
+        updateOverlay();
+    }
+
     private void showUdfpsOverlay() {
         mFgExecutor.execute(() -> {
             if (!mIsOverlayShowing) {
                 try {
                     Log.v(TAG, "showUdfpsOverlay | adding window");
-                    mWindowManager.addView(mView, mLayoutParams);
+                    mWindowManager.addView(mView, computeLayoutParams());
                     mIsOverlayShowing = true;
                     mView.setOnTouchListener(mOnTouchListener);
                 } catch (RuntimeException e) {
@@ -392,27 +425,6 @@ class UdfpsController implements DozeReceiver {
                 Log.e(TAG, "onFingerUp | failed to disable HBM: " + e.getMessage());
             }
         }
-    }
-
-    private static WindowManager.LayoutParams createLayoutParams(Context context) {
-        Point displaySize = new Point();
-        context.getDisplay().getRealSize(displaySize);
-        // TODO(b/160025856): move to the "dump" method.
-        Log.v(TAG, "createLayoutParams | display size: " + displaySize.x + "x"
-                + displaySize.y);
-        WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
-                displaySize.x,
-                displaySize.y,
-                // TODO(b/152419866): Use the UDFPS window type when it becomes available.
-                WindowManager.LayoutParams.TYPE_BOOT_PROGRESS,
-                WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
-                        | WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR
-                        | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
-                        | WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED,
-                PixelFormat.TRANSLUCENT);
-        lp.setTitle(TAG);
-        lp.setFitInsetsTypes(0);
-        return lp;
     }
 
     private static float obtainDefaultBrightness(PowerManager powerManager) {

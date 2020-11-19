@@ -55,7 +55,6 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="fill_vertical"
                 android:layout_weight="1"
-                android:minHeight="@dimen/notification_min_content_height"
                 android:paddingBottom="@dimen/notification_content_margin"
                 android:orientation="vertical"
                 >

@@ -56,6 +56,7 @@ public class BinderCallsStats implements BinderInternal.Observer {
     public static final int PERIODIC_SAMPLING_INTERVAL_DEFAULT = 1000;
     public static final boolean DEFAULT_TRACK_SCREEN_INTERACTIVE = false;
     public static final boolean DEFAULT_TRACK_DIRECT_CALLING_UID = true;
+    public static final boolean DEFAULT_IGNORE_BATTERY_STATUS = false;
     public static final int MAX_BINDER_CALL_STATS_COUNT_DEFAULT = 1500;
     private static final String DEBUG_ENTRY_PREFIX = "__DEBUG_";
 
@@ -95,6 +96,7 @@ public class BinderCallsStats implements BinderInternal.Observer {
     private boolean mAddDebugEntries = false;
     private boolean mTrackDirectCallingUid = DEFAULT_TRACK_DIRECT_CALLING_UID;
     private boolean mTrackScreenInteractive = DEFAULT_TRACK_SCREEN_INTERACTIVE;
+    private boolean mIgnoreBatteryStatus = DEFAULT_IGNORE_BATTERY_STATUS;
 
     private CachedDeviceState.Readonly mDeviceState;
     private CachedDeviceState.TimeInStateStopwatch mBatteryStopwatch;
@@ -185,8 +187,7 @@ public class BinderCallsStats implements BinderInternal.Observer {
     public CallSession callStarted(Binder binder, int code, int workSourceUid) {
         noteNativeThreadId();
 
-        if (!mRecordingAllTransactionsForUid
-                && (mDeviceState == null || mDeviceState.isCharging())) {
+        if (!canCollect()) {
             return null;
         }
 
@@ -255,8 +256,7 @@ public class BinderCallsStats implements BinderInternal.Observer {
 
         synchronized (mLock) {
             // This was already checked in #callStart but check again while synchronized.
-            if (!mRecordingAllTransactionsForUid
-                    && (mDeviceState == null || mDeviceState.isCharging())) {
+            if (!canCollect()) {
                 return;
             }
 
@@ -370,6 +370,22 @@ public class BinderCallsStats implements BinderInternal.Observer {
         }
 
         mCallStatsObserver.noteBinderThreadNativeIds(getNativeTids());
+    }
+
+    private boolean canCollect() {
+        if (mRecordingAllTransactionsForUid) {
+            return true;
+        }
+        if (mIgnoreBatteryStatus) {
+            return true;
+        }
+        if (mDeviceState == null) {
+            return false;
+        }
+        if (mDeviceState.isCharging()) {
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -666,6 +682,18 @@ public class BinderCallsStats implements BinderInternal.Observer {
         synchronized (mLock) {
             if (enabled != mTrackDirectCallingUid) {
                 mTrackDirectCallingUid = enabled;
+                reset();
+            }
+        }
+    }
+
+    /**
+     * Whether to ignore battery status when collecting stats
+     */
+    public void setIgnoreBatteryStatus(boolean ignored) {
+        synchronized (mLock) {
+            if (ignored != mIgnoreBatteryStatus) {
+                mIgnoreBatteryStatus = ignored;
                 reset();
             }
         }

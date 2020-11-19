@@ -17,9 +17,12 @@
 package com.android.internal.os;
 
 import android.os.BatteryStats;
+import android.os.UserHandle;
 import android.util.Log;
+import android.util.SparseArray;
 
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * Estimates the amount of power consumed by the System Server handling requests from
@@ -32,39 +35,40 @@ public class SystemServicePowerCalculator extends PowerCalculator {
     private static final long MICROSEC_IN_HR = (long) 60 * 60 * 1000 * 1000;
 
     private final PowerProfile mPowerProfile;
-    private final BatteryStats mBatteryStats;
+
     // Tracks system server CPU [cluster][speed] power in milliAmp-microseconds
     // Data organized like this:
     // {cluster1-speed1, cluster1-speed2, ..., cluster2-speed1, cluster2-speed2, ...}
     private double[] mSystemServicePowerMaUs;
 
-    public SystemServicePowerCalculator(PowerProfile powerProfile, BatteryStats batteryStats) {
+    public SystemServicePowerCalculator(PowerProfile powerProfile) {
         mPowerProfile = powerProfile;
-        mBatteryStats = batteryStats;
     }
 
     @Override
-    public void calculateApp(BatterySipper app, BatteryStats.Uid u, long rawRealtimeUs,
+    public void calculate(List<BatterySipper> sippers, BatteryStats batteryStats,
+            long rawRealtimeUs, long rawUptimeUs, int statsType,
+            SparseArray<UserHandle> asUsers) {
+        updateSystemServicePower(batteryStats);
+        super.calculate(sippers, batteryStats, rawRealtimeUs, rawUptimeUs, statsType, asUsers);
+    }
+
+    @Override
+    protected void calculateApp(BatterySipper app, BatteryStats.Uid u, long rawRealtimeUs,
             long rawUptimeUs, int statsType) {
         final double proportionalUsage = u.getProportionalSystemServiceUsage();
-        if (proportionalUsage > 0) {
-            if (mSystemServicePowerMaUs == null) {
-                updateSystemServicePower();
+        if (proportionalUsage > 0 && mSystemServicePowerMaUs != null) {
+            double cpuPowerMaUs = 0;
+            for (int i = 0; i < mSystemServicePowerMaUs.length; i++) {
+                cpuPowerMaUs += mSystemServicePowerMaUs[i] * proportionalUsage;
             }
 
-            if (mSystemServicePowerMaUs != null) {
-                double cpuPowerMaUs = 0;
-                for (int i = 0; i < mSystemServicePowerMaUs.length; i++) {
-                    cpuPowerMaUs += mSystemServicePowerMaUs[i] * proportionalUsage;
-                }
-
-                app.systemServiceCpuPowerMah = cpuPowerMaUs / MICROSEC_IN_HR;
-            }
+            app.systemServiceCpuPowerMah = cpuPowerMaUs / MICROSEC_IN_HR;
         }
     }
 
-    private void updateSystemServicePower() {
-        final long[] systemServiceTimeAtCpuSpeeds = mBatteryStats.getSystemServiceTimeAtCpuSpeeds();
+    private void updateSystemServicePower(BatteryStats batteryStats) {
+        final long[] systemServiceTimeAtCpuSpeeds = batteryStats.getSystemServiceTimeAtCpuSpeeds();
         if (systemServiceTimeAtCpuSpeeds == null) {
             return;
         }

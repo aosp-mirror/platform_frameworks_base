@@ -33,15 +33,29 @@
         android:padding="@dimen/notification_icon_circle_padding"
         />
 
-    <com.android.internal.widget.RemeasuringLinearLayout
+    <LinearLayout
         android:id="@+id/notification_standard_view_column"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
-        android:layout_marginBottom="@dimen/notification_headerless_margin_vertical"
-        android:layout_marginTop="@dimen/notification_headerless_margin_vertical"
+        android:layout_marginBottom="@dimen/notification_headerless_margin_minimum"
+        android:layout_marginTop="@dimen/notification_headerless_margin_minimum"
         android:orientation="vertical"
         >
+
+        <!--
+        This invisible FrameLayout is here as a collapsible padding.  Having a layout_weight=1 is
+        what causes this view (and it's counterpart at the opposite end) to collapse before the
+        actual content views do.
+        This pair of 10dp collapsible paddings (plus the 16dp fixed margins) allow us to support
+        headerless notifications of 1-3 lines (where each line is 20dp tall) where the 1-line
+        variant is 56dp and the 2- and 3-line variants are both 76dp.
+        -->
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/notification_headerless_margin_extra"
+            android:layout_weight="1"
+            />
 
         <!-- extends ViewGroup -->
         <NotificationTopLineView
@@ -58,6 +72,7 @@
                 android:id="@+id/title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/notification_header_separating_margin"
                 android:ellipsize="marquee"
                 android:fadingEdge="horizontal"
                 android:singleLine="true"
@@ -69,7 +84,7 @@
 
         </NotificationTopLineView>
 
-        <com.android.internal.widget.RemeasuringLinearLayout
+        <LinearLayout
             android:id="@+id/notification_main_column"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -91,8 +106,23 @@
                 android:layout_height="@dimen/notification_headerless_line_height"
                 />
 
-        </com.android.internal.widget.RemeasuringLinearLayout>
-    </com.android.internal.widget.RemeasuringLinearLayout>
+        </LinearLayout>
+
+        <!--
+        This invisible FrameLayout is here as a collapsible padding.  Having a layout_weight=1 is
+        what causes this view (and it's counterpart at the opposite end) to collapse before the
+        actual content views do.
+        This pair of 10dp collapsible paddings (plus the 16dp fixed margins) allow us to support
+        headerless notifications of 1-3 lines (where each line is 20dp tall) where the 1-line
+        variant is 56dp and the 2- and 3-line variants are both 76dp.
+        -->
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/notification_headerless_margin_extra"
+            android:layout_weight="1"
+            />
+
+    </LinearLayout>
 
     <ImageView
         android:id="@+id/right_icon"

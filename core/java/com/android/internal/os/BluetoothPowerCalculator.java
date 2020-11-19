@@ -16,14 +16,20 @@
 package com.android.internal.os;
 
 import android.os.BatteryStats;
+import android.os.Process;
+import android.os.UserHandle;
 import android.util.Log;
+import android.util.SparseArray;
+
+import java.util.List;
 
 public class BluetoothPowerCalculator extends PowerCalculator {
     private static final boolean DEBUG = BatteryStatsHelper.DEBUG;
-    private static final String TAG = "BluetoothPowerCalculator";
+    private static final String TAG = "BluetoothPowerCalc";
     private final double mIdleMa;
     private final double mRxMa;
     private final double mTxMa;
+    private final boolean mHasBluetoothPowerController;
     private double mAppTotalPowerMah = 0;
     private long mAppTotalTimeMs = 0;
 
@@ -31,10 +37,36 @@ public class BluetoothPowerCalculator extends PowerCalculator {
         mIdleMa = profile.getAveragePower(PowerProfile.POWER_BLUETOOTH_CONTROLLER_IDLE);
         mRxMa = profile.getAveragePower(PowerProfile.POWER_BLUETOOTH_CONTROLLER_RX);
         mTxMa = profile.getAveragePower(PowerProfile.POWER_BLUETOOTH_CONTROLLER_TX);
+        mHasBluetoothPowerController = mIdleMa != 0 && mRxMa != 0 && mTxMa != 0;
     }
 
     @Override
-    public void calculateApp(BatterySipper app, BatteryStats.Uid u, long rawRealtimeUs,
+    public void calculate(List<BatterySipper> sippers, BatteryStats batteryStats,
+            long rawRealtimeUs, long rawUptimeUs, int statsType, SparseArray<UserHandle> asUsers) {
+        if (!mHasBluetoothPowerController || !batteryStats.hasBluetoothActivityReporting()) {
+            return;
+        }
+
+        super.calculate(sippers, batteryStats, rawRealtimeUs, rawUptimeUs, statsType, asUsers);
+
+        BatterySipper bs = new BatterySipper(BatterySipper.DrainType.BLUETOOTH, null, 0);
+        calculateRemaining(bs, batteryStats, rawRealtimeUs, rawUptimeUs, statsType);
+
+        for (int i = sippers.size() - 1; i >= 0; i--) {
+            BatterySipper app = sippers.get(i);
+            if (app.getUid() == Process.BLUETOOTH_UID) {
+                if (DEBUG) Log.d(TAG, "Bluetooth adding sipper " + app + ": cpu=" + app.cpuTimeMs);
+                app.isAggregated = true;
+                bs.add(app);
+            }
+        }
+        if (bs.sumPower() > 0) {
+            sippers.add(bs);
+        }
+    }
+
+    @Override
+    protected void calculateApp(BatterySipper app, BatteryStats.Uid u, long rawRealtimeUs,
                              long rawUptimeUs, int statsType) {
 
         final BatteryStats.ControllerActivityCounter counter = u.getBluetoothControllerActivity();
@@ -63,8 +95,7 @@ public class BluetoothPowerCalculator extends PowerCalculator {
         mAppTotalTimeMs += totalTimeMs;
     }
 
-    @Override
-    public void calculateRemaining(BatterySipper app, BatteryStats stats, long rawRealtimeUs,
+    private void calculateRemaining(BatterySipper app, BatteryStats stats, long rawRealtimeUs,
                                    long rawUptimeUs, int statsType) {
         final BatteryStats.ControllerActivityCounter counter =
                 stats.getBluetoothControllerActivity();
@@ -87,7 +118,7 @@ public class BluetoothPowerCalculator extends PowerCalculator {
 
         if (DEBUG && powerMah != 0) {
             Log.d(TAG, "Bluetooth active: time=" + (totalTimeMs)
-                    + " power=" + BatteryStatsHelper.makemAh(powerMah));
+                    + " power=" + formatCharge(powerMah));
         }
 
         app.bluetoothPowerMah = powerMah;

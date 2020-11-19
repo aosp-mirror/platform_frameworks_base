@@ -16,14 +16,17 @@
 
 package android.content.pm;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.TypedXmlSerializer;
 
 import com.android.internal.util.ArrayUtils;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.lang.ref.SoftReference;
 import java.security.PublicKey;
@@ -288,6 +291,12 @@ public class Signature implements Parcelable {
             return new Signature[size];
         }
     };
+
+    /** {@hide} */
+    public void writeToXmlAttributeBytesHex(@NonNull TypedXmlSerializer out,
+            @Nullable String namespace, @NonNull String name) throws IOException {
+        out.attributeBytesHex(namespace, name, mSignature);
+    }
 
     private Signature(Parcel source) {
         mSignature = source.createByteArray();

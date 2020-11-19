@@ -64,6 +64,7 @@ import com.android.server.biometrics.sensors.face.hidl.Face10;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -423,6 +424,13 @@ public class FaceService extends SystemService implements BiometricServiceCallba
                     for (ServiceProvider provider : mServiceProviders) {
                         for (FaceSensorPropertiesInternal props : provider.getSensorProperties()) {
                             provider.dumpProtoMetrics(props.sensorId, fd);
+                        }
+                    }
+                } else if (args.length > 1 && "--hal".equals(args[0])) {
+                    for (ServiceProvider provider : mServiceProviders) {
+                        for (FaceSensorPropertiesInternal props : provider.getSensorProperties()) {
+                            provider.dumpHal(props.sensorId, fd,
+                                    Arrays.copyOfRange(args, 1, args.length, args.getClass()));
                         }
                     }
                 } else {

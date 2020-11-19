@@ -43,6 +43,8 @@ import static android.os.PowerManager.PARTIAL_WAKE_LOCK;
 import static android.os.Process.INVALID_UID;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.Display.DEFAULT_DISPLAY;
+import static android.view.WindowManager.TRANSIT_CLOSE;
+import static android.view.WindowManager.TRANSIT_TO_FRONT;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_STATES;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_TASKS;
@@ -153,8 +155,8 @@ import java.util.List;
 // - Move things relating to activity life cycles to maybe a new class called ActivityLifeCycler
 // - Move interface things to ActivityTaskManagerService.
 // - All other little things to other files.
-public class ActivityStackSupervisor implements RecentTasks.Callbacks {
-    private static final String TAG = TAG_WITH_CLASS_NAME ? "ActivityStackSupervisor" : TAG_ATM;
+public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
+    private static final String TAG = TAG_WITH_CLASS_NAME ? "ActivityTaskSupervisor" : TAG_ATM;
     private static final String TAG_IDLE = TAG + POSTFIX_IDLE;
     private static final String TAG_PAUSE = TAG + POSTFIX_PAUSE;
     private static final String TAG_RECENTS = TAG + POSTFIX_RECENTS;
@@ -238,7 +240,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
     /** Helper class to abstract out logic for fetching the set of currently running tasks */
     private RunningTasks mRunningTasks;
 
-    private final ActivityStackSupervisorHandler mHandler;
+    private final ActivityTaskSupervisorHandler mHandler;
     final Looper mLooper;
 
     /** Short cut */
@@ -405,10 +407,10 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         }
     }
 
-    public ActivityStackSupervisor(ActivityTaskManagerService service, Looper looper) {
+    public ActivityTaskSupervisor(ActivityTaskManagerService service, Looper looper) {
         mService = service;
         mLooper = looper;
-        mHandler = new ActivityStackSupervisorHandler(looper);
+        mHandler = new ActivityTaskSupervisorHandler(looper);
     }
 
     public void initialize() {
@@ -1349,6 +1351,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
             mUserLeaving = true;
         }
 
+        mService.getTransitionController().requestTransitionIfNeeded(TRANSIT_TO_FRONT, task);
         reason = reason + " findTaskToMoveToFront";
         boolean reparented = false;
         if (task.isResizeable() && canUseActivityOptionsLaunchBounds(options)) {
@@ -1472,7 +1475,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
             removePinnedStackInSurfaceTransaction(rootTask);
         } else {
             final PooledConsumer c = PooledLambda.obtainConsumer(
-                    ActivityStackSupervisor::processRemoveTask, this, PooledLambda.__(Task.class));
+                    ActivityTaskSupervisor::processRemoveTask, this, PooledLambda.__(Task.class));
             rootTask.forAllLeafTasks(c, true /* traverseTopToBottom */);
             c.recycle();
         }
@@ -1516,6 +1519,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
             // Prevent recursion.
             return;
         }
+        mService.getTransitionController().requestTransitionIfNeeded(TRANSIT_CLOSE, task);
         task.mInRemoveTask = true;
         try {
             task.performClearTask(reason);
@@ -1904,7 +1908,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
 
     public void dump(PrintWriter pw, String prefix) {
         pw.println();
-        pw.println("ActivityStackSupervisor state:");
+        pw.println("ActivityTaskSupervisor state:");
         mRootWindowContainer.dump(pw, prefix, true /* dumpAll */);
         getKeyguardController().dump(pw, prefix);
         mService.getLockTaskController().dump(pw, prefix);
@@ -2227,7 +2231,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
 
     void scheduleUpdateMultiWindowMode(Task task) {
         final PooledConsumer c = PooledLambda.obtainConsumer(
-                ActivityStackSupervisor::addToMultiWindowModeChangedList, this,
+                ActivityTaskSupervisor::addToMultiWindowModeChangedList, this,
                 PooledLambda.__(ActivityRecord.class));
         task.forAllActivities(c);
         c.recycle();
@@ -2255,7 +2259,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
 
     private void scheduleUpdatePictureInPictureModeIfNeeded(Task task, Rect targetStackBounds) {
         final PooledConsumer c = PooledLambda.obtainConsumer(
-                ActivityStackSupervisor::addToPipModeChangedList, this,
+                ActivityTaskSupervisor::addToPipModeChangedList, this,
                 PooledLambda.__(ActivityRecord.class));
         task.forAllActivities(c);
         c.recycle();
@@ -2329,9 +2333,9 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         return mDeferResumeCount == 0;
     }
 
-    private final class ActivityStackSupervisorHandler extends Handler {
+    private final class ActivityTaskSupervisorHandler extends Handler {
 
-        ActivityStackSupervisorHandler(Looper looper) {
+        ActivityTaskSupervisorHandler(Looper looper) {
             super(looper);
         }
 

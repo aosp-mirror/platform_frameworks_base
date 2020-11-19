@@ -42,7 +42,6 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.widget.RemeasuringLinearLayout;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
-import com.android.systemui.media.MediaHierarchyManager;
 import com.android.systemui.media.MediaHost;
 import com.android.systemui.plugins.qs.DetailAdapter;
 import com.android.systemui.plugins.qs.QSTile;
@@ -69,7 +68,7 @@ public class QSPanel extends LinearLayout implements Tunable {
     private static final String TAG = "QSPanel";
 
     protected final Context mContext;
-    protected final MediaHost mMediaHost;
+    private final MediaHost mMediaHost;
 
     /**
      * The index where the content starts that needs to be moved between parents
@@ -144,10 +143,6 @@ public class QSPanel extends LinearLayout implements Tunable {
         mMediaTotalBottomMargin = getResources().getDimensionPixelSize(
                 R.dimen.quick_settings_bottom_margin_media);
         mMediaHost = mediaHost;
-        mMediaHost.addVisibilityChangeListener((visible) -> {
-            onMediaVisibilityChanged(visible);
-            return null;
-        });
         mContext = context;
         mQSLogger = qsLogger;
         mUiEventLogger = uiEventLogger;
@@ -179,8 +174,6 @@ public class QSPanel extends LinearLayout implements Tunable {
 
             lp = new LayoutParams(LayoutParams.MATCH_PARENT, 0, 1);
             addView(mHorizontalLinearLayout, lp);
-
-            initMediaHostState();
         }
         mQSLogger.logAllTilesChangeListening(mListening, getDumpableTag(), "");
     }
@@ -220,17 +213,10 @@ public class QSPanel extends LinearLayout implements Tunable {
         return createRegularTileLayout();
     }
 
-    protected void initMediaHostState() {
-        mMediaHost.setExpansion(1.0f);
-        mMediaHost.setShowsOnlyActiveMedia(false);
-        updateMediaDisappearParameters();
-        mMediaHost.init(MediaHierarchyManager.LOCATION_QS);
-    }
-
     /**
      * Update the way the media disappears based on if we're using the horizontal layout
      */
-    private void updateMediaDisappearParameters() {
+    void updateMediaDisappearParameters() {
         if (!mUsingMediaPlayer) {
             return;
         }

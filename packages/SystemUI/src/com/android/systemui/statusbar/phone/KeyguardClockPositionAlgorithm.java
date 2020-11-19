@@ -256,10 +256,9 @@ public class KeyguardClockPositionAlgorithm {
 
         // TODO(b/12836565) - prototyping only adjustment
         if (mLockScreenMode != KeyguardUpdateMonitor.LOCK_SCREEN_MODE_NORMAL) {
-            // This will keep the clock at the top for AOD
-            return (int) (clockY + burnInPreventionOffsetY() + mEmptyDragAmount);
+            // This will keep the clock at the top
+            clockYDark = (int) (clockY + burnInPreventionOffsetY());
         }
-
         return (int) (MathUtils.lerp(clockY, clockYDark, darkAmount) + mEmptyDragAmount);
     }
 

@@ -22,9 +22,12 @@ java_defaults {
     ],
     errorprone: {
         javacflags: [
-            "-Xep:AndroidFrameworkBinderIdentity:ERROR",
+            // "-Xep:AndroidFrameworkBinderIdentity:ERROR",
             "-Xep:AndroidFrameworkCompatChange:ERROR",
-            "-Xep:AndroidFrameworkUid:ERROR",
+            // "-Xep:AndroidFrameworkUid:ERROR",
+            // NOTE: only enable to generate local patchfiles
+            // "-XepPatchChecks:refaster:frameworks/base/errorprone/refaster/EfficientXml.java.refaster",
+            // "-XepPatchLocation:/tmp/refaster/",
         ],
     },
 }
@@ -41,6 +44,7 @@ java_defaults {
             "-Xep:AndroidFrameworkEfficientCollections:OFF",
             "-Xep:AndroidFrameworkEfficientParcelable:OFF",
             "-Xep:AndroidFrameworkEfficientStrings:OFF",
+            "-Xep:AndroidFrameworkEfficientXml:OFF",
         ],
     },
 }
@@ -915,8 +919,9 @@ java_library_host {
         include_dirs: ["external/protobuf/src"],
         type: "full",
     },
+    // Protos have lots of MissingOverride and similar.
     errorprone: {
-        javacflags: ["-Xep:MissingOverride:OFF"], // b/72714520
+        javacflags: ["-XepDisableAllChecks"],
     },
 }
 

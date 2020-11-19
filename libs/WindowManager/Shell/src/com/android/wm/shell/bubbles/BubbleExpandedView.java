@@ -396,7 +396,7 @@ public class BubbleExpandedView extends LinearLayout {
     /** Return a GraphicBuffer with the contents of the task view surface. */
     @Nullable
     SurfaceControl.ScreenshotHardwareBuffer snapshotActivitySurface() {
-        if (mTaskView == null) {
+        if (mTaskView == null || mTaskView.getSurfaceControl() == null) {
             return null;
         }
         return SurfaceControl.captureLayers(

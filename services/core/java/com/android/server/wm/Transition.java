@@ -22,13 +22,15 @@ import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_NO_ANI
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_SUBTLE_ANIMATION;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_TO_SHADE;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_WITH_WALLPAPER;
-import static android.view.WindowManager.TRANSIT_OLD_KEYGUARD_GOING_AWAY;
-import static android.view.WindowManager.TRANSIT_OLD_KEYGUARD_GOING_AWAY_ON_WALLPAPER;
+import static android.view.WindowManager.TRANSIT_KEYGUARD_GOING_AWAY;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.graphics.Rect;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
@@ -41,8 +43,10 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.ProtoLogGroup;
 import com.android.internal.protolog.common.ProtoLog;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
-import java.util.Map;
+import java.util.Set;
 
 /**
  * Represents a logical transition.
@@ -65,21 +69,44 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
      */
     private static final int STATE_PLAYING = 2;
 
-    final @WindowManager.TransitionOldType int mType;
+    /**
+     * This transition is aborting or has aborted. No animation will play nor will anything get
+     * sent to the player.
+     */
+    private static final int STATE_ABORT = 3;
+
+    @IntDef(prefix = { "STATE_" }, value = {
+            STATE_COLLECTING,
+            STATE_STARTED,
+            STATE_PLAYING,
+            STATE_ABORT
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    @interface TransitionState {}
+
+    final @WindowManager.TransitionType int mType;
     private int mSyncId;
     private @WindowManager.TransitionFlags int mFlags;
     private final TransitionController mController;
     private final BLASTSyncEngine mSyncEngine;
-    final ArrayMap<WindowContainer, ChangeInfo> mParticipants = new ArrayMap<>();
-    private int mState = STATE_COLLECTING;
+
+    /**
+     * Contains change infos for both participants and all ancestors. We have to track ancestors
+     * because they are all promotion candidates and thus we need their start-states
+     * to be captured.
+     */
+    final ArrayMap<WindowContainer, ChangeInfo> mChanges = new ArrayMap<>();
+
+    final ArraySet<WindowContainer> mParticipants = new ArraySet<>();
+    private @TransitionState int mState = STATE_COLLECTING;
     private boolean mReadyCalled = false;
 
-    Transition(@WindowManager.TransitionOldType int type,
-            @WindowManager.TransitionFlags int flags, TransitionController controller) {
+    Transition(@WindowManager.TransitionType int type, @WindowManager.TransitionFlags int flags,
+            TransitionController controller, BLASTSyncEngine syncEngine) {
         mType = type;
         mFlags = flags;
         mController = controller;
-        mSyncEngine = mController.mAtm.mWindowManager.mSyncEngine;
+        mSyncEngine = syncEngine;
         mSyncId = mSyncEngine.startSyncSet(this);
     }
 
@@ -100,14 +127,40 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         }
     }
 
-    /** Adds wc to set of WindowContainers participating in this transition. */
+    /**
+     * Adds wc to set of WindowContainers participating in this transition.
+     */
     void collect(@NonNull WindowContainer wc) {
         if (mSyncId < 0) return;
         ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS, "Collecting in transition %d: %s",
                 mSyncId, wc);
-        if (mParticipants.containsKey(wc)) return;
+        // "snapshot" all parents (as potential promotion targets). Do this before checking
+        // if this is already a participant in case it has since been re-parented.
+        for (WindowContainer curr = wc.getParent(); curr != null && !mChanges.containsKey(curr);
+                curr = curr.getParent()) {
+            mChanges.put(curr, new ChangeInfo(curr));
+        }
+        if (mParticipants.contains(wc)) return;
         mSyncEngine.addToSyncSet(mSyncId, wc);
-        mParticipants.put(wc, new ChangeInfo());
+        mChanges.put(wc, new ChangeInfo(wc));
+        mParticipants.add(wc);
+    }
+
+    /**
+     * Records wc as changing its state of existence during this transition. For example, a new
+     * task is considered an existence change while moving a task to front is not. wc is added
+     * to the collection set. Note: Existence is NOT a promotable characteristic.
+     *
+     * This must be explicitly recorded because there are o number of situations where the actual
+     * hierarchy operations don't align with the intent (eg. re-using a task with a new activity
+     * or waiting until after the animation to close).
+     */
+    void collectExistenceChange(@NonNull WindowContainer wc) {
+        if (mSyncId < 0) return;
+        ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS, "Existence Changed in transition %d:"
+                + " %s", mSyncId, wc);
+        collect(wc);
+        mChanges.get(wc).mExistenceChanged = true;
     }
 
     /**
@@ -116,15 +169,20 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
      *
      * If this is called before the transition is started, it will be deferred until start.
      */
-    void setReady() {
+    void setReady(boolean ready) {
         if (mSyncId < 0) return;
         if (mState < STATE_STARTED) {
-            mReadyCalled = true;
+            mReadyCalled = ready;
             return;
         }
         ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
-                "Finish collecting in transition %d", mSyncId);
-        mSyncEngine.setReady(mSyncId);
+                "Set transition ready=%b %d", ready, mSyncId);
+        mSyncEngine.setReady(mSyncId, ready);
+    }
+
+    /** @see #setReady . This calls with parameter true. */
+    void setReady() {
+        setReady(true);
     }
 
     /** The transition has finished animating and is ready to finalize WM state */
@@ -133,7 +191,7 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
             throw new IllegalStateException("Can't finish a non-playing transition " + mSyncId);
         }
         for (int i = 0; i < mParticipants.size(); ++i) {
-            final ActivityRecord ar = mParticipants.keyAt(i).asActivityRecord();
+            final ActivityRecord ar = mParticipants.valueAt(i).asActivityRecord();
             if (ar == null || ar.mVisibleRequested) {
                 continue;
             }
@@ -143,20 +201,40 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         }
     }
 
+    void abort() {
+        // This calls back into itself via controller.abort, so just early return here.
+        if (mState == STATE_ABORT) return;
+        if (mState != STATE_COLLECTING) {
+            throw new IllegalStateException("Too late to abort.");
+        }
+        mState = STATE_ABORT;
+        // Syncengine abort will call through to onTransactionReady()
+        mSyncEngine.abort(mSyncId);
+    }
+
     @Override
     public void onTransactionReady(int syncId, SurfaceControl.Transaction transaction) {
         if (syncId != mSyncId) {
             Slog.e(TAG, "Unexpected Sync ID " + syncId + ". Expected " + mSyncId);
             return;
         }
-        mState = STATE_PLAYING;
-        mController.moveToPlaying(this);
-        final TransitionInfo info = calculateTransitionInfo(mType, mParticipants);
-
         int displayId = DEFAULT_DISPLAY;
-        for (WindowContainer container : mParticipants.keySet()) {
+        for (WindowContainer container : mParticipants) {
+            if (container.mDisplayContent == null) continue;
             displayId = container.mDisplayContent.getDisplayId();
         }
+
+        if (mState == STATE_ABORT) {
+            mController.abort(this);
+            mController.mAtm.mRootWindowContainer.getDisplayContent(displayId)
+                    .getPendingTransaction().merge(transaction);
+            mSyncId = -1;
+            return;
+        }
+
+        mState = STATE_PLAYING;
+        mController.moveToPlaying(this);
+        final TransitionInfo info = calculateTransitionInfo(mType, mParticipants, mChanges);
 
         handleNonAppWindowsInTransition(displayId, mType, mFlags);
 
@@ -176,13 +254,14 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         mSyncId = -1;
     }
 
-    private void handleNonAppWindowsInTransition(int displayId, int transit, int flags) {
+    private void handleNonAppWindowsInTransition(int displayId,
+            @WindowManager.TransitionType int transit, int flags) {
         final DisplayContent dc =
                 mController.mAtm.mRootWindowContainer.getDisplayContent(displayId);
         if (dc == null) {
             return;
         }
-        if (transit == TRANSIT_OLD_KEYGUARD_GOING_AWAY) {
+        if (transit == TRANSIT_KEYGUARD_GOING_AWAY) {
             if ((flags & TRANSIT_FLAG_KEYGUARD_GOING_AWAY_WITH_WALLPAPER) != 0
                     && (flags & TRANSIT_FLAG_KEYGUARD_GOING_AWAY_NO_ANIMATION) == 0
                     && (flags & TRANSIT_FLAG_KEYGUARD_GOING_AWAY_SUBTLE_ANIMATION) == 0) {
@@ -196,13 +275,13 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
                 }
             }
         }
-        if (transit == TRANSIT_OLD_KEYGUARD_GOING_AWAY
-                || transit == TRANSIT_OLD_KEYGUARD_GOING_AWAY_ON_WALLPAPER) {
+        if (transit == TRANSIT_KEYGUARD_GOING_AWAY) {
             dc.startKeyguardExitOnNonAppWindows(
-                    transit == TRANSIT_OLD_KEYGUARD_GOING_AWAY_ON_WALLPAPER,
+                    (flags & TRANSIT_FLAG_KEYGUARD_GOING_AWAY_WITH_WALLPAPER) != 0,
                     (flags & TRANSIT_FLAG_KEYGUARD_GOING_AWAY_TO_SHADE) != 0,
                     (flags & TRANSIT_FLAG_KEYGUARD_GOING_AWAY_SUBTLE_ANIMATION) != 0);
-            mController.mAtm.mWindowManager.mPolicy.startKeyguardExitAnimation(transit, 0);
+            mController.mAtm.mWindowManager.mPolicy.startKeyguardExitAnimation(
+                    SystemClock.uptimeMillis(), 0 /* duration */);
         }
     }
 
@@ -237,17 +316,6 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
             ++depth;
         }
         return -1;
-    }
-
-    private static @TransitionInfo.TransitionMode int getModeFor(WindowContainer wc) {
-        if (wc.isVisibleRequested()) {
-            final Task t = wc.asTask();
-            if (t != null && t.getHasBeenVisible()) {
-                return TransitionInfo.TRANSIT_SHOW;
-            }
-            return TransitionInfo.TRANSIT_OPEN;
-        }
-        return TransitionInfo.TRANSIT_CLOSE;
     }
 
     /**
@@ -321,10 +389,9 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
      * @return {@code true} if something was promoted.
      */
     private static boolean tryPromote(ArraySet<WindowContainer> topTargets,
-            ArrayMap<WindowContainer, ChangeInfo> targets) {
+            ArraySet<WindowContainer> targets, ArrayMap<WindowContainer, ChangeInfo> changes) {
         ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS, "  --- Start combine pass ---");
         // Go through each target until we find one that can be promoted.
-        targetLoop:
         for (WindowContainer targ : topTargets) {
             ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS, "    checking %s", targ);
             if (!canPromote(targ, topTargets)) {
@@ -334,25 +401,27 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
             // No obstructions found to promotion, so promote
             ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
                     "      CAN PROMOTE: promoting to parent %s", parent);
-            final ChangeInfo parentInfo = new ChangeInfo();
-            targets.put(parent, parentInfo);
-            // Go through all children of newly-promoted container and remove them from
-            // the top-targets.
+            final ChangeInfo parentInfo = changes.get(parent);
+            targets.add(parent);
+
+            // Go through all children of newly-promoted container and remove them from the
+            // top-targets.
             for (int i = parent.getChildCount() - 1; i >= 0; --i) {
                 final WindowContainer child = parent.getChildAt(i);
-                int idx = targets.indexOfKey(child);
+                int idx = targets.indexOf(child);
                 if (idx >= 0) {
+                    final ChangeInfo childInfo = changes.get(child);
                     if (reportIfNotTop(child)) {
-                        targets.valueAt(idx).mParent = parent;
+                        childInfo.mParent = parent;
                         parentInfo.addChild(child);
                         ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
                                 "        keep as target %s", child);
                     } else {
-                        if (targets.valueAt(idx).mChildren != null) {
+                        if (childInfo.mChildren != null) {
                             ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
                                     "        merging children in from %s: %s", child,
-                                    targets.valueAt(idx).mChildren);
-                            parentInfo.addChildren(targets.valueAt(idx).mChildren);
+                                    childInfo.mChildren);
+                            parentInfo.addChildren(childInfo.mChildren);
                         }
                         ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
                                 "        remove from targets %s", child);
@@ -374,84 +443,85 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
      * animation targets to higher level in the window hierarchy if possible.
      */
     @VisibleForTesting
-    static TransitionInfo calculateTransitionInfo(
-            int type, Map<WindowContainer, ChangeInfo> participants) {
+    static TransitionInfo calculateTransitionInfo(int type, Set<WindowContainer> participants,
+            ArrayMap<WindowContainer, ChangeInfo> changes) {
         final TransitionInfo out = new TransitionInfo(type);
 
         ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
-                "Start calculating TransitionInfo based on participants: %s",
-                new ArraySet<>(participants.keySet()));
+                "Start calculating TransitionInfo based on participants: %s", participants);
 
         final ArraySet<WindowContainer> topTargets = new ArraySet<>();
         // The final animation targets which cannot promote to higher level anymore.
-        final ArrayMap<WindowContainer, ChangeInfo> targets = new ArrayMap<>();
+        final ArraySet<WindowContainer> targets = new ArraySet<>();
 
         final ArrayList<WindowContainer> tmpList = new ArrayList<>();
 
-        // Build initial set of top-level participants by removing any participants that are
-        // children of other participants or are otherwise invalid.
-        for (Map.Entry<WindowContainer, ChangeInfo> entry : participants.entrySet()) {
-            final WindowContainer wc = entry.getKey();
+        // Build initial set of top-level participants by removing any participants that are no-ops
+        // or children of other participants or are otherwise invalid.
+        for (WindowContainer wc : participants) {
             // Don't include detached windows.
             if (!wc.isAttached()) continue;
 
-            final ChangeInfo changeInfo = entry.getValue();
-            WindowContainer parent = wc.getParent();
+            final ChangeInfo changeInfo = changes.get(wc);
+
+            // Reject no-ops
+            if (!changeInfo.hasChanged(wc)) continue;
+
+            // Search through ancestors to find the top-most participant (if one exists)
             WindowContainer topParent = null;
-            // Keep track of always-report parents in bottom-to-top order
             tmpList.clear();
-            while (parent != null) {
-                if (participants.containsKey(parent)) {
-                    topParent = parent;
-                } else if (reportIfNotTop(parent)) {
-                    tmpList.add(parent);
+            for (WindowContainer p = wc.getParent(); p != null; p = p.getParent()) {
+                if (participants.contains(p)) {
+                    topParent = p;
+                    break;
+                } else if (reportIfNotTop(p)) {
+                    tmpList.add(p);
                 }
-                parent = parent.getParent();
             }
             if (topParent != null) {
-                // Add always-report parents along the way
-                parent = topParent;
-                for (int i = tmpList.size() - 1; i >= 0; --i) {
-                    if (!participants.containsKey(tmpList.get(i))) {
-                        final ChangeInfo info = new ChangeInfo();
-                        info.mParent = parent;
-                        targets.put(tmpList.get(i), info);
-                    }
-                    parent = tmpList.get(i);
+                // There was an ancestor participant, so don't add wc to targets. However, continue
+                // to add any always-report parents along the way.
+                for (int i = 0; i < tmpList.size(); ++i) {
+                    targets.add(tmpList.get(i));
+                    final ChangeInfo info = changes.get(tmpList.get(i));
+                    info.mParent = i < tmpList.size() - 1 ? tmpList.get(i + 1) : topParent;
                 }
                 continue;
             }
-            targets.put(wc, changeInfo);
+            // No ancestors in participant-list, so wc is a top target.
+            targets.add(wc);
             topTargets.add(wc);
         }
 
         // Populate children lists
         for (int i = targets.size() - 1; i >= 0; --i) {
-            if (targets.valueAt(i).mParent != null) {
-                targets.get(targets.valueAt(i).mParent).addChild(targets.keyAt(i));
+            if (changes.get(targets.valueAt(i)).mParent != null) {
+                changes.get(changes.get(targets.valueAt(i)).mParent).addChild(targets.valueAt(i));
             }
         }
 
-        ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
-                "  Initial targets: %s", new ArraySet<>(targets.keySet()));
+        ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS, "  Initial targets: %s", targets);
         ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS, "  Top targets: %s", topTargets);
 
         // Combine targets by repeatedly going through the topTargets to see if they can be
         // promoted until there aren't any promotions possible.
-        while (tryPromote(topTargets, targets)) {
+        while (tryPromote(topTargets, targets, changes)) {
             // Empty on purpose
         }
 
         // Convert all the resolved ChangeInfos into a TransactionInfo object.
         for (int i = targets.size() - 1; i >= 0; --i) {
-            final WindowContainer target = targets.keyAt(i);
-            final ChangeInfo info = targets.valueAt(i);
+            final WindowContainer target = targets.valueAt(i);
+            final ChangeInfo info = changes.get(target);
             final TransitionInfo.Change change = new TransitionInfo.Change(
-                    target.mRemoteToken.toWindowContainerToken(), target.getSurfaceControl());
+                    target.mRemoteToken != null ? target.mRemoteToken.toWindowContainerToken()
+                            : null, target.getSurfaceControl());
             if (info.mParent != null) {
                 change.setParent(info.mParent.mRemoteToken.toWindowContainerToken());
             }
-            change.setMode(getModeFor(target));
+            change.setMode(info.getTransitMode(target));
+            change.setStartBounds(info.mAbsoluteBounds);
+            change.setEndBounds(target.getBounds());
             out.addChange(change);
         }
 
@@ -464,9 +534,51 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
 
     @VisibleForTesting
     static class ChangeInfo {
+        // Usually "post" change state.
         WindowContainer mParent;
         ArraySet<WindowContainer> mChildren;
-        // TODO(shell-transitions): other tracking like before state and bounds
+
+        // State tracking
+        boolean mExistenceChanged = false;
+        // before change state
+        boolean mVisible;
+        int mWindowingMode;
+        Rect mAbsoluteBounds;
+
+        ChangeInfo(@NonNull WindowContainer origState) {
+            mVisible = origState.isVisibleRequested();
+            mWindowingMode = origState.getWindowingMode();
+            mAbsoluteBounds = origState.getBounds();
+        }
+
+        @VisibleForTesting
+        ChangeInfo(boolean visible, boolean existChange) {
+            mVisible = visible;
+            mAbsoluteBounds = new Rect();
+            mExistenceChanged = existChange;
+        }
+
+        boolean hasChanged(@NonNull WindowContainer newState) {
+            return newState.isVisibleRequested() != mVisible
+                    // if mWindowingMode is 0, this container wasn't attached at collect time, so
+                    // assume no change in windowing-mode.
+                    || (mWindowingMode != 0 && newState.getWindowingMode() != mWindowingMode)
+                    || !newState.getBounds().equals(mAbsoluteBounds);
+        }
+
+        @TransitionInfo.TransitionMode
+        int getTransitMode(@NonNull WindowContainer wc) {
+            final boolean nowVisible = wc.isVisibleRequested();
+            if (nowVisible == mVisible) {
+                return TransitionInfo.TRANSIT_CHANGE;
+            }
+            if (mExistenceChanged) {
+                return nowVisible ? TransitionInfo.TRANSIT_OPEN : TransitionInfo.TRANSIT_CLOSE;
+            } else {
+                return nowVisible ? TransitionInfo.TRANSIT_SHOW : TransitionInfo.TRANSIT_HIDE;
+            }
+        }
+
         void addChild(@NonNull WindowContainer wc) {
             if (mChildren == null) {
                 mChildren = new ArraySet<>();

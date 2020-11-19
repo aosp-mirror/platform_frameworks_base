@@ -78,6 +78,7 @@ import android.util.DisplayMetrics;
 import android.util.Singleton;
 import android.util.Size;
 import android.view.Surface;
+import android.view.WindowInsetsController.Appearance;
 
 import com.android.internal.app.LocalePicker;
 import com.android.internal.app.procstats.ProcessStats;
@@ -322,8 +323,8 @@ public class ActivityManager {
     public static final int START_RETURN_INTENT_TO_CALLER = FIRST_START_SUCCESS_CODE + 1;
 
     /**
-     * Result for IActivityManaqer.startActivity: activity wasn't really started, but
-     * a task was simply brought to the foreground.
+     * Result for IActivityManaqer.startActivity: activity was started or brought forward in an
+     * existing task which was brought to the foreground.
      * @hide
      */
     public static final int START_TASK_TO_FRONT = FIRST_START_SUCCESS_CODE + 2;
@@ -2116,7 +2117,7 @@ public class ActivityManager {
         // the task having a secure window or having previews disabled
         private final boolean mIsRealSnapshot;
         private final int mWindowingMode;
-        private final int mSystemUiVisibility;
+        private final @Appearance int mAppearance;
         private final boolean mIsTranslucent;
         // Must be one of the named color spaces, otherwise, always use SRGB color space.
         private final ColorSpace mColorSpace;
@@ -2125,7 +2126,7 @@ public class ActivityManager {
                 @NonNull ComponentName topActivityComponent, HardwareBuffer snapshot,
                 @NonNull ColorSpace colorSpace, int orientation, int rotation, Point taskSize,
                 Rect contentInsets, boolean isLowResolution, boolean isRealSnapshot,
-                int windowingMode, int systemUiVisibility, boolean isTranslucent) {
+                int windowingMode, @Appearance int appearance, boolean isTranslucent) {
             mId = id;
             mTopActivityComponent = topActivityComponent;
             mSnapshot = snapshot;
@@ -2138,7 +2139,7 @@ public class ActivityManager {
             mIsLowResolution = isLowResolution;
             mIsRealSnapshot = isRealSnapshot;
             mWindowingMode = windowingMode;
-            mSystemUiVisibility = systemUiVisibility;
+            mAppearance = appearance;
             mIsTranslucent = isTranslucent;
         }
 
@@ -2157,7 +2158,7 @@ public class ActivityManager {
             mIsLowResolution = source.readBoolean();
             mIsRealSnapshot = source.readBoolean();
             mWindowingMode = source.readInt();
-            mSystemUiVisibility = source.readInt();
+            mAppearance = source.readInt();
             mIsTranslucent = source.readBoolean();
         }
 
@@ -2265,11 +2266,11 @@ public class ActivityManager {
         }
 
         /**
-         * @return The system ui visibility flags for the top most visible fullscreen window at the
+         * @return The {@link Appearance} flags for the top most visible fullscreen window at the
          *         time that the snapshot was taken.
          */
-        public int getSystemUiVisibility() {
-            return mSystemUiVisibility;
+        public @Appearance int getAppearance() {
+            return mAppearance;
         }
 
         @Override
@@ -2291,7 +2292,7 @@ public class ActivityManager {
             dest.writeBoolean(mIsLowResolution);
             dest.writeBoolean(mIsRealSnapshot);
             dest.writeInt(mWindowingMode);
-            dest.writeInt(mSystemUiVisibility);
+            dest.writeInt(mAppearance);
             dest.writeBoolean(mIsTranslucent);
         }
 
@@ -2311,7 +2312,7 @@ public class ActivityManager {
                     + " mIsLowResolution=" + mIsLowResolution
                     + " mIsRealSnapshot=" + mIsRealSnapshot
                     + " mWindowingMode=" + mWindowingMode
-                    + " mSystemUiVisibility=" + mSystemUiVisibility
+                    + " mAppearance=" + mAppearance
                     + " mIsTranslucent=" + mIsTranslucent;
         }
 
@@ -2336,7 +2337,7 @@ public class ActivityManager {
             private Rect mContentInsets;
             private boolean mIsRealSnapshot;
             private int mWindowingMode;
-            private int mSystemUiVisibility;
+            private @Appearance int mAppearance;
             private boolean mIsTranslucent;
             private int mPixelFormat;
 
@@ -2393,8 +2394,8 @@ public class ActivityManager {
                 return this;
             }
 
-            public Builder setSystemUiVisibility(int systemUiVisibility) {
-                mSystemUiVisibility = systemUiVisibility;
+            public Builder setAppearance(@Appearance int appearance) {
+                mAppearance = appearance;
                 return this;
             }
 
@@ -2428,7 +2429,7 @@ public class ActivityManager {
                         false /* isLowResolution */,
                         mIsRealSnapshot,
                         mWindowingMode,
-                        mSystemUiVisibility,
+                        mAppearance,
                         mIsTranslucent);
 
             }

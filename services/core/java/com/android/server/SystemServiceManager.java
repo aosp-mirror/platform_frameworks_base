@@ -24,7 +24,6 @@ import android.content.pm.UserInfo;
 import android.os.Environment;
 import android.os.SystemClock;
 import android.os.Trace;
-import android.os.UserManagerInternal;
 import android.util.ArrayMap;
 import android.util.EventLog;
 import android.util.IndentingPrintWriter;
@@ -35,6 +34,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.Preconditions;
 import com.android.server.SystemService.TargetUser;
 import com.android.server.am.EventLogTags;
+import com.android.server.pm.UserManagerInternal;
 import com.android.server.utils.TimingsTraceAndSlog;
 
 import dalvik.system.PathClassLoader;

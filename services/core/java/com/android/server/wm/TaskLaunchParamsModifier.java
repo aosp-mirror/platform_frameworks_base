@@ -83,13 +83,14 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
     // We always want to step by at least this.
     private static final int MINIMAL_STEP = 1;
 
-    private final ActivityStackSupervisor mSupervisor;
+    private final ActivityTaskSupervisor mSupervisor;
     private final Rect mTmpBounds = new Rect();
+    private final Rect mTmpStableBounds = new Rect();
     private final int[] mTmpDirections = new int[2];
 
     private StringBuilder mLogBuilder;
 
-    TaskLaunchParamsModifier(ActivityStackSupervisor supervisor) {
+    TaskLaunchParamsModifier(ActivityTaskSupervisor supervisor) {
         mSupervisor = supervisor;
     }
 
@@ -425,7 +426,8 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
 
         // Use stable frame instead of raw frame to avoid launching freeform windows on top of
         // stable insets, which usually are system widgets such as sysbar & navbar.
-        final Rect displayStableBounds = display.mDisplayContent.mDisplayFrames.mStable;
+        final Rect displayStableBounds = mTmpStableBounds;
+        display.getStableRect(displayStableBounds);
         final int defaultWidth = displayStableBounds.width();
         final int defaultHeight = displayStableBounds.height();
 
@@ -636,7 +638,8 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
         // of default size is calculated to keep the same aspect ratio as the display's. Here we use
         // stable bounds of displays because that indicates the area that isn't occupied by system
         // widgets (e.g. sysbar and navbar).
-        Rect displayStableBounds = display.mDisplayContent.mDisplayFrames.mStable;
+        final Rect displayStableBounds = mTmpStableBounds;
+        display.getStableRect(displayStableBounds);
         final int portraitHeight =
                 Math.min(displayStableBounds.width(), displayStableBounds.height());
         final int otherDimension =
@@ -676,7 +679,7 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
     private void centerBounds(@NonNull DisplayContent display, int width, int height,
             @NonNull Rect inOutBounds) {
         if (inOutBounds.isEmpty()) {
-            inOutBounds.set(display.mDisplayContent.mDisplayFrames.mStable);
+            display.getStableRect(inOutBounds);
         }
         final int left = inOutBounds.centerX() - width / 2;
         final int top = inOutBounds.centerY() - height / 2;
@@ -685,7 +688,8 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
 
     private void adjustBoundsToFitInDisplay(@NonNull DisplayContent display,
             @NonNull Rect inOutBounds) {
-        final Rect displayStableBounds = display.mDisplayContent.mDisplayFrames.mStable;
+        final Rect displayStableBounds = mTmpStableBounds;
+        display.getStableRect(displayStableBounds);
 
         if (displayStableBounds.width() < inOutBounds.width()
                 || displayStableBounds.height() < inOutBounds.height()) {

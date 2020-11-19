@@ -492,10 +492,10 @@ class InsetsPolicy {
                 }
                 mAnimatingShown = show;
 
+                final InsetsState state = getInsetsForWindow(mFocusedWin);
                 mAnimationControl = new InsetsAnimationControlImpl(controls,
-                        mFocusedWin.getDisplayContent().getBounds(), mFocusedWin.getInsetsState(),
-                        mListener, typesReady, this, mListener.getDurationMs(),
-                        InsetsController.SYSTEM_BARS_INTERPOLATOR,
+                        state.getDisplayFrame(), state, mListener, typesReady, this,
+                        mListener.getDurationMs(), InsetsController.SYSTEM_BARS_INTERPOLATOR,
                         show ? ANIMATION_TYPE_SHOW : ANIMATION_TYPE_HIDE, null /* translator */);
                 SurfaceAnimationThread.getHandler().post(
                         () -> mListener.onReady(mAnimationControl, typesReady));

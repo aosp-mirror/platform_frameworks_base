@@ -71,7 +71,6 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.UserHandle;
-import android.os.UserManagerInternal;
 import android.os.storage.IStorageManager;
 import android.platform.test.annotations.Presubmit;
 import android.util.Log;
@@ -80,6 +79,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.server.FgThread;
 import com.android.server.am.UserState.KeyEvictedCallback;
+import com.android.server.pm.UserManagerInternal;
 import com.android.server.pm.UserManagerService;
 import com.android.server.wm.WindowManagerService;
 
@@ -151,13 +151,13 @@ public class UserControllerTest {
             mInjector = spy(new TestInjector(getInstrumentation().getTargetContext()));
             doNothing().when(mInjector).clearAllLockedTasks(anyString());
             doNothing().when(mInjector).startHomeActivity(anyInt(), anyString());
-            doReturn(false).when(mInjector).stackSupervisorSwitchUser(anyInt(), any());
-            doNothing().when(mInjector).stackSupervisorResumeFocusedStackTopActivity();
+            doReturn(false).when(mInjector).taskSupervisorSwitchUser(anyInt(), any());
+            doNothing().when(mInjector).taskSupervisorResumeFocusedStackTopActivity();
             doNothing().when(mInjector).systemServiceManagerOnUserStopped(anyInt());
             doNothing().when(mInjector).activityManagerForceStopPackage(anyInt(), anyString());
             doNothing().when(mInjector).activityManagerOnUserStopped(anyInt());
             doNothing().when(mInjector).clearBroadcastQueueForUser(anyInt());
-            doNothing().when(mInjector).stackSupervisorRemoveUser(anyInt());
+            doNothing().when(mInjector).taskSupervisorRemoveUser(anyInt());
             // All UserController params are set to default.
             mUserController = new UserController(mInjector);
             setUpUser(TEST_USER_ID, NO_USERINFO_FLAGS);

@@ -41,6 +41,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.proto.ProtoOutputStream;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.biometrics.Utils;
 import com.android.server.biometrics.sensors.AuthenticationClient;
 import com.android.server.biometrics.sensors.ClientMonitor;
@@ -67,9 +68,12 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
     private static final String TAG = "FaceProvider";
     private static final int ENROLL_TIMEOUT_SEC = 75;
 
+    private boolean mTestHalEnabled;
+
     @NonNull private final Context mContext;
     @NonNull private final String mHalInstanceName;
-    @NonNull private final SparseArray<Sensor> mSensors; // Map of sensors that this HAL supports
+    @NonNull @VisibleForTesting
+    final SparseArray<Sensor> mSensors; // Map of sensors that this HAL supports
     @NonNull private final ClientMonitor.LazyDaemon<IFace> mLazyDaemon;
     @NonNull private final Handler mHandler;
     @NonNull private final LockoutResetDispatcher mLockoutResetDispatcher;
@@ -150,6 +154,10 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
 
     @Nullable
     private synchronized IFace getHalInstance() {
+        if (mTestHalEnabled) {
+            return new TestHal();
+        }
+
         if (mDaemon != null) {
             return mDaemon;
         }
@@ -525,7 +533,9 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
 
     @Override
     public void dumpProtoState(int sensorId, @NonNull ProtoOutputStream proto) {
-
+        if (mSensors.contains(sensorId)) {
+            mSensors.get(sensorId).dumpProtoState(sensorId, proto);
+        }
     }
 
     @Override
@@ -576,8 +586,11 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
     @NonNull
     @Override
     public ITestSession createTestSession(int sensorId, @NonNull String opPackageName) {
-        return null; // TODO
+        return mSensors.get(sensorId).createTestSession();
     }
+
+    @Override
+    public void dumpHal(int sensorId, @NonNull FileDescriptor fd, @NonNull String[] args) {}
 
     @Override
     public void binderDied() {
@@ -585,9 +598,16 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
         mHandler.post(() -> {
             mDaemon = null;
             for (int i = 0; i < mSensors.size(); i++) {
+                final Sensor sensor = mSensors.valueAt(i);
                 final int sensorId = mSensors.keyAt(i);
                 PerformanceTracker.getInstanceForSensorId(sensorId).incrementHALDeathCount();
+                sensor.getScheduler().recordCrashState();
+                sensor.getScheduler().reset();
             }
         });
+    }
+
+    void setTestHalEnabled(boolean enabled) {
+        mTestHalEnabled = enabled;
     }
 }

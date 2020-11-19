@@ -86,8 +86,6 @@ public class PlatformKeyManager {
     private final KeyStoreProxy mKeyStore;
     private final RecoverableKeyStoreDb mDatabase;
 
-    private static final String ANDROID_KEY_STORE_PROVIDER = "AndroidKeyStore";
-
     /**
      * A new instance operating on behalf of {@code userId}, storing its prefs in the location
      * defined by {@code context}.
@@ -472,7 +470,7 @@ public class PlatformKeyManager {
      * @throws KeyStoreException if there was a problem getting or initializing the key store.
      */
     private static KeyStore getAndLoadAndroidKeyStore() throws KeyStoreException {
-        KeyStore keyStore = KeyStore.getInstance(ANDROID_KEY_STORE_PROVIDER);
+        KeyStore keyStore = KeyStore.getInstance(KeyStoreProxyImpl.androidKeystoreProviderName());
         try {
             keyStore.load(/*param=*/ null);
         } catch (CertificateException | IOException | NoSuchAlgorithmException e) {

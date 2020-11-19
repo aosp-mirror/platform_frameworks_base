@@ -170,14 +170,14 @@ public final class TransitionInfo implements Parcelable {
         private final Rect mStartBounds = new Rect();
         private final Rect mEndBounds = new Rect();
 
-        public Change(@NonNull WindowContainerToken container, @NonNull SurfaceControl leash) {
+        public Change(@Nullable WindowContainerToken container, @NonNull SurfaceControl leash) {
             mContainer = container;
             mLeash = leash;
         }
 
         private Change(Parcel in) {
-            mContainer = WindowContainerToken.CREATOR.createFromParcel(in);
-            mParent = in.readParcelable(WindowContainerToken.class.getClassLoader());
+            mContainer = in.readTypedObject(WindowContainerToken.CREATOR);
+            mParent = in.readTypedObject(WindowContainerToken.CREATOR);
             mLeash = new SurfaceControl();
             mLeash.readFromParcel(in);
             mMode = in.readInt();
@@ -205,8 +205,8 @@ public final class TransitionInfo implements Parcelable {
             mEndBounds.set(rect);
         }
 
-        /** @return the container that is changing */
-        @NonNull
+        /** @return the container that is changing. May be null if non-remotable (eg. activity) */
+        @Nullable
         public WindowContainerToken getContainer() {
             return mContainer;
         }
@@ -252,8 +252,8 @@ public final class TransitionInfo implements Parcelable {
         @Override
         /** @hide */
         public void writeToParcel(@NonNull Parcel dest, int flags) {
-            mContainer.writeToParcel(dest, flags);
-            dest.writeParcelable(mParent, 0);
+            dest.writeTypedObject(mContainer, flags);
+            dest.writeTypedObject(mParent, flags);
             mLeash.writeToParcel(dest, flags);
             dest.writeInt(mMode);
             mStartBounds.writeToParcel(dest, flags);

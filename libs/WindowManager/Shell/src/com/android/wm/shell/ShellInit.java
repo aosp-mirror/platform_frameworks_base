@@ -16,9 +16,13 @@
 
 package com.android.wm.shell;
 
+import static com.android.wm.shell.ShellTaskOrganizer.TASK_LISTENER_TYPE_FULLSCREEN;
+import static com.android.wm.shell.ShellTaskOrganizer.TASK_LISTENER_TYPE_LETTERBOX;
+
 import com.android.wm.shell.apppairs.AppPairs;
 import com.android.wm.shell.common.DisplayImeController;
 import com.android.wm.shell.draganddrop.DragAndDropController;
+import com.android.wm.shell.letterbox.LetterboxTaskListener;
 import com.android.wm.shell.splitscreen.SplitScreen;
 
 import java.util.Optional;
@@ -33,24 +37,36 @@ public class ShellInit {
     private final ShellTaskOrganizer mShellTaskOrganizer;
     private final Optional<SplitScreen> mSplitScreenOptional;
     private final Optional<AppPairs> mAppPairsOptional;
+    private final LetterboxTaskListener mLetterboxTaskListener;
+    private final FullscreenTaskListener mFullscreenTaskListener;
 
     public ShellInit(DisplayImeController displayImeController,
             DragAndDropController dragAndDropController,
             ShellTaskOrganizer shellTaskOrganizer,
             Optional<SplitScreen> splitScreenOptional,
-            Optional<AppPairs> appPairsOptional) {
+            Optional<AppPairs> appPairsOptional,
+            LetterboxTaskListener letterboxTaskListener,
+            FullscreenTaskListener fullscreenTaskListener) {
         mDisplayImeController = displayImeController;
         mDragAndDropController = dragAndDropController;
         mShellTaskOrganizer = shellTaskOrganizer;
         mSplitScreenOptional = splitScreenOptional;
         mAppPairsOptional = appPairsOptional;
+        mLetterboxTaskListener = letterboxTaskListener;
+        mFullscreenTaskListener = fullscreenTaskListener;
     }
 
     public void init() {
         // Start listening for display changes
         mDisplayImeController.startMonitorDisplays();
+
+        mShellTaskOrganizer.addListenerForType(
+                mLetterboxTaskListener, TASK_LISTENER_TYPE_LETTERBOX);
+        mShellTaskOrganizer.addListenerForType(
+                mFullscreenTaskListener, TASK_LISTENER_TYPE_FULLSCREEN);
         // Register the shell organizer
         mShellTaskOrganizer.registerOrganizer();
+
         mAppPairsOptional.ifPresent(AppPairs::onOrganizerRegistered);
         // Bind the splitscreen impl to the drag drop controller
         mDragAndDropController.setSplitScreenController(mSplitScreenOptional);

@@ -75,7 +75,7 @@ class LaunchParamsPersister {
     private static final String TAG_LAUNCH_PARAMS = "launch_params";
 
     private final PersisterQueue mPersisterQueue;
-    private final ActivityStackSupervisor mSupervisor;
+    private final ActivityTaskSupervisor mSupervisor;
 
     /**
      * A function that takes in user ID and returns a folder to store information of that user. Used
@@ -101,12 +101,12 @@ class LaunchParamsPersister {
     private final ArrayMap<String, ArraySet<ComponentName>> mWindowLayoutAffinityMap =
             new ArrayMap<>();
 
-    LaunchParamsPersister(PersisterQueue persisterQueue, ActivityStackSupervisor supervisor) {
+    LaunchParamsPersister(PersisterQueue persisterQueue, ActivityTaskSupervisor supervisor) {
         this(persisterQueue, supervisor, Environment::getDataSystemCeDirectory);
     }
 
     @VisibleForTesting
-    LaunchParamsPersister(PersisterQueue persisterQueue, ActivityStackSupervisor supervisor,
+    LaunchParamsPersister(PersisterQueue persisterQueue, ActivityTaskSupervisor supervisor,
             IntFunction<File> userFolderGetter) {
         mPersisterQueue = persisterQueue;
         mSupervisor = supervisor;

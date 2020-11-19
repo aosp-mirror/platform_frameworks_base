@@ -83,7 +83,6 @@ import android.os.ShellCallback;
 import android.os.ShellCommand;
 import android.os.SystemClock;
 import android.os.UserHandle;
-import android.os.UserManagerInternal;
 import android.text.TextUtils;
 import android.text.format.TimeMigrationUtils;
 import android.util.ArraySet;
@@ -2838,10 +2837,14 @@ public class ShortcutService extends IShortcutService.Stub {
                 int queryFlags, int userId, int callingPid, int callingUid) {
             final ArrayList<ShortcutInfo> ret = new ArrayList<>();
 
-            final boolean cloneKeyFieldOnly =
-                    ((queryFlags & ShortcutQuery.FLAG_GET_KEY_FIELDS_ONLY) != 0);
-            final int cloneFlag = cloneKeyFieldOnly ? ShortcutInfo.CLONE_REMOVE_NON_KEY_INFO
-                    : ShortcutInfo.CLONE_REMOVE_FOR_LAUNCHER;
+            int flags = ShortcutInfo.CLONE_REMOVE_FOR_LAUNCHER;
+            if ((queryFlags & ShortcutQuery.FLAG_GET_KEY_FIELDS_ONLY) != 0) {
+                flags = ShortcutInfo.CLONE_REMOVE_NON_KEY_INFO;
+            } else if ((queryFlags & ShortcutQuery.FLAG_GET_PERSONS_DATA) != 0) {
+                flags &= ~ShortcutInfo.CLONE_REMOVE_PERSON;
+            }
+            final int cloneFlag = flags;
+
             if (packageName == null) {
                 shortcutIds = null; // LauncherAppsService already threw for it though.
             }

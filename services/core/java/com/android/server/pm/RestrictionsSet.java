@@ -189,7 +189,7 @@ public class RestrictionsSet {
         serializer.startTag(null, outerTag);
         for (int i = 0; i < mUserRestrictions.size(); i++) {
             serializer.startTag(null, TAG_RESTRICTIONS_USER);
-            serializer.attribute(null, USER_ID, String.valueOf(mUserRestrictions.keyAt(i)));
+            serializer.attributeInt(null, USER_ID, mUserRestrictions.keyAt(i));
             UserRestrictionsUtils.writeRestrictions(serializer, mUserRestrictions.valueAt(i),
                     TAG_RESTRICTIONS);
             serializer.endTag(null, TAG_RESTRICTIONS_USER);
@@ -211,7 +211,7 @@ public class RestrictionsSet {
             if (type == XmlPullParser.END_TAG && outerTag.equals(tag)) {
                 return restrictionsSet;
             } else if (type == XmlPullParser.START_TAG && TAG_RESTRICTIONS_USER.equals(tag)) {
-                userId = Integer.parseInt(parser.getAttributeValue(null, USER_ID));
+                userId = parser.getAttributeInt(null, USER_ID);
             } else if (type == XmlPullParser.START_TAG && TAG_RESTRICTIONS.equals(tag)) {
                 Bundle restrictions = UserRestrictionsUtils.readRestrictions(parser);
                 restrictionsSet.updateRestrictions(userId, restrictions);

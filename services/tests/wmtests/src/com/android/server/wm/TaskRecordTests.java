@@ -930,7 +930,7 @@ public class TaskRecordTests extends WindowTestsBase {
 
     @Test
     public void testSaveLaunchingStateWhenConfigurationChanged() {
-        LaunchParamsPersister persister = mAtm.mStackSupervisor.mLaunchParamsPersister;
+        LaunchParamsPersister persister = mAtm.mTaskSupervisor.mLaunchParamsPersister;
         spyOn(persister);
 
         final Task task = getTestTask();
@@ -946,7 +946,7 @@ public class TaskRecordTests extends WindowTestsBase {
 
     @Test
     public void testSaveLaunchingStateWhenClearingParent() {
-        LaunchParamsPersister persister = mAtm.mStackSupervisor.mLaunchParamsPersister;
+        LaunchParamsPersister persister = mAtm.mTaskSupervisor.mLaunchParamsPersister;
         spyOn(persister);
 
         final Task task = getTestTask();
@@ -971,7 +971,7 @@ public class TaskRecordTests extends WindowTestsBase {
 
     @Test
     public void testNotSaveLaunchingStateNonFreeformDisplay() {
-        LaunchParamsPersister persister = mAtm.mStackSupervisor.mLaunchParamsPersister;
+        LaunchParamsPersister persister = mAtm.mTaskSupervisor.mLaunchParamsPersister;
         spyOn(persister);
 
         final Task task = getTestTask();
@@ -986,7 +986,7 @@ public class TaskRecordTests extends WindowTestsBase {
 
     @Test
     public void testNotSaveLaunchingStateWhenNotFullscreenOrFreeformWindow() {
-        LaunchParamsPersister persister = mAtm.mStackSupervisor.mLaunchParamsPersister;
+        LaunchParamsPersister persister = mAtm.mTaskSupervisor.mLaunchParamsPersister;
         spyOn(persister);
 
         final Task task = getTestTask();
@@ -1116,7 +1116,7 @@ public class TaskRecordTests extends WindowTestsBase {
             parser.setInput(reader);
             assertEquals(XmlPullParser.START_TAG, parser.next());
             assertEquals(TASK_TAG, parser.getName());
-            return Task.restoreFromXml(parser, mAtm.mStackSupervisor);
+            return Task.restoreFromXml(parser, mAtm.mTaskSupervisor);
         }
     }
 

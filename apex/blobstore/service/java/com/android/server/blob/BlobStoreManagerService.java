@@ -79,7 +79,6 @@ import android.os.Process;
 import android.os.RemoteCallback;
 import android.os.SystemClock;
 import android.os.UserHandle;
-import android.os.UserManagerInternal;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;
@@ -106,6 +105,7 @@ import com.android.server.ServiceThread;
 import com.android.server.SystemService;
 import com.android.server.Watchdog;
 import com.android.server.blob.BlobMetadata.Committer;
+import com.android.server.pm.UserManagerInternal;
 import com.android.server.usage.StorageStatsManagerInternal;
 import com.android.server.usage.StorageStatsManagerInternal.StorageStatsAugmenter;
 

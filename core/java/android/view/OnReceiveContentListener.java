@@ -48,7 +48,7 @@ import java.util.function.Predicate;
  *     public static final String[] MIME_TYPES = new String[] {"image/*", "video/*"};
  *
  *     &#64;Override
- *     public Payload onReceiveContent(TextView view, Payload payload) {
+ *     public Payload onReceiveContent(View view, Payload payload) {
  *         Map&lt;Boolean, Payload&gt; split = payload.partition(item -&gt; item.getUri() != null);
  *         if (split.get(true) != null) {
  *             ClipData clip = payload.getClip();

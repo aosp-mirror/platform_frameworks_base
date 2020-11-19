@@ -214,6 +214,7 @@ public class QSCustomizer extends LinearLayout {
         @Override
         public void onAnimationCancel(Animator animation) {
             mOpening = false;
+            mQs.notifyCustomizeChanged();
             mNotifQsContainer.setCustomizerAnimating(false);
         }
     }

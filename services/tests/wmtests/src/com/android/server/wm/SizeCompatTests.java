@@ -544,8 +544,7 @@ public class SizeCompatTests extends WindowTestsBase {
         addStatusBar(mActivity.mDisplayContent);
 
         mActivity.setVisible(false);
-        mActivity.mDisplayContent.prepareAppTransitionOld(WindowManager.TRANSIT_OLD_ACTIVITY_OPEN,
-                false /* alwaysKeepCurrent */);
+        mActivity.mDisplayContent.prepareAppTransition(WindowManager.TRANSIT_OPEN);
         mActivity.mDisplayContent.mOpeningApps.add(mActivity);
         final float maxAspect = 1.8f;
         prepareUnresizable(maxAspect, SCREEN_ORIENTATION_LANDSCAPE);

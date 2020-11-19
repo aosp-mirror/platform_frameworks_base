@@ -19,6 +19,7 @@ package com.android.systemui.biometrics;
 import static com.android.systemui.doze.util.BurnInHelperKt.getBurnInOffset;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
@@ -31,6 +32,7 @@ import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.MathUtils;
+import android.view.Surface;
 import android.view.View;
 import android.view.ViewTreeObserver;
 
@@ -51,20 +53,26 @@ public class UdfpsView extends View implements DozeReceiver,
 
     private static final int DEBUG_TEXT_SIZE_PX = 32;
 
-    private final Rect mScrimRect;
-    private final Paint mScrimPaint;
-    private final Paint mDebugTextPaint;
+    @NonNull private final Rect mScrimRect;
+    @NonNull private final Paint mScrimPaint;
+    @NonNull private final Paint mDebugTextPaint;
 
-    private final RectF mSensorRect;
-    private final Paint mSensorPaint;
+    @NonNull private final RectF mSensorRect;
+    @NonNull private final Paint mSensorPaint;
     private final float mSensorTouchAreaCoefficient;
     private final int mMaxBurnInOffsetX;
     private final int mMaxBurnInOffsetY;
 
-    private final Rect mTouchableRegion;
-    private final ViewTreeObserver.OnComputeInternalInsetsListener mInsetsListener;
+    // Stores rounded up values from mSensorRect. Necessary for APIs that only take Rect (not RecF).
+    @NonNull private final Rect mTouchableRegion;
+    // mInsetsListener is used to set the touchable region for our window. Our window covers the
+    // whole screen, and by default its touchable region is the whole screen. We use
+    // mInsetsListener to restrict the touchable region and allow the touches outside of the sensor
+    // to propagate to the rest of the UI.
+    @NonNull private final ViewTreeObserver.OnComputeInternalInsetsListener mInsetsListener;
 
-    @NonNull private FingerprintSensorPropertiesInternal mProps;
+    // Used to obtain the sensor location.
+    @NonNull private FingerprintSensorPropertiesInternal mSensorProps;
 
     // AOD anti-burn-in offsets
     private float mInterpolatedDarkAmount;
@@ -72,8 +80,8 @@ public class UdfpsView extends View implements DozeReceiver,
     private float mBurnInOffsetY;
 
     private boolean mIsScrimShowing;
-    private boolean mHbmSupported;
-    private String mDebugMessage;
+    private boolean mIsHbmSupported;
+    @Nullable private String mDebugMessage;
 
     public UdfpsView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -107,7 +115,6 @@ public class UdfpsView extends View implements DozeReceiver,
         mSensorPaint.setStyle(Paint.Style.STROKE);
         mSensorPaint.setStrokeWidth(SENSOR_OUTLINE_WIDTH);
         mSensorPaint.setShadowLayer(SENSOR_SHADOW_RADIUS, 0, 0, Color.BLACK);
-        mSensorPaint.setAntiAlias(true);
 
         mDebugTextPaint = new Paint();
         mDebugTextPaint.setAntiAlias(true);
@@ -115,6 +122,8 @@ public class UdfpsView extends View implements DozeReceiver,
         mDebugTextPaint.setTextSize(DEBUG_TEXT_SIZE_PX);
 
         mTouchableRegion = new Rect();
+        // When the device is rotated, it's important that mTouchableRegion is updated before
+        // this listener is called. This listener is usually called shortly after onLayout.
         mInsetsListener = internalInsetsInfo -> {
             internalInsetsInfo.setTouchableInsets(
                     ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_REGION);
@@ -125,7 +134,7 @@ public class UdfpsView extends View implements DozeReceiver,
     }
 
     void setSensorProperties(@NonNull FingerprintSensorPropertiesInternal properties) {
-        mProps = properties;
+        mSensorProps = properties;
     }
 
     @Override
@@ -151,22 +160,50 @@ public class UdfpsView extends View implements DozeReceiver,
         postInvalidate();
     }
 
+    // The "h" and "w" are the display's height and width relative to its current rotation.
+    private void updateSensorRect(int h, int w) {
+        // mSensorProps coordinates assume portrait mode.
+        mSensorRect.set(mSensorProps.sensorLocationX - mSensorProps.sensorRadius,
+                mSensorProps.sensorLocationY - mSensorProps.sensorRadius,
+                mSensorProps.sensorLocationX + mSensorProps.sensorRadius,
+                mSensorProps.sensorLocationY + mSensorProps.sensorRadius);
+
+        // Transform mSensorRect if the device is in landscape mode.
+        switch (mContext.getDisplay().getRotation()) {
+            case Surface.ROTATION_90:
+                mSensorRect.set(mSensorRect.top, h - mSensorRect.right, mSensorRect.bottom,
+                        h - mSensorRect.left);
+                break;
+            case Surface.ROTATION_270:
+                mSensorRect.set(w - mSensorRect.bottom, mSensorRect.left, w - mSensorRect.top,
+                        mSensorRect.right);
+                break;
+            default:
+                // Do nothing to stay in portrait mode.
+        }
+    }
+
+    @Override
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        super.onLayout(changed, left, top, right, bottom);
+        // Always re-compute the layout regardless of whether "changed" is true. It is usually false
+        // when the device goes from landscape to seascape and vice versa, but mSensorRect and
+        // its dependencies need to be recalculated to stay at the same physical location on the
+        // screen.
+        final int w = getLayoutParams().width;
+        final int h = getLayoutParams().height;
+        mScrimRect.set(0 /* left */, 0 /* top */, w, h);
+        updateSensorRect(h, w);
+        // Update mTouchableRegion with the rounded up values from mSensorRect. After "onLayout"
+        // is finished, mTouchableRegion will be used by mInsetsListener to compute the touch
+        // insets.
+        mSensorRect.roundOut(mTouchableRegion);
+    }
+
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         Log.v(TAG, "onAttachedToWindow");
-
-        final int h = getLayoutParams().height;
-        final int w = getLayoutParams().width;
-        mScrimRect.set(0 /* left */, 0 /* top */, w, h);
-        mSensorRect.set(mProps.sensorLocationX - mProps.sensorRadius,
-                mProps.sensorLocationY - mProps.sensorRadius,
-                mProps.sensorLocationX + mProps.sensorRadius,
-                mProps.sensorLocationY + mProps.sensorRadius);
-
-        // Sets mTouchableRegion with rounded up values from mSensorRect.
-        mSensorRect.roundOut(mTouchableRegion);
-
         getViewTreeObserver().addOnComputeInternalInsetsListener(mInsetsListener);
     }
 
@@ -181,7 +218,7 @@ public class UdfpsView extends View implements DozeReceiver,
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
-        if (mIsScrimShowing && mHbmSupported) {
+        if (mIsScrimShowing && mIsHbmSupported) {
             // Only draw the scrim if HBM is supported.
             canvas.drawRect(mScrimRect, mScrimPaint);
         }
@@ -200,8 +237,8 @@ public class UdfpsView extends View implements DozeReceiver,
         return new RectF(mSensorRect);
     }
 
-    void setHbmSupported(boolean hbmSupported) {
-        mHbmSupported = hbmSupported;
+    void setHbmSupported(boolean value) {
+        mIsHbmSupported = value;
     }
 
     void setDebugMessage(String message) {
@@ -210,10 +247,17 @@ public class UdfpsView extends View implements DozeReceiver,
     }
 
     boolean isValidTouch(float x, float y, float pressure) {
-        return x > (mProps.sensorLocationX - mProps.sensorRadius * mSensorTouchAreaCoefficient)
-                && x < (mProps.sensorLocationX + mProps.sensorRadius * mSensorTouchAreaCoefficient)
-                && y > (mProps.sensorLocationY - mProps.sensorRadius * mSensorTouchAreaCoefficient)
-                && y < (mProps.sensorLocationY + mProps.sensorRadius * mSensorTouchAreaCoefficient);
+        // The X and Y coordinates of the sensor's center.
+        final float cx = mSensorRect.centerX();
+        final float cy = mSensorRect.centerY();
+        // Radii along the X and Y axes.
+        final float rx = (mSensorRect.right - mSensorRect.left) / 2.0f;
+        final float ry = (mSensorRect.bottom - mSensorRect.top) / 2.0f;
+
+        return x > (cx - rx * mSensorTouchAreaCoefficient)
+                && x < (cx + rx * mSensorTouchAreaCoefficient)
+                && y > (cy - ry * mSensorTouchAreaCoefficient)
+                && y < (cy + ry * mSensorTouchAreaCoefficient);
     }
 
     void setScrimAlpha(int alpha) {

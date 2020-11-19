@@ -73,10 +73,8 @@ public:
     virtual void restoreToCount(int saveCount) override;
     virtual void restoreUnclippedLayer(int saveCount, const SkPaint& paint) override;
 
-    virtual int saveLayer(float left, float top, float right, float bottom, const SkPaint* paint,
-                          SaveFlags::Flags flags) override;
-    virtual int saveLayerAlpha(float left, float top, float right, float bottom, int alpha,
-                               SaveFlags::Flags flags) override;
+    virtual int saveLayer(float left, float top, float right, float bottom, const SkPaint* paint) override;
+    virtual int saveLayerAlpha(float left, float top, float right, float bottom, int alpha) override;
     virtual int saveUnclippedLayer(int left, int top, int right, int bottom) override;
 
     virtual void getMatrix(SkMatrix* outMatrix) const override;

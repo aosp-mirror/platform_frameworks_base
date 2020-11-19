@@ -29,7 +29,6 @@ import android.widget.LinearLayout;
 
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.R;
-import com.android.systemui.media.MediaHierarchyManager;
 import com.android.systemui.media.MediaHost;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.qs.QSTile.SignalState;
@@ -86,14 +85,6 @@ public class QuickQSPanel extends QSPanel {
     @Override
     protected QSTileLayout createHorizontalTileLayout() {
         return new DoubleLineTileLayout(mContext, mUiEventLogger);
-    }
-
-    @Override
-
-    protected void initMediaHostState() {
-        mMediaHost.setExpansion(0.0f);
-        mMediaHost.setShowsOnlyActiveMedia(true);
-        mMediaHost.init(MediaHierarchyManager.LOCATION_QQS);
     }
 
     @Override

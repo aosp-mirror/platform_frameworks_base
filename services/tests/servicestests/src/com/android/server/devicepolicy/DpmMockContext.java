@@ -31,7 +31,6 @@ import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.UserHandle;
-import android.os.UserManagerInternal;
 import android.test.mock.MockContext;
 import android.util.ArrayMap;
 import android.util.ExceptionUtils;
@@ -39,6 +38,7 @@ import android.util.ExceptionUtils;
 import androidx.annotation.NonNull;
 
 import com.android.internal.util.FunctionalUtils;
+import com.android.server.pm.UserManagerInternal;
 
 import org.junit.Assert;
 

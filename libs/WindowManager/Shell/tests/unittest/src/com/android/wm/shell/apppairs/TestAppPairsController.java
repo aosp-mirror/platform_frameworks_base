@@ -17,13 +17,16 @@
 package com.android.wm.shell.apppairs;
 
 import com.android.wm.shell.ShellTaskOrganizer;
+import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.SyncTransactionQueue;
+import com.android.wm.shell.common.TaskStackListenerImpl;
 
 public class TestAppPairsController extends AppPairsController {
     TestAppPairsPool mPool;
 
-    public TestAppPairsController(ShellTaskOrganizer organizer, SyncTransactionQueue syncQueue) {
-        super(organizer, syncQueue);
+    public TestAppPairsController(ShellTaskOrganizer organizer, SyncTransactionQueue syncQueue,
+            DisplayController displayController, TaskStackListenerImpl taskStackListener) {
+        super(organizer, syncQueue, displayController, taskStackListener);
         mPool = new TestAppPairsPool(this);
         setPairsPool(mPool);
     }

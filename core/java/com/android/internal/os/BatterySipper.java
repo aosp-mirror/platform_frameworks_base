@@ -132,6 +132,10 @@ public class BatterySipper implements Comparable<BatterySipper> {
     public double wifiPowerMah;
     public double systemServiceCpuPowerMah;
 
+    // Do not include this sipper in results because it is included
+    // in an aggregate sipper.
+    public boolean isAggregated;
+
     //                           ****************
     // This list must be kept current with atoms.proto (frameworks/base/cmds/statsd/src/atoms.proto)
     // so the ordinal values (and therefore the order) must never change.

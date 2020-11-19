@@ -118,4 +118,6 @@ public interface ServiceProvider {
 
     @NonNull
     ITestSession createTestSession(int sensorId, @NonNull String opPackageName);
+
+    void dumpHal(int sensorId, @NonNull FileDescriptor fd, @NonNull String[] args);
 }

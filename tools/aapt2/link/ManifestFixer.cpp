@@ -112,6 +112,27 @@ static xml::XmlNodeAction::ActionFuncWithDiag RequiredAndroidAttribute(const std
   };
 }
 
+static xml::XmlNodeAction::ActionFuncWithDiag RequiredOneAndroidAttribute(
+    const std::string& attrName1, const std::string& attrName2) {
+  return [=](xml::Element* el, SourcePathDiagnostics* diag) -> bool {
+    xml::Attribute* attr1 = el->FindAttribute(xml::kSchemaAndroid, attrName1);
+    xml::Attribute* attr2 = el->FindAttribute(xml::kSchemaAndroid, attrName2);
+    if (attr1 == nullptr && attr2 == nullptr) {
+      diag->Error(DiagMessage(el->line_number)
+                  << "<" << el->name << "> is missing required attribute 'android:" << attrName1
+                  << "' or 'android:" << attrName2 << "'");
+      return false;
+    }
+    if (attr1 != nullptr && attr2 != nullptr) {
+      diag->Error(DiagMessage(el->line_number)
+                  << "<" << el->name << "> can only specify one of attribute 'android:" << attrName1
+                  << "' or 'android:" << attrName2 << "'");
+      return false;
+    }
+    return true;
+  };
+}
+
 static bool AutoGenerateIsFeatureSplit(xml::Element* el, SourcePathDiagnostics* diag) {
   constexpr const char* kFeatureSplit = "featureSplit";
   constexpr const char* kIsFeatureSplit = "isFeatureSplit";
@@ -282,6 +303,10 @@ bool ManifestFixer::BuildRules(xml::XmlActionExecutor* executor,
   // Common <meta-data> actions.
   xml::XmlNodeAction meta_data_action;
 
+  // Common <property> actions.
+  xml::XmlNodeAction property_action;
+  property_action.Action(RequiredOneAndroidAttribute("resource", "value"));
+
   // Common <uses-feature> actions.
   xml::XmlNodeAction uses_feature_action;
   uses_feature_action.Action(VerifyUsesFeature);
@@ -292,6 +317,7 @@ bool ManifestFixer::BuildRules(xml::XmlActionExecutor* executor,
   component_action["intent-filter"] = intent_filter_action;
   component_action["preferred"] = intent_filter_action;
   component_action["meta-data"] = meta_data_action;
+  component_action["property"] = property_action;
 
   // Manifest actions.
   xml::XmlNodeAction& manifest_action = (*executor)["manifest"];
@@ -427,6 +453,7 @@ bool ManifestFixer::BuildRules(xml::XmlActionExecutor* executor,
   application_action["uses-native-library"].Action(RequiredNameIsNotEmpty);
   application_action["library"].Action(RequiredNameIsNotEmpty);
   application_action["profileable"];
+  application_action["property"] = property_action;
 
   xml::XmlNodeAction& static_library_action = application_action["static-library"];
   static_library_action.Action(RequiredNameIsJavaPackage);

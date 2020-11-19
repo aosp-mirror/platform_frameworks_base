@@ -1238,7 +1238,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
      * @return {@code true} if the process has any visible activity.
      */
     boolean handleAppDied() {
-        mAtm.mStackSupervisor.removeHistoryRecords(this);
+        mAtm.mTaskSupervisor.removeHistoryRecords(this);
 
         boolean hasVisibleActivities = false;
         final boolean hasInactiveActivities =

@@ -433,6 +433,16 @@ public class LauncherApps {
          */
         public static final int FLAG_GET_KEY_FIELDS_ONLY = 1 << 2;
 
+        /**
+         * Populate the persons field in the result. See {@link ShortcutInfo#getPersons()}.
+         *
+         * <p>The caller must have the system {@code ACCESS_SHORTCUTS} permission.
+         *
+         * @hide
+         */
+        @SystemApi
+        public static final int FLAG_GET_PERSONS_DATA = 1 << 11;
+
         /** @hide */
         @IntDef(flag = true, prefix = { "FLAG_" }, value = {
                 FLAG_MATCH_DYNAMIC,
@@ -440,6 +450,7 @@ public class LauncherApps {
                 FLAG_MATCH_MANIFEST,
                 FLAG_MATCH_CACHED,
                 FLAG_GET_KEY_FIELDS_ONLY,
+                FLAG_GET_PERSONS_DATA,
         })
         @Retention(RetentionPolicy.SOURCE)
         public @interface QueryFlags {}

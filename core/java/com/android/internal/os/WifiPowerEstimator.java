@@ -16,7 +16,12 @@
 package com.android.internal.os;
 
 import android.os.BatteryStats;
+import android.os.Process;
+import android.os.UserHandle;
 import android.util.Log;
+import android.util.SparseArray;
+
+import java.util.List;
 
 /**
  * Estimates WiFi power usage based on timers in BatteryStats.
@@ -37,6 +42,27 @@ public class WifiPowerEstimator extends PowerCalculator {
         mWifiPowerBatchScan = profile.getAveragePower(PowerProfile.POWER_WIFI_BATCHED_SCAN);
     }
 
+    @Override
+    public void calculate(List<BatterySipper> sippers, BatteryStats batteryStats,
+            long rawRealtimeUs, long rawUptimeUs, int statsType, SparseArray<UserHandle> asUsers) {
+        super.calculate(sippers, batteryStats, rawRealtimeUs, rawUptimeUs, statsType, asUsers);
+
+        BatterySipper bs = new BatterySipper(BatterySipper.DrainType.WIFI, null, 0);
+        calculateRemaining(bs, batteryStats, rawRealtimeUs, rawUptimeUs, statsType);
+
+        for (int i = sippers.size() - 1; i >= 0; i--) {
+            BatterySipper app = sippers.get(i);
+            if (app.getUid() == Process.WIFI_UID) {
+                if (DEBUG) Log.d(TAG, "WiFi adding sipper " + app + ": cpu=" + app.cpuTimeMs);
+                app.isAggregated = true;
+                bs.add(app);
+            }
+        }
+        if (bs.sumPower() > 0) {
+            sippers.add(bs);
+        }
+    }
+
     /**
      * Return estimated power per Wi-Fi packet in mAh/packet where 1 packet = 2 KB.
      */
@@ -48,7 +74,7 @@ public class WifiPowerEstimator extends PowerCalculator {
     }
 
     @Override
-    public void calculateApp(BatterySipper app, BatteryStats.Uid u, long rawRealtimeUs,
+    protected void calculateApp(BatterySipper app, BatteryStats.Uid u, long rawRealtimeUs,
                              long rawUptimeUs, int statsType) {
         app.wifiRxPackets = u.getNetworkActivityPackets(BatteryStats.NETWORK_WIFI_RX_DATA,
                 statsType);
@@ -79,13 +105,11 @@ public class WifiPowerEstimator extends PowerCalculator {
 
         app.wifiPowerMah = wifiPacketPower + wifiLockPower + wifiScanPower + wifiBatchScanPower;
         if (DEBUG && app.wifiPowerMah != 0) {
-            Log.d(TAG, "UID " + u.getUid() + ": power=" +
-                    BatteryStatsHelper.makemAh(app.wifiPowerMah));
+            Log.d(TAG, "UID " + u.getUid() + ": power=" + formatCharge(app.wifiPowerMah));
         }
     }
 
-    @Override
-    public void calculateRemaining(BatterySipper app, BatteryStats stats, long rawRealtimeUs,
+    void calculateRemaining(BatterySipper app, BatteryStats stats, long rawRealtimeUs,
                                    long rawUptimeUs, int statsType) {
         final long totalRunningTimeMs = stats.getGlobalWifiRunningTime(rawRealtimeUs, statsType)
                 / 1000;

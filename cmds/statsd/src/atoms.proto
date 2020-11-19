@@ -508,6 +508,8 @@ message Atom {
         MediaPlaybackStateChanged media_playback_state_changed = 322;
         MediaPlaybackErrorReported media_playback_error_reported = 323;
         MediaPlaybackTrackChanged media_playback_track_changed = 324;
+        WifiScanReported wifi_scan_reported = 325 [(module) = "wifi"];
+        WifiPnoScanReported wifi_pno_scan_reported = 326  [(module) = "wifi"];
 
         // StatsdStats tracks platform atoms with ids upto 500.
         // Update StatsdStats::kMaxPushedAtomId when atom ids here approach that value.
@@ -12373,4 +12375,116 @@ message MediaPlaybackTrackChanged {
 message Experiments {
     // Experiment IDs sent by the player.
     repeated int64 experiments = 1;
+}
+
+/**
+ * Logs when a Wifi network scan happens.
+ *
+ * Logged from:
+ *   frameworks/opt/net/wifi/service/java/com/android/server/wifi/WifiMetrics.java
+ */
+message WifiScanReported {
+    enum Type {
+        TYPE_UNKNOWN = 0;
+
+        // Single scan.
+        TYPE_SINGLE = 1;
+
+        // Background scan (deprecated, should not happen).
+        TYPE_BACKGROUND = 2;
+    }
+
+    enum Result {
+        RESULT_UNKNOWN = 0;
+
+        // Failed to start scan.
+        RESULT_FAILED_TO_START = 1;
+
+        // The HAL reported a scan failure after the scan was started.
+        RESULT_FAILED_TO_SCAN = 2;
+
+        // Scan succeeded.
+        RESULT_SUCCESS = 3;
+    }
+
+    enum Source {
+        SOURCE_UNKNOWN = 0;
+
+        // No work source set - not possible to determine the origin.
+        SOURCE_NO_WORK_SOURCE = 1;
+
+        // The Wifi stack.
+        SOURCE_WIFI_STACK = 2;
+
+        // GMS on behalf of some other app.
+        SOURCE_GMS = 3;
+
+        // Settings app.
+        SOURCE_SETTINGS_APP = 4;
+
+        // Other app directly.
+        SOURCE_OTHER_APP = 5;
+    }
+
+    enum Importance {
+        IMPORTANCE_UNKNOWN = 0;
+
+        // Foreground app. Corresponds to the value of
+        // ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND or less.
+        IMPORTANCE_FOREGROUND = 1;
+
+        // Foreground service. Corresponds to the value of
+        // ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND_SERVICE
+        IMPORTANCE_FOREGROUND_SERVICE = 2;
+
+        // Everything else.
+        IMPORTANCE_BACKGROUND = 3;
+    }
+
+    // Scan type
+    optional Type type = 1;
+
+    // Outcome: success/failure
+    optional Result result = 2;
+
+    // What initiated a scan.
+    optional Source source = 3;
+
+    // Process importance of the initiator.
+    // This is only available for non-system calls.
+    optional Importance importance = 4;
+
+    // Time taken for the scan.
+    optional int32 scan_duration_millis = 5;
+
+    // Count of found networks.
+    optional int32 count_networks_found = 6;
+}
+
+/**
+ * Logs when a Wifi PNO (Preferred Network Offload) scan happens.
+ *
+ * Logged from:
+ *   frameworks/opt/net/wifi/service/java/com/android/server/wifi/WifiMetrics.java
+ */
+message WifiPnoScanReported {
+    enum State {
+        UNKNOWN = 0;
+
+        // Scan started.
+        STARTED = 1;
+
+        // Scan failed to start (e.g. bad request, unsupported by hardware, etc).
+        FAILED_TO_START = 2;
+
+        // Scan completed and a network was found.
+        // Note - due to implementation constraints, nothing is reported when a scan completes but
+        // doesn't find any networks.
+        FINISHED_NETWORKS_FOUND = 3;
+
+        // Scan failed.
+        FAILED = 4;
+    }
+
+    optional State state = 1;
 }

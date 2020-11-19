@@ -18,6 +18,7 @@ package android.security;
 
 import android.annotation.NonNull;
 import android.app.compat.CompatChanges;
+import android.hardware.keymint.KeyParameter;
 import android.os.RemoteException;
 import android.os.ServiceSpecificException;
 import android.security.keystore.BackendBusyException;
@@ -27,7 +28,6 @@ import android.system.keystore2.CreateOperationResponse;
 import android.system.keystore2.IKeystoreSecurityLevel;
 import android.system.keystore2.KeyDescriptor;
 import android.system.keystore2.KeyMetadata;
-import android.system.keystore2.KeyParameter;
 import android.system.keystore2.ResponseCode;
 import android.util.Log;
 

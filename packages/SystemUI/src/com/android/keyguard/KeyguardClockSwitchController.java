@@ -239,6 +239,15 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         mView.setFormat24Hour(Patterns.sClockView24);
     }
 
+    float getClockTextTopPadding() {
+        if (mLockScreenMode == KeyguardUpdateMonitor.LOCK_SCREEN_MODE_LAYOUT_1
+                && mNewLockScreenClockViewController != null) {
+            return mNewLockScreenClockViewController.getClockTextTopPadding();
+        }
+
+        return mView.getClockTextTopPadding();
+    }
+
     private void updateAodIcons() {
         NotificationIconContainer nic = (NotificationIconContainer)
                 mView.findViewById(
