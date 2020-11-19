@@ -3646,7 +3646,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
      */
     private static int checkCallingPermission(String permission) {
         return checkPermission(
-                permission, Binder.getCallingPid(), UserHandle.getAppId(Binder.getCallingUid()));
+                permission, Binder.getCallingPid(), Binder.getCallingUid());
     }
 
     /** This can be called with or without the global lock held. */
