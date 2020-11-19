@@ -8124,7 +8124,7 @@ public abstract class PackageManager {
      * Trust any Installer to provide checksums for the package.
      * @see #requestChecksums
      */
-    public static final @Nullable List<Certificate> TRUST_ALL = Collections.singletonList(null);
+    public static final @NonNull List<Certificate> TRUST_ALL = Collections.singletonList(null);
 
     /**
      * Don't trust any Installer to provide checksums for the package.
