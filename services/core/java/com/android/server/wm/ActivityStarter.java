@@ -1281,6 +1281,15 @@ class ActivityStarter {
             return false;
         }
 
+        // IME should always be allowed to start activity, like IME settings.
+        final WindowState imeWindow = mRootWindowContainer.getCurrentInputMethodWindow();
+        if (imeWindow != null && callingAppId == imeWindow.mOwnerUid) {
+            if (DEBUG_ACTIVITY_STARTS) {
+                Slog.d(TAG, "Activity start allowed for active ime (" + callingUid + ")");
+            }
+            return false;
+        }
+
         // App switching will be allowed if BAL app switching flag is not enabled, or if
         // its app switching rule allows it.
         // This is used to block background activity launch even if the app is still
