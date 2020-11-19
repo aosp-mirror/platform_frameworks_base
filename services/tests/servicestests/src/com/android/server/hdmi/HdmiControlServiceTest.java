@@ -470,7 +470,7 @@ public class HdmiControlServiceTest {
         mTestLooper.dispatchAll();
 
         HdmiCecMessage reportFeatures = HdmiCecMessageBuilder.buildReportFeatures(
-                Constants.ADDR_PLAYBACK_1, Constants.VERSION_2_0,
+                Constants.ADDR_PLAYBACK_1, HdmiControlManager.HDMI_CEC_VERSION_2_0,
                 Arrays.asList(DEVICE_PLAYBACK, DEVICE_AUDIO_SYSTEM),
                 mMyPlaybackDevice.getRcProfile(), mMyPlaybackDevice.getRcFeatures(),
                 mMyPlaybackDevice.getDeviceFeatures());
