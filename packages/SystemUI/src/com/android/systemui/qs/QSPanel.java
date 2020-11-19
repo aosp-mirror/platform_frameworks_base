@@ -16,7 +16,6 @@
 
 package com.android.systemui.qs;
 
-import static com.android.systemui.util.InjectionInflationController.VIEW_CONTEXT;
 import static com.android.systemui.util.Utils.useQsMediaPlayer;
 
 import android.annotation.NonNull;
@@ -40,7 +39,6 @@ import com.android.internal.widget.RemeasuringLinearLayout;
 import com.android.systemui.R;
 import com.android.systemui.plugins.qs.DetailAdapter;
 import com.android.systemui.plugins.qs.QSTile;
-import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.settings.brightness.BrightnessSlider;
 import com.android.systemui.statusbar.policy.BrightnessMirrorController;
 import com.android.systemui.tuner.TunerService;
@@ -49,9 +47,6 @@ import com.android.systemui.tuner.TunerService.Tunable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
-
-import javax.inject.Inject;
-import javax.inject.Named;
 
 /** View that represents the quick settings tile panel (when expanded/pulled down). **/
 public class QSPanel extends LinearLayout implements Tunable {
@@ -83,7 +78,6 @@ public class QSPanel extends LinearLayout implements Tunable {
     protected boolean mListening;
 
     private QSDetail.Callback mCallback;
-    private final QSLogger mQSLogger;
     protected QSTileHost mHost;
     private final List<OnConfigurationChangedListener> mOnConfigurationChangedListeners =
             new ArrayList<>();
@@ -119,19 +113,12 @@ public class QSPanel extends LinearLayout implements Tunable {
     private int mFooterMarginStartHorizontal;
     private Consumer<Boolean> mMediaVisibilityChangedListener;
 
-
-    @Inject
-    public QSPanel(
-            @Named(VIEW_CONTEXT) Context context,
-            AttributeSet attrs,
-            QSLogger qsLogger
-    ) {
+    public QSPanel(Context context, AttributeSet attrs) {
         super(context, attrs);
         mUsingMediaPlayer = useQsMediaPlayer(context);
         mMediaTotalBottomMargin = getResources().getDimensionPixelSize(
                 R.dimen.quick_settings_bottom_margin_media);
         mContext = context;
-        mQSLogger = qsLogger;
 
         setOrientation(VERTICAL);
 
@@ -161,7 +148,6 @@ public class QSPanel extends LinearLayout implements Tunable {
             lp = new LayoutParams(LayoutParams.MATCH_PARENT, 0, 1);
             addView(mHorizontalLinearLayout, lp);
         }
-        mQSLogger.logAllTilesChangeListening(mListening, getDumpableTag(), "");
     }
 
     protected void onMediaVisibilityChanged(Boolean visible) {
@@ -439,7 +425,6 @@ public class QSPanel extends LinearLayout implements Tunable {
 
     public void setExpanded(boolean expanded) {
         if (mExpanded == expanded) return;
-        mQSLogger.logPanelExpanded(expanded, getDumpableTag());
         mExpanded = expanded;
         if (!mExpanded && mTileLayout instanceof PagedTileLayout) {
             ((PagedTileLayout) mTileLayout).setCurrentItem(0, false);
