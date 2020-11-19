@@ -8957,11 +8957,8 @@ package android.service.attestation {
   public abstract class ImpressionAttestationService extends android.app.Service {
     ctor public ImpressionAttestationService();
     method @NonNull public final android.os.IBinder onBind(@NonNull android.content.Intent);
-    method @Nullable public abstract android.service.attestation.ImpressionToken onGenerateImpressionToken(@NonNull android.hardware.HardwareBuffer, @NonNull android.graphics.Rect, @NonNull String);
-    method public abstract int onVerifyImpressionToken(@NonNull android.service.attestation.ImpressionToken);
-    field public static final int VERIFICATION_STATUS_APP_DECLARED = 2; // 0x2
-    field public static final int VERIFICATION_STATUS_OS_VERIFIED = 1; // 0x1
-    field public static final int VERIFICATION_STATUS_UNKNOWN = 0; // 0x0
+    method @Nullable public abstract android.service.attestation.ImpressionToken onGenerateImpressionToken(@NonNull String, @NonNull android.hardware.HardwareBuffer, @NonNull android.graphics.Rect, @NonNull String);
+    method public abstract boolean onVerifyImpressionToken(@NonNull String, @NonNull android.service.attestation.ImpressionToken);
   }
 
   public final class ImpressionToken implements android.os.Parcelable {
