@@ -197,7 +197,7 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
 
     private void createNewSessionWithoutHandler(@NonNull IFace daemon, int sensorId,
             int userId) throws RemoteException {
-        // Note that per IFingerprint createSession contract, this method will block until all
+        // Note that per IFace createSession contract, this method will block until all
         // existing operations are canceled/finished. However, also note that this is fine, since
         // this method "withoutHandler" means it should only ever be invoked from the worker thread,
         // so callers will never be blocked.
