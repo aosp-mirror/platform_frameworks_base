@@ -103,7 +103,6 @@ import static android.os.incremental.IncrementalManager.isIncrementalPath;
 import static android.os.storage.StorageManager.FLAG_STORAGE_CE;
 import static android.os.storage.StorageManager.FLAG_STORAGE_DE;
 import static android.os.storage.StorageManager.FLAG_STORAGE_EXTERNAL;
-import static android.permission.PermissionManager.KILL_APP_REASON_GIDS_CHANGED;
 
 import static com.android.internal.annotations.VisibleForTesting.Visibility;
 import static com.android.internal.app.IntentForwarderActivity.FORWARD_INTENT_TO_MANAGED_PROFILE;
@@ -12961,7 +12960,7 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
-    void removePackageLI(String packageName, boolean chatty) {
+    private void removePackageLI(String packageName, boolean chatty) {
         if (DEBUG_INSTALL) {
             if (chatty)
                 Log.d(TAG, "Removing package " + packageName);
@@ -12976,9 +12975,9 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
-    void cleanPackageDataStructuresLILPw(AndroidPackage pkg, boolean chatty) {
+    private void cleanPackageDataStructuresLILPw(AndroidPackage pkg, boolean chatty) {
         mComponentResolver.removeAllComponents(pkg, chatty);
-        mPermissionManager.removeAllPermissions(pkg, chatty);
+        mPermissionManager.onPackageRemoved(pkg);
 
         final int instrumentationSize = ArrayUtils.size(pkg.getInstrumentations());
         StringBuilder r = null;
@@ -19476,33 +19475,13 @@ public class PackageManagerService extends IPackageManager.Stub
                     if (outInfo != null) {
                         outInfo.removedAppId = removedAppId;
                     }
-                    if ((deletedPs.sharedUser == null || deletedPs.sharedUser.packages.size() == 0)
-                            && !isUpdatedSystemApp(deletedPs)) {
-                        mPermissionManager.removeAppIdStateTEMP(removedAppId);
+                    final SharedUserSetting sus = deletedPs.getSharedUser();
+                    List<AndroidPackage> sharedUserPkgs = sus != null ? sus.getPackages() : null;
+                    if (sharedUserPkgs == null) {
+                        sharedUserPkgs = Collections.emptyList();
                     }
-                    mPermissionManager.updatePermissions(deletedPs.name, null);
-                    if (deletedPs.sharedUser != null) {
-                        // Remove permissions associated with package. Since runtime
-                        // permissions are per user we have to kill the removed package
-                        // or packages running under the shared user of the removed
-                        // package if revoking the permissions requested only by the removed
-                        // package is successful and this causes a change in gids.
-                        boolean shouldKill = false;
-                        for (int userId : UserManagerService.getInstance().getUserIds()) {
-                            final int userIdToKill = mPermissionManager
-                                    .revokeSharedUserPermissionsForDeletedPackageTEMP(deletedPs,
-                                            userId);
-                            shouldKill |= userIdToKill != UserHandle.USER_NULL;
-                        }
-                        // If gids changed, kill all affected packages.
-                        if (shouldKill) {
-                            mHandler.post(() -> {
-                                // This has to happen with no lock held.
-                                killApplication(deletedPs.name, deletedPs.appId,
-                                        KILL_APP_REASON_GIDS_CHANGED);
-                            });
-                        }
-                    }
+                    mPermissionManager.onPackageStateRemoved(packageName, deletedPs.appId,
+                            deletedPs.pkg, sharedUserPkgs);
                     clearPackagePreferredActivitiesLPw(
                             deletedPs.name, changedUsers, UserHandle.USER_ALL);
                 }
