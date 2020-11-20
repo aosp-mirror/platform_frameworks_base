@@ -5061,6 +5061,7 @@ package android.media.soundtrigger {
     field public static final int RECOGNITION_FLAG_CAPTURE_TRIGGER_AUDIO = 1; // 0x1
     field public static final int RECOGNITION_FLAG_ENABLE_AUDIO_ECHO_CANCELLATION = 4; // 0x4
     field public static final int RECOGNITION_FLAG_ENABLE_AUDIO_NOISE_SUPPRESSION = 8; // 0x8
+    field public static final int RECOGNITION_FLAG_RUN_IN_BATTERY_SAVER = 16; // 0x10
   }
 
   public abstract static class SoundTriggerDetector.Callback {
@@ -10204,6 +10205,7 @@ package android.service.voice {
     field public static final int RECOGNITION_FLAG_CAPTURE_TRIGGER_AUDIO = 1; // 0x1
     field public static final int RECOGNITION_FLAG_ENABLE_AUDIO_ECHO_CANCELLATION = 4; // 0x4
     field public static final int RECOGNITION_FLAG_ENABLE_AUDIO_NOISE_SUPPRESSION = 8; // 0x8
+    field public static final int RECOGNITION_FLAG_RUN_IN_BATTERY_SAVER = 16; // 0x10
     field public static final int RECOGNITION_MODE_USER_IDENTIFICATION = 2; // 0x2
     field public static final int RECOGNITION_MODE_VOICE_TRIGGER = 1; // 0x1
     field public static final int STATE_ERROR = 3; // 0x3

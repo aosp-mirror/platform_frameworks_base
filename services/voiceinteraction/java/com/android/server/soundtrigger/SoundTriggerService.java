@@ -296,8 +296,11 @@ public class SoundTriggerService extends SystemService {
 
         @Override
         public int startRecognition(ParcelUuid parcelUuid, IRecognitionStatusCallback callback,
-                RecognitionConfig config) {
+                RecognitionConfig config, boolean runInBatterySaverMode) {
             enforceCallingPermission(Manifest.permission.MANAGE_SOUND_TRIGGER);
+            if (runInBatterySaverMode) {
+                enforceCallingPermission(Manifest.permission.SOUND_TRIGGER_RUN_IN_BATTERY_SAVER);
+            }
             if (DEBUG) {
                 Slog.i(TAG, "startRecognition(): Uuid : " + parcelUuid);
             }
@@ -316,7 +319,7 @@ public class SoundTriggerService extends SystemService {
             }
 
             int ret = mSoundTriggerHelper.startGenericRecognition(parcelUuid.getUuid(), model,
-                    callback, config);
+                    callback, config, runInBatterySaverMode);
             if (ret == STATUS_OK) {
                 mSoundModelStatTracker.onStart(parcelUuid.getUuid());
             }
@@ -514,7 +517,7 @@ public class SoundTriggerService extends SystemService {
                 switch (soundModel.getType()) {
                     case SoundModel.TYPE_GENERIC_SOUND:
                         ret = mSoundTriggerHelper.startGenericRecognition(soundModel.getUuid(),
-                            (GenericSoundModel) soundModel, callback, config);
+                                (GenericSoundModel) soundModel, callback, config, false);
                         break;
                     default:
                         Slog.e(TAG, "Unknown model type");
@@ -1505,10 +1508,10 @@ public class SoundTriggerService extends SystemService {
 
             @Override
             public int startRecognition(int keyphraseId, KeyphraseSoundModel soundModel,
-                    IRecognitionStatusCallback listener, RecognitionConfig recognitionConfig) {
+                    IRecognitionStatusCallback listener, RecognitionConfig recognitionConfig,
+                    boolean runInBatterySaverMode) {
                 return mSoundTriggerHelper.startKeyphraseRecognition(keyphraseId, soundModel,
-                        listener,
-                        recognitionConfig);
+                        listener, recognitionConfig, runInBatterySaverMode);
             }
 
             @Override
