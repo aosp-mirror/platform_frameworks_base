@@ -28,7 +28,7 @@
     <string name="pip_skip_to_next" msgid="8403429188794867653">"التخطي إلى التالي"</string>
     <string name="pip_skip_to_prev" msgid="7172158111196394092">"التخطي إلى السابق"</string>
     <string name="accessibility_action_pip_resize" msgid="4623966104749543182">"تغيير الحجم"</string>
-    <string name="dock_forced_resizable" msgid="1749750436092293116">"يمكن ألا يعمل التطبيق مع وضع تقسيم الشاشة."</string>
+    <string name="dock_forced_resizable" msgid="1749750436092293116">"قد لا يعمل التطبيق بشكل سليم في وضع \"تقسيم الشاشة\"."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"التطبيق لا يتيح تقسيم الشاشة."</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"قد لا يعمل التطبيق على شاشة عرض ثانوية."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"لا يمكن تشغيل التطبيق على شاشات عرض ثانوية."</string>
@@ -45,7 +45,7 @@
     <string name="accessibility_action_divider_bottom_full" msgid="2831868345092314060">"عرض النافذة السفلية بملء الشاشة"</string>
     <string name="one_handed_tutorial_title" msgid="4583241688067426350">"استخدام وضع \"التصفح بيد واحدة\""</string>
     <string name="one_handed_tutorial_description" msgid="3486582858591353067">"للخروج، مرِّر سريعًا من أسفل الشاشة إلى أعلاها أو انقر في أي مكان فوق التطبيق."</string>
-    <string name="accessibility_action_start_one_handed" msgid="5070337354072861426">"تفعيل وضع \"التصفح بيد واحدة\""</string>
+    <string name="accessibility_action_start_one_handed" msgid="5070337354072861426">"بدء وضع \"التصفح بيد واحدة\""</string>
     <string name="accessibility_action_stop_one_handed" msgid="1369940261782179442">"الخروج من وضع \"التصفح بيد واحدة\""</string>
     <string name="bubbles_settings_button_description" msgid="1301286017420516912">"إعدادات فقاعات المحادثات على <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="bubble_overflow_button_content_description" msgid="8160974472718594382">"القائمة الكاملة"</string>
