@@ -16,8 +16,9 @@
 
 package com.android.server.location;
 
-import android.os.BasicShellCommandHandler;
 import android.os.UserHandle;
+
+import com.android.modules.utils.BasicShellCommandHandler;
 
 import java.io.PrintWriter;
 import java.util.Objects;
