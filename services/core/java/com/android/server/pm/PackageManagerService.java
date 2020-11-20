@@ -3842,7 +3842,7 @@ public class PackageManagerService extends IPackageManager.Stub
         // are all flushed.  Not really needed, but keeps things nice and
         // tidy.
         t.traceBegin("GC");
-        Runtime.getRuntime().gc();
+        VMRuntime.getRuntime().requestConcurrentGC();
         t.traceEnd();
 
         // The initial scanning above does many calls into installd while
