@@ -26,7 +26,6 @@ import android.content.pm.verify.domain.DomainVerificationState
 import android.os.Build
 import android.os.Process
 import android.util.ArraySet
-import android.util.SparseArray
 import com.android.server.pm.PackageSetting
 import com.android.server.pm.parsing.pkg.AndroidPackage
 import com.android.server.pm.test.verify.domain.DomainVerificationTestUtils.mockPackageSettings
@@ -232,7 +231,7 @@ class DomainVerificationSettingsMutationTest {
                 TEST_UUID
             )
         ) {
-            whenever(getName()) { TEST_PKG }
+            whenever(getPackageName()) { TEST_PKG }
             whenever(getPkg()) { mockPkg() }
             whenever(domainSetId) { TEST_UUID }
             whenever(readUserState(0)) { PackageUserState() }

@@ -2760,7 +2760,7 @@ public class ParsingPackageUtils {
             return input.success(pkg.setOverlay(true)
                     .setOverlayTarget(target)
                     .setOverlayPriority(priority)
-                    .setOverlayTargetName(
+                    .setOverlayTargetOverlayableName(
                             sa.getString(R.styleable.AndroidManifestResourceOverlay_targetName))
                     .setOverlayCategory(
                             sa.getString(R.styleable.AndroidManifestResourceOverlay_category))
@@ -2840,9 +2840,6 @@ public class ParsingPackageUtils {
                     R.styleable.AndroidManifestOriginalPackage_name,
                     0);
             if (!pkg.getPackageName().equals(orig)) {
-                if (pkg.getOriginalPackages().isEmpty()) {
-                    pkg.setRealPackage(pkg.getPackageName());
-                }
                 pkg.addOriginalPackage(orig);
             }
             return input.success(pkg);

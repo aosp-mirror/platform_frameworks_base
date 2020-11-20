@@ -176,7 +176,7 @@ public class ScanTests {
         final ScanRequest scanRequestNoRealPkg =
                 createBasicScanRequestBuilder(
                         createBasicPackage(DUMMY_PACKAGE_NAME)
-                                .setRealPackage("com.package.real"))
+                                .addOriginalPackage("com.package.real"))
                         .build();
 
         final ScanResult scanResultNoReal = executeScan(scanRequestNoRealPkg);

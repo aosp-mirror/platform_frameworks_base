@@ -183,6 +183,7 @@ open class AndroidPackageParsingTestBase {
             this.appId = aPkg.uid
             whenever(pkgState) { PackageStateUnserialized() }
             whenever(readUserState(anyInt())) { dummyUserState }
+            whenever(categoryOverride) { ApplicationInfo.CATEGORY_UNDEFINED }
         }
     }
 
