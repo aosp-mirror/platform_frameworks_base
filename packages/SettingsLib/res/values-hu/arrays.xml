@@ -1,0 +1,270 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+/*
+**
+** Copyright 2015 The Android Open Source Project
+**
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
+**
+**     http://www.apache.org/licenses/LICENSE-2.0
+**
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
+** limitations under the License.
+*/
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <string-array name="wifi_status">
+    <item msgid="1596683495752107015"></item>
+    <item msgid="3288373008277313483">"Keresés..."</item>
+    <item msgid="6050951078202663628">"Kapcsolódás…"</item>
+    <item msgid="8356618438494652335">"Hitelesítés..."</item>
+    <item msgid="2837871868181677206">"IP-cím lekérése..."</item>
+    <item msgid="4613015005934755724">"Csatlakozva"</item>
+    <item msgid="3763530049995655072">"Felfüggesztve"</item>
+    <item msgid="7852381437933824454">"Kapcsolat bontása..."</item>
+    <item msgid="5046795712175415059">"Nincs kapcsolat"</item>
+    <item msgid="2473654476624070462">"Sikertelen"</item>
+    <item msgid="9146847076036105115">"Letiltva"</item>
+    <item msgid="4543924085816294893">"A rossz minőségű kapcsolatok átmeneti elkerülése"</item>
+  </string-array>
+  <string-array name="wifi_status_with_ssid">
+    <item msgid="5969842512724979061"></item>
+    <item msgid="1818677602615822316">"Keresés..."</item>
+    <item msgid="8339720953594087771">"Csatlakozás a(z) <xliff:g id="NETWORK_NAME">%1$s</xliff:g> hálózathoz..."</item>
+    <item msgid="3028983857109369308">"Hitelesítés a(z) <xliff:g id="NETWORK_NAME">%1$s</xliff:g> hálózaton..."</item>
+    <item msgid="4287401332778341890">"IP-cím lekérése a(z) <xliff:g id="NETWORK_NAME">%1$s</xliff:g> hálózattól..."</item>
+    <item msgid="1043944043827424501">"Kapcsolódva a(z) <xliff:g id="NETWORK_NAME">%1$s</xliff:g> hálózathoz"</item>
+    <item msgid="7445993821842009653">"Felfüggesztve"</item>
+    <item msgid="1175040558087735707">"Kapcsolat bontása <xliff:g id="NETWORK_NAME">%1$s</xliff:g> hálózattal..."</item>
+    <item msgid="699832486578171722">"Nincs kapcsolat"</item>
+    <item msgid="522383512264986901">"Sikertelen"</item>
+    <item msgid="3602596701217484364">"Letiltva"</item>
+    <item msgid="1999413958589971747">"A rossz minőségű kapcsolatok átmeneti elkerülése"</item>
+  </string-array>
+  <string-array name="hdcp_checking_titles">
+    <item msgid="2377230797542526134">"Soha ne ellenőrizze"</item>
+    <item msgid="3919638466823112484">"Csak DRM-tartalom ellenőrzése"</item>
+    <item msgid="9048424957228926377">"Mindig ellenőrizze"</item>
+  </string-array>
+  <string-array name="hdcp_checking_summaries">
+    <item msgid="4045840870658484038">"Soha ne használjon HDCP ellenőrzést"</item>
+    <item msgid="8254225038262324761">"Csak DRM-tartalomhoz használjon HDCP ellenőrzést"</item>
+    <item msgid="6421717003037072581">"Mindig használjon HDCP ellenőrzést"</item>
+  </string-array>
+  <string-array name="bt_hci_snoop_log_entries">
+    <item msgid="695678520785580527">"Letiltva"</item>
+    <item msgid="6336372935919715515">"Szűrtek engedélyezve"</item>
+    <item msgid="2779123106632690576">"Engedélyezve"</item>
+  </string-array>
+  <string-array name="bluetooth_avrcp_versions">
+    <item msgid="6603880723315236832">"AVRCP 1.5 (alapértelmezett)"</item>
+    <item msgid="1637054408779685086">"AVRCP 1.3"</item>
+    <item msgid="5896162189744596291">"AVRCP 1.4"</item>
+    <item msgid="7556896992111771426">"AVRCP 1.6"</item>
+  </string-array>
+  <string-array name="bluetooth_avrcp_version_values">
+    <item msgid="4041937689950033942">"avrcp15"</item>
+    <item msgid="1613629084012791988">"avrcp13"</item>
+    <item msgid="99467845610592181">"avrcp14"</item>
+    <item msgid="1963366694959681026">"avrcp16"</item>
+  </string-array>
+  <string-array name="bluetooth_map_versions">
+    <item msgid="8786402640610987099">"MAP 1.2 (Alapértelmezett)"</item>
+    <item msgid="6817922176194686449">"MAP 1.3"</item>
+    <item msgid="3423518690032737851">"MAP 1.4"</item>
+  </string-array>
+  <string-array name="bluetooth_map_version_values">
+    <item msgid="1164651830068248391">"map12"</item>
+    <item msgid="7073042887003102964">"map13"</item>
+    <item msgid="8147982633566548515">"map14"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_titles">
+    <item msgid="2494959071796102843">"Rendszerérték (alapértelmezett)"</item>
+    <item msgid="4055460186095649420">"SBC"</item>
+    <item msgid="720249083677397051">"AAC"</item>
+    <item msgid="1049450003868150455">"Hang: <xliff:g id="QUALCOMM">Qualcomm®</xliff:g> <xliff:g id="APTX">aptX™</xliff:g>"</item>
+    <item msgid="2908219194098827570">"Hang: <xliff:g id="QUALCOMM">Qualcomm®</xliff:g> <xliff:g id="APTX_HD">aptX™ HD</xliff:g>"</item>
+    <item msgid="3825367753087348007">"LDAC"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_summaries">
+    <item msgid="8868109554557331312">"Rendszerérték (alapértelmezett)"</item>
+    <item msgid="9024885861221697796">"SBC"</item>
+    <item msgid="4688890470703790013">"AAC"</item>
+    <item msgid="8627333814413492563">"Hang: <xliff:g id="QUALCOMM">Qualcomm®</xliff:g> <xliff:g id="APTX">aptX™</xliff:g>"</item>
+    <item msgid="3517061573669307965">"Hang: <xliff:g id="QUALCOMM">Qualcomm®</xliff:g> <xliff:g id="APTX_HD">aptX™ HD</xliff:g>"</item>
+    <item msgid="2553206901068987657">"LDAC"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_sample_rate_titles">
+    <item msgid="926809261293414607">"Rendszerérték (alapértelmezett)"</item>
+    <item msgid="8003118270854840095">"44,1 kHz"</item>
+    <item msgid="3208896645474529394">"48 kHz"</item>
+    <item msgid="8420261949134022577">"88,2 kHz"</item>
+    <item msgid="8887519571067543785">"96 kHz"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_sample_rate_summaries">
+    <item msgid="2284090879080331090">"Rendszerérték (alapértelmezett)"</item>
+    <item msgid="1872276250541651186">"44,1 kHz"</item>
+    <item msgid="8736780630001704004">"48 kHz"</item>
+    <item msgid="7698585706868856888">"88,2 kHz"</item>
+    <item msgid="8946330945963372966">"96 kHz"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_bits_per_sample_titles">
+    <item msgid="2574107108483219051">"Rendszerérték (alapértelmezett)"</item>
+    <item msgid="4671992321419011165">"16 bit/minta"</item>
+    <item msgid="1933898806184763940">"24 bit/minta"</item>
+    <item msgid="1212577207279552119">"32 bit/minta"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_bits_per_sample_summaries">
+    <item msgid="9196208128729063711">"Rendszerérték (alapértelmezett)"</item>
+    <item msgid="1084497364516370912">"16 bit/minta"</item>
+    <item msgid="2077889391457961734">"24 bit/minta"</item>
+    <item msgid="3836844909491316925">"32 bit/minta"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_channel_mode_titles">
+    <item msgid="3014194562841654656">"Rendszerérték (alapértelmezett)"</item>
+    <item msgid="5982952342181788248">"Monó"</item>
+    <item msgid="927546067692441494">"Sztereó"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_channel_mode_summaries">
+    <item msgid="1997302811102880485">"Rendszerérték (alapértelmezett)"</item>
+    <item msgid="8005696114958453588">"Monó"</item>
+    <item msgid="1333279807604675720">"Sztereó"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_ldac_playback_quality_titles">
+    <item msgid="1241278021345116816">"Optimális hangminőség (990 kbps/909 kbps)"</item>
+    <item msgid="3523665555859696539">"Kiegyensúlyozott hang- és kapcsolatminőség (660 kbps/606 kbps)"</item>
+    <item msgid="886408010459747589">"Optimális kapcsolatminőség (330 kbps/303 kbps)"</item>
+    <item msgid="3808414041654351577">"A legjobb eredmény (adaptív bitsebesség)"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_ldac_playback_quality_summaries">
+    <item msgid="804499336721569838">"Optimális hangminőség"</item>
+    <item msgid="7451422070435297462">"Kiegyensúlyozott hang- és kapcsolatminőség"</item>
+    <item msgid="6173114545795428901">"Optimális kapcsolatminőség"</item>
+    <item msgid="4349908264188040530">"A legjobb eredmény (adaptív bitsebesség)"</item>
+  </string-array>
+  <string-array name="bluetooth_audio_active_device_summaries">
+    <item msgid="8019740759207729126"></item>
+    <item msgid="204248102837117183">", aktív"</item>
+    <item msgid="253388653486517049">", aktív (média)"</item>
+    <item msgid="5001852592115448348">", aktív (telefon)"</item>
+  </string-array>
+  <string-array name="select_logd_size_titles">
+    <item msgid="1191094707770726722">"Ki"</item>
+    <item msgid="7839165897132179888">"64 KB"</item>
+    <item msgid="2715700596495505626">"256 KB"</item>
+    <item msgid="7099386891713159947">"1 MB"</item>
+    <item msgid="6069075827077845520">"4 MB"</item>
+    <item msgid="8243549501764402572">"16 MB"</item>
+  </string-array>
+  <string-array name="select_logd_size_lowram_titles">
+    <item msgid="1145807928339101085">"Ki"</item>
+    <item msgid="4064786181089783077">"64 KB"</item>
+    <item msgid="3052710745383602630">"256 KB"</item>
+    <item msgid="3691785423374588514">"1 MB"</item>
+  </string-array>
+  <string-array name="select_logd_size_summaries">
+    <item msgid="409235464399258501">"Ki"</item>
+    <item msgid="4195153527464162486">"64 KB/naplópuffer"</item>
+    <item msgid="7464037639415220106">"256 KB/naplópuffer"</item>
+    <item msgid="8539423820514360724">"1 MB/naplópuffer"</item>
+    <item msgid="1984761927103140651">"4 MB/naplópuffer"</item>
+    <item msgid="7892098981256010498">"16 MB/naplópuffer"</item>
+  </string-array>
+  <string-array name="select_logpersist_titles">
+    <item msgid="704720725704372366">"Kikapcsolva"</item>
+    <item msgid="6014837961827347618">"Összes"</item>
+    <item msgid="7387060437894578132">"Rádiót kivéve"</item>
+    <item msgid="7300881231043255746">"csak kernel"</item>
+  </string-array>
+  <string-array name="select_logpersist_summaries">
+    <item msgid="97587758561106269">"Kikapcsolva"</item>
+    <item msgid="7126170197336963369">"Minden naplópuffer"</item>
+    <item msgid="7167543126036181392">"A rádiónapló-pufferen kívül mindegyik"</item>
+    <item msgid="5135340178556563979">"csak kernelnaplópuffer"</item>
+  </string-array>
+  <string-array name="window_animation_scale_entries">
+    <item msgid="2675263395797191850">"Animáció ki"</item>
+    <item msgid="5790132543372767872">"Animáció tempója: 0,5x"</item>
+    <item msgid="2529692189302148746">"Animáció tempója: 1x"</item>
+    <item msgid="8072785072237082286">"Animáció tempója: 1,5x"</item>
+    <item msgid="3531560925718232560">"Animáció tempója: 2x"</item>
+    <item msgid="4542853094898215187">"Animáció tempója: 5x"</item>
+    <item msgid="5643881346223901195">"Animáció tempója: 10x"</item>
+  </string-array>
+  <string-array name="transition_animation_scale_entries">
+    <item msgid="3376676813923486384">"Animáció ki"</item>
+    <item msgid="753422683600269114">"Animáció tempója: 0,5x"</item>
+    <item msgid="3695427132155563489">"Animáció tempója: 1x"</item>
+    <item msgid="9032615844198098981">"Animáció tempója: 1,5x"</item>
+    <item msgid="8473868962499332073">"Animáció tempója: 2x"</item>
+    <item msgid="4403482320438668316">"Animáció tempója: 5x"</item>
+    <item msgid="169579387974966641">"Animáció tempója: 10x"</item>
+  </string-array>
+  <string-array name="animator_duration_scale_entries">
+    <item msgid="6416998593844817378">"Animáció ki"</item>
+    <item msgid="875345630014338616">"Animáció tempója: 0,5x"</item>
+    <item msgid="2753729231187104962">"Animáció tempója: 1x"</item>
+    <item msgid="1368370459723665338">"Animáció tempója: 1,5x"</item>
+    <item msgid="5768005350534383389">"Animáció tempója: 2x"</item>
+    <item msgid="3728265127284005444">"Animáció tempója: 5x"</item>
+    <item msgid="2464080977843960236">"Animáció tempója: 10x"</item>
+  </string-array>
+  <string-array name="overlay_display_devices_entries">
+    <item msgid="4497393944195787240">"Egyik sem"</item>
+    <item msgid="8461943978957133391">"480p"</item>
+    <item msgid="6923083594932909205">"480p (biztonságos)"</item>
+    <item msgid="1226941831391497335">"720p"</item>
+    <item msgid="7051983425968643928">"720p (biztonságos)"</item>
+    <item msgid="7765795608738980305">"1080p"</item>
+    <item msgid="8084293856795803592">"1080p (biztonságos)"</item>
+    <item msgid="938784192903353277">"4K"</item>
+    <item msgid="8612549335720461635">"4K (biztonságos)"</item>
+    <item msgid="7322156123728520872">"4K (felskálázott)"</item>
+    <item msgid="7735692090314849188">"4K (felskálázott, biztonságos)"</item>
+    <item msgid="7346816300608639624">"720p, 1080p (két képernyő)"</item>
+  </string-array>
+  <string-array name="enable_opengl_traces_entries">
+    <item msgid="4433736508877934305">"Semelyik"</item>
+    <item msgid="9140053004929079158">"Logcat"</item>
+    <item msgid="3866871644917859262">"Systrace (grafika)"</item>
+    <item msgid="7345673972166571060">"Verem meghívása glGetError esetén"</item>
+  </string-array>
+  <string-array name="show_non_rect_clip_entries">
+    <item msgid="2482978351289846212">"Kikapcsolva"</item>
+    <item msgid="3405519300199774027">"Nem négyzetes kivágás kékkel"</item>
+    <item msgid="1212561935004167943">"Tesztelt rajzolási parancsok kiemelése zölddel"</item>
+  </string-array>
+  <string-array name="track_frame_time_entries">
+    <item msgid="634406443901014984">"Ki"</item>
+    <item msgid="1288760936356000927">"A képernyőn sávként"</item>
+    <item msgid="5023908510820531131">"<xliff:g id="AS_TYPED_COMMAND">adb shell dumpsys gfxinfo</xliff:g>"</item>
+  </string-array>
+  <string-array name="debug_hw_overdraw_entries">
+    <item msgid="1968128556747588800">"Ki"</item>
+    <item msgid="3033215374382962216">"Tartalom-felülírási területek mutatása"</item>
+    <item msgid="3474333938380896988">"A deuteranomália területeinek megjelenítése"</item>
+  </string-array>
+  <string-array name="app_process_limit_entries">
+    <item msgid="794656271086646068">"Normál korlátozás"</item>
+    <item msgid="8628438298170567201">"Nincsenek háttérfolyamatok"</item>
+    <item msgid="915752993383950932">"Legfeljebb 1 folyamat"</item>
+    <item msgid="8554877790859095133">"Legfeljebb 2 folyamat"</item>
+    <item msgid="9060830517215174315">"Legfeljebb 3 folyamat"</item>
+    <item msgid="6506681373060736204">"Legfeljebb 4 folyamat"</item>
+  </string-array>
+  <string-array name="usb_configuration_titles">
+    <item msgid="3358668781763928157">"Töltés"</item>
+    <item msgid="7804797564616858506">"MTP (Media Transfer Protocol, médiaátviteli protokoll)"</item>
+    <item msgid="910925519184248772">"PTP (Picture Transfer Protocol, képátviteli protokoll)"</item>
+    <item msgid="3825132913289380004">"RNDIS (USB Ethernet)"</item>
+    <item msgid="8828567335701536560">"Hangforrás"</item>
+    <item msgid="8688681727755534982">"MIDI"</item>
+  </string-array>
+</resources>
