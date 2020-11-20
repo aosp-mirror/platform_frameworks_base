@@ -474,6 +474,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
+    @GuardedBy("mMethodMap")
     final ArrayMap<IBinder, ClientState> mClients = new ArrayMap<>();
 
     private static final class ActivityViewInfo {
@@ -5322,20 +5323,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     case "reset":
                         return mService.handleShellCommandResetInputMethod(this);
                     case "tracing":
-                        int result = ImeTracing.getInstance().onShellCommand(this);
-                        boolean isImeTraceEnabled = ImeTracing.getInstance().isEnabled();
-                        for (ClientState state : mService.mClients.values()) {
-                            if (state != null) {
-                                try {
-                                    state.client.setImeTraceEnabled(isImeTraceEnabled);
-                                } catch (RemoteException e) {
-                                    Log.e(TAG,
-                                            "Error while trying to enable/disable ime "
-                                                    + "trace on client window", e);
-                                }
-                            }
-                        }
-                        return result;
+                        return mService.handleShellCommandTraceInputMethod(this);
                     default:
                         getOutPrintWriter().println("Unknown command: " + imeCommand);
                         return ShellCommandResult.FAILURE;
@@ -5713,6 +5701,34 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             }
         }
         return ShellCommandResult.SUCCESS;
+    }
+
+    /**
+     * Handles {@code adb shell ime tracing start/stop}.
+     * @param shellCommand {@link ShellCommand} object that is handling this command.
+     * @return Exit code of the command.
+     */
+    @BinderThread
+    @ShellCommandResult
+    private int handleShellCommandTraceInputMethod(@NonNull ShellCommand shellCommand) {
+        int result = ImeTracing.getInstance().onShellCommand(shellCommand);
+        boolean isImeTraceEnabled = ImeTracing.getInstance().isEnabled();
+        ArrayMap<IBinder, ClientState> clients;
+        synchronized (mMethodMap) {
+            clients = new ArrayMap<>(mClients);
+        }
+        for (ClientState state : clients.values()) {
+            if (state != null) {
+                try {
+                    state.client.setImeTraceEnabled(isImeTraceEnabled);
+                } catch (RemoteException e) {
+                    Log.e(TAG,
+                            "Error while trying to enable/disable ime "
+                            + "trace on client window", e);
+                }
+            }
+        }
+        return result;
     }
 
     /**
