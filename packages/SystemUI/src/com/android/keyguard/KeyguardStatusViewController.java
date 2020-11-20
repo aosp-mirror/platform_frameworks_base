@@ -130,6 +130,13 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
     }
 
     /**
+     * Get the height of the logout button.
+     */
+    public int getOwnerInfoHeight() {
+        return mView.getOwnerInfoHeight();
+    }
+
+    /**
      * Set keyguard status view alpha.
      */
     public void setAlpha(float alpha) {

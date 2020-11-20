@@ -926,6 +926,8 @@ public class NotificationPanelViewController extends PanelViewController {
         if (mUpdateMonitor.isUdfpsEnrolled()) {
             availableSpace = mNotificationStackScrollLayoutController.getHeight()
                     - minPadding - shelfSize
+                    - mKeyguardStatusViewController.getOwnerInfoHeight()
+                    - mKeyguardStatusViewController.getLogoutButtonHeight()
                     - (mStatusBar.getDisplayHeight() - mAuthController.getUdfpsRegion().top);
         }
 
