@@ -1998,8 +1998,8 @@ public class NotificationPanelViewController extends PanelViewController {
             maxHeight = calculatePanelHeightShade();
         }
         maxHeight = Math.max(min, maxHeight);
-        if (maxHeight == 0) {
-            Log.wtf(TAG, "maxPanelHeight is 0. getOverExpansionAmount(): "
+        if (maxHeight == 0 || isNaN(maxHeight)) {
+            Log.wtf(TAG, "maxPanelHeight is invalid. getOverExpansionAmount(): "
                     + getOverExpansionAmount() + ", calculatePanelHeightQsExpanded: "
                     + calculatePanelHeightQsExpanded() + ", calculatePanelHeightShade: "
                     + calculatePanelHeightShade() + ", mStatusBarMinHeight = "
