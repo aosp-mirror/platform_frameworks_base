@@ -18,12 +18,6 @@ package com.android.wm.shell.pip.phone;
 
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
-import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
-import static android.view.WindowManager.LayoutParams.FLAG_SLIPPERY;
-import static android.view.WindowManager.LayoutParams.FLAG_SPLIT_TOUCH;
-import static android.view.WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH;
-import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY;
-import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
 import static android.view.WindowManager.SHELL_ROOT_LAYER_PIP;
 
 import android.annotation.Nullable;
@@ -33,7 +27,6 @@ import android.app.RemoteAction;
 import android.content.Context;
 import android.content.pm.ParceledListSlice;
 import android.graphics.Matrix;
-import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.os.Debug;
@@ -44,27 +37,26 @@ import android.view.MotionEvent;
 import android.view.SurfaceControl;
 import android.view.SyncRtSurfaceTransactionApplier;
 import android.view.SyncRtSurfaceTransactionApplier.SurfaceParams;
-import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 
 import com.android.wm.shell.common.SystemWindows;
 import com.android.wm.shell.pip.PipMediaController;
 import com.android.wm.shell.pip.PipMediaController.ActionListener;
+import com.android.wm.shell.pip.PipMenuController;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Manages the PiP menu activity which can show menu options or a scrim.
+ * Manages the PiP menu view which can show menu options or a scrim.
  *
  * The current media session provides actions whenever there are no valid actions provided by the
  * current PiP activity. Otherwise, those actions always take precedence.
  */
-public class PipMenuActivityController {
+public class PhonePipMenuController implements PipMenuController {
 
     private static final String TAG = "PipMenuActController";
-    private static final String MENU_WINDOW_TITLE = "PipMenuView";
     private static final boolean DEBUG = false;
 
     public static final int MENU_STATE_NONE = 0;
@@ -124,7 +116,7 @@ public class PipMenuActivityController {
         }
     };
 
-    public PipMenuActivityController(Context context,
+    public PhonePipMenuController(Context context,
             PipMediaController mediaController, SystemWindows systemWindows) {
         mContext = context;
         mMediaController = mediaController;
@@ -138,20 +130,22 @@ public class PipMenuActivityController {
     /**
      * Attach the menu when the PiP task first appears.
      */
-    public void onTaskAppeared() {
+    @Override
+    public void attach(SurfaceControl leash) {
         attachPipMenuView();
     }
 
     /**
      * Detach the menu when the PiP task is gone.
      */
-    public void onTaskVanished() {
+    @Override
+    public void detach() {
         hideMenu();
         detachPipMenuView();
     }
 
 
-    public void onPinnedStackAnimationEnded() {
+    void onPinnedStackAnimationEnded() {
         if (isMenuVisible()) {
             mPipMenuView.onPipAnimationEnded();
         }
@@ -163,7 +157,9 @@ public class PipMenuActivityController {
             detachPipMenuView();
         }
         mPipMenuView = new PipMenuView(mContext, this);
-        mSystemWindows.addView(mPipMenuView, getPipMenuLayoutParams(0, 0), 0, SHELL_ROOT_LAYER_PIP);
+        mSystemWindows.addView(mPipMenuView,
+                getPipMenuLayoutParams(MENU_WINDOW_TITLE, 0 /* width */, 0 /* height */),
+                0, SHELL_ROOT_LAYER_PIP);
     }
 
     private void detachPipMenuView() {
@@ -181,9 +177,11 @@ public class PipMenuActivityController {
      * Updates the layout parameters of the menu.
      * @param destinationBounds New Menu bounds.
      */
+    @Override
     public void updateMenuBounds(Rect destinationBounds) {
         mSystemWindows.updateViewLayout(mPipMenuView,
-                getPipMenuLayoutParams(destinationBounds.width(), destinationBounds.height()));
+                getPipMenuLayoutParams(MENU_WINDOW_TITLE, destinationBounds.width(),
+                        destinationBounds.height()));
     }
 
     /**
@@ -203,6 +201,16 @@ public class PipMenuActivityController {
         if (!mListeners.contains(listener)) {
             mListeners.add(listener);
         }
+    }
+
+    /**
+     * When other components requests the menu controller directly to show the menu, we must
+     * first fire off the request to the other listeners who will then propagate the call
+     * back to the controller with the right parameters.
+     */
+    @Override
+    public void showMenu() {
+        mListeners.forEach(Listener::onPipShowMenu);
     }
 
     /**
@@ -250,6 +258,7 @@ public class PipMenuActivityController {
     /**
      * Move the PiP menu, which does a translation and possibly a scale transformation.
      */
+    @Override
     public void movePipMenu(@Nullable SurfaceControl pipLeash,
             @Nullable SurfaceControl.Transaction t,
             Rect destinationBounds) {
@@ -290,6 +299,7 @@ public class PipMenuActivityController {
     /**
      * Does an immediate window crop of the PiP menu.
      */
+    @Override
     public void resizePipMenu(@Nullable SurfaceControl pipLeash,
             @Nullable SurfaceControl.Transaction t,
             Rect destinationBounds) {
@@ -391,8 +401,9 @@ public class PipMenuActivityController {
     }
 
     /**
-     * Sets the menu actions to the actions provided by the current PiP activity.
+     * Sets the menu actions to the actions provided by the current PiP menu.
      */
+    @Override
     public void setAppActions(ParceledListSlice<RemoteAction> appActions) {
         mAppActions = appActions;
         updateMenuActions();
@@ -406,10 +417,6 @@ public class PipMenuActivityController {
         mListeners.forEach(Listener::onPipDismiss);
     }
 
-    void onPipShowMenu() {
-        mListeners.forEach(Listener::onPipShowMenu);
-    }
-
     /**
      * @return the best set of actions to show in the PiP menu.
      */
@@ -418,21 +425,6 @@ public class PipMenuActivityController {
             return mAppActions;
         }
         return mMediaActions;
-    }
-
-    /**
-     * Returns a default LayoutParams for the PIP Menu.
-     * @param width the PIP stack width.
-     * @param height the PIP stack height.
-     */
-    public static WindowManager.LayoutParams getPipMenuLayoutParams(int width, int height) {
-        final WindowManager.LayoutParams lp = new WindowManager.LayoutParams(width, height,
-                TYPE_APPLICATION_OVERLAY,
-                FLAG_WATCH_OUTSIDE_TOUCH | FLAG_SPLIT_TOUCH | FLAG_SLIPPERY | FLAG_NOT_TOUCHABLE,
-                PixelFormat.TRANSLUCENT);
-        lp.privateFlags |= PRIVATE_FLAG_TRUSTED_OVERLAY;
-        lp.setTitle(MENU_WINDOW_TITLE);
-        return lp;
     }
 
     /**
@@ -521,7 +513,7 @@ public class PipMenuActivityController {
         }
     }
 
-    public void dump(PrintWriter pw, String prefix) {
+    void dump(PrintWriter pw, String prefix) {
         final String innerPrefix = prefix + "  ";
         pw.println(prefix + TAG);
         pw.println(innerPrefix + "mMenuState=" + mMenuState);

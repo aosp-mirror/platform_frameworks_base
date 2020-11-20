@@ -70,7 +70,7 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
     private final PipTaskOrganizer mPipTaskOrganizer;
     private @NonNull PipBoundsState mPipBoundsState;
 
-    private PipMenuActivityController mMenuController;
+    private PhonePipMenuController mMenuController;
     private PipSnapAlgorithm mSnapAlgorithm;
 
     private final Handler mMainHandler = new Handler(Looper.getMainLooper());
@@ -162,7 +162,7 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
     };
 
     public PipMotionHelper(Context context, @NonNull PipBoundsState pipBoundsState,
-            PipTaskOrganizer pipTaskOrganizer, PipMenuActivityController menuController,
+            PipTaskOrganizer pipTaskOrganizer, PhonePipMenuController menuController,
             PipSnapAlgorithm snapAlgorithm, FloatingContentCoordinator floatingContentCoordinator) {
         mContext = context;
         mPipTaskOrganizer = pipTaskOrganizer;

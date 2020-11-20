@@ -92,7 +92,7 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
     private boolean mIsInFixedRotation;
     private Consumer<Boolean> mPinnedStackAnimationRecentsCallback;
 
-    protected PipMenuActivityController mMenuController;
+    protected PhonePipMenuController mMenuController;
     protected PipTaskOrganizer mPipTaskOrganizer;
     protected PinnedStackListenerForwarder.PinnedStackListener mPinnedStackListener =
             new PipControllerPinnedStackListener();
@@ -229,7 +229,7 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
             PipBoundsAlgorithm pipBoundsAlgorithm,
             @NonNull PipBoundsState pipBoundsState,
             PipMediaController pipMediaController,
-            PipMenuActivityController pipMenuActivityController,
+            PhonePipMenuController phonePipMenuController,
             PipTaskOrganizer pipTaskOrganizer,
             PipTouchHandler pipTouchHandler,
             WindowManagerShellWrapper windowManagerShellWrapper,
@@ -250,7 +250,7 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
         mPipTaskOrganizer = pipTaskOrganizer;
         mMainExecutor = mainExecutor;
         mMediaController = pipMediaController;
-        mMenuController = pipMenuActivityController;
+        mMenuController = phonePipMenuController;
         mTouchHandler = pipTouchHandler;
         mAppOpsListener = pipAppOpsListener;
         mPipInputConsumer = new PipInputConsumer(WindowManagerGlobal.getWindowManagerService(),
@@ -632,7 +632,7 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
     public static PipController create(Context context, DisplayController displayController,
             PipAppOpsListener pipAppOpsListener, PipBoundsAlgorithm pipBoundsAlgorithm,
             PipBoundsState pipBoundsState, PipMediaController pipMediaController,
-            PipMenuActivityController pipMenuActivityController, PipTaskOrganizer pipTaskOrganizer,
+            PhonePipMenuController phonePipMenuController, PipTaskOrganizer pipTaskOrganizer,
             PipTouchHandler pipTouchHandler, WindowManagerShellWrapper windowManagerShellWrapper,
             TaskStackListenerImpl taskStackListener, ShellExecutor mainExecutor) {
         if (!context.getPackageManager().hasSystemFeature(FEATURE_PICTURE_IN_PICTURE)) {
@@ -641,7 +641,7 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
         }
 
         return new PipController(context, displayController, pipAppOpsListener, pipBoundsAlgorithm,
-                pipBoundsState, pipMediaController, pipMenuActivityController, pipTaskOrganizer,
+                pipBoundsState, pipMediaController, phonePipMenuController, pipTaskOrganizer,
                 pipTouchHandler, windowManagerShellWrapper, taskStackListener, mainExecutor);
     }
 }

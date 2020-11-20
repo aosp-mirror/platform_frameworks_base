@@ -18,9 +18,9 @@ package com.android.wm.shell.pip.phone;
 
 import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.PIP_STASHING;
 import static com.android.wm.shell.pip.PipAnimationController.TRANSITION_DIRECTION_TO_PIP;
-import static com.android.wm.shell.pip.phone.PipMenuActivityController.MENU_STATE_CLOSE;
-import static com.android.wm.shell.pip.phone.PipMenuActivityController.MENU_STATE_FULL;
-import static com.android.wm.shell.pip.phone.PipMenuActivityController.MENU_STATE_NONE;
+import static com.android.wm.shell.pip.phone.PhonePipMenuController.MENU_STATE_CLOSE;
+import static com.android.wm.shell.pip.phone.PhonePipMenuController.MENU_STATE_FULL;
+import static com.android.wm.shell.pip.phone.PhonePipMenuController.MENU_STATE_NONE;
 
 import android.annotation.NonNull;
 import android.annotation.SuppressLint;
@@ -78,7 +78,7 @@ public class PipTouchHandler {
     private IPinnedStackController mPinnedStackController;
     private WeakReference<Consumer<Rect>> mPipExclusionBoundsChangeListener;
 
-    private final PipMenuActivityController mMenuController;
+    private final PhonePipMenuController mMenuController;
     private final AccessibilityManager mAccessibilityManager;
     private boolean mShowPipMenuOnAnimationEnd = false;
 
@@ -125,7 +125,7 @@ public class PipTouchHandler {
     /**
      * A listener for the PIP menu activity.
      */
-    private class PipMenuListener implements PipMenuActivityController.Listener {
+    private class PipMenuListener implements PhonePipMenuController.Listener {
         @Override
         public void onPipMenuStateChanged(int menuState, boolean resize, Runnable callback) {
             setMenuState(menuState, resize, callback);
@@ -152,7 +152,7 @@ public class PipTouchHandler {
 
     @SuppressLint("InflateParams")
     public PipTouchHandler(Context context,
-            PipMenuActivityController menuController,
+            PhonePipMenuController menuController,
             PipBoundsAlgorithm pipBoundsAlgorithm,
             @NonNull PipBoundsState pipBoundsState,
             PipTaskOrganizer pipTaskOrganizer,
