@@ -124,6 +124,16 @@ public final class Completable {
                 return true;
             }
         }
+
+        /**
+         * Blocks the calling thread until this object becomes ready to return the value.
+         */
+        @AnyThread
+        public void await() {
+            try {
+                mLatch.await();
+            } catch (InterruptedException ignored) { }
+        }
     }
 
     /**
@@ -250,6 +260,13 @@ public final class Completable {
     }
 
     /**
+     * @return an instance of {@link Completable.InputBindResult}.
+     */
+    public static Completable.InputBindResult createInputBindResult() {
+        return new Completable.InputBindResult();
+    }
+
+    /**
      * Completable object of {@link java.lang.Boolean}.
      */
     public static final class Boolean extends Values<java.lang.Boolean> { }
@@ -276,6 +293,18 @@ public final class Completable {
      */
     public static final class InputBindResult
             extends Values<com.android.internal.view.InputBindResult> { }
+
+    /**
+     * Await the result by the {@link Completable.Values}.
+     *
+     * @return the result once {@link ValueBase#onComplete()}
+     */
+    @AnyThread
+    @Nullable
+    public static <T> T getResult(@NonNull Completable.Values<T> value) {
+        value.await();
+        return value.getValue();
+    }
 
     /**
      * Await the result by the {@link Completable.Int}, and log it if there is no result after

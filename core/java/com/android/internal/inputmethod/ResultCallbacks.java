@@ -21,6 +21,8 @@ import android.annotation.BinderThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 
+import com.android.internal.view.InputBindResult;
+
 import java.lang.ref.WeakReference;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -147,6 +149,33 @@ public final class ResultCallbacks {
             @Override
             public void onResult(android.view.inputmethod.SurroundingText result) {
                 final Completable.SurroundingText value = unwrap(atomicRef);
+                if (value == null) {
+                    return;
+                }
+                value.onComplete(result);
+            }
+        };
+    }
+
+    /**
+     * Creates {@link IInputBindResultResultCallback.Stub} that is to set
+     * {@link Completable.InputBindResult} when receiving the result.
+     *
+     * @param value {@link Completable.InputBindResult} to be set when receiving the result.
+     * @return {@link IInputBindResultResultCallback.Stub} that can be passed as a binder IPC
+     *         parameter.
+     */
+    @AnyThread
+    public static IInputBindResultResultCallback.Stub of(
+            @NonNull Completable.InputBindResult value) {
+        final AtomicReference<WeakReference<Completable.InputBindResult>>
+                atomicRef = new AtomicReference<>(new WeakReference<>(value));
+
+        return new IInputBindResultResultCallback.Stub() {
+            @BinderThread
+            @Override
+            public void onResult(InputBindResult result) {
+                final Completable.InputBindResult value = unwrap(atomicRef);
                 if (value == null) {
                     return;
                 }

@@ -87,8 +87,10 @@ import android.view.WindowManager.LayoutParams.SoftInputModeFlags;
 import android.view.autofill.AutofillManager;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.inputmethod.Completable;
 import com.android.internal.inputmethod.InputMethodDebug;
 import com.android.internal.inputmethod.InputMethodPrivilegedOperationsRegistry;
+import com.android.internal.inputmethod.ResultCallbacks;
 import com.android.internal.inputmethod.StartInputFlags;
 import com.android.internal.inputmethod.StartInputReason;
 import com.android.internal.inputmethod.UnbindReason;
@@ -665,6 +667,7 @@ public final class InputMethodManager {
                     final int startInputReason =
                             nextFocusHasConnection ? WINDOW_FOCUS_GAIN_REPORT_WITH_CONNECTION
                                     : WINDOW_FOCUS_GAIN_REPORT_WITHOUT_CONNECTION;
+                    final Completable.InputBindResult value = Completable.createInputBindResult();
                     mService.startInputOrWindowGainedFocus(
                             startInputReason, mClient,
                             focusedView.getWindowToken(), startInputFlags, softInputMode,
@@ -672,7 +675,9 @@ public final class InputMethodManager {
                             null,
                             null,
                             0 /* missingMethodFlags */,
-                            mCurRootView.mContext.getApplicationInfo().targetSdkVersion);
+                            mCurRootView.mContext.getApplicationInfo().targetSdkVersion,
+                            ResultCallbacks.of(value));
+                    Completable.getResult(value); // ignore the result
                 } catch (RemoteException e) {
                     throw e.rethrowFromSystemServer();
                 }
@@ -2026,10 +2031,13 @@ public final class InputMethodManager {
                 if (DEBUG) Log.v(TAG, "START INPUT: view=" + dumpViewInfo(view) + " ic="
                         + ic + " tba=" + tba + " startInputFlags="
                         + InputMethodDebug.startInputFlagsToString(startInputFlags));
-                res = mService.startInputOrWindowGainedFocus(
+                final Completable.InputBindResult value = Completable.createInputBindResult();
+                mService.startInputOrWindowGainedFocus(
                         startInputReason, mClient, windowGainingFocus, startInputFlags,
                         softInputMode, windowFlags, tba, servedContext, missingMethodFlags,
-                        view.getContext().getApplicationInfo().targetSdkVersion);
+                        view.getContext().getApplicationInfo().targetSdkVersion,
+                        ResultCallbacks.of(value));
+                res = Completable.getResult(value);
                 if (DEBUG) Log.v(TAG, "Starting input: Bind result=" + res);
                 if (res == null) {
                     Log.wtf(TAG, "startInputOrWindowGainedFocus must not return"
