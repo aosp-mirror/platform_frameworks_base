@@ -1679,39 +1679,44 @@ public final class QuotaController extends StateController {
             // Update job bookkeeping out of band.
             JobSchedulerBackgroundThread.getHandler().post(() -> {
                 final int bucketIndex = JobSchedulerService.standbyBucketToBucketIndex(bucket);
-                if (DEBUG) {
-                    Slog.i(TAG, "Moving pkg " + string(userId, packageName) + " to bucketIndex "
-                            + bucketIndex);
-                }
-                List<JobStatus> restrictedChanges = new ArrayList<>();
-                synchronized (mLock) {
-                    ArraySet<JobStatus> jobs = mTrackedJobs.get(userId, packageName);
-                    if (jobs == null || jobs.size() == 0) {
-                        return;
-                    }
-                    for (int i = jobs.size() - 1; i >= 0; i--) {
-                        JobStatus js = jobs.valueAt(i);
-                        // Effective standby bucket can change after this in some situations so
-                        // use the real bucket so that the job is tracked by the controllers.
-                        if ((bucketIndex == RESTRICTED_INDEX
-                                || js.getStandbyBucket() == RESTRICTED_INDEX)
-                                && bucketIndex != js.getStandbyBucket()) {
-                            restrictedChanges.add(js);
-                        }
-                        js.setStandbyBucket(bucketIndex);
-                    }
-                    Timer timer = mPkgTimers.get(userId, packageName);
-                    if (timer != null && timer.isActive()) {
-                        timer.rescheduleCutoff();
-                    }
-                    if (maybeUpdateConstraintForPkgLocked(userId, packageName)) {
-                        mStateChangedListener.onControllerStateChanged();
-                    }
-                }
-                if (restrictedChanges.size() > 0) {
-                    mStateChangedListener.onRestrictedBucketChanged(restrictedChanges);
-                }
+                updateStandbyBucket(userId, packageName, bucketIndex);
             });
+        }
+    }
+
+    @VisibleForTesting
+    void updateStandbyBucket(
+            final int userId, final @NonNull String packageName, final int bucketIndex) {
+        if (DEBUG) {
+            Slog.i(TAG, "Moving pkg " + string(userId, packageName)
+                    + " to bucketIndex " + bucketIndex);
+        }
+        List<JobStatus> restrictedChanges = new ArrayList<>();
+        synchronized (mLock) {
+            ArraySet<JobStatus> jobs = mTrackedJobs.get(userId, packageName);
+            if (jobs == null || jobs.size() == 0) {
+                return;
+            }
+            for (int i = jobs.size() - 1; i >= 0; i--) {
+                JobStatus js = jobs.valueAt(i);
+                // Effective standby bucket can change after this in some situations so
+                // use the real bucket so that the job is tracked by the controllers.
+                if ((bucketIndex == RESTRICTED_INDEX || js.getStandbyBucket() == RESTRICTED_INDEX)
+                        && bucketIndex != js.getStandbyBucket()) {
+                    restrictedChanges.add(js);
+                }
+                js.setStandbyBucket(bucketIndex);
+            }
+            Timer timer = mPkgTimers.get(userId, packageName);
+            if (timer != null && timer.isActive()) {
+                timer.rescheduleCutoff();
+            }
+            if (maybeUpdateConstraintForPkgLocked(userId, packageName)) {
+                mStateChangedListener.onControllerStateChanged();
+            }
+        }
+        if (restrictedChanges.size() > 0) {
+            mStateChangedListener.onRestrictedBucketChanged(restrictedChanges);
         }
     }
 

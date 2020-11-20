@@ -36,7 +36,10 @@ import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_IN
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.os.Build;
+import android.os.HandlerExecutor;
 import android.os.HandlerThread;
+import android.provider.DeviceConfig;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.View;
@@ -47,6 +50,7 @@ import com.android.internal.jank.FrameTracker.ThreadedRendererWrapper;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -55,9 +59,21 @@ import java.util.concurrent.TimeUnit;
  */
 public class InteractionJankMonitor {
     private static final String TAG = InteractionJankMonitor.class.getSimpleName();
-    private static final boolean DEBUG = false;
     private static final String DEFAULT_WORKER_NAME = TAG + "-Worker";
     private static final long DEFAULT_TIMEOUT_MS = TimeUnit.SECONDS.toMillis(5L);
+    private static final String SETTINGS_ENABLED_KEY = "enabled";
+    private static final String SETTINGS_SAMPLING_INTERVAL_KEY = "sampling_interval";
+    private static final String SETTINGS_THRESHOLD_MISSED_FRAMES_KEY =
+            "trace_threshold_missed_frames";
+    private static final String SETTINGS_THRESHOLD_FRAME_TIME_MILLIS_KEY =
+            "trace_threshold_frame_time_millis";
+    /** Default to being enabled on debug builds. */
+    private static final boolean DEFAULT_ENABLED = Build.IS_DEBUGGABLE;
+    /** Default to collecting data for all CUJs. */
+    private static final int DEFAULT_SAMPLING_INTERVAL = 1;
+    /** Default to triggering trace if 3 frames are missed OR a frame takes at least 64ms */
+    private static final int DEFAULT_TRACE_THRESHOLD_MISSED_FRAMES = 3;
+    private static final int DEFAULT_TRACE_THRESHOLD_FRAME_TIME_MILLIS = 64;
 
     // Every value must have a corresponding entry in CUJ_STATSD_INTERACTION_TYPE.
     public static final int CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE = 0;
@@ -106,12 +122,20 @@ public class InteractionJankMonitor {
 
     private static volatile InteractionJankMonitor sInstance;
 
+    private final DeviceConfig.OnPropertiesChangedListener mPropertiesChangedListener =
+            this::updateProperties;
+
     private ThreadedRendererWrapper mRenderer;
     private FrameMetricsWrapper mMetrics;
     private SparseArray<FrameTracker> mRunningTrackers;
     private SparseArray<Runnable> mTimeoutActions;
     private HandlerThread mWorker;
+
     private boolean mInitialized;
+    private boolean mEnabled = DEFAULT_ENABLED;
+    private int mSamplingInterval = DEFAULT_SAMPLING_INTERVAL;
+    private int mTraceThresholdMissedFrames = DEFAULT_TRACE_THRESHOLD_MISSED_FRAMES;
+    private int mTraceThresholdFrameTimeMillis = DEFAULT_TRACE_THRESHOLD_FRAME_TIME_MILLIS;
 
     /** @hide */
     @IntDef({
@@ -134,10 +158,12 @@ public class InteractionJankMonitor {
             CUJ_NOTIFICATION_APP_START,
     })
     @Retention(RetentionPolicy.SOURCE)
-    public @interface CujType {}
+    public @interface CujType {
+    }
 
     /**
      * Get the singleton of InteractionJankMonitor.
+     *
      * @return instance of InteractionJankMonitor
      */
     public static InteractionJankMonitor getInstance() {
@@ -154,6 +180,7 @@ public class InteractionJankMonitor {
 
     /**
      * This constructor should be only public to tests.
+     *
      * @param worker the worker thread for the callbacks
      */
     @VisibleForTesting
@@ -165,11 +192,11 @@ public class InteractionJankMonitor {
 
     /**
      * Init InteractionJankMonitor for later instrumentation.
+     *
      * @param view Any view in the view tree to get context and ThreadedRenderer.
      * @return boolean true if the instance has been initialized successfully.
      */
     public boolean init(@NonNull View view) {
-        //TODO (163505250): This should be no-op if not in droid food rom.
         if (!mInitialized) {
             synchronized (this) {
                 if (!mInitialized) {
@@ -180,7 +207,20 @@ public class InteractionJankMonitor {
                     mRenderer = new ThreadedRendererWrapper(view.getThreadedRenderer());
                     mMetrics = new FrameMetricsWrapper();
                     mWorker.start();
+                    mEnabled = DEFAULT_ENABLED;
+                    mSamplingInterval = DEFAULT_SAMPLING_INTERVAL;
                     mInitialized = true;
+
+                    // Post initialization to the background in case we're running on the main
+                    // thread.
+                    mWorker.getThreadHandler().post(
+                            () -> mPropertiesChangedListener.onPropertiesChanged(
+                                    DeviceConfig.getProperties(
+                                            DeviceConfig.NAMESPACE_INTERACTION_JANK_MONITOR)));
+                    DeviceConfig.addOnPropertiesChangedListener(
+                            DeviceConfig.NAMESPACE_INTERACTION_JANK_MONITOR,
+                            new HandlerExecutor(mWorker.getThreadHandler()),
+                            mPropertiesChangedListener);
                 }
             }
         }
@@ -189,6 +229,7 @@ public class InteractionJankMonitor {
 
     /**
      * Create a {@link FrameTracker} instance.
+     *
      * @param session the session associates with this tracker
      * @return instance of the FrameTracker
      */
@@ -196,47 +237,50 @@ public class InteractionJankMonitor {
     public FrameTracker createFrameTracker(Session session) {
         synchronized (this) {
             if (!mInitialized) return null;
-            return new FrameTracker(session, mWorker.getThreadHandler(), mRenderer, mMetrics);
+            return new FrameTracker(session, mWorker.getThreadHandler(), mRenderer, mMetrics,
+                    mTraceThresholdMissedFrames, mTraceThresholdFrameTimeMillis);
         }
     }
 
     /**
      * Begin a trace session, must invoke {@link #init(View)} before invoking this method.
+     *
      * @param cujType the specific {@link InteractionJankMonitor.CujType}.
      * @return boolean true if the tracker is started successfully, false otherwise.
      */
     public boolean begin(@CujType int cujType) {
-        //TODO (163505250): This should be no-op if not in droid food rom.
         synchronized (this) {
-            return begin(cujType, 0L /* timeout */);
+            return begin(cujType, DEFAULT_TIMEOUT_MS);
         }
     }
 
     /**
      * Begin a trace session, must invoke {@link #init(View)} before invoking this method.
+     *
      * @param cujType the specific {@link InteractionJankMonitor.CujType}.
      * @param timeout the elapsed time in ms until firing the timeout action.
      * @return boolean true if the tracker is started successfully, false otherwise.
      */
     public boolean begin(@CujType int cujType, long timeout) {
-        //TODO (163505250): This should be no-op if not in droid food rom.
         synchronized (this) {
             if (!mInitialized) {
                 Log.d(TAG, "Not initialized!", new Throwable());
                 return false;
             }
-            Session session = new Session(cujType);
-            FrameTracker tracker = getTracker(session);
+            boolean shouldSample = ThreadLocalRandom.current().nextInt() % mSamplingInterval == 0;
+            if (!mEnabled || !shouldSample) {
+                return false;
+            }
+            FrameTracker tracker = getTracker(cujType);
             // Skip subsequent calls if we already have an ongoing tracing.
             if (tracker != null) return false;
 
             // begin a new trace session.
-            tracker = createFrameTracker(session);
+            tracker = createFrameTracker(new Session(cujType));
             mRunningTrackers.put(cujType, tracker);
             tracker.begin();
 
             // Cancel the trace if we don't get an end() call in specified duration.
-            timeout = timeout > 0L ? timeout : DEFAULT_TIMEOUT_MS;
             Runnable timeoutAction = () -> cancel(cujType);
             mTimeoutActions.put(cujType, timeoutAction);
             mWorker.getThreadHandler().postDelayed(timeoutAction, timeout);
@@ -246,6 +290,7 @@ public class InteractionJankMonitor {
 
     /**
      * End a trace session, must invoke {@link #init(View)} before invoking this method.
+     *
      * @param cujType the specific {@link InteractionJankMonitor.CujType}.
      * @return boolean true if the tracker is ended successfully, false otherwise.
      */
@@ -263,18 +308,18 @@ public class InteractionJankMonitor {
                 mTimeoutActions.remove(cujType);
             }
 
-            Session session = new Session(cujType);
-            FrameTracker tracker = getTracker(session);
+            FrameTracker tracker = getTracker(cujType);
             // Skip this call since we haven't started a trace yet.
             if (tracker == null) return false;
             tracker.end();
-            mRunningTrackers.remove(session.getCuj());
+            mRunningTrackers.remove(cujType);
             return true;
         }
     }
 
     /**
      * Cancel the trace session, must invoke {@link #init(View)} before invoking this method.
+     *
      * @return boolean true if the tracker is cancelled successfully, false otherwise.
      */
     public boolean cancel(@CujType int cujType) {
@@ -291,48 +336,38 @@ public class InteractionJankMonitor {
                 mTimeoutActions.remove(cujType);
             }
 
-            Session session = new Session(cujType);
-            FrameTracker tracker = getTracker(session);
+            FrameTracker tracker = getTracker(cujType);
             // Skip this call since we haven't started a trace yet.
             if (tracker == null) return false;
             tracker.cancel();
-            mRunningTrackers.remove(session.getCuj());
+            mRunningTrackers.remove(cujType);
             return true;
         }
     }
 
-    private void destroy() {
-        synchronized (this) {
-            int trackers = mRunningTrackers.size();
-            for (int i = 0; i < trackers; i++) {
-                mRunningTrackers.valueAt(i).cancel();
-            }
-            mRunningTrackers = null;
-            mTimeoutActions.clear();
-            mTimeoutActions = null;
-            mWorker.quit();
-            mWorker = null;
-        }
-    }
-
-    /**
-     * Abandon current instance.
-     */
-    @VisibleForTesting
-    public static void abandon() {
-        if (sInstance == null) return;
-        synchronized (InteractionJankMonitor.class) {
-            if (sInstance == null) return;
-            sInstance.destroy();
-            sInstance = null;
-        }
-    }
-
-    private FrameTracker getTracker(Session session) {
+    private FrameTracker getTracker(@CujType int cuj) {
         synchronized (this) {
             if (!mInitialized) return null;
-            return mRunningTrackers.get(session.getCuj());
+            return mRunningTrackers.get(cuj);
         }
+    }
+
+    private void updateProperties(DeviceConfig.Properties properties) {
+        synchronized (this) {
+            mSamplingInterval = properties.getInt(SETTINGS_SAMPLING_INTERVAL_KEY,
+                    DEFAULT_SAMPLING_INTERVAL);
+            mEnabled = properties.getBoolean(SETTINGS_ENABLED_KEY, DEFAULT_ENABLED);
+            mTraceThresholdMissedFrames = properties.getInt(SETTINGS_THRESHOLD_MISSED_FRAMES_KEY,
+                    DEFAULT_TRACE_THRESHOLD_MISSED_FRAMES);
+            mTraceThresholdFrameTimeMillis = properties.getInt(
+                    SETTINGS_THRESHOLD_FRAME_TIME_MILLIS_KEY,
+                    DEFAULT_TRACE_THRESHOLD_FRAME_TIME_MILLIS);
+        }
+    }
+
+    @VisibleForTesting
+    public DeviceConfig.OnPropertiesChangedListener getPropertiesChangedListener() {
+        return mPropertiesChangedListener;
     }
 
     /**
@@ -402,12 +437,14 @@ public class InteractionJankMonitor {
      * A class to represent a session.
      */
     public static class Session {
-        private @CujType int mCujType;
+        @CujType
+        private int mCujType;
 
         public Session(@CujType int cujType) {
             mCujType = cujType;
         }
 
+        @CujType
         public int getCuj() {
             return mCujType;
         }

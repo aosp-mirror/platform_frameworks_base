@@ -100,7 +100,7 @@ public final class DeviceStateManagerService extends SystemService {
     private final SparseArray<CallbackRecord> mCallbacks = new SparseArray<>();
 
     public DeviceStateManagerService(@NonNull Context context) {
-        this(context, new DeviceStatePolicyImpl());
+        this(context, new DeviceStatePolicyImpl(context));
     }
 
     @VisibleForTesting

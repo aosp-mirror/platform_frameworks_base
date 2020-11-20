@@ -233,7 +233,7 @@ public class DataServiceCallback {
      */
     @NonNull
     public static String resultCodeToString(@DataServiceCallback.ResultCode int resultCode) {
-        switch(resultCode) {
+        switch (resultCode) {
             case RESULT_SUCCESS:
                 return "RESULT_SUCCESS";
             case RESULT_ERROR_UNSUPPORTED:
@@ -246,6 +246,24 @@ public class DataServiceCallback {
                 return "RESULT_ERROR_ILLEGAL_STATE";
             default:
                 return "Missing case for result code=" + resultCode;
+        }
+    }
+
+    /**
+     * Indicates that the specified APN is no longer throttled.
+     *
+     * @param apn Access Point Name defined by the carrier.
+     */
+    public void onApnUnthrottled(@NonNull String apn) {
+        if (mCallback != null) {
+            try {
+                if (DBG) Rlog.d(TAG, "onApnUnthrottled");
+                mCallback.onApnUnthrottled(apn);
+            } catch (RemoteException e) {
+                Rlog.e(TAG, "onApnUnthrottled: remote exception", e);
+            }
+        } else {
+            Rlog.e(TAG, "onApnUnthrottled: callback is null!");
         }
     }
 }

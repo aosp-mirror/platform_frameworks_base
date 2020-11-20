@@ -16,7 +16,6 @@
 
 package com.android.wm.shell.flicker.helpers
 
-import android.app.ActivityManager
 import android.app.Instrumentation
 import android.content.ComponentName
 import android.content.Context
@@ -46,9 +45,6 @@ abstract class BaseAppHelper(
     protected val context: Context
         get() = mInstrumentation.context
 
-    private val activityManager: ActivityManager?
-        get() = context.getSystemService(ActivityManager::class.java)
-
     private val appSelector = By.pkg(packageName).depth(0)
 
     protected val isTelevision: Boolean
@@ -75,10 +71,6 @@ abstract class BaseAppHelper(
 
     fun waitUntilClosed(): Boolean {
         return uiDevice.wait(Until.gone(appSelector), APP_CLOSE_WAIT_TIME_MS)
-    }
-
-    fun forceStop() {
-        activityManager?.forceStopPackage(packageName)
     }
 
     override fun getOpenAppIntent(): Intent {

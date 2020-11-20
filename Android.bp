@@ -528,6 +528,7 @@ java_library {
         "android.hardware.vibrator-V1.3-java",
         "android.system.keystore2-java",
         "android.system.suspend.control.internal-java",
+        "cameraprotosnano",
         "devicepolicyprotosnano",
 
         "com.android.sysprop.apex",
@@ -627,6 +628,7 @@ java_defaults {
         "av-types-aidl-java",
         "mediatranscoding_aidl_interface-java",
         "soundtrigger_middleware-aidl-java",
+        "modules-utils-os",
     ],
 }
 
@@ -1268,7 +1270,6 @@ aidl_mapping {
 filegroup {
     name: "framework-telephony-common-shared-srcs",
     srcs: [
-        "core/java/android/os/BasicShellCommandHandler.java",
         "core/java/android/os/RegistrantList.java",
         "core/java/android/os/Registrant.java",
         "core/java/android/util/IndentingPrintWriter.java",
@@ -1351,7 +1352,6 @@ filegroup {
     name: "framework-wifi-service-shared-srcs",
     srcs: [
         "core/java/android/net/InterfaceConfiguration.java",
-        "core/java/android/os/BasicShellCommandHandler.java",
         "core/java/android/util/BackupUtils.java",
         "core/java/android/util/Rational.java",
         "core/java/com/android/internal/util/FastXmlSerializer.java",

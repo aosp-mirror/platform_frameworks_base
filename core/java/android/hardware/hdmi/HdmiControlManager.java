@@ -832,6 +832,22 @@ public final class HdmiControlManager {
     }
 
     /**
+     * For CEC source devices (OTT/STB/Audio system): toggle the power status of the HDMI-connected
+     * display and follow the display's new power status.
+     * For all other devices: no functionality.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.HDMI_CEC)
+    public void toggleAndFollowTvPower() {
+        try {
+            mService.toggleAndFollowTvPower();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Controls whether volume control commands via HDMI CEC are enabled.
      *
      * <p>When disabled:

@@ -717,6 +717,10 @@
         [CHAR LIMIT=NONE BACKUP_MESSAGE_ID=6665375982962336520] -->
     <string name="notification_channel_foreground_service">Apps consuming battery</string>
 
+    <!-- Text shown when viewing channel settings for notifications related to accessibility
+         magnification. [CHAR_LIMIT=NONE]-->
+    <string name="notification_channel_accessibility_magnification">Magnification</string>
+
     <!-- Label for foreground service notification when one app is running.
     [CHAR LIMIT=NONE BACKUP_MESSAGE_ID=6826789589341671842] -->
     <string name="foreground_service_app_in_background"><xliff:g id="app_name">%1$s</xliff:g> is
@@ -5767,4 +5771,16 @@ ul.</string>
     <string name="config_pdp_reject_service_not_subscribed"></string>
     <!-- pdp data reject dialog string for cause 55 (MULTI_CONN_TO_SAME_PDN_NOT_ALLOWED) [CHAR LIMIT=100] -->
     <string name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed"></string>
+
+    <!-- Window magnification prompt related string. -->
+
+    <!-- Notification title to prompt the user that new magnification feature is available. [CHAR LIMIT=50] -->
+    <string name="window_magnification_prompt_title">New: Window Magnifier</string>
+    <!-- Notification content to prompt the user that new magnification feature is available. [CHAR LIMIT=50] -->
+    <string name="window_magnification_prompt_content">You can now magnify some or all of your screen</string>
+    <!-- Notification action to bring the user to magnification settings page. [CHAR LIMIT=50] -->
+    <string name="turn_on_magnification_settings_action">Turn on in Settings</string>
+    <!-- Notification action to dismiss. [CHAR LIMIT=50] -->
+    <string name="dismiss_action">Dismiss</string>
+
 </resources>

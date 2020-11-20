@@ -51,6 +51,7 @@ import android.hardware.soundtrigger.SoundTrigger.ModelParamRange;
 import android.hardware.soundtrigger.SoundTrigger.ModuleProperties;
 import android.hardware.soundtrigger.SoundTrigger.RecognitionConfig;
 import android.hardware.soundtrigger.SoundTrigger.SoundModel;
+import android.hardware.soundtrigger.SoundTriggerModule;
 import android.media.AudioAttributes;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
@@ -219,9 +220,20 @@ public class SoundTriggerService extends SystemService {
         Identity originatorIdentity = IdentityContext.getNonNull();
 
         return new SoundTriggerHelper(mContext,
-                (moduleId, listener) -> SoundTrigger.attachModuleAsMiddleman(moduleId, listener,
-                        null,
-                        middlemanIdentity, originatorIdentity));
+                new SoundTriggerHelper.SoundTriggerModuleProvider() {
+                    @Override
+                    public int listModuleProperties(ArrayList<ModuleProperties> modules) {
+                        return SoundTrigger.listModulesAsMiddleman(modules, middlemanIdentity,
+                                originatorIdentity);
+                    }
+
+                    @Override
+                    public SoundTriggerModule getModule(int moduleId,
+                            SoundTrigger.StatusListener statusListener) {
+                        return SoundTrigger.attachModuleAsMiddleman(moduleId, statusListener, null,
+                                middlemanIdentity, originatorIdentity);
+                    }
+                });
     }
 
     class SoundTriggerServiceStub extends ISoundTriggerService.Stub {

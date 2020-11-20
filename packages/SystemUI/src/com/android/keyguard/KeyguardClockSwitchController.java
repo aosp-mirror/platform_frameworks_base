@@ -61,6 +61,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
      */
     private AnimatableClockController mNewLockScreenClockViewController;
     private FrameLayout mNewLockScreenClockFrame;
+    private AnimatableClockController mNewLockScreenLargeClockViewController;
 
     private int mLockScreenMode = KeyguardUpdateMonitor.LOCK_SCREEN_MODE_NORMAL;
 
@@ -189,6 +190,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     void refresh() {
         if (mNewLockScreenClockViewController != null) {
             mNewLockScreenClockViewController.refreshTime();
+            mNewLockScreenLargeClockViewController.refreshTime();
         }
 
         mView.refresh();
@@ -221,9 +223,15 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
                                 mView.findViewById(R.id.animatable_clock_view),
                                 mStatusBarStateController);
                 mNewLockScreenClockViewController.init();
+                mNewLockScreenLargeClockViewController =
+                        new AnimatableClockController(
+                                mView.findViewById(R.id.animatable_clock_view_large),
+                                mStatusBarStateController);
+                mNewLockScreenLargeClockViewController.init();
             }
         } else {
             mNewLockScreenClockViewController = null;
+            mNewLockScreenLargeClockViewController = null;
         }
         mView.updateLockScreenMode(mLockScreenMode);
         updateAodIcons();

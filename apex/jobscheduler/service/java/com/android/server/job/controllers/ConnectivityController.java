@@ -464,7 +464,7 @@ public final class ConnectivityController extends RestrictingController implemen
             NetworkCapabilities capabilities) {
         // TODO: consider matching against non-active networks
 
-        final boolean ignoreBlocked = (jobStatus.getFlags() & JobInfo.FLAG_WILL_BE_FOREGROUND) != 0;
+        final boolean ignoreBlocked = jobStatus.shouldIgnoreNetworkBlocking();
         final NetworkInfo info = mConnManager.getNetworkInfoForUid(network,
                 jobStatus.getSourceUid(), ignoreBlocked);
 

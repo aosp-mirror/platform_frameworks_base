@@ -834,9 +834,9 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         if (!mShouldDrawNotificationBackground) {
             return;
         }
-        final boolean clearUndershelf = Settings.Global.getInt(mContext.getContentResolver(),
-                Settings.Global.SHOW_NEW_NOTIF_DISMISS, 0 /* show background by default */) == 1;
-        if (clearUndershelf) {
+        final boolean newFlowHideShelf = Settings.Global.getInt(mContext.getContentResolver(),
+                Settings.Global.SHOW_NEW_NOTIF_DISMISS, 1 /* on by default */) == 1;
+        if (newFlowHideShelf) {
             mBackgroundPaint.setColor(Color.TRANSPARENT);
             invalidate();
             return;
@@ -2554,12 +2554,13 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         int childCount = getChildCount();
         for (int i = 0; i < childCount; i++) {
             ExpandableView child = (ExpandableView) getChildAt(i);
-            if (child.getVisibility() != View.GONE && !(child instanceof StackScrollerDecorView)
-                    && child != mShelf) {
+            if (child.getVisibility() != View.GONE
+                    && !(child instanceof StackScrollerDecorView)
+                    && child != mShelf
+                    && !mAmbientState.getDraggedViews().contains(child)) {
                 children.add(child);
             }
         }
-
         return children;
     }
 
@@ -5524,10 +5525,12 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
 
     void addDraggedView(View view) {
         mAmbientState.onBeginDrag(view);
+        updateFirstAndLastBackgroundViews();
     }
 
     void removeDraggedView(View view) {
         mAmbientState.onDragFinished(view);
+        updateFirstAndLastBackgroundViews();
     }
 
     void setTopHeadsUpEntry(NotificationEntry topEntry) {

@@ -36,6 +36,7 @@ import com.android.systemui.dump.DumpManager;
 import com.android.systemui.media.MediaHost;
 import com.android.systemui.plugins.qs.QSTileView;
 import com.android.systemui.qs.customize.QSCustomizerController;
+import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.settings.brightness.BrightnessController;
 import com.android.systemui.settings.brightness.BrightnessSlider;
@@ -77,6 +78,8 @@ public class QSPanelControllerTest extends SysuiTestCase {
     @Mock
     private QSSecurityFooter mQSSecurityFooter;
     @Mock
+    private QSLogger mQSLogger;
+    @Mock
     private BrightnessController.Factory mBrightnessControllerFactory;
     @Mock
     private BrightnessController mBrightnessController;
@@ -90,7 +93,6 @@ public class QSPanelControllerTest extends SysuiTestCase {
     QSTileView mQSTileView;
     @Mock
     PagedTileLayout mPagedTileLayout;
-
 
     private QSPanelController mController;
 
@@ -112,9 +114,9 @@ public class QSPanelControllerTest extends SysuiTestCase {
         when(mMediaHost.getDisappearParameters()).thenReturn(new DisappearParameters());
 
         mController = new QSPanelController(mQSPanel, mQSSecurityFooter, mTunerService,
-                mQSTileHost, mQSCustomizerController, mMediaHost, mQSTileRevealControllerFactory,
-                mDumpManager, mMetricsLogger, mUiEventLogger, mBrightnessControllerFactory,
-                mToggleSliderViewControllerFactory);
+                mQSTileHost, mQSCustomizerController, true, mMediaHost,
+                mQSTileRevealControllerFactory, mDumpManager, mMetricsLogger, mUiEventLogger,
+                mQSLogger, mBrightnessControllerFactory, mToggleSliderViewControllerFactory);
 
         mController.init();
     }

@@ -350,8 +350,8 @@ public class HdmiControlService extends SystemService {
 
     private HdmiCecMessageValidator mMessageValidator;
 
-    @ServiceThreadOnly
-    private int mPowerStatus = HdmiControlManager.POWER_STATUS_STANDBY;
+    private final HdmiCecPowerStatusController mPowerStatusController =
+            new HdmiCecPowerStatusController(this);
 
     @ServiceThreadOnly
     private String mMenuLanguage = localeToMenuLanguage(Locale.getDefault());
@@ -530,7 +530,8 @@ public class HdmiControlService extends SystemService {
             mIoThread.start();
             mIoLooper = mIoThread.getLooper();
         }
-        mPowerStatus = getInitialPowerStatus();
+
+        mPowerStatusController.setPowerStatus(getInitialPowerStatus());
         mProhibitMode = false;
         mHdmiControlEnabled = readBooleanSetting(Global.HDMI_CONTROL_ENABLED, true);
         mHdmiCecVolumeControlEnabled = readBooleanSetting(
@@ -673,10 +674,12 @@ public class HdmiControlService extends SystemService {
      * Updates the power status once the initialization of local devices is complete.
      */
     private void updatePowerStatusOnInitializeCecComplete() {
-        if (mPowerStatus == HdmiControlManager.POWER_STATUS_TRANSIENT_TO_ON) {
-            mPowerStatus = HdmiControlManager.POWER_STATUS_ON;
-        } else if (mPowerStatus == HdmiControlManager.POWER_STATUS_TRANSIENT_TO_STANDBY) {
-            mPowerStatus = HdmiControlManager.POWER_STATUS_STANDBY;
+        if (mPowerStatusController.isPowerStatusTransientToOn()) {
+            mHandler.post(() -> mPowerStatusController.setPowerStatus(
+                    HdmiControlManager.POWER_STATUS_ON));
+        } else if (mPowerStatusController.isPowerStatusTransientToStandby()) {
+            mHandler.post(() -> mPowerStatusController.setPowerStatus(
+                    HdmiControlManager.POWER_STATUS_STANDBY));
         }
     }
 
@@ -1686,11 +1689,24 @@ public class HdmiControlService extends SystemService {
         public void oneTouchPlay(final IHdmiControlCallback callback) {
             enforceAccessPermission();
             int pid = Binder.getCallingPid();
-            Slog.d(TAG, "Proccess pid: " + pid + " is calling oneTouchPlay.");
+            Slog.d(TAG, "Process pid: " + pid + " is calling oneTouchPlay.");
             runOnServiceThread(new Runnable() {
                 @Override
                 public void run() {
                     HdmiControlService.this.oneTouchPlay(callback);
+                }
+            });
+        }
+
+        @Override
+        public void toggleAndFollowTvPower() {
+            enforceAccessPermission();
+            int pid = Binder.getCallingPid();
+            Slog.d(TAG, "Process pid: " + pid + " is calling toggleAndFollowTvPower.");
+            runOnServiceThread(new Runnable() {
+                @Override
+                public void run() {
+                    HdmiControlService.this.toggleAndFollowTvPower();
                 }
             });
         }
@@ -2191,7 +2207,7 @@ public class HdmiControlService extends SystemService {
             final IndentingPrintWriter pw = new IndentingPrintWriter(writer, "  ");
 
             pw.println("mProhibitMode: " + mProhibitMode);
-            pw.println("mPowerStatus: " + mPowerStatus);
+            pw.println("mPowerStatus: " + mPowerStatusController.getPowerStatus());
 
             // System settings
             pw.println("System_settings:");
@@ -2362,7 +2378,23 @@ public class HdmiControlService extends SystemService {
     }
 
     @ServiceThreadOnly
-    private void queryDisplayStatus(final IHdmiControlCallback callback) {
+    @VisibleForTesting
+    protected void toggleAndFollowTvPower() {
+        assertRunOnServiceThread();
+        HdmiCecLocalDeviceSource source = playback();
+        if (source == null) {
+            source = audioSystem();
+        }
+
+        if (source == null) {
+            Slog.w(TAG, "Local source device not available");
+            return;
+        }
+        source.toggleAndFollowTvPower();
+    }
+
+    @ServiceThreadOnly
+    protected void queryDisplayStatus(final IHdmiControlCallback callback) {
         assertRunOnServiceThread();
         if (!mAddressAllocated) {
             mDisplayStatusCallback = callback;
@@ -2371,9 +2403,13 @@ public class HdmiControlService extends SystemService {
             return;
         }
 
-        HdmiCecLocalDevicePlayback source = playback();
+        HdmiCecLocalDeviceSource source = playback();
         if (source == null) {
-            Slog.w(TAG, "Local playback device not available");
+            source = audioSystem();
+        }
+
+        if (source == null) {
+            Slog.w(TAG, "Local source device not available");
             invokeCallback(callback, HdmiControlManager.RESULT_SOURCE_NOT_AVAILABLE);
             return;
         }
@@ -2831,34 +2867,34 @@ public class HdmiControlService extends SystemService {
     @ServiceThreadOnly
     int getPowerStatus() {
         assertRunOnServiceThread();
-        return mPowerStatus;
+        return mPowerStatusController.getPowerStatus();
     }
 
     @ServiceThreadOnly
     @VisibleForTesting
     void setPowerStatus(int powerStatus) {
         assertRunOnServiceThread();
-        mPowerStatus = powerStatus;
+        mPowerStatusController.setPowerStatus(powerStatus);
     }
 
     @ServiceThreadOnly
     boolean isPowerOnOrTransient() {
         assertRunOnServiceThread();
-        return mPowerStatus == HdmiControlManager.POWER_STATUS_ON
-                || mPowerStatus == HdmiControlManager.POWER_STATUS_TRANSIENT_TO_ON;
+        return mPowerStatusController.isPowerStatusOn()
+                || mPowerStatusController.isPowerStatusTransientToOn();
     }
 
     @ServiceThreadOnly
     boolean isPowerStandbyOrTransient() {
         assertRunOnServiceThread();
-        return mPowerStatus == HdmiControlManager.POWER_STATUS_STANDBY
-                || mPowerStatus == HdmiControlManager.POWER_STATUS_TRANSIENT_TO_STANDBY;
+        return mPowerStatusController.isPowerStatusStandby()
+                || mPowerStatusController.isPowerStatusTransientToStandby();
     }
 
     @ServiceThreadOnly
     boolean isPowerStandby() {
         assertRunOnServiceThread();
-        return mPowerStatus == HdmiControlManager.POWER_STATUS_STANDBY;
+        return mPowerStatusController.isPowerStatusStandby();
     }
 
     @ServiceThreadOnly
@@ -2895,7 +2931,8 @@ public class HdmiControlService extends SystemService {
     @ServiceThreadOnly
     private void onWakeUp(@WakeReason final int wakeUpAction) {
         assertRunOnServiceThread();
-        mPowerStatus = HdmiControlManager.POWER_STATUS_TRANSIENT_TO_ON;
+        mPowerStatusController.setPowerStatus(HdmiControlManager.POWER_STATUS_TRANSIENT_TO_ON,
+                false);
         if (mCecController != null) {
             if (mHdmiControlEnabled) {
                 int startReason = -1;
@@ -2926,14 +2963,15 @@ public class HdmiControlService extends SystemService {
     @VisibleForTesting
     protected void onStandby(final int standbyAction) {
         assertRunOnServiceThread();
-        mPowerStatus = HdmiControlManager.POWER_STATUS_TRANSIENT_TO_STANDBY;
+        mPowerStatusController.setPowerStatus(HdmiControlManager.POWER_STATUS_TRANSIENT_TO_STANDBY,
+                false);
         invokeVendorCommandListenersOnControlStateChanged(false,
                 HdmiControlManager.CONTROL_STATE_CHANGED_REASON_STANDBY);
 
         final List<HdmiCecLocalDevice> devices = getAllLocalDevices();
 
         if (!isStandbyMessageReceived() && !canGoToStandby()) {
-            mPowerStatus = HdmiControlManager.POWER_STATUS_STANDBY;
+            mPowerStatusController.setPowerStatus(HdmiControlManager.POWER_STATUS_STANDBY);
             for (HdmiCecLocalDevice device : devices) {
                 device.onStandby(mStandbyMessageReceived, standbyAction);
             }
@@ -3013,10 +3051,10 @@ public class HdmiControlService extends SystemService {
         assertRunOnServiceThread();
         Slog.v(TAG, "onStandbyCompleted");
 
-        if (mPowerStatus != HdmiControlManager.POWER_STATUS_TRANSIENT_TO_STANDBY) {
+        if (!mPowerStatusController.isPowerStatusTransientToStandby()) {
             return;
         }
-        mPowerStatus = HdmiControlManager.POWER_STATUS_STANDBY;
+        mPowerStatusController.setPowerStatus(HdmiControlManager.POWER_STATUS_STANDBY);
         for (HdmiCecLocalDevice device : mHdmiCecNetwork.getLocalDeviceList()) {
             device.onStandby(mStandbyMessageReceived, standbyAction);
         }

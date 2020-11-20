@@ -295,7 +295,7 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
             mMenuContainer = new FrameLayout(mContext);
         }
         final boolean newFlowHideShelf = Settings.Global.getInt(mContext.getContentResolver(),
-                Settings.Global.SHOW_NEW_NOTIF_DISMISS, 0) == 1;
+                Settings.Global.SHOW_NEW_NOTIF_DISMISS, 1 /* on by default */) == 1;
         if (newFlowHideShelf) {
             return;
         }

@@ -16,6 +16,9 @@
 
 package com.android.systemui.qs.dagger;
 
+import static com.android.systemui.util.Utils.useQsMediaPlayer;
+
+import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 
@@ -44,6 +47,7 @@ import dagger.Provides;
 @Module
 public interface QSFragmentModule {
     String QS_SECURITY_FOOTER_VIEW = "qs_security_footer";
+    String QS_USING_MEDIA_PLAYER = "qs_using_media_player";
 
     /** */
     @Provides
@@ -108,4 +112,12 @@ public interface QSFragmentModule {
     static View providesQSSecurityFooterView(LayoutInflater layoutInflater, QSPanel qsPanel) {
         return layoutInflater.inflate(R.layout.quick_settings_footer, qsPanel, false);
     }
+
+    /** */
+    @Provides
+    @Named(QS_USING_MEDIA_PLAYER)
+    static boolean providesQSUsingMediaPlayer(Context context) {
+        return useQsMediaPlayer(context);
+    }
+
 }

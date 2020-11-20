@@ -28,8 +28,6 @@ import static android.app.ActivityManager.START_RETURN_LOCK_TASK_MODE_VIOLATION;
 import static android.app.ActivityManager.START_SUCCESS;
 import static android.app.ActivityManager.START_TASK_TO_FRONT;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
-import static android.app.WaitResult.LAUNCH_STATE_COLD;
-import static android.app.WaitResult.LAUNCH_STATE_HOT;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
@@ -819,8 +817,6 @@ class ActivityStarter {
                 break;
             }
             case START_TASK_TO_FRONT: {
-                mRequest.waitResult.launchState =
-                        r.attachedToProcess() ? LAUNCH_STATE_HOT : LAUNCH_STATE_COLD;
                 // ActivityRecord may represent a different activity, but it should not be
                 // in the resumed state.
                 if (r.nowVisible && r.isState(RESUMED)) {
@@ -1285,6 +1281,15 @@ class ActivityStarter {
             return false;
         }
 
+        // IME should always be allowed to start activity, like IME settings.
+        final WindowState imeWindow = mRootWindowContainer.getCurrentInputMethodWindow();
+        if (imeWindow != null && callingAppId == imeWindow.mOwnerUid) {
+            if (DEBUG_ACTIVITY_STARTS) {
+                Slog.d(TAG, "Activity start allowed for active ime (" + callingUid + ")");
+            }
+            return false;
+        }
+
         // App switching will be allowed if BAL app switching flag is not enabled, or if
         // its app switching rule allows it.
         // This is used to block background activity launch even if the app is still
@@ -1292,9 +1297,8 @@ class ActivityStarter {
         final boolean appSwitchAllowed = mService.getBalAppSwitchesAllowed();
 
         // don't abort if the callingUid has a visible window or is a persistent system process
-        final int callingUidProcState = mService.getUidState(callingUid);
-        final boolean callingUidHasAnyVisibleWindow =
-                mService.mWindowManager.mRoot.isAnyNonToastWindowVisibleForUid(callingUid);
+        final int callingUidProcState = mService.mActiveUids.getUidState(callingUid);
+        final boolean callingUidHasAnyVisibleWindow = mService.hasActiveVisibleWindow(callingUid);
         final boolean isCallingUidForeground = callingUidHasAnyVisibleWindow
                 || callingUidProcState == ActivityManager.PROCESS_STATE_TOP
                 || callingUidProcState == ActivityManager.PROCESS_STATE_BOUND_TOP;
@@ -1312,10 +1316,10 @@ class ActivityStarter {
         // take realCallingUid into consideration
         final int realCallingUidProcState = (callingUid == realCallingUid)
                 ? callingUidProcState
-                : mService.getUidState(realCallingUid);
+                : mService.mActiveUids.getUidState(realCallingUid);
         final boolean realCallingUidHasAnyVisibleWindow = (callingUid == realCallingUid)
                 ? callingUidHasAnyVisibleWindow
-                : mService.mWindowManager.mRoot.isAnyNonToastWindowVisibleForUid(realCallingUid);
+                : mService.hasActiveVisibleWindow(realCallingUid);
         final boolean isRealCallingUidForeground = (callingUid == realCallingUid)
                 ? isCallingUidForeground
                 : realCallingUidHasAnyVisibleWindow

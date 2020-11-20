@@ -16,6 +16,7 @@
 package com.android.test.taskembed
 
 import android.app.Instrumentation
+import android.graphics.Point
 import android.graphics.Rect
 import androidx.test.ext.junit.rules.ActivityScenarioRule
 import androidx.test.platform.app.InstrumentationRegistry
@@ -93,13 +94,15 @@ class ResizeTasksSyncTest {
 
         // verify buffer size should be changed to expected values.
         assertThat(trace).layer(FIRST_ACTIVITY, frame).also {
-            it.hasLayerSize(firstBounds)
-            it.hasBufferSize(firstBounds)
+            val firstTaskSize = Point(firstBounds.width(), firstBounds.height())
+            it.hasLayerSize(firstTaskSize)
+            it.hasBufferSize(firstTaskSize)
         }
 
         assertThat(trace).layer(SECOND_ACTIVITY, frame).also {
-            it.hasLayerSize(secondBounds)
-            it.hasBufferSize(secondBounds)
+            val secondTaskSize = Point(secondBounds.width(), secondBounds.height())
+            it.hasLayerSize(secondTaskSize)
+            it.hasBufferSize(secondTaskSize)
         }
     }
 

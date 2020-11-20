@@ -1054,6 +1054,7 @@ public class JobSchedulerService extends com.android.server.SystemService
 
     public int scheduleAsPackage(JobInfo job, JobWorkItem work, int uId, String packageName,
             int userId, String tag) {
+        // Rate limit excessive schedule() calls.
         final String servicePkg = job.getService().getPackageName();
         if (job.isPersisted() && (packageName == null || packageName.equals(servicePkg))) {
             // Only limit schedule calls for persisted jobs scheduled by the app itself.
@@ -1358,8 +1359,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                 for (int i=0; i<mActiveServices.size(); i++) {
                     JobServiceContext jsc = mActiveServices.get(i);
                     final JobStatus executing = jsc.getRunningJobLocked();
-                    if (executing != null
-                            && (executing.getFlags() & JobInfo.FLAG_WILL_BE_FOREGROUND) == 0) {
+                    if (executing != null && !executing.canRunInDoze()) {
                         jsc.cancelExecutingJobLocked(JobParameters.REASON_DEVICE_IDLE,
                                 "cancelled due to doze");
                     }
@@ -1411,7 +1411,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                 final JobServiceContext jsc = mActiveServices.get(i);
                 final JobStatus job = jsc.getRunningJobLocked();
                 if (job != null
-                        && (job.getJob().getFlags() & JobInfo.FLAG_WILL_BE_FOREGROUND) == 0
+                        && !job.canRunInDoze()
                         && !job.dozeWhitelisted
                         && !job.uidActive) {
                     // We will report active if we have a job running and it is not an exception

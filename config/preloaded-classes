@@ -5575,7 +5575,6 @@ android.os.AsyncTask
 android.os.BadParcelableException
 android.os.BaseBundle$NoImagePreloadHolder
 android.os.BaseBundle
-android.os.BasicShellCommandHandler
 android.os.BatteryManager
 android.os.BatteryManagerInternal
 android.os.BatteryProperty$1
@@ -6750,6 +6749,7 @@ android.sysprop.-$$Lambda$TelephonyProperties$illdaSIVv8AlxP9uc8NqC3Ta1tA
 android.sysprop.-$$Lambda$TelephonyProperties$klELuV5zVSqFveC5l6c3FSJmLAU
 android.sysprop.-$$Lambda$TelephonyProperties$pFU8zg4eHAdooeRLJg1WBG52cKk
 android.sysprop.-$$Lambda$TelephonyProperties$sXc3eBCFirzHWb9pvClH7EsiM_Q
+android.stats.camera.nano.CameraStreamProto
 android.sysprop.AdbProperties
 android.sysprop.ApexProperties
 android.sysprop.ContactsProperties
@@ -11756,6 +11756,7 @@ com.android.net.module.annotation.VisibleForTesting$Visibility
 com.android.net.module.annotation.VisibleForTesting
 com.android.net.module.annotation.WorkerThread
 com.android.net.module.util.InetAddressUtils
+com.android.modules.utils.BasicShellCommandHandler
 com.android.okhttp.Address
 com.android.okhttp.AndroidShimResponseCache
 com.android.okhttp.Authenticator

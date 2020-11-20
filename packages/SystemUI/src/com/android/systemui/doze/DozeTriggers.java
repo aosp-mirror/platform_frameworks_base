@@ -134,7 +134,7 @@ public class DozeTriggers implements DozeMachine.Part {
         DOZING_UPDATE_SENSOR_TAP(441),
 
         @UiEvent(doc = "Dozing updated because on display auth was triggered from AOD.")
-        DOZING_UPDATE_AUTH_TRIGGERED(442);
+        DOZING_UPDATE_AUTH_TRIGGERED(657);
 
         private final int mId;
 

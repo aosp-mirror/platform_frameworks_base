@@ -70,6 +70,7 @@ stubs_defaults {
         "android.hardware.cas-V1.2-java",
         "android.hardware.health-V1.0-java-constants",
         "android.hardware.radio-V1.5-java",
+        "android.hardware.radio-V1.6-java",
         "android.hardware.thermal-V1.0-java-constants",
         "android.hardware.thermal-V2.0-java",
         "android.hardware.tv.input-V1.0-java-constants",
@@ -252,21 +253,7 @@ java_library_static {
         "framework-wifi.stubs",
         "private-stub-annotations-jar",
     ],
-    defaults: [
-        "android_defaults_stubs_current",
-        "android_stubs_dists_default",
-    ],
-    dist: {
-        dir: "apistubs/android/system",
-    },
-    dists: [
-        {
-            // Legacy dist path
-            targets: ["sdk", "win_sdk"],
-            tag: ".jar",
-            dest: "android_system.jar",
-        },
-    ],
+    defaults: ["android_defaults_stubs_current"],
 }
 
 java_library_static {
@@ -285,7 +272,21 @@ java_library_static {
         "framework-wifi.stubs.system",
         "private-stub-annotations-jar",
     ],
-    defaults: ["android_defaults_stubs_current"],
+    defaults: [
+        "android_defaults_stubs_current",
+        "android_stubs_dists_default",
+    ],
+    dist: {
+        dir: "apistubs/android/system",
+    },
+    dists: [
+        {
+            // Legacy dist path
+            targets: ["sdk", "win_sdk"],
+            tag: ".jar",
+            dest: "android_system.jar",
+        },
+    ],
 }
 
 java_library_static {

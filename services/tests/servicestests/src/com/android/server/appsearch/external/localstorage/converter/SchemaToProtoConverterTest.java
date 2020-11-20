@@ -20,9 +20,9 @@ import static com.google.common.truth.Truth.assertThat;
 
 import android.app.appsearch.AppSearchSchema;
 
-import com.android.server.appsearch.proto.IndexingConfig;
 import com.android.server.appsearch.proto.PropertyConfigProto;
 import com.android.server.appsearch.proto.SchemaTypeConfigProto;
+import com.android.server.appsearch.proto.StringIndexingConfig;
 import com.android.server.appsearch.proto.TermMatchType;
 
 import org.junit.Test;
@@ -51,18 +51,20 @@ public class SchemaToProtoConverterTest {
                         .setPropertyName("subject")
                         .setDataType(PropertyConfigProto.DataType.Code.STRING)
                         .setCardinality(PropertyConfigProto.Cardinality.Code.OPTIONAL)
-                        .setIndexingConfig(
-                                com.android.server.appsearch.proto.IndexingConfig.newBuilder()
-                                        .setTokenizerType(IndexingConfig.TokenizerType.Code.PLAIN)
+                        .setStringIndexingConfig(
+                                StringIndexingConfig.newBuilder()
+                                        .setTokenizerType(
+                                                StringIndexingConfig.TokenizerType.Code.PLAIN)
                                         .setTermMatchType(TermMatchType.Code.PREFIX)
                         )
                 ).addProperties(PropertyConfigProto.newBuilder()
                         .setPropertyName("body")
                         .setDataType(PropertyConfigProto.DataType.Code.STRING)
                         .setCardinality(PropertyConfigProto.Cardinality.Code.OPTIONAL)
-                        .setIndexingConfig(
-                                com.android.server.appsearch.proto.IndexingConfig.newBuilder()
-                                        .setTokenizerType(IndexingConfig.TokenizerType.Code.PLAIN)
+                        .setStringIndexingConfig(
+                                StringIndexingConfig.newBuilder()
+                                        .setTokenizerType(
+                                                StringIndexingConfig.TokenizerType.Code.PLAIN)
                                         .setTermMatchType(TermMatchType.Code.PREFIX)
                         )
                 ).build();
@@ -93,18 +95,20 @@ public class SchemaToProtoConverterTest {
                         .setPropertyName("artist")
                         .setDataType(PropertyConfigProto.DataType.Code.STRING)
                         .setCardinality(PropertyConfigProto.Cardinality.Code.REPEATED)
-                        .setIndexingConfig(
-                                com.android.server.appsearch.proto.IndexingConfig.newBuilder()
-                                        .setTokenizerType(IndexingConfig.TokenizerType.Code.PLAIN)
+                        .setStringIndexingConfig(
+                                StringIndexingConfig.newBuilder()
+                                        .setTokenizerType(
+                                                StringIndexingConfig.TokenizerType.Code.PLAIN)
                                         .setTermMatchType(TermMatchType.Code.PREFIX)
                         )
                 ).addProperties(PropertyConfigProto.newBuilder()
                         .setPropertyName("pubDate")
                         .setDataType(PropertyConfigProto.DataType.Code.INT64)
                         .setCardinality(PropertyConfigProto.Cardinality.Code.OPTIONAL)
-                        .setIndexingConfig(
-                                com.android.server.appsearch.proto.IndexingConfig.newBuilder()
-                                        .setTokenizerType(IndexingConfig.TokenizerType.Code.NONE)
+                        .setStringIndexingConfig(
+                                StringIndexingConfig.newBuilder()
+                                        .setTokenizerType(
+                                                StringIndexingConfig.TokenizerType.Code.NONE)
                                         .setTermMatchType(TermMatchType.Code.UNKNOWN)
                         )
                 ).build();

@@ -67,8 +67,8 @@ public class HdmiCecMessageValidatorTest {
     public void isValid_reportPowerStatus() {
         assertMessageValidity("04:90:00").isEqualTo(OK);
         assertMessageValidity("04:90:03:05").isEqualTo(OK);
+        assertMessageValidity("0F:90:00").isEqualTo(OK);
 
-        assertMessageValidity("0F:90:00").isEqualTo(ERROR_DESTINATION);
         assertMessageValidity("F0:90").isEqualTo(ERROR_SOURCE);
         assertMessageValidity("04:90").isEqualTo(ERROR_PARAMETER_SHORT);
         assertMessageValidity("04:90:04").isEqualTo(ERROR_PARAMETER);
