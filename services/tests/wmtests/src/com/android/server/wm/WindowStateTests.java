@@ -647,6 +647,8 @@ public class WindowStateTests extends WindowTestsBase {
         win1.mSurfaceControl = mock(SurfaceControl.class);
         win1.mAttrs.surfaceInsets.set(1, 2, 3, 4);
         win1.getFrame().offsetTo(WINDOW_OFFSET, 0);
+        // Simulate layout
+        win1.mRelayoutCalled = true;
         win1.updateSurfacePosition(t);
         win1.getTransformationMatrix(values, matrix);
 

@@ -5262,6 +5262,12 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if (mSurfaceControl == null) {
             return;
         }
+        if (mWmService.mWindowPlacerLocked.isLayoutDeferred() || isGoneForLayout()) {
+            // Since this relies on mWindowFrames, changes made while layout is deferred are
+            // likely to be invalid. Similarly, if it's goneForLayout, mWindowFrames may not be
+            // up-to-date and thus can't be relied on.
+            return;
+        }
 
         transformFrameToSurfacePosition(mWindowFrames.mFrame.left, mWindowFrames.mFrame.top,
                 mSurfacePosition);
