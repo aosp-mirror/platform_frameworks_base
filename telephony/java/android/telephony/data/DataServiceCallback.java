@@ -79,7 +79,7 @@ public class DataServiceCallback {
      * @param response Setup data call response.
      */
     public void onSetupDataCallComplete(@ResultCode int result,
-                                        @Nullable DataCallResponse response) {
+            @Nullable DataCallResponse response) {
         if (mCallback != null) {
             try {
                 if (DBG) Rlog.d(TAG, "onSetupDataCallComplete");
@@ -156,7 +156,7 @@ public class DataServiceCallback {
      * set it to an empty list.
      */
     public void onRequestDataCallListComplete(@ResultCode int result,
-                                              @NonNull List<DataCallResponse> dataCallList) {
+            @NonNull List<DataCallResponse> dataCallList) {
         if (mCallback != null) {
             try {
                 mCallback.onRequestDataCallListComplete(result, dataCallList);
@@ -184,6 +184,68 @@ public class DataServiceCallback {
             }
         } else {
             Rlog.e(TAG, "onDataCallListChanged: callback is null!");
+        }
+    }
+
+    /**
+     * Called to indicate result for the request {@link DataService#startHandover}.
+     *
+     * @param result The result code. Must be one of the {@link ResultCode}
+     */
+    public void onHandoverStarted(@ResultCode int result) {
+        if (mCallback != null) {
+            try {
+                if (DBG) Rlog.d(TAG, "onHandoverStarted");
+                mCallback.onHandoverStarted(result);
+            } catch (RemoteException e) {
+                Rlog.e(TAG, "Failed to onHandoverStarted on the remote");
+            }
+        } else {
+            Rlog.e(TAG, "onHandoverStarted: callback is null!");
+        }
+    }
+
+    /**
+     * Called to indicate result for the request {@link DataService#cancelHandover}.
+     *
+     * @param result The result code. Must be one of the {@link ResultCode}
+     */
+    public void onHandoverCancelled(@ResultCode int result) {
+        if (mCallback != null) {
+            try {
+                if (DBG) Rlog.d(TAG, "onHandoverCancelled");
+                mCallback.onHandoverCancelled(result);
+            } catch (RemoteException e) {
+                Rlog.e(TAG, "Failed to onHandoverCancelled on the remote");
+            }
+        } else {
+            Rlog.e(TAG, "onHandoverCancelled: callback is null!");
+        }
+    }
+
+    /**
+     * Get the result code as a string
+     *
+     * @param resultCode The result code. Must be one of the {@link ResultCode}
+     * @return the string representation
+     *
+     * @hide
+     */
+    @NonNull
+    public static String resultCodeToString(@DataServiceCallback.ResultCode int resultCode) {
+        switch(resultCode) {
+            case RESULT_SUCCESS:
+                return "RESULT_SUCCESS";
+            case RESULT_ERROR_UNSUPPORTED:
+                return "RESULT_ERROR_UNSUPPORTED";
+            case RESULT_ERROR_INVALID_ARG:
+                return "RESULT_ERROR_INVALID_ARG";
+            case RESULT_ERROR_BUSY:
+                return "RESULT_ERROR_BUSY";
+            case RESULT_ERROR_ILLEGAL_STATE:
+                return "RESULT_ERROR_ILLEGAL_STATE";
+            default:
+                return "Missing case for result code=" + resultCode;
         }
     }
 }
