@@ -305,4 +305,10 @@
 
     <!-- This value is used for the default system capabilities used on LE device. -->
     <string name="def_wearable_leSystemCapabilities" translatable="false">1</string>
+
+    <!-- Brightness levels, on a 0-255 scale -->
+    <string name="def_wearable_brightnessLevels" translatable="false">255,204,153,102,51</string>
+
+    <!-- Whether to allow mobile signal detector by default. -->
+    <bool name="def_wearable_mobileSignalDetectorAllowed">true</bool>
 </resources>

@@ -632,7 +632,11 @@ public class SettingsBackupTest {
                     Settings.Global.Wearable.ANDROID_WEAR_VERSION,
                     Settings.Global.Wearable.SYSTEM_CAPABILITIES,
                     Settings.Global.Wearable.SYSTEM_EDITION,
-                    Settings.Global.Wearable.WEAR_PLATFORM_MR_NUMBER);
+                    Settings.Global.Wearable.WEAR_PLATFORM_MR_NUMBER,
+                    Settings.Global.Wearable.DISPLAY_SHAPE,
+                    Settings.Global.Wearable.BOTTOM_OFFSET,
+                    Settings.Global.Wearable.SCREEN_BRIGHTNESS_LEVEL,
+                    Settings.Global.Wearable.MOBILE_SIGNAL_DETECTOR);
 
     private static final Set<String> BACKUP_DENY_LIST_SECURE_SETTINGS =
              newHashSet(

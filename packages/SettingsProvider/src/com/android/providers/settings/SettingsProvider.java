@@ -5293,6 +5293,22 @@ public class SettingsProvider extends ContentProvider {
                         initGlobalSettingsDefaultValForWearLocked(
                                 Global.Wearable.WEAR_PLATFORM_MR_NUMBER,
                                 SystemProperties.getInt("ro.cw_build.platform_mr", 0));
+                        initGlobalSettingsDefaultValForWearLocked(
+                                Settings.Global.Wearable.BOTTOM_OFFSET, 0);
+                        initGlobalSettingsDefaultValForWearLocked(
+                                Settings.Global.Wearable.DISPLAY_SHAPE,
+                                Settings.Global.Wearable.DISPLAY_SHAPE_SQUARE);
+                        initGlobalSettingsDefaultValForWearLocked(
+                                Settings.Global.Wearable.SCREEN_BRIGHTNESS_LEVEL,
+                                getContext()
+                                        .getResources()
+                                        .getString(R.string.def_wearable_brightnessLevels));
+                        initGlobalSettingsDefaultValForWearLocked(
+                                Settings.Global.Wearable.MOBILE_SIGNAL_DETECTOR,
+                                getContext()
+                                        .getResources()
+                                        .getBoolean(
+                                                R.bool.def_wearable_mobileSignalDetectorAllowed));
 
                         // TODO(b/164398026): add necessary initialization logic for all entries.
                         currentVersion = 204;
