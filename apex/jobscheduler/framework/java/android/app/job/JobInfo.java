@@ -1506,56 +1506,16 @@ public class JobInfo implements Parcelable {
          * @return The job object to hand to the JobScheduler. This object is immutable.
          */
         public JobInfo build() {
-            // Check that network estimates require network type
-            if ((mNetworkDownloadBytes > 0 || mNetworkUploadBytes > 0) && mNetworkRequest == null) {
-                throw new IllegalArgumentException(
-                        "Can't provide estimated network usage without requiring a network");
-            }
-            // We can't serialize network specifiers
-            if (mIsPersisted && mNetworkRequest != null
-                    && mNetworkRequest.networkCapabilities.getNetworkSpecifier() != null) {
-                throw new IllegalArgumentException(
-                        "Network specifiers aren't supported for persistent jobs");
-            }
-            // Check that a deadline was not set on a periodic job.
-            if (mIsPeriodic) {
-                if (mMaxExecutionDelayMillis != 0L) {
-                    throw new IllegalArgumentException("Can't call setOverrideDeadline() on a " +
-                            "periodic job.");
-                }
-                if (mMinLatencyMillis != 0L) {
-                    throw new IllegalArgumentException("Can't call setMinimumLatency() on a " +
-                            "periodic job");
-                }
-                if (mTriggerContentUris != null) {
-                    throw new IllegalArgumentException("Can't call addTriggerContentUri() on a " +
-                            "periodic job");
-                }
-            }
-            if (mIsPersisted) {
-                if (mTriggerContentUris != null) {
-                    throw new IllegalArgumentException("Can't call addTriggerContentUri() on a " +
-                            "persisted job");
-                }
-                if (!mTransientExtras.isEmpty()) {
-                    throw new IllegalArgumentException("Can't call setTransientExtras() on a " +
-                            "persisted job");
-                }
-                if (mClipData != null) {
-                    throw new IllegalArgumentException("Can't call setClipData() on a " +
-                            "persisted job");
-                }
-            }
-            if ((mFlags & FLAG_IMPORTANT_WHILE_FOREGROUND) != 0 && mHasEarlyConstraint) {
-                throw new IllegalArgumentException("An important while foreground job cannot "
-                        + "have a time delay");
-            }
+            // This check doesn't need to be inside enforceValidity. It's an unnecessary legacy
+            // check that would ideally be phased out instead.
             if (mBackoffPolicySet && (mConstraintFlags & CONSTRAINT_FLAG_DEVICE_IDLE) != 0) {
                 throw new IllegalArgumentException("An idle mode job will not respect any" +
                         " back-off policy, so calling setBackoffCriteria with" +
                         " setRequiresDeviceIdle is an error.");
             }
-            return new JobInfo(this);
+            JobInfo jobInfo = new JobInfo(this);
+            jobInfo.enforceValidity();
+            return jobInfo;
         }
 
         /**
@@ -1566,6 +1526,59 @@ public class JobInfo implements Parcelable {
                     ? mJobService.flattenToShortString()
                     : "null";
             return "JobInfo.Builder{job:" + mJobId + "/" + service + "}";
+        }
+    }
+
+    /**
+     * @hide
+     */
+    public void enforceValidity() {
+        // Check that network estimates require network type
+        if ((networkDownloadBytes > 0 || networkUploadBytes > 0) && networkRequest == null) {
+            throw new IllegalArgumentException(
+                    "Can't provide estimated network usage without requiring a network");
+        }
+
+        // Check that a deadline was not set on a periodic job.
+        if (isPeriodic) {
+            if (maxExecutionDelayMillis != 0L) {
+                throw new IllegalArgumentException(
+                        "Can't call setOverrideDeadline() on a periodic job.");
+            }
+            if (minLatencyMillis != 0L) {
+                throw new IllegalArgumentException(
+                        "Can't call setMinimumLatency() on a periodic job");
+            }
+            if (triggerContentUris != null) {
+                throw new IllegalArgumentException(
+                        "Can't call addTriggerContentUri() on a periodic job");
+            }
+        }
+
+        if (isPersisted) {
+            // We can't serialize network specifiers
+            if (networkRequest != null
+                    && networkRequest.networkCapabilities.getNetworkSpecifier() != null) {
+                throw new IllegalArgumentException(
+                        "Network specifiers aren't supported for persistent jobs");
+            }
+            if (triggerContentUris != null) {
+                throw new IllegalArgumentException(
+                        "Can't call addTriggerContentUri() on a persisted job");
+            }
+            if (!transientExtras.isEmpty()) {
+                throw new IllegalArgumentException(
+                        "Can't call setTransientExtras() on a persisted job");
+            }
+            if (clipData != null) {
+                throw new IllegalArgumentException(
+                        "Can't call setClipData() on a persisted job");
+            }
+        }
+
+        if ((flags & FLAG_IMPORTANT_WHILE_FOREGROUND) != 0 && hasEarlyConstraint) {
+            throw new IllegalArgumentException(
+                    "An important while foreground job cannot have a time delay");
         }
     }
 
