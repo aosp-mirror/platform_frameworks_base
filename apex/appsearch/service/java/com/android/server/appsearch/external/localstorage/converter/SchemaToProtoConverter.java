@@ -17,8 +17,8 @@
 package com.android.server.appsearch.external.localstorage.converter;
 
 import android.annotation.NonNull;
-
 import android.app.appsearch.AppSearchSchema;
+
 import com.android.internal.util.Preconditions;
 
 import com.google.android.icing.proto.PropertyConfigProto;
@@ -30,15 +30,15 @@ import java.util.List;
 
 /**
  * Translates an {@link AppSearchSchema} into a {@link SchemaTypeConfigProto}.
+ *
  * @hide
  */
-
 public final class SchemaToProtoConverter {
     private SchemaToProtoConverter() {}
 
     /**
-     * Converts an {@link android.app.appsearch.AppSearchSchema} into a
-     * {@link SchemaTypeConfigProto}.
+     * Converts an {@link android.app.appsearch.AppSearchSchema} into a {@link
+     * SchemaTypeConfigProto}.
      */
     @NonNull
     public static SchemaTypeConfigProto convert(@NonNull AppSearchSchema schema) {
@@ -57,8 +57,8 @@ public final class SchemaToProtoConverter {
     private static PropertyConfigProto convertProperty(
             @NonNull AppSearchSchema.PropertyConfig property) {
         Preconditions.checkNotNull(property);
-        PropertyConfigProto.Builder propertyConfigProto = PropertyConfigProto.newBuilder()
-                .setPropertyName(property.getName());
+        PropertyConfigProto.Builder propertyConfigProto =
+                PropertyConfigProto.newBuilder().setPropertyName(property.getName());
         StringIndexingConfig.Builder indexingConfig = StringIndexingConfig.newBuilder();
 
         // Set dataType
@@ -104,8 +104,8 @@ public final class SchemaToProtoConverter {
         indexingConfig.setTermMatchType(termMatchTypeProto);
 
         // Set tokenizerType
-        @AppSearchSchema.PropertyConfig.TokenizerType int tokenizerType =
-                property.getTokenizerType();
+        @AppSearchSchema.PropertyConfig.TokenizerType
+        int tokenizerType = property.getTokenizerType();
         StringIndexingConfig.TokenizerType.Code tokenizerTypeProto =
                 StringIndexingConfig.TokenizerType.Code.forNumber(tokenizerType);
         if (tokenizerTypeProto == null) {

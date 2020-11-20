@@ -16,10 +16,9 @@
 
 package android.app.appsearch;
 
-import android.os.Bundle;
-
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.os.Bundle;
 
 import com.android.internal.util.Preconditions;
 
@@ -29,19 +28,17 @@ import java.util.List;
 
 /**
  * This class represents a page of {@link SearchResult}s
+ *
  * @hide
  */
-
 public class SearchResultPage {
     public static final String RESULTS_FIELD = "results";
     public static final String NEXT_PAGE_TOKEN_FIELD = "nextPageToken";
     private final long mNextPageToken;
 
-    @Nullable
-    private List<SearchResult> mResults;
+    @Nullable private List<SearchResult> mResults;
 
-    @NonNull
-    private final Bundle mBundle;
+    @NonNull private final Bundle mBundle;
 
     public SearchResultPage(@NonNull Bundle bundle) {
         mBundle = Preconditions.checkNotNull(bundle);

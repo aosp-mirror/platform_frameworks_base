@@ -18,6 +18,7 @@ package android.app.appsearch;
 
 import android.annotation.NonNull;
 import android.util.ArraySet;
+
 import com.android.internal.util.Preconditions;
 
 import java.util.Arrays;

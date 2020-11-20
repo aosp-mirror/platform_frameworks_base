@@ -16,13 +16,7 @@
 
 package com.android.server.appsearch.external.localstorage;
 
-import android.os.Bundle;
-import android.util.Log;
-
-import com.android.internal.annotations.GuardedBy;
 import android.annotation.NonNull;
-
-import com.android.internal.annotations.VisibleForTesting;
 import android.annotation.WorkerThread;
 import android.app.appsearch.AppSearchResult;
 import android.app.appsearch.AppSearchSchema;
@@ -30,12 +24,17 @@ import android.app.appsearch.GenericDocument;
 import android.app.appsearch.SearchResultPage;
 import android.app.appsearch.SearchSpec;
 import android.app.appsearch.exceptions.AppSearchException;
+import android.os.Bundle;
+import android.util.ArraySet;
+import android.util.Log;
+
+import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.Preconditions;
 import com.android.server.appsearch.external.localstorage.converter.GenericDocumentToProtoConverter;
 import com.android.server.appsearch.external.localstorage.converter.SchemaToProtoConverter;
 import com.android.server.appsearch.external.localstorage.converter.SearchResultToProtoConverter;
 import com.android.server.appsearch.external.localstorage.converter.SearchSpecToProtoConverter;
-import android.util.ArraySet;
-import com.android.internal.util.Preconditions;
 
 import com.google.android.icing.IcingSearchEngine;
 import com.google.android.icing.proto.DeleteResultProto;
@@ -77,43 +76,40 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  *
  * <p>A single instance of {@link AppSearchImpl} can support all databases. Schemas and documents
  * are physically saved together in {@link IcingSearchEngine}, but logically isolated:
+ *
  * <ul>
- *      <li>Rewrite SchemaType in SchemaProto by adding database name prefix and save into
- *          SchemaTypes set in {@link #setSchema}.
- *      <li>Rewrite namespace and SchemaType in DocumentProto by adding database name prefix and
- *          save to namespaces set in {@link #putDocument}.
- *      <li>Remove database name prefix when retrieve documents in {@link #getDocument} and
- *          {@link #query}.
- *      <li>Rewrite filters in {@link SearchSpecProto} to have all namespaces and schema types of
- *          the queried database when user using empty filters in {@link #query}.
+ *   <li>Rewrite SchemaType in SchemaProto by adding database name prefix and save into SchemaTypes
+ *       set in {@link #setSchema}.
+ *   <li>Rewrite namespace and SchemaType in DocumentProto by adding database name prefix and save
+ *       to namespaces set in {@link #putDocument}.
+ *   <li>Remove database name prefix when retrieve documents in {@link #getDocument} and {@link
+ *       #query}.
+ *   <li>Rewrite filters in {@link SearchSpecProto} to have all namespaces and schema types of the
+ *       queried database when user using empty filters in {@link #query}.
  * </ul>
  *
  * <p>Methods in this class belong to two groups, the query group and the mutate group.
+ *
  * <ul>
- *     <li>All methods are going to modify global parameters and data in Icing are executed under
- *         WRITE lock to keep thread safety.
- *     <li>All methods are going to access global parameters or query data from Icing are executed
- *         under READ lock to improve query performance.
+ *   <li>All methods are going to modify global parameters and data in Icing are executed under
+ *       WRITE lock to keep thread safety.
+ *   <li>All methods are going to access global parameters or query data from Icing are executed
+ *       under READ lock to improve query performance.
  * </ul>
  *
  * <p>This class is thread safe.
  *
  * @hide
  */
-
 @WorkerThread
 public final class AppSearchImpl {
     private static final String TAG = "AppSearchImpl";
 
-    @VisibleForTesting
-    static final char DATABASE_DELIMITER = '/';
+    @VisibleForTesting static final char DATABASE_DELIMITER = '/';
 
-    @VisibleForTesting
-    static final int OPTIMIZE_THRESHOLD_DOC_COUNT = 1000;
-    @VisibleForTesting
-    static final int OPTIMIZE_THRESHOLD_BYTES = 1_000_000; // 1MB
-    @VisibleForTesting
-    static final int CHECK_OPTIMIZE_INTERVAL = 100;
+    @VisibleForTesting static final int OPTIMIZE_THRESHOLD_DOC_COUNT = 1000;
+    @VisibleForTesting static final int OPTIMIZE_THRESHOLD_BYTES = 1_000_000; // 1MB
+    @VisibleForTesting static final int CHECK_OPTIMIZE_INTERVAL = 100;
 
     private final ReadWriteLock mReadWriteLock = new ReentrantReadWriteLock();
 
@@ -134,8 +130,7 @@ public final class AppSearchImpl {
     private final Map<String, Set<String>> mNamespaceMapLocked = new HashMap<>();
 
     /**
-     * The counter to check when to call {@link #checkForOptimizeLocked(boolean)}. The
-     * interval is
+     * The counter to check when to call {@link #checkForOptimizeLocked(boolean)}. The interval is
      * {@link #CHECK_OPTIMIZE_INTERVAL}.
      */
     @GuardedBy("mReadWriteLock")
@@ -160,8 +155,10 @@ public final class AppSearchImpl {
         try {
             // We synchronize here because we don't want to call IcingSearchEngine.initialize() more
             // than once. It's unnecessary and can be a costly operation.
-            IcingSearchEngineOptions options = IcingSearchEngineOptions.newBuilder()
-                    .setBaseDir(icingDir.getAbsolutePath()).build();
+            IcingSearchEngineOptions options =
+                    IcingSearchEngineOptions.newBuilder()
+                            .setBaseDir(icingDir.getAbsolutePath())
+                            .build();
             mIcingSearchEngineLocked = new IcingSearchEngine(options);
 
             InitializeResultProto initializeResultProto = mIcingSearchEngineLocked.initialize();
@@ -182,13 +179,17 @@ public final class AppSearchImpl {
             // Populate schema map
             for (SchemaTypeConfigProto schema : schemaProto.getTypesList()) {
                 String qualifiedSchemaType = schema.getSchemaType();
-                addToMap(mSchemaMapLocked, getDatabaseName(qualifiedSchemaType),
+                addToMap(
+                        mSchemaMapLocked,
+                        getDatabaseName(qualifiedSchemaType),
                         qualifiedSchemaType);
             }
 
             // Populate namespace map
             for (String qualifiedNamespace : getAllNamespacesResultProto.getNamespacesList()) {
-                addToMap(mNamespaceMapLocked, getDatabaseName(qualifiedNamespace),
+                addToMap(
+                        mNamespaceMapLocked,
+                        getDatabaseName(qualifiedNamespace),
                         qualifiedNamespace);
             }
 
@@ -223,14 +224,17 @@ public final class AppSearchImpl {
      *
      * <p>This method belongs to mutate group.
      *
-     * @param databaseName  The name of the database where this schema lives.
-     * @param schemas       Schemas to set for this app.
+     * @param databaseName The name of the database where this schema lives.
+     * @param schemas Schemas to set for this app.
      * @param forceOverride Whether to force-apply the schema even if it is incompatible. Documents
-     *                      which do not comply with the new schema will be deleted.
+     *     which do not comply with the new schema will be deleted.
      * @throws AppSearchException on IcingSearchEngine error.
      */
-    public void setSchema(@NonNull String databaseName, @NonNull Set<AppSearchSchema> schemas,
-            boolean forceOverride) throws AppSearchException {
+    public void setSchema(
+            @NonNull String databaseName,
+            @NonNull Set<AppSearchSchema> schemas,
+            boolean forceOverride)
+            throws AppSearchException {
         mReadWriteLock.writeLock().lock();
         try {
             SchemaProto.Builder existingSchemaBuilder = getSchemaProtoLocked().toBuilder();
@@ -243,14 +247,13 @@ public final class AppSearchImpl {
 
             // Combine the existing schema (which may have types from other databases) with this
             // database's new schema. Modifies the existingSchemaBuilder.
-            RewrittenSchemaResults rewrittenSchemaResults = rewriteSchema(databaseName,
-                    existingSchemaBuilder,
-                    newSchemaBuilder.build());
+            RewrittenSchemaResults rewrittenSchemaResults =
+                    rewriteSchema(databaseName, existingSchemaBuilder, newSchemaBuilder.build());
 
             // Apply schema
             SetSchemaResultProto setSchemaResultProto =
-                    mIcingSearchEngineLocked.setSchema(existingSchemaBuilder.build(),
-                            forceOverride);
+                    mIcingSearchEngineLocked.setSchema(
+                            existingSchemaBuilder.build(), forceOverride);
 
             // Determine whether it succeeded.
             try {
@@ -259,11 +262,12 @@ public final class AppSearchImpl {
                 // Improve the error message by merging in information about incompatible types.
                 if (setSchemaResultProto.getDeletedSchemaTypesCount() > 0
                         || setSchemaResultProto.getIncompatibleSchemaTypesCount() > 0) {
-                    String newMessage = e.getMessage()
-                            + "\n  Deleted types: "
-                            + setSchemaResultProto.getDeletedSchemaTypesList()
-                            + "\n  Incompatible types: "
-                            + setSchemaResultProto.getIncompatibleSchemaTypesList();
+                    String newMessage =
+                            e.getMessage()
+                                    + "\n  Deleted types: "
+                                    + setSchemaResultProto.getDeletedSchemaTypesList()
+                                    + "\n  Incompatible types: "
+                                    + setSchemaResultProto.getIncompatibleSchemaTypesList();
                     throw new AppSearchException(e.getResultCode(), newMessage, e.getCause());
                 } else {
                     throw e;
@@ -272,17 +276,17 @@ public final class AppSearchImpl {
 
             // Update derived data structures.
             mSchemaMapLocked.put(databaseName, rewrittenSchemaResults.mRewrittenQualifiedTypes);
-            mVisibilityStoreLocked.updateSchemas(databaseName,
-                    rewrittenSchemaResults.mDeletedQualifiedTypes);
+            mVisibilityStoreLocked.updateSchemas(
+                    databaseName, rewrittenSchemaResults.mDeletedQualifiedTypes);
 
             // Determine whether to schedule an immediate optimize.
             if (setSchemaResultProto.getDeletedSchemaTypesCount() > 0
                     || (setSchemaResultProto.getIncompatibleSchemaTypesCount() > 0
-                    && forceOverride)) {
+                            && forceOverride)) {
                 // Any existing schemas which is not in 'schemas' will be deleted, and all
                 // documents of these types were also deleted. And so well if we force override
                 // incompatible schemas.
-                checkForOptimizeLocked(/* force= */true);
+                checkForOptimizeLocked(/* force= */ true);
             }
         } finally {
             mReadWriteLock.writeLock().unlock();
@@ -294,14 +298,12 @@ public final class AppSearchImpl {
      *
      * <p>This method belongs to the mutate group
      *
-     * @param databaseName                      The name of the database where the
-     *                                          visibility settings will apply.
-     * @param schemasHiddenFromPlatformSurfaces Schemas that should be hidden from platform
-     *                                          surfaces
+     * @param databaseName The name of the database where the visibility settings will apply.
+     * @param schemasHiddenFromPlatformSurfaces Schemas that should be hidden from platform surfaces
      * @throws AppSearchException on IcingSearchEngine error
      */
-    public void setVisibility(@NonNull String databaseName,
-            @NonNull Set<String> schemasHiddenFromPlatformSurfaces)
+    public void setVisibility(
+            @NonNull String databaseName, @NonNull Set<String> schemasHiddenFromPlatformSurfaces)
             throws AppSearchException {
         mReadWriteLock.writeLock().lock();
         try {
@@ -311,14 +313,16 @@ public final class AppSearchImpl {
             for (String schema : schemasHiddenFromPlatformSurfaces) {
                 Set<String> existingSchemas = mSchemaMapLocked.get(databaseName);
                 if (existingSchemas == null || !existingSchemas.contains(databasePrefix + schema)) {
-                    throw new AppSearchException(AppSearchResult.RESULT_NOT_FOUND,
-                            "Unknown schema(s): " + schemasHiddenFromPlatformSurfaces
+                    throw new AppSearchException(
+                            AppSearchResult.RESULT_NOT_FOUND,
+                            "Unknown schema(s): "
+                                    + schemasHiddenFromPlatformSurfaces
                                     + " provided during setVisibility.");
                 }
                 qualifiedSchemasHiddenFromPlatformSurface.add(databasePrefix + schema);
             }
-            mVisibilityStoreLocked.setVisibility(databaseName,
-                    qualifiedSchemasHiddenFromPlatformSurface);
+            mVisibilityStoreLocked.setVisibility(
+                    databaseName, qualifiedSchemasHiddenFromPlatformSurface);
         } finally {
             mReadWriteLock.writeLock().lock();
         }
@@ -330,13 +334,13 @@ public final class AppSearchImpl {
      * <p>This method belongs to mutate group.
      *
      * @param databaseName The databaseName this document resides in.
-     * @param document     The document to index.
+     * @param document The document to index.
      * @throws AppSearchException on IcingSearchEngine error.
      */
     public void putDocument(@NonNull String databaseName, @NonNull GenericDocument document)
             throws AppSearchException {
-        DocumentProto.Builder documentBuilder = GenericDocumentToProtoConverter.convert(
-                document).toBuilder();
+        DocumentProto.Builder documentBuilder =
+                GenericDocumentToProtoConverter.convert(document).toBuilder();
         addPrefixToDocument(documentBuilder, getDatabasePrefix(databaseName));
 
         PutResultProto putResultProto;
@@ -346,7 +350,7 @@ public final class AppSearchImpl {
             addToMap(mNamespaceMapLocked, databaseName, documentBuilder.getNamespace());
             // The existing documents with same URI will be deleted, so there maybe some resources
             // could be released after optimize().
-            checkForOptimizeLocked(/* force= */false);
+            checkForOptimizeLocked(/* force= */ false);
         } finally {
             mReadWriteLock.writeLock().unlock();
         }
@@ -359,19 +363,20 @@ public final class AppSearchImpl {
      * <p>This method belongs to query group.
      *
      * @param databaseName The databaseName this document resides in.
-     * @param namespace    The namespace this document resides in.
-     * @param uri          The URI of the document to get.
+     * @param namespace The namespace this document resides in.
+     * @param uri The URI of the document to get.
      * @return The Document contents
      * @throws AppSearchException on IcingSearchEngine error.
      */
     @NonNull
-    public GenericDocument getDocument(@NonNull String databaseName, @NonNull String namespace,
-            @NonNull String uri) throws AppSearchException {
+    public GenericDocument getDocument(
+            @NonNull String databaseName, @NonNull String namespace, @NonNull String uri)
+            throws AppSearchException {
         GetResultProto getResultProto;
         mReadWriteLock.readLock().lock();
         try {
-            getResultProto = mIcingSearchEngineLocked.get(
-                    getDatabasePrefix(databaseName) + namespace, uri);
+            getResultProto =
+                    mIcingSearchEngineLocked.get(getDatabasePrefix(databaseName) + namespace, uri);
         } finally {
             mReadWriteLock.readLock().unlock();
         }
@@ -387,22 +392,22 @@ public final class AppSearchImpl {
      *
      * <p>This method belongs to query group.
      *
-     * @param databaseName    The databaseName this query for.
+     * @param databaseName The databaseName this query for.
      * @param queryExpression Query String to search.
-     * @param searchSpec      Spec for setting filters, raw query etc.
-     * @return The results of performing this search. It may contain an empty list of results if
-     * no documents matched the query.
+     * @param searchSpec Spec for setting filters, raw query etc.
+     * @return The results of performing this search. It may contain an empty list of results if no
+     *     documents matched the query.
      * @throws AppSearchException on IcingSearchEngine error.
      */
     @NonNull
     public SearchResultPage query(
             @NonNull String databaseName,
             @NonNull String queryExpression,
-            @NonNull SearchSpec searchSpec) throws AppSearchException {
+            @NonNull SearchSpec searchSpec)
+            throws AppSearchException {
         mReadWriteLock.readLock().lock();
         try {
-            return doQueryLocked(Collections.singleton(databaseName), queryExpression,
-                    searchSpec);
+            return doQueryLocked(Collections.singleton(databaseName), queryExpression, searchSpec);
         } finally {
             mReadWriteLock.readLock().unlock();
         }
@@ -415,15 +420,15 @@ public final class AppSearchImpl {
      * <p>This method belongs to query group.
      *
      * @param queryExpression Query String to search.
-     * @param searchSpec      Spec for setting filters, raw query etc.
-     * @return The results of performing this search. It may contain an empty list of results if
-     * no documents matched the query.
+     * @param searchSpec Spec for setting filters, raw query etc.
+     * @return The results of performing this search. It may contain an empty list of results if no
+     *     documents matched the query.
      * @throws AppSearchException on IcingSearchEngine error.
      */
     @NonNull
     public SearchResultPage globalQuery(
-            @NonNull String queryExpression,
-            @NonNull SearchSpec searchSpec) throws AppSearchException {
+            @NonNull String queryExpression, @NonNull SearchSpec searchSpec)
+            throws AppSearchException {
         // TODO(b/169883602): Check if the platform is querying us at a higher level. At this
         //  point, we should add all platform-surfaceable schemas assuming the querier has been
         //  verified.
@@ -439,13 +444,13 @@ public final class AppSearchImpl {
 
     @GuardedBy("mReadWriteLock")
     private SearchResultPage doQueryLocked(
-            @NonNull Set<String> databases, @NonNull String queryExpression,
+            @NonNull Set<String> databases,
+            @NonNull String queryExpression,
             @NonNull SearchSpec searchSpec)
             throws AppSearchException {
-        SearchSpecProto searchSpecProto =
-                SearchSpecToProtoConverter.toSearchSpecProto(searchSpec);
-        SearchSpecProto.Builder searchSpecBuilder = searchSpecProto.toBuilder()
-                .setQuery(queryExpression);
+        SearchSpecProto searchSpecProto = SearchSpecToProtoConverter.toSearchSpecProto(searchSpec);
+        SearchSpecProto.Builder searchSpecBuilder =
+                searchSpecProto.toBuilder().setQuery(queryExpression);
 
         ResultSpecProto resultSpec = SearchSpecToProtoConverter.toResultSpecProto(searchSpec);
         ScoringSpecProto scoringSpec = SearchSpecToProtoConverter.toScoringSpecProto(searchSpec);
@@ -459,8 +464,8 @@ public final class AppSearchImpl {
         if (!rewriteSearchSpecForDatabasesLocked(searchSpecBuilder, databases)) {
             return new SearchResultPage(Bundle.EMPTY);
         }
-        searchResultProto = mIcingSearchEngineLocked.search(
-                searchSpecBuilder.build(), scoringSpec, resultSpec);
+        searchResultProto =
+                mIcingSearchEngineLocked.search(searchSpecBuilder.build(), scoringSpec, resultSpec);
         checkSuccess(searchResultProto.getStatus());
 
         return rewriteSearchResultProto(searchResultProto);
@@ -477,12 +482,11 @@ public final class AppSearchImpl {
      * @throws AppSearchException on IcingSearchEngine error.
      */
     @NonNull
-    public SearchResultPage getNextPage(long nextPageToken)
-            throws AppSearchException {
+    public SearchResultPage getNextPage(long nextPageToken) throws AppSearchException {
         mReadWriteLock.readLock().lock();
         try {
-            SearchResultProto searchResultProto = mIcingSearchEngineLocked.getNextPage(
-                    nextPageToken);
+            SearchResultProto searchResultProto =
+                    mIcingSearchEngineLocked.getNextPage(nextPageToken);
             checkSuccess(searchResultProto.getStatus());
             return rewriteSearchResultProto(searchResultProto);
         } finally {
@@ -496,7 +500,7 @@ public final class AppSearchImpl {
      * <p>This method belongs to query group.
      *
      * @param nextPageToken The token of pre-loaded results of previously executed query to be
-     *                      Invalidated.
+     *     Invalidated.
      */
     public void invalidateNextPageToken(long nextPageToken) {
         mReadWriteLock.readLock().lock();
@@ -513,18 +517,18 @@ public final class AppSearchImpl {
      * <p>This method belongs to mutate group.
      *
      * @param databaseName The databaseName the document is in.
-     * @param namespace    Namespace of the document to remove.
-     * @param uri          URI of the document to remove.
+     * @param namespace Namespace of the document to remove.
+     * @param uri URI of the document to remove.
      * @throws AppSearchException on IcingSearchEngine error.
      */
-    public void remove(@NonNull String databaseName, @NonNull String namespace,
-            @NonNull String uri) throws AppSearchException {
+    public void remove(@NonNull String databaseName, @NonNull String namespace, @NonNull String uri)
+            throws AppSearchException {
         String qualifiedNamespace = getDatabasePrefix(databaseName) + namespace;
         DeleteResultProto deleteResultProto;
         mReadWriteLock.writeLock().lock();
         try {
             deleteResultProto = mIcingSearchEngineLocked.delete(qualifiedNamespace, uri);
-            checkForOptimizeLocked(/* force= */false);
+            checkForOptimizeLocked(/* force= */ false);
         } finally {
             mReadWriteLock.writeLock().unlock();
         }
@@ -536,38 +540,38 @@ public final class AppSearchImpl {
      *
      * <p>This method belongs to mutate group.
      *
-     * @param databaseName    The databaseName the document is in.
+     * @param databaseName The databaseName the document is in.
      * @param queryExpression Query String to search.
-     * @param searchSpec      Defines what and how to remove
+     * @param searchSpec Defines what and how to remove
      * @throws AppSearchException on IcingSearchEngine error.
      */
-    public void removeByQuery(@NonNull String databaseName, @NonNull String queryExpression,
+    public void removeByQuery(
+            @NonNull String databaseName,
+            @NonNull String queryExpression,
             @NonNull SearchSpec searchSpec)
             throws AppSearchException {
-        SearchSpecProto searchSpecProto =
-                SearchSpecToProtoConverter.toSearchSpecProto(searchSpec);
-        SearchSpecProto.Builder searchSpecBuilder = searchSpecProto.toBuilder()
-                .setQuery(queryExpression);
+        SearchSpecProto searchSpecProto = SearchSpecToProtoConverter.toSearchSpecProto(searchSpec);
+        SearchSpecProto.Builder searchSpecBuilder =
+                searchSpecProto.toBuilder().setQuery(queryExpression);
         DeleteResultProto deleteResultProto;
         mReadWriteLock.writeLock().lock();
         try {
             // Only rewrite SearchSpec for non empty database.
             // rewriteSearchSpecForNonEmptyDatabase will return false for empty database, we
             // should skip sending request to Icing and return in here.
-            if (!rewriteSearchSpecForDatabasesLocked(searchSpecBuilder,
-                    Collections.singleton(databaseName))) {
+            if (!rewriteSearchSpecForDatabasesLocked(
+                    searchSpecBuilder, Collections.singleton(databaseName))) {
                 return;
             }
-            deleteResultProto = mIcingSearchEngineLocked.deleteByQuery(
-                    searchSpecBuilder.build());
-            checkForOptimizeLocked(/* force= */true);
+            deleteResultProto = mIcingSearchEngineLocked.deleteByQuery(searchSpecBuilder.build());
+            checkForOptimizeLocked(/* force= */ true);
         } finally {
             mReadWriteLock.writeLock().unlock();
         }
         // It seems that the caller wants to get success if the data matching the query is not in
         // the DB because it was not there or was successfully deleted.
-        checkCodeOneOf(deleteResultProto.getStatus(),
-                StatusProto.Code.OK, StatusProto.Code.NOT_FOUND);
+        checkCodeOneOf(
+                deleteResultProto.getStatus(), StatusProto.Code.OK, StatusProto.Code.NOT_FOUND);
     }
 
     /**
@@ -610,18 +614,20 @@ public final class AppSearchImpl {
      * Rewrites all types mentioned in the given {@code newSchema} to prepend {@code prefix}.
      * Rewritten types will be added to the {@code existingSchema}.
      *
-     * @param databaseName   The name of the database where this schema lives.
+     * @param databaseName The name of the database where this schema lives.
      * @param existingSchema A schema that may contain existing types from across all database
-     *                       instances. Will be mutated to contain the properly rewritten schema
-     *                       types from {@code newSchema}.
-     * @param newSchema      Schema with types to add to the {@code existingSchema}.
+     *     instances. Will be mutated to contain the properly rewritten schema types from {@code
+     *     newSchema}.
+     * @param newSchema Schema with types to add to the {@code existingSchema}.
      * @return a RewrittenSchemaResults contains all qualified schema type names in the given
-     * database as well as a set of schema types that were deleted from the database.
+     *     database as well as a set of schema types that were deleted from the database.
      */
     @VisibleForTesting
-    static RewrittenSchemaResults rewriteSchema(@NonNull String databaseName,
+    static RewrittenSchemaResults rewriteSchema(
+            @NonNull String databaseName,
             @NonNull SchemaProto.Builder existingSchema,
-            @NonNull SchemaProto newSchema) throws AppSearchException {
+            @NonNull SchemaProto newSchema)
+            throws AppSearchException {
         String prefix = getDatabasePrefix(databaseName);
         HashMap<String, SchemaTypeConfigProto> newTypesToProto = new HashMap<>();
         // Rewrite the schema type to include the typePrefix.
@@ -640,8 +646,7 @@ public final class AppSearchImpl {
                 PropertyConfigProto.Builder propertyConfigBuilder =
                         typeConfigBuilder.getProperties(propertyIdx).toBuilder();
                 if (!propertyConfigBuilder.getSchemaType().isEmpty()) {
-                    String newPropertySchemaType =
-                            prefix + propertyConfigBuilder.getSchemaType();
+                    String newPropertySchemaType = prefix + propertyConfigBuilder.getSchemaType();
                     propertyConfigBuilder.setSchemaType(newPropertySchemaType);
                     typeConfigBuilder.setProperties(propertyIdx, propertyConfigBuilder);
                 }
@@ -678,16 +683,15 @@ public final class AppSearchImpl {
     }
 
     /**
-     * Prepends {@code prefix} to all types and namespaces mentioned anywhere in
-     * {@code documentBuilder}.
+     * Prepends {@code prefix} to all types and namespaces mentioned anywhere in {@code
+     * documentBuilder}.
      *
      * @param documentBuilder The document to mutate
-     * @param prefix          The prefix to add
+     * @param prefix The prefix to add
      */
     @VisibleForTesting
     static void addPrefixToDocument(
-            @NonNull DocumentProto.Builder documentBuilder,
-            @NonNull String prefix) {
+            @NonNull DocumentProto.Builder documentBuilder, @NonNull String prefix) {
         // Rewrite the type name to include/remove the prefix.
         String newSchema = prefix + documentBuilder.getSchema();
         documentBuilder.setSchema(newSchema);
@@ -715,8 +719,8 @@ public final class AppSearchImpl {
     }
 
     /**
-     * Removes any database names from types and namespaces mentioned anywhere in
-     * {@code documentBuilder}.
+     * Removes any database names from types and namespaces mentioned anywhere in {@code
+     * documentBuilder}.
      *
      * @param documentBuilder The document to mutate
      */
@@ -749,8 +753,9 @@ public final class AppSearchImpl {
     /**
      * Rewrites the schemaTypeFilters and namespacesFilters that exist in {@code databaseNames}.
      *
-     * <p>If the searchSpec has empty filter lists, all existing databases from
-     * {@code databaseNames} will be added.
+     * <p>If the searchSpec has empty filter lists, all existing databases from {@code
+     * databaseNames} will be added.
+     *
      * <p>This method should be only called in query methods and get the READ lock to keep thread
      * safety.
      *
@@ -857,7 +862,8 @@ public final class AppSearchImpl {
             // Add 1 to include the char size of the DATABASE_DELIMITER
             return prefixedString.substring(delimiterIndex + 1);
         }
-        throw new AppSearchException(AppSearchResult.RESULT_UNKNOWN_ERROR,
+        throw new AppSearchException(
+                AppSearchResult.RESULT_UNKNOWN_ERROR,
                 "The prefixed value doesn't contains a valid database name.");
     }
 
@@ -865,14 +871,15 @@ public final class AppSearchImpl {
     private static String getDatabaseName(@NonNull String prefixedValue) throws AppSearchException {
         int delimiterIndex = prefixedValue.indexOf(DATABASE_DELIMITER);
         if (delimiterIndex == -1) {
-            throw new AppSearchException(AppSearchResult.RESULT_UNKNOWN_ERROR,
+            throw new AppSearchException(
+                    AppSearchResult.RESULT_UNKNOWN_ERROR,
                     "The databaseName prefixed value doesn't contains a valid database name.");
         }
         return prefixedValue.substring(0, delimiterIndex);
     }
 
-    private static void addToMap(Map<String, Set<String>> map, String databaseName,
-            String prefixedValue) {
+    private static void addToMap(
+            Map<String, Set<String>> map, String databaseName, String prefixedValue) {
         Set<String> values = map.get(databaseName);
         if (values == null) {
             values = new ArraySet<>();
@@ -891,8 +898,8 @@ public final class AppSearchImpl {
     }
 
     /**
-     * Checks the given status code is one of the provided codes, and throws an
-     * {@link AppSearchException} if it is not.
+     * Checks the given status code is one of the provided codes, and throws an {@link
+     * AppSearchException} if it is not.
      */
     private static void checkCodeOneOf(StatusProto statusProto, StatusProto.Code... codes)
             throws AppSearchException {
@@ -918,10 +925,12 @@ public final class AppSearchImpl {
      *
      * <p>This method should be only called in mutate methods and get the WRITE lock to keep thread
      * safety.
-     * <p>{@link IcingSearchEngine#optimize()} should be called only if
-     * {@link GetOptimizeInfoResultProto} shows there is enough resources could be released.
-     * <p>{@link IcingSearchEngine#getOptimizeInfo()} should be called once per
-     * {@link #CHECK_OPTIMIZE_INTERVAL} of remove executions.
+     *
+     * <p>{@link IcingSearchEngine#optimize()} should be called only if {@link
+     * GetOptimizeInfoResultProto} shows there is enough resources could be released.
+     *
+     * <p>{@link IcingSearchEngine#getOptimizeInfo()} should be called once per {@link
+     * #CHECK_OPTIMIZE_INTERVAL} of remove executions.
      *
      * @param force whether we should directly call {@link IcingSearchEngine#getOptimizeInfo()}.
      */
@@ -934,8 +943,7 @@ public final class AppSearchImpl {
             checkSuccess(optimizeInfo.getStatus());
             // Second threshold, decide when to call optimize().
             if (optimizeInfo.getOptimizableDocs() >= OPTIMIZE_THRESHOLD_DOC_COUNT
-                    || optimizeInfo.getEstimatedOptimizableBytes()
-                    >= OPTIMIZE_THRESHOLD_BYTES) {
+                    || optimizeInfo.getEstimatedOptimizableBytes() >= OPTIMIZE_THRESHOLD_BYTES) {
                 // TODO(b/155939114): call optimize in the same thread will slow down api calls
                 //  significantly. Move this call to background.
                 OptimizeResultProto optimizeResultProto = mIcingSearchEngineLocked.optimize();
@@ -977,34 +985,35 @@ public final class AppSearchImpl {
     }
 
     /**
-     * Converts an erroneous status code to an AppSearchException. Callers should ensure that
-     * the status code is not OK or WARNING_DATA_LOSS.
+     * Converts an erroneous status code to an AppSearchException. Callers should ensure that the
+     * status code is not OK or WARNING_DATA_LOSS.
      *
      * @param statusProto StatusProto with error code and message to translate into
-     *                    AppSearchException.
+     *     AppSearchException.
      * @return AppSearchException with the parallel error code.
      */
     private static AppSearchException statusProtoToAppSearchException(StatusProto statusProto) {
         switch (statusProto.getCode()) {
             case INVALID_ARGUMENT:
-                return new AppSearchException(AppSearchResult.RESULT_INVALID_ARGUMENT,
-                        statusProto.getMessage());
+                return new AppSearchException(
+                        AppSearchResult.RESULT_INVALID_ARGUMENT, statusProto.getMessage());
             case NOT_FOUND:
-                return new AppSearchException(AppSearchResult.RESULT_NOT_FOUND,
-                        statusProto.getMessage());
+                return new AppSearchException(
+                        AppSearchResult.RESULT_NOT_FOUND, statusProto.getMessage());
             case FAILED_PRECONDITION:
                 // Fallthrough
             case ABORTED:
                 // Fallthrough
             case INTERNAL:
-                return new AppSearchException(AppSearchResult.RESULT_INTERNAL_ERROR,
-                        statusProto.getMessage());
+                return new AppSearchException(
+                        AppSearchResult.RESULT_INTERNAL_ERROR, statusProto.getMessage());
             case OUT_OF_SPACE:
-                return new AppSearchException(AppSearchResult.RESULT_OUT_OF_SPACE,
-                        statusProto.getMessage());
+                return new AppSearchException(
+                        AppSearchResult.RESULT_OUT_OF_SPACE, statusProto.getMessage());
             default:
                 // Some unknown/unsupported error
-                return new AppSearchException(AppSearchResult.RESULT_UNKNOWN_ERROR,
+                return new AppSearchException(
+                        AppSearchResult.RESULT_UNKNOWN_ERROR,
                         "Unknown IcingSearchEngine status code: " + statusProto.getCode());
         }
     }

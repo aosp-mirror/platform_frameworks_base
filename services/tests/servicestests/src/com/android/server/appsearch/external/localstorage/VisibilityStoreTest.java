@@ -28,8 +28,7 @@ import java.util.Set;
 
 public class VisibilityStoreTest {
 
-    @Rule
-    public TemporaryFolder mTemporaryFolder = new TemporaryFolder();
+    @Rule public TemporaryFolder mTemporaryFolder = new TemporaryFolder();
     private AppSearchImpl mAppSearchImpl;
     private VisibilityStore mVisibilityStore;
 
@@ -72,5 +71,4 @@ public class VisibilityStoreTest {
         mVisibilityStore.updateSchemas("database", /*schemasToRemove=*/ Set.of("schema2"));
         assertThat(mVisibilityStore.getPlatformHiddenSchemas("database")).isEmpty();
     }
-
 }
