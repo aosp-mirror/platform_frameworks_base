@@ -200,7 +200,8 @@ class ConnectivityServiceIntegrationTest {
         nsInstrumentation.addHttpResponse(HttpResponse(httpProbeUrl, responseCode = 204))
         nsInstrumentation.addHttpResponse(HttpResponse(httpsProbeUrl, responseCode = 204))
 
-        val na = NetworkAgentWrapper(TRANSPORT_CELLULAR, LinkProperties(), context)
+        val na = NetworkAgentWrapper(TRANSPORT_CELLULAR, LinkProperties(), null /* ncTemplate */,
+                context)
         networkStackClient.verifyNetworkMonitorCreated(na.network, TEST_TIMEOUT_MS)
 
         na.addCapability(NET_CAPABILITY_INTERNET)
@@ -238,7 +239,7 @@ class ConnectivityServiceIntegrationTest {
 
         val lp = LinkProperties()
         lp.captivePortalApiUrl = Uri.parse(apiUrl)
-        val na = NetworkAgentWrapper(TRANSPORT_CELLULAR, lp, context)
+        val na = NetworkAgentWrapper(TRANSPORT_CELLULAR, lp, null /* ncTemplate */, context)
         networkStackClient.verifyNetworkMonitorCreated(na.network, TEST_TIMEOUT_MS)
 
         na.addCapability(NET_CAPABILITY_INTERNET)

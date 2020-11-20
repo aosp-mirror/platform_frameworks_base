@@ -176,6 +176,9 @@ public class TileService extends Service {
 
     @Override
     public void onDestroy() {
+        // As this call will come asynchronously in the main thread, prevent calls from the binder
+        // being processed after this.
+        mHandler.removeCallbacksAndMessages(null);
         if (mListening) {
             onStopListening();
             mListening = false;

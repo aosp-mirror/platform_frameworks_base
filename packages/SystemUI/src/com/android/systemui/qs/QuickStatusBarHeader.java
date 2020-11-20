@@ -311,10 +311,11 @@ public class QuickStatusBarHeader extends RelativeLayout implements LifecycleOwn
                 .build();
     }
 
-    public void setExpanded(boolean expanded) {
+    /** */
+    public void setExpanded(boolean expanded, QuickQSPanelController quickQSPanelController) {
         if (mExpanded == expanded) return;
         mExpanded = expanded;
-        mHeaderQsPanel.setExpanded(expanded);
+        quickQSPanelController.setExpanded(expanded);
         updateEverything();
     }
 

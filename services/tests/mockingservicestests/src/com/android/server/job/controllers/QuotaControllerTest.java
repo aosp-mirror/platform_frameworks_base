@@ -284,6 +284,8 @@ public class QuotaControllerTest {
                 return UsageStatsManager.STANDBY_BUCKET_FREQUENT;
             case RARE_INDEX:
                 return UsageStatsManager.STANDBY_BUCKET_RARE;
+            case RESTRICTED_INDEX:
+                return UsageStatsManager.STANDBY_BUCKET_RESTRICTED;
             default:
                 return UsageStatsManager.STANDBY_BUCKET_NEVER;
         }
@@ -292,6 +294,7 @@ public class QuotaControllerTest {
     private void setStandbyBucket(int bucketIndex) {
         when(mUsageStatsManager.getAppStandbyBucket(eq(SOURCE_PACKAGE), eq(SOURCE_USER_ID),
                 anyLong())).thenReturn(bucketIndexToUsageStatsBucket(bucketIndex));
+        mQuotaController.updateStandbyBucket(SOURCE_USER_ID, SOURCE_PACKAGE, bucketIndex);
     }
 
     private void setStandbyBucket(int bucketIndex, JobStatus... jobs) {

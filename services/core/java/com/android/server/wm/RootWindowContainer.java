@@ -276,7 +276,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     // Whether tasks have moved and we need to rank the tasks before next OOM scoring
     private boolean mTaskLayersChanged = true;
     private int mTmpTaskLayerRank;
-    private final ArraySet<WindowProcessController> mTmpTaskLayerChangedProcs = new ArraySet<>();
     private final LockedScheduler mRankTaskLayersScheduler;
 
     private boolean mTmpBoolean;
@@ -575,23 +574,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                 output.add(w);
             }
         }, true /* traverseTopToBottom */);
-    }
-
-    /**
-     * Returns {@code true} if the callingUid has any non-toast window currently visible to the
-     * user. Also ignores {@link android.view.WindowManager.LayoutParams#TYPE_APPLICATION_STARTING},
-     * since those windows don't belong to apps.
-     *
-     * @see WindowState#isNonToastOrStarting()
-     */
-    boolean isAnyNonToastWindowVisibleForUid(int callingUid) {
-        final PooledPredicate p = PooledLambda.obtainPredicate(
-                WindowState::isNonToastWindowVisibleForUid,
-                PooledLambda.__(WindowState.class), callingUid);
-
-        final WindowState w = getWindow(p);
-        p.recycle();
-        return w != null;
     }
 
     /**
@@ -1016,9 +998,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             }
         }
 
-        // Remove all deferred displays stacks, tasks, and activities.
-        handleCompleteDeferredRemoval();
-
         forAllDisplays(dc -> {
             dc.getInputMonitor().updateInputWindowsLw(true /*force*/);
             dc.updateSystemGestureExclusion();
@@ -1367,7 +1346,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         }
         for (int i = mChildren.size() - 1; i >= 0; --i) {
             DisplayContent dc = mChildren.get(i);
-            if (dc.isAnyNonToastWindowVisibleForPid(pid)) {
+            if (dc.getWindow(w -> pid == w.mSession.mPid && w.isVisibleNow()
+                    && w.mAttrs.type != WindowManager.LayoutParams.TYPE_TOAST) != null) {
                 outContexts.add(dc.getDisplayUiContext());
             }
         }
@@ -2720,16 +2700,16 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             if (task.mLayerRank != oldRank) {
                 task.forAllActivities(activity -> {
                     if (activity.hasProcess()) {
-                        mTmpTaskLayerChangedProcs.add(activity.app);
+                        mTaskSupervisor.onProcessActivityStateChanged(activity.app,
+                                true /* forceBatch */);
                     }
                 });
             }
         }, true /* traverseTopToBottom */);
 
-        for (int i = mTmpTaskLayerChangedProcs.size() - 1; i >= 0; i--) {
-            mTmpTaskLayerChangedProcs.valueAt(i).computeProcessActivityState();
+        if (!mTaskSupervisor.inActivityVisibilityUpdate()) {
+            mTaskSupervisor.computeProcessActivityStateBatch();
         }
-        mTmpTaskLayerChangedProcs.clear();
     }
 
     void clearOtherAppTimeTrackers(AppTimeTracker except) {

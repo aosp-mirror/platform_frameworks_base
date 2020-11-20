@@ -637,6 +637,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
      * Builder for creating new activities.
      */
     protected static class ActivityBuilder {
+        static final int DEFAULT_FAKE_UID = 12345;
         // An id appended to the end of the component name to make it unique
         private static int sCurrentActivityId = 0;
 
@@ -647,7 +648,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
         private Task mTask;
         private String mProcessName = "name";
         private String mAffinity;
-        private int mUid = 12345;
+        private int mUid = DEFAULT_FAKE_UID;
         private boolean mCreateTask = false;
         private Task mParentTask;
         private int mActivityFlags;
@@ -840,10 +841,13 @@ class WindowTestsBase extends SystemServiceTestsBase {
                 // to set it somewhere else since we can't mock resources.
                 doReturn(true).when(activity).occludesParent();
                 doReturn(true).when(activity).fillsParent();
+                mTask.addChild(activity);
                 if (mOnTop) {
+                    // Move the task to front after activity added.
+                    // Or {@link TaskDisplayArea#mPreferredTopFocusableStack} could be other stacks
+                    // (e.g. home stack).
                     mTask.moveToFront("createActivity");
                 }
-                mTask.addChild(activity);
                 // Make visible by default...
                 activity.setVisible(true);
             }
@@ -854,7 +858,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
             } else {
                 wpc = new WindowProcessController(mService,
                         aInfo.applicationInfo, mProcessName, mUid,
-                        UserHandle.getUserId(12345), mock(Object.class),
+                        UserHandle.getUserId(mUid), mock(Object.class),
                         mock(WindowProcessListener.class));
                 wpc.setThread(mock(IApplicationThread.class));
             }

@@ -17,13 +17,10 @@ package com.android.systemui.qs;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.content.Context;
-import android.os.UserManager;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
@@ -32,13 +29,11 @@ import android.widget.FrameLayout;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.systemui.Dependency;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.qs.QSTileView;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
-import com.android.systemui.statusbar.policy.SecurityController;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -76,16 +71,16 @@ public class QSPanelTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
         mTestableLooper = TestableLooper.get(this);
 
-        // Dependencies for QSSecurityFooter
-        mDependency.injectTestDependency(ActivityStarter.class, mActivityStarter);
-        mDependency.injectMockDependency(SecurityController.class);
-        mDependency.injectTestDependency(Dependency.BG_LOOPER, mTestableLooper.getLooper());
-        mContext.addMockSystemService(Context.USER_SERVICE, mock(UserManager.class));
+//        // Dependencies for QSSecurityFooter
+//        mDependency.injectTestDependency(ActivityStarter.class, mActivityStarter);
+//        mDependency.injectMockDependency(SecurityController.class);
+//        mDependency.injectTestDependency(Dependency.BG_LOOPER, mTestableLooper.getLooper());
+//        mContext.addMockSystemService(Context.USER_SERVICE, mock(UserManager.class));
         mDndTileRecord.tile = dndTile;
         mDndTileRecord.tileView = mQSTileView;
 
         mTestableLooper.runWithLooper(() -> {
-            mQsPanel = new QSPanel(mContext, null, mQSLogger);
+            mQsPanel = new QSPanel(mContext, null);
             mQsPanel.onFinishInflate();
             // Provides a parent with non-zero size for QSPanel
             mParentView = new FrameLayout(mContext);
@@ -97,15 +92,6 @@ public class QSPanelTest extends SysuiTestCase {
             mQsPanel.addTile(mDndTileRecord);
             mQsPanel.setCallback(mCallback);
         });
-    }
-
-    @Test
-    public void testSetExpanded_Metrics() {
-        mQsPanel.setExpanded(true);
-        verify(mQSLogger).logPanelExpanded(true, mQsPanel.getDumpableTag());
-
-        mQsPanel.setExpanded(false);
-        verify(mQSLogger).logPanelExpanded(false, mQsPanel.getDumpableTag());
     }
 
     @Test

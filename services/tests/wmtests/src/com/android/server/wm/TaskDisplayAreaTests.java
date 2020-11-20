@@ -70,23 +70,22 @@ import org.junit.runner.RunWith;
 @RunWith(WindowTestRunner.class)
 public class TaskDisplayAreaTests extends WindowTestsBase {
 
-    private Task mPinnedStack;
+    private Task mPinnedTask;
 
     @Before
     public void setUp() throws Exception {
-        mPinnedStack = createTaskStackOnDisplay(
+        mPinnedTask = createTaskStackOnDisplay(
                 WINDOWING_MODE_PINNED, ACTIVITY_TYPE_STANDARD, mDisplayContent);
         // Stack should contain visible app window to be considered visible.
-        final Task pinnedTask = createTaskInStack(mPinnedStack, 0 /* userId */);
-        assertFalse(mPinnedStack.isVisible());
+        assertFalse(mPinnedTask.isVisible());
         final ActivityRecord pinnedApp = createNonAttachedActivityRecord(mDisplayContent);
-        pinnedTask.addChild(pinnedApp, 0 /* addPos */);
-        assertTrue(mPinnedStack.isVisible());
+        mPinnedTask.addChild(pinnedApp, 0 /* addPos */);
+        assertTrue(mPinnedTask.isVisible());
     }
 
     @After
     public void tearDown() throws Exception {
-        mPinnedStack.removeImmediately();
+        mPinnedTask.removeImmediately();
     }
 
     @Test
@@ -118,19 +117,19 @@ public class TaskDisplayAreaTests extends WindowTestsBase {
 
         final int stack1Pos = taskStackContainer.mChildren.indexOf(stack1);
         final int stack2Pos = taskStackContainer.mChildren.indexOf(stack2);
-        final int pinnedStackPos = taskStackContainer.mChildren.indexOf(mPinnedStack);
+        final int pinnedStackPos = taskStackContainer.mChildren.indexOf(mPinnedTask);
         assertThat(pinnedStackPos).isGreaterThan(stack2Pos);
         assertThat(stack2Pos).isGreaterThan(stack1Pos);
 
-        taskStackContainer.positionChildAt(WindowContainer.POSITION_BOTTOM, mPinnedStack, false);
+        taskStackContainer.positionChildAt(WindowContainer.POSITION_BOTTOM, mPinnedTask, false);
         assertEquals(taskStackContainer.mChildren.get(stack1Pos), stack1);
         assertEquals(taskStackContainer.mChildren.get(stack2Pos), stack2);
-        assertEquals(taskStackContainer.mChildren.get(pinnedStackPos), mPinnedStack);
+        assertEquals(taskStackContainer.mChildren.get(pinnedStackPos), mPinnedTask);
 
-        taskStackContainer.positionChildAt(1, mPinnedStack, false);
+        taskStackContainer.positionChildAt(1, mPinnedTask, false);
         assertEquals(taskStackContainer.mChildren.get(stack1Pos), stack1);
         assertEquals(taskStackContainer.mChildren.get(stack2Pos), stack2);
-        assertEquals(taskStackContainer.mChildren.get(pinnedStackPos), mPinnedStack);
+        assertEquals(taskStackContainer.mChildren.get(pinnedStackPos), mPinnedTask);
     }
 
     @Test
@@ -141,16 +140,16 @@ public class TaskDisplayAreaTests extends WindowTestsBase {
         final WindowContainer taskStackContainer = stack1.getParent();
 
         final int stackPos = taskStackContainer.mChildren.indexOf(stack1);
-        final int pinnedStackPos = taskStackContainer.mChildren.indexOf(mPinnedStack);
+        final int pinnedStackPos = taskStackContainer.mChildren.indexOf(mPinnedTask);
         assertThat(pinnedStackPos).isGreaterThan(stackPos);
 
         taskStackContainer.positionChildAt(WindowContainer.POSITION_TOP, stack1, false);
         assertEquals(taskStackContainer.mChildren.get(stackPos), stack1);
-        assertEquals(taskStackContainer.mChildren.get(pinnedStackPos), mPinnedStack);
+        assertEquals(taskStackContainer.mChildren.get(pinnedStackPos), mPinnedTask);
 
         taskStackContainer.positionChildAt(taskStackContainer.mChildren.size() - 1, stack1, false);
         assertEquals(taskStackContainer.mChildren.get(stackPos), stack1);
-        assertEquals(taskStackContainer.mChildren.get(pinnedStackPos), mPinnedStack);
+        assertEquals(taskStackContainer.mChildren.get(pinnedStackPos), mPinnedTask);
     }
 
     @Test

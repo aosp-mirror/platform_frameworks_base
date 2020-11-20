@@ -42,6 +42,7 @@ import "frameworks/base/core/proto/android/server/job/enums.proto";
 import "frameworks/base/core/proto/android/server/location/enums.proto";
 import "frameworks/base/core/proto/android/service/procstats_enum.proto";
 import "frameworks/base/core/proto/android/service/usb.proto";
+import "frameworks/base/core/proto/android/stats/camera/camera.proto";
 import "frameworks/base/core/proto/android/stats/connectivity/network_stack.proto";
 import "frameworks/base/core/proto/android/stats/connectivity/tethering.proto";
 import "frameworks/base/core/proto/android/stats/dnsresolver/dns_resolver.proto";
@@ -60,6 +61,7 @@ import "frameworks/base/core/proto/android/stats/storage/storage_enums.proto";
 import "frameworks/base/core/proto/android/stats/style/style_enums.proto";
 import "frameworks/base/core/proto/android/stats/sysui/notification_enums.proto";
 import "frameworks/base/core/proto/android/stats/tls/enums.proto";
+import "frameworks/base/core/proto/android/stats/tv/tif_enums.proto";
 import "frameworks/base/core/proto/android/telecomm/enums.proto";
 import "frameworks/base/core/proto/android/telephony/enums.proto";
 import "frameworks/base/core/proto/android/view/enums.proto";
@@ -510,6 +512,8 @@ message Atom {
         MediaPlaybackTrackChanged media_playback_track_changed = 324;
         WifiScanReported wifi_scan_reported = 325 [(module) = "wifi"];
         WifiPnoScanReported wifi_pno_scan_reported = 326  [(module) = "wifi"];
+        TifTuneStateChanged tif_tune_changed = 327 [(module) = "framework"];
+        AutoRotateReported auto_rotate_reported = 328 [(module) = "framework"];
 
         // StatsdStats tracks platform atoms with ids upto 500.
         // Update StatsdStats::kMaxPushedAtomId when atom ids here approach that value.
@@ -3766,6 +3770,7 @@ message AppStartOccurred {
         WARM = 1;
         HOT = 2;
         COLD = 3;
+        RELAUNCH = 4;
     }
     // The transition type.
     optional TransitionType type = 3;
@@ -3827,6 +3832,7 @@ message AppStartCanceled {
         WARM = 1;
         HOT = 2;
         COLD = 3;
+        RELAUNCH = 4;
     }
     // The transition type.
     optional TransitionType type = 3;
@@ -9946,10 +9952,12 @@ message DisplayJankReported {
  *   frameworks/base/services/core/java/com/android/server/camera/CameraServiceProxy.java
  */
 message CameraActionEvent {
-    // Camera session duration
+    // Camera session duration in milliseconds if action is SESSION.
+    // 0 if action is OPEN or CLOSE.
     optional int64 duration_millis = 1;
 
-    // Camera API level used
+    // Camera API level used.
+    // 1 for camera1 API, and 2 for camera2 API.
     optional int32 api_level = 2;
 
     // Name of client package
@@ -9963,6 +9971,56 @@ message CameraActionEvent {
         EXTERNAL = 3;
     }
     optional Facing facing = 4;
+
+    // Camera ID
+    optional string camera_id = 5;
+
+    // Camera action type
+    enum Action {
+        UNKNOWN_ACTION = 0;
+        OPEN = 1;
+        CLOSE = 2;
+        SESSION = 3;
+    }
+    optional Action action = 6;
+
+    // Whether the client is accessing camera using ndk
+    optional bool is_ndk = 7;
+
+    // Action OPEN: Open latency
+    // Action CLOSE: Close latency
+    // Action SESSION: Camera session creation duration.
+    //                 If this entry is reusing an existing session, the value is -1.
+    optional int32 latency_millis = 8;
+
+    // session type: 0 for normal mode, 1 for constrained high speed mode
+    optional int32 operating_mode = 9;
+
+    // If actioh is SESSION: number of internal reconfigurations
+    // Else: 0
+    optional int32 internal_reconfig = 10;
+
+    // Number of requests for this capture session. Only applicable to SESSION
+    // action.
+    optional int64 request_count = 11;
+    // Number of result errors. Only applicable to SESSION action.
+    optional int64 result_error_count = 12;
+    // Whether the device runs into error state.
+    optional bool device_error = 13;
+
+    // If action is SESSION: Stream states
+    // Else: stream_count = 0
+    optional int32 stream_count = 14;
+    optional android.stats.camera.CameraStreamProto stream_1 = 15
+    [(android.os.statsd.log_mode) = MODE_BYTES];
+    optional android.stats.camera.CameraStreamProto stream_2 = 16
+    [(android.os.statsd.log_mode) = MODE_BYTES];
+    optional android.stats.camera.CameraStreamProto stream_3 = 17
+    [(android.os.statsd.log_mode) = MODE_BYTES];
+    optional android.stats.camera.CameraStreamProto stream_4 = 18
+    [(android.os.statsd.log_mode) = MODE_BYTES];
+    optional android.stats.camera.CameraStreamProto stream_5 = 19
+    [(android.os.statsd.log_mode) = MODE_BYTES];
 }
 
 /**
@@ -10349,6 +10407,39 @@ message CellBroadcastMessageError {
 
     // Exception message (or log message) associated with the error (max 1000 chars)
     optional string exception_message = 2;
+}
+
+/**
+ * Logs when a TV Input Service Session changes tune state
+ * This is atom ID 327.
+ *
+ * Logged from:
+ *   frameworks/base/services/core/java/com/android/server/tv/TvInputManagerService.java
+ */
+message TifTuneStateChanged {
+
+    // Tv Input Service uid, TV Player uid
+    repeated AttributionNode attribution_node = 1 [
+        (state_field_option).primary_field_first_uid = true
+    ];
+    optional android.stats.tv.TifTuneState state = 2 [
+        (state_field_option).exclusive_state = true,
+        (state_field_option).default_state_value = 0,
+        (state_field_option).nested = false
+    ];
+    // This a globally unique 128 bit random number created by TvInputManagerService when
+    // android.media.tv.TvInputManager#createSession is called.
+    // It is has no device or user association.
+    // See android.media.tv.TvInputService.onCreateSession(java.lang.String, java.lang.String)
+    // WARNING: Any changes to this field should be carefully reviewed for privacy.
+    //          Inspect the code at
+    //          framework/base/cmds/statsd/src/atoms.proto
+    //               TifTuneState
+    //          frameworks/base/services/core/java/com/android/server/tv/TvInputManagerService.java
+    //              logTuneStateChanged
+    //              BinderService.createSession
+    //              SessionState.sessionId
+    optional string tif_session_id = 3 [(state_field_option).primary_field = true];
 }
 
 /**
@@ -12074,6 +12165,33 @@ message HdmiCecMessageReported {
 
     // The reason for the feature abort.
     optional android.stats.hdmi.FeatureAbortReason feature_abort_reason = 9;
+}
+
+/**
+ * Logs when an auto rotate event occurs while smart auto rotate is enabled.
+ */
+message AutoRotateReported {
+    enum Orientation {
+        UNKNOWN = 1;
+        ROTATION_0 = 2;
+        ROTATION_90 = 3;
+        ROTATION_180 = 4;
+        ROTATION_270 = 5;
+        DISABLED = 6;
+        UNAVAILABLE = 7;
+        FAILURE = 8;
+    }
+
+    // Orientation of the device when a rotation was detected.
+    optional Orientation current_orientation = 1;
+    // The orientation of the phone after rotation before going through the recommendation service.
+    optional Orientation proposed_orientation = 2;
+    // Orientation recommended by the smart autorotate service component outside of the platform. It
+    // may or may not match the proposed_orientation. Can be disabled or unavailable if the
+    // recommendation service is disabled or unavailable. Will be unknown if the service failed.
+    optional Orientation recommended_orientation = 3;
+    // Time taken to calculate the rotation recommendation.
+    optional int64 recommendation_process_duration_millis = 4;
 }
 
 /**

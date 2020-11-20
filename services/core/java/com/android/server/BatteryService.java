@@ -437,6 +437,10 @@ public final class BatteryService extends SystemService {
                 info.legacy.legacy.batteryChargeCounter);
         Trace.traceCounter(Trace.TRACE_TAG_POWER, "BatteryCurrent",
                 info.legacy.legacy.batteryCurrent);
+        Trace.traceCounter(Trace.TRACE_TAG_POWER, "PlugType",
+                plugType(info.legacy.legacy));
+        Trace.traceCounter(Trace.TRACE_TAG_POWER, "BatteryStatus",
+                info.legacy.legacy.batteryStatus);
 
         synchronized (mLock) {
             if (!mUpdatesStopped) {
@@ -471,6 +475,18 @@ public final class BatteryService extends SystemService {
         dst.batteryTechnology = src.batteryTechnology;
     }
 
+    private static int plugType(HealthInfo healthInfo) {
+        if (healthInfo.chargerAcOnline) {
+            return BatteryManager.BATTERY_PLUGGED_AC;
+        } else if (healthInfo.chargerUsbOnline) {
+            return BatteryManager.BATTERY_PLUGGED_USB;
+        } else if (healthInfo.chargerWirelessOnline) {
+            return BatteryManager.BATTERY_PLUGGED_WIRELESS;
+        } else {
+            return BATTERY_PLUGGED_NONE;
+        }
+    }
+
     private void processValuesLocked(boolean force) {
         boolean logOutlier = false;
         long dischargeDuration = 0;
@@ -478,15 +494,7 @@ public final class BatteryService extends SystemService {
         mBatteryLevelCritical =
             mHealthInfo.batteryStatus != BatteryManager.BATTERY_STATUS_UNKNOWN
             && mHealthInfo.batteryLevel <= mCriticalBatteryLevel;
-        if (mHealthInfo.chargerAcOnline) {
-            mPlugType = BatteryManager.BATTERY_PLUGGED_AC;
-        } else if (mHealthInfo.chargerUsbOnline) {
-            mPlugType = BatteryManager.BATTERY_PLUGGED_USB;
-        } else if (mHealthInfo.chargerWirelessOnline) {
-            mPlugType = BatteryManager.BATTERY_PLUGGED_WIRELESS;
-        } else {
-            mPlugType = BATTERY_PLUGGED_NONE;
-        }
+        mPlugType = plugType(mHealthInfo);
 
         if (DEBUG) {
             Slog.d(TAG, "Processing new values: "

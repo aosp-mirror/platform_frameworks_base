@@ -706,7 +706,7 @@ public class PipTouchHandler {
                 return;
             }
 
-            Rect bounds = getPossiblyAnimatingBounds();
+            Rect bounds = getPossiblyMotionBounds();
             mDelta.set(0f, 0f);
             mStartPosition.set(bounds.left, bounds.top);
             mMovementWithinDismiss = touchState.getDownTouchPosition().y
@@ -745,7 +745,7 @@ public class PipTouchHandler {
                 mDelta.x += left - lastX;
                 mDelta.y += top - lastY;
 
-                mTmpBounds.set(getPossiblyAnimatingBounds());
+                mTmpBounds.set(getPossiblyMotionBounds());
                 mTmpBounds.offsetTo((int) left, (int) top);
                 mMotionHelper.movePip(mTmpBounds, true /* isDragging */);
 
@@ -895,12 +895,12 @@ public class PipTouchHandler {
     }
 
     /**
-     * Returns the PIP bounds if we're not animating, or the current, temporary animating bounds
-     * otherwise.
+     * Returns the PIP bounds if we're not in the middle of a motion operation, or the current,
+     * temporary motion bounds otherwise.
      */
-    Rect getPossiblyAnimatingBounds() {
-        return mPipBoundsState.getAnimatingBoundsState().isAnimating()
-                ? mPipBoundsState.getAnimatingBoundsState().getTemporaryBounds()
+    Rect getPossiblyMotionBounds() {
+        return mPipBoundsState.getMotionBoundsState().isInMotion()
+                ? mPipBoundsState.getMotionBoundsState().getBoundsInMotion()
                 : mPipBoundsState.getBounds();
     }
 

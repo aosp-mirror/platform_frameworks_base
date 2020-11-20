@@ -144,6 +144,20 @@ public abstract class InputEventReceiver {
     }
 
     /**
+     * Called when a Pointer Capture event is received.
+     *
+     * @param pointerCaptureEnabled if true, the window associated with this input channel has just
+     *                              received Pointer Capture
+     *                              if false, the window associated with this input channel has just
+     *                              lost Pointer Capture
+     * @see View#requestPointerCapture()
+     * @see View#releasePointerCapture()
+     */
+    // Called from native code.
+    public void onPointerCaptureEvent(boolean pointerCaptureEnabled) {
+    }
+
+    /**
      * Called when a batched input event is pending.
      *
      * The batched input event will continue to accumulate additional movement

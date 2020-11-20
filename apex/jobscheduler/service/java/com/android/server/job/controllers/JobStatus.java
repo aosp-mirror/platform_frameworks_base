@@ -470,7 +470,7 @@ public final class JobStatus {
         }
         this.requiredConstraints = requiredConstraints;
         mRequiredConstraintsOfInterest = requiredConstraints & CONSTRAINTS_OF_INTEREST;
-        mReadyNotDozing = (job.getFlags() & JobInfo.FLAG_WILL_BE_FOREGROUND) != 0;
+        mReadyNotDozing = canRunInDoze();
         if (standbyBucket == RESTRICTED_INDEX) {
             addDynamicConstraints(DYNAMIC_RESTRICTED_CONSTRAINTS);
         } else {
@@ -1036,6 +1036,22 @@ public final class JobStatus {
         mPersistedUtcTimes = null;
     }
 
+    /**
+     * @return true if the job is exempted from Doze restrictions and therefore allowed to run
+     * in Doze.
+     */
+    public boolean canRunInDoze() {
+        return (getFlags() & JobInfo.FLAG_WILL_BE_FOREGROUND) != 0;
+    }
+
+    boolean canRunInBatterySaver() {
+        return (getInternalFlags() & INTERNAL_FLAG_HAS_FOREGROUND_EXEMPTION) != 0;
+    }
+
+    boolean shouldIgnoreNetworkBlocking() {
+        return (getFlags() & JobInfo.FLAG_WILL_BE_FOREGROUND) != 0;
+    }
+
     /** @return true if the constraint was changed, false otherwise. */
     boolean setChargingConstraintSatisfied(boolean state) {
         return setConstraintSatisfied(CONSTRAINT_CHARGING, state);
@@ -1086,7 +1102,7 @@ public final class JobStatus {
         dozeWhitelisted = whitelisted;
         if (setConstraintSatisfied(CONSTRAINT_DEVICE_NOT_DOZING, state)) {
             // The constraint was changed. Update the ready flag.
-            mReadyNotDozing = state || (job.getFlags() & JobInfo.FLAG_WILL_BE_FOREGROUND) != 0;
+            mReadyNotDozing = state || canRunInDoze();
             return true;
         }
         return false;
@@ -1771,9 +1787,11 @@ public final class JobStatus {
             pw.print(prefix); pw.print("  readyDeadlineSatisfied: ");
             pw.println(mReadyDeadlineSatisfied);
         }
-        pw.print(prefix);
-        pw.print("  readyDynamicSatisfied: ");
-        pw.println(mReadyDynamicSatisfied);
+        if (mDynamicConstraints != 0) {
+            pw.print(prefix);
+            pw.print("  readyDynamicSatisfied: ");
+            pw.println(mReadyDynamicSatisfied);
+        }
         pw.print(prefix);
         pw.print("  readyComponentEnabled: ");
         pw.println(serviceInfo != null);

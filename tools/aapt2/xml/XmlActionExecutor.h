@@ -49,6 +49,8 @@ enum class XmlActionExecutorPolicy {
 // holds XmlNodeActions for child XML nodes.
 class XmlNodeAction {
  public:
+  using ActionFuncWithPolicyAndDiag =
+      std::function<bool(Element*, XmlActionExecutorPolicy, SourcePathDiagnostics*)>;
   using ActionFuncWithDiag = std::function<bool(Element*, SourcePathDiagnostics*)>;
   using ActionFunc = std::function<bool(Element*)>;
 
@@ -61,6 +63,7 @@ class XmlNodeAction {
   // Add an action to be performed at this XmlNodeAction.
   void Action(ActionFunc f);
   void Action(ActionFuncWithDiag);
+  void Action(ActionFuncWithPolicyAndDiag);
 
  private:
   friend class XmlActionExecutor;
@@ -69,7 +72,7 @@ class XmlNodeAction {
                SourcePathDiagnostics* diag, Element* el) const;
 
   std::map<std::string, XmlNodeAction> map_;
-  std::vector<ActionFuncWithDiag> actions_;
+  std::vector<ActionFuncWithPolicyAndDiag> actions_;
 };
 
 // Allows the definition of actions to execute at specific XML elements defined by their hierarchy.

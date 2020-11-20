@@ -487,10 +487,14 @@ public final class DataCallResponse implements Parcelable {
         dest.writeInt(mMtuV6);
         dest.writeInt(mHandoverFailureMode);
         dest.writeInt(mPduSessionId);
-        if (mDefaultQos.getType() == Qos.QOS_TYPE_EPS) {
-            dest.writeParcelable((EpsQos)mDefaultQos, flags);
+        if (mDefaultQos != null) {
+            if (mDefaultQos.getType() == Qos.QOS_TYPE_EPS) {
+                dest.writeParcelable((EpsQos) mDefaultQos, flags);
+            } else {
+                dest.writeParcelable((NrQos) mDefaultQos, flags);
+            }
         } else {
-            dest.writeParcelable((NrQos)mDefaultQos, flags);
+            dest.writeParcelable(null, flags);
         }
         dest.writeList(mQosSessions);
     }

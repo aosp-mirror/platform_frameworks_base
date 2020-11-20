@@ -30,18 +30,17 @@ import android.annotation.SystemApi;
 public final class ScramblingStatusEvent extends FilterEvent {
     private final int mScramblingStatus;
 
-    private ScramblingStatusEvent(@Filter.ScramblingStatusMask int scramblingStatus) {
+    private ScramblingStatusEvent(@Filter.ScramblingStatus int scramblingStatus) {
         mScramblingStatus = scramblingStatus;
     }
 
     /**
      * Gets Scrambling Status Type.
      *
-     * <p>This event field is only sent in Tuner 1.1 or higher version. Unsupported version returns
-     * default value 0. Use {@link TunerVersionChecker.getTunerVersion()} to get the version
-     * information.
+     * <p>This event field is only sent in Tuner 1.1 or higher version. Use
+     * {@link TunerVersionChecker.getTunerVersion()} to get the version information.
      */
-    @Filter.ScramblingStatusMask
+    @Filter.ScramblingStatus
     public int getScramblingStatus() {
         return mScramblingStatus;
     }

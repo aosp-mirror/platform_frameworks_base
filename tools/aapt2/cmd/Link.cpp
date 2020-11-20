@@ -1568,6 +1568,22 @@ class Linker {
     return true;
   }
 
+  ResourceEntry* ResolveTableEntry(LinkContext* context, ResourceTable* table,
+                                   Reference* reference) {
+    if (!reference || !reference->name) {
+      return nullptr;
+    }
+    auto name_ref = ResourceNameRef(reference->name.value());
+    if (name_ref.package.empty()) {
+      name_ref.package = context->GetCompilationPackage();
+    }
+    const auto search_result = table->FindResource(name_ref);
+    if (!search_result) {
+      return nullptr;
+    }
+    return search_result.value().entry;
+  }
+
   void AliasAdaptiveIcon(xml::XmlResource* manifest, ResourceTable* table) {
     const xml::Element* application = manifest->root->FindChild("", "application");
     if (!application) {
@@ -1582,22 +1598,13 @@ class Linker {
 
     // Find the icon resource defined within the application.
     const auto icon_reference = ValueCast<Reference>(icon->compiled_value.get());
-    if (!icon_reference || !icon_reference->name) {
-      return;
-    }
-
-    auto icon_name = ResourceNameRef(icon_reference->name.value());
-    if (icon_name.package.empty()) {
-      icon_name.package = context_->GetCompilationPackage();
-    }
-
-    const auto icon_entry_result = table->FindResource(icon_name);
-    if (!icon_entry_result) {
+    const auto icon_entry = ResolveTableEntry(context_, table, icon_reference);
+    if (!icon_entry) {
       return;
     }
 
     int icon_max_sdk = 0;
-    for (auto& config_value : icon_entry_result.value().entry->values) {
+    for (auto& config_value : icon_entry->values) {
       icon_max_sdk = (icon_max_sdk < config_value->config.sdkVersion)
           ? config_value->config.sdkVersion : icon_max_sdk;
     }
@@ -1608,22 +1615,13 @@ class Linker {
 
     // Find the roundIcon resource defined within the application.
     const auto round_icon_reference = ValueCast<Reference>(round_icon->compiled_value.get());
-    if (!round_icon_reference || !round_icon_reference->name) {
-      return;
-    }
-
-    auto round_icon_name = ResourceNameRef(round_icon_reference->name.value());
-    if (round_icon_name.package.empty()) {
-      round_icon_name.package = context_->GetCompilationPackage();
-    }
-
-    const auto round_icon_entry_result = table->FindResource(round_icon_name);
-    if (!round_icon_entry_result) {
+    const auto round_icon_entry = ResolveTableEntry(context_, table, round_icon_reference);
+    if (!round_icon_entry) {
       return;
     }
 
     int round_icon_max_sdk = 0;
-    for (auto& config_value : round_icon_entry_result.value().entry->values) {
+    for (auto& config_value : round_icon_entry->values) {
       round_icon_max_sdk = (round_icon_max_sdk < config_value->config.sdkVersion)
                      ? config_value->config.sdkVersion : round_icon_max_sdk;
     }
@@ -1634,7 +1632,7 @@ class Linker {
     }
 
     // Add an equivalent v26 entry to the roundIcon for each v26 variant of the regular icon.
-    for (auto& config_value : icon_entry_result.value().entry->values) {
+    for (auto& config_value : icon_entry->values) {
       if (config_value->config.sdkVersion < SDK_O) {
         continue;
       }
@@ -1645,10 +1643,60 @@ class Linker {
                                                      << "\" for round icon compatibility");
 
       auto value = icon_reference->Clone(&table->string_pool);
-      auto round_config_value = round_icon_entry_result.value().entry->FindOrCreateValue(
-          config_value->config, config_value->product);
+      auto round_config_value =
+          round_icon_entry->FindOrCreateValue(config_value->config, config_value->product);
       round_config_value->value.reset(value);
     }
+  }
+
+  bool VerifySharedUserId(xml::XmlResource* manifest, ResourceTable* table) {
+    const xml::Element* manifest_el = xml::FindRootElement(manifest->root.get());
+    if (manifest_el == nullptr) {
+      return true;
+    }
+    if (!manifest_el->namespace_uri.empty() || manifest_el->name != "manifest") {
+      return true;
+    }
+    const xml::Attribute* attr = manifest_el->FindAttribute(xml::kSchemaAndroid, "sharedUserId");
+    if (!attr) {
+      return true;
+    }
+    const auto validate = [&](const std::string& shared_user_id) -> bool {
+      if (util::IsAndroidSharedUserId(context_->GetCompilationPackage(), shared_user_id)) {
+        return true;
+      }
+      DiagMessage error_msg(manifest_el->line_number);
+      error_msg << "attribute 'sharedUserId' in <manifest> tag is not a valid shared user id: '"
+                << shared_user_id << "'";
+      if (options_.manifest_fixer_options.warn_validation) {
+        // Treat the error only as a warning.
+        context_->GetDiagnostics()->Warn(error_msg);
+        return true;
+      }
+      context_->GetDiagnostics()->Error(error_msg);
+      return false;
+    };
+    // If attr->compiled_value is not null, check if it is a ref
+    if (attr->compiled_value) {
+      const auto ref = ValueCast<Reference>(attr->compiled_value.get());
+      if (ref == nullptr) {
+        return true;
+      }
+      const auto shared_user_id_entry = ResolveTableEntry(context_, table, ref);
+      if (!shared_user_id_entry) {
+        return true;
+      }
+      for (const auto& value : shared_user_id_entry->values) {
+        const auto str_value = ValueCast<String>(value->value.get());
+        if (str_value != nullptr && !validate(*str_value->value)) {
+          return false;
+        }
+      }
+      return true;
+    }
+
+    // Fallback to checking the raw value
+    return validate(attr->value);
   }
 
   // Writes the AndroidManifest, ResourceTable, and all XML files referenced by the ResourceTable
@@ -1671,6 +1719,11 @@ class Linker {
     // the android:roundIcon on API 25 devices, and prefer the adaptive icon on API 26 devices.
     // See (b/34829129)
     AliasAdaptiveIcon(manifest, table);
+
+    // Verify the shared user id here to handle the case of reference value.
+    if (!VerifySharedUserId(manifest, table)) {
+      return false;
+    }
 
     ResourceFileFlattenerOptions file_flattener_options;
     file_flattener_options.keep_raw_values = keep_raw_values;

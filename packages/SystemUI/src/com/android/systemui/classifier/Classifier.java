@@ -54,11 +54,6 @@ public abstract class Classifier {
     public @interface InteractionType {}
 
     /**
-     * Contains all the information about touch events from which the classifier can query
-     */
-    protected ClassifierData mClassifierData;
-
-    /**
      * Informs the classifier that a new touch event has occurred
      */
     public void onTouchEvent(MotionEvent event) {

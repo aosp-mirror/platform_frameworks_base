@@ -27,7 +27,6 @@ import static com.android.server.wm.WindowOrganizerController.CONTROLLABLE_WINDO
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningTaskInfo;
-import android.app.ActivityManager.TaskDescription;
 import android.app.WindowConfiguration;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -52,7 +51,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Objects;
 import java.util.WeakHashMap;
 import java.util.function.Consumer;
 
@@ -538,16 +536,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
         }
         mTmpTaskInfo.configuration.unset();
         task.fillTaskInfo(mTmpTaskInfo);
-        boolean changed = lastInfo == null
-                || mTmpTaskInfo.topActivityType != lastInfo.topActivityType
-                || mTmpTaskInfo.isResizeable != lastInfo.isResizeable
-                || !Objects.equals(
-                        mTmpTaskInfo.positionInParent,
-                        lastInfo.positionInParent)
-                || isLetterboxInfoChanged(lastInfo, mTmpTaskInfo)
-                || mTmpTaskInfo.pictureInPictureParams != lastInfo.pictureInPictureParams
-                || mTmpTaskInfo.getWindowingMode() != lastInfo.getWindowingMode()
-                || !TaskDescription.equals(mTmpTaskInfo.taskDescription, lastInfo.taskDescription);
+        boolean changed = !mTmpTaskInfo.equalsForTaskOrganizer(lastInfo);
         if (!changed) {
             int cfgChanges = mTmpTaskInfo.configuration.diff(lastInfo.configuration);
             final int winCfgChanges = (cfgChanges & ActivityInfo.CONFIG_WINDOW_CONFIGURATION) != 0
@@ -580,20 +569,6 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
                 state.mOrganizer.onTaskInfoChanged(task, newInfo);
             }
         }
-    }
-
-    private boolean isLetterboxInfoChanged(
-                final RunningTaskInfo lastInfo, final RunningTaskInfo currentInfo) {
-        return !Objects.equals(
-                        currentInfo.letterboxActivityBounds,
-                        lastInfo.letterboxActivityBounds)
-                || !Objects.equals(
-                        currentInfo.getConfiguration().windowConfiguration.getBounds(),
-                        lastInfo.getConfiguration().windowConfiguration.getBounds())
-                || !Objects.equals(
-                        currentInfo.getConfiguration().windowConfiguration.getMaxBounds(),
-                        lastInfo.getConfiguration().windowConfiguration.getMaxBounds())
-                || !Objects.equals(currentInfo.parentBounds, lastInfo.parentBounds);
     }
 
     @Override

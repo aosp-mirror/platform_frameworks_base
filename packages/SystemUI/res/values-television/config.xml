@@ -44,6 +44,9 @@
         <item>com.android.systemui.wmshell.WMShell</item>
     </string-array>
 
+    <!-- Svelte specific logic, see RecentsConfiguration.SVELTE_* constants. -->
+    <integer name="recents_svelte_level">3</integer>
+
     <!-- Show a separate icon for low and high volume on the volume dialog -->
     <bool name="config_showLowMediaVolumeIcon">true</bool>
 

@@ -39,7 +39,7 @@ public final class SearchSpecToProtoConverter {
     public static SearchSpecProto toSearchSpecProto(@NonNull SearchSpec spec) {
         Preconditions.checkNotNull(spec);
         SearchSpecProto.Builder protoBuilder = SearchSpecProto.newBuilder()
-                .addAllSchemaTypeFilters(spec.getSchemas())
+                .addAllSchemaTypeFilters(spec.getSchemaTypes())
                 .addAllNamespaceFilters(spec.getNamespaces());
 
         @SearchSpec.TermMatch int termMatchCode = spec.getTermMatch();

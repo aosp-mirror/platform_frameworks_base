@@ -390,7 +390,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     private UserManagerService mUserManager;
     private AppOpsManager mAppOpsManager;
     /** All active uids in the system. */
-    private final MirrorActiveUids mActiveUids = new MirrorActiveUids();
+    final MirrorActiveUids mActiveUids = new MirrorActiveUids();
     private final SparseArray<String> mPendingTempAllowlist = new SparseArray<>();
     /** All processes currently running that might have a window organized by name. */
     final ProcessMap<WindowProcessController> mProcessNames = new ProcessMap<>();
@@ -4956,6 +4956,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             printedAnything = true;
             mTaskSupervisor.dump(pw, "  ");
             mTaskOrganizerController.dump(pw, "  ");
+            mVisibleActivityProcessTracker.dump(pw, "  ");
+            mActiveUids.dump(pw, "  ");
         }
 
         if (!printedAnything) {
@@ -5986,13 +5988,12 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         return null;
     }
 
-    int getUidState(int uid) {
-        return mActiveUids.getUidState(uid);
-    }
-
-    boolean isUidForeground(int uid) {
-        // A uid is considered to be foreground if it has a visible non-toast window.
-        return mWindowManager.mRoot.isAnyNonToastWindowVisibleForUid(uid);
+    /** A uid is considered to be foreground if it has a visible non-toast window. */
+    boolean hasActiveVisibleWindow(int uid) {
+        if (mVisibleActivityProcessTracker.hasVisibleActivity(uid)) {
+            return true;
+        }
+        return mActiveUids.hasNonAppVisibleWindow(uid);
     }
 
     boolean isDeviceOwner(int uid) {
@@ -7283,12 +7284,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
         @HotPath(caller = HotPath.OOM_ADJUSTMENT)
         @Override
-        public void onActiveUidsCleared() {
-            mActiveUids.onActiveUidsCleared();
-        }
-
-        @HotPath(caller = HotPath.OOM_ADJUSTMENT)
-        @Override
         public void onUidProcStateChanged(int uid, int procState) {
             mActiveUids.onUidProcStateChanged(uid, procState);
         }
@@ -7432,9 +7427,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
         @Override
         public boolean isUidForeground(int uid) {
-            synchronized (mGlobalLock) {
-                return ActivityTaskManagerService.this.isUidForeground(uid);
-            }
+            return ActivityTaskManagerService.this.hasActiveVisibleWindow(uid);
         }
 
         @Override

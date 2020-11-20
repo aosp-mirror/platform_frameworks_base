@@ -243,6 +243,50 @@ public class HdmiControlServiceTest {
     }
 
     @Test
+    public void initialPowerStatus_normalBoot_goToStandby_doesNotBroadcastsPowerStatus_1_4() {
+        mHdmiControlService.getHdmiCecConfig().setIntValue(
+                HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_VERSION,
+                HdmiControlManager.HDMI_CEC_VERSION_1_4_b);
+
+        mHdmiControlService.setControlEnabled(true);
+        mNativeWrapper.clearResultMessages();
+
+        assertThat(mHdmiControlService.getInitialPowerStatus()).isEqualTo(
+                HdmiControlManager.POWER_STATUS_TRANSIENT_TO_STANDBY);
+
+        mHdmiControlService.onStandby(HdmiControlService.STANDBY_SCREEN_OFF);
+
+        HdmiCecMessage reportPowerStatus = HdmiCecMessageBuilder.buildReportPowerStatus(
+                Constants.ADDR_PLAYBACK_1, Constants.ADDR_BROADCAST,
+                HdmiControlManager.POWER_STATUS_STANDBY);
+        assertThat(mNativeWrapper.getResultMessages()).doesNotContain(reportPowerStatus);
+    }
+
+    @Test
+    public void initialPowerStatus_normalBoot_goToStandby_broadcastsPowerStatus_2_0() {
+        mHdmiControlService.getHdmiCecConfig().setIntValue(
+                HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_VERSION,
+                HdmiControlManager.HDMI_CEC_VERSION_2_0);
+
+        mHdmiControlService.setControlEnabled(true);
+        mNativeWrapper.clearResultMessages();
+
+        mHdmiControlService.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
+        mTestLooper.dispatchAll();
+
+        assertThat(mHdmiControlService.getInitialPowerStatus()).isEqualTo(
+                HdmiControlManager.POWER_STATUS_TRANSIENT_TO_STANDBY);
+
+        mHdmiControlService.onStandby(HdmiControlService.STANDBY_SCREEN_OFF);
+        mTestLooper.dispatchAll();
+
+        HdmiCecMessage reportPowerStatus = HdmiCecMessageBuilder.buildReportPowerStatus(
+                Constants.ADDR_PLAYBACK_1, Constants.ADDR_BROADCAST,
+                HdmiControlManager.POWER_STATUS_STANDBY);
+        assertThat(mNativeWrapper.getResultMessages()).contains(reportPowerStatus);
+    }
+
+    @Test
     public void setAndGetCecVolumeControlEnabled_isApi() {
         mHdmiControlService.setHdmiCecVolumeControlEnabled(false);
         assertThat(mHdmiControlService.isHdmiCecVolumeControlEnabled()).isFalse();
@@ -470,7 +514,7 @@ public class HdmiControlServiceTest {
         mTestLooper.dispatchAll();
 
         HdmiCecMessage reportFeatures = HdmiCecMessageBuilder.buildReportFeatures(
-                Constants.ADDR_PLAYBACK_1, Constants.VERSION_2_0,
+                Constants.ADDR_PLAYBACK_1, HdmiControlManager.HDMI_CEC_VERSION_2_0,
                 Arrays.asList(DEVICE_PLAYBACK, DEVICE_AUDIO_SYSTEM),
                 mMyPlaybackDevice.getRcProfile(), mMyPlaybackDevice.getRcFeatures(),
                 mMyPlaybackDevice.getDeviceFeatures());

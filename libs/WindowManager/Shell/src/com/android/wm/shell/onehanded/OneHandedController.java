@@ -37,6 +37,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
+import com.android.wm.shell.R;
 import com.android.wm.shell.common.DisplayChangeController;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.TaskStackListenerCallback;
@@ -205,8 +206,11 @@ public class OneHandedController implements OneHanded {
         mGestureHandler = gestureHandler;
         mOverlayManager = overlayManager;
 
-        mOffSetFraction = SystemProperties.getInt(ONE_HANDED_MODE_OFFSET_PERCENTAGE, 50)
-                / 100.0f;
+        final float offsetPercentageConfig = context.getResources().getFraction(
+                R.fraction.config_one_handed_offset, 1, 1);
+        final int sysPropPercentageConfig = SystemProperties.getInt(
+                ONE_HANDED_MODE_OFFSET_PERCENTAGE, Math.round(offsetPercentageConfig * 100.0f));
+        mOffSetFraction = sysPropPercentageConfig / 100.0f;
         mIsOneHandedEnabled = OneHandedSettingsUtil.getSettingsOneHandedModeEnabled(
                 context.getContentResolver());
         mIsSwipeToNotificationEnabled =

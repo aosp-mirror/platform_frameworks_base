@@ -226,7 +226,7 @@ import android.app.ActivityOptions;
 import android.app.PendingIntent;
 import android.app.PictureInPictureParams;
 import android.app.ResultInfo;
-import android.app.WaitResult.LaunchState;
+import android.app.WaitResult;
 import android.app.servertransaction.ActivityConfigurationChangeItem;
 import android.app.servertransaction.ActivityLifecycleItem;
 import android.app.servertransaction.ActivityRelaunchItem;
@@ -1557,10 +1557,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 mRotationAnimationHint = rotationAnimation;
             }
         }
-
-        // Application tokens start out hidden.
-        setVisible(false);
-        mVisibleRequested = false;
 
         ColorDisplayService.ColorDisplayServiceInternal cds = LocalServices.getService(
                 ColorDisplayService.ColorDisplayServiceInternal.class);
@@ -3130,6 +3126,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     void finishRelaunching() {
+        mTaskSupervisor.getActivityMetricsLogger().notifyActivityRelaunched(this);
         unfreezeBounds();
 
         if (mPendingRelaunchCount > 0) {
@@ -3506,7 +3503,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 }
                 if (fromActivity.isVisible()) {
                     setVisible(true);
-                    mVisibleRequested = true;
+                    setVisibleRequested(true);
                     mVisibleSetFromTransferredStartingWindow = true;
                 }
                 setClientVisible(fromActivity.mClientVisible);
@@ -4122,7 +4119,24 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     void setVisible(boolean visible) {
         if (visible != mVisible) {
             mVisible = visible;
+            if (app != null) {
+                mTaskSupervisor.onProcessActivityStateChanged(app, false /* forceBatch */);
+            }
             scheduleAnimation();
+        }
+    }
+
+    /**
+     * This is the only place that writes {@link #mVisibleRequested} (except unit test). The caller
+     * outside of this class should use {@link #setVisibility}.
+     */
+    private void setVisibleRequested(boolean visible) {
+        if (visible == mVisibleRequested) {
+            return;
+        }
+        mVisibleRequested = visible;
+        if (app != null) {
+            mTaskSupervisor.onProcessActivityStateChanged(app, false /* forceBatch */);
         }
     }
 
@@ -4189,7 +4203,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         displayContent.mOpeningApps.remove(this);
         displayContent.mClosingApps.remove(this);
         waitingToShow = false;
-        mVisibleRequested = visible;
+        setVisibleRequested(visible);
         mLastDeferHidingClient = deferHidingClient;
 
         if (!visible) {
@@ -4331,7 +4345,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                     ANIMATION_TYPE_APP_TRANSITION));
         }
         setVisible(visible);
-        mVisibleRequested = visible;
+        setVisibleRequested(visible);
         if (!visible) {
             stopFreezingScreen(true, true);
         } else {
@@ -4519,7 +4533,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             detachChildren();
         }
         if (app != null) {
-            app.computeProcessActivityState();
+            mTaskSupervisor.onProcessActivityStateChanged(app, false /* forceBatch */);
         }
 
         switch (state) {
@@ -5435,14 +5449,15 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 .getActivityMetricsLogger().notifyWindowsDrawn(this, timestampNs);
         final boolean validInfo = info != null;
         final int windowsDrawnDelayMs = validInfo ? info.windowsDrawnDelayMs : INVALID_DELAY;
-        final @LaunchState int launchState = validInfo ? info.getLaunchState() : -1;
+        final @WaitResult.LaunchState int launchState =
+                validInfo ? info.getLaunchState() : WaitResult.LAUNCH_STATE_UNKNOWN;
         // The activity may have been requested to be invisible (another activity has been launched)
         // so there is no valid info. But if it is the current top activity (e.g. sleeping), the
         // invalid state is still reported to make sure the waiting result is notified.
         if (validInfo || this == getDisplayArea().topRunningActivity()) {
             mTaskSupervisor.reportActivityLaunchedLocked(false /* timeout */, this,
                     windowsDrawnDelayMs, launchState);
-            mTaskSupervisor.stopWaitingForActivityVisible(this, windowsDrawnDelayMs);
+            mTaskSupervisor.stopWaitingForActivityVisible(this, windowsDrawnDelayMs, launchState);
         }
         finishLaunchTickingLocked();
         if (task != null) {
@@ -7163,11 +7178,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             } else {
                 mRelaunchReason = RELAUNCH_REASON_NONE;
             }
-            if (!attachedToProcess()) {
-                ProtoLog.v(WM_DEBUG_CONFIGURATION,
-                        "Config is destroying non-running %s", this);
-                destroyImmediately("config");
-            } else if (mState == PAUSING) {
+            if (mState == PAUSING) {
                 // A little annoying: we are waiting for this activity to finish pausing. Let's not
                 // do anything now, but just flag that it needs to be restarted when done pausing.
                 ProtoLog.v(WM_DEBUG_CONFIGURATION,
