@@ -287,6 +287,7 @@
     <string name="notification_channel_usb" msgid="1528280969406244896">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‏‎‏‎‎‏‏‎‏‎‏‏‎‎‎‏‎‏‏‎‏‏‏‎‎‎‏‏‏‎‎‏‎‏‎‎‏‏‏‎‎‏‎‏‏‏‎‏‎‎‎‎‎‏‎‎‎‎‎‎USB connection‎‏‎‎‏‎"</string>
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‎‏‏‎‏‏‏‏‏‎‎‎‎‎‎‎‏‏‏‏‏‎‏‎‏‏‎‎‎‎‎‏‎‏‏‎‎‎‎‏‎‎‎‏‏‏‏‏‏‏‏‎‎‎‏‎‏‏‎App running‎‏‎‎‏‎"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‎‎‏‎‏‎‎‏‎‎‎‎‎‎‎‎‏‏‎‎‎‎‏‎‎‎‎‎‏‏‏‏‏‎‏‏‎‏‎‏‏‏‎‎‎‎‏‏‏‏‎‏‎‎‏‏‏‎‏‎‎Apps consuming battery‎‏‎‎‏‎"</string>
+    <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‏‏‏‏‎‏‏‎‎‏‏‏‎‏‏‏‎‏‎‏‎‎‏‏‏‏‎‎‎‏‎‏‏‎‎‏‎‎‏‏‏‏‏‎‏‏‏‏‎‏‎‎‏‎‏‎‎‏‎‎Magnification‎‏‎‎‏‎"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‎‏‏‏‏‏‏‏‎‎‏‎‏‏‎‎‎‏‎‎‏‎‏‏‎‏‏‎‎‏‎‏‏‎‏‏‏‎‎‏‎‎‎‏‏‏‏‎‎‎‎‎‏‎‏‎‎‏‏‎‎‏‎‎‏‏‎<xliff:g id="APP_NAME">%1$s</xliff:g>‎‏‎‎‏‏‏‎ is using battery‎‏‎‎‏‎"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‎‏‎‏‏‏‎‏‏‏‎‏‎‎‎‎‏‏‎‎‏‏‏‎‏‏‎‎‎‎‏‏‏‎‏‎‎‎‏‏‏‎‎‎‏‎‏‏‏‎‏‎‎‎‎‏‎‏‏‏‎‎‏‎‎‏‏‎<xliff:g id="NUMBER">%1$d</xliff:g>‎‏‎‎‏‏‏‎ apps are using battery‎‏‎‎‏‎"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‏‏‎‏‏‏‏‏‏‎‏‏‏‏‏‏‏‎‎‏‎‏‎‏‎‏‏‏‎‎‎‎‎‎‏‏‏‎‏‏‏‏‎‏‎‏‏‏‏‎‎‏‏‎‏‏‏‏‏‏‎Tap for details on battery and data usage‎‏‎‎‏‎"</string>
@@ -2188,4 +2189,8 @@
     <string name="config_pdp_reject_user_authentication_failed" msgid="4531693033885744689"></string>
     <string name="config_pdp_reject_service_not_subscribed" msgid="8190338397128671588"></string>
     <string name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed" msgid="6024904218067254186"></string>
+    <string name="window_magnification_prompt_title" msgid="8197528399699536320">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‎‎‏‏‏‎‎‎‎‏‏‎‏‏‏‏‎‎‎‏‎‏‎‎‏‎‏‏‎‏‎‏‏‎‎‎‏‎‎‎‏‎‎‎‏‏‎‏‎‎‏‏‏‎‎‎‎‎‎‎New: Window Magnifier‎‏‎‎‏‎"</string>
+    <string name="window_magnification_prompt_content" msgid="4166711383253283838">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‏‎‎‏‏‏‎‏‎‎‏‏‎‎‏‎‎‎‎‏‏‏‏‎‏‏‎‏‎‏‎‎‏‎‎‎‎‏‏‎‎‎‏‏‎‏‏‏‎‎‏‏‏‏‏‏‏‏‏‎‎You can now magnify some or all of your screen‎‏‎‎‏‎"</string>
+    <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‏‏‎‎‏‎‎‎‎‏‎‎‎‏‏‎‏‏‎‎‏‏‏‏‎‏‎‏‏‏‏‎‏‏‎‎‏‎‏‎‎‎‏‏‎‎‎‎‏‏‎‎‏‎‏‎‏‎‎‎Turn on in Settings‎‏‎‎‏‎"</string>
+    <string name="dismiss_action" msgid="1728820550388704784">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‏‏‏‏‏‏‏‏‏‏‎‎‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‎‎‎‎‎‏‎‎‏‎‏‎‎‎‎‎‏‏‎‎‏‏‎‎‎‎‏‎‎‎‎‎Dismiss‎‏‎‎‏‎"</string>
 </resources>

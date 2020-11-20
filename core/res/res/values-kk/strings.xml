@@ -287,6 +287,8 @@
     <string name="notification_channel_usb" msgid="1528280969406244896">"USB байланысы"</string>
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"Қолданба қосулы"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"Батареяны пайдаланып жатқан қолданбалар"</string>
+    <!-- no translation found for notification_channel_accessibility_magnification (1707913872219798098) -->
+    <skip />
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g> батареяны пайдалануда"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"<xliff:g id="NUMBER">%1$d</xliff:g> қолданба батареяны пайдалануда"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"Батарея мен деректер трафигі туралы білу үшін түртіңіз"</string>
@@ -319,7 +321,7 @@
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"ағза күйінің көрсеткіштері туралы сенсор деректеріне қатынасу"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"Терезе мазмұнын оқып отыру"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"Ашық тұрған терезе мазмұнын тексеру."</string>
-    <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"Explore by Touch функциясын қосу"</string>
+    <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"Түртілген элементтерді дыбыстау функциясын қосу"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="4394677060796752976">"Түртілген элементтер дауыстап айтылады және экранды қимылдар арқылы зерттеуге болады."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2772371671541753254">"Терілген мәтінді тексеру"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="2381315802405773092">"Несиелік карта нөмірі және құпия сөздер сияқты жеке деректі қоса."</string>
@@ -994,9 +996,9 @@
     <string name="searchview_description_clear" msgid="1989371719192982900">"Сұрақты өшіру"</string>
     <string name="searchview_description_submit" msgid="6771060386117334686">"Сұрақ жіберу"</string>
     <string name="searchview_description_voice" msgid="42360159504884679">"Дауыс арқылы іздеу"</string>
-    <string name="enable_explore_by_touch_warning_title" msgid="5095399706284943314">"Explore by Touch функциясы қосылсын ба?"</string>
-    <string name="enable_explore_by_touch_warning_message" product="tablet" msgid="1037295476738940824">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> қызметі Explore by Touch мүмкіндігін қосқысы келеді. Explore by Touch мүмкіндігі қосылған кезде, саусағыңыздың астындағы нәрсенің сипаттамаларын естисіз не көресіз немесе планшетпен өзара байланысу үшін қимылдайсыз."</string>
-    <string name="enable_explore_by_touch_warning_message" product="default" msgid="4312979647356179250">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> қызметі Explore by Touch мүмкіндігін қосқысы келеді. Explore by Touch мүмкіндігі қосылған кезде, саусағыңыздың астындағы нәрсенің сипаттамаларын естисіз не көресіз немесе телефонмен өзара байланысу үшін қимылдайсыз."</string>
+    <string name="enable_explore_by_touch_warning_title" msgid="5095399706284943314">"Түртілген элементтерді дыбыстау функциясы қосылсын ба?"</string>
+    <string name="enable_explore_by_touch_warning_message" product="tablet" msgid="1037295476738940824">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> қызметі Түртілген элементтерді дыбыстау функциясын қосуға рұқсат сұрап тұр. Ол қосылған кезде, саусағыңыздың астындағы элементтің сипаттамасын естіп не көріп тұрасыз немесе планшетті қимылмен басқарасыз."</string>
+    <string name="enable_explore_by_touch_warning_message" product="default" msgid="4312979647356179250">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> қызметі Түртілген элементтерді дыбыстау функциясын қосуға рұқсат сұрап тұр. Ол қосылған кезде, саусағыңыздың астындағы элементтің сипаттамасын естіп не көріп тұрасыз немесе телефонды қимылмен басқарасыз."</string>
     <string name="oneMonthDurationPast" msgid="4538030857114635777">"1 ай бұрын"</string>
     <string name="beforeOneMonthDurationPast" msgid="8315149541372065392">"Осыған дейін 1 ай бұрын"</string>
     <plurals name="last_num_days" formatted="false" msgid="687443109145393632">
@@ -1316,7 +1318,7 @@
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"Аналогтық аудиожабдық анықталды"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"Жалғанған құрылғы бұл телефонмен үйлесімсіз. Қосымша ақпарат алу үшін түртіңіз."</string>
     <string name="adb_active_notification_title" msgid="408390247354560331">"USB арқылы түзету қосылған"</string>
-    <string name="adb_active_notification_message" msgid="5617264033476778211">"USB арқылы түзетуді өшіру үшін түртіңіз"</string>
+    <string name="adb_active_notification_message" msgid="5617264033476778211">"USB арқылы түзетуді өшіру үшін түртіңіз."</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"USB арқылы түзетуді өшіру үшін таңдаңыз."</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"Сымсыз түзету байланыстырылды"</string>
     <string name="adbwifi_active_notification_message" msgid="930987922852867972">"Сымсыз түзетуді өшіру үшін түртіңіз."</string>
@@ -2188,4 +2190,12 @@
     <string name="config_pdp_reject_user_authentication_failed" msgid="4531693033885744689"></string>
     <string name="config_pdp_reject_service_not_subscribed" msgid="8190338397128671588"></string>
     <string name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed" msgid="6024904218067254186"></string>
+    <!-- no translation found for window_magnification_prompt_title (8197528399699536320) -->
+    <skip />
+    <!-- no translation found for window_magnification_prompt_content (4166711383253283838) -->
+    <skip />
+    <!-- no translation found for turn_on_magnification_settings_action (8521433346684847700) -->
+    <skip />
+    <!-- no translation found for dismiss_action (1728820550388704784) -->
+    <skip />
 </resources>
