@@ -61,7 +61,7 @@ public class QSContainerImpl extends FrameLayout {
     private float mQsExpansion;
     private QSCustomizer mQSCustomizer;
     private View mDragHandle;
-    private View mQSPanelContainer;
+    private NonInterceptingScrollView mQSPanelContainer;
 
     private View mBackground;
 
@@ -126,18 +126,12 @@ public class QSContainerImpl extends FrameLayout {
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         // QSPanel will show as many rows as it can (up to TileLayout.MAX_ROWS) such that the
         // bottom and footer are inside the screen.
-        Configuration config = getResources().getConfiguration();
-        boolean navBelow = config.smallestScreenWidthDp >= 600
-                || config.orientation != Configuration.ORIENTATION_LANDSCAPE;
         MarginLayoutParams layoutParams = (MarginLayoutParams) mQSPanelContainer.getLayoutParams();
 
         // The footer is pinned to the bottom of QSPanel (same bottoms), therefore we don't need to
         // subtract its height. We do not care if the collapsed notifications fit in the screen.
         int maxQs = getDisplayHeight() - layoutParams.topMargin - layoutParams.bottomMargin
                 - getPaddingBottom();
-        if (navBelow) {
-            maxQs -= getResources().getDimensionPixelSize(R.dimen.navigation_bar_height);
-        }
 
         int padding = mPaddingLeft + mPaddingRight + layoutParams.leftMargin
                 + layoutParams.rightMargin;
@@ -217,12 +211,13 @@ public class QSContainerImpl extends FrameLayout {
 
     public void updateExpansion(boolean animate) {
         int height = calculateContainerHeight();
+        int scrollBottom = calculateContainerBottom();
         setBottom(getTop() + height);
-        mQSDetail.setBottom(getTop() + height);
+        mQSDetail.setBottom(getTop() + scrollBottom);
         // Pin the drag handle to the bottom of the panel.
-        mDragHandle.setTranslationY(height - mDragHandle.getHeight());
+        mDragHandle.setTranslationY(scrollBottom - mDragHandle.getHeight());
         mBackground.setTop(mQSPanelContainer.getTop());
-        updateBackgroundBottom(height, animate);
+        updateBackgroundBottom(scrollBottom, animate);
     }
 
     private void updateBackgroundBottom(int height, boolean animated) {
@@ -244,6 +239,15 @@ public class QSContainerImpl extends FrameLayout {
         return mQSCustomizer.isCustomizing() ? mQSCustomizer.getHeight()
                 : Math.round(mQsExpansion * (heightOverride - mHeader.getHeight()))
                 + mHeader.getHeight();
+    }
+
+    int calculateContainerBottom() {
+        int heightOverride = mHeightOverride != -1 ? mHeightOverride : getMeasuredHeight();
+        return mQSCustomizer.isCustomizing() ? mQSCustomizer.getHeight()
+                : Math.round(mQsExpansion
+                        * (heightOverride + mQSPanelContainer.getScrollRange()
+                                - mQSPanelContainer.getScrollY() - mHeader.getHeight()))
+                        + mHeader.getHeight();
     }
 
     public void setExpansion(float expansion) {
