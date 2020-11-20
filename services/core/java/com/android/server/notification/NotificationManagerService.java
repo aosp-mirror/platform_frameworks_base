@@ -7164,6 +7164,16 @@ public class NotificationManagerService extends SystemService {
             return true;
         }
 
+        // Suppressed since it's a non-interruptive update to a bubble-suppressed notification
+        final boolean isBubbleOrOverflowed = record.canBubble() && (record.isFlagBubbleRemoved()
+                || record.getNotification().isBubbleNotification());
+        if (record.isUpdate && !record.isInterruptive() && isBubbleOrOverflowed
+                && record.getNotification().getBubbleMetadata() != null) {
+            if (record.getNotification().getBubbleMetadata().isNotificationSuppressed()) {
+                return true;
+            }
+        }
+
         return false;
     }
 
