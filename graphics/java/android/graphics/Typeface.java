@@ -169,6 +169,8 @@ public class Typeface {
     @UnsupportedAppUsage
     public long native_instance;
 
+    private Runnable mCleaner;
+
     /** @hide */
     @IntDef(value = {NORMAL, BOLD, ITALIC, BOLD_ITALIC})
     @Retention(RetentionPolicy.SOURCE)
@@ -1123,7 +1125,7 @@ public class Typeface {
         }
 
         native_instance = ni;
-        sRegistry.registerNativeAllocation(this, native_instance);
+        mCleaner = sRegistry.registerNativeAllocation(this, native_instance);
         mStyle = nativeGetStyle(ni);
         mWeight = nativeGetWeight(ni);
     }
@@ -1237,6 +1239,13 @@ public class Typeface {
         bos.write(value & 0xFF);
     }
 
+    /** @hide */
+    public static Map<String, Typeface> getSystemFontMap() {
+        synchronized (SYSTEM_FONT_MAP_LOCK) {
+            return sSystemFontMap;
+        }
+    }
+
     /**
      * Deserialize font map and set it as system font map. This method should be called at most once
      * per process.
@@ -1297,11 +1306,31 @@ public class Typeface {
         }
     }
 
-    static {
+    /** @hide */
+    @VisibleForTesting
+    public static void destroySystemFontMap() {
+        synchronized (SYSTEM_FONT_MAP_LOCK) {
+            for (Typeface typeface : sSystemFontMap.values()) {
+                typeface.mCleaner.run();
+            }
+            sSystemFontMap.clear();
+            if (sSystemFontMapBuffer != null) {
+                SharedMemory.unmap(sSystemFontMapBuffer);
+            }
+            sSystemFontMapBuffer = null;
+        }
+    }
+
+    /** @hide */
+    public static void loadPreinstalledSystemFontMap() {
         final HashMap<String, Typeface> systemFontMap = new HashMap<>();
         initSystemDefaultTypefaces(systemFontMap, SystemFonts.getRawSystemFallbackMap(),
                 SystemFonts.getAliases());
         setSystemFontMap(systemFontMap);
+    }
+
+    static {
+        loadPreinstalledSystemFontMap();
     }
 
     @Override

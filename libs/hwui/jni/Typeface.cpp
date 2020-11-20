@@ -145,6 +145,13 @@ static std::function<std::shared_ptr<minikin::MinikinFont>()> readMinikinFontSki
     return [fontPath, fontIndex, axesPtr, axesCount]() -> std::shared_ptr<minikin::MinikinFont> {
         std::string path(fontPath.data(), fontPath.size());
         sk_sp<SkData> data = SkData::MakeFromFileName(path.c_str());
+        if (data == nullptr) {
+            // This may happen if:
+            // 1. When the process failed to open the file (e.g. invalid path or permission).
+            // 2. When the process failed to map the file (e.g. hitting max_map_count limit).
+            ALOGE("Failed to make SkData from file name: %s", path.c_str());
+            return nullptr;
+        }
         const void* fontPtr = data->data();
         size_t fontSize = data->size();
         std::vector<minikin::FontVariation> axes(axesPtr, axesPtr + axesCount);
