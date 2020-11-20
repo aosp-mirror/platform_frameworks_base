@@ -57,7 +57,7 @@ public final class SearchSpecToProtoConverter {
     public static ResultSpecProto toResultSpecProto(@NonNull SearchSpec spec) {
         Preconditions.checkNotNull(spec);
         return ResultSpecProto.newBuilder()
-                .setNumPerPage(spec.getNumPerPage())
+                .setNumPerPage(spec.getResultCountPerPage())
                 .setSnippetSpec(
                         ResultSpecProto.SnippetSpecProto.newBuilder()
                                 .setNumToSnippet(spec.getSnippetCount())

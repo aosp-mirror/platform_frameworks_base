@@ -32,7 +32,7 @@ public class SearchSpecTest {
                 .setSnippetCount(5)
                 .setSnippetCountPerProperty(10)
                 .setMaxSnippetSize(15)
-                .setNumPerPage(42)
+                .setResultCountPerPage(42)
                 .setOrder(SearchSpec.ORDER_ASCENDING)
                 .setRankingStrategy(SearchSpec.RANKING_STRATEGY_DOCUMENT_SCORE)
                 .build();

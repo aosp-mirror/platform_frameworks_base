@@ -28,10 +28,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * This class represents one of the results obtained from the query.
+ * This class represents one of the results obtained from an AppSearch query.
  *
- * <p>It contains the document which matched, information about which section(s) in the document
- * matched, and snippet information containing textual summaries of the document's match(es).
+ * <p>This allows clients to obtain:
+ * <ul>
+ *   <li>The document which matched, using {@link #getDocument}
+ *   <li>Information about which properties in the document matched, and "snippet" information
+ *       containing textual summaries of the document's matches, using {@link #getMatches}
+ *  </ul>
+ *
+ * <p>"Snippet" refers to a substring of text from the content of document that is returned as a
+ * part of search result.
+ *
+ * @see SearchResults
  * @hide
  */
 public final class SearchResult {
@@ -116,8 +125,6 @@ public final class SearchResult {
     }
 
     /**
-     * Snippet: It refers to a substring of text from the content of document that is returned as a
-     * part of search result.
      * This class represents a match objects for any Snippets that might be present in
      * {@link SearchResults} from query. Using this class
      * user can get the full text, exact matches and Snippets of document content for a given match.

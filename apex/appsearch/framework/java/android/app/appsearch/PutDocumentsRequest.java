@@ -29,9 +29,9 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Encapsulates a request to index a document into an {@link AppSearchManager} database.
+ * Encapsulates a request to index a document into an {@link AppSearchSession} database.
  *
- * @see AppSearchManager#putDocuments
+ * @see AppSearchSession#putDocuments
  * @hide
  */
 public final class PutDocumentsRequest {

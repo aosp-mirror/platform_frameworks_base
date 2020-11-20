@@ -90,7 +90,7 @@ class VisibilityStore {
      * @throws AppSearchException AppSearchException on AppSearchImpl error.
      */
     public void initialize() throws AppSearchException {
-        if (!mAppSearchImpl.hasSchemaType(DATABASE_NAME, SCHEMA_TYPE)) {
+        if (!mAppSearchImpl.hasSchemaTypeLocked(DATABASE_NAME, SCHEMA_TYPE)) {
             // Schema type doesn't exist yet. Add it.
             mAppSearchImpl.setSchema(DATABASE_NAME,
                     Collections.singleton(new AppSearchSchema.Builder(SCHEMA_TYPE)
@@ -105,7 +105,7 @@ class VisibilityStore {
         }
 
         // Populate visibility settings map
-        for (String database : mAppSearchImpl.getDatabases()) {
+        for (String database : mAppSearchImpl.getDatabasesLocked()) {
             if (database.equals(DATABASE_NAME)) {
                 // Our own database. Skip
                 continue;
