@@ -34,6 +34,7 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
 import android.database.DatabaseUtils;
@@ -7617,7 +7618,7 @@ public class AppOpsManager {
                         // Only collect app-ops when the proxy is trusted
                         && (mContext.checkPermission(Manifest.permission.UPDATE_APP_OPS_STATS, -1,
                         myUid) == PackageManager.PERMISSION_GRANTED
-                        || isTrustedVoiceServiceProxy(mContext.getOpPackageName(), op))) {
+                        || isTrustedVoiceServiceProxy(mContext, mContext.getOpPackageName(), op))) {
                     collectNotedOpSync(op, proxiedAttributionTag);
                 }
             }
@@ -7628,29 +7629,41 @@ public class AppOpsManager {
         }
     }
 
-    private boolean isTrustedVoiceServiceProxy(String packageName, int code) {
+    /**
+     * Checks if the voice recognition service is a trust proxy.
+     *
+     * @return {@code true} if the package is a trust voice recognition service proxy
+     * @hide
+     */
+    public static boolean isTrustedVoiceServiceProxy(Context context, String packageName,
+            int code) {
         // This is a workaround for R QPR, new API change is not allowed. We only allow the current
         // voice recognizer is also the voice interactor to noteproxy op.
         if (code != OP_RECORD_AUDIO) {
             return false;
         }
         final String voiceRecognitionComponent = Settings.Secure.getString(
-                mContext.getContentResolver(), Settings.Secure.VOICE_RECOGNITION_SERVICE);
-        final String voiceInteractionComponent = Settings.Secure.getString(
-                mContext.getContentResolver(), Settings.Secure.VOICE_INTERACTION_SERVICE);
+                context.getContentResolver(), Settings.Secure.VOICE_RECOGNITION_SERVICE);
 
         final String voiceRecognitionServicePackageName =
                 getComponentPackageNameFromString(voiceRecognitionComponent);
-        final String voiceInteractionServicePackageName =
-                getComponentPackageNameFromString(voiceInteractionComponent);
-        return (Objects.equals(packageName, voiceRecognitionServicePackageName)) && (Objects.equals(
-                voiceRecognitionServicePackageName, voiceInteractionServicePackageName)
-                || voiceInteractionServicePackageName == null);
+        return (Objects.equals(packageName, voiceRecognitionServicePackageName))
+                && isPackagePreInstalled(context, packageName);
     }
 
-    private String getComponentPackageNameFromString(String from) {
+    private static String getComponentPackageNameFromString(String from) {
         ComponentName componentName = from != null ? ComponentName.unflattenFromString(from) : null;
         return componentName != null ? componentName.getPackageName() : "";
+    }
+
+    private static boolean isPackagePreInstalled(Context context, String packageName) {
+        try {
+            final PackageManager pm = context.getPackageManager();
+            final ApplicationInfo info = pm.getApplicationInfo(packageName, 0);
+            return ((info.flags & ApplicationInfo.FLAG_SYSTEM) != 0);
+        } catch (PackageManager.NameNotFoundException e) {
+            return false;
+        }
     }
 
     /**
