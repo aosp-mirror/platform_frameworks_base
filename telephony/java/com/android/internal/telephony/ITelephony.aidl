@@ -2249,4 +2249,12 @@ interface ITelephony {
      * @return CarrierBandwidth with bandwidth of both primary and secondary carrier.
      */
     CarrierBandwidth getCarrierBandwidth(int subId);
+
+    /**
+     * Checks whether the device supports the given capability on the radio interface.
+     *
+     * @param capability the name of the capability
+     * @return the availability of the capability
+     */
+    boolean isRadioInterfaceCapabilitySupported(String capability);
 }
