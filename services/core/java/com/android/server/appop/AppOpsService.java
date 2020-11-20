@@ -2993,9 +2993,10 @@ public class AppOpsService extends IAppOpsService.Stub {
         // voice recognizer is also the voice interactor to noteproxy op.
         final boolean isTrustVoiceServiceProxy =
                 AppOpsManager.isTrustedVoiceServiceProxy(mContext, proxyPackageName, code);
+        final boolean isSelfBlame = Binder.getCallingUid() == proxiedUid;
         final boolean isProxyTrusted = mContext.checkPermission(
                 Manifest.permission.UPDATE_APP_OPS_STATS, -1, proxyUid)
-                == PackageManager.PERMISSION_GRANTED || isTrustVoiceServiceProxy;
+                == PackageManager.PERMISSION_GRANTED || isTrustVoiceServiceProxy || isSelfBlame;
 
         final int proxyFlags = isProxyTrusted ? AppOpsManager.OP_FLAG_TRUSTED_PROXY
                 : AppOpsManager.OP_FLAG_UNTRUSTED_PROXY;
