@@ -709,8 +709,10 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
                         "GNSS HAL Requesting location updates from %s provider for %d millis.",
                         provider, durationMillis));
 
-        locationManager.requestLocationUpdates(provider, locationRequest.build(),
-                DIRECT_EXECUTOR, locationListener);
+        if (locationManager.getProvider(provider) != null) {
+            locationManager.requestLocationUpdates(provider, locationRequest.build(),
+                    DIRECT_EXECUTOR, locationListener);
+        }
     }
 
     private void injectBestLocation(Location location) {
