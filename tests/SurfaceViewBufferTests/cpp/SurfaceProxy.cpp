@@ -32,6 +32,7 @@
 extern "C" {
 int i = 0;
 static ANativeWindow* sAnw;
+static std::map<uint32_t /* slot */, ANativeWindowBuffer*> sBuffers;
 
 JNIEXPORT jint JNICALL Java_com_android_test_SurfaceProxy_setSurface(JNIEnv* env, jclass,
                                                                      jobject surfaceObject) {
@@ -39,11 +40,14 @@ JNIEXPORT jint JNICALL Java_com_android_test_SurfaceProxy_setSurface(JNIEnv* env
     assert(sAnw);
     android::sp<android::Surface> surface = static_cast<android::Surface*>(sAnw);
     surface->enableFrameTimestamps(true);
+    surface->connect(NATIVE_WINDOW_API_CPU, nullptr, false);
+    native_window_set_usage(sAnw, GRALLOC_USAGE_SW_WRITE_OFTEN);
+    native_window_set_buffers_format(sAnw, HAL_PIXEL_FORMAT_RGBA_8888);
     return 0;
 }
 
 JNIEXPORT jint JNICALL Java_com_android_test_SurfaceProxy_waitUntilBufferDisplayed(
-        JNIEnv*, jclass, jint jFrameNumber, jint timeoutSec) {
+        JNIEnv*, jclass, jlong jFrameNumber, jint timeoutMs) {
     using namespace std::chrono_literals;
     assert(sAnw);
     android::sp<android::Surface> surface = static_cast<android::Surface*>(sAnw);
@@ -63,8 +67,8 @@ JNIEXPORT jint JNICALL Java_com_android_test_SurfaceProxy_waitUntilBufferDisplay
                                     &outDisplayPresentTime, &outDequeueReadyTime, &outReleaseTime);
         if (outDisplayPresentTime < 0) {
             auto end = std::chrono::steady_clock::now();
-            if (std::chrono::duration_cast<std::chrono::seconds>(end - start).count() >
-                timeoutSec) {
+            if (std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() >
+                timeoutMs) {
                 return -1;
             }
         }
@@ -98,5 +102,122 @@ JNIEXPORT jint JNICALL Java_com_android_test_SurfaceProxy_ANativeWindowSetBuffer
         jint format) {
     assert(sAnw);
     return ANativeWindow_setBuffersGeometry(sAnw, w, h, format);
+}
+
+JNIEXPORT jint JNICALL Java_com_android_test_SurfaceProxy_ANativeWindowSetBuffersTransform(
+        JNIEnv* /* env */, jclass /* clazz */, jint transform) {
+    assert(sAnw);
+    return native_window_set_buffers_transform(sAnw, transform);
+}
+
+JNIEXPORT jint JNICALL Java_com_android_test_SurfaceProxy_SurfaceSetScalingMode(JNIEnv* /* env */,
+                                                                                jclass /* clazz */,
+                                                                                jint scalingMode) {
+    assert(sAnw);
+    android::sp<android::Surface> surface = static_cast<android::Surface*>(sAnw);
+    return surface->setScalingMode(scalingMode);
+}
+
+JNIEXPORT jint JNICALL Java_com_android_test_SurfaceProxy_SurfaceDequeueBuffer(JNIEnv* /* env */,
+                                                                               jclass /* clazz */,
+                                                                               jint slot,
+                                                                               jint timeoutMs) {
+    assert(sAnw);
+    ANativeWindowBuffer* anb;
+    int fenceFd;
+    int result = sAnw->dequeueBuffer(sAnw, &anb, &fenceFd);
+    if (result != android::OK) {
+        return result;
+    }
+    sBuffers[slot] = anb;
+    android::sp<android::Fence> fence(new android::Fence(fenceFd));
+    int waitResult = fence->wait(timeoutMs);
+    if (waitResult != android::OK) {
+        sAnw->cancelBuffer(sAnw, sBuffers[slot], -1);
+        sBuffers[slot] = nullptr;
+        return waitResult;
+    }
+    return 0;
+}
+
+JNIEXPORT jint JNICALL Java_com_android_test_SurfaceProxy_SurfaceCancelBuffer(JNIEnv* /* env */,
+                                                                              jclass /* clazz */,
+                                                                              jint slot) {
+    assert(sAnw);
+    assert(sBuffers[slot]);
+    int result = sAnw->cancelBuffer(sAnw, sBuffers[slot], -1);
+    sBuffers[slot] = nullptr;
+    return result;
+}
+
+JNIEXPORT jint JNICALL Java_com_android_test_SurfaceProxy_drawBuffer(JNIEnv* env,
+                                                                     jclass /* clazz */, jint slot,
+                                                                     jintArray jintArrayColor) {
+    assert(sAnw);
+    assert(sBuffers[slot]);
+
+    int* color = env->GetIntArrayElements(jintArrayColor, nullptr);
+
+    ANativeWindowBuffer* buffer = sBuffers[slot];
+    android::sp<android::GraphicBuffer> graphicBuffer(static_cast<android::GraphicBuffer*>(buffer));
+    const android::Rect bounds(buffer->width, buffer->height);
+    android::Region newDirtyRegion;
+    newDirtyRegion.set(bounds);
+
+    void* vaddr;
+    int fenceFd = -1;
+    graphicBuffer->lockAsync(GRALLOC_USAGE_SW_READ_OFTEN | GRALLOC_USAGE_SW_WRITE_OFTEN,
+                             newDirtyRegion.bounds(), &vaddr, fenceFd);
+
+    for (int32_t row = 0; row < buffer->height; row++) {
+        uint8_t* dst = static_cast<uint8_t*>(vaddr) + (buffer->stride * row) * 4;
+        for (int32_t column = 0; column < buffer->width; column++) {
+            dst[0] = color[0];
+            dst[1] = color[1];
+            dst[2] = color[2];
+            dst[3] = color[3];
+            dst += 4;
+        }
+    }
+    graphicBuffer->unlockAsync(&fenceFd);
+    env->ReleaseIntArrayElements(jintArrayColor, color, JNI_ABORT);
+    return 0;
+}
+
+JNIEXPORT jint JNICALL Java_com_android_test_SurfaceProxy_SurfaceQueueBuffer(JNIEnv* /* env */,
+                                                                             jclass /* clazz */,
+                                                                             jint slot,
+                                                                             jboolean freeSlot) {
+    assert(sAnw);
+    assert(sBuffers[slot]);
+    int result = sAnw->queueBuffer(sAnw, sBuffers[slot], -1);
+    if (freeSlot) {
+        sBuffers[slot] = nullptr;
+    }
+    return result;
+}
+
+JNIEXPORT jint JNICALL Java_com_android_test_SurfaceProxy_NativeWindowSetBufferCount(
+        JNIEnv* /* env */, jclass /* clazz */, jint count) {
+    assert(sAnw);
+    android::sp<android::Surface> surface = static_cast<android::Surface*>(sAnw);
+    int result = native_window_set_buffer_count(sAnw, count);
+    return result;
+}
+
+JNIEXPORT jint JNICALL Java_com_android_test_SurfaceProxy_NativeWindowSetSharedBufferMode(
+        JNIEnv* /* env */, jclass /* clazz */, jboolean shared) {
+    assert(sAnw);
+    android::sp<android::Surface> surface = static_cast<android::Surface*>(sAnw);
+    int result = native_window_set_shared_buffer_mode(sAnw, shared);
+    return result;
+}
+
+JNIEXPORT jint JNICALL Java_com_android_test_SurfaceProxy_NativeWindowSetAutoRefresh(
+        JNIEnv* /* env */, jclass /* clazz */, jboolean autoRefresh) {
+    assert(sAnw);
+    android::sp<android::Surface> surface = static_cast<android::Surface*>(sAnw);
+    int result = native_window_set_auto_refresh(sAnw, autoRefresh);
+    return result;
 }
 }

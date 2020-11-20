@@ -3,8 +3,10 @@ package com.android.server.wm;
 import static android.app.ActivityManager.START_SUCCESS;
 import static android.app.ActivityManager.START_TASK_TO_FRONT;
 import static android.app.ActivityManager.processStateAmToProto;
+import static android.app.WaitResult.INVALID_DELAY;
 import static android.app.WaitResult.LAUNCH_STATE_COLD;
 import static android.app.WaitResult.LAUNCH_STATE_HOT;
+import static android.app.WaitResult.LAUNCH_STATE_RELAUNCH;
 import static android.app.WaitResult.LAUNCH_STATE_WARM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
@@ -130,7 +132,6 @@ class ActivityMetricsLogger {
      * transition, in the case the launch is standalone (e.g. from recents).
      */
     private static final int IGNORE_CALLER = -1;
-    private static final int INVALID_DELAY = -1;
 
     // Preallocated strings we are sending to tron, so we don't have to allocate a new one every
     // time we log.
@@ -220,6 +221,8 @@ class ActivityMetricsLogger {
         boolean mLoggedStartingWindowDrawn;
         /** If the any app transitions have been logged as starting. */
         boolean mLoggedTransitionStarting;
+        /** Whether any activity belonging to this transition has relaunched. */
+        boolean mRelaunched;
 
         /** Non-null if the application has reported drawn but its window hasn't. */
         @Nullable Runnable mPendingFullyDrawn;
@@ -351,6 +354,7 @@ class ActivityMetricsLogger {
          */
         final int windowsFullyDrawnDelayMs;
         final int activityRecordIdHashCode;
+        final boolean relaunched;
 
         private TransitionInfoSnapshot(TransitionInfo info) {
             this(info, info.mLastLaunchedActivity, INVALID_DELAY);
@@ -379,6 +383,7 @@ class ActivityMetricsLogger {
             launchedActivityShortComponentName = launchedActivity.shortComponentName;
             activityRecordIdHashCode = System.identityHashCode(launchedActivity);
             this.windowsFullyDrawnDelayMs = windowsFullyDrawnDelayMs;
+            relaunched = info.mRelaunched;
         }
 
         @WaitResult.LaunchState int getLaunchState() {
@@ -386,7 +391,7 @@ class ActivityMetricsLogger {
                 case TYPE_TRANSITION_WARM_LAUNCH:
                     return LAUNCH_STATE_WARM;
                 case TYPE_TRANSITION_HOT_LAUNCH:
-                    return LAUNCH_STATE_HOT;
+                    return relaunched ? LAUNCH_STATE_RELAUNCH : LAUNCH_STATE_HOT;
                 case TYPE_TRANSITION_COLD_LAUNCH:
                     return LAUNCH_STATE_COLD;
                 default:
@@ -673,6 +678,13 @@ class ActivityMetricsLogger {
         }
     }
 
+    void notifyActivityRelaunched(ActivityRecord r) {
+        final TransitionInfo info = getActiveTransitionInfo(r);
+        if (info != null) {
+            info.mRelaunched = true;
+        }
+    }
+
     /** Makes sure that the reference to the removed activity is cleared. */
     void notifyActivityRemoved(@NonNull ActivityRecord r) {
         mLastTransitionInfo.remove(r);
@@ -800,13 +812,13 @@ class ActivityMetricsLogger {
                 FrameworkStatsLog.APP_START_CANCELED,
                 activity.info.applicationInfo.uid,
                 activity.packageName,
-                convertAppStartTransitionType(type),
+                getAppStartTransitionType(type, info.mRelaunched),
                 activity.info.name);
         if (DEBUG_METRICS) {
             Slog.i(TAG, String.format("APP_START_CANCELED(%s, %s, %s, %s)",
                     activity.info.applicationInfo.uid,
                     activity.packageName,
-                    convertAppStartTransitionType(type),
+                    getAppStartTransitionType(type, info.mRelaunched),
                     activity.info.name));
         }
     }
@@ -871,7 +883,7 @@ class ActivityMetricsLogger {
                 FrameworkStatsLog.APP_START_OCCURRED,
                 info.applicationInfo.uid,
                 info.packageName,
-                convertAppStartTransitionType(info.type),
+                getAppStartTransitionType(info.type, info.relaunched),
                 info.launchedActivityName,
                 info.launchedActivityLaunchedFromPackage,
                 isInstantApp,
@@ -891,7 +903,7 @@ class ActivityMetricsLogger {
             Slog.i(TAG, String.format("APP_START_OCCURRED(%s, %s, %s, %s, %s)",
                     info.applicationInfo.uid,
                     info.packageName,
-                    convertAppStartTransitionType(info.type),
+                    getAppStartTransitionType(info.type, info.relaunched),
                     info.launchedActivityName,
                     info.launchedActivityLaunchedFromPackage));
         }
@@ -918,7 +930,7 @@ class ActivityMetricsLogger {
         Log.i(TAG, sb.toString());
     }
 
-    private int convertAppStartTransitionType(int tronType) {
+    private static int getAppStartTransitionType(int tronType, boolean relaunched) {
         if (tronType == TYPE_TRANSITION_COLD_LAUNCH) {
             return FrameworkStatsLog.APP_START_OCCURRED__TYPE__COLD;
         }
@@ -926,15 +938,11 @@ class ActivityMetricsLogger {
             return FrameworkStatsLog.APP_START_OCCURRED__TYPE__WARM;
         }
         if (tronType == TYPE_TRANSITION_HOT_LAUNCH) {
-            return FrameworkStatsLog.APP_START_OCCURRED__TYPE__HOT;
+            return relaunched
+                    ? FrameworkStatsLog.APP_START_OCCURRED__TYPE__RELAUNCH
+                    : FrameworkStatsLog.APP_START_OCCURRED__TYPE__HOT;
         }
         return FrameworkStatsLog.APP_START_OCCURRED__TYPE__UNKNOWN;
-    }
-
-    /** @return the last known window drawn delay of the given activity. */
-    int getLastDrawnDelayMs(ActivityRecord r) {
-        final TransitionInfo info = mLastTransitionInfo.get(r);
-        return info != null ? info.mWindowsDrawnDelayMs : INVALID_DELAY;
     }
 
     /** @see android.app.Activity#reportFullyDrawn */

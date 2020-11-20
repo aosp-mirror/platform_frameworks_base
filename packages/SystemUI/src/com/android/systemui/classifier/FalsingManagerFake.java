@@ -22,6 +22,7 @@ import android.view.MotionEvent;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.plugins.FalsingManager;
 
+import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
 /**
@@ -29,10 +30,13 @@ import java.io.PrintWriter;
  */
 public class FalsingManagerFake implements FalsingManager {
     private boolean mIsFalseTouch;
+    private boolean mIsFalseTap;
+    private boolean mIsFalseDoubleTap;
     private boolean mIsUnlockingDisabled;
     private boolean mIsClassiferEnabled;
     private boolean mShouldEnforceBouncer;
     private boolean mIsReportingEnabled;
+    private boolean mIsFalseRobustTap;
 
     @Override
     public void onSuccessfulUnlock() {
@@ -72,6 +76,28 @@ public class FalsingManagerFake implements FalsingManager {
     @Override
     public boolean isFalseTouch(@Classifier.InteractionType int interactionType) {
         return mIsFalseTouch;
+    }
+
+    public void setFalseRobustTap(boolean falseRobustTap) {
+        mIsFalseRobustTap = falseRobustTap;
+    }
+
+    public void setFalseTap(boolean falseTap) {
+        mIsFalseTap = falseTap;
+    }
+
+    public void setFalseDoubleTap(boolean falseDoubleTap) {
+        mIsFalseDoubleTap = falseDoubleTap;
+    }
+
+    @Override
+    public boolean isFalseTap(boolean robustCheck) {
+        return robustCheck ? mIsFalseRobustTap : mIsFalseTap;
+    }
+
+    @Override
+    public boolean isFalseDoubleTap() {
+        return mIsFalseDoubleTap;
     }
 
     @Override
@@ -236,8 +262,7 @@ public class FalsingManagerFake implements FalsingManager {
     }
 
     @Override
-    public void dump(PrintWriter pw) {
-
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
     }
 
     @Override

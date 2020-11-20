@@ -89,6 +89,7 @@ public class BubbleController implements Bubbles {
 
     // TODO(b/173386799) keep in sync with Launcher3 and also don't do a broadcast
     public static final String TASKBAR_CHANGED_BROADCAST = "taskbarChanged";
+    public static final String EXTRA_TASKBAR_CREATED = "taskbarCreated";
     public static final String EXTRA_BUBBLE_OVERFLOW_OPENED = "bubbleOverflowOpened";
     public static final String EXTRA_TASKBAR_VISIBLE = "taskbarVisible";
     public static final String EXTRA_TASKBAR_POSITION = "taskbarPosition";
@@ -350,12 +351,15 @@ public class BubbleController implements Bubbles {
                 + " itemPosition: " + itemPosition[0] + "," + itemPosition[1]
                 + " iconSize: " + iconSize);
         PointF point = new PointF(itemPosition[0], itemPosition[1]);
-        mBubblePositioner.setPinnedLocation(point);
+        mBubblePositioner.setPinnedLocation(isVisible ? point : null);
         mBubblePositioner.updateForTaskbar(iconSize, taskbarPosition, isVisible, taskbarSize);
         if (mStackView != null) {
-            if (isVisible) {
-                mStackView.updateStackPosition();
+            if (isVisible && b.getBoolean(EXTRA_TASKBAR_CREATED, false /* default */)) {
+                // If taskbar was created, add and remove the window so that bubbles display on top
+                removeFromWindowManagerMaybe();
+                addToWindowManagerMaybe();
             }
+            mStackView.updateStackPosition();
             mBubbleIconFactory = new BubbleIconFactory(mContext);
             mStackView.onDisplaySizeChanged();
         }

@@ -63,6 +63,7 @@ import android.os.HandlerExecutor;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.StatFs;
+import android.os.StrictMode;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.storage.StorageManager;
@@ -6284,5 +6285,26 @@ public abstract class Context {
      */
     public boolean isUiContext() {
         throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
+
+    /**
+     * Returns {@code true} if the context is a UI context which can access UI components such as
+     * {@link WindowManager}, {@link android.view.LayoutInflater LayoutInflater} or
+     * {@link android.app.WallpaperManager WallpaperManager}. Accessing UI components from non-UI
+     * contexts throws {@link android.os.strictmode.Violation} if
+     * {@link StrictMode.VmPolicy.Builder#detectIncorrectContextUse()} is enabled.
+     * <p>
+     * Examples of UI contexts are
+     * an {@link android.app.Activity Activity}, a context created from
+     * {@link #createWindowContext(int, Bundle)} or
+     * {@link android.inputmethodservice.InputMethodService InputMethodService}
+     * </p>
+     *
+     * @see #getDisplay()
+     * @see #getSystemService(String)
+     * @see StrictMode.VmPolicy.Builder#detectIncorrectContextUse()
+     */
+    public static boolean isUiContext(@NonNull Context context) {
+        return context.isUiContext();
     }
 }

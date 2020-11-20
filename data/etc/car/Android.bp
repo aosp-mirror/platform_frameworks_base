@@ -157,3 +157,10 @@ prebuilt_etc {
     src: "com.android.car.provision.xml",
     filename_from_src: true,
 }
+
+prebuilt_etc {
+    name: "allowed_privapp_com.android.carshell",
+    sub_dir: "permissions",
+    src: "com.android.car.shell.xml",
+    filename_from_src: true,
+}

@@ -3031,8 +3031,9 @@ public class AppOpsService extends IAppOpsService.Stub {
                 getComponentPackageNameFromString(voiceRecognitionComponent);
         final String voiceInteractionServicePackageName =
                 getComponentPackageNameFromString(voiceInteractionComponent);
-        return Objects.equals(packageName, voiceRecognitionServicePackageName) && Objects.equals(
-                voiceRecognitionServicePackageName, voiceInteractionServicePackageName);
+        return (Objects.equals(packageName, voiceRecognitionServicePackageName)) && (Objects.equals(
+                voiceRecognitionServicePackageName, voiceInteractionServicePackageName)
+                || voiceInteractionServicePackageName == null);
     }
 
     private String getComponentPackageNameFromString(String from) {
@@ -3058,9 +3059,10 @@ public class AppOpsService extends IAppOpsService.Stub {
         // This is a workaround for R QPR, new API change is not allowed. We only allow the current
         // voice recognizer is also the voice interactor to noteproxy op.
         final boolean isTrustVoiceServiceProxy = isTrustedVoiceServiceProxy(proxyPackageName, code);
+        final boolean isSelfBlame = Binder.getCallingUid() == proxiedUid;
         final boolean isProxyTrusted = mContext.checkPermission(
                 Manifest.permission.UPDATE_APP_OPS_STATS, -1, proxyUid)
-                == PackageManager.PERMISSION_GRANTED || isTrustVoiceServiceProxy;
+                == PackageManager.PERMISSION_GRANTED || isTrustVoiceServiceProxy || isSelfBlame;
 
         final int proxyFlags = isProxyTrusted ? AppOpsManager.OP_FLAG_TRUSTED_PROXY
                 : AppOpsManager.OP_FLAG_UNTRUSTED_PROXY;
@@ -3525,9 +3527,10 @@ public class AppOpsService extends IAppOpsService.Stub {
         // This is a workaround for R QPR, new API change is not allowed. We only allow the current
         // voice recognizer is also the voice interactor to noteproxy op.
         final boolean isTrustVoiceServiceProxy = isTrustedVoiceServiceProxy(proxyPackageName, code);
+        final boolean isSelfBlame = Binder.getCallingUid() == proxiedUid;
         final boolean isProxyTrusted = mContext.checkPermission(
                 Manifest.permission.UPDATE_APP_OPS_STATS, -1, proxyUid)
-                == PackageManager.PERMISSION_GRANTED || isTrustVoiceServiceProxy;
+                == PackageManager.PERMISSION_GRANTED || isTrustVoiceServiceProxy || isSelfBlame;
 
         final int proxyFlags = isProxyTrusted ? AppOpsManager.OP_FLAG_TRUSTED_PROXY
                 : AppOpsManager.OP_FLAG_UNTRUSTED_PROXY;

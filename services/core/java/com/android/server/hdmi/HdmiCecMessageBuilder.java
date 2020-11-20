@@ -16,10 +16,10 @@
 
 package com.android.server.hdmi;
 
+import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiDeviceInfo;
 
 import com.android.server.hdmi.Constants.AudioCodec;
-import com.android.server.hdmi.Constants.CecVersion;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
@@ -696,9 +696,9 @@ public class HdmiCecMessageBuilder {
         return buildCommand(src, dest, Constants.MESSAGE_GIVE_FEATURES);
     }
 
-    static HdmiCecMessage buildReportFeatures(int src, @CecVersion int cecVersion,
-            List<Integer> allDeviceTypes, int rcProfile, List<Integer> rcFeatures,
-            List<Integer> deviceFeatures) {
+    static HdmiCecMessage buildReportFeatures(int src,
+            @HdmiControlManager.HdmiCecVersion int cecVersion, List<Integer> allDeviceTypes,
+            int rcProfile, List<Integer> rcFeatures, List<Integer> deviceFeatures) {
         byte cecVersionByte = (byte) (cecVersion & 0xFF);
         byte deviceTypes = 0;
         for (Integer deviceType : allDeviceTypes) {

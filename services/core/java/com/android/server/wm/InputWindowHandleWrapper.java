@@ -63,6 +63,10 @@ class InputWindowHandleWrapper {
         return mHandle.displayId;
     }
 
+    boolean isFocusable() {
+        return mHandle.focusable;
+    }
+
     InputApplicationHandle getInputApplicationHandle() {
         return mHandle.inputApplicationHandle;
     }

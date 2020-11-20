@@ -26,6 +26,7 @@ import android.view.MotionEvent;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.systemui.util.time.FakeSystemClock;
 import com.android.systemui.utils.leaks.FakeBatteryController;
 
 import org.junit.After;
@@ -51,7 +52,8 @@ public class FalsingDataProviderTest extends ClassifierTest {
         displayMetrics.ydpi = 100;
         displayMetrics.widthPixels = 1000;
         displayMetrics.heightPixels = 1000;
-        mDataProvider = new FalsingDataProvider(displayMetrics, mFakeBatteryController);
+        mDataProvider = new FalsingDataProvider(displayMetrics, mFakeBatteryController,
+                new FakeSystemClock());
     }
 
     @After

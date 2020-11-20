@@ -626,12 +626,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      */
     private boolean mInEnsureActivitiesVisible = false;
 
-    /**
-     * Last window to be requested focus via {@code SurfaceControl.Transaction#setFocusedWindow} to
-     * prevent duplicate requests to input.
-     */
-    WindowState mLastRequestedFocus = null;
-
     private final Consumer<WindowState> mUpdateWindowsForAnimator = w -> {
         WindowStateAnimator winAnimator = w.mWinAnimator;
         final ActivityRecord activity = w.mActivityRecord;
@@ -5382,20 +5376,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     @VisibleForTesting
     void removeAllTasks() {
         forAllTasks((t) -> { t.getRootTask().removeChild(t, "removeAllTasks"); });
-    }
-
-    /**
-     * Similar to {@link RootWindowContainer#isAnyNonToastWindowVisibleForUid(int)}, but
-     * used for pid.
-     */
-    boolean isAnyNonToastWindowVisibleForPid(int pid) {
-        final PooledPredicate p = PooledLambda.obtainPredicate(
-                WindowState::isNonToastWindowVisibleForPid,
-                PooledLambda.__(WindowState.class), pid);
-
-        final WindowState w = getWindow(p);
-        p.recycle();
-        return w != null;
     }
 
     Context getDisplayUiContext() {

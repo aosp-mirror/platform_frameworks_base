@@ -40,7 +40,6 @@ import java.util.ArrayList;
 public class SearchResultToProtoConverter {
     private SearchResultToProtoConverter() {}
 
-
     /** Translate a {@link SearchResultProto} into {@link SearchResultPage}. */
     @NonNull
     public static SearchResultPage convertToSearchResultPage(

@@ -137,6 +137,7 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
     @VisibleForTesting final ViewportDraggingState mViewportDraggingState;
 
     private final ScreenStateReceiver mScreenStateReceiver;
+    private final WindowMagnificationPromptController mPromptController;
 
     /**
      * {@code true} if this detector should detect and respond to triple-tap
@@ -178,6 +179,7 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
             ScaleChangedListener listener,
             boolean detectTripleTap,
             boolean detectShortcutTrigger,
+            @NonNull WindowMagnificationPromptController promptController,
             int displayId) {
         super(listener);
         if (DEBUG_ALL) {
@@ -186,6 +188,7 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
                             + ", detectShortcutTrigger = " + detectShortcutTrigger + ")");
         }
         mFullScreenMagnificationController = fullScreenMagnificationController;
+        mPromptController = promptController;
         mDisplayId = displayId;
 
         mDelegatingState = new DelegatingState();
@@ -195,7 +198,6 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
 
         mDetectTripleTap = detectTripleTap;
         mDetectShortcutTrigger = detectShortcutTrigger;
-
         if (mDetectShortcutTrigger) {
             mScreenStateReceiver = new ScreenStateReceiver(context, this);
             mScreenStateReceiver.register();
@@ -264,6 +266,7 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
         if (mScreenStateReceiver != null) {
             mScreenStateReceiver.unregister();
         }
+        mPromptController.onDestroy();
         // Check if need to reset when MagnificationGestureHandler is the last magnifying service.
         mFullScreenMagnificationController.resetAllIfNeeded(
                 AccessibilityManagerService.MAGNIFICATION_GESTURE_HANDLER_ID);
@@ -278,6 +281,7 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
             if (wasMagnifying) {
                 clearAndTransitionToStateDetecting();
             } else {
+                mPromptController.showNotificationIfNeeded();
                 mDetectingState.toggleShortcutTriggered();
             }
         }
@@ -950,6 +954,7 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
             if (mFullScreenMagnificationController.isMagnifying(mDisplayId)) {
                 zoomOff();
             } else {
+                mPromptController.showNotificationIfNeeded();
                 zoomOn(up.getX(), up.getY());
             }
         }

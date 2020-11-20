@@ -108,6 +108,11 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
     }
 
     @Override
+    protected void onInit() {
+        mQSLogger.logAllTilesChangeListening(mView.isListening(), mView.getDumpableTag(), "");
+    }
+
+    @Override
     protected void onViewAttached() {
         mQsTileRevealController = createTileRevealController();
         if (mQsTileRevealController != null) {
@@ -221,6 +226,11 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
 
     /** */
     public void setExpanded(boolean expanded) {
+        if (mView.isExpanded() == expanded) {
+            return;
+        }
+        mQSLogger.logPanelExpanded(expanded, mView.getDumpableTag());
+
         mView.setExpanded(expanded);
         mMetricsLogger.visibility(MetricsEvent.QS_PANEL, expanded);
         if (!expanded) {

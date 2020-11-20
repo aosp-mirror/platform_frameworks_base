@@ -82,6 +82,28 @@
             android:elegantTextHeight="false"
         />
     </FrameLayout>
+    <FrameLayout
+        android:id="@+id/new_lockscreen_clock_view_large"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/keyguard_status_area"
+        android:paddingTop="20dp"
+        android:visibility="gone">
+        <com.android.keyguard.AnimatableClockView
+            android:id="@+id/animatable_clock_view_large"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:gravity="center_horizontal"
+            android:textSize="170dp"
+            android:letterSpacing="0.02"
+            android:lineSpacingMultiplier=".8"
+            android:includeFontPadding="false"
+            android:fontFamily="@font/clock"
+            android:typeface="monospace"
+            android:elegantTextHeight="false"
+        />
+    </FrameLayout>
     <include layout="@layout/keyguard_status_area"
         android:id="@+id/keyguard_status_area"
         android:layout_width="match_parent"

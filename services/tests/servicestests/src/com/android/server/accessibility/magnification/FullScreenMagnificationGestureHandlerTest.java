@@ -66,7 +66,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.IntConsumer;
@@ -129,6 +128,8 @@ public class FullScreenMagnificationGestureHandlerTest {
     ScaleChangedListener mMockScaleChangedListener;
     @Mock
     MagnificationRequestObserver mMagnificationRequestObserver;
+    @Mock
+    WindowMagnificationPromptController mWindowMagnificationPromptController;
 
     private OffsettableClock mClock;
     private FullScreenMagnificationGestureHandler mMgh;
@@ -170,7 +171,9 @@ public class FullScreenMagnificationGestureHandlerTest {
 
     @After
     public void tearDown() {
+        mMgh.onDestroy();
         mFullScreenMagnificationController.unregister(DISPLAY_0);
+        verify(mWindowMagnificationPromptController).onDestroy();
     }
 
     @NonNull
@@ -178,7 +181,8 @@ public class FullScreenMagnificationGestureHandlerTest {
             boolean detectShortcutTrigger) {
         FullScreenMagnificationGestureHandler h = new FullScreenMagnificationGestureHandler(
                 mContext, mFullScreenMagnificationController, mMockScaleChangedListener,
-                detectTripleTap, detectShortcutTrigger, DISPLAY_0);
+                detectTripleTap, detectShortcutTrigger, mWindowMagnificationPromptController,
+                DISPLAY_0);
         mHandler = new TestHandler(h.mDetectingState, mClock) {
             @Override
             protected String messageToString(Message m) {
@@ -432,6 +436,20 @@ public class FullScreenMagnificationGestureHandlerTest {
 
         assertIn(STATE_PANNING);
         returnToNormalFrom(STATE_PANNING);
+    }
+
+    @Test
+    public void testZoomedWithTripleTap_invokeShowWindowPromptAction() {
+        goFromStateIdleTo(STATE_ZOOMED);
+
+        verify(mWindowMagnificationPromptController).showNotificationIfNeeded();
+    }
+
+    @Test
+    public void testShortcutTriggered_invokeShowWindowPromptAction() {
+        goFromStateIdleTo(STATE_SHORTCUT_TRIGGERED);
+
+        verify(mWindowMagnificationPromptController).showNotificationIfNeeded();
     }
 
     private void assertActionsInOrder(List<MotionEvent> actualEvents,

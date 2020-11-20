@@ -78,7 +78,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/status_bar_height"
-        android:layout_gravity="top|center_horizontal">
+        android:layout_gravity="top|center_horizontal"
+        android:gravity="center_horizontal">
         <com.android.systemui.statusbar.phone.LockIcon
             android:id="@+id/lock_icon"
             android:layout_width="@dimen/keyguard_lock_width"

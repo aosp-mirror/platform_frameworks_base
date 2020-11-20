@@ -33,6 +33,8 @@ android_test {
         "kotlinx-coroutines-android",
         "flickerlib",
         "truth-prebuilt",
+        "cts-wm-util",
+        "CtsSurfaceValidatorLib",
     ],
 }
 
@@ -43,6 +45,7 @@ cc_library_shared {
     ],
     shared_libs: [
         "libutils",
+        "libui",
         "libgui",
         "liblog",
         "libandroid",
