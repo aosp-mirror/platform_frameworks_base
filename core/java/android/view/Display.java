@@ -1512,6 +1512,9 @@ public final class Display {
          * then 1920x1080 50Hz will have alternative refresh rate of 60Hz. If 1920x1080 60Hz
          * has an alternative of 50Hz and 1920x1080 50Hz has an alternative of 24Hz, then 1920x1080
          * 60Hz will also have an alternative of 24Hz.
+         *
+         * @see Surface#setFrameRate
+         * @see SurfaceControl.Transaction#setFrameRate
          */
         @NonNull
         public float[] getAlternativeRefreshRates() {
