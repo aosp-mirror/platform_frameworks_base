@@ -1,0 +1,62 @@
+/*
+ * Copyright (C) 2020 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto2";
+
+import "frameworks/base/core/proto/android/server/accessibility.proto";
+import "frameworks/base/core/proto/android/server/windowmanagerservice.proto";
+
+package com.android.server.accessibility;
+
+option java_multiple_files = true;
+
+/* represents a file full of accessibility trace entries.
+   Encoded, it should start with 0x9 0x41 0x31 0x31 0x59 0x54 0x52 0x41 0x43 (.A11YTRAC), such
+   that they can be easily identified. */
+message AccessibilityTraceFileProto {
+
+    /* constant; MAGIC_NUMBER = (long) MAGIC_NUMBER_H << 32 | MagicNumber.MAGIC_NUMBER_L
+       (this is needed because enums have to be 32 bits and there's no nice way to put 64bit
+        constants into .proto files. */
+    enum MagicNumber {
+        INVALID = 0;
+        MAGIC_NUMBER_L = 0x59313141;  /* A11Y (little-endian ASCII) */
+        MAGIC_NUMBER_H = 0x43415254;  /* TRAC (little-endian ASCII) */
+    }
+
+    optional fixed64 magic_number = 1;  /* Must be the first field, set to value in MagicNumber */
+    repeated AccessibilityTraceProto entry = 2;
+}
+
+/* one accessibility trace entry. */
+message AccessibilityTraceProto {
+    /* required: elapsed realtime in nanos since boot of when this entry was logged */
+    optional fixed64 elapsed_realtime_nanos = 1;
+    optional string calendar_time = 2;
+
+    optional string process_name = 3;
+    optional string thread_id_name = 4;
+
+    /* where the trace originated */
+    optional string where = 5;
+
+    optional string calling_pkg = 6;
+    optional string calling_params = 7;
+    optional string calling_stacks = 8;
+
+    optional AccessibilityDumpProto accessibility_service = 9;
+    optional com.android.server.wm.WindowManagerServiceDumpProto window_manager_service = 10;
+}
