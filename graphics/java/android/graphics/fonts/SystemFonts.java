@@ -67,19 +67,6 @@ public final class SystemFonts {
     }
 
     /**
-     * Returns fallback list for the given family name.
-     *
-     * If no fallback found for the given family name, returns fallback for the default family.
-     *
-     * @param familyName family name, e.g. "serif"
-     * @hide
-     */
-    public static @NonNull FontFamily[] getSystemFallback(@Nullable String familyName) {
-        final FontFamily[] families = sSystemFallbackMap.get(familyName);
-        return families == null ? sSystemFallbackMap.get(DEFAULT_FAMILY) : families;
-    }
-
-    /**
      * Returns raw system fallback map.
      *
      * This method is intended to be used only by Typeface static initializer.
