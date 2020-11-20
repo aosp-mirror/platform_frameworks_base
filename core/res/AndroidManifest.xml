@@ -5034,6 +5034,13 @@
     <permission android:name="android.permission.MANAGE_SOUND_TRIGGER"
         android:protectionLevel="signature|privileged" />
 
+    <!-- Must be required by system/priv apps to run sound trigger recognition sessions while in
+         battery saver mode.
+         @hide
+         @SystemApi -->
+    <permission android:name="android.permission.SOUND_TRIGGER_RUN_IN_BATTERY_SAVER"
+                android:protectionLevel="signature|privileged" />
+
     <!-- Must be required by system/priv apps implementing sound trigger detection services
          @hide
          @SystemApi -->
