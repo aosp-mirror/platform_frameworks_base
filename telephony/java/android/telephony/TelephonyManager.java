@@ -11846,12 +11846,13 @@ public class TelephonyManager {
      * @hide
      */
     @SystemApi
+    @TestApi
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public @NetworkTypeBitMask long getSupportedRadioAccessFamily() {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
-                return (long) telephony.getRadioAccessFamily(getSlotIndex(), getOpPackageName());
+                return telephony.getRadioAccessFamily(getSlotIndex(), getOpPackageName());
             } else {
                 // This can happen when the ITelephony interface is not up yet.
                 return NETWORK_TYPE_BITMASK_UNKNOWN;
