@@ -3,7 +3,6 @@ package com.android.server.usage;
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
 import android.app.usage.AppStandbyInfo;
-import android.app.usage.UsageEvents;
 import android.app.usage.UsageStatsManager.StandbyBuckets;
 import android.app.usage.UsageStatsManager.SystemForcedReasons;
 import android.content.Context;
@@ -67,8 +66,6 @@ public interface AppStandbyInternal {
      * scheduling a series of repeating checkIdleStates each time we fired off one.
      */
     void postOneTimeCheckIdleStates();
-
-    void reportEvent(UsageEvents.Event event, int userId);
 
     void setLastJobRunTime(String packageName, int userId, long elapsedRealtime);
 

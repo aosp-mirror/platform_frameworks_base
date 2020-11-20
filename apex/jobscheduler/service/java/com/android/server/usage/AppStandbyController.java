@@ -62,6 +62,7 @@ import android.app.usage.AppStandbyInfo;
 import android.app.usage.UsageEvents;
 import android.app.usage.UsageStatsManager.StandbyBuckets;
 import android.app.usage.UsageStatsManager.SystemForcedReasons;
+import android.app.usage.UsageStatsManagerInternal;
 import android.appwidget.AppWidgetManager;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
@@ -128,9 +129,10 @@ import java.util.concurrent.CountDownLatch;
  * Manages the standby state of an app, listening to various events.
  *
  * Unit test:
-   atest com.android.server.usage.AppStandbyControllerTests
+ * atest com.android.server.usage.AppStandbyControllerTests
  */
-public class AppStandbyController implements AppStandbyInternal {
+public class AppStandbyController
+        implements AppStandbyInternal, UsageStatsManagerInternal.UsageEventListener {
 
     private static final String TAG = "AppStandbyController";
     // Do not submit with true.
@@ -468,10 +470,21 @@ public class AppStandbyController implements AppStandbyInternal {
 
     @VisibleForTesting
     void setAppIdleEnabled(boolean enabled) {
+        // Don't call out to USM with the lock held. Also, register the listener before we
+        // change our internal state so no events fall through the cracks.
+        final UsageStatsManagerInternal usmi =
+                LocalServices.getService(UsageStatsManagerInternal.class);
+        if (enabled) {
+            usmi.registerListener(this);
+        } else {
+            usmi.unregisterListener(this);
+        }
+
         synchronized (mAppIdleLock) {
             if (mAppIdleEnabled != enabled) {
                 final boolean oldParoleState = isInParole();
                 mAppIdleEnabled = enabled;
+
                 if (isInParole() != oldParoleState) {
                     postParoleStateChanged();
                 }
@@ -489,6 +502,11 @@ public class AppStandbyController implements AppStandbyInternal {
         mInjector.onBootPhase(phase);
         if (phase == PHASE_SYSTEM_SERVICES_READY) {
             Slog.d(TAG, "Setting app idle enabled state");
+
+            if (mAppIdleEnabled) {
+                LocalServices.getService(UsageStatsManagerInternal.class).registerListener(this);
+            }
+
             // Observe changes to the threshold
             ConstantsObserver settingsObserver = new ConstantsObserver(mHandler);
             settingsObserver.start();
@@ -912,8 +930,10 @@ public class AppStandbyController implements AppStandbyInternal {
         }
     }
 
-    @Override
-    public void reportEvent(UsageEvents.Event event, int userId) {
+    /**
+     * Callback to inform listeners of a new event.
+     */
+    public void onUsageEvent(int userId, @NonNull UsageEvents.Event event) {
         if (!mAppIdleEnabled) return;
         final int eventType = event.getEventType();
         if ((eventType == UsageEvents.Event.ACTIVITY_RESUMED
