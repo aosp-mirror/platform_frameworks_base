@@ -3192,6 +3192,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
     }
 
+    private void checkAllUsersAreAffiliatedWithDevice() {
+        Preconditions.checkCallAuthorization(areAllUsersAffiliatedWithDeviceLocked(),
+                "operation not allowed when device has unaffiliated users");
+    }
+
     @Override
     public boolean isAdminActive(ComponentName adminReceiver, int userHandle) {
         if (!mHasFeature) {
@@ -7034,7 +7039,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         // next boot? Might not be needed given that this still requires user consent.
         final CallerIdentity caller = getCallerIdentity(who);
         Preconditions.checkCallAuthorization(isDeviceOwner(caller));
-        Preconditions.checkCallAuthorization(areAllUsersAffiliatedWithDeviceLocked());
+        checkAllUsersAreAffiliatedWithDevice();
 
         if (mBugreportCollectionManager.requestBugreport()) {
             DevicePolicyEventLogger
@@ -8643,6 +8648,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             pw.println(policy.mUserControlDisabledPackages);
             pw.print("mAppsSuspended="); pw.println(policy.mAppsSuspended);
             pw.print("mUserSetupComplete="); pw.println(policy.mUserSetupComplete);
+            pw.print("mAffiliationIds="); pw.println(policy.mAffiliationIds);
             pw.decreaseIndent();
         }
     }
@@ -12925,13 +12931,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         });
     }
 
-    private boolean canStartSecurityLogging() {
-        synchronized (getLockObject()) {
-            return isOrganizationOwnedDeviceWithManagedProfile()
-                    || areAllUsersAffiliatedWithDeviceLocked();
-        }
-    }
-
     private @UserIdInt int getSecurityLoggingEnabledUser() {
         synchronized (getLockObject()) {
             if (mOwners.hasDeviceOwner()) {
@@ -13651,7 +13650,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         final CallerIdentity caller = getCallerIdentity(admin, packageName);
         Preconditions.checkCallAuthorization((caller.hasAdminComponent() &&  isDeviceOwner(caller))
                 || (caller.hasPackage() && isCallerDelegate(caller, DELEGATION_NETWORK_LOGGING)));
-        Preconditions.checkCallAuthorization(areAllUsersAffiliatedWithDeviceLocked());
+        checkAllUsersAreAffiliatedWithDevice();
 
         synchronized (getLockObject()) {
             if (mNetworkLogger == null || !isNetworkLoggingEnabledInternalLocked()) {
