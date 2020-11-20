@@ -50,16 +50,6 @@
         android:theme="@style/Theme.DeviceDefault.Notification"
         >
 
-        <TextView
-            android:id="@+id/app_name_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="@dimen/notification_header_separating_margin"
-            android:singleLine="true"
-            android:textAppearance="?attr/notificationHeaderTextAppearance"
-            android:visibility="?attr/notificationHeaderAppNameVisibility"
-            />
-
         <include layout="@layout/notification_top_line_views" />
 
     </NotificationTopLineView>
