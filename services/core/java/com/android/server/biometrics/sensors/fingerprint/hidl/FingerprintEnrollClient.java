@@ -65,7 +65,7 @@ public class FingerprintEnrollClient extends EnrollClient<IBiometricsFingerprint
         final int enrolled = mBiometricUtils.getBiometricsForUser(getContext(), getTargetUserId())
                 .size();
         if (enrolled >= limit) {
-            Slog.w(TAG, "Too many faces registered, user: " + getTargetUserId());
+            Slog.w(TAG, "Too many fingerprints registered, user: " + getTargetUserId());
             return true;
         }
         return false;

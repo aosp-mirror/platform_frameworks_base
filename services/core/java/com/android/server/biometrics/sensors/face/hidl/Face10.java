@@ -71,7 +71,6 @@ import com.android.server.biometrics.sensors.face.FaceUtils;
 import com.android.server.biometrics.sensors.face.LockoutHalImpl;
 import com.android.server.biometrics.sensors.face.ServiceProvider;
 import com.android.server.biometrics.sensors.face.UsageStats;
-import com.android.server.biometrics.sensors.fingerprint.FingerprintUtils;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -259,8 +258,7 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
 
                 if (!removed.isEmpty()) {
                     // Convert to old fingerprint-like behavior, where remove() receives
-                    // one removal
-                    // at a time. This way, remove can share some more common code.
+                    // one removal at a time. This way, remove can share some more common code.
                     for (int i = 0; i < removed.size(); i++) {
                         final int id = removed.get(i);
                         final Face face = new Face("", id, deviceId);
@@ -290,21 +288,16 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
                 final EnumerateConsumer enumerateConsumer = (EnumerateConsumer) client;
 
                 if (!faceIds.isEmpty()) {
-                    // Convert to old fingerprint-like behavior, where enumerate()
-                    // receives one
-                    // template at a time. This way, enumerate can share some more common
-                    // code.
+                    // Convert to old fingerprint-like behavior, where enumerate() receives one
+                    // template at a time. This way, enumerate can share some more common code.
                     for (int i = 0; i < faceIds.size(); i++) {
                         final Face face = new Face("", faceIds.get(i), deviceId);
                         enumerateConsumer.onEnumerationResult(face, faceIds.size() - i - 1);
                     }
                 } else {
-                    // For face, the HIDL contract is to receive an empty list when there
-                    // are no
-                    // templates enrolled. Send a null identifier since we don't consume
-                    // them
-                    // anywhere, and send remaining == 0 so this code can be shared with
-                    // Fingerprint@2.1
+                    // For face, the HIDL contract is to receive an empty list when there are no
+                    // templates enrolled. Send a null identifier since we don't consume them
+                    // anywhere, and send remaining == 0 so this code can be shared with Face@1.1
                     enumerateConsumer.onEnumerationResult(null /* identifier */, 0);
                 }
             });
