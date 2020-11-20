@@ -8663,17 +8663,30 @@ public class ActivityManagerService extends IActivityManager.Stub
             } else if ("service".equals(cmd)) {
                 String[] newArgs;
                 String name;
+                int[] users = null;
                 if (opti >= args.length) {
                     name = null;
                     newArgs = EMPTY_STRING_ARRAY;
                 } else {
                     name = args[opti];
                     opti++;
+                    if ("--user".equals(name) && opti < args.length) {
+                        int userId = UserHandle.parseUserArg(args[opti]);
+                        opti++;
+                        if (userId != UserHandle.USER_ALL) {
+                            if (userId == UserHandle.USER_CURRENT) {
+                                userId = getCurrentUser().id;
+                            }
+                            users = new int[] { userId };
+                        }
+                        name = args[opti];
+                        opti++;
+                    }
                     newArgs = new String[args.length - opti];
                     if (args.length > 2) System.arraycopy(args, opti, newArgs, 0,
                             args.length - opti);
                 }
-                if (!mServices.dumpService(fd, pw, name, newArgs, 0, dumpAll)) {
+                if (!mServices.dumpService(fd, pw, name, users, newArgs, 0, dumpAll)) {
                     pw.println("No services match: " + name);
                     pw.println("Use -h for help.");
                 }
