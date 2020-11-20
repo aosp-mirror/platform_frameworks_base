@@ -339,10 +339,14 @@ public final class NetworkCapabilities implements Parcelable {
     public static final int NET_CAPABILITY_PARTIAL_CONNECTIVITY = 24;
 
     /**
+     * Indicates that this network is temporarily unmetered.
+     * <p>
      * This capability will be set for networks that are generally metered, but are currently
      * unmetered, e.g., because the user is in a particular area. This capability can be changed at
      * any time. When it is removed, applications are responsible for stopping any data transfer
      * that should not occur on a metered network.
+     * Note that most apps should use {@link #NET_CAPABILITY_NOT_METERED} instead. For more
+     * information, see https://developer.android.com/about/versions/11/features/5g#meteredness.
      */
     public static final int NET_CAPABILITY_TEMPORARILY_NOT_METERED = 25;
 
@@ -370,8 +374,8 @@ public final class NetworkCapabilities implements Parcelable {
             | (1 << NET_CAPABILITY_FOREGROUND)
             | (1 << NET_CAPABILITY_NOT_CONGESTED)
             | (1 << NET_CAPABILITY_NOT_SUSPENDED)
-            | (1 << NET_CAPABILITY_PARTIAL_CONNECTIVITY
-            | (1 << NET_CAPABILITY_TEMPORARILY_NOT_METERED));
+            | (1 << NET_CAPABILITY_PARTIAL_CONNECTIVITY)
+            | (1 << NET_CAPABILITY_TEMPORARILY_NOT_METERED);
 
     /**
      * Network capabilities that are not allowed in NetworkRequests. This exists because the
@@ -1802,20 +1806,26 @@ public final class NetworkCapabilities implements Parcelable {
             sb.append(" OwnerUid: ").append(mOwnerUid);
         }
 
-        if (mAdministratorUids.length == 0) {
-            sb.append(" AdministratorUids: ").append(Arrays.toString(mAdministratorUids));
+        if (!ArrayUtils.isEmpty(mAdministratorUids)) {
+            sb.append(" AdminUids: ").append(Arrays.toString(mAdministratorUids));
+        }
+
+        if (mRequestorUid != Process.INVALID_UID) {
+            sb.append(" RequestorUid: ").append(mRequestorUid);
+        }
+
+        if (mRequestorPackageName != null) {
+            sb.append(" RequestorPkg: ").append(mRequestorPackageName);
         }
 
         if (null != mSSID) {
             sb.append(" SSID: ").append(mSSID);
         }
 
-        if (mPrivateDnsBroken) {
-            sb.append(" Private DNS is broken");
-        }
 
-        sb.append(" RequestorUid: ").append(mRequestorUid);
-        sb.append(" RequestorPackageName: ").append(mRequestorPackageName);
+        if (mPrivateDnsBroken) {
+            sb.append(" PrivateDnsBroken");
+        }
 
         sb.append("]");
         return sb.toString();

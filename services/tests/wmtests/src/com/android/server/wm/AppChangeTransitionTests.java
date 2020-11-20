@@ -53,14 +53,12 @@ import org.junit.runner.RunWith;
 @RunWith(WindowTestRunner.class)
 public class AppChangeTransitionTests extends WindowTestsBase {
 
-    private Task mStack;
     private Task mTask;
     private ActivityRecord mActivity;
 
     public void setUpOnDisplay(DisplayContent dc) {
         mActivity = createActivityRecord(dc, WINDOWING_MODE_UNDEFINED, ACTIVITY_TYPE_STANDARD);
         mTask = mActivity.getTask();
-        mStack = mTask.getRootTask();
 
         // Set a remote animator with snapshot disabled. Snapshots don't work in wmtests.
         RemoteAnimationDefinition definition = new RemoteAnimationDefinition();
@@ -143,7 +141,7 @@ public class AppChangeTransitionTests extends WindowTestsBase {
         // Reparenting to a display with different windowing mode may trigger
         // a change transition internally, but it should be cleaned-up once
         // the display change is complete.
-        mStack.reparent(mDisplayContent.getDefaultTaskDisplayArea(), true);
+        mTask.reparent(mDisplayContent.getDefaultTaskDisplayArea(), true);
 
         assertEquals(WINDOWING_MODE_FULLSCREEN, mTask.getWindowingMode());
 

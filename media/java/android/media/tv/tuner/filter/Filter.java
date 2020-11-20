@@ -186,7 +186,7 @@ public class Filter implements AutoCloseable {
             value = {SCRAMBLING_STATUS_UNKNOWN, SCRAMBLING_STATUS_NOT_SCRAMBLED,
                     SCRAMBLING_STATUS_SCRAMBLED})
     @Retention(RetentionPolicy.SOURCE)
-    public @interface ScramblingStatusMask {}
+    public @interface ScramblingStatus {}
 
     /**
      * Content’s scrambling status is unknown
@@ -204,6 +204,23 @@ public class Filter implements AutoCloseable {
     public static final int SCRAMBLING_STATUS_SCRAMBLED =
             android.hardware.tv.tuner.V1_1.Constants.ScramblingStatus.SCRAMBLED;
 
+    /** @hide */
+    @IntDef(flag = true,
+            prefix = "MONITOR_EVENT_",
+            value = {MONITOR_EVENT_SCRAMBLING_STATUS, MONITOR_EVENT_IP_CID_CHANGE})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface MonitorEventTypeMask {}
+
+    /**
+     * Monitor scrambling status change.
+     */
+    public static final int MONITOR_EVENT_SCRAMBLING_STATUS =
+            android.hardware.tv.tuner.V1_1.Constants.DemuxFilterMonitorEventType.SCRAMBLING_STATUS;
+    /**
+     * Monitor ip cid change.
+     */
+    public static final int MONITOR_EVENT_IP_CID_CHANGE =
+            android.hardware.tv.tuner.V1_1.Constants.DemuxFilterMonitorEventType.IP_CID_CHANGE;
 
     private static final String TAG = "Filter";
 
@@ -222,7 +239,7 @@ public class Filter implements AutoCloseable {
             int type, int subType, FilterConfiguration settings);
     private native int nativeGetId();
     private native long nativeGetId64Bit();
-    private native int nativeconfigureScramblingEvent(int scramblingStatusMask);
+    private native int nativeConfigureMonitorEvent(int monitorEventTypesMask);
     private native int nativeSetDataSource(Filter source);
     private native int nativeStartFilter();
     private native int nativeStopFilter();
@@ -306,34 +323,40 @@ public class Filter implements AutoCloseable {
     }
 
     /**
-     * Configure the Filter to monitor specific Scrambling Status through
-     * {@link ScramblingStatusEvent}.
+     * Configure the Filter to monitor scrambling status and ip cid change. Set corresponding bit of
+     * {@link MonitorEventTypeMask} to monitor the change. Reset to stop monitoring.
      *
      * <p>{@link ScramblingStatusEvent} should be sent at the following two scenarios:
-     *
      * <ul>
-     *   <li>When this method is called, the first detected scrambling status should be sent.
-     *   <li>When the filter transits into the monitored statuses configured in
-     *       {@code scramblingStatusMask}, event should be sent.
+     *   <li>When this method is called with {@link MONITOR_EVENT_SCRAMBLING_STATUS}, the first
+     *       detected scrambling status should be sent.
+     *   <li>When the Scrambling status transits into different status, event should be sent.
+     *     <ul/>
+     *
+     * <p>{@link IpCidChangeEvent} should be sent at the following two scenarios:
+     * <ul>
+     *   <li>When this method is called with {@link MONITOR_EVENT_IP_CID_CHANGE}, the first detected
+     *       CID for the IP should be sent.
+     *   <li>When the CID is changed to different value for the IP filter, event should be sent.
      *     <ul/>
      *
      * <p>This configuration is only supported in Tuner 1.1 or higher version. Unsupported version
      * will cause no-op. Use {@link TunerVersionChecker.getTunerVersion()} to get the version
      * information.
      *
-     * @param scramblingStatusMask Scrambling Statuses to be monitored. Set corresponding bit to
-     *                             monitor it. Reset to stop monitoring.
+     * @param monitorEventTypesMask Types of event to be monitored. Set corresponding bit to
+     *                              monitor it. Reset to stop monitoring.
      * @return result status of the operation.
      */
     @Result
-    public int configureScramblingStatusEvent(@ScramblingStatusMask int scramblingStatusMask) {
+    public int configureMonitorEvent(@MonitorEventTypeMask int monitorEventTypesMask) {
         synchronized (mLock) {
             TunerUtils.checkResourceState(TAG, mIsClosed);
             if (!TunerVersionChecker.checkHigherOrEqualVersionTo(
-                    TunerVersionChecker.TUNER_VERSION_1_1, "configureScramblingStatusEvent")) {
+                    TunerVersionChecker.TUNER_VERSION_1_1, "configureMonitorEvent")) {
                 return Tuner.RESULT_UNAVAILABLE;
             }
-            return nativeconfigureScramblingEvent(scramblingStatusMask);
+            return nativeConfigureMonitorEvent(monitorEventTypesMask);
         }
     }
 

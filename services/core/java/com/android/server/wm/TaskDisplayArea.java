@@ -379,7 +379,7 @@ final class TaskDisplayArea extends DisplayArea<Task> {
         }
 
         // Update the top resumed activity because the preferred top focusable task may be changed.
-        mAtmService.mStackSupervisor.updateTopResumedActivityIfNeeded();
+        mAtmService.mTaskSupervisor.updateTopResumedActivityIfNeeded();
 
         if (mChildren.indexOf(child) != oldPosition) {
             onStackOrderChanged(child);
@@ -657,6 +657,13 @@ final class TaskDisplayArea extends DisplayArea<Task> {
                 }
             }
             return SCREEN_ORIENTATION_UNSPECIFIED;
+        } else {
+            // Apps and their containers are not allowed to specify an orientation of full screen
+            // tasks created by organizer. The organizer handles the orientation instead.
+            final Task task = getTopStackInWindowingMode(WINDOWING_MODE_FULLSCREEN);
+            if (task != null && task.isVisible() && task.mCreatedByOrganizer) {
+                return SCREEN_ORIENTATION_UNSPECIFIED;
+            }
         }
 
         final int orientation = super.getOrientation(candidate);
@@ -966,7 +973,7 @@ final class TaskDisplayArea extends DisplayArea<Task> {
 
     @VisibleForTesting
     int getNextStackId() {
-        return mAtmService.mStackSupervisor.getNextTaskIdForUser();
+        return mAtmService.mTaskSupervisor.getNextTaskIdForUser();
     }
 
     Task createStack(int windowingMode, int activityType, boolean onTop) {
@@ -1308,7 +1315,7 @@ final class TaskDisplayArea extends DisplayArea<Task> {
         }
 
         for (int i = rootTasks.size() - 1; i >= 0; --i) {
-            mRootWindowContainer.mStackSupervisor.removeRootTask(rootTasks.get(i));
+            mRootWindowContainer.mTaskSupervisor.removeRootTask(rootTasks.get(i));
         }
     }
 
@@ -1340,7 +1347,7 @@ final class TaskDisplayArea extends DisplayArea<Task> {
         }
 
         for (int i = rootTasks.size() - 1; i >= 0; --i) {
-            mRootWindowContainer.mStackSupervisor.removeRootTask(rootTasks.get(i));
+            mRootWindowContainer.mTaskSupervisor.removeRootTask(rootTasks.get(i));
         }
     }
 
@@ -1579,7 +1586,7 @@ final class TaskDisplayArea extends DisplayArea<Task> {
         // This activity can be considered the top running activity if we are not considering
         // the locked state, the keyguard isn't locked, or we can show when locked.
         if (topRunning != null && considerKeyguardState
-                && mRootWindowContainer.mStackSupervisor.getKeyguardController()
+                && mRootWindowContainer.mTaskSupervisor.getKeyguardController()
                 .isKeyguardLocked()
                 && !topRunning.canShowWhenLocked()) {
             return null;
@@ -1813,7 +1820,7 @@ final class TaskDisplayArea extends DisplayArea<Task> {
 
     void ensureActivitiesVisible(ActivityRecord starting, int configChanges,
             boolean preserveWindows, boolean notifyClients, boolean userLeaving) {
-        mAtmService.mStackSupervisor.beginActivityVisibilityUpdate();
+        mAtmService.mTaskSupervisor.beginActivityVisibilityUpdate();
         try {
             for (int stackNdx = getStackCount() - 1; stackNdx >= 0; --stackNdx) {
                 final Task stack = getStackAt(stackNdx);
@@ -1821,7 +1828,7 @@ final class TaskDisplayArea extends DisplayArea<Task> {
                         notifyClients, userLeaving);
             }
         } finally {
-            mAtmService.mStackSupervisor.endActivityVisibilityUpdate();
+            mAtmService.mTaskSupervisor.endActivityVisibilityUpdate();
         }
     }
 

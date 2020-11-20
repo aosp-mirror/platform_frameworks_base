@@ -135,4 +135,38 @@ public class PipBoundsStateTest extends ShellTestCase {
 
         verify(callback, never()).accept(true, 100);
     }
+
+    @Test
+    public void testSetOverrideMinSize_changed_callbackInvoked() {
+        final Runnable callback = mock(Runnable.class);
+        mPipBoundsState.setOverrideMinSize(new Size(5, 5));
+        mPipBoundsState.setOnMinimalSizeChangeCallback(callback);
+
+        mPipBoundsState.setOverrideMinSize(new Size(10, 10));
+
+        verify(callback).run();
+    }
+
+    @Test
+    public void testSetOverrideMinSize_notChanged_callbackNotInvoked() {
+        final Runnable callback = mock(Runnable.class);
+        mPipBoundsState.setOverrideMinSize(new Size(5, 5));
+        mPipBoundsState.setOnMinimalSizeChangeCallback(callback);
+
+        mPipBoundsState.setOverrideMinSize(new Size(5, 5));
+
+        verify(callback, never()).run();
+    }
+
+    @Test
+    public void testGetOverrideMinEdgeSize() {
+        mPipBoundsState.setOverrideMinSize(null);
+        assertEquals(0, mPipBoundsState.getOverrideMinEdgeSize());
+
+        mPipBoundsState.setOverrideMinSize(new Size(5, 10));
+        assertEquals(5, mPipBoundsState.getOverrideMinEdgeSize());
+
+        mPipBoundsState.setOverrideMinSize(new Size(15, 10));
+        assertEquals(10, mPipBoundsState.getOverrideMinEdgeSize());
+    }
 }

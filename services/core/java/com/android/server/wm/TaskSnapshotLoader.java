@@ -197,7 +197,7 @@ class TaskSnapshotLoader {
                     hwBitmap.getColorSpace(), proto.orientation, proto.rotation, taskSize,
                     new Rect(proto.insetLeft, proto.insetTop, proto.insetRight, proto.insetBottom),
                     loadLowResolutionBitmap, proto.isRealSnapshot, proto.windowingMode,
-                    proto.systemUiVisibility, proto.isTranslucent);
+                    proto.appearance, proto.isTranslucent);
         } catch (IOException e) {
             Slog.w(TAG, "Unable to load task snapshot data for taskId=" + taskId);
             return null;

@@ -219,7 +219,7 @@ public abstract class ClientMonitor<T> extends LoggableMonitor implements IBinde
         return mSensorId;
     }
 
-    public final T getFreshDaemon() {
+    public T getFreshDaemon() {
         return mLazyDaemon.getDaemon();
     }
 

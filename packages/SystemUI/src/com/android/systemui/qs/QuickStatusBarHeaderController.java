@@ -379,6 +379,11 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
                 mZenModeController.getConsolidatedPolicy());
     }
 
+    public void setContentMargins(int contentPaddingStart, int contentPaddingEnd) {
+        mView.setContentMargins(contentPaddingStart, contentPaddingEnd, mHeaderQsPanelController);
+    }
+
+
     private static class ClockDemoModeReceiver implements DemoMode {
         private Clock mClockView;
 

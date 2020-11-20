@@ -32,6 +32,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.graphics.Color;
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Insets;
@@ -194,6 +195,7 @@ public class BubbleStackView extends FrameLayout
     private StackAnimationController mStackAnimationController;
     private ExpandedAnimationController mExpandedAnimationController;
 
+    private View mTaskbarScrim;
     private FrameLayout mExpandedViewContainer;
 
     /** Matrix used to scale the expanded view container with a given pivot point. */
@@ -631,7 +633,9 @@ public class BubbleStackView extends FrameLayout
         public void onUp(@NonNull View v, @NonNull MotionEvent ev, float viewInitialX,
                 float viewInitialY, float dx, float dy, float velX, float velY) {
             // If we're expanding or collapsing, ignore all touch events.
-            if (mIsExpansionAnimating) {
+            if (mIsExpansionAnimating
+                    // Also ignore events if we shouldn't be draggable.
+                    || (mPositioner.showingInTaskbar() && !mIsExpanded)) {
                 return;
             }
 
@@ -741,13 +745,12 @@ public class BubbleStackView extends FrameLayout
         mBubblePaddingTop = res.getDimensionPixelSize(R.dimen.bubble_padding_top);
         mBubbleTouchPadding = res.getDimensionPixelSize(R.dimen.bubble_touch_padding);
         mPointerHeight = res.getDimensionPixelSize(R.dimen.bubble_pointer_height);
-
         mImeOffset = res.getDimensionPixelSize(R.dimen.pip_ime_offset);
-
-        mPositioner = mBubbleController.getPositioner();
 
         mExpandedViewPadding = res.getDimensionPixelSize(R.dimen.bubble_expanded_view_padding);
         int elevation = res.getDimensionPixelSize(R.dimen.bubble_elevation);
+
+        mPositioner = mBubbleController.getPositioner();
 
         final TypedArray ta = mContext.obtainStyledAttributes(
                 new int[] {android.R.attr.dialogCornerRadius});
@@ -839,6 +842,12 @@ public class BubbleStackView extends FrameLayout
             mBubbleData.setSelectedBubble(mBubbleOverflow);
             mBubbleData.setExpanded(true);
         });
+
+        mTaskbarScrim = new View(getContext());
+        mTaskbarScrim.setBackgroundColor(Color.BLACK);
+        addView(mTaskbarScrim);
+        mTaskbarScrim.setAlpha(0f);
+        mTaskbarScrim.setVisibility(GONE);
 
         setOnApplyWindowInsetsListener((View view, WindowInsets insets) -> {
             mBubbleController.onImeVisibilityChanged(
@@ -1631,6 +1640,7 @@ public class BubbleStackView extends FrameLayout
     /** Set the stack position to whatever the positioner says. */
     void updateStackPosition() {
         mStackAnimationController.setStackPosition(mPositioner.getRestingPosition());
+        mDismissView.hide();
     }
 
     private void beforeExpandedViewAnimation() {
@@ -1663,6 +1673,17 @@ public class BubbleStackView extends FrameLayout
                 maybeShowManageEdu();
             }
         } /* after */);
+
+        if (mPositioner.showingInTaskbar()
+                // Don't need the scrim when the bar is at the bottom
+                && mPositioner.getTaskbarPosition() != BubblePositioner.TASKBAR_POSITION_BOTTOM) {
+            mTaskbarScrim.getLayoutParams().width = mPositioner.getTaskbarSize();
+            mTaskbarScrim.setTranslationX(mStackOnLeftOrWillBe
+                    ? 0f
+                    : mPositioner.getAvailableRect().right - mPositioner.getTaskbarSize());
+            mTaskbarScrim.setVisibility(VISIBLE);
+            mTaskbarScrim.animate().alpha(1f).start();
+        }
 
         mExpandedViewContainer.setTranslationX(0f);
         mExpandedViewContainer.setTranslationY(getExpandedViewY());
@@ -1781,6 +1802,10 @@ public class BubbleStackView extends FrameLayout
                 /* collapseTo */,
                 () -> mBubbleContainer.setActiveController(mStackAnimationController)), startDelay);
 
+        if (mTaskbarScrim.getVisibility() == VISIBLE) {
+            mTaskbarScrim.animate().alpha(0f).start();
+        }
+
         // We want to visually collapse into this bubble during the animation.
         final View expandingFromBubble = mExpandedBubble.getIconView();
 
@@ -1855,6 +1880,10 @@ public class BubbleStackView extends FrameLayout
                     afterExpandedViewAnimation();
                     if (previouslySelected != null) {
                         previouslySelected.setContentVisibility(false);
+                    }
+
+                    if (mPositioner.showingInTaskbar()) {
+                        mTaskbarScrim.setVisibility(GONE);
                     }
                 })
                 .start();

@@ -43,7 +43,6 @@ import android.content.pm.UserInfo;
 import android.os.Looper;
 import android.os.SystemProperties;
 import android.os.UserManager;
-import android.os.UserManagerInternal;
 import android.support.test.uiautomator.UiDevice;
 import android.util.ArrayMap;
 import android.util.ArraySet;

@@ -208,7 +208,6 @@ import com.android.server.policy.keyguard.KeyguardStateMonitor.StateCallback;
 import com.android.server.statusbar.StatusBarManagerInternal;
 import com.android.server.vr.VrManagerInternal;
 import com.android.server.wm.ActivityTaskManagerInternal;
-import com.android.server.wm.AppTransition;
 import com.android.server.wm.DisplayPolicy;
 import com.android.server.wm.DisplayRotation;
 import com.android.server.wm.WindowManagerInternal;
@@ -1959,14 +1958,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         mWindowManagerInternal.registerAppTransitionListener(new AppTransitionListener() {
             @Override
-            public int onAppTransitionStartingLocked(int transit, long duration,
+            public int onAppTransitionStartingLocked(boolean keyguardGoingAway, long duration,
                     long statusBarAnimationStartTime, long statusBarAnimationDuration) {
-                return handleStartTransitionForKeyguardLw(transit, duration);
+                return handleStartTransitionForKeyguardLw(keyguardGoingAway, duration);
             }
 
             @Override
-            public void onAppTransitionCancelledLocked(int transit) {
-                handleStartTransitionForKeyguardLw(transit, 0 /* duration */);
+            public void onAppTransitionCancelledLocked(boolean keyguardGoingAway) {
+                handleStartTransitionForKeyguardLw(keyguardGoingAway, 0 /* duration */);
             }
         });
         mKeyguardDelegate = new KeyguardServiceDelegate(mContext,
@@ -3194,7 +3193,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
 
-    private int handleStartTransitionForKeyguardLw(int transit, long duration) {
+    private int handleStartTransitionForKeyguardLw(boolean keyguardGoingAway, long duration) {
         if (mKeyguardOccludedChanged) {
             if (DEBUG_KEYGUARD) Slog.d(TAG, "transition/occluded changed occluded="
                     + mPendingKeyguardOccluded);
@@ -3203,7 +3202,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 return FINISH_LAYOUT_REDO_LAYOUT | FINISH_LAYOUT_REDO_WALLPAPER;
             }
         }
-        if (AppTransition.isKeyguardGoingAwayTransit(transit)) {
+        if (keyguardGoingAway) {
             if (DEBUG_KEYGUARD) Slog.d(TAG, "Starting keyguard exit animation");
             startKeyguardExitAnimation(SystemClock.uptimeMillis(), duration);
         }

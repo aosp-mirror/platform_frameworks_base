@@ -1507,8 +1507,10 @@ public final class DefaultPermissionGrantPolicy {
                     continue;
                 }
 
-                final boolean fixed = XmlUtils.readBooleanAttribute(parser, ATTR_FIXED);
-                final boolean whitelisted = XmlUtils.readBooleanAttribute(parser, ATTR_WHITELISTED);
+                final boolean fixed =
+                        parser.getAttributeBoolean(null, ATTR_FIXED, false);
+                final boolean whitelisted =
+                        parser.getAttributeBoolean(null, ATTR_WHITELISTED, false);
 
                 DefaultPermissionGrant exception = new DefaultPermissionGrant(
                         name, fixed, whitelisted);

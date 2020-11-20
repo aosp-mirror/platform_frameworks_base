@@ -23,6 +23,8 @@ import android.view.Display;
 
 import androidx.annotation.NonNull;
 
+import java.util.function.Consumer;
+
 /**
  * Supplies the instance with given display Id. It generates a new instance if the corresponding
  * one is not existed. It should run in single thread to avoid race conditions.
@@ -100,5 +102,16 @@ abstract class DisplayIdIndexSupplier<T> {
      */
     public int getSize() {
         return mSparseArray.size();
+    }
+
+    /**
+     * Runs task for each object.
+     *
+     * @param task of each object
+     */
+    public void forEach(Consumer<T> task) {
+        for (int i = 0; i < mSparseArray.size(); i++) {
+            task.accept(mSparseArray.valueAt(i));
+        }
     }
 }

@@ -36,6 +36,7 @@ import android.util.Log;
 import android.window.WindowContainerToken;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 /**
  * Stores information about a particular Task.
@@ -285,6 +286,36 @@ public class TaskInfo {
     @TestApi
     public boolean hasParentTask() {
         return parentTaskId != INVALID_TASK_ID;
+    }
+
+    /**
+      * Returns {@code true} if parameters that are important for task organizers have changed
+      * and {@link com.android.server.wm.TaskOrginizerController} needs to notify listeners
+      * about that.
+      * @hide
+      */
+    public boolean equalsForTaskOrganizer(@Nullable TaskInfo that) {
+        if (that == null) {
+            return false;
+        }
+        return topActivityType == that.topActivityType
+                && isResizeable == that.isResizeable
+                && Objects.equals(positionInParent, that.positionInParent)
+                && equalsLetterboxParams(that)
+                && pictureInPictureParams == that.pictureInPictureParams
+                && getWindowingMode() == that.getWindowingMode()
+                && Objects.equals(taskDescription, that.taskDescription);
+    }
+
+    private boolean equalsLetterboxParams(TaskInfo that) {
+        return Objects.equals(letterboxActivityBounds, that.letterboxActivityBounds)
+                && Objects.equals(
+                        getConfiguration().windowConfiguration.getBounds(),
+                        that.getConfiguration().windowConfiguration.getBounds())
+                && Objects.equals(
+                        getConfiguration().windowConfiguration.getMaxBounds(),
+                        that.getConfiguration().windowConfiguration.getMaxBounds())
+                && Objects.equals(parentBounds, that.parentBounds);
     }
 
     /**

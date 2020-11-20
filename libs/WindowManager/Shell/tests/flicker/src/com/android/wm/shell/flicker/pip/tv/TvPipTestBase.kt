@@ -53,7 +53,7 @@ abstract class TvPipTestBase : PipTestBase(rotationToString(ROTATION_0), ROTATIO
     open fun tearDown() {
         if (!isTelevision) return
 
-        testApp.forceStop()
+        testApp.exit()
 
         // Wait for 1 second, and check if the SystemUI has been alive and well since the start.
         SystemClock.sleep(AFTER_TEXT_PROCESS_CHECK_DELAY)

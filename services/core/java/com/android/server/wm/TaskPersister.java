@@ -71,7 +71,7 @@ public class TaskPersister implements PersisterQueue.Listener {
     private static final String TAG_TASK = "task";
 
     private final ActivityTaskManagerService mService;
-    private final ActivityStackSupervisor mStackSupervisor;
+    private final ActivityTaskSupervisor mTaskSupervisor;
     private final RecentTasks mRecentTasks;
     private final SparseArray<SparseBooleanArray> mTaskIdsInFile = new SparseArray<>();
     private final File mTaskIdsDir;
@@ -81,7 +81,7 @@ public class TaskPersister implements PersisterQueue.Listener {
 
     private final ArraySet<Integer> mTmpTaskIds = new ArraySet<>();
 
-    TaskPersister(File systemDir, ActivityStackSupervisor stackSupervisor,
+    TaskPersister(File systemDir, ActivityTaskSupervisor taskSupervisor,
             ActivityTaskManagerService service, RecentTasks recentTasks,
             PersisterQueue persisterQueue) {
 
@@ -100,7 +100,7 @@ public class TaskPersister implements PersisterQueue.Listener {
         }
 
         mTaskIdsDir = new File(Environment.getDataDirectory(), "system_de");
-        mStackSupervisor = stackSupervisor;
+        mTaskSupervisor = taskSupervisor;
         mService = service;
         mRecentTasks = recentTasks;
         mPersisterQueue = persisterQueue;
@@ -110,7 +110,7 @@ public class TaskPersister implements PersisterQueue.Listener {
     @VisibleForTesting
     TaskPersister(File workingDir) {
         mTaskIdsDir = workingDir;
-        mStackSupervisor = null;
+        mTaskSupervisor = null;
         mService = null;
         mRecentTasks = null;
         mPersisterQueue = new PersisterQueue();
@@ -319,7 +319,7 @@ public class TaskPersister implements PersisterQueue.Listener {
                     if (event == XmlPullParser.START_TAG) {
                         if (DEBUG) Slog.d(TAG, "restoreTasksForUserLocked: START_TAG name=" + name);
                         if (TAG_TASK.equals(name)) {
-                            final Task task = Task.restoreFromXml(in, mStackSupervisor);
+                            final Task task = Task.restoreFromXml(in, mTaskSupervisor);
                             if (DEBUG) Slog.d(TAG, "restoreTasksForUserLocked: restored task="
                                     + task);
                             if (task != null) {
@@ -339,7 +339,7 @@ public class TaskPersister implements PersisterQueue.Listener {
                                             + userTasksDir.getAbsolutePath());
                                 } else {
                                     // Looks fine.
-                                    mStackSupervisor.setNextTaskIdForUser(taskId, userId);
+                                    mTaskSupervisor.setNextTaskIdForUser(taskId, userId);
                                     task.isPersistable = true;
                                     tasks.add(task);
                                     recoveredTaskIds.add(taskId);

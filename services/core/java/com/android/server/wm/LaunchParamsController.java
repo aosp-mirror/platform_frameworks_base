@@ -60,7 +60,7 @@ class LaunchParamsController {
      * Creates a {@link LaunchParamsController} with default registered
      * {@link LaunchParamsModifier}s.
      */
-    void registerDefaultModifiers(ActivityStackSupervisor supervisor) {
+    void registerDefaultModifiers(ActivityTaskSupervisor supervisor) {
         // {@link TaskLaunchParamsModifier} handles window layout preferences.
         registerModifier(new TaskLaunchParamsModifier(supervisor));
     }

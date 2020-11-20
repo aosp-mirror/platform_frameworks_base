@@ -43,6 +43,8 @@ import android.view.KeyEvent;
 import android.view.OnReceiveContentListener;
 import android.view.View;
 
+import com.android.internal.util.Preconditions;
+
 class ComposingText implements NoCopySpan {
 }
 
@@ -504,7 +506,7 @@ public class BaseInputConnection implements InputConnection {
      */
     @Nullable
     public CharSequence getTextBeforeCursor(@IntRange(from = 0) int length, int flags) {
-        if (length < 0) return null;
+        Preconditions.checkArgumentNonnegative(length);
 
         final Editable content = getEditable();
         if (content == null) return null;
@@ -563,7 +565,7 @@ public class BaseInputConnection implements InputConnection {
      */
     @Nullable
     public CharSequence getTextAfterCursor(@IntRange(from = 0) int length, int flags) {
-        if (length < 0) return null;
+        Preconditions.checkArgumentNonnegative(length);
 
         final Editable content = getEditable();
         if (content == null) return null;
@@ -600,7 +602,8 @@ public class BaseInputConnection implements InputConnection {
     @Nullable
     public SurroundingText getSurroundingText(
             @IntRange(from = 0) int beforeLength, @IntRange(from = 0)  int afterLength, int flags) {
-        if (beforeLength < 0 || afterLength < 0) return null;
+        Preconditions.checkArgumentNonnegative(beforeLength);
+        Preconditions.checkArgumentNonnegative(afterLength);
 
         final Editable content = getEditable();
         if (content == null) return null;
@@ -927,9 +930,9 @@ public class BaseInputConnection implements InputConnection {
     }
 
     /**
-     * Default implementation which invokes {@link View#onReceiveContent} on the target view if the
-     * view {@link View#getOnReceiveContentMimeTypes allows} content insertion; otherwise returns
-     * false without any side effects.
+     * Default implementation which invokes {@link View#performReceiveContent} on the target
+     * view if the view {@link View#getOnReceiveContentMimeTypes allows} content insertion;
+     * otherwise returns false without any side effects.
      */
     public boolean commitContent(InputContentInfo inputContentInfo, int flags, Bundle opts) {
         ClipDescription description = inputContentInfo.getDescription();
@@ -954,6 +957,6 @@ public class BaseInputConnection implements InputConnection {
                 .setLinkUri(inputContentInfo.getLinkUri())
                 .setExtras(opts)
                 .build();
-        return mTargetView.onReceiveContent(payload) == null;
+        return mTargetView.performReceiveContent(payload) == null;
     }
 }

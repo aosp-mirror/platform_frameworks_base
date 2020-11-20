@@ -22,6 +22,7 @@ import static com.android.server.hdmi.HdmiUtils.buildMessage;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.platform.test.annotations.Presubmit;
 
@@ -103,7 +104,7 @@ public class HdmiCecMessageBuilderTest {
     @Test
     public void buildReportFeatures_basicTv_1_4() {
         HdmiCecMessage message = HdmiCecMessageBuilder.buildReportFeatures(ADDR_TV,
-                Constants.VERSION_1_4,
+                HdmiControlManager.HDMI_CEC_VERSION_1_4_b,
                 Lists.newArrayList(HdmiDeviceInfo.DEVICE_TV), Constants.RC_PROFILE_TV,
                 Lists.newArrayList(Constants.RC_PROFILE_TV_NONE), Collections.emptyList());
 
@@ -113,7 +114,7 @@ public class HdmiCecMessageBuilderTest {
     @Test
     public void buildReportFeatures_basicPlayback_1_4() {
         HdmiCecMessage message = HdmiCecMessageBuilder.buildReportFeatures(ADDR_PLAYBACK_1,
-                Constants.VERSION_1_4,
+                HdmiControlManager.HDMI_CEC_VERSION_1_4_b,
                 Lists.newArrayList(HdmiDeviceInfo.DEVICE_PLAYBACK), Constants.RC_PROFILE_TV,
                 Lists.newArrayList(Constants.RC_PROFILE_TV_NONE), Collections.emptyList());
 
@@ -123,7 +124,7 @@ public class HdmiCecMessageBuilderTest {
     @Test
     public void buildReportFeatures_basicPlaybackAudioSystem_1_4() {
         HdmiCecMessage message = HdmiCecMessageBuilder.buildReportFeatures(ADDR_PLAYBACK_1,
-                Constants.VERSION_1_4,
+                HdmiControlManager.HDMI_CEC_VERSION_1_4_b,
                 Lists.newArrayList(HdmiDeviceInfo.DEVICE_PLAYBACK,
                         HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM), Constants.RC_PROFILE_TV,
                 Lists.newArrayList(Constants.RC_PROFILE_TV_NONE), Collections.emptyList());
@@ -134,7 +135,7 @@ public class HdmiCecMessageBuilderTest {
     @Test
     public void buildReportFeatures_basicTv_2_0() {
         HdmiCecMessage message = HdmiCecMessageBuilder.buildReportFeatures(ADDR_TV,
-                Constants.VERSION_2_0,
+                HdmiControlManager.HDMI_CEC_VERSION_2_0,
                 Lists.newArrayList(HdmiDeviceInfo.DEVICE_TV), Constants.RC_PROFILE_TV,
                 Lists.newArrayList(Constants.RC_PROFILE_TV_NONE), Collections.emptyList());
 
@@ -144,7 +145,7 @@ public class HdmiCecMessageBuilderTest {
     @Test
     public void buildReportFeatures_remoteControlTv_2_0() {
         HdmiCecMessage message = HdmiCecMessageBuilder.buildReportFeatures(ADDR_TV,
-                Constants.VERSION_2_0,
+                HdmiControlManager.HDMI_CEC_VERSION_2_0,
                 Lists.newArrayList(HdmiDeviceInfo.DEVICE_TV), Constants.RC_PROFILE_TV,
                 Lists.newArrayList(Constants.RC_PROFILE_TV_ONE), Collections.emptyList());
 
@@ -154,7 +155,7 @@ public class HdmiCecMessageBuilderTest {
     @Test
     public void buildReportFeatures_remoteControlPlayback_2_0() {
         HdmiCecMessage message = HdmiCecMessageBuilder.buildReportFeatures(ADDR_TV,
-                Constants.VERSION_2_0,
+                HdmiControlManager.HDMI_CEC_VERSION_2_0,
                 Lists.newArrayList(HdmiDeviceInfo.DEVICE_PLAYBACK), Constants.RC_PROFILE_SOURCE,
                 Lists.newArrayList(Constants.RC_PROFILE_SOURCE_HANDLES_TOP_MENU,
                         Constants.RC_PROFILE_SOURCE_HANDLES_SETUP_MENU), Collections.emptyList());
@@ -165,7 +166,7 @@ public class HdmiCecMessageBuilderTest {
     @Test
     public void buildReportFeatures_deviceFeaturesTv_2_0() {
         HdmiCecMessage message = HdmiCecMessageBuilder.buildReportFeatures(ADDR_TV,
-                Constants.VERSION_2_0,
+                HdmiControlManager.HDMI_CEC_VERSION_2_0,
                 Lists.newArrayList(HdmiDeviceInfo.DEVICE_TV), Constants.RC_PROFILE_TV,
                 Lists.newArrayList(Constants.RC_PROFILE_TV_NONE),
                 Lists.newArrayList(Constants.DEVICE_FEATURE_TV_SUPPORTS_RECORD_TV_SCREEN));
@@ -176,7 +177,7 @@ public class HdmiCecMessageBuilderTest {
     @Test
     public void buildReportFeatures_deviceFeaturesPlayback_2_0() {
         HdmiCecMessage message = HdmiCecMessageBuilder.buildReportFeatures(ADDR_TV,
-                Constants.VERSION_2_0,
+                HdmiControlManager.HDMI_CEC_VERSION_2_0,
                 Lists.newArrayList(HdmiDeviceInfo.DEVICE_PLAYBACK), Constants.RC_PROFILE_SOURCE,
                 Lists.newArrayList(Constants.RC_PROFILE_SOURCE_HANDLES_TOP_MENU,
                         Constants.RC_PROFILE_SOURCE_HANDLES_SETUP_MENU),

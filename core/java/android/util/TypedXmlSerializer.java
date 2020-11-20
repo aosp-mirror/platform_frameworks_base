@@ -36,21 +36,21 @@ public interface TypedXmlSerializer extends XmlSerializer {
      * canonicalized, similar to {@link String#intern()}.
      */
     @NonNull XmlSerializer attributeInterned(@Nullable String namespace, @NonNull String name,
-            @Nullable String value) throws IOException;
+            @NonNull String value) throws IOException;
 
     /**
      * Encode the given strongly-typed value and serialize using
      * {@link #attribute(String, String, String)}.
      */
     @NonNull XmlSerializer attributeBytesHex(@Nullable String namespace, @NonNull String name,
-            byte[] value) throws IOException;
+            @NonNull byte[] value) throws IOException;
 
     /**
      * Encode the given strongly-typed value and serialize using
      * {@link #attribute(String, String, String)}.
      */
     @NonNull XmlSerializer attributeBytesBase64(@Nullable String namespace, @NonNull String name,
-            byte[] value) throws IOException;
+            @NonNull byte[] value) throws IOException;
 
     /**
      * Encode the given strongly-typed value and serialize using

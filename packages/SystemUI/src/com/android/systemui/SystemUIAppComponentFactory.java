@@ -23,6 +23,7 @@ import android.content.BroadcastReceiver;
 import android.content.ContentProvider;
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -94,7 +95,7 @@ public class SystemUIAppComponentFactory extends AppComponentFactory {
                         } catch (NoSuchMethodException
                                 | IllegalAccessException
                                 | InvocationTargetException e) {
-                            // no-op
+                            Log.w(TAG, "No injector for class: " + contentProvider.getClass(), e);
                         }
                     }
             );

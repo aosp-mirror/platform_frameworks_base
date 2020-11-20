@@ -23,7 +23,7 @@ import android.hardware.keymaster.HardwareAuthToken;
 import android.util.Slog;
 
 /**
- * Test HAL that provides only provides mostly no-ops.
+ * Test session that provides mostly no-ops.
  */
 class TestSession extends ISession.Stub {
 

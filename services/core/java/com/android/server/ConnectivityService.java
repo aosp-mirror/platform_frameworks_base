@@ -137,7 +137,6 @@ import android.net.netlink.InetDiagMessage;
 import android.net.shared.PrivateDnsConfig;
 import android.net.util.MultinetworkPolicyTracker;
 import android.net.util.NetdService;
-import android.os.BasicShellCommandHandler;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
@@ -190,6 +189,7 @@ import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.LocationPermissionChecker;
 import com.android.internal.util.MessageUtils;
 import com.android.internal.util.XmlUtils;
+import com.android.modules.utils.BasicShellCommandHandler;
 import com.android.net.module.util.LinkPropertiesUtils.CompareOrUpdateResult;
 import com.android.net.module.util.LinkPropertiesUtils.CompareResult;
 import com.android.server.am.BatteryStatsService;
@@ -5854,7 +5854,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
     @GuardedBy("mBlockedAppUids")
     private final HashSet<Integer> mBlockedAppUids = new HashSet<>();
 
-    // Note: if mDefaultRequest is changed, NetworkMonitor needs to be updated.
     @NonNull
     private final NetworkRequest mDefaultRequest;
     // The NetworkAgentInfo currently satisfying the default request, if any.

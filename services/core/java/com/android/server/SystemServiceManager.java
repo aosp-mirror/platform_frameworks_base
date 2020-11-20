@@ -21,10 +21,10 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.content.Context;
 import android.content.pm.UserInfo;
+import android.os.Build;
 import android.os.Environment;
 import android.os.SystemClock;
 import android.os.Trace;
-import android.os.UserManagerInternal;
 import android.util.ArrayMap;
 import android.util.EventLog;
 import android.util.IndentingPrintWriter;
@@ -32,9 +32,11 @@ import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.os.ClassLoaderFactory;
 import com.android.internal.util.Preconditions;
 import com.android.server.SystemService.TargetUser;
 import com.android.server.am.EventLogTags;
+import com.android.server.pm.UserManagerInternal;
 import com.android.server.utils.TimingsTraceAndSlog;
 
 import dalvik.system.PathClassLoader;
@@ -121,7 +123,10 @@ public final class SystemServiceManager implements Dumpable {
         if (pathClassLoader == null) {
             // NB: the parent class loader should always be the system server class loader.
             // Changing it has implications that require discussion with the mainline team.
-            pathClassLoader = new PathClassLoader(path, this.getClass().getClassLoader());
+            pathClassLoader = (PathClassLoader) ClassLoaderFactory.createClassLoader(
+                    path, null /* librarySearchPath */, null /* libraryPermittedPath */,
+                    this.getClass().getClassLoader(), Build.VERSION.SDK_INT,
+                    true /* isNamespaceShared */, null /* classLoaderName */);
             mLoadedPaths.put(path, pathClassLoader);
         }
         final Class<SystemService> serviceClass = loadClassFromLoader(className, pathClassLoader);

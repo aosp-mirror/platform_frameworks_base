@@ -322,6 +322,23 @@ public final class LooperStatsTest {
     }
 
     @Test
+    public void testDataCollectedIfIgnoreBatteryStatusFlagSet() {
+        TestableLooperStats looperStats = new TestableLooperStats(1, 100);
+        mDeviceState.setCharging(true);
+        looperStats.setIgnoreBatteryStatus(true);
+
+        Object token1 = looperStats.messageDispatchStarting();
+        looperStats.messageDispatched(token1, mHandlerFirst.obtainMessage(1000));
+        Object token2 = looperStats.messageDispatchStarting();
+        looperStats.dispatchingThrewException(token2, mHandlerFirst.obtainMessage(1000),
+                new IllegalArgumentException());
+
+        List<LooperStats.ExportedEntry> entries = looperStats.getEntries();
+        assertThat(entries).hasSize(1);
+
+    }
+
+    @Test
     public void testScreenStateCollected() {
         TestableLooperStats looperStats = new TestableLooperStats(1, 100);
 

@@ -18,6 +18,7 @@ package com.android.server.hdmi;
 import static com.android.server.hdmi.Constants.ADDR_AUDIO_SYSTEM;
 import static com.android.server.hdmi.Constants.ADDR_BROADCAST;
 import static com.android.server.hdmi.Constants.ADDR_INVALID;
+import static com.android.server.hdmi.Constants.ADDR_PLAYBACK_1;
 import static com.android.server.hdmi.Constants.ADDR_TV;
 import static com.android.server.hdmi.HdmiControlService.INITIATED_BY_ENABLE_CEC;
 
@@ -35,6 +36,7 @@ import android.os.Looper;
 import android.os.PowerManager;
 import android.os.test.TestLooper;
 import android.platform.test.annotations.Presubmit;
+import android.provider.Settings.Global;
 import android.sysprop.HdmiProperties;
 import android.view.KeyEvent;
 
@@ -93,6 +95,12 @@ public class HdmiCecLocalDevicePlaybackTest {
                     @Override
                     void standby() {
                         mStandby = true;
+                        mHdmiControlService.onStandby(HdmiControlService.STANDBY_SCREEN_OFF);
+                    }
+
+                    @Override
+                    boolean isStandbyMessageReceived() {
+                        return mStandby;
                     }
 
                     @Override
@@ -126,6 +134,7 @@ public class HdmiCecLocalDevicePlaybackTest {
                     }
                 };
 
+        mHdmiControlService.writeBooleanSetting(Global.HDMI_CONTROL_AUTO_DEVICE_OFF_ENABLED, true);
         mHdmiCecLocalDevicePlayback = new HdmiCecLocalDevicePlayback(mHdmiControlService);
         mHdmiCecLocalDevicePlayback.init();
         mHdmiControlService.setIoLooper(mMyLooper);
@@ -813,6 +822,46 @@ public class HdmiCecLocalDevicePlaybackTest {
     }
 
     @Test
+    public void losingActiveSource_standbyNow_verifyStandbyMessageIsSentOnNextStandby() {
+        // As described in b/161097846.
+        mHdmiCecLocalDevicePlayback.mService.getHdmiCecConfig().setStringValue(
+                HdmiControlManager.CEC_SETTING_NAME_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST,
+                HdmiControlManager.POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST_STANDBY_NOW);
+        mHdmiCecLocalDevicePlayback.mService.getHdmiCecConfig().setStringValue(
+                HdmiControlManager.CEC_SETTING_NAME_SEND_STANDBY_ON_SLEEP,
+                HdmiControlManager.SEND_STANDBY_ON_SLEEP_BROADCAST);
+        mStandby = false;
+        // 1. DUT is <AS>.
+        HdmiCecMessage message1 = HdmiCecMessageBuilder.buildActiveSource(ADDR_PLAYBACK_1,
+                                         mPlaybackPhysicalAddress);
+        assertThat(mHdmiCecLocalDevicePlayback.handleActiveSource(message1)).isTrue();
+        assertThat(mHdmiCecLocalDevicePlayback.isActiveSource()).isTrue();
+        assertThat(mStandby).isFalse();
+        // 2. DUT loses <AS> and goes to sleep.
+        HdmiCecMessage message2 = HdmiCecMessageBuilder.buildActiveSource(ADDR_TV, 0x0000);
+        assertThat(mHdmiCecLocalDevicePlayback.handleActiveSource(message2)).isTrue();
+        assertThat(mHdmiCecLocalDevicePlayback.isActiveSource()).isFalse();
+        assertThat(mStandby).isTrue();
+        // 3. DUT becomes <AS> again.
+        mWokenUp = false;
+        HdmiCecMessage setStreamPath = HdmiCecMessageBuilder.buildSetStreamPath(ADDR_TV,
+                mPlaybackPhysicalAddress);
+        mHdmiCecLocalDevicePlayback.dispatchMessage(setStreamPath);
+        mTestLooper.dispatchAll();
+        HdmiCecMessage activeSource = HdmiCecMessageBuilder.buildActiveSource(
+                mHdmiCecLocalDevicePlayback.mAddress, mPlaybackPhysicalAddress);
+        assertThat(mNativeWrapper.getResultMessages()).contains(activeSource);
+        assertThat(mWokenUp).isTrue();
+        assertThat(mHdmiCecLocalDevicePlayback.isActiveSource()).isTrue();
+        // 4. DUT turned off.
+        mHdmiControlService.onStandby(HdmiControlService.STANDBY_SCREEN_OFF);
+        mTestLooper.dispatchAll();
+        HdmiCecMessage standbyMessageBroadcast = HdmiCecMessageBuilder.buildStandby(
+                mHdmiCecLocalDevicePlayback.mAddress, ADDR_BROADCAST);
+        assertThat(mNativeWrapper.getResultMessages()).contains(standbyMessageBroadcast);
+    }
+
+    @Test
     public void sendVolumeKeyEvent_up_volumeEnabled() {
         mHdmiControlService.setHdmiCecVolumeControlEnabled(true);
         mHdmiCecLocalDevicePlayback.sendVolumeKeyEvent(KeyEvent.KEYCODE_VOLUME_UP, true);
@@ -1198,5 +1247,92 @@ public class HdmiCecLocalDevicePlaybackTest {
 
         assertThat(mHdmiControlService.getActiveSource().getPhysicalAddress()).isEqualTo(
                 externalDevice.getPhysicalAddress());
+    }
+
+    @Test
+    public void queryDisplayStatus() {
+        mHdmiControlService.queryDisplayStatus(new IHdmiControlCallback.Stub() {
+            @Override
+            public void onComplete(int result) {
+            }
+        });
+        mTestLooper.dispatchAll();
+
+        HdmiCecMessage expectedMessage = HdmiCecMessageBuilder.buildGiveDevicePowerStatus(
+                mPlaybackLogicalAddress, Constants.ADDR_TV);
+        assertThat(mNativeWrapper.getResultMessages()).contains(expectedMessage);
+    }
+
+    @Test
+    public void toggleAndFollowTvPower_ToTv_TvStatusOn() {
+        mHdmiCecLocalDevicePlayback.mService.getHdmiCecConfig().setStringValue(
+                HdmiControlManager.CEC_SETTING_NAME_SEND_STANDBY_ON_SLEEP,
+                HdmiControlManager.SEND_STANDBY_ON_SLEEP_TO_TV);
+        mStandby = false;
+        mHdmiControlService.toggleAndFollowTvPower();
+        HdmiCecMessage tvPowerStatus = HdmiCecMessageBuilder.buildReportPowerStatus(ADDR_TV,
+                mPlaybackLogicalAddress, HdmiControlManager.POWER_STATUS_ON);
+        assertThat(mHdmiCecLocalDevicePlayback.dispatchMessage(tvPowerStatus)).isTrue();
+        mTestLooper.dispatchAll();
+
+        HdmiCecMessage expectedMessage = HdmiCecMessageBuilder.buildStandby(
+                mPlaybackLogicalAddress, ADDR_TV);
+        assertThat(mNativeWrapper.getResultMessages()).contains(expectedMessage);
+        assertThat(mStandby).isTrue();
+    }
+
+    @Test
+    public void toggleAndFollowTvPower_Broadcast_TvStatusOn() {
+        mHdmiCecLocalDevicePlayback.mService.getHdmiCecConfig().setStringValue(
+                HdmiControlManager.CEC_SETTING_NAME_SEND_STANDBY_ON_SLEEP,
+                HdmiControlManager.SEND_STANDBY_ON_SLEEP_BROADCAST);
+        mStandby = false;
+        mHdmiControlService.toggleAndFollowTvPower();
+        HdmiCecMessage tvPowerStatus = HdmiCecMessageBuilder.buildReportPowerStatus(ADDR_TV,
+                mPlaybackLogicalAddress, HdmiControlManager.POWER_STATUS_ON);
+        assertThat(mHdmiCecLocalDevicePlayback.dispatchMessage(tvPowerStatus)).isTrue();
+        mTestLooper.dispatchAll();
+
+        HdmiCecMessage expectedMessage = HdmiCecMessageBuilder.buildStandby(
+                mPlaybackLogicalAddress, ADDR_BROADCAST);
+        assertThat(mNativeWrapper.getResultMessages()).contains(expectedMessage);
+        assertThat(mStandby).isTrue();
+    }
+
+    @Test
+    public void toggleAndFollowTvPower_TvStatusStandby() {
+        mStandby = false;
+        mHdmiControlService.toggleAndFollowTvPower();
+        HdmiCecMessage tvPowerStatus = HdmiCecMessageBuilder.buildReportPowerStatus(ADDR_TV,
+                mPlaybackLogicalAddress, HdmiControlManager.POWER_STATUS_STANDBY);
+        assertThat(mHdmiCecLocalDevicePlayback.dispatchMessage(tvPowerStatus)).isTrue();
+        mTestLooper.dispatchAll();
+
+        HdmiCecMessage textViewOn = HdmiCecMessageBuilder.buildTextViewOn(mPlaybackLogicalAddress,
+                ADDR_TV);
+        HdmiCecMessage activeSource = HdmiCecMessageBuilder.buildActiveSource(
+                mPlaybackLogicalAddress, mPlaybackPhysicalAddress);
+        assertThat(mNativeWrapper.getResultMessages()).contains(textViewOn);
+        assertThat(mNativeWrapper.getResultMessages()).contains(activeSource);
+        assertThat(mStandby).isFalse();
+    }
+
+    @Test
+    public void toggleAndFollowTvPower_TvStatusUnknown() {
+        mStandby = false;
+        mHdmiControlService.toggleAndFollowTvPower();
+        HdmiCecMessage tvPowerStatus = HdmiCecMessageBuilder.buildReportPowerStatus(ADDR_TV,
+                mPlaybackLogicalAddress, HdmiControlManager.POWER_STATUS_UNKNOWN);
+        assertThat(mHdmiCecLocalDevicePlayback.dispatchMessage(tvPowerStatus)).isTrue();
+        mTestLooper.dispatchAll();
+
+        HdmiCecMessage userControlPressed = HdmiCecMessageBuilder.buildUserControlPressed(
+                mPlaybackLogicalAddress, Constants.ADDR_TV,
+                HdmiCecKeycode.CEC_KEYCODE_POWER_TOGGLE_FUNCTION);
+        HdmiCecMessage userControlReleased = HdmiCecMessageBuilder.buildUserControlReleased(
+                mPlaybackLogicalAddress, Constants.ADDR_TV);
+        assertThat(mNativeWrapper.getResultMessages()).contains(userControlPressed);
+        assertThat(mNativeWrapper.getResultMessages()).contains(userControlReleased);
+        assertThat(mStandby).isFalse();
     }
 }

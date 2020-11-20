@@ -48,8 +48,10 @@ public class BubblePositioner {
             : BubbleDebugConfig.TAG_BUBBLES;
 
     @Retention(SOURCE)
-    @IntDef({TASKBAR_POSITION_RIGHT, TASKBAR_POSITION_LEFT, TASKBAR_POSITION_BOTTOM})
+    @IntDef({TASKBAR_POSITION_NONE, TASKBAR_POSITION_RIGHT, TASKBAR_POSITION_LEFT,
+            TASKBAR_POSITION_BOTTOM})
     @interface TaskbarPosition {}
+    public static final int TASKBAR_POSITION_NONE = -1;
     public static final int TASKBAR_POSITION_RIGHT = 0;
     public static final int TASKBAR_POSITION_LEFT = 1;
     public static final int TASKBAR_POSITION_BOTTOM = 2;
@@ -73,8 +75,9 @@ public class BubblePositioner {
     private PointF mRestingStackPosition;
 
     private boolean mShowingInTaskbar;
-    private @TaskbarPosition int mTaskbarPosition;
+    private @TaskbarPosition int mTaskbarPosition = TASKBAR_POSITION_NONE;
     private int mTaskbarIconSize;
+    private int mTaskbarSize;
 
     public BubblePositioner(Context context, WindowManager windowManager) {
         mContext = context;
@@ -107,6 +110,21 @@ public class BubblePositioner {
         updateInternal(orientation, insets, windowMetrics.getBounds());
     }
 
+    /**
+     * Updates position information to account for taskbar state.
+     *
+     * @param taskbarPosition which position the taskbar is displayed in.
+     * @param showingInTaskbar whether the taskbar is being shown.
+     */
+    public void updateForTaskbar(int iconSize,
+            @TaskbarPosition int taskbarPosition, boolean showingInTaskbar, int taskbarSize) {
+        mShowingInTaskbar = showingInTaskbar;
+        mTaskbarIconSize =  iconSize;
+        mTaskbarPosition = taskbarPosition;
+        mTaskbarSize = taskbarSize;
+        update(mOrientation);
+    }
+
     @VisibleForTesting
     public void updateInternal(int orientation, Insets insets, Rect bounds) {
         mOrientation = orientation;
@@ -121,21 +139,9 @@ public class BubblePositioner {
         Resources res = mContext.getResources();
         mBubbleSize = res.getDimensionPixelSize(R.dimen.individual_bubble_size);
         mBubbleBitmapSize = res.getDimensionPixelSize(R.dimen.bubble_bitmap_size);
-        adjustForTaskbar();
-    }
-
-    /**
-     * Updates position information to account for taskbar state.
-     *
-     * @param taskbarPosition which position the taskbar is displayed in.
-     * @param showingInTaskbar whether the taskbar is being shown.
-     */
-    public void updateForTaskbar(int iconSize,
-            @TaskbarPosition int taskbarPosition, boolean showingInTaskbar) {
-        mShowingInTaskbar = showingInTaskbar;
-        mTaskbarIconSize =  iconSize;
-        mTaskbarPosition = taskbarPosition;
-        update(mOrientation);
+        if (mShowingInTaskbar) {
+            adjustForTaskbar();
+        }
     }
 
     /**
@@ -260,6 +266,17 @@ public class BubblePositioner {
      */
     public boolean showingInTaskbar() {
         return mShowingInTaskbar;
+    }
+
+    /**
+     * @return the taskbar position if set.
+     */
+    public int getTaskbarPosition() {
+        return mTaskbarPosition;
+    }
+
+    public int getTaskbarSize() {
+        return mTaskbarSize;
     }
 
     /**

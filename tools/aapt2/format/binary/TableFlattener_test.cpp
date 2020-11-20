@@ -189,16 +189,16 @@ TEST_F(TableFlattenerTest, FlattenFullyLinkedTable) {
                      ResTable_config::CONFIG_VERSION));
 
   std::u16string foo_str = u"foo";
-  ssize_t idx = res_table.getTableStringBlock(0)->indexOfString(foo_str.data(), foo_str.size());
-  ASSERT_GE(idx, 0);
+  auto idx = res_table.getTableStringBlock(0)->indexOfString(foo_str.data(), foo_str.size());
+  ASSERT_TRUE(idx.has_value());
   EXPECT_TRUE(Exists(&res_table, "com.app.test:string/test", ResourceId(0x7f040000), {},
-                     Res_value::TYPE_STRING, (uint32_t)idx, 0u));
+                     Res_value::TYPE_STRING, (uint32_t)*idx, 0u));
 
   std::u16string bar_path = u"res/layout/bar.xml";
   idx = res_table.getTableStringBlock(0)->indexOfString(bar_path.data(), bar_path.size());
-  ASSERT_GE(idx, 0);
+  ASSERT_TRUE(idx.has_value());
   EXPECT_TRUE(Exists(&res_table, "com.app.test:layout/bar", ResourceId(0x7f050000), {},
-                     Res_value::TYPE_STRING, (uint32_t)idx, 0u));
+                     Res_value::TYPE_STRING, (uint32_t)*idx, 0u));
 }
 
 TEST_F(TableFlattenerTest, FlattenEntriesWithGapsInIds) {
@@ -603,16 +603,16 @@ TEST_F(TableFlattenerTest, ObfuscatingResourceNamesNoNameCollapseExemptionsSucce
                      2u, ResTable_config::CONFIG_VERSION));
 
   std::u16string foo_str = u"foo";
-  ssize_t idx = res_table.getTableStringBlock(0)->indexOfString(foo_str.data(), foo_str.size());
-  ASSERT_GE(idx, 0);
+  auto idx = res_table.getTableStringBlock(0)->indexOfString(foo_str.data(), foo_str.size());
+  ASSERT_TRUE(idx.has_value());
   EXPECT_TRUE(Exists(&res_table, "com.app.test:string/0_resource_name_obfuscated",
-                     ResourceId(0x7f040000), {}, Res_value::TYPE_STRING, (uint32_t)idx, 0u));
+                     ResourceId(0x7f040000), {}, Res_value::TYPE_STRING, (uint32_t)*idx, 0u));
 
   std::u16string bar_path = u"res/layout/bar.xml";
   idx = res_table.getTableStringBlock(0)->indexOfString(bar_path.data(), bar_path.size());
-  ASSERT_GE(idx, 0);
+  ASSERT_TRUE(idx.has_value());
   EXPECT_TRUE(Exists(&res_table, "com.app.test:layout/0_resource_name_obfuscated",
-                     ResourceId(0x7f050000), {}, Res_value::TYPE_STRING, (uint32_t)idx, 0u));
+                     ResourceId(0x7f050000), {}, Res_value::TYPE_STRING, (uint32_t)*idx, 0u));
 }
 
 TEST_F(TableFlattenerTest, ObfuscatingResourceNamesWithNameCollapseExemptionsSucceeds) {
@@ -659,16 +659,16 @@ TEST_F(TableFlattenerTest, ObfuscatingResourceNamesWithNameCollapseExemptionsSuc
                      2u, ResTable_config::CONFIG_VERSION));
 
   std::u16string foo_str = u"foo";
-  ssize_t idx = res_table.getTableStringBlock(0)->indexOfString(foo_str.data(), foo_str.size());
-  ASSERT_GE(idx, 0);
+  auto idx = res_table.getTableStringBlock(0)->indexOfString(foo_str.data(), foo_str.size());
+  ASSERT_TRUE(idx.has_value());
   EXPECT_TRUE(Exists(&res_table, "com.app.test:string/test", ResourceId(0x7f040000), {},
-                     Res_value::TYPE_STRING, (uint32_t)idx, 0u));
+                     Res_value::TYPE_STRING, (uint32_t)*idx, 0u));
 
   std::u16string bar_path = u"res/layout/bar.xml";
   idx = res_table.getTableStringBlock(0)->indexOfString(bar_path.data(), bar_path.size());
-  ASSERT_GE(idx, 0);
+  ASSERT_TRUE(idx.has_value());
   EXPECT_TRUE(Exists(&res_table, "com.app.test:layout/0_resource_name_obfuscated",
-                     ResourceId(0x7f050000), {}, Res_value::TYPE_STRING, (uint32_t)idx, 0u));
+                     ResourceId(0x7f050000), {}, Res_value::TYPE_STRING, (uint32_t)*idx, 0u));
 }
 
 TEST_F(TableFlattenerTest, FlattenOverlayable) {

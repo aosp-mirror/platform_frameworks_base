@@ -16,10 +16,6 @@
 
 package com.android.server.wm;
 
-import static android.view.Gravity.BOTTOM;
-import static android.view.Gravity.LEFT;
-import static android.view.Gravity.RIGHT;
-import static android.view.Gravity.TOP;
 import static android.view.InsetsState.ITYPE_CLIMATE_BAR;
 import static android.view.InsetsState.ITYPE_EXTRA_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
@@ -32,12 +28,10 @@ import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
-import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_INSET_PARENT_FRAME_BY_IME;
-import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_IS_SCREEN_DECOR;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
@@ -58,7 +52,6 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 import static org.testng.Assert.expectThrows;
 
@@ -106,7 +99,6 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
     private int mRotation = ROTATION_0;
     private boolean mHasDisplayCutout;
     private boolean mIsLongEdgeDisplayCutout;
-    private static final int DECOR_WINDOW_INSET = 50;
 
     private final Rect mDisplayBounds = new Rect();
 
@@ -282,12 +274,8 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         mDisplayPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
         mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
 
-        assertInsetByTopBottom(mWindow.getStableFrame(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
         assertInsetByTopBottom(mWindow.getDisplayFrame(), STATUS_BAR_HEIGHT, 0);
         assertInsetByTopBottom(mWindow.getParentFrame(), STATUS_BAR_HEIGHT, 0);
-        assertInsetByTopBottom(mWindow.getVisibleFrame(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
-        assertInsetByTopBottom(mWindow.getContentFrame(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
-        assertInsetByTopBottom(mWindow.getDecorFrame(), 0, 0);
     }
 
     @Test
@@ -298,12 +286,8 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         mDisplayPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
         mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
 
-        assertInsetByTopBottom(mWindow.getStableFrame(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
         assertInsetByTopBottom(mWindow.getDisplayFrame(), 0, NAV_BAR_HEIGHT);
         assertInsetByTopBottom(mWindow.getParentFrame(), 0, NAV_BAR_HEIGHT);
-        assertInsetByTopBottom(mWindow.getVisibleFrame(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
-        assertInsetByTopBottom(mWindow.getContentFrame(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
-        assertInsetByTopBottom(mWindow.getDecorFrame(), 0, 0);
     }
 
     @Test
@@ -314,12 +298,8 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         mDisplayPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
         mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
 
-        assertInsetByTopBottom(mWindow.getStableFrame(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
         assertInsetByTopBottom(mWindow.getDisplayFrame(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
         assertInsetByTopBottom(mWindow.getParentFrame(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
-        assertInsetByTopBottom(mWindow.getVisibleFrame(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
-        assertInsetByTopBottom(mWindow.getContentFrame(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
-        assertInsetByTopBottom(mWindow.getDecorFrame(), 0, 0);
     }
 
     @Test
@@ -330,18 +310,13 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         mDisplayPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
         mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
 
-        assertInsetByTopBottom(mWindow.getStableFrame(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
         assertInsetByTopBottom(mWindow.getDisplayFrame(), STATUS_BAR_HEIGHT, 0);
         assertInsetByTopBottom(mWindow.getParentFrame(), STATUS_BAR_HEIGHT, 0);
-        assertInsetByTopBottom(mWindow.getVisibleFrame(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
-        assertInsetByTopBottom(mWindow.getContentFrame(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
-        assertInsetByTopBottom(mWindow.getDecorFrame(), 0, 0);
     }
 
     @Test
     public void layoutWindowLw_fitInsetsIgnoringVisibility() {
-        final InsetsState state =
-                mDisplayContent.getInsetsPolicy().getInsetsForWindow(mWindow);
+        final InsetsState state = mWindow.getInsetsState();
         state.getSource(InsetsState.ITYPE_STATUS_BAR).setVisible(false);
         state.getSource(InsetsState.ITYPE_NAVIGATION_BAR).setVisible(false);
         mWindow.mAttrs.setFitInsetsIgnoringVisibility(true);
@@ -350,18 +325,13 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         mDisplayPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
         mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
 
-        assertInsetByTopBottom(mWindow.getStableFrame(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
         assertInsetByTopBottom(mWindow.getDisplayFrame(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
         assertInsetByTopBottom(mWindow.getParentFrame(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
-        assertInsetByTopBottom(mWindow.getVisibleFrame(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
-        assertInsetByTopBottom(mWindow.getContentFrame(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
-        assertInsetByTopBottom(mWindow.getDecorFrame(), 0, 0);
     }
 
     @Test
     public void layoutWindowLw_fitInsetsNotIgnoringVisibility() {
-        final InsetsState state =
-                mDisplayContent.getInsetsPolicy().getInsetsForWindow(mWindow);
+        final InsetsState state = mWindow.getInsetsState();
         state.getSource(InsetsState.ITYPE_STATUS_BAR).setVisible(false);
         state.getSource(InsetsState.ITYPE_NAVIGATION_BAR).setVisible(false);
         mWindow.mAttrs.setFitInsetsIgnoringVisibility(false);
@@ -370,12 +340,8 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         mDisplayPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
         mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
 
-        assertInsetByTopBottom(mWindow.getStableFrame(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
         assertInsetByTopBottom(mWindow.getDisplayFrame(), 0, 0);
         assertInsetByTopBottom(mWindow.getParentFrame(), 0, 0);
-        assertInsetByTopBottom(mWindow.getVisibleFrame(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
-        assertInsetByTopBottom(mWindow.getContentFrame(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
-        assertInsetByTopBottom(mWindow.getDecorFrame(), 0, 0);
     }
 
     @Test
@@ -407,12 +373,8 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         mDisplayPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
         mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
 
-        assertInsetByTopBottom(mWindow.getStableFrame(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
         assertInsetByTopBottom(mWindow.getDisplayFrame(), DISPLAY_CUTOUT_HEIGHT, 0);
         assertInsetByTopBottom(mWindow.getParentFrame(), DISPLAY_CUTOUT_HEIGHT, 0);
-        assertInsetByTopBottom(mWindow.getVisibleFrame(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
-        assertInsetByTopBottom(mWindow.getContentFrame(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
-        assertInsetByTopBottom(mWindow.getDecorFrame(), 0, 0);
     }
 
     @Test
@@ -428,9 +390,6 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
 
         assertInsetByTopBottom(mWindow.getParentFrame(), 0, 0);
-        assertInsetByTopBottom(mWindow.getStableFrame(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
-        assertInsetByTopBottom(mWindow.getContentFrame(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
-        assertInsetByTopBottom(mWindow.getDecorFrame(), 0, 0);
         assertInsetByTopBottom(mWindow.getDisplayFrame(), 0, 0);
     }
 
@@ -448,9 +407,6 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
 
         assertInsetByTopBottom(mWindow.getParentFrame(), STATUS_BAR_HEIGHT, 0);
-        assertInsetByTopBottom(mWindow.getStableFrame(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
-        assertInsetByTopBottom(mWindow.getContentFrame(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
-        assertInsetByTopBottom(mWindow.getDecorFrame(), 0, 0);
         assertInsetByTopBottom(mWindow.getDisplayFrame(), STATUS_BAR_HEIGHT, 0);
     }
 
@@ -468,9 +424,6 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
 
         assertInsetBy(mWindow.getParentFrame(), 0, 0, 0, 0);
-        assertInsetBy(mWindow.getStableFrame(), 0, STATUS_BAR_HEIGHT, 0, NAV_BAR_HEIGHT);
-        assertInsetBy(mWindow.getContentFrame(), 0, STATUS_BAR_HEIGHT, 0, NAV_BAR_HEIGHT);
-        assertInsetBy(mWindow.getDecorFrame(), 0, 0, 0, 0);
         assertInsetBy(mWindow.getDisplayFrame(), 0, 0, 0, 0);
     }
 
@@ -488,9 +441,6 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
 
         assertInsetBy(mWindow.getParentFrame(), 0, 0, 0, 0);
-        assertInsetBy(mWindow.getStableFrame(), 0, STATUS_BAR_HEIGHT, 0, NAV_BAR_HEIGHT);
-        assertInsetBy(mWindow.getContentFrame(), 0, STATUS_BAR_HEIGHT, 0, NAV_BAR_HEIGHT);
-        assertInsetBy(mWindow.getDecorFrame(), 0, 0, 0, 0);
         assertInsetBy(mWindow.getDisplayFrame(), 0, 0, 0, 0);
     }
 
@@ -509,9 +459,6 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
 
         assertInsetByTopBottom(mWindow.getParentFrame(), 0, 0);
-        assertInsetByTopBottom(mWindow.getStableFrame(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
-        assertInsetByTopBottom(mWindow.getContentFrame(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
-        assertInsetByTopBottom(mWindow.getDecorFrame(), 0, 0);
         assertInsetByTopBottom(mWindow.getDisplayFrame(), 0, 0);
     }
 
@@ -522,8 +469,7 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         mWindow.mAttrs.flags =
                 FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR | FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
         mWindow.mAttrs.setFitInsetsTypes(0 /* types */);
-        mDisplayContent.getInsetsPolicy().getInsetsForWindow(mWindow)
-                .getSource(InsetsState.ITYPE_STATUS_BAR).setVisible(false);
+        mWindow.getInsetsState().getSource(InsetsState.ITYPE_STATUS_BAR).setVisible(false);
         final InsetsState requestedState = new InsetsState();
         requestedState.getSource(ITYPE_STATUS_BAR).setVisible(false);
         mWindow.updateRequestedVisibility(requestedState);
@@ -533,9 +479,6 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
 
         assertInsetByTopBottom(mWindow.getParentFrame(), STATUS_BAR_HEIGHT, 0);
-        assertInsetByTopBottom(mWindow.getStableFrame(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
-        assertInsetByTopBottom(mWindow.getContentFrame(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
-        assertInsetByTopBottom(mWindow.getDecorFrame(), 0, 0);
         assertInsetByTopBottom(mWindow.getDisplayFrame(), STATUS_BAR_HEIGHT, 0);
     }
 
@@ -546,8 +489,7 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         mWindow.mAttrs.flags =
                 FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR | FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
         mWindow.mAttrs.setFitInsetsTypes(0 /* types */);
-        mDisplayContent.getInsetsPolicy().getInsetsForWindow(mWindow)
-                .getSource(InsetsState.ITYPE_STATUS_BAR).setVisible(false);
+        mWindow.getInsetsState().getSource(InsetsState.ITYPE_STATUS_BAR).setVisible(false);
         final InsetsState requestedState = new InsetsState();
         requestedState.getSource(ITYPE_STATUS_BAR).setVisible(false);
         mWindow.updateRequestedVisibility(requestedState);
@@ -558,9 +500,6 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
 
         assertInsetByTopBottom(mWindow.getParentFrame(), 0, 0);
-        assertInsetByTopBottom(mWindow.getStableFrame(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
-        assertInsetByTopBottom(mWindow.getContentFrame(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
-        assertInsetByTopBottom(mWindow.getDecorFrame(), 0, 0);
         assertInsetByTopBottom(mWindow.getDisplayFrame(), 0, 0);
     }
 
@@ -578,10 +517,6 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
 
         assertInsetBy(mWindow.getParentFrame(), DISPLAY_CUTOUT_HEIGHT, 0, 0, 0);
-        assertInsetBy(mWindow.getStableFrame(), 0, STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT, 0);
-        assertInsetBy(mWindow.getContentFrame(),
-                DISPLAY_CUTOUT_HEIGHT, STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT, 0);
-        assertInsetBy(mWindow.getDecorFrame(), 0, 0, 0, 0);
         assertInsetBy(mWindow.getDisplayFrame(), DISPLAY_CUTOUT_HEIGHT, 0, 0, 0);
     }
 
@@ -599,10 +534,6 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
 
         assertInsetBy(mWindow.getParentFrame(), 0, 0, DISPLAY_CUTOUT_HEIGHT, 0);
-        assertInsetBy(mWindow.getStableFrame(), NAV_BAR_HEIGHT, STATUS_BAR_HEIGHT, 0, 0);
-        assertInsetBy(mWindow.getContentFrame(),
-                NAV_BAR_HEIGHT, STATUS_BAR_HEIGHT, DISPLAY_CUTOUT_HEIGHT, 0);
-        assertInsetBy(mWindow.getDecorFrame(), 0, 0, 0, 0);
         assertInsetBy(mWindow.getDisplayFrame(), 0, 0, DISPLAY_CUTOUT_HEIGHT, 0);
     }
 
@@ -622,10 +553,6 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
 
         assertInsetBy(mWindow.getParentFrame(), DISPLAY_CUTOUT_HEIGHT, 0, 0, 0);
-        assertInsetBy(mWindow.getStableFrame(), 0, STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT, 0);
-        assertInsetBy(mWindow.getContentFrame(),
-                DISPLAY_CUTOUT_HEIGHT, STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT, 0);
-        assertInsetBy(mWindow.getDecorFrame(), 0, 0, 0, 0);
     }
 
     @Test
@@ -663,10 +590,6 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
 
         assertInsetBy(mWindow.getParentFrame(), 0, 0, 0, 0);
-        assertInsetBy(mWindow.getStableFrame(), 0, STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT, 0);
-        assertInsetBy(mWindow.getContentFrame(),
-                DISPLAY_CUTOUT_HEIGHT, STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT, 0);
-        assertInsetBy(mWindow.getDecorFrame(), 0, 0, 0, 0);
     }
 
     @Test
@@ -682,10 +605,6 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
 
         assertInsetBy(mWindow.getParentFrame(), DISPLAY_CUTOUT_HEIGHT, 0, 0, 0);
-        assertInsetBy(mWindow.getStableFrame(), 0, STATUS_BAR_HEIGHT, 0, NAV_BAR_HEIGHT);
-        assertInsetBy(mWindow.getContentFrame(), DISPLAY_CUTOUT_HEIGHT, STATUS_BAR_HEIGHT, 0,
-                NAV_BAR_HEIGHT);
-        assertInsetBy(mWindow.getDecorFrame(), 0, 0, 0, 0);
         assertInsetBy(mWindow.getDisplayFrame(), DISPLAY_CUTOUT_HEIGHT, 0, 0, 0);
     }
 
@@ -703,11 +622,6 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
 
         assertInsetBy(mWindow.getParentFrame(), DISPLAY_CUTOUT_HEIGHT, 0, 0, 0);
-        assertInsetBy(mWindow.getStableFrame(), 0, STATUS_BAR_HEIGHT, 0,
-                NAV_BAR_HEIGHT);
-        assertInsetBy(mWindow.getContentFrame(), DISPLAY_CUTOUT_HEIGHT, STATUS_BAR_HEIGHT, 0,
-                NAV_BAR_HEIGHT);
-        assertInsetBy(mWindow.getDecorFrame(), 0, 0, 0, 0);
         assertInsetBy(mWindow.getDisplayFrame(), DISPLAY_CUTOUT_HEIGHT, 0, 0, 0);
     }
 
@@ -725,10 +639,6 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
 
         assertInsetBy(mWindow.getParentFrame(), DISPLAY_CUTOUT_HEIGHT, 0, 0, 0);
-        assertInsetBy(mWindow.getStableFrame(), 0, STATUS_BAR_HEIGHT, 0, NAV_BAR_HEIGHT);
-        assertInsetBy(mWindow.getContentFrame(), DISPLAY_CUTOUT_HEIGHT, STATUS_BAR_HEIGHT, 0,
-                NAV_BAR_HEIGHT);
-        assertInsetBy(mWindow.getDecorFrame(), 0, 0, 0, 0);
         assertInsetBy(mWindow.getDisplayFrame(), DISPLAY_CUTOUT_HEIGHT, 0, 0, 0);
     }
 
@@ -746,10 +656,6 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
 
         assertInsetBy(mWindow.getParentFrame(), 0, 0, 0, 0);
-        assertInsetBy(mWindow.getStableFrame(), 0, STATUS_BAR_HEIGHT, 0, NAV_BAR_HEIGHT);
-        assertInsetBy(mWindow.getContentFrame(), DISPLAY_CUTOUT_HEIGHT, STATUS_BAR_HEIGHT, 0,
-                NAV_BAR_HEIGHT);
-        assertInsetBy(mWindow.getDecorFrame(), 0, 0, 0, 0);
         assertInsetBy(mWindow.getDisplayFrame(), 0, 0, 0, 0);
     }
 
@@ -767,10 +673,6 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
 
         assertInsetBy(mWindow.getParentFrame(), 0, 0, 0, 0);
-        assertInsetByTopBottom(mWindow.getStableFrame(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
-        assertInsetByTopBottom(mWindow.getContentFrame(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
-        assertInsetByTopBottom(mWindow.getVisibleFrame(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
-        assertInsetBy(mWindow.getDecorFrame(), 0, 0, 0, 0);
         assertInsetBy(mWindow.getDisplayFrame(), 0, 0, 0, 0);
     }
 
@@ -832,10 +734,16 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         // Initialize DisplayFrames
         mDisplayPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
 
+        final InsetsState state =
+                mDisplayContent.getInsetsStateController().getRawInsetsState();
+        final Rect contentFrame = new Rect(state.getDisplayFrame());
+        contentFrame.inset(state.calculateInsets(contentFrame, Type.systemBars(),
+                false /* ignoreVisibility */));
+
         // Task is in the nav bar area (usually does not happen, but this is similar enough to
         // the possible overlap with the IME)
-        final Rect taskBounds = new Rect(100, mFrames.mContent.bottom + 1,
-                200, mFrames.mContent.bottom + 10);
+        final Rect taskBounds = new Rect(100, contentFrame.bottom + 1,
+                200, contentFrame.bottom + 10);
 
         final Task task = mWindow.getTask();
         // Make the task floating.
@@ -913,59 +821,6 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
 
         assertEquals(DISPLAY_WIDTH, frame.width());
         assertEquals(DISPLAY_HEIGHT, rotatedFrame.width());
-    }
-
-    @Test
-    public void testScreenDecorWindows() {
-        final WindowState decorWindow = spy(
-                createWindow(null, TYPE_APPLICATION_OVERLAY, "decorWindow"));
-        mWindow.mAttrs.flags = FLAG_NOT_FOCUSABLE | FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR
-                | FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
-        decorWindow.mAttrs.privateFlags |= PRIVATE_FLAG_IS_SCREEN_DECOR;
-        addWindow(decorWindow);
-        addWindow(mWindow);
-        doReturn(new Rect(0, 0, mFrames.mDisplayWidth, mFrames.mDisplayHeight))
-                .when(decorWindow).getBounds();
-
-        // Decor on top
-        updateDecorWindow(decorWindow, MATCH_PARENT, DECOR_WINDOW_INSET, TOP);
-        mDisplayPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
-        mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
-        assertInsetByTopBottom(mWindow.getContentFrame(), DECOR_WINDOW_INSET, NAV_BAR_HEIGHT);
-
-        // Decor on bottom
-        updateDecorWindow(decorWindow, MATCH_PARENT, DECOR_WINDOW_INSET, BOTTOM);
-        mDisplayPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
-        mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
-        assertInsetByTopBottom(mWindow.getContentFrame(), STATUS_BAR_HEIGHT,
-                DECOR_WINDOW_INSET);
-
-        // Decor on the left
-        updateDecorWindow(decorWindow, DECOR_WINDOW_INSET, MATCH_PARENT, LEFT);
-        mDisplayPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
-        mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
-        assertInsetBy(mWindow.getContentFrame(), DECOR_WINDOW_INSET, STATUS_BAR_HEIGHT, 0,
-                NAV_BAR_HEIGHT);
-
-        // Decor on the right
-        updateDecorWindow(decorWindow, DECOR_WINDOW_INSET, MATCH_PARENT, RIGHT);
-        mDisplayPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
-        mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
-        assertInsetBy(mWindow.getContentFrame(), 0, STATUS_BAR_HEIGHT, DECOR_WINDOW_INSET,
-                NAV_BAR_HEIGHT);
-
-        // Decor not allowed as inset
-        updateDecorWindow(decorWindow, DECOR_WINDOW_INSET, DECOR_WINDOW_INSET, TOP);
-        mDisplayPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
-        mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
-        assertInsetByTopBottom(mWindow.getContentFrame(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
-    }
-
-    private void updateDecorWindow(WindowState decorWindow, int width, int height, int gravity) {
-        decorWindow.mAttrs.width = width;
-        decorWindow.mAttrs.height = height;
-        decorWindow.mAttrs.gravity = gravity;
-        decorWindow.setRequestedSize(width, height);
     }
 
     /**

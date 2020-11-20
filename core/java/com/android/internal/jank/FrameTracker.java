@@ -37,34 +37,33 @@ public class FrameTracker implements HardwareRendererObserver.OnFrameMetricsAvai
     //TODO (163431584): need also consider other refresh rates.
     private static final long JANK_THRESHOLD_NANOS = 1000000000 / 60;
     private static final long UNKNOWN_TIMESTAMP = -1;
+    public static final int NANOS_IN_MILLISECOND = 1_000_000;
 
     private final HardwareRendererObserver mObserver;
+    private final int mTraceThresholdMissedFrames;
+    private final int mTraceThresholdFrameTimeMillis;
     private final ThreadedRendererWrapper mRendererWrapper;
     private final FrameMetricsWrapper mMetricsWrapper;
 
     private long mBeginTime = UNKNOWN_TIMESTAMP;
     private long mEndTime = UNKNOWN_TIMESTAMP;
-    private boolean mShouldTriggerTrace;
     private boolean mSessionEnd;
+    private boolean mCancelled = false;
     private int mTotalFramesCount = 0;
     private int mMissedFramesCount = 0;
     private long mMaxFrameTimeNanos = 0;
 
     private Session mSession;
 
-    /**
-     * Constructor of FrameTracker.
-     * @param session a trace session.
-     * @param handler a handler for handling callbacks.
-     * @param renderer a ThreadedRendererWrapper instance.
-     * @param metrics a FrameMetricsWrapper instance.
-     */
     public FrameTracker(@NonNull Session session, @NonNull Handler handler,
-            @NonNull ThreadedRendererWrapper renderer, @NonNull FrameMetricsWrapper metrics) {
+            @NonNull ThreadedRendererWrapper renderer, @NonNull FrameMetricsWrapper metrics,
+            int traceThresholdMissedFrames, int traceThresholdFrameTimeMillis) {
         mSession = session;
         mRendererWrapper = renderer;
         mMetricsWrapper = metrics;
         mObserver = new HardwareRendererObserver(this, mMetricsWrapper.getTiming(), handler);
+        mTraceThresholdMissedFrames = traceThresholdMissedFrames;
+        mTraceThresholdFrameTimeMillis = traceThresholdFrameTimeMillis;
     }
 
     /**
@@ -109,13 +108,15 @@ public class FrameTracker implements HardwareRendererObserver.OnFrameMetricsAvai
         }
         Trace.endAsyncSection(mSession.getName(), (int) mBeginTime);
         mRendererWrapper.removeObserver(mObserver);
-        mBeginTime = UNKNOWN_TIMESTAMP;
-        mEndTime = UNKNOWN_TIMESTAMP;
-        mShouldTriggerTrace = false;
+        mCancelled = true;
     }
 
     @Override
     public synchronized void onFrameMetricsAvailable(int dropCountSinceLastInvocation) {
+        if (mCancelled) {
+            return;
+        }
+
         // Since this callback might come a little bit late after the end() call.
         // We should keep tracking the begin / end timestamp.
         // Then compare with vsync timestamp to check if the frame is in the duration of the CUJ.
@@ -136,13 +137,14 @@ public class FrameTracker implements HardwareRendererObserver.OnFrameMetricsAvai
             Trace.traceCounter(Trace.TRACE_TAG_APP, mSession.getName() + "#totalFrames",
                     mTotalFramesCount);
             Trace.traceCounter(Trace.TRACE_TAG_APP, mSession.getName() + "#maxFrameTimeMillis",
-                    (int) (mMaxFrameTimeNanos / 1_000_000));
+                    (int) (mMaxFrameTimeNanos / NANOS_IN_MILLISECOND));
 
             // Trigger perfetto if necessary.
-            if (mShouldTriggerTrace) {
-                if (DEBUG) {
-                    Log.v(TAG, "Found janky frame, triggering perfetto.");
-                }
+            boolean overMissedFramesThreshold = mTraceThresholdMissedFrames != -1
+                    && mMissedFramesCount >= mTraceThresholdMissedFrames;
+            boolean overFrameTimeThreshold = mTraceThresholdFrameTimeMillis != -1
+                    && mMaxFrameTimeNanos >= mTraceThresholdFrameTimeMillis * NANOS_IN_MILLISECOND;
+            if (overMissedFramesThreshold || overFrameTimeThreshold) {
                 triggerPerfetto();
             }
             if (mSession.logToStatsd()) {
@@ -168,7 +170,6 @@ public class FrameTracker implements HardwareRendererObserver.OnFrameMetricsAvai
 
         if (isJankyFrame) {
             mMissedFramesCount += 1;
-            mShouldTriggerTrace = true;
         }
     }
 

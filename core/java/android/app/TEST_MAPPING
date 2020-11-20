@@ -33,10 +33,10 @@
         },
         {
             "file_patterns": ["(/|^)AppOpsManager.java"],
-            "name": "CtsStatsdHostTestCases",
+            "name": "CtsStatsdAtomHostTestCases",
             "options": [
                 {
-                    "include-filter": "android.cts.statsd.atom.UidAtomTests#testAppOps"
+                    "include-filter": "android.cts.statsdatom.appops.AppOpsTests#testAppOps"
                 }
             ]
         },

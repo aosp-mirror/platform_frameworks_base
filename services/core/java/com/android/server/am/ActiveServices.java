@@ -1630,6 +1630,8 @@ public final class ActiveServices {
         }
     }
 
+    // TODO: remove as part of fixing b/173627642
+    @SuppressWarnings("AndroidFrameworkCompatChange")
     private void postFgsNotificationLocked(ServiceRecord r) {
         boolean showNow = !mAm.mConstants.mFlagFgsNotificationDeferralEnabled;
         if (!showNow) {

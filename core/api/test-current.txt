@@ -302,8 +302,10 @@ package android.app {
     method public void destroy();
     method @NonNull public android.os.ParcelFileDescriptor[] executeShellCommandRwe(@NonNull String);
     method @Deprecated public boolean grantRuntimePermission(String, String, android.os.UserHandle);
+    method public boolean injectInputEvent(@NonNull android.view.InputEvent, boolean, boolean);
     method @Deprecated public boolean revokeRuntimePermission(String, String, android.os.UserHandle);
     method public void syncInputTransactions();
+    method public void syncInputTransactions(boolean);
   }
 
   public class UiModeManager {
@@ -1227,7 +1229,6 @@ package android.os {
   }
 
   public static final class StrictMode.VmPolicy.Builder {
-    method @NonNull public android.os.StrictMode.VmPolicy.Builder detectIncorrectContextUse();
     method @NonNull public android.os.StrictMode.VmPolicy.Builder permitIncorrectContextUse();
   }
 

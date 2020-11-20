@@ -131,7 +131,7 @@ public class RecentTasksTest extends WindowTestsBase {
 
         // Set the running tasks we should use for testing in this class.
         mRunningTasks = new TestRunningTasks();
-        mAtm.mStackSupervisor.setRunningTasks(mRunningTasks);
+        mAtm.mTaskSupervisor.setRunningTasks(mRunningTasks);
 
         mStack = mTaskContainer.createStack(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
@@ -1234,7 +1234,7 @@ public class RecentTasksTest extends WindowTestsBase {
     }
 
     private TaskBuilder createTaskBuilder(String packageName, String className) {
-        return new TaskBuilder(mAtm.mStackSupervisor)
+        return new TaskBuilder(mAtm.mTaskSupervisor)
                 .setComponent(new ComponentName(packageName, className))
                 .setParentTask(mStack)
                 .setUserId(TEST_USER_0_ID);

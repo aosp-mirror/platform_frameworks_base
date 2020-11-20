@@ -78,7 +78,6 @@
 #include <android-base/unique_fd.h>
 #include <bionic/malloc.h>
 #include <bionic/mte.h>
-#include <bionic/mte_kernel.h>
 #include <cutils/fs.h>
 #include <cutils/memory.h>
 #include <cutils/multiuser.h>
@@ -1650,28 +1649,6 @@ static void BindMountStorageDirs(JNIEnv* env, jobjectArray pkg_data_info_list,
   }
 }
 
-#ifdef ANDROID_EXPERIMENTAL_MTE
-static void SetTagCheckingLevel(int level) {
-#ifdef __aarch64__
-  if (!(getauxval(AT_HWCAP2) & HWCAP2_MTE)) {
-    return;
-  }
-
-  int tagged_addr_ctrl = prctl(PR_GET_TAGGED_ADDR_CTRL, 0, 0, 0, 0);
-  if (tagged_addr_ctrl < 0) {
-    ALOGE("prctl(PR_GET_TAGGED_ADDR_CTRL) failed: %s", strerror(errno));
-    return;
-  }
-
-  tagged_addr_ctrl = (tagged_addr_ctrl & ~PR_MTE_TCF_MASK) | level;
-  if (prctl(PR_SET_TAGGED_ADDR_CTRL, tagged_addr_ctrl, 0, 0, 0) < 0) {
-    ALOGE("prctl(PR_SET_TAGGED_ADDR_CTRL, %d) failed: %s", tagged_addr_ctrl,
-          strerror(errno));
-  }
-#endif
-}
-#endif
-
 // Utility routine to specialize a zygote child process.
 static void SpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray gids,
                              jint runtime_flags, jobjectArray rlimits,
@@ -1807,22 +1784,14 @@ static void SpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray gids,
       heap_tagging_level = M_HEAP_TAGGING_LEVEL_TBI;
       break;
     case RuntimeFlags::MEMORY_TAG_LEVEL_ASYNC:
-#ifdef ANDROID_EXPERIMENTAL_MTE
-      SetTagCheckingLevel(PR_MTE_TCF_ASYNC);
-#endif
       heap_tagging_level = M_HEAP_TAGGING_LEVEL_ASYNC;
       break;
     case RuntimeFlags::MEMORY_TAG_LEVEL_SYNC:
-#ifdef ANDROID_EXPERIMENTAL_MTE
-      SetTagCheckingLevel(PR_MTE_TCF_SYNC);
-#endif
       heap_tagging_level = M_HEAP_TAGGING_LEVEL_SYNC;
       break;
     default:
-#ifdef ANDROID_EXPERIMENTAL_MTE
-      SetTagCheckingLevel(PR_MTE_TCF_NONE);
-#endif
       heap_tagging_level = M_HEAP_TAGGING_LEVEL_NONE;
+      break;
   }
   android_mallopt(M_SET_HEAP_TAGGING_LEVEL, &heap_tagging_level, sizeof(heap_tagging_level));
   // Now that we've used the flag, clear it so that we don't pass unknown flags to the ART runtime.

@@ -19,7 +19,9 @@ package com.android.server.biometrics.sensors.face.aidl;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
+import android.content.pm.UserInfo;
 import android.hardware.biometrics.BiometricsProtoEnums;
+import android.hardware.biometrics.ITestSession;
 import android.hardware.biometrics.face.Error;
 import android.hardware.biometrics.face.IFace;
 import android.hardware.biometrics.face.ISession;
@@ -31,10 +33,15 @@ import android.hardware.keymaster.HardwareAuthToken;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.os.UserManager;
 import android.util.Slog;
+import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.biometrics.HardwareAuthTokenUtils;
+import com.android.server.biometrics.SensorServiceStateProto;
+import com.android.server.biometrics.SensorStateProto;
+import com.android.server.biometrics.UserStateProto;
 import com.android.server.biometrics.Utils;
 import com.android.server.biometrics.sensors.AcquisitionClient;
 import com.android.server.biometrics.sensors.AuthenticationConsumer;
@@ -56,6 +63,8 @@ import java.util.Map;
  */
 public class Sensor implements IBinder.DeathRecipient {
 
+    private boolean mTestHalEnabled;
+
     @NonNull private final String mTag;
     @NonNull private final FaceProvider mProvider;
     @NonNull private final Context mContext;
@@ -66,27 +75,6 @@ public class Sensor implements IBinder.DeathRecipient {
     @NonNull private final Map<Integer, Long> mAuthenticatorIds;
     @NonNull private final ClientMonitor.LazyDaemon<ISession> mLazySession;
     @Nullable private Session mCurrentSession;
-
-    @Override
-    public void binderDied() {
-        Slog.e(mTag, "Binder died");
-        mHandler.post(() -> {
-            final ClientMonitor<?> client = mScheduler.getCurrentClient();
-            if (client instanceof Interruptable) {
-                Slog.e(mTag, "Sending ERROR_HW_UNAVAILABLE for client: " + client);
-                final Interruptable interruptable = (Interruptable) client;
-                interruptable.onError(FaceManager.FACE_ERROR_HW_UNAVAILABLE,
-                        0 /* vendorCode */);
-
-                mScheduler.recordCrashState();
-
-                FrameworkStatsLog.write(FrameworkStatsLog.BIOMETRIC_SYSTEM_HEALTH_ISSUE_DETECTED,
-                        BiometricsProtoEnums.MODALITY_FACE,
-                        BiometricsProtoEnums.ISSUE_HAL_DEATH);
-                mCurrentSession = null;
-            }
-        });
-    }
 
     static class Session {
         @NonNull final HalSessionCallback mHalSessionCallback;
@@ -102,67 +90,6 @@ public class Sensor implements IBinder.DeathRecipient {
             mHalSessionCallback = halSessionCallback;
             Slog.d(mTag, "New session created for user: " + userId);
         }
-    }
-
-    Sensor(@NonNull String tag, @NonNull FaceProvider provider, @NonNull Context context,
-            @NonNull Handler handler, @NonNull FaceSensorPropertiesInternal sensorProperties) {
-        mTag = tag;
-        mProvider = provider;
-        mContext = context;
-        mHandler = handler;
-        mSensorProperties = sensorProperties;
-        mScheduler = new BiometricScheduler(tag, null /* gestureAvailabilityDispatcher */);
-        mLockoutCache = new LockoutCache();
-        mAuthenticatorIds = new HashMap<>();
-        mLazySession = () -> (mCurrentSession != null) ? mCurrentSession.mSession : null;
-    }
-
-    @NonNull ClientMonitor.LazyDaemon<ISession> getLazySession() {
-        return mLazySession;
-    }
-
-    @NonNull FaceSensorPropertiesInternal getSensorProperties() {
-        return mSensorProperties;
-    }
-
-    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
-    boolean hasSessionForUser(int userId) {
-        return mCurrentSession != null && mCurrentSession.mUserId == userId;
-    }
-
-    @Nullable Session getSessionForUser(int userId) {
-        if (mCurrentSession != null && mCurrentSession.mUserId == userId) {
-            return mCurrentSession;
-        } else {
-            return null;
-        }
-    }
-
-    void createNewSession(@NonNull IFace daemon, int sensorId, int userId)
-            throws RemoteException {
-
-        final HalSessionCallback.Callback callback = () -> {
-            Slog.e(mTag, "Got ERROR_HW_UNAVAILABLE");
-            mCurrentSession = null;
-        };
-        final HalSessionCallback resultController = new HalSessionCallback(mContext, mHandler,
-                mTag, mScheduler, sensorId, userId, callback);
-
-        final ISession newSession = daemon.createSession(sensorId, userId, resultController);
-        newSession.asBinder().linkToDeath(this, 0 /* flags */);
-        mCurrentSession = new Session(mTag, newSession, userId, resultController);
-    }
-
-    @NonNull BiometricScheduler getScheduler() {
-        return mScheduler;
-    }
-
-    @NonNull LockoutCache getLockoutCache() {
-        return mLockoutCache;
-    }
-
-    @NonNull Map<Integer, Long> getAuthenticatorIds() {
-        return mAuthenticatorIds;
     }
 
     static class HalSessionCallback extends ISessionCallback.Stub {
@@ -207,7 +134,7 @@ public class Sensor implements IBinder.DeathRecipient {
         }
 
         @Override
-        public void onChallengeGenerated(int sensorId, int userId, long challenge) {
+        public void onChallengeGenerated(long challenge) {
             mHandler.post(() -> {
                 final ClientMonitor<?> client = mScheduler.getCurrentClient();
                 if (!(client instanceof FaceGenerateChallengeClient)) {
@@ -223,7 +150,7 @@ public class Sensor implements IBinder.DeathRecipient {
         }
 
         @Override
-        public void onChallengeRevoked(int sensorId, int userId, long challenge) {
+        public void onChallengeRevoked(long challenge) {
             mHandler.post(() -> {
                 final ClientMonitor<?> client = mScheduler.getCurrentClient();
                 if (!(client instanceof FaceRevokeChallengeClient)) {
@@ -452,5 +379,121 @@ public class Sensor implements IBinder.DeathRecipient {
             // TODO(b/159667191)
         }
 
+    }
+
+    Sensor(@NonNull String tag, @NonNull FaceProvider provider, @NonNull Context context,
+            @NonNull Handler handler, @NonNull FaceSensorPropertiesInternal sensorProperties) {
+        mTag = tag;
+        mProvider = provider;
+        mContext = context;
+        mHandler = handler;
+        mSensorProperties = sensorProperties;
+        mScheduler = new BiometricScheduler(tag, null /* gestureAvailabilityDispatcher */);
+        mLockoutCache = new LockoutCache();
+        mAuthenticatorIds = new HashMap<>();
+        mLazySession = () -> {
+            if (mTestHalEnabled) {
+                return new TestSession(mCurrentSession.mHalSessionCallback);
+            } else {
+                return mCurrentSession != null ? mCurrentSession.mSession : null;
+            }
+        };
+    }
+
+    @NonNull ClientMonitor.LazyDaemon<ISession> getLazySession() {
+        return mLazySession;
+    }
+
+    @NonNull FaceSensorPropertiesInternal getSensorProperties() {
+        return mSensorProperties;
+    }
+
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
+    boolean hasSessionForUser(int userId) {
+        return mCurrentSession != null && mCurrentSession.mUserId == userId;
+    }
+
+    @Nullable Session getSessionForUser(int userId) {
+        if (mCurrentSession != null && mCurrentSession.mUserId == userId) {
+            return mCurrentSession;
+        } else {
+            return null;
+        }
+    }
+
+    @NonNull ITestSession createTestSession() {
+        return new BiometricTestSessionImpl(mContext, mSensorProperties.sensorId, mProvider, this);
+    }
+
+    void createNewSession(@NonNull IFace daemon, int sensorId, int userId)
+            throws RemoteException {
+
+        final HalSessionCallback.Callback callback = () -> {
+            Slog.e(mTag, "Got ERROR_HW_UNAVAILABLE");
+            mCurrentSession = null;
+        };
+        final HalSessionCallback resultController = new HalSessionCallback(mContext, mHandler,
+                mTag, mScheduler, sensorId, userId, callback);
+
+        final ISession newSession = daemon.createSession(sensorId, userId, resultController);
+        newSession.asBinder().linkToDeath(this, 0 /* flags */);
+        mCurrentSession = new Session(mTag, newSession, userId, resultController);
+    }
+
+    @NonNull BiometricScheduler getScheduler() {
+        return mScheduler;
+    }
+
+    @NonNull LockoutCache getLockoutCache() {
+        return mLockoutCache;
+    }
+
+    @NonNull Map<Integer, Long> getAuthenticatorIds() {
+        return mAuthenticatorIds;
+    }
+
+    void setTestHalEnabled(boolean enabled) {
+        mTestHalEnabled = enabled;
+    }
+
+    void dumpProtoState(int sensorId, @NonNull ProtoOutputStream proto) {
+        final long sensorToken = proto.start(SensorServiceStateProto.SENSOR_STATES);
+
+        proto.write(SensorStateProto.SENSOR_ID, mSensorProperties.sensorId);
+        proto.write(SensorStateProto.IS_BUSY, mScheduler.getCurrentClient() != null);
+
+        for (UserInfo user : UserManager.get(mContext).getUsers()) {
+            final int userId = user.getUserHandle().getIdentifier();
+
+            final long userToken = proto.start(SensorStateProto.USER_STATES);
+            proto.write(UserStateProto.USER_ID, userId);
+            proto.write(UserStateProto.NUM_ENROLLED,
+                    FaceUtils.getInstance(mSensorProperties.sensorId)
+                            .getBiometricsForUser(mContext, userId).size());
+            proto.end(userToken);
+        }
+
+        proto.end(sensorToken);
+    }
+
+    @Override
+    public void binderDied() {
+        Slog.e(mTag, "Binder died");
+        mHandler.post(() -> {
+            final ClientMonitor<?> client = mScheduler.getCurrentClient();
+            if (client instanceof Interruptable) {
+                Slog.e(mTag, "Sending ERROR_HW_UNAVAILABLE for client: " + client);
+                final Interruptable interruptable = (Interruptable) client;
+                interruptable.onError(FaceManager.FACE_ERROR_HW_UNAVAILABLE,
+                        0 /* vendorCode */);
+
+                mScheduler.recordCrashState();
+
+                FrameworkStatsLog.write(FrameworkStatsLog.BIOMETRIC_SYSTEM_HEALTH_ISSUE_DETECTED,
+                        BiometricsProtoEnums.MODALITY_FACE,
+                        BiometricsProtoEnums.ISSUE_HAL_DEATH);
+                mCurrentSession = null;
+            }
+        });
     }
 }

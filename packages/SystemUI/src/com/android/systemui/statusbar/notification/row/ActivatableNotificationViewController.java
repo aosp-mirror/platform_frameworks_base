@@ -23,31 +23,43 @@ import android.view.accessibility.AccessibilityManager;
 
 import com.android.systemui.Gefingerpoken;
 import com.android.systemui.plugins.FalsingManager;
-import com.android.systemui.statusbar.phone.DoubleTapHelper;
+import com.android.systemui.statusbar.phone.NotificationTapHelper;
+import com.android.systemui.util.ViewController;
 
 import javax.inject.Inject;
 
 /**
  * Controller for {@link ActivatableNotificationView}
  */
-public class ActivatableNotificationViewController {
-    private final ActivatableNotificationView mView;
+public class ActivatableNotificationViewController
+        extends ViewController<ActivatableNotificationView> {
     private final ExpandableOutlineViewController mExpandableOutlineViewController;
     private final AccessibilityManager mAccessibilityManager;
     private final FalsingManager mFalsingManager;
-    private DoubleTapHelper mDoubleTapHelper;
-    private boolean mNeedsDimming;
+    private final NotificationTapHelper mNotificationTapHelper;
+    private final TouchHandler mTouchHandler = new TouchHandler();
 
-    private TouchHandler mTouchHandler = new TouchHandler();
+    private boolean mNeedsDimming;
 
     @Inject
     public ActivatableNotificationViewController(ActivatableNotificationView view,
+            NotificationTapHelper.Factory notificationTapHelpFactory,
             ExpandableOutlineViewController expandableOutlineViewController,
             AccessibilityManager accessibilityManager, FalsingManager falsingManager) {
-        mView = view;
+        super(view);
         mExpandableOutlineViewController = expandableOutlineViewController;
         mAccessibilityManager = accessibilityManager;
         mFalsingManager = falsingManager;
+
+        mNotificationTapHelper = notificationTapHelpFactory.create(
+                (active) -> {
+                    if (active) {
+                        mView.makeActive();
+                        mFalsingManager.onNotificationActive();
+                    } else {
+                        mView.makeInactive(true /* animate */);
+                    }
+                }, mView::performClick, mView::handleSlideBack);
 
         mView.setOnActivatedListener(new ActivatableNotificationView.OnActivatedListener() {
             @Override
@@ -64,23 +76,23 @@ public class ActivatableNotificationViewController {
     /**
      * Initialize the controller, setting up handlers and other behavior.
      */
-    public void init() {
+    @Override
+    public void onInit() {
         mExpandableOutlineViewController.init();
-        mDoubleTapHelper = new DoubleTapHelper(mView, (active) -> {
-            if (active) {
-                mView.makeActive();
-                mFalsingManager.onNotificationActive();
-            } else {
-                mView.makeInactive(true /* animate */);
-            }
-        }, mView::performClick, mView::handleSlideBack,
-                mFalsingManager::onNotificationDoubleTap);
         mView.setOnTouchListener(mTouchHandler);
         mView.setTouchHandler(mTouchHandler);
-        mView.setOnDimmedListener(dimmed -> {
-            mNeedsDimming = dimmed;
-        });
+        mView.setOnDimmedListener(dimmed -> mNeedsDimming = dimmed);
         mView.setAccessibilityManager(mAccessibilityManager);
+    }
+
+    @Override
+    protected void onViewAttached() {
+
+    }
+
+    @Override
+    protected void onViewDetached() {
+
     }
 
     class TouchHandler implements Gefingerpoken, View.OnTouchListener {
@@ -103,7 +115,7 @@ public class ActivatableNotificationViewController {
                     // let's ensure we have a ripple
                     return false;
                 }
-                result = mDoubleTapHelper.onTouchEvent(ev, mView.getActualHeight());
+                result = mNotificationTapHelper.onTouchEvent(ev, mView.getActualHeight());
             } else {
                 return false;
             }
@@ -117,7 +129,7 @@ public class ActivatableNotificationViewController {
                     && !mAccessibilityManager.isTouchExplorationEnabled()) {
                 if (!mView.isActive()) {
                     return true;
-                } else if (!mDoubleTapHelper.isWithinDoubleTapSlop(ev)) {
+                } else if (mFalsingManager.isFalseDoubleTap()) {
                     mBlockNextTouch = true;
                     mView.makeInactive(true /* animate */);
                     return true;

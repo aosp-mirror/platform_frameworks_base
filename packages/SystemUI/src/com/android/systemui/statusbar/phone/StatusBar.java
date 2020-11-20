@@ -45,6 +45,7 @@ import static com.android.systemui.statusbar.phone.BarTransitions.MODE_TRANSLUCE
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_TRANSPARENT;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_WARNING;
 import static com.android.systemui.statusbar.phone.BarTransitions.TransitionMode;
+import static com.android.wm.shell.bubbles.BubbleController.TASKBAR_CHANGED_BROADCAST;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -146,7 +147,6 @@ import com.android.systemui.SystemUI;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.charging.WirelessChargingAnimation;
-import com.android.systemui.classifier.FalsingLog;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.dagger.qualifiers.UiBackground;
 import com.android.systemui.demomode.DemoMode;
@@ -561,6 +561,15 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
     };
 
+    BroadcastReceiver mTaskbarChangeReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (mBubblesOptional.isPresent()) {
+                mBubblesOptional.get().onTaskbarChanged(intent.getExtras());
+            }
+        }
+    };
+
     private Runnable mLaunchTransitionEndRunnable;
     private NotificationEntry mDraggedDownEntry;
     private boolean mLaunchCameraWhenFinishedWaking;
@@ -844,6 +853,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         mBypassHeadsUpNotifier.setUp();
         if (mBubblesOptional.isPresent()) {
             mBubblesOptional.get().setExpandListener(mBubbleExpandListener);
+            IntentFilter filter = new IntentFilter(TASKBAR_CHANGED_BROADCAST);
+            mBroadcastDispatcher.registerReceiver(mTaskbarChangeReceiver, filter);
         }
 
         mColorExtractor.addOnColorsChangedListener(this);
@@ -1237,10 +1248,6 @@ public class StatusBar extends SystemUI implements DemoMode,
                 message.write("\nSerial number: ");
                 message.write(SystemProperties.get("ro.serialno"));
                 message.write("\n");
-
-                PrintWriter falsingPw = new PrintWriter(message);
-                FalsingLog.dump(falsingPw);
-                falsingPw.flush();
 
                 startActivityDismissingKeyguard(Intent.createChooser(new Intent(Intent.ACTION_SEND)
                                 .setType("*/*")
@@ -2663,9 +2670,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         if (mLightBarController != null) {
             mLightBarController.dump(fd, pw, args);
         }
-
-        mFalsingManager.dump(pw);
-        FalsingLog.dump(pw);
 
         pw.println("SharedPreferences:");
         for (Map.Entry<String, ?> entry : Prefs.getAll(mContext).entrySet()) {

@@ -193,13 +193,12 @@ public final class LegacyPermission {
         serializer.attribute(null, ATTR_NAME, mPermissionInfo.name);
         serializer.attribute(null, ATTR_PACKAGE, mPermissionInfo.packageName);
         if (mPermissionInfo.protectionLevel != PermissionInfo.PROTECTION_NORMAL) {
-            serializer.attribute(null, "protection",
-                    Integer.toString(mPermissionInfo.protectionLevel));
+            serializer.attributeInt(null, "protection", mPermissionInfo.protectionLevel);
         }
         if (mType == TYPE_DYNAMIC) {
             serializer.attribute(null, "type", "dynamic");
             if (mPermissionInfo.icon != 0) {
-                serializer.attribute(null, "icon", Integer.toString(mPermissionInfo.icon));
+                serializer.attributeInt(null, "icon", mPermissionInfo.icon);
             }
             if (mPermissionInfo.nonLocalizedLabel != null) {
                 serializer.attribute(null, "label", mPermissionInfo.nonLocalizedLabel.toString());

@@ -65,6 +65,12 @@ public abstract class DisplayManagerInternal {
     public abstract boolean isProximitySensorAvailable();
 
     /**
+     * Returns the id of the {@link com.android.server.display.DisplayGroup} to which the provided
+     * display belongs.
+     */
+    public abstract int getDisplayGroupId(int displayId);
+
+    /**
      * Screenshot for internal system-only use such as rotation, etc.  This method includes
      * secure layers and the result should never be exposed to non-system applications.
      * This method does not apply any rotation and provides the output in natural orientation.

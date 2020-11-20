@@ -806,6 +806,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
     void updateKeepWarmLocked() {
         mKeepWarming = ams.mConstants.KEEP_WARMING_SERVICES.contains(name)
                 && (ams.mUserController.getCurrentUserId() == userId
+                || ams.mUserController.isCurrentProfile(userId)
                 || ams.isSingleton(processName, appInfo, instanceName.getClassName(),
                         serviceInfo.flags));
     }

@@ -22,10 +22,16 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
+
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -180,6 +186,20 @@ public final class ApplicationMediaCapabilities implements Parcelable {
     }
 
     /**
+     * Creates {@link ApplicationMediaCapabilities} from an xml.
+     * @param xmlParser The underlying {@link XmlPullParser} that will read the xml.
+     * @return An ApplicationMediaCapabilities object.
+     * @throws UnsupportedOperationException if the capabilities in xml config are invalid or
+     * incompatible.
+     */
+    @NonNull
+    public static ApplicationMediaCapabilities createFromXml(@NonNull XmlPullParser xmlParser) {
+        ApplicationMediaCapabilities.Builder builder = new ApplicationMediaCapabilities.Builder();
+        builder.parseXml(xmlParser);
+        return builder.build();
+    }
+
+    /**
      * Builder class for {@link ApplicationMediaCapabilities} objects.
      * Use this class to configure and create an ApplicationMediaCapabilities instance. Builder
      * could be created from an existing ApplicationMediaCapabilities object, from a xml file or
@@ -195,10 +215,124 @@ public final class ApplicationMediaCapabilities implements Parcelable {
 
         private boolean mIsSlowMotionSupported = false;
 
+        /* Map to save the format read from the xml. */
+        private Map<String, Boolean> mFormatSupportedMap =  new HashMap<String, Boolean>();
+
         /**
          * Constructs a new Builder with all the supports default to false.
          */
         public Builder() {
+        }
+
+        private void parseXml(@NonNull XmlPullParser xmlParser)
+                throws UnsupportedOperationException {
+            if (xmlParser == null) {
+                throw new IllegalArgumentException("XmlParser must not be null");
+            }
+
+            try {
+                while (xmlParser.next() != XmlPullParser.START_TAG) {
+                    continue;
+                }
+
+                // Validates the tag is "media-capabilities".
+                if (!xmlParser.getName().equals("media-capabilities")) {
+                    throw new UnsupportedOperationException("Invalid tag");
+                }
+
+                xmlParser.next();
+                while (xmlParser.getEventType() != XmlPullParser.END_TAG) {
+                    while (xmlParser.getEventType() != XmlPullParser.START_TAG) {
+                        if (xmlParser.getEventType() == XmlPullParser.END_DOCUMENT) {
+                            return;
+                        }
+                        xmlParser.next();
+                    }
+
+                    // Validates the tag is "format".
+                    if (xmlParser.getName().equals("format")) {
+                        parseFormatTag(xmlParser);
+                    } else {
+                        throw new UnsupportedOperationException("Invalid tag");
+                    }
+                    while (xmlParser.getEventType() != XmlPullParser.END_TAG) {
+                        xmlParser.next();
+                    }
+                    xmlParser.next();
+                }
+            } catch (XmlPullParserException xppe) {
+                throw new UnsupportedOperationException("Ill-formatted xml file");
+            } catch (java.io.IOException ioe) {
+                throw new UnsupportedOperationException("Unable to read xml file");
+            }
+        }
+
+        private void parseFormatTag(XmlPullParser xmlParser) {
+            String name = null;
+            String supported = null;
+            for (int i = 0; i < xmlParser.getAttributeCount(); i++) {
+                String attrName = xmlParser.getAttributeName(i);
+                if (attrName.equals("name")) {
+                    name = xmlParser.getAttributeValue(i);
+                } else if (attrName.equals("supported")) {
+                    supported = xmlParser.getAttributeValue(i);
+                } else {
+                    throw new UnsupportedOperationException("Invalid attribute name " + attrName);
+                }
+            }
+
+            if (name != null && supported != null) {
+                if (!supported.equals("true") && !supported.equals("false")) {
+                    throw new UnsupportedOperationException(
+                            ("Supported value must be either true or false"));
+                }
+                boolean isSupported = Boolean.parseBoolean(supported);
+
+                // Check if the format is already found before.
+                if (mFormatSupportedMap.get(name) != null && mFormatSupportedMap.get(name)
+                        != isSupported) {
+                    throw new UnsupportedOperationException(
+                            "Format: " + name + " has conflict supported value");
+                }
+
+                switch (name) {
+                    case "HEVC":
+                        if (isSupported) {
+                            mSupportedVideoMimeTypes.add(MediaFormat.MIMETYPE_VIDEO_HEVC);
+                        }
+                        break;
+                    case "HDR10":
+                        if (isSupported) {
+                            mSupportedHdrTypes.add(MediaFeature.HdrType.HDR10);
+                        }
+                        break;
+                    case "HDR10Plus":
+                        if (isSupported) {
+                            mSupportedHdrTypes.add(MediaFeature.HdrType.HDR10_PLUS);
+                        }
+                        break;
+                    case "Dolby-Vision":
+                        if (isSupported) {
+                            mSupportedHdrTypes.add(MediaFeature.HdrType.DOLBY_VISION);
+                        }
+                        break;
+                    case "HLG":
+                        if (isSupported) {
+                            mSupportedHdrTypes.add(MediaFeature.HdrType.HLG);
+                        }
+                        break;
+                    case "SlowMotion":
+                        mIsSlowMotionSupported = isSupported;
+                        break;
+                    default:
+                        throw new UnsupportedOperationException("Invalid format name " + name);
+                }
+                // Save the name and isSupported into the map for validate later.
+                mFormatSupportedMap.put(name, isSupported);
+            } else {
+                throw new UnsupportedOperationException(
+                        "Format name and supported must both be specified");
+            }
         }
 
         /**
@@ -213,6 +347,11 @@ public final class ApplicationMediaCapabilities implements Parcelable {
          */
         @NonNull
         public ApplicationMediaCapabilities build() {
+            Log.d(TAG,
+                    "Building ApplicationMediaCapabilities with: " + mSupportedHdrTypes.toString()
+                            + " " + mSupportedVideoMimeTypes.toString() + " "
+                            + mIsSlowMotionSupported);
+
             // If hdr is supported, application must also support hevc.
             if (!mSupportedHdrTypes.isEmpty() && !mSupportedVideoMimeTypes.contains(
                     MediaFormat.MIMETYPE_VIDEO_HEVC)) {

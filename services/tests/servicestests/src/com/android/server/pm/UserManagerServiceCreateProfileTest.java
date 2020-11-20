@@ -27,7 +27,6 @@ import android.os.Looper;
 import android.os.ServiceSpecificException;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.os.UserManagerInternal;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.MediumTest;
