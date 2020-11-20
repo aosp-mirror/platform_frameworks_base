@@ -144,6 +144,14 @@
         />
 
     <FrameLayout
+        android:id="@+id/alternate_expand_target"
+        android:layout_width="@dimen/notification_content_margin_start"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        android:importantForAccessibility="no"
+        />
+
+    <FrameLayout
         android:id="@+id/expand_button_touch_container"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
