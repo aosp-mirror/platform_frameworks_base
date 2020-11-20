@@ -154,7 +154,6 @@ import java.util.function.Consumer;
 public class TelephonyManager {
     private static final String TAG = "TelephonyManager";
 
-    private TelephonyRegistryManager mTelephonyRegistryMgr;
     /**
      * To expand the error codes for {@link TelephonyManager#updateAvailableNetworks} and
      * {@link TelephonyManager#setPreferredOpportunisticDataSubscription}.
@@ -5594,22 +5593,12 @@ public class TelephonyManager {
      * @param events The telephony state(s) of interest to the listener,
      *               as a bitwise-OR combination of {@link PhoneStateListener}
      *               LISTEN_ flags.
-     * @deprecated Use {@link #registerPhoneStateListener(Executor, PhoneStateListener)}.
+     * @deprecated use {@link #listen(long, PhoneStateListener) instead due to the event number
+     *             limit increased to 64.
      */
     @Deprecated
     public void listen(PhoneStateListener listener, int events) {
-        boolean notifyNow = getITelephony() != null;
-        mTelephonyRegistryMgr = mContext.getSystemService(TelephonyRegistryManager.class);
-        if (mTelephonyRegistryMgr != null) {
-            if (events != PhoneStateListener.LISTEN_NONE) {
-                mTelephonyRegistryMgr.registerPhoneStateListenerWithEvents(getSubId(),
-                        getOpPackageName(), getAttributionTag(), listener, events, notifyNow);
-            } else {
-                unregisterPhoneStateListener(listener);
-            }
-        } else {
-            throw new IllegalStateException("telephony service is null.");
-        }
+        listen(events, listener);
     }
 
     /**
@@ -5645,21 +5634,18 @@ public class TelephonyManager {
      *               LISTEN_ flags.
      * @param listener The {@link PhoneStateListener} object to register
      *                 (or unregister)
-     * @deprecated Use {@link #registerPhoneStateListener(Executor, PhoneStateListener)}.
      */
-    @Deprecated
     public void listen(long events, @NonNull PhoneStateListener listener) {
-        mTelephonyRegistryMgr = mContext.getSystemService(TelephonyRegistryManager.class);
-        if (mTelephonyRegistryMgr != null) {
-            if (events != PhoneStateListener.LISTEN_NONE) {
-                mTelephonyRegistryMgr.registerPhoneStateListenerWithEvents(getSubId(),
-                        getOpPackageName(), getAttributionTag(), listener,
-                        Long.valueOf(events).intValue(), getITelephony() != null);
-            } else {
-                unregisterPhoneStateListener(listener);
-            }
+        if (mContext == null) return;
+        boolean notifyNow = (getITelephony() != null);
+        TelephonyRegistryManager telephonyRegistry =
+                (TelephonyRegistryManager)
+                        mContext.getSystemService(Context.TELEPHONY_REGISTRY_SERVICE);
+        if (telephonyRegistry != null) {
+            telephonyRegistry.listenForSubscriber(mSubId, getOpPackageName(), getAttributionTag(),
+                    listener, events, notifyNow);
         } else {
-            throw new IllegalStateException("telephony service is null.");
+            Rlog.w(TAG, "telephony registry not ready.");
         }
     }
 
@@ -14222,71 +14208,5 @@ public class TelephonyManager {
         }
 
         return Collections.emptyList();
-    }
-
-    /**
-     * Registers a listener object to receive notification of changes
-     * in specified telephony states.
-     * <p>
-     * To register a listener, pass a {@link PhoneStateListener} which implements
-     * interfaces of events. For example,
-     * FakeServiceStateChangedListener extends {@link PhoneStateListener} implements
-     * {@link PhoneStateListener.ServiceStateChangedListener}.
-     *
-     * At registration, and when a specified telephony state changes, the telephony manager invokes
-     * the appropriate callback method on the listener object and passes the current (updated)
-     * values.
-     * <p>
-     *
-     * If this TelephonyManager object has been created with {@link #createForSubscriptionId},
-     * applies to the given subId. Otherwise, applies to
-     * {@link SubscriptionManager#getDefaultSubscriptionId()}. To listen events for multiple subIds,
-     * pass a separate listener object to each TelephonyManager object created with
-     * {@link #createForSubscriptionId}.
-     *
-     * Note: if you call this method while in the middle of a binder transaction, you <b>must</b>
-     * call {@link android.os.Binder#clearCallingIdentity()} before calling this method. A
-     * {@link SecurityException} will be thrown otherwise.
-     *
-     * This API should be used sparingly -- large numbers of listeners will cause system
-     * instability. If a process has registered too many listeners without unregistering them, it
-     * may encounter an {@link IllegalStateException} when trying to register more listeners.
-     *
-     * @param executor The executor of where the callback will execute.
-     * @param listener The {@link PhoneStateListener} object to register.
-     */
-    public void registerPhoneStateListener(@NonNull @CallbackExecutor Executor executor,
-            @NonNull PhoneStateListener listener) {
-        if (executor == null || listener == null) {
-            throw new IllegalStateException("telephony service is null.");
-        }
-        mTelephonyRegistryMgr = (TelephonyRegistryManager)
-                mContext.getSystemService(Context.TELEPHONY_REGISTRY_SERVICE);
-        if (mTelephonyRegistryMgr != null) {
-            mTelephonyRegistryMgr.registerPhoneStateListener(executor, getSubId(),
-                    getOpPackageName(), getAttributionTag(), listener, getITelephony() != null);
-        } else {
-            throw new IllegalStateException("telephony service is null.");
-        }
-    }
-
-    /**
-     * Unregister an existing {@link PhoneStateListener}.
-     *
-     * @param listener The {@link PhoneStateListener} object to unregister.
-     */
-    public void unregisterPhoneStateListener(@NonNull PhoneStateListener listener) {
-
-        if (mContext == null) {
-            throw new IllegalStateException("telephony service is null.");
-        }
-
-        mTelephonyRegistryMgr = mContext.getSystemService(TelephonyRegistryManager.class);
-        if (mTelephonyRegistryMgr != null) {
-            mTelephonyRegistryMgr.unregisterPhoneStateListener(getSubId(), getOpPackageName(),
-                    getAttributionTag(), listener, getITelephony() != null);
-        } else {
-            throw new IllegalStateException("telephony service is null.");
-        }
     }
 }
