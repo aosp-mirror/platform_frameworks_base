@@ -57,6 +57,20 @@ public abstract class UserManagerInternal {
     }
 
     /**
+     * Listener for user lifecycle events.
+     *
+     * <p><b>NOTE: </b>implementations MUST not block the current thread.
+     */
+    public interface UserLifecycleListener {
+
+        /** Called when a new user is created. */
+        default void onUserCreated(UserInfo user) {}
+
+        /** Called when an existing user is removed. */
+        default void onUserRemoved(UserInfo user) {}
+    }
+
+    /**
      * Called by {@link com.android.server.devicepolicy.DevicePolicyManagerService} to set
      * restrictions enforced by the user.
      *
@@ -96,6 +110,12 @@ public abstract class UserManagerInternal {
 
     /** Remove a {@link UserRestrictionsListener}. */
     public abstract void removeUserRestrictionsListener(UserRestrictionsListener listener);
+
+    /** Adds a {@link UserLifecycleListener}. */
+    public abstract void addUserLifecycleListener(UserLifecycleListener listener);
+
+    /** Removes a {@link UserLifecycleListener}. */
+    public abstract void removeUserLifecycleListener(UserLifecycleListener listener);
 
     /**
      * Called by {@link com.android.server.devicepolicy.DevicePolicyManagerService} to update
