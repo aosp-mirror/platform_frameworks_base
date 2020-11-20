@@ -97,10 +97,8 @@ public class NotificationTopLineView extends ViewGroup {
         final int givenWidth = MeasureSpec.getSize(widthMeasureSpec);
         final int givenHeight = MeasureSpec.getSize(heightMeasureSpec);
         final boolean wrapHeight = MeasureSpec.getMode(heightMeasureSpec) == MeasureSpec.AT_MOST;
-        int wrapContentWidthSpec = MeasureSpec.makeMeasureSpec(givenWidth,
-                MeasureSpec.AT_MOST);
-        int wrapContentHeightSpec = MeasureSpec.makeMeasureSpec(givenHeight,
-                MeasureSpec.AT_MOST);
+        int wrapContentWidthSpec = MeasureSpec.makeMeasureSpec(givenWidth, MeasureSpec.AT_MOST);
+        int heightSpec = MeasureSpec.makeMeasureSpec(givenHeight, MeasureSpec.AT_MOST);
         int totalWidth = getPaddingStart();
         int maxChildHeight = -1;
         mMaxAscent = -1;
@@ -114,7 +112,7 @@ public class NotificationTopLineView extends ViewGroup {
             final MarginLayoutParams lp = (MarginLayoutParams) child.getLayoutParams();
             int childWidthSpec = getChildMeasureSpec(wrapContentWidthSpec,
                     lp.leftMargin + lp.rightMargin, lp.width);
-            int childHeightSpec = getChildMeasureSpec(wrapContentHeightSpec,
+            int childHeightSpec = getChildMeasureSpec(heightSpec,
                     lp.topMargin + lp.bottomMargin, lp.height);
             child.measure(childWidthSpec, childHeightSpec);
             totalWidth += lp.leftMargin + lp.rightMargin + child.getMeasuredWidth();
@@ -131,37 +129,37 @@ public class NotificationTopLineView extends ViewGroup {
         int endMargin = Math.max(mHeaderTextMarginEnd, getPaddingEnd());
         if (totalWidth > givenWidth - endMargin) {
             int overFlow = totalWidth - givenWidth + endMargin;
-            if (mAppName != null) {
-                // We are overflowing, lets shrink the app name first
-                overFlow = shrinkViewForOverflow(wrapContentHeightSpec, overFlow, mAppName,
-                        mChildMinWidth);
-            }
 
-            if (mTitle != null) {
-                // still overflowing, we shrink the title text
-                overFlow = shrinkViewForOverflow(wrapContentHeightSpec, overFlow, mTitle,
-                        mChildMinWidth);
-            }
+            // First shrink the app name, down to a minimum size
+            overFlow = shrinkViewForOverflow(heightSpec, overFlow, mAppName, mChildMinWidth);
 
-            // still overflowing, we shrink the header text
-            overFlow = shrinkViewForOverflow(wrapContentHeightSpec, overFlow, mHeaderText, 0);
+            // Next, shrink the header text (this usually has subText)
+            //   This shrinks the subtext first, but not all the way (yet!)
+            overFlow = shrinkViewForOverflow(heightSpec, overFlow, mHeaderText, mChildMinWidth);
 
-            // still overflowing, finally we shrink the secondary header text
-            shrinkViewForOverflow(wrapContentHeightSpec, overFlow, mSecondaryHeaderText,
-                    0);
+            // Next, shrink the secondary header text  (this rarely has conversationTitle)
+            overFlow = shrinkViewForOverflow(heightSpec, overFlow, mSecondaryHeaderText, 0);
+
+            // Next, shrink the title text (this has contentTitle; only in headerless views)
+            overFlow = shrinkViewForOverflow(heightSpec, overFlow, mTitle, mChildMinWidth);
+
+            // Finally, if there is still overflow, shrink the header down to 0 if still necessary.
+            shrinkViewForOverflow(heightSpec, overFlow, mHeaderText, 0);
         }
         setMeasuredDimension(givenWidth, wrapHeight ? maxChildHeight : givenHeight);
     }
 
     private int shrinkViewForOverflow(int heightSpec, int overFlow, View targetView,
             int minimumWidth) {
-        final int oldWidth = targetView.getMeasuredWidth();
-        if (overFlow > 0 && targetView.getVisibility() != GONE && oldWidth > minimumWidth) {
-            // we're still too big
-            int newSize = Math.max(minimumWidth, oldWidth - overFlow);
-            int childWidthSpec = MeasureSpec.makeMeasureSpec(newSize, MeasureSpec.AT_MOST);
-            targetView.measure(childWidthSpec, heightSpec);
-            overFlow -= oldWidth - newSize;
+        if (targetView != null) {
+            final int oldWidth = targetView.getMeasuredWidth();
+            if (overFlow > 0 && targetView.getVisibility() != GONE && oldWidth > minimumWidth) {
+                // we're still too big
+                int newSize = Math.max(minimumWidth, oldWidth - overFlow);
+                int childWidthSpec = MeasureSpec.makeMeasureSpec(newSize, MeasureSpec.AT_MOST);
+                targetView.measure(childWidthSpec, heightSpec);
+                overFlow -= oldWidth - newSize;
+            }
         }
         return overFlow;
     }
