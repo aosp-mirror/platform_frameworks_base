@@ -39,6 +39,7 @@ import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.EnrollClient;
 import com.android.server.biometrics.sensors.face.FaceUtils;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 /**
@@ -51,6 +52,7 @@ public class FaceEnrollClient extends EnrollClient<ISession> {
     @NonNull private final int[] mEnrollIgnoreList;
     @NonNull private final int[] mEnrollIgnoreListVendor;
     @Nullable private ICancellationSignal mCancellationSignal;
+    @Nullable private android.hardware.common.NativeHandle mPreviewSurface;
     private final int mMaxTemplatesPerUser;
 
     FaceEnrollClient(@NonNull Context context, @NonNull LazyDaemon<ISession> lazyDaemon,
@@ -66,6 +68,24 @@ public class FaceEnrollClient extends EnrollClient<ISession> {
         mEnrollIgnoreListVendor = getContext().getResources()
                 .getIntArray(R.array.config_face_acquire_vendor_enroll_ignorelist);
         mMaxTemplatesPerUser = maxTemplatesPerUser;
+        try {
+            // We must manually close the duplicate handle after it's no longer needed.
+            // The caller is responsible for closing the original handle.
+            mPreviewSurface = AidlNativeHandleUtils.dup(previewSurface);
+        } catch (IOException e) {
+            mPreviewSurface = null;
+            Slog.e(TAG, "Failed to dup previewSurface", e);
+        }
+    }
+
+    @Override
+    public void destroy() {
+        try {
+            AidlNativeHandleUtils.close(mPreviewSurface);
+        } catch (IOException e) {
+            Slog.e(TAG, "Failed to close mPreviewSurface", e);
+        }
+        super.destroy();
     }
 
     @Override
@@ -94,10 +114,9 @@ public class FaceEnrollClient extends EnrollClient<ISession> {
 
         try {
             // TODO(b/172593978): Pass features.
-            // TODO(b/172593521): Pass mPreviewSurface as android.hardware.common.NativeHandle.
             mCancellationSignal = getFreshDaemon().enroll(mSequentialId,
                     HardwareAuthTokenUtils.toHardwareAuthToken(mHardwareAuthToken),
-                    null /* mPreviewSurface */);
+                    mPreviewSurface);
         } catch (RemoteException e) {
             Slog.e(TAG, "Remote exception when requesting enroll", e);
             onError(BiometricFaceConstants.FACE_ERROR_UNABLE_TO_PROCESS, 0 /* vendorCode */);
