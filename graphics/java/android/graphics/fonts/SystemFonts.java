@@ -22,7 +22,9 @@ import android.graphics.FontListParser;
 import android.text.FontConfig;
 import android.util.ArrayMap;
 import android.util.Log;
+import android.util.Pair;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 
@@ -51,9 +53,9 @@ public final class SystemFonts {
 
     private SystemFonts() {}  // Do not instansiate.
 
-    private static final Map<String, FontFamily[]> sSystemFallbackMap;
-    private static final FontConfig.Alias[] sAliases;
-    private static final List<Font> sAvailableFonts;
+    private static final Object LOCK = new Object();
+    private static @GuardedBy("sLock") Set<Font> sAvailableFonts;
+    private static @GuardedBy("sLock") Map<String, FontFamily[]> sFamilyMap;
 
     /**
      * Returns all available font files in the system.
@@ -61,29 +63,24 @@ public final class SystemFonts {
      * @return a set of system fonts
      */
     public static @NonNull Set<Font> getAvailableFonts() {
-        HashSet<Font> set = new HashSet<>();
-        set.addAll(sAvailableFonts);
-        return set;
-    }
+        synchronized (LOCK) {
+            if (sAvailableFonts != null) {
+                return sAvailableFonts;
+            }
 
-    /**
-     * Returns raw system fallback map.
-     *
-     * This method is intended to be used only by Typeface static initializer.
-     * @hide
-     */
-    public static @NonNull Map<String, FontFamily[]> getRawSystemFallbackMap() {
-        return sSystemFallbackMap;
-    }
+            Set<Font> set = new HashSet<>();
 
-    /**
-     * Returns a list of aliases.
-     *
-     * This method is intended to be used only by Typeface static initializer.
-     * @hide
-     */
-    public static @NonNull FontConfig.Alias[] getAliases() {
-        return sAliases;
+            for (FontFamily[] items : sFamilyMap.values()) {
+                for (FontFamily family : items) {
+                    for (int i = 0; i < family.getSize(); ++i) {
+                        set.add(family.getFont(i));
+                    }
+                }
+            }
+
+            sAvailableFonts = Collections.unmodifiableSet(set);
+            return sAvailableFonts;
+        }
     }
 
     private static @Nullable ByteBuffer mmap(@NonNull String fullPath) {
@@ -98,8 +95,7 @@ public final class SystemFonts {
 
     private static void pushFamilyToFallback(@NonNull FontConfig.Family xmlFamily,
             @NonNull ArrayMap<String, ArrayList<FontFamily>> fallbackMap,
-            @NonNull Map<String, ByteBuffer> cache,
-            @NonNull ArrayList<Font> availableFonts) {
+            @NonNull Map<String, ByteBuffer> cache) {
 
         final String languageTags = xmlFamily.getLanguages();
         final int variant = xmlFamily.getVariant();
@@ -123,7 +119,7 @@ public final class SystemFonts {
         }
 
         final FontFamily defaultFamily = defaultFonts.isEmpty() ? null : createFontFamily(
-                xmlFamily.getName(), defaultFonts, languageTags, variant, cache, availableFonts);
+                xmlFamily.getName(), defaultFonts, languageTags, variant, cache);
 
         // Insert family into fallback map.
         for (int i = 0; i < fallbackMap.size(); i++) {
@@ -135,8 +131,7 @@ public final class SystemFonts {
                 }
             } else {
                 final FontFamily family = createFontFamily(
-                        xmlFamily.getName(), fallback, languageTags, variant, cache,
-                        availableFonts);
+                        xmlFamily.getName(), fallback, languageTags, variant, cache);
                 if (family != null) {
                     fallbackMap.valueAt(i).add(family);
                 } else if (defaultFamily != null) {
@@ -152,8 +147,7 @@ public final class SystemFonts {
             @NonNull List<FontConfig.Font> fonts,
             @NonNull String languageTags,
             @FontConfig.Family.Variant int variant,
-            @NonNull Map<String, ByteBuffer> cache,
-            @NonNull ArrayList<Font> availableFonts) {
+            @NonNull Map<String, ByteBuffer> cache) {
         if (fonts.size() == 0) {
             return null;
         }
@@ -187,7 +181,6 @@ public final class SystemFonts {
                 throw new RuntimeException(e);  // Never reaches here
             }
 
-            availableFonts.add(font);
             if (b == null) {
                 b = new FontFamily.Builder(font);
             } else {
@@ -199,12 +192,11 @@ public final class SystemFonts {
 
     private static void appendNamedFamily(@NonNull FontConfig.Family xmlFamily,
             @NonNull HashMap<String, ByteBuffer> bufferCache,
-            @NonNull ArrayMap<String, ArrayList<FontFamily>> fallbackListMap,
-            @NonNull ArrayList<Font> availableFonts) {
+            @NonNull ArrayMap<String, ArrayList<FontFamily>> fallbackListMap) {
         final String familyName = xmlFamily.getName();
         final FontFamily family = createFontFamily(
                 familyName, Arrays.asList(xmlFamily.getFonts()),
-                xmlFamily.getLanguages(), xmlFamily.getVariant(), bufferCache, availableFonts);
+                xmlFamily.getLanguages(), xmlFamily.getVariant(), bufferCache);
         if (family == null) {
             return;
         }
@@ -227,8 +219,7 @@ public final class SystemFonts {
     public static FontConfig.Alias[] buildSystemFallback(@NonNull String xmlPath,
             @NonNull String fontDir,
             @NonNull FontCustomizationParser.Result oemCustomization,
-            @NonNull ArrayMap<String, FontFamily[]> fallbackMap,
-            @NonNull ArrayList<Font> availableFonts) {
+            @NonNull Map<String, FontFamily[]> fallbackMap) {
         try {
             final FileInputStream fontsIn = new FileInputStream(xmlPath);
             final FontConfig fontConfig = FontListParser.parse(fontsIn, fontDir);
@@ -243,12 +234,12 @@ public final class SystemFonts {
                 if (familyName == null) {
                     continue;
                 }
-                appendNamedFamily(xmlFamily, bufferCache, fallbackListMap, availableFonts);
+                appendNamedFamily(xmlFamily, bufferCache, fallbackListMap);
             }
 
             for (int i = 0; i < oemCustomization.mAdditionalNamedFamilies.size(); ++i) {
                 appendNamedFamily(oemCustomization.mAdditionalNamedFamilies.get(i),
-                        bufferCache, fallbackListMap, availableFonts);
+                        bufferCache, fallbackListMap);
             }
 
             // Then, add fallback fonts to the each fallback map.
@@ -257,7 +248,7 @@ public final class SystemFonts {
                 // The first family (usually the sans-serif family) is always placed immediately
                 // after the primary family in the fallback.
                 if (i == 0 || xmlFamily.getName() == null) {
-                    pushFamilyToFallback(xmlFamily, fallbackListMap, bufferCache, availableFonts);
+                    pushFamilyToFallback(xmlFamily, fallbackListMap, bufferCache);
                 }
             }
 
@@ -292,14 +283,17 @@ public final class SystemFonts {
         }
     }
 
-    static {
-        final ArrayMap<String, FontFamily[]> systemFallbackMap = new ArrayMap<>();
-        final ArrayList<Font> availableFonts = new ArrayList<>();
+    /** @hide */
+    public static @NonNull Pair<FontConfig.Alias[], Map<String, FontFamily[]>>
+            initializePreinstalledFonts() {
         final FontCustomizationParser.Result oemCustomization =
                 readFontCustomization("/product/etc/fonts_customization.xml", "/product/fonts/");
-        sAliases = buildSystemFallback("/system/etc/fonts.xml", "/system/fonts/",
-                oemCustomization, systemFallbackMap, availableFonts);
-        sSystemFallbackMap = Collections.unmodifiableMap(systemFallbackMap);
-        sAvailableFonts = Collections.unmodifiableList(availableFonts);
+        Map<String, FontFamily[]> map = new ArrayMap<>();
+        FontConfig.Alias[] aliases = buildSystemFallback("/system/etc/fonts.xml", "/system/fonts/",
+                oemCustomization, map);
+        synchronized (LOCK) {
+            sFamilyMap = map;
+        }
+        return new Pair(aliases, map);
     }
 }

@@ -23,7 +23,6 @@ import static org.junit.Assert.assertTrue;
 
 import android.content.Context;
 import android.content.res.AssetManager;
-import android.graphics.fonts.Font;
 import android.graphics.fonts.FontCustomizationParser;
 import android.graphics.fonts.FontFamily;
 import android.graphics.fonts.SystemFonts;
@@ -49,7 +48,6 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
-import java.util.ArrayList;
 import java.util.Locale;
 
 @SmallTest
@@ -133,14 +131,14 @@ public class TypefaceSystemFallbackTest {
     private static void buildSystemFallback(String xml,
             FontCustomizationParser.Result oemCustomization, ArrayMap<String, Typeface> fontMap,
             ArrayMap<String, FontFamily[]> fallbackMap) {
-        final ArrayList<Font> availableFonts = new ArrayList<>();
         try (FileOutputStream fos = new FileOutputStream(TEST_FONTS_XML)) {
             fos.write(xml.getBytes(Charset.forName("UTF-8")));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+
         final FontConfig.Alias[] aliases = SystemFonts.buildSystemFallback(TEST_FONTS_XML,
-                TEST_FONT_DIR, oemCustomization, fallbackMap, availableFonts);
+                TEST_FONT_DIR, oemCustomization, fallbackMap);
         Typeface.initSystemDefaultTypefaces(fontMap, fallbackMap, aliases);
     }
 
@@ -156,12 +154,11 @@ public class TypefaceSystemFallbackTest {
     public void testBuildSystemFallback() {
         final ArrayMap<String, Typeface> fontMap = new ArrayMap<>();
         final ArrayMap<String, FontFamily[]> fallbackMap = new ArrayMap<>();
-        final ArrayList<Font> availableFonts = new ArrayList<>();
         final FontCustomizationParser.Result oemCustomization =
                 new FontCustomizationParser.Result();
 
         final FontConfig.Alias[] aliases = SystemFonts.buildSystemFallback(SYSTEM_FONTS_XML,
-                SYSTEM_FONT_DIR, oemCustomization, fallbackMap, availableFonts);
+                SYSTEM_FONT_DIR, oemCustomization, fallbackMap);
 
         assertNotNull(aliases);
         assertFalse(fallbackMap.isEmpty());

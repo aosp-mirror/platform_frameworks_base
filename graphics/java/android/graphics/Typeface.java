@@ -44,6 +44,7 @@ import android.text.FontConfig;
 import android.util.Base64;
 import android.util.LongSparseArray;
 import android.util.LruCache;
+import android.util.Pair;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
@@ -1296,8 +1297,9 @@ public class Typeface {
 
     static {
         final HashMap<String, Typeface> systemFontMap = new HashMap<>();
-        initSystemDefaultTypefaces(systemFontMap, SystemFonts.getRawSystemFallbackMap(),
-                SystemFonts.getAliases());
+        Pair<FontConfig.Alias[], Map<String, FontFamily[]>> pair =
+                SystemFonts.initializePreinstalledFonts();
+        initSystemDefaultTypefaces(systemFontMap, pair.second, pair.first);
         setSystemFontMap(systemFontMap);
     }
 
