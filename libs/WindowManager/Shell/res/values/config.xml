@@ -30,6 +30,12 @@
     <!-- Animation duration when using long press on recents to dock -->
     <integer name="long_press_dock_anim_duration">250</integer>
 
+    <!-- Animation duration for translating of one handed when trigger / dismiss. -->
+    <integer name="config_one_handed_translate_animation_duration">300</integer>
+
+    <!-- One handed mode default offset % of display size -->
+    <fraction name="config_one_handed_offset">40%</fraction>
+
     <!-- Allow one handed to enable round corner -->
     <bool name="config_one_handed_enable_round_corner">true</bool>
 

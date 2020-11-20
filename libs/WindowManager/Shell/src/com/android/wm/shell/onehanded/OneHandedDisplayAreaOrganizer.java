@@ -40,6 +40,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.os.SomeArgs;
+import com.android.wm.shell.R;
 import com.android.wm.shell.common.DisplayController;
 
 import java.io.PrintWriter;
@@ -156,8 +157,11 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer {
         mDisplayController = displayController;
         mDefaultDisplayBounds.set(getDisplayBounds());
         mLastVisualDisplayBounds.set(getDisplayBounds());
+        final int animationDurationConfig = context.getResources().getInteger(
+                R.integer.config_one_handed_translate_animation_duration);
         mEnterExitAnimationDurationMs =
-                SystemProperties.getInt(ONE_HANDED_MODE_TRANSLATE_ANIMATION_DURATION, 300);
+                SystemProperties.getInt(ONE_HANDED_MODE_TRANSLATE_ANIMATION_DURATION,
+                        animationDurationConfig);
         mSurfaceControlTransactionFactory = SurfaceControl.Transaction::new;
         mTutorialHandler = tutorialHandler;
     }
