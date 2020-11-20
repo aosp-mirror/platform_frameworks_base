@@ -88,11 +88,6 @@ public class SystemUserInfoHelper extends UserInfoHelper {
         return mUserManager;
     }
 
-    /**
-     * Returns an array of running user ids. This will include all running users, and will also
-     * include any profiles of the running users. The caller must never mutate the returned
-     * array.
-     */
     @Override
     public int[] getRunningUserIds() {
         IActivityManager activityManager = getActivityManager();
@@ -110,10 +105,6 @@ public class SystemUserInfoHelper extends UserInfoHelper {
         }
     }
 
-    /**
-     * Returns true if the given user id is either the current user or a profile of the current
-     * user.
-     */
     @Override
     public boolean isCurrentUserId(@UserIdInt int userId) {
         ActivityManagerInternal activityManagerInternal = getActivityManagerInternal();
@@ -126,6 +117,21 @@ public class SystemUserInfoHelper extends UserInfoHelper {
             }
         } else {
             return false;
+        }
+    }
+
+    @Override
+    public @UserIdInt int getCurrentUserId() {
+        ActivityManagerInternal activityManagerInternal = getActivityManagerInternal();
+        if (activityManagerInternal != null) {
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                return activityManagerInternal.getCurrentUserId();
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        } else {
+            return UserHandle.USER_NULL;
         }
     }
 

@@ -1469,17 +1469,8 @@ public class LocationProviderManager extends
 
     public @Nullable Location getLastLocation(CallerIdentity identity,
             @PermissionLevel int permissionLevel, boolean ignoreLocationSettings) {
-        if (mSettingsHelper.isLocationPackageBlacklisted(identity.getUserId(),
-                identity.getPackageName())) {
+        if (!isActive(ignoreLocationSettings, identity)) {
             return null;
-        }
-        if (!ignoreLocationSettings) {
-            if (!isEnabled(identity.getUserId())) {
-                return null;
-            }
-            if (!identity.isSystem() && !mUserHelper.isCurrentUserId(identity.getUserId())) {
-                return null;
-            }
         }
 
         // lastly - note app ops
@@ -1905,20 +1896,16 @@ public class LocationProviderManager extends
             Preconditions.checkState(Thread.holdsLock(mLock));
         }
 
-        CallerIdentity identity = registration.getIdentity();
-
         if (!registration.isPermitted()) {
             return false;
         }
 
-        if (!registration.getRequest().isLocationSettingsIgnored()) {
-            if (!isEnabled(identity.getUserId())) {
-                return false;
-            }
-            if (!identity.isSystem() && !mUserHelper.isCurrentUserId(identity.getUserId())) {
-                return false;
-            }
+        boolean locationSettingsIgnored = registration.getRequest().isLocationSettingsIgnored();
+        if (!isActive(locationSettingsIgnored, registration.getIdentity())) {
+            return false;
+        }
 
+        if (!locationSettingsIgnored) {
             switch (mLocationPowerSaveModeHelper.getLocationPowerSaveMode()) {
                 case LOCATION_MODE_FOREGROUND_ONLY:
                     if (!registration.isForeground()) {
@@ -1944,8 +1931,32 @@ public class LocationProviderManager extends
             }
         }
 
-        return !mSettingsHelper.isLocationPackageBlacklisted(identity.getUserId(),
-                identity.getPackageName());
+        return true;
+    }
+
+    private boolean isActive(boolean locationSettingsIgnored, CallerIdentity identity) {
+        if (identity.isSystemServer()) {
+            if (!locationSettingsIgnored) {
+                if (!isEnabled(mUserHelper.getCurrentUserId())) {
+                    return false;
+                }
+            }
+        } else {
+            if (!locationSettingsIgnored) {
+                if (!isEnabled(identity.getUserId())) {
+                    return false;
+                }
+                if (!mUserHelper.isCurrentUserId(identity.getUserId())) {
+                    return false;
+                }
+            }
+            if (mSettingsHelper.isLocationPackageBlacklisted(identity.getUserId(),
+                    identity.getPackageName())) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     @GuardedBy("mLock")

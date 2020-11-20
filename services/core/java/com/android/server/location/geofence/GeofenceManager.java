@@ -322,12 +322,28 @@ public class GeofenceManager extends
 
     @Override
     protected boolean isActive(GeofenceRegistration registration) {
-        CallerIdentity identity = registration.getIdentity();
-        return registration.isPermitted()
-                && (identity.isSystem() || mUserInfoHelper.isCurrentUserId(identity.getUserId()))
-                && mSettingsHelper.isLocationEnabled(identity.getUserId())
-                && !mSettingsHelper.isLocationPackageBlacklisted(identity.getUserId(),
-                identity.getPackageName());
+        return registration.isPermitted() && isActive(registration.getIdentity());
+    }
+
+    private boolean isActive(CallerIdentity identity) {
+        if (identity.isSystemServer()) {
+            if (!mSettingsHelper.isLocationEnabled(mUserInfoHelper.getCurrentUserId())) {
+                return false;
+            }
+        } else {
+            if (!mSettingsHelper.isLocationEnabled(identity.getUserId())) {
+                return false;
+            }
+            if (!mUserInfoHelper.isCurrentUserId(identity.getUserId())) {
+                return false;
+            }
+            if (mSettingsHelper.isLocationPackageBlacklisted(identity.getUserId(),
+                    identity.getPackageName())) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     @Override
