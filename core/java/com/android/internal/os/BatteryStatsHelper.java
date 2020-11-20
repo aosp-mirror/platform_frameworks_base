@@ -203,7 +203,7 @@ public class BatteryStatsHelper {
             }
         }
         return getStats(IBatteryStats.Stub.asInterface(
-                ServiceManager.getService(BatteryStats.SERVICE_NAME)));
+                ServiceManager.getService(BatteryStats.SERVICE_NAME)), true);
     }
 
     @UnsupportedAppUsage
@@ -223,8 +223,13 @@ public class BatteryStatsHelper {
 
     @UnsupportedAppUsage
     public BatteryStats getStats() {
+        return getStats(true /* updateAll */);
+    }
+
+    /** Retrieves stats from BatteryService, optionally getting updated numbers */
+    public BatteryStats getStats(boolean updateAll) {
         if (mStats == null) {
-            load();
+            load(updateAll);
         }
         return mStats;
     }
@@ -720,19 +725,23 @@ public class BatteryStatsHelper {
 
     @UnsupportedAppUsage
     private void load() {
+        load(true);
+    }
+
+    private void load(boolean updateAll) {
         if (mBatteryInfo == null) {
             return;
         }
-        mStats = getStats(mBatteryInfo);
+        mStats = getStats(mBatteryInfo, updateAll);
         if (mCollectBatteryBroadcast) {
             mBatteryBroadcast = mContext.registerReceiver(null,
                     new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
         }
     }
 
-    private static BatteryStatsImpl getStats(IBatteryStats service) {
+    private static BatteryStatsImpl getStats(IBatteryStats service, boolean updateAll) {
         try {
-            ParcelFileDescriptor pfd = service.getStatisticsStream();
+            ParcelFileDescriptor pfd = service.getStatisticsStream(updateAll);
             if (pfd != null) {
                 if (false) {
                     Log.d(TAG, "selinux context: "
