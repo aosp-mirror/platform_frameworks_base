@@ -36,6 +36,7 @@ import android.telephony.CarrierRestrictionRules;
 import android.telephony.CellIdentity;
 import android.telephony.CellInfo;
 import android.telephony.ClientRequestStats;
+import android.telephony.ThermalMitigationRequest;
 import android.telephony.IccOpenLogicalChannelResponse;
 import android.telephony.ICellInfoCallback;
 import android.telephony.ModemActivityInfo;
@@ -2257,4 +2258,14 @@ interface ITelephony {
      * @return the availability of the capability
      */
     boolean isRadioInterfaceCapabilitySupported(String capability);
+
+    /**
+     * Thermal mitigation request to control functionalities at modem.
+     *
+     * @param subId the id of the subscription
+     * @param thermalMitigationRequest holds the parameters necessary for the request.
+     * @throws InvalidThermalMitigationRequestException if the parametes are invalid.
+     */
+    int sendThermalMitigationRequest(int subId,
+            in ThermalMitigationRequest thermalMitigationRequest);
 }
