@@ -325,7 +325,7 @@
     <string name="capability_desc_canControlMagnification" msgid="2206586716709254805">"Legt die Zoom-Stufe und -Position auf dem Display fest."</string>
     <string name="capability_title_canPerformGestures" msgid="9106545062106728987">"Touch-Gesten möglich"</string>
     <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"Tippen, Wischen, Zusammenziehen und andere Touch-Gesten möglich."</string>
-    <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"Fingerabdrucksensor-Gesten"</string>
+    <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"Gesten auf dem Fingerabdrucksensor"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Erfasst Touch-Gesten auf dem Fingerabdrucksensor des Geräts."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Screenshot erstellen"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Es kann ein Screenshot des Displays erstellt werden."</string>

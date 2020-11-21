@@ -1216,7 +1216,7 @@
     <string name="dump_heap_ready_text" msgid="5849618132123045516">"Protsessi <xliff:g id="PROC">%1$s</xliff:g> mälutõmmis on jagamiseks saadaval. Olge ettevaatlik: see mälutõmmis võib sisaldada tundlikke isiklikke andmeid, millele protsessil on juurdepääs. See võib hõlmata teie sisestatud teavet."</string>
     <string name="sendText" msgid="493003724401350724">"Valige teksti jaoks toiming"</string>
     <string name="volume_ringtone" msgid="134784084629229029">"Helina helitugevus"</string>
-    <string name="volume_music" msgid="7727274216734955095">"Meediumi helitugevus"</string>
+    <string name="volume_music" msgid="7727274216734955095">"Meedia helitugevus"</string>
     <string name="volume_music_hint_playing_through_bluetooth" msgid="2614142915948898228">"Esitatakse Bluetoothi kaudu"</string>
     <string name="volume_music_hint_silent_ringtone_selected" msgid="1514829655029062233">"Valitud on hääletu märguanne"</string>
     <string name="volume_call" msgid="7625321655265747433">"Kõne helitugevus"</string>
@@ -1227,7 +1227,7 @@
     <string name="volume_icon_description_bluetooth" msgid="7540388479345558400">"Bluetoothi maht"</string>
     <string name="volume_icon_description_ringer" msgid="2187800636867423459">"Helina tugevus"</string>
     <string name="volume_icon_description_incall" msgid="4491255105381227919">"Kõne helitugevus"</string>
-    <string name="volume_icon_description_media" msgid="4997633254078171233">"Meediumi helitugevus"</string>
+    <string name="volume_icon_description_media" msgid="4997633254078171233">"Meedia helitugevus"</string>
     <string name="volume_icon_description_notification" msgid="579091344110747279">"Teatise helitugevus"</string>
     <string name="ringtone_default" msgid="9118299121288174597">"Vaikehelin"</string>
     <string name="ringtone_default_with_actual" msgid="2709686194556159773">"Vaikimisi (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
