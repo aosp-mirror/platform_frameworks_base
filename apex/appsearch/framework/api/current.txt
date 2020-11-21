@@ -1,1 +1,49 @@
 // Signature format: 2.0
+package android.app.appsearch {
+
+  public final class AppSearchSchema {
+    method @NonNull public java.util.List<android.app.appsearch.AppSearchSchema.PropertyConfig> getProperties();
+    method @NonNull public String getSchemaType();
+  }
+
+  public static final class AppSearchSchema.Builder {
+    ctor public AppSearchSchema.Builder(@NonNull String);
+    method @NonNull public android.app.appsearch.AppSearchSchema.Builder addProperty(@NonNull android.app.appsearch.AppSearchSchema.PropertyConfig);
+    method @NonNull public android.app.appsearch.AppSearchSchema build();
+  }
+
+  public static final class AppSearchSchema.PropertyConfig {
+    method public int getCardinality();
+    method public int getDataType();
+    method public int getIndexingType();
+    method @NonNull public String getName();
+    method @Nullable public String getSchemaType();
+    method public int getTokenizerType();
+    field public static final int CARDINALITY_OPTIONAL = 2; // 0x2
+    field public static final int CARDINALITY_REPEATED = 1; // 0x1
+    field public static final int CARDINALITY_REQUIRED = 3; // 0x3
+    field public static final int DATA_TYPE_BOOLEAN = 4; // 0x4
+    field public static final int DATA_TYPE_BYTES = 5; // 0x5
+    field public static final int DATA_TYPE_DOCUMENT = 6; // 0x6
+    field public static final int DATA_TYPE_DOUBLE = 3; // 0x3
+    field public static final int DATA_TYPE_INT64 = 2; // 0x2
+    field public static final int DATA_TYPE_STRING = 1; // 0x1
+    field public static final int INDEXING_TYPE_EXACT_TERMS = 1; // 0x1
+    field public static final int INDEXING_TYPE_NONE = 0; // 0x0
+    field public static final int INDEXING_TYPE_PREFIXES = 2; // 0x2
+    field public static final int TOKENIZER_TYPE_NONE = 0; // 0x0
+    field public static final int TOKENIZER_TYPE_PLAIN = 1; // 0x1
+  }
+
+  public static final class AppSearchSchema.PropertyConfig.Builder {
+    ctor public AppSearchSchema.PropertyConfig.Builder(@NonNull String);
+    method @NonNull public android.app.appsearch.AppSearchSchema.PropertyConfig build();
+    method @NonNull public android.app.appsearch.AppSearchSchema.PropertyConfig.Builder setCardinality(int);
+    method @NonNull public android.app.appsearch.AppSearchSchema.PropertyConfig.Builder setDataType(int);
+    method @NonNull public android.app.appsearch.AppSearchSchema.PropertyConfig.Builder setIndexingType(int);
+    method @NonNull public android.app.appsearch.AppSearchSchema.PropertyConfig.Builder setSchemaType(@NonNull String);
+    method @NonNull public android.app.appsearch.AppSearchSchema.PropertyConfig.Builder setTokenizerType(int);
+  }
+
+}
+
