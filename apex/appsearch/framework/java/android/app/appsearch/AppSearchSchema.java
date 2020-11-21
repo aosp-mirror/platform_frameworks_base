@@ -183,8 +183,9 @@ public final class AppSearchSchema {
         public static final int DATA_TYPE_BYTES = 5;
 
         /**
-         * Indicates that the property itself is an Document, making it part a hierarchical Document
-         * schema. Any property using this DataType MUST have a valid {@code schemaType}.
+         * Indicates that the property is itself a {@link GenericDocument}, making it part of a
+         * hierarchical schema. Any property using this DataType MUST have a valid {@link
+         * PropertyConfig#getSchemaType}.
          */
         public static final int DATA_TYPE_DOCUMENT = 6;
 
@@ -231,8 +232,8 @@ public final class AppSearchSchema {
          * Content in this property will not be tokenized or indexed.
          *
          * <p>Useful if the data type is not made up of terms (e.g. {@link
-         * PropertyConfig#DATA_TYPE_DOCUMENT} or {@link PropertyConfig#DATA_TYPE_BYTES} type). All
-         * the properties inside the nested property won't be indexed regardless of the value of
+         * PropertyConfig#DATA_TYPE_DOCUMENT} or {@link PropertyConfig#DATA_TYPE_BYTES} type). None
+         * of the properties inside the nested property will be indexed regardless of the value of
          * {@code indexingType} for the nested properties.
          */
         public static final int INDEXING_TYPE_NONE = 0;
