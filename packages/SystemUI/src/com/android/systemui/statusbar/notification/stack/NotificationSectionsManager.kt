@@ -126,7 +126,7 @@ class NotificationSectionsManager @Inject internal constructor(
 
     fun createSectionsForBuckets(): Array<NotificationSection> =
             sectionsFeatureManager.getNotificationBuckets()
-                    .map { NotificationSection(parent, it) }
+                    .map { NotificationSection(it) }
                     .toTypedArray()
 
     /**
