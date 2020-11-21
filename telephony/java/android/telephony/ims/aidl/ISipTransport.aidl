@@ -26,7 +26,7 @@ import android.telephony.ims.aidl.ISipDelegateStateCallback;
  * {@hide}
  */
 oneway interface ISipTransport {
-    void createSipDelegate(in DelegateRequest request, ISipDelegateStateCallback dc,
+    void createSipDelegate(int subId, in DelegateRequest request, ISipDelegateStateCallback dc,
             ISipDelegateMessageCallback mc);
     void destroySipDelegate(ISipDelegate delegate, int reason);
 }

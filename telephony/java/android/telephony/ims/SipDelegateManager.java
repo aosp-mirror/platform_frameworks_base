@@ -236,17 +236,17 @@ public class SipDelegateManager {
     public static final int SIP_DELEGATE_DESTROY_REASON_REQUESTED_BY_APP = 2;
 
     /**
-     * The SipDelegate has closed because the IMS service does not support the creation of
-     * SipDelegates.
-     * @hide
-     */
-    public static final int SIP_DELEGATE_DESTROY_REASON_SERVICE_NOT_SUPPORTED = 3;
-
-    /**
      * The SipDelegate has been closed due to the user disabling RCS.
      * @hide
      */
-    public static final int SIP_DELEGATE_DESTROY_REASON_USER_DISABLED_RCS = 4;
+    public static final int SIP_DELEGATE_DESTROY_REASON_USER_DISABLED_RCS = 3;
+
+    /**
+     * The SipDelegate has been closed due to the subscription associated with this delegate being
+     * torn down.
+     * @hide
+     */
+    public static final int SIP_DELEGATE_DESTROY_REASON_SUBSCRIPTION_TORN_DOWN = 4;
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
@@ -254,8 +254,8 @@ public class SipDelegateManager {
             SIP_DELEGATE_DESTROY_REASON_UNKNOWN,
             SIP_DELEGATE_DESTROY_REASON_SERVICE_DEAD,
             SIP_DELEGATE_DESTROY_REASON_REQUESTED_BY_APP,
-            SIP_DELEGATE_DESTROY_REASON_SERVICE_NOT_SUPPORTED,
-            SIP_DELEGATE_DESTROY_REASON_USER_DISABLED_RCS
+            SIP_DELEGATE_DESTROY_REASON_USER_DISABLED_RCS,
+            SIP_DELEGATE_DESTROY_REASON_SUBSCRIPTION_TORN_DOWN
     })
     public @interface SipDelegateDestroyReason {}
 
@@ -316,6 +316,9 @@ public class SipDelegateManager {
      * always be available to handle incoming messages. One mechanism that can be used for this is
      * the {@link android.service.carrier.CarrierMessagingClientService}, which the framework keeps
      * a persistent binding to when the app is the default SMS application.
+     * <p>
+     * Note: the ability to create SipDelegates is only available applications running as the
+     * primary user.
      * @param request The parameters that are associated with the SipDelegate creation request that
      *                will be used to create the SipDelegate connection.
      * @param executor The executor that will be used to call the callbacks associated with this
@@ -346,8 +349,8 @@ public class SipDelegateManager {
                 throw new ImsException("Telephony server is down",
                         ImsException.CODE_ERROR_SERVICE_UNAVAILABLE);
             }
-            controller.createSipDelegate(mSubId, request, wrapper.getStateCallbackBinder(),
-                    wrapper.getMessageCallbackBinder());
+            controller.createSipDelegate(mSubId, request, mContext.getOpPackageName(),
+                    wrapper.getStateCallbackBinder(), wrapper.getMessageCallbackBinder());
         } catch (ServiceSpecificException e) {
             throw new ImsException(e.getMessage(), e.errorCode);
         } catch (RemoteException e) {
