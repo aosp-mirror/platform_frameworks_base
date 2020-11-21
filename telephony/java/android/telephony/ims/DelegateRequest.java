@@ -98,4 +98,9 @@ public final class DelegateRequest implements Parcelable {
     public int hashCode() {
         return Objects.hash(mFeatureTags);
     }
+
+    @Override
+    public String toString() {
+        return "DelegateRequest{mFeatureTags=" + mFeatureTags + '}';
+    }
 }
