@@ -42,7 +42,7 @@ public class SearchSpecCtsTest {
                 .setSnippetCount(5)
                 .setSnippetCountPerProperty(10)
                 .setMaxSnippetSize(15)
-                .setNumPerPage(42)
+                .setResultCountPerPage(42)
                 .setOrder(SearchSpec.ORDER_ASCENDING)
                 .setRankingStrategy(SearchSpec.RANKING_STRATEGY_DOCUMENT_SCORE)
                 .build();
@@ -55,7 +55,7 @@ public class SearchSpecCtsTest {
         assertThat(searchSpec.getSnippetCount()).isEqualTo(5);
         assertThat(searchSpec.getSnippetCountPerProperty()).isEqualTo(10);
         assertThat(searchSpec.getMaxSnippetSize()).isEqualTo(15);
-        assertThat(searchSpec.getNumPerPage()).isEqualTo(42);
+        assertThat(searchSpec.getResultCountPerPage()).isEqualTo(42);
         assertThat(searchSpec.getOrder()).isEqualTo(SearchSpec.ORDER_ASCENDING);
         assertThat(searchSpec.getRankingStrategy())
                 .isEqualTo(SearchSpec.RANKING_STRATEGY_DOCUMENT_SCORE);

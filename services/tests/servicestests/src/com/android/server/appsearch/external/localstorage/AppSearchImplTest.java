@@ -292,7 +292,7 @@ public class AppSearchImplTest {
         }
 
         // Check optimize() will release 0 docs since there is no deletion.
-        GetOptimizeInfoResultProto optimizeInfo = mAppSearchImpl.getOptimizeInfoResult();
+        GetOptimizeInfoResultProto optimizeInfo = mAppSearchImpl.getOptimizeInfoResultLocked();
         assertThat(optimizeInfo.getOptimizableDocs()).isEqualTo(0);
 
         // delete 999 documents , we will reach the threshold to trigger optimize() in next
@@ -302,7 +302,7 @@ public class AppSearchImplTest {
         }
 
         // optimize() still not be triggered since we are in the interval to call getOptimizeInfo()
-        optimizeInfo = mAppSearchImpl.getOptimizeInfoResult();
+        optimizeInfo = mAppSearchImpl.getOptimizeInfoResultLocked();
         assertThat(optimizeInfo.getOptimizableDocs())
                 .isEqualTo(AppSearchImpl.OPTIMIZE_THRESHOLD_DOC_COUNT - 1);
 
@@ -314,7 +314,7 @@ public class AppSearchImplTest {
         }
 
         // Verify optimize() is triggered
-        optimizeInfo = mAppSearchImpl.getOptimizeInfoResult();
+        optimizeInfo = mAppSearchImpl.getOptimizeInfoResultLocked();
         assertThat(optimizeInfo.getOptimizableDocs())
                 .isLessThan(AppSearchImpl.CHECK_OPTIMIZE_INTERVAL);
     }
@@ -335,8 +335,9 @@ public class AppSearchImplTest {
         mAppSearchImpl.putDocument("database", document);
 
         // Rewrite SearchSpec
-        mAppSearchImpl.rewriteSearchSpecForDatabases(searchSpecProto, Collections.singleton(
-                "database"));
+        mAppSearchImpl.rewriteSearchSpecForDatabasesLocked(searchSpecProto,
+                Collections.singleton(
+                        "database"));
         assertThat(searchSpecProto.getSchemaTypeFiltersList()).containsExactly("database/type");
         assertThat(searchSpecProto.getNamespaceFiltersList()).containsExactly("database/namespace");
     }
@@ -363,7 +364,7 @@ public class AppSearchImplTest {
         mAppSearchImpl.putDocument("database2", document2);
 
         // Rewrite SearchSpec
-        mAppSearchImpl.rewriteSearchSpecForDatabases(searchSpecProto,
+        mAppSearchImpl.rewriteSearchSpecForDatabasesLocked(searchSpecProto,
                 ImmutableSet.of("database1", "database2"));
         assertThat(searchSpecProto.getSchemaTypeFiltersList()).containsExactly(
                 "database1/typeA", "database1/typeB", "database2/typeA", "database2/typeB");
@@ -424,7 +425,7 @@ public class AppSearchImplTest {
         List<SchemaTypeConfigProto> expectedTypes = new ArrayList<>();
         expectedTypes.add(mVisibilitySchemaProto);
         expectedTypes.addAll(expectedProto.getTypesList());
-        assertThat(mAppSearchImpl.getSchemaProto().getTypesList())
+        assertThat(mAppSearchImpl.getSchemaProtoLocked().getTypesList())
                 .containsExactlyElementsIn(expectedTypes);
     }
 
@@ -435,7 +436,7 @@ public class AppSearchImplTest {
         mAppSearchImpl.setVisibility("database", Set.of("schema1"));
 
         // "schema1" is platform hidden now
-        assertThat(mAppSearchImpl.getVisibilityStore().getPlatformHiddenSchemas(
+        assertThat(mAppSearchImpl.getVisibilityStoreLocked().getPlatformHiddenSchemas(
                 "database")).containsExactly("database/schema1");
 
         // Add a new schema, and include the already-existing "schema1"
@@ -445,7 +446,7 @@ public class AppSearchImplTest {
 
         // Check that "schema1" is still platform hidden, but "schema2" is the default platform
         // visible.
-        assertThat(mAppSearchImpl.getVisibilityStore().getPlatformHiddenSchemas(
+        assertThat(mAppSearchImpl.getVisibilityStoreLocked().getPlatformHiddenSchemas(
                 "database")).containsExactly("database/schema1");
     }
 
@@ -467,7 +468,7 @@ public class AppSearchImplTest {
         List<SchemaTypeConfigProto> expectedTypes = new ArrayList<>();
         expectedTypes.add(mVisibilitySchemaProto);
         expectedTypes.addAll(expectedProto.getTypesList());
-        assertThat(mAppSearchImpl.getSchemaProto().getTypesList())
+        assertThat(mAppSearchImpl.getSchemaProtoLocked().getTypesList())
                 .containsExactlyElementsIn(expectedTypes);
 
         final Set<AppSearchSchema> finalSchemas = Collections.singleton(new AppSearchSchema.Builder(
@@ -489,7 +490,7 @@ public class AppSearchImplTest {
         expectedTypes = new ArrayList<>();
         expectedTypes.add(mVisibilitySchemaProto);
         expectedTypes.addAll(expectedProto.getTypesList());
-        assertThat(mAppSearchImpl.getSchemaProto().getTypesList())
+        assertThat(mAppSearchImpl.getSchemaProtoLocked().getTypesList())
                 .containsExactlyElementsIn(expectedTypes);
     }
 
@@ -516,7 +517,7 @@ public class AppSearchImplTest {
         List<SchemaTypeConfigProto> expectedTypes = new ArrayList<>();
         expectedTypes.add(mVisibilitySchemaProto);
         expectedTypes.addAll(expectedProto.getTypesList());
-        assertThat(mAppSearchImpl.getSchemaProto().getTypesList())
+        assertThat(mAppSearchImpl.getSchemaProtoLocked().getTypesList())
                 .containsExactlyElementsIn(expectedTypes);
 
         // Save only Email to database1 this time.
@@ -535,7 +536,7 @@ public class AppSearchImplTest {
         expectedTypes = new ArrayList<>();
         expectedTypes.add(mVisibilitySchemaProto);
         expectedTypes.addAll(expectedProto.getTypesList());
-        assertThat(mAppSearchImpl.getSchemaProto().getTypesList())
+        assertThat(mAppSearchImpl.getSchemaProtoLocked().getTypesList())
                 .containsExactlyElementsIn(expectedTypes);
     }
 
@@ -547,7 +548,7 @@ public class AppSearchImplTest {
         mAppSearchImpl.setVisibility("database", Set.of("schema1"));
 
         // "schema1" is platform hidden now
-        assertThat(mAppSearchImpl.getVisibilityStore().getPlatformHiddenSchemas(
+        assertThat(mAppSearchImpl.getVisibilityStoreLocked().getPlatformHiddenSchemas(
                 "database")).containsExactly("database/schema1");
 
         // Remove "schema1" by force overriding
@@ -555,14 +556,16 @@ public class AppSearchImplTest {
 
         // Check that "schema1" is no longer considered platform hidden
         assertThat(
-                mAppSearchImpl.getVisibilityStore().getPlatformHiddenSchemas("database")).isEmpty();
+                mAppSearchImpl.getVisibilityStoreLocked().getPlatformHiddenSchemas(
+                        "database")).isEmpty();
 
         // Add "schema1" back, it gets default visibility settings which means it's not platform
         // hidden.
         mAppSearchImpl.setSchema("database", Collections.singleton(new AppSearchSchema.Builder(
                 "schema1").build()), /*forceOverride=*/false);
         assertThat(
-                mAppSearchImpl.getVisibilityStore().getPlatformHiddenSchemas("database")).isEmpty();
+                mAppSearchImpl.getVisibilityStoreLocked().getPlatformHiddenSchemas(
+                        "database")).isEmpty();
     }
 
     @Test
@@ -570,7 +573,8 @@ public class AppSearchImplTest {
         mAppSearchImpl.setSchema("database", Collections.singleton(new AppSearchSchema.Builder(
                 "Schema").build()), /*forceOverride=*/false);
         assertThat(
-                mAppSearchImpl.getVisibilityStore().getPlatformHiddenSchemas("database")).isEmpty();
+                mAppSearchImpl.getVisibilityStoreLocked().getPlatformHiddenSchemas(
+                        "database")).isEmpty();
     }
 
     @Test
@@ -578,7 +582,7 @@ public class AppSearchImplTest {
         mAppSearchImpl.setSchema("database", Collections.singleton(new AppSearchSchema.Builder(
                 "Schema").build()), /*forceOverride=*/false);
         mAppSearchImpl.setVisibility("database", Set.of("Schema"));
-        assertThat(mAppSearchImpl.getVisibilityStore().getPlatformHiddenSchemas(
+        assertThat(mAppSearchImpl.getVisibilityStoreLocked().getPlatformHiddenSchemas(
                 "database")).containsExactly("database/Schema");
     }
 
@@ -597,30 +601,31 @@ public class AppSearchImplTest {
     @Test
     public void testHasSchemaType() throws Exception {
         // Nothing exists yet
-        assertThat(mAppSearchImpl.hasSchemaType("database", "Schema")).isFalse();
+        assertThat(mAppSearchImpl.hasSchemaTypeLocked("database", "Schema")).isFalse();
 
         mAppSearchImpl.setSchema("database", Collections.singleton(new AppSearchSchema.Builder(
                 "Schema").build()), /*forceOverride=*/false);
-        assertThat(mAppSearchImpl.hasSchemaType("database", "Schema")).isTrue();
+        assertThat(mAppSearchImpl.hasSchemaTypeLocked("database", "Schema")).isTrue();
 
-        assertThat(mAppSearchImpl.hasSchemaType("database", "UnknownSchema")).isFalse();
+        assertThat(mAppSearchImpl.hasSchemaTypeLocked("database", "UnknownSchema")).isFalse();
     }
 
     @Test
     public void testGetDatabases() throws Exception {
         // No client databases exist yet, but the VisibilityStore's does
-        assertThat(mAppSearchImpl.getDatabases()).containsExactly(VisibilityStore.DATABASE_NAME);
+        assertThat(mAppSearchImpl.getDatabasesLocked()).containsExactly(
+                VisibilityStore.DATABASE_NAME);
 
         // Has database1
         mAppSearchImpl.setSchema("database1", Collections.singleton(new AppSearchSchema.Builder(
                 "schema").build()), /*forceOverride=*/false);
-        assertThat(mAppSearchImpl.getDatabases()).containsExactly(
+        assertThat(mAppSearchImpl.getDatabasesLocked()).containsExactly(
                 VisibilityStore.DATABASE_NAME, "database1");
 
         // Has both databases
         mAppSearchImpl.setSchema("database2", Collections.singleton(new AppSearchSchema.Builder(
                 "schema").build()), /*forceOverride=*/false);
-        assertThat(mAppSearchImpl.getDatabases()).containsExactly(
+        assertThat(mAppSearchImpl.getDatabasesLocked()).containsExactly(
                 VisibilityStore.DATABASE_NAME, "database1", "database2");
     }
 }

@@ -21,13 +21,12 @@ import android.annotation.Nullable;
 import android.app.appsearch.AppSearchResult;
 
 /**
- * An exception thrown by {@code android.app.appsearch.AppSearchManager} or a subcomponent.
+ * An exception thrown by {@link android.app.appsearch.AppSearchSession} or a subcomponent.
  *
  * <p>These exceptions can be converted into a failed {@link AppSearchResult}
  * for propagating to the client.
  * @hide
  */
-//TODO(b/157082794): Linkify to AppSearchManager once that API is public
 public class AppSearchException extends Exception {
     private final @AppSearchResult.ResultCode int mResultCode;
 

@@ -37,6 +37,10 @@ import java.util.Set;
  * Represents a document unit.
  *
  * <p>Documents are constructed via {@link GenericDocument.Builder}.
+ *
+ * @see AppSearchSession#putDocuments
+ * @see AppSearchSession#getByUri
+ * @see AppSearchSession#query
  * @hide
  */
 public class GenericDocument {
@@ -157,13 +161,21 @@ public class GenericDocument {
         return mSchemaType;
     }
 
-    /** Returns the creation timestamp of the {@link GenericDocument}, in milliseconds. */
+    /**
+     * Returns the creation timestamp of the {@link GenericDocument}, in milliseconds.
+     *
+     * <p>The value is in the {@link System#currentTimeMillis} time base.
+     */
     public long getCreationTimestampMillis() {
         return mCreationTimestampMillis;
     }
 
     /**
      * Returns the TTL (Time To Live) of the {@link GenericDocument}, in milliseconds.
+     *
+     * <p>The TTL is measured against {@link #getCreationTimestampMillis}. At the timestamp of
+     * {@code creationTimestampMillis + ttlMillis}, measured in the {@link System#currentTimeMillis}
+     * time base, the document will be auto-deleted.
      *
      * <p>The default value is 0, which means the document is permanent and won't be auto-deleted
      *    until the app is uninstalled.
@@ -175,10 +187,13 @@ public class GenericDocument {
     /**
      * Returns the score of the {@link GenericDocument}.
      *
-     * <p>The score is a query-independent measure of the document's quality, relative to other
-     * {@link GenericDocument}s of the same type.
+     * <p>The score is a query-independent measure of the document's quality, relative to
+     * other {@link GenericDocument}s of the same type.
      *
-     * <p>The default value is 0.
+     * <p>Results may be sorted by score using {@link SearchSpec.Builder#setRankingStrategy}.
+     * Documents with higher scores are considered better than documents with lower scores.
+     *
+     * <p>Any nonnegative integer can be used a score.
      */
     public int getScore() {
         return mBundle.getInt(SCORE_FIELD, DEFAULT_SCORE);
@@ -448,8 +463,8 @@ public class GenericDocument {
     }
 
     /**
-     * Deeply checks two bundles are equally or not.
-     * <p> Two bundles will be considered equally if they contain same content.
+     * Deeply checks whether two bundles are equal.
+     * <p>Two bundles will be considered equal if they contain the same content.
      */
     @SuppressWarnings("unchecked")
     private static boolean bundleEquals(Bundle one, Bundle two) {
@@ -704,6 +719,11 @@ public class GenericDocument {
          * <p>The score is a query-independent measure of the document's quality, relative to
          * other {@link GenericDocument}s of the same type.
          *
+         * <p>Results may be sorted by score using {@link SearchSpec.Builder#setRankingStrategy}.
+         * Documents with higher scores are considered better than documents with lower scores.
+         *
+         * <p>Any nonnegative integer can be used a score.
+         *
          * @throws IllegalArgumentException If the provided value is negative.
          */
         @NonNull
@@ -717,8 +737,10 @@ public class GenericDocument {
         }
 
         /**
-         * Sets the creation timestamp of the {@link GenericDocument}, in milliseconds. Should be
-         * set using a value obtained from the {@link System#currentTimeMillis()} time base.
+         * Sets the creation timestamp of the {@link GenericDocument}, in milliseconds.
+         *
+         * <p>Should be set using a value obtained from the {@link System#currentTimeMillis} time
+         * base.
          */
         @NonNull
         public BuilderType setCreationTimestampMillis(long creationTimestampMillis) {
@@ -731,8 +753,12 @@ public class GenericDocument {
         /**
          * Sets the TTL (Time To Live) of the {@link GenericDocument}, in milliseconds.
          *
-         * <p>After this many milliseconds since the {@link #setCreationTimestampMillis creation
-         * timestamp}, the document is deleted.
+         * <p>The TTL is measured against {@link #getCreationTimestampMillis}. At the timestamp of
+         * {@code creationTimestampMillis + ttlMillis}, measured in the
+         * {@link System#currentTimeMillis} time base, the document will be auto-deleted.
+         *
+         * <p>The default value is 0, which means the document is permanent and won't be
+         * auto-deleted until the app is uninstalled.
          *
          * @param ttlMillis A non-negative duration in milliseconds.
          * @throws IllegalArgumentException If the provided value is negative.

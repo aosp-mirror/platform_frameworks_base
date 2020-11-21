@@ -36,7 +36,7 @@ public class VisibilityStoreTest {
     @Before
     public void setUp() throws Exception {
         mAppSearchImpl = AppSearchImpl.create(mTemporaryFolder.newFolder());
-        mVisibilityStore = mAppSearchImpl.getVisibilityStore();
+        mVisibilityStore = mAppSearchImpl.getVisibilityStoreLocked();
     }
 
     @Test
