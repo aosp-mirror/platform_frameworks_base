@@ -38,12 +38,6 @@ import java.util.Map;
  * Validators for System settings
  */
 public class SystemSettingsValidators {
-    /**
-     * These are all public system settings
-     *
-     * <p>All settings in {@link System.SETTINGS_TO_BACKUP} array *must* have a non-null validator,
-     * otherwise they won't be restored.
-     */
     @UnsupportedAppUsage
     public static final Map<String, Validator> VALIDATORS = new ArrayMap<>();
 
