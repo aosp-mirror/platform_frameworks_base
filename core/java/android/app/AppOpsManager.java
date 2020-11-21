@@ -34,6 +34,7 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
 import android.database.DatabaseUtils;
@@ -7640,21 +7641,26 @@ public class AppOpsManager {
         }
         final String voiceRecognitionComponent = Settings.Secure.getString(
                 context.getContentResolver(), Settings.Secure.VOICE_RECOGNITION_SERVICE);
-        final String voiceInteractionComponent = Settings.Secure.getString(
-                context.getContentResolver(), Settings.Secure.VOICE_INTERACTION_SERVICE);
 
         final String voiceRecognitionServicePackageName =
-                getComponentPackagenameFromString(voiceRecognitionComponent);
-        final String voiceInteractionServicePackageName =
-                getComponentPackagenameFromString(voiceInteractionComponent);
-
-        return Objects.equals(packageName, voiceRecognitionServicePackageName) && Objects.equals(
-                voiceRecognitionServicePackageName, voiceInteractionServicePackageName);
+                getComponentPackageNameFromString(voiceRecognitionComponent);
+        return (Objects.equals(packageName, voiceRecognitionServicePackageName))
+                && isPackagePreInstalled(context, packageName);
     }
 
-    private static String getComponentPackagenameFromString(String from) {
+    private static String getComponentPackageNameFromString(String from) {
         ComponentName componentName = from != null ? ComponentName.unflattenFromString(from) : null;
         return componentName != null ? componentName.getPackageName() : "";
+    }
+
+    private static boolean isPackagePreInstalled(Context context, String packageName) {
+        try {
+            final PackageManager pm = context.getPackageManager();
+            final ApplicationInfo info = pm.getApplicationInfo(packageName, 0);
+            return ((info.flags & ApplicationInfo.FLAG_SYSTEM) != 0);
+        } catch (PackageManager.NameNotFoundException e) {
+            return false;
+        }
     }
 
     /**
