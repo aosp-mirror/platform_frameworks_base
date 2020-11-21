@@ -54,6 +54,14 @@
 
     </NotificationTopLineView>
 
+    <FrameLayout
+        android:id="@+id/alternate_expand_target"
+        android:layout_width="@dimen/notification_content_margin_start"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        android:importantForAccessibility="no"
+        />
+
     <com.android.internal.widget.NotificationExpandButton
         android:id="@+id/expand_button"
         android:layout_width="@dimen/notification_header_expand_icon_size"

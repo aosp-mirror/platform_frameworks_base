@@ -259,6 +259,9 @@
     <!-- The height of the background for a notification header on a group -->
     <dimen name="notification_header_background_height">49.5dp</dimen>
 
+    <!-- The height of the full-width touch rectangle for the notification header -->
+    <dimen name="notification_header_touchable_height">36dp</dimen>
+
     <!-- The top padding for the notification header -->
     <dimen name="notification_header_padding_top">16dp</dimen>
 
