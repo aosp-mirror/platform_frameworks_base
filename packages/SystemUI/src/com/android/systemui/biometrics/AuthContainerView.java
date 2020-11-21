@@ -281,7 +281,7 @@ public class AuthContainerView extends LinearLayout
 
         // Inflate biometric view only if necessary.
         if (Utils.isBiometricAllowed(mConfig.mPromptInfo)) {
-            if (config.mSensorIds.length == 1) {
+            if (config.mSensorIds.length == 1 || config.mSensorIds.length == 2) {
                 final int singleSensorAuthId = config.mSensorIds[0];
                 if (Utils.containsSensorId(mFpProps, singleSensorAuthId)) {
                     FingerprintSensorPropertiesInternal sensorProps = null;
@@ -313,7 +313,6 @@ public class AuthContainerView extends LinearLayout
                     return;
                 }
             } else {
-                // The UI currently only supports authentication with a single sensor.
                 Log.e(TAG, "Unsupported sensor array, length: " + config.mSensorIds.length);
                 mBiometricView = null;
                 mBackgroundView = null;
