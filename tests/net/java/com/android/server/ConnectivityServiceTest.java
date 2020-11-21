@@ -259,7 +259,10 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 import org.mockito.stubbing.Answer;
 
+import java.io.FileDescriptor;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.net.DatagramSocket;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
@@ -7584,5 +7587,40 @@ public class ConnectivityServiceTest {
 
 
         mCm.unregisterNetworkCallback(networkCallback);
+    }
+
+    @Test
+    public void testDumpDoesNotCrash() {
+        StringWriter stringWriter = new StringWriter();
+
+        mService.dump(new FileDescriptor(), new PrintWriter(stringWriter), new String[0]);
+
+        assertFalse(stringWriter.toString().isEmpty());
+    }
+
+    @Test
+    public void testRequestsSortedByIdSortsCorrectly() {
+        final TestNetworkCallback genericNetworkCallback = new TestNetworkCallback();
+        final TestNetworkCallback wifiNetworkCallback = new TestNetworkCallback();
+        final TestNetworkCallback cellNetworkCallback = new TestNetworkCallback();
+        final NetworkRequest genericRequest = new NetworkRequest.Builder()
+                .clearCapabilities().build();
+        final NetworkRequest wifiRequest = new NetworkRequest.Builder()
+                .addTransportType(TRANSPORT_WIFI).build();
+        final NetworkRequest cellRequest = new NetworkRequest.Builder()
+                .addTransportType(TRANSPORT_CELLULAR).build();
+        mCm.registerNetworkCallback(genericRequest, genericNetworkCallback);
+        mCm.registerNetworkCallback(wifiRequest, wifiNetworkCallback);
+        mCm.registerNetworkCallback(cellRequest, cellNetworkCallback);
+
+        ConnectivityService.NetworkRequestInfo[] nriOutput = mService.requestsSortedById();
+
+        assertTrue(nriOutput.length > 1);
+        for (int i = 0; i < nriOutput.length - 1; i++) {
+            boolean isRequestIdInOrder =
+                    nriOutput[i].mRequests.get(0).requestId
+                            < nriOutput[i + 1].mRequests.get(0).requestId;
+            assertTrue(isRequestIdInOrder);
+        }
     }
 }
