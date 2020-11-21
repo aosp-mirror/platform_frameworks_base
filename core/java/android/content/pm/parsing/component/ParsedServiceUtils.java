@@ -145,6 +145,10 @@ public class ParsedServiceUtils {
                 case "meta-data":
                     parseResult = ParsedComponentUtils.addMetaData(service, pkg, res, parser, input);
                     break;
+                case "property":
+                    parseResult =
+                            ParsedComponentUtils.addProperty(service, pkg, res, parser, input);
+                    break;
                 default:
                     parseResult = ParsingUtils.unknownTag(tag, pkg, parser, input);
                     break;

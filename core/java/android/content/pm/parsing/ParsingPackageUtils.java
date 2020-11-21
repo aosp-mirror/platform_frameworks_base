@@ -42,6 +42,7 @@ import android.content.pm.FeatureGroupInfo;
 import android.content.pm.FeatureInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.Property;
 import android.content.pm.PackageParser;
 import android.content.pm.PackageParser.PackageParserException;
 import android.content.pm.PackageParser.SigningDetails;
@@ -699,12 +700,19 @@ public class ParsingPackageUtils {
                 // note: application meta-data is stored off to the side, so it can
                 // remain null in the primary copy (we like to avoid extra copies because
                 // it can be large)
-                ParseResult<Bundle> metaDataResult = parseMetaData(pkg, res, parser,
-                        pkg.getMetaData(), input);
-                if (metaDataResult.isSuccess()) {
-                    pkg.setMetaData(metaDataResult.getResult());
+                ParseResult<Property> metaDataResult = parseMetaData(pkg, res, parser,
+                        "<meta-data>", input);
+                if (metaDataResult.isSuccess() && metaDataResult.getResult() != null) {
+                    pkg.setMetaData(metaDataResult.getResult().toBundle(pkg.getMetaData()));
                 }
                 return metaDataResult;
+            case "property":
+                ParseResult<Property> propertyResult = parseMetaData(pkg, res, parser,
+                        "<property>", input);
+                if (propertyResult.isSuccess()) {
+                    pkg.addProperty(propertyResult.getResult());
+                }
+                return propertyResult;
             case "uses-static-library":
                 return parseUsesStaticLibrary(input, pkg, res, parser);
             case "uses-library":
@@ -2085,13 +2093,19 @@ public class ParsingPackageUtils {
                 // note: application meta-data is stored off to the side, so it can
                 // remain null in the primary copy (we like to avoid extra copies because
                 // it can be large)
-                ParseResult<Bundle> metaDataResult = parseMetaData(pkg, res, parser,
-                        pkg.getMetaData(), input);
-                if (metaDataResult.isSuccess()) {
-                    pkg.setMetaData(metaDataResult.getResult());
+                final ParseResult<Property> metaDataResult = parseMetaData(pkg, res, parser,
+                        "<meta-data>", input);
+                if (metaDataResult.isSuccess() && metaDataResult.getResult() != null) {
+                    pkg.setMetaData(metaDataResult.getResult().toBundle(pkg.getMetaData()));
                 }
-
                 return metaDataResult;
+            case "property":
+                final ParseResult<Property> propertyResult = parseMetaData(pkg, res, parser,
+                        "<property>", input);
+                if (propertyResult.isSuccess()) {
+                    pkg.addProperty(propertyResult.getResult());
+                }
+                return propertyResult;
             case "static-library":
                 return parseStaticLibrary(pkg, res, parser, input);
             case "library":
@@ -2736,57 +2750,58 @@ public class ParsingPackageUtils {
                 : input.error("must have at least one '.' separator");
     }
 
-    public static ParseResult<Bundle> parseMetaData(ParsingPackage pkg, Resources res,
-            XmlResourceParser parser, Bundle data, ParseInput input) {
+    /**
+     * Parse a meta data defined on the enclosing tag.
+     * <p>Meta data can be defined by either &lt;meta-data&gt; or &lt;property&gt; elements.
+     */
+    public static ParseResult<Property> parseMetaData(ParsingPackage pkg, Resources res,
+            XmlResourceParser parser, String tagName, ParseInput input) {
         TypedArray sa = res.obtainAttributes(parser, R.styleable.AndroidManifestMetaData);
         try {
-            if (data == null) {
-                data = new Bundle();
-            }
-
-            String name = TextUtils.safeIntern(
+            final Property property;
+            final String name = TextUtils.safeIntern(
                     nonConfigString(0, R.styleable.AndroidManifestMetaData_name, sa));
             if (name == null) {
-                return input.error("<meta-data> requires an android:name attribute");
+                return input.error(tagName + " requires an android:name attribute");
             }
 
             TypedValue v = sa.peekValue(R.styleable.AndroidManifestMetaData_resource);
             if (v != null && v.resourceId != 0) {
-                //Slog.i(TAG, "Meta data ref " + name + ": " + v);
-                data.putInt(name, v.resourceId);
+                property = new Property(name, v.resourceId, true);
             } else {
                 v = sa.peekValue(R.styleable.AndroidManifestMetaData_value);
-                //Slog.i(TAG, "Meta data " + name + ": " + v);
                 if (v != null) {
                     if (v.type == TypedValue.TYPE_STRING) {
-                        CharSequence cs = v.coerceToString();
-                        data.putString(name, cs != null ? cs.toString() : null);
+                        final CharSequence cs = v.coerceToString();
+                        final String stringValue = cs != null ? cs.toString() : null;
+                        property = new Property(name, stringValue);
                     } else if (v.type == TypedValue.TYPE_INT_BOOLEAN) {
-                        data.putBoolean(name, v.data != 0);
+                        property = new Property(name, v.data != 0);
                     } else if (v.type >= TypedValue.TYPE_FIRST_INT
                             && v.type <= TypedValue.TYPE_LAST_INT) {
-                        data.putInt(name, v.data);
+                        property = new Property(name, v.data, false);
                     } else if (v.type == TypedValue.TYPE_FLOAT) {
-                        data.putFloat(name, v.getFloat());
+                        property = new Property(name, v.getFloat());
                     } else {
                         if (!PackageParser.RIGID_PARSER) {
                             Slog.w(TAG,
-                                    "<meta-data> only supports string, integer, float, color, "
+                                    tagName + " only supports string, integer, float, color, "
                                             + "boolean, and resource reference types: "
                                             + parser.getName() + " at "
                                             + pkg.getBaseApkPath() + " "
                                             + parser.getPositionDescription());
+                            property = null;
                         } else {
-                            return input.error("<meta-data> only supports string, integer, float, "
+                            return input.error(tagName + " only supports string, integer, float, "
                                     + "color, boolean, and resource reference types");
                         }
                     }
                 } else {
-                    return input.error("<meta-data> requires an android:value "
+                    return input.error(tagName + " requires an android:value "
                             + "or android:resource attribute");
                 }
             }
-            return input.success(data);
+            return input.success(property);
         } finally {
             sa.recycle();
         }
