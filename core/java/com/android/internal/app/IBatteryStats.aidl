@@ -52,7 +52,7 @@ interface IBatteryStats {
     @UnsupportedAppUsage
     byte[] getStatistics();
 
-    ParcelFileDescriptor getStatisticsStream();
+    ParcelFileDescriptor getStatisticsStream(boolean updateAll);
 
     // Return true if we see the battery as currently charging.
     @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)

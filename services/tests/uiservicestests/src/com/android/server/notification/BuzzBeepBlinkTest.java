@@ -15,6 +15,7 @@
  */
 package com.android.server.notification;
 
+import static android.app.Notification.FLAG_BUBBLE;
 import static android.app.Notification.GROUP_ALERT_ALL;
 import static android.app.Notification.GROUP_ALERT_CHILDREN;
 import static android.app.Notification.GROUP_ALERT_SUMMARY;
@@ -38,6 +39,7 @@ import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.argThat;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.timeout;
@@ -50,9 +52,11 @@ import android.app.Notification;
 import android.app.Notification.Builder;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.graphics.drawable.Icon;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.net.Uri;
@@ -1594,6 +1598,77 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
         verifyVibrate(2);
 
         assertTrue(interrupter.isInterruptive());
+    }
+
+    @Test
+    public void testBubbleSuppressedNotificationDoesntMakeSound() {
+        Notification.BubbleMetadata metadata = new Notification.BubbleMetadata.Builder(
+                        mock(PendingIntent.class), mock(Icon.class))
+                .build();
+
+        NotificationRecord record = getBuzzyNotification();
+        metadata.setFlags(Notification.BubbleMetadata.FLAG_SUPPRESS_NOTIFICATION);
+        record.getNotification().setBubbleMetadata(metadata);
+        record.setAllowBubble(true);
+        record.getNotification().flags |= FLAG_BUBBLE;
+        record.isUpdate = true;
+        record.setInterruptive(false);
+
+        mService.buzzBeepBlinkLocked(record);
+        verifyNeverVibrate();
+    }
+
+    @Test
+    public void testOverflowBubbleSuppressedNotificationDoesntMakeSound() {
+        Notification.BubbleMetadata metadata = new Notification.BubbleMetadata.Builder(
+                mock(PendingIntent.class), mock(Icon.class))
+                .build();
+
+        NotificationRecord record = getBuzzyNotification();
+        metadata.setFlags(Notification.BubbleMetadata.FLAG_SUPPRESS_NOTIFICATION);
+        record.getNotification().setBubbleMetadata(metadata);
+        record.setFlagBubbleRemoved(true);
+        record.setAllowBubble(true);
+        record.isUpdate = true;
+        record.setInterruptive(false);
+
+        mService.buzzBeepBlinkLocked(record);
+        verifyNeverVibrate();
+    }
+
+    @Test
+    public void testBubbleUpdateMakesSound() {
+        Notification.BubbleMetadata metadata = new Notification.BubbleMetadata.Builder(
+                mock(PendingIntent.class), mock(Icon.class))
+                .build();
+
+        NotificationRecord record = getBuzzyNotification();
+        record.getNotification().setBubbleMetadata(metadata);
+        record.setAllowBubble(true);
+        record.getNotification().flags |= FLAG_BUBBLE;
+        record.isUpdate = true;
+        record.setInterruptive(true);
+
+        mService.buzzBeepBlinkLocked(record);
+        verifyVibrate(1);
+    }
+
+    @Test
+    public void testNewBubbleSuppressedNotifMakesSound() {
+        Notification.BubbleMetadata metadata = new Notification.BubbleMetadata.Builder(
+                mock(PendingIntent.class), mock(Icon.class))
+                .build();
+
+        NotificationRecord record = getBuzzyNotification();
+        metadata.setFlags(Notification.BubbleMetadata.FLAG_SUPPRESS_NOTIFICATION);
+        record.getNotification().setBubbleMetadata(metadata);
+        record.setAllowBubble(true);
+        record.getNotification().flags |= FLAG_BUBBLE;
+        record.isUpdate = false;
+        record.setInterruptive(true);
+
+        mService.buzzBeepBlinkLocked(record);
+        verifyVibrate(1);
     }
 
     static class VibrateRepeatMatcher implements ArgumentMatcher<VibrationEffect> {

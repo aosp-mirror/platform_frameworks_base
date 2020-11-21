@@ -194,6 +194,7 @@ class UdfpsController implements DozeReceiver {
         mCoreLayoutParams.setFitInsetsTypes(0);
         mCoreLayoutParams.layoutInDisplayCutoutMode =
                 WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
+        mCoreLayoutParams.privateFlags = WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY;
 
         mView = (UdfpsView) inflater.inflate(R.layout.udfps_view, null, false);
         mView.setSensorProperties(mSensorProps);

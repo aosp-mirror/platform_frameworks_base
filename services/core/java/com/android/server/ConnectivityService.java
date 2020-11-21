@@ -5854,7 +5854,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
     @GuardedBy("mBlockedAppUids")
     private final HashSet<Integer> mBlockedAppUids = new HashSet<>();
 
-    // Note: if mDefaultRequest is changed, NetworkMonitor needs to be updated.
     @NonNull
     private final NetworkRequest mDefaultRequest;
     // The NetworkAgentInfo currently satisfying the default request, if any.

@@ -246,7 +246,6 @@ import android.database.ContentObserver;
 import android.graphics.Bitmap;
 import android.hardware.display.DisplayManager;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
@@ -339,7 +338,6 @@ import com.android.internal.os.SomeArgs;
 import com.android.internal.os.Zygote;
 import com.android.internal.telephony.CarrierAppUtils;
 import com.android.internal.util.ArrayUtils;
-import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.ConcurrentUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FastXmlSerializer;
@@ -3842,7 +3840,7 @@ public class PackageManagerService extends IPackageManager.Stub
         // are all flushed.  Not really needed, but keeps things nice and
         // tidy.
         t.traceBegin("GC");
-        Runtime.getRuntime().gc();
+        VMRuntime.getRuntime().requestConcurrentGC();
         t.traceEnd();
 
         // The initial scanning above does many calls into installd while
@@ -11592,22 +11590,6 @@ public class PackageManagerService extends IPackageManager.Stub
         }
         pkgSetting.signatures.mSigningDetails = reconciledPkg.signingDetails;
 
-        if (!pkg.getAdoptPermissions().isEmpty()) {
-            // This package wants to adopt ownership of permissions from
-            // another package.
-            for (int i = pkg.getAdoptPermissions().size() - 1; i >= 0; i--) {
-                final String origName = pkg.getAdoptPermissions().get(i);
-                final PackageSetting orig = mSettings.getPackageLPr(origName);
-                if (orig != null) {
-                    if (verifyPackageUpdateLPr(orig, pkg)) {
-                        Slog.i(TAG, "Adopting permissions from " + origName + " to "
-                                + pkg.getPackageName());
-                        mPermissionManager.transferPermissions(origName, pkg.getPackageName());
-                    }
-                }
-            }
-        }
-
         if (changedAbiCodePath != null && changedAbiCodePath.size() > 0) {
             for (int i = changedAbiCodePath.size() - 1; i >= 0; --i) {
                 final String codePathString = changedAbiCodePath.get(i);
@@ -12854,27 +12836,6 @@ public class PackageManagerService extends IPackageManager.Stub
                     reconciledPkg.prepareResult != null && reconciledPkg.prepareResult.replace;
             mAppsFilter.addPackage(pkgSetting, isReplace);
 
-            // Don't allow ephemeral applications to define new permissions groups.
-            if ((scanFlags & SCAN_AS_INSTANT_APP) != 0) {
-                Slog.w(TAG, "Permission groups from package " + pkg.getPackageName()
-                        + " ignored: instant apps cannot define new permission groups.");
-            } else {
-                mPermissionManager.addAllPermissionGroups(pkg, chatty);
-            }
-
-            // If a permission has had its defining app changed, or it has had its protection
-            // upgraded, we need to revoke apps that hold it
-            final List<String> permissionsWithChangedDefinition;
-            // Don't allow ephemeral applications to define new permissions.
-            if ((scanFlags & SCAN_AS_INSTANT_APP) != 0) {
-                permissionsWithChangedDefinition = null;
-                Slog.w(TAG, "Permissions from package " + pkg.getPackageName()
-                        + " ignored: instant apps cannot define new permissions.");
-            } else {
-                permissionsWithChangedDefinition =
-                        mPermissionManager.addAllPermissions(pkg, chatty);
-            }
-
             int collectionSize = ArrayUtils.size(pkg.getInstrumentations());
             StringBuilder r = null;
             int i;
@@ -12901,31 +12862,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
             }
 
-            boolean hasOldPkg = oldPkg != null;
-            boolean hasPermissionDefinitionChanges =
-                    !CollectionUtils.isEmpty(permissionsWithChangedDefinition);
-            if (hasOldPkg || hasPermissionDefinitionChanges) {
-                // We need to call revokeRuntimePermissionsIfGroupChanged async as permission
-                // revoke callbacks from this method might need to kill apps which need the
-                // mPackages lock on a different thread. This would dead lock.
-                //
-                // Hence create a copy of all package names and pass it into
-                // revokeRuntimePermissionsIfGroupChanged. Only for those permissions might get
-                // revoked. If a new package is added before the async code runs the permission
-                // won't be granted yet, hence new packages are no problem.
-                final ArrayList<String> allPackageNames = new ArrayList<>(mPackages.keySet());
-
-                AsyncTask.execute(() -> {
-                    if (hasOldPkg) {
-                        mPermissionManager.revokeRuntimePermissionsIfGroupChanged(pkg, oldPkg,
-                                allPackageNames);
-                    }
-                    if (hasPermissionDefinitionChanges) {
-                        mPermissionManager.revokeRuntimePermissionsIfPermissionDefinitionChanged(
-                                permissionsWithChangedDefinition, allPackageNames);
-                    }
-                });
-            }
+            mPermissionManager.onPackageAdded(pkg, (scanFlags & SCAN_AS_INSTANT_APP) != 0, oldPkg);
         }
 
         Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);

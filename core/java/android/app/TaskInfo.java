@@ -221,6 +221,12 @@ public class TaskInfo {
      */
     public Rect parentBounds;
 
+    /**
+     * Whether this task is focused.
+     * @hide
+     */
+    public boolean isFocused;
+
     TaskInfo() {
         // Do nothing
     }
@@ -304,7 +310,8 @@ public class TaskInfo {
                 && equalsLetterboxParams(that)
                 && pictureInPictureParams == that.pictureInPictureParams
                 && getWindowingMode() == that.getWindowingMode()
-                && Objects.equals(taskDescription, that.taskDescription);
+                && Objects.equals(taskDescription, that.taskDescription)
+                && isFocused == that.isFocused;
     }
 
     private boolean equalsLetterboxParams(TaskInfo that) {
@@ -350,6 +357,7 @@ public class TaskInfo {
         positionInParent = source.readTypedObject(Point.CREATOR);
         parentTaskId = source.readInt();
         parentBounds = source.readTypedObject(Rect.CREATOR);
+        isFocused = source.readBoolean();
     }
 
     /**
@@ -385,6 +393,7 @@ public class TaskInfo {
         dest.writeTypedObject(positionInParent, flags);
         dest.writeInt(parentTaskId);
         dest.writeTypedObject(parentBounds, flags);
+        dest.writeBoolean(isFocused);
     }
 
     @Override
@@ -407,8 +416,9 @@ public class TaskInfo {
                 + " launchCookies" + launchCookies
                 + " letterboxActivityBounds=" + letterboxActivityBounds
                 + " positionInParent=" + positionInParent
-                + " parentTaskId: " + parentTaskId
-                + " parentBounds: " + parentBounds
+                + " parentTaskId=" + parentTaskId
+                + " parentBounds=" + parentBounds
+                + " isFocused=" + isFocused
                 + "}";
     }
 }

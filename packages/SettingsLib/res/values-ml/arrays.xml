@@ -1,0 +1,270 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+/*
+**
+** Copyright 2015 The Android Open Source Project
+**
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
+**
+**     http://www.apache.org/licenses/LICENSE-2.0
+**
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
+** limitations under the License.
+*/
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <string-array name="wifi_status">
+    <item msgid="1596683495752107015"></item>
+    <item msgid="3288373008277313483">"സ്‌കാൻചെയ്യുന്നു..."</item>
+    <item msgid="6050951078202663628">"കണക്‌റ്റുചെയ്യുന്നു..."</item>
+    <item msgid="8356618438494652335">"പ്രാമാണീകരിക്കുന്നു..."</item>
+    <item msgid="2837871868181677206">"IP വിലാസം നേടുന്നു..."</item>
+    <item msgid="4613015005934755724">"കണക്റ്റ് ചെയ്‌തു"</item>
+    <item msgid="3763530049995655072">"താൽക്കാലികമായി നിർത്തി"</item>
+    <item msgid="7852381437933824454">"വിച്‌ഛേദിക്കുന്നു..."</item>
+    <item msgid="5046795712175415059">"വിച്ഛേദിച്ചു"</item>
+    <item msgid="2473654476624070462">"പരാജയപ്പെട്ടു"</item>
+    <item msgid="9146847076036105115">"തടഞ്ഞിരിക്കുന്നു"</item>
+    <item msgid="4543924085816294893">"മോശം കണക്ഷൻ താൽക്കാലികമായി ഒഴിവാക്കുന്നു"</item>
+  </string-array>
+  <string-array name="wifi_status_with_ssid">
+    <item msgid="5969842512724979061"></item>
+    <item msgid="1818677602615822316">"സ്‌കാൻചെയ്യുന്നു..."</item>
+    <item msgid="8339720953594087771">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g> എന്നതിലേക്ക് കണക്‌റ്റുചെയ്യുന്നു..."</item>
+    <item msgid="3028983857109369308">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g> മുഖേന പ്രമാണീകരിക്കുന്നു..."</item>
+    <item msgid="4287401332778341890">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g> എന്നതിൽ നിന്ന് IP വിലാസം നേടുന്നു..."</item>
+    <item msgid="1043944043827424501">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g> എന്നതിൽ കണക്‌റ്റുചെയ്‌തു"</item>
+    <item msgid="7445993821842009653">"താൽക്കാലികമായി നിർത്തി"</item>
+    <item msgid="1175040558087735707">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g> എന്നതിൽ നിന്ന് വിച്‌ഛേദിക്കുന്നു..."</item>
+    <item msgid="699832486578171722">"വിച്ഛേദിച്ചു"</item>
+    <item msgid="522383512264986901">"പരാജയപ്പെട്ടു"</item>
+    <item msgid="3602596701217484364">"തടഞ്ഞിരിക്കുന്നു"</item>
+    <item msgid="1999413958589971747">"മോശം കണക്ഷൻ താൽക്കാലികമായി ഒഴിവാക്കുന്നു"</item>
+  </string-array>
+  <string-array name="hdcp_checking_titles">
+    <item msgid="2377230797542526134">"ഒരിക്കലും പരിശോധിക്കരുത്"</item>
+    <item msgid="3919638466823112484">"DRM ഉള്ളടക്കത്തിനുമാത്രമായി പരിശോധിക്കുക"</item>
+    <item msgid="9048424957228926377">"എല്ലായ്‌പ്പോഴും പരിശോധിക്കുക"</item>
+  </string-array>
+  <string-array name="hdcp_checking_summaries">
+    <item msgid="4045840870658484038">"ഒരിക്കലും HDCP പരിശോധന ഉപയോഗിക്കരുത്"</item>
+    <item msgid="8254225038262324761">"DRM ഉള്ളടക്കത്തിനുമാത്രമായി HDCP പരിശോധന ഉപയോഗിക്കുക"</item>
+    <item msgid="6421717003037072581">"എല്ലായ്‌പ്പോഴും HDCP പരിശോധന ഉപയോഗിക്കുക"</item>
+  </string-array>
+  <string-array name="bt_hci_snoop_log_entries">
+    <item msgid="695678520785580527">"പ്രവർത്തനരഹിതമാക്കി"</item>
+    <item msgid="6336372935919715515">"ഫിൽട്ടറിംഗ് പ്രവർത്തനക്ഷമമാക്കി"</item>
+    <item msgid="2779123106632690576">"പ്രവർത്തനക്ഷമമാക്കി"</item>
+  </string-array>
+  <string-array name="bluetooth_avrcp_versions">
+    <item msgid="6603880723315236832">"AVRCP 1.5 (ഡിഫോൾട്ട്)"</item>
+    <item msgid="1637054408779685086">"AVRCP 1.3"</item>
+    <item msgid="5896162189744596291">"AVRCP 1.4"</item>
+    <item msgid="7556896992111771426">"AVRCP 1.6"</item>
+  </string-array>
+  <string-array name="bluetooth_avrcp_version_values">
+    <item msgid="4041937689950033942">"avrcp15"</item>
+    <item msgid="1613629084012791988">"avrcp13"</item>
+    <item msgid="99467845610592181">"avrcp14"</item>
+    <item msgid="1963366694959681026">"avrcp16"</item>
+  </string-array>
+  <string-array name="bluetooth_map_versions">
+    <item msgid="8786402640610987099">"MAP 1.2 (ഡിഫോൾട്ട്)"</item>
+    <item msgid="6817922176194686449">"MAP 1.3"</item>
+    <item msgid="3423518690032737851">"MAP 1.4"</item>
+  </string-array>
+  <string-array name="bluetooth_map_version_values">
+    <item msgid="1164651830068248391">"map12"</item>
+    <item msgid="7073042887003102964">"map13"</item>
+    <item msgid="8147982633566548515">"map14"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_titles">
+    <item msgid="2494959071796102843">"സിസ്റ്റം സെലക്ഷൻ ഉപയോഗിക്കൂ ‌(ഡിഫോൾട്ട്)"</item>
+    <item msgid="4055460186095649420">"SBC"</item>
+    <item msgid="720249083677397051">"AAC"</item>
+    <item msgid="1049450003868150455">"<xliff:g id="QUALCOMM">Qualcomm®</xliff:g> <xliff:g id="APTX">aptX™</xliff:g> ഓഡിയോ"</item>
+    <item msgid="2908219194098827570">"<xliff:g id="QUALCOMM">Qualcomm®</xliff:g> <xliff:g id="APTX_HD">aptX™ HD</xliff:g> ഓഡിയോ"</item>
+    <item msgid="3825367753087348007">"LDAC"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_summaries">
+    <item msgid="8868109554557331312">"സിസ്റ്റം സെലക്ഷൻ ഉപയോഗിക്കൂ ‌(ഡിഫോൾട്ട്)"</item>
+    <item msgid="9024885861221697796">"SBC"</item>
+    <item msgid="4688890470703790013">"AAC"</item>
+    <item msgid="8627333814413492563">"<xliff:g id="QUALCOMM">Qualcomm®</xliff:g> <xliff:g id="APTX">aptX™</xliff:g> ഓഡിയോ"</item>
+    <item msgid="3517061573669307965">"<xliff:g id="QUALCOMM">Qualcomm®</xliff:g> <xliff:g id="APTX_HD">aptX™ HD</xliff:g> ഓഡിയോ"</item>
+    <item msgid="2553206901068987657">"LDAC"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_sample_rate_titles">
+    <item msgid="926809261293414607">"സിസ്റ്റം സെലക്ഷൻ ഉപയോഗിക്കൂ ‌(ഡിഫോൾട്ട്)"</item>
+    <item msgid="8003118270854840095">"44.1 kHz"</item>
+    <item msgid="3208896645474529394">"48.0 kHz"</item>
+    <item msgid="8420261949134022577">"88.2 kHz"</item>
+    <item msgid="8887519571067543785">"96.0 kHz"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_sample_rate_summaries">
+    <item msgid="2284090879080331090">"സിസ്റ്റം സെലക്ഷൻ ഉപയോഗിക്കൂ ‌(ഡിഫോൾട്ട്)"</item>
+    <item msgid="1872276250541651186">"44.1 kHz"</item>
+    <item msgid="8736780630001704004">"48.0 kHz"</item>
+    <item msgid="7698585706868856888">"88.2 kHz"</item>
+    <item msgid="8946330945963372966">"96.0 kHz"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_bits_per_sample_titles">
+    <item msgid="2574107108483219051">"സിസ്റ്റം സെലക്ഷൻ ഉപയോഗിക്കൂ ‌(ഡിഫോൾട്ട്)"</item>
+    <item msgid="4671992321419011165">"16 ബിറ്റ്/സാമ്പിൾ"</item>
+    <item msgid="1933898806184763940">"24 ബിറ്റ്/സാമ്പിൾ"</item>
+    <item msgid="1212577207279552119">"32 ബിറ്റ്/സാമ്പിൾ"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_bits_per_sample_summaries">
+    <item msgid="9196208128729063711">"സിസ്റ്റം സെലക്ഷൻ ഉപയോഗിക്കൂ ‌(ഡിഫോൾട്ട്)"</item>
+    <item msgid="1084497364516370912">"16 ബിറ്റ്/സാമ്പിൾ"</item>
+    <item msgid="2077889391457961734">"16 ബിറ്റ്/സാമ്പിൾ"</item>
+    <item msgid="3836844909491316925">"32 ബിറ്റ്/സാമ്പിൾ"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_channel_mode_titles">
+    <item msgid="3014194562841654656">"സിസ്റ്റം സെലക്ഷൻ ഉപയോഗിക്കൂ ‌(ഡിഫോൾട്ട്)"</item>
+    <item msgid="5982952342181788248">"മോണോ"</item>
+    <item msgid="927546067692441494">"സ്റ്റീരിയോ"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_channel_mode_summaries">
+    <item msgid="1997302811102880485">"സിസ്റ്റം സെലക്ഷൻ ഉപയോഗിക്കൂ ‌(ഡിഫോൾട്ട്)"</item>
+    <item msgid="8005696114958453588">"മോണോ"</item>
+    <item msgid="1333279807604675720">"സ്റ്റീരിയോ"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_ldac_playback_quality_titles">
+    <item msgid="1241278021345116816">"ശബ്‌ദനിലവാരമുയർത്താൻ ഒപ്‌റ്റിമൈസ് ചെയ്‌തു (990kbps/909kbps)"</item>
+    <item msgid="3523665555859696539">"സന്തുലിതമായ ‌ഓഡിയോ/കണക്ഷൻ നിലവാരം (660kbps/606kbps)"</item>
+    <item msgid="886408010459747589">"കണക്ഷൻ നിലവാരമുയർത്താൻ ഒപ്‌റ്റിമൈസ് ചെയ്‌തു (330kbps/303kbps)"</item>
+    <item msgid="3808414041654351577">"മികച്ച സംവിധാനം (അനുയോജ്യമായ ബിറ്റ് റേറ്റ്)"</item>
+  </string-array>
+  <string-array name="bluetooth_a2dp_codec_ldac_playback_quality_summaries">
+    <item msgid="804499336721569838">"ശബ്‌ദനിലവാരമുയർത്താൻ ഒപ്‌റ്റിമൈസ് ചെയ്‌തു"</item>
+    <item msgid="7451422070435297462">"സന്തുലിതമായ ‌ഓഡിയോ/കണക്ഷൻ നിലവാരം"</item>
+    <item msgid="6173114545795428901">"കണക്ഷൻ നിലവാരമുയർത്താൻ ഒപ്‌റ്റിമൈസ് ചെയ്‌തു"</item>
+    <item msgid="4349908264188040530">"മികച്ച സംവിധാനം (അനുയോജ്യമായ ബിറ്റ് റേറ്റ്)"</item>
+  </string-array>
+  <string-array name="bluetooth_audio_active_device_summaries">
+    <item msgid="8019740759207729126"></item>
+    <item msgid="204248102837117183">", സജീവം"</item>
+    <item msgid="253388653486517049">", സജീവ (മീഡിയ)"</item>
+    <item msgid="5001852592115448348">", സജീവമായ (ഫോൺ)"</item>
+  </string-array>
+  <string-array name="select_logd_size_titles">
+    <item msgid="1191094707770726722">"ഓഫ്"</item>
+    <item msgid="7839165897132179888">"64K"</item>
+    <item msgid="2715700596495505626">"256K"</item>
+    <item msgid="7099386891713159947">"1M"</item>
+    <item msgid="6069075827077845520">"4M"</item>
+    <item msgid="8243549501764402572">"16M"</item>
+  </string-array>
+  <string-array name="select_logd_size_lowram_titles">
+    <item msgid="1145807928339101085">"ഓഫ്"</item>
+    <item msgid="4064786181089783077">"64K"</item>
+    <item msgid="3052710745383602630">"256K"</item>
+    <item msgid="3691785423374588514">"1M"</item>
+  </string-array>
+  <string-array name="select_logd_size_summaries">
+    <item msgid="409235464399258501">"ഓഫ്"</item>
+    <item msgid="4195153527464162486">"ഓരോ ലോഗ് ബഫറിനും 64K"</item>
+    <item msgid="7464037639415220106">"ഓരോ ലോഗ് ബഫറിനും 256K"</item>
+    <item msgid="8539423820514360724">"ഓരോ ലോഗ് ബഫറിനും 1M"</item>
+    <item msgid="1984761927103140651">"ഓരോ ലോഗ് ബഫറിനും 4M"</item>
+    <item msgid="7892098981256010498">"ഓരോ ലോഗ് ബഫറിനും 16M"</item>
+  </string-array>
+  <string-array name="select_logpersist_titles">
+    <item msgid="704720725704372366">"ഓഫ്"</item>
+    <item msgid="6014837961827347618">"എല്ലാം"</item>
+    <item msgid="7387060437894578132">"റേഡിയോ ഒഴികെയുള്ള എല്ലാം"</item>
+    <item msgid="7300881231043255746">"കേർനൽ മാത്രം"</item>
+  </string-array>
+  <string-array name="select_logpersist_summaries">
+    <item msgid="97587758561106269">"ഓഫ്"</item>
+    <item msgid="7126170197336963369">"എല്ലാ ലോഗ് ബഫറുകളും"</item>
+    <item msgid="7167543126036181392">"റേഡിയോ ലോഗ് ബഫറുകൾ ഒഴികെയുള്ള എല്ലാം"</item>
+    <item msgid="5135340178556563979">"കേർനൽ ലോഗ് ബഫർ മാത്രം"</item>
+  </string-array>
+  <string-array name="window_animation_scale_entries">
+    <item msgid="2675263395797191850">"ആനിമേഷൻ ഓഫുചെയ്യുക"</item>
+    <item msgid="5790132543372767872">"ആനിമേഷൻ സ്‌കെയിൽ .5x"</item>
+    <item msgid="2529692189302148746">"ആനിമേഷൻ സ്‌കെയിൽ 1x"</item>
+    <item msgid="8072785072237082286">"ആനിമേഷൻ സ്‌കെയിൽ 1.5x"</item>
+    <item msgid="3531560925718232560">"ആനിമേഷൻ സ്‌കെയിൽ 2x"</item>
+    <item msgid="4542853094898215187">"ആനിമേഷൻ സ്‌കെയിൽ 5x"</item>
+    <item msgid="5643881346223901195">"ആനിമേഷൻ സ്‌കെയിൽ 10x"</item>
+  </string-array>
+  <string-array name="transition_animation_scale_entries">
+    <item msgid="3376676813923486384">"ആനിമേഷൻ ഓഫുചെയ്യുക"</item>
+    <item msgid="753422683600269114">"ആനിമേഷൻ സ്‌കെയിൽ .5x"</item>
+    <item msgid="3695427132155563489">"ആനിമേഷൻ സ്‌കെയിൽ 1x"</item>
+    <item msgid="9032615844198098981">"ആനിമേഷൻ സ്‌കെയിൽ 1.5x"</item>
+    <item msgid="8473868962499332073">"ആനിമേഷൻ സ്‌കെയിൽ 2x"</item>
+    <item msgid="4403482320438668316">"ആനിമേഷൻ സ്‌കെയിൽ 5x"</item>
+    <item msgid="169579387974966641">"ആനിമേഷൻ സ്‌കെയിൽ 10x"</item>
+  </string-array>
+  <string-array name="animator_duration_scale_entries">
+    <item msgid="6416998593844817378">"ആനിമേഷൻ രഹിതം"</item>
+    <item msgid="875345630014338616">"ആനിമേഷൻ സ്‌കെയിൽ .5x"</item>
+    <item msgid="2753729231187104962">"ആനിമേഷൻ സ്‌കെയിൽ 1x"</item>
+    <item msgid="1368370459723665338">"ആനിമേഷൻ സ്‌കെയിൽ 1.5x"</item>
+    <item msgid="5768005350534383389">"ആനിമേഷൻ സ്‌കെയിൽ 2x"</item>
+    <item msgid="3728265127284005444">"ആനിമേഷൻ സ്‌കെയിൽ 5x"</item>
+    <item msgid="2464080977843960236">"ആനിമേഷൻ സ്‌കെയിൽ 10x"</item>
+  </string-array>
+  <string-array name="overlay_display_devices_entries">
+    <item msgid="4497393944195787240">"ഒന്നുമില്ല"</item>
+    <item msgid="8461943978957133391">"480p"</item>
+    <item msgid="6923083594932909205">"480p (സുരക്ഷിതം)"</item>
+    <item msgid="1226941831391497335">"720p"</item>
+    <item msgid="7051983425968643928">"720p (സുരക്ഷിതം)"</item>
+    <item msgid="7765795608738980305">"1080p"</item>
+    <item msgid="8084293856795803592">"1080p (സുരക്ഷിതം)"</item>
+    <item msgid="938784192903353277">"4K"</item>
+    <item msgid="8612549335720461635">"4K (സുരക്ഷിതം)"</item>
+    <item msgid="7322156123728520872">"4K (അപ്‌സ്കെയിൽ ചെയ്തത്)"</item>
+    <item msgid="7735692090314849188">"4K (അപ്‌സ്കെയിൽ ചെയ്തത്, സുരക്ഷിതം)"</item>
+    <item msgid="7346816300608639624">"720p, 1080p (ഇരട്ട സ്ക്രീൻ)"</item>
+  </string-array>
+  <string-array name="enable_opengl_traces_entries">
+    <item msgid="4433736508877934305">"ഒന്നുമില്ല"</item>
+    <item msgid="9140053004929079158">"ലോഗ്‌ക്യാറ്റ്"</item>
+    <item msgid="3866871644917859262">"സിസ്‌ട്രേസ് (ഗ്രാഫിക്‌സ്)"</item>
+    <item msgid="7345673972166571060">"glGetError-ലെ കോൾ സ്റ്റാക്ക്"</item>
+  </string-array>
+  <string-array name="show_non_rect_clip_entries">
+    <item msgid="2482978351289846212">"ഓഫ്"</item>
+    <item msgid="3405519300199774027">"നീലനിറത്തിൽ ചതുരമല്ലാത്ത ക്ലിപ്പ് ഭാഗം വരയ്‌ക്കുക"</item>
+    <item msgid="1212561935004167943">"പരിശോധിച്ച ഡ്രോയിംഗ് കമാൻഡുകൾ പച്ചനിറത്തിൽ ഹൈലൈറ്റുചെയ്യുക"</item>
+  </string-array>
+  <string-array name="track_frame_time_entries">
+    <item msgid="634406443901014984">"ഓഫ്"</item>
+    <item msgid="1288760936356000927">"സ്‌ക്രീനിൽ ബാറുകളായി"</item>
+    <item msgid="5023908510820531131">"<xliff:g id="AS_TYPED_COMMAND">adb shell dumpsys gfxinfo</xliff:g> എന്നതിൽ"</item>
+  </string-array>
+  <string-array name="debug_hw_overdraw_entries">
+    <item msgid="1968128556747588800">"ഓഫ്"</item>
+    <item msgid="3033215374382962216">"ഓവർഡ്രോ ഭാഗങ്ങൾ ദൃശ്യമാക്കുക"</item>
+    <item msgid="3474333938380896988">"വർണ്ണാന്ധതയ്‌ക്കായുള്ള ഭാഗങ്ങൾ ദൃശ്യമാക്കുക"</item>
+  </string-array>
+  <string-array name="app_process_limit_entries">
+    <item msgid="794656271086646068">"അടിസ്ഥാന പരിധി"</item>
+    <item msgid="8628438298170567201">"പശ്ചാത്തല പ്രോസ‌സ്സുകൾ ഒന്നുമില്ല"</item>
+    <item msgid="915752993383950932">"പരമാവധി ഒരു പ്രോസ‌സ്സ്"</item>
+    <item msgid="8554877790859095133">"പരമാവധി 2 പ്രോസസ്സുകൾ"</item>
+    <item msgid="9060830517215174315">"പരമാവധി 3 പ്രോസ‌സ്സുകൾ"</item>
+    <item msgid="6506681373060736204">"പരമാവധി 4 പ്രോസ‌സ്സുകൾ"</item>
+  </string-array>
+  <string-array name="usb_configuration_titles">
+    <item msgid="3358668781763928157">"ചാർജ് ചെയ്യുന്നു"</item>
+    <item msgid="7804797564616858506">"MTP (മീഡിയ ട്രാൻസ്‌ഫർ പ്രോട്ടോക്കോള്‍)"</item>
+    <item msgid="910925519184248772">"PTP (പിക്‌ചർ ട്രാൻസ്‌ഫർ പ്രോട്ടോക്കോള്‍)"</item>
+    <item msgid="3825132913289380004">"RNDIS (USB ഇതർനെറ്റ്)"</item>
+    <item msgid="8828567335701536560">"ഓഡിയോ ഉറവിടം"</item>
+    <item msgid="8688681727755534982">"MIDI"</item>
+  </string-array>
+</resources>

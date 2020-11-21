@@ -64,6 +64,8 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.os.UserHandle;
@@ -75,6 +77,7 @@ import android.permission.PermissionManager;
 import android.util.AndroidException;
 import android.util.Log;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 
 import dalvik.system.VMRuntime;
@@ -113,6 +116,213 @@ public abstract class PackageManager {
         public NameNotFoundException(String name) {
             super(name);
         }
+    }
+
+    /**
+     * A property value set within the manifest.
+     * <p>
+     * The value of a property will only have a single type, as defined by
+     * the property itself.
+     */
+    public static final class Property implements Parcelable {
+        private static final int TYPE_BOOLEAN = 1;
+        private static final int TYPE_FLOAT = 2;
+        private static final int TYPE_INTEGER = 3;
+        private static final int TYPE_RESOURCE = 4;
+        private static final int TYPE_STRING = 5;
+        private final String mName;
+        private boolean mBooleanValue;
+        private float mFloatValue;
+        private int mIntegerValue;
+        private String mStringValue;
+        private final int mType;
+
+        /** @hide */
+        @VisibleForTesting
+        public Property(@NonNull String name, int type) {
+            assert name != null;
+            assert type >= TYPE_BOOLEAN && type <= TYPE_STRING;
+            this.mName = name;
+            this.mType = type;
+        }
+        /** @hide */
+        public Property(@NonNull String name, boolean value) {
+            this(name, TYPE_BOOLEAN);
+            mBooleanValue = value;
+        }
+        /** @hide */
+        public Property(@NonNull String name, float value) {
+            this(name, TYPE_FLOAT);
+            mFloatValue = value;
+        }
+        /** @hide */
+        public Property(@NonNull String name, int value, boolean isResource) {
+            this(name, isResource ? TYPE_RESOURCE : TYPE_INTEGER);
+            mIntegerValue = value;
+        }
+        /** @hide */
+        public Property(@NonNull String name, String value) {
+            this(name, TYPE_STRING);
+            mStringValue = value;
+        }
+
+        /** @hide */
+        @VisibleForTesting
+        public int getType() {
+            return mType;
+        }
+
+        /**
+         * Returns the name of the property.
+         */
+        @NonNull public String getName() {
+            return mName;
+        }
+
+        /**
+         * Returns the boolean value set for the property.
+         * <p>If the property is not of a boolean type, returns {@code false}.
+         */
+        public boolean getBoolean() {
+            return mBooleanValue;
+        }
+
+        /**
+         * Returns {@code true} if the property is a boolean type. Otherwise {@code false}.
+         */
+        public boolean isBoolean() {
+            return mType == TYPE_BOOLEAN;
+        }
+
+        /**
+         * Returns the float value set for the property.
+         * <p>If the property is not of a float type, returns {@code 0.0}.
+         */
+        public float getFloat() {
+            return mFloatValue;
+        }
+
+        /**
+         * Returns {@code true} if the property is a float type. Otherwise {@code false}.
+         */
+        public boolean isFloat() {
+            return mType == TYPE_FLOAT;
+        }
+
+        /**
+         * Returns the integer value set for the property.
+         * <p>If the property is not of an integer type, returns {@code 0}.
+         */
+        public int getInteger() {
+            return mType == TYPE_INTEGER ? mIntegerValue : 0;
+        }
+
+        /**
+         * Returns {@code true} if the property is an integer type. Otherwise {@code false}.
+         */
+        public boolean isInteger() {
+            return mType == TYPE_INTEGER;
+        }
+
+        /**
+         * Returns the a resource id set for the property.
+         * <p>If the property is not of a resource id type, returns {@code 0}.
+         */
+        public int getResourceId() {
+            return mType == TYPE_RESOURCE ? mIntegerValue : 0;
+        }
+
+        /**
+         * Returns {@code true} if the property is a resource id type. Otherwise {@code false}.
+         */
+        public boolean isResourceId() {
+            return mType == TYPE_RESOURCE;
+        }
+
+        /**
+         * Returns the a String value set for the property.
+         * <p>If the property is not a String type, returns {@code null}.
+         */
+        @Nullable public String getString() {
+            return mStringValue;
+        }
+
+        /**
+         * Returns {@code true} if the property is a String type. Otherwise {@code false}.
+         */
+        public boolean isString() {
+            return mType == TYPE_STRING;
+        }
+
+        /**
+         * Adds a mapping from the given key to this property's value in the provided
+         * {@link android.os.Bundle}. If the provided {@link android.os.Bundle} is
+         * {@code null}, creates a new {@link android.os.Bundle}.
+         * @hide
+         */
+        public Bundle toBundle(Bundle outBundle) {
+            final Bundle b = outBundle == null ? new Bundle() : outBundle;
+            if (mType == TYPE_BOOLEAN) {
+                b.putBoolean(mName, mBooleanValue);
+            } else if (mType == TYPE_FLOAT) {
+                b.putFloat(mName, mFloatValue);
+            } else if (mType == TYPE_INTEGER) {
+                b.putInt(mName, mIntegerValue);
+            } else if (mType == TYPE_RESOURCE) {
+                b.putInt(mName, mIntegerValue);
+            } else if (mType == TYPE_STRING) {
+                b.putString(mName, mStringValue);
+            }
+            return b;
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(@NonNull Parcel dest, int flags) {
+            dest.writeString(mName);
+            dest.writeInt(mType);
+            if (mType == TYPE_BOOLEAN) {
+                dest.writeBoolean(mBooleanValue);
+            } else if (mType == TYPE_FLOAT) {
+                dest.writeFloat(mFloatValue);
+            } else if (mType == TYPE_INTEGER) {
+                dest.writeInt(mIntegerValue);
+            } else if (mType == TYPE_RESOURCE) {
+                dest.writeInt(mIntegerValue);
+            } else if (mType == TYPE_STRING) {
+                dest.writeString(mStringValue);
+            }
+        }
+
+        @NonNull
+        public static final Creator<Property> CREATOR = new Creator<Property>() {
+            @Override
+            public Property createFromParcel(@NonNull Parcel source) {
+                final String name = source.readString();
+                final int type = source.readInt();
+                if (type == TYPE_BOOLEAN) {
+                    return new Property(name, source.readBoolean());
+                } else if (type == TYPE_FLOAT) {
+                    return new Property(name, source.readFloat());
+                } else if (type == TYPE_INTEGER) {
+                    return new Property(name, source.readInt(), false);
+                } else if (type == TYPE_RESOURCE) {
+                    return new Property(name, source.readInt(), true);
+                } else if (type == TYPE_STRING) {
+                    return new Property(name, source.readString());
+                }
+                return null;
+            }
+
+            @Override
+            public Property[] newArray(int size) {
+                return new Property[size];
+            }
+        };
     }
 
     /**

@@ -47,6 +47,7 @@ import android.util.Slog;
 import com.android.internal.annotations.GuardedBy;
 
 import java.util.ArrayList;
+import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
@@ -78,6 +79,8 @@ public class ImpressionAttestationController {
 
     private final Handler mHandler;
 
+    private final String mSalt;
+
     private interface Command {
         void run(IImpressionAttestationService service) throws RemoteException;
     }
@@ -85,6 +88,7 @@ public class ImpressionAttestationController {
     ImpressionAttestationController(Context context) {
         mContext = context;
         mHandler = new Handler(Looper.getMainLooper());
+        mSalt = UUID.randomUUID().toString();
     }
 
     String[] getSupportedImpressionAlgorithms() {
@@ -118,17 +122,17 @@ public class ImpressionAttestationController {
         }
     }
 
-    int verifyImpressionToken(ImpressionToken impressionToken) {
+    boolean verifyImpressionToken(ImpressionToken impressionToken) {
         final SyncCommand syncCommand = new SyncCommand();
         Bundle results = syncCommand.run((service, remoteCallback) -> {
             try {
-                service.verifyImpressionToken(impressionToken, remoteCallback);
+                service.verifyImpressionToken(mSalt, impressionToken, remoteCallback);
             } catch (RemoteException e) {
                 Slog.e(TAG, "Failed to invoke verifyImpressionToken command");
             }
         });
 
-        return results.getInt(ImpressionAttestationService.EXTRA_VERIFICATION_STATUS);
+        return results.getBoolean(ImpressionAttestationService.EXTRA_VERIFICATION_STATUS);
     }
 
     ImpressionToken generateImpressionToken(HardwareBuffer screenshot, Rect bounds,
@@ -136,7 +140,8 @@ public class ImpressionAttestationController {
         final SyncCommand syncCommand = new SyncCommand();
         Bundle results = syncCommand.run((service, remoteCallback) -> {
             try {
-                service.generateImpressionToken(screenshot, bounds, hashAlgorithm, remoteCallback);
+                service.generateImpressionToken(mSalt, screenshot, bounds, hashAlgorithm,
+                        remoteCallback);
             } catch (RemoteException e) {
                 Slog.e(TAG, "Failed to invoke generateImpressionToken command", e);
             }
