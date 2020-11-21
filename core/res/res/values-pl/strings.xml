@@ -718,7 +718,7 @@
   <string-array name="phoneTypes">
     <item msgid="8996339953292723951">"Dom"</item>
     <item msgid="7740243458912727194">"Komórka"</item>
-    <item msgid="8526146065496663766">"Praca"</item>
+    <item msgid="8526146065496663766">"Służbowy"</item>
     <item msgid="8150904584178569699">"Faks w pracy"</item>
     <item msgid="4537253139152229577">"Faks domowy"</item>
     <item msgid="6751245029698664340">"Pager"</item>
@@ -727,24 +727,24 @@
   </string-array>
   <string-array name="emailAddressTypes">
     <item msgid="7786349763648997741">"Dom"</item>
-    <item msgid="435564470865989199">"Praca"</item>
+    <item msgid="435564470865989199">"Służbowy"</item>
     <item msgid="4199433197875490373">"Inne"</item>
     <item msgid="3233938986670468328">"Niestandardowy"</item>
   </string-array>
   <string-array name="postalAddressTypes">
     <item msgid="3861463339764243038">"Dom"</item>
-    <item msgid="5472578890164979109">"Praca"</item>
+    <item msgid="5472578890164979109">"Służbowy"</item>
     <item msgid="5718921296646594739">"Inny"</item>
     <item msgid="5523122236731783179">"Niestandardowy"</item>
   </string-array>
   <string-array name="imAddressTypes">
     <item msgid="588088543406993772">"Dom"</item>
-    <item msgid="5503060422020476757">"Praca"</item>
+    <item msgid="5503060422020476757">"Służbowy"</item>
     <item msgid="2530391194653760297">"Inne"</item>
     <item msgid="7640927178025203330">"Niestandardowy"</item>
   </string-array>
   <string-array name="organizationTypes">
-    <item msgid="6144047813304847762">"Praca"</item>
+    <item msgid="6144047813304847762">"Służbowy"</item>
     <item msgid="7402720230065674193">"Inne"</item>
     <item msgid="808230403067569648">"Niestandardowy"</item>
   </string-array>
@@ -1464,8 +1464,8 @@
     <string name="deny" msgid="6632259981847676572">"Odmów"</string>
     <string name="permission_request_notification_title" msgid="1810025922441048273">"Prośba o pozwolenie"</string>
     <string name="permission_request_notification_with_subtitle" msgid="3743417870360129298">"Prośba o pozwolenie\ndotyczące konta <xliff:g id="ACCOUNT">%s</xliff:g>"</string>
-    <string name="forward_intent_to_owner" msgid="4620359037192871015">"Używasz tej aplikacji poza profilem do pracy"</string>
-    <string name="forward_intent_to_work" msgid="3620262405636021151">"Używasz tej aplikacji w swoim profilu służbowego"</string>
+    <string name="forward_intent_to_owner" msgid="4620359037192871015">"Używasz tej aplikacji poza profilem służbowym"</string>
+    <string name="forward_intent_to_work" msgid="3620262405636021151">"Używasz tej aplikacji w swoim profilu służbowym"</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"Sposób wprowadzania tekstu"</string>
     <string name="sync_binding_label" msgid="469249309424662147">"Synchronizacja"</string>
     <string name="accessibility_binding_label" msgid="1974602776545801715">"Ułatwienia dostępu"</string>
@@ -1836,7 +1836,7 @@
     <string name="select_day" msgid="2060371240117403147">"Wybierz miesiąc i dzień"</string>
     <string name="select_year" msgid="1868350712095595393">"Wybierz rok"</string>
     <string name="deleted_key" msgid="9130083334943364001">"<xliff:g id="KEY">%1$s</xliff:g> usunięte"</string>
-    <string name="managed_profile_label_badge" msgid="6762559569999499495">"<xliff:g id="LABEL">%1$s</xliff:g> (praca)"</string>
+    <string name="managed_profile_label_badge" msgid="6762559569999499495">"<xliff:g id="LABEL">%1$s</xliff:g> (służbowy)"</string>
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"<xliff:g id="LABEL">%1$s</xliff:g> – praca 2"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"<xliff:g id="LABEL">%1$s</xliff:g> – praca 3"</string>
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"Podaj PIN, aby odpiąć"</string>
