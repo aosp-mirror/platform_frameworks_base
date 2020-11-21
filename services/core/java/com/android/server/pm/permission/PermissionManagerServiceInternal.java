@@ -24,7 +24,6 @@ import android.content.pm.PackageManager;
 import android.content.pm.PermissionInfo;
 import android.permission.PermissionManagerInternal;
 
-import com.android.server.pm.PackageSetting;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 
 import java.util.ArrayList;
@@ -277,44 +276,6 @@ public abstract class PermissionManagerServiceInternal extends PermissionManager
     public abstract void resetAllRuntimePermissions(@UserIdInt int userId);
 
     /**
-     * We might auto-grant permissions if any permission of the group is already granted. Hence if
-     * the group of a granted permission changes we need to revoke it to avoid having permissions of
-     * the new group auto-granted.
-     *
-     * @param newPackage The new package that was installed
-     * @param oldPackage The old package that was updated
-     * @param allPackageNames All packages
-     */
-    public abstract void revokeRuntimePermissionsIfGroupChanged(
-            @NonNull AndroidPackage newPackage,
-            @NonNull AndroidPackage oldPackage,
-            @NonNull ArrayList<String> allPackageNames);
-
-    /**
-     * Some permissions might have been owned by a non-system package, and the system then defined
-     * said permission. Some other permissions may one have been install permissions, but are now
-     * runtime or higher. These permissions should be revoked.
-     *
-     * @param permissionsToRevoke A list of permission names to revoke
-     * @param allPackageNames All packages
-     */
-    public abstract void revokeRuntimePermissionsIfPermissionDefinitionChanged(
-            @NonNull List<String> permissionsToRevoke,
-            @NonNull ArrayList<String> allPackageNames);
-
-    /**
-     * Add all permissions in the given package.
-     * <p>
-     * NOTE: argument {@code groupTEMP} is temporary until mPermissionGroups is moved to
-     * the permission settings.
-     *
-     * @return A list of BasePermissions that were updated, and need to be revoked from packages
-     */
-    public abstract List<String> addAllPermissions(@NonNull AndroidPackage pkg, boolean chatty);
-    public abstract void addAllPermissionGroups(@NonNull AndroidPackage pkg, boolean chatty);
-    public abstract void removeAllPermissions(@NonNull AndroidPackage pkg, boolean chatty);
-
-    /**
      * Read legacy permission state from package settings.
      *
      * TODO(zhanghai): This is a temporary method because we should not expose
@@ -335,30 +296,6 @@ public abstract class PermissionManagerServiceInternal extends PermissionManager
      * Notify that a user has been removed and its permission state should be removed as well.
      */
     public abstract void onUserRemoved(@UserIdInt int userId);
-
-    /**
-     * Remove the permission state associated with an app ID, called the same time as the
-     * removal of a {@code PackageSetitng}.
-     *
-     * TODO(zhanghai): This is a temporary method before we figure out a way to get notified of app
-     * ID removal via API.
-     */
-    public abstract void removeAppIdStateTEMP(@AppIdInt int appId);
-
-    /**
-     * Update the shared user setting when a package with a shared user id is removed. The gids
-     * associated with each permission of the deleted package are removed from the shared user'
-     * gid list only if its not in use by other permissions of packages in the shared user setting.
-     *
-     * TODO(zhanghai): We should not need this when permission no longer sees an incomplete package
-     * state where the updated system package is uninstalled but the disabled system package is yet
-     * to be installed. Then we should handle this in restorePermissionState().
-     *
-     * @return the affected user id, may be a real user ID, USER_ALL, or USER_NULL when none.
-     */
-    @UserIdInt
-    public abstract int revokeSharedUserPermissionsForDeletedPackageTEMP(
-            @NonNull PackageSetting deletedPs, @UserIdInt int userId);
 
     /**
      * Get all the permissions granted to a package.
@@ -578,10 +515,35 @@ public abstract class PermissionManagerServiceInternal extends PermissionManager
             @NonNull LegacyPermissionSettings legacyPermissionSettings);
 
     /**
-     * Transfers ownership of permissions from one package to another.
+     * Callback when a package has been added.
+     *
+     * @param pkg the added package
+     * @param isInstantApp whether the added package is an instant app
+     * @param oldPkg the old package, or {@code null} if none
      */
-    public abstract void transferPermissions(@NonNull String oldPackageName,
-            @NonNull String newPackageName);
+    //@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
+    public abstract void onPackageAdded(@NonNull AndroidPackage pkg, boolean isInstantApp,
+            @Nullable AndroidPackage oldPkg);
+
+    /**
+     * Callback when a package has been removed.
+     *
+     * @param pkg the removed package
+     */
+    //@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
+    public abstract void onPackageRemoved(@NonNull AndroidPackage pkg);
+
+    /**
+     * Callback when the state for a package has been removed.
+     *
+     * @param packageName the name of the removed package
+     * @param appId the app ID of the removed package
+     * @param pkg the removed package, or {@code null} if unavailable
+     * @param sharedUserPkgs the packages that are in the same shared user
+     */
+    //@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
+    public abstract void onPackageStateRemoved(@NonNull String packageName, int appId,
+            @Nullable AndroidPackage pkg, @NonNull List<AndroidPackage> sharedUserPkgs);
 
     /**
      * Check whether a permission can be propagated to instant app.

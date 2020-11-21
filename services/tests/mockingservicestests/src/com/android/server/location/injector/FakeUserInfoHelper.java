@@ -100,6 +100,11 @@ public class FakeUserInfoHelper extends UserInfoHelper {
     }
 
     @Override
+    public int getCurrentUserId() {
+        return mCurrentUserId;
+    }
+
+    @Override
     protected int[] getProfileIds(int userId) {
         IntArray profiles = mProfiles.get(userId);
         if (profiles != null) {

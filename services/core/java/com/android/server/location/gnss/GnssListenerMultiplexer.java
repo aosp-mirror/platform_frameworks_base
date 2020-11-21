@@ -266,11 +266,30 @@ public abstract class GnssListenerMultiplexer<TRequest, TListener extends IInter
         CallerIdentity identity = registration.getIdentity();
         return registration.isPermitted()
                 && (registration.isForeground() || isBackgroundRestrictionExempt(identity))
-                && (identity.isSystem() || mUserInfoHelper.isCurrentUserId(identity.getUserId()))
-                && mLocationManagerInternal.isProviderEnabledForUser(GPS_PROVIDER,
-                identity.getUserId())
-                && !mSettingsHelper.isLocationPackageBlacklisted(identity.getUserId(),
-                identity.getPackageName());
+                && isActive(identity);
+    }
+
+    private boolean isActive(CallerIdentity identity) {
+        if (identity.isSystemServer()) {
+            if (!mLocationManagerInternal.isProviderEnabledForUser(GPS_PROVIDER,
+                    mUserInfoHelper.getCurrentUserId())) {
+                return false;
+            }
+        } else {
+            if (!mLocationManagerInternal.isProviderEnabledForUser(GPS_PROVIDER,
+                    identity.getUserId())) {
+                return false;
+            }
+            if (!mUserInfoHelper.isCurrentUserId(identity.getUserId())) {
+                return false;
+            }
+            if (mSettingsHelper.isLocationPackageBlacklisted(identity.getUserId(),
+                    identity.getPackageName())) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private boolean isBackgroundRestrictionExempt(CallerIdentity identity) {

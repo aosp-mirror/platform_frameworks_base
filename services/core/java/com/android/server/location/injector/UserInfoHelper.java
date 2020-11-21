@@ -132,6 +132,12 @@ public abstract class UserInfoHelper {
      */
     public abstract boolean isCurrentUserId(@UserIdInt int userId);
 
+    /**
+     * Returns the current user id. Where possible, prefer to use {@link #isCurrentUserId(int)}
+     * instead, as that method has more flexibility.
+     */
+    public abstract @UserIdInt int getCurrentUserId();
+
     protected abstract int[] getProfileIds(@UserIdInt int userId);
 
     /**
