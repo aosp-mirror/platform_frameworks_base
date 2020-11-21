@@ -19,6 +19,10 @@ GenericException: android.service.autofill.augmented.FillWindow#finalize():
     
 
 
+IntentBuilderName: android.app.search.SearchAction#getIntent():
+    
+
+
 KotlinKeyword: android.app.Notification#when:
     
 
@@ -247,4 +251,10 @@ SamShouldBeLast: android.view.accessibility.AccessibilityManager#addAccessibilit
 SamShouldBeLast: android.view.accessibility.AccessibilityManager#addTouchExplorationStateChangeListener(android.view.accessibility.AccessibilityManager.TouchExplorationStateChangeListener, android.os.Handler):
     
 SamShouldBeLast: android.webkit.WebChromeClient#onShowFileChooser(android.webkit.WebView, android.webkit.ValueCallback<android.net.Uri[]>, android.webkit.WebChromeClient.FileChooserParams):
+    
+
+
+UserHandleName: android.app.search.SearchAction.Builder#setUserHandle(android.os.UserHandle):
+    Method taking UserHandle should be named `doFooAsUser` or `queryFooForUser`, was `setUserHandle`
+UserHandleName: android.app.search.SearchTarget.Builder#setUserHandle(android.os.UserHandle):
     

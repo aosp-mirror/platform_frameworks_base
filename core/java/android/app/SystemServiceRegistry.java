@@ -32,6 +32,7 @@ import android.app.job.JobSchedulerFrameworkInitializer;
 import android.app.prediction.AppPredictionManager;
 import android.app.role.RoleControllerManager;
 import android.app.role.RoleManager;
+import android.app.search.SearchUiManager;
 import android.app.slice.SliceManager;
 import android.app.time.TimeManager;
 import android.app.timedetector.TimeDetector;
@@ -1171,6 +1172,16 @@ public final class SystemServiceRegistry {
                 // manager to apps so the performance impact is practically zero
                 return null;
             }});
+
+        registerService(Context.SEARCH_UI_SERVICE, SearchUiManager.class,
+            new CachedServiceFetcher<SearchUiManager>() {
+                @Override
+                public SearchUiManager createService(ContextImpl ctx)
+                    throws ServiceNotFoundException {
+                    IBinder b = ServiceManager.getService(Context.SEARCH_UI_SERVICE);
+                    return b == null ? null : new SearchUiManager(ctx);
+                }
+            });
 
         registerService(Context.APP_PREDICTION_SERVICE, AppPredictionManager.class,
                 new CachedServiceFetcher<AppPredictionManager>() {

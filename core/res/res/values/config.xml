@@ -3741,6 +3741,16 @@
     -->
     <string name="config_defaultContentSuggestionsService" translatable="false"></string>
 
+    <!-- The package name for the system's search ui service.
+     This service returns search results when provided with an input string.
+
+     This service must be trusted, as it can be activated without explicit consent of the user.
+     If no service with the specified name exists on the device, on device search wil be
+     disabled.
+     Example: "com.android.intelliegence/.SearchUiService"
+-->
+    <string name="config_defaultSearchUiService" translatable="false"></string>
+
     <string name="config_defaultMusicRecognitionService" translatable="false"></string>
 
     <!-- The package name for the default retail demo app.
