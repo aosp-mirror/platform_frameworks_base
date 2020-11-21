@@ -23,8 +23,9 @@ import android.app.appsearch.AppSearchResult;
 /**
  * An exception thrown by {@link android.app.appsearch.AppSearchSession} or a subcomponent.
  *
- * <p>These exceptions can be converted into a failed {@link AppSearchResult}
- * for propagating to the client.
+ * <p>These exceptions can be converted into a failed {@link AppSearchResult} for propagating to the
+ * client.
+ *
  * @hide
  */
 public class AppSearchException extends Exception {
@@ -32,6 +33,7 @@ public class AppSearchException extends Exception {
 
     /**
      * Initializes an {@link AppSearchException} with no message.
+     *
      * @hide
      */
     public AppSearchException(@AppSearchResult.ResultCode int resultCode) {
@@ -58,9 +60,7 @@ public class AppSearchException extends Exception {
         return mResultCode;
     }
 
-    /**
-     * Converts this {@link java.lang.Exception} into a failed {@link AppSearchResult}
-     */
+    /** Converts this {@link java.lang.Exception} into a failed {@link AppSearchResult} */
     @NonNull
     public <T> AppSearchResult<T> toAppSearchResult() {
         return AppSearchResult.newFailedResult(mResultCode, getMessage());

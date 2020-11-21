@@ -16,7 +16,6 @@
 
 package android.app.appsearch.cts;
 
-
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.testng.Assert.expectThrows;
@@ -55,21 +54,28 @@ public class AppSearchSchemaCtsTest {
 
     @Test
     public void testDuplicateProperties() {
-        AppSearchSchema.Builder builder = new AppSearchSchema.Builder("Email")
-                .addProperty(new PropertyConfig.Builder("subject")
-                        .setDataType(PropertyConfig.DATA_TYPE_STRING)
-                        .setCardinality(PropertyConfig.CARDINALITY_OPTIONAL)
-                        .setIndexingType(PropertyConfig.INDEXING_TYPE_PREFIXES)
-                        .setTokenizerType(PropertyConfig.TOKENIZER_TYPE_PLAIN)
-                        .build()
-                );
-        IllegalSchemaException e = expectThrows(IllegalSchemaException.class,
-                () -> builder.addProperty(new PropertyConfig.Builder("subject")
-                        .setDataType(PropertyConfig.DATA_TYPE_STRING)
-                        .setCardinality(PropertyConfig.CARDINALITY_OPTIONAL)
-                        .setIndexingType(PropertyConfig.INDEXING_TYPE_PREFIXES)
-                        .setTokenizerType(PropertyConfig.TOKENIZER_TYPE_PLAIN)
-                        .build()));
+        AppSearchSchema.Builder builder =
+                new AppSearchSchema.Builder("Email")
+                        .addProperty(
+                                new PropertyConfig.Builder("subject")
+                                        .setDataType(PropertyConfig.DATA_TYPE_STRING)
+                                        .setCardinality(PropertyConfig.CARDINALITY_OPTIONAL)
+                                        .setIndexingType(PropertyConfig.INDEXING_TYPE_PREFIXES)
+                                        .setTokenizerType(PropertyConfig.TOKENIZER_TYPE_PLAIN)
+                                        .build());
+        IllegalSchemaException e =
+                expectThrows(
+                        IllegalSchemaException.class,
+                        () ->
+                                builder.addProperty(
+                                        new PropertyConfig.Builder("subject")
+                                                .setDataType(PropertyConfig.DATA_TYPE_STRING)
+                                                .setCardinality(PropertyConfig.CARDINALITY_OPTIONAL)
+                                                .setIndexingType(
+                                                        PropertyConfig.INDEXING_TYPE_PREFIXES)
+                                                .setTokenizerType(
+                                                        PropertyConfig.TOKENIZER_TYPE_PLAIN)
+                                                .build()));
         assertThat(e).hasMessageThat().contains("Property defined more than once: subject");
     }
 }

@@ -16,13 +16,11 @@
 
 package com.android.server.appsearch.external.localstorage.converter;
 
-import android.os.Bundle;
-
 import android.annotation.NonNull;
-
 import android.app.appsearch.GenericDocument;
 import android.app.appsearch.SearchResult;
 import android.app.appsearch.SearchResultPage;
+import android.os.Bundle;
 
 import com.google.android.icing.proto.SearchResultProto;
 import com.google.android.icing.proto.SearchResultProtoOrBuilder;
@@ -36,7 +34,6 @@ import java.util.ArrayList;
  *
  * @hide
  */
-
 public class SearchResultToProtoConverter {
     private SearchResultToProtoConverter() {}
 
@@ -67,8 +64,9 @@ public class SearchResultToProtoConverter {
             for (int i = 0; i < proto.getSnippet().getEntriesCount(); i++) {
                 SnippetProto.EntryProto entry = proto.getSnippet().getEntries(i);
                 for (int j = 0; j < entry.getSnippetMatchesCount(); j++) {
-                    Bundle matchInfoBundle = convertToMatchInfoBundle(
-                            entry.getSnippetMatches(j), entry.getPropertyName());
+                    Bundle matchInfoBundle =
+                            convertToMatchInfoBundle(
+                                    entry.getSnippetMatches(j), entry.getPropertyName());
                     matchList.add(matchInfoBundle);
                 }
             }
