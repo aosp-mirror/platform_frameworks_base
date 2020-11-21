@@ -52,6 +52,7 @@ import android.content.pm.parsing.component.ParsedActivity;
 import android.content.pm.parsing.component.ParsedActivityUtils;
 import android.content.pm.parsing.component.ParsedAttribution;
 import android.content.pm.parsing.component.ParsedAttributionUtils;
+import android.content.pm.parsing.component.ParsedComponent;
 import android.content.pm.parsing.component.ParsedInstrumentation;
 import android.content.pm.parsing.component.ParsedInstrumentationUtils;
 import android.content.pm.parsing.component.ParsedIntentInfo;
@@ -700,15 +701,15 @@ public class ParsingPackageUtils {
                 // note: application meta-data is stored off to the side, so it can
                 // remain null in the primary copy (we like to avoid extra copies because
                 // it can be large)
-                ParseResult<Property> metaDataResult = parseMetaData(pkg, res, parser,
-                        "<meta-data>", input);
+                ParseResult<Property> metaDataResult = parseMetaData(pkg, null, res,
+                        parser, "<meta-data>", input);
                 if (metaDataResult.isSuccess() && metaDataResult.getResult() != null) {
                     pkg.setMetaData(metaDataResult.getResult().toBundle(pkg.getMetaData()));
                 }
                 return metaDataResult;
             case "property":
-                ParseResult<Property> propertyResult = parseMetaData(pkg, res, parser,
-                        "<property>", input);
+                ParseResult<Property> propertyResult = parseMetaData(pkg, null, res,
+                        parser, "<property>", input);
                 if (propertyResult.isSuccess()) {
                     pkg.addProperty(propertyResult.getResult());
                 }
@@ -2093,15 +2094,15 @@ public class ParsingPackageUtils {
                 // note: application meta-data is stored off to the side, so it can
                 // remain null in the primary copy (we like to avoid extra copies because
                 // it can be large)
-                final ParseResult<Property> metaDataResult = parseMetaData(pkg, res, parser,
-                        "<meta-data>", input);
+                final ParseResult<Property> metaDataResult = parseMetaData(pkg, null, res,
+                        parser, "<meta-data>", input);
                 if (metaDataResult.isSuccess() && metaDataResult.getResult() != null) {
                     pkg.setMetaData(metaDataResult.getResult().toBundle(pkg.getMetaData()));
                 }
                 return metaDataResult;
             case "property":
-                final ParseResult<Property> propertyResult = parseMetaData(pkg, res, parser,
-                        "<property>", input);
+                final ParseResult<Property> propertyResult = parseMetaData(pkg, null, res,
+                        parser, "<property>", input);
                 if (propertyResult.isSuccess()) {
                     pkg.addProperty(propertyResult.getResult());
                 }
@@ -2754,8 +2755,8 @@ public class ParsingPackageUtils {
      * Parse a meta data defined on the enclosing tag.
      * <p>Meta data can be defined by either &lt;meta-data&gt; or &lt;property&gt; elements.
      */
-    public static ParseResult<Property> parseMetaData(ParsingPackage pkg, Resources res,
-            XmlResourceParser parser, String tagName, ParseInput input) {
+    public static ParseResult<Property> parseMetaData(ParsingPackage pkg, ParsedComponent component,
+            Resources res, XmlResourceParser parser, String tagName, ParseInput input) {
         TypedArray sa = res.obtainAttributes(parser, R.styleable.AndroidManifestMetaData);
         try {
             final Property property;
@@ -2765,23 +2766,25 @@ public class ParsingPackageUtils {
                 return input.error(tagName + " requires an android:name attribute");
             }
 
+            final String packageName = pkg.getPackageName();
+            final String className = component != null ? component.getName() : null;
             TypedValue v = sa.peekValue(R.styleable.AndroidManifestMetaData_resource);
             if (v != null && v.resourceId != 0) {
-                property = new Property(name, v.resourceId, true);
+                property = new Property(name, v.resourceId, true, packageName, className);
             } else {
                 v = sa.peekValue(R.styleable.AndroidManifestMetaData_value);
                 if (v != null) {
                     if (v.type == TypedValue.TYPE_STRING) {
                         final CharSequence cs = v.coerceToString();
                         final String stringValue = cs != null ? cs.toString() : null;
-                        property = new Property(name, stringValue);
+                        property = new Property(name, stringValue, packageName, className);
                     } else if (v.type == TypedValue.TYPE_INT_BOOLEAN) {
-                        property = new Property(name, v.data != 0);
+                        property = new Property(name, v.data != 0, packageName, className);
                     } else if (v.type >= TypedValue.TYPE_FIRST_INT
                             && v.type <= TypedValue.TYPE_LAST_INT) {
-                        property = new Property(name, v.data, false);
+                        property = new Property(name, v.data, false, packageName, className);
                     } else if (v.type == TypedValue.TYPE_FLOAT) {
-                        property = new Property(name, v.getFloat());
+                        property = new Property(name, v.getFloat(), packageName, className);
                     } else {
                         if (!PackageParser.RIGID_PARSER) {
                             Slog.w(TAG,

@@ -98,8 +98,8 @@ class ParsedComponentUtils {
 
     static ParseResult<Bundle> addMetaData(ParsedComponent component, ParsingPackage pkg,
             Resources resources, XmlResourceParser parser, ParseInput input) {
-        ParseResult<Property> result = ParsingPackageUtils.parseMetaData(pkg, resources,
-                parser, "<meta-data>", input);
+        ParseResult<Property> result = ParsingPackageUtils.parseMetaData(pkg, component,
+                resources, parser, "<meta-data>", input);
         if (result.isError()) {
             return input.error(result);
         }
@@ -112,8 +112,8 @@ class ParsedComponentUtils {
 
     static ParseResult<Property> addProperty(ParsedComponent component, ParsingPackage pkg,
             Resources resources, XmlResourceParser parser, ParseInput input) {
-        ParseResult<Property> result = ParsingPackageUtils.parseMetaData(pkg, resources,
-                parser, "<property>", input);
+        ParseResult<Property> result = ParsingPackageUtils.parseMetaData(pkg, component,
+                resources, parser, "<property>", input);
         if (result.isError()) {
             return input.error(result);
         }
