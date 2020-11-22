@@ -21,3 +21,18 @@ hyunyoungs@google.com
 
 # Graphics stats
 jreck@google.com
+
+# Temporary Block to assist in migration
+# Bug: 143080132
+per-file *enums.proto = baligh@google.com, yro@google.com, jeffreyhuang@google.com
+per-file *media_output_enum.proto = baligh@google.com, yro@google.com, jeffreyhuang@google.com
+per-file *networkcapabilities.proto = baligh@google.com, yro@google.com, jeffreyhuang@google.com
+per-file *data_stall_event.proto = baligh@google.com, yro@google.com, jeffreyhuang@google.com
+per-file *procstats_enum.proto = baligh@google.com, yro@google.com, jeffreyhuang@google.com
+per-file *usb.proto = baligh@google.com, yro@google.com, jeffreyhuang@google.com
+per-file *network_stack.proto = baligh@google.com, yro@google.com, jeffreyhuang@google.com
+per-file *tethering.proto = baligh@google.com, yro@google.com, jeffreyhuang@google.com
+per-file *dns_resolver.proto = baligh@google.com, yro@google.com, jeffreyhuang@google.com
+per-file *device_policy.proto = baligh@google.com, yro@google.com, jeffreyhuang@google.com
+per-file *launcher.proto = baligh@google.com, yro@google.com, jeffreyhuang@google.com
+per-file *mediametrics.proto = baligh@google.com, yro@google.com, jeffreyhuang@google.com
