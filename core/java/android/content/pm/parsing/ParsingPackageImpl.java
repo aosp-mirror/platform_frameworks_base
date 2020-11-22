@@ -31,6 +31,7 @@ import android.content.pm.ConfigurationInfo;
 import android.content.pm.FeatureGroupInfo;
 import android.content.pm.FeatureInfo;
 import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager.Property;
 import android.content.pm.PackageParser;
 import android.content.pm.parsing.component.ParsedActivity;
 import android.content.pm.parsing.component.ParsedAttribution;
@@ -272,6 +273,9 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
 
     @Nullable
     private Bundle metaData;
+
+    @NonNull
+    private Map<String, Property> mProperties = emptyMap();
 
     @Nullable
     @DataClass.ParcelWith(ForInternedString.class)
@@ -619,6 +623,15 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
     @Override
     public ParsingPackageImpl addFeatureGroup(FeatureGroupInfo featureGroup) {
         this.featureGroups = CollectionUtils.add(this.featureGroups, featureGroup);
+        return this;
+    }
+
+    @Override
+    public ParsingPackageImpl addProperty(@Nullable Property property) {
+        if (property == null) {
+            return this;
+        }
+        this.mProperties = CollectionUtils.add(this.mProperties, property.getName(), property);
         return this;
     }
 
@@ -1172,6 +1185,7 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
         dest.writeInt(this.gwpAsanMode);
         dest.writeSparseIntArray(this.minExtensionVersions);
         dest.writeLong(this.mBooleans);
+        dest.writeMap(this.mProperties);
     }
 
     public ParsingPackageImpl(Parcel in) {
@@ -1290,7 +1304,7 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
         this.gwpAsanMode = in.readInt();
         this.minExtensionVersions = in.readSparseIntArray();
         this.mBooleans = in.readLong();
-
+        this.mProperties = in.createTypedArrayMap(Property.CREATOR);
         assignDerivedFields();
     }
 
@@ -1524,6 +1538,12 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
     @Override
     public List<String> getImplicitPermissions() {
         return implicitPermissions;
+    }
+
+    @NonNull
+    @Override
+    public Map<String, Property> getProperties() {
+        return mProperties;
     }
 
     @NonNull

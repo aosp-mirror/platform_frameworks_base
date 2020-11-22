@@ -25,25 +25,26 @@ import org.junit.Test;
 public class SearchSpecTest {
     @Test
     public void testGetBundle() {
-        SearchSpec searchSpec = new SearchSpec.Builder()
-                .setTermMatch(SearchSpec.TERM_MATCH_PREFIX)
-                .addNamespace("namespace1", "namespace2")
-                .addSchemaType("schemaTypes1", "schemaTypes2")
-                .setSnippetCount(5)
-                .setSnippetCountPerProperty(10)
-                .setMaxSnippetSize(15)
-                .setNumPerPage(42)
-                .setOrder(SearchSpec.ORDER_ASCENDING)
-                .setRankingStrategy(SearchSpec.RANKING_STRATEGY_DOCUMENT_SCORE)
-                .build();
+        SearchSpec searchSpec =
+                new SearchSpec.Builder()
+                        .setTermMatch(SearchSpec.TERM_MATCH_PREFIX)
+                        .addNamespace("namespace1", "namespace2")
+                        .addSchemaType("schemaTypes1", "schemaTypes2")
+                        .setSnippetCount(5)
+                        .setSnippetCountPerProperty(10)
+                        .setMaxSnippetSize(15)
+                        .setResultCountPerPage(42)
+                        .setOrder(SearchSpec.ORDER_ASCENDING)
+                        .setRankingStrategy(SearchSpec.RANKING_STRATEGY_DOCUMENT_SCORE)
+                        .build();
 
         Bundle bundle = searchSpec.getBundle();
         assertThat(bundle.getInt(SearchSpec.TERM_MATCH_TYPE_FIELD))
                 .isEqualTo(SearchSpec.TERM_MATCH_PREFIX);
-        assertThat(bundle.getStringArrayList(SearchSpec.NAMESPACE_FIELD)).containsExactly(
-                "namespace1", "namespace2");
-        assertThat(bundle.getStringArrayList(SearchSpec.SCHEMA_TYPE_FIELD)).containsExactly(
-                "schemaTypes1", "schemaTypes2");
+        assertThat(bundle.getStringArrayList(SearchSpec.NAMESPACE_FIELD))
+                .containsExactly("namespace1", "namespace2");
+        assertThat(bundle.getStringArrayList(SearchSpec.SCHEMA_TYPE_FIELD))
+                .containsExactly("schemaTypes1", "schemaTypes2");
         assertThat(bundle.getInt(SearchSpec.SNIPPET_COUNT_FIELD)).isEqualTo(5);
         assertThat(bundle.getInt(SearchSpec.SNIPPET_COUNT_PER_PROPERTY_FIELD)).isEqualTo(10);
         assertThat(bundle.getInt(SearchSpec.MAX_SNIPPET_FIELD)).isEqualTo(15);

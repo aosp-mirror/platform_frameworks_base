@@ -68,6 +68,12 @@
             android:theme="@style/Theme.DeviceDefault.Notification"
             >
 
+            <!--
+            NOTE: The notification_top_line_views layout contains the app_name_text.
+            In order to include the title view at the beginning, the Notification.Builder
+            has logic to hide that view whenever this title view is to be visible.
+            -->
+
             <TextView
                 android:id="@+id/title"
                 android:layout_width="wrap_content"
@@ -135,6 +141,14 @@
         android:background="@drawable/notification_large_icon_outline"
         android:importantForAccessibility="no"
         android:scaleType="centerCrop"
+        />
+
+    <FrameLayout
+        android:id="@+id/alternate_expand_target"
+        android:layout_width="@dimen/notification_content_margin_start"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        android:importantForAccessibility="no"
         />
 
     <FrameLayout

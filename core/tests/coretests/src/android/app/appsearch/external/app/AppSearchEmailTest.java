@@ -24,16 +24,18 @@ public class AppSearchEmailTest {
 
     @Test
     public void testBuildEmailAndGetValue() {
-        AppSearchEmail email = new AppSearchEmail.Builder("uri")
-                .setFrom("FakeFromAddress")
-                .setCc("CC1", "CC2")
-                // Score and Property are mixed into the middle to make sure DocumentBuilder's
-                // methods can be interleaved with EmailBuilder's methods.
-                .setScore(1)
-                .setPropertyString("propertyKey", "propertyValue1", "propertyValue2")
-                .setSubject("subject")
-                .setBody("EmailBody")
-                .build();
+        AppSearchEmail email =
+                new AppSearchEmail.Builder("uri")
+                        .setFrom("FakeFromAddress")
+                        .setCc("CC1", "CC2")
+                        // Score and Property are mixed into the middle to make sure
+                        // DocumentBuilder's
+                        // methods can be interleaved with EmailBuilder's methods.
+                        .setScore(1)
+                        .setPropertyString("propertyKey", "propertyValue1", "propertyValue2")
+                        .setSubject("subject")
+                        .setBody("EmailBody")
+                        .build();
 
         assertThat(email.getUri()).isEqualTo("uri");
         assertThat(email.getFrom()).isEqualTo("FakeFromAddress");
@@ -42,8 +44,9 @@ public class AppSearchEmailTest {
         assertThat(email.getBcc()).isNull();
         assertThat(email.getScore()).isEqualTo(1);
         assertThat(email.getPropertyString("propertyKey")).isEqualTo("propertyValue1");
-        assertThat(email.getPropertyStringArray("propertyKey")).asList().containsExactly(
-                "propertyValue1", "propertyValue2");
+        assertThat(email.getPropertyStringArray("propertyKey"))
+                .asList()
+                .containsExactly("propertyValue1", "propertyValue2");
         assertThat(email.getSubject()).isEqualTo("subject");
         assertThat(email.getBody()).isEqualTo("EmailBody");
     }

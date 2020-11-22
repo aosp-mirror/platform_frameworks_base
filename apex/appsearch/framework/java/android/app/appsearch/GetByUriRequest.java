@@ -18,6 +18,7 @@ package android.app.appsearch;
 
 import android.annotation.NonNull;
 import android.util.ArraySet;
+
 import com.android.internal.util.Preconditions;
 
 import java.util.Arrays;
@@ -28,7 +29,7 @@ import java.util.Set;
 /**
  * Encapsulates a request to retrieve documents by namespace and URI.
  *
- * @see AppSearchManager#getByUri
+ * @see AppSearchSession#getByUri
  * @hide
  */
 public final class GetByUriRequest {

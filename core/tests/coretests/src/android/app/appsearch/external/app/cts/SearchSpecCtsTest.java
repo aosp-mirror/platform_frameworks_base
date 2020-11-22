@@ -27,35 +27,39 @@ import org.junit.Test;
 public class SearchSpecCtsTest {
     @Test
     public void buildSearchSpecWithoutTermMatchType() {
-        RuntimeException e = expectThrows(RuntimeException.class, () -> new SearchSpec.Builder()
-                .addSchemaType("testSchemaType")
-                .build());
+        RuntimeException e =
+                expectThrows(
+                        RuntimeException.class,
+                        () -> new SearchSpec.Builder().addSchemaType("testSchemaType").build());
         assertThat(e).hasMessageThat().contains("Missing termMatchType field");
     }
 
     @Test
     public void testBuildSearchSpec() {
-        SearchSpec searchSpec = new SearchSpec.Builder()
-                .setTermMatch(SearchSpec.TERM_MATCH_PREFIX)
-                .addNamespace("namespace1", "namespace2")
-                .addSchemaType("schemaTypes1", "schemaTypes2")
-                .setSnippetCount(5)
-                .setSnippetCountPerProperty(10)
-                .setMaxSnippetSize(15)
-                .setNumPerPage(42)
-                .setOrder(SearchSpec.ORDER_ASCENDING)
-                .setRankingStrategy(SearchSpec.RANKING_STRATEGY_DOCUMENT_SCORE)
-                .build();
+        SearchSpec searchSpec =
+                new SearchSpec.Builder()
+                        .setTermMatch(SearchSpec.TERM_MATCH_PREFIX)
+                        .addNamespace("namespace1", "namespace2")
+                        .addSchemaType("schemaTypes1", "schemaTypes2")
+                        .setSnippetCount(5)
+                        .setSnippetCountPerProperty(10)
+                        .setMaxSnippetSize(15)
+                        .setResultCountPerPage(42)
+                        .setOrder(SearchSpec.ORDER_ASCENDING)
+                        .setRankingStrategy(SearchSpec.RANKING_STRATEGY_DOCUMENT_SCORE)
+                        .build();
 
         assertThat(searchSpec.getTermMatch()).isEqualTo(SearchSpec.TERM_MATCH_PREFIX);
         assertThat(searchSpec.getNamespaces())
-                .containsExactly("namespace1", "namespace2").inOrder();
+                .containsExactly("namespace1", "namespace2")
+                .inOrder();
         assertThat(searchSpec.getSchemaTypes())
-                .containsExactly("schemaTypes1", "schemaTypes2").inOrder();
+                .containsExactly("schemaTypes1", "schemaTypes2")
+                .inOrder();
         assertThat(searchSpec.getSnippetCount()).isEqualTo(5);
         assertThat(searchSpec.getSnippetCountPerProperty()).isEqualTo(10);
         assertThat(searchSpec.getMaxSnippetSize()).isEqualTo(15);
-        assertThat(searchSpec.getNumPerPage()).isEqualTo(42);
+        assertThat(searchSpec.getResultCountPerPage()).isEqualTo(42);
         assertThat(searchSpec.getOrder()).isEqualTo(SearchSpec.ORDER_ASCENDING);
         assertThat(searchSpec.getRankingStrategy())
                 .isEqualTo(SearchSpec.RANKING_STRATEGY_DOCUMENT_SCORE);

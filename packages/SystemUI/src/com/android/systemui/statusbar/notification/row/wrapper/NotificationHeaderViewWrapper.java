@@ -56,6 +56,7 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
 
     private CachingIconView mIcon;
     private NotificationExpandButton mExpandButton;
+    private View mAltExpandTarget;
     protected NotificationHeaderView mNotificationHeader;
     protected NotificationTopLineView mNotificationTopLine;
     private TextView mHeaderText;
@@ -106,6 +107,7 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
         mHeaderText = mView.findViewById(com.android.internal.R.id.header_text);
         mAppNameText = mView.findViewById(com.android.internal.R.id.app_name_text);
         mExpandButton = mView.findViewById(com.android.internal.R.id.expand_button);
+        mAltExpandTarget = mView.findViewById(com.android.internal.R.id.alternate_expand_target);
         mRightIcon = mView.findViewById(com.android.internal.R.id.right_icon);
         mWorkProfileImage = mView.findViewById(com.android.internal.R.id.profile_badge);
         mNotificationHeader = mView.findViewById(com.android.internal.R.id.notification_header);
@@ -260,6 +262,9 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
     public void updateExpandability(boolean expandable, View.OnClickListener onClickListener) {
         mExpandButton.setVisibility(expandable ? View.VISIBLE : View.GONE);
         mExpandButton.setOnClickListener(expandable ? onClickListener : null);
+        if (mAltExpandTarget != null) {
+            mAltExpandTarget.setOnClickListener(expandable ? onClickListener : null);
+        }
         if (mNotificationHeader != null) {
             mNotificationHeader.setOnClickListener(expandable ? onClickListener : null);
         }

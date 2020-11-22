@@ -478,7 +478,7 @@ class ControlsControllerImpl @Inject constructor (
         val pendingIntent = PendingIntent.getActivity(context,
                 componentName.hashCode(),
                 intent,
-                0)
+                PendingIntent.FLAG_IMMUTABLE)
         val control = Control.StatelessBuilder(controlInfo.controlId, pendingIntent)
                 .setTitle(controlInfo.controlTitle)
                 .setSubtitle(controlInfo.controlSubtitle)

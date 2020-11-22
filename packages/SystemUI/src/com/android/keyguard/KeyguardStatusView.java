@@ -178,6 +178,13 @@ public class KeyguardStatusView extends GridLayout {
         return mLogoutView.getVisibility() == VISIBLE ? mLogoutView.getHeight() : 0;
     }
 
+    int getOwnerInfoHeight() {
+        if (mOwnerInfo == null) {
+            return 0;
+        }
+        return mOwnerInfo.getVisibility() == VISIBLE ? mOwnerInfo.getHeight() : 0;
+    }
+
     void updateLogoutView() {
         if (mLogoutView == null) {
             return;

@@ -40,8 +40,6 @@ import javax.inject.Named;
 @QSScope
 public class QuickQSPanelController extends QSPanelControllerBase<QuickQSPanel> {
 
-    private List<QSTile> mAllTiles = new ArrayList<>();
-
     private final QSPanel.OnConfigurationChangedListener mOnConfigurationChangedListener =
             newConfig -> {
                 int newMaxTiles = getResources().getInteger(R.integer.quick_qs_panel_max_columns);
@@ -92,14 +90,14 @@ public class QuickQSPanelController extends QSPanelControllerBase<QuickQSPanel> 
 
     @Override
     public void setTiles() {
-        mAllTiles.clear();
+        List<QSTile> tiles = new ArrayList();
         for (QSTile tile : mHost.getTiles()) {
-            mAllTiles.add(tile);
-            if (mAllTiles.size() == QuickQSPanel.DEFAULT_MAX_TILES) {
+            tiles.add(tile);
+            if (tiles.size() == mView.getNumQuickTiles()) {
                 break;
             }
         }
-        super.setTiles(mAllTiles.subList(0, mView.getNumQuickTiles()), true);
+        super.setTiles(tiles, true);
     }
 
     /** */

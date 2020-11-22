@@ -155,19 +155,19 @@
     <string name="fcError" msgid="5325116502080221346">"Проблем со поврзувањето или неважечки код за карактеристиката."</string>
     <string name="httpErrorOk" msgid="6206751415788256357">"Во ред"</string>
     <string name="httpError" msgid="3406003584150566720">"Настана грешка на мрежа."</string>
-    <string name="httpErrorLookup" msgid="3099834738227549349">"Не можеше да се најде URL."</string>
+    <string name="httpErrorLookup" msgid="3099834738227549349">"Не може да се најде URL."</string>
     <string name="httpErrorUnsupportedAuthScheme" msgid="3976195595501606787">"Шемата за автентикација на локацијата не е поддржана."</string>
-    <string name="httpErrorAuth" msgid="469553140922938968">"Не можеше да се автентицира."</string>
+    <string name="httpErrorAuth" msgid="469553140922938968">"Не може да се автентицира."</string>
     <string name="httpErrorProxyAuth" msgid="7229662162030113406">"Автентикацијата преку прокси серверот беше неуспешна."</string>
-    <string name="httpErrorConnect" msgid="3295081579893205617">"Не можеше да се поврзе со серверот."</string>
-    <string name="httpErrorIO" msgid="3860318696166314490">"Не можеше да се комуницира со серверот. Обидете се повторно подоцна."</string>
+    <string name="httpErrorConnect" msgid="3295081579893205617">"Не може да се поврзе со серверот."</string>
+    <string name="httpErrorIO" msgid="3860318696166314490">"Не може да се комуницира со серверот. Обидете се повторно подоцна."</string>
     <string name="httpErrorTimeout" msgid="7446272815190334204">"Времето за поврзување до серверот истече."</string>
     <string name="httpErrorRedirectLoop" msgid="8455757777509512098">"Страницата содржи премногу пренасочувања од серверот."</string>
     <string name="httpErrorUnsupportedScheme" msgid="2664108769858966374">"Протоколот не е поддржан."</string>
-    <string name="httpErrorFailedSslHandshake" msgid="546319061228876290">"Не можеше да се воспостави безбедна врска."</string>
-    <string name="httpErrorBadUrl" msgid="754447723314832538">"Страницата не можеше да се отвори, бидејќи URL е неважечки."</string>
-    <string name="httpErrorFile" msgid="3400658466057744084">"Не можеше да се пристапи до датотеката."</string>
-    <string name="httpErrorFileNotFound" msgid="5191433324871147386">"Не можеше да се најде бараната датотека."</string>
+    <string name="httpErrorFailedSslHandshake" msgid="546319061228876290">"Не може да се воспостави безбедна врска."</string>
+    <string name="httpErrorBadUrl" msgid="754447723314832538">"Страницата не може да се отвори, бидејќи URL е неважечки."</string>
+    <string name="httpErrorFile" msgid="3400658466057744084">"Не може да се пристапи до датотеката."</string>
+    <string name="httpErrorFileNotFound" msgid="5191433324871147386">"Не може да се најде бараната датотека."</string>
     <string name="httpErrorTooManyRequests" msgid="2149677715552037198">"Се обработуваат премногу барања. Обидете се повторно подоцна."</string>
     <string name="notification_title" msgid="5783748077084481121">"Грешка при пријавување за <xliff:g id="ACCOUNT">%1$s</xliff:g>"</string>
     <string name="contentServiceSync" msgid="2341041749565687871">"Синхронизирај"</string>
@@ -287,6 +287,8 @@
     <string name="notification_channel_usb" msgid="1528280969406244896">"USB-врска"</string>
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"Апликацијата работи"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"Апликации што ја трошат батеријата"</string>
+    <!-- no translation found for notification_channel_accessibility_magnification (1707913872219798098) -->
+    <skip />
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g> користи батерија"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"<xliff:g id="NUMBER">%1$d</xliff:g> апликации користат батерија"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"Допрете за детали за батеријата и потрошениот сообраќај"</string>
@@ -550,7 +552,7 @@
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"Не е поставен PIN, шема или лозинка"</string>
     <string name="biometric_error_generic" msgid="6784371929985434439">"Грешка при проверката"</string>
     <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"Откриен е делумен отпечаток. Обидете се повторно."</string>
-    <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Отпечатокот не можеше да се обработи. Обидете се повторно."</string>
+    <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Отпечатокот не може да се обработи. Обидете се повторно."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"Сензорот за отпечатоци е валкан. Исчистете го и обидете се повторно."</string>
     <string name="fingerprint_acquired_too_fast" msgid="5151661932298844352">"Прстот се движеше пребрзо. Обидете се повторно."</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Прстот се движеше премногу бавно. Обидете се повторно."</string>
@@ -1405,7 +1407,7 @@
     <string name="permlab_requestIgnoreBatteryOptimizations" msgid="7646611326036631439">"прашај дали да се игнорираат оптимизациите на батеријата"</string>
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"Овозможува апликацијата да побара дозвола за игнорирање на оптимизациите на батеријата за таа апликација."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"Допрете двапати за контрола на зумот"</string>
-    <string name="gadget_host_error_inflating" msgid="2449961590495198720">"Не можеше да се додаде виџет."</string>
+    <string name="gadget_host_error_inflating" msgid="2449961590495198720">"Не може да се додаде виџет."</string>
     <string name="ime_action_go" msgid="5536744546326495436">"Оди"</string>
     <string name="ime_action_search" msgid="4501435960587287668">"Пребарај"</string>
     <string name="ime_action_send" msgid="8456843745664334138">"Испрати"</string>
@@ -1440,7 +1442,7 @@
     <string name="vpn_lockdown_connecting" msgid="6096725311950342607">"Поврзување со секогаш вклучена VPN..."</string>
     <string name="vpn_lockdown_connected" msgid="2853127976590658469">"Поврзани со секогаш вклучена VPN"</string>
     <string name="vpn_lockdown_disconnected" msgid="5573611651300764955">"Исклучено од секогаш вклучената VPN"</string>
-    <string name="vpn_lockdown_error" msgid="4453048646854247947">"Не можеше да се поврзе на секогаш вклучената VPN"</string>
+    <string name="vpn_lockdown_error" msgid="4453048646854247947">"Не може да се поврзе на секогаш вклучената VPN"</string>
     <string name="vpn_lockdown_config" msgid="8331697329868252169">"Променете ја мрежата или поставките за VPN"</string>
     <string name="upload_file" msgid="8651942222301634271">"Избери датотека"</string>
     <string name="no_file_chosen" msgid="4146295695162318057">"Не е избрана датотека"</string>
@@ -1982,9 +1984,9 @@
     <string name="popup_window_default_title" msgid="6907717596694826919">"Појавен прозорец"</string>
     <string name="slice_more_content" msgid="3377367737876888459">"+ <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
     <string name="shortcut_restored_on_lower_version" msgid="9206301954024286063">"Верзијата на апликацијата е постара или не е компатибилна со кратенкава"</string>
-    <string name="shortcut_restore_not_supported" msgid="4763198938588468400">"Не можеше да се врати кратенката бидејќи апликацијата не поддржува бекап и враќање"</string>
-    <string name="shortcut_restore_signature_mismatch" msgid="579345304221605479">"Не можеше да се врати кратенката бидејќи потписот на апликацијата не се совпаѓа"</string>
-    <string name="shortcut_restore_unknown_issue" msgid="2478146134395982154">"Не можеше да се врати кратенката"</string>
+    <string name="shortcut_restore_not_supported" msgid="4763198938588468400">"Не може да се врати кратенката бидејќи апликацијата не поддржува бекап и враќање"</string>
+    <string name="shortcut_restore_signature_mismatch" msgid="579345304221605479">"Не може да се врати кратенката бидејќи потписот на апликацијата не се совпаѓа"</string>
+    <string name="shortcut_restore_unknown_issue" msgid="2478146134395982154">"Не може да се врати кратенката"</string>
     <string name="shortcut_disabled_reason_unknown" msgid="753074793553599166">"Кратенката е оневозможена"</string>
     <string name="harmful_app_warning_uninstall" msgid="6472912975664191772">"ДЕИНСТАЛИРАЈ"</string>
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"СЕПАК ОТВОРИ"</string>
@@ -2188,4 +2190,12 @@
     <string name="config_pdp_reject_user_authentication_failed" msgid="4531693033885744689"></string>
     <string name="config_pdp_reject_service_not_subscribed" msgid="8190338397128671588"></string>
     <string name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed" msgid="6024904218067254186"></string>
+    <!-- no translation found for window_magnification_prompt_title (8197528399699536320) -->
+    <skip />
+    <!-- no translation found for window_magnification_prompt_content (4166711383253283838) -->
+    <skip />
+    <!-- no translation found for turn_on_magnification_settings_action (8521433346684847700) -->
+    <skip />
+    <!-- no translation found for dismiss_action (1728820550388704784) -->
+    <skip />
 </resources>

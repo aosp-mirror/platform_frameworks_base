@@ -17,11 +17,13 @@
 package com.android.companiondevicemanager;
 
 import static android.companion.BluetoothDeviceFilterUtils.getDeviceMacAddress;
+import static android.text.TextUtils.withoutPrefix;
 import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
 
 import static java.util.Objects.requireNonNull;
 
 import android.app.Activity;
+import android.companion.AssociationRequest;
 import android.companion.CompanionDeviceManager;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -62,12 +64,19 @@ public class DeviceChooserActivity extends Activity {
 
         getWindow().addSystemFlags(SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS);
 
-        if (getService().mRequest.isSingleDevice()) {
+        String deviceProfile = getRequest().getDeviceProfile();
+        String profileName = deviceProfile == null
+                ? getString(R.string.profile_name_generic)
+                //TODO introduce PermissionController APIs to resolve UI values
+                : withoutPrefix("android.app.role.COMPANION_DEVICE_", deviceProfile).toLowerCase();
+
+        if (getRequest().isSingleDevice()) {
             setContentView(R.layout.device_confirmation);
             final DeviceFilterPair selectedDevice = getService().mDevicesFound.get(0);
             setTitle(Html.fromHtml(getString(
                     R.string.confirmation_title,
                     getCallingAppName(),
+                    profileName,
                     selectedDevice.getDisplayName()), 0));
             mPairButton = findViewById(R.id.button_pair);
             mPairButton.setOnClickListener(v -> onDeviceConfirmed(getService().mSelectedDevice));
@@ -77,7 +86,9 @@ public class DeviceChooserActivity extends Activity {
             setContentView(R.layout.device_chooser);
             mPairButton = findViewById(R.id.button_pair);
             mPairButton.setVisibility(View.GONE);
-            setTitle(Html.fromHtml(getString(R.string.chooser_title, getCallingAppName()), 0));
+            setTitle(Html.fromHtml(getString(R.string.chooser_title,
+                    profileName,
+                    getCallingAppName()), 0));
             mDeviceListView = findViewById(R.id.device_list);
             final DeviceDiscoveryService.DevicesAdapter adapter = getService().mDevicesAdapter;
             mDeviceListView.setAdapter(adapter);
@@ -97,10 +108,31 @@ public class DeviceChooserActivity extends Activity {
             });
             mDeviceListView.addFooterView(mLoadingIndicator = getProgressBar(), null, false);
         }
+
+        TextView profileSummary = findViewById(R.id.profile_summary);
+
+        if (deviceProfile != null) {
+            //TODO introduce PermissionController APIs to resolve UI values
+            String privileges = "Notifications, Phone, Contacts and Calendar";
+            profileSummary.setVisibility(View.VISIBLE);
+            profileSummary.setText(getString(R.string.profile_summary,
+                    getCallingAppName(),
+                    profileName,
+                    getCallingAppName(),
+                    privileges,
+                    profileName));
+        } else {
+            profileSummary.setVisibility(View.GONE);
+        }
+
         getService().mActivity = this;
 
         mCancelButton = findViewById(R.id.button_cancel);
         mCancelButton.setOnClickListener(v -> cancel());
+    }
+
+    private AssociationRequest getRequest() {
+        return getService().mRequest;
     }
 
     private void cancel() {
@@ -132,7 +164,7 @@ public class DeviceChooserActivity extends Activity {
 
     @Override
     public String getCallingPackage() {
-        return requireNonNull(getService().mRequest.getCallingPackage());
+        return requireNonNull(getRequest().getCallingPackage());
     }
 
     @Override

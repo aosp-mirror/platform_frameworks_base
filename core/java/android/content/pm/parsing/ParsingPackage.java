@@ -23,6 +23,7 @@ import android.content.Intent;
 import android.content.pm.ConfigurationInfo;
 import android.content.pm.FeatureGroupInfo;
 import android.content.pm.FeatureInfo;
+import android.content.pm.PackageManager.Property;
 import android.content.pm.PackageParser;
 import android.content.pm.parsing.component.ParsedActivity;
 import android.content.pm.parsing.component.ParsedAttribution;
@@ -74,6 +75,9 @@ public interface ParsingPackage extends ParsingPackageRead {
     ParsingPackage addPermissionGroup(ParsedPermissionGroup permissionGroup);
 
     ParsingPackage addPreferredActivityFilter(String className, ParsedIntentInfo intentInfo);
+
+    /** Add a property to the application scope */
+    ParsingPackage addProperty(Property property);
 
     ParsingPackage addProtectedBroadcast(String protectedBroadcast);
 

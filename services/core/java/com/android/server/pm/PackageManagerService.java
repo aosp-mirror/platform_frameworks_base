@@ -94,6 +94,11 @@ import static android.content.pm.PackageManager.MOVE_FAILED_OPERATION_PENDING;
 import static android.content.pm.PackageManager.MOVE_FAILED_SYSTEM_PACKAGE;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.content.pm.PackageManager.RESTRICTION_NONE;
+import static android.content.pm.PackageManager.TYPE_ACTIVITY;
+import static android.content.pm.PackageManager.TYPE_PROVIDER;
+import static android.content.pm.PackageManager.TYPE_RECEIVER;
+import static android.content.pm.PackageManager.TYPE_SERVICE;
+import static android.content.pm.PackageManager.TYPE_UNKNOWN;
 import static android.content.pm.PackageManager.UNINSTALL_REASON_UNKNOWN;
 import static android.content.pm.PackageManagerInternal.LAST_KNOWN_PACKAGE;
 import static android.content.pm.PackageParser.SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V4;
@@ -103,7 +108,6 @@ import static android.os.incremental.IncrementalManager.isIncrementalPath;
 import static android.os.storage.StorageManager.FLAG_STORAGE_CE;
 import static android.os.storage.StorageManager.FLAG_STORAGE_DE;
 import static android.os.storage.StorageManager.FLAG_STORAGE_EXTERNAL;
-import static android.permission.PermissionManager.KILL_APP_REASON_GIDS_CHANGED;
 
 import static com.android.internal.annotations.VisibleForTesting.Visibility;
 import static com.android.internal.app.IntentForwarderActivity.FORWARD_INTENT_TO_MANAGED_PROFILE;
@@ -196,8 +200,11 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageInfoLite;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.ComponentType;
 import android.content.pm.PackageManager.LegacyPackageDeleteObserver;
 import android.content.pm.PackageManager.ModuleInfoFlags;
+import android.content.pm.PackageManager.Property;
+import android.content.pm.PackageManager.PropertyLocation;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.PackageManagerInternal.PackageListObserver;
 import android.content.pm.PackageManagerInternal.PrivateResolveFlags;
@@ -340,7 +347,6 @@ import com.android.internal.telephony.CarrierAppUtils;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.ConcurrentUtils;
 import com.android.internal.util.DumpUtils;
-import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
@@ -395,7 +401,6 @@ import libcore.util.HexEncoding;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
 
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
@@ -572,21 +577,6 @@ public class PackageManagerService extends IPackageManager.Stub
     public final static String STUB_SUFFIX = "-Stub";
 
     private static final int[] EMPTY_INT_ARRAY = new int[0];
-
-    private static final int TYPE_UNKNOWN = 0;
-    private static final int TYPE_ACTIVITY = 1;
-    private static final int TYPE_RECEIVER = 2;
-    private static final int TYPE_SERVICE = 3;
-    private static final int TYPE_PROVIDER = 4;
-    @IntDef(prefix = { "TYPE_" }, value = {
-            TYPE_UNKNOWN,
-            TYPE_ACTIVITY,
-            TYPE_RECEIVER,
-            TYPE_SERVICE,
-            TYPE_PROVIDER,
-    })
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface ComponentType {}
 
     /**
      * Timeout (in milliseconds) after which the watchdog should declare that
@@ -1317,6 +1307,8 @@ public class PackageManagerService extends IPackageManager.Stub
     private Future<?> mPrepareAppDataFuture;
 
     private final IncrementalManager mIncrementalManager;
+
+    private final PackageProperty mPackageProperty = new PackageProperty();
 
     private static class IFVerificationParams {
         String packageName;
@@ -12709,6 +12701,37 @@ public class PackageManagerService extends IPackageManager.Stub
         return true;
     }
 
+    @Override
+    public Property getProperty(String propertyName, String packageName, String className) {
+        Objects.requireNonNull(propertyName);
+        Objects.requireNonNull(packageName);
+        synchronized (mLock) {
+            final PackageSetting ps = getPackageSetting(packageName);
+            if (shouldFilterApplicationLocked(ps, Binder.getCallingUid(),
+                    UserHandle.getCallingUserId())) {
+                return null;
+            }
+            return mPackageProperty.getProperty(propertyName, packageName, className);
+        }
+    }
+
+    @Override
+    public ParceledListSlice<Property> queryProperty(
+            String propertyName, @PropertyLocation int componentType) {
+        Objects.requireNonNull(propertyName);
+        final int callingUid = Binder.getCallingUid();
+        final int callingUserId = UserHandle.getCallingUserId();
+        final List<Property> result =
+                mPackageProperty.queryProperty(propertyName, componentType, packageName -> {
+                    final PackageSetting ps = getPackageSetting(packageName);
+                    return shouldFilterApplicationLocked(ps, callingUid, callingUserId);
+                });
+        if (result == null) {
+            return ParceledListSlice.emptyList();
+        }
+        return new ParceledListSlice<>(result);
+    }
+
     /**
      * Adds a scanned package to the system. When this method is finished, the package will
      * be available for query, resolution, etc...
@@ -12835,6 +12858,7 @@ public class PackageManagerService extends IPackageManager.Stub
             final boolean isReplace =
                     reconciledPkg.prepareResult != null && reconciledPkg.prepareResult.replace;
             mAppsFilter.addPackage(pkgSetting, isReplace);
+            mPackageProperty.addAllProperties(pkg);
 
             int collectionSize = ArrayUtils.size(pkg.getInstrumentations());
             StringBuilder r = null;
@@ -12961,7 +12985,7 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
-    void removePackageLI(String packageName, boolean chatty) {
+    private void removePackageLI(String packageName, boolean chatty) {
         if (DEBUG_INSTALL) {
             if (chatty)
                 Log.d(TAG, "Removing package " + packageName);
@@ -12976,9 +13000,10 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
-    void cleanPackageDataStructuresLILPw(AndroidPackage pkg, boolean chatty) {
+    private void cleanPackageDataStructuresLILPw(AndroidPackage pkg, boolean chatty) {
         mComponentResolver.removeAllComponents(pkg, chatty);
-        mPermissionManager.removeAllPermissions(pkg, chatty);
+        mPermissionManager.onPackageRemoved(pkg);
+        mPackageProperty.removeAllProperties(pkg);
 
         final int instrumentationSize = ArrayUtils.size(pkg.getInstrumentations());
         StringBuilder r = null;
@@ -19476,33 +19501,13 @@ public class PackageManagerService extends IPackageManager.Stub
                     if (outInfo != null) {
                         outInfo.removedAppId = removedAppId;
                     }
-                    if ((deletedPs.sharedUser == null || deletedPs.sharedUser.packages.size() == 0)
-                            && !isUpdatedSystemApp(deletedPs)) {
-                        mPermissionManager.removeAppIdStateTEMP(removedAppId);
+                    final SharedUserSetting sus = deletedPs.getSharedUser();
+                    List<AndroidPackage> sharedUserPkgs = sus != null ? sus.getPackages() : null;
+                    if (sharedUserPkgs == null) {
+                        sharedUserPkgs = Collections.emptyList();
                     }
-                    mPermissionManager.updatePermissions(deletedPs.name, null);
-                    if (deletedPs.sharedUser != null) {
-                        // Remove permissions associated with package. Since runtime
-                        // permissions are per user we have to kill the removed package
-                        // or packages running under the shared user of the removed
-                        // package if revoking the permissions requested only by the removed
-                        // package is successful and this causes a change in gids.
-                        boolean shouldKill = false;
-                        for (int userId : UserManagerService.getInstance().getUserIds()) {
-                            final int userIdToKill = mPermissionManager
-                                    .revokeSharedUserPermissionsForDeletedPackageTEMP(deletedPs,
-                                            userId);
-                            shouldKill |= userIdToKill != UserHandle.USER_NULL;
-                        }
-                        // If gids changed, kill all affected packages.
-                        if (shouldKill) {
-                            mHandler.post(() -> {
-                                // This has to happen with no lock held.
-                                killApplication(deletedPs.name, deletedPs.appId,
-                                        KILL_APP_REASON_GIDS_CHANGED);
-                            });
-                        }
-                    }
+                    mPermissionManager.onPackageStateRemoved(packageName, deletedPs.appId,
+                            deletedPs.pkg, sharedUserPkgs);
                     clearPackagePreferredActivitiesLPw(
                             deletedPs.name, changedUsers, UserHandle.USER_ALL);
                 }

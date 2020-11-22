@@ -147,7 +147,6 @@ import com.android.server.Watchdog;
 import com.android.server.pm.ApexManager;
 import com.android.server.pm.PackageManagerServiceUtils;
 import com.android.server.pm.PackageSetting;
-import com.android.server.pm.SharedUserSetting;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.pm.UserManagerService;
 import com.android.server.pm.parsing.PackageInfoUtils;
@@ -2587,7 +2586,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         }
     }
 
-    private void removeAllPermissions(AndroidPackage pkg, boolean chatty) {
+    private void removeAllPermissionsInternal(@NonNull AndroidPackage pkg) {
         synchronized (mLock) {
             int N = ArrayUtils.size(pkg.getPermissions());
             StringBuilder r = null;
@@ -2599,7 +2598,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                 }
                 if (bp != null && bp.isPermission(p)) {
                     bp.setPermissionInfo(null);
-                    if (DEBUG_REMOVE && chatty) {
+                    if (DEBUG_REMOVE) {
                         if (r == null) {
                             r = new StringBuilder(256);
                         } else {
@@ -3977,34 +3976,30 @@ public class PermissionManagerService extends IPermissionManager.Stub {
     }
 
     @UserIdInt
-    private int revokeSharedUserPermissionsForDeletedPackage(@NonNull PackageSetting deletedPs,
+    private int revokeSharedUserPermissionsForDeletedPackageInternal(
+            @Nullable AndroidPackage pkg, @NonNull List<AndroidPackage> sharedUserPkgs,
             @UserIdInt int userId) {
-        if ((deletedPs == null) || (deletedPs.pkg == null)) {
+        if (pkg == null) {
             Slog.i(TAG, "Trying to update info for null package. Just ignoring");
             return UserHandle.USER_NULL;
         }
 
-        SharedUserSetting sus = deletedPs.getSharedUser();
-
-        // No sharedUserId
-        if (sus == null) {
+        // No shared user packages
+        if (sharedUserPkgs.isEmpty()) {
             return UserHandle.USER_NULL;
         }
 
         int affectedUserId = UserHandle.USER_NULL;
         // Update permissions
-        for (String eachPerm : deletedPs.pkg.getRequestedPermissions()) {
+        for (String eachPerm : pkg.getRequestedPermissions()) {
             // Check if another package in the shared user needs the permission.
             boolean used = false;
-            final List<AndroidPackage> pkgs = sus.getPackages();
-            if (pkgs != null) {
-                for (AndroidPackage pkg : pkgs) {
-                    if (pkg != null
-                            && !pkg.getPackageName().equals(deletedPs.pkg.getPackageName())
-                            && pkg.getRequestedPermissions().contains(eachPerm)) {
-                        used = true;
-                        break;
-                    }
+            for (AndroidPackage sharedUserpkg : sharedUserPkgs) {
+                if (sharedUserpkg != null
+                        && !sharedUserpkg.getPackageName().equals(pkg.getPackageName())
+                        && sharedUserpkg.getRequestedPermissions().contains(eachPerm)) {
+                    used = true;
+                    break;
                 }
             }
             if (used) {
@@ -4012,7 +4007,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             }
 
             PackageSetting disabledPs = mPackageManagerInt.getDisabledSystemPackage(
-                    deletedPs.pkg.getPackageName());
+                    pkg.getPackageName());
 
             // If the package is shadowing is a disabled system package,
             // do not drop permissions that the shadowed package requests.
@@ -4030,9 +4025,9 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             }
 
             synchronized (mLock) {
-                UidPermissionState uidState = getUidStateLocked(deletedPs.pkg, userId);
+                UidPermissionState uidState = getUidStateLocked(pkg, userId);
                 if (uidState == null) {
-                    Slog.e(TAG, "Missing permissions state for " + deletedPs.pkg.getPackageName()
+                    Slog.e(TAG, "Missing permissions state for " + pkg.getPackageName()
                             + " and user " + userId);
                     continue;
                 }
@@ -4912,6 +4907,39 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         return true;
     }
 
+    private void onPackageRemovedInternal(@NonNull AndroidPackage pkg) {
+        removeAllPermissionsInternal(pkg);
+    }
+
+    private void onPackageStateRemovedInternal(@NonNull String packageName, int appId,
+            @Nullable AndroidPackage pkg, @NonNull List<AndroidPackage> sharedUserPkgs) {
+        if (sharedUserPkgs.isEmpty()
+                && mPackageManagerInt.getDisabledSystemPackage(packageName) == null) {
+            removeAppIdState(appId);
+        }
+        updatePermissions(packageName, null, mDefaultPermissionCallback);
+        if (!sharedUserPkgs.isEmpty()) {
+            // Remove permissions associated with package. Since runtime
+            // permissions are per user we have to kill the removed package
+            // or packages running under the shared user of the removed
+            // package if revoking the permissions requested only by the removed
+            // package is successful and this causes a change in gids.
+            boolean shouldKill = false;
+            for (int userId : UserManagerService.getInstance().getUserIds()) {
+                final int userIdToKill = revokeSharedUserPermissionsForDeletedPackageInternal(pkg,
+                        sharedUserPkgs, userId);
+                shouldKill |= userIdToKill != UserHandle.USER_NULL;
+            }
+            // If gids changed, kill all affected packages.
+            if (shouldKill) {
+                mHandler.post(() -> {
+                    // This has to happen with no lock held.
+                    killUid(appId, UserHandle.USER_ALL, KILL_APP_REASON_GIDS_CHANGED);
+                });
+            }
+        }
+    }
+
     private boolean canPropagatePermissionToInstantApp(@NonNull String permissionName) {
         synchronized (mLock) {
             final Permission bp = mRegistry.getPermission(permissionName);
@@ -5012,10 +5040,6 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         }
 
         @Override
-        public void removeAllPermissions(AndroidPackage pkg, boolean chatty) {
-            PermissionManagerService.this.removeAllPermissions(pkg, chatty);
-        }
-        @Override
         public void readLegacyPermissionStateTEMP() {
             PermissionManagerService.this.readLegacyPermissionState();
         }
@@ -5026,17 +5050,6 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         @Override
         public void onUserRemoved(@UserIdInt int userId) {
             PermissionManagerService.this.onUserRemoved(userId);
-        }
-        @Override
-        public void removeAppIdStateTEMP(@AppIdInt int appId) {
-            PermissionManagerService.this.removeAppIdState(appId);
-        }
-        @Override
-        @UserIdInt
-        public int revokeSharedUserPermissionsForDeletedPackageTEMP(
-                @NonNull PackageSetting deletedPs, @UserIdInt int userId) {
-            return PermissionManagerService.this.revokeSharedUserPermissionsForDeletedPackage(
-                    deletedPs, userId);
         }
         @NonNull
         @Override
@@ -5349,6 +5362,20 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                 @Nullable AndroidPackage oldPkg) {
             Objects.requireNonNull(pkg);
             onPackageAddedInternal(pkg, isInstantApp, oldPkg);
+        }
+
+        @Override
+        public void onPackageRemoved(@NonNull AndroidPackage pkg) {
+            Objects.requireNonNull(pkg);
+            onPackageRemovedInternal(pkg);
+        }
+
+        @Override
+        public void onPackageStateRemoved(@NonNull String packageName, int appId,
+                @Nullable AndroidPackage pkg, @NonNull List<AndroidPackage> sharedUserPkgs) {
+            Objects.requireNonNull(packageName);
+            Objects.requireNonNull(sharedUserPkgs);
+            onPackageStateRemovedInternal(packageName, appId, pkg, sharedUserPkgs);
         }
 
         @Override

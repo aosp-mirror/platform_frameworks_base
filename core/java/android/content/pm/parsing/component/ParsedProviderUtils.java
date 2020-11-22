@@ -180,6 +180,9 @@ public class ParsedProviderUtils {
                 case "meta-data":
                     result = ParsedComponentUtils.addMetaData(provider, pkg, res, parser, input);
                     break;
+                case "property":
+                    result = ParsedComponentUtils.addProperty(provider, pkg, res, parser, input);
+                    break;
                 case "grant-uri-permission": {
                     result = parseGrantUriPermission(provider, pkg, res, parser, input);
                     break;

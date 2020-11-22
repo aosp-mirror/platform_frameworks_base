@@ -51,7 +51,7 @@ public class RecordSettings extends Settings {
     public @interface TsIndexMask {}
 
     /**
-     * Invalid TS index.
+     * Invalid Transport Stream (TS) index.
      */
     public static final int TS_INDEX_INVALID = 0;
     /**

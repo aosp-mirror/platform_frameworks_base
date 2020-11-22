@@ -4888,12 +4888,6 @@ public class Notification implements Parcelable
             mN.mUsesStandardHeader = false;
         }
 
-        private RemoteViews applyStandardTemplate(int resId, int viewType,
-                TemplateBindResult result) {
-            return applyStandardTemplate(resId,
-                    mParams.reset().viewType(viewType).fillTextsFrom(this), result);
-        }
-
         private RemoteViews applyStandardTemplate(int resId, StandardTemplateParams p,
                 TemplateBindResult result) {
             p.headerless(resId == getBaseLayoutResource()
@@ -4907,7 +4901,7 @@ public class Notification implements Parcelable
             bindNotificationHeader(contentView, p);
             bindLargeIconAndApplyMargin(contentView, p, result);
             boolean showProgress = handleProgressBar(contentView, ex, p);
-            if (p.title != null && p.title.length() > 0) {
+            if (p.title != null && p.title.length() > 0 && !p.mHasCustomContent) {
                 contentView.setViewVisibility(R.id.title, View.VISIBLE);
                 contentView.setTextViewText(R.id.title, processTextSpans(p.title));
                 setTextViewColorPrimary(contentView, R.id.title, p);
@@ -5302,6 +5296,12 @@ public class Notification implements Parcelable
                 contentView.setViewVisibility(R.id.app_name_text, View.GONE);
                 return false;
             }
+            if (p.mHeaderless && !p.mHasCustomContent) {
+                contentView.setViewVisibility(R.id.app_name_text, View.GONE);
+                // the headerless template will have the TITLE in this position; return true to
+                // keep the divider visible between that title and the next text element.
+                return true;
+            }
             contentView.setViewVisibility(R.id.app_name_text, View.VISIBLE);
             contentView.setTextViewText(R.id.app_name_text, loadHeaderAppName());
             if (isColorized(p)) {
@@ -5354,12 +5354,6 @@ public class Notification implements Parcelable
                         Settings.Secure.SHOW_NOTIFICATION_SNOOZE, 0) == 1);
             big.setViewLayoutMarginBottomDimen(R.id.notification_action_list_margin_target,
                     snoozeEnabled ? 0 : R.dimen.notification_content_margin);
-        }
-
-        private RemoteViews applyStandardTemplateWithActions(int layoutId, int viewType,
-                TemplateBindResult result) {
-            return applyStandardTemplateWithActions(layoutId,
-                    mParams.reset().viewType(viewType).fillTextsFrom(this), result);
         }
 
         private static List<Notification.Action> filterOutContextualActions(
@@ -5499,8 +5493,10 @@ public class Notification implements Parcelable
                     return styleView;
                 }
             }
-            return applyStandardTemplate(getBaseLayoutResource(),
-                    StandardTemplateParams.VIEW_TYPE_NORMAL, null /* result */);
+            StandardTemplateParams p = mParams.reset()
+                    .viewType(StandardTemplateParams.VIEW_TYPE_NORMAL)
+                    .fillTextsFrom(this);
+            return applyStandardTemplate(getBaseLayoutResource(), p, null /* result */);
         }
 
         private boolean useExistingRemoteView() {
@@ -5520,12 +5516,25 @@ public class Notification implements Parcelable
                 result = mStyle.makeBigContentView();
                 hideLine1Text(result);
             }
-            if (result == null) {
-                result = applyStandardTemplateWithActions(getBigBaseLayoutResource(),
-                        StandardTemplateParams.VIEW_TYPE_BIG, null /* result */);
+            if (result == null && bigContentViewRequired()) {
+                StandardTemplateParams p = mParams.reset()
+                        .viewType(StandardTemplateParams.VIEW_TYPE_BIG)
+                        .fillTextsFrom(this);
+                result = applyStandardTemplateWithActions(getBigBaseLayoutResource(), p,
+                        null /* result */);
             }
             makeHeaderExpanded(result);
             return result;
+        }
+
+        private boolean bigContentViewRequired() {
+            // If the big content view has no content, we can exempt the app from having to show it.
+            // TODO(b/173550917): add an UNDO style then force this requirement on apps targeting S
+            boolean exempt = mN.contentView != null && mN.bigContentView == null
+                    && mStyle == null && mActions.size() == 0
+                    && mN.extras.getCharSequence(EXTRA_TITLE) == null
+                    && mN.extras.getCharSequence(EXTRA_TEXT) == null;
+            return !exempt;
         }
 
         /**
@@ -8693,18 +8702,24 @@ public class Notification implements Parcelable
                return makeStandardTemplateWithCustomContent(headsUpContentView);
             }
             TemplateBindResult result = new TemplateBindResult();
+            StandardTemplateParams p = mBuilder.mParams.reset()
+                    .viewType(StandardTemplateParams.VIEW_TYPE_HEADS_UP)
+                    .hasCustomContent(headsUpContentView != null)
+                    .fillTextsFrom(mBuilder);
             RemoteViews remoteViews = mBuilder.applyStandardTemplateWithActions(
-                    mBuilder.getHeadsUpBaseLayoutResource(),
-                    StandardTemplateParams.VIEW_TYPE_HEADS_UP, result);
+                    mBuilder.getHeadsUpBaseLayoutResource(), p, result);
             buildIntoRemoteViewContent(remoteViews, headsUpContentView, result, true);
             return remoteViews;
         }
 
         private RemoteViews makeStandardTemplateWithCustomContent(RemoteViews customContent) {
             TemplateBindResult result = new TemplateBindResult();
+            StandardTemplateParams p = mBuilder.mParams.reset()
+                    .viewType(StandardTemplateParams.VIEW_TYPE_NORMAL)
+                    .hasCustomContent(customContent != null)
+                    .fillTextsFrom(mBuilder);
             RemoteViews remoteViews = mBuilder.applyStandardTemplate(
-                    mBuilder.getBaseLayoutResource(),
-                    StandardTemplateParams.VIEW_TYPE_NORMAL, result);
+                    mBuilder.getBaseLayoutResource(), p, result);
             buildIntoRemoteViewContent(remoteViews, customContent, result, true);
             return remoteViews;
         }
@@ -8714,9 +8729,12 @@ public class Notification implements Parcelable
                     ? mBuilder.mN.contentView
                     : mBuilder.mN.bigContentView;
             TemplateBindResult result = new TemplateBindResult();
+            StandardTemplateParams p = mBuilder.mParams.reset()
+                    .viewType(StandardTemplateParams.VIEW_TYPE_BIG)
+                    .hasCustomContent(bigContentView != null)
+                    .fillTextsFrom(mBuilder);
             RemoteViews remoteViews = mBuilder.applyStandardTemplateWithActions(
-                    mBuilder.getBigBaseLayoutResource(),
-                    StandardTemplateParams.VIEW_TYPE_BIG, result);
+                    mBuilder.getBigBaseLayoutResource(), p, result);
             buildIntoRemoteViewContent(remoteViews, bigContentView, result, false);
             return remoteViews;
         }
@@ -11029,6 +11047,7 @@ public class Notification implements Parcelable
 
         int mViewType = VIEW_TYPE_UNSPECIFIED;
         boolean mHeaderless;
+        boolean mHasCustomContent;
         boolean hasProgress = true;
         CharSequence title;
         CharSequence text;
@@ -11042,6 +11061,7 @@ public class Notification implements Parcelable
         final StandardTemplateParams reset() {
             mViewType = VIEW_TYPE_UNSPECIFIED;
             mHeaderless = false;
+            mHasCustomContent = false;
             hasProgress = true;
             title = null;
             text = null;
@@ -11065,6 +11085,11 @@ public class Notification implements Parcelable
 
         final StandardTemplateParams hasProgress(boolean hasProgress) {
             this.hasProgress = hasProgress;
+            return this;
+        }
+
+        final StandardTemplateParams hasCustomContent(boolean hasCustomContent) {
+            this.mHasCustomContent = hasCustomContent;
             return this;
         }
 

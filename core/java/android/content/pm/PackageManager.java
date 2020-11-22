@@ -131,38 +131,48 @@ public abstract class PackageManager {
         private static final int TYPE_RESOURCE = 4;
         private static final int TYPE_STRING = 5;
         private final String mName;
+        private final int mType;
+        private final String mClassName;
+        private final String mPackageName;
         private boolean mBooleanValue;
         private float mFloatValue;
         private int mIntegerValue;
         private String mStringValue;
-        private final int mType;
 
         /** @hide */
         @VisibleForTesting
-        public Property(@NonNull String name, int type) {
+        public Property(@NonNull String name, int type,
+                @NonNull String packageName, @Nullable String className) {
             assert name != null;
             assert type >= TYPE_BOOLEAN && type <= TYPE_STRING;
+            assert packageName != null;
             this.mName = name;
             this.mType = type;
+            this.mPackageName = packageName;
+            this.mClassName = className;
         }
         /** @hide */
-        public Property(@NonNull String name, boolean value) {
-            this(name, TYPE_BOOLEAN);
+        public Property(@NonNull String name, boolean value,
+                String packageName, String className) {
+            this(name, TYPE_BOOLEAN, packageName, className);
             mBooleanValue = value;
         }
         /** @hide */
-        public Property(@NonNull String name, float value) {
-            this(name, TYPE_FLOAT);
+        public Property(@NonNull String name, float value,
+                String packageName, String className) {
+            this(name, TYPE_FLOAT, packageName, className);
             mFloatValue = value;
         }
         /** @hide */
-        public Property(@NonNull String name, int value, boolean isResource) {
-            this(name, isResource ? TYPE_RESOURCE : TYPE_INTEGER);
+        public Property(@NonNull String name, int value, boolean isResource,
+                String packageName, String className) {
+            this(name, isResource ? TYPE_RESOURCE : TYPE_INTEGER, packageName, className);
             mIntegerValue = value;
         }
         /** @hide */
-        public Property(@NonNull String name, String value) {
-            this(name, TYPE_STRING);
+        public Property(@NonNull String name, String value,
+                String packageName, String className) {
+            this(name, TYPE_STRING, packageName, className);
             mStringValue = value;
         }
 
@@ -177,6 +187,22 @@ public abstract class PackageManager {
          */
         @NonNull public String getName() {
             return mName;
+        }
+
+        /**
+         * Returns the name of the package where this this property was defined.
+         */
+        @NonNull public String getPackageName() {
+            return mPackageName;
+        }
+
+        /**
+         * Returns the classname of the component where this property was defined.
+         * <p>If the property was defined within and &lt;application&gt; tag, retutrns
+         * {@code null}
+         */
+        @Nullable public String getClassName() {
+            return mClassName;
         }
 
         /**
@@ -285,6 +311,8 @@ public abstract class PackageManager {
         public void writeToParcel(@NonNull Parcel dest, int flags) {
             dest.writeString(mName);
             dest.writeInt(mType);
+            dest.writeString(mPackageName);
+            dest.writeString(mClassName);
             if (mType == TYPE_BOOLEAN) {
                 dest.writeBoolean(mBooleanValue);
             } else if (mType == TYPE_FLOAT) {
@@ -304,16 +332,18 @@ public abstract class PackageManager {
             public Property createFromParcel(@NonNull Parcel source) {
                 final String name = source.readString();
                 final int type = source.readInt();
+                final String packageName = source.readString();
+                final String className = source.readString();
                 if (type == TYPE_BOOLEAN) {
-                    return new Property(name, source.readBoolean());
+                    return new Property(name, source.readBoolean(), packageName, className);
                 } else if (type == TYPE_FLOAT) {
-                    return new Property(name, source.readFloat());
+                    return new Property(name, source.readFloat(), packageName, className);
                 } else if (type == TYPE_INTEGER) {
-                    return new Property(name, source.readInt(), false);
+                    return new Property(name, source.readInt(), false, packageName, className);
                 } else if (type == TYPE_RESOURCE) {
-                    return new Property(name, source.readInt(), true);
+                    return new Property(name, source.readInt(), true, packageName, className);
                 } else if (type == TYPE_STRING) {
-                    return new Property(name, source.readString());
+                    return new Property(name, source.readString(), packageName, className);
                 }
                 return null;
             }
@@ -339,6 +369,41 @@ public abstract class PackageManager {
          */
         public void onPermissionsChanged(int uid);
     }
+
+    /** @hide */
+    public static final int TYPE_UNKNOWN = 0;
+    /** @hide */
+    public static final int TYPE_ACTIVITY = 1;
+    /** @hide */
+    public static final int TYPE_RECEIVER = 2;
+    /** @hide */
+    public static final int TYPE_SERVICE = 3;
+    /** @hide */
+    public static final int TYPE_PROVIDER = 4;
+    /** @hide */
+    public static final int TYPE_APPLICATION = 5;
+    /** @hide */
+    @IntDef(prefix = { "TYPE_" }, value = {
+            TYPE_UNKNOWN,
+            TYPE_ACTIVITY,
+            TYPE_RECEIVER,
+            TYPE_SERVICE,
+            TYPE_PROVIDER,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ComponentType {}
+
+    /** @hide */
+    @IntDef(prefix = { "TYPE_" }, value = {
+            TYPE_UNKNOWN,
+            TYPE_ACTIVITY,
+            TYPE_RECEIVER,
+            TYPE_SERVICE,
+            TYPE_PROVIDER,
+            TYPE_APPLICATION,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface PropertyLocation {}
 
     /**
      * As a guiding principle:
@@ -8570,6 +8635,87 @@ public abstract class PackageManager {
     public Set<String> getMimeGroup(@NonNull String mimeGroup) {
         throw new UnsupportedOperationException(
                 "getMimeGroup not implemented in subclass");
+    }
+
+    /**
+     * Returns the property defined in the given package's &lt;appliction&gt; tag.
+     *
+     * @throws NameNotFoundException if either the given package is not installed or if the
+     * given property is not defined within the &lt;application&gt; tag.
+     */
+    @NonNull
+    public Property getProperty(@NonNull String propertyName, @NonNull String packageName)
+            throws NameNotFoundException {
+        throw new UnsupportedOperationException(
+                "getProperty not implemented in subclass");
+    }
+
+    /**
+     * Returns the property defined in the given component declaration.
+     *
+     * @throws NameNotFoundException if either the given component does not exist or if the
+     * given property is not defined within the component declaration.
+     */
+    @NonNull
+    public Property getProperty(@NonNull String propertyName, @NonNull ComponentName component)
+            throws NameNotFoundException {
+        throw new UnsupportedOperationException(
+                "getProperty not implemented in subclass");
+    }
+
+    /**
+     * Returns the property definition for all &lt;application&gt; tags.
+     * <p>If the property is not defined with any &lt;application&gt; tag,
+     * returns and empty list.
+     */
+    @NonNull
+    public List<Property> queryApplicationProperty(@NonNull String propertyName) {
+        throw new UnsupportedOperationException(
+                "qeuryApplicationProperty not implemented in subclass");
+    }
+
+    /**
+     * Returns the property definition for all &lt;activity&gt; and &lt;activity-alias&gt; tags.
+     * <p>If the property is not defined with any &lt;activity&gt; and &lt;activity-alias&gt; tag,
+     * returns and empty list.
+     */
+    @NonNull
+    public List<Property> queryActivityProperty(@NonNull String propertyName) {
+        throw new UnsupportedOperationException(
+                "qeuryActivityProperty not implemented in subclass");
+    }
+
+    /**
+     * Returns the property definition for all &lt;provider&gt; tags.
+     * <p>If the property is not defined with any &lt;provider&gt; tag,
+     * returns and empty list.
+     */
+    @NonNull
+    public List<Property> queryProviderProperty(@NonNull String propertyName) {
+        throw new UnsupportedOperationException(
+                "qeuryProviderProperty not implemented in subclass");
+    }
+
+    /**
+     * Returns the property definition for all &lt;receiver&gt; tags.
+     * <p>If the property is not defined with any &lt;receiver&gt; tag,
+     * returns and empty list.
+     */
+    @NonNull
+    public List<Property> queryReceiverProperty(@NonNull String propertyName) {
+        throw new UnsupportedOperationException(
+                "qeuryReceiverProperty not implemented in subclass");
+    }
+
+    /**
+     * Returns the property definition for all &lt;service&gt; tags.
+     * <p>If the property is not defined with any &lt;service&gt; tag,
+     * returns and empty list.
+     */
+    @NonNull
+    public List<Property> queryServiceProperty(@NonNull String propertyName) {
+        throw new UnsupportedOperationException(
+                "qeuryServiceProperty not implemented in subclass");
     }
 
     /**

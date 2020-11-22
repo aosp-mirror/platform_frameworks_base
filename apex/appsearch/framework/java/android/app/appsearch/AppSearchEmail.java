@@ -16,10 +16,8 @@
 
 package android.app.appsearch;
 
-
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-
 import android.app.appsearch.AppSearchSchema.PropertyConfig;
 
 /**
@@ -29,9 +27,8 @@ import android.app.appsearch.AppSearchSchema.PropertyConfig;
  *
  * @hide
  */
-
 public class AppSearchEmail extends GenericDocument {
-    /** The name of the schema type for {@link AppSearchEmail} documents.*/
+    /** The name of the schema type for {@link AppSearchEmail} documents. */
     public static final String SCHEMA_TYPE = "builtin:Email";
 
     private static final String KEY_FROM = "from";
@@ -41,54 +38,55 @@ public class AppSearchEmail extends GenericDocument {
     private static final String KEY_SUBJECT = "subject";
     private static final String KEY_BODY = "body";
 
-    public static final AppSearchSchema SCHEMA = new AppSearchSchema.Builder(SCHEMA_TYPE)
-            .addProperty(new PropertyConfig.Builder(KEY_FROM)
-                    .setDataType(PropertyConfig.DATA_TYPE_STRING)
-                    .setCardinality(PropertyConfig.CARDINALITY_OPTIONAL)
-                    .setTokenizerType(PropertyConfig.TOKENIZER_TYPE_PLAIN)
-                    .setIndexingType(PropertyConfig.INDEXING_TYPE_PREFIXES)
-                    .build()
-
-            ).addProperty(new PropertyConfig.Builder(KEY_TO)
-                    .setDataType(PropertyConfig.DATA_TYPE_STRING)
-                    .setCardinality(PropertyConfig.CARDINALITY_REPEATED)
-                    .setTokenizerType(PropertyConfig.TOKENIZER_TYPE_PLAIN)
-                    .setIndexingType(PropertyConfig.INDEXING_TYPE_PREFIXES)
-                    .build()
-
-            ).addProperty(new PropertyConfig.Builder(KEY_CC)
-                    .setDataType(PropertyConfig.DATA_TYPE_STRING)
-                    .setCardinality(PropertyConfig.CARDINALITY_REPEATED)
-                    .setTokenizerType(PropertyConfig.TOKENIZER_TYPE_PLAIN)
-                    .setIndexingType(PropertyConfig.INDEXING_TYPE_PREFIXES)
-                    .build()
-
-            ).addProperty(new PropertyConfig.Builder(KEY_BCC)
-                    .setDataType(PropertyConfig.DATA_TYPE_STRING)
-                    .setCardinality(PropertyConfig.CARDINALITY_REPEATED)
-                    .setTokenizerType(PropertyConfig.TOKENIZER_TYPE_PLAIN)
-                    .setIndexingType(PropertyConfig.INDEXING_TYPE_PREFIXES)
-                    .build()
-
-            ).addProperty(new PropertyConfig.Builder(KEY_SUBJECT)
-                    .setDataType(PropertyConfig.DATA_TYPE_STRING)
-                    .setCardinality(PropertyConfig.CARDINALITY_OPTIONAL)
-                    .setTokenizerType(PropertyConfig.TOKENIZER_TYPE_PLAIN)
-                    .setIndexingType(PropertyConfig.INDEXING_TYPE_PREFIXES)
-                    .build()
-
-            ).addProperty(new PropertyConfig.Builder(KEY_BODY)
-                    .setDataType(PropertyConfig.DATA_TYPE_STRING)
-                    .setCardinality(PropertyConfig.CARDINALITY_OPTIONAL)
-                    .setTokenizerType(PropertyConfig.TOKENIZER_TYPE_PLAIN)
-                    .setIndexingType(PropertyConfig.INDEXING_TYPE_PREFIXES)
-                    .build()
-
-            ).build();
+    public static final AppSearchSchema SCHEMA =
+            new AppSearchSchema.Builder(SCHEMA_TYPE)
+                    .addProperty(
+                            new PropertyConfig.Builder(KEY_FROM)
+                                    .setDataType(PropertyConfig.DATA_TYPE_STRING)
+                                    .setCardinality(PropertyConfig.CARDINALITY_OPTIONAL)
+                                    .setTokenizerType(PropertyConfig.TOKENIZER_TYPE_PLAIN)
+                                    .setIndexingType(PropertyConfig.INDEXING_TYPE_PREFIXES)
+                                    .build())
+                    .addProperty(
+                            new PropertyConfig.Builder(KEY_TO)
+                                    .setDataType(PropertyConfig.DATA_TYPE_STRING)
+                                    .setCardinality(PropertyConfig.CARDINALITY_REPEATED)
+                                    .setTokenizerType(PropertyConfig.TOKENIZER_TYPE_PLAIN)
+                                    .setIndexingType(PropertyConfig.INDEXING_TYPE_PREFIXES)
+                                    .build())
+                    .addProperty(
+                            new PropertyConfig.Builder(KEY_CC)
+                                    .setDataType(PropertyConfig.DATA_TYPE_STRING)
+                                    .setCardinality(PropertyConfig.CARDINALITY_REPEATED)
+                                    .setTokenizerType(PropertyConfig.TOKENIZER_TYPE_PLAIN)
+                                    .setIndexingType(PropertyConfig.INDEXING_TYPE_PREFIXES)
+                                    .build())
+                    .addProperty(
+                            new PropertyConfig.Builder(KEY_BCC)
+                                    .setDataType(PropertyConfig.DATA_TYPE_STRING)
+                                    .setCardinality(PropertyConfig.CARDINALITY_REPEATED)
+                                    .setTokenizerType(PropertyConfig.TOKENIZER_TYPE_PLAIN)
+                                    .setIndexingType(PropertyConfig.INDEXING_TYPE_PREFIXES)
+                                    .build())
+                    .addProperty(
+                            new PropertyConfig.Builder(KEY_SUBJECT)
+                                    .setDataType(PropertyConfig.DATA_TYPE_STRING)
+                                    .setCardinality(PropertyConfig.CARDINALITY_OPTIONAL)
+                                    .setTokenizerType(PropertyConfig.TOKENIZER_TYPE_PLAIN)
+                                    .setIndexingType(PropertyConfig.INDEXING_TYPE_PREFIXES)
+                                    .build())
+                    .addProperty(
+                            new PropertyConfig.Builder(KEY_BODY)
+                                    .setDataType(PropertyConfig.DATA_TYPE_STRING)
+                                    .setCardinality(PropertyConfig.CARDINALITY_OPTIONAL)
+                                    .setTokenizerType(PropertyConfig.TOKENIZER_TYPE_PLAIN)
+                                    .setIndexingType(PropertyConfig.INDEXING_TYPE_PREFIXES)
+                                    .build())
+                    .build();
 
     /**
-     * Creates a new {@link AppSearchEmail} from the contents of an existing
-     * {@link GenericDocument}.
+     * Creates a new {@link AppSearchEmail} from the contents of an existing {@link
+     * GenericDocument}.
      *
      * @param document The {@link GenericDocument} containing the email content.
      */
@@ -109,8 +107,8 @@ public class AppSearchEmail extends GenericDocument {
     /**
      * Gets the destination addresses of {@link AppSearchEmail}.
      *
-     * @return The destination addresses of {@link AppSearchEmail} or {@code null} if it's not
-     *         been set yet.
+     * @return The destination addresses of {@link AppSearchEmail} or {@code null} if it's not been
+     *     set yet.
      */
     @Nullable
     public String[] getTo() {
@@ -157,9 +155,7 @@ public class AppSearchEmail extends GenericDocument {
         return getPropertyString(KEY_BODY);
     }
 
-    /**
-     * The builder class for {@link AppSearchEmail}.
-     */
+    /** The builder class for {@link AppSearchEmail}. */
     public static class Builder extends GenericDocument.Builder<AppSearchEmail.Builder> {
 
         /**
@@ -171,54 +167,42 @@ public class AppSearchEmail extends GenericDocument {
             super(uri, SCHEMA_TYPE);
         }
 
-        /**
-         * Sets the from address of {@link AppSearchEmail}
-         */
+        /** Sets the from address of {@link AppSearchEmail} */
         @NonNull
         public AppSearchEmail.Builder setFrom(@NonNull String from) {
             setPropertyString(KEY_FROM, from);
             return this;
         }
 
-        /**
-         * Sets the destination address of {@link AppSearchEmail}
-         */
+        /** Sets the destination address of {@link AppSearchEmail} */
         @NonNull
         public AppSearchEmail.Builder setTo(@NonNull String... to) {
             setPropertyString(KEY_TO, to);
             return this;
         }
 
-        /**
-         * Sets the CC list of {@link AppSearchEmail}
-         */
+        /** Sets the CC list of {@link AppSearchEmail} */
         @NonNull
         public AppSearchEmail.Builder setCc(@NonNull String... cc) {
             setPropertyString(KEY_CC, cc);
             return this;
         }
 
-        /**
-         * Sets the BCC list of {@link AppSearchEmail}
-         */
+        /** Sets the BCC list of {@link AppSearchEmail} */
         @NonNull
         public AppSearchEmail.Builder setBcc(@NonNull String... bcc) {
             setPropertyString(KEY_BCC, bcc);
             return this;
         }
 
-        /**
-         * Sets the subject of {@link AppSearchEmail}
-         */
+        /** Sets the subject of {@link AppSearchEmail} */
         @NonNull
         public AppSearchEmail.Builder setSubject(@NonNull String subject) {
             setPropertyString(KEY_SUBJECT, subject);
             return this;
         }
 
-        /**
-         * Sets the body of {@link AppSearchEmail}
-         */
+        /** Sets the body of {@link AppSearchEmail} */
         @NonNull
         public AppSearchEmail.Builder setBody(@NonNull String body) {
             setPropertyString(KEY_BODY, body);
