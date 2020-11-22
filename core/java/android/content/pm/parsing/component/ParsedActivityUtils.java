@@ -356,6 +356,8 @@ public class ParsedActivityUtils {
                 result = intentResult;
             } else if (parser.getName().equals("meta-data")) {
                 result = ParsedComponentUtils.addMetaData(activity, pkg, resources, parser, input);
+            } else if (parser.getName().equals("property")) {
+                result = ParsedComponentUtils.addProperty(activity, pkg, resources, parser, input);
             } else if (!isReceiver && !isAlias && parser.getName().equals("preferred")) {
                 ParseResult<ParsedIntentInfo> intentResult = parseIntentFilter(pkg, activity,
                         true /*allowImplicitEphemeralVisibility*/, visibleToEphemeral,

@@ -16,15 +16,14 @@
 
 package android.app.appsearch;
 
-import android.annotation.SuppressLint;
-import android.os.Bundle;
-
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-
+import android.annotation.SuppressLint;
 import android.app.appsearch.exceptions.IllegalSchemaException;
+import android.os.Bundle;
 import android.util.ArraySet;
+
 import com.android.internal.util.Preconditions;
 
 import java.lang.annotation.Retention;
@@ -40,6 +39,8 @@ import java.util.Set;
  * <p>For example, an e-mail message or a music recording could be a schema type.
  *
  * <p>The schema consists of type information, properties, and config (like tokenization type).
+ *
+ * @see AppSearchSession#setSchema
  * @hide
  */
 public final class AppSearchSchema {
@@ -49,7 +50,6 @@ public final class AppSearchSchema {
     private final Bundle mBundle;
 
     /** @hide */
-    
     public AppSearchSchema(@NonNull Bundle bundle) {
         Preconditions.checkNotNull(bundle);
         mBundle = bundle;
@@ -57,9 +57,9 @@ public final class AppSearchSchema {
 
     /**
      * Returns the {@link Bundle} populated by this builder.
+     *
      * @hide
      */
-    
     @NonNull
     public Bundle getBundle() {
         return mBundle;
@@ -144,8 +144,8 @@ public final class AppSearchSchema {
     /**
      * Configuration for a single property (field) of a document type.
      *
-     * <p>For example, an {@code EmailMessage} would be a type and the {@code subject} would be
-     * a property.
+     * <p>For example, an {@code EmailMessage} would be a type and the {@code subject} would be a
+     * property.
      */
     public static final class PropertyConfig {
         private static final String NAME_FIELD = "name";
@@ -157,18 +157,20 @@ public final class AppSearchSchema {
 
         /**
          * Physical data-types of the contents of the property.
+         *
          * @hide
          */
         // NOTE: The integer values of these constants must match the proto enum constants in
         // com.google.android.icing.proto.PropertyConfigProto.DataType.Code.
-        @IntDef(value = {
-                DATA_TYPE_STRING,
-                DATA_TYPE_INT64,
-                DATA_TYPE_DOUBLE,
-                DATA_TYPE_BOOLEAN,
-                DATA_TYPE_BYTES,
-                DATA_TYPE_DOCUMENT,
-        })
+        @IntDef(
+                value = {
+                    DATA_TYPE_STRING,
+                    DATA_TYPE_INT64,
+                    DATA_TYPE_DOUBLE,
+                    DATA_TYPE_BOOLEAN,
+                    DATA_TYPE_BYTES,
+                    DATA_TYPE_DOCUMENT,
+                })
         @Retention(RetentionPolicy.SOURCE)
         public @interface DataType {}
 
@@ -181,23 +183,25 @@ public final class AppSearchSchema {
         public static final int DATA_TYPE_BYTES = 5;
 
         /**
-         * Indicates that the property itself is an Document, making it part a hierarchical
-         * Document schema. Any property using this DataType MUST have a valid
-         * {@code schemaType}.
+         * Indicates that the property is itself a {@link GenericDocument}, making it part of a
+         * hierarchical schema. Any property using this DataType MUST have a valid {@link
+         * PropertyConfig#getSchemaType}.
          */
         public static final int DATA_TYPE_DOCUMENT = 6;
 
         /**
          * The cardinality of the property (whether it is required, optional or repeated).
+         *
          * @hide
          */
         // NOTE: The integer values of these constants must match the proto enum constants in
         // com.google.android.icing.proto.PropertyConfigProto.Cardinality.Code.
-        @IntDef(value = {
-                CARDINALITY_REPEATED,
-                CARDINALITY_OPTIONAL,
-                CARDINALITY_REQUIRED,
-        })
+        @IntDef(
+                value = {
+                    CARDINALITY_REPEATED,
+                    CARDINALITY_OPTIONAL,
+                    CARDINALITY_REQUIRED,
+                })
         @Retention(RetentionPolicy.SOURCE)
         public @interface Cardinality {}
 
@@ -212,23 +216,25 @@ public final class AppSearchSchema {
 
         /**
          * Encapsulates the configurations on how AppSearch should query/index these terms.
+         *
          * @hide
          */
-        @IntDef(value = {
-                INDEXING_TYPE_NONE,
-                INDEXING_TYPE_EXACT_TERMS,
-                INDEXING_TYPE_PREFIXES,
-        })
+        @IntDef(
+                value = {
+                    INDEXING_TYPE_NONE,
+                    INDEXING_TYPE_EXACT_TERMS,
+                    INDEXING_TYPE_PREFIXES,
+                })
         @Retention(RetentionPolicy.SOURCE)
         public @interface IndexingType {}
 
         /**
          * Content in this property will not be tokenized or indexed.
          *
-         * <p>Useful if the data type is not made up of terms (e.g.
-         * {@link PropertyConfig#DATA_TYPE_DOCUMENT} or {@link PropertyConfig#DATA_TYPE_BYTES}
-         * type). All the properties inside the nested property won't be indexed regardless of the
-         * value of {@code indexingType} for the nested properties.
+         * <p>Useful if the data type is not made up of terms (e.g. {@link
+         * PropertyConfig#DATA_TYPE_DOCUMENT} or {@link PropertyConfig#DATA_TYPE_BYTES} type). None
+         * of the properties inside the nested property will be indexed regardless of the value of
+         * {@code indexingType} for the nested properties.
          */
         public static final int INDEXING_TYPE_NONE = 0;
 
@@ -250,20 +256,22 @@ public final class AppSearchSchema {
 
         /**
          * Configures how tokens should be extracted from this property.
+         *
          * @hide
          */
         // NOTE: The integer values of these constants must match the proto enum constants in
         // com.google.android.icing.proto.IndexingConfig.TokenizerType.Code.
-        @IntDef(value = {
-                TOKENIZER_TYPE_NONE,
-                TOKENIZER_TYPE_PLAIN,
-        })
+        @IntDef(
+                value = {
+                    TOKENIZER_TYPE_NONE,
+                    TOKENIZER_TYPE_PLAIN,
+                })
         @Retention(RetentionPolicy.SOURCE)
         public @interface TokenizerType {}
 
         /**
-         * It is only valid for tokenizer_type to be 'NONE' if the data type is
-         * {@link PropertyConfig#DATA_TYPE_DOCUMENT}.
+         * It is only valid for tokenizer_type to be 'NONE' if the data type is {@link
+         * PropertyConfig#DATA_TYPE_DOCUMENT}.
          */
         public static final int TOKENIZER_TYPE_NONE = 0;
 
@@ -295,8 +303,8 @@ public final class AppSearchSchema {
         /**
          * Returns the logical schema-type of the contents of this property.
          *
-         * <p>Only set when {@link #getDataType} is set to {@link #DATA_TYPE_DOCUMENT}.
-         * Otherwise, it is {@code null}.
+         * <p>Only set when {@link #getDataType} is set to {@link #DATA_TYPE_DOCUMENT}. Otherwise,
+         * it is {@code null}.
          */
         @Nullable
         public String getSchemaType() {
@@ -325,9 +333,10 @@ public final class AppSearchSchema {
          *
          * <p>The following properties must be set, or {@link PropertyConfig} construction will
          * fail:
+         *
          * <ul>
-         *     <li>dataType
-         *     <li>cardinality
+         *   <li>dataType
+         *   <li>cardinality
          * </ul>
          *
          * <p>In addition, if {@code schemaType} is {@link #DATA_TYPE_DOCUMENT}, {@code schemaType}
@@ -359,8 +368,8 @@ public final class AppSearchSchema {
             /**
              * The logical schema-type of the contents of this property.
              *
-             * <p>Only required when {@link #setDataType} is set to
-             * {@link #DATA_TYPE_DOCUMENT}. Otherwise, it is ignored.
+             * <p>Only required when {@link #setDataType} is set to {@link #DATA_TYPE_DOCUMENT}.
+             * Otherwise, it is ignored.
              */
             @NonNull
             public PropertyConfig.Builder setSchemaType(@NonNull String schemaType) {

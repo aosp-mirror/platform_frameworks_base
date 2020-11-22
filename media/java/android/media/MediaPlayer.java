@@ -4237,14 +4237,14 @@ public class MediaPlayer extends PlayerBase
      * @hide
      */
     @SystemApi
-    @RequiresPermission("android.permission.BIND_IMS_SERVICE")
+    @RequiresPermission(BIND_IMS_SERVICE)
     public void setOnRtpRxNoticeListener(
             @NonNull Context context,
             @NonNull OnRtpRxNoticeListener listener, @Nullable Handler handler) {
         Objects.requireNonNull(context);
         Preconditions.checkArgument(
                 context.checkSelfPermission(BIND_IMS_SERVICE) == PERMISSION_GRANTED,
-                "android.permission.BIND_IMS_SERVICE permission not granted.");
+                BIND_IMS_SERVICE + " permission not granted.");
         mOnRtpRxNoticeListener = Objects.requireNonNull(listener);
         mOnRtpRxNoticeHandler = handler;
     }

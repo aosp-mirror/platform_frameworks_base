@@ -17,8 +17,8 @@
 package com.android.server.appsearch.external.localstorage.converter;
 
 import android.annotation.NonNull;
-
 import android.app.appsearch.GenericDocument;
+
 import com.android.internal.util.Preconditions;
 
 import com.google.android.icing.proto.DocumentProto;
@@ -30,9 +30,9 @@ import java.util.Collections;
 
 /**
  * Translates a {@link GenericDocument} into a {@link DocumentProto}.
+ *
  * @hide
  */
-
 public final class GenericDocumentToProtoConverter {
     private GenericDocumentToProtoConverter() {}
 
@@ -42,7 +42,8 @@ public final class GenericDocumentToProtoConverter {
     public static DocumentProto convert(@NonNull GenericDocument document) {
         Preconditions.checkNotNull(document);
         DocumentProto.Builder mProtoBuilder = DocumentProto.newBuilder();
-        mProtoBuilder.setUri(document.getUri())
+        mProtoBuilder
+                .setUri(document.getUri())
                 .setSchema(document.getSchemaType())
                 .setNamespace(document.getNamespace())
                 .setScore(document.getScore())

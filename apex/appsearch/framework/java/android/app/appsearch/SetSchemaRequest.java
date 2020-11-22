@@ -16,11 +16,11 @@
 
 package android.app.appsearch;
 
-import android.annotation.SuppressLint;
-
 import android.annotation.NonNull;
+import android.annotation.SuppressLint;
 import android.app.appsearch.exceptions.AppSearchException;
 import android.util.ArraySet;
+
 import com.android.internal.util.Preconditions;
 
 import java.util.ArrayList;
@@ -30,9 +30,9 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Encapsulates a request to update the schema of an {@link AppSearchManager} database.
+ * Encapsulates a request to update the schema of an {@link AppSearchSession} database.
  *
- * @see AppSearchManager#setSchema
+ * @see AppSearchSession#setSchema
  * @hide
  */
 public final class SetSchemaRequest {
@@ -81,10 +81,10 @@ public final class SetSchemaRequest {
          * Configures the {@link SetSchemaRequest} to delete any existing documents that don't
          * follow the new schema.
          *
-         * <p>By default, this is {@code false} and schema incompatibility causes the
-         * {@link AppSearchManager#setSchema} call to fail.
+         * <p>By default, this is {@code false} and schema incompatibility causes the {@link
+         * AppSearchSession#setSchema} call to fail.
          *
-         * @see AppSearchManager#setSchema
+         * @see AppSearchSession#setSchema
          */
         @NonNull
         public Builder setForceOverride(boolean forceOverride) {

@@ -16,14 +16,14 @@
 
 package android.app.appsearch;
 
-import android.annotation.SuppressLint;
-import android.os.Bundle;
-
 import android.annotation.IntDef;
+import android.annotation.IntRange;
 import android.annotation.NonNull;
-
+import android.annotation.SuppressLint;
 import android.app.appsearch.exceptions.AppSearchException;
 import android.app.appsearch.exceptions.IllegalSearchSpecException;
+import android.os.Bundle;
+
 import com.android.internal.util.Preconditions;
 
 import java.lang.annotation.Retention;
@@ -52,10 +52,10 @@ public final class SearchSpec {
     static final String MAX_SNIPPET_FIELD = "maxSnippet";
 
     /** @hide */
-    
     public static final int DEFAULT_NUM_PER_PAGE = 10;
 
-    // TODO(b/170371356): In framework, we may want these limits might be flag controlled.
+    // TODO(b/170371356): In framework, we may want these limits to be flag controlled.
+    //  If that happens, the @IntRange() directives in this class may have to change.
     private static final int MAX_NUM_PER_PAGE = 10_000;
     private static final int MAX_SNIPPET_COUNT = 10_000;
     private static final int MAX_SNIPPET_PER_PROPERTY_COUNT = 10_000;
@@ -63,43 +63,45 @@ public final class SearchSpec {
 
     /**
      * Term Match Type for the query.
+     *
      * @hide
      */
     // NOTE: The integer values of these constants must match the proto enum constants in
     // {@link com.google.android.icing.proto.SearchSpecProto.termMatchType}
-    @IntDef(value = {
-            TERM_MATCH_EXACT_ONLY,
-            TERM_MATCH_PREFIX
-    })
+    @IntDef(value = {TERM_MATCH_EXACT_ONLY, TERM_MATCH_PREFIX})
     @Retention(RetentionPolicy.SOURCE)
     public @interface TermMatch {}
 
     /**
      * Query terms will only match exact tokens in the index.
+     *
      * <p>Ex. A query term "foo" will only match indexed token "foo", and not "foot" or "football".
      */
     public static final int TERM_MATCH_EXACT_ONLY = 1;
     /**
      * Query terms will match indexed tokens when the query term is a prefix of the token.
+     *
      * <p>Ex. A query term "foo" will match indexed tokens like "foo", "foot", and "football".
      */
     public static final int TERM_MATCH_PREFIX = 2;
 
     /**
      * Ranking Strategy for query result.
+     *
      * @hide
      */
     // NOTE: The integer values of these constants must match the proto enum constants in
     // {@link ScoringSpecProto.RankingStrategy.Code}
-    @IntDef(value = {
-            RANKING_STRATEGY_NONE,
-            RANKING_STRATEGY_DOCUMENT_SCORE,
-            RANKING_STRATEGY_CREATION_TIMESTAMP
-    })
+    @IntDef(
+            value = {
+                RANKING_STRATEGY_NONE,
+                RANKING_STRATEGY_DOCUMENT_SCORE,
+                RANKING_STRATEGY_CREATION_TIMESTAMP
+            })
     @Retention(RetentionPolicy.SOURCE)
     public @interface RankingStrategy {}
 
-    /** No Ranking, results are returned in arbitrary order.*/
+    /** No Ranking, results are returned in arbitrary order. */
     public static final int RANKING_STRATEGY_NONE = 0;
     /** Ranked by app-provided document scores. */
     public static final int RANKING_STRATEGY_DOCUMENT_SCORE = 1;
@@ -108,14 +110,12 @@ public final class SearchSpec {
 
     /**
      * Order for query result.
+     *
      * @hide
      */
     // NOTE: The integer values of these constants must match the proto enum constants in
     // {@link ScoringSpecProto.Order.Code}
-    @IntDef(value = {
-            ORDER_DESCENDING,
-            ORDER_ASCENDING
-    })
+    @IntDef(value = {ORDER_DESCENDING, ORDER_ASCENDING})
     @Retention(RetentionPolicy.SOURCE)
     public @interface Order {}
 
@@ -127,7 +127,6 @@ public final class SearchSpec {
     private final Bundle mBundle;
 
     /** @hide */
-    
     public SearchSpec(@NonNull Bundle bundle) {
         Preconditions.checkNotNull(bundle);
         mBundle = bundle;
@@ -135,9 +134,9 @@ public final class SearchSpec {
 
     /**
      * Returns the {@link Bundle} populated by this builder.
+     *
      * @hide
      */
-    
     @NonNull
     public Bundle getBundle() {
         return mBundle;
@@ -176,8 +175,8 @@ public final class SearchSpec {
         return Collections.unmodifiableList(namespaces);
     }
 
-    /** Returns the number of results per page in the returned object. */
-    public int getNumPerPage() {
+    /** Returns the number of results per page in the result set. */
+    public int getResultCountPerPage() {
         return mBundle.getInt(NUM_PER_PAGE_FIELD, DEFAULT_NUM_PER_PAGE);
     }
 
@@ -222,14 +221,12 @@ public final class SearchSpec {
             mBundle.putInt(NUM_PER_PAGE_FIELD, DEFAULT_NUM_PER_PAGE);
         }
 
-        /**
-         * Indicates how the query terms should match {@code TermMatchCode} in the index.
-         */
+        /** Indicates how the query terms should match {@code TermMatchCode} in the index. */
         @NonNull
         public Builder setTermMatch(@TermMatch int termMatchTypeCode) {
             Preconditions.checkState(!mBuilt, "Builder has already been used");
-            Preconditions.checkArgumentInRange(termMatchTypeCode, TERM_MATCH_EXACT_ONLY,
-                    TERM_MATCH_PREFIX, "Term match type");
+            Preconditions.checkArgumentInRange(
+                    termMatchTypeCode, TERM_MATCH_EXACT_ONLY, TERM_MATCH_PREFIX, "Term match type");
             mBundle.putInt(TERM_MATCH_TYPE_FIELD, termMatchTypeCode);
             return this;
         }
@@ -262,8 +259,9 @@ public final class SearchSpec {
         }
 
         /**
-         * Adds a namespace filter to {@link SearchSpec} Entry. Only search for documents that
-         * have the specified namespaces.
+         * Adds a namespace filter to {@link SearchSpec} Entry. Only search for documents that have
+         * the specified namespaces.
+         *
          * <p>If unset, the query will search over all namespaces.
          */
         @NonNull
@@ -274,8 +272,9 @@ public final class SearchSpec {
         }
 
         /**
-         * Adds a namespace filter to {@link SearchSpec} Entry. Only search for documents that
-         * have the specified namespaces.
+         * Adds a namespace filter to {@link SearchSpec} Entry. Only search for documents that have
+         * the specified namespaces.
+         *
          * <p>If unset, the query will search over all namespaces.
          */
         @NonNull
@@ -288,51 +287,56 @@ public final class SearchSpec {
 
         /**
          * Sets the number of results per page in the returned object.
-         * <p> The default number of results per page is 10. And should be set in range [0, 10k].
+         *
+         * <p>The default number of results per page is 10.
          */
         @NonNull
-        public SearchSpec.Builder setNumPerPage(int numPerPage) {
+        public SearchSpec.Builder setResultCountPerPage(
+                @IntRange(from = 0, to = MAX_NUM_PER_PAGE) int numPerPage) {
             Preconditions.checkState(!mBuilt, "Builder has already been used");
             Preconditions.checkArgumentInRange(numPerPage, 0, MAX_NUM_PER_PAGE, "NumPerPage");
             mBundle.putInt(NUM_PER_PAGE_FIELD, numPerPage);
             return this;
         }
 
-        /** Sets ranking strategy for AppSearch results.*/
+        /** Sets ranking strategy for AppSearch results. */
         @NonNull
         public Builder setRankingStrategy(@RankingStrategy int rankingStrategy) {
             Preconditions.checkState(!mBuilt, "Builder has already been used");
-            Preconditions.checkArgumentInRange(rankingStrategy, RANKING_STRATEGY_NONE,
-                    RANKING_STRATEGY_CREATION_TIMESTAMP, "Result ranking strategy");
+            Preconditions.checkArgumentInRange(
+                    rankingStrategy,
+                    RANKING_STRATEGY_NONE,
+                    RANKING_STRATEGY_CREATION_TIMESTAMP,
+                    "Result ranking strategy");
             mBundle.putInt(RANKING_STRATEGY_FIELD, rankingStrategy);
             return this;
         }
 
         /**
-         * Indicates the order of returned search results, the default is DESC, meaning that results
-         * with higher scores come first.
+         * Indicates the order of returned search results, the default is {@link #ORDER_DESCENDING},
+         * meaning that results with higher scores come first.
+         *
          * <p>This order field will be ignored if RankingStrategy = {@code RANKING_STRATEGY_NONE}.
          */
         @NonNull
         public Builder setOrder(@Order int order) {
             Preconditions.checkState(!mBuilt, "Builder has already been used");
-            Preconditions.checkArgumentInRange(order, ORDER_DESCENDING, ORDER_ASCENDING,
-                    "Result ranking order");
+            Preconditions.checkArgumentInRange(
+                    order, ORDER_DESCENDING, ORDER_ASCENDING, "Result ranking order");
             mBundle.putInt(ORDER_FIELD, order);
             return this;
         }
 
         /**
-         * Only the first {@code snippetCount} documents based on the ranking strategy
-         * will have snippet information provided.
+         * Only the first {@code snippetCount} documents based on the ranking strategy will have
+         * snippet information provided.
          *
          * <p>If set to 0 (default), snippeting is disabled and {@link SearchResult#getMatches} will
          * return {@code null} for that result.
-         *
-         * <p>The value should be set in range[0, 10k].
          */
         @NonNull
-        public SearchSpec.Builder setSnippetCount(int snippetCount) {
+        public SearchSpec.Builder setSnippetCount(
+                @IntRange(from = 0, to = MAX_SNIPPET_COUNT) int snippetCount) {
             Preconditions.checkState(!mBuilt, "Builder has already been used");
             Preconditions.checkArgumentInRange(snippetCount, 0, MAX_SNIPPET_COUNT, "snippetCount");
             mBundle.putInt(SNIPPET_COUNT_FIELD, snippetCount);
@@ -343,36 +347,38 @@ public final class SearchSpec {
          * Sets {@code snippetCountPerProperty}. Only the first {@code snippetCountPerProperty}
          * snippets for each property of {@link GenericDocument} will contain snippet information.
          *
-         * <p>If set to 0, snippeting is disabled and {@link SearchResult#getMatches}
-         * will return {@code null} for that result.
-         *
-         * <p>The value should be set in range[0, 10k].
+         * <p>If set to 0, snippeting is disabled and {@link SearchResult#getMatches} will return
+         * {@code null} for that result.
          */
         @NonNull
-        public SearchSpec.Builder setSnippetCountPerProperty(int snippetCountPerProperty) {
+        public SearchSpec.Builder setSnippetCountPerProperty(
+                @IntRange(from = 0, to = MAX_SNIPPET_PER_PROPERTY_COUNT)
+                        int snippetCountPerProperty) {
             Preconditions.checkState(!mBuilt, "Builder has already been used");
-            Preconditions.checkArgumentInRange(snippetCountPerProperty,
-                    0, MAX_SNIPPET_PER_PROPERTY_COUNT, "snippetCountPerProperty");
+            Preconditions.checkArgumentInRange(
+                    snippetCountPerProperty,
+                    0,
+                    MAX_SNIPPET_PER_PROPERTY_COUNT,
+                    "snippetCountPerProperty");
             mBundle.putInt(SNIPPET_COUNT_PER_PROPERTY_FIELD, snippetCountPerProperty);
             return this;
         }
 
         /**
-         * Sets {@code maxSnippetSize}, the maximum snippet size. Snippet windows start at
-         * {@code maxSnippetSize/2} bytes before the middle of the matching token and end at
-         * {@code maxSnippetSize/2} bytes after the middle of the matching token. It respects
-         * token boundaries, therefore the returned window may be smaller than requested.
+         * Sets {@code maxSnippetSize}, the maximum snippet size. Snippet windows start at {@code
+         * maxSnippetSize/2} bytes before the middle of the matching token and end at {@code
+         * maxSnippetSize/2} bytes after the middle of the matching token. It respects token
+         * boundaries, therefore the returned window may be smaller than requested.
          *
-         * <p> Setting {@code maxSnippetSize} to 0 will disable windowing and an empty string will
-         * be returned. If matches enabled is also set to false, then snippeting is disabled.
+         * <p>Setting {@code maxSnippetSize} to 0 will disable windowing and an empty string will be
+         * returned. If matches enabled is also set to false, then snippeting is disabled.
          *
          * <p>Ex. {@code maxSnippetSize} = 16. "foo bar baz bat rat" with a query of "baz" will
          * return a window of "bar baz bat" which is only 11 bytes long.
-         *
-         * <p>The value should be in range[0, 10k].
          */
         @NonNull
-        public SearchSpec.Builder setMaxSnippetSize(int maxSnippetSize) {
+        public SearchSpec.Builder setMaxSnippetSize(
+                @IntRange(from = 0, to = MAX_SNIPPET_SIZE_LIMIT) int maxSnippetSize) {
             Preconditions.checkState(!mBuilt, "Builder has already been used");
             Preconditions.checkArgumentInRange(
                     maxSnippetSize, 0, MAX_SNIPPET_SIZE_LIMIT, "maxSnippetSize");

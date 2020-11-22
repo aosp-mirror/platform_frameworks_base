@@ -25,6 +25,7 @@ import android.content.pm.ConfigurationInfo;
 import android.content.pm.FeatureGroupInfo;
 import android.content.pm.FeatureInfo;
 import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager.Property;
 import android.content.pm.PackageParser;
 import android.content.pm.ServiceInfo;
 import android.content.pm.parsing.component.ParsedActivity;
@@ -42,8 +43,6 @@ import android.util.ArraySet;
 import android.util.Pair;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
-
-import com.android.internal.R;
 
 import java.security.PublicKey;
 import java.util.List;
@@ -202,6 +201,12 @@ public interface ParsingPackageRead extends Parcelable {
      */
     @NonNull
     List<String> getRequestedPermissions();
+
+    /**
+     * Returns the properties set on the application
+     */
+    @NonNull
+    Map<String, Property> getProperties();
 
     /**
      * Whether or not the app requested explicitly resizeable Activities.

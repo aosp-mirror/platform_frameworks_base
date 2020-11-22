@@ -22,6 +22,7 @@ import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.media.tv.tuner.Tuner.Result;
 import android.media.tv.tuner.filter.Filter;
+import android.util.Log;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -115,9 +116,9 @@ public class Descrambler implements AutoCloseable {
      * keys for different purposes.
      *
      * @param keyToken the token to be used to link the key slot. Use {@link Tuner.INVALID_KEYTOKEN}
-     *        to remove the to remove the current key from descrambler. If the current keyToken
-     *        comes from MediaCas session, use {@link Tuner.INVALID_KEYTOKEN} to remove current key
-     *        before close MediaCas session.
+     *        to remove the current key from descrambler. If the current keyToken comes from a
+     *        MediaCas session, use {@link Tuner.INVALID_KEYTOKEN} to remove current key before
+     *        closing the MediaCas session.
      * @return result status of the operation.
      */
     @Result
@@ -125,6 +126,9 @@ public class Descrambler implements AutoCloseable {
         synchronized (mLock) {
             TunerUtils.checkResourceState(TAG, mIsClosed);
             Objects.requireNonNull(keyToken, "key token must not be null");
+            if (!isValidKeyToken(keyToken)) {
+                return Tuner.RESULT_INVALID_ARGUMENT;
+            }
             return nativeSetKeyToken(keyToken);
         }
     }
@@ -147,4 +151,17 @@ public class Descrambler implements AutoCloseable {
         }
     }
 
+    private boolean isValidKeyToken(byte[] keyToken) {
+        if (keyToken.length == 0 || keyToken.length > 16) {
+            Log.d(TAG, "Invalid key token size: " + (keyToken.length * 8) + " bit.");
+            return false;
+        }
+        for (int i = 0; i < keyToken.length; i++) {
+            if (keyToken[i] < 0) {
+                Log.d(TAG, "Invalid key token.");
+                return false;
+            }
+        }
+        return true;
+    }
 }

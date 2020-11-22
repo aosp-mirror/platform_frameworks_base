@@ -18,7 +18,7 @@ package android.os.strictmode;
 public final class UntaggedSocketViolation extends Violation {
     /** @hide */
     public UntaggedSocketViolation() {
-        super("Untagged socket detected; use TrafficStats.setThreadSocketTag() to "
+        super("Untagged socket detected; use TrafficStats.setTrafficStatsTag() to "
                 + "track all network usage");
     }
 }

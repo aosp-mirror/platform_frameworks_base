@@ -58,11 +58,11 @@ public class SipTransportImplBase {
 
     private final ISipTransport.Stub mSipTransportImpl = new ISipTransport.Stub() {
         @Override
-        public void createSipDelegate(DelegateRequest request, ISipDelegateStateCallback dc,
-                ISipDelegateMessageCallback mc) {
+        public void createSipDelegate(int subId, DelegateRequest request,
+                ISipDelegateStateCallback dc, ISipDelegateMessageCallback mc) {
             final long token = Binder.clearCallingIdentity();
             try {
-                mBinderExecutor.execute(() -> createSipDelegateInternal(request, dc, mc));
+                mBinderExecutor.execute(() -> createSipDelegateInternal(subId, request, dc, mc));
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -105,6 +105,7 @@ public class SipTransportImplBase {
      * This method will be called on the Executor specified in
      * {@link SipTransportImplBase#SipTransportImplBase(Executor)}.
      *
+     * @param subscriptionId The subscription ID associated with the requested {@link SipDelegate}.
      * @param request A SIP delegate request containing the parameters that the remote RCS
      * application wishes to use.
      * @param dc A callback back to the remote application to be used to communicate state callbacks
@@ -113,9 +114,9 @@ public class SipTransportImplBase {
      *           remote application and acknowledge the sending of outgoing SIP messages.
      * @hide
      */
-    public void createSipDelegate(@NonNull DelegateRequest request,
+    public void createSipDelegate(int subscriptionId, @NonNull DelegateRequest request,
             @NonNull DelegateStateCallback dc, @NonNull DelegateMessageCallback mc) {
-        throw new UnsupportedOperationException("destroySipDelegate not implemented!");
+        throw new UnsupportedOperationException("createSipDelegate not implemented!");
     }
 
     /**
@@ -136,11 +137,11 @@ public class SipTransportImplBase {
         throw new UnsupportedOperationException("destroySipDelegate not implemented!");
     }
 
-    private void createSipDelegateInternal(DelegateRequest r, ISipDelegateStateCallback cb,
-            ISipDelegateMessageCallback mc) {
+    private void createSipDelegateInternal(int subId, DelegateRequest r,
+            ISipDelegateStateCallback cb, ISipDelegateMessageCallback mc) {
         SipDelegateAidlWrapper wrapper = new SipDelegateAidlWrapper(mBinderExecutor, cb, mc);
         mDelegates.add(wrapper);
-        createSipDelegate(r, wrapper, wrapper);
+        createSipDelegate(subId, r, wrapper, wrapper);
     }
 
     private void destroySipDelegateInternal(ISipDelegate d, int reason) {

@@ -43,12 +43,13 @@ import java.util.ArrayList;
  */
 @RemoteViews.RemoteView
 public class NotificationHeaderView extends FrameLayout {
-    private final int mContentEndMargin;
     private final int mHeadingEndMargin;
+    private final int mTouchableHeight;
     private OnClickListener mExpandClickListener;
     private HeaderTouchListener mTouchListener = new HeaderTouchListener();
     private NotificationTopLineView mTopLineView;
     private NotificationExpandButton mExpandButton;
+    private View mAltExpandTarget;
     private CachingIconView mIcon;
     private Drawable mBackground;
     private boolean mEntireHeaderClickable;
@@ -82,8 +83,8 @@ public class NotificationHeaderView extends FrameLayout {
             int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
         Resources res = getResources();
-        mContentEndMargin = res.getDimensionPixelSize(R.dimen.notification_content_margin_end);
         mHeadingEndMargin = res.getDimensionPixelSize(R.dimen.notification_heading_margin_end);
+        mTouchableHeight = res.getDimensionPixelSize(R.dimen.notification_header_touchable_height);
         mEntireHeaderClickable = res.getBoolean(R.bool.config_notificationHeaderClickableForExpand);
     }
 
@@ -93,6 +94,7 @@ public class NotificationHeaderView extends FrameLayout {
         mIcon = findViewById(R.id.icon);
         mTopLineView = findViewById(R.id.notification_top_line);
         mExpandButton = findViewById(R.id.expand_button);
+        mAltExpandTarget = findViewById(R.id.alternate_expand_target);
         setClipToPadding(false);
     }
 
@@ -146,6 +148,7 @@ public class NotificationHeaderView extends FrameLayout {
     public void setOnClickListener(@Nullable OnClickListener l) {
         mExpandClickListener = l;
         mExpandButton.setOnClickListener(mExpandClickListener);
+        mAltExpandTarget.setOnClickListener(mExpandClickListener);
         updateTouchListener();
     }
 
@@ -187,6 +190,7 @@ public class NotificationHeaderView extends FrameLayout {
 
         private final ArrayList<Rect> mTouchRects = new ArrayList<>();
         private Rect mExpandButtonRect;
+        private Rect mAltExpandTargetRect;
         private int mTouchSlop;
         private boolean mTrackGesture;
         private float mDownX;
@@ -199,6 +203,7 @@ public class NotificationHeaderView extends FrameLayout {
             mTouchRects.clear();
             addRectAroundView(mIcon);
             mExpandButtonRect = addRectAroundView(mExpandButton);
+            mAltExpandTargetRect = addRectAroundView(mAltExpandTarget);
             addWidthRect();
             mTouchSlop = ViewConfiguration.get(getContext()).getScaledTouchSlop();
         }
@@ -206,7 +211,7 @@ public class NotificationHeaderView extends FrameLayout {
         private void addWidthRect() {
             Rect r = new Rect();
             r.top = 0;
-            r.bottom = (int) (32 * getResources().getDisplayMetrics().density);
+            r.bottom = mTouchableHeight;
             r.left = 0;
             r.right = getWidth();
             mTouchRects.add(r);
@@ -277,7 +282,8 @@ public class NotificationHeaderView extends FrameLayout {
                 return true;
             }
             if (mExpandOnlyOnButton) {
-                return mExpandButtonRect.contains((int) x, (int) y);
+                return mExpandButtonRect.contains((int) x, (int) y)
+                        || mAltExpandTargetRect.contains((int) x, (int) y);
             }
             for (int i = 0; i < mTouchRects.size(); i++) {
                 Rect r = mTouchRects.get(i);

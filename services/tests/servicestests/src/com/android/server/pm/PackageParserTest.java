@@ -21,7 +21,9 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
+import static java.lang.Boolean.TRUE;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
 import android.annotation.NonNull;
@@ -32,6 +34,7 @@ import android.content.pm.ConfigurationInfo;
 import android.content.pm.FeatureGroupInfo;
 import android.content.pm.FeatureInfo;
 import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager.Property;
 import android.content.pm.PackageParser;
 import android.content.pm.PackageUserState;
 import android.content.pm.ServiceInfo;
@@ -81,7 +84,9 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 @Presubmit
@@ -99,6 +104,8 @@ public class PackageParserTest {
     private static final String TEST_APP1_APK = "PackageParserTestApp1.apk";
     private static final String TEST_APP2_APK = "PackageParserTestApp2.apk";
     private static final String TEST_APP3_APK = "PackageParserTestApp3.apk";
+    private static final String TEST_APP4_APK = "PackageParserTestApp4.apk";
+    private static final String PACKAGE_NAME = "com.android.servicestests.apps.packageparserapp";
 
     @Before
     public void setUp() throws IOException {
@@ -270,6 +277,234 @@ public class PackageParserTest {
         }
     }
 
+    private static final int PROPERTY_TYPE_BOOLEAN = 1;
+    private static final int PROPERTY_TYPE_FLOAT = 2;
+    private static final int PROPERTY_TYPE_INTEGER = 3;
+    private static final int PROPERTY_TYPE_RESOURCE = 4;
+    private static final int PROPERTY_TYPE_STRING = 5;
+    public void assertProperty(Map<String, Property> properties, String propertyName,
+            int propertyType, Object propertyValue) {
+        assertTrue(properties.containsKey(propertyName));
+
+        final Property testProperty = properties.get(propertyName);
+        assertEquals(propertyType, testProperty.getType());
+
+        if (propertyType == PROPERTY_TYPE_BOOLEAN) {
+            assertTrue(testProperty.isBoolean());
+            assertFalse(testProperty.isFloat());
+            assertFalse(testProperty.isInteger());
+            assertFalse(testProperty.isResourceId());
+            assertFalse(testProperty.isString());
+
+            // assert the property's type is set correctly
+            final Boolean boolValue = (Boolean) propertyValue;
+            if (boolValue.booleanValue()) {
+                assertTrue(testProperty.getBoolean());
+            } else {
+                assertFalse(testProperty.getBoolean());
+            }
+            // assert the other values have an appropriate default
+            assertEquals(0.0f, testProperty.getFloat(), 0.0f);
+            assertEquals(0, testProperty.getInteger());
+            assertEquals(0, testProperty.getResourceId());
+            assertEquals(null, testProperty.getString());
+        } else if (propertyType == PROPERTY_TYPE_FLOAT) {
+            assertFalse(testProperty.isBoolean());
+            assertTrue(testProperty.isFloat());
+            assertFalse(testProperty.isInteger());
+            assertFalse(testProperty.isResourceId());
+            assertFalse(testProperty.isString());
+
+            // assert the property's type is set correctly
+            final Float floatValue = (Float) propertyValue;
+            assertEquals(floatValue.floatValue(), testProperty.getFloat(), 0.0f);
+            // assert the other values have an appropriate default
+            assertFalse(testProperty.getBoolean());
+            assertEquals(0, testProperty.getInteger());
+            assertEquals(0, testProperty.getResourceId());
+            assertEquals(null, testProperty.getString());
+        } else if (propertyType == PROPERTY_TYPE_INTEGER) {
+            assertFalse(testProperty.isBoolean());
+            assertFalse(testProperty.isFloat());
+            assertTrue(testProperty.isInteger());
+            assertFalse(testProperty.isResourceId());
+            assertFalse(testProperty.isString());
+
+            // assert the property's type is set correctly
+            final Integer integerValue = (Integer) propertyValue;
+            assertEquals(integerValue.intValue(), testProperty.getInteger());
+            // assert the other values have an appropriate default
+            assertFalse(testProperty.getBoolean());
+            assertEquals(0.0f, testProperty.getFloat(), 0.0f);
+            assertEquals(0, testProperty.getResourceId());
+            assertEquals(null, testProperty.getString());
+        } else if (propertyType == PROPERTY_TYPE_RESOURCE) {
+            assertFalse(testProperty.isBoolean());
+            assertFalse(testProperty.isFloat());
+            assertFalse(testProperty.isInteger());
+            assertTrue(testProperty.isResourceId());
+            assertFalse(testProperty.isString());
+
+            // assert the property's type is set correctly
+            final Integer resourceValue = (Integer) propertyValue;
+            assertEquals(resourceValue.intValue(), testProperty.getResourceId());
+            // assert the other values have an appropriate default
+            assertFalse(testProperty.getBoolean());
+            assertEquals(0.0f, testProperty.getFloat(), 0.0f);
+            assertEquals(0, testProperty.getInteger());
+            assertEquals(null, testProperty.getString());
+        } else if (propertyType == PROPERTY_TYPE_STRING) {
+            assertFalse(testProperty.isBoolean());
+            assertFalse(testProperty.isFloat());
+            assertFalse(testProperty.isInteger());
+            assertFalse(testProperty.isResourceId());
+            assertTrue(testProperty.isString());
+
+            // assert the property's type is set correctly
+            final String stringValue = (String) propertyValue;
+            assertEquals(stringValue, testProperty.getString());
+            // assert the other values have an appropriate default
+            assertFalse(testProperty.getBoolean());
+            assertEquals(0.0f, testProperty.getFloat(), 0.0f);
+            assertEquals(0, testProperty.getInteger());
+            assertEquals(0, testProperty.getResourceId());
+        } else {
+            fail("Unknown property type");
+        }
+    }
+
+    @Test
+    public void testParseApplicationProperties() throws Exception {
+        final File testFile = extractFile(TEST_APP4_APK);
+        try {
+            final ParsedPackage pkg = new TestPackageParser2().parsePackage(testFile, 0, false);
+            final Map<String, Property> properties = pkg.getProperties();
+            assertEquals(10, properties.size());
+            assertProperty(properties,
+                    "android.cts.PROPERTY_RESOURCE_XML", PROPERTY_TYPE_RESOURCE, 0x7f060000);
+            assertProperty(properties,
+                    "android.cts.PROPERTY_RESOURCE_INTEGER", PROPERTY_TYPE_RESOURCE, 0x7f040000);
+            assertProperty(properties,
+                    "android.cts.PROPERTY_BOOLEAN", PROPERTY_TYPE_BOOLEAN, TRUE);
+            assertProperty(properties,
+                    "android.cts.PROPERTY_BOOLEAN_VIA_RESOURCE", PROPERTY_TYPE_BOOLEAN, TRUE);
+            assertProperty(properties,
+                    "android.cts.PROPERTY_FLOAT", PROPERTY_TYPE_FLOAT, 3.14f);
+            assertProperty(properties,
+                    "android.cts.PROPERTY_FLOAT_VIA_RESOURCE", PROPERTY_TYPE_FLOAT, 2.718f);
+            assertProperty(properties,
+                    "android.cts.PROPERTY_INTEGER", PROPERTY_TYPE_INTEGER, 42);
+            assertProperty(properties,
+                    "android.cts.PROPERTY_INTEGER_VIA_RESOURCE", PROPERTY_TYPE_INTEGER, 123);
+            assertProperty(properties,
+                    "android.cts.PROPERTY_STRING", PROPERTY_TYPE_STRING, "koala");
+            assertProperty(properties,
+                    "android.cts.PROPERTY_STRING_VIA_RESOURCE", PROPERTY_TYPE_STRING, "giraffe");
+        } finally {
+            testFile.delete();
+        }
+    }
+
+    @Test
+    public void testParseActivityProperties() throws Exception {
+        final File testFile = extractFile(TEST_APP4_APK);
+        try {
+            final ParsedPackage pkg = new TestPackageParser2().parsePackage(testFile, 0, false);
+            final List<ParsedActivity> activities = pkg.getActivities();
+            for (ParsedActivity activity : activities) {
+                final Map<String, Property> properties = activity.getProperties();
+                if ((PACKAGE_NAME + ".MyActivityAlias").equals(activity.getName())) {
+                    assertEquals(2, properties.size());
+                    assertProperty(properties,
+                            "android.cts.PROPERTY_ACTIVITY_ALIAS", PROPERTY_TYPE_INTEGER, 123);
+                    assertProperty(properties,
+                            "android.cts.PROPERTY_COMPONENT", PROPERTY_TYPE_INTEGER, 123);
+                } else if ((PACKAGE_NAME + ".MyActivity").equals(activity.getName())) {
+                    assertEquals(3, properties.size());
+                    assertProperty(properties,
+                            "android.cts.PROPERTY_ACTIVITY", PROPERTY_TYPE_INTEGER, 123);
+                    assertProperty(properties,
+                            "android.cts.PROPERTY_COMPONENT", PROPERTY_TYPE_INTEGER, 123);
+                    assertProperty(properties,
+                            "android.cts.PROPERTY_STRING", PROPERTY_TYPE_STRING, "koala activity");
+                } else if ("android.app.AppDetailsActivity".equals(activity.getName())) {
+                    // ignore default added activity
+                } else {
+                    fail("Found unknown activity; name = " + activity.getName());
+                }
+            }
+        } finally {
+            testFile.delete();
+        }
+    }
+
+    @Test
+    public void testParseProviderProperties() throws Exception {
+        final File testFile = extractFile(TEST_APP4_APK);
+        try {
+            final ParsedPackage pkg = new TestPackageParser2().parsePackage(testFile, 0, false);
+            final List<ParsedProvider> providers = pkg.getProviders();
+            for (ParsedProvider provider : providers) {
+                final Map<String, Property> properties = provider.getProperties();
+                if ((PACKAGE_NAME + ".MyProvider").equals(provider.getName())) {
+                    assertEquals(1, properties.size());
+                    assertProperty(properties,
+                            "android.cts.PROPERTY_PROVIDER", PROPERTY_TYPE_INTEGER, 123);
+                } else {
+                    fail("Found unknown provider; name = " + provider.getName());
+                }
+            }
+        } finally {
+            testFile.delete();
+        }
+    }
+
+    @Test
+    public void testParseReceiverProperties() throws Exception {
+        final File testFile = extractFile(TEST_APP4_APK);
+        try {
+            final ParsedPackage pkg = new TestPackageParser2().parsePackage(testFile, 0, false);
+            final List<ParsedActivity> receivers = pkg.getReceivers();
+            for (ParsedActivity receiver : receivers) {
+                final Map<String, Property> properties = receiver.getProperties();
+                if ((PACKAGE_NAME + ".MyReceiver").equals(receiver.getName())) {
+                    assertEquals(2, properties.size());
+                    assertProperty(properties,
+                            "android.cts.PROPERTY_RECEIVER", PROPERTY_TYPE_INTEGER, 123);
+                    assertProperty(properties,
+                            "android.cts.PROPERTY_STRING", PROPERTY_TYPE_STRING, "koala receiver");
+                } else {
+                    fail("Found unknown receiver; name = " + receiver.getName());
+                }
+            }
+        } finally {
+            testFile.delete();
+        }
+    }
+
+    @Test
+    public void testParseServiceProperties() throws Exception {
+        final File testFile = extractFile(TEST_APP4_APK);
+        try {
+            final ParsedPackage pkg = new TestPackageParser2().parsePackage(testFile, 0, false);
+            final List<ParsedService> services = pkg.getServices();
+            for (ParsedService service : services) {
+                final Map<String, Property> properties = service.getProperties();
+                if ((PACKAGE_NAME + ".MyService").equals(service.getName())) {
+                    assertEquals(2, properties.size());
+                    assertProperty(properties,
+                            "android.cts.PROPERTY_SERVICE", PROPERTY_TYPE_INTEGER, 123);
+                    assertProperty(properties,
+                            "android.cts.PROPERTY_COMPONENT", PROPERTY_TYPE_RESOURCE, 0x7f040000);
+                } else {
+                    fail("Found unknown service; name = " + service.getName());
+                }
+            }
+        } finally {
+            testFile.delete();
+        }
+    }
+
     /**
      * A trivial subclass of package parser that only caches the package name, and throws away
      * all other information.
@@ -386,6 +621,13 @@ public class PackageParserTest {
                     b.getInstrumentations().get(i));
         }
 
+        assertEquals(a.getProperties().size(), b.getProperties().size());
+        final Iterator<String> iter = a.getProperties().keySet().iterator();
+        while (iter.hasNext()) {
+            final String key = iter.next();
+            assertEquals(a.getProperties().get(key), b.getProperties().get(key));
+        }
+
         assertEquals(a.getRequestedPermissions(), b.getRequestedPermissions());
         assertEquals(a.getProtectedBroadcasts(), b.getProtectedBroadcasts());
         assertEquals(a.getLibraryNames(), b.getLibraryNames());
@@ -442,6 +684,13 @@ public class PackageParserTest {
             assertEquals(aIntent.getLabelRes(), bIntent.getLabelRes());
             assertEquals(aIntent.getNonLocalizedLabel(), bIntent.getNonLocalizedLabel());
             assertEquals(aIntent.getIcon(), bIntent.getIcon());
+        }
+
+        assertEquals(a.getProperties().size(), b.getProperties().size());
+        final Iterator<String> iter = a.getProperties().keySet().iterator();
+        while (iter.hasNext()) {
+            final String key = iter.next();
+            assertEquals(a.getProperties().get(key), b.getProperties().get(key));
         }
     }
 

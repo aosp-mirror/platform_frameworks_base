@@ -28,8 +28,7 @@
     <string name="pip_skip_to_next" msgid="8403429188794867653">"അടുത്തതിലേക്ക് പോകുക"</string>
     <string name="pip_skip_to_prev" msgid="7172158111196394092">"മുമ്പത്തേതിലേക്ക് പോകുക"</string>
     <string name="accessibility_action_pip_resize" msgid="4623966104749543182">"വലുപ്പം മാറ്റുക"</string>
-    <!-- no translation found for dock_forced_resizable (1749750436092293116) -->
-    <skip />
+    <string name="dock_forced_resizable" msgid="1749750436092293116">"സ്‌ക്രീൻ വിഭജന മോഡിൽ ആപ്പ് പ്രവർത്തിച്ചേക്കില്ല."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"സ്പ്ലിറ്റ്-സ്ക്രീനിനെ ആപ്പ് പിന്തുണയ്ക്കുന്നില്ല."</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"രണ്ടാം ഡിസ്‌പ്ലേയിൽ ആപ്പ് പ്രവർത്തിച്ചേക്കില്ല."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"രണ്ടാം ഡിസ്‌പ്ലേകളിൽ സമാരംഭിക്കുന്നതിനെ ആപ്പ് അനുവദിക്കുന്നില്ല."</string>
@@ -44,14 +43,10 @@
     <string name="accessibility_action_divider_top_50" msgid="8649582798829048946">"മുകളിൽ 50%"</string>
     <string name="accessibility_action_divider_top_30" msgid="3572788224908570257">"മുകളിൽ 30%"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="2831868345092314060">"താഴെ പൂർണ്ണ സ്ക്രീൻ"</string>
-    <!-- no translation found for one_handed_tutorial_title (4583241688067426350) -->
-    <skip />
-    <!-- no translation found for one_handed_tutorial_description (3486582858591353067) -->
-    <skip />
-    <!-- no translation found for accessibility_action_start_one_handed (5070337354072861426) -->
-    <skip />
-    <!-- no translation found for accessibility_action_stop_one_handed (1369940261782179442) -->
-    <skip />
+    <string name="one_handed_tutorial_title" msgid="4583241688067426350">"ഒറ്റക്കൈ മോഡ് എങ്ങനെ ഉപയോഗിക്കാം"</string>
+    <string name="one_handed_tutorial_description" msgid="3486582858591353067">"പുറത്ത് കടക്കാൻ, സ്ക്രീനിന്റെ ചുവടെ നിന്ന് മുകളിലേക്ക് സ്വൈപ്പ് ചെയ്യുക അല്ലെങ്കിൽ ആപ്പിന് മുകളിലായി എവിടെയെങ്കിലും ടാപ്പ് ചെയ്യുക"</string>
+    <string name="accessibility_action_start_one_handed" msgid="5070337354072861426">"ഒറ്റക്കൈ മോഡ് ആരംഭിച്ചു"</string>
+    <string name="accessibility_action_stop_one_handed" msgid="1369940261782179442">"ഒറ്റക്കൈ മോഡിൽ നിന്ന് പുറത്തുകടക്കുക"</string>
     <string name="bubbles_settings_button_description" msgid="1301286017420516912">"<xliff:g id="APP_NAME">%1$s</xliff:g> ബബിളുകളുടെ ക്രമീകരണം"</string>
     <string name="bubble_overflow_button_content_description" msgid="8160974472718594382">"ഓവർഫ്ലോ"</string>
     <string name="bubble_accessibility_action_add_back" msgid="1830101076853540953">"അടുക്കുകളിലേക്ക് തിരിച്ച് ചേർക്കുക"</string>
@@ -68,8 +63,7 @@
     <string name="bubbles_user_education_description" msgid="4215862563054175407">"പുതിയ സംഭാഷണങ്ങൾ ഫ്ലോട്ടിംഗ് ഐക്കണുകളോ ബബിളുകളോ ആയി ദൃശ്യമാവുന്നു. ബബിൾ തുറക്കാൻ ടാപ്പ് ചെയ്യൂ. ഇത് നീക്കാൻ വലിച്ചിടുക."</string>
     <string name="bubbles_user_education_manage_title" msgid="7042699946735628035">"ബബിളുകൾ ഏതുസമയത്തും നിയന്ത്രിക്കുക"</string>
     <string name="bubbles_user_education_manage" msgid="3460756219946517198">"ഈ ആപ്പിൽ നിന്നുള്ള ബബിളുകൾ ഓഫാക്കാൻ മാനേജ് ചെയ്യുക ടാപ്പ് ചെയ്യുക"</string>
-    <!-- no translation found for bubbles_user_education_got_it (3382046149225428296) -->
-    <skip />
+    <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"മനസ്സിലായി"</string>
     <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"അടുത്തിടെയുള്ള ബബിളുകൾ ഒന്നുമില്ല"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"അടുത്തിടെയുള്ള ബബിളുകൾ, ഡിസ്മിസ് ചെയ്ത ബബിളുകൾ എന്നിവ ഇവിടെ ദൃശ്യമാവും"</string>
     <string name="notification_bubble_title" msgid="6082910224488253378">"ബബ്ൾ"</string>

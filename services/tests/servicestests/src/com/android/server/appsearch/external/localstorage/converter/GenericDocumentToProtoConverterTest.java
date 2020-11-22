@@ -32,18 +32,18 @@ import java.util.HashMap;
 import java.util.List;
 
 public class GenericDocumentToProtoConverterTest {
-    private static final byte[] BYTE_ARRAY_1 = new byte[]{(byte) 1, (byte) 2, (byte) 3};
-    private static final byte[] BYTE_ARRAY_2 = new byte[]{(byte) 4, (byte) 5, (byte) 6, (byte) 7};
+    private static final byte[] BYTE_ARRAY_1 = new byte[] {(byte) 1, (byte) 2, (byte) 3};
+    private static final byte[] BYTE_ARRAY_2 = new byte[] {(byte) 4, (byte) 5, (byte) 6, (byte) 7};
     private static final GenericDocument DOCUMENT_PROPERTIES_1 =
             new GenericDocument.Builder<GenericDocument.Builder<?>>(
-                    "sDocumentProperties1", "sDocumentPropertiesSchemaType1")
-            .setCreationTimestampMillis(12345L)
-            .build();
+                            "sDocumentProperties1", "sDocumentPropertiesSchemaType1")
+                    .setCreationTimestampMillis(12345L)
+                    .build();
     private static final GenericDocument DOCUMENT_PROPERTIES_2 =
             new GenericDocument.Builder<GenericDocument.Builder<?>>(
-                    "sDocumentProperties2", "sDocumentPropertiesSchemaType2")
-            .setCreationTimestampMillis(6789L)
-            .build();
+                            "sDocumentProperties2", "sDocumentPropertiesSchemaType2")
+                    .setCreationTimestampMillis(6789L)
+                    .build();
 
     @Test
     public void testDocumentProtoConvert() {
@@ -63,32 +63,42 @@ public class GenericDocumentToProtoConverterTest {
                         .build();
 
         // Create the Document proto. Need to sort the property order by key.
-        DocumentProto.Builder documentProtoBuilder = DocumentProto.newBuilder()
-                .setUri("uri1")
-                .setSchema("schemaType1")
-                .setCreationTimestampMs(5L)
-                .setScore(1)
-                .setTtlMs(1L)
-                .setNamespace("namespace");
+        DocumentProto.Builder documentProtoBuilder =
+                DocumentProto.newBuilder()
+                        .setUri("uri1")
+                        .setSchema("schemaType1")
+                        .setCreationTimestampMs(5L)
+                        .setScore(1)
+                        .setTtlMs(1L)
+                        .setNamespace("namespace");
         HashMap<String, PropertyProto.Builder> propertyProtoMap = new HashMap<>();
-        propertyProtoMap.put("longKey1",
-                PropertyProto.newBuilder().setName("longKey1").addInt64Values(1L));
-        propertyProtoMap.put("doubleKey1",
+        propertyProtoMap.put(
+                "longKey1", PropertyProto.newBuilder().setName("longKey1").addInt64Values(1L));
+        propertyProtoMap.put(
+                "doubleKey1",
                 PropertyProto.newBuilder().setName("doubleKey1").addDoubleValues(1.0));
-        propertyProtoMap.put("booleanKey1",
+        propertyProtoMap.put(
+                "booleanKey1",
                 PropertyProto.newBuilder().setName("booleanKey1").addBooleanValues(true));
-        propertyProtoMap.put("stringKey1",
+        propertyProtoMap.put(
+                "stringKey1",
                 PropertyProto.newBuilder().setName("stringKey1").addStringValues("test-value1"));
-        propertyProtoMap.put("byteKey1",
-                PropertyProto.newBuilder().setName("byteKey1")
+        propertyProtoMap.put(
+                "byteKey1",
+                PropertyProto.newBuilder()
+                        .setName("byteKey1")
                         .addBytesValues(ByteString.copyFrom(BYTE_ARRAY_1))
                         .addBytesValues(ByteString.copyFrom(BYTE_ARRAY_2)));
-        propertyProtoMap.put("documentKey1",
-                PropertyProto.newBuilder().setName("documentKey1")
+        propertyProtoMap.put(
+                "documentKey1",
+                PropertyProto.newBuilder()
+                        .setName("documentKey1")
                         .addDocumentValues(
                                 GenericDocumentToProtoConverter.convert(DOCUMENT_PROPERTIES_1)));
-        propertyProtoMap.put("documentKey2",
-                PropertyProto.newBuilder().setName("documentKey2")
+        propertyProtoMap.put(
+                "documentKey2",
+                PropertyProto.newBuilder()
+                        .setName("documentKey2")
                         .addDocumentValues(
                                 GenericDocumentToProtoConverter.convert(DOCUMENT_PROPERTIES_2)));
         List<String> sortedKey = new ArrayList<>(propertyProtoMap.keySet());
@@ -97,8 +107,7 @@ public class GenericDocumentToProtoConverterTest {
             documentProtoBuilder.addProperties(propertyProtoMap.get(key));
         }
         DocumentProto documentProto = documentProtoBuilder.build();
-        assertThat(GenericDocumentToProtoConverter.convert(document))
-                .isEqualTo(documentProto);
+        assertThat(GenericDocumentToProtoConverter.convert(document)).isEqualTo(documentProto);
         assertThat(document).isEqualTo(GenericDocumentToProtoConverter.convert(documentProto));
     }
 }

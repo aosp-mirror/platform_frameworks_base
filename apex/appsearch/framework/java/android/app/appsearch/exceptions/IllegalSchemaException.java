@@ -18,14 +18,12 @@ package android.app.appsearch.exceptions;
 
 import android.annotation.NonNull;
 
-
 /**
  * Indicates that a {@link android.app.appsearch.AppSearchSchema} has logical inconsistencies such
  * as unpopulated mandatory fields or illegal combinations of parameters.
  *
  * @hide
  */
-
 public class IllegalSchemaException extends IllegalArgumentException {
     /**
      * Constructs a new {@link IllegalSchemaException}.

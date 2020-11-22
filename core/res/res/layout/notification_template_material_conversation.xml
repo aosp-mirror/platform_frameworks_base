@@ -327,10 +327,10 @@
             android:id="@+id/expand_button_touch_container"
             android:layout_width="wrap_content"
             android:layout_height="@dimen/conversation_expand_button_size"
-            android:paddingStart="16dp"
+            android:paddingStart="@dimen/conversation_expand_button_side_margin"
             android:orientation="horizontal"
             android:layout_gravity="end|top"
-            android:paddingEnd="@dimen/notification_content_margin_end"
+            android:paddingEnd="@dimen/conversation_expand_button_side_margin"
             android:clipToPadding="false"
             android:clipChildren="false"
             >

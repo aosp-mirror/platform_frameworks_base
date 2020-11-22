@@ -259,6 +259,9 @@
     <!-- The height of the background for a notification header on a group -->
     <dimen name="notification_header_background_height">49.5dp</dimen>
 
+    <!-- The height of the full-width touch rectangle for the notification header -->
+    <dimen name="notification_header_touchable_height">36dp</dimen>
+
     <!-- The top padding for the notification header -->
     <dimen name="notification_header_padding_top">16dp</dimen>
 
@@ -340,11 +343,8 @@
     <!-- The margin of the content to an image-->
     <dimen name="notification_content_image_margin_end">8dp</dimen>
 
-    <!-- The padding at the end of actions when the bubble button is visible-->
-    <dimen name="bubble_visible_padding_end">3dp</dimen>
-
-    <!-- The padding at the end of actions when the bubble button is gone-->
-    <dimen name="bubble_gone_padding_end">12dp</dimen>
+    <!-- The padding at the end of actions when the snooze and bubble buttons are gone-->
+    <dimen name="snooze_and_bubble_gone_padding_end">12dp</dimen>
 
     <!-- The spacing between messages in Notification.MessagingStyle -->
     <dimen name="notification_messaging_spacing">6dp</dimen>
@@ -744,6 +744,9 @@
     <dimen name="conversation_expand_button_size">80dp</dimen>
     <!-- Top margin of the expand button for conversations when expanded -->
     <dimen name="conversation_expand_button_top_margin_expanded">18dp</dimen>
+    <!-- Side margin of the expand button for conversations.
+         width of expand asset (22) + 2 * this (13) == notification_header_expand_icon_size (48) -->
+    <dimen name="conversation_expand_button_side_margin">13dp</dimen>
     <!-- Side margins of the conversation badge in relation to the conversation icon -->
     <dimen name="conversation_badge_side_margin">36dp</dimen>
     <!-- size of the notification badge when applied to the conversation icon -->

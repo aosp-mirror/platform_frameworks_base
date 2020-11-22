@@ -1369,16 +1369,8 @@ public class NotificationContentView extends FrameLayout {
             bubbleButton.setOnClickListener(mContainingNotification.getBubbleClickListener());
             bubbleButton.setVisibility(VISIBLE);
             actionContainer.setVisibility(VISIBLE);
-
-            int paddingEnd = getResources().getDimensionPixelSize(
-                    com.android.internal.R.dimen.bubble_visible_padding_end);
-            actionContainerLayout.setPaddingRelative(0, 0, paddingEnd, 0);
         } else  {
             bubbleButton.setVisibility(GONE);
-
-            int paddingEnd = getResources().getDimensionPixelSize(
-                    com.android.internal.R.dimen.bubble_gone_padding_end);
-            actionContainerLayout.setPaddingRelative(0, 0, paddingEnd, 0);
         }
     }
 

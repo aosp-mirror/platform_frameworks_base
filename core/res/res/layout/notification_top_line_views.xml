@@ -14,11 +14,21 @@
   ~ limitations under the License
   -->
 <!--
- This layout file should be included inside a NotificationTopLineView, usually after either a
- <TextView android:id="@+id/app_name_text"/> or <TextView android:id="@+id/title"/>
+ This layout file should be included inside a NotificationTopLineView, sometimes after a
+ <TextView android:id="@+id/title"/>
 -->
 <merge
     xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <TextView
+        android:id="@+id/app_name_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/notification_header_separating_margin"
+        android:singleLine="true"
+        android:textAppearance="?attr/notificationHeaderTextAppearance"
+        android:visibility="?attr/notificationHeaderAppNameVisibility"
+        />
 
     <TextView
         android:id="@+id/header_text_secondary_divider"

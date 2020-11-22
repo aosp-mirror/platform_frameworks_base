@@ -17,8 +17,8 @@
 package com.android.server.appsearch.external.localstorage.converter;
 
 import android.annotation.NonNull;
-
 import android.app.appsearch.SearchSpec;
+
 import com.android.internal.util.Preconditions;
 
 import com.google.android.icing.proto.ResultSpecProto;
@@ -28,9 +28,9 @@ import com.google.android.icing.proto.TermMatchType;
 
 /**
  * Translates a {@link SearchSpec} into icing search protos.
+ *
  * @hide
  */
-
 public final class SearchSpecToProtoConverter {
     private SearchSpecToProtoConverter() {}
 
@@ -38,9 +38,10 @@ public final class SearchSpecToProtoConverter {
     @NonNull
     public static SearchSpecProto toSearchSpecProto(@NonNull SearchSpec spec) {
         Preconditions.checkNotNull(spec);
-        SearchSpecProto.Builder protoBuilder = SearchSpecProto.newBuilder()
-                .addAllSchemaTypeFilters(spec.getSchemaTypes())
-                .addAllNamespaceFilters(spec.getNamespaces());
+        SearchSpecProto.Builder protoBuilder =
+                SearchSpecProto.newBuilder()
+                        .addAllSchemaTypeFilters(spec.getSchemaTypes())
+                        .addAllNamespaceFilters(spec.getNamespaces());
 
         @SearchSpec.TermMatch int termMatchCode = spec.getTermMatch();
         TermMatchType.Code termMatchCodeProto = TermMatchType.Code.forNumber(termMatchCode);
@@ -57,7 +58,7 @@ public final class SearchSpecToProtoConverter {
     public static ResultSpecProto toResultSpecProto(@NonNull SearchSpec spec) {
         Preconditions.checkNotNull(spec);
         return ResultSpecProto.newBuilder()
-                .setNumPerPage(spec.getNumPerPage())
+                .setNumPerPage(spec.getResultCountPerPage())
                 .setSnippetSpec(
                         ResultSpecProto.SnippetSpecProto.newBuilder()
                                 .setNumToSnippet(spec.getSnippetCount())
@@ -84,8 +85,8 @@ public final class SearchSpecToProtoConverter {
         ScoringSpecProto.RankingStrategy.Code rankingStrategyCodeProto =
                 ScoringSpecProto.RankingStrategy.Code.forNumber(rankingStrategyCode);
         if (rankingStrategyCodeProto == null) {
-            throw new IllegalArgumentException("Invalid result ranking strategy: "
-                    + rankingStrategyCode);
+            throw new IllegalArgumentException(
+                    "Invalid result ranking strategy: " + rankingStrategyCode);
         }
         protoBuilder.setRankBy(rankingStrategyCodeProto);
 

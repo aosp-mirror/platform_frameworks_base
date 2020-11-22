@@ -16,10 +16,10 @@
 
 package android.app.appsearch;
 
-import android.annotation.SuppressLint;
-
 import android.annotation.NonNull;
+import android.annotation.SuppressLint;
 import android.app.appsearch.exceptions.AppSearchException;
+
 import com.android.internal.util.Preconditions;
 
 import java.util.ArrayList;
@@ -29,9 +29,9 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Encapsulates a request to index a document into an {@link AppSearchManager} database.
+ * Encapsulates a request to index a document into an {@link AppSearchSession} database.
  *
- * @see AppSearchManager#putDocuments
+ * @see AppSearchSession#putDocuments
  * @hide
  */
 public final class PutDocumentsRequest {
@@ -53,7 +53,7 @@ public final class PutDocumentsRequest {
         private boolean mBuilt = false;
 
         /** Adds one or more documents to the request. */
-        @SuppressLint("MissingGetterMatchingBuilder")  // Merged list available from getDocuments()
+        @SuppressLint("MissingGetterMatchingBuilder") // Merged list available from getDocuments()
         @NonNull
         public Builder addGenericDocument(@NonNull GenericDocument... documents) {
             Preconditions.checkNotNull(documents);
@@ -61,7 +61,7 @@ public final class PutDocumentsRequest {
         }
 
         /** Adds one or more documents to the request. */
-        @SuppressLint("MissingGetterMatchingBuilder")  // Merged list available from getDocuments()
+        @SuppressLint("MissingGetterMatchingBuilder") // Merged list available from getDocuments()
         @NonNull
         public Builder addGenericDocument(@NonNull Collection<GenericDocument> documents) {
             Preconditions.checkState(!mBuilt, "Builder has already been used");

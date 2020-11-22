@@ -50,16 +50,56 @@
             android:id="@+id/notification_main_column"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/notification_content_margin_top"
+            android:layout_marginTop="46dp"
             android:layout_marginStart="@dimen/notification_content_margin_start"
             android:layout_marginBottom="@dimen/notification_content_margin"
             android:layout_marginEnd="@dimen/notification_content_margin_end"
             android:orientation="vertical"
             >
+            <!-- TODO(b/172652345): fix the media style -->
+            <!--<include layout="@layout/notification_template_part_line1"/>-->
+            <!--<include layout="@layout/notification_template_text"/>-->
 
-            <include layout="@layout/notification_template_part_line1" />
+            <LinearLayout
+                android:id="@+id/line1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                >
+                <TextView android:id="@+id/title"
+                    android:textAppearance="@style/TextAppearance.DeviceDefault.Notification.Title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:singleLine="true"
+                    android:ellipsize="marquee"
+                    android:fadingEdge="horizontal"
+                    android:textAlignment="viewStart"
+                    />
+                <TextView android:id="@+id/text_line_1"
+                    style="@style/Widget.DeviceDefault.Notification.Text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="end|bottom"
+                    android:layout_marginStart="16dp"
+                    android:singleLine="true"
+                    android:ellipsize="marquee"
+                    android:fadingEdge="horizontal"
+                    />
+            </LinearLayout>
 
-            <include layout="@layout/notification_template_text" />
+            <com.android.internal.widget.ImageFloatingTextView
+                style="@style/Widget.DeviceDefault.Notification.Text"
+                android:id="@+id/text"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/notification_text_height"
+                android:layout_gravity="top"
+                android:layout_marginTop="0.5dp"
+                android:ellipsize="marquee"
+                android:fadingEdge="horizontal"
+                android:gravity="top"
+                android:singleLine="true"
+                android:textAlignment="viewStart"
+                />
         </LinearLayout>
 
         <LinearLayout
