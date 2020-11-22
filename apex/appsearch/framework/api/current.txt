@@ -85,5 +85,59 @@ package android.app.appsearch {
     method @NonNull public BuilderType setTtlMillis(long);
   }
 
+  public final class SearchResult {
+    method @NonNull public android.app.appsearch.GenericDocument getDocument();
+    method @NonNull public java.util.List<android.app.appsearch.SearchResult.MatchInfo> getMatches();
+  }
+
+  public static final class SearchResult.MatchInfo {
+    method @NonNull public CharSequence getExactMatch();
+    method @NonNull public android.app.appsearch.SearchResult.MatchRange getExactMatchPosition();
+    method @NonNull public String getFullText();
+    method @NonNull public String getPropertyPath();
+    method @NonNull public CharSequence getSnippet();
+    method @NonNull public android.app.appsearch.SearchResult.MatchRange getSnippetPosition();
+  }
+
+  public static final class SearchResult.MatchRange {
+    method public int getEnd();
+    method public int getStart();
+  }
+
+  public final class SearchSpec {
+    method public int getMaxSnippetSize();
+    method @NonNull public java.util.List<java.lang.String> getNamespaces();
+    method public int getOrder();
+    method public int getRankingStrategy();
+    method public int getResultCountPerPage();
+    method @NonNull public java.util.List<java.lang.String> getSchemaTypes();
+    method public int getSnippetCount();
+    method public int getSnippetCountPerProperty();
+    method public int getTermMatch();
+    field public static final int ORDER_ASCENDING = 1; // 0x1
+    field public static final int ORDER_DESCENDING = 0; // 0x0
+    field public static final int RANKING_STRATEGY_CREATION_TIMESTAMP = 2; // 0x2
+    field public static final int RANKING_STRATEGY_DOCUMENT_SCORE = 1; // 0x1
+    field public static final int RANKING_STRATEGY_NONE = 0; // 0x0
+    field public static final int TERM_MATCH_EXACT_ONLY = 1; // 0x1
+    field public static final int TERM_MATCH_PREFIX = 2; // 0x2
+  }
+
+  public static final class SearchSpec.Builder {
+    ctor public SearchSpec.Builder();
+    method @NonNull public android.app.appsearch.SearchSpec.Builder addNamespace(@NonNull java.lang.String...);
+    method @NonNull public android.app.appsearch.SearchSpec.Builder addNamespace(@NonNull java.util.Collection<java.lang.String>);
+    method @NonNull public android.app.appsearch.SearchSpec.Builder addSchemaType(@NonNull java.lang.String...);
+    method @NonNull public android.app.appsearch.SearchSpec.Builder addSchemaType(@NonNull java.util.Collection<java.lang.String>);
+    method @NonNull public android.app.appsearch.SearchSpec build();
+    method @NonNull public android.app.appsearch.SearchSpec.Builder setMaxSnippetSize(@IntRange(from=0, to=android.app.appsearch.SearchSpec.MAX_SNIPPET_SIZE_LIMIT) int);
+    method @NonNull public android.app.appsearch.SearchSpec.Builder setOrder(int);
+    method @NonNull public android.app.appsearch.SearchSpec.Builder setRankingStrategy(int);
+    method @NonNull public android.app.appsearch.SearchSpec.Builder setResultCountPerPage(@IntRange(from=0, to=android.app.appsearch.SearchSpec.MAX_NUM_PER_PAGE) int);
+    method @NonNull public android.app.appsearch.SearchSpec.Builder setSnippetCount(@IntRange(from=0, to=android.app.appsearch.SearchSpec.MAX_SNIPPET_COUNT) int);
+    method @NonNull public android.app.appsearch.SearchSpec.Builder setSnippetCountPerProperty(@IntRange(from=0, to=android.app.appsearch.SearchSpec.MAX_SNIPPET_PER_PROPERTY_COUNT) int);
+    method @NonNull public android.app.appsearch.SearchSpec.Builder setTermMatch(int);
+  }
+
 }
 
