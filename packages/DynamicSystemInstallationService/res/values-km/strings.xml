@@ -5,7 +5,7 @@
     <string name="notification_install_completed" msgid="6252047868415172643">"ប្រព័ន្ធឌីណាមិច​អាចប្រើ​បានហើយ។ ដើម្បីចាប់ផ្ដើមប្រើ​ប្រព័ន្ធឌីណាមិច សូមចាប់ផ្ដើម​ឧបករណ៍របស់អ្នក​ឡើងវិញ។"</string>
     <string name="notification_install_inprogress" msgid="7383334330065065017">"ការដំឡើងកំពុង​ដំណើរការ"</string>
     <string name="notification_install_failed" msgid="4066039210317521404">"ការដំឡើង​មិនបានសម្រេច"</string>
-    <string name="notification_image_validation_failed" msgid="2720357826403917016">"បញ្ជាក់​ភាពត្រឹមត្រូវ​នៃរូបភាព​មិនបានសម្រេច។ បោះបង់​ការដំឡើង។"</string>
+    <string name="notification_image_validation_failed" msgid="2720357826403917016">"ការផ្ទៀងផ្ទាត់ច្បាប់ចម្លងថាស​មិនបានសម្រេច។ បោះបង់​ការដំឡើង។"</string>
     <string name="notification_dynsystem_in_use" msgid="1053194595682188396">"បច្ចុប្បន្ន​កំពុងដំណើរការ​ប្រព័ន្ធឌីណាមិច។ ចាប់ផ្ដើម​ឡើងវិញ ដើម្បីប្រើ​កំណែ Android ដើម។"</string>
     <string name="notification_action_cancel" msgid="5929299408545961077">"បោះបង់"</string>
     <string name="notification_action_discard" msgid="1817481003134947493">"លុបចោល"</string>
