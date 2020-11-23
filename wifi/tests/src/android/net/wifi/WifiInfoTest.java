@@ -18,6 +18,7 @@ package android.net.wifi;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertTrue;
@@ -26,6 +27,8 @@ import android.os.Parcel;
 import android.telephony.SubscriptionManager;
 
 import androidx.test.filters.SmallTest;
+
+import com.android.modules.utils.build.SdkLevel;
 
 import org.junit.Test;
 
@@ -205,5 +208,83 @@ public class WifiInfoTest {
         assertEquals(TEST_BSSID, info2.getBSSID());
         assertEquals(TEST_RSSI, info2.getRssi());
         assertEquals(TEST_NETWORK_ID2, info2.getNetworkId());
+    }
+
+    @Test
+    public void testWifiInfoEquals() throws Exception {
+        WifiInfo.Builder builder = new WifiInfo.Builder()
+                .setSsid(TEST_SSID.getBytes(StandardCharsets.UTF_8))
+                .setBssid(TEST_BSSID)
+                .setRssi(TEST_RSSI)
+                .setNetworkId(TEST_NETWORK_ID);
+
+        WifiInfo info1 = builder.build();
+        WifiInfo info2 = builder.build();
+        if (SdkLevel.isAtLeastS()) {
+            assertEquals(info1, info2);
+        } else {
+            assertNotEquals(info1, info2);
+        }
+
+        info1.setSubscriptionId(TEST_SUB_ID);
+        // Same behavior pre-S & post-S.
+        assertNotEquals(info1, info2);
+
+        info2.setSubscriptionId(TEST_SUB_ID);
+        if (SdkLevel.isAtLeastS()) {
+            assertEquals(info1, info2);
+        } else {
+            assertNotEquals(info1, info2);
+        }
+
+        info1.setSSID(WifiSsid.createFromHex(null));
+        // Same behavior pre-S & post-S.
+        assertNotEquals(info1, info2);
+
+        info2.setSSID(WifiSsid.createFromHex(null));
+        if (SdkLevel.isAtLeastS()) {
+            assertEquals(info1, info2);
+        } else {
+            assertNotEquals(info1, info2);
+        }
+    }
+
+    @Test
+    public void testWifiInfoHashcode() throws Exception {
+        WifiInfo.Builder builder = new WifiInfo.Builder()
+                .setSsid(TEST_SSID.getBytes(StandardCharsets.UTF_8))
+                .setBssid(TEST_BSSID)
+                .setRssi(TEST_RSSI)
+                .setNetworkId(TEST_NETWORK_ID);
+
+        WifiInfo info1 = builder.build();
+        WifiInfo info2 = builder.build();
+        if (SdkLevel.isAtLeastS()) {
+            assertEquals(info1.hashCode(), info2.hashCode());
+        } else {
+            assertNotEquals(info1.hashCode(), info2.hashCode());
+        }
+
+        info1.setSubscriptionId(TEST_SUB_ID);
+        // Same behavior pre-S & post-S.
+        assertNotEquals(info1.hashCode(), info2.hashCode());
+
+        info2.setSubscriptionId(TEST_SUB_ID);
+        if (SdkLevel.isAtLeastS()) {
+            assertEquals(info1.hashCode(), info2.hashCode());
+        } else {
+            assertNotEquals(info1.hashCode(), info2.hashCode());
+        }
+
+        info1.setSSID(WifiSsid.createFromHex(null));
+        // Same behavior pre-S & post-S.
+        assertNotEquals(info1.hashCode(), info2.hashCode());
+
+        info2.setSSID(WifiSsid.createFromHex(null));
+        if (SdkLevel.isAtLeastS()) {
+            assertEquals(info1.hashCode(), info2.hashCode());
+        } else {
+            assertNotEquals(info1.hashCode(), info2.hashCode());
+        }
     }
 }
