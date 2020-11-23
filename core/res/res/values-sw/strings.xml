@@ -305,7 +305,7 @@
     <string name="permgroupdesc_storage" msgid="6351503740613026600">"ifikie picha, maudhui na faili kwenye kifaa chako"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Maikrofoni"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"irekodi sauti"</string>
-    <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Shughuli za kimwili"</string>
+    <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Mazoezi ya mwili"</string>
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"ifikie shughuli zako za kimwili"</string>
     <string name="permgrouplab_camera" msgid="9090413408963547706">"Kamera"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"ipige picha na kurekodi video"</string>

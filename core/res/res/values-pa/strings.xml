@@ -1216,18 +1216,18 @@
     <string name="dump_heap_ready_text" msgid="5849618132123045516">"ਸਾਂਝਾ ਕਰਨ ਲਈ <xliff:g id="PROC">%1$s</xliff:g> ਦੀ ਪ੍ਰਕਿਰਿਆ ਦਾ ਹੀਪ ਡੰਪ ਤੁਹਾਡੇ ਲਈ ਉਪਲਬਧ ਹੈ। ਸਾਵਧਾਨ ਰਹੋ: ਸ਼ਾਇਦ ਇਸ ਹੀਪ ਡੰਪ ਵਿੱਚ ਕੋਈ ਵੀ ਸੰਵੇਦਨਸ਼ੀਲ ਨਿੱਜੀ ਜਾਣਕਾਰੀ ਸ਼ਾਮਲ ਹੋਵੇ, ਜਿਸ \'ਤੇ ਪ੍ਰਕਿਰਿਆ ਦੀ ਪਹੁੰਚ ਹੈ, ਜਿਸ ਵਿੱਚ ਸ਼ਾਇਦ ਤੁਹਾਡੇ ਵੱਲੋਂ ਟਾਈਪ ਕੀਤੀਆਂ ਚੀਜ਼ਾਂ ਸ਼ਾਮਲ ਹੋਣ।"</string>
     <string name="sendText" msgid="493003724401350724">"ਲਿਖਤ ਲਈ ਕੋਈ ਕਾਰਵਾਈ ਚੁਣੋ"</string>
     <string name="volume_ringtone" msgid="134784084629229029">"ਰਿੰਗਰ ਵੌਲਿਊਮ"</string>
-    <string name="volume_music" msgid="7727274216734955095">"ਮੀਡੀਆ ਵੌਲਿਊਮ"</string>
+    <string name="volume_music" msgid="7727274216734955095">"ਮੀਡੀਆ ਦੀ ਅਵਾਜ਼"</string>
     <string name="volume_music_hint_playing_through_bluetooth" msgid="2614142915948898228">"Bluetooth ਰਾਹੀਂ ਪਲੇ ਕਰ ਰਿਹਾ ਹੈ"</string>
     <string name="volume_music_hint_silent_ringtone_selected" msgid="1514829655029062233">"ਖਾਮੋਸ਼ ਰਿੰਗਟੋਨ ਸੈੱਟ ਕੀਤੀ"</string>
     <string name="volume_call" msgid="7625321655265747433">"ਇਨ-ਕਾਲ ਅਵਾਜ਼"</string>
     <string name="volume_bluetooth_call" msgid="2930204618610115061">"ਬਲੂਟੁੱਥ ਇਨ-ਕਾਲ ਅਵਾਜ਼"</string>
-    <string name="volume_alarm" msgid="4486241060751798448">"ਅਲਾਰਮ ਵੌਲਿਊਮ"</string>
+    <string name="volume_alarm" msgid="4486241060751798448">"ਅਲਾਰਮ ਦੀ ਅਵਾਜ਼"</string>
     <string name="volume_notification" msgid="6864412249031660057">"ਸੂਚਨਾ ਵੌਲਿਊਮ"</string>
     <string name="volume_unknown" msgid="4041914008166576293">"ਵੌਲਿਊਮ"</string>
     <string name="volume_icon_description_bluetooth" msgid="7540388479345558400">"Bluetooth ਵੌਲਿਊਮ"</string>
     <string name="volume_icon_description_ringer" msgid="2187800636867423459">"ਰਿੰਗਟੋਨ ਵੌਲਿਊਮ"</string>
     <string name="volume_icon_description_incall" msgid="4491255105381227919">"ਕਾਲ ਅਵਾਜ਼"</string>
-    <string name="volume_icon_description_media" msgid="4997633254078171233">"ਮੀਡੀਆ ਵੌਲਿਊਮ"</string>
+    <string name="volume_icon_description_media" msgid="4997633254078171233">"ਮੀਡੀਆ ਦੀ ਅਵਾਜ਼"</string>
     <string name="volume_icon_description_notification" msgid="579091344110747279">"ਸੂਚਨਾ ਵੌਲਿਊਮ"</string>
     <string name="ringtone_default" msgid="9118299121288174597">"ਪੂਰਵ-ਨਿਰਧਾਰਤ ਰਿੰਗਟੋਨ"</string>
     <string name="ringtone_default_with_actual" msgid="2709686194556159773">"ਪੂਰਵ-ਨਿਰਧਾਰਤ (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>

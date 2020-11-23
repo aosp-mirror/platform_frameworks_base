@@ -1259,9 +1259,9 @@
     <string name="volume_music" msgid="7727274216734955095">"Гучність медіа"</string>
     <string name="volume_music_hint_playing_through_bluetooth" msgid="2614142915948898228">"Відтвор. через Bluetooth"</string>
     <string name="volume_music_hint_silent_ringtone_selected" msgid="1514829655029062233">"Установлено сигнал дзвінка без звуку"</string>
-    <string name="volume_call" msgid="7625321655265747433">"Обсяг вхідних"</string>
-    <string name="volume_bluetooth_call" msgid="2930204618610115061">"Обсяг вхідних Bluetooth"</string>
-    <string name="volume_alarm" msgid="4486241060751798448">"Гучн. сповіщ."</string>
+    <string name="volume_call" msgid="7625321655265747433">"Гучність під час розмови"</string>
+    <string name="volume_bluetooth_call" msgid="2930204618610115061">"Гучність у викликах Bluetooth"</string>
+    <string name="volume_alarm" msgid="4486241060751798448">"Гучність будильника"</string>
     <string name="volume_notification" msgid="6864412249031660057">"Гучність сповіщень"</string>
     <string name="volume_unknown" msgid="4041914008166576293">"Гучність"</string>
     <string name="volume_icon_description_bluetooth" msgid="7540388479345558400">"Гучність Bluetooth"</string>
