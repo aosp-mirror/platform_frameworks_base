@@ -4914,6 +4914,20 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         return true;
     }
 
+    private void onPackageInstalledInternal(@NonNull AndroidPackage pkg,
+            @NonNull List<String> grantedPermissions,
+            @NonNull List<String> allowlistedRestrictedPermissions, int autoRevokePermissionsMode,
+            @NonNull int[] userIds) {
+        setAllowlistedRestrictedPermissionsInternal(pkg, allowlistedRestrictedPermissions,
+                FLAG_PERMISSION_WHITELIST_INSTALLER, userIds);
+        if (autoRevokePermissionsMode == AppOpsManager.MODE_ALLOWED
+                || autoRevokePermissionsMode == AppOpsManager.MODE_IGNORED) {
+            setAutoRevokeExemptedInternal(pkg,
+                    autoRevokePermissionsMode == AppOpsManager.MODE_IGNORED, userIds);
+        }
+        grantRequestedRuntimePermissionsInternal(pkg, grantedPermissions, userIds);
+    }
+
     private void onPackageRemovedInternal(@NonNull AndroidPackage pkg) {
         removeAllPermissionsInternal(pkg);
     }
@@ -5078,28 +5092,6 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         public String[] getAppOpPermissionPackages(@NonNull String permissionName) {
             Objects.requireNonNull(permissionName, "permissionName");
             return PermissionManagerService.this.getAppOpPermissionPackagesInternal(permissionName);
-        }
-        @Override
-        public void grantRequestedRuntimePermissions(@NonNull AndroidPackage pkg,
-                @Nullable List<String> permissions, @NonNull int[] userIds) {
-            Objects.requireNonNull(pkg, "pkg");
-            Objects.requireNonNull(userIds, "userIds");
-            grantRequestedRuntimePermissionsInternal(pkg, permissions, userIds);
-        }
-        @Override
-        public void setAllowlistedRestrictedPermissions(@NonNull AndroidPackage pkg,
-                @Nullable List<String> permissions, @PermissionWhitelistFlags int allowlistFlags,
-                @NonNull int[] userIds) {
-            Objects.requireNonNull(pkg, "pkg");
-            Objects.requireNonNull(userIds, "userIds");
-            setAllowlistedRestrictedPermissionsInternal(pkg, permissions, allowlistFlags, userIds);
-        }
-        @Override
-        public void setAutoRevokeExempted(@NonNull AndroidPackage pkg, boolean exempted,
-                @NonNull int[] userIds) {
-            Objects.requireNonNull(pkg, "pkg");
-            Objects.requireNonNull(userIds, "userIds");
-            setAutoRevokeExemptedInternal(pkg, exempted, userIds);
         }
         @Override
         public void updatePermissions(@NonNull String packageName, @Nullable AndroidPackage pkg) {
@@ -5369,6 +5361,20 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                 @Nullable AndroidPackage oldPkg) {
             Objects.requireNonNull(pkg);
             onPackageAddedInternal(pkg, isInstantApp, oldPkg);
+        }
+
+        @Override
+        public void onPackageInstalled(@NonNull AndroidPackage pkg,
+                @NonNull List<String> grantedPermissions,
+                @NonNull List<String> allowlistedRestrictedPermissions,
+                int autoRevokePermissionsMode, @NonNull int[] userIds) {
+            Objects.requireNonNull(pkg, "pkg");
+            Objects.requireNonNull(grantedPermissions, "grantedPermissions");
+            Objects.requireNonNull(allowlistedRestrictedPermissions,
+                    "allowlistedRestrictedPermissions");
+            Objects.requireNonNull(userIds, "userIds");
+            onPackageInstalledInternal(pkg, grantedPermissions, allowlistedRestrictedPermissions,
+                    autoRevokePermissionsMode, userIds);
         }
 
         @Override
