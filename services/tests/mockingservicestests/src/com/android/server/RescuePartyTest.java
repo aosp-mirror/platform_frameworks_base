@@ -16,6 +16,7 @@
 
 package com.android.server;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.any;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.anyBoolean;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.anyInt;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.anyLong;
@@ -44,6 +45,7 @@ import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.provider.DeviceConfig;
 import android.provider.Settings;
+import android.util.ArraySet;
 
 import com.android.dx.mockito.inline.extended.ExtendedMockito;
 import com.android.server.PackageWatchdog.PackageHealthObserverImpact;
@@ -63,6 +65,7 @@ import org.mockito.stubbing.Answer;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 
 /**
@@ -79,9 +82,11 @@ public class RescuePartyTest {
     private static final String PROP_DISABLE_RESCUE = "persist.sys.disable_rescue";
     private static final String CALLING_PACKAGE1 = "com.package.name1";
     private static final String CALLING_PACKAGE2 = "com.package.name2";
+    private static final String CALLING_PACKAGE3 = "com.package.name3";
     private static final String NAMESPACE1 = "namespace1";
     private static final String NAMESPACE2 = "namespace2";
     private static final String NAMESPACE3 = "namespace3";
+    private static final String NAMESPACE4 = "namespace4";
     private static final String PROP_DEVICE_CONFIG_DISABLE_FLAG =
             "persist.device_config.configuration.disable_rescue_party";
     private static final String PROP_DISABLE_FACTORY_RESET_FLAG =
@@ -89,6 +94,8 @@ public class RescuePartyTest {
 
     private MockitoSession mSession;
     private HashMap<String, String> mSystemSettingsMap;
+    //Records the namespaces wiped by setProperties().
+    private HashSet<String> mNamespacesWiped;
 
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     private Context mMockContext;
@@ -119,6 +126,7 @@ public class RescuePartyTest {
                         .spyStatic(PackageWatchdog.class)
                         .startMocking();
         mSystemSettingsMap = new HashMap<>();
+        mNamespacesWiped = new HashSet<>();
 
         when(mMockContext.getContentResolver()).thenReturn(mMockContentResolver);
         // Reset observer instance to get new mock context on every run
@@ -167,6 +175,16 @@ public class RescuePartyTest {
                         anyBoolean()));
         doAnswer((Answer<Void>) invocationOnMock -> null)
                 .when(() -> DeviceConfig.resetToDefaults(anyInt(), anyString()));
+        doAnswer((Answer<Boolean>) invocationOnMock -> {
+                    DeviceConfig.Properties properties = invocationOnMock.getArgument(0);
+                    String namespace = properties.getNamespace();
+                    // record a wipe
+                    if (properties.getKeyset().isEmpty()) {
+                        mNamespacesWiped.add(namespace);
+                    }
+                    return true;
+                }
+        ).when(() -> DeviceConfig.setProperties(any(DeviceConfig.Properties.class)));
 
         // Mock PackageWatchdog
         doAnswer((Answer<PackageWatchdog>) invocationOnMock -> mMockPackageWatchdog)
@@ -448,6 +466,122 @@ public class RescuePartyTest {
         assertEquals(observer.onBootLoop(3), PackageHealthObserverImpact.USER_IMPACT_HIGH);
         assertEquals(observer.onBootLoop(4), PackageHealthObserverImpact.USER_IMPACT_HIGH);
         assertEquals(observer.onBootLoop(5), PackageHealthObserverImpact.USER_IMPACT_HIGH);
+    }
+
+    @Test
+    public void testResetDeviceConfigForPackagesOnlyRuntimeMap() {
+        RescueParty.onSettingsProviderPublished(mMockContext);
+        verify(() -> Settings.Config.registerMonitorCallback(eq(mMockContentResolver),
+                mMonitorCallbackCaptor.capture()));
+
+        // Record DeviceConfig accesses
+        RescuePartyObserver observer = RescuePartyObserver.getInstance(mMockContext);
+        RemoteCallback monitorCallback = mMonitorCallbackCaptor.getValue();
+        monitorCallback.sendResult(getConfigAccessBundle(CALLING_PACKAGE1, NAMESPACE1));
+        monitorCallback.sendResult(getConfigAccessBundle(CALLING_PACKAGE1, NAMESPACE2));
+        monitorCallback.sendResult(getConfigAccessBundle(CALLING_PACKAGE2, NAMESPACE2));
+        monitorCallback.sendResult(getConfigAccessBundle(CALLING_PACKAGE2, NAMESPACE3));
+        // Fake DeviceConfig value changes
+        monitorCallback.sendResult(getConfigNamespaceUpdateBundle(NAMESPACE1));
+        monitorCallback.sendResult(getConfigNamespaceUpdateBundle(NAMESPACE2));
+        monitorCallback.sendResult(getConfigNamespaceUpdateBundle(NAMESPACE3));
+
+        doReturn("").when(() -> DeviceConfig.getString(
+                eq(RescueParty.NAMESPACE_CONFIGURATION),
+                eq(RescueParty.NAMESPACE_TO_PACKAGE_MAPPING_FLAG),
+                eq("")));
+
+        RescueParty.resetDeviceConfigForPackages(Arrays.asList(new String[]{CALLING_PACKAGE1}));
+        ArraySet<String> expectedNamespacesWiped = new ArraySet<String>(
+                Arrays.asList(new String[]{NAMESPACE1, NAMESPACE2}));
+        assertEquals(mNamespacesWiped, expectedNamespacesWiped);
+    }
+
+    @Test
+    public void testResetDeviceConfigForPackagesOnlyPresetMap() {
+        RescueParty.onSettingsProviderPublished(mMockContext);
+        verify(() -> Settings.Config.registerMonitorCallback(eq(mMockContentResolver),
+                mMonitorCallbackCaptor.capture()));
+
+        String presetMapping = NAMESPACE1 + ":" + CALLING_PACKAGE1 + ","
+                + NAMESPACE2 + ":" + CALLING_PACKAGE2 + ","
+                + NAMESPACE3 +  ":" + CALLING_PACKAGE1;
+        doReturn(presetMapping).when(() -> DeviceConfig.getString(
+                eq(RescueParty.NAMESPACE_CONFIGURATION),
+                eq(RescueParty.NAMESPACE_TO_PACKAGE_MAPPING_FLAG),
+                eq("")));
+
+        RescueParty.resetDeviceConfigForPackages(Arrays.asList(new String[]{CALLING_PACKAGE1}));
+        ArraySet<String> expectedNamespacesWiped = new ArraySet<String>(
+                Arrays.asList(new String[]{NAMESPACE1, NAMESPACE3}));
+        assertEquals(mNamespacesWiped, expectedNamespacesWiped);
+    }
+
+    @Test
+    public void testResetDeviceConfigForPackagesBothMaps() {
+        RescueParty.onSettingsProviderPublished(mMockContext);
+        verify(() -> Settings.Config.registerMonitorCallback(eq(mMockContentResolver),
+                mMonitorCallbackCaptor.capture()));
+
+        // Record DeviceConfig accesses
+        RescuePartyObserver observer = RescuePartyObserver.getInstance(mMockContext);
+        RemoteCallback monitorCallback = mMonitorCallbackCaptor.getValue();
+        monitorCallback.sendResult(getConfigAccessBundle(CALLING_PACKAGE1, NAMESPACE1));
+        monitorCallback.sendResult(getConfigAccessBundle(CALLING_PACKAGE1, NAMESPACE2));
+        monitorCallback.sendResult(getConfigAccessBundle(CALLING_PACKAGE2, NAMESPACE2));
+        monitorCallback.sendResult(getConfigAccessBundle(CALLING_PACKAGE2, NAMESPACE3));
+        monitorCallback.sendResult(getConfigAccessBundle(CALLING_PACKAGE3, NAMESPACE4));
+        // Fake DeviceConfig value changes
+        monitorCallback.sendResult(getConfigNamespaceUpdateBundle(NAMESPACE1));
+        monitorCallback.sendResult(getConfigNamespaceUpdateBundle(NAMESPACE2));
+        monitorCallback.sendResult(getConfigNamespaceUpdateBundle(NAMESPACE3));
+        monitorCallback.sendResult(getConfigNamespaceUpdateBundle(NAMESPACE4));
+
+        String presetMapping = NAMESPACE1 + ":" + CALLING_PACKAGE1 + ","
+                + NAMESPACE2 + ":" + CALLING_PACKAGE2 + ","
+                + NAMESPACE4 + ":" + CALLING_PACKAGE3;
+        doReturn(presetMapping).when(() -> DeviceConfig.getString(
+                eq(RescueParty.NAMESPACE_CONFIGURATION),
+                eq(RescueParty.NAMESPACE_TO_PACKAGE_MAPPING_FLAG),
+                eq("")));
+
+        RescueParty.resetDeviceConfigForPackages(
+                Arrays.asList(new String[]{CALLING_PACKAGE1, CALLING_PACKAGE2}));
+        ArraySet<String> expectedNamespacesWiped = new ArraySet<String>(
+                Arrays.asList(new String[]{NAMESPACE1, NAMESPACE2, NAMESPACE3}));
+        assertEquals(mNamespacesWiped, expectedNamespacesWiped);
+    }
+
+    @Test
+    public void testResetDeviceConfigNoExceptionWhenFlagMalformed() {
+        RescueParty.onSettingsProviderPublished(mMockContext);
+        verify(() -> Settings.Config.registerMonitorCallback(eq(mMockContentResolver),
+                mMonitorCallbackCaptor.capture()));
+
+        // Record DeviceConfig accesses
+        RescuePartyObserver observer = RescuePartyObserver.getInstance(mMockContext);
+        RemoteCallback monitorCallback = mMonitorCallbackCaptor.getValue();
+        monitorCallback.sendResult(getConfigAccessBundle(CALLING_PACKAGE1, NAMESPACE1));
+        monitorCallback.sendResult(getConfigAccessBundle(CALLING_PACKAGE2, NAMESPACE3));
+        monitorCallback.sendResult(getConfigAccessBundle(CALLING_PACKAGE3, NAMESPACE4));
+        // Fake DeviceConfig value changes
+        monitorCallback.sendResult(getConfigNamespaceUpdateBundle(NAMESPACE1));
+        monitorCallback.sendResult(getConfigNamespaceUpdateBundle(NAMESPACE2));
+        monitorCallback.sendResult(getConfigNamespaceUpdateBundle(NAMESPACE3));
+        monitorCallback.sendResult(getConfigNamespaceUpdateBundle(NAMESPACE4));
+
+        String invalidPresetMapping = NAMESPACE2 + ":" + CALLING_PACKAGE2 + ","
+                + NAMESPACE1 + "." + CALLING_PACKAGE2;
+        doReturn(invalidPresetMapping).when(() -> DeviceConfig.getString(
+                eq(RescueParty.NAMESPACE_CONFIGURATION),
+                eq(RescueParty.NAMESPACE_TO_PACKAGE_MAPPING_FLAG),
+                eq("")));
+
+        RescueParty.resetDeviceConfigForPackages(
+                Arrays.asList(new String[]{CALLING_PACKAGE1, CALLING_PACKAGE2}));
+        ArraySet<String> expectedNamespacesWiped = new ArraySet<String>(
+                Arrays.asList(new String[]{NAMESPACE1, NAMESPACE3}));
+        assertEquals(mNamespacesWiped, expectedNamespacesWiped);
     }
 
     private void verifySettingsResets(int resetMode, String[] resetNamespaces,
