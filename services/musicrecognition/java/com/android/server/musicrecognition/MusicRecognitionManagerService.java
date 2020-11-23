@@ -16,6 +16,7 @@
 
 package com.android.server.musicrecognition;
 
+import static android.Manifest.permission.MANAGE_MUSIC_RECOGNITION;
 import static android.content.PermissionChecker.PERMISSION_GRANTED;
 import static android.media.musicrecognition.MusicRecognitionManager.RECOGNITION_FAILED_SERVICE_UNAVAILABLE;
 
@@ -28,11 +29,14 @@ import android.media.musicrecognition.RecognitionRequest;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.os.ResultReceiver;
+import android.os.ShellCallback;
 import android.os.UserHandle;
 
 import com.android.server.infra.AbstractMasterSystemService;
 import com.android.server.infra.FrameworkResourcesServiceNameResolver;
 
+import java.io.FileDescriptor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -45,6 +49,7 @@ public class MusicRecognitionManagerService extends
                 MusicRecognitionManagerPerUserService> {
 
     private static final String TAG = MusicRecognitionManagerService.class.getSimpleName();
+    private static final int MAX_TEMP_SERVICE_SUBSTITUTION_DURATION_MS = 60_000;
 
     private MusicRecognitionManagerStub mMusicRecognitionManagerStub;
     final ExecutorService mExecutorService = Executors.newCachedThreadPool();
@@ -90,6 +95,16 @@ public class MusicRecognitionManagerService extends
         throw new SecurityException(msg);
     }
 
+    @Override
+    protected void enforceCallingPermissionForManagement() {
+        getContext().enforceCallingPermission(MANAGE_MUSIC_RECOGNITION, TAG);
+    }
+
+    @Override
+    protected int getMaximumTemporaryServiceDurationMs() {
+        return MAX_TEMP_SERVICE_SUBSTITUTION_DURATION_MS;
+    }
+
     final class MusicRecognitionManagerStub extends IMusicRecognitionManager.Stub {
         @Override
         public void beginRecognition(
@@ -111,6 +126,18 @@ public class MusicRecognitionManagerService extends
                     }
                 }
             }
+        }
+
+        @Override
+        public void onShellCommand(@Nullable FileDescriptor in,
+                @Nullable FileDescriptor out,
+                @Nullable FileDescriptor err,
+                @NonNull String[] args,
+                @Nullable ShellCallback callback,
+                @NonNull ResultReceiver resultReceiver) throws RemoteException {
+            new MusicRecognitionManagerServiceShellCommand(
+                    MusicRecognitionManagerService.this).exec(this, in, out, err, args, callback,
+                    resultReceiver);
         }
     }
 }

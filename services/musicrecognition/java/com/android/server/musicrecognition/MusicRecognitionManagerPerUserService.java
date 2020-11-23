@@ -113,7 +113,8 @@ public final class MusicRecognitionManagerPerUserService extends
 
             mRemoteService = new RemoteMusicRecognitionService(getContext(),
                     serviceComponent, mUserId, this,
-                    mRemoteServiceCallback, mMaster.isBindInstantServiceAllowed(), mMaster.verbose);
+                    mRemoteServiceCallback, mMaster.isBindInstantServiceAllowed(),
+                    mMaster.verbose);
         }
 
         return mRemoteService;
@@ -167,7 +168,8 @@ public final class MusicRecognitionManagerPerUserService extends
                         recognitionRequest.getIgnoreBeginningFrames() * BYTES_PER_SAMPLE;
                 audioRecord.startRecording();
                 while (bytesRead >= 0 && totalBytesRead
-                        < audioRecord.getBufferSizeInFrames() * BYTES_PER_SAMPLE) {
+                        < audioRecord.getBufferSizeInFrames() * BYTES_PER_SAMPLE
+                        && mRemoteService != null) {
                     bytesRead = audioRecord.read(byteBuffer, 0, byteBuffer.length);
                     if (bytesRead > 0) {
                         totalBytesRead += bytesRead;
@@ -215,6 +217,7 @@ public final class MusicRecognitionManagerPerUserService extends
             } catch (RemoteException ignored) {
                 // Ignored.
             }
+            destroyService();
         }
 
         @Override
@@ -224,6 +227,7 @@ public final class MusicRecognitionManagerPerUserService extends
             } catch (RemoteException ignored) {
                 // Ignored.
             }
+            destroyService();
         }
     }
 
@@ -235,6 +239,17 @@ public final class MusicRecognitionManagerPerUserService extends
             // Ignored.
         }
         Slog.w(TAG, "remote service died: " + service);
+        destroyService();
+    }
+
+    @GuardedBy("mLock")
+    private void destroyService() {
+        synchronized (mLock) {
+            if (mRemoteService != null) {
+                mRemoteService.destroy();
+                mRemoteService = null;
+            }
+        }
     }
 
     /** Establishes an audio stream from the DSP audio source. */

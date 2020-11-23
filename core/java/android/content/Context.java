@@ -4536,6 +4536,7 @@ public abstract class Context {
      * @hide
      * @see #getSystemService(String)
      */
+    @SystemApi
     public static final String MUSIC_RECOGNITION_SERVICE = "music_recognition";
 
     /**
