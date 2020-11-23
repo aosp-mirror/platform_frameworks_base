@@ -8505,6 +8505,8 @@ public class DevicePolicyManager {
      * it previously set with {@link #addUserRestriction(ComponentName, String)}.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @return a {@link Bundle} whose keys are the user restrictions, and the values a
+     * {@code boolean} indicating whether the restriction is set.
      * @throws SecurityException if {@code admin} is not a device or profile owner.
      */
     public @NonNull Bundle getUserRestrictions(@NonNull ComponentName admin) {
