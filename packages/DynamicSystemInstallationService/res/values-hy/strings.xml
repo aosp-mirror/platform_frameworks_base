@@ -5,7 +5,7 @@
     <string name="notification_install_completed" msgid="6252047868415172643">"Դինամիկ համակարգը պատրաստ է։ Այն օգտագործելու համար վերագործարկեք ձեր սարքը։"</string>
     <string name="notification_install_inprogress" msgid="7383334330065065017">"Տեղադրում"</string>
     <string name="notification_install_failed" msgid="4066039210317521404">"Չհաջողվեց տեղադրել"</string>
-    <string name="notification_image_validation_failed" msgid="2720357826403917016">"Չհաջողվեց հաստատել պատկերը։ Չեղարկել տեղադրումը։"</string>
+    <string name="notification_image_validation_failed" msgid="2720357826403917016">"Չհաջողվեց հաստատել սկավառակի պատկերը։ Չեղարկեք տեղադրումը։"</string>
     <string name="notification_dynsystem_in_use" msgid="1053194595682188396">"Աշխատեցվում է դինամիկ համակարգը։ Վերագործարկեք՝ Android-ի նախկին տարբերակին անցնելու համար։"</string>
     <string name="notification_action_cancel" msgid="5929299408545961077">"Չեղարկել"</string>
     <string name="notification_action_discard" msgid="1817481003134947493">"Հրաժարվել"</string>
