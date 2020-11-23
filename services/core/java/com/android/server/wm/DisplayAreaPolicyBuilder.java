@@ -172,10 +172,16 @@ class DisplayAreaPolicyBuilder {
             throw new IllegalStateException("Root must be set for the display area policy.");
         }
 
+        final Set<Integer> rootIdSet = new ArraySet<>();
+        rootIdSet.add(mRootHierarchyBuilder.mRoot.mFeatureId);
         boolean containsImeContainer = mRootHierarchyBuilder.mImeContainer != null;
         boolean containsDefaultTda = containsDefaultTaskDisplayArea(mRootHierarchyBuilder);
         for (int i = 0; i < mDisplayAreaGroupHierarchyBuilders.size(); i++) {
             HierarchyBuilder hierarchyBuilder = mDisplayAreaGroupHierarchyBuilders.get(i);
+            if (!rootIdSet.add(hierarchyBuilder.mRoot.mFeatureId)) {
+                throw new IllegalStateException("There should not be two RootDisplayAreas with id "
+                        + hierarchyBuilder.mRoot.mFeatureId);
+            }
             if (hierarchyBuilder.mTaskDisplayAreas.isEmpty()) {
                 throw new IllegalStateException(
                         "DisplayAreaGroup must contain at least one TaskDisplayArea.");

@@ -101,6 +101,19 @@ public class DisplayAreaOrganizer extends WindowOrganizer {
     public static final int FEATURE_VENDOR_FIRST = FEATURE_SYSTEM_LAST + 1;
 
     /**
+     * Last possible vendor specific display area id.
+     * @hide
+     */
+    public static final int FEATURE_VENDOR_LAST = FEATURE_VENDOR_FIRST + 10_000;
+
+    /**
+     * Task display areas that can be created at runtime start with this value.
+     * @see #createTaskDisplayArea(int, int, String)
+     * @hide
+     */
+    public static final int FEATURE_RUNTIME_TASK_CONTAINER_FIRST = FEATURE_VENDOR_LAST + 1;
+
+    /**
      * Registers a DisplayAreaOrganizer to manage display areas for a given feature. A feature can
      * not be registered by multiple organizers at the same time.
      *
@@ -126,6 +139,50 @@ public class DisplayAreaOrganizer extends WindowOrganizer {
     public void unregisterOrganizer() {
         try {
             getController().unregisterOrganizer(mInterface);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Creates a persistent task display area. It will be added to be the top most task display area
+     * in the root.
+     *
+     * The new created TDA is organized by the organizer, and will be deleted on calling
+     * {@link #deleteTaskDisplayArea(WindowContainerToken)} or {@link #unregisterOrganizer()}.
+     *
+     * @param displayId the display to create the new task display area in.
+     * @param rootFeatureId the root display area to create the new task display area in. Caller can
+     *                      use {@link #FEATURE_ROOT} as the root of the logical display.
+     * @param name the name for the new task display area.
+     * @return the new created task display area.
+     * @throws IllegalArgumentException if failed to create a new task display area.
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS)
+    @CallSuper
+    @NonNull
+    public DisplayAreaAppearedInfo createTaskDisplayArea(int displayId, int rootFeatureId,
+            @NonNull String name) {
+        try {
+            return getController().createTaskDisplayArea(
+                    mInterface, displayId, rootFeatureId, name);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Deletes a persistent task display area. It can only be one that created by an organizer.
+     *
+     * @throws IllegalArgumentException if failed to delete the task display area.
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS)
+    @CallSuper
+    public void deleteTaskDisplayArea(@NonNull WindowContainerToken taskDisplayArea) {
+        try {
+            getController().deleteTaskDisplayArea(taskDisplayArea);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

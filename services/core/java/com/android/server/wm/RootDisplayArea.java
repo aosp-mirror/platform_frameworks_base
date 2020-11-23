@@ -57,6 +57,11 @@ class RootDisplayArea extends DisplayArea<DisplayArea> {
         return this;
     }
 
+    @Override
+    RootDisplayArea asRootDisplayArea() {
+        return this;
+    }
+
     /** Whether the orientation (based on dimensions) of this root is different from the Display. */
     boolean isOrientationDifferentFromDisplay() {
         return false;
