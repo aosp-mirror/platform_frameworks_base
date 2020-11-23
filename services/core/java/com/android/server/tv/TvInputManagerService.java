@@ -84,6 +84,7 @@ import android.view.InputChannel;
 import android.view.Surface;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.util.DumpUtils;
@@ -1441,8 +1442,8 @@ public final class TvInputManagerService extends SystemService {
                 if (sessionState != null) {
                     int state = surface == null
                             ?
-                            FrameworkStatsLog.TIF_TUNE_STATE_CHANGED__STATE__SURFACE_ATTACHED
-                            : FrameworkStatsLog.TIF_TUNE_STATE_CHANGED__STATE__SURFACE_DETACHED;
+                            FrameworkStatsLog.TIF_TUNE_STATE_CHANGED__STATE__SURFACE_DETACHED
+                            : FrameworkStatsLog.TIF_TUNE_STATE_CHANGED__STATE__SURFACE_ATTACHED;
                     logTuneStateChanged(state, sessionState,
                             TvInputManagerService.getTvInputState(sessionState, userState));
                 }
@@ -2963,15 +2964,7 @@ public final class TvInputManagerService extends SystemService {
                         getUserStateLocked(mCurrentUserId));
                 try {
                     mSessionState.client.onVideoUnavailable(reason, mSessionState.seq);
-                    int loggedReason = reason + FrameworkStatsLog
-                            .TIF_TUNE_STATE_CHANGED__STATE__VIDEO_UNAVAILABLE_REASON_UNKNOWN;
-                    if (loggedReason < FrameworkStatsLog
-                            .TIF_TUNE_STATE_CHANGED__STATE__VIDEO_UNAVAILABLE_REASON_UNKNOWN
-                            || loggedReason > FrameworkStatsLog
-                            .TIF_TUNE_STATE_CHANGED__STATE__VIDEO_UNAVAILABLE_REASON_CAS_UNKNOWN) {
-                        loggedReason = FrameworkStatsLog
-                                .TIF_TUNE_STATE_CHANGED__STATE__VIDEO_UNAVAILABLE_REASON_UNKNOWN;
-                    }
+                    int loggedReason = getVideoUnavailableReasonForStatsd(reason);
                     logTuneStateChanged(loggedReason, mSessionState, tvInputState);
                 } catch (RemoteException e) {
                     Slog.e(TAG, "error in onVideoUnavailable", e);
@@ -3156,6 +3149,21 @@ public final class TvInputManagerService extends SystemService {
                 }
             }
         }
+    }
+
+    @VisibleForTesting
+    static int getVideoUnavailableReasonForStatsd(
+            @TvInputManager.VideoUnavailableReason int reason) {
+        int loggedReason = reason + FrameworkStatsLog
+                .TIF_TUNE_STATE_CHANGED__STATE__VIDEO_UNAVAILABLE_REASON_UNKNOWN;
+        if (loggedReason < FrameworkStatsLog
+                .TIF_TUNE_STATE_CHANGED__STATE__VIDEO_UNAVAILABLE_REASON_UNKNOWN
+                || loggedReason > FrameworkStatsLog
+                .TIF_TUNE_STATE_CHANGED__STATE__VIDEO_UNAVAILABLE_REASON_CAS_UNKNOWN) {
+            loggedReason = FrameworkStatsLog
+                    .TIF_TUNE_STATE_CHANGED__STATE__VIDEO_UNAVAILABLE_REASON_UNKNOWN;
+        }
+        return loggedReason;
     }
 
     private UserState getUserStateLocked(int userId) {
