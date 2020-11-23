@@ -1,7 +1,20 @@
 filegroup {
+    name: "services.core-sources-am-wm",
+    srcs: [
+        "java/com/android/server/am/**/*.java",
+        "java/com/android/server/wm/**/*.java",
+    ],
+    path: "java",
+    visibility: ["//frameworks/base/services"],
+}
+
+filegroup {
     name: "services.core-sources",
     srcs: ["java/**/*.java"],
-    exclude_srcs: [":connectivity-service-srcs"],
+    exclude_srcs: [
+        ":connectivity-service-srcs",
+        ":services.core-sources-am-wm"
+    ],
     path: "java",
     visibility: [
         "//frameworks/base/services",
@@ -13,7 +26,7 @@ genrule {
     name: "services.core.protologsrc",
     srcs: [
         ":protolog-groups",
-        ":services.core-sources",
+        ":services.core-sources-am-wm",
     ],
     tools: ["protologtool"],
     cmd: "$(location protologtool) transform-protolog-calls " +
@@ -23,7 +36,7 @@ genrule {
       "--loggroups-class com.android.internal.protolog.ProtoLogGroup " +
       "--loggroups-jar $(location :protolog-groups) " +
       "--output-srcjar $(out) " +
-      "$(locations :services.core-sources)",
+      "$(locations :services.core-sources-am-wm)",
     out: ["services.core.protolog.srcjar"],
 }
 
@@ -31,7 +44,7 @@ genrule {
     name: "generate-protolog.json",
     srcs: [
         ":protolog-groups",
-        ":services.core-sources",
+        ":services.core-sources-am-wm",
     ],
     tools: ["protologtool"],
     cmd: "$(location protologtool) generate-viewer-config " +
@@ -39,7 +52,7 @@ genrule {
       "--loggroups-class com.android.internal.protolog.ProtoLogGroup " +
       "--loggroups-jar $(location :protolog-groups) " +
       "--viewer-conf $(out) " +
-      "$(locations :services.core-sources)",
+      "$(locations :services.core-sources-am-wm)",
     out: ["services.core.protolog.json"],
 }
 
@@ -63,6 +76,7 @@ java_library_static {
     name: "services.core.unboosted",
     defaults: ["platform_service_defaults"],
     srcs: [
+        ":services.core-sources",
         ":services.core.protologsrc",
         ":dumpstate_aidl",
         ":framework_native_aidl",
