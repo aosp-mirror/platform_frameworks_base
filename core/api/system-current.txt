@@ -9153,6 +9153,33 @@ package android.telecom {
     field @Deprecated public static final int ROUTE_WIRED_OR_EARPIECE = 5; // 0x5
   }
 
+  public final class BluetoothCallQualityReport implements android.os.Parcelable {
+    method public int describeContents();
+    method @IntRange(from=0) public int getNegativeAcknowledgementCount();
+    method @IntRange(from=0) public int getPacketsNotReceivedCount();
+    method @IntRange(from=0) public int getRetransmittedPacketsCount();
+    method @IntRange(from=0xffffff81, to=20) public int getRssiDbm();
+    method public long getSentTimestampMillis();
+    method public int getSnrDb();
+    method public boolean isChoppyVoice();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.telecom.BluetoothCallQualityReport> CREATOR;
+    field public static final String EVENT_BLUETOOTH_CALL_QUALITY_REPORT = "android.telecom.event.BLUETOOTH_CALL_QUALITY_REPORT";
+    field public static final String EXTRA_BLUETOOTH_CALL_QUALITY_REPORT = "android.telecom.extra.BLUETOOTH_CALL_QUALITY_REPORT";
+  }
+
+  public static final class BluetoothCallQualityReport.Builder {
+    ctor public BluetoothCallQualityReport.Builder();
+    method @NonNull public android.telecom.BluetoothCallQualityReport build();
+    method @NonNull public android.telecom.BluetoothCallQualityReport.Builder setChoppyVoice(boolean);
+    method @NonNull public android.telecom.BluetoothCallQualityReport.Builder setNegativeAcknowledgementCount(int);
+    method @NonNull public android.telecom.BluetoothCallQualityReport.Builder setPacketsNotReceivedCount(int);
+    method @NonNull public android.telecom.BluetoothCallQualityReport.Builder setRetransmittedPacketsCount(int);
+    method @NonNull public android.telecom.BluetoothCallQualityReport.Builder setRssiDbm(int);
+    method @NonNull public android.telecom.BluetoothCallQualityReport.Builder setSentTimestampMillis(long);
+    method @NonNull public android.telecom.BluetoothCallQualityReport.Builder setSnrDb(int);
+  }
+
   public final class Call {
     method @Deprecated public void addListener(android.telecom.Call.Listener);
     method public void enterBackgroundAudioProcessing();
