@@ -273,7 +273,7 @@
     <string name="notification_channel_car_mode" msgid="2123919247040988436">"Машины горим"</string>
     <string name="notification_channel_account" msgid="6436294521740148173">"Бүртгэлийн төлөв"</string>
     <string name="notification_channel_developer" msgid="1691059964407549150">"Хөгжүүлэгчийн мессеж"</string>
-    <string name="notification_channel_developer_important" msgid="7197281908918789589">"Хөгжүүлэгчийн чухал зурвас"</string>
+    <string name="notification_channel_developer_important" msgid="7197281908918789589">"Хөгжүүлэгчийн чухал мессеж"</string>
     <string name="notification_channel_updates" msgid="7907863984825495278">"Шинэчлэлтүүд"</string>
     <string name="notification_channel_network_status" msgid="2127687368725272809">"Сүлжээний төлөв"</string>
     <string name="notification_channel_network_alerts" msgid="6312366315654526528">"Сүлжээний сануулга"</string>
@@ -356,9 +356,9 @@
     <string name="permlab_sendSms" msgid="7757368721742014252">"SMS мессежийг илгээх, харах"</string>
     <string name="permdesc_sendSms" msgid="6757089798435130769">"Апп нь SMS мессеж илгээх боломжтой. Энэ нь санаандгүй төлбөрт оруулж болзошгүй. Хортой апп нь таны зөвшөөрөлгүйгээр мессеж илгээн таныг төлбөрт оруулж болзошгүй."</string>
     <string name="permlab_readSms" msgid="5164176626258800297">"таны текст мессежийг унших(SMS эсвэл MMS)"</string>
-    <string name="permdesc_readSms" product="tablet" msgid="7912990447198112829">"Энэ апп таны таблетад хадгалсан бүх SMS (текст) зурвасыг унших боломжтой."</string>
+    <string name="permdesc_readSms" product="tablet" msgid="7912990447198112829">"Энэ апп таны таблетад хадгалсан бүх SMS (текст) мессежийг унших боломжтой."</string>
     <string name="permdesc_readSms" product="tv" msgid="3054753345758011986">"Энэ апп таны Android TV төхөөрөмжид хадгалсан бүх SMS (текст) мессежийг уншиж чадна."</string>
-    <string name="permdesc_readSms" product="default" msgid="774753371111699782">"Энэ апп таны утсанд хадгалсан бүх SMS (текст) зурвасыг унших боломжтой."</string>
+    <string name="permdesc_readSms" product="default" msgid="774753371111699782">"Энэ апп таны утсанд хадгалсан бүх SMS (текст) мессежийг унших боломжтой."</string>
     <string name="permlab_receiveWapPush" msgid="4223747702856929056">"текст мессеж(WAP) хүлээн авах"</string>
     <string name="permdesc_receiveWapPush" msgid="1638677888301778457">"Апп нь WAP мессежийг хүлээн авах болон биелүүлэх боломжтой. Энэ зөвшөөрөл нь танд илгээсэн мессежийг танд харуулалгүйгээр хянах эсвэл устгах боломжийг агуулна."</string>
     <string name="permlab_getTasks" msgid="7460048811831750262">"ажиллаж байгаа апп-г дуудах"</string>
@@ -416,9 +416,9 @@
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Энэ апп таны Android TV төхөөрөмжид хадгалсан календарийн бүх арга хэмжээг унших болон таны календарийн өгөгдлийг хуваалцах эсвэл хадгалах боломжтой."</string>
     <string name="permdesc_readCalendar" product="default" msgid="9118823807655829957">"Энэ апп таны утсанд хадгалсан хуанлийн бүх арга хэмжээг унших, хуанлийн өгөгдлийг хуваалцах, хадгалах боломжтой."</string>
     <string name="permlab_writeCalendar" msgid="6422137308329578076">"календарын хуваарийг нэмэх эсвэл өөрчлөх болон эзэмшигчид мэдэгдэлгүйгээр зочидруу имэйл илгээх"</string>
-    <string name="permdesc_writeCalendar" product="tablet" msgid="8722230940717092850">"Энэ апп таны таблет дээр хуанлийн арга хэмжээг нэмэх, устгах, эсвэл өөрчлөх боломжтой. Энэ апп нь хуанли эзэмшигчээс зурвас илгээсэн мэт харагдах, эсвэл эзэмшигчид мэдэгдэлгүйгээр арга хэмжээг өөрчлөх боломжтой."</string>
+    <string name="permdesc_writeCalendar" product="tablet" msgid="8722230940717092850">"Энэ апп таны таблет дээр хуанлийн арга хэмжээг нэмэх, устгах, эсвэл өөрчлөх боломжтой. Энэ апп нь хуанли эзэмшигчээс мессеж илгээсэн мэт харагдах, эсвэл эзэмшигчид мэдэгдэлгүйгээр арга хэмжээг өөрчлөх боломжтой."</string>
     <string name="permdesc_writeCalendar" product="tv" msgid="951246749004952706">"Энэ апп таны Android TV төхөөрөмжид календарийн арга хэмжээ нэмэх, үүнийг устгах, эсвэл өөрчлөх боломжтой. Энэ апп календарийн өмчлөгчөөс ирсэн мэт харагдаж болох мессеж илгээх эсвэл арга хэмжээг өмчлөгчид нь мэдэгдэлгүйгээр өөрчлөх боломжтой."</string>
-    <string name="permdesc_writeCalendar" product="default" msgid="5416380074475634233">"Энэ апп таны утсанд хуанлийн арга хэмжээг нэмэх, устгах, эсвэл өөрчлөх боломжтой. Энэ апп нь хуанли эзэмшигчээс зурвас илгээсэн мэт харагдах, эсвэл эзэмшигчид мэдэгдэлгүйгээр арга хэмжээг өөрчлөх боломжтой."</string>
+    <string name="permdesc_writeCalendar" product="default" msgid="5416380074475634233">"Энэ апп таны утсанд хуанлийн арга хэмжээг нэмэх, устгах, эсвэл өөрчлөх боломжтой. Энэ апп нь хуанли эзэмшигчээс мессеж илгээсэн мэт харагдах, эсвэл эзэмшигчид мэдэгдэлгүйгээр арга хэмжээг өөрчлөх боломжтой."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"байршил нийлүүлэгчийн нэмэлт тушаалд хандах"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"Апп нь байршил нийлүүлэгчийн нэмэлт тушаалд хандах боломжтой. Энэ нь апп-д GPS эсвэл бусад байршлын үйлчилгээний ажиллагаанд нөлөөлөх боломжийг олгоно."</string>
     <string name="permlab_accessFineLocation" msgid="6426318438195622966">"нарийвчилсан байршилд зөвхөн нүүр хэсэгт хандах"</string>
@@ -661,8 +661,8 @@
     <string name="permdesc_handoverStatus" msgid="3842269451732571070">"Одоогийн Андройд Бийм дамжуулалтын мэдээллийг хүлээн авахыг аппликейшнд зөвшөөрөх"</string>
     <string name="permlab_removeDrmCertificates" msgid="710576248717404416">"DRM сертификатыг устгах"</string>
     <string name="permdesc_removeDrmCertificates" msgid="4068445390318355716">"Аппликейшнд DRM сертификатыг устгахыг зөвшөөрнө. Энгийн апп-уудад хэзээ ч ашиглагдахгүй."</string>
-    <string name="permlab_bindCarrierMessagingService" msgid="3363450860593096967">"зөөгч зурвасын үйлчилгээнд холбох"</string>
-    <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"Эзэмшигчид зөөгч зурвасын үйлчилгээний түвшний интерфэйст холбогдохыг зөвшөөрдөг. Энгийн апп-д шаардлагагүй."</string>
+    <string name="permlab_bindCarrierMessagingService" msgid="3363450860593096967">"зөөгч мессежийн үйлчилгээнд холбох"</string>
+    <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"Эзэмшигчид зөөгч мессежийн үйлчилгээний түвшний интерфэйст холбогдохыг зөвшөөрдөг. Энгийн апп-д шаардлагагүй."</string>
     <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"Үүрэн холбооны үйлчилгээ үзүүлэгчтэй холбогдох"</string>
     <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"Аливаа эзэмшигчийг үүрэн холбооны үйлчилгээ үзүүлэгчтэй холбодог. Энгийн аппд шаардлагагүй."</string>
     <string name="permlab_access_notification_policy" msgid="5524112842876975537">"Бүү саад бол тохируулгад хандалт хийх"</string>
@@ -959,7 +959,7 @@
     <string name="permlab_setAlarm" msgid="1158001610254173567">"сэрүүлэг тохируулах"</string>
     <string name="permdesc_setAlarm" msgid="2185033720060109640">"Апп нь суулгагдсан сэрүүлэгний апп дээр сэрүүлэг тохируулах боломжтой. Зарим сэрүүлэгний апп нь энэ функцийг дэмжихгүй байж болзошгүй."</string>
     <string name="permlab_addVoicemail" msgid="4770245808840814471">"дуут шуудан нэмэх"</string>
-    <string name="permdesc_addVoicemail" msgid="5470312139820074324">"Таны дуут шуудангийн ирсэн мэйлд зурвас нэмэхийг апп-д зөвшөөрөх."</string>
+    <string name="permdesc_addVoicemail" msgid="5470312139820074324">"Таны дуут шуудангийн ирсэн мэйлд мессеж нэмэхийг апп-д зөвшөөрөх."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="8605631647492879449">"Хөтчийн геобайршлын зөвшөөрлийг өөрчлөх"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="5817346421222227772">"Апп нь Хөтчийн гео байршлын зөвшөөрлийг өөрчлөх боломжтой. Хортой апп нь энийг ашиглан дурын веб хуудасруу байршлын мэдээллийг илгээх боломжтой."</string>
     <string name="save_password_message" msgid="2146409467245462965">"Та хөтчид энэ нууц үгийг сануулах уу?"</string>
@@ -1502,7 +1502,7 @@
     <string name="shareactionprovider_share_with_application" msgid="4902832247173666973">"<xliff:g id="APPLICATION_NAME">%s</xliff:g>-тай хуваалцана уу"</string>
     <string name="content_description_sliding_handle" msgid="982510275422590757">"Бариулыг гулсуулна. Хүрээд хүлээнэ."</string>
     <string name="description_target_unlock_tablet" msgid="7431571180065859551">"Түгжээг тайлах бол татна уу"</string>
-    <string name="action_bar_home_description" msgid="1501655419158631974">"Нүүр хуудасруу шилжих"</string>
+    <string name="action_bar_home_description" msgid="1501655419158631974">"Нүүр хуудас руу шилжих"</string>
     <string name="action_bar_up_description" msgid="6611579697195026932">"Дээш шилжих"</string>
     <string name="action_menu_overflow_description" msgid="4579536843510088170">"Нэмэлт сонголтууд"</string>
     <string name="action_bar_home_description_format" msgid="5087107531331621803">"%1$s, %2$s"</string>
@@ -1893,7 +1893,7 @@
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> яг одоо боломжгүй байна."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Энэ аппыг Андройдын хуучин хувилбарт зориулсан бөгөөд буруу ажиллаж болзошгүй. Шинэчлэлтийг шалгаж эсвэл хөгжүүлэгчтэй холбогдоно уу."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Шинэчлэлтийг шалгах"</string>
-    <string name="new_sms_notification_title" msgid="6528758221319927107">"Танд шинэ зурвасууд байна"</string>
+    <string name="new_sms_notification_title" msgid="6528758221319927107">"Танд шинэ мессежүүд байна"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"Үзэхийн тулд SMS аппыг нээх"</string>
     <string name="profile_encrypted_title" msgid="9001208667521266472">"Зарим функцийг хязгаарласан байж болзошгүй"</string>
     <string name="profile_encrypted_detail" msgid="5279730442756849055">"Ажлын профайлыг түгжсэн"</string>
@@ -1961,7 +1961,7 @@
     <string name="etws_primary_default_message_earthquake" msgid="8401079517718280669">"Тайван байж, ойролцоох нуугдах газар хайна уу."</string>
     <string name="etws_primary_default_message_tsunami" msgid="5828171463387976279">"Эргийн бүс, голын эргийн бүсээс өндөрлөг газар зэрэг аюулгүй газар руу нэн даруй шилжинэ үү."</string>
     <string name="etws_primary_default_message_earthquake_and_tsunami" msgid="4888224011071875068">"Тайван байж, ойролцоох нуугдах газар хайна уу."</string>
-    <string name="etws_primary_default_message_test" msgid="4583367373909549421">"Онцгой байдлын зурвасын тест"</string>
+    <string name="etws_primary_default_message_test" msgid="4583367373909549421">"Онцгой байдлын мессежийн тест"</string>
     <string name="notification_reply_button_accessibility" msgid="5235776156579456126">"Хариу бичих"</string>
     <string name="etws_primary_default_message_others" msgid="7958161706019130739"></string>
     <string name="mmcc_authentication_reject" msgid="4891965994643876369">"SIM-г дуу хоолойд зөвшөөрдөггүй"</string>

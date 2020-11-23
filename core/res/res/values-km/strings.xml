@@ -1219,8 +1219,8 @@
     <string name="volume_music" msgid="7727274216734955095">"កម្រិត​សំឡេង​មេឌៀ"</string>
     <string name="volume_music_hint_playing_through_bluetooth" msgid="2614142915948898228">"ចាក់​តាម​ប៊្លូធូស"</string>
     <string name="volume_music_hint_silent_ringtone_selected" msgid="1514829655029062233">"កំណត់​សំឡេង​រោទ៍​ស្ងាត់"</string>
-    <string name="volume_call" msgid="7625321655265747433">"កម្រិត​សំឡេង​ហៅ​ចូល"</string>
-    <string name="volume_bluetooth_call" msgid="2930204618610115061">"កម្រិត​សំឡេង​ហៅ​ចូល​តាម​ប៊្លូធូស"</string>
+    <string name="volume_call" msgid="7625321655265747433">"កម្រិត​សំឡេង​ក្នុងពេលនិយាយទូរសព្ទ"</string>
+    <string name="volume_bluetooth_call" msgid="2930204618610115061">"កម្រិត​សំឡេង​ក្នុងពេលនិយាយទូរសព្ទ​តាម​ប៊្លូធូស"</string>
     <string name="volume_alarm" msgid="4486241060751798448">"កម្រិត​សំឡេងម៉ោងរោទ៍"</string>
     <string name="volume_notification" msgid="6864412249031660057">"កម្រិត​សំឡេង​ការ​ជូន​ដំណឹង"</string>
     <string name="volume_unknown" msgid="4041914008166576293">"កម្រិត​សំឡេង"</string>
@@ -1792,7 +1792,7 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"ធ្វើ​បច្ចុប្បន្នភាព​ដោយ​អ្នកគ្រប់គ្រង​របស់​អ្នក"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"លុប​ដោយ​អ្នកគ្រប់គ្រង​របស់​អ្នក"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"យល់ព្រម"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"ដើម្បី​បង្កើនកម្រិត​ថាមពលថ្ម កម្មវិធី​សន្សំថ្ម៖\n\n• បើករចនាប័ទ្មងងឹត\n• បិទ ឬដាក់កំហិតលើ​សកម្មភាពផ្ទៃខាងក្រោយ ឥទ្ធិពល​ជារូបភាពមួយចំនួន និងមុខងារផ្សេងទៀត​ដូចជា “Ok Google” ជាដើម\n\n"<annotation id="url">"ស្វែងយល់​បន្ថែម"</annotation></string>
+    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"ដើម្បី​បង្កើនកម្រិត​ថាមពលថ្ម មុខងារ​សន្សំ​ថ្ម៖\n\n• បើករចនាប័ទ្មងងឹត\n• បិទ ឬដាក់កំហិតលើ​សកម្មភាពផ្ទៃខាងក្រោយ ឥទ្ធិពល​ជារូបភាពមួយចំនួន និងមុខងារផ្សេងទៀត​ដូចជា “Hey Google” ជាដើម\n\n"<annotation id="url">"ស្វែងយល់​បន្ថែម"</annotation></string>
     <string name="battery_saver_description" msgid="6794188153647295212">"ដើម្បី​បង្កើនកម្រិត​ថាមពលថ្ម មុខងារ​សន្សំថ្ម៖\n\n• បើករចនាប័ទ្មងងឹត\n• បិទ ឬដាក់កំហិតលើ​សកម្មភាពផ្ទៃខាងក្រោយ ឥទ្ធិពលរូបភាពមួយចំនួន និងមុខងារផ្សេងទៀត​ដូចជា “Ok Google” ជាដើម"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"ដើម្បីជួយកាត់បន្ថយការប្រើប្រាស់ទិន្នន័យ កម្មវិធីសន្សំសំចៃទិន្នន័យរារាំងកម្មវិធីមួយចំនួនមិនឲ្យបញ្ជូន ឬទទួលទិន្នន័យនៅផ្ទៃខាងក្រោយទេ។ កម្មវិធីដែលអ្នកកំពុងប្រើនាពេលបច្ចុប្បន្នអាចចូលប្រើប្រាស់​ទិន្នន័យបាន ប៉ុន្តែអាចនឹងមិនញឹកញាប់ដូចមុនទេ។ ឧទាហរណ៍ រូបភាពមិនបង្ហាញទេ លុះត្រាតែអ្នកប៉ះរូបភាពទាំងនោះ។"</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"បើកកម្មវិធីសន្សំសំចៃទិន្នន័យ?"</string>
@@ -1999,9 +1999,9 @@
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"កំពុងបង្ហាញ​ពីលើកម្មវិធីផ្សេងទៀត​នៅលើអេក្រង់​របស់អ្នក"</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"ការ​ជូនដំណឹង​ព័ត៌មាន​របស់​មុខងារ​ទម្លាប់"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"ថ្ម​អាច​នឹង​អស់ មុនពេល​សាកថ្មធម្មតា"</string>
-    <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"បាន​បើក​ដំណើរការកម្មវិធី​សន្សំ​ថ្ម ដើម្បីបង្កើនកម្រិត​ថាមពល​​ថ្ម"</string>
+    <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"បាន​បើក​ដំណើរការមុខងារ​សន្សំ​ថ្ម ដើម្បីបង្កើនកម្រិត​ថាមពល​​ថ្ម"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"មុខងារ​សន្សំ​ថ្ម"</string>
-    <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"កម្មវិធី​សន្សំ​ថ្ម​ត្រូវបានបិទ"</string>
+    <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"មុខងារ​សន្សំ​ថ្ម​ត្រូវបានបិទ"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"ទូរសព្ទ​មាន​កម្រិតថ្ម​គ្រប់គ្រាន់​។ មុខងារ​ផ្សេងៗ​មិន​ត្រូវបាន​រឹតបន្តឹងទៀត​ទេ។"</string>
     <string name="battery_saver_charged_notification_summary" product="tablet" msgid="4426317048139996888">"ថេប្លេត​មាន​កម្រិតថ្ម​គ្រប់គ្រាន់​។ មុខងារ​ផ្សេងៗ​មិន​ត្រូវបាន​រឹតបន្តឹងទៀត​ទេ។"</string>
     <string name="battery_saver_charged_notification_summary" product="device" msgid="1031562417867646649">"ឧបករណ៍​មាន​កម្រិតថ្ម​គ្រប់គ្រាន់​។ មុខងារ​ផ្សេងៗ​មិន​ត្រូវបាន​រឹតបន្តឹងទៀត​ទេ។"</string>
