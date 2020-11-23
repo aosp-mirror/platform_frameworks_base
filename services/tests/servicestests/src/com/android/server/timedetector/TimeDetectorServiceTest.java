@@ -227,10 +227,6 @@ public class TimeDetectorServiceTest {
         private boolean mDumpCalled;
 
         @Override
-        public void initialize(Callback ignored) {
-        }
-
-        @Override
         public void suggestTelephonyTime(TelephonyTimeSuggestion timeSuggestion) {
             mLastTelephonySuggestion = timeSuggestion;
         }
