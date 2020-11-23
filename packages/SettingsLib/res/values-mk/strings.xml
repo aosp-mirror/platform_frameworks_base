@@ -51,9 +51,9 @@
     <string name="connected_via_carrier" msgid="1968057009076191514">"Поврзано преку %1$s"</string>
     <string name="available_via_carrier" msgid="465598683092718294">"Достапно преку %1$s"</string>
     <string name="osu_opening_provider" msgid="4318105381295178285">"Се отвора <xliff:g id="PASSPOINTPROVIDER">%1$s</xliff:g>"</string>
-    <string name="osu_connect_failed" msgid="9107873364807159193">"Не можеше да се поврзе"</string>
+    <string name="osu_connect_failed" msgid="9107873364807159193">"Не може да се поврзе"</string>
     <string name="osu_completing_sign_up" msgid="8412636665040390901">"Се завршува регистрацијата…"</string>
-    <string name="osu_sign_up_failed" msgid="5605453599586001793">"Не можеше да се заврши регистрацијата. Допрете за да се обидете повторно."</string>
+    <string name="osu_sign_up_failed" msgid="5605453599586001793">"Не може да се заврши регистрацијата. Допрете за да се обидете повторно."</string>
     <string name="osu_sign_up_complete" msgid="7640183358878916847">"Регистрацијата е завршена. Се поврзува…"</string>
     <string name="speed_label_very_slow" msgid="8526005255731597666">"Многу бавна"</string>
     <string name="speed_label_slow" msgid="6069917670665664161">"Бавна"</string>
@@ -116,8 +116,8 @@
     <string name="bluetooth_pairing_accept_all_caps" msgid="2734383073450506220">"СПАРИ"</string>
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Откажи"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"Кога е поврзано, спарувањето одобрува пристап до контактите и историјата на повиците."</string>
-    <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"Не можеше да се спари со <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Не можеше да се спари со <xliff:g id="DEVICE_NAME">%1$s</xliff:g> поради погрешен PIN или лозинка."</string>
+    <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"Не може да се спари со <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Не може да се спари со <xliff:g id="DEVICE_NAME">%1$s</xliff:g> поради погрешен PIN или лозинка."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"Не може да комуницира со <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"Спарувањето е одбиено од <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"Компјутер"</string>
@@ -399,9 +399,9 @@
     <string name="inactive_app_inactive_summary" msgid="3161222402614236260">"Неактивно. Допрете за да смените."</string>
     <string name="inactive_app_active_summary" msgid="8047630990208722344">"Активно. Допрете за да смените."</string>
     <string name="standby_bucket_summary" msgid="5128193447550429600">"Состојба на мирување на апликацијата: <xliff:g id="BUCKET"> %s</xliff:g>"</string>
-    <string name="transcode_settings_title" msgid="6700974145733932357">"Поставки за транскодирање на аудиовизуелни содржини"</string>
-    <string name="transcode_enable_all" msgid="4719796495995795404">"Овозможи транскодирање за сите апликации"</string>
-    <string name="transcode_skip_apps" msgid="5680997722349545778">"Оневозможи транскодирање за сите апликации"</string>
+    <string name="transcode_settings_title" msgid="2581975870429850549">"Поставки за транскодирање аудиовизуелни содржини"</string>
+    <string name="transcode_enable_all" msgid="9102460144086871903">"Оневозможи транскодирање"</string>
+    <string name="transcode_skip_apps" msgid="8249721984597390142">"Овозможете транскодирање за апликациите"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"Активни услуги"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"Погледнете и контролирајте услуги што се моментално активни"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"Воведување WebView"</string>
@@ -449,6 +449,8 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"Уште <xliff:g id="TIME">%1$s</xliff:g> до целосно полнење"</string>
     <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> до целосно полнење"</string>
+    <!-- no translation found for power_charging_limited (5902301801611726210) -->
+    <skip />
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Непознато"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Се полни"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Брзо полнење"</string>

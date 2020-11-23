@@ -399,9 +399,12 @@
     <string name="inactive_app_inactive_summary" msgid="3161222402614236260">"אפליקציה לא פעילה. הקש כדי להחליף מצב."</string>
     <string name="inactive_app_active_summary" msgid="8047630990208722344">"אפליקציה פעילה. הקש כדי להחליף מצב."</string>
     <string name="standby_bucket_summary" msgid="5128193447550429600">"אפליקציה במצב המתנה:<xliff:g id="BUCKET"> %s</xliff:g>"</string>
-    <string name="transcode_settings_title" msgid="6700974145733932357">"הגדרות המרת קידוד במדיה"</string>
-    <string name="transcode_enable_all" msgid="4719796495995795404">"הפעלת המרת קידוד בכל האפליקציות"</string>
-    <string name="transcode_skip_apps" msgid="5680997722349545778">"השבתת המרת קידוד באפליקציות"</string>
+    <!-- no translation found for transcode_settings_title (2581975870429850549) -->
+    <skip />
+    <!-- no translation found for transcode_enable_all (9102460144086871903) -->
+    <skip />
+    <!-- no translation found for transcode_skip_apps (8249721984597390142) -->
+    <skip />
     <string name="runningservices_settings_title" msgid="6460099290493086515">"שירותים פועלים"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"הצגת השירותים הפועלים כעת ושליטה בהם"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"‏יישום WebView"</string>
@@ -449,6 +452,8 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g>‏ - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"נשארו <xliff:g id="TIME">%1$s</xliff:g> עד הטעינה"</string>
     <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> עד הטעינה"</string>
+    <!-- no translation found for power_charging_limited (5902301801611726210) -->
+    <skip />
     <string name="battery_info_status_unknown" msgid="268625384868401114">"לא ידוע"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"בטעינה"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"הסוללה נטענת מהר"</string>
