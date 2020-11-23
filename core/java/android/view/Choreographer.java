@@ -276,7 +276,7 @@ public final class Choreographer {
     private static float getRefreshRate() {
         DisplayInfo di = DisplayManagerGlobal.getInstance().getDisplayInfo(
                 Display.DEFAULT_DISPLAY);
-        return di.getMode().getRefreshRate();
+        return di.getRefreshRate();
     }
 
     /**
@@ -944,7 +944,7 @@ public final class Choreographer {
         private VsyncEventData mLastVsyncEventData = new VsyncEventData();
 
         public FrameDisplayEventReceiver(Looper looper, int vsyncSource) {
-            super(looper, vsyncSource, CONFIG_CHANGED_EVENT_SUPPRESS);
+            super(looper, vsyncSource, 0);
         }
 
         // TODO(b/116025192): physicalDisplayId is ignored because SF only emits VSYNC events for

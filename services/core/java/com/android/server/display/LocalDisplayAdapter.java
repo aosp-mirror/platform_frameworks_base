@@ -208,6 +208,9 @@ final class LocalDisplayAdapter extends DisplayAdapter {
 
         private DisplayDeviceConfig mDisplayDeviceConfig;
 
+        private DisplayEventReceiver.FrameRateOverride[] mFrameRateOverrides =
+                new DisplayEventReceiver.FrameRateOverride[0];
+
         LocalDisplayDevice(IBinder displayToken, long physicalDisplayId,
                 SurfaceControl.DisplayInfo info, SurfaceControl.DisplayConfig[] configs,
                 int activeConfigId, SurfaceControl.DesiredDisplayConfigSpecs configSpecs,
@@ -625,6 +628,8 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                     mInfo.name = getContext().getResources().getString(
                             com.android.internal.R.string.display_manager_hdmi_display_name);
                 }
+                mInfo.frameRateOverrides = mFrameRateOverrides;
+
                 // The display is trusted since it is created by system.
                 mInfo.flags |= DisplayDeviceInfo.FLAG_TRUSTED;
             }
@@ -882,6 +887,13 @@ final class LocalDisplayAdapter extends DisplayAdapter {
             }
         }
 
+        public void onFrameRateOverridesChanged(
+                DisplayEventReceiver.FrameRateOverride[] overrides) {
+            if (updateFrameRateOverridesLocked(overrides)) {
+                updateDeviceInfoLocked();
+            }
+        }
+
         public boolean updateActiveModeLocked(int activeConfigId) {
             if (mActiveConfigId == activeConfigId) {
                 return false;
@@ -892,6 +904,16 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                 Slog.w(TAG, "In unknown mode after setting allowed configs"
                         + ", activeConfigId=" + mActiveConfigId);
             }
+            return true;
+        }
+
+        public boolean updateFrameRateOverridesLocked(
+                DisplayEventReceiver.FrameRateOverride[] overrides) {
+            if (overrides.equals(mFrameRateOverrides)) {
+                return false;
+            }
+
+            mFrameRateOverrides = overrides;
             return true;
         }
 
@@ -1102,23 +1124,39 @@ final class LocalDisplayAdapter extends DisplayAdapter {
     public interface DisplayEventListener {
         void onHotplug(long timestampNanos, long physicalDisplayId, boolean connected);
         void onConfigChanged(long timestampNanos, long physicalDisplayId, int configId);
+        void onFrameRateOverridesChanged(long timestampNanos, long physicalDisplayId,
+                DisplayEventReceiver.FrameRateOverride[] overrides);
+
     }
 
     public static final class ProxyDisplayEventReceiver extends DisplayEventReceiver {
         private final DisplayEventListener mListener;
         ProxyDisplayEventReceiver(Looper looper, DisplayEventListener listener) {
-            super(looper, VSYNC_SOURCE_APP, CONFIG_CHANGED_EVENT_DISPATCH);
+            super(looper, VSYNC_SOURCE_APP,
+                    EVENT_REGISTRATION_CONFIG_CHANGED_FLAG
+                            | EVENT_REGISTRATION_FRAME_RATE_OVERRIDE_FLAG);
             mListener = listener;
         }
+
+        @Override
         public void onHotplug(long timestampNanos, long physicalDisplayId, boolean connected) {
             mListener.onHotplug(timestampNanos, physicalDisplayId, connected);
         }
+
+        @Override
         public void onConfigChanged(long timestampNanos, long physicalDisplayId, int configId) {
             mListener.onConfigChanged(timestampNanos, physicalDisplayId, configId);
+        }
+
+        @Override
+        public void onFrameRateOverridesChanged(long timestampNanos, long physicalDisplayId,
+                DisplayEventReceiver.FrameRateOverride[] overrides) {
+            mListener.onFrameRateOverridesChanged(timestampNanos, physicalDisplayId, overrides);
         }
     }
 
     private final class LocalDisplayEventListener implements DisplayEventListener {
+        @Override
         public void onHotplug(long timestampNanos, long physicalDisplayId, boolean connected) {
             synchronized (getSyncRoot()) {
                 if (connected) {
@@ -1128,6 +1166,8 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                 }
             }
         }
+
+        @Override
         public void onConfigChanged(long timestampNanos, long physicalDisplayId, int configId) {
             if (DEBUG) {
                 Slog.d(TAG, "onConfigChanged("
@@ -1145,6 +1185,27 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                     return;
                 }
                 device.onActiveDisplayConfigChangedLocked(configId);
+            }
+        }
+
+        @Override
+        public void onFrameRateOverridesChanged(long timestampNanos, long physicalDisplayId,
+                DisplayEventReceiver.FrameRateOverride[] overrides) {
+            if (DEBUG) {
+                Slog.d(TAG, "onFrameRateOverrideChanged(timestampNanos=" + timestampNanos
+                        + ", physicalDisplayId=" + physicalDisplayId + " overrides="
+                        + Arrays.toString(overrides) + ")");
+            }
+            synchronized (getSyncRoot()) {
+                LocalDisplayDevice device = mDevices.get(physicalDisplayId);
+                if (device == null) {
+                    if (DEBUG) {
+                        Slog.d(TAG, "Received frame rate override event for unhandled physical"
+                                + " display: physicalDisplayId=" + physicalDisplayId);
+                    }
+                    return;
+                }
+                device.onFrameRateOverridesChanged(overrides);
             }
         }
     }
