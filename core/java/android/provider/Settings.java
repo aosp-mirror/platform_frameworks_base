@@ -13286,16 +13286,6 @@ public final class Settings {
                 "storage_settings_clobber_threshold";
 
         /**
-         * If set to 1, {@link Secure#LOCATION_MODE} will be set to {@link Secure#LOCATION_MODE_OFF}
-         * temporarily for all users.
-         *
-         * @hide
-         */
-        @TestApi
-        public static final String LOCATION_GLOBAL_KILL_SWITCH =
-                "location_global_kill_switch";
-
-        /**
          * If set to 1, SettingsProvider's restoreAnyVersion="true" attribute will be ignored
          * and restoring to lower version of platform API will be skipped.
          *
