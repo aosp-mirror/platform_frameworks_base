@@ -319,30 +319,17 @@ public class KeyguardSimPukView extends KeyguardPinBasedInputView {
 
         @Override
         public void run() {
-            if (DEBUG) Log.v(TAG, "call supplyPukReportResult()");
+            if (DEBUG) {
+                Log.v(TAG, "call supplyIccLockPuk(subid=" + mSubId + ")");
+            }
             TelephonyManager telephonyManager =
                     ((TelephonyManager) mContext.getSystemService(Context.TELEPHONY_SERVICE))
                             .createForSubscriptionId(mSubId);
-            final PinResult result = telephonyManager.supplyPukReportPinResult(mPuk, mPin);
-            if (result == null) {
-                Log.e(TAG, "Error result for supplyPukReportResult.");
-                post(new Runnable() {
-                    @Override
-                    public void run() {
-                        onSimLockChangedResponse(PinResult.getDefaultFailedResult());
-                    }
-                });
-            } else {
-                if (DEBUG) {
-                    Log.v(TAG, "supplyPukReportResult returned: " + result.toString());
-                }
-                post(new Runnable() {
-                    @Override
-                    public void run() {
-                        onSimLockChangedResponse(result);
-                    }
-                });
+            final PinResult result = telephonyManager.supplyIccLockPuk(mPuk, mPin);
+            if (DEBUG) {
+                Log.v(TAG, "supplyIccLockPuk returned: " + result.toString());
             }
+            post(() -> onSimLockChangedResponse(result));
         }
     }
 
@@ -415,8 +402,8 @@ public class KeyguardSimPukView extends KeyguardPinBasedInputView {
                             }
                             resetPasswordText(true /* animate */,
                                     /* announce */
-                                    result.getType() != PinResult.PIN_RESULT_TYPE_SUCCESS);
-                            if (result.getType() == PinResult.PIN_RESULT_TYPE_SUCCESS) {
+                                    result.getResult() != PinResult.PIN_RESULT_TYPE_SUCCESS);
+                            if (result.getResult() == PinResult.PIN_RESULT_TYPE_SUCCESS) {
                                 Dependency.get(KeyguardUpdateMonitor.class)
                                         .reportSimUnlocked(mSubId);
                                 mRemainingAttempts = -1;
@@ -427,7 +414,7 @@ public class KeyguardSimPukView extends KeyguardPinBasedInputView {
                                 }
                             } else {
                                 mShowDefaultMessage = false;
-                                if (result.getType() == PinResult.PIN_RESULT_TYPE_INCORRECT) {
+                                if (result.getResult() == PinResult.PIN_RESULT_TYPE_INCORRECT) {
                                     // show message
                                     mSecurityMessageDisplay.setMessage(getPukPasswordErrorMessage(
                                             result.getAttemptsRemaining(), false));
