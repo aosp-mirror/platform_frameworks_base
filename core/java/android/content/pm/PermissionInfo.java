@@ -65,12 +65,20 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
     @Deprecated
     public static final int PROTECTION_SIGNATURE_OR_SYSTEM = 3;
 
+    /**
+     * System-level value for {@link #protectionLevel}, corresponding
+     * to the <code>internal</code> value of
+     * {@link android.R.attr#protectionLevel}.
+     */
+    public static final int PROTECTION_INTERNAL = 4;
+
     /** @hide */
     @IntDef(flag = false, prefix = { "PROTECTION_" }, value = {
             PROTECTION_NORMAL,
             PROTECTION_DANGEROUS,
             PROTECTION_SIGNATURE,
             PROTECTION_SIGNATURE_OR_SYSTEM,
+            PROTECTION_INTERNAL,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Protection {}
@@ -327,7 +335,7 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
      * </pre>
      *
      * <p></p>Base permission types are {@link #PROTECTION_NORMAL},
-     * {@link #PROTECTION_DANGEROUS}, {@link #PROTECTION_SIGNATURE}
+     * {@link #PROTECTION_DANGEROUS}, {@link #PROTECTION_SIGNATURE}, {@link #PROTECTION_INTERNAL}
      * and the deprecated {@link #PROTECTION_SIGNATURE_OR_SYSTEM}.
      * Flags are listed under {@link android.R.attr#protectionLevel}.
      *
@@ -488,6 +496,9 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
                 break;
             case PermissionInfo.PROTECTION_SIGNATURE_OR_SYSTEM:
                 protLevel.append("signatureOrSystem");
+                break;
+            case PermissionInfo.PROTECTION_INTERNAL:
+                protLevel.append("internal");
                 break;
             default:
                 protLevel.append("????");

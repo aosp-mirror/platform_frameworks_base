@@ -2717,7 +2717,8 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         boolean runtimePermissionsRevoked = false;
         int[] updatedUserIds = EMPTY_INT_ARRAY;
 
-        final ArraySet<String> shouldGrantSignaturePermission = new ArraySet<>();
+        ArraySet<String> shouldGrantSignaturePermission = null;
+        ArraySet<String> shouldGrantInternalPermission = null;
         final List<String> requestedPermissions = pkg.getRequestedPermissions();
         final int requestedPermissionsSize = requestedPermissions.size();
         for (int i = 0; i < requestedPermissionsSize; i++) {
@@ -2730,8 +2731,19 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             if (permission == null) {
                 continue;
             }
-            if (permission.isSignature() && shouldGrantSignaturePermission(pkg, ps, permission)) {
+            if (permission.isSignature() && (shouldGrantSignaturePermission(pkg, permission)
+                    || shouldGrantPermissionByProtectionFlags(pkg, ps, permission))) {
+                if (shouldGrantSignaturePermission == null) {
+                    shouldGrantSignaturePermission = new ArraySet<>();
+                }
                 shouldGrantSignaturePermission.add(permissionName);
+            }
+            if (permission.isInternal()
+                    && shouldGrantPermissionByProtectionFlags(pkg, ps, permission)) {
+                if (shouldGrantInternalPermission == null) {
+                    shouldGrantInternalPermission = new ArraySet<>();
+                }
+                shouldGrantInternalPermission.add(permissionName);
             }
         }
 
@@ -2942,10 +2954,17 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                                 + pkg.getPackageName());
                     }
 
-                    if ((bp.isNormal() && shouldGrantNormalPermission) || (bp.isSignature()
-                            && (shouldGrantSignaturePermission.contains(permName)
-                            || ((bp.isDevelopment() || bp.isRole())
-                            && origState.isPermissionGranted(permName))))) {
+                    if ((bp.isNormal() && shouldGrantNormalPermission)
+                            || (bp.isSignature()
+                                    && ((shouldGrantSignaturePermission != null
+                                            && shouldGrantSignaturePermission.contains(permName))
+                                            || ((bp.isDevelopment() || bp.isRole())
+                                                    && origState.isPermissionGranted(permName))))
+                            || (bp.isInternal()
+                                    && ((shouldGrantInternalPermission != null
+                                            && shouldGrantInternalPermission.contains(permName))
+                                            || ((bp.isDevelopment() || bp.isRole())
+                                                    && origState.isPermissionGranted(permName))))) {
                         // Grant an install permission.
                         if (uidState.grantPermission(bp)) {
                             changedInstallPermission = true;
@@ -3445,7 +3464,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
     }
 
     private boolean shouldGrantSignaturePermission(@NonNull AndroidPackage pkg,
-            @NonNull PackageSetting pkgSetting, @NonNull Permission bp) {
+            @NonNull Permission bp) {
         // expect single system package
         String systemPackageName = ArrayUtils.firstOrNull(mPackageManagerInt.getKnownPackageNames(
                 PackageManagerInternal.PACKAGE_SYSTEM, UserHandle.USER_SYSTEM));
@@ -3460,8 +3479,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         //     - or it shares the above relationships with the system package
         final PackageParser.SigningDetails sourceSigningDetails =
                 getSourcePackageSigningDetails(bp);
-        boolean allowed =
-                pkg.getSigningDetails().hasAncestorOrSelf(sourceSigningDetails)
+        return pkg.getSigningDetails().hasAncestorOrSelf(sourceSigningDetails)
                 || sourceSigningDetails.checkCapability(
                         pkg.getSigningDetails(),
                         PackageParser.SigningDetails.CertCapabilities.PERMISSION)
@@ -3469,6 +3487,11 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                 || systemPackage.getSigningDetails().checkCapability(
                         pkg.getSigningDetails(),
                         PackageParser.SigningDetails.CertCapabilities.PERMISSION);
+    }
+
+    private boolean shouldGrantPermissionByProtectionFlags(@NonNull AndroidPackage pkg,
+            @NonNull PackageSetting pkgSetting, @NonNull Permission bp) {
+        boolean allowed = false;
         final boolean isVendorPrivilegedPermission = bp.isVendorPrivileged();
         final boolean isPrivilegedPermission = bp.isPrivileged() || isVendorPrivilegedPermission;
         final boolean isOemPermission = bp.isOem();

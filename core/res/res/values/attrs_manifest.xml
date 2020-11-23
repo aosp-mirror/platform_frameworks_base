@@ -226,6 +226,9 @@
              to share specific features explicitly because they are being built
              together. -->
         <flag name="signatureOrSystem" value="3" />
+        <!-- <strong>Base permission type</strong>: a permission that is managed internally by the
+             system and only granted according to the protection flags. -->
+        <flag name="internal" value="4" />
         <!-- Additional flag from base permission type: this permission can also
              be granted to any applications installed as privileged apps on the system image.
              Please avoid using this option, as the

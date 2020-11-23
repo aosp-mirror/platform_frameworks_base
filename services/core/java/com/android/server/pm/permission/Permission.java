@@ -61,6 +61,7 @@ public final class Permission {
             PermissionInfo.PROTECTION_NORMAL,
             PermissionInfo.PROTECTION_SIGNATURE,
             PermissionInfo.PROTECTION_SIGNATURE_OR_SYSTEM,
+            PermissionInfo.PROTECTION_INTERNAL,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ProtectionLevel {}
@@ -244,6 +245,11 @@ public final class Permission {
     public boolean isSignature() {
         return (mPermissionInfo.protectionLevel & PermissionInfo.PROTECTION_MASK_BASE)
                 == PermissionInfo.PROTECTION_SIGNATURE;
+    }
+
+    public boolean isInternal() {
+        return (mPermissionInfo.protectionLevel & PermissionInfo.PROTECTION_MASK_BASE)
+                == PermissionInfo.PROTECTION_INTERNAL;
     }
 
     public boolean isAppOp() {
