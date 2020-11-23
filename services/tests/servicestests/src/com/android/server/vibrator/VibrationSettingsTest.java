@@ -20,7 +20,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -32,6 +34,9 @@ import android.content.Context;
 import android.content.ContextWrapper;
 import android.media.AudioManager;
 import android.os.Handler;
+import android.os.PowerManagerInternal;
+import android.os.PowerSaveState;
+import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.VibrationAttributes;
 import android.os.VibrationEffect;
@@ -44,6 +49,7 @@ import androidx.test.InstrumentationRegistry;
 
 import com.android.internal.util.test.FakeSettingsProvider;
 import com.android.internal.util.test.FakeSettingsProviderRule;
+import com.android.server.LocalServices;
 
 import org.junit.After;
 import org.junit.Before;
@@ -62,17 +68,24 @@ import org.mockito.junit.MockitoRule;
 @Presubmit
 public class VibrationSettingsTest {
 
+    private static final int UID = 1;
+    private static final PowerSaveState NORMAL_POWER_STATE = new PowerSaveState.Builder().build();
+    private static final PowerSaveState LOW_POWER_STATE = new PowerSaveState.Builder()
+            .setBatterySaverEnabled(true).build();
+
     @Rule public MockitoRule mMockitoRule = MockitoJUnit.rule();
     @Rule public FakeSettingsProviderRule mSettingsProviderRule = FakeSettingsProvider.rule();
 
     // TODO(b/131311651): replace with a FakeVibrator instead.
     @Mock private Vibrator mVibratorMock;
     @Mock private VibrationSettings.OnVibratorSettingsChanged mListenerMock;
+    @Mock private PowerManagerInternal mPowerManagerInternalMock;
 
     private TestLooper mTestLooper;
     private ContextWrapper mContextSpy;
     private AudioManager mAudioManager;
     private VibrationSettings mVibrationSettings;
+    private PowerManagerInternal.LowPowerModeListener mRegisteredPowerModeListener;
 
     @Before
     public void setUp() throws Exception {
@@ -83,10 +96,17 @@ public class VibrationSettingsTest {
         when(mContextSpy.getContentResolver()).thenReturn(contentResolver);
         when(mContextSpy.getSystemService(eq(Context.VIBRATOR_SERVICE))).thenReturn(mVibratorMock);
         when(mVibratorMock.hasVibrator()).thenReturn(true);
+        doAnswer(invocation -> {
+            mRegisteredPowerModeListener = invocation.getArgument(0);
+            return null;
+        }).when(mPowerManagerInternalMock).registerLowPowerModeObserver(any());
+
+        LocalServices.removeServiceForTest(PowerManagerInternal.class);
+        LocalServices.addService(PowerManagerInternal.class, mPowerManagerInternalMock);
 
         mAudioManager = mContextSpy.getSystemService(AudioManager.class);
-        mVibrationSettings = new VibrationSettings(
-                mContextSpy, new Handler(mTestLooper.getLooper()));
+        mVibrationSettings = new VibrationSettings(mContextSpy,
+                new Handler(mTestLooper.getLooper()));
 
         setUserSetting(Settings.System.VIBRATE_INPUT_DEVICES, 0);
         setUserSetting(Settings.System.VIBRATE_WHEN_RINGING, 0);
@@ -96,7 +116,7 @@ public class VibrationSettingsTest {
 
     @After
     public void tearDown() throws Exception {
-        FakeSettingsProvider.clearSettingsProvider();
+        LocalServices.removeServiceForTest(PowerManagerInternal.class);
     }
 
     @Test
@@ -118,6 +138,17 @@ public class VibrationSettingsTest {
     }
 
     @Test
+    public void addListener_lowPowerModeChangeTriggerListener() {
+        mVibrationSettings.addListener(mListenerMock);
+
+        mRegisteredPowerModeListener.onLowPowerModeChanged(LOW_POWER_STATE);
+        mRegisteredPowerModeListener.onLowPowerModeChanged(NORMAL_POWER_STATE);
+        mRegisteredPowerModeListener.onLowPowerModeChanged(NORMAL_POWER_STATE); // No change.
+
+        verify(mListenerMock, times(2)).onChange();
+    }
+
+    @Test
     public void removeListener_noMoreCallbacksToListener() {
         mVibrationSettings.addListener(mListenerMock);
 
@@ -132,56 +163,103 @@ public class VibrationSettingsTest {
     }
 
     @Test
-    public void shouldVibrateForRingtones_withVibrateWhenRinging_onlyIgnoreSettingsForSilentMode() {
-        setUserSetting(Settings.System.VIBRATE_WHEN_RINGING, 1);
-
-        setRingerMode(AudioManager.RINGER_MODE_SILENT);
-        assertFalse(mVibrationSettings.shouldVibrateForRingtone());
-
-        setRingerMode(AudioManager.RINGER_MODE_MAX);
-        assertTrue(mVibrationSettings.shouldVibrateForRingtone());
-
-        setRingerMode(AudioManager.RINGER_MODE_NORMAL);
-        assertTrue(mVibrationSettings.shouldVibrateForRingtone());
-
-        setRingerMode(AudioManager.RINGER_MODE_VIBRATE);
-        assertTrue(mVibrationSettings.shouldVibrateForRingtone());
+    public void shouldVibrateForRingerMode_withoutRingtoneUsage_returnsTrue() {
+        assertTrue(mVibrationSettings.shouldVibrateForRingerMode(VibrationAttributes.USAGE_ALARM));
+        assertTrue(mVibrationSettings.shouldVibrateForRingerMode(VibrationAttributes.USAGE_TOUCH));
+        assertTrue(mVibrationSettings.shouldVibrateForRingerMode(
+                VibrationAttributes.USAGE_NOTIFICATION));
+        assertTrue(mVibrationSettings.shouldVibrateForRingerMode(
+                VibrationAttributes.USAGE_COMMUNICATION_REQUEST));
     }
 
     @Test
-    public void shouldVibrateForRingtones_withApplyRampingRinger_onlyIgnoreSettingsForSilentMode() {
+    public void shouldVibrateForRingerMode_withVibrateWhenRinging_ignoreSettingsForSilentMode() {
+        int usageRingtone = VibrationAttributes.USAGE_RINGTONE;
+        setUserSetting(Settings.System.VIBRATE_WHEN_RINGING, 1);
+
+        setRingerMode(AudioManager.RINGER_MODE_SILENT);
+        assertFalse(mVibrationSettings.shouldVibrateForRingerMode(usageRingtone));
+
+        setRingerMode(AudioManager.RINGER_MODE_MAX);
+        assertTrue(mVibrationSettings.shouldVibrateForRingerMode(usageRingtone));
+
+        setRingerMode(AudioManager.RINGER_MODE_NORMAL);
+        assertTrue(mVibrationSettings.shouldVibrateForRingerMode(usageRingtone));
+
+        setRingerMode(AudioManager.RINGER_MODE_VIBRATE);
+        assertTrue(mVibrationSettings.shouldVibrateForRingerMode(usageRingtone));
+    }
+
+    @Test
+    public void shouldVibrateForRingerMode_withApplyRampingRinger_ignoreSettingsForSilentMode() {
+        int usageRingtone = VibrationAttributes.USAGE_RINGTONE;
         setUserSetting(Settings.System.VIBRATE_WHEN_RINGING, 0);
         setGlobalSetting(Settings.Global.APPLY_RAMPING_RINGER, 1);
 
         setRingerMode(AudioManager.RINGER_MODE_SILENT);
-        assertFalse(mVibrationSettings.shouldVibrateForRingtone());
+        assertFalse(mVibrationSettings.shouldVibrateForRingerMode(usageRingtone));
 
         setRingerMode(AudioManager.RINGER_MODE_MAX);
-        assertTrue(mVibrationSettings.shouldVibrateForRingtone());
+        assertTrue(mVibrationSettings.shouldVibrateForRingerMode(usageRingtone));
 
         setRingerMode(AudioManager.RINGER_MODE_NORMAL);
-        assertTrue(mVibrationSettings.shouldVibrateForRingtone());
+        assertTrue(mVibrationSettings.shouldVibrateForRingerMode(usageRingtone));
 
         setRingerMode(AudioManager.RINGER_MODE_VIBRATE);
-        assertTrue(mVibrationSettings.shouldVibrateForRingtone());
+        assertTrue(mVibrationSettings.shouldVibrateForRingerMode(usageRingtone));
     }
 
     @Test
-    public void shouldVibrateForRingtones_withAllSettingsOff_onlyVibratesForVibrateMode() {
+    public void shouldVibrateForRingerMode_withAllSettingsOff_onlyVibratesForVibrateMode() {
+        int usageRingtone = VibrationAttributes.USAGE_RINGTONE;
         setUserSetting(Settings.System.VIBRATE_WHEN_RINGING, 0);
         setGlobalSetting(Settings.Global.APPLY_RAMPING_RINGER, 0);
 
         setRingerMode(AudioManager.RINGER_MODE_VIBRATE);
-        assertTrue(mVibrationSettings.shouldVibrateForRingtone());
+        assertTrue(mVibrationSettings.shouldVibrateForRingerMode(usageRingtone));
 
         setRingerMode(AudioManager.RINGER_MODE_SILENT);
-        assertFalse(mVibrationSettings.shouldVibrateForRingtone());
+        assertFalse(mVibrationSettings.shouldVibrateForRingerMode(usageRingtone));
 
         setRingerMode(AudioManager.RINGER_MODE_MAX);
-        assertFalse(mVibrationSettings.shouldVibrateForRingtone());
+        assertFalse(mVibrationSettings.shouldVibrateForRingerMode(usageRingtone));
 
         setRingerMode(AudioManager.RINGER_MODE_NORMAL);
-        assertFalse(mVibrationSettings.shouldVibrateForRingtone());
+        assertFalse(mVibrationSettings.shouldVibrateForRingerMode(usageRingtone));
+    }
+
+    @Test
+    public void shouldVibrateForUid_withBackgroundAllowedUsage_returnTrue() throws RemoteException {
+        assertTrue(mVibrationSettings.shouldVibrateForUid(UID, VibrationAttributes.USAGE_ALARM));
+        assertTrue(mVibrationSettings.shouldVibrateForUid(UID,
+                VibrationAttributes.USAGE_NOTIFICATION));
+        assertTrue(mVibrationSettings.shouldVibrateForUid(UID, VibrationAttributes.USAGE_RINGTONE));
+    }
+
+    @Test
+    public void shouldVibrateForPowerMode_withLowPowerAndAllowedUsage_returnTrue() {
+        mRegisteredPowerModeListener.onLowPowerModeChanged(LOW_POWER_STATE);
+
+        assertTrue(mVibrationSettings.shouldVibrateForPowerMode(VibrationAttributes.USAGE_ALARM));
+        assertTrue(mVibrationSettings.shouldVibrateForPowerMode(
+                VibrationAttributes.USAGE_RINGTONE));
+        assertTrue(mVibrationSettings.shouldVibrateForPowerMode(
+                VibrationAttributes.USAGE_COMMUNICATION_REQUEST));
+    }
+
+    @Test
+    public void shouldVibrateForPowerMode_withRestrictedUsage_returnsFalseWhileInLowPowerMode() {
+        mRegisteredPowerModeListener.onLowPowerModeChanged(NORMAL_POWER_STATE);
+
+        assertTrue(mVibrationSettings.shouldVibrateForPowerMode(VibrationAttributes.USAGE_TOUCH));
+        assertTrue(mVibrationSettings.shouldVibrateForPowerMode(
+                VibrationAttributes.USAGE_NOTIFICATION));
+
+        mRegisteredPowerModeListener.onLowPowerModeChanged(LOW_POWER_STATE);
+
+        assertFalse(mVibrationSettings.shouldVibrateForPowerMode(VibrationAttributes.USAGE_TOUCH));
+        assertFalse(mVibrationSettings.shouldVibrateForPowerMode(
+                VibrationAttributes.USAGE_NOTIFICATION));
     }
 
     @Test
@@ -299,4 +377,5 @@ public class VibrationSettingsTest {
         mAudioManager.setRingerModeInternal(ringerMode);
         assertEquals(ringerMode, mAudioManager.getRingerModeInternal());
     }
+
 }

@@ -51,7 +51,6 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.IVibratorStateListener;
 import android.os.Looper;
-import android.os.PowerManager;
 import android.os.PowerManagerInternal;
 import android.os.PowerSaveState;
 import android.os.Process;
@@ -101,6 +100,9 @@ public class VibratorServiceTest {
 
     private static final int UID = Process.ROOT_UID;
     private static final String PACKAGE_NAME = "package";
+    private static final PowerSaveState NORMAL_POWER_STATE = new PowerSaveState.Builder().build();
+    private static final PowerSaveState LOW_POWER_STATE = new PowerSaveState.Builder()
+            .setBatterySaverEnabled(true).build();
     private static final VibrationAttributes ALARM_ATTRS =
             new VibrationAttributes.Builder().setUsage(VibrationAttributes.USAGE_ALARM).build();
     private static final VibrationAttributes HAPTIC_FEEDBACK_ATTRS =
@@ -118,7 +120,6 @@ public class VibratorServiceTest {
 
     @Mock private PackageManagerInternal mPackageManagerInternalMock;
     @Mock private PowerManagerInternal mPowerManagerInternalMock;
-    @Mock private PowerSaveState mPowerSaveStateMock;
     // TODO(b/131311651): replace with a FakeVibrator instead.
     @Mock private Vibrator mVibratorMock;
     @Mock private AppOpsManager mAppOpsManagerMock;
@@ -129,6 +130,7 @@ public class VibratorServiceTest {
 
     private TestLooper mTestLooper;
     private ContextWrapper mContextSpy;
+    private PowerManagerInternal.LowPowerModeListener mRegisteredPowerModeListener;
 
     @Before
     public void setUp() throws Exception {
@@ -150,8 +152,10 @@ public class VibratorServiceTest {
         when(mVibratorStateListenerMock.asBinder()).thenReturn(mVibratorStateListenerBinderMock);
         when(mPackageManagerInternalMock.getSystemUiServiceComponent())
                 .thenReturn(new ComponentName("", ""));
-        when(mPowerManagerInternalMock.getLowPowerState(PowerManager.ServiceType.VIBRATION))
-                .thenReturn(mPowerSaveStateMock);
+        doAnswer(invocation -> {
+            mRegisteredPowerModeListener = invocation.getArgument(0);
+            return null;
+        }).when(mPowerManagerInternalMock).registerLowPowerModeObserver(any());
         when(mIInputManagerMock.getInputDeviceIds()).thenReturn(new int[0]);
 
         setUserSetting(Settings.System.VIBRATE_WHEN_RINGING, 1);
@@ -199,7 +203,7 @@ public class VibratorServiceTest {
     public void createService_initializesNativeService() {
         createService();
         verify(mNativeWrapperMock).init(eq(0), notNull());
-        verify(mNativeWrapperMock).off();
+        verify(mNativeWrapperMock, times(2)).off(); // Called from constructor and onSystemReady
     }
 
     @Test
@@ -271,6 +275,24 @@ public class VibratorServiceTest {
         inOrderVerifier.verify(mNativeWrapperMock, never()).on(eq(1L), anyLong());
         inOrderVerifier.verify(mNativeWrapperMock).on(eq(10L), anyLong());
         inOrderVerifier.verify(mNativeWrapperMock).on(eq(100L), anyLong());
+    }
+
+    @Test
+    public void vibrate_withPowerModeChange_usesLowPowerModeState() {
+        VibratorService service = createService();
+        mRegisteredPowerModeListener.onLowPowerModeChanged(LOW_POWER_STATE);
+        vibrate(service, VibrationEffect.createOneShot(1, 1), HAPTIC_FEEDBACK_ATTRS);
+        vibrate(service, VibrationEffect.createOneShot(2, 2), RINGTONE_ATTRS);
+
+        mRegisteredPowerModeListener.onLowPowerModeChanged(NORMAL_POWER_STATE);
+        vibrate(service, VibrationEffect.createOneShot(3, 3), /* attributes= */ null);
+        vibrate(service, VibrationEffect.createOneShot(4, 4), NOTIFICATION_ATTRS);
+
+        InOrder inOrderVerifier = inOrder(mNativeWrapperMock);
+        inOrderVerifier.verify(mNativeWrapperMock, never()).on(eq(1L), anyLong());
+        inOrderVerifier.verify(mNativeWrapperMock).on(eq(2L), anyLong());
+        inOrderVerifier.verify(mNativeWrapperMock).on(eq(3L), anyLong());
+        inOrderVerifier.verify(mNativeWrapperMock).on(eq(4L), anyLong());
     }
 
     @Test
