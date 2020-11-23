@@ -21,6 +21,8 @@ import static com.android.systemui.classifier.Classifier.QUICK_SETTINGS;
 
 import android.view.MotionEvent;
 
+import com.android.systemui.classifier.FalsingDataProvider;
+
 import java.util.Locale;
 
 /**

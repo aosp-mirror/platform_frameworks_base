@@ -19,7 +19,8 @@ java_library {
     srcs: ["src/**/*.java"],
 
     static_libs: [
-        "PluginCoreLib"
+        "PluginCoreLib",
+        "SystemUI-sensors",
     ],
 
 }

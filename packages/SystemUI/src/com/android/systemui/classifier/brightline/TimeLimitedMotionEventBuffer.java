@@ -36,7 +36,7 @@ public class TimeLimitedMotionEventBuffer implements List<MotionEvent> {
     private final LinkedList<MotionEvent> mMotionEvents;
     private final long mMaxAgeMs;
 
-    TimeLimitedMotionEventBuffer(long maxAgeMs) {
+    public TimeLimitedMotionEventBuffer(long maxAgeMs) {
         super();
         mMaxAgeMs = maxAgeMs;
         mMotionEvents = new LinkedList<>();

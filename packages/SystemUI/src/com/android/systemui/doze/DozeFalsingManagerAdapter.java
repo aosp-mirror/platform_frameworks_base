@@ -16,8 +16,8 @@
 
 package com.android.systemui.doze;
 
+import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.doze.dagger.DozeScope;
-import com.android.systemui.plugins.FalsingManager;
 
 import javax.inject.Inject;
 
@@ -27,16 +27,16 @@ import javax.inject.Inject;
 @DozeScope
 public class DozeFalsingManagerAdapter implements DozeMachine.Part {
 
-    private final FalsingManager mFalsingManager;
+    private final FalsingCollector mFalsingCollector;
 
     @Inject
-    public DozeFalsingManagerAdapter(FalsingManager falsingManager) {
-        mFalsingManager = falsingManager;
+    public DozeFalsingManagerAdapter(FalsingCollector falsingCollector) {
+        mFalsingCollector = falsingCollector;
     }
 
     @Override
     public void transitionTo(DozeMachine.State oldState, DozeMachine.State newState) {
-        mFalsingManager.setShowingAod(isAodMode(newState));
+        mFalsingCollector.setShowingAod(isAodMode(newState));
     }
 
     private boolean isAodMode(DozeMachine.State state) {

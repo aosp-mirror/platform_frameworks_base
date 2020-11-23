@@ -20,6 +20,7 @@ import android.net.Uri;
 import android.view.MotionEvent;
 
 import com.android.systemui.plugins.annotations.ProvidesInterface;
+import com.android.systemui.util.sensors.ThresholdSensor;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -34,12 +35,6 @@ public interface FalsingManager {
     int VERSION = 6;
 
     void onSuccessfulUnlock();
-
-    void onNotificationActive();
-
-    void setShowingAod(boolean showingAod);
-
-    void onNotificatonStartDraggingDown();
 
     boolean isUnlockingDisabled();
 
@@ -82,61 +77,13 @@ public interface FalsingManager {
      */
     boolean isFalseDoubleTap();
 
-    void onNotificatonStopDraggingDown();
-
-    void setNotificationExpanded();
-
     boolean isClassifierEnabled();
-
-    void onQsDown();
-
-    void setQsExpanded(boolean expanded);
 
     boolean shouldEnforceBouncer();
 
-    void onTrackingStarted(boolean secure);
-
-    void onTrackingStopped();
-
-    void onLeftAffordanceOn();
-
-    void onCameraOn();
-
-    void onAffordanceSwipingStarted(boolean rightCorner);
-
-    void onAffordanceSwipingAborted();
-
-    void onStartExpandingFromPulse();
-
-    void onExpansionFromPulseStopped();
-
     Uri reportRejectedTouch();
 
-    void onScreenOnFromTouch();
-
     boolean isReportingEnabled();
-
-    void onUnlockHintStarted();
-
-    void onCameraHintStarted();
-
-    void onLeftAffordanceHintStarted();
-
-    void onScreenTurningOn();
-
-    void onScreenOff();
-
-    void onNotificationStopDismissing();
-
-    void onNotificationDismissed();
-
-    void onNotificationStartDismissing();
-
-    void onNotificationDoubleTap(boolean accepted, float dx, float dy);
-
-    void onBouncerShown();
-
-    void onBouncerHidden();
 
     void onTouchEvent(MotionEvent ev, int width, int height);
 
@@ -144,4 +91,7 @@ public interface FalsingManager {
     void dump(FileDescriptor fd, PrintWriter pw, String[] args);
 
     void cleanup();
+
+    /** Call to report a ProximityEvent to the FalsingManager. */
+    void onProximityEvent(ThresholdSensor.ThresholdSensorEvent proximityEvent);
 }

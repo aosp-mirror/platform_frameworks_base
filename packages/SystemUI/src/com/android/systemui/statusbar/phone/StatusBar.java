@@ -147,6 +147,7 @@ import com.android.systemui.SystemUI;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.charging.WirelessChargingAnimation;
+import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.dagger.qualifiers.UiBackground;
 import com.android.systemui.demomode.DemoMode;
@@ -384,6 +385,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     private final StatusBarTouchableRegionManager mStatusBarTouchableRegionManager;
     private final DynamicPrivacyController mDynamicPrivacyController;
     private final BypassHeadsUpNotifier mBypassHeadsUpNotifier;
+    private final FalsingCollector mFalsingCollector;
     private final FalsingManager mFalsingManager;
     private final BroadcastDispatcher mBroadcastDispatcher;
     private final ConfigurationController mConfigurationController;
@@ -692,6 +694,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             DynamicPrivacyController dynamicPrivacyController,
             BypassHeadsUpNotifier bypassHeadsUpNotifier,
             FalsingManager falsingManager,
+            FalsingCollector falsingCollector,
             BroadcastDispatcher broadcastDispatcher,
             RemoteInputQuickSettingsDisabler remoteInputQuickSettingsDisabler,
             NotificationGutsManager notificationGutsManager,
@@ -772,6 +775,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mStatusBarTouchableRegionManager = statusBarTouchableRegionManager;
         mDynamicPrivacyController = dynamicPrivacyController;
         mBypassHeadsUpNotifier = bypassHeadsUpNotifier;
+        mFalsingCollector = falsingCollector;
         mFalsingManager = falsingManager;
         mBroadcastDispatcher = broadcastDispatcher;
         mRemoteInputQuickSettingsDisabler = remoteInputQuickSettingsDisabler;
@@ -1389,7 +1393,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             where.getLocationInWindow(mTmpInt2);
             mWakeUpTouchLocation = new PointF(mTmpInt2[0] + where.getWidth() / 2,
                     mTmpInt2[1] + where.getHeight() / 2);
-            mFalsingManager.onScreenOnFromTouch();
+            mFalsingCollector.onScreenOnFromTouch();
         }
     }
 
@@ -1648,7 +1652,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             return;
         }
         mReportRejectedTouch.setVisibility(mState == StatusBarState.KEYGUARD && !mDozing
-                && mFalsingManager.isReportingEnabled() ? View.VISIBLE : View.INVISIBLE);
+                && mFalsingCollector.isReportingEnabled() ? View.VISIBLE : View.INVISIBLE);
     }
 
     /**
@@ -3685,7 +3689,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     public void onUnlockHintStarted() {
-        mFalsingManager.onUnlockHintStarted();
+        mFalsingCollector.onUnlockHintStarted();
         mKeyguardIndicationController.showTransientIndication(R.string.keyguard_unlock);
     }
 
@@ -3695,17 +3699,17 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     public void onCameraHintStarted() {
-        mFalsingManager.onCameraHintStarted();
+        mFalsingCollector.onCameraHintStarted();
         mKeyguardIndicationController.showTransientIndication(R.string.camera_hint);
     }
 
     public void onVoiceAssistHintStarted() {
-        mFalsingManager.onLeftAffordanceHintStarted();
+        mFalsingCollector.onLeftAffordanceHintStarted();
         mKeyguardIndicationController.showTransientIndication(R.string.voice_hint);
     }
 
     public void onPhoneHintStarted() {
-        mFalsingManager.onLeftAffordanceHintStarted();
+        mFalsingCollector.onLeftAffordanceHintStarted();
         mKeyguardIndicationController.showTransientIndication(R.string.phone_hint);
     }
 
@@ -3756,7 +3760,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         boolean fullShadeNeedsBouncer = !mLockscreenUserManager.
                 userAllowsPrivateNotificationsInPublic(mLockscreenUserManager.getCurrentUserId())
                 || !mLockscreenUserManager.shouldShowLockscreenNotifications()
-                || mFalsingManager.shouldEnforceBouncer();
+                || mFalsingCollector.shouldEnforceBouncer();
         if (mKeyguardBypassController.getBypassEnabled()) {
             fullShadeNeedsBouncer = false;
         }
@@ -3888,7 +3892,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     final ScreenLifecycle.Observer mScreenObserver = new ScreenLifecycle.Observer() {
         @Override
         public void onScreenTurningOn() {
-            mFalsingManager.onScreenTurningOn();
+            mFalsingCollector.onScreenTurningOn();
             mNotificationPanelViewController.onScreenTurningOn();
         }
 
@@ -3899,7 +3903,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         @Override
         public void onScreenTurnedOff() {
-            mFalsingManager.onScreenOff();
+            mFalsingCollector.onScreenOff();
             mScrimController.onScreenTurnedOff();
             updateIsKeyguard();
         }

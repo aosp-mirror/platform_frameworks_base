@@ -44,9 +44,9 @@ import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.util.NotificationMessagingUtil;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.classifier.FalsingCollectorFake;
 import com.android.systemui.media.MediaFeatureFlag;
 import com.android.systemui.media.dialog.MediaOutputDialogFactory;
-import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.statusbar.FeatureFlags;
@@ -129,7 +129,6 @@ public class NotificationEntryManagerInflationTest extends SysuiTestCase {
     @Mock(answer = Answers.RETURNS_SELF)
     private ExpandableNotificationRowComponent.Builder mExpandableNotificationRowComponentBuilder;
     @Mock private ExpandableNotificationRowComponent mExpandableNotificationRowComponent;
-    @Mock private FalsingManager mFalsingManager;
     @Mock private KeyguardBypassController mKeyguardBypassController;
     @Mock private StatusBarStateController mStatusBarStateController;
 
@@ -244,7 +243,7 @@ public class NotificationEntryManagerInflationTest extends SysuiTestCase {
                                 mGutsManager,
                                 true,
                                 null,
-                                mFalsingManager,
+                                new FalsingCollectorFake(),
                                 mPeopleNotificationIdentifier,
                                 Optional.of(mock(BubblesManager.class))
                         ));
