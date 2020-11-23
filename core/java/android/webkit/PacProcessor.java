@@ -54,7 +54,7 @@ public interface PacProcessor {
      */
     @NonNull
     static PacProcessor createInstance() {
-        throw new UnsupportedOperationException("Not implemented");
+        return WebViewFactory.getProvider().createPacProcessor();
     }
 
     /**
