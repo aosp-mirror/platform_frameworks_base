@@ -305,7 +305,7 @@
     <string name="adbwifi_warning_message" msgid="8005936574322702388">"वायरलेस डिबगिङ डिभलपमेन्ट प्रयोजनका लागि मात्रै हो। यसलाई आफ्ना कम्प्युटर र उपकरणका बिच डेटा प्रतिलिपि गर्न, सूचना नदिई आफ्नो उपकरणमा एपहरू स्थापना गर्न र लग डेटा पढ्न प्रयोग गर्नुहोस्।"</string>
     <string name="adb_keys_warning_message" msgid="2968555274488101220">"तपाईं पहिले नै अधिकृत गर्नुभएका सबै कम्प्यूटरबाट USB डिबग गर्नको लागि पहुँच रद्द गर्ने हो?"</string>
     <string name="dev_settings_warning_title" msgid="8251234890169074553">"विकास सेटिङहरू अनुमति दिने हो?"</string>
-    <string name="dev_settings_warning_message" msgid="37741686486073668">"यी सेटिङहरू केवल विकास प्रयोगको लागि विचार गरिएको हो। तिनीहरूले तपाईंको उपकरण र अनुप्रयोगहरूलाई विच्छेदन गर्न वा दुर्व्यवहार गर्न सक्दछ।"</string>
+    <string name="dev_settings_warning_message" msgid="37741686486073668">"यी सेटिङहरू केवल विकास प्रयोगको लागि विचार गरिएको हो। तिनीहरूले तपाईंको उपकरण र एपहरूलाई विच्छेदन गर्न वा दुर्व्यवहार गर्न सक्दछ।"</string>
     <string name="verify_apps_over_usb_title" msgid="6031809675604442636">"USB मा एपहरू रुजु गर्नुहोस्"</string>
     <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"हानिकारक व्यवहारको लागि ADB/ADT को माध्यमबाट स्थापित अनुप्रयोगहरूको जाँच गर्नुहोस्।"</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"नामकरण नगरिएका ब्लुटुथ यन्त्रहरू (MAC ठेगाना भएका मात्र) देखाइनेछ"</string>
@@ -399,9 +399,12 @@
     <string name="inactive_app_inactive_summary" msgid="3161222402614236260">"निष्क्रिय। टगल गर्न ट्याप गर्नुहोस्।"</string>
     <string name="inactive_app_active_summary" msgid="8047630990208722344">"सक्रिय। टगल गर्न ट्याप गर्नुहोस्।"</string>
     <string name="standby_bucket_summary" msgid="5128193447550429600">"एपको स्ट्यान्डबाई अवस्था:<xliff:g id="BUCKET"> %s</xliff:g>"</string>
-    <string name="transcode_settings_title" msgid="6700974145733932357">"मिडिया फाइल ट्रान्सकोड गर्नेसम्बन्धी सेटिङ"</string>
-    <string name="transcode_enable_all" msgid="4719796495995795404">"सबै एपमा ट्रान्सकोडिङ अन गर्नुहोस्"</string>
-    <string name="transcode_skip_apps" msgid="5680997722349545778">"एपमा ट्रान्सकोडिङ अफ गर्नुहोस्"</string>
+    <!-- no translation found for transcode_settings_title (2581975870429850549) -->
+    <skip />
+    <!-- no translation found for transcode_enable_all (9102460144086871903) -->
+    <skip />
+    <!-- no translation found for transcode_skip_apps (8249721984597390142) -->
+    <skip />
     <string name="runningservices_settings_title" msgid="6460099290493086515">"चलिरहेका सेवाहरू"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"हाल चालु भइरहेका सेवाहरू हेर्नुहोस् र नियन्त्रण गर्नुहोस्"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"WebView कार्यान्वयन"</string>
@@ -449,6 +452,8 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"पूर्ण चार्ज हुन <xliff:g id="TIME">%1$s</xliff:g> बाँकी"</string>
     <string name="power_charging_duration" msgid="5005740040558984057">"पूर्ण चार्ज हुन <xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> लाग्छ"</string>
+    <!-- no translation found for power_charging_limited (5902301801611726210) -->
+    <skip />
     <string name="battery_info_status_unknown" msgid="268625384868401114">"अज्ञात"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"चार्ज हुँदै"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"द्रुत गतिमा चार्ज गरिँदै"</string>
