@@ -94,7 +94,7 @@ public class AndroidPackageUtils {
                 SharedLibraryInfo.TYPE_STATIC,
                 new VersionedPackage(pkg.getManifestPackageName(),
                         pkg.getLongVersionCode()),
-                null, null);
+                null, null, false /* isNative */);
     }
 
     public static SharedLibraryInfo createSharedLibraryForDynamic(AndroidPackage pkg, String name) {
@@ -103,7 +103,7 @@ public class AndroidPackageUtils {
                 SharedLibraryInfo.VERSION_UNDEFINED,
                 SharedLibraryInfo.TYPE_DYNAMIC, new VersionedPackage(pkg.getPackageName(),
                 pkg.getLongVersionCode()),
-                null, null);
+                null, null, false /* isNative */);
     }
 
     /**
