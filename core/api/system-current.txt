@@ -2280,6 +2280,7 @@ package android.content.pm {
     field public static final int PROTECTION_FLAG_DOCUMENTER = 262144; // 0x40000
     field public static final int PROTECTION_FLAG_INCIDENT_REPORT_APPROVER = 1048576; // 0x100000
     field public static final int PROTECTION_FLAG_OEM = 16384; // 0x4000
+    field public static final int PROTECTION_FLAG_RECENTS = 33554432; // 0x2000000
     field public static final int PROTECTION_FLAG_RETAIL_DEMO = 16777216; // 0x1000000
     field public static final int PROTECTION_FLAG_SYSTEM_TEXT_CLASSIFIER = 65536; // 0x10000
     field public static final int PROTECTION_FLAG_WELLBEING = 131072; // 0x20000
