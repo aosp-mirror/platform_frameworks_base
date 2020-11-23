@@ -19,6 +19,8 @@ package com.android.systemui.screenrecord;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 
 import android.app.PendingIntent;
@@ -126,6 +128,35 @@ public class RecordingControllerTest extends SysuiTestCase {
         mController.updateState(false);
         assertFalse(mController.isRecording());
         verify(mCallback).onRecordingEnd();
+    }
+
+    // Test that broadcast will update state
+    @Test
+    public void testUpdateStateBroadcast() {
+        if (Looper.myLooper() == null) {
+            Looper.prepare();
+        }
+
+        // When a recording has started
+        PendingIntent startIntent = Mockito.mock(PendingIntent.class);
+        mController.startCountdown(0, 0, startIntent, null);
+        verify(mCallback).onCountdownEnd();
+
+        // then the receiver was registered
+        verify(mBroadcastDispatcher).registerReceiver(eq(mController.mStateChangeReceiver),
+                any(), any(), any());
+
+        // When the receiver gets an update
+        Intent intent = new Intent(RecordingController.INTENT_UPDATE_STATE);
+        intent.putExtra(RecordingController.EXTRA_STATE, false);
+        mController.mStateChangeReceiver.onReceive(mContext, intent);
+
+        // then the state is updated
+        assertFalse(mController.isRecording());
+        verify(mCallback).onRecordingEnd();
+
+        // and the receiver is unregistered
+        verify(mBroadcastDispatcher).unregisterReceiver(eq(mController.mStateChangeReceiver));
     }
 
     // Test that switching users will stop an ongoing recording
