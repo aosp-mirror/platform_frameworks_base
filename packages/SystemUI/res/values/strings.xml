@@ -226,6 +226,8 @@
     <string name="screenshot_saved_text">Tap to view your screenshot</string>
     <!-- Notification title displayed when we fail to take a screenshot. [CHAR LIMIT=50] -->
     <string name="screenshot_failed_title">Couldn\'t save screenshot</string>
+    <!-- Notification text displayed when we fail to save a screenshot due to locked storage. [CHAR LIMIT=100] -->
+    <string name="screenshot_failed_to_save_user_locked_text">Device must be unlocked before screenshot can be saved</string>
     <!-- Notification text displayed when we fail to save a screenshot for unknown reasons. [CHAR LIMIT=100] -->
     <string name="screenshot_failed_to_save_unknown_text">Try taking screenshot again</string>
     <!-- Notification text displayed when we fail to save a screenshot. [CHAR LIMIT=100] -->
