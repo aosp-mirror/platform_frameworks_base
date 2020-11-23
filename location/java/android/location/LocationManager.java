@@ -683,6 +683,7 @@ public class LocationManager {
      * location should always be checked.
      *
      * @return the last known location, or null if not available
+     *
      * @throws SecurityException if no suitable location permission is present
      *
      * @hide
@@ -706,18 +707,50 @@ public class LocationManager {
      * in the course of the attempt as compared to this method.
      *
      * @param provider a provider listed by {@link #getAllProviders()}
+     *
      * @return the last known location for the given provider, or null if not available
+     *
      * @throws SecurityException if no suitable permission is present
      * @throws IllegalArgumentException if provider is null or doesn't exist
      */
     @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
     @Nullable
     public Location getLastKnownLocation(@NonNull String provider) {
+        return getLastKnownLocation(provider, new LastLocationRequest.Builder().build());
+    }
+
+    /**
+     * Gets the last known location from the given provider, or null if there is no last known
+     * location.
+     *
+     * <p>See {@link LastLocationRequest} documentation for an explanation of various request
+     * parameters and how they can affect the returned location.
+     *
+     * <p>See {@link #getLastKnownLocation(String)} for more detail on how this method works.
+     *
+     * @param provider            a provider listed by {@link #getAllProviders()}
+     * @param lastLocationRequest the last location request containing location parameters
+     *
+     * @return the last known location for the given provider, or null if not available
+     *
+     * @throws SecurityException if no suitable permission is present
+     * @throws IllegalArgumentException if provider is null or doesn't exist
+     * @throws IllegalArgumentException if lastLocationRequest is null
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
+    @Nullable
+    public Location getLastKnownLocation(@NonNull String provider,
+            @NonNull LastLocationRequest lastLocationRequest) {
         Preconditions.checkArgument(provider != null, "invalid null provider");
+        Preconditions.checkArgument(lastLocationRequest != null,
+                "invalid null last location request");
 
         try {
-            return mService.getLastLocation(provider, mContext.getPackageName(),
-                    mContext.getAttributionTag());
+            return mService.getLastLocation(provider, lastLocationRequest,
+                    mContext.getPackageName(), mContext.getAttributionTag());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
