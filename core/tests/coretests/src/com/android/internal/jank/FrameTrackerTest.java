@@ -77,7 +77,8 @@ public class FrameTrackerTest {
 
         Session session = new Session(CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE);
         mTracker = Mockito.spy(
-                new FrameTracker(session, handler, mRenderer, mWrapper, 1, -1));
+                new FrameTracker(session, handler, mRenderer, mWrapper,
+                        /*traceThresholdMissedFrames=*/ 1, /*traceThresholdFrameTimeMillis=*/ -1));
         doNothing().when(mTracker).triggerPerfetto();
     }
 
