@@ -1058,7 +1058,9 @@ public class ConnectivityServiceTest {
 
         public void setUids(Set<UidRange> uids) {
             mNetworkCapabilities.setUids(uids);
-            updateCapabilitiesInternal(null /* defaultNetwork */, true);
+            if (mAgentRegistered) {
+                mMockNetworkAgent.setNetworkCapabilities(mNetworkCapabilities, true);
+            }
         }
 
         public void setVpnType(int vpnType) {
@@ -1141,28 +1143,6 @@ public class ConnectivityServiceTest {
 
         public void sendLinkProperties(LinkProperties lp) {
             mMockNetworkAgent.sendLinkProperties(lp);
-        }
-
-        private NetworkCapabilities updateCapabilitiesInternal(Network defaultNetwork,
-                boolean sendToConnectivityService) {
-            if (!mAgentRegistered) return null;
-            super.updateCapabilities(defaultNetwork);
-            // Because super.updateCapabilities will update the capabilities of the agent but
-            // not the mock agent, the mock agent needs to know about them.
-            copyCapabilitiesToNetworkAgent(sendToConnectivityService);
-            return new NetworkCapabilities(mNetworkCapabilities);
-        }
-
-        private void copyCapabilitiesToNetworkAgent(boolean sendToConnectivityService) {
-            if (null != mMockNetworkAgent) {
-                mMockNetworkAgent.setNetworkCapabilities(mNetworkCapabilities,
-                        sendToConnectivityService);
-            }
-        }
-
-        @Override
-        public NetworkCapabilities updateCapabilities(Network defaultNetwork) {
-            return updateCapabilitiesInternal(defaultNetwork, false);
         }
 
         public void disconnect() {
