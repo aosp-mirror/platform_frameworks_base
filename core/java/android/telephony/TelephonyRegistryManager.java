@@ -15,6 +15,7 @@
  */
 package android.telephony;
 
+import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -24,6 +25,9 @@ import android.compat.annotation.EnabledAfter;
 import android.content.Context;
 import android.os.Binder;
 import android.os.Build;
+import android.os.Handler;
+import android.os.HandlerExecutor;
+import android.os.Looper;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.telephony.Annotation.CallState;
@@ -37,6 +41,7 @@ import android.telephony.Annotation.SimActivationState;
 import android.telephony.Annotation.SrvccState;
 import android.telephony.emergency.EmergencyNumber;
 import android.telephony.ims.ImsReasonInfo;
+import android.util.ArraySet;
 import android.util.Log;
 
 import com.android.internal.telephony.IOnSubscriptionsChangedListener;
@@ -45,6 +50,7 @@ import com.android.internal.telephony.ITelephonyRegistry;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Executor;
 
 /**
@@ -206,7 +212,7 @@ public class TelephonyRegistryManager {
     }
 
     /**
-     * To check the SDK version for {@link #listenForSubscriber}.
+     * To check the SDK version for {@link #listenWithEventList}.
      */
     @ChangeId
     @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.P)
@@ -218,23 +224,23 @@ public class TelephonyRegistryManager {
      * @param pkg Package name
      * @param featureId Feature ID
      * @param listener Listener providing callback
-     * @param events Events
+     * @param events List events
      * @param notifyNow Whether to notify instantly
      */
-    public void listenForSubscriber(int subId, @NonNull String pkg, @NonNull String featureId,
-            @NonNull PhoneStateListener listener, long events, boolean notifyNow) {
+    public void listenWithEventList(int subId, @NonNull String pkg, @NonNull String featureId,
+            @NonNull PhoneStateListener listener, @NonNull int[] events, boolean notifyNow) {
         try {
             // subId from PhoneStateListener is deprecated Q on forward, use the subId from
             // TelephonyManager instance. Keep using subId from PhoneStateListener for pre-Q.
             if (Compatibility.isChangeEnabled(LISTEN_CODE_CHANGE)) {
                 // Since mSubId in PhoneStateListener is deprecated from Q on forward, this is
                 // the only place to set mSubId and its for "informational" only.
-                listener.mSubId = (events == PhoneStateListener.LISTEN_NONE)
+                listener.mSubId = (events.length == 0)
                         ? SubscriptionManager.INVALID_SUBSCRIPTION_ID : subId;
             } else if (listener.mSubId != null) {
                 subId = listener.mSubId;
             }
-            sRegistry.listenForSubscriber(
+            sRegistry.listenWithEventList(
                     subId, pkg, featureId, listener.callback, events, notifyNow);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -771,13 +777,345 @@ public class TelephonyRegistryManager {
      * @param subId the subId
      * @param configs a list of {@link PhysicalChannelConfig}, the configs of physical channel.
      */
-    public void notifyPhysicalChannelConfigurationForSubscriber(
+    public void notifyPhysicalChannelConfigForSubscriber(
             int subId, List<PhysicalChannelConfig> configs) {
         try {
-            sRegistry.notifyPhysicalChannelConfigurationForSubscriber(subId, configs);
+            sRegistry.notifyPhysicalChannelConfigForSubscriber(subId, configs);
         } catch (RemoteException ex) {
             // system server crash
         }
     }
 
+    public @NonNull Set<Integer> getEventsFromListener(@NonNull PhoneStateListener listener) {
+
+        Set<Integer> eventList = new ArraySet<>();
+
+        if (listener instanceof PhoneStateListener.ServiceStateChangedListener) {
+            eventList.add(PhoneStateListener.EVENT_SERVICE_STATE_CHANGED);
+        }
+
+        if (listener instanceof PhoneStateListener.MessageWaitingIndicatorChangedListener) {
+            eventList.add(PhoneStateListener.EVENT_MESSAGE_WAITING_INDICATOR_CHANGED);
+        }
+
+        if (listener instanceof PhoneStateListener.CallForwardingIndicatorChangedListener) {
+            eventList.add(PhoneStateListener.EVENT_CALL_FORWARDING_INDICATOR_CHANGED);
+        }
+
+        if (listener instanceof PhoneStateListener.CellLocationChangedListener) {
+            eventList.add(PhoneStateListener.EVENT_CELL_LOCATION_CHANGED);
+        }
+
+        if (listener instanceof PhoneStateListener.CallStateChangedListener) {
+            eventList.add(PhoneStateListener.EVENT_CALL_STATE_CHANGED);
+        }
+
+        if (listener instanceof PhoneStateListener.DataConnectionStateChangedListener) {
+            eventList.add(PhoneStateListener.EVENT_DATA_CONNECTION_STATE_CHANGED);
+        }
+
+        if (listener instanceof PhoneStateListener.DataActivityListener) {
+            eventList.add(PhoneStateListener.EVENT_DATA_ACTIVITY_CHANGED);
+        }
+
+        if (listener instanceof PhoneStateListener.SignalStrengthsChangedListener) {
+            eventList.add(PhoneStateListener.EVENT_SIGNAL_STRENGTHS_CHANGED);
+        }
+
+        if (listener instanceof PhoneStateListener.AlwaysReportedSignalStrengthChangedListener) {
+            eventList.add(PhoneStateListener.EVENT_ALWAYS_REPORTED_SIGNAL_STRENGTH_CHANGED);
+        }
+
+        if (listener instanceof PhoneStateListener.CellInfoChangedListener) {
+            eventList.add(PhoneStateListener.EVENT_CELL_INFO_CHANGED);
+        }
+
+        if (listener instanceof PhoneStateListener.PreciseCallStateChangedListener) {
+            eventList.add(PhoneStateListener.EVENT_PRECISE_CALL_STATE_CHANGED);
+        }
+
+        if (listener instanceof PhoneStateListener.CallDisconnectCauseChangedListener) {
+            eventList.add(PhoneStateListener.EVENT_CALL_DISCONNECT_CAUSE_CHANGED);
+        }
+
+        if (listener instanceof PhoneStateListener.ImsCallDisconnectCauseChangedListener) {
+            eventList.add(PhoneStateListener.EVENT_IMS_CALL_DISCONNECT_CAUSE_CHANGED);
+        }
+
+        if (listener instanceof PhoneStateListener.PreciseDataConnectionStateChangedListener) {
+            eventList.add(PhoneStateListener.EVENT_PRECISE_DATA_CONNECTION_STATE_CHANGED);
+        }
+
+        if (listener instanceof PhoneStateListener.SrvccStateChangedListener) {
+            eventList.add(PhoneStateListener.EVENT_SRVCC_STATE_CHANGED);
+        }
+
+        if (listener instanceof PhoneStateListener.VoiceActivationStateChangedListener) {
+            eventList.add(PhoneStateListener.EVENT_VOICE_ACTIVATION_STATE_CHANGED);
+        }
+
+        if (listener instanceof PhoneStateListener.DataActivationStateChangedListener) {
+            eventList.add(PhoneStateListener.EVENT_DATA_ACTIVATION_STATE_CHANGED);
+        }
+
+        if (listener instanceof PhoneStateListener.UserMobileDataStateChangedListener) {
+            eventList.add(PhoneStateListener.EVENT_USER_MOBILE_DATA_STATE_CHANGED);
+        }
+
+        if (listener instanceof PhoneStateListener.DisplayInfoChangedListener) {
+            eventList.add(PhoneStateListener.EVENT_DISPLAY_INFO_CHANGED);
+        }
+
+        if (listener instanceof PhoneStateListener.EmergencyNumberListChangedListener) {
+            eventList.add(PhoneStateListener.EVENT_EMERGENCY_NUMBER_LIST_CHANGED);
+        }
+
+        if (listener instanceof PhoneStateListener.OutgoingEmergencyCallListener) {
+            eventList.add(PhoneStateListener.EVENT_OUTGOING_EMERGENCY_CALL);
+        }
+
+        if (listener instanceof PhoneStateListener.OutgoingEmergencySmsListener) {
+            eventList.add(PhoneStateListener.EVENT_OUTGOING_EMERGENCY_SMS);
+        }
+
+        if (listener instanceof PhoneStateListener.PhoneCapabilityChangedListener) {
+            eventList.add(PhoneStateListener.EVENT_PHONE_CAPABILITY_CHANGED);
+        }
+
+        if (listener instanceof PhoneStateListener.ActiveDataSubscriptionIdChangedListener) {
+            eventList.add(PhoneStateListener.EVENT_ACTIVE_DATA_SUBSCRIPTION_ID_CHANGED);
+        }
+
+        if (listener instanceof PhoneStateListener.RadioPowerStateChangedListener) {
+            eventList.add(PhoneStateListener.EVENT_RADIO_POWER_STATE_CHANGED);
+        }
+
+        if (listener instanceof PhoneStateListener.CarrierNetworkChangeListener) {
+            eventList.add(PhoneStateListener.EVENT_CARRIER_NETWORK_CHANGED);
+        }
+
+        if (listener instanceof PhoneStateListener.RegistrationFailedListener) {
+            eventList.add(PhoneStateListener.EVENT_REGISTRATION_FAILURE);
+        }
+
+        if (listener instanceof PhoneStateListener.CallAttributesChangedListener) {
+            eventList.add(PhoneStateListener.EVENT_CALL_ATTRIBUTES_CHANGED);
+        }
+
+        if (listener instanceof PhoneStateListener.BarringInfoChangedListener) {
+            eventList.add(PhoneStateListener.EVENT_BARRING_INFO_CHANGED);
+        }
+
+        if (listener instanceof PhoneStateListener.PhysicalChannelConfigChangedListener) {
+            eventList.add(PhoneStateListener.EVENT_PHYSICAL_CHANNEL_CONFIG_CHANGED);
+        }
+
+        if (listener instanceof PhoneStateListener.DataEnabledChangedListener) {
+            eventList.add(PhoneStateListener.EVENT_DATA_ENABLED_CHANGED);
+        }
+
+        return eventList;
+    }
+
+    private @NonNull Set<Integer> getEventsFromBitmask(int eventMask) {
+
+        Set<Integer> eventList = new ArraySet<>();
+
+        if ((eventMask & PhoneStateListener.LISTEN_SERVICE_STATE) != 0) {
+            eventList.add(PhoneStateListener.EVENT_SERVICE_STATE_CHANGED);
+        }
+
+        if ((eventMask & PhoneStateListener.LISTEN_SIGNAL_STRENGTH) != 0) {
+            eventList.add(PhoneStateListener.EVENT_SIGNAL_STRENGTH_CHANGED);
+        }
+
+        if ((eventMask & PhoneStateListener.LISTEN_MESSAGE_WAITING_INDICATOR) != 0) {
+            eventList.add(PhoneStateListener.EVENT_MESSAGE_WAITING_INDICATOR_CHANGED);
+        }
+
+        if ((eventMask & PhoneStateListener.LISTEN_CALL_FORWARDING_INDICATOR) != 0) {
+            eventList.add(PhoneStateListener.EVENT_CALL_FORWARDING_INDICATOR_CHANGED);
+        }
+
+        if ((eventMask & PhoneStateListener.LISTEN_CELL_LOCATION) != 0) {
+            eventList.add(PhoneStateListener.EVENT_CELL_LOCATION_CHANGED);
+        }
+
+        if ((eventMask & PhoneStateListener.LISTEN_CALL_STATE) != 0) {
+            eventList.add(PhoneStateListener.EVENT_CALL_STATE_CHANGED);
+        }
+
+        if ((eventMask & PhoneStateListener.LISTEN_DATA_CONNECTION_STATE) != 0) {
+            eventList.add(PhoneStateListener.EVENT_DATA_CONNECTION_STATE_CHANGED);
+        }
+
+        if ((eventMask & PhoneStateListener.LISTEN_DATA_ACTIVITY) != 0) {
+            eventList.add(PhoneStateListener.EVENT_DATA_ACTIVITY_CHANGED);
+        }
+
+        if ((eventMask & PhoneStateListener.LISTEN_SIGNAL_STRENGTHS) != 0) {
+            eventList.add(PhoneStateListener.EVENT_SIGNAL_STRENGTHS_CHANGED);
+        }
+
+        if ((eventMask & PhoneStateListener.LISTEN_ALWAYS_REPORTED_SIGNAL_STRENGTH) != 0) {
+            eventList.add(PhoneStateListener.EVENT_ALWAYS_REPORTED_SIGNAL_STRENGTH_CHANGED);
+        }
+
+        if ((eventMask & PhoneStateListener.LISTEN_CELL_INFO) != 0) {
+            eventList.add(PhoneStateListener.EVENT_CELL_INFO_CHANGED);
+        }
+
+        if ((eventMask & PhoneStateListener.LISTEN_PRECISE_CALL_STATE) != 0) {
+            eventList.add(PhoneStateListener.EVENT_PRECISE_CALL_STATE_CHANGED);
+        }
+
+        if ((eventMask & PhoneStateListener.LISTEN_PRECISE_DATA_CONNECTION_STATE) != 0) {
+            eventList.add(PhoneStateListener.EVENT_PRECISE_DATA_CONNECTION_STATE_CHANGED);
+        }
+
+        if ((eventMask & PhoneStateListener.LISTEN_DATA_CONNECTION_REAL_TIME_INFO) != 0) {
+            eventList.add(PhoneStateListener.EVENT_DATA_CONNECTION_REAL_TIME_INFO_CHANGED);
+        }
+
+        if ((eventMask & PhoneStateListener.LISTEN_OEM_HOOK_RAW_EVENT) != 0) {
+            eventList.add(PhoneStateListener.EVENT_OEM_HOOK_RAW);
+        }
+
+        if ((eventMask & PhoneStateListener.LISTEN_SRVCC_STATE_CHANGED) != 0) {
+            eventList.add(PhoneStateListener.EVENT_SRVCC_STATE_CHANGED);
+        }
+
+        if ((eventMask & PhoneStateListener.LISTEN_CARRIER_NETWORK_CHANGE) != 0) {
+            eventList.add(PhoneStateListener.EVENT_CARRIER_NETWORK_CHANGED);
+        }
+
+        if ((eventMask & PhoneStateListener.LISTEN_VOICE_ACTIVATION_STATE) != 0) {
+            eventList.add(PhoneStateListener.EVENT_VOICE_ACTIVATION_STATE_CHANGED);
+        }
+
+        if ((eventMask & PhoneStateListener.LISTEN_DATA_ACTIVATION_STATE) != 0) {
+            eventList.add(PhoneStateListener.EVENT_DATA_ACTIVATION_STATE_CHANGED);
+        }
+
+        if ((eventMask & PhoneStateListener.LISTEN_USER_MOBILE_DATA_STATE) != 0) {
+            eventList.add(PhoneStateListener.EVENT_USER_MOBILE_DATA_STATE_CHANGED);
+        }
+
+        if ((eventMask & PhoneStateListener.LISTEN_DISPLAY_INFO_CHANGED) != 0) {
+            eventList.add(PhoneStateListener.EVENT_DISPLAY_INFO_CHANGED);
+        }
+
+        if ((eventMask & PhoneStateListener.LISTEN_PHONE_CAPABILITY_CHANGE) != 0) {
+            eventList.add(PhoneStateListener.EVENT_PHONE_CAPABILITY_CHANGED);
+        }
+
+        if ((eventMask & PhoneStateListener.LISTEN_ACTIVE_DATA_SUBSCRIPTION_ID_CHANGE) != 0) {
+            eventList.add(PhoneStateListener.EVENT_ACTIVE_DATA_SUBSCRIPTION_ID_CHANGED);
+        }
+
+        if ((eventMask & PhoneStateListener.LISTEN_RADIO_POWER_STATE_CHANGED) != 0) {
+            eventList.add(PhoneStateListener.EVENT_RADIO_POWER_STATE_CHANGED);
+        }
+
+        if ((eventMask & PhoneStateListener.LISTEN_EMERGENCY_NUMBER_LIST) != 0) {
+            eventList.add(PhoneStateListener.EVENT_EMERGENCY_NUMBER_LIST_CHANGED);
+        }
+
+        if ((eventMask & PhoneStateListener.LISTEN_CALL_DISCONNECT_CAUSES) != 0) {
+            eventList.add(PhoneStateListener.EVENT_CALL_DISCONNECT_CAUSE_CHANGED);
+        }
+
+        if ((eventMask & PhoneStateListener.LISTEN_CALL_ATTRIBUTES_CHANGED) != 0) {
+            eventList.add(PhoneStateListener.EVENT_CALL_ATTRIBUTES_CHANGED);
+        }
+
+        if ((eventMask & PhoneStateListener.LISTEN_IMS_CALL_DISCONNECT_CAUSES) != 0) {
+            eventList.add(PhoneStateListener.EVENT_IMS_CALL_DISCONNECT_CAUSE_CHANGED);
+        }
+
+        if ((eventMask & PhoneStateListener.LISTEN_OUTGOING_EMERGENCY_CALL) != 0) {
+            eventList.add(PhoneStateListener.EVENT_OUTGOING_EMERGENCY_CALL);
+        }
+
+        if ((eventMask & PhoneStateListener.LISTEN_OUTGOING_EMERGENCY_SMS) != 0) {
+            eventList.add(PhoneStateListener.EVENT_OUTGOING_EMERGENCY_SMS);
+        }
+
+        if ((eventMask & PhoneStateListener.LISTEN_REGISTRATION_FAILURE) != 0) {
+            eventList.add(PhoneStateListener.EVENT_REGISTRATION_FAILURE);
+        }
+
+        if ((eventMask & PhoneStateListener.LISTEN_BARRING_INFO) != 0) {
+            eventList.add(PhoneStateListener.EVENT_BARRING_INFO_CHANGED);
+        }
+        return eventList;
+
+    }
+
+    /**
+     * Registers a listener object to receive notification of changes
+     * in specified telephony states.
+     * <p>
+     * To register a listener, pass a {@link PhoneStateListener} which implements
+     * interfaces of events. For example,
+     * FakeServiceStateChangedListener extends {@link PhoneStateListener} implements
+     * {@link PhoneStateListener.ServiceStateChangedListener}.
+     *
+     * At registration, and when a specified telephony state changes, the telephony manager invokes
+     * the appropriate callback method on the listener object and passes the current (updated)
+     * values.
+     * <p>
+     *
+     * If this TelephonyManager object has been created with
+     * {@link TelephonyManager#createForSubscriptionId}, applies to the given subId.
+     * Otherwise, applies to {@link SubscriptionManager#getDefaultSubscriptionId()}.
+     * To listen events for multiple subIds, pass a separate listener object to
+     * each TelephonyManager object created with {@link TelephonyManager#createForSubscriptionId}.
+     *
+     * Note: if you call this method while in the middle of a binder transaction, you <b>must</b>
+     * call {@link android.os.Binder#clearCallingIdentity()} before calling this method. A
+     * {@link SecurityException} will be thrown otherwise.
+     *
+     * This API should be used sparingly -- large numbers of listeners will cause system
+     * instability. If a process has registered too many listeners without unregistering them, it
+     * may encounter an {@link IllegalStateException} when trying to register more listeners.
+     *
+     * @param listener The {@link PhoneStateListener} object to register.
+     */
+    public void registerPhoneStateListener(@NonNull @CallbackExecutor Executor executor, int subId,
+            String pkgName, String attributionTag, @NonNull PhoneStateListener listener,
+            boolean notifyNow) {
+        listener.setExecutor(executor);
+        registerPhoneStateListener(subId, pkgName, attributionTag, listener,
+                getEventsFromListener(listener), notifyNow);
+    }
+
+    public void registerPhoneStateListenerWithEvents(int subId, String pkgName,
+            String attributionTag, @NonNull PhoneStateListener listener, int events,
+            boolean notifyNow) {
+        registerPhoneStateListener(
+                subId, pkgName, attributionTag, listener, getEventsFromBitmask(events), notifyNow);
+    }
+
+    private void registerPhoneStateListener(int subId,
+            String pkgName, String attributionTag, @NonNull PhoneStateListener listener,
+            @NonNull Set<Integer> events, boolean notifyNow) {
+        if (listener == null) {
+            throw new IllegalStateException("telephony service is null.");
+        }
+
+        listenWithEventList(subId, pkgName, attributionTag, listener,
+                events.stream().mapToInt(i -> i).toArray(), notifyNow);
+    }
+
+    /**
+     * Unregister an existing {@link PhoneStateListener}.
+     *
+     * @param listener The {@link PhoneStateListener} object to unregister.
+     */
+    public void unregisterPhoneStateListener(int subId, String pkgName, String attributionTag,
+                                             @NonNull PhoneStateListener listener,
+                                             boolean notifyNow) {
+        listenWithEventList(subId, pkgName, attributionTag, listener, new int[0], notifyNow);
+    }
 }
