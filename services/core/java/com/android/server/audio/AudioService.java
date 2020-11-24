@@ -5121,8 +5121,7 @@ public class AudioService extends IAudioService.Stub
         switch (mPlatformType) {
         case AudioSystem.PLATFORM_VOICE:
             if (isInCommunication()) {
-                if (mAudioSystem.getForceUse(AudioSystem.FOR_COMMUNICATION)
-                        == AudioSystem.FORCE_BT_SCO) {
+                if (mDeviceBroker.isBluetoothScoOn()) {
                     // Log.v(TAG, "getActiveStreamType: Forcing STREAM_BLUETOOTH_SCO...");
                     return AudioSystem.STREAM_BLUETOOTH_SCO;
                 } else {
@@ -5158,8 +5157,7 @@ public class AudioService extends IAudioService.Stub
             }
         default:
             if (isInCommunication()) {
-                if (mAudioSystem.getForceUse(AudioSystem.FOR_COMMUNICATION)
-                        == AudioSystem.FORCE_BT_SCO) {
+                if (mDeviceBroker.isBluetoothScoOn()) {
                     if (DEBUG_VOL) Log.v(TAG, "getActiveStreamType: Forcing STREAM_BLUETOOTH_SCO");
                     return AudioSystem.STREAM_BLUETOOTH_SCO;
                 } else {
