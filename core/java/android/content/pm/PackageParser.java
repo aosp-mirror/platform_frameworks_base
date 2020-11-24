@@ -56,6 +56,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.overlay.OverlayPaths;
 import android.content.pm.parsing.ParsingPackageUtils;
+import android.content.pm.pkg.PackageUserState;
+import android.content.pm.pkg.PackageUserStateUtils;
 import android.content.pm.split.SplitAssetLoader;
 import android.content.pm.parsing.result.ParseResult;
 import android.content.pm.parsing.result.ParseTypeImpl;
@@ -647,14 +649,14 @@ public class PackageParser {
             ApplicationInfo appInfo) {
         // Returns false if the package is hidden system app until installed.
         if ((flags & PackageManager.MATCH_HIDDEN_UNTIL_INSTALLED_COMPONENTS) == 0
-                && !state.installed
+                && !state.isInstalled()
                 && appInfo != null && appInfo.hiddenUntilInstalled) {
             return false;
         }
 
         // If available for the target user, or trying to match uninstalled packages and it's
         // a system app.
-        return state.isAvailable(flags)
+        return PackageUserStateUtils.isAvailable(state, flags)
                 || (appInfo != null && appInfo.isSystemApp()
                         && ((flags & PackageManager.MATCH_KNOWN_PACKAGES) != 0
                         || (flags & PackageManager.MATCH_HIDDEN_UNTIL_INSTALLED_COMPONENTS) != 0));
@@ -699,7 +701,7 @@ public class PackageParser {
     public static PackageInfo generatePackageInfo(
             PackageParser.Package pkg, ApexInfo apexInfo, int flags) {
         return generatePackageInfo(pkg, apexInfo, EmptyArray.INT, flags, 0, 0,
-                Collections.emptySet(), new PackageUserState(), UserHandle.getCallingUserId());
+                Collections.emptySet(), PackageUserState.DEFAULT, UserHandle.getCallingUserId());
     }
 
     private static PackageInfo generatePackageInfo(PackageParser.Package p, ApexInfo apexInfo,
@@ -764,7 +766,7 @@ public class PackageParser {
                 final ActivityInfo[] res = new ActivityInfo[N];
                 for (int i = 0; i < N; i++) {
                     final Activity a = p.activities.get(i);
-                    if (state.isMatch(a.info, flags)) {
+                    if (PackageUserStateUtils.isMatch(state, a.info, flags)) {
                         if (PackageManager.APP_DETAILS_ACTIVITY_CLASS_NAME.equals(a.className)) {
                             continue;
                         }
@@ -781,7 +783,7 @@ public class PackageParser {
                 final ActivityInfo[] res = new ActivityInfo[N];
                 for (int i = 0; i < N; i++) {
                     final Activity a = p.receivers.get(i);
-                    if (state.isMatch(a.info, flags)) {
+                    if (PackageUserStateUtils.isMatch(state, a.info, flags)) {
                         res[num++] = generateActivityInfo(a, flags, state, userId);
                     }
                 }
@@ -795,7 +797,7 @@ public class PackageParser {
                 final ServiceInfo[] res = new ServiceInfo[N];
                 for (int i = 0; i < N; i++) {
                     final Service s = p.services.get(i);
-                    if (state.isMatch(s.info, flags)) {
+                    if (PackageUserStateUtils.isMatch(state, s.info, flags)) {
                         res[num++] = generateServiceInfo(s, flags, state, userId);
                     }
                 }
@@ -809,7 +811,7 @@ public class PackageParser {
                 final ProviderInfo[] res = new ProviderInfo[N];
                 for (int i = 0; i < N; i++) {
                     final Provider pr = p.providers.get(i);
-                    if (state.isMatch(pr.info, flags)) {
+                    if (PackageUserStateUtils.isMatch(state, pr.info, flags)) {
                         res[num++] = generateProviderInfo(pr, flags, state, userId);
                     }
                 }
@@ -7887,23 +7889,24 @@ public class PackageParser {
             // to fix up the uid.
             return true;
         }
-        if (state.enabled != PackageManager.COMPONENT_ENABLED_STATE_DEFAULT) {
-            boolean enabled = state.enabled == PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
+        if (state.getEnabledState() != PackageManager.COMPONENT_ENABLED_STATE_DEFAULT) {
+            boolean enabled =
+                    state.getEnabledState() == PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
             if (p.applicationInfo.enabled != enabled) {
                 return true;
             }
         }
         boolean suspended = (p.applicationInfo.flags & FLAG_SUSPENDED) != 0;
-        if (state.suspended != suspended) {
+        if (state.isSuspended() != suspended) {
             return true;
         }
-        if (!state.installed || state.hidden) {
+        if (!state.isInstalled() || state.isHidden()) {
             return true;
         }
-        if (state.stopped) {
+        if (state.isStopped()) {
             return true;
         }
-        if (state.instantApp != p.applicationInfo.isInstantApp()) {
+        if (state.isInstantApp() != p.applicationInfo.isInstantApp()) {
             return true;
         }
         if ((flags & PackageManager.GET_META_DATA) != 0
@@ -7936,40 +7939,42 @@ public class PackageParser {
         if (!sCompatibilityModeEnabled) {
             ai.disableCompatibilityMode();
         }
-        if (state.installed) {
+        if (state.isInstalled()) {
             ai.flags |= ApplicationInfo.FLAG_INSTALLED;
         } else {
             ai.flags &= ~ApplicationInfo.FLAG_INSTALLED;
         }
-        if (state.suspended) {
+        if (state.isSuspended()) {
             ai.flags |= ApplicationInfo.FLAG_SUSPENDED;
         } else {
             ai.flags &= ~ApplicationInfo.FLAG_SUSPENDED;
         }
-        if (state.instantApp) {
+        if (state.isInstantApp()) {
             ai.privateFlags |= ApplicationInfo.PRIVATE_FLAG_INSTANT;
         } else {
             ai.privateFlags &= ~ApplicationInfo.PRIVATE_FLAG_INSTANT;
         }
-        if (state.virtualPreload) {
+        if (state.isVirtualPreload()) {
             ai.privateFlags |= ApplicationInfo.PRIVATE_FLAG_VIRTUAL_PRELOAD;
         } else {
             ai.privateFlags &= ~ApplicationInfo.PRIVATE_FLAG_VIRTUAL_PRELOAD;
         }
-        if (state.hidden) {
+        if (state.isHidden()) {
             ai.privateFlags |= ApplicationInfo.PRIVATE_FLAG_HIDDEN;
         } else {
             ai.privateFlags &= ~ApplicationInfo.PRIVATE_FLAG_HIDDEN;
         }
-        if (state.enabled == PackageManager.COMPONENT_ENABLED_STATE_ENABLED) {
+        if (state.getEnabledState() == PackageManager.COMPONENT_ENABLED_STATE_ENABLED) {
             ai.enabled = true;
-        } else if (state.enabled == PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED) {
+        } else if (state.getEnabledState()
+                == PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED) {
             ai.enabled = (flags&PackageManager.GET_DISABLED_UNTIL_USED_COMPONENTS) != 0;
-        } else if (state.enabled == PackageManager.COMPONENT_ENABLED_STATE_DISABLED
-                || state.enabled == PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER) {
+        } else if (state.getEnabledState() == PackageManager.COMPONENT_ENABLED_STATE_DISABLED
+                || state.getEnabledState()
+                == PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER) {
             ai.enabled = false;
         }
-        ai.enabledSetting = state.enabled;
+        ai.enabledSetting = state.getEnabledState();
         if (ai.category == ApplicationInfo.CATEGORY_UNDEFINED) {
             ai.category = FallbackCategoryProvider.getFallbackCategory(ai.packageName);
         }
@@ -7991,7 +7996,8 @@ public class PackageParser {
         }
         if (!copyNeeded(flags, p, state, null, userId)
                 && ((flags&PackageManager.GET_DISABLED_UNTIL_USED_COMPONENTS) == 0
-                        || state.enabled != PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED)) {
+                        || state.getEnabledState()
+                                != PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED)) {
             // In this case it is safe to directly modify the internal ApplicationInfo state:
             // - CompatibilityMode is global state, so will be the same for every call.
             // - We only come in to here if the app should reported as installed; this is the
@@ -8013,7 +8019,7 @@ public class PackageParser {
             ai.sharedLibraryFiles = p.usesLibraryFiles;
             ai.sharedLibraryInfos = p.usesLibraryInfos;
         }
-        if (state.stopped) {
+        if (state.isStopped()) {
             ai.flags |= ApplicationInfo.FLAG_STOPPED;
         } else {
             ai.flags &= ~ApplicationInfo.FLAG_STOPPED;
@@ -8032,7 +8038,7 @@ public class PackageParser {
         // make a copy.
         ai = new ApplicationInfo(ai);
         ai.initForUser(userId);
-        if (state.stopped) {
+        if (state.isStopped()) {
             ai.flags |= ApplicationInfo.FLAG_STOPPED;
         } else {
             ai.flags &= ~ApplicationInfo.FLAG_STOPPED;

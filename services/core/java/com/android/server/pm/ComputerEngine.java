@@ -68,7 +68,6 @@ import android.content.pm.InstantAppResolveInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
-import android.content.pm.PackageUserState;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.ProviderInfo;
 import android.content.pm.ResolveInfo;
@@ -81,6 +80,8 @@ import android.content.pm.parsing.component.ParsedActivity;
 import android.content.pm.parsing.component.ParsedInstrumentation;
 import android.content.pm.parsing.component.ParsedProvider;
 import android.content.pm.parsing.component.ParsedService;
+import android.content.pm.pkg.PackageUserState;
+import android.content.pm.pkg.PackageUserStateUtils;
 import android.os.Binder;
 import android.os.PatternMatcher;
 import android.os.Process;
@@ -647,7 +648,7 @@ public class ComputerEngine implements Computer {
         }
         if (resolveComponentName().equals(component)) {
             return PackageInfoWithoutStateUtils.generateDelegateActivityInfo(mResolveActivity,
-                    flags, new PackageUserState(), userId);
+                    flags, PackageUserState.DEFAULT, userId);
         }
         return null;
     }
@@ -1312,8 +1313,8 @@ public class ComputerEngine implements Computer {
         }
         final PackageSetting ps =
                 mSettings.getPackageLPr(instantAppInstallerActivity().packageName);
-        if (ps == null
-                || !ps.readUserState(userId).isEnabled(instantAppInstallerActivity(), 0)) {
+        if (ps == null || !PackageUserStateUtils.isEnabled(ps.readUserState(userId),
+                instantAppInstallerActivity(), 0)) {
             return result;
         }
         final ResolveInfo ephemeralInstaller = new ResolveInfo(mInstantAppInstallerInfo);
@@ -1388,7 +1389,8 @@ public class ComputerEngine implements Computer {
                     resolveExternalPackageNameLPr(p);
 
             return packageInfo;
-        } else if ((flags & MATCH_UNINSTALLED_PACKAGES) != 0 && state.isAvailable(flags)) {
+        } else if ((flags & MATCH_UNINSTALLED_PACKAGES) != 0
+                && PackageUserStateUtils.isAvailable(state, flags)) {
             PackageInfo pi = new PackageInfo();
             pi.packageName = ps.getPackageName();
             pi.setLongVersionCode(ps.getVersionCode());

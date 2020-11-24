@@ -22,12 +22,13 @@ import android.annotation.AttrRes;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Intent;
-import android.content.pm.PackageUserState;
 import android.content.pm.parsing.ParsingPackage;
 import android.content.pm.parsing.ParsingPackageUtils;
 import android.content.pm.parsing.ParsingUtils;
 import android.content.pm.parsing.result.ParseInput;
 import android.content.pm.parsing.result.ParseResult;
+import android.content.pm.pkg.PackageUserState;
+import android.content.pm.pkg.PackageUserStateUtils;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
@@ -38,7 +39,9 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 
-/** @hide */
+/**
+ * @hide
+ */
 public class ComponentParseUtils {
 
     public static boolean isImplicitlyExposedIntent(ParsedIntentInfo intentInfo) {
@@ -157,7 +160,7 @@ public class ComponentParseUtils {
 
     /**
      * This is not state aware. Avoid and access through PackageInfoUtils in the system server.
-     *
+     * <p>
      * This is a method of the utility class to discourage use.
      */
     public static int getIcon(ParsedComponent component) {
@@ -166,13 +169,13 @@ public class ComponentParseUtils {
 
     public static boolean isMatch(PackageUserState state, boolean isSystem,
             boolean isPackageEnabled, ParsedMainComponent component, int flags) {
-        return state.isMatch(isSystem, isPackageEnabled, component.isEnabled(),
-                component.isDirectBootAware(), component.getName(), flags);
+        return PackageUserStateUtils.isMatch(state, isSystem, isPackageEnabled,
+                component.isEnabled(), component.isDirectBootAware(), component.getName(), flags);
     }
 
     public static boolean isEnabled(PackageUserState state, boolean isPackageEnabled,
             ParsedMainComponent parsedComponent, int flags) {
-        return state.isEnabled(isPackageEnabled, parsedComponent.isEnabled(),
+        return PackageUserStateUtils.isEnabled(state, isPackageEnabled, parsedComponent.isEnabled(),
                 parsedComponent.getName(), flags);
     }
 }

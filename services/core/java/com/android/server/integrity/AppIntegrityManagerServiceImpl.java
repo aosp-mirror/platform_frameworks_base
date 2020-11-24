@@ -41,7 +41,6 @@ import android.content.integrity.Rule;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
-import android.content.pm.PackageUserState;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.Signature;
 import android.content.pm.SigningDetails;
@@ -49,6 +48,7 @@ import android.content.pm.SigningInfo;
 import android.content.pm.parsing.ParsingPackageUtils;
 import android.content.pm.parsing.result.ParseResult;
 import android.content.pm.parsing.result.ParseTypeImpl;
+import android.content.pm.pkg.PackageUserState;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
@@ -598,7 +598,7 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
                     0,
                     0,
                     null,
-                    new PackageUserState(),
+                    PackageUserState.DEFAULT,
                     UserHandle.getCallingUserId(),
                     null);
         } catch (Exception e) {

@@ -19,9 +19,10 @@ package com.android.server.pm.test.verify.domain
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.content.pm.PackageUserState
 import android.content.pm.parsing.component.ParsedActivity
 import android.content.pm.parsing.component.ParsedIntentInfo
+import android.content.pm.pkg.PackageUserState
+import android.content.pm.pkg.PackageUserStateInternal
 import android.content.pm.verify.domain.DomainVerificationState
 import android.os.Build
 import android.os.Process
@@ -231,13 +232,13 @@ class DomainVerificationSettingsMutationTest {
                 TEST_UUID
             )
         ) {
-            whenever(getPackageName()) { TEST_PKG }
-            whenever(getPkg()) { mockPkg() }
+            whenever(packageName) { TEST_PKG }
+            whenever(pkg) { mockPkg() }
             whenever(domainSetId) { TEST_UUID }
-            whenever(readUserState(0)) { PackageUserState() }
-            whenever(readUserState(10)) { PackageUserState() }
+            whenever(readUserState(0)) { PackageUserStateInternal.DEFAULT }
+            whenever(readUserState(10)) { PackageUserStateInternal.DEFAULT }
             whenever(getInstantApp(anyInt())) { false }
-            whenever(isSystem()) { false }
+            whenever(isSystem) { false }
         }
     }
 

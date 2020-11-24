@@ -16,6 +16,8 @@
 
 package android.content.pm;
 
+import android.content.pm.pkg.PackageUserState;
+
 /**
  * Utility methods that need to be used in application space.
  * @hide
@@ -30,7 +32,7 @@ public final class SELinuxUtil {
 
     /** @hide */
     public static String getSeinfoUser(PackageUserState userState) {
-        if (userState.instantApp) {
+        if (userState.isInstantApp()) {
            return INSTANT_APP_STR + COMPLETE_STR;
         }
         return COMPLETE_STR;
