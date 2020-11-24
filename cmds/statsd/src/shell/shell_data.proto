@@ -21,7 +21,7 @@ package android.os.statsd;
 option java_package = "com.android.os.statsd";
 option java_outer_classname = "ShellDataProto";
 
-import "frameworks/proto_logging/stats/atoms.proto";
+import "frameworks/base/cmds/statsd/src/atoms.proto";
 
 // The output of shell subscription, including both pulled and pushed subscriptions.
 message ShellData {
