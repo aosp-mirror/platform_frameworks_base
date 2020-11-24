@@ -113,7 +113,7 @@ public interface FalsingCollector {
     void onBouncerHidden();
 
     /** */
-    void onTouchEvent(MotionEvent ev, int width, int height);
+    void onTouchEvent(MotionEvent ev);
 
     /** */
     void cleanup();

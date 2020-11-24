@@ -238,7 +238,7 @@ public class NotificationShadeWindowViewController {
                 if (mTouchCancelled || mExpandAnimationRunning || mExpandAnimationPending) {
                     return false;
                 }
-                mFalsingCollector.onTouchEvent(ev, mView.getWidth(), mView.getHeight());
+                mFalsingCollector.onTouchEvent(ev);
                 mGestureDetector.onTouchEvent(ev);
                 if (mBrightnessMirror != null
                         && mBrightnessMirror.getVisibility() == View.VISIBLE) {

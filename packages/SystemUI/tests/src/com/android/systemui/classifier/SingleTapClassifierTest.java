@@ -70,14 +70,14 @@ public class SingleTapClassifierTest extends ClassifierTest {
         addMotionEvent(0, 0, MotionEvent.ACTION_DOWN, 1, 1);
         addMotionEvent(0, 1, MotionEvent.ACTION_UP, TOUCH_SLOP, 1);
 
-        assertThat(mClassifier.isFalseTouch(), is(false));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
 
         mMotionEvents.clear();
 
         addMotionEvent(0, 0, MotionEvent.ACTION_DOWN, 1, 1);
         addMotionEvent(0, 1, MotionEvent.ACTION_UP, -TOUCH_SLOP + 2, 1);
 
-        assertThat(mClassifier.isFalseTouch(), is(false));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
 
     }
 
@@ -86,14 +86,14 @@ public class SingleTapClassifierTest extends ClassifierTest {
         addMotionEvent(0, 0, MotionEvent.ACTION_DOWN, 1, 1);
         addMotionEvent(0, 1, MotionEvent.ACTION_UP, 1, TOUCH_SLOP);
 
-        assertThat(mClassifier.isFalseTouch(), is(false));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
 
         mMotionEvents.clear();
 
         addMotionEvent(0, 0, MotionEvent.ACTION_DOWN, 1, 1);
         addMotionEvent(0, 1, MotionEvent.ACTION_UP, 1, -TOUCH_SLOP + 2);
 
-        assertThat(mClassifier.isFalseTouch(), is(false));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
     }
 
 
@@ -102,14 +102,14 @@ public class SingleTapClassifierTest extends ClassifierTest {
         addMotionEvent(0, 0, MotionEvent.ACTION_DOWN, 1, 1);
         addMotionEvent(0, 1, MotionEvent.ACTION_UP, TOUCH_SLOP + 1, 1);
 
-        assertThat(mClassifier.isFalseTouch(), is(true));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(true));
 
         mMotionEvents.clear();
 
         addMotionEvent(0, 0, MotionEvent.ACTION_DOWN, 1, 1);
         addMotionEvent(0, 1, MotionEvent.ACTION_UP, -TOUCH_SLOP - 1, 1);
 
-        assertThat(mClassifier.isFalseTouch(), is(true));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(true));
 
     }
 
@@ -118,14 +118,14 @@ public class SingleTapClassifierTest extends ClassifierTest {
         addMotionEvent(0, 0, MotionEvent.ACTION_DOWN, 1, 1);
         addMotionEvent(0, 1, MotionEvent.ACTION_UP, 1, TOUCH_SLOP + 1);
 
-        assertThat(mClassifier.isFalseTouch(), is(true));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(true));
 
         mMotionEvents.clear();
 
         addMotionEvent(0, 0, MotionEvent.ACTION_DOWN, 1, 1);
         addMotionEvent(0, 1, MotionEvent.ACTION_UP, 1, -TOUCH_SLOP - 1);
 
-        assertThat(mClassifier.isFalseTouch(), is(true));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(true));
     }
 
     @Test
@@ -134,7 +134,7 @@ public class SingleTapClassifierTest extends ClassifierTest {
         addMotionEvent(0, 1, MotionEvent.ACTION_MOVE, 1, TOUCH_SLOP + 1);
         addMotionEvent(0, 2, MotionEvent.ACTION_UP, 1, 1);
 
-        assertThat(mClassifier.isFalseTouch(), is(true));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(true));
     }
 
     @Test

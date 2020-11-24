@@ -112,18 +112,18 @@ class ProximityClassifier extends FalsingClassifier {
     }
 
     @Override
-    public boolean isFalseTouch() {
+    Result calculateFalsingResult(double historyPenalty, double historyConfidence) {
         if (getInteractionType() == QUICK_SETTINGS) {
-            return false;
+            return new Result(false, 0);
         }
 
         logInfo("Percent of gesture in proximity: " + mPercentNear);
 
         if (mPercentNear > mPercentCoveredThreshold) {
-            return !mDistanceClassifier.isLongSwipe();
+            return new Result(!mDistanceClassifier.isLongSwipe(), 0.5);
         }
 
-        return false;
+        return new Result(false, 0.5);
     }
 
     @Override

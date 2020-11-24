@@ -244,9 +244,8 @@ class FalsingCollectorImpl implements FalsingCollector {
     }
 
     @Override
-    public void onTouchEvent(MotionEvent ev, int width, int height) {
+    public void onTouchEvent(MotionEvent ev) {
         mFalsingDataProvider.onMotionEvent(ev);
-        mFalsingManager.onTouchEvent(ev, width, height);
     }
 
     @Override

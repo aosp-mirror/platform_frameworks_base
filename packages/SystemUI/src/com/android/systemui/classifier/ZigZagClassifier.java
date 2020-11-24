@@ -84,7 +84,7 @@ class ZigZagClassifier extends FalsingClassifier {
     }
 
     @Override
-    boolean isFalseTouch() {
+    Result calculateFalsingResult(double historyPenalty, double historyConfidence) {
         List<MotionEvent> motionEvents = getRecentMotionEvents();
         // Rotate horizontal gestures to be horizontal between their first and last point.
         // Rotate vertical gestures to be vertical between their first and last point.
@@ -95,7 +95,7 @@ class ZigZagClassifier extends FalsingClassifier {
         // For vertical lines, the difference in the y direction should be small.
 
         if (motionEvents.size() < 3) {
-            return false;
+            return new Result(false, 0);
         }
 
         List<Point> rotatedPoints;
@@ -155,7 +155,7 @@ class ZigZagClassifier extends FalsingClassifier {
 
         logDebug("Straightness Deviance: (" + devianceX + "," + devianceY + ") vs "
                 + "(" + maxXDeviance + "," + maxYDeviance + ")");
-        return devianceX > maxXDeviance || devianceY > maxYDeviance;
+        return new Result(devianceX > maxXDeviance || devianceY > maxYDeviance, 0.5);
     }
 
     @Override

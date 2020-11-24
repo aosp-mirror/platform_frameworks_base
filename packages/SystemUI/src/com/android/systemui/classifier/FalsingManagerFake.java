@@ -17,7 +17,6 @@
 package com.android.systemui.classifier;
 
 import android.net.Uri;
-import android.view.MotionEvent;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.plugins.FalsingManager;
@@ -114,11 +113,6 @@ public class FalsingManagerFake implements FalsingManager {
     @Override
     public boolean isReportingEnabled() {
         return mIsReportingEnabled;
-    }
-
-    @Override
-    public void onTouchEvent(MotionEvent ev, int width, int height) {
-
     }
 
     @Override

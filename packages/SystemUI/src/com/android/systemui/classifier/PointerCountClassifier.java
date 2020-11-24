@@ -56,12 +56,12 @@ class PointerCountClassifier extends FalsingClassifier {
     }
 
     @Override
-    public boolean isFalseTouch() {
+    Result calculateFalsingResult(double historyPenalty, double historyConfidence) {
         int interactionType = getInteractionType();
         if (interactionType == QUICK_SETTINGS || interactionType == NOTIFICATION_DRAG_DOWN) {
-            return mMaxPointerCount > MAX_ALLOWED_POINTERS_SWIPE_DOWN;
+            return new Result(mMaxPointerCount > MAX_ALLOWED_POINTERS_SWIPE_DOWN, 1);
         }
-        return mMaxPointerCount > MAX_ALLOWED_POINTERS;
+        return new Result(mMaxPointerCount > MAX_ALLOWED_POINTERS, 1);
     }
 
     @Override

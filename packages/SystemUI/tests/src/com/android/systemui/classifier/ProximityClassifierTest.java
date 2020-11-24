@@ -69,7 +69,7 @@ public class ProximityClassifierTest extends ClassifierTest {
     public void testPass_uncovered() {
         touchDown();
         touchUp(10);
-        assertThat(mClassifier.isFalseTouch(), is(false));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
     }
 
     @Test
@@ -78,7 +78,7 @@ public class ProximityClassifierTest extends ClassifierTest {
         mClassifier.onProximityEvent(createSensorEvent(true, 1));
         mClassifier.onProximityEvent(createSensorEvent(false, 2));
         touchUp(20);
-        assertThat(mClassifier.isFalseTouch(), is(false));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
     }
 
     @Test
@@ -88,7 +88,7 @@ public class ProximityClassifierTest extends ClassifierTest {
         mClassifier.onProximityEvent(createSensorEvent(true, 1));
         mClassifier.onProximityEvent(createSensorEvent(false, 11));
         touchUp(10);
-        assertThat(mClassifier.isFalseTouch(), is(false));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
     }
 
     @Test
@@ -97,7 +97,7 @@ public class ProximityClassifierTest extends ClassifierTest {
         mClassifier.onProximityEvent(createSensorEvent(true, 1));
         mClassifier.onProximityEvent(createSensorEvent(false, 11));
         touchUp(10);
-        assertThat(mClassifier.isFalseTouch(), is(true));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(true));
     }
 
     @Test
@@ -108,7 +108,7 @@ public class ProximityClassifierTest extends ClassifierTest {
         mClassifier.onProximityEvent(createSensorEvent(true, 96));
         mClassifier.onProximityEvent(createSensorEvent(false, 100));
         touchUp(100);
-        assertThat(mClassifier.isFalseTouch(), is(true));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(true));
     }
 
     @Test
@@ -118,7 +118,7 @@ public class ProximityClassifierTest extends ClassifierTest {
         mClassifier.onProximityEvent(createSensorEvent(false, 11));
         touchUp(10);
         when(mDistanceClassifier.isLongSwipe()).thenReturn(true);
-        assertThat(mClassifier.isFalseTouch(), is(false));
+        assertThat(mClassifier.classifyGesture().isFalse(), is(false));
     }
 
     private void touchDown() {

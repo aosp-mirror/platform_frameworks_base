@@ -29,8 +29,11 @@ import java.util.Queue;
 public abstract class FalsingClassifier {
     private final FalsingDataProvider mDataProvider;
 
+    private final FalsingDataProvider.MotionEventListener mMotionEventListener = this::onTouchEvent;
+
     FalsingClassifier(FalsingDataProvider dataProvider) {
         mDataProvider = dataProvider;
+        mDataProvider.addMotionEventListener(mMotionEventListener);
     }
 
     List<MotionEvent> getRecentMotionEvents() {
@@ -89,6 +92,10 @@ public abstract class FalsingClassifier {
         return mDataProvider.getInteractionType();
     }
 
+    void cleanup() {
+        mDataProvider.removeMotionEventListener(mMotionEventListener);
+    }
+
     /**
      * Called whenever a MotionEvent occurs.
      *
@@ -115,13 +122,21 @@ public abstract class FalsingClassifier {
     /**
      * Returns true if the data captured so far looks like a false touch.
      */
-    abstract boolean isFalseTouch();
+    Result classifyGesture() {
+        return calculateFalsingResult(0, 0);
+    }
+
+    boolean classifyGesture(double historyPenalty, double historyConfidence) {
+        return calculateFalsingResult(historyPenalty, historyConfidence).isFalse();
+    }
+
+    abstract Result calculateFalsingResult(double historyPenalty, double historyConfidence);
 
     /**
      * Give the classifier a chance to log more details about why it triggered.
      *
-     * This should only be called after a call to {@link #isFalseTouch()}, and only if
-     * {@link #isFalseTouch()} returns true;
+     * This should only be called after a call to {@link #classifyGesture()}, and only if
+     * {@link #classifyGesture()} returns true;
      */
     abstract String getReason();
 
@@ -138,5 +153,23 @@ public abstract class FalsingClassifier {
     /** */
     public static void logError(String msg) {
         BrightLineFalsingManager.logError(msg);
+    }
+
+    static class Result {
+        private final boolean mFalsed;
+        private final double mConfidence;
+
+        Result(boolean falsed, double confidence) {
+            mFalsed = falsed;
+            mConfidence = confidence;
+        }
+
+        public boolean isFalse() {
+            return mFalsed;
+        }
+
+        public double getConfidence() {
+            return mConfidence;
+        }
     }
 }
