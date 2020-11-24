@@ -66,7 +66,7 @@
     <string name="bluetooth_disconnected" msgid="7739366554710388701">"Desconnectat"</string>
     <string name="bluetooth_disconnecting" msgid="7638892134401574338">"S\'està desconnectant..."</string>
     <string name="bluetooth_connecting" msgid="5871702668260192755">"S\'està connectant…"</string>
-    <string name="bluetooth_connected" msgid="8065345572198502293">"<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> connectat"</string>
+    <string name="bluetooth_connected" msgid="8065345572198502293">"<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> Connectat"</string>
     <string name="bluetooth_pairing" msgid="4269046942588193600">"S\'està vinculant..."</string>
     <string name="bluetooth_connected_no_headset" msgid="2224101138659967604">"<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> connectat (sense accés al telèfon)"</string>
     <string name="bluetooth_connected_no_a2dp" msgid="8566874395813947092">"<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> connectat (sense contingut multimèdia)"</string>
@@ -446,6 +446,7 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g>: <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"<xliff:g id="TIME">%1$s</xliff:g> per completar la càrrega"</string>
     <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g>: <xliff:g id="TIME">%2$s</xliff:g> per completar la càrrega"</string>
+    <string name="power_charging_limited" msgid="5902301801611726210">"<xliff:g id="LEVEL">%1$s</xliff:g>: bateria limitada temporalment"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Desconegut"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"S\'està carregant"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Carregant ràpidament"</string>
@@ -531,7 +532,7 @@
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"Perfil restringit"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"Vols afegir un usuari nou?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"Pots compartir aquest dispositiu amb altres persones creant usuaris addicionals. Cada usuari té el seu propi espai, que pot personalitzar amb aplicacions i fons de pantalla, entre d\'altres. Els usuaris també poden ajustar opcions de configuració del dispositiu, com ara la Wi-Fi, que afecten els altres usuaris.\n\nQuan afegeixis un usuari nou, haurà de configurar el seu espai.\n\nTots els usuaris poden actualitzar les aplicacions de la resta. És possible que la configuració i els serveis d\'accessibilitat no es transfereixin a l\'usuari nou."</string>
-    <string name="user_add_user_message_short" msgid="3295959985795716166">"Quan s\'afegeix un usuari nou, aquest usuari ha de configurar el seu espai.\n\nQualsevol usuari pot actualitzar les aplicacions dels altres usuaris."</string>
+    <string name="user_add_user_message_short" msgid="3295959985795716166">"Quan s\'afegeix un usuari nou, aquesta persona ha de configurar el seu espai.\n\nQualsevol usuari pot actualitzar les aplicacions dels altres usuaris."</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Vols configurar l\'usuari ara?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Assegura\'t que la persona estigui disponible per accedir al dispositiu i configurar el seu espai."</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Vols configurar el perfil ara?"</string>

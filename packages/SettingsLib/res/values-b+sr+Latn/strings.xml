@@ -27,7 +27,7 @@
     <string name="wifi_disabled_generic" msgid="2651916945380294607">"Onemogućeno"</string>
     <string name="wifi_disabled_network_failure" msgid="2660396183242399585">"IP konfiguracija je otkazala"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="1302938248432705534">"Nije povezano zbog lošeg kvaliteta mreže"</string>
-    <string name="wifi_disabled_wifi_failure" msgid="8819554899148331100">"Wi-Fi veza je otkazala"</string>
+    <string name="wifi_disabled_wifi_failure" msgid="8819554899148331100">"WiFi veza je otkazala"</string>
     <string name="wifi_disabled_password_failure" msgid="6892387079613226738">"Problem sa potvrdom identiteta"</string>
     <string name="wifi_cant_connect" msgid="5718417542623056783">"Povezivanje nije uspelo"</string>
     <string name="wifi_cant_connect_to_ap" msgid="3099667989279700135">"Povezivanje sa „<xliff:g id="AP_NAME">%1$s</xliff:g>“ nije uspelo"</string>
@@ -131,12 +131,12 @@
     <string name="bluetooth_hearingaid_right_pairing_message" msgid="2655347721696331048">"Uparivanje desnog slušnog aparata…"</string>
     <string name="bluetooth_hearingaid_left_battery_level" msgid="7375621694748104876">"Levi – nivo baterije je <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_hearingaid_right_battery_level" msgid="1850094448499089312">"Desni – nivo baterije je <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="accessibility_wifi_off" msgid="1195445715254137155">"Wi-Fi je isključen."</string>
-    <string name="accessibility_no_wifi" msgid="5297119459491085771">"Wi-Fi veza je prekinuta."</string>
-    <string name="accessibility_wifi_one_bar" msgid="6025652717281815212">"Wi-Fi signal ima jednu crtu."</string>
-    <string name="accessibility_wifi_two_bars" msgid="687800024970972270">"Wi-Fi signal ima dve crte."</string>
-    <string name="accessibility_wifi_three_bars" msgid="779895671061950234">"Wi-Fi signal ima tri crte."</string>
-    <string name="accessibility_wifi_signal_full" msgid="7165262794551355617">"Wi-Fi signal je najjači."</string>
+    <string name="accessibility_wifi_off" msgid="1195445715254137155">"WiFi je isključen."</string>
+    <string name="accessibility_no_wifi" msgid="5297119459491085771">"WiFi veza je prekinuta."</string>
+    <string name="accessibility_wifi_one_bar" msgid="6025652717281815212">"WiFi signal ima jednu crtu."</string>
+    <string name="accessibility_wifi_two_bars" msgid="687800024970972270">"WiFi signal ima dve crte."</string>
+    <string name="accessibility_wifi_three_bars" msgid="779895671061950234">"WiFi signal ima tri crte."</string>
+    <string name="accessibility_wifi_signal_full" msgid="7165262794551355617">"WiFi signal je najjači."</string>
     <string name="accessibility_wifi_security_type_none" msgid="162352241518066966">"Otvorena mreža"</string>
     <string name="accessibility_wifi_security_type_secured" msgid="2399774097343238942">"Bezbedna mreža"</string>
     <string name="process_kernel_label" msgid="950292573930336765">"Android OS"</string>
@@ -232,7 +232,7 @@
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"IP adresa i port"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"Skeniraj QR kôd"</string>
     <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"Uparite uređaj pomoću Wi‑Fi mreže tako što ćete skenirati QR kôd"</string>
-    <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Povežite se na Wi-Fi mrežu"</string>
+    <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Povežite se na WiFi mrežu"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, otklanjanje grešaka, programer"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Prečica za izveštaj o greškama"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Prikaži dugme u meniju napajanja za pravljenje izveštaja o greškama"</string>
@@ -250,7 +250,7 @@
     <string name="debug_networking_category" msgid="6829757985772659599">"Umrežavanje"</string>
     <string name="wifi_display_certification" msgid="1805579519992520381">"Sertifikacija bežičnog ekrana"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Omogući detaljniju evidenciju za Wi‑Fi"</string>
-    <string name="wifi_scan_throttling" msgid="2985624788509913617">"Usporavanje Wi-Fi skeniranja"</string>
+    <string name="wifi_scan_throttling" msgid="2985624788509913617">"Usporavanje WiFi skeniranja"</string>
     <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"Nasumično MAC razvrstavanje po Wi‑Fi‑ju"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Mobilni podaci su uvek aktivni"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Hardversko ubrzanje privezivanja"</string>
@@ -446,6 +446,7 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"Napuniće se za <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> – napuniće se za <xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <string name="power_charging_limited" msgid="5902301801611726210">"<xliff:g id="LEVEL">%1$s</xliff:g> – baterija je trenutno ograničena"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Nepoznato"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Puni se"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Brzo se puni"</string>

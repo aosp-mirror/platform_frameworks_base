@@ -446,6 +446,7 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"Napunit će se za <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> – napunit će se za <xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <string name="power_charging_limited" msgid="5902301801611726210">"<xliff:g id="LEVEL">%1$s</xliff:g> – Baterija je privremeno ograničena"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Nepoznato"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Punjenje"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Brzo punjenje"</string>
@@ -473,7 +474,7 @@
     <string name="screen_zoom_summary_extremely_large" msgid="1438045624562358554">"Najveći"</string>
     <string name="screen_zoom_summary_custom" msgid="3468154096832912210">"Prilagodi (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
     <string name="content_description_menu_button" msgid="6254844309171779931">"Meni"</string>
-    <string name="retail_demo_reset_message" msgid="5392824901108195463">"Unesite lozinku da izvršite vraćanje na fabričke postavke u načinu demonstracije"</string>
+    <string name="retail_demo_reset_message" msgid="5392824901108195463">"Unesite lozinku da izvršite vraćanje na fabričke postavke u načinu rada za demonstraciju"</string>
     <string name="retail_demo_reset_next" msgid="3688129033843885362">"Naprijed"</string>
     <string name="retail_demo_reset_title" msgid="1866911701095959800">"Potrebna je lozinka"</string>
     <string name="active_input_method_subtypes" msgid="4232680535471633046">"Aktivne metode unosa"</string>

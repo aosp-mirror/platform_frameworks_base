@@ -81,11 +81,11 @@
     <string name="bluetooth_battery_level" msgid="2893696778200201555">"Chaji ya betri ni <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_battery_level_untethered" msgid="4002282355111504349">"L: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> ya betri, R: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> ya betri"</string>
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"Kimeunganishwa"</string>
-    <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Media ya sauti"</string>
+    <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Sauti ya maudhui"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"Simu"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Uhamishaji wa faili"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"Kifaa cha kuingiza"</string>
-    <string name="bluetooth_profile_pan" msgid="1006235139308318188">"Ufikiaji wa mtandao"</string>
+    <string name="bluetooth_profile_pan" msgid="1006235139308318188">"Ufikiaji wa intaneti"</string>
     <string name="bluetooth_profile_pbap" msgid="7064307749579335765">"Kushiriki anwani"</string>
     <string name="bluetooth_profile_pbap_summary" msgid="2955819694801952056">"Tumia kwa kushiriki anwani"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"Kushiriki muunganisho wa tovuti"</string>
@@ -107,7 +107,7 @@
     <string name="bluetooth_pan_profile_summary_use_for" msgid="7422039765025340313">"Tumia kuunganisha kwenye intaneti"</string>
     <string name="bluetooth_map_profile_summary_use_for" msgid="4453622103977592583">"Tumia kwa ramani"</string>
     <string name="bluetooth_sap_profile_summary_use_for" msgid="6204902866176714046">"Tumia kwa ufikiaji wa SIM"</string>
-    <string name="bluetooth_a2dp_profile_summary_use_for" msgid="7324694226276491807">"Tumia kwa sauti ya media"</string>
+    <string name="bluetooth_a2dp_profile_summary_use_for" msgid="7324694226276491807">"Tumia kwa sauti ya maudhui"</string>
     <string name="bluetooth_headset_profile_summary_use_for" msgid="808970643123744170">"Tumia kwa sauti ya simu"</string>
     <string name="bluetooth_opp_profile_summary_use_for" msgid="461981154387015457">"Tumia kwa hali faili"</string>
     <string name="bluetooth_hid_profile_summary_use_for" msgid="4289460627406490952">"Tumia kwa kuingiza"</string>
@@ -446,6 +446,7 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"Imebakisha <xliff:g id="TIME">%1$s</xliff:g> ijae chaji"</string>
     <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> ijae chaji"</string>
+    <string name="power_charging_limited" msgid="5902301801611726210">"<xliff:g id="LEVEL">%1$s</xliff:g> - Betri imedhibitiwa kwa muda"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Haijulikani"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Inachaji"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Inachaji kwa kasi"</string>

@@ -70,7 +70,7 @@
     <string name="bluetooth_pairing" msgid="4269046942588193600">"Хослуулж байна…"</string>
     <string name="bluetooth_connected_no_headset" msgid="2224101138659967604">"Холбогдсон (утас байхгүй)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_a2dp" msgid="8566874395813947092">"Холбогдсон (медиа байхгүй)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_connected_no_map" msgid="3381860077002724689">"Холбогдсон (зурвасын хандалт байхгүй)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_map" msgid="3381860077002724689">"Холбогдсон (мессежийн хандалт байхгүй)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp" msgid="2893204819854215433">"Холбогдсон (утас эсвэл медиа байхгүй)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_battery_level" msgid="5410325759372259950">"Холбогдсон, батерей <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_battery_level" msgid="2661863370509206428">"Холбогдсон (утас байхгүй), батерей <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
@@ -287,7 +287,7 @@
     <string name="wifi_metered_label" msgid="8737187690304098638">"Хязгаартай"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Хязгааргүй"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Логгерын буферын хэмжээ"</string>
-    <string name="select_logd_size_dialog_title" msgid="2105401994681013578">"Лог буфер бүрт ногдох логгерын хэмжээг сонгоно уу"</string>
+    <string name="select_logd_size_dialog_title" msgid="2105401994681013578">"Лог буфер бүрд ногдох логгерын хэмжээг сонгоно уу"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="8631859265777337991">"Нэвтрэгчийн тогтмол санг устгах уу?"</string>
     <string name="dev_logpersist_clear_warning_message" msgid="6447590867594287413">"Бид байнгын логоор хянаагүй үед таны төхөөрөмжтэй холбоотой нэвтрэгч өгөгдлийг устгах шаардлагатай."</string>
     <string name="select_logpersist_title" msgid="447071974007104196">"Төхөөрөмжид тогтмол нэвтрэгчийн өгөгдлийн сан"</string>
@@ -446,6 +446,7 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"Цэнэглэх хүртэл үлдсэн <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> - цэнэглэх хүртэл <xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <string name="power_charging_limited" msgid="5902301801611726210">"<xliff:g id="LEVEL">%1$s</xliff:g> - Батарейг түр хугацаанд хязгаарласан"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Тодорхойгүй"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Цэнэглэж байна"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Хурдан цэнэглэж байна"</string>
