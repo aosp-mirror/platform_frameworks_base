@@ -28,6 +28,7 @@ import android.app.compat.ChangeIdStateCache;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 
 import androidx.test.runner.AndroidJUnit4;
 
@@ -230,6 +231,83 @@ public class CompatConfigTest {
     }
 
     @Test
+    public void testApplyDeferredOverridesAfterInstallingApp() throws Exception {
+        ApplicationInfo applicationInfo = ApplicationInfoBuilder.create()
+                .withPackageName("com.notinstalled.foo")
+                .debuggable().build();
+        when(mPackageManager.getApplicationInfo(eq("com.notinstalled.foo"), anyInt()))
+                .thenThrow(new NameNotFoundException());
+        CompatConfig compatConfig = CompatConfigBuilder.create(mBuildClassifier, mContext)
+                .addDisabledChangeWithId(1234L).build();
+        when(mBuildClassifier.isDebuggableBuild()).thenReturn(false);
+        when(mBuildClassifier.isFinalBuild()).thenReturn(true);
+
+        // Add override before the app is available.
+        compatConfig.addOverride(1234L, "com.notinstalled.foo", true);
+        assertThat(compatConfig.isChangeEnabled(1234L, applicationInfo)).isFalse();
+
+        // Pretend the app is now installed.
+        when(mPackageManager.getApplicationInfo(eq("com.notinstalled.foo"), anyInt()))
+                .thenReturn(applicationInfo);
+
+        compatConfig.recheckOverrides("com.notinstalled.foo");
+        assertThat(compatConfig.isChangeEnabled(1234L, applicationInfo)).isTrue();
+    }
+
+    @Test
+    public void testApplyDeferredOverrideClearsOverrideAfterUninstall() throws Exception {
+        ApplicationInfo applicationInfo = ApplicationInfoBuilder.create()
+                .withPackageName("com.installedapp.foo")
+                .debuggable().build();
+        when(mPackageManager.getApplicationInfo(eq("com.installedapp.foo"), anyInt()))
+                .thenReturn(applicationInfo);
+
+        CompatConfig compatConfig = CompatConfigBuilder.create(mBuildClassifier, mContext)
+                .addDisabledChangeWithId(1234L).build();
+        when(mBuildClassifier.isDebuggableBuild()).thenReturn(false);
+        when(mBuildClassifier.isFinalBuild()).thenReturn(true);
+
+        // Add override when app is installed.
+        compatConfig.addOverride(1234L, "com.installedapp.foo", true);
+        assertThat(compatConfig.isChangeEnabled(1234L, applicationInfo)).isTrue();
+
+        // Pretend the app is now uninstalled.
+        when(mPackageManager.getApplicationInfo(eq("com.installedapp.foo"), anyInt()))
+                .thenThrow(new NameNotFoundException());
+
+        compatConfig.recheckOverrides("com.installedapp.foo");
+        assertThat(compatConfig.isChangeEnabled(1234L, applicationInfo)).isFalse();
+    }
+
+    @Test
+    public void testApplyDeferredOverrideClearsOverrideAfterChange() throws Exception {
+        ApplicationInfo debuggableApp = ApplicationInfoBuilder.create()
+                .withPackageName("com.installedapp.foo")
+                .debuggable().build();
+        ApplicationInfo releaseApp = ApplicationInfoBuilder.create()
+                .withPackageName("com.installedapp.foo")
+                .build();
+        when(mPackageManager.getApplicationInfo(eq("com.installedapp.foo"), anyInt()))
+                .thenReturn(debuggableApp);
+
+        CompatConfig compatConfig = CompatConfigBuilder.create(mBuildClassifier, mContext)
+                .addDisabledChangeWithId(1234L).build();
+        when(mBuildClassifier.isDebuggableBuild()).thenReturn(false);
+        when(mBuildClassifier.isFinalBuild()).thenReturn(true);
+
+        // Add override for debuggable app.
+        compatConfig.addOverride(1234L, "com.installedapp.foo", true);
+        assertThat(compatConfig.isChangeEnabled(1234L, debuggableApp)).isTrue();
+
+        // Pretend the app now is no longer debuggable, but has the same package.
+        when(mPackageManager.getApplicationInfo(eq("com.installedapp.foo"), anyInt()))
+                .thenReturn(releaseApp);
+
+        compatConfig.recheckOverrides("com.installedapp.foo");
+        assertThat(compatConfig.isChangeEnabled(1234L, releaseApp)).isFalse();
+    }
+
+    @Test
     public void testLoggingOnlyChangePreventAddOverride() throws Exception {
         CompatConfig compatConfig = CompatConfigBuilder.create(mBuildClassifier, mContext)
                 .addLoggingOnlyChangeWithId(1234L)
@@ -259,7 +337,7 @@ public class CompatConfigTest {
         // Reject all override attempts.
         // Force the validator to prevent overriding the change by using a user build.
         when(mBuildClassifier.isDebuggableBuild()).thenReturn(false);
-        when(mBuildClassifier.isFinalBuild()).thenReturn(true);
+        when(mBuildClassifier.isFinalBuild()).thenReturn(false);
         // Try to turn off change, but validator prevents it.
         assertThrows(SecurityException.class,
                 () -> compatConfig.removeOverride(1234L, "com.some.package"));

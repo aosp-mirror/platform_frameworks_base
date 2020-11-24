@@ -17,11 +17,11 @@
 package com.android.server.compat;
 
 import static com.android.internal.compat.OverrideAllowedState.ALLOWED;
+import static com.android.internal.compat.OverrideAllowedState.DEFERRED_VERIFICATION;
 import static com.android.internal.compat.OverrideAllowedState.DISABLED_NON_TARGET_SDK;
 import static com.android.internal.compat.OverrideAllowedState.DISABLED_NOT_DEBUGGABLE;
 import static com.android.internal.compat.OverrideAllowedState.DISABLED_TARGET_SDK_TOO_HIGH;
 import static com.android.internal.compat.OverrideAllowedState.LOGGING_ONLY_CHANGE;
-import static com.android.internal.compat.OverrideAllowedState.PACKAGE_DOES_NOT_EXIST;
 
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -73,7 +73,7 @@ public class OverrideValidatorImpl extends IOverrideValidator.Stub {
         try {
             applicationInfo = packageManager.getApplicationInfo(packageName, 0);
         } catch (NameNotFoundException e) {
-            return new OverrideAllowedState(PACKAGE_DOES_NOT_EXIST, -1, -1);
+            return new OverrideAllowedState(DEFERRED_VERIFICATION, -1, -1);
         }
         int appTargetSdk = applicationInfo.targetSdkVersion;
         // Only allow overriding debuggable apps.
