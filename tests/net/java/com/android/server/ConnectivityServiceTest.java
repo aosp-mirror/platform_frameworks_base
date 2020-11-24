@@ -46,6 +46,7 @@ import static android.net.INetworkMonitor.NETWORK_VALIDATION_PROBE_HTTPS;
 import static android.net.INetworkMonitor.NETWORK_VALIDATION_PROBE_PRIVDNS;
 import static android.net.INetworkMonitor.NETWORK_VALIDATION_RESULT_PARTIAL;
 import static android.net.INetworkMonitor.NETWORK_VALIDATION_RESULT_VALID;
+import static android.net.NetworkCapabilities.LINK_BANDWIDTH_UNSPECIFIED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_CAPTIVE_PORTAL;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_CBS;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_DUN;
@@ -56,8 +57,10 @@ import static android.net.NetworkCapabilities.NET_CAPABILITY_IA;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_IMS;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_MMS;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_CONGESTED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_METERED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_ROAMING;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_SUSPENDED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_VPN;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_PARTIAL_CONNECTIVITY;
@@ -5398,6 +5401,102 @@ public class ConnectivityServiceTest {
     }
 
     @Test
+    public void testApplyUnderlyingCapabilities() throws Exception {
+        mCellNetworkAgent = new TestNetworkAgentWrapper(TRANSPORT_CELLULAR);
+        mWiFiNetworkAgent = new TestNetworkAgentWrapper(TRANSPORT_WIFI);
+        mCellNetworkAgent.connect(false /* validated */);
+        mWiFiNetworkAgent.connect(false /* validated */);
+
+        final NetworkCapabilities cellNc = new NetworkCapabilities()
+                .addTransportType(TRANSPORT_CELLULAR)
+                .addCapability(NET_CAPABILITY_INTERNET)
+                .addCapability(NET_CAPABILITY_NOT_CONGESTED)
+                .setLinkDownstreamBandwidthKbps(10);
+        final NetworkCapabilities wifiNc = new NetworkCapabilities()
+                .addTransportType(TRANSPORT_WIFI)
+                .addCapability(NET_CAPABILITY_INTERNET)
+                .addCapability(NET_CAPABILITY_NOT_METERED)
+                .addCapability(NET_CAPABILITY_NOT_ROAMING)
+                .addCapability(NET_CAPABILITY_NOT_CONGESTED)
+                .addCapability(NET_CAPABILITY_NOT_SUSPENDED)
+                .setLinkUpstreamBandwidthKbps(20);
+        mCellNetworkAgent.setNetworkCapabilities(cellNc, true /* sendToConnectivityService */);
+        mWiFiNetworkAgent.setNetworkCapabilities(wifiNc, true /* sendToConnectivityService */);
+        waitForIdle();
+
+        final Network mobile = mCellNetworkAgent.getNetwork();
+        final Network wifi = mWiFiNetworkAgent.getNetwork();
+
+        final NetworkCapabilities caps = new NetworkCapabilities();
+
+        mService.applyUnderlyingCapabilities(new Network[]{}, caps, false);
+        assertTrue(caps.hasTransport(TRANSPORT_VPN));
+        assertFalse(caps.hasTransport(TRANSPORT_CELLULAR));
+        assertFalse(caps.hasTransport(TRANSPORT_WIFI));
+        assertEquals(LINK_BANDWIDTH_UNSPECIFIED, caps.getLinkDownstreamBandwidthKbps());
+        assertEquals(LINK_BANDWIDTH_UNSPECIFIED, caps.getLinkUpstreamBandwidthKbps());
+        assertFalse(caps.hasCapability(NET_CAPABILITY_NOT_METERED));
+        assertTrue(caps.hasCapability(NET_CAPABILITY_NOT_ROAMING));
+        assertTrue(caps.hasCapability(NET_CAPABILITY_NOT_CONGESTED));
+        assertTrue(caps.hasCapability(NET_CAPABILITY_NOT_SUSPENDED));
+
+        NetworkCapabilities otherCaps = new NetworkCapabilities(caps);
+        final boolean notDeclaredMetered = false;
+        mService.applyUnderlyingCapabilities(new Network[]{null}, otherCaps, notDeclaredMetered);
+        assertEquals(caps, otherCaps);
+
+        mService.applyUnderlyingCapabilities(new Network[]{mobile}, caps, notDeclaredMetered);
+        assertTrue(caps.hasTransport(TRANSPORT_VPN));
+        assertTrue(caps.hasTransport(TRANSPORT_CELLULAR));
+        assertFalse(caps.hasTransport(TRANSPORT_WIFI));
+        assertEquals(10, caps.getLinkDownstreamBandwidthKbps());
+        assertEquals(LINK_BANDWIDTH_UNSPECIFIED, caps.getLinkUpstreamBandwidthKbps());
+        assertFalse(caps.hasCapability(NET_CAPABILITY_NOT_METERED));
+        assertFalse(caps.hasCapability(NET_CAPABILITY_NOT_ROAMING));
+        assertTrue(caps.hasCapability(NET_CAPABILITY_NOT_CONGESTED));
+        assertFalse(caps.hasCapability(NET_CAPABILITY_NOT_SUSPENDED));
+
+        mService.applyUnderlyingCapabilities(new Network[]{wifi}, caps, notDeclaredMetered);
+        assertTrue(caps.hasTransport(TRANSPORT_VPN));
+        assertFalse(caps.hasTransport(TRANSPORT_CELLULAR));
+        assertTrue(caps.hasTransport(TRANSPORT_WIFI));
+        assertEquals(LINK_BANDWIDTH_UNSPECIFIED, caps.getLinkDownstreamBandwidthKbps());
+        assertEquals(20, caps.getLinkUpstreamBandwidthKbps());
+        assertTrue(caps.hasCapability(NET_CAPABILITY_NOT_METERED));
+        assertTrue(caps.hasCapability(NET_CAPABILITY_NOT_ROAMING));
+        assertTrue(caps.hasCapability(NET_CAPABILITY_NOT_CONGESTED));
+        assertTrue(caps.hasCapability(NET_CAPABILITY_NOT_SUSPENDED));
+
+        final boolean isDeclaredMetered = true;
+        mService.applyUnderlyingCapabilities(new Network[]{wifi}, caps, isDeclaredMetered);
+        assertTrue(caps.hasTransport(TRANSPORT_VPN));
+        assertFalse(caps.hasTransport(TRANSPORT_CELLULAR));
+        assertTrue(caps.hasTransport(TRANSPORT_WIFI));
+        assertEquals(LINK_BANDWIDTH_UNSPECIFIED, caps.getLinkDownstreamBandwidthKbps());
+        assertEquals(20, caps.getLinkUpstreamBandwidthKbps());
+        assertFalse(caps.hasCapability(NET_CAPABILITY_NOT_METERED));
+        assertTrue(caps.hasCapability(NET_CAPABILITY_NOT_ROAMING));
+        assertTrue(caps.hasCapability(NET_CAPABILITY_NOT_CONGESTED));
+        assertTrue(caps.hasCapability(NET_CAPABILITY_NOT_SUSPENDED));
+
+        mService.applyUnderlyingCapabilities(new Network[]{mobile, wifi}, caps, notDeclaredMetered);
+        assertTrue(caps.hasTransport(TRANSPORT_VPN));
+        assertTrue(caps.hasTransport(TRANSPORT_CELLULAR));
+        assertTrue(caps.hasTransport(TRANSPORT_WIFI));
+        assertEquals(10, caps.getLinkDownstreamBandwidthKbps());
+        assertEquals(20, caps.getLinkUpstreamBandwidthKbps());
+        assertFalse(caps.hasCapability(NET_CAPABILITY_NOT_METERED));
+        assertFalse(caps.hasCapability(NET_CAPABILITY_NOT_ROAMING));
+        assertTrue(caps.hasCapability(NET_CAPABILITY_NOT_CONGESTED));
+        assertTrue(caps.hasCapability(NET_CAPABILITY_NOT_SUSPENDED));
+
+        otherCaps = new NetworkCapabilities(caps);
+        mService.applyUnderlyingCapabilities(new Network[]{null, mobile, null, wifi},
+                otherCaps, notDeclaredMetered);
+        assertEquals(otherCaps, caps);
+    }
+
+    @Test
     public void testVpnConnectDisconnectUnderlyingNetwork() throws Exception {
         final TestNetworkCallback callback = new TestNetworkCallback();
         final NetworkRequest request = new NetworkRequest.Builder()
@@ -5947,17 +6046,28 @@ public class ConnectivityServiceTest {
                 && caps.hasTransport(TRANSPORT_VPN)
                 && caps.hasTransport(TRANSPORT_WIFI));
 
+        // Change the VPN's capabilities somehow (specifically, disconnect wifi).
+        mWiFiNetworkAgent.disconnect();
+        callback.expectCallback(CallbackEntry.LOST, mWiFiNetworkAgent);
+        callback.expectCapabilitiesThat(mMockVpn, (caps)
+                -> caps.getUids().size() == 2
+                && caps.getUids().contains(new UidRange(uid, uid))
+                && caps.getUids().contains(UidRange.createForUser(restrictedUserId))
+                && caps.hasTransport(TRANSPORT_VPN)
+                && !caps.hasTransport(TRANSPORT_WIFI));
+
         // Send a USER_REMOVED broadcast and expect to lose the UID range for the restricted user.
         final Intent removedIntent = new Intent(ACTION_USER_REMOVED);
         removedIntent.putExtra(Intent.EXTRA_USER_HANDLE, restrictedUserId);
         handler.post(() -> mServiceContext.sendBroadcast(removedIntent));
 
-        // Expect that the VPN gains the UID range for the restricted user.
+        // Expect that the VPN gains the UID range for the restricted user, and that the capability
+        // change made just before that (i.e., loss of TRANSPORT_WIFI) is preserved.
         callback.expectCapabilitiesThat(mMockVpn, (caps)
                 -> caps.getUids().size() == 1
                 && caps.getUids().contains(new UidRange(uid, uid))
                 && caps.hasTransport(TRANSPORT_VPN)
-                && caps.hasTransport(TRANSPORT_WIFI));
+                && !caps.hasTransport(TRANSPORT_WIFI));
     }
 
     @Test

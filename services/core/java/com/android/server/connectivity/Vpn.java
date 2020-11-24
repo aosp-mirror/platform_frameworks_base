@@ -18,10 +18,7 @@ package com.android.server.connectivity;
 
 import static android.Manifest.permission.BIND_VPN_SERVICE;
 import static android.net.ConnectivityManager.NETID_UNSET;
-import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_CONGESTED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_METERED;
-import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_ROAMING;
-import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_SUSPENDED;
 import static android.net.RouteInfo.RTN_THROW;
 import static android.net.RouteInfo.RTN_UNREACHABLE;
 
@@ -111,7 +108,6 @@ import com.android.internal.net.LegacyVpnInfo;
 import com.android.internal.net.VpnConfig;
 import com.android.internal.net.VpnInfo;
 import com.android.internal.net.VpnProfile;
-import com.android.internal.util.ArrayUtils;
 import com.android.server.DeviceIdleInternal;
 import com.android.server.LocalServices;
 import com.android.server.net.BaseNetworkObserver;
@@ -460,99 +456,6 @@ public class Vpn {
                 throw new IllegalArgumentException("Illegal state argument " + detailedState);
         }
         updateAlwaysOnNotification(detailedState);
-    }
-
-    /**
-     * Updates {@link #mNetworkCapabilities} based on current underlying networks and returns a
-     * defensive copy.
-     *
-     * <p>Does not propagate updated capabilities to apps.
-     *
-     * @param defaultNetwork underlying network for VPNs following platform's default
-     */
-    public synchronized NetworkCapabilities updateCapabilities(@Nullable Network defaultNetwork) {
-        if (mConfig == null) {
-            // VPN is not running.
-            return null;
-        }
-
-        Network[] underlyingNetworks = mConfig.underlyingNetworks;
-        if (underlyingNetworks == null && defaultNetwork != null) {
-            // null underlying networks means to track the default.
-            underlyingNetworks = new Network[] { defaultNetwork };
-        }
-        // Only apps targeting Q and above can explicitly declare themselves as metered.
-        final boolean isAlwaysMetered = mIsPackageTargetingAtLeastQ && mConfig.isMetered;
-
-        applyUnderlyingCapabilities(
-                mConnectivityManager,
-                underlyingNetworks,
-                mNetworkCapabilities,
-                isAlwaysMetered);
-
-        return new NetworkCapabilities(mNetworkCapabilities);
-    }
-
-    @VisibleForTesting
-    public static void applyUnderlyingCapabilities(
-            @NonNull final ConnectivityManager cm,
-            @Nullable final Network[] underlyingNetworks,
-            @NonNull final NetworkCapabilities caps,
-            final boolean isAlwaysMetered) {
-        int[] transportTypes = new int[] { NetworkCapabilities.TRANSPORT_VPN };
-        int downKbps = NetworkCapabilities.LINK_BANDWIDTH_UNSPECIFIED;
-        int upKbps = NetworkCapabilities.LINK_BANDWIDTH_UNSPECIFIED;
-        boolean metered = isAlwaysMetered; // metered if any underlying is metered, or alwaysMetered
-        boolean roaming = false; // roaming if any underlying is roaming
-        boolean congested = false; // congested if any underlying is congested
-        boolean suspended = true; // suspended if all underlying are suspended
-
-        boolean hadUnderlyingNetworks = false;
-        if (null != underlyingNetworks) {
-            for (Network underlying : underlyingNetworks) {
-                // TODO(b/124469351): Get capabilities directly from ConnectivityService instead.
-                final NetworkCapabilities underlyingCaps = cm.getNetworkCapabilities(underlying);
-                if (underlyingCaps == null) continue;
-                hadUnderlyingNetworks = true;
-                for (int underlyingType : underlyingCaps.getTransportTypes()) {
-                    transportTypes = ArrayUtils.appendInt(transportTypes, underlyingType);
-                }
-
-                // Merge capabilities of this underlying network. For bandwidth, assume the
-                // worst case.
-                downKbps = NetworkCapabilities.minBandwidth(downKbps,
-                        underlyingCaps.getLinkDownstreamBandwidthKbps());
-                upKbps = NetworkCapabilities.minBandwidth(upKbps,
-                        underlyingCaps.getLinkUpstreamBandwidthKbps());
-                // If this underlying network is metered, the VPN is metered (it may cost money
-                // to send packets on this network).
-                metered |= !underlyingCaps.hasCapability(NET_CAPABILITY_NOT_METERED);
-                // If this underlying network is roaming, the VPN is roaming (the billing structure
-                // is different than the usual, local one).
-                roaming |= !underlyingCaps.hasCapability(NET_CAPABILITY_NOT_ROAMING);
-                // If this underlying network is congested, the VPN is congested (the current
-                // condition of the network affects the performance of this network).
-                congested |= !underlyingCaps.hasCapability(NET_CAPABILITY_NOT_CONGESTED);
-                // If this network is not suspended, the VPN is not suspended (the VPN
-                // is able to transfer some data).
-                suspended &= !underlyingCaps.hasCapability(NET_CAPABILITY_NOT_SUSPENDED);
-            }
-        }
-        if (!hadUnderlyingNetworks) {
-            // No idea what the underlying networks are; assume the safer defaults
-            metered = true;
-            roaming = false;
-            congested = false;
-            suspended = false;
-        }
-
-        caps.setTransportTypes(transportTypes);
-        caps.setLinkDownstreamBandwidthKbps(downKbps);
-        caps.setLinkUpstreamBandwidthKbps(upKbps);
-        caps.setCapability(NET_CAPABILITY_NOT_METERED, !metered);
-        caps.setCapability(NET_CAPABILITY_NOT_ROAMING, !roaming);
-        caps.setCapability(NET_CAPABILITY_NOT_CONGESTED, !congested);
-        caps.setCapability(NET_CAPABILITY_NOT_SUSPENDED, !suspended);
     }
 
     /**
