@@ -112,13 +112,14 @@ class DistanceClassifier extends FalsingClassifier {
 
     private DistanceVectors calculateDistances() {
         // This code assumes that there will be no missed DOWN or UP events.
-        VelocityTracker velocityTracker = VelocityTracker.obtain();
         List<MotionEvent> motionEvents = getRecentMotionEvents();
 
         if (motionEvents.size() < 3) {
             logDebug("Only " + motionEvents.size() + " motion events recorded.");
             return new DistanceVectors(0, 0, 0, 0);
         }
+
+        VelocityTracker velocityTracker = VelocityTracker.obtain();
 
         for (MotionEvent motionEvent : motionEvents) {
             velocityTracker.addMovement(motionEvent);
