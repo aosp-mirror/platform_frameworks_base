@@ -11016,6 +11016,7 @@ package android.telephony.ims {
     method public boolean getCallExtraBoolean(String, boolean);
     method public int getCallExtraInt(String);
     method public int getCallExtraInt(String, int);
+    method @Nullable public <T extends android.os.Parcelable> T getCallExtraParcelable(@Nullable String);
     method public android.os.Bundle getCallExtras();
     method public int getCallType();
     method public static int getCallTypeFromVideoState(int);
@@ -11038,6 +11039,7 @@ package android.telephony.ims {
     method public void setCallExtra(String, String);
     method public void setCallExtraBoolean(String, boolean);
     method public void setCallExtraInt(String, int);
+    method public void setCallExtraParcelable(@NonNull String, @NonNull android.os.Parcelable);
     method public void setCallRestrictCause(int);
     method public void setCallerNumberVerificationStatus(int);
     method public void setEmergencyCallRouting(int);
@@ -11072,6 +11074,7 @@ package android.telephony.ims {
     field public static final String EXTRA_CALL_DISCONNECT_CAUSE = "android.telephony.ims.extra.CALL_DISCONNECT_CAUSE";
     field public static final String EXTRA_CALL_NETWORK_TYPE = "android.telephony.ims.extra.CALL_NETWORK_TYPE";
     field @Deprecated public static final String EXTRA_CALL_RAT_TYPE = "CallRadioTech";
+    field public static final String EXTRA_CALL_SUBJECT = "android.telephony.ims.extra.CALL_SUBJECT";
     field public static final String EXTRA_CHILD_NUMBER = "ChildNum";
     field public static final String EXTRA_CNA = "cna";
     field public static final String EXTRA_CNAP = "cnap";
@@ -11081,8 +11084,11 @@ package android.telephony.ims {
     field public static final String EXTRA_EMERGENCY_CALL = "e_call";
     field public static final String EXTRA_FORWARDED_NUMBER = "android.telephony.ims.extra.FORWARDED_NUMBER";
     field public static final String EXTRA_IS_CALL_PULL = "CallPull";
+    field public static final String EXTRA_LOCATION = "android.telephony.ims.extra.LOCATION";
     field public static final String EXTRA_OI = "oi";
     field public static final String EXTRA_OIR = "oir";
+    field public static final String EXTRA_PICTURE_URL = "android.telephony.ims.extra.PICTURE_URL";
+    field public static final String EXTRA_PRIORITY = "android.telephony.ims.extra.PRIORITY";
     field public static final String EXTRA_REMOTE_URI = "remote_uri";
     field public static final String EXTRA_USSD = "ussd";
     field public static final int OIR_DEFAULT = 0; // 0x0
@@ -11090,6 +11096,8 @@ package android.telephony.ims {
     field public static final int OIR_PRESENTATION_PAYPHONE = 4; // 0x4
     field public static final int OIR_PRESENTATION_RESTRICTED = 1; // 0x1
     field public static final int OIR_PRESENTATION_UNKNOWN = 3; // 0x3
+    field public static final int PRIORITY_NORMAL = 0; // 0x0
+    field public static final int PRIORITY_URGENT = 1; // 0x1
     field public static final int SERVICE_TYPE_EMERGENCY = 2; // 0x2
     field public static final int SERVICE_TYPE_NONE = 0; // 0x0
     field public static final int SERVICE_TYPE_NORMAL = 1; // 0x1
