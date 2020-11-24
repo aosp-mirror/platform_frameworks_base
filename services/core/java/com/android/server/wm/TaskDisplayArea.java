@@ -157,12 +157,24 @@ final class TaskDisplayArea extends DisplayArea<Task> {
      */
     private int mLastLeafTaskToFrontId;
 
+    /**
+     * Whether this TaskDisplayArea was created by a {@link android.window.DisplayAreaOrganizer}.
+     * If {@code true}, this will be removed when the organizer is unregistered.
+     */
+    final boolean mCreatedByOrganizer;
+
     TaskDisplayArea(DisplayContent displayContent, WindowManagerService service, String name,
             int displayAreaFeature) {
+        this(displayContent, service, name, displayAreaFeature, false /* createdByOrganizer */);
+    }
+
+    TaskDisplayArea(DisplayContent displayContent, WindowManagerService service, String name,
+            int displayAreaFeature, boolean createdByOrganizer) {
         super(service, Type.ANY, name, displayAreaFeature);
         mDisplayContent = displayContent;
         mRootWindowContainer = service.mRoot;
         mAtmService = service.mAtmService;
+        mCreatedByOrganizer = createdByOrganizer;
     }
 
     /**
@@ -1911,6 +1923,11 @@ final class TaskDisplayArea extends DisplayArea<Task> {
     @Override
     protected boolean isTaskDisplayArea() {
         return true;
+    }
+
+    @Override
+    TaskDisplayArea asTaskDisplayArea() {
+        return this;
     }
 
     @Override

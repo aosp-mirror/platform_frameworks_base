@@ -1,0 +1,6 @@
+# Temporary OWNERS Block to assist with migration
+# bug: 167962588
+per-file *atoms.proto = set noparent
+per-file *atom_field_options.proto = set noparent
+per-file *atoms.proto = baligh@google.com, yro@google.com, singhtejinder@google.com, jeffreyhuang@google.com
+per-file *atom_field_options.proto = baligh@google.com, yro@google.com, singhtejinder@google.com, jeffreyhuang@google.com

@@ -12,6 +12,7 @@ import android.view.ViewGroup
 import android.widget.LinearLayout
 import androidx.annotation.VisibleForTesting
 import com.android.systemui.R
+import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.plugins.ActivityStarter
@@ -44,6 +45,7 @@ class MediaCarouselController @Inject constructor(
     @Main executor: DelayableExecutor,
     private val mediaManager: MediaDataManager,
     configurationController: ConfigurationController,
+    falsingCollector: FalsingCollector,
     falsingManager: FalsingManager
 ) {
     /**
@@ -156,7 +158,7 @@ class MediaCarouselController @Inject constructor(
         pageIndicator = mediaFrame.requireViewById(R.id.media_page_indicator)
         mediaCarouselScrollHandler = MediaCarouselScrollHandler(mediaCarousel, pageIndicator,
                 executor, mediaManager::onSwipeToDismiss, this::updatePageIndicatorLocation,
-                this::closeGuts, falsingManager)
+                this::closeGuts, falsingCollector, falsingManager)
         isRtl = context.resources.configuration.layoutDirection == View.LAYOUT_DIRECTION_RTL
         inflateSettingsButton()
         mediaContent = mediaCarousel.requireViewById(R.id.media_carousel)

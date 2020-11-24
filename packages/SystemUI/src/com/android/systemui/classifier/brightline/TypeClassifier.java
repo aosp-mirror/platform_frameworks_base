@@ -26,6 +26,8 @@ import static com.android.systemui.classifier.Classifier.QUICK_SETTINGS;
 import static com.android.systemui.classifier.Classifier.RIGHT_AFFORDANCE;
 import static com.android.systemui.classifier.Classifier.UNLOCK;
 
+import com.android.systemui.classifier.FalsingDataProvider;
+
 /**
  * Ensure that the swipe direction generally matches that of the interaction type.
  */

@@ -1041,7 +1041,9 @@ base::expected<const ResolvedBag*, NullOrIOError> AssetManager2::ResolveBag(
 
 base::expected<const ResolvedBag*, NullOrIOError> AssetManager2::GetBag(uint32_t resid) const {
   std::vector<uint32_t> found_resids;
-  return GetBag(resid, found_resids);
+  const auto bag = GetBag(resid, found_resids);
+  cached_bag_resid_stacks_.emplace(resid, found_resids);
+  return bag;
 }
 
 base::expected<const ResolvedBag*, NullOrIOError> AssetManager2::GetBag(

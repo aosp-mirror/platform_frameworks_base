@@ -28,6 +28,12 @@
         android:text="Enter PIP"
         android:onClick="enterPip"/>
 
+    <CheckBox
+        android:id="@+id/with_custom_actions"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="With custom actions"/>
+
     <RadioGroup
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

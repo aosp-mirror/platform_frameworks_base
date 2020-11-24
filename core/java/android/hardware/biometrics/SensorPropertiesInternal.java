@@ -16,12 +16,9 @@
 
 package android.hardware.biometrics;
 
-import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.os.Parcel;
 import android.os.Parcelable;
-
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 
 /**
  * The base class containing all modality-agnostic information. This is a superset of the
@@ -34,6 +31,11 @@ public class SensorPropertiesInternal implements Parcelable {
     public final int sensorId;
     @SensorProperties.Strength public final int sensorStrength;
     public final int maxEnrollmentsPerUser;
+
+    public static SensorPropertiesInternal from(@NonNull SensorPropertiesInternal prop) {
+        return new SensorPropertiesInternal(prop.sensorId, prop.sensorStrength,
+                prop.maxEnrollmentsPerUser);
+    }
 
     protected SensorPropertiesInternal(int sensorId, @SensorProperties.Strength int sensorStrength,
             int maxEnrollmentsPerUser) {
@@ -71,5 +73,11 @@ public class SensorPropertiesInternal implements Parcelable {
         dest.writeInt(sensorId);
         dest.writeInt(sensorStrength);
         dest.writeInt(maxEnrollmentsPerUser);
+    }
+
+    @Override
+    public String toString() {
+        return "ID: " + sensorId + ", Strength: " + sensorStrength
+                + ", MaxEnrollmentsPerUser: " + maxEnrollmentsPerUser;
     }
 }

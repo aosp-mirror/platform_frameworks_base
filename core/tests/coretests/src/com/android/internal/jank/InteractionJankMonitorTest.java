@@ -94,7 +94,8 @@ public class InteractionJankMonitorTest {
         Session session = new Session(CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE);
         FrameTracker tracker = spy(new FrameTracker(session, mWorker.getThreadHandler(),
                 new ThreadedRendererWrapper(mView.getThreadedRenderer()),
-                new FrameMetricsWrapper(), 1, -1));
+                new FrameMetricsWrapper(), /*traceThresholdMissedFrames=*/ 1,
+                /*traceThresholdFrameTimeMillis=*/ -1));
         doReturn(tracker).when(monitor).createFrameTracker(any());
 
         // Simulate a trace session and see if begin / end are invoked.
@@ -150,7 +151,8 @@ public class InteractionJankMonitorTest {
         Session session = new Session(CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE);
         FrameTracker tracker = spy(new FrameTracker(session, mWorker.getThreadHandler(),
                 new ThreadedRendererWrapper(mView.getThreadedRenderer()),
-                new FrameMetricsWrapper(), 1, -1));
+                new FrameMetricsWrapper(), /*traceThresholdMissedFrames=*/ 1,
+                /*traceThresholdFrameTimeMillis=*/ -1));
         doReturn(tracker).when(monitor).createFrameTracker(any());
 
         assertThat(monitor.begin(session.getCuj())).isTrue();

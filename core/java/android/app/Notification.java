@@ -4901,7 +4901,7 @@ public class Notification implements Parcelable
             bindNotificationHeader(contentView, p);
             bindLargeIconAndApplyMargin(contentView, p, result);
             boolean showProgress = handleProgressBar(contentView, ex, p);
-            if (p.title != null && p.title.length() > 0 && !p.mHasCustomContent) {
+            if (p.hasTitle()) {
                 contentView.setViewVisibility(R.id.title, View.VISIBLE);
                 contentView.setTextViewText(R.id.title, processTextSpans(p.title));
                 setTextViewColorPrimary(contentView, R.id.title, p);
@@ -5296,7 +5296,7 @@ public class Notification implements Parcelable
                 contentView.setViewVisibility(R.id.app_name_text, View.GONE);
                 return false;
             }
-            if (p.mHeaderless && !p.mHasCustomContent) {
+            if (p.mHeaderless && p.hasTitle()) {
                 contentView.setViewVisibility(R.id.app_name_text, View.GONE);
                 // the headerless template will have the TITLE in this position; return true to
                 // keep the divider visible between that title and the next text element.
@@ -11071,6 +11071,10 @@ public class Notification implements Parcelable
             allowColorization = true;
             forceDefaultColor = false;
             return this;
+        }
+
+        final boolean hasTitle() {
+            return title != null && title.length() != 0 && !mHasCustomContent;
         }
 
         final StandardTemplateParams viewType(int viewType) {

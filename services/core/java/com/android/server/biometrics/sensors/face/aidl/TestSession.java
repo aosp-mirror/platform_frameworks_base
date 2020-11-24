@@ -24,7 +24,6 @@ import android.hardware.common.NativeHandle;
 import android.hardware.keymaster.HardwareAuthToken;
 import android.os.Binder;
 import android.os.IBinder;
-import android.os.RemoteException;
 
 /**
  * Test session that provides mostly no-ops.
@@ -59,7 +58,7 @@ public class TestSession extends ISession.Stub {
     public ICancellationSignal authenticate(int cookie, long operationId) {
         return new ICancellationSignal() {
             @Override
-            public void cancel() throws RemoteException {
+            public void cancel() {
                 mHalSessionCallback.onError(Error.CANCELED, 0 /* vendorCode */);
             }
 

@@ -43,6 +43,7 @@ import android.view.WindowManager;
 
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.util.ScreenshotHelper;
+import com.android.systemui.R;
 import com.android.systemui.shared.recents.utilities.BitmapUtil;
 
 import java.util.function.Consumer;
@@ -55,6 +56,7 @@ public class TakeScreenshotService extends Service {
     private final ScreenshotController mScreenshot;
     private final UserManager mUserManager;
     private final UiEventLogger mUiEventLogger;
+    private final ScreenshotNotificationsController mNotificationsController;
 
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
 
@@ -90,6 +92,8 @@ public class TakeScreenshotService extends Service {
             // animation and error notification.
             if (!mUserManager.isUserUnlocked()) {
                 Log.w(TAG, "Skipping screenshot because storage is locked!");
+                mNotificationsController.notifyScreenshotError(
+                        R.string.screenshot_failed_to_save_user_locked_text);
                 post(() -> uriConsumer.accept(null));
                 post(onComplete);
                 return;
@@ -125,11 +129,15 @@ public class TakeScreenshotService extends Service {
     };
 
     @Inject
-    public TakeScreenshotService(ScreenshotController screenshotController, UserManager userManager,
-            UiEventLogger uiEventLogger) {
+    public TakeScreenshotService(
+            ScreenshotController screenshotController,
+            UserManager userManager,
+            UiEventLogger uiEventLogger,
+            ScreenshotNotificationsController notificationsController) {
         mScreenshot = screenshotController;
         mUserManager = userManager;
         mUiEventLogger = uiEventLogger;
+        mNotificationsController = notificationsController;
     }
 
     @Override

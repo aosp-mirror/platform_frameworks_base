@@ -19,6 +19,7 @@ package com.android.systemui.classifier.brightline;
 import android.view.MotionEvent;
 
 import com.android.systemui.classifier.Classifier;
+import com.android.systemui.classifier.FalsingDataProvider;
 import com.android.systemui.util.sensors.ProximitySensor;
 
 import java.util.List;
@@ -27,7 +28,7 @@ import java.util.Queue;
 /**
  * Base class for rules that determine False touches.
  */
-abstract class FalsingClassifier {
+public abstract class FalsingClassifier {
     private final FalsingDataProvider mDataProvider;
 
     FalsingClassifier(FalsingDataProvider dataProvider) {
@@ -126,15 +127,18 @@ abstract class FalsingClassifier {
      */
     abstract String getReason();
 
-    static void logDebug(String msg) {
+    /** */
+    public static void logDebug(String msg) {
         BrightLineFalsingManager.logDebug(msg);
     }
 
-    static void logInfo(String msg) {
+    /** */
+    public static void logInfo(String msg) {
         BrightLineFalsingManager.logInfo(msg);
     }
 
-    static void logError(String msg) {
+    /** */
+    public static void logError(String msg) {
         BrightLineFalsingManager.logError(msg);
     }
 }

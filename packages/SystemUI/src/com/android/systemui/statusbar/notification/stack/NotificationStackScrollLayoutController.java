@@ -60,10 +60,10 @@ import com.android.systemui.ExpandHelper;
 import com.android.systemui.Gefingerpoken;
 import com.android.systemui.R;
 import com.android.systemui.SwipeHelper;
+import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.media.KeyguardMediaController;
-import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin.OnMenuEventListener;
 import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper;
@@ -143,7 +143,7 @@ public class NotificationStackScrollLayoutController {
     private final ConfigurationController mConfigurationController;
     private final ZenModeController mZenModeController;
     private final MetricsLogger mMetricsLogger;
-    private final FalsingManager mFalsingManager;
+    private final FalsingCollector mFalsingCollector;
     private final Resources mResources;
     private final NotificationSwipeHelper.Builder mNotificationSwipeHelperBuilder;
     private final ScrimController mScrimController;
@@ -361,7 +361,7 @@ public class NotificationStackScrollLayoutController {
 
                 @Override
                 public void onDragCancelled(View v) {
-                    mFalsingManager.onNotificationStopDismissing();
+                    mFalsingCollector.onNotificationStopDismissing();
                 }
 
                 /**
@@ -405,8 +405,8 @@ public class NotificationStackScrollLayoutController {
                     }
 
                     mView.addSwipedOutView(view);
-                    mFalsingManager.onNotificationDismissed();
-                    if (mFalsingManager.shouldEnforceBouncer()) {
+                    mFalsingCollector.onNotificationDismissed();
+                    if (mFalsingCollector.shouldEnforceBouncer()) {
                         mStatusBar.executeRunnableDismissingKeyguard(
                                 null,
                                 null /* cancelAction */,
@@ -448,7 +448,7 @@ public class NotificationStackScrollLayoutController {
 
                 @Override
                 public void onBeginDrag(View v) {
-                    mFalsingManager.onNotificationStartDismissing();
+                    mFalsingCollector.onNotificationStartDismissing();
                     mView.onSwipeBegin();
                 }
 
@@ -550,7 +550,7 @@ public class NotificationStackScrollLayoutController {
             SysuiColorExtractor colorExtractor,
             NotificationLockscreenUserManager lockscreenUserManager,
             MetricsLogger metricsLogger,
-            FalsingManager falsingManager,
+            FalsingCollector falsingCollector,
             @Main Resources resources,
             NotificationSwipeHelper.Builder notificationSwipeHelperBuilder,
             StatusBar statusBar,
@@ -584,7 +584,7 @@ public class NotificationStackScrollLayoutController {
         mColorExtractor = colorExtractor;
         mLockscreenUserManager = lockscreenUserManager;
         mMetricsLogger = metricsLogger;
-        mFalsingManager = falsingManager;
+        mFalsingCollector = falsingCollector;
         mResources = resources;
         mNotificationSwipeHelperBuilder = notificationSwipeHelperBuilder;
         mStatusBar = statusBar;

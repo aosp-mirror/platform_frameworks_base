@@ -22,6 +22,7 @@ import android.view.View;
 import android.view.accessibility.AccessibilityManager;
 
 import com.android.systemui.Gefingerpoken;
+import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.statusbar.phone.NotificationTapHelper;
 import com.android.systemui.util.ViewController;
@@ -36,6 +37,7 @@ public class ActivatableNotificationViewController
     private final ExpandableOutlineViewController mExpandableOutlineViewController;
     private final AccessibilityManager mAccessibilityManager;
     private final FalsingManager mFalsingManager;
+    private final FalsingCollector mFalsingCollector;
     private final NotificationTapHelper mNotificationTapHelper;
     private final TouchHandler mTouchHandler = new TouchHandler();
 
@@ -45,17 +47,19 @@ public class ActivatableNotificationViewController
     public ActivatableNotificationViewController(ActivatableNotificationView view,
             NotificationTapHelper.Factory notificationTapHelpFactory,
             ExpandableOutlineViewController expandableOutlineViewController,
-            AccessibilityManager accessibilityManager, FalsingManager falsingManager) {
+            AccessibilityManager accessibilityManager, FalsingManager falsingManager,
+            FalsingCollector falsingCollector) {
         super(view);
         mExpandableOutlineViewController = expandableOutlineViewController;
         mAccessibilityManager = accessibilityManager;
         mFalsingManager = falsingManager;
+        mFalsingCollector = falsingCollector;
 
         mNotificationTapHelper = notificationTapHelpFactory.create(
                 (active) -> {
                     if (active) {
                         mView.makeActive();
-                        mFalsingManager.onNotificationActive();
+                        mFalsingCollector.onNotificationActive();
                     } else {
                         mView.makeInactive(true /* animate */);
                     }
@@ -64,7 +68,7 @@ public class ActivatableNotificationViewController
         mView.setOnActivatedListener(new ActivatableNotificationView.OnActivatedListener() {
             @Override
             public void onActivated(ActivatableNotificationView view) {
-                mFalsingManager.onNotificationActive();
+                mFalsingCollector.onNotificationActive();
             }
 
             @Override

@@ -183,6 +183,15 @@ public final class SoftApInfo implements Parcelable {
         if (!SdkLevel.isAtLeastS()) {
             throw new UnsupportedOperationException();
         }
+        return getWifiStandardInternal();
+    }
+
+    /**
+     * Internal version bypassing SdkLevel checks
+     * TODO(b/173791707): find a better way to allow Wifi to call its own new S APIs.
+     * @hide
+     */
+    public @WifiAnnotations.WifiStandard int getWifiStandardInternal() {
         return mWifiStandard;
     }
 

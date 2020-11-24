@@ -2481,6 +2481,29 @@ public abstract class BatteryStats implements Parcelable {
         "group", "compl", "dorm", "uninit"
     };
 
+    /**
+     * Returned value if energy data is unavailable
+     *
+     * {@hide}
+     */
+    public static final long ENERGY_DATA_UNAVAILABLE = -1;
+
+    /**
+     * Returns the energy in microjoules that the screen consumed while on.
+     * Will return {@link #ENERGY_DATA_UNAVAILABLE} if data is unavailable
+     *
+     * {@hide}
+     */
+    public abstract long getScreenOnEnergy();
+
+    /**
+     * Returns the energy in microjoules that the screen consumed while in doze
+     * Will return {@link #ENERGY_DATA_UNAVAILABLE} if data is unavailable
+     *
+     * {@hide}
+     */
+    public abstract long getScreenDozeEnergy();
+
     public static final BitDescription[] HISTORY_STATE_DESCRIPTIONS = new BitDescription[] {
         new BitDescription(HistoryItem.STATE_CPU_RUNNING_FLAG, "running", "r"),
         new BitDescription(HistoryItem.STATE_WAKE_LOCK_FLAG, "wake_lock", "w"),

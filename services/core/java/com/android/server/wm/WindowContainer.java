@@ -1814,7 +1814,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     /**
      * For all {@link TaskDisplayArea} at or below this container call the callback.
      * @param callback Applies on each {@link TaskDisplayArea} found and stops the search if it
-     *                  returns {@code true}.
+     *                 returns {@code true}.
      * @param traverseTopToBottom If {@code true}, traverses the hierarchy from top-to-bottom in
      *                            terms of z-order, else from bottom-to-top.
      * @return {@code true} if the search ended before we reached the end of the hierarchy due to
@@ -1837,7 +1837,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      * For all {@link TaskDisplayArea} at or below this container call the callback. Traverses from
      * top to bottom in terms of z-order.
      * @param callback Applies on each {@link TaskDisplayArea} found and stops the search if it
-     *                  returns {@code true}.
+     *                 returns {@code true}.
      * @return {@code true} if the search ended before we reached the end of the hierarchy due to
      *         callback returning {@code true}.
      */
@@ -1873,7 +1873,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      * Performs a reduction on all {@link TaskDisplayArea} at or below this container, using the
      * provided initial value and an accumulation function, and returns the reduced value.
      * @param accumulator Applies on each {@link TaskDisplayArea} found with the accumulative result
-     *                 from the previous call.
+     *                    from the previous call.
      * @param initValue The initial value to pass to the accumulating function with the first
      *                  {@link TaskDisplayArea}.
      * @param traverseTopToBottom If {@code true}, traverses the hierarchy from top-to-bottom in
@@ -1899,7 +1899,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      * provided initial value and an accumulation function, and returns the reduced value. Traverses
      * from top to bottom in terms of z-order.
      * @param accumulator Applies on each {@link TaskDisplayArea} found with the accumulative result
-     *                 from the previous call.
+     *                    from the previous call.
      * @param initValue The initial value to pass to the accumulating function with the first
      *                  {@link TaskDisplayArea}.
      * @return the accumulative result.
@@ -1912,9 +1912,29 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
 
     /**
      * Finds the first non {@code null} return value from calling the callback on all
+     * {@link DisplayArea} at or below this container. Traverses from top to bottom in terms of
+     * z-order.
+     * @param callback Applies on each {@link DisplayArea} found and stops the search if it
+     *                 returns non {@code null}.
+     * @return the first returned object that is not {@code null}. Returns {@code null} if not
+     *         found.
+     */
+    @Nullable
+    <R> R getItemFromDisplayAreas(Function<DisplayArea, R> callback) {
+        for (int i = mChildren.size() - 1; i >= 0; --i) {
+            R result = (R) mChildren.get(i).getItemFromDisplayAreas(callback);
+            if (result != null) {
+                return result;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Finds the first non {@code null} return value from calling the callback on all
      * {@link TaskDisplayArea} at or below this container.
      * @param callback Applies on each {@link TaskDisplayArea} found and stops the search if it
-     *                  returns non {@code null}.
+     *                 returns non {@code null}.
      * @param traverseTopToBottom If {@code true}, traverses the hierarchy from top-to-bottom in
      *                            terms of z-order, else from bottom-to-top.
      * @return the first returned object that is not {@code null}. Returns {@code null} if not
@@ -1941,7 +1961,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      * {@link TaskDisplayArea} at or below this container. Traverses from top to bottom in terms of
      * z-order.
      * @param callback Applies on each {@link TaskDisplayArea} found and stops the search if it
-     *                  returns non {@code null}.
+     *                 returns non {@code null}.
      * @return the first returned object that is not {@code null}. Returns {@code null} if not
      *         found.
      */
@@ -2881,6 +2901,16 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
 
     /** Cheap way of doing cast and instanceof. */
     DisplayArea asDisplayArea() {
+        return null;
+    }
+
+    /** Cheap way of doing cast and instanceof. */
+    RootDisplayArea asRootDisplayArea() {
+        return null;
+    }
+
+    /** Cheap way of doing cast and instanceof. */
+    TaskDisplayArea asTaskDisplayArea() {
         return null;
     }
 

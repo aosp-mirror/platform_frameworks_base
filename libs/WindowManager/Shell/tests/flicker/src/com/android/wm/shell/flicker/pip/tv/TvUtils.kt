@@ -58,6 +58,9 @@ fun UiDevice.waitForTvPipMenuElementWithDescription(desc: String): UiObject2? {
             ?.findObject(buttonSelector)
 }
 
+fun UiDevice.waitUntilTvPipMenuElementWithDescriptionIsGone(desc: String): Boolean? =
+    wait(Until.gone(By.copy(tvPipMenuSelector).hasDescendant(By.desc(desc))), WAIT_TIME_MS)
+
 fun UiObject2.isFullscreen(uiDevice: UiDevice): Boolean = visibleBounds.run {
     height() == uiDevice.displayHeight && width() == uiDevice.displayWidth
 }

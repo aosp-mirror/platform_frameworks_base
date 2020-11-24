@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,17 @@
  * limitations under the License.
  */
 
-package com.android.systemui.classifier.brightline;
+package com.android.systemui.classifier;
 
 import android.util.DisplayMetrics;
 import android.view.MotionEvent;
 import android.view.MotionEvent.PointerCoords;
 import android.view.MotionEvent.PointerProperties;
 
-import com.android.systemui.classifier.Classifier;
+import com.android.systemui.classifier.brightline.BrightLineFalsingManager;
+import com.android.systemui.classifier.brightline.FalsingClassifier;
+import com.android.systemui.classifier.brightline.TimeLimitedMotionEventBuffer;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.util.time.SystemClock;
 
@@ -36,6 +39,7 @@ import javax.inject.Inject;
 /**
  * Acts as a cache and utility class for FalsingClassifiers.
  */
+@SysUISingleton
 public class FalsingDataProvider {
 
     private static final long MOTION_EVENT_AGE_MS = 1000;
@@ -48,6 +52,7 @@ public class FalsingDataProvider {
     private final SystemClock mSystemClock;
     private final float mXdpi;
     private final float mYdpi;
+    private final List<SessionListener> mSessionListeners = new ArrayList<>();
 
     private @Classifier.InteractionType int mInteractionType;
     private final Deque<TimeLimitedMotionEventBuffer> mExtendedMotionEvents = new LinkedList<>();
@@ -57,9 +62,9 @@ public class FalsingDataProvider {
     private boolean mDirty = true;
 
     private float mAngle = 0;
-    private MotionEvent mFirstActualMotionEvent;
     private MotionEvent mFirstRecentMotionEvent;
     private MotionEvent mLastMotionEvent;
+    private boolean mJustUnlockedWithFace;
 
     @Inject
     public FalsingDataProvider(DisplayMetrics displayMetrics, BatteryController batteryController,
@@ -76,10 +81,6 @@ public class FalsingDataProvider {
     }
 
     void onMotionEvent(MotionEvent motionEvent) {
-        if (motionEvent.getActionMasked() == MotionEvent.ACTION_DOWN) {
-            mFirstActualMotionEvent = motionEvent;
-        }
-
         List<MotionEvent> motionEvents = unpackMotionEvent(motionEvent);
         FalsingClassifier.logDebug("Unpacked into: " + motionEvents.size());
         if (BrightLineFalsingManager.DEBUG) {
@@ -103,29 +104,29 @@ public class FalsingDataProvider {
     }
 
     /** Returns screen width in pixels. */
-    int getWidthPixels() {
+    public int getWidthPixels() {
         return mWidthPixels;
     }
 
     /** Returns screen height in pixels. */
-    int getHeightPixels() {
+    public int getHeightPixels() {
         return mHeightPixels;
     }
 
-    float getXdpi() {
+    public float getXdpi() {
         return mXdpi;
     }
 
-    float getYdpi() {
+    public float getYdpi() {
         return mYdpi;
     }
 
-    List<MotionEvent> getRecentMotionEvents() {
+    public List<MotionEvent> getRecentMotionEvents() {
         return mRecentMotionEvents;
     }
 
     /** Returns recent gestures, exclusive of the most recent gesture. Newer gestures come first. */
-    Queue<? extends List<MotionEvent>> getHistoricalMotionEvents() {
+    public Queue<? extends List<MotionEvent>> getHistoricalMotionEvents() {
         long nowMs = mSystemClock.uptimeMillis();
 
         mExtendedMotionEvents.removeIf(
@@ -137,31 +138,38 @@ public class FalsingDataProvider {
     /**
      * interactionType is defined by {@link com.android.systemui.classifier.Classifier}.
      */
-    final void setInteractionType(@Classifier.InteractionType int interactionType) {
+    public final void setInteractionType(@Classifier.InteractionType int interactionType) {
         if (mInteractionType != interactionType) {
             mInteractionType = interactionType;
             mDirty = true;
         }
     }
 
+    /**
+     * Returns true if new data has been supplied since the last time this class has been accessed.
+     */
     public boolean isDirty() {
         return mDirty;
     }
 
-    final int getInteractionType() {
+    /** Return the interaction type that is being compared against for falsing. */
+    public  final int getInteractionType() {
         return mInteractionType;
     }
 
-    MotionEvent getFirstActualMotionEvent() {
-        return mFirstActualMotionEvent;
-    }
-
-    MotionEvent getFirstRecentMotionEvent() {
+    /**
+     * Get the first recorded {@link MotionEvent} of the most recent gesture.
+     *
+     * Note that MotionEvents are not kept forever. As a gesture gets longer in duration, older
+     * MotionEvents may expire and be ejected.
+     */
+    public MotionEvent getFirstRecentMotionEvent() {
         recalculateData();
         return mFirstRecentMotionEvent;
     }
 
-    MotionEvent getLastMotionEvent() {
+    /** Get the last recorded {@link MotionEvent}. */
+    public MotionEvent getLastMotionEvent() {
         recalculateData();
         return mLastMotionEvent;
     }
@@ -171,12 +179,13 @@ public class FalsingDataProvider {
      *
      * The angle will be in radians, always be between 0 and 2*PI, inclusive.
      */
-    float getAngle() {
+    public float getAngle() {
         recalculateData();
         return mAngle;
     }
 
-    boolean isHorizontal() {
+    /** Returns if the most recent gesture is more horizontal than vertical. */
+    public boolean isHorizontal() {
         recalculateData();
         if (mRecentMotionEvents.isEmpty()) {
             return false;
@@ -186,7 +195,13 @@ public class FalsingDataProvider {
                 .abs(mFirstRecentMotionEvent.getY() - mLastMotionEvent.getY());
     }
 
-    boolean isRight() {
+    /**
+     * Is the most recent gesture more right than left.
+     *
+     * This does not mean the gesture is mostly horizontal. Simply that it ended at least one pixel
+     * to the right of where it started. See also {@link #isHorizontal()}.
+     */
+    public boolean isRight() {
         recalculateData();
         if (mRecentMotionEvents.isEmpty()) {
             return false;
@@ -195,11 +210,18 @@ public class FalsingDataProvider {
         return mLastMotionEvent.getX() > mFirstRecentMotionEvent.getX();
     }
 
-    boolean isVertical() {
+    /** Returns if the most recent gesture is more vertical than horizontal. */
+    public boolean isVertical() {
         return !isHorizontal();
     }
 
-    boolean isUp() {
+    /**
+     * Is the most recent gesture more up than down.
+     *
+     * This does not mean the gesture is mostly vertical. Simply that it ended at least one pixel
+     * higher than it started. See also {@link #isVertical()}.
+     */
+    public boolean isUp() {
         recalculateData();
         if (mRecentMotionEvents.isEmpty()) {
             return false;
@@ -209,7 +231,7 @@ public class FalsingDataProvider {
     }
 
     /** Returns true if phone is being charged without a cable. */
-    boolean isWirelessCharging() {
+    public boolean isWirelessCharging() {
         return mBatteryController.isWirelessCharging();
     }
 
@@ -292,9 +314,21 @@ public class FalsingDataProvider {
         return motionEvents;
     }
 
-    void onSessionEnd() {
-        mFirstActualMotionEvent = null;
+    /** Register a {@link SessionListener}. */
+    public void addSessionListener(SessionListener listener) {
+        mSessionListeners.add(listener);
+    }
 
+    /** Unregister a {@link SessionListener}. */
+    public void removeSessionListener(SessionListener listener) {
+        mSessionListeners.remove(listener);
+    }
+
+    void onSessionStarted() {
+        mSessionListeners.forEach(SessionListener::onSessionStarted);
+    }
+
+    void onSessionEnd() {
         for (MotionEvent ev : mRecentMotionEvents) {
             ev.recycle();
         }
@@ -302,5 +336,24 @@ public class FalsingDataProvider {
         mRecentMotionEvents.clear();
 
         mDirty = true;
+
+        mSessionListeners.forEach(SessionListener::onSessionEnded);
+    }
+
+    public boolean isJustUnlockedWithFace() {
+        return mJustUnlockedWithFace;
+    }
+
+    public void setJustUnlockedWithFace(boolean justUnlockedWithFace) {
+        mJustUnlockedWithFace = justUnlockedWithFace;
+    }
+
+    /** Implement to be alerted abotu the beginning and ending of falsing tracking. */
+    public interface SessionListener {
+        /** Called when the lock screen is shown and falsing-tracking begins. */
+        void onSessionStarted();
+
+        /** Called when the lock screen exits and falsing-tracking ends. */
+        void onSessionEnded();
     }
 }

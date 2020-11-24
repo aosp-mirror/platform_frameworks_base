@@ -25,7 +25,15 @@ import static android.media.session.PlaybackState.STATE_PLAYING;
 import static android.media.session.PlaybackState.STATE_STOPPED;
 
 import android.app.Activity;
+import android.app.PendingIntent;
 import android.app.PictureInPictureParams;
+import android.app.RemoteAction;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.res.Configuration;
+import android.graphics.drawable.Icon;
 import android.media.MediaMetadata;
 import android.media.session.MediaSession;
 import android.media.session.PlaybackState;
@@ -34,6 +42,12 @@ import android.util.Rational;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.CheckBox;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 public class PipActivity extends Activity {
     /**
@@ -52,13 +66,49 @@ public class PipActivity extends Activity {
     private static final Rational RATIO_WIDE = new Rational(2, 1);
     private static final Rational RATIO_TALL = new Rational(1, 2);
 
-    private PictureInPictureParams.Builder mPipParamsBuilder;
+    private static final String PIP_ACTION_NO_OP = "No-Op";
+    private static final String PIP_ACTION_OFF = "Off";
+    private static final String PIP_ACTION_ON = "On";
+    private static final String PIP_ACTION_CLEAR = "Clear";
+    private static final String ACTION_NO_OP = "com.android.wm.shell.flicker.testapp.NO_OP";
+    private static final String ACTION_SWITCH_OFF =
+            "com.android.wm.shell.flicker.testapp.SWITCH_OFF";
+    private static final String ACTION_SWITCH_ON = "com.android.wm.shell.flicker.testapp.SWITCH_ON";
+    private static final String ACTION_CLEAR = "com.android.wm.shell.flicker.testapp.CLEAR";
+
+    private final PictureInPictureParams.Builder mPipParamsBuilder =
+            new PictureInPictureParams.Builder()
+                    .setAspectRatio(RATIO_DEFAULT);
     private MediaSession mMediaSession;
     private final PlaybackState.Builder mPlaybackStateBuilder = new PlaybackState.Builder()
             .setActions(ACTION_PLAY | ACTION_PAUSE | ACTION_STOP)
             .setState(STATE_STOPPED, 0, 1f);
     private PlaybackState mPlaybackState = mPlaybackStateBuilder.build();
     private final MediaMetadata.Builder mMediaMetadataBuilder = new MediaMetadata.Builder();
+
+    private final List<RemoteAction> mSwitchOffActions = new ArrayList<>();
+    private final List<RemoteAction> mSwitchOnActions = new ArrayList<>();
+    private final BroadcastReceiver mCustomActionReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            switch (intent.getAction()) {
+                case ACTION_SWITCH_ON:
+                    mPipParamsBuilder.setActions(mSwitchOnActions);
+                    break;
+                case ACTION_SWITCH_OFF:
+                    mPipParamsBuilder.setActions(mSwitchOffActions);
+                    break;
+                case ACTION_CLEAR:
+                    mPipParamsBuilder.setActions(Collections.emptyList());
+                    break;
+                case ACTION_NO_OP:
+                default:
+                    return;
+            }
+            setPictureInPictureParams(mPipParamsBuilder.build());
+        }
+    };
+    private boolean mIsReceiverRegistered = false;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -71,9 +121,6 @@ public class PipActivity extends Activity {
         window.setAttributes(layoutParams);
 
         setContentView(R.layout.activity_pip);
-
-        mPipParamsBuilder = new PictureInPictureParams.Builder()
-                .setAspectRatio(RATIO_DEFAULT);
 
         findViewById(R.id.media_session_start)
                 .setOnClickListener(v -> updateMediaSessionState(STATE_PLAYING));
@@ -98,9 +145,63 @@ public class PipActivity extends Activity {
                 updateMediaSessionState(STATE_STOPPED);
             }
         });
+
+        // Build two sets of the custom actions. We'll replace one with the other when 'On'/'Off'
+        // action is invoked.
+        // The first set consists of 3 actions: 1) Off; 2) No-Op; 3) Clear.
+        // The second set consists of 2 actions: 1) On; 2) Clear.
+        // Upon invocation 'Clear' action clear-off all the custom actions, including itself.
+        final Icon icon = Icon.createWithResource(this, android.R.drawable.ic_menu_help);
+        final RemoteAction noOpAction = buildRemoteAction(icon, PIP_ACTION_NO_OP, ACTION_NO_OP);
+        final RemoteAction switchOnAction =
+                buildRemoteAction(icon, PIP_ACTION_ON, ACTION_SWITCH_ON);
+        final RemoteAction switchOffAction =
+                buildRemoteAction(icon, PIP_ACTION_OFF, ACTION_SWITCH_OFF);
+        final RemoteAction clearAllAction = buildRemoteAction(icon, PIP_ACTION_CLEAR, ACTION_CLEAR);
+        mSwitchOffActions.addAll(Arrays.asList(switchOnAction, clearAllAction));
+        mSwitchOnActions.addAll(Arrays.asList(noOpAction, switchOffAction, clearAllAction));
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (mIsReceiverRegistered) {
+            unregisterReceiver(mCustomActionReceiver);
+            mIsReceiverRegistered = false;
+        }
+        super.onDestroy();
+    }
+
+    @Override
+    public void onPictureInPictureModeChanged(boolean isInPictureInPictureMode,
+            Configuration newConfig) {
+        if (isInPictureInPictureMode && !mIsReceiverRegistered) {
+            final IntentFilter filter = new IntentFilter();
+            filter.addAction(ACTION_NO_OP);
+            filter.addAction(ACTION_SWITCH_ON);
+            filter.addAction(ACTION_SWITCH_OFF);
+            filter.addAction(ACTION_CLEAR);
+            registerReceiver(mCustomActionReceiver, filter);
+
+            mIsReceiverRegistered = true;
+        } else if (!isInPictureInPictureMode && mIsReceiverRegistered) {
+            unregisterReceiver(mCustomActionReceiver);
+
+            mIsReceiverRegistered = false;
+        }
+    }
+
+    private RemoteAction buildRemoteAction(Icon icon, String label, String action) {
+        final Intent intent = new Intent(action);
+        final PendingIntent pendingIntent =
+                PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
+        return new RemoteAction(icon, label, label, pendingIntent);
     }
 
     public void enterPip(View v) {
+        final boolean withCustomActions =
+                ((CheckBox) findViewById(R.id.with_custom_actions)).isChecked();
+        mPipParamsBuilder.setActions(
+                withCustomActions ? mSwitchOnActions : Collections.emptyList());
         enterPictureInPictureMode(mPipParamsBuilder.build());
     }
 

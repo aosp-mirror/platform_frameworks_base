@@ -43,7 +43,6 @@ import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
 import android.util.ArraySet;
 import android.util.AttributeSet;
@@ -74,7 +73,7 @@ import com.android.internal.widget.MessagingLayout;
 import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
-import com.android.systemui.plugins.FalsingManager;
+import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.plugins.PluginListener;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin.MenuItem;
@@ -213,7 +212,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     private NotificationGuts mGuts;
     private NotificationEntry mEntry;
     private String mAppName;
-    private FalsingManager mFalsingManager;
+    private FalsingCollector mFalsingCollector;
 
     /**
      * Whether or not the notification is using the heads up view and should peek from the top.
@@ -1584,7 +1583,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             OnExpandClickListener onExpandClickListener,
             NotificationMediaManager notificationMediaManager,
             CoordinateOnClickListener onFeedbackClickListener,
-            FalsingManager falsingManager,
+            FalsingCollector falsingCollector,
             StatusBarStateController statusBarStateController,
             PeopleNotificationIdentifier peopleNotificationIdentifier,
             OnUserInteractionCallback onUserInteractionCallback,
@@ -1609,7 +1608,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         mOnExpandClickListener = onExpandClickListener;
         mMediaManager = notificationMediaManager;
         setOnFeedbackClickListener(onFeedbackClickListener);
-        mFalsingManager = falsingManager;
+        mFalsingCollector = falsingCollector;
         mStatusBarStateController = statusBarStateController;
 
         mPeopleNotificationIdentifier = peopleNotificationIdentifier;
@@ -2176,7 +2175,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
      * @param allowChildExpansion whether a call to this method allows expanding children
      */
     public void setUserExpanded(boolean userExpanded, boolean allowChildExpansion) {
-        mFalsingManager.setNotificationExpanded();
+        mFalsingCollector.setNotificationExpanded();
         if (mIsSummaryWithChildren && !shouldShowPublic() && allowChildExpansion
                 && !mChildrenContainer.showingAsLowPriority()) {
             final boolean wasExpanded = mGroupExpansionManager.isGroupExpanded(mEntry);

@@ -23,8 +23,11 @@ import static org.junit.Assert.assertTrue;
 import android.content.Context;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
+import android.graphics.fonts.FontFamily;
 import android.graphics.fonts.SystemFonts;
 import android.os.SharedMemory;
+import android.text.FontConfig;
+import android.util.Pair;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.LargeTest;
@@ -195,8 +198,9 @@ public class TypefaceTest {
     @Test
     public void testSerialize() throws Exception {
         HashMap<String, Typeface> systemFontMap = new HashMap<>();
-        Typeface.initSystemDefaultTypefaces(systemFontMap, SystemFonts.getRawSystemFallbackMap(),
-                SystemFonts.getAliases());
+        Pair<FontConfig.Alias[], Map<String, FontFamily[]>> res =
+                SystemFonts.initializePreinstalledFonts();
+        Typeface.initSystemDefaultTypefaces(systemFontMap, res.second, res.first);
         SharedMemory sharedMemory = Typeface.serializeFontMap(systemFontMap);
         Map<String, Typeface> copiedFontMap =
                 Typeface.deserializeFontMap(sharedMemory.mapReadOnly().order(ByteOrder.BIG_ENDIAN));

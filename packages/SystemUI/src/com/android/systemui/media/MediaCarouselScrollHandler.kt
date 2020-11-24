@@ -31,6 +31,7 @@ import com.android.systemui.Gefingerpoken
 import com.android.systemui.qs.PageIndicator
 import com.android.systemui.R
 import com.android.systemui.classifier.Classifier.NOTIFICATION_DISMISS
+import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.plugins.FalsingManager
 import com.android.wm.shell.animation.PhysicsAnimator
 import com.android.systemui.util.concurrency.DelayableExecutor
@@ -58,6 +59,7 @@ class MediaCarouselScrollHandler(
     private val dismissCallback: () -> Unit,
     private var translationChangedListener: () -> Unit,
     private val closeGuts: () -> Unit,
+    private val falsingCollector: FalsingCollector,
     private val falsingManager: FalsingManager
 ) {
     /**
@@ -162,7 +164,7 @@ class MediaCarouselScrollHandler(
 
         override fun onDown(e: MotionEvent?): Boolean {
             if (falsingProtectionNeeded) {
-                falsingManager.onNotificationStartDismissing()
+                falsingCollector.onNotificationStartDismissing()
             }
             return false
         }
@@ -258,7 +260,7 @@ class MediaCarouselScrollHandler(
     private fun onTouch(motionEvent: MotionEvent): Boolean {
         val isUp = motionEvent.action == MotionEvent.ACTION_UP
         if (isUp && falsingProtectionNeeded) {
-            falsingManager.onNotificationStopDismissing()
+            falsingCollector.onNotificationStopDismissing()
         }
         if (gestureDetector.onTouchEvent(motionEvent)) {
             if (isUp) {

@@ -776,7 +776,7 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
 
         JSONObject dump = new JSONObject();
         try {
-            dump.put("service", "Fingerprint Manager");
+            dump.put("service", TAG);
 
             JSONArray sets = new JSONArray();
             for (UserInfo user : UserManager.get(mContext).getUsers()) {

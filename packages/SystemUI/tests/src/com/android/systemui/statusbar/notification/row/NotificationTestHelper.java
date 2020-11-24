@@ -45,9 +45,9 @@ import android.widget.RemoteViews;
 
 import com.android.systemui.R;
 import com.android.systemui.TestableDependency;
+import com.android.systemui.classifier.FalsingCollectorFake;
 import com.android.systemui.media.MediaFeatureFlag;
 import com.android.systemui.media.dialog.MediaOutputDialogFactory;
-import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
@@ -428,7 +428,7 @@ public class NotificationTestHelper {
                 mock(OnExpandClickListener.class),
                 mock(NotificationMediaManager.class),
                 mock(ExpandableNotificationRow.CoordinateOnClickListener.class),
-                mock(FalsingManager.class),
+                new FalsingCollectorFake(),
                 mStatusBarStateController,
                 mPeopleNotificationIdentifier,
                 mock(OnUserInteractionCallback.class),

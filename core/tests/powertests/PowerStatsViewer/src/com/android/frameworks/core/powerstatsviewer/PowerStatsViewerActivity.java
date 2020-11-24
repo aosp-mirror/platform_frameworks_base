@@ -29,6 +29,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.activity.ComponentActivity;
+import androidx.activity.result.ActivityResultLauncher;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.loader.app.LoaderManager;
@@ -60,6 +61,8 @@ public class PowerStatsViewerActivity extends ComponentActivity {
     private RecyclerView mPowerStatsDataView;
     private View mLoadingView;
     private View mEmptyView;
+    private ActivityResultLauncher<Void> mStartAppPicker = registerForActivityResult(
+            PowerConsumerPickerActivity.CONTRACT, this::onApplicationSelected);
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -105,8 +108,7 @@ public class PowerStatsViewerActivity extends ComponentActivity {
     }
 
     private void startAppPicker() {
-        registerForActivityResult(PowerConsumerPickerActivity.CONTRACT, this::onApplicationSelected)
-                .launch(null);
+        mStartAppPicker.launch(null);
     }
 
     private void onApplicationSelected(String powerConsumerId) {

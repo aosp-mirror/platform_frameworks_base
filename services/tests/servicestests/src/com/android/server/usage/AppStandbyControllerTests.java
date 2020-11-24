@@ -65,6 +65,7 @@ import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.app.usage.AppStandbyInfo;
 import android.app.usage.UsageEvents;
+import android.app.usage.UsageStatsManagerInternal;
 import android.appwidget.AppWidgetManager;
 import android.content.Context;
 import android.content.ContextWrapper;
@@ -86,9 +87,11 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.usage.AppStandbyInternal.AppIdleStateChangeListener;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -425,9 +428,16 @@ public class AppStandbyControllerTests {
 
     @Before
     public void setUp() throws Exception {
+        LocalServices.addService(
+                UsageStatsManagerInternal.class, mock(UsageStatsManagerInternal.class));
         MyContextWrapper myContext = new MyContextWrapper(InstrumentationRegistry.getContext());
         mInjector = new MyInjector(myContext, Looper.getMainLooper());
         mController = setupController();
+    }
+
+    @After
+    public void tearDown() {
+        LocalServices.removeServiceForTest(UsageStatsManagerInternal.class);
     }
 
     @Test
@@ -562,7 +572,7 @@ public class AppStandbyControllerTests {
         UsageEvents.Event ev = new UsageEvents.Event();
         ev.mPackage = packageName;
         ev.mEventType = eventType;
-        controller.reportEvent(ev, USER_ID);
+        controller.onUsageEvent(USER_ID, ev);
     }
 
     private int getStandbyBucket(AppStandbyController controller, String packageName) {

@@ -16,7 +16,12 @@
 
 package com.android.server.wm;
 
+import static android.view.Display.DEFAULT_DISPLAY;
+import static android.window.DisplayAreaOrganizer.FEATURE_ROOT;
+import static android.window.DisplayAreaOrganizer.FEATURE_RUNTIME_TASK_CONTAINER_FIRST;
 import static android.window.DisplayAreaOrganizer.FEATURE_VENDOR_FIRST;
+
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -25,6 +30,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertThrows;
 
 import android.content.res.Configuration;
 import android.graphics.Rect;
@@ -55,9 +61,12 @@ import java.util.List;
 public class DisplayAreaOrganizerTest extends WindowTestsBase {
 
     private DisplayArea mTestDisplayArea;
+    private DisplayAreaOrganizerController mOrganizerController;
 
     @Before
     public void setUp() {
+        mOrganizerController =
+                mWm.mAtmService.mWindowOrganizerController.mDisplayAreaOrganizerController;
         WindowContainer parentWindow = mDisplayContent.getDefaultTaskDisplayArea().getParent();
         mTestDisplayArea = new DisplayArea(mWm, DisplayArea.Type.ANY,
                 "TestDisplayArea", FEATURE_VENDOR_FIRST);
@@ -76,8 +85,7 @@ public class DisplayAreaOrganizerTest extends WindowTestsBase {
 
     private IDisplayAreaOrganizer registerMockOrganizer(int feature, Binder binder) {
         final IDisplayAreaOrganizer organizer = createMockOrganizer(binder);
-        mWm.mAtmService.mWindowOrganizerController.mDisplayAreaOrganizerController
-                .registerOrganizer(organizer, feature);
+        mOrganizerController.registerOrganizer(organizer, feature);
         return organizer;
     }
 
@@ -87,16 +95,10 @@ public class DisplayAreaOrganizerTest extends WindowTestsBase {
         return organizer;
     }
 
-    private void unregisterMockOrganizer(IDisplayAreaOrganizer organizer) {
-        mWm.mAtmService.mWindowOrganizerController.mDisplayAreaOrganizerController
-                .unregisterOrganizer(organizer);
-    }
-
     @Test
     public void testRegisterOrganizer() throws RemoteException {
-        IDisplayAreaOrganizer organizer = createMockOrganizer(new Binder());
-        List<DisplayAreaAppearedInfo> infos = mWm.mAtmService.mWindowOrganizerController
-                .mDisplayAreaOrganizerController
+        final IDisplayAreaOrganizer organizer = createMockOrganizer(new Binder());
+        List<DisplayAreaAppearedInfo> infos = mOrganizerController
                 .registerOrganizer(organizer, FEATURE_VENDOR_FIRST).getList();
 
         // Return a list contains the DA, and no onDisplayAreaAppeared triggered.
@@ -108,16 +110,135 @@ public class DisplayAreaOrganizerTest extends WindowTestsBase {
     }
 
     @Test
+    public void testRegisterOrganizer_alreadyRegisteredFeature() {
+        registerMockOrganizer(FEATURE_VENDOR_FIRST);
+        assertThrows(IllegalStateException.class,
+                () -> registerMockOrganizer(FEATURE_VENDOR_FIRST));
+    }
+
+    @Test
+    public void testCreateTaskDisplayArea() {
+        final String newTdaName = "testTda";
+        final IDisplayAreaOrganizer organizer = createMockOrganizer(new Binder());
+        final DisplayAreaAppearedInfo tdaInfo = mOrganizerController.createTaskDisplayArea(
+                organizer, DEFAULT_DISPLAY, FEATURE_ROOT, newTdaName);
+
+        final int newTdaIndex =
+                mTestDisplayArea.getParent().mChildren.indexOf(mTestDisplayArea) + 1;
+        final WindowContainer wc = mTestDisplayArea.getParent().getChildAt(newTdaIndex);
+
+        // A new TaskDisplayArea is created on the top.
+        assertThat(wc).isInstanceOf(TaskDisplayArea.class);
+        assertThat(tdaInfo.getDisplayAreaInfo().displayId).isEqualTo(DEFAULT_DISPLAY);
+        assertThat(tdaInfo.getDisplayAreaInfo().token)
+                .isEqualTo(wc.mRemoteToken.toWindowContainerToken());
+
+        final TaskDisplayArea tda = wc.asTaskDisplayArea();
+
+        assertThat(tda.getName()).isEqualTo(newTdaName);
+        assertThat(tda.mFeatureId).isEqualTo(tdaInfo.getDisplayAreaInfo().featureId);
+        assertThat(tda.mCreatedByOrganizer).isTrue();
+        assertThat(tda.mOrganizer).isEqualTo(organizer);
+    }
+
+    @Test
+    public void testCreateTaskDisplayArea_incrementalTdaFeatureId() {
+        final String newTdaName = "testTda";
+        final IDisplayAreaOrganizer organizer = createMockOrganizer(new Binder());
+        final DisplayAreaAppearedInfo tdaInfo1 = mOrganizerController.createTaskDisplayArea(
+                organizer, DEFAULT_DISPLAY, FEATURE_ROOT, newTdaName);
+        final DisplayAreaAppearedInfo tdaInfo2 = mOrganizerController.createTaskDisplayArea(
+                organizer, DEFAULT_DISPLAY, FEATURE_ROOT, newTdaName);
+
+        // New created TDA has unique feature id starting from FEATURE_RUNTIME_TASK_CONTAINER_FIRST.
+        assertThat(tdaInfo1.getDisplayAreaInfo().featureId).isEqualTo(
+                FEATURE_RUNTIME_TASK_CONTAINER_FIRST);
+        assertThat(tdaInfo2.getDisplayAreaInfo().featureId).isEqualTo(
+                FEATURE_RUNTIME_TASK_CONTAINER_FIRST + 1);
+    }
+
+
+    @Test
+    public void testCreateTaskDisplayArea_invalidDisplayAndRoot() {
+        final IDisplayAreaOrganizer organizer = createMockOrganizer(new Binder());
+        assertThrows(IllegalArgumentException.class, () ->
+                mOrganizerController.createTaskDisplayArea(
+                        organizer, SystemServicesTestRule.sNextDisplayId + 1, FEATURE_ROOT,
+                        "testTda"));
+        assertThrows(IllegalArgumentException.class, () ->
+                mOrganizerController.createTaskDisplayArea(
+                        organizer, DEFAULT_DISPLAY, FEATURE_ROOT - 1, "testTda"));
+    }
+
+    @Test
+    public void testDeleteTaskDisplayArea() {
+        final String newTdaName = "testTda";
+        final IDisplayAreaOrganizer organizer = createMockOrganizer(new Binder());
+        final DisplayAreaAppearedInfo tdaInfo = mOrganizerController.createTaskDisplayArea(
+                organizer, DEFAULT_DISPLAY, FEATURE_ROOT, newTdaName);
+        final int tdaFeatureId = tdaInfo.getDisplayAreaInfo().featureId;
+
+        final TaskDisplayArea newTda = mDisplayContent.getItemFromDisplayAreas(
+                da -> da.mFeatureId == tdaFeatureId ? da.asTaskDisplayArea() : null);
+        spyOn(newTda);
+
+        mOrganizerController.deleteTaskDisplayArea(newTda.mRemoteToken.toWindowContainerToken());
+
+        verify(newTda).remove();
+        verify(newTda).removeImmediately();
+        assertThat(newTda.mOrganizer).isNull();
+        assertThat(newTda.isRemoved()).isTrue();
+
+        final TaskDisplayArea curTda = mDisplayContent.getItemFromDisplayAreas(
+                da -> da.mFeatureId == tdaFeatureId ? da.asTaskDisplayArea() : null);
+
+        assertThat(curTda).isNull();
+    }
+
+    @Test
+    public void testUnregisterOrganizer_deleteNewCreatedTaskDisplayArea() {
+        final String newTdaName = "testTda";
+        final IDisplayAreaOrganizer organizer = createMockOrganizer(new Binder());
+        final DisplayAreaAppearedInfo tdaInfo = mOrganizerController.createTaskDisplayArea(
+                organizer, DEFAULT_DISPLAY, FEATURE_ROOT, newTdaName);
+        final int tdaFeatureId = tdaInfo.getDisplayAreaInfo().featureId;
+
+        final TaskDisplayArea newTda = mDisplayContent.getItemFromDisplayAreas(
+                da -> da.mFeatureId == tdaFeatureId ? da.asTaskDisplayArea() : null);
+        spyOn(newTda);
+
+        mOrganizerController.unregisterOrganizer(organizer);
+
+        verify(newTda).remove();
+        verify(newTda).removeImmediately();
+        assertThat(newTda.mOrganizer).isNull();
+        assertThat(newTda.isRemoved()).isTrue();
+
+        final TaskDisplayArea curTda = mDisplayContent.getItemFromDisplayAreas(
+                da -> da.mFeatureId == tdaFeatureId ? da.asTaskDisplayArea() : null);
+
+        assertThat(curTda).isNull();
+    }
+
+    @Test
+    public void testDeleteTaskDisplayArea_invalidTaskDisplayArea() {
+        final TaskDisplayArea tda = mDisplayContent.getDefaultTaskDisplayArea();
+        assertThrows(IllegalArgumentException.class, () ->
+                mOrganizerController.deleteTaskDisplayArea(
+                        tda.mRemoteToken.toWindowContainerToken()));
+    }
+
+    @Test
     public void testAppearedVanished() throws RemoteException {
-        IDisplayAreaOrganizer organizer = registerMockOrganizer(FEATURE_VENDOR_FIRST);
-        unregisterMockOrganizer(organizer);
+        final IDisplayAreaOrganizer organizer = registerMockOrganizer(FEATURE_VENDOR_FIRST);
+        mOrganizerController.unregisterOrganizer(organizer);
 
         verify(organizer).onDisplayAreaVanished(any());
     }
 
     @Test
     public void testChanged() throws RemoteException {
-        IDisplayAreaOrganizer organizer = registerMockOrganizer(FEATURE_VENDOR_FIRST);
+        final IDisplayAreaOrganizer organizer = registerMockOrganizer(FEATURE_VENDOR_FIRST);
         mDisplayContent.setBounds(new Rect(0, 0, 1000, 1000));
 
         verify(organizer).onDisplayAreaInfoChanged(any());
@@ -137,7 +258,7 @@ public class DisplayAreaOrganizerTest extends WindowTestsBase {
 
         assertThat(mTestDisplayArea.mOrganizer).isNotNull();
 
-        unregisterMockOrganizer(createMockOrganizer(binder));
+        mOrganizerController.unregisterOrganizer(createMockOrganizer(binder));
 
         assertThat(mTestDisplayArea.mOrganizer).isNull();
     }

@@ -19,7 +19,6 @@ package android.hardware.face;
 import android.hardware.biometrics.SensorProperties;
 import android.hardware.biometrics.SensorPropertiesInternal;
 import android.os.Parcel;
-import android.os.Parcelable;
 
 /**
  * Container for face sensor properties.
@@ -77,5 +76,10 @@ public class FaceSensorPropertiesInternal extends SensorPropertiesInternal {
         super.writeToParcel(dest, flags);
         dest.writeBoolean(supportsFaceDetection);
         dest.writeBoolean(supportsSelfIllumination);
+    }
+
+    @Override
+    public String toString() {
+        return "ID: " + sensorId + ", Strength: " + sensorStrength;
     }
 }

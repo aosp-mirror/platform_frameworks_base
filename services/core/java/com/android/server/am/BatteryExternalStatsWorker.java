@@ -37,13 +37,14 @@ import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.BatteryStatsImpl;
+import com.android.internal.power.MeasuredEnergyArray;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.function.pooled.PooledLambda;
 
-import java.util.concurrent.ExecutionException;
 import libcore.util.EmptyArray;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -101,6 +102,9 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
 
     @GuardedBy("this")
     private boolean mOnBatteryScreenOff;
+
+    @GuardedBy("this")
+    private int mScreenState;
 
     @GuardedBy("this")
     private boolean mUseLatestStates = true;
@@ -194,15 +198,17 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
     }
 
     @Override
-    public Future<?> scheduleCpuSyncDueToScreenStateChange(
-            boolean onBattery, boolean onBatteryScreenOff) {
+    public Future<?> scheduleSyncDueToScreenStateChange(
+            int flags, boolean onBattery, boolean onBatteryScreenOff, int screenState) {
         synchronized (BatteryExternalStatsWorker.this) {
             if (mCurrentFuture == null || (mUpdateFlags & UPDATE_CPU) == 0) {
                 mOnBattery = onBattery;
                 mOnBatteryScreenOff = onBatteryScreenOff;
                 mUseLatestStates = false;
             }
-            return scheduleSyncLocked("screen-state", UPDATE_CPU);
+            // always update screen state
+            mScreenState = screenState;
+            return scheduleSyncLocked("screen-state", flags);
         }
     }
 
@@ -332,6 +338,7 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
             final int[] uidsToRemove;
             final boolean onBattery;
             final boolean onBatteryScreenOff;
+            final int screenState;
             final boolean useLatestStates;
             synchronized (BatteryExternalStatsWorker.this) {
                 updateFlags = mUpdateFlags;
@@ -339,6 +346,7 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
                 uidsToRemove = mUidsToRemove.size() > 0 ? mUidsToRemove.toArray() : EmptyArray.INT;
                 onBattery = mOnBattery;
                 onBatteryScreenOff = mOnBatteryScreenOff;
+                screenState = mScreenState;
                 useLatestStates = mUseLatestStates;
                 mUpdateFlags = 0;
                 mCurrentReason = null;
@@ -360,7 +368,7 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
                     }
                     try {
                         updateExternalStatsLocked(reason, updateFlags, onBattery,
-                                onBatteryScreenOff, useLatestStates);
+                                onBatteryScreenOff, screenState, useLatestStates);
                     } finally {
                         if (DEBUG) {
                             Slog.d(TAG, "end updateExternalStatsSync");
@@ -402,13 +410,14 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
     };
 
     @GuardedBy("mWorkerLock")
-    private void updateExternalStatsLocked(final String reason, int updateFlags,
-            boolean onBattery, boolean onBatteryScreenOff, boolean useLatestStates) {
+    private void updateExternalStatsLocked(final String reason, int updateFlags, boolean onBattery,
+            boolean onBatteryScreenOff, int screenState, boolean useLatestStates) {
         // We will request data from external processes asynchronously, and wait on a timeout.
         SynchronousResultReceiver wifiReceiver = null;
         SynchronousResultReceiver bluetoothReceiver = null;
         CompletableFuture<ModemActivityInfo> modemFuture = CompletableFuture.completedFuture(null);
         boolean railUpdated = false;
+        MeasuredEnergyArray energyArray = null;
 
         if ((updateFlags & BatteryStatsImpl.ExternalStatsSync.UPDATE_WIFI) != 0) {
             // We were asked to fetch WiFi data.
@@ -486,6 +495,13 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
             }
         }
 
+        if ((updateFlags & UPDATE_ENERGY) != 0) {
+            synchronized (mStats) {
+                // TODO(b/172934873) evaluate a safe way to query the HAL without holding mStats
+                energyArray = mStats.getEnergyConsumptionDataLocked();
+            }
+        }
+
         final WifiActivityEnergyInfo wifiInfo = awaitControllerInfo(wifiReceiver);
         final BluetoothActivityEnergyInfo bluetoothInfo = awaitControllerInfo(bluetoothReceiver);
         ModemActivityInfo modemInfo = null;
@@ -532,6 +548,11 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
                 } else {
                     Slog.w(TAG, "bluetooth info is invalid: " + bluetoothInfo);
                 }
+            }
+
+            if ((updateFlags & UPDATE_ENERGY) != 0 && energyArray != null) {
+                // Always use what BatteryExternalStatsWorker thinks screenState is.
+                mStats.updateMeasuredEnergyStatsLocked(energyArray, screenState);
             }
         }
 

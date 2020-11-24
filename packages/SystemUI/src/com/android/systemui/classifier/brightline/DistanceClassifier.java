@@ -27,6 +27,7 @@ import android.provider.DeviceConfig;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 
+import com.android.systemui.classifier.FalsingDataProvider;
 import com.android.systemui.util.DeviceConfigProxy;
 
 import java.util.List;
