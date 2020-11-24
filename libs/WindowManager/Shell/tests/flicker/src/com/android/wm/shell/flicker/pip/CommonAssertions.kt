@@ -14,6 +14,6 @@
  * limitations under the License.
  */
 
-package com.android.server.wm.flicker.pip
+package com.android.wm.shell.flicker.pip
 
 internal const val PIP_WINDOW_TITLE = "PipMenuActivity"

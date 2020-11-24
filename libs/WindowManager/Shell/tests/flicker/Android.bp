@@ -29,7 +29,10 @@ android_test {
         "truth-prebuilt",
         "app-helpers-core",
         "launcher-helper-lib",
-        "launcher-aosp-tapl"
+        "launcher-aosp-tapl",
+        "wm-flicker-common-assertions",
+        "wm-flicker-common-app-helpers",
+        "platform-test-annotations",
     ],
 }
 
@@ -47,6 +50,9 @@ android_test {
         "truth-prebuilt",
         "app-helpers-core",
         "launcher-helper-lib",
-        "launcher-aosp-tapl"
+        "launcher-aosp-tapl",
+        "wm-flicker-common-assertions",
+        "wm-flicker-common-app-helpers",
+        "platform-test-annotations",
     ],
 }
