@@ -1792,8 +1792,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Na-update ng iyong admin"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Na-delete ng iyong admin"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"Para patagalin ang baterya, ginagawa ng Pangtipid sa Baterya na:\n\n• I-on ang Madilim na tema\n• I-off o paghihigpitan ang aktibidad sa background, ilang visual effect, at iba pang feature gaya ng “Hey Google”\n\n"<annotation id="url">"Matuto pa"</annotation></string>
-    <string name="battery_saver_description" msgid="6794188153647295212">"Para patagalin ang baterya, ginagawa ng Pangtipid sa Baterya na:\n\n• I-on ang Madilim na tema\n• I-off o paghihigpitan ang aktibidad sa background, ilang visual effect, at iba pang feature gaya ng “Hey Google”"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"Para patagalin ang baterya, ginagawa ng Pantipid ng Baterya na:\n\n• I-on ang Madilim na tema\n• I-off o paghihigpitan ang aktibidad sa background, ilang visual effect, at iba pang feature gaya ng “Hey Google”\n\n"<annotation id="url">"Matuto pa"</annotation></string>
+    <string name="battery_saver_description" msgid="6794188153647295212">"Para patagalin ang baterya, ginagawa ng Pantipid ng Baterya na:\n\n• I-on ang Madilim na tema\n• I-off o paghihigpitan ang aktibidad sa background, ilang visual effect, at iba pang feature gaya ng “Hey Google”"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Upang makatulong na mabawasan ang paggamit ng data, pinipigilan ng Data Saver ang ilang app na magpadala o makatanggap ng data sa background. Maaaring mag-access ng data ang isang app na ginagamit mo sa kasalukuyan, ngunit mas bihira na nito magagawa iyon. Halimbawa, maaaring hindi lumabas ang mga larawan hangga\'t hindi mo nata-tap ang mga ito."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"I-on ang Data Saver?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"I-on"</string>
@@ -1999,9 +1999,9 @@
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"ipinapakita sa ibabaw ng ibang app sa iyong screen"</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Notification ng impormasyon ng Routine Mode"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Maaaring maubos ang baterya bago ang karaniwang pag-charge"</string>
-    <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Na-activate ang Pangtipid sa Baterya para patagalin ang buhay ng baterya"</string>
-    <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"Pangtipid sa Baterya"</string>
-    <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"Na-off ang Pangtipid sa Baterya"</string>
+    <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Na-activate ang Pantipid ng Baterya para patagalin ang buhay ng baterya"</string>
+    <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"Pantipid ng Baterya"</string>
+    <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"Na-off ang Pantipid ng Baterya"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"May sapat na charge ang telepono. Hindi na pinaghihigpitan ang mga feature."</string>
     <string name="battery_saver_charged_notification_summary" product="tablet" msgid="4426317048139996888">"May sapat na charge ang tablet. Hindi na pinaghihigpitan ang mga feature."</string>
     <string name="battery_saver_charged_notification_summary" product="device" msgid="1031562417867646649">"May sapat na charge ang device. Hindi na pinaghihigpitan ang mga feature."</string>

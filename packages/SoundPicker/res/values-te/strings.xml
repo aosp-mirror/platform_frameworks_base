@@ -17,8 +17,8 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="ringtone_default" msgid="798836092118824500">"డిఫాల్ట్ రింగ్‌టోన్"</string>
-    <string name="notification_sound_default" msgid="8133121186242636840">"డిఫాల్ట్ నోటిఫికేషన్ ధ్వని"</string>
-    <string name="alarm_sound_default" msgid="4787646764557462649">"డిఫాల్ట్ అలారం ధ్వని"</string>
+    <string name="notification_sound_default" msgid="8133121186242636840">"నోటిఫికేషన్ ఆటోమేటిక్ సౌండ్"</string>
+    <string name="alarm_sound_default" msgid="4787646764557462649">"అలారం ఆటోమేటిక్ సౌండ్"</string>
     <string name="add_ringtone_text" msgid="6642389991738337529">"రింగ్‌టోన్‌ను జోడించు"</string>
     <string name="add_alarm_text" msgid="3545497316166999225">"అలారాన్ని జోడించు"</string>
     <string name="add_notification_text" msgid="4431129543300614788">"నోటిఫికేషన్‌‌ని జోడించు"</string>
