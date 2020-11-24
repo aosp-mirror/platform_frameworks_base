@@ -88,17 +88,17 @@ public class HdmiCecLocalDeviceTvTest {
                     }
 
                     @Override
-                    void writeStringSystemProperty(String key, String value) {
+                    protected void writeStringSystemProperty(String key, String value) {
                         // do nothing
                     }
 
                     @Override
-                    PowerManager getPowerManager() {
+                    protected PowerManager getPowerManager() {
                         return powerManager;
                     }
 
                     @Override
-                    HdmiCecConfig getHdmiCecConfig() {
+                    protected HdmiCecConfig getHdmiCecConfig() {
                         return hdmiCecConfig;
                     }
                 };

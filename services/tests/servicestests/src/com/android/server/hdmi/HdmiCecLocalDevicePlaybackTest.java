@@ -114,7 +114,7 @@ public class HdmiCecLocalDevicePlaybackTest {
                     }
 
                     @Override
-                    void writeStringSystemProperty(String key, String value) {
+                    protected void writeStringSystemProperty(String key, String value) {
                         // do nothing
                     }
 
@@ -124,12 +124,12 @@ public class HdmiCecLocalDevicePlaybackTest {
                     }
 
                     @Override
-                    PowerManager getPowerManager() {
+                    protected PowerManager getPowerManager() {
                         return powerManager;
                     }
 
                     @Override
-                    HdmiCecConfig getHdmiCecConfig() {
+                    protected HdmiCecConfig getHdmiCecConfig() {
                         return hdmiCecConfig;
                     }
                 };

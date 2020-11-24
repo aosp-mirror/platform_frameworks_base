@@ -86,7 +86,7 @@ public class ArcTerminationActionFromAvrTest {
                     }
 
                     @Override
-                    PowerManager getPowerManager() {
+                    protected PowerManager getPowerManager() {
                         return powerManager;
                     }
 
@@ -111,7 +111,7 @@ public class ArcTerminationActionFromAvrTest {
                     }
 
                     @Override
-                    HdmiCecConfig getHdmiCecConfig() {
+                    protected HdmiCecConfig getHdmiCecConfig() {
                         return hdmiCecConfig;
                     }
                 };

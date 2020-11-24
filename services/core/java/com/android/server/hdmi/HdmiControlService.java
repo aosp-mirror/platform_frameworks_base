@@ -564,7 +564,8 @@ public class HdmiControlService extends SystemService {
         mTvInputManager.unregisterCallback(callback);
     }
 
-    PowerManager getPowerManager() {
+    @VisibleForTesting
+    protected PowerManager getPowerManager() {
         return mPowerManager;
     }
 
@@ -729,7 +730,8 @@ public class HdmiControlService extends SystemService {
         Global.putInt(cr, key, toInt(value));
     }
 
-    void writeStringSystemProperty(String key, String value) {
+    @VisibleForTesting
+    protected void writeStringSystemProperty(String key, String value) {
         SystemProperties.set(key, value);
     }
 
@@ -3366,7 +3368,7 @@ public class HdmiControlService extends SystemService {
     }
 
     @VisibleForTesting
-    HdmiCecAtomWriter getAtomWriter() {
+    protected HdmiCecAtomWriter getAtomWriter() {
         return mAtomWriter;
     }
 
@@ -3395,7 +3397,8 @@ public class HdmiControlService extends SystemService {
                 HdmiControlService.PERMISSION);
     }
 
-    HdmiCecConfig getHdmiCecConfig() {
+    @VisibleForTesting
+    protected HdmiCecConfig getHdmiCecConfig() {
         return mHdmiCecConfig;
     }
 }

@@ -162,7 +162,7 @@ public class SystemAudioInitiationActionFromAvrTest {
                     }
 
                     @Override
-                    HdmiCecConfig getHdmiCecConfig() {
+                    protected HdmiCecConfig getHdmiCecConfig() {
                         return hdmiCecConfig;
                     }
                 };
