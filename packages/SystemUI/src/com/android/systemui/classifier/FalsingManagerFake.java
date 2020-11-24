@@ -21,6 +21,7 @@ import android.view.MotionEvent;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.plugins.FalsingManager;
+import com.android.systemui.util.sensors.ThresholdSensor;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -40,21 +41,6 @@ public class FalsingManagerFake implements FalsingManager {
 
     @Override
     public void onSuccessfulUnlock() {
-
-    }
-
-    @Override
-    public void onNotificationActive() {
-
-    }
-
-    @Override
-    public void setShowingAod(boolean showingAod) {
-
-    }
-
-    @Override
-    public void onNotificatonStartDraggingDown() {
 
     }
 
@@ -100,16 +86,6 @@ public class FalsingManagerFake implements FalsingManager {
         return mIsFalseDoubleTap;
     }
 
-    @Override
-    public void onNotificatonStopDraggingDown() {
-
-    }
-
-    @Override
-    public void setNotificationExpanded() {
-
-    }
-
     @VisibleForTesting
     public void setIsClassiferEnabled(boolean isClassiferEnabled) {
         mIsClassiferEnabled = isClassiferEnabled;
@@ -121,75 +97,14 @@ public class FalsingManagerFake implements FalsingManager {
     }
 
     @Override
-    public void onQsDown() {
-
-    }
-
-    @Override
-    public void setQsExpanded(boolean expanded) {
-
-    }
-
-    @VisibleForTesting
-    public void setShouldEnforceBouncer(boolean shouldEnforceBouncer) {
-        mShouldEnforceBouncer = shouldEnforceBouncer;
-    }
-
-    @Override
     public boolean shouldEnforceBouncer() {
         return mShouldEnforceBouncer;
-    }
-
-    @Override
-    public void onTrackingStarted(boolean secure) {
-
-    }
-
-    @Override
-    public void onTrackingStopped() {
-
-    }
-
-    @Override
-    public void onLeftAffordanceOn() {
-
-    }
-
-    @Override
-    public void onCameraOn() {
-
-    }
-
-    @Override
-    public void onAffordanceSwipingStarted(boolean rightCorner) {
-
-    }
-
-    @Override
-    public void onAffordanceSwipingAborted() {
-
-    }
-
-    @Override
-    public void onStartExpandingFromPulse() {
-
-    }
-
-    @Override
-    public void onExpansionFromPulseStopped() {
-
     }
 
     @Override
     public Uri reportRejectedTouch() {
         return null;
     }
-
-    @Override
-    public void onScreenOnFromTouch() {
-
-    }
-
 
     @VisibleForTesting
     public void setIsReportingEnabled(boolean isReportingEnabled) {
@@ -199,61 +114,6 @@ public class FalsingManagerFake implements FalsingManager {
     @Override
     public boolean isReportingEnabled() {
         return mIsReportingEnabled;
-    }
-
-    @Override
-    public void onUnlockHintStarted() {
-
-    }
-
-    @Override
-    public void onCameraHintStarted() {
-
-    }
-
-    @Override
-    public void onLeftAffordanceHintStarted() {
-
-    }
-
-    @Override
-    public void onScreenTurningOn() {
-
-    }
-
-    @Override
-    public void onScreenOff() {
-
-    }
-
-    @Override
-    public void onNotificationStopDismissing() {
-
-    }
-
-    @Override
-    public void onNotificationDismissed() {
-
-    }
-
-    @Override
-    public void onNotificationStartDismissing() {
-
-    }
-
-    @Override
-    public void onNotificationDoubleTap(boolean accepted, float dx, float dy) {
-
-    }
-
-    @Override
-    public void onBouncerShown() {
-
-    }
-
-    @Override
-    public void onBouncerHidden() {
-
     }
 
     @Override
@@ -267,5 +127,10 @@ public class FalsingManagerFake implements FalsingManager {
 
     @Override
     public void cleanup() {
+    }
+
+    @Override
+    public void onProximityEvent(ThresholdSensor.ThresholdSensorEvent proximityEvent) {
+
     }
 }

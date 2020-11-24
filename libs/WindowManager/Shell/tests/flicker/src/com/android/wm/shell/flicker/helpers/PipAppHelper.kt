@@ -70,6 +70,12 @@ class PipAppHelper(
         startButton.click()
     }
 
+    fun checkWithCustomActionsCheckbox() = uiDevice
+            .findObject(By.res(packageName, "with_custom_actions"))
+            ?.takeIf { it.isCheckable }
+            ?.apply { if (!isChecked) click() }
+            ?: error("'With custom actions' checkbox not found")
+
     fun pauseMedia() = mediaController?.transportControls?.pause()
             ?: error("No active media session found")
 

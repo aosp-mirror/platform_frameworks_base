@@ -796,7 +796,7 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
 
         JSONObject dump = new JSONObject();
         try {
-            dump.put("service", "Face Manager");
+            dump.put("service", TAG);
 
             JSONArray sets = new JSONArray();
             for (UserInfo user : UserManager.get(mContext).getUsers()) {

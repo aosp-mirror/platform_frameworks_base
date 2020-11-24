@@ -31,6 +31,10 @@ val TEST_APP_PIP_ACTIVITY_COMPONENT_NAME: ComponentName = ComponentName.createRe
         TEST_APP_PACKAGE_NAME, ".PipActivity")
 const val TEST_APP_PIP_ACTIVITY_LABEL = "PipApp"
 const val TEST_APP_PIP_ACTIVITY_WINDOW_NAME = "PipActivity"
+const val TEST_APP_PIP_MENU_ACTION_NO_OP = "No-Op"
+const val TEST_APP_PIP_MENU_ACTION_ON = "On"
+const val TEST_APP_PIP_MENU_ACTION_OFF = "Off"
+const val TEST_APP_PIP_MENU_ACTION_CLEAR = "Clear"
 
 // Test App > Ime Activity
 val TEST_APP_IME_ACTIVITY_COMPONENT_NAME: ComponentName = ComponentName.createRelative(

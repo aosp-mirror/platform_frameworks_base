@@ -94,7 +94,7 @@ public class ScreenMediaRecorder {
         mAudioSource = audioSource;
     }
 
-    private void prepare() throws IOException, RemoteException {
+    private void prepare() throws IOException, RemoteException, RuntimeException {
         //Setup media projection
         IBinder b = ServiceManager.getService(MEDIA_PROJECTION_SERVICE);
         IMediaProjectionManager mediaService =
@@ -257,7 +257,7 @@ public class ScreenMediaRecorder {
     /**
     * Start screen recording
     */
-    void start() throws IOException, RemoteException, IllegalStateException {
+    void start() throws IOException, RemoteException, RuntimeException {
         Log.d(TAG, "start recording");
         prepare();
         mMediaRecorder.start();

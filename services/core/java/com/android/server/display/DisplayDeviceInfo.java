@@ -22,6 +22,7 @@ import android.util.DisplayMetrics;
 import android.view.Display;
 import android.view.DisplayAddress;
 import android.view.DisplayCutout;
+import android.view.DisplayEventReceiver;
 import android.view.Surface;
 
 import java.util.Arrays;
@@ -333,6 +334,9 @@ final class DisplayDeviceInfo {
      */
     public String ownerPackageName;
 
+    public DisplayEventReceiver.FrameRateOverride[] frameRateOverrides =
+            new DisplayEventReceiver.FrameRateOverride[0];
+
     public void setAssumedDensityForExternalDisplay(int width, int height) {
         densityDpi = Math.min(width, height) * DisplayMetrics.DENSITY_XHIGH / 1080;
         // Technically, these values should be smaller than the apparent density
@@ -386,7 +390,8 @@ final class DisplayDeviceInfo {
                 || !Objects.equals(address, other.address)
                 || !Objects.equals(deviceProductInfo, other.deviceProductInfo)
                 || ownerUid != other.ownerUid
-                || !Objects.equals(ownerPackageName, other.ownerPackageName)) {
+                || !Objects.equals(ownerPackageName, other.ownerPackageName)
+                || !Objects.equals(frameRateOverrides, other.frameRateOverrides)) {
             diff |= DIFF_OTHER;
         }
         return diff;
@@ -425,6 +430,7 @@ final class DisplayDeviceInfo {
         state = other.state;
         ownerUid = other.ownerUid;
         ownerPackageName = other.ownerPackageName;
+        frameRateOverrides = other.frameRateOverrides;
     }
 
     // For debugging purposes
@@ -460,6 +466,10 @@ final class DisplayDeviceInfo {
         if (ownerUid != 0 || ownerPackageName != null) {
             sb.append(", owner ").append(ownerPackageName);
             sb.append(" (uid ").append(ownerUid).append(")");
+        }
+        sb.append(", frameRateOverride ");
+        for (DisplayEventReceiver.FrameRateOverride frameRateOverride : frameRateOverrides) {
+            sb.append(frameRateOverride).append(" ");
         }
         sb.append(flagsToString(flags));
         sb.append("}");

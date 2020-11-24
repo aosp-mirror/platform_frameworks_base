@@ -18,6 +18,8 @@ package com.android.systemui.classifier.brightline;
 
 import android.view.MotionEvent;
 
+import com.android.systemui.classifier.FalsingDataProvider;
+
 import java.util.List;
 import java.util.Queue;
 

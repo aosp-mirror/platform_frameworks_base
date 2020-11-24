@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.classifier.brightline;
+package com.android.systemui.classifier;
 
 import static com.android.systemui.classifier.Classifier.UNLOCK;
 
@@ -55,7 +55,7 @@ public class ClassifierTest extends LeakCheckedTest {
         resetDataProvider();
     }
 
-    FalsingDataProvider getDataProvider() {
+    protected FalsingDataProvider getDataProvider() {
         return mDataProvider;
     }
 
@@ -63,15 +63,15 @@ public class ClassifierTest extends LeakCheckedTest {
         return mFakeBatteryController;
     }
 
-    void setOffsetX(float offsetX) {
+    protected void setOffsetX(float offsetX) {
         mOffsetX = offsetX;
     }
 
-    void setOffsetY(float offsetY) {
+    protected void setOffsetY(float offsetY) {
         mOffsetY = offsetY;
     }
 
-    void resetDataProvider() {
+    protected void resetDataProvider() {
         for (MotionEvent motionEvent : mMotionEvents) {
             motionEvent.recycle();
         }
@@ -81,28 +81,28 @@ public class ClassifierTest extends LeakCheckedTest {
         mDataProvider.onSessionEnd();
     }
 
-    MotionEvent appendDownEvent(float x, float y) {
+    protected MotionEvent appendDownEvent(float x, float y) {
         return appendMotionEvent(MotionEvent.ACTION_DOWN, x, y);
     }
 
-    MotionEvent appendDownEvent(float x, float y, long eventTime) {
+    protected MotionEvent appendDownEvent(float x, float y, long eventTime) {
         return appendMotionEvent(MotionEvent.ACTION_DOWN, x, y, eventTime);
     }
 
-    MotionEvent appendMoveEvent(float x, float y) {
+    protected MotionEvent appendMoveEvent(float x, float y) {
         return appendMotionEvent(MotionEvent.ACTION_MOVE, x, y);
     }
 
-    MotionEvent appendMoveEvent(float x, float y, long eventTime) {
+    protected MotionEvent appendMoveEvent(float x, float y, long eventTime) {
         return appendMotionEvent(MotionEvent.ACTION_MOVE, x, y, eventTime);
     }
 
 
-    MotionEvent appendUpEvent(float x, float y) {
+    protected MotionEvent appendUpEvent(float x, float y) {
         return appendMotionEvent(MotionEvent.ACTION_UP, x, y);
     }
 
-    MotionEvent appendUpEvent(float x, float y, long eventTime) {
+    protected MotionEvent appendUpEvent(float x, float y, long eventTime) {
         return appendMotionEvent(MotionEvent.ACTION_UP, x, y, eventTime);
     }
 

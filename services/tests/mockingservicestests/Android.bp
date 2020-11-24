@@ -20,6 +20,7 @@ android_test {
     static_libs: [
         "services.core",
         "services.net",
+        "services.usage",
         "service-jobscheduler",
         "service-permission.impl",
         "service-blobstore",

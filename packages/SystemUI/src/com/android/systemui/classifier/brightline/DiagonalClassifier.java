@@ -23,6 +23,7 @@ import static com.android.systemui.classifier.Classifier.RIGHT_AFFORDANCE;
 
 import android.provider.DeviceConfig;
 
+import com.android.systemui.classifier.FalsingDataProvider;
 import com.android.systemui.util.DeviceConfigProxy;
 
 import java.util.Locale;

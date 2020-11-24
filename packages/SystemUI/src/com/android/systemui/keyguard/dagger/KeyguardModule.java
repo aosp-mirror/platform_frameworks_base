@@ -31,6 +31,8 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardViewController;
 import com.android.keyguard.dagger.KeyguardStatusViewComponent;
 import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.classifier.FalsingCollector;
+import com.android.systemui.classifier.FalsingModule;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dagger.qualifiers.UiBackground;
@@ -39,7 +41,6 @@ import com.android.systemui.keyguard.DismissCallbackRegistry;
 import com.android.systemui.keyguard.FaceAuthScreenBrightnessController;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.navigationbar.NavigationModeController;
-import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.phone.KeyguardLiftController;
@@ -59,7 +60,8 @@ import dagger.Provides;
 /**
  * Dagger Module providing {@link StatusBar}.
  */
-@Module(subcomponents = {KeyguardStatusViewComponent.class})
+@Module(subcomponents = {KeyguardStatusViewComponent.class},
+        includes = {FalsingModule.class})
 public class KeyguardModule {
     /**
      * Provides our instance of KeyguardViewMediator which is considered optional.
@@ -68,7 +70,7 @@ public class KeyguardModule {
     @SysUISingleton
     public static KeyguardViewMediator newKeyguardViewMediator(
             Context context,
-            FalsingManager falsingManager,
+            FalsingCollector falsingCollector,
             LockPatternUtils lockPatternUtils,
             BroadcastDispatcher broadcastDispatcher,
             Lazy<KeyguardViewController> statusBarKeyguardViewManagerLazy,
@@ -83,7 +85,7 @@ public class KeyguardModule {
             KeyguardDisplayManager keyguardDisplayManager) {
         return new KeyguardViewMediator(
                 context,
-                falsingManager,
+                falsingCollector,
                 lockPatternUtils,
                 broadcastDispatcher,
                 statusBarKeyguardViewManagerLazy,

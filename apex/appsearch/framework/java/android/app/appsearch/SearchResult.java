@@ -41,7 +41,6 @@ import java.util.Objects;
  * part of search result.
  *
  * @see SearchResults
- * @hide
  */
 public final class SearchResult {
     /** @hide */

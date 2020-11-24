@@ -21,7 +21,6 @@ import static android.Manifest.permission.MANAGE_DEVICE_ADMINS;
 import static android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS;
 import static android.Manifest.permission.REQUEST_DELETE_PACKAGES;
 import static android.Manifest.permission.SET_HARMFUL_APP_WARNINGS;
-import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.AppOpsManager.MODE_DEFAULT;
 import static android.app.AppOpsManager.MODE_IGNORED;
 import static android.content.Intent.ACTION_MAIN;
@@ -44,7 +43,6 @@ import static android.content.pm.PackageManager.FLAG_PERMISSION_REVOKED_COMPAT;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_SYSTEM_FIXED;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_USER_FIXED;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_USER_SET;
-import static android.content.pm.PackageManager.FLAG_PERMISSION_WHITELIST_INSTALLER;
 import static android.content.pm.PackageManager.INSTALL_FAILED_ALREADY_EXISTS;
 import static android.content.pm.PackageManager.INSTALL_FAILED_BAD_PERMISSION_GROUP;
 import static android.content.pm.PackageManager.INSTALL_FAILED_DUPLICATE_PACKAGE;
@@ -141,6 +139,7 @@ import android.annotation.AppIdInt;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.StringRes;
 import android.annotation.UserIdInt;
 import android.annotation.WorkerThread;
 import android.app.ActivityManager;
@@ -1203,6 +1202,7 @@ public class PackageManagerService extends IPackageManager.Stub
         public ViewCompiler viewCompiler;
         public @Nullable String wellbeingPackage;
         public @Nullable String retailDemoPackage;
+        public @Nullable String recentsPackage;
         public ComponentName resolveComponentName;
         public ArrayMap<String, AndroidPackage> packages;
         public boolean enableFreeCacheV2;
@@ -1737,6 +1737,7 @@ public class PackageManagerService extends IPackageManager.Stub
     final @Nullable String mSharedSystemSharedLibraryPackageName;
     final @Nullable String mRetailDemoPackage;
     final @Nullable String mOverlayConfigSignaturePackage;
+    final @Nullable String mRecentsPackage;
 
     private final PackageUsage mPackageUsage = new PackageUsage();
     private final CompilerStats mCompilerStats = new CompilerStats();
@@ -2169,7 +2170,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
     private void handlePackagePostInstall(PackageInstalledInfo res, boolean grantPermissions,
             boolean killApp, boolean virtualPreload,
-            String[] grantedPermissions, List<String> whitelistedRestrictedPermissions,
+            String[] grantedPermissions, List<String> allowlistedRestrictedPermissions,
             int autoRevokePermissionsMode,
             boolean launchedForRestore, String installerPackage,
             IPackageInstallObserver2 installObserver, int dataLoaderType) {
@@ -2202,32 +2203,21 @@ public class PackageManagerService extends IPackageManager.Stub
                 res.removedInfo.sendPackageRemovedBroadcasts(killApp, false /*removedBySystem*/);
             }
 
-            // Allowlist any restricted permissions first as some may be runtime
-            // that the installer requested to be granted at install time.
-            if (whitelistedRestrictedPermissions != null
-                    && !whitelistedRestrictedPermissions.isEmpty()) {
-                mPermissionManager.setAllowlistedRestrictedPermissions(res.pkg,
-                        whitelistedRestrictedPermissions, FLAG_PERMISSION_WHITELIST_INSTALLER,
-                        res.newUsers);
-            }
-
-            if (autoRevokePermissionsMode == MODE_ALLOWED
-                    || autoRevokePermissionsMode == MODE_IGNORED) {
-                mPermissionManager.setAutoRevokeExempted(res.pkg,
-                        autoRevokePermissionsMode == MODE_IGNORED, res.newUsers);
-            }
-
-            // Now that we successfully installed the package, grant runtime
-            // permissions if requested before broadcasting the install. Also
-            // for legacy apps in permission review mode we clear the permission
-            // review flag which is used to emulate runtime permissions for
-            // legacy apps.
+            final List<String> grantedPermissionsList;
             if (grantPermissions) {
-                final int callingUid = Binder.getCallingUid();
-                mPermissionManager.grantRequestedRuntimePermissions(res.pkg,
-                        grantedPermissions != null ? Arrays.asList(grantedPermissions) : null,
-                        res.newUsers);
+                if (grantedPermissions != null) {
+                    grantedPermissionsList = Arrays.asList(grantedPermissions);
+                } else {
+                    grantedPermissionsList = res.pkg.getRequestedPermissions();
+                }
+            } else {
+                grantedPermissionsList = Collections.emptyList();
             }
+            if (allowlistedRestrictedPermissions == null) {
+                allowlistedRestrictedPermissions = Collections.emptyList();
+            }
+            mPermissionManager.onPackageInstalled(res.pkg, grantedPermissionsList,
+                    allowlistedRestrictedPermissions, autoRevokePermissionsMode, res.newUsers);
 
             final String installerPackageName =
                     res.installerPackageName != null
@@ -2980,6 +2970,7 @@ public class PackageManagerService extends IPackageManager.Stub
         mSystemTextClassifierPackageName = testParams.systemTextClassifierPackage;
         mWellbeingPackage = testParams.wellbeingPackage;
         mRetailDemoPackage = testParams.retailDemoPackage;
+        mRecentsPackage = testParams.recentsPackage;
         mDocumenterPackage = testParams.documenterPackage;
         mConfiguratorPackage = testParams.configuratorPackage;
         mAppPredictionServicePackage = testParams.appPredictionServicePackage;
@@ -3564,6 +3555,7 @@ public class PackageManagerService extends IPackageManager.Stub
             mIncidentReportApproverPackage = getIncidentReportApproverPackageName();
             mRetailDemoPackage = getRetailDemoPackageName();
             mOverlayConfigSignaturePackage = getOverlayConfigSignaturePackageName();
+            mRecentsPackage = getRecentsPackageName();
 
             // Now that we know all of the shared libraries, update all clients to have
             // the correct library paths.
@@ -13676,9 +13668,8 @@ public class PackageManagerService extends IPackageManager.Stub
                             != 0) {
                         whiteListedPermissions = pkgSetting.pkg.getRequestedPermissions();
                     }
-                    mPermissionManager.setAllowlistedRestrictedPermissions(pkgSetting.pkg,
-                            whiteListedPermissions, FLAG_PERMISSION_WHITELIST_INSTALLER,
-                            new int[] { userId });
+                    mPermissionManager.onPackageInstalled(pkgSetting.pkg, Collections.emptyList(),
+                            whiteListedPermissions, MODE_DEFAULT, new int[] { userId });
                 }
 
                 if (pkgSetting.pkg != null) {
@@ -21329,15 +21320,8 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @Override
     public @Nullable String getAttentionServicePackageName() {
-        final String flattenedComponentName =
-                mContext.getString(R.string.config_defaultAttentionService);
-        if (flattenedComponentName != null) {
-            ComponentName componentName = ComponentName.unflattenFromString(flattenedComponentName);
-            if (componentName != null && componentName.getPackageName() != null) {
-                return ensureSystemPackageName(componentName.getPackageName());
-            }
-        }
-        return null;
+        return ensureSystemPackageName(
+                getPackageFromComponentString(R.string.config_defaultAttentionService));
     }
 
     private @Nullable String getDocumenterPackageName() {
@@ -21372,17 +21356,8 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @Override
     public String getAppPredictionServicePackageName() {
-        String flattenedAppPredictionServiceComponentName =
-                mContext.getString(R.string.config_defaultAppPredictionService);
-        if (flattenedAppPredictionServiceComponentName == null) {
-            return null;
-        }
-        ComponentName appPredictionServiceComponentName =
-                ComponentName.unflattenFromString(flattenedAppPredictionServiceComponentName);
-        if (appPredictionServiceComponentName == null) {
-            return null;
-        }
-        return ensureSystemPackageName(appPredictionServiceComponentName.getPackageName());
+        return ensureSystemPackageName(
+                getPackageFromComponentString(R.string.config_defaultAppPredictionService));
     }
 
     private @NonNull String[] dropNonSystemPackages(@NonNull String[] pkgNames) {
@@ -21399,19 +21374,8 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @Override
     public String getSystemCaptionsServicePackageName() {
-        String flattenedSystemCaptionsServiceComponentName =
-                mContext.getString(R.string.config_defaultSystemCaptionsService);
-
-        if (TextUtils.isEmpty(flattenedSystemCaptionsServiceComponentName)) {
-            return null;
-        }
-
-        ComponentName systemCaptionsServiceComponentName =
-                ComponentName.unflattenFromString(flattenedSystemCaptionsServiceComponentName);
-        if (systemCaptionsServiceComponentName == null) {
-            return null;
-        }
-        return ensureSystemPackageName(systemCaptionsServiceComponentName.getPackageName());
+        return ensureSystemPackageName(
+                getPackageFromComponentString(R.string.config_defaultSystemCaptionsService));
     }
 
     @Override
@@ -21429,19 +21393,8 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @Override
     public String getContentCaptureServicePackageName() {
-        final String flattenedContentCaptureService =
-                mContext.getString(R.string.config_defaultContentCaptureService);
-
-        if (TextUtils.isEmpty(flattenedContentCaptureService)) {
-            return null;
-        }
-
-        final ComponentName contentCaptureServiceComponentName =
-                ComponentName.unflattenFromString(flattenedContentCaptureService);
-        if (contentCaptureServiceComponentName == null) {
-            return null;
-        }
-        return ensureSystemPackageName(contentCaptureServiceComponentName.getPackageName());
+        return ensureSystemPackageName(
+                getPackageFromComponentString(R.string.config_defaultContentCaptureService));
     }
 
     public String getOverlayConfigSignaturePackageName() {
@@ -21482,6 +21435,26 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         return null;
+    }
+
+    @Nullable
+    private String getRecentsPackageName() {
+        return ensureSystemPackageName(
+                getPackageFromComponentString(R.string.config_recentsComponentName));
+
+    }
+
+    @Nullable
+    private String getPackageFromComponentString(@StringRes int stringResId) {
+        final String componentString = mContext.getString(stringResId);
+        if (TextUtils.isEmpty(componentString)) {
+            return null;
+        }
+        final ComponentName component = ComponentName.unflattenFromString(componentString);
+        if (component == null) {
+            return null;
+        }
+        return component.getPackageName();
     }
 
     @Nullable
@@ -25092,6 +25065,8 @@ public class PackageManagerService extends IPackageManager.Stub
                             : new String[] {mRetailDemoPackage};
                 case PackageManagerInternal.PACKAGE_OVERLAY_CONFIG_SIGNATURE:
                     return filterOnlySystemPackages(getOverlayConfigSignaturePackageName());
+                case PackageManagerInternal.PACKAGE_RECENTS:
+                    return filterOnlySystemPackages(mRecentsPackage);
                 default:
                     return ArrayUtils.emptyArray(String.class);
             }

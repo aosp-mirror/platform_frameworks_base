@@ -88,12 +88,12 @@ import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.SystemUI;
 import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.dagger.qualifiers.UiBackground;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.KeyguardService;
 import com.android.systemui.keyguard.dagger.KeyguardModule;
 import com.android.systemui.navigationbar.NavigationModeController;
-import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.statusbar.phone.BiometricUnlockController;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
@@ -223,7 +223,7 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable {
     private boolean mBootSendUserPresent;
     private boolean mShuttingDown;
     private boolean mDozing;
-    private final FalsingManager mFalsingManager;
+    private final FalsingCollector mFalsingCollector;
 
     /** High level access to the power manager for WakeLocks */
     private final PowerManager mPM;
@@ -715,7 +715,7 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable {
      */
     public KeyguardViewMediator(
             Context context,
-            FalsingManager falsingManager,
+            FalsingCollector falsingCollector,
             LockPatternUtils lockPatternUtils,
             BroadcastDispatcher broadcastDispatcher,
             Lazy<KeyguardViewController> statusBarKeyguardViewManagerLazy,
@@ -727,7 +727,7 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable {
             NavigationModeController navigationModeController,
             KeyguardDisplayManager keyguardDisplayManager) {
         super(context);
-        mFalsingManager = falsingManager;
+        mFalsingCollector = falsingCollector;
         mLockPatternUtils = lockPatternUtils;
         mBroadcastDispatcher = broadcastDispatcher;
         mKeyguardViewControllerLazy = statusBarKeyguardViewManagerLazy;
@@ -1682,7 +1682,7 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable {
                             "KeyguardViewMediator#handleMessage START_KEYGUARD_EXIT_ANIM");
                     StartKeyguardExitAnimParams params = (StartKeyguardExitAnimParams) msg.obj;
                     handleStartKeyguardExitAnimation(params.startTime, params.fadeoutDuration);
-                    mFalsingManager.onSuccessfulUnlock();
+                    mFalsingCollector.onSuccessfulUnlock();
                     Trace.endSection();
                     break;
                 case KEYGUARD_DONE_PENDING_TIMEOUT:

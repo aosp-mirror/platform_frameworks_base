@@ -17,6 +17,7 @@
 package com.android.frameworks.core.powerstatsviewer;
 
 import android.content.Context;
+import android.os.BatteryStats;
 import android.os.Process;
 
 import com.android.internal.os.BatterySipper;
@@ -31,6 +32,15 @@ public class PowerStatsData {
     private static final String PACKAGE_SYSTEMUI = "com.android.systemui";
     private static final String[] PACKAGES_SYSTEM = {PACKAGE_MEDIA_PROVIDER,
             PACKAGE_CALENDAR_PROVIDER, PACKAGE_SYSTEMUI};
+
+    // Temporary placeholder voltage for converting energy to charge
+    // TODO: remove this when b/173765509 is resolved
+    private static final double MOCK_NOMINAL_VOLTAGE = 3.7;
+
+    // Unit conversion:
+    //   mAh = uWs * (1/1000)(milli/micro) * (1/Voltage) * (1/3600)(hours/second)
+    private static final double UJ_2_MAH =
+            (1.0 / 1000) * (1.0 / MOCK_NOMINAL_VOLTAGE) * (1.0 / 3600);
 
     enum EntryType {
         POWER,
@@ -50,6 +60,7 @@ public class PowerStatsData {
     public PowerStatsData(Context context, BatteryStatsHelper batteryStatsHelper,
             String powerConsumerId) {
         List<BatterySipper> usageList = batteryStatsHelper.getUsageList();
+        BatteryStats batteryStats = batteryStatsHelper.getStats();
 
         double totalPowerMah = 0;
         double totalSmearedPowerMah = 0;
@@ -125,6 +136,8 @@ public class PowerStatsData {
             totalVideoTimeMs += sipper.videoTimeMs;
         }
 
+        long totalScreenMeasuredEnergyUJ = batteryStats.getScreenOnEnergy();
+
         if (requestedPowerConsumer == null) {
             mPowerConsumerInfo = null;
             return;
@@ -135,10 +148,18 @@ public class PowerStatsData {
 
         addEntry("Total power", EntryType.POWER,
                 requestedPowerConsumer.totalSmearedPowerMah, totalSmearedPowerMah);
+        maybeAddMeasuredEnergyEntry(requestedPowerConsumer.drainType, batteryStats);
+
         addEntry("... excluding system", EntryType.POWER,
                 requestedPowerConsumer.totalSmearedPowerMah, totalPowerExcludeSystemMah);
         addEntry("Screen, smeared", EntryType.POWER,
                 requestedPowerConsumer.screenPowerMah, totalScreenPower);
+        if (totalScreenMeasuredEnergyUJ != BatteryStats.ENERGY_DATA_UNAVAILABLE) {
+            final double measuredCharge = UJ_2_MAH * totalScreenMeasuredEnergyUJ;
+            final double ratio = measuredCharge / totalScreenPower;
+            addEntry("Screen, smeared (PowerStatsHal adjusted)", EntryType.POWER,
+                    requestedPowerConsumer.screenPowerMah * ratio, measuredCharge);
+        }
         addEntry("Other, smeared", EntryType.POWER,
                 requestedPowerConsumer.proportionalSmearMah, totalProportionalSmearMah);
         addEntry("Excluding smeared", EntryType.POWER,
@@ -216,6 +237,28 @@ public class PowerStatsData {
         entry.value = amount;
         entry.total = totalAmount;
         mEntries.add(entry);
+    }
+
+    private void maybeAddMeasuredEnergyEntry(BatterySipper.DrainType drainType,
+            BatteryStats batteryStats) {
+        switch (drainType) {
+            case AMBIENT_DISPLAY:
+                final long totalDozeMeasuredEnergyUJ = batteryStats.getScreenDozeEnergy();
+                if (totalDozeMeasuredEnergyUJ != BatteryStats.ENERGY_DATA_UNAVAILABLE) {
+                    final double measuredCharge = UJ_2_MAH * totalDozeMeasuredEnergyUJ;
+                    addEntry("Measured ambient display power", EntryType.POWER, measuredCharge,
+                            measuredCharge);
+                }
+                break;
+            case SCREEN:
+                final long totalScreenMeasuredEnergyUJ = batteryStats.getScreenOnEnergy();
+                if (totalScreenMeasuredEnergyUJ != BatteryStats.ENERGY_DATA_UNAVAILABLE) {
+                    final double measuredCharge = UJ_2_MAH * totalScreenMeasuredEnergyUJ;
+                    addEntry("Measured screen power", EntryType.POWER, measuredCharge,
+                            measuredCharge);
+                }
+                break;
+        }
     }
 
     public PowerConsumerInfoHelper.PowerConsumerInfo getPowerConsumerInfo() {

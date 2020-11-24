@@ -83,6 +83,7 @@ import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.classifier.FalsingCollectorFake;
 import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.demomode.DemoModeController;
@@ -356,6 +357,7 @@ public class StatusBarTest extends SysuiTestCase {
                 mDynamicPrivacyController,
                 mBypassHeadsUpNotifier,
                 new FalsingManagerFake(),
+                new FalsingCollectorFake(),
                 mBroadcastDispatcher,
                 new RemoteInputQuickSettingsDisabler(
                         mContext,

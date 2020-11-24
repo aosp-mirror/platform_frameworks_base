@@ -22,6 +22,7 @@ import static android.Manifest.permission.FILTER_EVENTS;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
 import static android.Manifest.permission.START_ACTIVITIES_FROM_BACKGROUND;
+import static android.Manifest.permission.START_FOREGROUND_SERVICES_FROM_BACKGROUND;
 import static android.app.ActivityManager.INSTR_FLAG_DISABLE_HIDDEN_API_CHECKS;
 import static android.app.ActivityManager.INSTR_FLAG_DISABLE_ISOLATED_STORAGE;
 import static android.app.ActivityManager.INSTR_FLAG_DISABLE_TEST_API_CHECKS;
@@ -13321,15 +13322,22 @@ public class ActivityManagerService extends IActivityManager.Stub
                 // See if the caller is allowed to do this.  Note we are checking against
                 // the actual real caller (not whoever provided the operation as say a
                 // PendingIntent), because that who is actually supplied the arguments.
-                if (checkComponentPermission(
-                        android.Manifest.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST,
+                if (checkComponentPermission(CHANGE_DEVICE_IDLE_TEMP_WHITELIST,
+                        realCallingPid, realCallingUid, -1, true)
+                        != PackageManager.PERMISSION_GRANTED
+                        && checkComponentPermission(START_ACTIVITIES_FROM_BACKGROUND,
+                        realCallingPid, realCallingUid, -1, true)
+                        != PackageManager.PERMISSION_GRANTED
+                        && checkComponentPermission(START_FOREGROUND_SERVICES_FROM_BACKGROUND,
                         realCallingPid, realCallingUid, -1, true)
                         != PackageManager.PERMISSION_GRANTED) {
                     String msg = "Permission Denial: " + intent.getAction()
                             + " broadcast from " + callerPackage + " (pid=" + callingPid
                             + ", uid=" + callingUid + ")"
                             + " requires "
-                            + android.Manifest.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST;
+                            + CHANGE_DEVICE_IDLE_TEMP_WHITELIST + " or "
+                            + START_ACTIVITIES_FROM_BACKGROUND + " or "
+                            + START_FOREGROUND_SERVICES_FROM_BACKGROUND;
                     Slog.w(TAG, msg);
                     throw new SecurityException(msg);
                 }
@@ -14289,8 +14297,10 @@ public class ActivityManagerService extends IActivityManager.Stub
             activeInstr.mHasBackgroundActivityStartsPermission = checkPermission(
                     START_ACTIVITIES_FROM_BACKGROUND, callingPid, callingUid)
                             == PackageManager.PERMISSION_GRANTED;
+            activeInstr.mHasBackgroundForegroundServiceStartsPermission = checkPermission(
+                    START_FOREGROUND_SERVICES_FROM_BACKGROUND, callingPid, callingUid)
+                            == PackageManager.PERMISSION_GRANTED;
             activeInstr.mNoRestart = noRestart;
-
             boolean disableHiddenApiChecks = ai.usesNonSdkApi()
                     || (flags & INSTR_FLAG_DISABLE_HIDDEN_API_CHECKS) != 0;
             boolean disableTestApiChecks = disableHiddenApiChecks

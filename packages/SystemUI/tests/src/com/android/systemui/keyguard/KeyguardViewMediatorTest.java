@@ -41,7 +41,7 @@ import com.android.keyguard.KeyguardDisplayManager;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastDispatcher;
-import com.android.systemui.classifier.FalsingManagerFake;
+import com.android.systemui.classifier.FalsingCollectorFake;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
@@ -76,18 +76,18 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
     private DeviceConfigProxy mDeviceConfig = new DeviceConfigProxyFake();
     private FakeExecutor mUiBgExecutor = new FakeExecutor(new FakeSystemClock());
 
-    private FalsingManagerFake mFalsingManager;
+    private FalsingCollectorFake mFalsingCollector;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        mFalsingManager = new FalsingManagerFake();
+        mFalsingCollector = new FalsingCollectorFake();
 
         when(mLockPatternUtils.getDevicePolicyManager()).thenReturn(mDevicePolicyManager);
         when(mPowerManager.newWakeLock(anyInt(), any())).thenReturn(mock(WakeLock.class));
 
         mViewMediator = new KeyguardViewMediator(
-                mContext, mFalsingManager, mLockPatternUtils, mBroadcastDispatcher,
+                mContext, mFalsingCollector, mLockPatternUtils, mBroadcastDispatcher,
                 () -> mStatusBarKeyguardViewManager,
                 mDismissCallbackRegistry, mUpdateMonitor, mDumpManager, mUiBgExecutor,
                 mPowerManager, mTrustManager, mDeviceConfig, mNavigationModeController,

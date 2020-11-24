@@ -50,9 +50,9 @@ import com.android.keyguard.ViewMediatorCallback;
 import com.android.keyguard.dagger.KeyguardBouncerComponent;
 import com.android.systemui.DejankUtils;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.keyguard.DismissCallbackRegistry;
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
-import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import org.junit.Assert;
@@ -72,7 +72,7 @@ import org.mockito.stubbing.Answer;
 public class KeyguardBouncerTest extends SysuiTestCase {
 
     @Mock
-    private FalsingManager mFalsingManager;
+    private FalsingCollector mFalsingCollector;
     @Mock
     private ViewMediatorCallback mViewMediatorCallback;
     @Mock
@@ -128,7 +128,7 @@ public class KeyguardBouncerTest extends SysuiTestCase {
 
         final ViewGroup container = new FrameLayout(getContext());
         mBouncer = new KeyguardBouncer.Factory(getContext(), mViewMediatorCallback,
-                mDismissCallbackRegistry, mFalsingManager,
+                mDismissCallbackRegistry, mFalsingCollector,
                 mKeyguardStateController, mKeyguardUpdateMonitor,
                 mKeyguardBypassController, mHandler, mKeyguardSecurityModel,
                 mKeyguardBouncerComponentFactory)
@@ -143,10 +143,10 @@ public class KeyguardBouncerTest extends SysuiTestCase {
     @Test
     public void testShow_notifiesFalsingManager() {
         mBouncer.show(true);
-        verify(mFalsingManager).onBouncerShown();
+        verify(mFalsingCollector).onBouncerShown();
 
         mBouncer.show(true, false);
-        verifyNoMoreInteractions(mFalsingManager);
+        verifyNoMoreInteractions(mFalsingCollector);
     }
 
     /**
@@ -212,11 +212,11 @@ public class KeyguardBouncerTest extends SysuiTestCase {
         mBouncer.setExpansion(0.5f);
 
         mBouncer.setExpansion(KeyguardBouncer.EXPANSION_HIDDEN);
-        verify(mFalsingManager).onBouncerHidden();
+        verify(mFalsingCollector).onBouncerHidden();
         verify(mExpansionCallback).onFullyHidden();
 
         mBouncer.setExpansion(KeyguardBouncer.EXPANSION_VISIBLE);
-        verify(mFalsingManager).onBouncerShown();
+        verify(mFalsingCollector).onBouncerShown();
         verify(mExpansionCallback).onFullyShown();
 
         verify(mExpansionCallback, never()).onStartingToHide();
@@ -239,7 +239,7 @@ public class KeyguardBouncerTest extends SysuiTestCase {
     @Test
     public void testHide_notifiesFalsingManager() {
         mBouncer.hide(false);
-        verify(mFalsingManager).onBouncerHidden();
+        verify(mFalsingCollector).onBouncerHidden();
     }
 
     @Test

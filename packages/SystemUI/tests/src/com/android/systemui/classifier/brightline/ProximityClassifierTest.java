@@ -28,6 +28,8 @@ import android.view.MotionEvent;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.systemui.classifier.ClassifierTest;
+import com.android.systemui.classifier.FalsingDataProvider;
 import com.android.systemui.util.DeviceConfigProxyFake;
 import com.android.systemui.util.sensors.ProximitySensor;
 
