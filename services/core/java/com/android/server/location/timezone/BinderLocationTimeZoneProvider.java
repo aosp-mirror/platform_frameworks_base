@@ -25,10 +25,10 @@ import static com.android.server.location.timezone.LocationTimeZoneProvider.Prov
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.location.timezone.LocationTimeZoneEvent;
 import android.util.IndentingPrintWriter;
 import android.util.Slog;
 
+import com.android.internal.location.timezone.LocationTimeZoneEvent;
 import com.android.internal.location.timezone.LocationTimeZoneProviderRequest;
 
 import java.time.Duration;

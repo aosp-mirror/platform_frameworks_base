@@ -20,7 +20,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Context;
-import android.location.timezone.LocationTimeZoneEvent;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.IndentingPrintWriter;
@@ -28,6 +27,7 @@ import android.util.IndentingPrintWriter;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.location.timezone.ILocationTimeZoneProvider;
 import com.android.internal.location.timezone.ILocationTimeZoneProviderManager;
+import com.android.internal.location.timezone.LocationTimeZoneEvent;
 import com.android.internal.location.timezone.LocationTimeZoneProviderRequest;
 import com.android.server.ServiceWatcher;
 

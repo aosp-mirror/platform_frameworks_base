@@ -16,10 +16,9 @@
 
 package com.android.server.location.timezone;
 
-import static android.location.timezone.LocationTimeZoneEvent.EVENT_TYPE_PERMANENT_FAILURE;
-import static android.location.timezone.LocationTimeZoneEvent.EVENT_TYPE_SUCCESS;
-import static android.location.timezone.LocationTimeZoneEvent.EVENT_TYPE_UNCERTAIN;
-
+import static com.android.internal.location.timezone.LocationTimeZoneEvent.EVENT_TYPE_PERMANENT_FAILURE;
+import static com.android.internal.location.timezone.LocationTimeZoneEvent.EVENT_TYPE_SUCCESS;
+import static com.android.internal.location.timezone.LocationTimeZoneEvent.EVENT_TYPE_UNCERTAIN;
 import static com.android.server.location.timezone.LocationTimeZoneManagerService.debugLog;
 import static com.android.server.location.timezone.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_DISABLED;
 import static com.android.server.location.timezone.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_ENABLED_CERTAIN;
@@ -30,12 +29,12 @@ import static com.android.server.location.timezone.LocationTimeZoneProvider.Prov
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.location.timezone.LocationTimeZoneEvent;
 import android.os.Handler;
 import android.os.SystemClock;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.location.timezone.LocationTimeZoneEvent;
 import com.android.server.location.timezone.LocationTimeZoneProvider.ProviderState.ProviderStateEnum;
 import com.android.server.location.timezone.ThreadingDomain.SingleRunnableQueue;
 import com.android.server.timezonedetector.ConfigurationInternal;

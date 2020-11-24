@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package android.location.timezone;
+package com.android.internal.location.timezone;
 
-import static android.location.timezone.ParcelableTestSupport.assertRoundTripParcelable;
+import static com.android.internal.location.timezone.ParcelableTestSupport.assertRoundTripParcelable;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;

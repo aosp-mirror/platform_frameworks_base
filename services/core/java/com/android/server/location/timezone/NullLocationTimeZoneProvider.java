@@ -38,8 +38,8 @@ import java.time.Duration;
  * enters a {@link ProviderState#PROVIDER_STATE_PERM_FAILED} state immediately after being enabled
  * for the first time and sends the appropriate event, which ensures the {@link
  * LocationTimeZoneProviderController} won't expect any further {@link
- * android.location.timezone.LocationTimeZoneEvent}s to come from it, and won't attempt to use it
- * again.
+ * com.android.internal.location.timezone.LocationTimeZoneEvent}s to come from it, and won't attempt
+ * to use it again.
  */
 class NullLocationTimeZoneProvider extends LocationTimeZoneProvider {
 
