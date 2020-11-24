@@ -21,6 +21,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
+import android.security.keystore.AndroidKeyStoreProvider;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -36,15 +37,15 @@ import java.util.concurrent.Executor;
  * compromised. Implementing confirmation prompts with these guarantees requires dedicated
  * hardware-support and may not always be available.
  *
- * <p>Confirmation prompts are typically used with an external entitity - the <i>Relying Party</i> -
+ * <p>Confirmation prompts are typically used with an external entity - the <i>Relying Party</i> -
  * in the following way. The setup steps are as follows:
  * <ul>
  * <li> Before first use, the application generates a key-pair with the
  * {@link android.security.keystore.KeyGenParameterSpec.Builder#setUserConfirmationRequired
- * CONFIRMATION tag} set. Device attestation,
- * e.g. {@link java.security.KeyStore#getCertificateChain getCertificateChain()}, is used to
- * generate a certificate chain that includes the public key (<code>Kpub</code> in the following)
- * of the newly generated key.
+ * CONFIRMATION tag} set. AndroidKeyStore key attestation, e.g.,
+ * {@link android.security.keystore.KeyGenParameterSpec.Builder#setAttestationChallenge(byte[])}
+ * is used to generate a certificate chain that includes the public key (<code>Kpub</code> in the
+ * following) of the newly generated key.
  * <li> The application sends <code>Kpub</code> and the certificate chain resulting from device
  * attestation to the <i>Relying Party</i>.
  * <li> The <i>Relying Party</i> validates the certificate chain which involves checking the root
@@ -78,9 +79,10 @@ import java.util.concurrent.Executor;
  * previously created nonce. If all checks passes, the transaction is executed.
  * </ul>
  *
- * <p>A common way of implementing the "<code>promptText</code> is what is expected" check in the
- * last bullet, is to have the <i>Relying Party</i> generate <code>promptText</code> and store it
- * along the nonce in the <code>extraData</code> blob.
+ * <p>Note: It is vital to check the <code>promptText</code> because this is the only part that
+ * the user has approved. To avoid writing parsers for all of the possible locales, it is
+ * recommended that the <i>Relying Party</i> uses the same string generator as used on the device
+ * and performs a simple string comparison.
  */
 public class ConfirmationPrompt {
     private static final String TAG = "ConfirmationPrompt";
@@ -92,6 +94,14 @@ public class ConfirmationPrompt {
     private Context mContext;
 
     private final KeyStore mKeyStore = KeyStore.getInstance();
+    private AndroidProtectedConfirmation mProtectedConfirmation;
+
+    private AndroidProtectedConfirmation getService() {
+        if (mProtectedConfirmation == null) {
+            mProtectedConfirmation = new AndroidProtectedConfirmation();
+        }
+        return mProtectedConfirmation;
+    }
 
     private void doCallback(int responseCode, byte[] dataThatWasConfirmed,
             ConfirmationCallback callback) {
@@ -119,6 +129,32 @@ public class ConfirmationPrompt {
         }
     }
 
+    private void doCallback2(int responseCode, byte[] dataThatWasConfirmed,
+            ConfirmationCallback callback) {
+        switch (responseCode) {
+            case AndroidProtectedConfirmation.ERROR_OK:
+                callback.onConfirmed(dataThatWasConfirmed);
+                break;
+
+            case AndroidProtectedConfirmation.ERROR_CANCELED:
+                callback.onDismissed();
+                break;
+
+            case AndroidProtectedConfirmation.ERROR_ABORTED:
+                callback.onCanceled();
+                break;
+
+            case AndroidProtectedConfirmation.ERROR_SYSTEM_ERROR:
+                callback.onError(new Exception("System error returned by ConfirmationUI."));
+                break;
+
+            default:
+                callback.onError(new Exception("Unexpected responseCode=" + responseCode
+                        + " from onConfirmtionPromptCompleted() callback."));
+                break;
+        }
+    }
+
     private final android.os.IBinder mCallbackBinder =
             new android.security.IConfirmationPromptCallback.Stub() {
                 @Override
@@ -139,6 +175,29 @@ public class ConfirmationPrompt {
                                         doCallback(responseCode, dataThatWasConfirmed, callback);
                                     }
                                 });
+                        }
+                    }
+                }
+            };
+
+    private final android.security.apc.IConfirmationCallback mConfirmationCallback =
+            new android.security.apc.IConfirmationCallback.Stub() {
+                @Override
+                public void onCompleted(int result, byte[] dataThatWasConfirmed)
+                        throws android.os.RemoteException {
+                    if (mCallback != null) {
+                        ConfirmationCallback callback = mCallback;
+                        Executor executor = mExecutor;
+                        mCallback = null;
+                        mExecutor = null;
+                        if (executor == null) {
+                            doCallback2(result, dataThatWasConfirmed, callback);
+                        } else {
+                            executor.execute(new Runnable() {
+                                @Override public void run() {
+                                    doCallback2(result, dataThatWasConfirmed, callback);
+                                }
+                            });
                         }
                     }
                 }
@@ -211,6 +270,9 @@ public class ConfirmationPrompt {
     private static final int UI_OPTION_ACCESSIBILITY_MAGNIFIED_FLAG = 1 << 1;
 
     private int getUiOptionsAsFlags() {
+        if (AndroidKeyStoreProvider.isKeystore2Enabled()) {
+            return getUiOptionsAsFlags2();
+        }
         int uiOptionsAsFlags = 0;
         ContentResolver contentResolver = mContext.getContentResolver();
         int inversionEnabled = Settings.Secure.getInt(contentResolver,
@@ -222,6 +284,22 @@ public class ConfirmationPrompt {
                 Settings.System.FONT_SCALE, (float) 1.0);
         if (fontScale > 1.0) {
             uiOptionsAsFlags |= UI_OPTION_ACCESSIBILITY_MAGNIFIED_FLAG;
+        }
+        return uiOptionsAsFlags;
+    }
+
+    private int getUiOptionsAsFlags2() {
+        int uiOptionsAsFlags = 0;
+        ContentResolver contentResolver = mContext.getContentResolver();
+        int inversionEnabled = Settings.Secure.getInt(contentResolver,
+                Settings.Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED, 0);
+        if (inversionEnabled == 1) {
+            uiOptionsAsFlags |= AndroidProtectedConfirmation.FLAG_UI_OPTION_INVERTED;
+        }
+        float fontScale = Settings.System.getFloat(contentResolver,
+                Settings.System.FONT_SCALE, (float) 1.0);
+        if (fontScale > 1.0) {
+            uiOptionsAsFlags |= AndroidProtectedConfirmation.FLAG_UI_OPTION_MAGNIFIED;
         }
         return uiOptionsAsFlags;
     }
@@ -270,29 +348,53 @@ public class ConfirmationPrompt {
         mCallback = callback;
         mExecutor = executor;
 
-        int uiOptionsAsFlags = getUiOptionsAsFlags();
         String locale = Locale.getDefault().toLanguageTag();
-        int responseCode = mKeyStore.presentConfirmationPrompt(
-                mCallbackBinder, mPromptText.toString(), mExtraData, locale, uiOptionsAsFlags);
-        switch (responseCode) {
-            case KeyStore.CONFIRMATIONUI_OK:
-                return;
+        if (AndroidKeyStoreProvider.isKeystore2Enabled()) {
+            int uiOptionsAsFlags = getUiOptionsAsFlags2();
+            int responseCode = getService().presentConfirmationPrompt(
+                    mConfirmationCallback, mPromptText.toString(), mExtraData, locale,
+                    uiOptionsAsFlags);
+            switch (responseCode) {
+                case AndroidProtectedConfirmation.ERROR_OK:
+                    return;
 
-            case KeyStore.CONFIRMATIONUI_OPERATION_PENDING:
-                throw new ConfirmationAlreadyPresentingException();
+                case AndroidProtectedConfirmation.ERROR_OPERATION_PENDING:
+                    throw new ConfirmationAlreadyPresentingException();
 
-            case KeyStore.CONFIRMATIONUI_UNIMPLEMENTED:
-                throw new ConfirmationNotAvailableException();
+                case AndroidProtectedConfirmation.ERROR_UNIMPLEMENTED:
+                    throw new ConfirmationNotAvailableException();
 
-            case KeyStore.CONFIRMATIONUI_UIERROR:
-                throw new IllegalArgumentException();
+                default:
+                    // Unexpected error code.
+                    Log.w(TAG,
+                            "Unexpected responseCode=" + responseCode
+                                    + " from presentConfirmationPrompt() call.");
+                    throw new IllegalArgumentException();
+            }
+        } else {
+            int uiOptionsAsFlags = getUiOptionsAsFlags();
+            int responseCode = mKeyStore.presentConfirmationPrompt(
+                    mCallbackBinder, mPromptText.toString(), mExtraData, locale, uiOptionsAsFlags);
+            switch (responseCode) {
+                case KeyStore.CONFIRMATIONUI_OK:
+                    return;
 
-            default:
-                // Unexpected error code.
-                Log.w(TAG,
-                        "Unexpected responseCode=" + responseCode
-                        + " from presentConfirmationPrompt() call.");
-                throw new IllegalArgumentException();
+                case KeyStore.CONFIRMATIONUI_OPERATION_PENDING:
+                    throw new ConfirmationAlreadyPresentingException();
+
+                case KeyStore.CONFIRMATIONUI_UNIMPLEMENTED:
+                    throw new ConfirmationNotAvailableException();
+
+                case KeyStore.CONFIRMATIONUI_UIERROR:
+                    throw new IllegalArgumentException();
+
+                default:
+                    // Unexpected error code.
+                    Log.w(TAG,
+                            "Unexpected responseCode=" + responseCode
+                                    + " from presentConfirmationPrompt() call.");
+                    throw new IllegalArgumentException();
+            }
         }
     }
 
@@ -306,17 +408,33 @@ public class ConfirmationPrompt {
      * @throws IllegalStateException if no prompt is currently being presented.
      */
     public void cancelPrompt() {
-        int responseCode = mKeyStore.cancelConfirmationPrompt(mCallbackBinder);
-        if (responseCode == KeyStore.CONFIRMATIONUI_OK) {
-            return;
-        } else if (responseCode == KeyStore.CONFIRMATIONUI_OPERATION_PENDING) {
-            throw new IllegalStateException();
+        if (AndroidKeyStoreProvider.isKeystore2Enabled()) {
+            int responseCode =
+                    getService().cancelConfirmationPrompt(mConfirmationCallback);
+            if (responseCode == AndroidProtectedConfirmation.ERROR_OK) {
+                return;
+            } else if (responseCode == AndroidProtectedConfirmation.ERROR_OPERATION_PENDING) {
+                throw new IllegalStateException();
+            } else {
+                // Unexpected error code.
+                Log.w(TAG,
+                        "Unexpected responseCode=" + responseCode
+                                + " from cancelConfirmationPrompt() call.");
+                throw new IllegalStateException();
+            }
         } else {
-            // Unexpected error code.
-            Log.w(TAG,
-                    "Unexpected responseCode=" + responseCode
-                    + " from cancelConfirmationPrompt() call.");
-            throw new IllegalStateException();
+            int responseCode = mKeyStore.cancelConfirmationPrompt(mCallbackBinder);
+            if (responseCode == KeyStore.CONFIRMATIONUI_OK) {
+                return;
+            } else if (responseCode == KeyStore.CONFIRMATIONUI_OPERATION_PENDING) {
+                throw new IllegalStateException();
+            } else {
+                // Unexpected error code.
+                Log.w(TAG,
+                        "Unexpected responseCode=" + responseCode
+                                + " from cancelConfirmationPrompt() call.");
+                throw new IllegalStateException();
+            }
         }
     }
 
@@ -329,6 +447,9 @@ public class ConfirmationPrompt {
     public static boolean isSupported(Context context) {
         if (isAccessibilityServiceRunning(context)) {
             return false;
+        }
+        if (AndroidKeyStoreProvider.isKeystore2Enabled()) {
+            return new AndroidProtectedConfirmation().isConfirmationPromptSupported();
         }
         return KeyStore.getInstance().isConfirmationPromptSupported();
     }

@@ -480,6 +480,7 @@ java_library {
         "android.hardware.vibrator-V1.1-java",
         "android.hardware.vibrator-V1.2-java",
         "android.hardware.vibrator-V1.3-java",
+        "android.security.apc-java",
         "android.system.keystore2-java",
         "android.system.suspend.control.internal-java",
         "devicepolicyprotosnano",
