@@ -112,7 +112,7 @@
     <string name="bluetooth_opp_profile_summary_use_for" msgid="461981154387015457">"Använd för filöverföring"</string>
     <string name="bluetooth_hid_profile_summary_use_for" msgid="4289460627406490952">"Använd för inmatning"</string>
     <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="7689393730163320483">"Använd med hörapparater"</string>
-    <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"Parkoppling"</string>
+    <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"Parkoppla"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="2734383073450506220">"PARKOPPLA"</string>
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Avbryt"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"Om du kopplar enheten får du tillgång till dina kontakter och din samtalshistorik när du är ansluten."</string>
@@ -446,12 +446,13 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"<xliff:g id="TIME">%1$s</xliff:g> kvar till full laddning"</string>
     <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> till full laddning"</string>
+    <string name="power_charging_limited" msgid="5902301801611726210">"<xliff:g id="LEVEL">%1$s</xliff:g> – batteriet är tillfälligt begränsat"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Okänd"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Laddar"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Laddas snabbt"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"Laddas långsamt"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Laddar inte"</string>
-    <string name="battery_info_status_not_charging" msgid="8330015078868707899">"Inkopplad, kan inte laddas just nu"</string>
+    <string name="battery_info_status_not_charging" msgid="8330015078868707899">"Ansluten, kan inte laddas just nu"</string>
     <string name="battery_info_status_full" msgid="4443168946046847468">"Fullt"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Strys av administratören"</string>
     <string name="disabled" msgid="8017887509554714950">"Inaktiverad"</string>
