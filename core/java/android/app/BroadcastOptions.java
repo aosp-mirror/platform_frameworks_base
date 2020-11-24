@@ -90,7 +90,9 @@ public class BroadcastOptions {
      * power allowlist when this broadcast is being delivered to it.
      * @param duration The duration in milliseconds; 0 means to not place on allowlist.
      */
-    @RequiresPermission(android.Manifest.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST)
+    @RequiresPermission(anyOf = {android.Manifest.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST,
+            android.Manifest.permission.START_ACTIVITIES_FROM_BACKGROUND,
+            android.Manifest.permission.START_FOREGROUND_SERVICES_FROM_BACKGROUND})
     public void setTemporaryAppWhitelistDuration(long duration) {
         mTemporaryAppWhitelistDuration = duration;
     }
