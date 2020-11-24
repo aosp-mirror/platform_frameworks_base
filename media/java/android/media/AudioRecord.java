@@ -165,6 +165,7 @@ public class AudioRecord implements AudioRouting, MicrophoneDirection,
     //--------------------
     /**
      * Accessed by native methods: provides access to C++ AudioRecord object
+     * Is 0 after release()
      */
     @SuppressWarnings("unused")
     @UnsupportedAppUsage
@@ -1863,7 +1864,11 @@ public class AudioRecord implements AudioRouting, MicrophoneDirection,
         if (mNativeRecorderInJavaObj == 0) {
             return 0;
         }
-        return native_getPortId();
+        try {
+            return native_getPortId();
+        } catch (IllegalStateException e) {
+            return 0;
+        }
     }
 
     //--------------------------------------------------------------------------
@@ -2046,6 +2051,9 @@ public class AudioRecord implements AudioRouting, MicrophoneDirection,
     private native final int native_get_active_microphones(
             ArrayList<MicrophoneInfo> activeMicrophones);
 
+    /**
+     * @throws IllegalStateException
+     */
     private native int native_getPortId();
 
     private native int native_set_preferred_microphone_direction(int direction);
