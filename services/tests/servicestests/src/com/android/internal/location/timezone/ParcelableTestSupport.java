@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.location.timezone;
+package com.android.internal.location.timezone;
 
 import static org.junit.Assert.assertEquals;
 
@@ -24,7 +24,7 @@ import android.os.Parcelable;
 import java.lang.reflect.Field;
 
 /** Utility methods related to {@link Parcelable} objects used in several tests. */
-public final class ParcelableTestSupport {
+final class ParcelableTestSupport {
 
     private ParcelableTestSupport() {}
 

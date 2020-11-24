@@ -16,7 +16,7 @@
 
 package com.android.internal.location.timezone;
 
-import static android.location.timezone.ParcelableTestSupport.assertRoundTripParcelable;
+import static com.android.internal.location.timezone.ParcelableTestSupport.assertRoundTripParcelable;
 
 import org.junit.Test;
 

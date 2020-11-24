@@ -42,7 +42,7 @@ import java.util.Objects;
  * A service class that acts as a container for the {@link LocationTimeZoneProviderController},
  * which determines what {@link com.android.server.timezonedetector.GeolocationTimeZoneSuggestion}
  * are made to the {@link TimeZoneDetectorInternal}, and the {@link LocationTimeZoneProvider}s that
- * offer {@link android.location.timezone.LocationTimeZoneEvent}s.
+ * (indirectly) generate {@link com.android.internal.location.timezone.LocationTimeZoneEvent}s.
  *
  * <p>For details of the time zone suggestion behavior, see {@link
  * LocationTimeZoneProviderController}.
