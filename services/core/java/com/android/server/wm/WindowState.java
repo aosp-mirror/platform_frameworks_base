@@ -2103,7 +2103,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return getDisplayContent().getBounds().equals(getBounds());
     }
 
-    private boolean matchesRootDisplayAreaBounds() {
+    boolean matchesRootDisplayAreaBounds() {
         RootDisplayArea root = getRootDisplayArea();
         if (root == null || root == getDisplayContent()) {
             return matchesDisplayBounds();
