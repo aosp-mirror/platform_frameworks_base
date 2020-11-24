@@ -20,7 +20,7 @@
 
 #include <map>
 
-#include "frameworks/proto_logging/stats/atoms.pb.h"
+#include "frameworks/base/cmds/statsd/src/atoms.pb.h"
 
 namespace android {
 namespace stats_log_api_gen {

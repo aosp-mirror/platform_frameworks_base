@@ -16,8 +16,8 @@
 
 syntax = "proto2";
 
-import "frameworks/proto_logging/stats/atoms.proto";
-import "frameworks/proto_logging/stats/atom_field_options.proto";
+import "frameworks/base/cmds/statsd/src/atoms.proto";
+import "frameworks/base/cmds/statsd/src/atom_field_options.proto";
 
 package android.stats_log_api_gen;
 
