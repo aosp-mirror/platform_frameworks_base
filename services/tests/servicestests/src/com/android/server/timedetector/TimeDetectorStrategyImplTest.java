@@ -616,7 +616,7 @@ public class TimeDetectorStrategyImplTest {
      * A fake implementation of TimeDetectorStrategy.Callback. Besides tracking changes and behaving
      * like the real thing should, it also asserts preconditions.
      */
-    private static class FakeCallback implements TimeDetectorStrategy.Callback {
+    private static class FakeCallback implements TimeDetectorStrategyImpl.Callback {
         private boolean mAutoTimeDetectionEnabled;
         private boolean mWakeLockAcquired;
         private long mElapsedRealtimeMillis;
@@ -731,9 +731,7 @@ public class TimeDetectorStrategyImplTest {
 
         Script() {
             mFakeCallback = new FakeCallback();
-            mTimeDetectorStrategy = new TimeDetectorStrategyImpl();
-            mTimeDetectorStrategy.initialize(mFakeCallback);
-
+            mTimeDetectorStrategy = new TimeDetectorStrategyImpl(mFakeCallback);
         }
 
         Script pokeAutoTimeDetectionEnabled(boolean enabled) {
