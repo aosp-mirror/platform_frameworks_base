@@ -21,6 +21,7 @@ import static android.Manifest.permission.MANAGE_DEVICE_ADMINS;
 import static android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS;
 import static android.Manifest.permission.REQUEST_DELETE_PACKAGES;
 import static android.Manifest.permission.SET_HARMFUL_APP_WARNINGS;
+import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.AppOpsManager.MODE_DEFAULT;
 import static android.app.AppOpsManager.MODE_IGNORED;
 import static android.content.Intent.ACTION_MAIN;
@@ -43,6 +44,7 @@ import static android.content.pm.PackageManager.FLAG_PERMISSION_REVOKED_COMPAT;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_SYSTEM_FIXED;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_USER_FIXED;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_USER_SET;
+import static android.content.pm.PackageManager.FLAG_PERMISSION_WHITELIST_INSTALLER;
 import static android.content.pm.PackageManager.INSTALL_FAILED_ALREADY_EXISTS;
 import static android.content.pm.PackageManager.INSTALL_FAILED_BAD_PERMISSION_GROUP;
 import static android.content.pm.PackageManager.INSTALL_FAILED_DUPLICATE_PACKAGE;
@@ -2170,7 +2172,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
     private void handlePackagePostInstall(PackageInstalledInfo res, boolean grantPermissions,
             boolean killApp, boolean virtualPreload,
-            String[] grantedPermissions, List<String> allowlistedRestrictedPermissions,
+            String[] grantedPermissions, List<String> whitelistedRestrictedPermissions,
             int autoRevokePermissionsMode,
             boolean launchedForRestore, String installerPackage,
             IPackageInstallObserver2 installObserver, int dataLoaderType) {
@@ -2203,21 +2205,32 @@ public class PackageManagerService extends IPackageManager.Stub
                 res.removedInfo.sendPackageRemovedBroadcasts(killApp, false /*removedBySystem*/);
             }
 
-            final List<String> grantedPermissionsList;
+            // Allowlist any restricted permissions first as some may be runtime
+            // that the installer requested to be granted at install time.
+            if (whitelistedRestrictedPermissions != null
+                    && !whitelistedRestrictedPermissions.isEmpty()) {
+                mPermissionManager.setAllowlistedRestrictedPermissions(res.pkg,
+                        whitelistedRestrictedPermissions, FLAG_PERMISSION_WHITELIST_INSTALLER,
+                        res.newUsers);
+            }
+
+            if (autoRevokePermissionsMode == MODE_ALLOWED
+                    || autoRevokePermissionsMode == MODE_IGNORED) {
+                mPermissionManager.setAutoRevokeExempted(res.pkg,
+                        autoRevokePermissionsMode == MODE_IGNORED, res.newUsers);
+            }
+
+            // Now that we successfully installed the package, grant runtime
+            // permissions if requested before broadcasting the install. Also
+            // for legacy apps in permission review mode we clear the permission
+            // review flag which is used to emulate runtime permissions for
+            // legacy apps.
             if (grantPermissions) {
-                if (grantedPermissions != null) {
-                    grantedPermissionsList = Arrays.asList(grantedPermissions);
-                } else {
-                    grantedPermissionsList = res.pkg.getRequestedPermissions();
-                }
-            } else {
-                grantedPermissionsList = Collections.emptyList();
+                final int callingUid = Binder.getCallingUid();
+                mPermissionManager.grantRequestedRuntimePermissions(res.pkg,
+                        grantedPermissions != null ? Arrays.asList(grantedPermissions) : null,
+                        res.newUsers);
             }
-            if (allowlistedRestrictedPermissions == null) {
-                allowlistedRestrictedPermissions = Collections.emptyList();
-            }
-            mPermissionManager.onPackageInstalled(res.pkg, grantedPermissionsList,
-                    allowlistedRestrictedPermissions, autoRevokePermissionsMode, res.newUsers);
 
             final String installerPackageName =
                     res.installerPackageName != null
@@ -13668,8 +13681,9 @@ public class PackageManagerService extends IPackageManager.Stub
                             != 0) {
                         whiteListedPermissions = pkgSetting.pkg.getRequestedPermissions();
                     }
-                    mPermissionManager.onPackageInstalled(pkgSetting.pkg, Collections.emptyList(),
-                            whiteListedPermissions, MODE_DEFAULT, new int[] { userId });
+                    mPermissionManager.setAllowlistedRestrictedPermissions(pkgSetting.pkg,
+                            whiteListedPermissions, FLAG_PERMISSION_WHITELIST_INSTALLER,
+                            new int[] { userId });
                 }
 
                 if (pkgSetting.pkg != null) {
