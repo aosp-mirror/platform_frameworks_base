@@ -41787,6 +41787,7 @@ package android.telephony {
     method @NonNull public android.telephony.SmsManager createForSubscriptionId(int);
     method public java.util.ArrayList<java.lang.String> divideMessage(String);
     method public void downloadMultimediaMessage(android.content.Context, String, android.net.Uri, android.os.Bundle, android.app.PendingIntent);
+    method public void downloadMultimediaMessage(@NonNull android.content.Context, @NonNull String, @NonNull android.net.Uri, @Nullable android.os.Bundle, @Nullable android.app.PendingIntent, long);
     method @NonNull public android.os.Bundle getCarrierConfigValues();
     method @Deprecated public static android.telephony.SmsManager getDefault();
     method public static int getDefaultSmsSubscriptionId();
@@ -41798,6 +41799,7 @@ package android.telephony {
     method public void injectSmsPdu(byte[], String, android.app.PendingIntent);
     method public void sendDataMessage(String, String, short, byte[], android.app.PendingIntent, android.app.PendingIntent);
     method public void sendMultimediaMessage(android.content.Context, android.net.Uri, String, android.os.Bundle, android.app.PendingIntent);
+    method public void sendMultimediaMessage(@NonNull android.content.Context, @NonNull android.net.Uri, @Nullable String, @Nullable android.os.Bundle, @Nullable android.app.PendingIntent, long);
     method public void sendMultipartTextMessage(String, String, java.util.ArrayList<java.lang.String>, java.util.ArrayList<android.app.PendingIntent>, java.util.ArrayList<android.app.PendingIntent>);
     method public void sendMultipartTextMessage(@NonNull String, @Nullable String, @NonNull java.util.List<java.lang.String>, @Nullable java.util.List<android.app.PendingIntent>, @Nullable java.util.List<android.app.PendingIntent>, long);
     method public void sendMultipartTextMessage(@NonNull String, @Nullable String, @NonNull java.util.List<java.lang.String>, @Nullable java.util.List<android.app.PendingIntent>, @Nullable java.util.List<android.app.PendingIntent>, @NonNull String, @Nullable String);
