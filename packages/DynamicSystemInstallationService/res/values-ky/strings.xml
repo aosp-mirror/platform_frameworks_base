@@ -5,7 +5,7 @@
     <string name="notification_install_completed" msgid="6252047868415172643">"Динамикалык система даяр. Аны колдонуу үчүн, түзмөктү өчүрүп күйгүзүңүз."</string>
     <string name="notification_install_inprogress" msgid="7383334330065065017">"Орнотулууда"</string>
     <string name="notification_install_failed" msgid="4066039210317521404">"Орнотулбай койду"</string>
-    <string name="notification_image_validation_failed" msgid="2720357826403917016">"Сүрөт текшерилбей калды. Орнотууну токтотуңуз."</string>
+    <string name="notification_image_validation_failed" msgid="2720357826403917016">"Дисктин сүрөтү текшерилбей калды. Орнотууну токтотуңуз."</string>
     <string name="notification_dynsystem_in_use" msgid="1053194595682188396">"Учурда динамикалык система колдонулууда. Android\'дин түпнуска версиясын колдонуу үчүн, өчүрүп күйгүзүңүз."</string>
     <string name="notification_action_cancel" msgid="5929299408545961077">"Жок"</string>
     <string name="notification_action_discard" msgid="1817481003134947493">"Жоюу"</string>

@@ -1221,7 +1221,7 @@
     <string name="volume_music_hint_silent_ringtone_selected" msgid="1514829655029062233">"ಶಾಂತ ರಿಂಗ್‌ಟೋನ್ ಹೊಂದಿಸಲಾಗಿದೆ"</string>
     <string name="volume_call" msgid="7625321655265747433">"ಒಳ-ಕರೆಯ ವಾಲ್ಯೂಮ್"</string>
     <string name="volume_bluetooth_call" msgid="2930204618610115061">"ಬ್ಲೂಟೂತ್‌‌ ಒಳ-ಕರೆಯ ವಾಲ್ಯೂಮ್"</string>
-    <string name="volume_alarm" msgid="4486241060751798448">"ಅಲಾರಮ್ ವಾಲ್ಯೂಮ್"</string>
+    <string name="volume_alarm" msgid="4486241060751798448">"ಅಲಾರಂ ವಾಲ್ಯೂಮ್"</string>
     <string name="volume_notification" msgid="6864412249031660057">"ಅಧಿಸೂಚನೆಯ ವಾಲ್ಯೂಮ್"</string>
     <string name="volume_unknown" msgid="4041914008166576293">"ವಾಲ್ಯೂಮ್"</string>
     <string name="volume_icon_description_bluetooth" msgid="7540388479345558400">"ಬ್ಲೂಟೂತ್‌‌ ವಾಲ್ಯೂಮ್"</string>
