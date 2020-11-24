@@ -194,7 +194,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
 
     @Override
     public MeasuredEnergyArray getEnergyConsumptionData() {
-        final EnergyConsumerResult[] results = mPowerStatsHALWrapper.getEnergyConsumed();
+        final EnergyConsumerResult[] results = mPowerStatsHALWrapper.getEnergyConsumed(new int[0]);
         if (results == null) return null;
         final int size = results.length;
         final int[] subsystems = new int[size];
