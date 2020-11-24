@@ -19,6 +19,7 @@ package android.graphics.fonts;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.graphics.FontListParser;
+import android.graphics.Typeface;
 import android.text.FontConfig;
 import android.util.ArrayMap;
 import android.util.Log;
@@ -68,19 +69,50 @@ public final class SystemFonts {
                 return sAvailableFonts;
             }
 
-            Set<Font> set = new HashSet<>();
+            if (Typeface.ENABLE_LAZY_TYPEFACE_INITIALIZATION) {
+                sAvailableFonts = collectAllFonts();
+            } else {
+                Set<Font> set = new HashSet<>();
+                for (FontFamily[] items : sFamilyMap.values()) {
+                    for (FontFamily family : items) {
+                        for (int i = 0; i < family.getSize(); ++i) {
+                            set.add(family.getFont(i));
+                        }
+                    }
+                }
 
-            for (FontFamily[] items : sFamilyMap.values()) {
-                for (FontFamily family : items) {
-                    for (int i = 0; i < family.getSize(); ++i) {
-                        set.add(family.getFont(i));
+                sAvailableFonts = Collections.unmodifiableSet(set);
+            }
+            return sAvailableFonts;
+        }
+    }
+
+    private static @NonNull Set<Font> collectAllFonts() {
+        Map<String, Typeface> map = Typeface.getSystemFontMap();
+        HashSet<NativeFont.Font> seenFonts = new HashSet<>();
+        HashSet<Font> result = new HashSet<>();
+        for (Typeface typeface : map.values()) {
+            List<NativeFont.Family> families = NativeFont.readTypeface(typeface);
+            for (NativeFont.Family family : families) {
+                for (NativeFont.Font font : family.getFonts()) {
+                    if (seenFonts.contains(font)) {
+                        continue;
+                    }
+                    seenFonts.add(font);
+                    try {
+                        result.add(new Font.Builder(font.getFile(), family.getLocale())
+                                .setFontVariationSettings(font.getAxes())
+                                .setTtcIndex(font.getIndex())
+                                .setWeight(font.getStyle().getWeight())
+                                .setSlant(font.getStyle().getSlant())
+                                .build());
+                    } catch (IOException e) {
+                        Log.w(TAG, "Failed to load " + font.getFile(), e);
                     }
                 }
             }
-
-            sAvailableFonts = Collections.unmodifiableSet(set);
-            return sAvailableFonts;
         }
+        return result;
     }
 
     private static @Nullable ByteBuffer mmap(@NonNull String fullPath) {
