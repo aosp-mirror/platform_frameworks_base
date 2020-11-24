@@ -16764,6 +16764,12 @@ public final class Settings {
              */
             public static final String WEAR_ACTIVITY_AUTO_RESUME_TIMEOUT_MS =
                     "wear_activity_auto_resume_timeout_ms";
+
+            /**
+             * If burn in protection is enabled.
+             * @hide
+             */
+            public static final String BURN_IN_PROTECTION_ENABLED = "burn_in_protection";
         }
     }
 

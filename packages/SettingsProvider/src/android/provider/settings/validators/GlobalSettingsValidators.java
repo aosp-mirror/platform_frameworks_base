@@ -310,6 +310,7 @@ public class GlobalSettingsValidators {
         VALIDATORS.put(
                 Global.Wearable.WEAR_ACTIVITY_AUTO_RESUME_TIMEOUT_MS,
                 NON_NEGATIVE_INTEGER_VALIDATOR);
+        VALIDATORS.put(Global.Wearable.BURN_IN_PROTECTION_ENABLED, BOOLEAN_VALIDATOR);
     }
 }
 

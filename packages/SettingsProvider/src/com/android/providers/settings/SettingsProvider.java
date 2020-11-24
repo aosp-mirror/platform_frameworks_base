@@ -5380,6 +5380,20 @@ public class SettingsProvider extends ContentProvider {
                         initGlobalSettingsDefaultValForWearLocked(
                                 Settings.Global.Wearable.COMPANION_OS_VERSION,
                                 Settings.Global.Wearable.COMPANION_OS_VERSION_UNDEFINED);
+                        final boolean defaultBurnInProtectionEnabled =
+                                getContext()
+                                        .getResources()
+                                        .getBoolean(
+                                                com.android
+                                                        .internal
+                                                        .R
+                                                        .bool
+                                                        .config_enableBurnInProtection);
+                        final boolean forceBurnInProtection =
+                                SystemProperties.getBoolean("persist.debug.force_burn_in", false);
+                        initGlobalSettingsDefaultValForWearLocked(
+                                Settings.Global.Wearable.BURN_IN_PROTECTION_ENABLED,
+                                defaultBurnInProtectionEnabled || forceBurnInProtection);
 
                         // TODO(b/164398026): add necessary initialization logic for all entries.
                         currentVersion = 204;
