@@ -366,7 +366,9 @@ final class LogicalDisplay {
             mBaseDisplayInfo.displayCutout = maskCutout ? null : deviceInfo.displayCutout;
             mBaseDisplayInfo.displayId = mDisplayId;
             updateFrameRateOverrides(deviceInfo);
-
+            mBaseDisplayInfo.brightnessMinimum = deviceInfo.brightnessMinimum;
+            mBaseDisplayInfo.brightnessMaximum = deviceInfo.brightnessMaximum;
+            mBaseDisplayInfo.brightnessDefault = deviceInfo.brightnessDefault;
             mPrimaryDisplayDeviceInfo = deviceInfo;
             mInfo.set(null);
         }

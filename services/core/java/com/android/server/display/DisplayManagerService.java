@@ -288,9 +288,6 @@ public final class DisplayManagerService extends SystemService {
     @GuardedBy("mSyncRoot")
     private final SparseArray<Float> mDisplayBrightnesses = new SparseArray<>();
 
-    // The default brightness.
-    private final float mDisplayDefaultBrightness;
-
     // Set to true when there are pending display changes that have yet to be applied
     // to the surface flinger state.
     private boolean mPendingTraversal;
@@ -416,9 +413,6 @@ public final class DisplayManagerService extends SystemService {
         mMinimumBrightnessCurve = new Curve(lux, nits);
         mMinimumBrightnessSpline = Spline.createSpline(lux, nits);
 
-        PowerManager pm = mContext.getSystemService(PowerManager.class);
-        mDisplayDefaultBrightness = pm.getBrightnessConstraint(
-                PowerManager.BRIGHTNESS_CONSTRAINT_TYPE_DEFAULT);
         mCurrentUserId = UserHandle.USER_SYSTEM;
         ColorSpace[] colorSpaces = SurfaceControl.getCompositionColorSpaces();
         mWideColorSpace = colorSpaces[1];
@@ -1108,7 +1102,7 @@ public final class DisplayManagerService extends SystemService {
         }
         addDisplayPowerControllerLocked(displayId);
         mDisplayStates.append(displayId, Display.STATE_OFF);
-        mDisplayBrightnesses.append(displayId, mDisplayDefaultBrightness);
+        mDisplayBrightnesses.append(displayId, display.getDisplayInfoLocked().brightnessDefault);
 
         DisplayManagerGlobal.invalidateLocalDisplayInfoCaches();
 
@@ -1876,7 +1870,7 @@ public final class DisplayManagerService extends SystemService {
         }
         final DisplayPowerController displayPowerController = new DisplayPowerController(
                 mContext, mDisplayPowerCallbacks, mPowerHandler, mSensorManager,
-                mDisplayBlanker, displayId);
+                mDisplayBlanker, mLogicalDisplayMapper.getLocked(displayId));
         mDisplayPowerControllers.append(displayId, displayPowerController);
     }
 

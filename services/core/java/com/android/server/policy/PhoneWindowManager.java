@@ -2698,8 +2698,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 float stepFloat = (maxFloat - minFloat) / BRIGHTNESS_STEPS * direction;
                 float brightnessFloat = Settings.System.getFloatForUser(
                         mContext.getContentResolver(), Settings.System.SCREEN_BRIGHTNESS_FLOAT,
-                        mPowerManager.getBrightnessConstraint(
-                                PowerManager.BRIGHTNESS_CONSTRAINT_TYPE_DEFAULT),
+                        mContext.getDisplay().getBrightnessDefault(),
                         UserHandle.USER_CURRENT_OR_SELF);
                 brightnessFloat += stepFloat;
                 // Make sure we don't go beyond the limits.
