@@ -327,8 +327,8 @@ public class SwipeHelper implements Gefingerpoken {
                     if (Math.abs(delta) > pagingTouchSlop
                             && Math.abs(delta) > Math.abs(deltaPerpendicular)) {
                         if (mCallback.canChildBeDragged(mTouchedView)) {
-                            mCallback.onBeginDrag(mTouchedView);
                             mIsSwiping = true;
+                            mCallback.onBeginDrag(mTouchedView);
                             mInitialTouchPos = getPos(ev);
                             mTranslation = getTranslation(mTouchedView);
                         }
