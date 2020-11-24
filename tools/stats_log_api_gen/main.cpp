@@ -9,7 +9,7 @@
 #include <vector>
 
 #include "Collation.h"
-#include "frameworks/proto_logging/stats/atoms.pb.h"
+#include "frameworks/base/cmds/statsd/src/atoms.pb.h"
 #include "java_writer.h"
 #include "java_writer_q.h"
 #include "native_writer.h"

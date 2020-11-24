@@ -14,6 +14,34 @@
 // limitations under the License.
 //
 
+// ==========================================================
+// Build the library for use on the host
+// ==========================================================
+cc_library_host_shared {
+    name: "libstats_proto_host",
+    srcs: [
+        "src/atoms.proto",
+        "src/atom_field_options.proto",
+    ],
+
+    shared_libs: [
+        "libplatformprotos",
+    ],
+
+    proto: {
+        type: "full",
+        export_proto_headers: true,
+        include_dirs: [
+            "external/protobuf/src",
+        ],
+    },
+
+    export_shared_lib_headers: [
+        "libplatformprotos",
+    ]
+
+}
+
 cc_defaults {
     name: "statsd_defaults",
 
@@ -249,8 +277,9 @@ cc_test {
         // atom_field_options.proto needs field_options.proto, but that is
         // not included in libprotobuf-cpp-lite, so compile it here.
         ":libprotobuf-internal-protos",
-        ":libstats_internal_protos",
 
+        "src/atom_field_options.proto",
+        "src/atoms.proto",
         "src/shell/shell_data.proto",
         "src/stats_log.proto",
         "tests/AlarmMonitor_test.cpp",
@@ -317,10 +346,7 @@ cc_test {
 
     proto: {
         type: "lite",
-        include_dirs: [
-            "external/protobuf/src",
-            "frameworks/proto_logging/stats",
-        ],
+        include_dirs: ["external/protobuf/src"],
     },
 
 }
@@ -337,7 +363,6 @@ cc_benchmark {
         // atom_field_options.proto needs field_options.proto, but that is
         // not included in libprotobuf-cpp-lite, so compile it here.
         ":libprotobuf-internal-protos",
-        ":libstats_internal_protos",
 
         "benchmark/duration_metric_benchmark.cpp",
         "benchmark/filter_value_benchmark.cpp",
@@ -347,15 +372,14 @@ cc_benchmark {
         "benchmark/main.cpp",
         "benchmark/metric_util.cpp",
         "benchmark/stats_write_benchmark.cpp",
+        "src/atom_field_options.proto",
+        "src/atoms.proto",
         "src/stats_log.proto",
     ],
 
     proto: {
         type: "lite",
-        include_dirs: [
-            "external/protobuf/src",
-            "frameworks/proto_logging/stats",
-        ],
+        include_dirs: ["external/protobuf/src"],
     },
 
     cflags: [
@@ -387,14 +411,11 @@ java_library {
     sdk_version: "core_current",
     proto: {
         type: "lite",
-        include_dirs: [
-            "external/protobuf/src",
-            "frameworks/proto_logging/stats",
-        ],
+        include_dirs: ["external/protobuf/src"],
     },
 
     srcs: [
-        ":libstats_atoms_proto",
+        "src/atoms.proto",
         "src/shell/shell_config.proto",
         "src/shell/shell_data.proto",
         "src/stats_log.proto",
@@ -416,13 +437,10 @@ java_library {
     proto: {
         type: "nano",
         output_params: ["store_unknown_fields=true"],
-        include_dirs: [
-            "external/protobuf/src",
-            "frameworks/proto_logging/stats",
-        ],
+        include_dirs: ["external/protobuf/src"],
     },
     srcs: [
-        ":libstats_atoms_proto",
+        "src/atoms.proto",
         "src/shell/shell_config.proto",
         "src/shell/shell_data.proto",
         "src/stats_log.proto",

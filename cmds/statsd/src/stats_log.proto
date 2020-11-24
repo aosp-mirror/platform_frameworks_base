@@ -21,7 +21,7 @@ package android.os.statsd;
 option java_package = "com.android.os";
 option java_outer_classname = "StatsLog";
 
-import "frameworks/proto_logging/stats/atoms.proto";
+import "frameworks/base/cmds/statsd/src/atoms.proto";
 
 message DimensionsValue {
   optional int32 field = 1;
