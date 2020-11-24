@@ -2034,7 +2034,7 @@ public class PackageManagerService extends IPackageManager.Stub
                         Slog.e(TAG, "Failed to find package setting " + packageName);
                         return;
                     }
-                    pkg = ps.pkg;
+                    pkg = ps.getPkg();
                     sharedUser = ps.getSharedUser();
                     oldSeInfo = AndroidPackageUtils.getSeInfo(pkg, ps);
                 }
@@ -2479,7 +2479,7 @@ public class PackageManagerService extends IPackageManager.Stub
             if (isDeviceUpgrading()) {
                 mExistingPackages = new ArraySet<>(packageSettings.size());
                 for (PackageSetting ps : packageSettings.values()) {
-                    mExistingPackages.add(ps.name);
+                    mExistingPackages.add(ps.getPackageName());
                 }
             }
 
@@ -2634,7 +2634,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     synchronized (mLock) {
                         PackageSetting ps = mSettings.getPackageLPr(pkgName);
                         if (ps != null && ps.getInstalled(UserHandle.USER_SYSTEM)) {
-                            pkg = ps.pkg;
+                            pkg = ps.getPkg();
                         }
                     }
                     if (pkg != null) {
@@ -2659,9 +2659,9 @@ public class PackageManagerService extends IPackageManager.Stub
                 Slog.i(TAG, "Build fingerprint changed; clearing code caches");
                 for (int i = 0; i < packageSettings.size(); i++) {
                     final PackageSetting ps = packageSettings.valueAt(i);
-                    if (Objects.equals(StorageManager.UUID_PRIVATE_INTERNAL, ps.volumeUuid)) {
+                    if (Objects.equals(StorageManager.UUID_PRIVATE_INTERNAL, ps.getVolumeUuid())) {
                         // No apps are running this early, so no need to freeze
-                        clearAppDataLIF(ps.pkg, UserHandle.USER_ALL,
+                        clearAppDataLIF(ps.getPkg(), UserHandle.USER_ALL,
                                 FLAG_STORAGE_DE | FLAG_STORAGE_CE | FLAG_STORAGE_EXTERNAL
                                         | Installer.FLAG_CLEAR_CODE_CACHE_ONLY
                                         | Installer.FLAG_CLEAR_APP_DATA_KEEP_ART_PROFILES);
@@ -2744,7 +2744,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     if (ps == null || !ps.getInstantApp(userId) || !ps.getInstalled(userId)) {
                         continue;
                     }
-                    mInstantAppRegistry.addInstantAppLPw(userId, ps.appId);
+                    mInstantAppRegistry.addInstantAppLPw(userId, ps.getAppId());
                 }
             }
 
@@ -3284,7 +3284,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 return PACKAGE_STARTABILITY_FROZEN;
             }
 
-            if (!userKeyUnlocked && !AndroidPackageUtils.isEncryptionAware(ps.pkg)) {
+            if (!userKeyUnlocked && !AndroidPackageUtils.isEncryptionAware(ps.getPkg())) {
                 return PACKAGE_STARTABILITY_DIRECT_BOOT_UNSUPPORTED;
             }
         }
@@ -3394,14 +3394,14 @@ public class PackageManagerService extends IPackageManager.Stub
             for (int i=names.length-1; i>=0; i--) {
                 final PackageSetting ps = mSettings.getPackageLPr(names[i]);
                 boolean translateName = false;
-                if (ps != null && ps.realName != null) {
+                if (ps != null && ps.getRealName() != null) {
                     final boolean targetIsInstantApp = ps.getInstantApp(callingUserId);
                     translateName = !targetIsInstantApp
                             || canViewInstantApps
                             || mInstantAppRegistry.isInstantAccessGranted(callingUserId,
-                                    UserHandle.getAppId(callingUid), ps.appId);
+                                    UserHandle.getAppId(callingUid), ps.getAppId());
                 }
-                out[i] = translateName ? ps.realName : names[i];
+                out[i] = translateName ? ps.getRealName() : names[i];
             }
         }
         return out;
@@ -3428,7 +3428,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     translateName = !targetIsInstantApp
                             || canViewInstantApps
                             || mInstantAppRegistry.isInstantAccessGranted(callingUserId,
-                                    UserHandle.getAppId(callingUid), ps.appId);
+                                    UserHandle.getAppId(callingUid), ps.getAppId());
                 }
                 out[i] = translateName ? cur : names[i];
             }
@@ -3465,14 +3465,16 @@ public class PackageManagerService extends IPackageManager.Stub
                 final PackageSetting ps = getPackageSetting(p.getPackageName());
                 if (ps != null && ps.getInstalled(userId)
                         && !shouldFilterApplicationLocked(ps, callingUid, userId)) {
-                    return mPermissionManager.getGidsForUid(UserHandle.getUid(userId, ps.appId));
+                    return mPermissionManager.getGidsForUid(UserHandle.getUid(userId,
+                            ps.getAppId()));
                 }
             }
             if ((flags & MATCH_KNOWN_PACKAGES) != 0) {
                 final PackageSetting ps = mSettings.getPackageLPr(packageName);
                 if (ps != null && ps.isMatch(flags)
                         && !shouldFilterApplicationLocked(ps, callingUid, userId)) {
-                    return mPermissionManager.getGidsForUid(UserHandle.getUid(userId, ps.appId));
+                    return mPermissionManager.getGidsForUid(
+                            UserHandle.getUid(userId, ps.getAppId()));
                 }
             }
         }
@@ -3702,11 +3704,11 @@ public class PackageManagerService extends IPackageManager.Stub
                     final PackageSetting ps = mSettings.getPackageLPr(internalPackageName);
                     // Skip unused static shared libs cached less than the min period
                     // to prevent pruning a lib needed by a subsequently installed package.
-                    if (ps == null || now - ps.lastUpdateTime < maxCachePeriod) {
+                    if (ps == null || now - ps.getLastUpdateTime() < maxCachePeriod) {
                         continue;
                     }
 
-                    if (ps.pkg.isSystem()) {
+                    if (ps.getPkg().isSystem()) {
                         continue;
                     }
 
@@ -4056,21 +4058,23 @@ public class PackageManagerService extends IPackageManager.Stub
                     versionedPackages = new ArrayList<>();
                 }
                 // If the dependent is a static shared lib, use the public package name
-                String dependentPackageName = ps.name;
-                if (ps.pkg != null && ps.pkg.isStaticSharedLibrary()) {
-                    dependentPackageName = ps.pkg.getManifestPackageName();
+                String dependentPackageName = ps.getPackageName();
+                if (ps.getPkg() != null && ps.getPkg().isStaticSharedLibrary()) {
+                    dependentPackageName = ps.getPkg().getManifestPackageName();
                 }
-                versionedPackages.add(new VersionedPackage(dependentPackageName, ps.versionCode));
-            } else if (ps.pkg != null) {
-                if (ArrayUtils.contains(ps.pkg.getUsesLibraries(), libName)
-                        || ArrayUtils.contains(ps.pkg.getUsesOptionalLibraries(), libName)) {
+                versionedPackages.add(new VersionedPackage(dependentPackageName,
+                        ps.getLongVersionCode()));
+            } else if (ps.getPkg() != null) {
+                if (ArrayUtils.contains(ps.getPkg().getUsesLibraries(), libName)
+                        || ArrayUtils.contains(ps.getPkg().getUsesOptionalLibraries(), libName)) {
                     if (shouldFilterApplicationLocked(ps, callingUid, userId)) {
                         continue;
                     }
                     if (versionedPackages == null) {
                         versionedPackages = new ArrayList<>();
                     }
-                    versionedPackages.add(new VersionedPackage(ps.name, ps.versionCode));
+                    versionedPackages.add(new VersionedPackage(ps.getPackageName(),
+                            ps.getLongVersionCode()));
                 }
             }
         }
@@ -4208,12 +4212,12 @@ public class PackageManagerService extends IPackageManager.Stub
                 sequenceNumbers = new HashMap<>();
                 mChangedPackagesSequenceNumbers.put(userId, sequenceNumbers);
             }
-            final Integer sequenceNumber = sequenceNumbers.get(pkgSetting.name);
+            final Integer sequenceNumber = sequenceNumbers.get(pkgSetting.getPackageName());
             if (sequenceNumber != null) {
                 changedPackages.remove(sequenceNumber);
             }
-            changedPackages.put(mChangedPackagesSequenceNumber, pkgSetting.name);
-            sequenceNumbers.put(pkgSetting.name, mChangedPackagesSequenceNumber);
+            changedPackages.put(mChangedPackagesSequenceNumber, pkgSetting.getPackageName());
+            sequenceNumbers.put(pkgSetting.getPackageName(), mChangedPackagesSequenceNumber);
         }
         mChangedPackagesSequenceNumber++;
     }
@@ -4412,7 +4416,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     if (shouldFilterApplicationLocked(ps, callingUid, callingUserId)) {
                         return PackageManager.SIGNATURE_UNKNOWN_PACKAGE;
                     }
-                    p1SigningDetails = ps.signatures.mSigningDetails;
+                    p1SigningDetails = ps.getSigningDetails();
                 } else {
                     return PackageManager.SIGNATURE_UNKNOWN_PACKAGE;
                 }
@@ -4432,7 +4436,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     if (shouldFilterApplicationLocked(ps, callingUid, callingUserId)) {
                         return PackageManager.SIGNATURE_UNKNOWN_PACKAGE;
                     }
-                    p2SigningDetails = ps.signatures.mSigningDetails;
+                    p2SigningDetails = ps.getSigningDetails();
                 } else {
                     return PackageManager.SIGNATURE_UNKNOWN_PACKAGE;
                 }
@@ -4526,7 +4530,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     if (shouldFilterApplicationLocked(ps, callingUid, callingUserId)) {
                         return false;
                     }
-                    signingDetails = ps.signatures.mSigningDetails;
+                    signingDetails = ps.getSigningDetails();
                 } else {
                     return false;
                 }
@@ -4593,8 +4597,8 @@ public class PackageManagerService extends IPackageManager.Stub
                     final PackageSetting ps = getPackageSetting(pkg.getPackageName());
                     if (ps != null
                             && ps.getInstantApp(callingUserId)
-                            && !mInstantAppRegistry.isInstantAccessGranted(
-                                    callingUserId, UserHandle.getAppId(callingUid), ps.appId)) {
+                            && !mInstantAppRegistry.isInstantAccessGranted(callingUserId,
+                                    UserHandle.getAppId(callingUid), ps.getAppId())) {
                         continue;
                     }
                     result.add(pkg.getPackageName());
@@ -4650,7 +4654,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 if (shouldFilterApplicationLocked(ps, callingUid, callingUserId)) {
                     return null;
                 }
-                return ps.name;
+                return ps.getPackageName();
             }
             return null;
         }
@@ -4683,7 +4687,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     if (shouldFilterApplicationLocked(ps, callingUid, callingUserId)) {
                         names[i] = null;
                     } else {
-                        names[i] = ps.name;
+                        names[i] = ps.getPackageName();
                     }
                 } else {
                     names[i] = null;
@@ -5739,7 +5743,7 @@ public class PackageManagerService extends IPackageManager.Stub
         int numMatch = 0;
         for (int i=0; i<permissions.length; i++) {
             final String permission = permissions[i];
-            if (checkPermission(permission, ps.name, userId) == PERMISSION_GRANTED) {
+            if (checkPermission(permission, ps.getPackageName(), userId) == PERMISSION_GRANTED) {
                 tmp[i] = true;
                 numMatch++;
             } else {
@@ -5838,22 +5842,22 @@ public class PackageManagerService extends IPackageManager.Stub
                     if (ps.isSystem()) {
                         effectiveFlags |= PackageManager.MATCH_ANY_USER;
                     }
-                    if (ps.pkg != null) {
+                    if (ps.getPkg() != null) {
                         if (filterSharedLibPackageLPr(ps, callingUid, userId, flags)) {
                             continue;
                         }
                         if (shouldFilterApplicationLocked(ps, callingUid, userId)) {
                             continue;
                         }
-                        ai = PackageInfoUtils.generateApplicationInfo(ps.pkg, effectiveFlags,
+                        ai = PackageInfoUtils.generateApplicationInfo(ps.getPkg(), effectiveFlags,
                                 ps.readUserState(userId), userId, ps);
                         if (ai != null) {
-                            ai.packageName = resolveExternalPackageNameLPr(ps.pkg);
+                            ai.packageName = resolveExternalPackageNameLPr(ps.getPkg());
                         }
                     } else {
                         // Shared lib filtering done in generateApplicationInfoFromSettingsLPw
                         // and already converts to externally visible package name
-                        ai = generateApplicationInfoFromSettingsLPw(ps.name,
+                        ai = generateApplicationInfoFromSettingsLPw(ps.getPackageName(),
                                 effectiveFlags, callingUid, userId);
                     }
                     if (ai != null) {
@@ -6337,7 +6341,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
         List<AndroidPackage> pkgs = new ArrayList<>(pkgSettings.size());
         for (int index = 0; index < pkgSettings.size(); index++) {
-            pkgs.add(pkgSettings.get(index).pkg);
+            pkgs.add(pkgSettings.get(index).getPkg());
         }
 
         final long startTime = System.nanoTime();
@@ -6411,11 +6415,11 @@ public class PackageManagerService extends IPackageManager.Stub
                     // Handle compressed APKs in this path. Only do this for stubs with profiles to
                     // minimize the number off apps being speed-profile compiled during first boot.
                     // The other paths will not change the filter.
-                    if (disabledPs != null && disabledPs.pkg.isStub()) {
+                    if (disabledPs != null && disabledPs.getPkg().isStub()) {
                         // The package is the stub one, remove the stub suffix to get the normal
                         // package and APK names.
-                        String systemProfilePath =
-                                getPrebuildProfilePath(disabledPs.pkg).replace(STUB_SUFFIX, "");
+                        String systemProfilePath = getPrebuildProfilePath(disabledPs.getPkg())
+                                .replace(STUB_SUFFIX, "");
                         profileFile = new File(systemProfilePath);
                         // If we have a profile for a compressed APK, copy it to the reference
                         // location.
@@ -6843,7 +6847,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 for (SharedLibraryInfo info : deps) {
                     PackageSetting depPackageSetting =
                             mSettings.getPackageLPr(info.getPackageName());
-                    if (depPackageSetting != null && depPackageSetting.pkg != null) {
+                    if (depPackageSetting != null && depPackageSetting.getPkg() != null) {
                         retValue.add(depPackageSetting);
                     }
                 }
@@ -7175,7 +7179,7 @@ public class PackageManagerService extends IPackageManager.Stub
             Map<String, AndroidPackage> availablePackages)
             throws PackageManagerException {
         final ArrayList<SharedLibraryInfo> sharedLibraryInfos = collectSharedLibraryInfos(
-                pkgSetting.pkg, availablePackages, mSharedLibraries, null /* newLibraries */,
+                pkgSetting.getPkg(), availablePackages, mSharedLibraries, null /* newLibraries */,
                 mInjector.getCompatibility());
         executeSharedLibrariesUpdateLPr(pkg, pkgSetting, changingLib, changingLibSetting,
                 sharedLibraryInfos, mUserManager.getUserIds());
@@ -7479,10 +7483,10 @@ public class PackageManagerService extends IPackageManager.Stub
         final String realPkgName = request.mRealPkgName;
         final List<String> changedAbiCodePath = result.mChangedAbiCodePath;
         final PackageSetting pkgSetting;
-        if (request.mPkgSetting != null && request.mPkgSetting.sharedUser != null
-                && request.mPkgSetting.sharedUser != result.mPkgSetting.sharedUser) {
+        if (request.mPkgSetting != null && request.mPkgSetting.getSharedUser() != null
+                && request.mPkgSetting.getSharedUser() != result.mPkgSetting.getSharedUser()) {
             // shared user changed, remove from old shared user
-            request.mPkgSetting.sharedUser.removePackage(request.mPkgSetting);
+            request.mPkgSetting.getSharedUser().removePackage(request.mPkgSetting);
         }
         if (result.mExistingSettingCopied) {
             pkgSetting = request.mPkgSetting;
@@ -7492,18 +7496,18 @@ public class PackageManagerService extends IPackageManager.Stub
             if (originalPkgSetting != null) {
                 mSettings.addRenamedPackageLPw(
                         AndroidPackageUtils.getRealPackageOrNull(parsedPackage),
-                        originalPkgSetting.name);
-                mTransferredPackages.add(originalPkgSetting.name);
+                        originalPkgSetting.getPackageName());
+                mTransferredPackages.add(originalPkgSetting.getPackageName());
             } else {
                 mSettings.removeRenamedPackageLPw(parsedPackage.getPackageName());
             }
         }
-        if (pkgSetting.sharedUser != null) {
-            pkgSetting.sharedUser.addPackage(pkgSetting);
+        if (pkgSetting.getSharedUser() != null) {
+            pkgSetting.getSharedUser().addPackage(pkgSetting);
         }
         if (reconciledPkg.mInstallArgs != null
-                && reconciledPkg.mInstallArgs.mForceQueryableOverride) {
-            pkgSetting.forceQueryableOverride = true;
+                        && reconciledPkg.mInstallArgs.mForceQueryableOverride) {
+            pkgSetting.setForceQueryableOverride(true);
         }
 
         // If this is part of a standard install, set the initiating package name, else rely on
@@ -7515,7 +7519,7 @@ public class PackageManagerService extends IPackageManager.Stub
                         installSource.initiatingPackageName);
                 if (ips != null) {
                     installSource = installSource.setInitiatingPackageSignatures(
-                            ips.signatures);
+                            ips.getSignatures());
                 }
             }
             pkgSetting.setInstallSource(installSource);
@@ -7527,7 +7531,7 @@ public class PackageManagerService extends IPackageManager.Stub
         // We need to have this here because addUserToSettingLPw() is sometimes responsible
         // for creating the application ID. If we did this earlier, we would be saving the
         // correct ID.
-        parsedPackage.setUid(pkgSetting.appId);
+        parsedPackage.setUid(pkgSetting.getAppId());
         final AndroidPackage pkg = parsedPackage.hideAsFinal();
 
         mSettings.writeUserRestrictionsLPw(pkgSetting, oldPkgSetting);
@@ -7546,10 +7550,10 @@ public class PackageManagerService extends IPackageManager.Stub
             ksms.removeAppKeySetDataLPw(pkg.getPackageName());
         }
         if (reconciledPkg.mSharedUserSignaturesChanged) {
-            pkgSetting.sharedUser.signaturesChanged = Boolean.TRUE;
-            pkgSetting.sharedUser.signatures.mSigningDetails = reconciledPkg.mSigningDetails;
+            pkgSetting.getSharedUser().signaturesChanged = Boolean.TRUE;
+            pkgSetting.getSharedUser().signatures.mSigningDetails = reconciledPkg.mSigningDetails;
         }
-        pkgSetting.signatures.mSigningDetails = reconciledPkg.mSigningDetails;
+        pkgSetting.setSigningDetails(reconciledPkg.mSigningDetails);
 
         if (changedAbiCodePath != null && changedAbiCodePath.size() > 0) {
             for (int i = changedAbiCodePath.size() - 1; i >= 0; --i) {
@@ -7567,7 +7571,7 @@ public class PackageManagerService extends IPackageManager.Stub
         commitPackageSettings(pkg, oldPkg, pkgSetting, oldPkgSetting, scanFlags,
                 (parseFlags & ParsingPackageUtils.PARSE_CHATTY) != 0 /*chatty*/, reconciledPkg);
         if (pkgSetting.getInstantApp(userId)) {
-            mInstantAppRegistry.addInstantAppLPw(userId, pkgSetting.appId);
+            mInstantAppRegistry.addInstantAppLPw(userId, pkgSetting.getAppId());
         }
         pkgSetting.setStatesOnCommit();
 
@@ -7935,7 +7939,7 @@ public class PackageManagerService extends IPackageManager.Stub
         // Remove the parent package setting
         PackageSetting ps = getPackageSetting(pkg.getPackageName());
         if (ps != null) {
-            removePackageLI(ps.name, chatty);
+            removePackageLI(ps.getPackageName(), chatty);
         } else if (DEBUG_REMOVE && chatty) {
             Log.d(TAG, "Not removing package " + pkg.getPackageName() + "; mExtras == null");
         }
@@ -8158,7 +8162,7 @@ public class PackageManagerService extends IPackageManager.Stub
         final int[] userIds = isInstantApp ? EMPTY_INT_ARRAY : new int[] { userId };
         final int[] instantUserIds = isInstantApp ? new int[] { userId } : EMPTY_INT_ARRAY;
         sendPackageAddedForNewUsers(packageName, isSystem /*sendBootCompleted*/,
-                false /*startReceiver*/, pkgSetting.appId, userIds, instantUserIds,
+                false /*startReceiver*/, pkgSetting.getAppId(), userIds, instantUserIds,
                 dataLoaderType);
 
         // Send a session commit broadcast
@@ -8283,7 +8287,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     return false;
                 }
                 // Only allow protected packages to hide themselves.
-                if (hidden && !UserHandle.isSameApp(callingUid, pkgSetting.appId)
+                if (hidden && !UserHandle.isSameApp(callingUid, pkgSetting.getAppId())
                         && mProtectedPackages.isPackageStateProtected(userId, packageName)) {
                     Slog.w(TAG, "Not hiding protected package: " + packageName);
                     return false;
@@ -8304,7 +8308,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 return true;
             }
             if (sendRemoved) {
-                killApplication(packageName, pkgSetting.appId, userId,
+                killApplication(packageName, pkgSetting.getAppId(), userId,
                         "hiding pkg");
                 sendApplicationHiddenForUser(packageName, pkgSetting, userId);
                 return true;
@@ -8396,10 +8400,10 @@ public class PackageManagerService extends IPackageManager.Stub
             int userId) {
         final PackageRemovedInfo info = new PackageRemovedInfo(this);
         info.mRemovedPackage = packageName;
-        info.mInstallerPackageName = pkgSetting.installSource.installerPackageName;
+        info.mInstallerPackageName = pkgSetting.getInstallSource().installerPackageName;
         info.mRemovedUsers = new int[] {userId};
         info.mBroadcastUsers = new int[] {userId};
-        info.mUid = UserHandle.getUid(userId, pkgSetting.appId);
+        info.mUid = UserHandle.getUid(userId, pkgSetting.getAppId());
         info.sendPackageRemovedBroadcasts(true /*killApp*/, false /*removedBySystem*/);
     }
 
@@ -8571,24 +8575,24 @@ public class PackageManagerService extends IPackageManager.Stub
             }
 
             if (installed) {
-                if (pkgSetting.pkg != null) {
+                if (pkgSetting.getPkg() != null) {
                     final PermissionManagerServiceInternal.PackageInstalledParams.Builder
                             permissionParamsBuilder =
                             new PermissionManagerServiceInternal.PackageInstalledParams.Builder();
                     if ((installFlags & PackageManager.INSTALL_ALL_WHITELIST_RESTRICTED_PERMISSIONS)
                             != 0) {
                         permissionParamsBuilder.setAllowlistedRestrictedPermissions(
-                                pkgSetting.pkg.getRequestedPermissions());
+                                pkgSetting.getPkg().getRequestedPermissions());
                     }
-                    mPermissionManager.onPackageInstalled(pkgSetting.pkg,
+                    mPermissionManager.onPackageInstalled(pkgSetting.getPkg(),
                             Process.INVALID_UID /* previousAppId */,
                             permissionParamsBuilder.build(), userId);
                 }
 
-                if (pkgSetting.pkg != null) {
+                if (pkgSetting.getPkg() != null) {
                     synchronized (mInstallLock) {
                         // We don't need to freeze for a brand new install
-                        prepareAppDataAfterInstallLIF(pkgSetting.pkg);
+                        prepareAppDataAfterInstallLIF(pkgSetting.getPkg());
                     }
                 }
                 sendPackageAddedForUser(packageName, pkgSetting, userId, DataLoaderType.NONE);
@@ -8598,7 +8602,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 // start async restore with no post-install since we finish install here
                 PackageInstalledInfo res = new PackageInstalledInfo(
                         PackageManager.INSTALL_SUCCEEDED);
-                res.mPkg = pkgSetting.pkg;
+                res.mPkg = pkgSetting.getPkg();
                 res.mNewUsers = new int[]{ userId };
 
                 PostInstallData postInstallData =
@@ -8706,7 +8710,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 if (restrictionFlags != oldDistractionFlags) {
                     pkgSetting.setDistractionFlags(restrictionFlags, userId);
                     changedPackagesList.add(packageName);
-                    changedUids.add(UserHandle.getUid(userId, pkgSetting.appId));
+                    changedUids.add(UserHandle.getUid(userId, pkgSetting.getAppId()));
                 }
             }
         }
@@ -8814,11 +8818,11 @@ public class PackageManagerService extends IPackageManager.Stub
             }
             if (suspended || packageUnsuspended) {
                 changedPackagesList.add(packageName);
-                changedUids.add(UserHandle.getUid(userId, pkgSetting.appId));
+                changedUids.add(UserHandle.getUid(userId, pkgSetting.getAppId()));
             }
             if (packageModified) {
                 modifiedPackagesList.add(packageName);
-                modifiedUids.add(UserHandle.getUid(userId, pkgSetting.appId));
+                modifiedUids.add(UserHandle.getUid(userId, pkgSetting.getAppId()));
             }
         }
 
@@ -8956,7 +8960,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 if (ps != null && ps.getSuspended(userId)) {
                     ps.removeSuspension(suspendingPackagePredicate, userId);
                     if (!ps.getSuspended(userId)) {
-                        unsuspendedPackages.add(ps.name);
+                        unsuspendedPackages.add(ps.getPackageName());
                         unsuspendedUids.add(UserHandle.getUid(userId, ps.getAppId()));
                     }
                 }
@@ -8997,7 +9001,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 final PackageSetting ps = mSettings.getPackageLPr(packageName);
                 if (ps != null && ps.getDistractionFlags(userId) != 0) {
                     ps.setDistractionFlags(0, userId);
-                    changedPackages.add(ps.name);
+                    changedPackages.add(ps.getPackageName());
                     changedUids.add(UserHandle.getUid(userId, ps.getAppId()));
                 }
             }
@@ -9320,7 +9324,7 @@ public class PackageManagerService extends IPackageManager.Stub
                             ((SharedUserSetting) obj).signatures.mSigningDetails.getSignatures();
                 } else if (obj instanceof PackageSetting) {
                     callerSignature =
-                            ((PackageSetting) obj).signatures.mSigningDetails.getSignatures();
+                            ((PackageSetting) obj).getSigningDetails().getSignatures();
                 } else {
                     throw new SecurityException("Bad object " + obj + " for uid " + callingUid);
                 }
@@ -9332,7 +9336,7 @@ public class PackageManagerService extends IPackageManager.Stub
             // not signed with the same cert as the caller.
             if (installerPackageSetting != null) {
                 if (compareSignatures(callerSignature,
-                        installerPackageSetting.signatures.mSigningDetails.getSignatures())
+                        installerPackageSetting.getSigningDetails().getSignatures())
                         != PackageManager.SIGNATURE_MATCH) {
                     throw new SecurityException(
                             "Caller does not have same cert as new installer package "
@@ -9343,13 +9347,13 @@ public class PackageManagerService extends IPackageManager.Stub
             // Verify: if target already has an installer package, it must
             // be signed with the same cert as the caller.
             String targetInstallerPackageName =
-                    targetPackageSetting.installSource.installerPackageName;
+                    targetPackageSetting.getInstallSource().installerPackageName;
             PackageSetting targetInstallerPkgSetting = targetInstallerPackageName == null ? null :
                     mSettings.getPackageLPr(targetInstallerPackageName);
 
             if (targetInstallerPkgSetting != null) {
                 if (compareSignatures(callerSignature,
-                        targetInstallerPkgSetting.signatures.mSigningDetails.getSignatures())
+                        targetInstallerPkgSetting.getSigningDetails().getSignatures())
                         != PackageManager.SIGNATURE_MATCH) {
                     throw new SecurityException(
                             "Caller does not have same cert as old installer package "
@@ -9381,7 +9385,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
             // Okay!
             targetPackageSetting.setInstallerPackageName(installerPackageName);
-            mSettings.addInstallerPackageNames(targetPackageSetting.installSource);
+            mSettings.addInstallerPackageNames(targetPackageSetting.getInstallSource());
             mAppsFilter.addPackage(targetPackageSetting);
             scheduleWriteSettingsLocked();
         }
@@ -9401,13 +9405,13 @@ public class PackageManagerService extends IPackageManager.Stub
                     ps, Binder.getCallingUid(), UserHandle.getCallingUserId())) {
                 throw new IllegalArgumentException("Unknown target package " + packageName);
             }
-            if (!Objects.equals(callerPackageName, ps.installSource.installerPackageName)) {
+            if (!Objects.equals(callerPackageName, ps.getInstallSource().installerPackageName)) {
                 throw new IllegalArgumentException("Calling package " + callerPackageName
                         + " is not installer for " + packageName);
             }
 
-            if (ps.categoryHint != categoryHint) {
-                ps.categoryHint = categoryHint;
+            if (ps.getCategoryOverride() != categoryHint) {
+                ps.setCategoryOverride(categoryHint);
                 scheduleWriteSettingsLocked();
             }
         }
@@ -9529,7 +9533,7 @@ public class PackageManagerService extends IPackageManager.Stub
         synchronized (mLock) {
             ps = mSettings.getPackageLPr(packageName);
             if (ps != null) {
-                appId = ps.appId;
+                appId = ps.getAppId();
                 ceDataInode = ps.getCeDataInode(userId);
             }
 
@@ -9633,7 +9637,8 @@ public class PackageManagerService extends IPackageManager.Stub
             final ScanResult scanResult = scannedPackages.get(installPackageName);
 
             // add / replace existing with incoming packages
-            combinedPackages.put(scanResult.mPkgSetting.name, scanResult.mRequest.mParsedPackage);
+            combinedPackages.put(scanResult.mPkgSetting.getPackageName(),
+                    scanResult.mRequest.mParsedPackage);
 
             // in the first pass, we'll build up the set of incoming shared libraries
             final List<SharedLibraryInfo> allowedSharedLibInfos =
@@ -9729,20 +9734,21 @@ public class PackageManagerService extends IPackageManager.Stub
                     // newer
                     // signing certificate than the existing one, and if so, copy over the new
                     // details
-                    if (signatureCheckPs.sharedUser != null) {
+                    if (signatureCheckPs.getSharedUser() != null) {
                         // Attempt to merge the existing lineage for the shared SigningDetails with
                         // the lineage of the new package; if the shared SigningDetails are not
                         // returned this indicates the new package added new signers to the lineage
                         // and/or changed the capabilities of existing signers in the lineage.
                         SigningDetails sharedSigningDetails =
-                                signatureCheckPs.sharedUser.signatures.mSigningDetails;
+                                signatureCheckPs.getSharedUser().signatures.mSigningDetails;
                         SigningDetails mergedDetails = sharedSigningDetails.mergeLineageWith(
                                 signingDetails);
                         if (mergedDetails != sharedSigningDetails) {
-                            signatureCheckPs.sharedUser.signatures.mSigningDetails = mergedDetails;
+                            signatureCheckPs.getSharedUser().signatures.mSigningDetails =
+                                    mergedDetails;
                         }
-                        if (signatureCheckPs.sharedUser.signaturesChanged == null) {
-                            signatureCheckPs.sharedUser.signaturesChanged = Boolean.FALSE;
+                        if (signatureCheckPs.getSharedUser().signaturesChanged == null) {
+                            signatureCheckPs.getSharedUser().signaturesChanged = Boolean.FALSE;
                         }
                     }
                 } catch (PackageManagerException e) {
@@ -9759,10 +9765,10 @@ public class PackageManagerService extends IPackageManager.Stub
                     // updating
                     // the signatures on the first package scanned for the shared user (i.e. if the
                     // signaturesChanged state hasn't been initialized yet in SharedUserSetting).
-                    if (signatureCheckPs.sharedUser != null) {
-                        final Signature[] sharedUserSignatures = signatureCheckPs.sharedUser
+                    if (signatureCheckPs.getSharedUser() != null) {
+                        final Signature[] sharedUserSignatures = signatureCheckPs.getSharedUser()
                                 .signatures.mSigningDetails.getSignatures();
-                        if (signatureCheckPs.sharedUser.signaturesChanged != null
+                        if (signatureCheckPs.getSharedUser().signaturesChanged != null
                                 && compareSignatures(sharedUserSignatures,
                                 parsedPackage.getSigningDetails().getSignatures())
                                         != PackageManager.SIGNATURE_MATCH) {
@@ -9776,7 +9782,7 @@ public class PackageManagerService extends IPackageManager.Stub
                                 throw new ReconcileFailure(
                                         INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES,
                                         "Signature mismatch for shared user: "
-                                                + scanResult.mPkgSetting.sharedUser);
+                                                + scanResult.mPkgSetting.getSharedUser());
                             } else {
                                 // Treat mismatched signatures on system packages using a shared
                                 // UID as
@@ -9786,14 +9792,14 @@ public class PackageManagerService extends IPackageManager.Stub
                                         "Signature mismatch on system package "
                                                 + parsedPackage.getPackageName()
                                                 + " for shared user "
-                                                + scanResult.mPkgSetting.sharedUser);
+                                                + scanResult.mPkgSetting.getSharedUser());
                             }
                         }
 
                         sharedUserSignaturesChanged = true;
-                        signatureCheckPs.sharedUser.signatures.mSigningDetails =
+                        signatureCheckPs.getSharedUser().signatures.mSigningDetails =
                                 parsedPackage.getSigningDetails();
-                        signatureCheckPs.sharedUser.signaturesChanged = Boolean.TRUE;
+                        signatureCheckPs.getSharedUser().signaturesChanged = Boolean.TRUE;
                     }
                     // File a report about this.
                     String msg = "System package " + parsedPackage.getPackageName()
@@ -9875,8 +9881,8 @@ public class PackageManagerService extends IPackageManager.Stub
                         ? scanResult.mRequest.mOldPkgSetting
                         : scanResult.mRequest.mDisabledPkgSetting
                 : null;
-        if (isUpdatedSystemApp && (updatedSystemPs.pkg == null
-                || updatedSystemPs.pkg.getLibraryNames() == null)) {
+        if (isUpdatedSystemApp && (updatedSystemPs.getPkg() == null
+                || updatedSystemPs.getPkg().getLibraryNames() == null)) {
             Slog.w(TAG, "Package " + parsedPackage.getPackageName()
                     + " declares libraries that are not declared on the system image; skipping");
             return null;
@@ -9896,7 +9902,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 // with it.  Better to just have the restriction here, be
                 // conservative, and create many fewer cases that can negatively
                 // impact the user experience.
-                if (!updatedSystemPs.pkg.getLibraryNames().contains(name)) {
+                if (!updatedSystemPs.getPkg().getLibraryNames().contains(name)) {
                     Slog.w(TAG, "Package " + parsedPackage.getPackageName()
                             + " declares library " + name
                             + " that is not declared on system image; skipping");
@@ -10356,9 +10362,9 @@ public class PackageManagerService extends IPackageManager.Stub
             }
 
             if (versionCode != PackageManager.VERSION_CODE_HIGHEST
-                    && uninstalledPs.versionCode != versionCode) {
+                    && uninstalledPs.getLongVersionCode() != versionCode) {
                 Slog.w(TAG, "Not removing package " + packageName + " with versionCode "
-                        + uninstalledPs.versionCode + " != " + versionCode);
+                        + uninstalledPs.getLongVersionCode() + " != " + versionCode);
                 return PackageManager.DELETE_FAILED_INTERNAL_ERROR;
             }
 
@@ -10468,7 +10474,7 @@ public class PackageManagerService extends IPackageManager.Stub
             }
 
             final AndroidPackage stubPkg =
-                    (disabledSystemPs == null) ? null : disabledSystemPs.pkg;
+                    (disabledSystemPs == null) ? null : disabledSystemPs.getPkg();
             if (stubPkg != null && stubPkg.isStub()) {
                 final PackageSetting stubPs;
                 synchronized (mLock) {
@@ -10502,20 +10508,20 @@ public class PackageManagerService extends IPackageManager.Stub
      */
     void removePackageDataLIF(final PackageSetting deletedPs, @NonNull int[] allUserHandles,
             PackageRemovedInfo outInfo, int flags, boolean writeSettings) {
-        String packageName = deletedPs.name;
+        String packageName = deletedPs.getPackageName();
         if (DEBUG_REMOVE) Slog.d(TAG, "removePackageDataLI: " + deletedPs);
         // Retrieve object to delete permissions for shared user later on
-        final AndroidPackage deletedPkg = deletedPs.pkg;
+        final AndroidPackage deletedPkg = deletedPs.getPkg();
         if (outInfo != null) {
             outInfo.mRemovedPackage = packageName;
-            outInfo.mInstallerPackageName = deletedPs.installSource.installerPackageName;
+            outInfo.mInstallerPackageName = deletedPs.getInstallSource().installerPackageName;
             outInfo.mIsStaticSharedLib = deletedPkg != null
                     && deletedPkg.getStaticSharedLibName() != null;
             outInfo.populateUsers(deletedPs == null ? null
                     : deletedPs.queryInstalledUsers(mUserManager.getUserIds(), true), deletedPs);
         }
 
-        removePackageLI(deletedPs.name, (flags & PackageManager.DELETE_CHATTY) != 0);
+        removePackageLI(deletedPs.getPackageName(), (flags & PackageManager.DELETE_CHATTY) != 0);
 
         if ((flags & PackageManager.DELETE_KEEP_DATA) == 0) {
             final AndroidPackage resolvedPkg;
@@ -10524,8 +10530,8 @@ public class PackageManagerService extends IPackageManager.Stub
             } else {
                 // We don't have a parsed package when it lives on an ejected
                 // adopted storage device, so fake something together
-                resolvedPkg = PackageImpl.buildFakeForDeletion(deletedPs.name,
-                        deletedPs.volumeUuid);
+                resolvedPkg = PackageImpl.buildFakeForDeletion(deletedPs.getPackageName(),
+                        deletedPs.getVolumeUuid());
             }
             destroyAppDataLIF(resolvedPkg, UserHandle.USER_ALL,
                     FLAG_STORAGE_DE | FLAG_STORAGE_CE | FLAG_STORAGE_EXTERNAL);
@@ -10543,7 +10549,7 @@ public class PackageManagerService extends IPackageManager.Stub
             if ((flags & PackageManager.DELETE_KEEP_DATA) == 0) {
                 final SparseBooleanArray changedUsers = new SparseBooleanArray();
                 synchronized (mLock) {
-                    mDomainVerificationManager.clearPackage(deletedPs.name);
+                    mDomainVerificationManager.clearPackage(deletedPs.getPackageName());
                     mSettings.getKeySetManagerService().removeAppKeySetDataLPw(packageName);
                     mAppsFilter.removePackage(getPackageSetting(packageName),
                             false /* isReplace */);
@@ -10560,13 +10566,13 @@ public class PackageManagerService extends IPackageManager.Stub
                         if (sharedUserPkgs == null) {
                             sharedUserPkgs = Collections.emptyList();
                         }
-                        mPermissionManager.onPackageUninstalled(packageName, deletedPs.appId,
-                                deletedPs.pkg, sharedUserPkgs, UserHandle.USER_ALL);
+                        mPermissionManager.onPackageUninstalled(packageName, deletedPs.getAppId(),
+                                deletedPs.getPkg(), sharedUserPkgs, UserHandle.USER_ALL);
                     }
                     clearPackagePreferredActivitiesLPw(
-                            deletedPs.name, changedUsers, UserHandle.USER_ALL);
+                            deletedPs.getPackageName(), changedUsers, UserHandle.USER_ALL);
 
-                    mSettings.removeRenamedPackageLPw(deletedPs.realName);
+                    mSettings.removeRenamedPackageLPw(deletedPs.getRealName());
                 }
                 if (changedUsers.size() > 0) {
                     updateDefaultHomeNotLocked(changedUsers);
@@ -10629,7 +10635,7 @@ public class PackageManagerService extends IPackageManager.Stub
             PackageRemovedInfo outInfo, boolean writeSettings) {
         synchronized (mLock) {
             if (outInfo != null) {
-                outInfo.mUid = ps.appId;
+                outInfo.mUid = ps.getAppId();
                 outInfo.mBroadcastAllowList = mAppsFilter.getVisibilityAllowList(ps,
                         allUserHandles, mSettings.getPackagesLocked());
             }
@@ -10642,7 +10648,7 @@ public class PackageManagerService extends IPackageManager.Stub
         if (deleteCodeAndResources && (outInfo != null)) {
             outInfo.mArgs = createInstallArgsForExisting(
                     ps.getPathString(), getAppDexInstructionSets(
-                            ps.primaryCpuAbiString, ps.secondaryCpuAbiString));
+                            ps.getPrimaryCpuAbi(), ps.getSecondaryCpuAbi()));
             if (DEBUG_SD_INSTALL) Slog.i(TAG, "args=" + outInfo.mArgs);
         }
     }
@@ -10716,7 +10722,8 @@ public class PackageManagerService extends IPackageManager.Stub
             final boolean deleteAllUsers =
                     user == null || user.getIdentifier() == UserHandle.USER_ALL;
             if ((!deleteSystem || deleteAllUsers) && disabledPs == null) {
-                Slog.w(TAG, "Attempt to delete unknown system package " + ps.pkg.getPackageName());
+                Slog.w(TAG, "Attempt to delete unknown system package "
+                        + ps.getPkg().getPackageName());
                 return null;
             }
             // Confirmed if the system package has been updated
@@ -10820,14 +10827,14 @@ public class PackageManagerService extends IPackageManager.Stub
 
         // TODO(b/109941548): break reasons for ret = false out into mayDelete method
         if (systemApp) {
-            if (DEBUG_REMOVE) Slog.d(TAG, "Removing system package: " + ps.name);
+            if (DEBUG_REMOVE) Slog.d(TAG, "Removing system package: " + ps.getPackageName());
             // When an updated system application is deleted we delete the existing resources
             // as well and fall back to existing code in system partition
             final InitAndSystemPackageHelper helper = new InitAndSystemPackageHelper(this);
             helper.deleteSystemPackageLIF(action, ps, allUserHandles, flags, outInfo,
                     writeSettings, mDefParseFlags, mDirsToScanAsSystem);
         } else {
-            if (DEBUG_REMOVE) Slog.d(TAG, "Removing non-system package: " + ps.name);
+            if (DEBUG_REMOVE) Slog.d(TAG, "Removing non-system package: " + ps.getPackageName());
             deleteInstalledPackageLIF(ps, deleteCodeAndResources, flags, allUserHandles,
                     outInfo, writeSettings);
         }
@@ -10847,7 +10854,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
         // Take a note whether we deleted the package for all users
         if (outInfo != null) {
-            outInfo.mRemovedForAllUsers = mPackages.get(ps.name) == null;
+            outInfo.mRemovedForAllUsers = mPackages.get(ps.getPackageName()) == null;
         }
     }
 
@@ -10857,7 +10864,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 ? mUserManager.getUserIds() : new int[] {user.getIdentifier()};
         for (int nextUserId : userIds) {
             if (DEBUG_REMOVE) {
-                Slog.d(TAG, "Marking package:" + ps.name + " uninstalled for user:" + nextUserId);
+                Slog.d(TAG, "Marking package:" + ps.getPackageName()
+                        + " uninstalled for user:" + nextUserId);
             }
             ps.setUserState(nextUserId, 0, COMPONENT_ENABLED_STATE_DEFAULT,
                     false /*installed*/,
@@ -10884,7 +10892,7 @@ public class PackageManagerService extends IPackageManager.Stub
             PackageRemovedInfo outInfo, int flags) {
         final AndroidPackage pkg;
         synchronized (mLock) {
-            pkg = mPackages.get(ps.name);
+            pkg = mPackages.get(ps.getPackageName());
         }
 
         destroyAppProfilesLIF(pkg);
@@ -10898,27 +10906,29 @@ public class PackageManagerService extends IPackageManager.Stub
                 : new int[] {userId};
         for (int nextUserId : userIds) {
             if (DEBUG_REMOVE) {
-                Slog.d(TAG, "Updating package:" + ps.name + " install state for user:"
+                Slog.d(TAG, "Updating package:" + ps.getPackageName() + " install state for user:"
                         + nextUserId);
             }
             if ((flags & PackageManager.DELETE_KEEP_DATA) == 0) {
                 destroyAppDataLIF(pkg, nextUserId,
                         FLAG_STORAGE_DE | FLAG_STORAGE_CE | FLAG_STORAGE_EXTERNAL);
             }
-            removeKeystoreDataIfNeeded(mInjector.getUserManagerInternal(), nextUserId, ps.appId);
-            clearPackagePreferredActivities(ps.name, nextUserId);
-            mDomainVerificationManager.clearPackageForUser(ps.name, nextUserId);
+            removeKeystoreDataIfNeeded(mInjector.getUserManagerInternal(), nextUserId,
+                    ps.getAppId());
+            clearPackagePreferredActivities(ps.getPackageName(), nextUserId);
+            mDomainVerificationManager.clearPackageForUser(ps.getPackageName(), nextUserId);
         }
-        mPermissionManager.onPackageUninstalled(ps.name, ps.appId, pkg, sharedUserPkgs, userId);
+        mPermissionManager.onPackageUninstalled(ps.getPackageName(), ps.getAppId(), pkg,
+                sharedUserPkgs, userId);
 
         if (outInfo != null) {
             if ((flags & PackageManager.DELETE_KEEP_DATA) == 0) {
                 outInfo.mDataRemoved = true;
             }
-            outInfo.mRemovedPackage = ps.name;
-            outInfo.mInstallerPackageName = ps.installSource.installerPackageName;
+            outInfo.mRemovedPackage = ps.getPackageName();
+            outInfo.mInstallerPackageName = ps.getInstallSource().installerPackageName;
             outInfo.mIsStaticSharedLib = pkg != null && pkg.getStaticSharedLibName() != null;
-            outInfo.mRemovedAppId = ps.appId;
+            outInfo.mRemovedAppId = ps.getAppId();
             outInfo.mRemovedUsers = userIds;
             outInfo.mBroadcastUsers = userIds;
         }
@@ -11017,7 +11027,7 @@ public class PackageManagerService extends IPackageManager.Stub
             ps = mSettings.getPackageLPr(packageName);
             if (pkg == null) {
                 if (ps != null) {
-                    pkg = ps.pkg;
+                    pkg = ps.getPkg();
                 }
             }
         }
@@ -11158,16 +11168,16 @@ public class PackageManagerService extends IPackageManager.Stub
             final int numPackages = sus.packages.size();
             for (int index = 0; index < numPackages; index++) {
                 final PackageSetting ps = sus.packages.valueAt(index);
-                if (ps.pkg != null) {
-                    int v = ps.pkg.getTargetSdkVersion();
+                if (ps.getPkg() != null) {
+                    int v = ps.getPkg().getTargetSdkVersion();
                     if (v < vers) vers = v;
                 }
             }
             return vers;
         } else if (obj instanceof PackageSetting) {
             final PackageSetting ps = (PackageSetting) obj;
-            if (ps.pkg != null) {
-                return ps.pkg.getTargetSdkVersion();
+            if (ps.getPkg() != null) {
+                return ps.getPkg().getTargetSdkVersion();
             }
         }
         return Build.VERSION_CODES.CUR_DEVELOPMENT;
@@ -12567,7 +12577,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 final String packageName = sendNowBroadcasts.keyAt(i);
                 final ArrayList<String> components = sendNowBroadcasts.valueAt(i);
                 final int packageUid = UserHandle.getUid(
-                        userId, pkgSettings.get(packageName).appId);
+                        userId, pkgSettings.get(packageName).getAppId());
                 sendPackageChangedBroadcast(packageName, false /* dontKillApp */,
                         components, packageUid, null /* reason */);
             }
@@ -12858,7 +12868,7 @@ public class PackageManagerService extends IPackageManager.Stub
             return null;
         }
 
-        return ps.installSource;
+        return ps.getInstallSource();
     }
 
     public boolean isOrphaned(String packageName) {
@@ -13923,10 +13933,10 @@ public class PackageManagerService extends IPackageManager.Stub
             final PackageSetting ps = mSettings.getPackageLPr(packageName);
             if (ps == null) {
                 throw new PackageManagerException("Package " + packageName + " is unknown");
-            } else if (!TextUtils.equals(volumeUuid, ps.volumeUuid)) {
+            } else if (!TextUtils.equals(volumeUuid, ps.getVolumeUuid())) {
                 throw new PackageManagerException(
                         "Package " + packageName + " found on unknown volume " + volumeUuid
-                                + "; expected volume " + ps.volumeUuid);
+                                + "; expected volume " + ps.getVolumeUuid());
             } else if (!ps.getInstalled(userId)) {
                 throw new PackageManagerException(
                         "Package " + packageName + " not installed for user " + userId);
@@ -14039,21 +14049,21 @@ public class PackageManagerService extends IPackageManager.Stub
         }
         int preparedCount = 0;
         for (PackageSetting ps : packages) {
-            final String packageName = ps.name;
-            if (ps.pkg == null) {
+            final String packageName = ps.getPackageName();
+            if (ps.getPkg() == null) {
                 Slog.w(TAG, "Odd, missing scanned package " + packageName);
                 // TODO: might be due to legacy ASEC apps; we should circle back
                 // and reconcile again once they're scanned
                 continue;
             }
             // Skip non-core apps if requested
-            if (onlyCoreApps && !ps.pkg.isCoreApp()) {
+            if (onlyCoreApps && !ps.getPkg().isCoreApp()) {
                 result.add(packageName);
                 continue;
             }
 
             if (ps.getInstalled(userId)) {
-                prepareAppDataAndMigrate(batch, ps.pkg, userId, flags, migrateAppData);
+                prepareAppDataAndMigrate(batch, ps.getPkg(), userId, flags, migrateAppData);
                 preparedCount++;
             }
         }
@@ -14439,13 +14449,13 @@ public class PackageManagerService extends IPackageManager.Stub
         final int numPackages = mSettings.getPackagesLocked().size();
         for (int index = 0; index < numPackages; index++) {
             final PackageSetting ps = mSettings.getPackagesLocked().valueAt(index);
-            if (ps.pkg == null) {
+            if (ps.getPkg() == null) {
                 continue;
             }
-            final String packageName = ps.pkg.getPackageName();
+            final String packageName = ps.getPkg().getPackageName();
             // Skip over if system app or static shared library
             if ((ps.pkgFlags & ApplicationInfo.FLAG_SYSTEM) != 0
-                    || !TextUtils.isEmpty(ps.pkg.getStaticSharedLibName())) {
+                    || !TextUtils.isEmpty(ps.getPkg().getStaticSharedLibName())) {
                 continue;
             }
             if (DEBUG_CLEAN_APKS) {
@@ -14939,7 +14949,7 @@ public class PackageManagerService extends IPackageManager.Stub
             if (packageSetting == null) {
                 return false;
             }
-            AndroidPackage pkg = packageSetting.pkg;
+            AndroidPackage pkg = packageSetting.getPkg();
             if (pkg == null) {
                 // May happen if package in on a removable sd card
                 return false;
@@ -15097,7 +15107,8 @@ public class PackageManagerService extends IPackageManager.Stub
         String getDisabledSystemPackageName(@NonNull String packageName) {
             PackageSetting disabledPkgSetting = getDisabledSystemPackage(
                     packageName);
-            AndroidPackage disabledPkg = disabledPkgSetting == null ? null : disabledPkgSetting.pkg;
+            AndroidPackage disabledPkg = disabledPkgSetting == null
+                    ? null : disabledPkgSetting.getPkg();
             return disabledPkg == null ? null : disabledPkg.getPackageName();
         }
 
@@ -15960,9 +15971,10 @@ public class PackageManagerService extends IPackageManager.Stub
                     return false;
                 }
                 final PackageSetting installerPackageSetting =
-                        mSettings.getPackageLPr(packageSetting.installSource.installerPackageName);
+                        mSettings.getPackageLPr(packageSetting.getInstallSource()
+                                .installerPackageName);
                 return installerPackageSetting != null
-                        && UserHandle.isSameApp(installerPackageSetting.appId, callingUid);
+                        && UserHandle.isSameApp(installerPackageSetting.getAppId(), callingUid);
             }
         }
 
@@ -15995,7 +16007,7 @@ public class PackageManagerService extends IPackageManager.Stub
             if (pkg == null) {
                 throw new IllegalStateException("No package found for " + packageName);
             }
-            mAppsFilter.getFeatureConfig().enableLogging(pkg.appId, enable);
+            mAppsFilter.getFeatureConfig().enableLogging(pkg.getAppId(), enable);
         }
 
         @Override
@@ -16052,7 +16064,7 @@ public class PackageManagerService extends IPackageManager.Stub
             if (ps == null) {
                 return null;
             }
-            return ps.getIncrementalStates();
+            return ps.getIncrementalStatesInfo();
         }
 
         @Override
@@ -16185,14 +16197,14 @@ public class PackageManagerService extends IPackageManager.Stub
             return EmptyArray.STRING;
         }
 
-        ArraySet<PackageSetting> packages = packageSetting.sharedUser.packages;
+        ArraySet<PackageSetting> packages = packageSetting.getSharedUser().packages;
         final int numPackages = packages.size();
         String[] res = new String[numPackages];
         int i = 0;
         for (int index = 0; index < numPackages; index++) {
             final PackageSetting ps = packages.valueAt(index);
             if (ps.getInstalled(userId)) {
-                res[i++] = ps.name;
+                res[i++] = ps.getPackageName();
             }
         }
         res = ArrayUtils.trimToSize(res, i);
@@ -16208,7 +16220,7 @@ public class PackageManagerService extends IPackageManager.Stub
             return PackageInfoUtils.generateProcessInfo(sus.processes, 0);
         } else if (obj instanceof PackageSetting) {
             final PackageSetting ps = (PackageSetting) obj;
-            return PackageInfoUtils.generateProcessInfo(ps.pkg.getProcesses(), 0);
+            return PackageInfoUtils.generateProcessInfo(ps.getPkg().getProcesses(), 0);
         }
         return null;
     }
@@ -16515,7 +16527,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 PackageDexUsage.PackageUseInfo packageUseInfo =
                       getDexManager().getPackageUseInfoOrDefault(pkg.getPackageName());
                 if (PackageManagerServiceUtils
-                        .isUnusedSinceTimeInMillis(ps.firstInstallTime, currentTimeInMillis,
+                        .isUnusedSinceTimeInMillis(ps.getFirstInstallTime(), currentTimeInMillis,
                                 downgradeTimeThresholdMillis, packageUseInfo,
                                 ps.getPkgState().getLatestPackageUseTimeInMills(),
                                 ps.getPkgState().getLatestForegroundPackageUseTimeInMills())) {
@@ -16766,9 +16778,10 @@ public class PackageManagerService extends IPackageManager.Stub
                     }
                     continue;
                 }
-                if (ps.appId < Process.FIRST_APPLICATION_UID) {
+                if (ps.getAppId() < Process.FIRST_APPLICATION_UID) {
                     if (DEBUG_PER_UID_READ_TIMEOUTS) {
-                        Slog.i(TAG, "PerUidReadTimeouts: package is system, appId=" + ps.appId);
+                        Slog.i(TAG, "PerUidReadTimeouts: package is system, appId="
+                                + ps.getAppId());
                     }
                     continue;
                 }
@@ -16795,7 +16808,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     if (!ps.getInstalled(userId)) {
                         continue;
                     }
-                    final int uid = UserHandle.getUid(userId, ps.appId);
+                    final int uid = UserHandle.getUid(userId, ps.getAppId());
                     final PerUidReadTimeouts perUid = new PerUidReadTimeouts();
                     perUid.uid = uid;
                     perUid.minTimeUs = perPackage.timeouts.minTimeUs;
@@ -16936,7 +16949,7 @@ public class PackageManagerService extends IPackageManager.Stub
                         + (filterTarget ? targetPackageName + " " : "")
                         + "not found."));
             }
-            final int sourcePackageUid = UserHandle.getUid(userId, sourceSetting.appId);
+            final int sourcePackageUid = UserHandle.getUid(userId, sourceSetting.getAppId());
             return !shouldFilterApplicationLocked(targetSetting, sourcePackageUid, userId);
         }
     }

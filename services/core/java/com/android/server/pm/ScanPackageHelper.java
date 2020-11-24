@@ -149,8 +149,8 @@ public final class ScanPackageHelper {
     public void cleanUpAppIdCreation(@NonNull ScanResult result) {
         // iff we've acquired an app ID for a new package setting, remove it so that it can be
         // acquired by another request.
-        if (result.mPkgSetting.appId > 0) {
-            mPm.mSettings.removeAppIdLPw(result.mPkgSetting.appId);
+        if (result.mPkgSetting.getAppId() > 0) {
+            mPm.mSettings.removeAppIdLPw(result.mPkgSetting.getAppId());
         }
     }
 
@@ -267,7 +267,7 @@ public final class ScanPackageHelper {
             String platformPackageName = mPm.mPlatformPackage == null
                     ? null : mPm.mPlatformPackage.getPackageName();
             final ScanRequest request = new ScanRequest(parsedPackage, sharedUserSetting,
-                    pkgSetting == null ? null : pkgSetting.pkg, pkgSetting, disabledPkgSetting,
+                    pkgSetting == null ? null : pkgSetting.getPkg(), pkgSetting, disabledPkgSetting,
                     originalPkgSetting, realPkgName, parseFlags, scanFlags,
                     Objects.equals(parsedPackage.getPackageName(), platformPackageName), user,
                     cpuAbiOverride);
@@ -328,11 +328,11 @@ public final class ScanPackageHelper {
                 // API info from existing package setting. However, stub packages currently do not
                 // preserve ABI info, thus the special condition check here. Remove the special
                 // check after we fix the stub generation.
-                if (pkgSetting.pkg != null && pkgSetting.pkg.isStub()) {
+                if (pkgSetting.getPkg() != null && pkgSetting.getPkg().isStub()) {
                     needToDeriveAbi = true;
                 } else {
-                    primaryCpuAbiFromSettings = pkgSetting.primaryCpuAbiString;
-                    secondaryCpuAbiFromSettings = pkgSetting.secondaryCpuAbiString;
+                    primaryCpuAbiFromSettings = pkgSetting.getPrimaryCpuAbi();
+                    secondaryCpuAbiFromSettings = pkgSetting.getSecondaryCpuAbi();
                 }
             } else {
                 // Re-scanning a system package after uninstalling updates; need to derive ABI
@@ -342,18 +342,18 @@ public final class ScanPackageHelper {
 
         int previousAppId = Process.INVALID_UID;
 
-        if (pkgSetting != null && pkgSetting.sharedUser != sharedUserSetting) {
-            if (pkgSetting.sharedUser != null && sharedUserSetting == null) {
-                previousAppId = pkgSetting.appId;
+        if (pkgSetting != null && pkgSetting.getSharedUser() != sharedUserSetting) {
+            if (pkgSetting.getSharedUser() != null && sharedUserSetting == null) {
+                previousAppId = pkgSetting.getAppId();
                 // Log that something is leaving shareduid and keep going
                 Slog.i(TAG,
                         "Package " + parsedPackage.getPackageName() + " shared user changed from "
-                                + pkgSetting.sharedUser.name + " to " + "<nothing>.");
+                                + pkgSetting.getSharedUser().name + " to " + "<nothing>.");
             } else {
                 PackageManagerService.reportSettingsProblem(Log.WARN,
                         "Package " + parsedPackage.getPackageName() + " shared user changed from "
-                                + (pkgSetting.sharedUser != null
-                                ? pkgSetting.sharedUser.name : "<nothing>")
+                                + (pkgSetting.getSharedUser() != null
+                                ? pkgSetting.getSharedUser().name : "<nothing>")
                                 + " to "
                                 + (sharedUserSetting != null ? sharedUserSetting.name : "<nothing>")
                                 + "; replacing with new");
@@ -397,7 +397,7 @@ public final class ScanPackageHelper {
         } else {
             // make a deep copy to avoid modifying any existing system state.
             pkgSetting = new PackageSetting(pkgSetting);
-            pkgSetting.pkg = parsedPackage;
+            pkgSetting.setPkg(parsedPackage);
 
             // REMOVE SharedUserSetting from method; update in a separate call.
             //
@@ -419,11 +419,11 @@ public final class ScanPackageHelper {
             // fix up the new package's name now. We must do this after looking
             // up the package under its new name, so getPackageLP takes care of
             // fiddling things correctly.
-            parsedPackage.setPackageName(originalPkgSetting.name);
+            parsedPackage.setPackageName(originalPkgSetting.getPackageName());
 
             // File a report about this.
-            String msg = "New package " + pkgSetting.realName
-                    + " renamed to replace old package " + pkgSetting.name;
+            String msg = "New package " + pkgSetting.getRealName()
+                    + " renamed to replace old package " + pkgSetting.getPackageName();
             PackageManagerService.reportSettingsProblem(Log.WARN, msg);
         }
 
@@ -504,8 +504,8 @@ public final class ScanPackageHelper {
                 // We haven't run dex-opt for this move (since we've moved the compiled output too)
                 // but we already have this packages package info in the PackageSetting. We just
                 // use that and derive the native library path based on the new code path.
-                parsedPackage.setPrimaryCpuAbi(pkgSetting.primaryCpuAbiString)
-                        .setSecondaryCpuAbi(pkgSetting.secondaryCpuAbiString);
+                parsedPackage.setPrimaryCpuAbi(pkgSetting.getPrimaryCpuAbi())
+                        .setSecondaryCpuAbi(pkgSetting.getSecondaryCpuAbi());
             }
 
             // Set native library paths again. For moves, the path will be updated based on the
@@ -538,9 +538,9 @@ public final class ScanPackageHelper {
             }
         }
 
-        pkgSetting.primaryCpuAbiString = AndroidPackageUtils.getRawPrimaryCpuAbi(parsedPackage);
-        pkgSetting.secondaryCpuAbiString = AndroidPackageUtils.getRawSecondaryCpuAbi(parsedPackage);
-        pkgSetting.cpuAbiOverrideString = cpuAbiOverride;
+        pkgSetting.setPrimaryCpuAbi(AndroidPackageUtils.getRawPrimaryCpuAbi(parsedPackage))
+                .setSecondaryCpuAbi(AndroidPackageUtils.getRawSecondaryCpuAbi(parsedPackage))
+                .setCpuAbiOverride(cpuAbiOverride);
 
         if (DEBUG_ABI_SELECTION) {
             Slog.d(TAG, "Resolved nativeLibraryRoot for " + parsedPackage.getPackageName()
@@ -551,25 +551,25 @@ public final class ScanPackageHelper {
 
         // Push the derived path down into PackageSettings so we know what to
         // clean up at uninstall time.
-        pkgSetting.legacyNativeLibraryPathString = parsedPackage.getNativeLibraryRootDir();
+        pkgSetting.setLegacyNativeLibraryPath(parsedPackage.getNativeLibraryRootDir());
 
         if (DEBUG_ABI_SELECTION) {
             Log.d(TAG, "Abis for package[" + parsedPackage.getPackageName() + "] are"
-                    + " primary=" + pkgSetting.primaryCpuAbiString
-                    + " secondary=" + pkgSetting.primaryCpuAbiString
-                    + " abiOverride=" + pkgSetting.cpuAbiOverrideString);
+                    + " primary=" + pkgSetting.getPrimaryCpuAbi()
+                    + " secondary=" + pkgSetting.getSecondaryCpuAbi()
+                    + " abiOverride=" + pkgSetting.getCpuAbiOverride());
         }
 
-        if ((scanFlags & SCAN_BOOTING) == 0 && pkgSetting.sharedUser != null) {
+        if ((scanFlags & SCAN_BOOTING) == 0 && pkgSetting.getSharedUser() != null) {
             // We don't do this here during boot because we can do it all
             // at once after scanning all existing packages.
             //
             // We also do this *before* we perform dexopt on this package, so that
             // we can avoid redundant dexopts, and also to make sure we've got the
             // code and package path correct.
-            changedAbiCodePath = applyAdjustedAbiToSharedUser(pkgSetting.sharedUser, parsedPackage,
-                    packageAbiHelper.getAdjustedAbiForSharedUser(
-                            pkgSetting.sharedUser.packages, parsedPackage));
+            changedAbiCodePath = applyAdjustedAbiToSharedUser(pkgSetting.getSharedUser(),
+                    parsedPackage, packageAbiHelper.getAdjustedAbiForSharedUser(
+                            pkgSetting.getSharedUser().packages, parsedPackage));
         }
 
         parsedPackage.setFactoryTest(isUnderFactoryTest && parsedPackage.getRequestedPermissions()
@@ -582,39 +582,41 @@ public final class ScanPackageHelper {
         // Take care of first install / last update times.
         final long scanFileTime = getLastModifiedTime(parsedPackage);
         if (currentTime != 0) {
-            if (pkgSetting.firstInstallTime == 0) {
-                pkgSetting.firstInstallTime = pkgSetting.lastUpdateTime = currentTime;
+            if (pkgSetting.getFirstInstallTime() == 0) {
+                pkgSetting.setFirstInstallTime(currentTime)
+                        .setLastUpdateTime(currentTime);
             } else if ((scanFlags & SCAN_UPDATE_TIME) != 0) {
-                pkgSetting.lastUpdateTime = currentTime;
+                pkgSetting.setLastUpdateTime(currentTime);
             }
-        } else if (pkgSetting.firstInstallTime == 0) {
+        } else if (pkgSetting.getFirstInstallTime() == 0) {
             // We need *something*.  Take time time stamp of the file.
-            pkgSetting.firstInstallTime = pkgSetting.lastUpdateTime = scanFileTime;
+            pkgSetting.setFirstInstallTime(scanFileTime)
+                    .setLastUpdateTime(scanFileTime);
         } else if ((parseFlags & ParsingPackageUtils.PARSE_IS_SYSTEM_DIR) != 0) {
-            if (scanFileTime != pkgSetting.timeStamp) {
+            if (scanFileTime != pkgSetting.getLastModifiedTime()) {
                 // A package on the system image has changed; consider this
                 // to be an update.
-                pkgSetting.lastUpdateTime = scanFileTime;
+                pkgSetting.setLastUpdateTime(scanFileTime);
             }
         }
-        pkgSetting.setTimeStamp(scanFileTime);
+        pkgSetting.setLastModifiedTime(scanFileTime);
         // TODO(b/135203078): Remove, move to constructor
-        pkgSetting.pkg = parsedPackage;
+        pkgSetting.setPkg(parsedPackage);
         pkgSetting.pkgFlags = PackageInfoUtils.appInfoFlags(parsedPackage, pkgSetting);
         pkgSetting.pkgPrivateFlags =
                 PackageInfoUtils.appInfoPrivateFlags(parsedPackage, pkgSetting);
-        if (parsedPackage.getLongVersionCode() != pkgSetting.versionCode) {
-            pkgSetting.versionCode = parsedPackage.getLongVersionCode();
+        if (parsedPackage.getLongVersionCode() != pkgSetting.getVersionCode()) {
+            pkgSetting.setLongVersionCode(parsedPackage.getLongVersionCode());
         }
         // Update volume if needed
         final String volumeUuid = parsedPackage.getVolumeUuid();
-        if (!Objects.equals(volumeUuid, pkgSetting.volumeUuid)) {
+        if (!Objects.equals(volumeUuid, pkgSetting.getVolumeUuid())) {
             Slog.i(PackageManagerService.TAG,
                     "Update" + (pkgSetting.isSystem() ? " system" : "")
                             + " package " + parsedPackage.getPackageName()
-                            + " volume from " + pkgSetting.volumeUuid
+                            + " volume from " + pkgSetting.getVolumeUuid()
                             + " to " + volumeUuid);
-            pkgSetting.volumeUuid = volumeUuid;
+            pkgSetting.setVolumeUuid(volumeUuid);
         }
 
         SharedLibraryInfo staticSharedLibraryInfo = null;
@@ -698,7 +700,7 @@ public final class ScanPackageHelper {
             if (pkgSetting.getInstantApp(userId)) {
                 scanFlags |= SCAN_AS_INSTANT_APP;
             }
-            if (pkgSetting.getVirtulalPreload(userId)) {
+            if (pkgSetting.getVirtualPreload(userId)) {
                 scanFlags |= SCAN_AS_VIRTUAL_PRELOAD;
             }
         }
@@ -724,7 +726,7 @@ public final class ScanPackageHelper {
                 synchronized (mPm.mLock) {
                     PackageSetting platformPkgSetting = mPm.mSettings.getPackageLPr("android");
                     if ((compareSignatures(
-                            platformPkgSetting.signatures.mSigningDetails.getSignatures(),
+                            platformPkgSetting.getSigningDetails().getSignatures(),
                             pkg.getSigningDetails().getSignatures())
                             != PackageManager.SIGNATURE_MATCH)) {
                         scanFlags |= SCAN_AS_PRIVILEGED;
@@ -779,7 +781,7 @@ public final class ScanPackageHelper {
             pkgSetting = originalPkgSetting == null ? installedPkgSetting : originalPkgSetting;
             pkgAlreadyExists = pkgSetting != null;
             final String disabledPkgName = pkgAlreadyExists
-                    ? pkgSetting.name : parsedPackage.getPackageName();
+                    ? pkgSetting.getPackageName() : parsedPackage.getPackageName();
             if (scanSystemPartition && !pkgAlreadyExists
                     && mPm.mSettings.getDisabledSystemPkgLPr(disabledPkgName) != null) {
                 // The updated-package data for /system apk remains inconsistently
@@ -834,8 +836,8 @@ public final class ScanPackageHelper {
 
         final boolean newPkgChangedPaths = pkgAlreadyExists
                 && !pkgSetting.getPathString().equals(parsedPackage.getPath());
-        final boolean newPkgVersionGreater =
-                pkgAlreadyExists && parsedPackage.getLongVersionCode() > pkgSetting.versionCode;
+        final boolean newPkgVersionGreater = pkgAlreadyExists
+                && parsedPackage.getLongVersionCode() > pkgSetting.getVersionCode();
         final boolean isSystemPkgBetter = scanSystemPartition && isSystemPkgUpdated
                 && newPkgChangedPaths && newPkgVersionGreater;
         if (isSystemPkgBetter) {
@@ -845,23 +847,23 @@ public final class ScanPackageHelper {
             // there won't be a working copy of the application.
             synchronized (mPm.mLock) {
                 // just remove the loaded entries from package lists
-                mPm.mPackages.remove(pkgSetting.name);
+                mPm.mPackages.remove(pkgSetting.getPackageName());
             }
 
             logCriticalInfo(Log.WARN,
                     "System package updated;"
-                            + " name: " + pkgSetting.name
-                            + "; " + pkgSetting.versionCode + " --> "
+                            + " name: " + pkgSetting.getPackageName()
+                            + "; " + pkgSetting.getVersionCode() + " --> "
                             + parsedPackage.getLongVersionCode()
                             + "; " + pkgSetting.getPathString()
                             + " --> " + parsedPackage.getPath());
 
             final InstallArgs args = mPm.createInstallArgsForExisting(
                     pkgSetting.getPathString(), getAppDexInstructionSets(
-                            pkgSetting.primaryCpuAbiString, pkgSetting.secondaryCpuAbiString));
+                            pkgSetting.getPrimaryCpuAbi(), pkgSetting.getSecondaryCpuAbi()));
             args.cleanUpResourcesLI();
             synchronized (mPm.mLock) {
-                mPm.mSettings.enableSystemPackageLPw(pkgSetting.name);
+                mPm.mSettings.enableSystemPackageLPw(pkgSetting.getPackageName());
             }
         }
 
@@ -877,7 +879,7 @@ public final class ScanPackageHelper {
             parsedPackage.hideAsFinal();
             throw new PackageManagerException(Log.WARN, "Package " + parsedPackage.getPackageName()
                     + " at " + parsedPackage.getPath() + " ignored: updated version "
-                    + (pkgAlreadyExists ? String.valueOf(pkgSetting.versionCode) : "unknown")
+                    + (pkgAlreadyExists ? String.valueOf(pkgSetting.getVersionCode()) : "unknown")
                     + " better than this " + parsedPackage.getLongVersionCode());
         }
 
@@ -915,14 +917,14 @@ public final class ScanPackageHelper {
                 && !pkgSetting.isSystem()) {
 
             if (!parsedPackage.getSigningDetails()
-                    .checkCapability(pkgSetting.signatures.mSigningDetails,
+                    .checkCapability(pkgSetting.getSigningDetails(),
                             SigningDetails.CertCapabilities.INSTALLED_DATA)
-                    && !pkgSetting.signatures.mSigningDetails.checkCapability(
+                    && !pkgSetting.getSigningDetails().checkCapability(
                     parsedPackage.getSigningDetails(),
                     SigningDetails.CertCapabilities.ROLLBACK)) {
                 logCriticalInfo(Log.WARN,
                         "System package signature mismatch;"
-                                + " name: " + pkgSetting.name);
+                                + " name: " + pkgSetting.getPackageName());
                 try (@SuppressWarnings("unused") PackageFreezer freezer = mPm.freezePackage(
                         parsedPackage.getPackageName(),
                         "scanPackageInternalLI")) {
@@ -936,14 +938,14 @@ public final class ScanPackageHelper {
                 // and replace it with the version on /system.
                 logCriticalInfo(Log.WARN,
                         "System package enabled;"
-                                + " name: " + pkgSetting.name
-                                + "; " + pkgSetting.versionCode + " --> "
+                                + " name: " + pkgSetting.getPackageName()
+                                + "; " + pkgSetting.getVersionCode() + " --> "
                                 + parsedPackage.getLongVersionCode()
                                 + "; " + pkgSetting.getPathString() + " --> "
                                 + parsedPackage.getPath());
                 InstallArgs args = mPm.createInstallArgsForExisting(
                         pkgSetting.getPathString(), getAppDexInstructionSets(
-                                pkgSetting.primaryCpuAbiString, pkgSetting.secondaryCpuAbiString));
+                                pkgSetting.getPrimaryCpuAbi(), pkgSetting.getSecondaryCpuAbi()));
                 synchronized (mPm.mInstallLock) {
                     args.cleanUpResourcesLI();
                 }
@@ -954,9 +956,9 @@ public final class ScanPackageHelper {
                 shouldHideSystemApp = true;
                 logCriticalInfo(Log.INFO,
                         "System package disabled;"
-                                + " name: " + pkgSetting.name
+                                + " name: " + pkgSetting.getPackageName()
                                 + "; old: " + pkgSetting.getPathString() + " @ "
-                                + pkgSetting.versionCode
+                                + pkgSetting.getVersionCode()
                                 + "; new: " + parsedPackage.getPath() + " @ "
                                 + parsedPackage.getPath());
             }
@@ -968,7 +970,7 @@ public final class ScanPackageHelper {
             synchronized (mPm.mLock) {
                 boolean appIdCreated = false;
                 try {
-                    final String pkgName = scanResult.mPkgSetting.name;
+                    final String pkgName = scanResult.mPkgSetting.getPackageName();
                     final Map<String, ReconciledPackage> reconcileResult =
                             mPm.reconcilePackagesLocked(
                                     new ReconcileRequest(
@@ -1010,7 +1012,7 @@ public final class ScanPackageHelper {
                         new IncrementalProgressListener(parsedPackage.getPackageName(), mPm));
             }
         }
-        return scanResult.mPkgSetting.pkg;
+        return scanResult.mPkgSetting.getPkg();
     }
 
     /**
@@ -1071,22 +1073,22 @@ public final class ScanPackageHelper {
                 mPm.getSettingsVersionForPackage(parsedPackage);
         if (ps != null && !forceCollect
                 && ps.getPathString().equals(parsedPackage.getPath())
-                && ps.timeStamp == lastModifiedTime
+                && ps.getLastModifiedTime() == lastModifiedTime
                 && !PackageManagerService.isCompatSignatureUpdateNeeded(settingsVersionForPackage)
                 && !PackageManagerService.isRecoverSignatureUpdateNeeded(
                 settingsVersionForPackage)) {
-            if (ps.signatures.mSigningDetails.getSignatures() != null
-                    && ps.signatures.mSigningDetails.getSignatures().length != 0
-                    && ps.signatures.mSigningDetails.getSignatureSchemeVersion()
+            if (ps.getSigningDetails().getSignatures() != null
+                    && ps.getSigningDetails().getSignatures().length != 0
+                    && ps.getSigningDetails().getSignatureSchemeVersion()
                     != SigningDetails.SignatureSchemeVersion.UNKNOWN) {
                 // Optimization: reuse the existing cached signing data
                 // if the package appears to be unchanged.
                 parsedPackage.setSigningDetails(
-                        new SigningDetails(ps.signatures.mSigningDetails));
+                        new SigningDetails(ps.getSigningDetails()));
                 return;
             }
 
-            Slog.w(TAG, "PackageSetting for " + ps.name
+            Slog.w(TAG, "PackageSetting for " + ps.getPackageName()
                     + " is missing signatures.  Collecting certs again to recover them.");
         } else {
             Slog.i(TAG, parsedPackage.getPath() + " changed; collecting certs"
@@ -1118,15 +1120,15 @@ public final class ScanPackageHelper {
         if (originalPkgSetting == null || !mPm.isDeviceUpgrading()) {
             return;
         }
-        if (originalPkgSetting.versionCode == pkg.getLongVersionCode()) {
+        if (originalPkgSetting.getVersionCode() == pkg.getLongVersionCode()) {
             return;
         }
 
         mPm.clearAppProfilesLIF(pkg);
         if (DEBUG_INSTALL) {
-            Slog.d(TAG, originalPkgSetting.name
+            Slog.d(TAG, originalPkgSetting.getPackageName()
                     + " clear profile due to version change "
-                    + originalPkgSetting.versionCode + " != "
+                    + originalPkgSetting.getVersionCode() + " != "
                     + pkg.getLongVersionCode());
         }
     }
@@ -1154,12 +1156,12 @@ public final class ScanPackageHelper {
                 if (!verifyPackageUpdateLPr(originalPs, pkg)) {
                     // the new package is incompatible with the original
                     continue;
-                } else if (originalPs.sharedUser != null) {
-                    if (!originalPs.sharedUser.name.equals(pkg.getSharedUserId())) {
+                } else if (originalPs.getSharedUser() != null) {
+                    if (!originalPs.getSharedUser().name.equals(pkg.getSharedUserId())) {
                         // the shared user id is incompatible with the original
-                        Slog.w(TAG, "Unable to migrate data from " + originalPs.name
+                        Slog.w(TAG, "Unable to migrate data from " + originalPs.getPackageName()
                                 + " to " + pkg.getPackageName() + ": old uid "
-                                + originalPs.sharedUser.name
+                                + originalPs.getSharedUser().name
                                 + " differs from " + pkg.getSharedUserId());
                         continue;
                     }
@@ -1167,7 +1169,8 @@ public final class ScanPackageHelper {
                 } else {
                     if (DEBUG_UPGRADE) {
                         Log.v(TAG, "Renaming new package "
-                                + pkg.getPackageName() + " to old name " + originalPs.name);
+                                + pkg.getPackageName() + " to old name "
+                                + originalPs.getPackageName());
                     }
                 }
                 return originalPs;
@@ -1179,12 +1182,12 @@ public final class ScanPackageHelper {
     @GuardedBy("mPm.mLock")
     private boolean verifyPackageUpdateLPr(PackageSetting oldPkg, AndroidPackage newPkg) {
         if ((oldPkg.pkgFlags & ApplicationInfo.FLAG_SYSTEM) == 0) {
-            Slog.w(TAG, "Unable to update from " + oldPkg.name
+            Slog.w(TAG, "Unable to update from " + oldPkg.getPackageName()
                     + " to " + newPkg.getPackageName()
                     + ": old package not in system partition");
             return false;
-        } else if (mPm.mPackages.get(oldPkg.name) != null) {
-            Slog.w(TAG, "Unable to update from " + oldPkg.name
+        } else if (mPm.mPackages.get(oldPkg.getPackageName()) != null) {
+            Slog.w(TAG, "Unable to update from " + oldPkg.getPackageName()
                     + " to " + newPkg.getPackageName()
                     + ": old package still exists");
             return false;
@@ -1592,19 +1595,20 @@ public final class ScanPackageHelper {
         }
         List<String> changedAbiCodePath = null;
         for (PackageSetting ps : sharedUserSetting.packages) {
-            if (scannedPackage == null || !scannedPackage.getPackageName().equals(ps.name)) {
-                if (ps.primaryCpuAbiString != null) {
+            if (scannedPackage == null
+                    || !scannedPackage.getPackageName().equals(ps.getPackageName())) {
+                if (ps.getPrimaryCpuAbi() != null) {
                     continue;
                 }
 
-                ps.primaryCpuAbiString = adjustedAbi;
-                if (ps.pkg != null) {
+                ps.setPrimaryCpuAbi(adjustedAbi);
+                if (ps.getPkg() != null) {
                     if (!TextUtils.equals(adjustedAbi,
-                            AndroidPackageUtils.getRawPrimaryCpuAbi(ps.pkg))) {
+                            AndroidPackageUtils.getRawPrimaryCpuAbi(ps.getPkg()))) {
                         if (DEBUG_ABI_SELECTION) {
                             Slog.i(TAG,
-                                    "Adjusting ABI for " + ps.name + " to " + adjustedAbi
-                                            + " (scannedPackage="
+                                    "Adjusting ABI for " + ps.getPackageName() + " to "
+                                            + adjustedAbi + " (scannedPackage="
                                             + (scannedPackage != null ? scannedPackage : "null")
                                             + ")");
                         }

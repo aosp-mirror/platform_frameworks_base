@@ -2739,7 +2739,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                 boolean changedInstallPermission = false;
 
                 if (replace) {
-                    userState.setInstallPermissionsFixed(ps.name, false);
+                    userState.setInstallPermissionsFixed(ps.getPackageName(), false);
                     if (!ps.isSharedUser()) {
                         origState = new UidPermissionState(uidState);
                         uidState.reset();
@@ -2865,7 +2865,8 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                         // If this is an existing, non-system package, then
                         // we can't add any new permissions to it. Runtime
                         // permissions can be added any time - they are dynamic.
-                        if (!ps.isSystem() && userState.areInstallPermissionsFixed(ps.name)) {
+                        if (!ps.isSystem() && userState.areInstallPermissionsFixed(
+                                ps.getPackageName())) {
                             // Except...  if this is a permission that was added
                             // to the platform (note: need to only do this when
                             // updating the platform).
@@ -3037,12 +3038,12 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                 }
 
                 if ((changedInstallPermission || replace)
-                        && !userState.areInstallPermissionsFixed(ps.name)
+                        && !userState.areInstallPermissionsFixed(ps.getPackageName())
                         && !ps.isSystem() || ps.getPkgState().isUpdatedSystemApp()) {
                     // This is the first that we have heard about this package, so the
                     // permissions we have now selected are fixed until explicitly
                     // changed.
-                    userState.setInstallPermissionsFixed(ps.name, true);
+                    userState.setInstallPermissionsFixed(ps.getPackageName(), true);
                 }
 
                 updatedUserIds = revokePermissionsNoLongerImplicitLocked(uidState, pkg,
@@ -3571,7 +3572,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             if (pkgSetting.getPkgState().isUpdatedSystemApp()) {
                 final PackageSetting disabledPs = mPackageManagerInt
                         .getDisabledSystemPackage(pkg.getPackageName());
-                final AndroidPackage disabledPkg = disabledPs == null ? null : disabledPs.pkg;
+                final AndroidPackage disabledPkg = disabledPs == null ? null : disabledPs.getPkg();
                 if (disabledPkg != null
                         && ((isPrivilegedPermission && disabledPkg.isPrivileged())
                         || (isOemPermission && canGrantOemPermission(disabledPkg,
@@ -3968,7 +3969,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
         PackageSetting disabledPs = mPackageManagerInt.getDisabledSystemPackage(
                 pkg.getPackageName());
-        boolean isShadowingSystemPkg = disabledPs != null && disabledPs.appId == pkg.getUid();
+        boolean isShadowingSystemPkg = disabledPs != null && disabledPs.getAppId() == pkg.getUid();
 
         boolean shouldKillUid = false;
         // Update permissions
@@ -4680,7 +4681,8 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                 for (final int userId : userIds) {
                     final UserPermissionState userState = mState.getOrCreateUserState(userId);
 
-                    userState.setInstallPermissionsFixed(ps.name, ps.areInstallPermissionsFixed());
+                    userState.setInstallPermissionsFixed(ps.getPackageName(),
+                            ps.isInstallPermissionsFixed());
                     final UidPermissionState uidState = userState.getOrCreateUidState(appId);
                     uidState.reset();
                     uidState.setMissing(legacyState.isMissing(userId));
@@ -4725,14 +4727,14 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                         continue;
                     }
 
-                    if (userState.areInstallPermissionsFixed(ps.name)) {
+                    if (userState.areInstallPermissionsFixed(ps.getPackageName())) {
                         ps.setInstallPermissionsFixed(true);
                     }
 
                     final UidPermissionState uidState = userState.getUidState(appId);
                     if (uidState == null) {
-                        Slog.e(TAG, "Missing permission state for " + ps.name + " and user "
-                                + userId);
+                        Slog.e(TAG, "Missing permission state for " + ps.getPackageName()
+                                + " and user " + userId);
                         continue;
                     }
 
@@ -4875,13 +4877,13 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             return false;
         }
         if (!oldPs.isSystem()) {
-            Slog.w(TAG, "Unable to update from " + oldPs.name
+            Slog.w(TAG, "Unable to update from " + oldPs.getPackageName()
                     + " to " + newPkg.getPackageName()
                     + ": old package not in system partition");
             return false;
         }
-        if (mPackageManagerInt.getPackage(oldPs.name) != null) {
-            Slog.w(TAG, "Unable to update from " + oldPs.name
+        if (mPackageManagerInt.getPackage(oldPs.getPackageName()) != null) {
+            Slog.w(TAG, "Unable to update from " + oldPs.getPackageName()
                     + " to " + newPkg.getPackageName()
                     + ": old package still exists");
             return false;

@@ -89,7 +89,7 @@ abstract class HandlerParams {
             if (dataOwnerPkg  == null) {
                 PackageSetting ps = mPm.mSettings.getPackageLPr(packageName);
                 if (ps != null) {
-                    dataOwnerPkg = ps.pkg;
+                    dataOwnerPkg = ps.getPkg();
                 }
             }
 

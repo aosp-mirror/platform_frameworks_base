@@ -161,16 +161,16 @@ public final class SharedUserSetting extends SettingBase {
     void addPackage(PackageSetting packageSetting) {
         // If this is the first package added to this shared user, temporarily (until next boot) use
         // its targetSdkVersion when assigning seInfo for the shared user.
-        if ((packages.size() == 0) && (packageSetting.pkg != null)) {
-            seInfoTargetSdkVersion = packageSetting.pkg.getTargetSdkVersion();
+        if ((packages.size() == 0) && (packageSetting.getPkg() != null)) {
+            seInfoTargetSdkVersion = packageSetting.getPkg().getTargetSdkVersion();
         }
         if (packages.add(packageSetting)) {
             setFlags(this.pkgFlags | packageSetting.pkgFlags);
             setPrivateFlags(this.pkgPrivateFlags | packageSetting.pkgPrivateFlags);
             onChanged();
         }
-        if (packageSetting.pkg != null) {
-            addProcesses(packageSetting.pkg.getProcesses());
+        if (packageSetting.getPkg() != null) {
+            addProcesses(packageSetting.getPkg().getProcesses());
         }
     }
 
@@ -180,10 +180,10 @@ public final class SharedUserSetting extends SettingBase {
         }
         final ArrayList<AndroidPackage> pkgList = new ArrayList<>(packages.size());
         for (PackageSetting ps : packages) {
-            if ((ps == null) || (ps.pkg == null)) {
+            if ((ps == null) || (ps.getPkg() == null)) {
                 continue;
             }
-            pkgList.add(ps.pkg);
+            pkgList.add(ps.getPkg());
         }
         return pkgList;
     }
@@ -203,21 +203,21 @@ public final class SharedUserSetting extends SettingBase {
             return;
         }
         for (PackageSetting ps : packages) {
-            if ((ps == null) || (ps.pkg == null)) {
+            if ((ps == null) || (ps.getPkg() == null)) {
                 continue;
             }
-            if (ps.pkg.getTargetSdkVersion() < seInfoTargetSdkVersion) {
-                seInfoTargetSdkVersion = ps.pkg.getTargetSdkVersion();
+            if (ps.getPkg().getTargetSdkVersion() < seInfoTargetSdkVersion) {
+                seInfoTargetSdkVersion = ps.getPkg().getTargetSdkVersion();
                 onChanged();
             }
         }
 
         for (PackageSetting ps : packages) {
-            if ((ps == null) || (ps.pkg == null)) {
+            if ((ps == null) || (ps.getPkg() == null)) {
                 continue;
             }
-            final boolean isPrivileged = isPrivileged() | ps.pkg.isPrivileged();
-            ps.getPkgState().setOverrideSeInfo(SELinuxMMAC.getSeInfo(ps.pkg, isPrivileged,
+            final boolean isPrivileged = isPrivileged() | ps.getPkg().isPrivileged();
+            ps.getPkgState().setOverrideSeInfo(SELinuxMMAC.getSeInfo(ps.getPkg(), isPrivileged,
                     seInfoTargetSdkVersion));
             onChanged();
         }
@@ -229,7 +229,7 @@ public final class SharedUserSetting extends SettingBase {
     public void updateProcesses() {
         processes.clear();
         for (int i = packages.size() - 1; i >= 0; i--) {
-            final AndroidPackage pkg = packages.valueAt(i).pkg;
+            final AndroidPackage pkg = packages.valueAt(i).getPkg();
             if (pkg != null) {
                 addProcesses(pkg.getProcesses());
             }
@@ -256,7 +256,7 @@ public final class SharedUserSetting extends SettingBase {
 
     /** Updates all fields in this shared user setting from another. */
     public SharedUserSetting updateFrom(SharedUserSetting sharedUser) {
-        copyFrom(sharedUser);
+        super.copySettingBase(sharedUser);
         this.userId = sharedUser.userId;
         this.uidFlags = sharedUser.uidFlags;
         this.uidPrivateFlags = sharedUser.uidPrivateFlags;

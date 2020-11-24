@@ -184,6 +184,8 @@ open class AndroidPackageParsingTestBase {
             whenever(pkgState) { PackageStateUnserialized() }
             whenever(readUserState(anyInt())) { dummyUserState }
             whenever(categoryOverride) { ApplicationInfo.CATEGORY_UNDEFINED }
+            whenever(primaryCpuAbi) { null }
+            whenever(secondaryCpuAbi) { null }
         }
     }
 

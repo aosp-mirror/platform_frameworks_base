@@ -264,20 +264,20 @@ public class AndroidPackageUtils {
     }
 
     public static String getPrimaryCpuAbi(AndroidPackage pkg, @Nullable PackageSetting pkgSetting) {
-        if (pkgSetting == null || TextUtils.isEmpty(pkgSetting.primaryCpuAbiString)) {
+        if (pkgSetting == null || TextUtils.isEmpty(pkgSetting.getPrimaryCpuAbi())) {
             return getRawPrimaryCpuAbi(pkg);
         }
 
-        return pkgSetting.primaryCpuAbiString;
+        return pkgSetting.getPrimaryCpuAbi();
     }
 
     public static String getSecondaryCpuAbi(AndroidPackage pkg,
             @Nullable PackageSetting pkgSetting) {
-        if (pkgSetting == null || TextUtils.isEmpty(pkgSetting.secondaryCpuAbiString)) {
+        if (pkgSetting == null || TextUtils.isEmpty(pkgSetting.getSecondaryCpuAbi())) {
             return getRawSecondaryCpuAbi(pkg);
         }
 
-        return pkgSetting.secondaryCpuAbiString;
+        return pkgSetting.getSecondaryCpuAbi();
     }
 
     /**
