@@ -69,7 +69,7 @@ public final class PeopleServiceTest {
         when(mCallback.asBinder()).thenReturn(new Binder());
 
         PeopleService service = new PeopleService(mContext);
-        service.onStart();
+        service.onStart(/* isForTesting= */ true);
 
         mServiceInternal = LocalServices.getService(PeopleServiceInternal.class);
         mLocalService = (PeopleService.LocalService) mServiceInternal;
