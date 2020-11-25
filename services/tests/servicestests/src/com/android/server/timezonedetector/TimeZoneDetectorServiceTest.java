@@ -96,15 +96,16 @@ public class TimeZoneDetectorServiceTest {
         doNothing().when(mMockContext).enforceCallingOrSelfPermission(anyString(), any());
 
         ManualTimeZoneSuggestion timeZoneSuggestion = createManualTimeZoneSuggestion();
-        mTimeZoneDetectorService.suggestManualTimeZone(timeZoneSuggestion);
-        mTestHandler.assertTotalMessagesEnqueued(1);
+
+        boolean expectedResult = true; // The test strategy always returns true.
+        assertEquals(expectedResult,
+                mTimeZoneDetectorService.suggestManualTimeZone(timeZoneSuggestion));
+
+        mStubbedTimeZoneDetectorStrategy.verifySuggestManualTimeZoneCalled(timeZoneSuggestion);
 
         verify(mMockContext).enforceCallingOrSelfPermission(
                 eq(android.Manifest.permission.SUGGEST_MANUAL_TIME_AND_ZONE),
                 anyString());
-
-        mTestHandler.waitForMessagesToBeProcessed();
-        mStubbedTimeZoneDetectorStrategy.verifySuggestManualTimeZoneCalled(timeZoneSuggestion);
     }
 
     @Test(expected = SecurityException.class)
@@ -187,8 +188,9 @@ public class TimeZoneDetectorServiceTest {
         private boolean mDumpCalled;
 
         @Override
-        public void suggestManualTimeZone(ManualTimeZoneSuggestion timeZoneSuggestion) {
+        public boolean suggestManualTimeZone(ManualTimeZoneSuggestion timeZoneSuggestion) {
             mLastManualSuggestion = timeZoneSuggestion;
+            return true;
         }
 
         @Override
