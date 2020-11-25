@@ -912,13 +912,17 @@ java_library_host {
     name: "platformprotos",
     srcs: [
         ":ipconnectivity-proto-src",
+        ":libstats_internal_protos",
         "cmds/am/proto/instrumentation_data.proto",
         "cmds/statsd/src/**/*.proto",
         "core/proto/**/*.proto",
         "libs/incident/proto/**/*.proto",
     ],
     proto: {
-        include_dirs: ["external/protobuf/src"],
+        include_dirs: [
+            "external/protobuf/src",
+            "frameworks/proto_logging/stats",
+        ],
         type: "full",
     },
     // Protos have lots of MissingOverride and similar.
