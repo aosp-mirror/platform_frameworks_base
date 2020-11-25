@@ -1866,6 +1866,13 @@ public class InputManagerService extends IInputManager.Stub
         }
 
         VibrationInfo(VibrationEffect effect) {
+            // First replace prebaked effects with its fallback, if any available.
+            if (effect instanceof VibrationEffect.Prebaked) {
+                VibrationEffect fallback = ((VibrationEffect.Prebaked) effect).getFallbackEffect();
+                if (fallback != null) {
+                    effect = fallback;
+                }
+            }
             if (effect instanceof VibrationEffect.OneShot) {
                 VibrationEffect.OneShot oneShot = (VibrationEffect.OneShot) effect;
                 mPattern = new long[] { 0, oneShot.getDuration() };
@@ -1892,8 +1899,7 @@ public class InputManagerService extends IInputManager.Stub
                     throw new ArrayIndexOutOfBoundsException();
                 }
             } else {
-                // TODO: Add support for prebaked effects
-                Slog.w(TAG, "Pre-baked effects aren't supported on input devices");
+                Slog.w(TAG, "Pre-baked and composed effects aren't supported on input devices");
             }
         }
     }

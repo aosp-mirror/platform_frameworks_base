@@ -18,6 +18,7 @@ package com.android.server.vibrator;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.os.CombinedVibrationEffect;
 import android.os.IBinder;
 import android.os.SystemClock;
 import android.os.VibrationAttributes;
@@ -72,14 +73,14 @@ public class Vibration {
 
     /** The actual effect to be played. */
     @Nullable
-    private VibrationEffect mEffect;
+    private CombinedVibrationEffect mEffect;
 
     /**
      * The original effect that was requested. Typically these two things differ because the effect
      * was scaled based on the users vibration intensity settings.
      */
     @Nullable
-    private VibrationEffect mOriginalEffect;
+    private CombinedVibrationEffect mOriginalEffect;
 
     /**
      * Start/end times in unix epoch time. Only to be used for debugging purposes and to correlate
@@ -90,7 +91,7 @@ public class Vibration {
     private long mEndTimeDebug;
     private Status mStatus;
 
-    public Vibration(IBinder token, int id, VibrationEffect effect,
+    public Vibration(IBinder token, int id, CombinedVibrationEffect effect,
             VibrationAttributes attrs, int uid, String opPkg, String reason) {
         this.token = token;
         this.mEffect = effect;
@@ -124,7 +125,7 @@ public class Vibration {
      * Replace this vibration effect if given {@code scaledEffect} is different, preserving the
      * original one for debug purposes.
      */
-    public void updateEffect(@NonNull VibrationEffect newEffect) {
+    public void updateEffect(@NonNull CombinedVibrationEffect newEffect) {
         if (newEffect.equals(mEffect)) {
             return;
         }
@@ -139,7 +140,7 @@ public class Vibration {
 
     /** Return the effect that should be played by this vibration. */
     @Nullable
-    public VibrationEffect getEffect() {
+    public CombinedVibrationEffect getEffect() {
         return mEffect;
     }
 
@@ -154,8 +155,8 @@ public class Vibration {
     public static final class DebugInfo {
         private final long mStartTimeDebug;
         private final long mEndTimeDebug;
-        private final VibrationEffect mEffect;
-        private final VibrationEffect mOriginalEffect;
+        private final CombinedVibrationEffect mEffect;
+        private final CombinedVibrationEffect mOriginalEffect;
         private final float mScale;
         private final VibrationAttributes mAttrs;
         private final int mUid;
@@ -163,8 +164,8 @@ public class Vibration {
         private final String mReason;
         private final Status mStatus;
 
-        public DebugInfo(long startTimeDebug, long endTimeDebug, VibrationEffect effect,
-                VibrationEffect originalEffect, float scale, VibrationAttributes attrs,
+        public DebugInfo(long startTimeDebug, long endTimeDebug, CombinedVibrationEffect effect,
+                CombinedVibrationEffect originalEffect, float scale, VibrationAttributes attrs,
                 int uid, String opPkg, String reason, Status status) {
             mStartTimeDebug = startTimeDebug;
             mEndTimeDebug = endTimeDebug;
@@ -228,7 +229,22 @@ public class Vibration {
             proto.end(token);
         }
 
-        private void dumpEffect(ProtoOutputStream proto, long fieldId, VibrationEffect effect) {
+        private void dumpEffect(
+                ProtoOutputStream proto, long fieldId, CombinedVibrationEffect combinedEffect) {
+            VibrationEffect effect;
+            // TODO(b/177805090): add proper support for dumping combined effects to proto
+            if (combinedEffect instanceof CombinedVibrationEffect.Mono) {
+                effect = ((CombinedVibrationEffect.Mono) combinedEffect).getEffect();
+            } else if (combinedEffect instanceof CombinedVibrationEffect.Stereo) {
+                effect = ((CombinedVibrationEffect.Stereo) combinedEffect).getEffects().valueAt(0);
+            } else if (combinedEffect instanceof CombinedVibrationEffect.Sequential) {
+                dumpEffect(proto, fieldId,
+                        ((CombinedVibrationEffect.Sequential) combinedEffect).getEffects().get(0));
+                return;
+            } else {
+                // Unknown combined effect, skip dump.
+                return;
+            }
             final long token = proto.start(fieldId);
             if (effect instanceof VibrationEffect.OneShot) {
                 dumpEffect(proto, VibrationEffectProto.ONESHOT, (VibrationEffect.OneShot) effect);
