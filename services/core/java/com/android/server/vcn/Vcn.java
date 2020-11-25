@@ -69,7 +69,7 @@ public class Vcn extends Handler {
     }
 
     /** Asynchronously tears down this Vcn instance, along with all tunnels and Networks */
-    public void teardown() {
+    public void teardownAsynchronously() {
         // TODO: Proxy to handler, and teardown there.
     }
 

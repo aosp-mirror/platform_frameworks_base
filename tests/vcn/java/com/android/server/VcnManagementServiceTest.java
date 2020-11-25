@@ -21,6 +21,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
@@ -42,6 +43,9 @@ import android.telephony.TelephonyManager;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.server.VcnManagementService.VcnNetworkProvider;
+import com.android.server.vcn.Vcn;
+import com.android.server.vcn.VcnContext;
 import com.android.server.vcn.util.PersistableBundleUtils;
 
 import org.junit.Test;
@@ -92,9 +96,11 @@ public class VcnManagementServiceTest {
     private final ConnectivityManager mConnMgr = mock(ConnectivityManager.class);
     private final TelephonyManager mTelMgr = mock(TelephonyManager.class);
     private final SubscriptionManager mSubMgr = mock(SubscriptionManager.class);
-    private final VcnManagementService mVcnMgmtSvc;
+    private final VcnContext mVcnContext = mock(VcnContext.class);
     private final PersistableBundleUtils.LockingReadWriteHelper mConfigReadWriteHelper =
             mock(PersistableBundleUtils.LockingReadWriteHelper.class);
+
+    private final VcnManagementService mVcnMgmtSvc;
 
     public VcnManagementServiceTest() throws Exception {
         setupSystemService(mConnMgr, Context.CONNECTIVITY_SERVICE, ConnectivityManager.class);
@@ -104,9 +110,21 @@ public class VcnManagementServiceTest {
 
         doReturn(mTestLooper.getLooper()).when(mMockDeps).getLooper();
         doReturn(Process.FIRST_APPLICATION_UID).when(mMockDeps).getBinderCallingUid();
+        doReturn(mVcnContext)
+                .when(mMockDeps)
+                .newVcnContext(
+                        eq(mMockContext),
+                        eq(mTestLooper.getLooper()),
+                        any(VcnNetworkProvider.class));
         doReturn(mConfigReadWriteHelper)
                 .when(mMockDeps)
                 .newPersistableBundleLockingReadWriteHelper(any());
+
+        // Setup VCN instance generation
+        doAnswer((invocation) -> {
+            // Mock-within a doAnswer is safe, because it doesn't actually run nested.
+            return mock(Vcn.class);
+        }).when(mMockDeps).newVcn(any(), any(), any());
 
         final PersistableBundle bundle =
                 PersistableBundleUtils.fromMap(
@@ -254,5 +272,27 @@ public class VcnManagementServiceTest {
         mVcnMgmtSvc.clearVcnConfig(TEST_UUID_1);
         assertTrue(mVcnMgmtSvc.getConfigs().isEmpty());
         verify(mConfigReadWriteHelper).writeToDisk(any(PersistableBundle.class));
+    }
+
+    @Test
+    public void testSetVcnConfigClearVcnConfigStartsUpdatesAndTeardsDownVcns() throws Exception {
+        // Use a different UUID to simulate a new VCN config.
+        mVcnMgmtSvc.setVcnConfig(TEST_UUID_2, TEST_VCN_CONFIG);
+        final Map<ParcelUuid, Vcn> vcnInstances = mVcnMgmtSvc.getAllVcns();
+        final Vcn vcnInstance = vcnInstances.get(TEST_UUID_2);
+        assertEquals(1, vcnInstances.size());
+        assertEquals(TEST_VCN_CONFIG, mVcnMgmtSvc.getConfigs().get(TEST_UUID_2));
+        verify(mConfigReadWriteHelper).writeToDisk(any(PersistableBundle.class));
+
+        // Verify Vcn is started
+        verify(mMockDeps).newVcn(eq(mVcnContext), eq(TEST_UUID_2), eq(TEST_VCN_CONFIG));
+
+        // Verify Vcn is updated if it was previously started
+        mVcnMgmtSvc.setVcnConfig(TEST_UUID_2, TEST_VCN_CONFIG);
+        verify(vcnInstance).updateConfig(TEST_VCN_CONFIG);
+
+        // Verify Vcn is stopped if it was already started
+        mVcnMgmtSvc.clearVcnConfig(TEST_UUID_2);
+        verify(vcnInstance).teardownAsynchronously();
     }
 }
