@@ -85,7 +85,7 @@
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"ការហៅ​ទូរសព្ទ"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"ផ្ទេរ​ឯកសារ"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"ឧបករណ៍​បញ្ចូល"</string>
-    <string name="bluetooth_profile_pan" msgid="1006235139308318188">"ចូល​អ៊ីនធឺណិត"</string>
+    <string name="bluetooth_profile_pan" msgid="1006235139308318188">"ការចូលប្រើ​អ៊ីនធឺណិត"</string>
     <string name="bluetooth_profile_pbap" msgid="7064307749579335765">"ការ​ចែករំលែក​​ទំនាក់ទំនង"</string>
     <string name="bluetooth_profile_pbap_summary" msgid="2955819694801952056">"ប្រើ​សម្រាប់​ការ​ចែករំលែក​ទំនាក់ទំនង"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"ចែករំលែក​ការ​តភ្ជាប់​អ៊ីនធឺណិត"</string>
@@ -446,6 +446,7 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"<xliff:g id="TIME">%1$s</xliff:g> ទៀតទើបសាកថ្មពេញ"</string>
     <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> ទៀតទើប​សាកថ្មពេញ"</string>
+    <string name="power_charging_limited" msgid="5902301801611726210">"<xliff:g id="LEVEL">%1$s</xliff:g> - បានដាក់កម្រិតថ្ម​ជាបណ្ដោះអាសន្ន"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"មិន​ស្គាល់"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"កំពុងបញ្ចូល​ថ្ម"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"កំពុងសាកថ្មយ៉ាងឆាប់រហ័ស"</string>

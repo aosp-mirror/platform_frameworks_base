@@ -142,7 +142,7 @@
     <string name="process_kernel_label" msgid="950292573930336765">"Système d\'exploitation Android"</string>
     <string name="data_usage_uninstalled_apps" msgid="1933665711856171491">"Applications supprimées"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="5533981546921913295">"Applications et utilisateurs supprimés"</string>
-    <string name="data_usage_ota" msgid="7984667793701597001">"Mises à jour système"</string>
+    <string name="data_usage_ota" msgid="7984667793701597001">"Mises à jour du système"</string>
     <string name="tether_settings_title_usb" msgid="3728686573430917722">"Partage de connexion par USB"</string>
     <string name="tether_settings_title_wifi" msgid="4803402057533895526">"Point d\'accès Wi-Fi mobile"</string>
     <string name="tether_settings_title_bluetooth" msgid="916519902721399656">"Partage connexion Bluetooth"</string>
@@ -446,6 +446,7 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"<xliff:g id="TIME">%1$s</xliff:g> jusqu\'à la charge complète"</string>
     <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> : <xliff:g id="TIME">%2$s</xliff:g> jusqu\'à la charge complète"</string>
+    <string name="power_charging_limited" msgid="5902301801611726210">"<xliff:g id="LEVEL">%1$s</xliff:g> – Pile limitée temporairement"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Inconnu"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Charge en cours…"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Recharge rapide"</string>
@@ -488,6 +489,7 @@
     <string name="wifi_status_mac_randomized" msgid="466382542497832189">"Les adresses MAC sont randomisées"</string>
     <plurals name="wifi_tether_connected_summary" formatted="false" msgid="6317236306047306139">
       <item quantity="one">%1$d appareil connecté</item>
+      <item quantity="many">%1$d devices connected</item>
       <item quantity="other">%1$d appareils connectés</item>
     </plurals>
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"Plus longtemps."</string>
@@ -497,7 +499,7 @@
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Activer"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Activer le mode Ne pas déranger"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"Jamais"</string>
-    <string name="zen_interruption_level_priority" msgid="5392140786447823299">"Priorités seulement"</string>
+    <string name="zen_interruption_level_priority" msgid="5392140786447823299">"Prioritaires seulement"</string>
     <string name="zen_mode_and_condition" msgid="8877086090066332516">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="zen_alarm_warning_indef" msgid="4146527909616457163">"Vous n\'entendrez pas votre prochaine alarme à <xliff:g id="WHEN">%1$s</xliff:g> sauf si vous désactivez préalablement cette option"</string>
     <string name="zen_alarm_warning" msgid="245729928048586280">"Vous n\'entendrez pas votre prochaine alarme à <xliff:g id="WHEN">%1$s</xliff:g>"</string>
