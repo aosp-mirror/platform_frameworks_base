@@ -103,6 +103,7 @@
     <uses-permission android:name="android.permission.START_ACTIVITY_AS_CALLER" />
     <uses-permission android:name="android.permission.START_TASKS_FROM_RECENTS" />
     <uses-permission android:name="android.permission.GET_INTENT_SENDER_INTENT" />
+    <uses-permission android:name="android.permission.BROADCAST_CLOSE_SYSTEM_DIALOGS" />
 
     <!-- WindowManager -->
     <uses-permission android:name="android.permission.INTERNAL_SYSTEM_WINDOW" />
