@@ -576,8 +576,6 @@ public class SettingsBackupTest {
                     Settings.Global.CHAINED_BATTERY_ATTRIBUTION_ENABLED,
                     Settings.Global.HIDDEN_API_BLACKLIST_EXEMPTIONS,
                     Settings.Global.BACKUP_AGENT_TIMEOUT_PARAMETERS,
-                    Settings.Global.ISOLATED_STORAGE_LOCAL,
-                    Settings.Global.ISOLATED_STORAGE_REMOTE,
                     Settings.Global.APPOP_HISTORY_PARAMETERS,
                     Settings.Global.APPOP_HISTORY_MODE,
                     Settings.Global.APPOP_HISTORY_INTERVAL_MULTIPLIER,

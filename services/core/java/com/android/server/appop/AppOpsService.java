@@ -124,7 +124,6 @@ import android.os.ShellCommand;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.os.storage.StorageManager;
 import android.os.storage.StorageManagerInternal;
 import android.provider.Settings;
 import android.util.ArrayMap;
@@ -155,10 +154,8 @@ import com.android.internal.app.IAppOpsService;
 import com.android.internal.app.IAppOpsStartedCallback;
 import com.android.internal.app.MessageSamplingConfig;
 import com.android.internal.compat.IPlatformCompat;
-import com.android.internal.os.Zygote;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
-import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.XmlUtils;
 import com.android.internal.util.function.pooled.PooledLambda;
@@ -175,7 +172,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -185,7 +181,6 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -1764,26 +1759,6 @@ public class AppOpsService extends IAppOpsService.Stub {
                     }
                 });
 
-        if (!StorageManager.hasIsolatedStorage()) {
-            StorageManagerInternal storageManagerInternal = LocalServices.getService(
-                    StorageManagerInternal.class);
-            storageManagerInternal.addExternalStoragePolicy(
-                    new StorageManagerInternal.ExternalStorageMountPolicy() {
-                        @Override
-                        public int getMountMode(int uid, String packageName) {
-                            if (Process.isIsolated(uid)) {
-                                return Zygote.MOUNT_EXTERNAL_NONE;
-                            }
-                            return Zygote.MOUNT_EXTERNAL_DEFAULT;
-                        }
-
-                        @Override
-                        public boolean hasExternalStorage(int uid, String packageName) {
-                            final int mountMode = getMountMode(uid, packageName);
-                            return mountMode != Zygote.MOUNT_EXTERNAL_NONE;
-                        }
-                    });
-        }
         mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
     }
 

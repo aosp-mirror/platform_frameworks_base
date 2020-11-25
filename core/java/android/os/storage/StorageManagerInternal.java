@@ -28,50 +28,8 @@ import java.util.Set;
  * @hide Only for use within the system server.
  */
 public abstract class StorageManagerInternal {
-
     /**
-     * Policy that influences how external storage is mounted and reported.
-     */
-    public interface ExternalStorageMountPolicy {
-        /**
-         * Gets the external storage mount mode for the given uid.
-         *
-         * @param uid The UID for which to determine mount mode.
-         * @param packageName The package in the UID for making the call.
-         * @return The mount mode.
-         *
-         * @see com.android.internal.os.Zygote#MOUNT_EXTERNAL_NONE
-         * @see com.android.internal.os.Zygote#MOUNT_EXTERNAL_DEFAULT
-         * @see com.android.internal.os.Zygote#MOUNT_EXTERNAL_READ
-         * @see com.android.internal.os.Zygote#MOUNT_EXTERNAL_WRITE
-         */
-        public int getMountMode(int uid, String packageName);
-
-        /**
-         * Gets whether external storage should be reported to the given UID.
-         *
-         * @param uid The UID for which to determine whether it has external storage.
-         * @param packageName The package in the UID for making the call.
-         * @return Weather to report external storage.
-         * @return True to report the state of external storage, false to
-         *     report it as unmounted.
-         */
-        public boolean hasExternalStorage(int uid, String packageName);
-    }
-
-    /**
-     * Adds a policy for determining how external storage is mounted and reported.
-     * The mount mode is the most conservative result from querying all registered
-     * policies. Similarly, the reported state is the most conservative result from
-     * querying all registered policies.
-     *
-     * @param policy The policy to add.
-     */
-    public abstract void addExternalStoragePolicy(ExternalStorageMountPolicy policy);
-
-    /**
-     * Gets the mount mode to use for a given UID as determined by consultin all
-     * policies.
+     * Gets the mount mode to use for a given UID
      *
      * @param uid The UID for which to get mount mode.
      * @param packageName The package in the UID for making the call.

@@ -343,7 +343,6 @@ import com.android.internal.content.PackageHelper;
 import com.android.internal.content.om.OverlayConfig;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.os.SomeArgs;
-import com.android.internal.os.Zygote;
 import com.android.internal.telephony.CarrierAppUtils;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.ConcurrentUtils;
@@ -4105,10 +4104,7 @@ public class PackageManagerService extends IPackageManager.Stub
         // feature flags should cause us to invalidate any caches.
         final String cacheName = FORCE_PACKAGE_PARSED_CACHE_ENABLED ? "debug"
                 : injector.getSystemWrapper().digestOfProperties(
-                        "ro.build.fingerprint",
-                        StorageManager.PROP_ISOLATED_STORAGE,
-                        StorageManager.PROP_ISOLATED_STORAGE_SNAPSHOT
-                );
+                        "ro.build.fingerprint");
 
         // Reconcile cache directories, keeping only what we'd actually use.
         for (File cacheDir : FileUtils.listFilesOrEmpty(cacheBaseDir)) {
@@ -22218,22 +22214,6 @@ public class PackageManagerService extends IPackageManager.Stub
 
         mInstallerService.systemReady();
         mPackageDexOptimizer.systemReady();
-
-        mInjector.getLocalService(StorageManagerInternal.class).addExternalStoragePolicy(
-                new StorageManagerInternal.ExternalStorageMountPolicy() {
-                    @Override
-                    public int getMountMode(int uid, String packageName) {
-                        if (Process.isIsolated(uid)) {
-                            return Zygote.MOUNT_EXTERNAL_NONE;
-                        }
-                        return Zygote.MOUNT_EXTERNAL_DEFAULT;
-                    }
-
-                    @Override
-                    public boolean hasExternalStorage(int uid, String packageName) {
-                        return true;
-                    }
-        });
 
         // Now that we're mostly running, clean up stale users and apps
         mUserManager.reconcileUsers(StorageManager.UUID_PRIVATE_INTERNAL);
