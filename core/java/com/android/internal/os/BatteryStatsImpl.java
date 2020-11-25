@@ -13738,10 +13738,6 @@ public class BatteryStatsImpl extends BatteryStats {
         return u;
     }
 
-    public void onCleanupUserLocked(int userId) {
-        onCleanupUserLocked(userId, mClocks.elapsedRealtime());
-    }
-
     public void onCleanupUserLocked(int userId, long elapsedRealtimeMs) {
         final int firstUidForUser = UserHandle.getUid(userId, 0);
         final int lastUidForUser = UserHandle.getUid(userId, UserHandle.PER_USER_RANGE - 1);
