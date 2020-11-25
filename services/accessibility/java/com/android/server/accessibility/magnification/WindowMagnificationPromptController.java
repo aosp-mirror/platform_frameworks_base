@@ -106,13 +106,16 @@ public class WindowMagnificationPromptController {
 
         final Notification.Builder notificationBuilder = new Notification.Builder(mContext,
                 SystemNotificationChannels.ACCESSIBILITY_MAGNIFICATION);
+        final String message = mContext.getString(R.string.window_magnification_prompt_content);
+
         notificationBuilder.setSmallIcon(R.drawable.ic_settings_24dp)
                 .setContentTitle(mContext.getString(R.string.window_magnification_prompt_title))
-                .setContentText(mContext.getString(R.string.window_magnification_prompt_content))
+                .setContentText(message)
                 .setLargeIcon(Icon.createWithResource(mContext,
                         R.drawable.ic_accessibility_magnification))
                 .setTicker(mContext.getString(R.string.window_magnification_prompt_title))
                 .setOnlyAlertOnce(true)
+                .setStyle(new Notification.BigTextStyle().bigText(message))
                 .setDeleteIntent(createPendingIntent(ACTION_DISMISS))
                 .setContentIntent(createPendingIntent(ACTION_TURN_ON_IN_SETTINGS))
                 .setActions(buildTurnOnAction(), buildDismissAction());
