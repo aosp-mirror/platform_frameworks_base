@@ -34,7 +34,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.widget.CachingIconView;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.CrossFadeHelper;
-import com.android.systemui.statusbar.NotificationHeaderUtil;
+import com.android.systemui.statusbar.NotificationGroupingUtil;
 import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.notification.collection.legacy.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
@@ -94,7 +94,7 @@ public class NotificationChildrenContainer extends ViewGroup {
     private NotificationViewWrapper mNotificationHeaderWrapper;
     private NotificationHeaderView mNotificationHeaderLowPriority;
     private NotificationViewWrapper mNotificationHeaderWrapperLowPriority;
-    private NotificationHeaderUtil mHeaderUtil;
+    private NotificationGroupingUtil mGroupingUtil;
     private ViewState mHeaderViewState;
     private int mClipBottomAmount;
     private boolean mIsLowPriority;
@@ -299,7 +299,7 @@ public class NotificationChildrenContainer extends ViewGroup {
         row.setSystemChildExpanded(false);
         row.setUserLocked(false);
         if (!row.isRemoved()) {
-            mHeaderUtil.restoreNotificationHeader(row);
+            mGroupingUtil.restoreChildNotification(row);
         }
     }
 
@@ -341,7 +341,7 @@ public class NotificationChildrenContainer extends ViewGroup {
         }
         recreateLowPriorityHeader(builder, isConversation);
         updateHeaderVisibility(false /* animate */);
-        updateChildrenHeaderAppearance();
+        updateChildrenAppearance();
     }
 
     /**
@@ -389,8 +389,11 @@ public class NotificationChildrenContainer extends ViewGroup {
         }
     }
 
-    public void updateChildrenHeaderAppearance() {
-        mHeaderUtil.updateChildrenHeaderAppearance();
+    /**
+     * Update the appearance of the children to reduce redundancies.
+     */
+    public void updateChildrenAppearance() {
+        mGroupingUtil.updateChildrenAppearance();
     }
 
     public void updateGroupOverflow() {
@@ -861,7 +864,7 @@ public class NotificationChildrenContainer extends ViewGroup {
 
     public void setContainingNotification(ExpandableNotificationRow parent) {
         mContainingNotification = parent;
-        mHeaderUtil = new NotificationHeaderUtil(mContainingNotification);
+        mGroupingUtil = new NotificationGroupingUtil(mContainingNotification);
     }
 
     public ExpandableNotificationRow getContainingNotification() {

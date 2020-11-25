@@ -218,7 +218,7 @@
   <java-symbol type="id" name="inbox_text6" />
   <java-symbol type="id" name="status_bar_latest_event_content" />
   <java-symbol type="id" name="notification_main_column" />
-  <java-symbol type="id" name="notification_standard_view_column" />
+  <java-symbol type="id" name="notification_headerless_view_column" />
   <java-symbol type="id" name="sms_short_code_confirm_message" />
   <java-symbol type="id" name="sms_short_code_detail_layout" />
   <java-symbol type="id" name="sms_short_code_detail_message" />
@@ -3070,6 +3070,8 @@
   <java-symbol type="dimen" name="notification_media_image_margin_end" />
   <java-symbol type="id" name="notification_action_list_margin_target" />
   <java-symbol type="dimen" name="notification_action_disabled_alpha" />
+  <java-symbol type="id" name="tag_margin_end_when_icon_visible" />
+  <java-symbol type="id" name="tag_margin_end_when_icon_gone" />
 
   <!-- Override Wake Key Behavior When Screen is Off -->
   <java-symbol type="bool" name="config_wakeOnDpadKeyPress" />
