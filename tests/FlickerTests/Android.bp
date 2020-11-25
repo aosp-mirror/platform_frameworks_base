@@ -59,9 +59,25 @@ android_test {
 java_library {
     name: "wm-flicker-common-assertions",
     platform_apis: true,
-    srcs: ["src/**/*Assertions.java", "src/**/*Assertions.kt"],
+    srcs: [
+        "src/**/*Assertions.java",
+        "src/**/*Assertions.kt",
+    ],
     exclude_srcs: [
         "**/helpers/*",
+    ],
+    static_libs: [
+        "flickerlib",
+        "truth-prebuilt",
+        "app-helpers-core"
+    ],
+}
+
+java_library {
+    name: "wm-flicker-common-app-helpers",
+    platform_apis: true,
+    srcs: [
+        "**/helpers/*"
     ],
     static_libs: [
         "flickerlib",

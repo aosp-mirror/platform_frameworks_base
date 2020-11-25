@@ -33,7 +33,10 @@ import java.util.List;
  *
  * @param <S> the concrete remote service class
  * @param <I> the interface of the binder service
+ *
+ * @deprecated Use {@link ServiceConnector} to manage remote service connections
  */
+@Deprecated
 public abstract class AbstractMultiplePendingRequestsRemoteService<S
         extends AbstractMultiplePendingRequestsRemoteService<S, I>, I extends IInterface>
         extends AbstractRemoteService<S, I> {

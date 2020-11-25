@@ -18,8 +18,9 @@ package com.android.location.timezone.provider;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
-import android.location.timezone.LocationTimeZoneEvent;
 import android.os.SystemClock;
+
+import com.android.internal.location.timezone.LocationTimeZoneEvent;
 
 import java.util.Collections;
 import java.util.List;

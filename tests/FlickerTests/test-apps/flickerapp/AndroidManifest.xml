@@ -49,18 +49,6 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <activity android:name=".PipActivity"
-             android:resizeableActivity="true"
-             android:supportsPictureInPicture="true"
-             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
-             android:taskAffinity="com.android.server.wm.flicker.testapp.PipActivity"
-             android:label="PipApp"
-             android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="android.intent.category.LAUNCHER"/>
-            </intent-filter>
-        </activity>
         <activity android:name=".SeamlessRotationActivity"
              android:taskAffinity="com.android.server.wm.flicker.testapp.SeamlessRotationActivity"
              android:configChanges="orientation|screenSize"

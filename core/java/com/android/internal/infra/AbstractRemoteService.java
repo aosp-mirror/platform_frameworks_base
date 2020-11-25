@@ -58,9 +58,12 @@ import java.util.ArrayList;
  * @param <S> the concrete remote service class
  * @param <I> the interface of the binder service
  *
+ * @deprecated Use {@link ServiceConnector} to manage remote service connections
+ *
  * @hide
  */
 //TODO(b/117779333): improve javadoc above instead of using Autofill as an example
+@Deprecated
 public abstract class AbstractRemoteService<S extends AbstractRemoteService<S, I>,
         I extends IInterface> implements DeathRecipient {
     private static final int MSG_BIND = 1;

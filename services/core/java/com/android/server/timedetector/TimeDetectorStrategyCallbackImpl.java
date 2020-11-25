@@ -29,9 +29,9 @@ import android.util.Slog;
 import java.util.Objects;
 
 /**
- * The real implementation of {@link TimeDetectorStrategy.Callback} used on device.
+ * The real implementation of {@link TimeDetectorStrategyImpl.Callback} used on device.
  */
-public final class TimeDetectorStrategyCallbackImpl implements TimeDetectorStrategy.Callback {
+public final class TimeDetectorStrategyCallbackImpl implements TimeDetectorStrategyImpl.Callback {
 
     private final static String TAG = "timedetector.TimeDetectorStrategyCallbackImpl";
 

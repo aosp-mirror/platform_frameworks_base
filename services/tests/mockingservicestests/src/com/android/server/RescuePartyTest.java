@@ -174,8 +174,6 @@ public class RescuePartyTest {
 
         doReturn(CURRENT_NETWORK_TIME_MILLIS).when(() -> RescueParty.getElapsedRealtime());
 
-        SystemProperties.set(RescueParty.PROP_RESCUE_LEVEL,
-                Integer.toString(RescueParty.LEVEL_NONE));
         SystemProperties.set(RescueParty.PROP_RESCUE_BOOT_COUNT, Integer.toString(0));
         SystemProperties.set(RescueParty.PROP_ENABLE_RESCUE, Boolean.toString(true));
         SystemProperties.set(PROP_DEVICE_CONFIG_DISABLE_FLAG, Boolean.toString(false));
@@ -193,12 +191,10 @@ public class RescuePartyTest {
                 mMonitorCallbackCaptor.capture()));
         HashMap<String, Integer> verifiedTimesMap = new HashMap<String, Integer>();
 
-        noteBoot();
+        noteBoot(1);
 
         verifySettingsResets(Settings.RESET_MODE_UNTRUSTED_DEFAULTS, /*resetNamespaces=*/ null,
                 verifiedTimesMap);
-        assertEquals(RescueParty.LEVEL_RESET_SETTINGS_UNTRUSTED_DEFAULTS,
-                SystemProperties.getInt(RescueParty.PROP_RESCUE_LEVEL, RescueParty.LEVEL_NONE));
 
         // Record DeviceConfig accesses
         RescuePartyObserver observer = RescuePartyObserver.getInstance(mMockContext);
@@ -208,24 +204,19 @@ public class RescuePartyTest {
 
         final String[] expectedAllResetNamespaces = new String[]{NAMESPACE1, NAMESPACE2};
 
-        noteBoot();
+        noteBoot(2);
 
         verifySettingsResets(Settings.RESET_MODE_UNTRUSTED_CHANGES, expectedAllResetNamespaces,
                 verifiedTimesMap);
-        assertEquals(RescueParty.LEVEL_RESET_SETTINGS_UNTRUSTED_CHANGES,
-                SystemProperties.getInt(RescueParty.PROP_RESCUE_LEVEL, RescueParty.LEVEL_NONE));
 
-        noteBoot();
+        noteBoot(3);
 
         verifySettingsResets(Settings.RESET_MODE_TRUSTED_DEFAULTS, expectedAllResetNamespaces,
                 verifiedTimesMap);
-        assertEquals(RescueParty.LEVEL_RESET_SETTINGS_TRUSTED_DEFAULTS,
-                SystemProperties.getInt(RescueParty.PROP_RESCUE_LEVEL, RescueParty.LEVEL_NONE));
 
-        noteBoot();
+        noteBoot(4);
 
-        assertEquals(LEVEL_FACTORY_RESET,
-                SystemProperties.getInt(RescueParty.PROP_RESCUE_LEVEL, RescueParty.LEVEL_NONE));
+        assertTrue(RescueParty.isAttemptingFactoryReset());
     }
 
     @Test
@@ -364,21 +355,9 @@ public class RescuePartyTest {
     @Test
     public void testIsAttemptingFactoryReset() {
         for (int i = 0; i < LEVEL_FACTORY_RESET; i++) {
-            noteBoot();
+            noteBoot(i + 1);
         }
         assertTrue(RescueParty.isAttemptingFactoryReset());
-    }
-
-    @Test
-    public void testOnSettingsProviderPublishedExecutesRescueLevels() {
-        SystemProperties.set(RescueParty.PROP_RESCUE_LEVEL, Integer.toString(1));
-
-        RescueParty.onSettingsProviderPublished(mMockContext);
-
-        verifySettingsResets(Settings.RESET_MODE_UNTRUSTED_DEFAULTS, /*resetNamespaces=*/ null,
-                /*configResetVerifiedTimesMap=*/ null);
-        assertEquals(RescueParty.LEVEL_RESET_SETTINGS_UNTRUSTED_DEFAULTS,
-                SystemProperties.getInt(RescueParty.PROP_RESCUE_LEVEL, RescueParty.LEVEL_NONE));
     }
 
     @Test
@@ -425,7 +404,7 @@ public class RescuePartyTest {
         SystemProperties.set(PROP_DISABLE_FACTORY_RESET_FLAG, Boolean.toString(true));
 
         for (int i = 0; i < LEVEL_FACTORY_RESET; i++) {
-            noteBoot();
+            noteBoot(i + 1);
         }
         assertFalse(RescueParty.isAttemptingFactoryReset());
 
@@ -463,29 +442,12 @@ public class RescuePartyTest {
     public void testBootLoopLevels() {
         RescuePartyObserver observer = RescuePartyObserver.getInstance(mMockContext);
 
-        /*
-         Ensure that the returned user impact corresponds with the user impact of the next available
-         rescue level, not the current one.
-         */
-        SystemProperties.set(RescueParty.PROP_RESCUE_LEVEL, Integer.toString(
-                RescueParty.LEVEL_NONE));
-        assertEquals(observer.onBootLoop(), PackageHealthObserverImpact.USER_IMPACT_LOW);
-
-        SystemProperties.set(RescueParty.PROP_RESCUE_LEVEL, Integer.toString(
-                RescueParty.LEVEL_RESET_SETTINGS_UNTRUSTED_DEFAULTS));
-        assertEquals(observer.onBootLoop(), PackageHealthObserverImpact.USER_IMPACT_LOW);
-
-        SystemProperties.set(RescueParty.PROP_RESCUE_LEVEL, Integer.toString(
-                RescueParty.LEVEL_RESET_SETTINGS_UNTRUSTED_CHANGES));
-        assertEquals(observer.onBootLoop(), PackageHealthObserverImpact.USER_IMPACT_HIGH);
-
-        SystemProperties.set(RescueParty.PROP_RESCUE_LEVEL, Integer.toString(
-                RescueParty.LEVEL_RESET_SETTINGS_TRUSTED_DEFAULTS));
-        assertEquals(observer.onBootLoop(), PackageHealthObserverImpact.USER_IMPACT_HIGH);
-
-        SystemProperties.set(RescueParty.PROP_RESCUE_LEVEL, Integer.toString(
-                LEVEL_FACTORY_RESET));
-        assertEquals(observer.onBootLoop(), PackageHealthObserverImpact.USER_IMPACT_HIGH);
+        assertEquals(observer.onBootLoop(0), PackageHealthObserverImpact.USER_IMPACT_NONE);
+        assertEquals(observer.onBootLoop(1), PackageHealthObserverImpact.USER_IMPACT_LOW);
+        assertEquals(observer.onBootLoop(2), PackageHealthObserverImpact.USER_IMPACT_LOW);
+        assertEquals(observer.onBootLoop(3), PackageHealthObserverImpact.USER_IMPACT_HIGH);
+        assertEquals(observer.onBootLoop(4), PackageHealthObserverImpact.USER_IMPACT_HIGH);
+        assertEquals(observer.onBootLoop(5), PackageHealthObserverImpact.USER_IMPACT_HIGH);
     }
 
     private void verifySettingsResets(int resetMode, String[] resetNamespaces,
@@ -513,8 +475,8 @@ public class RescuePartyTest {
         }
     }
 
-    private void noteBoot() {
-        RescuePartyObserver.getInstance(mMockContext).executeBootLoopMitigation();
+    private void noteBoot(int mitigationCount) {
+        RescuePartyObserver.getInstance(mMockContext).executeBootLoopMitigation(mitigationCount);
     }
 
     private void notePersistentAppCrash(int mitigationCount) {

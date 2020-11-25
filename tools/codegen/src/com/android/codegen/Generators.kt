@@ -5,8 +5,6 @@ import com.github.javaparser.ast.body.MethodDeclaration
 import com.github.javaparser.ast.body.VariableDeclarator
 import com.github.javaparser.ast.expr.AnnotationExpr
 import com.github.javaparser.ast.expr.ArrayInitializerExpr
-import com.github.javaparser.ast.expr.LiteralExpr
-import com.github.javaparser.ast.expr.UnaryExpr
 import java.io.File
 
 
@@ -163,7 +161,12 @@ fun ClassPrinter.generateCopyConstructor() {
         return
     }
 
-    +"/** Copy constructor */"
+    +"/**"
+    +" * Copy constructor"
+    if (FeatureFlag.COPY_CONSTRUCTOR.hidden) {
+        +" * @hide"
+    }
+    +" */"
     +GENERATED_MEMBER_HEADER
     "public $ClassName(@$NonNull $ClassName orig)" {
         fields.forEachApply {

@@ -98,8 +98,8 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
     @NonNull
     private final LocalLog mTimeChangesLog = new LocalLog(30, false /* useLocalTimestamps */);
 
-    // @NonNull after initialize()
-    private Callback mCallback;
+    @NonNull
+    private final Callback mCallback;
 
     // Used to store the last time the system clock state was set automatically. It is used to
     // detect (and log) issues with the realtime clock or whether the clock is being set without
@@ -121,8 +121,44 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
     private final ReferenceWithHistory<NetworkTimeSuggestion> mLastNetworkSuggestion =
             new ReferenceWithHistory<>(KEEP_SUGGESTION_HISTORY_SIZE);
 
-    @Override
-    public void initialize(@NonNull Callback callback) {
+    /**
+     * The interface used by the strategy to interact with the surrounding service.
+     *
+     * <p>Note: Because the system properties-derived value {@link #isAutoTimeDetectionEnabled()}
+     * can be modified independently and from different threads (and processes!), its use is prone
+     * to race conditions. That will be true until the responsibility for setting their values is
+     * moved to {@link TimeDetectorStrategy}. There are similar issues with
+     * {@link #systemClockMillis()} while any process can modify the system clock.
+     */
+    public interface Callback {
+
+        /**
+         * The absolute threshold below which the system clock need not be updated. i.e. if setting
+         * the system clock would adjust it by less than this (either backwards or forwards) then it
+         * need not be set.
+         */
+        int systemClockUpdateThresholdMillis();
+
+        /** Returns true if automatic time detection is enabled. */
+        boolean isAutoTimeDetectionEnabled();
+
+        /** Acquire a suitable wake lock. Must be followed by {@link #releaseWakeLock()} */
+        void acquireWakeLock();
+
+        /** Returns the elapsedRealtimeMillis clock value. */
+        long elapsedRealtimeMillis();
+
+        /** Returns the system clock value. */
+        long systemClockMillis();
+
+        /** Sets the device system clock. The WakeLock must be held. */
+        void setSystemClock(long newTimeMillis);
+
+        /** Release the wake lock acquired by a call to {@link #acquireWakeLock()}. */
+        void releaseWakeLock();
+    }
+
+    TimeDetectorStrategyImpl(@NonNull Callback callback) {
         mCallback = callback;
     }
 
