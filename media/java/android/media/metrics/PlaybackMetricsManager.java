@@ -61,6 +61,18 @@ public class PlaybackMetricsManager {
     }
 
     /**
+     * Reports playback state event.
+     * @hide
+     */
+    public void reportPlaybackStateEvent(@NonNull String sessionId, PlaybackStateEvent event) {
+        try {
+            mService.reportPlaybackStateEvent(sessionId, event, mUserId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Creates a playback session.
      */
     public PlaybackSession createSession() {

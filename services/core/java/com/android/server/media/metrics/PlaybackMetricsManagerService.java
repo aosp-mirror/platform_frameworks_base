@@ -21,6 +21,7 @@ import android.media.metrics.IPlaybackMetricsManager;
 import android.media.metrics.NetworkEvent;
 import android.media.metrics.PlaybackErrorEvent;
 import android.media.metrics.PlaybackMetrics;
+import android.media.metrics.PlaybackStateEvent;
 import android.os.Binder;
 import android.util.Base64;
 import android.util.StatsEvent;
@@ -77,6 +78,12 @@ public final class PlaybackMetricsManagerService extends SystemService {
                     .usePooledBuffer()
                     .build();
             StatsLog.write(statsEvent);
+        }
+
+        @Override
+        public void reportPlaybackStateEvent(
+                String sessionId, PlaybackStateEvent event, int userId) {
+            // TODO: log it to statsd
         }
 
         @Override
