@@ -30,6 +30,7 @@ import static android.os.UserManager.USER_TYPE_FULL_RESTRICTED;
 import static android.os.UserManager.USER_TYPE_FULL_SECONDARY;
 import static android.os.UserManager.USER_TYPE_FULL_SYSTEM;
 import static android.os.UserManager.USER_TYPE_PROFILE_MANAGED;
+import static android.os.UserManager.USER_TYPE_PROFILE_TEST;
 import static android.os.UserManager.USER_TYPE_SYSTEM_HEADLESS;
 
 import static com.android.server.pm.UserTypeDetails.UNLIMITED_NUMBER_OF_USERS;
@@ -37,6 +38,7 @@ import static com.android.server.pm.UserTypeDetails.UNLIMITED_NUMBER_OF_USERS;
 import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.UserManager;
 import android.util.ArrayMap;
@@ -98,6 +100,9 @@ public final class UserTypeFactory {
         builders.put(USER_TYPE_FULL_DEMO, getDefaultTypeFullDemo());
         builders.put(USER_TYPE_FULL_RESTRICTED, getDefaultTypeFullRestricted());
         builders.put(USER_TYPE_SYSTEM_HEADLESS, getDefaultTypeSystemHeadless());
+        if (Build.IS_DEBUGGABLE) {
+            builders.put(USER_TYPE_PROFILE_TEST, getDefaultTypeProfileTest());
+        }
 
         return builders;
     }
@@ -129,6 +134,37 @@ public final class UserTypeFactory {
                         com.android.internal.R.color.profile_badge_2_dark,
                         com.android.internal.R.color.profile_badge_3_dark)
                 .setDefaultRestrictions(null);
+    }
+
+    /**
+     * Returns the Builder for the default {@link UserManager#USER_TYPE_PROFILE_TEST}
+     * configuration (for userdebug builds). For now it just uses managed profile badges.
+     */
+    private static UserTypeDetails.Builder getDefaultTypeProfileTest() {
+        final Bundle restrictions = new Bundle();
+        restrictions.putBoolean(UserManager.DISALLOW_FUN, true);
+
+        return new UserTypeDetails.Builder()
+                .setName(USER_TYPE_PROFILE_TEST)
+                .setBaseType(FLAG_PROFILE)
+                .setMaxAllowedPerParent(2)
+                .setLabel(0)
+                .setIconBadge(com.android.internal.R.drawable.ic_corp_icon_badge_case)
+                .setBadgePlain(com.android.internal.R.drawable.ic_corp_badge_case)
+                .setBadgeNoBackground(com.android.internal.R.drawable.ic_corp_badge_no_background)
+                .setBadgeLabels(
+                        com.android.internal.R.string.managed_profile_label_badge,
+                        com.android.internal.R.string.managed_profile_label_badge_2,
+                        com.android.internal.R.string.managed_profile_label_badge_3)
+                .setBadgeColors(
+                        com.android.internal.R.color.profile_badge_1,
+                        com.android.internal.R.color.profile_badge_2,
+                        com.android.internal.R.color.profile_badge_3)
+                .setDarkThemeBadgeColors(
+                        com.android.internal.R.color.profile_badge_1_dark,
+                        com.android.internal.R.color.profile_badge_2_dark,
+                        com.android.internal.R.color.profile_badge_3_dark)
+                .setDefaultRestrictions(restrictions);
     }
 
     /**
