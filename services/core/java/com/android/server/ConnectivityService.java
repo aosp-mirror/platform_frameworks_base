@@ -3591,8 +3591,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
     private boolean isNetworkPotentialSatisfier(
             @NonNull final NetworkAgentInfo candidate, @NonNull final NetworkRequestInfo nri) {
         // listen requests won't keep up a network satisfying it. If this is not a multilayer
-        // request, we can return immediately. For multilayer requests, we have to check to see if
-        // any of the multilayer requests may have a potential satisfier.
+        // request, return immediately. For multilayer requests, check to see if any of the
+        // multilayer requests may have a potential satisfier.
         if (!nri.isMultilayerRequest() && nri.mRequests.get(0).isListen()) {
             return false;
         }
@@ -8233,6 +8233,13 @@ public class ConnectivityService extends IConnectivityManager.Stub
         final IBinder iCb = cb.asBinder();
         final NetworkRequestInfo nri = cbInfo.mRequestInfo;
 
+        // Connectivity Diagnostics are meant to be used with a single network request. It would be
+        // confusing for these networks to change when an NRI is satisfied in another layer.
+        if (nri.isMultilayerRequest()) {
+            throw new IllegalArgumentException("Connectivity Diagnostics do not support multilayer "
+                + "network requests.");
+        }
+
         // This means that the client registered the same callback multiple times. Do
         // not override the previous entry, and exit silently.
         if (mConnectivityDiagnosticsCallbacks.containsKey(iCb)) {
@@ -8259,7 +8266,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
         synchronized (mNetworkForNetId) {
             for (int i = 0; i < mNetworkForNetId.size(); i++) {
                 final NetworkAgentInfo nai = mNetworkForNetId.valueAt(i);
-                if (nai.satisfies(nri.request)) {
+                // Connectivity Diagnostics rejects multilayer requests at registration hence get(0)
+                if (nai.satisfies(nri.mRequests.get(0))) {
                     matchingNetworks.add(nai);
                 }
             }
@@ -8387,7 +8395,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 mConnectivityDiagnosticsCallbacks.entrySet()) {
             final ConnectivityDiagnosticsCallbackInfo cbInfo = entry.getValue();
             final NetworkRequestInfo nri = cbInfo.mRequestInfo;
-            if (nai.satisfies(nri.request)) {
+            // Connectivity Diagnostics rejects multilayer requests at registration hence get(0).
+            if (nai.satisfies(nri.mRequests.get(0))) {
                 if (checkConnectivityDiagnosticsPermissions(
                         nri.mPid, nri.mUid, nai, cbInfo.mCallingPackageName)) {
                     results.add(entry.getValue().mCb);
