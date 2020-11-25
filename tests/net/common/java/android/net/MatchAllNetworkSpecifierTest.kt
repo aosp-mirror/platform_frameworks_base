@@ -53,8 +53,13 @@ class MatchAllNetworkSpecifierTest {
         assertParcelSane(MatchAllNetworkSpecifier(), 0)
     }
 
-    @Test @IgnoreAfter(Build.VERSION_CODES.R)
-    fun testCanBeSatisfiedBy_BeforeS() {
+    @Test
+    @IgnoreUpTo(Build.VERSION_CODES.Q)
+    @IgnoreAfter(Build.VERSION_CODES.R)
+    // Only run this test on Android R.
+    // The method - satisfiedBy() has changed to canBeSatisfiedBy() starting from Android R, so the
+    // method - canBeSatisfiedBy() cannot be found when running this test on Android Q.
+    fun testCanBeSatisfiedBy_OnlyForR() {
         // MatchAllNetworkSpecifier didn't follow its parent class to change the satisfiedBy() to
         // canBeSatisfiedBy(), so if a caller calls MatchAllNetworkSpecifier#canBeSatisfiedBy(), the
         // NetworkSpecifier#canBeSatisfiedBy() will be called actually, and false will be returned.

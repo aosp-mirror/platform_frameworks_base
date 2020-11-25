@@ -14,6 +14,6 @@
  * limitations under the License.
  */
 
-package android.location.timezone;
+package com.android.internal.location.timezone;
 
 parcelable LocationTimeZoneEvent;

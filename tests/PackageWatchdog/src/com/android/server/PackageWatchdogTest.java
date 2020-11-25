@@ -1064,6 +1064,31 @@ public class PackageWatchdogTest {
     }
 
     /**
+     * Ensure that the correct mitigation counts are sent to the boot loop observer.
+     */
+    @Test
+    public void testMultipleBootLoopMitigation() {
+        PackageWatchdog watchdog = createWatchdog();
+        TestObserver bootObserver = new TestObserver(OBSERVER_NAME_1);
+        watchdog.registerHealthObserver(bootObserver);
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < PackageWatchdog.DEFAULT_BOOT_LOOP_TRIGGER_COUNT; j++) {
+                watchdog.noteBoot();
+            }
+        }
+
+        moveTimeForwardAndDispatch(PackageWatchdog.DEFAULT_DEESCALATION_WINDOW_MS + 1);
+
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < PackageWatchdog.DEFAULT_BOOT_LOOP_TRIGGER_COUNT; j++) {
+                watchdog.noteBoot();
+            }
+        }
+
+        assertThat(bootObserver.mBootMitigationCounts).isEqualTo(List.of(1, 2, 3, 4, 1, 2, 3, 4));
+    }
+
+    /**
      * Ensure that passing a null list of failed packages does not cause any mitigation logic to
      * execute.
      */
@@ -1267,6 +1292,7 @@ public class PackageWatchdogTest {
         final List<String> mHealthCheckFailedPackages = new ArrayList<>();
         final List<String> mMitigatedPackages = new ArrayList<>();
         final List<Integer> mMitigationCounts = new ArrayList<>();
+        final List<Integer> mBootMitigationCounts = new ArrayList<>();
 
         TestObserver(String name) {
             mName = name;
@@ -1304,12 +1330,13 @@ public class PackageWatchdogTest {
             return mMayObservePackages;
         }
 
-        public int onBootLoop() {
+        public int onBootLoop(int level) {
             return mImpact;
         }
 
-        public boolean executeBootLoopMitigation() {
+        public boolean executeBootLoopMitigation(int level) {
             mMitigatedBootLoop = true;
+            mBootMitigationCounts.add(level);
             return true;
         }
 

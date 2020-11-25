@@ -16,7 +16,7 @@
 
 package com.android.internal.location.timezone;
 
-import android.location.timezone.LocationTimeZoneEvent;
+import com.android.internal.location.timezone.LocationTimeZoneEvent;
 
 /**
  * Binder interface for the manager of location time zone provider implementations.

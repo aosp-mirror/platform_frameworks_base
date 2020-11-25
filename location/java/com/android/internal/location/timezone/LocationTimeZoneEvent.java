@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.location.timezone;
+package com.android.internal.location.timezone;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;

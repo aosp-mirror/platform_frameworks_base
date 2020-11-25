@@ -38,11 +38,41 @@ public final class PowerStatsHALWrapper {
      */
     public interface IPowerStatsHALWrapper {
         /**
+         * Returns information related to all supported PowerEntity(s) for which state residency
+         * data is available.
+         *
+         * A PowerEntity is defined as a platform subsystem, peripheral, or power domain that
+         * impacts the total device power consumption.
+         *
+         * @return List of information on each PowerEntity.
+         */
+        android.hardware.power.stats.PowerEntityInfo[] getPowerEntityInfo();
+
+        /**
+         * Reports the accumulated state residency for each requested PowerEntity.
+         *
+         * Each PowerEntity may reside in one of multiple states. It may also transition from one
+         * state to another. StateResidency is defined as an accumulation of time that a
+         * PowerEntity resided in each of its possible states, the number of times that each state
+         * was entered, and a timestamp corresponding to the last time that state was entered.
+         *
+         * Data is accumulated starting at device boot.
+         *
+         * @param powerEntityIds List of IDs of PowerEntities for which data is requested.  Passing
+         *                       an empty list will return state residency for all available
+         *                       PowerEntities.  ID of each PowerEntity is contained in
+         *                       PowerEntityInfo.
+         *
+         * @return StateResidency since boot for each requested PowerEntity
+         */
+        android.hardware.power.stats.StateResidencyResult[] getStateResidency(int[] powerEntityIds);
+
+        /**
          * Returns the energy consumer IDs for all available energy consumers (power models) on the
-         *         device.  Examples of subsystems for which energy consumer results (power models)
-         *         may be available are GPS, display, wifi, etc.  The default list of energy
-         *         consumers can be found in the PowerStats HAL definition (EnergyConsumerId.aidl).
-         *         The availability of energy consumer IDs is hardware dependent.
+         * device.  Examples of subsystems for which energy consumer results (power models) may be
+         * available are GPS, display, wifi, etc.  The default list of energy consumers can be
+         * found in the PowerStats HAL definition (EnergyConsumerId.aidl).  The availability of
+         * energy consumer IDs is hardware dependent.
          *
          * @return List of EnergyConsumerIds all available energy consumers.
          */
@@ -50,14 +80,19 @@ public final class PowerStatsHALWrapper {
 
         /**
          * Returns the energy consumer result for all available energy consumers (power models).
-         *         Available consumers can be retrieved by calling getEnergyConsumerInfo().  The
-         *         subsystem corresponding to the energy consumer result is defined by the energy
-         *         consumer ID.
+         * Available consumers can be retrieved by calling getEnergyConsumerInfo().  The subsystem
+         * corresponding to the energy consumer result is defined by the energy consumer ID.
+         *
+         * @param energyConsumerIds Array of energy consumer IDs for which energy consumed is being
+         *                          requested.  Energy consumers available on the device can be
+         *                          queried by calling getEnergyConsumerInfo().  Passing an empty
+         *                          array will return results for all energy consumers.
          *
          * @return List of EnergyConsumerResult objects containing energy consumer results for all
          *         available energy consumers (power models).
          */
-        android.hardware.power.stats.EnergyConsumerResult[] getEnergyConsumed();
+        android.hardware.power.stats.EnergyConsumerResult[] getEnergyConsumed(
+                int[] energyConsumerIds);
 
         /**
          * Returns channel info for all available energy meters.
@@ -69,17 +104,21 @@ public final class PowerStatsHALWrapper {
 
         /**
          * Returns energy measurements for all available energy meters.  Available channels can be
-         *         retrieved by calling getEnergyMeterInfo().  Energy measurements and channel info
-         *         can be linked through the channelId field.
+         * retrieved by calling getEnergyMeterInfo().  Energy measurements and channel info can be
+         * linked through the channelId field.
+         *
+         * @param channelIds Array of channel IDs for which energy measurements are being requested.
+         *                   Channel IDs available on the device can be queried by calling
+         *                   getEnergyMeterInfo().  Passing an empty array will return energy
+         *                   measurements for all channels.
          *
          * @return List of EnergyMeasurement objects containing energy measurements for all
          *         available energy meters.
          */
-        android.hardware.power.stats.EnergyMeasurement[] readEnergyMeters();
+        android.hardware.power.stats.EnergyMeasurement[] readEnergyMeters(int[] channelIds);
 
         /**
-         * Returns boolean indicating if connection to power stats HAL was
-         *         established.
+         * Returns boolean indicating if connection to power stats HAL was established.
          *
          * @return true if connection to power stats HAL was correctly established.
          */
@@ -93,6 +132,38 @@ public final class PowerStatsHALWrapper {
      */
     public static final class PowerStatsHALWrapperImpl implements IPowerStatsHALWrapper {
         private static Supplier<IPowerStats> sVintfPowerStats;
+
+        @Override
+        public android.hardware.power.stats.PowerEntityInfo[] getPowerEntityInfo() {
+            android.hardware.power.stats.PowerEntityInfo[] powerEntityInfoHAL = null;
+
+            if (sVintfPowerStats != null) {
+                try {
+                    powerEntityInfoHAL = sVintfPowerStats.get().getPowerEntityInfo();
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Failed to get power entity info from PowerStats HAL");
+                }
+            }
+
+            return powerEntityInfoHAL;
+        }
+
+        @Override
+        public android.hardware.power.stats.StateResidencyResult[] getStateResidency(
+                int[] powerEntityIds) {
+            android.hardware.power.stats.StateResidencyResult[] stateResidencyResultHAL = null;
+
+            if (sVintfPowerStats != null) {
+                try {
+                    stateResidencyResultHAL =
+                        sVintfPowerStats.get().getStateResidency(powerEntityIds);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Failed to get state residency from PowerStats HAL");
+                }
+            }
+
+            return stateResidencyResultHAL;
+        }
 
         @Override
         public int[] getEnergyConsumerInfo() {
@@ -110,13 +181,14 @@ public final class PowerStatsHALWrapper {
         }
 
         @Override
-        public android.hardware.power.stats.EnergyConsumerResult[] getEnergyConsumed() {
+        public android.hardware.power.stats.EnergyConsumerResult[] getEnergyConsumed(
+                int[] energyConsumerIds) {
             android.hardware.power.stats.EnergyConsumerResult[] energyConsumedHAL = null;
 
             if (sVintfPowerStats != null) {
                 try {
                     energyConsumedHAL =
-                        sVintfPowerStats.get().getEnergyConsumed(new int[0]);
+                        sVintfPowerStats.get().getEnergyConsumed(energyConsumerIds);
                 } catch (RemoteException e) {
                     Slog.e(TAG, "Failed to get energy consumer results from PowerStats HAL");
                 }
@@ -141,13 +213,13 @@ public final class PowerStatsHALWrapper {
         }
 
         @Override
-        public android.hardware.power.stats.EnergyMeasurement[] readEnergyMeters() {
+        public android.hardware.power.stats.EnergyMeasurement[] readEnergyMeters(int[] channelIds) {
             android.hardware.power.stats.EnergyMeasurement[] energyMeasurementHAL = null;
 
             if (sVintfPowerStats != null) {
                 try {
                     energyMeasurementHAL =
-                        sVintfPowerStats.get().readEnergyMeters(new int[0]);
+                        sVintfPowerStats.get().readEnergyMeters(channelIds);
                 } catch (RemoteException e) {
                     Slog.e(TAG, "Failed to get energy measurements from PowerStats HAL");
                 }

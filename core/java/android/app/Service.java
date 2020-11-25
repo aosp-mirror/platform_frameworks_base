@@ -697,6 +697,10 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
      * service element of manifest file. The value of attribute
      * {@link android.R.attr#foregroundServiceType} can be multiple flags ORed together.</p>
      *
+     * @throws IllegalStateException If the app targeting API is
+     * {@link android.os.Build.VERSION_CODES#S} or later, and the service is restricted from
+     * becoming foreground service due to background restriction.
+     *
      * @param id The identifier for this notification as per
      * {@link NotificationManager#notify(int, Notification)
      * NotificationManager.notify(int, Notification)}; must not be 0.

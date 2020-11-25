@@ -41,14 +41,21 @@ static struct {
     jmethodID dispatchVsync;
     jmethodID dispatchHotplug;
     jmethodID dispatchConfigChanged;
+    jmethodID dispatchFrameRateOverrides;
+
+    struct {
+        jclass clazz;
+        jmethodID init;
+    } frameRateOverrideClassInfo;
+
 } gDisplayEventReceiverClassInfo;
 
 
 class NativeDisplayEventReceiver : public DisplayEventDispatcher {
 public:
-    NativeDisplayEventReceiver(JNIEnv* env,
-            jobject receiverWeak, const sp<MessageQueue>& messageQueue, jint vsyncSource,
-            jint configChanged);
+    NativeDisplayEventReceiver(JNIEnv* env, jobject receiverWeak,
+                               const sp<MessageQueue>& messageQueue, jint vsyncSource,
+                               jint eventRegistration);
 
     void dispose();
 
@@ -64,16 +71,17 @@ private:
     void dispatchHotplug(nsecs_t timestamp, PhysicalDisplayId displayId, bool connected) override;
     void dispatchConfigChanged(nsecs_t timestamp, PhysicalDisplayId displayId,
                                int32_t configId, nsecs_t vsyncPeriod) override;
+    void dispatchFrameRateOverrides(nsecs_t timestamp, PhysicalDisplayId displayId,
+                                    std::vector<FrameRateOverride> overrides) override;
     void dispatchNullEvent(nsecs_t timestamp, PhysicalDisplayId displayId) override {}
 };
 
-
-NativeDisplayEventReceiver::NativeDisplayEventReceiver(JNIEnv* env,
-        jobject receiverWeak, const sp<MessageQueue>& messageQueue, jint vsyncSource,
-        jint configChanged) :
-        DisplayEventDispatcher(messageQueue->getLooper(),
-                static_cast<ISurfaceComposer::VsyncSource>(vsyncSource),
-                static_cast<ISurfaceComposer::ConfigChanged>(configChanged)),
+NativeDisplayEventReceiver::NativeDisplayEventReceiver(JNIEnv* env, jobject receiverWeak,
+                                                       const sp<MessageQueue>& messageQueue,
+                                                       jint vsyncSource, jint eventRegistration)
+      : DisplayEventDispatcher(messageQueue->getLooper(),
+                               static_cast<ISurfaceComposer::VsyncSource>(vsyncSource),
+                               static_cast<ISurfaceComposer::EventRegistration>(eventRegistration)),
         mReceiverWeakGlobal(env->NewGlobalRef(receiverWeak)),
         mMessageQueue(messageQueue) {
     ALOGV("receiver %p ~ Initializing display event receiver.", this);
@@ -137,16 +145,48 @@ void NativeDisplayEventReceiver::dispatchConfigChanged(
   mMessageQueue->raiseAndClearException(env, "dispatchConfigChanged");
 }
 
-static jlong nativeInit(JNIEnv* env, jclass clazz, jobject receiverWeak,
-        jobject messageQueueObj, jint vsyncSource, jint configChanged) {
+void NativeDisplayEventReceiver::dispatchFrameRateOverrides(
+        nsecs_t timestamp, PhysicalDisplayId displayId, std::vector<FrameRateOverride> overrides) {
+    JNIEnv* env = AndroidRuntime::getJNIEnv();
+
+    ScopedLocalRef<jobject> receiverObj(env, jniGetReferent(env, mReceiverWeakGlobal));
+    if (receiverObj.get()) {
+        ALOGV("receiver %p ~ Invoking FrameRateOverride handler.", this);
+        const auto frameRateOverrideClass =
+                gDisplayEventReceiverClassInfo.frameRateOverrideClassInfo.clazz;
+        const auto frameRateOverrideInit =
+                gDisplayEventReceiverClassInfo.frameRateOverrideClassInfo.init;
+        auto frameRateOverrideInitObject =
+                env->NewObject(frameRateOverrideClass, frameRateOverrideInit, 0, 0);
+        auto frameRateOverrideArray = env->NewObjectArray(overrides.size(), frameRateOverrideClass,
+                                                          frameRateOverrideInitObject);
+        for (size_t i = 0; i < overrides.size(); i++) {
+            auto FrameRateOverrideObject =
+                    env->NewObject(frameRateOverrideClass, frameRateOverrideInit, overrides[i].uid,
+                                   overrides[i].frameRateHz);
+            env->SetObjectArrayElement(frameRateOverrideArray, i, FrameRateOverrideObject);
+        }
+
+        env->CallVoidMethod(receiverObj.get(),
+                            gDisplayEventReceiverClassInfo.dispatchFrameRateOverrides, timestamp,
+                            displayId.value, frameRateOverrideArray);
+        ALOGV("receiver %p ~ Returned from FrameRateOverride handler.", this);
+    }
+
+    mMessageQueue->raiseAndClearException(env, "dispatchConfigChanged");
+}
+
+static jlong nativeInit(JNIEnv* env, jclass clazz, jobject receiverWeak, jobject messageQueueObj,
+                        jint vsyncSource, jint eventRegistration) {
     sp<MessageQueue> messageQueue = android_os_MessageQueue_getMessageQueue(env, messageQueueObj);
     if (messageQueue == NULL) {
         jniThrowRuntimeException(env, "MessageQueue is not initialized.");
         return 0;
     }
 
-    sp<NativeDisplayEventReceiver> receiver = new NativeDisplayEventReceiver(env,
-            receiverWeak, messageQueue, vsyncSource, configChanged);
+    sp<NativeDisplayEventReceiver> receiver =
+            new NativeDisplayEventReceiver(env, receiverWeak, messageQueue, vsyncSource,
+                                           eventRegistration);
     status_t status = receiver->initialize();
     if (status) {
         String8 message;
@@ -205,6 +245,18 @@ int register_android_view_DisplayEventReceiver(JNIEnv* env) {
             gDisplayEventReceiverClassInfo.clazz, "dispatchHotplug", "(JJZ)V");
     gDisplayEventReceiverClassInfo.dispatchConfigChanged = GetMethodIDOrDie(env,
            gDisplayEventReceiverClassInfo.clazz, "dispatchConfigChanged", "(JJI)V");
+    gDisplayEventReceiverClassInfo.dispatchFrameRateOverrides =
+            GetMethodIDOrDie(env, gDisplayEventReceiverClassInfo.clazz,
+                             "dispatchFrameRateOverrides",
+                             "(JJ[Landroid/view/DisplayEventReceiver$FrameRateOverride;)V");
+
+    jclass frameRateOverrideClazz =
+            FindClassOrDie(env, "android/view/DisplayEventReceiver$FrameRateOverride");
+    gDisplayEventReceiverClassInfo.frameRateOverrideClassInfo.clazz =
+            MakeGlobalRefOrDie(env, frameRateOverrideClazz);
+    gDisplayEventReceiverClassInfo.frameRateOverrideClassInfo.init =
+            GetMethodIDOrDie(env, gDisplayEventReceiverClassInfo.frameRateOverrideClassInfo.clazz,
+                             "<init>", "(IF)V");
 
     return res;
 }

@@ -359,6 +359,8 @@ class ProcessRecord implements WindowProcessListener {
     // It must obtain the proc state from a persistent/top process or FGS, not transitive.
     int mAllowStartFgsState = PROCESS_STATE_NONEXISTENT;
 
+    private final ArraySet<Binder> mBackgroundFgsStartTokens = new ArraySet<>();
+
     void setStartParams(int startUid, HostingRecord hostingRecord, String seInfo,
             long startTime) {
         this.startUid = startUid;
@@ -1963,6 +1965,18 @@ class ProcessRecord implements WindowProcessListener {
         if (mCachedAdj == ProcessList.VISIBLE_APP_ADJ) {
             mCachedAdj += minLayer;
         }
+    }
+
+    public void addAllowBackgroundFgsStartsToken(Binder entity) {
+        mBackgroundFgsStartTokens.add(entity);
+    }
+
+    public void removeAllowBackgroundFgsStartsToken(Binder entity) {
+        mBackgroundFgsStartTokens.remove(entity);
+    }
+
+    public boolean areBackgroundFgsStartsAllowedByToken() {
+        return !mBackgroundFgsStartTokens.isEmpty();
     }
 
     ErrorDialogController getDialogController() {

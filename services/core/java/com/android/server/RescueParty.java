@@ -29,7 +29,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.FileUtils;
-import android.os.Process;
 import android.os.RecoverySystem;
 import android.os.RemoteCallback;
 import android.os.SystemClock;
@@ -40,7 +39,6 @@ import android.provider.Settings;
 import android.util.ArraySet;
 import android.util.ExceptionUtils;
 import android.util.Log;
-import android.util.MathUtils;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
@@ -75,8 +73,6 @@ import java.util.concurrent.TimeUnit;
 public class RescueParty {
     @VisibleForTesting
     static final String PROP_ENABLE_RESCUE = "persist.sys.enable_rescue";
-    @VisibleForTesting
-    static final String PROP_RESCUE_LEVEL = "sys.rescue_level";
     static final String PROP_ATTEMPTING_FACTORY_RESET = "sys.attempting_factory_reset";
     static final String PROP_MAX_RESCUE_LEVEL_ATTEMPTED = "sys.max_rescue_level_attempted";
     @VisibleForTesting
@@ -168,7 +164,6 @@ public class RescueParty {
      */
     public static void onSettingsProviderPublished(Context context) {
         handleNativeRescuePartyResets();
-        executeRescueLevel(context, /*failedPackage=*/ null);
         ContentResolver contentResolver = context.getContentResolver();
         Settings.Config.registerMonitorCallback(contentResolver, new RemoteCallback(result -> {
             handleMonitorCallback(context, result);
@@ -258,33 +253,6 @@ public class RescueParty {
             Slog.w(TAG, "Expected positive mitigation count, was " + mitigationCount);
             return LEVEL_NONE;
         }
-    }
-
-    /**
-     * Get the next rescue level. This indicates the next level of mitigation that may be taken.
-     */
-    private static int getNextRescueLevel() {
-        return MathUtils.constrain(SystemProperties.getInt(PROP_RESCUE_LEVEL, LEVEL_NONE) + 1,
-                LEVEL_NONE, getMaxRescueLevel());
-    }
-
-    /**
-     * Escalate to the next rescue level. After incrementing the level you'll
-     * probably want to call {@link #executeRescueLevel(Context, String)}.
-     */
-    private static void incrementRescueLevel(int triggerUid) {
-        final int level = getNextRescueLevel();
-        SystemProperties.set(PROP_RESCUE_LEVEL, Integer.toString(level));
-
-        EventLogTags.writeRescueLevel(level, triggerUid);
-        logCriticalInfo(Log.WARN, "Incremented rescue level to "
-                + levelToString(level) + " triggered by UID " + triggerUid);
-    }
-
-    private static void executeRescueLevel(Context context, @Nullable String failedPackage) {
-        final int level = SystemProperties.getInt(PROP_RESCUE_LEVEL, LEVEL_NONE);
-        if (level == LEVEL_NONE) return;
-        executeRescueLevel(context, failedPackage, level);
     }
 
     private static void executeRescueLevel(Context context, @Nullable String failedPackage,
@@ -561,20 +529,19 @@ public class RescueParty {
         }
 
         @Override
-        public int onBootLoop() {
+        public int onBootLoop(int mitigationCount) {
             if (isDisabled()) {
                 return PackageHealthObserverImpact.USER_IMPACT_NONE;
             }
-            return mapRescueLevelToUserImpact(getNextRescueLevel());
+            return mapRescueLevelToUserImpact(getRescueLevel(mitigationCount));
         }
 
         @Override
-        public boolean executeBootLoopMitigation() {
+        public boolean executeBootLoopMitigation(int mitigationCount) {
             if (isDisabled()) {
                 return false;
             }
-            incrementRescueLevel(Process.ROOT_UID);
-            executeRescueLevel(mContext, /*failedPackage=*/ null);
+            executeRescueLevel(mContext, /*failedPackage=*/ null, getRescueLevel(mitigationCount));
             return true;
         }
 

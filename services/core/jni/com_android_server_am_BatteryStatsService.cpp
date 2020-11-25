@@ -122,7 +122,7 @@ public:
         {
             std::unique_lock<std::mutex> reasonsLock(mReasonsMutex, std::defer_lock);
             if (reasonsLock.try_lock() && mWakeupReasons.empty()) {
-                mWakeupReasons = std::move(wakeupReasons);
+                mWakeupReasons = wakeupReasons;
                 reasonsCaptured = true;
             }
         }
