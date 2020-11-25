@@ -1315,6 +1315,7 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
         if (mRootWindowContainer.allResumedActivitiesIdle()) {
             if (r != null) {
                 mService.scheduleAppGcsLocked();
+                mRecentTasks.onActivityIdle(r);
             }
 
             if (mLaunchingActivityWakeLock.isHeld()) {
