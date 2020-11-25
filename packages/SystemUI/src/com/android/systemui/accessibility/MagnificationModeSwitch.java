@@ -52,7 +52,7 @@ class MagnificationModeSwitch {
     @VisibleForTesting
     static final long FADING_ANIMATION_DURATION_MS = 300;
     @VisibleForTesting
-    static final int DEFAULT_FADE_OUT_ANIMATION_DELAY_MS = 3000;
+    static final int DEFAULT_FADE_OUT_ANIMATION_DELAY_MS = 5000;
     private int mUiTimeout;
     private final Runnable mFadeInAnimationTask;
     private final Runnable mFadeOutAnimationTask;
