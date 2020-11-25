@@ -39,7 +39,7 @@ RENDERTHREAD_TEST(DeferredLayerUpdater, updateLayer) {
     EXPECT_EQ(Matrix4::identity(), layerUpdater->backingLayer()->getTexTransform());
 
     // push the deferred updates to the layer
-    SkMatrix scaledMatrix = SkMatrix::MakeScale(0.5, 0.5);
+    SkMatrix scaledMatrix = SkMatrix::Scale(0.5, 0.5);
     SkBitmap bitmap;
     bitmap.allocN32Pixels(16, 16);
     sk_sp<SkImage> layerImage = SkImage::MakeFromBitmap(bitmap);

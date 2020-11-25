@@ -263,10 +263,10 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaDisplayList, prepareListAndChildren_vdOffscr
     }
 
     // Another way to be offscreen: a matrix from the draw call.
-    for (const SkMatrix translate : { SkMatrix::MakeTrans(width, 0),
-                                      SkMatrix::MakeTrans(0, height),
-                                      SkMatrix::MakeTrans(-width, 0),
-                                      SkMatrix::MakeTrans(0, -height)}) {
+    for (const SkMatrix translate : { SkMatrix::Translate(width, 0),
+                                      SkMatrix::Translate(0, height),
+                                      SkMatrix::Translate(-width, 0),
+                                      SkMatrix::Translate(0, -height)}) {
         SkiaDisplayList skiaDL;
         VectorDrawableRoot dirtyVD(new VectorDrawable::Group());
         dirtyVD.mutateProperties()->setBounds(bounds);
@@ -291,7 +291,7 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaDisplayList, prepareListAndChildren_vdOffscr
         SkiaDisplayList skiaDL;
         VectorDrawableRoot dirtyVD(new VectorDrawable::Group());
         dirtyVD.mutateProperties()->setBounds(bounds);
-        SkMatrix translate = SkMatrix::MakeTrans(50, 50);
+        SkMatrix translate = SkMatrix::Translate(50, 50);
         skiaDL.appendVD(&dirtyVD, translate);
 
         ASSERT_TRUE(dirtyVD.isDirty());
