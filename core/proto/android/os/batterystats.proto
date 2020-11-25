@@ -19,10 +19,10 @@ option java_multiple_files = true;
 
 package android.os;
 
-import "frameworks/base/core/proto/android/app/job/enums.proto";
 import "frameworks/base/core/proto/android/os/powermanager.proto";
-import "frameworks/base/core/proto/android/telephony/enums.proto";
 import "frameworks/base/core/proto/android/privacy.proto";
+import "frameworks/proto_logging/stats/enums/app/job/enums.proto";
+import "frameworks/proto_logging/stats/enums/telephony/enums.proto";
 
 message BatteryStatsProto {
     option (android.msg_privacy).dest = DEST_AUTOMATIC;
