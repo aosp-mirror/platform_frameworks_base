@@ -1132,10 +1132,13 @@ package android.hardware.display {
   }
 
   public final class DisplayManager {
+    method public boolean areUserDisabledHdrTypesAllowed();
     method @RequiresPermission(android.Manifest.permission.MODIFY_REFRESH_RATE_SWITCHING_TYPE) public int getRefreshRateSwitchingType();
     method public boolean isMinimalPostProcessingRequested(int);
+    method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public void setAreUserDisabledHdrTypesAllowed(boolean);
     method @RequiresPermission(android.Manifest.permission.MODIFY_REFRESH_RATE_SWITCHING_TYPE) public void setRefreshRateSwitchingType(int);
     method @RequiresPermission(android.Manifest.permission.OVERRIDE_DISPLAY_MODE_REQUESTS) public void setShouldAlwaysRespectAppRequestedMode(boolean);
+    method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public void setUserDisabledHdrTypes(@NonNull int[]);
     method @RequiresPermission(android.Manifest.permission.OVERRIDE_DISPLAY_MODE_REQUESTS) public boolean shouldAlwaysRespectAppRequestedMode();
     field public static final int SWITCHING_TYPE_ACROSS_AND_WITHIN_GROUPS = 2; // 0x2
     field public static final int SWITCHING_TYPE_NONE = 0; // 0x0
@@ -1974,6 +1977,7 @@ package android.provider {
 
   public static final class Settings.Global extends android.provider.Settings.NameValueTable {
     field public static final String APP_OPS_CONSTANTS = "app_ops_constants";
+    field public static final String ARE_USER_DISABLED_HDR_FORMATS_ALLOWED = "are_user_disabled_hdr_formats_allowed";
     field public static final String AUTOMATIC_POWER_SAVE_MODE = "automatic_power_save_mode";
     field public static final String BATTERY_SAVER_CONSTANTS = "battery_saver_constants";
     field public static final String DEVELOPMENT_ENABLE_NON_RESIZABLE_MULTI_WINDOW = "enable_non_resizable_multi_window";
@@ -1988,6 +1992,7 @@ package android.provider {
     field public static final String NOTIFICATION_BUBBLES = "notification_bubbles";
     field public static final String OVERLAY_DISPLAY_DEVICES = "overlay_display_devices";
     field public static final String SHOW_FIRST_CRASH_DIALOG = "show_first_crash_dialog";
+    field public static final String USER_DISABLED_HDR_FORMATS = "user_disabled_hdr_formats";
     field public static final String USE_OPEN_WIFI_PACKAGE = "use_open_wifi_package";
   }
 
@@ -2587,7 +2592,9 @@ package android.view {
   public final class SurfaceControl implements android.os.Parcelable {
     ctor public SurfaceControl(@NonNull android.view.SurfaceControl, @NonNull String);
     method public static long acquireFrameRateFlexibilityToken();
+    method @NonNull public static android.os.IBinder getInternalDisplayToken();
     method public boolean isSameSurface(@NonNull android.view.SurfaceControl);
+    method public static void overrideHdrTypes(@NonNull android.os.IBinder, @NonNull int[]);
     method public static void releaseFrameRateFlexibilityToken(long);
   }
 
