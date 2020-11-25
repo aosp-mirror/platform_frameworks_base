@@ -345,6 +345,9 @@
     <!-- Allows overriding the system's device state from the shell -->
     <uses-permission android:name="android.permission.CONTROL_DEVICE_STATE"/>
 
+    <!-- Permissions required for CTS tests to close system dialogs -->
+    <uses-permission android:name="android.permission.BROADCAST_CLOSE_SYSTEM_DIALOGS" />
+
     <application android:label="@string/app_label"
                 android:theme="@android:style/Theme.DeviceDefault.DayNight"
                 android:defaultToDeviceProtectedStorage="true"
