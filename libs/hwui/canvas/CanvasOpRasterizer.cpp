@@ -33,7 +33,11 @@ void rasterizeCanvasBuffer(const CanvasOpBuffer& source, SkCanvas* destination) 
     SkMatrix& currentGlobalTransform = globalMatrixStack.emplace_back(SkMatrix::I());
 
     source.for_each([&]<CanvasOpType T>(const CanvasOpContainer<T> * op) {
-        if constexpr (T == CanvasOpType::BeginZ || T == CanvasOpType::EndZ) {
+        if constexpr (
+            T == CanvasOpType::BeginZ ||
+            T == CanvasOpType::EndZ   ||
+            T == CanvasOpType::DrawLayer
+        ) {
             // Do beginZ or endZ
             LOG_ALWAYS_FATAL("TODO");
             return;
