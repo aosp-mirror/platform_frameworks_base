@@ -4896,8 +4896,6 @@ public class ConnectivityServiceTest {
 
         final Network[] cellAndVpn = new Network[] {
                 mCellNetworkAgent.getNetwork(), mMockVpn.getNetwork()};
-        Network[] cellAndWifi = new Network[] {
-                mCellNetworkAgent.getNetwork(), mWiFiNetworkAgent.getNetwork()};
 
         // A VPN with default (null) underlying networks sets the underlying network's interfaces...
         expectForceUpdateIfaces(cellAndVpn, MOBILE_IFNAME, Process.myUid(), VPN_IFNAME,
@@ -4907,10 +4905,13 @@ public class ConnectivityServiceTest {
         mWiFiNetworkAgent = new TestNetworkAgentWrapper(TRANSPORT_WIFI);
         mWiFiNetworkAgent.connect(false);
         mWiFiNetworkAgent.sendLinkProperties(wifiLp);
+        final Network[] onlyNull = new Network[]{null};
         final Network[] wifiAndVpn = new Network[] {
                 mWiFiNetworkAgent.getNetwork(), mMockVpn.getNetwork()};
-        cellAndWifi = new Network[] {
+        final Network[] cellAndWifi = new Network[] {
                 mCellNetworkAgent.getNetwork(), mWiFiNetworkAgent.getNetwork()};
+        final Network[] cellNullAndWifi = new Network[] {
+                mCellNetworkAgent.getNetwork(), null, mWiFiNetworkAgent.getNetwork()};
 
         waitForIdle();
         assertEquals(wifiLp, mService.getActiveLinkProperties());
@@ -4931,6 +4932,13 @@ public class ConnectivityServiceTest {
         reset(mStatsService);
 
         mService.setUnderlyingNetworksForVpn(cellAndWifi);
+        waitForIdle();
+        expectForceUpdateIfaces(wifiAndVpn, MOBILE_IFNAME, Process.myUid(), VPN_IFNAME,
+                new String[]{MOBILE_IFNAME, WIFI_IFNAME});
+        reset(mStatsService);
+
+        // Null underlying networks are ignored.
+        mService.setUnderlyingNetworksForVpn(cellNullAndWifi);
         waitForIdle();
         expectForceUpdateIfaces(wifiAndVpn, MOBILE_IFNAME, Process.myUid(), VPN_IFNAME,
                 new String[]{MOBILE_IFNAME, WIFI_IFNAME});
@@ -4970,6 +4978,7 @@ public class ConnectivityServiceTest {
                 argThat(vpnInfos -> vpnInfos[0].underlyingIfaces.length == 1
                         && WIFI_IFNAME.equals(vpnInfos[0].underlyingIfaces[0])));
         mEthernetNetworkAgent.disconnect();
+        waitForIdle();
         reset(mStatsService);
 
         // When a VPN declares no underlying networks (i.e., no connectivity), getAllVpnInfo
@@ -4979,6 +4988,18 @@ public class ConnectivityServiceTest {
         // no underlying networks).
         // Also, for the same reason as above, the active interface passed in is null.
         mService.setUnderlyingNetworksForVpn(new Network[0]);
+        waitForIdle();
+        expectForceUpdateIfaces(wifiAndVpn, null);
+        reset(mStatsService);
+
+        // Specifying only a null underlying network is the same as no networks.
+        mService.setUnderlyingNetworksForVpn(onlyNull);
+        waitForIdle();
+        expectForceUpdateIfaces(wifiAndVpn, null);
+        reset(mStatsService);
+
+        // Specifying networks that are all disconnected is the same as specifying no networks.
+        mService.setUnderlyingNetworksForVpn(onlyCell);
         waitForIdle();
         expectForceUpdateIfaces(wifiAndVpn, null);
         reset(mStatsService);
