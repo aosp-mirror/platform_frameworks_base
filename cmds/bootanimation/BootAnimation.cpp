@@ -605,6 +605,7 @@ bool BootAnimation::threadLoop() {
         result = movie();
     }
 
+    mCallbacks->shutdown();
     eglMakeCurrent(mDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
     eglDestroyContext(mDisplay, mContext);
     eglDestroySurface(mDisplay, mSurface);
@@ -691,7 +692,6 @@ void BootAnimation::checkExit() {
     int exitnow = atoi(value);
     if (exitnow) {
         requestExit();
-        mCallbacks->shutdown();
     }
 }
 
