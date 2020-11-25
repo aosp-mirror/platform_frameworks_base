@@ -16,6 +16,8 @@
 
 package com.android.server.accessibility.magnification;
 
+import android.annotation.NonNull;
+
 import com.android.server.accessibility.BaseEventStreamTransformation;
 
 /**
@@ -23,23 +25,45 @@ import com.android.server.accessibility.BaseEventStreamTransformation;
  */
 public abstract class MagnificationGestureHandler extends BaseEventStreamTransformation {
 
-    protected final ScaleChangedListener mListener;
-
-    protected MagnificationGestureHandler(ScaleChangedListener listener) {
-        mListener = listener;
-    }
+    /**
+     * The logical display id.
+     */
+    protected final int mDisplayId;
 
     /**
-     * Interface for listening to the magnification scaling gesture.
+     * {@code true} if this detector should be "triggerable" by some
+     * external shortcut invoking {@link #notifyShortcutTriggered},
+     * {@code false} if it should ignore such triggers.
      */
+    protected final boolean mDetectShortcutTrigger;
+
+    /**
+     * {@code true} if this detector should detect and respond to triple-tap
+     * gestures for engaging and disengaging magnification,
+     * {@code false} if it should ignore such gestures
+     */
+    protected final boolean mDetectTripleTap;
+
+    /** Interface for listening to the magnification scaling gesture. */
     public interface ScaleChangedListener {
         /**
          * Called when the magnification scale is changed by users.
          *
          * @param displayId The logical display id
-         * @param mode  The magnification mode
+         * @param mode The magnification mode
          */
         void onMagnificationScaleChanged(int displayId, int mode);
+    }
+
+    protected final ScaleChangedListener mListener;
+
+    protected MagnificationGestureHandler(int displayId, boolean detectTripleTap,
+            boolean detectShortcutTrigger,
+            @NonNull ScaleChangedListener listener) {
+        mDisplayId = displayId;
+        mDetectTripleTap = detectTripleTap;
+        mDetectShortcutTrigger = detectShortcutTrigger;
+        mListener = listener;
     }
 
     /**

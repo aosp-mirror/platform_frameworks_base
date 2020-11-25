@@ -139,41 +139,15 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
     private final ScreenStateReceiver mScreenStateReceiver;
     private final WindowMagnificationPromptController mPromptController;
 
-    /**
-     * {@code true} if this detector should detect and respond to triple-tap
-     * gestures for engaging and disengaging magnification,
-     * {@code false} if it should ignore such gestures
-     */
-    final boolean mDetectTripleTap;
-
-    /**
-     * Whether {@link DetectingState#mShortcutTriggered shortcut} is enabled
-     */
-    final boolean mDetectShortcutTrigger;
-
     @VisibleForTesting State mCurrentState;
     @VisibleForTesting State mPreviousState;
 
     private PointerCoords[] mTempPointerCoords;
     private PointerProperties[] mTempPointerProperties;
 
-    private final int mDisplayId;
-
     private final Queue<MotionEvent> mDebugInputEventHistory;
     private final Queue<MotionEvent> mDebugOutputEventHistory;
 
-    /**
-     * @param context Context for resolving various magnification-related resources
-     * @param fullScreenMagnificationController the {@link FullScreenMagnificationController}
-     *
-     * @param detectTripleTap {@code true} if this detector should detect and respond to triple-tap
-     *                                gestures for engaging and disengaging magnification,
-     *                                {@code false} if it should ignore such gestures
-     * @param detectShortcutTrigger {@code true} if this detector should be "triggerable" by some
-     *                           external shortcut invoking {@link #notifyShortcutTriggered},
-     *                           {@code false} if it should ignore such triggers.
-     * @param displayId The logical display id.
-     */
     public FullScreenMagnificationGestureHandler(Context context,
             FullScreenMagnificationController fullScreenMagnificationController,
             ScaleChangedListener listener,
@@ -181,7 +155,7 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
             boolean detectShortcutTrigger,
             @NonNull WindowMagnificationPromptController promptController,
             int displayId) {
-        super(listener);
+        super(displayId, detectTripleTap, detectShortcutTrigger, listener);
         if (DEBUG_ALL) {
             Log.i(LOG_TAG,
                     "FullScreenMagnificationGestureHandler(detectTripleTap = " + detectTripleTap
@@ -189,15 +163,12 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
         }
         mFullScreenMagnificationController = fullScreenMagnificationController;
         mPromptController = promptController;
-        mDisplayId = displayId;
 
         mDelegatingState = new DelegatingState();
         mDetectingState = new DetectingState(context);
         mViewportDraggingState = new ViewportDraggingState();
         mPanningScalingState = new PanningScalingState(context);
 
-        mDetectTripleTap = detectTripleTap;
-        mDetectShortcutTrigger = detectShortcutTrigger;
         if (mDetectShortcutTrigger) {
             mScreenStateReceiver = new ScreenStateReceiver(context, this);
             mScreenStateReceiver.register();

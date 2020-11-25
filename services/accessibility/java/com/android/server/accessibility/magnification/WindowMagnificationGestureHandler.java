@@ -88,38 +88,28 @@ public class WindowMagnificationGestureHandler extends MagnificationGestureHandl
     @VisibleForTesting
     State mPreviousState;
 
-    final boolean mDetectShortcutTrigger;
-
     private MotionEventDispatcherDelegate mMotionEventDispatcherDelegate;
-    private final int mDisplayId;
     private final Context mContext;
     private final Point mTempPoint = new Point();
 
     private final Queue<MotionEvent> mDebugOutputEventHistory;
 
-    /**
-     * @param context                Context for resolving various magnification-related resources
-     * @param windowMagnificationMgr The {@link WindowMagnificationManager}
-     * @param displayId              The logical display id.
-     */
     public WindowMagnificationGestureHandler(Context context,
             WindowMagnificationManager windowMagnificationMgr,
-            ScaleChangedListener listener, boolean detectTripleTap,
-            boolean detectShortcutTrigger, int displayId) {
-        super(listener);
+            ScaleChangedListener listener,
+            boolean detectTripleTap, boolean detectShortcutTrigger, int displayId) {
+        super(displayId, detectTripleTap, detectShortcutTrigger, listener);
         if (DEBUG_ALL) {
             Slog.i(LOG_TAG,
                     "WindowMagnificationGestureHandler() , displayId = " + displayId + ")");
         }
         mContext = context;
         mWindowMagnificationMgr = windowMagnificationMgr;
-        mDetectShortcutTrigger = detectShortcutTrigger;
-        mDisplayId = displayId;
         mMotionEventDispatcherDelegate = new MotionEventDispatcherDelegate(context,
                 (event, rawEvent, policyFlags) -> super.onMotionEvent(
                         event, rawEvent, policyFlags));
         mDelegatingState = new DelegatingState(mMotionEventDispatcherDelegate);
-        mDetectingState = new DetectingState(context, detectTripleTap);
+        mDetectingState = new DetectingState(context, mDetectTripleTap);
         mObservePanningScalingState = new PanningScalingGestureState(
                 new PanningScalingHandler(context, MAX_SCALE, MIN_SCALE, true,
                         new PanningScalingHandler.MagnificationDelegate() {
