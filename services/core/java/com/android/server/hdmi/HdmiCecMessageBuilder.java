@@ -697,8 +697,10 @@ public class HdmiCecMessageBuilder {
     }
 
     static HdmiCecMessage buildReportFeatures(int src,
-            @HdmiControlManager.HdmiCecVersion int cecVersion, List<Integer> allDeviceTypes,
-            int rcProfile, List<Integer> rcFeatures, List<Integer> deviceFeatures) {
+            @HdmiControlManager.HdmiCecVersion int cecVersion,
+            List<Integer> allDeviceTypes, @Constants.RcProfile int rcProfile,
+            List<Integer> rcFeatures,
+            List<Integer> deviceFeatures) {
         byte cecVersionByte = (byte) (cecVersion & 0xFF);
         byte deviceTypes = 0;
         for (Integer deviceType : allDeviceTypes) {
@@ -708,16 +710,16 @@ public class HdmiCecMessageBuilder {
         byte rcProfileByte = 0;
         rcProfileByte |= rcProfile << 6;
         if (rcProfile == Constants.RC_PROFILE_SOURCE) {
-            for (Integer rcFeature : rcFeatures) {
+            for (@Constants.RcProfileSource Integer rcFeature : rcFeatures) {
                 rcProfileByte |= 1 << rcFeature;
             }
         } else {
-            byte rcProfileTv = (byte) (rcFeatures.get(0) & 0xFFFF);
+            @Constants.RcProfileTv byte rcProfileTv = (byte) (rcFeatures.get(0) & 0xFFFF);
             rcProfileByte |= rcProfileTv;
         }
 
         byte deviceFeaturesByte = 0;
-        for (Integer deviceFeature : deviceFeatures) {
+        for (@Constants.DeviceFeature Integer deviceFeature : deviceFeatures) {
             deviceFeaturesByte |= 1 << deviceFeature;
         }
 
@@ -777,6 +779,7 @@ public class HdmiCecMessageBuilder {
         };
     }
 
+    @Constants.DeviceType
     private static int hdmiDeviceInfoDeviceTypeToShiftValue(int deviceType) {
         switch (deviceType) {
             case HdmiDeviceInfo.DEVICE_TV:

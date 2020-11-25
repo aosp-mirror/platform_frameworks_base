@@ -53,6 +53,7 @@ import com.android.server.hdmi.HdmiControlService.SendMessageCallback;
 
 import com.google.android.collect.Lists;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -1480,6 +1481,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         return true;
     }
 
+    @Constants.RcProfile
     @Override
     protected int getRcProfile() {
         return Constants.RC_PROFILE_TV;
@@ -1492,8 +1494,21 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
 
     @Override
     protected List<Integer> getDeviceFeatures() {
-        return Lists.newArrayList(Constants.DEVICE_FEATURE_SINK_SUPPORTS_ARC_TX,
-                Constants.DEVICE_FEATURE_TV_SUPPORTS_RECORD_TV_SCREEN);
+        List<Integer> deviceFeatures = new ArrayList<>();
+
+        boolean hasArcPort = false;
+        List<HdmiPortInfo> ports = mService.getPortInfo();
+        for (HdmiPortInfo port : ports) {
+            if (isArcFeatureEnabled(port.getId())) {
+                hasArcPort = true;
+                break;
+            }
+        }
+        if (hasArcPort) {
+            deviceFeatures.add(Constants.DEVICE_FEATURE_SINK_SUPPORTS_ARC_TX);
+        }
+        deviceFeatures.add(Constants.DEVICE_FEATURE_TV_SUPPORTS_RECORD_TV_SCREEN);
+        return deviceFeatures;
     }
 
     @Override
