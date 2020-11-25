@@ -2826,7 +2826,6 @@ public interface WindowManager extends ViewManager {
         /** @hide */
         @Retention(RetentionPolicy.SOURCE)
         @IntDef(
-                flag = true,
                 value = {LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT,
                         LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES,
                         LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER,
