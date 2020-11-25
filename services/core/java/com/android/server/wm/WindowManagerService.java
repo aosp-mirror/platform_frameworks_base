@@ -1121,10 +1121,7 @@ public class WindowManagerService extends IWindowManager.Stub
             final boolean isRecentsAnimationTarget = getRecentsAnimationController() != null
                     && getRecentsAnimationController().isTargetApp(atoken);
             if (atoken.mLaunchTaskBehind && !isRecentsAnimationTarget) {
-                try {
-                    mActivityTaskManager.notifyLaunchTaskBehindComplete(atoken.token);
-                } catch (RemoteException e) {
-                }
+                mAtmService.mTaskSupervisor.scheduleLaunchTaskBehindComplete(atoken.token);
                 atoken.mLaunchTaskBehind = false;
             } else {
                 atoken.updateReportedVisibilityLocked();
@@ -1132,9 +1129,11 @@ public class WindowManagerService extends IWindowManager.Stub
                 // successfully finishes.
                 if (atoken.mEnteringAnimation && !isRecentsAnimationTarget) {
                     atoken.mEnteringAnimation = false;
-                    try {
-                        mActivityTaskManager.notifyEnterAnimationComplete(atoken.token);
-                    } catch (RemoteException e) {
+                    if (atoken != null && atoken.attachedToProcess()) {
+                        try {
+                            atoken.app.getThread().scheduleEnterAnimationComplete(atoken.appToken);
+                        } catch (RemoteException e) {
+                        }
                     }
                 }
             }
@@ -5106,9 +5105,11 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
 
                 case NOTIFY_ACTIVITY_DRAWN: {
-                    try {
-                        mActivityTaskManager.notifyActivityDrawn((IBinder) msg.obj);
-                    } catch (RemoteException e) {
+                    final ActivityRecord activity = (ActivityRecord) msg.obj;
+                    synchronized (mGlobalLock) {
+                        if (activity.isAttached()) {
+                            activity.getRootTask().notifyActivityDrawnLocked(activity);
+                        }
                     }
                     break;
                 }

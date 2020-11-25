@@ -16,7 +16,6 @@
 
 package com.android.server.wm;
 
-import android.app.ActivityTaskManager;
 import android.app.UriGrantsManager;
 import android.content.ClipData;
 import android.net.Uri;
@@ -33,6 +32,7 @@ import java.util.ArrayList;
 class DragAndDropPermissionsHandler extends IDragAndDropPermissions.Stub
         implements IBinder.DeathRecipient {
 
+    private final WindowManagerGlobalLock mGlobalLock;
     private final int mSourceUid;
     private final String mTargetPackage;
     private final int mMode;
@@ -45,8 +45,9 @@ class DragAndDropPermissionsHandler extends IDragAndDropPermissions.Stub
     private IBinder mPermissionOwnerToken = null;
     private IBinder mTransientToken = null;
 
-    DragAndDropPermissionsHandler(ClipData clipData, int sourceUid, String targetPackage, int mode,
-                                  int sourceUserId, int targetUserId) {
+    DragAndDropPermissionsHandler(WindowManagerGlobalLock lock, ClipData clipData, int sourceUid,
+            String targetPackage, int mode, int sourceUserId, int targetUserId) {
+        mGlobalLock = lock;
         mSourceUid = sourceUid;
         mTargetPackage = targetPackage;
         mMode = mode;
@@ -64,8 +65,7 @@ class DragAndDropPermissionsHandler extends IDragAndDropPermissions.Stub
         mActivityToken = activityToken;
 
         // Will throw if Activity is not found.
-        IBinder permissionOwner = ActivityTaskManager.getService().
-                getUriPermissionOwnerForActivity(mActivityToken);
+        IBinder permissionOwner = getUriPermissionOwnerForActivity(mActivityToken);
 
         doTake(permissionOwner);
     }
@@ -105,8 +105,7 @@ class DragAndDropPermissionsHandler extends IDragAndDropPermissions.Stub
         IBinder permissionOwner = null;
         if (mActivityToken != null) {
             try {
-                permissionOwner = ActivityTaskManager.getService().
-                        getUriPermissionOwnerForActivity(mActivityToken);
+                permissionOwner = getUriPermissionOwnerForActivity(mActivityToken);
             } catch (Exception e) {
                 // Activity is destroyed, permissions already revoked.
                 return;
@@ -123,6 +122,18 @@ class DragAndDropPermissionsHandler extends IDragAndDropPermissions.Stub
         UriGrantsManagerInternal ugm = LocalServices.getService(UriGrantsManagerInternal.class);
         for (int i = 0; i < mUris.size(); ++i) {
             ugm.revokeUriPermissionFromOwner(permissionOwner, mUris.get(i), mMode, mSourceUserId);
+        }
+    }
+
+    private IBinder getUriPermissionOwnerForActivity(IBinder activityToken) {
+        ActivityTaskManagerService.enforceNotIsolatedCaller("getUriPermissionOwnerForActivity");
+        synchronized (mGlobalLock) {
+            ActivityRecord r = ActivityRecord.isInStackLocked(activityToken);
+            if (r == null) {
+                throw new IllegalArgumentException("Activity does not exist; token="
+                        + activityToken);
+            }
+            return r.getUriPermissionsLocked().getExternalToken();
         }
     }
 

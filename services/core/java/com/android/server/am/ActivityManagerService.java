@@ -139,6 +139,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.Activity;
+import android.app.ActivityClient;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityManagerInternal;
@@ -287,7 +288,6 @@ import android.util.SparseIntArray;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 import android.util.proto.ProtoUtils;
-import android.view.Display;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -2857,12 +2857,13 @@ public class ActivityManagerService extends IActivityManager.Stub
     @Override
     public final boolean finishActivity(IBinder token, int resultCode, Intent resultData,
             int finishTask) {
-        return mActivityTaskManager.finishActivity(token, resultCode, resultData, finishTask);
+        return ActivityClient.getInstance().finishActivity(token, resultCode, resultData,
+                finishTask);
     }
 
     @Override
     public void setRequestedOrientation(IBinder token, int requestedOrientation) {
-        mActivityTaskManager.setRequestedOrientation(token, requestedOrientation);
+        ActivityClient.getInstance().setRequestedOrientation(token, requestedOrientation);
     }
 
     @Override
@@ -5704,7 +5705,7 @@ public class ActivityManagerService extends IActivityManager.Stub
      */
     @Override
     public boolean moveActivityTaskToBack(IBinder token, boolean nonRoot) {
-        return mActivityTaskManager.moveActivityTaskToBack(token, nonRoot);
+        return ActivityClient.getInstance().moveActivityTaskToBack(token, nonRoot);
     }
 
     @Override
@@ -5739,7 +5740,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @Override
     public int getTaskForActivity(IBinder token, boolean onlyRoot) {
-        return mActivityTaskManager.getTaskForActivity(token, onlyRoot);
+        return ActivityClient.getInstance().getTaskForActivity(token, onlyRoot);
     }
 
     @Override
@@ -6712,7 +6713,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @Override
     public boolean isTopOfTask(IBinder token) {
-        return mActivityTaskManager.isTopOfTask(token);
+        return ActivityClient.getInstance().isTopOfTask(token);
     }
 
     @Override
@@ -16298,14 +16299,9 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         @Override
         public ActivityPresentationInfo getActivityPresentationInfo(IBinder token) {
-            int displayId = Display.INVALID_DISPLAY;
-            try {
-                displayId = mActivityTaskManager.getDisplayId(token);
-            } catch (RemoteException e) {
-            }
-
-            return new ActivityPresentationInfo(mActivityTaskManager.getTaskForActivity(token,
-                    /*onlyRoot=*/ false), displayId,
+            final ActivityClient ac = ActivityClient.getInstance();
+            return new ActivityPresentationInfo(ac.getTaskForActivity(token,
+                    /*onlyRoot=*/ false), ac.getDisplayId(token),
                     mActivityTaskManager.getActivityClassForToken(token));
         }
 
