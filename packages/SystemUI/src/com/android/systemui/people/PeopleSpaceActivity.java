@@ -16,19 +16,30 @@
 
 package com.android.systemui.people;
 
+import static android.appwidget.AppWidgetManager.EXTRA_APPWIDGET_ID;
+import static android.appwidget.AppWidgetManager.INVALID_APPWIDGET_ID;
+
 import android.app.Activity;
 import android.app.INotificationManager;
 import android.app.people.IPeopleManager;
 import android.app.people.PeopleSpaceTile;
+import android.appwidget.AppWidgetManager;
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.LauncherApps;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.ServiceManager;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.ViewGroup;
 
+import androidx.preference.PreferenceManager;
+
 import com.android.systemui.R;
+import com.android.systemui.people.widget.PeopleSpaceWidgetProvider;
 
 import java.util.List;
 import java.util.Map;
@@ -46,6 +57,9 @@ public class PeopleSpaceActivity extends Activity {
     private PackageManager mPackageManager;
     private LauncherApps mLauncherApps;
     private Context mContext;
+    private AppWidgetManager mAppWidgetManager;
+    private int mAppWidgetId;
+    private boolean mShowSingleConversation;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,7 +73,18 @@ public class PeopleSpaceActivity extends Activity {
         mPeopleManager = IPeopleManager.Stub.asInterface(
                 ServiceManager.getService(Context.PEOPLE_SERVICE));
         mLauncherApps = mContext.getSystemService(LauncherApps.class);
+        mAppWidgetManager = AppWidgetManager.getInstance(mContext);
         setTileViewsWithPriorityConversations();
+        mAppWidgetId = getIntent().getIntExtra(EXTRA_APPWIDGET_ID,
+                INVALID_APPWIDGET_ID);
+        mShowSingleConversation = Settings.Global.getInt(mContext.getContentResolver(),
+                Settings.Global.PEOPLE_SPACE_CONVERSATION_TYPE, 0) == 0;
+        // Finish the configuration activity immediately if a widget is added for multiple
+        // conversations. If the mAppWidgetId is INVALID, then the activity wasn't launched as a
+        // widget configuration activity.
+        if (!mShowSingleConversation && mAppWidgetId != INVALID_APPWIDGET_ID) {
+            finishActivity();
+        }
     }
 
     /**
@@ -93,10 +118,37 @@ public class PeopleSpaceActivity extends Activity {
             tileView.setName(tile.getUserName().toString());
             tileView.setPackageIcon(mPackageManager.getApplicationIcon(pkg));
             tileView.setPersonIcon(tile.getUserIcon());
-            tileView.setOnClickListener(mLauncherApps, tile);
+            tileView.setOnClickListener(v -> storeWidgetConfiguration(tile));
         } catch (Exception e) {
             Log.e(TAG, "Couldn't retrieve shortcut information", e);
         }
+    }
+
+    /** Stores the user selected configuration for {@code mAppWidgetId}. */
+    private void storeWidgetConfiguration(PeopleSpaceTile tile) {
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(mContext);
+        SharedPreferences.Editor editor = sp.edit();
+        if (PeopleSpaceUtils.DEBUG) {
+            Log.d(TAG, "Put " + tile.getUserName() + "'s shortcut ID: "
+                    + tile.getId() + " for widget ID: "
+                    + mAppWidgetId);
+        }
+        editor.putString(String.valueOf(mAppWidgetId), tile.getId());
+        editor.commit();
+        AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(mContext);
+        int[] widgetIds = appWidgetManager.getAppWidgetIds(
+                new ComponentName(mContext, PeopleSpaceWidgetProvider.class));
+        PeopleSpaceUtils.updateSingleConversationWidgets(mContext, widgetIds, mAppWidgetManager,
+                mNotificationManager);
+        finishActivity();
+    }
+
+    /** Finish activity with a successful widget configuration result. */
+    private void finishActivity() {
+        Intent resultValue = new Intent();
+        resultValue.putExtra(EXTRA_APPWIDGET_ID, mAppWidgetId);
+        setResult(RESULT_OK, resultValue);
+        finish();
     }
 
     @Override

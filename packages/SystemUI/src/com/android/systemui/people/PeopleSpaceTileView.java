@@ -84,4 +84,9 @@ public class PeopleSpaceTileView extends LinearLayout {
                 launcherApps.startShortcut(tile.getPackageName(), tile.getId(), null, null,
                         UserHandle.getUserHandleForUid(tile.getUid())));
     }
+
+    /** Sets the click listener of the tile directly. */
+    public void setOnClickListener(OnClickListener onClickListener) {
+        mTileView.setOnClickListener(onClickListener);
+    }
 }
