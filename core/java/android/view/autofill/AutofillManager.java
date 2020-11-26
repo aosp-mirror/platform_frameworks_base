@@ -1911,7 +1911,10 @@ public final class AutofillManager {
         if (client == null) {
             return;
         }
-
+        if (mService == null) {
+            Log.w(TAG, "Autofill service is null!");
+            return;
+        }
         if (mServiceClient == null) {
             mServiceClient = new AutofillManagerClient(this);
             try {
