@@ -146,7 +146,7 @@ class PackageManagerShellCommand extends ShellCommand {
 
     final IPackageManager mInterface;
     final IPermissionManager mPermissionManager;
-    final Context mShellPackageContext;
+    final Context mContext;
     final private WeakHashMap<String, Resources> mResourceCache =
             new WeakHashMap<String, Resources>();
     int mTargetUser;
@@ -158,13 +158,7 @@ class PackageManagerShellCommand extends ShellCommand {
             PackageManagerService service, IPermissionManager permissionManager, Context context) {
         mInterface = service;
         mPermissionManager = permissionManager;
-        try {
-            mShellPackageContext = context.createPackageContextAsUser(
-                    "com.android.shell", 0, Binder.getCallingUserHandle());
-        } catch (NameNotFoundException e) {
-            // should not happen
-            throw new RuntimeException(e);
-        }
+        mContext = context;
     }
 
     @Override
@@ -487,8 +481,17 @@ class PackageManagerShellCommand extends ShellCommand {
             return 1;
         }
 
+        final Context shellPackageContext;
+        try {
+            shellPackageContext = mContext.createPackageContextAsUser(
+                    "com.android.shell", 0, Binder.getCallingUserHandle());
+        } catch (NameNotFoundException e) {
+            // should not happen
+            throw new RuntimeException(e);
+        }
+
         final LocalIntentReceiver receiver = new LocalIntentReceiver();
-        RollbackManager rm = mShellPackageContext.getSystemService(RollbackManager.class);
+        RollbackManager rm = shellPackageContext.getSystemService(RollbackManager.class);
         RollbackInfo rollback = null;
         for (RollbackInfo r : rm.getAvailableRollbacks()) {
             for (PackageRollbackInfo info : r.getPackages()) {
