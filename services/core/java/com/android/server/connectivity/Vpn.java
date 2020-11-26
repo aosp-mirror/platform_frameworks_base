@@ -122,7 +122,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.math.BigInteger;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
@@ -159,30 +158,6 @@ public class Vpn {
     // the device idle allowlist during service launch and VPN bootstrap.
     private static final long VPN_LAUNCH_IDLE_ALLOWLIST_DURATION_MS = 60 * 1000;
 
-    // Settings for how much of the address space should be routed so that Vpn considers
-    // "most" of the address space is routed. This is used to determine whether this Vpn
-    // should be marked with the INTERNET capability.
-    private static final long MOST_IPV4_ADDRESSES_COUNT;
-    private static final BigInteger MOST_IPV6_ADDRESSES_COUNT;
-    static {
-        // 85% of the address space must be routed for Vpn to consider this VPN to provide
-        // INTERNET access.
-        final int howManyPercentIsMost = 85;
-
-        final long twoPower32 = 1L << 32;
-        MOST_IPV4_ADDRESSES_COUNT = twoPower32 * howManyPercentIsMost / 100;
-        final BigInteger twoPower128 = BigInteger.ONE.shiftLeft(128);
-        MOST_IPV6_ADDRESSES_COUNT = twoPower128
-                .multiply(BigInteger.valueOf(howManyPercentIsMost))
-                .divide(BigInteger.valueOf(100));
-    }
-    // How many routes to evaluate before bailing and declaring this Vpn should provide
-    // the INTERNET capability. This is necessary because computing the address space is
-    // O(n²) and this is running in the system service, so a limit is needed to alleviate
-    // the risk of attack.
-    // This is taken as a total of IPv4 + IPV6 routes for simplicity, but the algorithm
-    // is actually O(n²)+O(n²).
-    private static final int MAX_ROUTES_TO_EVALUATE = 150;
     private static final String LOCKDOWN_ALLOWLIST_SETTING_NAME =
             Settings.Secure.ALWAYS_ON_VPN_LOCKDOWN_WHITELIST;
     /**
@@ -199,6 +174,7 @@ public class Vpn {
     // automated reconnection
 
     private final Context mContext;
+    private final ConnectivityManager mConnectivityManager;
     // The context is for specific user which is created from mUserId
     private final Context mUserIdContext;
     @VisibleForTesting final Dependencies mDeps;
@@ -402,6 +378,7 @@ public class Vpn {
             int userId, @NonNull KeyStore keyStore, SystemServices systemServices,
             Ikev2SessionCreator ikev2SessionCreator) {
         mContext = context;
+        mConnectivityManager = mContext.getSystemService(ConnectivityManager.class);
         mUserIdContext = context.createContextAsUser(UserHandle.of(userId), 0 /* flags */);
         mDeps = deps;
         mNetd = netService;
@@ -504,7 +481,7 @@ public class Vpn {
         final boolean isAlwaysMetered = mIsPackageTargetingAtLeastQ && mConfig.isMetered;
 
         applyUnderlyingCapabilities(
-                mContext.getSystemService(ConnectivityManager.class),
+                mConnectivityManager,
                 underlyingNetworks,
                 mNetworkCapabilities,
                 isAlwaysMetered);
@@ -514,10 +491,10 @@ public class Vpn {
 
     @VisibleForTesting
     public static void applyUnderlyingCapabilities(
-            ConnectivityManager cm,
-            Network[] underlyingNetworks,
-            NetworkCapabilities caps,
-            boolean isAlwaysMetered) {
+            @NonNull final ConnectivityManager cm,
+            @Nullable final Network[] underlyingNetworks,
+            @NonNull final NetworkCapabilities caps,
+            final boolean isAlwaysMetered) {
         int[] transportTypes = new int[] { NetworkCapabilities.TRANSPORT_VPN };
         int downKbps = NetworkCapabilities.LINK_BANDWIDTH_UNSPECIFIED;
         int upKbps = NetworkCapabilities.LINK_BANDWIDTH_UNSPECIFIED;
@@ -2438,7 +2415,6 @@ public class Vpn {
             // When restricted to test networks, select any network with TRANSPORT_TEST. Since the
             // creator of the profile and the test network creator both have MANAGE_TEST_NETWORKS,
             // this is considered safe.
-            final ConnectivityManager cm = ConnectivityManager.from(mContext);
             final NetworkRequest req;
 
             if (mProfile.isRestrictedToTestNetworks()) {
@@ -2457,7 +2433,7 @@ public class Vpn {
                         .build();
             }
 
-            cm.requestNetwork(req, mNetworkCallback);
+            mConnectivityManager.requestNetwork(req, mNetworkCallback);
         }
 
         private boolean isActiveNetwork(@Nullable Network network) {
@@ -2744,8 +2720,7 @@ public class Vpn {
 
             resetIkeState();
 
-            final ConnectivityManager cm = ConnectivityManager.from(mContext);
-            cm.unregisterNetworkCallback(mNetworkCallback);
+            mConnectivityManager.unregisterNetworkCallback(mNetworkCallback);
 
             mExecutor.shutdown();
         }
@@ -2826,13 +2801,12 @@ public class Vpn {
             mProfile = profile;
 
             if (!TextUtils.isEmpty(mOuterInterface)) {
-                final ConnectivityManager cm = ConnectivityManager.from(mContext);
-                for (Network network : cm.getAllNetworks()) {
-                    final LinkProperties lp = cm.getLinkProperties(network);
+                for (Network network : mConnectivityManager.getAllNetworks()) {
+                    final LinkProperties lp = mConnectivityManager.getLinkProperties(network);
                     if (lp != null && lp.getAllInterfaceNames().contains(mOuterInterface)) {
-                        final NetworkInfo networkInfo = cm.getNetworkInfo(network);
-                        if (networkInfo != null) {
-                            mOuterConnection.set(networkInfo.getType());
+                        final NetworkInfo netInfo = mConnectivityManager.getNetworkInfo(network);
+                        if (netInfo != null) {
+                            mOuterConnection.set(netInfo.getType());
                             break;
                         }
                     }
