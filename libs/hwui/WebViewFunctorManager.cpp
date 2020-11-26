@@ -26,6 +26,35 @@
 
 namespace android::uirenderer {
 
+namespace {
+class ScopedCurrentFunctor {
+public:
+    ScopedCurrentFunctor(WebViewFunctor* functor) {
+        ALOG_ASSERT(!sCurrentFunctor);
+        ALOG_ASSERT(functor);
+        sCurrentFunctor = functor;
+    }
+    ~ScopedCurrentFunctor() {
+        ALOG_ASSERT(sCurrentFunctor);
+        sCurrentFunctor = nullptr;
+    }
+
+    static ASurfaceControl* getSurfaceControl() {
+        ALOG_ASSERT(sCurrentFunctor);
+        return sCurrentFunctor->getSurfaceControl();
+    }
+    static void mergeTransaction(ASurfaceTransaction* transaction) {
+        ALOG_ASSERT(sCurrentFunctor);
+        sCurrentFunctor->mergeTransaction(transaction);
+    }
+
+private:
+    static WebViewFunctor* sCurrentFunctor;
+};
+
+WebViewFunctor* ScopedCurrentFunctor::sCurrentFunctor = nullptr;
+}  // namespace
+
 RenderMode WebViewFunctor_queryPlatformRenderMode() {
     auto pipelineType = Properties::getRenderPipelineType();
     switch (pipelineType) {
@@ -83,7 +112,15 @@ void WebViewFunctor::drawGl(const DrawGlInfo& drawInfo) {
     if (!mHasContext) {
         mHasContext = true;
     }
-    mCallbacks.gles.draw(mFunctor, mData, drawInfo);
+    ScopedCurrentFunctor currentFunctor(this);
+
+    WebViewOverlayData overlayParams = {
+            // TODO:
+            .overlaysMode = OverlaysMode::Disabled,
+            .getSurfaceControl = currentFunctor.getSurfaceControl,
+            .mergeTransaction = currentFunctor.mergeTransaction,
+    };
+    mCallbacks.gles.draw(mFunctor, mData, drawInfo, overlayParams);
 }
 
 void WebViewFunctor::initVk(const VkFunctorInitParams& params) {
@@ -98,7 +135,15 @@ void WebViewFunctor::initVk(const VkFunctorInitParams& params) {
 
 void WebViewFunctor::drawVk(const VkFunctorDrawParams& params) {
     ATRACE_NAME("WebViewFunctor::drawVk");
-    mCallbacks.vk.draw(mFunctor, mData, params);
+    ScopedCurrentFunctor currentFunctor(this);
+
+    WebViewOverlayData overlayParams = {
+            // TODO
+            .overlaysMode = OverlaysMode::Disabled,
+            .getSurfaceControl = currentFunctor.getSurfaceControl,
+            .mergeTransaction = currentFunctor.mergeTransaction,
+    };
+    mCallbacks.vk.draw(mFunctor, mData, params, overlayParams);
 }
 
 void WebViewFunctor::postDrawVk() {
@@ -116,6 +161,20 @@ void WebViewFunctor::destroyContext() {
         auto* grContext = renderthread::RenderThread::getInstance().getGrContext();
         if (grContext) grContext->resetContext();
     }
+}
+
+void WebViewFunctor::removeOverlays() {
+    ScopedCurrentFunctor currentFunctor(this);
+    mCallbacks.removeOverlays(mFunctor, mData, currentFunctor.mergeTransaction);
+}
+
+ASurfaceControl* WebViewFunctor::getSurfaceControl() {
+    // TODO
+    return nullptr;
+}
+
+void WebViewFunctor::mergeTransaction(ASurfaceTransaction* transaction) {
+    // TODO
 }
 
 WebViewFunctorManager& WebViewFunctorManager::instance() {
