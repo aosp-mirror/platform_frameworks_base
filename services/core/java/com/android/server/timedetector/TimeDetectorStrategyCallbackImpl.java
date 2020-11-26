@@ -20,12 +20,15 @@ import android.annotation.NonNull;
 import android.app.AlarmManager;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.os.Build;
+import android.os.Environment;
 import android.os.PowerManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.provider.Settings;
 import android.util.Slog;
 
+import java.time.Instant;
 import java.util.Objects;
 
 /**
@@ -36,6 +39,13 @@ public final class TimeDetectorStrategyCallbackImpl implements TimeDetectorStrat
     private final static String TAG = "timedetector.TimeDetectorStrategyCallbackImpl";
 
     private static final int SYSTEM_CLOCK_UPDATE_THRESHOLD_MILLIS_DEFAULT = 2 * 1000;
+
+    /**
+     * Time in the past. If automatic time suggestion is before this point, it's
+     * incorrect for sure.
+     */
+    private static final Instant TIME_LOWER_BOUND = Instant.ofEpochMilli(
+            Long.max(Environment.getRootDirectory().lastModified(), Build.TIME));
 
     /**
      * If a newly calculated system clock time and the current system clock time differs by this or
@@ -76,6 +86,11 @@ public final class TimeDetectorStrategyCallbackImpl implements TimeDetectorStrat
         } catch (Settings.SettingNotFoundException snfe) {
             return true;
         }
+    }
+
+    @Override
+    public Instant autoTimeLowerBound() {
+        return TIME_LOWER_BOUND;
     }
 
     @Override
