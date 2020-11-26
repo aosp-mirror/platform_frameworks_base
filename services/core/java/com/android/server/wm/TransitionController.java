@@ -26,7 +26,9 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
 import android.view.WindowManager;
+import android.window.IRemoteTransition;
 import android.window.ITransitionPlayer;
+import android.window.TransitionRequestInfo;
 
 import com.android.internal.protolog.ProtoLogGroup;
 import com.android.internal.protolog.common.ProtoLog;
@@ -140,7 +142,7 @@ class TransitionController {
     }
 
     /**
-     * @see #requestTransitionIfNeeded(int, int)
+     * @see #requestTransitionIfNeeded(int, int, WindowContainer, IRemoteTransition)
      */
     @Nullable
     Transition requestTransitionIfNeeded(@WindowManager.TransitionType int type,
@@ -148,9 +150,19 @@ class TransitionController {
         return requestTransitionIfNeeded(type, 0 /* flags */, trigger);
     }
 
+    /**
+     * @see #requestTransitionIfNeeded(int, int, WindowContainer, IRemoteTransition)
+     */
+    @Nullable
+    Transition requestTransitionIfNeeded(@WindowManager.TransitionType int type,
+            @WindowManager.TransitionFlags int flags, @Nullable WindowContainer trigger) {
+        return requestTransitionIfNeeded(type, flags, trigger, null /* remote */);
+    }
+
     private static boolean isExistenceType(@WindowManager.TransitionType int type) {
         return type == TRANSIT_OPEN || type == TRANSIT_CLOSE;
     }
+
     /**
      * If a transition isn't requested yet, creates one and asks the TransitionPlayer (Shell) to
      * start it. Collection can start immediately.
@@ -159,7 +171,8 @@ class TransitionController {
      */
     @Nullable
     Transition requestTransitionIfNeeded(@WindowManager.TransitionType int type,
-            @WindowManager.TransitionFlags int flags, @Nullable WindowContainer trigger) {
+            @WindowManager.TransitionFlags int flags, @Nullable WindowContainer trigger,
+            @Nullable IRemoteTransition remoteTransition) {
         if (mTransitionPlayer == null) {
             return null;
         }
@@ -169,7 +182,7 @@ class TransitionController {
             mCollectingTransition.setReady(false);
         } else {
             newTransition = requestStartTransition(createTransition(type, flags),
-                    trigger != null ? trigger.asTask() : null);
+                    trigger != null ? trigger.asTask() : null, remoteTransition);
         }
         if (trigger != null) {
             if (isExistenceType(type)) {
@@ -183,7 +196,8 @@ class TransitionController {
 
     /** Asks the transition player (shell) to start a created but not yet started transition. */
     @NonNull
-    Transition requestStartTransition(@NonNull Transition transition, @Nullable Task startTask) {
+    Transition requestStartTransition(@NonNull Transition transition, @Nullable Task startTask,
+            @Nullable IRemoteTransition remoteTransition) {
         try {
             ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
                     "Requesting StartTransition: %s", transition);
@@ -192,7 +206,8 @@ class TransitionController {
                 info = new ActivityManager.RunningTaskInfo();
                 startTask.fillTaskInfo(info);
             }
-            mTransitionPlayer.requestStartTransition(transition.mType, transition, info);
+            mTransitionPlayer.requestStartTransition(transition, new TransitionRequestInfo(
+                    transition.mType, info, remoteTransition));
         } catch (RemoteException e) {
             Slog.e(TAG, "Error requesting transition", e);
             transition.start();
