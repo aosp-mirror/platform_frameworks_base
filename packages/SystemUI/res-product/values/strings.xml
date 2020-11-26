@@ -23,7 +23,7 @@
     <!-- Indication when device is not charging due to bad placement on the dock. [CHAR LIMIT=60] -->
     <string name="dock_alignment_not_charging" product="default">Realign phone to charge wirelessly</string>
 
-    <!-- Message of the overlay warning the user to interact with the device or it will go to sleep. [CHAR LIMIT=NONE] -->
+    <!-- Message of the overlay warning the user that the TV is about to go to standby unless a TV remote button is pressed. [CHAR LIMIT=NONE] -->
     <string name="inattentive_sleep_warning_message" product="tv">The Android TV device will soon turn off; press a button to keep it on.</string>
     <!-- Message of the overlay warning the user to interact with the device or it will go to sleep. [CHAR LIMIT=NONE] -->
     <string name="inattentive_sleep_warning_message" product="default">The device will soon turn off; press to keep it on.</string>
