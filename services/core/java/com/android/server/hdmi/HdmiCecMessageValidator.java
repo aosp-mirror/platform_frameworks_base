@@ -309,7 +309,14 @@ public class HdmiCecMessageValidator {
     }
 
     private boolean isValidPhysicalAddress(byte[] params, int offset) {
-        // TODO: Add more logic like validating 1.0.1.0.
+        int physicalAddress = HdmiUtils.twoBytesToInt(params, offset);
+        while (physicalAddress != 0) {
+            int maskedAddress = physicalAddress & 0xF000;
+            physicalAddress = (physicalAddress << 4) & 0xFFFF;
+            if (maskedAddress == 0 && physicalAddress != 0) {
+                return false;
+            }
+        }
 
         if (!mService.isTvDevice()) {
             // If the device is not TV, we can't convert path to port-id, so stop here.

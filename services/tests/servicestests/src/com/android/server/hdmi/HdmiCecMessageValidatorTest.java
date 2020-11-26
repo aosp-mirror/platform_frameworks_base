@@ -97,6 +97,16 @@ public class HdmiCecMessageValidatorTest {
     }
 
     @Test
+    public void isValid_systemAudioModeRequest() {
+        assertMessageValidity("40:70:00:00").isEqualTo(OK);
+        assertMessageValidity("40:70").isEqualTo(OK);
+
+        assertMessageValidity("F0:70").isEqualTo(ERROR_SOURCE);
+        // Invalid physical address
+        assertMessageValidity("40:70:10:10").isEqualTo(ERROR_PARAMETER);
+    }
+
+    @Test
     public void isValid_setSystemAudioMode() {
         assertMessageValidity("40:72:00").isEqualTo(OK);
         assertMessageValidity("4F:72:01:03").isEqualTo(OK);
@@ -316,6 +326,8 @@ public class HdmiCecMessageValidatorTest {
         assertMessageValidity("40:A2:14:09:12:28:4B:19:10:08:10:00").isEqualTo(ERROR_PARAMETER);
         // Invalid External PLug
         assertMessageValidity("04:A1:0C:08:15:05:04:1E:02:04:00").isEqualTo(ERROR_PARAMETER);
+        // Invalid Physical Address
+        assertMessageValidity("40:A2:14:09:12:28:4B:19:10:05:10:10").isEqualTo(ERROR_PARAMETER);
     }
 
     @Test
@@ -537,6 +549,59 @@ public class HdmiCecMessageValidatorTest {
         assertMessageValidity("40:44:56:11").isEqualTo(ERROR_PARAMETER);
         // Invalid UI Sound Presentation Control
         assertMessageValidity("40:44:57:40").isEqualTo(ERROR_PARAMETER);
+    }
+
+    @Test
+    public void isValid_physicalAddress() {
+        assertMessageValidity("4F:82:10:00").isEqualTo(OK);
+        assertMessageValidity("4F:82:12:34").isEqualTo(OK);
+        assertMessageValidity("0F:82:00:00").isEqualTo(OK);
+        assertMessageValidity("40:9D:14:00").isEqualTo(OK);
+        assertMessageValidity("40:9D:10:00").isEqualTo(OK);
+        assertMessageValidity("0F:81:44:20").isEqualTo(OK);
+        assertMessageValidity("4F:81:13:10").isEqualTo(OK);
+        assertMessageValidity("4F:86:14:14").isEqualTo(OK);
+        assertMessageValidity("0F:86:15:24").isEqualTo(OK);
+
+        assertMessageValidity("4F:82:10").isEqualTo(ERROR_PARAMETER_SHORT);
+        assertMessageValidity("40:9D:14").isEqualTo(ERROR_PARAMETER_SHORT);
+        assertMessageValidity("0F:81:44").isEqualTo(ERROR_PARAMETER_SHORT);
+        assertMessageValidity("0F:86:15").isEqualTo(ERROR_PARAMETER_SHORT);
+
+        assertMessageValidity("4F:82:10:10").isEqualTo(ERROR_PARAMETER);
+        assertMessageValidity("4F:82:10:06").isEqualTo(ERROR_PARAMETER);
+        assertMessageValidity("40:9D:14:04").isEqualTo(ERROR_PARAMETER);
+        assertMessageValidity("40:9D:10:01").isEqualTo(ERROR_PARAMETER);
+        assertMessageValidity("0F:81:44:02").isEqualTo(ERROR_PARAMETER);
+        assertMessageValidity("4F:81:13:05").isEqualTo(ERROR_PARAMETER);
+        assertMessageValidity("4F:86:10:14").isEqualTo(ERROR_PARAMETER);
+        assertMessageValidity("0F:86:10:24").isEqualTo(ERROR_PARAMETER);
+    }
+
+    @Test
+    public void isValid_reportPhysicalAddress() {
+        assertMessageValidity("4F:84:10:00:04").isEqualTo(OK);
+        assertMessageValidity("0F:84:00:00:00").isEqualTo(OK);
+
+        assertMessageValidity("4F:84:10:00").isEqualTo(ERROR_PARAMETER_SHORT);
+        assertMessageValidity("0F:84:00").isEqualTo(ERROR_PARAMETER_SHORT);
+        assertMessageValidity("40:84:10:00:04").isEqualTo(ERROR_DESTINATION);
+        // Invalid Physical Address
+        assertMessageValidity("4F:84:10:10:04").isEqualTo(ERROR_PARAMETER);
+        assertMessageValidity("0F:84:00:30:00").isEqualTo(ERROR_PARAMETER);
+        // Invalid Device Type
+        assertMessageValidity("4F:84:12:34:08").isEqualTo(ERROR_PARAMETER);
+    }
+
+    @Test
+    public void isValid_routingChange() {
+        assertMessageValidity("0F:80:10:00:40:00").isEqualTo(OK);
+        assertMessageValidity("4F:80:12:00:50:00").isEqualTo(OK);
+
+        assertMessageValidity("0F:80:10:00:40").isEqualTo(ERROR_PARAMETER_SHORT);
+        assertMessageValidity("40:80:12:00:50:00").isEqualTo(ERROR_DESTINATION);
+        assertMessageValidity("0F:80:10:01:40:00").isEqualTo(ERROR_PARAMETER);
+        assertMessageValidity("4F:80:12:00:50:50").isEqualTo(ERROR_PARAMETER);
     }
 
     private IntegerSubject assertMessageValidity(String message) {
