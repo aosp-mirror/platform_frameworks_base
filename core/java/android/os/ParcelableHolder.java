@@ -170,16 +170,21 @@ public final class ParcelableHolder implements Parcelable {
 
         mParcelable = null;
 
+        int dataSize = parcel.readInt();
+        if (dataSize < 0) {
+            throw new IllegalArgumentException("dataSize from parcel is negative");
+        } else if (dataSize == 0) {
+            if (mParcel != null) {
+                mParcel.recycle();
+                mParcel = null;
+            }
+            return;
+        }
         if (mParcel == null) {
             mParcel = Parcel.obtain();
         }
         mParcel.setDataPosition(0);
         mParcel.setDataSize(0);
-
-        int dataSize = parcel.readInt();
-        if (dataSize < 0) {
-            throw new IllegalArgumentException("dataSize from parcel is negative");
-        }
         int dataStartPos = parcel.dataPosition();
 
         mParcel.appendFrom(parcel, dataStartPos, dataSize);
@@ -193,6 +198,11 @@ public final class ParcelableHolder implements Parcelable {
         if (mParcel != null) {
             parcel.writeInt(mParcel.dataSize());
             parcel.appendFrom(mParcel, 0, mParcel.dataSize());
+            return;
+        }
+
+        if (mParcelable == null) {
+            parcel.writeInt(0);
             return;
         }
 
