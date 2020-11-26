@@ -159,7 +159,8 @@ class PackageManagerShellCommand extends ShellCommand {
         mInterface = service;
         mPermissionManager = permissionManager;
         try {
-            mShellPackageContext = context.createPackageContext("com.android.shell", 0);
+            mShellPackageContext = context.createPackageContextAsUser(
+                    "com.android.shell", 0, Binder.getCallingUserHandle());
         } catch (NameNotFoundException e) {
             // should not happen
             throw new RuntimeException(e);
