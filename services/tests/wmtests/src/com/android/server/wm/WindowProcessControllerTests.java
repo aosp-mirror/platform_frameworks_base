@@ -27,10 +27,13 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.when;
 
 import android.Manifest;
 import android.app.IApplicationThread;
@@ -325,6 +328,45 @@ public class WindowProcessControllerTests extends WindowTestsBase {
 
     private ActivityRecord createActivityRecord(WindowProcessController wpc) {
         return new ActivityBuilder(mAtm).setCreateTask(true).setUseProcess(wpc).build();
+    }
+
+    @Test
+    public void testTopActivityDisplayAreaMatchesTopMostActivity_noActivities() {
+        assertNull(mWpc.getTopActivityDisplayArea());
+    }
+
+    @Test
+    public void testTopActivityDisplayAreaMatchesTopMostActivity_singleActivity() {
+        final ActivityRecord activityRecord = new ActivityBuilder(mSupervisor.mService).build();
+        final TaskDisplayArea expectedDisplayArea = mock(TaskDisplayArea.class);
+
+        when(activityRecord.getDisplayArea())
+                .thenReturn(expectedDisplayArea);
+
+        mWpc.addActivityIfNeeded(activityRecord);
+
+        assertEquals(expectedDisplayArea, mWpc.getTopActivityDisplayArea());
+    }
+
+    /**
+     * Test that top most activity respects z-order.
+     */
+    @Test
+    public void testTopActivityDisplayAreaMatchesTopMostActivity_multipleActivities() {
+        final ActivityRecord bottomRecord = new ActivityBuilder(mSupervisor.mService).build();
+        final TaskDisplayArea bottomDisplayArea = mock(TaskDisplayArea.class);
+        final ActivityRecord topRecord = new ActivityBuilder(mSupervisor.mService).build();
+        final TaskDisplayArea topDisplayArea = mock(TaskDisplayArea.class);
+
+        when(bottomRecord.getDisplayArea()).thenReturn(bottomDisplayArea);
+        when(topRecord.getDisplayArea()).thenReturn(topDisplayArea);
+        doReturn(-1).when(bottomRecord).compareTo(topRecord);
+        doReturn(1).when(topRecord).compareTo(bottomRecord);
+
+        mWpc.addActivityIfNeeded(topRecord);
+        mWpc.addActivityIfNeeded(bottomRecord);
+
+        assertEquals(topDisplayArea, mWpc.getTopActivityDisplayArea());
     }
 
     private TestDisplayContent createTestDisplayContentInContainer() {

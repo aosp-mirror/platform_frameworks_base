@@ -7584,6 +7584,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         return (config.uiMode & UI_MODE_TYPE_MASK) == UI_MODE_TYPE_VR_HEADSET;
     }
 
+    String getProcessName() {
+        return info.applicationInfo.processName;
+    }
+
     int getUid() {
         return info.applicationInfo.uid;
     }
@@ -7594,6 +7598,14 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     int getPid() {
         return app != null ? app.getPid() : 0;
+    }
+
+    int getLaunchedFromPid() {
+        return launchedFromPid;
+    }
+
+    int getLaunchedFromUid() {
+        return launchedFromUid;
     }
 
     /**
