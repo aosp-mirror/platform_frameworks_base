@@ -125,6 +125,26 @@ public final class StorageUserConnection {
     }
 
     /**
+     * Frees any cache held by ExternalStorageService.
+     *
+     * <p> Blocks until the service frees the cache or fails in doing so.
+     *
+     * @param volumeUuid uuid of the {@link StorageVolume} from which cache needs to be freed
+     * @param bytes number of bytes which need to be freed
+     * @throws ExternalStorageServiceException if it fails to connect to ExternalStorageService
+     */
+    public void freeCache(String volumeUuid, long bytes)
+            throws ExternalStorageServiceException {
+        Objects.requireNonNull(volumeUuid);
+
+        synchronized (mSessionsLock) {
+            for (String sessionId : mSessions.keySet()) {
+                mActiveConnection.freeCache(sessionId, volumeUuid, bytes);
+            }
+        }
+    }
+
+    /**
      * Removes a session without ending it or waiting for exit.
      *
      * This should only be used if the session has certainly been ended because the volume was
@@ -214,7 +234,7 @@ public final class StorageUserConnection {
         // A list of outstanding futures for async calls, for which we are still waiting
         // for a callback. Used to unblock waiters if the service dies.
         @GuardedBy("mLock")
-        private ArrayList<CompletableFuture<Void>> mOutstandingOps = new ArrayList<>();
+        private final ArrayList<CompletableFuture<Void>> mOutstandingOps = new ArrayList<>();
 
         @Override
         public void close() {
@@ -306,6 +326,17 @@ public final class StorageUserConnection {
             } catch (Exception e) {
                 throw new ExternalStorageServiceException("Failed to notify volume state changed "
                         + "for vol : " + vol, e);
+            }
+        }
+
+        public void freeCache(String sessionId, String volumeUuid, long bytes)
+                throws ExternalStorageServiceException {
+            try {
+                waitForAsync((service, callback) ->
+                        service.freeCache(sessionId, volumeUuid, bytes, callback));
+            } catch (Exception e) {
+                throw new ExternalStorageServiceException("Failed to free " + bytes
+                        + " bytes for volumeUuid : " + volumeUuid, e);
             }
         }
 

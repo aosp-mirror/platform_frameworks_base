@@ -32,6 +32,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.ServiceSpecificException;
 import android.os.UserHandle;
+import android.os.storage.StorageVolume;
 import android.os.storage.VolumeInfo;
 import android.provider.MediaStore;
 import android.service.storage.ExternalStorageService;
@@ -133,6 +134,28 @@ public final class StorageSessionController {
         }
     }
 
+    /**
+     * Frees any cache held by ExternalStorageService.
+     *
+     * <p> Blocks until the service frees the cache or fails in doing so.
+     *
+     * @param volumeUuid uuid of the {@link StorageVolume} from which cache needs to be freed
+     * @param bytes number of bytes which need to be freed
+     * @throws ExternalStorageServiceException if it fails to connect to ExternalStorageService
+     */
+    public void freeCache(String volumeUuid, long bytes)
+            throws ExternalStorageServiceException {
+        synchronized (mLock) {
+            int size = mConnections.size();
+            for (int i = 0; i < size; i++) {
+                int key = mConnections.keyAt(i);
+                StorageUserConnection connection = mConnections.get(key);
+                if (connection != null) {
+                    connection.freeCache(volumeUuid, bytes);
+                }
+            }
+        }
+    }
 
     /**
      * Removes and returns the {@link StorageUserConnection} for {@code vol}.

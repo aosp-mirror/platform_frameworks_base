@@ -101,4 +101,15 @@ public abstract class StorageManagerInternal {
      * Return true if uid is external storage service.
      */
     public abstract boolean isExternalStorageService(int uid);
+
+    /**
+     * Frees cache held by ExternalStorageService.
+     *
+     * <p> Blocks until the service frees the cache or fails in doing so.
+     *
+     * @param volumeUuid uuid of the {@link StorageVolume} from which cache needs to be freed,
+     *                   null value indicates private internal volume.
+     * @param bytes number of bytes which need to be freed
+     */
+    public abstract void freeCache(@Nullable String volumeUuid, long bytes);
 }
