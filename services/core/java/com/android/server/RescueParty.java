@@ -16,6 +16,8 @@
 
 package com.android.server;
 
+import static android.provider.DeviceConfig.Properties;
+
 import static com.android.server.pm.PackageManagerServiceUtils.logCriticalInfo;
 
 import android.annotation.NonNull;
@@ -36,6 +38,7 @@ import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.provider.DeviceConfig;
 import android.provider.Settings;
+import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.ExceptionUtils;
 import android.util.Log;
@@ -93,6 +96,12 @@ public class RescueParty {
     static final long DEFAULT_OBSERVING_DURATION_MS = TimeUnit.DAYS.toMillis(2);
     @VisibleForTesting
     static final int DEVICE_CONFIG_RESET_MODE = Settings.RESET_MODE_TRUSTED_DEFAULTS;
+    // The DeviceConfig namespace containing all RescueParty switches.
+    @VisibleForTesting
+    static final String NAMESPACE_CONFIGURATION = "configuration";
+    @VisibleForTesting
+    static final String NAMESPACE_TO_PACKAGE_MAPPING_FLAG =
+            "namespace_to_package_mapping";
 
     private static final String NAME = "rescue-party-observer";
 
@@ -103,8 +112,6 @@ public class RescueParty {
             "persist.device_config.configuration.disable_rescue_party";
     private static final String PROP_DISABLE_FACTORY_RESET_FLAG =
             "persist.device_config.configuration.disable_rescue_party_factory_reset";
-    // The DeviceConfig namespace containing all RescueParty switches.
-    private static final String NAMESPACE_CONFIGURATION = "configuration";
 
     private static final int PERSISTENT_MASK = ApplicationInfo.FLAG_PERSISTENT
             | ApplicationInfo.FLAG_SYSTEM;
@@ -168,6 +175,81 @@ public class RescueParty {
         Settings.Config.registerMonitorCallback(contentResolver, new RemoteCallback(result -> {
             handleMonitorCallback(context, result);
         }));
+    }
+
+
+    /**
+     * Called when {@code RollbackManager} performs Mainline module rollbacks,
+     * to avoid rolled back modules consuming flag values only expected to work
+     * on modules of newer versions.
+     */
+    public static void resetDeviceConfigForPackages(List<String> packageNames) {
+        if (packageNames == null) {
+            return;
+        }
+        Set<String> namespacesToReset = new ArraySet<String>();
+        Iterator<String> it = packageNames.iterator();
+        RescuePartyObserver rescuePartyObserver = RescuePartyObserver.getInstanceIfCreated();
+        // Get runtime package to namespace mapping if created.
+        if (rescuePartyObserver != null) {
+            while (it.hasNext()) {
+                String packageName = it.next();
+                Set<String> runtimeAffectedNamespaces =
+                        rescuePartyObserver.getAffectedNamespaceSet(packageName);
+                if (runtimeAffectedNamespaces != null) {
+                    namespacesToReset.addAll(runtimeAffectedNamespaces);
+                }
+            }
+        }
+        // Get preset package to namespace mapping if created.
+        Set<String> presetAffectedNamespaces = getPresetNamespacesForPackages(
+                packageNames);
+        if (presetAffectedNamespaces != null) {
+            namespacesToReset.addAll(presetAffectedNamespaces);
+        }
+
+        // Clear flags under the namespaces mapped to these packages.
+        // Using setProperties since DeviceConfig.resetToDefaults bans the current flag set.
+        Iterator<String> namespaceIt = namespacesToReset.iterator();
+        while (namespaceIt.hasNext()) {
+            String namespaceToReset = namespaceIt.next();
+            Properties properties = new Properties.Builder(namespaceToReset).build();
+            try {
+                DeviceConfig.setProperties(properties);
+            } catch (DeviceConfig.BadConfigException exception) {
+                logCriticalInfo(Log.WARN, "namespace " + namespaceToReset
+                        + " is already banned, skip reset.");
+            }
+        }
+    }
+
+    private static Set<String> getPresetNamespacesForPackages(List<String> packageNames) {
+        Set<String> resultSet = new ArraySet<String>();
+        try {
+            String flagVal = DeviceConfig.getString(NAMESPACE_CONFIGURATION,
+                    NAMESPACE_TO_PACKAGE_MAPPING_FLAG, "");
+            String[] mappingEntries = flagVal.split(",");
+            for (int i = 0; i < mappingEntries.length; i++) {
+                if (TextUtils.isEmpty(mappingEntries[i])) {
+                    continue;
+                }
+                String[] splittedEntry = mappingEntries[i].split(":");
+                if (splittedEntry.length != 2) {
+                    throw new RuntimeException("Invalid mapping entry: " + mappingEntries[i]);
+                }
+                String namespace = splittedEntry[0];
+                String packageName = splittedEntry[1];
+
+                if (packageNames.contains(packageName)) {
+                    resultSet.add(namespace);
+                }
+            }
+        } catch (Exception e) {
+            resultSet.clear();
+            Slog.e(TAG, "Failed to read preset package to namespaces mapping.", e);
+        } finally {
+            return resultSet;
+        }
     }
 
     @VisibleForTesting
@@ -465,6 +547,14 @@ public class RescueParty {
                 if (sRescuePartyObserver == null) {
                     sRescuePartyObserver = new RescuePartyObserver(context);
                 }
+                return sRescuePartyObserver;
+            }
+        }
+
+        /** Gets singleton instance. It returns null if the instance is not created yet.*/
+        @Nullable
+        public static RescuePartyObserver getInstanceIfCreated() {
+            synchronized (RescuePartyObserver.class) {
                 return sRescuePartyObserver;
             }
         }
