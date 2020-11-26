@@ -554,7 +554,7 @@ public class DataManager {
             @Nullable List<String> shortcutIds) {
         @ShortcutQuery.QueryFlags int queryFlags = ShortcutQuery.FLAG_MATCH_DYNAMIC
                 | ShortcutQuery.FLAG_MATCH_PINNED | ShortcutQuery.FLAG_MATCH_PINNED_BY_ANY_LAUNCHER
-                | ShortcutQuery.FLAG_MATCH_CACHED;
+                | ShortcutQuery.FLAG_MATCH_CACHED | ShortcutQuery.FLAG_GET_PERSONS_DATA;
         return mShortcutServiceInternal.getShortcuts(
                 UserHandle.USER_SYSTEM, mContext.getPackageName(),
                 /*changedSince=*/ 0, packageName, shortcutIds, /*locusIds=*/ null,
