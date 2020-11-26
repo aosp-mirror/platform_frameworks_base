@@ -52,6 +52,9 @@ class ActiveInstrumentation {
     // Whether the caller holds START_ACTIVITIES_FROM_BACKGROUND permission
     boolean mHasBackgroundActivityStartsPermission;
 
+    // Whether the caller holds START_FOREGROUND_SERVICES_FROM_BACKGROUND permission
+    boolean mHasBackgroundForegroundServiceStartsPermission;
+
     // As given to us
     Bundle mArguments;
 
@@ -128,6 +131,8 @@ class ActiveInstrumentation {
         }
         pw.print("mHasBackgroundActivityStartsPermission=");
         pw.println(mHasBackgroundActivityStartsPermission);
+        pw.print("mHasBackgroundForegroundServiceStartsPermission=");
+        pw.println(mHasBackgroundForegroundServiceStartsPermission);
         pw.print(prefix); pw.print("mArguments=");
         pw.println(mArguments);
     }

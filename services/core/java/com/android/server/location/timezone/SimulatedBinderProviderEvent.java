@@ -16,18 +16,18 @@
 
 package com.android.server.location.timezone;
 
-import static android.location.timezone.LocationTimeZoneEvent.EVENT_TYPE_PERMANENT_FAILURE;
-import static android.location.timezone.LocationTimeZoneEvent.EVENT_TYPE_SUCCESS;
-import static android.location.timezone.LocationTimeZoneEvent.EVENT_TYPE_UNCERTAIN;
-
+import static com.android.internal.location.timezone.LocationTimeZoneEvent.EVENT_TYPE_PERMANENT_FAILURE;
+import static com.android.internal.location.timezone.LocationTimeZoneEvent.EVENT_TYPE_SUCCESS;
+import static com.android.internal.location.timezone.LocationTimeZoneEvent.EVENT_TYPE_UNCERTAIN;
 import static com.android.server.location.timezone.LocationTimeZoneManagerService.PRIMARY_PROVIDER_NAME;
 import static com.android.server.location.timezone.LocationTimeZoneManagerService.SECONDARY_PROVIDER_NAME;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.location.timezone.LocationTimeZoneEvent;
 import android.os.ShellCommand;
 import android.os.SystemClock;
+
+import com.android.internal.location.timezone.LocationTimeZoneEvent;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -117,7 +117,7 @@ final class SimulatedBinderProviderEvent {
 
     private static LocationTimeZoneEvent parseLocationTimeZoneEventArgs(ShellCommand shellCommand) {
         LocationTimeZoneEvent.Builder eventBuilder = new LocationTimeZoneEvent.Builder()
-                .setElapsedRealtimeNanos(SystemClock.elapsedRealtime());
+                .setElapsedRealtimeMillis(SystemClock.elapsedRealtime());
 
         String eventTypeString = shellCommand.getNextArgRequired();
         switch (eventTypeString.toUpperCase()) {

@@ -19,6 +19,8 @@ package com.android.server.powerstats;
 import android.hardware.power.stats.ChannelInfo;
 import android.hardware.power.stats.EnergyConsumerResult;
 import android.hardware.power.stats.EnergyMeasurement;
+import android.hardware.power.stats.PowerEntityInfo;
+import android.hardware.power.stats.StateResidencyResult;
 import android.util.Slog;
 import android.util.proto.ProtoInputStream;
 import android.util.proto.ProtoOutputStream;
@@ -42,6 +44,48 @@ import java.util.List;
 public class ProtoStreamUtils {
     private static final String TAG = ProtoStreamUtils.class.getSimpleName();
 
+    static class PowerEntityInfoUtils {
+        public static void print(PowerEntityInfo[] powerEntityInfo) {
+            for (int i = 0; i < powerEntityInfo.length; i++) {
+                Slog.d(TAG, "PowerEntityId: " + powerEntityInfo[i].powerEntityId
+                        + ", PowerEntityName: " + powerEntityInfo[i].powerEntityName);
+                for (int j = 0; j < powerEntityInfo[i].states.length; j++) {
+                    Slog.d(TAG, "  StateId: " + powerEntityInfo[i].states[j].stateId
+                            + ", StateName: " + powerEntityInfo[i].states[j].stateName);
+                }
+            }
+        }
+
+        public static void dumpsys(PowerEntityInfo[] powerEntityInfo, PrintWriter pw) {
+            for (int i = 0; i < powerEntityInfo.length; i++) {
+                pw.println("PowerEntityId: " + powerEntityInfo[i].powerEntityId
+                        + ", PowerEntityName: " + powerEntityInfo[i].powerEntityName);
+                for (int j = 0; j < powerEntityInfo[i].states.length; j++) {
+                    pw.println("  StateId: " + powerEntityInfo[i].states[j].stateId
+                            + ", StateName: " + powerEntityInfo[i].states[j].stateName);
+                }
+            }
+        }
+    }
+
+    static class StateResidencyResultUtils {
+        public static void print(StateResidencyResult[] stateResidencyResult) {
+            for (int i = 0; i < stateResidencyResult.length; i++) {
+                Slog.d(TAG, "PowerEntityId: " + stateResidencyResult[i].powerEntityId);
+                for (int j = 0; j < stateResidencyResult[i].stateResidencyData.length; j++) {
+                    Slog.d(TAG, "  StateId: "
+                            + stateResidencyResult[i].stateResidencyData[j].stateId
+                            + ", TotalTimeInStateMs: "
+                            + stateResidencyResult[i].stateResidencyData[j].totalTimeInStateMs
+                            + ", TotalStateEntryCount: "
+                            + stateResidencyResult[i].stateResidencyData[j].totalStateEntryCount
+                            + ", LastEntryTimestampMs: "
+                            + stateResidencyResult[i].stateResidencyData[j].lastEntryTimestampMs);
+                }
+            }
+        }
+    }
+
     static class ChannelInfoUtils {
         public static void packProtoMessage(ChannelInfo[] channelInfo, ProtoOutputStream pos) {
             long token;
@@ -57,15 +101,15 @@ public class ProtoStreamUtils {
 
         public static void print(ChannelInfo[] channelInfo) {
             for (int i = 0; i < channelInfo.length; i++) {
-                Slog.d(TAG, "ChannelId = " + channelInfo[i].channelId
-                        + ", ChannelName = " + channelInfo[i].channelName);
+                Slog.d(TAG, "ChannelId: " + channelInfo[i].channelId
+                        + ", ChannelName: " + channelInfo[i].channelName);
             }
         }
 
         public static void dumpsys(ChannelInfo[] channelInfo, PrintWriter pw) {
             for (int i = 0; i < channelInfo.length; i++) {
-                pw.println("ChannelId = " + channelInfo[i].channelId
-                        + ", ChannelName = " + channelInfo[i].channelName);
+                pw.println("ChannelId: " + channelInfo[i].channelId
+                        + ", ChannelName: " + channelInfo[i].channelName);
             }
         }
     }
@@ -157,9 +201,9 @@ public class ProtoStreamUtils {
 
         public static void print(EnergyMeasurement[] energyMeasurement) {
             for (int i = 0; i < energyMeasurement.length; i++) {
-                Slog.d(TAG, "ChannelId = " + energyMeasurement[i].channelId
-                        + ", Timestamp (ms) = " + energyMeasurement[i].timestampMs
-                        + ", Energy (uWs) = " + energyMeasurement[i].energyUWs);
+                Slog.d(TAG, "ChannelId: " + energyMeasurement[i].channelId
+                        + ", Timestamp (ms): " + energyMeasurement[i].timestampMs
+                        + ", Energy (uWs): " + energyMeasurement[i].energyUWs);
             }
         }
     }
@@ -177,13 +221,13 @@ public class ProtoStreamUtils {
 
         public static void print(int[] energyConsumerId) {
             for (int i = 0; i < energyConsumerId.length; i++) {
-                Slog.d(TAG, "EnergyConsumerId = " + energyConsumerId[i]);
+                Slog.d(TAG, "EnergyConsumerId: " + energyConsumerId[i]);
             }
         }
 
         public static void dumpsys(int[] energyConsumerId, PrintWriter pw) {
             for (int i = 0; i < energyConsumerId.length; i++) {
-                pw.println("EnergyConsumerId = " + energyConsumerId[i]);
+                pw.println("EnergyConsumerId: " + energyConsumerId[i]);
             }
         }
     }
@@ -278,9 +322,9 @@ public class ProtoStreamUtils {
 
         public static void print(EnergyConsumerResult[] energyConsumerResult) {
             for (int i = 0; i < energyConsumerResult.length; i++) {
-                Slog.d(TAG, "EnergyConsumerId = " + energyConsumerResult[i].energyConsumerId
-                        + ", Timestamp (ms) = " + energyConsumerResult[i].timestampMs
-                        + ", Energy (uWs) = " + energyConsumerResult[i].energyUWs);
+                Slog.d(TAG, "EnergyConsumerId: " + energyConsumerResult[i].energyConsumerId
+                        + ", Timestamp (ms): " + energyConsumerResult[i].timestampMs
+                        + ", Energy (uWs): " + energyConsumerResult[i].energyUWs);
             }
         }
     }

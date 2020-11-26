@@ -6436,6 +6436,8 @@ public class DevicePolicyManager {
     }
 
     /**
+     * Called by a privileged caller holding {@code BIND_DEVICE_ADMIN} permission to retrieve
+     * the remove warning for the given device admin.
      * @hide
      */
     public void getRemoveWarning(@Nullable ComponentName admin, RemoteCallback result) {

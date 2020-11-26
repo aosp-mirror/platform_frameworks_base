@@ -23,6 +23,10 @@ import android.content.Context;
 import android.hardware.power.stats.ChannelInfo;
 import android.hardware.power.stats.EnergyConsumerResult;
 import android.hardware.power.stats.EnergyMeasurement;
+import android.hardware.power.stats.PowerEntityInfo;
+import android.hardware.power.stats.StateInfo;
+import android.hardware.power.stats.StateResidency;
+import android.hardware.power.stats.StateResidencyResult;
 
 import androidx.test.InstrumentationRegistry;
 
@@ -56,8 +60,13 @@ public class PowerStatsServiceTest {
     private static final String MODEL_FILENAME = "modeltest";
     private static final String PROTO_OUTPUT_FILENAME = "powerstats.proto";
     private static final String CHANNEL_NAME = "channelname";
+    private static final String POWER_ENTITY_NAME = "powerentityinfo";
+    private static final String STATE_NAME = "stateinfo";
     private static final int ENERGY_METER_COUNT = 8;
     private static final int ENERGY_CONSUMER_COUNT = 2;
+    private static final int POWER_ENTITY_COUNT = 3;
+    private static final int STATE_INFO_COUNT = 5;
+    private static final int STATE_RESIDENCY_COUNT = 4;
 
     private final Context mContext = InstrumentationRegistry.getInstrumentation().getContext();
     private PowerStatsService mService;
@@ -118,6 +127,43 @@ public class PowerStatsServiceTest {
 
     public static final class TestPowerStatsHALWrapper implements IPowerStatsHALWrapper {
         @Override
+        public PowerEntityInfo[] getPowerEntityInfo() {
+            PowerEntityInfo[] powerEntityInfoList = new PowerEntityInfo[POWER_ENTITY_COUNT];
+            for (int i = 0; i < powerEntityInfoList.length; i++) {
+                powerEntityInfoList[i] = new PowerEntityInfo();
+                powerEntityInfoList[i].powerEntityId = i;
+                powerEntityInfoList[i].powerEntityName = new String(POWER_ENTITY_NAME + i);
+                powerEntityInfoList[i].states = new StateInfo[STATE_INFO_COUNT];
+                for (int j = 0; j < powerEntityInfoList[i].states.length; j++) {
+                    powerEntityInfoList[i].states[j] = new StateInfo();
+                    powerEntityInfoList[i].states[j].stateId = j;
+                    powerEntityInfoList[i].states[j].stateName = new String(STATE_NAME + i);
+                }
+            }
+            return powerEntityInfoList;
+        }
+
+        @Override
+        public StateResidencyResult[] getStateResidency(int[] powerEntityIds) {
+            StateResidencyResult[] stateResidencyResultList =
+                new StateResidencyResult[POWER_ENTITY_COUNT];
+            for (int i = 0; i < stateResidencyResultList.length; i++) {
+                stateResidencyResultList[i] = new StateResidencyResult();
+                stateResidencyResultList[i].powerEntityId = i;
+                stateResidencyResultList[i].stateResidencyData =
+                    new StateResidency[STATE_RESIDENCY_COUNT];
+                for (int j = 0; j < stateResidencyResultList[i].stateResidencyData.length; j++) {
+                    stateResidencyResultList[i].stateResidencyData[j] = new StateResidency();
+                    stateResidencyResultList[i].stateResidencyData[j].totalTimeInStateMs = j;
+                    stateResidencyResultList[i].stateResidencyData[j].totalStateEntryCount = j;
+                    stateResidencyResultList[i].stateResidencyData[j].lastEntryTimestampMs = j;
+                }
+            }
+
+            return stateResidencyResultList;
+        }
+
+        @Override
         public int[] getEnergyConsumerInfo() {
             int[] energyConsumerInfoList = new int[ENERGY_CONSUMER_COUNT];
             for (int i = 0; i < energyConsumerInfoList.length; i++) {
@@ -127,7 +173,7 @@ public class PowerStatsServiceTest {
         }
 
         @Override
-        public EnergyConsumerResult[] getEnergyConsumed() {
+        public EnergyConsumerResult[] getEnergyConsumed(int[] energyConsumerIds) {
             EnergyConsumerResult[] energyConsumedList =
                 new EnergyConsumerResult[ENERGY_CONSUMER_COUNT];
             for (int i = 0; i < energyConsumedList.length; i++) {
@@ -151,7 +197,7 @@ public class PowerStatsServiceTest {
         }
 
         @Override
-        public EnergyMeasurement[] readEnergyMeters() {
+        public EnergyMeasurement[] readEnergyMeters(int[] channelIds) {
             EnergyMeasurement[] energyMeasurementList = new EnergyMeasurement[ENERGY_METER_COUNT];
             for (int i = 0; i < energyMeasurementList.length; i++) {
                 energyMeasurementList[i] = new EnergyMeasurement();

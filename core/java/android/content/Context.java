@@ -367,6 +367,16 @@ public abstract class Context {
     /***********    Hidden flags below this line ***********/
 
     /**
+     * Flag for {@link #bindService}: allow background foreground service starts from the bound
+     * service's process.
+     * This flag is only respected if the caller is holding
+     * {@link android.Manifest.permission#START_FOREGROUND_SERVICES_FROM_BACKGROUND}.
+     * @hide
+     */
+    @SystemApi
+    public static final int BIND_ALLOW_FOREGROUND_SERVICE_STARTS_FROM_BACKGROUND = 0x00040000;
+
+    /**
      * Flag for {@link #bindService}: This flag is intended to be used only by the system to adjust
      * the scheduling policy for IMEs (and any other out-of-process user-visible components that
      * work closely with the top app) so that UI hosted in such services can have the same
@@ -3106,6 +3116,10 @@ public abstract class Context {
      *
      * @throws SecurityException If the caller does not have permission to access the service
      * or the service can not be found.
+     *
+     * @throws IllegalStateException If the caller app's targeting API is
+     * {@link android.os.Build.VERSION_CODES#S} or later, and the foreground service is restricted
+     * from start due to background restriction.
      *
      * @see #stopService
      * @see android.app.Service#startForeground(int, android.app.Notification)

@@ -23,6 +23,8 @@ import android.os.Looper;
 import android.os.MessageQueue;
 import android.util.Log;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 import dalvik.annotation.optimization.FastNative;
 import dalvik.system.CloseGuard;
 
@@ -56,18 +58,18 @@ public abstract class DisplayEventReceiver {
     public static final int VSYNC_SOURCE_SURFACE_FLINGER = 1;
 
     /**
-     * Specifies to suppress config changed events from being generated from Surface Flinger.
-     * <p>
-     * Needs to be kept in sync with frameworks/native/include/gui/ISurfaceComposer.h
-     */
-    public static final int CONFIG_CHANGED_EVENT_SUPPRESS = 0;
-
-    /**
      * Specifies to generate config changed events from Surface Flinger.
      * <p>
      * Needs to be kept in sync with frameworks/native/include/gui/ISurfaceComposer.h
      */
-    public static final int CONFIG_CHANGED_EVENT_DISPATCH = 1;
+    public static final int EVENT_REGISTRATION_CONFIG_CHANGED_FLAG = 0x1;
+
+    /**
+     * Specifies to generate frame rate override events from Surface Flinger.
+     * <p>
+     * Needs to be kept in sync with frameworks/native/include/gui/ISurfaceComposer.h
+     */
+    public static final int EVENT_REGISTRATION_FRAME_RATE_OVERRIDE_FLAG = 0x2;
 
     private static final String TAG = "DisplayEventReceiver";
 
@@ -81,7 +83,7 @@ public abstract class DisplayEventReceiver {
     private MessageQueue mMessageQueue;
 
     private static native long nativeInit(WeakReference<DisplayEventReceiver> receiver,
-            MessageQueue messageQueue, int vsyncSource, int configChanged);
+            MessageQueue messageQueue, int vsyncSource, int eventRegistration);
     private static native void nativeDispose(long receiverPtr);
     @FastNative
     private static native void nativeScheduleVsync(long receiverPtr);
@@ -93,7 +95,7 @@ public abstract class DisplayEventReceiver {
      */
     @UnsupportedAppUsage
     public DisplayEventReceiver(Looper looper) {
-        this(looper, VSYNC_SOURCE_APP, CONFIG_CHANGED_EVENT_SUPPRESS);
+        this(looper, VSYNC_SOURCE_APP, 0);
     }
 
     /**
@@ -101,17 +103,17 @@ public abstract class DisplayEventReceiver {
      *
      * @param looper The looper to use when invoking callbacks.
      * @param vsyncSource The source of the vsync tick. Must be on of the VSYNC_SOURCE_* values.
-     * @param configChanged Whether to dispatch config changed events. Must be one of the
-     * CONFIG_CHANGED_EVENT_* values.
+     * @param eventRegistration Which events to dispatch. Must be a bitfield consist of the
+     * EVENT_REGISTRATION_*_FLAG values.
      */
-    public DisplayEventReceiver(Looper looper, int vsyncSource, int configChanged) {
+    public DisplayEventReceiver(Looper looper, int vsyncSource, int eventRegistration) {
         if (looper == null) {
             throw new IllegalArgumentException("looper must not be null");
         }
 
         mMessageQueue = looper.getQueue();
         mReceiverPtr = nativeInit(new WeakReference<DisplayEventReceiver>(this), mMessageQueue,
-                vsyncSource, configChanged);
+                vsyncSource, eventRegistration);
 
         mCloseGuard.open("dispose");
     }
@@ -206,6 +208,41 @@ public abstract class DisplayEventReceiver {
     }
 
     /**
+     * Represents a mapping between a UID and an override frame rate
+     */
+    public static class FrameRateOverride {
+        // The application uid
+        public final int uid;
+
+        // The frame rate that this application runs at
+        public final float frameRateHz;
+
+
+        @VisibleForTesting
+        public FrameRateOverride(int uid, float frameRateHz) {
+            this.uid = uid;
+            this.frameRateHz = frameRateHz;
+        }
+
+        @Override
+        public String toString() {
+            return "{uid=" + uid + " frameRateHz=" + frameRateHz + "}";
+        }
+    }
+
+    /**
+     * Called when frame rate override event is received.
+     *
+     * @param timestampNanos The timestamp of the event, in the {@link System#nanoTime()}
+     * timebase.
+     * @param physicalDisplayId Stable display ID that uniquely describes a (display, port) pair.
+     * @param overrides The mappings from uid to frame rates
+     */
+    public void onFrameRateOverridesChanged(long timestampNanos, long physicalDisplayId,
+            FrameRateOverride[] overrides) {
+    }
+
+    /**
      * Schedules a single vertical sync pulse to be delivered when the next
      * display frame begins.
      */
@@ -238,6 +275,13 @@ public abstract class DisplayEventReceiver {
     @SuppressWarnings("unused")
     private void dispatchConfigChanged(long timestampNanos, long physicalDisplayId, int configId) {
         onConfigChanged(timestampNanos, physicalDisplayId, configId);
+    }
+
+    // Called from native code.
+    @SuppressWarnings("unused")
+    private void dispatchFrameRateOverrides(long timestampNanos, long physicalDisplayId,
+            FrameRateOverride[] overrides) {
+        onFrameRateOverridesChanged(timestampNanos, physicalDisplayId, overrides);
     }
 
 }

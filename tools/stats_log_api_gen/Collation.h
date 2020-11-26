@@ -24,7 +24,7 @@
 #include <set>
 #include <vector>
 
-#include "frameworks/base/cmds/statsd/src/atom_field_options.pb.h"
+#include "frameworks/proto_logging/stats/atom_field_options.pb.h"
 
 namespace android {
 namespace stats_log_api_gen {

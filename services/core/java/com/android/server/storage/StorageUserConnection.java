@@ -115,6 +115,12 @@ public final class StorageUserConnection {
         Objects.requireNonNull(sessionId);
         Objects.requireNonNull(vol);
 
+        synchronized (mSessionsLock) {
+            if (!mSessions.containsKey(sessionId)) {
+                Slog.i(TAG, "No session found for sessionId: " + sessionId);
+                return;
+            }
+        }
         mActiveConnection.notifyVolumeStateChanged(sessionId, vol);
     }
 
@@ -324,7 +330,7 @@ public final class StorageUserConnection {
                 if (mRemoteFuture != null) {
                     return mRemoteFuture;
                 }
-                mRemoteFuture = new CompletableFuture<>();
+                CompletableFuture<IExternalStorageService> future = new CompletableFuture<>();
                 mServiceConnection = new ServiceConnection() {
                     @Override
                     public void onServiceConnected(ComponentName name, IBinder service) {
@@ -356,7 +362,7 @@ public final class StorageUserConnection {
 
                     private void handleConnection(IBinder service) {
                         synchronized (mLock) {
-                            mRemoteFuture.complete(
+                            future.complete(
                                     IExternalStorageService.Stub.asInterface(service));
                         }
                     }
@@ -380,7 +386,8 @@ public final class StorageUserConnection {
                                 mHandlerThread.getThreadHandler(),
                                 UserHandle.of(mUserId))) {
                     Slog.i(TAG, "Bound to the ExternalStorageService for user " + mUserId);
-                    return mRemoteFuture;
+                    mRemoteFuture = future;
+                    return future;
                 } else {
                     throw new ExternalStorageServiceException(
                             "Failed to bind to the ExternalStorageService for user " + mUserId);

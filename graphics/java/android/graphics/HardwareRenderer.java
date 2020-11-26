@@ -1163,7 +1163,7 @@ public class HardwareRenderer {
             // heuristic we don't need to be always 100% correct.
             Mode activeMode = display.getMode();
             nInitDisplayInfo(activeMode.getPhysicalWidth(), activeMode.getPhysicalHeight(),
-                    activeMode.getRefreshRate(), maxRefreshRate,
+                    display.getRefreshRate(), maxRefreshRate,
                     wideColorDataspace.mNativeDataspace, display.getAppVsyncOffsetNanos(),
                     display.getPresentationDeadlineNanos());
 

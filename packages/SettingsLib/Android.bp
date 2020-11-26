@@ -53,6 +53,7 @@ java_defaults {
         "SettingsLibUtils",
         "SettingsLibEmergencyNumber",
         "SettingsLibTopIntroPreference",
+        "SettingsLibBannerMessagePreference",
     ],
 }
 

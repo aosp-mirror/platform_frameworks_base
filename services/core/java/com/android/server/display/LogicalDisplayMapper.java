@@ -23,6 +23,7 @@ import android.text.TextUtils;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.view.Display;
+import android.view.DisplayEventReceiver;
 import android.view.DisplayInfo;
 
 import com.android.internal.util.IndentingPrintWriter;
@@ -52,6 +53,7 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
     public static final int LOGICAL_DISPLAY_EVENT_CHANGED = 2;
     public static final int LOGICAL_DISPLAY_EVENT_REMOVED = 3;
     public static final int LOGICAL_DISPLAY_EVENT_SWAPPED = 4;
+    public static final int LOGICAL_DISPLAY_EVENT_FRAME_RATE_OVERRIDES_CHANGED = 5;
 
     /**
      * Temporary display info, used for comparing display configurations.
@@ -342,6 +344,8 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
 
             mTempDisplayInfo.copyFrom(display.getDisplayInfoLocked());
             display.getNonOverrideDisplayInfoLocked(mTempNonOverrideDisplayInfo);
+            DisplayEventReceiver.FrameRateOverride[] frameRatesOverrides =
+                    display.getFrameRateOverrides();
             display.updateLocked(mDisplayDeviceRepo);
             if (!display.isValidLocked()) {
                 mLogicalDisplays.removeAt(i);
@@ -376,6 +380,9 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
                 final int eventMsg = TextUtils.equals(oldUniqueId, newUniqueId)
                         ? LOGICAL_DISPLAY_EVENT_CHANGED : LOGICAL_DISPLAY_EVENT_SWAPPED;
                 mListener.onLogicalDisplayEventLocked(display, eventMsg);
+            } else if (!display.getPendingFrameRateOverrideUids().isEmpty()) {
+                mListener.onLogicalDisplayEventLocked(display,
+                        LogicalDisplayMapper.LOGICAL_DISPLAY_EVENT_FRAME_RATE_OVERRIDES_CHANGED);
             } else {
                 // While applications shouldn't know nor care about the non-overridden info, we
                 // still need to let WindowManager know so it can update its own internal state for

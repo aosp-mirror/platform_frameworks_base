@@ -19,6 +19,7 @@ package com.android.internal.inputmethod;
 import android.annotation.AnyThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
 
@@ -275,4 +276,53 @@ public final class Completable {
      */
     public static final class InputBindResult
             extends Values<com.android.internal.view.InputBindResult> { }
+
+    /**
+     * Await the result by the {@link Completable.Int}, and log it if there is no result after
+     * given timeout.
+     *
+     * @return the result once {@link ValueBase#onComplete()}
+     */
+    @AnyThread
+    public static int getResultOrZero(@NonNull Completable.Int value, String tag,
+            @NonNull String methodName, @Nullable CancellationGroup cancellationGroup,
+            int maxWaitTime) {
+        final boolean timedOut = value.await(maxWaitTime, TimeUnit.MILLISECONDS, cancellationGroup);
+        if (value.hasValue()) {
+            return value.getValue();
+        }
+        logInternal(tag, methodName, timedOut, maxWaitTime, 0);
+        return 0;
+    }
+
+    /**
+     * Await the result by the {@link Completable.Values}, and log it if there is no result after
+     * given timeout.
+     *
+     * @return the result once {@link ValueBase#onComplete()}
+     */
+    @AnyThread
+    @Nullable
+    public static <T> T getResultOrNull(@NonNull Completable.Values<T> value, String tag,
+            @NonNull String methodName, @Nullable CancellationGroup cancellationGroup,
+            int maxWaitTime) {
+        final boolean timedOut = value.await(maxWaitTime, TimeUnit.MILLISECONDS, cancellationGroup);
+        if (value.hasValue()) {
+            return value.getValue();
+        }
+        logInternal(tag, methodName, timedOut, maxWaitTime, null);
+        return null;
+    }
+
+    @AnyThread
+    private static void logInternal(String tag, @Nullable String methodName, boolean timedOut,
+            int maxWaitTime, @Nullable Object defaultValue) {
+        if (timedOut) {
+            Log.w(tag, methodName + " didn't respond in " + maxWaitTime + " msec."
+                    + " Returning default: " + defaultValue);
+        } else {
+            Log.w(tag, methodName + " was canceled before complete. Returning default: "
+                    + defaultValue);
+        }
+    }
 }

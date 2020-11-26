@@ -19,6 +19,7 @@ package com.android.server.powerstats;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.hardware.power.stats.ChannelInfo;
+import android.hardware.power.stats.PowerEntityInfo;
 import android.os.Binder;
 import android.os.Environment;
 import android.os.UserHandle;
@@ -31,6 +32,7 @@ import com.android.server.powerstats.PowerStatsHALWrapper.IPowerStatsHALWrapper;
 import com.android.server.powerstats.PowerStatsHALWrapper.PowerStatsHALWrapperImpl;
 import com.android.server.powerstats.ProtoStreamUtils.ChannelInfoUtils;
 import com.android.server.powerstats.ProtoStreamUtils.EnergyConsumerIdUtils;
+import com.android.server.powerstats.ProtoStreamUtils.PowerEntityInfoUtils;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -110,6 +112,10 @@ public class PowerStatsService extends SystemService {
                         mPowerStatsLogger.writeMeterDataToFile(fd);
                     }
                 } else if (args.length == 0) {
+                    pw.println("PowerStatsService dumpsys: available PowerEntityInfos");
+                    PowerEntityInfo[] powerEntityInfo = mPowerStatsHALWrapper.getPowerEntityInfo();
+                    PowerEntityInfoUtils.dumpsys(powerEntityInfo, pw);
+
                     pw.println("PowerStatsService dumpsys: available ChannelInfos");
                     ChannelInfo[] channelInfo = mPowerStatsHALWrapper.getEnergyMeterInfo();
                     ChannelInfoUtils.dumpsys(channelInfo, pw);

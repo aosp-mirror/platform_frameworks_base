@@ -296,6 +296,7 @@ abstract class HdmiCecLocalDeviceSource extends HdmiCecLocalDevice {
         // do nothing
     }
 
+    @Constants.RcProfile
     @Override
     protected int getRcProfile() {
         return Constants.RC_PROFILE_SOURCE;
@@ -303,10 +304,8 @@ abstract class HdmiCecLocalDeviceSource extends HdmiCecLocalDevice {
 
     @Override
     protected List<Integer> getRcFeatures() {
-        return Lists.newArrayList(Constants.RC_PROFILE_SOURCE_HANDLES_CONTENTS_MENU,
-                Constants.RC_PROFILE_SOURCE_HANDLES_ROOT_MENU,
-                Constants.RC_PROFILE_SOURCE_HANDLES_SETUP_MENU,
-                Constants.RC_PROFILE_SOURCE_HANDLES_TOP_MENU);
+        return Lists.newArrayList(Constants.RC_PROFILE_SOURCE_HANDLES_ROOT_MENU,
+                Constants.RC_PROFILE_SOURCE_HANDLES_SETUP_MENU);
     }
 
     @Override

@@ -61,14 +61,15 @@ public final class PowerStatsLogger extends Handler {
                 if (DEBUG) Slog.d(TAG, "Logging to data storage");
 
                 // Log power meter data.
-                EnergyMeasurement[] energyMeasurements = mPowerStatsHALWrapper.readEnergyMeters();
+                EnergyMeasurement[] energyMeasurements =
+                    mPowerStatsHALWrapper.readEnergyMeters(new int[0]);
                 mPowerStatsMeterStorage.write(
                         EnergyMeasurementUtils.getProtoBytes(energyMeasurements));
                 if (DEBUG) EnergyMeasurementUtils.print(energyMeasurements);
 
                 // Log power model data.
                 EnergyConsumerResult[] energyConsumerResults =
-                    mPowerStatsHALWrapper.getEnergyConsumed();
+                    mPowerStatsHALWrapper.getEnergyConsumed(new int[0]);
                 mPowerStatsModelStorage.write(
                         EnergyConsumerResultUtils.getProtoBytes(energyConsumerResults));
                 if (DEBUG) EnergyConsumerResultUtils.print(energyConsumerResults);

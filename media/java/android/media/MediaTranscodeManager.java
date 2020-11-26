@@ -29,6 +29,7 @@ import android.net.Uri;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.ServiceSpecificException;
 import android.system.Os;
 import android.util.Log;
 
@@ -616,15 +617,24 @@ public final class MediaTranscodeManager {
         /* Writes the TranscodingRequest to a parcel. */
         private TranscodingRequestParcel writeToParcel(@NonNull Context context) {
             TranscodingRequestParcel parcel = new TranscodingRequestParcel();
-            // TODO(hkuang): Implement all the fields here to pass to service.
             parcel.priority = mPriority;
             parcel.transcodingType = mType;
             parcel.sourceFilePath = mSourceUri.toString();
             parcel.destinationFilePath = mDestinationUri.toString();
             parcel.clientUid = mClientUid;
             parcel.clientPid = mClientPid;
-            parcel.clientPackageName = mClientUid < 0 ? context.getPackageName() :
-                context.getPackageManager().getNameForUid(mClientUid);
+            if (mClientUid < 0) {
+                parcel.clientPackageName = context.getPackageName();
+            } else {
+                String packageName = context.getPackageManager().getNameForUid(mClientUid);
+                // PackageName is optional as some uid does not have package name. Set to
+                // "Unavailable" string in this case.
+                if (packageName == null) {
+                    Log.w(TAG, "Failed to find package for uid: " + mClientUid);
+                    packageName = "Unavailable";
+                }
+                parcel.clientPackageName = packageName;
+            }
             parcel.requestedVideoTrackFormat = convertToVideoTrackFormat(mVideoTrackFormat);
             if (mTestConfig != null) {
                 parcel.isForTesting = true;
@@ -753,7 +763,7 @@ public final class MediaTranscodeManager {
              */
             @NonNull
             public Builder setClientUid(int uid) {
-                if (uid <= 0) {
+                if (uid < 0) {
                     throw new IllegalArgumentException("Invalid Uid");
                 }
                 mClientUid = uid;
@@ -769,7 +779,7 @@ public final class MediaTranscodeManager {
              */
             @NonNull
             public Builder setClientPid(int pid) {
-                if (pid <= 0) {
+                if (pid < 0) {
                     throw new IllegalArgumentException("Invalid pid");
                 }
                 mClientPid = pid;
@@ -1417,7 +1427,7 @@ public final class MediaTranscodeManager {
                 mPendingTranscodingSessions.put(session.getSessionId(), session);
                 return session;
             }
-        } catch (RemoteException re) {
+        } catch (RemoteException | ServiceSpecificException ex) {
             throw new UnsupportedOperationException(
                     "Failed to submit request to Transcoding service");
         }

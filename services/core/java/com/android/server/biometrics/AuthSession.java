@@ -142,6 +142,7 @@ public final class AuthSession implements IBinder.DeathRecipient {
             @NonNull PromptInfo promptInfo,
             boolean debugEnabled,
             @NonNull List<FingerprintSensorPropertiesInternal> fingerprintSensorProperties) {
+        Slog.d(TAG, "Creating AuthSession with: " + preAuthInfo);
         mContext = context;
         mStatusBarService = statusBarService;
         mSysuiReceiver = sysuiReceiver;

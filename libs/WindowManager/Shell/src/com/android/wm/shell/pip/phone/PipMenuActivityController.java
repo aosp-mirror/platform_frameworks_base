@@ -239,7 +239,9 @@ public class PipMenuActivityController {
                     + " callers=\n" + Debug.getCallers(5, "    "));
         }
 
-        maybeCreateSyncApplier();
+        if (!maybeCreateSyncApplier()) {
+            return;
+        }
 
         mPipMenuView.showMenu(menuState, stackBounds, allowMenuTimeout, willResizeMenu, withDelay,
                 showResizeHandle);

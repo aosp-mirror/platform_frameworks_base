@@ -15,10 +15,9 @@
  */
 package com.android.server.location.timezone;
 
-import static android.location.timezone.LocationTimeZoneEvent.EVENT_TYPE_PERMANENT_FAILURE;
-import static android.location.timezone.LocationTimeZoneEvent.EVENT_TYPE_SUCCESS;
-import static android.location.timezone.LocationTimeZoneEvent.EVENT_TYPE_UNCERTAIN;
-
+import static com.android.internal.location.timezone.LocationTimeZoneEvent.EVENT_TYPE_PERMANENT_FAILURE;
+import static com.android.internal.location.timezone.LocationTimeZoneEvent.EVENT_TYPE_SUCCESS;
+import static com.android.internal.location.timezone.LocationTimeZoneEvent.EVENT_TYPE_UNCERTAIN;
 import static com.android.server.location.timezone.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_DISABLED;
 import static com.android.server.location.timezone.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_ENABLED_CERTAIN;
 import static com.android.server.location.timezone.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_ENABLED_INITIALIZING;
@@ -37,10 +36,10 @@ import static java.util.Arrays.asList;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.location.timezone.LocationTimeZoneEvent;
 import android.platform.test.annotations.Presubmit;
 import android.util.IndentingPrintWriter;
 
+import com.android.internal.location.timezone.LocationTimeZoneEvent;
 import com.android.server.location.timezone.LocationTimeZoneProvider.ProviderState.ProviderStateEnum;
 import com.android.server.timezonedetector.ConfigurationInternal;
 import com.android.server.timezonedetector.GeolocationTimeZoneSuggestion;
@@ -60,7 +59,7 @@ import java.util.Objects;
 @Presubmit
 public class ControllerImplTest {
 
-    private static final long ARBITRARY_TIME = 12345L;
+    private static final long ARBITRARY_TIME_MILLIS = 12345L;
 
     private static final LocationTimeZoneEvent USER1_SUCCESS_LOCATION_TIME_ZONE_EVENT1 =
             createLocationTimeZoneEvent(EVENT_TYPE_SUCCESS, asList("Europe/London"));
@@ -936,7 +935,7 @@ public class ControllerImplTest {
     private static LocationTimeZoneEvent createLocationTimeZoneEvent(
             int eventType, @Nullable List<String> timeZoneIds) {
         LocationTimeZoneEvent.Builder builder = new LocationTimeZoneEvent.Builder()
-                .setElapsedRealtimeNanos(ARBITRARY_TIME)
+                .setElapsedRealtimeMillis(ARBITRARY_TIME_MILLIS)
                 .setEventType(eventType);
         if (timeZoneIds != null) {
             builder.setTimeZoneIds(timeZoneIds);

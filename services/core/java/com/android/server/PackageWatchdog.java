@@ -47,7 +47,6 @@ import android.util.Xml;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.BackgroundThread;
-import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.XmlUtils;
 
@@ -64,7 +63,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -129,8 +127,16 @@ public class PackageWatchdog {
     @VisibleForTesting
     static final int DEFAULT_BOOT_LOOP_TRIGGER_COUNT = 5;
     static final long DEFAULT_BOOT_LOOP_TRIGGER_WINDOW_MS = TimeUnit.MINUTES.toMillis(10);
+
+    // These properties track individual system server boot events, and are reset once the boot
+    // threshold is met, or the boot loop trigger window is exceeded between boot events.
     private static final String PROP_RESCUE_BOOT_COUNT = "sys.rescue_boot_count";
     private static final String PROP_RESCUE_BOOT_START = "sys.rescue_boot_start";
+
+    // These properties track multiple calls made to observers tracking boot loops. They are reset
+    // when the de-escalation window is exceeded between boot events.
+    private static final String PROP_BOOT_MITIGATION_WINDOW_START = "sys.boot_mitigation_start";
+    private static final String PROP_BOOT_MITIGATION_COUNT = "sys.boot_mitigation_count";
 
     private long mNumberOfNativeCrashPollsRemaining;
 
@@ -191,7 +197,6 @@ public class PackageWatchdog {
     @FunctionalInterface
     @VisibleForTesting
     interface SystemClock {
-        // TODO: Add elapsedRealtime to this interface
         long uptimeMillis();
     }
 
@@ -471,13 +476,14 @@ public class PackageWatchdog {
         synchronized (mLock) {
             if (mBootThreshold.incrementAndTest()) {
                 mBootThreshold.reset();
+                int mitigationCount = mBootThreshold.getMitigationCount() + 1;
                 PackageHealthObserver currentObserverToNotify = null;
                 int currentObserverImpact = Integer.MAX_VALUE;
                 for (int i = 0; i < mAllObservers.size(); i++) {
                     final ObserverInternal observer = mAllObservers.valueAt(i);
                     PackageHealthObserver registeredObserver = observer.registeredObserver;
                     if (registeredObserver != null) {
-                        int impact = registeredObserver.onBootLoop();
+                        int impact = registeredObserver.onBootLoop(mitigationCount);
                         if (impact != PackageHealthObserverImpact.USER_IMPACT_NONE
                                 && impact < currentObserverImpact) {
                             currentObserverToNotify = registeredObserver;
@@ -486,7 +492,8 @@ public class PackageWatchdog {
                     }
                 }
                 if (currentObserverToNotify != null) {
-                    currentObserverToNotify.executeBootLoopMitigation();
+                    mBootThreshold.setMitigationCount(mitigationCount);
+                    currentObserverToNotify.executeBootLoopMitigation(mitigationCount);
                 }
             }
         }
@@ -609,15 +616,20 @@ public class PackageWatchdog {
         /**
          * Called when the system server has booted several times within a window of time, defined
          * by {@link #mBootThreshold}
+         *
+         * @param mitigationCount the number of times mitigation has been attempted for this
+         *                        boot loop (including this time).
          */
-        default @PackageHealthObserverImpact int onBootLoop() {
+        default @PackageHealthObserverImpact int onBootLoop(int mitigationCount) {
             return PackageHealthObserverImpact.USER_IMPACT_NONE;
         }
 
         /**
          * Executes mitigation for {@link #onBootLoop}
+         * @param mitigationCount the number of times mitigation has been attempted for this
+         *                        boot loop (including this time).
          */
-        default boolean executeBootLoopMitigation() {
+        default boolean executeBootLoopMitigation(int mitigationCount) {
             return false;
         }
 
@@ -1577,7 +1589,7 @@ public class PackageWatchdog {
     /**
      * Handles the thresholding logic for system server boots.
      */
-    static class BootThreshold {
+    class BootThreshold {
 
         private final int mBootTriggerCount;
         private final long mTriggerWindow;
@@ -1604,18 +1616,44 @@ public class PackageWatchdog {
             return SystemProperties.getLong(PROP_RESCUE_BOOT_START, 0);
         }
 
-        public void setStart(long start) {
-            final long now = android.os.SystemClock.elapsedRealtime();
-            final long newStart = MathUtils.constrain(start, 0, now);
-            SystemProperties.set(PROP_RESCUE_BOOT_START, Long.toString(newStart));
+        public int getMitigationCount() {
+            return SystemProperties.getInt(PROP_BOOT_MITIGATION_COUNT, 0);
         }
+
+        public void setStart(long start) {
+            setPropertyStart(PROP_RESCUE_BOOT_START, start);
+        }
+
+        public void setMitigationStart(long start) {
+            setPropertyStart(PROP_BOOT_MITIGATION_WINDOW_START, start);
+        }
+
+        public long getMitigationStart() {
+            return SystemProperties.getLong(PROP_BOOT_MITIGATION_WINDOW_START, 0);
+        }
+
+        public void setMitigationCount(int count) {
+            SystemProperties.set(PROP_BOOT_MITIGATION_COUNT, Integer.toString(count));
+        }
+
+        public void setPropertyStart(String property, long start) {
+            final long now = mSystemClock.uptimeMillis();
+            final long newStart = MathUtils.constrain(start, 0, now);
+            SystemProperties.set(property, Long.toString(newStart));
+        }
+
 
         /** Increments the boot counter, and returns whether the device is bootlooping. */
         public boolean incrementAndTest() {
-            final long now = android.os.SystemClock.elapsedRealtime();
+            final long now = mSystemClock.uptimeMillis();
             if (now - getStart() < 0) {
                 Slog.e(TAG, "Window was less than zero. Resetting start to current time.");
                 setStart(now);
+                setMitigationStart(now);
+            }
+            if (now - getMitigationStart() > DEFAULT_DEESCALATION_WINDOW_MS) {
+                setMitigationCount(0);
+                setMitigationStart(now);
             }
             final long window = now - getStart();
             if (window >= mTriggerWindow) {

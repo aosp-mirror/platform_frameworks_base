@@ -4909,7 +4909,7 @@ public class Notification implements Parcelable
                         ? ViewGroup.LayoutParams.WRAP_CONTENT
                         : ViewGroup.LayoutParams.MATCH_PARENT);
             }
-            if (p.text != null) {
+            if (p.text != null && p.text.length() != 0) {
                 int textId = showProgress ? com.android.internal.R.id.text_line_1
                         : com.android.internal.R.id.text;
                 contentView.setTextViewText(textId, processTextSpans(p.text));
