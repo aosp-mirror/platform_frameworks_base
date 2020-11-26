@@ -17,6 +17,7 @@
 package com.android.server.wm;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
+import static android.view.WindowManager.DISPLAY_IME_POLICY_LOCAL;
 
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
@@ -167,7 +168,7 @@ public class DisplayWindowSettingsProviderTests extends WindowTestsBase {
                 mBaseSettingsStorage, mOverrideSettingsStorage);
         SettingsEntry overrideSettings = provider.getOverrideSettings(secondaryDisplayInfo);
         overrideSettings.mShouldShowSystemDecors = true;
-        overrideSettings.mShouldShowIme = true;
+        overrideSettings.mImePolicy = DISPLAY_IME_POLICY_LOCAL;
         provider.updateOverrideSettings(secondaryDisplayInfo, overrideSettings);
         assertTrue(mOverrideSettingsStorage.wasWriteSuccessful());
 
@@ -176,8 +177,8 @@ public class DisplayWindowSettingsProviderTests extends WindowTestsBase {
                 getStoredDisplayAttributeValue(mOverrideSettingsStorage, "name"));
         assertEquals("Attribute value must be stored", "true",
                 getStoredDisplayAttributeValue(mOverrideSettingsStorage, "shouldShowSystemDecors"));
-        assertEquals("Attribute value must be stored", "true",
-                getStoredDisplayAttributeValue(mOverrideSettingsStorage, "shouldShowIme"));
+        assertEquals("Attribute value must be stored", "0",
+                getStoredDisplayAttributeValue(mOverrideSettingsStorage, "imePolicy"));
     }
 
     @Test
@@ -195,7 +196,7 @@ public class DisplayWindowSettingsProviderTests extends WindowTestsBase {
                 mBaseSettingsStorage, mOverrideSettingsStorage);
         SettingsEntry overrideSettings = provider.getOverrideSettings(secondaryDisplayInfo);
         overrideSettings.mShouldShowSystemDecors = true;
-        overrideSettings.mShouldShowIme = true;
+        overrideSettings.mImePolicy = DISPLAY_IME_POLICY_LOCAL;
         provider.updateOverrideSettings(secondaryDisplayInfo, overrideSettings);
         assertTrue(mOverrideSettingsStorage.wasWriteSuccessful());
 
@@ -204,8 +205,8 @@ public class DisplayWindowSettingsProviderTests extends WindowTestsBase {
                 getStoredDisplayAttributeValue(mOverrideSettingsStorage, "name"));
         assertEquals("Attribute value must be stored", "true",
                 getStoredDisplayAttributeValue(mOverrideSettingsStorage, "shouldShowSystemDecors"));
-        assertEquals("Attribute value must be stored", "true",
-                getStoredDisplayAttributeValue(mOverrideSettingsStorage, "shouldShowIme"));
+        assertEquals("Attribute value must be stored", "0",
+                getStoredDisplayAttributeValue(mOverrideSettingsStorage, "imePolicy"));
     }
 
     /**

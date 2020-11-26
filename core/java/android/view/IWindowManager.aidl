@@ -648,24 +648,24 @@ interface IWindowManager
     void setShouldShowSystemDecors(int displayId, boolean shouldShow);
 
     /**
-     * Indicates that the display should show IME.
+     * Indicates the policy for how the display should show IME.
      *
      * @param displayId The id of the display.
-     * @return {@code true} if the display should show IME.
+     * @return The policy for how the display should show IME.
      * @see KeyguardManager#isDeviceSecure()
      * @see KeyguardManager#isDeviceLocked()
      */
-    boolean shouldShowIme(int displayId);
+    int getDisplayImePolicy(int displayId);
 
     /**
-     * Sets that the display should show IME.
+     * Sets the policy for how the display should show IME.
      *
      * @param displayId The id of the display.
-     * @param shouldShow Indicates that the display should show IME.
+     * @param imePolicy Indicates the policy for how the display should show IME.
      * @see KeyguardManager#isDeviceSecure()
      * @see KeyguardManager#isDeviceLocked()
      */
-    void setShouldShowIme(int displayId, boolean shouldShow);
+    void setDisplayImePolicy(int displayId, int imePolicy);
 
     /**
      * Waits for transactions to get applied before injecting input, optionally waiting for
