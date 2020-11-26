@@ -43,6 +43,8 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.pm.PackageManagerInternal;
+import android.hardware.input.IInputManager;
+import android.hardware.input.InputManager;
 import android.hardware.vibrator.IVibrator;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
@@ -63,6 +65,7 @@ import android.os.Vibrator;
 import android.os.test.TestLooper;
 import android.platform.test.annotations.Presubmit;
 import android.provider.Settings;
+import android.view.InputDevice;
 
 import androidx.test.InstrumentationRegistry;
 
@@ -120,6 +123,7 @@ public class VibratorServiceTest {
     @Mock private AppOpsManager mAppOpsManagerMock;
     @Mock private VibratorService.NativeWrapper mNativeWrapperMock;
     @Mock private IVibratorStateListener mVibratorStateListenerMock;
+    @Mock private IInputManager mIInputManagerMock;
     @Mock private IBinder mVibratorStateListenerBinderMock;
 
     private TestLooper mTestLooper;
@@ -129,10 +133,12 @@ public class VibratorServiceTest {
     public void setUp() throws Exception {
         mTestLooper = new TestLooper();
         mContextSpy = spy(new ContextWrapper(InstrumentationRegistry.getContext()));
+        InputManager inputManager = InputManager.resetInstance(mIInputManagerMock);
 
         ContentResolver contentResolver = mSettingsProviderRule.mockContentResolver(mContextSpy);
         when(mContextSpy.getContentResolver()).thenReturn(contentResolver);
         when(mContextSpy.getSystemService(eq(Context.VIBRATOR_SERVICE))).thenReturn(mVibratorMock);
+        when(mContextSpy.getSystemService(eq(Context.INPUT_SERVICE))).thenReturn(inputManager);
         when(mContextSpy.getSystemService(Context.APP_OPS_SERVICE)).thenReturn(mAppOpsManagerMock);
         when(mVibratorMock.getDefaultHapticFeedbackIntensity())
                 .thenReturn(Vibrator.VIBRATION_INTENSITY_MEDIUM);
@@ -145,6 +151,7 @@ public class VibratorServiceTest {
                 .thenReturn(new ComponentName("", ""));
         when(mPowerManagerInternalMock.getLowPowerState(PowerManager.ServiceType.VIBRATION))
                 .thenReturn(mPowerSaveStateMock);
+        when(mIInputManagerMock.getInputDeviceIds()).thenReturn(new int[0]);
 
         setUserSetting(Settings.System.VIBRATE_WHEN_RINGING, 1);
         setUserSetting(Settings.System.NOTIFICATION_VIBRATION_INTENSITY,
@@ -214,6 +221,15 @@ public class VibratorServiceTest {
     @Test
     public void hasAmplitudeControl_withNoAmplitudeControlSupport_returnsFalse() {
         assertFalse(createService().hasAmplitudeControl());
+    }
+
+    @Test
+    public void hasAmplitudeControl_withInputDevices_returnsTrue() throws Exception {
+        when(mIInputManagerMock.getInputDeviceIds()).thenReturn(new int[]{1});
+        when(mIInputManagerMock.getInputDevice(1)).thenReturn(createInputDeviceWithVibrator(1));
+        mockVibratorCapabilities(IVibrator.CAP_AMPLITUDE_CONTROL);
+        setUserSetting(Settings.System.VIBRATE_INPUT_DEVICES, 1);
+        assertTrue(createService().hasAmplitudeControl());
     }
 
     @Test
@@ -375,6 +391,22 @@ public class VibratorServiceTest {
     }
 
     @Test
+    public void vibrate_withOneShotAndInputDevices_vibratesInputDevices() throws Exception {
+        when(mIInputManagerMock.getInputDeviceIds()).thenReturn(new int[]{1});
+        when(mIInputManagerMock.getInputDevice(1)).thenReturn(createInputDeviceWithVibrator(1));
+        setUserSetting(Settings.System.VIBRATE_INPUT_DEVICES, 1);
+        VibratorService service = createService();
+        Mockito.clearInvocations(mNativeWrapperMock);
+
+        VibrationEffect effect = VibrationEffect.createOneShot(100, 128);
+        vibrate(service, effect);
+        assertFalse(service.isVibrating());
+
+        verify(mIInputManagerMock).vibrate(eq(1), eq(effect), any());
+        verify(mNativeWrapperMock, never()).vibratorOn(anyLong(), anyLong());
+    }
+
+    @Test
     public void vibrate_withOneShotAndAmplitudeControl_turnsVibratorOnAndSetsAmplitude() {
         mockVibratorCapabilities(IVibrator.CAP_AMPLITUDE_CONTROL);
         VibratorService service = createService();
@@ -416,6 +448,25 @@ public class VibratorServiceTest {
     }
 
     @Test
+    public void vibrate_withPrebakedAndInputDevices_vibratesFallbackWaveformOnInputDevices()
+            throws Exception {
+        when(mIInputManagerMock.getInputDeviceIds()).thenReturn(new int[]{1});
+        when(mIInputManagerMock.getInputDevice(1)).thenReturn(createInputDeviceWithVibrator(1));
+        setUserSetting(Settings.System.VIBRATE_INPUT_DEVICES, 1);
+        VibratorService service = createService();
+        Mockito.clearInvocations(mNativeWrapperMock);
+
+        vibrate(service, VibrationEffect.get(VibrationEffect.EFFECT_CLICK));
+        assertFalse(service.isVibrating());
+
+        // Wait for VibrateThread to turn input device vibrator ON.
+        Thread.sleep(5);
+        verify(mIInputManagerMock).vibrate(eq(1), any(), any());
+        verify(mNativeWrapperMock, never()).vibratorOn(anyLong(), anyLong());
+        verify(mNativeWrapperMock, never()).vibratorPerformEffect(anyLong(), anyLong(), anyLong());
+    }
+
+    @Test
     public void vibrate_withComposed_performsEffect() {
         mockVibratorCapabilities(IVibrator.CAP_COMPOSE_EFFECTS);
         VibratorService service = createService();
@@ -439,6 +490,27 @@ public class VibratorServiceTest {
         assertEquals(VibrationEffect.Composition.PRIMITIVE_CLICK, primitive.id);
         assertEquals(0.5f, primitive.scale, /* delta= */ 1e-2);
         assertEquals(10, primitive.delay);
+    }
+
+    @Test
+    public void vibrate_withComposedAndInputDevices_vibratesInputDevices()
+            throws Exception {
+        when(mIInputManagerMock.getInputDeviceIds()).thenReturn(new int[]{1, 2});
+        when(mIInputManagerMock.getInputDevice(1)).thenReturn(createInputDeviceWithVibrator(1));
+        when(mIInputManagerMock.getInputDevice(2)).thenReturn(createInputDeviceWithVibrator(2));
+        setUserSetting(Settings.System.VIBRATE_INPUT_DEVICES, 1);
+        VibratorService service = createService();
+        Mockito.clearInvocations(mNativeWrapperMock);
+
+        VibrationEffect effect = VibrationEffect.startComposition()
+                .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, 0.5f, 10)
+                .compose();
+        vibrate(service, effect);
+        assertFalse(service.isVibrating());
+
+        verify(mIInputManagerMock).vibrate(eq(1), eq(effect), any());
+        verify(mIInputManagerMock).vibrate(eq(2), eq(effect), any());
+        verify(mNativeWrapperMock, never()).vibratorPerformComposedEffect(any(), anyLong());
     }
 
     @Test
@@ -497,6 +569,25 @@ public class VibratorServiceTest {
         assertTrue("Waveform with perceived delay of " + delay + "ms,"
                         + " expected less than " + maxDelay + "ms",
                 delay < maxDelay);
+    }
+
+    @Test
+    public void vibrate_withWaveformAndInputDevices_vibratesInputDevices() throws Exception {
+        when(mIInputManagerMock.getInputDeviceIds()).thenReturn(new int[]{1});
+        when(mIInputManagerMock.getInputDevice(1)).thenReturn(createInputDeviceWithVibrator(1));
+        setUserSetting(Settings.System.VIBRATE_INPUT_DEVICES, 1);
+        VibratorService service = createService();
+        Mockito.clearInvocations(mNativeWrapperMock);
+
+        VibrationEffect effect = VibrationEffect.createWaveform(
+                new long[]{10, 10, 10}, new int[]{100, 200, 50}, -1);
+        vibrate(service, effect);
+        assertFalse(service.isVibrating());
+
+        // Wait for VibrateThread to turn input device vibrator ON.
+        Thread.sleep(5);
+        verify(mIInputManagerMock).vibrate(eq(1), eq(effect), any());
+        verify(mNativeWrapperMock, never()).vibratorOn(anyLong(), anyLong());
     }
 
     @Test
@@ -793,6 +884,11 @@ public class VibratorServiceTest {
 
     private void mockVibratorCapabilities(int capabilities) {
         when(mNativeWrapperMock.vibratorGetCapabilities()).thenReturn((long) capabilities);
+    }
+
+    private InputDevice createInputDeviceWithVibrator(int id) {
+        return new InputDevice(id, 0, 0, "name", 0, 0, "description", false, 0, 0,
+                null, /* hasVibrator= */ true, false, false);
     }
 
     private static <T> void addLocalServiceMock(Class<T> clazz, T mock) {
