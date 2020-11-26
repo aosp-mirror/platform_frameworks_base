@@ -41,6 +41,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doAnswer;
@@ -86,10 +87,10 @@ import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.os.ConditionVariable;
 import android.os.INetworkManagementService;
-import android.os.Looper;
 import android.os.Process;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.os.test.TestLooper;
 import android.provider.Settings;
 import android.security.Credentials;
 import android.security.KeyStore;
@@ -224,6 +225,8 @@ public class VpnTest {
                 .thenReturn(mNotificationManager);
         when(mContext.getSystemService(eq(Context.CONNECTIVITY_SERVICE)))
                 .thenReturn(mConnectivityManager);
+        when(mContext.getSystemServiceName(eq(ConnectivityManager.class)))
+                .thenReturn(Context.CONNECTIVITY_SERVICE);
         when(mContext.getSystemService(eq(Context.IPSEC_SERVICE))).thenReturn(mIpSecManager);
         when(mContext.getString(R.string.config_customVpnAlwaysOnDisconnectedDialogComponent))
                 .thenReturn(Resources.getSystem().getString(
@@ -1286,8 +1289,13 @@ public class VpnTest {
         doReturn(UserHandle.of(userId)).when(asUserContext).getUser();
         when(mContext.createContextAsUser(eq(UserHandle.of(userId)), anyInt()))
                 .thenReturn(asUserContext);
-        return new Vpn(Looper.myLooper(), mContext, new TestDeps(), mNetService,
+        final TestLooper testLooper = new TestLooper();
+        final Vpn vpn = new Vpn(testLooper.getLooper(), mContext, new TestDeps(), mNetService,
                 userId, mKeyStore, mSystemServices, mIkev2SessionCreator);
+        verify(mConnectivityManager, times(1)).registerNetworkProvider(argThat(
+                provider -> provider.getName().contains("VpnNetworkProvider")
+        ));
+        return vpn;
     }
 
     private static void assertBlocked(Vpn vpn, int... uids) {

@@ -5140,7 +5140,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
     }
 
-    private void onUserStart(int userId) {
+    private void onUserStarted(int userId) {
         synchronized (mVpns) {
             Vpn userVpn = mVpns.get(userId);
             if (userVpn != null) {
@@ -5155,7 +5155,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
     }
 
-    private void onUserStop(int userId) {
+    private void onUserStopped(int userId) {
         synchronized (mVpns) {
             Vpn userVpn = mVpns.get(userId);
             if (userVpn == null) {
@@ -5272,9 +5272,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
             if (userId == UserHandle.USER_NULL) return;
 
             if (Intent.ACTION_USER_STARTED.equals(action)) {
-                onUserStart(userId);
+                onUserStarted(userId);
             } else if (Intent.ACTION_USER_STOPPED.equals(action)) {
-                onUserStop(userId);
+                onUserStopped(userId);
             } else if (Intent.ACTION_USER_ADDED.equals(action)) {
                 onUserAdded(userId);
             } else if (Intent.ACTION_USER_REMOVED.equals(action)) {
