@@ -9,6 +9,7 @@ filegroup {
     name: "services-all-sources",
     srcs: [
         ":services.core-sources",
+        ":services.core-sources-am-wm",
         ":services.accessibility-sources",
         ":services.appprediction-sources",
         ":services.appwidget-sources",

@@ -1047,7 +1047,7 @@ public class BiometricService extends SystemService {
                 final Pair<Integer, Integer> preAuthStatus = preAuthInfo.getPreAuthenticateStatus();
 
                 Slog.d(TAG, "handleAuthenticate: modality(" + preAuthStatus.first
-                        + "), status(" + preAuthStatus.second + ")");
+                        + "), status(" + preAuthStatus.second + "), preAuthInfo: " + preAuthInfo);
 
                 if (preAuthStatus.second == BiometricConstants.BIOMETRIC_SUCCESS) {
                     // If BIOMETRIC_WEAK or BIOMETRIC_STRONG are allowed, but not enrolled, but

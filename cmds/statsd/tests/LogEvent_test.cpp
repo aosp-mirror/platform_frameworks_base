@@ -16,8 +16,8 @@
 
 #include <gtest/gtest.h>
 
-#include "frameworks/base/cmds/statsd/src/atoms.pb.h"
-#include "frameworks/base/core/proto/android/stats/launcher/launcher.pb.h"
+#include "frameworks/proto_logging/stats/atoms.pb.h"
+#include "frameworks/proto_logging/stats/enums/stats/launcher/launcher.pb.h"
 #include "log/log_event_list.h"
 #include "stats_event.h"
 

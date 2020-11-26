@@ -206,7 +206,7 @@ TEST(RenderNodeDrawable, saveLayerClipAndMatrixRestore) {
                 ASSERT_EQ(SkRect::MakeLTRB(50, 50, 350, 350), getRecorderClipBounds(recorder));
 
                 recorder.translate(300.0f, 400.0f);
-                EXPECT_EQ(SkMatrix::MakeTrans(300.0f, 400.0f), getRecorderMatrix(recorder));
+                EXPECT_EQ(SkMatrix::Translate(300.0f, 400.0f), getRecorderMatrix(recorder));
 
                 recorder.restore();
                 ASSERT_EQ(SkRect::MakeLTRB(0, 0, 400, 800), getRecorderClipBounds(recorder));
@@ -1120,14 +1120,14 @@ TEST(ReorderBarrierDrawable, testShadowMatrix) {
             if (mFirstDidConcat) {
                 // First invocation is EndReorderBarrierDrawable::drawShadow to apply shadow matrix.
                 mFirstDidConcat = false;
-                EXPECT_EQ(SkMatrix::MakeTrans(CASTER_X + TRANSLATE_X, CASTER_Y + TRANSLATE_Y),
+                EXPECT_EQ(SkMatrix::Translate(CASTER_X + TRANSLATE_X, CASTER_Y + TRANSLATE_Y),
                           matrix);
-                EXPECT_EQ(SkMatrix::MakeTrans(CASTER_X + TRANSLATE_X, CASTER_Y + TRANSLATE_Y),
+                EXPECT_EQ(SkMatrix::Translate(CASTER_X + TRANSLATE_X, CASTER_Y + TRANSLATE_Y),
                           getTotalMatrix());
             } else {
                 // Second invocation is preparing the matrix for an elevated RenderNodeDrawable.
-                EXPECT_EQ(SkMatrix::MakeTrans(TRANSLATE_X, TRANSLATE_Y), matrix);
-                EXPECT_EQ(SkMatrix::MakeTrans(TRANSLATE_X, TRANSLATE_Y), getTotalMatrix());
+                EXPECT_EQ(SkMatrix::Translate(TRANSLATE_X, TRANSLATE_Y), matrix);
+                EXPECT_EQ(SkMatrix::Translate(TRANSLATE_X, TRANSLATE_Y), getTotalMatrix());
             }
         }
 

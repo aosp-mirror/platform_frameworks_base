@@ -2089,6 +2089,9 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     }
 
     void assignLayer(Transaction t, int layer) {
+        // Don't assign layers while a transition animation is playing
+        // TODO(b/173528115): establish robust best-practices around z-order fighting.
+        if (mWmService.mAtmService.getTransitionController().isPlaying()) return;
         final boolean changed = layer != mLastLayer || mLastRelativeToLayer != null;
         if (mSurfaceControl != null && changed) {
             setLayer(t, layer);
@@ -2111,6 +2114,10 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         // Route through surface animator to accommodate that our surface control might be
         // attached to the leash, and leash is attached to parent container.
         mSurfaceAnimator.setLayer(t, layer);
+    }
+
+    int getLastLayer() {
+        return mLastLayer;
     }
 
     protected void setRelativeLayer(Transaction t, SurfaceControl relativeTo, int layer) {

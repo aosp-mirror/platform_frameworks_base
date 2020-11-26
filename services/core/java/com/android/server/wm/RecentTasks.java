@@ -181,6 +181,9 @@ class RecentTasks {
     /** The non-empty tasks that are removed from recent tasks (see {@link #removeForAddTask}). */
     private final ArrayList<Task> mHiddenTasks = new ArrayList<>();
 
+    /** Whether to trim inactive tasks when activities are idle. */
+    private boolean mCheckTrimmableTasksOnIdle;
+
     // These values are generally loaded from resources, but can be set dynamically in the tests
     private boolean mHasVisibleRecentTasks;
     private int mGlobalMaxNumTasks;
@@ -1045,16 +1048,6 @@ class RecentTasks {
     void add(Task task) {
         if (DEBUG_RECENTS_TRIM_TASKS) Slog.d(TAG, "add: task=" + task);
 
-        // Only allow trimming task if it is not updating visibility for activities, so the caller
-        // doesn't need to handle unexpected size and index when looping task containers.
-        final boolean canTrimTask = !mSupervisor.inActivityVisibilityUpdate();
-
-        // Clean up the hidden tasks when going to home because the user may not be unable to return
-        // to the task from recents.
-        if (canTrimTask && !mHiddenTasks.isEmpty() && task.isActivityTypeHome()) {
-            removeUnreachableHiddenTasks(task.getWindowingMode());
-        }
-
         final boolean isAffiliated = task.mAffiliatedTaskId != task.mTaskId
                 || task.mNextAffiliateTaskId != INVALID_TASK_ID
                 || task.mPrevAffiliateTaskId != INVALID_TASK_ID;
@@ -1183,10 +1176,7 @@ class RecentTasks {
             cleanupLocked(task.mUserId);
         }
 
-        // Trim the set of tasks to the active set
-        if (canTrimTask) {
-            trimInactiveRecentTasks();
-        }
+        mCheckTrimmableTasksOnIdle = true;
         notifyTaskPersisterLocked(task, false /* flush */);
     }
 
@@ -1210,6 +1200,22 @@ class RecentTasks {
     void remove(Task task) {
         mTasks.remove(task);
         notifyTaskRemoved(task, false /* wasTrimmed */, false /* killProcess */);
+    }
+
+    /**
+     * Called when an activity reports idle. The caller should not be in any loop that iterates
+     * window hierarchy. so it is safe (e.g. index out of bound) to remove inactive tasks.
+     */
+    void onActivityIdle(ActivityRecord r) {
+        // Clean up the hidden tasks when going to home because the user may not be unable to return
+        // to the task from recents.
+        if (!mHiddenTasks.isEmpty() && r.isActivityTypeHome()) {
+            removeUnreachableHiddenTasks(r.getWindowingMode());
+        }
+        if (mCheckTrimmableTasksOnIdle) {
+            mCheckTrimmableTasksOnIdle = false;
+            trimInactiveRecentTasks();
+        }
     }
 
     /**
