@@ -59,7 +59,7 @@ import java.util.Objects;
 @Presubmit
 public class ControllerImplTest {
 
-    private static final long ARBITRARY_TIME = 12345L;
+    private static final long ARBITRARY_TIME_MILLIS = 12345L;
 
     private static final LocationTimeZoneEvent USER1_SUCCESS_LOCATION_TIME_ZONE_EVENT1 =
             createLocationTimeZoneEvent(EVENT_TYPE_SUCCESS, asList("Europe/London"));
@@ -935,7 +935,7 @@ public class ControllerImplTest {
     private static LocationTimeZoneEvent createLocationTimeZoneEvent(
             int eventType, @Nullable List<String> timeZoneIds) {
         LocationTimeZoneEvent.Builder builder = new LocationTimeZoneEvent.Builder()
-                .setElapsedRealtimeNanos(ARBITRARY_TIME)
+                .setElapsedRealtimeMillis(ARBITRARY_TIME_MILLIS)
                 .setEventType(eventType);
         if (timeZoneIds != null) {
             builder.setTimeZoneIds(timeZoneIds);

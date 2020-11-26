@@ -20,7 +20,6 @@ package com.android.server.job;
 
 option java_multiple_files = true;
 
-import "frameworks/base/core/proto/android/app/job/enums.proto";
 import "frameworks/base/core/proto/android/content/clipdata.proto";
 import "frameworks/base/core/proto/android/content/component_name.proto";
 import "frameworks/base/core/proto/android/content/intent.proto";
@@ -29,10 +28,11 @@ import "frameworks/base/core/proto/android/net/networkrequest.proto";
 import "frameworks/base/core/proto/android/os/bundle.proto";
 import "frameworks/base/core/proto/android/os/persistablebundle.proto";
 import "frameworks/base/core/proto/android/server/appstatetracker.proto";
-import "frameworks/base/core/proto/android/server/job/enums.proto";
 import "frameworks/base/core/proto/android/server/statlogger.proto";
 import "frameworks/base/core/proto/android/privacy.proto";
 import "frameworks/base/core/proto/android/util/quotatracker.proto";
+import "frameworks/proto_logging/stats/enums/app/job/enums.proto";
+import "frameworks/proto_logging/stats/enums/server/job/enums.proto";
 
 message JobSchedulerServiceDumpProto {
     option (.android.msg_privacy).dest = DEST_AUTOMATIC;

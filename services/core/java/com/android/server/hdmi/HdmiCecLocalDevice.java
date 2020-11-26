@@ -554,6 +554,7 @@ abstract class HdmiCecLocalDevice {
         return false;
     }
 
+    @Constants.RcProfile
     protected abstract int getRcProfile();
 
     protected abstract List<Integer> getRcFeatures();

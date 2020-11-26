@@ -117,7 +117,7 @@ final class SimulatedBinderProviderEvent {
 
     private static LocationTimeZoneEvent parseLocationTimeZoneEventArgs(ShellCommand shellCommand) {
         LocationTimeZoneEvent.Builder eventBuilder = new LocationTimeZoneEvent.Builder()
-                .setElapsedRealtimeNanos(SystemClock.elapsedRealtime());
+                .setElapsedRealtimeMillis(SystemClock.elapsedRealtime());
 
         String eventTypeString = shellCommand.getNextArgRequired();
         switch (eventTypeString.toUpperCase()) {

@@ -24,7 +24,6 @@ import "frameworks/base/core/proto/android/server/windowcontainerthumbnail.proto
 import "frameworks/base/core/proto/android/server/surfaceanimator.proto";
 import "frameworks/base/core/proto/android/view/displaycutout.proto";
 import "frameworks/base/core/proto/android/view/displayinfo.proto";
-import "frameworks/base/core/proto/android/view/enums.proto";
 import "frameworks/base/core/proto/android/view/surface.proto";
 import "frameworks/base/core/proto/android/view/windowlayoutparams.proto";
 import "frameworks/base/core/proto/android/privacy.proto";
@@ -33,6 +32,8 @@ import "frameworks/base/core/proto/android/typedef.proto";
 import "frameworks/base/core/proto/android/view/surfacecontrol.proto";
 import "frameworks/base/core/proto/android/view/insetssource.proto";
 import "frameworks/base/core/proto/android/view/insetssourcecontrol.proto";
+
+import "frameworks/proto_logging/stats/enums/view/enums.proto";
 
 package com.android.server.wm;
 

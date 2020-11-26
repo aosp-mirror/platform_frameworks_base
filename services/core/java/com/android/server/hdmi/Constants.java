@@ -507,6 +507,15 @@ final class Constants {
     static final int ALL_DEVICE_TYPES_PLAYBACK = 4;
     static final int ALL_DEVICE_TYPES_AUDIO_SYSTEM = 3;
     static final int ALL_DEVICE_TYPES_SWITCH = 2;
+    @IntDef({
+            ALL_DEVICE_TYPES_TV,
+            ALL_DEVICE_TYPES_RECORDER,
+            ALL_DEVICE_TYPES_TUNER,
+            ALL_DEVICE_TYPES_PLAYBACK,
+            ALL_DEVICE_TYPES_AUDIO_SYSTEM,
+            ALL_DEVICE_TYPES_SWITCH
+    })
+    @interface DeviceType {}
 
     static final int DEVICE_FEATURE_TV_SUPPORTS_RECORD_TV_SCREEN = 6;
     static final int DEVICE_FEATURE_TV_SUPPORTS_SET_OSD_STRING = 5;
@@ -514,21 +523,51 @@ final class Constants {
     static final int DEVICE_FEATURE_SUPPORTS_SET_AUDIO_RATE = 3;
     static final int DEVICE_FEATURE_SINK_SUPPORTS_ARC_TX = 2;
     static final int DEVICE_FEATURE_SOURCE_SUPPORTS_ARC_RX = 1;
+    @IntDef({
+            DEVICE_FEATURE_TV_SUPPORTS_RECORD_TV_SCREEN,
+            DEVICE_FEATURE_TV_SUPPORTS_SET_OSD_STRING,
+            DEVICE_FEATURE_SUPPORTS_DECK_CONTROL,
+            DEVICE_FEATURE_SUPPORTS_SET_AUDIO_RATE,
+            DEVICE_FEATURE_SINK_SUPPORTS_ARC_TX,
+            DEVICE_FEATURE_SOURCE_SUPPORTS_ARC_RX
+    })
+    @interface DeviceFeature {}
 
     static final int RC_PROFILE_TV = 0;
     static final int RC_PROFILE_SOURCE = 1;
+    @IntDef({
+            RC_PROFILE_TV,
+            RC_PROFILE_SOURCE
+    })
+    @interface RcProfile {}
 
     static final int RC_PROFILE_TV_NONE = 0x0;
     static final int RC_PROFILE_TV_ONE = 0x2;
     static final int RC_PROFILE_TV_TWO = 0x6;
     static final int RC_PROFILE_TV_THREE = 0xA;
     static final int RC_PROFILE_TV_FOUR = 0xE;
+    @IntDef({
+            RC_PROFILE_TV_NONE,
+            RC_PROFILE_TV_ONE,
+            RC_PROFILE_TV_TWO,
+            RC_PROFILE_TV_THREE,
+            RC_PROFILE_TV_FOUR
+    })
+    @interface RcProfileTv {}
 
     static final int RC_PROFILE_SOURCE_HANDLES_ROOT_MENU = 4;
     static final int RC_PROFILE_SOURCE_HANDLES_SETUP_MENU = 3;
     static final int RC_PROFILE_SOURCE_HANDLES_CONTENTS_MENU = 2;
     static final int RC_PROFILE_SOURCE_HANDLES_TOP_MENU = 1;
     static final int RC_PROFILE_SOURCE_HANDLES_MEDIA_CONTEXT_SENSITIVE_MENU = 0;
+    @IntDef({
+            RC_PROFILE_SOURCE_HANDLES_ROOT_MENU,
+            RC_PROFILE_SOURCE_HANDLES_SETUP_MENU,
+            RC_PROFILE_SOURCE_HANDLES_CONTENTS_MENU,
+            RC_PROFILE_SOURCE_HANDLES_TOP_MENU,
+            RC_PROFILE_SOURCE_HANDLES_MEDIA_CONTEXT_SENSITIVE_MENU
+    })
+    @interface RcProfileSource {}
 
     private Constants() {
         /* cannot be instantiated */

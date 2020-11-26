@@ -239,7 +239,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
     private static boolean useBlastAdapter(Context context) {
         ContentResolver contentResolver = context.getContentResolver();
         return Settings.Global.getInt(contentResolver,
-                Settings.Global.DEVELOPMENT_USE_BLAST_ADAPTER_SV, 1 /* default */) == 1;
+                Settings.Global.DEVELOPMENT_USE_BLAST_ADAPTER_SV, 0 /* default */) == 1;
     }
 
     private final boolean mUseBlastAdapter;

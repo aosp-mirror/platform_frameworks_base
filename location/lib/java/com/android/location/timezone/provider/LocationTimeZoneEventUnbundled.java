@@ -147,7 +147,7 @@ public final class LocationTimeZoneEventUnbundled {
             LocationTimeZoneEvent event = new LocationTimeZoneEvent.Builder()
                     .setEventType(internalEventType)
                     .setTimeZoneIds(mTimeZoneIds)
-                    .setElapsedRealtimeNanos(SystemClock.elapsedRealtimeNanos())
+                    .setElapsedRealtimeMillis(SystemClock.elapsedRealtime())
                     .build();
             return new LocationTimeZoneEventUnbundled(event);
         }

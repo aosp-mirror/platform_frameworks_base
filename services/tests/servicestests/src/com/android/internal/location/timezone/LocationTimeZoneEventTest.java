@@ -29,7 +29,7 @@ import java.util.List;
 
 public class LocationTimeZoneEventTest {
 
-    private static final long ARBITRARY_ELAPSED_REALTIME_NANOS = 9999;
+    private static final long ARBITRARY_ELAPSED_REALTIME_MILLIS = 9999;
 
     private static final List<String> ARBITRARY_TIME_ZONE_IDS = singletonList("Europe/London");
 
@@ -42,7 +42,7 @@ public class LocationTimeZoneEventTest {
     public void testBuildUnsetEventType() {
         new LocationTimeZoneEvent.Builder()
                 .setTimeZoneIds(ARBITRARY_TIME_ZONE_IDS)
-                .setElapsedRealtimeNanos(ARBITRARY_ELAPSED_REALTIME_NANOS)
+                .setElapsedRealtimeMillis(ARBITRARY_ELAPSED_REALTIME_MILLIS)
                 .build();
     }
 
@@ -51,7 +51,7 @@ public class LocationTimeZoneEventTest {
         new LocationTimeZoneEvent.Builder()
                 .setEventType(LocationTimeZoneEvent.EVENT_TYPE_UNCERTAIN)
                 .setTimeZoneIds(ARBITRARY_TIME_ZONE_IDS)
-                .setElapsedRealtimeNanos(ARBITRARY_ELAPSED_REALTIME_NANOS)
+                .setElapsedRealtimeMillis(ARBITRARY_ELAPSED_REALTIME_MILLIS)
                 .build();
     }
 
@@ -59,7 +59,7 @@ public class LocationTimeZoneEventTest {
     public void testEquals() {
         LocationTimeZoneEvent.Builder builder1 = new LocationTimeZoneEvent.Builder()
                 .setEventType(LocationTimeZoneEvent.EVENT_TYPE_UNCERTAIN)
-                .setElapsedRealtimeNanos(ARBITRARY_ELAPSED_REALTIME_NANOS);
+                .setElapsedRealtimeMillis(ARBITRARY_ELAPSED_REALTIME_MILLIS);
         {
             LocationTimeZoneEvent one = builder1.build();
             assertEquals(one, one);
@@ -67,7 +67,7 @@ public class LocationTimeZoneEventTest {
 
         LocationTimeZoneEvent.Builder builder2 = new LocationTimeZoneEvent.Builder()
                 .setEventType(LocationTimeZoneEvent.EVENT_TYPE_UNCERTAIN)
-                .setElapsedRealtimeNanos(ARBITRARY_ELAPSED_REALTIME_NANOS);
+                .setElapsedRealtimeMillis(ARBITRARY_ELAPSED_REALTIME_MILLIS);
         {
             LocationTimeZoneEvent one = builder1.build();
             LocationTimeZoneEvent two = builder2.build();
@@ -75,7 +75,7 @@ public class LocationTimeZoneEventTest {
             assertEquals(two, one);
         }
 
-        builder1.setElapsedRealtimeNanos(ARBITRARY_ELAPSED_REALTIME_NANOS + 1);
+        builder1.setElapsedRealtimeMillis(ARBITRARY_ELAPSED_REALTIME_MILLIS + 1);
         {
             LocationTimeZoneEvent one = builder1.build();
             LocationTimeZoneEvent two = builder2.build();
@@ -83,7 +83,7 @@ public class LocationTimeZoneEventTest {
             assertNotEquals(two, one);
         }
 
-        builder2.setElapsedRealtimeNanos(ARBITRARY_ELAPSED_REALTIME_NANOS + 1);
+        builder2.setElapsedRealtimeMillis(ARBITRARY_ELAPSED_REALTIME_MILLIS + 1);
         {
             LocationTimeZoneEvent one = builder1.build();
             LocationTimeZoneEvent two = builder2.build();
@@ -128,7 +128,7 @@ public class LocationTimeZoneEventTest {
     public void testParcelable() {
         LocationTimeZoneEvent.Builder builder = new LocationTimeZoneEvent.Builder()
                 .setEventType(LocationTimeZoneEvent.EVENT_TYPE_PERMANENT_FAILURE)
-                .setElapsedRealtimeNanos(ARBITRARY_ELAPSED_REALTIME_NANOS);
+                .setElapsedRealtimeMillis(ARBITRARY_ELAPSED_REALTIME_MILLIS);
         assertRoundTripParcelable(builder.build());
 
         builder.setEventType(LocationTimeZoneEvent.EVENT_TYPE_SUCCESS)
