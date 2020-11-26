@@ -5717,7 +5717,8 @@ public class PackageManagerService extends IPackageManager.Stub
                             getPackagesUsingSharedLibraryLPr(libInfo, flags, userId),
                             (libInfo.getDependencies() == null
                                     ? null
-                                    : new ArrayList<>(libInfo.getDependencies())));
+                                    : new ArrayList<>(libInfo.getDependencies())),
+                            libInfo.isNative());
 
                     if (result == null) {
                         result = new ArrayList<>();
@@ -5786,7 +5787,8 @@ public class PackageManagerService extends IPackageManager.Stub
                             libraryInfo.getLongVersion(), libraryInfo.getType(),
                             libraryInfo.getDeclaringPackage(), getPackagesUsingSharedLibraryLPr(
                             libraryInfo, flags, userId), libraryInfo.getDependencies() == null
-                            ? null : new ArrayList<>(libraryInfo.getDependencies()));
+                            ? null : new ArrayList<>(libraryInfo.getDependencies()),
+                            libraryInfo.isNative());
 
                     if (result == null) {
                         result = new ArrayList<>();
