@@ -82,8 +82,7 @@ private:
     void restore();
 
     void concat(const SkM44&);
-    void concat(const SkMatrix&);
-    void setMatrix(const SkMatrix&);
+    void setMatrix(const SkM44&);
     void scale(SkScalar, SkScalar);
     void translate(SkScalar, SkScalar);
     void translateZ(SkScalar);
@@ -154,8 +153,7 @@ public:
     void onFlush() override;
 
     void didConcat44(const SkM44&) override;
-    void didConcat(const SkMatrix&) override;
-    void didSetMatrix(const SkMatrix&) override;
+    void didSetM44(const SkM44&) override;
     void didScale(SkScalar, SkScalar) override;
     void didTranslate(SkScalar, SkScalar) override;
 
