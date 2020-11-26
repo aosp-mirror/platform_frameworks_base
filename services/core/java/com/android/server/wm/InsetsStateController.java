@@ -473,10 +473,7 @@ class InsetsStateController {
     }
 
     void notifyInsetsChanged() {
-        mDisplayContent.forAllWindows(mDispatchInsetsChanged, true /* traverseTopToBottom */);
-        if (mDisplayContent.mRemoteInsetsControlTarget != null) {
-            mDisplayContent.mRemoteInsetsControlTarget.notifyInsetsChanged();
-        }
+        mDisplayContent.notifyInsetsChanged(mDispatchInsetsChanged);
     }
 
     void dump(String prefix, PrintWriter pw) {
