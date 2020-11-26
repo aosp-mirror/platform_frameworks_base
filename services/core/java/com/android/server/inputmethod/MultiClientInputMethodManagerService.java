@@ -1817,5 +1817,15 @@ public final class MultiClientInputMethodManagerService {
         public boolean isImeTraceEnabled() {
             return false;
         }
+
+        @BinderThread
+        @Override
+        public void startImeTrace() {
+        }
+
+        @BinderThread
+        @Override
+        public void stopImeTrace() {
+        }
     }
 }

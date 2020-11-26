@@ -121,7 +121,6 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.EventLog;
 import android.util.IndentingPrintWriter;
-import android.util.Log;
 import android.util.LruCache;
 import android.util.Pair;
 import android.util.PrintWriterPrinter;
@@ -4110,6 +4109,44 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         return ImeTracing.getInstance().isEnabled();
     }
 
+    @BinderThread
+    @Override
+    public void startImeTrace() {
+        ImeTracing.getInstance().startTrace(null /* printwriter */);
+        ArrayMap<IBinder, ClientState> clients;
+        synchronized (mMethodMap) {
+            clients = new ArrayMap<>(mClients);
+        }
+        for (ClientState state : clients.values()) {
+            if (state != null) {
+                try {
+                    state.client.setImeTraceEnabled(true /* enabled */);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Error while trying to enable ime trace on client window", e);
+                }
+            }
+        }
+    }
+
+    @BinderThread
+    @Override
+    public void stopImeTrace() {
+        ImeTracing.getInstance().stopTrace(null /* printwriter */);
+        ArrayMap<IBinder, ClientState> clients;
+        synchronized (mMethodMap) {
+            clients = new ArrayMap<>(mClients);
+        }
+        for (ClientState state : clients.values()) {
+            if (state != null) {
+                try {
+                    state.client.setImeTraceEnabled(false /* enabled */);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Error while trying to disable ime trace on client window", e);
+                }
+            }
+        }
+    }
+
     @GuardedBy("mMethodMap")
     private void dumpDebug(ProtoOutputStream proto, long fieldId) {
         synchronized (mMethodMap) {
@@ -5772,9 +5809,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 try {
                     state.client.setImeTraceEnabled(isImeTraceEnabled);
                 } catch (RemoteException e) {
-                    Log.e(TAG,
-                            "Error while trying to enable/disable ime "
-                            + "trace on client window", e);
+                    Slog.e(TAG, "Error while trying to enable/disable ime trace on client window",
+                            e);
                 }
             }
         }
