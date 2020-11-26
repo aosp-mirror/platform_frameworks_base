@@ -186,7 +186,7 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
     private static final int RESTART_ACTIVITY_PROCESS_TIMEOUT_MSG = FIRST_SUPERVISOR_STACK_MSG + 13;
     private static final int REPORT_MULTI_WINDOW_MODE_CHANGED_MSG = FIRST_SUPERVISOR_STACK_MSG + 14;
     private static final int REPORT_PIP_MODE_CHANGED_MSG = FIRST_SUPERVISOR_STACK_MSG + 15;
-    private static final int REPORT_HOME_CHANGED_MSG = FIRST_SUPERVISOR_STACK_MSG + 16;
+    private static final int START_HOME_MSG = FIRST_SUPERVISOR_STACK_MSG + 16;
     private static final int TOP_RESUMED_STATE_LOSS_TIMEOUT_MSG = FIRST_SUPERVISOR_STACK_MSG + 17;
 
     // Used to indicate that windows of activities should be preserved during the resize.
@@ -446,6 +446,9 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
         // unlocked.
         mPersisterQueue.startPersisting();
         mLaunchParamsPersister.onUnlockUser(userId);
+
+        // Need to launch home again for those displays that do not have encryption aware home app.
+        scheduleStartHome("userUnlocked");
     }
 
     public ActivityMetricsLogger getActivityMetricsLogger() {
@@ -956,10 +959,14 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
 
     void updateHomeProcess(WindowProcessController app) {
         if (app != null && mService.mHomeProcess != app) {
-            if (!mHandler.hasMessages(REPORT_HOME_CHANGED_MSG)) {
-                mHandler.sendEmptyMessage(REPORT_HOME_CHANGED_MSG);
-            }
+            scheduleStartHome("homeChanged");
             mService.mHomeProcess = app;
+        }
+    }
+
+    private void scheduleStartHome(String reason) {
+        if (!mHandler.hasMessages(START_HOME_MSG)) {
+            mHandler.obtainMessage(START_HOME_MSG, reason).sendToTarget();
         }
     }
 
@@ -2473,11 +2480,11 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
                         handleLaunchTaskBehindCompleteLocked(r);
                     }
                 } break;
-                case REPORT_HOME_CHANGED_MSG: {
-                    mHandler.removeMessages(REPORT_HOME_CHANGED_MSG);
+                case START_HOME_MSG: {
+                    mHandler.removeMessages(START_HOME_MSG);
 
                     // Start home activities on displays with no activities.
-                    mRootWindowContainer.startHomeOnEmptyDisplays("homeChanged");
+                    mRootWindowContainer.startHomeOnEmptyDisplays((String) msg.obj);
                 } break;
                 case TOP_RESUMED_STATE_LOSS_TIMEOUT_MSG: {
                     final ActivityRecord r = (ActivityRecord) msg.obj;
