@@ -2031,12 +2031,12 @@ class ActivityStarter {
      */
     private int deliverToCurrentTopIfNeeded(Task topStack, NeededUriGrants intentGrants) {
         final ActivityRecord top = topStack.topRunningNonDelayedActivityLocked(mNotTop);
-        final boolean dontStart = top != null && mStartActivity.resultTo == null
+        final boolean dontStart = top != null
                 && top.mActivityComponent.equals(mStartActivity.mActivityComponent)
                 && top.mUserId == mStartActivity.mUserId
                 && top.attachedToProcess()
                 && ((mLaunchFlags & FLAG_ACTIVITY_SINGLE_TOP) != 0
-                || isLaunchModeOneOf(LAUNCH_SINGLE_TOP, LAUNCH_SINGLE_TASK))
+                || LAUNCH_SINGLE_TOP == mLaunchMode)
                 // This allows home activity to automatically launch on secondary task display area
                 // when it was added, if home was the top activity on default task display area,
                 // instead of sending new intent to the home activity on default display area.
@@ -2055,6 +2055,13 @@ class ActivityStarter {
             // We don't need to start a new activity, and the client said not to do anything if
             // that is the case, so this is it!
             return START_RETURN_INTENT_TO_CALLER;
+        }
+
+        if (mStartActivity.resultTo != null) {
+            mStartActivity.resultTo.sendResult(INVALID_UID, mStartActivity.resultWho,
+                    mStartActivity.requestCode, RESULT_CANCELED,
+                    null /* data */, null /* dataGrants */);
+            mStartActivity.resultTo = null;
         }
 
         deliverNewIntent(top, intentGrants);
