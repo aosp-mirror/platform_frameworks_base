@@ -18,7 +18,6 @@ package com.android.server.media;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
-import android.content.Context;
 import android.media.session.MediaSession;
 
 import java.lang.annotation.Retention;
@@ -55,7 +54,7 @@ public abstract class SessionPolicyProvider {
      */
     static final int SESSION_POLICY_IGNORE_BUTTON_SESSION = 1 << 1;
 
-    public SessionPolicyProvider(Context context) {
+    public SessionPolicyProvider() {
         // Constructor used for reflection
     }
 
