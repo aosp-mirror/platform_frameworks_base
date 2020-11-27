@@ -82,9 +82,6 @@ public class AmbientState {
     private ExpandableNotificationRow mTrackedHeadsUpRow;
     private float mAppearFraction;
 
-    /** Tracks the state from AlertingNotificationManager#hasNotifications() */
-    private boolean mHasAlertEntries;
-
     public AmbientState(
             Context context,
             @NonNull SectionProvider sectionProvider) {
@@ -368,19 +365,8 @@ public class AmbientState {
         mPanelTracking = panelTracking;
     }
 
-    public boolean hasPulsingNotifications() {
-        return mPulsing && mHasAlertEntries;
-    }
-
     public void setPulsing(boolean hasPulsing) {
         mPulsing = hasPulsing;
-    }
-
-    /**
-     * @return if we're pulsing in general
-     */
-    public boolean isPulsing() {
-        return mPulsing;
     }
 
     public boolean isPulsing(NotificationEntry entry) {
@@ -540,9 +526,5 @@ public class AmbientState {
 
     public float getAppearFraction() {
         return mAppearFraction;
-    }
-
-    public void setHasAlertEntries(boolean hasAlertEntries) {
-        mHasAlertEntries = hasAlertEntries;
     }
 }

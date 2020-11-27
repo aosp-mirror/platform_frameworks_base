@@ -54,6 +54,8 @@ class IInputMethodSessionWrapper extends IInputMethodSession.Stub
     private static final int DO_VIEW_CLICKED = 115;
     private static final int DO_NOTIFY_IME_HIDDEN = 120;
     private static final int DO_REMOVE_IME_SURFACE = 130;
+    private static final int DO_FINISH_INPUT = 140;
+
 
     @UnsupportedAppUsage
     HandlerCaller mCaller;
@@ -141,6 +143,10 @@ class IInputMethodSessionWrapper extends IInputMethodSession.Stub
                 mInputMethodSession.removeImeSurface();
                 return;
             }
+            case DO_FINISH_INPUT: {
+                mInputMethodSession.finishInput();
+                return;
+            }
         }
         Log.w(TAG, "Unhandled message code: " + msg.what);
     }
@@ -222,6 +228,10 @@ class IInputMethodSessionWrapper extends IInputMethodSession.Stub
         mCaller.executeOrSendMessage(mCaller.obtainMessage(DO_FINISH_SESSION));
     }
 
+    @Override
+    public void finishInput() {
+        mCaller.executeOrSendMessage(mCaller.obtainMessage(DO_FINISH_INPUT));
+    }
     private final class ImeInputEventReceiver extends InputEventReceiver
             implements InputMethodSession.EventCallback {
         private final SparseArray<InputEvent> mPendingEvents = new SparseArray<InputEvent>();

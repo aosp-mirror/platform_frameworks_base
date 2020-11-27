@@ -22,6 +22,8 @@ import static android.view.IWindowManager.FIXED_TO_USER_ROTATION_DISABLED;
 import static android.view.IWindowManager.FIXED_TO_USER_ROTATION_ENABLED;
 import static android.view.WindowManager.REMOVE_CONTENT_MODE_DESTROY;
 import static android.view.WindowManager.REMOVE_CONTENT_MODE_MOVE_TO_PRIMARY;
+import static android.view.WindowManager.DISPLAY_IME_POLICY_LOCAL;
+import static android.view.WindowManager.DISPLAY_IME_POLICY_FALLBACK_DISPLAY;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
@@ -49,7 +51,6 @@ import androidx.test.filters.SmallTest;
 
 import com.android.server.LocalServices;
 import com.android.server.policy.WindowManagerPolicy;
-import com.android.server.wm.DisplayWindowSettings.SettingsProvider.SettingsEntry;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -319,17 +320,21 @@ public class DisplayWindowSettingsTests extends WindowTestsBase {
     }
 
     @Test
-    public void testPrimaryDisplayShouldShowIme() {
-        assertTrue(mDisplayWindowSettings.shouldShowImeLocked(mPrimaryDisplay));
+    public void testPrimaryDisplayImePolicy() {
+        assertEquals(DISPLAY_IME_POLICY_LOCAL,
+                mDisplayWindowSettings.getImePolicyLocked(mPrimaryDisplay));
 
-        mDisplayWindowSettings.setShouldShowImeLocked(mPrimaryDisplay, false);
+        mDisplayWindowSettings.setDisplayImePolicy(mPrimaryDisplay,
+                DISPLAY_IME_POLICY_FALLBACK_DISPLAY);
 
-        assertTrue(mDisplayWindowSettings.shouldShowImeLocked(mPrimaryDisplay));
+        assertEquals(DISPLAY_IME_POLICY_LOCAL,
+                mDisplayWindowSettings.getImePolicyLocked(mPrimaryDisplay));
     }
 
     @Test
-    public void testSecondaryDisplayDefaultToNotShowIme() {
-        assertFalse(mDisplayWindowSettings.shouldShowImeLocked(mSecondaryDisplay));
+    public void testSecondaryDisplayDefaultToShowImeOnFallbackDisplay() {
+        assertEquals(DISPLAY_IME_POLICY_FALLBACK_DISPLAY,
+                mDisplayWindowSettings.getImePolicyLocked(mSecondaryDisplay));
     }
 
     @Test
@@ -400,17 +405,18 @@ public class DisplayWindowSettingsTests extends WindowTestsBase {
     }
 
     @Test
-    public void testShouldShowImeWithinForceDesktopMode() {
+    public void testShouldShowImeOnDisplayWithinForceDesktopMode() {
         try {
             // Presume display enabled force desktop mode from developer options.
             final DisplayContent dc = createMockSimulatedDisplay();
             mWm.setForceDesktopModeOnExternalDisplays(true);
             final WindowManagerInternal wmInternal = LocalServices.getService(
                     WindowManagerInternal.class);
-            // Make sure WindowManagerInter#shouldShowIme as true is due to
-            // mForceDesktopModeOnExternalDisplays as true.
-            assertFalse(mWm.mDisplayWindowSettings.shouldShowImeLocked(dc));
-            assertTrue(wmInternal.shouldShowIme(dc.getDisplayId()));
+            // Make sure WindowManagerInter#getDisplayImePolicy is SHOW_IME_ON_DISPLAY is due to
+            // mForceDesktopModeOnExternalDisplays being SHOW_IME_ON_DISPLAY.
+            assertEquals(DISPLAY_IME_POLICY_FALLBACK_DISPLAY,
+                    mWm.mDisplayWindowSettings.getImePolicyLocked(dc));
+            assertEquals(DISPLAY_IME_POLICY_LOCAL, wmInternal.getDisplayImePolicy(dc.getDisplayId()));
         } finally {
             mWm.setForceDesktopModeOnExternalDisplays(false);
         }

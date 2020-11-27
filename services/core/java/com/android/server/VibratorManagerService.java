@@ -159,7 +159,7 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
                 pw.println("    Prints this help text.");
                 pw.println("");
                 pw.println("  list");
-                pw.println("    Prints the id of device vibrators. This do not include any ");
+                pw.println("    Prints the id of device vibrators. This does not include any ");
                 pw.println("    connected input device.");
                 pw.println("");
             }

@@ -123,7 +123,7 @@ public class RollbackUnitTest {
     public void deletedRollbackCannotBeMadeAvailable() {
         Rollback rollback = new Rollback(123, new File("/test/testing"), -1, USER, INSTALLER);
 
-        rollback.delete(mMockDataHelper);
+        rollback.delete(mMockDataHelper, "test");
 
         assertThat(rollback.isDeleted()).isTrue();
 
@@ -221,7 +221,7 @@ public class RollbackUnitTest {
         PackageRollbackInfo pkgInfo2 = newPkgInfoFor(PKG_2, 18, 12, true);
         rollback.info.getPackages().addAll(Arrays.asList(pkgInfo1, pkgInfo2));
 
-        rollback.delete(mMockDataHelper);
+        rollback.delete(mMockDataHelper, "test");
 
         assertThat(rollback.isDeleted()).isTrue();
 
@@ -247,7 +247,7 @@ public class RollbackUnitTest {
 
         verify(mMockDataHelper).snapshotAppData(eq(123), pkgRollbackInfoFor(PKG_2), eq(userIds));
 
-        rollback.delete(mMockDataHelper);
+        rollback.delete(mMockDataHelper, "test");
 
         verify(mMockDataHelper).destroyAppDataSnapshot(eq(123), pkgRollbackInfoFor(PKG_2), eq(111));
         verify(mMockDataHelper).destroyAppDataSnapshot(eq(123), pkgRollbackInfoFor(PKG_2), eq(222));
@@ -269,7 +269,7 @@ public class RollbackUnitTest {
 
         verify(mMockDataHelper).snapshotAppData(eq(123), pkgRollbackInfoFor(PKG_2), eq(userIds));
 
-        rollback.delete(mMockDataHelper);
+        rollback.delete(mMockDataHelper, "test");
 
         verify(mMockDataHelper, never())
                 .destroyAppDataSnapshot(anyInt(), pkgRollbackInfoFor(PKG_2), anyInt());

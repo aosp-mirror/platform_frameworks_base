@@ -394,7 +394,6 @@ public class NotificationStackScrollLayoutController {
                     if (mView.getDismissAllInProgress()) {
                         return;
                     }
-                    mView.onSwipeEnd();
                     if (view instanceof ExpandableNotificationRow) {
                         ExpandableNotificationRow row = (ExpandableNotificationRow) view;
                         if (row.isHeadsUp()) {
@@ -454,7 +453,6 @@ public class NotificationStackScrollLayoutController {
 
                 @Override
                 public void onChildSnappedBack(View animView, float targetLeft) {
-                    mView.onSwipeEnd();
                     if (animView instanceof ExpandableNotificationRow) {
                         ExpandableNotificationRow row = (ExpandableNotificationRow) animView;
                         if (row.isPinned() && !canChildBeDismissed(row)
@@ -518,9 +516,7 @@ public class NotificationStackScrollLayoutController {
 
                 @Override
                 public void onHeadsUpStateChanged(NotificationEntry entry, boolean isHeadsUp) {
-                    long numEntries = mHeadsUpManager.getAllEntries().count();
                     NotificationEntry topEntry = mHeadsUpManager.getTopEntry();
-                    mView.setNumHeadsUp(numEntries);
                     mView.setTopHeadsUpEntry(topEntry);
                     mNotificationRoundnessManager.updateView(entry.getRow(), false /* animate */);
                 }
@@ -664,8 +660,6 @@ public class NotificationStackScrollLayoutController {
         mHeadsUpManager.addListener(mOnHeadsUpChangedListener);
         mHeadsUpManager.setAnimationStateHandler(mView::setHeadsUpGoingAwayAnimationsAllowed);
         mDynamicPrivacyController.addListener(mDynamicPrivacyControllerListener);
-
-        mScrimController.setScrimBehindChangeRunnable(mView::updateBackgroundDimming);
 
         mLockscreenUserManager.addUserChangedListener(mLockscreenUserChangeListener);
 

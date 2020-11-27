@@ -32,6 +32,15 @@ struct SupportData {
   AwDrawFnFunctorCallbacks callbacks;
 };
 
+AwDrawFnOverlaysMode GetOverlaysMode(uirenderer::OverlaysMode overlays_mode) {
+  switch (overlays_mode) {
+    case uirenderer::OverlaysMode::Disabled:
+      return AW_DRAW_FN_OVERLAYS_MODE_DISABLED;
+    case uirenderer::OverlaysMode::Enabled:
+      return AW_DRAW_FN_OVERLAYS_MODE_ENABLED;
+  }
+}
+
 void onSync(int functor, void* data,
             const uirenderer::WebViewSyncData& syncData) {
   AwDrawFn_OnSyncParams params = {
@@ -53,8 +62,20 @@ void onDestroyed(int functor, void* data) {
   delete support;
 }
 
+void removeOverlays(int functor, void* data,
+                    AwDrawFn_MergeTransaction merge_transaction) {
+  AwDrawFn_RemoveOverlaysParams params = {
+      .version = kAwDrawFnVersion,
+      .merge_transaction = merge_transaction
+  };
+  SupportData* support = static_cast<SupportData*>(data);
+  if (support->callbacks.remove_overlays)
+    support->callbacks.remove_overlays(functor, support->data, &params);
+}
+
 void draw_gl(int functor, void* data,
-             const uirenderer::DrawGlInfo& draw_gl_params) {
+             const uirenderer::DrawGlInfo& draw_gl_params,
+             const uirenderer::WebViewOverlayData& overlay_params) {
   float gabcdef[7];
   draw_gl_params.color_space_ptr->transferFn(gabcdef);
   AwDrawFn_DrawGLParams params = {
@@ -73,6 +94,9 @@ void draw_gl(int functor, void* data,
       .transfer_function_d = gabcdef[4],
       .transfer_function_e = gabcdef[5],
       .transfer_function_f = gabcdef[6],
+      .overlays_mode = GetOverlaysMode(overlay_params.overlaysMode),
+      .get_surface_control = overlay_params.getSurfaceControl,
+      .merge_transaction = overlay_params.mergeTransaction
   };
   COMPILE_ASSERT(NELEM(params.transform) == NELEM(draw_gl_params.transform),
                  mismatched_transform_matrix_sizes);
@@ -118,7 +142,9 @@ void initializeVk(int functor, void* data,
   support->callbacks.init_vk(functor, support->data, &params);
 }
 
-void drawVk(int functor, void* data, const uirenderer::VkFunctorDrawParams& draw_vk_params) {
+void drawVk(int functor, void* data,
+            const uirenderer::VkFunctorDrawParams& draw_vk_params,
+            const uirenderer::WebViewOverlayData& overlay_params) {
   SupportData* support = static_cast<SupportData*>(data);
   float gabcdef[7];
   draw_vk_params.color_space_ptr->transferFn(gabcdef);
@@ -142,6 +168,9 @@ void drawVk(int functor, void* data, const uirenderer::VkFunctorDrawParams& draw
       .clip_top = draw_vk_params.clip_top,
       .clip_right = draw_vk_params.clip_right,
       .clip_bottom = draw_vk_params.clip_bottom,
+      .overlays_mode = GetOverlaysMode(overlay_params.overlaysMode),
+      .get_surface_control = overlay_params.getSurfaceControl,
+      .merge_transaction = overlay_params.mergeTransaction
   };
   COMPILE_ASSERT(sizeof(params.color_space_toXYZD50) == sizeof(skcms_Matrix3x3),
                  gamut_transform_size_mismatch);
@@ -161,12 +190,14 @@ void postDrawVk(int functor, void* data) {
   support->callbacks.post_draw_vk(functor, support->data, &params);
 }
 
-int CreateFunctor(void* data, AwDrawFnFunctorCallbacks* functor_callbacks) {
+int CreateFunctor_v3(void* data, int version,
+                     AwDrawFnFunctorCallbacks* functor_callbacks) {
   static bool callbacks_initialized = false;
   static uirenderer::WebViewFunctorCallbacks webview_functor_callbacks = {
       .onSync = &onSync,
       .onContextDestroyed = &onContextDestroyed,
       .onDestroyed = &onDestroyed,
+      .removeOverlays = &removeOverlays,
   };
   if (!callbacks_initialized) {
     switch (uirenderer::WebViewFunctor_queryPlatformRenderMode()) {
@@ -183,13 +214,34 @@ int CreateFunctor(void* data, AwDrawFnFunctorCallbacks* functor_callbacks) {
   }
   SupportData* support = new SupportData{
       .data = data,
-      .callbacks = *functor_callbacks,
   };
+
+  // These callbacks are available on all versions.
+  support->callbacks = {
+      .on_sync = functor_callbacks->on_sync,
+      .on_context_destroyed = functor_callbacks->on_context_destroyed,
+      .on_destroyed = functor_callbacks->on_destroyed,
+      .draw_gl = functor_callbacks->draw_gl,
+      .init_vk = functor_callbacks->init_vk,
+      .draw_vk = functor_callbacks->draw_vk,
+      .post_draw_vk = functor_callbacks->post_draw_vk,
+  };
+
+  if (version >= 3) {
+    support->callbacks.remove_overlays = functor_callbacks->remove_overlays;
+  }
+
   int functor = uirenderer::WebViewFunctor_create(
       support, webview_functor_callbacks,
       uirenderer::WebViewFunctor_queryPlatformRenderMode());
   if (functor <= 0) delete support;
   return functor;
+}
+
+int CreateFunctor(void* data, AwDrawFnFunctorCallbacks* functor_callbacks) {
+  const int kVersionForDeprecatedCreateFunctor = 2;
+  return CreateFunctor_v3(data, kVersionForDeprecatedCreateFunctor,
+                          functor_callbacks);
 }
 
 void ReleaseFunctor(int functor) {
@@ -211,6 +263,7 @@ jlong GetDrawFnFunctionTable() {
     .query_render_mode = &QueryRenderMode,
     .create_functor = &CreateFunctor,
     .release_functor = &ReleaseFunctor,
+    .create_functor_v3 = &CreateFunctor_v3,
   };
   return reinterpret_cast<intptr_t>(&function_table);
 }

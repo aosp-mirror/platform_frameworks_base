@@ -40,6 +40,8 @@ import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_NOTIFICATION_SHADE;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
+import static android.view.WindowManager.DISPLAY_IME_POLICY_LOCAL;
+import static android.view.WindowManager.DISPLAY_IME_POLICY_FALLBACK_DISPLAY;
 
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
@@ -80,6 +82,7 @@ import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.WindowManager.DisplayImePolicy;
 import android.window.ITaskOrganizer;
 
 import com.android.internal.util.ArrayUtils;
@@ -174,7 +177,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
 
     private void createTestDisplay(UseTestDisplay annotation) {
         beforeCreateTestDisplay();
-        mDisplayContent = createNewDisplay(true /* supportIme */);
+        mDisplayContent = createNewDisplayWithImeSupport(DISPLAY_IME_POLICY_LOCAL);
 
         final boolean addAll = annotation.addAllCommonWindows();
         final @CommonTypes int[] requestedWindows = annotation.addWindows();
@@ -482,26 +485,26 @@ class WindowTestsBase extends SystemServiceTestsBase {
 
     /** Creates a {@link DisplayContent} that supports IME and adds it to the system. */
     DisplayContent createNewDisplay() {
-        return createNewDisplay(true /* supportIme */);
+        return createNewDisplayWithImeSupport(DISPLAY_IME_POLICY_LOCAL);
     }
 
     /** Creates a {@link DisplayContent} and adds it to the system. */
-    private DisplayContent createNewDisplay(boolean supportIme) {
-        return createNewDisplay(mDisplayInfo, supportIme);
+    private DisplayContent createNewDisplayWithImeSupport(@DisplayImePolicy int imePolicy) {
+        return createNewDisplay(mDisplayInfo, imePolicy);
     }
 
     /** Creates a {@link DisplayContent} that supports IME and adds it to the system. */
     DisplayContent createNewDisplay(DisplayInfo info) {
-        return createNewDisplay(info, true /* supportIme */);
+        return createNewDisplay(info, DISPLAY_IME_POLICY_LOCAL);
     }
 
     /** Creates a {@link DisplayContent} and adds it to the system. */
-    private DisplayContent createNewDisplay(DisplayInfo info, boolean supportIme) {
+    private DisplayContent createNewDisplay(DisplayInfo info, @DisplayImePolicy int imePolicy) {
         final DisplayContent display =
                 new TestDisplayContent.Builder(mAtm, info).build();
         final DisplayContent dc = display.mDisplayContent;
         // this display can show IME.
-        dc.mWmService.mDisplayWindowSettings.setShouldShowImeLocked(dc, supportIme);
+        dc.mWmService.mDisplayWindowSettings.setDisplayImePolicy(dc, imePolicy);
         return dc;
     }
 
@@ -516,7 +519,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
         DisplayInfo displayInfo = new DisplayInfo();
         displayInfo.copyFrom(mDisplayInfo);
         displayInfo.state = displayState;
-        return createNewDisplay(displayInfo, true /* supportIme */);
+        return createNewDisplay(displayInfo, DISPLAY_IME_POLICY_LOCAL);
     }
 
     /** Creates a {@link TestWindowState} */
@@ -532,7 +535,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
         displayInfo.copyFrom(mDisplayInfo);
         displayInfo.type = Display.TYPE_VIRTUAL;
         displayInfo.ownerUid = SYSTEM_UID;
-        return createNewDisplay(displayInfo, false /* supportIme */);
+        return createNewDisplay(displayInfo, DISPLAY_IME_POLICY_FALLBACK_DISPLAY);
     }
 
     IDisplayWindowInsetsController createDisplayWindowInsetsController() {

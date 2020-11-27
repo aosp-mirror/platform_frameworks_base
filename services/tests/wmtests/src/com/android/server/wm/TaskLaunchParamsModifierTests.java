@@ -35,6 +35,7 @@ import static android.view.InsetsState.ITYPE_STATUS_BAR;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
+import static com.android.server.wm.ActivityStarter.Request;
 import static com.android.server.wm.LaunchParamsController.LaunchParamsModifier.RESULT_CONTINUE;
 import static com.android.server.wm.LaunchParamsController.LaunchParamsModifier.RESULT_SKIP;
 
@@ -42,6 +43,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import android.app.ActivityOptions;
 import android.content.pm.ActivityInfo;
@@ -263,6 +267,180 @@ public class TaskLaunchParamsModifierTests extends WindowTestsBase {
 
         assertEquals(freeformDisplay.getDefaultTaskDisplayArea(),
                 mResult.mPreferredTaskDisplayArea);
+    }
+
+    @Test
+    public void testUsesDisplayAreaFromTopMostActivityInApplicationIfAvailable() {
+        final String processName = "processName";
+        final int uid = 124214;
+        final TestDisplayContent firstScreen = createNewDisplayContent(WINDOWING_MODE_FULLSCREEN);
+        final TestDisplayContent secondScreen = createNewDisplayContent(WINDOWING_MODE_FULLSCREEN);
+        final TaskDisplayArea expectedDisplayArea = secondScreen.getDefaultTaskDisplayArea();
+        final WindowProcessController controller = mock(WindowProcessController.class);
+
+        when(controller.getTopActivityDisplayArea()).thenReturn(expectedDisplayArea);
+
+        when(mActivity.getProcessName()).thenReturn(processName);
+        when(mActivity.getUid()).thenReturn(uid);
+        doReturn(controller)
+                .when(mSupervisor.mService)
+                .getProcessController(processName, uid);
+
+        assertEquals(RESULT_CONTINUE, mTarget.onCalculate(
+                null /* task */,
+                null /* layout */,
+                mActivity /* activity */,
+                null /* source */,
+                null /* options */,
+                -1 /* phase */,
+                mCurrent,
+                mResult,
+                null /* request */
+        ));
+
+        assertEquals(expectedDisplayArea, mResult.mPreferredTaskDisplayArea);
+    }
+
+    @Test
+    public void testUsesDisplayAreaFromLaunchingActivityIfApplicationLaunching() {
+        final String processName = "processName";
+        final int uid = 124214;
+        final TestDisplayContent firstScreen = createNewDisplayContent(WINDOWING_MODE_FULLSCREEN);
+        final TestDisplayContent secondScreen = createNewDisplayContent(WINDOWING_MODE_FULLSCREEN);
+        final TaskDisplayArea expectedTaskDisplayArea = secondScreen.getDefaultTaskDisplayArea();
+        final WindowProcessController controller = mock(WindowProcessController.class);
+
+        when(controller.getTopActivityDisplayArea()).thenReturn(expectedTaskDisplayArea);
+
+        when(mActivity.getProcessName()).thenReturn(processName);
+        when(mActivity.getUid()).thenReturn(uid);
+        doReturn(null)
+                .when(mSupervisor.mService)
+                .getProcessController(processName, uid);
+
+        doReturn(controller)
+                .when(mSupervisor.mService)
+                .getProcessController(mActivity.launchedFromPid, mActivity.launchedFromUid);
+
+        assertEquals(RESULT_CONTINUE, mTarget.onCalculate(
+                null /* task */,
+                null /* layout */,
+                mActivity /* activity */,
+                null /* source */,
+                null /* options */,
+                -1 /* phase */,
+                mCurrent,
+                mResult,
+                null /* request */
+        ));
+
+        assertEquals(expectedTaskDisplayArea, mResult.mPreferredTaskDisplayArea);
+    }
+
+    @Test
+    public void testDisplayAreaFromLaunchingActivityTakesPrecedence() {
+        final String processName = "processName";
+        final int uid = 124214;
+        final TestDisplayContent firstScreen = createNewDisplayContent(WINDOWING_MODE_FULLSCREEN);
+        final TestDisplayContent secondScreen = createNewDisplayContent(WINDOWING_MODE_FULLSCREEN);
+        final TaskDisplayArea firstTaskDisplayArea = firstScreen.getDefaultTaskDisplayArea();
+        final TaskDisplayArea expectedTaskDisplayArea = secondScreen.getDefaultTaskDisplayArea();
+        final WindowProcessController controllerForLaunching = mock(WindowProcessController.class);
+        final WindowProcessController controllerForApplication =
+                mock(WindowProcessController.class);
+
+        when(mActivity.getProcessName()).thenReturn(processName);
+        when(mActivity.getUid()).thenReturn(uid);
+
+        when(controllerForApplication.getTopActivityDisplayArea()).thenReturn(firstTaskDisplayArea);
+        when(controllerForLaunching.getTopActivityDisplayArea())
+                .thenReturn(expectedTaskDisplayArea);
+
+        doReturn(controllerForApplication)
+                .when(mSupervisor.mService)
+                .getProcessController(processName, uid);
+        doReturn(controllerForLaunching)
+                .when(mSupervisor.mService)
+                .getProcessController(mActivity.launchedFromPid, mActivity.launchedFromUid);
+
+        assertEquals(RESULT_CONTINUE, mTarget.onCalculate(
+                null /* task */,
+                null /* layout */,
+                mActivity /* activity */,
+                null /* source */,
+                null /* options */,
+                -1 /* phase */,
+                mCurrent,
+                mResult,
+                null /* request */
+        ));
+
+        assertEquals(expectedTaskDisplayArea, mResult.mPreferredTaskDisplayArea);
+    }
+
+    @Test
+    public void testUsesDisplayAreaOriginalProcessAsLastResort() {
+        final TestDisplayContent firstScreen = createNewDisplayContent(WINDOWING_MODE_FULLSCREEN);
+        final TestDisplayContent secondScreen = createNewDisplayContent(WINDOWING_MODE_FULLSCREEN);
+        final TaskDisplayArea expectedTaskDisplayArea = secondScreen.getDefaultTaskDisplayArea();
+        final Request request = new Request();
+        request.realCallingPid = 12412413;
+        request.realCallingUid = 235424;
+
+        final WindowProcessController controller = mock(WindowProcessController.class);
+
+        when(controller.getTopActivityDisplayArea()).thenReturn(expectedTaskDisplayArea);
+
+        doReturn(null)
+                .when(mSupervisor.mService)
+                .getProcessController(mActivity.processName, mActivity.info.applicationInfo.uid);
+
+        doReturn(null)
+                .when(mSupervisor.mService)
+                .getProcessController(mActivity.launchedFromPid, mActivity.launchedFromUid);
+
+        doReturn(controller)
+                .when(mSupervisor.mService)
+                .getProcessController(request.realCallingPid, request.realCallingUid);
+
+        assertEquals(RESULT_CONTINUE, mTarget.onCalculate(
+                null /* task */,
+                null /* layout */,
+                mActivity /* activity */,
+                null /* source */,
+                null /* options */,
+                -1 /* phase */,
+                mCurrent,
+                mResult,
+                request
+        ));
+
+        assertEquals(expectedTaskDisplayArea, mResult.mPreferredTaskDisplayArea);
+    }
+
+    @Test
+    public void testUsesDefaultDisplayAreaIfWindowProcessControllerIsNotPresent() {
+        doReturn(null)
+                .when(mSupervisor.mService)
+                .getProcessController(mActivity.processName, mActivity.info.applicationInfo.uid);
+
+        doReturn(null)
+                .when(mSupervisor.mService)
+                .getProcessController(mActivity.launchedFromPid, mActivity.launchedFromUid);
+
+        assertEquals(RESULT_CONTINUE, mTarget.onCalculate(
+                null /* task */,
+                null /* layout */,
+                mActivity /* activity */,
+                null /* source */,
+                null /* options */,
+                -1 /* phase */,
+                mCurrent,
+                mResult,
+                null /* request */
+        ));
+
+        assertEquals(DEFAULT_DISPLAY, mResult.mPreferredTaskDisplayArea.getDisplayId());
     }
 
     // =====================================

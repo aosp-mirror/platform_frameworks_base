@@ -3213,6 +3213,9 @@ class StorageManagerService extends IStorageManager.Stub
             try {
                 mVold.unlockUserKey(userId, serialNumber, encodeBytes(token),
                         encodeBytes(secret));
+            } catch (ServiceSpecificException sse) {
+                Slog.d(TAG, "Expected if the user has not unlocked the device.", sse);
+                return;
             } catch (Exception e) {
                 Slog.wtf(TAG, e);
                 return;

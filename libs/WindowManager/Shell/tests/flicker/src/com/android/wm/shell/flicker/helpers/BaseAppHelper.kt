@@ -17,7 +17,6 @@
 package com.android.wm.shell.flicker.helpers
 
 import android.app.Instrumentation
-import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager.FEATURE_LEANBACK
@@ -28,15 +27,15 @@ import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.UiObject2
 import androidx.test.uiautomator.Until
 import com.android.server.wm.flicker.helpers.StandardAppHelper
-import com.android.wm.shell.flicker.TEST_APP_PACKAGE_NAME
+import com.android.wm.shell.flicker.testapp.Components
 
 abstract class BaseAppHelper(
     instrumentation: Instrumentation,
     launcherName: String,
-    private val launcherActivityComponent: ComponentName
+    private val componentsInfo: Components.ComponentsInfo
 ) : StandardAppHelper(
         instrumentation,
-        TEST_APP_PACKAGE_NAME,
+        Components.PACKAGE_NAME,
         launcherName,
         LauncherStrategyFactory.getInstance(instrumentation).launcherStrategy
 ) {
@@ -53,7 +52,7 @@ abstract class BaseAppHelper(
         }
 
     val defaultWindowName: String
-        get() = launcherActivityComponent.className
+        get() = componentsInfo.activityName
 
     val label: String
         get() = context.packageManager.run {
@@ -63,8 +62,12 @@ abstract class BaseAppHelper(
     val ui: UiObject2?
         get() = uiDevice.findObject(appSelector)
 
-    fun launchViaIntent() {
-        context.startActivity(openAppIntent)
+    fun launchViaIntent(stringExtras: Map<String, String> = mapOf()) {
+        val intent = openAppIntent
+        stringExtras.forEach() {
+            intent.putExtra(it.key, it.value)
+        }
+        context.startActivity(intent)
 
         uiDevice.wait(Until.hasObject(appSelector), APP_LAUNCH_WAIT_TIME_MS)
     }
@@ -75,7 +78,7 @@ abstract class BaseAppHelper(
 
     override fun getOpenAppIntent(): Intent {
         val intent = Intent()
-        intent.component = launcherActivityComponent
+        intent.component = componentsInfo.componentName
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         return intent
     }

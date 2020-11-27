@@ -56,6 +56,8 @@ public:
 
         void postDrawVk() { mReference.postDrawVk(); }
 
+        void removeOverlays() { mReference.removeOverlays(); }
+
     private:
         friend class WebViewFunctor;
 
@@ -71,6 +73,10 @@ public:
     void drawVk(const VkFunctorDrawParams& params);
     void postDrawVk();
     void destroyContext();
+    void removeOverlays();
+
+    ASurfaceControl* getSurfaceControl();
+    void mergeTransaction(ASurfaceTransaction* transaction);
 
     sp<Handle> createHandle() {
         LOG_ALWAYS_FATAL_IF(mCreatedHandle);

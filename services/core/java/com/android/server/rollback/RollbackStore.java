@@ -69,18 +69,20 @@ class RollbackStore {
     // * XXX, YYY are the rollbackIds for the corresponding rollbacks.
     // * rollback.json contains all relevant metadata for the rollback.
     private final File mRollbackDataDir;
+    private final File mRollbackHistoryDir;
 
-    RollbackStore(File rollbackDataDir) {
+    RollbackStore(File rollbackDataDir, File rollbackHistoryDir) {
         mRollbackDataDir = rollbackDataDir;
+        mRollbackHistoryDir = rollbackHistoryDir;
     }
 
     /**
      * Reads the rollbacks from persistent storage.
      */
-    List<Rollback> loadRollbacks() {
+    private static List<Rollback> loadRollbacks(File rollbackDataDir) {
         List<Rollback> rollbacks = new ArrayList<>();
-        mRollbackDataDir.mkdirs();
-        for (File rollbackDir : mRollbackDataDir.listFiles()) {
+        rollbackDataDir.mkdirs();
+        for (File rollbackDir : rollbackDataDir.listFiles()) {
             if (rollbackDir.isDirectory()) {
                 try {
                     rollbacks.add(loadRollback(rollbackDir));
@@ -91,6 +93,14 @@ class RollbackStore {
             }
         }
         return rollbacks;
+    }
+
+    List<Rollback> loadRollbacks() {
+        return loadRollbacks(mRollbackDataDir);
+    }
+
+    List<Rollback> loadHistorialRollbacks() {
+        return loadRollbacks(mRollbackHistoryDir);
     }
 
     /**
@@ -258,15 +268,17 @@ class RollbackStore {
     /**
      * Saves the given rollback to persistent storage.
      */
-    static void saveRollback(Rollback rollback) {
+    private static void saveRollback(Rollback rollback, File backDir) {
         FileOutputStream fos = null;
-        AtomicFile file = new AtomicFile(new File(rollback.getBackupDir(), "rollback.json"));
+        AtomicFile file = new AtomicFile(new File(backDir, "rollback.json"));
         try {
+            backDir.mkdirs();
             JSONObject dataJson = new JSONObject();
             dataJson.put("info", rollbackInfoToJson(rollback.info));
             dataJson.put("timestamp", rollback.getTimestamp().toString());
             dataJson.put("stagedSessionId", rollback.getStagedSessionId());
             dataJson.put("state", rollback.getStateAsString());
+            dataJson.put("stateDescription", rollback.getStateDescription());
             dataJson.put("restoreUserDataInProgress", rollback.isRestoreUserDataInProgress());
             dataJson.put("userId", rollback.getUserId());
             dataJson.putOpt("installerPackageName", rollback.getInstallerPackageName());
@@ -284,6 +296,22 @@ class RollbackStore {
                 file.failWrite(fos);
             }
         }
+    }
+
+    static void saveRollback(Rollback rollback) {
+        saveRollback(rollback, rollback.getBackupDir());
+    }
+
+    /**
+     * Saves the rollback to $mRollbackHistoryDir/ROLLBACKID-HEX for debugging purpose.
+     */
+    void saveRollbackToHistory(Rollback rollback) {
+        // The same id might be allocated to different historical rollbacks.
+        // Let's add a suffix to avoid naming collision.
+        String suffix = Long.toHexString(rollback.getTimestamp().getEpochSecond());
+        String dirName = Integer.toString(rollback.info.getRollbackId());
+        File backupDir = new File(mRollbackHistoryDir, dirName + "-" + suffix);
+        saveRollback(rollback, backupDir);
     }
 
     /**
@@ -318,6 +346,7 @@ class RollbackStore {
                 Instant.parse(dataJson.getString("timestamp")),
                 dataJson.getInt("stagedSessionId"),
                 rollbackStateFromString(dataJson.getString("state")),
+                dataJson.optString("stateDescription"),
                 dataJson.getBoolean("restoreUserDataInProgress"),
                 dataJson.optInt("userId", UserHandle.SYSTEM.getIdentifier()),
                 dataJson.optString("installerPackageName", ""),

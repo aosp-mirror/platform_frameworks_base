@@ -391,16 +391,19 @@ public class ZygoteInit {
         SharedLibraryInfo hidlBase = new SharedLibraryInfo(
                 "/system/framework/android.hidl.base-V1.0-java.jar", null /*packageName*/,
                 null /*codePaths*/, null /*name*/, 0 /*version*/, SharedLibraryInfo.TYPE_BUILTIN,
-                null /*declaringPackage*/, null /*dependentPackages*/, null /*dependencies*/);
+                null /*declaringPackage*/, null /*dependentPackages*/, null /*dependencies*/,
+                false /*isNative*/);
         SharedLibraryInfo hidlManager = new SharedLibraryInfo(
                 "/system/framework/android.hidl.manager-V1.0-java.jar", null /*packageName*/,
                 null /*codePaths*/, null /*name*/, 0 /*version*/, SharedLibraryInfo.TYPE_BUILTIN,
-                null /*declaringPackage*/, null /*dependentPackages*/, null /*dependencies*/);
+                null /*declaringPackage*/, null /*dependentPackages*/, null /*dependencies*/,
+                false /*isNative*/);
 
         SharedLibraryInfo androidTestBase = new SharedLibraryInfo(
                 "/system/framework/android.test.base.jar", null /*packageName*/,
                 null /*codePaths*/, null /*name*/, 0 /*version*/, SharedLibraryInfo.TYPE_BUILTIN,
-                null /*declaringPackage*/, null /*dependentPackages*/, null /*dependencies*/);
+                null /*declaringPackage*/, null /*dependentPackages*/, null /*dependencies*/,
+                false /*isNative*/);
 
         ApplicationLoaders.getDefault().createAndCacheNonBootclasspathSystemClassLoaders(
                 new SharedLibraryInfo[]{
@@ -625,8 +628,11 @@ public class ZygoteInit {
 
     /**
      * Creates a PathClassLoader for the given class path that is associated with a shared
-     * namespace, i.e., this classloader can access platform-private native libraries. The
-     * classloader will use java.library.path as the native library path.
+     * namespace, i.e., this classloader can access platform-private native libraries.
+     *
+     * The classloader will add java.library.path to the native library path for the classloader
+     * namespace. Since it includes platform locations like /system/lib, this is only appropriate
+     * for platform code that don't need linker namespace isolation (as opposed to APEXes and apps).
      */
     static ClassLoader createPathClassLoader(String classPath, int targetSdkVersion) {
         String libraryPath = System.getProperty("java.library.path");

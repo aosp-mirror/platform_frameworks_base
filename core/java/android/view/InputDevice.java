@@ -29,6 +29,8 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.Vibrator;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
@@ -423,9 +425,13 @@ public final class InputDevice implements Parcelable {
         }
     };
 
-    // Called by native code.
+    /**
+     * Called by native code
+     * @hide
+     */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    private InputDevice(int id, int generation, int controllerNumber, String name, int vendorId,
+    @VisibleForTesting
+    public InputDevice(int id, int generation, int controllerNumber, String name, int vendorId,
             int productId, String descriptor, boolean isExternal, int sources, int keyboardType,
             KeyCharacterMap keyCharacterMap, boolean hasVibrator, boolean hasMicrophone,
             boolean hasButtonUnderPad) {

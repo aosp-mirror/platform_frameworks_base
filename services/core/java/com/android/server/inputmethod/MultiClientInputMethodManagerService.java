@@ -911,7 +911,8 @@ public final class MultiClientInputMethodManagerService {
                                     com.android.internal.R.string.input_method_binding_label)
                             .putExtra(Intent.EXTRA_CLIENT_INTENT, PendingIntent.getActivity(
                                     context, 0,
-                                    new Intent(Settings.ACTION_INPUT_METHOD_SETTINGS), 0));
+                                    new Intent(Settings.ACTION_INPUT_METHOD_SETTINGS),
+                                    PendingIntent.FLAG_MUTABLE));
 
             // Note: Instead of re-dispatching callback from the main thread to the worker thread
             // where OnWorkerThreadCallback is running, we pass the Handler object here so that
@@ -1338,7 +1339,7 @@ public final class MultiClientInputMethodManagerService {
                 switch (clientInfo.mState) {
                     case InputMethodClientState.WAITING_FOR_IME_SESSION:
                         try {
-                            clientInfo.mClient.setActive(true, false);
+                            clientInfo.mClient.setActive(true, false, false);
                         } catch (RemoteException e) {
                             // TODO(yukawa): Remove this client.
                             return;
@@ -1400,7 +1401,7 @@ public final class MultiClientInputMethodManagerService {
                     return;
                 }
                 try {
-                    clientInfo.mClient.setActive(active, false /* fullscreen */);
+                    clientInfo.mClient.setActive(active, false /* fullscreen */, false);
                 } catch (RemoteException e) {
                     return;
                 }
@@ -1815,6 +1816,16 @@ public final class MultiClientInputMethodManagerService {
         @Override
         public boolean isImeTraceEnabled() {
             return false;
+        }
+
+        @BinderThread
+        @Override
+        public void startImeTrace() {
+        }
+
+        @BinderThread
+        @Override
+        public void stopImeTrace() {
         }
     }
 }

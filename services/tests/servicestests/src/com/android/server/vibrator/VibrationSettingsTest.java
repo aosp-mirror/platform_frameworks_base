@@ -18,6 +18,7 @@ package com.android.server.vibrator;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.spy;
@@ -33,6 +34,7 @@ import android.media.AudioManager;
 import android.os.Handler;
 import android.os.UserHandle;
 import android.os.VibrationAttributes;
+import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.os.test.TestLooper;
 import android.platform.test.annotations.Presubmit;
@@ -269,6 +271,15 @@ public class VibrationSettingsTest {
                         VibrationAttributes.USAGE_PHYSICAL_EMULATION));
         assertEquals(Vibrator.VIBRATION_INTENSITY_LOW,
                 mVibrationSettings.getCurrentIntensity(VibrationAttributes.USAGE_RINGTONE));
+    }
+
+    @Test
+    public void getFallbackEffect_returnsEffectsFromSettings() {
+        assertNotNull(mVibrationSettings.getFallbackEffect(VibrationEffect.EFFECT_TICK));
+        assertNotNull(mVibrationSettings.getFallbackEffect(VibrationEffect.EFFECT_TEXTURE_TICK));
+        assertNotNull(mVibrationSettings.getFallbackEffect(VibrationEffect.EFFECT_CLICK));
+        assertNotNull(mVibrationSettings.getFallbackEffect(VibrationEffect.EFFECT_HEAVY_CLICK));
+        assertNotNull(mVibrationSettings.getFallbackEffect(VibrationEffect.EFFECT_DOUBLE_CLICK));
     }
 
     private void setUserSetting(String settingName, int value) {

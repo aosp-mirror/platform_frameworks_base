@@ -51,6 +51,8 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Rect;
 import android.hardware.display.DisplayManager;
+import android.hardware.display.VirtualDisplay;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.platform.test.annotations.Presubmit;
 import android.util.DisplayMetrics;
@@ -66,6 +68,7 @@ import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.content.ReferrerIntent;
 
+import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -94,6 +97,16 @@ public class ActivityThreadTest {
     private final ActivityTestRule<TestActivity> mActivityTestRule =
             new ActivityTestRule<>(TestActivity.class, true /* initialTouchMode */,
                     false /* launchActivity */);
+
+    private ArrayList<VirtualDisplay> mCreatedVirtualDisplays;
+
+    @After
+    public void tearDown() {
+        if (mCreatedVirtualDisplays != null) {
+            mCreatedVirtualDisplays.forEach(VirtualDisplay::release);
+            mCreatedVirtualDisplays = null;
+        }
+    }
 
     @Test
     public void testDoubleRelaunch() throws Exception {
@@ -410,7 +423,6 @@ public class ActivityThreadTest {
             Context appContext = activity.getApplication();
             Configuration originalAppConfig =
                     new Configuration(appContext.getResources().getConfiguration());
-            DisplayManager dm = appContext.getSystemService(DisplayManager.class);
 
             int virtualDisplayWidth;
             int virtualDisplayHeight;
@@ -421,8 +433,8 @@ public class ActivityThreadTest {
                 virtualDisplayWidth = 200;
                 virtualDisplayHeight = 100;
             }
-            Display virtualDisplay = dm.createVirtualDisplay("virtual-display",
-                    virtualDisplayWidth, virtualDisplayHeight, 200, null, 0).getDisplay();
+            final Display virtualDisplay = createVirtualDisplay(appContext,
+                    virtualDisplayWidth, virtualDisplayHeight);
             Context virtualDisplayContext = appContext.createDisplayContext(virtualDisplay);
             int originalVirtualDisplayOrientation = virtualDisplayContext.getResources()
                     .getConfiguration().orientation;
@@ -467,7 +479,6 @@ public class ActivityThreadTest {
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
             Configuration originalActivityConfig =
                     new Configuration(activity.getResources().getConfiguration());
-            DisplayManager dm = activity.getSystemService(DisplayManager.class);
 
             int virtualDisplayWidth;
             int virtualDisplayHeight;
@@ -478,8 +489,8 @@ public class ActivityThreadTest {
                 virtualDisplayWidth = 200;
                 virtualDisplayHeight = 100;
             }
-            Display virtualDisplay = dm.createVirtualDisplay("virtual-display",
-                    virtualDisplayWidth, virtualDisplayHeight, 200, null, 0).getDisplay();
+            final Display virtualDisplay = createVirtualDisplay(activity,
+                    virtualDisplayWidth, virtualDisplayHeight);
             Context virtualDisplayContext = activity.createDisplayContext(virtualDisplay);
             int originalVirtualDisplayOrientation = virtualDisplayContext.getResources()
                     .getConfiguration().orientation;
@@ -704,6 +715,17 @@ public class ActivityThreadTest {
         return config.seq;
     }
 
+    private Display createVirtualDisplay(Context context, int w, int h) {
+        final DisplayManager dm = context.getSystemService(DisplayManager.class);
+        final VirtualDisplay virtualDisplay = dm.createVirtualDisplay("virtual-display", w, h,
+                200 /* densityDpi */, null /* surface */, 0 /* flags */);
+        if (mCreatedVirtualDisplays == null) {
+            mCreatedVirtualDisplays = new ArrayList<>();
+        }
+        mCreatedVirtualDisplays.add(virtualDisplay);
+        return virtualDisplay.getDisplay();
+    }
+
     private static ActivityClientRecord getActivityClientRecord(Activity activity) {
         final ActivityThread thread = activity.getActivityThread();
         final IBinder token = activity.getActivityToken();
@@ -794,6 +816,14 @@ public class ActivityThreadTest {
          * latch reaches 0.
          */
         volatile CountDownLatch mConfigLatch;
+
+        @Override
+        protected void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+            getWindow().getDecorView().setKeepScreenOn(true);
+            setShowWhenLocked(true);
+            setTurnScreenOn(true);
+        }
 
         @Override
         public void onConfigurationChanged(Configuration config) {

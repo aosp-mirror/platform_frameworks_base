@@ -56,6 +56,7 @@ import android.view.PointerIcon;
 import android.view.VerifiedInputEvent;
 import android.view.WindowManager.LayoutParams;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.util.ArrayUtils;
 
@@ -266,6 +267,21 @@ public final class InputManager {
 
     private InputManager(IInputManager im) {
         mIm = im;
+    }
+
+    /**
+     * Gets an instance of the input manager.
+     *
+     * @return The input manager instance.
+     *
+     * @hide
+     */
+    @VisibleForTesting
+    public static InputManager resetInstance(IInputManager inputManagerService) {
+        synchronized (InputManager.class) {
+            sInstance = new InputManager(inputManagerService);
+            return sInstance;
+        }
     }
 
     /**
@@ -1428,7 +1444,7 @@ public final class InputManager {
 
         @Override
         public boolean hasAmplitudeControl() {
-            return false;
+            return true;
         }
 
         /**
