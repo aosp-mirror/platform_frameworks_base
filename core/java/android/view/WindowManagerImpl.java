@@ -201,20 +201,20 @@ public final class WindowManagerImpl implements WindowManager {
     }
 
     @Override
-    public void setShouldShowIme(int displayId, boolean shouldShow) {
+    public void setDisplayImePolicy(int displayId, @DisplayImePolicy int imePolicy) {
         try {
-            WindowManagerGlobal.getWindowManagerService().setShouldShowIme(displayId, shouldShow);
+            WindowManagerGlobal.getWindowManagerService().setDisplayImePolicy(displayId, imePolicy);
         } catch (RemoteException e) {
         }
     }
 
     @Override
-    public boolean shouldShowIme(int displayId) {
+    public @DisplayImePolicy int getDisplayImePolicy(int displayId) {
         try {
-            return WindowManagerGlobal.getWindowManagerService().shouldShowIme(displayId);
+            return WindowManagerGlobal.getWindowManagerService().getDisplayImePolicy(displayId);
         } catch (RemoteException e) {
         }
-        return false;
+        return DISPLAY_IME_POLICY_FALLBACK_DISPLAY;
     }
 
     @Override

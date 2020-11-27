@@ -357,9 +357,6 @@
          the notification is not swiped enough to dismiss it. -->
     <bool name="config_showNotificationGear">true</bool>
 
-    <!-- Whether or not a background should be drawn behind a notification. -->
-    <bool name="config_drawNotificationBackground">true</bool>
-
     <!-- Whether or the notifications can be shown and dismissed with a drag. -->
     <bool name="config_enableNotificationShadeDrag">true</bool>
 

@@ -323,7 +323,8 @@ public:
         };
         switch (mode) {
             case RenderMode::OpenGL_ES:
-                callbacks.gles.draw = [](int functor, void* client_data, const DrawGlInfo& params) {
+                callbacks.gles.draw = [](int functor, void* client_data, const DrawGlInfo& params,
+                                         const WebViewOverlayData& overlay_params) {
                     expectOnRenderThread("draw");
                     sMockFunctorCounts[functor].glesDraw++;
                 };

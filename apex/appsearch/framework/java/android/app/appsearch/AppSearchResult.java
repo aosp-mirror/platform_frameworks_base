@@ -19,9 +19,11 @@ package android.app.appsearch;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.appsearch.exceptions.AppSearchException;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Objects;
@@ -217,5 +219,26 @@ public final class AppSearchResult<ValueType> implements Parcelable {
     public static <ValueType> AppSearchResult<ValueType> newFailedResult(
             @ResultCode int resultCode, @Nullable String errorMessage) {
         return new AppSearchResult<>(resultCode, /*resultValue=*/ null, errorMessage);
+    }
+
+    /** @hide */
+    @NonNull
+    public static <ValueType> AppSearchResult<ValueType> throwableToFailedResult(
+            @NonNull Throwable t) {
+        if (t instanceof AppSearchException) {
+            return ((AppSearchException) t).toAppSearchResult();
+        }
+
+        @AppSearchResult.ResultCode int resultCode;
+        if (t instanceof IllegalStateException) {
+            resultCode = AppSearchResult.RESULT_INTERNAL_ERROR;
+        } else if (t instanceof IllegalArgumentException) {
+            resultCode = AppSearchResult.RESULT_INVALID_ARGUMENT;
+        } else if (t instanceof IOException) {
+            resultCode = AppSearchResult.RESULT_IO_ERROR;
+        } else {
+            resultCode = AppSearchResult.RESULT_UNKNOWN_ERROR;
+        }
+        return AppSearchResult.newFailedResult(resultCode, t.toString());
     }
 }

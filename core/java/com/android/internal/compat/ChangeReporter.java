@@ -223,7 +223,7 @@ public final class ChangeReporter {
                     FrameworkStatsLog.APP_COMPATIBILITY_CHANGE_REPORTED__SOURCE__SYSTEM_SERVER;
 
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef(flag = true, prefix = { "STATE_" }, value = {
+    @IntDef(prefix = { "STATE_" }, value = {
             STATE_UNKNOWN_STATE,
             STATE_ENABLED,
             STATE_DISABLED,
@@ -233,7 +233,7 @@ public final class ChangeReporter {
     }
 
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef(flag = true, prefix = { "SOURCE_" }, value = {
+    @IntDef(prefix = { "SOURCE_" }, value = {
             SOURCE_UNKNOWN_SOURCE,
             SOURCE_APP_PROCESS,
             SOURCE_SYSTEM_SERVER

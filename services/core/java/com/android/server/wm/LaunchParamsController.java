@@ -19,6 +19,7 @@ package com.android.server.wm;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.view.Display.INVALID_DISPLAY;
 
+import static com.android.server.wm.ActivityStarter.Request;
 import static com.android.server.wm.LaunchParamsController.LaunchParamsModifier.PHASE_BOUNDS;
 import static com.android.server.wm.LaunchParamsController.LaunchParamsModifier.RESULT_CONTINUE;
 import static com.android.server.wm.LaunchParamsController.LaunchParamsModifier.RESULT_DONE;
@@ -73,9 +74,10 @@ class LaunchParamsController {
      * @param source    The {@link ActivityRecord} from which activity was started from.
      * @param options   The {@link ActivityOptions} specified for the activity.
      * @param result    The resulting params.
+     * @param request   The optional request from the activity starter.
      */
-    void calculate(Task task, WindowLayout layout, ActivityRecord activity,
-                   ActivityRecord source, ActivityOptions options, int phase, LaunchParams result) {
+    void calculate(Task task, WindowLayout layout, ActivityRecord activity, ActivityRecord source,
+            ActivityOptions options, int phase, LaunchParams result, @Nullable Request request) {
         result.reset();
 
         if (task != null || activity != null) {
@@ -91,7 +93,7 @@ class LaunchParamsController {
             final LaunchParamsModifier modifier = mModifiers.get(i);
 
             switch(modifier.onCalculate(task, layout, activity, source, options, phase, mTmpCurrent,
-                    mTmpResult)) {
+                    mTmpResult, request)) {
                 case RESULT_SKIP:
                     // Do not apply any results when we are told to skip
                     continue;
@@ -128,7 +130,8 @@ class LaunchParamsController {
 
     boolean layoutTask(Task task, WindowLayout layout, ActivityRecord activity,
             ActivityRecord source, ActivityOptions options) {
-        calculate(task, layout, activity, source, options, PHASE_BOUNDS, mTmpParams);
+        calculate(task, layout, activity, source, options, PHASE_BOUNDS, mTmpParams,
+                null /* request */);
 
         // No changes, return.
         if (mTmpParams.isEmpty()) {
@@ -305,15 +308,17 @@ class LaunchParamsController {
          *                      launched should have this be non-null.
          * @param source        the Activity that launched a new task. Could be {@code null}.
          * @param options       {@link ActivityOptions} used to start the activity with.
-         * @param phase         the calculation phase, see {@link LaunchParamsModifier.Phase}
+         * @param phase         the calculation phase, see {@link Phase}
          * @param currentParams launching params after the process of last {@link
          *                      LaunchParamsModifier}.
          * @param outParams     the result params to be set.
+         * @param request       Optional data to give more context on the launch
          * @return see {@link LaunchParamsModifier.Result}
          */
         @Result
-        int onCalculate(Task task, WindowLayout layout, ActivityRecord activity,
+        int onCalculate(@Nullable Task task, WindowLayout layout, ActivityRecord activity,
                 ActivityRecord source, ActivityOptions options, @Phase int phase,
-                LaunchParams currentParams, LaunchParams outParams);
+                LaunchParams currentParams, LaunchParams outParams,
+                @Nullable Request request);
     }
 }

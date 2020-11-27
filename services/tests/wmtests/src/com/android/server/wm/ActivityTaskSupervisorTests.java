@@ -34,6 +34,7 @@ import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.timeout;
 
 import android.app.WaitResult;
 import android.content.pm.ActivityInfo;
@@ -44,6 +45,8 @@ import androidx.test.filters.MediumTest;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * Tests for the {@link ActivityTaskSupervisor} class.
@@ -189,5 +192,17 @@ public class ActivityTaskSupervisorTests extends WindowTestsBase {
                 callingUid, display.getDisplayId(), activityInfo);
 
         assertThat(allowedOnUntrusted).isFalse();
+    }
+
+    /**
+     * We need to launch home again after user unlocked for those displays that do not have
+     * encryption aware home app.
+     */
+    @Test
+    public void testStartHomeAfterUserUnlocked() {
+        mSupervisor.onUserUnlocked(0);
+        waitHandlerIdle(mAtm.mH);
+        verify(mRootWindowContainer, timeout(TimeUnit.SECONDS.toMillis(10)))
+                .startHomeOnEmptyDisplays("userUnlocked");
     }
 }

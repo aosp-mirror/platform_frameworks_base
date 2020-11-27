@@ -78,6 +78,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_VOICE_INTERACTION;
 import static android.view.WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 import static android.view.WindowManager.REMOVE_CONTENT_MODE_UNDEFINED;
+import static android.view.WindowManager.DISPLAY_IME_POLICY_FALLBACK_DISPLAY;
 import static android.view.WindowManager.TRANSIT_NONE;
 import static android.view.WindowManager.TRANSIT_RELAUNCH;
 import static android.view.WindowManagerGlobal.ADD_OKAY;
@@ -257,6 +258,7 @@ import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 import android.view.WindowManager.RemoveContentMode;
+import android.view.WindowManager.DisplayImePolicy;
 import android.view.WindowManagerGlobal;
 import android.view.WindowManagerPolicyConstants.PointerEventListener;
 import android.window.ClientWindowFrames;
@@ -7245,28 +7247,25 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     @Override
-    public boolean shouldShowIme(int displayId) {
-        if (!checkCallingPermission(INTERNAL_SYSTEM_WINDOW, "shouldShowIme()")) {
+    public @DisplayImePolicy int getDisplayImePolicy(int displayId) {
+        if (!checkCallingPermission(INTERNAL_SYSTEM_WINDOW, "getDisplayImePolicy()")) {
             throw new SecurityException("Requires INTERNAL_SYSTEM_WINDOW permission");
         }
-        boolean show;
         final DisplayContent dc = mRoot.getDisplayContent(displayId);
         if (dc == null) {
             ProtoLog.w(WM_ERROR,
-                    "Attempted to get IME flag of a display that does not exist: %d",
+                    "Attempted to get IME policy of a display that does not exist: %d",
                     displayId);
-            return false;
+            return DISPLAY_IME_POLICY_FALLBACK_DISPLAY;
         }
         synchronized (mGlobalLock) {
-            show = dc.canShowIme();
+            return dc.getImePolicy();
         }
-
-        return show;
     }
 
     @Override
-    public void setShouldShowIme(int displayId, boolean shouldShow) {
-        if (!checkCallingPermission(INTERNAL_SYSTEM_WINDOW, "setShouldShowIme()")) {
+    public void setDisplayImePolicy(int displayId, @DisplayImePolicy int imePolicy) {
+        if (!checkCallingPermission(INTERNAL_SYSTEM_WINDOW, "setDisplayImePolicy()")) {
             throw new SecurityException("Requires INTERNAL_SYSTEM_WINDOW permission");
         }
         final long origId = Binder.clearCallingIdentity();
@@ -7274,16 +7273,16 @@ public class WindowManagerService extends IWindowManager.Stub
             synchronized (mGlobalLock) {
                 final DisplayContent displayContent = getDisplayContentOrCreate(displayId, null);
                 if (displayContent == null) {
-                    ProtoLog.w(WM_ERROR, "Attempted to set IME flag to a display that does not "
-                            + "exist: %d", displayId);
+                    ProtoLog.w(WM_ERROR, "Attempted to set IME policy to a display"
+                            + " that does not exist: %d", displayId);
                     return;
                 }
                 if (!displayContent.isTrusted()) {
-                    throw new SecurityException("Attempted to set IME flag to an untrusted "
+                    throw new SecurityException("Attempted to set IME policy to an untrusted "
                             + "virtual display: " + displayId);
                 }
 
-                mDisplayWindowSettings.setShouldShowImeLocked(displayContent, shouldShow);
+                mDisplayWindowSettings.setDisplayImePolicy(displayContent, imePolicy);
 
                 displayContent.reconfigureDisplayLocked();
             }
@@ -7765,9 +7764,9 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         @Override
-        public boolean shouldShowIme(int displayId) {
+        public @DisplayImePolicy int getDisplayImePolicy(int displayId) {
             synchronized (mGlobalLock) {
-                return WindowManagerService.this.shouldShowIme(displayId);
+                return WindowManagerService.this.getDisplayImePolicy(displayId);
             }
         }
 

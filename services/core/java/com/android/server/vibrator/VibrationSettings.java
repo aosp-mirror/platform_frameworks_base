@@ -17,14 +17,17 @@
 package com.android.server.vibrator;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.UserHandle;
 import android.os.VibrationAttributes;
+import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.provider.Settings;
+import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -36,6 +39,8 @@ import java.util.List;
 // TODO(b/159207608): Make this package-private once vibrator services are moved to this package
 public final class VibrationSettings {
     private static final String TAG = "VibrationSettings";
+
+    private static final long[] DOUBLE_CLICK_EFFECT_FALLBACK_TIMINGS = {0, 30, 100, 30};
 
     /** Listener for changes on vibration settings. */
     public interface OnVibratorSettingsChanged {
@@ -51,6 +56,7 @@ public final class VibrationSettings {
 
     @GuardedBy("mLock")
     private final List<OnVibratorSettingsChanged> mListeners = new ArrayList<>();
+    private final SparseArray<VibrationEffect> mFallbackEffects;
 
     @GuardedBy("mLock")
     private boolean mVibrateInputDevices;
@@ -83,6 +89,23 @@ public final class VibrationSettings {
                 Settings.System.getUriFor(Settings.System.NOTIFICATION_VIBRATION_INTENSITY));
         registerSettingsObserver(
                 Settings.System.getUriFor(Settings.System.RING_VIBRATION_INTENSITY));
+
+        VibrationEffect clickEffect = createEffectFromResource(
+                com.android.internal.R.array.config_virtualKeyVibePattern);
+        VibrationEffect doubleClickEffect = VibrationEffect.createWaveform(
+                DOUBLE_CLICK_EFFECT_FALLBACK_TIMINGS, -1 /*repeatIndex*/);
+        VibrationEffect heavyClickEffect = createEffectFromResource(
+                com.android.internal.R.array.config_longPressVibePattern);
+        VibrationEffect tickEffect = createEffectFromResource(
+                com.android.internal.R.array.config_clockTickVibePattern);
+
+        mFallbackEffects = new SparseArray<>();
+        mFallbackEffects.put(VibrationEffect.EFFECT_CLICK, clickEffect);
+        mFallbackEffects.put(VibrationEffect.EFFECT_DOUBLE_CLICK, doubleClickEffect);
+        mFallbackEffects.put(VibrationEffect.EFFECT_TICK, tickEffect);
+        mFallbackEffects.put(VibrationEffect.EFFECT_HEAVY_CLICK, heavyClickEffect);
+        mFallbackEffects.put(VibrationEffect.EFFECT_TEXTURE_TICK,
+                VibrationEffect.get(VibrationEffect.EFFECT_TICK, false));
 
         // Update with current values from settings.
         updateSettings();
@@ -147,6 +170,17 @@ public final class VibrationSettings {
                 return Vibrator.VIBRATION_INTENSITY_MEDIUM;
             }
         }
+    }
+
+    /**
+     * Return a {@link VibrationEffect} that should be played if the device do not support given
+     * {@code effectId}.
+     *
+     * @param effectId one of VibrationEffect.EFFECT_*
+     * @return The effect to be played as a fallback
+     */
+    public VibrationEffect getFallbackEffect(int effectId) {
+        return mFallbackEffects.get(effectId);
     }
 
     /**
@@ -268,6 +302,33 @@ public final class VibrationSettings {
         mContext.getContentResolver().registerContentObserver(
                 settingUri, /* notifyForDescendants= */ true, mSettingObserver,
                 UserHandle.USER_ALL);
+    }
+
+    private VibrationEffect createEffectFromResource(int resId) {
+        long[] timings = getLongIntArray(mContext.getResources(), resId);
+        return createEffectFromTimings(timings);
+    }
+
+    private static VibrationEffect createEffectFromTimings(long[] timings) {
+        if (timings == null || timings.length == 0) {
+            return null;
+        } else if (timings.length == 1) {
+            return VibrationEffect.createOneShot(timings[0], VibrationEffect.DEFAULT_AMPLITUDE);
+        } else {
+            return VibrationEffect.createWaveform(timings, -1);
+        }
+    }
+
+    private static long[] getLongIntArray(Resources r, int resid) {
+        int[] ar = r.getIntArray(resid);
+        if (ar == null) {
+            return null;
+        }
+        long[] out = new long[ar.length];
+        for (int i = 0; i < ar.length; i++) {
+            out[i] = ar[i];
+        }
+        return out;
     }
 
     /** Implementation of {@link ContentObserver} to be registered to a setting {@link Uri}. */

@@ -15,6 +15,7 @@
 
 package com.android.server.inputmethod;
 
+import static android.inputmethodservice.InputMethodService.FINISH_INPUT_NO_FALLBACK_CONNECTION;
 import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_CRITICAL;
 import static android.os.IServiceManager.DUMP_FLAG_PROTO;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
@@ -45,6 +46,8 @@ import static android.server.inputmethod.InputMethodManagerServiceProto.SYSTEM_R
 import static android.util.imetracing.ImeTracing.IME_TRACING_FROM_IMMS;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
+import static android.view.WindowManager.DISPLAY_IME_POLICY_HIDE;
+import static android.view.WindowManager.DISPLAY_IME_POLICY_LOCAL;
 
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
@@ -118,7 +121,6 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.EventLog;
 import android.util.IndentingPrintWriter;
-import android.util.Log;
 import android.util.LruCache;
 import android.util.Pair;
 import android.util.PrintWriterPrinter;
@@ -131,6 +133,8 @@ import android.view.DisplayInfo;
 import android.view.IWindowManager;
 import android.view.InputChannel;
 import android.view.View;
+import android.view.WindowManager;
+import android.view.WindowManager.DisplayImePolicy;
 import android.view.WindowManager.LayoutParams;
 import android.view.WindowManager.LayoutParams.SoftInputModeFlags;
 import android.view.autofill.AutofillId;
@@ -152,6 +156,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.view.inputmethod.InputMethodSubtype;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.compat.IPlatformCompat;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.inputmethod.IInputContentUriToken;
 import com.android.internal.inputmethod.IInputMethodPrivilegedOperations;
@@ -531,6 +536,13 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     int mCurSeq;
 
     /**
+     * {@code true} if the Ime policy has been set to {@link WindowManager#DISPLAY_IME_POLICY_HIDE}.
+     *
+     * This prevents the IME from showing when it otherwise may have shown.
+     */
+    boolean mImeHiddenByDisplayPolicy;
+
+    /**
      * The client that is currently bound to an input method.
      */
     ClientState mCurClient;
@@ -708,6 +720,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
      * True if the device is currently interactive with user.  The value is true initially.
      */
     boolean mIsInteractive = true;
+
+    private IPlatformCompat mPlatformCompat;
 
     int mBackDisposition = InputMethodService.BACK_DISPOSITION_DEFAULT;
 
@@ -1658,7 +1672,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         mPackageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
         mInputManagerInternal = LocalServices.getService(InputManagerInternal.class);
         mDisplayManagerInternal = LocalServices.getService(DisplayManagerInternal.class);
-        mImeDisplayValidator = displayId -> mWindowManagerInternal.shouldShowIme(displayId);
+        mImeDisplayValidator = displayId -> mWindowManagerInternal.getDisplayImePolicy(displayId);
         mCaller = new HandlerCaller(context, null, new HandlerCaller.Callback() {
             @Override
             public void executeMessage(Message msg) {
@@ -1670,6 +1684,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         mUserManagerInternal = LocalServices.getService(UserManagerInternal.class);
         mHasFeature = context.getPackageManager().hasSystemFeature(
                 PackageManager.FEATURE_INPUT_METHODS);
+        mPlatformCompat = IPlatformCompat.Stub.asInterface(
+                ServiceManager.getService(Context.PLATFORM_COMPAT_SERVICE));
         mSlotIme = mContext.getString(com.android.internal.R.string.status_bar_ime);
         mIsLowRam = ActivityManager.isLowRamDeviceStatic();
 
@@ -2306,8 +2322,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 }
             }
 
-            executeOrSendMessage(mCurClient.client, mCaller.obtainMessageIIO(
-                    MSG_SET_ACTIVE, 0, 0, mCurClient));
+            scheduleSetActiveToClient(mCurClient, false /* active */, false /* fullscreen */,
+                    false /* reportToImeController */);
             executeOrSendMessage(mCurClient.client, mCaller.obtainMessageIIO(
                     MSG_UNBIND_CLIENT, mCurSeq, unbindClientReason, mCurClient.client));
             mCurClient.sessionRequested = false;
@@ -2438,6 +2454,12 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         final int displayIdToShowIme = computeImeDisplayIdForTarget(cs.selfReportedDisplayId,
                 mImeDisplayValidator);
 
+        if (displayIdToShowIme == INVALID_DISPLAY) {
+            mImeHiddenByDisplayPolicy = true;
+            return InputBindResult.NO_IME;
+        }
+        mImeHiddenByDisplayPolicy = false;
+
         if (mCurClient != cs) {
             // Was the keyguard locked when switching over to the new client?
             mCurClientInKeyguard = isKeyguardLocked();
@@ -2449,7 +2471,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
             // If the screen is on, inform the new client it is active
             if (mIsInteractive) {
-                executeOrSendMessage(cs.client, mCaller.obtainMessageIO(MSG_SET_ACTIVE, 1, cs));
+                scheduleSetActiveToClient(cs, true /* active */, false /* fullscreen */,
+                        false /* reportToImeController */);
             }
         }
 
@@ -2549,7 +2572,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     @FunctionalInterface
     interface ImeDisplayValidator {
-        boolean displayCanShowIme(int displayId);
+        @DisplayImePolicy int getDisplayImePolicy(int displayId);
     }
 
     /**
@@ -2558,7 +2581,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
      * @param displayId the ID of the display where the IME client target is.
      * @param checker instance of {@link ImeDisplayValidator} which is used for
      *                checking display config to adjust the final target display.
-     * @return The ID of the display where the IME should be shown.
+     * @return The ID of the display where the IME should be shown or
+     *         {@link android.view.Display#INVALID_DISPLAY} if the display has an ImePolicy of
+     *         {@link WindowManager#DISPLAY_IME_POLICY_HIDE}.
      */
     static int computeImeDisplayIdForTarget(int displayId, @NonNull ImeDisplayValidator checker) {
         if (displayId == DEFAULT_DISPLAY || displayId == INVALID_DISPLAY) {
@@ -2567,7 +2592,14 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
         // Show IME window on fallback display when the display doesn't support system decorations
         // or the display is virtual and isn't owned by system for security concern.
-        return checker.displayCanShowIme(displayId) ? displayId : FALLBACK_DISPLAY_ID;
+        final int result = checker.getDisplayImePolicy(displayId);
+        if (result == DISPLAY_IME_POLICY_LOCAL) {
+            return displayId;
+        } else if (result == DISPLAY_IME_POLICY_HIDE) {
+            return INVALID_DISPLAY;
+        } else {
+            return FALLBACK_DISPLAY_ID;
+        }
     }
 
     @AnyThread
@@ -4077,6 +4109,44 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         return ImeTracing.getInstance().isEnabled();
     }
 
+    @BinderThread
+    @Override
+    public void startImeTrace() {
+        ImeTracing.getInstance().startTrace(null /* printwriter */);
+        ArrayMap<IBinder, ClientState> clients;
+        synchronized (mMethodMap) {
+            clients = new ArrayMap<>(mClients);
+        }
+        for (ClientState state : clients.values()) {
+            if (state != null) {
+                try {
+                    state.client.setImeTraceEnabled(true /* enabled */);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Error while trying to enable ime trace on client window", e);
+                }
+            }
+        }
+    }
+
+    @BinderThread
+    @Override
+    public void stopImeTrace() {
+        ImeTracing.getInstance().stopTrace(null /* printwriter */);
+        ArrayMap<IBinder, ClientState> clients;
+        synchronized (mMethodMap) {
+            clients = new ArrayMap<>(mClients);
+        }
+        for (ClientState state : clients.values()) {
+            if (state != null) {
+                try {
+                    state.client.setImeTraceEnabled(false /* enabled */);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Error while trying to disable ime trace on client window", e);
+                }
+            }
+        }
+    }
+
     @GuardedBy("mMethodMap")
     private void dumpDebug(ProtoOutputStream proto, long fieldId) {
         synchronized (mMethodMap) {
@@ -4452,15 +4522,20 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 args.recycle();
                 return true;
             }
-            case MSG_SET_ACTIVE:
+            case MSG_SET_ACTIVE: {
+                args = (SomeArgs) msg.obj;
+                final ClientState clientState = (ClientState) args.arg1;
                 try {
-                    ((ClientState)msg.obj).client.setActive(msg.arg1 != 0, msg.arg2 != 0);
+                    clientState.client.setActive(args.argi1 != 0 /* active */,
+                            args.argi2 != 0 /* fullScreen */,
+                            args.argi3 != 0 /* reportToImeController */);
                 } catch (RemoteException e) {
                     Slog.w(TAG, "Got RemoteException sending setActive(false) notification to pid "
-                            + ((ClientState)msg.obj).pid + " uid "
-                            + ((ClientState)msg.obj).uid);
+                            + clientState.pid + " uid " + clientState.uid);
                 }
+                args.recycle();
                 return true;
+            }
             case MSG_SET_INTERACTIVE:
                 handleSetInteractive(msg.arg1 != 0);
                 return true;
@@ -4546,11 +4621,22 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
             // Inform the current client of the change in active status
             if (mCurClient != null && mCurClient.client != null) {
-                executeOrSendMessage(mCurClient.client, mCaller.obtainMessageIIO(
-                        MSG_SET_ACTIVE, mIsInteractive ? 1 : 0, mInFullscreenMode ? 1 : 0,
-                        mCurClient));
+                boolean reportToImeController = false;
+                try {
+                    reportToImeController = mPlatformCompat.isChangeEnabledByUid(
+                            FINISH_INPUT_NO_FALLBACK_CONNECTION, mCurMethodUid);
+                } catch (RemoteException e) {
+                }
+                scheduleSetActiveToClient(mCurClient, mIsInteractive, mInFullscreenMode,
+                        reportToImeController);
             }
         }
+    }
+
+    private void scheduleSetActiveToClient(ClientState state, boolean active, boolean fullscreen,
+            boolean reportToImeController) {
+        executeOrSendMessage(state.client, mCaller.obtainMessageIIIIO(MSG_SET_ACTIVE,
+                active ? 1 : 0, fullscreen ? 1 : 0, reportToImeController ? 1 : 0, 0, state));
     }
 
     private boolean chooseNewDefaultIMELocked() {
@@ -5181,6 +5267,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             p.println("  mInFullscreenMode=" + mInFullscreenMode);
             p.println("  mSystemReady=" + mSystemReady + " mInteractive=" + mIsInteractive);
             p.println("  mSettingsObserver=" + mSettingsObserver);
+            p.println("  mImeHiddenByDisplayPolicy=" + mImeHiddenByDisplayPolicy);
             p.println("  mSwitchingController:");
             mSwitchingController.dump(p);
             p.println("  mSettings:");
@@ -5722,9 +5809,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 try {
                     state.client.setImeTraceEnabled(isImeTraceEnabled);
                 } catch (RemoteException e) {
-                    Log.e(TAG,
-                            "Error while trying to enable/disable ime "
-                            + "trace on client window", e);
+                    Slog.e(TAG, "Error while trying to enable/disable ime trace on client window",
+                            e);
                 }
             }
         }

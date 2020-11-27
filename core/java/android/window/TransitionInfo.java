@@ -19,6 +19,7 @@ package android.window;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -66,6 +67,9 @@ public final class TransitionInfo implements Parcelable {
     private final @WindowManager.TransitionOldType int mType;
     private final ArrayList<Change> mChanges = new ArrayList<>();
 
+    private SurfaceControl mRootLeash;
+    private final Point mRootOffset = new Point();
+
     /** @hide */
     public TransitionInfo(@WindowManager.TransitionOldType int type) {
         mType = type;
@@ -74,6 +78,9 @@ public final class TransitionInfo implements Parcelable {
     private TransitionInfo(Parcel in) {
         mType = in.readInt();
         in.readList(mChanges, null /* classLoader */);
+        mRootLeash = new SurfaceControl();
+        mRootLeash.readFromParcel(in);
+        mRootOffset.readFromParcel(in);
     }
 
     @Override
@@ -81,6 +88,8 @@ public final class TransitionInfo implements Parcelable {
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeInt(mType);
         dest.writeList(mChanges);
+        mRootLeash.writeToParcel(dest, flags);
+        mRootOffset.writeToParcel(dest, flags);
     }
 
     @NonNull
@@ -103,8 +112,33 @@ public final class TransitionInfo implements Parcelable {
         return 0;
     }
 
+    /** @see #getRootLeash() */
+    public void setRootLeash(@NonNull SurfaceControl leash, int offsetLeft, int offsetTop) {
+        mRootLeash = leash;
+        mRootOffset.set(offsetLeft, offsetTop);
+    }
+
     public int getType() {
         return mType;
+    }
+
+    /**
+     * @return a surfacecontrol that can serve as a parent surfacecontrol for all the changing
+     * participants to animate within. This will generally be placed at the highest-z-order
+     * shared ancestor of all participants.
+     */
+    @NonNull
+    public SurfaceControl getRootLeash() {
+        if (mRootLeash == null) {
+            throw new IllegalStateException("Trying to get a leash which wasn't set");
+        }
+        return mRootLeash;
+    }
+
+    /** @return the offset (relative to the screen) of the root leash. */
+    @NonNull
+    public Point getRootOffset() {
+        return mRootOffset;
     }
 
     @NonNull
@@ -136,7 +170,7 @@ public final class TransitionInfo implements Parcelable {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("{t=" + mType + " c=[");
+        sb.append("{t=" + mType + " ro=" + mRootOffset + " c=[");
         for (int i = 0; i < mChanges.size(); ++i) {
             if (i > 0) {
                 sb.append(',');
@@ -167,8 +201,9 @@ public final class TransitionInfo implements Parcelable {
         private WindowContainerToken mParent;
         private final SurfaceControl mLeash;
         private int mMode = TRANSIT_NONE;
-        private final Rect mStartBounds = new Rect();
-        private final Rect mEndBounds = new Rect();
+        private final Rect mStartAbsBounds = new Rect();
+        private final Rect mEndAbsBounds = new Rect();
+        private final Point mEndRelOffset = new Point();
 
         public Change(@Nullable WindowContainerToken container, @NonNull SurfaceControl leash) {
             mContainer = container;
@@ -181,8 +216,9 @@ public final class TransitionInfo implements Parcelable {
             mLeash = new SurfaceControl();
             mLeash.readFromParcel(in);
             mMode = in.readInt();
-            mStartBounds.readFromParcel(in);
-            mEndBounds.readFromParcel(in);
+            mStartAbsBounds.readFromParcel(in);
+            mEndAbsBounds.readFromParcel(in);
+            mEndRelOffset.readFromParcel(in);
         }
 
         /** Sets the parent of this change's container. The parent must be a participant or null. */
@@ -195,14 +231,19 @@ public final class TransitionInfo implements Parcelable {
             mMode = mode;
         }
 
-        /** Sets the bounds this container occupied before the change */
-        public void setStartBounds(@Nullable Rect rect) {
-            mStartBounds.set(rect);
+        /** Sets the bounds this container occupied before the change in screen space */
+        public void setStartAbsBounds(@Nullable Rect rect) {
+            mStartAbsBounds.set(rect);
         }
 
-        /** Sets the bounds this container will occupy after the change */
-        public void setEndBounds(@Nullable Rect rect) {
-            mEndBounds.set(rect);
+        /** Sets the bounds this container will occupy after the change in screen space */
+        public void setEndAbsBounds(@Nullable Rect rect) {
+            mEndAbsBounds.set(rect);
+        }
+
+        /** Sets the offset of this container from its parent surface */
+        public void setEndRelOffset(int left, int top) {
+            mEndRelOffset.set(left, top);
         }
 
         /** @return the container that is changing. May be null if non-remotable (eg. activity) */
@@ -230,8 +271,8 @@ public final class TransitionInfo implements Parcelable {
          * is coming into existence.
          */
         @NonNull
-        public Rect getStartBounds() {
-            return mStartBounds;
+        public Rect getStartAbsBounds() {
+            return mStartAbsBounds;
         }
 
         /**
@@ -239,8 +280,16 @@ public final class TransitionInfo implements Parcelable {
          * is disappearing.
          */
         @NonNull
-        public Rect getEndBounds() {
-            return mEndBounds;
+        public Rect getEndAbsBounds() {
+            return mEndAbsBounds;
+        }
+
+        /**
+         * @return the offset of the container's surface from its parent surface after the change.
+         */
+        @NonNull
+        public Point getEndRelOffset() {
+            return mEndRelOffset;
         }
 
         /** @return the leash or surface to animate for this container */
@@ -256,8 +305,9 @@ public final class TransitionInfo implements Parcelable {
             dest.writeTypedObject(mParent, flags);
             mLeash.writeToParcel(dest, flags);
             dest.writeInt(mMode);
-            mStartBounds.writeToParcel(dest, flags);
-            mEndBounds.writeToParcel(dest, flags);
+            mStartAbsBounds.writeToParcel(dest, flags);
+            mEndAbsBounds.writeToParcel(dest, flags);
+            mEndRelOffset.writeToParcel(dest, flags);
         }
 
         @NonNull
@@ -283,8 +333,8 @@ public final class TransitionInfo implements Parcelable {
         @Override
         public String toString() {
             return "{" + mContainer + "(" + mParent + ") leash=" + mLeash
-                    + " m=" + modeToString(mMode) + " sb=" + mStartBounds
-                    + " eb=" + mEndBounds + "}";
+                    + " m=" + modeToString(mMode) + " sb=" + mStartAbsBounds
+                    + " eb=" + mEndAbsBounds + " eo=" + mEndRelOffset + "}";
         }
     }
 }

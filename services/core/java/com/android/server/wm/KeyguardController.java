@@ -206,9 +206,8 @@ class KeyguardController {
                     mAodShowing ? 1 : 0,
                     1 /* keyguardGoingAway */,
                     "keyguardGoingAway");
-            mRootWindowContainer.getDefaultDisplay()
-                    .prepareAppTransition(TRANSIT_KEYGUARD_GOING_AWAY,
-                            convertTransitFlags(flags));
+            mRootWindowContainer.getDefaultDisplay().requestTransitionAndLegacyPrepare(
+                    TRANSIT_KEYGUARD_GOING_AWAY, convertTransitFlags(flags));
             updateKeyguardSleepToken();
 
             // Some stack visibility might change (e.g. docked stack)

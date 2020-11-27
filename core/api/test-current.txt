@@ -832,6 +832,14 @@ package android.hardware.soundtrigger {
 
 }
 
+package android.inputmethodservice {
+
+  public class InputMethodService extends android.inputmethodservice.AbstractInputMethodService {
+    field public static final long FINISH_INPUT_NO_FALLBACK_CONNECTION = 156215187L; // 0x94fa793L
+  }
+
+}
+
 package android.location {
 
   public final class GnssClock implements android.os.Parcelable {
@@ -2082,12 +2090,15 @@ package android.view {
   }
 
   public interface WindowManager extends android.view.ViewManager {
+    method public default int getDisplayImePolicy(int);
     method public default void holdLock(android.os.IBinder, int);
-    method public default void setShouldShowIme(int, boolean);
+    method public default void setDisplayImePolicy(int, int);
     method public default void setShouldShowSystemDecors(int, boolean);
     method public default void setShouldShowWithInsecureKeyguard(int, boolean);
-    method public default boolean shouldShowIme(int);
     method public default boolean shouldShowSystemDecors(int);
+    field public static final int DISPLAY_IME_POLICY_FALLBACK_DISPLAY = 1; // 0x1
+    field public static final int DISPLAY_IME_POLICY_HIDE = 2; // 0x2
+    field public static final int DISPLAY_IME_POLICY_LOCAL = 0; // 0x0
   }
 
   public static class WindowManager.LayoutParams extends android.view.ViewGroup.LayoutParams implements android.os.Parcelable {

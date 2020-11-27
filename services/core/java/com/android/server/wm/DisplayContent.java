@@ -73,6 +73,8 @@ import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_ERROR;
 import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
+import static android.view.WindowManager.DISPLAY_IME_POLICY_LOCAL;
+import static android.view.WindowManager.DISPLAY_IME_POLICY_FALLBACK_DISPLAY;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import static android.window.DisplayAreaOrganizer.FEATURE_ROOT;
@@ -91,7 +93,7 @@ import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_C
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_LAYOUT;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
 import static com.android.server.wm.DisplayContentProto.APP_TRANSITION;
-import static com.android.server.wm.DisplayContentProto.CAN_SHOW_IME;
+import static com.android.server.wm.DisplayContentProto.IME_POLICY;
 import static com.android.server.wm.DisplayContentProto.CLOSING_APPS;
 import static com.android.server.wm.DisplayContentProto.CURRENT_FOCUS;
 import static com.android.server.wm.DisplayContentProto.DISPLAY_FRAMES;
@@ -203,6 +205,7 @@ import android.view.SurfaceControl.Transaction;
 import android.view.SurfaceSession;
 import android.view.WindowInsets;
 import android.view.WindowManager;
+import android.view.WindowManager.DisplayImePolicy;
 import android.view.WindowManagerPolicyConstants.PointerEventListener;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -2930,7 +2933,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             mInsetsStateController.getImeSourceProvider().dumpDebug(proto,
                     IME_INSETS_SOURCE_PROVIDER, logLevel);
         }
-        proto.write(CAN_SHOW_IME, canShowIme());
+        proto.write(IME_POLICY, getImePolicy());
         proto.end(token);
     }
 
@@ -3561,7 +3564,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      * @return {@link InsetsControlTarget} that can host IME.
      */
     InsetsControlTarget getImeHostOrFallback(WindowState target) {
-        if (target != null && target.getDisplayContent().canShowIme()) {
+        if (target != null
+                && target.getDisplayContent().getImePolicy() == DISPLAY_IME_POLICY_LOCAL) {
             return target;
         }
         return getImeFallback();
@@ -3575,12 +3579,17 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         return statusBar != null ? statusBar : defaultDc.mRemoteInsetsControlTarget;
     }
 
-    boolean canShowIme() {
+    @DisplayImePolicy int getImePolicy() {
         if (!isTrusted()) {
-            return false;
+            return DISPLAY_IME_POLICY_FALLBACK_DISPLAY;
         }
-        return mWmService.mDisplayWindowSettings.shouldShowImeLocked(this)
-                || forceDesktopMode();
+        final int imePolicy = mWmService.mDisplayWindowSettings.getImePolicyLocked(this);
+        if (imePolicy == DISPLAY_IME_POLICY_FALLBACK_DISPLAY && forceDesktopMode()) {
+            // If the display has not explicitly requested for the IME to be hidden then it shall
+            // show the IME locally.
+            return DISPLAY_IME_POLICY_LOCAL;
+        }
+        return imePolicy;
     }
 
     boolean forceDesktopMode() {
