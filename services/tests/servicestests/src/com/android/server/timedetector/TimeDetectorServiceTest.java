@@ -242,7 +242,7 @@ public class TimeDetectorServiceTest {
         }
 
         @Override
-        public void handleAutoTimeDetectionChanged() {
+        public void handleAutoTimeConfigChanged() {
             mHandleAutoTimeDetectionChangedCalled = true;
         }
 
