@@ -14,13 +14,16 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.flicker.pip
+package com.android.wm.shell.flicker.helpers
 
-import com.android.wm.shell.flicker.helpers.PipAppHelper
+import android.app.Instrumentation
+import com.android.wm.shell.flicker.TEST_APP_FIXED_ACTIVITY_LABEL
+import com.android.wm.shell.flicker.testapp.Components
 
-abstract class PipTestBase(
-    rotationName: String,
-    rotation: Int
-) : AppTestBase(rotationName, rotation) {
-    protected val testApp = PipAppHelper(instrumentation)
-}
+class FixedAppHelper(
+    instrumentation: Instrumentation
+) : BaseAppHelper(
+        instrumentation,
+        TEST_APP_FIXED_ACTIVITY_LABEL,
+        Components.FixedActivity()
+)

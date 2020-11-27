@@ -21,8 +21,8 @@ import androidx.test.uiautomator.By
 import androidx.test.uiautomator.Until
 import com.android.server.wm.flicker.helpers.FIND_TIMEOUT
 import com.android.server.wm.flicker.helpers.waitForIME
-import com.android.wm.shell.flicker.TEST_APP_IME_ACTIVITY_COMPONENT_NAME
 import com.android.wm.shell.flicker.TEST_APP_IME_ACTIVITY_LABEL
+import com.android.wm.shell.flicker.testapp.Components
 import org.junit.Assert
 
 open class ImeAppHelper(
@@ -30,7 +30,7 @@ open class ImeAppHelper(
 ) : BaseAppHelper(
         instrumentation,
         TEST_APP_IME_ACTIVITY_LABEL,
-        TEST_APP_IME_ACTIVITY_COMPONENT_NAME
+        Components.ImeActivity()
 ) {
     fun openIME() {
         val editText = uiDevice.wait(

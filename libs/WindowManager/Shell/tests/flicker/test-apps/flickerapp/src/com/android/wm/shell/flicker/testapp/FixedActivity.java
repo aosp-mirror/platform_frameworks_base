@@ -14,13 +14,22 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.flicker.pip
+package com.android.wm.shell.flicker.testapp;
 
-import com.android.wm.shell.flicker.helpers.PipAppHelper
+import static com.android.wm.shell.flicker.testapp.Components.FixedActivity.EXTRA_FIXED_ORIENTATION;
 
-abstract class PipTestBase(
-    rotationName: String,
-    rotation: Int
-) : AppTestBase(rotationName, rotation) {
-    protected val testApp = PipAppHelper(instrumentation)
+import android.os.Bundle;
+
+public class FixedActivity extends SimpleActivity {
+
+    @Override
+    public void onCreate(Bundle icicle) {
+        super.onCreate(icicle);
+
+        // Set the fixed orientation if requested
+        if (getIntent().hasExtra(EXTRA_FIXED_ORIENTATION)) {
+            final int ori = Integer.parseInt(getIntent().getStringExtra(EXTRA_FIXED_ORIENTATION));
+            setRequestedOrientation(ori);
+        }
+    }
 }

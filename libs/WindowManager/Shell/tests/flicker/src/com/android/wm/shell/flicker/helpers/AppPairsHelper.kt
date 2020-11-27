@@ -17,19 +17,19 @@
 package com.android.wm.shell.flicker.helpers
 
 import android.app.Instrumentation
-import android.content.ComponentName
 import android.graphics.Region
 import android.system.helpers.ActivityHelper
 import com.android.server.wm.flicker.helpers.WindowUtils
+import com.android.wm.shell.flicker.testapp.Components
 
 class AppPairsHelper(
     instrumentation: Instrumentation,
     activityLabel: String,
-    componentName: ComponentName
+    componentsInfo: Components.ComponentsInfo
 ) : BaseAppHelper(
     instrumentation,
     activityLabel,
-    componentName
+    componentsInfo
 ) {
     val activityHelper = ActivityHelper.getInstance()
 

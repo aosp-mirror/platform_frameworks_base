@@ -16,28 +16,21 @@
 
 package com.android.wm.shell.flicker.pip
 
-import android.content.ComponentName
-import android.graphics.Region
-import android.util.Log
 import android.view.Surface
-import android.view.WindowManager
 import androidx.test.filters.RequiresDevice
-import com.android.compatibility.common.util.SystemUtil
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.dsl.runWithFlicker
+import com.android.server.wm.flicker.helpers.WindowUtils
 import com.android.server.wm.flicker.helpers.closePipWindow
 import com.android.server.wm.flicker.helpers.hasPipWindow
 import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
-import com.android.wm.shell.flicker.TEST_APP_IME_ACTIVITY_COMPONENT_NAME
 import com.android.wm.shell.flicker.IME_WINDOW_NAME
-import com.android.wm.shell.flicker.TEST_APP_PIP_ACTIVITY_WINDOW_NAME
 import com.android.wm.shell.flicker.helpers.ImeAppHelper
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
-import java.io.IOException
 
 /**
  * Test Pip launch.
@@ -50,9 +43,6 @@ class PipKeyboardTest(
     rotationName: String,
     rotation: Int
 ) : PipTestBase(rotationName, rotation) {
-    private val windowManager: WindowManager =
-            instrumentation.context.getSystemService(WindowManager::class.java)
-
     private val keyboardApp = ImeAppHelper(instrumentation)
 
     private val keyboardScenario: FlickerBuilder
@@ -71,7 +61,7 @@ class PipKeyboardTest(
                     // open an app with an input field and a keyboard
                     // UiAutomator doesn't support to launch the multiple Activities in a task.
                     // So use launchActivity() for the Keyboard Activity.
-                    launchActivity(TEST_APP_IME_ACTIVITY_COMPONENT_NAME)
+                    keyboardApp.launchViaIntent()
                 }
             }
             teardown {
@@ -103,10 +93,8 @@ class PipKeyboardTest(
             assertions {
                 windowManagerTrace {
                     all("PiP window must remain inside visible bounds") {
-                        coversAtMostRegion(
-                                partialWindowTitle = "PipActivity",
-                                region = Region(windowManager.maximumWindowMetrics.bounds)
-                        )
+                        val displayBounds = WindowUtils.getDisplayBounds(rotation)
+                        coversAtMostRegion(testApp.defaultWindowName, displayBounds)
                     }
                 }
             }
@@ -132,71 +120,10 @@ class PipKeyboardTest(
             assertions {
                 windowManagerTrace {
                     end {
-                        isAboveWindow(IME_WINDOW_NAME, TEST_APP_PIP_ACTIVITY_WINDOW_NAME)
+                        isAboveWindow(IME_WINDOW_NAME, testApp.defaultWindowName)
                     }
                 }
             }
-        }
-    }
-
-    private fun launchActivity(
-        activity: ComponentName? = null,
-        action: String? = null,
-        flags: Set<Int> = setOf(),
-        boolExtras: Map<String, Boolean> = mapOf(),
-        intExtras: Map<String, Int> = mapOf(),
-        stringExtras: Map<String, String> = mapOf()
-    ) {
-        require(activity != null || !action.isNullOrBlank()) {
-            "Cannot launch an activity with neither activity name nor action!"
-        }
-        val command = composeCommand(
-                "start", activity, action, flags, boolExtras, intExtras, stringExtras)
-        executeShellCommand(command)
-    }
-
-    private fun composeCommand(
-        command: String,
-        activity: ComponentName?,
-        action: String?,
-        flags: Set<Int>,
-        boolExtras: Map<String, Boolean>,
-        intExtras: Map<String, Int>,
-        stringExtras: Map<String, String>
-    ): String = buildString {
-        append("am ")
-        append(command)
-        activity?.let {
-            append(" -n ")
-            append(it.flattenToShortString())
-        }
-        action?.let {
-            append(" -a ")
-            append(it)
-        }
-        flags.forEach {
-            append(" -f ")
-            append(it)
-        }
-        boolExtras.forEach {
-            append(it.withFlag("ez"))
-        }
-        intExtras.forEach {
-            append(it.withFlag("ei"))
-        }
-        stringExtras.forEach {
-            append(it.withFlag("es"))
-        }
-    }
-
-    private fun Map.Entry<String, *>.withFlag(flag: String): String = " --$flag $key $value"
-
-    private fun executeShellCommand(cmd: String): String {
-        try {
-            return SystemUtil.runShellCommand(instrumentation, cmd)
-        } catch (e: IOException) {
-            Log.e("FlickerTests", "Error running shell command: $cmd")
-            throw e
         }
     }
 
