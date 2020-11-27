@@ -331,6 +331,7 @@ package android.net.wifi {
     method public boolean is5GHzBandSupported();
     method public boolean is6GHzBandSupported();
     method @RequiresPermission(android.Manifest.permission.ACCESS_WIFI_STATE) public boolean isAutoWakeupEnabled();
+    method public boolean isBridgedApConcurrencySupported();
     method @Deprecated public boolean isDeviceToApRttSupported();
     method public boolean isEasyConnectSupported();
     method public boolean isEnhancedOpenSupported();
@@ -341,6 +342,7 @@ package android.net.wifi {
     method @Deprecated public boolean isScanAlwaysAvailable();
     method @RequiresPermission(android.Manifest.permission.ACCESS_WIFI_STATE) public boolean isScanThrottleEnabled();
     method public boolean isStaApConcurrencySupported();
+    method public boolean isStaBridgedApConcurrencySupported();
     method public boolean isTdlsSupported();
     method public boolean isWapiSupported();
     method public boolean isWifiEnabled();
