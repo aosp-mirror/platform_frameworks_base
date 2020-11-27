@@ -6,3 +6,6 @@ per-file VibratorManagerService.java, VibratorService.java, DisplayThread.java =
 
 # Zram writeback
 per-file ZramWriteback.java = minchan@google.com, rajekumar@google.com, srnvs@google.com
+
+# Userspace reboot
+per-file UserspaceRebootLogger.java = ioffe@google.com, tomcherry@google.com
