@@ -109,11 +109,15 @@ public class EditorInfoTest {
         editorInfo.initialSelEnd = editorInfo.initialSelStart + selectionLength;
         final int expectedTextBeforeCursorLength = 0;
         final int expectedTextAfterCursorLength = testText.length();
+        final SurroundingText expectedSurroundingText =
+                new SurroundingText(testText, editorInfo.initialSelStart,
+                        editorInfo.initialSelEnd, 0);
+
 
         editorInfo.setInitialSurroundingText(testText);
 
         assertExpectedTextLength(editorInfo, expectedTextBeforeCursorLength, selectionLength,
-                expectedTextAfterCursorLength);
+                expectedTextAfterCursorLength, expectedSurroundingText);
     }
 
     @Test
@@ -125,11 +129,14 @@ public class EditorInfoTest {
         editorInfo.initialSelEnd = testText.length();
         final int expectedTextBeforeCursorLength = testText.length();
         final int expectedTextAfterCursorLength = 0;
+        final SurroundingText expectedSurroundingText =
+                new SurroundingText(testText, editorInfo.initialSelStart,
+                        editorInfo.initialSelEnd, 0);
 
         editorInfo.setInitialSurroundingText(testText);
 
         assertExpectedTextLength(editorInfo, expectedTextBeforeCursorLength, selectionLength,
-                expectedTextAfterCursorLength);
+                expectedTextAfterCursorLength, expectedSurroundingText);
     }
 
     @Test
@@ -141,11 +148,14 @@ public class EditorInfoTest {
         editorInfo.initialSelEnd = editorInfo.initialSelStart + selectionLength;
         final int expectedTextBeforeCursorLength = editorInfo.initialSelStart;
         final int expectedTextAfterCursorLength = testText.length() - editorInfo.initialSelEnd;
+        final SurroundingText expectedSurroundingText =
+                new SurroundingText(testText, editorInfo.initialSelStart,
+                        editorInfo.initialSelEnd, 0);
 
         editorInfo.setInitialSurroundingText(testText);
 
         assertExpectedTextLength(editorInfo, expectedTextBeforeCursorLength, selectionLength,
-                expectedTextAfterCursorLength);
+                expectedTextAfterCursorLength, expectedSurroundingText);
     }
 
     @Test
@@ -158,11 +168,14 @@ public class EditorInfoTest {
         final int expectedTextBeforeCursorLength = testText.length() / 2;
         final int expectedTextAfterCursorLength = testText.length() - testText.length() / 2
                 - selectionLength;
-
+        final SurroundingText expectedSurroundingText =
+                new SurroundingText(testText,
+                        editorInfo.initialSelEnd,
+                        editorInfo.initialSelStart , 0);
         editorInfo.setInitialSurroundingText(testText);
 
         assertExpectedTextLength(editorInfo, expectedTextBeforeCursorLength, selectionLength,
-                expectedTextAfterCursorLength);
+                expectedTextAfterCursorLength, expectedSurroundingText);
     }
 
     @Test
@@ -174,9 +187,10 @@ public class EditorInfoTest {
         editorInfo.setInitialSurroundingText(testText);
 
         assertExpectedTextLength(editorInfo,
-                /* expectBeforeCursorLength= */null,
-                /* expectSelectionLength= */null,
-                /* expectAfterCursorLength= */null);
+                /* expectBeforeCursorLength= */ null,
+                /* expectSelectionLength= */ null,
+                /* expectAfterCursorLength= */   null,
+                /* expectSurroundingText= */ null);
     }
 
     @Test
@@ -190,11 +204,23 @@ public class EditorInfoTest {
                 (int) (0.8 * (EditorInfo.MEMORY_EFFICIENT_TEXT_LENGTH - selectionLength)));
         final int expectedTextAfterCursorLength = EditorInfo.MEMORY_EFFICIENT_TEXT_LENGTH
                 - expectedTextBeforeCursorLength - selectionLength;
+        final int offset = editorInfo.initialSelStart - expectedTextBeforeCursorLength;
+        final CharSequence beforeCursor = testText.subSequence(
+                offset, offset + expectedTextBeforeCursorLength);
+        final CharSequence afterCursor = testText.subSequence(editorInfo.initialSelEnd,
+                editorInfo.initialSelEnd + expectedTextAfterCursorLength);
+        final CharSequence selectedText = testText.subSequence(editorInfo.initialSelStart,
+                editorInfo.initialSelEnd);
+
+        final SurroundingText expectedSurroundingText =
+                new SurroundingText(TextUtils.concat(beforeCursor, selectedText, afterCursor),
+                        expectedTextBeforeCursorLength,
+                        expectedTextBeforeCursorLength + selectionLength, offset);
 
         editorInfo.setInitialSurroundingText(testText);
 
         assertExpectedTextLength(editorInfo, expectedTextBeforeCursorLength, selectionLength,
-                expectedTextAfterCursorLength);
+                expectedTextAfterCursorLength, expectedSurroundingText);
     }
 
     @Test
@@ -207,11 +233,22 @@ public class EditorInfoTest {
         final int expectedTextBeforeCursorLength = Math.min(editorInfo.initialSelStart,
                 (int) (0.8 * EditorInfo.MEMORY_EFFICIENT_TEXT_LENGTH));
         final int expectedTextAfterCursorLength = testText.length() - editorInfo.initialSelEnd;
+        final CharSequence before = testText.subSequence(
+                editorInfo.initialSelStart  - expectedTextBeforeCursorLength,
+                expectedTextBeforeCursorLength);
+        final CharSequence after = testText.subSequence(editorInfo.initialSelEnd,
+                editorInfo.initialSelEnd + expectedTextAfterCursorLength);
+        final SurroundingText expectedSurroundingText =
+                new SurroundingText(TextUtils.concat(before, after),
+                        expectedTextBeforeCursorLength,
+                        expectedTextBeforeCursorLength,
+                        editorInfo.initialSelStart - expectedTextBeforeCursorLength);
 
         editorInfo.setInitialSurroundingText(testText);
 
         assertExpectedTextLength(editorInfo, expectedTextBeforeCursorLength,
-                /* expectSelectionLength= */null, expectedTextAfterCursorLength);
+                /* expectSelectionLength= */null, expectedTextAfterCursorLength,
+                expectedSurroundingText);
     }
 
     @Test
@@ -269,6 +306,19 @@ public class EditorInfoTest {
                         InputConnection.GET_TEXT_WITH_STYLES),
                 targetEditorInfo.getInitialTextAfterCursor(LONG_EXP_TEXT_LENGTH,
                         InputConnection.GET_TEXT_WITH_STYLES)));
+
+        final SurroundingText sourceSurroundingText = sourceEditorInfo.getInitialSurroundingText(
+                LONG_EXP_TEXT_LENGTH, LONG_EXP_TEXT_LENGTH, InputConnection.GET_TEXT_WITH_STYLES);
+        final SurroundingText targetSurroundingText = targetEditorInfo.getInitialSurroundingText(
+                LONG_EXP_TEXT_LENGTH, LONG_EXP_TEXT_LENGTH, InputConnection.GET_TEXT_WITH_STYLES);
+
+        assertTrue(TextUtils.equals(sourceSurroundingText.getText(),
+                targetSurroundingText.getText()));
+        assertEquals(sourceSurroundingText.getSelectionStart(),
+                targetSurroundingText.getSelectionStart());
+        assertEquals(sourceSurroundingText.getSelectionEnd(),
+                targetSurroundingText.getSelectionEnd());
+        assertEquals(sourceSurroundingText.getOffset(), targetSurroundingText.getOffset());
     }
 
     @Test
@@ -338,7 +388,8 @@ public class EditorInfoTest {
 
     private static void assertExpectedTextLength(EditorInfo editorInfo,
             @Nullable Integer expectBeforeCursorLength, @Nullable Integer expectSelectionLength,
-            @Nullable Integer expectAfterCursorLength) {
+            @Nullable Integer expectAfterCursorLength,
+            @Nullable SurroundingText expectSurroundingText) {
         final CharSequence textBeforeCursor =
                 editorInfo.getInitialTextBeforeCursor(LONG_EXP_TEXT_LENGTH,
                         InputConnection.GET_TEXT_WITH_STYLES);
@@ -347,6 +398,10 @@ public class EditorInfoTest {
         final CharSequence textAfterCursor =
                 editorInfo.getInitialTextAfterCursor(LONG_EXP_TEXT_LENGTH,
                         InputConnection.GET_TEXT_WITH_STYLES);
+        final SurroundingText surroundingText = editorInfo.getInitialSurroundingText(
+                LONG_EXP_TEXT_LENGTH,
+                LONG_EXP_TEXT_LENGTH,
+                InputConnection.GET_TEXT_WITH_STYLES);
 
         if (expectBeforeCursorLength == null) {
             assertNull(textBeforeCursor);
@@ -364,6 +419,18 @@ public class EditorInfoTest {
             assertNull(textAfterCursor);
         } else {
             assertEquals(expectAfterCursorLength.intValue(), textAfterCursor.length());
+        }
+
+        if (expectSurroundingText == null) {
+            assertNull(surroundingText);
+        } else {
+            assertTrue(TextUtils.equals(
+                    expectSurroundingText.getText(), surroundingText.getText()));
+            assertEquals(expectSurroundingText.getSelectionStart(),
+                    surroundingText.getSelectionStart());
+            assertEquals(expectSurroundingText.getSelectionEnd(),
+                    surroundingText.getSelectionEnd());
+            assertEquals(expectSurroundingText.getOffset(), surroundingText.getOffset());
         }
     }
 
