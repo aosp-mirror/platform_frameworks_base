@@ -1980,18 +1980,16 @@ public class ConnectivityServiceTest {
         mWiFiNetworkAgent.setNetworkCapabilities(agentCapabilities, true);
         waitForIdle();
 
-        // Check that the owner UID is not updated.
+        // Check that the owner UID is updated.
+        // The owner UID is -1 because it is visible only to the UID that owns the network.
         NetworkCapabilities nc = mCm.getNetworkCapabilities(mWiFiNetworkAgent.getNetwork());
-        assertEquals(originalOwnerUid, nc.getOwnerUid());
+        assertEquals(-1, nc.getOwnerUid());
 
-        // Make an unrelated change to the capabilities.
+        // Make an unrelated change to the capabilities and check it. The owner UID remains -1.
         assertFalse(agentCapabilities.hasCapability(NET_CAPABILITY_NOT_CONGESTED));
         agentCapabilities.addCapability(NET_CAPABILITY_NOT_CONGESTED);
         mWiFiNetworkAgent.setNetworkCapabilities(agentCapabilities, true);
         waitForIdle();
-
-        // Check that both the capability change and the owner UID have been modified.
-        // The owner UID is -1 because it is visible only to the UID that owns the network.
         nc = mCm.getNetworkCapabilities(mWiFiNetworkAgent.getNetwork());
         assertEquals(-1, nc.getOwnerUid());
         assertTrue(nc.hasCapability(NET_CAPABILITY_NOT_CONGESTED));
