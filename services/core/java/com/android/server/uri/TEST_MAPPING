@@ -7,6 +7,26 @@
                     "include-filter": "com.android.server.uri."
                 }
             ]
+        },
+        {
+            "name": "CtsAppSecurityHostTestCases",
+            "options": [
+                {
+                    "include-filter": "android.appsecurity.cts.ExternalStorageHostTest#testGrantUriPermission"
+                },
+                {
+                    "include-filter": "android.appsecurity.cts.ExternalStorageHostTest#testGrantUriPermission29"
+                },
+                {
+                    "include-filter": "android.appsecurity.cts.ExternalStorageHostTest#testMediaNone"
+                },
+                {
+                    "include-filter": "android.appsecurity.cts.ExternalStorageHostTest#testMediaNone28"
+                },
+                {
+                    "include-filter": "android.appsecurity.cts.ExternalStorageHostTest#testMediaNone29"
+                }
+            ]
         }
     ],
     "postsubmit": [
