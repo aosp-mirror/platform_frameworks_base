@@ -85,7 +85,7 @@ public class HdmiCecConfig {
 
     @NonNull private final Context mContext;
     @NonNull private final StorageAdapter mStorageAdapter;
-    @Nullable private final CecSettings mSystemConfig;
+    @Nullable private final CecSettings mProductConfig;
     @Nullable private final CecSettings mVendorOverride;
 
     /**
@@ -162,14 +162,14 @@ public class HdmiCecConfig {
     @VisibleForTesting
     HdmiCecConfig(@NonNull Context context,
                   @NonNull StorageAdapter storageAdapter,
-                  @Nullable CecSettings systemConfig,
+                  @Nullable CecSettings productConfig,
                   @Nullable CecSettings vendorOverride) {
         mContext = context;
         mStorageAdapter = storageAdapter;
-        mSystemConfig = systemConfig;
+        mProductConfig = productConfig;
         mVendorOverride = vendorOverride;
-        if (mSystemConfig == null) {
-            Slog.i(TAG, "CEC system configuration XML missing.");
+        if (mProductConfig == null) {
+            Slog.i(TAG, "CEC master configuration XML missing.");
         }
         if (mVendorOverride == null) {
             Slog.i(TAG, "CEC OEM configuration override XML missing.");
@@ -178,7 +178,7 @@ public class HdmiCecConfig {
 
     HdmiCecConfig(@NonNull Context context) {
         this(context, new StorageAdapter(context),
-             readSettingsFromFile(Environment.buildPath(Environment.getRootDirectory(),
+             readSettingsFromFile(Environment.buildPath(Environment.getProductDirectory(),
                                                         ETC_DIR, CONFIG_FILE)),
              readSettingsFromFile(Environment.buildPath(Environment.getVendorDirectory(),
                                                         ETC_DIR, CONFIG_FILE)));
@@ -205,14 +205,14 @@ public class HdmiCecConfig {
     @VisibleForTesting
     static HdmiCecConfig createFromStrings(@NonNull Context context,
                                            @NonNull StorageAdapter storageAdapter,
-                                           @Nullable String systemConfigXml,
+                                           @Nullable String productConfigXml,
                                            @Nullable String vendorOverrideXml) {
-        CecSettings systemConfig = null;
+        CecSettings productConfig = null;
         CecSettings vendorOverride = null;
         try {
-            if (systemConfigXml != null) {
-                systemConfig = XmlParser.read(
-                        new ByteArrayInputStream(systemConfigXml.getBytes()));
+            if (productConfigXml != null) {
+                productConfig = XmlParser.read(
+                        new ByteArrayInputStream(productConfigXml.getBytes()));
             }
             if (vendorOverrideXml != null) {
                 vendorOverride = XmlParser.read(
@@ -221,12 +221,12 @@ public class HdmiCecConfig {
         } catch (IOException | DatatypeConfigurationException | XmlPullParserException e) {
             Slog.e(TAG, "Encountered an error while reading/parsing CEC config strings", e);
         }
-        return new HdmiCecConfig(context, storageAdapter, systemConfig, vendorOverride);
+        return new HdmiCecConfig(context, storageAdapter, productConfig, vendorOverride);
     }
 
     @Nullable
     private Setting getSetting(@NonNull String name) {
-        if (mSystemConfig == null) {
+        if (mProductConfig == null) {
             return null;
         }
         if (mVendorOverride != null) {
@@ -237,8 +237,8 @@ public class HdmiCecConfig {
                 }
             }
         }
-        // If not found, try the system config.
-        for (Setting setting : mSystemConfig.getSetting()) {
+        // If not found, try the product config.
+        for (Setting setting : mProductConfig.getSetting()) {
             if (setting.getName().equals(name)) {
                 return setting;
             }
@@ -322,11 +322,11 @@ public class HdmiCecConfig {
      * Returns a list of all settings based on the XML metadata.
      */
     public @CecSettingName List<String> getAllSettings() {
-        if (mSystemConfig == null) {
+        if (mProductConfig == null) {
             return new ArrayList<String>();
         }
         List<String> allSettings = new ArrayList<String>();
-        for (Setting setting : mSystemConfig.getSetting()) {
+        for (Setting setting : mProductConfig.getSetting()) {
             allSettings.add(setting.getName());
         }
         return allSettings;
@@ -336,12 +336,12 @@ public class HdmiCecConfig {
      * Returns a list of user-modifiable settings based on the XML metadata.
      */
     public @CecSettingName List<String> getUserSettings() {
-        if (mSystemConfig == null) {
+        if (mProductConfig == null) {
             return new ArrayList<String>();
         }
         Set<String> userSettings = new HashSet<String>();
-        // First read from the system config.
-        for (Setting setting : mSystemConfig.getSetting()) {
+        // First read from the product config.
+        for (Setting setting : mProductConfig.getSetting()) {
             if (setting.getUserConfigurable()) {
                 userSettings.add(setting.getName());
             }
