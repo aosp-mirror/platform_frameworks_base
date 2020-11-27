@@ -83,8 +83,7 @@ public class AndroidKeyStoreProvider extends Provider {
         boolean supports3DES = "true".equals(android.os.SystemProperties.get(DESEDE_SYSTEM_PROPERTY));
 
         // java.security.KeyStore
-        put("KeyStore.AndroidKeyStore", PACKAGE_NAME + ".AndroidKeyStoreSpi");
-        put("Alg.Alias.KeyStore.AndroidKeyStoreLegacy", "AndroidKeyStore");
+        put("KeyStore." + providerName, PACKAGE_NAME + ".AndroidKeyStoreSpi");
 
         // java.security.KeyPairGenerator
         put("KeyPairGenerator.EC", PACKAGE_NAME + ".AndroidKeyStoreKeyPairGeneratorSpi$EC");
