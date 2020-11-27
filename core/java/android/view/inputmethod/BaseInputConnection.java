@@ -16,7 +16,7 @@
 
 package android.view.inputmethod;
 
-import static android.view.OnReceiveContentListener.Payload.SOURCE_INPUT_METHOD;
+import static android.view.ContentInfo.SOURCE_INPUT_METHOD;
 
 import android.annotation.CallSuper;
 import android.annotation.IntRange;
@@ -38,9 +38,9 @@ import android.text.TextUtils;
 import android.text.method.MetaKeyKeyListener;
 import android.util.Log;
 import android.util.LogPrinter;
+import android.view.ContentInfo;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
-import android.view.OnReceiveContentListener;
 import android.view.View;
 
 import com.android.internal.util.Preconditions;
@@ -952,8 +952,8 @@ public class BaseInputConnection implements InputConnection {
         }
         final ClipData clip = new ClipData(inputContentInfo.getDescription(),
                 new ClipData.Item(inputContentInfo.getContentUri()));
-        final OnReceiveContentListener.Payload payload =
-                new OnReceiveContentListener.Payload.Builder(clip, SOURCE_INPUT_METHOD)
+        final ContentInfo payload =
+                new ContentInfo.Builder(clip, SOURCE_INPUT_METHOD)
                 .setLinkUri(inputContentInfo.getLinkUri())
                 .setExtras(opts)
                 .build();

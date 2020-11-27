@@ -17,10 +17,10 @@
 package android.widget;
 
 import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
-import static android.view.OnReceiveContentListener.Payload.FLAG_CONVERT_TO_PLAIN_TEXT;
-import static android.view.OnReceiveContentListener.Payload.SOURCE_AUTOFILL;
-import static android.view.OnReceiveContentListener.Payload.SOURCE_CLIPBOARD;
-import static android.view.OnReceiveContentListener.Payload.SOURCE_PROCESS_TEXT;
+import static android.view.ContentInfo.FLAG_CONVERT_TO_PLAIN_TEXT;
+import static android.view.ContentInfo.SOURCE_AUTOFILL;
+import static android.view.ContentInfo.SOURCE_CLIPBOARD;
+import static android.view.ContentInfo.SOURCE_PROCESS_TEXT;
 import static android.view.accessibility.AccessibilityNodeInfo.EXTRA_DATA_RENDERING_INFO_KEY;
 import static android.view.accessibility.AccessibilityNodeInfo.EXTRA_DATA_TEXT_CHARACTER_LOCATION_ARG_LENGTH;
 import static android.view.accessibility.AccessibilityNodeInfo.EXTRA_DATA_TEXT_CHARACTER_LOCATION_ARG_START_INDEX;
@@ -146,6 +146,7 @@ import android.util.TypedValue;
 import android.view.AccessibilityIterators.TextSegmentIterator;
 import android.view.ActionMode;
 import android.view.Choreographer;
+import android.view.ContentInfo;
 import android.view.ContextMenu;
 import android.view.DragEvent;
 import android.view.Gravity;
@@ -154,7 +155,6 @@ import android.view.InputDevice;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
-import android.view.OnReceiveContentListener.Payload;
 import android.view.PointerIcon;
 import android.view.View;
 import android.view.ViewConfiguration;
@@ -2151,7 +2151,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 if (result != null) {
                     if (isTextEditable()) {
                         ClipData clip = ClipData.newPlainText("", result);
-                        Payload payload = new Payload.Builder(clip, SOURCE_PROCESS_TEXT).build();
+                        ContentInfo payload =
+                                new ContentInfo.Builder(clip, SOURCE_PROCESS_TEXT).build();
                         performReceiveContent(payload);
                         if (mEditor != null) {
                             mEditor.refreshTextActionMode();
@@ -11857,7 +11858,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     + " cannot be autofilled into " + this);
             return;
         }
-        final Payload payload = new Payload.Builder(clip, SOURCE_AUTOFILL).build();
+        final ContentInfo payload = new ContentInfo.Builder(clip, SOURCE_AUTOFILL).build();
         performReceiveContent(payload);
     }
 
@@ -12924,7 +12925,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         if (clip == null) {
             return;
         }
-        final Payload payload = new Payload.Builder(clip, SOURCE_CLIPBOARD)
+        final ContentInfo payload = new ContentInfo.Builder(clip, SOURCE_CLIPBOARD)
                 .setFlags(withFormatting ? 0 : FLAG_CONVERT_TO_PLAIN_TEXT)
                 .build();
         performReceiveContent(payload);
@@ -13740,8 +13741,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * @return The portion of the passed-in content that was not handled (may be all, some, or none
      * of the passed-in content).
      */
+    @Nullable
     @Override
-    public @Nullable Payload onReceiveContent(@NonNull Payload payload) {
+    public ContentInfo onReceiveContent(@NonNull ContentInfo payload) {
         if (mEditor != null) {
             return mEditor.getDefaultOnReceiveContentListener().onReceiveContent(this, payload);
         }

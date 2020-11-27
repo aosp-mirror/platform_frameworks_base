@@ -17,10 +17,10 @@
 package android.widget;
 
 import static android.content.ContentResolver.SCHEME_CONTENT;
-import static android.view.OnReceiveContentListener.Payload.FLAG_CONVERT_TO_PLAIN_TEXT;
-import static android.view.OnReceiveContentListener.Payload.SOURCE_AUTOFILL;
-import static android.view.OnReceiveContentListener.Payload.SOURCE_DRAG_AND_DROP;
-import static android.view.OnReceiveContentListener.Payload.SOURCE_INPUT_METHOD;
+import static android.view.ContentInfo.FLAG_CONVERT_TO_PLAIN_TEXT;
+import static android.view.ContentInfo.SOURCE_AUTOFILL;
+import static android.view.ContentInfo.SOURCE_DRAG_AND_DROP;
+import static android.view.ContentInfo.SOURCE_INPUT_METHOD;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -38,9 +38,10 @@ import android.text.Selection;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.util.Log;
+import android.view.ContentInfo;
+import android.view.ContentInfo.Flags;
+import android.view.ContentInfo.Source;
 import android.view.OnReceiveContentListener;
-import android.view.OnReceiveContentListener.Payload.Flags;
-import android.view.OnReceiveContentListener.Payload.Source;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
@@ -53,20 +54,21 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 /**
- * Default implementation of {@link OnReceiveContentListener} for editable
- * {@link TextView} components. This class handles insertion of text (plain text, styled text, HTML,
- * etc) but not images or other content.
+ * Default implementation for {@link View#onReceiveContent} for editable {@link TextView}
+ * components. This class handles insertion of text (plain text, styled text, HTML, etc) but not
+ * images or other content.
  *
  * @hide
  */
 @VisibleForTesting
 public final class TextViewOnReceiveContentListener implements OnReceiveContentListener {
-    private static final String LOG_TAG = "OnReceiveContent";
+    private static final String LOG_TAG = "ReceiveContent";
 
     @Nullable private InputConnectionInfo mInputConnectionInfo;
 
+    @Nullable
     @Override
-    public @Nullable Payload onReceiveContent(@NonNull View view, @NonNull Payload payload) {
+    public ContentInfo onReceiveContent(@NonNull View view, @NonNull ContentInfo payload) {
         if (Log.isLoggable(LOG_TAG, Log.DEBUG)) {
             Log.d(LOG_TAG, "onReceive: " + payload);
         }
@@ -126,7 +128,7 @@ public final class TextViewOnReceiveContentListener implements OnReceiveContentL
         editable.replace(start, end, replacement);
     }
 
-    private void onReceiveForAutofill(@NonNull TextView view, @NonNull Payload payload) {
+    private void onReceiveForAutofill(@NonNull TextView view, @NonNull ContentInfo payload) {
         ClipData clip = payload.getClip();
         if (isUsageOfImeCommitContentEnabled(view)) {
             clip = handleNonTextViaImeCommitContent(clip);
@@ -145,7 +147,8 @@ public final class TextViewOnReceiveContentListener implements OnReceiveContentL
         Selection.setSelection(editable, editable.length());
     }
 
-    private static void onReceiveForDragAndDrop(@NonNull TextView view, @NonNull Payload payload) {
+    private static void onReceiveForDragAndDrop(@NonNull TextView view,
+            @NonNull ContentInfo payload) {
         final CharSequence text = coerceToText(payload.getClip(), view.getContext(),
                 payload.getFlags());
         replaceSelection((Editable) view.getText(), text);
