@@ -4610,4 +4610,9 @@
          If omitted, image editing will not be offered via Chooser.
          This name is in the ComponentName flattened format (package/class) [DO NOT TRANSLATE]  -->
     <string name="config_systemImageEditor" translatable="false"></string>
+
+    <!-- Whether to force WindowOrientationListener to keep listening to its sensor, even when
+         dreaming. This allows the AoD to rotate on devices without a wake device_orientation
+         sensor. Note that this flag should only be enabled for development/testing use. -->
+    <bool name="config_forceOrientationListenerEnabledWhileDreaming">false</bool>
 </resources>

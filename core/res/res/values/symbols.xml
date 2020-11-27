@@ -4146,4 +4146,6 @@
   <java-symbol type="bool" name="config_attachNavBarToAppDuringTransition" />
 
   <java-symbol type="bool" name="config_enableBackSound" />
+
+  <java-symbol type="bool" name="config_forceOrientationListenerEnabledWhileDreaming" />
 </resources>
