@@ -94,7 +94,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * System implementation of MediaSessionManager
@@ -149,7 +148,6 @@ public class MediaSessionService extends SystemService implements Monitor {
 
     private SessionPolicyProvider mCustomSessionPolicyProvider;
     private MediaKeyDispatcher mCustomMediaKeyDispatcher;
-    private Map<Integer, Integer> mOverriddenKeyEventsMap;
 
     public MediaSessionService(Context context) {
         super(context);
@@ -780,7 +778,6 @@ public class MediaSessionService extends SystemService implements Monitor {
     private void instantiateCustomDispatcher(String nameFromTesting) {
         synchronized (mLock) {
             mCustomMediaKeyDispatcher = null;
-            mOverriddenKeyEventsMap = null;
 
             String customDispatcherClassName = (nameFromTesting == null)
                     ? mContext.getResources().getString(R.string.config_customMediaKeyDispatcher)
@@ -788,9 +785,10 @@ public class MediaSessionService extends SystemService implements Monitor {
             try {
                 if (!TextUtils.isEmpty(customDispatcherClassName)) {
                     Class customDispatcherClass = Class.forName(customDispatcherClassName);
-                    Constructor constructor = customDispatcherClass.getDeclaredConstructor();
-                    mCustomMediaKeyDispatcher = (MediaKeyDispatcher) constructor.newInstance();
-                    mOverriddenKeyEventsMap = mCustomMediaKeyDispatcher.getOverriddenKeyEvents();
+                    Constructor constructor =
+                            customDispatcherClass.getDeclaredConstructor(Context.class);
+                    mCustomMediaKeyDispatcher =
+                            (MediaKeyDispatcher) constructor.newInstance(mContext);
                 }
             } catch (ClassNotFoundException | InstantiationException | InvocationTargetException
                     | IllegalAccessException | NoSuchMethodException e) {
@@ -810,9 +808,10 @@ public class MediaSessionService extends SystemService implements Monitor {
             try {
                 if (!TextUtils.isEmpty(customProviderClassName)) {
                     Class customProviderClass = Class.forName(customProviderClassName);
-                    Constructor constructor = customProviderClass.getDeclaredConstructor();
+                    Constructor constructor =
+                            customProviderClass.getDeclaredConstructor(Context.class);
                     mCustomSessionPolicyProvider =
-                            (SessionPolicyProvider) constructor.newInstance();
+                            (SessionPolicyProvider) constructor.newInstance(mContext);
                 }
             } catch (ClassNotFoundException | InstantiationException | InvocationTargetException
                     | IllegalAccessException | NoSuchMethodException e) {
@@ -2382,9 +2381,12 @@ public class MediaSessionService extends SystemService implements Monitor {
                     return;
                 }
 
-                int overriddenKeyEvents = (mCustomMediaKeyDispatcher == null) ? 0
-                        : mCustomMediaKeyDispatcher.getOverriddenKeyEvents()
-                                .get(keyEvent.getKeyCode());
+                int overriddenKeyEvents = 0;
+                if (mCustomMediaKeyDispatcher == null
+                        && mCustomMediaKeyDispatcher.getOverriddenKeyEvents() != null) {
+                    overriddenKeyEvents = mCustomMediaKeyDispatcher.getOverriddenKeyEvents()
+                            .get(keyEvent.getKeyCode());
+                }
                 cancelTrackingIfNeeded(packageName, pid, uid, asSystemService, keyEvent,
                         needWakeLock, opPackageName, stream, musicOnly, overriddenKeyEvents);
                 if (!needTracking(keyEvent, overriddenKeyEvents)) {
