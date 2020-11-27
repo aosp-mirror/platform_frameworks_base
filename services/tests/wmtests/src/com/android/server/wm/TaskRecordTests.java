@@ -1064,12 +1064,12 @@ public class TaskRecordTests extends WindowTestsBase {
 
         activity.setRequestedOrientation(SCREEN_ORIENTATION_LANDSCAPE);
         assertEquals(SCREEN_ORIENTATION_UNSET, task.getOrientation());
-        verify(display).onDescendantOrientationChanged(any(), same(task));
+        verify(display).onDescendantOrientationChanged(same(task));
         reset(display);
 
         display.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
         assertEquals(SCREEN_ORIENTATION_LANDSCAPE, task.getOrientation());
-        verify(display).onDescendantOrientationChanged(any(), same(task));
+        verify(display).onDescendantOrientationChanged(same(task));
     }
 
     private Task getTestTask() {

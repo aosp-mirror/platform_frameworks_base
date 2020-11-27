@@ -1300,10 +1300,9 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     }
 
     @Override
-    boolean onDescendantOrientationChanged(IBinder freezeDisplayToken,
-            WindowContainer requestingContainer) {
+    boolean onDescendantOrientationChanged(WindowContainer requestingContainer) {
         final Configuration config = updateOrientation(
-                getRequestedOverrideConfiguration(), freezeDisplayToken, false /* forceUpdate */);
+                getRequestedOverrideConfiguration(), requestingContainer, false /* forceUpdate */);
         // If display rotation class tells us that it doesn't consider app requested orientation,
         // this display won't rotate just because of an app changes its requested orientation. Thus
         // it indicates that this display chooses not to handle this request.
@@ -1355,11 +1354,11 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      * @param currentConfig The current requested override configuration (it is usually set from
      *                      the last {@link #sendNewConfiguration}) of the display. It is used to
      *                      check if the configuration container has the latest state.
-     * @param freezeDisplayToken Freeze the app window token if the orientation is changed.
+     * @param freezeDisplayWindow Freeze the app window if the orientation is changed.
      * @param forceUpdate See {@link DisplayRotation#updateRotationUnchecked(boolean)}
      */
-    Configuration updateOrientation(Configuration currentConfig, IBinder freezeDisplayToken,
-            boolean forceUpdate) {
+    Configuration updateOrientation(Configuration currentConfig,
+            WindowContainer freezeDisplayWindow, boolean forceUpdate) {
         if (!mDisplayReady) {
             return null;
         }
@@ -1368,9 +1367,9 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         if (updateOrientation(forceUpdate)) {
             // If we changed the orientation but mOrientationChangeComplete is already true,
             // we used seamless rotation, and we don't need to freeze the screen.
-            if (freezeDisplayToken != null && !mWmService.mRoot.mOrientationChangeComplete) {
-                final ActivityRecord activity = getActivityRecord(freezeDisplayToken);
-                if (activity != null) {
+            if (freezeDisplayWindow != null && !mWmService.mRoot.mOrientationChangeComplete) {
+                final ActivityRecord activity = freezeDisplayWindow.asActivityRecord();
+                if (activity != null && activity.mayFreezeScreenLocked()) {
                     activity.startFreezingScreen();
                 }
             }

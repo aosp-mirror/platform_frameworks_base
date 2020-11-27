@@ -56,7 +56,6 @@ import static org.junit.Assert.assertTrue;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Rect;
-import android.os.IBinder;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
 import android.view.IRemoteAnimationFinishedCallback;
@@ -787,12 +786,11 @@ public class WindowContainerTests extends WindowTestsBase {
         final TestWindowContainerBuilder builder = new TestWindowContainerBuilder(mWm);
         final TestWindowContainer root = spy(builder.build());
 
-        final IBinder binder = mock(IBinder.class);
         final ActivityRecord activityRecord = mock(ActivityRecord.class);
         final TestWindowContainer child = root.addChildWindow();
 
-        child.setOrientation(ActivityInfo.SCREEN_ORIENTATION_LOCKED, binder, activityRecord);
-        verify(root).onDescendantOrientationChanged(binder, activityRecord);
+        child.setOrientation(ActivityInfo.SCREEN_ORIENTATION_LOCKED, activityRecord);
+        verify(root).onDescendantOrientationChanged(activityRecord);
     }
 
     @Test
