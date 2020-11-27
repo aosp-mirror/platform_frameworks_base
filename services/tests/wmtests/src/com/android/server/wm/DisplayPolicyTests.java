@@ -236,8 +236,7 @@ public class DisplayPolicyTests extends WindowTestsBase {
         final WindowState activity = createBaseApplicationWindow();
         activity.mAttrs.privateFlags |= PRIVATE_FLAG_FORCE_DRAW_BAR_BACKGROUNDS;
 
-        policy.adjustWindowParamsLw(activity, activity.mAttrs, 0 /* callingPid */,
-                0 /* callingUid */);
+        policy.adjustWindowParamsLw(activity, activity.mAttrs);
     }
 
     private WindowState createApplicationWindow() {
