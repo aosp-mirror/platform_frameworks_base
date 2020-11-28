@@ -712,6 +712,7 @@ public final class NetworkCapabilities implements Parcelable {
         if (ArrayUtils.contains(originalAdministratorUids, creatorUid)) {
             setAdministratorUids(new int[] {creatorUid});
         }
+        // There is no need to clear the UIDs, they have already been cleared by clearAll() above.
     }
 
     /**
@@ -805,7 +806,9 @@ public final class NetworkCapabilities implements Parcelable {
      */
     private static final int TEST_NETWORKS_ALLOWED_TRANSPORTS = 1 << TRANSPORT_TEST
             // Test ethernet networks can be created with EthernetManager#setIncludeTestInterfaces
-            | 1 << TRANSPORT_ETHERNET;
+            | 1 << TRANSPORT_ETHERNET
+            // Test VPN networks can be created but their UID ranges must be empty.
+            | 1 << TRANSPORT_VPN;
 
     /**
      * Adds the given transport type to this {@code NetworkCapability} instance.
