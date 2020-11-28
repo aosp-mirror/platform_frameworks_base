@@ -16,12 +16,11 @@
 
 package com.android.wm.shell.flicker.pip
 
-import com.android.wm.shell.flicker.NonRotationTestBase
 import com.android.wm.shell.flicker.helpers.PipAppHelper
 
 abstract class PipTestBase(
     rotationName: String,
     rotation: Int
-) : NonRotationTestBase(rotationName, rotation) {
+) : AppTestBase(rotationName, rotation) {
     protected val testApp = PipAppHelper(instrumentation)
 }

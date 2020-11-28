@@ -2772,7 +2772,11 @@ public class DisplayPolicy {
                 && mLastDockedStackBounds.equals(mDockedStackBounds)) {
             return false;
         }
-
+        if (mDisplayContent.isDefaultDisplay && mLastFocusIsFullscreen != isFullscreen
+                && ((mLastAppearance ^ appearance) & APPEARANCE_LOW_PROFILE_BARS) != 0) {
+            mService.mInputManager.setSystemUiLightsOut(
+                    isFullscreen || (appearance & APPEARANCE_LOW_PROFILE_BARS) != 0);
+        }
         mLastDisableFlags = disableFlags;
         mLastAppearance = appearance;
         mLastFullscreenAppearance = fullscreenAppearance;
@@ -2802,10 +2806,6 @@ public class DisplayPolicy {
 
             }
         });
-        if (mDisplayContent.isDefaultDisplay) {
-            mService.mInputManager.setSystemUiLightsOut(
-                    isFullscreen || (appearance & APPEARANCE_LOW_PROFILE_BARS) != 0);
-        }
         return true;
     }
 

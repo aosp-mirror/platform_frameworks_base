@@ -16,6 +16,8 @@
 
 package com.android.server.timedetector;
 
+import static com.android.server.timedetector.TimeDetectorStrategy.stringToOrigin;
+
 import android.annotation.NonNull;
 import android.app.AlarmManager;
 import android.content.ContentResolver;
@@ -58,6 +60,7 @@ public final class TimeDetectorStrategyCallbackImpl implements TimeDetectorStrat
     @NonNull private final ContentResolver mContentResolver;
     @NonNull private final PowerManager.WakeLock mWakeLock;
     @NonNull private final AlarmManager mAlarmManager;
+    @NonNull private final int[] mOriginPriorities;
 
     public TimeDetectorStrategyCallbackImpl(@NonNull Context context) {
         mContext = Objects.requireNonNull(context);
@@ -72,6 +75,15 @@ public final class TimeDetectorStrategyCallbackImpl implements TimeDetectorStrat
         mSystemClockUpdateThresholdMillis =
                 SystemProperties.getInt("ro.sys.time_detector_update_diff",
                         SYSTEM_CLOCK_UPDATE_THRESHOLD_MILLIS_DEFAULT);
+
+        // TODO(b/172230856): Obtain these values from configuration.
+        String[] originStrings = { "telephony", "network" };
+        int[] origins = new int[originStrings.length];
+        for (int i = 0; i < originStrings.length; i++) {
+            int origin = stringToOrigin(originStrings[i]);
+            origins[i] = origin;
+        }
+        mOriginPriorities = origins;
     }
 
     @Override
@@ -91,6 +103,11 @@ public final class TimeDetectorStrategyCallbackImpl implements TimeDetectorStrat
     @Override
     public Instant autoTimeLowerBound() {
         return TIME_LOWER_BOUND;
+    }
+
+    @Override
+    public int[] getAutoOriginPriorities() {
+        return mOriginPriorities;
     }
 
     @Override

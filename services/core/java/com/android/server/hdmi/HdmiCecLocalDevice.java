@@ -566,6 +566,11 @@ abstract class HdmiCecLocalDevice {
             return false;
         }
 
+        reportFeatures();
+        return true;
+    }
+
+    protected void reportFeatures() {
         List<Integer> localDeviceTypes = new ArrayList<>();
         for (HdmiCecLocalDevice localDevice : mService.getAllLocalDevices()) {
             localDeviceTypes.add(localDevice.mDeviceType);
@@ -579,7 +584,6 @@ abstract class HdmiCecLocalDevice {
         mService.sendCecCommand(
                 HdmiCecMessageBuilder.buildReportFeatures(mAddress, mService.getCecVersion(),
                         localDeviceTypes, rcProfile, rcFeatures, deviceFeatures));
-        return true;
     }
 
     @ServiceThreadOnly
@@ -791,6 +795,9 @@ abstract class HdmiCecLocalDevice {
     final void handleAddressAllocated(int logicalAddress, int reason) {
         assertRunOnServiceThread();
         mAddress = mPreferredAddress = logicalAddress;
+        if (mService.getCecVersion() >= HdmiControlManager.HDMI_CEC_VERSION_2_0) {
+            reportFeatures();
+        }
         onAddressAllocated(logicalAddress, reason);
         setPreferredAddress(logicalAddress);
     }

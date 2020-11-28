@@ -114,15 +114,6 @@ public final class SharedLibraryInfo implements Parcelable {
         mIsNative = isNative;
     }
 
-    /** @hide */
-    public SharedLibraryInfo(String path, String packageName, List<String> codePaths,
-            String name, long version, int type,
-            VersionedPackage declaringPackage, List<VersionedPackage> dependentPackages,
-            List<SharedLibraryInfo> dependencies) {
-        this(path, packageName, codePaths, name, version, type, declaringPackage, dependentPackages,
-            dependencies, false /* isNative */);
-    }
-
     private SharedLibraryInfo(Parcel parcel) {
         mPath = parcel.readString8();
         mPackageName = parcel.readString8();

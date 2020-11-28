@@ -16,7 +16,8 @@
 
 package com.android.server.timedetector;
 
-import android.annotation.IntDef;
+import static com.android.server.timedetector.TimeDetectorStrategy.originToString;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.AlarmManager;
@@ -33,9 +34,8 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.timezonedetector.ArrayMapWithHistory;
 import com.android.server.timezonedetector.ReferenceWithHistory;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.time.Instant;
+import java.util.Arrays;
 
 /**
  * An implementation of {@link TimeDetectorStrategy} that passes telephony and manual suggestions to
@@ -62,22 +62,6 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
     @VisibleForTesting
     static final long MAX_UTC_TIME_AGE_MILLIS =
             TELEPHONY_BUCKET_COUNT * TELEPHONY_BUCKET_SIZE_MILLIS;
-
-    @IntDef({ ORIGIN_TELEPHONY, ORIGIN_MANUAL, ORIGIN_NETWORK })
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface Origin {}
-
-    /** Used when a time value originated from a telephony signal. */
-    @Origin
-    private static final int ORIGIN_TELEPHONY = 1;
-
-    /** Used when a time value originated from a user / manual settings. */
-    @Origin
-    private static final int ORIGIN_MANUAL = 2;
-
-    /** Used when a time value originated from a network signal. */
-    @Origin
-    private static final int ORIGIN_NETWORK = 3;
 
     /**
      * CLOCK_PARANOIA: The maximum difference allowed between the expected system clock time and the
@@ -151,6 +135,12 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
          */
         @NonNull
         Instant autoTimeLowerBound();
+
+        /**
+         * Returns the order to look at time suggestions when automatically detecting time.
+         * See {@code #ORIGIN_} constants
+         */
+        @Origin int[] getAutoOriginPriorities();
 
         /** Acquire a suitable wake lock. Must be followed by {@link #releaseWakeLock()} */
         void acquireWakeLock();
@@ -236,12 +226,12 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
     }
 
     @Override
-    public synchronized void handleAutoTimeDetectionChanged() {
+    public synchronized void handleAutoTimeConfigChanged() {
         boolean enabled = mCallback.isAutoTimeDetectionEnabled();
         // When automatic time detection is enabled we update the system clock instantly if we can.
         // Conversely, when automatic time detection is disabled we leave the clock as it is.
         if (enabled) {
-            String reason = "Auto time zone detection setting enabled.";
+            String reason = "Auto time zone detection config changed.";
             doAutoTimeDetection(reason);
         } else {
             // CLOCK_PARANOIA: We are losing "control" of the system clock so we cannot predict what
@@ -362,33 +352,44 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
             return;
         }
 
-        // Android devices currently prioritize any telephony over network signals. There are
-        // carrier compliance tests that would need to be changed before we could ignore NITZ or
-        // prefer NTP generally. This check is cheap on devices without telephony hardware.
-        TelephonyTimeSuggestion bestTelephonySuggestion = findBestTelephonySuggestion();
-        if (bestTelephonySuggestion != null) {
-            final TimestampedValue<Long> newUtcTime = bestTelephonySuggestion.getUtcTime();
-            String cause = "Found good telephony suggestion."
-                    + ", bestTelephonySuggestion=" + bestTelephonySuggestion
-                    + ", detectionReason=" + detectionReason;
-            setSystemClockIfRequired(ORIGIN_TELEPHONY, newUtcTime, cause);
-            return;
-        }
+        // Try the different origins one at a time.
+        int[] originPriorities = mCallback.getAutoOriginPriorities();
+        for (int origin : originPriorities) {
+            TimestampedValue<Long> newUtcTime = null;
+            String cause = null;
+            if (origin == ORIGIN_TELEPHONY) {
+                TelephonyTimeSuggestion bestTelephonySuggestion = findBestTelephonySuggestion();
+                if (bestTelephonySuggestion != null) {
+                    newUtcTime = bestTelephonySuggestion.getUtcTime();
+                    cause = "Found good telephony suggestion."
+                            + ", bestTelephonySuggestion=" + bestTelephonySuggestion
+                            + ", detectionReason=" + detectionReason;
+                }
+            } else if (origin == ORIGIN_NETWORK) {
+                NetworkTimeSuggestion networkSuggestion = findLatestValidNetworkSuggestion();
+                if (networkSuggestion != null) {
+                    newUtcTime = networkSuggestion.getUtcTime();
+                    cause = "Found good network suggestion."
+                            + ", networkSuggestion=" + networkSuggestion
+                            + ", detectionReason=" + detectionReason;
+                }
+            } else {
+                Slog.w(LOG_TAG, "Unknown or unsupported origin=" + origin
+                        + " in " + Arrays.toString(originPriorities)
+                        + ": Skipping");
+            }
 
-        // There is no good telephony suggestion, try network.
-        NetworkTimeSuggestion networkSuggestion = findLatestValidNetworkSuggestion();
-        if (networkSuggestion != null) {
-            final TimestampedValue<Long> newUtcTime = networkSuggestion.getUtcTime();
-            String cause = "Found good network suggestion."
-                    + ", networkSuggestion=" + networkSuggestion
-                    + ", detectionReason=" + detectionReason;
-            setSystemClockIfRequired(ORIGIN_NETWORK, newUtcTime, cause);
-            return;
+            // Update the system clock if a good suggestion has been found.
+            if (newUtcTime != null) {
+                setSystemClockIfRequired(origin, newUtcTime, cause);
+                return;
+            }
         }
 
         if (DBG) {
-            Slog.d(LOG_TAG, "Could not determine time: No best telephony or network suggestion."
-                    + " detectionReason=" + detectionReason);
+            Slog.d(LOG_TAG, "Could not determine time: No suggestion found in"
+                    + " originPriorities=" + Arrays.toString(originPriorities)
+                    + ", detectionReason=" + detectionReason);
         }
     }
 
@@ -473,7 +474,7 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
         // Validate first.
         TimestampedValue<Long> utcTime = timeSuggestion.getUtcTime();
         if (!validateSuggestionUtcTime(elapsedRealtimeMillis, utcTime)) {
-            Slog.w(LOG_TAG, "Existing suggestion found to be invalid "
+            Slog.w(LOG_TAG, "Existing suggestion found to be invalid"
                     + " elapsedRealtimeMillis=" + elapsedRealtimeMillis
                     + ", timeSuggestion=" + timeSuggestion);
             return TELEPHONY_INVALID_SCORE;
@@ -522,7 +523,7 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
             if (!mCallback.isAutoTimeDetectionEnabled()) {
                 if (DBG) {
                     Slog.d(LOG_TAG, "Auto time detection is not enabled."
-                            + " origin=" + origin
+                            + " origin=" + originToString(origin)
                             + ", time=" + time
                             + ", cause=" + cause);
                 }
@@ -532,7 +533,7 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
             if (mCallback.isAutoTimeDetectionEnabled()) {
                 if (DBG) {
                     Slog.d(LOG_TAG, "Auto time detection is enabled."
-                            + " origin=" + origin
+                            + " origin=" + originToString(origin)
                             + ", time=" + time
                             + ", cause=" + cause);
                 }
@@ -554,7 +555,7 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
 
     @GuardedBy("this")
     private boolean setSystemClockUnderWakeLock(
-            int origin, @NonNull TimestampedValue<Long> newTime, @NonNull Object cause) {
+            @Origin int origin, @NonNull TimestampedValue<Long> newTime, @NonNull String cause) {
 
         long elapsedRealtimeMillis = mCallback.elapsedRealtimeMillis();
         boolean isOriginAutomatic = isOriginAutomatic(origin);

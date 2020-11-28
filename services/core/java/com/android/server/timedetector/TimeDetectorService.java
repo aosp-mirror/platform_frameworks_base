@@ -132,7 +132,7 @@ public final class TimeDetectorService extends ITimeDetectorService.Stub {
     /** Internal method for handling the auto time setting being changed. */
     @VisibleForTesting
     public void handleAutoTimeDetectionChanged() {
-        mHandler.post(mTimeDetectorStrategy::handleAutoTimeDetectionChanged);
+        mHandler.post(mTimeDetectorStrategy::handleAutoTimeConfigChanged);
     }
 
     @Override

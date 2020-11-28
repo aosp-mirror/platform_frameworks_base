@@ -18,3 +18,9 @@ android_test {
     sdk_version: "current",
     test_suites: ["device-tests"],
 }
+
+java_library {
+    name: "wmshell-flicker-test-components",
+    srcs: ["src/**/Components.java"],
+    sdk_version: "test_current",
+}

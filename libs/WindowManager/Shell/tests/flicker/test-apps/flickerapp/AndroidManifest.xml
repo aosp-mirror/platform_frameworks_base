@@ -21,13 +21,25 @@
          android:targetSdkVersion="29"/>
     <application android:allowBackup="false"
          android:supportsRtl="true">
+        <activity android:name=".FixedActivity"
+                  android:resizeableActivity="true"
+                  android:supportsPictureInPicture="true"
+                  android:launchMode="singleTop"
+                  android:label="FixedApp"
+                  android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
         <activity android:name=".PipActivity"
-             android:resizeableActivity="true"
-             android:supportsPictureInPicture="true"
-             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
-             android:taskAffinity="com.android.wm.shell.flicker.testapp.PipActivity"
-             android:label="PipApp"
-             android:exported="true">
+                 android:resizeableActivity="true"
+                 android:supportsPictureInPicture="true"
+                 android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
+                 android:taskAffinity="com.android.wm.shell.flicker.testapp.PipActivity"
+                 android:launchMode="singleTop"
+                 android:label="PipApp"
+                 android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
@@ -39,9 +51,9 @@
         </activity>
 
         <activity android:name=".ImeActivity"
-             android:taskAffinity="com.android.wm.shell.flicker.testapp.ImeActivity"
-             android:label="ImeApp"
-             android:exported="true">
+                 android:taskAffinity="com.android.wm.shell.flicker.testapp.ImeActivity"
+                 android:label="ImeApp"
+                 android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>

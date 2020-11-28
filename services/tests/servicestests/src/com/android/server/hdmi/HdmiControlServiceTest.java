@@ -521,6 +521,41 @@ public class HdmiControlServiceTest {
         assertThat(mNativeWrapper.getResultMessages()).contains(reportFeatures);
     }
 
+    @Test
+    public void initializeCec_14_doesNotBroadcastReportFeatures() {
+        mNativeWrapper.clearResultMessages();
+        mHdmiControlService.getHdmiCecConfig().setIntValue(
+                HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_VERSION,
+                HdmiControlManager.HDMI_CEC_VERSION_1_4_b);
+        mHdmiControlService.setControlEnabled(true);
+        mHdmiControlService.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
+        mTestLooper.dispatchAll();
+
+        HdmiCecMessage reportFeatures = HdmiCecMessageBuilder.buildReportFeatures(
+                Constants.ADDR_PLAYBACK_1, HdmiControlManager.HDMI_CEC_VERSION_2_0,
+                Arrays.asList(DEVICE_PLAYBACK, DEVICE_AUDIO_SYSTEM),
+                mMyPlaybackDevice.getRcProfile(), mMyPlaybackDevice.getRcFeatures(),
+                mMyPlaybackDevice.getDeviceFeatures());
+        assertThat(mNativeWrapper.getResultMessages()).doesNotContain(reportFeatures);
+    }
+
+    @Test
+    public void initializeCec_20_reportsFeaturesBroadcast() {
+        mHdmiControlService.getHdmiCecConfig().setIntValue(
+                HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_VERSION,
+                HdmiControlManager.HDMI_CEC_VERSION_2_0);
+        mHdmiControlService.setControlEnabled(true);
+        mHdmiControlService.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
+        mTestLooper.dispatchAll();
+
+        HdmiCecMessage reportFeatures = HdmiCecMessageBuilder.buildReportFeatures(
+                Constants.ADDR_PLAYBACK_1, HdmiControlManager.HDMI_CEC_VERSION_2_0,
+                Arrays.asList(DEVICE_PLAYBACK, DEVICE_AUDIO_SYSTEM),
+                mMyPlaybackDevice.getRcProfile(), mMyPlaybackDevice.getRcFeatures(),
+                mMyPlaybackDevice.getDeviceFeatures());
+        assertThat(mNativeWrapper.getResultMessages()).contains(reportFeatures);
+    }
+
     private static class VolumeControlFeatureCallback extends
             IHdmiCecVolumeControlFeatureListener.Stub {
         boolean mCallbackReceived = false;
