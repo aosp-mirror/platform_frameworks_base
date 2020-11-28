@@ -28,8 +28,10 @@ import org.xmlpull.v1.XmlSerializer;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * The app-URI authentication policy is set by the credential management app. This policy determines
@@ -221,6 +223,19 @@ public final class AppUriAuthenticationPolicy implements Parcelable {
             appsToUris.getValue().writeToXml(out);
             out.endTag(null, KEY_AUTHENTICATION_POLICY_APP_TO_URIS);
         }
+    }
+
+    /**
+     * Get the set of aliases found in the policy.
+     *
+     * @hide
+     */
+    public Set<String> getAliases() {
+        Set<String> aliases = new HashSet<>();
+        for (UrisToAliases appsToUris : mAppToUris.values()) {
+            aliases.addAll(appsToUris.getUrisToAliases().values());
+        }
+        return aliases;
     }
 
 }
