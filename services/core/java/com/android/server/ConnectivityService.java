@@ -5980,13 +5980,29 @@ public class ConnectivityService extends IConnectivityManager.Stub
             int currentScore, NetworkAgentConfig networkAgentConfig, int providerId) {
         if (networkCapabilities.hasTransport(TRANSPORT_TEST)) {
             enforceAnyPermissionOf(Manifest.permission.MANAGE_TEST_NETWORKS);
+        } else {
+            enforceNetworkFactoryPermission();
+        }
+
+        final int uid = Binder.getCallingUid();
+        final long token = Binder.clearCallingIdentity();
+        try {
+            return registerNetworkAgentInternal(messenger, networkInfo, linkProperties,
+                    networkCapabilities, currentScore, networkAgentConfig, providerId, uid);
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+    }
+
+    private Network registerNetworkAgentInternal(Messenger messenger, NetworkInfo networkInfo,
+            LinkProperties linkProperties, NetworkCapabilities networkCapabilities,
+            int currentScore, NetworkAgentConfig networkAgentConfig, int providerId, int uid) {
+        if (networkCapabilities.hasTransport(TRANSPORT_TEST)) {
             // Strictly, sanitizing here is unnecessary as the capabilities will be sanitized in
             // the call to mixInCapabilities below anyway, but sanitizing here means the NAI never
             // sees capabilities that may be malicious, which might prevent mistakes in the future.
             networkCapabilities = new NetworkCapabilities(networkCapabilities);
-            networkCapabilities.restrictCapabilitesForTestNetwork(Binder.getCallingUid());
-        } else {
-            enforceNetworkFactoryPermission();
+            networkCapabilities.restrictCapabilitesForTestNetwork(uid);
         }
 
         LinkProperties lp = new LinkProperties(linkProperties);
@@ -5997,7 +6013,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         final NetworkAgentInfo nai = new NetworkAgentInfo(messenger, new AsyncChannel(),
                 new Network(mNetIdManager.reserveNetId()), new NetworkInfo(networkInfo), lp, nc,
                 currentScore, mContext, mTrackerHandler, new NetworkAgentConfig(networkAgentConfig),
-                this, mNetd, mDnsResolver, mNMS, providerId, Binder.getCallingUid());
+                this, mNetd, mDnsResolver, mNMS, providerId, uid);
 
         // Make sure the LinkProperties and NetworkCapabilities reflect what the agent info says.
         processCapabilitiesFromAgent(nai, nc);
@@ -6008,13 +6024,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
         final String name = TextUtils.isEmpty(extraInfo)
                 ? nai.networkCapabilities.getSsid() : extraInfo;
         if (DBG) log("registerNetworkAgent " + nai);
-        final long token = Binder.clearCallingIdentity();
-        try {
-            mDeps.getNetworkStack().makeNetworkMonitor(
-                    nai.network, name, new NetworkMonitorCallbacks(nai));
-        } finally {
-            Binder.restoreCallingIdentity(token);
-        }
+        mDeps.getNetworkStack().makeNetworkMonitor(
+                nai.network, name, new NetworkMonitorCallbacks(nai));
         // NetworkAgentInfo registration will finish when the NetworkMonitor is created.
         // If the network disconnects or sends any other event before that, messages are deferred by
         // NetworkAgent until nai.asyncChannel.connect(), which will be called when finalizing the
