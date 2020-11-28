@@ -6175,6 +6175,7 @@ package android.net {
     method public final void sendNetworkCapabilities(@NonNull android.net.NetworkCapabilities);
     method public final void sendNetworkScore(@IntRange(from=0, to=99) int);
     method public final void sendSocketKeepaliveEvent(int, int);
+    method public final void setUnderlyingNetworks(@Nullable java.util.List<android.net.Network>);
     method public void unregister();
     field public static final int VALIDATION_STATUS_NOT_VALID = 2; // 0x2
     field public static final int VALIDATION_STATUS_VALID = 1; // 0x1
