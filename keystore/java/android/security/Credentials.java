@@ -49,6 +49,8 @@ public class Credentials {
 
     public static final String INSTALL_AS_USER_ACTION = "android.credentials.INSTALL_AS_USER";
 
+    public static final String ACTION_MANAGE_CREDENTIALS = "android.security.MANAGE_CREDENTIALS";
+
     /**
      * Key prefix for CA certificates.
      *
