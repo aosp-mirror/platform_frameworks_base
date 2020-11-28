@@ -165,7 +165,7 @@
     <string name="tts_lang_not_selected" msgid="7927823081096056147">"Langue non sélectionnée"</string>
     <string name="tts_default_lang_summary" msgid="9042620014800063470">"Définir la langue utilisée par la synthèse vocale"</string>
     <string name="tts_play_example_title" msgid="1599468547216481684">"Écouter un échantillon"</string>
-    <string name="tts_play_example_summary" msgid="634044730710636383">"Lire une courte démonstration de la synthèse vocale"</string>
+    <string name="tts_play_example_summary" msgid="634044730710636383">"Écoutez une courte démonstration de la synthèse vocale"</string>
     <string name="tts_install_data_title" msgid="1829942496472751703">"Installer les données vocales"</string>
     <string name="tts_install_data_summary" msgid="3608874324992243851">"Installer les données nécessaires à la synthèse vocale"</string>
     <string name="tts_engine_security_warning" msgid="3372432853837988146">"Ce moteur de synthèse vocale est susceptible de collecter tout ce qui sera lu, y compris les données personnelles comme les mots de passe et les numéros de carte de paiement. Il provient du moteur <xliff:g id="TTS_PLUGIN_ENGINE_NAME">%s</xliff:g>. Voulez-vous activer son utilisation ?"</string>
@@ -189,8 +189,8 @@
     <item msgid="1158955023692670059">"Rapide"</item>
     <item msgid="5664310435707146591">"Plus rapide"</item>
     <item msgid="5491266922147715962">"Très rapide"</item>
-    <item msgid="7659240015901486196">"Rapide"</item>
-    <item msgid="7147051179282410945">"Très rapide"</item>
+    <item msgid="7659240015901486196">"Beaucoup plus rapide"</item>
+    <item msgid="7147051179282410945">"Extrêmement rapide"</item>
     <item msgid="581904787661470707">"La plus rapide"</item>
   </string-array>
     <string name="choose_profile" msgid="343803890897657450">"Sélectionner un profil"</string>
@@ -489,6 +489,7 @@
     <string name="wifi_status_mac_randomized" msgid="466382542497832189">"La sélection des adresses MAC est aléatoire"</string>
     <plurals name="wifi_tether_connected_summary" formatted="false" msgid="6317236306047306139">
       <item quantity="one">%1$d appareil connecté</item>
+      <item quantity="many">%1$d devices connected</item>
       <item quantity="other">%1$d appareils connectés</item>
     </plurals>
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"Plus longtemps."</string>
