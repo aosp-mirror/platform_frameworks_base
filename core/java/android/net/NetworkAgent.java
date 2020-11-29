@@ -40,6 +40,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -174,6 +175,14 @@ public abstract class NetworkAgent {
     public static final int EVENT_NETWORK_SCORE_CHANGED = BASE + 4;
 
     /**
+     * Sent by the NetworkAgent to ConnectivityService to pass the current
+     * list of underlying networks.
+     * obj = array of Network objects
+     * @hide
+     */
+    public static final int EVENT_UNDERLYING_NETWORKS_CHANGED = BASE + 5;
+
+    /**
      * Sent by ConnectivityService to the NetworkAgent to inform the agent of the
      * networks status - whether we could use the network or could not, due to
      * either a bad network configuration (no internet link) or captive portal.
@@ -217,7 +226,13 @@ public abstract class NetworkAgent {
      * The key for the redirect URL in the Bundle argument of {@code CMD_REPORT_NETWORK_STATUS}.
      * @hide
      */
-    public static String REDIRECT_URL_KEY = "redirect URL";
+    public static final String REDIRECT_URL_KEY = "redirect URL";
+
+    /**
+     * Bundle key for the underlying networks in {@code EVENT_UNDERLYING_NETWORKS_CHANGED}.
+     * @hide
+     */
+    public static final String UNDERLYING_NETWORKS_KEY = "underlyingNetworks";
 
      /**
      * Sent by the NetworkAgent to ConnectivityService to indicate this network was
@@ -647,6 +662,33 @@ public abstract class NetworkAgent {
     public final void sendLinkProperties(@NonNull LinkProperties linkProperties) {
         Objects.requireNonNull(linkProperties);
         queueOrSendMessage(EVENT_NETWORK_PROPERTIES_CHANGED, new LinkProperties(linkProperties));
+    }
+
+    /**
+     * Must be called by the agent when the network's underlying networks change.
+     *
+     * <p>{@code networks} is one of the following:
+     * <ul>
+     * <li><strong>a non-empty array</strong>: an array of one or more {@link Network}s, in
+     * decreasing preference order. For example, if this VPN uses both wifi and mobile (cellular)
+     * networks to carry app traffic, but prefers or uses wifi more than mobile, wifi should appear
+     * first in the array.</li>
+     * <li><strong>an empty array</strong>: a zero-element array, meaning that the VPN has no
+     * underlying network connection, and thus, app traffic will not be sent or received.</li>
+     * <li><strong>null</strong>: (default) signifies that the VPN uses whatever is the system's
+     * default network. I.e., it doesn't use the {@code bindSocket} or {@code bindDatagramSocket}
+     * APIs mentioned above to send traffic over specific channels.</li>
+     * </ul>
+     *
+     * @param underlyingNetworks the new list of underlying networks.
+     * @see {@link VpnService.Builder#setUnderlyingNetworks(Network[])}
+     */
+    public final void setUnderlyingNetworks(@Nullable List<Network> underlyingNetworks) {
+        final ArrayList<Network> underlyingArray = (underlyingNetworks != null)
+                ? new ArrayList<>(underlyingNetworks) : null;
+        final Bundle bundle = new Bundle();
+        bundle.putParcelableArrayList(UNDERLYING_NETWORKS_KEY, underlyingArray);
+        queueOrSendMessage(EVENT_UNDERLYING_NETWORKS_CHANGED, bundle);
     }
 
     /**
