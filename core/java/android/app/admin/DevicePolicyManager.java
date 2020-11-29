@@ -5213,9 +5213,22 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by a device or profile owner, or delegated certificate installer, to install a
-     * certificate and corresponding private key. All apps within the profile will be able to access
-     * the certificate and use the private key, given direct user approval.
+     * This API can be called by the following to install a certificate and corresponding
+     * private key:
+     * <ul>
+     *    <li>Device owner</li>
+     *    <li>Profile owner</li>
+     *    <li>Delegated certificate installer</li>
+     *    <li>Credential management app</li>
+     * </ul>
+     * All apps within the profile will be able to access the certificate and use the private key,
+     * given direct user approval.
+     *
+     * <p>From Android {@link android.os.Build.VERSION_CODES#S}, the credential management app
+     * can call this API. However, this API sets the key pair as user selectable by default,
+     * which is not permitted when called by the credential management app. Instead,
+     * {@link #installKeyPair(ComponentName, PrivateKey, Certificate[], String, int)} should be
+     * called with {@link #INSTALLKEY_SET_USER_SELECTABLE} not set as a flag.
      *
      * <p>Access to the installed credentials will not be granted to the caller of this API without
      * direct user approval. This is for security - should a certificate installer become
@@ -5246,10 +5259,23 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by a device or profile owner, or delegated certificate installer, to install a
-     * certificate chain and corresponding private key for the leaf certificate. All apps within the
-     * profile will be able to access the certificate chain and use the private key, given direct
-     * user approval.
+     * This API can be called by the following to install a certificate chain and corresponding
+     * private key for the leaf certificate:
+     * <ul>
+     *    <li>Device owner</li>
+     *    <li>Profile owner</li>
+     *    <li>Delegated certificate installer</li>
+     *    <li>Credential management app</li>
+     * </ul>
+     * All apps within the profile will be able to access the certificate chain and use the private
+     * key, given direct user approval.
+     *
+     * <p>From Android {@link android.os.Build.VERSION_CODES#S}, the credential management app
+     * can call this API. However, this API sets the key pair as user selectable by default,
+     * which is not permitted when called by the credential management app. Instead,
+     * {@link #installKeyPair(ComponentName, PrivateKey, Certificate[], String, int)} should be
+     * called with {@link #INSTALLKEY_SET_USER_SELECTABLE} not set as a flag.
+     * Note, there can only be a credential management app on an unmanaged device.
      *
      * <p>The caller of this API may grant itself access to the certificate and private key
      * immediately, without user approval. It is a best practice not to request this unless strictly
@@ -5287,10 +5313,26 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by a device or profile owner, or delegated certificate installer, to install a
-     * certificate chain and corresponding private key for the leaf certificate. All apps within the
-     * profile will be able to access the certificate chain and use the private key, given direct
-     * user approval (if the user is allowed to select the private key).
+     * This API can be called by the following to install a certificate chain and corresponding
+     * private key for the leaf certificate:
+     * <ul>
+     *    <li>Device owner</li>
+     *    <li>Profile owner</li>
+     *    <li>Delegated certificate installer</li>
+     *    <li>Credential management app</li>
+     * </ul>
+     * All apps within the profile will be able to access the certificate chain and use the
+     * private key, given direct user approval (if the user is allowed to select the private key).
+     *
+     * <p>From Android {@link android.os.Build.VERSION_CODES#S}, the credential management app
+     * can call this API. If called by the credential management app:
+     * <ul>
+     *    <li>The componentName must be {@code null}r</li>
+     *    <li>The alias must exist in the credential management app's
+     *    {@link android.security.AppUriAuthenticationPolicy}</li>
+     *    <li>The key pair must not be user selectable</li>
+     * </ul>
+     * Note, there can only be a credential management app on an unmanaged device.
      *
      * <p>The caller of this API may grant itself access to the certificate and private key
      * immediately, without user approval. It is a best practice not to request this unless strictly
@@ -5316,7 +5358,8 @@ public class DevicePolicyManager {
      *        {@link #INSTALLKEY_REQUEST_CREDENTIALS_ACCESS}.
      * @return {@code true} if the keys were installed, {@code false} otherwise.
      * @throws SecurityException if {@code admin} is not {@code null} and not a device or profile
-     *         owner.
+     *         owner, or {@code admin} is null but the calling application is not a delegated
+     *         certificate installer or credential management app.
      * @see android.security.KeyChain#getCertificateChain
      * @see #setDelegatedScopes
      * @see #DELEGATION_CERT_INSTALL
@@ -5349,15 +5392,26 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by a device or profile owner, or delegated certificate installer, to remove a
-     * certificate and private key pair installed under a given alias.
+     * This API can be called by the following to remove a certificate and private key pair
+     * installed under a given alias:
+     * <ul>
+     *    <li>Device owner</li>
+     *    <li>Profile owner</li>
+     *    <li>Delegated certificate installer</li>
+     *    <li>Credential management app</li>
+     * </ul>
+     *
+     * <p>From Android {@link android.os.Build.VERSION_CODES#S}, the credential management app
+     * can call this API. If called by the credential management app, the componentName must be
+     * {@code null}. Note, there can only be a credential management app on an unmanaged device.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with, or
      *        {@code null} if calling from a delegated certificate installer.
      * @param alias The private key alias under which the certificate is installed.
      * @return {@code true} if the private key alias no longer exists, {@code false} otherwise.
      * @throws SecurityException if {@code admin} is not {@code null} and not a device or profile
-     *         owner.
+     *         owner, or {@code admin} is null but the calling application is not a delegated
+     *         certificate installer or credential management app.
      * @see #setDelegatedScopes
      * @see #DELEGATION_CERT_INSTALL
      */
@@ -5392,10 +5446,20 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by a device or profile owner, or delegated certificate installer, to generate a
-     * new private/public key pair. If the device supports key generation via secure hardware,
-     * this method is useful for creating a key in KeyChain that never left the secure hardware.
-     * Access to the key is controlled the same way as in {@link #installKeyPair}.
+     * This API can be called by the following to generate a new private/public key pair:
+     * <ul>
+     *    <li>Device owner</li>
+     *    <li>Profile owner</li>
+     *    <li>Delegated certificate installer</li>
+     *    <li>Credential management app</li>
+     * </ul>
+     * If the device supports key generation via secure hardware, this method is useful for
+     * creating a key in KeyChain that never left the secure hardware. Access to the key is
+     * controlled the same way as in {@link #installKeyPair}.
+     *
+     * <p>From Android {@link android.os.Build.VERSION_CODES#S}, the credential management app
+     * can call this API. If called by the credential management app, the componentName must be
+     * {@code null}. Note, there can only be a credential management app on an unmanaged device.
      *
      * <p>Because this method might take several seconds to complete, it should only be called from
      * a worker thread. This method returns {@code null} when called from the main thread.
@@ -5418,9 +5482,10 @@ public class DevicePolicyManager {
      * supports these features, refer to {@link #isDeviceIdAttestationSupported()} and
      * {@link #isUniqueDeviceAttestationSupported()}.
      *
-     * <p>Device owner, profile owner and their delegated certificate installer can use
-     * {@link #ID_TYPE_BASE_INFO} to request inclusion of the general device information
-     * including manufacturer, model, brand, device and product in the attestation record.
+     * <p>Device owner, profile owner, their delegated certificate installer and the credential
+     * management app can use {@link #ID_TYPE_BASE_INFO} to request inclusion of the general device
+     * information including manufacturer, model, brand, device and product in the attestation
+     * record.
      * Only device owner, profile owner on an organization-owned device and their delegated
      * certificate installers can use {@link #ID_TYPE_SERIAL}, {@link #ID_TYPE_IMEI} and
      * {@link #ID_TYPE_MEID} to request unique device identifiers to be attested (the serial number,
@@ -5455,9 +5520,11 @@ public class DevicePolicyManager {
      *        {@code keySpec}.
      * @return A non-null {@code AttestedKeyPair} if the key generation succeeded, null otherwise.
      * @throws SecurityException if {@code admin} is not {@code null} and not a device or profile
-     *         owner. If Device ID attestation is requested (using {@link #ID_TYPE_SERIAL},
-     *         {@link #ID_TYPE_IMEI} or {@link #ID_TYPE_MEID}), the caller must be the Device Owner
-     *         or the Certificate Installer delegate.
+     *         owner, or {@code admin} is null but the calling application is not a delegated
+     *         certificate installer or credential management app. If Device ID attestation is
+     *         requested (using {@link #ID_TYPE_SERIAL}, {@link #ID_TYPE_IMEI} or
+     *         {@link #ID_TYPE_MEID}), the caller must be the Device Owner or the Certificate
+     *         Installer delegate.
      * @throws IllegalArgumentException in the following cases:
      *         <p>
      *         <ul>
@@ -5620,10 +5687,19 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by a device or profile owner, or delegated certificate installer, to associate
-     * certificates with a key pair that was generated using {@link #generateKeyPair}, and
-     * set whether the key is available for the user to choose in the certificate selection
-     * prompt.
+     * This API can be called by the following to associate certificates with a key pair that was
+     * generated using {@link #generateKeyPair}, and set whether the key is available for the user
+     * to choose in the certificate selection prompt:
+     * <ul>
+     *    <li>Device owner</li>
+     *    <li>Profile owner</li>
+     *    <li>Delegated certificate installer</li>
+     *    <li>Credential management app</li>
+     * </ul>
+     *
+     * <p>From Android {@link android.os.Build.VERSION_CODES#S}, the credential management app
+     * can call this API. If called by the credential management app, the componentName must be
+     * {@code null}. Note, there can only be a credential management app on an unmanaged device.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with, or
      *            {@code null} if calling from a delegated certificate installer.
@@ -5641,7 +5717,7 @@ public class DevicePolicyManager {
      *        successfully associated with it, {@code false} otherwise.
      * @throws SecurityException if {@code admin} is not {@code null} and not a device or profile
      *         owner, or {@code admin} is null but the calling application is not a delegated
-     *         certificate installer.
+     *         certificate installer or credential management app.
      */
     public boolean setKeyPairCertificate(@Nullable ComponentName admin,
             @NonNull String alias, @NonNull List<Certificate> certs, boolean isUserSelectable) {
