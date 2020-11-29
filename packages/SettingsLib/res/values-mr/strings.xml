@@ -25,7 +25,7 @@
     <string name="wifi_remembered" msgid="3266709779723179188">"सेव्ह केले"</string>
     <string name="wifi_disconnected" msgid="7054450256284661757">"डिस्कनेक्ट केले"</string>
     <string name="wifi_disabled_generic" msgid="2651916945380294607">"अक्षम"</string>
-    <string name="wifi_disabled_network_failure" msgid="2660396183242399585">"IP कॉन्फिगरेशन अयशस्वी"</string>
+    <string name="wifi_disabled_network_failure" msgid="2660396183242399585">"IP कॉंफिगरेशन अयशस्वी"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="1302938248432705534">"कमी दर्जाच्या नेटवर्कमुळे कनेक्ट केलेले नाही"</string>
     <string name="wifi_disabled_wifi_failure" msgid="8819554899148331100">"WiFi कनेक्शन अयशस्वी"</string>
     <string name="wifi_disabled_password_failure" msgid="6892387079613226738">"प्रमाणीकरण समस्या"</string>
@@ -97,7 +97,7 @@
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"श्रवण यंत्रांशी कनेक्ट केले आहे"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"मीडिया ऑडिओवर कनेक्ट केले"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"फोन ऑडिओ वर कनेक्ट केले"</string>
-    <string name="bluetooth_opp_profile_summary_connected" msgid="2393521801478157362">"फाईल स्थानांतर सर्व्हरवर कनेक्ट केले"</string>
+    <string name="bluetooth_opp_profile_summary_connected" msgid="2393521801478157362">"फाइल स्थानांतर सर्व्हरवर कनेक्ट केले"</string>
     <string name="bluetooth_map_profile_summary_connected" msgid="4141725591784669181">"नकाशाशी कनेक्ट केले"</string>
     <string name="bluetooth_sap_profile_summary_connected" msgid="1280297388033001037">"SAP शी कनेक्‍ट केले"</string>
     <string name="bluetooth_opp_profile_summary_not_connected" msgid="3959741824627764954">"फाइल स्थानांतर सर्व्हरशी कनेक्ट केले नाही"</string>
@@ -109,7 +109,7 @@
     <string name="bluetooth_sap_profile_summary_use_for" msgid="6204902866176714046">"SIM प्रवेशासाठी वापरा"</string>
     <string name="bluetooth_a2dp_profile_summary_use_for" msgid="7324694226276491807">"मीडिया ऑडिओसाठी वापरा"</string>
     <string name="bluetooth_headset_profile_summary_use_for" msgid="808970643123744170">"फोन ऑडिओसाठी वापरा"</string>
-    <string name="bluetooth_opp_profile_summary_use_for" msgid="461981154387015457">"फाईल स्थानांतरणासाठी वापरा"</string>
+    <string name="bluetooth_opp_profile_summary_use_for" msgid="461981154387015457">"फाइल स्थानांतरणासाठी वापरा"</string>
     <string name="bluetooth_hid_profile_summary_use_for" msgid="4289460627406490952">"इनपुट साठी वापरा"</string>
     <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="7689393730163320483">"श्रवण यंत्रांसाठी वापरा"</string>
     <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"पेअर करा"</string>
@@ -269,8 +269,8 @@
     <string name="bluetooth_select_a2dp_codec_type_help_info" msgid="8647200416514412338">"फोन किंवा हेडसेटला सपोर्ट करत नाही म्हणजे ती निकामी झाली आहे"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="6253965294594390806">"प्रति पॅटर्न ब्लूटूध ऑडिओ बिट"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="4898693684282596143">"ब्लूटूथ ऑडिओ Codec ट्रिगर करा\nनिवड: बिट प्रति नमुना"</string>
-    <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="364277285688014427">"ब्लूटूथ ऑडिओ चॅनेल मोड"</string>
-    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="2076949781460359589">"ब्लूटूथ ऑडिओ Codec ट्रिगर करा\nनिवड: चॅनेल मोड"</string>
+    <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="364277285688014427">"ब्लूटूथ ऑडिओ चॅनल मोड"</string>
+    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="2076949781460359589">"ब्लूटूथ ऑडिओ Codec ट्रिगर करा\nनिवड: चॅनल मोड"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3233402355917446304">"ब्लूटूथ ऑडिओ LDAC कोडेक: प्लेबॅक गुणवत्ता"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="7274396574659784285">"ब्लूटूथ ऑडिओ LDAC\nकोडेक निवड ट्रिगर करा: प्लेबॅक गुणवत्ता"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="2040810756832027227">"स्ट्रीमिंग: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
@@ -371,7 +371,7 @@
     <string name="app_process_limit_title" msgid="8361367869453043007">"पार्श्वभूमी प्रक्रिया मर्यादा"</string>
     <string name="show_all_anrs" msgid="9160563836616468726">"बॅकग्राउंड ANR दाखवा"</string>
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"बॅकग्राउंड अ‍ॅप्ससाठी अ‍ॅप प्रतिसाद देत नाही दाखवते"</string>
-    <string name="show_notification_channel_warnings" msgid="3448282400127597331">"सूचना चॅनेल चेतावण्या दाखवा"</string>
+    <string name="show_notification_channel_warnings" msgid="3448282400127597331">"सूचना चॅनल चेतावण्या दाखवा"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"एखादे अ‍ॅप वैध चॅनेलशिवाय सूचना पोस्ट करते तेव्हा स्क्रीनवर चेतावणी देते"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"बाह्यवर ॲप्सना अनुमती देण्याची सक्ती करा"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"manifest मूल्यांकडे दुर्लक्ष करून, कोणत्याही ॲपला बाह्य स्टोरेजवर लेखन केले जाण्यासाठी पात्र बनविते"</string>
@@ -405,11 +405,11 @@
     <string name="select_webview_provider_title" msgid="3917815648099445503">"वेबदृश्य अंमलबजावणी"</string>
     <string name="select_webview_provider_dialog_title" msgid="2444261109877277714">"वेबदृश्य अंमलबजावणी सेट करा"</string>
     <string name="select_webview_provider_toast_text" msgid="8512254949169359848">"ही निवड यापुढे वैध असणार नाही. पुन्हा प्रयत्न करा."</string>
-    <string name="convert_to_file_encryption" msgid="2828976934129751818">"फाईल कूटबद्धीकरणावर रूपांतरित करा"</string>
+    <string name="convert_to_file_encryption" msgid="2828976934129751818">"फाइल कूटबद्धीकरणावर रूपांतरित करा"</string>
     <string name="convert_to_file_encryption_enabled" msgid="840757431284311754">"रूपांतरित करा..."</string>
-    <string name="convert_to_file_encryption_done" msgid="8965831011811180627">"फाईल आधीपासून एंक्रिप्ट होती"</string>
-    <string name="title_convert_fbe" msgid="5780013350366495149">"फाईल आधारित कूटबद्धीकरणावर रूपांतरित करणे"</string>
-    <string name="convert_to_fbe_warning" msgid="34294381569282109">"फाईल आधारित कूटबद्धीकरणावर डेटा विभाजक रूपांतरित करा.\n !!चेतावणी!! हे आपल्‍या सर्व डेटास मिटवेल.\n हे वैशिष्ट्य अल्‍फा आहे आणि कदाचित योग्यरित्या कार्य करू शकत नाही.\n सुरू ठेवण्‍यासाठी \'पुसा आणि रूपांतरित करा...\' दाबा."</string>
+    <string name="convert_to_file_encryption_done" msgid="8965831011811180627">"फाइल आधीपासून एंक्रिप्ट होती"</string>
+    <string name="title_convert_fbe" msgid="5780013350366495149">"फाइल आधारित कूटबद्धीकरणावर रूपांतरित करणे"</string>
+    <string name="convert_to_fbe_warning" msgid="34294381569282109">"फाइल आधारित कूटबद्धीकरणावर डेटा विभाजक रूपांतरित करा.\n !!चेतावणी!! हे आपल्‍या सर्व डेटास मिटवेल.\n हे वैशिष्ट्य अल्‍फा आहे आणि कदाचित योग्यरित्या कार्य करू शकत नाही.\n सुरू ठेवण्‍यासाठी \'पुसा आणि रूपांतरित करा...\' दाबा."</string>
     <string name="button_convert_fbe" msgid="1159861795137727671">"पुसा आणि रुपांतरित करा..."</string>
     <string name="picture_color_mode" msgid="1013807330552931903">"चित्र रंग मोड"</string>
     <string name="picture_color_mode_desc" msgid="151780973768136200">"sRGB वापरा"</string>
@@ -526,7 +526,7 @@
     <string name="accessor_expires_text" msgid="4625619273236786252">"भाडेपट्टी <xliff:g id="DATE">%s</xliff:g> रोजी एक्स्पायर होईल"</string>
     <string name="delete_blob_text" msgid="2819192607255625697">"शेअर केलेला डेटा हटवा"</string>
     <string name="delete_blob_confirmation_text" msgid="7807446938920827280">"तुम्हाला नक्की हा शेअर केलेला डेटा हटवायचा आहे का?"</string>
-    <string name="user_add_user_item_summary" msgid="5748424612724703400">"वापरकर्त्यांकडे त्यांचे स्वत:चे अ‍ॅप्स आणि सामग्री आहे"</string>
+    <string name="user_add_user_item_summary" msgid="5748424612724703400">"वापरकर्त्यांकडे त्यांचे स्वत:चे अ‍ॅप्स आणि आशय आहे"</string>
     <string name="user_add_profile_item_summary" msgid="5418602404308968028">"तुम्ही आपल्या खात्यावरुन अ‍ॅप्स आणि सामग्रीमध्ये प्रवेश करण्यास प्रतिबंध करु शकता"</string>
     <string name="user_add_user_item_title" msgid="2394272381086965029">"वापरकर्ता"</string>
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"प्रतिबंधित प्रोफाईल"</string>

@@ -171,11 +171,11 @@
   </string-array>
   <string-array name="select_logd_size_summaries">
     <item msgid="409235464399258501">"Идэвхгүй"</item>
-    <item msgid="4195153527464162486">"лог буфер бүрт 64K"</item>
-    <item msgid="7464037639415220106">"лог буфер бүрт 256K"</item>
-    <item msgid="8539423820514360724">"лог буфер бүрт 1M"</item>
-    <item msgid="1984761927103140651">"лог буфер бүрт 4M"</item>
-    <item msgid="7892098981256010498">"лог буфер бүрт 16M"</item>
+    <item msgid="4195153527464162486">"лог буфер бүрд 64K"</item>
+    <item msgid="7464037639415220106">"лог буфер бүрд 256K"</item>
+    <item msgid="8539423820514360724">"лог буфер бүрд 1M"</item>
+    <item msgid="1984761927103140651">"лог буфер бүрд 4M"</item>
+    <item msgid="7892098981256010498">"лог буфер бүрд 16M"</item>
   </string-array>
   <string-array name="select_logpersist_titles">
     <item msgid="704720725704372366">"Идэвхгүй"</item>

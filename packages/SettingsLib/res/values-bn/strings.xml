@@ -211,9 +211,9 @@
     <string name="adb_wireless_error" msgid="721958772149779856">"সমস্যা"</string>
     <string name="adb_wireless_settings" msgid="2295017847215680229">"ওয়্যারলেস ডিবাগিং"</string>
     <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"কোন কোন ডিভাইস উপলভ্য আছে তা দেখে নিয়ে ব্যবহার করার জন্য, ওয়্যারলেস ডিবাগিং চালু করুন"</string>
-    <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"QR কোড ব্যবহার করে ডিভাইস যোগ করুন"</string>
+    <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"QR কোড ব্যবহার করে ডিভাইসের সাথে পেয়ার করুন"</string>
     <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"QR কোড স্ক্যানার ব্যবহার করে নতুন ডিভাইস যোগ করুন"</string>
-    <string name="adb_pair_method_code_title" msgid="1122590300445142904">"যোগ করার কোড ব্যবহার করে ডিভাইস যোগ করুন"</string>
+    <string name="adb_pair_method_code_title" msgid="1122590300445142904">"পেয়ারিং কোড ব্যবহার করে ডিভাইসের সাথে পেয়ার করুন"</string>
     <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"ছয় সংখ্যার কোড ব্যবহার করে নতুন ডিভাইস যোগ করুন"</string>
     <string name="adb_paired_devices_title" msgid="5268997341526217362">"যোগ করা ডিভাইস"</string>
     <string name="adb_wireless_device_connected_summary" msgid="3039660790249148713">"এখন কানেক্ট রয়েছে"</string>
@@ -222,16 +222,16 @@
     <string name="adb_device_fingerprint_title_format" msgid="291504822917843701">"ডিভাইসে আঙ্গুলের ছাপ: <xliff:g id="FINGERPRINT_PARAM">%1$s</xliff:g>"</string>
     <string name="adb_wireless_connection_failed_title" msgid="664211177427438438">"কানেক্ট করা যায়নি"</string>
     <string name="adb_wireless_connection_failed_message" msgid="9213896700171602073">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>টি সঠিক নেটওয়ার্কে কানেক্ট আছে কিনা দেখে নিন"</string>
-    <string name="adb_pairing_device_dialog_title" msgid="7141739231018530210">"ডিভাইসের সাথে যোগ করুন"</string>
-    <string name="adb_pairing_device_dialog_pairing_code_label" msgid="3639239786669722731">"ওয়াই-ফাই যোগ করার কোড"</string>
-    <string name="adb_pairing_device_dialog_failed_title" msgid="3426758947882091735">"যোগ করা যায়নি"</string>
+    <string name="adb_pairing_device_dialog_title" msgid="7141739231018530210">"ডিভাইসের সাথে পেয়ার করুন"</string>
+    <string name="adb_pairing_device_dialog_pairing_code_label" msgid="3639239786669722731">"ওয়াই-ফাইয়ের সাথে পেয়ার করার কোড"</string>
+    <string name="adb_pairing_device_dialog_failed_title" msgid="3426758947882091735">"পেয়ার করা যায়নি"</string>
     <string name="adb_pairing_device_dialog_failed_msg" msgid="6611097519661997148">"ডিভাইসটি একই নেটওয়ার্কে কানেক্ট আছে কিনা দেখে নিন।"</string>
-    <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"QR কোড স্ক্যান করে ওয়াই-ফাই ব্যবহার করে ডিভাইস যোগ করুন"</string>
+    <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"QR কোড স্ক্যান করে ওয়াই-ফাই ব্যবহার করে ডিভাইসের সাথে পেয়ার করুন"</string>
     <string name="adb_wireless_verifying_qrcode_text" msgid="6123192424916029207">"ডিভাইস যোগ করা হচ্ছে…"</string>
     <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"ডিভাইস যোগ করা যায়নি। এটি দুটি কারণে হয়ে থাকে - QR কোডটি সঠিক নয় বা ডিভাইসটি একই নেটওয়ার্কে কানেক্ট করা নেই।"</string>
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"IP অ্যাড্রেস ও পোর্ট"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"QR কোড স্ক্যান করুন"</string>
-    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"QR কোড স্ক্যান করে ওয়াই-ফাইয়ের সাহায্যে ডিভাইস যোগ করুন"</string>
+    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"QR কোড স্ক্যান করে ওয়াই-ফাই ব্যবহার করে ডিভাইসের সাথে পেয়ার করুন"</string>
     <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"একটি ওয়াই-ফাই নেটওয়ার্কের সাথে কানেক্ট করুন"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, debug, dev"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"ত্রুটি প্রতিবেদনের শর্টকাট"</string>
@@ -488,8 +488,8 @@
     <string name="status_unavailable" msgid="5279036186589861608">"অনুপলভ্য"</string>
     <string name="wifi_status_mac_randomized" msgid="466382542497832189">"MAC র‍্যান্ডমাইজ করা হয়েছে"</string>
     <plurals name="wifi_tether_connected_summary" formatted="false" msgid="6317236306047306139">
-      <item quantity="one">%1$dটি ডিভাইস কানেক্ট</item>
-      <item quantity="other">%1$dটি ডিভাইস কানেক্ট</item>
+      <item quantity="one">%1$dটি ডিভাইস কানেক্ট রয়েছে</item>
+      <item quantity="other">%1$dটি ডিভাইস কানেক্ট রয়েছে</item>
     </plurals>
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"আরও বেশি।"</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"আরও কম।"</string>
