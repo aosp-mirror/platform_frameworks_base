@@ -1089,6 +1089,10 @@ public class ConnectivityServiceTest {
             mMockNetworkAgent = new TestNetworkAgentWrapper(TRANSPORT_VPN, lp,
                     mNetworkCapabilities);
             mMockNetworkAgent.waitForIdle(TIMEOUT_MS);
+            verify(mNetworkManagementService, times(1))
+                    .addVpnUidRanges(eq(mMockVpn.getNetId()), eq(uids.toArray(new UidRange[0])));
+            verify(mNetworkManagementService, never())
+                    .removeVpnUidRanges(eq(mMockVpn.getNetId()), any());
             mAgentRegistered = true;
             mNetworkCapabilities.set(mMockNetworkAgent.getNetworkCapabilities());
             mNetworkAgent = mMockNetworkAgent.getNetworkAgent();
@@ -6922,8 +6926,8 @@ public class ConnectivityServiceTest {
         final Set<UidRange> vpnRange = Collections.singleton(UidRange.createForUser(VPN_USER));
         mMockVpn.establish(lp, VPN_UID, vpnRange);
 
-        // Connected VPN should have interface rules set up. There are two expected invocations,
-        // one during VPN uid update, one during VPN LinkProperties update
+        // A connected VPN should have interface rules set up. There are two expected invocations,
+        // one during the VPN initial connection, one during the VPN LinkProperties update.
         ArgumentCaptor<int[]> uidCaptor = ArgumentCaptor.forClass(int[].class);
         verify(mMockNetd, times(2)).firewallAddUidInterfaceRules(eq("tun0"), uidCaptor.capture());
         assertContainsExactly(uidCaptor.getAllValues().get(0), APP1_UID, APP2_UID);
