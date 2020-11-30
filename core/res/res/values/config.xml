@@ -1532,6 +1532,14 @@
     <!-- Class name of WallpaperManagerService. -->
     <string name="config_wallpaperManagerServiceName" translatable="false">com.android.server.wallpaper.WallpaperManagerService</string>
 
+    <!-- Specifies priority of automatic time sources. Suggestions from higher entries in the list
+         take precedence over lower ones.
+         See com.android.server.timedetector.TimeDetectorStrategy for available sources. -->
+    <string-array name="config_autoTimeSourcesPriority">
+        <item>telephony</item>
+        <item>network</item>
+    </string-array>
+
     <!-- Enables the TimeZoneRuleManager service. This is the global switch for the updateable time
          zone update mechanism. -->
     <bool name="config_enableUpdateableTimeZoneRules">false</bool>

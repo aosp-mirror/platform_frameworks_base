@@ -18,6 +18,8 @@ package com.android.server.timedetector;
 
 import static com.android.server.timedetector.TimeDetectorStrategy.originToString;
 
+import static java.util.stream.Collectors.joining;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.AlarmManager;
@@ -141,7 +143,7 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
          * Returns the order to look at time suggestions when automatically detecting time.
          * See {@code #ORIGIN_} constants
          */
-        @Origin int[] getAutoOriginPriorities();
+        @Origin int[] autoOriginPriorities();
 
         /** Acquire a suitable wake lock. Must be followed by {@link #releaseWakeLock()} */
         void acquireWakeLock();
@@ -254,6 +256,14 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
         ipw.println("mCallback.systemClockMillis()=" + mCallback.systemClockMillis());
         ipw.println("mCallback.systemClockUpdateThresholdMillis()="
                 + mCallback.systemClockUpdateThresholdMillis());
+        ipw.printf("mCallback.autoTimeLowerBound()=%s(%s)\n",
+                mCallback.autoTimeLowerBound(),
+                mCallback.autoTimeLowerBound().toEpochMilli());
+        String priorities =
+                Arrays.stream(mCallback.autoOriginPriorities())
+                        .mapToObj(TimeDetectorStrategy::originToString)
+                        .collect(joining(",", "[", "]"));
+        ipw.println("mCallback.autoOriginPriorities()=" + priorities);
 
         ipw.println("Time change log:");
         ipw.increaseIndent(); // level 2
@@ -356,7 +366,7 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
         }
 
         // Try the different origins one at a time.
-        int[] originPriorities = mCallback.getAutoOriginPriorities();
+        int[] originPriorities = mCallback.autoOriginPriorities();
         for (int origin : originPriorities) {
             TimestampedValue<Long> newUtcTime = null;
             String cause = null;
