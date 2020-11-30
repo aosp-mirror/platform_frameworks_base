@@ -200,6 +200,7 @@ public class ToggleSliderView extends RelativeLayout implements ToggleSlider {
 
             if (mMirrorController != null) {
                 mMirrorController.hideMirror();
+                mMirrorController.hideMirrorImmediately();
             }
         }
     };
