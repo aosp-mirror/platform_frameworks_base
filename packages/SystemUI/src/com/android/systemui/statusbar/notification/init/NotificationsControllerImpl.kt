@@ -22,6 +22,7 @@ import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper.Snoo
 import com.android.systemui.statusbar.FeatureFlags
 import com.android.systemui.statusbar.NotificationListener
 import com.android.systemui.statusbar.NotificationPresenter
+import com.android.systemui.statusbar.notification.AnimatedImageNotificationManager
 import com.android.systemui.statusbar.notification.NotificationActivityStarter
 import com.android.systemui.statusbar.notification.NotificationClicker
 import com.android.systemui.statusbar.notification.NotificationEntryManager
@@ -71,7 +72,8 @@ class NotificationsControllerImpl @Inject constructor(
     private val headsUpManager: HeadsUpManager,
     private val headsUpController: HeadsUpController,
     private val headsUpViewBinder: HeadsUpViewBinder,
-    private val clickerBuilder: NotificationClicker.Builder
+    private val clickerBuilder: NotificationClicker.Builder,
+    private val animatedImageNotificationManager: AnimatedImageNotificationManager
 ) : NotificationsController {
 
     override fun initialize(
@@ -100,6 +102,7 @@ class NotificationsControllerImpl @Inject constructor(
                 bindRowCallback)
         headsUpViewBinder.setPresenter(presenter)
         notifBindPipelineInitializer.initialize()
+        animatedImageNotificationManager.bind()
 
         if (featureFlags.isNewNotifPipelineEnabled) {
             newNotifPipeline.get().initialize(
