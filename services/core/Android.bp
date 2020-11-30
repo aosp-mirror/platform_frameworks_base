@@ -196,7 +196,6 @@ filegroup {
         "java/com/android/server/connectivity/KeepaliveTracker.java",
         "java/com/android/server/connectivity/LingerMonitor.java",
         "java/com/android/server/connectivity/MockableSystemProperties.java",
-        "java/com/android/server/connectivity/MultipathPolicyTracker.java",
         "java/com/android/server/connectivity/Nat464Xlat.java",
         "java/com/android/server/connectivity/NetdEventListenerService.java",
         "java/com/android/server/connectivity/NetworkAgentInfo.java",
