@@ -77,7 +77,7 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
     @NonNull private final ClientMonitor.LazyDaemon<IFingerprint> mLazyDaemon;
     @NonNull private final Handler mHandler;
     @NonNull private final LockoutResetDispatcher mLockoutResetDispatcher;
-    @NonNull private final IActivityTaskManager mActivityTaskManager;
+    @NonNull private final ActivityTaskManager mActivityTaskManager;
     @NonNull private final BiometricTaskStackListener mTaskStackListener;
 
     @Nullable private IFingerprint mDaemon;
@@ -98,22 +98,18 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
                         continue; // Keyguard is always allowed
                     }
 
-                    try {
-                        final List<ActivityManager.RunningTaskInfo> runningTasks =
-                                mActivityTaskManager.getTasks(1);
-                        if (!runningTasks.isEmpty()) {
-                            final String topPackage =
-                                    runningTasks.get(0).topActivity.getPackageName();
-                            if (!topPackage.contentEquals(client.getOwnerString())
-                                    && !client.isAlreadyDone()) {
-                                Slog.e(getTag(), "Stopping background authentication, top: "
-                                        + topPackage + " currentClient: " + client);
-                                mSensors.valueAt(i).getScheduler()
-                                        .cancelAuthentication(client.getToken());
-                            }
+                    final List<ActivityManager.RunningTaskInfo> runningTasks =
+                            mActivityTaskManager.getTasks(1);
+                    if (!runningTasks.isEmpty()) {
+                        final String topPackage =
+                                runningTasks.get(0).topActivity.getPackageName();
+                        if (!topPackage.contentEquals(client.getOwnerString())
+                                && !client.isAlreadyDone()) {
+                            Slog.e(getTag(), "Stopping background authentication, top: "
+                                    + topPackage + " currentClient: " + client);
+                            mSensors.valueAt(i).getScheduler()
+                                    .cancelAuthentication(client.getToken());
                         }
-                    } catch (RemoteException e) {
-                        Slog.e(getTag(), "Unable to get running tasks", e);
                     }
                 }
             });
@@ -129,7 +125,7 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
         mLazyDaemon = this::getHalInstance;
         mHandler = new Handler(Looper.getMainLooper());
         mLockoutResetDispatcher = lockoutResetDispatcher;
-        mActivityTaskManager = ActivityTaskManager.getService();
+        mActivityTaskManager = ActivityTaskManager.getInstance();
         mTaskStackListener = new BiometricTaskStackListener();
 
         for (SensorProps prop : props) {

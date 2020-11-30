@@ -151,6 +151,12 @@ public class FrameworkServicesModule {
 
     @Provides
     @Singleton
+    static ActivityTaskManager provideActivityTaskManager() {
+        return ActivityTaskManager.getInstance();
+    }
+
+    @Provides
+    @Singleton
     static IActivityTaskManager provideIActivityTaskManager() {
         return ActivityTaskManager.getService();
     }

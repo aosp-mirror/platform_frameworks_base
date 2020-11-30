@@ -42,7 +42,7 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 
 import android.app.ActivityManager;
-import android.app.IActivityTaskManager;
+import android.app.ActivityTaskManager;
 import android.app.PendingIntent;
 import android.content.ClipData;
 import android.content.ClipDescription;
@@ -69,7 +69,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
 import java.util.ArrayList;
@@ -88,7 +87,7 @@ public class DragAndDropPolicyTest {
     private Context mContext;
 
     @Mock
-    private IActivityTaskManager mIActivityTaskManager;
+    private ActivityTaskManager mActivityTaskManager;
 
     @Mock
     private SplitScreen mSplitScreen;
@@ -134,7 +133,7 @@ public class DragAndDropPolicyTest {
             return null;
         }).when(mSplitScreen).registerInSplitScreenListener(any());
 
-        mPolicy = new DragAndDropPolicy(mContext, mIActivityTaskManager, mSplitScreen, mStarter);
+        mPolicy = new DragAndDropPolicy(mContext, mActivityTaskManager, mSplitScreen, mStarter);
         mActivityClipData = createClipData(MIMETYPE_APPLICATION_ACTIVITY);
         mNonResizeableActivityClipData = createClipData(MIMETYPE_APPLICATION_ACTIVITY);
         setClipDataResizeable(mNonResizeableActivityClipData, false);
@@ -188,9 +187,9 @@ public class DragAndDropPolicyTest {
         return info;
     }
 
-    private void setRunningTask(ActivityManager.RunningTaskInfo task) throws RemoteException {
-        doReturn(Collections.singletonList(task)).when(mIActivityTaskManager)
-                .getFilteredTasks(anyInt(), anyBoolean());
+    private void setRunningTask(ActivityManager.RunningTaskInfo task) {
+        doReturn(Collections.singletonList(task)).when(mActivityTaskManager)
+                .getTasks(anyInt(), anyBoolean());
     }
 
     private void setClipDataResizeable(ClipData data, boolean resizeable) {
