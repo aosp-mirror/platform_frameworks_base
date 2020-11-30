@@ -107,11 +107,9 @@ public class DisplayPolicyTestsBase extends WindowTestsBase {
     }
 
     void addWindow(WindowState win) {
-        final int callingPid = Binder.getCallingPid();
-        final int callingUid = Binder.getCallingUid();
-        mDisplayPolicy.adjustWindowParamsLw(win, win.mAttrs, callingPid, callingUid);
-        assertEquals(WindowManagerGlobal.ADD_OKAY,
-                mDisplayPolicy.validateAddingWindowLw(win.mAttrs, callingPid, callingUid));
+        mDisplayPolicy.adjustWindowParamsLw(win, win.mAttrs);
+        assertEquals(WindowManagerGlobal.ADD_OKAY, mDisplayPolicy.validateAddingWindowLw(
+                win.mAttrs, Binder.getCallingPid(), Binder.getCallingUid()));
         mDisplayPolicy.addWindowLw(win, win.mAttrs);
         win.mHasSurface = true;
     }
