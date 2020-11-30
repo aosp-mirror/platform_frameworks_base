@@ -4664,13 +4664,13 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         return userState.getUidState(appId);
     }
 
-    private void removeAppIdState(@AppIdInt int appId) {
+    private void removeUidState(@AppIdInt int appId, @UserIdInt int userId) {
         synchronized (mLock) {
-            final int[] userIds = mState.getUserIds();
-            for (final int userId : userIds) {
-                final UserPermissionState userState = mState.getUserState(userId);
-                userState.removeUidState(appId);
+            final UserPermissionState userState = mState.getUserState(userId);
+            if (userState == null) {
+                return;
             }
+            userState.removeUidState(appId);
         }
     }
 
@@ -4929,25 +4929,34 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         removeAllPermissionsInternal(pkg);
     }
 
-    private void onPackageStateRemovedInternal(@NonNull String packageName, int appId,
-            @Nullable AndroidPackage pkg, @NonNull List<AndroidPackage> sharedUserPkgs) {
-        if (sharedUserPkgs.isEmpty()
-                && mPackageManagerInt.getDisabledSystemPackage(packageName) == null) {
-            removeAppIdState(appId);
+    private void onPackageUninstalledInternal(@NonNull String packageName, int appId,
+            @Nullable AndroidPackage pkg, @NonNull List<AndroidPackage> sharedUserPkgs,
+            @UserIdInt int userId) {
+        // TODO: Move these checks to check PackageState to be more reliable.
+        // System packages should always have an available APK.
+        if (pkg != null && pkg.isSystem()
+                // We may be fully removing invalid system packages during boot, and in that case we
+                // do want to remove their permission state. So make sure that the package is only
+                // being marked as uninstalled instead of fully removed.
+                && mPackageManagerInt.getPackage(packageName) != null) {
+            // If we are only marking a system package as uninstalled, we need to keep its
+            // pregranted permission state so that it still works once it gets reinstalled, thus
+            // only reset the user modifications to its permission state.
+            resetRuntimePermissionsInternal(pkg, userId);
+            return;
         }
         updatePermissions(packageName, null, mDefaultPermissionCallback);
-        if (!sharedUserPkgs.isEmpty()) {
+        if (sharedUserPkgs.isEmpty()) {
+            removeUidState(appId, userId);
+        } else {
             // Remove permissions associated with package. Since runtime
             // permissions are per user we have to kill the removed package
             // or packages running under the shared user of the removed
             // package if revoking the permissions requested only by the removed
             // package is successful and this causes a change in gids.
-            boolean shouldKill = false;
-            for (int userId : UserManagerService.getInstance().getUserIds()) {
-                final int userIdToKill = revokeSharedUserPermissionsForDeletedPackageInternal(pkg,
-                        sharedUserPkgs, userId);
-                shouldKill |= userIdToKill != UserHandle.USER_NULL;
-            }
+            final int userIdToKill = revokeSharedUserPermissionsForDeletedPackageInternal(pkg,
+                    sharedUserPkgs, userId);
+            final boolean shouldKill = userIdToKill != UserHandle.USER_NULL;
             // If gids changed, kill all affected packages.
             if (shouldKill) {
                 mHandler.post(() -> {
@@ -5381,11 +5390,13 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         }
 
         @Override
-        public void onPackageStateRemoved(@NonNull String packageName, int appId,
-                @Nullable AndroidPackage pkg, @NonNull List<AndroidPackage> sharedUserPkgs) {
-            Objects.requireNonNull(packageName);
-            Objects.requireNonNull(sharedUserPkgs);
-            onPackageStateRemovedInternal(packageName, appId, pkg, sharedUserPkgs);
+        public void onPackageUninstalled(@NonNull String packageName, int appId,
+                @Nullable AndroidPackage pkg, @NonNull List<AndroidPackage> sharedUserPkgs,
+                @UserIdInt int userId) {
+            Objects.requireNonNull(packageName, "packageName");
+            Objects.requireNonNull(sharedUserPkgs, "sharedUserPkgs");
+            Preconditions.checkArgumentNonNegative(userId, "userId");
+            onPackageUninstalledInternal(packageName, appId, pkg, sharedUserPkgs, userId);
         }
 
         @Override
