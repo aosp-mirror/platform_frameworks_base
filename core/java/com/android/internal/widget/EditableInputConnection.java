@@ -16,21 +16,36 @@
 
 package com.android.internal.widget;
 
+import static android.view.inputmethod.InputConnectionProto.CURSOR_CAPS_MODE;
+import static android.view.inputmethod.InputConnectionProto.EDITABLE_TEXT;
+import static android.view.inputmethod.InputConnectionProto.SELECTED_TEXT;
+import static android.view.inputmethod.InputConnectionProto.SELECTED_TEXT_END;
+import static android.view.inputmethod.InputConnectionProto.SELECTED_TEXT_START;
+
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Bundle;
 import android.text.Editable;
+import android.text.Selection;
 import android.text.method.KeyListener;
 import android.util.Log;
+import android.util.proto.ProtoOutputStream;
 import android.view.inputmethod.BaseInputConnection;
 import android.view.inputmethod.CompletionInfo;
 import android.view.inputmethod.CorrectionInfo;
+import android.view.inputmethod.DumpableInputConnection;
 import android.view.inputmethod.ExtractedText;
 import android.view.inputmethod.ExtractedTextRequest;
 import android.view.inputmethod.InputConnection;
 import android.widget.TextView;
 
-public class EditableInputConnection extends BaseInputConnection {
+/**
+ * Base class for an editable InputConnection instance. This is created by {@link TextView} or
+ * {@link EditText}.
+ */
+public class EditableInputConnection extends BaseInputConnection
+        implements DumpableInputConnection {
     private static final boolean DEBUG = false;
+    private static final boolean DUMP_TEXT = false;
     private static final String TAG = "EditableInputConnection";
 
     private final TextView mTextView;
@@ -221,5 +236,29 @@ public class EditableInputConnection extends BaseInputConnection {
             }
         }
         return true;
+    }
+
+    @Override
+    public void dumpDebug(ProtoOutputStream proto, long fieldId) {
+        final long token = proto.start(fieldId);
+        CharSequence editableText = mTextView.getText();
+        CharSequence selectedText = getSelectedText(0 /* flags */);
+        if (DUMP_TEXT) {
+            if (editableText != null) {
+                proto.write(EDITABLE_TEXT, editableText.toString());
+            }
+            if (selectedText != null) {
+                proto.write(SELECTED_TEXT, selectedText.toString());
+            }
+        }
+        final Editable content = getEditable();
+        if (content != null) {
+            int start = Selection.getSelectionStart(content);
+            int end = Selection.getSelectionEnd(content);
+            proto.write(SELECTED_TEXT_START, start);
+            proto.write(SELECTED_TEXT_END, end);
+        }
+        proto.write(CURSOR_CAPS_MODE, getCursorCapsMode(0));
+        proto.end(token);
     }
 }
