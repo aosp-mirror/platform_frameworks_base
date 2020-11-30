@@ -1824,6 +1824,7 @@ public class AudioTrack extends PlayerBase
 
     @Override
     protected void finalize() {
+        tryToDisableNativeRoutingCallback();
         baseRelease();
         native_finalize();
     }
@@ -2717,9 +2718,15 @@ public class AudioTrack extends PlayerBase
     }
 
     private void startImpl() {
+        synchronized (mRoutingChangeListeners) {
+            if (!mEnableSelfRoutingMonitor) {
+                testEnableNativeRoutingCallbacksLocked();
+                mEnableSelfRoutingMonitor = true;
+            }
+        }
         synchronized(mPlayStateLock) {
-            baseStart();
             native_start();
+            baseStart(native_getRoutedDeviceId());
             if (mPlayState == PLAYSTATE_PAUSED_STOPPING) {
                 mPlayState = PLAYSTATE_STOPPING;
             } else {
@@ -2757,6 +2764,7 @@ public class AudioTrack extends PlayerBase
                 mPlayStateLock.notify();
             }
         }
+        tryToDisableNativeRoutingCallback();
     }
 
     /**
@@ -3496,12 +3504,21 @@ public class AudioTrack extends PlayerBase
         return null;
     }
 
+    private void tryToDisableNativeRoutingCallback() {
+        synchronized (mRoutingChangeListeners) {
+            if (mEnableSelfRoutingMonitor) {
+                mEnableSelfRoutingMonitor = false;
+                testDisableNativeRoutingCallbacksLocked();
+            }
+        }
+    }
+
     /*
      * Call BEFORE adding a routing callback handler.
      */
     @GuardedBy("mRoutingChangeListeners")
     private void testEnableNativeRoutingCallbacksLocked() {
-        if (mRoutingChangeListeners.size() == 0) {
+        if (mRoutingChangeListeners.size() == 0 && !mEnableSelfRoutingMonitor) {
             native_enableDeviceCallback();
         }
     }
@@ -3511,7 +3528,7 @@ public class AudioTrack extends PlayerBase
      */
     @GuardedBy("mRoutingChangeListeners")
     private void testDisableNativeRoutingCallbacksLocked() {
-        if (mRoutingChangeListeners.size() == 0) {
+        if (mRoutingChangeListeners.size() == 0 && !mEnableSelfRoutingMonitor) {
             native_disableDeviceCallback();
         }
     }
@@ -3527,6 +3544,9 @@ public class AudioTrack extends PlayerBase
     @GuardedBy("mRoutingChangeListeners")
     private ArrayMap<AudioRouting.OnRoutingChangedListener,
             NativeRoutingEventHandlerDelegate> mRoutingChangeListeners = new ArrayMap<>();
+
+    @GuardedBy("mRoutingChangeListeners")
+    private boolean mEnableSelfRoutingMonitor;
 
    /**
     * Adds an {@link AudioRouting.OnRoutingChangedListener} to receive notifications of routing
@@ -3627,6 +3647,7 @@ public class AudioTrack extends PlayerBase
      */
     private void broadcastRoutingChange() {
         AudioManager.resetAudioPortGeneration();
+        baseUpdateDeviceId(getRoutedDevice());
         synchronized (mRoutingChangeListeners) {
             for (NativeRoutingEventHandlerDelegate delegate : mRoutingChangeListeners.values()) {
                 delegate.notifyClient();
