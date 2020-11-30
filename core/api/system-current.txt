@@ -5986,6 +5986,7 @@ package android.net {
     field @Deprecated public static final int TETHER_ERROR_NO_ERROR = 0; // 0x0
     field @Deprecated public static final int TETHER_ERROR_PROVISION_FAILED = 11; // 0xb
     field public static final int TYPE_NONE = -1; // 0xffffffff
+    field @Deprecated public static final int TYPE_PROXY = 16; // 0x10
     field @Deprecated public static final int TYPE_WIFI_P2P = 13; // 0xd
   }
 
