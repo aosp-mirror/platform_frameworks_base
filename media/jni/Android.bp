@@ -139,6 +139,8 @@ cc_library_shared {
     name: "libmedia_tv_tuner",
     srcs: [
         "android_media_tv_Tuner.cpp",
+        "tuner/DemuxClient.cpp",
+        "tuner/FilterClient.cpp",
         "tuner/FrontendClient.cpp",
         "tuner/TunerClient.cpp",
     ],

@@ -22,6 +22,7 @@
 #include <android/hardware/tv/tuner/1.1/types.h>
 
 #include "FrontendClient.h"
+#include "DemuxClient.h"
 
 using ::aidl::android::media::tv::tuner::ITunerService;
 using ::aidl::android::media::tv::tuner::TunerServiceFrontendInfo;
@@ -74,6 +75,21 @@ public:
     shared_ptr<FrontendDtmbCapabilities> getFrontendDtmbCapabilities(int id);
 
     /**
+     * Open a new interface of DemuxClient given a demuxHandle.
+     *
+     * @param demuxHandle the handle of the demux granted by TRM.
+     * @return a newly created DemuxClient interface.
+     */
+    sp<DemuxClient> openDemux(int demuxHandle);
+
+    /**
+     * Retrieve the Demux capabilities.
+     *
+     * @return the demux’s capabilities.
+     */
+    //DemuxCapabilities getDemuxCaps() {};
+
+    /**
      * Get the current Tuner HAL version. The high 16 bits are the major version number
      * while the low 16 bits are the minor version. Default value is unknown version 0.
      */
@@ -110,6 +126,7 @@ private:
 
     sp<ITuner> getHidlTuner();
     sp<IFrontend> openHidlFrontendByHandle(int frontendHandle);
+    sp<IDemux> openHidlDemux();
     Result getHidlFrontendInfo(int id, FrontendInfo& info);
     FrontendInfo FrontendInfoAidlToHidl(TunerServiceFrontendInfo aidlFrontendInfo);
 };
