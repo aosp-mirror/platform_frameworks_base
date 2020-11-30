@@ -20,12 +20,15 @@ import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.InsetsState.ITYPE_IME;
 import static android.view.Surface.ROTATION_0;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 
 import android.graphics.Point;
+import android.view.InsetsSource;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
 import android.view.SurfaceControl;
@@ -68,19 +71,31 @@ public class DisplayImeControllerTest {
     @Test
     public void reappliesVisibilityToChangedLeash() {
         verifyZeroInteractions(mT);
+        mPerDisplay.mImeShowing = true;
 
-        mPerDisplay.mImeShowing = false;
-        mPerDisplay.insetsControlChanged(new InsetsState(), new InsetsSourceControl[] {
-                new InsetsSourceControl(ITYPE_IME, mock(SurfaceControl.class), new Point(0, 0))
-        });
+        mPerDisplay.insetsControlChanged(insetsStateWithIme(false), insetsSourceControl());
 
+        assertFalse(mPerDisplay.mImeShowing);
         verify(mT).hide(any());
 
         mPerDisplay.mImeShowing = true;
-        mPerDisplay.insetsControlChanged(new InsetsState(), new InsetsSourceControl[] {
-                new InsetsSourceControl(ITYPE_IME, mock(SurfaceControl.class), new Point(0, 0))
-        });
+        mPerDisplay.insetsControlChanged(insetsStateWithIme(true), insetsSourceControl());
 
+        assertTrue(mPerDisplay.mImeShowing);
         verify(mT).show(any());
     }
+
+    private InsetsSourceControl[] insetsSourceControl() {
+        return new InsetsSourceControl[]{
+                new InsetsSourceControl(ITYPE_IME, mock(SurfaceControl.class), new Point(0, 0))
+        };
+    }
+
+    private InsetsState insetsStateWithIme(boolean visible) {
+        InsetsState state = new InsetsState();
+        state.addSource(new InsetsSource(ITYPE_IME));
+        state.setSourceVisible(ITYPE_IME, visible);
+        return state;
+    }
+
 }
