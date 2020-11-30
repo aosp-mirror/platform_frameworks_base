@@ -335,7 +335,7 @@ public class NotificationLockscreenUserManagerImpl implements
         }
         NotificationEntry visibleEntry = getEntryManager().getActiveNotificationUnfiltered(key);
         return isLockscreenPublicMode(mCurrentUserId) && visibleEntry != null
-                && visibleEntry.getRanking().getVisibilityOverride() == VISIBILITY_SECRET;
+                && visibleEntry.getRanking().getLockscreenVisibilityOverride() == VISIBILITY_SECRET;
     }
 
     public boolean shouldShowOnKeyguard(NotificationEntry entry) {
@@ -513,7 +513,8 @@ public class NotificationLockscreenUserManagerImpl implements
         }
         NotificationEntry entry = getEntryManager().getActiveNotificationUnfiltered(key);
         return entry != null
-                && entry.getRanking().getVisibilityOverride() == Notification.VISIBILITY_PRIVATE;
+                && entry.getRanking().getLockscreenVisibilityOverride() 
+                == Notification.VISIBILITY_PRIVATE;
     }
 
     private void updateCurrentProfilesCache() {
