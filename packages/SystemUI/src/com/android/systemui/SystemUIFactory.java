@@ -113,8 +113,10 @@ public class SystemUIFactory {
                     .setShellCommandHandler(mWMComponent.getShellCommandHandler())
                     .setAppPairs(mWMComponent.getAppPairs());
         } else {
-            // TODO: Call on prepareSysUIComponentBuilder but not with real components.
-            builder = builder.setPip(Optional.ofNullable(null))
+            // TODO: Call on prepareSysUIComponentBuilder but not with real components. Other option
+            // is separating this logic into newly creating SystemUITestsFactory.
+            builder = prepareSysUIComponentBuilder(builder, mWMComponent)
+                    .setPip(Optional.ofNullable(null))
                     .setSplitScreen(Optional.ofNullable(null))
                     .setOneHanded(Optional.ofNullable(null))
                     .setBubbles(Optional.ofNullable(null))
