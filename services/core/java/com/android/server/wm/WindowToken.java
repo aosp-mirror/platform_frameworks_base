@@ -827,15 +827,15 @@ class WindowToken extends WindowContainer<WindowState> {
      * system bars, or in other words extend outside of the "Decor Frame"
      */
     boolean canLayerAboveSystemBars() {
-        int layer = mWmService.mPolicy.getWindowLayerFromTypeLw(windowType,
-                mOwnerCanManageAppTokens);
+        int layer = getWindowLayerFromType();
         int navLayer = mWmService.mPolicy.getWindowLayerFromTypeLw(TYPE_NAVIGATION_BAR,
                 mOwnerCanManageAppTokens);
         return mOwnerCanManageAppTokens && (layer > navLayer);
     }
 
     int getWindowLayerFromType() {
-        return mWmService.mPolicy.getWindowLayerFromTypeLw(windowType, mOwnerCanManageAppTokens);
+        return mWmService.mPolicy.getWindowLayerFromTypeLw(windowType, mOwnerCanManageAppTokens,
+                mRoundedCornerOverlay);
     }
 
     int getOwnerUid() {

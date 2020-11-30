@@ -365,7 +365,7 @@ class DisplayAreaPolicyBuilder {
          */
         private void build(@Nullable List<HierarchyBuilder> displayAreaGroupHierarchyBuilders) {
             final WindowManagerPolicy policy = mRoot.mWmService.mPolicy;
-            final int maxWindowLayerCount = policy.getMaxWindowLayer();
+            final int maxWindowLayerCount = policy.getMaxWindowLayer() + 1;
             final DisplayArea.Tokens[] displayAreaForLayer =
                     new DisplayArea.Tokens[maxWindowLayerCount];
             final Map<Feature, List<DisplayArea<WindowContainer>>> featureAreas =
@@ -560,6 +560,7 @@ class DisplayAreaPolicyBuilder {
             private final int mId;
             private final boolean[] mLayers;
             private NewDisplayAreaSupplier mNewDisplayAreaSupplier = DisplayArea::new;
+            private boolean mExcludeRoundedCorner = true;
 
             /**
              * Builds a new feature that applies to a set of window types as specified by the
@@ -578,7 +579,7 @@ class DisplayAreaPolicyBuilder {
                 mPolicy = policy;
                 mName = name;
                 mId = id;
-                mLayers = new boolean[mPolicy.getMaxWindowLayer()];
+                mLayers = new boolean[mPolicy.getMaxWindowLayer() + 1];
             }
 
             /**
@@ -633,7 +634,18 @@ class DisplayAreaPolicyBuilder {
                 return this;
             }
 
+            // TODO(b/155340867): consider to remove the logic after using pure Surface for rounded
+            // corner overlay.
+            Builder setExcludeRoundedCornerOverlay(boolean excludeRoundedCorner) {
+                mExcludeRoundedCorner = excludeRoundedCorner;
+                return this;
+            }
+
             Feature build() {
+                if (mExcludeRoundedCorner) {
+                    // Always put the rounded corner layer to the top most layer.
+                    mLayers[mPolicy.getMaxWindowLayer()] = false;
+                }
                 return new Feature(mName, mId, mLayers.clone(), mNewDisplayAreaSupplier);
             }
 

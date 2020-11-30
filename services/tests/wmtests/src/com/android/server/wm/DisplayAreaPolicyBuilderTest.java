@@ -22,6 +22,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
+import static android.view.WindowManager.LayoutParams.TYPE_POINTER;
 import static android.view.WindowManager.LayoutParams.TYPE_PRESENTATION;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
@@ -665,6 +666,15 @@ public class DisplayAreaPolicyBuilderTest {
         assertThat(token0.isDescendantOf(mRoot)).isTrue();
         assertThat(token1.isDescendantOf(mGroupRoot1)).isTrue();
         assertThat(token2.isDescendantOf(mGroupRoot2)).isTrue();
+    }
+
+    @Test
+    public void testFeatureNotThrowArrayIndexOutOfBoundsException() {
+        final Feature feature1 = new Feature.Builder(mWms.mPolicy, "feature1",
+                FEATURE_VENDOR_FIRST + 5)
+                .all()
+                .except(TYPE_POINTER)
+                .build();
     }
 
     private static Resources resourcesWithProvider(String provider) {
