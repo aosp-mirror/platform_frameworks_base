@@ -185,8 +185,12 @@ public class BrightLineFalsingManager implements FalsingManager {
             return true;
         }
 
-        // TODO(b/172655679): we always reject single-taps when doing a robust check for now.
-        return robustCheck;
+        // TODO(b/172655679): More heuristics to come. For now, allow touches through if face-authed
+        if (robustCheck) {
+            return !mDataProvider.isJustUnlockedWithFace();
+        }
+
+        return false;
     }
 
     @Override
