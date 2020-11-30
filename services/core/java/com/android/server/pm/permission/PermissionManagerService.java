@@ -1249,47 +1249,53 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
         final long identity = Binder.clearCallingIdentity();
         try {
-            synchronized (mLock) {
-                final UidPermissionState uidState = getUidStateLocked(pkg, userId);
-                if (uidState == null) {
-                    Slog.e(TAG, "Missing permissions state for " + packageName + " and user "
-                            + userId);
-                    return null;
-                }
-
-                int queryFlags = 0;
-                if ((flags & PackageManager.FLAG_PERMISSION_WHITELIST_SYSTEM) != 0) {
-                    queryFlags |= FLAG_PERMISSION_RESTRICTION_SYSTEM_EXEMPT;
-                }
-                if ((flags & PackageManager.FLAG_PERMISSION_WHITELIST_UPGRADE) != 0) {
-                    queryFlags |= FLAG_PERMISSION_RESTRICTION_UPGRADE_EXEMPT;
-                }
-                if ((flags & PackageManager.FLAG_PERMISSION_WHITELIST_INSTALLER) != 0) {
-                    queryFlags |= FLAG_PERMISSION_RESTRICTION_INSTALLER_EXEMPT;
-                }
-                if ((flags & PackageManager.FLAG_PERMISSION_ALLOWLIST_ROLE) != 0) {
-                    queryFlags |=  FLAG_PERMISSION_RESTRICTION_ROLE_EXEMPT;
-                }
-
-                ArrayList<String> whitelistedPermissions = null;
-
-                final int permissionCount = ArrayUtils.size(pkg.getRequestedPermissions());
-                for (int i = 0; i < permissionCount; i++) {
-                    final String permissionName = pkg.getRequestedPermissions().get(i);
-                    final int currentFlags =
-                            uidState.getPermissionFlags(permissionName);
-                    if ((currentFlags & queryFlags) != 0) {
-                        if (whitelistedPermissions == null) {
-                            whitelistedPermissions = new ArrayList<>();
-                        }
-                        whitelistedPermissions.add(permissionName);
-                    }
-                }
-
-                return whitelistedPermissions;
-            }
+            return getAllowlistedRestrictedPermissionsInternal(pkg, flags, userId);
         } finally {
             Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    @Nullable
+    private List<String> getAllowlistedRestrictedPermissionsInternal(@NonNull AndroidPackage pkg,
+            @PermissionWhitelistFlags int flags, @UserIdInt int userId) {
+        synchronized (mLock) {
+            final UidPermissionState uidState = getUidStateLocked(pkg, userId);
+            if (uidState == null) {
+                Slog.e(TAG, "Missing permissions state for " + pkg.getPackageName() + " and user "
+                        + userId);
+                return null;
+            }
+
+            int queryFlags = 0;
+            if ((flags & PackageManager.FLAG_PERMISSION_WHITELIST_SYSTEM) != 0) {
+                queryFlags |= FLAG_PERMISSION_RESTRICTION_SYSTEM_EXEMPT;
+            }
+            if ((flags & PackageManager.FLAG_PERMISSION_WHITELIST_UPGRADE) != 0) {
+                queryFlags |= FLAG_PERMISSION_RESTRICTION_UPGRADE_EXEMPT;
+            }
+            if ((flags & PackageManager.FLAG_PERMISSION_WHITELIST_INSTALLER) != 0) {
+                queryFlags |= FLAG_PERMISSION_RESTRICTION_INSTALLER_EXEMPT;
+            }
+            if ((flags & PackageManager.FLAG_PERMISSION_ALLOWLIST_ROLE) != 0) {
+                queryFlags |=  FLAG_PERMISSION_RESTRICTION_ROLE_EXEMPT;
+            }
+
+            ArrayList<String> allowlistedPermissions = null;
+
+            final int permissionCount = ArrayUtils.size(pkg.getRequestedPermissions());
+            for (int i = 0; i < permissionCount; i++) {
+                final String permissionName = pkg.getRequestedPermissions().get(i);
+                final int currentFlags =
+                        uidState.getPermissionFlags(permissionName);
+                if ((currentFlags & queryFlags) != 0) {
+                    if (allowlistedPermissions == null) {
+                        allowlistedPermissions = new ArrayList<>();
+                    }
+                    allowlistedPermissions.add(permissionName);
+                }
+            }
+
+            return allowlistedPermissions;
         }
     }
 
@@ -1435,8 +1441,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
         final long identity = Binder.clearCallingIdentity();
         try {
-            setAllowlistedRestrictedPermissionsInternal(pkg, permissions, flags,
-                    new int[] { userId });
+            setAllowlistedRestrictedPermissionsInternal(pkg, permissions, flags, userId);
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
@@ -1457,13 +1462,6 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         }
 
         return setAutoRevokeExemptedInternal(pkg, whitelisted, userId);
-    }
-
-    private void setAutoRevokeExemptedInternal(@NonNull AndroidPackage pkg, boolean exempted,
-            @NonNull int[] userIds) {
-        for (final int userId : userIds) {
-            setAutoRevokeExemptedInternal(pkg, exempted, userId);
-        }
     }
 
     private boolean setAutoRevokeExemptedInternal(@NonNull AndroidPackage pkg, boolean exempted,
@@ -3823,13 +3821,6 @@ public class PermissionManagerService extends IPermissionManager.Stub {
     }
 
     private void grantRequestedRuntimePermissionsInternal(@NonNull AndroidPackage pkg,
-            @Nullable List<String> permissions, @NonNull int[] userIds) {
-        for (int userId : userIds) {
-            grantRequestedRuntimePermissionsForUser(pkg, permissions, userId);
-        }
-    }
-
-    private void grantRequestedRuntimePermissionsForUser(@NonNull AndroidPackage pkg,
             @Nullable List<String> permissions, int userId) {
         final int immutableFlags = PackageManager.FLAG_PERMISSION_SYSTEM_FIXED
                 | PackageManager.FLAG_PERMISSION_POLICY_FIXED;
@@ -3876,25 +3867,136 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
     private void setAllowlistedRestrictedPermissionsInternal(@NonNull AndroidPackage pkg,
             @Nullable List<String> permissions, @PermissionWhitelistFlags int allowlistFlags,
-            @UserIdInt int[] userIds) {
-        SparseArray<ArraySet<String>> oldGrantedRestrictedPermissions = new SparseArray<>();
+            @UserIdInt int userId) {
+        ArraySet<String> oldGrantedRestrictedPermissions = null;
         boolean updatePermissions = false;
         final int permissionCount = pkg.getRequestedPermissions().size();
         final int myUid = Process.myUid();
 
-        for (int i = 0; i < userIds.length; i++) {
-            int userId = userIds[i];
+        for (int j = 0; j < permissionCount; j++) {
+            final String permissionName = pkg.getRequestedPermissions().get(j);
 
-            for (int j = 0; j < permissionCount; j++) {
-                final String permissionName = pkg.getRequestedPermissions().get(j);
+            final boolean isGranted;
+            synchronized (mLock) {
+                final Permission bp = mRegistry.getPermission(permissionName);
+                if (bp == null || !bp.isHardOrSoftRestricted()) {
+                    continue;
+                }
 
+                final UidPermissionState uidState = getUidStateLocked(pkg, userId);
+                if (uidState == null) {
+                    Slog.e(TAG, "Missing permissions state for " + pkg.getPackageName()
+                            + " and user " + userId);
+                    continue;
+                }
+                isGranted = uidState.isPermissionGranted(permissionName);
+            }
+
+            if (isGranted) {
+                if (oldGrantedRestrictedPermissions == null) {
+                    oldGrantedRestrictedPermissions = new ArraySet<>();
+                }
+                oldGrantedRestrictedPermissions.add(permissionName);
+            }
+
+            final int oldFlags = getPermissionFlagsInternal(permissionName,
+                    pkg.getPackageName(), myUid, userId);
+
+            int newFlags = oldFlags;
+            int mask = 0;
+            int whitelistFlagsCopy = allowlistFlags;
+            while (whitelistFlagsCopy != 0) {
+                final int flag = 1 << Integer.numberOfTrailingZeros(whitelistFlagsCopy);
+                whitelistFlagsCopy &= ~flag;
+                switch (flag) {
+                    case FLAG_PERMISSION_WHITELIST_SYSTEM: {
+                        mask |= FLAG_PERMISSION_RESTRICTION_SYSTEM_EXEMPT;
+                        if (permissions != null && permissions.contains(permissionName)) {
+                            newFlags |= FLAG_PERMISSION_RESTRICTION_SYSTEM_EXEMPT;
+                        } else {
+                            newFlags &= ~FLAG_PERMISSION_RESTRICTION_SYSTEM_EXEMPT;
+                        }
+                    }
+                    break;
+                    case FLAG_PERMISSION_WHITELIST_UPGRADE: {
+                        mask |= FLAG_PERMISSION_RESTRICTION_UPGRADE_EXEMPT;
+                        if (permissions != null && permissions.contains(permissionName)) {
+                            newFlags |= FLAG_PERMISSION_RESTRICTION_UPGRADE_EXEMPT;
+                        } else {
+                            newFlags &= ~FLAG_PERMISSION_RESTRICTION_UPGRADE_EXEMPT;
+                        }
+                    }
+                    break;
+                    case FLAG_PERMISSION_WHITELIST_INSTALLER: {
+                        mask |= FLAG_PERMISSION_RESTRICTION_INSTALLER_EXEMPT;
+                        if (permissions != null && permissions.contains(permissionName)) {
+                            newFlags |= FLAG_PERMISSION_RESTRICTION_INSTALLER_EXEMPT;
+                        } else {
+                            newFlags &= ~FLAG_PERMISSION_RESTRICTION_INSTALLER_EXEMPT;
+                        }
+                    }
+                    break;
+                    case FLAG_PERMISSION_ALLOWLIST_ROLE: {
+                        mask |= FLAG_PERMISSION_RESTRICTION_ROLE_EXEMPT;
+                        if (permissions != null && permissions.contains(permissionName)) {
+                            newFlags |= FLAG_PERMISSION_RESTRICTION_ROLE_EXEMPT;
+                        } else {
+                            newFlags &= ~FLAG_PERMISSION_RESTRICTION_ROLE_EXEMPT;
+                        }
+                    }
+                    break;
+                }
+            }
+
+            if (oldFlags == newFlags) {
+                continue;
+            }
+
+            updatePermissions = true;
+
+            final boolean wasWhitelisted = (oldFlags
+                    & (PackageManager.FLAGS_PERMISSION_RESTRICTION_ANY_EXEMPT)) != 0;
+            final boolean isWhitelisted = (newFlags
+                    & (PackageManager.FLAGS_PERMISSION_RESTRICTION_ANY_EXEMPT)) != 0;
+
+            // If the permission is policy fixed as granted but it is no longer
+            // on any of the whitelists we need to clear the policy fixed flag
+            // as whitelisting trumps policy i.e. policy cannot grant a non
+            // grantable permission.
+            if ((oldFlags & PackageManager.FLAG_PERMISSION_POLICY_FIXED) != 0) {
+                if (!isWhitelisted && isGranted) {
+                    mask |= PackageManager.FLAG_PERMISSION_POLICY_FIXED;
+                    newFlags &= ~PackageManager.FLAG_PERMISSION_POLICY_FIXED;
+                }
+            }
+
+            // If we are whitelisting an app that does not support runtime permissions
+            // we need to make sure it goes through the permission review UI at launch.
+            if (pkg.getTargetSdkVersion() < Build.VERSION_CODES.M
+                    && !wasWhitelisted && isWhitelisted) {
+                mask |= PackageManager.FLAG_PERMISSION_REVIEW_REQUIRED;
+                newFlags |= PackageManager.FLAG_PERMISSION_REVIEW_REQUIRED;
+            }
+
+            updatePermissionFlagsInternal(permissionName, pkg.getPackageName(), mask, newFlags,
+                    myUid, userId, false, null /*callback*/);
+        }
+
+        if (updatePermissions) {
+            // Update permission of this app to take into account the new whitelist state.
+            restorePermissionState(pkg, false, pkg.getPackageName(), mDefaultPermissionCallback);
+
+            // If this resulted in losing a permission we need to kill the app.
+            if (oldGrantedRestrictedPermissions == null) {
+                return;
+            }
+
+            final int oldGrantedCount = oldGrantedRestrictedPermissions.size();
+            for (int j = 0; j < oldGrantedCount; j++) {
+                final String permissionName = oldGrantedRestrictedPermissions.valueAt(j);
+                // Sometimes we create a new permission state instance during update.
                 final boolean isGranted;
                 synchronized (mLock) {
-                    final Permission bp = mRegistry.getPermission(permissionName);
-                    if (bp == null || !bp.isHardOrSoftRestricted()) {
-                        continue;
-                    }
-
                     final UidPermissionState uidState = getUidStateLocked(pkg, userId);
                     if (uidState == null) {
                         Slog.e(TAG, "Missing permissions state for " + pkg.getPackageName()
@@ -3903,128 +4005,9 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                     }
                     isGranted = uidState.isPermissionGranted(permissionName);
                 }
-
-                if (isGranted) {
-                    if (oldGrantedRestrictedPermissions.get(userId) == null) {
-                        oldGrantedRestrictedPermissions.put(userId, new ArraySet<>());
-                    }
-                    oldGrantedRestrictedPermissions.get(userId).add(permissionName);
-                }
-
-                final int oldFlags = getPermissionFlagsInternal(permissionName,
-                        pkg.getPackageName(), myUid, userId);
-
-                int newFlags = oldFlags;
-                int mask = 0;
-                int whitelistFlagsCopy = allowlistFlags;
-                while (whitelistFlagsCopy != 0) {
-                    final int flag = 1 << Integer.numberOfTrailingZeros(whitelistFlagsCopy);
-                    whitelistFlagsCopy &= ~flag;
-                    switch (flag) {
-                        case FLAG_PERMISSION_WHITELIST_SYSTEM: {
-                            mask |= FLAG_PERMISSION_RESTRICTION_SYSTEM_EXEMPT;
-                            if (permissions != null && permissions.contains(permissionName)) {
-                                newFlags |= FLAG_PERMISSION_RESTRICTION_SYSTEM_EXEMPT;
-                            } else {
-                                newFlags &= ~FLAG_PERMISSION_RESTRICTION_SYSTEM_EXEMPT;
-                            }
-                        }
-                        break;
-                        case FLAG_PERMISSION_WHITELIST_UPGRADE: {
-                            mask |= FLAG_PERMISSION_RESTRICTION_UPGRADE_EXEMPT;
-                            if (permissions != null && permissions.contains(permissionName)) {
-                                newFlags |= FLAG_PERMISSION_RESTRICTION_UPGRADE_EXEMPT;
-                            } else {
-                                newFlags &= ~FLAG_PERMISSION_RESTRICTION_UPGRADE_EXEMPT;
-                            }
-                        }
-                        break;
-                        case FLAG_PERMISSION_WHITELIST_INSTALLER: {
-                            mask |= FLAG_PERMISSION_RESTRICTION_INSTALLER_EXEMPT;
-                            if (permissions != null && permissions.contains(permissionName)) {
-                                newFlags |= FLAG_PERMISSION_RESTRICTION_INSTALLER_EXEMPT;
-                            } else {
-                                newFlags &= ~FLAG_PERMISSION_RESTRICTION_INSTALLER_EXEMPT;
-                            }
-                        }
-                        break;
-                        case FLAG_PERMISSION_ALLOWLIST_ROLE: {
-                            mask |= FLAG_PERMISSION_RESTRICTION_ROLE_EXEMPT;
-                            if (permissions != null && permissions.contains(permissionName)) {
-                                newFlags |= FLAG_PERMISSION_RESTRICTION_ROLE_EXEMPT;
-                            } else {
-                                newFlags &= ~FLAG_PERMISSION_RESTRICTION_ROLE_EXEMPT;
-                            }
-                        }
-                        break;
-                    }
-                }
-
-                if (oldFlags == newFlags) {
-                    continue;
-                }
-
-                updatePermissions = true;
-
-                final boolean wasWhitelisted = (oldFlags
-                        & (PackageManager.FLAGS_PERMISSION_RESTRICTION_ANY_EXEMPT)) != 0;
-                final boolean isWhitelisted = (newFlags
-                        & (PackageManager.FLAGS_PERMISSION_RESTRICTION_ANY_EXEMPT)) != 0;
-
-                // If the permission is policy fixed as granted but it is no longer
-                // on any of the whitelists we need to clear the policy fixed flag
-                // as whitelisting trumps policy i.e. policy cannot grant a non
-                // grantable permission.
-                if ((oldFlags & PackageManager.FLAG_PERMISSION_POLICY_FIXED) != 0) {
-                    if (!isWhitelisted && isGranted) {
-                        mask |= PackageManager.FLAG_PERMISSION_POLICY_FIXED;
-                        newFlags &= ~PackageManager.FLAG_PERMISSION_POLICY_FIXED;
-                    }
-                }
-
-                // If we are whitelisting an app that does not support runtime permissions
-                // we need to make sure it goes through the permission review UI at launch.
-                if (pkg.getTargetSdkVersion() < Build.VERSION_CODES.M
-                        && !wasWhitelisted && isWhitelisted) {
-                    mask |= PackageManager.FLAG_PERMISSION_REVIEW_REQUIRED;
-                    newFlags |= PackageManager.FLAG_PERMISSION_REVIEW_REQUIRED;
-                }
-
-                updatePermissionFlagsInternal(permissionName, pkg.getPackageName(), mask, newFlags,
-                        myUid, userId, false, null /*callback*/);
-            }
-        }
-
-        if (updatePermissions) {
-            // Update permission of this app to take into account the new whitelist state.
-            restorePermissionState(pkg, false, pkg.getPackageName(), mDefaultPermissionCallback);
-
-            // If this resulted in losing a permission we need to kill the app.
-            for (int i = 0; i < userIds.length; i++) {
-                int userId = userIds[i];
-                ArraySet<String> oldPermsForUser = oldGrantedRestrictedPermissions.get(userId);
-                if (oldPermsForUser == null) {
-                    continue;
-                }
-
-                final int oldGrantedCount = oldPermsForUser.size();
-                for (int j = 0; j < oldGrantedCount; j++) {
-                    final String permissionName = oldPermsForUser.valueAt(j);
-                    // Sometimes we create a new permission state instance during update.
-                    final boolean isGranted;
-                    synchronized (mLock) {
-                        final UidPermissionState uidState = getUidStateLocked(pkg, userId);
-                        if (uidState == null) {
-                            Slog.e(TAG, "Missing permissions state for " + pkg.getPackageName()
-                                    + " and user " + userId);
-                            continue;
-                        }
-                        isGranted = uidState.isPermissionGranted(permissionName);
-                    }
-                    if (!isGranted) {
-                        mDefaultPermissionCallback.onPermissionRevoked(pkg.getUid(), userId, null);
-                        break;
-                    }
+                if (!isGranted) {
+                    mDefaultPermissionCallback.onPermissionRevoked(pkg.getUid(), userId, null);
+                    break;
                 }
             }
         }
@@ -4963,6 +4946,34 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         return true;
     }
 
+    private void onPackageInstalledInternal(@NonNull AndroidPackage pkg,
+            @NonNull List<String> grantedPermissions,
+            @NonNull List<String> allowlistedRestrictedPermissions, int autoRevokePermissionsMode,
+            @UserIdInt int userId) {
+        addAllowlistedRestrictedPermissionsInternal(pkg, allowlistedRestrictedPermissions,
+                FLAG_PERMISSION_WHITELIST_INSTALLER, userId);
+        if (autoRevokePermissionsMode == AppOpsManager.MODE_ALLOWED
+                || autoRevokePermissionsMode == AppOpsManager.MODE_IGNORED) {
+            setAutoRevokeExemptedInternal(pkg,
+                    autoRevokePermissionsMode == AppOpsManager.MODE_IGNORED, userId);
+        }
+        grantRequestedRuntimePermissionsInternal(pkg, grantedPermissions, userId);
+    }
+
+    private void addAllowlistedRestrictedPermissionsInternal(@NonNull AndroidPackage pkg,
+            @NonNull List<String> allowlistedRestrictedPermissions,
+            @PermissionWhitelistFlags int flags, @UserIdInt int userId) {
+        List<String> permissions = getAllowlistedRestrictedPermissionsInternal(pkg, flags, userId);
+        if (permissions != null) {
+            ArraySet<String> permissionSet = new ArraySet<>(permissions);
+            permissionSet.addAll(allowlistedRestrictedPermissions);
+            permissions = new ArrayList<>(permissionSet);
+        } else {
+            permissions = allowlistedRestrictedPermissions;
+        }
+        setAllowlistedRestrictedPermissionsInternal(pkg, permissions, flags, userId);
+    }
+
     private void onPackageRemovedInternal(@NonNull AndroidPackage pkg) {
         removeAllPermissionsInternal(pkg);
     }
@@ -5127,28 +5138,6 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         public String[] getAppOpPermissionPackages(@NonNull String permissionName) {
             Objects.requireNonNull(permissionName, "permissionName");
             return PermissionManagerService.this.getAppOpPermissionPackagesInternal(permissionName);
-        }
-        @Override
-        public void grantRequestedRuntimePermissions(@NonNull AndroidPackage pkg,
-                @Nullable List<String> permissions, @NonNull int[] userIds) {
-            Objects.requireNonNull(pkg, "pkg");
-            Objects.requireNonNull(userIds, "userIds");
-            grantRequestedRuntimePermissionsInternal(pkg, permissions, userIds);
-        }
-        @Override
-        public void setAllowlistedRestrictedPermissions(@NonNull AndroidPackage pkg,
-                @Nullable List<String> permissions, @PermissionWhitelistFlags int allowlistFlags,
-                @NonNull int[] userIds) {
-            Objects.requireNonNull(pkg, "pkg");
-            Objects.requireNonNull(userIds, "userIds");
-            setAllowlistedRestrictedPermissionsInternal(pkg, permissions, allowlistFlags, userIds);
-        }
-        @Override
-        public void setAutoRevokeExempted(@NonNull AndroidPackage pkg, boolean exempted,
-                @NonNull int[] userIds) {
-            Objects.requireNonNull(pkg, "pkg");
-            Objects.requireNonNull(userIds, "userIds");
-            setAutoRevokeExemptedInternal(pkg, exempted, userIds);
         }
         @Override
         public void updatePermissions(@NonNull String packageName, @Nullable AndroidPackage pkg) {
@@ -5418,6 +5407,20 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                 @Nullable AndroidPackage oldPkg) {
             Objects.requireNonNull(pkg);
             onPackageAddedInternal(pkg, isInstantApp, oldPkg);
+        }
+
+        @Override
+        public void onPackageInstalled(@NonNull AndroidPackage pkg,
+                @NonNull List<String> grantedPermissions,
+                @NonNull List<String> allowlistedRestrictedPermissions,
+                int autoRevokePermissionsMode, @UserIdInt int userId) {
+            Objects.requireNonNull(pkg, "pkg");
+            Objects.requireNonNull(grantedPermissions, "grantedPermissions");
+            Objects.requireNonNull(allowlistedRestrictedPermissions,
+                    "allowlistedRestrictedPermissions");
+            Preconditions.checkArgumentNonNegative(userId, "userId");
+            onPackageInstalledInternal(pkg, grantedPermissions, allowlistedRestrictedPermissions,
+                    autoRevokePermissionsMode, userId);
         }
 
         @Override
