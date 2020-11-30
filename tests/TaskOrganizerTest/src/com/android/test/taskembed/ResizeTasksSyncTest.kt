@@ -77,17 +77,13 @@ class ResizeTasksSyncTest {
         }
 
         // find the frame which match resized buffer size.
-        var frame: Long = -1
-        loop@ for (trace in trace.entries) {
-            for (layer in trace.flattenedLayers) {
-                if (layer.proto.activeBuffer != null &&
-                        layer.proto.activeBuffer.width == firstBounds.width() &&
-                        layer.proto.activeBuffer.height == firstBounds.height()) {
-                    frame = layer.proto.currFrame
-                    break@loop
-                }
-            }
-        }
+        val frame = trace.entries.flatMap { it.flattenedLayers }
+                .firstOrNull { layer ->
+                    !layer.isActiveBufferEmpty &&
+                        layer.activeBuffer?.width == firstBounds.width() &&
+                        layer.activeBuffer?.height == firstBounds.height()
+                }?.currFrame ?: -1
+
         assertNotEquals(-1, frame)
         // layer bounds should be related to parent surfaceview.
         secondBounds.offsetTo(0, 0)
