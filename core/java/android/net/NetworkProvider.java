@@ -51,13 +51,6 @@ public class NetworkProvider {
     public static final int ID_NONE = -1;
 
     /**
-     * A hardcoded ID for NetworkAgents representing VPNs. These agents are not created by any
-     * provider, so they use this constant for clarity instead of NONE.
-     * @hide only used by ConnectivityService.
-     */
-    public static final int ID_VPN = -2;
-
-    /**
      * The first providerId value that will be allocated.
      * @hide only used by ConnectivityService.
      */

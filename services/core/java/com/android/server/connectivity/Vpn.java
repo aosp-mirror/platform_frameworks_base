@@ -122,7 +122,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.math.BigInteger;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
@@ -152,36 +151,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class Vpn {
     private static final String NETWORKTYPE = "VPN";
     private static final String TAG = "Vpn";
+    private static final String VPN_PROVIDER_NAME_BASE = "VpnNetworkProvider:";
     private static final boolean LOGD = true;
 
     // Length of time (in milliseconds) that an app hosting an always-on VPN is placed on
     // the device idle allowlist during service launch and VPN bootstrap.
     private static final long VPN_LAUNCH_IDLE_ALLOWLIST_DURATION_MS = 60 * 1000;
 
-    // Settings for how much of the address space should be routed so that Vpn considers
-    // "most" of the address space is routed. This is used to determine whether this Vpn
-    // should be marked with the INTERNET capability.
-    private static final long MOST_IPV4_ADDRESSES_COUNT;
-    private static final BigInteger MOST_IPV6_ADDRESSES_COUNT;
-    static {
-        // 85% of the address space must be routed for Vpn to consider this VPN to provide
-        // INTERNET access.
-        final int howManyPercentIsMost = 85;
-
-        final long twoPower32 = 1L << 32;
-        MOST_IPV4_ADDRESSES_COUNT = twoPower32 * howManyPercentIsMost / 100;
-        final BigInteger twoPower128 = BigInteger.ONE.shiftLeft(128);
-        MOST_IPV6_ADDRESSES_COUNT = twoPower128
-                .multiply(BigInteger.valueOf(howManyPercentIsMost))
-                .divide(BigInteger.valueOf(100));
-    }
-    // How many routes to evaluate before bailing and declaring this Vpn should provide
-    // the INTERNET capability. This is necessary because computing the address space is
-    // O(n²) and this is running in the system service, so a limit is needed to alleviate
-    // the risk of attack.
-    // This is taken as a total of IPv4 + IPV6 routes for simplicity, but the algorithm
-    // is actually O(n²)+O(n²).
-    private static final int MAX_ROUTES_TO_EVALUATE = 150;
     private static final String LOCKDOWN_ALLOWLIST_SETTING_NAME =
             Settings.Secure.ALWAYS_ON_VPN_LOCKDOWN_WHITELIST;
     /**
@@ -198,6 +174,7 @@ public class Vpn {
     // automated reconnection
 
     private final Context mContext;
+    private final ConnectivityManager mConnectivityManager;
     // The context is for specific user which is created from mUserId
     private final Context mUserIdContext;
     @VisibleForTesting final Dependencies mDeps;
@@ -218,6 +195,7 @@ public class Vpn {
     private final INetworkManagementService mNetd;
     @VisibleForTesting
     protected VpnConfig mConfig;
+    private final NetworkProvider mNetworkProvider;
     @VisibleForTesting
     protected NetworkAgent mNetworkAgent;
     private final Looper mLooper;
@@ -401,6 +379,7 @@ public class Vpn {
             int userId, @NonNull KeyStore keyStore, SystemServices systemServices,
             Ikev2SessionCreator ikev2SessionCreator) {
         mContext = context;
+        mConnectivityManager = mContext.getSystemService(ConnectivityManager.class);
         mUserIdContext = context.createContextAsUser(UserHandle.of(userId), 0 /* flags */);
         mDeps = deps;
         mNetd = netService;
@@ -419,6 +398,10 @@ public class Vpn {
             Log.wtf(TAG, "Problem registering observer", e);
         }
 
+        mNetworkProvider = new NetworkProvider(context, looper, VPN_PROVIDER_NAME_BASE + mUserId);
+        // This constructor is called in onUserStart and registers the provider. The provider
+        // will be unregistered in onUserStop.
+        mConnectivityManager.registerNetworkProvider(mNetworkProvider);
         mLegacyState = LegacyVpnInfo.STATE_DISCONNECTED;
         mNetworkInfo = new NetworkInfo(ConnectivityManager.TYPE_VPN, 0 /* subtype */, NETWORKTYPE,
                 "" /* subtypeName */);
@@ -443,12 +426,39 @@ public class Vpn {
      * Update current state, dispatching event to listeners.
      */
     @VisibleForTesting
+    @GuardedBy("this")
     protected void updateState(DetailedState detailedState, String reason) {
         if (LOGD) Log.d(TAG, "setting state=" + detailedState + ", reason=" + reason);
         mLegacyState = LegacyVpnInfo.stateFromNetworkInfo(detailedState);
         mNetworkInfo.setDetailedState(detailedState, reason, null);
-        if (mNetworkAgent != null) {
-            mNetworkAgent.sendNetworkInfo(mNetworkInfo);
+        // TODO : only accept transitions when the agent is in the correct state (non-null for
+        // CONNECTED, DISCONNECTED and FAILED, null for CONNECTED).
+        // This will require a way for tests to pretend the VPN is connected that's not
+        // calling this method with CONNECTED.
+        // It will also require audit of where the code calls this method with DISCONNECTED
+        // with a null agent, which it was doing historically to make sure the agent is
+        // disconnected as this was a no-op if the agent was null.
+        switch (detailedState) {
+            case CONNECTED:
+                if (null != mNetworkAgent) {
+                    mNetworkAgent.markConnected();
+                }
+                break;
+            case DISCONNECTED:
+            case FAILED:
+                if (null != mNetworkAgent) {
+                    mNetworkAgent.unregister();
+                    mNetworkAgent = null;
+                }
+                break;
+            case CONNECTING:
+                if (null != mNetworkAgent) {
+                    throw new IllegalStateException("VPN can only go to CONNECTING state when"
+                            + " the agent is null.");
+                }
+                break;
+            default:
+                throw new IllegalArgumentException("Illegal state argument " + detailedState);
         }
         updateAlwaysOnNotification(detailedState);
     }
@@ -476,7 +486,7 @@ public class Vpn {
         final boolean isAlwaysMetered = mIsPackageTargetingAtLeastQ && mConfig.isMetered;
 
         applyUnderlyingCapabilities(
-                mContext.getSystemService(ConnectivityManager.class),
+                mConnectivityManager,
                 underlyingNetworks,
                 mNetworkCapabilities,
                 isAlwaysMetered);
@@ -486,10 +496,10 @@ public class Vpn {
 
     @VisibleForTesting
     public static void applyUnderlyingCapabilities(
-            ConnectivityManager cm,
-            Network[] underlyingNetworks,
-            NetworkCapabilities caps,
-            boolean isAlwaysMetered) {
+            @NonNull final ConnectivityManager cm,
+            @Nullable final Network[] underlyingNetworks,
+            @NonNull final NetworkCapabilities caps,
+            final boolean isAlwaysMetered) {
         int[] transportTypes = new int[] { NetworkCapabilities.TRANSPORT_VPN };
         int downKbps = NetworkCapabilities.LINK_BANDWIDTH_UNSPECIFIED;
         int upKbps = NetworkCapabilities.LINK_BANDWIDTH_UNSPECIFIED;
@@ -1016,7 +1026,7 @@ public class Vpn {
             }
             mConfig = null;
 
-            updateState(DetailedState.IDLE, "prepare");
+            updateState(DetailedState.DISCONNECTED, "prepare");
             setVpnForcedLocked(mLockdown);
         } finally {
             Binder.restoreCallingIdentity(token);
@@ -1252,7 +1262,7 @@ public class Vpn {
         mNetworkCapabilities.addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET);
 
         mLegacyState = LegacyVpnInfo.STATE_CONNECTING;
-        mNetworkInfo.setDetailedState(DetailedState.CONNECTING, null, null);
+        updateState(DetailedState.CONNECTING, "agentConnect");
 
         NetworkAgentConfig networkAgentConfig = new NetworkAgentConfig();
         networkAgentConfig.allowBypass = mConfig.allowBypass && !mLockdown;
@@ -1270,20 +1280,23 @@ public class Vpn {
             mNetworkCapabilities.addCapability(NET_CAPABILITY_NOT_METERED);
         }
 
-        final long token = Binder.clearCallingIdentity();
-        try {
-            mNetworkAgent = new NetworkAgent(mLooper, mContext, NETWORKTYPE /* logtag */,
-                    mNetworkInfo, mNetworkCapabilities, lp,
-                    ConnectivityConstants.VPN_DEFAULT_SCORE, networkAgentConfig,
-                    NetworkProvider.ID_VPN) {
-                            @Override
-                            public void unwanted() {
-                                // We are user controlled, not driven by NetworkRequest.
-                            }
-                        };
-        } finally {
-            Binder.restoreCallingIdentity(token);
-        }
+        mNetworkAgent = new NetworkAgent(mContext, mLooper, NETWORKTYPE /* logtag */,
+                mNetworkCapabilities, lp,
+                ConnectivityConstants.VPN_DEFAULT_SCORE, networkAgentConfig, mNetworkProvider) {
+            @Override
+            public void unwanted() {
+                // We are user controlled, not driven by NetworkRequest.
+            }
+        };
+        Binder.withCleanCallingIdentity(() -> {
+            try {
+                mNetworkAgent.register();
+            } catch (final Exception e) {
+                // If register() throws, don't keep an unregistered agent.
+                mNetworkAgent = null;
+                throw e;
+            }
+        });
         mNetworkAgent.setUnderlyingNetworks((mConfig.underlyingNetworks != null)
                 ? Arrays.asList(mConfig.underlyingNetworks) : null);
         mNetworkInfo.setIsAvailable(true);
@@ -1301,19 +1314,12 @@ public class Vpn {
 
     private void agentDisconnect(NetworkAgent networkAgent) {
         if (networkAgent != null) {
-            NetworkInfo networkInfo = new NetworkInfo(mNetworkInfo);
-            networkInfo.setIsAvailable(false);
-            networkInfo.setDetailedState(DetailedState.DISCONNECTED, null, null);
-            networkAgent.sendNetworkInfo(networkInfo);
+            networkAgent.unregister();
         }
     }
 
     private void agentDisconnect() {
-        if (mNetworkInfo.isConnected()) {
-            mNetworkInfo.setIsAvailable(false);
-            updateState(DetailedState.DISCONNECTED, "agentDisconnect");
-            mNetworkAgent = null;
-        }
+        updateState(DetailedState.DISCONNECTED, "agentDisconnect");
     }
 
     /**
@@ -1402,6 +1408,8 @@ public class Vpn {
                     && updateLinkPropertiesInPlaceIfPossible(mNetworkAgent, oldConfig)) {
                 // Keep mNetworkAgent unchanged
             } else {
+                // Initialize the state for a new agent, while keeping the old one connected
+                // in case this new connection fails.
                 mNetworkAgent = null;
                 updateState(DetailedState.CONNECTING, "establish");
                 // Set up forwarding and DNS rules.
@@ -1635,6 +1643,9 @@ public class Vpn {
 
         // Quit any active connections
         agentDisconnect();
+
+        // The provider has been registered in the constructor, which is called in onUserStart.
+        mConnectivityManager.unregisterNetworkProvider(mNetworkProvider);
     }
 
     /**
@@ -2411,7 +2422,6 @@ public class Vpn {
             // When restricted to test networks, select any network with TRANSPORT_TEST. Since the
             // creator of the profile and the test network creator both have MANAGE_TEST_NETWORKS,
             // this is considered safe.
-            final ConnectivityManager cm = ConnectivityManager.from(mContext);
             final NetworkRequest req;
 
             if (mProfile.isRestrictedToTestNetworks()) {
@@ -2430,7 +2440,7 @@ public class Vpn {
                         .build();
             }
 
-            cm.requestNetwork(req, mNetworkCallback);
+            mConnectivityManager.requestNetwork(req, mNetworkCallback);
         }
 
         private boolean isActiveNetwork(@Nullable Network network) {
@@ -2717,8 +2727,7 @@ public class Vpn {
 
             resetIkeState();
 
-            final ConnectivityManager cm = ConnectivityManager.from(mContext);
-            cm.unregisterNetworkCallback(mNetworkCallback);
+            mConnectivityManager.unregisterNetworkCallback(mNetworkCallback);
 
             mExecutor.shutdown();
         }
@@ -2799,13 +2808,12 @@ public class Vpn {
             mProfile = profile;
 
             if (!TextUtils.isEmpty(mOuterInterface)) {
-                final ConnectivityManager cm = ConnectivityManager.from(mContext);
-                for (Network network : cm.getAllNetworks()) {
-                    final LinkProperties lp = cm.getLinkProperties(network);
+                for (Network network : mConnectivityManager.getAllNetworks()) {
+                    final LinkProperties lp = mConnectivityManager.getLinkProperties(network);
                     if (lp != null && lp.getAllInterfaceNames().contains(mOuterInterface)) {
-                        final NetworkInfo networkInfo = cm.getNetworkInfo(network);
-                        if (networkInfo != null) {
-                            mOuterConnection.set(networkInfo.getType());
+                        final NetworkInfo netInfo = mConnectivityManager.getNetworkInfo(network);
+                        if (netInfo != null) {
+                            mOuterConnection.set(netInfo.getType());
                             break;
                         }
                     }
