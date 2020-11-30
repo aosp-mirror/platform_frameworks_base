@@ -19,6 +19,7 @@ package com.android.wm.shell.pip.phone;
 import android.graphics.PointF;
 import android.os.Handler;
 import android.util.Log;
+import android.view.Display;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.ViewConfiguration;
@@ -64,6 +65,7 @@ public class PipTouchState {
     private boolean mStartedDragging = false;
     private boolean mAllowDraggingOffscreen = false;
     private int mActivePointerId;
+    private int mLastTouchDisplayId = Display.INVALID_DISPLAY;
 
     public PipTouchState(ViewConfiguration viewConfig, Handler handler,
             Runnable doubleTapTimeoutCallback, Runnable hoverExitTimeoutCallback) {
@@ -81,12 +83,14 @@ public class PipTouchState {
         mIsDragging = false;
         mStartedDragging = false;
         mIsUserInteracting = false;
+        mLastTouchDisplayId = Display.INVALID_DISPLAY;
     }
 
     /**
      * Processes a given touch event and updates the state.
      */
     public void onTouchEvent(MotionEvent ev) {
+        mLastTouchDisplayId = ev.getDisplayId();
         switch (ev.getActionMasked()) {
             case MotionEvent.ACTION_DOWN: {
                 if (!mAllowTouches) {
@@ -266,6 +270,13 @@ public class PipTouchState {
     }
 
     /**
+     * @return Display ID of the last touch event.
+     */
+    public int getLastTouchDisplayId() {
+        return mLastTouchDisplayId;
+    }
+
+    /**
      * Sets whether touching is currently allowed.
      */
     public void setAllowTouches(boolean allowTouches) {
@@ -378,6 +389,7 @@ public class PipTouchState {
         pw.println(prefix + TAG);
         pw.println(innerPrefix + "mAllowTouches=" + mAllowTouches);
         pw.println(innerPrefix + "mActivePointerId=" + mActivePointerId);
+        pw.println(innerPrefix + "mLastTouchDisplayId=" + mLastTouchDisplayId);
         pw.println(innerPrefix + "mDownTouch=" + mDownTouch);
         pw.println(innerPrefix + "mDownDelta=" + mDownDelta);
         pw.println(innerPrefix + "mLastTouch=" + mLastTouch);
