@@ -987,21 +987,17 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
             // update client uids
             updateClientUids(mProviderRequest.getWorkSource());
 
-            mFixInterval = (int) mProviderRequest.getIntervalMillis();
-            // check for overflow
-            if (mFixInterval != mProviderRequest.getIntervalMillis()) {
+            if (mProviderRequest.getIntervalMillis() <= Integer.MAX_VALUE) {
+                mFixInterval = (int) mProviderRequest.getIntervalMillis();
+            } else {
                 Log.w(TAG, "interval overflow: " + mProviderRequest.getIntervalMillis());
                 mFixInterval = Integer.MAX_VALUE;
             }
-            // requested batch size, or zero to disable batching
-            int batchSize;
-            try {
-                batchSize = mBatchingEnabled ? Math.toIntExact(
-                        mProviderRequest.getMaxUpdateDelayMillis() / mFixInterval) : 0;
-            } catch (ArithmeticException e) {
-                batchSize = Integer.MAX_VALUE;
-            }
 
+            // requested batch size, or zero to disable batching
+            long batchSize =
+                    mBatchingEnabled ? mProviderRequest.getMaxUpdateDelayMillis() / Math.max(
+                            mFixInterval, 1) : 0;
             if (batchSize < getBatchSize()) {
                 batchSize = 0;
             }
