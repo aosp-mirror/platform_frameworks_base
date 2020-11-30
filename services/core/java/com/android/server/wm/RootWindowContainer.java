@@ -2152,9 +2152,13 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             } else {
                 // In the case of multiple activities, we will create a new task for it and then
                 // move the PIP activity into the task.
-                rootTask = taskDisplayArea.createRootTask(WINDOWING_MODE_UNDEFINED,
-                        r.getActivityType(), ON_TOP, r.info, r.intent,
-                        false /* createdByOrganizer */);
+                rootTask = new Task.Builder(mService)
+                        .setActivityType(r.getActivityType())
+                        .setOnTop(true)
+                        .setActivityInfo(r.info)
+                        .setParent(taskDisplayArea)
+                        .setIntent(r.intent)
+                        .build();
                 // It's possible the task entering PIP is in freeform, so save the last
                 // non-fullscreen bounds. Then when this new PIP task exits PIP, it can restore
                 // to its previous freeform bounds.
