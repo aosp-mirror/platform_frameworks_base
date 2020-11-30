@@ -42,6 +42,7 @@ import android.text.SpannedString;
 import android.text.TextWatcher;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.ContentInfo;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -590,12 +591,12 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
                         new OnReceiveContentListener() {
                             @Override
                             @Nullable
-                            public Payload onReceiveContent(@NonNull View view,
-                                    @NonNull Payload payload) {
-                                Map<Boolean, Payload> split = payload.partition(
+                            public ContentInfo onReceiveContent(@NonNull View view,
+                                    @NonNull ContentInfo payload) {
+                                Map<Boolean, ContentInfo> split = payload.partition(
                                         item -> item.getUri() != null);
-                                Payload uriItems = split.get(true);
-                                Payload remainingItems = split.get(false);
+                                ContentInfo uriItems = split.get(true);
+                                ContentInfo remainingItems = split.get(false);
                                 if (uriItems != null) {
                                     ClipData clip = uriItems.getClip();
                                     ClipDescription description = clip.getDescription();

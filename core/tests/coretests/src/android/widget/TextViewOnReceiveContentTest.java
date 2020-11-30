@@ -16,11 +16,11 @@
 
 package android.widget;
 
-import static android.view.OnReceiveContentListener.Payload.SOURCE_AUTOFILL;
-import static android.view.OnReceiveContentListener.Payload.SOURCE_CLIPBOARD;
-import static android.view.OnReceiveContentListener.Payload.SOURCE_DRAG_AND_DROP;
-import static android.view.OnReceiveContentListener.Payload.SOURCE_INPUT_METHOD;
-import static android.view.OnReceiveContentListener.Payload.SOURCE_PROCESS_TEXT;
+import static android.view.ContentInfo.SOURCE_AUTOFILL;
+import static android.view.ContentInfo.SOURCE_CLIPBOARD;
+import static android.view.ContentInfo.SOURCE_DRAG_AND_DROP;
+import static android.view.ContentInfo.SOURCE_INPUT_METHOD;
+import static android.view.ContentInfo.SOURCE_PROCESS_TEXT;
 import static android.widget.espresso.TextViewActions.clickOnTextAtIndex;
 
 import static androidx.test.espresso.Espresso.onView;
@@ -41,7 +41,7 @@ import android.content.ClipData;
 import android.content.ClipDescription;
 import android.net.Uri;
 import android.os.Bundle;
-import android.view.OnReceiveContentListener;
+import android.view.ContentInfo;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputConnectionWrapper;
 import android.view.inputmethod.InputContentInfo;
@@ -133,8 +133,8 @@ public class TextViewOnReceiveContentTest {
         // InputConnection.commitContent.
         ClipDescription description = new ClipDescription("", new String[] {"image/gif"});
         ClipData clip = new ClipData(description, new ClipData.Item(SAMPLE_CONTENT_URI));
-        OnReceiveContentListener.Payload payload =
-                new OnReceiveContentListener.Payload.Builder(clip, SOURCE_AUTOFILL).build();
+        ContentInfo payload =
+                new ContentInfo.Builder(clip, SOURCE_AUTOFILL).build();
         mDefaultReceiver.onReceiveContent(mEditText, payload);
         verify(ic.mMock, times(1))
                 .commitContent(any(InputContentInfo.class), eq(0), eq(null));
@@ -155,8 +155,8 @@ public class TextViewOnReceiveContentTest {
         // Invoke the listener and assert that the InputConnection is not invoked.
         ClipDescription description = new ClipDescription("", new String[] {"image/gif"});
         ClipData clip = new ClipData(description, new ClipData.Item(SAMPLE_CONTENT_URI));
-        OnReceiveContentListener.Payload payload =
-                new OnReceiveContentListener.Payload.Builder(clip, SOURCE_AUTOFILL).build();
+        ContentInfo payload =
+                new ContentInfo.Builder(clip, SOURCE_AUTOFILL).build();
         mDefaultReceiver.onReceiveContent(mEditText, payload);
         verifyZeroInteractions(ic.mMock);
     }
@@ -176,20 +176,20 @@ public class TextViewOnReceiveContentTest {
         // trigger calls to InputConnection.commitContent.
         ClipDescription description = new ClipDescription("", new String[] {"image/gif"});
         ClipData clip = new ClipData(description, new ClipData.Item(SAMPLE_CONTENT_URI));
-        OnReceiveContentListener.Payload payload =
-                new OnReceiveContentListener.Payload.Builder(clip, SOURCE_CLIPBOARD).build();
+        ContentInfo payload =
+                new ContentInfo.Builder(clip, SOURCE_CLIPBOARD).build();
         mDefaultReceiver.onReceiveContent(mEditText, payload);
         verifyZeroInteractions(ic.mMock);
 
-        payload = new OnReceiveContentListener.Payload.Builder(clip, SOURCE_INPUT_METHOD).build();
+        payload = new ContentInfo.Builder(clip, SOURCE_INPUT_METHOD).build();
         mDefaultReceiver.onReceiveContent(mEditText, payload);
         verifyZeroInteractions(ic.mMock);
 
-        payload = new OnReceiveContentListener.Payload.Builder(clip, SOURCE_DRAG_AND_DROP).build();
+        payload = new ContentInfo.Builder(clip, SOURCE_DRAG_AND_DROP).build();
         mDefaultReceiver.onReceiveContent(mEditText, payload);
         verifyZeroInteractions(ic.mMock);
 
-        payload = new OnReceiveContentListener.Payload.Builder(clip, SOURCE_PROCESS_TEXT).build();
+        payload = new ContentInfo.Builder(clip, SOURCE_PROCESS_TEXT).build();
         mDefaultReceiver.onReceiveContent(mEditText, payload);
         verifyZeroInteractions(ic.mMock);
     }

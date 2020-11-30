@@ -112,7 +112,6 @@ import android.view.AccessibilityIterators.TextSegmentIterator;
 import android.view.AccessibilityIterators.WordTextSegmentIterator;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.InputDevice.InputSourceClass;
-import android.view.OnReceiveContentListener.Payload;
 import android.view.Window.OnContentApplyWindowInsetsListener;
 import android.view.WindowInsets.Type;
 import android.view.WindowInsetsAnimation.Bounds;
@@ -9063,11 +9062,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @return The portion of the passed-in content that was not accepted (may be all, some, or none
      * of the passed-in content).
      */
-    public @Nullable Payload performReceiveContent(@NonNull Payload payload) {
+    @Nullable
+    public ContentInfo performReceiveContent(@NonNull ContentInfo payload) {
         final OnReceiveContentListener listener = (mListenerInfo == null) ? null
                 : getListenerInfo().mOnReceiveContentListener;
         if (listener != null) {
-            final Payload remaining = listener.onReceiveContent(this, payload);
+            final ContentInfo remaining = listener.onReceiveContent(this, payload);
             return (remaining == null) ? null : onReceiveContent(remaining);
         }
         return onReceiveContent(payload);
@@ -9088,7 +9088,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @return The portion of the passed-in content that was not handled (may be all, some, or none
      * of the passed-in content).
      */
-    public @Nullable Payload onReceiveContent(@NonNull Payload payload) {
+    @Nullable
+    public ContentInfo onReceiveContent(@NonNull ContentInfo payload) {
         return payload;
     }
 
@@ -9113,7 +9114,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @return The MIME types accepted by {@link #performReceiveContent} for this view (may
      * include patterns such as "image/*").
      */
-    public @Nullable String[] getOnReceiveContentMimeTypes() {
+    @Nullable
+    public String[] getOnReceiveContentMimeTypes() {
         return mOnReceiveContentMimeTypes;
     }
 
