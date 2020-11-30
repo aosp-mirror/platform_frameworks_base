@@ -22,10 +22,13 @@ import static com.android.testutils.ParcelUtils.assertParcelSane;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import android.os.Build;
 import android.util.SparseArray;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
+
+import com.android.testutils.DevSdkIgnoreRule.IgnoreUpTo;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -34,6 +37,7 @@ import org.junit.runner.RunWith;
 import java.util.ArrayList;
 import java.util.List;
 
+@IgnoreUpTo(Build.VERSION_CODES.R)
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 public class OemNetworkPreferencesTest {
