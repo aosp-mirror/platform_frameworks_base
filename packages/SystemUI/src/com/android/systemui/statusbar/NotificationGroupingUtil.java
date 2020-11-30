@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -11,19 +11,22 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License
+ * limitations under the License.
  */
 
 package com.android.systemui.statusbar;
 
 import android.app.Notification;
+import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
 import android.text.TextUtils;
+import android.view.NotificationHeaderView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.android.internal.R;
 import com.android.internal.widget.CachingIconView;
 import com.android.internal.widget.ConversationLayout;
 import com.android.internal.widget.NotificationExpandButton;
@@ -36,35 +39,38 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * A Util to manage {@link android.view.NotificationHeaderView} objects and their redundancies.
+ * A utility to manage notification views when they are placed in a group by adjusting elements
+ * to reduce redundancies and occasionally tweak layouts to highlight the unique content.
  */
-public class NotificationHeaderUtil {
+public class NotificationGroupingUtil {
 
-    private static final TextViewComparator sTextViewComparator = new TextViewComparator();
-    private static final TextViewComparator sAppNameComparator = new AppNameComparator();
-    private static final VisibilityApplicator sVisibilityApplicator = new VisibilityApplicator();
-    private static final VisibilityApplicator sAppNameApplicator = new AppNameApplicator();
-    private static  final DataExtractor sIconExtractor = new DataExtractor() {
+    private static final TextViewComparator TEXT_VIEW_COMPARATOR = new TextViewComparator();
+    private static final TextViewComparator APP_NAME_COMPARATOR = new AppNameComparator();
+    private static final ViewComparator BADGE_COMPARATOR = new BadgeComparator();
+    private static final VisibilityApplicator VISIBILITY_APPLICATOR = new VisibilityApplicator();
+    private static final VisibilityApplicator APP_NAME_APPLICATOR = new AppNameApplicator();
+    private static final ResultApplicator LEFT_ICON_APPLICATOR = new LeftIconApplicator();
+    private static final DataExtractor ICON_EXTRACTOR = new DataExtractor() {
         @Override
         public Object extractData(ExpandableNotificationRow row) {
             return row.getEntry().getSbn().getNotification();
         }
     };
-    private static final IconComparator sIconVisibilityComparator = new IconComparator() {
+    private static final IconComparator ICON_VISIBILITY_COMPARATOR = new IconComparator() {
         public boolean compare(View parent, View child, Object parentData,
                 Object childData) {
             return hasSameIcon(parentData, childData)
                     && hasSameColor(parentData, childData);
         }
     };
-    private static final IconComparator sGreyComparator = new IconComparator() {
+    private static final IconComparator GREY_COMPARATOR = new IconComparator() {
         public boolean compare(View parent, View child, Object parentData,
                 Object childData) {
             return !hasSameIcon(parentData, childData)
                     || hasSameColor(parentData, childData);
         }
     };
-    private final static ResultApplicator mGreyApplicator = new ResultApplicator() {
+    private static final ResultApplicator GREY_APPLICATOR = new ResultApplicator() {
         @Override
         public void apply(View parent, View view, boolean apply, boolean reset) {
             CachingIconView icon = view.findViewById(com.android.internal.R.id.icon);
@@ -80,87 +86,79 @@ public class NotificationHeaderUtil {
     };
 
     private final ExpandableNotificationRow mRow;
-    private final ArrayList<HeaderProcessor> mComparators = new ArrayList<>();
+    private final ArrayList<Processor> mProcessors = new ArrayList<>();
     private final HashSet<Integer> mDividers = new HashSet<>();
 
-    public NotificationHeaderUtil(ExpandableNotificationRow row) {
+    public NotificationGroupingUtil(ExpandableNotificationRow row) {
         mRow = row;
         // To hide the icons if they are the same and the color is the same
-        mComparators.add(new HeaderProcessor(mRow,
+        mProcessors.add(new Processor(mRow,
                 com.android.internal.R.id.icon,
-                sIconExtractor,
-                sIconVisibilityComparator,
-                sVisibilityApplicator));
+                ICON_EXTRACTOR,
+                ICON_VISIBILITY_COMPARATOR,
+                VISIBILITY_APPLICATOR));
         // To grey them out the icons and expand button when the icons are not the same
-        mComparators.add(new HeaderProcessor(mRow,
-                com.android.internal.R.id.notification_header,
-                sIconExtractor,
-                sGreyComparator,
-                mGreyApplicator));
-        mComparators.add(new HeaderProcessor(mRow,
+        mProcessors.add(new Processor(mRow,
+                com.android.internal.R.id.status_bar_latest_event_content,
+                ICON_EXTRACTOR,
+                GREY_COMPARATOR,
+                GREY_APPLICATOR));
+        mProcessors.add(new Processor(mRow,
+                com.android.internal.R.id.status_bar_latest_event_content,
+                ICON_EXTRACTOR,
+                ICON_VISIBILITY_COMPARATOR,
+                LEFT_ICON_APPLICATOR));
+        mProcessors.add(new Processor(mRow,
                 com.android.internal.R.id.profile_badge,
                 null /* Extractor */,
-                new ViewComparator() {
-                    @Override
-                    public boolean compare(View parent, View child, Object parentData,
-                            Object childData) {
-                        return parent.getVisibility() != View.GONE;
-                    }
-
-                    @Override
-                    public boolean isEmpty(View view) {
-                        if (view instanceof ImageView) {
-                            return ((ImageView) view).getDrawable() == null;
-                        }
-                        return false;
-                    }
-                },
-                sVisibilityApplicator));
-        mComparators.add(new HeaderProcessor(
-                mRow,
+                BADGE_COMPARATOR,
+                VISIBILITY_APPLICATOR));
+        mProcessors.add(new Processor(mRow,
                 com.android.internal.R.id.app_name_text,
                 null,
-                sAppNameComparator,
-                sAppNameApplicator));
-        mComparators.add(HeaderProcessor.forTextView(mRow,
-                com.android.internal.R.id.header_text));
+                APP_NAME_COMPARATOR,
+                APP_NAME_APPLICATOR));
+        mProcessors.add(Processor.forTextView(mRow, com.android.internal.R.id.header_text));
         mDividers.add(com.android.internal.R.id.header_text_divider);
         mDividers.add(com.android.internal.R.id.header_text_secondary_divider);
         mDividers.add(com.android.internal.R.id.time_divider);
     }
 
-    public void updateChildrenHeaderAppearance() {
+    /**
+     * Update the appearance of the children in this group to reduce redundancies.
+     */
+    public void updateChildrenAppearance() {
         List<ExpandableNotificationRow> notificationChildren = mRow.getAttachedChildren();
         if (notificationChildren == null) {
             return;
         }
-        // Initialize the comparators
-        for (int compI = 0; compI < mComparators.size(); compI++) {
-            mComparators.get(compI).init();
+        // Initialize the processors
+        for (int compI = 0; compI < mProcessors.size(); compI++) {
+            mProcessors.get(compI).init();
         }
 
         // Compare all notification headers
         for (int i = 0; i < notificationChildren.size(); i++) {
             ExpandableNotificationRow row = notificationChildren.get(i);
-            for (int compI = 0; compI < mComparators.size(); compI++) {
-                mComparators.get(compI).compareToHeader(row);
+            for (int compI = 0; compI < mProcessors.size(); compI++) {
+                mProcessors.get(compI).compareToGroupParent(row);
             }
         }
 
         // Apply the comparison to the row
         for (int i = 0; i < notificationChildren.size(); i++) {
             ExpandableNotificationRow row = notificationChildren.get(i);
-            for (int compI = 0; compI < mComparators.size(); compI++) {
-                mComparators.get(compI).apply(row);
+            for (int compI = 0; compI < mProcessors.size(); compI++) {
+                mProcessors.get(compI).apply(row);
             }
             // We need to sanitize the dividers since they might be off-balance now
-            sanitizeHeaderViews(row);
+            sanitizeTopLineViews(row);
         }
     }
 
-    private void sanitizeHeaderViews(ExpandableNotificationRow row) {
+    private void sanitizeTopLineViews(ExpandableNotificationRow row) {
         if (row.isSummaryWithChildren()) {
-            sanitizeHeader(row.getNotificationViewWrapper().getNotificationHeader());
+            sanitizeTopLine(row.getNotificationViewWrapper().getNotificationHeader());
             return;
         }
         final NotificationContentView layout = row.getPrivateLayout();
@@ -171,13 +169,11 @@ public class NotificationHeaderUtil {
 
     private void sanitizeChild(View child) {
         if (child != null) {
-            ViewGroup header = child.findViewById(
-                    com.android.internal.R.id.notification_top_line);
-            sanitizeHeader(header);
+            sanitizeTopLine(child.findViewById(R.id.notification_top_line));
         }
     }
 
-    private void sanitizeHeader(ViewGroup rowHeader) {
+    private void sanitizeTopLine(ViewGroup rowHeader) {
         if (rowHeader == null) {
             return;
         }
@@ -225,28 +221,31 @@ public class NotificationHeaderUtil {
         }
     }
 
-    public void restoreNotificationHeader(ExpandableNotificationRow row) {
-        for (int compI = 0; compI < mComparators.size(); compI++) {
-            mComparators.get(compI).apply(row, true /* reset */);
+    /**
+     * Reset the modifications to this row for removing it from the group.
+     */
+    public void restoreChildNotification(ExpandableNotificationRow row) {
+        for (int compI = 0; compI < mProcessors.size(); compI++) {
+            mProcessors.get(compI).apply(row, true /* reset */);
         }
-        sanitizeHeaderViews(row);
+        sanitizeTopLineViews(row);
     }
 
-    private static class HeaderProcessor {
+    private static class Processor {
         private final int mId;
         private final DataExtractor mExtractor;
+        private final ViewComparator mComparator;
         private final ResultApplicator mApplicator;
         private final ExpandableNotificationRow mParentRow;
         private boolean mApply;
         private View mParentView;
-        private ViewComparator mComparator;
         private Object mParentData;
 
-        public static HeaderProcessor forTextView(ExpandableNotificationRow row, int id) {
-            return new HeaderProcessor(row, id, null, sTextViewComparator, sVisibilityApplicator);
+        public static Processor forTextView(ExpandableNotificationRow row, int id) {
+            return new Processor(row, id, null, TEXT_VIEW_COMPARATOR, VISIBILITY_APPLICATOR);
         }
 
-        HeaderProcessor(ExpandableNotificationRow row, int id, DataExtractor extractor,
+        Processor(ExpandableNotificationRow row, int id, DataExtractor extractor,
                 ViewComparator comparator,
                 ResultApplicator applicator) {
             mId = id;
@@ -262,7 +261,7 @@ public class NotificationHeaderUtil {
             mParentData = mExtractor == null ? null : mExtractor.extractData(mParentRow);
             mApply = !mComparator.isEmpty(mParentView);
         }
-        public void compareToHeader(ExpandableNotificationRow row) {
+        public void compareToGroupParent(ExpandableNotificationRow row) {
             if (!mApply) {
                 return;
             }
@@ -308,8 +307,8 @@ public class NotificationHeaderUtil {
 
     private interface ViewComparator {
         /**
-         * @param parent the parent view
-         * @param child the child view
+         * @param parent the view with the given id in the group header
+         * @param child the view with the given id in the child notification
          * @param parentData optional data for the parent
          * @param childData optional data for the child
          * @return whether to views are the same
@@ -320,6 +319,21 @@ public class NotificationHeaderUtil {
 
     private interface DataExtractor {
         Object extractData(ExpandableNotificationRow row);
+    }
+
+    private static class BadgeComparator implements ViewComparator {
+        @Override
+        public boolean compare(View parent, View child, Object parentData, Object childData) {
+            return parent.getVisibility() != View.GONE;
+        }
+
+        @Override
+        public boolean isEmpty(View view) {
+            if (view instanceof ImageView) {
+                return ((ImageView) view).getDrawable() == null;
+            }
+            return false;
+        }
     }
 
     private static class TextViewComparator implements ViewComparator {
@@ -338,7 +352,7 @@ public class NotificationHeaderUtil {
         }
     }
 
-    private static abstract class IconComparator implements ViewComparator {
+    private abstract static class IconComparator implements ViewComparator {
         @Override
         public boolean compare(View parent, View child, Object parentData, Object childData) {
             return false;
@@ -366,6 +380,12 @@ public class NotificationHeaderUtil {
     }
 
     private interface ResultApplicator {
+        /**
+         * @param parent the root view of the child notification
+         * @param view the view with the given id in the child notification
+         * @param apply whether the state should be applied or removed
+         * @param reset if [de]application is the result of a reset
+         */
         void apply(View parent, View view, boolean apply, boolean reset);
     }
 
@@ -401,6 +421,56 @@ public class NotificationHeaderUtil {
                 return true;
             }
             return super.compare(parent, child, parentData, childData);
+        }
+    }
+
+    private static class LeftIconApplicator implements ResultApplicator {
+
+        public static final int[] MARGIN_ADJUSTED_VIEWS = {
+                R.id.notification_headerless_view_column,
+                R.id.line1,
+                R.id.notification_main_column,
+                R.id.notification_header};
+
+        @Override
+        public void apply(View parent, View child, boolean apply, boolean reset) {
+            ImageView rightIcon = child.findViewById(com.android.internal.R.id.right_icon);
+            ImageView leftIcon = child.findViewById(com.android.internal.R.id.left_icon);
+            if (rightIcon == null || leftIcon == null) {
+                return;
+            }
+            Drawable iconDrawable = rightIcon.getDrawable();
+            if (iconDrawable == null) {
+                return;
+            }
+            rightIcon.setVisibility(apply ? View.GONE : View.VISIBLE);
+            leftIcon.setVisibility(apply ? View.VISIBLE : View.GONE);
+            leftIcon.setImageDrawable(apply ? iconDrawable : null);
+
+            for (int viewId : MARGIN_ADJUSTED_VIEWS) {
+                adjustMargins(!apply, child.findViewById(viewId));
+            }
+        }
+
+        void adjustMargins(boolean iconVisible, View target) {
+            if (target == null) {
+                return;
+            }
+            Integer value = (Integer) target.getTag(iconVisible
+                    ? com.android.internal.R.id.tag_margin_end_when_icon_visible
+                    : com.android.internal.R.id.tag_margin_end_when_icon_gone);
+            if (value == null) {
+                return;
+            }
+            if (target instanceof NotificationHeaderView) {
+                ((NotificationHeaderView) target).setTopLineExtraMarginEnd(value);
+            } else {
+                ViewGroup.LayoutParams layoutParams = target.getLayoutParams();
+                if (layoutParams instanceof ViewGroup.MarginLayoutParams) {
+                    ((ViewGroup.MarginLayoutParams) layoutParams).setMarginEnd(value);
+                    target.setLayoutParams(layoutParams);
+                }
+            }
         }
     }
 }
