@@ -18,6 +18,8 @@ package com.android.server.appsearch;
 import static android.app.appsearch.AppSearchResult.throwableToFailedResult;
 
 import android.annotation.NonNull;
+import android.annotation.UserIdInt;
+import android.app.ActivityManager;
 import android.app.appsearch.AppSearchBatchResult;
 import android.app.appsearch.AppSearchResult;
 import android.app.appsearch.AppSearchSchema;
@@ -32,7 +34,6 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.ParcelableException;
 import android.os.RemoteException;
-import android.os.UserHandle;
 import android.util.Log;
 
 import com.android.internal.util.Preconditions;
@@ -64,12 +65,13 @@ public class AppSearchManagerService extends SystemService {
                 @NonNull List<Bundle> schemaBundles,
                 @NonNull List<String> schemasNotPlatformSurfaceable,
                 boolean forceOverride,
+                @UserIdInt int userId,
                 @NonNull IAppSearchResultCallback callback) {
             Preconditions.checkNotNull(databaseName);
             Preconditions.checkNotNull(schemaBundles);
             Preconditions.checkNotNull(callback);
-            int callingUid = Binder.getCallingUidOrThrow();
-            int callingUserId = UserHandle.getUserId(callingUid);
+            int callingUid = Binder.getCallingUid();
+            int callingUserId = handleIncomingUser(userId, callingUid);
             final long callingIdentity = Binder.clearCallingIdentity();
             try {
                 List<AppSearchSchema> schemas = new ArrayList<>(schemaBundles.size());
@@ -92,11 +94,12 @@ public class AppSearchManagerService extends SystemService {
         @Override
         public void getSchema(
                 @NonNull String databaseName,
+                @UserIdInt int userId,
                 @NonNull IAppSearchResultCallback callback) {
             Preconditions.checkNotNull(databaseName);
             Preconditions.checkNotNull(callback);
             int callingUid = Binder.getCallingUidOrThrow();
-            int callingUserId = UserHandle.getUserId(callingUid);
+            int callingUserId = handleIncomingUser(userId, callingUid);
             final long callingIdentity = Binder.clearCallingIdentity();
             try {
                 AppSearchImpl impl = ImplInstanceManager.getInstance(getContext(), callingUserId);
@@ -119,12 +122,13 @@ public class AppSearchManagerService extends SystemService {
         public void putDocuments(
                 @NonNull String databaseName,
                 @NonNull List<Bundle> documentBundles,
+                @UserIdInt int userId,
                 @NonNull IAppSearchBatchResultCallback callback) {
             Preconditions.checkNotNull(databaseName);
             Preconditions.checkNotNull(documentBundles);
             Preconditions.checkNotNull(callback);
-            int callingUid = Binder.getCallingUidOrThrow();
-            int callingUserId = UserHandle.getUserId(callingUid);
+            int callingUid = Binder.getCallingUid();
+            int callingUserId = handleIncomingUser(userId, callingUid);
             final long callingIdentity = Binder.clearCallingIdentity();
             try {
                 AppSearchBatchResult.Builder<String, Void> resultBuilder =
@@ -151,15 +155,18 @@ public class AppSearchManagerService extends SystemService {
         }
 
         @Override
-        public void getDocuments(@NonNull String databaseName, @NonNull String namespace,
+        public void getDocuments(
+                @NonNull String databaseName,
+                @NonNull String namespace,
                 @NonNull List<String> uris,
+                @UserIdInt int userId,
                 @NonNull IAppSearchBatchResultCallback callback) {
             Preconditions.checkNotNull(databaseName);
             Preconditions.checkNotNull(namespace);
             Preconditions.checkNotNull(uris);
             Preconditions.checkNotNull(callback);
-            int callingUid = Binder.getCallingUidOrThrow();
-            int callingUserId = UserHandle.getUserId(callingUid);
+            int callingUid = Binder.getCallingUid();
+            int callingUserId = handleIncomingUser(userId, callingUid);
             final long callingIdentity = Binder.clearCallingIdentity();
             try {
                 AppSearchBatchResult.Builder<String, Bundle> resultBuilder =
@@ -190,13 +197,14 @@ public class AppSearchManagerService extends SystemService {
                 @NonNull String databaseName,
                 @NonNull String queryExpression,
                 @NonNull Bundle searchSpecBundle,
+                @UserIdInt int userId,
                 @NonNull IAppSearchResultCallback callback) {
             Preconditions.checkNotNull(databaseName);
             Preconditions.checkNotNull(queryExpression);
             Preconditions.checkNotNull(searchSpecBundle);
             Preconditions.checkNotNull(callback);
-            int callingUid = Binder.getCallingUidOrThrow();
-            int callingUserId = UserHandle.getUserId(callingUid);
+            int callingUid = Binder.getCallingUid();
+            int callingUserId = handleIncomingUser(userId, callingUid);
             final long callingIdentity = Binder.clearCallingIdentity();
             try {
                 AppSearchImpl impl = ImplInstanceManager.getInstance(getContext(), callingUserId);
@@ -215,15 +223,17 @@ public class AppSearchManagerService extends SystemService {
             }
         }
 
+        @Override
         public void globalQuery(
                 @NonNull String queryExpression,
                 @NonNull Bundle searchSpecBundle,
+                @UserIdInt int userId,
                 @NonNull IAppSearchResultCallback callback) {
             Preconditions.checkNotNull(queryExpression);
             Preconditions.checkNotNull(searchSpecBundle);
             Preconditions.checkNotNull(callback);
-            int callingUid = Binder.getCallingUidOrThrow();
-            int callingUserId = UserHandle.getUserId(callingUid);
+            int callingUid = Binder.getCallingUid();
+            int callingUserId = handleIncomingUser(userId, callingUid);
             final long callingIdentity = Binder.clearCallingIdentity();
             try {
                 AppSearchImpl impl = ImplInstanceManager.getInstance(getContext(), callingUserId);
@@ -240,11 +250,11 @@ public class AppSearchManagerService extends SystemService {
         }
 
         @Override
-        public void getNextPage(long nextPageToken,
+        public void getNextPage(long nextPageToken, @UserIdInt int userId,
                 @NonNull IAppSearchResultCallback callback) {
             Preconditions.checkNotNull(callback);
-            int callingUid = Binder.getCallingUidOrThrow();
-            int callingUserId = UserHandle.getUserId(callingUid);
+            int callingUid = Binder.getCallingUid();
+            int callingUserId = handleIncomingUser(userId, callingUid);
             final long callingIdentity = Binder.clearCallingIdentity();
             // TODO(b/162450968) check nextPageToken is being advanced by the same uid as originally
             // opened it
@@ -261,9 +271,9 @@ public class AppSearchManagerService extends SystemService {
         }
 
         @Override
-        public void invalidateNextPageToken(long nextPageToken) {
-            int callingUid = Binder.getCallingUidOrThrow();
-            int callingUserId = UserHandle.getUserId(callingUid);
+        public void invalidateNextPageToken(long nextPageToken, @UserIdInt int userId) {
+            int callingUid = Binder.getCallingUid();
+            int callingUserId = handleIncomingUser(userId, callingUid);
             final long callingIdentity = Binder.clearCallingIdentity();
             try {
                 AppSearchImpl impl = ImplInstanceManager.getInstance(getContext(), callingUserId);
@@ -276,14 +286,17 @@ public class AppSearchManagerService extends SystemService {
         }
 
         @Override
-        public void removeByUri(@NonNull String databaseName, @NonNull String namespace,
+        public void removeByUri(
+                @NonNull String databaseName,
+                @NonNull String namespace,
                 @NonNull List<String> uris,
+                @UserIdInt int userId,
                 @NonNull IAppSearchBatchResultCallback callback) {
             Preconditions.checkNotNull(databaseName);
             Preconditions.checkNotNull(uris);
             Preconditions.checkNotNull(callback);
-            int callingUid = Binder.getCallingUidOrThrow();
-            int callingUserId = UserHandle.getUserId(callingUid);
+            int callingUid = Binder.getCallingUid();
+            int callingUserId = handleIncomingUser(userId, callingUid);
             final long callingIdentity = Binder.clearCallingIdentity();
             try {
                 AppSearchBatchResult.Builder<String, Void> resultBuilder =
@@ -312,13 +325,14 @@ public class AppSearchManagerService extends SystemService {
                 @NonNull String databaseName,
                 @NonNull String queryExpression,
                 @NonNull Bundle searchSpecBundle,
+                @UserIdInt int userId,
                 @NonNull IAppSearchResultCallback callback) {
             Preconditions.checkNotNull(databaseName);
             Preconditions.checkNotNull(queryExpression);
             Preconditions.checkNotNull(searchSpecBundle);
             Preconditions.checkNotNull(callback);
-            int callingUid = Binder.getCallingUidOrThrow();
-            int callingUserId = UserHandle.getUserId(callingUid);
+            int callingUid = Binder.getCallingUid();
+            int callingUserId = handleIncomingUser(userId, callingUid);
             final long callingIdentity = Binder.clearCallingIdentity();
             try {
                 AppSearchImpl impl = ImplInstanceManager.getInstance(getContext(), callingUserId);
@@ -334,10 +348,10 @@ public class AppSearchManagerService extends SystemService {
         }
 
         @Override
-        public void initialize(@NonNull IAppSearchResultCallback callback) {
+        public void initialize(@UserIdInt int userId, @NonNull IAppSearchResultCallback callback) {
             Preconditions.checkNotNull(callback);
-            int callingUid = Binder.getCallingUidOrThrow();
-            int callingUserId = UserHandle.getUserId(callingUid);
+            int callingUid = Binder.getCallingUid();
+            int callingUserId = handleIncomingUser(userId, callingUid);
             final long callingIdentity = Binder.clearCallingIdentity();
             try {
                 ImplInstanceManager.getInstance(getContext(), callingUserId);
@@ -414,5 +428,15 @@ public class AppSearchManagerService extends SystemService {
                 Log.d(TAG, "Unable to send error to the callback", e);
             }
         }
+    }
+
+    //TODO(b/173553485) verifying that the caller has permission to access target user's data
+    //TODO(b/173553485) Handle ACTION_USER_REMOVED broadcast
+    //TODO(b/173553485) Implement SystemService.onUserStopping()
+    private static int handleIncomingUser(@UserIdInt int userId, int callingUid) {
+        int callingPid = Binder.getCallingPid();
+        return ActivityManager.handleIncomingUser(callingPid, callingUid, userId,
+                /*allowAll=*/ false, /*requireFull=*/ false,
+                /*name=*/ null, /*callerPackage=*/ null);
     }
 }

@@ -18,6 +18,7 @@ package android.app.appsearch;
 
 import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
+import android.annotation.UserIdInt;
 import android.os.Bundle;
 import android.os.ParcelableException;
 import android.os.RemoteException;
@@ -39,15 +40,18 @@ import java.util.function.Consumer;
  */
 public final class AppSearchSession {
     private final String mDatabaseName;
+    @UserIdInt
+    private final int mUserId;
     private final IAppSearchManager mService;
 
     static void createSearchSession(
             @NonNull AppSearchManager.SearchContext searchContext,
             @NonNull IAppSearchManager service,
+            @UserIdInt int userId,
             @NonNull @CallbackExecutor Executor executor,
             @NonNull Consumer<AppSearchResult<AppSearchSession>> callback) {
         AppSearchSession searchSession =
-                new AppSearchSession(searchContext.mDatabaseName, service);
+                new AppSearchSession(service, userId, searchContext.mDatabaseName);
         searchSession.initialize(executor, callback);
     }
 
@@ -57,7 +61,7 @@ public final class AppSearchSession {
             @NonNull @CallbackExecutor Executor executor,
             @NonNull Consumer<AppSearchResult<AppSearchSession>> callback) {
         try {
-            mService.initialize(new IAppSearchResultCallback.Stub() {
+            mService.initialize(mUserId, new IAppSearchResultCallback.Stub() {
                 public void onResult(AppSearchResult result) {
                     executor.execute(() -> {
                         if (result.isSuccess()) {
@@ -74,9 +78,11 @@ public final class AppSearchSession {
         }
     }
 
-    private AppSearchSession(@NonNull String databaseName, @NonNull IAppSearchManager service) {
+    private AppSearchSession(@NonNull IAppSearchManager service, @UserIdInt int userId,
+            @NonNull String databaseName) {
         mDatabaseName = databaseName;
         mService = service;
+        mUserId = userId;
     }
 
     /**
@@ -154,6 +160,7 @@ public final class AppSearchSession {
                     schemaBundles,
                     new ArrayList<>(request.getSchemasNotPlatformSurfaceable()),
                     request.isForceOverride(),
+                    mUserId,
                     new IAppSearchResultCallback.Stub() {
                         public void onResult(AppSearchResult result) {
                             executor.execute(() -> callback.accept(result));
@@ -178,6 +185,7 @@ public final class AppSearchSession {
         try {
             mService.getSchema(
                     mDatabaseName,
+                    mUserId,
                     new IAppSearchResultCallback.Stub() {
                         public void onResult(AppSearchResult result) {
                             executor.execute(() -> {
@@ -230,7 +238,7 @@ public final class AppSearchSession {
             documentBundles.add(documents.get(i).getBundle());
         }
         try {
-            mService.putDocuments(mDatabaseName, documentBundles,
+            mService.putDocuments(mDatabaseName, documentBundles, mUserId,
                     new IAppSearchBatchResultCallback.Stub() {
                         public void onResult(AppSearchBatchResult result) {
                             executor.execute(() -> callback.onResult(result));
@@ -269,7 +277,7 @@ public final class AppSearchSession {
         Objects.requireNonNull(callback);
         try {
             mService.getDocuments(mDatabaseName, request.getNamespace(),
-                    new ArrayList<>(request.getUris()),
+                    new ArrayList<>(request.getUris()), mUserId,
                     new IAppSearchBatchResultCallback.Stub() {
                         public void onResult(AppSearchBatchResult result) {
                             executor.execute(() -> {
@@ -371,7 +379,8 @@ public final class AppSearchSession {
         Objects.requireNonNull(queryExpression);
         Objects.requireNonNull(searchSpec);
         Objects.requireNonNull(executor);
-        return new SearchResults(mService, mDatabaseName, queryExpression, searchSpec, executor);
+        return new SearchResults(mService, mDatabaseName, queryExpression, searchSpec, mUserId,
+                executor);
     }
 
     /**
@@ -397,7 +406,7 @@ public final class AppSearchSession {
         Objects.requireNonNull(callback);
         try {
             mService.removeByUri(mDatabaseName, request.getNamespace(),
-                    new ArrayList<>(request.getUris()),
+                    new ArrayList<>(request.getUris()), mUserId,
                     new IAppSearchBatchResultCallback.Stub() {
                         public void onResult(AppSearchBatchResult result) {
                             executor.execute(() -> callback.onResult(result));
@@ -440,7 +449,7 @@ public final class AppSearchSession {
         Objects.requireNonNull(executor);
         Objects.requireNonNull(callback);
         try {
-            mService.removeByQuery(mDatabaseName, queryExpression, searchSpec.getBundle(),
+            mService.removeByQuery(mDatabaseName, queryExpression, searchSpec.getBundle(), mUserId,
                     new IAppSearchResultCallback.Stub() {
                         public void onResult(AppSearchResult result) {
                             executor.execute(() -> callback.accept(result));
