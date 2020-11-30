@@ -1057,18 +1057,19 @@ public class AppOpsService extends IAppOpsService.Stub {
             }
 
             int numInProgressEvents = mInProgressEvents.size();
+            List<IBinder> binders = new ArrayList<>(mInProgressEvents.keySet());
             for (int i = 0; i < numInProgressEvents; i++) {
-                InProgressStartOpEvent event = mInProgressEvents.valueAt(i);
+                InProgressStartOpEvent event = mInProgressEvents.get(binders.get(i));
 
-                if (event.getUidState() != newState) {
+                if (event != null && event.getUidState() != newState) {
                     try {
                         // Remove all but one unfinished start count and then call finished() to
                         // remove start event object
                         int numPreviousUnfinishedStarts = event.numUnfinishedStarts;
                         event.numUnfinishedStarts = 1;
-                        finished(event.getClientId(), false);
-
                         OpEventProxyInfo proxy = event.getProxy();
+
+                        finished(event.getClientId(), false);
 
                         // Call started() to add a new start event object and then add the
                         // previously removed unfinished start counts back
@@ -1079,7 +1080,11 @@ public class AppOpsService extends IAppOpsService.Stub {
                             started(event.getClientId(), Process.INVALID_UID, null, null, newState,
                                     OP_FLAG_SELF, false);
                         }
-                        event.numUnfinishedStarts += numPreviousUnfinishedStarts - 1;
+
+                        InProgressStartOpEvent newEvent = mInProgressEvents.get(binders.get(i));
+                        if (newEvent != null) {
+                            newEvent.numUnfinishedStarts += numPreviousUnfinishedStarts - 1;
+                        }
                     } catch (RemoteException e) {
                         if (DEBUG) Slog.e(TAG, "Cannot switch to new uidState " + newState);
                     }
