@@ -17,7 +17,6 @@
 package com.android.keyguard
 
 import android.animation.ValueAnimator
-import android.graphics.Paint
 import android.testing.AndroidTestingRunner
 import android.text.Layout
 import android.text.StaticLayout
@@ -53,7 +52,7 @@ class TextAnimatorTest : SysuiTestCase() {
         val layout = makeLayout("Hello, World", PAINT[0])
         val valueAnimator = mock(ValueAnimator::class.java)
         val textInterpolator = mock(TextInterpolator::class.java)
-        val paint = arrayListOf(mock(Paint::class.java))
+        val paint = arrayListOf(mock(TextPaint::class.java))
         `when`(textInterpolator.targetPaint).thenReturn(paint)
 
         val textAnimator = TextAnimator(layout, {}).apply {
@@ -85,7 +84,7 @@ class TextAnimatorTest : SysuiTestCase() {
         val layout = makeLayout("Hello, World", PAINT[0])
         val valueAnimator = mock(ValueAnimator::class.java)
         val textInterpolator = mock(TextInterpolator::class.java)
-        val paint = arrayListOf(mock(Paint::class.java))
+        val paint = arrayListOf(mock(TextPaint::class.java))
         `when`(textInterpolator.targetPaint).thenReturn(paint)
 
         val textAnimator = TextAnimator(layout, {}).apply {
