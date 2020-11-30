@@ -5618,7 +5618,6 @@ public class DevicePolicyManager {
         return null;
     }
 
-
     /**
      * Called by a device or profile owner, or delegated certificate chooser (an app that has been
      * delegated the {@link #DELEGATION_CERT_SELECTION} privilege), to grant an application access
@@ -5652,6 +5651,51 @@ public class DevicePolicyManager {
             e.rethrowFromSystemServer();
         }
         return false;
+    }
+
+    /**
+     * Called by a device or profile owner, or delegated certificate chooser (an app that has been
+     * delegated the {@link #DELEGATION_CERT_SELECTION} privilege), to query which apps have access
+     * to a given KeyChain key.
+     *
+     * Key are granted on a per-UID basis, so if several apps share the same UID, granting access to
+     * one of them automatically grants it to others. This method returns a set of sets of package
+     * names, where each internal set contains all packages sharing the same UID. Grantee packages
+     * that don't share UID with other packages are represented by singleton sets.
+     *
+     * @param alias The alias of the key to grant access to.
+     * @return package names of apps that have access to a given key, grouped by UIDs
+     *
+     * @throws SecurityException if the caller is not a device owner, a profile owner or
+     *         delegated certificate chooser.
+     * @throws IllegalArgumentException if {@code alias} doesn't correspond to an existing key.
+     *
+     * @see #grantKeyPairToApp(ComponentName, String, String)
+     */
+    public @NonNull Set<Set<String>> getKeyPairGrants(@NonNull String alias) {
+        throwIfParentInstance("getKeyPairGrants");
+        try {
+            // Set of sets is flattened into a null-separated list.
+            final List<String> flattened =
+                    mService.getKeyPairGrants(mContext.getPackageName(), alias);
+            final Set<Set<String>> result = new HashSet<>();
+            Set<String> pkgsForOneUid = new HashSet<>();
+            for (final String pkg : flattened) {
+                if (pkg == null) {
+                    result.add(pkgsForOneUid);
+                    pkgsForOneUid = new HashSet<>();
+                } else {
+                    pkgsForOneUid.add(pkg);
+                }
+            }
+            if (!pkgsForOneUid.isEmpty()) {
+                result.add(pkgsForOneUid);
+            }
+            return result;
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+        return null;
     }
 
     /**
