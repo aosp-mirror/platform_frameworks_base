@@ -276,6 +276,7 @@ import com.android.server.pm.PackageManagerService;
 import com.android.server.policy.PhoneWindowManager;
 import com.android.server.statusbar.StatusBarManagerInternal;
 import com.android.server.uri.UriGrantsManagerInternal;
+import com.android.server.utils.quota.MultiRateLimiter;
 import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.BackgroundActivityStartCallback;
 import com.android.server.wm.WindowManagerInternal;
@@ -299,6 +300,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -372,6 +374,20 @@ public class NotificationManagerService extends SystemService {
             RoleManager.ROLE_EMERGENCY
     };
 
+    // Used for rate limiting toasts by package.
+    static final String TOAST_QUOTA_TAG = "toast_quota_tag";
+
+    // This constant defines rate limits applied to showing toasts. The numbers are set in a way
+    // such that an aggressive toast showing strategy would result in a roughly 1.5x longer wait
+    // time (before the package is allowed to show toasts again) each time the toast rate limit is
+    // reached. It's meant to protect the user against apps spamming them with toasts (either
+    // accidentally or on purpose).
+    private static final MultiRateLimiter.RateLimit[] TOAST_RATE_LIMITS = {
+            MultiRateLimiter.RateLimit.create(3, Duration.ofSeconds(20)),
+            MultiRateLimiter.RateLimit.create(5, Duration.ofSeconds(42)),
+            MultiRateLimiter.RateLimit.create(6, Duration.ofSeconds(68)),
+    };
+
     // When #matchesCallFilter is called from the ringer, wait at most
     // 3s to resolve the contacts. This timeout is required since
     // ContactsProvider might take a long time to start up.
@@ -422,6 +438,16 @@ public class NotificationManagerService extends SystemService {
     @ChangeId
     @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.R)
     private static final long NOTIFICATION_TRAMPOLINE_BLOCK = 167676448L;
+
+    /**
+     * Rate limit showing toasts, on a per package basis.
+     *
+     * It limits the effects of {@link android.widget.Toast#show()} calls to prevent overburdening
+     * the user with too many toasts in a limited time. Any attempt to show more toasts than allowed
+     * in a certain time frame will result in the toast being discarded.
+     */
+    @ChangeId
+    private static final long RATE_LIMIT_TOASTS = 154198299L;
 
     private IActivityManager mAm;
     private ActivityTaskManagerInternal mAtm;
@@ -500,6 +526,9 @@ public class NotificationManagerService extends SystemService {
     // True if the toast that's on top of the queue is being shown at the moment.
     @GuardedBy("mToastQueue")
     private boolean mIsCurrentToastShown = false;
+
+    // Used for rate limiting toasts by package.
+    private MultiRateLimiter mToastRateLimiter;
 
     // The last key in this list owns the hardware.
     ArrayList<String> mLights = new ArrayList<>();
@@ -1907,7 +1936,8 @@ public class NotificationManagerService extends SystemService {
             DevicePolicyManagerInternal dpm, IUriGrantsManager ugm,
             UriGrantsManagerInternal ugmInternal, AppOpsManager appOps, UserManager userManager,
             NotificationHistoryManager historyManager, StatsManager statsManager,
-            TelephonyManager telephonyManager, ActivityManagerInternal ami) {
+            TelephonyManager telephonyManager, ActivityManagerInternal ami,
+            MultiRateLimiter toastRateLimiter) {
         mHandler = handler;
         Resources resources = getContext().getResources();
         mMaxPackageEnqueueRate = Settings.Global.getFloat(getContext().getContentResolver(),
@@ -2099,6 +2129,8 @@ public class NotificationManagerService extends SystemService {
                 com.android.internal.R.array.config_notificationMsgPkgsAllowedAsConvos));
         mStatsManager = statsManager;
 
+        mToastRateLimiter = toastRateLimiter;
+
         // register for various Intents.
         // If this is called within a test, make sure to unregister the intent receivers by
         // calling onDestroy()
@@ -2209,7 +2241,8 @@ public class NotificationManagerService extends SystemService {
                 mStatsManager = (StatsManager) getContext().getSystemService(
                         Context.STATS_MANAGER),
                 getContext().getSystemService(TelephonyManager.class),
-                LocalServices.getService(ActivityManagerInternal.class));
+                LocalServices.getService(ActivityManagerInternal.class),
+                createToastRateLimiter());
 
         publishBinderService(Context.NOTIFICATION_SERVICE, mService, /* allowIsolated= */ false,
                 DUMP_FLAG_PRIORITY_CRITICAL | DUMP_FLAG_PRIORITY_NORMAL);
@@ -2845,6 +2878,10 @@ public class NotificationManagerService extends SystemService {
     @VisibleForTesting
     NotificationManagerInternal getInternalService() {
         return mInternalService;
+    }
+
+    private MultiRateLimiter createToastRateLimiter() {
+        return new MultiRateLimiter.Builder(getContext()).addRateLimits(TOAST_RATE_LIMITS).build();
     }
 
     @VisibleForTesting
@@ -7310,10 +7347,21 @@ public class NotificationManagerService extends SystemService {
 
         ToastRecord record = mToastQueue.get(0);
         while (record != null) {
-            if (record.show()) {
+            int userId = UserHandle.getUserId(record.uid);
+            boolean rateLimitingEnabled =
+                    CompatChanges.isChangeEnabled(RATE_LIMIT_TOASTS, record.uid);
+            boolean isWithinQuota =
+                    mToastRateLimiter.isWithinQuota(userId, record.pkg, TOAST_QUOTA_TAG);
+            if ((!rateLimitingEnabled || isWithinQuota) && record.show()) {
                 scheduleDurationReachedLocked(record);
                 mIsCurrentToastShown = true;
+                if (rateLimitingEnabled) {
+                    mToastRateLimiter.noteEvent(userId, record.pkg, TOAST_QUOTA_TAG);
+                }
                 return;
+            } else if (rateLimitingEnabled && !isWithinQuota) {
+                Slog.w(TAG, "Package " + record.pkg + " is above allowed toast quota, the "
+                        + "following toast was blocked and discarded: " + record);
             }
             int index = mToastQueue.indexOf(record);
             if (index >= 0) {

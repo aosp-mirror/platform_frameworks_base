@@ -182,6 +182,7 @@ import com.android.server.notification.NotificationManagerService.NotificationAs
 import com.android.server.notification.NotificationManagerService.NotificationListeners;
 import com.android.server.statusbar.StatusBarManagerInternal;
 import com.android.server.uri.UriGrantsManagerInternal;
+import com.android.server.utils.quota.MultiRateLimiter;
 import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.WindowManagerInternal;
 
@@ -296,6 +297,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     NotificationHistoryManager mHistoryManager;
     @Mock
     StatsManager mStatsManager;
+    @Mock
+    MultiRateLimiter mToastRateLimiter;
     BroadcastReceiver mPackageIntentReceiver;
     NotificationRecordLoggerFake mNotificationRecordLogger = new NotificationRecordLoggerFake();
     private InstanceIdSequence mNotificationInstanceIdSequence = new InstanceIdSequenceFake(
@@ -485,7 +488,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 mGroupHelper, mAm, mAtm, mAppUsageStats,
                 mock(DevicePolicyManagerInternal.class), mUgm, mUgmInternal,
                 mAppOpsManager, mUm, mHistoryManager, mStatsManager,
-                mock(TelephonyManager.class), mAmi);
+                mock(TelephonyManager.class), mAmi, mToastRateLimiter);
         mService.onBootPhase(SystemService.PHASE_SYSTEM_SERVICES_READY);
 
         mService.setAudioManager(mAudioManager);
@@ -565,7 +568,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         try {
             mService.onDestroy();
-        } catch (IllegalStateException e) {
+        } catch (IllegalStateException | IllegalArgumentException e) {
             // can throw if a broadcast receiver was never registered
         }
 
@@ -4887,6 +4890,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         final String testPackage = "testPackageName";
         assertEquals(0, mService.mToastQueue.size());
         mService.isSystemUid = false;
+        setToastRateIsWithinQuota(true);
 
         // package is not suspended
         when(mPackageManager.isPackageSuspendedForUser(testPackage, UserHandle.getUserId(mUid)))
@@ -4909,6 +4913,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         final String testPackage = "testPackageName";
         assertEquals(0, mService.mToastQueue.size());
         mService.isSystemUid = false;
+        setToastRateIsWithinQuota(true);
 
         // package is not suspended
         when(mPackageManager.isPackageSuspendedForUser(testPackage, UserHandle.getUserId(mUid)))
@@ -4927,6 +4932,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         final String testPackage = "testPackageName";
         assertEquals(0, mService.mToastQueue.size());
         mService.isSystemUid = false;
+        setToastRateIsWithinQuota(true);
 
         // package is not suspended
         when(mPackageManager.isPackageSuspendedForUser(testPackage, UserHandle.getUserId(mUid)))
@@ -4949,10 +4955,32 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testToastRateLimiterCanPreventsShowCallForCustomToast() throws Exception {
+        final String testPackage = "testPackageName";
+        assertEquals(0, mService.mToastQueue.size());
+        mService.isSystemUid = false;
+        setToastRateIsWithinQuota(false); // rate limit reached
+
+        // package is not suspended
+        when(mPackageManager.isPackageSuspendedForUser(testPackage, UserHandle.getUserId(mUid)))
+                .thenReturn(false);
+
+        setAppInForegroundForToasts(mUid, true);
+
+        Binder token = new Binder();
+        ITransientNotification callback = mock(ITransientNotification.class);
+        INotificationManager nmService = (INotificationManager) mService.mService;
+
+        nmService.enqueueToast(testPackage, token, callback, 2000, 0);
+        verify(callback, times(0)).show(any());
+    }
+
+    @Test
     public void testAllowForegroundTextToasts() throws Exception {
         final String testPackage = "testPackageName";
         assertEquals(0, mService.mToastQueue.size());
         mService.isSystemUid = false;
+        setToastRateIsWithinQuota(true);
 
         // package is not suspended
         when(mPackageManager.isPackageSuspendedForUser(testPackage, UserHandle.getUserId(mUid)))
@@ -4971,6 +4999,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         final String testPackage = "testPackageName";
         assertEquals(0, mService.mToastQueue.size());
         mService.isSystemUid = false;
+        setToastRateIsWithinQuota(true);
 
         // package is not suspended
         when(mPackageManager.isPackageSuspendedForUser(testPackage, UserHandle.getUserId(mUid)))
@@ -4989,6 +5018,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         final String testPackage = "testPackageName";
         assertEquals(0, mService.mToastQueue.size());
         mService.isSystemUid = false;
+        setToastRateIsWithinQuota(true);
 
         // package is not suspended
         when(mPackageManager.isPackageSuspendedForUser(testPackage, UserHandle.getUserId(mUid)))
@@ -5012,11 +5042,31 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testToastRateLimiterCanPreventsShowCallForTextToast() throws Exception {
+        final String testPackage = "testPackageName";
+        assertEquals(0, mService.mToastQueue.size());
+        mService.isSystemUid = false;
+        setToastRateIsWithinQuota(false); // rate limit reached
+
+        // package is not suspended
+        when(mPackageManager.isPackageSuspendedForUser(testPackage, UserHandle.getUserId(mUid)))
+                .thenReturn(false);
+
+        Binder token = new Binder();
+        INotificationManager nmService = (INotificationManager) mService.mService;
+
+        nmService.enqueueTextToast(testPackage, token, "Text", 2000, 0, null);
+        verify(mStatusBar, times(0))
+                .showToast(anyInt(), any(), any(), any(), any(), anyInt(), any());
+    }
+
+    @Test
     public void backgroundSystemCustomToast_callsSetProcessImportantAsForegroundForToast() throws
             Exception {
         final String testPackage = "testPackageName";
         assertEquals(0, mService.mToastQueue.size());
         mService.isSystemUid = true;
+        setToastRateIsWithinQuota(true);
 
         // package is not suspended
         when(mPackageManager.isPackageSuspendedForUser(testPackage, UserHandle.getUserId(mUid)))
@@ -5041,6 +5091,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         final String testPackage = "testPackageName";
         assertEquals(0, mService.mToastQueue.size());
         mService.isSystemUid = false;
+        setToastRateIsWithinQuota(true);
 
         // package is not suspended
         when(mPackageManager.isPackageSuspendedForUser(testPackage, UserHandle.getUserId(mUid)))
@@ -5061,6 +5112,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         final String testPackage = "testPackageName";
         assertEquals(0, mService.mToastQueue.size());
         mService.isSystemUid = false;
+        setToastRateIsWithinQuota(true);
 
         // package is not suspended
         when(mPackageManager.isPackageSuspendedForUser(testPackage, UserHandle.getUserId(mUid)))
@@ -5080,6 +5132,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         final String testPackage = "testPackageName";
         assertEquals(0, mService.mToastQueue.size());
         mService.isSystemUid = false;
+        setToastRateIsWithinQuota(true);
 
         // package is not suspended
         when(mPackageManager.isPackageSuspendedForUser(testPackage, UserHandle.getUserId(mUid)))
@@ -5096,6 +5149,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         final String testPackage = "testPackageName";
         assertEquals(0, mService.mToastQueue.size());
         mService.isSystemUid = false;
+        setToastRateIsWithinQuota(true);
 
         // package is suspended
         when(mPackageManager.isPackageSuspendedForUser(testPackage, UserHandle.getUserId(mUid)))
@@ -5116,6 +5170,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         final String testPackage = "testPackageName";
         assertEquals(0, mService.mToastQueue.size());
         mService.isSystemUid = false;
+        setToastRateIsWithinQuota(true);
 
         // package is not suspended
         when(mPackageManager.isPackageSuspendedForUser(testPackage, UserHandle.getUserId(mUid)))
@@ -5138,6 +5193,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         final String testPackage = "testPackageName";
         assertEquals(0, mService.mToastQueue.size());
         mService.isSystemUid = true;
+        setToastRateIsWithinQuota(true);
 
         // package is suspended
         when(mPackageManager.isPackageSuspendedForUser(testPackage, UserHandle.getUserId(mUid)))
@@ -5160,6 +5216,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         final String testPackage = "testPackageName";
         assertEquals(0, mService.mToastQueue.size());
         mService.isSystemUid = false;
+        setToastRateIsWithinQuota(true);
 
         // package is not suspended
         when(mPackageManager.isPackageSuspendedForUser(testPackage, UserHandle.getUserId(mUid)))
@@ -5185,6 +5242,14 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         int importance = (inForeground) ? IMPORTANCE_FOREGROUND : IMPORTANCE_NONE;
         when(mActivityManager.getUidImportance(mUid)).thenReturn(importance);
         when(mAtm.hasResumedActivity(uid)).thenReturn(inForeground);
+    }
+
+    private void setToastRateIsWithinQuota(boolean isWithinQuota) {
+        when(mToastRateLimiter.isWithinQuota(
+                anyInt(),
+                anyString(),
+                eq(NotificationManagerService.TOAST_QUOTA_TAG)))
+                .thenReturn(isWithinQuota);
     }
 
     @Test
