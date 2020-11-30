@@ -50,12 +50,16 @@ public class ProximityClassifierTest extends ClassifierTest {
     private DistanceClassifier mDistanceClassifier;
     private FalsingClassifier mClassifier;
 
+    private final FalsingClassifier.Result mFalsedResult =
+            FalsingClassifier.Result.falsed(1, "test");
+    private final FalsingClassifier.Result mPassedResult = FalsingClassifier.Result.passed(1);
+
     @Before
     public void setup() {
         super.setup();
         MockitoAnnotations.initMocks(this);
         when(mDataProvider.getInteractionType()).thenReturn(GENERIC);
-        when(mDistanceClassifier.isLongSwipe()).thenReturn(false);
+        when(mDistanceClassifier.isLongSwipe()).thenReturn(mFalsedResult);
         mClassifier = new ProximityClassifier(
                 mDistanceClassifier, mDataProvider, new DeviceConfigProxyFake());
     }
@@ -117,7 +121,7 @@ public class ProximityClassifierTest extends ClassifierTest {
         mClassifier.onProximityEvent(createSensorEvent(true, 1));
         mClassifier.onProximityEvent(createSensorEvent(false, 11));
         touchUp(10);
-        when(mDistanceClassifier.isLongSwipe()).thenReturn(true);
+        when(mDistanceClassifier.isLongSwipe()).thenReturn(mPassedResult);
         assertThat(mClassifier.classifyGesture().isFalse(), is(false));
     }
 

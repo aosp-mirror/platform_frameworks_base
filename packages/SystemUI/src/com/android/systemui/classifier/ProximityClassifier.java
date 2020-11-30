@@ -33,7 +33,7 @@ import javax.inject.Inject;
 /**
  * False touch if proximity sensor is covered for more than a certain percentage of the gesture.
  *
- * This classifer is essentially a no-op for QUICK_SETTINGS, as we assume the sensor may be
+ * This classifier is essentially a no-op for QUICK_SETTINGS, as we assume the sensor may be
  * covered when swiping from the top.
  */
 class ProximityClassifier extends FalsingClassifier {
@@ -114,26 +114,27 @@ class ProximityClassifier extends FalsingClassifier {
     @Override
     Result calculateFalsingResult(double historyPenalty, double historyConfidence) {
         if (getInteractionType() == QUICK_SETTINGS) {
-            return new Result(false, 0);
+            return Result.passed(0);
         }
 
         logInfo("Percent of gesture in proximity: " + mPercentNear);
 
         if (mPercentNear > mPercentCoveredThreshold) {
-            return new Result(!mDistanceClassifier.isLongSwipe(), 0.5);
+            Result longSwipeResult = mDistanceClassifier.isLongSwipe();
+            return longSwipeResult.isFalse()
+                    ? Result.falsed(0.5, getReason(longSwipeResult)) : Result.passed(0.5);
         }
 
-        return new Result(false, 0.5);
+        return Result.passed(0.5);
     }
 
-    @Override
-    String getReason() {
+    private String getReason(Result longSwipeResult) {
         return String.format(
                 (Locale) null,
                 "{percentInProximity=%f, threshold=%f, distanceClassifier=%s}",
                 mPercentNear,
                 mPercentCoveredThreshold,
-                mDistanceClassifier.getReason());
+                longSwipeResult.getReason());
     }
 
     /**

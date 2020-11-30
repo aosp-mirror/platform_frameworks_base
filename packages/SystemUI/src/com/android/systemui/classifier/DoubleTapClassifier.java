@@ -36,8 +36,6 @@ public class DoubleTapClassifier extends FalsingClassifier {
     private final float mDoubleTapSlop;
     private final long mDoubleTapTimeMs;
 
-    private StringBuilder mReason = new StringBuilder();
-
     @Inject
     DoubleTapClassifier(FalsingDataProvider dataProvider, SingleTapClassifier singleTapClassifier,
             @Named(DOUBLE_TAP_TOUCH_SLOP) float doubleTapSlop,
@@ -54,27 +52,29 @@ public class DoubleTapClassifier extends FalsingClassifier {
         Queue<? extends List<MotionEvent>> historicalEvents = getHistoricalEvents();
         List<MotionEvent> firstTapEvents = historicalEvents.peek();
 
-        mReason = new StringBuilder();
+        StringBuilder reason = new StringBuilder();
 
         if (firstTapEvents == null) {
-            mReason.append("Only one gesture recorded");
-            return new Result(true, 1);
+            return Result.falsed(1, "Only one gesture recorded");
         }
 
-        return new Result(!isDoubleTap(firstTapEvents, secondTapEvents, mReason), 0.5);
+        return !isDoubleTap(firstTapEvents, secondTapEvents, reason)
+                ? Result.falsed(0.5, reason.toString()) : Result.passed(0.5);
     }
 
     /** Returns true if the two supplied lists of {@link MotionEvent}s look like a double-tap. */
     public boolean isDoubleTap(List<MotionEvent> firstEvents, List<MotionEvent> secondEvents,
             StringBuilder reason) {
 
-        if (!mSingleTapClassifier.isTap(firstEvents)) {
-            reason.append("First gesture is not a tap. ").append(mSingleTapClassifier.getReason());
+        Result firstTap = mSingleTapClassifier.isTap(firstEvents);
+        if (firstTap.isFalse()) {
+            reason.append("First gesture is not a tap. ").append(firstTap.getReason());
             return false;
         }
 
-        if (!mSingleTapClassifier.isTap(secondEvents)) {
-            reason.append("Second gesture is not a tap. ").append(mSingleTapClassifier.getReason());
+        Result secondTap = mSingleTapClassifier.isTap(secondEvents);
+        if (secondTap.isFalse()) {
+            reason.append("Second gesture is not a tap. ").append(secondTap.getReason());
             return false;
         }
 
@@ -105,10 +105,5 @@ public class DoubleTapClassifier extends FalsingClassifier {
         }
 
         return true;
-    }
-
-    @Override
-    String getReason() {
-        return mReason.toString();
     }
 }

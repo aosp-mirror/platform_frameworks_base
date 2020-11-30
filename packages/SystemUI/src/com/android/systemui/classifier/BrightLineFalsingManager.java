@@ -137,22 +137,22 @@ public class BrightLineFalsingManager implements FalsingManager {
         mPreviousResult = !mTestHarness
                 && !mDataProvider.isJustUnlockedWithFace() && !mDockManager.isDocked()
                 && mClassifiers.stream().anyMatch(falsingClassifier -> {
-                    boolean result = falsingClassifier.classifyGesture(
+                    FalsingClassifier.Result result = falsingClassifier.classifyGesture(
                             mHistoryTracker.falsePenalty(), mHistoryTracker.falseConfidence());
-                    if (result) {
+                    if (result.isFalse()) {
                         logInfo(String.format(
                                 (Locale) null,
                                 "{classifier=%s, interactionType=%d}",
                                 falsingClassifier.getClass().getName(),
                                 mDataProvider.getInteractionType()));
-                        String reason = falsingClassifier.getReason();
+                        String reason = result.getReason();
                         if (reason != null) {
                             logInfo(reason);
                         }
                     } else {
                         logDebug(falsingClassifier.getClass().getName() + ": false");
                     }
-                    return result;
+                    return result.isFalse();
                 });
 
         logDebug("Is false touch? " + mPreviousResult);
@@ -178,10 +178,12 @@ public class BrightLineFalsingManager implements FalsingManager {
 
     @Override
     public boolean isFalseTap(boolean robustCheck) {
-        if (!mSingleTapClassifier.isTap(mDataProvider.getRecentMotionEvents())) {
+        FalsingClassifier.Result singleTapResult =
+                mSingleTapClassifier.isTap(mDataProvider.getRecentMotionEvents());
+        if (singleTapResult.isFalse()) {
             logInfo(String.format(
                     (Locale) null, "{classifier=%s}", mSingleTapClassifier.getClass().getName()));
-            String reason = mSingleTapClassifier.getReason();
+            String reason = singleTapResult.getReason();
             if (reason != null) {
                 logInfo(reason);
             }
@@ -198,16 +200,16 @@ public class BrightLineFalsingManager implements FalsingManager {
 
     @Override
     public boolean isFalseDoubleTap() {
-        boolean result = mDoubleTapClassifier.classifyGesture().isFalse();
-        if (result) {
+        FalsingClassifier.Result result = mDoubleTapClassifier.classifyGesture();
+        if (result.isFalse()) {
             logInfo(String.format(
                     (Locale) null, "{classifier=%s}", mDoubleTapClassifier.getClass().getName()));
-            String reason = mDoubleTapClassifier.getReason();
+            String reason = result.getReason();
             if (reason != null) {
                 logInfo(reason);
             }
         }
-        return result;
+        return result.isFalse();
     }
 
     @Override

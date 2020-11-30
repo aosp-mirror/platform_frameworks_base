@@ -66,12 +66,12 @@ class DiagonalClassifier extends FalsingClassifier {
         float angle = getAngle();
 
         if (angle == Float.MAX_VALUE) {  // Unknown angle
-            return new Result(false, 0);
+            return Result.passed(0);
         }
 
         if (getInteractionType() == LEFT_AFFORDANCE
                 || getInteractionType() == RIGHT_AFFORDANCE) {
-            return new Result(false, 0);
+            return Result.passed(0);
         }
 
         float minAngle = DIAGONAL - mHorizontalAngleRange;
@@ -81,15 +81,15 @@ class DiagonalClassifier extends FalsingClassifier {
             maxAngle = DIAGONAL + mVerticalAngleRange;
         }
 
-        return new Result(angleBetween(angle, minAngle, maxAngle)
+        boolean falsed = angleBetween(angle, minAngle, maxAngle)
                 || angleBetween(angle, minAngle + NINETY_DEG, maxAngle + NINETY_DEG)
                 || angleBetween(angle, minAngle - NINETY_DEG, maxAngle - NINETY_DEG)
                 || angleBetween(angle, minAngle + ONE_HUNDRED_EIGHTY_DEG,
-                maxAngle + ONE_HUNDRED_EIGHTY_DEG), 0.5f);
+                maxAngle + ONE_HUNDRED_EIGHTY_DEG);
+        return falsed ? Result.falsed(0.5f, getReason()) : Result.passed(0.5);
     }
 
-    @Override
-    String getReason() {
+    private String getReason() {
         return String.format(
                 (Locale) null,
                 "{angle=%f, vertical=%s}",
