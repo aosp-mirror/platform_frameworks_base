@@ -174,6 +174,9 @@ public final class UserTypeDetails {
     /**
      * Returns the maximum number of this user type allowed per parent (for user types, like
      * profiles, that have parents).
+     * Under certain circumstances (such as after a change-user-type) the max value can actually
+     * be exceeded: this is allowed in order to keep the device in a usable state.
+     * An error is logged in {@link UserManagerService#upgradeProfileToTypeLU}
      * <p>Returns {@link #UNLIMITED_NUMBER_OF_USERS} to indicate that there is no hard limit.
      */
     public int getMaxAllowedPerParent() {
