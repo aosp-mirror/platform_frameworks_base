@@ -64,23 +64,23 @@ public class VibrationScalerTest {
     @Rule public MockitoRule mMockitoRule = MockitoJUnit.rule();
     @Rule public FakeSettingsProviderRule mSettingsProviderRule = FakeSettingsProvider.rule();
 
-    // TODO(b/131311651): replace with a FakeVibrator instead.
-    @Mock private Vibrator mVibratorMock;
     @Mock private PowerManagerInternal mPowerManagerInternalMock;
 
     private TestLooper mTestLooper;
     private ContextWrapper mContextSpy;
+    private FakeVibrator mFakeVibrator;
     private VibrationSettings mVibrationSettings;
     private VibrationScaler mVibrationScaler;
 
     @Before
     public void setUp() throws Exception {
         mTestLooper = new TestLooper();
+        mFakeVibrator = new FakeVibrator();
         mContextSpy = spy(new ContextWrapper(InstrumentationRegistry.getContext()));
 
         ContentResolver contentResolver = mSettingsProviderRule.mockContentResolver(mContextSpy);
         when(mContextSpy.getContentResolver()).thenReturn(contentResolver);
-        when(mContextSpy.getSystemService(eq(Context.VIBRATOR_SERVICE))).thenReturn(mVibratorMock);
+        when(mContextSpy.getSystemService(eq(Context.VIBRATOR_SERVICE))).thenReturn(mFakeVibrator);
 
         LocalServices.removeServiceForTest(PowerManagerInternal.class);
         LocalServices.addService(PowerManagerInternal.class, mPowerManagerInternalMock);
@@ -97,8 +97,7 @@ public class VibrationScalerTest {
 
     @Test
     public void testGetExternalVibrationScale() {
-        when(mVibratorMock.getDefaultHapticFeedbackIntensity())
-                .thenReturn(Vibrator.VIBRATION_INTENSITY_LOW);
+        mFakeVibrator.setDefaultHapticFeedbackIntensity(Vibrator.VIBRATION_INTENSITY_LOW);
         setUserSetting(Settings.System.HAPTIC_FEEDBACK_INTENSITY,
                 Vibrator.VIBRATION_INTENSITY_HIGH);
         assertEquals(IExternalVibratorService.SCALE_VERY_HIGH,
@@ -114,13 +113,11 @@ public class VibrationScalerTest {
         assertEquals(IExternalVibratorService.SCALE_NONE,
                 mVibrationScaler.getExternalVibrationScale(VibrationAttributes.USAGE_TOUCH));
 
-        when(mVibratorMock.getDefaultHapticFeedbackIntensity())
-                .thenReturn(Vibrator.VIBRATION_INTENSITY_MEDIUM);
+        mFakeVibrator.setDefaultHapticFeedbackIntensity(Vibrator.VIBRATION_INTENSITY_MEDIUM);
         assertEquals(IExternalVibratorService.SCALE_LOW,
                 mVibrationScaler.getExternalVibrationScale(VibrationAttributes.USAGE_TOUCH));
 
-        when(mVibratorMock.getDefaultHapticFeedbackIntensity())
-                .thenReturn(Vibrator.VIBRATION_INTENSITY_HIGH);
+        mFakeVibrator.setDefaultHapticFeedbackIntensity(Vibrator.VIBRATION_INTENSITY_HIGH);
         assertEquals(IExternalVibratorService.SCALE_VERY_LOW,
                 mVibrationScaler.getExternalVibrationScale(VibrationAttributes.USAGE_TOUCH));
 
@@ -222,8 +219,7 @@ public class VibrationScalerTest {
     @Test
     public void scale_withOneShotAndWaveform_resolvesAmplitude() {
         // No scale, default amplitude still resolved
-        when(mVibratorMock.getDefaultRingVibrationIntensity())
-                .thenReturn(Vibrator.VIBRATION_INTENSITY_LOW);
+        mFakeVibrator.setDefaultRingVibrationIntensity(Vibrator.VIBRATION_INTENSITY_LOW);
         setUserSetting(Settings.System.RING_VIBRATION_INTENSITY,
                 Vibrator.VIBRATION_INTENSITY_LOW);
 
@@ -241,16 +237,13 @@ public class VibrationScalerTest {
 
     @Test
     public void scale_withOneShotWaveform_scalesAmplitude() {
-        when(mVibratorMock.getDefaultRingVibrationIntensity())
-                .thenReturn(Vibrator.VIBRATION_INTENSITY_LOW);
+        mFakeVibrator.setDefaultRingVibrationIntensity(Vibrator.VIBRATION_INTENSITY_LOW);
         setUserSetting(Settings.System.RING_VIBRATION_INTENSITY,
                 Vibrator.VIBRATION_INTENSITY_HIGH);
-        when(mVibratorMock.getDefaultNotificationVibrationIntensity())
-                .thenReturn(Vibrator.VIBRATION_INTENSITY_HIGH);
+        mFakeVibrator.setDefaultNotificationVibrationIntensity(Vibrator.VIBRATION_INTENSITY_HIGH);
         setUserSetting(Settings.System.NOTIFICATION_VIBRATION_INTENSITY,
                 Vibrator.VIBRATION_INTENSITY_LOW);
-        when(mVibratorMock.getDefaultHapticFeedbackIntensity())
-                .thenReturn(Vibrator.VIBRATION_INTENSITY_MEDIUM);
+        mFakeVibrator.setDefaultHapticFeedbackIntensity(Vibrator.VIBRATION_INTENSITY_MEDIUM);
         setUserSetting(Settings.System.HAPTIC_FEEDBACK_INTENSITY,
                 Vibrator.VIBRATION_INTENSITY_MEDIUM);
 
@@ -273,16 +266,13 @@ public class VibrationScalerTest {
 
     @Test
     public void scale_withComposed_scalesPrimitives() {
-        when(mVibratorMock.getDefaultRingVibrationIntensity())
-                .thenReturn(Vibrator.VIBRATION_INTENSITY_LOW);
+        mFakeVibrator.setDefaultRingVibrationIntensity(Vibrator.VIBRATION_INTENSITY_LOW);
         setUserSetting(Settings.System.RING_VIBRATION_INTENSITY,
                 Vibrator.VIBRATION_INTENSITY_HIGH);
-        when(mVibratorMock.getDefaultNotificationVibrationIntensity())
-                .thenReturn(Vibrator.VIBRATION_INTENSITY_HIGH);
+        mFakeVibrator.setDefaultNotificationVibrationIntensity(Vibrator.VIBRATION_INTENSITY_HIGH);
         setUserSetting(Settings.System.NOTIFICATION_VIBRATION_INTENSITY,
                 Vibrator.VIBRATION_INTENSITY_LOW);
-        when(mVibratorMock.getDefaultHapticFeedbackIntensity())
-                .thenReturn(Vibrator.VIBRATION_INTENSITY_MEDIUM);
+        mFakeVibrator.setDefaultHapticFeedbackIntensity(Vibrator.VIBRATION_INTENSITY_MEDIUM);
         setUserSetting(Settings.System.HAPTIC_FEEDBACK_INTENSITY,
                 Vibrator.VIBRATION_INTENSITY_MEDIUM);
 
