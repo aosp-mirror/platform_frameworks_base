@@ -70,7 +70,7 @@ public class NetworkProvider {
 
     private final Messenger mMessenger;
     private final String mName;
-    private final ConnectivityManager mCm;
+    private final Context mContext;
 
     private int mProviderId = ID_NONE;
 
@@ -85,8 +85,6 @@ public class NetworkProvider {
      */
     @SystemApi
     public NetworkProvider(@NonNull Context context, @NonNull Looper looper, @NonNull String name) {
-        mCm = ConnectivityManager.from(context);
-
         Handler handler = new Handler(looper) {
             @Override
             public void handleMessage(Message m) {
@@ -102,6 +100,7 @@ public class NetworkProvider {
                 }
             }
         };
+        mContext = context;
         mMessenger = new Messenger(handler);
         mName = name;
     }
@@ -165,6 +164,6 @@ public class NetworkProvider {
     @SystemApi
     @RequiresPermission(android.Manifest.permission.NETWORK_FACTORY)
     public void declareNetworkRequestUnfulfillable(@NonNull NetworkRequest request) {
-        mCm.declareNetworkRequestUnfulfillable(request);
+        ConnectivityManager.from(mContext).declareNetworkRequestUnfulfillable(request);
     }
 }
