@@ -264,6 +264,8 @@ TEST(RenderNode, releasedCallback) {
     TestUtils::runOnRenderThreadUnmanaged([&] (RenderThread&) {
         TestUtils::syncHierarchyPropertiesAndDisplayList(node);
     });
+    // Fence on any remaining post'd work
+    TestUtils::runOnRenderThreadUnmanaged([] (RenderThread&) {});
     EXPECT_EQ(2, counts.sync);
     EXPECT_EQ(1, counts.destroyed);
 }
