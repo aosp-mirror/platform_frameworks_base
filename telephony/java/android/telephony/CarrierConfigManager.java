@@ -53,9 +53,13 @@ public class CarrierConfigManager {
     public static final String EXTRA_SLOT_INDEX = "android.telephony.extra.SLOT_INDEX";
 
     /**
-     * Extra included in {@link #ACTION_CARRIER_CONFIG_CHANGED} to indicate whether this is a
-     * rebroadcast on unlock. Defaults to {@code false} if not specified.
-     * @hide
+     * {@link #ACTION_CARRIER_CONFIG_CHANGED} is broadcast once on device bootup and then again when
+     * the device is unlocked. Direct-Boot-aware applications may use the first broadcast as an
+     * early signal that the carrier config has been loaded, but other applications will only
+     * receive the second broadcast, when the device is unlocked.
+     *
+     * This extra is included in {@link #ACTION_CARRIER_CONFIG_CHANGED} to indicate whether this is
+     * a rebroadcast on unlock.
      */
     public static final String EXTRA_REBROADCAST_ON_UNLOCK =
             "android.telephony.extra.REBROADCAST_ON_UNLOCK";
