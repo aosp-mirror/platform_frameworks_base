@@ -6355,9 +6355,15 @@ public class ConnectivityService extends IConnectivityManager.Stub
         nai.declaredMetered = !nc.hasCapability(NET_CAPABILITY_NOT_METERED);
     }
 
+    /** Modifies |caps| based on the capabilities of the specified underlying networks. */
     @VisibleForTesting
-    void applyUnderlyingCapabilities(Network[] underlyingNetworks,
-            NetworkCapabilities caps,  boolean declaredMetered) {
+    void applyUnderlyingCapabilities(@Nullable Network[] underlyingNetworks,
+            @NonNull NetworkCapabilities caps,  boolean declaredMetered) {
+        final Network defaultNetwork = getNetwork(getDefaultNetwork());
+        if (underlyingNetworks == null && defaultNetwork != null) {
+            // null underlying networks means to track the default.
+            underlyingNetworks = new Network[] { defaultNetwork };
+        }
         int[] transportTypes = new int[] { NetworkCapabilities.TRANSPORT_VPN };
         int downKbps = NetworkCapabilities.LINK_BANDWIDTH_UNSPECIFIED;
         int upKbps = NetworkCapabilities.LINK_BANDWIDTH_UNSPECIFIED;
@@ -6416,17 +6422,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
         caps.setCapability(NET_CAPABILITY_NOT_SUSPENDED, !suspended);
     }
 
-    /** Propagates to |nc| the capabilities declared by the underlying networks of |nai|. */
-    private void mixInUnderlyingCapabilities(NetworkAgentInfo nai, NetworkCapabilities nc) {
-        Network[] underlyingNetworks = nai.declaredUnderlyingNetworks;
-        Network defaultNetwork = getNetwork(getDefaultNetwork());
-        if (underlyingNetworks == null && defaultNetwork != null) {
-            // null underlying networks means to track the default.
-            underlyingNetworks = new Network[] { defaultNetwork };
-        }
-        applyUnderlyingCapabilities(underlyingNetworks, nc, nai.declaredMetered);
-    }
-
     /**
      * Augments the NetworkCapabilities passed in by a NetworkAgent with capabilities that are
      * maintained here that the NetworkAgent is not aware of (e.g., validated, captive portal,
@@ -6481,7 +6476,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
 
         if (nai.supportsUnderlyingNetworks()) {
-            mixInUnderlyingCapabilities(nai, newNc);
+            applyUnderlyingCapabilities(nai.declaredUnderlyingNetworks, newNc, nai.declaredMetered);
         }
 
         return newNc;
