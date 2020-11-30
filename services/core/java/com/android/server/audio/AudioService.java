@@ -7724,10 +7724,12 @@ public class AudioService extends IAudioService.Stub
 
     private class MyHdmiControlStatusChangeListenerCallback
             implements HdmiControlManager.HdmiControlStatusChangeListener {
-        public void onStatusChange(boolean isCecEnabled, boolean isCecAvailable) {
+        public void onStatusChange(@HdmiControlManager.HdmiCecControl int isCecEnabled,
+                boolean isCecAvailable) {
             synchronized (mHdmiClientLock) {
                 if (mHdmiManager == null) return;
-                updateHdmiCecSinkLocked(isCecEnabled ? isCecAvailable : false);
+                boolean cecEnabled = isCecEnabled == HdmiControlManager.HDMI_CEC_CONTROL_ENABLED;
+                updateHdmiCecSinkLocked(cecEnabled ? isCecAvailable : false);
             }
         }
     };
