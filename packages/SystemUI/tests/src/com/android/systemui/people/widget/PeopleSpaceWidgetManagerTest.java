@@ -16,6 +16,7 @@
 
 package com.android.systemui.people.widget;
 
+import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
 import static android.app.NotificationManager.IMPORTANCE_HIGH;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -164,7 +165,7 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
         when(mIAppWidgetService.getAppWidgetIds(any())).thenReturn(widgetIdsArray);
 
         NotificationChannel channel =
-                mNoMan.createNotificationChannel(TEST_CHANNEL_ID, TEST_CHANNEL_NAME);
+                new NotificationChannel(TEST_CHANNEL_ID, TEST_CHANNEL_NAME, IMPORTANCE_DEFAULT);
 
         mNoMan.issueChannelModification(TEST_PACKAGE_A,
                 UserHandle.getUserHandleForUid(0), channel, IMPORTANCE_HIGH);
@@ -181,7 +182,7 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
         when(mIAppWidgetService.getAppWidgetIds(any())).thenReturn(widgetIdsArray);
 
         NotificationChannel channel =
-                mNoMan.createNotificationChannel(TEST_CHANNEL_ID, TEST_CHANNEL_NAME);
+                new NotificationChannel(TEST_CHANNEL_ID, TEST_CHANNEL_NAME, IMPORTANCE_DEFAULT);
         channel.setConversationId(TEST_PARENT_CHANNEL_ID, TEST_CONVERSATION_ID);
 
         mNoMan.issueChannelModification(TEST_PACKAGE_A,
