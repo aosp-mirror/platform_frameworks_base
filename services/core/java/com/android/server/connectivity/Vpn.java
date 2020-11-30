@@ -408,7 +408,6 @@ public class Vpn {
         mNetworkCapabilities = new NetworkCapabilities();
         mNetworkCapabilities.addTransportType(NetworkCapabilities.TRANSPORT_VPN);
         mNetworkCapabilities.removeCapability(NetworkCapabilities.NET_CAPABILITY_NOT_VPN);
-        updateCapabilities(null /* defaultNetwork */);
 
         loadAlwaysOnPackage(keyStore);
     }
@@ -1593,11 +1592,12 @@ public class Vpn {
                     try {
                         addUserToRanges(existingRanges, userId, mConfig.allowedApplications,
                                 mConfig.disallowedApplications);
-                        // ConnectivityService will call {@link #updateCapabilities} and apply
-                        // those for VPN network.
                         mNetworkCapabilities.setUids(existingRanges);
                     } catch (Exception e) {
                         Log.wtf(TAG, "Failed to add restricted user to owner", e);
+                    }
+                    if (mNetworkAgent != null) {
+                        mNetworkAgent.sendNetworkCapabilities(mNetworkCapabilities);
                     }
                 }
                 setVpnForcedLocked(mLockdown);
@@ -1621,11 +1621,12 @@ public class Vpn {
                         final List<UidRange> removedRanges =
                                 uidRangesForUser(userId, existingRanges);
                         existingRanges.removeAll(removedRanges);
-                        // ConnectivityService will call {@link #updateCapabilities} and
-                        // apply those for VPN network.
                         mNetworkCapabilities.setUids(existingRanges);
                     } catch (Exception e) {
                         Log.wtf(TAG, "Failed to remove restricted user to owner", e);
+                    }
+                    if (mNetworkAgent != null) {
+                        mNetworkAgent.sendNetworkCapabilities(mNetworkCapabilities);
                     }
                 }
                 setVpnForcedLocked(mLockdown);
