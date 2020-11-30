@@ -16,10 +16,7 @@
 
 package com.android.settingslib;
 
-import static com.android.settingslib.RestrictedLockUtils.EnforcedAdmin;
-
 import android.content.Context;
-import android.os.UserHandle;
 import android.util.AttributeSet;
 
 import androidx.core.content.res.TypedArrayUtils;
@@ -28,7 +25,7 @@ import androidx.preference.PreferenceManager;
 import androidx.preference.PreferenceViewHolder;
 
 /** Top level preference that can be disabled by a device admin using a user restriction. */
-public class RestrictedTopLevelPreference extends Preference {
+public class RestrictedTopLevelPreference extends Preference implements Restrictable {
     private RestrictedPreferenceHelper mHelper;
 
     public RestrictedTopLevelPreference(Context context, AttributeSet attrs,
@@ -69,23 +66,14 @@ public class RestrictedTopLevelPreference extends Preference {
         super.onAttachedToHierarchy(preferenceManager);
     }
 
-    /**
-     * Set the user restriction and disable this preference.
-     *
-     * @param userRestriction constant from {@link android.os.UserManager}
-     */
-    public void checkRestrictionAndSetDisabled(String userRestriction) {
-        mHelper.checkRestrictionAndSetDisabled(userRestriction, UserHandle.myUserId());
+    @Override
+    public RestrictedPreferenceHelper getHelper() {
+        return mHelper;
     }
 
-    /**
-     * Set the user restriction and disable this preference for the given user.
-     *
-     * @param userRestriction constant from {@link android.os.UserManager}
-     * @param userId          user to check the restriction for.
-     */
-    public void checkRestrictionAndSetDisabled(String userRestriction, int userId) {
-        mHelper.checkRestrictionAndSetDisabled(userRestriction, userId);
+    @Override
+    public void notifyPreferenceChanged() {
+        notifyChanged();
     }
 
     @Override
@@ -95,26 +83,5 @@ public class RestrictedTopLevelPreference extends Preference {
             return;
         }
         super.setEnabled(enabled);
-    }
-
-    /**
-     * Check whether this preference is disabled by admin.
-     *
-     * @return true if this preference is disabled by admin.
-     */
-    public boolean isDisabledByAdmin() {
-        return mHelper.isDisabledByAdmin();
-    }
-
-    /**
-     * Disable preference based on the enforce admin.
-     *
-     * @param admin details of the admin who enforced the restriction. If it is {@code null}, then
-     *              this preference will be enabled. Otherwise, it will be disabled.
-     */
-    public void setDisabledByAdmin(EnforcedAdmin admin) {
-        if (mHelper.setDisabledByAdmin(admin)) {
-            notifyChanged();
-        }
     }
 }

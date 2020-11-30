@@ -73,6 +73,7 @@ java_defaults {
         "SettingsLibCollapsingToolbarBaseActivity",
         "SettingsLibTwoTargetPreference",
         "SettingsLibSettingsTransition",
+        "SettingsLibSeekBarPreference",
     ],
 }
 
