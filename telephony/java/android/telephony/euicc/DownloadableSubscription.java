@@ -19,6 +19,7 @@ import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.app.PendingIntent;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.telephony.UiccAccessRule;
@@ -61,7 +62,7 @@ public final class DownloadableSubscription implements Parcelable {
      */
     @Nullable
     @Deprecated
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public final String encodedActivationCode;
 
     @Nullable private String confirmationCode;
@@ -191,7 +192,7 @@ public final class DownloadableSubscription implements Parcelable {
      * @deprecated - Do not use.
      */
     @Deprecated
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void setCarrierName(String carrierName) {
         this.carrierName = carrierName;
     }
@@ -238,7 +239,7 @@ public final class DownloadableSubscription implements Parcelable {
      * @deprecated - Do not use.
      */
     @Deprecated
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void setAccessRules(UiccAccessRule[] accessRules) {
         this.accessRules = Arrays.asList(accessRules);
     }

@@ -56,7 +56,8 @@ TEST(PrettyPrintVisitorTests, CreatePrettyPrintVisitor) {
 
   ASSERT_NE(stream.str().find("target apk path  : "), std::string::npos);
   ASSERT_NE(stream.str().find("overlay apk path : "), std::string::npos);
-  ASSERT_NE(stream.str().find(R::target::integer::literal::int1 + " -> 0x7f010000 integer/int1\n"),
+  ASSERT_NE(stream.str().find(R::target::integer::literal::int1 +
+                              " -> 0x7f010000 (integer/int1 -> integer/int1)\n"),
             std::string::npos);
 }
 
@@ -75,7 +76,7 @@ TEST(PrettyPrintVisitorTests, CreatePrettyPrintVisitorWithoutAccessToApks) {
 
   ASSERT_NE(stream.str().find("target apk path  : "), std::string::npos);
   ASSERT_NE(stream.str().find("overlay apk path : "), std::string::npos);
-  ASSERT_NE(stream.str().find("0x7f020000 -> 0x7f020000\n"), std::string::npos);
+  ASSERT_NE(stream.str().find("0x7f020000 -> 0x7f020000 (\?\?\? -> \?\?\?)\n"), std::string::npos);
 }
 
 }  // namespace android::idmap2

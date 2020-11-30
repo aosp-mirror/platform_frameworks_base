@@ -71,7 +71,7 @@ public class KeyStore {
     private static final String TAG = "KeyStore";
 
     // ResponseCodes - see system/security/keystore/include/keystore/keystore.h
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static final int NO_ERROR = 1;
     public static final int LOCKED = 2;
     public static final int UNINITIALIZED = 3;
@@ -191,7 +191,7 @@ public class KeyStore {
         return mToken;
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public State state(int userId) {
         final int ret;
         try {
@@ -222,7 +222,7 @@ public class KeyStore {
         return get(key, uid, false);
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public byte[] get(String key) {
         return get(key, UID_SELF);
     }
@@ -282,7 +282,7 @@ public class KeyStore {
         return ret == NO_ERROR || ret == KEY_NOT_FOUND;
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public boolean delete(String key) {
         return delete(key, UID_SELF);
     }
@@ -319,7 +319,7 @@ public class KeyStore {
      * List uids of all keys that are auth bound to the current user.
      * Only system is allowed to call this method.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public int[] listUidsOfAuthBoundKeys() {
         // uids are returned as a list of strings because list of integers
         // as an output parameter is not supported by aidl-cpp.
@@ -386,7 +386,7 @@ public class KeyStore {
         }
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public boolean unlock(String password) {
         return unlock(UserHandle.getUserId(Process.myUid()), password);
     }
@@ -1262,7 +1262,7 @@ public class KeyStore {
      * Returns a {@link KeyStoreException} corresponding to the provided keystore/keymaster error
      * code.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static KeyStoreException getKeyStoreException(int errorCode) {
         if (errorCode > 0) {
             // KeyStore layer error

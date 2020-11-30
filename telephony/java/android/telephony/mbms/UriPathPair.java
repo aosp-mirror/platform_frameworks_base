@@ -17,7 +17,6 @@
 package android.telephony.mbms;
 
 import android.annotation.SystemApi;
-import android.annotation.TestApi;
 import android.content.ContentResolver;
 import android.net.Uri;
 import android.os.Parcel;
@@ -30,7 +29,6 @@ import android.telephony.mbms.vendor.VendorUtils;
  * @hide
  */
 @SystemApi
-@TestApi
 public final class UriPathPair implements Parcelable {
     private final Uri mFilePathUri;
     private final Uri mContentUri;

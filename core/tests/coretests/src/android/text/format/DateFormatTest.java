@@ -21,13 +21,19 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import android.compat.testing.PlatformCompatChangeRule;
 import android.icu.text.DateFormatSymbols;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import libcore.junit.util.compat.CoreCompatChangeRule.DisableCompatChanges;
+import libcore.junit.util.compat.CoreCompatChangeRule.EnableCompatChanges;
+
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TestRule;
 import org.junit.runner.RunWith;
 
 import java.util.Arrays;
@@ -37,6 +43,9 @@ import java.util.Locale;
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class DateFormatTest {
+
+    @Rule
+    public TestRule compatChangeRule = new PlatformCompatChangeRule();
 
     @Test
     public void testHasDesignator() {
@@ -134,5 +143,30 @@ public class DateFormatTest {
 
     private static String best(Locale l, String skeleton) {
         return DateFormat.getBestDateTimePattern(l, skeleton);
+    }
+
+    @Test
+    @EnableCompatChanges({DateFormat.DISALLOW_DUPLICATE_FIELD_IN_SKELETON})
+    public void testGetBestDateTimePattern_disableDuplicateField() {
+        assertIllegalArgumentException(Locale.US, "jmma");
+        assertIllegalArgumentException(Locale.US, "ahmma");
+    }
+
+    @Test
+    @DisableCompatChanges({DateFormat.DISALLOW_DUPLICATE_FIELD_IN_SKELETON})
+    public void testGetBestDateTimePattern_enableDuplicateField() {
+        // en-US uses 12-hour format by default.
+        assertEquals("h:mm a", DateFormat.getBestDateTimePattern(Locale.US, "jmma"));
+        assertEquals("h:mm a", DateFormat.getBestDateTimePattern(Locale.US, "ahmma"));
+    }
+
+    private static void assertIllegalArgumentException(Locale l, String skeleton) {
+        try {
+            DateFormat.getBestDateTimePattern(l, skeleton);
+            fail("getBestDateTimePattern() does not fail with Locale: " + l
+                    + " skeleton: " + skeleton);
+        } catch (IllegalArgumentException expected) {
+            // ignored
+        }
     }
 }

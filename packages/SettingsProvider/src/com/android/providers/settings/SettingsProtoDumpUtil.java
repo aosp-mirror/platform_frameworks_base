@@ -761,8 +761,8 @@ class SettingsProtoDumpUtil {
                 Settings.Global.GLOBAL_SETTINGS_ANGLE_GL_DRIVER_SELECTION_VALUES,
                 GlobalSettingsProto.Gpu.ANGLE_GL_DRIVER_SELECTION_VALUES);
         dumpSetting(s, p,
-                Settings.Global.GLOBAL_SETTINGS_ANGLE_WHITELIST,
-                GlobalSettingsProto.Gpu.ANGLE_WHITELIST);
+                Settings.Global.GLOBAL_SETTINGS_ANGLE_ALLOWLIST,
+                GlobalSettingsProto.Gpu.ANGLE_ALLOWLIST);
         dumpSetting(s, p,
                 Settings.Global.GLOBAL_SETTINGS_SHOW_ANGLE_IN_USE_DIALOG_BOX,
                 GlobalSettingsProto.Gpu.SHOW_ANGLE_IN_USE_DIALOG);
@@ -785,14 +785,14 @@ class SettingsProtoDumpUtil {
                 Settings.Global.GAME_DRIVER_OPT_OUT_APPS,
                 GlobalSettingsProto.Gpu.GAME_DRIVER_OPT_OUT_APPS);
         dumpSetting(s, p,
-                Settings.Global.GAME_DRIVER_BLACKLIST,
-                GlobalSettingsProto.Gpu.GAME_DRIVER_BLACKLIST);
+                Settings.Global.GAME_DRIVER_DENYLIST,
+                GlobalSettingsProto.Gpu.GAME_DRIVER_DENYLIST);
         dumpSetting(s, p,
-                Settings.Global.GAME_DRIVER_WHITELIST,
-                GlobalSettingsProto.Gpu.GAME_DRIVER_WHITELIST);
+                Settings.Global.GAME_DRIVER_ALLOWLIST,
+                GlobalSettingsProto.Gpu.GAME_DRIVER_ALLOWLIST);
         dumpSetting(s, p,
-                Settings.Global.GAME_DRIVER_BLACKLISTS,
-                GlobalSettingsProto.Gpu.GAME_DRIVER_BLACKLISTS);
+                Settings.Global.GAME_DRIVER_DENYLISTS,
+                GlobalSettingsProto.Gpu.GAME_DRIVER_DENYLISTS);
         dumpSetting(s, p,
                 Settings.Global.GAME_DRIVER_SPHAL_LIBRARIES,
                 GlobalSettingsProto.Gpu.GAME_DRIVER_SPHAL_LIBRARIES);

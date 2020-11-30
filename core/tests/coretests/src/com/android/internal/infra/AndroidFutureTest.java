@@ -81,7 +81,7 @@ public class AndroidFutureTest {
         future.completeExceptionally(origException);
         ExecutionException executionException =
                 expectThrows(ExecutionException.class, future::get);
-        assertThat(executionException.getCause()).isSameAs(origException);
+        assertThat(executionException.getCause()).isSameInstanceAs(origException);
     }
 
     @Test
@@ -92,7 +92,7 @@ public class AndroidFutureTest {
         CountDownLatch latch = new CountDownLatch(1);
         future.whenComplete((obj, err) -> {
             assertThat(obj).isNull();
-            assertThat(err).isSameAs(origException);
+            assertThat(err).isSameInstanceAs(origException);
             latch.countDown();
         });
         latch.await();

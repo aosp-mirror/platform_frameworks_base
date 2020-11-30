@@ -21,29 +21,30 @@ import static com.android.systemui.classifier.Classifier.UNLOCK;
 import android.util.DisplayMetrics;
 import android.view.MotionEvent;
 
-import com.android.systemui.SysuiTestCase;
+import com.android.systemui.utils.leaks.FakeBatteryController;
+import com.android.systemui.utils.leaks.LeakCheckedTest;
 
 import org.junit.After;
-import org.junit.Before;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class ClassifierTest extends SysuiTestCase {
+public class ClassifierTest extends LeakCheckedTest {
 
     private FalsingDataProvider mDataProvider;
     private List<MotionEvent> mMotionEvents = new ArrayList<>();
     private float mOffsetX = 0;
     private float mOffsetY = 0;
+    private FakeBatteryController mFakeBatteryController;
 
-    @Before
     public void setup() {
         DisplayMetrics displayMetrics = new DisplayMetrics();
         displayMetrics.xdpi = 100;
         displayMetrics.ydpi = 100;
         displayMetrics.widthPixels = 1000;
         displayMetrics.heightPixels = 1000;
-        mDataProvider = new FalsingDataProvider(displayMetrics);
+        mFakeBatteryController = new FakeBatteryController(getLeakCheck());
+        mDataProvider = new FalsingDataProvider(displayMetrics, mFakeBatteryController);
         mDataProvider.setInteractionType(UNLOCK);
     }
 
@@ -54,6 +55,10 @@ public class ClassifierTest extends SysuiTestCase {
 
     FalsingDataProvider getDataProvider() {
         return mDataProvider;
+    }
+
+    FakeBatteryController getFakeBatteryController() {
+        return mFakeBatteryController;
     }
 
     void setOffsetX(float offsetX) {

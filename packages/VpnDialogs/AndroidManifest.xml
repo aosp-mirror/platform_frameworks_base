@@ -23,6 +23,9 @@
     <uses-permission android:name="android.permission.CONTROL_ALWAYS_ON_VPN" />
     <uses-permission android:name="android.permission.HIDE_NON_SYSTEM_OVERLAY_WINDOWS"/>
 
+    <!-- Query all packages on device on R+ -->
+    <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
+
     <application android:label="VpnDialogs"
                  android:allowBackup="false">
 

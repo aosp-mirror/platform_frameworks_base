@@ -82,7 +82,7 @@ public abstract class VibrationEffect implements Parcelable {
      * @see #get(int)
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     @TestApi
     public static final int EFFECT_THUD = Effect.THUD;
 
@@ -91,7 +91,7 @@ public abstract class VibrationEffect implements Parcelable {
      * @see #get(int)
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     @TestApi
     public static final int EFFECT_POP = Effect.POP;
 
@@ -132,7 +132,7 @@ public abstract class VibrationEffect implements Parcelable {
      * @see #get(Uri, Context)
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     @TestApi
     public static final int[] RINGTONES = {
         Effect.RINGTONE_1,
@@ -518,7 +518,7 @@ public abstract class VibrationEffect implements Parcelable {
             out.writeInt(mAmplitude);
         }
 
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public static final @android.annotation.NonNull Parcelable.Creator<OneShot> CREATOR =
             new Parcelable.Creator<OneShot>() {
                 @Override

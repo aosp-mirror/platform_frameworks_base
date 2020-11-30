@@ -45,7 +45,8 @@ public class CompoundFormulaTest {
                         CompoundFormula.AND, Arrays.asList(ATOMIC_FORMULA_1, ATOMIC_FORMULA_2));
 
         assertThat(compoundFormula.getConnector()).isEqualTo(CompoundFormula.AND);
-        assertThat(compoundFormula.getFormulas()).containsAllOf(ATOMIC_FORMULA_1, ATOMIC_FORMULA_2);
+        assertThat(compoundFormula.getFormulas())
+                .containsAtLeast(ATOMIC_FORMULA_1, ATOMIC_FORMULA_2);
     }
 
     @Test

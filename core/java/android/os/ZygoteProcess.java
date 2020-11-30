@@ -922,13 +922,13 @@ public class ZygoteProcess {
     }
 
     /**
-     * Push hidden API denylisting exemptions into the zygote process(es).
+     * Push hidden API deny-listing exemptions into the zygote process(es).
      *
      * <p>The list of exemptions will take affect for all new processes forked from the zygote after
      * this call.
      *
      * @param exemptions List of hidden API exemption prefixes. Any matching members are treated as
-     *        allowlisted/public APIs (i.e. allowed, no logging of usage).
+     *        allowed/public APIs (i.e. allowed, no logging of usage).
      */
     public boolean setApiDenylistExemptions(List<String> exemptions) {
         synchronized (mLock) {

@@ -25,6 +25,7 @@ import android.app.timedetector.TelephonyTimeSuggestion;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.database.ContentObserver;
+import android.os.Binder;
 import android.os.Handler;
 import android.provider.Settings;
 
@@ -64,9 +65,8 @@ public final class TimeDetectorService extends ITimeDetectorService.Stub {
     @NonNull private final TimeDetectorStrategy mTimeDetectorStrategy;
 
     private static TimeDetectorService create(@NonNull Context context) {
-        TimeDetectorStrategy timeDetectorStrategy = new TimeDetectorStrategyImpl();
-        TimeDetectorStrategyCallbackImpl callback = new TimeDetectorStrategyCallbackImpl(context);
-        timeDetectorStrategy.initialize(callback);
+        TimeDetectorStrategyImpl.Callback callback = new TimeDetectorStrategyCallbackImpl(context);
+        TimeDetectorStrategy timeDetectorStrategy = new TimeDetectorStrategyImpl(callback);
 
         Handler handler = FgThread.getHandler();
         TimeDetectorService timeDetectorService =
@@ -102,11 +102,16 @@ public final class TimeDetectorService extends ITimeDetectorService.Stub {
     }
 
     @Override
-    public void suggestManualTime(@NonNull ManualTimeSuggestion timeSignal) {
+    public boolean suggestManualTime(@NonNull ManualTimeSuggestion timeSignal) {
         enforceSuggestManualTimePermission();
         Objects.requireNonNull(timeSignal);
 
-        mHandler.post(() -> mTimeDetectorStrategy.suggestManualTime(timeSignal));
+        long token = Binder.clearCallingIdentity();
+        try {
+            return mTimeDetectorStrategy.suggestManualTime(timeSignal);
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
     }
 
     @Override
@@ -120,7 +125,7 @@ public final class TimeDetectorService extends ITimeDetectorService.Stub {
     /** Internal method for handling the auto time setting being changed. */
     @VisibleForTesting
     public void handleAutoTimeDetectionChanged() {
-        mHandler.post(mTimeDetectorStrategy::handleAutoTimeDetectionChanged);
+        mHandler.post(mTimeDetectorStrategy::handleAutoTimeConfigChanged);
     }
 
     @Override

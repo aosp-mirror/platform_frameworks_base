@@ -17,6 +17,7 @@
 
 package android.provider;
 
+import android.annotation.LongDef;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ContentProvider;
 import android.content.ContentResolver;
@@ -43,6 +44,8 @@ import android.telephony.PhoneNumberUtils;
 import android.text.TextUtils;
 import android.util.Log;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.List;
 
 /**
@@ -611,6 +614,144 @@ public class CallLog {
          */
         public static final String BLOCK_REASON = "block_reason";
 
+        /** @hide */
+        @LongDef(flag = true, value = {
+                MISSED_REASON_NOT_MISSED,
+                AUTO_MISSED_EMERGENCY_CALL,
+                AUTO_MISSED_MAXIMUM_RINGING,
+                AUTO_MISSED_MAXIMUM_DIALING,
+                USER_MISSED_NO_ANSWER,
+                USER_MISSED_SHORT_RING,
+                USER_MISSED_DND_MODE,
+                USER_MISSED_LOW_RING_VOLUME,
+                USER_MISSED_NO_VIBRATE,
+                USER_MISSED_CALL_SCREENING_SERVICE_SILENCED,
+                USER_MISSED_CALL_FILTERS_TIMEOUT
+        })
+        @Retention(RetentionPolicy.SOURCE)
+        public @interface MissedReason {}
+
+        /**
+         * Value for {@link CallLog.Calls#MISSED_REASON}, set as the default value when a call was
+         * not missed.
+         */
+        public static final long MISSED_REASON_NOT_MISSED = 0;
+
+        /**
+         * Value for {@link CallLog.Calls#MISSED_REASON}, set when {@link CallLog.Calls#TYPE} is
+         * {@link CallLog.Calls#MISSED_TYPE} to indicate that a call was automatically rejected by
+         * system because an ongoing emergency call.
+         */
+        public static final long AUTO_MISSED_EMERGENCY_CALL = 1 << 0;
+
+        /**
+         * Value for {@link CallLog.Calls#MISSED_REASON}, set when {@link CallLog.Calls#TYPE} is
+         * {@link CallLog.Calls#MISSED_TYPE} to indicate that a call was automatically rejected by
+         * system because the system cannot support any more ringing calls.
+         */
+        public static final long AUTO_MISSED_MAXIMUM_RINGING = 1 << 1;
+
+        /**
+         * Value for {@link CallLog.Calls#MISSED_REASON}, set when {@link CallLog.Calls#TYPE} is
+         * {@link CallLog.Calls#MISSED_TYPE} to indicate that a call was automatically rejected by
+         * system because the system cannot support any more dialing calls.
+         */
+        public static final long AUTO_MISSED_MAXIMUM_DIALING = 1 << 2;
+
+        /**
+         * When {@link CallLog.Calls#TYPE} is {@link CallLog.Calls#MISSED_TYPE}, set this bit when
+         * the call was missed just because user didn't answer it.
+         */
+        public static final long USER_MISSED_NO_ANSWER = 1 << 16;
+
+        /**
+         * When {@link CallLog.Calls#TYPE} is {@link CallLog.Calls#MISSED_TYPE}, set this bit when
+         * this call rang for a short period of time.
+         */
+        public static final long USER_MISSED_SHORT_RING = 1 << 17;
+
+        /**
+         * When {@link CallLog.Calls#TYPE} is {@link CallLog.Calls#MISSED_TYPE}, when this call
+         * rings less than this defined time in millisecond, set
+         * {@link CallLog.Calls#USER_MISSED_SHORT_RING} bit.
+         * @hide
+         */
+        public static final long SHORT_RING_THRESHOLD = 5000L;
+
+        /**
+         * When {@link CallLog.Calls#TYPE} is {@link CallLog.Calls#MISSED_TYPE}, set this bit when
+         * this call is silenced because the phone is in 'do not disturb mode'.
+         */
+        public static final long USER_MISSED_DND_MODE = 1 << 18;
+
+        /**
+         * When {@link CallLog.Calls#TYPE} is {@link CallLog.Calls#MISSED_TYPE}, set this bit when
+         * this call rings with a low ring volume.
+         */
+        public static final long USER_MISSED_LOW_RING_VOLUME = 1 << 19;
+
+        /**
+         * When {@link CallLog.Calls#TYPE} is {@link CallLog.Calls#MISSED_TYPE}, when this call
+         * rings in volume less than this defined volume threshold, set
+         * {@link CallLog.Calls#USER_MISSED_LOW_RING_VOLUME} bit.
+         * @hide
+         */
+        public static final int LOW_RING_VOLUME = 0;
+
+        /**
+         * When {@link CallLog.Calls#TYPE} is {@link CallLog.Calls#MISSED_TYPE} set this bit when
+         * this call rings without vibration.
+         */
+        public static final long USER_MISSED_NO_VIBRATE = 1 << 20;
+
+        /**
+         * When {@link CallLog.Calls#TYPE} is {@link CallLog.Calls#MISSED_TYPE}, set this bit when
+         * this call is silenced by the call screening service.
+         */
+        public static final long USER_MISSED_CALL_SCREENING_SERVICE_SILENCED = 1 << 21;
+
+        /**
+         * When {@link CallLog.Calls#TYPE} is {@link CallLog.Calls#MISSED_TYPE}, set this bit when
+         * the call filters timed out.
+         */
+        public static final long USER_MISSED_CALL_FILTERS_TIMEOUT = 1 << 22;
+
+        /**
+         * Where the {@link CallLog.Calls#TYPE} is {@link CallLog.Calls#MISSED_TYPE},
+         * indicates factors which may have lead the user to miss the call.
+         * <P>Type: INTEGER</P>
+         *
+         * <p>
+         * There are two main cases. Auto missed cases and user missed cases. Default value is:
+         * <ul>
+         * <li>{@link CallLog.Calls#MISSED_REASON_NOT_MISSED}</li>
+         * </ul>
+         * </p>
+         * <P>
+         * Auto missed cases are those where a call was missed because it was not possible for the
+         * incoming call to be presented to the user at all. Possible values are:
+         * <ul>
+         * <li>{@link CallLog.Calls#AUTO_MISSED_EMERGENCY_CALL}</li>
+         * <li>{@link CallLog.Calls#AUTO_MISSED_MAXIMUM_RINGING}</li>
+         * <li>{@link CallLog.Calls#AUTO_MISSED_MAXIMUM_DIALING}</li>
+         * </ul>
+         * </P>
+         * <P>
+         * User missed cases are those where the incoming call was presented to the user, but
+         * factors such as a low ringing volume may have contributed to the call being missed.
+         * Following bits can be set to indicate possible reasons for this:
+         * <ul>
+         * <li>{@link CallLog.Calls#USER_MISSED_SHORT_RING}</li>
+         * <li>{@link CallLog.Calls#USER_MISSED_DND_MODE}</li>
+         * <li>{@link CallLog.Calls#USER_MISSED_LOW_RING_VOLUME}</li>
+         * <li>{@link CallLog.Calls#USER_MISSED_NO_VIBRATE}</li>
+         * <li>{@link CallLog.Calls#USER_MISSED_CALL_SCREENING_SERVICE_SILENCED}</li>
+         * <li>{@link CallLog.Calls#USER_MISSED_CALL_FILTERS_TIMEOUT}</li>
+         * </ul>
+         * </P>
+         */
+        public static final String MISSED_REASON = "missed_reason";
+
         /**
          * Adds a call to the call log.
          *
@@ -635,12 +776,13 @@ public class CallLog {
         public static Uri addCall(CallerInfo ci, Context context, String number,
                 int presentation, int callType, int features,
                 PhoneAccountHandle accountHandle,
-                long start, int duration, Long dataUsage) {
+                long start, int duration, Long dataUsage, long missedReason) {
             return addCall(ci, context, number, "" /* postDialDigits */, "" /* viaNumber */,
                 presentation, callType, features, accountHandle, start, duration,
                 dataUsage, false /* addForAllUsers */, null /* userToBeInsertedTo */,
                 false /* isRead */, Calls.BLOCK_REASON_NOT_BLOCKED /* callBlockReason */,
-                null /* callScreeningAppName */, null /* callScreeningComponentName */);
+                null /* callScreeningAppName */, null /* callScreeningComponentName */,
+                    missedReason);
         }
 
 
@@ -675,12 +817,13 @@ public class CallLog {
         public static Uri addCall(CallerInfo ci, Context context, String number,
                 String postDialDigits, String viaNumber, int presentation, int callType,
                 int features, PhoneAccountHandle accountHandle, long start, int duration,
-                Long dataUsage, boolean addForAllUsers, UserHandle userToBeInsertedTo) {
+                Long dataUsage, boolean addForAllUsers, UserHandle userToBeInsertedTo,
+                long missedReason) {
             return addCall(ci, context, number, postDialDigits, viaNumber, presentation, callType,
                 features, accountHandle, start, duration, dataUsage, addForAllUsers,
                 userToBeInsertedTo, false /* isRead */ , Calls.BLOCK_REASON_NOT_BLOCKED
                 /* callBlockReason */, null /* callScreeningAppName */,
-                null /* callScreeningComponentName */);
+                null /* callScreeningComponentName */, missedReason);
         }
 
         /**
@@ -714,6 +857,7 @@ public class CallLog {
          * @param callBlockReason The reason why the call is blocked.
          * @param callScreeningAppName The call screening application name which block the call.
          * @param callScreeningComponentName The call screening component name which block the call.
+         * @param missedReason The encoded missed information of the call.
          *
          * @result The URI of the call log entry belonging to the user that made or received this
          *        call.  This could be of the shadow provider.  Do not return it to non-system apps,
@@ -726,7 +870,7 @@ public class CallLog {
                 int features, PhoneAccountHandle accountHandle, long start, int duration,
                 Long dataUsage, boolean addForAllUsers, UserHandle userToBeInsertedTo,
                 boolean isRead, int callBlockReason, CharSequence callScreeningAppName,
-                String callScreeningComponentName) {
+                String callScreeningComponentName, long missedReason) {
             if (VERBOSE_LOG) {
                 Log.v(LOG_TAG, String.format("Add call: number=%s, user=%s, for all=%s",
                         number, userToBeInsertedTo, addForAllUsers));
@@ -779,6 +923,7 @@ public class CallLog {
             values.put(BLOCK_REASON, callBlockReason);
             values.put(CALL_SCREENING_APP_NAME, charSequenceToString(callScreeningAppName));
             values.put(CALL_SCREENING_COMPONENT_NAME, callScreeningComponentName);
+            values.put(MISSED_REASON, Long.valueOf(missedReason));
 
             if ((ci != null) && (ci.getContactId() > 0)) {
                 // Update usage information for the number associated with the contact ID.
@@ -1113,6 +1258,20 @@ public class CallLog {
                 }
             }
             return countryIso;
+        }
+
+        /**
+         * Check if the missedReason code indicate that the call was user missed or automatically
+         * rejected by system.
+         *
+         * @param missedReason
+         * The result is true if the call was user missed, false if the call was automatically
+         * rejected by system.
+         *
+         * @hide
+         */
+        public static boolean isUserMissed(long missedReason) {
+            return missedReason >= (USER_MISSED_NO_ANSWER);
         }
     }
 }

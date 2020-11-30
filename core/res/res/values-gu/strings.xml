@@ -1135,7 +1135,7 @@
     <string name="whichGiveAccessToApplicationLabel" msgid="7805857277166106236">"ઍક્સેસ આપો"</string>
     <string name="whichEditApplication" msgid="6191568491456092812">"આનાથી સંપાદિત કરો"</string>
     <string name="whichEditApplicationNamed" msgid="8096494987978521514">"%1$s સાથે સંપાદિત કરો"</string>
-    <string name="whichEditApplicationLabel" msgid="1463288652070140285">"સંપાદિત કરો"</string>
+    <string name="whichEditApplicationLabel" msgid="1463288652070140285">"ફેરફાર કરો"</string>
     <string name="whichSendApplication" msgid="4143847974460792029">"શેર કરો"</string>
     <string name="whichSendApplicationNamed" msgid="4470386782693183461">"%1$s સાથે શેર કરો"</string>
     <string name="whichSendApplicationLabel" msgid="7467813004769188515">"શેર કરો"</string>
@@ -1221,7 +1221,7 @@
     <string name="volume_music_hint_silent_ringtone_selected" msgid="1514829655029062233">"સાઇલેન્ટ રિંગટોન સેટ કરી"</string>
     <string name="volume_call" msgid="7625321655265747433">"ઇન-કૉલ વૉલ્યૂમ"</string>
     <string name="volume_bluetooth_call" msgid="2930204618610115061">"બ્લૂટૂથ ઇન-કૉલ વૉલ્યૂમ"</string>
-    <string name="volume_alarm" msgid="4486241060751798448">"એલાર્મ વૉલ્યૂમ"</string>
+    <string name="volume_alarm" msgid="4486241060751798448">"અલાર્મ વૉલ્યૂમ"</string>
     <string name="volume_notification" msgid="6864412249031660057">"સૂચના વૉલ્યૂમ"</string>
     <string name="volume_unknown" msgid="4041914008166576293">"વૉલ્યૂમ"</string>
     <string name="volume_icon_description_bluetooth" msgid="7540388479345558400">"બ્લૂટૂથ વૉલ્યૂમ"</string>
@@ -1513,7 +1513,7 @@
     <string name="storage_usb_drive" msgid="448030813201444573">"USB ડ્રાઇવ"</string>
     <string name="storage_usb_drive_label" msgid="6631740655876540521">"<xliff:g id="MANUFACTURER">%s</xliff:g> USB ડ્રાઇવ"</string>
     <string name="storage_usb" msgid="2391213347883616886">"USB સ્ટોરેજ"</string>
-    <string name="extract_edit_menu_button" msgid="63954536535863040">"સંપાદિત કરો"</string>
+    <string name="extract_edit_menu_button" msgid="63954536535863040">"ફેરફાર કરો"</string>
     <string name="data_usage_warning_title" msgid="9034893717078325845">"ડેટા ચેતવણી"</string>
     <string name="data_usage_warning_body" msgid="1669325367188029454">"તમે <xliff:g id="APP">%s</xliff:g> ડેટા વાપર્યો છે"</string>
     <string name="data_usage_mobile_limit_title" msgid="3911447354393775241">"મોબાઇલ ડેટાની મર્યાદા આવી ગઈ"</string>

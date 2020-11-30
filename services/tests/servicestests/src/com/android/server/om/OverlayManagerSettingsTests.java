@@ -50,55 +50,55 @@ public class OverlayManagerSettingsTests {
     private OverlayManagerSettings mSettings;
 
     private static final OverlayInfo OVERLAY_A0 = new OverlayInfo(
-            "com.dummy.overlay_a",
-            "com.dummy.target",
+            "com.test.overlay_a",
+            "com.test.target",
             null,
             "some-category",
-            "/data/app/com.dummy.overlay_a-1/base.apk",
+            "/data/app/com.test.overlay_a-1/base.apk",
             STATE_DISABLED,
             0,
             0,
             true);
 
     private static final OverlayInfo OVERLAY_B0 = new OverlayInfo(
-            "com.dummy.overlay_b",
-            "com.dummy.target",
+            "com.test.overlay_b",
+            "com.test.target",
             null,
             "some-category",
-            "/data/app/com.dummy.overlay_b-1/base.apk",
+            "/data/app/com.test.overlay_b-1/base.apk",
             STATE_DISABLED,
             0,
             0,
             true);
 
     private static final OverlayInfo OVERLAY_C0 = new OverlayInfo(
-            "com.dummy.overlay_c",
-            "com.dummy.target",
+            "com.test.overlay_c",
+            "com.test.target",
             null,
             "some-category",
-            "/data/app/com.dummy.overlay_c-1/base.apk",
+            "/data/app/com.test.overlay_c-1/base.apk",
             STATE_DISABLED,
             0,
             0,
             true);
 
     private static final OverlayInfo OVERLAY_A1 = new OverlayInfo(
-            "com.dummy.overlay_a",
-            "com.dummy.target",
+            "com.test.overlay_a",
+            "com.test.target",
             null,
             "some-category",
-            "/data/app/com.dummy.overlay_a-1/base.apk",
+            "/data/app/com.test.overlay_a-1/base.apk",
             STATE_DISABLED,
             1,
             0,
             true);
 
     private static final OverlayInfo OVERLAY_B1 = new OverlayInfo(
-            "com.dummy.overlay_b",
-            "com.dummy.target",
+            "com.test.overlay_b",
+            "com.test.target",
             null,
             "some-category",
-            "/data/app/com.dummy.overlay_b-1/base.apk",
+            "/data/app/com.test.overlay_b-1/base.apk",
             STATE_DISABLED,
             1,
             0,
@@ -230,11 +230,11 @@ public class OverlayManagerSettingsTests {
         assertListsAreEqual(list, OVERLAY_A0, OVERLAY_C0, OVERLAY_B0);
 
         OverlayInfo otherTarget = new OverlayInfo(
-                "com.dummy.overlay_other",
-                "com.dummy.some.other.target",
+                "com.test.overlay_other",
+                "com.test.some.other.target",
                 null,
                 "some-category",
-                "/data/app/com.dummy.overlay_other-1/base.apk",
+                "/data/app/com.test.overlay_other-1/base.apk",
                 STATE_DISABLED,
                 0,
                 0,
@@ -350,7 +350,7 @@ public class OverlayManagerSettingsTests {
         ByteArrayInputStream is = new ByteArrayInputStream(xml.getBytes("utf-8"));
 
         mSettings.restore(is);
-        assertDoesNotContain(mSettings, "com.dummy.overlay", 0);
+        assertDoesNotContain(mSettings, "com.test.overlay", 0);
     }
 
     @Test
@@ -359,27 +359,27 @@ public class OverlayManagerSettingsTests {
         final String xml =
                 "<?xml version='1.0' encoding='utf-8' standalone='yes'?>\n"
                 + "<overlays version='" + version + "'>\n"
-                + "<item packageName='com.dummy.overlay'\n"
+                + "<item packageName='com.test.overlay'\n"
                 + "      userId='1234'\n"
-                + "      targetPackageName='com.dummy.target'\n"
-                + "      baseCodePath='/data/app/com.dummy.overlay-1/base.apk'\n"
+                + "      targetPackageName='com.test.target'\n"
+                + "      baseCodePath='/data/app/com.test.overlay-1/base.apk'\n"
                 + "      state='" + STATE_DISABLED + "'\n"
                 + "      isEnabled='false'\n"
-                + "      category='dummy-category'\n"
+                + "      category='test-category'\n"
                 + "      isStatic='false'\n"
                 + "      priority='0' />\n"
                 + "</overlays>\n";
         ByteArrayInputStream is = new ByteArrayInputStream(xml.getBytes("utf-8"));
 
         mSettings.restore(is);
-        OverlayInfo oi = mSettings.getOverlayInfo("com.dummy.overlay", 1234);
+        OverlayInfo oi = mSettings.getOverlayInfo("com.test.overlay", 1234);
         assertNotNull(oi);
-        assertEquals("com.dummy.overlay", oi.packageName);
-        assertEquals("com.dummy.target", oi.targetPackageName);
-        assertEquals("/data/app/com.dummy.overlay-1/base.apk", oi.baseCodePath);
+        assertEquals("com.test.overlay", oi.packageName);
+        assertEquals("com.test.target", oi.targetPackageName);
+        assertEquals("/data/app/com.test.overlay-1/base.apk", oi.baseCodePath);
         assertEquals(1234, oi.userId);
         assertEquals(STATE_DISABLED, oi.state);
-        assertFalse(mSettings.getEnabled("com.dummy.overlay", 1234));
+        assertFalse(mSettings.getEnabled("com.test.overlay", 1234));
     }
 
     @Test

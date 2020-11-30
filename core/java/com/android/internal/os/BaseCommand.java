@@ -18,13 +18,15 @@
 package com.android.internal.os;
 
 import android.compat.annotation.UnsupportedAppUsage;
-import android.os.BasicShellCommandHandler;
+import android.os.Build;
+
+import com.android.modules.utils.BasicShellCommandHandler;
 
 import java.io.PrintStream;
 
 public abstract class BaseCommand {
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     final protected BasicShellCommandHandler mArgs = new BasicShellCommandHandler() {
         @Override public int onCommand(String cmd) {
             return 0;
@@ -40,7 +42,7 @@ public abstract class BaseCommand {
 
     private String[] mRawArgs;
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public BaseCommand() {
     }
 

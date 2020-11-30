@@ -945,17 +945,6 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
     }
 
     @Override
-    public void setMtu(String iface, int mtu) {
-        NetworkStack.checkNetworkStackPermission(mContext);
-
-        try {
-            mNetdService.interfaceSetMtu(iface, mtu);
-        } catch (RemoteException | ServiceSpecificException e) {
-            throw new IllegalStateException(e);
-        }
-    }
-
-    @Override
     public void shutdown() {
         // TODO: remove from aidl if nobody calls externally
         mContext.enforceCallingOrSelfPermission(SHUTDOWN, TAG);
@@ -1985,16 +1974,6 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
         pw.println("]");
     }
 
-    @Override
-    public void addInterfaceToNetwork(String iface, int netId) {
-        modifyInterfaceInNetwork(MODIFY_OPERATION_ADD, netId, iface);
-    }
-
-    @Override
-    public void removeInterfaceFromNetwork(String iface, int netId) {
-        modifyInterfaceInNetwork(MODIFY_OPERATION_REMOVE, netId, iface);
-    }
-
     private void modifyInterfaceInNetwork(boolean add, int netId, String iface) {
         NetworkStack.checkNetworkStackPermission(mContext);
         try {
@@ -2024,39 +2003,6 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
         }
         try {
             mNetdService.networkAddLegacyRoute(netId, ifName, dst, nextHop, uid);
-        } catch (RemoteException | ServiceSpecificException e) {
-            throw new IllegalStateException(e);
-        }
-    }
-
-    @Override
-    public void setDefaultNetId(int netId) {
-        NetworkStack.checkNetworkStackPermission(mContext);
-
-        try {
-            mNetdService.networkSetDefault(netId);
-        } catch (RemoteException | ServiceSpecificException e) {
-            throw new IllegalStateException(e);
-        }
-    }
-
-    @Override
-    public void clearDefaultNetId() {
-        NetworkStack.checkNetworkStackPermission(mContext);
-
-        try {
-            mNetdService.networkClearDefault();
-        } catch (RemoteException | ServiceSpecificException e) {
-            throw new IllegalStateException(e);
-        }
-    }
-
-    @Override
-    public void setNetworkPermission(int netId, int permission) {
-        NetworkStack.checkNetworkStackPermission(mContext);
-
-        try {
-            mNetdService.networkSetPermissionForNetwork(netId, permission);
         } catch (RemoteException | ServiceSpecificException e) {
             throw new IllegalStateException(e);
         }

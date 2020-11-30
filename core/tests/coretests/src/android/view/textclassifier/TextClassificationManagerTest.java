@@ -52,7 +52,8 @@ public class TextClassificationManagerTest {
 
     @Test
     public void testGetLocalTextClassifier() {
-        assertThat(mTcm.getTextClassifier(TextClassifier.LOCAL)).isSameAs(TextClassifier.NO_OP);
+        assertThat(mTcm.getTextClassifier(TextClassifier.LOCAL))
+                .isSameInstanceAs(TextClassifier.NO_OP);
     }
 
     @Test

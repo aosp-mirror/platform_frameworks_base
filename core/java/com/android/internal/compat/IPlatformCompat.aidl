@@ -164,7 +164,7 @@ interface IPlatformCompat
     boolean clearOverride(long changeId, String packageName);
 
     /**
-     * Enable all compatibility changes which have enabledAfterTargetSdk ==
+     * Enable all compatibility changes which have enabledSinceTargetSdk ==
      * {@param targetSdkVersion} for an app, subject to the policy. Kills the app to allow the
      * changes to take effect.
      *

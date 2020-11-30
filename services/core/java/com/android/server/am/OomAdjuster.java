@@ -76,7 +76,11 @@ import android.app.ApplicationExitInfo;
 import android.app.usage.UsageEvents;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledAfter;
+import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.ServiceInfo;
 import android.os.Debug;
 import android.os.Handler;
@@ -265,6 +269,43 @@ public final class OomAdjuster {
 
     void initSettings() {
         mCachedAppOptimizer.init();
+        if (mService.mConstants.KEEP_WARMING_SERVICES.size() > 0) {
+            final IntentFilter filter = new IntentFilter(Intent.ACTION_USER_SWITCHED);
+            mService.mContext.registerReceiverForAllUsers(new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    synchronized (mService) {
+                        handleUserSwitchedLocked();
+                    }
+                }
+            }, filter, null, mService.mHandler);
+        }
+    }
+
+    /**
+     * Update the keep-warming service flags upon user switches
+     */
+    @VisibleForTesting
+    @GuardedBy("mService")
+    void handleUserSwitchedLocked() {
+        final ArraySet<ComponentName> warmServices = mService.mConstants.KEEP_WARMING_SERVICES;
+        final ArrayList<ProcessRecord> processes = mProcessList.mLruProcesses;
+        for (int i = processes.size() - 1; i >= 0; i--) {
+            final ProcessRecord app = processes.get(i);
+            boolean includeWarmPkg = false;
+            for (int j = warmServices.size() - 1; j >= 0; j--) {
+                if (app.pkgList.containsKey(warmServices.valueAt(j).getPackageName())) {
+                    includeWarmPkg = true;
+                    break;
+                }
+            }
+            if (!includeWarmPkg) {
+                continue;
+            }
+            for (int j = app.numberOfRunningServices() - 1; j >= 0; j--) {
+                app.getRunningServiceAt(j).updateKeepWarmLocked();
+            }
+        }
     }
 
     /**
@@ -1470,7 +1511,7 @@ public final class OomAdjuster {
                                 "Raise procstate to started service: " + app);
                     }
                 }
-                if (app.hasShownUi && !app.getCachedIsHomeProcess()) {
+                if (!s.mKeepWarming && app.hasShownUi && !app.getCachedIsHomeProcess()) {
                     // If this process has shown some UI, let it immediately
                     // go to the LRU list because it may be pretty heavy with
                     // UI stuff.  We'll tag it with a label just to help
@@ -1479,7 +1520,8 @@ public final class OomAdjuster {
                         app.adjType = "cch-started-ui-services";
                     }
                 } else {
-                    if (now < (s.lastActivity + mConstants.MAX_SERVICE_INACTIVITY)) {
+                    if (s.mKeepWarming
+                            || now < (s.lastActivity + mConstants.MAX_SERVICE_INACTIVITY)) {
                         // This service has seen some activity within
                         // recent memory, so we will keep its process ahead
                         // of the background processes.

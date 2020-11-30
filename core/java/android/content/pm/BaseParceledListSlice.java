@@ -18,6 +18,7 @@ package android.content.pm;
 
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Binder;
+import android.os.Build;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -133,7 +134,7 @@ abstract class BaseParceledListSlice<T> implements Parcelable {
         }
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public List<T> getList() {
         return mList;
     }
@@ -207,7 +208,7 @@ abstract class BaseParceledListSlice<T> implements Parcelable {
 
     protected abstract void writeElement(T parcelable, Parcel reply, int callFlags);
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     protected abstract void writeParcelableCreator(T parcelable, Parcel dest);
 
     protected abstract Parcelable.Creator<?> readParcelableCreator(Parcel from, ClassLoader loader);

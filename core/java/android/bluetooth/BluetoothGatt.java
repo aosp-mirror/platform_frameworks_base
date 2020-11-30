@@ -58,9 +58,9 @@ public final class BluetoothGatt implements BluetoothProfile {
     private int mConnState;
     private final Object mStateLock = new Object();
     private final Object mDeviceBusyLock = new Object();
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private Boolean mDeviceBusy = false;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private int mTransport;
     private int mPhy;
     private boolean mOpportunistic;
@@ -688,6 +688,31 @@ public final class BluetoothGatt implements BluetoothProfile {
                         }
                     });
                 }
+
+                /**
+                 * Callback invoked when service changed event is received
+                 * @hide
+                 */
+                @Override
+                public void onServiceChanged(String address) {
+                    if (DBG) {
+                        Log.d(TAG, "onServiceChanged() - Device=" + address);
+                    }
+
+                    if (!address.equals(mDevice.getAddress())) {
+                        return;
+                    }
+
+                    runOrQueueCallback(new Runnable() {
+                        @Override
+                        public void run() {
+                            final BluetoothGattCallback callback = mCallback;
+                            if (callback != null) {
+                                callback.onServiceChanged(BluetoothGatt.this);
+                            }
+                        }
+                    });
+                }
             };
 
     /*package*/ BluetoothGatt(IBluetoothGatt iGatt, BluetoothDevice device,
@@ -856,7 +881,7 @@ public final class BluetoothGatt implements BluetoothProfile {
      * automatically connect as soon as the remote device becomes available (true).
      * @return true, if the connection attempt was initiated successfully
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     /*package*/ boolean connect(Boolean autoConnect, BluetoothGattCallback callback,
             Handler handler) {
         if (DBG) {

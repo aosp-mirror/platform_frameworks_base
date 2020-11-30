@@ -79,7 +79,7 @@ public class LocationFudgerTest {
             Location coarse = mFudger.createCoarse(fine);
 
             assertThat(coarse).isNotNull();
-            assertThat(coarse).isNotSameAs(fine);
+            assertThat(coarse).isNotSameInstanceAs(fine);
             assertThat(coarse.hasBearing()).isFalse();
             assertThat(coarse.hasSpeed()).isFalse();
             assertThat(coarse.hasAltitude()).isFalse();

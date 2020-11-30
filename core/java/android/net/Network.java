@@ -18,8 +18,8 @@ package android.net;
 
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
-import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.system.ErrnoException;
@@ -110,7 +110,7 @@ public class Network implements Parcelable {
     /**
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public Network(int netId) {
         this(netId, false);
     }
@@ -127,7 +127,6 @@ public class Network implements Parcelable {
      * @hide
      */
     @SystemApi
-    @TestApi
     public Network(@NonNull Network that) {
         this(that.netId, that.mPrivateDnsBypass);
     }
@@ -164,7 +163,6 @@ public class Network implements Parcelable {
      *
      * @hide
      */
-    @TestApi
     @SystemApi
     public @NonNull Network getPrivateDnsBypassingCopy() {
         return new Network(netId, true);
@@ -175,7 +173,6 @@ public class Network implements Parcelable {
      *
      * @hide
      */
-    @TestApi
     @SystemApi
     public int getNetId() {
         return netId;

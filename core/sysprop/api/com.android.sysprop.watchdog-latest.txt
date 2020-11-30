@@ -1,0 +1,20 @@
+props {
+  module: "android.sysprop.WatchdogProperties"
+  prop {
+    api_name: "fatal_count"
+    type: Integer
+    scope: Internal
+    prop_name: "framework_watchdog.fatal_count"
+  }
+  prop {
+    api_name: "fatal_window_second"
+    type: Integer
+    scope: Internal
+    prop_name: "framework_watchdog.fatal_window.second"
+  }
+  prop {
+    api_name: "is_fatal_ignore"
+    scope: Internal
+    prop_name: "persist.debug.framework_watchdog.fatal_ignore"
+  }
+}

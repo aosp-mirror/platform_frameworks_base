@@ -22,10 +22,14 @@ import android.annotation.SystemApi;
 /**
  * Describes specific properties of a requested network for use in a {@link NetworkRequest}.
  *
- * Applications cannot instantiate this class by themselves, but can obtain instances of
- * subclasses of this class via other APIs.
+ * This as an abstract class. Applications shouldn't instantiate this class by themselves, but can
+ * obtain instances of subclasses of this class via other APIs.
  */
 public abstract class NetworkSpecifier {
+    /**
+     * Create a placeholder object. Please use subclasses of this class in a {@link NetworkRequest}
+     * to request a network.
+     */
     public NetworkSpecifier() {}
 
     /**

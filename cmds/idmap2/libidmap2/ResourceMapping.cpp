@@ -61,16 +61,19 @@ Result<Unit> CheckOverlayable(const LoadedPackage& target_package,
                               const ResourceId& target_resource) {
   static constexpr const PolicyBitmask sDefaultPolicies =
       PolicyFlags::ODM_PARTITION | PolicyFlags::OEM_PARTITION | PolicyFlags::SYSTEM_PARTITION |
-      PolicyFlags::VENDOR_PARTITION | PolicyFlags::PRODUCT_PARTITION | PolicyFlags::SIGNATURE;
+      PolicyFlags::VENDOR_PARTITION | PolicyFlags::PRODUCT_PARTITION | PolicyFlags::SIGNATURE |
+      PolicyFlags::CONFIG_SIGNATURE;
 
   // If the resource does not have an overlayable definition, allow the resource to be overlaid if
-  // the overlay is preinstalled or signed with the same signature as the target.
+  // the overlay is preinstalled, signed with the same signature as the target or signed with the
+  // same signature as reference package defined in SystemConfig under 'overlay-config-signature'
+  // tag.
   if (!target_package.DefinesOverlayable()) {
     return (sDefaultPolicies & fulfilled_policies) != 0
                ? Result<Unit>({})
-               : Error(
-                     "overlay must be preinstalled or signed with the same signature as the "
-                     "target");
+               : Error("overlay must be preinstalled, signed with the same signature as the target,"
+                       " or signed with the same signature as the package referenced through"
+                       " <overlay-config-signature>.");
   }
 
   const OverlayableInfo* overlayable_info = target_package.GetOverlayableInfo(target_resource);
@@ -202,19 +205,14 @@ Result<ResourceMapping> ResourceMapping::CreateResourceMapping(const AssetManage
       overlay_resource->data += string_pool_offset;
     }
 
-    // Only rewrite resources defined within the overlay package to their corresponding target
-    // resource ids at runtime.
-    bool rewrite_overlay_reference =
-        IsReference(overlay_resource->dataType)
-            ? overlay_package_id == EXTRACT_PACKAGE(overlay_resource->data)
-            : false;
-
-    if (rewrite_overlay_reference) {
-      overlay_resource->dataType = Res_value::TYPE_DYNAMIC_REFERENCE;
+    if (IsReference(overlay_resource->dataType)) {
+      // Only rewrite resources defined within the overlay package to their corresponding target
+      // resource ids at runtime.
+      bool rewrite_reference = overlay_package_id == EXTRACT_PACKAGE(overlay_resource->data);
+      resource_mapping.AddMapping(target_id, overlay_resource->data, rewrite_reference);
+    } else {
+      resource_mapping.AddMapping(target_id, overlay_resource->dataType, overlay_resource->data);
     }
-
-    resource_mapping.AddMapping(target_id, overlay_resource->dataType, overlay_resource->data,
-                                rewrite_overlay_reference);
   }
 
   return resource_mapping;
@@ -243,9 +241,8 @@ Result<ResourceMapping> ResourceMapping::CreateResourceMappingLegacy(
 
     // Retrieve the compile-time resource id of the target resource.
     target_resource = REWRITE_PACKAGE(target_resource, target_package_id);
-
-    resource_mapping.AddMapping(target_resource, Res_value::TYPE_REFERENCE, overlay_resid,
-                                /* rewrite_overlay_reference */ false);
+    resource_mapping.AddMapping(target_resource, overlay_resid,
+                                false /* rewrite_overlay_reference */);
   }
 
   return resource_mapping;
@@ -393,9 +390,7 @@ OverlayResourceMap ResourceMapping::GetOverlayToTargetMap() const {
   return map;
 }
 
-Result<Unit> ResourceMapping::AddMapping(ResourceId target_resource,
-                                         TargetValue::DataType data_type,
-                                         TargetValue::DataValue data_value,
+Result<Unit> ResourceMapping::AddMapping(ResourceId target_resource, ResourceId overlay_resource,
                                          bool rewrite_overlay_reference) {
   if (target_map_.find(target_resource) != target_map_.end()) {
     return Error(R"(target resource id "0x%08x" mapped to multiple values)", target_resource);
@@ -404,13 +399,26 @@ Result<Unit> ResourceMapping::AddMapping(ResourceId target_resource,
   // TODO(141485591): Ensure that the overlay type is compatible with the target type. If the
   // runtime types are not compatible, it could cause runtime crashes when the resource is resolved.
 
-  target_map_.insert(std::make_pair(target_resource, TargetValue{data_type, data_value}));
+  target_map_.insert(std::make_pair(target_resource, overlay_resource));
 
-  if (rewrite_overlay_reference && IsReference(data_type)) {
-    overlay_map_.insert(std::make_pair(data_value, target_resource));
+  if (rewrite_overlay_reference) {
+    overlay_map_.insert(std::make_pair(overlay_resource, target_resource));
+  }
+  return Unit{};
+}
+
+Result<Unit> ResourceMapping::AddMapping(ResourceId target_resource,
+                                         TargetValue::DataType data_type,
+                                         TargetValue::DataValue data_value) {
+  if (target_map_.find(target_resource) != target_map_.end()) {
+    return Error(R"(target resource id "0x%08x" mapped to multiple values)", target_resource);
   }
 
-  return Result<Unit>({});
+  // TODO(141485591): Ensure that the overlay type is compatible with the target type. If the
+  // runtime types are not compatible, it could cause runtime crashes when the resource is resolved.
+
+  target_map_.insert(std::make_pair(target_resource, TargetValue{data_type, data_value}));
+  return Unit{};
 }
 
 void ResourceMapping::RemoveMapping(ResourceId target_resource) {
@@ -419,14 +427,15 @@ void ResourceMapping::RemoveMapping(ResourceId target_resource) {
     return;
   }
 
-  const TargetValue value = target_iter->second;
+  const auto value = target_iter->second;
   target_map_.erase(target_iter);
 
-  if (!IsReference(value.data_type)) {
+  const ResourceId* overlay_resource = std::get_if<ResourceId>(&value);
+  if (overlay_resource == nullptr) {
     return;
   }
 
-  auto overlay_iter = overlay_map_.equal_range(value.data_value);
+  auto overlay_iter = overlay_map_.equal_range(*overlay_resource);
   for (auto i = overlay_iter.first; i != overlay_iter.second; ++i) {
     if (i->second == target_resource) {
       overlay_map_.erase(i);

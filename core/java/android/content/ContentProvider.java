@@ -129,7 +129,7 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
     // performance.
     @UnsupportedAppUsage
     private String mAuthority;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private String[] mAuthorities;
     @UnsupportedAppUsage
     private String mReadPermission;
@@ -2341,7 +2341,7 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
      * when directly instantiating the provider for testing.
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void attachInfoForTesting(Context context, ProviderInfo info) {
         attachInfo(context, info, true);
     }

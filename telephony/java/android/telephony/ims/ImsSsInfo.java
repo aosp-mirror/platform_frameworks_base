@@ -20,8 +20,8 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
-import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -38,7 +38,6 @@ import java.lang.annotation.RetentionPolicy;
  * @hide
  */
 @SystemApi
-@TestApi
 public final class ImsSsInfo implements Parcelable {
 
     /**@hide*/
@@ -157,10 +156,10 @@ public final class ImsSsInfo implements Parcelable {
 
     // 0: disabled, 1: enabled
     /** @hide */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public int mStatus;
     /** @hide */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public String mIcbNum;
     /** @hide */
     public int mProvisionStatus = SERVICE_PROVISIONING_UNKNOWN;
@@ -168,7 +167,7 @@ public final class ImsSsInfo implements Parcelable {
     private int mClirOutgoingState = CLIR_OUTGOING_DEFAULT;
 
     /**@hide*/
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public ImsSsInfo() {
     }
 

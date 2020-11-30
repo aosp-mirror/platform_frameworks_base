@@ -174,7 +174,7 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
      *
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static Bundle forPair(String key, String value) {
         Bundle b = new Bundle(1);
         b.putString(key, value);
@@ -306,7 +306,7 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
      *
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public int getSize() {
         if (mParcelledData != null) {
             return mParcelledData.dataSize();
@@ -389,7 +389,7 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
      * Filter values in Bundle to only basic types.
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public Bundle filterValues() {
         unparcel();
         Bundle bundle = this;

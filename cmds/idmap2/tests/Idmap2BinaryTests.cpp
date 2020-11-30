@@ -128,13 +128,13 @@ TEST_F(Idmap2BinaryTests, Dump) {
   // clang-format on
   ASSERT_THAT(result, NotNull());
   ASSERT_EQ(result->status, EXIT_SUCCESS) << result->stderr;
-  ASSERT_NE(result->stdout.find(R::target::integer::literal::int1 + " -> 0x7f010000 integer/int1"),
+  ASSERT_NE(result->stdout.find(R::target::integer::literal::int1 + " -> 0x7f010000"),
             std::string::npos);
-  ASSERT_NE(result->stdout.find(R::target::string::literal::str1 + " -> 0x7f020000 string/str1"),
+  ASSERT_NE(result->stdout.find(R::target::string::literal::str1 + " -> 0x7f020000"),
             std::string::npos);
-  ASSERT_NE(result->stdout.find(R::target::string::literal::str3 + " -> 0x7f020001 string/str3"),
+  ASSERT_NE(result->stdout.find(R::target::string::literal::str3 + " -> 0x7f020001"),
             std::string::npos);
-  ASSERT_NE(result->stdout.find(R::target::string::literal::str4 + " -> 0x7f020002 string/str4"),
+  ASSERT_NE(result->stdout.find(R::target::string::literal::str4 + " -> 0x7f020002"),
             std::string::npos);
 
   // clang-format off

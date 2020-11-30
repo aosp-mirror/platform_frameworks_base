@@ -37,6 +37,7 @@ import android.content.pm.LauncherApps;
 import android.content.pm.PackageManager;
 import android.content.pm.ShortcutManager;
 import android.content.res.Resources;
+import android.hardware.SensorManager;
 import android.hardware.SensorPrivacyManager;
 import android.hardware.display.DisplayManager;
 import android.media.AudioManager;
@@ -252,6 +253,12 @@ public class SystemServicesModule {
     @Main
     static Resources provideResources(Context context) {
         return context.getResources();
+    }
+
+    @Provides
+    @Singleton
+    static SensorManager providesSensorManager(Context context) {
+        return context.getSystemService(SensorManager.class);
     }
 
     @Singleton

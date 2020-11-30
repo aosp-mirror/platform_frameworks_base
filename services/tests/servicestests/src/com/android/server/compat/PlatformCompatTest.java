@@ -84,22 +84,22 @@ public class PlatformCompatTest {
         mCompatConfig = CompatConfigBuilder.create(mBuildClassifier, mContext)
                 .addEnabledChangeWithId(1L)
                 .addDisabledChangeWithIdAndName(2L, "change2")
-                .addTargetSdkChangeWithIdAndDescription(Build.VERSION_CODES.O, 3L, "description")
-                .addTargetSdkChangeWithId(Build.VERSION_CODES.P, 4L)
-                .addTargetSdkChangeWithId(Build.VERSION_CODES.Q, 5L)
-                .addTargetSdkChangeWithId(Build.VERSION_CODES.R, 6L)
+                .addEnableAfterSdkChangeWithIdAndDescription(Build.VERSION_CODES.O, 3L, "desc")
+                .addEnableAfterSdkChangeWithId(Build.VERSION_CODES.P, 4L)
+                .addEnableAfterSdkChangeWithId(Build.VERSION_CODES.Q, 5L)
+                .addEnableAfterSdkChangeWithId(Build.VERSION_CODES.R, 6L)
                 .addLoggingOnlyChangeWithId(7L)
                 .build();
         mPlatformCompat = new PlatformCompat(mContext, mCompatConfig);
         assertThat(mPlatformCompat.listAllChanges()).asList().containsExactly(
-                new CompatibilityChangeInfo(1L, "", -1, false, false, ""),
-                new CompatibilityChangeInfo(2L, "change2", -1, true, false, ""),
-                new CompatibilityChangeInfo(3L, "", Build.VERSION_CODES.O, false, false,
-                        "description"),
-                new CompatibilityChangeInfo(4L, "", Build.VERSION_CODES.P, false, false, ""),
-                new CompatibilityChangeInfo(5L, "", Build.VERSION_CODES.Q, false, false, ""),
-                new CompatibilityChangeInfo(6L, "", Build.VERSION_CODES.R, false, false, ""),
-                new CompatibilityChangeInfo(7L, "", -1, false, true, ""));
+                new CompatibilityChangeInfo(1L, "", -1, -1, false, false, ""),
+                new CompatibilityChangeInfo(2L, "change2", -1, -1, true, false, ""),
+                new CompatibilityChangeInfo(3L, "", Build.VERSION_CODES.O, -1, false, false,
+                        "desc"),
+                new CompatibilityChangeInfo(4L, "", Build.VERSION_CODES.P, -1, false, false, ""),
+                new CompatibilityChangeInfo(5L, "", Build.VERSION_CODES.Q, -1, false, false, ""),
+                new CompatibilityChangeInfo(6L, "", Build.VERSION_CODES.R, -1, false, false, ""),
+                new CompatibilityChangeInfo(7L, "", -1, -1, false, true, ""));
     }
 
     @Test
@@ -107,18 +107,18 @@ public class PlatformCompatTest {
         mCompatConfig = CompatConfigBuilder.create(mBuildClassifier, mContext)
                 .addEnabledChangeWithId(1L)
                 .addDisabledChangeWithIdAndName(2L, "change2")
-                .addTargetSdkChangeWithIdAndDescription(Build.VERSION_CODES.O, 3L, "description")
-                .addTargetSdkChangeWithId(Build.VERSION_CODES.P, 4L)
-                .addTargetSdkChangeWithId(Build.VERSION_CODES.Q, 5L)
-                .addTargetSdkChangeWithId(Build.VERSION_CODES.R, 6L)
+                .addEnableAfterSdkChangeWithIdAndDescription(Build.VERSION_CODES.O, 3L, "desc")
+                .addEnableAfterSdkChangeWithId(Build.VERSION_CODES.P, 4L)
+                .addEnableAfterSdkChangeWithId(Build.VERSION_CODES.Q, 5L)
+                .addEnableAfterSdkChangeWithId(Build.VERSION_CODES.R, 6L)
                 .addLoggingOnlyChangeWithId(7L)
                 .build();
         mPlatformCompat = new PlatformCompat(mContext, mCompatConfig);
         assertThat(mPlatformCompat.listUIChanges()).asList().containsExactly(
-                new CompatibilityChangeInfo(1L, "", -1, false, false, ""),
-                new CompatibilityChangeInfo(2L, "change2", -1, true, false, ""),
-                new CompatibilityChangeInfo(4L, "", Build.VERSION_CODES.P, false, false, ""),
-                new CompatibilityChangeInfo(5L, "", Build.VERSION_CODES.Q, false, false, ""));
+                new CompatibilityChangeInfo(1L, "", -1, -1, false, false, ""),
+                new CompatibilityChangeInfo(2L, "change2", -1, -1, true, false, ""),
+                new CompatibilityChangeInfo(4L, "", Build.VERSION_CODES.P, -1, false, false, ""),
+                new CompatibilityChangeInfo(5L, "", Build.VERSION_CODES.Q, -1, false, false, ""));
     }
 
     @Test

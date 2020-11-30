@@ -20,7 +20,6 @@ import android.Manifest.permission;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
-import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.Intent;
@@ -121,7 +120,7 @@ public class BatteryManager {
      * Int value set to the maximum charging current supported by the charger in micro amperes.
      * {@hide}
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static final String EXTRA_MAX_CHARGING_CURRENT = "max_charging_current";
 
     /**
@@ -129,7 +128,7 @@ public class BatteryManager {
      * Int value set to the maximum charging voltage supported by the charger in micro volts.
      * {@hide}
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static final String EXTRA_MAX_CHARGING_VOLTAGE = "max_charging_voltage";
 
     /**
@@ -137,7 +136,7 @@ public class BatteryManager {
      * integer containing the charge counter present in the battery.
      * {@hide}
      */
-     @UnsupportedAppUsage
+     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
      public static final String EXTRA_CHARGE_COUNTER = "charge_counter";
 
     /**
@@ -392,7 +391,6 @@ public class BatteryManager {
      */
     @RequiresPermission(permission.POWER_SAVER)
     @SystemApi
-    @TestApi
     public boolean setChargingStateUpdateDelayMillis(int delayMillis) {
         try {
             return mBatteryStats.setChargingStateUpdateDelayMillis(delayMillis);

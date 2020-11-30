@@ -27,6 +27,7 @@ import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
@@ -579,7 +580,7 @@ public class AudioTrack extends PlayerBase
      * the native AudioTrack object, but not stored in it).
      */
     @SuppressWarnings("unused")
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private long mJniData;
 
 
@@ -874,7 +875,7 @@ public class AudioTrack extends PlayerBase
     /**
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     /* package */ void deferred_connect(long nativeTrackInJavaObj) {
         if (mState != STATE_INITIALIZED) {
             // Note that for this native_setup, we are providing an already created/initialized
@@ -1261,14 +1262,20 @@ public class AudioTrack extends PlayerBase
 
             // TODO: Check mEncapsulationMode compatibility with MODE_STATIC, etc?
 
-            try {
-                // If the buffer size is not specified in streaming mode,
-                // use a single frame for the buffer size and let the
-                // native code figure out the minimum buffer size.
-                if (mMode == MODE_STREAM && mBufferSizeInBytes == 0) {
-                    mBufferSizeInBytes = mFormat.getChannelCount()
-                            * mFormat.getBytesPerSample(mFormat.getEncoding());
+            // If the buffer size is not specified in streaming mode,
+            // use a single frame for the buffer size and let the
+            // native code figure out the minimum buffer size.
+            if (mMode == MODE_STREAM && mBufferSizeInBytes == 0) {
+                int bytesPerSample = 1;
+                try {
+                    bytesPerSample = mFormat.getBytesPerSample(mFormat.getEncoding());
+                } catch (IllegalArgumentException e) {
+                    // do nothing
                 }
+                mBufferSizeInBytes = mFormat.getChannelCount() * bytesPerSample;
+            }
+
+            try {
                 final AudioTrack track = new AudioTrack(
                         mAttributes, mFormat, mBufferSizeInBytes, mMode, mSessionId, mOffload,
                         mEncapsulationMode, mTunerConfiguration);
@@ -4004,7 +4011,7 @@ public class AudioTrack extends PlayerBase
     // Java methods called from the native side
     //--------------------
     @SuppressWarnings("unused")
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private static void postEventFromNative(Object audiotrack_ref,
             int what, int arg1, int arg2, Object obj) {
         //logd("Event posted from the native side: event="+ what + " args="+ arg1+" "+arg2);

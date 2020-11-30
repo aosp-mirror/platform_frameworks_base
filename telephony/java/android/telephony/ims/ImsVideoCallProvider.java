@@ -17,14 +17,13 @@
 package android.telephony.ims;
 
 import android.annotation.SystemApi;
-import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
-import android.telecom.Connection;
 import android.telecom.VideoProfile;
 import android.telecom.VideoProfile.CameraCapabilities;
 import android.view.Surface;
@@ -37,7 +36,6 @@ import com.android.internal.os.SomeArgs;
  * @hide
  */
 @SystemApi
-@TestApi
 public abstract class ImsVideoCallProvider {
     private static final int MSG_SET_CALLBACK = 1;
     private static final int MSG_SET_CAMERA = 2;
@@ -182,7 +180,7 @@ public abstract class ImsVideoCallProvider {
      * Returns binder object which can be used across IPC methods.
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public final IImsVideoCallProvider getInterface() {
         return mBinder;
     }

@@ -47,7 +47,6 @@ import android.net.NetworkAgent;
 import android.net.NetworkUtils;
 import android.net.SocketKeepalive.InvalidSocketException;
 import android.net.TcpKeepalivePacketData;
-import android.net.util.IpUtils;
 import android.net.util.KeepaliveUtils;
 import android.os.Binder;
 import android.os.Handler;
@@ -63,6 +62,7 @@ import android.util.Pair;
 import com.android.internal.R;
 import com.android.internal.util.HexDump;
 import com.android.internal.util.IndentingPrintWriter;
+import com.android.net.module.util.IpUtils;
 
 import java.io.FileDescriptor;
 import java.net.InetAddress;
@@ -367,6 +367,13 @@ public class KeepaliveTracker {
                     Log.e(TAG, "Cannot stop unowned keepalive " + mSlot + " on " + mNai.network);
                 }
             }
+            // Ignore the case when the network disconnects immediately after stop() has been
+            // called and the keepalive code is waiting for the response from the modem. This
+            // might happen when the caller listens for a lower-layer network disconnect
+            // callback and stop the keepalive at that time. But the stop() races with the
+            // stop() generated in ConnectivityService network disconnection code path.
+            if (mStartedState == STOPPING && reason == ERROR_INVALID_NETWORK) return;
+
             // Store the reason of stopping, and report it after the keepalive is fully stopped.
             if (mStopReason != ERROR_STOP_REASON_UNINITIALIZED) {
                 throw new IllegalStateException("Unexpected stop reason: " + mStopReason);
@@ -380,9 +387,6 @@ public class KeepaliveTracker {
                     // e.g. invalid parameter.
                     cleanupStoppedKeepalive(mNai, mSlot);
                     break;
-                case STOPPING:
-                    // Keepalive is already in stopping state, ignore.
-                    return;
                 default:
                     mStartedState = STOPPING;
                     switch (mType) {

@@ -1312,7 +1312,7 @@
     <string name="sms_short_code_confirm_deny" msgid="1356917469323768230">"Отмена"</string>
     <string name="sms_short_code_remember_choice" msgid="1374526438647744862">"Запомнить выбор"</string>
     <string name="sms_short_code_remember_undo_instruction" msgid="2620984439143080410">"Это можно изменить позже в разделе настроек \"Приложения\"."</string>
-    <string name="sms_short_code_confirm_always_allow" msgid="2223014893129755950">"Всегда разрешать"</string>
+    <string name="sms_short_code_confirm_always_allow" msgid="2223014893129755950">"Разрешать всегда"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="2688828813521652079">"Не разрешать"</string>
     <string name="sim_removed_title" msgid="5387212933992546283">"SIM-карта удалена"</string>
     <string name="sim_removed_message" msgid="9051174064474904617">"Пока вы не вставите действующую SIM-карту, мобильная сеть будет недоступна."</string>

@@ -233,7 +233,7 @@ public class SmsMessage extends SmsMessageBase {
      *         null on encode error.
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static SubmitPdu getSubmitPdu(String scAddr, String destAddr, String message,
             boolean statusReportRequested, SmsHeader smsHeader, int priority) {
 
@@ -316,7 +316,7 @@ public class SmsMessage extends SmsMessageBase {
      * @return a <code>SubmitPdu</code> containing null SC address and the encoded message. Returns
      *         null on encode error.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static SubmitPdu getSubmitPdu(String destAddr, UserData userData,
             boolean statusReportRequested, int priority) {
         return privateGetSubmitPdu(destAddr, statusReportRequested, userData, priority);

@@ -1,7 +1,0 @@
-android_app {
-    name: "bttraffic",
-    srcs: ["src/**/*.java"],
-    resource_dirs: ["res"],
-    sdk_version: "current",
-    certificate: "platform",
-}

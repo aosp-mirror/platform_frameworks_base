@@ -21,6 +21,7 @@ import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -28,6 +29,8 @@ import android.telecom.VideoProfile;
 import android.telephony.emergency.EmergencyNumber;
 import android.telephony.emergency.EmergencyNumber.EmergencyCallRouting;
 import android.telephony.emergency.EmergencyNumber.EmergencyServiceCategories;
+import android.telephony.ims.feature.MmTelFeature;
+import android.util.ArraySet;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -37,7 +40,10 @@ import com.android.internal.telephony.util.TelephonyUtils;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * A Parcelable object to handle the IMS call profile, which provides the service, call type, and
@@ -48,7 +54,6 @@ import java.util.List;
  * @hide
  */
 @SystemApi
-@TestApi
 public final class ImsCallProfile implements Parcelable {
     private static final String TAG = "ImsCallProfile";
 
@@ -357,10 +362,10 @@ public final class ImsCallProfile implements Parcelable {
     /** @hide */
     public int mServiceType;
     /** @hide */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public int mCallType;
     /** @hide */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public @CallRestrictCause int mRestrictCause = CALL_RESTRICT_CAUSE_NONE;
 
     /**
@@ -445,6 +450,8 @@ public final class ImsCallProfile implements Parcelable {
     /** Indicates if we have known the intent of the user for the call is emergency */
     private boolean mHasKnownUserIntentEmergency = false;
 
+    private Set<RtpHeaderExtensionType> mAcceptedRtpHeaderExtensionTypes = new ArraySet<>();
+
     /**
      * Extras associated with this {@link ImsCallProfile}.
      * <p>
@@ -468,10 +475,10 @@ public final class ImsCallProfile implements Parcelable {
      * a {@link android.os.Binder}.
      */
     /** @hide */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public Bundle mCallExtras;
     /** @hide */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public ImsStreamMediaProfile mMediaProfile;
 
     /** @hide */
@@ -683,6 +690,7 @@ public final class ImsCallProfile implements Parcelable {
         out.writeBoolean(mHasKnownUserIntentEmergency);
         out.writeInt(mRestrictCause);
         out.writeInt(mCallerNumberVerificationStatus);
+        out.writeArray(mAcceptedRtpHeaderExtensionTypes.toArray());
     }
 
     private void readFromParcel(Parcel in) {
@@ -697,9 +705,13 @@ public final class ImsCallProfile implements Parcelable {
         mHasKnownUserIntentEmergency = in.readBoolean();
         mRestrictCause = in.readInt();
         mCallerNumberVerificationStatus = in.readInt();
+        Object[] accepted = in.readArray(RtpHeaderExtensionType.class.getClassLoader());
+        mAcceptedRtpHeaderExtensionTypes = Arrays.stream(accepted)
+                .map(o -> (RtpHeaderExtensionType) o).collect(Collectors.toSet());
     }
 
-    public static final @android.annotation.NonNull Creator<ImsCallProfile> CREATOR = new Creator<ImsCallProfile>() {
+    public static final @android.annotation.NonNull Creator<ImsCallProfile> CREATOR =
+            new Creator<ImsCallProfile>() {
         @Override
         public ImsCallProfile createFromParcel(Parcel in) {
             return new ImsCallProfile(in);
@@ -824,7 +836,7 @@ public final class ImsCallProfile implements Parcelable {
      * See {@link #presentationToOir(int)}.
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static int presentationToOIR(int presentation) {
         switch (presentation) {
             case PhoneConstants.PRESENTATION_RESTRICTED:
@@ -1085,5 +1097,34 @@ public final class ImsCallProfile implements Parcelable {
      */
     public boolean hasKnownUserIntentEmergency() {
         return mHasKnownUserIntentEmergency;
+    }
+
+    /**
+     * Gets the {@link RtpHeaderExtensionType}s which have been accepted by both ends of the call.
+     * <p>
+     * According to RFC8285, RTP header extensions available to a call are determined using the
+     * offer/accept phase of the SDP protocol (see RFC4566).
+     * <p>
+     * The offered header extension types supported by the framework and exposed to the
+     * {@link ImsService} via {@link MmTelFeature#changeOfferedRtpHeaderExtensionTypes(Set)}.
+     *
+     * @return the {@link RtpHeaderExtensionType}s which were accepted by the other end of the call.
+     */
+    public @NonNull Set<RtpHeaderExtensionType> getAcceptedRtpHeaderExtensionTypes() {
+        return mAcceptedRtpHeaderExtensionTypes;
+    }
+
+    /**
+     * Sets the accepted {@link RtpHeaderExtensionType}s for this call.
+     * <p>
+     * According to RFC8285, RTP header extensions available to a call are determined using the
+     * offer/accept phase of the SDP protocol (see RFC4566).
+     *
+     * @param rtpHeaderExtensions
+     */
+    public void setAcceptedRtpHeaderExtensionTypes(@NonNull Set<RtpHeaderExtensionType>
+            rtpHeaderExtensions) {
+        mAcceptedRtpHeaderExtensionTypes.clear();
+        mAcceptedRtpHeaderExtensionTypes.addAll(rtpHeaderExtensions);
     }
 }

@@ -118,17 +118,17 @@
 
     <!-- Titles for Bluetooth AVRCP Versions -->
     <string-array name="bluetooth_avrcp_versions">
-        <item>AVRCP 1.4 (Default)</item>
+        <item>AVRCP 1.5 (Default)</item>
         <item>AVRCP 1.3</item>
-        <item>AVRCP 1.5</item>
+        <item>AVRCP 1.4</item>
         <item>AVRCP 1.6</item>
     </string-array>
 
     <!-- Values for Bluetooth AVRCP Versions -->
     <string-array name="bluetooth_avrcp_version_values">
-        <item>avrcp14</item>
-        <item>avrcp13</item>
         <item>avrcp15</item>
+        <item>avrcp13</item>
+        <item>avrcp14</item>
         <item>avrcp16</item>
     </string-array>
 

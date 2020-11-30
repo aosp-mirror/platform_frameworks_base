@@ -132,15 +132,14 @@ public class TimeDetectorServiceTest {
         doNothing().when(mMockContext).enforceCallingOrSelfPermission(anyString(), any());
 
         ManualTimeSuggestion manualTimeSuggestion = createManualTimeSuggestion();
-        mTimeDetectorService.suggestManualTime(manualTimeSuggestion);
-        mTestHandler.assertTotalMessagesEnqueued(1);
+
+        assertTrue(mTimeDetectorService.suggestManualTime(manualTimeSuggestion));
+        mStubbedTimeDetectorStrategy.verifySuggestManualTimeCalled(manualTimeSuggestion);
 
         verify(mMockContext).enforceCallingOrSelfPermission(
                 eq(android.Manifest.permission.SUGGEST_MANUAL_TIME_AND_ZONE),
                 anyString());
 
-        mTestHandler.waitForMessagesToBeProcessed();
-        mStubbedTimeDetectorStrategy.verifySuggestManualTimeCalled(manualTimeSuggestion);
     }
 
     @Test(expected = SecurityException.class)
@@ -227,17 +226,14 @@ public class TimeDetectorServiceTest {
         private boolean mDumpCalled;
 
         @Override
-        public void initialize(Callback ignored) {
-        }
-
-        @Override
         public void suggestTelephonyTime(TelephonyTimeSuggestion timeSuggestion) {
             mLastTelephonySuggestion = timeSuggestion;
         }
 
         @Override
-        public void suggestManualTime(ManualTimeSuggestion timeSuggestion) {
+        public boolean suggestManualTime(ManualTimeSuggestion timeSuggestion) {
             mLastManualSuggestion = timeSuggestion;
+            return true;
         }
 
         @Override
@@ -246,7 +242,7 @@ public class TimeDetectorServiceTest {
         }
 
         @Override
-        public void handleAutoTimeDetectionChanged() {
+        public void handleAutoTimeConfigChanged() {
             mHandleAutoTimeDetectionChangedCalled = true;
         }
 
@@ -267,11 +263,11 @@ public class TimeDetectorServiceTest {
             assertEquals(expectedSuggestion, mLastTelephonySuggestion);
         }
 
-        public void verifySuggestManualTimeCalled(ManualTimeSuggestion expectedSuggestion) {
+        void verifySuggestManualTimeCalled(ManualTimeSuggestion expectedSuggestion) {
             assertEquals(expectedSuggestion, mLastManualSuggestion);
         }
 
-        public void verifySuggestNetworkTimeCalled(NetworkTimeSuggestion expectedSuggestion) {
+        void verifySuggestNetworkTimeCalled(NetworkTimeSuggestion expectedSuggestion) {
             assertEquals(expectedSuggestion, mLastNetworkSuggestion);
         }
 

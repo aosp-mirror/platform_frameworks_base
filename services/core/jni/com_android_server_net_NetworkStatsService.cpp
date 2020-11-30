@@ -215,21 +215,6 @@ static const JNINativeMethod gMethods[] = {
 };
 
 int register_android_server_net_NetworkStatsService(JNIEnv* env) {
-    jclass netStatsService = env->FindClass("com/android/server/net/NetworkStatsService");
-    jfieldID rxBytesId = env->GetStaticFieldID(netStatsService, "TYPE_RX_BYTES", "I");
-    jfieldID rxPacketsId = env->GetStaticFieldID(netStatsService, "TYPE_RX_PACKETS", "I");
-    jfieldID txBytesId = env->GetStaticFieldID(netStatsService, "TYPE_TX_BYTES", "I");
-    jfieldID txPacketsId = env->GetStaticFieldID(netStatsService, "TYPE_TX_PACKETS", "I");
-    jfieldID tcpRxPacketsId = env->GetStaticFieldID(netStatsService, "TYPE_TCP_RX_PACKETS", "I");
-    jfieldID tcpTxPacketsId = env->GetStaticFieldID(netStatsService, "TYPE_TCP_TX_PACKETS", "I");
-
-    env->SetStaticIntField(netStatsService, rxBytesId, RX_BYTES);
-    env->SetStaticIntField(netStatsService, rxPacketsId, RX_PACKETS);
-    env->SetStaticIntField(netStatsService, txBytesId, TX_BYTES);
-    env->SetStaticIntField(netStatsService, txPacketsId, TX_PACKETS);
-    env->SetStaticIntField(netStatsService, tcpRxPacketsId, TCP_RX_PACKETS);
-    env->SetStaticIntField(netStatsService, tcpTxPacketsId, TCP_TX_PACKETS);
-
     return jniRegisterNativeMethods(env, "com/android/server/net/NetworkStatsService", gMethods,
                                     NELEM(gMethods));
 }

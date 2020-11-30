@@ -113,7 +113,7 @@ interface IActivityManager {
             in String callingFeatureId, in Intent intent, in String resolvedType,
             in IBinder resultTo, in String resultWho, int requestCode, int flags,
             in ProfilerInfo profilerInfo, in Bundle options);
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     void unhandledBack();
     @UnsupportedAppUsage
     boolean finishActivity(in IBinder token, int code, in Intent data, int finishTask);
@@ -172,12 +172,12 @@ interface IActivityManager {
     @UnsupportedAppUsage
     boolean unbindService(in IServiceConnection connection);
     void publishService(in IBinder token, in Intent intent, in IBinder service);
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     void setDebugApp(in String packageName, boolean waitForDebugger, boolean persistent);
     void setAgentApp(in String packageName, @nullable String agent);
     @UnsupportedAppUsage
     void setAlwaysFinish(boolean enabled);
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     boolean startInstrumentation(in ComponentName className, in String profileFile,
             int flags, in Bundle arguments, in IInstrumentationWatcher watcher,
             in IUiAutomationConnection connection, int userId,
@@ -199,7 +199,7 @@ interface IActivityManager {
      * @throws RemoteException
      * @return Returns true if the configuration was updated.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     boolean updateConfiguration(in Configuration values);
     /**
      * Updates mcc mnc configuration and applies changes to the entire system.
@@ -224,7 +224,7 @@ interface IActivityManager {
             int mode, int userId);
     void revokeUriPermission(in IApplicationThread caller, in String targetPkg, in Uri uri,
             int mode, int userId);
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     void setActivityController(in IActivityController watcher, boolean imAMonkey);
     void showWaitingForDebugger(in IApplicationThread who, boolean waiting);
     /*
@@ -278,7 +278,7 @@ interface IActivityManager {
     List<ActivityManager.RunningAppProcessInfo> getRunningAppProcesses();
     IBinder peekService(in Intent service, in String resolvedType, in String callingPackage);
     // Turn on/off profiling in a particular process.
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     boolean profileControl(in String process, int userId, boolean start,
             in ProfilerInfo profilerInfo, int profileType);
     @UnsupportedAppUsage
@@ -309,7 +309,7 @@ interface IActivityManager {
     // Retrieve info of applications installed on external media that are currently
     // running.
     List<ApplicationInfo> getRunningExternalApplications();
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     void finishHeavyWeightApp();
     // A StrictMode violation to be handled.
     @UnsupportedAppUsage
@@ -331,7 +331,7 @@ interface IActivityManager {
             in RemoteCallback finishCallback);
     @UnsupportedAppUsage
     boolean isUserRunning(int userid, int flags);
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     void setPackageScreenCompatMode(in String packageName, int mode);
     @UnsupportedAppUsage
     boolean switchUser(int userid);
@@ -347,12 +347,12 @@ interface IActivityManager {
     @UnsupportedAppUsage
     long[] getProcessPss(in int[] pids);
     void showBootMessage(in CharSequence msg, boolean always);
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     void killAllBackgroundProcesses();
     ContentProviderHolder getContentProviderExternal(in String name, int userId,
             in IBinder token, String tag);
     /** @deprecated - Use {@link #removeContentProviderExternalAsUser} which takes a user ID. */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     void removeContentProviderExternal(in String name, in IBinder token);
     void removeContentProviderExternalAsUser(in String name, in IBinder token, int userId);
     // Get memory information about the calling process.
@@ -380,7 +380,7 @@ interface IActivityManager {
             in String callingFeatureId, in Intent intent, in String resolvedType,
             in IBinder resultTo, in String resultWho, int requestCode, int flags,
             in ProfilerInfo profilerInfo, in Bundle options, int userId);
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     int stopUser(int userid, boolean force, in IStopUserCallback callback);
     /**
      * Check {@link com.android.server.am.ActivityManagerService#stopUserWithDelayedLocking(int, boolean, IStopUserCallback)}
@@ -441,7 +441,7 @@ interface IActivityManager {
     String getLaunchedFromPackage(in IBinder activityToken);
     void killUid(int appId, int userId, in String reason);
     void setUserIsMonkey(boolean monkey);
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     void hang(in IBinder who, boolean allowRestart);
 
     @UnsupportedAppUsage
@@ -450,13 +450,13 @@ interface IActivityManager {
     void moveTaskToStack(int taskId, int stackId, boolean toTop);
     void setFocusedStack(int stackId);
     ActivityManager.StackInfo getFocusedStackInfo();
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     void restart();
     void performIdleMaintenance();
     void appNotRespondingViaProvider(in IBinder connection);
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     Rect getTaskBounds(int taskId);
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     boolean setProcessMemoryTrimLevel(in String process, int uid, int level);
 
 
@@ -464,7 +464,7 @@ interface IActivityManager {
     String getTagForIntentSender(in IIntentSender sender, in String prefix);
     @UnsupportedAppUsage
     boolean startUserInBackground(int userid);
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     boolean isInLockTaskMode();
     @UnsupportedAppUsage
     void startRecentsActivity(in Intent intent, in IAssistDataReceiver assistDataReceiver,
@@ -475,7 +475,7 @@ interface IActivityManager {
     int startActivityFromRecents(int taskId, in Bundle options);
     @UnsupportedAppUsage
     void startSystemLockTaskMode(int taskId);
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     boolean isTopOfTask(in IBinder token);
     void bootAnimationComplete();
     int checkPermissionWithToken(in String permission, int pid, int uid,
@@ -486,11 +486,11 @@ interface IActivityManager {
     void notifyCleartextNetwork(int uid, in byte[] firstPacket);
     @UnsupportedAppUsage
     void setTaskResizeable(int taskId, int resizeableMode);
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     void resizeTask(int taskId, in Rect bounds, int resizeMode);
     @UnsupportedAppUsage
     int getLockTaskModeState();
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     void setDumpHeapDebugLimit(in String processName, int uid, long maxMemSize,
             in String reportPackage);
     void dumpHeapFinished(in String path);
@@ -503,11 +503,11 @@ interface IActivityManager {
 
     // Start of N transactions
     // Start Binder transaction tracking for all applications.
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     boolean startBinderTracking();
     // Stop Binder transaction tracking for all applications and dump trace data to the given file
     // descriptor.
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     boolean stopBinderTrackingAndDump(in ParcelFileDescriptor fd);
     /**
      * Try to place task to provided position. The final position might be different depending on
@@ -516,12 +516,12 @@ interface IActivityManager {
      */
     @UnsupportedAppUsage
     void positionTaskInStack(int taskId, int stackId, int position);
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     void suppressResizeConfigChanges(boolean suppress);
     @UnsupportedAppUsage
     boolean moveTopActivityToPinnedStack(int stackId, in Rect bounds);
     boolean isAppStartModeDisabled(int uid, in String packageName);
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     boolean unlockUser(int userid, in byte[] token, in byte[] secret,
             in IProgressListener listener);
     void killPackageDependents(in String packageName, int userId);
@@ -532,7 +532,7 @@ interface IActivityManager {
     boolean isVrModePackageEnabled(in ComponentName packageName);
     void notifyLockedProfile(int userId);
     void startConfirmDeviceCredentialIntent(in Intent intent, in Bundle options);
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     void sendIdleJobTrigger();
     int sendIntentSender(in IIntentSender target, in IBinder whitelistToken, int code,
             in Intent intent, in String resolvedType, in IIntentReceiver finishedReceiver,

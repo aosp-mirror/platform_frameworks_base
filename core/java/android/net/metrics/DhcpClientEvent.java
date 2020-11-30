@@ -19,8 +19,8 @@ package android.net.metrics;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
-import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
@@ -30,7 +30,6 @@ import android.text.TextUtils;
  * {@hide}
  */
 @SystemApi
-@TestApi
 public final class DhcpClientEvent implements IpConnectivityLog.Event {
 
     // Names for recording DhcpClient pseudo-state transitions.
@@ -40,7 +39,7 @@ public final class DhcpClientEvent implements IpConnectivityLog.Event {
     /** @hide */
     public final int durationMs;
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private DhcpClientEvent(String msg, int durationMs) {
         this.msg = msg;
         this.durationMs = durationMs;

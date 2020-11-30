@@ -16,8 +16,6 @@
 
 package com.android.server.wm;
 
-import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
-
 import static com.android.server.wm.ActivityStack.TAG_VISIBILITY;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_VISIBILITY;
 
@@ -174,12 +172,7 @@ class EnsureActivitiesVisibleHelper {
         }
 
         final int windowingMode = mContiner.getWindowingMode();
-        if (windowingMode == WINDOWING_MODE_FREEFORM) {
-            // The visibility of tasks and the activities they contain in freeform stack are
-            // determined individually unlike other stacks where the visibility or fullscreen
-            // status of an activity in a previous task affects other.
-            mBehindFullscreenActivity = !mContainerShouldBeVisible;
-        } else if (!mBehindFullscreenActivity && mContiner.isActivityTypeHome()
+        if (!mBehindFullscreenActivity && mContiner.isActivityTypeHome()
                 && r.isRootOfTask()) {
             if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY, "Home task: at " + mContiner
                     + " stackShouldBeVisible=" + mContainerShouldBeVisible

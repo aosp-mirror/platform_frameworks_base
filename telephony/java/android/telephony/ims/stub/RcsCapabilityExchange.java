@@ -87,12 +87,8 @@ public class RcsCapabilityExchange {
 
     /** @hide */
     protected final IRcsFeatureListener getListener() throws ImsException {
-        IRcsFeatureListener listener = mFeature.getListener();
-        if (listener == null) {
-            throw new ImsException("Connection to Framework has not been established, wait for "
-                    + "onFeatureReady().", ImsException.CODE_ERROR_SERVICE_UNAVAILABLE);
-        }
-        return mFeature.getListener();
+        throw new ImsException("This method is deprecated.",
+                ImsException.CODE_ERROR_UNSUPPORTED_OPERATION);
     }
 
     /**

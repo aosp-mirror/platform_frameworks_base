@@ -41,7 +41,7 @@ struct TargetValue {
   DataValue data_value;
 };
 
-using TargetResourceMap = std::map<ResourceId, TargetValue>;
+using TargetResourceMap = std::map<ResourceId, std::variant<ResourceId, TargetValue>>;
 using OverlayResourceMap = std::map<ResourceId, ResourceId>;
 
 class ResourceMapping {
@@ -56,7 +56,7 @@ class ResourceMapping {
                                                bool enforce_overlayable, LogInfo& log_info);
 
   // Retrieves the mapping of target resource id to overlay value.
-  inline TargetResourceMap GetTargetToOverlayMap() const {
+  inline const TargetResourceMap& GetTargetToOverlayMap() const {
     return target_map_;
   }
 
@@ -81,19 +81,24 @@ class ResourceMapping {
   }
 
   // Retrieves the raw string pool data from the xml referenced in android:resourcesMap.
-  inline const std::pair<const uint8_t*, uint32_t> GetStringPoolData() const {
-    return std::make_pair(string_pool_data_.get(), string_pool_data_length_);
+  inline const StringPiece GetStringPoolData() const {
+    return StringPiece(reinterpret_cast<const char*>(string_pool_data_.get()),
+                       string_pool_data_length_);
   }
 
  private:
   ResourceMapping() = default;
 
-  // Apps a mapping of target resource id to the type and value of the data that overlays the
-  // target resource. The data_type is the runtime format of the data value (see
-  // Res_value::dataType). If rewrite_overlay_reference is `true` then references to an overlay
+  // Maps a target resource id to an overlay resource id.
+  // If rewrite_overlay_reference is `true` then references to the overlay
   // resource should appear as a reference to its corresponding target resource at runtime.
+  Result<Unit> AddMapping(ResourceId target_resource, ResourceId overlay_resource,
+                          bool rewrite_overlay_reference);
+
+  // Maps a target resource id to a data type and value combination.
+  // The `data_type` is the runtime format of the data value (see Res_value::dataType).
   Result<Unit> AddMapping(ResourceId target_resource, TargetValue::DataType data_type,
-                          TargetValue::DataValue data_value, bool rewrite_overlay_reference);
+                          TargetValue::DataValue data_value);
 
   // Removes the overlay value mapping for the target resource.
   void RemoveMapping(ResourceId target_resource);

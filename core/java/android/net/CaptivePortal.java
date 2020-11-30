@@ -19,7 +19,6 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
-import android.annotation.TestApi;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -42,7 +41,6 @@ public class CaptivePortal implements Parcelable {
      * @hide
      */
     @SystemApi
-    @TestApi
     public static final int APP_RETURN_DISMISSED    = 0;
     /**
      * Response code from the captive portal application, indicating that the user did not login and
@@ -52,7 +50,6 @@ public class CaptivePortal implements Parcelable {
      * @hide
      */
     @SystemApi
-    @TestApi
     public static final int APP_RETURN_UNWANTED     = 1;
     /**
      * Response code from the captive portal application, indicating that the user does not wish to
@@ -62,7 +59,6 @@ public class CaptivePortal implements Parcelable {
      * @hide
      */
     @SystemApi
-    @TestApi
     public static final int APP_RETURN_WANTED_AS_IS = 2;
     /** Event offset of request codes from captive portal application. */
     private static final int APP_REQUEST_BASE = 100;
@@ -74,7 +70,6 @@ public class CaptivePortal implements Parcelable {
      * @hide
      */
     @SystemApi
-    @TestApi
     public static final int APP_REQUEST_REEVALUATION_REQUIRED = APP_REQUEST_BASE + 0;
 
     private final IBinder mBinder;
@@ -154,7 +149,6 @@ public class CaptivePortal implements Parcelable {
      * @hide
      */
     @SystemApi
-    @TestApi
     public void useNetwork() {
         try {
             ICaptivePortal.Stub.asInterface(mBinder).appResponse(APP_RETURN_WANTED_AS_IS);
@@ -167,7 +161,6 @@ public class CaptivePortal implements Parcelable {
      * @hide
      */
     @SystemApi
-    @TestApi
     @RequiresPermission(android.Manifest.permission.NETWORK_STACK)
     public void reevaluateNetwork() {
         try {
@@ -183,7 +176,6 @@ public class CaptivePortal implements Parcelable {
      * @hide
      */
     @SystemApi
-    @TestApi
     public void logEvent(@EventId int eventId, @NonNull String packageName) {
         try {
             ICaptivePortal.Stub.asInterface(mBinder).logEvent(eventId, packageName);

@@ -1,0 +1,31 @@
+{
+  "presubmit": [
+    {
+      "name": "CtsBugreportTestCases",
+      "options": [
+        {
+          "exclude-annotation": "androidx.test.filters.LargeTest"
+        }
+      ]
+    },
+    {
+      "name": "ShellTests",
+      "options": [
+        {
+          "exclude-annotation": "androidx.test.filters.LargeTest"
+        },
+        {
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
+        }
+      ]
+    }
+  ],
+  "postsubmit": [
+    {
+      "name": "CtsBugreportTestCases"
+    },
+    {
+      "name": "ShellTests"
+    }
+  ]
+}

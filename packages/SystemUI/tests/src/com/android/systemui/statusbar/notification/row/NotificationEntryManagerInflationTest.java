@@ -43,6 +43,7 @@ import androidx.test.filters.SmallTest;
 import com.android.internal.util.NotificationMessagingUtil;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shared.plugins.PluginManager;
@@ -95,6 +96,8 @@ import org.mockito.stubbing.Answer;
 
 import java.util.concurrent.CountDownLatch;
 
+import dagger.Lazy;
+
 /**
  * Functional tests for notification inflation from {@link NotificationEntryManager}.
  */
@@ -135,6 +138,8 @@ public class NotificationEntryManagerInflationTest extends SysuiTestCase {
     @Mock private ActivatableNotificationViewController mActivatableNotificationViewController;
     @Mock private NotificationRowComponent.Builder mNotificationRowComponentBuilder;
     @Mock private PeopleNotificationIdentifier mPeopleNotificationIdentifier;
+
+    @Mock private Lazy<BubbleController> mBubbleControllerLazy;
 
     private StatusBarNotification mSbn;
     private NotificationListenerService.RankingMap mRankingMap;
@@ -183,6 +188,7 @@ public class NotificationEntryManagerInflationTest extends SysuiTestCase {
                 () -> mRowBinder,
                 () -> mRemoteInputManager,
                 mLeakDetector,
+                mBubbleControllerLazy,
                 mock(ForegroundServiceDismissalFeatureController.class)
         );
 

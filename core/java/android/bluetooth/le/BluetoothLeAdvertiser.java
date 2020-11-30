@@ -507,6 +507,33 @@ public final class BluetoothLeAdvertiser {
                         + num128BitUuids * BluetoothUuid.UUID_BYTES_128_BIT;
             }
         }
+        if (data.getServiceSolicitationUuids() != null) {
+            int num16BitUuids = 0;
+            int num32BitUuids = 0;
+            int num128BitUuids = 0;
+            for (ParcelUuid uuid : data.getServiceSolicitationUuids()) {
+                if (BluetoothUuid.is16BitUuid(uuid)) {
+                    ++num16BitUuids;
+                } else if (BluetoothUuid.is32BitUuid(uuid)) {
+                    ++num32BitUuids;
+                } else {
+                    ++num128BitUuids;
+                }
+            }
+            // 16 bit service uuids are grouped into one field when doing advertising.
+            if (num16BitUuids != 0) {
+                size += OVERHEAD_BYTES_PER_FIELD + num16BitUuids * BluetoothUuid.UUID_BYTES_16_BIT;
+            }
+            // 32 bit service uuids are grouped into one field when doing advertising.
+            if (num32BitUuids != 0) {
+                size += OVERHEAD_BYTES_PER_FIELD + num32BitUuids * BluetoothUuid.UUID_BYTES_32_BIT;
+            }
+            // 128 bit service uuids are grouped into one field when doing advertising.
+            if (num128BitUuids != 0) {
+                size += OVERHEAD_BYTES_PER_FIELD
+                        + num128BitUuids * BluetoothUuid.UUID_BYTES_128_BIT;
+            }
+        }
         for (ParcelUuid uuid : data.getServiceData().keySet()) {
             int uuidLen = BluetoothUuid.uuidToBytes(uuid).length;
             size += OVERHEAD_BYTES_PER_FIELD + uuidLen

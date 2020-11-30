@@ -31,13 +31,13 @@ interface IDeviceIdleController {
     String[] getSystemPowerWhitelistExceptIdle();
     String[] getSystemPowerWhitelist();
     String[] getUserPowerWhitelist();
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     String[] getFullPowerWhitelistExceptIdle();
     String[] getFullPowerWhitelist();
     int[] getAppIdWhitelistExceptIdle();
     int[] getAppIdWhitelist();
     int[] getAppIdUserWhitelist();
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     int[] getAppIdTempWhitelist();
     boolean isPowerSaveWhitelistExceptIdleApp(String name);
     boolean isPowerSaveWhitelistApp(String name);

@@ -73,7 +73,7 @@ interface IConnectivityManager
 
     NetworkCapabilities getNetworkCapabilities(in Network network, String callingPackageName);
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     NetworkState[] getAllNetworkState();
 
     NetworkQuotaInfo getActiveNetworkQuotaInfo();
@@ -134,7 +134,7 @@ interface IConnectivityManager
 
     VpnConfig getVpnConfig(int userId);
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     void startLegacyVpn(in VpnProfile profile);
 
     LegacyVpnInfo getLegacyVpnInfo(int userId);
@@ -233,4 +233,6 @@ interface IConnectivityManager
 
     void simulateDataStall(int detectionMethod, long timestampMillis, in Network network,
                 in PersistableBundle extras);
+
+    void systemReady();
 }

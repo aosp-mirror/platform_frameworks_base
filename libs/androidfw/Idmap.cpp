@@ -36,16 +36,12 @@ using ::android::base::StringPrintf;
 
 namespace android {
 
-static bool compare_target_entries(const Idmap_target_entry &e1, const uint32_t target_id) {
-  return dtohl(e1.target_id) < target_id;
-}
-
-static bool compare_overlay_entries(const Idmap_overlay_entry& e1, const uint32_t overlay_id) {
-  return dtohl(e1.overlay_id) < overlay_id;
+uint32_t round_to_4_bytes(uint32_t size) {
+  return size + (4U - (size % 4U)) % 4U;
 }
 
 size_t Idmap_header::Size() const {
-  return sizeof(Idmap_header) + sizeof(uint8_t) * dtohl(debug_info_size);
+  return sizeof(Idmap_header) + sizeof(uint8_t) * round_to_4_bytes(dtohl(debug_info_size));
 }
 
 OverlayStringPool::OverlayStringPool(const LoadedIdmap* loaded_idmap)
@@ -88,7 +84,10 @@ OverlayDynamicRefTable::OverlayDynamicRefTable(const Idmap_data_header* data_hea
 status_t OverlayDynamicRefTable::lookupResourceId(uint32_t* resId) const {
   const Idmap_overlay_entry* first_entry = entries_;
   const Idmap_overlay_entry* end_entry = entries_ + dtohl(data_header_->overlay_entry_count);
-  auto entry = std::lower_bound(first_entry, end_entry, *resId, compare_overlay_entries);
+  auto entry = std::lower_bound(first_entry, end_entry, *resId,
+                                [](const Idmap_overlay_entry& e1, const uint32_t overlay_id) {
+    return dtohl(e1.overlay_id) < overlay_id;
+  });
 
   if (entry == end_entry || dtohl(entry->overlay_id) != *resId) {
     // A mapping for the target resource id could not be found.
@@ -96,7 +95,7 @@ status_t OverlayDynamicRefTable::lookupResourceId(uint32_t* resId) const {
   }
 
   *resId = (0x00FFFFFFU & dtohl(entry->target_id))
-      | (((uint32_t) target_assigned_package_id_) << 24);
+      | (((uint32_t) target_assigned_package_id_) << 24U);
   return NO_ERROR;
 }
 
@@ -106,62 +105,58 @@ status_t OverlayDynamicRefTable::lookupResourceIdNoRewrite(uint32_t* resId) cons
 
 IdmapResMap::IdmapResMap(const Idmap_data_header* data_header,
                          const Idmap_target_entry* entries,
+                         const Idmap_target_entry_inline* inline_entries,
                          uint8_t target_assigned_package_id,
                          const OverlayDynamicRefTable* overlay_ref_table)
     : data_header_(data_header),
       entries_(entries),
+      inline_entries_(inline_entries),
       target_assigned_package_id_(target_assigned_package_id),
-      overlay_ref_table_(overlay_ref_table) { };
+      overlay_ref_table_(overlay_ref_table) { }
 
 IdmapResMap::Result IdmapResMap::Lookup(uint32_t target_res_id) const {
-  if ((target_res_id >> 24) != target_assigned_package_id_) {
+  if ((target_res_id >> 24U) != target_assigned_package_id_) {
     // The resource id must have the same package id as the target package.
     return {};
   }
 
   // The resource ids encoded within the idmap are build-time resource ids.
   target_res_id = (0x00FFFFFFU & target_res_id)
-      | (((uint32_t) data_header_->target_package_id) << 24);
+      | (((uint32_t) data_header_->target_package_id) << 24U);
 
-  const Idmap_target_entry* first_entry = entries_;
-  const Idmap_target_entry* end_entry = entries_ + dtohl(data_header_->target_entry_count);
-  auto entry = std::lower_bound(first_entry, end_entry, target_res_id, compare_target_entries);
+  // Check if the target resource is mapped to an overlay resource.
+  auto first_entry = entries_;
+  auto end_entry = entries_ + dtohl(data_header_->target_entry_count);
+  auto entry = std::lower_bound(first_entry, end_entry, target_res_id,
+                                [](const Idmap_target_entry &e, const uint32_t target_id) {
+    return dtohl(e.target_id) < target_id;
+  });
 
-  if (entry == end_entry || dtohl(entry->target_id) != target_res_id) {
-    // A mapping for the target resource id could not be found.
-    return {};
-  }
-
-  // A reference should be treated as an alias of the resource. Instead of returning the table
-  // entry, return the alias resource id to look up. The alias resource might not reside within the
-  // overlay package, so the resource id must be fixed with the dynamic reference table of the
-  // overlay before returning.
-  if (entry->type == Res_value::TYPE_REFERENCE
-      || entry->type == Res_value::TYPE_DYNAMIC_REFERENCE) {
-    uint32_t overlay_resource_id = dtohl(entry->value);
-
+  if (entry != end_entry && dtohl(entry->target_id) == target_res_id) {
+    uint32_t overlay_resource_id = dtohl(entry->overlay_id);
     // Lookup the resource without rewriting the overlay resource id back to the target resource id
     // being looked up.
     overlay_ref_table_->lookupResourceIdNoRewrite(&overlay_resource_id);
     return Result(overlay_resource_id);
   }
 
-  // Copy the type and value into the ResTable_entry structure needed by asset manager.
-  uint16_t malloc_size = sizeof(ResTable_entry) + sizeof(Res_value);
-  auto table_entry = reinterpret_cast<ResTable_entry*>(malloc(malloc_size));
-  memset(table_entry, 0, malloc_size);
-  table_entry->size = htods(sizeof(ResTable_entry));
+  // Check if the target resources is mapped to an inline table entry.
+  auto first_inline_entry = inline_entries_;
+  auto end_inline_entry = inline_entries_ + dtohl(data_header_->target_inline_entry_count);
+  auto inline_entry = std::lower_bound(first_inline_entry, end_inline_entry, target_res_id,
+                                       [](const Idmap_target_entry_inline &e,
+                                          const uint32_t target_id) {
+    return dtohl(e.target_id) < target_id;
+  });
 
-  auto table_value = reinterpret_cast<Res_value*>(reinterpret_cast<uint8_t*>(table_entry)
-      + sizeof(ResTable_entry));
-  table_value->dataType = entry->type;
-  table_value->data = entry->value;
-
-  return Result(ResTable_entry_handle::managed(table_entry, [](auto p) { free(p); }));
+  if (inline_entry != end_inline_entry && dtohl(inline_entry->target_id) == target_res_id) {
+    return Result(inline_entry->value);
+  }
+  return {};
 }
 
 static bool is_word_aligned(const void* data) {
-  return (reinterpret_cast<uintptr_t>(data) & 0x03) == 0;
+  return (reinterpret_cast<uintptr_t>(data) & 0x03U) == 0U;
 }
 
 static bool IsValidIdmapHeader(const StringPiece& data) {
@@ -175,7 +170,7 @@ static bool IsValidIdmapHeader(const StringPiece& data) {
     return false;
   }
 
-  const Idmap_header* header = reinterpret_cast<const Idmap_header*>(data.data());
+  auto header = reinterpret_cast<const Idmap_header*>(data.data());
   if (dtohl(header->magic) != kIdmapMagic) {
     LOG(ERROR) << StringPrintf("Invalid Idmap file: bad magic value (was 0x%08x, expected 0x%08x)",
                                dtohl(header->magic), kIdmapMagic);
@@ -198,11 +193,13 @@ LoadedIdmap::LoadedIdmap(std::string&& idmap_path,
                          const Idmap_header* header,
                          const Idmap_data_header* data_header,
                          const Idmap_target_entry* target_entries,
+                         const Idmap_target_entry_inline* target_inline_entries,
                          const Idmap_overlay_entry* overlay_entries,
                          ResStringPool* string_pool)
      : header_(header),
        data_header_(data_header),
        target_entries_(target_entries),
+       target_inline_entries_(target_inline_entries),
        overlay_entries_(overlay_entries),
        string_pool_(string_pool),
        idmap_path_(std::move(idmap_path)),
@@ -233,7 +230,7 @@ std::unique_ptr<const LoadedIdmap> LoadedIdmap::Load(const StringPiece& idmap_pa
   data_ptr += sizeof(*data_header);
   data_size -= sizeof(*data_header);
 
-  // Make sure there is enough space for the target entries declared in the header.
+  // Make sure there is enough space for the target entries declared in the header
   const auto target_entries = reinterpret_cast<const Idmap_target_entry*>(data_ptr);
   if (data_size / sizeof(Idmap_target_entry) <
       static_cast<size_t>(dtohl(data_header->target_entry_count))) {
@@ -248,6 +245,21 @@ std::unique_ptr<const LoadedIdmap> LoadedIdmap::Load(const StringPiece& idmap_pa
   data_ptr += target_entry_size_bytes;
   data_size -= target_entry_size_bytes;
 
+  // Make sure there is enough space for the target entries declared in the header.
+  const auto target_inline_entries = reinterpret_cast<const Idmap_target_entry_inline*>(data_ptr);
+  if (data_size / sizeof(Idmap_target_entry_inline) <
+      static_cast<size_t>(dtohl(data_header->target_inline_entry_count))) {
+    LOG(ERROR) << StringPrintf("Idmap too small for the number of target inline entries (%d)",
+                               (int)dtohl(data_header->target_inline_entry_count));
+    return {};
+  }
+
+  // Advance the data pointer past the target entries.
+  const size_t target_inline_entry_size_bytes =
+      (dtohl(data_header->target_inline_entry_count) * sizeof(Idmap_target_entry_inline));
+  data_ptr += target_inline_entry_size_bytes;
+  data_size -= target_inline_entry_size_bytes;
+
   // Make sure there is enough space for the overlay entries declared in the header.
   const auto overlay_entries = reinterpret_cast<const Idmap_overlay_entry*>(data_ptr);
   if (data_size / sizeof(Idmap_overlay_entry) <
@@ -257,22 +269,26 @@ std::unique_ptr<const LoadedIdmap> LoadedIdmap::Load(const StringPiece& idmap_pa
     return {};
   }
 
-  // Advance the data pointer past the target entries.
+  // Advance the data pointer past the overlay entries.
   const size_t overlay_entry_size_bytes =
       (dtohl(data_header->overlay_entry_count) * sizeof(Idmap_overlay_entry));
   data_ptr += overlay_entry_size_bytes;
   data_size -= overlay_entry_size_bytes;
 
   // Read the idmap string pool that holds the value of inline string entries.
-  if (data_size < dtohl(data_header->string_pool_length)) {
+  uint32_t string_pool_size = dtohl(*reinterpret_cast<const uint32_t*>(data_ptr));
+  data_ptr += sizeof(uint32_t);
+  data_size -= sizeof(uint32_t);
+
+  if (data_size < string_pool_size) {
     LOG(ERROR) << StringPrintf("Idmap too small for string pool (length %d)",
-                               (int)dtohl(data_header->string_pool_length));
+                               (int)string_pool_size);
     return {};
   }
 
   auto idmap_string_pool = util::make_unique<ResStringPool>();
-  if (dtohl(data_header->string_pool_length) > 0) {
-    status_t err = idmap_string_pool->setTo(data_ptr, dtohl(data_header->string_pool_length));
+  if (string_pool_size > 0) {
+    status_t err = idmap_string_pool->setTo(data_ptr, string_pool_size);
     if (err != NO_ERROR) {
       LOG(ERROR) << "idmap string pool corrupt.";
       return {};
@@ -280,9 +296,10 @@ std::unique_ptr<const LoadedIdmap> LoadedIdmap::Load(const StringPiece& idmap_pa
   }
 
   // Can't use make_unique because LoadedIdmap constructor is private.
-  std::unique_ptr<LoadedIdmap> loaded_idmap = std::unique_ptr<LoadedIdmap>(
+  auto loaded_idmap = std::unique_ptr<LoadedIdmap>(
       new LoadedIdmap(idmap_path.to_string(), getFileModDate(idmap_path.data()), header,
-                      data_header, target_entries, overlay_entries, idmap_string_pool.release()));
+                      data_header, target_entries, target_inline_entries, overlay_entries,
+                      idmap_string_pool.release()));
 
   return std::move(loaded_idmap);
 }

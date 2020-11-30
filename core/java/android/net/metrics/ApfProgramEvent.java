@@ -20,8 +20,8 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
-import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
@@ -40,7 +40,6 @@ import java.util.List;
  * the APF program in place with a new APF program.
  * {@hide}
  */
-@TestApi
 @SystemApi
 public final class ApfProgramEvent implements IpConnectivityLog.Event {
 
@@ -57,22 +56,22 @@ public final class ApfProgramEvent implements IpConnectivityLog.Event {
     public @interface Flags {}
 
     /** @hide */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public final long lifetime;       // Maximum computed lifetime of the program in seconds
     /** @hide */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public final long actualLifetime; // Effective program lifetime in seconds
     /** @hide */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public final int filteredRas;     // Number of RAs filtered by the APF program
     /** @hide */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public final int currentRas;      // Total number of current RAs at generation time
     /** @hide */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public final int programLength;   // Length of the APF program in bytes
     /** @hide */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public final int flags;           // Bitfield compound of FLAG_* constants
 
     private ApfProgramEvent(long lifetime, long actualLifetime, int filteredRas, int currentRas,
@@ -219,7 +218,7 @@ public final class ApfProgramEvent implements IpConnectivityLog.Event {
     };
 
     /** @hide */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static @Flags int flagsFor(boolean hasIPv4, boolean multicastFilterOn) {
         int bitfield = 0;
         if (hasIPv4) {

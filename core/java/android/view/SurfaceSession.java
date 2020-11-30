@@ -17,6 +17,7 @@
 package android.view;
 
 import android.compat.annotation.UnsupportedAppUsage;
+import android.os.Build;
 
 /**
  * An instance of this class represents a connection to the surface
@@ -26,7 +27,7 @@ import android.compat.annotation.UnsupportedAppUsage;
  */
 public final class SurfaceSession {
     // Note: This field is accessed by native code.
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private long mNativeClient; // SurfaceComposerClient*
 
     private static native long nativeCreate();

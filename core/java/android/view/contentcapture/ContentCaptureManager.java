@@ -644,7 +644,6 @@ public final class ContentCaptureManager {
      * @hide
      */
     @SystemApi
-    @TestApi
     public boolean isContentCaptureFeatureEnabled() {
         final SyncResultReceiver resultReceiver = syncRun(
                 (r) -> mService.isContentCaptureFeatureEnabled(r));

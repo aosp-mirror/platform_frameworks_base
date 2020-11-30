@@ -83,6 +83,7 @@ public class LockscreenLockIconController {
     private boolean mWakeAndUnlockRunning;
     private boolean mShowingLaunchAffordance;
     private boolean mBouncerShowingScrimmed;
+    private boolean mFingerprintUnlock;
     private int mStatusBarState = StatusBarState.SHADE;
     private LockIcon mLockIcon;
 
@@ -389,14 +390,19 @@ public class LockscreenLockIconController {
     /**
      * We need to hide the lock whenever there's a fingerprint unlock, otherwise you'll see the
      * icon on top of the black front scrim.
+     * We also want to halt padlock the animation when we're in face bypass mode or dismissing the
+     * keyguard with fingerprint.
      * @param wakeAndUnlock are we wake and unlocking
      * @param isUnlock are we currently unlocking
      */
-    public void onBiometricAuthModeChanged(boolean wakeAndUnlock, boolean isUnlock) {
+    public void onBiometricAuthModeChanged(boolean wakeAndUnlock, boolean isUnlock,
+            BiometricSourceType type) {
         if (wakeAndUnlock) {
             mWakeAndUnlockRunning = true;
         }
-        if (isUnlock && mKeyguardBypassController.getBypassEnabled() && canBlockUpdates()) {
+        mFingerprintUnlock = type == BiometricSourceType.FINGERPRINT;
+        if (isUnlock && (mFingerprintUnlock || mKeyguardBypassController.getBypassEnabled())
+                && canBlockUpdates()) {
             // We don't want the icon to change while we are unlocking
             mBlockUpdates = true;
         }
@@ -513,10 +519,13 @@ public class LockscreenLockIconController {
                 && (!mStatusBarStateController.isPulsing() || mDocked);
         boolean invisible = onAodNotPulsingOrDocked || mWakeAndUnlockRunning
                 || mShowingLaunchAffordance;
-        if (mKeyguardBypassController.getBypassEnabled() && !mBouncerShowingScrimmed) {
+        boolean fingerprintOrBypass = mFingerprintUnlock
+                || mKeyguardBypassController.getBypassEnabled();
+        if (fingerprintOrBypass && !mBouncerShowingScrimmed) {
             if ((mHeadsUpManagerPhone.isHeadsUpGoingAway()
                     || mHeadsUpManagerPhone.hasPinnedHeadsUp()
-                    || mStatusBarState == StatusBarState.KEYGUARD)
+                    || mStatusBarState == StatusBarState.KEYGUARD
+                    || mStatusBarState == StatusBarState.SHADE)
                     && !mNotificationWakeUpCoordinator.getNotificationsFullyHidden()) {
                 invisible = true;
             }

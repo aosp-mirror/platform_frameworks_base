@@ -478,6 +478,9 @@ public class UserGridRecyclerView extends RecyclerView {
                 if (user != null) {
                     mCarUserManagerHelper.switchToUser(user);
                 }
+                if (mAddUserView != null) {
+                    mAddUserView.setEnabled(true);
+                }
             }
         }
 

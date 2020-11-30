@@ -126,6 +126,9 @@ cc_library {
         host: {
             static_libs: ["libstatssocket"],
         },
+        darwin: {
+            enabled: false,
+        },
     },
 }
 

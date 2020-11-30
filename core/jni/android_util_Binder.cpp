@@ -302,8 +302,9 @@ static void report_java_lang_error(JNIEnv* env, jthrowable error, const char* ms
     report_java_lang_error_fatal_error(env, error, msg);
 }
 
-static void report_exception(JNIEnv* env, jthrowable excep, const char* msg)
-{
+namespace android {
+
+void binder_report_exception(JNIEnv* env, jthrowable excep, const char* msg) {
     env->ExceptionClear();
 
     ScopedLocalRef<jstring> tagstr(env, env->NewStringUTF(LOG_TAG));
@@ -330,6 +331,8 @@ static void report_exception(JNIEnv* env, jthrowable excep, const char* msg)
         report_java_lang_error(env, excep, msg);
     }
 }
+
+} // namespace android
 
 class JavaBBinderHolder;
 
@@ -405,9 +408,9 @@ protected:
 
         if (env->ExceptionCheck()) {
             ScopedLocalRef<jthrowable> excep(env, env->ExceptionOccurred());
-            report_exception(env, excep.get(),
-                "*** Uncaught remote exception!  "
-                "(Exceptions are not yet supported across processes.)");
+            binder_report_exception(env, excep.get(),
+                                    "*** Uncaught remote exception!  "
+                                    "(Exceptions are not yet supported across processes.)");
             res = JNI_FALSE;
         }
 
@@ -421,8 +424,8 @@ protected:
 
         if (env->ExceptionCheck()) {
             ScopedLocalRef<jthrowable> excep(env, env->ExceptionOccurred());
-            report_exception(env, excep.get(),
-                "*** Uncaught exception in onBinderStrictModePolicyChange");
+            binder_report_exception(env, excep.get(),
+                                    "*** Uncaught exception in onBinderStrictModePolicyChange");
         }
 
         // Need to always call through the native implementation of
@@ -567,8 +570,8 @@ public:
                                       jBinderProxy.get());
             if (env->ExceptionCheck()) {
                 jthrowable excep = env->ExceptionOccurred();
-                report_exception(env, excep,
-                        "*** Uncaught exception returned from death notification!");
+                binder_report_exception(env, excep,
+                                        "*** Uncaught exception returned from death notification!");
             }
 
             // Serialize with our containing DeathRecipientList so that we can't
@@ -1163,8 +1166,8 @@ static void android_os_BinderInternal_proxyLimitcallback(int uid)
 
     if (env->ExceptionCheck()) {
         ScopedLocalRef<jthrowable> excep(env, env->ExceptionOccurred());
-        report_exception(env, excep.get(),
-            "*** Uncaught exception in binderProxyLimitCallbackFromNative");
+        binder_report_exception(env, excep.get(),
+                                "*** Uncaught exception in binderProxyLimitCallbackFromNative");
     }
 }
 

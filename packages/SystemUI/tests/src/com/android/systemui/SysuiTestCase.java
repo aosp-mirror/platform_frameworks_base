@@ -140,6 +140,10 @@ public abstract class SysuiTestCase {
         return null;
     }
 
+    protected FakeBroadcastDispatcher getFakeBroadcastDispatcher() {
+        return mFakeBroadcastDispatcher;
+    }
+
     public SysuiTestableContext getContext() {
         return mContext;
     }

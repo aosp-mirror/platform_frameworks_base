@@ -23,7 +23,6 @@ import static com.android.internal.util.function.pooled.PooledLambda.obtainMessa
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
-import android.annotation.TestApi;
 import android.graphics.Rect;
 import android.os.Handler;
 import android.os.Looper;
@@ -64,7 +63,6 @@ import java.lang.ref.WeakReference;
  * @hide
  */
 @SystemApi
-@TestApi
 public final class FillWindow implements AutoCloseable {
     private static final String TAG = FillWindow.class.getSimpleName();
 

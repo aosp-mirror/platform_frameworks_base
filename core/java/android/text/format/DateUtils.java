@@ -25,6 +25,7 @@ import android.icu.text.MeasureFormat;
 import android.icu.text.MeasureFormat.FormatWidth;
 import android.icu.util.Measure;
 import android.icu.util.MeasureUnit;
+import android.os.Build;
 
 import com.android.internal.R;
 
@@ -395,7 +396,7 @@ public class DateUtils
      * the briefest form available (e.g. "2h").
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static CharSequence formatDuration(long millis, int abbrev) {
         final FormatWidth width;
         switch (abbrev) {

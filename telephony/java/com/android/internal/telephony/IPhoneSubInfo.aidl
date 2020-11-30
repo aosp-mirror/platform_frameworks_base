@@ -25,7 +25,7 @@ import android.telephony.ImsiEncryptionInfo;
 interface IPhoneSubInfo {
 
     /** @deprecated Use {@link #getDeviceIdWithFeature(String, String) instead */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     String getDeviceId(String callingPackage);
 
     /**

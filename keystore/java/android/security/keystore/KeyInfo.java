@@ -84,6 +84,7 @@ public class KeyInfo implements KeySpec {
     private final boolean mTrustedUserPresenceRequired;
     private final boolean mInvalidatedByBiometricEnrollment;
     private final boolean mUserConfirmationRequired;
+    private final @KeyProperties.SecurityLevelEnum int mSecurityLevel;
 
     /**
      * @hide
@@ -107,7 +108,8 @@ public class KeyInfo implements KeySpec {
             boolean userAuthenticationValidWhileOnBody,
             boolean trustedUserPresenceRequired,
             boolean invalidatedByBiometricEnrollment,
-            boolean userConfirmationRequired) {
+            boolean userConfirmationRequired,
+            @KeyProperties.SecurityLevelEnum int securityLevel) {
         mKeystoreAlias = keystoreKeyAlias;
         mInsideSecureHardware = insideSecureHardware;
         mOrigin = origin;
@@ -131,6 +133,7 @@ public class KeyInfo implements KeySpec {
         mTrustedUserPresenceRequired = trustedUserPresenceRequired;
         mInvalidatedByBiometricEnrollment = invalidatedByBiometricEnrollment;
         mUserConfirmationRequired = userConfirmationRequired;
+        mSecurityLevel = securityLevel;
     }
 
     /**
@@ -144,7 +147,10 @@ public class KeyInfo implements KeySpec {
      * Returns {@code true} if the key resides inside secure hardware (e.g., Trusted Execution
      * Environment (TEE) or Secure Element (SE)). Key material of such keys is available in
      * plaintext only inside the secure hardware and is not exposed outside of it.
+     *
+     * @deprecated This method is superseded by @see getSecurityLevel.
      */
+    @Deprecated
     public boolean isInsideSecureHardware() {
         return mInsideSecureHardware;
     }
@@ -354,5 +360,18 @@ public class KeyInfo implements KeySpec {
      */
     public boolean isTrustedUserPresenceRequired() {
         return mTrustedUserPresenceRequired;
+    }
+
+    /**
+     * Returns the security level that the key is protected by.
+     * {@code KeyProperties.SecurityLevelEnum.TRUSTED_ENVIRONMENT} and
+     * {@code KeyProperties.SecurityLevelEnum.STRONGBOX} indicate that the key material resides
+     * in secure hardware. Key material of such keys is available in
+     * plaintext only inside the secure hardware and is not exposed outside of it.
+     *
+     * <p>See {@link KeyProperties}.{@code SecurityLevelEnum} constants.
+     */
+    public @KeyProperties.SecurityLevelEnum int getSecurityLevel() {
+        return mSecurityLevel;
     }
 }

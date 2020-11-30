@@ -712,7 +712,7 @@
     <string name="notification_alert_title" msgid="3656229781017543655">"Өгөгдмөл"</string>
     <string name="notification_bubble_title" msgid="8330481035191903164">"Бөмбөлөг"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Дуу эсвэл чичиргээ байхгүй"</string>
-    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Дуу эсвэл чичиргээ байхгүй бөгөөд харицан ярианы хэсгийн доод талд харагдана"</string>
+    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Дуу эсвэл чичиргээ байхгүй бөгөөд харилцан ярианы хэсгийн доод талд харагдана"</string>
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"Утасны тохиргоонд тулгуурлан хонх дуугаргах эсвэл чичирхийлж болзошгүй"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Утасны тохиргоонд тулгуурлан хонх дуугаргах эсвэл чичирхийлж болзошгүй. <xliff:g id="APP_NAME">%1$s</xliff:g>-н харилцан яриаг өгөгдмөл тохиргооны дагуу бөмбөлөг болгоно."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Энэ контентын хөвөн гарч ирэх товчлолтойгоор таны анхаарлыг татдаг."</string>

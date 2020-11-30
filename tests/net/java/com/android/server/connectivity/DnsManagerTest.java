@@ -98,7 +98,6 @@ public class DnsManagerTest {
 
     @Mock Context mCtx;
     @Mock IDnsResolver mMockDnsResolver;
-    @Mock MockableSystemProperties mSystemProperties;
 
     private void assertResolverOptionsEquals(
             @NonNull ResolverOptionsParcel actual,
@@ -137,7 +136,7 @@ public class DnsManagerTest {
         mContentResolver.addProvider(Settings.AUTHORITY,
                 new FakeSettingsProvider());
         when(mCtx.getContentResolver()).thenReturn(mContentResolver);
-        mDnsManager = new DnsManager(mCtx, mMockDnsResolver, mSystemProperties);
+        mDnsManager = new DnsManager(mCtx, mMockDnsResolver);
 
         // Clear the private DNS settings
         Settings.Global.putString(mContentResolver, PRIVATE_DNS_DEFAULT_MODE, "");
@@ -159,7 +158,6 @@ public class DnsManagerTest {
         // Send a validation event that is tracked on the alternate netId
         mDnsManager.updateTransportsForNetwork(TEST_NETID, TEST_TRANSPORT_TYPES);
         mDnsManager.noteDnsServersForNetwork(TEST_NETID, lp);
-        mDnsManager.setDefaultDnsSystemProperties(lp.getDnsServers());
         mDnsManager.flushVmDnsCache();
         mDnsManager.updateTransportsForNetwork(TEST_NETID_ALTERNATE, TEST_TRANSPORT_TYPES);
         mDnsManager.noteDnsServersForNetwork(TEST_NETID_ALTERNATE, lp);
@@ -196,7 +194,6 @@ public class DnsManagerTest {
                     }));
         mDnsManager.updateTransportsForNetwork(TEST_NETID, TEST_TRANSPORT_TYPES);
         mDnsManager.noteDnsServersForNetwork(TEST_NETID, lp);
-        mDnsManager.setDefaultDnsSystemProperties(lp.getDnsServers());
         mDnsManager.flushVmDnsCache();
         fixedLp = new LinkProperties(lp);
         mDnsManager.updatePrivateDnsStatus(TEST_NETID, fixedLp);
@@ -232,7 +229,6 @@ public class DnsManagerTest {
         lp.addDnsServer(InetAddress.getByName("3.3.3.3"));
         mDnsManager.updateTransportsForNetwork(TEST_NETID, TEST_TRANSPORT_TYPES);
         mDnsManager.noteDnsServersForNetwork(TEST_NETID, lp);
-        mDnsManager.setDefaultDnsSystemProperties(lp.getDnsServers());
         mDnsManager.flushVmDnsCache();
         mDnsManager.updatePrivateDnsValidation(
                 new DnsManager.PrivateDnsValidationUpdate(TEST_NETID,
@@ -246,7 +242,6 @@ public class DnsManagerTest {
                 mDnsManager.getPrivateDnsConfig());
         mDnsManager.updateTransportsForNetwork(TEST_NETID, TEST_TRANSPORT_TYPES);
         mDnsManager.noteDnsServersForNetwork(TEST_NETID, lp);
-        mDnsManager.setDefaultDnsSystemProperties(lp.getDnsServers());
         mDnsManager.flushVmDnsCache();
         mDnsManager.updatePrivateDnsValidation(
                 new DnsManager.PrivateDnsValidationUpdate(TEST_NETID_UNTRACKED,
@@ -295,7 +290,6 @@ public class DnsManagerTest {
                 mDnsManager.getPrivateDnsConfig());
         mDnsManager.updateTransportsForNetwork(TEST_NETID, TEST_TRANSPORT_TYPES);
         mDnsManager.noteDnsServersForNetwork(TEST_NETID, lp);
-        mDnsManager.setDefaultDnsSystemProperties(lp.getDnsServers());
         mDnsManager.flushVmDnsCache();
         mDnsManager.updatePrivateDnsValidation(
                 new DnsManager.PrivateDnsValidationUpdate(TEST_NETID,
@@ -341,7 +335,6 @@ public class DnsManagerTest {
         lp.addDnsServer(InetAddress.getByName("4.4.4.4"));
         mDnsManager.updateTransportsForNetwork(TEST_NETID, TEST_TRANSPORT_TYPES);
         mDnsManager.noteDnsServersForNetwork(TEST_NETID, lp);
-        mDnsManager.setDefaultDnsSystemProperties(lp.getDnsServers());
         mDnsManager.flushVmDnsCache();
 
         final ArgumentCaptor<ResolverParamsParcel> resolverParamsParcelCaptor =

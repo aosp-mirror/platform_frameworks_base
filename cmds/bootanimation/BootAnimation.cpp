@@ -459,6 +459,8 @@ status_t BootAnimation::readyToRun() {
     mFlingerSurface = s;
     mTargetInset = -1;
 
+    projectSceneToWindow();
+
     // Register a display event receiver
     mDisplayEventReceiver = std::make_unique<DisplayEventReceiver>();
     status_t status = mDisplayEventReceiver->initCheck();
@@ -468,6 +470,16 @@ status_t BootAnimation::readyToRun() {
             new DisplayEventCallback(this), nullptr);
 
     return NO_ERROR;
+}
+
+void BootAnimation::projectSceneToWindow() {
+    glViewport(0, 0, mWidth, mHeight);
+    glScissor(0, 0, mWidth, mHeight);
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    glOrthof(0, static_cast<float>(mWidth), 0, static_cast<float>(mHeight), -1, 1);
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
 }
 
 void BootAnimation::resizeSurface(int newWidth, int newHeight) {
@@ -494,8 +506,8 @@ void BootAnimation::resizeSurface(int newWidth, int newHeight) {
         SLOGE("Can't make the new surface current. Error %d", eglGetError());
         return;
     }
-    glViewport(0, 0, mWidth, mHeight);
-    glScissor(0, 0, mWidth, mHeight);
+
+    projectSceneToWindow();
 
     mSurface = surface;
 }
@@ -776,6 +788,37 @@ status_t BootAnimation::initFont(Font* font, const char* fallback) {
     return status;
 }
 
+void BootAnimation::fadeFrame(const int frameLeft, const int frameBottom, const int frameWidth,
+                              const int frameHeight, const Animation::Part& part,
+                              const int fadedFramesCount) {
+    glEnable(GL_BLEND);
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glDisable(GL_TEXTURE_2D);
+    // avoid creating a hole due to mixing result alpha with GL_REPLACE texture
+    glBlendFuncSeparateOES(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ZERO, GL_ONE);
+
+    const float alpha = static_cast<float>(fadedFramesCount) / part.framesToFadeCount;
+    glColor4f(part.backgroundColor[0], part.backgroundColor[1], part.backgroundColor[2], alpha);
+
+    const float frameStartX = static_cast<float>(frameLeft);
+    const float frameStartY = static_cast<float>(frameBottom);
+    const float frameEndX = frameStartX + frameWidth;
+    const float frameEndY = frameStartY + frameHeight;
+    const GLfloat frameRect[] = {
+        frameStartX, frameStartY,
+        frameEndX,   frameStartY,
+        frameEndX,   frameEndY,
+        frameStartX, frameEndY
+    };
+    glVertexPointer(2, GL_FLOAT, 0, frameRect);
+    glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_TEXTURE_2D);
+    glDisableClientState(GL_VERTEX_ARRAY);
+    glDisable(GL_BLEND);
+}
+
 void BootAnimation::drawText(const char* str, const Font& font, bool bold, int* x, int* y) {
     glEnable(GL_BLEND);  // Allow us to draw on top of the animation
     glBindTexture(GL_TEXTURE_2D, font.texture.name);
@@ -867,23 +910,34 @@ bool BootAnimation::parseAnimationDesc(Animation& animation)  {
         int height = 0;
         int count = 0;
         int pause = 0;
+        int framesToFadeCount = 0;
         char path[ANIM_ENTRY_NAME_MAX];
         char color[7] = "000000"; // default to black if unspecified
         char clockPos1[TEXT_POS_LEN_MAX + 1] = "";
         char clockPos2[TEXT_POS_LEN_MAX + 1] = "";
-
         char pathType;
+
+        int nextReadPos;
+
         if (sscanf(l, "%d %d %d", &width, &height, &fps) == 3) {
             // SLOGD("> w=%d, h=%d, fps=%d", width, height, fps);
             animation.width = width;
             animation.height = height;
             animation.fps = fps;
-        } else if (sscanf(l, " %c %d %d %" STRTO(ANIM_PATH_MAX) "s #%6s %16s %16s",
-                          &pathType, &count, &pause, path, color, clockPos1, clockPos2) >= 4) {
-            //SLOGD("> type=%c, count=%d, pause=%d, path=%s, color=%s, clockPos1=%s, clockPos2=%s",
-            //    pathType, count, pause, path, color, clockPos1, clockPos2);
+        } else if (sscanf(l, "%c %d %d %" STRTO(ANIM_PATH_MAX) "s%n",
+                          &pathType, &count, &pause, path, &nextReadPos) >= 4) {
+            if (pathType == 'f') {
+                sscanf(l + nextReadPos, " %d #%6s %16s %16s", &framesToFadeCount, color, clockPos1,
+                       clockPos2);
+            } else {
+                sscanf(l + nextReadPos, " #%6s %16s %16s", color, clockPos1, clockPos2);
+            }
+            // SLOGD("> type=%c, count=%d, pause=%d, path=%s, framesToFadeCount=%d, color=%s, "
+            //       "clockPos1=%s, clockPos2=%s",
+            //       pathType, count, pause, path, framesToFadeCount, color, clockPos1, clockPos2);
             Animation::Part part;
             part.playUntilComplete = pathType == 'c';
+            part.framesToFadeCount = framesToFadeCount;
             part.count = count;
             part.pause = pause;
             part.path = path;
@@ -902,6 +956,7 @@ bool BootAnimation::parseAnimationDesc(Animation& animation)  {
             // SLOGD("> SYSTEM");
             Animation::Part part;
             part.playUntilComplete = false;
+            part.framesToFadeCount = 0;
             part.count = 1;
             part.pause = 0;
             part.audioData = nullptr;
@@ -1098,12 +1153,19 @@ bool BootAnimation::movie() {
     return false;
 }
 
+bool BootAnimation::shouldStopPlayingPart(const Animation::Part& part, const int fadedFramesCount) {
+    // stop playing only if it is time to exit and it's a partial part which has been faded out
+    return exitPending() && !part.playUntilComplete && fadedFramesCount >= part.framesToFadeCount;
+}
+
 bool BootAnimation::playAnimation(const Animation& animation) {
     const size_t pcount = animation.parts.size();
     nsecs_t frameDuration = s2ns(1) / animation.fps;
 
     SLOGD("%sAnimationShownTiming start time: %" PRId64 "ms", mShuttingDown ? "Shutdown" : "Boot",
             elapsedRealtime());
+
+    int fadedFramesCount = 0;
     for (size_t i=0 ; i<pcount ; i++) {
         const Animation::Part& part(animation.parts[i]);
         const size_t fcount = part.frames.size();
@@ -1117,10 +1179,9 @@ bool BootAnimation::playAnimation(const Animation& animation) {
             continue; //to next part
         }
 
-        for (int r=0 ; !part.count || r<part.count ; r++) {
-            // Exit any non playuntil complete parts immediately
-            if(exitPending() && !part.playUntilComplete)
-                break;
+        // process the part not only while the count allows but also if already fading
+        for (int r=0 ; !part.count || r<part.count || fadedFramesCount > 0 ; r++) {
+            if (shouldStopPlayingPart(part, fadedFramesCount)) break;
 
             mCallbacks->playPart(i, part, r);
 
@@ -1130,7 +1191,9 @@ bool BootAnimation::playAnimation(const Animation& animation) {
                     part.backgroundColor[2],
                     1.0f);
 
-            for (size_t j=0 ; j<fcount && (!exitPending() || part.playUntilComplete) ; j++) {
+            for (size_t j=0 ; j<fcount ; j++) {
+                if (shouldStopPlayingPart(part, fadedFramesCount)) break;
+
                 processDisplayEvents();
 
                 const int animationX = (mWidth - animation.width) / 2;
@@ -1169,11 +1232,22 @@ bool BootAnimation::playAnimation(const Animation& animation) {
                 }
                 // specify the y center as ceiling((mHeight - frame.trimHeight) / 2)
                 // which is equivalent to mHeight - (yc + frame.trimHeight)
-                glDrawTexiOES(xc, mHeight - (yc + frame.trimHeight),
-                              0, frame.trimWidth, frame.trimHeight);
+                const int frameDrawY = mHeight - (yc + frame.trimHeight);
+                glDrawTexiOES(xc, frameDrawY, 0, frame.trimWidth, frame.trimHeight);
+
+                // if the part hasn't been stopped yet then continue fading if necessary
+                if (exitPending() && part.hasFadingPhase()) {
+                    fadeFrame(xc, frameDrawY, frame.trimWidth, frame.trimHeight, part,
+                              ++fadedFramesCount);
+                    if (fadedFramesCount >= part.framesToFadeCount) {
+                        fadedFramesCount = MAX_FADED_FRAMES_COUNT; // no more fading
+                    }
+                }
+
                 if (mClockEnabled && mTimeIsAccurate && validClock(part)) {
                     drawClock(animation.clockFont, part.clockPosX, part.clockPosY);
                 }
+
                 handleViewport(frameDuration);
 
                 eglSwapBuffers(mDisplay, mSurface);
@@ -1198,11 +1272,11 @@ bool BootAnimation::playAnimation(const Animation& animation) {
 
             usleep(part.pause * ns2us(frameDuration));
 
-            // For infinite parts, we've now played them at least once, so perhaps exit
-            if(exitPending() && !part.count && mCurrentInset >= mTargetInset)
-                break;
+            if (exitPending() && !part.count && mCurrentInset >= mTargetInset &&
+                !part.hasFadingPhase()) {
+                break; // exit the infinite non-fading part when it has been played at least once
+            }
         }
-
     }
 
     // Free textures created for looping parts now that the animation is done.

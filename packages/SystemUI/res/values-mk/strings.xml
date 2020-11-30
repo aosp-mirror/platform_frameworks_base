@@ -712,13 +712,13 @@
     <string name="notification_alert_title" msgid="3656229781017543655">"Стандардно"</string>
     <string name="notification_bubble_title" msgid="8330481035191903164">"Балонче"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Без звук или вибрации"</string>
-    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Без звук или вибрации и се појавува под делот за разговор"</string>
+    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Без звук или вибрации и се појавува подолу во делот со разговори"</string>
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"Може да ѕвони или вибрира во зависност од поставките на телефонот"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Може да ѕвони или вибрира во зависност од поставките на телефонот Стандардно, разговорите од <xliff:g id="APP_NAME">%1$s</xliff:g> се во балончиња."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Ви го задржува вниманието со лебдечка кратенка на содржинава."</string>
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Се појавува на горниот дел од секцијата на разговорот во вид на лебдечко меурче, покажувајќи ја профилната слика на заклучениот екран"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Поставки"</string>
-    <string name="notification_priority_title" msgid="2079708866333537093">"Приоритет"</string>
+    <string name="notification_priority_title" msgid="2079708866333537093">"Приоритетно"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> не поддржува функции за разговор"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Нема неодамнешни балончиња"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Неодамнешните и отфрлените балончиња ќе се појавуваат тука"</string>

@@ -20,6 +20,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.StringDef;
+import android.security.KeyStore;
 import android.security.keymaster.KeymasterDefs;
 
 import libcore.util.EmptyArray;
@@ -496,10 +497,16 @@ public abstract class KeyProperties {
      */
     public static final String SIGNATURE_PADDING_RSA_PSS = "PSS";
 
-    static abstract class SignaturePadding {
+    /**
+     * @hide
+     */
+    public abstract static class SignaturePadding {
         private SignaturePadding() {}
 
-        static int toKeymaster(@NonNull @SignaturePaddingEnum String padding) {
+        /**
+         * @hide
+         */
+        public static int toKeymaster(@NonNull @SignaturePaddingEnum String padding) {
             switch (padding.toUpperCase(Locale.US)) {
                 case SIGNATURE_PADDING_RSA_PKCS1:
                     return KeymasterDefs.KM_PAD_RSA_PKCS1_1_5_SIGN;
@@ -512,7 +519,7 @@ public abstract class KeyProperties {
         }
 
         @NonNull
-        static @SignaturePaddingEnum String fromKeymaster(int padding) {
+        public static @SignaturePaddingEnum String fromKeymaster(int padding) {
             switch (padding) {
                 case KeymasterDefs.KM_PAD_RSA_PKCS1_1_5_SIGN:
                     return SIGNATURE_PADDING_RSA_PKCS1;
@@ -524,7 +531,7 @@ public abstract class KeyProperties {
         }
 
         @NonNull
-        static int[] allToKeymaster(@Nullable @SignaturePaddingEnum String[] paddings) {
+        public static int[] allToKeymaster(@Nullable @SignaturePaddingEnum String[] paddings) {
             if ((paddings == null) || (paddings.length == 0)) {
                 return EmptyArray.INT;
             }
@@ -770,5 +777,124 @@ public abstract class KeyProperties {
             value >>>= 1;
         }
         return result;
+    }
+
+    /**
+     * @hide
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = { "SECURITY_LEVEL_" }, value = {
+            SECURITY_LEVEL_UNKNOWN,
+            SECURITY_LEVEL_UNKNOWN_SECURE,
+            SECURITY_LEVEL_SOFTWARE,
+            SECURITY_LEVEL_TRUSTED_ENVIRONMENT,
+            SECURITY_LEVEL_STRONGBOX,
+    })
+    public @interface SecurityLevelEnum {}
+
+    /**
+     * This security level indicates that no assumptions can be made about the security level of the
+     * respective key.
+     */
+    public static final int SECURITY_LEVEL_UNKNOWN = -2;
+    /**
+     * This security level indicates that due to the target API level of the caller no exact
+     * statement can be made about the security level of the key, however, the security level
+     * can be considered is at least equivalent to {@link #SECURITY_LEVEL_TRUSTED_ENVIRONMENT}.
+     */
+    public static final int SECURITY_LEVEL_UNKNOWN_SECURE = -1;
+
+    /** Indicates enforcement by system software. */
+    public static final int SECURITY_LEVEL_SOFTWARE = 0;
+
+    /** Indicates enforcement by a trusted execution environment. */
+    public static final int SECURITY_LEVEL_TRUSTED_ENVIRONMENT = 1;
+
+    /**
+     * Indicates enforcement by environment meeting the Strongbox security profile,
+     * such as a secure element.
+     */
+    public static final int SECURITY_LEVEL_STRONGBOX = 2;
+
+    /**
+     * @hide
+     */
+    public abstract static class SecurityLevel {
+        private SecurityLevel() {}
+
+        /**
+         * @hide
+         */
+        public static int toKeymaster(int securityLevel) {
+            switch (securityLevel) {
+                case SECURITY_LEVEL_SOFTWARE:
+                    return KeymasterDefs.KM_SECURITY_LEVEL_SOFTWARE;
+                case SECURITY_LEVEL_TRUSTED_ENVIRONMENT:
+                    return KeymasterDefs.KM_SECURITY_LEVEL_TRUSTED_ENVIRONMENT;
+                case SECURITY_LEVEL_STRONGBOX:
+                    return KeymasterDefs.KM_SECURITY_LEVEL_STRONGBOX;
+                default:
+                    throw new IllegalArgumentException("Unsupported security level: "
+                            + securityLevel);
+            }
+        }
+
+        /**
+         * @hide
+         */
+        @NonNull
+        public static int fromKeymaster(int securityLevel) {
+            switch (securityLevel) {
+                case KeymasterDefs.KM_SECURITY_LEVEL_SOFTWARE:
+                    return SECURITY_LEVEL_SOFTWARE;
+                case KeymasterDefs.KM_SECURITY_LEVEL_TRUSTED_ENVIRONMENT:
+                    return SECURITY_LEVEL_TRUSTED_ENVIRONMENT;
+                case KeymasterDefs.KM_SECURITY_LEVEL_STRONGBOX:
+                    return SECURITY_LEVEL_STRONGBOX;
+                default:
+                    throw new IllegalArgumentException("Unsupported security level: "
+                            + securityLevel);
+            }
+        }
+    }
+
+    /**
+     * This value indicates the implicit keystore namespace of the calling application.
+     * It is used by default. Only select system components can choose a different namespace
+     * which it must be configured in SEPolicy.
+     * @hide
+     */
+    public static final int NAMESPACE_APPLICATION = -1;
+
+    /**
+     * For legacy support, translate namespaces into known UIDs.
+     * @hide
+     */
+    public static int namespaceToLegacyUid(int namespace) {
+        switch (namespace) {
+            case NAMESPACE_APPLICATION:
+                return KeyStore.UID_SELF;
+            // TODO Translate WIFI and VPN UIDs once the namespaces are defined.
+            //  b/171305388 and b/171305607
+            default:
+                throw new IllegalArgumentException("No UID corresponding to namespace "
+                        + namespace);
+        }
+    }
+
+    /**
+     * For legacy support, translate namespaces into known UIDs.
+     * @hide
+     */
+    public static int legacyUidToNamespace(int uid) {
+        switch (uid) {
+            case KeyStore.UID_SELF:
+                return NAMESPACE_APPLICATION;
+            // TODO Translate WIFI and VPN UIDs once the namespaces are defined.
+            //  b/171305388 and b/171305607
+            default:
+                throw new IllegalArgumentException("No namespace corresponding to uid "
+                        + uid);
+        }
     }
 }

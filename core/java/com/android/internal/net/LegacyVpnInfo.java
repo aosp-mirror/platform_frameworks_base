@@ -83,8 +83,8 @@ public class LegacyVpnInfo implements Parcelable {
      * Return best matching {@link LegacyVpnInfo} state based on given
      * {@link NetworkInfo}.
      */
-    public static int stateFromNetworkInfo(NetworkInfo info) {
-        switch (info.getDetailedState()) {
+    public static int stateFromNetworkInfo(NetworkInfo.DetailedState state) {
+        switch (state) {
             case CONNECTING:
                 return STATE_CONNECTING;
             case CONNECTED:
@@ -94,8 +94,7 @@ public class LegacyVpnInfo implements Parcelable {
             case FAILED:
                 return STATE_FAILED;
             default:
-                Log.w(TAG, "Unhandled state " + info.getDetailedState()
-                        + " ; treating as disconnected");
+                Log.w(TAG, "Unhandled state " + state + " ; treating as disconnected");
                 return STATE_DISCONNECTED;
         }
     }

@@ -23,7 +23,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.provider.Settings.Global;
 import android.telephony.Annotation;
-import android.telephony.CdmaEriInformation;
 import android.telephony.CellSignalStrength;
 import android.telephony.CellSignalStrengthCdma;
 import android.telephony.PhoneStateListener;
@@ -284,6 +283,9 @@ public class MobileSignalController extends SignalController<
         mNetworkToIconLookup.put(toDisplayIconKey(
                 TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_NR_NSA_MMWAVE),
                 TelephonyIcons.NR_5G_PLUS);
+        mNetworkToIconLookup.put(toIconKey(
+                TelephonyManager.NETWORK_TYPE_NR),
+                TelephonyIcons.NR_5G);
     }
 
     private String getIconKey() {
@@ -306,9 +308,9 @@ public class MobileSignalController extends SignalController<
             case TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_LTE_ADVANCED_PRO:
                 return toIconKey(TelephonyManager.NETWORK_TYPE_LTE) + "_CA_Plus";
             case TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_NR_NSA:
-                return "5G";
+                return toIconKey(TelephonyManager.NETWORK_TYPE_NR);
             case TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_NR_NSA_MMWAVE:
-                return "5G_Plus";
+                return toIconKey(TelephonyManager.NETWORK_TYPE_NR) + "_Plus";
             default:
                 return "unsupported";
         }
@@ -420,11 +422,9 @@ public class MobileSignalController extends SignalController<
         if (isCarrierNetworkChangeActive()) {
             return false;
         }
-        if (isCdma() && mServiceState != null) {
-            final int iconMode = mPhone.getCdmaEriInformation().getEriIconMode();
-            return mPhone.getCdmaEriInformation().getEriIconIndex() != CdmaEriInformation.ERI_OFF
-                    && (iconMode == CdmaEriInformation.ERI_ICON_MODE_NORMAL
-                    || iconMode == CdmaEriInformation.ERI_ICON_MODE_FLASH);
+        if (isCdma()) {
+            return mPhone.getCdmaEnhancedRoamingIndicatorDisplayNumber()
+                    != TelephonyManager.ERI_OFF;
         } else {
             return mServiceState != null && mServiceState.getRoaming();
         }

@@ -678,7 +678,7 @@ public class ViewConfiguration {
      * to a hover movement gesture.
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static int getHoverTapSlop() {
         return HOVER_TAP_SLOP;
     }

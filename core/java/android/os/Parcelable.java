@@ -120,7 +120,7 @@ public interface Parcelable {
      * @see ParcelableHolder
      * @hide
      */
-    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @SystemApi(client = SystemApi.Client.PRIVILEGED_APPS)
     public static final int PARCELABLE_STABILITY_LOCAL = 0x0000;
     /**
      * Something that is meant to be used between system and vendor.
@@ -128,7 +128,7 @@ public interface Parcelable {
      * @see ParcelableHolder
      * @hide
      */
-    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @SystemApi(client = SystemApi.Client.PRIVILEGED_APPS)
     public static final int PARCELABLE_STABILITY_VINTF = 0x0001;
 
     /**

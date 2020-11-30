@@ -14,7 +14,11 @@ per-file settings_enums.proto=tmfang@google.com
 # Frameworks
 ogunwale@google.com
 jjaggi@google.com
+roosa@google.com
 per-file usagestatsservice.proto, usagestatsservice_v2.proto = mwachens@google.com
+
+# Biometrics
+kchyn@google.com
 
 # Launcher
 hyunyoungs@google.com

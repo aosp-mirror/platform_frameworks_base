@@ -21,7 +21,6 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
-import android.annotation.TestApi;
 import android.app.Activity;
 import android.app.Application;
 import android.app.PendingIntent;
@@ -131,7 +130,7 @@ public final class CompanionDeviceManager {
      * you use the {@link android.Manifest.permission#REQUEST_COMPANION_RUN_IN_BACKGROUND} and {@link
      * android.Manifest.permission#REQUEST_COMPANION_USE_DATA_IN_BACKGROUND} respectively. Note that these
      * special capabilities have a negative effect on the device's battery and user's data
-     * usage, therefore you should requested them when absolutely necessary.</p>
+     * usage, therefore you should request them when absolutely necessary.</p>
      *
      * <p>You can call {@link #getAssociations} to get the list of currently associated
      * devices, and {@link #disassociate} to remove an association. Consider doing so when the
@@ -285,7 +284,6 @@ public final class CompanionDeviceManager {
      * @hide
      */
     @SystemApi
-    @TestApi
     @RequiresPermission(android.Manifest.permission.MANAGE_COMPANION_DEVICES)
     public boolean isDeviceAssociatedForWifiConnection(
             @NonNull String packageName,

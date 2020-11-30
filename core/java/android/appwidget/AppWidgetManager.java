@@ -34,6 +34,7 @@ import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.ShortcutInfo;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.RemoteException;
@@ -943,7 +944,7 @@ public class AppWidgetManager {
      *
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void bindAppWidgetId(int appWidgetId, ComponentName provider, Bundle options) {
         if (mService == null) {
             return;
@@ -1114,7 +1115,7 @@ public class AppWidgetManager {
      * @see Context#getServiceDispatcher(ServiceConnection, Handler, int)
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public boolean bindRemoteViewsService(Context context, int appWidgetId, Intent intent,
             IServiceConnection connection, @Context.BindServiceFlags int flags) {
         if (mService == null) {

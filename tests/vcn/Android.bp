@@ -1,0 +1,27 @@
+//########################################################################
+// Build FrameworksVcnTests package
+//########################################################################
+
+android_test {
+    name: "FrameworksVcnTests",
+    srcs: [
+        "java/**/*.java",
+        "java/**/*.kt",
+    ],
+    platform_apis: true,
+    test_suites: ["device-tests"],
+    certificate: "platform",
+    static_libs: [
+        "androidx.test.rules",
+        "frameworks-base-testutils",
+        "framework-protos",
+        "mockito-target-minus-junit4",
+        "platform-test-annotations",
+        "services.core",
+    ],
+    libs: [
+        "android.test.runner",
+        "android.test.base",
+        "android.test.mock",
+    ],
+}

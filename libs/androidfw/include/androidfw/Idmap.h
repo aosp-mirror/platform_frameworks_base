@@ -77,40 +77,40 @@ class OverlayDynamicRefTable : public DynamicRefTable {
 // A mapping of target resource ids to a values or resource ids that should overlay the target.
 class IdmapResMap {
  public:
-  // Represents the result of a idmap lookup. The result can be one of three possibillities:
+  // Represents the result of a idmap lookup. The result can be one of three possibilities:
   // 1) The result is a resource id which represents the overlay resource that should act as an
   //    alias of the target resource.
   // 2) The result is a table entry which overlays the type and value of the target resource.
   // 3) The result is neither and the target resource is not overlaid.
   class Result {
    public:
-    Result() : data_(nullptr) {};
+    Result() = default;
     explicit Result(uint32_t value) : data_(value) {};
-    explicit Result(ResTable_entry_handle&& value) : data_(value) { };
+    explicit Result(const Res_value& value) : data_(value) { };
 
     // Returns `true` if the resource is overlaid.
-    inline explicit operator bool() const {
-      return !std::get_if<nullptr_t>(&data_);
+    explicit operator bool() const {
+      return std::get_if<std::monostate>(&data_) == nullptr;
     }
 
-    inline bool IsResourceId() const {
-      return std::get_if<uint32_t>(&data_);
+    bool IsResourceId() const {
+      return std::get_if<uint32_t>(&data_) != nullptr;
     }
 
-    inline uint32_t GetResourceId() const {
-      return *std::get_if<uint32_t>(&data_);
+    uint32_t GetResourceId() const {
+      return std::get<uint32_t>(data_);
     }
 
-    inline bool IsTableEntry() const {
-      return std::get_if<ResTable_entry_handle>(&data_);
+    bool IsInlineValue() const {
+      return std::get_if<Res_value>(&data_) != nullptr;
     }
 
-    inline const ResTable_entry_handle& GetTableEntry() const {
-      return *std::get_if<ResTable_entry_handle>(&data_);
+    const Res_value& GetInlineValue() const {
+      return std::get<Res_value>(data_);
     }
 
    private:
-      std::variant<uint32_t, nullptr_t, ResTable_entry_handle> data_;
+      std::variant<std::monostate, uint32_t, Res_value> data_;
   };
 
   // Looks up the value that overlays the target resource id.
@@ -123,11 +123,13 @@ class IdmapResMap {
  private:
   explicit IdmapResMap(const Idmap_data_header* data_header,
                        const Idmap_target_entry* entries,
+                       const Idmap_target_entry_inline* inline_entries,
                        uint8_t target_assigned_package_id,
                        const OverlayDynamicRefTable* overlay_ref_table);
 
   const Idmap_data_header* data_header_;
   const Idmap_target_entry* entries_;
+  const Idmap_target_entry_inline* inline_entries_;
   const uint8_t target_assigned_package_id_;
   const OverlayDynamicRefTable* overlay_ref_table_;
 
@@ -163,8 +165,8 @@ class LoadedIdmap {
   // Returns a mapping from target resource ids to overlay values.
   inline const IdmapResMap GetTargetResourcesMap(
       uint8_t target_assigned_package_id, const OverlayDynamicRefTable* overlay_ref_table) const {
-    return IdmapResMap(data_header_, target_entries_, target_assigned_package_id,
-                       overlay_ref_table);
+    return IdmapResMap(data_header_, target_entries_, target_inline_entries_,
+                       target_assigned_package_id, overlay_ref_table);
   }
 
   // Returns a dynamic reference table for a loaded overlay package.
@@ -184,6 +186,7 @@ class LoadedIdmap {
   const Idmap_header* header_;
   const Idmap_data_header* data_header_;
   const Idmap_target_entry* target_entries_;
+  const Idmap_target_entry_inline* target_inline_entries_;
   const Idmap_overlay_entry* overlay_entries_;
   const std::unique_ptr<ResStringPool> string_pool_;
 
@@ -200,6 +203,7 @@ class LoadedIdmap {
                        const Idmap_header* header,
                        const Idmap_data_header* data_header,
                        const Idmap_target_entry* target_entries,
+                       const Idmap_target_entry_inline* target_inline_entries,
                        const Idmap_overlay_entry* overlay_entries,
                        ResStringPool* string_pool);
 

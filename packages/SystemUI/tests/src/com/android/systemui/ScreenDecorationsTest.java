@@ -44,6 +44,7 @@ import static org.mockito.Mockito.when;
 
 import android.content.res.Configuration;
 import android.graphics.Insets;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.drawable.VectorDrawable;
 import android.hardware.display.DisplayManager;
@@ -193,6 +194,7 @@ public class ScreenDecorationsTest extends SysuiTestCase {
     @Test
     public void testRoundingRadius_NoCutout() {
         final int testRadius = 1;
+        final Point testRadiusPoint = new Point(1, 1);
         mContext.getOrCreateTestableResources().addOverride(
                 com.android.internal.R.bool.config_fillMainBuiltInDisplayCutout, false);
         mContext.getOrCreateTestableResources().addOverride(
@@ -209,9 +211,9 @@ public class ScreenDecorationsTest extends SysuiTestCase {
 
         mScreenDecorations.start();
         // Size of corner view should same as rounded_corner_radius{_top|_bottom}
-        assertThat(mScreenDecorations.mRoundedDefault).isEqualTo(testRadius);
-        assertThat(mScreenDecorations.mRoundedDefaultTop).isEqualTo(testRadius);
-        assertThat(mScreenDecorations.mRoundedDefaultBottom).isEqualTo(testRadius);
+        assertThat(mScreenDecorations.mRoundedDefault).isEqualTo(testRadiusPoint);
+        assertThat(mScreenDecorations.mRoundedDefaultTop).isEqualTo(testRadiusPoint);
+        assertThat(mScreenDecorations.mRoundedDefaultBottom).isEqualTo(testRadiusPoint);
     }
 
     @Test
@@ -237,14 +239,18 @@ public class ScreenDecorationsTest extends SysuiTestCase {
                 mScreenDecorations.mOverlays[BOUNDS_POSITION_TOP].findViewById(R.id.left);
         View rightRoundedCorner =
                 mScreenDecorations.mOverlays[BOUNDS_POSITION_TOP].findViewById(R.id.right);
-        verify(mScreenDecorations, atLeastOnce()).setSize(leftRoundedCorner, testTopRadius);
-        verify(mScreenDecorations, atLeastOnce()).setSize(rightRoundedCorner, testTopRadius);
+        verify(mScreenDecorations, atLeastOnce())
+                .setSize(leftRoundedCorner, new Point(testTopRadius, testTopRadius));
+        verify(mScreenDecorations, atLeastOnce())
+                .setSize(rightRoundedCorner, new Point(testTopRadius, testTopRadius));
         leftRoundedCorner =
                 mScreenDecorations.mOverlays[BOUNDS_POSITION_BOTTOM].findViewById(R.id.left);
         rightRoundedCorner =
                 mScreenDecorations.mOverlays[BOUNDS_POSITION_BOTTOM].findViewById(R.id.right);
-        verify(mScreenDecorations, atLeastOnce()).setSize(leftRoundedCorner, testBottomRadius);
-        verify(mScreenDecorations, atLeastOnce()).setSize(rightRoundedCorner, testBottomRadius);
+        verify(mScreenDecorations, atLeastOnce())
+                .setSize(leftRoundedCorner, new Point(testBottomRadius, testBottomRadius));
+        verify(mScreenDecorations, atLeastOnce())
+                .setSize(rightRoundedCorner, new Point(testBottomRadius, testBottomRadius));
     }
 
     @Test
@@ -276,20 +282,24 @@ public class ScreenDecorationsTest extends SysuiTestCase {
                 mScreenDecorations.mOverlays[BOUNDS_POSITION_LEFT].findViewById(R.id.left);
         View rightRoundedCorner =
                 mScreenDecorations.mOverlays[BOUNDS_POSITION_LEFT].findViewById(R.id.right);
-        verify(mScreenDecorations, atLeastOnce()).setSize(leftRoundedCorner, testTopRadius);
-        verify(mScreenDecorations, atLeastOnce()).setSize(rightRoundedCorner, testBottomRadius);
+        verify(mScreenDecorations, atLeastOnce())
+                .setSize(leftRoundedCorner, new Point(testTopRadius, testTopRadius));
+        verify(mScreenDecorations, atLeastOnce())
+                .setSize(rightRoundedCorner, new Point(testBottomRadius, testBottomRadius));
         leftRoundedCorner =
                 mScreenDecorations.mOverlays[BOUNDS_POSITION_RIGHT].findViewById(R.id.left);
         rightRoundedCorner =
                 mScreenDecorations.mOverlays[BOUNDS_POSITION_RIGHT].findViewById(R.id.right);
-        verify(mScreenDecorations, atLeastOnce()).setSize(leftRoundedCorner, testTopRadius);
-        verify(mScreenDecorations, atLeastOnce()).setSize(rightRoundedCorner, testBottomRadius);
+        verify(mScreenDecorations, atLeastOnce())
+                .setSize(leftRoundedCorner, new Point(testTopRadius, testTopRadius));
+        verify(mScreenDecorations, atLeastOnce())
+                .setSize(rightRoundedCorner, new Point(testBottomRadius, testBottomRadius));
     }
 
     @Test
     public void testRoundingMultipleRadius_NoCutout() {
         final VectorDrawable d = (VectorDrawable) mContext.getDrawable(R.drawable.rounded);
-        final int multipleRadiusSize = Math.max(d.getIntrinsicWidth(), d.getIntrinsicHeight());
+        final Point multipleRadiusSize = new Point(d.getIntrinsicWidth(), d.getIntrinsicHeight());
 
         mContext.getOrCreateTestableResources().addOverride(
                 com.android.internal.R.bool.config_fillMainBuiltInDisplayCutout, false);
@@ -600,13 +610,14 @@ public class ScreenDecorationsTest extends SysuiTestCase {
                 .addOverride(R.bool.config_roundedCornerMultipleRadius, false);
 
         mScreenDecorations.start();
-        assertEquals(mScreenDecorations.mRoundedDefault, 20);
+        assertEquals(mScreenDecorations.mRoundedDefault, new Point(20, 20));
 
         mContext.getOrCreateTestableResources().addOverride(
                 com.android.internal.R.dimen.rounded_corner_radius, 5);
         mScreenDecorations.onConfigurationChanged(null);
-        assertEquals(mScreenDecorations.mRoundedDefault, 5);
+        assertEquals(mScreenDecorations.mRoundedDefault, new Point(5, 5));
     }
+
 
     @Test
     public void testBoundingRectsToRegion() throws Exception {

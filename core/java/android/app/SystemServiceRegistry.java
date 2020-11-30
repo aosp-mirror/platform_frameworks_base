@@ -131,6 +131,8 @@ import android.net.lowpan.ILowpanManager;
 import android.net.lowpan.LowpanManager;
 import android.net.nsd.INsdManager;
 import android.net.nsd.NsdManager;
+import android.net.vcn.IVcnManagementService;
+import android.net.vcn.VcnManager;
 import android.net.wifi.WifiFrameworkInitializer;
 import android.net.wifi.nl80211.WifiNl80211Manager;
 import android.nfc.NfcManager;
@@ -371,6 +373,14 @@ public final class SystemServiceRegistry {
                         ctx, () -> ServiceManager.getService(Context.TETHERING_SERVICE));
             }});
 
+        registerService(Context.VCN_MANAGEMENT_SERVICE, VcnManager.class,
+                new CachedServiceFetcher<VcnManager>() {
+            @Override
+            public VcnManager createService(ContextImpl ctx) throws ServiceNotFoundException {
+                IBinder b = ServiceManager.getService(Context.VCN_MANAGEMENT_SERVICE);
+                IVcnManagementService service = IVcnManagementService.Stub.asInterface(b);
+                return new VcnManager(ctx, service);
+            }});
 
         registerService(Context.IPSEC_SERVICE, IpSecManager.class,
                 new CachedServiceFetcher<IpSecManager>() {
@@ -1386,6 +1396,7 @@ public final class SystemServiceRegistry {
                 case Context.CONTENT_CAPTURE_MANAGER_SERVICE:
                 case Context.APP_PREDICTION_SERVICE:
                 case Context.INCREMENTAL_SERVICE:
+                case Context.ETHERNET_SERVICE:
                     return null;
             }
             Slog.wtf(TAG, "Manager wrapper not available: " + name);

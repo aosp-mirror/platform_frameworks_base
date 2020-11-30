@@ -105,6 +105,7 @@ cc_library_shared {
 cc_library_shared {
     name: "libandroid_net",
     defaults: ["libandroid_defaults"],
+    llndk_stubs: "libandroid_net.llndk",
     srcs: ["net.c"],
 
     shared_libs: ["libnetd_client"],
@@ -113,7 +114,7 @@ cc_library_shared {
 }
 
 llndk_library {
-    name: "libandroid_net",
+    name: "libandroid_net.llndk",
     export_include_dirs: ["include"],
     symbol_file: "libandroid_net.map.txt",
     unversioned: true,

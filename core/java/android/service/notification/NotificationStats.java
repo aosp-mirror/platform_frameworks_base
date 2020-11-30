@@ -19,7 +19,6 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
-import android.annotation.TestApi;
 import android.app.RemoteInput;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -31,7 +30,6 @@ import java.lang.annotation.RetentionPolicy;
  * Information about how the user has interacted with a given notification.
  * @hide
  */
-@TestApi
 @SystemApi
 public final class NotificationStats implements Parcelable {
 

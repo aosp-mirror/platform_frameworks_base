@@ -1,4 +1,5 @@
 moltmann@google.com
+zhanghai@google.com
 per-file DefaultPermissionGrantPolicy.java = hackbod@android.com
 per-file DefaultPermissionGrantPolicy.java = jsharkey@android.com
 per-file DefaultPermissionGrantPolicy.java = svetoslavganov@google.com
@@ -7,3 +8,4 @@ per-file DefaultPermissionGrantPolicy.java = yamasani@google.com
 per-file DefaultPermissionGrantPolicy.java = patb@google.com
 per-file DefaultPermissionGrantPolicy.java = eugenesusla@google.com
 per-file DefaultPermissionGrantPolicy.java = moltmann@google.com
+per-file DefaultPermissionGrantPolicy.java = zhanghai@google.com

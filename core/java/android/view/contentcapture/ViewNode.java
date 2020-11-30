@@ -42,7 +42,6 @@ import com.android.internal.util.Preconditions;
 // instead
 /** @hide */
 @SystemApi
-@TestApi
 public final class ViewNode extends AssistStructure.ViewNode {
 
     private static final String TAG = ViewNode.class.getSimpleName();

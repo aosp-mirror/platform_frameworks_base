@@ -73,6 +73,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.security.Provider;
 import java.security.Security;
+import java.util.Optional;
 
 /**
  * Startup class for the zygote process.
@@ -225,7 +226,17 @@ public class ZygoteInit {
         // AndroidKeyStoreProvider.install() manipulates the list of JCA providers to insert
         // preferred providers. Note this is not done via security.properties as the JCA providers
         // are not on the classpath in the case of, for example, raw dalvikvm runtimes.
-        AndroidKeyStoreProvider.install();
+        // TODO b/171305684 This code is used to conditionally enable the installation of the
+        //      Keystore 2.0 provider to enable teams adjusting to Keystore 2.0 at their own
+        //      pace. This code will be removed when all calling code was adjusted to
+        //      Keystore 2.0.
+        Optional<Boolean> keystore2_enabled =
+                android.sysprop.Keystore2Properties.keystore2_enabled();
+        if (keystore2_enabled.isPresent() && keystore2_enabled.get()) {
+            android.security.keystore2.AndroidKeyStoreProvider.install();
+        } else {
+            AndroidKeyStoreProvider.install();
+        }
         Log.i(TAG, "Installed AndroidKeyStoreProvider in "
                 + (SystemClock.uptimeMillis() - startTime) + "ms.");
         Trace.traceEnd(Trace.TRACE_TAG_DALVIK);
@@ -385,7 +396,6 @@ public class ZygoteInit {
                 "/system/framework/android.hidl.manager-V1.0-java.jar", null /*packageName*/,
                 null /*codePaths*/, null /*name*/, 0 /*version*/, SharedLibraryInfo.TYPE_BUILTIN,
                 null /*declaringPackage*/, null /*dependentPackages*/, null /*dependencies*/);
-        hidlManager.addDependency(hidlBase);
 
         SharedLibraryInfo androidTestBase = new SharedLibraryInfo(
                 "/system/framework/android.test.base.jar", null /*packageName*/,
@@ -600,6 +610,9 @@ public class ZygoteInit {
         VMRuntime.registerAppInfo(profilePath, codePaths);
     }
 
+    /**
+     * Sets the list of classes/methods for the hidden API
+     */
     public static void setApiDenylistExemptions(String[] exemptions) {
         VMRuntime.getRuntime().setHiddenApiExemptions(exemptions);
     }
@@ -618,8 +631,11 @@ public class ZygoteInit {
 
     /**
      * Creates a PathClassLoader for the given class path that is associated with a shared
-     * namespace, i.e., this classloader can access platform-private native libraries. The
-     * classloader will use java.library.path as the native library path.
+     * namespace, i.e., this classloader can access platform-private native libraries.
+     *
+     * The classloader will add java.library.path to the native library path for the classloader
+     * namespace. Since it includes platform locations like /system/lib, this is only appropriate
+     * for platform code that don't need linker namespace isolation (as opposed to APEXes and apps).
      */
     static ClassLoader createPathClassLoader(String classPath, int targetSdkVersion) {
         String libraryPath = System.getProperty("java.library.path");

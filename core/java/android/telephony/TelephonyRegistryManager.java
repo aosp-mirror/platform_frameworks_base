@@ -26,10 +26,8 @@ import android.os.Binder;
 import android.os.Build;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.telephony.Annotation.ApnType;
 import android.telephony.Annotation.CallState;
 import android.telephony.Annotation.DataActivityType;
-import android.telephony.Annotation.DataFailureCause;
 import android.telephony.Annotation.DisconnectCauses;
 import android.telephony.Annotation.NetworkType;
 import android.telephony.Annotation.PreciseCallStates;
@@ -37,7 +35,6 @@ import android.telephony.Annotation.PreciseDisconnectCauses;
 import android.telephony.Annotation.RadioPowerState;
 import android.telephony.Annotation.SimActivationState;
 import android.telephony.Annotation.SrvccState;
-import android.telephony.data.ApnSetting;
 import android.telephony.emergency.EmergencyNumber;
 import android.telephony.ims.ImsReasonInfo;
 import android.util.Log;
@@ -413,17 +410,16 @@ public class TelephonyRegistryManager {
      * @param subId for which data connection state changed.
      * @param slotIndex for which data connections state changed. Can be derived from subId except
      * when subId is invalid.
-     * @param apnType the apn type bitmask, defined with {@code ApnSetting#TYPE_*} flags.
      * @param preciseState the PreciseDataConnectionState
      *
-     * @see android.telephony.PreciseDataConnection
+     * @see PreciseDataConnectionState
      * @see TelephonyManager#DATA_DISCONNECTED
      */
     public void notifyDataConnectionForSubscriber(int slotIndex, int subId,
-            @ApnType int apnType, @Nullable PreciseDataConnectionState preciseState) {
+            @NonNull PreciseDataConnectionState preciseState) {
         try {
             sRegistry.notifyDataConnectionForSubscriber(
-                    slotIndex, subId, apnType, preciseState);
+                    slotIndex, subId, preciseState);
         } catch (RemoteException ex) {
             // system process is dead
         }
@@ -617,25 +613,6 @@ public class TelephonyRegistryManager {
     public void notifyImsDisconnectCause(int subId, @NonNull ImsReasonInfo imsReasonInfo) {
         try {
             sRegistry.notifyImsDisconnectCause(subId, imsReasonInfo);
-        } catch (RemoteException ex) {
-            // system process is dead
-        }
-    }
-
-    /**
-     * Notify precise data connection failed cause on certain subscription.
-     *
-     * @param subId for which data connection failed.
-     * @param slotIndex for which data conenction failed. Can be derived from subId except when
-     * subId is invalid.
-     * @param apnType the apn type bitmask, defined with {@code ApnSetting#TYPE_*} flags.
-     * @param apn the APN {@link ApnSetting#getApnName()} of this data connection.
-     * @param failCause data fail cause.
-     */
-    public void notifyPreciseDataConnectionFailed(int subId, int slotIndex, @ApnType int apnType,
-            @Nullable String apn, @DataFailureCause int failCause) {
-        try {
-            sRegistry.notifyPreciseDataConnectionFailed(slotIndex, subId, apnType, apn, failCause);
         } catch (RemoteException ex) {
             // system process is dead
         }

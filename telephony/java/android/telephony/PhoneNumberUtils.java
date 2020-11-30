@@ -27,6 +27,7 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Build;
 import android.os.PersistableBundle;
 import android.provider.Contacts;
 import android.provider.ContactsContract;
@@ -1832,7 +1833,7 @@ public class PhoneNumberUtils {
      *
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     @Deprecated
     public static boolean isPotentialEmergencyNumber(int subId, String number) {
         // Check against the emergency numbers listed by the RIL / SIM,
@@ -2108,7 +2109,7 @@ public class PhoneNumberUtils {
      * @hide
      */
     @Deprecated
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static boolean isPotentialLocalEmergencyNumber(Context context, String number) {
         return isPotentialLocalEmergencyNumber(context, getDefaultVoiceSubId(), number);
     }
@@ -2138,7 +2139,7 @@ public class PhoneNumberUtils {
      *
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     @Deprecated
     public static boolean isPotentialLocalEmergencyNumber(Context context, int subId,
             String number) {
@@ -2239,7 +2240,6 @@ public class PhoneNumberUtils {
      * @hide
      */
     @SystemApi
-    @TestApi
     public static boolean isVoiceMailNumber(@NonNull Context context, int subId,
             @Nullable String number) {
         String vmNumber, mdn;
@@ -2728,7 +2728,6 @@ public class PhoneNumberUtils {
      * @return true if number contains @
      */
     @SystemApi
-    @TestApi
     public static boolean isUriNumber(@Nullable String number) {
         // Note we allow either "@" or "%40" to indicate a URI, in case
         // the passed-in string is URI-escaped.  (Neither "@" nor "%40"
@@ -2747,7 +2746,6 @@ public class PhoneNumberUtils {
      * @hide
      */
     @SystemApi
-    @TestApi
     public static @NonNull String getUsernameFromUriNumber(@NonNull String number) {
         // The delimiter between username and domain name can be
         // either "@" or "%40" (the URI-escaped equivalent.)

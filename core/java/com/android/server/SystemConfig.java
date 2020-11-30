@@ -19,6 +19,7 @@ package com.android.server;
 import static com.android.internal.util.ArrayUtils.appendInt;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.pm.FeatureInfo;
@@ -238,6 +239,14 @@ public class SystemConfig {
      */
     private Map<String, Map<String, String>> mNamedActors = null;
 
+    // Package name of the package pre-installed on a read-only
+    // partition that is used to verify if an overlay package fulfills
+    // the 'config_signature' policy by comparing their signatures:
+    // if the overlay package is signed with the same certificate as
+    // the package declared in 'overlay-config-signature' tag, then the
+    // overlay package fulfills the 'config_signature' policy.
+    private String mOverlayConfigSignaturePackage;
+
     public static SystemConfig getInstance() {
         if (!isSystemProcess()) {
             Slog.wtf(TAG, "SystemConfig is being accessed by a process other than "
@@ -431,6 +440,12 @@ public class SystemConfig {
     @NonNull
     public Map<String, Map<String, String>> getNamedActors() {
         return mNamedActors != null ? mNamedActors : Collections.emptyMap();
+    }
+
+    @Nullable
+    public String getOverlayConfigSignaturePackage() {
+        return TextUtils.isEmpty(mOverlayConfigSignaturePackage)
+                ? null : mOverlayConfigSignaturePackage;
     }
 
     /**
@@ -1148,6 +1163,27 @@ public class SystemConfig {
                             }
 
                             nameToPkgMap.put(actorName, pkgName);
+                        }
+                        XmlUtils.skipCurrentTag(parser);
+                    } break;
+                    case "overlay-config-signature": {
+                        if (allowAll) {
+                            String pkgName = parser.getAttributeValue(null, "package");
+                            if (pkgName == null) {
+                                Slog.w(TAG, "<" + name + "> without package in " + permFile
+                                        + " at " + parser.getPositionDescription());
+                            } else {
+                                if (TextUtils.isEmpty(mOverlayConfigSignaturePackage)) {
+                                    mOverlayConfigSignaturePackage = pkgName.intern();
+                                } else {
+                                    throw new IllegalStateException("Reference signature package "
+                                                  + "defined as both "
+                                                  + mOverlayConfigSignaturePackage
+                                                  + " and " + pkgName);
+                                }
+                            }
+                        } else {
+                            logNotAllowedInPartition(name, permFile, parser);
                         }
                         XmlUtils.skipCurrentTag(parser);
                     } break;
