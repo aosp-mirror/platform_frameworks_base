@@ -41,23 +41,6 @@ import java.util.Objects;
  */
 class RealLocationTimeZoneProviderProxy extends LocationTimeZoneProviderProxy {
 
-    /**
-     * Creates and registers this proxy. If no suitable service is available for the proxy, returns
-     * null.
-     */
-    @Nullable
-    static LocationTimeZoneProviderProxy createAndRegister(
-            @NonNull Context context, @NonNull ThreadingDomain threadingDomain,
-            @NonNull String action, int enableOverlayResId, int nonOverlayPackageResId) {
-        RealLocationTimeZoneProviderProxy proxy = new RealLocationTimeZoneProviderProxy(
-                context, threadingDomain, action, enableOverlayResId, nonOverlayPackageResId);
-        if (proxy.register()) {
-            return proxy;
-        } else {
-            return null;
-        }
-    }
-
     @NonNull private final ServiceWatcher mServiceWatcher;
 
     @GuardedBy("mProxyLock")
@@ -66,7 +49,7 @@ class RealLocationTimeZoneProviderProxy extends LocationTimeZoneProviderProxy {
     @GuardedBy("mProxyLock")
     @NonNull private LocationTimeZoneProviderRequest mRequest;
 
-    private RealLocationTimeZoneProviderProxy(
+    RealLocationTimeZoneProviderProxy(
             @NonNull Context context, @NonNull ThreadingDomain threadingDomain,
             @NonNull String action, int enableOverlayResId,
             int nonOverlayPackageResId) {
@@ -75,6 +58,13 @@ class RealLocationTimeZoneProviderProxy extends LocationTimeZoneProviderProxy {
         mRequest = LocationTimeZoneProviderRequest.EMPTY_REQUEST;
         mServiceWatcher = new ServiceWatcher(context, action, this::onBind, this::onUnbind,
                 enableOverlayResId, nonOverlayPackageResId);
+    }
+
+    @Override
+    void onInitialize() {
+        if (!register()) {
+            throw new IllegalStateException("Unable to register binder proxy");
+        }
     }
 
     private boolean register() {
