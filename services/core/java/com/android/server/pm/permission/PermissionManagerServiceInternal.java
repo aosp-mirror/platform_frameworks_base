@@ -266,6 +266,17 @@ public abstract class PermissionManagerServiceInternal extends PermissionManager
             @NonNull ArrayList<String> allPackageNames);
 
     /**
+     * If the app is updated, and has scoped storage permissions, then it is possible that the
+     * app updated in an attempt to get unscoped storage. If so, revoke all storage permissions.
+     * @param newPackage The new package that was installed
+     * @param oldPackage The old package that was updated
+     */
+    public abstract void revokeStoragePermissionsIfScopeExpanded(
+            @NonNull AndroidPackage newPackage,
+            @NonNull AndroidPackage oldPackage
+    );
+
+    /**
      * Add all permissions in the given package.
      * <p>
      * NOTE: argument {@code groupTEMP} is temporary until mPermissionGroups is moved to
