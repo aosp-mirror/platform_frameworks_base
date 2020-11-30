@@ -4099,6 +4099,7 @@ class Task extends WindowContainer<WindowContainer> {
                 ? rootTask.mTaskId
                 : INVALID_TASK_ID;
         info.isFocused = isFocused();
+        info.isVisible = hasVisibleChildren();
     }
 
     @Nullable PictureInPictureParams getPictureInPictureParams() {
@@ -5762,6 +5763,10 @@ class Task extends WindowContainer<WindowContainer> {
         try {
             forAllLeafTasks(task -> task.mEnsureActivitiesVisibleHelper.process(
                     starting, configChanges, preserveWindows, notifyClients, userLeaving),
+                    true /* traverseTopToBottom */);
+
+            // Notify WM shell that task visibilities may have changed
+            forAllTasks(task -> task.dispatchTaskInfoChangedIfNeeded(/* force */ false),
                     true /* traverseTopToBottom */);
 
             if (mTranslucentActivityWaiting != null &&
