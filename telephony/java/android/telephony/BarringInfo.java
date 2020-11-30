@@ -252,7 +252,6 @@ public final class BarringInfo implements Parcelable {
     private SparseArray<BarringServiceInfo> mBarringServiceInfos;
 
     /** @hide */
-    @TestApi
     @SystemApi
     public BarringInfo() {
         mBarringServiceInfos = new SparseArray<>();

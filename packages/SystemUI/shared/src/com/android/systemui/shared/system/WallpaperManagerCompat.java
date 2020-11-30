@@ -18,6 +18,7 @@ package com.android.systemui.shared.system;
 
 import android.app.WallpaperManager;
 import android.content.Context;
+import android.content.res.Resources;
 import android.os.IBinder;
 
 /**
@@ -35,5 +36,16 @@ public class WallpaperManagerCompat {
      */
     public void setWallpaperZoomOut(IBinder windowToken, float zoom) {
         mWallpaperManager.setWallpaperZoomOut(windowToken, zoom);
+    }
+
+    /**
+     * @return the max scale for the wallpaper when it's fully zoomed out
+     */
+    public static float getWallpaperZoomOutMaxScale(Context context) {
+        return context.getResources()
+                .getFloat(Resources.getSystem().getIdentifier(
+                        /* name= */ "config_wallpaperMaxScale",
+                        /* defType= */ "dimen",
+                        /* defPackage= */ "android"));
     }
 }

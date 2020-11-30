@@ -20,7 +20,6 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
-import android.annotation.TestApi;
 import android.hardware.camera2.params.InputConfiguration;
 import android.hardware.camera2.params.OutputConfiguration;
 import android.hardware.camera2.params.SessionConfiguration;
@@ -358,7 +357,6 @@ public abstract class CameraDevice implements AutoCloseable {
      * @hide
      */
     @SystemApi
-    @TestApi
     public static final int SESSION_OPERATION_MODE_NORMAL =
             0; // ICameraDeviceUser.NORMAL_MODE;
 
@@ -369,7 +367,6 @@ public abstract class CameraDevice implements AutoCloseable {
      * @hide
      */
     @SystemApi
-    @TestApi
     public static final int SESSION_OPERATION_MODE_CONSTRAINED_HIGH_SPEED =
             1; // ICameraDeviceUser.CONSTRAINED_HIGH_SPEED_MODE;
 
@@ -380,7 +377,6 @@ public abstract class CameraDevice implements AutoCloseable {
      * @hide
      */
     @SystemApi
-    @TestApi
     public static final int SESSION_OPERATION_MODE_VENDOR_START =
             0x8000; // ICameraDeviceUser.VENDOR_MODE_START;
 
@@ -423,7 +419,6 @@ public abstract class CameraDevice implements AutoCloseable {
      * @hide
      */
     @SystemApi
-    @TestApi
     @Deprecated
     public abstract void createCustomCaptureSession(
             InputConfiguration inputConfig,
@@ -683,6 +678,8 @@ public abstract class CameraDevice implements AutoCloseable {
      *<p>BACKWARD_COMPATIBLE devices capable of streaming concurrently with other devices as described by
      * {@link android.hardware.camera2.CameraManager#getConcurrentCameraIds} have the
      * following guaranteed streams (when streaming concurrently with other devices)</p>
+     * <p> Note: The sizes mentioned for these concurrent streams are the maximum sizes guaranteed
+     * to be supported. Sizes smaller than these, obtained by {@link StreamConfigurationMap#getOutputSizes} for a particular format, are supported as well. </p>
      *
      * <table>
      * <tr><th colspan="5">Concurrent stream guaranteed configurations</th></tr>
@@ -696,7 +693,7 @@ public abstract class CameraDevice implements AutoCloseable {
      * </table><br>
      * </p>
      *
-     * <p> Devices which are not backwards-compatible, support a mandatory single stream of size sVGA with image format {@code DEPTH16} during concurrent operation.
+     * <p> Devices which are not backwards-compatible, support a mandatory single stream of size sVGA with image format {@code DEPTH16} during concurrent operation. </p>
      *
      * <p> For guaranteed concurrent stream configurations:</p>
      * <p> sVGA refers to the camera device's maximum resolution for that format from {@link StreamConfigurationMap#getOutputSizes} or

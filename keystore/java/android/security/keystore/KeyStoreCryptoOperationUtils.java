@@ -48,7 +48,7 @@ abstract class KeyStoreCryptoOperationUtils {
             return null;
         }
 
-        // An error occured. However, some errors should not lead to init throwing an exception.
+        // An error occurred. However, some errors should not lead to init throwing an exception.
         // See below.
         InvalidKeyException e =
                 keyStore.getInvalidKeyException(key.getAlias(), key.getUid(), beginOpResultCode);

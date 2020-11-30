@@ -60,7 +60,7 @@ public class TunerServiceImpl extends TunerService {
 
     // Things that use the tunable infrastructure but are now real user settings and
     // shouldn't be reset with tuner settings.
-    private static final String[] RESET_BLACKLIST = new String[] {
+    private static final String[] RESET_EXCEPTION_LIST = new String[] {
             QSTileHost.TILES_SETTING,
             Settings.Secure.DOZE_ALWAYS_ON,
             Settings.Secure.MEDIA_CONTROLS_RESUME
@@ -116,17 +116,17 @@ public class TunerServiceImpl extends TunerService {
 
     private void upgradeTuner(int oldVersion, int newVersion, Handler mainHandler) {
         if (oldVersion < 1) {
-            String blacklistStr = getValue(StatusBarIconController.ICON_BLACKLIST);
-            if (blacklistStr != null) {
-                ArraySet<String> iconBlacklist =
-                        StatusBarIconController.getIconBlacklist(mContext, blacklistStr);
+            String hideListStr = getValue(StatusBarIconController.ICON_HIDE_LIST);
+            if (hideListStr != null) {
+                ArraySet<String> iconHideList =
+                        StatusBarIconController.getIconHideList(mContext, hideListStr);
 
-                iconBlacklist.add("rotate");
-                iconBlacklist.add("headset");
+                iconHideList.add("rotate");
+                iconHideList.add("headset");
 
                 Settings.Secure.putStringForUser(mContentResolver,
-                        StatusBarIconController.ICON_BLACKLIST,
-                        TextUtils.join(",", iconBlacklist), mCurrentUser);
+                        StatusBarIconController.ICON_HIDE_LIST,
+                        TextUtils.join(",", iconHideList), mCurrentUser);
             }
         }
         if (oldVersion < 2) {
@@ -251,7 +251,7 @@ public class TunerServiceImpl extends TunerService {
         mContext.sendBroadcast(intent);
 
         for (String key : mTunableLookup.keySet()) {
-            if (ArrayUtils.contains(RESET_BLACKLIST, key)) {
+            if (ArrayUtils.contains(RESET_EXCEPTION_LIST, key)) {
                 continue;
             }
             Settings.Secure.putStringForUser(mContentResolver, key, null, user);

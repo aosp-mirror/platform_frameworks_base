@@ -1353,7 +1353,7 @@ public final class ImsReasonInfo implements Parcelable {
     }
 
     /** @hide */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public ImsReasonInfo(int code, int extraCode) {
         mCode = code;
         mExtraCode = extraCode;

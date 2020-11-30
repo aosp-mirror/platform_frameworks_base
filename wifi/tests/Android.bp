@@ -31,10 +31,11 @@ android_test {
     static_libs: [
         "androidx.test.rules",
         "core-test-rules",
+        "frameworks-base-testutils",
         "guava",
         "mockito-target-minus-junit4",
+        "modules-utils-build",
         "net-tests-utils",
-        "frameworks-base-testutils",
         "truth-prebuilt",
     ],
 
@@ -47,4 +48,8 @@ android_test {
         "device-tests",
         "mts",
     ],
+
+    // static libs used by both framework-wifi & FrameworksWifiApiTests. Need to rename test usage
+    // to a different package name to prevent conflict with the copy in production code.
+    jarjar_rules: "test-jarjar-rules.txt",
 }

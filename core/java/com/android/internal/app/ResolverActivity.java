@@ -1281,7 +1281,7 @@ public class ResolverActivity extends Activity implements
     private void safelyStartActivityInternal(TargetInfo cti) {
         // If the target is suspended, the activity will not be successfully launched.
         // Do not unregister from package manager updates in this case
-        if (!cti.isSuspended()) {
+        if (!cti.isSuspended() && mRegistered) {
             if (mPersonalPackageMonitor != null) {
                 mPersonalPackageMonitor.unregister();
             }

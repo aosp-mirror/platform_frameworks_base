@@ -18,6 +18,7 @@ package android.timezone;
 
 import android.annotation.NonNull;
 
+import com.android.i18n.timezone.TimeZoneDataFiles;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.io.IOException;
@@ -75,8 +76,7 @@ public final class TzDataSetVersion {
     @NonNull
     public static TzDataSetVersion read() throws IOException, TzDataSetException {
         try {
-            return new TzDataSetVersion(
-                    com.android.i18n.timezone.TzDataSetVersion.readTimeZoneModuleVersion());
+            return new TzDataSetVersion(TimeZoneDataFiles.readTimeZoneModuleVersion());
         } catch (com.android.i18n.timezone.TzDataSetVersion.TzDataSetException e) {
             throw new TzDataSetException(e.getMessage(), e);
         }

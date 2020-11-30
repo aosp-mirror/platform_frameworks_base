@@ -38,6 +38,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
 import android.metrics.LogMaker;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.UserHandle;
@@ -64,7 +65,7 @@ import java.util.concurrent.Executors;
  * be passed in and out of a managed profile.
  */
 public class IntentForwarderActivity extends Activity  {
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static String TAG = "IntentForwarderActivity";
 
     public static String FORWARD_INTENT_TO_PARENT

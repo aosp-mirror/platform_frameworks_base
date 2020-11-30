@@ -113,6 +113,7 @@ public class MountServiceIdler extends JobService {
         JobInfo.Builder builder = new JobInfo.Builder(MOUNT_JOB_ID, sIdleService);
         builder.setRequiresDeviceIdle(true);
         builder.setRequiresBatteryNotLow(true);
+        builder.setRequiresCharging(true);
         builder.setMinimumLatency(nextScheduleTime);
         tm.schedule(builder.build());
     }

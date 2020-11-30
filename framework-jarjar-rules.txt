@@ -1,2 +1,6 @@
 rule android.hidl.** android.internal.hidl.@1
 rule android.net.wifi.WifiAnnotations* android.internal.wifi.WifiAnnotations@1
+
+# Hide media mainline module implementation classes to avoid collisions with
+# app-bundled ExoPlayer classes.
+rule com.google.android.exoplayer2.** android.media.internal.exo.@1

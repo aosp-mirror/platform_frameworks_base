@@ -695,7 +695,7 @@
     <string name="notification_channel_unsilenced" msgid="94878840742161152">"ఈ నోటిఫికేషన్‌లు మిమ్మల్ని హెచ్చరిస్తాయి"</string>
     <string name="inline_blocking_helper" msgid="2891486013649543452">"మీరు సాధారణంగా ఈ నోటిఫికేషన్‌లను విస్మరిస్తారు. \nవాటి ప్రదర్శనను కొనసాగించాలా?"</string>
     <string name="inline_done_button" msgid="6043094985588909584">"పూర్తయింది"</string>
-    <string name="inline_ok_button" msgid="603075490581280343">"అప్లై చేయి"</string>
+    <string name="inline_ok_button" msgid="603075490581280343">"అప్లయి చేయి"</string>
     <string name="inline_keep_showing" msgid="8736001253507073497">"ఈ నోటిఫికేషన్‌లను చూపిస్తూ ఉండాలా?"</string>
     <string name="inline_stop_button" msgid="2453460935438696090">"నోటిఫికేషన్‌లను ఆపివేయి"</string>
     <string name="inline_deliver_silently_button" msgid="2714314213321223286">"నిశ్శబ్దంగా బట్వాడా చేయండి"</string>

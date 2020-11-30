@@ -1093,7 +1093,7 @@
     <string name="cut" msgid="2561199725874745819">"ဖြတ်ရန်"</string>
     <string name="copy" msgid="5472512047143665218">"ကူးရန်"</string>
     <string name="failed_to_copy_to_clipboard" msgid="725919885138539875">"ကလစ်ဘုတ်သို့ မိတ္တူကူးခြင်း မအောင်မြင်ပါ"</string>
-    <string name="paste" msgid="461843306215520225">"Paste"</string>
+    <string name="paste" msgid="461843306215520225">"ကူးထည့်ရန်"</string>
     <string name="paste_as_plain_text" msgid="7664800665823182587">"စာသားအတိုင်း ကူးထည့်ပါ"</string>
     <string name="replace" msgid="7842675434546657444">"အစားထိုခြင်း"</string>
     <string name="delete" msgid="1514113991712129054">"ဖျက်ရန်"</string>

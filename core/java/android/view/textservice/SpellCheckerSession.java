@@ -18,6 +18,7 @@ package android.view.textservice;
 
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Message;
@@ -97,7 +98,7 @@ public class SpellCheckerSession {
     private final InternalListener mInternalListener;
     private final TextServicesManager mTextServicesManager;
     private final SpellCheckerInfo mSpellCheckerInfo;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private final SpellCheckerSessionListener mSpellCheckerSessionListener;
     private final SpellCheckerSessionListenerImpl mSpellCheckerSessionListenerImpl;
 

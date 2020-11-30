@@ -16,26 +16,44 @@
 
 package com.android.tests.stagedinstallinternal.host;
 
+import static com.android.cts.shim.lib.ShimPackage.SHIM_APEX_PACKAGE_NAME;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeTrue;
+
+import android.cts.install.lib.host.InstallUtilsHost;
 
 import com.android.ddmlib.Log;
+import com.android.tests.rollback.host.AbandonSessionsRule;
+import com.android.tests.util.ModuleTestUtils;
 import com.android.tradefed.testtype.DeviceJUnit4ClassRunner;
 import com.android.tradefed.testtype.junit4.BaseHostJUnit4Test;
 import com.android.tradefed.util.ProcessInfo;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import java.io.File;
 
 @RunWith(DeviceJUnit4ClassRunner.class)
 public class StagedInstallInternalTest extends BaseHostJUnit4Test {
 
     private static final String TAG = StagedInstallInternalTest.class.getSimpleName();
     private static final long SYSTEM_SERVER_TIMEOUT_MS = 60 * 1000;
-    private boolean mWasRoot = false;
+
+    @Rule
+    public AbandonSessionsRule mHostTestRule = new AbandonSessionsRule(this);
+
+    private static final String SHIM_V2 = "com.android.apex.cts.shim.v2.apex";
+    private static final String APK_A = "TestAppAv1.apk";
+
+    private final ModuleTestUtils mTestUtils = new ModuleTestUtils(this);
+    private final InstallUtilsHost mHostUtils = new InstallUtilsHost(this);
 
     /**
      * Runs the given phase of a test by calling into the device.
@@ -62,21 +80,11 @@ public class StagedInstallInternalTest extends BaseHostJUnit4Test {
 
     @Before
     public void setUp() throws Exception {
-        mWasRoot = getDevice().isAdbRoot();
-        if (!mWasRoot) {
-            getDevice().enableAdbRoot();
-        }
         cleanUp();
-        // Abandon all staged sessions
-        getDevice().executeShellCommand("pm install-abandon $(pm get-stagedsessions --only-ready "
-                + "--only-parent --only-sessionid)");
     }
 
     @After
     public void tearDown() throws Exception {
-        if (!mWasRoot) {
-            getDevice().disableAdbRoot();
-        }
         cleanUp();
     }
 
@@ -87,16 +95,106 @@ public class StagedInstallInternalTest extends BaseHostJUnit4Test {
         runPhase("testSystemServerRestartDoesNotAffectStagedSessions_Verify");
     }
 
+    // Test waiting time for staged session to be ready using adb staged install can be altered
+    @Test
+    public void testAdbStagdReadyTimeoutFlagWorks() throws Exception {
+        assumeTrue("Device does not support updating APEX",
+                mHostUtils.isApexUpdateSupported());
+
+        final File apexFile = mTestUtils.getTestFile(SHIM_V2);
+        final String output = getDevice().executeAdbCommand("install", "--staged",
+                "--staged-ready-timeout", "60000", apexFile.getAbsolutePath());
+        assertThat(output).contains("Reboot device to apply staged session");
+        final String sessionId = getDevice().executeShellCommand(
+                "pm get-stagedsessions --only-ready --only-parent --only-sessionid").trim();
+        assertThat(sessionId).isNotEmpty();
+    }
+
+    // Test adb staged installation wait for session to be ready by default
+    @Test
+    public void testAdbStagedInstallWaitsTillReadyByDefault() throws Exception {
+        assumeTrue("Device does not support updating APEX",
+                mHostUtils.isApexUpdateSupported());
+
+        final File apexFile = mTestUtils.getTestFile(SHIM_V2);
+        final String output = getDevice().executeAdbCommand("install", "--staged",
+                apexFile.getAbsolutePath());
+        assertThat(output).contains("Reboot device to apply staged session");
+        final String sessionId = getDevice().executeShellCommand(
+                "pm get-stagedsessions --only-ready --only-parent --only-sessionid").trim();
+        assertThat(sessionId).isNotEmpty();
+    }
+
+    // Test we can skip waiting for staged session to be ready
+    @Test
+    public void testAdbStagedReadyWaitCanBeSkipped() throws Exception {
+        assumeTrue("Device does not support updating APEX",
+                mHostUtils.isApexUpdateSupported());
+
+        final File apexFile = mTestUtils.getTestFile(SHIM_V2);
+        final String output = getDevice().executeAdbCommand("install", "--staged",
+                "--staged-ready-timeout", "0", apexFile.getAbsolutePath());
+        assertThat(output).doesNotContain("Reboot device to apply staged session");
+        assertThat(output).contains("Success");
+        final String sessionId = getDevice().executeShellCommand(
+                "pm get-stagedsessions --only-ready --only-parent --only-sessionid").trim();
+        assertThat(sessionId).isEmpty();
+    }
+
+    // Test rollback-app command waits for staged sessions to be ready
+    @Test
+    public void testAdbRollbackAppWaitsForStagedReady() throws Exception {
+        assumeTrue("Device does not support updating APEX",
+                mHostUtils.isApexUpdateSupported());
+
+        final File apexFile = mTestUtils.getTestFile(SHIM_V2);
+        String output = getDevice().executeAdbCommand("install", "--staged",
+                "--enable-rollback", apexFile.getAbsolutePath());
+        assertThat(output).contains("Reboot device to apply staged session");
+        getDevice().reboot();
+        output = getDevice().executeShellCommand("pm rollback-app " + SHIM_APEX_PACKAGE_NAME);
+        assertThat(output).contains("Reboot device to apply staged session");
+        final String sessionId = getDevice().executeShellCommand(
+                "pm get-stagedsessions --only-ready --only-parent --only-sessionid").trim();
+        assertThat(sessionId).isNotEmpty();
+    }
+
+    @Test
+    public void testAdbInstallMultiPackageCommandWorks() throws Exception {
+        assumeTrue("Device does not support updating APEX",
+                mHostUtils.isApexUpdateSupported());
+
+        final File apexFile = mTestUtils.getTestFile(SHIM_V2);
+        final File apkFile = mTestUtils.getTestFile(APK_A);
+        final String output = getDevice().executeAdbCommand("install-multi-package",
+                apexFile.getAbsolutePath(), apkFile.getAbsolutePath());
+        assertThat(output).contains("Created parent session");
+        assertThat(output).contains("Created child session");
+        assertThat(output).contains("Success. Reboot device to apply staged session");
+
+        // Ensure there is only one parent session
+        String[] sessionIds = getDevice().executeShellCommand(
+                "pm get-stagedsessions --only-ready --only-parent --only-sessionid").split("\n");
+        assertThat(sessionIds.length).isEqualTo(1);
+        // Ensure there are two children session
+        sessionIds = getDevice().executeShellCommand(
+                "pm get-stagedsessions --only-ready --only-sessionid").split("\n");
+        assertThat(sessionIds.length).isEqualTo(3);
+    }
+
     private void restartSystemServer() throws Exception {
         // Restart the system server
-        long oldStartTime = getDevice().getProcessByName("system_server").getStartTime();
+        final long oldStartTime = getDevice().getProcessByName("system_server").getStartTime();
+
+        getDevice().enableAdbRoot(); // Need root to restart system server
         assertThat(getDevice().executeShellCommand("am restart")).contains("Restart the system");
+        getDevice().disableAdbRoot();
 
         // Wait for new system server process to start
-        long start = System.currentTimeMillis();
+        final long start = System.currentTimeMillis();
         long newStartTime = oldStartTime;
         while (System.currentTimeMillis() < start + SYSTEM_SERVER_TIMEOUT_MS) {
-            ProcessInfo newPs = getDevice().getProcessByName("system_server");
+            final ProcessInfo newPs = getDevice().getProcessByName("system_server");
             if (newPs != null) {
                 newStartTime = newPs.getStartTime();
                 if (newStartTime != oldStartTime) {

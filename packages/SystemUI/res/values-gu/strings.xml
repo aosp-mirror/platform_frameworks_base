@@ -859,7 +859,7 @@
     <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"ટાઇલને ફરીથી ગોઠવવા માટે આંગળી દબાવીને ખેંચો"</string>
     <string name="drag_to_remove_tiles" msgid="4682194717573850385">"દૂર કરવા માટે અહીં ખેંચો"</string>
     <string name="drag_to_remove_disabled" msgid="933046987838658850">"તમને ઓછામાં ઓછી <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> ટાઇલની જરૂર છે"</string>
-    <string name="qs_edit" msgid="5583565172803472437">"સંપાદિત કરો"</string>
+    <string name="qs_edit" msgid="5583565172803472437">"ફેરફાર કરો"</string>
     <string name="tuner_time" msgid="2450785840990529997">"સમય"</string>
   <string-array name="clock_options">
     <item msgid="3986445361435142273">"કલાક, મિનિટ અને સેકન્ડ બતાવો"</item>

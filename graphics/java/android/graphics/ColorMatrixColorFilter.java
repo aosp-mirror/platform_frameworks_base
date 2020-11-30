@@ -19,6 +19,7 @@ package android.graphics;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.os.Build;
 
 /**
  * A color filter that transforms colors through a 4x5 color matrix. This filter
@@ -107,7 +108,7 @@ public class ColorMatrixColorFilter extends ColorFilter {
      *
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void setColorMatrixArray(@Nullable float[] array) {
         // called '...Array' so that passing null isn't ambiguous
         discardNativeInstance();

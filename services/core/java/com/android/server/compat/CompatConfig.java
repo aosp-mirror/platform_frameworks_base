@@ -192,16 +192,19 @@ final class CompatConfig {
     }
 
     /**
-     * Returns the minimum sdk version for which this change should be enabled (or 0 if it is not
+     * Returns the maximum sdk version for which this change can be opted in (or -1 if it is not
      * target sdk gated).
      */
-    int minTargetSdkForChangeId(long changeId) {
+    int maxTargetSdkForChangeIdOptIn(long changeId) {
         synchronized (mChanges) {
             CompatChange c = mChanges.get(changeId);
             if (c == null) {
-                return 0;
+                return -1;
             }
-            return c.getEnableAfterTargetSdk();
+            if (c.getEnableSinceTargetSdk() != -1) {
+                return c.getEnableSinceTargetSdk() - 1;
+            }
+            return -1;
         }
     }
 
@@ -318,7 +321,7 @@ final class CompatConfig {
         }
     }
 
-    private long[] getAllowedChangesAfterTargetSdkForPackage(String packageName,
+    private long[] getAllowedChangesSinceTargetSdkForPackage(String packageName,
                                                              int targetSdkVersion)
                     throws RemoteException {
         LongArray allowed = new LongArray();
@@ -326,7 +329,7 @@ final class CompatConfig {
             for (int i = 0; i < mChanges.size(); ++i) {
                 try {
                     CompatChange change = mChanges.valueAt(i);
-                    if (change.getEnableAfterTargetSdk() != targetSdkVersion) {
+                    if (change.getEnableSinceTargetSdk() != targetSdkVersion) {
                         continue;
                     }
                     OverrideAllowedState allowedState =
@@ -345,14 +348,14 @@ final class CompatConfig {
     }
 
     /**
-     * Enables all changes with enabledAfterTargetSdk == {@param targetSdkVersion} for
+     * Enables all changes with enabledSinceTargetSdk == {@param targetSdkVersion} for
      * {@param packageName}.
      *
      * @return The number of changes that were toggled.
      */
     int enableTargetSdkChangesForPackage(String packageName, int targetSdkVersion)
             throws RemoteException {
-        long[] changes = getAllowedChangesAfterTargetSdkForPackage(packageName, targetSdkVersion);
+        long[] changes = getAllowedChangesSinceTargetSdkForPackage(packageName, targetSdkVersion);
         for (long changeId : changes) {
             addOverride(changeId, packageName, true);
         }
@@ -361,14 +364,14 @@ final class CompatConfig {
 
 
     /**
-     * Disables all changes with enabledAfterTargetSdk == {@param targetSdkVersion} for
+     * Disables all changes with enabledSinceTargetSdk == {@param targetSdkVersion} for
      * {@param packageName}.
      *
      * @return The number of changes that were toggled.
      */
     int disableTargetSdkChangesForPackage(String packageName, int targetSdkVersion)
             throws RemoteException {
-        long[] changes = getAllowedChangesAfterTargetSdkForPackage(packageName, targetSdkVersion);
+        long[] changes = getAllowedChangesSinceTargetSdkForPackage(packageName, targetSdkVersion);
         for (long changeId : changes) {
             addOverride(changeId, packageName, false);
         }
@@ -448,12 +451,7 @@ final class CompatConfig {
             CompatibilityChangeInfo[] changeInfos = new CompatibilityChangeInfo[mChanges.size()];
             for (int i = 0; i < mChanges.size(); ++i) {
                 CompatChange change = mChanges.valueAt(i);
-                changeInfos[i] = new CompatibilityChangeInfo(change.getId(),
-                        change.getName(),
-                        change.getEnableAfterTargetSdk(),
-                        change.getDisabled(),
-                        change.getLoggingOnly(),
-                        change.getDescription());
+                changeInfos[i] = new CompatibilityChangeInfo(change);
             }
             return changeInfos;
         }

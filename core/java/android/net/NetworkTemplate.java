@@ -37,6 +37,7 @@ import static android.net.wifi.WifiInfo.sanitizeSsid;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.telephony.Annotation.NetworkType;
@@ -159,7 +160,7 @@ public class NetworkTemplate implements Parcelable {
      * Template to match metered {@link ConnectivityManager#TYPE_MOBILE} networks,
      * regardless of IMSI.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static NetworkTemplate buildTemplateMobileWildcard() {
         return new NetworkTemplate(MATCH_MOBILE_WILDCARD, null, null);
     }

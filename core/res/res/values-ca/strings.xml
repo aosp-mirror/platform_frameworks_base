@@ -988,8 +988,8 @@
     <string name="searchview_description_submit" msgid="6771060386117334686">"Envia la consulta"</string>
     <string name="searchview_description_voice" msgid="42360159504884679">"Cerca per veu"</string>
     <string name="enable_explore_by_touch_warning_title" msgid="5095399706284943314">"Vols activar l\'exploració tàctil?"</string>
-    <string name="enable_explore_by_touch_warning_message" product="tablet" msgid="1037295476738940824">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> vol activar l\'exploració tàctil. Quan l\'exploració tàctil està activada, pots escoltar o veure les descripcions del contingut seleccionat o utilitzar gestos per interactuar amb la tauleta."</string>
-    <string name="enable_explore_by_touch_warning_message" product="default" msgid="4312979647356179250">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> vol activar l\'exploració tàctil. Quan l\'exploració per tàctil està activada, pots escoltar o veure les descripcions del contingut seleccionat o utilitzar gestos per interactuar amb el telèfon."</string>
+    <string name="enable_explore_by_touch_warning_message" product="tablet" msgid="1037295476738940824">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> vol activar l\'exploració tàctil. Quan l\'exploració tàctil està activada, pots escoltar o veure les descripcions del contingut seleccionat o utilitzar gestos per interaccionar amb la tauleta."</string>
+    <string name="enable_explore_by_touch_warning_message" product="default" msgid="4312979647356179250">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> vol activar l\'exploració tàctil. Quan l\'exploració per tàctil està activada, pots escoltar o veure les descripcions del contingut seleccionat o utilitzar gestos per interaccionar amb el telèfon."</string>
     <string name="oneMonthDurationPast" msgid="4538030857114635777">"Fa 1 mes"</string>
     <string name="beforeOneMonthDurationPast" msgid="8315149541372065392">"Fa més d\'1 mes"</string>
     <plurals name="last_num_days" formatted="false" msgid="687443109145393632">
@@ -1221,7 +1221,7 @@
     <string name="volume_music_hint_silent_ringtone_selected" msgid="1514829655029062233">"S\'ha establert el so de silenci"</string>
     <string name="volume_call" msgid="7625321655265747433">"Volum en trucada"</string>
     <string name="volume_bluetooth_call" msgid="2930204618610115061">"Volum en trucada per Bluetooth"</string>
-    <string name="volume_alarm" msgid="4486241060751798448">"Volum de l\'alarma"</string>
+    <string name="volume_alarm" msgid="4486241060751798448">"Volum d\'alarma"</string>
     <string name="volume_notification" msgid="6864412249031660057">"Volum de notificacions"</string>
     <string name="volume_unknown" msgid="4041914008166576293">"Volum"</string>
     <string name="volume_icon_description_bluetooth" msgid="7540388479345558400">"Volum del Bluetooth"</string>

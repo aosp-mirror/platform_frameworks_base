@@ -34,6 +34,7 @@ import android.os.Handler;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
+import android.view.Display;
 
 import androidx.test.filters.SmallTest;
 
@@ -41,10 +42,13 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.statusbar.phone.DozeParameters;
+import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.sensors.AsyncSensorManager;
 import com.android.systemui.util.sensors.FakeProximitySensor;
 import com.android.systemui.util.sensors.FakeSensorManager;
+import com.android.systemui.util.sensors.FakeThresholdSensor;
 import com.android.systemui.util.sensors.ProximitySensor;
+import com.android.systemui.util.time.FakeSystemClock;
 import com.android.systemui.util.wakelock.WakeLock;
 import com.android.systemui.util.wakelock.WakeLockFake;
 
@@ -72,10 +76,12 @@ public class DozeTriggersTest extends SysuiTestCase {
     private DockManager mDockManager;
     @Mock
     private ProximitySensor.ProximityCheck mProximityCheck;
+
     private DozeTriggers mTriggers;
     private FakeSensorManager mSensors;
     private Sensor mTapSensor;
     private FakeProximitySensor mProximitySensor;
+    private FakeExecutor mExecutor = new FakeExecutor(new FakeSystemClock());
 
     @Before
     public void setUp() throws Exception {
@@ -87,7 +93,10 @@ public class DozeTriggersTest extends SysuiTestCase {
         WakeLock wakeLock = new WakeLockFake();
         AsyncSensorManager asyncSensorManager =
                 new AsyncSensorManager(mSensors, null, new Handler());
-        mProximitySensor = new FakeProximitySensor(getContext().getResources(), asyncSensorManager);
+
+        FakeThresholdSensor thresholdSensor = new FakeThresholdSensor();
+        thresholdSensor.setLoaded(true);
+        mProximitySensor = new FakeProximitySensor(thresholdSensor,  null, mExecutor);
 
         mTriggers = new DozeTriggers(mContext, mMachine, mHost, mAlarmManager, config, parameters,
                 asyncSensorManager, wakeLock, true, mDockManager, mProximitySensor,
@@ -105,16 +114,17 @@ public class DozeTriggersTest extends SysuiTestCase {
         mTriggers.transitionTo(DozeMachine.State.INITIALIZED, DozeMachine.State.DOZE);
         clearInvocations(mMachine);
 
-        mProximitySensor.setLastEvent(new ProximitySensor.ProximityEvent(true, 1));
+        mProximitySensor.setLastEvent(new ProximitySensor.ThresholdSensorEvent(true, 1));
         captor.getValue().onNotificationAlerted(null /* pulseSuppressedListener */);
         mProximitySensor.alertListeners();
 
         verify(mMachine, never()).requestState(any());
         verify(mMachine, never()).requestPulse(anyInt());
 
-        mProximitySensor.setLastEvent(new ProximitySensor.ProximityEvent(false, 2));
-        captor.getValue().onNotificationAlerted(null /* pulseSuppressedListener */);
+        mProximitySensor.setLastEvent(new ProximitySensor.ThresholdSensorEvent(false, 2));
         mProximitySensor.alertListeners();
+        waitForSensorManager();
+        captor.getValue().onNotificationAlerted(null /* pulseSuppressedListener */);
 
         verify(mMachine).requestPulse(anyInt());
     }
@@ -124,6 +134,7 @@ public class DozeTriggersTest extends SysuiTestCase {
         when(mMachine.getState()).thenReturn(DozeMachine.State.DOZE);
 
         mTriggers.transitionTo(DozeMachine.State.INITIALIZED, DozeMachine.State.DOZE);
+        mTriggers.onScreenState(Display.STATE_OFF);
         waitForSensorManager();
         verify(mSensors).requestTriggerSensor(any(), eq(mTapSensor));
 
@@ -132,6 +143,7 @@ public class DozeTriggersTest extends SysuiTestCase {
                 DozeMachine.State.DOZE_REQUEST_PULSE);
         mTriggers.transitionTo(DozeMachine.State.DOZE_REQUEST_PULSE,
                 DozeMachine.State.DOZE_PULSING);
+        mTriggers.onScreenState(Display.STATE_DOZE);
         waitForSensorManager();
         verify(mSensors).cancelTriggerSensor(any(), eq(mTapSensor));
 
@@ -144,10 +156,12 @@ public class DozeTriggersTest extends SysuiTestCase {
     @Test
     public void transitionToDockedAod_disablesTouchSensors() {
         mTriggers.transitionTo(DozeMachine.State.INITIALIZED, DozeMachine.State.DOZE);
+        mTriggers.onScreenState(Display.STATE_OFF);
         waitForSensorManager();
         verify(mSensors).requestTriggerSensor(any(), eq(mTapSensor));
 
         mTriggers.transitionTo(DozeMachine.State.DOZE, DozeMachine.State.DOZE_AOD_DOCKED);
+        mTriggers.onScreenState(Display.STATE_DOZE);
         waitForSensorManager();
 
         verify(mSensors).cancelTriggerSensor(any(), eq(mTapSensor));

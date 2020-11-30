@@ -91,17 +91,13 @@ Status checkUid(uid_t expectedUid) {
 StatsService::StatsService(const sp<Looper>& handlerLooper, shared_ptr<LogEventQueue> queue)
     : mAnomalyAlarmMonitor(new AlarmMonitor(
               MIN_DIFF_TO_UPDATE_REGISTERED_ALARM_SECS,
-              [](const shared_ptr<IStatsCompanionService>& sc, int64_t timeMillis) {
-                  if (sc != nullptr) {
-                      sc->setAnomalyAlarm(timeMillis);
-                      StatsdStats::getInstance().noteRegisteredAnomalyAlarmChanged();
-                  }
+              [this](const shared_ptr<IStatsCompanionService>& /*sc*/, int64_t timeMillis) {
+                  mProcessor->setAnomalyAlarm(timeMillis);
+                  StatsdStats::getInstance().noteRegisteredAnomalyAlarmChanged();
               },
-              [](const shared_ptr<IStatsCompanionService>& sc) {
-                  if (sc != nullptr) {
-                      sc->cancelAnomalyAlarm();
-                      StatsdStats::getInstance().noteRegisteredAnomalyAlarmChanged();
-                  }
+              [this](const shared_ptr<IStatsCompanionService>& /*sc*/) {
+                  mProcessor->cancelAnomalyAlarm();
+                  StatsdStats::getInstance().noteRegisteredAnomalyAlarmChanged();
               })),
       mPeriodicAlarmMonitor(new AlarmMonitor(
               MIN_DIFF_TO_UPDATE_REGISTERED_ALARM_SECS,
@@ -972,22 +968,6 @@ Status StatsService::informOnePackageRemoved(const string& app, int32_t uid) {
     String16 utf16App = String16(app.c_str());
     mUidMap->removeApp(getElapsedRealtimeNs(), utf16App, uid);
     mConfigManager->RemoveConfigs(uid);
-    return Status::ok();
-}
-
-Status StatsService::informAnomalyAlarmFired() {
-    ENFORCE_UID(AID_SYSTEM);
-
-    VLOG("StatsService::informAnomalyAlarmFired was called");
-    int64_t currentTimeSec = getElapsedRealtimeSec();
-    std::unordered_set<sp<const InternalAlarm>, SpHash<InternalAlarm>> alarmSet =
-            mAnomalyAlarmMonitor->popSoonerThan(static_cast<uint32_t>(currentTimeSec));
-    if (alarmSet.size() > 0) {
-        VLOG("Found an anomaly alarm that fired.");
-        mProcessor->onAnomalyAlarmFired(currentTimeSec * NS_PER_SEC, alarmSet);
-    } else {
-        VLOG("Cannot find an anomaly alarm that fired. Perhaps it was recently cancelled.");
-    }
     return Status::ok();
 }
 

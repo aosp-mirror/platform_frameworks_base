@@ -24,10 +24,6 @@
 
 namespace android::idmap2 {
 
-void BinaryStreamVisitor::Write(const void* value, size_t length) {
-  stream_.write(reinterpret_cast<const char*>(value), length);
-}
-
 void BinaryStreamVisitor::Write8(uint8_t value) {
   stream_.write(reinterpret_cast<char*>(&value), sizeof(uint8_t));
 }
@@ -49,11 +45,11 @@ void BinaryStreamVisitor::WriteString256(const StringPiece& value) {
   stream_.write(buf, sizeof(buf));
 }
 
-void BinaryStreamVisitor::WriteString(const std::string& value) {
-  // pad with null to nearest word boundary; include at least one terminating null
-  size_t padding_size = 4 - (value.size() % 4);
-  Write32(value.size() + padding_size);
-  stream_.write(value.c_str(), value.size());
+void BinaryStreamVisitor::WriteString(const StringPiece& value) {
+  // pad with null to nearest word boundary;
+  size_t padding_size = CalculatePadding(value.size());
+  Write32(value.size());
+  stream_.write(value.data(), value.size());
   stream_.write("\0\0\0\0", padding_size);
 }
 
@@ -67,7 +63,7 @@ void BinaryStreamVisitor::visit(const IdmapHeader& header) {
   Write32(header.GetTargetCrc());
   Write32(header.GetOverlayCrc());
   Write32(header.GetFulfilledPolicies());
-  Write8(static_cast<uint8_t>(header.GetEnforceOverlayable()));
+  Write32(static_cast<uint8_t>(header.GetEnforceOverlayable()));
   WriteString256(header.GetTargetPath());
   WriteString256(header.GetOverlayPath());
   WriteString(header.GetDebugInfo());
@@ -76,8 +72,16 @@ void BinaryStreamVisitor::visit(const IdmapHeader& header) {
 void BinaryStreamVisitor::visit(const IdmapData& data) {
   for (const auto& target_entry : data.GetTargetEntries()) {
     Write32(target_entry.target_id);
-    Write8(target_entry.data_type);
-    Write32(target_entry.data_value);
+    Write32(target_entry.overlay_id);
+  }
+
+  static constexpr uint16_t kValueSize = 8U;
+  for (const auto& target_entry : data.GetTargetInlineEntries()) {
+    Write32(target_entry.target_id);
+    Write16(kValueSize);
+    Write8(0U);  // padding
+    Write8(target_entry.value.data_type);
+    Write32(target_entry.value.data_value);
   }
 
   for (const auto& overlay_entry : data.GetOverlayEntries()) {
@@ -85,16 +89,18 @@ void BinaryStreamVisitor::visit(const IdmapData& data) {
     Write32(overlay_entry.target_id);
   }
 
-  Write(data.GetStringPoolData(), data.GetHeader()->GetStringPoolLength());
+  WriteString(data.GetStringPoolData());
 }
 
 void BinaryStreamVisitor::visit(const IdmapData::Header& header) {
   Write8(header.GetTargetPackageId());
   Write8(header.GetOverlayPackageId());
+  Write8(0U);  // padding
+  Write8(0U);  // padding
   Write32(header.GetTargetEntryCount());
+  Write32(header.GetTargetInlineEntryCount());
   Write32(header.GetOverlayEntryCount());
   Write32(header.GetStringPoolIndexOffset());
-  Write32(header.GetStringPoolLength());
 }
 
 }  // namespace android::idmap2

@@ -30,14 +30,20 @@ The first line defines the general parameters of the animation:
 
 It is followed by a number of rows of the form:
 
-    TYPE COUNT PAUSE PATH [#RGBHEX [CLOCK1 [CLOCK2]]]
+    TYPE COUNT PAUSE PATH [FADE [#RGBHEX [CLOCK1 [CLOCK2]]]]
 
   * **TYPE:** a single char indicating what type of animation segment this is:
       + `p` -- this part will play unless interrupted by the end of the boot
       + `c` -- this part will play to completion, no matter what
+      + `f` -- same as `p` but in addition the specified number of frames is being faded out while
+        continue playing. Only the first interrupted `f` part is faded out, other subsequent `f`
+        parts are skipped
   * **COUNT:** how many times to play the animation, or 0 to loop forever until boot is complete
   * **PAUSE:** number of FRAMES to delay after this part ends
   * **PATH:** directory in which to find the frames for this part (e.g. `part0`)
+  * **FADE:** _(ONLY FOR `f` TYPE)_ number of frames to fade out when interrupted where `0` means
+              _immediately_ which makes `f ... 0` behave like `p` and doesn't count it as a fading
+              part
   * **RGBHEX:** _(OPTIONAL)_ a background color, specified as `#RRGGBB`
   * **CLOCK1, CLOCK2:** _(OPTIONAL)_ the coordinates at which to draw the current time (for watches):
       + If only `CLOCK1` is provided it is the y-coordinate of the clock and the x-coordinate

@@ -18,7 +18,6 @@ package android.service.autofill.augmented;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
-import android.annotation.TestApi;
 import android.graphics.Rect;
 import android.service.autofill.augmented.AugmentedAutofillService.AutofillProxy;
 import android.view.View;
@@ -36,7 +35,6 @@ import java.io.PrintWriter;
  * @hide
  */
 @SystemApi
-@TestApi
 public abstract class PresentationParams {
 
     // /** @hide */
@@ -61,7 +59,6 @@ public abstract class PresentationParams {
      * @hide
      */
     @SystemApi
-    @TestApi
     public abstract static class Area {
 
         /** @hide */

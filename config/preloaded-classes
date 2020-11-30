@@ -4539,7 +4539,6 @@ android.os.AsyncTask
 android.os.BadParcelableException
 android.os.BaseBundle$NoImagePreloadHolder
 android.os.BaseBundle
-android.os.BasicShellCommandHandler
 android.os.BatteryManager
 android.os.BatteryManagerInternal
 android.os.BatteryProperty$1
@@ -9565,6 +9564,7 @@ com.android.internal.widget.VerifyCredentialResponse$1
 com.android.internal.widget.VerifyCredentialResponse
 com.android.internal.widget.ViewClippingUtil$ClippingParameters
 com.android.internal.widget.ViewClippingUtil
+com.android.modules.utils.BasicShellCommandHandler
 com.android.okhttp.Address
 com.android.okhttp.AndroidShimResponseCache
 com.android.okhttp.Authenticator

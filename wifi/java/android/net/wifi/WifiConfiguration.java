@@ -873,7 +873,7 @@ public class WifiConfiguration implements Parcelable {
      * @hide
      * Number of reports indicating no Internet Access
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public int numNoInternetAccessReports;
 
     /**
@@ -893,7 +893,7 @@ public class WifiConfiguration implements Parcelable {
      * this configuration and selects "don't ask again".
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public boolean noInternetAccessExpected;
 
     /**
@@ -933,7 +933,7 @@ public class WifiConfiguration implements Parcelable {
      * @deprecated only kept for @UnsupportedAppUsage
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public boolean selfAdded;
 
     /**

@@ -488,6 +488,18 @@ public class PackageManagerServiceUtils {
     }
 
     /**
+     * Returns true if the signature set of the package is identical to the specified signature
+     * set or if the signing details of the package are unknown.
+     */
+    public static boolean comparePackageSignatures(PackageSetting pkgSetting,
+            Signature[] signatures) {
+        return pkgSetting.signatures.mSigningDetails
+                == PackageParser.SigningDetails.UNKNOWN
+                || compareSignatures(pkgSetting.signatures.mSigningDetails.signatures, signatures)
+                == PackageManager.SIGNATURE_MATCH;
+    }
+
+    /**
      * Used for backward compatibility to make sure any packages with
      * certificate chains get upgraded to the new style. {@code existingSigs}
      * will be in the old format (since they were stored on disk from before the

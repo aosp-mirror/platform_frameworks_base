@@ -502,7 +502,7 @@ public final class AudioAttributes implements Parcelable {
     @Retention(RetentionPolicy.SOURCE)
     public @interface CapturePolicy {}
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private int mUsage = USAGE_UNKNOWN;
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private int mContentType = CONTENT_TYPE_UNKNOWN;
@@ -511,7 +511,7 @@ public final class AudioAttributes implements Parcelable {
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private int mFlags = 0x0;
     private HashSet<String> mTags;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private String mFormattedTags;
     private Bundle mBundle; // lazy-initialized, may be null
 

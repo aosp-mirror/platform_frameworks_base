@@ -61,6 +61,8 @@ import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.function.Consumer;
 
 import javax.inject.Inject;
@@ -432,7 +434,7 @@ public class NotificationShadeWindowController implements Callback, Dumpable,
     }
 
     private void applyHasTopUi(State state) {
-        mHasTopUiChanged = state.mForceHasTopUi || isExpanded(state);
+        mHasTopUiChanged = !state.mComponentsForcingTopUi.isEmpty() || isExpanded(state);
     }
 
     private void applyNotTouchable(State state) {
@@ -635,12 +637,17 @@ public class NotificationShadeWindowController implements Callback, Dumpable,
         apply(mCurrentState);
     }
 
-    public boolean getForceHasTopUi() {
-        return mCurrentState.mForceHasTopUi;
-    }
-
-    public void setForceHasTopUi(boolean forceHasTopUi) {
-        mCurrentState.mForceHasTopUi = forceHasTopUi;
+    /**
+     * SystemUI may need top-ui to avoid jank when performing animations.  After the
+     * animation is performed, the component should remove itself from the list of features that
+     * are forcing SystemUI to be top-ui.
+     */
+    public void setRequestTopUi(boolean requestTopUi, String componentTag) {
+        if (requestTopUi) {
+            mCurrentState.mComponentsForcingTopUi.add(componentTag);
+        } else {
+            mCurrentState.mComponentsForcingTopUi.remove(componentTag);
+        }
         apply(mCurrentState);
     }
 
@@ -663,7 +670,7 @@ public class NotificationShadeWindowController implements Callback, Dumpable,
         boolean mBackdropShowing;
         boolean mWallpaperSupportsAmbientMode;
         boolean mNotTouchable;
-        boolean mForceHasTopUi;
+        Set<String> mComponentsForcingTopUi = new HashSet<>();
 
         /**
          * The {@link StatusBar} state from the status bar.

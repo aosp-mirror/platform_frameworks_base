@@ -98,7 +98,7 @@ public class CompatConfigTest {
     @Test
     public void testTargetSdkChangeDisabled() throws Exception {
         CompatConfig compatConfig = CompatConfigBuilder.create(mBuildClassifier, mContext)
-                .addTargetSdkChangeWithId(2, 1234L)
+                .addEnableAfterSdkChangeWithId(2, 1234L)
                 .build();
 
         assertThat(compatConfig.isChangeEnabled(1234L,
@@ -109,7 +109,7 @@ public class CompatConfigTest {
     @Test
     public void testTargetSdkChangeEnabled() throws Exception {
         CompatConfig compatConfig = CompatConfigBuilder.create(mBuildClassifier, mContext)
-                .addTargetSdkChangeWithId(2, 1234L)
+                .addEnableAfterSdkChangeWithId(2, 1234L)
                 .build();
 
         assertThat(compatConfig.isChangeEnabled(1234L,
@@ -119,7 +119,7 @@ public class CompatConfigTest {
     @Test
     public void testDisabledOverrideTargetSdkChange() throws Exception {
         CompatConfig compatConfig = CompatConfigBuilder.create(mBuildClassifier, mContext)
-                .addTargetSdkDisabledChangeWithId(2, 1234L)
+                .addEnableAfterSdkChangeWithIdDefaultDisabled(2, 1234L)
                 .build();
 
         assertThat(compatConfig.isChangeEnabled(1234L,
@@ -293,8 +293,8 @@ public class CompatConfigTest {
         CompatConfig compatConfig = CompatConfigBuilder.create(mBuildClassifier, mContext)
                 .addEnabledChangeWithId(1L)
                 .addDisabledChangeWithId(2L)
-                .addTargetSdkChangeWithId(3, 3L)
-                .addTargetSdkChangeWithId(4, 4L)
+                .addEnableSinceSdkChangeWithId(3, 3L)
+                .addEnableSinceSdkChangeWithId(4, 4L)
                 .build();
         ApplicationInfo applicationInfo = ApplicationInfoBuilder.create()
                 .withPackageName("foo.bar")
@@ -314,8 +314,8 @@ public class CompatConfigTest {
         CompatConfig compatConfig = CompatConfigBuilder.create(mBuildClassifier, mContext)
                 .addEnabledChangeWithId(1L)
                 .addDisabledChangeWithId(2L)
-                .addTargetSdkChangeWithId(3, 3L)
-                .addTargetSdkChangeWithId(4, 4L)
+                .addEnableSinceSdkChangeWithId(3, 3L)
+                .addEnableSinceSdkChangeWithId(4, 4L)
                 .build();
         ApplicationInfo applicationInfo = ApplicationInfoBuilder.create()
                 .withPackageName("foo.bar")

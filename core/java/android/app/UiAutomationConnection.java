@@ -25,6 +25,7 @@ import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.hardware.input.InputManager;
 import android.os.Binder;
+import android.os.Build;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
@@ -88,7 +89,7 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
 
     private int mOwningUid;
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public UiAutomationConnection() {
     }
 

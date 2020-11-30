@@ -241,7 +241,7 @@
     <string name="global_action_power_off" msgid="4404936470711393203">"Isključi"</string>
     <string name="global_action_power_options" msgid="1185286119330160073">"Napajanje"</string>
     <string name="global_action_restart" msgid="4678451019561687074">"Restartuj"</string>
-    <string name="global_action_emergency" msgid="1387617624177105088">"Hitni poziv"</string>
+    <string name="global_action_emergency" msgid="1387617624177105088">"Hitan poziv"</string>
     <string name="global_action_bug_report" msgid="5127867163044170003">"Izveštaj o grešci"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"Završi sesiju"</string>
     <string name="global_action_screenshot" msgid="2610053466156478564">"Snimak ekrana"</string>
@@ -1815,7 +1815,7 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Ažurirao je administrator"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Izbrisao je administrator"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"Potvrdi"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="5997766757551917769">"Da bi se produžilo trajanje baterije, Ušteda baterije:\n\n•uključuje tamnu temu\n•isključuje ili ograničava aktivnosti u pozadini, neke vizuelne efekte i druge funkcije, na primer, „Ok Google“\n\n"<annotation id="url">"Saznajte više"</annotation></string>
+    <string name="battery_saver_description_with_learn_more" msgid="5997766757551917769">"Da bi se produžilo trajanje baterije, Ušteda baterije:\n\n•uključuje tamnu temu\n•isključuje ili ograničava aktivnosti u pozadini, neke vizuelne efekte i druge funkcije, na primer „Ok Google“\n\n"<annotation id="url">"Saznajte više"</annotation></string>
     <string name="battery_saver_description" msgid="8587408568232177204">"Da bi se produžilo trajanje baterije, Ušteda baterije:\n\n•uključuje tamnu temu\n•isključuje ili ograničava aktivnosti u pozadini, neke vizuelne efekte i druge funkcije, na primer, „Ok Google“"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Da bi se smanjila potrošnja podataka, Ušteda podataka sprečava neke aplikacije da šalju ili primaju podatke u pozadini. Aplikacija koju trenutno koristite može da pristupa podacima, ali će to činiti ređe. Na primer, slike se neće prikazivati dok ih ne dodirnete."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Želite da uključite Uštedu podataka?"</string>

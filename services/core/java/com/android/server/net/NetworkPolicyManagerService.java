@@ -96,7 +96,9 @@ import static com.android.internal.util.XmlUtils.readBooleanAttribute;
 import static com.android.internal.util.XmlUtils.readIntAttribute;
 import static com.android.internal.util.XmlUtils.readLongAttribute;
 import static com.android.internal.util.XmlUtils.readStringAttribute;
+import static com.android.internal.util.XmlUtils.readThisIntArrayXml;
 import static com.android.internal.util.XmlUtils.writeBooleanAttribute;
+import static com.android.internal.util.XmlUtils.writeIntArrayXml;
 import static com.android.internal.util.XmlUtils.writeIntAttribute;
 import static com.android.internal.util.XmlUtils.writeLongAttribute;
 import static com.android.internal.util.XmlUtils.writeStringAttribute;
@@ -229,6 +231,7 @@ import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.StatLogger;
+import com.android.internal.util.XmlUtils;
 import com.android.server.EventLogTags;
 import com.android.server.LocalServices;
 import com.android.server.ServiceThread;
@@ -239,6 +242,7 @@ import com.android.server.usage.AppStandbyInternal.AppIdleStateChangeListener;
 import libcore.io.IoUtils;
 
 import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
 import java.io.File;
@@ -313,7 +317,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private static final int VERSION_ADDED_NETWORK_ID = 9;
     private static final int VERSION_SWITCH_UID = 10;
     private static final int VERSION_ADDED_CYCLE = 11;
-    private static final int VERSION_LATEST = VERSION_ADDED_CYCLE;
+    private static final int VERSION_ADDED_NETWORK_TYPES = 12;
+    private static final int VERSION_LATEST = VERSION_ADDED_NETWORK_TYPES;
 
     @VisibleForTesting
     public static final int TYPE_WARNING = SystemMessage.NOTE_NET_WARNING;
@@ -332,6 +337,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private static final String TAG_WHITELIST = "whitelist";
     private static final String TAG_RESTRICT_BACKGROUND = "restrict-background";
     private static final String TAG_REVOKED_RESTRICT_BACKGROUND = "revoked-restrict-background";
+    private static final String TAG_XML_UTILS_INT_ARRAY = "int-array";
 
     private static final String ATTR_VERSION = "version";
     private static final String ATTR_RESTRICT_BACKGROUND = "restrictBackground";
@@ -360,6 +366,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private static final String ATTR_USAGE_BYTES = "usageBytes";
     private static final String ATTR_USAGE_TIME = "usageTime";
     private static final String ATTR_OWNER_PACKAGE = "ownerPackage";
+    private static final String ATTR_NETWORK_TYPES = "networkTypes";
+    private static final String ATTR_XML_UTILS_NAME = "name";
 
     private static final String ACTION_ALLOW_BACKGROUND =
             "com.android.server.net.action.ALLOW_BACKGROUND";
@@ -518,8 +526,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private final SparseBooleanArray mRestrictBackgroundAllowlistRevokedUids =
             new SparseBooleanArray();
 
+    final Object mMeteredIfacesLock = new Object();
     /** Set of ifaces that are metered. */
-    @GuardedBy("mNetworkPoliciesSecondLock")
+    @GuardedBy("mMeteredIfacesLock")
     private ArraySet<String> mMeteredIfaces = new ArraySet<>();
     /** Set of over-limit templates that have been notified. */
     @GuardedBy("mNetworkPoliciesSecondLock")
@@ -550,6 +559,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     /** Set of all merged subscriberId as of last update */
     @GuardedBy("mNetworkPoliciesSecondLock")
     private List<String[]> mMergedSubscriberIds = new ArrayList<>();
+    /** Map from subId to carrierConfig as of last update */
+    @GuardedBy("mNetworkPoliciesSecondLock")
+    private final SparseArray<PersistableBundle> mSubIdToCarrierConfig =
+            new SparseArray<PersistableBundle>();
 
     /**
      * Indicates the uids restricted by admin from accessing metered data. It's a mapping from
@@ -1177,7 +1190,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             final long totalBytes = getTotalBytes(policy.template, cycleStart, cycleEnd);
 
             // Carrier might want to manage notifications themselves
-            final PersistableBundle config = mCarrierConfigManager.getConfigForSubId(subId);
+            final PersistableBundle config = mSubIdToCarrierConfig.get(subId);
             if (!CarrierConfigManager.isConfigForIdentifiedCarrier(config)) {
                 if (LOGV) Slog.v(TAG, "isConfigForIdentifiedCarrier returned false");
                 // Don't show notifications until we confirm that the loaded config is from an
@@ -1822,8 +1835,11 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
         final List<String[]> mergedSubscriberIdsList = new ArrayList();
         final SparseArray<String> subIdToSubscriberId = new SparseArray<>(subList.size());
+        final SparseArray<PersistableBundle> subIdToCarrierConfig =
+                new SparseArray<PersistableBundle>();
         for (final SubscriptionInfo sub : subList) {
-            final TelephonyManager tmSub = tm.createForSubscriptionId(sub.getSubscriptionId());
+            final int subId = sub.getSubscriptionId();
+            final TelephonyManager tmSub = tm.createForSubscriptionId(subId);
             final String subscriberId = tmSub.getSubscriberId();
             if (!TextUtils.isEmpty(subscriberId)) {
                 subIdToSubscriberId.put(tmSub.getSubscriptionId(), subscriberId);
@@ -1834,6 +1850,13 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             final String[] mergedSubscriberId = ArrayUtils.defeatNullable(
                     tmSub.getMergedImsisFromGroup());
             mergedSubscriberIdsList.add(mergedSubscriberId);
+
+            final PersistableBundle config = mCarrierConfigManager.getConfigForSubId(subId);
+            if (config != null) {
+                subIdToCarrierConfig.put(subId, config);
+            } else {
+                Slog.e(TAG, "Missing CarrierConfig for subId " + subId);
+            }
         }
 
         synchronized (mNetworkPoliciesSecondLock) {
@@ -1844,6 +1867,12 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             }
 
             mMergedSubscriberIds = mergedSubscriberIdsList;
+
+            mSubIdToCarrierConfig.clear();
+            for (int i = 0; i < subIdToCarrierConfig.size(); i++) {
+                mSubIdToCarrierConfig.put(subIdToCarrierConfig.keyAt(i),
+                        subIdToCarrierConfig.valueAt(i));
+            }
         }
 
         Trace.traceEnd(TRACE_TAG_NETWORK);
@@ -1972,13 +2001,15 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
 
         // Remove quota from any interfaces that are no longer metered.
-        for (int i = mMeteredIfaces.size() - 1; i >= 0; i--) {
-            final String iface = mMeteredIfaces.valueAt(i);
-            if (!newMeteredIfaces.contains(iface)) {
-                removeInterfaceQuotaAsync(iface);
+        synchronized (mMeteredIfacesLock) {
+            for (int i = mMeteredIfaces.size() - 1; i >= 0; i--) {
+                final String iface = mMeteredIfaces.valueAt(i);
+                if (!newMeteredIfaces.contains(iface)) {
+                    removeInterfaceQuotaAsync(iface);
+                }
             }
+            mMeteredIfaces = newMeteredIfaces;
         }
-        mMeteredIfaces = newMeteredIfaces;
 
         final ContentResolver cr = mContext.getContentResolver();
         final boolean quotaEnabled = Settings.Global.getInt(cr,
@@ -2030,7 +2061,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             mSubscriptionOpportunisticQuota.put(subId, quotaBytes);
         }
 
-        final String[] meteredIfaces = mMeteredIfaces.toArray(new String[mMeteredIfaces.size()]);
+        final String[] meteredIfaces;
+        synchronized (mMeteredIfacesLock) {
+            meteredIfaces = mMeteredIfaces.toArray(new String[mMeteredIfaces.size()]);
+        }
         mHandler.obtainMessage(MSG_METERED_IFACES_CHANGED, meteredIfaces).sendToTarget();
 
         mHandler.obtainMessage(MSG_ADVISE_PERSIST_THRESHOLD, lowestRule).sendToTarget();
@@ -2158,7 +2192,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 }
             }
         } else {
-            final PersistableBundle config = mCarrierConfigManager.getConfigForSubId(subId);
+            final PersistableBundle config = mSubIdToCarrierConfig.get(subId);
             final int currentCycleDay;
             if (policy.cycleRule.isMonthly()) {
                 currentCycleDay = policy.cycleRule.start.getDayOfMonth();
@@ -2311,13 +2345,25 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                         }
 
                         final int subId = readIntAttribute(in, ATTR_SUB_ID);
+                        final String ownerPackage = readStringAttribute(in, ATTR_OWNER_PACKAGE);
+
+                        if (version >= VERSION_ADDED_NETWORK_TYPES) {
+                            final int depth = in.getDepth();
+                            while (XmlUtils.nextElementWithin(in, depth)) {
+                                if (TAG_XML_UTILS_INT_ARRAY.equals(in.getName())
+                                        && ATTR_NETWORK_TYPES.equals(
+                                                readStringAttribute(in, ATTR_XML_UTILS_NAME))) {
+                                    final int[] networkTypes =
+                                            readThisIntArrayXml(in, TAG_XML_UTILS_INT_ARRAY, null);
+                                    builder.setNetworkTypes(networkTypes);
+                                }
+                            }
+                        }
+
                         final SubscriptionPlan plan = builder.build();
                         mSubscriptionPlans.put(subId, ArrayUtils.appendElement(
                                 SubscriptionPlan.class, mSubscriptionPlans.get(subId), plan));
-
-                        final String ownerPackage = readStringAttribute(in, ATTR_OWNER_PACKAGE);
                         mSubscriptionPlansOwner.put(subId, ownerPackage);
-
                     } else if (TAG_UID_POLICY.equals(tag)) {
                         final int uid = readIntAttribute(in, ATTR_UID);
                         final int policy = readIntAttribute(in, ATTR_POLICY);
@@ -2513,6 +2559,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     writeIntAttribute(out, ATTR_LIMIT_BEHAVIOR, plan.getDataLimitBehavior());
                     writeLongAttribute(out, ATTR_USAGE_BYTES, plan.getDataUsageBytes());
                     writeLongAttribute(out, ATTR_USAGE_TIME, plan.getDataUsageTime());
+                    try {
+                        writeIntArrayXml(plan.getNetworkTypes(), ATTR_NETWORK_TYPES, out);
+                    } catch (XmlPullParserException ignored) { }
                     out.endTag(null, TAG_SUBSCRIPTION_PLAN);
                 }
             }
@@ -3310,7 +3359,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             // let in core system components (like the Settings app).
             final String ownerPackage = mSubscriptionPlansOwner.get(subId);
             if (Objects.equals(ownerPackage, callingPackage)
-                    || (UserHandle.getCallingAppId() == android.os.Process.SYSTEM_UID)) {
+                    || (UserHandle.getCallingAppId() == android.os.Process.SYSTEM_UID)
+                    || (UserHandle.getCallingAppId() == android.os.Process.PHONE_UID)) {
                 return mSubscriptionPlans.get(subId);
             } else {
                 Log.w(TAG, "Not returning plans because caller " + callingPackage
@@ -3436,7 +3486,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 fout.print("Restrict background: "); fout.println(mRestrictBackground);
                 fout.print("Restrict power: "); fout.println(mRestrictPower);
                 fout.print("Device idle: "); fout.println(mDeviceIdleMode);
-                fout.print("Metered ifaces: "); fout.println(mMeteredIfaces);
+                synchronized (mMeteredIfacesLock) {
+                    fout.print("Metered ifaces: ");
+                    fout.println(mMeteredIfaces);
+                }
 
                 fout.println();
                 fout.print("mRestrictBackgroundLowPowerMode: " + mRestrictBackgroundLowPowerMode);
@@ -3867,7 +3920,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                         // quick check: if this uid doesn't have INTERNET permission, it
                         // doesn't have network access anyway, so it is a waste to mess
                         // with it here.
-                        if (hasInternetPermissionUL(uid)) {
+                        if (hasInternetPermissionUL(uid) && !isUidForegroundOnRestrictPowerUL(uid)) {
                             uidRules.put(uid, FIREWALL_RULE_DENY);
                         }
                     }
@@ -4632,7 +4685,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 }
                 case MSG_LIMIT_REACHED: {
                     final String iface = (String) msg.obj;
-                    synchronized (mNetworkPoliciesSecondLock) {
+                    synchronized (mMeteredIfacesLock) {
                         // fast return if not needed.
                         if (!mMeteredIfaces.contains(iface)) {
                             return true;
@@ -5274,7 +5327,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 isBackgroundRestricted = mRestrictBackground;
             }
             final boolean isNetworkMetered;
-            synchronized (mNetworkPoliciesSecondLock) {
+            synchronized (mMeteredIfacesLock) {
                 isNetworkMetered = mMeteredIfaces.contains(ifname);
             }
             final boolean ret = isUidNetworkingBlockedInternal(uid, uidRules, isNetworkMetered,

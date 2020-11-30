@@ -1396,7 +1396,7 @@ public class DevicePolicyManager {
      * sent to the parent user.
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static final String ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED
             = "android.app.action.DEVICE_POLICY_MANAGER_STATE_CHANGED";
 
@@ -1465,7 +1465,7 @@ public class DevicePolicyManager {
      * @see #createAdminSupportIntent(String)
      * @hide
      */
-    @TestApi @SystemApi
+    @SystemApi
     public static final String EXTRA_RESTRICTION = "android.app.extra.RESTRICTION";
 
     /**
@@ -2688,13 +2688,11 @@ public class DevicePolicyManager {
      * </ul>
      */
     @SystemApi
-    @TestApi
     public static final String ACCOUNT_FEATURE_DEVICE_OR_PROFILE_OWNER_ALLOWED =
             "android.account.DEVICE_OR_PROFILE_OWNER_ALLOWED";
 
     /** @hide See {@link #ACCOUNT_FEATURE_DEVICE_OR_PROFILE_OWNER_ALLOWED} */
     @SystemApi
-    @TestApi
     public static final String ACCOUNT_FEATURE_DEVICE_OR_PROFILE_OWNER_DISALLOWED =
             "android.account.DEVICE_OR_PROFILE_OWNER_DISALLOWED";
 
@@ -4124,7 +4122,7 @@ public class DevicePolicyManager {
     }
 
     /** @hide per-user version */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public long getMaximumTimeToLock(@Nullable ComponentName admin, int userHandle) {
         if (mService != null) {
             try {
@@ -4206,7 +4204,7 @@ public class DevicePolicyManager {
     }
 
     /** @hide per-user version */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     @RequiresFeature(PackageManager.FEATURE_SECURE_LOCK_SCREEN)
     public long getRequiredStrongAuthTimeout(@Nullable ComponentName admin, @UserIdInt int userId) {
         if (mService != null) {
@@ -4508,7 +4506,7 @@ public class DevicePolicyManager {
      *            of the device admin that sets the proxy.
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public @Nullable ComponentName setGlobalProxy(@NonNull ComponentName admin, Proxy proxySpec,
             List<String> exclusionList ) {
         throwIfParentInstance("setGlobalProxy");
@@ -5718,8 +5716,8 @@ public class DevicePolicyManager {
      * System apps can always bypass VPN.
      * <p> Note that the system doesn't update the allowlist when packages are installed or
      * uninstalled, the admin app must call this method to keep the list up to date.
-     * <p> When {@code lockdownEnabled} is false {@code lockdownWhitelist} is ignored . When
-     * {@code lockdownEnabled} is {@code true} and {@code lockdownWhitelist} is {@code null} or
+     * <p> When {@code lockdownEnabled} is false {@code lockdownAllowlist} is ignored . When
+     * {@code lockdownEnabled} is {@code true} and {@code lockdownAllowlist} is {@code null} or
      * empty, only system apps can bypass VPN.
      * <p> Setting always-on VPN package to {@code null} or using
      * {@link #setAlwaysOnVpnPackage(ComponentName, String, boolean)} clears lockdown allowlist.
@@ -5728,24 +5726,24 @@ public class DevicePolicyManager {
      *         to remove an existing always-on VPN configuration
      * @param lockdownEnabled {@code true} to disallow networking when the VPN is not connected or
      *         {@code false} otherwise. This has no effect when clearing.
-     * @param lockdownWhitelist Packages that will be able to access the network directly when VPN
+     * @param lockdownAllowlist Packages that will be able to access the network directly when VPN
      *         is in lockdown mode but not connected. Has no effect when clearing.
      * @throws SecurityException if {@code admin} is not a device or a profile
      *         owner.
      * @throws NameNotFoundException if {@code vpnPackage} or one of
-     *         {@code lockdownWhitelist} is not installed.
+     *         {@code lockdownAllowlist} is not installed.
      * @throws UnsupportedOperationException if {@code vpnPackage} exists but does
      *         not support being set as always-on, or if always-on VPN is not
      *         available.
      */
     public void setAlwaysOnVpnPackage(@NonNull ComponentName admin, @Nullable String vpnPackage,
-            boolean lockdownEnabled, @Nullable Set<String> lockdownWhitelist)
+            boolean lockdownEnabled, @Nullable Set<String> lockdownAllowlist)
             throws NameNotFoundException {
         throwIfParentInstance("setAlwaysOnVpnPackage");
         if (mService != null) {
             try {
                 mService.setAlwaysOnVpnPackage(admin, vpnPackage, lockdownEnabled,
-                        lockdownWhitelist == null ? null : new ArrayList<>(lockdownWhitelist));
+                        lockdownAllowlist == null ? null : new ArrayList<>(lockdownAllowlist));
             } catch (ServiceSpecificException e) {
                 switch (e.errorCode) {
                     case ERROR_VPN_PACKAGE_NOT_FOUND:
@@ -5820,9 +5818,9 @@ public class DevicePolicyManager {
         throwIfParentInstance("getAlwaysOnVpnLockdownWhitelist");
         if (mService != null) {
             try {
-                final List<String> whitelist =
-                        mService.getAlwaysOnVpnLockdownWhitelist(admin);
-                return whitelist == null ? null : new HashSet<>(whitelist);
+                final List<String> allowlist =
+                        mService.getAlwaysOnVpnLockdownAllowlist(admin);
+                return allowlist == null ? null : new HashSet<>(allowlist);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -6321,7 +6319,7 @@ public class DevicePolicyManager {
     /**
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void setActiveAdmin(@NonNull ComponentName policyReceiver, boolean refreshing,
             int userHandle) {
         if (mService != null) {
@@ -6682,8 +6680,7 @@ public class DevicePolicyManager {
      * @hide
      */
     @SystemApi
-    @TestApi
-    @SuppressLint("Doclava125")
+    @SuppressLint("RequiresPermission")
     public boolean isDeviceManaged() {
         try {
             return mService.hasDeviceOwner();
@@ -7036,7 +7033,7 @@ public class DevicePolicyManager {
     /**
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public @Nullable ComponentName getProfileOwnerAsUser(final int userId) {
         if (mService != null) {
             try {
@@ -7451,7 +7448,7 @@ public class DevicePolicyManager {
     }
 
     /** @hide per-user version */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     @RequiresFeature(PackageManager.FEATURE_SECURE_LOCK_SCREEN)
     public @Nullable List<PersistableBundle> getTrustAgentConfiguration(
             @Nullable ComponentName admin, @NonNull ComponentName agent, int userHandle) {
@@ -10395,8 +10392,7 @@ public class DevicePolicyManager {
      * @hide
      */
     @SystemApi
-    @TestApi
-    @SuppressLint("Doclava125")
+    @SuppressLint("RequiresPermission")
     public @Nullable CharSequence getDeviceOwnerOrganizationName() {
         try {
             return mService.getDeviceOwnerOrganizationName();
@@ -10641,7 +10637,7 @@ public class DevicePolicyManager {
         }
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private void throwIfParentInstance(String functionName) {
         if (mParentInstance) {
             throw new SecurityException(functionName + " cannot be called on the parent instance");

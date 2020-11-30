@@ -179,6 +179,11 @@ interface ITelecomService {
     boolean isInCall(String callingPackage, String callingFeatureId);
 
     /**
+     * @see TelecomServiceImpl#hasCompanionInCallServiceAccess
+     */
+    boolean hasCompanionInCallServiceAccess(String callingPackage);
+
+    /**
      * @see TelecomServiceImpl#isInManagedCall
      */
     boolean isInManagedCall(String callingPackage, String callingFeatureId);
@@ -191,7 +196,7 @@ interface ITelecomService {
     /**
      * @see TelecomServiceImpl#getCallState
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     int getCallState();
 
     /**

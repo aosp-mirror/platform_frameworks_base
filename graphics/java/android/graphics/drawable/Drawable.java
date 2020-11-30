@@ -46,6 +46,7 @@ import android.graphics.PorterDuffColorFilter;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.graphics.Xfermode;
+import android.os.Build;
 import android.os.Trace;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
@@ -1719,7 +1720,7 @@ public abstract class Drawable {
      *
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static BlendMode parseBlendMode(int value, BlendMode defaultMode) {
         switch (value) {
             case 3: return BlendMode.SRC_OVER;

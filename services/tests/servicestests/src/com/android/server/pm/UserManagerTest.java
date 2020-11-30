@@ -639,7 +639,7 @@ public final class UserManagerTest {
         UserInfo user1 = createUser("User 1", 0);
         UserInfo user2 = createUser("User 2", 0);
         long[] serialNumbersOfUsers = mUserManager.getSerialNumbersOfUsers(false);
-        assertThat(serialNumbersOfUsers).asList().containsAllOf(
+        assertThat(serialNumbersOfUsers).asList().containsAtLeast(
                 (long) user1.serialNumber, (long) user2.serialNumber);
     }
 

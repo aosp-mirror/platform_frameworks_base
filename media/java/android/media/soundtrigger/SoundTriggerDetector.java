@@ -28,6 +28,7 @@ import android.hardware.soundtrigger.SoundTrigger;
 import android.hardware.soundtrigger.SoundTrigger.ModuleProperties;
 import android.hardware.soundtrigger.SoundTrigger.RecognitionConfig;
 import android.media.AudioFormat;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -192,7 +193,7 @@ public final class SoundTriggerDetector {
          * @hide
          */
         @Nullable
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public byte[] getData() {
             if (!mTriggerAvailable) {
                 return mData;
@@ -220,7 +221,7 @@ public final class SoundTriggerDetector {
          * @hide
          */
         @Nullable
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public Integer getCaptureSession() {
             if (mCaptureAvailable) {
                 return mCaptureSession;

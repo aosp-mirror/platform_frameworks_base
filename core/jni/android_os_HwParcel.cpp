@@ -990,6 +990,8 @@ static jobject JHwParcel_native_readStrongBinder(JNIEnv *env, jobject thiz) {
     }
 
     if (!validateCanUseHwBinder(binder)) {
+        jniThrowException(env, "java/lang/IllegalArgumentException",
+                          "Local binder is not supported in Java");
         return nullptr;
     }
 

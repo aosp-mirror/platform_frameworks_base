@@ -190,7 +190,7 @@ public final class ServiceManager {
      * @param dumpPriority supported dump priority levels as a bitmask
      * to access this service
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static void addService(String name, IBinder service, boolean allowIsolated,
             int dumpPriority) {
         try {
@@ -231,6 +231,21 @@ public final class ServiceManager {
         } catch (RemoteException e) {
             Log.e(TAG, "error in isDeclared", e);
             return false;
+        }
+    }
+
+    /**
+     * Returns the list of declared instances for an interface.
+     *
+     * @return true if the service is declared somewhere (eg. VINTF manifest) and
+     * waitForService should always be able to return the service.
+     */
+    public static String[] getDeclaredInstances(@NonNull String iface) {
+        try {
+            return getIServiceManager().getDeclaredInstances(iface);
+        } catch (RemoteException e) {
+            Log.e(TAG, "error in getDeclaredInstances", e);
+            return null;
         }
     }
 

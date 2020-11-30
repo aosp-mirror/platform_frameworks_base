@@ -20,7 +20,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
-import android.annotation.TestApi;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.telephony.AccessNetworkConstants.TransportType;
@@ -71,37 +71,37 @@ public final class NetworkRegistrationInfo implements Parcelable {
      * Not registered. The device is not currently searching a new operator to register.
      * @hide
      */
-    @SystemApi @TestApi
+    @SystemApi
     public static final int REGISTRATION_STATE_NOT_REGISTERED_OR_SEARCHING = 0;
     /**
      * Registered on home network.
      * @hide
      */
-    @SystemApi @TestApi
+    @SystemApi
     public static final int REGISTRATION_STATE_HOME = 1;
     /**
      * Not registered. The device is currently searching a new operator to register.
      * @hide
      */
-    @SystemApi @TestApi
+    @SystemApi
     public static final int REGISTRATION_STATE_NOT_REGISTERED_SEARCHING = 2;
     /**
      * Registration denied.
      * @hide
      */
-    @SystemApi @TestApi
+    @SystemApi
     public static final int REGISTRATION_STATE_DENIED = 3;
     /**
      * Registration state is unknown.
      * @hide
      */
-    @SystemApi @TestApi
+    @SystemApi
     public static final int REGISTRATION_STATE_UNKNOWN = 4;
     /**
      * Registered on roaming network.
      * @hide
      */
-    @SystemApi @TestApi
+    @SystemApi
     public static final int REGISTRATION_STATE_ROAMING = 5;
 
     /** @hide */
@@ -370,7 +370,6 @@ public final class NetworkRegistrationInfo implements Parcelable {
      * Get the 5G NR connection state.
      *
      * @return the 5G NR connection state.
-     * @hide
      */
     public @NRState int getNrState() {
         return mNrState;
@@ -386,7 +385,7 @@ public final class NetworkRegistrationInfo implements Parcelable {
      *
      * @hide
      */
-    @SystemApi @TestApi
+    @SystemApi
     public @RegistrationState int getRegistrationState() {
         return mRegistrationState;
     }
@@ -451,7 +450,7 @@ public final class NetworkRegistrationInfo implements Parcelable {
      * @return the current network roaming type.
      * @hide
      */
-    @SystemApi @TestApi
+    @SystemApi
     public @ServiceState.RoamingType int getRoamingType() {
         return mRoamingType;
     }
@@ -460,7 +459,7 @@ public final class NetworkRegistrationInfo implements Parcelable {
      * @return Whether emergency is enabled.
      * @hide
      */
-    @SystemApi @TestApi
+    @SystemApi
     public boolean isEmergencyEnabled() { return mEmergencyOnly; }
 
     /**
@@ -498,7 +497,7 @@ public final class NetworkRegistrationInfo implements Parcelable {
      * 10.5.3.6 for UMTS, 3GPP TS 24.301 9.9.3.9 for LTE, and 3GPP2 A.S0001 6.2.2.44 for CDMA
      * @hide
      */
-    @SystemApi @TestApi
+    @SystemApi
     public int getRejectCause() {
         return mRejectCause;
     }
@@ -545,7 +544,7 @@ public final class NetworkRegistrationInfo implements Parcelable {
      * @hide
      */
     @Nullable
-    @SystemApi @TestApi
+    @SystemApi
     public DataSpecificRegistrationInfo getDataSpecificInfo() {
         return mDataSpecificInfo;
     }
@@ -637,7 +636,8 @@ public final class NetworkRegistrationInfo implements Parcelable {
                 .append(" cellIdentity=").append(mCellIdentity)
                 .append(" voiceSpecificInfo=").append(mVoiceSpecificInfo)
                 .append(" dataSpecificInfo=").append(mDataSpecificInfo)
-                .append(" nrState=").append(nrStateToString(mNrState))
+                .append(" nrState=").append(Build.IS_DEBUGGABLE
+                        ? nrStateToString(mNrState) : "****")
                 .append(" rRplmn=").append(mRplmn)
                 .append(" isUsingCarrierAggregation=").append(mIsUsingCarrierAggregation)
                 .append("}").toString();
@@ -680,7 +680,7 @@ public final class NetworkRegistrationInfo implements Parcelable {
      * @hide
      */
     @Override
-    @SystemApi @TestApi
+    @SystemApi
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(mDomain);
         dest.writeInt(mTransportType);
@@ -772,7 +772,7 @@ public final class NetworkRegistrationInfo implements Parcelable {
      * </code></pre>
      * @hide
      */
-    @SystemApi @TestApi
+    @SystemApi
     public static final class Builder {
         @Domain
         private int mDomain;
@@ -877,7 +877,7 @@ public final class NetworkRegistrationInfo implements Parcelable {
          * @return The same instance of the builder.
          * @hide
          */
-        @SystemApi @TestApi
+        @SystemApi
         public @NonNull Builder setEmergencyOnly(boolean emergencyOnly) {
             mEmergencyOnly = emergencyOnly;
             return this;
@@ -891,7 +891,7 @@ public final class NetworkRegistrationInfo implements Parcelable {
          * @return The same instance of the builder.
          * @hide
          */
-        @SystemApi @TestApi
+        @SystemApi
         public @NonNull Builder setAvailableServices(
                 @NonNull @ServiceType List<Integer> availableServices) {
             mAvailableServices = availableServices;
@@ -906,7 +906,7 @@ public final class NetworkRegistrationInfo implements Parcelable {
          * @return The same instance of the builder.
          * @hide
          */
-        @SystemApi @TestApi
+        @SystemApi
         public @NonNull Builder setCellIdentity(@Nullable CellIdentity cellIdentity) {
             mCellIdentity = cellIdentity;
             return this;
@@ -929,7 +929,7 @@ public final class NetworkRegistrationInfo implements Parcelable {
          * @return the NetworkRegistrationInfo object.
          * @hide
          */
-        @SystemApi @TestApi
+        @SystemApi
         public @NonNull NetworkRegistrationInfo build() {
             return new NetworkRegistrationInfo(mDomain, mTransportType, mRegistrationState,
                     mAccessNetworkTechnology, mRejectCause, mEmergencyOnly, mAvailableServices,

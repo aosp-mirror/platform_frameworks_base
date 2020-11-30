@@ -277,6 +277,8 @@ public final class Parcel {
     private static final int EX_TRANSACTION_FAILED = -129;
 
     @CriticalNative
+    private static native void nativeMarkSensitive(long nativePtr);
+    @CriticalNative
     private static native int nativeDataSize(long nativePtr);
     @CriticalNative
     private static native int nativeDataAvail(long nativePtr);
@@ -483,12 +485,20 @@ public final class Parcel {
     }
 
     /** @hide */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static native long getGlobalAllocSize();
 
     /** @hide */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static native long getGlobalAllocCount();
+
+    /**
+     * Parcel data should be zero'd before realloc'd or deleted.
+     * @hide
+     */
+    public final void markSensitive() {
+        nativeMarkSensitive(mNativePtr);
+    }
 
     /**
      * Returns the total amount of data contained in the parcel.
@@ -642,11 +652,11 @@ public final class Parcel {
      * {@link #dataPosition}.  This is used to validate that the marshalled
      * transaction is intended for the target interface.
      */
-    public final void writeInterfaceToken(String interfaceName) {
+    public final void writeInterfaceToken(@NonNull String interfaceName) {
         nativeWriteInterfaceToken(mNativePtr, interfaceName);
     }
 
-    public final void enforceInterface(String interfaceName) {
+    public final void enforceInterface(@NonNull String interfaceName) {
         nativeEnforceInterface(mNativePtr, interfaceName);
     }
 
@@ -711,7 +721,7 @@ public final class Parcel {
      * {@hide}
      * {@SystemApi}
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public final void writeBlob(@Nullable byte[] b) {
         writeBlob(b, 0, (b != null) ? b.length : 0);
     }
@@ -983,7 +993,7 @@ public final class Parcel {
     /**
      * @hide For testing only.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void writeArrayMap(@Nullable ArrayMap<String, Object> val) {
         writeArrayMapInternal(val);
     }
@@ -1022,7 +1032,7 @@ public final class Parcel {
      *
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void writeArraySet(@Nullable ArraySet<? extends Object> val) {
         final int size = (val != null) ? val.size() : -1;
         writeInt(size);
@@ -2684,7 +2694,7 @@ public final class Parcel {
      * {@hide}
      * {@SystemApi}
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     @Nullable
     public final byte[] readBlob() {
         return nativeReadBlob(mNativePtr);
@@ -3594,7 +3604,7 @@ public final class Parcel {
     /**
      * @hide For testing only.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void readArrayMap(@NonNull ArrayMap outVal, @Nullable ClassLoader loader) {
         final int N = readInt();
         if (N < 0) {

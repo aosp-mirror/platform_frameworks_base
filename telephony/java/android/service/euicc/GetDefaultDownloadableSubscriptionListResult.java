@@ -18,6 +18,7 @@ package android.service.euicc;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.telephony.euicc.DownloadableSubscription;
@@ -50,7 +51,7 @@ public final class GetDefaultDownloadableSubscriptionListResult implements Parce
      * @deprecated - Do no use. Use getResult() instead.
      */
     @Deprecated
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public final int result;
 
     @Nullable

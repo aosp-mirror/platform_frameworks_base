@@ -120,6 +120,7 @@ import static com.android.server.pm.InstructionSets.getDexCodeInstructionSet;
 import static com.android.server.pm.InstructionSets.getDexCodeInstructionSets;
 import static com.android.server.pm.InstructionSets.getPreferredInstructionSet;
 import static com.android.server.pm.PackageManagerServiceCompilerMapping.getDefaultCompilerFilter;
+import static com.android.server.pm.PackageManagerServiceUtils.comparePackageSignatures;
 import static com.android.server.pm.PackageManagerServiceUtils.compareSignatures;
 import static com.android.server.pm.PackageManagerServiceUtils.compressedFileExists;
 import static com.android.server.pm.PackageManagerServiceUtils.decompressFile;
@@ -280,6 +281,7 @@ import android.os.storage.StorageManagerInternal;
 import android.os.storage.VolumeInfo;
 import android.os.storage.VolumeRecord;
 import android.permission.IPermissionManager;
+import android.provider.ContactsContract;
 import android.provider.DeviceConfig;
 import android.provider.Settings.Global;
 import android.provider.Settings.Secure;
@@ -1113,6 +1115,7 @@ public class PackageManagerService extends IPackageManager.Stub
         public @Nullable String storageManagerPackage;
         public @Nullable String defaultTextClassifierPackage;
         public @Nullable String systemTextClassifierPackage;
+        public @Nullable String overlayConfigSignaturePackage;
         public ViewCompiler viewCompiler;
         public @Nullable String wellbeingPackage;
         public @Nullable String retailDemoPackage;
@@ -1645,6 +1648,7 @@ public class PackageManagerService extends IPackageManager.Stub
     final @Nullable String mServicesExtensionPackageName;
     final @Nullable String mSharedSystemSharedLibraryPackageName;
     final @Nullable String mRetailDemoPackage;
+    final @Nullable String mOverlayConfigSignaturePackage;
 
     private final PackageUsage mPackageUsage = new PackageUsage();
     private final CompilerStats mCompilerStats = new CompilerStats();
@@ -2807,6 +2811,7 @@ public class PackageManagerService extends IPackageManager.Stub
         mIncidentReportApproverPackage = testParams.incidentReportApproverPackage;
         mServicesExtensionPackageName = testParams.servicesExtensionPackageName;
         mSharedSystemSharedLibraryPackageName = testParams.sharedSystemSharedLibraryPackageName;
+        mOverlayConfigSignaturePackage = testParams.overlayConfigSignaturePackage;
 
         mResolveComponentName = testParams.resolveComponentName;
         mPackages.putAll(testParams.packages);
@@ -3372,6 +3377,7 @@ public class PackageManagerService extends IPackageManager.Stub
             mAppPredictionServicePackage = getAppPredictionServicePackageName();
             mIncidentReportApproverPackage = getIncidentReportApproverPackageName();
             mRetailDemoPackage = getRetailDemoPackageName();
+            mOverlayConfigSignaturePackage = getOverlayConfigSignaturePackageName();
 
             // Now that we know all of the shared libraries, update all clients to have
             // the correct library paths.
@@ -3648,6 +3654,8 @@ public class PackageManagerService extends IPackageManager.Stub
         PackageParser.readConfigUseRoundIcon(mContext.getResources());
 
         mServiceStartWithDelay = SystemClock.uptimeMillis() + (60 * 1000L);
+
+        Slog.i(TAG, "Fix for b/169414761 is applied");
     }
 
     /**
@@ -4198,13 +4206,9 @@ public class PackageManagerService extends IPackageManager.Stub
         Iterator<ResolveInfo> iter = matches.iterator();
         while (iter.hasNext()) {
             final ResolveInfo rInfo = iter.next();
-            final PackageSetting ps = mSettings.mPackages.get(rInfo.activityInfo.packageName);
-            if (ps != null) {
-                final PermissionsState permissionsState = ps.getPermissionsState();
-                if (permissionsState.hasPermission(Manifest.permission.INSTALL_PACKAGES, 0)
-                        || Build.IS_ENG) {
-                    continue;
-                }
+            if (checkPermission(Manifest.permission.INSTALL_PACKAGES,
+                    rInfo.activityInfo.packageName, 0) == PERMISSION_GRANTED || Build.IS_ENG) {
+                continue;
             }
             iter.remove();
         }
@@ -4380,8 +4384,24 @@ public class PackageManagerService extends IPackageManager.Stub
             final int[] gids = (flags & PackageManager.GET_GIDS) == 0
                     ? EMPTY_INT_ARRAY : permissionsState.computeGids(userId);
             // Compute granted permissions only if package has requested permissions
-            final Set<String> permissions = ArrayUtils.isEmpty(p.getRequestedPermissions())
+            Set<String> permissions = ArrayUtils.isEmpty(p.getRequestedPermissions())
                     ? Collections.emptySet() : permissionsState.getPermissions(userId);
+            if (state.instantApp) {
+                permissions = new ArraySet<>(permissions);
+                permissions.removeIf(permissionName -> {
+                    BasePermission permission = mPermissionManager.getPermissionTEMP(
+                            permissionName);
+                    if (permission == null) {
+                        return true;
+                    }
+                    if (!permission.isInstant()) {
+                        EventLog.writeEvent(0x534e4554, "140256621", UserHandle.getUid(userId,
+                                ps.appId), permissionName);
+                        return true;
+                    }
+                    return false;
+                });
+            }
 
             PackageInfo packageInfo = PackageInfoUtils.generate(p, gids, flags,
                     ps.firstInstallTime, ps.lastUpdateTime, permissions, state, userId, ps);
@@ -8579,10 +8599,9 @@ public class PackageManagerService extends IPackageManager.Stub
     private void addPackageHoldingPermissions(ArrayList<PackageInfo> list, PackageSetting ps,
             String[] permissions, boolean[] tmp, int flags, int userId) {
         int numMatch = 0;
-        final PermissionsState permissionsState = ps.getPermissionsState();
         for (int i=0; i<permissions.length; i++) {
             final String permission = permissions[i];
-            if (permissionsState.hasPermission(permission, userId)) {
+            if (checkPermission(permission, ps.name, userId) == PERMISSION_GRANTED) {
                 tmp[i] = true;
                 numMatch++;
             } else {
@@ -10545,7 +10564,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     continue;
                 }
                 final PackageSetting staticLibPkgSetting = getPackageSetting(
-                        toStaticSharedLibraryPackageName(sharedLibraryInfo.getPackageName(),
+                        toStaticSharedLibraryPackageName(sharedLibraryInfo.getName(),
                                 sharedLibraryInfo.getLongVersion()));
                 if (staticLibPkgSetting == null) {
                     Slog.wtf(TAG, "Shared lib without setting: " + sharedLibraryInfo);
@@ -11095,6 +11114,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 mSettings.addRenamedPackageLPw(parsedPackage.getRealPackage(),
                         originalPkgSetting.name);
                 mTransferredPackages.add(originalPkgSetting.name);
+            } else {
+                mSettings.removeRenamedPackageLPw(parsedPackage.getPackageName());
             }
         }
         if (pkgSetting.sharedUser != null) {
@@ -12095,12 +12116,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 if (sharedUserSetting != null && sharedUserSetting.isPrivileged()) {
                     // Exempt SharedUsers signed with the platform key.
                     PackageSetting platformPkgSetting = mSettings.mPackages.get("android");
-                    if ((platformPkgSetting.signatures.mSigningDetails
-                            != PackageParser.SigningDetails.UNKNOWN)
-                            && (compareSignatures(
-                                    platformPkgSetting.signatures.mSigningDetails.signatures,
-                            pkg.getSigningDetails().signatures)
-                                            != PackageManager.SIGNATURE_MATCH)) {
+                    if (!comparePackageSignatures(platformPkgSetting,
+                            pkg.getSigningDetails().signatures)) {
                         throw new PackageManagerException("Apps that share a user with a " +
                                 "privileged app must themselves be marked as privileged. " +
                                 pkg.getPackageName() + " shares privileged user " +
@@ -12147,12 +12164,8 @@ public class PackageManagerService extends IPackageManager.Stub
                     if (pkg.getTargetSdkVersion() < Build.VERSION_CODES.Q) {
                         final PackageSetting platformPkgSetting =
                                 mSettings.getPackageLPr("android");
-                        if ((platformPkgSetting.signatures.mSigningDetails
-                                    != PackageParser.SigningDetails.UNKNOWN)
-                                && (compareSignatures(
-                                        platformPkgSetting.signatures.mSigningDetails.signatures,
-                                pkg.getSigningDetails().signatures)
-                                    != PackageManager.SIGNATURE_MATCH)) {
+                        if (!comparePackageSignatures(platformPkgSetting,
+                                pkg.getSigningDetails().signatures)) {
                             throw new PackageManagerException("Overlay "
                                     + pkg.getPackageName()
                                     + " must target Q or later, "
@@ -12161,24 +12174,36 @@ public class PackageManagerService extends IPackageManager.Stub
                     }
 
                     // A non-preloaded overlay package, without <overlay android:targetName>, will
-                    // only be used if it is signed with the same certificate as its target. If the
-                    // target is already installed, check this here to augment the last line of
-                    // defence which is OMS.
+                    // only be used if it is signed with the same certificate as its target OR if
+                    // it is signed with the same certificate as a reference package declared
+                    // in 'overlay-config-signature' tag of SystemConfig.
+                    // If the target is already installed or 'overlay-config-signature' tag in
+                    // SystemConfig is set, check this here to augment the last line of defense
+                    // which is OMS.
                     if (pkg.getOverlayTargetName() == null) {
                         final PackageSetting targetPkgSetting =
                                 mSettings.getPackageLPr(pkg.getOverlayTarget());
                         if (targetPkgSetting != null) {
-                            if ((targetPkgSetting.signatures.mSigningDetails
-                                        != PackageParser.SigningDetails.UNKNOWN)
-                                    && (compareSignatures(
-                                            targetPkgSetting.signatures.mSigningDetails.signatures,
-                                    pkg.getSigningDetails().signatures)
-                                        != PackageManager.SIGNATURE_MATCH)) {
-                                throw new PackageManagerException("Overlay "
-                                        + pkg.getPackageName() + " and target "
-                                        + pkg.getOverlayTarget() + " signed with"
-                                        + " different certificates, and the overlay lacks"
-                                        + " <overlay android:targetName>");
+                            if (!comparePackageSignatures(targetPkgSetting,
+                                    pkg.getSigningDetails().signatures)) {
+                                // check reference signature
+                                if (mOverlayConfigSignaturePackage == null) {
+                                    throw new PackageManagerException("Overlay "
+                                            + pkg.getPackageName() + " and target "
+                                            + pkg.getOverlayTarget() + " signed with"
+                                            + " different certificates, and the overlay lacks"
+                                            + " <overlay android:targetName>");
+                                }
+                                final PackageSetting refPkgSetting =
+                                        mSettings.getPackageLPr(mOverlayConfigSignaturePackage);
+                                if (!comparePackageSignatures(refPkgSetting,
+                                        pkg.getSigningDetails().signatures)) {
+                                    throw new PackageManagerException("Overlay "
+                                            + pkg.getPackageName() + " signed with a different "
+                                            + "certificate than both the reference package and "
+                                            + "target " + pkg.getOverlayTarget() + ", and the "
+                                            + "overlay lacks <overlay android:targetName>");
+                                }
                             }
                         }
                     }
@@ -19185,6 +19210,14 @@ public class PackageManagerService extends IPackageManager.Stub
         final int flags = action.flags;
         final boolean systemApp = isSystemApp(ps);
 
+        // We need to get the permission state before package state is (potentially) destroyed.
+        final SparseBooleanArray hadSuspendAppsPermission = new SparseBooleanArray();
+        // allUserHandles could be null, so call mUserManager.getUserIds() directly which is cached anyway.
+        for (int userId : mUserManager.getUserIds()) {
+            hadSuspendAppsPermission.put(userId, checkPermission(Manifest.permission.SUSPEND_APPS,
+                    packageName, userId) == PERMISSION_GRANTED);
+        }
+
         final int userId = user == null ? UserHandle.USER_ALL : user.getIdentifier();
 
         if ((!systemApp || (flags & PackageManager.DELETE_SYSTEM_APP) != 0)
@@ -19251,8 +19284,7 @@ public class PackageManagerService extends IPackageManager.Stub
             affectedUserIds = resolveUserIds(userId);
         }
         for (final int affectedUserId : affectedUserIds) {
-            if (ps.getPermissionsState().hasPermission(Manifest.permission.SUSPEND_APPS,
-                    affectedUserId)) {
+            if (hadSuspendAppsPermission.get(affectedUserId)) {
                 unsuspendForSuspendingPackage(packageName, affectedUserId);
                 removeAllDistractingPackageRestrictions(affectedUserId);
             }
@@ -20711,6 +20743,11 @@ public class PackageManagerService extends IPackageManager.Stub
         return ensureSystemPackageName(contentCaptureServiceComponentName.getPackageName());
     }
 
+    public String getOverlayConfigSignaturePackageName() {
+        return ensureSystemPackageName(SystemConfig.getInstance()
+                .getOverlayConfigSignaturePackage());
+    }
+
     @Nullable
     private String getRetailDemoPackageName() {
         final String predefinedPkgName = mContext.getString(R.string.config_retailDemoPackage);
@@ -21017,8 +21054,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 pkgSetting.setEnabled(newState, userId, callingPackage);
                 if ((newState == COMPONENT_ENABLED_STATE_DISABLED_USER
                         || newState == COMPONENT_ENABLED_STATE_DISABLED)
-                        && pkgSetting.getPermissionsState().hasPermission(
-                                Manifest.permission.SUSPEND_APPS, userId)) {
+                        && checkPermission(Manifest.permission.SUSPEND_APPS, packageName, userId)
+                        == PERMISSION_GRANTED) {
                     // This app should not generally be allowed to get disabled by the UI, but if it
                     // ever does, we don't want to end up with some of the user's apps permanently
                     // suspended.
@@ -24227,6 +24264,8 @@ public class PackageManagerService extends IPackageManager.Stub
                     return TextUtils.isEmpty(mRetailDemoPackage)
                             ? ArrayUtils.emptyArray(String.class)
                             : new String[] {mRetailDemoPackage};
+                case PackageManagerInternal.PACKAGE_OVERLAY_CONFIG_SIGNATURE:
+                    return filterOnlySystemPackages(getOverlayConfigSignaturePackageName());
                 default:
                     return ArrayUtils.emptyArray(String.class);
             }
@@ -25398,6 +25437,32 @@ public class PackageManagerService extends IPackageManager.Stub
         synchronized (mLock) {
             return mInstantAppRegistry.getInstantAppAndroidIdLPw(packageName, userId);
         }
+    }
+
+    @Override
+    public void grantImplicitAccess(int recipientUid, String visibleAuthority) {
+        // This API is exposed temporarily to only the contacts provider. (b/158688602)
+        final int callingUid = Binder.getCallingUid();
+        ProviderInfo contactsProvider = resolveContentProviderInternal(
+                        ContactsContract.AUTHORITY, 0, UserHandle.getUserId(callingUid));
+        if (contactsProvider == null || contactsProvider.applicationInfo == null
+                || !UserHandle.isSameApp(contactsProvider.applicationInfo.uid, callingUid)) {
+            throw new SecurityException(callingUid + " is not allow to call grantImplicitAccess");
+        }
+        final int userId = UserHandle.getUserId(recipientUid);
+        final long token = Binder.clearCallingIdentity();
+        final ProviderInfo providerInfo;
+        try {
+            providerInfo = resolveContentProvider(visibleAuthority, 0 /*flags*/, userId);
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+        if (providerInfo == null) {
+            return;
+        }
+        int visibleUid = providerInfo.applicationInfo.uid;
+        mPmInternal.grantImplicitAccess(userId, null /*Intent*/, UserHandle.getAppId(recipientUid),
+                visibleUid, false);
     }
 
     boolean canHaveOatDir(String packageName) {

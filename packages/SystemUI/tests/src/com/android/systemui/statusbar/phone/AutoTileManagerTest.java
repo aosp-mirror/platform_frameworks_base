@@ -18,7 +18,9 @@ package com.android.systemui.statusbar.phone;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -27,6 +29,7 @@ import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -54,7 +57,6 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.qs.AutoAddTracker;
 import com.android.systemui.qs.QSTileHost;
 import com.android.systemui.qs.SecureSetting;
-import com.android.systemui.statusbar.phone.AutoTileManagerTest.MyContextWrapper;
 import com.android.systemui.statusbar.policy.CastController;
 import com.android.systemui.statusbar.policy.CastController.CastDevice;
 import com.android.systemui.statusbar.policy.DataSaverController;
@@ -110,13 +112,15 @@ public class AutoTileManagerTest extends SysuiTestCase {
                         TEST_SETTING_COMPONENT + SEPARATOR + TEST_CUSTOM_SPEC
                 }
         );
+        mContext.getOrCreateTestableResources().addOverride(
+                com.android.internal.R.bool.config_nightDisplayAvailable, true);
 
         when(mAutoAddTrackerBuilder.build()).thenReturn(mAutoAddTracker);
         when(mQsTileHost.getUserContext()).thenReturn(mUserContext);
         when(mUserContext.getUser()).thenReturn(UserHandle.of(USER));
 
-        mAutoTileManager = createAutoTileManager(new
-                MyContextWrapper(mContext));
+        mAutoTileManager = createAutoTileManager(new MyContextWrapper(mContext));
+        mAutoTileManager.init();
     }
 
     @After
@@ -124,14 +128,63 @@ public class AutoTileManagerTest extends SysuiTestCase {
         mAutoTileManager.destroy();
     }
 
-    private AutoTileManager createAutoTileManager(Context context) {
-        return new AutoTileManager(context, mAutoAddTrackerBuilder, mQsTileHost,
+    private AutoTileManager createAutoTileManager(
+            Context context,
+            AutoAddTracker.Builder autoAddTrackerBuilder,
+            HotspotController hotspotController,
+            DataSaverController dataSaverController,
+            ManagedProfileController managedProfileController,
+            NightDisplayListener nightDisplayListener,
+            CastController castController) {
+        return new AutoTileManager(context, autoAddTrackerBuilder, mQsTileHost,
                 Handler.createAsync(TestableLooper.get(this).getLooper()),
-                mHotspotController,
-                mDataSaverController,
-                mManagedProfileController,
-                mNightDisplayListener,
+                hotspotController,
+                dataSaverController,
+                managedProfileController,
+                nightDisplayListener,
+                castController);
+    }
+
+    private AutoTileManager createAutoTileManager(Context context) {
+        return createAutoTileManager(context, mAutoAddTrackerBuilder, mHotspotController,
+                mDataSaverController, mManagedProfileController, mNightDisplayListener,
                 mCastController);
+    }
+
+    @Test
+    public void testCreatedAutoTileManagerIsNotInitialized() {
+        AutoAddTracker.Builder builder = mock(AutoAddTracker.Builder.class, Answers.RETURNS_SELF);
+        AutoAddTracker tracker = mock(AutoAddTracker.class);
+        when(builder.build()).thenReturn(tracker);
+        HotspotController hC = mock(HotspotController.class);
+        DataSaverController dSC = mock(DataSaverController.class);
+        ManagedProfileController mPC = mock(ManagedProfileController.class);
+        NightDisplayListener nDS = mock(NightDisplayListener.class);
+        CastController cC = mock(CastController.class);
+
+        AutoTileManager manager =
+                createAutoTileManager(mock(Context.class), builder, hC, dSC, mPC, nDS, cC);
+
+        verify(tracker, never()).initialize();
+        verify(hC, never()).addCallback(any());
+        verify(dSC, never()).addCallback(any());
+        verify(mPC, never()).addCallback(any());
+        verify(nDS, never()).setCallback(any());
+        verify(cC, never()).addCallback(any());
+        assertNull(manager.getSecureSettingForKey(TEST_SETTING));
+        assertNull(manager.getSecureSettingForKey(TEST_SETTING_COMPONENT));
+    }
+
+    @Test
+    public void testChangeUserWhenNotInitializedThrows() {
+        AutoTileManager manager = createAutoTileManager(mock(Context.class));
+
+        try {
+            manager.changeUser(UserHandle.of(USER + 1));
+            fail();
+        } catch (Exception e) {
+            // This should throw and take this path
+        }
     }
 
     @Test

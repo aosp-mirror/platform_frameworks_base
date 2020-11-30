@@ -39,10 +39,8 @@
 namespace android {
 
 struct FindEntryResult {
-  // A pointer to the resource table entry for this resource.
-  // If the size of the entry is > sizeof(ResTable_entry), it can be cast to
-  // a ResTable_map_entry and processed as a bag/map.
-  ResTable_entry_handle entry;
+  // A pointer to the value of the resource table entry.
+  std::variant<Res_value, const ResTable_map_entry*> entry;
 
   // The configuration for which the resulting entry was defined. This is already swapped to host
   // endianness.
@@ -554,11 +552,9 @@ ApkAssetsCookie AssetManager2::FindEntry(uint32_t resid, uint16_t density_overri
       if (!overlay_entry) {
         // No id map entry exists for this target resource.
         continue;
-      }
-
-      if (overlay_entry.IsTableEntry()) {
+      } else if (overlay_entry.IsInlineValue()) {
         // The target resource is overlaid by an inline value not represented by a resource.
-        out_entry->entry = overlay_entry.GetTableEntry();
+        out_entry->entry = overlay_entry.GetInlineValue();
         out_entry->dynamic_ref_table = id_map.overlay_res_maps_.GetOverlayDynamicRefTable();
         cookie = id_map.cookie;
         continue;
@@ -580,7 +576,7 @@ ApkAssetsCookie AssetManager2::FindEntry(uint32_t resid, uint16_t density_overri
       }
 
       cookie = overlay_cookie;
-      out_entry->entry = std::move(overlay_result.entry);
+      out_entry->entry = overlay_result.entry;
       out_entry->config = overlay_result.config;
       out_entry->dynamic_ref_table = id_map.overlay_res_maps_.GetOverlayDynamicRefTable();
       if (resource_resolution_logging_enabled_) {
@@ -761,7 +757,19 @@ ApkAssetsCookie AssetManager2::FindEntryInternal(const PackageGroup& package_gro
     return kInvalidCookie;
   }
 
-  out_entry->entry = ResTable_entry_handle::unmanaged(best_entry);
+  const uint16_t entry_size = dtohs(best_entry->size);
+  if (entry_size >= sizeof(ResTable_map_entry) &&
+      (dtohs(best_entry->flags) & ResTable_entry::FLAG_COMPLEX)) {
+    // The entry represents a bag/map.
+    out_entry->entry = reinterpret_cast<const ResTable_map_entry*>(best_entry);
+  } else {
+    // The entry represents a value.
+    Res_value value;
+    value.copyFrom_dtoh(*reinterpret_cast<const Res_value*>(
+        reinterpret_cast<const uint8_t*>(best_entry) + entry_size));
+    out_entry->entry = value;
+  }
+
   out_entry->config = *best_config;
   out_entry->type_flags = type_flags;
   out_entry->package_name = &best_package->GetPackageName();
@@ -905,8 +913,8 @@ ApkAssetsCookie AssetManager2::GetResource(uint32_t resid, bool may_be_bag,
     return kInvalidCookie;
   }
 
-  const ResTable_entry* table_entry = *entry.entry;
-  if (dtohs(table_entry->flags) & ResTable_entry::FLAG_COMPLEX) {
+  auto result_map_entry = std::get_if<const ResTable_map_entry*>(&entry.entry);
+  if (result_map_entry != nullptr) {
     if (!may_be_bag) {
       LOG(ERROR) << base::StringPrintf("Resource %08x is a complex map type.", resid);
       return kInvalidCookie;
@@ -920,11 +928,8 @@ ApkAssetsCookie AssetManager2::GetResource(uint32_t resid, bool may_be_bag,
     return cookie;
   }
 
-  const Res_value* device_value = reinterpret_cast<const Res_value*>(
-      reinterpret_cast<const uint8_t*>(table_entry) + dtohs(table_entry->size));
-  out_value->copyFrom_dtoh(*device_value);
-
   // Convert the package ID to the runtime assigned package ID.
+  *out_value = std::get<Res_value>(entry.entry);
   entry.dynamic_ref_table->lookupResourceValue(out_value);
 
   *out_selected_config = entry.config;
@@ -1004,19 +1009,15 @@ const ResolvedBag* AssetManager2::GetBag(uint32_t resid, std::vector<uint32_t>& 
     return nullptr;
   }
 
-  // Check that the size of the entry header is at least as big as
-  // the desired ResTable_map_entry. Also verify that the entry
-  // was intended to be a map.
-  const ResTable_entry* table_entry = *entry.entry;
-  if (dtohs(table_entry->size) < sizeof(ResTable_map_entry) ||
-      (dtohs(table_entry->flags) & ResTable_entry::FLAG_COMPLEX) == 0) {
+  auto result_map_entry = std::get_if<const ResTable_map_entry*>(&entry.entry);
+  if (result_map_entry == nullptr) {
     // Not a bag, nothing to do.
     return nullptr;
   }
 
-  const ResTable_map_entry* map = reinterpret_cast<const ResTable_map_entry*>(table_entry);
-  const ResTable_map* map_entry =
-      reinterpret_cast<const ResTable_map*>(reinterpret_cast<const uint8_t*>(map) + map->size);
+  auto map = reinterpret_cast<const ResTable_map_entry*>(*result_map_entry);
+  auto map_entry = reinterpret_cast<const ResTable_map*>(
+      reinterpret_cast<const uint8_t*>(map) + map->size);
   const ResTable_map* const map_entry_end = map_entry + dtohl(map->count);
 
   // Keep track of ids that have already been seen to prevent infinite loops caused by circular

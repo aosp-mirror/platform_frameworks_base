@@ -26,7 +26,6 @@ cc_library_static {
         "stats/SubsystemSleepStatePuller.cpp",
         "com_android_server_adb_AdbDebuggingManager.cpp",
         "com_android_server_am_BatteryStatsService.cpp",
-        "com_android_server_connectivity_Vpn.cpp",
         "com_android_server_ConsumerIrService.cpp",
         "com_android_server_devicepolicy_CryptoTestHelper.cpp",
         "com_android_server_gpu_GpuService.cpp",
@@ -60,6 +59,8 @@ cc_library_static {
         "com_android_server_pm_PackageManagerShellCommandDataLoader.cpp",
         "onload.cpp",
         ":lib_networkStatsFactory_native",
+        // TODO: move the file below to the connectivity APEX
+        "com_android_server_connectivity_Vpn.cpp",
     ],
 
     include_dirs: [
@@ -161,9 +162,10 @@ cc_defaults {
         "android.frameworks.schedulerservice@1.0",
         "android.frameworks.sensorservice@1.0",
         "android.frameworks.stats@1.0",
+        "android.system.suspend.control-cpp",
+        "android.system.suspend.control.internal-cpp",
         "android.system.suspend@1.0",
         "service.incremental",
-        "suspend_control_aidl_interface-cpp",
     ],
 
     static_libs: [

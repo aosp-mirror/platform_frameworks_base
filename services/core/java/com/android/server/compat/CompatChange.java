@@ -18,7 +18,7 @@ package com.android.server.compat;
 
 import android.annotation.Nullable;
 import android.compat.annotation.ChangeId;
-import android.compat.annotation.EnabledAfter;
+import android.compat.annotation.EnabledSince;
 import android.content.pm.ApplicationInfo;
 
 import com.android.internal.compat.CompatibilityChangeInfo;
@@ -43,8 +43,8 @@ public final class CompatChange extends CompatibilityChangeInfo {
      * A change ID to be used only in the CTS test for this SystemApi
      */
     @ChangeId
-    @EnabledAfter(targetSdkVersion = 1234) // Needs to be > test APK targetSdkVersion.
-    private static final long CTS_SYSTEM_API_CHANGEID = 149391281; // This is a bug id.
+    @EnabledSince(targetSdkVersion = 1235) // Needs to be > test APK targetSdkVersion.
+    static final long CTS_SYSTEM_API_CHANGEID = 149391281; // This is a bug id.
 
     /**
      * Callback listener for when compat changes are updated for a package.
@@ -63,7 +63,7 @@ public final class CompatChange extends CompatibilityChangeInfo {
     private Map<String, Boolean> mPackageOverrides;
 
     public CompatChange(long changeId) {
-        this(changeId, null, -1, false, false, null);
+        this(changeId, null, -1, -1, false, false, null);
     }
 
     /**
@@ -71,11 +71,14 @@ public final class CompatChange extends CompatibilityChangeInfo {
      * @param name Short descriptive name.
      * @param enableAfterTargetSdk {@code targetSdkVersion} restriction. See {@link EnabledAfter};
      *                             -1 if the change is always enabled.
+     * @param enableSinceTargetSdk {@code targetSdkVersion} restriction. See {@link EnabledSince};
+     *                             -1 if the change is always enabled.
      * @param disabled If {@code true}, overrides any {@code enableAfterTargetSdk} set.
      */
     public CompatChange(long changeId, @Nullable String name, int enableAfterTargetSdk,
-            boolean disabled, boolean loggingOnly, String description) {
-        super(changeId, name, enableAfterTargetSdk, disabled, loggingOnly, description);
+            int enableSinceTargetSdk, boolean disabled, boolean loggingOnly, String description) {
+        super(changeId, name, enableAfterTargetSdk, enableSinceTargetSdk, disabled, loggingOnly,
+              description);
     }
 
     /**
@@ -83,7 +86,8 @@ public final class CompatChange extends CompatibilityChangeInfo {
      */
     public CompatChange(Change change) {
         super(change.getId(), change.getName(), change.getEnableAfterTargetSdk(),
-                change.getDisabled(), change.getLoggingOnly(), change.getDescription());
+                change.getEnableSinceTargetSdk(), change.getDisabled(), change.getLoggingOnly(),
+                change.getDescription());
     }
 
     void registerListener(ChangeListener listener) {
@@ -145,8 +149,8 @@ public final class CompatChange extends CompatibilityChangeInfo {
         if (getDisabled()) {
             return false;
         }
-        if (getEnableAfterTargetSdk() != -1) {
-            return app.targetSdkVersion > getEnableAfterTargetSdk();
+        if (getEnableSinceTargetSdk() != -1) {
+            return app.targetSdkVersion >= getEnableSinceTargetSdk();
         }
         return true;
     }
@@ -167,8 +171,8 @@ public final class CompatChange extends CompatibilityChangeInfo {
         if (getName() != null) {
             sb.append("; name=").append(getName());
         }
-        if (getEnableAfterTargetSdk() != -1) {
-            sb.append("; enableAfterTargetSdk=").append(getEnableAfterTargetSdk());
+        if (getEnableSinceTargetSdk() != -1) {
+            sb.append("; enableSinceTargetSdk=").append(getEnableSinceTargetSdk());
         }
         if (getDisabled()) {
             sb.append("; disabled");

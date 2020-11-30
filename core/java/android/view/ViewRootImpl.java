@@ -281,7 +281,7 @@ public final class ViewRootImpl implements ViewParent,
      */
     private static final int CONTENT_CAPTURE_ENABLED_FALSE = 2;
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     static final ThreadLocal<HandlerActionQueue> sRunQueues = new ThreadLocal<HandlerActionQueue>();
 
     static final ArrayList<Runnable> sFirstDrawHandlers = new ArrayList<>();
@@ -427,11 +427,11 @@ public final class ViewRootImpl implements ViewParent,
     final Region mTransparentRegion;
     final Region mPreviousTransparentRegion;
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     int mWidth;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     int mHeight;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     Rect mDirty;
     public boolean mIsAnimating;
 
@@ -802,7 +802,7 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     /** Add static config callback to be notified about global config changes. */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static void addConfigCallback(ConfigChangedCallback callback) {
         synchronized (sConfigCallbacks) {
             sConfigCallbacks.add(callback);
@@ -1174,7 +1174,7 @@ public final class ViewRootImpl implements ViewParent,
         }
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public int getWindowFlags() {
         return mWindowAttributes.flags;
     }
@@ -1824,19 +1824,13 @@ public final class ViewRootImpl implements ViewParent,
     /**
      * Called after window layout to update the bounds surface. If the surface insets have changed
      * or the surface has resized, update the bounds surface.
-     *
-     * @param shouldReparent Whether it should reparent the bounds layer to the main SurfaceControl.
      */
-    private void updateBoundsLayer(boolean shouldReparent) {
+    private void updateBoundsLayer() {
         if (mBoundsLayer != null) {
             setBoundsLayerCrop();
-            mTransaction.deferTransactionUntil(mBoundsLayer, getRenderSurfaceControl(),
-                    mSurface.getNextFrameNumber());
-
-            if (shouldReparent) {
-                mTransaction.reparent(mBoundsLayer, getRenderSurfaceControl());
-            }
-            mTransaction.apply();
+            mTransaction.deferTransactionUntil(mBoundsLayer,
+                    getRenderSurfaceControl(), mSurface.getNextFrameNumber())
+                    .apply();
         }
     }
 
@@ -1919,7 +1913,7 @@ public final class ViewRootImpl implements ViewParent,
         }
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     void scheduleTraversals() {
         if (!mTraversalScheduled) {
             mTraversalScheduled = true;
@@ -2919,16 +2913,7 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         if (surfaceSizeChanged || surfaceReplaced || surfaceCreated || windowAttributesChanged) {
-            // If the surface has been replaced, there's a chance the bounds layer is not parented
-            // to the new layer. When updating bounds layer, also reparent to the main VRI
-            // SurfaceControl to ensure it's correctly placed in the hierarchy.
-            //
-            // This needs to be done on the client side since WMS won't reparent the children to the
-            // new surface if it thinks the app is closing. WMS gets the signal that the app is
-            // stopping, but on the client side it doesn't get stopped since it's restarted quick
-            // enough. WMS doesn't want to keep around old children since they will leak when the
-            // client creates new children.
-            updateBoundsLayer(surfaceReplaced);
+            updateBoundsLayer();
         }
 
         final boolean didLayout = layoutRequested && (!mStopped || mReportNextDraw);
@@ -5166,7 +5151,7 @@ public final class ViewRootImpl implements ViewParent,
      * @param inTouchMode Whether we want to be in touch mode.
      * @return True if the touch mode changed and focus changed was changed as a result
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     boolean ensureTouchMode(boolean inTouchMode) {
         if (DBG) Log.d("touchmode", "ensureTouchMode(" + inTouchMode + "), current "
                 + "touch mode is " + mAttachInfo.mInTouchMode);
@@ -7199,7 +7184,7 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     /* drag/drop */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     void setLocalDragState(Object obj) {
         mLocalDragState = obj;
     }
@@ -7961,7 +7946,7 @@ public final class ViewRootImpl implements ViewParent,
         }
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     void enqueueInputEvent(InputEvent event) {
         enqueueInputEvent(event, null, 0, false);
     }
@@ -8367,7 +8352,7 @@ public final class ViewRootImpl implements ViewParent,
         mInvalidateOnAnimationRunnable.addViewRect(info);
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void cancelInvalidate(View view) {
         mHandler.removeMessages(MSG_INVALIDATE, view);
         // fixme: might leak the AttachInfo.InvalidateInfo objects instead of returning
@@ -8376,12 +8361,12 @@ public final class ViewRootImpl implements ViewParent,
         mInvalidateOnAnimationRunnable.removeView(view);
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void dispatchInputEvent(InputEvent event) {
         dispatchInputEvent(event, null);
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void dispatchInputEvent(InputEvent event, InputEventReceiver receiver) {
         SomeArgs args = SomeArgs.obtain();
         args.arg1 = event;

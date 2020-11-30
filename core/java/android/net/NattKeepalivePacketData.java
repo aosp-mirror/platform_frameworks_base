@@ -22,10 +22,11 @@ import static android.net.InvalidPacketException.ERROR_INVALID_PORT;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
-import android.net.util.IpUtils;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.system.OsConstants;
+
+import com.android.net.module.util.IpUtils;
 
 import java.net.Inet4Address;
 import java.net.InetAddress;

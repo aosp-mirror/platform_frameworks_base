@@ -1663,6 +1663,21 @@
         -->
     </string-array>
 
+    <!-- Optional IPsec algorithms enabled by this device, defaulting to empty. OEMs can override
+         it by providing a list of algorithm names in an overlay config.xml file.
+
+         As Android releases new versions, more algorithms are becoming mandatory. Mandatory
+         algorithms will be automatically enabled on the device. Optional algorithms need
+         to be explicitly declared in this resource to be enabled.
+             * SDK level 28 makes the following algorithms mandatory : "cbc(aes)", "hmac(md5)",
+               "hmac(sha1)", "hmac(sha256)", "hmac(sha384)", "hmac(sha512)", "rfc4106(gcm(aes))"
+             * SDK level 31 makes the following algorithms mandatory : "rfc3686(ctr(aes))",
+               "xcbc(aes)", "rfc7539esp(chacha20,poly1305)"
+     -->
+    <string-array name="config_optionalIpSecAlgorithms" translatable="false">
+        <!-- Add algorithm here -->
+    </string-array>
+
     <!-- Boolean indicating if current platform supports bluetooth SCO for off call
     use cases -->
     <bool name="config_bluetooth_sco_off_call">true</bool>
@@ -1779,6 +1794,9 @@
 
          Note: This config is deprecated, please use config_defaultSms instead. -->
     <string name="default_sms_application" translatable="false">com.android.messaging</string>
+
+    <!-- Flag indicating whether the current device supports "Ask every time" for sms-->
+    <bool name="config_sms_ask_every_time_support">true</bool>
 
     <!-- Flag indicating whether the current device allows data.
          If true, this means that the device supports data connectivity through
@@ -2089,7 +2107,7 @@
          effectively and terminate the dream.  Use -1 to disable this safety feature.  -->
     <integer name="config_dreamsBatteryLevelDrainCutoff">5</integer>
     <!-- Limit of how long the device can remain unlocked due to attention checking.  -->
-    <integer name="config_attentionMaximumExtension">330000</integer> <!-- 5 minutes and 30 sec.-->
+    <integer name="config_attentionMaximumExtension">900000</integer> <!-- 15 minutes.  -->
 
     <!-- ComponentName of a dream to show whenever the system would otherwise have
          gone to sleep.  When the PowerManager is asked to go to sleep, it will instead
@@ -2774,6 +2792,7 @@
         <item>power</item>
         <item>restart</item>
         <item>logout</item>
+        <item>screenshot</item>
         <item>bugreport</item>
     </string-array>
 
@@ -3488,6 +3507,7 @@
      mode -->
     <string-array translatable="false" name="config_priorityOnlyDndExemptPackages">
         <item>com.android.dialer</item>
+        <item>com.android.server.telecom</item>
         <item>com.android.systemui</item>
         <item>android</item>
     </string-array>
@@ -4369,4 +4389,7 @@
     <bool name="config_pdp_reject_enable_retry">false</bool>
     <!-- pdp data reject retry delay in ms -->
     <integer name="config_pdp_reject_retry_delay_ms">-1</integer>
+
+    <!-- Component names of the services which will keep critical code path warm -->
+    <string-array name="config_keep_warming_services" translatable="false" />
 </resources>

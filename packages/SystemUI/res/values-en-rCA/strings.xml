@@ -92,7 +92,7 @@
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Processing screen recording"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Ongoing notification for a screen record session"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Start recording?"</string>
-    <string name="screenrecord_description" msgid="1123231719680353736">"While recording, Android System can capture any sensitive information that’s visible on your screen or played on your device. This includes passwords, payment info, photos, messages and audio."</string>
+    <string name="screenrecord_description" msgid="1123231719680353736">"While recording, the Android System can capture any sensitive information that’s visible on your screen or played on your device. This includes passwords, payment info, photos, messages and audio."</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Record audio"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Device audio"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Sound from your device, like music, calls and ringtones"</string>

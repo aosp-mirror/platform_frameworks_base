@@ -1,9 +1,0 @@
-rule android.telephony.Annotation* android.telephony.framework.Annotation@1
-rule android.util.RecurrenceRule* android.telephony.RecurrenceRule@1
-rule com.android.i18n.phonenumbers.** com.android.telephony.framework.phonenumbers.@1
-rule com.android.internal.os.SomeArgs* android.telephony.SomeArgs@1
-rule com.android.internal.util.BitwiseInputStream* android.telephony.BitwiseInputStream@1
-rule com.android.internal.util.BitwiseOutputStream* android.telephony.BitwiseOutputStream@1
-rule com.android.internal.util.Preconditions* android.telephony.Preconditions@1
-rule com.android.internal.util.IndentingPrintWriter* android.telephony.IndentingPrintWriter@1
-rule com.android.internal.util.HexDump* android.telephony.HexDump@1

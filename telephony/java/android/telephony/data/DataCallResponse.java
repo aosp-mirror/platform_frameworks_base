@@ -67,8 +67,60 @@ public final class DataCallResponse implements Parcelable {
     /** Indicates the data connection is active with physical link up. */
     public static final int LINK_STATUS_ACTIVE = 2;
 
+    /** {@hide} */
+    @IntDef(prefix = "HANDOVER_FAILURE_MODE_", value = {
+            HANDOVER_FAILURE_MODE_LEGACY,
+            HANDOVER_FAILURE_MODE_DO_FALLBACK,
+            HANDOVER_FAILURE_MODE_NO_FALLBACK_RETRY_HANDOVER,
+            HANDOVER_FAILURE_MODE_NO_FALLBACK_RETRY_SETUP_NORMAL
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface HandoverFailureMode {}
+
+    /**
+     * Data handover failure mode is unknown.
+     */
+    public static final int HANDOVER_FAILURE_MODE_UNKNOWN = -1;
+
+    /**
+     * Perform fallback to the source data transport on data handover failure using
+     * the legacy logic, which is fallback if the fail cause is
+     * {@link DataFailCause#HANDOFF_PREFERENCE_CHANGED}.
+     */
+    public static final int HANDOVER_FAILURE_MODE_LEGACY = 0;
+
+    /**
+     * Perform fallback to the source data transport on data handover failure.
+     */
+    public static final int HANDOVER_FAILURE_MODE_DO_FALLBACK = 1;
+
+    /**
+     * Do not perform fallback to the source data transport on data handover failure.
+     * Framework will retry setting up a new data connection by sending
+     * {@link DataService#REQUEST_REASON_HANDOVER} request to the underlying {@link DataService}.
+     */
+    public static final int HANDOVER_FAILURE_MODE_NO_FALLBACK_RETRY_HANDOVER = 2;
+
+    /**
+     * Do not perform fallback to the source transport on data handover failure.
+     * Framework will retry setting up a new data connection by sending
+     * {@link DataService#REQUEST_REASON_NORMAL} request to the underlying {@link DataService}.
+     */
+    public static final int HANDOVER_FAILURE_MODE_NO_FALLBACK_RETRY_SETUP_NORMAL = 3;
+
+    /**
+     * Indicates that data retry interval is not specified. Platform can determine when to
+     * perform data setup appropriately.
+     */
+    public static final int RETRY_INTERVAL_UNDEFINED = -1;
+
+    /**
+     * Indicates that the pdu session id is not set.
+     */
+    public static final int PDU_SESSION_ID_NOT_SET = 0;
+
     private final @DataFailureCause int mCause;
-    private final int mSuggestedRetryTime;
+    private final long mSuggestedRetryTime;
     private final int mId;
     private final @LinkStatus int mLinkStatus;
     private final @ProtocolType int mProtocolType;
@@ -80,6 +132,8 @@ public final class DataCallResponse implements Parcelable {
     private final int mMtu;
     private final int mMtuV4;
     private final int mMtuV6;
+    private final @HandoverFailureMode int mHandoverFailureMode;
+    private final int mPduSessionId;
 
     /**
      * @param cause Data call fail cause. {@link DataFailCause#NONE} indicates no error.
@@ -126,14 +180,16 @@ public final class DataCallResponse implements Parcelable {
         mPcscfAddresses = (pcscfAddresses == null)
                 ? new ArrayList<>() : new ArrayList<>(pcscfAddresses);
         mMtu = mMtuV4 = mMtuV6 = mtu;
+        mHandoverFailureMode = HANDOVER_FAILURE_MODE_LEGACY;
+        mPduSessionId = PDU_SESSION_ID_NOT_SET;
     }
 
-    /** @hide */
-    private DataCallResponse(@DataFailureCause int cause, int suggestedRetryTime, int id,
+    private DataCallResponse(@DataFailureCause int cause, long suggestedRetryTime, int id,
             @LinkStatus int linkStatus, @ProtocolType int protocolType,
             @Nullable String interfaceName, @Nullable List<LinkAddress> addresses,
             @Nullable List<InetAddress> dnsAddresses, @Nullable List<InetAddress> gatewayAddresses,
-            @Nullable List<InetAddress> pcscfAddresses, int mtu, int mtuV4, int mtuV6) {
+            @Nullable List<InetAddress> pcscfAddresses, int mtu, int mtuV4, int mtuV6,
+            @HandoverFailureMode int handoverFailureMode, int pduSessionId) {
         mCause = cause;
         mSuggestedRetryTime = suggestedRetryTime;
         mId = id;
@@ -151,13 +207,15 @@ public final class DataCallResponse implements Parcelable {
         mMtu = mtu;
         mMtuV4 = mtuV4;
         mMtuV6 = mtuV6;
+        mHandoverFailureMode = handoverFailureMode;
+        mPduSessionId = pduSessionId;
     }
 
     /** @hide */
     @VisibleForTesting
     public DataCallResponse(Parcel source) {
         mCause = source.readInt();
-        mSuggestedRetryTime = source.readInt();
+        mSuggestedRetryTime = source.readLong();
         mId = source.readInt();
         mLinkStatus = source.readInt();
         mProtocolType = source.readInt();
@@ -173,6 +231,8 @@ public final class DataCallResponse implements Parcelable {
         mMtu = source.readInt();
         mMtuV4 = source.readInt();
         mMtuV6 = source.readInt();
+        mHandoverFailureMode = source.readInt();
+        mPduSessionId = source.readInt();
     }
 
     /**
@@ -183,8 +243,22 @@ public final class DataCallResponse implements Parcelable {
 
     /**
      * @return The suggested data retry time in milliseconds.
+     *
+     * @deprecated Use {@link #getRetryIntervalMillis()} instead.
      */
-    public int getSuggestedRetryTime() { return mSuggestedRetryTime; }
+    @Deprecated
+    public int getSuggestedRetryTime() {
+        return (int) mSuggestedRetryTime;
+    }
+
+    /**
+     * @return The network suggested data retry interval in milliseconds. {@code Long.MAX_VALUE}
+     * indicates data retry should not occur. {@link #RETRY_INTERVAL_UNDEFINED} indicates network
+     * did not suggest any retry interval.
+     */
+    public long getRetryIntervalMillis() {
+        return mSuggestedRetryTime;
+    }
 
     /**
      * @return The unique id of the data connection.
@@ -262,6 +336,20 @@ public final class DataCallResponse implements Parcelable {
         return mMtuV6;
     }
 
+    /**
+     * @return The data handover failure mode.
+     */
+    public @HandoverFailureMode int getHandoverFailureMode() {
+        return mHandoverFailureMode;
+    }
+
+    /**
+     * @return The pdu session id
+     */
+    public int getPduSessionId() {
+        return mPduSessionId;
+    }
+
     @NonNull
     @Override
     public String toString() {
@@ -280,6 +368,8 @@ public final class DataCallResponse implements Parcelable {
            .append(" mtu=").append(getMtu())
            .append(" mtuV4=").append(getMtuV4())
            .append(" mtuV6=").append(getMtuV6())
+           .append(" handoverFailureMode=").append(getHandoverFailureMode())
+           .append(" pduSessionId=").append(getPduSessionId())
            .append("}");
         return sb.toString();
     }
@@ -309,14 +399,16 @@ public final class DataCallResponse implements Parcelable {
                 && mPcscfAddresses.containsAll(other.mPcscfAddresses)
                 && mMtu == other.mMtu
                 && mMtuV4 == other.mMtuV4
-                && mMtuV6 == other.mMtuV6;
+                && mMtuV6 == other.mMtuV6
+                && mHandoverFailureMode == other.mHandoverFailureMode
+                && mPduSessionId == other.mPduSessionId;
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(mCause, mSuggestedRetryTime, mId, mLinkStatus, mProtocolType,
                 mInterfaceName, mAddresses, mDnsAddresses, mGatewayAddresses, mPcscfAddresses,
-                mMtu, mMtuV4, mMtuV6);
+                mMtu, mMtuV4, mMtuV6, mHandoverFailureMode, mPduSessionId);
     }
 
     @Override
@@ -327,7 +419,7 @@ public final class DataCallResponse implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(mCause);
-        dest.writeInt(mSuggestedRetryTime);
+        dest.writeLong(mSuggestedRetryTime);
         dest.writeInt(mId);
         dest.writeInt(mLinkStatus);
         dest.writeInt(mProtocolType);
@@ -339,6 +431,8 @@ public final class DataCallResponse implements Parcelable {
         dest.writeInt(mMtu);
         dest.writeInt(mMtuV4);
         dest.writeInt(mMtuV6);
+        dest.writeInt(mHandoverFailureMode);
+        dest.writeInt(mPduSessionId);
     }
 
     public static final @android.annotation.NonNull Parcelable.Creator<DataCallResponse> CREATOR =
@@ -353,6 +447,25 @@ public final class DataCallResponse implements Parcelable {
                     return new DataCallResponse[size];
                 }
             };
+
+    /**
+     * Convert handover failure mode to string.
+     *
+     * @param handoverFailureMode Handover failure mode
+     * @return Handover failure mode in string
+     *
+     * @hide
+     */
+    public static String failureModeToString(@HandoverFailureMode int handoverFailureMode) {
+        switch (handoverFailureMode) {
+            case HANDOVER_FAILURE_MODE_UNKNOWN: return "unknown";
+            case HANDOVER_FAILURE_MODE_LEGACY: return "legacy";
+            case HANDOVER_FAILURE_MODE_DO_FALLBACK: return "fallback";
+            case HANDOVER_FAILURE_MODE_NO_FALLBACK_RETRY_HANDOVER: return "retry handover";
+            case HANDOVER_FAILURE_MODE_NO_FALLBACK_RETRY_SETUP_NORMAL: return "retry setup new one";
+            default: return Integer.toString(handoverFailureMode);
+        }
+    }
 
     /**
      * Provides a convenient way to set the fields of a {@link DataCallResponse} when creating a new
@@ -371,7 +484,7 @@ public final class DataCallResponse implements Parcelable {
     public static final class Builder {
         private @DataFailureCause int mCause;
 
-        private int mSuggestedRetryTime;
+        private long mSuggestedRetryTime = RETRY_INTERVAL_UNDEFINED;
 
         private int mId;
 
@@ -395,6 +508,10 @@ public final class DataCallResponse implements Parcelable {
 
         private int mMtuV6;
 
+        private @HandoverFailureMode int mHandoverFailureMode = HANDOVER_FAILURE_MODE_LEGACY;
+
+        private int mPduSessionId = PDU_SESSION_ID_NOT_SET;
+
         /**
          * Default constructor for Builder.
          */
@@ -417,9 +534,23 @@ public final class DataCallResponse implements Parcelable {
          *
          * @param suggestedRetryTime The suggested data retry time in milliseconds.
          * @return The same instance of the builder.
+         *
+         * @deprecated Use {@link #setRetryIntervalMillis(long)} instead.
          */
+        @Deprecated
         public @NonNull Builder setSuggestedRetryTime(int suggestedRetryTime) {
-            mSuggestedRetryTime = suggestedRetryTime;
+            mSuggestedRetryTime = (long) suggestedRetryTime;
+            return this;
+        }
+
+        /**
+         * Set the network suggested data retry interval.
+         *
+         * @param retryIntervalMillis The suggested data retry interval in milliseconds.
+         * @return The same instance of the builder.
+         */
+        public @NonNull Builder setRetryIntervalMillis(long retryIntervalMillis) {
+            mSuggestedRetryTime = retryIntervalMillis;
             return this;
         }
 
@@ -553,6 +684,28 @@ public final class DataCallResponse implements Parcelable {
         }
 
         /**
+         * Set data handover failure mode for the data call response.
+         *
+         * @param failureMode Handover failure mode.
+         * @return The same instance of the builder.
+         */
+        public @NonNull Builder setHandoverFailureMode(@HandoverFailureMode int failureMode) {
+            mHandoverFailureMode = failureMode;
+            return this;
+        }
+
+        /**
+         * Set pdu session id.
+         *
+         * @param pduSessionId Pdu Session Id of the data call.
+         * @return The same instance of the builder.
+         */
+        public @NonNull Builder setPduSessionId(int pduSessionId) {
+            mPduSessionId = pduSessionId;
+            return this;
+        }
+
+        /**
          * Build the DataCallResponse.
          *
          * @return the DataCallResponse object.
@@ -560,7 +713,7 @@ public final class DataCallResponse implements Parcelable {
         public @NonNull DataCallResponse build() {
             return new DataCallResponse(mCause, mSuggestedRetryTime, mId, mLinkStatus,
                     mProtocolType, mInterfaceName, mAddresses, mDnsAddresses, mGatewayAddresses,
-                    mPcscfAddresses, mMtu, mMtuV4, mMtuV6);
+                    mPcscfAddresses, mMtu, mMtuV4, mMtuV6, mHandoverFailureMode, mPduSessionId);
         }
     }
 }

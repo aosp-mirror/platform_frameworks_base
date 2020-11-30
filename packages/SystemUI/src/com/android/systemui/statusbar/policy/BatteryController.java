@@ -58,6 +58,11 @@ public interface BatteryController extends DemoMode, Dumpable,
     default void init() { }
 
     /**
+     * Returns {@code true} if the device is currently in wireless charging mode.
+     */
+    default boolean isWirelessCharging() { return false; }
+
+    /**
      * Returns {@code true} if reverse is supported.
      */
     default boolean isReverseSupported() { return false; }

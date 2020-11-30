@@ -23,6 +23,7 @@ import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.media.audiofx.AudioEffect;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
@@ -222,7 +223,7 @@ public final class AudioRecordingConfiguration implements Parcelable {
      * <br>When called without the permission, the result is an empty string.
      * @return the package name
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public String getClientPackageName() { return mClientPackageName; }
 
     /**

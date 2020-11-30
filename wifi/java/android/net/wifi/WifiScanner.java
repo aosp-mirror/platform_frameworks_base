@@ -1239,7 +1239,7 @@ public class WifiScanner {
      * @param bssidInfos access points to watch
      */
     @Deprecated
-    @SuppressLint("Doclava125")
+    @SuppressLint("RequiresPermission")
     public void configureWifiChange(
             int rssiSampleSize,                             /* sample size for RSSI averaging */
             int lostApSampleSize,                           /* samples to confirm AP's loss */
@@ -1273,7 +1273,7 @@ public class WifiScanner {
      *                 provided on {@link #stopTrackingWifiChange}
      */
     @Deprecated
-    @SuppressLint("Doclava125")
+    @SuppressLint("RequiresPermission")
     public void startTrackingWifiChange(WifiChangeListener listener) {
         throw new UnsupportedOperationException();
     }
@@ -1284,7 +1284,7 @@ public class WifiScanner {
      * #stopTrackingWifiChange}
      */
     @Deprecated
-    @SuppressLint("Doclava125")
+    @SuppressLint("RequiresPermission")
     public void stopTrackingWifiChange(WifiChangeListener listener) {
         throw new UnsupportedOperationException();
     }
@@ -1292,7 +1292,7 @@ public class WifiScanner {
     /** @hide */
     @SystemApi
     @Deprecated
-    @SuppressLint("Doclava125")
+    @SuppressLint("RequiresPermission")
     public void configureWifiChange(WifiChangeSettings settings) {
         throw new UnsupportedOperationException();
     }
@@ -1348,7 +1348,7 @@ public class WifiScanner {
      *                 also be provided on {@link #stopTrackingBssids}
      */
     @Deprecated
-    @SuppressLint("Doclava125")
+    @SuppressLint("RequiresPermission")
     public void startTrackingBssids(BssidInfo[] bssidInfos,
                                     int apLostThreshold, BssidListener listener) {
         throw new UnsupportedOperationException();
@@ -1359,7 +1359,7 @@ public class WifiScanner {
      * @param listener same object provided in {@link #startTrackingBssids}
      */
     @Deprecated
-    @SuppressLint("Doclava125")
+    @SuppressLint("RequiresPermission")
     public void stopTrackingBssids(BssidListener listener) {
         throw new UnsupportedOperationException();
     }

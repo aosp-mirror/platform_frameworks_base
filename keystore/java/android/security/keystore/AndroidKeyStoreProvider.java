@@ -23,6 +23,7 @@ import android.security.KeyStore;
 import android.security.keymaster.ExportResult;
 import android.security.keymaster.KeyCharacteristics;
 import android.security.keymaster.KeymasterDefs;
+import android.sysprop.Keystore2Properties;
 
 import java.io.IOException;
 import java.security.KeyFactory;
@@ -70,14 +71,19 @@ public class AndroidKeyStoreProvider extends Provider {
     private static final String DESEDE_SYSTEM_PROPERTY =
             "ro.hardware.keystore_desede";
 
-    /** @hide **/
+    /** @hide */
     public AndroidKeyStoreProvider() {
-        super(PROVIDER_NAME, 1.0, "Android KeyStore security provider");
+        this(PROVIDER_NAME);
+    }
+
+    /** @hide **/
+    public AndroidKeyStoreProvider(String providerName) {
+        super(providerName, 1.0, "Android KeyStore security provider");
 
         boolean supports3DES = "true".equals(android.os.SystemProperties.get(DESEDE_SYSTEM_PROPERTY));
 
         // java.security.KeyStore
-        put("KeyStore.AndroidKeyStore", PACKAGE_NAME + ".AndroidKeyStoreSpi");
+        put("KeyStore." + providerName, PACKAGE_NAME + ".AndroidKeyStoreSpi");
 
         // java.security.KeyPairGenerator
         put("KeyPairGenerator.EC", PACKAGE_NAME + ".AndroidKeyStoreKeyPairGeneratorSpi$EC");
@@ -111,6 +117,26 @@ public class AndroidKeyStoreProvider extends Provider {
         putSecretKeyFactoryImpl("HmacSHA512");
     }
 
+    private static boolean sKeystore2Enabled;
+
+    /**
+     * This function indicates whether or not Keystore 2.0 is enabled. Some parts of the
+     * Keystore SPI must behave subtly differently when Keystore 2.0 is enabled. However,
+     * the platform property that indicates that Keystore 2.0 is enabled is not readable
+     * by applications. So we set this value when {@code install()} is called because it
+     * is called by zygote, which can access Keystore2Properties.
+     *
+     * This function can be removed once the transition to Keystore 2.0 is complete.
+     * b/171305684
+     *
+     * @return true if Keystore 2.0 is enabled.
+     * @hide
+     */
+    public static boolean isKeystore2Enabled() {
+        return sKeystore2Enabled;
+    }
+
+
     /**
      * Installs a new instance of this provider (and the
      * {@link AndroidKeyStoreBCWorkaroundProvider}).
@@ -138,6 +164,11 @@ public class AndroidKeyStoreProvider extends Provider {
             // priority.
             Security.addProvider(workaroundProvider);
         }
+
+        // {@code install()} is run by zygote when this property is still accessible. We store its
+        // value so that the Keystore SPI can act accordingly without having to access an internal
+        // property.
+        sKeystore2Enabled = Keystore2Properties.keystore2_enabled().orElse(false);
     }
 
     private void putSecretKeyFactoryImpl(String algorithm) {
@@ -412,8 +443,12 @@ public class AndroidKeyStoreProvider extends Provider {
     @NonNull
     public static java.security.KeyStore getKeyStoreForUid(int uid)
             throws KeyStoreException, NoSuchProviderException {
+        String providerName = PROVIDER_NAME;
+        if (android.security.keystore2.AndroidKeyStoreProvider.isInstalled()) {
+            providerName = "AndroidKeyStoreLegacy";
+        }
         java.security.KeyStore result =
-                java.security.KeyStore.getInstance("AndroidKeyStore", PROVIDER_NAME);
+                java.security.KeyStore.getInstance(providerName);
         try {
             result.load(new AndroidKeyStoreLoadStoreParameter(uid));
         } catch (NoSuchAlgorithmException | CertificateException | IOException e) {

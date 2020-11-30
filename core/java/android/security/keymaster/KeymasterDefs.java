@@ -94,6 +94,8 @@ public final class KeymasterDefs {
     public static final int KM_TAG_ATTESTATION_ID_MEID = KM_BYTES | 715;
     public static final int KM_TAG_ATTESTATION_ID_MANUFACTURER = KM_BYTES | 716;
     public static final int KM_TAG_ATTESTATION_ID_MODEL = KM_BYTES | 717;
+    public static final int KM_TAG_VENDOR_PATCHLEVEL =  KM_UINT | 718;
+    public static final int KM_TAG_BOOT_PATCHLEVEL =  KM_UINT | 719;
     public static final int KM_TAG_DEVICE_UNIQUE_ATTESTATION = KM_BOOL | 720;
 
     public static final int KM_TAG_ASSOCIATED_DATA = KM_BYTES | 1000;
@@ -157,6 +159,11 @@ public final class KeymasterDefs {
     public static final int HW_AUTH_PASSWORD = 1 << 0;
     public static final int HW_AUTH_BIOMETRIC = 1 << 1;
 
+    // Security Levels.
+    public static final int KM_SECURITY_LEVEL_SOFTWARE = 0;
+    public static final int KM_SECURITY_LEVEL_TRUSTED_ENVIRONMENT = 1;
+    public static final int KM_SECURITY_LEVEL_STRONGBOX = 2;
+
     // Error codes.
     public static final int KM_ERROR_OK = 0;
     public static final int KM_ERROR_ROOT_OF_TRUST_ALREADY_SET = -1;
@@ -218,6 +225,7 @@ public final class KeymasterDefs {
     public static final int KM_ERROR_MISSING_MIN_MAC_LENGTH = -58;
     public static final int KM_ERROR_UNSUPPORTED_MIN_MAC_LENGTH = -59;
     public static final int KM_ERROR_CANNOT_ATTEST_IDS = -66;
+    public static final int KM_ERROR_HARDWARE_TYPE_UNAVAILABLE = -68;
     public static final int KM_ERROR_DEVICE_LOCKED = -72;
     public static final int KM_ERROR_UNIMPLEMENTED = -100;
     public static final int KM_ERROR_VERSION_MISMATCH = -101;
@@ -265,6 +273,8 @@ public final class KeymasterDefs {
         sErrorCodeToString.put(KM_ERROR_INVALID_MAC_LENGTH,
                 "Invalid MAC or authentication tag length");
         sErrorCodeToString.put(KM_ERROR_CANNOT_ATTEST_IDS, "Unable to attest device ids");
+        sErrorCodeToString.put(KM_ERROR_HARDWARE_TYPE_UNAVAILABLE, "Requested security level "
+                        + "(likely Strongbox) is not available.");
         sErrorCodeToString.put(KM_ERROR_DEVICE_LOCKED, "Device locked");
         sErrorCodeToString.put(KM_ERROR_UNIMPLEMENTED, "Not implemented");
         sErrorCodeToString.put(KM_ERROR_UNKNOWN_ERROR, "Unknown error");

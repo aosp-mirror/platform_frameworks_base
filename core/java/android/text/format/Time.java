@@ -18,6 +18,7 @@ package android.text.format;
 
 import android.util.TimeFormatException;
 
+import com.android.i18n.timezone.WallTime;
 import com.android.i18n.timezone.ZoneInfoData;
 import com.android.i18n.timezone.ZoneInfoDb;
 
@@ -1070,7 +1071,7 @@ public class Time {
      * to the enclosing object, but others do not: thus separate state is retained.
      */
     private static class TimeCalculator {
-        public final ZoneInfoData.WallTime wallTime;
+        public final WallTime wallTime;
         public String timezone;
 
         // Information about the current timezone.
@@ -1078,7 +1079,7 @@ public class Time {
 
         public TimeCalculator(String timezoneId) {
             this.mZoneInfoData = lookupZoneInfoData(timezoneId);
-            this.wallTime = new ZoneInfoData.WallTime();
+            this.wallTime = new WallTime();
         }
 
         public long toMillis(boolean ignoreDst) {

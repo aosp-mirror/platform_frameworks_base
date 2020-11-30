@@ -17,6 +17,7 @@
 package android.net.wifi.p2p;
 
 import android.compat.annotation.UnsupportedAppUsage;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
@@ -83,7 +84,7 @@ public class WifiP2pDeviceList implements Parcelable {
      * @param device to be updated
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void update(WifiP2pDevice device) {
         updateSupplicantDetails(device);
         mDevices.get(device.deviceAddress).status = device.status;

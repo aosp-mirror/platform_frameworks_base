@@ -25,11 +25,11 @@ import android.annotation.RequiresPermission;
 import android.annotation.SuppressAutoDoc;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
-import android.annotation.TestApi;
 import android.os.Binder;
 import android.os.RemoteException;
 import android.os.ServiceSpecificException;
 import android.telephony.AccessNetworkConstants;
+import android.telephony.BinderCacheManager;
 import android.telephony.CarrierConfigManager;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyFrameworkInitializer;
@@ -59,6 +59,7 @@ import java.util.function.Consumer;
  * manager.
  */
 public class ImsMmTelManager implements RegistrationManager {
+    private static final String TAG = "ImsMmTelManager";
 
     /**
      * @hide
@@ -96,7 +97,7 @@ public class ImsMmTelManager implements RegistrationManager {
      */
     // Do not add to this class, add to RegistrationManager.RegistrationCallback instead.
     @Deprecated
-    @SystemApi @TestApi
+    @SystemApi
     public static class RegistrationCallback extends RegistrationManager.RegistrationCallback {
 
         /**
@@ -213,6 +214,7 @@ public class ImsMmTelManager implements RegistrationManager {
     }
 
     private final int mSubId;
+    private final BinderCacheManager<ITelephony> mBinderCache;
 
     /**
      * Create an instance of {@link ImsMmTelManager} for the subscription id specified.
@@ -230,7 +232,6 @@ public class ImsMmTelManager implements RegistrationManager {
      * @hide
      */
     @SystemApi
-    @TestApi
     @Deprecated
     @SuppressAutoDoc // No support for device / profile owner or carrier privileges (b/72967236).
     @RequiresPermission(anyOf = {
@@ -243,7 +244,8 @@ public class ImsMmTelManager implements RegistrationManager {
             throw new IllegalArgumentException("Invalid subscription ID");
         }
 
-        return new ImsMmTelManager(subId);
+        return new ImsMmTelManager(subId, new BinderCacheManager<>(
+                ImsMmTelManager::getITelephonyInterface));
     }
 
     /**
@@ -251,8 +253,9 @@ public class ImsMmTelManager implements RegistrationManager {
      * @hide
      */
     @VisibleForTesting
-    public ImsMmTelManager(int subId) {
+    public ImsMmTelManager(int subId, BinderCacheManager<ITelephony> binderCache) {
         mSubId = subId;
+        mBinderCache = binderCache;
     }
 
     /**
@@ -279,7 +282,7 @@ public class ImsMmTelManager implements RegistrationManager {
      * @hide
      */
     @Deprecated
-    @SystemApi @TestApi
+    @SystemApi
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public void registerImsRegistrationCallback(@NonNull @CallbackExecutor Executor executor,
             @NonNull RegistrationCallback c) throws ImsException {
@@ -365,7 +368,7 @@ public class ImsMmTelManager implements RegistrationManager {
      * @hide
      */
     @Deprecated
-    @SystemApi @TestApi
+    @SystemApi
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public void unregisterImsRegistrationCallback(@NonNull RegistrationCallback c) {
         if (c == null) {
@@ -421,7 +424,7 @@ public class ImsMmTelManager implements RegistrationManager {
      * @hide
      */
     @Override
-    @SystemApi @TestApi
+    @SystemApi
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public void getRegistrationState(@NonNull @CallbackExecutor Executor executor,
             @NonNull @ImsRegistrationState Consumer<Integer> stateCallback) {
@@ -680,7 +683,7 @@ public class ImsMmTelManager implements RegistrationManager {
      * @hide
      */
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
-    @SystemApi @TestApi
+    @SystemApi
     public void setAdvancedCallingSettingEnabled(boolean isEnabled) {
         ITelephony iTelephony = getITelephony();
         if (iTelephony == null) {
@@ -724,7 +727,7 @@ public class ImsMmTelManager implements RegistrationManager {
      * @hide
      */
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
-    @SystemApi @TestApi
+    @SystemApi
     public boolean isCapable(@MmTelFeature.MmTelCapabilities.MmTelCapability int capability,
             @ImsRegistrationImplBase.ImsRegistrationTech int imsRegTech) {
         ITelephony iTelephony = getITelephony();
@@ -757,7 +760,7 @@ public class ImsMmTelManager implements RegistrationManager {
      *         otherwise.
      * @hide
      */
-    @SystemApi @TestApi
+    @SystemApi
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public boolean isAvailable(@MmTelFeature.MmTelCapabilities.MmTelCapability int capability,
             @ImsRegistrationImplBase.ImsRegistrationTech int imsRegTech) {
@@ -789,7 +792,7 @@ public class ImsMmTelManager implements RegistrationManager {
      * available.
      * @hide
      */
-    @SystemApi @TestApi
+    @SystemApi
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public void isSupported(@MmTelFeature.MmTelCapabilities.MmTelCapability int capability,
             @AccessNetworkConstants.TransportType int transportType,
@@ -809,7 +812,7 @@ public class ImsMmTelManager implements RegistrationManager {
         }
 
         try {
-            getITelephony().isMmTelCapabilitySupported(mSubId, new IIntegerConsumer.Stub() {
+            iTelephony.isMmTelCapabilitySupported(mSubId, new IIntegerConsumer.Stub() {
                 @Override
                 public void accept(int result) {
                     executor.execute(() -> callback.accept(result == 1));
@@ -878,7 +881,7 @@ public class ImsMmTelManager implements RegistrationManager {
      * @see #isVtSettingEnabled()
      * @hide
      */
-    @SystemApi @TestApi
+    @SystemApi
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
     public void setVtSettingEnabled(boolean isEnabled) {
         ITelephony iTelephony = getITelephony();
@@ -953,7 +956,7 @@ public class ImsMmTelManager implements RegistrationManager {
      * @see #isVoWiFiSettingEnabled()
      * @hide
      */
-    @SystemApi @TestApi
+    @SystemApi
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
     public void setVoWiFiSettingEnabled(boolean isEnabled) {
         ITelephony iTelephony = getITelephony();
@@ -1031,7 +1034,7 @@ public class ImsMmTelManager implements RegistrationManager {
      * @see #isVoWiFiRoamingSettingEnabled()
      * @hide
      */
-    @SystemApi @TestApi
+    @SystemApi
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
     public void setVoWiFiRoamingSettingEnabled(boolean isEnabled) {
         ITelephony iTelephony = getITelephony();
@@ -1068,7 +1071,7 @@ public class ImsMmTelManager implements RegistrationManager {
      * @see #setVoWiFiSettingEnabled(boolean)
      * @hide
      */
-    @SystemApi @TestApi
+    @SystemApi
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
     public void setVoWiFiNonPersistent(boolean isCapable, int mode) {
         ITelephony iTelephony = getITelephony();
@@ -1151,7 +1154,7 @@ public class ImsMmTelManager implements RegistrationManager {
      * @see #getVoWiFiModeSetting()
      * @hide
      */
-    @SystemApi @TestApi
+    @SystemApi
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
     public void setVoWiFiModeSetting(@WiFiCallingMode int mode) {
         ITelephony iTelephony = getITelephony();
@@ -1187,7 +1190,7 @@ public class ImsMmTelManager implements RegistrationManager {
      * @see #setVoWiFiRoamingSettingEnabled(boolean)
      * @hide
      */
-    @SystemApi @TestApi
+    @SystemApi
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public @WiFiCallingMode int getVoWiFiRoamingModeSetting() {
         ITelephony iTelephony = getITelephony();
@@ -1223,7 +1226,7 @@ public class ImsMmTelManager implements RegistrationManager {
      * @see #getVoWiFiRoamingModeSetting()
      * @hide
      */
-    @SystemApi @TestApi
+    @SystemApi
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
     public void setVoWiFiRoamingModeSetting(@WiFiCallingMode int mode) {
         ITelephony iTelephony = getITelephony();
@@ -1257,7 +1260,7 @@ public class ImsMmTelManager implements RegistrationManager {
      * @param isEnabled if true RTT should be enabled during calls made on this subscription.
      * @hide
      */
-    @SystemApi @TestApi
+    @SystemApi
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
     public void setRttCapabilitySetting(boolean isEnabled) {
         ITelephony iTelephony = getITelephony();
@@ -1337,7 +1340,7 @@ public class ImsMmTelManager implements RegistrationManager {
      * the IMS service is not available.
      * @hide
      */
-    @SystemApi @TestApi
+    @SystemApi
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public void getFeatureState(@NonNull @CallbackExecutor Executor executor,
             @NonNull @ImsFeature.ImsState Consumer<Integer> callback) throws ImsException {
@@ -1368,7 +1371,11 @@ public class ImsMmTelManager implements RegistrationManager {
         }
     }
 
-    private static ITelephony getITelephony() {
+    private ITelephony getITelephony() {
+        return mBinderCache.getBinder();
+    }
+
+    private static ITelephony getITelephonyInterface() {
         ITelephony binder = ITelephony.Stub.asInterface(
                 TelephonyFrameworkInitializer
                         .getTelephonyServiceManager()

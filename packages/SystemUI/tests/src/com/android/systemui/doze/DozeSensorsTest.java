@@ -23,7 +23,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -141,21 +140,6 @@ public class DozeSensorsTest extends SysuiTestCase {
         mDozeSensors.setListening(true);
 
         verify(mTriggerSensor, times(1)).registerSettingsObserver(any(ContentObserver.class));
-    }
-
-    @Test
-    public void testSetPaused_doesntPause_sensors() {
-        verify(mSensorManager, never()).registerListener(any(), any(Sensor.class), anyInt());
-        mDozeSensors.setListening(true);
-        verify(mTriggerSensor).setListening(eq(true));
-
-        clearInvocations(mTriggerSensor);
-        mDozeSensors.setPaused(true);
-        verify(mTriggerSensor).setListening(eq(true));
-
-        clearInvocations(mTriggerSensor);
-        mDozeSensors.setListening(false);
-        verify(mTriggerSensor).setListening(eq(false));
     }
 
     @Test

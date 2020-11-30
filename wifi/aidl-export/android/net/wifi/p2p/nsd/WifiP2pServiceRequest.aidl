@@ -14,6 +14,6 @@
  * limitations under the License.
  */
 
-package android.net.wifi.p2p.servicediscovery;
+package android.net.wifi.p2p.nsd;
 
 parcelable WifiP2pServiceRequest;

@@ -92,10 +92,10 @@
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Processant gravació de pantalla"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Notificació en curs d\'una sessió de gravació de la pantalla"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Vols iniciar la gravació?"</string>
-    <string name="screenrecord_description" msgid="1123231719680353736">"Quan graves contingut, el sistema Android pot capturar qualsevol informació sensible que es mostri a la pantalla o que es reprodueixi al dispositiu. Això inclou les contrasenyes, la informació de pagament, les fotos, els missatges i l\'àudio."</string>
+    <string name="screenrecord_description" msgid="1123231719680353736">"Durant la gravació, el sistema Android pot capturar qualsevol informació sensible que es mostri a la pantalla o que es reprodueixi al dispositiu. Això inclou contrasenyes, informació de pagament, fotos, missatges i àudio."</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Grava l\'àudio"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Àudio del dispositiu"</string>
-    <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Sons del dispositiu, com ara la música, les trucades i els sons de trucada"</string>
+    <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"So del dispositiu, com ara música, trucades i sons de trucada"</string>
     <string name="screenrecord_mic_label" msgid="2111264835791332350">"Micròfon"</string>
     <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"Àudio del dispositiu i micròfon"</string>
     <string name="screenrecord_start" msgid="330991441575775004">"Inicia"</string>
@@ -389,7 +389,7 @@
     <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"La Wi‑Fi no està connectada"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"Brillantor"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="2325362583903258677">"AUTOMÀTICA"</string>
-    <string name="quick_settings_inversion_label" msgid="5078769633069667698">"Inverteix els colors"</string>
+    <string name="quick_settings_inversion_label" msgid="5078769633069667698">"Inverteix colors"</string>
     <string name="quick_settings_color_space_label" msgid="537528291083575559">"Mode de correcció de color"</string>
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"Més opcions"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Fet"</string>

@@ -66,11 +66,6 @@ public:
                       const DumpLatency dumpLatency,
                       ProtoOutputStream* proto);
 
-    /* Tells MetricsManager that the alarms in alarmSet have fired. Modifies anomaly alarmSet. */
-    void onAnomalyAlarmFired(
-            const int64_t& timestampNs,
-            unordered_set<sp<const InternalAlarm>, SpHash<InternalAlarm>> alarmSet);
-
     /* Tells MetricsManager that the alarms in alarmSet have fired. Modifies periodic alarmSet. */
     void onPeriodicAlarmFired(
             const int64_t& timestampNs,
@@ -148,6 +143,10 @@ public:
     // Add a specific config key to the possible configs to dump ASAP.
     void noteOnDiskData(const ConfigKey& key);
 
+    void setAnomalyAlarm(const int64_t timeMillis);
+
+    void cancelAnomalyAlarm();
+
 private:
     // For testing only.
     inline sp<AlarmMonitor> getAnomalyAlarmMonitor() const {
@@ -159,6 +158,11 @@ private:
     }
 
     mutable mutex mMetricsMutex;
+
+    // Guards mNextAnomalyAlarmTime. A separate mutex is needed because alarms are set/cancelled
+    // in the onLogEvent code path, which is locked by mMetricsMutex.
+    // DO NOT acquire mMetricsMutex while holding mAnomalyAlarmMutex. This can lead to a deadlock.
+    mutable mutex mAnomalyAlarmMutex;
 
     std::unordered_map<ConfigKey, sp<MetricsManager>> mMetricsManagers;
 
@@ -250,6 +254,15 @@ private:
     // Reset the specified configs.
     void resetConfigsLocked(const int64_t timestampNs, const std::vector<ConfigKey>& configs);
 
+    // An anomaly alarm should have fired.
+    // Check with anomaly alarm manager to find the alarms and process the result.
+    void informAnomalyAlarmFiredLocked(const int64_t elapsedTimeMillis);
+
+    /* Tells MetricsManager that the alarms in alarmSet have fired. Modifies anomaly alarmSet. */
+    void processFiredAnomalyAlarmsLocked(
+            const int64_t& timestampNs,
+            unordered_set<sp<const InternalAlarm>, SpHash<InternalAlarm>> alarmSet);
+
     // Function used to send a broadcast so that receiver for the config key can call getData
     // to retrieve the stored data.
     std::function<bool(const ConfigKey& key)> mSendBroadcast;
@@ -275,6 +288,9 @@ private:
 
     //Last time we wrote metadata to disk.
     int64_t mLastMetadataWriteNs = 0;
+
+    // The time for the next anomaly alarm for alerts.
+    int64_t mNextAnomalyAlarmTime = 0;
 
 #ifdef VERY_VERBOSE_PRINTING
     bool mPrintAllLogs = false;

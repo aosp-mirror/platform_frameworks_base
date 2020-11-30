@@ -325,7 +325,7 @@
     <string name="capability_desc_canControlMagnification" msgid="2206586716709254805">"Controla el posicionamiento y el nivel de zoom de la pantalla."</string>
     <string name="capability_title_canPerformGestures" msgid="9106545062106728987">"Realizar gestos"</string>
     <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"Puedes tocar y pellizcar la pantalla, deslizar el dedo y hacer otros gestos."</string>
-    <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"Gestos de huellas digitales"</string>
+    <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"Gestos de huella digital"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Puede capturar los gestos realizados en el sensor de huellas digitales del dispositivo."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Hacer captura"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Puede hacer capturas de la pantalla."</string>

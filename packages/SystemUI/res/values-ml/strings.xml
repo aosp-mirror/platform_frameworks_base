@@ -389,7 +389,7 @@
     <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"വൈഫൈ കണക്റ്റ് ചെയ്‌തിട്ടില്ല"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"തെളിച്ചം"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="2325362583903258677">"യാന്ത്രികം"</string>
-    <string name="quick_settings_inversion_label" msgid="5078769633069667698">"നിറം മാറ്റുക"</string>
+    <string name="quick_settings_inversion_label" msgid="5078769633069667698">"നെഗറ്റീവ് ലുക്ക്"</string>
     <string name="quick_settings_color_space_label" msgid="537528291083575559">"വർണ്ണം ശരിയാക്കൽ മോഡ്"</string>
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"കൂടുതൽ ക്രമീകരണങ്ങൾ"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"പൂർത്തിയാക്കി"</string>

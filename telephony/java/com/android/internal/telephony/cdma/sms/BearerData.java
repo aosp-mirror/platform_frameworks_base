@@ -18,6 +18,7 @@ package com.android.internal.telephony.cdma.sms;
 
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.res.Resources;
+import android.os.Build;
 import android.telephony.SmsCbCmasInfo;
 import android.telephony.cdma.CdmaSmsCbProgramData;
 import android.telephony.cdma.CdmaSmsCbProgramResults;
@@ -1919,7 +1920,7 @@ public final class BearerData {
      * @return the number of bits to read from the stream
      * @throws CodingException if the specified encoding is not supported
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private static int getBitsForNumFields(int msgEncoding, int numFields)
             throws CodingException {
         switch (msgEncoding) {

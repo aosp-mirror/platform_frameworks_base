@@ -23,10 +23,10 @@ import android.annotation.RequiresPermission;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
-import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
+import android.os.Build;
 import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.service.carrier.CarrierService;
@@ -78,6 +78,30 @@ public class CarrierConfigManager {
      * Reference: 3GPP TS 27.007 Section 7.4 Facility lock +CLCK
      */
     public static final int SERVICE_CLASS_VOICE = ImsSsData.SERVICE_CLASS_VOICE;
+
+    /**
+     * Only send USSD over IMS while CS is out of service, otherwise send USSD over CS.
+     * {@link #KEY_CARRIER_USSD_METHOD_INT}
+     */
+    public static final int USSD_OVER_CS_PREFERRED   = 0;
+
+    /**
+     * Send USSD over IMS or CS while IMS is out of service or silent redial over CS if needed.
+     * {@link #KEY_CARRIER_USSD_METHOD_INT}
+     */
+    public static final int USSD_OVER_IMS_PREFERRED  = 1;
+
+    /**
+     * Only send USSD over CS.
+     * {@link #KEY_CARRIER_USSD_METHOD_INT}
+     */
+    public static final int USSD_OVER_CS_ONLY        = 2;
+
+    /**
+     * Only send USSD over IMS and disallow silent redial over CS.
+     * {@link #KEY_CARRIER_USSD_METHOD_INT}
+     */
+    public static final int USSD_OVER_IMS_ONLY       = 3;
 
     private final Context mContext;
 
@@ -582,6 +606,20 @@ public class CarrierConfigManager {
      * If true: then depends on carrier provisioning, availability, etc.
      */
     public static final String KEY_CARRIER_VT_AVAILABLE_BOOL = "carrier_vt_available_bool";
+
+    /**
+     * Specify the method of selection for UE sending USSD requests. The default value is
+     * {@link #USSD_OVER_CS_PREFERRED}.
+     * <p> Available options:
+     * <ul>
+     *   <li>0: {@link #USSD_OVER_CS_PREFERRED} </li>
+     *   <li>1: {@link #USSD_OVER_IMS_PREFERRED} </li>
+     *   <li>2: {@link #USSD_OVER_CS_ONLY} </li>
+     *   <li>3: {@link #USSD_OVER_IMS_ONLY} </li>
+     * </ul>
+     */
+    public static final String KEY_CARRIER_USSD_METHOD_INT =
+            "carrier_ussd_method_int";
 
     /**
      * Flag specifying whether to show an alert dialog for 5G disable when the user disables VoLTE.
@@ -1703,6 +1741,15 @@ public class CarrierConfigManager {
             "hide_lte_plus_data_icon_bool";
 
     /**
+     * The combined channel bandwidth threshold (non-inclusive) in KHz required to display the
+     * LTE+ data icon. It is 20000 by default, meaning the LTE+ icon will be shown if the device is
+     * using carrier aggregation and the combined channel bandwidth is strictly greater than 20 MHz.
+     * @hide
+     */
+    public static final String KEY_LTE_PLUS_THRESHOLD_BANDWIDTH_KHZ_INT =
+            "lte_plus_threshold_bandwidth_khz_int";
+
+    /**
      * The string is used to filter redundant string from PLMN Network Name that's supplied by
      * specific carrier.
      *
@@ -2677,7 +2724,7 @@ public class CarrierConfigManager {
      * Key identifying if voice call barring notification is required to be shown to the user.
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static final String KEY_DISABLE_VOICE_BARRING_NOTIFICATION_BOOL =
             "disable_voice_barring_notification_bool";
 
@@ -3786,11 +3833,26 @@ public class CarrierConfigManager {
         public static final String KEY_WIFI_OFF_DEFERRING_TIME_MILLIS_INT =
                 KEY_PREFIX + "wifi_off_deferring_time_millis_int";
 
+        /**
+         * A boolean flag specifying whether or not this carrier requires one IMS registration for
+         * all IMS services (MMTEL and RCS).
+         * <p>
+         * If set to {@code true}, the IMS Service must use one IMS registration for all IMS
+         * services. If set to {@code false}, IMS services may use separate IMS registrations for
+         * MMTEL and RCS.
+         * <p>
+         * The default value for this configuration is {@code false}.
+         * @see android.telephony.ims.SipDelegateManager
+         */
+        public static final String KEY_IMS_SINGLE_REGISTRATION_REQUIRED_BOOL =
+                KEY_PREFIX + "ims_single_registration_required_bool";
+
         private Ims() {}
 
         private static PersistableBundle getDefaults() {
             PersistableBundle defaults = new PersistableBundle();
             defaults.putInt(KEY_WIFI_OFF_DEFERRING_TIME_MILLIS_INT, 4000);
+            defaults.putBoolean(KEY_IMS_SINGLE_REGISTRATION_REQUIRED_BOOL, false);
             return defaults;
         }
     }
@@ -3923,6 +3985,16 @@ public class CarrierConfigManager {
     public static final String KEY_DEFAULT_PREFERRED_APN_NAME_STRING =
             "default_preferred_apn_name_string";
 
+    /**
+     * For Android 11, provide a temporary solution for OEMs to use the lower of the two MTU values
+     * for IPv4 and IPv6 if both are sent.
+     * TODO: remove in later release
+     *
+     * @hide
+     */
+    public static final String KEY_USE_LOWER_MTU_VALUE_IF_BOTH_RECEIVED =
+            "use_lower_mtu_value_if_both_received";
+
     /** The default value for every variable. */
     private final static PersistableBundle sDefaults;
 
@@ -3944,6 +4016,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_CARRIER_SETTINGS_ENABLE_BOOL, false);
         sDefaults.putBoolean(KEY_CARRIER_VOLTE_AVAILABLE_BOOL, false);
         sDefaults.putBoolean(KEY_CARRIER_VT_AVAILABLE_BOOL, false);
+        sDefaults.putInt(KEY_CARRIER_USSD_METHOD_INT, USSD_OVER_CS_PREFERRED);
         sDefaults.putBoolean(KEY_VOLTE_5G_LIMITED_ALERT_DIALOG_BOOL, false);
         sDefaults.putBoolean(KEY_NOTIFY_HANDOVER_VIDEO_FROM_WIFI_TO_LTE_BOOL, false);
         sDefaults.putBoolean(KEY_ALLOW_MERGING_RTT_CALLS_BOOL, false);
@@ -4293,6 +4366,7 @@ public class CarrierConfigManager {
         sDefaults.putString(KEY_OPERATOR_NAME_FILTER_PATTERN_STRING, "");
         sDefaults.putString(KEY_SHOW_CARRIER_DATA_ICON_PATTERN_STRING, "");
         sDefaults.putBoolean(KEY_HIDE_LTE_PLUS_DATA_ICON_BOOL, true);
+        sDefaults.putInt(KEY_LTE_PLUS_THRESHOLD_BANDWIDTH_KHZ_INT, 20000);
         sDefaults.putBoolean(KEY_NR_ENABLED_BOOL, true);
         sDefaults.putBoolean(KEY_LTE_ENABLED_BOOL, true);
         sDefaults.putBoolean(KEY_SUPPORT_TDSCDMA_BOOL, false);
@@ -4440,7 +4514,7 @@ public class CarrierConfigManager {
                 });
         sDefaults.putBoolean(KEY_SUPPORT_WPS_OVER_IMS_BOOL, true);
         sDefaults.putAll(Ims.getDefaults());
-        sDefaults.putStringArray(KEY_CARRIER_CERTIFICATE_STRING_ARRAY, null);
+        sDefaults.putStringArray(KEY_CARRIER_CERTIFICATE_STRING_ARRAY, new String[0]);
          sDefaults.putBoolean(KEY_FORMAT_INCOMING_NUMBER_TO_NATIONAL_FOR_JP_BOOL, false);
         sDefaults.putIntArray(KEY_DISCONNECT_CAUSE_PLAY_BUSYTONE_INT_ARRAY,
                 new int[] {4 /* BUSY */});
@@ -4463,6 +4537,7 @@ public class CarrierConfigManager {
         sDefaults.putStringArray(KEY_MISSED_INCOMING_CALL_SMS_PATTERN_STRING_ARRAY, new String[0]);
         sDefaults.putBoolean(KEY_DISABLE_DUN_APN_WHILE_ROAMING_WITH_PRESET_APN_BOOL, false);
         sDefaults.putString(KEY_DEFAULT_PREFERRED_APN_NAME_STRING, "");
+        sDefaults.putBoolean(KEY_USE_LOWER_MTU_VALUE_IF_BOTH_RECEIVED, false);
     }
 
     /**
@@ -4543,7 +4618,6 @@ public class CarrierConfigManager {
      */
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
     @SystemApi
-    @TestApi
     public void overrideConfig(int subscriptionId, @Nullable PersistableBundle overrideValues) {
         overrideConfig(subscriptionId, overrideValues, false);
     }
@@ -4718,7 +4792,7 @@ public class CarrierConfigManager {
      */
     @NonNull
     @SystemApi
-    @SuppressLint("Doclava125")
+    @SuppressLint("RequiresPermission")
     public static PersistableBundle getDefaultConfig() {
         return new PersistableBundle(sDefaults);
     }

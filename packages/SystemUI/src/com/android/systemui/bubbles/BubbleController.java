@@ -207,12 +207,6 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
     /** Whether or not the BubbleStackView has been added to the WindowManager. */
     private boolean mAddedToWindowManager = false;
 
-    /**
-     * Value from {@link NotificationShadeWindowController#getForceHasTopUi()} when we forced top UI
-     * due to expansion. We'll restore this value when the stack collapses.
-     */
-    private boolean mHadTopUi = false;
-
     // Listens to user switch so bubbles can be saved and restored.
     private final NotificationLockscreenUserManager mNotifUserManager;
 
@@ -1303,7 +1297,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
             // Collapsing? Do this first before remaining steps.
             if (update.expandedChanged && !update.expanded) {
                 mStackView.setExpanded(false);
-                mNotificationShadeWindowController.setForceHasTopUi(mHadTopUi);
+                mNotificationShadeWindowController.setRequestTopUi(false, TAG);
             }
 
             // Do removals, if any.
@@ -1393,8 +1387,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
             if (update.expandedChanged && update.expanded) {
                 if (mStackView != null) {
                     mStackView.setExpanded(true);
-                    mHadTopUi = mNotificationShadeWindowController.getForceHasTopUi();
-                    mNotificationShadeWindowController.setForceHasTopUi(true);
+                    mNotificationShadeWindowController.setRequestTopUi(true, TAG);
                 }
             }
 

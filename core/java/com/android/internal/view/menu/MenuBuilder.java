@@ -27,6 +27,7 @@ import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.util.SparseArray;
@@ -210,7 +211,7 @@ public class MenuBuilder implements Menu {
         setShortcutsVisibleInner(true);
     }
     
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public MenuBuilder setDefaultShowAsAction(int defaultShowAsAction) {
         mDefaultShowAsAction = defaultShowAsAction;
         return this;
@@ -223,7 +224,7 @@ public class MenuBuilder implements Menu {
      *
      * @param presenter The presenter to add
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void addMenuPresenter(MenuPresenter presenter) {
         addMenuPresenter(presenter, mContext);
     }
@@ -250,7 +251,7 @@ public class MenuBuilder implements Menu {
      *
      * @param presenter The presenter to remove
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void removeMenuPresenter(MenuPresenter presenter) {
         for (WeakReference<MenuPresenter> ref : mPresenters) {
             final MenuPresenter item = ref.get();
@@ -1015,7 +1016,7 @@ public class MenuBuilder implements Menu {
      * {@link #startDispatchingItemsChanged()} is called. Useful when
      * many menu operations are going to be performed as a batch.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void stopDispatchingItemsChanged() {
         if (!mPreventDispatchingItemsChanged) {
             mPreventDispatchingItemsChanged = true;
@@ -1023,7 +1024,7 @@ public class MenuBuilder implements Menu {
         }
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void startDispatchingItemsChanged() {
         mPreventDispatchingItemsChanged = false;
 
@@ -1145,7 +1146,7 @@ public class MenuBuilder implements Menu {
         return mActionItems;
     }
     
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public ArrayList<MenuItemImpl> getNonActionItems() {
         flagActionItems();
         return mNonActionItems;

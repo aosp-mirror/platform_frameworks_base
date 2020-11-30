@@ -20,6 +20,7 @@ import android.annotation.MenuRes;
 import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
+import android.os.Build;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -40,7 +41,7 @@ import com.android.internal.view.menu.ShowableListMenu;
  * it.
  */
 public class PopupMenu {
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private final Context mContext;
     private final MenuBuilder mMenu;
     private final View mAnchor;

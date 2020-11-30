@@ -1231,7 +1231,7 @@
     <string name="volume_icon_description_notification" msgid="579091344110747279">"Volume pemberitahuan"</string>
     <string name="ringtone_default" msgid="9118299121288174597">"Nada dering default"</string>
     <string name="ringtone_default_with_actual" msgid="2709686194556159773">"Default (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
-    <string name="ringtone_silent" msgid="397111123930141876">"Tidak Ada"</string>
+    <string name="ringtone_silent" msgid="397111123930141876">"Tidak ada"</string>
     <string name="ringtone_picker_title" msgid="667342618626068253">"Nada dering"</string>
     <string name="ringtone_picker_title_alarm" msgid="7438934548339024767">"Suara alarm"</string>
     <string name="ringtone_picker_title_notification" msgid="6387191794719608122">"Suara notifikasi"</string>

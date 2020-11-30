@@ -34,6 +34,7 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.Rect;
 import android.graphics.Shader;
+import android.os.Build;
 import android.os.Trace;
 import android.util.ArrayMap;
 import android.util.AttributeSet;
@@ -324,7 +325,7 @@ public class VectorDrawable extends Drawable {
 
     private VectorDrawableState mVectorState;
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private PorterDuffColorFilter mTintFilter;
 
     private BlendModeColorFilter mBlendModeColorFilter;

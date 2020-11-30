@@ -24,6 +24,7 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Binder;
+import android.os.Build;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
@@ -388,7 +389,7 @@ public final class BluetoothMapClient implements BluetoothProfile {
      * @param deliveredIntent intent issued when message is delivered
      * @return true if the message is enqueued, false on error
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public boolean sendMessage(BluetoothDevice device, Uri[] contacts, String message,
             PendingIntent sentIntent, PendingIntent deliveredIntent) {
         if (DBG) Log.d(TAG, "sendMessage(" + device + ", " + contacts + ", " + message);

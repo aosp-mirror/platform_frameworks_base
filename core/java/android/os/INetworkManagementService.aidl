@@ -68,7 +68,7 @@ interface INetworkManagementService
     /**
      * Clear all IP addresses on the specified interface
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     void clearInterfaceAddresses(String iface);
 
     /**
@@ -84,26 +84,26 @@ interface INetworkManagementService
     /**
      * Set interface IPv6 privacy extensions
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     void setInterfaceIpv6PrivacyExtensions(String iface, boolean enable);
 
     /**
      * Disable IPv6 on an interface
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     void disableIpv6(String iface);
 
     /**
      * Enable IPv6 on an interface
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     void enableIpv6(String iface);
 
     /**
      * Set IPv6 autoconf address generation mode.
      * This is a no-op if an unsupported mode is requested.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     void setIPv6AddrGenMode(String iface, int mode);
 
     /**
@@ -115,11 +115,6 @@ interface INetworkManagementService
      * Remove the specified route from the interface.
      */
     void removeRoute(int netId, in RouteInfo route);
-
-    /**
-     * Set the specified MTU size
-     */
-    void setMtu(String iface, int mtu);
 
     /**
      * Shuts down the service
@@ -296,7 +291,7 @@ interface INetworkManagementService
     /**
      * Return status of bandwidth control module.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     boolean isBandwidthControlEnabled();
 
     /**
@@ -350,27 +345,7 @@ interface INetworkManagementService
      */
     boolean isNetworkActive();
 
-    /**
-     * Add an interface to a network.
-     */
-    void addInterfaceToNetwork(String iface, int netId);
-
-    /**
-     * Remove an Interface from a network.
-     */
-    void removeInterfaceFromNetwork(String iface, int netId);
-
     void addLegacyRouteForNetId(int netId, in RouteInfo routeInfo, int uid);
-
-    void setDefaultNetId(int netId);
-    void clearDefaultNetId();
-
-    /**
-     * Set permission for a network.
-     * @param permission PERMISSION_NONE to clear permissions.
-     *                   PERMISSION_NETWORK or PERMISSION_SYSTEM to set permission.
-     */
-    void setNetworkPermission(int netId, int permission);
 
     /**
      * Allow UID to call protect().

@@ -43,7 +43,7 @@ public class NetworkRequest implements Parcelable {
      * The {@link NetworkCapabilities} that define this request.
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public final @NonNull NetworkCapabilities networkCapabilities;
 
     /**
@@ -52,7 +52,7 @@ public class NetworkRequest implements Parcelable {
      * the request.
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public final int requestId;
 
     /**

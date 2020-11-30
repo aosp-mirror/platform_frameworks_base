@@ -317,7 +317,7 @@ public class Resources {
      *                    class loader
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public Resources(@Nullable ClassLoader classLoader) {
         mClassLoader = classLoader == null ? ClassLoader.getSystemClassLoader() : classLoader;
     }
@@ -394,7 +394,7 @@ public class Resources {
      * @return the inflater used to create drawable objects
      * @hide Pending API finalization.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public final DrawableInflater getDrawableInflater() {
         if (mDrawableInflater == null) {
             mDrawableInflater = new DrawableInflater(this, mClassLoader);
@@ -987,7 +987,7 @@ public class Resources {
     }
 
     @NonNull
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     Drawable loadDrawable(@NonNull TypedValue value, int id, int density, @Nullable Theme theme)
             throws NotFoundException {
         return mResourcesImpl.loadDrawable(this, value, id, density, theme);
@@ -2057,7 +2057,7 @@ public class Resources {
     }
 
     /** @hide */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public DisplayAdjustments getDisplayAdjustments() {
         final DisplayAdjustments overrideDisplayAdjustments = mOverrideDisplayAdjustments;
         if (overrideDisplayAdjustments != null) {

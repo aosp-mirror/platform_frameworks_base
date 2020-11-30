@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.annotation.SystemService;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
+import android.os.Build;
 import android.os.ServiceManager;
 import android.view.textclassifier.TextClassifier.TextClassifierType;
 
@@ -104,7 +105,7 @@ public final class TextClassificationManager {
      * @see TextClassifier#DEFAULT_SYSTEM
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public TextClassifier getTextClassifier(@TextClassifierType int type) {
         switch (type) {
             case TextClassifier.LOCAL:

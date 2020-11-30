@@ -17,6 +17,7 @@
 package com.android.internal.util;
 
 import android.compat.annotation.UnsupportedAppUsage;
+import android.os.Build;
 
 import java.io.PrintWriter;
 import java.io.Writer;
@@ -49,7 +50,7 @@ public class IndentingPrintWriter extends PrintWriter {
 
     private char[] mSingleChar = new char[1];
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public IndentingPrintWriter(Writer writer, String singleIndent) {
         this(writer, singleIndent, -1);
     }
@@ -75,14 +76,14 @@ public class IndentingPrintWriter extends PrintWriter {
         return this;
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public IndentingPrintWriter increaseIndent() {
         mIndentBuilder.append(mSingleIndent);
         mCurrentIndent = null;
         return this;
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public IndentingPrintWriter decreaseIndent() {
         mIndentBuilder.delete(0, mSingleIndent.length());
         mCurrentIndent = null;

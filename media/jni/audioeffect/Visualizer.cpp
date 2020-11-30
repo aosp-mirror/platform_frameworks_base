@@ -51,10 +51,11 @@ status_t Visualizer::set(int32_t priority,
                          void* user,
                          audio_session_t sessionId,
                          audio_io_handle_t io,
-                         const AudioDeviceTypeAddr& device)
+                         const AudioDeviceTypeAddr& device,
+                         bool probe)
 {
     status_t status = AudioEffect::set(
-            SL_IID_VISUALIZATION, nullptr, priority, cbf, user, sessionId, io, device);
+            SL_IID_VISUALIZATION, nullptr, priority, cbf, user, sessionId, io, device, probe);
     if (status == NO_ERROR || status == ALREADY_EXISTS) {
         initCaptureSize();
     }

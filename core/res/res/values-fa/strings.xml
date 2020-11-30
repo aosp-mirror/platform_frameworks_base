@@ -1264,7 +1264,7 @@
     <string name="sms_control_title" msgid="4748684259903148341">"درحال ارسال پیامک‌ها"</string>
     <string name="sms_control_message" msgid="6574313876316388239">"‏&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; درحال ارسال تعداد زیادی پیامک است. آیا اجازه می‌دهید این برنامه همچنان پیامک ارسال کند؟"</string>
     <string name="sms_control_yes" msgid="4858845109269524622">"مجاز است"</string>
-    <string name="sms_control_no" msgid="4845717880040355570">"اجازه ندارد"</string>
+    <string name="sms_control_no" msgid="4845717880040355570">"مجاز نبودن"</string>
     <string name="sms_short_code_confirm_message" msgid="1385416688897538724">"‏&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; مایل است پیامی به &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt; ارسال کند."</string>
     <string name="sms_short_code_details" msgid="2723725738333388351">"این مورد "<b>"شاید هزینه‌ای"</b>" را به حساب دستگاه همراهتان بگذارد."</string>
     <string name="sms_premium_short_code_details" msgid="1400296309866638111"><b>"این مورد هزینه‌ای را به حساب دستگاه همراهتان می‌گذارد."</b></string>
@@ -1410,7 +1410,7 @@
     <string name="grant_credentials_permission_message_footer" msgid="1886710210516246461">"می‌خواهید به این درخواست اجازه دهید؟"</string>
     <string name="grant_permissions_header_text" msgid="3420736827804657201">"درخواست دسترسی"</string>
     <string name="allow" msgid="6195617008611933762">"ارزیابی‌شده"</string>
-    <string name="deny" msgid="6632259981847676572">"اجازه ندارد"</string>
+    <string name="deny" msgid="6632259981847676572">"مجاز نبودن"</string>
     <string name="permission_request_notification_title" msgid="1810025922441048273">"مجوز درخواست شد"</string>
     <string name="permission_request_notification_with_subtitle" msgid="3743417870360129298">"مجوز\nبرای حساب <xliff:g id="ACCOUNT">%s</xliff:g> درخواست شد."</string>
     <string name="forward_intent_to_owner" msgid="4620359037192871015">"شما از این برنامه در خارج از نمایه کاری‌تان استفاده می‌کنید"</string>
@@ -1639,7 +1639,7 @@
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"مشاهده و انجام کنش‌ها"</string>
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"این عملکرد می‌تواند با برنامه یا حسگری سخت‌افزاری تعاملاتتان را ردیابی کند و ازطرف شما با برنامه‌ها تعامل داشته باشد."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"مجاز"</string>
-    <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"رد کردن"</string>
+    <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"مجاز نبودن"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"برای استفاده از ویژگی، روی آن ضربه بزنید:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"انتخاب ویژگی‌های موردنظر برای استفاده با دکمه دسترس‌پذیری"</string>
     <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"انتخاب ویژگی‌های موردنظر برای استفاده با میان‌بر کلید میزان صدا"</string>
@@ -1654,11 +1654,11 @@
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"کلیدهای میزان صدا پایین نگه داشته شد. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> خاموش شد."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"برای استفاده از <xliff:g id="SERVICE_NAME">%1$s</xliff:g>، هر دو کلید صدا را فشار دهید و سه ثانیه نگه دارید"</string>
     <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"ویژگی را انتخاب کنید که هنگام ضربه زدن روی دکمه دسترس‌پذیری استفاده می‌شود:"</string>
-    <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"ویژگی را برای استفاده با اشاره دسترس‌پذیری انتخاب کنید (با دو انگشت صفحه را از پایین تند به بالا بکشید):"</string>
-    <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"ویزگی را برای استفاده با اشاره دسترس‌پذیری انتخاب کنید (با سه انگشت صفحه را از پایین تند به بالا بکشید):"</string>
+    <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"ویژگی را برای استفاده با اشاره دسترس‌پذیری انتخاب کنید (با دو انگشت صفحه را از پایین تند به‌بالا بکشید):"</string>
+    <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"ویزگی را برای استفاده با اشاره دسترس‌پذیری انتخاب کنید (با سه انگشت صفحه را از پایین تند به‌بالا بکشید):"</string>
     <string name="accessibility_button_instructional_text" msgid="8853928358872550500">"برای جابه‌جایی بین ویژگی‌ها، دکمه دسترس‌پذیری را لمس کنید و نگه دارید."</string>
-    <string name="accessibility_gesture_instructional_text" msgid="9196230728837090497">"برای جابه‌جایی بین ویژگی‌ها، با دو انگشت صفحه را تند به بالا بکشید و نگه دارید."</string>
-    <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"برای جابه‌جایی بین ویژگی‌ها، با سه انگشت صفحه را تند به بالا بکشید و نگه دارید."</string>
+    <string name="accessibility_gesture_instructional_text" msgid="9196230728837090497">"برای جابه‌جایی بین ویژگی‌ها، با دو انگشت صفحه را تند به‌بالا بکشید و نگه دارید."</string>
+    <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"برای جابه‌جایی بین ویژگی‌ها، با سه انگشت صفحه را تند به‌بالا بکشید و نگه دارید."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"درشت‌نمایی"</string>
     <string name="user_switched" msgid="7249833311585228097">"کاربر کنونی <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="1912993630661332336">"در حالت تغییر به <xliff:g id="NAME">%1$s</xliff:g>…"</string>

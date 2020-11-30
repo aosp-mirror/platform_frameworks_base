@@ -42,7 +42,7 @@ oneway interface IRecentsAnimationRunner {
      *
      * @see {@link RecentsAnimationController#cleanupScreenshot}
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     void onAnimationCanceled(in @nullable ActivityManager.TaskSnapshot taskSnapshot) = 1;
 
     /**
@@ -52,7 +52,7 @@ oneway interface IRecentsAnimationRunner {
      * @param minimizedHomeBounds Specifies the bounds of the minimized home app, will be
      *                            {@code null} if the device is not currently in split screen
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     void onAnimationStart(in IRecentsAnimationController controller,
             in RemoteAnimationTarget[] apps, in RemoteAnimationTarget[] wallpapers,
             in Rect homeContentInsets, in Rect minimizedHomeBounds) = 2;

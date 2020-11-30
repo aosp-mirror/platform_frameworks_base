@@ -126,7 +126,7 @@ public final class AccessibilityInteractionClient
     /**
      * @return The client for the current thread.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static AccessibilityInteractionClient getInstance() {
         final long threadId = Thread.currentThread().getId();
         return getInstanceForThread(threadId);
@@ -205,7 +205,7 @@ public final class AccessibilityInteractionClient
      *
      * @param message The message.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void setSameThreadMessage(Message message) {
         synchronized (mInstanceLock) {
             mSameThreadMessage = message;
@@ -729,7 +729,7 @@ public final class AccessibilityInteractionClient
         return false;
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void clearCache() {
         sAccessibilityCache.clear();
     }

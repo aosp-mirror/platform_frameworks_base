@@ -22,6 +22,7 @@ import android.content.res.Resources;
 import android.database.sqlite.SQLiteClosable;
 import android.database.sqlite.SQLiteException;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.Process;
@@ -770,7 +771,7 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
         }
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private String printStats() {
         StringBuilder buff = new StringBuilder();
         int myPid = Process.myPid();

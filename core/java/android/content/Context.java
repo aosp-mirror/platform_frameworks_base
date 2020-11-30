@@ -800,6 +800,7 @@ public abstract class Context {
      * case {@link #getOpPackageName()} will be the name of the primary package in
      * that process (so that app ops uid verification will work with the name).
      */
+    @SuppressWarnings("HiddenAbstractMethod")
     @UnsupportedAppUsage
     public abstract String getBasePackageName();
 
@@ -916,6 +917,7 @@ public abstract class Context {
      * @see #MODE_PRIVATE
      * @removed
      */
+    @SuppressWarnings("HiddenAbstractMethod")
     public abstract SharedPreferences getSharedPreferences(File file, @PreferencesMode int mode);
 
     /**
@@ -946,6 +948,7 @@ public abstract class Context {
     public abstract boolean deleteSharedPreferences(String name);
 
     /** @hide */
+    @SuppressWarnings("HiddenAbstractMethod")
     public abstract void reloadSharedPreferences();
 
     /**
@@ -1034,6 +1037,7 @@ public abstract class Context {
      * @see #getSharedPreferences(String, int)
      * @removed
      */
+    @SuppressWarnings("HiddenAbstractMethod")
     public abstract File getSharedPreferencesPath(String name);
 
     /**
@@ -1505,6 +1509,7 @@ public abstract class Context {
      * There is no guarantee when these files will be deleted.
      * @hide
      */
+    @SuppressWarnings("HiddenAbstractMethod")
     @Nullable
     @SystemApi
     public abstract File getPreloadsFileCache();
@@ -1838,7 +1843,6 @@ public abstract class Context {
      */
     @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS)
     @SystemApi
-    @TestApi
     public void startActivityAsUser(@RequiresPermission @NonNull Intent intent,
             @NonNull UserHandle user) {
         throw new RuntimeException("Not implemented. Must override in a subclass.");
@@ -1917,7 +1921,7 @@ public abstract class Context {
      * {@link #startActivityForResult(String, Intent, int, Bundle)}.
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public boolean canStartActivityForResult() {
         return false;
     }
@@ -2174,6 +2178,7 @@ public abstract class Context {
      * @see #sendOrderedBroadcast(Intent, String, BroadcastReceiver, Handler, int, String, Bundle)
      * @hide
      */
+    @SuppressWarnings("HiddenAbstractMethod")
     public abstract void sendBroadcastAsUserMultiplePermissions(Intent intent, UserHandle user,
             String[] receiverPermissions);
 
@@ -2204,6 +2209,7 @@ public abstract class Context {
      * @see #sendOrderedBroadcast(Intent, String, BroadcastReceiver, Handler, int, String, Bundle)
      * @hide
      */
+    @SuppressWarnings("HiddenAbstractMethod")
     @SystemApi
     public abstract void sendBroadcast(Intent intent,
             @Nullable String receiverPermission,
@@ -2214,6 +2220,7 @@ public abstract class Context {
      * of an associated app op as per {@link android.app.AppOpsManager}.
      * @hide
      */
+    @SuppressWarnings("HiddenAbstractMethod")
     @UnsupportedAppUsage
     public abstract void sendBroadcast(Intent intent,
             String receiverPermission, int appOp);
@@ -2329,6 +2336,7 @@ public abstract class Context {
      * @see android.app.Activity#RESULT_OK
      * @hide
      */
+    @SuppressWarnings("HiddenAbstractMethod")
     @SystemApi
     public abstract void sendOrderedBroadcast(@NonNull Intent intent,
             @Nullable String receiverPermission, @Nullable Bundle options,
@@ -2341,6 +2349,7 @@ public abstract class Context {
      * of an associated app op as per {@link android.app.AppOpsManager}.
      * @hide
      */
+    @SuppressWarnings("HiddenAbstractMethod")
     @UnsupportedAppUsage
     public abstract void sendOrderedBroadcast(Intent intent,
             String receiverPermission, int appOp, BroadcastReceiver resultReceiver,
@@ -2394,6 +2403,7 @@ public abstract class Context {
      * @see #sendBroadcast(Intent, String, Bundle)
      * @hide
      */
+    @SuppressWarnings("HiddenAbstractMethod")
     @SystemApi
     @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS)
     public abstract void sendBroadcastAsUser(@RequiresPermission Intent intent,
@@ -2416,8 +2426,9 @@ public abstract class Context {
      *
      * @hide
      */
+    @SuppressWarnings("HiddenAbstractMethod")
     @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS)
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public abstract void sendBroadcastAsUser(@RequiresPermission Intent intent,
             UserHandle user, @Nullable String receiverPermission, int appOp);
 
@@ -2462,8 +2473,9 @@ public abstract class Context {
      *       BroadcastReceiver, Handler, int, String, Bundle)
      * @hide
      */
+    @SuppressWarnings("HiddenAbstractMethod")
     @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS)
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public abstract void sendOrderedBroadcastAsUser(Intent intent, UserHandle user,
             @Nullable String receiverPermission, int appOp, BroadcastReceiver resultReceiver,
             @Nullable Handler scheduler, int initialCode, @Nullable String initialData,
@@ -2475,6 +2487,7 @@ public abstract class Context {
      *       BroadcastReceiver, Handler, int, String, Bundle)
      * @hide
      */
+    @SuppressWarnings("HiddenAbstractMethod")
     @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS)
     @UnsupportedAppUsage
     public abstract void sendOrderedBroadcastAsUser(Intent intent, UserHandle user,
@@ -2689,6 +2702,7 @@ public abstract class Context {
      * @hide
      * This is just here for sending CONNECTIVITY_ACTION.
      */
+    @SuppressWarnings("HiddenAbstractMethod")
     @Deprecated
     @RequiresPermission(allOf = {
             android.Manifest.permission.INTERACT_ACROSS_USERS,
@@ -2979,6 +2993,7 @@ public abstract class Context {
      * @see #sendBroadcast
      * @see #unregisterReceiver
      */
+    @SuppressWarnings("HiddenAbstractMethod")
     @Nullable
     @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL)
     @UnsupportedAppUsage
@@ -3089,6 +3104,7 @@ public abstract class Context {
     /**
      * @hide like {@link #startForegroundService(Intent)} but for a specific user.
      */
+    @SuppressWarnings("HiddenAbstractMethod")
     @Nullable
     @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS)
     public abstract ComponentName startForegroundServiceAsUser(Intent service, UserHandle user);
@@ -3127,6 +3143,7 @@ public abstract class Context {
     /**
      * @hide like {@link #startService(Intent)} but for a specific user.
      */
+    @SuppressWarnings("HiddenAbstractMethod")
     @Nullable
     @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS)
     @UnsupportedAppUsage
@@ -3135,6 +3152,7 @@ public abstract class Context {
     /**
      * @hide like {@link #stopService(Intent)} but for a specific user.
      */
+    @SuppressWarnings("HiddenAbstractMethod")
     @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS)
     public abstract boolean stopServiceAsUser(Intent service, UserHandle user);
 
@@ -3403,6 +3421,7 @@ public abstract class Context {
             VIBRATOR_SERVICE,
             //@hide: STATUS_BAR_SERVICE,
             CONNECTIVITY_SERVICE,
+            VCN_MANAGEMENT_SERVICE,
             //@hide: IP_MEMORY_STORE_SERVICE,
             IPSEC_SERVICE,
             VPN_MANAGEMENT_SERVICE,
@@ -3953,7 +3972,6 @@ public abstract class Context {
      * @hide
      */
     @SystemApi
-    @TestApi
     @SuppressLint("ServiceName")
     public static final String STATUS_BAR_SERVICE = "statusbar";
 
@@ -3966,6 +3984,16 @@ public abstract class Context {
      * @see android.net.ConnectivityManager
      */
     public static final String CONNECTIVITY_SERVICE = "connectivity";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve a {@link android.net.vcn.VcnManager}
+     * for managing Virtual Carrier Networks
+     *
+     * @see #getSystemService(String)
+     * @see android.net.vcn.VcnManager
+     * @hide
+     */
+    public static final String VCN_MANAGEMENT_SERVICE = "vcn_management";
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve a
@@ -4165,7 +4193,6 @@ public abstract class Context {
      * @hide
      */
     @SystemApi
-    @TestApi
     public static final String ETHERNET_SERVICE = "ethernet";
 
     /**
@@ -4469,7 +4496,6 @@ public abstract class Context {
      * @see #getSystemService(String)
      * @hide
      */
-    @TestApi
     @SystemApi
     public static final String PERMISSION_SERVICE = "permission";
 
@@ -4500,7 +4526,7 @@ public abstract class Context {
      * @see #getSystemService(String)
      * @hide
      */
-    @SystemApi @TestApi
+    @SystemApi
     public static final String ROLLBACK_SERVICE = "rollback";
 
     /**
@@ -4974,7 +5000,7 @@ public abstract class Context {
      * @see android.os.BugreportManager
      * @hide
      */
-    @SystemApi @TestApi
+    @SystemApi
     public static final String BUGREPORT_SERVICE = "bugreport";
 
     /**
@@ -5118,7 +5144,6 @@ public abstract class Context {
      * @hide
      */
     @SystemApi
-    @TestApi
     public static final String APP_INTEGRITY_SERVICE = "app_integrity";
 
     /**
@@ -5184,8 +5209,9 @@ public abstract class Context {
     public abstract int checkPermission(@NonNull String permission, int pid, int uid);
 
     /** @hide */
+    @SuppressWarnings("HiddenAbstractMethod")
     @PackageManager.PermissionResult
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public abstract int checkPermission(@NonNull String permission, int pid, int uid,
             IBinder callerToken);
 
@@ -5411,6 +5437,7 @@ public abstract class Context {
             @Intent.AccessUriMode int modeFlags);
 
     /** @hide */
+    @SuppressWarnings("HiddenAbstractMethod")
     @PackageManager.PermissionResult
     public abstract int checkUriPermission(Uri uri, int pid, int uid,
             @Intent.AccessUriMode int modeFlags, IBinder callerToken);
@@ -5664,7 +5691,6 @@ public abstract class Context {
      * @hide
      */
     @SystemApi
-    @TestApi
     @NonNull
     public Context createPackageContextAsUser(
             @NonNull String packageName, @CreatePackageOptions int flags, @NonNull UserHandle user)
@@ -5683,7 +5709,6 @@ public abstract class Context {
      * @hide
      */
     @SystemApi
-    @TestApi
     @NonNull
     public Context createContextAsUser(@NonNull UserHandle user, @CreatePackageOptions int flags) {
         if (Build.IS_ENG) {
@@ -5697,6 +5722,7 @@ public abstract class Context {
      *
      * @hide
      */
+    @SuppressWarnings("HiddenAbstractMethod")
     @UnsupportedAppUsage
     public abstract Context createApplicationContext(ApplicationInfo application,
             @CreatePackageOptions int flags) throws PackageManager.NameNotFoundException;
@@ -5916,6 +5942,7 @@ public abstract class Context {
      * @see #isCredentialProtectedStorage()
      * @hide
      */
+    @SuppressWarnings("HiddenAbstractMethod")
     @SystemApi
     public abstract Context createCredentialProtectedStorageContext();
 
@@ -5928,6 +5955,7 @@ public abstract class Context {
      * @return The compatibility info holder, or null if not required by the application.
      * @hide
      */
+    @SuppressWarnings("HiddenAbstractMethod")
     public abstract DisplayAdjustments getDisplayAdjustments(int displayId);
 
     /**
@@ -5962,12 +5990,14 @@ public abstract class Context {
      * @see #getDisplay()
      * @hide
      */
+    @SuppressWarnings("HiddenAbstractMethod")
     @TestApi
     public abstract int getDisplayId();
 
     /**
      * @hide
      */
+    @SuppressWarnings("HiddenAbstractMethod")
     public abstract void updateDisplay(int displayId);
 
     /**
@@ -5996,6 +6026,7 @@ public abstract class Context {
      * @see #createCredentialProtectedStorageContext()
      * @hide
      */
+    @SuppressWarnings("HiddenAbstractMethod")
     @SystemApi
     public abstract boolean isCredentialProtectedStorage();
 
@@ -6003,6 +6034,7 @@ public abstract class Context {
      * Returns true if the context can load unsafe resources, e.g. fonts.
      * @hide
      */
+    @SuppressWarnings("HiddenAbstractMethod")
     public abstract boolean canLoadUnsafeResources();
 
     /**

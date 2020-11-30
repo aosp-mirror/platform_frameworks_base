@@ -3003,7 +3003,7 @@ public class NotificationPanelViewController extends PanelViewController {
     private void updateShowEmptyShadeView() {
         boolean
                 showEmptyShadeView =
-                mBarState != StatusBarState.KEYGUARD && !mEntryManager.hasActiveNotifications();
+                mBarState != StatusBarState.KEYGUARD && !mEntryManager.hasVisibleNotifications();
         showEmptyShadeView(showEmptyShadeView);
     }
 

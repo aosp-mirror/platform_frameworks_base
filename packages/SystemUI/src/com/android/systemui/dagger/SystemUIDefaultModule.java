@@ -36,6 +36,7 @@ import com.android.systemui.plugins.qs.QSFactory;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.power.EnhancedEstimates;
 import com.android.systemui.power.EnhancedEstimatesImpl;
+import com.android.systemui.qs.dagger.QSModule;
 import com.android.systemui.qs.tileimpl.QSFactoryImpl;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsImplementation;
@@ -70,7 +71,7 @@ import dagger.Provides;
  * A dagger module for injecting default implementations of components of System UI that may be
  * overridden by the System UI implementation.
  */
-@Module(includes = {DividerModule.class})
+@Module(includes = {DividerModule.class, QSModule.class})
 public abstract class SystemUIDefaultModule {
 
     @Singleton

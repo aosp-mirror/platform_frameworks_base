@@ -464,7 +464,7 @@ android_glBufferData__IILjava_nio_Buffer_2I
 
 exit:
     if (_array) {
-        releasePointer(_env, _array, data, JNI_FALSE);
+        releasePointer(_env, _array, (void *)((char *)data - _bufferOffset), JNI_FALSE);
     }
     if (_exception) {
         jniThrowException(_env, _exceptionType, _exceptionMessage);
@@ -509,7 +509,7 @@ android_glBufferSubData__IIILjava_nio_Buffer_2
 
 exit:
     if (_array) {
-        releasePointer(_env, _array, data, JNI_FALSE);
+        releasePointer(_env, _array, (void *)((char *)data - _bufferOffset), JNI_FALSE);
     }
     if (_exception) {
         jniThrowException(_env, _exceptionType, _exceptionMessage);

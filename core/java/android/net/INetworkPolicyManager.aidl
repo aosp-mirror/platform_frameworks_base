@@ -67,7 +67,7 @@ interface INetworkPolicyManager {
     void setDeviceIdleMode(boolean enabled);
     void setWifiMeteredOverride(String networkId, int meteredOverride);
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     NetworkQuotaInfo getNetworkQuotaInfo(in NetworkState state);
 
     SubscriptionPlan[] getSubscriptionPlans(int subId, String callingPackage);

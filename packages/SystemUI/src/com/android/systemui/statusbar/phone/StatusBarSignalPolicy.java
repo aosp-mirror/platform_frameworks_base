@@ -52,12 +52,12 @@ public class StatusBarSignalPolicy implements NetworkControllerImpl.SignalCallba
     private final SecurityController mSecurityController;
     private final Handler mHandler = Handler.getMain();
 
-    private boolean mBlockAirplane;
-    private boolean mBlockMobile;
-    private boolean mBlockWifi;
-    private boolean mBlockEthernet;
+    private boolean mHideAirplane;
+    private boolean mHideMobile;
+    private boolean mHideWifi;
+    private boolean mHideEthernet;
     private boolean mActivityEnabled;
-    private boolean mForceBlockWifi;
+    private boolean mForceHideWifi;
 
     // Track as little state as possible, and only for padding purposes
     private boolean mIsAirplaneMode = false;
@@ -80,7 +80,7 @@ public class StatusBarSignalPolicy implements NetworkControllerImpl.SignalCallba
         mNetworkController = Dependency.get(NetworkController.class);
         mSecurityController = Dependency.get(SecurityController.class);
 
-        Dependency.get(TunerService.class).addTunable(this, StatusBarIconController.ICON_BLACKLIST);
+        Dependency.get(TunerService.class).addTunable(this, StatusBarIconController.ICON_HIDE_LIST);
         mNetworkController.addCallback(this);
         mSecurityController.addCallback(this);
     }
@@ -114,21 +114,21 @@ public class StatusBarSignalPolicy implements NetworkControllerImpl.SignalCallba
 
     @Override
     public void onTuningChanged(String key, String newValue) {
-        if (!StatusBarIconController.ICON_BLACKLIST.equals(key)) {
+        if (!StatusBarIconController.ICON_HIDE_LIST.equals(key)) {
             return;
         }
-        ArraySet<String> blockList = StatusBarIconController.getIconBlacklist(mContext, newValue);
-        boolean blockAirplane = blockList.contains(mSlotAirplane);
-        boolean blockMobile = blockList.contains(mSlotMobile);
-        boolean blockWifi = blockList.contains(mSlotWifi);
-        boolean blockEthernet = blockList.contains(mSlotEthernet);
+        ArraySet<String> hideList = StatusBarIconController.getIconHideList(mContext, newValue);
+        boolean hideAirplane = hideList.contains(mSlotAirplane);
+        boolean hideMobile = hideList.contains(mSlotMobile);
+        boolean hideWifi = hideList.contains(mSlotWifi);
+        boolean hideEthernet = hideList.contains(mSlotEthernet);
 
-        if (blockAirplane != mBlockAirplane || blockMobile != mBlockMobile
-                || blockEthernet != mBlockEthernet || blockWifi != mBlockWifi) {
-            mBlockAirplane = blockAirplane;
-            mBlockMobile = blockMobile;
-            mBlockEthernet = blockEthernet;
-            mBlockWifi = blockWifi || mForceBlockWifi;
+        if (hideAirplane != mHideAirplane || hideMobile != mHideMobile
+                || hideEthernet != mHideEthernet || hideWifi != mHideWifi) {
+            mHideAirplane = hideAirplane;
+            mHideMobile = hideMobile;
+            mHideEthernet = hideEthernet;
+            mHideWifi = hideWifi || mForceHideWifi;
             // Re-register to get new callbacks.
             mNetworkController.removeCallback(this);
             mNetworkController.addCallback(this);
@@ -140,7 +140,7 @@ public class StatusBarSignalPolicy implements NetworkControllerImpl.SignalCallba
             boolean activityIn, boolean activityOut, String description, boolean isTransient,
             String statusLabel) {
 
-        boolean visible = statusIcon.visible && !mBlockWifi;
+        boolean visible = statusIcon.visible && !mHideWifi;
         boolean in = activityIn && mActivityEnabled && visible;
         boolean out = activityOut && mActivityEnabled && visible;
 
@@ -189,7 +189,7 @@ public class StatusBarSignalPolicy implements NetworkControllerImpl.SignalCallba
         // Visibility of the data type indicator changed
         boolean typeChanged = statusType != state.typeId && (statusType == 0 || state.typeId == 0);
 
-        state.visible = statusIcon.visible && !mBlockMobile;
+        state.visible = statusIcon.visible && !mHideMobile;
         state.strengthId = statusIcon.icon;
         state.typeId = statusType;
         state.contentDescription = statusIcon.contentDescription;
@@ -270,7 +270,7 @@ public class StatusBarSignalPolicy implements NetworkControllerImpl.SignalCallba
 
     @Override
     public void setEthernetIndicators(IconState state) {
-        boolean visible = state.visible && !mBlockEthernet;
+        boolean visible = state.visible && !mHideEthernet;
         int resId = state.icon;
         String description = state.contentDescription;
 
@@ -284,7 +284,7 @@ public class StatusBarSignalPolicy implements NetworkControllerImpl.SignalCallba
 
     @Override
     public void setIsAirplaneMode(IconState icon) {
-        mIsAirplaneMode = icon.visible && !mBlockAirplane;
+        mIsAirplaneMode = icon.visible && !mHideAirplane;
         int resId = icon.icon;
         String description = icon.contentDescription;
 

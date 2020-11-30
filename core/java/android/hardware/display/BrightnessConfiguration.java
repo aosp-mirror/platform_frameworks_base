@@ -20,7 +20,6 @@ import android.annotation.FloatRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
-import android.annotation.TestApi;
 import android.content.pm.ApplicationInfo;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -44,7 +43,6 @@ import java.util.Objects;
 
 /** @hide */
 @SystemApi
-@TestApi
 public final class BrightnessConfiguration implements Parcelable {
     private static final String TAG_BRIGHTNESS_CURVE = "brightness-curve";
     private static final String TAG_BRIGHTNESS_POINT = "brightness-point";
