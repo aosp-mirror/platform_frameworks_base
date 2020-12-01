@@ -43,7 +43,6 @@ import com.android.internal.protolog.common.ProtoLog;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -113,14 +112,7 @@ public final class CompatModePackages {
                             if ("pkg".equals(tagName)) {
                                 String pkg = parser.getAttributeValue(null, "name");
                                 if (pkg != null) {
-                                    String mode = parser.getAttributeValue(null, "mode");
-                                    int modeInt = 0;
-                                    if (mode != null) {
-                                        try {
-                                            modeInt = Integer.parseInt(mode);
-                                        } catch (NumberFormatException e) {
-                                        }
-                                    }
+                                    int modeInt = parser.getAttributeInt(null, "mode", 0);
                                     mPackages.put(pkg, modeInt);
                                 }
                             }
@@ -396,7 +388,7 @@ public final class CompatModePackages {
                 }
                 out.startTag(null, "pkg");
                 out.attribute(null, "name", pkg);
-                out.attribute(null, "mode", Integer.toString(mode));
+                out.attributeInt(null, "mode", mode);
                 out.endTag(null, "pkg");
             }
 

@@ -25,6 +25,8 @@ import android.content.Context;
 import android.content.pm.PackageParser;
 import android.content.pm.Signature;
 import android.util.TypedXmlPullParser;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import androidx.test.InstrumentationRegistry;

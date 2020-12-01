@@ -201,7 +201,7 @@ public class SystemUpdateManagerService extends ISystemUpdateManager.Stub {
 
     // Performs I/O work only, without validating the loaded info.
     @Nullable
-    private PersistableBundle readInfoFileLocked(XmlPullParser parser)
+    private PersistableBundle readInfoFileLocked(TypedXmlPullParser parser)
             throws XmlPullParserException, IOException {
         int type;
         while ((type = parser.next()) != END_DOCUMENT) {

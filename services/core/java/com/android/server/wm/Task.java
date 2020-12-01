@@ -196,6 +196,8 @@ import android.util.ArraySet;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Slog;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 import android.util.proto.ProtoOutputStream;
 import android.view.DisplayInfo;
 import android.view.RemoteAnimationAdapter;
@@ -4484,14 +4486,14 @@ class Task extends WindowContainer<WindowContainer> {
     /**
      * Saves this {@link Task} to XML using given serializer.
      */
-    void saveToXml(XmlSerializer out) throws Exception {
+    void saveToXml(TypedXmlSerializer out) throws Exception {
         if (DEBUG_RECENTS) Slog.i(TAG_RECENTS, "Saving task=" + this);
 
-        out.attribute(null, ATTR_TASKID, String.valueOf(mTaskId));
+        out.attributeInt(null, ATTR_TASKID, mTaskId);
         if (realActivity != null) {
             out.attribute(null, ATTR_REALACTIVITY, realActivity.flattenToShortString());
         }
-        out.attribute(null, ATTR_REALACTIVITY_SUSPENDED, String.valueOf(realActivitySuspended));
+        out.attributeBoolean(null, ATTR_REALACTIVITY_SUSPENDED, realActivitySuspended);
         if (origActivity != null) {
             out.attribute(null, ATTR_ORIGACTIVITY, origActivity.flattenToShortString());
         }
@@ -4510,37 +4512,36 @@ class Task extends WindowContainer<WindowContainer> {
         if (mWindowLayoutAffinity != null) {
             out.attribute(null, ATTR_WINDOW_LAYOUT_AFFINITY, mWindowLayoutAffinity);
         }
-        out.attribute(null, ATTR_ROOTHASRESET, String.valueOf(rootWasReset));
-        out.attribute(null, ATTR_AUTOREMOVERECENTS, String.valueOf(autoRemoveRecents));
-        out.attribute(null, ATTR_ASKEDCOMPATMODE, String.valueOf(askedCompatMode));
-        out.attribute(null, ATTR_USERID, String.valueOf(mUserId));
-        out.attribute(null, ATTR_USER_SETUP_COMPLETE, String.valueOf(mUserSetupComplete));
-        out.attribute(null, ATTR_EFFECTIVE_UID, String.valueOf(effectiveUid));
-        out.attribute(null, ATTR_LASTTIMEMOVED, String.valueOf(mLastTimeMoved));
-        out.attribute(null, ATTR_NEVERRELINQUISH, String.valueOf(mNeverRelinquishIdentity));
+        out.attributeBoolean(null, ATTR_ROOTHASRESET, rootWasReset);
+        out.attributeBoolean(null, ATTR_AUTOREMOVERECENTS, autoRemoveRecents);
+        out.attributeBoolean(null, ATTR_ASKEDCOMPATMODE, askedCompatMode);
+        out.attributeInt(null, ATTR_USERID, mUserId);
+        out.attributeBoolean(null, ATTR_USER_SETUP_COMPLETE, mUserSetupComplete);
+        out.attributeInt(null, ATTR_EFFECTIVE_UID, effectiveUid);
+        out.attributeLong(null, ATTR_LASTTIMEMOVED, mLastTimeMoved);
+        out.attributeBoolean(null, ATTR_NEVERRELINQUISH, mNeverRelinquishIdentity);
         if (lastDescription != null) {
             out.attribute(null, ATTR_LASTDESCRIPTION, lastDescription.toString());
         }
         if (getTaskDescription() != null) {
             getTaskDescription().saveToXml(out);
         }
-        out.attribute(null, ATTR_TASK_AFFILIATION, String.valueOf(mAffiliatedTaskId));
-        out.attribute(null, ATTR_PREV_AFFILIATION, String.valueOf(mPrevAffiliateTaskId));
-        out.attribute(null, ATTR_NEXT_AFFILIATION, String.valueOf(mNextAffiliateTaskId));
-        out.attribute(null, ATTR_CALLING_UID, String.valueOf(mCallingUid));
+        out.attributeInt(null, ATTR_TASK_AFFILIATION, mAffiliatedTaskId);
+        out.attributeInt(null, ATTR_PREV_AFFILIATION, mPrevAffiliateTaskId);
+        out.attributeInt(null, ATTR_NEXT_AFFILIATION, mNextAffiliateTaskId);
+        out.attributeInt(null, ATTR_CALLING_UID, mCallingUid);
         out.attribute(null, ATTR_CALLING_PACKAGE, mCallingPackage == null ? "" : mCallingPackage);
         out.attribute(null, ATTR_CALLING_FEATURE_ID,
                 mCallingFeatureId == null ? "" : mCallingFeatureId);
-        out.attribute(null, ATTR_RESIZE_MODE, String.valueOf(mResizeMode));
-        out.attribute(null, ATTR_SUPPORTS_PICTURE_IN_PICTURE,
-                String.valueOf(mSupportsPictureInPicture));
+        out.attributeInt(null, ATTR_RESIZE_MODE, mResizeMode);
+        out.attributeBoolean(null, ATTR_SUPPORTS_PICTURE_IN_PICTURE, mSupportsPictureInPicture);
         if (mLastNonFullscreenBounds != null) {
             out.attribute(
                     null, ATTR_NON_FULLSCREEN_BOUNDS, mLastNonFullscreenBounds.flattenToString());
         }
-        out.attribute(null, ATTR_MIN_WIDTH, String.valueOf(mMinWidth));
-        out.attribute(null, ATTR_MIN_HEIGHT, String.valueOf(mMinHeight));
-        out.attribute(null, ATTR_PERSIST_TASK_VERSION, String.valueOf(PERSIST_TASK_VERSION));
+        out.attributeInt(null, ATTR_MIN_WIDTH, mMinWidth);
+        out.attributeInt(null, ATTR_MIN_HEIGHT, mMinHeight);
+        out.attributeInt(null, ATTR_PERSIST_TASK_VERSION, PERSIST_TASK_VERSION);
 
         if (affinityIntent != null) {
             out.startTag(null, TAG_AFFINITYINTENT);
@@ -4565,7 +4566,7 @@ class Task extends WindowContainer<WindowContainer> {
     }
 
     private static boolean saveActivityToXml(
-            ActivityRecord r, ActivityRecord first, XmlSerializer out) {
+            ActivityRecord r, ActivityRecord first, TypedXmlSerializer out) {
         if (r.info.persistableMode == ActivityInfo.PERSIST_ROOT_ONLY || !r.isPersistable()
                 || ((r.intent.getFlags() & FLAG_ACTIVITY_NEW_DOCUMENT
                 | FLAG_ACTIVITY_RETAIN_IN_RECENTS) == FLAG_ACTIVITY_NEW_DOCUMENT)
@@ -4584,7 +4585,7 @@ class Task extends WindowContainer<WindowContainer> {
         }
     }
 
-    static Task restoreFromXml(XmlPullParser in, ActivityTaskSupervisor taskSupervisor)
+    static Task restoreFromXml(TypedXmlPullParser in, ActivityTaskSupervisor taskSupervisor)
             throws IOException, XmlPullParserException {
         Intent intent = null;
         Intent affinityIntent = null;

@@ -26,6 +26,8 @@ import android.text.format.Formatter;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Slog;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
@@ -38,7 +40,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
 
 import java.io.File;
 import java.io.IOException;
@@ -329,7 +330,7 @@ class ShortcutUser {
         });
     }
 
-    public void saveToXml(XmlSerializer out, boolean forBackup)
+    public void saveToXml(TypedXmlSerializer out, boolean forBackup)
             throws IOException, XmlPullParserException {
         out.startTag(null, TAG_ROOT);
 
@@ -371,7 +372,7 @@ class ShortcutUser {
         out.endTag(null, TAG_ROOT);
     }
 
-    private void saveShortcutPackageItem(XmlSerializer out, ShortcutPackageItem spi,
+    private void saveShortcutPackageItem(TypedXmlSerializer out, ShortcutPackageItem spi,
             boolean forBackup) throws IOException, XmlPullParserException {
         if (forBackup) {
             if (spi.getPackageUserId() != spi.getOwnerUserId()) {
@@ -408,7 +409,7 @@ class ShortcutUser {
         return new File(path, fileName);
     }
 
-    public static ShortcutUser loadFromXml(ShortcutService s, XmlPullParser parser, int userId,
+    public static ShortcutUser loadFromXml(ShortcutService s, TypedXmlPullParser parser, int userId,
             boolean fromBackup) throws IOException, XmlPullParserException, InvalidFileFormatException {
         final ShortcutUser ret = new ShortcutUser(s, userId);
         boolean readShortcutItems = false;

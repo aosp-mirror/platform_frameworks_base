@@ -35,6 +35,8 @@ import android.util.ArraySet;
 import android.util.AtomicFile;
 import android.util.Log;
 import android.util.Slog;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -52,15 +54,12 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
 
-import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -1571,7 +1570,7 @@ class ShortcutPackage extends ShortcutPackageItem {
     }
 
     @Override
-    public void saveToXml(@NonNull XmlSerializer out, boolean forBackup)
+    public void saveToXml(@NonNull TypedXmlSerializer out, boolean forBackup)
             throws IOException, XmlPullParserException {
         final int size = mShortcuts.size();
         final int shareTargetSize = mShareTargets.size();
@@ -1601,7 +1600,7 @@ class ShortcutPackage extends ShortcutPackageItem {
         out.endTag(null, TAG_ROOT);
     }
 
-    private void saveShortcut(XmlSerializer out, ShortcutInfo si, boolean forBackup,
+    private void saveShortcut(TypedXmlSerializer out, ShortcutInfo si, boolean forBackup,
             boolean appSupportsBackup)
             throws IOException, XmlPullParserException {
 
@@ -1734,11 +1733,8 @@ class ShortcutPackage extends ShortcutPackageItem {
         }
 
         try {
-            final BufferedInputStream bis = new BufferedInputStream(in);
-
             ShortcutPackage ret = null;
-            XmlPullParser parser = Xml.newPullParser();
-            parser.setInput(bis, StandardCharsets.UTF_8.name());
+            TypedXmlPullParser parser = Xml.resolvePullParser(in);
 
             int type;
             while ((type = parser.next()) != XmlPullParser.END_DOCUMENT) {
@@ -1767,7 +1763,7 @@ class ShortcutPackage extends ShortcutPackageItem {
     }
 
     public static ShortcutPackage loadFromXml(ShortcutService s, ShortcutUser shortcutUser,
-            XmlPullParser parser, boolean fromBackup)
+            TypedXmlPullParser parser, boolean fromBackup)
             throws IOException, XmlPullParserException {
 
         final String packageName = ShortcutService.parseStringAttribute(parser,
@@ -1814,7 +1810,7 @@ class ShortcutPackage extends ShortcutPackageItem {
         return ret;
     }
 
-    private static ShortcutInfo parseShortcut(XmlPullParser parser, String packageName,
+    private static ShortcutInfo parseShortcut(TypedXmlPullParser parser, String packageName,
             @UserIdInt int userId, boolean fromBackup)
             throws IOException, XmlPullParserException {
         String id;
@@ -1948,7 +1944,7 @@ class ShortcutPackage extends ShortcutPackageItem {
                 disabledReason, persons.toArray(new Person[persons.size()]), locusId);
     }
 
-    private static Intent parseIntent(XmlPullParser parser)
+    private static Intent parseIntent(TypedXmlPullParser parser)
             throws IOException, XmlPullParserException {
 
         Intent intent = ShortcutService.parseIntentAttribute(parser,
@@ -1978,7 +1974,7 @@ class ShortcutPackage extends ShortcutPackageItem {
         return intent;
     }
 
-    private static Person parsePerson(XmlPullParser parser)
+    private static Person parsePerson(TypedXmlPullParser parser)
             throws IOException, XmlPullParserException {
         CharSequence name = ShortcutService.parseStringAttribute(parser, ATTR_PERSON_NAME);
         String uri = ShortcutService.parseStringAttribute(parser, ATTR_PERSON_URI);

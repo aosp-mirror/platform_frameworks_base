@@ -70,6 +70,8 @@ import android.graphics.Rect;
 import android.os.IBinder;
 import android.platform.test.annotations.Presubmit;
 import android.util.DisplayMetrics;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 import android.util.Xml;
 import android.view.DisplayInfo;
 
@@ -1097,7 +1099,7 @@ public class TaskRecordTests extends WindowTestsBase {
 
     private byte[] serializeToBytes(Task r) throws Exception {
         try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
-            final XmlSerializer serializer = Xml.newSerializer();
+            final TypedXmlSerializer serializer = Xml.newFastSerializer();
             serializer.setOutput(os, "UTF-8");
             serializer.startDocument(null, true);
             serializer.startTag(null, TASK_TAG);
@@ -1112,7 +1114,7 @@ public class TaskRecordTests extends WindowTestsBase {
 
     private Task restoreFromBytes(byte[] in) throws IOException, XmlPullParserException {
         try (Reader reader = new InputStreamReader(new ByteArrayInputStream(in))) {
-            final XmlPullParser parser = Xml.newPullParser();
+            final TypedXmlPullParser parser = Xml.newFastPullParser();
             parser.setInput(reader);
             assertEquals(XmlPullParser.START_TAG, parser.next());
             assertEquals(TASK_TAG, parser.getName());

@@ -1947,8 +1947,7 @@ public class AdbDebuggingManager {
                                 + tagName);
                         return keyMap;
                     }
-                    int keystoreVersion = Integer.parseInt(
-                            parser.getAttributeValue(null, XML_ATTRIBUTE_VERSION));
+                    int keystoreVersion = parser.getAttributeInt(null, XML_ATTRIBUTE_VERSION);
                     if (keystoreVersion > MAX_SUPPORTED_KEYSTORE_VERSION) {
                         Slog.e(TAG, "Keystore version=" + keystoreVersion
                                 + " not supported (max_supported="
@@ -2068,8 +2067,7 @@ public class AdbDebuggingManager {
                                 + tagName);
                         return trustedNetworks;
                     }
-                    int keystoreVersion = Integer.parseInt(
-                            parser.getAttributeValue(null, XML_ATTRIBUTE_VERSION));
+                    int keystoreVersion = parser.getAttributeInt(null, XML_ATTRIBUTE_VERSION);
                     if (keystoreVersion > MAX_SUPPORTED_KEYSTORE_VERSION) {
                         Slog.e(TAG, "Keystore version=" + keystoreVersion
                                 + " not supported (max_supported="
@@ -2148,7 +2146,7 @@ public class AdbDebuggingManager {
                 serializer.startDocument(null, true);
 
                 serializer.startTag(null, XML_KEYSTORE_START_TAG);
-                serializer.attribute(null, XML_ATTRIBUTE_VERSION, String.valueOf(KEYSTORE_VERSION));
+                serializer.attributeInt(null, XML_ATTRIBUTE_VERSION, KEYSTORE_VERSION);
                 for (Map.Entry<String, Long> keyEntry : mKeyMap.entrySet()) {
                     serializer.startTag(null, XML_TAG_ADB_KEY);
                     serializer.attribute(null, XML_ATTRIBUTE_KEY, keyEntry.getKey());

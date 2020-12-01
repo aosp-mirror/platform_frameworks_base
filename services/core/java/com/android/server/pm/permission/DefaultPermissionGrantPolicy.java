@@ -73,7 +73,6 @@ import com.android.server.pm.permission.PermissionManagerServiceInternal.SyncAda
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
-import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -1414,11 +1413,8 @@ public final class DefaultPermissionGrantPolicy {
                 Slog.w(TAG, "Default permissions file " + file + " cannot be read");
                 continue;
             }
-            try (
-                InputStream str = new BufferedInputStream(new FileInputStream(file))
-            ) {
-                TypedXmlPullParser parser = Xml.newFastPullParser();
-                parser.setInput(str, null);
+            try (InputStream str = new FileInputStream(file)) {
+                TypedXmlPullParser parser = Xml.resolvePullParser(str);
                 parse(pm, parser, grantExceptions);
             } catch (XmlPullParserException | IOException e) {
                 Slog.w(TAG, "Error reading default permissions file " + file, e);

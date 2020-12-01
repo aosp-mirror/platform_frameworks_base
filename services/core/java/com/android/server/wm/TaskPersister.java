@@ -30,26 +30,28 @@ import android.util.AtomicFile;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.XmlUtils;
 
 import libcore.io.IoUtils;
 
 import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlSerializer;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.StringWriter;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -305,12 +307,9 @@ public class TaskPersister implements PersisterQueue.Listener {
                 continue;
             }
 
-            BufferedReader reader = null;
             boolean deleteFile = false;
-            try {
-                reader = new BufferedReader(new FileReader(taskFile));
-                final XmlPullParser in = Xml.newPullParser();
-                in.setInput(reader);
+            try (InputStream is = new FileInputStream(taskFile)) {
+                final TypedXmlPullParser in = Xml.resolvePullParser(is);
 
                 int event;
                 while (((event = in.next()) != XmlPullParser.END_DOCUMENT) &&
@@ -360,7 +359,6 @@ public class TaskPersister implements PersisterQueue.Listener {
                 Slog.e(TAG, "Failing file: " + fileToString(taskFile));
                 deleteFile = true;
             } finally {
-                IoUtils.closeQuietly(reader);
                 if (deleteFile) {
                     if (DEBUG) Slog.d(TAG, "Deleting file=" + taskFile.getName());
                     taskFile.delete();
@@ -513,11 +511,10 @@ public class TaskPersister implements PersisterQueue.Listener {
             mService = service;
         }
 
-        private StringWriter saveToXml(Task task) throws Exception {
+        private byte[] saveToXml(Task task) throws Exception {
             if (DEBUG) Slog.d(TAG, "saveToXml: task=" + task);
-            final XmlSerializer xmlSerializer = new FastXmlSerializer();
-            StringWriter stringWriter = new StringWriter();
-            xmlSerializer.setOutput(stringWriter);
+            final ByteArrayOutputStream os = new ByteArrayOutputStream();
+            final TypedXmlSerializer xmlSerializer = Xml.resolveSerializer(os);
 
             if (DEBUG) {
                 xmlSerializer.setFeature(
@@ -534,13 +531,13 @@ public class TaskPersister implements PersisterQueue.Listener {
             xmlSerializer.endDocument();
             xmlSerializer.flush();
 
-            return stringWriter;
+            return os.toByteArray();
         }
 
         @Override
         public void process() {
             // Write out one task.
-            StringWriter stringWriter = null;
+            byte[] data = null;
             Task task = mTask;
             if (DEBUG) Slog.d(TAG, "Writing task=" + task);
             synchronized (mService.mGlobalLock) {
@@ -548,12 +545,12 @@ public class TaskPersister implements PersisterQueue.Listener {
                     // Still there.
                     try {
                         if (DEBUG) Slog.d(TAG, "Saving task=" + task);
-                        stringWriter = saveToXml(task);
+                        data = saveToXml(task);
                     } catch (Exception e) {
                     }
                 }
             }
-            if (stringWriter != null) {
+            if (data != null) {
                 // Write out xml file while not holding mService lock.
                 FileOutputStream file = null;
                 AtomicFile atomicFile = null;
@@ -567,8 +564,7 @@ public class TaskPersister implements PersisterQueue.Listener {
                     atomicFile = new AtomicFile(new File(userTasksDir,
                             String.valueOf(task.mTaskId) + TASK_FILENAME_SUFFIX));
                     file = atomicFile.startWrite();
-                    file.write(stringWriter.toString().getBytes());
-                    file.write('\n');
+                    file.write(data);
                     atomicFile.finishWrite(file);
                 } catch (IOException e) {
                     if (file != null) {

@@ -39,11 +39,7 @@ import static android.os.storage.OnObbStateChangeListener.ERROR_PERMISSION_DENIE
 import static android.os.storage.OnObbStateChangeListener.MOUNTED;
 import static android.os.storage.OnObbStateChangeListener.UNMOUNTED;
 
-import static com.android.internal.util.XmlUtils.readIntAttribute;
-import static com.android.internal.util.XmlUtils.readLongAttribute;
 import static com.android.internal.util.XmlUtils.readStringAttribute;
-import static com.android.internal.util.XmlUtils.writeIntAttribute;
-import static com.android.internal.util.XmlUtils.writeLongAttribute;
 import static com.android.internal.util.XmlUtils.writeStringAttribute;
 
 import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
@@ -158,9 +154,7 @@ import com.android.server.wm.ActivityTaskManagerInternal.ScreenObserver;
 import libcore.io.IoUtils;
 import libcore.util.EmptyArray;
 
-import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -2000,7 +1994,7 @@ class StorageManagerService extends IStorageManager.Stub
                 if (type == START_TAG) {
                     final String tag = in.getName();
                     if (TAG_VOLUMES.equals(tag)) {
-                        final int version = readIntAttribute(in, ATTR_VERSION, VERSION_INIT);
+                        final int version = in.getAttributeInt(null, ATTR_VERSION, VERSION_INIT);
                         final boolean primaryPhysical = SystemProperties.getBoolean(
                                 StorageManager.PROP_PRIMARY_PHYSICAL, false);
                         final boolean validAttr = (version >= VERSION_FIX_PRIMARY)
@@ -2035,7 +2029,7 @@ class StorageManagerService extends IStorageManager.Stub
             TypedXmlSerializer out = Xml.resolveSerializer(fos);
             out.startDocument(null, true);
             out.startTag(null, TAG_VOLUMES);
-            writeIntAttribute(out, ATTR_VERSION, VERSION_FIX_PRIMARY);
+            out.attributeInt(null, ATTR_VERSION, VERSION_FIX_PRIMARY);
             writeStringAttribute(out, ATTR_PRIMARY_STORAGE_UUID, mPrimaryStorageUuid);
             final int size = mRecords.size();
             for (int i = 0; i < size; i++) {
@@ -2053,31 +2047,33 @@ class StorageManagerService extends IStorageManager.Stub
         }
     }
 
-    public static VolumeRecord readVolumeRecord(XmlPullParser in) throws IOException {
-        final int type = readIntAttribute(in, ATTR_TYPE);
+    public static VolumeRecord readVolumeRecord(TypedXmlPullParser in)
+            throws IOException, XmlPullParserException {
+        final int type = in.getAttributeInt(null, ATTR_TYPE);
         final String fsUuid = readStringAttribute(in, ATTR_FS_UUID);
         final VolumeRecord meta = new VolumeRecord(type, fsUuid);
         meta.partGuid = readStringAttribute(in, ATTR_PART_GUID);
         meta.nickname = readStringAttribute(in, ATTR_NICKNAME);
-        meta.userFlags = readIntAttribute(in, ATTR_USER_FLAGS);
-        meta.createdMillis = readLongAttribute(in, ATTR_CREATED_MILLIS, 0);
-        meta.lastSeenMillis = readLongAttribute(in, ATTR_LAST_SEEN_MILLIS, 0);
-        meta.lastTrimMillis = readLongAttribute(in, ATTR_LAST_TRIM_MILLIS, 0);
-        meta.lastBenchMillis = readLongAttribute(in, ATTR_LAST_BENCH_MILLIS, 0);
+        meta.userFlags = in.getAttributeInt(null, ATTR_USER_FLAGS);
+        meta.createdMillis = in.getAttributeLong(null, ATTR_CREATED_MILLIS, 0);
+        meta.lastSeenMillis = in.getAttributeLong(null, ATTR_LAST_SEEN_MILLIS, 0);
+        meta.lastTrimMillis = in.getAttributeLong(null, ATTR_LAST_TRIM_MILLIS, 0);
+        meta.lastBenchMillis = in.getAttributeLong(null, ATTR_LAST_BENCH_MILLIS, 0);
         return meta;
     }
 
-    public static void writeVolumeRecord(XmlSerializer out, VolumeRecord rec) throws IOException {
+    public static void writeVolumeRecord(TypedXmlSerializer out, VolumeRecord rec)
+            throws IOException {
         out.startTag(null, TAG_VOLUME);
-        writeIntAttribute(out, ATTR_TYPE, rec.type);
+        out.attributeInt(null, ATTR_TYPE, rec.type);
         writeStringAttribute(out, ATTR_FS_UUID, rec.fsUuid);
         writeStringAttribute(out, ATTR_PART_GUID, rec.partGuid);
         writeStringAttribute(out, ATTR_NICKNAME, rec.nickname);
-        writeIntAttribute(out, ATTR_USER_FLAGS, rec.userFlags);
-        writeLongAttribute(out, ATTR_CREATED_MILLIS, rec.createdMillis);
-        writeLongAttribute(out, ATTR_LAST_SEEN_MILLIS, rec.lastSeenMillis);
-        writeLongAttribute(out, ATTR_LAST_TRIM_MILLIS, rec.lastTrimMillis);
-        writeLongAttribute(out, ATTR_LAST_BENCH_MILLIS, rec.lastBenchMillis);
+        out.attributeInt(null, ATTR_USER_FLAGS, rec.userFlags);
+        out.attributeLong(null, ATTR_CREATED_MILLIS, rec.createdMillis);
+        out.attributeLong(null, ATTR_LAST_SEEN_MILLIS, rec.lastSeenMillis);
+        out.attributeLong(null, ATTR_LAST_TRIM_MILLIS, rec.lastTrimMillis);
+        out.attributeLong(null, ATTR_LAST_BENCH_MILLIS, rec.lastBenchMillis);
         out.endTag(null, TAG_VOLUME);
     }
 
