@@ -857,6 +857,11 @@ interface ITelephony {
             in int[] featureTypes, in String packageName);
 
     /**
+     *  @return true if the ImsService cleared any carrier ImsService overrides, false otherwise.
+     */
+    boolean clearCarrierImsServiceOverride(int slotIndex);
+
+    /**
     * @return the package name of the carrier/device ImsService associated with this slot.
     */
     String getBoundImsServicePackage(int slotIndex, boolean isCarrierImsService, int featureType);
