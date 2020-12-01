@@ -3724,6 +3724,14 @@
     -->
     <string name="config_defaultAugmentedAutofillService" translatable="false"></string>
 
+    <!-- The package name for the system's translation service.
+     This service must be trusted, as it can be activated without explicit consent of the user.
+     If no service with the specified name exists on the device, translation wil be
+     disabled.
+     Example: "com.android.translation/.TranslationService"
+-->
+    <string name="config_defaultTranslationService" translatable="false"></string>
+
     <!-- The package name for the system's app prediction service.
          This service must be trusted, as it can be activated without explicit consent of the user.
          Example: "com.android.intelligence/.AppPredictionService"

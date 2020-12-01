@@ -52,6 +52,7 @@ package android {
     field public static final String BIND_TELEPHONY_NETWORK_SERVICE = "android.permission.BIND_TELEPHONY_NETWORK_SERVICE";
     field public static final String BIND_TEXTCLASSIFIER_SERVICE = "android.permission.BIND_TEXTCLASSIFIER_SERVICE";
     field public static final String BIND_TIME_ZONE_PROVIDER_SERVICE = "android.permission.BIND_TIME_ZONE_PROVIDER_SERVICE";
+    field public static final String BIND_TRANSLATION_SERVICE = "android.permission.BIND_TRANSLATION_SERVICE";
     field public static final String BIND_TRUST_AGENT = "android.permission.BIND_TRUST_AGENT";
     field public static final String BIND_TV_REMOTE_SERVICE = "android.permission.BIND_TV_REMOTE_SERVICE";
     field public static final String BRICK = "android.permission.BRICK";
@@ -1935,6 +1936,7 @@ package android.content {
     field public static final String SYSTEM_CONFIG_SERVICE = "system_config";
     field public static final String SYSTEM_UPDATE_SERVICE = "system_update";
     field public static final String TETHERING_SERVICE = "tethering";
+    field public static final String TRANSLATION_MANAGER_SERVICE = "transformer";
     field public static final String VR_SERVICE = "vrmanager";
     field public static final String WIFI_NL80211_SERVICE = "wifinl80211";
     field @Deprecated public static final String WIFI_RTT_SERVICE = "rttmanager";
@@ -9791,6 +9793,48 @@ package android.service.timezone {
     method @NonNull public android.service.timezone.TimeZoneProviderSuggestion build();
     method @NonNull public android.service.timezone.TimeZoneProviderSuggestion.Builder setElapsedRealtimeMillis(long);
     method @NonNull public android.service.timezone.TimeZoneProviderSuggestion.Builder setTimeZoneIds(@NonNull java.util.List<java.lang.String>);
+  }
+
+}
+
+package android.service.translation {
+
+  public final class TranslationRequest implements android.os.Parcelable {
+    ctor public TranslationRequest(int, @NonNull android.view.translation.TranslationSpec, @NonNull android.view.translation.TranslationSpec, @NonNull java.util.List<android.view.translation.TranslationRequest>);
+    method public int describeContents();
+    method @NonNull public android.view.translation.TranslationSpec getDestSpec();
+    method public int getRequestId();
+    method @NonNull public android.view.translation.TranslationSpec getSourceSpec();
+    method @NonNull public java.util.List<android.view.translation.TranslationRequest> getTranslationRequests();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.service.translation.TranslationRequest> CREATOR;
+  }
+
+  public static final class TranslationRequest.Builder {
+    ctor public TranslationRequest.Builder(int, @NonNull android.view.translation.TranslationSpec, @NonNull android.view.translation.TranslationSpec, @NonNull java.util.List<android.view.translation.TranslationRequest>);
+    method @NonNull public android.service.translation.TranslationRequest.Builder addTranslationRequests(@NonNull android.view.translation.TranslationRequest);
+    method @NonNull public android.service.translation.TranslationRequest build();
+    method @NonNull public android.service.translation.TranslationRequest.Builder setDestSpec(@NonNull android.view.translation.TranslationSpec);
+    method @NonNull public android.service.translation.TranslationRequest.Builder setRequestId(int);
+    method @NonNull public android.service.translation.TranslationRequest.Builder setSourceSpec(@NonNull android.view.translation.TranslationSpec);
+    method @NonNull public android.service.translation.TranslationRequest.Builder setTranslationRequests(@NonNull java.util.List<android.view.translation.TranslationRequest>);
+  }
+
+  public abstract class TranslationService extends android.app.Service {
+    ctor public TranslationService();
+    method @Nullable public final android.os.IBinder onBind(@NonNull android.content.Intent);
+    method public void onConnected();
+    method public abstract void onCreateTranslationSession(@NonNull android.view.translation.TranslationSpec, @NonNull android.view.translation.TranslationSpec, int);
+    method public void onDisconnected();
+    method public abstract void onFinishTranslationSession(int);
+    method public abstract void onTranslationRequest(@NonNull android.service.translation.TranslationRequest, int, @NonNull android.os.CancellationSignal, @NonNull android.service.translation.TranslationService.OnTranslationResultCallback);
+    field public static final String SERVICE_INTERFACE = "android.service.translation.TranslationService";
+    field public static final String SERVICE_META_DATA = "android.translation_service";
+  }
+
+  public static interface TranslationService.OnTranslationResultCallback {
+    method public void onError();
+    method public void onTranslationSuccess(@NonNull android.view.translation.TranslationResponse);
   }
 
 }

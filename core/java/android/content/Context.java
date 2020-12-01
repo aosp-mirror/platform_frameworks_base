@@ -4508,6 +4508,17 @@ public abstract class Context {
     public static final String CONTENT_CAPTURE_MANAGER_SERVICE = "content_capture";
 
     /**
+     * Official published name of the translation service.
+     *
+     * @hide
+     * @see #getSystemService(String)
+     */
+    // TODO(b/176208267): change it back to translation before S release.
+    @SystemApi
+    @SuppressLint("ServiceName")
+    public static final String TRANSLATION_MANAGER_SERVICE = "transformer";
+
+    /**
      * Used for getting content selections and classifications for task snapshots.
      *
      * @hide

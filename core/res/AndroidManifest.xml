@@ -3591,6 +3591,14 @@
     <permission android:name="android.permission.BIND_CONTENT_CAPTURE_SERVICE"
                 android:protectionLevel="signature" />
 
+    <!-- Must be required by a android.service.translation.TranslationService,
+         to ensure that only the system can bind to it.
+         @SystemApi @hide This is not a third-party API (intended for OEMs and system apps).
+         <p>Protection level: signature
+     -->
+    <permission android:name="android.permission.BIND_TRANSLATION_SERVICE"
+                android:protectionLevel="signature" />
+
     <!-- Must be required by a android.service.contentsuggestions.ContentSuggestionsService,
          to ensure that only the system can bind to it.
          @SystemApi @hide This is not a third-party API (intended for OEMs and system apps).
