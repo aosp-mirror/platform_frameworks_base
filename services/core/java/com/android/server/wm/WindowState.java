@@ -1526,10 +1526,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     InsetsState getInsetsState() {
-        final InsetsState insetsState = mToken.getFixedRotationTransformInsetsState();
-        if (insetsState != null) {
-            return insetsState;
-        }
         return getDisplayContent().getInsetsPolicy().getInsetsForDispatch(this);
     }
 

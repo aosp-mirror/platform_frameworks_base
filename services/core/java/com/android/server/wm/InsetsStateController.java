@@ -107,6 +107,10 @@ class InsetsStateController {
      * @return The state stripped of the necessary information.
      */
     InsetsState getInsetsForDispatch(@NonNull WindowState target) {
+        final InsetsState rotatedState = target.mToken.getFixedRotationTransformInsetsState();
+        if (rotatedState != null) {
+            return rotatedState;
+        }
         final InsetsSourceProvider provider = target.getControllableInsetProvider();
         final @InternalInsetsType int type = provider != null
                 ? provider.getSource().getType() : ITYPE_INVALID;
