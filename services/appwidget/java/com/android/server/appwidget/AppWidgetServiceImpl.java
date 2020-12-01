@@ -2503,7 +2503,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         out.startTag(null, "p");
         out.attribute(null, "pkg", p.info.provider.getPackageName());
         out.attribute(null, "cl", p.info.provider.getClassName());
-        out.attribute(null, "tag", Integer.toHexString(p.tag));
+        out.attributeIntHex(null, "tag", p.tag);
         if (!TextUtils.isEmpty(p.infoTag)) {
             out.attribute(null, "info_tag", p.infoTag);
         }
@@ -2513,35 +2513,35 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
     private static void serializeHost(TypedXmlSerializer out, Host host) throws IOException {
         out.startTag(null, "h");
         out.attribute(null, "pkg", host.id.packageName);
-        out.attribute(null, "id", Integer.toHexString(host.id.hostId));
-        out.attribute(null, "tag", Integer.toHexString(host.tag));
+        out.attributeIntHex(null, "id", host.id.hostId);
+        out.attributeIntHex(null, "tag", host.tag);
         out.endTag(null, "h");
     }
 
     private static void serializeAppWidget(TypedXmlSerializer out, Widget widget,
             boolean saveRestoreCompleted) throws IOException {
         out.startTag(null, "g");
-        out.attribute(null, "id", Integer.toHexString(widget.appWidgetId));
-        out.attribute(null, "rid", Integer.toHexString(widget.restoredId));
-        out.attribute(null, "h", Integer.toHexString(widget.host.tag));
+        out.attributeIntHex(null, "id", widget.appWidgetId);
+        out.attributeIntHex(null, "rid", widget.restoredId);
+        out.attributeIntHex(null, "h", widget.host.tag);
         if (widget.provider != null) {
-            out.attribute(null, "p", Integer.toHexString(widget.provider.tag));
+            out.attributeIntHex(null, "p", widget.provider.tag);
         }
         if (widget.options != null) {
             int minWidth = widget.options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH);
             int minHeight = widget.options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT);
             int maxWidth = widget.options.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH);
             int maxHeight = widget.options.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT);
-            out.attribute(null, "min_width", Integer.toHexString((minWidth > 0) ? minWidth : 0));
-            out.attribute(null, "min_height", Integer.toHexString((minHeight > 0) ? minHeight : 0));
-            out.attribute(null, "max_width", Integer.toHexString((maxWidth > 0) ? maxWidth : 0));
-            out.attribute(null, "max_height", Integer.toHexString((maxHeight > 0) ? maxHeight : 0));
-            out.attribute(null, "host_category", Integer.toHexString(widget.options.getInt(
-                    AppWidgetManager.OPTION_APPWIDGET_HOST_CATEGORY)));
+            out.attributeIntHex(null, "min_width", (minWidth > 0) ? minWidth : 0);
+            out.attributeIntHex(null, "min_height", (minHeight > 0) ? minHeight : 0);
+            out.attributeIntHex(null, "max_width", (maxWidth > 0) ? maxWidth : 0);
+            out.attributeIntHex(null, "max_height", (maxHeight > 0) ? maxHeight : 0);
+            out.attributeIntHex(null, "host_category", widget.options.getInt(
+                    AppWidgetManager.OPTION_APPWIDGET_HOST_CATEGORY));
             if (saveRestoreCompleted) {
                 boolean restoreCompleted = widget.options.getBoolean(
                         AppWidgetManager.OPTION_APPWIDGET_RESTORE_COMPLETED);
-                out.attribute(null, "restore_completed", Boolean.toString(restoreCompleted));
+                out.attributeBoolean(null, "restore_completed", restoreCompleted);
             }
         }
         out.endTag(null, "g");
@@ -3082,7 +3082,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             TypedXmlSerializer out = Xml.resolveSerializer(stream);
             out.startDocument(null, true);
             out.startTag(null, "gs");
-            out.attribute(null, "version", String.valueOf(CURRENT_VERSION));
+            out.attributeInt(null, "version", CURRENT_VERSION);
 
             N = mProviders.size();
             for (int i = 0; i < N; i++) {
@@ -3223,8 +3223,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                         if (!host.zombie || mSafeMode) {
                             // In safe mode, we don't discard the hosts we don't recognize
                             // so that they're not pruned from our list. Otherwise, we do.
-                            final int hostId = Integer.parseInt(parser.getAttributeValue(
-                                    null, "id"), 16);
+                            final int hostId = parser.getAttributeIntHex(null, "id");
 
                             String tagAttribute = parser.getAttributeValue(null, "tag");
                             final int hostTag = !TextUtils.isEmpty(tagAttribute)
@@ -3243,8 +3242,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                         }
                     } else if ("g".equals(tag)) {
                         Widget widget = new Widget();
-                        widget.appWidgetId = Integer.parseInt(parser.getAttributeValue(
-                                null, "id"), 16);
+                        widget.appWidgetId = parser.getAttributeIntHex(null, "id");
                         setMinAppWidgetIdLocked(userId, widget.appWidgetId + 1);
 
                         // restored ID is allowed to be absent
@@ -3253,11 +3251,10 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                                 : Integer.parseInt(restoredIdString, 16);
                         widget.options = parseWidgetIdOptions(parser);
 
-                        final int hostTag = Integer.parseInt(parser.getAttributeValue(
-                                null, "h"), 16);
+                        final int hostTag = parser.getAttributeIntHex(null, "h");
                         String providerString = parser.getAttributeValue(null, "p");
-                        final int providerTag = (providerString != null) ? Integer.parseInt(
-                                parser.getAttributeValue(null, "p"), 16) : TAG_UNDEFINED;
+                        final int providerTag = (providerString != null)
+                                ? parser.getAttributeIntHex(null, "p") : TAG_UNDEFINED;
 
                         // We can match widgets with hosts and providers only after hosts
                         // and providers for all users have been loaded since the widget
@@ -4378,7 +4375,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                     out.setOutput(stream, StandardCharsets.UTF_8.name());
                     out.startDocument(null, true);
                     out.startTag(null, "ws");      // widget state
-                    out.attribute(null, "version", String.valueOf(WIDGET_STATE_VERSION));
+                    out.attributeInt(null, "version", WIDGET_STATE_VERSION);
                     out.attribute(null, "pkg", backedupPackage);
 
                     // Remember all the providers that are currently hosted or published
@@ -4522,8 +4519,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                                 String pkg = parser.getAttributeValue(null, "pkg");
 
                                 final int uid = getUidForPackage(pkg, userId);
-                                final int hostId = Integer.parseInt(
-                                        parser.getAttributeValue(null, "id"), 16);
+                                final int hostId = parser.getAttributeIntHex(null, "id");
 
                                 HostId id = new HostId(uid, hostId, pkg);
                                 Host h = lookupOrAddHostLocked(id);
@@ -4534,10 +4530,8 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                                             + "]: {" + h.id + "}");
                                 }
                             } else if ("g".equals(tag)) {
-                                int restoredId = Integer.parseInt(
-                                        parser.getAttributeValue(null, "id"), 16);
-                                int hostIndex = Integer.parseInt(
-                                        parser.getAttributeValue(null, "h"), 16);
+                                int restoredId = parser.getAttributeIntHex(null, "id");
+                                int hostIndex = parser.getAttributeIntHex(null, "h");
                                 Host host = restoredHosts.get(hostIndex);
                                 Provider p = null;
                                 String prov = parser.getAttributeValue(null, "p");

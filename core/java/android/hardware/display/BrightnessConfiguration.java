@@ -350,8 +350,8 @@ public final class BrightnessConfiguration implements Parcelable {
         }
         for (int i = 0; i < mLux.length; i++) {
             serializer.startTag(null, TAG_BRIGHTNESS_POINT);
-            serializer.attribute(null, ATTR_LUX, Float.toString(mLux[i]));
-            serializer.attribute(null, ATTR_NITS, Float.toString(mNits[i]));
+            serializer.attributeFloat(null, ATTR_LUX, mLux[i]);
+            serializer.attributeFloat(null, ATTR_NITS, mNits[i]);
             serializer.endTag(null, TAG_BRIGHTNESS_POINT);
         }
         serializer.endTag(null, TAG_BRIGHTNESS_CURVE);
@@ -370,7 +370,7 @@ public final class BrightnessConfiguration implements Parcelable {
             final int category = entry.getKey();
             final BrightnessCorrection correction = entry.getValue();
             serializer.startTag(null, TAG_BRIGHTNESS_CORRECTION);
-            serializer.attribute(null, ATTR_CATEGORY, Integer.toString(category));
+            serializer.attributeInt(null, ATTR_CATEGORY, category);
             correction.saveToXml(serializer);
             serializer.endTag(null, TAG_BRIGHTNESS_CORRECTION);
         }
@@ -378,19 +378,18 @@ public final class BrightnessConfiguration implements Parcelable {
 
         serializer.startTag(null, TAG_BRIGHTNESS_PARAMS);
         if (mShouldCollectColorSamples) {
-            serializer.attribute(null, ATTR_COLLECT_COLOR, Boolean.toString(true));
+            serializer.attributeBoolean(null, ATTR_COLLECT_COLOR, true);
         }
         if (mShortTermModelTimeout >= 0) {
-            serializer.attribute(null, ATTR_MODEL_TIMEOUT,
-                    Long.toString(mShortTermModelTimeout));
+            serializer.attributeLong(null, ATTR_MODEL_TIMEOUT, mShortTermModelTimeout);
         }
         if (!Float.isNaN(mShortTermModelLowerLuxMultiplier)) {
-            serializer.attribute(null, ATTR_MODEL_LOWER_BOUND,
-                    Float.toString(mShortTermModelLowerLuxMultiplier));
+            serializer.attributeFloat(null, ATTR_MODEL_LOWER_BOUND,
+                    mShortTermModelLowerLuxMultiplier);
         }
         if (!Float.isNaN(mShortTermModelUpperLuxMultiplier)) {
-            serializer.attribute(null, ATTR_MODEL_UPPER_BOUND,
-                    Float.toString(mShortTermModelUpperLuxMultiplier));
+            serializer.attributeFloat(null, ATTR_MODEL_UPPER_BOUND,
+                    mShortTermModelUpperLuxMultiplier);
         }
         serializer.endTag(null, TAG_BRIGHTNESS_PARAMS);
     }
@@ -455,7 +454,7 @@ public final class BrightnessConfiguration implements Parcelable {
                 }
             } else if (TAG_BRIGHTNESS_PARAMS.equals(parser.getName())) {
                 shouldCollectColorSamples =
-                        Boolean.parseBoolean(parser.getAttributeValue(null, ATTR_COLLECT_COLOR));
+                        parser.getAttributeBoolean(null, ATTR_COLLECT_COLOR, false);
                 Long timeout = loadLongFromXml(parser, ATTR_MODEL_TIMEOUT);
                 if (timeout != null) {
                     shortTermModelTimeout = timeout;

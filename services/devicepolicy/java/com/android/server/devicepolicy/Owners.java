@@ -576,7 +576,7 @@ class Owners {
                     String profileOwnerName = parser.getAttributeValue(null, ATTR_NAME);
                     String profileOwnerComponentStr =
                             parser.getAttributeValue(null, ATTR_COMPONENT_NAME);
-                    int userId = Integer.parseInt(parser.getAttributeValue(null, ATTR_USERID));
+                    int userId = parser.getAttributeInt(null, ATTR_USERID);
                     OwnerInfo profileOwnerInfo = null;
                     if (profileOwnerComponentStr != null) {
                         ComponentName admin = ComponentName.unflattenFromString(
@@ -830,7 +830,7 @@ class Owners {
             if (mDeviceOwner != null) {
                 mDeviceOwner.writeToXml(out, TAG_DEVICE_OWNER);
                 out.startTag(null, TAG_DEVICE_OWNER_CONTEXT);
-                out.attribute(null, ATTR_USERID, String.valueOf(mDeviceOwnerUserId));
+                out.attributeInt(null, ATTR_USERID, mDeviceOwnerUserId);
                 out.endTag(null, TAG_DEVICE_OWNER_CONTEXT);
             }
 
@@ -989,8 +989,7 @@ class Owners {
             if (admin != null) {
                 out.attribute(null, ATTR_COMPONENT_NAME, admin.flattenToString());
             }
-            out.attribute(null, ATTR_USER_RESTRICTIONS_MIGRATED,
-                    String.valueOf(userRestrictionsMigrated));
+            out.attributeBoolean(null, ATTR_USER_RESTRICTIONS_MIGRATED, userRestrictionsMigrated);
             if (remoteBugreportUri != null) {
                 out.attribute(null, ATTR_REMOTE_BUGREPORT_URI, remoteBugreportUri);
             }
@@ -998,8 +997,8 @@ class Owners {
                 out.attribute(null, ATTR_REMOTE_BUGREPORT_HASH, remoteBugreportHash);
             }
             if (isOrganizationOwnedDevice) {
-                out.attribute(null, ATTR_PROFILE_OWNER_OF_ORG_OWNED_DEVICE,
-                        String.valueOf(isOrganizationOwnedDevice));
+                out.attributeBoolean(null, ATTR_PROFILE_OWNER_OF_ORG_OWNED_DEVICE,
+                        isOrganizationOwnedDevice);
             }
             out.endTag(null, tag);
         }

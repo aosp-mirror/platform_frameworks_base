@@ -203,8 +203,8 @@ public final class FactoryResetProtectionPolicy implements Parcelable {
     @Nullable
     public static FactoryResetProtectionPolicy readFromXml(@NonNull TypedXmlPullParser parser) {
         try {
-            boolean factoryResetProtectionEnabled = Boolean.parseBoolean(
-                    parser.getAttributeValue(null, KEY_FACTORY_RESET_PROTECTION_ENABLED));
+            boolean factoryResetProtectionEnabled = parser.getAttributeBoolean(null,
+                    KEY_FACTORY_RESET_PROTECTION_ENABLED, false);
 
             List<String> factoryResetProtectionAccounts = new ArrayList<>();
             int outerDepth = parser.getDepth();
@@ -233,8 +233,8 @@ public final class FactoryResetProtectionPolicy implements Parcelable {
      * @hide
      */
     public void writeToXml(@NonNull TypedXmlSerializer out) throws IOException {
-        out.attribute(null, KEY_FACTORY_RESET_PROTECTION_ENABLED,
-                Boolean.toString(mFactoryResetProtectionEnabled));
+        out.attributeBoolean(null, KEY_FACTORY_RESET_PROTECTION_ENABLED,
+                mFactoryResetProtectionEnabled);
         for (String account : mFactoryResetProtectionAccounts) {
             out.startTag(null, KEY_FACTORY_RESET_PROTECTION_ACCOUNT);
             out.attribute(null, ATTR_VALUE, account);

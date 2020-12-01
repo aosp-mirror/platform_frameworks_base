@@ -1509,19 +1509,16 @@ public class ActivityManager {
                 out.attribute(null, ATTR_TASKDESCRIPTIONLABEL, mLabel);
             }
             if (mColorPrimary != 0) {
-                out.attribute(null, ATTR_TASKDESCRIPTIONCOLOR_PRIMARY,
-                        Integer.toHexString(mColorPrimary));
+                out.attributeIntHex(null, ATTR_TASKDESCRIPTIONCOLOR_PRIMARY, mColorPrimary);
             }
             if (mColorBackground != 0) {
-                out.attribute(null, ATTR_TASKDESCRIPTIONCOLOR_BACKGROUND,
-                        Integer.toHexString(mColorBackground));
+                out.attributeIntHex(null, ATTR_TASKDESCRIPTIONCOLOR_BACKGROUND, mColorBackground);
             }
             if (mIconFilename != null) {
                 out.attribute(null, ATTR_TASKDESCRIPTIONICON_FILENAME, mIconFilename);
             }
             if (mIcon != null && mIcon.getType() == Icon.TYPE_RESOURCE) {
-                out.attribute(null, ATTR_TASKDESCRIPTIONICON_RESOURCE,
-                        Integer.toString(mIcon.getResId()));
+                out.attributeInt(null, ATTR_TASKDESCRIPTIONICON_RESOURCE, mIcon.getResId());
                 out.attribute(null, ATTR_TASKDESCRIPTIONICON_RESOURCE_PACKAGE,
                         mIcon.getResPackage());
             }

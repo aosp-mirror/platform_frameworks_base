@@ -475,14 +475,13 @@ public final class DeviceAdminInfo implements Parcelable {
     /** @hide */
     public void writePoliciesToXml(TypedXmlSerializer out)
             throws IllegalArgumentException, IllegalStateException, IOException {
-        out.attribute(null, "flags", Integer.toString(mUsesPolicies));
+        out.attributeInt(null, "flags", mUsesPolicies);
     }
 
     /** @hide */
     public void readPoliciesFromXml(TypedXmlPullParser parser)
             throws XmlPullParserException, IOException {
-        mUsesPolicies = Integer.parseInt(
-                parser.getAttributeValue(null, "flags"));
+        mUsesPolicies = parser.getAttributeInt(null, "flags");
     }
 
     public void dump(Printer pw, String prefix) {

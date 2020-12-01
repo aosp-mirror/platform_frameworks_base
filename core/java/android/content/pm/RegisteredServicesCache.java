@@ -766,7 +766,7 @@ public abstract class RegisteredServicesCache<V> {
             out.startTag(null, "services");
             for (Map.Entry<V, Integer> service : user.persistentServices.entrySet()) {
                 out.startTag(null, "service");
-                out.attribute(null, "uid", Integer.toString(service.getValue()));
+                out.attributeInt(null, "uid", service.getValue());
                 mSerializerAndParser.writeAsXml(service.getKey(), out);
                 out.endTag(null, "service");
             }

@@ -126,8 +126,8 @@ public final class SystemUpdateInfo implements Parcelable {
     /** @hide */
     public void writeToXml(TypedXmlSerializer out, String tag) throws IOException {
         out.startTag(null, tag);
-        out.attribute(null, ATTR_RECEIVED_TIME, String.valueOf(mReceivedTime));
-        out.attribute(null, ATTR_SECURITY_PATCH_STATE, String.valueOf(mSecurityPatchState));
+        out.attributeLong(null, ATTR_RECEIVED_TIME, mReceivedTime);
+        out.attributeInt(null, ATTR_SECURITY_PATCH_STATE, mSecurityPatchState);
         out.attribute(null, ATTR_ORIGINAL_BUILD , Build.FINGERPRINT);
         out.endTag(null, tag);
     }
@@ -141,9 +141,9 @@ public final class SystemUpdateInfo implements Parcelable {
             return null;
         }
         final long receivedTime =
-                Long.parseLong(parser.getAttributeValue(null, ATTR_RECEIVED_TIME));
+                parser.getAttributeLong(null, ATTR_RECEIVED_TIME);
         final int securityPatchState =
-                Integer.parseInt(parser.getAttributeValue(null, ATTR_SECURITY_PATCH_STATE));
+                parser.getAttributeInt(null, ATTR_SECURITY_PATCH_STATE);
         return new SystemUpdateInfo(receivedTime, securityPatchState);
     }
 

@@ -784,9 +784,9 @@ public final class SystemUpdatePolicy implements Parcelable {
      * @hide
      */
     public void saveToXml(TypedXmlSerializer out) throws IOException {
-        out.attribute(null, KEY_POLICY_TYPE, Integer.toString(mPolicyType));
-        out.attribute(null, KEY_INSTALL_WINDOW_START, Integer.toString(mMaintenanceWindowStart));
-        out.attribute(null, KEY_INSTALL_WINDOW_END, Integer.toString(mMaintenanceWindowEnd));
+        out.attributeInt(null, KEY_POLICY_TYPE, mPolicyType);
+        out.attributeInt(null, KEY_INSTALL_WINDOW_START, mMaintenanceWindowStart);
+        out.attributeInt(null, KEY_INSTALL_WINDOW_END, mMaintenanceWindowEnd);
         for (int i = 0; i < mFreezePeriods.size(); i++) {
             FreezePeriod interval = mFreezePeriods.get(i);
             out.startTag(null, KEY_FREEZE_TAG);

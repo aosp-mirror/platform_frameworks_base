@@ -413,11 +413,11 @@ class ActiveAdmin {
         }
         if (isNetworkLoggingEnabled) {
             out.startTag(null, TAG_IS_NETWORK_LOGGING_ENABLED);
-            out.attribute(null, ATTR_VALUE, Boolean.toString(isNetworkLoggingEnabled));
-            out.attribute(null, ATTR_NUM_NETWORK_LOGGING_NOTIFICATIONS,
-                    Integer.toString(numNetworkLoggingNotifications));
-            out.attribute(null, ATTR_LAST_NETWORK_LOGGING_NOTIFICATION,
-                    Long.toString(lastNetworkLoggingNotificationTimeMs));
+            out.attributeBoolean(null, ATTR_VALUE, isNetworkLoggingEnabled);
+            out.attributeInt(null, ATTR_NUM_NETWORK_LOGGING_NOTIFICATIONS,
+                    numNetworkLoggingNotifications);
+            out.attributeLong(null, ATTR_LAST_NETWORK_LOGGING_NOTIFICATION,
+                    lastNetworkLoggingNotificationTimeMs);
             out.endTag(null, TAG_IS_NETWORK_LOGGING_ENABLED);
         }
         if (disabledKeyguardFeatures != DEF_KEYGUARD_FEATURES_DISABLED) {
@@ -560,21 +560,21 @@ class ActiveAdmin {
     void writeAttributeValueToXml(TypedXmlSerializer out, String tag, int value)
             throws IOException {
         out.startTag(null, tag);
-        out.attribute(null, ATTR_VALUE, Integer.toString(value));
+        out.attributeInt(null, ATTR_VALUE, value);
         out.endTag(null, tag);
     }
 
     void writeAttributeValueToXml(TypedXmlSerializer out, String tag, long value)
             throws IOException {
         out.startTag(null, tag);
-        out.attribute(null, ATTR_VALUE, Long.toString(value));
+        out.attributeLong(null, ATTR_VALUE, value);
         out.endTag(null, tag);
     }
 
     void writeAttributeValueToXml(TypedXmlSerializer out, String tag, boolean value)
             throws IOException {
         out.startTag(null, tag);
-        out.attribute(null, ATTR_VALUE, Boolean.toString(value));
+        out.attributeBoolean(null, ATTR_VALUE, value);
         out.endTag(null, tag);
     }
 
@@ -606,47 +606,34 @@ class ActiveAdmin {
                     info.readPoliciesFromXml(parser);
                 }
             } else if (TAG_PASSWORD_QUALITY.equals(tag)) {
-                mPasswordPolicy.quality = Integer.parseInt(
-                        parser.getAttributeValue(null, ATTR_VALUE));
+                mPasswordPolicy.quality = parser.getAttributeInt(null, ATTR_VALUE);
             } else if (TAG_MIN_PASSWORD_LENGTH.equals(tag)) {
-                mPasswordPolicy.length = Integer.parseInt(
-                        parser.getAttributeValue(null, ATTR_VALUE));
+                mPasswordPolicy.length = parser.getAttributeInt(null, ATTR_VALUE);
             } else if (TAG_PASSWORD_HISTORY_LENGTH.equals(tag)) {
-                passwordHistoryLength = Integer.parseInt(
-                        parser.getAttributeValue(null, ATTR_VALUE));
+                passwordHistoryLength = parser.getAttributeInt(null, ATTR_VALUE);
             } else if (TAG_MIN_PASSWORD_UPPERCASE.equals(tag)) {
-                mPasswordPolicy.upperCase = Integer.parseInt(
-                        parser.getAttributeValue(null, ATTR_VALUE));
+                mPasswordPolicy.upperCase = parser.getAttributeInt(null, ATTR_VALUE);
             } else if (TAG_MIN_PASSWORD_LOWERCASE.equals(tag)) {
-                mPasswordPolicy.lowerCase = Integer.parseInt(
-                        parser.getAttributeValue(null, ATTR_VALUE));
+                mPasswordPolicy.lowerCase = parser.getAttributeInt(null, ATTR_VALUE);
             } else if (TAG_MIN_PASSWORD_LETTERS.equals(tag)) {
-                mPasswordPolicy.letters = Integer.parseInt(
-                        parser.getAttributeValue(null, ATTR_VALUE));
+                mPasswordPolicy.letters = parser.getAttributeInt(null, ATTR_VALUE);
             } else if (TAG_MIN_PASSWORD_NUMERIC.equals(tag)) {
-                mPasswordPolicy.numeric = Integer.parseInt(
-                        parser.getAttributeValue(null, ATTR_VALUE));
+                mPasswordPolicy.numeric = parser.getAttributeInt(null, ATTR_VALUE);
             } else if (TAG_MIN_PASSWORD_SYMBOLS.equals(tag)) {
-                mPasswordPolicy.symbols = Integer.parseInt(
-                        parser.getAttributeValue(null, ATTR_VALUE));
+                mPasswordPolicy.symbols = parser.getAttributeInt(null, ATTR_VALUE);
             } else if (TAG_MIN_PASSWORD_NONLETTER.equals(tag)) {
-                mPasswordPolicy.nonLetter = Integer.parseInt(
-                        parser.getAttributeValue(null, ATTR_VALUE));
+                mPasswordPolicy.nonLetter = parser.getAttributeInt(null, ATTR_VALUE);
             } else if (TAG_PASSWORD_QUALITY_APPLIES_TO_PARENT.equals(tag)) {
                 mPasswordPolicyAppliesToParent = Boolean.parseBoolean(
                         parser.getAttributeValue(null, ATTR_VALUE));
             } else if (TAG_MAX_TIME_TO_UNLOCK.equals(tag)) {
-                maximumTimeToUnlock = Long.parseLong(
-                        parser.getAttributeValue(null, ATTR_VALUE));
+                maximumTimeToUnlock = parser.getAttributeLong(null, ATTR_VALUE);
             } else if (TAG_STRONG_AUTH_UNLOCK_TIMEOUT.equals(tag)) {
-                strongAuthUnlockTimeout = Long.parseLong(
-                        parser.getAttributeValue(null, ATTR_VALUE));
+                strongAuthUnlockTimeout = parser.getAttributeLong(null, ATTR_VALUE);
             } else if (TAG_MAX_FAILED_PASSWORD_WIPE.equals(tag)) {
-                maximumFailedPasswordsForWipe = Integer.parseInt(
-                        parser.getAttributeValue(null, ATTR_VALUE));
+                maximumFailedPasswordsForWipe = parser.getAttributeInt(null, ATTR_VALUE);
             } else if (TAG_SPECIFIES_GLOBAL_PROXY.equals(tag)) {
-                specifiesGlobalProxy = Boolean.parseBoolean(
-                        parser.getAttributeValue(null, ATTR_VALUE));
+                specifiesGlobalProxy = parser.getAttributeBoolean(null, ATTR_VALUE, false);
             } else if (TAG_GLOBAL_PROXY_SPEC.equals(tag)) {
                 globalProxySpec =
                     parser.getAttributeValue(null, ATTR_VALUE);
@@ -654,48 +641,36 @@ class ActiveAdmin {
                 globalProxyExclusionList =
                     parser.getAttributeValue(null, ATTR_VALUE);
             } else if (TAG_PASSWORD_EXPIRATION_TIMEOUT.equals(tag)) {
-                passwordExpirationTimeout = Long.parseLong(
-                        parser.getAttributeValue(null, ATTR_VALUE));
+                passwordExpirationTimeout = parser.getAttributeLong(null, ATTR_VALUE);
             } else if (TAG_PASSWORD_EXPIRATION_DATE.equals(tag)) {
-                passwordExpirationDate = Long.parseLong(
-                        parser.getAttributeValue(null, ATTR_VALUE));
+                passwordExpirationDate = parser.getAttributeLong(null, ATTR_VALUE);
             } else if (TAG_ENCRYPTION_REQUESTED.equals(tag)) {
-                encryptionRequested = Boolean.parseBoolean(
-                        parser.getAttributeValue(null, ATTR_VALUE));
+                encryptionRequested = parser.getAttributeBoolean(null, ATTR_VALUE, false);
             } else if (TAG_TEST_ONLY_ADMIN.equals(tag)) {
-                testOnlyAdmin = Boolean.parseBoolean(
-                        parser.getAttributeValue(null, ATTR_VALUE));
+                testOnlyAdmin = parser.getAttributeBoolean(null, ATTR_VALUE, false);
             } else if (TAG_DISABLE_CAMERA.equals(tag)) {
-                disableCamera = Boolean.parseBoolean(
-                        parser.getAttributeValue(null, ATTR_VALUE));
+                disableCamera = parser.getAttributeBoolean(null, ATTR_VALUE, false);
             } else if (TAG_DISABLE_CALLER_ID.equals(tag)) {
-                disableCallerId = Boolean.parseBoolean(
-                        parser.getAttributeValue(null, ATTR_VALUE));
+                disableCallerId = parser.getAttributeBoolean(null, ATTR_VALUE, false);
             } else if (TAG_DISABLE_CONTACTS_SEARCH.equals(tag)) {
-                disableContactsSearch = Boolean.parseBoolean(
-                        parser.getAttributeValue(null, ATTR_VALUE));
+                disableContactsSearch = parser.getAttributeBoolean(null, ATTR_VALUE, false);
             } else if (TAG_DISABLE_BLUETOOTH_CONTACT_SHARING.equals(tag)) {
-                disableBluetoothContactSharing = Boolean.parseBoolean(parser
-                        .getAttributeValue(null, ATTR_VALUE));
+                disableBluetoothContactSharing =
+                        parser.getAttributeBoolean(null, ATTR_VALUE, false);
             } else if (TAG_DISABLE_SCREEN_CAPTURE.equals(tag)) {
-                disableScreenCapture = Boolean.parseBoolean(
-                        parser.getAttributeValue(null, ATTR_VALUE));
+                disableScreenCapture = parser.getAttributeBoolean(null, ATTR_VALUE, false);
             } else if (TAG_REQUIRE_AUTO_TIME.equals(tag)) {
-                requireAutoTime = Boolean.parseBoolean(
-                        parser.getAttributeValue(null, ATTR_VALUE));
+                requireAutoTime = parser.getAttributeBoolean(null, ATTR_VALUE, false);
             } else if (TAG_FORCE_EPHEMERAL_USERS.equals(tag)) {
-                forceEphemeralUsers = Boolean.parseBoolean(
-                        parser.getAttributeValue(null, ATTR_VALUE));
+                forceEphemeralUsers = parser.getAttributeBoolean(null, ATTR_VALUE, false);
             } else if (TAG_IS_NETWORK_LOGGING_ENABLED.equals(tag)) {
-                isNetworkLoggingEnabled = Boolean.parseBoolean(
-                        parser.getAttributeValue(null, ATTR_VALUE));
-                lastNetworkLoggingNotificationTimeMs = Long.parseLong(
-                        parser.getAttributeValue(null, ATTR_LAST_NETWORK_LOGGING_NOTIFICATION));
-                numNetworkLoggingNotifications = Integer.parseInt(
-                        parser.getAttributeValue(null, ATTR_NUM_NETWORK_LOGGING_NOTIFICATIONS));
+                isNetworkLoggingEnabled = parser.getAttributeBoolean(null, ATTR_VALUE, false);
+                lastNetworkLoggingNotificationTimeMs = parser.getAttributeLong(null,
+                        ATTR_LAST_NETWORK_LOGGING_NOTIFICATION);
+                numNetworkLoggingNotifications = parser.getAttributeInt(null,
+                        ATTR_NUM_NETWORK_LOGGING_NOTIFICATIONS);
             } else if (TAG_DISABLE_KEYGUARD_FEATURES.equals(tag)) {
-                disabledKeyguardFeatures = Integer.parseInt(
-                        parser.getAttributeValue(null, ATTR_VALUE));
+                disabledKeyguardFeatures = parser.getAttributeInt(null, ATTR_VALUE);
             } else if (TAG_DISABLE_ACCOUNT_MANAGEMENT.equals(tag)) {
                 readAttributeValues(
                         parser, TAG_ACCOUNT_TYPE, accountTypesWithManagementDisabled);
@@ -740,8 +715,7 @@ class ActiveAdmin {
                 parentAdmin = new ActiveAdmin(info, /* parent */ true);
                 parentAdmin.readFromXml(parser, shouldOverridePolicies);
             } else if (TAG_ORGANIZATION_COLOR.equals(tag)) {
-                organizationColor = Integer.parseInt(
-                        parser.getAttributeValue(null, ATTR_VALUE));
+                organizationColor = parser.getAttributeInt(null, ATTR_VALUE);
             } else if (TAG_ORGANIZATION_NAME.equals(tag)) {
                 type = parser.next();
                 if (type == TypedXmlPullParser.TEXT) {
@@ -751,8 +725,7 @@ class ActiveAdmin {
                             "Missing text when loading organization name");
                 }
             } else if (TAG_IS_LOGOUT_ENABLED.equals(tag)) {
-                isLogoutEnabled = Boolean.parseBoolean(
-                        parser.getAttributeValue(null, ATTR_VALUE));
+                isLogoutEnabled = parser.getAttributeBoolean(null, ATTR_VALUE, false);
             } else if (TAG_START_USER_SESSION_MESSAGE.equals(tag)) {
                 type = parser.next();
                 if (type == TypedXmlPullParser.TEXT) {
@@ -779,24 +752,21 @@ class ActiveAdmin {
                 mFactoryResetProtectionPolicy = FactoryResetProtectionPolicy.readFromXml(
                             parser);
             } else if (TAG_SUSPEND_PERSONAL_APPS.equals(tag)) {
-                mSuspendPersonalApps = Boolean.parseBoolean(
-                        parser.getAttributeValue(null, ATTR_VALUE));
+                mSuspendPersonalApps = parser.getAttributeBoolean(null, ATTR_VALUE, false);
             } else if (TAG_PROFILE_MAXIMUM_TIME_OFF.equals(tag)) {
                 mProfileMaximumTimeOffMillis =
-                        Long.parseLong(parser.getAttributeValue(null, ATTR_VALUE));
+                        parser.getAttributeLong(null, ATTR_VALUE);
             } else if (TAG_PROFILE_OFF_DEADLINE.equals(tag)) {
                 mProfileOffDeadline =
-                        Long.parseLong(parser.getAttributeValue(null, ATTR_VALUE));
+                        parser.getAttributeLong(null, ATTR_VALUE);
             } else if (TAG_ALWAYS_ON_VPN_PACKAGE.equals(tag)) {
                 mAlwaysOnVpnPackage = parser.getAttributeValue(null, ATTR_VALUE);
             } else if (TAG_ALWAYS_ON_VPN_LOCKDOWN.equals(tag)) {
-                mAlwaysOnVpnLockdown = Boolean.parseBoolean(
-                        parser.getAttributeValue(null, ATTR_VALUE));
+                mAlwaysOnVpnLockdown = parser.getAttributeBoolean(null, ATTR_VALUE, false);
             } else if (TAG_COMMON_CRITERIA_MODE.equals(tag)) {
-                mCommonCriteriaMode = Boolean.parseBoolean(
-                        parser.getAttributeValue(null, ATTR_VALUE));
+                mCommonCriteriaMode = parser.getAttributeBoolean(null, ATTR_VALUE, false);
             } else if (TAG_PASSWORD_COMPLEXITY.equals(tag)) {
-                mPasswordComplexity = Integer.parseInt(parser.getAttributeValue(null, ATTR_VALUE));
+                mPasswordComplexity = parser.getAttributeInt(null, ATTR_VALUE);
             } else {
                 Slog.w(DevicePolicyManagerService.LOG_TAG, "Unknown admin tag: " + tag);
                 XmlUtils.skipCurrentTag(parser);

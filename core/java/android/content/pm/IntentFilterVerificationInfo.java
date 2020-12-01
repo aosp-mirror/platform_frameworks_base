@@ -185,7 +185,7 @@ public final class IntentFilterVerificationInfo implements Parcelable {
     /** @hide */
     public void writeToXml(TypedXmlSerializer serializer) throws IOException {
         serializer.attribute(null, ATTR_PACKAGE_NAME, mPackageName);
-        serializer.attribute(null, ATTR_STATUS, String.valueOf(mStatus));
+        serializer.attributeInt(null, ATTR_STATUS, mStatus);
         for (String str : mDomains) {
             serializer.startTag(null, TAG_DOMAIN);
             serializer.attribute(null, ATTR_DOMAIN_NAME, str);

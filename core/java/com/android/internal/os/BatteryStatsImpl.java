@@ -10868,8 +10868,8 @@ public class BatteryStatsImpl extends BatteryStats {
         for (int i=0; i<mDailyItems.size(); i++) {
             final DailyItem dit = mDailyItems.get(i);
             out.startTag(null, "item");
-            out.attribute(null, "start", Long.toString(dit.mStartTime));
-            out.attribute(null, "end", Long.toString(dit.mEndTime));
+            out.attributeLong(null, "start", dit.mStartTime);
+            out.attributeLong(null, "end", dit.mEndTime);
             writeDailyLevelSteps(out, "dis", dit.mDischargeSteps, sb);
             writeDailyLevelSteps(out, "chg", dit.mChargeSteps, sb);
             if (dit.mPackageChanges != null) {
@@ -10878,7 +10878,7 @@ public class BatteryStatsImpl extends BatteryStats {
                     if (pc.mUpdate) {
                         out.startTag(null, "upd");
                         out.attribute(null, "pkg", pc.mPackageName);
-                        out.attribute(null, "ver", Long.toString(pc.mVersionCode));
+                        out.attributeLong(null, "ver", pc.mVersionCode);
                         out.endTag(null, "upd");
                     } else {
                         out.startTag(null, "rem");
@@ -10897,7 +10897,7 @@ public class BatteryStatsImpl extends BatteryStats {
             StringBuilder tmpBuilder) throws IOException {
         if (steps != null) {
             out.startTag(null, tag);
-            out.attribute(null, "n", Integer.toString(steps.mNumStepDurations));
+            out.attributeInt(null, "n", steps.mNumStepDurations);
             for (int i=0; i<steps.mNumStepDurations; i++) {
                 out.startTag(null, "s");
                 tmpBuilder.setLength(0);

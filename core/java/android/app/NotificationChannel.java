@@ -983,62 +983,58 @@ public final class NotificationChannel implements Parcelable {
             out.attribute(null, ATT_DESC, getDescription());
         }
         if (getImportance() != DEFAULT_IMPORTANCE) {
-            out.attribute(
-                    null, ATT_IMPORTANCE, Integer.toString(getImportance()));
+            out.attributeInt(null, ATT_IMPORTANCE, getImportance());
         }
         if (canBypassDnd()) {
-            out.attribute(
-                    null, ATT_PRIORITY, Integer.toString(Notification.PRIORITY_MAX));
+            out.attributeInt(null, ATT_PRIORITY, Notification.PRIORITY_MAX);
         }
         if (getLockscreenVisibility() != DEFAULT_VISIBILITY) {
-            out.attribute(null, ATT_VISIBILITY,
-                    Integer.toString(getLockscreenVisibility()));
+            out.attributeInt(null, ATT_VISIBILITY, getLockscreenVisibility());
         }
         Uri sound = forBackup ? getSoundForBackup(context) : getSound();
         if (sound != null) {
             out.attribute(null, ATT_SOUND, sound.toString());
         }
         if (getAudioAttributes() != null) {
-            out.attribute(null, ATT_USAGE, Integer.toString(getAudioAttributes().getUsage()));
-            out.attribute(null, ATT_CONTENT_TYPE,
-                    Integer.toString(getAudioAttributes().getContentType()));
-            out.attribute(null, ATT_FLAGS, Integer.toString(getAudioAttributes().getFlags()));
+            out.attributeInt(null, ATT_USAGE, getAudioAttributes().getUsage());
+            out.attributeInt(null, ATT_CONTENT_TYPE, getAudioAttributes().getContentType());
+            out.attributeInt(null, ATT_FLAGS, getAudioAttributes().getFlags());
         }
         if (shouldShowLights()) {
-            out.attribute(null, ATT_LIGHTS, Boolean.toString(shouldShowLights()));
+            out.attributeBoolean(null, ATT_LIGHTS, shouldShowLights());
         }
         if (getLightColor() != DEFAULT_LIGHT_COLOR) {
-            out.attribute(null, ATT_LIGHT_COLOR, Integer.toString(getLightColor()));
+            out.attributeInt(null, ATT_LIGHT_COLOR, getLightColor());
         }
         if (shouldVibrate()) {
-            out.attribute(null, ATT_VIBRATION_ENABLED, Boolean.toString(shouldVibrate()));
+            out.attributeBoolean(null, ATT_VIBRATION_ENABLED, shouldVibrate());
         }
         if (getVibrationPattern() != null) {
             out.attribute(null, ATT_VIBRATION, longArrayToString(getVibrationPattern()));
         }
         if (getUserLockedFields() != 0) {
-            out.attribute(null, ATT_USER_LOCKED, Integer.toString(getUserLockedFields()));
+            out.attributeInt(null, ATT_USER_LOCKED, getUserLockedFields());
         }
         if (isFgServiceShown()) {
-            out.attribute(null, ATT_FG_SERVICE_SHOWN, Boolean.toString(isFgServiceShown()));
+            out.attributeBoolean(null, ATT_FG_SERVICE_SHOWN, isFgServiceShown());
         }
         if (canShowBadge()) {
-            out.attribute(null, ATT_SHOW_BADGE, Boolean.toString(canShowBadge()));
+            out.attributeBoolean(null, ATT_SHOW_BADGE, canShowBadge());
         }
         if (isDeleted()) {
-            out.attribute(null, ATT_DELETED, Boolean.toString(isDeleted()));
+            out.attributeBoolean(null, ATT_DELETED, isDeleted());
         }
         if (getGroup() != null) {
             out.attribute(null, ATT_GROUP, getGroup());
         }
         if (isBlockable()) {
-            out.attribute(null, ATT_BLOCKABLE_SYSTEM, Boolean.toString(isBlockable()));
+            out.attributeBoolean(null, ATT_BLOCKABLE_SYSTEM, isBlockable());
         }
         if (getAllowBubbles() != DEFAULT_ALLOW_BUBBLE) {
-            out.attribute(null, ATT_ALLOW_BUBBLE, Integer.toString(getAllowBubbles()));
+            out.attributeInt(null, ATT_ALLOW_BUBBLE, getAllowBubbles());
         }
         if (getOriginalImportance() != DEFAULT_IMPORTANCE) {
-            out.attribute(null, ATT_ORIG_IMP, Integer.toString(getOriginalImportance()));
+            out.attributeInt(null, ATT_ORIG_IMP, getOriginalImportance());
         }
         if (getParentChannelId() != null) {
             out.attribute(null, ATT_PARENT_CHANNEL, getParentChannelId());
@@ -1047,10 +1043,10 @@ public final class NotificationChannel implements Parcelable {
             out.attribute(null, ATT_CONVERSATION_ID, getConversationId());
         }
         if (isDemoted()) {
-            out.attribute(null, ATT_DEMOTE, Boolean.toString(isDemoted()));
+            out.attributeBoolean(null, ATT_DEMOTE, isDemoted());
         }
         if (isImportantConversation()) {
-            out.attribute(null, ATT_IMP_CONVERSATION, Boolean.toString(isImportantConversation()));
+            out.attributeBoolean(null, ATT_IMP_CONVERSATION, isImportantConversation());
         }
 
         // mImportanceLockedDefaultApp and mImportanceLockedByOEM have a different source of

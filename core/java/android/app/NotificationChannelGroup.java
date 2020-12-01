@@ -253,8 +253,8 @@ public final class NotificationChannelGroup implements Parcelable {
         if (getDescription() != null) {
             out.attribute(null, ATT_DESC, getDescription().toString());
         }
-        out.attribute(null, ATT_BLOCKED, Boolean.toString(isBlocked()));
-        out.attribute(null, ATT_USER_LOCKED, Integer.toString(mUserLockedFields));
+        out.attributeBoolean(null, ATT_BLOCKED, isBlocked());
+        out.attributeInt(null, ATT_USER_LOCKED, mUserLockedFields);
 
         out.endTag(null, TAG_GROUP);
     }

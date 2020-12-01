@@ -265,8 +265,8 @@ public final class BrightnessCorrection implements Parcelable {
         @Override
         public void saveToXml(TypedXmlSerializer serializer) throws IOException {
             serializer.startTag(null, TAG_SCALE_AND_TRANSLATE_LOG);
-            serializer.attribute(null, ATTR_SCALE, Float.toString(mScale));
-            serializer.attribute(null, ATTR_TRANSLATE, Float.toString(mTranslate));
+            serializer.attributeFloat(null, ATTR_SCALE, mScale);
+            serializer.attributeFloat(null, ATTR_TRANSLATE, mTranslate);
             serializer.endTag(null, TAG_SCALE_AND_TRANSLATE_LOG);
         }
 
