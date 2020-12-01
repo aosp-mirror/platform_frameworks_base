@@ -14,6 +14,7 @@ package android.net.wifi {
     field public static final int EASY_CONNECT_EVENT_FAILURE_NOT_COMPATIBLE = -3; // 0xfffffffd
     field public static final int EASY_CONNECT_EVENT_FAILURE_NOT_SUPPORTED = -8; // 0xfffffff8
     field public static final int EASY_CONNECT_EVENT_FAILURE_TIMEOUT = -6; // 0xfffffffa
+    field public static final int EASY_CONNECT_EVENT_FAILURE_URI_GENERATION = -13; // 0xfffffff3
   }
 
   public final class ScanResult implements android.os.Parcelable {

@@ -161,6 +161,11 @@ public abstract class EasyConnectStatusCallback {
      */
     public static final int EASY_CONNECT_EVENT_FAILURE_ENROLLEE_REJECTED_CONFIGURATION = -12;
 
+    /**
+     * Easy Connect Failure event: System failed to generate DPP URI.
+     */
+    public static final int EASY_CONNECT_EVENT_FAILURE_URI_GENERATION = -13;
+
     /** @hide */
     @IntDef(prefix = {"EASY_CONNECT_EVENT_FAILURE_"}, value = {
             EASY_CONNECT_EVENT_FAILURE_INVALID_URI,
@@ -175,6 +180,7 @@ public abstract class EasyConnectStatusCallback {
             EASY_CONNECT_EVENT_FAILURE_CANNOT_FIND_NETWORK,
             EASY_CONNECT_EVENT_FAILURE_ENROLLEE_AUTHENTICATION,
             EASY_CONNECT_EVENT_FAILURE_ENROLLEE_REJECTED_CONFIGURATION,
+            EASY_CONNECT_EVENT_FAILURE_URI_GENERATION,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface EasyConnectFailureStatusCode {
@@ -264,4 +270,17 @@ public abstract class EasyConnectStatusCallback {
      */
     @SystemApi
     public abstract void onProgress(@EasyConnectProgressStatusCode int code);
+
+    /**
+     * Called when local Easy Connect Responder successfully generates a DPP URI from
+     * the supplicant. This callback is the first successful outcome
+     * of a Easy Connect Responder flow starting with
+     * {@link WifiManager#startEasyConnectAsEnrolleeResponder(String, int, Executor,
+     * EasyConnectStatusCallback)} .
+     *
+     * @param uri DPP URI from the supplicant.
+     * @hide
+     */
+    @SystemApi
+    public void onBootstrapUriGenerated(@NonNull String uri) {};
 }

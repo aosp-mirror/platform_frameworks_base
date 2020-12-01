@@ -124,7 +124,6 @@ import android.os.ShellCommand;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.os.storage.StorageManager;
 import android.os.storage.StorageManagerInternal;
 import android.provider.Settings;
 import android.util.ArrayMap;
@@ -155,10 +154,8 @@ import com.android.internal.app.IAppOpsService;
 import com.android.internal.app.IAppOpsStartedCallback;
 import com.android.internal.app.MessageSamplingConfig;
 import com.android.internal.compat.IPlatformCompat;
-import com.android.internal.os.Zygote;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
-import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.XmlUtils;
 import com.android.internal.util.function.pooled.PooledLambda;
@@ -175,7 +172,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -185,7 +181,6 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -1057,18 +1052,19 @@ public class AppOpsService extends IAppOpsService.Stub {
             }
 
             int numInProgressEvents = mInProgressEvents.size();
+            List<IBinder> binders = new ArrayList<>(mInProgressEvents.keySet());
             for (int i = 0; i < numInProgressEvents; i++) {
-                InProgressStartOpEvent event = mInProgressEvents.valueAt(i);
+                InProgressStartOpEvent event = mInProgressEvents.get(binders.get(i));
 
-                if (event.getUidState() != newState) {
+                if (event != null && event.getUidState() != newState) {
                     try {
                         // Remove all but one unfinished start count and then call finished() to
                         // remove start event object
                         int numPreviousUnfinishedStarts = event.numUnfinishedStarts;
                         event.numUnfinishedStarts = 1;
-                        finished(event.getClientId(), false);
-
                         OpEventProxyInfo proxy = event.getProxy();
+
+                        finished(event.getClientId(), false);
 
                         // Call started() to add a new start event object and then add the
                         // previously removed unfinished start counts back
@@ -1079,7 +1075,11 @@ public class AppOpsService extends IAppOpsService.Stub {
                             started(event.getClientId(), Process.INVALID_UID, null, null, newState,
                                     OP_FLAG_SELF, false);
                         }
-                        event.numUnfinishedStarts += numPreviousUnfinishedStarts - 1;
+
+                        InProgressStartOpEvent newEvent = mInProgressEvents.get(binders.get(i));
+                        if (newEvent != null) {
+                            newEvent.numUnfinishedStarts += numPreviousUnfinishedStarts - 1;
+                        }
                     } catch (RemoteException e) {
                         if (DEBUG) Slog.e(TAG, "Cannot switch to new uidState " + newState);
                     }
@@ -1764,26 +1764,6 @@ public class AppOpsService extends IAppOpsService.Stub {
                     }
                 });
 
-        if (!StorageManager.hasIsolatedStorage()) {
-            StorageManagerInternal storageManagerInternal = LocalServices.getService(
-                    StorageManagerInternal.class);
-            storageManagerInternal.addExternalStoragePolicy(
-                    new StorageManagerInternal.ExternalStorageMountPolicy() {
-                        @Override
-                        public int getMountMode(int uid, String packageName) {
-                            if (Process.isIsolated(uid)) {
-                                return Zygote.MOUNT_EXTERNAL_NONE;
-                            }
-                            return Zygote.MOUNT_EXTERNAL_DEFAULT;
-                        }
-
-                        @Override
-                        public boolean hasExternalStorage(int uid, String packageName) {
-                            final int mountMode = getMountMode(uid, packageName);
-                            return mountMode != Zygote.MOUNT_EXTERNAL_NONE;
-                        }
-                    });
-        }
         mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
     }
 

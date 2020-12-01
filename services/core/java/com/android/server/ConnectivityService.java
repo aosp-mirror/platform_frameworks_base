@@ -4821,15 +4821,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
     }
 
-    private void updateVpnCapabilities(Vpn vpn, @Nullable NetworkCapabilities nc) {
-        ensureRunningOnConnectivityServiceThread();
-        NetworkAgentInfo vpnNai = getNetworkAgentInfoForNetId(vpn.getNetId());
-        if (vpnNai == null || nc == null) {
-            return;
-        }
-        updateCapabilities(vpnNai.getCurrentScore(), vpnNai, nc);
-    }
-
     @Override
     public boolean updateLockdownVpn() {
         if (Binder.getCallingUid() != Process.SYSTEM_UID) {
@@ -5140,7 +5131,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
     }
 
-    private void onUserStart(int userId) {
+    private void onUserStarted(int userId) {
         synchronized (mVpns) {
             Vpn userVpn = mVpns.get(userId);
             if (userVpn != null) {
@@ -5155,7 +5146,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
     }
 
-    private void onUserStop(int userId) {
+    private void onUserStopped(int userId) {
         synchronized (mVpns) {
             Vpn userVpn = mVpns.get(userId);
             if (userVpn == null) {
@@ -5169,28 +5160,22 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     private void onUserAdded(int userId) {
         mPermissionMonitor.onUserAdded(userId);
-        Network defaultNetwork = getNetwork(getDefaultNetwork());
         synchronized (mVpns) {
             final int vpnsSize = mVpns.size();
             for (int i = 0; i < vpnsSize; i++) {
                 Vpn vpn = mVpns.valueAt(i);
                 vpn.onUserAdded(userId);
-                NetworkCapabilities nc = vpn.updateCapabilities(defaultNetwork);
-                updateVpnCapabilities(vpn, nc);
             }
         }
     }
 
     private void onUserRemoved(int userId) {
         mPermissionMonitor.onUserRemoved(userId);
-        Network defaultNetwork = getNetwork(getDefaultNetwork());
         synchronized (mVpns) {
             final int vpnsSize = mVpns.size();
             for (int i = 0; i < vpnsSize; i++) {
                 Vpn vpn = mVpns.valueAt(i);
                 vpn.onUserRemoved(userId);
-                NetworkCapabilities nc = vpn.updateCapabilities(defaultNetwork);
-                updateVpnCapabilities(vpn, nc);
             }
         }
     }
@@ -5272,9 +5257,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
             if (userId == UserHandle.USER_NULL) return;
 
             if (Intent.ACTION_USER_STARTED.equals(action)) {
-                onUserStart(userId);
+                onUserStarted(userId);
             } else if (Intent.ACTION_USER_STOPPED.equals(action)) {
-                onUserStop(userId);
+                onUserStopped(userId);
             } else if (Intent.ACTION_USER_ADDED.equals(action)) {
                 onUserAdded(userId);
             } else if (Intent.ACTION_USER_REMOVED.equals(action)) {
@@ -8276,13 +8261,12 @@ public class ConnectivityService extends IConnectivityManager.Stub
             return false;
         }
 
-        final Network[] underlyingNetworks;
-        synchronized (mVpns) {
-            final Vpn vpn = getVpnIfOwner(callbackUid);
-            underlyingNetworks = (vpn == null) ? null : vpn.getUnderlyingNetworks();
-        }
-        if (underlyingNetworks != null) {
-            if (Arrays.asList(underlyingNetworks).contains(nai.network)) return true;
+        for (NetworkAgentInfo virtual : mNetworkAgentInfos.values()) {
+            if (virtual.supportsUnderlyingNetworks()
+                    && virtual.networkCapabilities.getOwnerUid() == callbackUid
+                    && ArrayUtils.contains(virtual.declaredUnderlyingNetworks, nai.network)) {
+                return true;
+            }
         }
 
         // Administrator UIDs also contains the Owner UID

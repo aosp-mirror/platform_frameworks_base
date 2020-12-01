@@ -20,7 +20,6 @@ import android.annotation.AppIdInt;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
-import android.content.pm.PackageManager;
 import android.content.pm.PermissionInfo;
 import android.permission.PermissionManagerInternal;
 
@@ -188,42 +187,6 @@ public abstract class PermissionManagerServiceInternal extends PermissionManager
     //@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
     public abstract boolean isPermissionsReviewRequired(@NonNull String packageName,
             @UserIdInt int userId);
-
-    /**
-     * Grant the requested runtime permissions for a package, or an explicit subset of them.
-     *
-     * @param pkg the package
-     * @param permissions the names of the subset of permissions to be granted, or {@code null} for
-     *                    granting all the requested permissions
-     * @param userIds the user IDs
-     */
-    //@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
-    public abstract void grantRequestedRuntimePermissions(@NonNull AndroidPackage pkg,
-            @Nullable List<String> permissions, @NonNull int[] userIds);
-
-    /**
-     * Set the allowlisted restricted permissions for a package, or an explicit subset of them.
-     *
-     * @param pkg the package
-     * @param permissions the names of the subset of permissions to be allowlisted, or {@code null}
-     *                    for allowlisting all the requested restricted permissions
-     * @param userIds the user IDs
-     */
-    //@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
-    public abstract void setAllowlistedRestrictedPermissions(
-            @NonNull AndroidPackage pkg, @Nullable List<String> permissions,
-            @PackageManager.PermissionWhitelistFlags int allowlistFlags, @NonNull int[] userIds);
-
-    /**
-     * Set whether a package is exempted from auto revoke.
-     *
-     * @param pkg the package
-     * @param exempted whether the package is exempted from auto revoke
-     * @param userIds the user IDs
-     */
-    //@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
-    public abstract void setAutoRevokeExempted(@NonNull AndroidPackage pkg, boolean exempted,
-            @NonNull int[] userIds);
 
     /**
      * Update permissions when a package changed.
@@ -524,6 +487,21 @@ public abstract class PermissionManagerServiceInternal extends PermissionManager
     //@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
     public abstract void onPackageAdded(@NonNull AndroidPackage pkg, boolean isInstantApp,
             @Nullable AndroidPackage oldPkg);
+
+    /**
+     * Callback when a package has been installed for certain users.
+     *
+     * @param pkg the installed package
+     * @param grantedPermissions the permissions to be granted
+     * @param allowlistedRestrictedPermissions the restricted permissions to be allowlisted
+     * @param autoRevokePermissionsMode the auto revoke permissions mode for this package
+     * @param userId the user ID this package is installed for
+     */
+    //@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
+    public abstract void onPackageInstalled(@NonNull AndroidPackage pkg,
+            @NonNull List<String> grantedPermissions,
+            @NonNull List<String> allowlistedRestrictedPermissions,
+            int autoRevokePermissionsMode, @UserIdInt int userId);
 
     /**
      * Callback when a package has been removed.

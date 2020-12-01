@@ -21,7 +21,6 @@ import static android.Manifest.permission.MANAGE_DEVICE_ADMINS;
 import static android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS;
 import static android.Manifest.permission.REQUEST_DELETE_PACKAGES;
 import static android.Manifest.permission.SET_HARMFUL_APP_WARNINGS;
-import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.AppOpsManager.MODE_DEFAULT;
 import static android.app.AppOpsManager.MODE_IGNORED;
 import static android.content.Intent.ACTION_MAIN;
@@ -44,7 +43,6 @@ import static android.content.pm.PackageManager.FLAG_PERMISSION_REVOKED_COMPAT;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_SYSTEM_FIXED;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_USER_FIXED;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_USER_SET;
-import static android.content.pm.PackageManager.FLAG_PERMISSION_WHITELIST_INSTALLER;
 import static android.content.pm.PackageManager.INSTALL_FAILED_ALREADY_EXISTS;
 import static android.content.pm.PackageManager.INSTALL_FAILED_BAD_PERMISSION_GROUP;
 import static android.content.pm.PackageManager.INSTALL_FAILED_DUPLICATE_PACKAGE;
@@ -343,7 +341,6 @@ import com.android.internal.content.PackageHelper;
 import com.android.internal.content.om.OverlayConfig;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.os.SomeArgs;
-import com.android.internal.os.Zygote;
 import com.android.internal.telephony.CarrierAppUtils;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.ConcurrentUtils;
@@ -2172,7 +2169,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
     private void handlePackagePostInstall(PackageInstalledInfo res, boolean grantPermissions,
             boolean killApp, boolean virtualPreload,
-            String[] grantedPermissions, List<String> whitelistedRestrictedPermissions,
+            String[] grantedPermissions, List<String> allowlistedRestrictedPermissions,
             int autoRevokePermissionsMode,
             boolean launchedForRestore, String installerPackage,
             IPackageInstallObserver2 installObserver, int dataLoaderType) {
@@ -2205,31 +2202,22 @@ public class PackageManagerService extends IPackageManager.Stub
                 res.removedInfo.sendPackageRemovedBroadcasts(killApp, false /*removedBySystem*/);
             }
 
-            // Allowlist any restricted permissions first as some may be runtime
-            // that the installer requested to be granted at install time.
-            if (whitelistedRestrictedPermissions != null
-                    && !whitelistedRestrictedPermissions.isEmpty()) {
-                mPermissionManager.setAllowlistedRestrictedPermissions(res.pkg,
-                        whitelistedRestrictedPermissions, FLAG_PERMISSION_WHITELIST_INSTALLER,
-                        res.newUsers);
-            }
-
-            if (autoRevokePermissionsMode == MODE_ALLOWED
-                    || autoRevokePermissionsMode == MODE_IGNORED) {
-                mPermissionManager.setAutoRevokeExempted(res.pkg,
-                        autoRevokePermissionsMode == MODE_IGNORED, res.newUsers);
-            }
-
-            // Now that we successfully installed the package, grant runtime
-            // permissions if requested before broadcasting the install. Also
-            // for legacy apps in permission review mode we clear the permission
-            // review flag which is used to emulate runtime permissions for
-            // legacy apps.
+            final List<String> grantedPermissionsList;
             if (grantPermissions) {
-                final int callingUid = Binder.getCallingUid();
-                mPermissionManager.grantRequestedRuntimePermissions(res.pkg,
-                        grantedPermissions != null ? Arrays.asList(grantedPermissions) : null,
-                        res.newUsers);
+                if (grantedPermissions != null) {
+                    grantedPermissionsList = Arrays.asList(grantedPermissions);
+                } else {
+                    grantedPermissionsList = res.pkg.getRequestedPermissions();
+                }
+            } else {
+                grantedPermissionsList = Collections.emptyList();
+            }
+            if (allowlistedRestrictedPermissions == null) {
+                allowlistedRestrictedPermissions = Collections.emptyList();
+            }
+            for (final int userId : res.newUsers) {
+                mPermissionManager.onPackageInstalled(res.pkg, grantedPermissionsList,
+                        allowlistedRestrictedPermissions, autoRevokePermissionsMode, userId);
             }
 
             final String installerPackageName =
@@ -4105,10 +4093,7 @@ public class PackageManagerService extends IPackageManager.Stub
         // feature flags should cause us to invalidate any caches.
         final String cacheName = FORCE_PACKAGE_PARSED_CACHE_ENABLED ? "debug"
                 : injector.getSystemWrapper().digestOfProperties(
-                        "ro.build.fingerprint",
-                        StorageManager.PROP_ISOLATED_STORAGE,
-                        StorageManager.PROP_ISOLATED_STORAGE_SNAPSHOT
-                );
+                        "ro.build.fingerprint");
 
         // Reconcile cache directories, keeping only what we'd actually use.
         for (File cacheDir : FileUtils.listFilesOrEmpty(cacheBaseDir)) {
@@ -13611,11 +13596,12 @@ public class PackageManagerService extends IPackageManager.Stub
     int installExistingPackageAsUser(@Nullable String packageName, @UserIdInt int userId,
             @PackageManager.InstallFlags int installFlags,
             @PackageManager.InstallReason int installReason,
-            @Nullable List<String> whiteListedPermissions, @Nullable IntentSender intentSender) {
+            @Nullable List<String> allowlistedRestrictedPermissions,
+            @Nullable IntentSender intentSender) {
         if (DEBUG_INSTALL) {
             Log.v(TAG, "installExistingPackageAsUser package=" + packageName + " userId=" + userId
                     + " installFlags=" + installFlags + " installReason=" + installReason
-                    + " whiteListedPermissions=" + whiteListedPermissions);
+                    + " allowlistedRestrictedPermissions=" + allowlistedRestrictedPermissions);
         }
 
         final int callingUid = Binder.getCallingUid();
@@ -13681,11 +13667,12 @@ public class PackageManagerService extends IPackageManager.Stub
                 if (pkgSetting.pkg != null) {
                     if ((installFlags & PackageManager.INSTALL_ALL_WHITELIST_RESTRICTED_PERMISSIONS)
                             != 0) {
-                        whiteListedPermissions = pkgSetting.pkg.getRequestedPermissions();
+                        allowlistedRestrictedPermissions = pkgSetting.pkg.getRequestedPermissions();
+                    } else if (allowlistedRestrictedPermissions == null) {
+                        allowlistedRestrictedPermissions = Collections.emptyList();
                     }
-                    mPermissionManager.setAllowlistedRestrictedPermissions(pkgSetting.pkg,
-                            whiteListedPermissions, FLAG_PERMISSION_WHITELIST_INSTALLER,
-                            new int[] { userId });
+                    mPermissionManager.onPackageInstalled(pkgSetting.pkg, Collections.emptyList(),
+                            allowlistedRestrictedPermissions, MODE_DEFAULT, userId);
                 }
 
                 if (pkgSetting.pkg != null) {
@@ -22220,22 +22207,6 @@ public class PackageManagerService extends IPackageManager.Stub
 
         mInstallerService.systemReady();
         mPackageDexOptimizer.systemReady();
-
-        mInjector.getLocalService(StorageManagerInternal.class).addExternalStoragePolicy(
-                new StorageManagerInternal.ExternalStorageMountPolicy() {
-                    @Override
-                    public int getMountMode(int uid, String packageName) {
-                        if (Process.isIsolated(uid)) {
-                            return Zygote.MOUNT_EXTERNAL_NONE;
-                        }
-                        return Zygote.MOUNT_EXTERNAL_DEFAULT;
-                    }
-
-                    @Override
-                    public boolean hasExternalStorage(int uid, String packageName) {
-                        return true;
-                    }
-        });
 
         // Now that we're mostly running, clean up stale users and apps
         mUserManager.reconcileUsers(StorageManager.UUID_PRIVATE_INTERNAL);

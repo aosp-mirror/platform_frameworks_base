@@ -18,11 +18,12 @@ package com.android.keyguard
 
 import android.graphics.Bitmap
 import android.graphics.Canvas
-import android.graphics.Paint
 import android.testing.AndroidTestingRunner
 import android.text.Layout
 import android.text.StaticLayout
 import android.text.TextPaint
+import android.text.TextDirectionHeuristic
+import android.text.TextDirectionHeuristics
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.google.common.truth.Truth.assertThat
@@ -31,6 +32,7 @@ import org.junit.runner.RunWith
 import kotlin.math.ceil
 
 private const val TEXT = "Hello, World."
+private const val BIDI_TEXT = "abc\u05D0\u05D1\u05D2"
 private const val BMP_WIDTH = 400
 private const val BMP_HEIGHT = 300
 
@@ -38,11 +40,11 @@ private val PAINT = TextPaint().apply {
     textSize = 32f
 }
 
-private val START_PAINT = arrayListOf<Paint>(TextPaint(PAINT).apply {
+private val START_PAINT = arrayListOf(TextPaint(PAINT).apply {
     fontVariationSettings = "'wght' 400"
 })
 
-private val END_PAINT = arrayListOf<Paint>(TextPaint(PAINT).apply {
+private val END_PAINT = arrayListOf(TextPaint(PAINT).apply {
     fontVariationSettings = "'wght' 700"
 })
 
@@ -50,9 +52,14 @@ private val END_PAINT = arrayListOf<Paint>(TextPaint(PAINT).apply {
 @SmallTest
 class TextInterpolatorTest : SysuiTestCase() {
 
-    private fun makeLayout(text: String, paint: TextPaint): Layout {
+    private fun makeLayout(
+        text: String,
+        paint: TextPaint,
+        dir: TextDirectionHeuristic = TextDirectionHeuristics.LTR
+    ): Layout {
         val width = ceil(Layout.getDesiredWidth(text, 0, text.length, paint)).toInt()
-        return StaticLayout.Builder.obtain(text, 0, text.length, paint, width).build()
+        return StaticLayout.Builder.obtain(text, 0, text.length, paint, width)
+                .setTextDirection(dir).build()
     }
 
     @Test
@@ -69,7 +76,7 @@ class TextInterpolatorTest : SysuiTestCase() {
         // Just after created TextInterpolator, it should have 0 progress.
         assertThat(interp.progress).isEqualTo(0f)
         val actual = interp.toBitmap(BMP_WIDTH, BMP_HEIGHT)
-        val expected = makeLayout(TEXT, START_PAINT[0] as TextPaint).toBitmap(BMP_WIDTH, BMP_HEIGHT)
+        val expected = makeLayout(TEXT, START_PAINT[0]).toBitmap(BMP_WIDTH, BMP_HEIGHT)
 
         assertThat(expected.sameAs(actual)).isTrue()
     }
@@ -87,7 +94,7 @@ class TextInterpolatorTest : SysuiTestCase() {
 
         interp.progress = 1f
         val actual = interp.toBitmap(BMP_WIDTH, BMP_HEIGHT)
-        val expected = makeLayout(TEXT, END_PAINT[0] as TextPaint).toBitmap(BMP_WIDTH, BMP_HEIGHT)
+        val expected = makeLayout(TEXT, END_PAINT[0]).toBitmap(BMP_WIDTH, BMP_HEIGHT)
 
         assertThat(expected.sameAs(actual)).isTrue()
     }
@@ -108,9 +115,9 @@ class TextInterpolatorTest : SysuiTestCase() {
         // end state.
         interp.progress = 0.5f
         val actual = interp.toBitmap(BMP_WIDTH, BMP_HEIGHT)
-        assertThat(actual.sameAs(makeLayout(TEXT, START_PAINT[0] as TextPaint)
+        assertThat(actual.sameAs(makeLayout(TEXT, START_PAINT[0])
             .toBitmap(BMP_WIDTH, BMP_HEIGHT))).isFalse()
-        assertThat(actual.sameAs(makeLayout(TEXT, END_PAINT[0] as TextPaint)
+        assertThat(actual.sameAs(makeLayout(TEXT, END_PAINT[0])
             .toBitmap(BMP_WIDTH, BMP_HEIGHT))).isFalse()
     }
 
@@ -135,10 +142,50 @@ class TextInterpolatorTest : SysuiTestCase() {
 
         assertThat(expected.sameAs(actual)).isTrue()
     }
+
+    @Test
+    fun testBidi_LTR() {
+        val layout = makeLayout(BIDI_TEXT, PAINT, TextDirectionHeuristics.LTR)
+
+        val interp = TextInterpolator(layout)
+        TextInterpolator.updatePaint(interp.basePaint, START_PAINT)
+        interp.onBasePaintModified()
+
+        TextInterpolator.updatePaint(interp.targetPaint, END_PAINT)
+        interp.onTargetPaintModified()
+
+        // Just after created TextInterpolator, it should have 0 progress.
+        assertThat(interp.progress).isEqualTo(0f)
+        val actual = interp.toBitmap(BMP_WIDTH, BMP_HEIGHT)
+        val expected = makeLayout(BIDI_TEXT, START_PAINT[0], TextDirectionHeuristics.LTR)
+                .toBitmap(BMP_WIDTH, BMP_HEIGHT)
+
+        assertThat(expected.sameAs(actual)).isTrue()
+    }
+
+    @Test
+    fun testBidi_RTL() {
+        val layout = makeLayout(BIDI_TEXT, PAINT, TextDirectionHeuristics.RTL)
+
+        val interp = TextInterpolator(layout)
+        TextInterpolator.updatePaint(interp.basePaint, START_PAINT)
+        interp.onBasePaintModified()
+
+        TextInterpolator.updatePaint(interp.targetPaint, END_PAINT)
+        interp.onTargetPaintModified()
+
+        // Just after created TextInterpolator, it should have 0 progress.
+        assertThat(interp.progress).isEqualTo(0f)
+        val actual = interp.toBitmap(BMP_WIDTH, BMP_HEIGHT)
+        val expected = makeLayout(BIDI_TEXT, START_PAINT[0], TextDirectionHeuristics.RTL)
+                .toBitmap(BMP_WIDTH, BMP_HEIGHT)
+
+        assertThat(expected.sameAs(actual)).isTrue()
+    }
 }
 
 private fun Layout.toBitmap(width: Int, height: Int) =
-        Bitmap.createBitmap(width, height, Bitmap.Config.ALPHA_8).also { draw(Canvas(it)) }!!
+        Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888).also { draw(Canvas(it)) }!!
 
 private fun TextInterpolator.toBitmap(width: Int, height: Int) =
-        Bitmap.createBitmap(width, height, Bitmap.Config.ALPHA_8).also { draw(Canvas(it)) }
+        Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888).also { draw(Canvas(it)) }

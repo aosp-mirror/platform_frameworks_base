@@ -272,8 +272,9 @@ class HideDisplayCutoutOrganizer extends DisplayAreaOrganizer {
     @VisibleForTesting
     void applyBoundsAndOffsets(WindowContainerToken token, SurfaceControl leash,
             WindowContainerTransaction wct, SurfaceControl.Transaction t) {
-        wct.setBounds(token, mCurrentDisplayBounds.isEmpty() ? null : mCurrentDisplayBounds);
+        wct.setBounds(token, mCurrentDisplayBounds);
         t.setPosition(leash, mOffsetX,  mOffsetY);
+        t.setWindowCrop(leash, mCurrentDisplayBounds.width(), mCurrentDisplayBounds.height());
     }
 
     @VisibleForTesting

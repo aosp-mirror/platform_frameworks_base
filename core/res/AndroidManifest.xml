@@ -4190,6 +4190,14 @@
     <permission android:name="android.permission.FACTORY_TEST"
         android:protectionLevel="signature" />
 
+    <!-- @hide @TestApi Allows an application to broadcast the intent {@link
+         android.content.Intent#ACTION_CLOSE_SYSTEM_DIALOGS}.
+         <p>Not for use by third-party applications.
+    -->
+    <permission android:name="android.permission.BROADCAST_CLOSE_SYSTEM_DIALOGS"
+        android:protectionLevel="signature|recents" />
+    <uses-permission android:name="android.permission.BROADCAST_CLOSE_SYSTEM_DIALOGS" />
+
     <!-- Allows an application to broadcast a notification that an application
          package has been removed.
          <p>Not for use by third-party applications.

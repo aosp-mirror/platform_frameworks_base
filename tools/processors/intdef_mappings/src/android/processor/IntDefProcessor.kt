@@ -33,13 +33,12 @@ import javax.tools.Diagnostic.Kind
 import javax.tools.StandardLocation.CLASS_OUTPUT
 import kotlin.collections.set
 
-
 /**
  * The IntDefProcessor is intended to generate a mapping from ints to their respective string
  * identifier for each IntDef for use by Winscope or any other tool which requires such a mapping.
  *
- * The processor will run when building :frameworks-all and dump all the IntDef mappings found the
- * files the make up :frameworks-all as json to outputPath.
+ * The processor will run when building :framework-minus-apex-intdefs and dump all the IntDef
+ * mappings found in the files that make up the build target as json to outputPath.
  */
 class IntDefProcessor : AbstractProcessor() {
     private val outputName = "intDefMapping.json"
@@ -72,8 +71,8 @@ class IntDefProcessor : AbstractProcessor() {
     }
 
     private fun generateIntDefMapping(
-            annotatedElement: TypeElement,
-            annotationType: TypeElement
+        annotatedElement: TypeElement,
+        annotationType: TypeElement
     ): Map<Int, String> {
         // LinkedHashMap makes sure ordering is the same as in the code
         val mapping = LinkedHashMap<Int, String>()
@@ -151,8 +150,8 @@ class IntDefProcessor : AbstractProcessor() {
 
     companion object {
         fun serializeTo(
-                annotationTypeToIntDefMapping: Map<String, IntDefMapping>,
-                writer: Writer
+            annotationTypeToIntDefMapping: Map<String, IntDefMapping>,
+            writer: Writer
         ) {
             val indent = "  "
 

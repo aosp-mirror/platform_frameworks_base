@@ -156,10 +156,6 @@ public class StorageManager {
     /** {@hide} */
     public static final String PROP_VIRTUAL_DISK = "persist.sys.virtual_disk";
     /** {@hide} */
-    public static final String PROP_ISOLATED_STORAGE = "persist.sys.isolated_storage";
-    /** {@hide} */
-    public static final String PROP_ISOLATED_STORAGE_SNAPSHOT = "sys.isolated_storage_snapshot";
-    /** {@hide} */
     public static final String PROP_FORCED_SCOPED_STORAGE_WHITELIST =
             "forced_scoped_storage_whitelist";
 
@@ -263,10 +259,6 @@ public class StorageManager {
     public static final int DEBUG_SDCARDFS_FORCE_OFF = 1 << 4;
     /** {@hide} */
     public static final int DEBUG_VIRTUAL_DISK = 1 << 5;
-    /** {@hide} */
-    public static final int DEBUG_ISOLATED_STORAGE_FORCE_ON = 1 << 6;
-    /** {@hide} */
-    public static final int DEBUG_ISOLATED_STORAGE_FORCE_OFF = 1 << 7;
 
     /** {@hide} */
     public static final int FLAG_STORAGE_DE = IInstalld.FLAG_STORAGE_DE;
@@ -1695,16 +1687,13 @@ public class StorageManager {
 
     /**
      * Return if the currently booted device has the "isolated storage" feature
-     * flag enabled. This will eventually be fully enabled in the final
-     * {@link android.os.Build.VERSION_CODES#Q} release.
+     * flag enabled.
      *
      * @hide
      */
     @SystemApi
     public static boolean hasIsolatedStorage() {
-        // Prefer to use snapshot for current boot when available
-        return SystemProperties.getBoolean(PROP_ISOLATED_STORAGE_SNAPSHOT,
-                SystemProperties.getBoolean(PROP_ISOLATED_STORAGE, true));
+        return false;
     }
 
     /**

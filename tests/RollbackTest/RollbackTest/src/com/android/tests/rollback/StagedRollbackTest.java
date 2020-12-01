@@ -34,7 +34,6 @@ import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.cts.install.lib.Install;
 import com.android.cts.install.lib.InstallUtils;
-import com.android.cts.install.lib.LocalIntentSender;
 import com.android.cts.install.lib.TestApp;
 import com.android.cts.install.lib.Uninstall;
 import com.android.cts.rollback.lib.Rollback;
@@ -258,10 +257,6 @@ public class StagedRollbackTest {
                 .getPackageManager().getPackageInstaller();
         pi.abandonSession(sessionId);
 
-        // Remove the first intent sender result, so that the next staged install session does not
-        // erroneously think that it has itself been abandoned.
-        // TODO(b/136260017): Restructure LocalIntentSender to negate the need for this step.
-        LocalIntentSender.getIntentSenderResult();
         Install.single(TestApp.A2).setStaged().setEnableRollback().commit();
     }
 

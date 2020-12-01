@@ -95,7 +95,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:gravity="center_horizontal"
-            android:textSize="170dp"
+            android:textSize="180dp"
             android:letterSpacing="0.02"
             android:lineSpacingMultiplier=".8"
             android:includeFontPadding="false"

@@ -125,24 +125,18 @@ struct SaveBehind final : Op {
     }
 };
 
-struct Concat44 final : Op {
-    static const auto kType = Type::Concat44;
-    Concat44(const SkM44& m) : matrix(m) {}
-    SkM44 matrix;
-    void draw(SkCanvas* c, const SkMatrix&) const { c->concat(matrix); }
-};
 struct Concat final : Op {
     static const auto kType = Type::Concat;
-    Concat(const SkMatrix& matrix) : matrix(matrix) {}
-    SkMatrix matrix;
+    Concat(const SkM44& matrix) : matrix(matrix) {}
+    SkM44 matrix;
     void draw(SkCanvas* c, const SkMatrix&) const { c->concat(matrix); }
 };
 struct SetMatrix final : Op {
     static const auto kType = Type::SetMatrix;
-    SetMatrix(const SkMatrix& matrix) : matrix(matrix) {}
-    SkMatrix matrix;
+    SetMatrix(const SkM44& matrix) : matrix(matrix) {}
+    SkM44 matrix;
     void draw(SkCanvas* c, const SkMatrix& original) const {
-        c->setMatrix(SkMatrix::Concat(original, matrix));
+        c->setMatrix(SkM44(original) * matrix);
     }
 };
 struct Scale final : Op {
@@ -569,12 +563,9 @@ void DisplayListData::saveBehind(const SkRect* subset) {
 }
 
 void DisplayListData::concat(const SkM44& m) {
-    this->push<Concat44>(0, m);
+    this->push<Concat>(0, m);
 }
-void DisplayListData::concat(const SkMatrix& matrix) {
-    this->push<Concat>(0, matrix);
-}
-void DisplayListData::setMatrix(const SkMatrix& matrix) {
+void DisplayListData::setMatrix(const SkM44& matrix) {
     this->push<SetMatrix>(0, matrix);
 }
 void DisplayListData::scale(SkScalar sx, SkScalar sy) {
@@ -834,10 +825,7 @@ bool RecordingCanvas::onDoSaveBehind(const SkRect* subset) {
 void RecordingCanvas::didConcat44(const SkM44& m) {
     fDL->concat(m);
 }
-void RecordingCanvas::didConcat(const SkMatrix& matrix) {
-    fDL->concat(matrix);
-}
-void RecordingCanvas::didSetMatrix(const SkMatrix& matrix) {
+void RecordingCanvas::didSetM44(const SkM44& matrix) {
     fDL->setMatrix(matrix);
 }
 void RecordingCanvas::didScale(SkScalar sx, SkScalar sy) {

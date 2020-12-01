@@ -29,6 +29,10 @@
         {
             "name": "CtsScopedStorageHostTest",
             "file_patterns": ["StorageManagerService\\.java"]
+        },
+        {
+            "name": "CtsScopedStorageDeviceOnlyTest",
+            "file_patterns": ["StorageManagerService\\.java"]
         }
     ]
 }

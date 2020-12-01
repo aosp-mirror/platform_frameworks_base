@@ -16,8 +16,6 @@
 
 package com.android.systemui.statusbar.notification.collection;
 
-import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
-
 import static org.junit.Assert.assertNotNull;
 
 import android.app.NotificationChannel;
@@ -74,10 +72,6 @@ public class NoManSimulator {
         for (NotificationHandler listener : mListeners) {
             listener.onNotificationRankingUpdate(rankingMap);
         }
-    }
-
-    public NotificationChannel createNotificationChannel(String id, String name) {
-        return new NotificationChannel(id, name, IMPORTANCE_DEFAULT);
     }
 
     public void issueChannelModification(

@@ -45,4 +45,10 @@ oneway interface IDppCallback
      * to show progress.
      */
     void onProgress(int status);
+
+    /**
+     * Called when local DPP Responder successfully generates a URI.
+     */
+    void onBootstrapUriGenerated(String uri);
+
 }

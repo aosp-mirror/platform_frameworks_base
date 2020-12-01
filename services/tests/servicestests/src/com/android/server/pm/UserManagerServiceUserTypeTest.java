@@ -51,6 +51,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.List;
+
 /**
  * Tests for {@link UserTypeDetails} and {@link UserTypeFactory}.
  *
@@ -358,13 +360,56 @@ public class UserManagerServiceUserTypeTest {
                 () -> UserTypeFactory.customizeBuilders(builders, parser));
     }
 
+    @Test
+    public void testUserTypeFactoryVersion_versionMissing() {
+        final XmlResourceParser parser = mResources.getXml(R.xml.usertypes_test_eraseArray);
+        assertEquals(0, UserTypeFactory.getUserTypeVersion(parser));
+    }
+
+    @Test
+    public void testUserTypeFactoryVersion_versionPresent() {
+        final XmlResourceParser parser = mResources.getXml(R.xml.usertypes_test_profile);
+        assertEquals(1234, UserTypeFactory.getUserTypeVersion(parser));
+    }
+
+    @Test
+    public void testUserTypeFactoryUpgrades_validUpgrades() {
+        final ArrayMap<String, UserTypeDetails.Builder> builders = new ArrayMap<>();
+        builders.put("name", getMinimalBuilder());
+
+        final XmlResourceParser parser = mResources.getXml(R.xml.usertypes_test_profile);
+        List<UserTypeFactory.UserTypeUpgrade> upgrades = UserTypeFactory.parseUserUpgrades(builders,
+                parser);
+
+        assertFalse(upgrades.isEmpty());
+        UserTypeFactory.UserTypeUpgrade upgrade = upgrades.get(0);
+        assertEquals("android.test.1", upgrade.getFromType());
+        assertEquals("android.test.2", upgrade.getToType());
+        assertEquals(1233, upgrade.getUpToVersion());
+    }
+
+    @Test
+    public void testUserTypeFactoryUpgrades_illegalBaseTypeUpgrade() {
+        final String userTypeFull = "android.test.1";
+        final ArrayMap<String, UserTypeDetails.Builder> builders = new ArrayMap<>();
+        builders.put(userTypeFull, new UserTypeDetails.Builder()
+                .setName(userTypeFull)
+                .setBaseType(FLAG_FULL));
+
+        final XmlResourceParser parser = mResources.getXml(R.xml.usertypes_test_full);
+
+        // parser is illegal because the "to" upgrade type is not a profile, but a full user
+        assertThrows(IllegalArgumentException.class,
+                () -> UserTypeFactory.parseUserUpgrades(builders, parser));
+    }
+
     /** Returns a minimal {@link UserTypeDetails.Builder} that can legitimately be created. */
     private UserTypeDetails.Builder getMinimalBuilder() {
         return new UserTypeDetails.Builder().setName("name").setBaseType(FLAG_FULL);
     }
 
     /** Creates a Bundle of the given String restrictions, each set to true. */
-    private Bundle makeRestrictionsBundle(String ... restrictions) {
+    public static Bundle makeRestrictionsBundle(String ... restrictions) {
         final Bundle bundle = new Bundle();
         for (String restriction : restrictions) {
             bundle.putBoolean(restriction, true);

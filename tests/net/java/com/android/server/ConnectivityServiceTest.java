@@ -1058,7 +1058,9 @@ public class ConnectivityServiceTest {
 
         public void setUids(Set<UidRange> uids) {
             mNetworkCapabilities.setUids(uids);
-            updateCapabilitiesInternal(null /* defaultNetwork */, true);
+            if (mAgentRegistered) {
+                mMockNetworkAgent.setNetworkCapabilities(mNetworkCapabilities, true);
+            }
         }
 
         public void setVpnType(int vpnType) {
@@ -1089,6 +1091,10 @@ public class ConnectivityServiceTest {
             mMockNetworkAgent = new TestNetworkAgentWrapper(TRANSPORT_VPN, lp,
                     mNetworkCapabilities);
             mMockNetworkAgent.waitForIdle(TIMEOUT_MS);
+            verify(mNetworkManagementService, times(1))
+                    .addVpnUidRanges(eq(mMockVpn.getNetId()), eq(uids.toArray(new UidRange[0])));
+            verify(mNetworkManagementService, never())
+                    .removeVpnUidRanges(eq(mMockVpn.getNetId()), any());
             mAgentRegistered = true;
             mNetworkCapabilities.set(mMockNetworkAgent.getNetworkCapabilities());
             mNetworkAgent = mMockNetworkAgent.getNetworkAgent();
@@ -1141,28 +1147,6 @@ public class ConnectivityServiceTest {
 
         public void sendLinkProperties(LinkProperties lp) {
             mMockNetworkAgent.sendLinkProperties(lp);
-        }
-
-        private NetworkCapabilities updateCapabilitiesInternal(Network defaultNetwork,
-                boolean sendToConnectivityService) {
-            if (!mAgentRegistered) return null;
-            super.updateCapabilities(defaultNetwork);
-            // Because super.updateCapabilities will update the capabilities of the agent but
-            // not the mock agent, the mock agent needs to know about them.
-            copyCapabilitiesToNetworkAgent(sendToConnectivityService);
-            return new NetworkCapabilities(mNetworkCapabilities);
-        }
-
-        private void copyCapabilitiesToNetworkAgent(boolean sendToConnectivityService) {
-            if (null != mMockNetworkAgent) {
-                mMockNetworkAgent.setNetworkCapabilities(mNetworkCapabilities,
-                        sendToConnectivityService);
-            }
-        }
-
-        @Override
-        public NetworkCapabilities updateCapabilities(Network defaultNetwork) {
-            return updateCapabilitiesInternal(defaultNetwork, false);
         }
 
         public void disconnect() {
@@ -6922,8 +6906,8 @@ public class ConnectivityServiceTest {
         final Set<UidRange> vpnRange = Collections.singleton(UidRange.createForUser(VPN_USER));
         mMockVpn.establish(lp, VPN_UID, vpnRange);
 
-        // Connected VPN should have interface rules set up. There are two expected invocations,
-        // one during VPN uid update, one during VPN LinkProperties update
+        // A connected VPN should have interface rules set up. There are two expected invocations,
+        // one during the VPN initial connection, one during the VPN LinkProperties update.
         ArgumentCaptor<int[]> uidCaptor = ArgumentCaptor.forClass(int[].class);
         verify(mMockNetd, times(2)).firewallAddUidInterfaceRules(eq("tun0"), uidCaptor.capture());
         assertContainsExactly(uidCaptor.getAllValues().get(0), APP1_UID, APP2_UID);
@@ -7438,20 +7422,14 @@ public class ConnectivityServiceTest {
         setupLocationPermissions(Build.VERSION_CODES.Q, true, AppOpsManager.OPSTR_FINE_LOCATION,
                 Manifest.permission.ACCESS_FINE_LOCATION);
 
-        // setUp() calls mockVpn() which adds a VPN with the Test Runner's uid. Configure it to be
-        // active
-        final VpnInfo info = new VpnInfo();
-        info.ownerUid = Process.myUid();
-        info.vpnIface = VPN_IFNAME;
-        mMockVpn.setVpnInfo(info);
-
         mMockVpn.establishForMyUid();
-        waitForIdle();
 
+        // Wait for networks to connect and broadcasts to be sent before removing permissions.
+        waitForIdle();
         mServiceContext.setPermission(android.Manifest.permission.NETWORK_STACK, PERMISSION_DENIED);
 
-
         assertTrue(mService.setUnderlyingNetworksForVpn(new Network[] {network}));
+        waitForIdle();
         assertTrue(
                 "Active VPN permission not applied",
                 mService.checkConnectivityDiagnosticsPermissions(
@@ -7459,6 +7437,7 @@ public class ConnectivityServiceTest {
                         mContext.getOpPackageName()));
 
         assertTrue(mService.setUnderlyingNetworksForVpn(null));
+        waitForIdle();
         assertFalse(
                 "VPN shouldn't receive callback on non-underlying network",
                 mService.checkConnectivityDiagnosticsPermissions(

@@ -63,7 +63,6 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
-import android.os.storage.StorageManager;
 import android.system.Int32Ref;
 import android.text.TextUtils;
 import android.util.EventLog;
@@ -110,7 +109,7 @@ public abstract class ContentResolver implements ContentInterface {
      *
      * @hide
      */
-    public static final boolean DEPRECATE_DATA_COLUMNS = StorageManager.hasIsolatedStorage();
+    public static final boolean DEPRECATE_DATA_COLUMNS = true;
 
     /**
      * Special filesystem path prefix which indicates that a path should be
