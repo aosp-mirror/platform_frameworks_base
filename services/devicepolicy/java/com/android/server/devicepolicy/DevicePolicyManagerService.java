@@ -233,6 +233,7 @@ import android.provider.ContactsInternal;
 import android.provider.Settings;
 import android.provider.Settings.Global;
 import android.provider.Telephony;
+import android.security.AppUriAuthenticationPolicy;
 import android.security.IKeyChainAliasCallback;
 import android.security.IKeyChainService;
 import android.security.KeyChain;
@@ -1152,6 +1153,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         PersistentDataBlockManagerInternal getPersistentDataBlockManagerInternal() {
             return LocalServices.getService(PersistentDataBlockManagerInternal.class);
+        }
+
+        AppOpsManager getAppOpsManager() {
+            return mContext.getSystemService(AppOpsManager.class);
         }
 
         LockSettingsInternal getLockSettingsInternal() {
@@ -5031,7 +5036,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         final CallerIdentity caller = getCallerIdentity(who, callerPackage);
         Preconditions.checkCallAuthorization((caller.hasAdminComponent()
                 && (isProfileOwner(caller) || isDeviceOwner(caller)))
-                || (caller.hasPackage() && isCallerDelegate(caller, DELEGATION_CERT_INSTALL)));
+                || (caller.hasPackage() && (isCallerDelegate(caller, DELEGATION_CERT_INSTALL)
+                || isCredentialManagementApp(caller, alias, isUserSelectable))));
 
         final long id = mInjector.binderClearCallingIdentity();
         try {
@@ -5071,7 +5077,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         final CallerIdentity caller = getCallerIdentity(who, callerPackage);
         Preconditions.checkCallAuthorization((caller.hasAdminComponent()
                 && (isProfileOwner(caller) || isDeviceOwner(caller)))
-                || (caller.hasPackage() && isCallerDelegate(caller, DELEGATION_CERT_INSTALL)));
+                || (caller.hasPackage() && (isCallerDelegate(caller, DELEGATION_CERT_INSTALL)
+                || isCredentialManagementApp(caller, alias))));
 
         final long id = Binder.clearCallingIdentity();
         try {
@@ -5275,7 +5282,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         } else {
             Preconditions.checkCallAuthorization((caller.hasAdminComponent()
                     && (isProfileOwner(caller) || isDeviceOwner(caller)))
-                    || (caller.hasPackage() && isCallerDelegate(caller, DELEGATION_CERT_INSTALL)));
+                    || (caller.hasPackage() && (isCallerDelegate(caller, DELEGATION_CERT_INSTALL)
+                    || isCredentialManagementApp(caller, alias))));
         }
 
         // As the caller will be granted access to the key, ensure no UID was specified, as
@@ -5371,7 +5379,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         final CallerIdentity caller = getCallerIdentity(who, callerPackage);
         Preconditions.checkCallAuthorization((caller.hasAdminComponent()
                 && (isProfileOwner(caller) || isDeviceOwner(caller)))
-                || (caller.hasPackage() && isCallerDelegate(caller, DELEGATION_CERT_INSTALL)));
+                || (caller.hasPackage() && (isCallerDelegate(caller, DELEGATION_CERT_INSTALL)
+                || isCredentialManagementApp(caller, alias))));
 
         final long id = mInjector.binderClearCallingIdentity();
         try (final KeyChainConnection keyChainConnection =
@@ -5804,6 +5813,70 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 }
             }
         }
+    }
+
+    /**
+     * Check whether a caller application is the credential management app, which can access
+     * privileged APIs.
+     * <p>
+     * This is done by checking that the calling package is authorized to perform the app operation
+     * {@link android.app.AppOpsManager#OP_MANAGE_CREDENTIALS}. The alias provided must be contained
+     * in the aliases specified in the credential management app's authentication policy. The
+     * key pair to install must not be user selectable.
+     *
+     * @param caller the calling identity
+     * @return {@code true} if the calling process is the credential management app.
+     */
+    private boolean isCredentialManagementApp(CallerIdentity caller, String alias,
+            boolean isUserSelectable) {
+        // Should not be user selectable
+        if (isUserSelectable) {
+            Log.e(LOG_TAG, "The credential management app is not allowed to install a "
+                    + "user selectable key pair");
+            return false;
+        }
+        return isCredentialManagementApp(caller, alias);
+    }
+
+    /**
+     * Check whether a caller application is the credential mangement app, which can access
+     * privileged APIs.
+     * <p>
+     * This is done by checking that the calling package is authorized to perform the app operation
+     * {@link android.app.AppOpsManager#OP_MANAGE_CREDENTIALS}. The alias provided must be contained
+     * in the aliases specified in the credential management app's authentication policy.
+     *
+     * @param caller the calling identity
+     * @return {@code true} if the calling process is the credential management app.
+     */
+    private boolean isCredentialManagementApp(CallerIdentity caller, String alias) {
+        // Should include alias in authentication policy
+        try (KeyChainConnection connection = KeyChain.bindAsUser(mContext,
+                caller.getUserHandle())) {
+            if (!containsAlias(connection.getService().getCredentialManagementAppPolicy(), alias)) {
+                return false;
+            }
+        } catch (RemoteException | InterruptedException e) {
+            return false;
+        }
+
+        AppOpsManager appOpsManager = mInjector.getAppOpsManager();
+        return appOpsManager != null
+                ? appOpsManager.noteOpNoThrow(AppOpsManager.OP_MANAGE_CREDENTIALS, caller.getUid(),
+                caller.getPackageName(), null, null) == AppOpsManager.MODE_ALLOWED
+                : false;
+    }
+
+    private static boolean containsAlias(AppUriAuthenticationPolicy policy, String alias) {
+        for (Map.Entry<String, Map<Uri, String>> appsToUris :
+                policy.getAppAndUriMappings().entrySet()) {
+            for (Map.Entry<Uri, String> urisToAliases : appsToUris.getValue().entrySet()) {
+                if (urisToAliases.getValue().equals(alias)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     @Override
