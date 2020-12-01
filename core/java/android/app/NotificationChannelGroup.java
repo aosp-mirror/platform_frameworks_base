@@ -23,12 +23,12 @@ import android.content.Intent;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 import android.util.proto.ProtoOutputStream;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlSerializer;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -228,13 +228,13 @@ public final class NotificationChannelGroup implements Parcelable {
     /**
      * @hide
      */
-    public void populateFromXml(XmlPullParser parser) {
+    public void populateFromXml(TypedXmlPullParser parser) {
         // Name, id, and importance are set in the constructor.
         setDescription(parser.getAttributeValue(null, ATT_DESC));
         setBlocked(safeBool(parser, ATT_BLOCKED, false));
     }
 
-    private static boolean safeBool(XmlPullParser parser, String att, boolean defValue) {
+    private static boolean safeBool(TypedXmlPullParser parser, String att, boolean defValue) {
         final String value = parser.getAttributeValue(null, att);
         if (TextUtils.isEmpty(value)) return defValue;
         return Boolean.parseBoolean(value);
@@ -243,7 +243,7 @@ public final class NotificationChannelGroup implements Parcelable {
     /**
      * @hide
      */
-    public void writeXml(XmlSerializer out) throws IOException {
+    public void writeXml(TypedXmlSerializer out) throws IOException {
         out.startTag(null, TAG_GROUP);
 
         out.attribute(null, ATT_ID, getId());

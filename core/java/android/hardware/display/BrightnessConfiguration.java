@@ -24,13 +24,13 @@ import android.content.pm.ApplicationInfo;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Pair;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.XmlUtils;
 
-import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -343,7 +343,7 @@ public final class BrightnessConfiguration implements Parcelable {
      *
      * @hide
      */
-    public void saveToXml(@NonNull XmlSerializer serializer) throws IOException {
+    public void saveToXml(@NonNull TypedXmlSerializer serializer) throws IOException {
         serializer.startTag(null, TAG_BRIGHTNESS_CURVE);
         if (mDescription != null) {
             serializer.attribute(null, ATTR_DESCRIPTION, mDescription);
@@ -408,7 +408,7 @@ public final class BrightnessConfiguration implements Parcelable {
      *
      * @hide
      */
-    public static BrightnessConfiguration loadFromXml(@NonNull XmlPullParser parser)
+    public static BrightnessConfiguration loadFromXml(@NonNull TypedXmlPullParser parser)
             throws IOException, XmlPullParserException {
         String description = null;
         List<Float> luxList = new ArrayList<>();
@@ -491,7 +491,7 @@ public final class BrightnessConfiguration implements Parcelable {
         return builder.build();
     }
 
-    private static float loadFloatFromXml(XmlPullParser parser, String attribute) {
+    private static float loadFloatFromXml(TypedXmlPullParser parser, String attribute) {
         final String string = parser.getAttributeValue(null, attribute);
         try {
             return Float.parseFloat(string);
@@ -500,7 +500,7 @@ public final class BrightnessConfiguration implements Parcelable {
         }
     }
 
-    private static Long loadLongFromXml(XmlPullParser parser, String attribute) {
+    private static Long loadLongFromXml(TypedXmlPullParser parser, String attribute) {
         final String string = parser.getAttributeValue(null, attribute);
         try {
             return Long.parseLong(string);

@@ -40,14 +40,14 @@ import android.util.ArraySet;
 import android.util.IndentingPrintWriter;
 import android.util.Log;
 import android.util.Slog;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.XmlUtils;
 import com.android.server.pm.UserRestrictionsUtils;
 
-import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -300,7 +300,7 @@ class ActiveAdmin {
         return UserHandle.of(UserHandle.getUserId(info.getActivityInfo().applicationInfo.uid));
     }
 
-    void writeToXml(XmlSerializer out)
+    void writeToXml(TypedXmlSerializer out)
             throws IllegalArgumentException, IllegalStateException, IOException {
         out.startTag(null, TAG_POLICIES);
         info.writePoliciesToXml(out);
@@ -535,13 +535,13 @@ class ActiveAdmin {
         }
     }
 
-    void writeTextToXml(XmlSerializer out, String tag, String text) throws IOException {
+    void writeTextToXml(TypedXmlSerializer out, String tag, String text) throws IOException {
         out.startTag(null, tag);
         out.text(text);
         out.endTag(null, tag);
     }
 
-    void writePackageListToXml(XmlSerializer out, String outerTag,
+    void writePackageListToXml(TypedXmlSerializer out, String outerTag,
             List<String> packageList)
             throws IllegalArgumentException, IllegalStateException, IOException {
         if (packageList == null) {
@@ -550,35 +550,35 @@ class ActiveAdmin {
         writeAttributeValuesToXml(out, outerTag, TAG_PACKAGE_LIST_ITEM, packageList);
     }
 
-    void writeAttributeValueToXml(XmlSerializer out, String tag, String value)
+    void writeAttributeValueToXml(TypedXmlSerializer out, String tag, String value)
             throws IOException {
         out.startTag(null, tag);
         out.attribute(null, ATTR_VALUE, value);
         out.endTag(null, tag);
     }
 
-    void writeAttributeValueToXml(XmlSerializer out, String tag, int value)
+    void writeAttributeValueToXml(TypedXmlSerializer out, String tag, int value)
             throws IOException {
         out.startTag(null, tag);
         out.attribute(null, ATTR_VALUE, Integer.toString(value));
         out.endTag(null, tag);
     }
 
-    void writeAttributeValueToXml(XmlSerializer out, String tag, long value)
+    void writeAttributeValueToXml(TypedXmlSerializer out, String tag, long value)
             throws IOException {
         out.startTag(null, tag);
         out.attribute(null, ATTR_VALUE, Long.toString(value));
         out.endTag(null, tag);
     }
 
-    void writeAttributeValueToXml(XmlSerializer out, String tag, boolean value)
+    void writeAttributeValueToXml(TypedXmlSerializer out, String tag, boolean value)
             throws IOException {
         out.startTag(null, tag);
         out.attribute(null, ATTR_VALUE, Boolean.toString(value));
         out.endTag(null, tag);
     }
 
-    void writeAttributeValuesToXml(XmlSerializer out, String outerTag, String innerTag,
+    void writeAttributeValuesToXml(TypedXmlSerializer out, String outerTag, String innerTag,
             @NonNull Collection<String> values) throws IOException {
         out.startTag(null, outerTag);
         for (String value : values) {
@@ -589,7 +589,7 @@ class ActiveAdmin {
         out.endTag(null, outerTag);
     }
 
-    void readFromXml(XmlPullParser parser, boolean shouldOverridePolicies)
+    void readFromXml(TypedXmlPullParser parser, boolean shouldOverridePolicies)
             throws XmlPullParserException, IOException {
         int outerDepth = parser.getDepth();
         int type;
@@ -721,7 +721,7 @@ class ActiveAdmin {
                         parser, TAG_RESTRICTION, defaultEnabledRestrictionsAlreadySet);
             } else if (TAG_SHORT_SUPPORT_MESSAGE.equals(tag)) {
                 type = parser.next();
-                if (type == XmlPullParser.TEXT) {
+                if (type == TypedXmlPullParser.TEXT) {
                     shortSupportMessage = parser.getText();
                 } else {
                     Log.w(DevicePolicyManagerService.LOG_TAG,
@@ -729,7 +729,7 @@ class ActiveAdmin {
                 }
             } else if (TAG_LONG_SUPPORT_MESSAGE.equals(tag)) {
                 type = parser.next();
-                if (type == XmlPullParser.TEXT) {
+                if (type == TypedXmlPullParser.TEXT) {
                     longSupportMessage = parser.getText();
                 } else {
                     Log.w(DevicePolicyManagerService.LOG_TAG,
@@ -744,7 +744,7 @@ class ActiveAdmin {
                         parser.getAttributeValue(null, ATTR_VALUE));
             } else if (TAG_ORGANIZATION_NAME.equals(tag)) {
                 type = parser.next();
-                if (type == XmlPullParser.TEXT) {
+                if (type == TypedXmlPullParser.TEXT) {
                     organizationName = parser.getText();
                 } else {
                     Log.w(DevicePolicyManagerService.LOG_TAG,
@@ -755,7 +755,7 @@ class ActiveAdmin {
                         parser.getAttributeValue(null, ATTR_VALUE));
             } else if (TAG_START_USER_SESSION_MESSAGE.equals(tag)) {
                 type = parser.next();
-                if (type == XmlPullParser.TEXT) {
+                if (type == TypedXmlPullParser.TEXT) {
                     startUserSessionMessage = parser.getText();
                 } else {
                     Log.w(DevicePolicyManagerService.LOG_TAG,
@@ -763,7 +763,7 @@ class ActiveAdmin {
                 }
             } else if (TAG_END_USER_SESSION_MESSAGE.equals(tag)) {
                 type = parser.next();
-                if (type == XmlPullParser.TEXT) {
+                if (type == TypedXmlPullParser.TEXT) {
                     endUserSessionMessage = parser.getText();
                 } else {
                     Log.w(DevicePolicyManagerService.LOG_TAG,
@@ -804,14 +804,14 @@ class ActiveAdmin {
         }
     }
 
-    private List<String> readPackageList(XmlPullParser parser,
+    private List<String> readPackageList(TypedXmlPullParser parser,
             String tag) throws XmlPullParserException, IOException {
         List<String> result = new ArrayList<String>();
         int outerDepth = parser.getDepth();
         int outerType;
-        while ((outerType = parser.next()) != XmlPullParser.END_DOCUMENT
-                && (outerType != XmlPullParser.END_TAG || parser.getDepth() > outerDepth)) {
-            if (outerType == XmlPullParser.END_TAG || outerType == XmlPullParser.TEXT) {
+        while ((outerType = parser.next()) != TypedXmlPullParser.END_DOCUMENT
+                && (outerType != TypedXmlPullParser.END_TAG || parser.getDepth() > outerDepth)) {
+            if (outerType == TypedXmlPullParser.END_TAG || outerType == TypedXmlPullParser.TEXT) {
                 continue;
             }
             String outerTag = parser.getName();
@@ -832,7 +832,7 @@ class ActiveAdmin {
     }
 
     private void readAttributeValues(
-            XmlPullParser parser, String tag, Collection<String> result)
+            TypedXmlPullParser parser, String tag, Collection<String> result)
             throws XmlPullParserException, IOException {
         result.clear();
         int outerDepthDAM = parser.getDepth();
@@ -854,7 +854,7 @@ class ActiveAdmin {
 
     @NonNull
     private ArrayMap<String, TrustAgentInfo> getAllTrustAgentInfos(
-            XmlPullParser parser, String tag) throws XmlPullParserException, IOException {
+            TypedXmlPullParser parser, String tag) throws XmlPullParserException, IOException {
         int outerDepthDAM = parser.getDepth();
         int typeDAM;
         final ArrayMap<String, TrustAgentInfo> result = new ArrayMap<>();
@@ -876,7 +876,7 @@ class ActiveAdmin {
         return result;
     }
 
-    private TrustAgentInfo getTrustAgentInfo(XmlPullParser parser, String tag)
+    private TrustAgentInfo getTrustAgentInfo(TypedXmlPullParser parser, String tag)
             throws XmlPullParserException, IOException  {
         int outerDepthDAM = parser.getDepth();
         int typeDAM;

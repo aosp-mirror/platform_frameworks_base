@@ -77,6 +77,8 @@ import android.util.ArrayMap;
 import android.util.DisplayMetrics;
 import android.util.Singleton;
 import android.util.Size;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 import android.view.Surface;
 import android.view.WindowInsetsController.Appearance;
 
@@ -1502,7 +1504,7 @@ public class ActivityManager {
         }
 
         /** @hide */
-        public void saveToXml(XmlSerializer out) throws IOException {
+        public void saveToXml(TypedXmlSerializer out) throws IOException {
             if (mLabel != null) {
                 out.attribute(null, ATTR_TASKDESCRIPTIONLABEL, mLabel);
             }
@@ -1526,7 +1528,7 @@ public class ActivityManager {
         }
 
         /** @hide */
-        public void restoreFromXml(XmlPullParser in) {
+        public void restoreFromXml(TypedXmlPullParser in) {
             final String label = in.getAttributeValue(null, ATTR_TASKDESCRIPTIONLABEL);
             if (label != null) {
                 setLabel(label);

@@ -26,10 +26,10 @@ import android.content.ComponentName;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 
-import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -201,7 +201,7 @@ public final class FactoryResetProtectionPolicy implements Parcelable {
      * @hide
      */
     @Nullable
-    public static FactoryResetProtectionPolicy readFromXml(@NonNull XmlPullParser parser) {
+    public static FactoryResetProtectionPolicy readFromXml(@NonNull TypedXmlPullParser parser) {
         try {
             boolean factoryResetProtectionEnabled = Boolean.parseBoolean(
                     parser.getAttributeValue(null, KEY_FACTORY_RESET_PROTECTION_ENABLED));
@@ -232,7 +232,7 @@ public final class FactoryResetProtectionPolicy implements Parcelable {
     /**
      * @hide
      */
-    public void writeToXml(@NonNull XmlSerializer out) throws IOException {
+    public void writeToXml(@NonNull TypedXmlSerializer out) throws IOException {
         out.attribute(null, KEY_FACTORY_RESET_PROTECTION_ENABLED,
                 Boolean.toString(mFactoryResetProtectionEnabled));
         for (String account : mFactoryResetProtectionAccounts) {

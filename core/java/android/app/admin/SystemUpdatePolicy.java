@@ -26,10 +26,10 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
 import android.util.Pair;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 
-import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
 
 import java.io.IOException;
 import java.lang.annotation.Retention;
@@ -741,7 +741,7 @@ public final class SystemUpdatePolicy implements Parcelable {
      * system server from a validated policy object previously.
      * @hide
      */
-    public static SystemUpdatePolicy restoreFromXml(XmlPullParser parser) {
+    public static SystemUpdatePolicy restoreFromXml(TypedXmlPullParser parser) {
         try {
             SystemUpdatePolicy policy = new SystemUpdatePolicy();
             String value = parser.getAttributeValue(null, KEY_POLICY_TYPE);
@@ -783,7 +783,7 @@ public final class SystemUpdatePolicy implements Parcelable {
     /**
      * @hide
      */
-    public void saveToXml(XmlSerializer out) throws IOException {
+    public void saveToXml(TypedXmlSerializer out) throws IOException {
         out.attribute(null, KEY_POLICY_TYPE, Integer.toString(mPolicyType));
         out.attribute(null, KEY_INSTALL_WINDOW_START, Integer.toString(mMaintenanceWindowStart));
         out.attribute(null, KEY_INSTALL_WINDOW_END, Integer.toString(mMaintenanceWindowEnd));

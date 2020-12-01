@@ -32,9 +32,12 @@ import android.os.Parcelable;
 import android.provider.Settings;
 import android.service.notification.NotificationListenerService;
 import android.text.TextUtils;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.util.Preconditions;
+import com.android.internal.util.XmlUtils;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -869,7 +872,7 @@ public final class NotificationChannel implements Parcelable {
      * @hide
      */
     public void populateFromXmlForRestore(XmlPullParser parser, Context context) {
-        populateFromXml(parser, true, context);
+        populateFromXml(XmlUtils.makeTyped(parser), true, context);
     }
 
     /**
@@ -877,13 +880,13 @@ public final class NotificationChannel implements Parcelable {
      */
     @SystemApi
     public void populateFromXml(XmlPullParser parser) {
-        populateFromXml(parser, false, null);
+        populateFromXml(XmlUtils.makeTyped(parser), false, null);
     }
 
     /**
      * If {@param forRestore} is true, {@param Context} MUST be non-null.
      */
-    private void populateFromXml(XmlPullParser parser, boolean forRestore,
+    private void populateFromXml(TypedXmlPullParser parser, boolean forRestore,
             @Nullable Context context) {
         Preconditions.checkArgument(!forRestore || context != null,
                 "forRestore is true but got null context");
@@ -941,14 +944,14 @@ public final class NotificationChannel implements Parcelable {
      */
     @SystemApi
     public void writeXml(XmlSerializer out) throws IOException {
-        writeXml(out, false, null);
+        writeXml(XmlUtils.makeTyped(out), false, null);
     }
 
     /**
      * @hide
      */
     public void writeXmlForBackup(XmlSerializer out, Context context) throws IOException {
-        writeXml(out, true, context);
+        writeXml(XmlUtils.makeTyped(out), true, context);
     }
 
     private Uri getSoundForBackup(Context context) {
@@ -967,7 +970,7 @@ public final class NotificationChannel implements Parcelable {
     /**
      * If {@param forBackup} is true, {@param Context} MUST be non-null.
      */
-    private void writeXml(XmlSerializer out, boolean forBackup, @Nullable Context context)
+    private void writeXml(TypedXmlSerializer out, boolean forBackup, @Nullable Context context)
             throws IOException {
         Preconditions.checkArgument(!forBackup || context != null,
                 "forBackup is true but got null context");
@@ -1099,7 +1102,7 @@ public final class NotificationChannel implements Parcelable {
         return record;
     }
 
-    private static AudioAttributes safeAudioAttributes(XmlPullParser parser) {
+    private static AudioAttributes safeAudioAttributes(TypedXmlPullParser parser) {
         int usage = safeInt(parser, ATT_USAGE, AudioAttributes.USAGE_NOTIFICATION);
         int contentType = safeInt(parser, ATT_CONTENT_TYPE,
                 AudioAttributes.CONTENT_TYPE_SONIFICATION);
@@ -1111,12 +1114,12 @@ public final class NotificationChannel implements Parcelable {
                 .build();
     }
 
-    private static Uri safeUri(XmlPullParser parser, String att) {
+    private static Uri safeUri(TypedXmlPullParser parser, String att) {
         final String val = parser.getAttributeValue(null, att);
         return val == null ? null : Uri.parse(val);
     }
 
-    private static int safeInt(XmlPullParser parser, String att, int defValue) {
+    private static int safeInt(TypedXmlPullParser parser, String att, int defValue) {
         final String val = parser.getAttributeValue(null, att);
         return tryParseInt(val, defValue);
     }
@@ -1130,13 +1133,13 @@ public final class NotificationChannel implements Parcelable {
         }
     }
 
-    private static boolean safeBool(XmlPullParser parser, String att, boolean defValue) {
+    private static boolean safeBool(TypedXmlPullParser parser, String att, boolean defValue) {
         final String value = parser.getAttributeValue(null, att);
         if (TextUtils.isEmpty(value)) return defValue;
         return Boolean.parseBoolean(value);
     }
 
-    private static long[] safeLongArray(XmlPullParser parser, String att, long[] defValue) {
+    private static long[] safeLongArray(TypedXmlPullParser parser, String att, long[] defValue) {
         final String attributeValue = parser.getAttributeValue(null, att);
         if (TextUtils.isEmpty(attributeValue)) return defValue;
         String[] values = attributeValue.split(DELIMITER);

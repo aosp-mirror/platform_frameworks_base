@@ -19,6 +19,7 @@ package com.android.server.appwidget;
 import static android.content.Context.KEYGUARD_SERVICE;
 import static android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
+
 import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
 
 import android.annotation.UserIdInt;
@@ -102,6 +103,7 @@ import android.util.proto.ProtoOutputStream;
 import android.view.Display;
 import android.view.View;
 import android.widget.RemoteViews;
+
 import com.android.internal.R;
 import com.android.internal.app.SuspendedAppActivity;
 import com.android.internal.app.UnlaunchableAppActivity;
@@ -111,11 +113,14 @@ import com.android.internal.os.BackgroundThread;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
-import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.widget.IRemoteViewsFactory;
 import com.android.server.LocalServices;
 import com.android.server.WidgetBackupProvider;
 import com.android.server.policy.IconUtilities;
+
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -137,9 +142,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
 
 class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBackupProvider,
         OnCrossProfileWidgetProvidersChangeListener {
@@ -2497,7 +2499,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         }
     }
 
-    private static void serializeProvider(XmlSerializer out, Provider p) throws IOException {
+    private static void serializeProvider(TypedXmlSerializer out, Provider p) throws IOException {
         out.startTag(null, "p");
         out.attribute(null, "pkg", p.info.provider.getPackageName());
         out.attribute(null, "cl", p.info.provider.getClassName());
@@ -2508,7 +2510,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         out.endTag(null, "p");
     }
 
-    private static void serializeHost(XmlSerializer out, Host host) throws IOException {
+    private static void serializeHost(TypedXmlSerializer out, Host host) throws IOException {
         out.startTag(null, "h");
         out.attribute(null, "pkg", host.id.packageName);
         out.attribute(null, "id", Integer.toHexString(host.id.hostId));
@@ -2516,7 +2518,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         out.endTag(null, "h");
     }
 
-    private static void serializeAppWidget(XmlSerializer out, Widget widget,
+    private static void serializeAppWidget(TypedXmlSerializer out, Widget widget,
             boolean saveRestoreCompleted) throws IOException {
         out.startTag(null, "g");
         out.attribute(null, "id", Integer.toHexString(widget.appWidgetId));
@@ -2545,7 +2547,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         out.endTag(null, "g");
     }
 
-    private static Bundle parseWidgetIdOptions(XmlPullParser parser) {
+    private static Bundle parseWidgetIdOptions(TypedXmlPullParser parser) {
         Bundle options = new Bundle();
         String restoreCompleted = parser.getAttributeValue(null, "restore_completed");
         if (restoreCompleted != null) {
@@ -4372,7 +4374,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                 }
 
                 try {
-                    XmlSerializer out = new FastXmlSerializer();
+                    TypedXmlSerializer out = Xml.newFastSerializer();
                     out.setOutput(stream, StandardCharsets.UTF_8.name());
                     out.startDocument(null, true);
                     out.startTag(null, "ws");      // widget state
@@ -4464,7 +4466,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                 // Hosts mentioned in the widget dataset by ordinal
                 ArrayList<Host> restoredHosts = new ArrayList<>();
 
-                XmlPullParser parser = Xml.newPullParser();
+                TypedXmlPullParser parser = Xml.newFastPullParser();
                 parser.setInput(stream, StandardCharsets.UTF_8.name());
 
                 synchronized (mLock) {

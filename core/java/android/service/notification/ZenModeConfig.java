@@ -45,13 +45,14 @@ import android.text.format.DateFormat;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.R;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -515,7 +516,7 @@ public class ZenModeConfig implements Parcelable {
         }
     }
 
-    public static ZenModeConfig readXml(XmlPullParser parser)
+    public static ZenModeConfig readXml(TypedXmlPullParser parser)
             throws XmlPullParserException, IOException {
         int type = parser.getEventType();
         if (type != XmlPullParser.START_TAG) return null;
@@ -611,7 +612,7 @@ public class ZenModeConfig implements Parcelable {
      * @param version uses XML_VERSION if version is null
      * @throws IOException
      */
-    public void writeXml(XmlSerializer out, Integer version) throws IOException {
+    public void writeXml(TypedXmlSerializer out, Integer version) throws IOException {
         out.startTag(null, ZEN_TAG);
         out.attribute(null, ZEN_ATT_VERSION, version == null
                 ? Integer.toString(XML_VERSION) : Integer.toString(version));
@@ -658,7 +659,7 @@ public class ZenModeConfig implements Parcelable {
         out.endTag(null, ZEN_TAG);
     }
 
-    public static ZenRule readRuleXml(XmlPullParser parser) {
+    public static ZenRule readRuleXml(TypedXmlPullParser parser) {
         final ZenRule rt = new ZenRule();
         rt.enabled = safeBoolean(parser, RULE_ATT_ENABLED, true);
         rt.name = parser.getAttributeValue(null, RULE_ATT_NAME);
@@ -691,7 +692,7 @@ public class ZenModeConfig implements Parcelable {
         return rt;
     }
 
-    public static void writeRuleXml(ZenRule rule, XmlSerializer out) throws IOException {
+    public static void writeRuleXml(ZenRule rule, TypedXmlSerializer out) throws IOException {
         out.attribute(null, RULE_ATT_ENABLED, Boolean.toString(rule.enabled));
         if (rule.name != null) {
             out.attribute(null, RULE_ATT_NAME, rule.name);
@@ -720,7 +721,7 @@ public class ZenModeConfig implements Parcelable {
         out.attribute(null, RULE_ATT_MODIFIED, Boolean.toString(rule.modified));
     }
 
-    public static Condition readConditionXml(XmlPullParser parser) {
+    public static Condition readConditionXml(TypedXmlPullParser parser) {
         final Uri id = safeUri(parser, CONDITION_ATT_ID);
         if (id == null) return null;
         final String summary = parser.getAttributeValue(null, CONDITION_ATT_SUMMARY);
@@ -737,7 +738,7 @@ public class ZenModeConfig implements Parcelable {
         }
     }
 
-    public static void writeConditionXml(Condition c, XmlSerializer out) throws IOException {
+    public static void writeConditionXml(Condition c, TypedXmlSerializer out) throws IOException {
         out.attribute(null, CONDITION_ATT_ID, c.id.toString());
         out.attribute(null, CONDITION_ATT_SUMMARY, c.summary);
         out.attribute(null, CONDITION_ATT_LINE1, c.line1);
@@ -751,7 +752,7 @@ public class ZenModeConfig implements Parcelable {
      * Read the zen policy from xml
      * Returns null if no zen policy exists
      */
-    public static ZenPolicy readZenPolicyXml(XmlPullParser parser) {
+    public static ZenPolicy readZenPolicyXml(TypedXmlPullParser parser) {
         boolean policySet = false;
 
         ZenPolicy.Builder builder = new ZenPolicy.Builder();
@@ -845,7 +846,7 @@ public class ZenModeConfig implements Parcelable {
     /**
      * Writes zen policy to xml
      */
-    public static void writeZenPolicyXml(ZenPolicy policy, XmlSerializer out)
+    public static void writeZenPolicyXml(ZenPolicy policy, TypedXmlSerializer out)
             throws IOException {
         writeZenPolicyState(ALLOW_ATT_CALLS_FROM, policy.getPriorityCallSenders(), out);
         writeZenPolicyState(ALLOW_ATT_MESSAGES_FROM, policy.getPriorityMessageSenders(), out);
@@ -868,7 +869,7 @@ public class ZenModeConfig implements Parcelable {
                 out);
     }
 
-    private static void writeZenPolicyState(String attr, int val, XmlSerializer out)
+    private static void writeZenPolicyState(String attr, int val, TypedXmlSerializer out)
             throws IOException {
         if (Objects.equals(attr, ALLOW_ATT_CALLS_FROM)
                 || Objects.equals(attr, ALLOW_ATT_MESSAGES_FROM)) {
@@ -894,13 +895,13 @@ public class ZenModeConfig implements Parcelable {
         return source >= SOURCE_ANYONE && source <= MAX_SOURCE;
     }
 
-    private static Boolean unsafeBoolean(XmlPullParser parser, String att) {
+    private static Boolean unsafeBoolean(TypedXmlPullParser parser, String att) {
         final String val = parser.getAttributeValue(null, att);
         if (TextUtils.isEmpty(val)) return null;
         return Boolean.parseBoolean(val);
     }
 
-    private static boolean safeBoolean(XmlPullParser parser, String att, boolean defValue) {
+    private static boolean safeBoolean(TypedXmlPullParser parser, String att, boolean defValue) {
         final String val = parser.getAttributeValue(null, att);
         return safeBoolean(val, defValue);
     }
@@ -910,24 +911,24 @@ public class ZenModeConfig implements Parcelable {
         return Boolean.parseBoolean(val);
     }
 
-    private static int safeInt(XmlPullParser parser, String att, int defValue) {
+    private static int safeInt(TypedXmlPullParser parser, String att, int defValue) {
         final String val = parser.getAttributeValue(null, att);
         return tryParseInt(val, defValue);
     }
 
-    private static ComponentName safeComponentName(XmlPullParser parser, String att) {
+    private static ComponentName safeComponentName(TypedXmlPullParser parser, String att) {
         final String val = parser.getAttributeValue(null, att);
         if (TextUtils.isEmpty(val)) return null;
         return ComponentName.unflattenFromString(val);
     }
 
-    private static Uri safeUri(XmlPullParser parser, String att) {
+    private static Uri safeUri(TypedXmlPullParser parser, String att) {
         final String val = parser.getAttributeValue(null, att);
         if (TextUtils.isEmpty(val)) return null;
         return Uri.parse(val);
     }
 
-    private static long safeLong(XmlPullParser parser, String att, long defValue) {
+    private static long safeLong(TypedXmlPullParser parser, String att, long defValue) {
         final String val = parser.getAttributeValue(null, att);
         return tryParseLong(val, defValue);
     }

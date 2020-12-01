@@ -90,6 +90,8 @@ import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.util.SparseLongArray;
 import android.util.TimeUtils;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 import android.util.Xml;
 import android.view.Display;
 
@@ -112,7 +114,6 @@ import libcore.util.EmptyArray;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -10830,8 +10831,7 @@ public class BatteryStatsImpl extends BatteryStats {
             }
             final ByteArrayOutputStream memStream = new ByteArrayOutputStream();
             try {
-                XmlSerializer out = new FastXmlSerializer();
-                out.setOutput(memStream, StandardCharsets.UTF_8.name());
+                TypedXmlSerializer out = Xml.resolveSerializer(memStream);
                 writeDailyItemsLocked(out);
                 final long initialTimeMs = SystemClock.uptimeMillis() - startTimeMs;
                 BackgroundThread.getHandler().post(new Runnable() {
@@ -10861,7 +10861,7 @@ public class BatteryStatsImpl extends BatteryStats {
         }
     }
 
-    private void writeDailyItemsLocked(XmlSerializer out) throws IOException {
+    private void writeDailyItemsLocked(TypedXmlSerializer out) throws IOException {
         StringBuilder sb = new StringBuilder(64);
         out.startDocument(null, true);
         out.startTag(null, "daily-items");
@@ -10893,7 +10893,7 @@ public class BatteryStatsImpl extends BatteryStats {
         out.endDocument();
     }
 
-    private void writeDailyLevelSteps(XmlSerializer out, String tag, LevelStepTracker steps,
+    private void writeDailyLevelSteps(TypedXmlSerializer out, String tag, LevelStepTracker steps,
             StringBuilder tmpBuilder) throws IOException {
         if (steps != null) {
             out.startTag(null, tag);
@@ -10919,10 +10919,9 @@ public class BatteryStatsImpl extends BatteryStats {
             return;
         }
         try {
-            XmlPullParser parser = Xml.newPullParser();
-            parser.setInput(stream, StandardCharsets.UTF_8.name());
+            TypedXmlPullParser parser = Xml.resolvePullParser(stream);
             readDailyItemsLocked(parser);
-        } catch (XmlPullParserException e) {
+        } catch (IOException e) {
         } finally {
             try {
                 stream.close();
@@ -10931,7 +10930,7 @@ public class BatteryStatsImpl extends BatteryStats {
         }
     }
 
-    private void readDailyItemsLocked(XmlPullParser parser) {
+    private void readDailyItemsLocked(TypedXmlPullParser parser) {
         try {
             int type;
             while ((type = parser.next()) != XmlPullParser.START_TAG
@@ -10975,7 +10974,7 @@ public class BatteryStatsImpl extends BatteryStats {
         }
     }
 
-    void readDailyItemTagLocked(XmlPullParser parser) throws NumberFormatException,
+    void readDailyItemTagLocked(TypedXmlPullParser parser) throws NumberFormatException,
             XmlPullParserException, IOException {
         DailyItem dit = new DailyItem();
         String attr = parser.getAttributeValue(null, "start");
@@ -11028,7 +11027,7 @@ public class BatteryStatsImpl extends BatteryStats {
         mDailyItems.add(dit);
     }
 
-    void readDailyItemTagDetailsLocked(XmlPullParser parser, DailyItem dit, boolean isCharge,
+    void readDailyItemTagDetailsLocked(TypedXmlPullParser parser, DailyItem dit, boolean isCharge,
             String tag)
             throws NumberFormatException, XmlPullParserException, IOException {
         final String numAttr = parser.getAttributeValue(null, "n");

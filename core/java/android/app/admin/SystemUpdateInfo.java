@@ -21,9 +21,8 @@ import android.annotation.Nullable;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
-
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlSerializer;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 
 import java.io.IOException;
 import java.lang.annotation.Retention;
@@ -125,7 +124,7 @@ public final class SystemUpdateInfo implements Parcelable {
             };
 
     /** @hide */
-    public void writeToXml(XmlSerializer out, String tag) throws IOException {
+    public void writeToXml(TypedXmlSerializer out, String tag) throws IOException {
         out.startTag(null, tag);
         out.attribute(null, ATTR_RECEIVED_TIME, String.valueOf(mReceivedTime));
         out.attribute(null, ATTR_SECURITY_PATCH_STATE, String.valueOf(mSecurityPatchState));
@@ -135,7 +134,7 @@ public final class SystemUpdateInfo implements Parcelable {
 
     /** @hide */
     @Nullable
-    public static SystemUpdateInfo readFromXml(XmlPullParser parser) {
+    public static SystemUpdateInfo readFromXml(TypedXmlPullParser parser) {
         // If an OTA has been applied (build fingerprint has changed), discard stale info.
         final String buildFingerprint = parser.getAttributeValue(null, ATTR_ORIGINAL_BUILD );
         if (!Build.FINGERPRINT.equals(buildFingerprint)) {

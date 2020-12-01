@@ -29,12 +29,11 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.PersistableBundle;
 import android.util.Slog;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.XmlUtils;
-
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlSerializer;
 
 import java.io.IOException;
 import java.lang.annotation.Retention;
@@ -169,7 +168,7 @@ public final class SuspendDialogInfo implements Parcelable {
     /**
      * @hide
      */
-    public void saveToXml(XmlSerializer out) throws IOException {
+    public void saveToXml(TypedXmlSerializer out) throws IOException {
         if (mIconResId != ID_NULL) {
             XmlUtils.writeIntAttribute(out, XML_ATTR_ICON_RES_ID, mIconResId);
         }
@@ -190,7 +189,7 @@ public final class SuspendDialogInfo implements Parcelable {
     /**
      * @hide
      */
-    public static SuspendDialogInfo restoreFromXml(XmlPullParser in) {
+    public static SuspendDialogInfo restoreFromXml(TypedXmlPullParser in) {
         final SuspendDialogInfo.Builder dialogInfoBuilder = new SuspendDialogInfo.Builder();
         try {
             final int iconId = XmlUtils.readIntAttribute(in, XML_ATTR_ICON_RES_ID, ID_NULL);

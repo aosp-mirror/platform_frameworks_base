@@ -17,17 +17,17 @@
 package android.content.pm;
 
 import android.compat.annotation.UnsupportedAppUsage;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 
-import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
 
 import java.io.IOException;
 
 /** @hide */
 public interface XmlSerializerAndParser<T> {
     @UnsupportedAppUsage
-    void writeAsXml(T item, XmlSerializer out) throws IOException;
+    void writeAsXml(T item, TypedXmlSerializer out) throws IOException;
     @UnsupportedAppUsage
-    T createFromXml(XmlPullParser parser) throws IOException, XmlPullParserException;
+    T createFromXml(TypedXmlPullParser parser) throws IOException, XmlPullParserException;
 }

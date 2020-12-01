@@ -43,22 +43,18 @@ import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.FastXmlSerializer;
 import com.android.server.LocalServices;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.wm.ActivityTaskManagerInternal;
 
 import libcore.io.IoUtils;
 
-import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
@@ -558,11 +554,10 @@ class Owners {
         }
         try {
             InputStream input = new AtomicFile(file).openRead();
-            XmlPullParser parser = Xml.newPullParser();
-            parser.setInput(input, StandardCharsets.UTF_8.name());
+            TypedXmlPullParser parser = Xml.resolvePullParser(input);
             int type;
-            while ((type=parser.next()) != XmlPullParser.END_DOCUMENT) {
-                if (type!=XmlPullParser.START_TAG) {
+            while ((type=parser.next()) != TypedXmlPullParser.END_DOCUMENT) {
+                if (type!=TypedXmlPullParser.START_TAG) {
                     continue;
                 }
 
@@ -781,12 +776,12 @@ class Owners {
 
                 int type;
                 int depth = 0;
-                while ((type = parser.next()) != XmlPullParser.END_DOCUMENT) {
+                while ((type = parser.next()) != TypedXmlPullParser.END_DOCUMENT) {
                     switch (type) {
-                        case XmlPullParser.START_TAG:
+                        case TypedXmlPullParser.START_TAG:
                             depth++;
                             break;
-                        case XmlPullParser.END_TAG:
+                        case TypedXmlPullParser.END_TAG:
                             depth--;
                             // fallthrough
                         default:
@@ -813,9 +808,9 @@ class Owners {
             }
         }
 
-        abstract void writeInner(XmlSerializer out) throws IOException;
+        abstract void writeInner(TypedXmlSerializer out) throws IOException;
 
-        abstract boolean readInner(XmlPullParser parser, int depth, String tag);
+        abstract boolean readInner(TypedXmlPullParser parser, int depth, String tag);
     }
 
     private class DeviceOwnerReadWriter extends FileReadWriter {
@@ -831,7 +826,7 @@ class Owners {
         }
 
         @Override
-        void writeInner(XmlSerializer out) throws IOException {
+        void writeInner(TypedXmlSerializer out) throws IOException {
             if (mDeviceOwner != null) {
                 mDeviceOwner.writeToXml(out, TAG_DEVICE_OWNER);
                 out.startTag(null, TAG_DEVICE_OWNER_CONTEXT);
@@ -863,7 +858,7 @@ class Owners {
         }
 
         @Override
-        boolean readInner(XmlPullParser parser, int depth, String tag) {
+        boolean readInner(TypedXmlPullParser parser, int depth, String tag) {
             if (depth > 2) {
                 return true; // Ignore
             }
@@ -927,7 +922,7 @@ class Owners {
         }
 
         @Override
-        void writeInner(XmlSerializer out) throws IOException {
+        void writeInner(TypedXmlSerializer out) throws IOException {
             final OwnerInfo profileOwner = mProfileOwners.get(mUserId);
             if (profileOwner != null) {
                 profileOwner.writeToXml(out, TAG_PROFILE_OWNER);
@@ -935,7 +930,7 @@ class Owners {
         }
 
         @Override
-        boolean readInner(XmlPullParser parser, int depth, String tag) {
+        boolean readInner(TypedXmlPullParser parser, int depth, String tag) {
             if (depth > 2) {
                 return true; // Ignore
             }
@@ -985,7 +980,7 @@ class Owners {
             this.isOrganizationOwnedDevice = isOrganizationOwnedDevice;
         }
 
-        public void writeToXml(XmlSerializer out, String tag) throws IOException {
+        public void writeToXml(TypedXmlSerializer out, String tag) throws IOException {
             out.startTag(null, tag);
             out.attribute(null, ATTR_PACKAGE, packageName);
             if (name != null) {
@@ -1009,7 +1004,7 @@ class Owners {
             out.endTag(null, tag);
         }
 
-        public static OwnerInfo readFromXml(XmlPullParser parser) {
+        public static OwnerInfo readFromXml(TypedXmlPullParser parser) {
             final String packageName = parser.getAttributeValue(null, ATTR_PACKAGE);
             final String name = parser.getAttributeValue(null, ATTR_NAME);
             final String componentName =
