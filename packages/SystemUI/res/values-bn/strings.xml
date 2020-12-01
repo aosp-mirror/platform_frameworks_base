@@ -951,7 +951,7 @@
     <string name="notification_channel_general" msgid="4384774889645929705">"সাধারণ বার্তাগুলি"</string>
     <string name="notification_channel_storage" msgid="2720725707628094977">"স্টোরেজ"</string>
     <string name="notification_channel_hints" msgid="7703783206000346876">"হিন্ট"</string>
-    <string name="instant_apps" msgid="8337185853050247304">"ইনস্ট্যান্ট অ্যাপ"</string>
+    <string name="instant_apps" msgid="8337185853050247304">"Instant Apps"</string>
     <string name="instant_apps_title" msgid="8942706782103036910">"<xliff:g id="APP">%1$s</xliff:g> চলছে"</string>
     <string name="instant_apps_message" msgid="6112428971833011754">"অ্যাপটি ইনস্টল না করে চালু করা হয়েছে।"</string>
     <string name="instant_apps_message_with_help" msgid="1816952263531203932">"অ্যাপটি ইনস্টল না করে চালু করা হয়েছে। আরও জানতে ট্যাপ করুন।"</string>
