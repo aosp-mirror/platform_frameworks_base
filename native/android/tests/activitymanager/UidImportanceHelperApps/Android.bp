@@ -1,0 +1,11 @@
+android_test_helper_app {
+    name: "UidImportanceHelperApp",
+    manifest: "HelperAppManifest.xml",
+    static_libs: ["androidx.test.rules"],
+    sdk_version: "test_current",
+    srcs: ["src/**/*.java"],
+    test_suites: [
+        "general-tests",
+    ],
+}
+
