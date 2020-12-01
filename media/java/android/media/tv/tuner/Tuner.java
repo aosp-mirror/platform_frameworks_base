@@ -308,6 +308,7 @@ public class Tuner implements AutoCloseable  {
                                 .write(FrameworkStatsLog.TV_TUNER_STATE_CHANGED, mUserId,
                                     FrameworkStatsLog.TV_TUNER_STATE_CHANGED__STATE__UNKNOWN);
                     }
+                    releaseAll();
                     mHandler.sendMessage(mHandler.obtainMessage(MSG_RESOURCE_LOST));
                 }
             };
@@ -610,7 +611,6 @@ public class Tuner implements AutoCloseable  {
                     break;
                 }
                 case MSG_RESOURCE_LOST: {
-                    releaseAll();
                     if (mOnResourceLostListener != null
                                 && mOnResourceLostListenerExecutor != null) {
                         mOnResourceLostListenerExecutor.execute(
