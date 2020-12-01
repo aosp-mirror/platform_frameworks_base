@@ -82,6 +82,7 @@ import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_RECENTS_ANIMA
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_STATES;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_TASKS;
 import static com.android.server.wm.ActivityRecord.STARTING_WINDOW_SHOWN;
+import static com.android.server.wm.ActivityRecord.TRANSFER_SPLASH_SCREEN_COPYING;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_RECENTS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_RESULTS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_SWITCH;
@@ -3878,6 +3879,13 @@ class Task extends WindowContainer<WindowContainer> {
         return getActivity((r) -> {
             // skip hidden (or about to hide) apps
             return !r.mIsExiting && r.isClientVisible() && r.mVisibleRequested;
+        });
+    }
+
+    ActivityRecord getTopWaitSplashScreenActivity() {
+        return getActivity((r) -> {
+            return r.mHandleExitSplashScreen
+                    && r.mTransferringSplashScreenState == TRANSFER_SPLASH_SCREEN_COPYING;
         });
     }
 

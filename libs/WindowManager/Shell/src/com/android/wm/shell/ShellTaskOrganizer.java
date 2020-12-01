@@ -254,6 +254,11 @@ public class ShellTaskOrganizer extends TaskOrganizer {
     }
 
     @Override
+    public void copySplashScreenView(int taskId) {
+        mStartingSurfaceDrawer.copySplashScreenView(taskId);
+    }
+
+    @Override
     public void onTaskAppeared(RunningTaskInfo taskInfo, SurfaceControl leash) {
         synchronized (mLock) {
             onTaskAppeared(new TaskAppearedInfo(taskInfo, leash));

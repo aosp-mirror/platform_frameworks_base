@@ -43,6 +43,8 @@ import android.util.SparseArray;
 import android.view.Display;
 import android.view.View;
 import android.view.WindowManager;
+import android.window.SplashScreenView;
+import android.window.SplashScreenView.SplashScreenViewParcelable;
 import android.window.StartingWindowInfo;
 import android.window.TaskOrganizer;
 import android.window.TaskSnapshot;
@@ -63,7 +65,6 @@ import java.util.function.Consumer;
  * class to remove the starting window of the Task.
  * @hide
  */
-
 public class StartingSurfaceDrawer {
     static final String TAG = StartingSurfaceDrawer.class.getSimpleName();
     static final boolean DEBUG_SPLASH_SCREEN = false;
@@ -352,9 +353,10 @@ public class StartingSurfaceDrawer {
         }
 
         params.setTitle("Splash Screen " + activityInfo.packageName);
-        final View contentView = mSplashscreenContentDrawer.makeSplashScreenContentView(win,
-                context, iconRes, splashscreenContentResId[0]);
-        if (contentView == null) {
+        final SplashScreenView splashScreenView =
+                mSplashscreenContentDrawer.makeSplashScreenContentView(win, context, iconRes,
+                        splashscreenContentResId[0]);
+        if (splashScreenView == null) {
             Slog.w(TAG, "Adding splash screen window for " + activityInfo.packageName + " failed!");
             return;
         }
@@ -366,7 +368,7 @@ public class StartingSurfaceDrawer {
                     + activityInfo.packageName + " / " + appToken + ": " + view);
         }
         final WindowManager wm = context.getSystemService(WindowManager.class);
-        postAddWindow(taskInfo.taskId, appToken, view, wm, params);
+        postAddWindow(taskInfo.taskId, appToken, view, wm, params, splashScreenView);
     }
 
     /**
@@ -379,7 +381,7 @@ public class StartingSurfaceDrawer {
                 snapshot, mMainExecutor, () -> removeWindowSynced(taskId) /* clearWindow */);
         mMainExecutor.executeDelayed(() -> removeWindowSynced(taskId), REMOVE_WHEN_TIMEOUT);
         final StartingWindowRecord tView =
-                new StartingWindowRecord(null/* decorView */, surface);
+                new StartingWindowRecord(null/* decorView */, surface, null /* splashScreenView */);
         mStartingWindowRecords.put(taskId, tView);
     }
 
@@ -393,37 +395,59 @@ public class StartingSurfaceDrawer {
         removeWindowSynced(taskId);
     }
 
-    protected void postAddWindow(int taskId, IBinder appToken,
-        View view, WindowManager wm, WindowManager.LayoutParams params) {
-        boolean shouldSaveView = true;
-        try {
-            wm.addView(view, params);
-        } catch (WindowManager.BadTokenException e) {
-            // ignore
-            Slog.w(TAG, appToken + " already running, starting window not displayed. "
-                    + e.getMessage());
-            shouldSaveView = false;
-        } catch (RuntimeException e) {
-            // don't crash if something else bad happens, for example a
-            // failure loading resources because we are loading from an app
-            // on external storage that has been unmounted.
-            Slog.w(TAG, appToken + " failed creating starting window", e);
-            shouldSaveView = false;
-        } finally {
-            if (view != null && view.getParent() == null) {
-                Slog.w(TAG, "view not successfully added to wm, removing view");
-                wm.removeViewImmediate(view);
-                shouldSaveView = false;
-            }
+    /**
+     * Called when the Task wants to copy the splash screen.
+     * @param taskId
+     */
+    public void copySplashScreenView(int taskId) {
+        final StartingWindowRecord preView = mStartingWindowRecords.get(taskId);
+        final SplashScreenViewParcelable parcelable;
+        if (preView != null && preView.mContentView != null
+                && preView.mContentView.isCopyable()) {
+            parcelable = new SplashScreenViewParcelable(preView.mContentView);
+        } else {
+            parcelable = null;
         }
+        if (DEBUG_SPLASH_SCREEN) {
+            Slog.v(TAG, "Copying splash screen window view for task: " + taskId
+                    + " parcelable? " + parcelable);
+        }
+        ActivityTaskManager.getInstance().onSplashScreenViewCopyFinished(taskId, parcelable);
+    }
 
-        if (shouldSaveView) {
-            removeWindowSynced(taskId);
-            mMainExecutor.executeDelayed(() -> removeWindowSynced(taskId), REMOVE_WHEN_TIMEOUT);
-            final StartingWindowRecord tView =
-                    new StartingWindowRecord(view, null /* TaskSnapshotWindow */);
-            mStartingWindowRecords.put(taskId, tView);
-        }
+    protected void postAddWindow(int taskId, IBinder appToken,
+            View view, WindowManager wm, WindowManager.LayoutParams params,
+            SplashScreenView splashScreenView) {
+        mMainExecutor.execute(() -> {
+            boolean shouldSaveView = true;
+            try {
+                wm.addView(view, params);
+            } catch (WindowManager.BadTokenException e) {
+                // ignore
+                Slog.w(TAG, appToken + " already running, starting window not displayed. "
+                        + e.getMessage());
+                shouldSaveView = false;
+            } catch (RuntimeException e) {
+                // don't crash if something else bad happens, for example a
+                // failure loading resources because we are loading from an app
+                // on external storage that has been unmounted.
+                Slog.w(TAG, appToken + " failed creating starting window", e);
+                shouldSaveView = false;
+            } finally {
+                if (view != null && view.getParent() == null) {
+                    Slog.w(TAG, "view not successfully added to wm, removing view");
+                    wm.removeViewImmediate(view);
+                    shouldSaveView = false;
+                }
+            }
+            if (shouldSaveView) {
+                removeWindowSynced(taskId);
+                mMainExecutor.executeDelayed(() -> removeWindowSynced(taskId), REMOVE_WHEN_TIMEOUT);
+                final StartingWindowRecord tView = new StartingWindowRecord(view,
+                        null /* TaskSnapshotWindow */, splashScreenView);
+                mStartingWindowRecords.put(taskId, tView);
+            }
+        });
     }
 
     protected void removeWindowSynced(int taskId) {
@@ -459,10 +483,13 @@ public class StartingSurfaceDrawer {
     private static class StartingWindowRecord {
         private final View mDecorView;
         private final TaskSnapshotWindow mTaskSnapshotWindow;
+        private final SplashScreenView mContentView;
 
-        StartingWindowRecord(View decorView, TaskSnapshotWindow taskSnapshotWindow) {
+        StartingWindowRecord(View decorView, TaskSnapshotWindow taskSnapshotWindow,
+                SplashScreenView splashScreenView) {
             mDecorView = decorView;
             mTaskSnapshotWindow = taskSnapshotWindow;
+            mContentView = splashScreenView;
         }
     }
 }

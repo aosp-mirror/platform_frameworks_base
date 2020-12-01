@@ -2748,6 +2748,7 @@ package android.window {
   public class TaskOrganizer extends android.window.WindowOrganizer {
     ctor public TaskOrganizer();
     method @BinderThread public void addStartingWindow(@NonNull android.window.StartingWindowInfo, @NonNull android.os.IBinder);
+    method @BinderThread public void copySplashScreenView(int);
     method @Nullable @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS) public void createRootTask(int, int, @Nullable android.os.IBinder);
     method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS) public boolean deleteRootTask(@NonNull android.window.WindowContainerToken);
     method @Nullable @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS) public java.util.List<android.app.ActivityManager.RunningTaskInfo> getChildTasks(@NonNull android.window.WindowContainerToken, @NonNull int[]);

@@ -224,6 +224,7 @@ import android.view.RemoteAnimationAdapter;
 import android.view.RemoteAnimationDefinition;
 import android.view.WindowManager;
 import android.window.IWindowOrganizerController;
+import android.window.SplashScreenView.SplashScreenViewParcelable;
 import android.window.TaskSnapshot;
 import android.window.WindowContainerTransaction;
 
@@ -3245,6 +3246,30 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 "suppressResizeConfigChanges()");
         synchronized (mGlobalLock) {
             mSuppressResizeConfigChanges = suppress;
+        }
+    }
+
+    /**
+     * A splash screen view has copied, pass it to an activity.
+     *
+     * @param taskId Id of task to handle the material to reconstruct the view.
+     * @param parcelable Used to reconstruct the view, null means the surface is un-copyable.
+     * @hide
+     */
+    @Override
+    public void onSplashScreenViewCopyFinished(int taskId, SplashScreenViewParcelable parcelable)
+            throws RemoteException {
+        mAmInternal.enforceCallingPermission(MANAGE_ACTIVITY_TASKS,
+                "copySplashScreenViewFinish()");
+        synchronized (mGlobalLock) {
+            final Task task = mRootWindowContainer.anyTaskForId(taskId,
+                    MATCH_ATTACHED_TASK_ONLY);
+            if (task != null) {
+                final ActivityRecord r = task.getTopWaitSplashScreenActivity();
+                if (r != null) {
+                    r.onCopySplashScreenFinish(parcelable);
+                }
+            }
         }
     }
 

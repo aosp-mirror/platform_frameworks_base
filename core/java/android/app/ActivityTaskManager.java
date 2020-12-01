@@ -19,6 +19,7 @@ package android.app;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
@@ -37,6 +38,7 @@ import android.os.ServiceManager;
 import android.util.DisplayMetrics;
 import android.util.Singleton;
 import android.view.RemoteAnimationDefinition;
+import android.window.SplashScreenView.SplashScreenViewParcelable;
 
 import java.util.List;
 
@@ -240,6 +242,22 @@ public class ActivityTaskManager {
             return sMaxRecentTasks = ActivityManager.isLowRamDeviceStatic() ? 36 : 48;
         }
         return sMaxRecentTasks;
+    }
+
+    /**
+     * Notify the server that splash screen of the given task has been copied"
+     *
+     * @param taskId Id of task to handle the material to reconstruct the splash screen view.
+     * @param parcelable Used to reconstruct the view, null means the surface is un-copyable.
+     * @hide
+     */
+    public void onSplashScreenViewCopyFinished(int taskId,
+            @Nullable SplashScreenViewParcelable parcelable) {
+        try {
+            getService().onSplashScreenViewCopyFinished(taskId, parcelable);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**

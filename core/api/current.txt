@@ -3865,6 +3865,7 @@ package android.app {
     method @Nullable public android.net.Uri getReferrer();
     method public int getRequestedOrientation();
     method public final android.view.SearchEvent getSearchEvent();
+    method @NonNull public final android.window.SplashScreen getSplashScreen();
     method public int getTaskId();
     method public final CharSequence getTitle();
     method public final int getTitleColor();
@@ -55819,6 +55820,23 @@ package android.widget.inline {
     ctor public InlinePresentationSpec.Builder(@NonNull android.util.Size, @NonNull android.util.Size);
     method @NonNull public android.widget.inline.InlinePresentationSpec build();
     method @NonNull public android.widget.inline.InlinePresentationSpec.Builder setStyle(@NonNull android.os.Bundle);
+  }
+
+}
+
+package android.window {
+
+  public interface SplashScreen {
+    method public void setOnExitAnimationListener(@Nullable android.window.SplashScreen.OnExitAnimationListener);
+  }
+
+  public static interface SplashScreen.OnExitAnimationListener {
+    method public void onSplashScreenExit(@NonNull android.window.SplashScreenView);
+  }
+
+  public final class SplashScreenView extends android.widget.FrameLayout {
+    method @Nullable public android.view.View getIconView();
+    method public void remove();
   }
 
 }

@@ -138,6 +138,16 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
             });
         }
 
+        void copySplashScreenView(Task task) {
+            mDeferTaskOrgCallbacksConsumer.accept(() -> {
+                try {
+                    mTaskOrganizer.copySplashScreenView(task.mTaskId);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Exception sending copyStartingWindowView callback", e);
+                }
+            });
+        }
+
         SurfaceControl prepareLeash(Task task, boolean visible, String reason) {
             SurfaceControl outSurfaceControl = new SurfaceControl(task.getSurfaceControl(), reason);
             if (!task.mCreatedByOrganizer && !visible) {
@@ -238,6 +248,10 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
 
         void removeStartingWindow(Task t) {
             mOrganizer.removeStartingWindow(t);
+        }
+
+        void copySplashScreenView(Task t) {
+            mOrganizer.copySplashScreenView(t);
         }
 
         /**
@@ -484,6 +498,17 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
         final TaskOrganizerState state =
                 mTaskOrganizerStates.get(rootTask.mTaskOrganizer.asBinder());
         state.removeStartingWindow(task);
+    }
+
+    boolean copySplashScreenView(Task task) {
+        final Task rootTask = task.getRootTask();
+        if (rootTask == null || rootTask.mTaskOrganizer == null) {
+            return false;
+        }
+        final TaskOrganizerState state =
+                mTaskOrganizerStates.get(rootTask.mTaskOrganizer.asBinder());
+        state.copySplashScreenView(task);
+        return true;
     }
 
     void onTaskAppeared(ITaskOrganizer organizer, Task task) {

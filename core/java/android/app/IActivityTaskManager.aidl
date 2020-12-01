@@ -70,6 +70,7 @@ import android.view.IRecentsAnimationRunner;
 import android.view.RemoteAnimationDefinition;
 import android.view.RemoteAnimationAdapter;
 import android.window.IWindowOrganizerController;
+import android.window.SplashScreenView;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.os.IResultReceiver;
 
@@ -348,4 +349,10 @@ interface IActivityTaskManager {
      * Clears launch params for given packages.
      */
     void clearLaunchParamsForPackages(in List<String> packageNames);
+
+    /**
+     * A splash screen view has copied.
+     */
+    void onSplashScreenViewCopyFinished(int taskId,
+            in SplashScreenView.SplashScreenViewParcelable material);
 }

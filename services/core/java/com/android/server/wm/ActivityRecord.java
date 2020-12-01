@@ -42,6 +42,8 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.ROTATION_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.activityTypeToString;
+import static android.app.servertransaction.TransferSplashScreenViewStateItem.ATTACH_TO;
+import static android.app.servertransaction.TransferSplashScreenViewStateItem.HANDOVER_TO;
 import static android.content.Intent.ACTION_MAIN;
 import static android.content.Intent.CATEGORY_HOME;
 import static android.content.Intent.CATEGORY_LAUNCHER;
@@ -243,6 +245,7 @@ import android.app.servertransaction.ResumeActivityItem;
 import android.app.servertransaction.StartActivityItem;
 import android.app.servertransaction.StopActivityItem;
 import android.app.servertransaction.TopResumedActivityChangeItem;
+import android.app.servertransaction.TransferSplashScreenViewStateItem;
 import android.app.usage.UsageEvents.Event;
 import android.content.ComponentName;
 import android.content.Intent;
@@ -300,6 +303,7 @@ import android.view.WindowManager.LayoutParams;
 import android.view.WindowManager.TransitionOldType;
 import android.view.animation.Animation;
 import android.window.IRemoteTransition;
+import android.window.SplashScreenView.SplashScreenViewParcelable;
 import android.window.TaskSnapshot;
 import android.window.WindowContainerToken;
 
@@ -668,6 +672,30 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     WindowManagerPolicy.StartingSurface mStartingSurface;
     boolean startingDisplayed;
     boolean startingMoved;
+
+    boolean mHandleExitSplashScreen;
+    @TransferSplashScreenState int mTransferringSplashScreenState =
+            TRANSFER_SPLASH_SCREEN_IDLE;
+
+    // Idle, can be triggered to do transfer if needed.
+    static final int TRANSFER_SPLASH_SCREEN_IDLE = 0;
+    // requesting a copy from shell.
+    static final int TRANSFER_SPLASH_SCREEN_COPYING = 1;
+    // attach the splash screen view to activity.
+    static final int TRANSFER_SPLASH_SCREEN_ATTACH_TO_CLIENT = 2;
+    // client has taken over splash screen view.
+    static final int TRANSFER_SPLASH_SCREEN_FINISH = 3;
+
+    @IntDef(prefix = { "TRANSFER_SPLASH_SCREEN_" }, value = {
+            TRANSFER_SPLASH_SCREEN_IDLE,
+            TRANSFER_SPLASH_SCREEN_COPYING,
+            TRANSFER_SPLASH_SCREEN_ATTACH_TO_CLIENT,
+            TRANSFER_SPLASH_SCREEN_FINISH,
+    })
+    @interface TransferSplashScreenState {}
+
+    // How long we wait until giving up transfer splash screen.
+    private static final int TRANSFER_SPLASH_SCREEN_TIMEOUT = 2000;
 
     // TODO: Have a WindowContainer state for tracking exiting/deferred removal.
     boolean mIsExiting;
@@ -2031,7 +2059,118 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         return snapshot.getRotation() == targetRotation;
     }
 
+    /**
+     * See {@link SplashScreen#setOnExitAnimationListener}.
+     */
+    void setCustomizeSplashScreenExitAnimation(boolean enable) {
+        if (mHandleExitSplashScreen == enable) {
+            return;
+        }
+        mHandleExitSplashScreen = enable;
+    }
+
+    private final Runnable mTransferSplashScreenTimeoutRunnable = new Runnable() {
+        @Override
+        public void run() {
+            synchronized (mAtmService.mGlobalLock) {
+                Slog.w(TAG, "Activity transferring splash screen timeout for "
+                        + ActivityRecord.this + " state " + mTransferringSplashScreenState);
+                if (isTransferringSplashScreen()) {
+                    mTransferringSplashScreenState = TRANSFER_SPLASH_SCREEN_FINISH;
+                    // TODO show default exit splash screen animation
+                    removeStartingWindow();
+                }
+            }
+        }
+    };
+
+    private void scheduleTransferSplashScreenTimeout() {
+        mAtmService.mH.postDelayed(mTransferSplashScreenTimeoutRunnable,
+                TRANSFER_SPLASH_SCREEN_TIMEOUT);
+    }
+
+    private void removeTransferSplashScreenTimeout() {
+        mAtmService.mH.removeCallbacks(mTransferSplashScreenTimeoutRunnable);
+    }
+
+    private boolean transferSplashScreenIfNeeded() {
+        if (!mHandleExitSplashScreen || mStartingSurface == null || mStartingWindow == null
+                || mTransferringSplashScreenState == TRANSFER_SPLASH_SCREEN_FINISH) {
+            return false;
+        }
+        if (isTransferringSplashScreen()) {
+            return true;
+        }
+        requestCopySplashScreen();
+        return isTransferringSplashScreen();
+    }
+
+    private boolean isTransferringSplashScreen() {
+        return mTransferringSplashScreenState == TRANSFER_SPLASH_SCREEN_ATTACH_TO_CLIENT
+                || mTransferringSplashScreenState == TRANSFER_SPLASH_SCREEN_COPYING;
+    }
+
+    private void requestCopySplashScreen() {
+        mTransferringSplashScreenState = TRANSFER_SPLASH_SCREEN_COPYING;
+        if (!mAtmService.mTaskOrganizerController.copySplashScreenView(getTask())) {
+            mTransferringSplashScreenState = TRANSFER_SPLASH_SCREEN_FINISH;
+            removeStartingWindow();
+        }
+        scheduleTransferSplashScreenTimeout();
+    }
+
+    /**
+     * Receive the splash screen data from shell, sending to client.
+     * @param parcelable The data to reconstruct the splash screen view, null mean unable to copy.
+     */
+    void onCopySplashScreenFinish(SplashScreenViewParcelable parcelable) {
+        removeTransferSplashScreenTimeout();
+        // unable to copy from shell, maybe it's not a splash screen. or something went wrong.
+        // either way, abort and reset the sequence.
+        if (parcelable == null
+                || mTransferringSplashScreenState != TRANSFER_SPLASH_SCREEN_COPYING) {
+            if (parcelable != null) {
+                parcelable.clearIfNeeded();
+            }
+            mTransferringSplashScreenState = TRANSFER_SPLASH_SCREEN_FINISH;
+            removeStartingWindow();
+            return;
+        }
+        // schedule attach splashScreen to client
+        try {
+            mTransferringSplashScreenState = TRANSFER_SPLASH_SCREEN_ATTACH_TO_CLIENT;
+            mAtmService.getLifecycleManager().scheduleTransaction(app.getThread(), appToken,
+                    TransferSplashScreenViewStateItem.obtain(ATTACH_TO, parcelable));
+            scheduleTransferSplashScreenTimeout();
+        } catch (Exception e) {
+            Slog.w(TAG, "onCopySplashScreenComplete fail: " + this);
+            parcelable.clearIfNeeded();
+            mTransferringSplashScreenState = TRANSFER_SPLASH_SCREEN_FINISH;
+        }
+    }
+
+    private void onSplashScreenAttachComplete() {
+        removeTransferSplashScreenTimeout();
+        // Client has draw the splash screen, so we can remove the starting window.
+        if (mStartingWindow != null) {
+            mStartingWindow.hide(false, false);
+        }
+        try {
+            mAtmService.getLifecycleManager().scheduleTransaction(app.getThread(), appToken,
+                    TransferSplashScreenViewStateItem.obtain(HANDOVER_TO, null));
+        } catch (Exception e) {
+            Slog.w(TAG, "onSplashScreenAttachComplete fail: " + this);
+        }
+        // no matter what, remove the starting window.
+        mTransferringSplashScreenState = TRANSFER_SPLASH_SCREEN_FINISH;
+        removeStartingWindow();
+    }
+
     void removeStartingWindow() {
+        if (transferSplashScreenIfNeeded()) {
+            return;
+        }
+        mTransferringSplashScreenState = TRANSFER_SPLASH_SCREEN_IDLE;
         if (mStartingWindow == null) {
             if (mStartingData != null) {
                 // Starting window has not been added yet, but it is scheduled to be added.
@@ -5092,7 +5231,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
     }
 
-    static void activityResumedLocked(IBinder token) {
+    static void activityResumedLocked(IBinder token, boolean handleSplashScreenExit) {
         final ActivityRecord r = ActivityRecord.forTokenLocked(token);
         ProtoLog.i(WM_DEBUG_STATES, "Resumed activity; dropping state of: %s", r);
         if (r == null) {
@@ -5100,10 +5239,20 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             // been removed (e.g. destroy timeout), so the token could be null.
             return;
         }
+        r.setCustomizeSplashScreenExitAnimation(handleSplashScreenExit);
         r.setSavedState(null /* savedState */);
 
         r.mDisplayContent.handleActivitySizeCompatModeIfNeeded(r);
         r.mDisplayContent.mUnknownAppVisibilityController.notifyAppResumedFinished(r);
+    }
+
+    static void splashScreenAttachedLocked(IBinder token) {
+        final ActivityRecord r = ActivityRecord.forTokenLocked(token);
+        if (r == null) {
+            Slog.w(TAG, "splashScreenTransferredLocked cannot find activity");
+            return;
+        }
+        r.onSplashScreenAttachComplete();
     }
 
     /**

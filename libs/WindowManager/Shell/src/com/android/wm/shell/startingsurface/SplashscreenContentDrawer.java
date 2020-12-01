@@ -31,16 +31,13 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
 import android.os.Build;
 import android.util.Slog;
-import android.view.Gravity;
-import android.view.View;
-import android.view.WindowManager;
-import android.widget.FrameLayout;
+import android.view.Window;
+import android.window.SplashScreenView;
 
 import com.android.internal.R;
 import com.android.internal.graphics.palette.Palette;
 import com.android.internal.graphics.palette.Quantizer;
 import com.android.internal.graphics.palette.VariationalKMeansQuantizer;
-import com.android.internal.policy.PhoneWindow;
 
 import java.util.List;
 
@@ -83,12 +80,12 @@ class SplashscreenContentDrawer {
         return new ColorDrawable(getSystemBGColor());
     }
 
-    View makeSplashScreenContentView(PhoneWindow win, Context context, int iconRes,
+    SplashScreenView makeSplashScreenContentView(Window win, Context context, int iconRes,
             int splashscreenContentResId) {
         updateDensity();
-        win.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
         // splash screen content will be deprecated after S.
-        final View ssc = makeSplashscreenContentDrawable(win, context, splashscreenContentResId);
+        final SplashScreenView ssc =
+                makeSplashscreenContentDrawable(win, context, splashscreenContentResId);
         if (ssc != null) {
             return ssc;
         }
@@ -109,7 +106,7 @@ class SplashscreenContentDrawer {
         // TODO (b/173975965) Tracking the performance on improved splash screen.
         final StartingWindowViewBuilder builder = new StartingWindowViewBuilder();
         return builder
-                .setPhoneWindow(win)
+                .setWindow(win)
                 .setContext(context)
                 .setThemeDrawable(themeBGDrawable)
                 .setIconDrawable(iconDrawable).build();
@@ -119,12 +116,12 @@ class SplashscreenContentDrawer {
         // materials
         private Drawable mThemeBGDrawable;
         private Drawable mIconDrawable;
-        private PhoneWindow mPhoneWindow;
+        private Window mWindow;
         private Context mContext;
 
         // result
         private boolean mBuildComplete = false;
-        private View mCachedResult;
+        private SplashScreenView mCachedResult;
         private int mThemeColor;
         private Drawable mFinalIconDrawable;
         private float mScale = 1f;
@@ -141,8 +138,8 @@ class SplashscreenContentDrawer {
             return this;
         }
 
-        StartingWindowViewBuilder setPhoneWindow(PhoneWindow window) {
-            mPhoneWindow = window;
+        StartingWindowViewBuilder setWindow(Window window) {
+            mWindow = window;
             mBuildComplete = false;
             return this;
         }
@@ -153,11 +150,11 @@ class SplashscreenContentDrawer {
             return this;
         }
 
-        View build() {
+        SplashScreenView build() {
             if (mBuildComplete) {
                 return mCachedResult;
             }
-            if (mPhoneWindow == null || mContext == null) {
+            if (mWindow == null || mContext == null) {
                 Slog.e(TAG, "Unable to create StartingWindowView, lack of materials!");
                 return null;
             }
@@ -173,7 +170,7 @@ class SplashscreenContentDrawer {
                 mFinalIconDrawable = mIconDrawable;
             }
             final int iconSize = mFinalIconDrawable != null ? (int) (mIconSize * mScale) : 0;
-            mCachedResult = fillViewWithIcon(mPhoneWindow, mContext, iconSize, mFinalIconDrawable);
+            mCachedResult = fillViewWithIcon(mWindow, mContext, iconSize, mFinalIconDrawable);
             mBuildComplete = true;
             return mCachedResult;
         }
@@ -249,25 +246,21 @@ class SplashscreenContentDrawer {
             return true;
         }
 
-        private View fillViewWithIcon(PhoneWindow win, Context context,
+        private SplashScreenView fillViewWithIcon(Window win, Context context,
                 int iconSize, Drawable iconDrawable) {
-            final StartingSurfaceWindowView surfaceWindowView =
-                    new StartingSurfaceWindowView(context, iconSize);
-            surfaceWindowView.setBackground(new ColorDrawable(mThemeColor));
+            final SplashScreenView.Builder builder = new SplashScreenView.Builder(context);
+            builder.setIconSize(iconSize).setBackgroundColor(mThemeColor);
             if (iconDrawable != null) {
-                surfaceWindowView.setIconDrawable(iconDrawable);
+                builder.setCenterViewDrawable(iconDrawable);
             }
+            final SplashScreenView splashScreenView = builder.build();
             if (DEBUG) {
-                Slog.d(TAG, "fillViewWithIcon surfaceWindowView " + surfaceWindowView);
+                Slog.d(TAG, "fillViewWithIcon surfaceWindowView " + splashScreenView);
             }
-            win.setContentView(surfaceWindowView);
-            makeSystemUIColorsTransparent(win);
-            return surfaceWindowView;
-        }
-
-        private void makeSystemUIColorsTransparent(PhoneWindow win) {
-            win.setStatusBarColor(Color.TRANSPARENT);
-            win.setNavigationBarColor(Color.TRANSPARENT);
+            win.setContentView(splashScreenView);
+            splashScreenView.cacheRootWindow(win);
+            splashScreenView.makeSystemUIColorsTransparent();
+            return splashScreenView;
         }
     }
 
@@ -298,8 +291,8 @@ class SplashscreenContentDrawer {
         return root < 0.1;
     }
 
-    private static View makeSplashscreenContentDrawable(PhoneWindow win, Context ctx,
-            int splashscreenContentResId) {
+    private static SplashScreenView makeSplashscreenContentDrawable(Window win,
+            Context ctx, int splashscreenContentResId) {
         // doesn't support windowSplashscreenContent after S
         // TODO add an allowlist to skip some packages if needed
         final int targetSdkVersion = ctx.getApplicationInfo().targetSdkVersion;
@@ -316,7 +309,8 @@ class SplashscreenContentDrawer {
         if (drawable == null) {
             return null;
         }
-        View view = new View(ctx);
+        SplashScreenView view = new SplashScreenView(ctx);
+        view.setNotCopyable();
         view.setBackground(drawable);
         win.setContentView(view);
         return view;
@@ -529,36 +523,6 @@ class SplashscreenContentDrawer {
                 public List<Palette.Swatch> getQuantizedColors() {
                     return mInnerQuantizer.getQuantizedColors();
                 }
-            }
-        }
-    }
-
-    private static class StartingSurfaceWindowView extends FrameLayout {
-        // TODO animate the icon view
-        private final View mIconView;
-
-        StartingSurfaceWindowView(Context context, int iconSize) {
-            super(context);
-
-            final boolean emptyIcon = iconSize == 0;
-            if (emptyIcon) {
-                mIconView = null;
-            } else {
-                mIconView = new View(context);
-                FrameLayout.LayoutParams params =
-                        new FrameLayout.LayoutParams(iconSize, iconSize);
-                params.gravity = Gravity.CENTER;
-                addView(mIconView, params);
-            }
-            setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                    | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                    | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
-        }
-
-        // TODO support animatable icon
-        void setIconDrawable(Drawable icon) {
-            if (mIconView != null) {
-                mIconView.setBackground(icon);
             }
         }
     }
