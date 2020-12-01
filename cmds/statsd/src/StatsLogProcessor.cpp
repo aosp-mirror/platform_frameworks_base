@@ -24,12 +24,13 @@
 #include <frameworks/base/cmds/statsd/src/active_config_list.pb.h>
 #include <frameworks/base/cmds/statsd/src/experiment_ids.pb.h>
 
+#include "StatsService.h"
 #include "android-base/stringprintf.h"
 #include "external/StatsPullerManager.h"
+#include "flags/flags.h"
 #include "guardrail/StatsdStats.h"
 #include "logd/LogEvent.h"
 #include "metrics/CountMetricProducer.h"
-#include "StatsService.h"
 #include "state/StateManager.h"
 #include "stats_log_util.h"
 #include "stats_util.h"
@@ -520,9 +521,10 @@ void StatsLogProcessor::GetActiveConfigsLocked(const int uid, vector<int64_t>& o
 }
 
 void StatsLogProcessor::OnConfigUpdated(const int64_t timestampNs, const ConfigKey& key,
-                                        const StatsdConfig& config, bool modularUpdate) {
+                                        const StatsdConfig& config) {
     std::lock_guard<std::mutex> lock(mMetricsMutex);
     WriteDataToDiskLocked(key, timestampNs, CONFIG_UPDATED, NO_TIME_CONSTRAINTS);
+    bool modularUpdate = getFlagBool(PARTIAL_CONFIG_UPDATE_FLAG, "false");
     OnConfigUpdatedLocked(timestampNs, key, config, modularUpdate);
 }
 

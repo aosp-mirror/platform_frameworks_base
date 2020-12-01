@@ -14,39 +14,24 @@
  * limitations under the License.
  */
 
-#pragma once
+#include "flags.h"
 
-#include "config/ConfigKey.h"
+#include <server_configurable_flags/get_flags.h>
 
-#include <utils/RefBase.h>
+using server_configurable_flags::GetServerConfigurableFlag;
+using std::string;
 
 namespace android {
 namespace os {
 namespace statsd {
 
-using android::RefBase;
+string getFlagString(const string& flagName, const string& defaultValue) {
+    return GetServerConfigurableFlag(STATSD_NATIVE_NAMESPACE, flagName, defaultValue);
+}
 
-/**
- * Callback for different subsystems inside statsd to implement to find out
- * when a configuration has been added, updated or removed.
- */
-class ConfigListener : public virtual RefBase {
-public:
-    ConfigListener();
-    virtual ~ConfigListener();
-
-    /**
-     * A configuration was added or updated.
-     */
-    virtual void OnConfigUpdated(const int64_t timestampNs, const ConfigKey& key,
-                                 const StatsdConfig& config) = 0;
-
-    /**
-     * A configuration was removed.
-     */
-    virtual void OnConfigRemoved(const ConfigKey& key) = 0;
-};
-
+bool getFlagBool(const string& flagName, const string& defaultValue) {
+    return getFlagString(flagName, defaultValue) == "true";
+}
 }  // namespace statsd
 }  // namespace os
 }  // namespace android

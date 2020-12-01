@@ -334,7 +334,7 @@ private:
 
     FRIEND_TEST(AlarmE2eTest, TestMultipleAlarms);
     FRIEND_TEST(ConfigTtlE2eTest, TestCountMetric);
-    FRIEND_TEST(ConfigUpdateE2eTest, TestConfigTtl);
+    FRIEND_TEST(ConfigUpdateE2eAbTest, TestConfigTtl);
     FRIEND_TEST(MetricActivationE2eTest, TestCountMetric);
     FRIEND_TEST(MetricActivationE2eTest, TestCountMetricWithOneDeactivation);
     FRIEND_TEST(MetricActivationE2eTest, TestCountMetricWithTwoDeactivations);
