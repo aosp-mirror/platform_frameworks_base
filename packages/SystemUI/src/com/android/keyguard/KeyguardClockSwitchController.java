@@ -17,7 +17,9 @@
 package com.android.keyguard;
 
 import android.app.WallpaperManager;
+import android.content.ContentResolver;
 import android.content.res.Resources;
+import android.provider.Settings;
 import android.text.format.DateFormat;
 import android.util.TypedValue;
 import android.view.View;
@@ -90,6 +92,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     };
 
     private ClockManager.ClockChangedListener mClockChangedListener = this::setClockPlugin;
+    private String mTimeFormat;
 
     @Inject
     public KeyguardClockSwitchController(
@@ -98,7 +101,8 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
             StatusBarStateController statusBarStateController,
             SysuiColorExtractor colorExtractor, ClockManager clockManager,
             KeyguardSliceViewController keyguardSliceViewController,
-            NotificationIconAreaController notificationIconAreaController) {
+            NotificationIconAreaController notificationIconAreaController,
+            ContentResolver contentResolver) {
         super(keyguardClockSwitch);
         mResources = resources;
         mStatusBarStateController = statusBarStateController;
@@ -106,6 +110,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         mClockManager = clockManager;
         mKeyguardSliceViewController = keyguardSliceViewController;
         mNotificationIconAreaController = notificationIconAreaController;
+        mTimeFormat = Settings.System.getString(contentResolver, Settings.System.TIME_12_24);
     }
 
     /**
@@ -246,12 +251,26 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
 
     void updateTimeZone(TimeZone timeZone) {
         mView.onTimeZoneChanged(timeZone);
+        if (mNewLockScreenClockViewController != null) {
+            mNewLockScreenClockViewController.onTimeZoneChanged(timeZone);
+            mNewLockScreenLargeClockViewController.onTimeZoneChanged(timeZone);
+        }
     }
 
-    void refreshFormat() {
+    void refreshFormat(String timeFormat) {
+        mTimeFormat = timeFormat;
         Patterns.update(mResources);
         mView.setFormat12Hour(Patterns.sClockView12);
         mView.setFormat24Hour(Patterns.sClockView24);
+        mView.onTimeFormatChanged(mTimeFormat);
+        if (mNewLockScreenClockViewController != null) {
+            mNewLockScreenClockViewController.refreshFormat();
+            mNewLockScreenLargeClockViewController.refreshFormat();
+        }
+    }
+
+    void refreshFormat() {
+        refreshFormat(mTimeFormat);
     }
 
     float getClockTextTopPadding() {

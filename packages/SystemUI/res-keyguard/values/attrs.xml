@@ -39,4 +39,9 @@
     </declare-styleable>
 
     <attr name="passwordStyle" format="reference" />
+
+    <declare-styleable name="AnimatableClockView">
+        <attr name="dozeWeight" format="integer" />
+        <attr name="lockScreenWeight" format="integer" />
+    </declare-styleable>
 </resources>

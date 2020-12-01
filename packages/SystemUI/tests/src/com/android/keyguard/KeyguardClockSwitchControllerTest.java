@@ -23,6 +23,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.content.ContentResolver;
 import android.content.res.Resources;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
@@ -72,6 +73,8 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
     Resources mResources;
     @Mock
     NotificationIconAreaController mNotificationIconAreaController;
+    @Mock
+    ContentResolver mContentResolver;
 
     private KeyguardClockSwitchController mController;
 
@@ -90,7 +93,8 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
                 mColorExtractor,
                 mClockManager,
                 mKeyguardSliceViewController,
-                mNotificationIconAreaController);
+                mNotificationIconAreaController,
+                mContentResolver);
 
         when(mStatusBarStateController.getState()).thenReturn(StatusBarState.SHADE);
         when(mColorExtractor.getColors(anyInt())).thenReturn(mGradientColors);
