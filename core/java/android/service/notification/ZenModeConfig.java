@@ -895,14 +895,15 @@ public class ZenModeConfig implements Parcelable {
     }
 
     private static Boolean unsafeBoolean(TypedXmlPullParser parser, String att) {
-        final String val = parser.getAttributeValue(null, att);
-        if (TextUtils.isEmpty(val)) return null;
-        return Boolean.parseBoolean(val);
+        try {
+            return parser.getAttributeBoolean(null, att);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     private static boolean safeBoolean(TypedXmlPullParser parser, String att, boolean defValue) {
-        final String val = parser.getAttributeValue(null, att);
-        return safeBoolean(val, defValue);
+        return parser.getAttributeBoolean(null, att, defValue);
     }
 
     private static boolean safeBoolean(String val, boolean defValue) {
@@ -911,8 +912,7 @@ public class ZenModeConfig implements Parcelable {
     }
 
     private static int safeInt(TypedXmlPullParser parser, String att, int defValue) {
-        final String val = parser.getAttributeValue(null, att);
-        return tryParseInt(val, defValue);
+        return parser.getAttributeInt(null, att, defValue);
     }
 
     private static ComponentName safeComponentName(TypedXmlPullParser parser, String att) {

@@ -744,35 +744,28 @@ public final class SystemUpdatePolicy implements Parcelable {
     public static SystemUpdatePolicy restoreFromXml(TypedXmlPullParser parser) {
         try {
             SystemUpdatePolicy policy = new SystemUpdatePolicy();
-            String value = parser.getAttributeValue(null, KEY_POLICY_TYPE);
-            if (value != null) {
-                policy.mPolicyType = Integer.parseInt(value);
+            policy.mPolicyType =
+                    parser.getAttributeInt(null, KEY_POLICY_TYPE, TYPE_UNKNOWN);
+            policy.mMaintenanceWindowStart =
+                    parser.getAttributeInt(null, KEY_INSTALL_WINDOW_START, 0);
+            policy.mMaintenanceWindowEnd =
+                    parser.getAttributeInt(null, KEY_INSTALL_WINDOW_END, 0);
 
-                value = parser.getAttributeValue(null, KEY_INSTALL_WINDOW_START);
-                if (value != null) {
-                    policy.mMaintenanceWindowStart = Integer.parseInt(value);
+            int outerDepth = parser.getDepth();
+            int type;
+            while ((type = parser.next()) != END_DOCUMENT
+                    && (type != END_TAG || parser.getDepth() > outerDepth)) {
+                if (type == END_TAG || type == TEXT) {
+                    continue;
                 }
-                value = parser.getAttributeValue(null, KEY_INSTALL_WINDOW_END);
-                if (value != null) {
-                    policy.mMaintenanceWindowEnd = Integer.parseInt(value);
+                if (!parser.getName().equals(KEY_FREEZE_TAG)) {
+                    continue;
                 }
-
-                int outerDepth = parser.getDepth();
-                int type;
-                while ((type = parser.next()) != END_DOCUMENT
-                        && (type != END_TAG || parser.getDepth() > outerDepth)) {
-                    if (type == END_TAG || type == TEXT) {
-                        continue;
-                    }
-                    if (!parser.getName().equals(KEY_FREEZE_TAG)) {
-                        continue;
-                    }
-                    policy.mFreezePeriods.add(new FreezePeriod(
-                            MonthDay.parse(parser.getAttributeValue(null, KEY_FREEZE_START)),
-                            MonthDay.parse(parser.getAttributeValue(null, KEY_FREEZE_END))));
-                }
-                return policy;
+                policy.mFreezePeriods.add(new FreezePeriod(
+                        MonthDay.parse(parser.getAttributeValue(null, KEY_FREEZE_START)),
+                        MonthDay.parse(parser.getAttributeValue(null, KEY_FREEZE_END))));
             }
+            return policy;
         } catch (NumberFormatException | XmlPullParserException | IOException e) {
             // Fail through
             Log.w(TAG, "Load xml failed", e);

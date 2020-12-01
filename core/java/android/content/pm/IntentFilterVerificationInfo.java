@@ -135,15 +135,7 @@ public final class IntentFilterVerificationInfo implements Parcelable {
     }
 
     int getIntFromXml(TypedXmlPullParser parser, String attribute, int defaultValue) {
-        String value = parser.getAttributeValue(null, attribute);
-        if (TextUtils.isEmpty(value)) {
-            String msg = "Missing element under " + TAG +": " + attribute + " at " +
-                    parser.getPositionDescription();
-            Log.w(TAG, msg);
-            return defaultValue;
-        } else {
-            return Integer.parseInt(value);
-        }
+        return parser.getAttributeInt(null, attribute, defaultValue);
     }
 
     /** @hide */

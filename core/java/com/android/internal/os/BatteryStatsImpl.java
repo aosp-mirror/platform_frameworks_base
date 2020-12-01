@@ -10977,14 +10977,8 @@ public class BatteryStatsImpl extends BatteryStats {
     void readDailyItemTagLocked(TypedXmlPullParser parser) throws NumberFormatException,
             XmlPullParserException, IOException {
         DailyItem dit = new DailyItem();
-        String attr = parser.getAttributeValue(null, "start");
-        if (attr != null) {
-            dit.mStartTime = Long.parseLong(attr);
-        }
-        attr = parser.getAttributeValue(null, "end");
-        if (attr != null) {
-            dit.mEndTime = Long.parseLong(attr);
-        }
+        dit.mStartTime = parser.getAttributeLong(null, "start", 0);
+        dit.mEndTime = parser.getAttributeLong(null, "end", 0);
         int outerDepth = parser.getDepth();
         int type;
         while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
@@ -11005,8 +10999,7 @@ public class BatteryStatsImpl extends BatteryStats {
                 PackageChange pc = new PackageChange();
                 pc.mUpdate = true;
                 pc.mPackageName = parser.getAttributeValue(null, "pkg");
-                String verStr = parser.getAttributeValue(null, "ver");
-                pc.mVersionCode = verStr != null ? Long.parseLong(verStr) : 0;
+                pc.mVersionCode = parser.getAttributeLong(null, "ver", 0);
                 dit.mPackageChanges.add(pc);
                 XmlUtils.skipCurrentTag(parser);
             } else if (tagName.equals("rem")) {
@@ -11030,13 +11023,12 @@ public class BatteryStatsImpl extends BatteryStats {
     void readDailyItemTagDetailsLocked(TypedXmlPullParser parser, DailyItem dit, boolean isCharge,
             String tag)
             throws NumberFormatException, XmlPullParserException, IOException {
-        final String numAttr = parser.getAttributeValue(null, "n");
-        if (numAttr == null) {
+        final int num = parser.getAttributeInt(null, "n", -1);
+        if (num == -1) {
             Slog.w(TAG, "Missing 'n' attribute at " + parser.getPositionDescription());
             XmlUtils.skipCurrentTag(parser);
             return;
         }
-        final int num = Integer.parseInt(numAttr);
         LevelStepTracker steps = new LevelStepTracker(num);
         if (isCharge) {
             dit.mChargeSteps = steps;

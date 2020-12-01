@@ -733,8 +733,7 @@ public class BootReceiver extends BroadcastReceiver {
                     String tagName = parser.getName();
                     if (tagName.equals("log")) {
                         final String filename = parser.getAttributeValue(null, "filename");
-                        final long timestamp = Long.valueOf(parser.getAttributeValue(
-                                    null, "timestamp"));
+                        final long timestamp = parser.getAttributeLong(null, "timestamp");
                         timestamps.put(filename, timestamp);
                     } else {
                         Slog.w(TAG, "Unknown tag: " + parser.getName());
@@ -782,7 +781,7 @@ public class BootReceiver extends BroadcastReceiver {
                     String filename = itor.next();
                     out.startTag(null, "log");
                     out.attribute(null, "filename", filename);
-                    out.attribute(null, "timestamp", timestamps.get(filename).toString());
+                    out.attributeLong(null, "timestamp", timestamps.get(filename));
                     out.endTag(null, "log");
                 }
 

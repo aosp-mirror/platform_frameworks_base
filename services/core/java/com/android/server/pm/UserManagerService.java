@@ -4245,10 +4245,9 @@ public class UserManagerService extends IUserManager.Stub {
         if (type == XmlPullParser.START_TAG && parser.getName().equals(TAG_ENTRY)) {
             String key = parser.getAttributeValue(null, ATTR_KEY);
             String valType = parser.getAttributeValue(null, ATTR_VALUE_TYPE);
-            String multiple = parser.getAttributeValue(null, ATTR_MULTIPLE);
-            if (multiple != null) {
+            int count = parser.getAttributeInt(null, ATTR_MULTIPLE, -1);
+            if (count != -1) {
                 values.clear();
-                int count = Integer.parseInt(multiple);
                 while (count > 0 && (type = parser.next()) != XmlPullParser.END_DOCUMENT) {
                     if (type == XmlPullParser.START_TAG
                             && parser.getName().equals(TAG_VALUE)) {

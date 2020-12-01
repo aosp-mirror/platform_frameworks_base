@@ -688,8 +688,7 @@ public abstract class RegisteredServicesCache<V> {
                         if (service == null) {
                             break;
                         }
-                        String uidString = parser.getAttributeValue(null, "uid");
-                        final int uid = Integer.parseInt(uidString);
+                        final int uid = parser.getAttributeInt(null, "uid");
                         final int userId = UserHandle.getUserId(uid);
                         final UserServices<V> user = findOrCreateUserLocked(userId,
                                 false /*loadFromFileIfNew*/) ;

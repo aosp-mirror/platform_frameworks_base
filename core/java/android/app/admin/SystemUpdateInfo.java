@@ -21,8 +21,11 @@ import android.annotation.Nullable;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
 import android.util.TypedXmlPullParser;
 import android.util.TypedXmlSerializer;
+
+import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.lang.annotation.Retention;
@@ -33,6 +36,7 @@ import java.util.Objects;
  * A class containing information about a pending system update.
  */
 public final class SystemUpdateInfo implements Parcelable {
+    private static final String TAG = "SystemUpdateInfo";
 
     /**
      * Represents it is unknown whether the system update is a security patch.
@@ -140,11 +144,16 @@ public final class SystemUpdateInfo implements Parcelable {
         if (!Build.FINGERPRINT.equals(buildFingerprint)) {
             return null;
         }
-        final long receivedTime =
-                parser.getAttributeLong(null, ATTR_RECEIVED_TIME);
-        final int securityPatchState =
-                parser.getAttributeInt(null, ATTR_SECURITY_PATCH_STATE);
-        return new SystemUpdateInfo(receivedTime, securityPatchState);
+        try {
+            final long receivedTime =
+                    parser.getAttributeLong(null, ATTR_RECEIVED_TIME);
+            final int securityPatchState =
+                    parser.getAttributeInt(null, ATTR_SECURITY_PATCH_STATE);
+            return new SystemUpdateInfo(receivedTime, securityPatchState);
+        } catch (XmlPullParserException e) {
+            Log.w(TAG, "Load xml failed", e);
+            return null;
+        }
     }
 
     @Override

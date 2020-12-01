@@ -1116,23 +1116,11 @@ public final class NotificationChannel implements Parcelable {
     }
 
     private static int safeInt(TypedXmlPullParser parser, String att, int defValue) {
-        final String val = parser.getAttributeValue(null, att);
-        return tryParseInt(val, defValue);
-    }
-
-    private static int tryParseInt(String value, int defValue) {
-        if (TextUtils.isEmpty(value)) return defValue;
-        try {
-            return Integer.parseInt(value);
-        } catch (NumberFormatException e) {
-            return defValue;
-        }
+        return parser.getAttributeInt(null, att, defValue);
     }
 
     private static boolean safeBool(TypedXmlPullParser parser, String att, boolean defValue) {
-        final String value = parser.getAttributeValue(null, att);
-        if (TextUtils.isEmpty(value)) return defValue;
-        return Boolean.parseBoolean(value);
+        return parser.getAttributeBoolean(null, att, defValue);
     }
 
     private static long[] safeLongArray(TypedXmlPullParser parser, String att, long[] defValue) {

@@ -231,13 +231,7 @@ public final class NotificationChannelGroup implements Parcelable {
     public void populateFromXml(TypedXmlPullParser parser) {
         // Name, id, and importance are set in the constructor.
         setDescription(parser.getAttributeValue(null, ATT_DESC));
-        setBlocked(safeBool(parser, ATT_BLOCKED, false));
-    }
-
-    private static boolean safeBool(TypedXmlPullParser parser, String att, boolean defValue) {
-        final String value = parser.getAttributeValue(null, att);
-        if (TextUtils.isEmpty(value)) return defValue;
-        return Boolean.parseBoolean(value);
+        setBlocked(parser.getAttributeBoolean(null, ATT_BLOCKED, false));
     }
 
     /**

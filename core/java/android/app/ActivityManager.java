@@ -1530,28 +1530,28 @@ public class ActivityManager {
             if (label != null) {
                 setLabel(label);
             }
-            final String colorPrimary = in.getAttributeValue(null,
-                    ATTR_TASKDESCRIPTIONCOLOR_PRIMARY);
-            if (colorPrimary != null) {
-                setPrimaryColor((int) Long.parseLong(colorPrimary, 16));
+            final int colorPrimary = in.getAttributeIntHex(null,
+                    ATTR_TASKDESCRIPTIONCOLOR_PRIMARY, 0);
+            if (colorPrimary != 0) {
+                setPrimaryColor(colorPrimary);
             }
-            final String colorBackground = in.getAttributeValue(null,
-                    ATTR_TASKDESCRIPTIONCOLOR_BACKGROUND);
-            if (colorBackground != null) {
-                setBackgroundColor((int) Long.parseLong(colorBackground, 16));
+            final int colorBackground = in.getAttributeIntHex(null,
+                    ATTR_TASKDESCRIPTIONCOLOR_BACKGROUND, 0);
+            if (colorBackground != 0) {
+                setBackgroundColor(colorBackground);
             }
             final String iconFilename = in.getAttributeValue(null,
                     ATTR_TASKDESCRIPTIONICON_FILENAME);
             if (iconFilename != null) {
                 setIconFilename(iconFilename);
             }
-            final String iconResourceId = in.getAttributeValue(null,
-                    ATTR_TASKDESCRIPTIONICON_RESOURCE);
+            final int iconResourceId = in.getAttributeInt(null,
+                    ATTR_TASKDESCRIPTIONICON_RESOURCE, Resources.ID_NULL);
             final String iconResourcePackage = in.getAttributeValue(null,
                     ATTR_TASKDESCRIPTIONICON_RESOURCE_PACKAGE);
-            if (iconResourceId != null && iconResourcePackage != null) {
+            if (iconResourceId != Resources.ID_NULL && iconResourcePackage != null) {
                 setIcon(Icon.createWithResource(iconResourcePackage,
-                        Integer.parseInt(iconResourceId, 10)));
+                        iconResourceId));
             }
         }
 

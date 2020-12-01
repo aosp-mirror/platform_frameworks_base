@@ -868,13 +868,8 @@ class Owners {
                     mDeviceOwnerUserId = UserHandle.USER_SYSTEM; // Set default
                     break;
                 case TAG_DEVICE_OWNER_CONTEXT: {
-                    final String userIdString =
-                            parser.getAttributeValue(null, ATTR_USERID);
-                    try {
-                        mDeviceOwnerUserId = Integer.parseInt(userIdString);
-                    } catch (NumberFormatException e) {
-                        Slog.e(TAG, "Error parsing user-id " + userIdString);
-                    }
+                    mDeviceOwnerUserId = parser.getAttributeInt(null, ATTR_USERID,
+                            mDeviceOwnerUserId);
                     break;
                 }
                 case TAG_DEVICE_INITIALIZER:

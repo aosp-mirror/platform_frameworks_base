@@ -20,14 +20,26 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.util.TypedXmlPullParser;
 import android.util.TypedXmlSerializer;
 
+import com.android.internal.util.XmlUtils;
+
+import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlSerializer;
 
 import java.io.IOException;
 
 /** @hide */
 public interface XmlSerializerAndParser<T> {
-    @UnsupportedAppUsage
     void writeAsXml(T item, TypedXmlSerializer out) throws IOException;
-    @UnsupportedAppUsage
     T createFromXml(TypedXmlPullParser parser) throws IOException, XmlPullParserException;
+
+    @UnsupportedAppUsage
+    default void writeAsXml(T item, XmlSerializer out) throws IOException {
+        writeAsXml(item, XmlUtils.makeTyped(out));
+    }
+
+    @UnsupportedAppUsage
+    default T createFromXml(XmlPullParser parser) throws IOException, XmlPullParserException {
+        return createFromXml(XmlUtils.makeTyped(parser));
+    }
 }

@@ -402,13 +402,13 @@ class DevicePolicyData {
             if (Boolean.toString(true).equals(deviceProvisioningConfigApplied)) {
                 policy.mDeviceProvisioningConfigApplied = true;
             }
-            String provisioningState = parser.getAttributeValue(null, ATTR_PROVISIONING_STATE);
-            if (!TextUtils.isEmpty(provisioningState)) {
-                policy.mUserProvisioningState = Integer.parseInt(provisioningState);
+            int provisioningState = parser.getAttributeInt(null, ATTR_PROVISIONING_STATE, -1);
+            if (provisioningState != -1) {
+                policy.mUserProvisioningState = provisioningState;
             }
-            String permissionPolicy = parser.getAttributeValue(null, ATTR_PERMISSION_POLICY);
-            if (!TextUtils.isEmpty(permissionPolicy)) {
-                policy.mPermissionPolicy = Integer.parseInt(permissionPolicy);
+            int permissionPolicy = parser.getAttributeInt(null, ATTR_PERMISSION_POLICY, -1);
+            if (permissionPolicy != -1) {
+                policy.mPermissionPolicy = permissionPolicy;
             }
 
             parser.next();

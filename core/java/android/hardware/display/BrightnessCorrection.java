@@ -182,12 +182,7 @@ public final class BrightnessCorrection implements Parcelable {
     }
 
     private static float loadFloatFromXml(TypedXmlPullParser parser, String attribute) {
-        final String string = parser.getAttributeValue(null, attribute);
-        try {
-            return Float.parseFloat(string);
-        } catch (NullPointerException | NumberFormatException e) {
-            return Float.NaN;
-        }
+        return parser.getAttributeFloat(null, attribute, Float.NaN);
     }
 
     private interface BrightnessCorrectionImplementation {

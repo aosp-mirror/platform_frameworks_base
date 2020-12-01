@@ -624,8 +624,7 @@ class ActiveAdmin {
             } else if (TAG_MIN_PASSWORD_NONLETTER.equals(tag)) {
                 mPasswordPolicy.nonLetter = parser.getAttributeInt(null, ATTR_VALUE);
             } else if (TAG_PASSWORD_QUALITY_APPLIES_TO_PARENT.equals(tag)) {
-                mPasswordPolicyAppliesToParent = Boolean.parseBoolean(
-                        parser.getAttributeValue(null, ATTR_VALUE));
+                mPasswordPolicyAppliesToParent = parser.getAttributeBoolean(null, ATTR_VALUE);
             } else if (TAG_MAX_TIME_TO_UNLOCK.equals(tag)) {
                 maximumTimeToUnlock = parser.getAttributeLong(null, ATTR_VALUE);
             } else if (TAG_STRONG_AUTH_UNLOCK_TIMEOUT.equals(tag)) {

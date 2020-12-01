@@ -2549,35 +2549,30 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
 
     private static Bundle parseWidgetIdOptions(TypedXmlPullParser parser) {
         Bundle options = new Bundle();
-        String restoreCompleted = parser.getAttributeValue(null, "restore_completed");
-        if (restoreCompleted != null) {
-            options.putBoolean(AppWidgetManager.OPTION_APPWIDGET_RESTORE_COMPLETED,
-                    Boolean.valueOf(restoreCompleted));
+        boolean restoreCompleted = parser.getAttributeBoolean(null, "restore_completed", false);
+        if (restoreCompleted) {
+            options.putBoolean(AppWidgetManager.OPTION_APPWIDGET_RESTORE_COMPLETED, true);
         }
-        String minWidthString = parser.getAttributeValue(null, "min_width");
-        if (minWidthString != null) {
-            options.putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH,
-                    Integer.parseInt(minWidthString, 16));
+        int minWidth = parser.getAttributeIntHex(null, "min_width", -1);
+        if (minWidth != -1) {
+            options.putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, minWidth);
         }
-        String minHeightString = parser.getAttributeValue(null, "min_height");
-        if (minHeightString != null) {
-            options.putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT,
-                    Integer.parseInt(minHeightString, 16));
+        int minHeight = parser.getAttributeIntHex(null, "min_height", -1);
+        if (minHeight != -1) {
+            options.putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, minHeight);
         }
-        String maxWidthString = parser.getAttributeValue(null, "max_width");
-        if (maxWidthString != null) {
-            options.putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH,
-                    Integer.parseInt(maxWidthString, 16));
+        int maxWidth = parser.getAttributeIntHex(null, "max_width", -1);
+        if (maxWidth != -1) {
+            options.putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH, maxWidth);
         }
-        String maxHeightString = parser.getAttributeValue(null, "max_height");
-        if (maxHeightString != null) {
-            options.putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT,
-                    Integer.parseInt(maxHeightString, 16));
+        int maxHeight = parser.getAttributeIntHex(null, "max_height", -1);
+        if (maxHeight != -1) {
+            options.putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT, maxHeight);
         }
-        String categoryString = parser.getAttributeValue(null, "host_category");
-        if (categoryString != null) {
-            options.putInt(AppWidgetManager.OPTION_APPWIDGET_HOST_CATEGORY,
-                    Integer.parseInt(categoryString, 16));
+        int category = parser.getAttributeIntHex(null, "host_category",
+                AppWidgetProviderInfo.WIDGET_CATEGORY_UNKNOWN);
+        if (category != AppWidgetProviderInfo.WIDGET_CATEGORY_UNKNOWN) {
+            options.putInt(AppWidgetManager.OPTION_APPWIDGET_HOST_CATEGORY, category);
         }
         return options;
     }
@@ -3151,12 +3146,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                 if (type == XmlPullParser.START_TAG) {
                     String tag = parser.getName();
                     if ("gs".equals(tag)) {
-                        String attributeValue = parser.getAttributeValue(null, "version");
-                        try {
-                            version = Integer.parseInt(attributeValue);
-                        } catch (NumberFormatException e) {
-                            version = 0;
-                        }
+                        version = parser.getAttributeInt(null, "version", 0);
                     } else if ("p".equals(tag)) {
                         legacyProviderIndex++;
                         // TODO: do we need to check that this package has the same signature
@@ -3195,9 +3185,8 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                             mProviders.add(provider);
                         }
 
-                        String tagAttribute = parser.getAttributeValue(null, "tag");
-                        final int providerTag = !TextUtils.isEmpty(tagAttribute)
-                                ? Integer.parseInt(tagAttribute, 16) : legacyProviderIndex;
+                        final int providerTag = parser.getAttributeIntHex(null, "tag",
+                                legacyProviderIndex);
                         provider.tag = providerTag;
 
                         provider.infoTag = parser.getAttributeValue(null, "info_tag");
@@ -3224,10 +3213,8 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                             // In safe mode, we don't discard the hosts we don't recognize
                             // so that they're not pruned from our list. Otherwise, we do.
                             final int hostId = parser.getAttributeIntHex(null, "id");
-
-                            String tagAttribute = parser.getAttributeValue(null, "tag");
-                            final int hostTag = !TextUtils.isEmpty(tagAttribute)
-                                    ? Integer.parseInt(tagAttribute, 16) : legacyHostIndex;
+                            final int hostTag = parser.getAttributeIntHex(null, "tag",
+                                    legacyHostIndex);
 
                             host.tag = hostTag;
                             host.id = new HostId(uid, hostId, pkg);
@@ -3246,9 +3233,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                         setMinAppWidgetIdLocked(userId, widget.appWidgetId + 1);
 
                         // restored ID is allowed to be absent
-                        String restoredIdString = parser.getAttributeValue(null, "rid");
-                        widget.restoredId = (restoredIdString == null) ? 0
-                                : Integer.parseInt(restoredIdString, 16);
+                        widget.restoredId = parser.getAttributeIntHex(null, "rid", 0);
                         widget.options = parseWidgetIdOptions(parser);
 
                         final int hostTag = parser.getAttributeIntHex(null, "h");
@@ -4473,11 +4458,9 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                         if (type == XmlPullParser.START_TAG) {
                             final String tag = parser.getName();
                             if ("ws".equals(tag)) {
-                                String version = parser.getAttributeValue(null, "version");
-
-                                final int versionNumber = Integer.parseInt(version);
+                                final int versionNumber = parser.getAttributeInt(null, "version");
                                 if (versionNumber > WIDGET_STATE_VERSION) {
-                                    Slog.w(TAG, "Unable to process state version " + version);
+                                    Slog.w(TAG, "Unable to process state version " + versionNumber);
                                     return;
                                 }
 
@@ -4534,11 +4517,10 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                                 int hostIndex = parser.getAttributeIntHex(null, "h");
                                 Host host = restoredHosts.get(hostIndex);
                                 Provider p = null;
-                                String prov = parser.getAttributeValue(null, "p");
-                                if (prov != null) {
+                                int which = parser.getAttributeIntHex(null, "p", -1);
+                                if (which != -1) {
                                     // could have been null if the app had allocated an id
                                     // but not yet established a binding under that id
-                                    int which = Integer.parseInt(prov, 16);
                                     p = restoredProviders.get(which);
                                 }
 

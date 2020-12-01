@@ -68,6 +68,9 @@ public class AppWidgetProviderInfo implements Parcelable {
     @Retention(RetentionPolicy.SOURCE)
     public @interface ResizeModeFlags {}
 
+    /** {@hide} */
+    public static final int WIDGET_CATEGORY_UNKNOWN = -1;
+
     /**
      * Indicates that the widget can be displayed on the home screen. This is the default value.
      */

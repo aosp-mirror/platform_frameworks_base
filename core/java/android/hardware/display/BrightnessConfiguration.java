@@ -439,17 +439,12 @@ public final class BrightnessConfiguration implements Parcelable {
                         continue;
                     }
                     final String packageName = parser.getAttributeValue(null, ATTR_PACKAGE_NAME);
-                    final String categoryText = parser.getAttributeValue(null, ATTR_CATEGORY);
+                    final int category = parser.getAttributeInt(null, ATTR_CATEGORY, -1);
                     BrightnessCorrection correction = BrightnessCorrection.loadFromXml(parser);
                     if (packageName != null) {
                         correctionsByPackageName.put(packageName, correction);
-                    } else if (categoryText != null) {
-                        try {
-                            final int category = Integer.parseInt(categoryText);
-                            correctionsByCategory.put(category, correction);
-                        } catch (NullPointerException | NumberFormatException e) {
-                            continue;
-                        }
+                    } else if (category != -1) {
+                        correctionsByCategory.put(category, correction);
                     }
                 }
             } else if (TAG_BRIGHTNESS_PARAMS.equals(parser.getName())) {
@@ -491,22 +486,15 @@ public final class BrightnessConfiguration implements Parcelable {
     }
 
     private static float loadFloatFromXml(TypedXmlPullParser parser, String attribute) {
-        final String string = parser.getAttributeValue(null, attribute);
-        try {
-            return Float.parseFloat(string);
-        } catch (NullPointerException | NumberFormatException e) {
-            return Float.NaN;
-        }
+        return parser.getAttributeFloat(null, attribute, Float.NaN);
     }
 
     private static Long loadLongFromXml(TypedXmlPullParser parser, String attribute) {
-        final String string = parser.getAttributeValue(null, attribute);
         try {
-            return Long.parseLong(string);
-        } catch (NullPointerException | NumberFormatException e) {
-            // Ignoring
+            return parser.getAttributeLong(null, attribute);
+        } catch (Exception e) {
+            return null;
         }
-        return null;
     }
 
     /**
