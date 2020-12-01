@@ -185,12 +185,13 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.logging.MetricsLogger;
-import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.AsyncChannel;
+import com.android.internal.util.BitUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.LocationPermissionChecker;
 import com.android.internal.util.MessageUtils;
 import com.android.modules.utils.BasicShellCommandHandler;
+import com.android.net.module.util.CollectionUtils;
 import com.android.net.module.util.LinkPropertiesUtils.CompareOrUpdateResult;
 import com.android.net.module.util.LinkPropertiesUtils.CompareResult;
 import com.android.server.am.BatteryStatsService;
@@ -2558,13 +2559,13 @@ public class ConnectivityService extends IConnectivityManager.Stub
         if (!checkDumpPermission(mContext, TAG, pw)) return;
         if (asProto) return;
 
-        if (ArrayUtils.contains(args, DIAG_ARG)) {
+        if (CollectionUtils.contains(args, DIAG_ARG)) {
             dumpNetworkDiagnostics(pw);
             return;
-        } else if (ArrayUtils.contains(args, NETWORK_ARG)) {
+        } else if (CollectionUtils.contains(args, NETWORK_ARG)) {
             dumpNetworks(pw);
             return;
-        } else if (ArrayUtils.contains(args, REQUEST_ARG)) {
+        } else if (CollectionUtils.contains(args, REQUEST_ARG)) {
             dumpNetworkRequests(pw);
             return;
         }
@@ -2635,7 +2636,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
         pw.println();
 
-        if (ArrayUtils.contains(args, SHORT_ARG) == false) {
+        if (!CollectionUtils.contains(args, SHORT_ARG)) {
             pw.println();
             pw.println("mNetworkRequestInfoLogs (most recent first):");
             pw.increaseIndent();
@@ -4788,7 +4789,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             }
         }
 
-        if (ArrayUtils.isEmpty(underlyingNetworks)) return null;
+        if (CollectionUtils.isEmpty(underlyingNetworks)) return null;
 
         List<String> interfaces = new ArrayList<>();
         for (Network network : underlyingNetworks) {
@@ -4832,7 +4833,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         if (!nai.supportsUnderlyingNetworks()) return false;
         final Network[] underlying = underlyingNetworksOrDefault(
                 nai.networkCapabilities.getOwnerUid(), nai.declaredUnderlyingNetworks);
-        return ArrayUtils.contains(underlying, network);
+        return CollectionUtils.contains(underlying, network);
     }
 
     /**
@@ -5296,8 +5297,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 }
             }
         }
-        // TODO: use NetworkStackUtils.convertToIntArray after moving it
-        return ArrayUtils.convertToIntArray(new ArrayList<>(thresholds));
+        return CollectionUtils.toIntArray(new ArrayList<>(thresholds));
     }
 
     private void updateSignalStrengthThresholds(
@@ -6416,7 +6416,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             @NonNull NetworkCapabilities agentCaps, @NonNull NetworkCapabilities newNc) {
         underlyingNetworks = underlyingNetworksOrDefault(
                 agentCaps.getOwnerUid(), underlyingNetworks);
-        int[] transportTypes = agentCaps.getTransportTypes();
+        long transportTypes = BitUtils.packBits(agentCaps.getTransportTypes());
         int downKbps = NetworkCapabilities.LINK_BANDWIDTH_UNSPECIFIED;
         int upKbps = NetworkCapabilities.LINK_BANDWIDTH_UNSPECIFIED;
         // metered if any underlying is metered, or originally declared metered by the agent.
@@ -6435,7 +6435,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 final NetworkCapabilities underlyingCaps = underlying.networkCapabilities;
                 hadUnderlyingNetworks = true;
                 for (int underlyingType : underlyingCaps.getTransportTypes()) {
-                    transportTypes = ArrayUtils.appendInt(transportTypes, underlyingType);
+                    transportTypes |= 1L << underlyingType;
                 }
 
                 // Merge capabilities of this underlying network. For bandwidth, assume the
@@ -6466,7 +6466,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             suspended = false;
         }
 
-        newNc.setTransportTypes(transportTypes);
+        newNc.setTransportTypes(BitUtils.unpackBits(transportTypes));
         newNc.setLinkDownstreamBandwidthKbps(downKbps);
         newNc.setLinkUpstreamBandwidthKbps(upKbps);
         newNc.setCapability(NET_CAPABILITY_NOT_METERED, !metered);
@@ -8531,14 +8531,14 @@ public class ConnectivityService extends IConnectivityManager.Stub
         for (NetworkAgentInfo virtual : mNetworkAgentInfos) {
             if (virtual.supportsUnderlyingNetworks()
                     && virtual.networkCapabilities.getOwnerUid() == callbackUid
-                    && ArrayUtils.contains(virtual.declaredUnderlyingNetworks, nai.network)) {
+                    && CollectionUtils.contains(virtual.declaredUnderlyingNetworks, nai.network)) {
                 return true;
             }
         }
 
         // Administrator UIDs also contains the Owner UID
         final int[] administratorUids = nai.networkCapabilities.getAdministratorUids();
-        return ArrayUtils.contains(administratorUids, callbackUid);
+        return CollectionUtils.contains(administratorUids, callbackUid);
     }
 
     @Override
