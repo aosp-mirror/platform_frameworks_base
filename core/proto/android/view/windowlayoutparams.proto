@@ -35,7 +35,7 @@ message WindowLayoutParamsProto {
     optional int32 height = 5;
     optional float horizontal_margin = 6;
     optional float vertical_margin = 7;
-    optional int32 gravity = 8;
+    optional int32 gravity = 8 [(.android.typedef) = "android.view.Gravity.GravityFlags"];
     optional int32 soft_input_mode = 9 [(.android.typedef) = "android.view.WindowManager.LayoutParams.SoftInputModeFlags"];
     optional .android.graphics.PixelFormatProto.Format format = 10;
     optional int32 window_animations = 11;
