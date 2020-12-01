@@ -4310,9 +4310,15 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     saveSettingsLocked(caller.getUserId());
                     //TODO: Log password complexity change if security logging is enabled.
                 });
+
+                DevicePolicyEventLogger
+                        .createEvent(DevicePolicyEnums.SET_PASSWORD_COMPLEXITY)
+                        .setAdmin(admin.info.getPackageName())
+                        .setInt(passwordComplexity)
+                        .setBoolean(calledOnParent)
+                        .write();
             }
         }
-        //TODO: Log metrics.
     }
 
     private int getEffectivePasswordComplexityRequirementLocked(@UserIdInt int userHandle) {
