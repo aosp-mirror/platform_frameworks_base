@@ -1202,6 +1202,17 @@ public class DisplayContentTests extends WindowTestsBase {
         assertTrue(mNavBarWindow.getParent().isAnimating(WindowContainer.AnimationFlags.PARENTS,
                 ANIMATION_TYPE_FIXED_TRANSFORM));
 
+        // If the visibility of insets state is changed, the rotated state should be updated too.
+        final InsetsState rotatedState = app.getFixedRotationTransformInsetsState();
+        final InsetsState state = mDisplayContent.getInsetsStateController().getRawInsetsState();
+        assertEquals(state.getSource(ITYPE_STATUS_BAR).isVisible(),
+                rotatedState.getSource(ITYPE_STATUS_BAR).isVisible());
+        state.getSource(ITYPE_STATUS_BAR).setVisible(
+                !rotatedState.getSource(ITYPE_STATUS_BAR).isVisible());
+        mDisplayContent.getInsetsStateController().notifyInsetsChanged();
+        assertEquals(state.getSource(ITYPE_STATUS_BAR).isVisible(),
+                rotatedState.getSource(ITYPE_STATUS_BAR).isVisible());
+
         final Rect outFrame = new Rect();
         final Rect outInsets = new Rect();
         final Rect outStableInsets = new Rect();
