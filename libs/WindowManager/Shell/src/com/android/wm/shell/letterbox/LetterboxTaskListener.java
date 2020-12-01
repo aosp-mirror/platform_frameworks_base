@@ -107,6 +107,7 @@ public class LetterboxTaskListener implements ShellTaskOrganizer.TaskListener {
         transaction.setWindowCrop(leash, crop);
     }
 
+    // TODO(b/173440321): Correct presentation of letterboxed activities in One-handed mode.
     private void resolveTaskPositionAndCrop(
                 ActivityManager.RunningTaskInfo taskInfo,
                 Point positionInParent,
@@ -125,15 +126,18 @@ public class LetterboxTaskListener implements ShellTaskOrganizer.TaskListener {
         final Rect activityBounds = taskInfo.letterboxActivityBounds;
 
         Insets insets = getInsets();
+        Rect displayBoundsWithInsets =
+                new Rect(mWindowManager.getMaximumWindowMetrics().getBounds());
+        displayBoundsWithInsets.inset(insets);
 
         Rect taskBoundsWithInsets = new Rect(taskBounds);
-        applyInsets(taskBoundsWithInsets, insets, taskInfo.parentBounds);
+        taskBoundsWithInsets.intersect(displayBoundsWithInsets);
 
         Rect activityBoundsWithInsets = new Rect(activityBounds);
-        applyInsets(activityBoundsWithInsets, insets, taskInfo.parentBounds);
+        activityBoundsWithInsets.intersect(displayBoundsWithInsets);
 
         Rect parentBoundsWithInsets = new Rect(parentBounds);
-        applyInsets(parentBoundsWithInsets, insets, parentBounds);
+        parentBoundsWithInsets.intersect(displayBoundsWithInsets);
 
         // Crop need to be in the task coordinates.
         crop.set(activityBoundsWithInsets);
@@ -215,12 +219,6 @@ public class LetterboxTaskListener implements ShellTaskOrganizer.TaskListener {
                         WindowInsets.Type.navigationBars()
                                 | WindowInsets.Type.statusBars()
                                 | WindowInsets.Type.displayCutout());
-    }
-
-    private void applyInsets(Rect innerBounds, Insets insets, Rect outerBounds) {
-        Rect outerBoundsWithInsets = new Rect(outerBounds);
-        outerBoundsWithInsets.inset(insets);
-        innerBounds.intersect(outerBoundsWithInsets);
     }
 
 }

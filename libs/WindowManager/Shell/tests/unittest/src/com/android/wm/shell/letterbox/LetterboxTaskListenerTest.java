@@ -96,6 +96,7 @@ public final class LetterboxTaskListenerTest extends ShellTestCase {
         mLetterboxTaskListener.onTaskAppeared(
                 createTaskInfo(
                         /* taskId */ 1,
+                        /* maxBounds= */ new Rect(0, 0, 200, 100), // equal to parent bounds
                         /* parentBounds */ new Rect(0, 0, 200, 100),
                         /* activityBounds */ new Rect(75, 0, 125, 75),
                         /* taskBounds */ new Rect(50, 0, 125, 100)),
@@ -109,6 +110,7 @@ public final class LetterboxTaskListenerTest extends ShellTestCase {
         mLetterboxTaskListener.onTaskInfoChanged(
                 createTaskInfo(
                         /* taskId */ 1,
+                        /* maxBounds= */ new Rect(0, 0, 200, 100), // equal to parent bounds
                         /* parentBounds */ new Rect(0, 0, 200, 100),
                         // Activity is offset by 25 to the left
                         /* activityBounds */ new Rect(50, 0, 100, 75),
@@ -130,6 +132,7 @@ public final class LetterboxTaskListenerTest extends ShellTestCase {
         mLetterboxTaskListener.onTaskAppeared(
                 createTaskInfo(
                         /* taskId */ 1,
+                        /* maxBounds= */ new Rect(0, 0, 200, 100), // equal to parent bounds
                         /* parentBounds */ new Rect(0, 0, 200, 100),
                         /* activityBounds */ new Rect(150, 0, 200, 75),
                         /* taskBounds */ new Rect(125, 0, 200, 100)),
@@ -150,6 +153,7 @@ public final class LetterboxTaskListenerTest extends ShellTestCase {
         mLetterboxTaskListener.onTaskAppeared(
                 createTaskInfo(
                         /* taskId */ 1,
+                        /* maxBounds= */ new Rect(0, 0, 200, 100), // equal to parent bounds
                         /* parentBounds */ new Rect(0, 0, 200, 100),
                         /* activityBounds */ new Rect(150, 0, 200, 75),
                         /* taskBounds */ new Rect(125, 0, 200, 100)),
@@ -170,6 +174,7 @@ public final class LetterboxTaskListenerTest extends ShellTestCase {
         mLetterboxTaskListener.onTaskAppeared(
                 createTaskInfo(
                         /* taskId */ 1,
+                        /* maxBounds= */ new Rect(0, 0, 200, 100), // equal to parent bounds
                         /* parentBounds */ new Rect(0, 0, 200, 100),
                         /* activityBounds */ new Rect(50, 0, 100, 75),
                         /* taskBounds */ new Rect(25, 0, 100, 100)),
@@ -190,6 +195,7 @@ public final class LetterboxTaskListenerTest extends ShellTestCase {
         mLetterboxTaskListener.onTaskAppeared(
                 createTaskInfo(
                         /* taskId */ 1,
+                        /* maxBounds= */ new Rect(0, 0, 100, 150), // equal to parent bounds
                         /* parentBounds */ new Rect(0, 0, 100, 150),
                         /* activityBounds */ new Rect(0, 75, 50, 125),
                         /* taskBounds */ new Rect(0, 50, 100, 125)),
@@ -210,6 +216,7 @@ public final class LetterboxTaskListenerTest extends ShellTestCase {
         mLetterboxTaskListener.onTaskAppeared(
                 createTaskInfo(
                         /* taskId */ 1,
+                        /* maxBounds= */ new Rect(0, 0, 100, 150), // equal to parent bounds
                         /* parentBounds */ new Rect(0, 0, 100, 150),
                         /* activityBounds */ new Rect(0, 75, 50, 125),
                         /* taskBounds */ new Rect(0, 50, 100, 125)),
@@ -230,6 +237,7 @@ public final class LetterboxTaskListenerTest extends ShellTestCase {
         mLetterboxTaskListener.onTaskAppeared(
                 createTaskInfo(
                         /* taskId */ 1,
+                        /* maxBounds= */ new Rect(0, 0, 100, 150), // equal to parent bounds
                         /* parentBounds */ new Rect(0, 0, 100, 150),
                         /* activityBounds */ new Rect(0, 75, 50, 125),
                         /* taskBounds */ new Rect(0, 50, 100, 125)),
@@ -250,6 +258,7 @@ public final class LetterboxTaskListenerTest extends ShellTestCase {
         mLetterboxTaskListener.onTaskAppeared(
                 createTaskInfo(
                         /* taskId */ 1,
+                        /* maxBounds= */ new Rect(0, 0, 200, 125), // equal to parent bounds
                         /* parentBounds */ new Rect(0, 0, 200, 125),
                         /* activityBounds */ new Rect(15, 0, 175, 120),
                         /* taskBounds */ new Rect(0, 0, 100, 125)), // equal to parent bounds
@@ -272,6 +281,7 @@ public final class LetterboxTaskListenerTest extends ShellTestCase {
         mLetterboxTaskListener.onTaskAppeared(
                 createTaskInfo(
                         /* taskId */ 1,
+                        /* maxBounds= */ new Rect(0, 0, 100, 150),
                         /* parentBounds */ new Rect(0, 75, 100, 225),
                         /* activityBounds */ new Rect(25, 75, 75, 125),
                         /* taskBounds */ new Rect(0, 75, 100, 125)),
@@ -285,7 +295,7 @@ public final class LetterboxTaskListenerTest extends ShellTestCase {
     public void testOnTaskAppeared_calledSecondTimeWithSameTaskId_throwsException() {
         setWindowBoundsAndInsets(new Rect(),  Insets.NONE);
         RunningTaskInfo taskInfo =
-                createTaskInfo(/* taskId */ 1, new Rect(), new Rect(), new Rect());
+                createTaskInfo(/* taskId */ 1, new Rect(),  new Rect(), new Rect(), new Rect());
         mLetterboxTaskListener.onTaskAppeared(taskInfo, mLeash);
         mLetterboxTaskListener.onTaskAppeared(taskInfo, mLeash);
     }
@@ -306,11 +316,13 @@ public final class LetterboxTaskListenerTest extends ShellTestCase {
 
     private static RunningTaskInfo createTaskInfo(
                 int taskId,
+                final Rect maxBounds,
                 final Rect parentBounds,
                 final Rect activityBounds,
                 final Rect taskBounds) {
         RunningTaskInfo taskInfo = new RunningTaskInfo();
         taskInfo.taskId = taskId;
+        taskInfo.configuration.windowConfiguration.setMaxBounds(maxBounds);
         taskInfo.parentBounds = parentBounds;
         taskInfo.configuration.windowConfiguration.setBounds(taskBounds);
         taskInfo.letterboxActivityBounds = Rect.copyOrNull(activityBounds);
