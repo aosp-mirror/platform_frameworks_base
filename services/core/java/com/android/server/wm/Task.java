@@ -2251,7 +2251,7 @@ class Task extends WindowContainer<WindowContainer> {
             // the rotation animation needs to capture snapshot earlier to avoid animating from
             // an intermediate state.
             if (oldOrientation != getOrientation()) {
-                onDescendantOrientationChanged(null, this);
+                onDescendantOrientationChanged(this);
             }
         } finally {
             if (pipChanging) {
@@ -3307,9 +3307,8 @@ class Task extends WindowContainer<WindowContainer> {
     }
 
     @Override
-    public boolean onDescendantOrientationChanged(IBinder freezeDisplayToken,
-            WindowContainer requestingContainer) {
-        if (super.onDescendantOrientationChanged(freezeDisplayToken, requestingContainer)) {
+    public boolean onDescendantOrientationChanged(WindowContainer requestingContainer) {
+        if (super.onDescendantOrientationChanged(requestingContainer)) {
             return true;
         }
 

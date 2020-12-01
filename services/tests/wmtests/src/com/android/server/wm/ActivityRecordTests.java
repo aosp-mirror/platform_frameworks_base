@@ -401,7 +401,7 @@ public class ActivityRecordTests extends WindowTestsBase {
 
         // Mimic the behavior that display doesn't handle app's requested orientation.
         final DisplayContent dc = activity.getTask().getDisplayContent();
-        doReturn(false).when(dc).onDescendantOrientationChanged(any(), any());
+        doReturn(false).when(dc).onDescendantOrientationChanged(any());
         doReturn(false).when(dc).handlesOrientationChangeFromDescendant();
 
         final int requestedOrientation;
@@ -1658,7 +1658,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         final int rotatedOrentation = r.getConfiguration().orientation == ORIENTATION_PORTRAIT
                 ? SCREEN_ORIENTATION_LANDSCAPE
                 : SCREEN_ORIENTATION_PORTRAIT;
-        doReturn(false).when(r).onDescendantOrientationChanged(any(), any());
+        doReturn(false).when(r).onDescendantOrientationChanged(any());
         r.setOrientation(rotatedOrentation);
     }
 

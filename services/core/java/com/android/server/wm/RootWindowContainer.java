@@ -1804,10 +1804,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         Configuration config = null;
         if (displayContent != null) {
             config = displayContent.updateOrientation(
-                    getDisplayOverrideConfiguration(displayId),
-                    starting != null && starting.mayFreezeScreenLocked()
-                            ? starting.appToken : null,
-                    true /* forceUpdate */);
+                    getDisplayOverrideConfiguration(displayId), starting, true /* forceUpdate */);
         }
         // Visibilities may change so let the starting activity have a chance to report. Can't do it
         // when visibility is changed in each AppWindowToken because it may trigger wrong

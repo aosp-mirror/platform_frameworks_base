@@ -6372,14 +6372,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     void setRequestedOrientation(int requestedOrientation) {
-        setOrientation(requestedOrientation, mayFreezeScreenLocked());
-        mAtmService.getTaskChangeNotificationController().notifyActivityRequestedOrientationChanged(
-                task.mTaskId, requestedOrientation);
-    }
-
-    private void setOrientation(int requestedOrientation, boolean freezeScreenIfNeeded) {
-        final IBinder binder = freezeScreenIfNeeded ? appToken.asBinder() : null;
-        setOrientation(requestedOrientation, binder, this);
+        setOrientation(requestedOrientation, this);
 
         // Push the new configuration to the requested app in case where it's not pushed, e.g. when
         // the request is handled at task level with letterbox.
@@ -6387,6 +6380,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 mLastReportedConfiguration.getMergedConfiguration())) {
             ensureActivityConfiguration(0 /* globalChanges */, false /* preserveWindow */);
         }
+
+        mAtmService.getTaskChangeNotificationController().notifyActivityRequestedOrientationChanged(
+                task.mTaskId, requestedOrientation);
     }
 
     /*
@@ -6403,8 +6399,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return;
         }
 
-        final IBinder freezeToken = mayFreezeScreenLocked() ? appToken : null;
-        if (onDescendantOrientationChanged(freezeToken, this)) {
+        if (onDescendantOrientationChanged(this)) {
             // The app is just becoming visible, and the parent Task has updated with the
             // orientation request. Update the size compat mode.
             updateSizeCompatMode();

@@ -196,7 +196,7 @@ public class AppTransitionTests extends WindowTestsBase {
     @Test
     public void testCancelRemoteAnimationWhenFreeze() {
         final DisplayContent dc = createNewDisplay(Display.STATE_ON);
-        doReturn(false).when(dc).onDescendantOrientationChanged(any(), any());
+        doReturn(false).when(dc).onDescendantOrientationChanged(any());
         final WindowState exitingAppWindow = createWindow(null /* parent */, TYPE_BASE_APPLICATION,
                 dc, "exiting app");
         final ActivityRecord exitingActivity= exitingAppWindow.mActivityRecord;
