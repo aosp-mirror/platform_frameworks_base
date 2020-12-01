@@ -4874,6 +4874,7 @@ public class Notification implements Parcelable
             // Small icon doesn't need to be reset, as it's always set. Resetting would prevent
             // re-using the drawable when the notification is updated.
             contentView.setBoolean(R.id.expand_button, "setExpanded", false);
+            contentView.setViewVisibility(R.id.app_name_text, View.GONE);
             contentView.setTextViewText(R.id.app_name_text, null);
             contentView.setViewVisibility(R.id.chronometer, View.GONE);
             contentView.setViewVisibility(R.id.header_text, View.GONE);
@@ -5150,9 +5151,14 @@ public class Notification implements Parcelable
 
         private void bindNotificationHeader(RemoteViews contentView, StandardTemplateParams p) {
             bindSmallIcon(contentView, p);
-            boolean hasTextToLeft = bindHeaderAppName(contentView, p);
+            // Populate text left-to-right so that separators are only shown between strings
+            boolean hasTextToLeft = bindHeaderAppName(contentView, p, false /* force */);
             hasTextToLeft |= bindHeaderTextSecondary(contentView, p, hasTextToLeft);
             hasTextToLeft |= bindHeaderText(contentView, p, hasTextToLeft);
+            if (!hasTextToLeft) {
+                // If there's still no text, force add the app name so there is some text.
+                hasTextToLeft |= bindHeaderAppName(contentView, p, true /* force */);
+            }
             bindHeaderChronometerAndTime(contentView, p, hasTextToLeft);
             bindProfileBadge(contentView, p);
             bindAlertedIcon(contentView, p);
@@ -5216,7 +5222,7 @@ public class Notification implements Parcelable
                     && mN.extras.getCharSequence(EXTRA_INFO_TEXT) != null) {
                 summaryText = mN.extras.getCharSequence(EXTRA_INFO_TEXT);
             }
-            if (summaryText != null) {
+            if (!TextUtils.isEmpty(summaryText)) {
                 // TODO: Remove the span entirely to only have the string with propper formating.
                 contentView.setTextViewText(R.id.header_text, processTextSpans(
                         processLegacyText(summaryText)));
@@ -5288,13 +5294,13 @@ public class Notification implements Parcelable
         /**
          * @return true if the app name will be visible
          */
-        private boolean bindHeaderAppName(RemoteViews contentView, StandardTemplateParams p) {
-            if (p.mViewType == StandardTemplateParams.VIEW_TYPE_MINIMIZED) {
-                contentView.setViewVisibility(R.id.app_name_text, View.GONE);
+        private boolean bindHeaderAppName(RemoteViews contentView, StandardTemplateParams p,
+                boolean force) {
+            if (p.mViewType == StandardTemplateParams.VIEW_TYPE_MINIMIZED && !force) {
+                // unless the force flag is set, don't show the app name in the minimized state.
                 return false;
             }
             if (p.mHeaderless && p.hasTitle()) {
-                contentView.setViewVisibility(R.id.app_name_text, View.GONE);
                 // the headerless template will have the TITLE in this position; return true to
                 // keep the divider visible between that title and the next text element.
                 return true;
@@ -11104,7 +11110,9 @@ public class Notification implements Parcelable
         }
 
         final boolean hasTitle() {
-            return title != null && title.length() != 0 && !mHasCustomContent;
+            // We hide the title when the notification is a decorated custom view so that decorated
+            // custom views always have to include their own title.
+            return !TextUtils.isEmpty(title) && !mHasCustomContent;
         }
 
         final StandardTemplateParams viewType(int viewType) {

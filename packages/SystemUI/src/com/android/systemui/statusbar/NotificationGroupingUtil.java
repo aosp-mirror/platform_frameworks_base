@@ -129,7 +129,7 @@ public class NotificationGroupingUtil {
      */
     public void updateChildrenAppearance() {
         List<ExpandableNotificationRow> notificationChildren = mRow.getAttachedChildren();
-        if (notificationChildren == null) {
+        if (notificationChildren == null || !mRow.isSummaryWithChildren()) {
             return;
         }
         // Initialize the processors
@@ -256,8 +256,8 @@ public class NotificationGroupingUtil {
         }
 
         public void init() {
-            mParentView = mParentRow.getNotificationViewWrapper().getNotificationHeader()
-                    .findViewById(mId);
+            View header = mParentRow.getNotificationViewWrapper().getNotificationHeader();
+            mParentView = header == null ? null : header.findViewById(mId);
             mParentData = mExtractor == null ? null : mExtractor.extractData(mParentRow);
             mApply = !mComparator.isEmpty(mParentView);
         }
