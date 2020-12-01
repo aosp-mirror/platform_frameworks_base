@@ -24,6 +24,7 @@ import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.service.attestation.ImpressionToken;
 import android.util.Log;
 import android.util.MergedConfiguration;
 import android.window.ClientWindowFrames;
@@ -459,5 +460,11 @@ public class WindowlessWindowManager implements IWindowSession {
     @Override
     public void grantEmbeddedWindowFocus(IWindow callingWindow, IBinder targetInputToken,
                                          boolean grantFocus) {
+    }
+
+    @Override
+    public ImpressionToken generateImpressionToken(IWindow window, Rect boundsInWindow,
+            String hashAlgorithm) {
+        return null;
     }
 }
