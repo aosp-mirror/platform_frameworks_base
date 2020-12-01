@@ -244,7 +244,7 @@ public class KeyguardSliceView extends LinearLayout {
                     iconDrawable.setBounds(0, 0, Math.max(width, 1), iconSize);
                 }
             }
-            button.setCompoundDrawables(iconDrawable, null, null, null);
+            button.setCompoundDrawablesRelative(iconDrawable, null, null, null);
             button.setOnClickListener(mOnClickListener);
             button.setClickable(pendingIntent != null);
         }
@@ -536,9 +536,9 @@ public class KeyguardSliceView extends LinearLayout {
         }
 
         @Override
-        public void setCompoundDrawables(Drawable left, Drawable top, Drawable right,
+        public void setCompoundDrawablesRelative(Drawable start, Drawable top, Drawable end,
                 Drawable bottom) {
-            super.setCompoundDrawables(left, top, right, bottom);
+            super.setCompoundDrawablesRelative(start, top, end, bottom);
             updateDrawableColors();
             updatePadding();
         }
@@ -558,9 +558,9 @@ public class KeyguardSliceView extends LinearLayout {
         public void setLockScreenMode(int mode) {
             mLockScreenMode = mode;
             if (mLockScreenMode == KeyguardUpdateMonitor.LOCK_SCREEN_MODE_LAYOUT_1) {
-                setGravity(Gravity.START);
+                setTextAlignment(View.TEXT_ALIGNMENT_VIEW_START);
             } else {
-                setGravity(Gravity.CENTER);
+                setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
             }
             updatePadding();
         }

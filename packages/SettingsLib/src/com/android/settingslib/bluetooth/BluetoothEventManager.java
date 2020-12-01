@@ -49,6 +49,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  */
 public class BluetoothEventManager {
     private static final String TAG = "BluetoothEventManager";
+    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     private final LocalBluetoothAdapter mLocalAdapter;
     private final CachedBluetoothDeviceManager mDeviceManager;
@@ -366,6 +367,9 @@ public class BluetoothEventManager {
          *               BluetoothDevice.UNBOND_REASON_*
          */
         private void showUnbondMessage(Context context, String name, int reason) {
+            if (DEBUG) {
+                Log.d(TAG, "showUnbondMessage() name : " + name + ", reason : " + reason);
+            }
             int errorMsg;
 
             switch (reason) {
@@ -382,6 +386,7 @@ public class BluetoothEventManager {
                 case BluetoothDevice.UNBOND_REASON_AUTH_TIMEOUT:
                 case BluetoothDevice.UNBOND_REASON_REPEATED_ATTEMPTS:
                 case BluetoothDevice.UNBOND_REASON_REMOTE_AUTH_CANCELED:
+                case BluetoothDevice.UNBOND_REASON_REMOVED:
                     errorMsg = R.string.bluetooth_pairing_error_message;
                     break;
                 default:

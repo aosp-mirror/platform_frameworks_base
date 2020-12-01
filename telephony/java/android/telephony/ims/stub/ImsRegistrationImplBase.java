@@ -49,8 +49,7 @@ public class ImsRegistrationImplBase {
      * @hide
      */
     // Defines the underlying radio technology type that we have registered for IMS over.
-    @IntDef(flag = true,
-            value = {
+    @IntDef(value = {
                     REGISTRATION_TECH_NONE,
                     REGISTRATION_TECH_LTE,
                     REGISTRATION_TECH_IWLAN

@@ -9463,7 +9463,7 @@ public class TelephonyManager {
     }
 
     /** @hide */
-    @IntDef(flag = true, prefix = { "CDMA_SUBSCRIPTION_" }, value = {
+    @IntDef(prefix = { "CDMA_SUBSCRIPTION_" }, value = {
             CDMA_SUBSCRIPTION_UNKNOWN,
             CDMA_SUBSCRIPTION_RUIM_SIM,
             CDMA_SUBSCRIPTION_NV

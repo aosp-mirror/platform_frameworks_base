@@ -16,7 +16,7 @@
 
 package android.widget;
 
-import static android.view.OnReceiveContentListener.Payload.SOURCE_DRAG_AND_DROP;
+import static android.view.ContentInfo.SOURCE_DRAG_AND_DROP;
 
 import android.R;
 import android.animation.ValueAnimator;
@@ -87,6 +87,7 @@ import android.util.SparseArray;
 import android.util.TypedValue;
 import android.view.ActionMode;
 import android.view.ActionMode.Callback;
+import android.view.ContentInfo;
 import android.view.ContextMenu;
 import android.view.ContextThemeWrapper;
 import android.view.DragAndDropPermissions;
@@ -98,7 +99,6 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
-import android.view.OnReceiveContentListener;
 import android.view.SubMenu;
 import android.view.View;
 import android.view.View.DragShadowBuilder;
@@ -2869,8 +2869,8 @@ public class Editor {
             final int originalLength = mTextView.getText().length();
             Selection.setSelection((Spannable) mTextView.getText(), offset);
             final ClipData clip = event.getClipData();
-            final OnReceiveContentListener.Payload payload =
-                    new OnReceiveContentListener.Payload.Builder(clip, SOURCE_DRAG_AND_DROP)
+            final ContentInfo payload =
+                    new ContentInfo.Builder(clip, SOURCE_DRAG_AND_DROP)
                     .build();
             mTextView.performReceiveContent(payload);
             if (dragDropIntoItself) {

@@ -97,7 +97,7 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
     private boolean mTestHalEnabled;
 
     final Context mContext;
-    private final IActivityTaskManager mActivityTaskManager;
+    private final ActivityTaskManager mActivityTaskManager;
     @NonNull private final FingerprintSensorPropertiesInternal mSensorProperties;
     private final BiometricScheduler mScheduler;
     private final Handler mHandler;
@@ -125,20 +125,16 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
                     return; // Keyguard is always allowed
                 }
 
-                try {
-                    final List<ActivityManager.RunningTaskInfo> runningTasks =
-                            mActivityTaskManager.getTasks(1);
-                    if (!runningTasks.isEmpty()) {
-                        final String topPackage = runningTasks.get(0).topActivity.getPackageName();
-                        if (!topPackage.contentEquals(client.getOwnerString())
-                                && !client.isAlreadyDone()) {
-                            Slog.e(TAG, "Stopping background authentication, top: "
-                                    + topPackage + " currentClient: " + client);
-                            mScheduler.cancelAuthentication(client.getToken());
-                        }
+                final List<ActivityManager.RunningTaskInfo> runningTasks =
+                        mActivityTaskManager.getTasks(1);
+                if (!runningTasks.isEmpty()) {
+                    final String topPackage = runningTasks.get(0).topActivity.getPackageName();
+                    if (!topPackage.contentEquals(client.getOwnerString())
+                            && !client.isAlreadyDone()) {
+                        Slog.e(TAG, "Stopping background authentication, top: "
+                                + topPackage + " currentClient: " + client);
+                        mScheduler.cancelAuthentication(client.getToken());
                     }
-                } catch (RemoteException e) {
-                    Slog.e(TAG, "Unable to get running tasks", e);
                 }
             });
         }
@@ -313,7 +309,7 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
         mContext = context;
         mScheduler = scheduler;
         mHandler = handler;
-        mActivityTaskManager = ActivityTaskManager.getService();
+        mActivityTaskManager = ActivityTaskManager.getInstance();
 
         mTaskStackListener = new BiometricTaskStackListener();
         mAuthenticatorIds = Collections.synchronizedMap(new HashMap<>());

@@ -99,6 +99,7 @@ public abstract class LocalEventLog {
     private long mLastLogRealtimeMs;
 
     public LocalEventLog(int size) {
+        Preconditions.checkArgument(size > 0);
         mLog = new Log[size];
         mLogSize = 0;
         mLogEndIndex = 0;
@@ -163,7 +164,7 @@ public abstract class LocalEventLog {
 
         if (mLogSize == mLog.length) {
             // if log is full, size will remain the same, but update the start time
-            mStartRealtimeMs += event.getTimeDeltaMs();
+            mStartRealtimeMs += mLog[startIndex()].getTimeDeltaMs();
         } else {
             // otherwise add an item
             mLogSize++;

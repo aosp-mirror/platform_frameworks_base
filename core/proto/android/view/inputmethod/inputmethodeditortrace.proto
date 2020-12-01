@@ -24,6 +24,7 @@ import "frameworks/base/core/proto/android/view/viewrootimpl.proto";
 import "frameworks/base/core/proto/android/view/insetscontroller.proto";
 import "frameworks/base/core/proto/android/view/imeinsetssourceconsumer.proto";
 import "frameworks/base/core/proto/android/view/inputmethod/editorinfo.proto";
+import "frameworks/base/core/proto/android/view/inputmethod/inputconnection.proto";
 import "frameworks/base/core/proto/android/view/imefocuscontroller.proto";
 
 import "frameworks/base/core/proto/android/server/inputmethod/inputmethodmanagerservice.proto";
@@ -70,6 +71,7 @@ message InputMethodClientsTraceProto {
         optional ImeInsetsSourceConsumerProto ime_insets_source_consumer = 5;
         optional EditorInfoProto editor_info = 6;
         optional ImeFocusControllerProto ime_focus_controller = 7;
+        optional InputConnectionProto input_connection = 8;
     }
 }
 

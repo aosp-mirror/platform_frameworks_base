@@ -22,6 +22,7 @@ import static android.hardware.biometrics.BiometricManager.Authenticators;
 
 import android.annotation.Nullable;
 import android.app.ActivityManager;
+import android.app.ActivityTaskManager;
 import android.app.IActivityTaskManager;
 import android.app.TaskStackListener;
 import android.content.BroadcastReceiver;
@@ -74,7 +75,7 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
 
     private final CommandQueue mCommandQueue;
     private final StatusBarStateController mStatusBarStateController;
-    private final IActivityTaskManager mActivityTaskManager;
+    private final ActivityTaskManager mActivityTaskManager;
     @Nullable private final FingerprintManager mFingerprintManager;
     @Nullable private final FaceManager mFaceManager;
     private final Provider<UdfpsController> mUdfpsControllerFactory;
@@ -313,7 +314,7 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
     @Inject
     public AuthController(Context context, CommandQueue commandQueue,
             StatusBarStateController statusBarStateController,
-            IActivityTaskManager activityTaskManager,
+            ActivityTaskManager activityTaskManager,
             @Nullable FingerprintManager fingerprintManager,
             @Nullable FaceManager faceManager,
             Provider<UdfpsController> udfpsControllerFactory) {
@@ -356,12 +357,8 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
             mUdfpsController = mUdfpsControllerFactory.get();
         }
 
-        try {
-            mTaskStackListener = new BiometricTaskStackListener();
-            mActivityTaskManager.registerTaskStackListener(mTaskStackListener);
-        } catch (RemoteException e) {
-            Log.w(TAG, "Unable to register task stack listener", e);
-        }
+        mTaskStackListener = new BiometricTaskStackListener();
+        mActivityTaskManager.registerTaskStackListener(mTaskStackListener);
     }
 
     @Override

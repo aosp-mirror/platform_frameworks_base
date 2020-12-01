@@ -506,7 +506,7 @@ public class SplitScreenController implements SplitScreen,
 
             // Try fetching the top running task.
             final List<RunningTaskInfo> runningTasks =
-                    ActivityTaskManager.getService().getTasks(1 /* maxNum */);
+                    ActivityTaskManager.getInstance().getTasks(1 /* maxNum */);
             if (runningTasks == null || runningTasks.isEmpty()) {
                 return false;
             }

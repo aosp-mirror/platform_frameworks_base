@@ -21,6 +21,7 @@ import static android.content.pm.UserInfo.FLAG_DISABLED;
 import static android.content.pm.UserInfo.FLAG_EPHEMERAL;
 import static android.content.pm.UserInfo.FLAG_FULL;
 import static android.content.pm.UserInfo.FLAG_GUEST;
+import static android.content.pm.UserInfo.FLAG_INITIALIZED;
 import static android.content.pm.UserInfo.FLAG_MANAGED_PROFILE;
 import static android.content.pm.UserInfo.FLAG_PROFILE;
 import static android.content.pm.UserInfo.FLAG_RESTRICTED;
@@ -44,6 +45,7 @@ import android.content.pm.UserInfo.UserInfoFlag;
 import android.os.Looper;
 import android.os.Parcel;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.text.TextUtils;
 
 import androidx.test.InstrumentationRegistry;
@@ -206,6 +208,8 @@ public class UserManagerServiceUserInfoTest {
     @Test
     public void testUpgradeIfNecessaryLP_9() {
         final int versionToTest = 9;
+        // do not trigger a user type upgrade
+        final int userTypeVersion = UserTypeFactory.getUserTypeVersion();
 
         mUserManagerService.putUserInfo(createUser(100, FLAG_MANAGED_PROFILE, null));
         mUserManagerService.putUserInfo(createUser(101,
@@ -216,7 +220,7 @@ public class UserManagerServiceUserInfoTest {
         mUserManagerService.putUserInfo(createUser(105, FLAG_SYSTEM | FLAG_FULL, null));
         mUserManagerService.putUserInfo(createUser(106, FLAG_DEMO | FLAG_FULL, null));
 
-        mUserManagerService.upgradeIfNecessaryLP(null, versionToTest - 1);
+        mUserManagerService.upgradeIfNecessaryLP(null, versionToTest - 1, userTypeVersion);
 
         assertTrue(mUserManagerService.isUserOfType(100, USER_TYPE_PROFILE_MANAGED));
         assertTrue((mUserManagerService.getUserInfo(100).flags & FLAG_PROFILE) != 0);
@@ -277,5 +281,87 @@ public class UserManagerServiceUserInfoTest {
             assertEquals("convertedFromPreCreated not preserved", one.convertedFromPreCreated,
                     two.convertedFromPreCreated);
         }
+    }
+
+    /** Tests upgrading profile types */
+    @Test
+    public void testUpgradeProfileType_updateTypeAndFlags() {
+        final int userId = 42;
+        final String newUserTypeName = "new.user.type";
+        final String oldUserTypeName = USER_TYPE_PROFILE_MANAGED;
+
+        UserTypeDetails.Builder oldUserTypeBuilder = new UserTypeDetails.Builder()
+                .setName(oldUserTypeName)
+                .setBaseType(FLAG_PROFILE)
+                .setDefaultUserInfoPropertyFlags(FLAG_MANAGED_PROFILE)
+                .setMaxAllowedPerParent(32)
+                .setIconBadge(401)
+                .setBadgeColors(402, 403, 404)
+                .setBadgeLabels(23, 24, 25);
+        UserTypeDetails oldUserType = oldUserTypeBuilder.createUserTypeDetails();
+
+        UserInfo userInfo = createUser(userId,
+                oldUserType.getDefaultUserInfoFlags() | FLAG_INITIALIZED, oldUserTypeName);
+        mUserManagerService.putUserInfo(userInfo);
+
+        UserTypeDetails.Builder newUserTypeBuilder = new UserTypeDetails.Builder()
+                .setName(newUserTypeName)
+                .setBaseType(FLAG_PROFILE)
+                .setMaxAllowedPerParent(32)
+                .setIconBadge(401)
+                .setBadgeColors(402, 403, 404)
+                .setBadgeLabels(23, 24, 25);
+        UserTypeDetails newUserType = newUserTypeBuilder.createUserTypeDetails();
+
+        mUserManagerService.upgradeProfileToTypeLU(userInfo, newUserType);
+
+        assertTrue(mUserManagerService.isUserOfType(userId, newUserTypeName));
+        assertTrue((mUserManagerService.getUserInfo(userId).flags & FLAG_PROFILE) != 0);
+        assertTrue((mUserManagerService.getUserInfo(userId).flags & FLAG_MANAGED_PROFILE) == 0);
+        assertTrue((mUserManagerService.getUserInfo(userId).flags & FLAG_INITIALIZED) != 0);
+    }
+
+    @Test
+    public void testUpgradeProfileType_updateRestrictions() {
+        final int userId = 42;
+        final String newUserTypeName = "new.user.type";
+        final String oldUserTypeName = USER_TYPE_PROFILE_MANAGED;
+
+        UserTypeDetails.Builder oldUserTypeBuilder = new UserTypeDetails.Builder()
+                .setName(oldUserTypeName)
+                .setBaseType(FLAG_PROFILE)
+                .setDefaultUserInfoPropertyFlags(FLAG_MANAGED_PROFILE)
+                .setMaxAllowedPerParent(32)
+                .setIconBadge(401)
+                .setBadgeColors(402, 403, 404)
+                .setBadgeLabels(23, 24, 25);
+        UserTypeDetails oldUserType = oldUserTypeBuilder.createUserTypeDetails();
+
+        UserInfo userInfo = createUser(userId, oldUserType.getDefaultUserInfoFlags(),
+                oldUserTypeName);
+        mUserManagerService.putUserInfo(userInfo);
+        mUserManagerService.setUserRestriction(UserManager.DISALLOW_CAMERA, true, userId);
+        mUserManagerService.setUserRestriction(UserManager.DISALLOW_PRINTING, true, userId);
+
+        UserTypeDetails.Builder newUserTypeBuilder = new UserTypeDetails.Builder()
+                .setName(newUserTypeName)
+                .setBaseType(FLAG_PROFILE)
+                .setMaxAllowedPerParent(32)
+                .setIconBadge(401)
+                .setBadgeColors(402, 403, 404)
+                .setBadgeLabels(23, 24, 25)
+                .setDefaultRestrictions(
+                        UserManagerServiceUserTypeTest.makeRestrictionsBundle(
+                                UserManager.DISALLOW_WALLPAPER));
+        UserTypeDetails newUserType = newUserTypeBuilder.createUserTypeDetails();
+
+        mUserManagerService.upgradeProfileToTypeLU(userInfo, newUserType);
+
+        assertTrue(mUserManagerService.getUserRestrictions(userId).getBoolean(
+                UserManager.DISALLOW_PRINTING));
+        assertTrue(mUserManagerService.getUserRestrictions(userId).getBoolean(
+                UserManager.DISALLOW_CAMERA));
+        assertTrue(mUserManagerService.getUserRestrictions(userId).getBoolean(
+                UserManager.DISALLOW_WALLPAPER));
     }
 }

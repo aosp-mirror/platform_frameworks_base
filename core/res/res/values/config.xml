@@ -4522,4 +4522,7 @@
 
     <!-- If true, hide the display cutout with display area -->
     <bool name="config_hideDisplayCutoutWithDisplayArea">false</bool>
+
+    <!-- Indicates that default fitness tracker app needs to request sensor and location permissions. -->
+    <bool name="config_trackerAppNeedsPermissions">false</bool>
 </resources>

@@ -274,7 +274,7 @@ public class PackageProperty {
 
     private Property getApplicationProperty(String propertyName, String packageName) {
         final ArrayMap<String, ArrayList<Property>> packagePropertyMap =
-                mApplicationProperties.get(propertyName);
+                mApplicationProperties != null ? mApplicationProperties.get(propertyName) : null;
         if (packagePropertyMap == null) {
             return null;
         }

@@ -5551,6 +5551,89 @@ public class WifiManager {
     }
 
     /**
+     * Easy Connect Device information maximum allowed length.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int EASY_CONNECT_DEVICE_INFO_MAXIMUM_LENGTH = 40;
+
+    /**
+     * Easy Connect Cryptography Curve name: prime256v1
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int EASY_CONNECT_CRYPTOGRAPHY_CURVE_PRIME256V1 = 0;
+
+    /**
+     * Easy Connect Cryptography Curve name: secp384r1
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int EASY_CONNECT_CRYPTOGRAPHY_CURVE_SECP384R1 = 1;
+
+    /**
+     * Easy Connect Cryptography Curve name: secp521r1
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int EASY_CONNECT_CRYPTOGRAPHY_CURVE_SECP521R1 = 2;
+
+
+    /**
+     * Easy Connect Cryptography Curve name: brainpoolP256r1
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int EASY_CONNECT_CRYPTOGRAPHY_CURVE_BRAINPOOLP256R1 = 3;
+
+
+    /**
+     * Easy Connect Cryptography Curve name: brainpoolP384r1
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int EASY_CONNECT_CRYPTOGRAPHY_CURVE_BRAINPOOLP384R1 = 4;
+
+
+    /**
+     * Easy Connect Cryptography Curve name: brainpoolP512r1
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int EASY_CONNECT_CRYPTOGRAPHY_CURVE_BRAINPOOLP512R1 = 5;
+
+    /**
+     * Easy Connect Cryptography Curve name: default
+     * This allows framework to choose manadatory curve prime256v1.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int EASY_CONNECT_CRYPTOGRAPHY_CURVE_DEFAULT =
+            EASY_CONNECT_CRYPTOGRAPHY_CURVE_PRIME256V1;
+
+    /** @hide */
+    @IntDef(prefix = {"EASY_CONNECT_CRYPTOGRAPHY_CURVE_"}, value = {
+            EASY_CONNECT_CRYPTOGRAPHY_CURVE_DEFAULT,
+            EASY_CONNECT_CRYPTOGRAPHY_CURVE_PRIME256V1,
+            EASY_CONNECT_CRYPTOGRAPHY_CURVE_SECP384R1,
+            EASY_CONNECT_CRYPTOGRAPHY_CURVE_SECP521R1,
+            EASY_CONNECT_CRYPTOGRAPHY_CURVE_BRAINPOOLP256R1,
+            EASY_CONNECT_CRYPTOGRAPHY_CURVE_BRAINPOOLP384R1,
+            EASY_CONNECT_CRYPTOGRAPHY_CURVE_BRAINPOOLP512R1,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface EasyConnectCryptographyCurve {
+    }
+
+    /**
      * Start Easy Connect (DPP) in Configurator-Initiator role. The current device will initiate
      * Easy Connect bootstrapping with a peer, and configure the peer with the SSID and password of
      * the specified network using the Easy Connect protocol on an encrypted link.
@@ -5599,6 +5682,52 @@ public class WifiManager {
         Binder binder = new Binder();
         try {
             mService.startDppAsEnrolleeInitiator(binder, configuratorUri,
+                    new EasyConnectCallbackProxy(executor, callback));
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Start Easy Connect (DPP) in Enrollee-Responder role.
+     * The device will:
+     * 1. Generate a DPP bootstrap URI and return it using the
+     * {@link EasyConnectStatusCallback#onBootstrapUriGenerated(String)} method.
+     * 2. Start DPP as a Responder, waiting for an Initiator device to start the DPP
+     * authentication process.
+     * The caller should use the URI provided in step #1, for instance display it as a QR code
+     * or communicate it in some other way to the initiator device.
+     *
+     * @param deviceInfo      Device specific information to add to the DPP URI. This field allows
+     *                        the users of the configurators to identify the device.
+     *                        Optional - if not provided or in case of an empty string,
+     *                        Info field (I:) will be skipped in the generated DPP URI.
+     *                        Allowed Range of ASCII characters in deviceInfo - %x20-7E.
+     *                        semicolon and space are not allowed.
+     *                        Due to the limitation of maximum allowed characters in QR code,
+     *                        framework limits to a max of
+     *                        {@link #EASY_CONNECT_DEVICE_INFO_MAXIMUM_LENGTH} characters in
+     *                        deviceInfo.
+     *                        Violation of these rules will result in an exception.
+     * @param curve           Elliptic curve cryptography used to generate DPP
+     *                        public/private key pair. If application is not interested in a
+     *                        specific curve, choose default curve
+     *                        {@link #EASY_CONNECT_CRYPTOGRAPHY_CURVE_DEFAULT}.
+     * @param callback        Callback for status updates
+     * @param executor        The Executor on which to run the callback.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.NETWORK_SETTINGS,
+            android.Manifest.permission.NETWORK_SETUP_WIZARD})
+    public void startEasyConnectAsEnrolleeResponder(@Nullable String deviceInfo,
+            @EasyConnectCryptographyCurve int curve,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull EasyConnectStatusCallback callback) {
+        Binder binder = new Binder();
+        try {
+            mService.startDppAsEnrolleeResponder(binder, deviceInfo, curve,
                     new EasyConnectCallbackProxy(executor, callback));
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -5677,6 +5806,15 @@ public class WifiManager {
             Binder.clearCallingIdentity();
             mExecutor.execute(() -> {
                 mEasyConnectStatusCallback.onProgress(status);
+            });
+        }
+
+        @Override
+        public void onBootstrapUriGenerated(String uri) {
+            Log.d(TAG, "Easy Connect onBootstrapUriGenerated callback");
+            Binder.clearCallingIdentity();
+            mExecutor.execute(() -> {
+                mEasyConnectStatusCallback.onBootstrapUriGenerated(uri);
             });
         }
     }

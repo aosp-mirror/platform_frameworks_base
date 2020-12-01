@@ -27,7 +27,6 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Rect;
 import android.os.Build;
-import android.os.Handler;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -35,6 +34,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.DisplayMetrics;
 import android.util.Singleton;
+import android.view.RemoteAnimationDefinition;
 
 import java.util.List;
 
@@ -147,7 +147,20 @@ public class ActivityTaskManager {
 
     private static int sMaxRecentTasks = -1;
 
-    ActivityTaskManager(Context context, Handler handler) {
+    private static final Singleton<ActivityTaskManager> sInstance =
+            new Singleton<ActivityTaskManager>() {
+                @Override
+                protected ActivityTaskManager create() {
+                    return new ActivityTaskManager();
+                }
+            };
+
+    private ActivityTaskManager() {
+    }
+
+    /** @hide */
+    public static ActivityTaskManager getInstance() {
+        return sInstance.get();
     }
 
     /** @hide */
@@ -441,6 +454,98 @@ public class ActivityTaskManager {
     public static int getMaxNumPictureInPictureActions(@NonNull Context context) {
         return context.getResources().getInteger(
                 com.android.internal.R.integer.config_pictureInPictureMaxNumberOfActions);
+    }
+
+    /**
+     * @return List of running tasks.
+     * @hide
+     */
+    public List<ActivityManager.RunningTaskInfo> getTasks(int maxNum) {
+        return getTasks(maxNum, false /* filterForVisibleRecents */);
+    }
+
+    /**
+     * @return List of running tasks that can be filtered by visibility in recents.
+     * @hide
+     */
+    public List<ActivityManager.RunningTaskInfo> getTasks(
+            int maxNum, boolean filterOnlyVisibleRecents) {
+        try {
+            return getService().getTasks(maxNum, filterOnlyVisibleRecents);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @return List of recent tasks.
+     * @hide
+     */
+    public List<ActivityManager.RecentTaskInfo> getRecentTasks(
+            int maxNum, int flags, int userId) {
+        try {
+            return getService().getRecentTasks(maxNum, flags, userId).getList();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /** @hide */
+    public void registerTaskStackListener(TaskStackListener listener) {
+        try {
+            getService().registerTaskStackListener(listener);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /** @hide */
+    public void unregisterTaskStackListener(TaskStackListener listener) {
+        try {
+            getService().unregisterTaskStackListener(listener);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /** @hide */
+    public Rect getTaskBounds(int taskId) {
+        try {
+            return getService().getTaskBounds(taskId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Registers remote animations for a display.
+     * @hide
+     */
+    public void registerRemoteAnimationsForDisplay(
+            int displayId, RemoteAnimationDefinition definition) {
+        try {
+            getService().registerRemoteAnimationsForDisplay(displayId, definition);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /** @hide */
+    public boolean isInLockTaskMode() {
+        try {
+            return getService().isInLockTaskMode();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /** @hide */
+    public boolean removeTask(int taskId) {
+        try {
+            return getService().removeTask(taskId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**

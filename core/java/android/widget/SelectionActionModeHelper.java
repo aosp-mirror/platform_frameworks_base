@@ -156,8 +156,7 @@ public final class SelectionActionModeHelper {
                     mSmartSelectSprite != null
                             ? this::startSelectionActionModeWithSmartSelectAnimation
                             : this::startSelectionActionMode,
-                    mTextClassificationHelper::getOriginalSelection,
-                    mTextClassificationHelper::isTextClassifierDestroyed)
+                    mTextClassificationHelper::getOriginalSelection)
                     .execute();
         }
     }
@@ -179,8 +178,7 @@ public final class SelectionActionModeHelper {
                     mTextClassificationHelper.getTimeoutDuration(),
                     mTextClassificationHelper::classifyText,
                     this::startLinkActionMode,
-                    mTextClassificationHelper::getOriginalSelection,
-                    mTextClassificationHelper::isTextClassifierDestroyed)
+                    mTextClassificationHelper::getOriginalSelection)
                     .execute();
         }
     }
@@ -196,8 +194,7 @@ public final class SelectionActionModeHelper {
                     mTextClassificationHelper.getTimeoutDuration(),
                     mTextClassificationHelper::classifyText,
                     this::invalidateActionMode,
-                    mTextClassificationHelper::getOriginalSelection,
-                    mTextClassificationHelper::isTextClassifierDestroyed)
+                    mTextClassificationHelper::getOriginalSelection)
                     .execute();
         }
     }
@@ -995,7 +992,6 @@ public final class SelectionActionModeHelper {
         private final Supplier<SelectionResult> mSelectionResultSupplier;
         private final Consumer<SelectionResult> mSelectionResultCallback;
         private final Supplier<SelectionResult> mTimeOutResultSupplier;
-        private final Supplier<Boolean> mIsTextClassifierDestroyedSupplier;
         private final TextView mTextView;
         private final String mOriginalText;
 
@@ -1010,16 +1006,13 @@ public final class SelectionActionModeHelper {
                 @NonNull TextView textView, int timeOut,
                 @NonNull Supplier<SelectionResult> selectionResultSupplier,
                 @NonNull Consumer<SelectionResult> selectionResultCallback,
-                @NonNull Supplier<SelectionResult> timeOutResultSupplier,
-                @NonNull Supplier<Boolean> isTextClassifierDestroyedSupplier) {
+                @NonNull Supplier<SelectionResult> timeOutResultSupplier) {
             super(textView != null ? textView.getHandler() : null);
             mTextView = Objects.requireNonNull(textView);
             mTimeOutDuration = timeOut;
             mSelectionResultSupplier = Objects.requireNonNull(selectionResultSupplier);
             mSelectionResultCallback = Objects.requireNonNull(selectionResultCallback);
             mTimeOutResultSupplier = Objects.requireNonNull(timeOutResultSupplier);
-            mIsTextClassifierDestroyedSupplier =
-                    Objects.requireNonNull(isTextClassifierDestroyedSupplier);
             // Make a copy of the original text.
             mOriginalText = getText(mTextView).toString();
         }
@@ -1033,14 +1026,8 @@ public final class SelectionActionModeHelper {
             try {
                 result = mSelectionResultSupplier.get();
             } catch (IllegalStateException e) {
-                // Swallows the exception if the text classifier session is destroyed
-                if (mIsTextClassifierDestroyedSupplier.get()) {
-                    Log.w(LOG_TAG,
-                          "TextClassificationAsyncTask failed because TextClassifier destroyed",
-                          e);
-                } else {
-                    throw e;
-                }
+                // TODO(b/174300371): Only swallows the exception if the TCSession is destroyed
+                Log.w(LOG_TAG, "TextClassificationAsyncTask failed.", e);
             }
             mTextView.removeCallbacks(onTimeOut);
             return result;
@@ -1171,10 +1158,6 @@ public final class SelectionActionModeHelper {
                 // selection handles or toolbar until after this timeout.
                 return 500;
             }
-        }
-
-        public boolean isTextClassifierDestroyed() {
-          return mTextClassifier.get().isDestroyed();
         }
 
         private boolean isDarkLaunchEnabled() {
