@@ -218,8 +218,10 @@ import android.os.Process;
 import android.os.RecoverySystem;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
+import android.os.ResultReceiver;
 import android.os.ServiceManager;
 import android.os.ServiceSpecificException;
+import android.os.ShellCallback;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
@@ -8725,6 +8727,14 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         String safetyChecker = mSafetyChecker == null ? "N/A" : mSafetyChecker.getClass().getName();
         pw.printf("mSafetyChecker=%b\n", safetyChecker);
         pw.decreaseIndent();
+    }
+
+    @Override
+    public void onShellCommand(FileDescriptor in, FileDescriptor out, FileDescriptor err,
+            String[] args, ShellCallback callback, ResultReceiver resultReceiver) {
+        new DevicePolicyManagerServiceShellCommand(DevicePolicyManagerService.this).exec(
+                this, in, out, err, args, callback, resultReceiver);
+
     }
 
     private String getEncryptionStatusName(int encryptionStatus) {
