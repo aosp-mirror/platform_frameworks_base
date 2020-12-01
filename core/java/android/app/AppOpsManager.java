@@ -357,7 +357,7 @@ public class AppOpsManager {
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef(flag = true, prefix = { "MODE_" }, value = {
+    @IntDef(prefix = { "MODE_" }, value = {
             MODE_ALLOWED,
             MODE_IGNORED,
             MODE_ERRORED,
