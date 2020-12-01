@@ -72,6 +72,7 @@ import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -3110,6 +3111,238 @@ public class WifiManager {
         }
     }
 
+    /* Wi-Fi/Cellular Coex */
+
+    /**
+     * Mandatory coex restriction flag for Wi-Fi Direct.
+     *
+     * @see #setCoexUnsafeChannels(Set, int)
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int COEX_RESTRICTION_WIFI_DIRECT = 0x1 << 0;
+
+    /**
+     * Mandatory coex restriction flag for SoftAP
+     *
+     * @see #setCoexUnsafeChannels(Set, int)
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int COEX_RESTRICTION_SOFTAP = 0x1 << 1;
+
+    /**
+     * Mandatory coex restriction flag for Wi-Fi Aware.
+     *
+     * @see #setCoexUnsafeChannels(Set, int)
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int COEX_RESTRICTION_WIFI_AWARE = 0x1 << 2;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(flag = true, prefix = {"COEX_RESTRICTION_"}, value = {
+            COEX_RESTRICTION_WIFI_DIRECT,
+            COEX_RESTRICTION_SOFTAP,
+            COEX_RESTRICTION_WIFI_AWARE
+    })
+    public @interface CoexRestriction {}
+
+    /**
+     * Specify the set of {@link CoexUnsafeChannel} to propagate through the framework for
+     * Wi-Fi/Cellular coex channel avoidance if the default algorithm is disabled via overlay
+     * (i.e. config_wifiCoexDefaultAlgorithmEnabled = false). Otherwise do nothing.
+     *
+     * @param unsafeChannels Set of {@link CoexUnsafeChannel} to avoid.
+     * @param restrictions Bitmap of {@link CoexRestriction} specifying the mandatory restricted
+     *                     uses of the specified channels. If any restrictions are set, then the
+     *                     supplied CoexUnsafeChannels will be completely avoided for the
+     *                     specified modes, rather than be avoided with best effort.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.WIFI_UPDATE_COEX_UNSAFE_CHANNELS)
+    public void setCoexUnsafeChannels(@NonNull Set<CoexUnsafeChannel> unsafeChannels,
+            int restrictions) {
+        if (unsafeChannels == null) {
+            throw new IllegalArgumentException("unsafeChannels must not be null");
+        }
+        try {
+            mService.setCoexUnsafeChannels(new ArrayList<>(unsafeChannels), restrictions);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns the set of current {@link CoexUnsafeChannel} being used for Wi-Fi/Cellular coex
+     * channel avoidance.
+     *
+     * This returns the set calculated by the default algorithm if
+     * config_wifiCoexDefaultAlgorithmEnabled is {@code true}. Otherwise, returns the set supplied
+     * in {@link #setCoexUnsafeChannels(Set, int)}.
+     *
+     * If any {@link CoexRestriction} flags are set in {@link #getCoexRestrictions()}, then the
+     * CoexUnsafeChannels should be totally avoided (i.e. not best effort) for the Wi-Fi modes
+     * specified by the flags.
+     *
+     * @return Set of current CoexUnsafeChannels.
+     *
+     * @hide
+     */
+    @NonNull
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.WIFI_ACCESS_COEX_UNSAFE_CHANNELS)
+    public Set<CoexUnsafeChannel> getCoexUnsafeChannels() {
+        try {
+            return new HashSet<>(mService.getCoexUnsafeChannels());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns the current coex restrictions being used for Wi-Fi/Cellular coex
+     * channel avoidance.
+     *
+     * This returns the restrictions calculated by the default algorithm if
+     * config_wifiCoexDefaultAlgorithmEnabled is {@code true}. Otherwise, returns the value supplied
+     * in {@link #setCoexUnsafeChannels(Set, int)}.
+     *
+     * @return int containing a bitwise-OR combination of {@link CoexRestriction}.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.WIFI_ACCESS_COEX_UNSAFE_CHANNELS)
+    public int getCoexRestrictions() {
+        try {
+            return mService.getCoexRestrictions();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Registers a CoexCallback to listen on the current CoexUnsafeChannels and restrictions being
+     * used for Wi-Fi/cellular coex channel avoidance.
+     * @param executor Executor to execute listener callback on
+     * @param callback CoexCallback to register
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.WIFI_ACCESS_COEX_UNSAFE_CHANNELS)
+    public void registerCoexCallback(
+            @NonNull @CallbackExecutor Executor executor, @NonNull CoexCallback callback) {
+        if (executor == null) throw new IllegalArgumentException("executor must not be null");
+        if (callback == null) throw new IllegalArgumentException("callback must not be null");
+        CoexCallback.CoexCallbackProxy proxy = callback.getProxy();
+        proxy.initProxy(executor, callback);
+        try {
+            mService.registerCoexCallback(proxy);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Unregisters a CoexCallback from listening on the current CoexUnsafeChannels and restrictions
+     * being used for Wi-Fi/cellular coex channel avoidance.
+     * @param callback CoexCallback to unregister
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.WIFI_ACCESS_COEX_UNSAFE_CHANNELS)
+    public void unregisterCoexCallback(@NonNull CoexCallback callback) {
+        if (callback == null) throw new IllegalArgumentException("callback must not be null");
+        CoexCallback.CoexCallbackProxy proxy = callback.getProxy();
+        try {
+            mService.unregisterCoexCallback(proxy);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        } finally {
+            proxy.cleanUpProxy();
+        }
+    }
+
+    /**
+     * Abstract callback class for applications to receive updates about current CoexUnsafeChannels
+     * for Wi-Fi/Cellular coex channel avoidance.
+     *
+     * @hide
+     */
+    @SystemApi
+    public abstract static class CoexCallback {
+        private final CoexCallbackProxy mCoexCallbackProxy;
+
+        public CoexCallback() {
+            mCoexCallbackProxy = new CoexCallbackProxy();
+        }
+
+        /*package*/ @NonNull
+        CoexCallbackProxy getProxy() {
+            return mCoexCallbackProxy;
+        }
+
+        /**
+         * Indicates that the current CoexUnsafeChannels or restrictions have changed.
+         * Clients should call {@link #getCoexUnsafeChannels()} and {@link #getCoexRestrictions()}
+         * to get the updated values.
+         */
+        public abstract void onCoexUnsafeChannelsChanged();
+
+        /**
+         * Callback proxy for CoexCallback objects.
+         */
+        private static class CoexCallbackProxy extends ICoexCallback.Stub {
+            private final Object mLock = new Object();
+            @Nullable @GuardedBy("mLock") private Executor mExecutor;
+            @Nullable @GuardedBy("mLock") private CoexCallback mCallback;
+
+            CoexCallbackProxy() {
+                mExecutor = null;
+                mCallback = null;
+            }
+
+            /*package*/ void initProxy(@NonNull Executor executor,
+                    @NonNull CoexCallback callback) {
+                synchronized (mLock) {
+                    mExecutor = executor;
+                    mCallback = callback;
+                }
+            }
+
+            /*package*/ void cleanUpProxy() {
+                synchronized (mLock) {
+                    mExecutor = null;
+                    mCallback = null;
+                }
+            }
+
+            @Override
+            public void onCoexUnsafeChannelsChanged() {
+                Executor executor;
+                CoexCallback callback;
+                synchronized (mLock) {
+                    executor = mExecutor;
+                    callback = mCallback;
+                }
+                if (executor == null || callback == null) {
+                    return;
+                }
+                Binder.clearCallingIdentity();
+                executor.execute(callback::onCoexUnsafeChannelsChanged);
+            }
+        }
+    }
+
     /**
      * Start Soft AP (hotspot) mode for tethering purposes with the specified configuration.
      * Note that starting Soft AP mode may disable station mode operation if the device does not
@@ -5991,7 +6224,6 @@ public class WifiManager {
                 executor.execute(callback::onScanResultsAvailable);
             }
         }
-
     }
 
     /**
