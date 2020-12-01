@@ -16,6 +16,11 @@
 
 package com.android.systemui.screenshot;
 
+import static com.android.systemui.screenshot.LogConfig.DEBUG_ACTIONS;
+import static com.android.systemui.screenshot.LogConfig.DEBUG_CALLBACK;
+import static com.android.systemui.screenshot.LogConfig.DEBUG_STORAGE;
+import static com.android.systemui.screenshot.LogConfig.logTag;
+
 import android.app.ActivityTaskManager;
 import android.app.Notification;
 import android.app.PendingIntent;
@@ -45,7 +50,7 @@ import android.provider.MediaStore;
 import android.provider.MediaStore.MediaColumns;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
-import android.util.Slog;
+import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
@@ -73,8 +78,8 @@ import java.util.concurrent.CompletableFuture;
 /**
  * An AsyncTask that saves an image to the media store in the background.
  */
-class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
-    private static final String TAG = "SaveImageInBackgroundTask";
+class  SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
+    private static final String TAG = logTag(SaveImageInBackgroundTask.class);
 
     private static final String SCREENSHOT_FILE_NAME_TEMPLATE = "Screenshot_%s.png";
     private static final String SCREENSHOT_ID_TEMPLATE = "Screenshot_%s";
@@ -121,6 +126,9 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
     @Override
     protected Void doInBackground(Void... paramsUnused) {
         if (isCancelled()) {
+            if (DEBUG_STORAGE) {
+                Log.d(TAG, "cancelled! returning null");
+            }
             return null;
         }
         Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
@@ -151,8 +159,18 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
             try {
                 // First, write the actual data for our screenshot
                 try (OutputStream out = resolver.openOutputStream(uri)) {
+                    if (DEBUG_STORAGE) {
+                        Log.d(TAG, "Compressing PNG:"
+                                + " w=" + image.getWidth() + " h=" + image.getHeight());
+                    }
                     if (!image.compress(Bitmap.CompressFormat.PNG, 100, out)) {
+                        if (DEBUG_STORAGE) {
+                            Log.d(TAG, "Bitmap.compress returned false");
+                        }
                         throw new IOException("Failed to compress");
+                    }
+                    if (DEBUG_STORAGE) {
+                        Log.d(TAG, "Done compressing PNG");
                     }
                 }
 
@@ -181,7 +199,9 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
                         exif.setAttribute(ExifInterface.TAG_OFFSET_TIME_ORIGINAL,
                                 DateTimeFormatter.ofPattern("XXX").format(time));
                     }
-
+                    if (DEBUG_STORAGE) {
+                        Log.d(TAG, "Writing EXIF metadata");
+                    }
                     exif.saveAttributes();
                 }
 
@@ -190,6 +210,9 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
                 values.put(MediaColumns.IS_PENDING, 0);
                 values.putNull(MediaColumns.DATE_EXPIRES);
                 resolver.update(uri, values, null, null);
+                if (DEBUG_STORAGE) {
+                    Log.d(TAG, "Completed writing to ContentManager");
+                }
             } catch (Exception e) {
                 resolver.delete(uri, null);
                 throw e;
@@ -215,15 +238,24 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
             mImageData.deleteAction = createDeleteAction(mContext, mContext.getResources(), uri);
 
             mParams.mActionsReadyListener.onActionsReady(mImageData);
+            if (DEBUG_CALLBACK) {
+                Log.d(TAG, "finished background processing, Calling (Consumer<Uri>) "
+                        + "finisher.accept(\"" + mImageData.uri + "\"");
+            }
             mParams.finisher.accept(mImageData.uri);
             mParams.image = null;
         } catch (Exception e) {
             // IOException/UnsupportedOperationException may be thrown if external storage is
             // not mounted
-            Slog.e(TAG, "unable to save screenshot", e);
+            if (DEBUG_STORAGE) {
+                Log.d(TAG, "Failed to store screenshot", e);
+            }
             mParams.clearImage();
             mImageData.reset();
             mParams.mActionsReadyListener.onActionsReady(mImageData);
+            if (DEBUG_CALLBACK) {
+                Log.d(TAG, "Calling (Consumer<Uri>) finisher.accept(null)");
+            }
             mParams.finisher.accept(null);
         }
 
@@ -245,6 +277,9 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
         // params from the ctor in any case.
         mImageData.reset();
         mParams.mActionsReadyListener.onActionsReady(mImageData);
+        if (DEBUG_CALLBACK) {
+            Log.d(TAG, "onCancelled, calling (Consumer<Uri>) finisher.accept(null)");
+        }
         mParams.finisher.accept(null);
         mParams.clearImage();
     }
@@ -380,7 +415,9 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
         try {
             return ActivityTaskManager.getService().getLastResumedActivityUserId();
         } catch (RemoteException e) {
-            Slog.w(TAG, "getUserHandleOfForegroundApplication: ", e);
+            if (DEBUG_ACTIONS) {
+                Log.d(TAG, "Failed to get UserHandle of foreground app: ", e);
+            }
             return context.getUserId();
         }
     }
@@ -421,6 +458,4 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
                 .putExtra(ScreenshotController.EXTRA_ID, screenshotId)
                 .putExtra(ScreenshotController.EXTRA_SMART_ACTIONS_ENABLED, smartActionsEnabled);
     }
-
-
 }
