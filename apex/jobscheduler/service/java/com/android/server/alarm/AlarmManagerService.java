@@ -417,6 +417,9 @@ public class AlarmManagerService extends SystemService {
         @VisibleForTesting
         static final String KEY_LAZY_BATCHING = "lazy_batching";
 
+        private static final String KEY_TIME_TICK_ALLOWED_WHILE_IDLE =
+                "time_tick_allowed_while_idle";
+
         private static final long DEFAULT_MIN_FUTURITY = 5 * 1000;
         private static final long DEFAULT_MIN_INTERVAL = 60 * 1000;
         private static final long DEFAULT_MAX_INTERVAL = 365 * DateUtils.DAY_IN_MILLIS;
@@ -440,6 +443,7 @@ public class AlarmManagerService extends SystemService {
         private static final long DEFAULT_APP_STANDBY_RESTRICTED_WINDOW = MILLIS_IN_DAY;
 
         private static final boolean DEFAULT_LAZY_BATCHING = true;
+        private static final boolean DEFAULT_TIME_TICK_ALLOWED_WHILE_IDLE = true;
 
         // Minimum futurity of a new alarm
         public long MIN_FUTURITY = DEFAULT_MIN_FUTURITY;
@@ -470,6 +474,7 @@ public class AlarmManagerService extends SystemService {
         public long APP_STANDBY_RESTRICTED_WINDOW = DEFAULT_APP_STANDBY_RESTRICTED_WINDOW;
 
         public boolean LAZY_BATCHING = DEFAULT_LAZY_BATCHING;
+        public boolean TIME_TICK_ALLOWED_WHILE_IDLE = DEFAULT_TIME_TICK_ALLOWED_WHILE_IDLE;
 
         private long mLastAllowWhileIdleWhitelistDuration = -1;
 
@@ -556,6 +561,11 @@ public class AlarmManagerService extends SystemService {
                             if (oldLazyBatching != LAZY_BATCHING) {
                                 migrateAlarmsToNewStoreLocked();
                             }
+                            break;
+                        case KEY_TIME_TICK_ALLOWED_WHILE_IDLE:
+                            TIME_TICK_ALLOWED_WHILE_IDLE = properties.getBoolean(
+                                    KEY_TIME_TICK_ALLOWED_WHILE_IDLE,
+                                    DEFAULT_TIME_TICK_ALLOWED_WHILE_IDLE);
                             break;
                         default:
                             if (name.startsWith(KEY_PREFIX_STANDBY_QUOTA) && !standbyQuotaUpdated) {
@@ -688,6 +698,9 @@ public class AlarmManagerService extends SystemService {
             pw.println();
 
             pw.print(KEY_LAZY_BATCHING, LAZY_BATCHING);
+            pw.println();
+
+            pw.print(KEY_TIME_TICK_ALLOWED_WHILE_IDLE, TIME_TICK_ALLOWED_WHILE_IDLE);
             pw.println();
 
             pw.decreaseIndent();
@@ -3756,9 +3769,14 @@ public class AlarmManagerService extends SystemService {
             final long tickEventDelay = nextTime - currentTime;
 
             final WorkSource workSource = null; // Let system take blame for time tick events.
+
+            int flags = AlarmManager.FLAG_STANDALONE;
+            flags |= mConstants.TIME_TICK_ALLOWED_WHILE_IDLE ? FLAG_ALLOW_WHILE_IDLE_UNRESTRICTED
+                    : 0;
+
             setImpl(ELAPSED_REALTIME, mInjector.getElapsedRealtime() + tickEventDelay, 0,
-                    0, null, mTimeTickTrigger, TIME_TICK_TAG, AlarmManager.FLAG_STANDALONE,
-                    workSource, null, Process.myUid(), "android");
+                    0, null, mTimeTickTrigger, TIME_TICK_TAG, flags, workSource, null,
+                    Process.myUid(), "android");
 
             // Finally, remember when we set the tick alarm
             synchronized (mLock) {
