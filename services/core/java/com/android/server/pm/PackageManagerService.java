@@ -2203,22 +2203,27 @@ public class PackageManagerService extends IPackageManager.Stub
                 res.removedInfo.sendPackageRemovedBroadcasts(killApp, false /*removedBySystem*/);
             }
 
+            final PermissionManagerServiceInternal.PackageInstalledParams.Builder
+                    permissionParamsBuilder =
+                    new PermissionManagerServiceInternal.PackageInstalledParams.Builder();
             final List<String> grantedPermissionsList;
             if (grantPermissions) {
                 if (grantedPermissions != null) {
-                    grantedPermissionsList = Arrays.asList(grantedPermissions);
+                    permissionParamsBuilder.setGrantedPermissions(Arrays.asList(
+                            grantedPermissions));
                 } else {
-                    grantedPermissionsList = res.pkg.getRequestedPermissions();
+                    permissionParamsBuilder.setGrantedPermissions(
+                            res.pkg.getRequestedPermissions());
                 }
-            } else {
-                grantedPermissionsList = Collections.emptyList();
             }
-            if (allowlistedRestrictedPermissions == null) {
-                allowlistedRestrictedPermissions = Collections.emptyList();
+            if (allowlistedRestrictedPermissions != null) {
+                permissionParamsBuilder.setAllowlistedRestrictedPermissions(
+                        allowlistedRestrictedPermissions);
             }
+            permissionParamsBuilder.setAutoRevokePermissionsMode(autoRevokePermissionsMode);
             for (final int userId : res.newUsers) {
-                mPermissionManager.onPackageInstalled(res.pkg, grantedPermissionsList,
-                        allowlistedRestrictedPermissions, autoRevokePermissionsMode, userId);
+                mPermissionManager.onPackageInstalled(res.pkg, permissionParamsBuilder.build(),
+                        userId);
             }
 
             final String installerPackageName =
@@ -3918,8 +3923,9 @@ public class PackageManagerService extends IPackageManager.Stub
                     }
                     final int[] userIds = mUserManager.getUserIds();
                     for (final int userId : userIds) {
-                        mPermissionManager.onPackageInstalled(pkg, Collections.emptyList(),
-                                Collections.emptyList(), MODE_DEFAULT, userId);
+                        mPermissionManager.onPackageInstalled(pkg,
+                                PermissionManagerServiceInternal.PackageInstalledParams.DEFAULT,
+                                userId);
                     }
                     writeSettingsLPrTEMP();
                 }
@@ -13664,14 +13670,16 @@ public class PackageManagerService extends IPackageManager.Stub
 
             if (installed) {
                 if (pkgSetting.pkg != null) {
+                    final PermissionManagerServiceInternal.PackageInstalledParams.Builder
+                            permissionParamsBuilder =
+                            new PermissionManagerServiceInternal.PackageInstalledParams.Builder();
                     if ((installFlags & PackageManager.INSTALL_ALL_WHITELIST_RESTRICTED_PERMISSIONS)
                             != 0) {
-                        allowlistedRestrictedPermissions = pkgSetting.pkg.getRequestedPermissions();
-                    } else if (allowlistedRestrictedPermissions == null) {
-                        allowlistedRestrictedPermissions = Collections.emptyList();
+                        permissionParamsBuilder.setAllowlistedRestrictedPermissions(
+                                pkgSetting.pkg.getRequestedPermissions());
                     }
-                    mPermissionManager.onPackageInstalled(pkgSetting.pkg, Collections.emptyList(),
-                            allowlistedRestrictedPermissions, MODE_DEFAULT, userId);
+                    mPermissionManager.onPackageInstalled(pkgSetting.pkg,
+                            permissionParamsBuilder.build(), userId);
                 }
 
                 if (pkgSetting.pkg != null) {
@@ -19724,8 +19732,8 @@ public class PackageManagerService extends IPackageManager.Stub
             for (final int userId : allUserHandles) {
                 // The method below will take care of removing obsolete permissions and granting
                 // install permissions.
-                mPermissionManager.onPackageInstalled(pkg, Collections.emptyList(),
-                        Collections.emptyList(), MODE_DEFAULT, userId);
+                mPermissionManager.onPackageInstalled(pkg,
+                        PermissionManagerServiceInternal.PackageInstalledParams.DEFAULT, userId);
                 if (applyUserRestrictions) {
                     mSettings.writeRuntimePermissionsForUserLPr(userId, false);
                 }

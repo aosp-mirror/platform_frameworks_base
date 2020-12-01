@@ -20,13 +20,16 @@ import android.annotation.AppIdInt;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
+import android.app.AppOpsManager;
 import android.content.pm.PermissionInfo;
 import android.permission.PermissionManagerInternal;
 
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
 
@@ -476,16 +479,12 @@ public abstract class PermissionManagerServiceInternal extends PermissionManager
      * Callback when a package has been installed for a user.
      *
      * @param pkg the installed package
-     * @param grantedPermissions the permissions to be granted
-     * @param allowlistedRestrictedPermissions the restricted permissions to be allowlisted
-     * @param autoRevokePermissionsMode the auto revoke permissions mode for this package
+     * @param params the parameters passed in for package installation
      * @param userId the user ID this package is installed for
      */
     //@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
     public abstract void onPackageInstalled(@NonNull AndroidPackage pkg,
-            @NonNull List<String> grantedPermissions,
-            @NonNull List<String> allowlistedRestrictedPermissions,
-            int autoRevokePermissionsMode, @UserIdInt int userId);
+            @NonNull PackageInstalledParams params, @UserIdInt int userId);
 
     /**
      * Callback when a package has been removed.
@@ -521,4 +520,132 @@ public abstract class PermissionManagerServiceInternal extends PermissionManager
      * @return whether the permission can be propagated
      */
     public abstract boolean canPropagatePermissionToInstantApp(@NonNull String permissionName);
+
+    /**
+     * The permission-related parameters passed in for package installation.
+     *
+     * @see android.content.pm.PackageInstaller.SessionParams
+     */
+    //@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
+    public static final class PackageInstalledParams {
+        /**
+         * A static instance whose parameters are all in their default state.
+         */
+        public static final PackageInstalledParams DEFAULT = new Builder().build();
+
+        @NonNull
+        private final List<String> mGrantedPermissions;
+        @NonNull
+        private final List<String> mAllowlistedRestrictedPermissions;
+        @NonNull
+        private final int mAutoRevokePermissionsMode;
+
+        private PackageInstalledParams(@NonNull List<String> grantedPermissions,
+                @NonNull List<String> allowlistedRestrictedPermissions,
+                int autoRevokePermissionsMode) {
+            mGrantedPermissions = grantedPermissions;
+            mAllowlistedRestrictedPermissions = allowlistedRestrictedPermissions;
+            mAutoRevokePermissionsMode = autoRevokePermissionsMode;
+        }
+
+        /**
+         * Get the permissions to be granted.
+         *
+         * @return the permissions to be granted
+         */
+        @NonNull
+        public List<String> getGrantedPermissions() {
+            return mGrantedPermissions;
+        }
+
+        /**
+         * Get the restricted permissions to be allowlisted.
+         *
+         * @return the restricted permissions to be allowlisted
+         */
+        @NonNull
+        public List<String> getAllowlistedRestrictedPermissions() {
+            return mAllowlistedRestrictedPermissions;
+        }
+
+        /**
+         * Get the mode for auto revoking permissions.
+         *
+         * @return the mode for auto revoking permissions
+         */
+        public int getAutoRevokePermissionsMode() {
+            return mAutoRevokePermissionsMode;
+        }
+
+        /**
+         * Builder class for {@link PackageInstalledParams}.
+         */
+        public static final class Builder {
+            @NonNull
+            private List<String> mGrantedPermissions = Collections.emptyList();
+            @NonNull
+            private List<String> mAllowlistedRestrictedPermissions = Collections.emptyList();
+            @NonNull
+            private int mAutoRevokePermissionsMode = AppOpsManager.MODE_DEFAULT;
+
+            /**
+             * Set the permissions to be granted.
+             *
+             * @param grantedPermissions the permissions to be granted
+             *
+             * @see android.content.pm.PackageInstaller.SessionParams#setGrantedRuntimePermissions(
+             *      java.lang.String[])
+             */
+            public void setGrantedPermissions(@NonNull List<String> grantedPermissions) {
+                Objects.requireNonNull(grantedPermissions);
+                mGrantedPermissions = new ArrayList<>(grantedPermissions);
+            }
+
+            /**
+             * Set the restricted permissions to be allowlisted.
+             * <p>
+             * Permissions that are not restricted are ignored, so one can just pass in all
+             * requested permissions of a package to get all its restricted permissions allowlisted.
+             *
+             * @param allowlistedRestrictedPermissions the restricted permissions to be allowlisted
+             *
+             * @see android.content.pm.PackageInstaller.SessionParams#setWhitelistedRestrictedPermissions(Set)
+             */
+            public void setAllowlistedRestrictedPermissions(
+                    @NonNull List<String> allowlistedRestrictedPermissions) {
+                Objects.requireNonNull(mGrantedPermissions);
+                mAllowlistedRestrictedPermissions = new ArrayList<>(
+                        allowlistedRestrictedPermissions);
+            }
+
+            /**
+             * Set the mode for auto revoking permissions.
+             * <p>
+             * {@link AppOpsManager#MODE_ALLOWED} means the system is allowed to auto revoke
+             * permissions from this package, and {@link AppOpsManager#MODE_IGNORED} means this
+             * package should be ignored when auto revoking permissions.
+             * {@link AppOpsManager#MODE_DEFAULT} means no changes will be made to the auto revoke
+             * mode of this package.
+             *
+             * @param autoRevokePermissionsMode the mode for auto revoking permissions
+             *
+             * @see android.content.pm.PackageInstaller.SessionParams#setAutoRevokePermissionsMode(
+             *      boolean)
+             */
+            public void setAutoRevokePermissionsMode(int autoRevokePermissionsMode) {
+                mAutoRevokePermissionsMode = autoRevokePermissionsMode;
+            }
+
+            /**
+             * Build a new instance of {@link PackageInstalledParams}.
+             *
+             * @return the {@link PackageInstalledParams} built
+             */
+            @NonNull
+            public PackageInstalledParams build() {
+                return new PackageInstalledParams(mGrantedPermissions,
+                        mAllowlistedRestrictedPermissions, mAutoRevokePermissionsMode);
+            }
+        }
+    }
 }

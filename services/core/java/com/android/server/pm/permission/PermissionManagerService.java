@@ -4895,18 +4895,19 @@ public class PermissionManagerService extends IPermissionManager.Stub {
     }
 
     private void onPackageInstalledInternal(@NonNull AndroidPackage pkg,
-            @NonNull List<String> grantedPermissions,
-            @NonNull List<String> allowlistedRestrictedPermissions, int autoRevokePermissionsMode,
+            @NonNull PermissionManagerServiceInternal.PackageInstalledParams params,
             @UserIdInt int userId) {
         updatePermissions(pkg.getPackageName(), pkg);
-        addAllowlistedRestrictedPermissionsInternal(pkg, allowlistedRestrictedPermissions,
+        addAllowlistedRestrictedPermissionsInternal(pkg,
+                params.getAllowlistedRestrictedPermissions(),
                 FLAG_PERMISSION_WHITELIST_INSTALLER, userId);
+        final int autoRevokePermissionsMode = params.getAutoRevokePermissionsMode();
         if (autoRevokePermissionsMode == AppOpsManager.MODE_ALLOWED
                 || autoRevokePermissionsMode == AppOpsManager.MODE_IGNORED) {
             setAutoRevokeExemptedInternal(pkg,
                     autoRevokePermissionsMode == AppOpsManager.MODE_IGNORED, userId);
         }
-        grantRequestedRuntimePermissionsInternal(pkg, grantedPermissions, userId);
+        grantRequestedRuntimePermissionsInternal(pkg, params.getGrantedPermissions(), userId);
     }
 
     private void addAllowlistedRestrictedPermissionsInternal(@NonNull AndroidPackage pkg,
@@ -5364,16 +5365,11 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
         @Override
         public void onPackageInstalled(@NonNull AndroidPackage pkg,
-                @NonNull List<String> grantedPermissions,
-                @NonNull List<String> allowlistedRestrictedPermissions,
-                int autoRevokePermissionsMode, @UserIdInt int userId) {
+                @NonNull PackageInstalledParams params, @UserIdInt int userId) {
             Objects.requireNonNull(pkg, "pkg");
-            Objects.requireNonNull(grantedPermissions, "grantedPermissions");
-            Objects.requireNonNull(allowlistedRestrictedPermissions,
-                    "allowlistedRestrictedPermissions");
+            Objects.requireNonNull(params, "params");
             Preconditions.checkArgumentNonNegative(userId, "userId");
-            onPackageInstalledInternal(pkg, grantedPermissions, allowlistedRestrictedPermissions,
-                    autoRevokePermissionsMode, userId);
+            onPackageInstalledInternal(pkg, params, userId);
         }
 
         @Override
