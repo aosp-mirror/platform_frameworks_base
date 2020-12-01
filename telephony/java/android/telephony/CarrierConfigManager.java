@@ -2033,8 +2033,16 @@ public class CarrierConfigManager {
             "allow_hold_call_during_emergency_bool";
 
     /**
-     * Flag indicating whether the carrier supports RCS presence indication for
-     * User Capability Exchange (UCE).  When presence is supported, the device should use the
+     * Flag indicating whether or not the carrier supports the periodic exchange of phone numbers
+     * in the user's address book with the carrier's presence server in order to retrieve the RCS
+     * capabilities for each contact used in the RCS User Capability Exchange (UCE) procedure. See
+     * RCC.71, section 3 for more information.
+     * <p>
+     * The flag {@link Ims#KEY_ENABLE_PRESENCE_PUBLISH_BOOL} must also be enabled if this flag is
+     * enabled, as sending a periodic SIP PUBLISH with this device's RCS capabilities is a
+     * requirement for capability exchange to begin.
+     * <p>
+     * When presence is supported, the device should use the
      * {@link android.provider.ContactsContract.Data#CARRIER_PRESENCE} bit mask and set the
      * {@link android.provider.ContactsContract.Data#CARRIER_PRESENCE_VT_CAPABLE} bit to indicate
      * whether each contact supports video calling.  The UI is made aware that presence is enabled
@@ -3850,12 +3858,27 @@ public class CarrierConfigManager {
         public static final String KEY_IMS_SINGLE_REGISTRATION_REQUIRED_BOOL =
                 KEY_PREFIX + "ims_single_registration_required_bool";
 
+        /**
+         * A boolean flag specifying whether or not this carrier supports the device notifying the
+         * network of its RCS capabilities using the SIP PUBLISH procedure defined for User
+         * Capability Exchange (UCE). See RCC.71, section 3 for more information.
+         * <p>
+         * If this key's value is set to false, the procedure for RCS contact capability exchange
+         * via SIP SUBSCRIBE/NOTIFY will also be disabled internally, and
+         * {@link #KEY_USE_RCS_PRESENCE_BOOL} must also be set to false to ensure apps do not
+         * improperly think that capability exchange via SIP PUBLISH is enabled.
+         * <p> The default value for this key is {@code false}.
+         */
+        public static final String KEY_ENABLE_PRESENCE_PUBLISH_BOOL =
+                KEY_PREFIX + "enable_presence_publish_bool";
+
         private Ims() {}
 
         private static PersistableBundle getDefaults() {
             PersistableBundle defaults = new PersistableBundle();
             defaults.putInt(KEY_WIFI_OFF_DEFERRING_TIME_MILLIS_INT, 4000);
             defaults.putBoolean(KEY_IMS_SINGLE_REGISTRATION_REQUIRED_BOOL, false);
+            defaults.putBoolean(KEY_ENABLE_PRESENCE_PUBLISH_BOOL, false);
             return defaults;
         }
     }
