@@ -1537,12 +1537,14 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
         @Override
         public void sessionCreated(IInputMethodSession session) {
+            Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMMS.sessionCreated");
             final long ident = Binder.clearCallingIdentity();
             try {
                 mParentIMMS.onSessionCreated(mMethod, session, mChannel);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
+            Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         }
     }
 
@@ -2615,6 +2617,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     @Override
     public void onServiceConnected(ComponentName name, IBinder service) {
+        Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMMS.onServiceConnected");
         synchronized (mMethodMap) {
             if (mCurIntent != null && name.equals(mCurIntent.getComponent())) {
                 mCurMethod = IInputMethod.Stub.asInterface(service);
@@ -2630,6 +2633,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 if (mCurToken == null) {
                     Slog.w(TAG, "Service connected without a token!");
                     unbindCurrentMethodLocked();
+                    Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
                     return;
                 }
                 if (DEBUG) Slog.v(TAG, "Initiating attach with token: " + mCurToken);
@@ -2643,6 +2647,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 }
             }
         }
+        Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
     }
 
     void onSessionCreated(IInputMethod method, IInputMethodSession session,
