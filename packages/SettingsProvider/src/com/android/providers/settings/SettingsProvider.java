@@ -5257,9 +5257,6 @@ public class SettingsProvider extends ContentProvider {
                                         .getResources()
                                         .getBoolean(R.bool.def_wearable_alternateLauncherEnabled));
                         initGlobalSettingsDefaultValForWearLocked(
-                                Global.Wearable.CARD_PREVIEW_MODE,
-                                Global.Wearable.CARD_PREVIEW_MODE_NORMAL);
-                        initGlobalSettingsDefaultValForWearLocked(
                                 Global.Wearable.CORNER_ROUNDNESS,
                                 getContext()
                                         .getResources()
