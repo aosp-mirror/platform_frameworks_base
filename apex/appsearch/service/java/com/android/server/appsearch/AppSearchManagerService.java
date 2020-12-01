@@ -225,21 +225,21 @@ public class AppSearchManagerService extends SystemService {
                 @NonNull String databaseName,
                 @NonNull String queryExpression,
                 @NonNull Bundle searchSpecBundle,
-                @NonNull AndroidFuture<AppSearchResult> callback) {
+                @NonNull IAppSearchResultCallback callback) {
             Preconditions.checkNotNull(databaseName);
             Preconditions.checkNotNull(queryExpression);
             Preconditions.checkNotNull(searchSpecBundle);
-            Preconditions.checkNotNull(callback);
             int callingUid = Binder.getCallingUidOrThrow();
             int callingUserId = UserHandle.getUserId(callingUid);
             final long callingIdentity = Binder.clearCallingIdentity();
             try {
                 AppSearchImpl impl = ImplInstanceManager.getInstance(getContext(), callingUserId);
                 databaseName = rewriteDatabaseNameWithUid(databaseName, callingUid);
-                impl.removeByQuery(databaseName, queryExpression, new SearchSpec(searchSpecBundle));
-                callback.complete(AppSearchResult.newSuccessfulResult(/*result= */null));
+                impl.removeByQuery(databaseName, queryExpression,
+                        new SearchSpec(searchSpecBundle));
+                invokeCallbackOnResult(callback, AppSearchResult.newSuccessfulResult(null));
             } catch (Throwable t) {
-                callback.complete(throwableToFailedResult(t));
+                invokeCallbackOnError(callback, t);
             } finally {
                 Binder.restoreCallingIdentity(callingIdentity);
             }
