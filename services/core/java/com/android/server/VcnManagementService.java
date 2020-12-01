@@ -22,6 +22,7 @@ import static com.android.server.vcn.TelephonySubscriptionTracker.TelephonySubsc
 import static java.util.Objects.requireNonNull;
 
 import android.annotation.NonNull;
+import android.app.AppOpsManager;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkProvider;
@@ -122,6 +123,7 @@ public class VcnManagementService extends IVcnManagementService.Stub {
     @VisibleForTesting(visibility = Visibility.PRIVATE)
     static final String VCN_CONFIG_FILE = "/data/system/vcn/configs.xml";
 
+    // TODO(b/176956496): Directly use CarrierServiceBindHelper.UNBIND_DELAY_MILLIS
     @VisibleForTesting(visibility = Visibility.PRIVATE)
     static final long CARRIER_PRIVILEGES_LOST_TEARDOWN_DELAY_MS = TimeUnit.SECONDS.toMillis(30);
 
@@ -346,9 +348,8 @@ public class VcnManagementService extends IVcnManagementService.Stub {
 
                 // Start any VCN instances as necessary
                 for (Entry<ParcelUuid, VcnConfig> entry : mConfigs.entrySet()) {
-                    if (snapshot.getActiveSubscriptionGroups().contains(entry.getKey())) {
-                        // TODO: Add checks to ensure provisioning app is currently carrier
-                        //       privileged on this subscription
+                    if (snapshot.packageHasPermissionsForSubscriptionGroup(
+                            entry.getKey(), entry.getValue().getProvisioningPackageName())) {
                         if (!mVcns.containsKey(entry.getKey())) {
                             startVcnLocked(entry.getKey(), entry.getValue());
                         }
@@ -361,7 +362,10 @@ public class VcnManagementService extends IVcnManagementService.Stub {
                 // Schedule teardown of any VCN instances that have lost carrier privileges (after a
                 // delay)
                 for (Entry<ParcelUuid, Vcn> entry : mVcns.entrySet()) {
-                    if (!snapshot.getActiveSubscriptionGroups().contains(entry.getKey())) {
+                    final VcnConfig config = mConfigs.get(entry.getKey());
+                    if (config == null
+                            || !snapshot.packageHasPermissionsForSubscriptionGroup(
+                                    entry.getKey(), config.getProvisioningPackageName())) {
                         final ParcelUuid uuidToTeardown = entry.getKey();
                         final Vcn instanceToTeardown = entry.getValue();
 
@@ -408,11 +412,20 @@ public class VcnManagementService extends IVcnManagementService.Stub {
      * <p>Implements the IVcnManagementService Binder interface.
      */
     @Override
-    public void setVcnConfig(@NonNull ParcelUuid subscriptionGroup, @NonNull VcnConfig config) {
+    public void setVcnConfig(
+            @NonNull ParcelUuid subscriptionGroup,
+            @NonNull VcnConfig config,
+            @NonNull String opPkgName) {
         requireNonNull(subscriptionGroup, "subscriptionGroup was null");
         requireNonNull(config, "config was null");
+        requireNonNull(opPkgName, "opPkgName was null");
+        if (!config.getProvisioningPackageName().equals(opPkgName)) {
+            throw new IllegalArgumentException("Mismatched caller and VcnConfig creator");
+        }
         Slog.v(TAG, "VCN config updated for subGrp: " + subscriptionGroup);
 
+        mContext.getSystemService(AppOpsManager.class)
+                .checkPackage(mDeps.getBinderCallingUid(), config.getProvisioningPackageName());
         enforceCallingUserAndCarrierPrivilege(subscriptionGroup);
 
         Binder.withCleanCallingIdentity(() -> {
