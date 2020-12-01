@@ -366,6 +366,30 @@ public class ConfigurationContainerTests {
         assertTrue(child.getConfiguration().windowConfiguration.getMaxBounds().isEmpty());
     }
 
+    @Test
+    public void testOnRequestedOverrideConfigurationChangedOverrideMaxBounds() {
+        final TestConfigurationContainer root =
+                new TestConfigurationContainer(true /* providesMaxBounds */);
+        final Rect bounds = new Rect(0, 0, 10, 10);
+        final TestConfigurationContainer child = new TestConfigurationContainer();
+        root.addChild(child);
+        final Configuration configuration = new Configuration();
+        configuration.windowConfiguration.setBounds(bounds);
+
+        root.onRequestedOverrideConfigurationChanged(configuration);
+
+        assertEquals(bounds, root.getBounds());
+        assertEquals(bounds, root.getConfiguration().windowConfiguration.getBounds());
+        assertEquals(bounds, child.getBounds());
+        assertEquals(bounds, child.getConfiguration().windowConfiguration.getBounds());
+
+        assertEquals(bounds, root.getMaxBounds());
+        assertEquals(bounds, root.getConfiguration().windowConfiguration.getMaxBounds());
+        assertEquals(bounds, child.getMaxBounds());
+        assertEquals(bounds, child.getConfiguration().windowConfiguration.getMaxBounds());
+    }
+
+
     /**
      * Contains minimal implementation of {@link ConfigurationContainer}'s abstract behavior needed
      * for testing.
