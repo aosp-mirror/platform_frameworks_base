@@ -336,7 +336,7 @@ static jint getVectorOfAudioDeviceTypeAddr(JNIEnv *env, jintArray deviceTypes,
             return (jint)AUDIO_JAVA_BAD_VALUE;
         }
         const char *address = env->GetStringUTFChars((jstring)addrJobj, NULL);
-        AudioDeviceTypeAddr dev = AudioDeviceTypeAddr(typesPtr[i], address);
+        AudioDeviceTypeAddr dev = AudioDeviceTypeAddr((audio_devices_t)typesPtr[i], address);
         audioDeviceTypeAddrVector.add(dev);
         env->ReleaseStringUTFChars((jstring)addrJobj, address);
     }
@@ -818,7 +818,8 @@ static void convertAudioGainConfigToNative(JNIEnv *env,
                                                bool useInMask)
 {
     nAudioGainConfig->index = env->GetIntField(jAudioGainConfig, gAudioGainConfigFields.mIndex);
-    nAudioGainConfig->mode = env->GetIntField(jAudioGainConfig, gAudioGainConfigFields.mMode);
+    nAudioGainConfig->mode =
+            (audio_gain_mode_t)env->GetIntField(jAudioGainConfig, gAudioGainConfigFields.mMode);
     ALOGV("convertAudioGainConfigToNative got gain index %d", nAudioGainConfig->index);
     jint jMask = env->GetIntField(jAudioGainConfig, gAudioGainConfigFields.mChannelMask);
     audio_channel_mask_t nMask;
@@ -938,8 +939,8 @@ static jint convertAudioPortConfigToNativeWithDevicePort(JNIEnv *env,
 
     jobject jAudioDevicePort = env->GetObjectField(jAudioPortConfig,
             gAudioPortConfigFields.mPort);
-    nAudioPortConfig->ext.device.type = env->GetIntField(jAudioDevicePort,
-            gAudioPortFields.mType);
+    nAudioPortConfig->ext.device.type =
+            (audio_devices_t)env->GetIntField(jAudioDevicePort, gAudioPortFields.mType);
     jstring jDeviceAddress = (jstring)env->GetObjectField(jAudioDevicePort,
             gAudioPortFields.mAddress);
     const char *nDeviceAddress = env->GetStringUTFChars(jDeviceAddress, NULL);
@@ -2332,7 +2333,7 @@ static jint android_media_AudioSystem_setSupportedSystemUsages(JNIEnv *env, jobj
 
 static jint
 android_media_AudioSystem_setAllowedCapturePolicy(JNIEnv *env, jobject thiz, jint uid, jint flags) {
-    return AudioSystem::setAllowedCapturePolicy(uid, flags);
+    return AudioSystem::setAllowedCapturePolicy(uid, static_cast<audio_flags_mask_t>(flags));
 }
 
 static jint
@@ -2367,8 +2368,10 @@ android_media_AudioSystem_setPreferredDeviceForStrategy(JNIEnv *env, jobject thi
 
     const char *c_address = env->GetStringUTFChars(deviceAddress, NULL);
     int status = check_AudioSystem_Command(
-            AudioSystem::setPreferredDeviceForStrategy((product_strategy_t) strategy,
-                    AudioDeviceTypeAddr(deviceType, c_address)));
+            AudioSystem::setPreferredDeviceForStrategy((product_strategy_t)strategy,
+                                                       AudioDeviceTypeAddr((audio_devices_t)
+                                                                                   deviceType,
+                                                                           c_address)));
     env->ReleaseStringUTFChars(deviceAddress, c_address);
     return (jint) status;
 }
