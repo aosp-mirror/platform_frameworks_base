@@ -3721,6 +3721,27 @@ public class DevicePolicyManager {
     }
 
     /**
+     * Returns the password complexity that applies to this user, aggregated from other users if
+     * necessary (for example, if the DPC has set password complexity requirements on the parent
+     * profile DPM instance of a managed profile user, they would apply to the primary user on the
+     * device).
+     * @hide
+     */
+    @PasswordComplexity
+    public int getAggregatedPasswordComplexityForUser(int userId) {
+        if (mService == null) {
+            return PASSWORD_COMPLEXITY_NONE;
+        }
+
+        try {
+            return mService.getAggregatedPasswordComplexityForUser(userId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+
+    /**
      * When called by a profile owner of a managed profile returns true if the profile uses unified
      * challenge with its parent user.
      *
