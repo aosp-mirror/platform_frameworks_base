@@ -25,6 +25,7 @@ import static android.view.InsetsSourceConsumerProto.IS_REQUESTED_VISIBLE;
 import static android.view.InsetsSourceConsumerProto.PENDING_FRAME;
 import static android.view.InsetsSourceConsumerProto.PENDING_VISIBLE_FRAME;
 import static android.view.InsetsSourceConsumerProto.SOURCE_CONTROL;
+import static android.view.InsetsState.ITYPE_IME;
 import static android.view.InsetsState.getDefaultVisibility;
 import static android.view.InsetsState.toPublicType;
 
@@ -34,6 +35,7 @@ import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.graphics.Rect;
 import android.util.Log;
+import android.util.imetracing.ImeTracing;
 import android.util.proto.ProtoOutputStream;
 import android.view.InsetsState.InternalInsetsType;
 import android.view.SurfaceControl.Transaction;
@@ -108,6 +110,10 @@ public class InsetsSourceConsumer {
      */
     public void setControl(@Nullable InsetsSourceControl control,
             @InsetsType int[] showTypes, @InsetsType int[] hideTypes) {
+        if (mType == ITYPE_IME) {
+            ImeTracing.getInstance().triggerClientDump("InsetsSourceConsumer#setControl",
+                    mController.getHost().getInputMethodManager());
+        }
         if (mSourceControl == control) {
             return;
         }
@@ -236,6 +242,12 @@ public class InsetsSourceConsumer {
         final InsetsSource source = mState.peekSource(mType);
         final boolean isVisible = source != null ? source.isVisible() : getDefaultVisibility(mType);
         final boolean hasControl = mSourceControl != null;
+
+        if (mType == ITYPE_IME) {
+            ImeTracing.getInstance().triggerClientDump(
+                    "InsetsSourceConsumer#applyLocalVisibilityOverride",
+                    mController.getHost().getInputMethodManager());
+        }
 
         // We still need to let the legacy app know the visibility change even if we don't have the
         // control. If we don't have the source, we don't change the requested visibility for making

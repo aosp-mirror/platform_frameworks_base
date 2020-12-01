@@ -1057,6 +1057,10 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
             boolean canRun = false;
             if (show) {
                 // Show request
+                if (fromIme) {
+                    ImeTracing.getInstance().triggerClientDump(
+                            "ImeInsetsSourceConsumer#requestShow", mHost.getInputMethodManager());
+                }
                 switch(consumer.requestShow(fromIme)) {
                     case ShowResult.SHOW_IMMEDIATELY:
                         canRun = true;
@@ -1096,8 +1100,16 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
                         + fromIme);
                 // We don't have a control at the moment. However, we still want to update requested
                 // visibility state such that in case we get control, we can apply show animation.
+                if (fromIme) {
+                    ImeTracing.getInstance().triggerClientDump(
+                            "InsetsSourceConsumer#show", mHost.getInputMethodManager());
+                }
                 consumer.show(fromIme);
             } else if (animationType == ANIMATION_TYPE_HIDE) {
+                if (fromIme) {
+                    ImeTracing.getInstance().triggerClientDump(
+                            "InsetsSourceConsumer#hide", mHost.getInputMethodManager());
+                }
                 consumer.hide();
             }
         }
@@ -1217,8 +1229,8 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
 
     private void applyLocalVisibilityOverride() {
         for (int i = mSourceConsumers.size() - 1; i >= 0; i--) {
-            final InsetsSourceConsumer controller = mSourceConsumers.valueAt(i);
-            controller.applyLocalVisibilityOverride();
+            final InsetsSourceConsumer consumer = mSourceConsumers.valueAt(i);
+            consumer.applyLocalVisibilityOverride();
         }
     }
 
