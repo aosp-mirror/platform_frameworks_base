@@ -4091,17 +4091,14 @@ public class PermissionManagerService extends IPermissionManager.Stub {
      *
      * @param packageName The package that is updated
      * @param pkg The package that is updated, or {@code null} if package is deleted
-     * @param allPackages All currently known packages
-     * @param callback Callback to call after permission changes
      */
-    private void updatePermissions(@NonNull String packageName, @Nullable AndroidPackage pkg,
-            @NonNull PermissionCallback callback) {
+    private void updatePermissions(@NonNull String packageName, @Nullable AndroidPackage pkg) {
         // If the package is being deleted, update the permissions of all the apps
         final int flags =
                 (pkg == null ? UPDATE_PERMISSIONS_ALL | UPDATE_PERMISSIONS_REPLACE_PKG
                         : UPDATE_PERMISSIONS_REPLACE_PKG);
         updatePermissions(
-                packageName, pkg, getVolumeUuidForPackage(pkg), flags, callback);
+                packageName, pkg, getVolumeUuidForPackage(pkg), flags, mDefaultPermissionCallback);
     }
 
     /**
@@ -4901,6 +4898,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             @NonNull List<String> grantedPermissions,
             @NonNull List<String> allowlistedRestrictedPermissions, int autoRevokePermissionsMode,
             @UserIdInt int userId) {
+        updatePermissions(pkg.getPackageName(), pkg);
         addAllowlistedRestrictedPermissionsInternal(pkg, allowlistedRestrictedPermissions,
                 FLAG_PERMISSION_WHITELIST_INSTALLER, userId);
         if (autoRevokePermissionsMode == AppOpsManager.MODE_ALLOWED
@@ -4945,7 +4943,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             resetRuntimePermissionsInternal(pkg, userId);
             return;
         }
-        updatePermissions(packageName, null, mDefaultPermissionCallback);
+        updatePermissions(packageName, null);
         if (sharedUserPkgs.isEmpty()) {
             removeUidState(appId, userId);
         } else {
@@ -5098,11 +5096,6 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         public String[] getAppOpPermissionPackages(@NonNull String permissionName) {
             Objects.requireNonNull(permissionName, "permissionName");
             return PermissionManagerService.this.getAppOpPermissionPackagesInternal(permissionName);
-        }
-        @Override
-        public void updatePermissions(@NonNull String packageName, @Nullable AndroidPackage pkg) {
-            PermissionManagerService.this
-                    .updatePermissions(packageName, pkg, mDefaultPermissionCallback);
         }
         @Override
         public void updateAllPermissions(@Nullable String volumeUuid, boolean sdkUpdated) {

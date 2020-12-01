@@ -189,22 +189,6 @@ public abstract class PermissionManagerServiceInternal extends PermissionManager
             @UserIdInt int userId);
 
     /**
-     * Update permissions when a package changed.
-     *
-     * <p><ol>
-     *     <li>Reconsider the ownership of permission</li>
-     *     <li>Update the state (grant, flags) of the permissions</li>
-     * </ol>
-     *
-     * @param packageName The package that is updated
-     * @param pkg The package that is updated, or {@code null} if package is deleted
-     * @param allPackages All currently known packages
-     * @param callback Callback to call after permission changes
-     */
-    public abstract void updatePermissions(@NonNull String packageName,
-            @Nullable AndroidPackage pkg);
-
-    /**
      * Update all permissions for all apps.
      *
      * <p><ol>
@@ -489,7 +473,7 @@ public abstract class PermissionManagerServiceInternal extends PermissionManager
             @Nullable AndroidPackage oldPkg);
 
     /**
-     * Callback when a package has been installed for certain users.
+     * Callback when a package has been installed for a user.
      *
      * @param pkg the installed package
      * @param grantedPermissions the permissions to be granted
