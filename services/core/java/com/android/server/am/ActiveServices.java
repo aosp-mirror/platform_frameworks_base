@@ -91,6 +91,7 @@ import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.TransactionTooLargeException;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.provider.Settings;
 import android.stats.devicepolicy.DevicePolicyEnums;
 import android.text.TextUtils;
@@ -165,6 +166,7 @@ public final class ActiveServices {
     public static final int FGS_FEATURE_ALLOWED_BY_DEVICE_IDLE_ALLOW_LIST = 15;
     public static final int FGS_FEATURE_ALLOWED_BY_SYSTEM_ALERT_WINDOW_PERMISSION = 16;
     public static final int FGS_FEATURE_ALLOWED_BY_FGS_BINDING = 17;
+    public static final int FGS_FEATURE_ALLOWED_BY_DEVICE_DEMO_MODE = 18;
 
     @IntDef(flag = true, prefix = { "FGS_FEATURE_" }, value = {
             FGS_FEATURE_DENIED,
@@ -183,7 +185,8 @@ public final class ActiveServices {
             FGS_FEATURE_ALLOWED_BY_DEVICE_OWNER,
             FGS_FEATURE_ALLOWED_BY_DEVICE_IDLE_ALLOW_LIST,
             FGS_FEATURE_ALLOWED_BY_SYSTEM_ALERT_WINDOW_PERMISSION,
-            FGS_FEATURE_ALLOWED_BY_FGS_BINDING
+            FGS_FEATURE_ALLOWED_BY_FGS_BINDING,
+            FGS_FEATURE_ALLOWED_BY_DEVICE_DEMO_MODE
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface FgsFeatureRetCode {}
@@ -5283,6 +5286,12 @@ public final class ActiveServices {
             }
         }
 
+        if (ret == FGS_FEATURE_DENIED) {
+            if (UserManager.isDeviceInDemoMode(mAm.mContext)) {
+                ret = FGS_FEATURE_ALLOWED_BY_DEVICE_DEMO_MODE;
+            }
+        }
+
         final String debugInfo =
                 "[callingPackage: " + callingPackage
                         + "; callingUid: " + callingUid
@@ -5336,6 +5345,8 @@ public final class ActiveServices {
                 return "ALLOWED_BY_SYSTEM_ALERT_WINDOW_PERMISSION";
             case FGS_FEATURE_ALLOWED_BY_FGS_BINDING:
                 return "ALLOWED_BY_FGS_BINDING";
+            case FGS_FEATURE_ALLOWED_BY_DEVICE_DEMO_MODE:
+                return "ALLOWED_BY_DEVICE_DEMO_MODE";
             default:
                 return "";
         }
