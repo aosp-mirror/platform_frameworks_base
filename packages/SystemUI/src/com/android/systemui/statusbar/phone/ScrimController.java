@@ -236,6 +236,11 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
             }
 
             @Override
+            public void onOverlayChanged() {
+                ScrimController.this.onThemeChanged();
+            }
+
+            @Override
             public void onUiModeChanged() {
                 ScrimController.this.onThemeChanged();
             }
