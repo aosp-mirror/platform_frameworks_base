@@ -15,6 +15,10 @@
  */
 package com.android.systemui.statusbar.policy;
 
+import static com.android.settingslib.mobile.MobileMappings.getIconKey;
+import static com.android.settingslib.mobile.MobileMappings.toDisplayIconKey;
+import static com.android.settingslib.mobile.MobileMappings.toIconKey;
+
 import android.content.Context;
 import android.content.Intent;
 import android.database.ContentObserver;
@@ -22,10 +26,8 @@ import android.net.NetworkCapabilities;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.Settings.Global;
-import android.telephony.Annotation;
 import android.telephony.CellSignalStrength;
 import android.telephony.CellSignalStrengthCdma;
-import android.telephony.PhoneStateListener;
 import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
 import android.telephony.SubscriptionInfo;
@@ -39,12 +41,13 @@ import android.util.Log;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.settingslib.Utils;
 import com.android.settingslib.graph.SignalDrawable;
+import com.android.settingslib.mobile.MobileStatusTracker;
+import com.android.settingslib.mobile.MobileStatusTracker.SubscriptionDefaults;
 import com.android.settingslib.net.SignalStrengthUtil;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.policy.NetworkController.IconState;
 import com.android.systemui.statusbar.policy.NetworkController.SignalCallback;
 import com.android.systemui.statusbar.policy.NetworkControllerImpl.Config;
-import com.android.systemui.statusbar.policy.NetworkControllerImpl.SubscriptionDefaults;
 
 import java.io.PrintWriter;
 import java.util.BitSet;
@@ -52,8 +55,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.Executor;
-
 
 public class MobileSignalController extends SignalController<
         MobileSignalController.MobileState, MobileSignalController.MobileIconGroup> {
@@ -62,14 +63,10 @@ public class MobileSignalController extends SignalController<
     private final String mNetworkNameDefault;
     private final String mNetworkNameSeparator;
     private final ContentObserver mObserver;
-    @VisibleForTesting
-    final PhoneStateListener mPhoneStateListener;
     // Save entire info for logging, we only use the id.
     final SubscriptionInfo mSubscriptionInfo;
-
     // @VisibleForDemoMode
     final Map<String, MobileIconGroup> mNetworkToIconLookup;
-
     // Since some pieces of the phone state are interdependent we store it locally,
     // this could potentially become part of MobileState for simplification/complication
     // of code.
@@ -83,6 +80,9 @@ public class MobileSignalController extends SignalController<
     private Config mConfig;
     @VisibleForTesting
     boolean mInflateSignalStrengths = false;
+    private MobileStatusTracker.Callback mCallback;
+    @VisibleForTesting
+    MobileStatusTracker mMobileStatusTracker;
 
     // TODO: Reduce number of vars passed in, if we have the NetworkController, probably don't
     // need listener lists anymore.
@@ -98,28 +98,42 @@ public class MobileSignalController extends SignalController<
         mPhone = phone;
         mDefaults = defaults;
         mSubscriptionInfo = info;
-        mPhoneStateListener = new MobilePhoneStateListener((new Handler(receiverLooper))::post);
         mNetworkNameSeparator = getTextIfExists(R.string.status_bar_network_name_separator)
                 .toString();
         mNetworkNameDefault = getTextIfExists(
                 com.android.internal.R.string.lockscreen_carrier_default).toString();
-
         mapIconSets();
-
         String networkName = info.getCarrierName() != null ? info.getCarrierName().toString()
                 : mNetworkNameDefault;
         mLastState.networkName = mCurrentState.networkName = networkName;
         mLastState.networkNameData = mCurrentState.networkNameData = networkName;
         mLastState.enabled = mCurrentState.enabled = hasMobileData;
         mLastState.iconGroup = mCurrentState.iconGroup = mDefaultIcons;
-        // Get initial data sim state.
-        updateDataSim();
         mObserver = new ContentObserver(new Handler(receiverLooper)) {
             @Override
             public void onChange(boolean selfChange) {
                 updateTelephony();
             }
         };
+        mCallback = new MobileStatusTracker.Callback() {
+            @Override
+            public void onMobileStatusChanged(boolean updateTelephony,
+                    MobileStatusTracker.MobileStatus mobileStatus) {
+                if (Log.isLoggable(mTag, Log.DEBUG)) {
+                    Log.d(mTag, "onMobileStatusChanged="
+                            + " updateTelephony=" + updateTelephony
+                            + " mobileStatus=" + mobileStatus.toString());
+                }
+                updateMobileStatus(mobileStatus);
+                if (updateTelephony) {
+                    updateTelephony();
+                } else {
+                    notifyListenersIfNecessary();
+                }
+            }
+        };
+        mMobileStatusTracker = new MobileStatusTracker(mPhone, receiverLooper,
+                info, mDefaults, mCallback);
     }
 
     public void setConfiguration(Config config) {
@@ -157,15 +171,7 @@ public class MobileSignalController extends SignalController<
      * Start listening for phone state changes.
      */
     public void registerListener() {
-        mPhone.listen(mPhoneStateListener,
-                PhoneStateListener.LISTEN_SERVICE_STATE
-                        | PhoneStateListener.LISTEN_SIGNAL_STRENGTHS
-                        | PhoneStateListener.LISTEN_CALL_STATE
-                        | PhoneStateListener.LISTEN_DATA_CONNECTION_STATE
-                        | PhoneStateListener.LISTEN_DATA_ACTIVITY
-                        | PhoneStateListener.LISTEN_CARRIER_NETWORK_CHANGE
-                        | PhoneStateListener.LISTEN_ACTIVE_DATA_SUBSCRIPTION_ID_CHANGE
-                        | PhoneStateListener.LISTEN_DISPLAY_INFO_CHANGED);
+        mMobileStatusTracker.setListening(true);
         mContext.getContentResolver().registerContentObserver(Global.getUriFor(Global.MOBILE_DATA),
                 true, mObserver);
         mContext.getContentResolver().registerContentObserver(Global.getUriFor(
@@ -177,7 +183,7 @@ public class MobileSignalController extends SignalController<
      * Stop listening for phone state changes.
      */
     public void unregisterListener() {
-        mPhone.listen(mPhoneStateListener, 0);
+        mMobileStatusTracker.setListening(false);
         mContext.getContentResolver().unregisterContentObserver(mObserver);
     }
 
@@ -286,34 +292,6 @@ public class MobileSignalController extends SignalController<
         mNetworkToIconLookup.put(toIconKey(
                 TelephonyManager.NETWORK_TYPE_NR),
                 TelephonyIcons.NR_5G);
-    }
-
-    private String getIconKey() {
-        if (mTelephonyDisplayInfo.getOverrideNetworkType()
-                == TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_NONE) {
-            return toIconKey(mTelephonyDisplayInfo.getNetworkType());
-        } else {
-            return toDisplayIconKey(mTelephonyDisplayInfo.getOverrideNetworkType());
-        }
-    }
-
-    private String toIconKey(@Annotation.NetworkType int networkType) {
-        return Integer.toString(networkType);
-    }
-
-    private String toDisplayIconKey(@Annotation.OverrideNetworkType int displayNetworkType) {
-        switch (displayNetworkType) {
-            case TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_LTE_CA:
-                return toIconKey(TelephonyManager.NETWORK_TYPE_LTE) + "_CA";
-            case TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_LTE_ADVANCED_PRO:
-                return toIconKey(TelephonyManager.NETWORK_TYPE_LTE) + "_CA_Plus";
-            case TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_NR_NSA:
-                return toIconKey(TelephonyManager.NETWORK_TYPE_NR);
-            case TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_NR_NSA_MMWAVE:
-                return toIconKey(TelephonyManager.NETWORK_TYPE_NR) + "_Plus";
-            default:
-                return "unsupported";
-        }
     }
 
     private void updateInflateSignalStrength() {
@@ -521,13 +499,24 @@ public class MobileSignalController extends SignalController<
         return CellSignalStrength.SIGNAL_STRENGTH_NONE_OR_UNKNOWN;
     }
 
+    private void updateMobileStatus(MobileStatusTracker.MobileStatus mobileStatus) {
+        mCurrentState.activityIn = mobileStatus.activityIn;
+        mCurrentState.activityOut = mobileStatus.activityOut;
+        mCurrentState.dataSim = mobileStatus.dataSim;
+        mCurrentState.carrierNetworkChangeMode = mobileStatus.carrierNetworkChangeMode;
+        mDataState = mobileStatus.dataState;
+        mServiceState = mobileStatus.serviceState;
+        mSignalStrength = mobileStatus.signalStrength;
+        mTelephonyDisplayInfo = mobileStatus.telephonyDisplayInfo;
+    }
+
     /**
      * Updates the current state based on mServiceState, mSignalStrength, mDataState,
      * mTelephonyDisplayInfo, and mSimState.  It should be called any time one of these is updated.
      * This will call listeners if necessary.
      */
     private final void updateTelephony() {
-        if (DEBUG) {
+        if (Log.isLoggable(mTag, Log.DEBUG)) {
             Log.d(mTag, "updateTelephonySignalStrength: hasService=" +
                     Utils.isInService(mServiceState) + " ss=" + mSignalStrength
                     + " displayInfo=" + mTelephonyDisplayInfo);
@@ -542,7 +531,7 @@ public class MobileSignalController extends SignalController<
             }
         }
 
-        String iconKey = getIconKey();
+        String iconKey = getIconKey(mTelephonyDisplayInfo);
         if (mNetworkToIconLookup.get(iconKey) != null) {
             mCurrentState.iconGroup = mNetworkToIconLookup.get(iconKey);
         } else {
@@ -620,75 +609,6 @@ public class MobileSignalController extends SignalController<
         pw.println("  mDataState=" + mDataState + ",");
         pw.println("  mInflateSignalStrengths=" + mInflateSignalStrengths + ",");
         pw.println("  isDataDisabled=" + isDataDisabled() + ",");
-    }
-
-    class MobilePhoneStateListener extends PhoneStateListener {
-        public MobilePhoneStateListener(Executor executor) {
-            super(executor);
-        }
-
-        @Override
-        public void onSignalStrengthsChanged(SignalStrength signalStrength) {
-            if (DEBUG) {
-                Log.d(mTag, "onSignalStrengthsChanged signalStrength=" + signalStrength +
-                        ((signalStrength == null) ? "" : (" level=" + signalStrength.getLevel())));
-            }
-            mSignalStrength = signalStrength;
-            updateTelephony();
-        }
-
-        @Override
-        public void onServiceStateChanged(ServiceState state) {
-            if (DEBUG) {
-                Log.d(mTag, "onServiceStateChanged voiceState=" + state.getState()
-                        + " dataState=" + state.getDataRegistrationState());
-            }
-            mServiceState = state;
-            updateTelephony();
-        }
-
-        @Override
-        public void onDataConnectionStateChanged(int state, int networkType) {
-            if (DEBUG) {
-                Log.d(mTag, "onDataConnectionStateChanged: state=" + state
-                        + " type=" + networkType);
-            }
-            mDataState = state;
-            updateTelephony();
-        }
-
-        @Override
-        public void onDataActivity(int direction) {
-            if (DEBUG) {
-                Log.d(mTag, "onDataActivity: direction=" + direction);
-            }
-            setActivity(direction);
-        }
-
-        @Override
-        public void onCarrierNetworkChange(boolean active) {
-            if (DEBUG) {
-                Log.d(mTag, "onCarrierNetworkChange: active=" + active);
-            }
-            mCurrentState.carrierNetworkChangeMode = active;
-            updateTelephony();
-        }
-
-        @Override
-        public void onActiveDataSubscriptionIdChanged(int subId) {
-            if (DEBUG) Log.d(mTag, "onActiveDataSubscriptionIdChanged: subId=" + subId);
-            updateDataSim();
-            updateTelephony();
-        }
-
-        @Override
-        public void onDisplayInfoChanged(TelephonyDisplayInfo telephonyDisplayInfo) {
-            if (DEBUG) {
-                Log.d(mTag, "onDisplayInfoChanged: telephonyDisplayInfo=" + telephonyDisplayInfo);
-            }
-            mTelephonyDisplayInfo = telephonyDisplayInfo;
-            updateTelephony();
-        }
     }
 
     static class MobileIconGroup extends SignalController.IconGroup {
