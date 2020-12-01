@@ -839,12 +839,12 @@ public class DisplayContentTests extends WindowTestsBase {
         final DisplayContent newDisplay = createNewDisplay();
 
         final WindowState appWin = createWindow(null, TYPE_APPLICATION, mDisplayContent, "appWin");
-        final Task stack = mDisplayContent.getTopStack();
+        final Task stack = mDisplayContent.getTopRootTask();
         final ActivityRecord activity = stack.topRunningActivity();
         doReturn(true).when(activity).shouldBeVisibleUnchecked();
 
         final WindowState appWin1 = createWindow(null, TYPE_APPLICATION, newDisplay, "appWin1");
-        final Task stack1 = newDisplay.getTopStack();
+        final Task stack1 = newDisplay.getTopRootTask();
         final ActivityRecord activity1 = stack1.topRunningActivity();
         doReturn(true).when(activity1).shouldBeVisibleUnchecked();
         appWin.setHasSurface(true);
@@ -886,7 +886,7 @@ public class DisplayContentTests extends WindowTestsBase {
         doReturn(true).when(freeformStack).isVisible();
         freeformStack.getTopChild().setBounds(100, 100, 300, 400);
 
-        assertTrue(dc.getDefaultTaskDisplayArea().isStackVisible(WINDOWING_MODE_FREEFORM));
+        assertTrue(dc.getDefaultTaskDisplayArea().isRootTaskVisible(WINDOWING_MODE_FREEFORM));
 
         freeformStack.getTopNonFinishingActivity().setOrientation(SCREEN_ORIENTATION_LANDSCAPE);
         stack.getTopNonFinishingActivity().setOrientation(SCREEN_ORIENTATION_PORTRAIT);

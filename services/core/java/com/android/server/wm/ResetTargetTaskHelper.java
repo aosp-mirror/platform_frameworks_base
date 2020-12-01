@@ -237,7 +237,7 @@ class ResetTargetTaskHelper {
 
         while (!mPendingReparentActivities.isEmpty()) {
             final ActivityRecord r = mPendingReparentActivities.remove(0);
-            final boolean alwaysCreateTask = DisplayContent.alwaysCreateStack(windowingMode,
+            final boolean alwaysCreateTask = DisplayContent.alwaysCreateRootTask(windowingMode,
                     activityType);
             final Task task = alwaysCreateTask
                     ? taskDisplayArea.getBottomMostTask() : mTargetStack.getBottomMostTask();
@@ -251,7 +251,7 @@ class ResetTargetTaskHelper {
             }
             if (targetTask == null) {
                 if (alwaysCreateTask) {
-                    targetTask = taskDisplayArea.getOrCreateStack(windowingMode,
+                    targetTask = taskDisplayArea.getOrCreateRootTask(windowingMode,
                             activityType, false /* onTop */);
                 } else {
                     targetTask = mTargetStack.reuseOrCreateTask(r.info, null /*intent*/,

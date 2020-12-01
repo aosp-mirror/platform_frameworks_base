@@ -326,7 +326,7 @@ public class SystemServicesTestRule implements TestRule {
         // Set the default focused TDA.
         display.setLastFocusedTaskDisplayArea(taskDisplayArea);
         spyOn(taskDisplayArea);
-        final Task homeStack = taskDisplayArea.getStack(
+        final Task homeStack = taskDisplayArea.getRootTask(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_HOME);
         spyOn(homeStack);
     }

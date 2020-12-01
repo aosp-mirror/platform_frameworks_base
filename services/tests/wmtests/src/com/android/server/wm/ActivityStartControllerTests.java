@@ -33,8 +33,8 @@ import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.server.wm.ActivityTaskSupervisor.PendingActivityLaunch;
 import com.android.server.wm.ActivityStarter.Factory;
+import com.android.server.wm.ActivityTaskSupervisor.PendingActivityLaunch;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -77,8 +77,8 @@ public class ActivityStartControllerTests extends WindowTestsBase {
                 .setCreateTask(true)
                 .build();
         final int startFlags = random.nextInt();
-        final Task stack = mAtm.mRootWindowContainer.getDefaultTaskDisplayArea()
-                .createStack(WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
+        final Task rootTask = mAtm.mRootWindowContainer.getDefaultTaskDisplayArea().createRootTask(
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
         final WindowProcessController wpc = new WindowProcessController(mAtm,
                 mAtm.mContext.getApplicationInfo(), "name", 12345,
                 UserHandle.getUserId(12345), mock(Object.class),
@@ -86,7 +86,7 @@ public class ActivityStartControllerTests extends WindowTestsBase {
         wpc.setThread(mock(IApplicationThread.class));
 
         mController.addPendingActivityLaunch(
-                new PendingActivityLaunch(activity, source, startFlags, stack, wpc, null));
+                new PendingActivityLaunch(activity, source, startFlags, rootTask, wpc, null));
         final boolean resume = random.nextBoolean();
         mController.doPendingActivityLaunches(resume);
 

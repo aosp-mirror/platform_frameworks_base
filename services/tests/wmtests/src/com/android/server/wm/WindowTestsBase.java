@@ -797,7 +797,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
                 mTask = new TaskBuilder(mService.mTaskSupervisor)
                         .setComponent(mComponent)
                         .setParentTask(mParentTask).build();
-            } else if (mTask == null && mParentTask != null && DisplayContent.alwaysCreateStack(
+            } else if (mTask == null && mParentTask != null && DisplayContent.alwaysCreateRootTask(
                     mParentTask.getWindowingMode(), mParentTask.getActivityType())) {
                 // The stack can be the task root.
                 mTask = mParentTask;
@@ -871,7 +871,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
                     activity.processName, activity.info.applicationInfo.uid);
 
             // Resume top activities to make sure all other signals in the system are connected.
-            mService.mRootWindowContainer.resumeFocusedStacksTopActivities();
+            mService.mRootWindowContainer.resumeFocusedTasksTopActivities();
             return activity;
         }
     }
@@ -995,7 +995,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
 
             // Create parent task.
             if (mParentTask == null && mCreateParentTask) {
-                mParentTask = mTaskDisplayArea.createStack(
+                mParentTask = mTaskDisplayArea.createRootTask(
                         WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
             }
             if (mParentTask != null && !Mockito.mockingDetails(mParentTask).isSpy()) {
@@ -1020,9 +1020,9 @@ class WindowTestsBase extends SystemServiceTestsBase {
             }
 
             Task task;
-            final int taskId = mTaskId >= 0 ? mTaskId : mTaskDisplayArea.getNextStackId();
+            final int taskId = mTaskId >= 0 ? mTaskId : mTaskDisplayArea.getNextRootTaskId();
             if (mParentTask == null) {
-                task = mTaskDisplayArea.createStackUnchecked(
+                task = mTaskDisplayArea.createRootTaskUnchecked(
                         mWindowingMode, mActivityType, taskId, mOnTop, mActivityInfo, mIntent,
                         false /* createdByOrganizer */, false /* deferTaskAppear */,
                         null /* launchCookie */);
@@ -1114,8 +1114,8 @@ class WindowTestsBase extends SystemServiceTestsBase {
                     mSecondary.mRemoteToken.toWindowContainerToken());
             DisplayContent dc = mService.mRootWindowContainer.getDisplayContent(mDisplayId);
             dc.forAllTaskDisplayAreas(taskDisplayArea -> {
-                for (int sNdx = taskDisplayArea.getStackCount() - 1; sNdx >= 0; --sNdx) {
-                    final Task stack = taskDisplayArea.getStackAt(sNdx);
+                for (int sNdx = taskDisplayArea.getRootTaskCount() - 1; sNdx >= 0; --sNdx) {
+                    final Task stack = taskDisplayArea.getRootTaskAt(sNdx);
                     if (!WindowConfiguration.isSplitScreenWindowingMode(stack.getWindowingMode())) {
                         stack.reparent(mSecondary, POSITION_BOTTOM);
                     }
