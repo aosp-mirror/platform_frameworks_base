@@ -4304,11 +4304,21 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     updatePasswordValidityCheckpointLocked(caller.getUserId(), calledOnParent);
                     updatePasswordQualityCacheForUserGroup(caller.getUserId());
                     saveSettingsLocked(caller.getUserId());
-                    //TODO: Log password complexity change if security logging is enabled.
                 });
             }
+            logPasswordComplexityRequiredIfSecurityLogEnabled(admin.info.getComponent(),
+                    caller.getUserId(), calledOnParent, passwordComplexity);
         }
         //TODO: Log metrics.
+    }
+
+    private void logPasswordComplexityRequiredIfSecurityLogEnabled(ComponentName who, int userId,
+            boolean parent, int complexity) {
+        if (SecurityLog.isLoggingEnabled()) {
+            final int affectedUserId = parent ? getProfileParentId(userId) : userId;
+            SecurityLog.writeEvent(SecurityLog.TAG_PASSWORD_COMPLEXITY_REQUIRED,
+                    who.getPackageName(), userId, affectedUserId, complexity);
+        }
     }
 
     private int getEffectivePasswordComplexityRequirementLocked(@UserIdInt int userHandle) {
