@@ -116,6 +116,9 @@ public final class VibrationThread extends Thread implements IBinder.DeathRecipi
 
     @Override
     public void binderDied() {
+        if (DEBUG) {
+            Slog.d(TAG, "Binder died, cancelling vibration...");
+        }
         cancel();
     }
 
@@ -146,6 +149,9 @@ public final class VibrationThread extends Thread implements IBinder.DeathRecipi
     /** Notify current vibration that a step has completed on given vibrator. */
     public void vibratorComplete(int vibratorId) {
         synchronized (mLock) {
+            if (DEBUG) {
+                Slog.d(TAG, "Vibration complete reported by vibrator " + vibratorId);
+            }
             if (mCurrentVibrateStep != null) {
                 mCurrentVibrateStep.vibratorComplete(vibratorId);
             }
@@ -467,7 +473,7 @@ public final class VibrationThread extends Thread implements IBinder.DeathRecipi
                     noteVibratorOff();
                 }
                 if (DEBUG) {
-                    Slog.d(TAG, "SingleVibrateStep step done.");
+                    Slog.d(TAG, "SingleVibrateStep done.");
                 }
                 Trace.traceEnd(Trace.TRACE_TAG_VIBRATOR);
             }
