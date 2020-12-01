@@ -3032,6 +3032,12 @@
     <permission android:name="android.permission.DUMP"
         android:protectionLevel="signature|privileged|development" />
 
+    <!-- Allows an application to start tracing for InputMethod and WindowManager.
+    <p>Not for use by third-party applications.
+    @hide -->
+    <permission android:name="android.permission.CONTROL_UI_TRACING"
+        android:protectionLevel="signature|privileged|development" />
+
     <!-- Allows an application to read the low-level system log files.
     <p>Not for use by third-party applications, because
     Log entries can contain the user's private information. -->

@@ -320,6 +320,7 @@ applications that come with the platform
         <permission name="android.permission.DELETE_CACHE_FILES"/>
         <permission name="android.permission.DELETE_PACKAGES"/>
         <permission name="android.permission.DUMP"/>
+        <permission name="android.permission.CONTROL_UI_TRACING"/>
         <permission name="android.permission.ACTIVITY_EMBEDDING"/>
         <permission name="android.permission.FORCE_STOP_PACKAGES"/>
         <permission name="android.permission.GET_APP_OPS_STATS"/>
