@@ -11,7 +11,7 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License
+ * limitations under the License.
  */
 
 package com.android.server.pm.dex;
@@ -28,28 +28,34 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.content.res.Resources;
+import android.os.BatteryManager;
 import android.os.Build;
+import android.os.PowerManager;
 import android.os.UserHandle;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.dx.mockito.inline.extended.ExtendedMockito;
+import com.android.dx.mockito.inline.extended.StaticMockitoSession;
 import com.android.server.pm.Installer;
+import com.android.server.pm.PackageManagerService;
 
 import dalvik.system.DelegateLastClassLoader;
 import dalvik.system.PathClassLoader;
 import dalvik.system.VMRuntime;
 
+import org.junit.After;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnit;
-import org.mockito.junit.MockitoRule;
 import org.mockito.quality.Strictness;
 
 import java.io.File;
@@ -69,9 +75,15 @@ public class DexManagerTests {
             DelegateLastClassLoader.class.getName();
     private static final String UNSUPPORTED_CLASS_LOADER_NAME = "unsupported.class_loader";
 
-    @Rule public MockitoRule mockito = MockitoJUnit.rule().strictness(Strictness.STRICT_STUBS);
+    private static final int TEST_BATTERY_LEVEL_CRITICAL = 10;
+    private static final int TEST_BATTERY_LEVEL_DEFAULT = 80;
+
+    public StaticMockitoSession mMockitoSession;
     @Mock Installer mInstaller;
     @Mock IPackageManager mPM;
+    @Mock BatteryManager mMockBatteryManager;
+    @Mock PowerManager mMockPowerManager;
+
     private final Object mInstallLock = new Object();
 
     private DexManager mDexManager;
@@ -117,7 +129,37 @@ public class DexManagerTests {
         mSystemServerJarUpdatedContext = new TestData("android", isa, mUser0,
                 DELEGATE_LAST_CLASS_LOADER_NAME);
 
-        mDexManager = new DexManager(/*Context*/ null, mPM, /*PackageDexOptimizer*/ null,
+        // Initialize Static Mocking
+
+        mMockitoSession = ExtendedMockito.mockitoSession()
+            .initMocks(this)
+            .strictness(Strictness.LENIENT)
+            .startMocking();
+
+        // Mock....
+
+        mMockBatteryManager = ExtendedMockito.mock(BatteryManager.class);
+        mMockPowerManager   = ExtendedMockito.mock(PowerManager.class);
+
+        setDefaultMockValues();
+
+        Resources mockResources = ExtendedMockito.mock(Resources.class);
+        ExtendedMockito.when(mockResources
+            .getInteger(com.android.internal.R.integer.config_criticalBatteryWarningLevel))
+                .thenReturn(15);
+
+        Context mockContext = ExtendedMockito.mock(Context.class);
+        ExtendedMockito.doReturn(mockResources)
+            .when(mockContext)
+                .getResources();
+        ExtendedMockito.doReturn(mMockBatteryManager)
+            .when(mockContext)
+                .getSystemService(BatteryManager.class);
+        ExtendedMockito.doReturn(mMockPowerManager)
+            .when(mockContext)
+                .getSystemService(PowerManager.class);
+
+        mDexManager = new DexManager(mockContext, mPM, /*PackageDexOptimizer*/ null,
                 mInstaller, mInstallLock);
 
         // Foo and Bar are available to user0.
@@ -126,6 +168,25 @@ public class DexManagerTests {
         existingPackages.put(mUser0, Arrays.asList(mFooUser0.mPackageInfo, mBarUser0.mPackageInfo));
         existingPackages.put(mUser1, Arrays.asList(mBarUser1.mPackageInfo));
         mDexManager.load(existingPackages);
+    }
+
+    @After
+    public void teardown() throws Exception {
+        mMockitoSession.finishMocking();
+    }
+
+    private void setDefaultMockValues() {
+        ExtendedMockito.doReturn(BatteryManager.BATTERY_STATUS_DISCHARGING)
+            .when(mMockBatteryManager)
+                .getIntProperty(BatteryManager.BATTERY_PROPERTY_STATUS);
+
+        ExtendedMockito.doReturn(TEST_BATTERY_LEVEL_DEFAULT)
+            .when(mMockBatteryManager)
+                .getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY);
+
+        ExtendedMockito.doReturn(PowerManager.THERMAL_STATUS_NONE)
+            .when(mMockPowerManager)
+                .getCurrentThermalStatus();
     }
 
     @Test
@@ -631,6 +692,114 @@ public class DexManagerTests {
         notifyDexLoad(mSystemServerJarInvalid, dexFiles, mUser0);
         assertNoUseInfo(mSystemServerJarInvalid);
         assertNoDclInfo(mSystemServerJarInvalid);
+    }
+
+    @Test
+    public void testInstallScenarioToReasonDefault() {
+        assertEquals(
+                PackageManagerService.REASON_INSTALL,
+                mDexManager.getCompilationReasonForInstallScenario(
+                        PackageManager.INSTALL_SCENARIO_DEFAULT));
+
+        assertEquals(
+                PackageManagerService.REASON_INSTALL_FAST,
+                mDexManager.getCompilationReasonForInstallScenario(
+                        PackageManager.INSTALL_SCENARIO_FAST));
+
+        assertEquals(
+                PackageManagerService.REASON_INSTALL_BULK,
+                mDexManager.getCompilationReasonForInstallScenario(
+                        PackageManager.INSTALL_SCENARIO_BULK));
+
+        assertEquals(
+                PackageManagerService.REASON_INSTALL_BULK_SECONDARY,
+                mDexManager.getCompilationReasonForInstallScenario(
+                        PackageManager.INSTALL_SCENARIO_BULK_SECONDARY));
+    }
+
+    @Test
+    public void testInstallScenarioToReasonThermal() {
+        ExtendedMockito.doReturn(PowerManager.THERMAL_STATUS_SEVERE)
+            .when(mMockPowerManager)
+                .getCurrentThermalStatus();
+
+        assertEquals(
+                PackageManagerService.REASON_INSTALL,
+                mDexManager.getCompilationReasonForInstallScenario(
+                        PackageManager.INSTALL_SCENARIO_DEFAULT));
+
+        assertEquals(
+                PackageManagerService.REASON_INSTALL_FAST,
+                mDexManager.getCompilationReasonForInstallScenario(
+                        PackageManager.INSTALL_SCENARIO_FAST));
+
+        assertEquals(
+                PackageManagerService.REASON_INSTALL_BULK_DOWNGRADED,
+                mDexManager.getCompilationReasonForInstallScenario(
+                        PackageManager.INSTALL_SCENARIO_BULK));
+
+        assertEquals(
+                PackageManagerService.REASON_INSTALL_BULK_SECONDARY_DOWNGRADED,
+                mDexManager.getCompilationReasonForInstallScenario(
+                        PackageManager.INSTALL_SCENARIO_BULK_SECONDARY));
+    }
+
+    @Test
+    public void testInstallScenarioToReasonBatteryDischarging() {
+        ExtendedMockito.doReturn(TEST_BATTERY_LEVEL_CRITICAL)
+            .when(mMockBatteryManager)
+                .getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY);
+
+        assertEquals(
+                PackageManagerService.REASON_INSTALL,
+                mDexManager.getCompilationReasonForInstallScenario(
+                        PackageManager.INSTALL_SCENARIO_DEFAULT));
+
+        assertEquals(
+                PackageManagerService.REASON_INSTALL_FAST,
+                mDexManager.getCompilationReasonForInstallScenario(
+                        PackageManager.INSTALL_SCENARIO_FAST));
+
+        assertEquals(
+                PackageManagerService.REASON_INSTALL_BULK_DOWNGRADED,
+                mDexManager.getCompilationReasonForInstallScenario(
+                        PackageManager.INSTALL_SCENARIO_BULK));
+
+        assertEquals(
+                PackageManagerService.REASON_INSTALL_BULK_SECONDARY_DOWNGRADED,
+                mDexManager.getCompilationReasonForInstallScenario(
+                        PackageManager.INSTALL_SCENARIO_BULK_SECONDARY));
+    }
+
+    @Test
+    public void testInstallScenarioToReasonBatteryCharging() {
+        ExtendedMockito.doReturn(TEST_BATTERY_LEVEL_CRITICAL)
+            .when(mMockBatteryManager)
+                .getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY);
+
+        ExtendedMockito.doReturn(BatteryManager.BATTERY_STATUS_CHARGING)
+            .when(mMockBatteryManager)
+                .getIntProperty(BatteryManager.BATTERY_PROPERTY_STATUS);
+
+        assertEquals(
+                PackageManagerService.REASON_INSTALL,
+                mDexManager.getCompilationReasonForInstallScenario(
+                        PackageManager.INSTALL_SCENARIO_DEFAULT));
+
+        assertEquals(
+                PackageManagerService.REASON_INSTALL_FAST,
+                mDexManager.getCompilationReasonForInstallScenario(
+                        PackageManager.INSTALL_SCENARIO_FAST));
+
+        assertEquals(
+                PackageManagerService.REASON_INSTALL_BULK,
+                mDexManager.getCompilationReasonForInstallScenario(
+                        PackageManager.INSTALL_SCENARIO_BULK));
+
+        assertEquals(
+                PackageManagerService.REASON_INSTALL_BULK_SECONDARY,
+                mDexManager.getCompilationReasonForInstallScenario(
+                        PackageManager.INSTALL_SCENARIO_BULK_SECONDARY));
     }
 
     private void assertSecondaryUse(TestData testData, PackageUseInfo pui,
