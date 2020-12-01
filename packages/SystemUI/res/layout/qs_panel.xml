@@ -40,6 +40,7 @@
             android:id="@+id/quick_settings_panel"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
             android:background="@android:color/transparent"
             android:focusable="true"
             android:accessibilityTraversalBefore="@android:id/edit">

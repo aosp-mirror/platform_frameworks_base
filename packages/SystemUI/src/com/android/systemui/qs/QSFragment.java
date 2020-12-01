@@ -174,6 +174,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
     @Override
     public void onDestroy() {
         super.onDestroy();
+        mQSPanel.setBrightnessListening(false);
         mStatusBarStateController.removeCallback(this);
         if (mListening) {
             setListening(false);

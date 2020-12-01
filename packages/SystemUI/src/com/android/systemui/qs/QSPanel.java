@@ -26,6 +26,7 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.PointF;
+import android.graphics.PorterDuff;
 import android.metrics.LogMaker;
 import android.os.Bundle;
 import android.os.Handler;
@@ -36,6 +37,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
+import android.widget.ImageView;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEventLogger;
@@ -146,6 +148,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
     private int mFooterMarginStartHorizontal;
     private Consumer<Boolean> mMediaVisibilityChangedListener;
 
+    private View mBrightnessMirror;
 
     @Inject
     public QSPanel(
@@ -174,7 +177,6 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
 
         setOrientation(VERTICAL);
 
-        addViewsAboveTiles();
         mMovableContentStartIndex = getChildCount();
         mRegularTileLayout = createRegularTileLayout();
 
@@ -202,6 +204,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
 
             initMediaHostState();
         }
+        addBrightnessView();
         addSecurityFooter();
         if (mRegularTileLayout instanceof PagedTileLayout) {
             mQsTileRevealController = new QSTileRevealController(mContext, this,
@@ -222,12 +225,16 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
         mSecurityFooter = new QSSecurityFooter(this, mContext);
     }
 
-    protected void addViewsAboveTiles() {
+    protected void addBrightnessView() {
         mBrightnessView = LayoutInflater.from(mContext).inflate(
             R.layout.quick_settings_brightness_dialog, this, false);
+        updateBrightnessViewParams();
         addView(mBrightnessView);
-        mBrightnessController = new BrightnessController(getContext(),
-                findViewById(R.id.brightness_slider), mBroadcastDispatcher);
+        final ImageView level = findViewById(R.id.brightness_level);
+        final ImageView icon = findViewById(R.id.brightness_icon);
+        final ToggleSliderView slider = findViewById(R.id.brightness_slider);
+        mBrightnessController = new BrightnessController(getContext(), level, icon,
+                slider, mBroadcastDispatcher);
     }
 
     protected QSTileLayout createRegularTileLayout() {
@@ -513,6 +520,8 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
             mLastOrientation = newConfig.orientation;
             switchTileLayout();
         }
+
+        updateBrightnessViewParams();
     }
 
     @Override
@@ -671,6 +680,19 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
                     .findViewById(R.id.brightness_slider);
             brightnessSlider.setMirror(mirrorSlider);
             brightnessSlider.setMirrorController(mBrightnessMirrorController);
+            if (mBrightnessController != null) {
+                mBrightnessMirror = mBrightnessMirrorController.getMirror();
+                mBrightnessController.setMirrorView(mBrightnessMirror);
+            }
+        }
+    }
+
+    private void updateBrightnessViewParams() {
+        if (mBrightnessView != null) {
+            MarginLayoutParams lp = (MarginLayoutParams) mBrightnessView.getLayoutParams();
+            lp.height = getResources().getDimensionPixelSize(R.dimen.brightness_mirror_height);
+            mBrightnessView.setLayoutParams(lp);
+            forceLayout();
         }
     }
 
