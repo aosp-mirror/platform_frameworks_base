@@ -951,7 +951,7 @@
     <string name="notification_channel_general" msgid="4384774889645929705">"ಸಾಮಾನ್ಯ ಸಂದೇಶಗಳು"</string>
     <string name="notification_channel_storage" msgid="2720725707628094977">"ಸಂಗ್ರಹಣೆ"</string>
     <string name="notification_channel_hints" msgid="7703783206000346876">"ಸುಳಿವುಗಳು"</string>
-    <string name="instant_apps" msgid="8337185853050247304">"ಇನ್‌ಸ್ಟಂಟ್ ಆ್ಯಪ್‌ಗಳು"</string>
+    <string name="instant_apps" msgid="8337185853050247304">"Instant Apps"</string>
     <string name="instant_apps_title" msgid="8942706782103036910">"<xliff:g id="APP">%1$s</xliff:g> ರನ್ ಆಗುತ್ತಿದೆ"</string>
     <string name="instant_apps_message" msgid="6112428971833011754">"ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡದೆ ಆ್ಯಪ್‌ ತೆರೆಯಲಾಗಿದೆ."</string>
     <string name="instant_apps_message_with_help" msgid="1816952263531203932">"ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡದೆ ಆ್ಯಪ್‌ ತೆರೆಯಲಾಗಿದೆ. ಇನ್ನಷ್ಟು ತಿಳಿಯಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
