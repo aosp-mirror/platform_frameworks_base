@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.phone;
 
 import static com.android.systemui.doze.util.BurnInHelperKt.getBurnInOffset;
+import static com.android.systemui.doze.util.BurnInHelperKt.getBurnInScale;
 import static com.android.systemui.statusbar.notification.NotificationUtils.interpolate;
 
 import android.content.res.Resources;
@@ -184,6 +185,7 @@ public class KeyguardClockPositionAlgorithm {
         result.stackScrollerPaddingExpanded = mBypassEnabled ? mUnlockedStackScrollerPadding
                 : getClockY(1.0f) + mKeyguardStatusHeight;
         result.clockX = (int) interpolate(0, burnInPreventionOffsetX(), mDarkAmount);
+        result.clockScale = interpolate(getBurnInScale(), 1.0f, 1.0f - mDarkAmount);
     }
 
     /**
@@ -302,6 +304,11 @@ public class KeyguardClockPositionAlgorithm {
          * The alpha value of the clock.
          */
         public float clockAlpha;
+
+        /**
+         * Amount to scale the large clock (0.0 - 1.0)
+         */
+        public float clockScale;
 
         /**
          * The top padding of the stack scroller, in pixels.
