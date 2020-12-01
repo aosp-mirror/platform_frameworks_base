@@ -62,6 +62,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     private AnimatableClockController mNewLockScreenClockViewController;
     private FrameLayout mNewLockScreenClockFrame;
     private AnimatableClockController mNewLockScreenLargeClockViewController;
+    private FrameLayout mNewLockScreenLargeClockFrame;
 
     private int mLockScreenMode = KeyguardUpdateMonitor.LOCK_SCREEN_MODE_NORMAL;
 
@@ -126,6 +127,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         mView.updateColors(getGradientColors());
         updateAodIcons();
         mNewLockScreenClockFrame = mView.findViewById(R.id.new_lockscreen_clock_view);
+        mNewLockScreenLargeClockFrame = mView.findViewById(R.id.new_lockscreen_clock_view_large);
     }
 
     @Override
@@ -199,13 +201,18 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     /**
      * Update position of the view, with optional animation. Move the slice view and the clock
      * slightly towards the center in order to prevent burn-in. Y positioning occurs at the
-     * view parent level.
+     * view parent level. The large clock view will scale instead of using x position offsets, to
+     * keep the clock centered.
      */
-    void updatePosition(int x, AnimationProperties props, boolean animate) {
+    void updatePosition(int x, float scale, AnimationProperties props, boolean animate) {
         x = Math.abs(x);
         if (mNewLockScreenClockFrame != null) {
             PropertyAnimator.setProperty(mNewLockScreenClockFrame, AnimatableProperty.TRANSLATION_X,
                     -x, props, animate);
+            PropertyAnimator.setProperty(mNewLockScreenLargeClockFrame, AnimatableProperty.SCALE_X,
+                    scale, props, animate);
+            PropertyAnimator.setProperty(mNewLockScreenLargeClockFrame, AnimatableProperty.SCALE_Y,
+                    scale, props, animate);
         }
         mKeyguardSliceViewController.updatePosition(x, props, animate);
         mNotificationIconAreaController.updatePosition(x, props, animate);
