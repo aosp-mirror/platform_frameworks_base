@@ -530,6 +530,14 @@
             androidprv:alwaysFocusable="true"
             android:excludeFromRecents="true" />
 
+        <!-- started from TvNotificationPanel -->
+        <activity
+            android:name=".statusbar.tv.notifications.TvNotificationPanelActivity"
+            android:excludeFromRecents="true"
+            android:launchMode="singleTask"
+            android:noHistory="true"
+            android:theme="@style/TvSidePanelTheme" />
+
         <!-- started from SliceProvider -->
         <activity android:name=".SlicePermissionActivity"
             android:theme="@style/Theme.SystemUI.Dialog.Alert"

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.tv;
+package com.android.systemui.statusbar.tv.notifications;
 
 import android.Manifest;
 import android.app.NotificationManager;
@@ -59,9 +59,8 @@ public class TvNotificationPanel extends SystemUI implements CommandQueue.Callba
             startNotificationHandlerActivity(
                     new Intent(NotificationManager.ACTION_TOGGLE_NOTIFICATION_HANDLER_PANEL));
         } else {
-            Log.w(TAG,
-                    "Not toggling notification panel: config_notificationHandlerPackage is "
-                            + "empty");
+            openInternalNotificationPanel(
+                    NotificationManager.ACTION_TOGGLE_NOTIFICATION_HANDLER_PANEL);
         }
     }
 
@@ -71,9 +70,8 @@ public class TvNotificationPanel extends SystemUI implements CommandQueue.Callba
             startNotificationHandlerActivity(
                     new Intent(NotificationManager.ACTION_OPEN_NOTIFICATION_HANDLER_PANEL));
         } else {
-            Log.w(TAG,
-                    "Not expanding notification panel: config_notificationHandlerPackage is "
-                            + "empty");
+            openInternalNotificationPanel(
+                    NotificationManager.ACTION_OPEN_NOTIFICATION_HANDLER_PANEL);
         }
     }
 
@@ -86,9 +84,15 @@ public class TvNotificationPanel extends SystemUI implements CommandQueue.Callba
             closeNotificationIntent.setPackage(mNotificationHandlerPackage);
             mContext.sendBroadcastAsUser(closeNotificationIntent, UserHandle.CURRENT);
         } else {
-            Log.w(TAG,
-                    "Not closing notification panel: config_notificationHandlerPackage is empty");
+            openInternalNotificationPanel(
+                    NotificationManager.ACTION_CLOSE_NOTIFICATION_HANDLER_PANEL);
         }
+    }
+
+    private void openInternalNotificationPanel(String action) {
+        Intent intent = new Intent(mContext, TvNotificationPanelActivity.class);
+        intent.setAction(action);
+        mContext.startActivityAsUser(intent, UserHandle.SYSTEM);
     }
 
     /**

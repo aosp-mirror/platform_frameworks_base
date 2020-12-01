@@ -26,4 +26,6 @@
     <!-- Disclosure text in the connected notification that indicates that the device is connected to a VPN. The placeholder is the VPN name. [CHAR LIMIT=40] -->
     <string name="notification_disclosure_vpn_text">Via <xliff:g id="vpn_app" example="Foo VPN App">%1$s</xliff:g></string>
 
+    <string name="tv_notification_panel_title">Notifications</string>
+    <string name="tv_notification_panel_no_notifications">No Notifications</string>
 </resources>
