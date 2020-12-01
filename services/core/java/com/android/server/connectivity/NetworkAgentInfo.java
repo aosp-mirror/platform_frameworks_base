@@ -138,9 +138,10 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
     // not guaranteed to be current or correct, or even to exist.
     public @Nullable Network[] declaredUnderlyingNetworks;
 
-    // Whether this network is always metered even if its underlying networks are unmetered.
-    // Only relevant if #supportsUnderlyingNetworks is true.
-    public boolean declaredMetered;
+    // The capabilities originally announced by the NetworkAgent, regardless of any capabilities
+    // that were added or removed due to this network's underlying networks.
+    // Only set if #supportsUnderlyingNetworks is true.
+    public @Nullable NetworkCapabilities declaredCapabilities;
 
     // Indicates if netd has been told to create this Network. From this point on the appropriate
     // routing rules are setup and routes are added so packets can begin flowing over the Network.
