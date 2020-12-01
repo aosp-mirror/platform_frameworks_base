@@ -188,6 +188,8 @@ import android.view.IWindow;
 import android.view.InputChannel;
 import android.view.InputDevice;
 import android.view.InputWindowHandle;
+import android.view.InsetsSource;
+import android.view.InsetsState;
 import android.view.InsetsState.InternalInsetsType;
 import android.view.MagnificationSpec;
 import android.view.RemoteAnimationDefinition;
@@ -1663,6 +1665,28 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         if (controller != null && !mDisplayRotation.hasSeamlessRotatingWindow()) {
             controller.show();
             mFixedRotationAnimationController = null;
+        }
+    }
+
+    void notifyInsetsChanged(Consumer<WindowState> dispatchInsetsChanged) {
+        if (mFixedRotationLaunchingApp != null) {
+            // The insets state of fixed rotation app is a rotated copy. Make sure the visibilities
+            // of insets sources are consistent with the latest state.
+            final InsetsState rotatedState =
+                    mFixedRotationLaunchingApp.getFixedRotationTransformInsetsState();
+            if (rotatedState != null) {
+                final InsetsState state = mInsetsStateController.getRawInsetsState();
+                for (int i = 0; i < InsetsState.SIZE; i++) {
+                    final InsetsSource source = state.peekSource(i);
+                    if (source != null) {
+                        rotatedState.setSourceVisible(i, source.isVisible());
+                    }
+                }
+            }
+        }
+        forAllWindows(dispatchInsetsChanged, true /* traverseTopToBottom */);
+        if (mRemoteInsetsControlTarget != null) {
+            mRemoteInsetsControlTarget.notifyInsetsChanged();
         }
     }
 
