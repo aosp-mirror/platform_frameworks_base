@@ -17,6 +17,7 @@
 package com.android.wm.shell.flicker.splitscreen
 
 import com.android.wm.shell.flicker.NonRotationTestBase
+import com.android.wm.shell.flicker.TEST_APP_NONRESIZEABLE_LABEL
 import com.android.wm.shell.flicker.TEST_APP_SPLITSCREEN_PRIMARY_LABEL
 import com.android.wm.shell.flicker.TEST_APP_SPLITSCREEN_SECONDARY_LABEL
 import com.android.wm.shell.flicker.helpers.SplitScreenHelper
@@ -32,4 +33,7 @@ abstract class SplitScreenTestBase(
     protected val secondaryApp = SplitScreenHelper(instrumentation,
             TEST_APP_SPLITSCREEN_SECONDARY_LABEL,
             Components.SplitScreenSecondaryActivity())
+    protected val nonResizeableApp = SplitScreenHelper(instrumentation,
+            TEST_APP_NONRESIZEABLE_LABEL,
+            Components.NonResizeableActivity())
 }

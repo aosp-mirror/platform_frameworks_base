@@ -38,6 +38,13 @@ public class Components {
         }
     }
 
+    public static class NonResizeableActivity extends ComponentsInfo {
+        @Override
+        public String getActivityName() {
+            return NonResizeableActivity.class.getSimpleName();
+        }
+    }
+
     public static class PipActivity extends ComponentsInfo {
         // Intent action that this activity dynamically registers to enter picture-in-picture
         public static final String ACTION_ENTER_PIP = PACKAGE_NAME + ".PipActivity.ENTER_PIP";
