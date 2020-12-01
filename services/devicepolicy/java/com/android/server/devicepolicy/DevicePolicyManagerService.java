@@ -987,29 +987,21 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     /**
-     * Checks if the feature is supported and it's safe to execute the given {@code operation}.
-     *
-     * <p>Typically called at the beginning of each API method as:
-     *
-     * <pre><code>
-     *
-     * if (!canExecute(operation, permission)) return;
-     *
-     * </code></pre>
-     *
-     * @return {@code true} when it's safe to execute, {@code false} when the feature is not
-     * supported or the caller does not have the given {@code requiredPermission}.
+     * Checks if it's safe to execute the given {@code operation}.
      *
      * @throws UnsafeStateException if it's not safe to execute the operation.
      */
-    boolean canExecute(@DevicePolicyOperation int operation, @NonNull String requiredPermission) {
-        if (!mHasFeature && !hasCallingPermission(requiredPermission)) {
-            return false;
+    private void checkCanExecuteOrThrowUnsafe(@DevicePolicyOperation int operation) {
+        if (!canExecute(operation)) {
+            throw mSafetyChecker.newUnsafeStateException(operation);
         }
-        if (mSafetyChecker == null || mSafetyChecker.isDevicePolicyOperationSafe(operation)) {
-            return true;
-        }
-        throw mSafetyChecker.newUnsafeStateException(operation);
+    }
+
+    /**
+     * Returns whether it's safe to execute the given {@code operation}.
+     */
+    boolean canExecute(@DevicePolicyOperation int operation) {
+        return mSafetyChecker == null || mSafetyChecker.isDevicePolicyOperationSafe(operation);
     }
 
     /**
@@ -4845,10 +4837,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @Override
     public void lockNow(int flags, boolean parent) {
-        if (!canExecute(DevicePolicyManager.OPERATION_LOCK_NOW, permission.LOCK_DEVICE)) {
-            return;
-        }
-
         final CallerIdentity caller = getCallerIdentity();
 
         final int callingUserId = caller.getUserId();
@@ -4861,6 +4849,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     DeviceAdminInfo.USES_POLICY_FORCE_LOCK,
                     parent,
                     android.Manifest.permission.LOCK_DEVICE);
+            checkCanExecuteOrThrowUnsafe(DevicePolicyManager.OPERATION_LOCK_NOW);
             final long ident = mInjector.binderClearCallingIdentity();
             try {
                 adminComponent = admin == null ? null : admin.info.getComponent();
@@ -9398,6 +9387,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         Preconditions.checkCallAuthorization(caller.getUserHandle().isSystem(),
                 "createAndManageUser was called from non-system user");
         Preconditions.checkCallAuthorization(isDeviceOwner(caller));
+        checkCanExecuteOrThrowUnsafe(DevicePolicyManager.OPERATION_CREATE_AND_MANAGE_USER);
+
         final boolean ephemeral = (flags & DevicePolicyManager.MAKE_USER_EPHEMERAL) != 0;
         final boolean demo = (flags & DevicePolicyManager.MAKE_USER_DEMO) != 0
                 && UserManager.isDeviceInDemoMode(mContext);
@@ -9526,6 +9517,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         Objects.requireNonNull(userHandle, "UserHandle is null");
         final CallerIdentity caller = getCallerIdentity(who);
         Preconditions.checkCallAuthorization(isDeviceOwner(caller));
+        checkCanExecuteOrThrowUnsafe(DevicePolicyManager.OPERATION_REMOVE_USER);
 
         return mInjector.binderWithCleanCallingIdentity(() -> {
             String restriction = isManagedProfile(userHandle.getIdentifier())
@@ -9559,6 +9551,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         Objects.requireNonNull(who, "ComponentName is null");
         final CallerIdentity caller = getCallerIdentity(who);
         Preconditions.checkCallAuthorization(isDeviceOwner(caller));
+        checkCanExecuteOrThrowUnsafe(DevicePolicyManager.OPERATION_SWITCH_USER);
 
         synchronized (getLockObject()) {
             long id = mInjector.binderClearCallingIdentity();
@@ -9583,6 +9576,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         Objects.requireNonNull(userHandle, "UserHandle is null");
         final CallerIdentity caller = getCallerIdentity(who);
         Preconditions.checkCallAuthorization(isDeviceOwner(caller));
+        checkCanExecuteOrThrowUnsafe(DevicePolicyManager.OPERATION_START_USER_IN_BACKGROUND);
 
         final int userId = userHandle.getIdentifier();
         if (isManagedProfile(userId)) {
@@ -9616,6 +9610,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         Objects.requireNonNull(userHandle, "UserHandle is null");
         final CallerIdentity caller = getCallerIdentity(who);
         Preconditions.checkCallAuthorization(isDeviceOwner(caller));
+        checkCanExecuteOrThrowUnsafe(DevicePolicyManager.OPERATION_STOP_USER);
 
         final int userId = userHandle.getIdentifier();
         if (isManagedProfile(userId)) {

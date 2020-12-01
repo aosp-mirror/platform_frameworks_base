@@ -87,6 +87,7 @@ import android.service.restrictions.RestrictionsReceiver;
 import android.telephony.TelephonyManager;
 import android.telephony.data.ApnSetting;
 import android.util.ArraySet;
+import android.util.DebugUtils;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -2453,17 +2454,43 @@ public class DevicePolicyManager {
     @Retention(RetentionPolicy.SOURCE)
     public @interface PersonalAppsSuspensionReason {}
 
+    // TODO(b/172376923) - make all (or none) @TestApi
+
     /** @hide */
     @TestApi
     public static final int OPERATION_LOCK_NOW = 1;
 
+    /** @hide */
+    public static final int OPERATION_SWITCH_USER = 2;
+    /** @hide */
+    public static final int OPERATION_START_USER_IN_BACKGROUND = 3;
+    /** @hide */
+    public static final int OPERATION_STOP_USER = 4;
+    /** @hide */
+    public static final int OPERATION_CREATE_AND_MANAGE_USER = 5;
+    /** @hide */
+    public static final int OPERATION_REMOVE_USER = 6;
+
+    private static final String PREFIX_OPERATION = "OPERATION_";
+
+
     // TODO(b/172376923) - add all operations
     /** @hide */
-    @IntDef(prefix = "OPERATION_", value = {
+    @IntDef(prefix = PREFIX_OPERATION, value = {
             OPERATION_LOCK_NOW,
+            OPERATION_SWITCH_USER,
+            OPERATION_START_USER_IN_BACKGROUND,
+            OPERATION_STOP_USER,
+            OPERATION_CREATE_AND_MANAGE_USER,
+            OPERATION_REMOVE_USER
     })
     @Retention(RetentionPolicy.SOURCE)
     public static @interface DevicePolicyOperation {
+    }
+
+    /** @hide */
+    public static String operationToString(@DevicePolicyOperation int operation) {
+        return DebugUtils.constantToString(DevicePolicyManager.class, PREFIX_OPERATION, operation);
     }
 
     /**
