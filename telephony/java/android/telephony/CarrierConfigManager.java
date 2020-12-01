@@ -4056,6 +4056,17 @@ public class CarrierConfigManager {
             "default_preferred_apn_name_string";
 
     /**
+     * Indicates if the carrier supports call composer.
+     */
+    public static final String KEY_SUPPORTS_CALL_COMPOSER_BOOL = "supports_call_composer_bool";
+
+    /**
+     * Indicates the carrier server url that serves the call composer picture.
+     */
+    public static final String KEY_CALL_COMPOSER_PICTURE_SERVER_URL_STRING =
+            "call_composer_picture_server_url_string";
+
+    /**
      * For Android 11, provide a temporary solution for OEMs to use the lower of the two MTU values
      * for IPv4 and IPv6 if both are sent.
      * TODO: remove in later release
@@ -4613,6 +4624,8 @@ public class CarrierConfigManager {
         sDefaults.putStringArray(KEY_MISSED_INCOMING_CALL_SMS_PATTERN_STRING_ARRAY, new String[0]);
         sDefaults.putBoolean(KEY_DISABLE_DUN_APN_WHILE_ROAMING_WITH_PRESET_APN_BOOL, false);
         sDefaults.putString(KEY_DEFAULT_PREFERRED_APN_NAME_STRING, "");
+        sDefaults.putBoolean(KEY_SUPPORTS_CALL_COMPOSER_BOOL, false);
+        sDefaults.putString(KEY_CALL_COMPOSER_PICTURE_SERVER_URL_STRING, "");
         sDefaults.putBoolean(KEY_USE_LOWER_MTU_VALUE_IF_BOTH_RECEIVED, false);
         sDefaults.putBoolean(KEY_USE_ACS_FOR_RCS_BOOL, false);
     }
