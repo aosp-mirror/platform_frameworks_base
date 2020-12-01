@@ -11611,6 +11611,27 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         public ComponentName getProfileOwnerAsUser(int userHandle) {
             return DevicePolicyManagerService.this.getProfileOwnerAsUser(userHandle);
         }
+
+        @Override
+        public boolean isDeviceOrProfileOwnerInCallingUser(String packageName) {
+            return isDeviceOwnerInCallingUser(packageName)
+                    || isProfileOwnerInCallingUser(packageName);
+        }
+
+        private boolean isDeviceOwnerInCallingUser(String packageName) {
+            final ComponentName deviceOwnerInCallingUser =
+                    DevicePolicyManagerService.this.getDeviceOwnerComponent(
+                            /* callingUserOnly= */ true);
+            return deviceOwnerInCallingUser != null
+                    && packageName.equals(deviceOwnerInCallingUser.getPackageName());
+        }
+
+        private boolean isProfileOwnerInCallingUser(String packageName) {
+            final ComponentName profileOwnerInCallingUser =
+                    getProfileOwnerAsUser(UserHandle.getCallingUserId());
+            return profileOwnerInCallingUser != null
+                    && packageName.equals(profileOwnerInCallingUser.getPackageName());
+        }
     }
 
     private Intent createShowAdminSupportIntent(ComponentName admin, int userId) {

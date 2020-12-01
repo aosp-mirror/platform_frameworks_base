@@ -39,7 +39,7 @@ import android.app.WallpaperColors;
 import android.app.WallpaperInfo;
 import android.app.WallpaperManager;
 import android.app.WallpaperManager.SetWallpaperFlags;
-import android.app.admin.DevicePolicyManager;
+import android.app.admin.DevicePolicyManagerInternal;
 import android.app.backup.WallpaperBackupHelper;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -2846,10 +2846,8 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         if (!uidMatchPackage) {
             return false;   // callingPackage was faked.
         }
-
-        // TODO(b/144048540): DPM needs to take into account the userId, not just the package.
-        final DevicePolicyManager dpm = mContext.getSystemService(DevicePolicyManager.class);
-        if (dpm.isDeviceOwnerApp(callingPackage) || dpm.isProfileOwnerApp(callingPackage)) {
+        if (LocalServices.getService(DevicePolicyManagerInternal.class)
+                .isDeviceOrProfileOwnerInCallingUser(callingPackage)) {
             return true;
         }
         final int callingUserId = UserHandle.getCallingUserId();

@@ -16,6 +16,7 @@
 
 package android.app.admin;
 
+import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.content.ComponentName;
 import android.content.Intent;
@@ -229,5 +230,11 @@ public abstract class DevicePolicyManagerInternal {
     /**
      * Returns the profile owner component for the given user, or {@code null} if there is not one.
      */
+    @Nullable
     public abstract ComponentName getProfileOwnerAsUser(int userHandle);
+
+    /**
+     * Returns whether the given package is a device owner or a profile owner in the calling user.
+     */
+    public abstract boolean isDeviceOrProfileOwnerInCallingUser(String packageName);
 }
