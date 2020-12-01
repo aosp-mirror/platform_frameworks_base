@@ -410,6 +410,11 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
         mCurrentDialog.onHelp(message);
     }
 
+    @Nullable
+    public List<FingerprintSensorPropertiesInternal> getUdfpsProps() {
+        return mUdfpsProps;
+    }
+
     private String getErrorString(int modality, int error, int vendorCode) {
         switch (modality) {
             case TYPE_FACE:

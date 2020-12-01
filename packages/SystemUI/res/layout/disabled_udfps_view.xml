@@ -14,10 +14,11 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<com.android.systemui.biometrics.UdfpsView
+<com.android.keyguard.DisabledUdfpsView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:systemui="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/udfps_view"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    systemui:sensorTouchAreaCoefficient="0.5"/>
+    android:id="@+id/disabled_udfps_view"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="@drawable/circle_white"
+/>

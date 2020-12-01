@@ -68,6 +68,7 @@ import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.util.LatencyTracker;
+import com.android.keyguard.DisabledUdfpsController;
 import com.android.keyguard.KeyguardClockSwitchController;
 import com.android.keyguard.KeyguardStatusView;
 import com.android.keyguard.KeyguardStatusViewController;
@@ -256,7 +257,25 @@ public class NotificationPanelViewController extends PanelViewController {
                     mFirstBypassAttempt = mKeyguardBypassController.getBypassEnabled();
                     mDelayShowingKeyguardStatusBar = false;
                 }
-            };
+
+                @Override
+                public void onKeyguardVisibilityChanged(boolean showing) {
+                    if (mDisabledUdfpsController == null
+                            && mAuthController.getUdfpsRegion() != null
+                            && mAuthController.isUdfpsEnrolled(
+                                   KeyguardUpdateMonitor.getCurrentUser())) {
+                        LayoutInflater.from(mView.getContext())
+                                .inflate(R.layout.disabled_udfps_view, mView);
+                        mDisabledUdfpsController = new DisabledUdfpsController(
+                                mView.findViewById(R.id.disabled_udfps_view),
+                                mStatusBarStateController,
+                                mUpdateMonitor,
+                                mAuthController,
+                                mStatusBarKeyguardViewManager);
+                        mDisabledUdfpsController.init();
+                    }
+                }
+    };
 
     private final InjectionInflationController mInjectionInflationController;
     private final PowerManager mPowerManager;
@@ -284,6 +303,7 @@ public class NotificationPanelViewController extends PanelViewController {
     private QS mQs;
     private FrameLayout mQsFrame;
     private KeyguardStatusViewController mKeyguardStatusViewController;
+    private DisabledUdfpsController mDisabledUdfpsController;
     private View mQsNavbarScrim;
     private NotificationsQuickSettingsContainer mNotificationContainerParent;
     private boolean mAnimateNextPositionUpdate;
@@ -3043,6 +3063,9 @@ public class NotificationPanelViewController extends PanelViewController {
         pw.println("    gestureExclusionRect: " + calculateGestureExclusionRect());
         if (mKeyguardStatusBar != null) {
             mKeyguardStatusBar.dump(fd, pw, args);
+        }
+        if (mDisabledUdfpsController != null) {
+            mDisabledUdfpsController.dump(fd, pw, args);
         }
     }
 

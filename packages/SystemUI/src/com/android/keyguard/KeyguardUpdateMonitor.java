@@ -1925,6 +1925,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         }
 
         // TODO: Add support for multiple fingerprint sensors, b/173730729
+        updateUdfpsEnrolled(getCurrentUser());
         boolean shouldListenForFingerprint =
                 isUdfpsEnrolled() ? shouldListenForUdfps() : shouldListenForFingerprint();
         boolean runningOrRestarting = mFingerprintRunningState == BIOMETRIC_STATE_RUNNING
@@ -2137,7 +2138,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         }
         if (DEBUG) Log.v(TAG, "startListeningForFingerprint()");
         int userId = getCurrentUser();
-        updateUdfpsEnrolled(userId);
         if (isUnlockWithFingerprintPossible(userId)) {
             if (mFingerprintCancelSignal != null) {
                 mFingerprintCancelSignal.cancel();
@@ -2627,7 +2627,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         Assert.isMainThread();
         if (DEBUG) Log.d(TAG, "handleKeyguardBouncerChanged(" + bouncerVisible + ")");
         mBouncer = bouncerVisible == 1;
-
         if (mBouncer) {
             // If the bouncer is shown, always clear this flag. This can happen in the following
             // situations: 1) Default camera with SHOW_WHEN_LOCKED is not chosen yet. 2) Secure
