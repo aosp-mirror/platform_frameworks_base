@@ -1233,7 +1233,7 @@ public class ConnectivityServiceTest {
         MockitoAnnotations.initMocks(this);
         when(mMetricsService.defaultNetworkMetrics()).thenReturn(mDefaultNetworkMetrics);
 
-        when(mUserManager.getUsers(eq(true))).thenReturn(
+        when(mUserManager.getAliveUsers()).thenReturn(
                 Arrays.asList(new UserInfo[] {
                         new UserInfo(VPN_USER, "", 0),
                 }));

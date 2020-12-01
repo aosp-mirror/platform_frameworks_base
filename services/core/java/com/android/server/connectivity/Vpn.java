@@ -1500,7 +1500,7 @@ public class Vpn {
             final long token = Binder.clearCallingIdentity();
             List<UserInfo> users;
             try {
-                users = UserManager.get(mContext).getUsers(true);
+                users = UserManager.get(mContext).getAliveUsers();
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
