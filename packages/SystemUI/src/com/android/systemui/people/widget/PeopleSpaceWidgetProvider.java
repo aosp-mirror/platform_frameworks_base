@@ -32,7 +32,9 @@ public class PeopleSpaceWidgetProvider extends AppWidgetProvider {
     private static final String TAG = "PeopleSpaceWidgetPvd";
     private static final boolean DEBUG = PeopleSpaceUtils.DEBUG;
 
-    public static final String EXTRA_SHORTCUT_INFO = "extra_shortcut_info";
+    public static final String EXTRA_TILE_ID = "extra_tile_id";
+    public static final String EXTRA_PACKAGE_NAME = "extra_package_name";
+    public static final String EXTRA_UID = "extra_uid";
 
     /** Called when widget updates. */
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
