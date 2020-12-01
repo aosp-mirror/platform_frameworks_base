@@ -17,6 +17,7 @@
 package android.telephony.ims;
 
 import android.annotation.NonNull;
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.telephony.ims.stub.DelegateConnectionStateCallback;
@@ -39,6 +40,7 @@ import java.util.Objects;
  * currently available.
  * @hide
  */
+@SystemApi
 public final class FeatureTagState implements Parcelable {
 
     private final String mFeatureTag;
@@ -48,8 +50,8 @@ public final class FeatureTagState implements Parcelable {
      * Associate an IMS feature tag with its current state. See {@link DelegateRegistrationState}
      * and {@link DelegateConnectionStateCallback#onFeatureTagStatusChanged(
      * DelegateRegistrationState, List)} and
-     * {@link DelegateStateCallback#onCreated(SipDelegate, List)} for examples on how and when this
-     * is used.
+     * {@link DelegateStateCallback#onCreated(SipDelegate, java.util.Set)} for examples on how and
+     * when this is used.
      *
      * @param featureTag The IMS feature tag that is deregistered, in the process of
      *                   deregistering, or denied.
@@ -93,12 +95,12 @@ public final class FeatureTagState implements Parcelable {
     }
 
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeString(mFeatureTag);
         dest.writeInt(mState);
     }
 
-    public static final Creator<FeatureTagState> CREATOR = new Creator<FeatureTagState>() {
+    public static final @NonNull Creator<FeatureTagState> CREATOR = new Creator<FeatureTagState>() {
         @Override
         public FeatureTagState createFromParcel(Parcel source) {
             return new FeatureTagState(source);

@@ -18,14 +18,14 @@ package android.telephony.ims;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.SuppressLint;
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.ArraySet;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -34,6 +34,7 @@ import java.util.Set;
  * ImsService.
  * @hide
  */
+@SystemApi
 public final class DelegateRegistrationState implements Parcelable {
 
     /**
@@ -114,14 +115,14 @@ public final class DelegateRegistrationState implements Parcelable {
     })
     public @interface DeregisteringReason {}
 
-    private final ArrayList<String> mRegisteredTags = new ArrayList<>();
-    private final ArrayList<FeatureTagState> mDeregisteringTags = new ArrayList<>();
-    private final ArrayList<FeatureTagState> mDeregisteredTags = new ArrayList<>();
+    private ArraySet<String> mRegisteredTags = new ArraySet<>();
+    private final ArraySet<FeatureTagState> mDeregisteringTags = new ArraySet<>();
+    private final ArraySet<FeatureTagState> mDeregisteredTags = new ArraySet<>();
 
     /**
      * Builder used to create new instances of {@link DelegateRegistrationState}.
      */
-    public static class Builder {
+    public static final class Builder {
 
         private final DelegateRegistrationState mState;
 
@@ -135,10 +136,8 @@ public final class DelegateRegistrationState implements Parcelable {
          * @param featureTag The IMS media feature tag included in the current IMS registration.
          * @return The in-progress Builder instance for RegistrationState.
          */
-        public Builder addRegisteredFeatureTag(@NonNull String featureTag) {
-            if (!mState.mRegisteredTags.contains(featureTag)) {
-                mState.mRegisteredTags.add(featureTag);
-            }
+        public @NonNull Builder addRegisteredFeatureTag(@NonNull String featureTag) {
+            mState.mRegisteredTags.add(featureTag);
             return this;
         }
 
@@ -148,7 +147,8 @@ public final class DelegateRegistrationState implements Parcelable {
          * @param featureTags The IMS media feature tags included in the current IMS registration.
          * @return The in-progress Builder instance for RegistrationState.
          */
-        public Builder addRegisteredFeatureTags(@NonNull Set<String> featureTags) {
+        @SuppressLint("MissingGetterMatchingBuilder")
+        public @NonNull Builder addRegisteredFeatureTags(@NonNull Set<String> featureTags) {
             mState.mRegisteredTags.addAll(featureTags);
             return this;
         }
@@ -167,13 +167,9 @@ public final class DelegateRegistrationState implements Parcelable {
          *         The availability of the feature tag depends on the {@link DeregisteringReason}.
          * @return The in-progress Builder instance for RegistrationState.
          */
-        public Builder addDeregisteringFeatureTag(@NonNull String featureTag,
+        public @NonNull Builder addDeregisteringFeatureTag(@NonNull String featureTag,
                 @DeregisteringReason int reason) {
-            boolean ftExists = mState.mDeregisteringTags.stream().anyMatch(
-                    f -> f.getFeatureTag().equals(featureTag));
-            if (!ftExists) {
-                mState.mDeregisteringTags.add(new FeatureTagState(featureTag, reason));
-            }
+            mState.mDeregisteringTags.add(new FeatureTagState(featureTag, reason));
             return this;
         }
 
@@ -185,20 +181,16 @@ public final class DelegateRegistrationState implements Parcelable {
          * @param reason The reason why the media feature tag has been deregistered.
          * @return The in-progress Builder instance for RegistrationState.
          */
-        public Builder addDeregisteredFeatureTag(@NonNull String featureTag,
+        public @NonNull Builder addDeregisteredFeatureTag(@NonNull String featureTag,
                 @DeregisteredReason int reason) {
-            boolean ftExists = mState.mDeregisteredTags.stream().anyMatch(
-                    f -> f.getFeatureTag().equals(featureTag));
-            if (!ftExists) {
-                mState.mDeregisteredTags.add(new FeatureTagState(featureTag, reason));
-            }
+            mState.mDeregisteredTags.add(new FeatureTagState(featureTag, reason));
             return this;
         }
 
         /**
          * @return the finalized instance.
          */
-        public DelegateRegistrationState build() {
+        public @NonNull DelegateRegistrationState build() {
             return mState;
         }
     }
@@ -212,7 +204,7 @@ public final class DelegateRegistrationState implements Parcelable {
      * Used for unparcelling only.
      */
     private DelegateRegistrationState(Parcel source) {
-        source.readList(mRegisteredTags, null /*classloader*/);
+        mRegisteredTags = (ArraySet<String>) source.readArraySet(null);
         readStateFromParcel(source, mDeregisteringTags);
         readStateFromParcel(source, mDeregisteredTags);
     }
@@ -268,7 +260,8 @@ public final class DelegateRegistrationState implements Parcelable {
         return new ArraySet<>(mDeregisteredTags);
     }
 
-    public static final Creator<DelegateRegistrationState> CREATOR =
+
+    public static final @NonNull Creator<DelegateRegistrationState> CREATOR =
             new Creator<DelegateRegistrationState>() {
         @Override
         public DelegateRegistrationState createFromParcel(Parcel source) {
@@ -287,13 +280,13 @@ public final class DelegateRegistrationState implements Parcelable {
     }
 
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeList(mRegisteredTags);
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
+        dest.writeArraySet(mRegisteredTags);
         writeStateToParcel(dest, mDeregisteringTags);
         writeStateToParcel(dest, mDeregisteredTags);
     }
 
-    private void writeStateToParcel(Parcel dest, List<FeatureTagState> state) {
+    private void writeStateToParcel(Parcel dest, Set<FeatureTagState> state) {
         dest.writeInt(state.size());
         for (FeatureTagState s : state) {
             dest.writeString(s.getFeatureTag());
@@ -301,11 +294,12 @@ public final class DelegateRegistrationState implements Parcelable {
         }
     }
 
-    private void readStateFromParcel(Parcel source, List<FeatureTagState> emptyState) {
+    private void readStateFromParcel(Parcel source, Set<FeatureTagState> emptyState) {
         int len = source.readInt();
         for (int i = 0; i < len; i++) {
             String ft = source.readString();
             int reason = source.readInt();
+
             emptyState.add(new FeatureTagState(ft, reason));
         }
     }
