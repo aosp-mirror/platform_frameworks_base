@@ -19,13 +19,17 @@ package com.android.server.media.metrics;
 import android.content.Context;
 import android.media.metrics.IPlaybackMetricsManager;
 import android.media.metrics.PlaybackMetrics;
+import android.util.Base64;
 
 import com.android.server.SystemService;
+
+import java.security.SecureRandom;
 
 /**
  * System service manages playback metrics.
  */
 public final class PlaybackMetricsManagerService extends SystemService {
+    private final SecureRandom mSecureRandom;
 
     /**
      * Initializes the playback metrics manager service.
@@ -34,6 +38,7 @@ public final class PlaybackMetricsManagerService extends SystemService {
      */
     public PlaybackMetricsManagerService(Context context) {
         super(context);
+        mSecureRandom = new SecureRandom();
     }
 
     @Override
@@ -44,8 +49,16 @@ public final class PlaybackMetricsManagerService extends SystemService {
 
     private final class BinderService extends IPlaybackMetricsManager.Stub {
         @Override
-        public void reportPlaybackMetrics(PlaybackMetrics metrics, int userId) {
+        public void reportPlaybackMetrics(String sessionId, PlaybackMetrics metrics, int userId) {
             // TODO: log it to statsd
+        }
+
+        @Override
+        public String getSessionId(int userId) {
+            byte[] byteId = new byte[16]; // 128 bits
+            mSecureRandom.nextBytes(byteId);
+            String id = Base64.encodeToString(byteId, Base64.DEFAULT);
+            return id;
         }
     }
 }

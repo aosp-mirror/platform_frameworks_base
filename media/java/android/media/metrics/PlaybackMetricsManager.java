@@ -16,6 +16,7 @@
 
 package android.media.metrics;
 
+import android.annotation.NonNull;
 import android.os.RemoteException;
 
 /**
@@ -38,10 +39,24 @@ public class PlaybackMetricsManager {
 
     /**
      * Reports playback metrics.
+     * @hide
      */
-    public void reportPlaybackMetrics(PlaybackMetrics metrics) {
+    public void reportPlaybackMetrics(@NonNull String sessionId, PlaybackMetrics metrics) {
         try {
-            mService.reportPlaybackMetrics(metrics, mUserId);
+            mService.reportPlaybackMetrics(sessionId, metrics, mUserId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Creates a playback session.
+     */
+    public PlaybackSession createSession() {
+        try {
+            String id = mService.getSessionId(mUserId);
+            PlaybackSession session = new PlaybackSession(id, this);
+            return session;
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

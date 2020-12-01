@@ -23,5 +23,6 @@ import android.media.metrics.PlaybackMetrics;
  * @hide
  */
 interface IPlaybackMetricsManager {
-    void reportPlaybackMetrics(in PlaybackMetrics metrics, int userId);
+    void reportPlaybackMetrics(in String sessionId, in PlaybackMetrics metrics, int userId);
+    String getSessionId(int userId);
 }
