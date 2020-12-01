@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.flicker.splitscreen
 
+import android.platform.test.annotations.Presubmit
 import android.util.Rational
 import android.view.Surface
 import androidx.test.filters.FlakyTest
@@ -40,6 +41,7 @@ import org.junit.runners.Parameterized
  * Test exit SplitScreen mode.
  * To run this test: `atest WMShellFlickerTests:ExitSplitScreenTest`
  */
+@Presubmit
 @RequiresDevice
 @RunWith(Parameterized::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)

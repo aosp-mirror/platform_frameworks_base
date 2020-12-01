@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.flicker.apppairs
 
+import android.platform.test.annotations.Presubmit
 import android.os.SystemClock
 import android.util.Log
 import android.view.Surface
@@ -43,6 +44,7 @@ import java.io.IOException
  * Test AppPairs launch.
  * To run this test: `atest WMShellFlickerTests:AppPairsTest`
  */
+@Presubmit
 @RequiresDevice
 @RunWith(Parameterized::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
