@@ -48,7 +48,8 @@ import java.lang.annotation.Retention;
         SoftInputShowHideReason.HIDE_DOCKED_STACK_ATTACHED,
         SoftInputShowHideReason.HIDE_RECENTS_ANIMATION,
         SoftInputShowHideReason.HIDE_BUBBLES,
-        SoftInputShowHideReason.HIDE_SAME_WINDOW_FOCUSED_WITHOUT_EDITOR})
+        SoftInputShowHideReason.HIDE_SAME_WINDOW_FOCUSED_WITHOUT_EDITOR,
+        SoftInputShowHideReason.HIDE_REMOVE_CLIENT})
 public @interface SoftInputShowHideReason {
     /** Show soft input by {@link android.view.inputmethod.InputMethodManager#showSoftInput}. */
     int SHOW_SOFT_INPUT = 0;
@@ -161,4 +162,9 @@ public @interface SoftInputShowHideReason {
      * soft-input when the same window focused again to align with the same behavior prior to R.
      */
     int HIDE_SAME_WINDOW_FOCUSED_WITHOUT_EDITOR = 20;
+
+    /**
+     * Hide soft input when a {@link com.android.internal.view.IInputMethodClient} is removed.
+     */
+    int HIDE_REMOVE_CLIENT = 21;
 }

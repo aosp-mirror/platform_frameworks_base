@@ -2284,6 +2284,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 }
 
                 if (mCurClient == cs) {
+                    hideCurrentInputLocked(
+                            mCurFocusedWindow, 0, null, SoftInputShowHideReason.HIDE_REMOVE_CLIENT);
                     if (mBoundToMethod) {
                         mBoundToMethod = false;
                         if (mCurMethod != null) {
