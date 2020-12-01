@@ -307,13 +307,13 @@ public class ThemeOverlayController extends SystemUI implements Dumpable {
         if (!hasSystemPalette && mSystemOverlayColor != Color.TRANSPARENT) {
             categoryToPackage.put(OVERLAY_CATEGORY_SYSTEM_PALETTE,
                     ThemeOverlayApplier.MONET_SYSTEM_PALETTE_PACKAGE
-                            + Integer.toHexString(mSystemOverlayColor).toUpperCase());
+                            + getColorString(mSystemOverlayColor));
         }
         // Same for the accent color
         if (!hasAccentColor && mAccentOverlayColor != Color.TRANSPARENT) {
             categoryToPackage.put(OVERLAY_CATEGORY_ACCENT_COLOR,
                     ThemeOverlayApplier.MONET_ACCENT_COLOR_PACKAGE
-                            + Integer.toHexString(mAccentOverlayColor).toUpperCase());
+                            + getColorString(mAccentOverlayColor));
         }
 
         Set<UserHandle> userHandles = Sets.newHashSet(UserHandle.of(currentUser));
@@ -323,6 +323,14 @@ public class ThemeOverlayController extends SystemUI implements Dumpable {
             }
         }
         mThemeManager.applyCurrentUserOverlays(categoryToPackage, userHandles);
+    }
+
+    private String getColorString(int color) {
+        String colorString = Integer.toHexString(color).toUpperCase();
+        while (colorString.length() < 6) {
+            colorString = "0" + colorString;
+        }
+        return colorString;
     }
 
     @Override
