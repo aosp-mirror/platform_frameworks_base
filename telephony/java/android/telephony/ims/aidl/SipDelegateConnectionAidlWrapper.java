@@ -158,7 +158,7 @@ public class SipDelegateConnectionAidlWrapper implements SipDelegateConnection,
     }
 
     @Override
-    public void sendMessage(SipMessage sipMessage, int configVersion) {
+    public void sendMessage(SipMessage sipMessage, long configVersion) {
         try {
             ISipDelegate conn = getSipDelegateBinder();
             if (conn == null) {
