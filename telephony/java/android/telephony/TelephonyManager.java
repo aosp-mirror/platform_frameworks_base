@@ -13030,6 +13030,37 @@ public class TelephonyManager {
     }
 
     /**
+     * Get which bands the modem's background scan is acting on, specified by
+     * {@link #setSystemSelectionChannels}.
+     *
+     * <p>Requires Permission:
+     * {@link android.Manifest.permission#READ_PRIVILEGED_PHONE_STATE READ_PRIVILEGED_PHONE_STATE}
+     * or that the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
+     *
+     * @return a list of {@link RadioAccessSpecifier}, or an empty list if no bands are specified.
+     * @throws IllegalStateException if the Telephony process is not currently available.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public @NonNull List<RadioAccessSpecifier> getSystemSelectionChannels() {
+        try {
+            ITelephony service = getITelephony();
+            if (service != null) {
+                return service.getSystemSelectionChannels(getSubId());
+            } else {
+                throw new IllegalStateException("telephony service is null.");
+            }
+        } catch (RemoteException ex) {
+            if (!isSystemProcess()) {
+                ex.rethrowAsRuntimeException();
+            }
+        }
+        return new ArrayList<>();
+    }
+
+    /**
      * Verifies whether the input MCC/MNC and MVNO correspond to the current carrier.
      *
      * @param mccmnc the carrier's mccmnc that you want to match
