@@ -18,10 +18,11 @@ package android.telephony.ims;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.telephony.ims.stub.SipDelegate;
 import android.telephony.ims.stub.SipTransportImplBase;
 
-import java.util.List;
+import java.util.Set;
 
 /**
  * Callback interface to notify a remote application of the following:
@@ -34,26 +35,24 @@ import java.util.List;
  * </ul>
  * @hide
  */
+@SystemApi
 public interface DelegateStateCallback {
 
     /**
      * This must be called by the ImsService after {@link SipTransportImplBase#createSipDelegate} is
      * called by the framework to notify the framework and remote application that the
      * {@link SipDelegate} has been successfully created.
-     *
-     * @param delegate The SipDelegate created to service the DelegateRequest.
-     * @param deniedTags A List of {@link FeatureTagState}, which contains the feature tags
+     *  @param delegate The SipDelegate created to service the DelegateRequest.
+     * @param deniedTags A Set of {@link FeatureTagState}s, which contain the feature tags
      *    associated with this {@link SipDelegate} that have no access to send/receive SIP messages
      *    as well as a reason for why the feature tag is denied. For more information on the reason
      *    why the feature tag was denied access, see the
      *    {@link SipDelegateManager.DeniedReason} reasons. This is considered a permanent denial due
      *    to this {@link SipDelegate} not supporting a feature or this ImsService already
      *    implementing this feature elsewhere. If all features of this {@link SipDelegate} are
-     *    denied, {@link #onCreated(SipDelegate, List)} should still be called as the framework will
-     *    later call {@link SipTransportImplBase#destroySipDelegate(SipDelegate, int)} to clean the
-     *    delegate up.
+     *    denied, this method should still be called.
      */
-    void onCreated(@NonNull SipDelegate delegate, @Nullable List<FeatureTagState> deniedTags);
+    void onCreated(@NonNull SipDelegate delegate, @Nullable Set<FeatureTagState> deniedTags);
 
     /**
      * This must be called by the ImsService after the framework calls
