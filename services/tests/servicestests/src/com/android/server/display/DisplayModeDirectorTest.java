@@ -40,6 +40,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.database.ContentObserver;
+import android.hardware.display.DisplayManager;
 import android.hardware.Sensor;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
@@ -402,7 +403,7 @@ public class DisplayModeDirectorTest {
 
         director.injectVotesByDisplay(votesByDisplay);
         assertThat(director.getModeSwitchingType())
-                .isNotEqualTo(DisplayModeDirector.SWITCHING_TYPE_NONE);
+                .isNotEqualTo(DisplayManager.SWITCHING_TYPE_NONE);
         DesiredDisplayModeSpecs desiredSpecs = director.getDesiredDisplayModeSpecs(displayId);
 
         assertThat(desiredSpecs.primaryRefreshRateRange.min).isWithin(FLOAT_TOLERANCE).of(30);
@@ -411,9 +412,9 @@ public class DisplayModeDirectorTest {
         assertThat(desiredSpecs.appRequestRefreshRateRange.max).isWithin(FLOAT_TOLERANCE).of(60);
         assertThat(desiredSpecs.baseModeId).isEqualTo(30);
 
-        director.setModeSwitchingType(DisplayModeDirector.SWITCHING_TYPE_NONE);
+        director.setModeSwitchingType(DisplayManager.SWITCHING_TYPE_NONE);
         assertThat(director.getModeSwitchingType())
-                .isEqualTo(DisplayModeDirector.SWITCHING_TYPE_NONE);
+                .isEqualTo(DisplayManager.SWITCHING_TYPE_NONE);
 
         desiredSpecs = director.getDesiredDisplayModeSpecs(displayId);
         assertThat(desiredSpecs.primaryRefreshRateRange.min).isWithin(FLOAT_TOLERANCE).of(30);
@@ -428,9 +429,9 @@ public class DisplayModeDirectorTest {
         final int displayId = 0;
         DisplayModeDirector director = createDirectorFromFpsRange(0, 90);
 
-        director.setModeSwitchingType(DisplayModeDirector.SWITCHING_TYPE_WITHIN_GROUPS);
+        director.setModeSwitchingType(DisplayManager.SWITCHING_TYPE_WITHIN_GROUPS);
         assertThat(director.getModeSwitchingType())
-                .isEqualTo(DisplayModeDirector.SWITCHING_TYPE_WITHIN_GROUPS);
+                .isEqualTo(DisplayManager.SWITCHING_TYPE_WITHIN_GROUPS);
         DesiredDisplayModeSpecs desiredSpecs = director.getDesiredDisplayModeSpecs(displayId);
         assertThat(desiredSpecs.allowGroupSwitching).isFalse();
     }
@@ -440,9 +441,9 @@ public class DisplayModeDirectorTest {
         final int displayId = 0;
         DisplayModeDirector director = createDirectorFromFpsRange(0, 90);
 
-        director.setModeSwitchingType(DisplayModeDirector.SWITCHING_TYPE_ACROSS_AND_WITHIN_GROUPS);
+        director.setModeSwitchingType(DisplayManager.SWITCHING_TYPE_ACROSS_AND_WITHIN_GROUPS);
         assertThat(director.getModeSwitchingType())
-                .isEqualTo(DisplayModeDirector.SWITCHING_TYPE_ACROSS_AND_WITHIN_GROUPS);
+                .isEqualTo(DisplayManager.SWITCHING_TYPE_ACROSS_AND_WITHIN_GROUPS);
         DesiredDisplayModeSpecs desiredSpecs = director.getDesiredDisplayModeSpecs(displayId);
         assertThat(desiredSpecs.allowGroupSwitching).isTrue();
     }

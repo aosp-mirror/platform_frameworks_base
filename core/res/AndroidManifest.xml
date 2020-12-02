@@ -4047,6 +4047,13 @@
     <permission android:name="android.permission.OVERRIDE_DISPLAY_MODE_REQUESTS"
                 android:protectionLevel="signature" />
 
+    <!-- Allows an application to modify the refresh rate switching type. This
+         matches Setting.Secure.MATCH_CONTENT_FRAME_RATE.
+         @hide
+         @TestApi -->
+    <permission android:name="android.permission.MODIFY_REFRESH_RATE_SWITCHING_TYPE"
+                android:protectionLevel="signature" />
+
     <!-- @SystemApi Allows an application to control VPN.
          <p>Not for use by third-party applications.</p>
          @hide -->
