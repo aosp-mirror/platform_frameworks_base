@@ -20,6 +20,9 @@ android_test {
 
     defaults: ["framework-wifi-test-defaults"],
 
+    min_sdk_version: "30",
+    target_sdk_version: "30",
+
     srcs: ["**/*.java"],
 
     jacoco: {
