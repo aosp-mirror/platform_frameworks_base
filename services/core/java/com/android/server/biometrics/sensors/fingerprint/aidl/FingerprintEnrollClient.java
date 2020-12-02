@@ -19,6 +19,7 @@ package com.android.server.biometrics.sensors.fingerprint.aidl;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
+import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricFingerprintConstants;
 import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.common.ICancellationSignal;
@@ -56,6 +57,15 @@ class FingerprintEnrollClient extends EnrollClient<ISession> implements Udfps {
                 true /* shouldVibrate */);
         mUdfpsOverlayController = udfpsOvelayController;
         mMaxTemplatesPerUser = maxTemplatesPerUser;
+    }
+
+    @Override
+    public void onEnrollResult(BiometricAuthenticator.Identifier identifier, int remaining) {
+        super.onEnrollResult(identifier, remaining);
+
+        if (remaining == 0) {
+            UdfpsHelper.hideUdfpsOverlay(getSensorId(), mUdfpsOverlayController);
+        }
     }
 
     @Override
