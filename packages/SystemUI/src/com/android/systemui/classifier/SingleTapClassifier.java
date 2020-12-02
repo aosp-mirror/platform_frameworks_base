@@ -14,13 +14,16 @@
  * limitations under the License.
  */
 
-package com.android.systemui.classifier.brightline;
+package com.android.systemui.classifier;
+
+import static com.android.systemui.classifier.FalsingModule.SINGLE_TAP_TOUCH_SLOP;
 
 import android.view.MotionEvent;
 
-import com.android.systemui.classifier.FalsingDataProvider;
-
 import java.util.List;
+
+import javax.inject.Inject;
+import javax.inject.Named;
 
 /**
  * Falsing classifier that accepts or rejects a single gesture as a tap.
@@ -29,7 +32,9 @@ public class SingleTapClassifier extends FalsingClassifier {
     private final float mTouchSlop;
     private String mReason;
 
-    SingleTapClassifier(FalsingDataProvider dataProvider, float touchSlop) {
+    @Inject
+    SingleTapClassifier(FalsingDataProvider dataProvider,
+            @Named(SINGLE_TAP_TOUCH_SLOP) float touchSlop) {
         super(dataProvider);
         mTouchSlop = touchSlop;
     }

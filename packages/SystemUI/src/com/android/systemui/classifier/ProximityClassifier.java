@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.classifier.brightline;
+package com.android.systemui.classifier;
 
 import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.BRIGHTLINE_FALSING_PROXIMITY_PERCENT_COVERED_THRESHOLD;
 import static com.android.systemui.classifier.Classifier.QUICK_SETTINGS;
@@ -22,11 +22,12 @@ import static com.android.systemui.classifier.Classifier.QUICK_SETTINGS;
 import android.provider.DeviceConfig;
 import android.view.MotionEvent;
 
-import com.android.systemui.classifier.FalsingDataProvider;
 import com.android.systemui.util.DeviceConfigProxy;
 import com.android.systemui.util.sensors.ProximitySensor;
 
 import java.util.Locale;
+
+import javax.inject.Inject;
 
 
 /**
@@ -47,10 +48,11 @@ class ProximityClassifier extends FalsingClassifier {
     private long mNearDurationNs;
     private float mPercentNear;
 
+    @Inject
     ProximityClassifier(DistanceClassifier distanceClassifier,
             FalsingDataProvider dataProvider, DeviceConfigProxy deviceConfigProxy) {
         super(dataProvider);
-        this.mDistanceClassifier = distanceClassifier;
+        mDistanceClassifier = distanceClassifier;
 
         mPercentCoveredThreshold = deviceConfigProxy.getFloat(
                 DeviceConfig.NAMESPACE_SYSTEMUI,

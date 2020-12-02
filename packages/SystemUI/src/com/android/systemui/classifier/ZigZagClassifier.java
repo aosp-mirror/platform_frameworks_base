@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.classifier.brightline;
+package com.android.systemui.classifier;
 
 import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.BRIGHTLINE_FALSING_ZIGZAG_X_PRIMARY_DEVIANCE;
 import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.BRIGHTLINE_FALSING_ZIGZAG_X_SECONDARY_DEVIANCE;
@@ -25,12 +25,13 @@ import android.graphics.Point;
 import android.provider.DeviceConfig;
 import android.view.MotionEvent;
 
-import com.android.systemui.classifier.FalsingDataProvider;
 import com.android.systemui.util.DeviceConfigProxy;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+
+import javax.inject.Inject;
 
 /**
  * Penalizes gestures that change direction in either the x or y too much.
@@ -56,6 +57,7 @@ class ZigZagClassifier extends FalsingClassifier {
     private float mLastMaxXDeviance;
     private float mLastMaxYDeviance;
 
+    @Inject
     ZigZagClassifier(FalsingDataProvider dataProvider, DeviceConfigProxy deviceConfigProxy) {
         super(dataProvider);
 

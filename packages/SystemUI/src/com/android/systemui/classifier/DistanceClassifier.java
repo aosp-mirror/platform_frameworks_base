@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.classifier.brightline;
+package com.android.systemui.classifier;
 
 import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.BRIGHTLINE_FALSING_DISTANCE_HORIZONTAL_FLING_THRESHOLD_IN;
 import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.BRIGHTLINE_FALSING_DISTANCE_HORIZONTAL_SWIPE_THRESHOLD_IN;
@@ -27,11 +27,12 @@ import android.provider.DeviceConfig;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 
-import com.android.systemui.classifier.FalsingDataProvider;
 import com.android.systemui.util.DeviceConfigProxy;
 
 import java.util.List;
 import java.util.Locale;
+
+import javax.inject.Inject;
 
 /**
  * Ensure that the swipe + momentum covers a minimum distance.
@@ -54,6 +55,7 @@ class DistanceClassifier extends FalsingClassifier {
     private boolean mDistanceDirty;
     private DistanceVectors mCachedDistance;
 
+    @Inject
     DistanceClassifier(FalsingDataProvider dataProvider, DeviceConfigProxy deviceConfigProxy) {
         super(dataProvider);
 

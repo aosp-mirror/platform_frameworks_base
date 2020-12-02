@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,44 +14,39 @@
  * limitations under the License.
  */
 
-package com.android.systemui.classifier.brightline;
+package com.android.systemui.classifier;
 
 import static com.android.systemui.classifier.FalsingManagerProxy.FALSING_SUCCESS;
+import static com.android.systemui.classifier.FalsingModule.BRIGHT_LINE_GESTURE_CLASSIFERS;
 
-import android.app.ActivityManager;
-import android.content.res.Resources;
 import android.net.Uri;
 import android.os.Build;
 import android.util.IndentingPrintWriter;
 import android.util.Log;
 import android.view.MotionEvent;
-import android.view.ViewConfiguration;
 
 import androidx.annotation.NonNull;
 
 import com.android.internal.logging.MetricsLogger;
-import com.android.systemui.R;
-import com.android.systemui.classifier.Classifier;
-import com.android.systemui.classifier.FalsingDataProvider;
 import com.android.systemui.classifier.FalsingDataProvider.SessionListener;
-import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.dagger.qualifiers.TestHarness;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.plugins.FalsingManager;
-import com.android.systemui.statusbar.phone.NotificationTapHelper;
-import com.android.systemui.util.DeviceConfigProxy;
 import com.android.systemui.util.sensors.ThresholdSensor;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayDeque;
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import java.util.Queue;
+import java.util.Set;
 import java.util.StringJoiner;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 
 /**
  * FalsingManager designed to make clear why a touch was rejected.
@@ -68,6 +63,7 @@ public class BrightLineFalsingManager implements FalsingManager {
     private final DockManager mDockManager;
     private final SingleTapClassifier mSingleTapClassifier;
     private final DoubleTapClassifier mDoubleTapClassifier;
+    private final boolean mTestHarness;
     private final MetricsLogger mMetricsLogger;
     private int mIsFalseTouchCalls;
     private static final Queue<String> RECENT_INFO_LOG =
@@ -75,7 +71,7 @@ public class BrightLineFalsingManager implements FalsingManager {
     private static final Queue<DebugSwipeRecord> RECENT_SWIPES =
             new ArrayDeque<>(RECENT_SWIPE_LOG_SIZE + 1);
 
-    private final List<FalsingClassifier> mClassifiers;
+    private final Collection<FalsingClassifier> mClassifiers;
 
     private final SessionListener mSessionListener = new SessionListener() {
         @Override
@@ -93,29 +89,17 @@ public class BrightLineFalsingManager implements FalsingManager {
 
     @Inject
     public BrightLineFalsingManager(FalsingDataProvider falsingDataProvider,
-            DeviceConfigProxy deviceConfigProxy, @Main Resources resources,
-            ViewConfiguration viewConfiguration, DockManager dockManager) {
+            DockManager dockManager, MetricsLogger metricsLogger,
+            @Named(BRIGHT_LINE_GESTURE_CLASSIFERS) Set<FalsingClassifier> classifiers,
+            SingleTapClassifier singleTapClassifier, DoubleTapClassifier doubleTapClassifier,
+            @TestHarness boolean testHarness) {
         mDataProvider = falsingDataProvider;
         mDockManager = dockManager;
-
-        mMetricsLogger = new MetricsLogger();
-        mClassifiers = new ArrayList<>();
-        DistanceClassifier distanceClassifier =
-                new DistanceClassifier(mDataProvider, deviceConfigProxy);
-        ProximityClassifier proximityClassifier =
-                new ProximityClassifier(distanceClassifier, mDataProvider, deviceConfigProxy);
-        mClassifiers.add(new PointerCountClassifier(mDataProvider));
-        mClassifiers.add(new TypeClassifier(mDataProvider));
-        mClassifiers.add(new DiagonalClassifier(mDataProvider, deviceConfigProxy));
-        mClassifiers.add(distanceClassifier);
-        mClassifiers.add(proximityClassifier);
-        mClassifiers.add(new ZigZagClassifier(mDataProvider, deviceConfigProxy));
-
-        mSingleTapClassifier = new SingleTapClassifier(
-                mDataProvider, viewConfiguration.getScaledTouchSlop());
-        mDoubleTapClassifier = new DoubleTapClassifier(mDataProvider, mSingleTapClassifier,
-                resources.getDimension(R.dimen.double_tap_slop),
-                NotificationTapHelper.DOUBLE_TAP_TIMEOUT_MS);
+        mMetricsLogger = metricsLogger;
+        mClassifiers = classifiers;
+        mSingleTapClassifier = singleTapClassifier;
+        mDoubleTapClassifier = doubleTapClassifier;
+        mTestHarness = testHarness;
 
         mDataProvider.addSessionListener(mSessionListener);
     }
@@ -132,7 +116,7 @@ public class BrightLineFalsingManager implements FalsingManager {
             return mPreviousResult;
         }
 
-        mPreviousResult = !ActivityManager.isRunningInUserTestHarness()
+        mPreviousResult = !mTestHarness
                 && !mDataProvider.isJustUnlockedWithFace() && !mDockManager.isDocked()
                 && mClassifiers.stream().anyMatch(falsingClassifier -> {
                     boolean result = falsingClassifier.isFalseTouch();
