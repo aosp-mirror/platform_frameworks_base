@@ -24,6 +24,7 @@ import java.util.Objects;
 final class DevicePolicyManagerServiceShellCommand extends ShellCommand {
 
     private static final String CMD_IS_SAFE_OPERATION = "is-operation-safe";
+    private static final String CMD_SET_SAFE_OPERATION = "set-operation-safe";
 
     private final DevicePolicyManagerService mService;
 
@@ -48,6 +49,8 @@ final class DevicePolicyManagerServiceShellCommand extends ShellCommand {
             switch (cmd) {
                 case CMD_IS_SAFE_OPERATION:
                     return runIsSafeOperation(pw);
+                case CMD_SET_SAFE_OPERATION:
+                    return runSetSafeOperation(pw);
                 default:
                     return onInvalidCommand(pw, cmd);
             }
@@ -70,6 +73,9 @@ final class DevicePolicyManagerServiceShellCommand extends ShellCommand {
         pw.printf("    Prints this help text.\n\n");
         pw.printf("  %s <OPERATION_ID>\n", CMD_IS_SAFE_OPERATION);
         pw.printf("    Checks if the give operation is safe \n\n");
+        pw.printf("  %s <OPERATION_ID> <true|false>\n", CMD_SET_SAFE_OPERATION);
+        pw.printf("    Emulates the result of the next call to check if the given operation is safe"
+                + " \n\n");
     }
 
     private int runIsSafeOperation(PrintWriter pw) {
@@ -77,6 +83,15 @@ final class DevicePolicyManagerServiceShellCommand extends ShellCommand {
         boolean safe = mService.canExecute(operation);
         pw.printf("Operation %s is %s\n", DevicePolicyManager.operationToString(operation),
                 safe ? "SAFE" : "UNSAFE");
+        return 0;
+    }
+
+    private int runSetSafeOperation(PrintWriter pw) {
+        int operation = Integer.parseInt(getNextArgRequired());
+        boolean safe = getNextArg().equals("true");
+        mService.setNextOperationSafety(operation, safe);
+        pw.printf("Next call to check operation %s will return %s\n",
+                DevicePolicyManager.operationToString(operation), safe ? "SAFE" : "UNSAFE");
         return 0;
     }
 }
