@@ -1097,6 +1097,11 @@ public class ActivityManagerService extends IActivityManager.Stub
     final PendingTempWhitelists mPendingTempWhitelist = new PendingTempWhitelists(this);
 
     /**
+     * The temp-allowlist that is allowed to start FGS from background.
+     */
+    final FgsStartTempAllowList mFgsStartTempAllowList = new FgsStartTempAllowList();
+
+    /**
      * Information about and control over application operations
      */
     final AppOpsService mAppOpsService;
@@ -5511,6 +5516,12 @@ public class ActivityManagerService extends IActivityManager.Stub
         return Arrays.binarySearch(whitelist, appId) >= 0
                 || Arrays.binarySearch(mDeviceIdleTempWhitelist, appId) >= 0
                 || mPendingTempWhitelist.indexOfKey(uid) >= 0;
+    }
+
+    boolean isWhitelistedForFgsStartLocked(int uid) {
+        final int appId = UserHandle.getAppId(uid);
+        return Arrays.binarySearch(mDeviceIdleExceptIdleWhitelist, appId) >= 0
+                || mFgsStartTempAllowList.isAllowed(uid);
     }
 
     /**
@@ -15327,17 +15338,22 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
         }
 
-        tempWhitelistUidLocked(targetUid, duration, tag);
+        tempWhitelistUidLocked(targetUid, duration, tag,
+                BroadcastOptions.TEMPORARY_WHITELIST_TYPE_FOREGROUND_SERVICE_ALLOWED);
     }
 
     /**
      * Whitelists {@code targetUid} to temporarily bypass Power Save mode.
      */
     @GuardedBy("this")
-    void tempWhitelistUidLocked(int targetUid, long duration, String tag) {
+    void tempWhitelistUidLocked(int targetUid, long duration, String tag, int type) {
         mPendingTempWhitelist.put(targetUid, new PendingTempWhitelist(targetUid, duration, tag));
         setUidTempWhitelistStateLocked(targetUid, true);
         mUiHandler.obtainMessage(PUSH_TEMP_WHITELIST_UI_MSG).sendToTarget();
+
+        if (type == BroadcastOptions.TEMPORARY_WHITELIST_TYPE_FOREGROUND_SERVICE_ALLOWED) {
+            mFgsStartTempAllowList.add(targetUid, duration);
+        }
     }
 
     void pushTempWhitelist() {
