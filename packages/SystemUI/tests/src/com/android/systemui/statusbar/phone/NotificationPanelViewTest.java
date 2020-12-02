@@ -270,7 +270,7 @@ public class NotificationPanelViewTest extends SysuiTestCase {
                 mDozeParameters, mCommandQueue, mVibratorHelper,
                 mLatencyTracker, mPowerManager, mAccessibilityManager, 0, mUpdateMonitor,
                 mMetricsLogger, mActivityManager, mConfigurationController,
-                flingAnimationUtilsBuilder, mStatusBarTouchableRegionManager,
+                () -> flingAnimationUtilsBuilder, mStatusBarTouchableRegionManager,
                 mConversationNotificationManager, mMediaHiearchyManager,
                 mBiometricUnlockController, mStatusBarKeyguardViewManager,
                 mNotificationStackScrollLayoutController,
