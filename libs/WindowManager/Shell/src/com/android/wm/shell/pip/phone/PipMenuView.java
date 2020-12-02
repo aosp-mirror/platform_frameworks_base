@@ -23,9 +23,9 @@ import static android.view.accessibility.AccessibilityManager.FLAG_CONTENT_CONTR
 import static android.view.accessibility.AccessibilityManager.FLAG_CONTENT_ICONS;
 import static android.view.accessibility.AccessibilityNodeInfo.ACTION_CLICK;
 
-import static com.android.wm.shell.pip.phone.PipMenuActivityController.MENU_STATE_CLOSE;
-import static com.android.wm.shell.pip.phone.PipMenuActivityController.MENU_STATE_FULL;
-import static com.android.wm.shell.pip.phone.PipMenuActivityController.MENU_STATE_NONE;
+import static com.android.wm.shell.pip.phone.PhonePipMenuController.MENU_STATE_CLOSE;
+import static com.android.wm.shell.pip.phone.PhonePipMenuController.MENU_STATE_FULL;
+import static com.android.wm.shell.pip.phone.PhonePipMenuController.MENU_STATE_NONE;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -105,7 +105,7 @@ public class PipMenuView extends FrameLayout {
     private int mBetweenActionPaddingLand;
 
     private AnimatorSet mMenuContainerAnimator;
-    private PipMenuActivityController mController;
+    private PhonePipMenuController mController;
 
     private ValueAnimator.AnimatorUpdateListener mMenuBgUpdateListener =
             new ValueAnimator.AnimatorUpdateListener() {
@@ -127,7 +127,7 @@ public class PipMenuView extends FrameLayout {
     protected View mTopEndContainer;
     protected PipMenuIconsAlgorithm mPipMenuIconsAlgorithm;
 
-    public PipMenuView(Context context, PipMenuActivityController controller) {
+    public PipMenuView(Context context, PhonePipMenuController controller) {
         super(context, null, 0);
         mContext = context;
         mController = controller;
@@ -182,7 +182,7 @@ public class PipMenuView extends FrameLayout {
             @Override
             public boolean performAccessibilityAction(View host, int action, Bundle args) {
                 if (action == ACTION_CLICK && mMenuState == MENU_STATE_CLOSE) {
-                    mController.onPipShowMenu();
+                    mController.showMenu();
                 }
                 return super.performAccessibilityAction(host, action, args);
             }

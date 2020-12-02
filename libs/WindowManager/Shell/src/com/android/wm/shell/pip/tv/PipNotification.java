@@ -19,12 +19,10 @@ package com.android.wm.shell.pip.tv;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.app.RemoteAction;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.ParceledListSlice;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.media.MediaMetadata;
@@ -95,11 +93,6 @@ public class PipNotification implements PipController.Listener {
 
     @Override
     public void onShowPipMenu() {
-        // no-op.
-    }
-
-    @Override
-    public void onPipMenuActionsChanged(ParceledListSlice<RemoteAction> actions) {
         // no-op.
     }
 

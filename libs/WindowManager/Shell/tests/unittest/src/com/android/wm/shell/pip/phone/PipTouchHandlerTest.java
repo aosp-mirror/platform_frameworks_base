@@ -60,7 +60,7 @@ public class PipTouchHandlerTest extends ShellTestCase {
     private PipTouchHandler mPipTouchHandler;
 
     @Mock
-    private PipMenuActivityController mPipMenuActivityController;
+    private PhonePipMenuController mPhonePipMenuController;
 
     @Mock
     private PipTaskOrganizer mPipTaskOrganizer;
@@ -92,7 +92,7 @@ public class PipTouchHandlerTest extends ShellTestCase {
         mPipBoundsAlgorithm = new PipBoundsAlgorithm(mContext, mPipBoundsState);
         mPipSnapAlgorithm = mPipBoundsAlgorithm.getSnapAlgorithm();
         mPipSnapAlgorithm = new PipSnapAlgorithm();
-        mPipTouchHandler = new PipTouchHandler(mContext, mPipMenuActivityController,
+        mPipTouchHandler = new PipTouchHandler(mContext, mPhonePipMenuController,
                 mPipBoundsAlgorithm, mPipBoundsState, mPipTaskOrganizer,
                 mFloatingContentCoordinator, mPipUiEventLogger);
         mMotionHelper = Mockito.spy(mPipTouchHandler.getMotionHelper());

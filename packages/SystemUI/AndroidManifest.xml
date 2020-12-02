@@ -516,20 +516,6 @@
             android:excludeFromRecents="true"
             android:visibleToInstantApps="true"/>
 
-        <!-- started from PipController -->
-        <activity
-            android:name="com.android.wm.shell.pip.tv.PipMenuActivity"
-            android:permission="com.android.systemui.permission.SELF"
-            android:exported="false"
-            android:theme="@style/PipTheme"
-            android:launchMode="singleTop"
-            android:taskAffinity=""
-            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|locale|layoutDirection"
-            android:resizeableActivity="true"
-            android:supportsPictureInPicture="true"
-            androidprv:alwaysFocusable="true"
-            android:excludeFromRecents="true" />
-
         <!-- started from TvNotificationPanel -->
         <activity
             android:name=".statusbar.tv.notifications.TvNotificationPanelActivity"

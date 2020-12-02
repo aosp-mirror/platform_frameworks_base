@@ -103,7 +103,7 @@ public class PipResizeGestureHandler {
     private InputMonitor mInputMonitor;
     private InputEventReceiver mInputEventReceiver;
     private PipTaskOrganizer mPipTaskOrganizer;
-    private PipMenuActivityController mPipMenuActivityController;
+    private PhonePipMenuController mPhonePipMenuController;
     private PipUiEventLogger mPipUiEventLogger;
 
     private int mCtrlType;
@@ -112,7 +112,7 @@ public class PipResizeGestureHandler {
             PipBoundsState pipBoundsState, PipMotionHelper motionHelper,
             PipTaskOrganizer pipTaskOrganizer, Function<Rect, Rect> movementBoundsSupplier,
             Runnable updateMovementBoundsRunnable, PipUiEventLogger pipUiEventLogger,
-            PipMenuActivityController menuActivityController) {
+            PhonePipMenuController menuActivityController) {
         mContext = context;
         mDisplayId = context.getDisplayId();
         mMainExecutor = context.getMainExecutor();
@@ -122,7 +122,7 @@ public class PipResizeGestureHandler {
         mPipTaskOrganizer = pipTaskOrganizer;
         mMovementBoundsSupplier = movementBoundsSupplier;
         mUpdateMovementBoundsRunnable = updateMovementBoundsRunnable;
-        mPipMenuActivityController = menuActivityController;
+        mPhonePipMenuController = menuActivityController;
         mPipUiEventLogger = pipUiEventLogger;
 
         context.getDisplay().getRealSize(mMaxSize);
@@ -422,8 +422,8 @@ public class PipResizeGestureHandler {
                 mLastDownBounds.set(mPipBoundsState.getBounds());
             }
             if (!currentPipBounds.contains((int) ev.getX(), (int) ev.getY())
-                    && mPipMenuActivityController.isMenuVisible()) {
-                mPipMenuActivityController.hideMenu();
+                    && mPhonePipMenuController.isMenuVisible()) {
+                mPhonePipMenuController.hideMenu();
             }
 
         } else if (mAllowGesture) {
@@ -442,9 +442,9 @@ public class PipResizeGestureHandler {
                         mInputMonitor.pilferPointers();
                     }
                     if (mThresholdCrossed) {
-                        if (mPipMenuActivityController.isMenuVisible()) {
-                            mPipMenuActivityController.hideMenuWithoutResize();
-                            mPipMenuActivityController.hideMenu();
+                        if (mPhonePipMenuController.isMenuVisible()) {
+                            mPhonePipMenuController.hideMenuWithoutResize();
+                            mPhonePipMenuController.hideMenu();
                         }
                         final Rect currentPipBounds = mPipBoundsState.getBounds();
                         mLastResizeBounds.set(TaskResizingAlgorithm.resizeDrag(x, y,
