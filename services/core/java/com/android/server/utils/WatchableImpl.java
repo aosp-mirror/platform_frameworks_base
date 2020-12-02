@@ -19,11 +19,15 @@ package com.android.server.utils;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 
+import com.android.internal.annotations.GuardedBy;
+
 import java.util.ArrayList;
 import java.util.Objects;
 
 /**
- * A concrete implementation of {@link Watchable}
+ * A concrete implementation of {@link Watchable}.  This includes one commonly needed feature:
+ * the Watchable may be sealed, so that it throws an {@link IllegalStateException} if
+ * a change is detected.
  */
 public class WatchableImpl implements Watchable {
     /**
@@ -78,10 +82,37 @@ public class WatchableImpl implements Watchable {
     @Override
     public void dispatchChange(@Nullable Watchable what) {
         synchronized (mObservers) {
+            if (mSealed) {
+                throw new IllegalStateException("attempt to change a sealed object");
+            }
             final int end = mObservers.size();
             for (int i = 0; i < end; i++) {
                 mObservers.get(i).onChange(what);
             }
+        }
+    }
+
+    /**
+     * True if the object is sealed.
+     */
+    @GuardedBy("mObservers")
+    private boolean mSealed = false;
+
+    /**
+     * Freeze the {@link Watchable}.
+     **/
+    public void seal() {
+        synchronized (mObservers) {
+            mSealed = true;
+        }
+    }
+
+    /**
+     * Return the sealed state.
+     */
+    public boolean isFrozen() {
+        synchronized (mObservers) {
+            return mSealed;
         }
     }
 }

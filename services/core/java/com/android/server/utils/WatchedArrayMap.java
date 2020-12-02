@@ -18,9 +18,7 @@ package com.android.server.utils;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-
 import android.util.ArrayMap;
-import android.util.Log;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -31,14 +29,17 @@ import java.util.Set;
  * WatchedArrayMap is an {@link android.util.ArrayMap} that can report changes to itself.  If its
  * values are {@link Watchable} then the WatchedArrayMap will also report changes to the values.
  * A {@link Watchable} is notified only once, no matter how many times it is stored in the array.
+ * @param <K> The key type.
+ * @param <V> The value type.
  */
-public class WatchedArrayMap<K, V> extends WatchableImpl implements Map<K, V> {
+public class WatchedArrayMap<K, V> extends WatchableImpl
+        implements Map<K, V>, Snappable {
 
     // The storage
     private final ArrayMap<K, V> mStorage;
 
     // If true, the array is watching its children
-    private boolean mWatching = false;
+    private volatile boolean mWatching = false;
 
     // The local observer
     private final Watcher mObserver = new Watcher() {
@@ -385,5 +386,39 @@ public class WatchedArrayMap<K, V> extends WatchableImpl implements Map<K, V> {
         unregisterChildIf(result);
         onChanged();
         return result;
+    }
+
+    /**
+     * Create a copy of the array.  If the element is a subclass of Snapper then the copy
+     * contains snapshots of the elements.  Otherwise the copy contains references to the
+     * elements.  The returned snapshot is immutable.
+     * @return A new array whose elements are the elements of <this>.
+     */
+    public WatchedArrayMap<K, V> snapshot() {
+        WatchedArrayMap<K, V> l = new WatchedArrayMap<>();
+        snapshot(l, this);
+        return l;
+    }
+
+    /**
+     * Make the destination a copy of the source.  If the element is a subclass of Snapper then the
+     * copy contains snapshots of the elements.  Otherwise the copy contains references to the
+     * elements.  The destination must be initially empty.  Upon return, the destination is
+     * immutable.
+     * @param dst The destination array.  It must be empty.
+     * @param src The source array.  It is not modified.
+     */
+    public static <K, V> void snapshot(@NonNull WatchedArrayMap<K, V> dst,
+            @NonNull WatchedArrayMap<K, V> src) {
+        if (dst.size() != 0) {
+            throw new IllegalArgumentException("snapshot destination is not empty");
+        }
+        final int end = src.size();
+        for (int i = 0; i < end; i++) {
+            final V val = Snapshots.maybeSnapshot(src.valueAt(i));
+            final K key = src.keyAt(i);
+            dst.put(key, val);
+        }
+        dst.seal();
     }
 }
