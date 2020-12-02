@@ -40,6 +40,7 @@ cc_defaults {
         "src/external/StatsPullerManager.cpp",
         "src/external/TrainInfoPuller.cpp",
         "src/FieldValue.cpp",
+        "src/flags/flags.cpp",
         "src/guardrail/StatsdStats.cpp",
         "src/hash.cpp",
         "src/HashableDimensionKey.cpp",
@@ -92,6 +93,7 @@ cc_defaults {
         "libstatslog_statsd",
         "libsysutils",
         "libutils",
+        "server_configurable_flags",
         "statsd-aidl-ndk_platform",
     ],
     shared_libs: [
@@ -265,6 +267,7 @@ cc_test {
         "tests/e2e/Anomaly_duration_sum_e2e_test.cpp",
         "tests/e2e/Attribution_e2e_test.cpp",
         "tests/e2e/ConfigTtl_e2e_test.cpp",
+        "tests/e2e/ConfigUpdate_e2e_ab_test.cpp",
         "tests/e2e/ConfigUpdate_e2e_test.cpp",
         "tests/e2e/CountMetric_e2e_test.cpp",
         "tests/e2e/DurationMetric_e2e_test.cpp",
