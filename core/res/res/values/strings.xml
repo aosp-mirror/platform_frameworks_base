@@ -434,7 +434,7 @@
     <!-- Attribution for Twilight service. [CHAR LIMIT=NONE]-->
     <string name="twilight_service">Twilight Service</string>
     <!-- Attribution for the Offline LocationTimeZoneProvider service, i.e. the service capable of
-         performing time zone detection using time zone geospacial information held on the device.
+         performing time zone detection using time zone geospatial information held on the device.
          This text is shown in UIs related to an application name to help users and developers to
          understand which sub-unit of an application is requesting permissions and using power.
          [CHAR LIMIT=NONE]-->
