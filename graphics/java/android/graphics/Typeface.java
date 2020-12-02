@@ -81,6 +81,9 @@ public class Typeface {
 
     private static String TAG = "Typeface";
 
+    /** @hide */
+    public static final boolean ENABLE_LAZY_TYPEFACE_INITIALIZATION = false;
+
     private static final NativeAllocationRegistry sRegistry =
             NativeAllocationRegistry.createMalloced(
             Typeface.class.getClassLoader(), nativeGetReleaseFunc());
@@ -1329,7 +1332,9 @@ public class Typeface {
     }
 
     static {
-        loadPreinstalledSystemFontMap();
+        if (!ENABLE_LAZY_TYPEFACE_INITIALIZATION) {
+            loadPreinstalledSystemFontMap();
+        }
     }
 
     @Override

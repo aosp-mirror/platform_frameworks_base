@@ -85,6 +85,7 @@ import android.database.sqlite.SQLiteDebug.DbStats;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.HardwareRenderer;
+import android.graphics.Typeface;
 import android.hardware.display.DisplayManagerGlobal;
 import android.inputmethodservice.InputMethodService;
 import android.media.MediaFrameworkInitializer;
@@ -117,6 +118,7 @@ import android.os.Process;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.SharedMemory;
 import android.os.StatsFrameworkInitializer;
 import android.os.StatsServiceManager;
 import android.os.StrictMode;
@@ -844,6 +846,8 @@ public final class ActivityThread extends ClientTransactionHandler {
 
         long[] disabledCompatChanges;
 
+        SharedMemory mSerializedSystemFontMap;
+
         @Override
         public String toString() {
             return "AppBindData{appInfo=" + appInfo + "}";
@@ -1054,7 +1058,8 @@ public final class ActivityThread extends ClientTransactionHandler {
                 boolean isRestrictedBackupMode, boolean persistent, Configuration config,
                 CompatibilityInfo compatInfo, Map services, Bundle coreSettings,
                 String buildSerial, AutofillOptions autofillOptions,
-                ContentCaptureOptions contentCaptureOptions, long[] disabledCompatChanges) {
+                ContentCaptureOptions contentCaptureOptions, long[] disabledCompatChanges,
+                SharedMemory serializedSystemFontMap) {
             if (services != null) {
                 if (false) {
                     // Test code to make sure the app could see the passed-in services.
@@ -1103,6 +1108,7 @@ public final class ActivityThread extends ClientTransactionHandler {
             data.autofillOptions = autofillOptions;
             data.contentCaptureOptions = contentCaptureOptions;
             data.disabledCompatChanges = disabledCompatChanges;
+            data.mSerializedSystemFontMap = serializedSystemFontMap;
             sendMessage(H.BIND_APPLICATION, data);
         }
 
@@ -6410,6 +6416,13 @@ public final class ActivityThread extends ClientTransactionHandler {
          * Set the LocaleList. This may change once we create the App Context.
          */
         LocaleList.setDefault(data.config.getLocales());
+
+        try {
+            Typeface.setSystemFontMap(data.mSerializedSystemFontMap);
+        } catch (IOException | ErrnoException e) {
+            Slog.e(TAG, "Failed to parse serialized system font map");
+            Typeface.loadPreinstalledSystemFontMap();
+        }
 
         synchronized (mResourcesManager) {
             /*
