@@ -16,6 +16,7 @@
 package com.android.internal.os;
 
 import android.os.BatteryStats;
+import android.os.UidBatteryConsumer;
 import android.util.ArrayMap;
 import android.util.Log;
 
@@ -30,9 +31,9 @@ public class CpuPowerCalculator extends PowerCalculator {
     }
 
     @Override
-    protected void calculateApp(BatterySipper app, BatteryStats.Uid u, long rawRealtimeUs,
-            long rawUptimeUs, int statsType) {
-        app.cpuTimeMs = (u.getUserCpuTimeUs(statsType) + u.getSystemCpuTimeUs(statsType)) / 1000;
+    protected void calculateApp(UidBatteryConsumer.Builder app, BatteryStats.Uid u,
+            long rawRealtimeUs, long rawUptimeUs, int statsType) {
+        long cpuTimeMs = (u.getUserCpuTimeUs(statsType) + u.getSystemCpuTimeUs(statsType)) / 1000;
         final int numClusters = mProfile.getNumCpuClusters();
 
         double cpuPowerMaUs = 0;
@@ -70,47 +71,52 @@ public class CpuPowerCalculator extends PowerCalculator {
                         + numClusters + " actual # " + cpuClusterTimes.length);
             }
         }
-        app.cpuPowerMah = cpuPowerMaUs / MICROSEC_IN_HR;
+        final double cpuPowerMah = cpuPowerMaUs / MICROSEC_IN_HR;
 
-        if (DEBUG && (app.cpuTimeMs != 0 || app.cpuPowerMah != 0)) {
-            Log.d(TAG, "UID " + u.getUid() + ": CPU time=" + app.cpuTimeMs + " ms power="
-                    + formatCharge(app.cpuPowerMah));
+        if (DEBUG && (cpuTimeMs != 0 || cpuPowerMah != 0)) {
+            Log.d(TAG, "UID " + u.getUid() + ": CPU time=" + cpuTimeMs + " ms power="
+                    + formatCharge(cpuPowerMah));
         }
 
         // Keep track of the package with highest drain.
         double highestDrain = 0;
-
-        app.cpuFgTimeMs = 0;
+        String packageWithHighestDrain = null;
+        long cpuFgTimeMs = 0;
         final ArrayMap<String, ? extends BatteryStats.Uid.Proc> processStats = u.getProcessStats();
         final int processStatsCount = processStats.size();
         for (int i = 0; i < processStatsCount; i++) {
             final BatteryStats.Uid.Proc ps = processStats.valueAt(i);
             final String processName = processStats.keyAt(i);
-            app.cpuFgTimeMs += ps.getForegroundTime(statsType);
+            cpuFgTimeMs += ps.getForegroundTime(statsType);
 
             final long costValue = ps.getUserTime(statsType) + ps.getSystemTime(statsType)
                     + ps.getForegroundTime(statsType);
 
             // Each App can have multiple packages and with multiple running processes.
             // Keep track of the package who's process has the highest drain.
-            if (app.packageWithHighestDrain == null ||
-                    app.packageWithHighestDrain.startsWith("*")) {
+            if (packageWithHighestDrain == null || packageWithHighestDrain.startsWith("*")) {
                 highestDrain = costValue;
-                app.packageWithHighestDrain = processName;
+                packageWithHighestDrain = processName;
             } else if (highestDrain < costValue && !processName.startsWith("*")) {
                 highestDrain = costValue;
-                app.packageWithHighestDrain = processName;
+                packageWithHighestDrain = processName;
             }
         }
 
+
         // Ensure that the CPU times make sense.
-        if (app.cpuFgTimeMs > app.cpuTimeMs) {
-            if (DEBUG && app.cpuFgTimeMs > app.cpuTimeMs + 10000) {
+        if (cpuFgTimeMs > cpuTimeMs) {
+            if (DEBUG && cpuFgTimeMs > cpuTimeMs + 10000) {
                 Log.d(TAG, "WARNING! Cputime is more than 10 seconds behind Foreground time");
             }
 
             // Statistics may not have been gathered yet.
-            app.cpuTimeMs = app.cpuFgTimeMs;
+            cpuTimeMs = cpuFgTimeMs;
         }
+
+        app.setConsumedPower(UidBatteryConsumer.POWER_COMPONENT_CPU, cpuPowerMah);
+        app.setUsageDurationMillis(UidBatteryConsumer.TIME_COMPONENT_CPU, cpuTimeMs);
+        app.setUsageDurationMillis(UidBatteryConsumer.TIME_COMPONENT_CPU_FOREGROUND, cpuFgTimeMs);
+        app.setPackageWithHighestDrain(packageWithHighestDrain);
     }
 }
