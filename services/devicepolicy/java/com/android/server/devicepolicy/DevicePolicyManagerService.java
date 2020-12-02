@@ -266,7 +266,6 @@ import android.view.inputmethod.InputMethodInfo;
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.compat.IPlatformCompat;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.notification.SystemNotificationChannels;
@@ -554,7 +553,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     private final LockSettingsInternal mLockSettingsInternal;
     private final DeviceAdminServiceController mDeviceAdminServiceController;
     private final OverlayPackagesProvider mOverlayPackagesProvider;
-    private final IPlatformCompat mIPlatformCompat;
 
     private final DevicePolicyCacheImpl mPolicyCache = new DevicePolicyCacheImpl();
     private final DeviceStateCacheImpl mStateCache = new DeviceStateCacheImpl();
@@ -1166,11 +1164,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return LocalServices.getService(LockSettingsInternal.class);
         }
 
-        IPlatformCompat getIPlatformCompat() {
-            return IPlatformCompat.Stub.asInterface(
-                    ServiceManager.getService(Context.PLATFORM_COMPAT_SERVICE));
-        }
-
         boolean hasUserSetupCompleted(DevicePolicyData userData) {
             return userData.mUserSetupComplete;
         }
@@ -1441,7 +1434,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         mUsageStatsManagerInternal = Objects.requireNonNull(
                 injector.getUsageStatsManagerInternal());
         mIPackageManager = Objects.requireNonNull(injector.getIPackageManager());
-        mIPlatformCompat = Objects.requireNonNull(injector.getIPlatformCompat());
         mIPermissionManager = Objects.requireNonNull(injector.getIPermissionManager());
         mTelephonyManager = Objects.requireNonNull(injector.getTelephonyManager());
 
@@ -3385,13 +3377,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     private boolean passwordQualityInvocationOrderCheckEnabled(String packageName, int userId) {
-        try {
-            return mIPlatformCompat.isChangeEnabledByPackageName(ADMIN_APP_PASSWORD_COMPLEXITY,
-                    packageName, userId);
-        } catch (RemoteException e) {
-            Log.e(LOG_TAG, "Failed to get a response from PLATFORM_COMPAT_SERVICE", e);
-        }
-        return getTargetSdk(packageName, userId) > Build.VERSION_CODES.Q;
+        return mInjector.isChangeEnabled(ADMIN_APP_PASSWORD_COMPLEXITY, packageName, userId);
     }
 
     /**
@@ -10919,16 +10905,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     private boolean isSetSecureSettingLocationModeCheckEnabled(String packageName, int userId) {
-        long ident = mInjector.binderClearCallingIdentity();
-        try {
-            return mIPlatformCompat.isChangeEnabledByPackageName(USE_SET_LOCATION_ENABLED,
-                    packageName, userId);
-        } catch (RemoteException e) {
-            Log.e(LOG_TAG, "Failed to get a response from PLATFORM_COMPAT_SERVICE", e);
-            return getTargetSdk(packageName, userId) > Build.VERSION_CODES.Q;
-        } finally {
-            mInjector.binderRestoreCallingIdentity(ident);
-        }
+        return mInjector.isChangeEnabled(USE_SET_LOCATION_ENABLED, packageName, userId);
     }
 
     @Override
