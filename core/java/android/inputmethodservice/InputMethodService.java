@@ -25,6 +25,7 @@ import static android.inputmethodservice.InputMethodServiceProto.EXTRACTED_TOKEN
 import static android.inputmethodservice.InputMethodServiceProto.EXTRACT_VIEW_HIDDEN;
 import static android.inputmethodservice.InputMethodServiceProto.FULLSCREEN_APPLIED;
 import static android.inputmethodservice.InputMethodServiceProto.INPUT_BINDING;
+import static android.inputmethodservice.InputMethodServiceProto.INPUT_CONNECTION_CALL;
 import static android.inputmethodservice.InputMethodServiceProto.INPUT_EDITOR_INFO;
 import static android.inputmethodservice.InputMethodServiceProto.INPUT_STARTED;
 import static android.inputmethodservice.InputMethodServiceProto.INPUT_VIEW_STARTED;
@@ -742,7 +743,8 @@ public class InputMethodService extends AbstractInputMethodService {
                 return;
             }
             ImeTracing.getInstance().triggerServiceDump(
-                    "InputMethodService.InputMethodImpl#hideSoftInput", InputMethodService.this);
+                    "InputMethodService.InputMethodImpl#hideSoftInput", InputMethodService.this,
+                    null /* icProto */);
             final boolean wasVisible = isInputViewShown();
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMS.hideSoftInput");
 
@@ -798,7 +800,8 @@ public class InputMethodService extends AbstractInputMethodService {
             }
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMS.showSoftInput");
             ImeTracing.getInstance().triggerServiceDump(
-                    "InputMethodService.InputMethodImpl#showSoftInput", InputMethodService.this);
+                    "InputMethodService.InputMethodImpl#showSoftInput", InputMethodService.this,
+                    null /* icProto */);
             final boolean wasVisible = isInputViewShown();
             if (dispatchOnShowInputRequested(flags, false)) {
 
@@ -2182,7 +2185,8 @@ public class InputMethodService extends AbstractInputMethodService {
             return;
         }
 
-        ImeTracing.getInstance().triggerServiceDump("InputMethodService#showWindow", this);
+        ImeTracing.getInstance().triggerServiceDump("InputMethodService#showWindow", this,
+                null /* icProto */);
         Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMS.showWindow");
         mDecorViewWasVisible = mDecorViewVisible;
         mInShowWindow = true;
@@ -2260,7 +2264,8 @@ public class InputMethodService extends AbstractInputMethodService {
      */
     private void applyVisibilityInInsetsConsumerIfNecessary(boolean setVisible) {
         ImeTracing.getInstance().triggerServiceDump(
-                "InputMethodService#applyVisibilityInInsetsConsumerIfNecessary", this);
+                "InputMethodService#applyVisibilityInInsetsConsumerIfNecessary", this,
+                null /* icProto */);
         mPrivOps.applyImeVisibility(setVisible
                 ? mCurShowInputToken : mCurHideInputToken, setVisible);
     }
@@ -2285,7 +2290,8 @@ public class InputMethodService extends AbstractInputMethodService {
 
     public void hideWindow() {
         if (DEBUG) Log.v(TAG, "CALL: hideWindow");
-        ImeTracing.getInstance().triggerServiceDump("InputMethodService#hideWindow", this);
+        ImeTracing.getInstance().triggerServiceDump("InputMethodService#hideWindow", this,
+                null /* icProto */);
         mWindowVisible = false;
         finishViews(false /* finishingInput */);
         if (mDecorViewVisible) {
@@ -2356,7 +2362,8 @@ public class InputMethodService extends AbstractInputMethodService {
     
     void doFinishInput() {
         if (DEBUG) Log.v(TAG, "CALL: doFinishInput");
-        ImeTracing.getInstance().triggerServiceDump("InputMethodService#doFinishInput", this);
+        ImeTracing.getInstance().triggerServiceDump("InputMethodService#doFinishInput", this,
+                null /* icProto */);
         finishViews(true /* finishingInput */);
         if (mInputStarted) {
             mInlineSuggestionSessionController.notifyOnFinishInput();
@@ -2372,7 +2379,8 @@ public class InputMethodService extends AbstractInputMethodService {
         if (!restarting && mInputStarted) {
             doFinishInput();
         }
-        ImeTracing.getInstance().triggerServiceDump("InputMethodService#doStartInput", this);
+        ImeTracing.getInstance().triggerServiceDump("InputMethodService#doStartInput", this,
+                null /* icProto */);
         mInputStarted = true;
         mStartedInputConnection = ic;
         mInputEditorInfo = attribute;
@@ -2531,7 +2539,8 @@ public class InputMethodService extends AbstractInputMethodService {
      * @param flags Provides additional operating flags.
      */
     public void requestHideSelf(int flags) {
-        ImeTracing.getInstance().triggerServiceDump("InputMethodService#requestHideSelf", this);
+        ImeTracing.getInstance().triggerServiceDump("InputMethodService#requestHideSelf", this,
+                null /* icProto */);
         mPrivOps.hideMySoftInput(flags);
     }
 
@@ -2544,7 +2553,8 @@ public class InputMethodService extends AbstractInputMethodService {
      * @param flags Provides additional operating flags.
      */
     public final void requestShowSelf(int flags) {
-        ImeTracing.getInstance().triggerServiceDump("InputMethodService#requestShowSelf", this);
+        ImeTracing.getInstance().triggerServiceDump("InputMethodService#requestShowSelf", this,
+                null /* icProto */);
         mPrivOps.showMySoftInput(flags);
     }
 
@@ -3364,7 +3374,7 @@ public class InputMethodService extends AbstractInputMethodService {
      * @hide
      */
     @Override
-    public final void dumpProtoInternal(ProtoOutputStream proto) {
+    public final void dumpProtoInternal(ProtoOutputStream proto, ProtoOutputStream icProto) {
         final long token = proto.start(InputMethodServiceTraceProto.INPUT_METHOD_SERVICE);
         mWindow.dumpDebug(proto, SOFT_INPUT_WINDOW);
         proto.write(VIEWS_CREATED, mViewsCreated);
@@ -3393,6 +3403,9 @@ public class InputMethodService extends AbstractInputMethodService {
         proto.write(STATUS_ICON, mStatusIcon);
         mTmpInsets.dumpDebug(proto, LAST_COMPUTED_INSETS);
         proto.write(SETTINGS_OBSERVER, Objects.toString(mSettingsObserver));
+        if (icProto != null) {
+            proto.write(INPUT_CONNECTION_CALL, icProto.getBytes());
+        }
         proto.end(token);
     }
 }

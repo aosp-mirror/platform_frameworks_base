@@ -72,6 +72,7 @@ message InputMethodClientsTraceProto {
         optional EditorInfoProto editor_info = 6;
         optional ImeFocusControllerProto ime_focus_controller = 7;
         optional InputConnectionProto input_connection = 8;
+        optional InputConnectionCallProto input_connection_call = 9;
     }
 }
 
