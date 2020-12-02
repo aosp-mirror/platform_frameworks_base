@@ -28,7 +28,7 @@
     <string name="bugreport_finished_pending_screenshot_text" product="tv" msgid="2343263822812016950">"Selecione para partilhar o relatório de erro sem uma captura de ecrã ou aguarde a conclusão da mesma"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"Toque para partilhar o relatório de erro sem uma captura de ecrã ou aguarde a conclusão da mesma"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"Toque para partilhar o relatório de erro sem uma captura de ecrã ou aguarde a conclusão da mesma"</string>
-    <string name="bugreport_confirm" msgid="5917407234515812495">"Os relatórios de erros contêm dados de vários ficheiros de registo do sistema, que podem incluir dados que considere confidenciais (tais como dados de utilização de apps e de localização). Partilhe os relatórios de erros apenas com apps fidedignas e pessoas em quem confia."</string>
+    <string name="bugreport_confirm" msgid="5917407234515812495">"Os relatórios de erros contêm dados de vários ficheiros de registo do sistema, que podem incluir dados que considere confidenciais (tais como dados de utilização de aplicações e de localização). Partilhe os relatórios de erros apenas com aplicações fidedignas e pessoas em quem confia."</string>
     <string name="bugreport_confirm_dont_repeat" msgid="6179945398364357318">"Não mostrar de novo"</string>
     <string name="bugreport_storage_title" msgid="5332488144740527109">"Relatórios de erros"</string>
     <string name="bugreport_unreadable_text" msgid="586517851044535486">"Não foi possível ler o ficheiro de relatório de erro"</string>

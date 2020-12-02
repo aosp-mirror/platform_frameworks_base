@@ -24,32 +24,32 @@ import com.android.systemui.settings.CurrentUserTracker
 import com.android.systemui.statusbar.NotificationLockscreenUserManager
 import java.util.concurrent.Executor
 import javax.inject.Inject
-import javax.inject.Singleton
 
 private const val TAG = "MediaDataFilter"
+private const val DEBUG = true
 
 /**
  * Filters data updates from [MediaDataCombineLatest] based on the current user ID, and handles user
  * switches (removing entries for the previous user, adding back entries for the current user)
  *
- * This is added downstream of [MediaDataManager] since we may still need to handle callbacks from
- * background users (e.g. timeouts) that UI classes should ignore.
- * Instead, UI classes should listen to this so they can stay in sync with the current user.
+ * This is added at the end of the pipeline since we may still need to handle callbacks from
+ * background users (e.g. timeouts).
  */
-@Singleton
 class MediaDataFilter @Inject constructor(
-    private val dataSource: MediaDataCombineLatest,
     private val broadcastDispatcher: BroadcastDispatcher,
     private val mediaResumeListener: MediaResumeListener,
-    private val mediaDataManager: MediaDataManager,
     private val lockscreenUserManager: NotificationLockscreenUserManager,
     @Main private val executor: Executor
 ) : MediaDataManager.Listener {
     private val userTracker: CurrentUserTracker
-    private val listeners: MutableSet<MediaDataManager.Listener> = mutableSetOf()
+    private val _listeners: MutableSet<MediaDataManager.Listener> = mutableSetOf()
+    internal val listeners: Set<MediaDataManager.Listener>
+        get() = _listeners.toSet()
+    internal lateinit var mediaDataManager: MediaDataManager
 
-    // The filtered mediaEntries, which will be a subset of all mediaEntries in MediaDataManager
-    private val mediaEntries: LinkedHashMap<String, MediaData> = LinkedHashMap()
+    private val allEntries: LinkedHashMap<String, MediaData> = LinkedHashMap()
+    // The filtered userEntries, which will be a subset of all userEntries in MediaDataManager
+    private val userEntries: LinkedHashMap<String, MediaData> = LinkedHashMap()
 
     init {
         userTracker = object : CurrentUserTracker(broadcastDispatcher) {
@@ -59,31 +59,34 @@ class MediaDataFilter @Inject constructor(
             }
         }
         userTracker.startTracking()
-        dataSource.addListener(this)
     }
 
     override fun onMediaDataLoaded(key: String, oldKey: String?, data: MediaData) {
+        if (oldKey != null && oldKey != key) {
+            allEntries.remove(oldKey)
+        }
+        allEntries.put(key, data)
+
         if (!lockscreenUserManager.isCurrentProfile(data.userId)) {
             return
         }
 
-        if (oldKey != null) {
-            mediaEntries.remove(oldKey)
+        if (oldKey != null && oldKey != key) {
+            userEntries.remove(oldKey)
         }
-        mediaEntries.put(key, data)
+        userEntries.put(key, data)
 
         // Notify listeners
-        val listenersCopy = listeners.toSet()
-        listenersCopy.forEach {
+        listeners.forEach {
             it.onMediaDataLoaded(key, oldKey, data)
         }
     }
 
     override fun onMediaDataRemoved(key: String) {
-        mediaEntries.remove(key)?.let {
+        allEntries.remove(key)
+        userEntries.remove(key)?.let {
             // Only notify listeners if something actually changed
-            val listenersCopy = listeners.toSet()
-            listenersCopy.forEach {
+            listeners.forEach {
                 it.onMediaDataRemoved(key)
             }
         }
@@ -92,22 +95,22 @@ class MediaDataFilter @Inject constructor(
     @VisibleForTesting
     internal fun handleUserSwitched(id: Int) {
         // If the user changes, remove all current MediaData objects and inform listeners
-        val listenersCopy = listeners.toSet()
-        val keyCopy = mediaEntries.keys.toMutableList()
+        val listenersCopy = listeners
+        val keyCopy = userEntries.keys.toMutableList()
         // Clear the list first, to make sure callbacks from listeners if we have any entries
         // are up to date
-        mediaEntries.clear()
+        userEntries.clear()
         keyCopy.forEach {
-            Log.d(TAG, "Removing $it after user change")
+            if (DEBUG) Log.d(TAG, "Removing $it after user change")
             listenersCopy.forEach { listener ->
                 listener.onMediaDataRemoved(it)
             }
         }
 
-        dataSource.getData().forEach { (key, data) ->
+        allEntries.forEach { (key, data) ->
             if (lockscreenUserManager.isCurrentProfile(data.userId)) {
-                Log.d(TAG, "Re-adding $key after user change")
-                mediaEntries.put(key, data)
+                if (DEBUG) Log.d(TAG, "Re-adding $key after user change")
+                userEntries.put(key, data)
                 listenersCopy.forEach { listener ->
                     listener.onMediaDataLoaded(key, null, data)
                 }
@@ -119,7 +122,8 @@ class MediaDataFilter @Inject constructor(
      * Invoked when the user has dismissed the media carousel
      */
     fun onSwipeToDismiss() {
-        val mediaKeys = mediaEntries.keys.toSet()
+        if (DEBUG) Log.d(TAG, "Media carousel swiped away")
+        val mediaKeys = userEntries.keys.toSet()
         mediaKeys.forEach {
             mediaDataManager.setTimedOut(it, timedOut = true)
         }
@@ -128,26 +132,20 @@ class MediaDataFilter @Inject constructor(
     /**
      * Are there any media notifications active?
      */
-    fun hasActiveMedia() = mediaEntries.any { it.value.active }
+    fun hasActiveMedia() = userEntries.any { it.value.active }
 
     /**
      * Are there any media entries we should display?
-     * If resumption is enabled, this will include inactive players
-     * If resumption is disabled, we only want to show active players
      */
-    fun hasAnyMedia() = if (mediaResumeListener.isResumptionEnabled()) {
-        mediaEntries.isNotEmpty()
-    } else {
-        hasActiveMedia()
-    }
+    fun hasAnyMedia() = userEntries.isNotEmpty()
 
     /**
      * Add a listener for filtered [MediaData] changes
      */
-    fun addListener(listener: MediaDataManager.Listener) = listeners.add(listener)
+    fun addListener(listener: MediaDataManager.Listener) = _listeners.add(listener)
 
     /**
      * Remove a listener that was registered with addListener
      */
-    fun removeListener(listener: MediaDataManager.Listener) = listeners.remove(listener)
+    fun removeListener(listener: MediaDataManager.Listener) = _listeners.remove(listener)
 }

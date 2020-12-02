@@ -186,4 +186,19 @@ public class TaskTests extends WindowTestsBase {
             assertTrue(r.finishing);
         });
     }
+
+    @Test
+    public void testSwitchUser() {
+        final Task rootTask = createTaskStackOnDisplay(mDisplayContent);
+        final Task childTask = createTaskInStack((ActivityStack) rootTask, 0 /* userId */);
+        final Task leafTask1 = createTaskInStack((ActivityStack) childTask, 10 /* userId */);
+        final Task leafTask2 = createTaskInStack((ActivityStack) childTask, 0 /* userId */);
+        assertEquals(1, rootTask.getChildCount());
+        assertEquals(leafTask2, childTask.getTopChild());
+
+        doReturn(true).when(leafTask1).showToCurrentUser();
+        rootTask.switchUser(10);
+        assertEquals(1, rootTask.getChildCount());
+        assertEquals(leafTask1, childTask.getTopChild());
+    }
 }

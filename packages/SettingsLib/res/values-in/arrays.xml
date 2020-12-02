@@ -31,7 +31,7 @@
     <item msgid="7852381437933824454">"Memutus sambungan..."</item>
     <item msgid="5046795712175415059">"Sambungan terputus"</item>
     <item msgid="2473654476624070462">"Gagal"</item>
-    <item msgid="9146847076036105115">"Diblokir"</item>
+    <item msgid="9146847076036105115">"Dicekal"</item>
     <item msgid="4543924085816294893">"Menghindari sambungan buruk untuk sementara"</item>
   </string-array>
   <string-array name="wifi_status_with_ssid">

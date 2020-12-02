@@ -21,6 +21,7 @@ import android.util.Log
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.android.systemui.controls.ControlInterface
+import com.android.systemui.controls.CustomIconCache
 import com.android.systemui.controls.controller.ControlInfo
 import java.util.Collections
 
@@ -35,6 +36,7 @@ import java.util.Collections
  * @property favoritesModelCallback callback to notify on first change and empty favorites
  */
 class FavoritesModel(
+    private val customIconCache: CustomIconCache,
     private val componentName: ComponentName,
     favorites: List<ControlInfo>,
     private val favoritesModelCallback: FavoritesModelCallback
@@ -83,7 +85,7 @@ class FavoritesModel(
         }
 
     override val elements: List<ElementWrapper> = favorites.map {
-        ControlInfoWrapper(componentName, it, true)
+        ControlInfoWrapper(componentName, it, true, customIconCache::retrieve)
     } + DividerWrapper()
 
     /**

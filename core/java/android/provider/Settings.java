@@ -8942,6 +8942,13 @@ public final class Settings {
         public static final int ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW = 0x2;
 
         /**
+         * Whether the Adaptive connectivity option is enabled.
+         *
+         * @hide
+         */
+        public static final String ADAPTIVE_CONNECTIVITY_ENABLED = "adaptive_connectivity_enabled";
+
+        /**
          * Keys we no longer back up under the current schema, but want to continue to
          * process when restoring historical backup datasets.
          *
@@ -8955,6 +8962,22 @@ public final class Settings {
                 ENABLED_NOTIFICATION_ASSISTANT,
                 ENABLED_NOTIFICATION_POLICY_ACCESS_PACKAGES
         };
+
+        /**
+         * How long Assistant handles have enabled in milliseconds.
+         *
+         * @hide
+         */
+        public static final String ASSIST_HANDLES_LEARNING_TIME_ELAPSED_MILLIS =
+                "reminder_exp_learning_time_elapsed";
+
+        /**
+         * How many times the Assistant has been triggered using the touch gesture.
+         *
+         * @hide
+         */
+        public static final String ASSIST_HANDLES_LEARNING_EVENT_COUNT =
+                "reminder_exp_learning_event_count";
 
         /**
          * These entries are considered common between the personal and the managed profile,
@@ -12263,63 +12286,71 @@ public final class Settings {
                 "show_angle_in_use_dialog_box";
 
         /**
-         * Game Driver global preference for all Apps.
+         * Updatable driver global preference for all Apps.
          * 0 = Default
-         * 1 = All Apps use Game Driver
-         * 2 = All Apps use system graphics driver
+         * 1 = All Apps use updatable production driver
+         * 2 = All apps use updatable prerelease driver
+         * 3 = All Apps use system graphics driver
          * @hide
          */
-        public static final String GAME_DRIVER_ALL_APPS = "game_driver_all_apps";
+        public static final String UPDATABLE_DRIVER_ALL_APPS = "updatable_driver_all_apps";
 
         /**
-         * List of Apps selected to use Game Driver.
+         * List of Apps selected to use updatable production driver.
          * i.e. <pkg1>,<pkg2>,...,<pkgN>
          * @hide
          */
-        public static final String GAME_DRIVER_OPT_IN_APPS = "game_driver_opt_in_apps";
+        public static final String UPDATABLE_DRIVER_PRODUCTION_OPT_IN_APPS =
+                "updatable_driver_production_opt_in_apps";
 
         /**
-         * List of Apps selected to use prerelease Game Driver.
+         * List of Apps selected to use updatable prerelease driver.
          * i.e. <pkg1>,<pkg2>,...,<pkgN>
          * @hide
          */
-        public static final String GAME_DRIVER_PRERELEASE_OPT_IN_APPS =
-                "game_driver_prerelease_opt_in_apps";
+        public static final String UPDATABLE_DRIVER_PRERELEASE_OPT_IN_APPS =
+                "updatable_driver_prerelease_opt_in_apps";
 
         /**
-         * List of Apps selected not to use Game Driver.
+         * List of Apps selected not to use updatable production driver.
          * i.e. <pkg1>,<pkg2>,...,<pkgN>
          * @hide
          */
-        public static final String GAME_DRIVER_OPT_OUT_APPS = "game_driver_opt_out_apps";
+        public static final String UPDATABLE_DRIVER_PRODUCTION_OPT_OUT_APPS =
+                "updatable_driver_production_opt_out_apps";
 
         /**
-         * Apps on the denylist that are forbidden to use Game Driver.
+         * Apps on the denylist that are forbidden to use updatable production driver.
          * @hide
          */
-        public static final String GAME_DRIVER_DENYLIST = "game_driver_denylist";
+        public static final String UPDATABLE_DRIVER_PRODUCTION_DENYLIST =
+                "updatable_driver_production_denylist";
 
         /**
-         * List of denylists, each denylist is a denylist for a specific version of Game Driver.
+         * List of denylists, each denylist is a denylist for a specific version of
+         * updatable production driver.
          * @hide
          */
-        public static final String GAME_DRIVER_DENYLISTS = "game_driver_denylists";
+        public static final String UPDATABLE_DRIVER_PRODUCTION_DENYLISTS =
+                "updatable_driver_production_denylists";
 
         /**
-         * Apps on the allowlist that are allowed to use Game Driver.
+         * Apps on the allowlist that are allowed to use updatable production driver.
          * The string is a list of application package names, seperated by comma.
          * i.e. <apk1>,<apk2>,...,<apkN>
          * @hide
          */
-        public static final String GAME_DRIVER_ALLOWLIST = "game_driver_allowlist";
+        public static final String UPDATABLE_DRIVER_PRODUCTION_ALLOWLIST =
+                "updatable_driver_production_allowlist";
 
         /**
-         * List of libraries in sphal accessible by Game Driver
+         * List of libraries in sphal accessible by updatable driver
          * The string is a list of library names, separated by colon.
          * i.e. <lib1>:<lib2>:...:<libN>
          * @hide
          */
-        public static final String GAME_DRIVER_SPHAL_LIBRARIES = "game_driver_sphal_libraries";
+        public static final String UPDATABLE_DRIVER_SPHAL_LIBRARIES =
+                "updatable_driver_sphal_libraries";
 
         /**
          * Ordered GPU debug layer list for Vulkan

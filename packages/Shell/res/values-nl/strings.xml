@@ -30,7 +30,7 @@
     <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"Tik om je bugrapport te delen zonder screenshot of wacht tot het screenshot is voltooid"</string>
     <string name="bugreport_confirm" msgid="5917407234515812495">"Bugrapporten bevatten gegevens uit de verschillende logbestanden van het systeem, die gegevens kunnen bevatten die je als gevoelig beschouwt (zoals gegevens met betrekking tot app-gebruik en locatie). Deel bugrapporten alleen met mensen en apps die je vertrouwt."</string>
     <string name="bugreport_confirm_dont_repeat" msgid="6179945398364357318">"Niet opnieuw weergeven"</string>
-    <string name="bugreport_storage_title" msgid="5332488144740527109">"Bugrapporten"</string>
+    <string name="bugreport_storage_title" msgid="5332488144740527109">"Foutenrapporten"</string>
     <string name="bugreport_unreadable_text" msgid="586517851044535486">"Bestand met bugrapport kan niet worden gelezen"</string>
     <string name="bugreport_add_details_to_zip_failed" msgid="1302931926486712371">"Kan details van bugrapport niet toevoegen aan zip-bestand"</string>
     <string name="bugreport_unnamed" msgid="2800582406842092709">"naamloos"</string>

@@ -130,14 +130,16 @@ public class DisplayAdjustments {
         w = metrics.noncompatWidthPixels;
         metrics.noncompatWidthPixels = metrics.noncompatHeightPixels;
         metrics.noncompatHeightPixels = w;
+    }
 
-        float x = metrics.xdpi;
-        metrics.xdpi = metrics.ydpi;
-        metrics.ydpi = x;
-
-        x = metrics.noncompatXdpi;
-        metrics.noncompatXdpi = metrics.noncompatYdpi;
-        metrics.noncompatYdpi = x;
+    /** Adjusts global display metrics that is available to applications. */
+    public void adjustGlobalAppMetrics(@NonNull DisplayMetrics metrics) {
+        final FixedRotationAdjustments rotationAdjustments = mFixedRotationAdjustments;
+        if (rotationAdjustments == null) {
+            return;
+        }
+        metrics.noncompatWidthPixels = metrics.widthPixels = rotationAdjustments.mAppWidth;
+        metrics.noncompatHeightPixels = metrics.heightPixels = rotationAdjustments.mAppHeight;
     }
 
     /** Returns the adjusted cutout if available. Otherwise the original cutout is returned. */
@@ -178,7 +180,7 @@ public class DisplayAdjustments {
 
     /**
      * An application can be launched in different rotation than the real display. This class
-     * provides the information to adjust the values returned by {@link #Display}.
+     * provides the information to adjust the values returned by {@link Display}.
      * @hide
      */
     public static class FixedRotationAdjustments implements Parcelable {
@@ -186,12 +188,24 @@ public class DisplayAdjustments {
         @Surface.Rotation
         final int mRotation;
 
+        /**
+         * The rotated {@link DisplayInfo#appWidth}. The value cannot be simply swapped according
+         * to rotation because it minus the region of screen decorations.
+         */
+        final int mAppWidth;
+
+        /** The rotated {@link DisplayInfo#appHeight}. */
+        final int mAppHeight;
+
         /** Non-null if the device has cutout. */
         @Nullable
         final DisplayCutout mRotatedDisplayCutout;
 
-        public FixedRotationAdjustments(@Surface.Rotation int rotation, DisplayCutout cutout) {
+        public FixedRotationAdjustments(@Surface.Rotation int rotation, int appWidth, int appHeight,
+                DisplayCutout cutout) {
             mRotation = rotation;
+            mAppWidth = appWidth;
+            mAppHeight = appHeight;
             mRotatedDisplayCutout = cutout;
         }
 
@@ -199,6 +213,8 @@ public class DisplayAdjustments {
         public int hashCode() {
             int hash = 17;
             hash = hash * 31 + mRotation;
+            hash = hash * 31 + mAppWidth;
+            hash = hash * 31 + mAppHeight;
             hash = hash * 31 + Objects.hashCode(mRotatedDisplayCutout);
             return hash;
         }
@@ -210,12 +226,14 @@ public class DisplayAdjustments {
             }
             final FixedRotationAdjustments other = (FixedRotationAdjustments) o;
             return mRotation == other.mRotation
+                    && mAppWidth == other.mAppWidth && mAppHeight == other.mAppHeight
                     && Objects.equals(mRotatedDisplayCutout, other.mRotatedDisplayCutout);
         }
 
         @Override
         public String toString() {
             return "FixedRotationAdjustments{rotation=" + Surface.rotationToString(mRotation)
+                    + " appWidth=" + mAppWidth + " appHeight=" + mAppHeight
                     + " cutout=" + mRotatedDisplayCutout + "}";
         }
 
@@ -227,12 +245,16 @@ public class DisplayAdjustments {
         @Override
         public void writeToParcel(Parcel dest, int flags) {
             dest.writeInt(mRotation);
+            dest.writeInt(mAppWidth);
+            dest.writeInt(mAppHeight);
             dest.writeTypedObject(
                     new DisplayCutout.ParcelableWrapper(mRotatedDisplayCutout), flags);
         }
 
         private FixedRotationAdjustments(Parcel in) {
             mRotation = in.readInt();
+            mAppWidth = in.readInt();
+            mAppHeight = in.readInt();
             final DisplayCutout.ParcelableWrapper cutoutWrapper =
                     in.readTypedObject(DisplayCutout.ParcelableWrapper.CREATOR);
             mRotatedDisplayCutout = cutoutWrapper != null ? cutoutWrapper.get() : null;

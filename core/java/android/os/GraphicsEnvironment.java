@@ -64,10 +64,11 @@ public class GraphicsEnvironment {
     private static final String SYSTEM_DRIVER_NAME = "system";
     private static final String SYSTEM_DRIVER_VERSION_NAME = "";
     private static final long SYSTEM_DRIVER_VERSION_CODE = 0;
-    private static final String PROPERTY_GFX_DRIVER = "ro.gfx.driver.0";
+    private static final String PROPERTY_GFX_DRIVER_PRODUCTION = "ro.gfx.driver.0";
     private static final String PROPERTY_GFX_DRIVER_PRERELEASE = "ro.gfx.driver.1";
     private static final String PROPERTY_GFX_DRIVER_BUILD_TIME = "ro.gfx.driver_build_time";
-    private static final String METADATA_DRIVER_BUILD_TIME = "com.android.gamedriver.build_time";
+    private static final String METADATA_DRIVER_BUILD_TIME =
+            "com.android.graphics.driver.build_time";
     private static final String METADATA_DEVELOPER_DRIVER_ENABLE =
             "com.android.graphics.developerdriver.enable";
     private static final String METADATA_INJECT_LAYERS_ENABLE =
@@ -78,20 +79,20 @@ public class GraphicsEnvironment {
     private static final String ACTION_ANGLE_FOR_ANDROID_TOAST_MESSAGE =
             "android.app.action.ANGLE_FOR_ANDROID_TOAST_MESSAGE";
     private static final String INTENT_KEY_A4A_TOAST_MESSAGE = "A4A Toast Message";
-    private static final String GAME_DRIVER_ALLOWLIST_ALL = "*";
-    private static final String GAME_DRIVER_SPHAL_LIBRARIES_FILENAME = "sphal_libraries.txt";
+    private static final String UPDATABLE_DRIVER_ALLOWLIST_ALL = "*";
+    private static final String UPDATABLE_DRIVER_SPHAL_LIBRARIES_FILENAME = "sphal_libraries.txt";
     private static final int VULKAN_1_0 = 0x00400000;
     private static final int VULKAN_1_1 = 0x00401000;
 
-    // GAME_DRIVER_ALL_APPS
+    // UPDATABLE_DRIVER_ALL_APPS
     // 0: Default (Invalid values fallback to default as well)
-    // 1: All apps use Game Driver
-    // 2: All apps use Prerelease Driver
+    // 1: All apps use updatable production driver
+    // 2: All apps use updatable prerelease driver
     // 3: All apps use system graphics driver
-    private static final int GAME_DRIVER_GLOBAL_OPT_IN_DEFAULT = 0;
-    private static final int GAME_DRIVER_GLOBAL_OPT_IN_GAME_DRIVER = 1;
-    private static final int GAME_DRIVER_GLOBAL_OPT_IN_PRERELEASE_DRIVER = 2;
-    private static final int GAME_DRIVER_GLOBAL_OPT_IN_OFF = 3;
+    private static final int UPDATABLE_DRIVER_GLOBAL_OPT_IN_DEFAULT = 0;
+    private static final int UPDATABLE_DRIVER_GLOBAL_OPT_IN_PRODUCTION_DRIVER = 1;
+    private static final int UPDATABLE_DRIVER_GLOBAL_OPT_IN_PRERELEASE_DRIVER = 2;
+    private static final int UPDATABLE_DRIVER_GLOBAL_OPT_IN_OFF = 3;
 
     private ClassLoader mClassLoader;
     private String mLibrarySearchPaths;
@@ -722,14 +723,17 @@ public class GraphicsEnvironment {
      * Return the driver package name to use. Return null for system driver.
      */
     private static String chooseDriverInternal(Bundle coreSettings, ApplicationInfo ai) {
-        final String gameDriver = SystemProperties.get(PROPERTY_GFX_DRIVER);
-        final boolean hasGameDriver = gameDriver != null && !gameDriver.isEmpty();
+        final String productionDriver = SystemProperties.get(PROPERTY_GFX_DRIVER_PRODUCTION);
+        final boolean hasProductionDriver = productionDriver != null && !productionDriver.isEmpty();
 
         final String prereleaseDriver = SystemProperties.get(PROPERTY_GFX_DRIVER_PRERELEASE);
         final boolean hasPrereleaseDriver = prereleaseDriver != null && !prereleaseDriver.isEmpty();
 
-        if (!hasGameDriver && !hasPrereleaseDriver) {
-            if (DEBUG) Log.v(TAG, "Neither Game Driver nor prerelease driver is supported.");
+        if (!hasProductionDriver && !hasPrereleaseDriver) {
+            if (DEBUG) {
+                Log.v(TAG,
+                        "Neither updatable production driver nor prerelease driver is supported.");
+            }
             return null;
         }
 
@@ -745,56 +749,59 @@ public class GraphicsEnvironment {
                 (ai.metaData != null && ai.metaData.getBoolean(METADATA_DEVELOPER_DRIVER_ENABLE))
                 || isDebuggable();
 
-        // Priority for Game Driver settings global on confliction (Higher priority comes first):
-        // 1. GAME_DRIVER_ALL_APPS
-        // 2. GAME_DRIVER_OPT_OUT_APPS
-        // 3. GAME_DRIVER_PRERELEASE_OPT_IN_APPS
-        // 4. GAME_DRIVER_OPT_IN_APPS
-        // 5. GAME_DRIVER_DENYLIST
-        // 6. GAME_DRIVER_ALLOWLIST
-        switch (coreSettings.getInt(Settings.Global.GAME_DRIVER_ALL_APPS, 0)) {
-            case GAME_DRIVER_GLOBAL_OPT_IN_OFF:
-                if (DEBUG) Log.v(TAG, "Game Driver is turned off on this device.");
+        // Priority of updatable driver settings on confliction (Higher priority comes first):
+        // 1. UPDATABLE_DRIVER_ALL_APPS
+        // 2. UPDATABLE_DRIVER_PRODUCTION_OPT_OUT_APPS
+        // 3. UPDATABLE_DRIVER_PRERELEASE_OPT_IN_APPS
+        // 4. UPDATABLE_DRIVER_PRODUCTION_OPT_IN_APPS
+        // 5. UPDATABLE_DRIVER_PRODUCTION_DENYLIST
+        // 6. UPDATABLE_DRIVER_PRODUCTION_ALLOWLIST
+        switch (coreSettings.getInt(Settings.Global.UPDATABLE_DRIVER_ALL_APPS, 0)) {
+            case UPDATABLE_DRIVER_GLOBAL_OPT_IN_OFF:
+                if (DEBUG) Log.v(TAG, "updatable driver is turned off on this device.");
                 return null;
-            case GAME_DRIVER_GLOBAL_OPT_IN_GAME_DRIVER:
-                if (DEBUG) Log.v(TAG, "All apps opt in to use Game Driver.");
-                return hasGameDriver ? gameDriver : null;
-            case GAME_DRIVER_GLOBAL_OPT_IN_PRERELEASE_DRIVER:
-                if (DEBUG) Log.v(TAG, "All apps opt in to use prerelease driver.");
+            case UPDATABLE_DRIVER_GLOBAL_OPT_IN_PRODUCTION_DRIVER:
+                if (DEBUG) Log.v(TAG, "All apps opt in to use updatable production driver.");
+                return hasProductionDriver ? productionDriver : null;
+            case UPDATABLE_DRIVER_GLOBAL_OPT_IN_PRERELEASE_DRIVER:
+                if (DEBUG) Log.v(TAG, "All apps opt in to use updatable prerelease driver.");
                 return hasPrereleaseDriver && enablePrereleaseDriver ? prereleaseDriver : null;
-            case GAME_DRIVER_GLOBAL_OPT_IN_DEFAULT:
+            case UPDATABLE_DRIVER_GLOBAL_OPT_IN_DEFAULT:
             default:
                 break;
         }
 
         final String appPackageName = ai.packageName;
-        if (getGlobalSettingsString(null, coreSettings, Settings.Global.GAME_DRIVER_OPT_OUT_APPS)
+        if (getGlobalSettingsString(null, coreSettings,
+                                    Settings.Global.UPDATABLE_DRIVER_PRODUCTION_OPT_OUT_APPS)
                         .contains(appPackageName)) {
-            if (DEBUG) Log.v(TAG, "App opts out for Game Driver.");
+            if (DEBUG) Log.v(TAG, "App opts out for updatable production driver.");
             return null;
         }
 
         if (getGlobalSettingsString(
-                    null, coreSettings, Settings.Global.GAME_DRIVER_PRERELEASE_OPT_IN_APPS)
+                    null, coreSettings, Settings.Global.UPDATABLE_DRIVER_PRERELEASE_OPT_IN_APPS)
                         .contains(appPackageName)) {
-            if (DEBUG) Log.v(TAG, "App opts in for prerelease Game Driver.");
+            if (DEBUG) Log.v(TAG, "App opts in for updatable prerelease driver.");
             return hasPrereleaseDriver && enablePrereleaseDriver ? prereleaseDriver : null;
         }
 
-        // Early return here since the rest logic is only for Game Driver.
-        if (!hasGameDriver) {
-            if (DEBUG) Log.v(TAG, "Game Driver is not supported on the device.");
+        // Early return here since the rest logic is only for updatable production Driver.
+        if (!hasProductionDriver) {
+            if (DEBUG) Log.v(TAG, "Updatable production driver is not supported on the device.");
             return null;
         }
 
         final boolean isOptIn =
-                getGlobalSettingsString(null, coreSettings, Settings.Global.GAME_DRIVER_OPT_IN_APPS)
+                getGlobalSettingsString(null, coreSettings,
+                                        Settings.Global.UPDATABLE_DRIVER_PRODUCTION_OPT_IN_APPS)
                         .contains(appPackageName);
         final List<String> allowlist =
-                getGlobalSettingsString(null, coreSettings, Settings.Global.GAME_DRIVER_ALLOWLIST);
-        if (!isOptIn && allowlist.indexOf(GAME_DRIVER_ALLOWLIST_ALL) != 0
+                getGlobalSettingsString(null, coreSettings,
+                                        Settings.Global.UPDATABLE_DRIVER_PRODUCTION_ALLOWLIST);
+        if (!isOptIn && allowlist.indexOf(UPDATABLE_DRIVER_ALLOWLIST_ALL) != 0
                 && !allowlist.contains(appPackageName)) {
-            if (DEBUG) Log.v(TAG, "App is not on the allowlist for Game Driver.");
+            if (DEBUG) Log.v(TAG, "App is not on the allowlist for updatable production driver.");
             return null;
         }
 
@@ -802,13 +809,13 @@ public class GraphicsEnvironment {
         // terminate early if it's on the denylist and fallback to system driver.
         if (!isOptIn
                 && getGlobalSettingsString(
-                        null, coreSettings, Settings.Global.GAME_DRIVER_DENYLIST)
+                        null, coreSettings, Settings.Global.UPDATABLE_DRIVER_PRODUCTION_DENYLIST)
                            .contains(appPackageName)) {
-            if (DEBUG) Log.v(TAG, "App is on the denylist for Game Driver.");
+            if (DEBUG) Log.v(TAG, "App is on the denylist for updatable production driver.");
             return null;
         }
 
-        return gameDriver;
+        return productionDriver;
     }
 
     /**
@@ -871,9 +878,10 @@ public class GraphicsEnvironment {
             throw new NullPointerException("apk's meta-data cannot be null");
         }
 
-        final String driverBuildTime = driverAppInfo.metaData.getString(METADATA_DRIVER_BUILD_TIME);
-        if (driverBuildTime == null || driverBuildTime.isEmpty()) {
-            throw new IllegalArgumentException("com.android.gamedriver.build_time is not set");
+        String driverBuildTime = driverAppInfo.metaData.getString(METADATA_DRIVER_BUILD_TIME);
+        if (driverBuildTime == null || driverBuildTime.length() <= 1) {
+            Log.v(TAG, "com.android.graphics.driver.build_time is not set");
+            driverBuildTime = "L0";
         }
         // driver_build_time in the meta-data is in "L<Unix epoch timestamp>" format. e.g. L123456.
         // Long.parseLong will throw if the meta-data "driver_build_time" is not set properly.
@@ -901,7 +909,7 @@ public class GraphicsEnvironment {
             final Context driverContext =
                     context.createPackageContext(driverPackageName, Context.CONTEXT_RESTRICTED);
             final BufferedReader reader = new BufferedReader(new InputStreamReader(
-                    driverContext.getAssets().open(GAME_DRIVER_SPHAL_LIBRARIES_FILENAME)));
+                    driverContext.getAssets().open(UPDATABLE_DRIVER_SPHAL_LIBRARIES_FILENAME)));
             final ArrayList<String> assetStrings = new ArrayList<>();
             for (String assetString; (assetString = reader.readLine()) != null;) {
                 assetStrings.add(assetString);
@@ -913,7 +921,7 @@ public class GraphicsEnvironment {
             }
         } catch (IOException e) {
             if (DEBUG) {
-                Log.w(TAG, "Failed to load '" + GAME_DRIVER_SPHAL_LIBRARIES_FILENAME + "'");
+                Log.w(TAG, "Failed to load '" + UPDATABLE_DRIVER_SPHAL_LIBRARIES_FILENAME + "'");
             }
         }
         return "";

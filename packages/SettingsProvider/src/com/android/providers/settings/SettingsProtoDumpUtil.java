@@ -773,29 +773,29 @@ class SettingsProtoDumpUtil {
                 Settings.Global.GPU_DEBUG_LAYERS_GLES,
                 GlobalSettingsProto.Gpu.DEBUG_LAYERS_GLES);
         dumpSetting(s, p,
-                Settings.Global.GAME_DRIVER_ALL_APPS,
-                GlobalSettingsProto.Gpu.GAME_DRIVER_ALL_APPS);
+                Settings.Global.UPDATABLE_DRIVER_ALL_APPS,
+                GlobalSettingsProto.Gpu.UPDATABLE_DRIVER_ALL_APPS);
         dumpSetting(s, p,
-                Settings.Global.GAME_DRIVER_OPT_IN_APPS,
-                GlobalSettingsProto.Gpu.GAME_DRIVER_OPT_IN_APPS);
+                Settings.Global.UPDATABLE_DRIVER_PRODUCTION_OPT_IN_APPS,
+                GlobalSettingsProto.Gpu.UPDATABLE_DRIVER_PRODUCTION_OPT_IN_APPS);
         dumpSetting(s, p,
-                Settings.Global.GAME_DRIVER_PRERELEASE_OPT_IN_APPS,
-                GlobalSettingsProto.Gpu.GAME_DRIVER_PRERELEASE_OPT_IN_APPS);
+                Settings.Global.UPDATABLE_DRIVER_PRERELEASE_OPT_IN_APPS,
+                GlobalSettingsProto.Gpu.UPDATABLE_DRIVER_PRERELEASE_OPT_IN_APPS);
         dumpSetting(s, p,
-                Settings.Global.GAME_DRIVER_OPT_OUT_APPS,
-                GlobalSettingsProto.Gpu.GAME_DRIVER_OPT_OUT_APPS);
+                Settings.Global.UPDATABLE_DRIVER_PRODUCTION_OPT_OUT_APPS,
+                GlobalSettingsProto.Gpu.UPDATABLE_DRIVER_PRODUCTION_OPT_OUT_APPS);
         dumpSetting(s, p,
-                Settings.Global.GAME_DRIVER_DENYLIST,
-                GlobalSettingsProto.Gpu.GAME_DRIVER_DENYLIST);
+                Settings.Global.UPDATABLE_DRIVER_PRODUCTION_DENYLIST,
+                GlobalSettingsProto.Gpu.UPDATABLE_DRIVER_PRODUCTION_DENYLIST);
         dumpSetting(s, p,
-                Settings.Global.GAME_DRIVER_ALLOWLIST,
-                GlobalSettingsProto.Gpu.GAME_DRIVER_ALLOWLIST);
+                Settings.Global.UPDATABLE_DRIVER_PRODUCTION_ALLOWLIST,
+                GlobalSettingsProto.Gpu.UPDATABLE_DRIVER_PRODUCTION_ALLOWLIST);
         dumpSetting(s, p,
-                Settings.Global.GAME_DRIVER_DENYLISTS,
-                GlobalSettingsProto.Gpu.GAME_DRIVER_DENYLISTS);
+                Settings.Global.UPDATABLE_DRIVER_PRODUCTION_DENYLISTS,
+                GlobalSettingsProto.Gpu.UPDATABLE_DRIVER_PRODUCTION_DENYLISTS);
         dumpSetting(s, p,
-                Settings.Global.GAME_DRIVER_SPHAL_LIBRARIES,
-                GlobalSettingsProto.Gpu.GAME_DRIVER_SPHAL_LIBRARIES);
+                Settings.Global.UPDATABLE_DRIVER_SPHAL_LIBRARIES,
+                GlobalSettingsProto.Gpu.UPDATABLE_DRIVER_SPHAL_LIBRARIES);
         p.end(gpuToken);
 
         final long hdmiToken = p.start(GlobalSettingsProto.HDMI);
@@ -1875,6 +1875,15 @@ class SettingsProtoDumpUtil {
                 SecureSettingsProto.Assist.GESTURE_SETUP_COMPLETE);
         p.end(assistToken);
 
+        final long assistHandlesToken = p.start(SecureSettingsProto.ASSIST_HANDLES);
+        dumpSetting(s, p,
+                Settings.Secure.ASSIST_HANDLES_LEARNING_TIME_ELAPSED_MILLIS,
+                SecureSettingsProto.AssistHandles.LEARNING_TIME_ELAPSED_MILLIS);
+        dumpSetting(s, p,
+                Settings.Secure.ASSIST_HANDLES_LEARNING_EVENT_COUNT,
+                SecureSettingsProto.AssistHandles.LEARNING_EVENT_COUNT);
+        p.end(assistHandlesToken);
+
         final long autofillToken = p.start(SecureSettingsProto.AUTOFILL);
         dumpSetting(s, p,
                 Settings.Secure.AUTOFILL_SERVICE,
@@ -1976,6 +1985,9 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Secure.CONNECTIVITY_RELEASE_PENDING_INTENT_DELAY_MS,
                 SecureSettingsProto.CONNECTIVITY_RELEASE_PENDING_INTENT_DELAY_MS);
+        dumpSetting(s, p,
+                Settings.Secure.ADAPTIVE_CONNECTIVITY_ENABLED,
+                SecureSettingsProto.ADAPTIVE_CONNECTIVITY_ENABLED);
 
         final long controlsToken = p.start(SecureSettingsProto.CONTROLS);
         dumpSetting(s, p,

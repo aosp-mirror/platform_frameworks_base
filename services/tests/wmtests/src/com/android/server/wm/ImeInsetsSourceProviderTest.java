@@ -56,4 +56,12 @@ public class ImeInsetsSourceProviderTest extends WindowTestsBase {
         mImeProvider.scheduleShowImePostLayout(appWin);
         assertTrue(mImeProvider.isImeTargetFromDisplayContentAndImeSame());
     }
+
+    @Test
+    public void testInputMethodInputTargetCanShowIme() {
+        WindowState target = createWindow(null, TYPE_APPLICATION, "app");
+        mDisplayContent.mInputMethodTarget = target;
+        mImeProvider.scheduleShowImePostLayout(target);
+        assertTrue(mImeProvider.isImeTargetFromDisplayContentAndImeSame());
+    }
 }

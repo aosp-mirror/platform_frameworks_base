@@ -29,8 +29,8 @@
     <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"Мүчүлүштүк тууралуу билдирүүңүздү скриншотсуз бөлүшүү үчүн таптап коюңуз же скриншот даяр болгуча күтө туруңуз"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"Мүчүлүштүк тууралуу билдирүүңүздү скриншотсуз бөлүшүү үчүн таптап коюңуз же скриншот даяр болгуча күтө туруңуз"</string>
     <string name="bugreport_confirm" msgid="5917407234515812495">"Мүчүлүштүктөр тууралуу билдирүүлөрдө тутумдун ар кандай таржымалдарынан алынган дайындар, ошондой эле купуя маалымат камтылышы мүмкүн (мисалы, жайгашкан жер сыяктуу). Мындай билдирүүлөрдү бир гана ишеничтүү адамдар жана колдонмолор менен бөлүшүңүз."</string>
-    <string name="bugreport_confirm_dont_repeat" msgid="6179945398364357318">"Экинчи көрүнбөсүн"</string>
-    <string name="bugreport_storage_title" msgid="5332488144740527109">"Мүчүлүштүктөрдү кабарлоо"</string>
+    <string name="bugreport_confirm_dont_repeat" msgid="6179945398364357318">"Экинчи көрсөтүлбөсүн"</string>
+    <string name="bugreport_storage_title" msgid="5332488144740527109">"Мүчүлүштүктөрдү кабарлоолор"</string>
     <string name="bugreport_unreadable_text" msgid="586517851044535486">"Мүчүлүштүк тууралуу кабарлаган файл окулбай койду"</string>
     <string name="bugreport_add_details_to_zip_failed" msgid="1302931926486712371">"Мүчүлүштүктөр жөнүндө кабардын чоо-жайы zip файлына кошулбай койду"</string>
     <string name="bugreport_unnamed" msgid="2800582406842092709">"аталышы жок"</string>

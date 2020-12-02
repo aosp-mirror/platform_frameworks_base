@@ -306,7 +306,6 @@ public class BubbleExpandedView extends LinearLayout {
         // Set ActivityView's alpha value as zero, since there is no view content to be shown.
         setContentVisibility(false);
 
-        mActivityViewContainer.setBackgroundColor(Color.WHITE);
         mActivityViewContainer.setOutlineProvider(new ViewOutlineProvider() {
             @Override
             public void getOutline(View view, Outline outline) {
@@ -434,9 +433,11 @@ public class BubbleExpandedView extends LinearLayout {
     }
 
     void applyThemeAttrs() {
-        final TypedArray ta = mContext.obtainStyledAttributes(
-                new int[] {android.R.attr.dialogCornerRadius});
+        final TypedArray ta = mContext.obtainStyledAttributes(new int[] {
+                android.R.attr.dialogCornerRadius,
+                android.R.attr.colorBackgroundFloating});
         mCornerRadius = ta.getDimensionPixelSize(0, 0);
+        mActivityViewContainer.setBackgroundColor(ta.getColor(1, Color.WHITE));
         ta.recycle();
 
         if (mActivityView != null && ScreenDecorationsUtils.supportsRoundedCornersOnWindows(

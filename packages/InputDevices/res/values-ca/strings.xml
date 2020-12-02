@@ -26,7 +26,6 @@
     <string name="keyboard_layout_finnish" msgid="5585659438924315466">"Finès"</string>
     <string name="keyboard_layout_croatian" msgid="4172229471079281138">"Croat"</string>
     <string name="keyboard_layout_czech" msgid="1349256901452975343">"Txec"</string>
-    <string name="keyboard_layout_czech_qwerty" msgid="3331402534128515501">"Estil QWERTY txec"</string>
     <string name="keyboard_layout_estonian" msgid="8775830985185665274">"Estonià"</string>
     <string name="keyboard_layout_hungarian" msgid="4154963661406035109">"Hongarès"</string>
     <string name="keyboard_layout_icelandic" msgid="5836645650912489642">"Islandès"</string>
@@ -45,7 +44,4 @@
     <string name="keyboard_layout_persian" msgid="3920643161015888527">"Persa"</string>
     <string name="keyboard_layout_azerbaijani" msgid="7315895417176467567">"Àzeri"</string>
     <string name="keyboard_layout_polish" msgid="1121588624094925325">"Polonès"</string>
-    <string name="keyboard_layout_belarusian" msgid="7619281752698687588">"Bielorús"</string>
-    <string name="keyboard_layout_mongolian" msgid="7678483495823936626">"Mongol"</string>
-    <string name="keyboard_layout_georgian" msgid="4596185456863747454">"Georgià"</string>
 </resources>

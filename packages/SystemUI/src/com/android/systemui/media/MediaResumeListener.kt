@@ -28,6 +28,7 @@ import android.os.UserHandle
 import android.provider.Settings
 import android.service.media.MediaBrowserService
 import android.util.Log
+import com.android.internal.annotations.VisibleForTesting
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.tuner.TunerService
@@ -47,7 +48,8 @@ class MediaResumeListener @Inject constructor(
     private val context: Context,
     private val broadcastDispatcher: BroadcastDispatcher,
     @Background private val backgroundExecutor: Executor,
-    private val tunerService: TunerService
+    private val tunerService: TunerService,
+    private val mediaBrowserFactory: ResumeMediaBrowserFactory
 ) : MediaDataManager.Listener {
 
     private var useMediaResumption: Boolean = Utils.useMediaResumption(context)
@@ -58,7 +60,8 @@ class MediaResumeListener @Inject constructor(
     private var mediaBrowser: ResumeMediaBrowser? = null
     private var currentUserId: Int = context.userId
 
-    private val userChangeReceiver = object : BroadcastReceiver() {
+    @VisibleForTesting
+    val userChangeReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             if (Intent.ACTION_USER_UNLOCKED == intent.action) {
                 loadMediaResumptionControls()
@@ -116,8 +119,6 @@ class MediaResumeListener @Inject constructor(
         }, Settings.Secure.MEDIA_CONTROLS_RESUME)
     }
 
-    fun isResumptionEnabled() = useMediaResumption
-
     private fun loadSavedComponents() {
         // Make sure list is empty (if we switched users)
         resumeComponents.clear()
@@ -144,7 +145,7 @@ class MediaResumeListener @Inject constructor(
         }
 
         resumeComponents.forEach {
-            val browser = ResumeMediaBrowser(context, mediaBrowserCallback, it)
+            val browser = mediaBrowserFactory.create(mediaBrowserCallback, it)
             browser.findRecentMedia()
         }
     }
@@ -183,19 +184,28 @@ class MediaResumeListener @Inject constructor(
     private fun tryUpdateResumptionList(key: String, componentName: ComponentName) {
         Log.d(TAG, "Testing if we can connect to $componentName")
         mediaBrowser?.disconnect()
-        mediaBrowser = ResumeMediaBrowser(context,
+        mediaBrowser = mediaBrowserFactory.create(
                 object : ResumeMediaBrowser.Callback() {
                     override fun onConnected() {
-                        Log.d(TAG, "yes we can resume with $componentName")
-                        mediaDataManager.setResumeAction(key, getResumeAction(componentName))
-                        updateResumptionList(componentName)
-                        mediaBrowser?.disconnect()
-                        mediaBrowser = null
+                        Log.d(TAG, "Connected to $componentName")
                     }
 
                     override fun onError() {
                         Log.e(TAG, "Cannot resume with $componentName")
                         mediaDataManager.setResumeAction(key, null)
+                        mediaBrowser?.disconnect()
+                        mediaBrowser = null
+                    }
+
+                    override fun addTrack(
+                        desc: MediaDescription,
+                        component: ComponentName,
+                        browser: ResumeMediaBrowser
+                    ) {
+                        // Since this is a test, just save the component for later
+                        Log.d(TAG, "Can get resumable media from $componentName")
+                        mediaDataManager.setResumeAction(key, getResumeAction(componentName))
+                        updateResumptionList(componentName)
                         mediaBrowser?.disconnect()
                         mediaBrowser = null
                     }
@@ -235,7 +245,7 @@ class MediaResumeListener @Inject constructor(
     private fun getResumeAction(componentName: ComponentName): Runnable {
         return Runnable {
             mediaBrowser?.disconnect()
-            mediaBrowser = ResumeMediaBrowser(context,
+            mediaBrowser = mediaBrowserFactory.create(
                 object : ResumeMediaBrowser.Callback() {
                     override fun onConnected() {
                         if (mediaBrowser?.token == null) {
