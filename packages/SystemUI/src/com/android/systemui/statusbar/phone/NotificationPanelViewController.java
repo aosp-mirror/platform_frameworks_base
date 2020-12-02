@@ -304,7 +304,6 @@ public class NotificationPanelViewController extends PanelViewController {
     private FrameLayout mQsFrame;
     private KeyguardStatusViewController mKeyguardStatusViewController;
     private DisabledUdfpsController mDisabledUdfpsController;
-    private View mQsNavbarScrim;
     private NotificationsQuickSettingsContainer mNotificationContainerParent;
     private boolean mAnimateNextPositionUpdate;
 
@@ -650,7 +649,6 @@ public class NotificationPanelViewController extends PanelViewController {
                 mOnEmptySpaceClickListener);
         addTrackingHeadsUpListener(mNotificationStackScrollLayoutController::setTrackingHeadsUp);
         mKeyguardBottomArea = mView.findViewById(R.id.keyguard_bottom_area);
-        mQsNavbarScrim = mView.findViewById(R.id.qs_navbar_scrim);
         mLastOrientation = mResources.getConfiguration().orientation;
 
         initBottomArea();
@@ -1730,9 +1728,6 @@ public class NotificationPanelViewController extends PanelViewController {
                 mBarState != KEYGUARD && (!mQsExpanded
                         || mQsExpansionFromOverscroll));
 
-        mQsNavbarScrim.setVisibility(
-                mBarState == StatusBarState.SHADE && mQsExpanded && !mStackScrollerOverscrolling
-                        && mQsScrimEnabled ? View.VISIBLE : View.INVISIBLE);
         if (mKeyguardUserSwitcher != null && mQsExpanded && !mStackScrollerOverscrolling) {
             mKeyguardUserSwitcher.hideIfNotSimple(true /* animate */);
         }
@@ -1756,10 +1751,6 @@ public class NotificationPanelViewController extends PanelViewController {
         if (mBarState == StatusBarState.SHADE_LOCKED || mBarState == KEYGUARD) {
             updateKeyguardBottomAreaAlpha();
             updateBigClockAlpha();
-        }
-        if (mBarState == StatusBarState.SHADE && mQsExpanded && !mStackScrollerOverscrolling
-                && mQsScrimEnabled) {
-            mQsNavbarScrim.setAlpha(getQsExpansionFraction());
         }
 
         if (mAccessibilityManager.isEnabled()) {
