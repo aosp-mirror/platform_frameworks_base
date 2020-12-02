@@ -34,8 +34,8 @@ interface IFingerprintService {
     // Creates a test session with the specified sensorId
     ITestSession createTestSession(int sensorId, String opPackageName);
 
-    // Requests a proto dump of the service to the specified fd
-    byte[] dumpSensorServiceStateProto();
+    // Requests a proto dump of the specified sensor
+    byte[] dumpSensorServiceStateProto(int sensorId);
 
     // Retrieve static sensor properties for all fingerprint sensors
     List<FingerprintSensorPropertiesInternal> getSensorPropertiesInternal(String opPackageName);

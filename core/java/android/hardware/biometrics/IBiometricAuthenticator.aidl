@@ -36,7 +36,7 @@ interface IBiometricAuthenticator {
     // Retrieve static sensor properties
     SensorPropertiesInternal getSensorProperties(String opPackageName);
 
-    // Requests a proto dump of the service. See biometrics.proto
+    // Requests a proto dump of the sensor. See biometrics.proto
     byte[] dumpSensorServiceStateProto();
 
     // This method prepares the service to start authenticating, but doesn't start authentication.
