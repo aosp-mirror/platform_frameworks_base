@@ -7488,6 +7488,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     admin.getPackageName(), userId, "set-device-owner");
 
             Slog.i(LOG_TAG, "Device owner set: " + admin + " on user " + userId);
+
+            if (mInjector.userManagerIsHeadlessSystemUserMode()) {
+                Slog.i(LOG_TAG, "manageUser: " + admin + " on user " + userId);
+
+                manageUser(admin, admin, caller.getUserId(), null);
+            }
             return true;
         }
     }
@@ -9541,29 +9547,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         final long id = mInjector.binderClearCallingIdentity();
         try {
-            final String adminPkg = admin.getPackageName();
-            try {
-                // Install the profile owner if not present.
-                if (!mIPackageManager.isPackageAvailable(adminPkg, userHandle)) {
-                    mIPackageManager.installExistingPackageAsUser(adminPkg, userHandle,
-                            PackageManager.INSTALL_ALL_WHITELIST_RESTRICTED_PERMISSIONS,
-                            PackageManager.INSTALL_REASON_POLICY, null);
-                }
-            } catch (RemoteException e) {
-                // Does not happen, same process
-            }
-
-            // Set admin.
-            setActiveAdmin(profileOwner, true, userHandle);
-            final String ownerName = getProfileOwnerName(Process.myUserHandle().getIdentifier());
-            setProfileOwner(profileOwner, ownerName, userHandle);
-
-            synchronized (getLockObject()) {
-                DevicePolicyData policyData = getUserData(userHandle);
-                policyData.mInitBundle = adminExtras;
-                policyData.mAdminBroadcastPending = true;
-                saveSettingsLocked(userHandle);
-            }
+            manageUser(admin, profileOwner, userHandle, adminExtras);
 
             if ((flags & DevicePolicyManager.SKIP_SETUP_WIZARD) != 0) {
                 Settings.Secure.putIntForUser(mContext.getContentResolver(),
@@ -9581,6 +9565,46 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             }
         } finally {
             mInjector.binderRestoreCallingIdentity(id);
+        }
+    }
+
+    private void manageUser(ComponentName admin, ComponentName profileOwner,
+            @UserIdInt int userId, PersistableBundle adminExtras) {
+        // Check for permission
+        final CallerIdentity caller = getCallerIdentity();
+        Preconditions.checkCallAuthorization(canManageUsers(caller));
+        Preconditions.checkCallAuthorization(
+                hasCallingOrSelfPermission(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS));
+        mInjector.binderWithCleanCallingIdentity(() ->
+                    manageUserNoCheck(admin, profileOwner, userId, adminExtras));
+    }
+
+    private void manageUserNoCheck(ComponentName admin, ComponentName profileOwner,
+            int user, PersistableBundle adminExtras) {
+
+        final String adminPkg = admin.getPackageName();
+        try {
+            // Install the profile owner if not present.
+            if (!mIPackageManager.isPackageAvailable(adminPkg, user)) {
+                mIPackageManager.installExistingPackageAsUser(adminPkg, user,
+                        PackageManager.INSTALL_ALL_WHITELIST_RESTRICTED_PERMISSIONS,
+                        PackageManager.INSTALL_REASON_POLICY, null);
+            }
+        } catch (RemoteException e) {
+            // Does not happen, same process
+        }
+
+        // Set admin.
+        setActiveAdmin(profileOwner, true, user);
+        final String ownerName = getProfileOwnerName(Process.myUserHandle().getIdentifier());
+        setProfileOwner(profileOwner, ownerName, user);
+
+        synchronized (getLockObject()) {
+            DevicePolicyData policyData = getUserData(user);
+            policyData.mInitBundle = adminExtras;
+            policyData.mAdminBroadcastPending = true;
+
+            saveSettingsLocked(user);
         }
     }
 
@@ -12261,8 +12285,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 if (hasUserSetupCompleted(UserHandle.USER_SYSTEM)) {
                     return CODE_USER_SETUP_COMPLETED;
                 }
-            }  else {
-                // STOPSHIP Do proper check in split user mode
             }
             return CODE_OK;
         }
