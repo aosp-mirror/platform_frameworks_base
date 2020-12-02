@@ -53,9 +53,9 @@ public:
     ConditionState getUnSlicedPartConditionState(const int index) {
         return mAllConditions[index]->getUnSlicedPartConditionState();
     }
-    void getTrueSlicedDimensions(const int index,
-        std::set<HashableDimensionKey>* trueDimensions) const {
-        return mAllConditions[index]->getTrueSlicedDimensions(mAllConditions, trueDimensions);
+
+    const std::map<HashableDimensionKey, int>* getSlicedDimensionMap(const int index) const {
+        return mAllConditions[index]->getSlicedDimensionMap(mAllConditions);
     }
 
 private:

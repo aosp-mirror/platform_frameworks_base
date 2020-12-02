@@ -1091,6 +1091,21 @@ void ValidateAttributionUidAndTagDimension(
         .value_tuple().dimensions_value(1).value_str(), tag);
 }
 
+void ValidateStateValue(const google::protobuf::RepeatedPtrField<StateValue>& stateValues,
+                        int atomId, int64_t value) {
+    ASSERT_EQ(stateValues.size(), 1);
+    ASSERT_EQ(stateValues[0].atom_id(), atomId);
+    switch (stateValues[0].contents_case()) {
+        case StateValue::ContentsCase::kValue:
+            EXPECT_EQ(stateValues[0].value(), (int32_t)value);
+            break;
+        case StateValue::ContentsCase::kGroupId:
+            EXPECT_EQ(stateValues[0].group_id(), value);
+            break;
+        default:
+            FAIL() << "State value should have either a value or a group id";
+    }
+}
 bool EqualsTo(const DimensionsValue& s1, const DimensionsValue& s2) {
     if (s1.field() != s2.field()) {
         return false;

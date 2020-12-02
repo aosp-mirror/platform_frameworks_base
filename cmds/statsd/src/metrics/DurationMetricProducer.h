@@ -40,8 +40,8 @@ class DurationMetricProducer : public MetricProducer {
 public:
     DurationMetricProducer(
             const ConfigKey& key, const DurationMetric& durationMetric, const int conditionIndex,
-            const vector<ConditionState>& initialConditionCache, const int startIndex,
-            const int stopIndex, const int stopAllIndex, const bool nesting,
+            const vector<ConditionState>& initialConditionCache, const int whatIndex,
+            const int startIndex, const int stopIndex, const int stopAllIndex, const bool nesting,
             const sp<ConditionWizard>& wizard, const uint64_t protoHash,
             const FieldMatcher& internalDimensions, const int64_t timeBaseNs,
             const int64_t startTimeNs,
@@ -74,8 +74,15 @@ protected:
             const std::map<int, HashableDimensionKey>& statePrimaryKeys) override;
 
 private:
+    // Initializes true dimensions of the 'what' predicate. Only to be called during initialization.
+    void initTrueDimensions(const int whatIndex, const int64_t startTimeNs);
+
+    void handleMatchedLogEventValuesLocked(const size_t matcherIndex,
+                                           const std::vector<FieldValue>& values,
+                                           const int64_t eventTimeNs);
     void handleStartEvent(const MetricDimensionKey& eventKey, const ConditionKey& conditionKeys,
-                          bool condition, const LogEvent& event);
+                          bool condition, const int64_t eventTimeNs,
+                          const vector<FieldValue>& eventValues);
 
     void onDumpReportLocked(const int64_t dumpTimeNs,
                             const bool include_current_partial_bucket,
