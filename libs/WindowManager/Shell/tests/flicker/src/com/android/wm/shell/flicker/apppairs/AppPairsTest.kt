@@ -29,10 +29,10 @@ import com.android.wm.shell.flicker.helpers.AppPairsHelper
 import com.android.wm.shell.flicker.helpers.AppPairsHelper.Companion.TEST_REPETITIONS
 import com.android.wm.shell.flicker.appPairsDividerIsInvisible
 import com.android.wm.shell.flicker.appPairsDividerIsVisible
-import com.android.wm.shell.flicker.navBarLayerIsAlwaysVisible
-import com.android.wm.shell.flicker.navBarWindowIsAlwaysVisible
-import com.android.wm.shell.flicker.statusBarLayerIsAlwaysVisible
-import com.android.wm.shell.flicker.statusBarWindowIsAlwaysVisible
+import com.android.server.wm.flicker.navBarWindowIsAlwaysVisible
+import com.android.server.wm.flicker.statusBarLayerIsAlwaysVisible
+import com.android.server.wm.flicker.navBarLayerIsAlwaysVisible
+import com.android.server.wm.flicker.statusBarWindowIsAlwaysVisible
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
