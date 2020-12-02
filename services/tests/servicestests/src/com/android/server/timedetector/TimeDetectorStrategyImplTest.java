@@ -525,6 +525,7 @@ public class TimeDetectorStrategyImplTest {
     @Test
     public void testSuggestNetworkTime_autoTimeEnabled() {
         mScript.pokeFakeClocks(ARBITRARY_CLOCK_INITIALIZATION_INFO)
+                .pokeAutoOriginPriorities(ORIGIN_NETWORK)
                 .pokeAutoTimeDetectionEnabled(true);
 
         NetworkTimeSuggestion timeSuggestion =
@@ -541,6 +542,7 @@ public class TimeDetectorStrategyImplTest {
     @Test
     public void testSuggestNetworkTime_autoTimeDisabled() {
         mScript.pokeFakeClocks(ARBITRARY_CLOCK_INITIALIZATION_INFO)
+                .pokeAutoOriginPriorities(ORIGIN_NETWORK)
                 .pokeAutoTimeDetectionEnabled(false);
 
         NetworkTimeSuggestion timeSuggestion =
@@ -552,9 +554,25 @@ public class TimeDetectorStrategyImplTest {
     }
 
     @Test
-    public void testSuggestNetworkTime_telephonySuggestionsBeatNetworkSuggestions() {
+    public void networkTimeSuggestion_ignoredWhenReferencedTimeIsInThePast() {
         mScript.pokeFakeClocks(ARBITRARY_CLOCK_INITIALIZATION_INFO)
+                .pokeAutoOriginPriorities(ORIGIN_NETWORK)
                 .pokeAutoTimeDetectionEnabled(true);
+
+        Instant suggestedTime = TIME_LOWER_BOUND.minus(Duration.ofDays(1));
+        NetworkTimeSuggestion timeSuggestion = mScript
+                .generateNetworkTimeSuggestion(suggestedTime);
+
+        mScript.simulateNetworkTimeSuggestion(timeSuggestion)
+                .verifySystemClockWasNotSetAndResetCallTracking()
+                .assertLatestNetworkSuggestion(null);
+    }
+
+    @Test
+    public void highPrioritySuggestionsShouldBeatLowerPrioritySuggestions() {
+        mScript.pokeFakeClocks(ARBITRARY_CLOCK_INITIALIZATION_INFO)
+                .pokeAutoTimeDetectionEnabled(true)
+                .pokeAutoOriginPriorities(ORIGIN_TELEPHONY, ORIGIN_NETWORK);
 
         // Three obviously different times that could not be mistaken for each other.
         Instant networkTime1 = ARBITRARY_TEST_TIME;
@@ -576,7 +594,7 @@ public class TimeDetectorStrategyImplTest {
         mScript.assertLatestTelephonySuggestion(ARBITRARY_SLOT_INDEX, null)
                 .assertLatestNetworkSuggestion(networkTimeSuggestion1);
         assertEquals(networkTimeSuggestion1, mScript.peekLatestValidNetworkSuggestion());
-        assertNull(mScript.peekBestTelephonySuggestion());
+        assertNull("No telephony suggestions were made:", mScript.peekBestTelephonySuggestion());
 
         // Simulate a little time passing.
         mScript.simulateTimePassing(smallTimeIncrementMillis)
@@ -631,7 +649,9 @@ public class TimeDetectorStrategyImplTest {
         mScript.assertLatestTelephonySuggestion(ARBITRARY_SLOT_INDEX, telephonyTimeSuggestion)
                 .assertLatestNetworkSuggestion(networkTimeSuggestion2);
         assertEquals(networkTimeSuggestion2, mScript.peekLatestValidNetworkSuggestion());
-        assertNull(mScript.peekBestTelephonySuggestion());
+        assertNull(
+                "Telephony suggestion should be expired:",
+                mScript.peekBestTelephonySuggestion());
 
         // Toggle auto-time off and on to force the detection logic to run.
         mScript.simulateAutoTimeDetectionToggle()
@@ -646,27 +666,16 @@ public class TimeDetectorStrategyImplTest {
         mScript.assertLatestTelephonySuggestion(ARBITRARY_SLOT_INDEX, telephonyTimeSuggestion)
                 .assertLatestNetworkSuggestion(networkTimeSuggestion2);
         assertEquals(networkTimeSuggestion2, mScript.peekLatestValidNetworkSuggestion());
-        assertNull(mScript.peekBestTelephonySuggestion());
-    }
-
-    @Test
-    public void networkTimeSuggestion_ignoredWhenReferencedTimeIsInThePast() {
-        mScript.pokeFakeClocks(ARBITRARY_CLOCK_INITIALIZATION_INFO)
-                .pokeAutoTimeDetectionEnabled(true);
-
-        Instant suggestedTime = TIME_LOWER_BOUND.minus(Duration.ofDays(1));
-        NetworkTimeSuggestion timeSuggestion = mScript
-                .generateNetworkTimeSuggestion(suggestedTime);
-
-        mScript.simulateNetworkTimeSuggestion(timeSuggestion)
-                .verifySystemClockWasNotSetAndResetCallTracking()
-                .assertLatestNetworkSuggestion(null);
+        assertNull(
+                "Telephony suggestion should still be expired:",
+                mScript.peekBestTelephonySuggestion());
     }
 
     @Test
     public void whenAllTimeSuggestionsAreAvailable_higherPriorityWins_lowerPriorityComesFirst() {
         mScript.pokeFakeClocks(ARBITRARY_CLOCK_INITIALIZATION_INFO)
-                .pokeAutoTimeDetectionEnabled(true);
+                .pokeAutoTimeDetectionEnabled(true)
+                .pokeAutoOriginPriorities(ORIGIN_TELEPHONY, ORIGIN_NETWORK);
 
         Instant networkTime = ARBITRARY_TEST_TIME;
         Instant telephonyTime = ARBITRARY_TEST_TIME.plus(Duration.ofDays(30));
@@ -686,7 +695,8 @@ public class TimeDetectorStrategyImplTest {
     @Test
     public void whenAllTimeSuggestionsAreAvailable_higherPriorityWins_higherPriorityComesFirst() {
         mScript.pokeFakeClocks(ARBITRARY_CLOCK_INITIALIZATION_INFO)
-                .pokeAutoTimeDetectionEnabled(true);
+                .pokeAutoTimeDetectionEnabled(true)
+                .pokeAutoOriginPriorities(ORIGIN_TELEPHONY, ORIGIN_NETWORK);
 
         Instant networkTime = ARBITRARY_TEST_TIME;
         Instant telephonyTime = ARBITRARY_TEST_TIME.plus(Duration.ofDays(30));
@@ -706,7 +716,8 @@ public class TimeDetectorStrategyImplTest {
     @Test
     public void whenHighestPrioritySuggestionIsNotAvailable_fallbacksToNext() {
         mScript.pokeFakeClocks(ARBITRARY_CLOCK_INITIALIZATION_INFO)
-                .pokeAutoTimeDetectionEnabled(true);
+                .pokeAutoTimeDetectionEnabled(true)
+                .pokeAutoOriginPriorities(ORIGIN_TELEPHONY, ORIGIN_NETWORK);
 
         NetworkTimeSuggestion timeSuggestion =
                 mScript.generateNetworkTimeSuggestion(ARBITRARY_TEST_TIME);
@@ -720,7 +731,7 @@ public class TimeDetectorStrategyImplTest {
     public void suggestionsFromSourceNotListedInPrioritiesList_areIgnored() {
         mScript.pokeFakeClocks(ARBITRARY_CLOCK_INITIALIZATION_INFO)
                 .pokeAutoTimeDetectionEnabled(true)
-                .pokeAutoOriginPriorities(new int[]{ORIGIN_TELEPHONY});
+                .pokeAutoOriginPriorities(ORIGIN_TELEPHONY);
 
         NetworkTimeSuggestion timeSuggestion = mScript.generateNetworkTimeSuggestion(
                 ARBITRARY_TEST_TIME);
@@ -728,6 +739,19 @@ public class TimeDetectorStrategyImplTest {
         mScript.simulateNetworkTimeSuggestion(timeSuggestion)
                 .assertLatestNetworkSuggestion(timeSuggestion)
                 .verifySystemClockWasNotSetAndResetCallTracking();
+    }
+
+    @Test
+    public void autoOriginPrioritiesList_doesNotAffectManualSuggestion() {
+        mScript.pokeFakeClocks(ARBITRARY_CLOCK_INITIALIZATION_INFO)
+                .pokeAutoTimeDetectionEnabled(false)
+                .pokeAutoOriginPriorities(ORIGIN_TELEPHONY);
+
+        ManualTimeSuggestion timeSuggestion =
+                mScript.generateManualTimeSuggestion(ARBITRARY_TEST_TIME);
+
+        mScript.simulateManualTimeSuggestion(timeSuggestion, true /* expectedResult */)
+                .verifySystemClockWasSetAndResetCallTracking(ARBITRARY_TEST_TIME.toEpochMilli());
     }
 
     /**
@@ -761,7 +785,7 @@ public class TimeDetectorStrategyImplTest {
         }
 
         @Override
-        public int[] getAutoOriginPriorities() {
+        public int[] autoOriginPriorities() {
             return mAutoOriginPriorities;
         }
 
@@ -886,8 +910,8 @@ public class TimeDetectorStrategyImplTest {
             return this;
         }
 
-        Script pokeAutoOriginPriorities(@Origin int[] autoOriginPriorites) {
-            mFakeCallback.pokeAutoOriginPriorities(autoOriginPriorites);
+        Script pokeAutoOriginPriorities(@Origin int... autoOriginPriorities) {
+            mFakeCallback.pokeAutoOriginPriorities(autoOriginPriorities);
             return this;
         }
 
