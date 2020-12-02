@@ -1795,11 +1795,11 @@ package android.content {
 
   public class ContextWrapper extends android.content.Context {
     method public android.content.Context createCredentialProtectedStorageContext();
-    method public java.io.File getPreloadsFileCache();
+    method @Nullable public java.io.File getPreloadsFileCache();
     method public boolean isCredentialProtectedStorage();
-    method public void sendBroadcast(android.content.Intent, String, android.os.Bundle);
-    method public void sendBroadcastAsUser(android.content.Intent, android.os.UserHandle, String, android.os.Bundle);
-    method public void sendOrderedBroadcast(android.content.Intent, String, android.os.Bundle, android.content.BroadcastReceiver, android.os.Handler, int, String, android.os.Bundle);
+    method public void sendBroadcast(android.content.Intent, @Nullable String, @Nullable android.os.Bundle);
+    method public void sendBroadcastAsUser(android.content.Intent, android.os.UserHandle, @Nullable String, @Nullable android.os.Bundle);
+    method public void sendOrderedBroadcast(android.content.Intent, @Nullable String, @Nullable android.os.Bundle, @Nullable android.content.BroadcastReceiver, @Nullable android.os.Handler, int, @Nullable String, @Nullable android.os.Bundle);
   }
 
   public class Intent implements java.lang.Cloneable android.os.Parcelable {
