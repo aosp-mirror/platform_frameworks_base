@@ -152,6 +152,7 @@ import android.app.ResourcesManager;
 import android.app.admin.IDevicePolicyManager;
 import android.app.admin.SecurityLog;
 import android.app.backup.IBackupManager;
+import android.app.role.RoleManager;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledAfter;
 import android.content.BroadcastReceiver;
@@ -941,6 +942,7 @@ public class PackageManagerService extends IPackageManager.Stub
         private final Singleton<ViewCompiler> mViewCompilerProducer;
         private final Singleton<IPermissionManager> mPermissionManagerProducer;
         private final Singleton<IncrementalManager> mIncrementalManagerProducer;
+        private final Singleton<DefaultAppProvider> mDefaultAppProviderProducer;
         private final SystemWrapper mSystemWrapper;
         private final ServiceProducer mGetLocalServiceProducer;
         private final ServiceProducer mGetSystemServiceProducer;
@@ -962,6 +964,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 Producer<IPermissionManager> permissionManagerProducer,
                 Producer<ViewCompiler> viewCompilerProducer,
                 Producer<IncrementalManager> incrementalManagerProducer,
+                Producer<DefaultAppProvider> defaultAppProviderProducer,
                 SystemWrapper systemWrapper,
                 ServiceProducer getLocalServiceProducer,
                 ServiceProducer getSystemServiceProducer) {
@@ -986,6 +989,7 @@ public class PackageManagerService extends IPackageManager.Stub
             mPermissionManagerProducer = new Singleton<>(permissionManagerProducer);
             mViewCompilerProducer = new Singleton<>(viewCompilerProducer);
             mIncrementalManagerProducer = new Singleton<>(incrementalManagerProducer);
+            mDefaultAppProviderProducer = new Singleton<>(defaultAppProviderProducer);
             mSystemWrapper = systemWrapper;
             mGetLocalServiceProducer = getLocalServiceProducer;
             mGetSystemServiceProducer = getSystemServiceProducer;
@@ -1098,6 +1102,10 @@ public class PackageManagerService extends IPackageManager.Stub
         public IncrementalManager getIncrementalManager() {
             return mIncrementalManagerProducer.get(this, mPackageManager);
         }
+
+        public DefaultAppProvider getDefaultAppProvider() {
+            return mDefaultAppProviderProducer.get(this, mPackageManager);
+        }
     }
 
     /** Provides an abstraction to static access to system state. */
@@ -1155,6 +1163,7 @@ public class PackageManagerService extends IPackageManager.Stub
         public ArtManagerService artManagerService;
         public @Nullable String configuratorPackage;
         public int defParseFlags;
+        public DefaultAppProvider defaultAppProvider;
         public DexManager dexManager;
         public List<ScanPartition> dirsToScanAsSystem;
         public @Nullable String documenterPackage;
@@ -1307,6 +1316,8 @@ public class PackageManagerService extends IPackageManager.Stub
     private Future<?> mPrepareAppDataFuture;
 
     private final IncrementalManager mIncrementalManager;
+
+    private final DefaultAppProvider mDefaultAppProvider;
 
     private final PackageProperty mPackageProperty = new PackageProperty();
 
@@ -2761,6 +2772,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 (i, pm) -> new ViewCompiler(i.getInstallLock(), i.getInstaller()),
                 (i, pm) -> (IncrementalManager)
                         pm.mContext.getSystemService(Context.INCREMENTAL_SERVICE),
+                (i, pm) -> new DefaultAppProvider(() -> context.getSystemService(RoleManager.class),
+                        i.getPermissionManagerServiceInternal()),
                 new DefaultSystemWrapper(),
                 LocalServices::getService,
                 context::getSystemService);
@@ -2936,6 +2949,7 @@ public class PackageManagerService extends IPackageManager.Stub
         mArtManagerService = testParams.artManagerService;
         mAvailableFeatures = testParams.availableFeatures;
         mDefParseFlags = testParams.defParseFlags;
+        mDefaultAppProvider = testParams.defaultAppProvider;
         mDexManager = testParams.dexManager;
         mDirsToScanAsSystem = testParams.dirsToScanAsSystem;
         mFactoryTest = testParams.factoryTest;
@@ -3043,6 +3057,7 @@ public class PackageManagerService extends IPackageManager.Stub
         mSettings = injector.getSettings();
         mPermissionManagerService = injector.getPermissionManagerService();
         mIncrementalManager = mInjector.getIncrementalManager();
+        mDefaultAppProvider = mInjector.getDefaultAppProvider();
         PlatformCompat platformCompat = mInjector.getCompatibility();
         mPackageParserCallback = new PackageParser2.Callback() {
             @Override
@@ -7959,8 +7974,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 } else {
                     // Browser/generic handling case.  If there's a default browser, go straight
                     // to that (but only if there is no other higher-priority match).
-                    final String defaultBrowserPackageName =
-                            mPermissionManager.getDefaultBrowser(userId);
+                    final String defaultBrowserPackageName = mDefaultAppProvider.getDefaultBrowser(
+                            userId);
                     int maxMatchPrio = 0;
                     ResolveInfo defaultBrowserMatch = null;
                     final int numCandidates = matchAllList.size();
@@ -14156,8 +14171,8 @@ public class PackageManagerService extends IPackageManager.Stub
         final boolean isCallerOwner = isCallerDeviceOrProfileOwner(userId);
         final long callingId = Binder.clearCallingIdentity();
         try {
-            final String activeLauncherPackageName = mPermissionManager.getDefaultHome(userId);
-            final String dialerPackageName = mPermissionManager.getDefaultDialer(userId);
+            final String activeLauncherPackageName = mDefaultAppProvider.getDefaultHome(userId);
+            final String dialerPackageName = mDefaultAppProvider.getDefaultDialer(userId);
             for (int i = 0; i < packageNames.length; i++) {
                 canSuspend[i] = false;
                 final String packageName = packageNames[i];
@@ -20635,10 +20650,10 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     private void clearDefaultBrowserIfNeededForUser(String packageName, int userId) {
-        final String defaultBrowserPackageName = mPermissionManager.getDefaultBrowser(userId);
+        final String defaultBrowserPackageName = mDefaultAppProvider.getDefaultBrowser(userId);
         if (!TextUtils.isEmpty(defaultBrowserPackageName)) {
             if (packageName.equals(defaultBrowserPackageName)) {
-                mPermissionManager.setDefaultBrowser(null, true, true, userId);
+                mDefaultAppProvider.setDefaultBrowser(null, true, true, userId);
             }
         }
     }
@@ -20653,7 +20668,7 @@ public class PackageManagerService extends IPackageManager.Stub
             // If this browser is restored from user's backup, do not clear
             // default-browser state for this user
             if (installReason != PackageManager.INSTALL_REASON_DEVICE_RESTORE) {
-                mPermissionManager.setDefaultBrowser(null, true, true, userId);
+                mDefaultAppProvider.setDefaultBrowser(null, true, true, userId);
             }
         }
 
@@ -20692,7 +20707,7 @@ public class PackageManagerService extends IPackageManager.Stub
             // significant refactoring to keep all default apps in the package
             // manager (cleaner but more work) or have the services provide
             // callbacks to the package manager to request a default app reset.
-            mPermissionManager.setDefaultBrowser(null, true, true, userId);
+            mDefaultAppProvider.setDefaultBrowser(null, true, true, userId);
             resetNetworkPolicies(userId);
             synchronized (mLock) {
                 scheduleWritePackageRestrictionsLocked(userId);
@@ -20952,8 +20967,8 @@ public class PackageManagerService extends IPackageManager.Stub
                             defaultBrowser = mSettings.removeDefaultBrowserPackageNameLPw(userId1);
                         }
                         if (defaultBrowser != null) {
-                            mPermissionManager
-                                    .setDefaultBrowser(defaultBrowser, false, false, userId1);
+                            mDefaultAppProvider.setDefaultBrowser(defaultBrowser, false, false,
+                                    userId1);
                         }
                     });
         } catch (Exception e) {
@@ -21193,7 +21208,7 @@ public class PackageManagerService extends IPackageManager.Stub
         }
         allHomeCandidates.addAll(resolveInfos);
 
-        final String packageName = mPermissionManager.getDefaultHome(userId);
+        final String packageName = mDefaultAppProvider.getDefaultHome(userId);
         if (packageName == null) {
             return null;
         }
@@ -21247,7 +21262,7 @@ public class PackageManagerService extends IPackageManager.Stub
         final String packageName = preferredResolveInfo != null
                 && preferredResolveInfo.activityInfo != null
                 ? preferredResolveInfo.activityInfo.packageName : null;
-        final String currentPackageName = mPermissionManager.getDefaultHome(userId);
+        final String currentPackageName = mDefaultAppProvider.getDefaultHome(userId);
         if (TextUtils.equals(currentPackageName, packageName)) {
             return false;
         }
@@ -21262,12 +21277,12 @@ public class PackageManagerService extends IPackageManager.Stub
             // Keep the default home package in RoleManager.
             return false;
         }
-        mPermissionManager.setDefaultHome(packageName, userId, (successful) -> {
-            if (successful) {
-                postPreferredActivityChangedBroadcast(userId);
-            }
-        });
-        return true;
+        return mDefaultAppProvider.setDefaultHome(packageName, userId, mContext.getMainExecutor(),
+                successful -> {
+                    if (successful) {
+                        postPreferredActivityChangedBroadcast(userId);
+                    }
+                });
     }
 
     @Override
@@ -25059,7 +25074,7 @@ public class PackageManagerService extends IPackageManager.Stub
         private String[] getKnownPackageNamesInternal(int knownPackage, int userId) {
             switch (knownPackage) {
                 case PackageManagerInternal.PACKAGE_BROWSER:
-                    return new String[]{mPermissionManager.getDefaultBrowser(userId)};
+                    return new String[] { mDefaultAppProvider.getDefaultBrowser(userId) };
                 case PackageManagerInternal.PACKAGE_INSTALLER:
                     return filterOnlySystemPackages(mRequiredInstallerPackage);
                 case PackageManagerInternal.PACKAGE_SETUP_WIZARD:

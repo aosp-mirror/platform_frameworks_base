@@ -613,12 +613,56 @@ public final class RoleManager {
     }
 
     /**
-     * Allows getting the role holder for {@link #ROLE_SMS} without
-     * {@link Manifest.permission#OBSERVE_ROLE_HOLDERS}, as required by
-     * {@link android.provider.Telephony.Sms#getDefaultSmsPackage(Context)}
+     * Get the role holder of {@link #ROLE_BROWSER} without requiring
+     * {@link Manifest.permission#OBSERVE_ROLE_HOLDERS}, as in
+     * {@link android.content.pm.PackageManager#getDefaultBrowserPackageNameAsUser(int)}
      *
-     * @param userId The user ID to get the default SMS package for.
-     * @return the package name of the default SMS app, or {@code null} if not configured.
+     * @param userId the user ID
+     * @return the package name of the default browser, or {@code null} if none
+     *
+     * @hide
+     */
+    @Nullable
+    //@SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public String getBrowserRoleHolder(@UserIdInt int userId) {
+        try {
+            return mService.getBrowserRoleHolder(userId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Set the role holder of {@link #ROLE_BROWSER} requiring
+     * {@link Manifest.permission.SET_PREFERRED_APPLICATIONS} instead of
+     * {@link Manifest.permission#MANAGE_ROLE_HOLDERS}, as in
+     * {@link android.content.pm.PackageManager#setDefaultBrowserPackageNameAsUser(String, int)}
+     *
+     * @param packageName the package name of the default browser, or {@code null} if none
+     * @param userId the user ID
+     * @return whether the default browser was set successfully
+     *
+     * @hide
+     */
+    @Nullable
+    @RequiresPermission(Manifest.permission.SET_PREFERRED_APPLICATIONS)
+    //@SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public boolean setBrowserRoleHolder(@Nullable String packageName, @UserIdInt int userId) {
+        try {
+            return mService.setBrowserRoleHolder(packageName, userId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Allows getting the role holder for {@link #ROLE_SMS} without requiring
+     * {@link Manifest.permission#OBSERVE_ROLE_HOLDERS}, as in
+     * {@link android.provider.Telephony.Sms#getDefaultSmsPackage(Context)}.
+     *
+     * @param userId the user ID to get the default SMS package for
+     * @return the package name of the default SMS app, or {@code null} if none
+     *
      * @hide
      */
     @Nullable
@@ -626,7 +670,7 @@ public final class RoleManager {
     @TestApi
     public String getSmsRoleHolder(@UserIdInt int userId) {
         try {
-            return mService.getDefaultSmsPackage(userId);
+            return mService.getSmsRoleHolder(userId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

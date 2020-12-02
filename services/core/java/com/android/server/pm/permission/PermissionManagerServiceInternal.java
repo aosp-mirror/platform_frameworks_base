@@ -30,7 +30,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import java.util.function.Consumer;
 
 /**
  * Internal interfaces services.
@@ -64,82 +63,6 @@ public abstract class PermissionManagerServiceInternal extends PermissionManager
          * @return The package names.
          */
         String[] getPackages(String authority, int userId);
-    }
-
-    /**
-     * Provider for default browser
-     */
-    public interface DefaultBrowserProvider {
-
-        /**
-         * Get the package name of the default browser.
-         *
-         * @param userId the user id
-         *
-         * @return the package name of the default browser, or {@code null} if none
-         */
-        @Nullable
-        String getDefaultBrowser(@UserIdInt int userId);
-
-        /**
-         * Set the package name of the default browser.
-         *
-         * @param packageName package name of the default browser, or {@code null} to remove
-         * @param userId the user id
-         *
-         * @return whether the default browser was successfully set.
-         */
-        boolean setDefaultBrowser(@Nullable String packageName, @UserIdInt int userId);
-
-        /**
-         * Set the package name of the default browser asynchronously.
-         *
-         * @param packageName package name of the default browser, or {@code null} to remove
-         * @param userId the user id
-         */
-        void setDefaultBrowserAsync(@Nullable String packageName, @UserIdInt int userId);
-    }
-
-    /**
-     * Provider for default dialer
-     */
-    public interface DefaultDialerProvider {
-
-        /**
-         * Get the package name of the default dialer.
-         *
-         * @param userId the user id
-         *
-         * @return the package name of the default dialer, or {@code null} if none
-         */
-        @Nullable
-        String getDefaultDialer(@UserIdInt int userId);
-    }
-
-    /**
-     * Provider for default home
-     */
-    public interface DefaultHomeProvider {
-
-        /**
-         * Get the package name of the default home.
-         *
-         * @param userId the user id
-         *
-         * @return the package name of the default home, or {@code null} if none
-         */
-        @Nullable
-        String getDefaultHome(@UserIdInt int userId);
-
-        /**
-         * Set the package name of the default home.
-         *
-         * @param packageName package name of the default home, or {@code null} to remove
-         * @param userId the user id
-         * @param callback the callback made after the default home as been updated
-         */
-        void setDefaultHomeAsync(@Nullable String packageName, @UserIdInt int userId,
-                @NonNull Consumer<Boolean> callback);
     }
 
     public abstract void systemReady();
@@ -319,69 +242,12 @@ public abstract class PermissionManagerServiceInternal extends PermissionManager
     public abstract void setVoiceInteractionPackagesProvider(PackagesProvider provider);
 
     /**
-     * Sets the default browser provider.
-     *
-     * @param provider the provider
+     * Requests granting of the default permissions to the current default browser.
+     * @param packageName The default browser package name.
+     * @param userId The user for which to grant the permissions.
      */
-    public abstract void setDefaultBrowserProvider(@NonNull DefaultBrowserProvider provider);
-
-    /**
-     * Sets the package name of the default browser provider for the given user.
-     *
-     * @param packageName The package name of the default browser or {@code null}
-     *          to clear the default browser
-     * @param async If {@code true}, set the default browser asynchronously,
-     *          otherwise set it synchronously
-     * @param doGrant If {@code true} and if {@code packageName} is not {@code null},
-     *          perform default permission grants on the browser, otherwise skip the
-     *          default permission grants.
-     * @param userId The user to set the default browser for.
-     */
-    public abstract void setDefaultBrowser(@Nullable String packageName, boolean async,
-            boolean doGrant, @UserIdInt int userId);
-
-    /**
-     * Sets the default dialer provider.
-     *
-     * @param provider the provider
-     */
-    public abstract void setDefaultDialerProvider(@NonNull DefaultDialerProvider provider);
-
-    /**
-     * Sets the default home provider.
-     *
-     * @param provider the provider
-     */
-    public abstract void setDefaultHomeProvider(@NonNull DefaultHomeProvider provider);
-
-    /**
-     * Asynchronously sets the package name of the default home provider for the given user.
-     *
-     * @param packageName The package name of the default home or {@code null}
-     *          to clear the default browser
-     * @param userId The user to set the default browser for
-     * @param callback Invoked after the default home has been set
-     */
-    public abstract void setDefaultHome(@Nullable String packageName, @UserIdInt int userId,
-            @NonNull Consumer<Boolean> callback);
-
-    /**
-     * Returns the default browser package name for the given user.
-     */
-    @Nullable
-    public abstract String getDefaultBrowser(@UserIdInt int userId);
-
-    /**
-     * Returns the default dialer package name for the given user.
-     */
-    @Nullable
-    public abstract String getDefaultDialer(@UserIdInt int userId);
-
-    /**
-     * Returns the default home package name for the given user.
-     */
-    @Nullable
-    public abstract String getDefaultHome(@UserIdInt int userId);
+    public abstract void grantDefaultPermissionsToDefaultBrowser(
+            @NonNull String packageName, @UserIdInt int userId);
 
     /**
      * Requests granting of the default permissions to the current default Use Open Wifi app.

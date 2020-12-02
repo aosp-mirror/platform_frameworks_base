@@ -53,5 +53,9 @@ interface IRoleManager {
 
     List<String> getHeldRolesFromController(in String packageName);
 
-    String getDefaultSmsPackage(int userId);
+    String getBrowserRoleHolder(int userId);
+
+    boolean setBrowserRoleHolder(String packageName, int userId);
+
+    String getSmsRoleHolder(int userId);
 }
