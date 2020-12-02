@@ -468,14 +468,14 @@ public class DisplayAreaTest extends WindowTestsBase {
 
         activity.setRequestedOrientation(SCREEN_ORIENTATION_LANDSCAPE);
 
-        verify(tda).onDescendantOrientationChanged(any(), any());
-        verify(mDisplayContent, never()).onDescendantOrientationChanged(any(), any());
+        verify(tda).onDescendantOrientationChanged(any());
+        verify(mDisplayContent, never()).onDescendantOrientationChanged(any());
 
         tda.setIgnoreOrientationRequest(false /* ignoreOrientationRequest */);
         activity.setRequestedOrientation(SCREEN_ORIENTATION_PORTRAIT);
 
-        verify(tda, times(2)).onDescendantOrientationChanged(any(), any());
-        verify(mDisplayContent).onDescendantOrientationChanged(any(), any());
+        verify(tda, times(2)).onDescendantOrientationChanged(any());
+        verify(mDisplayContent).onDescendantOrientationChanged(any());
     }
 
     private static class TestDisplayArea<T extends WindowContainer> extends DisplayArea<T> {

@@ -4987,14 +4987,16 @@ public final class ActiveServices {
      *  - the first arg isn't the flattened component name of an existing service:
      *    dump all services whose component contains the first arg as a substring
      */
-    protected boolean dumpService(FileDescriptor fd, PrintWriter pw, final String name,
+    protected boolean dumpService(FileDescriptor fd, PrintWriter pw, String name, int[] users,
             String[] args, int opti, boolean dumpAll) {
         final ArrayList<ServiceRecord> services = new ArrayList<>();
 
         final Predicate<ServiceRecord> filter = DumpUtils.filterRecord(name);
 
         synchronized (mAm) {
-            int[] users = mAm.mUserController.getUsers();
+            if (users == null) {
+                users = mAm.mUserController.getUsers();
+            }
 
             for (int user : users) {
                 ServiceMap smap = mServiceMap.get(user);
@@ -5039,11 +5041,13 @@ public final class ActiveServices {
         String innerPrefix = prefix + "  ";
         synchronized (mAm) {
             pw.print(prefix); pw.print("SERVICE ");
-                    pw.print(r.shortInstanceName); pw.print(" ");
-                    pw.print(Integer.toHexString(System.identityHashCode(r)));
-                    pw.print(" pid=");
-                    if (r.app != null) pw.println(r.app.pid);
-                    else pw.println("(not running)");
+            pw.print(r.shortInstanceName); pw.print(" ");
+            pw.print(Integer.toHexString(System.identityHashCode(r)));
+            pw.print(" pid=");
+            if (r.app != null) {
+                pw.print(r.app.pid);
+                pw.print(" user="); pw.println(r.userId);
+            } else pw.println("(not running)");
             if (dumpAll) {
                 r.dump(pw, innerPrefix);
             }

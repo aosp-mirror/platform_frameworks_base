@@ -20,6 +20,8 @@ import android.content.Context;
 import android.hardware.fingerprint.Fingerprint;
 import android.util.AtomicFile;
 import android.util.Slog;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import com.android.internal.annotations.GuardedBy;
@@ -29,7 +31,6 @@ import libcore.io.IoUtils;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -88,8 +89,7 @@ public class FingerprintUserState extends BiometricUserState<Fingerprint> {
         try {
             out = destination.startWrite();
 
-            XmlSerializer serializer = Xml.newSerializer();
-            serializer.setOutput(out, "utf-8");
+            TypedXmlSerializer serializer = Xml.resolveSerializer(out);
             serializer.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
             serializer.startDocument(null, true);
             serializer.startTag(null, TAG_FINGERPRINTS);
@@ -98,10 +98,10 @@ public class FingerprintUserState extends BiometricUserState<Fingerprint> {
             for (int i = 0; i < count; i++) {
                 Fingerprint fp = fingerprints.get(i);
                 serializer.startTag(null, TAG_FINGERPRINT);
-                serializer.attribute(null, ATTR_FINGER_ID, Integer.toString(fp.getBiometricId()));
+                serializer.attributeInt(null, ATTR_FINGER_ID, fp.getBiometricId());
                 serializer.attribute(null, ATTR_NAME, fp.getName().toString());
-                serializer.attribute(null, ATTR_GROUP_ID, Integer.toString(fp.getGroupId()));
-                serializer.attribute(null, ATTR_DEVICE_ID, Long.toString(fp.getDeviceId()));
+                serializer.attributeInt(null, ATTR_GROUP_ID, fp.getGroupId());
+                serializer.attributeLong(null, ATTR_DEVICE_ID, fp.getDeviceId());
                 serializer.endTag(null, TAG_FINGERPRINT);
             }
 
@@ -121,7 +121,7 @@ public class FingerprintUserState extends BiometricUserState<Fingerprint> {
 
     @GuardedBy("this")
     @Override
-    protected void parseBiometricsLocked(XmlPullParser parser)
+    protected void parseBiometricsLocked(TypedXmlPullParser parser)
             throws IOException, XmlPullParserException {
 
         final int outerDepth = parser.getDepth();
@@ -135,11 +135,10 @@ public class FingerprintUserState extends BiometricUserState<Fingerprint> {
             String tagName = parser.getName();
             if (tagName.equals(TAG_FINGERPRINT)) {
                 String name = parser.getAttributeValue(null, ATTR_NAME);
-                String groupId = parser.getAttributeValue(null, ATTR_GROUP_ID);
-                String fingerId = parser.getAttributeValue(null, ATTR_FINGER_ID);
-                String deviceId = parser.getAttributeValue(null, ATTR_DEVICE_ID);
-                mBiometrics.add(new Fingerprint(name, Integer.parseInt(groupId),
-                        Integer.parseInt(fingerId), Long.parseLong(deviceId)));
+                int groupId = parser.getAttributeInt(null, ATTR_GROUP_ID);
+                int fingerId = parser.getAttributeInt(null, ATTR_FINGER_ID);
+                long deviceId = parser.getAttributeLong(null, ATTR_DEVICE_ID);
+                mBiometrics.add(new Fingerprint(name, groupId, fingerId, deviceId));
             }
         }
     }

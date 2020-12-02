@@ -17,6 +17,7 @@
 package android.telephony.ims.stub;
 
 import android.annotation.NonNull;
+import android.annotation.SystemApi;
 import android.telephony.ims.DelegateRegistrationState;
 import android.telephony.ims.DelegateRequest;
 import android.telephony.ims.FeatureTagState;
@@ -58,6 +59,7 @@ import java.util.Set;
  *
  * @hide
  */
+@SystemApi
 public interface DelegateConnectionStateCallback {
 
     /**

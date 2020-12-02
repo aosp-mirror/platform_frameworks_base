@@ -555,22 +555,22 @@ public class BrightnessTracker {
             if (userSerialNo != -1 && toWrite[i].timeStamp > timeCutOff) {
                 mEvents.append(toWrite[i]);
                 out.startTag(null, TAG_EVENT);
-                out.attribute(null, ATTR_NITS, Float.toString(toWrite[i].brightness));
-                out.attribute(null, ATTR_TIMESTAMP, Long.toString(toWrite[i].timeStamp));
+                out.attributeFloat(null, ATTR_NITS, toWrite[i].brightness);
+                out.attributeLong(null, ATTR_TIMESTAMP, toWrite[i].timeStamp);
                 out.attribute(null, ATTR_PACKAGE_NAME, toWrite[i].packageName);
-                out.attribute(null, ATTR_USER, Integer.toString(userSerialNo));
-                out.attribute(null, ATTR_BATTERY_LEVEL, Float.toString(toWrite[i].batteryLevel));
-                out.attribute(null, ATTR_NIGHT_MODE, Boolean.toString(toWrite[i].nightMode));
-                out.attribute(null, ATTR_COLOR_TEMPERATURE, Integer.toString(
-                        toWrite[i].colorTemperature));
-                out.attribute(null, ATTR_LAST_NITS,
-                        Float.toString(toWrite[i].lastBrightness));
-                out.attribute(null, ATTR_DEFAULT_CONFIG,
-                        Boolean.toString(toWrite[i].isDefaultBrightnessConfig));
-                out.attribute(null, ATTR_POWER_SAVE,
-                        Float.toString(toWrite[i].powerBrightnessFactor));
-                out.attribute(null, ATTR_USER_POINT,
-                        Boolean.toString(toWrite[i].isUserSetBrightness));
+                out.attributeInt(null, ATTR_USER, userSerialNo);
+                out.attributeFloat(null, ATTR_BATTERY_LEVEL, toWrite[i].batteryLevel);
+                out.attributeBoolean(null, ATTR_NIGHT_MODE, toWrite[i].nightMode);
+                out.attributeInt(null, ATTR_COLOR_TEMPERATURE,
+                        toWrite[i].colorTemperature);
+                out.attributeFloat(null, ATTR_LAST_NITS,
+                        toWrite[i].lastBrightness);
+                out.attributeBoolean(null, ATTR_DEFAULT_CONFIG,
+                        toWrite[i].isDefaultBrightnessConfig);
+                out.attributeFloat(null, ATTR_POWER_SAVE,
+                        toWrite[i].powerBrightnessFactor);
+                out.attributeBoolean(null, ATTR_USER_POINT,
+                        toWrite[i].isUserSetBrightness);
                 StringBuilder luxValues = new StringBuilder();
                 StringBuilder luxTimestamps = new StringBuilder();
                 for (int j = 0; j < toWrite[i].luxValues.length; ++j) {
@@ -585,8 +585,8 @@ public class BrightnessTracker {
                 out.attribute(null, ATTR_LUX_TIMESTAMPS, luxTimestamps.toString());
                 if (toWrite[i].colorValueBuckets != null
                         && toWrite[i].colorValueBuckets.length > 0) {
-                    out.attribute(null, ATTR_COLOR_SAMPLE_DURATION,
-                            Long.toString(toWrite[i].colorSampleDuration));
+                    out.attributeLong(null, ATTR_COLOR_SAMPLE_DURATION,
+                            toWrite[i].colorSampleDuration);
                     StringBuilder buckets = new StringBuilder();
                     for (int j = 0; j < toWrite[i].colorValueBuckets.length; ++j) {
                         if (j > 0) {
@@ -633,22 +633,16 @@ public class BrightnessTracker {
                 if (TAG_EVENT.equals(tag)) {
                     BrightnessChangeEvent.Builder builder = new BrightnessChangeEvent.Builder();
 
-                    String brightness = parser.getAttributeValue(null, ATTR_NITS);
-                    builder.setBrightness(Float.parseFloat(brightness));
-                    String timestamp = parser.getAttributeValue(null, ATTR_TIMESTAMP);
-                    builder.setTimeStamp(Long.parseLong(timestamp));
+                    builder.setBrightness(parser.getAttributeFloat(null, ATTR_NITS));
+                    builder.setTimeStamp(parser.getAttributeLong(null, ATTR_TIMESTAMP));
                     builder.setPackageName(parser.getAttributeValue(null, ATTR_PACKAGE_NAME));
-                    String user = parser.getAttributeValue(null, ATTR_USER);
-                    builder.setUserId(mInjector.getUserId(mUserManager, Integer.parseInt(user)));
-                    String batteryLevel = parser.getAttributeValue(null, ATTR_BATTERY_LEVEL);
-                    builder.setBatteryLevel(Float.parseFloat(batteryLevel));
-                    String nightMode = parser.getAttributeValue(null, ATTR_NIGHT_MODE);
-                    builder.setNightMode(Boolean.parseBoolean(nightMode));
-                    String colorTemperature =
-                            parser.getAttributeValue(null, ATTR_COLOR_TEMPERATURE);
-                    builder.setColorTemperature(Integer.parseInt(colorTemperature));
-                    String lastBrightness = parser.getAttributeValue(null, ATTR_LAST_NITS);
-                    builder.setLastBrightness(Float.parseFloat(lastBrightness));
+                    builder.setUserId(mInjector.getUserId(mUserManager,
+                            parser.getAttributeInt(null, ATTR_USER)));
+                    builder.setBatteryLevel(parser.getAttributeFloat(null, ATTR_BATTERY_LEVEL));
+                    builder.setNightMode(parser.getAttributeBoolean(null, ATTR_NIGHT_MODE));
+                    builder.setColorTemperature(
+                            parser.getAttributeInt(null, ATTR_COLOR_TEMPERATURE));
+                    builder.setLastBrightness(parser.getAttributeFloat(null, ATTR_LAST_NITS));
 
                     String luxValue = parser.getAttributeValue(null, ATTR_LUX);
                     String luxTimestamp = parser.getAttributeValue(null, ATTR_LUX_TIMESTAMPS);
@@ -667,20 +661,12 @@ public class BrightnessTracker {
                     builder.setLuxValues(luxValues);
                     builder.setLuxTimestamps(luxTimestamps);
 
-                    String defaultConfig = parser.getAttributeValue(null, ATTR_DEFAULT_CONFIG);
-                    if (defaultConfig != null) {
-                        builder.setIsDefaultBrightnessConfig(Boolean.parseBoolean(defaultConfig));
-                    }
-                    String powerSave = parser.getAttributeValue(null, ATTR_POWER_SAVE);
-                    if (powerSave != null) {
-                        builder.setPowerBrightnessFactor(Float.parseFloat(powerSave));
-                    } else {
-                        builder.setPowerBrightnessFactor(1.0f);
-                    }
-                    String userPoint = parser.getAttributeValue(null, ATTR_USER_POINT);
-                    if (userPoint != null) {
-                        builder.setUserBrightnessPoint(Boolean.parseBoolean(userPoint));
-                    }
+                    builder.setIsDefaultBrightnessConfig(
+                            parser.getAttributeBoolean(null, ATTR_DEFAULT_CONFIG, false));
+                    builder.setPowerBrightnessFactor(
+                            parser.getAttributeFloat(null, ATTR_POWER_SAVE, 1.0f));
+                    builder.setUserBrightnessPoint(
+                            parser.getAttributeBoolean(null, ATTR_USER_POINT, false));
 
                     String colorSampleDurationString =
                             parser.getAttributeValue(null, ATTR_COLOR_SAMPLE_DURATION);

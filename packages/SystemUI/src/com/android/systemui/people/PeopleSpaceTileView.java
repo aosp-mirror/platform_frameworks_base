@@ -16,10 +16,12 @@
 
 package com.android.systemui.people;
 
+import android.app.people.PeopleSpaceTile;
 import android.content.Context;
 import android.content.pm.LauncherApps;
-import android.content.pm.ShortcutInfo;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.Icon;
+import android.os.UserHandle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -71,13 +73,15 @@ public class PeopleSpaceTileView extends LinearLayout {
         mPackageIconView.setImageDrawable(drawable);
     }
 
-    /** Sets the person drawable on the tile. */
-    public void setPersonIcon(Drawable drawable) {
-        mPersonIconView.setImageDrawable(drawable);
+    /** Sets the person bitmap on the tile. */
+    public void setPersonIcon(Icon icon) {
+        mPersonIconView.setImageIcon(icon);
     }
 
     /** Sets the click listener of the tile. */
-    public void setOnClickListener(LauncherApps launcherApps, ShortcutInfo shortcutInfo) {
-        mTileView.setOnClickListener(v -> launcherApps.startShortcut(shortcutInfo, null, null));
+    public void setOnClickListener(LauncherApps launcherApps, PeopleSpaceTile tile) {
+        mTileView.setOnClickListener(v ->
+                launcherApps.startShortcut(tile.getPackageName(), tile.getId(), null, null,
+                        UserHandle.getUserHandleForUid(tile.getUid())));
     }
 }

@@ -22,6 +22,7 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.Bundle;
+import android.service.attestation.ImpressionToken;
 import android.util.MergedConfiguration;
 import android.view.DisplayCutout;
 import android.view.InputChannel;
@@ -344,4 +345,16 @@ interface IWindowSession {
      *                     window, the system will try to find a new focus target.
      */
     void grantEmbeddedWindowFocus(IWindow window, in IBinder inputToken, boolean grantFocus);
+
+    /**
+     * Generates an impression token that can be used to validate whether specific content was on
+     * screen.
+     *
+     * @param window The token for the window where the view to attest is shown.
+     * @param boundsInWindow The size and position of the ads view in the window
+     * @param hashAlgorithm The String for the hashing algorithm to use based on values returned
+     *                      from {@link IWindowManager#getSupportedImpressionAlgorithms()}
+     */
+    ImpressionToken generateImpressionToken(IWindow window, in Rect boundsInWindow,
+            in String hashAlgorithm);
 }

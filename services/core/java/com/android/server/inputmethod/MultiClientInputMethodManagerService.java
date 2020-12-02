@@ -72,6 +72,8 @@ import android.view.inputmethod.InputMethodSubtype;
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.inputmethod.CallbackUtils;
+import com.android.internal.inputmethod.IInputBindResultResultCallback;
 import com.android.internal.inputmethod.IMultiClientInputMethod;
 import com.android.internal.inputmethod.IMultiClientInputMethodPrivilegedOperations;
 import com.android.internal.inputmethod.IMultiClientInputMethodSession;
@@ -104,6 +106,7 @@ import java.lang.annotation.Retention;
 import java.util.Collections;
 import java.util.List;
 import java.util.WeakHashMap;
+import java.util.function.Supplier;
 
 /**
  * Actual implementation of multi-client InputMethodManagerService.
@@ -1588,7 +1591,26 @@ public final class MultiClientInputMethodManagerService {
 
         @BinderThread
         @Override
-        public InputBindResult startInputOrWindowGainedFocus(
+        public void startInputOrWindowGainedFocus(
+                @StartInputReason int startInputReason,
+                @Nullable IInputMethodClient client,
+                @Nullable IBinder windowToken,
+                @StartInputFlags int startInputFlags,
+                @SoftInputModeFlags int softInputMode,
+                int windowFlags,
+                @Nullable EditorInfo editorInfo,
+                @Nullable IInputContext inputContext,
+                @MissingMethodFlags int missingMethods,
+                int unverifiedTargetSdkVersion,
+                IInputBindResultResultCallback resultCallback) {
+            CallbackUtils.onResult(resultCallback, (Supplier<InputBindResult>) () ->
+                    startInputOrWindowGainedFocusInternal(startInputReason, client, windowToken,
+                            startInputFlags, softInputMode, windowFlags, editorInfo, inputContext,
+                            missingMethods, unverifiedTargetSdkVersion));
+        }
+
+        @BinderThread
+        private InputBindResult startInputOrWindowGainedFocusInternal(
                 @StartInputReason int startInputReason,
                 @Nullable IInputMethodClient client,
                 @Nullable IBinder windowToken,
@@ -1676,8 +1698,7 @@ public final class MultiClientInputMethodManagerService {
                                 clientInfo.mMSInputMethodSession.startInputOrWindowGainedFocus(
                                         inputContext, missingMethods, editorInfo, startInputFlags,
                                         softInputMode, windowHandle);
-                            } catch (RemoteException e) {
-                            }
+                            } catch (RemoteException ignored) { }
                             break;
                     }
                     return InputBindResult.NULL_EDITOR_INFO;
@@ -1708,8 +1729,7 @@ public final class MultiClientInputMethodManagerService {
                             clientInfo.mMSInputMethodSession.startInputOrWindowGainedFocus(
                                     inputContext, missingMethods, editorInfo, startInputFlags,
                                     softInputMode, windowHandle);
-                        } catch (RemoteException e) {
-                        }
+                        } catch (RemoteException ignored) { }
                         clientInfo.mState = InputMethodClientState.ALREADY_SENT_BIND_RESULT;
                         return new InputBindResult(
                                 InputBindResult.ResultCode.SUCCESS_WITH_IME_SESSION,

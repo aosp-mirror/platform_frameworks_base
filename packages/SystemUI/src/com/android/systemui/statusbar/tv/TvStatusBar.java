@@ -71,7 +71,6 @@ public class TvStatusBar extends SystemUI implements CommandQueue.Callbacks {
             // Creating AudioRecordingDisclosureBar and just letting it run
             new AudioRecordingDisclosureBar(mContext);
         }
-
     }
 
     @Override

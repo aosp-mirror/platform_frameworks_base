@@ -200,6 +200,21 @@ public class VolumeInfo implements Parcelable {
         internalPath = parcel.readString8();
     }
 
+    public VolumeInfo(VolumeInfo volumeInfo) {
+        this.id = volumeInfo.id;
+        this.type = volumeInfo.type;
+        this.disk = volumeInfo.disk;
+        this.partGuid = volumeInfo.partGuid;
+        this.mountFlags = volumeInfo.mountFlags;
+        this.mountUserId = volumeInfo.mountUserId;
+        this.state = volumeInfo.state;
+        this.fsType = volumeInfo.fsType;
+        this.fsUuid = volumeInfo.fsUuid;
+        this.fsLabel = volumeInfo.fsLabel;
+        this.path = volumeInfo.path;
+        this.internalPath = volumeInfo.internalPath;
+    }
+
     @UnsupportedAppUsage
     public static @NonNull String getEnvironmentForState(int state) {
         final String envState = sStateToEnvironment.get(state);

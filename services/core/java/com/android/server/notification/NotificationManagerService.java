@@ -231,6 +231,8 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.StatsEvent;
 import android.util.Xml;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 import android.util.proto.ProtoOutputStream;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
@@ -743,8 +745,13 @@ public class NotificationManagerService extends SystemService {
 
     void readPolicyXml(InputStream stream, boolean forRestore, int userId)
             throws XmlPullParserException, NumberFormatException, IOException {
-        final XmlPullParser parser = Xml.newPullParser();
-        parser.setInput(stream, StandardCharsets.UTF_8.name());
+        final TypedXmlPullParser parser;
+        if (forRestore) {
+            parser = Xml.newFastPullParser();
+            parser.setInput(stream, StandardCharsets.UTF_8.name());
+        } else {
+            parser = Xml.resolvePullParser(stream);
+        }
         XmlUtils.beginDocument(parser, TAG_NOTIFICATION_POLICY);
         boolean migratedManagedServices = false;
         boolean ineligibleForManagedServices = forRestore && mUm.isManagedProfile(userId);
@@ -781,9 +788,8 @@ public class NotificationManagerService extends SystemService {
                 if (forRestore && userId != UserHandle.USER_SYSTEM) {
                     continue;
                 }
-                mLockScreenAllowSecureNotifications =
-                        safeBoolean(parser.getAttributeValue(null,
-                                        LOCKSCREEN_ALLOW_SECURE_NOTIFICATIONS_VALUE), true);
+                mLockScreenAllowSecureNotifications = parser.getAttributeBoolean(null,
+                        LOCKSCREEN_ALLOW_SECURE_NOTIFICATIONS_VALUE, true);
             }
         }
 
@@ -856,11 +862,16 @@ public class NotificationManagerService extends SystemService {
 
     private void writePolicyXml(OutputStream stream, boolean forBackup, int userId)
             throws IOException {
-        final XmlSerializer out = new FastXmlSerializer();
-        out.setOutput(stream, StandardCharsets.UTF_8.name());
+        final TypedXmlSerializer out;
+        if (forBackup) {
+            out = Xml.newFastSerializer();
+            out.setOutput(stream, StandardCharsets.UTF_8.name());
+        } else {
+            out = Xml.resolveSerializer(stream);
+        }
         out.startDocument(null, true);
         out.startTag(null, TAG_NOTIFICATION_POLICY);
-        out.attribute(null, ATTR_VERSION, Integer.toString(DB_VERSION));
+        out.attributeInt(null, ATTR_VERSION, DB_VERSION);
         mZenModeHelper.writeXml(out, forBackup, null, userId);
         mPreferencesHelper.writeXml(out, forBackup, userId);
         mListeners.writeXml(out, forBackup, userId);
@@ -8975,7 +8986,7 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
-        protected void writeExtraXmlTags(XmlSerializer out) throws IOException {
+        protected void writeExtraXmlTags(TypedXmlSerializer out) throws IOException {
             synchronized (mLock) {
                 out.startTag(null, TAG_ALLOWED_ADJUSTMENT_TYPES);
                 out.attribute(null, ATT_TYPES, TextUtils.join(",", mAllowedAdjustments));
@@ -8984,7 +8995,7 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
-        protected void readExtraTag(String tag, XmlPullParser parser) throws IOException {
+        protected void readExtraTag(String tag, TypedXmlPullParser parser) throws IOException {
             if (TAG_ALLOWED_ADJUSTMENT_TYPES.equals(tag)) {
                 final String types = XmlUtils.readStringAttribute(parser, ATT_TYPES);
                 synchronized (mLock) {
@@ -9104,9 +9115,9 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
-        protected void readExtraAttributes(String tag, XmlPullParser parser, int userId)
+        protected void readExtraAttributes(String tag, TypedXmlPullParser parser, int userId)
                 throws IOException {
-            boolean userSet = XmlUtils.readBooleanAttribute(parser, ATT_USER_SET, false);
+            boolean userSet = parser.getAttributeBoolean(null, ATT_USER_SET, false);
             setUserSet(userId, userSet);
         }
 
@@ -10106,16 +10117,11 @@ public class NotificationManagerService extends SystemService {
         }
     }
 
-    private void writeSecureNotificationsPolicy(XmlSerializer out) throws IOException {
+    private void writeSecureNotificationsPolicy(TypedXmlSerializer out) throws IOException {
         out.startTag(null, LOCKSCREEN_ALLOW_SECURE_NOTIFICATIONS_TAG);
-        out.attribute(null, LOCKSCREEN_ALLOW_SECURE_NOTIFICATIONS_VALUE,
-                Boolean.toString(mLockScreenAllowSecureNotifications));
+        out.attributeBoolean(null, LOCKSCREEN_ALLOW_SECURE_NOTIFICATIONS_VALUE,
+                mLockScreenAllowSecureNotifications);
         out.endTag(null, LOCKSCREEN_ALLOW_SECURE_NOTIFICATIONS_TAG);
-    }
-
-    private static boolean safeBoolean(String val, boolean defValue) {
-        if (TextUtils.isEmpty(val)) return defValue;
-        return Boolean.parseBoolean(val);
     }
 
     /**

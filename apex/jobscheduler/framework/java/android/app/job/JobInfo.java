@@ -462,11 +462,11 @@ public class JobInfo implements Parcelable {
     public @NetworkType int getNetworkType() {
         if (networkRequest == null) {
             return NETWORK_TYPE_NONE;
-        } else if (networkRequest.networkCapabilities.hasCapability(NET_CAPABILITY_NOT_METERED)) {
+        } else if (networkRequest.hasCapability(NET_CAPABILITY_NOT_METERED)) {
             return NETWORK_TYPE_UNMETERED;
-        } else if (networkRequest.networkCapabilities.hasCapability(NET_CAPABILITY_NOT_ROAMING)) {
+        } else if (networkRequest.hasCapability(NET_CAPABILITY_NOT_ROAMING)) {
             return NETWORK_TYPE_NOT_ROAMING;
-        } else if (networkRequest.networkCapabilities.hasTransport(TRANSPORT_CELLULAR)) {
+        } else if (networkRequest.hasTransport(TRANSPORT_CELLULAR)) {
             return NETWORK_TYPE_CELLULAR;
         } else {
             return NETWORK_TYPE_ANY;
@@ -1558,7 +1558,7 @@ public class JobInfo implements Parcelable {
         if (isPersisted) {
             // We can't serialize network specifiers
             if (networkRequest != null
-                    && networkRequest.networkCapabilities.getNetworkSpecifier() != null) {
+                    && networkRequest.getNetworkSpecifier() != null) {
                 throw new IllegalArgumentException(
                         "Network specifiers aren't supported for persistent jobs");
             }

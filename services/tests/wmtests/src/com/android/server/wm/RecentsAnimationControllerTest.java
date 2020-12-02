@@ -322,7 +322,7 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
         assertEquals(landActivity.findMainWindow(), win1);
 
         // Ensure that the display is in Landscape
-        landActivity.onDescendantOrientationChanged(landActivity.token, landActivity);
+        landActivity.onDescendantOrientationChanged(landActivity);
         assertEquals(Configuration.ORIENTATION_LANDSCAPE,
                 mDefaultDisplay.getConfiguration().orientation);
 

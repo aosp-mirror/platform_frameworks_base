@@ -408,7 +408,8 @@ public class RestrictedLockUtilsInternal extends RestrictedLockUtils {
     }
 
     /**
-     * Checks if an admin has enforced minimum password quality requirements on the given user.
+     * Checks if an admin has enforced minimum password quality or complexity requirements on the
+     * given user.
      *
      * @return EnforcedAdmin Object containing the enforced admin component and admin user details,
      * or {@code null} if no quality requirements are set. If the requirements are set by
@@ -428,6 +429,30 @@ public class RestrictedLockUtilsInternal extends RestrictedLockUtils {
         }
 
         LockPatternUtils lockPatternUtils = new LockPatternUtils(context);
+        final int aggregatedComplexity = dpm.getAggregatedPasswordComplexityForUser(userId);
+        if (aggregatedComplexity > DevicePolicyManager.PASSWORD_COMPLEXITY_NONE) {
+            // First, check if there's a Device Owner. If so, then only it can apply password
+            // complexity requiremnts (there can be no secondary profiles).
+            final UserHandle deviceOwnerUser = dpm.getDeviceOwnerUser();
+            if (deviceOwnerUser != null) {
+                return new EnforcedAdmin(dpm.getDeviceOwnerComponentOnAnyUser(), deviceOwnerUser);
+            }
+
+            // The complexity could be enforced by a Profile Owner - either in the current user
+            // or the current user is the parent user that is affected by the profile owner.
+            for (UserInfo userInfo : UserManager.get(context).getProfiles(userId)) {
+                final ComponentName profileOwnerComponent = dpm.getProfileOwnerAsUser(userInfo.id);
+                if (profileOwnerComponent != null) {
+                    return new EnforcedAdmin(profileOwnerComponent, getUserHandleOf(userInfo.id));
+                }
+            }
+
+            // Should not get here: A Device Owner or Profile Owner should be found.
+            throw new IllegalStateException(
+                    String.format("Could not find admin enforcing complexity %d for user %d",
+                            aggregatedComplexity, userId));
+        }
+
         if (sProxy.isSeparateProfileChallengeEnabled(lockPatternUtils, userId)) {
             // userId is managed profile and has a separate challenge, only consider
             // the admins in that user.

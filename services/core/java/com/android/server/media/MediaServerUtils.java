@@ -18,6 +18,9 @@ package com.android.server.media;
 
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.media.AudioAttributes;
+import android.media.AudioManager;
+import android.media.AudioPlaybackConfiguration;
 import android.os.Binder;
 
 import java.io.PrintWriter;
@@ -29,7 +32,7 @@ class MediaServerUtils {
     /**
      * Verify that caller holds {@link android.Manifest.permission#DUMP}.
      */
-    public static boolean checkDumpPermission(Context context, String tag, PrintWriter pw) {
+    static boolean checkDumpPermission(Context context, String tag, PrintWriter pw) {
         if (context.checkCallingOrSelfPermission(android.Manifest.permission.DUMP)
                 != PackageManager.PERMISSION_GRANTED) {
             pw.println("Permission Denial: can't dump " + tag + " from from pid="
@@ -39,5 +42,19 @@ class MediaServerUtils {
         } else {
             return true;
         }
+    }
+
+    /**
+     * Whether the given stream is currently active or not.
+     */
+    static boolean isStreamActive(AudioManager audioManager, int stream) {
+        for (AudioPlaybackConfiguration configuration
+                : audioManager.getActivePlaybackConfigurations()) {
+            AudioAttributes attributes = configuration.getAudioAttributes();
+            if (attributes != null && attributes.getVolumeControlStream() == stream) {
+                return configuration.isActive();
+            }
+        }
+        return false;
     }
 }

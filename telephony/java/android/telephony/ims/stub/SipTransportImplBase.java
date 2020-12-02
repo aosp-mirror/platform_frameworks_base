@@ -17,6 +17,7 @@
 package android.telephony.ims.stub;
 
 import android.annotation.NonNull;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.os.Binder;
 import android.os.IBinder;
@@ -32,7 +33,6 @@ import android.telephony.ims.aidl.SipDelegateAidlWrapper;
 import android.util.Log;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Executor;
 
@@ -99,7 +99,8 @@ public class SipTransportImplBase {
     /**
      * Called by the Telephony framework to request the creation of a new {@link SipDelegate}.
      * <p>
-     * The implementation must call {@link DelegateStateCallback#onCreated(SipDelegate, List)} with
+     * The implementation must call
+     * {@link DelegateStateCallback#onCreated(SipDelegate, java.util.Set)} with
      * the {@link SipDelegate} that is associated with the {@link DelegateRequest}.
      * <p>
      * This method will be called on the Executor specified in
@@ -112,8 +113,9 @@ public class SipTransportImplBase {
      *           for the SipDelegate.
      * @param mc A callback back to the remote application to be used to send SIP messages to the
      *           remote application and acknowledge the sending of outgoing SIP messages.
-     * @hide
      */
+    // executor used is defined in the constructor.
+    @SuppressLint("ExecutorRegistration")
     public void createSipDelegate(int subscriptionId, @NonNull DelegateRequest request,
             @NonNull DelegateStateCallback dc, @NonNull DelegateMessageCallback mc) {
         throw new UnsupportedOperationException("createSipDelegate not implemented!");
@@ -130,7 +132,6 @@ public class SipTransportImplBase {
      * @param delegate The delegate to be destroyed.
      * @param reason The reason the remote connection to this {@link SipDelegate} is being
      *         destroyed.
-     * @hide
      */
     public void destroySipDelegate(@NonNull SipDelegate delegate,
             @SipDelegateManager.SipDelegateDestroyReason int reason) {

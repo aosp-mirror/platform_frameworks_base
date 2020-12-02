@@ -98,6 +98,8 @@ import android.os.UserHandle;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.util.Log;
 import android.util.SparseArray;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import com.android.frameworks.servicestests.R;
@@ -8695,7 +8697,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
 
         // Write ShareTargets to Xml
         ByteArrayOutputStream outStream = new ByteArrayOutputStream();
-        final XmlSerializer outXml = new FastXmlSerializer();
+        final TypedXmlSerializer outXml = Xml.newFastSerializer();
         outXml.setOutput(outStream, StandardCharsets.UTF_8.name());
         outXml.startDocument(null, true);
         for (int i = 0; i < expectedValues.size(); i++) {
@@ -8706,7 +8708,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
 
         // Read ShareTargets from Xml
         ByteArrayInputStream inStream = new ByteArrayInputStream(outStream.toByteArray());
-        XmlPullParser parser = Xml.newPullParser();
+        TypedXmlPullParser parser = Xml.newFastPullParser();
         parser.setInput(new InputStreamReader(inStream));
         List<ShareTargetInfo> shareTargets = new ArrayList<>();
         int type;

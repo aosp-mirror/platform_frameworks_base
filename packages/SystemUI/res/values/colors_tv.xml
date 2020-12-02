@@ -33,4 +33,7 @@
     <color name="tv_volume_dialog_seek_bar_background">#A03C4043</color>
     <color name="tv_volume_dialog_seek_bar_fill">#FFF8F9FA</color>
     <color name="tv_volume_dialog_accent">#FFDADCE0</color>
+
+    <color name="tv_notification_background_color">#383838</color>
+    <color name="tv_notification_text_color">#FFFFFF</color>
 </resources>

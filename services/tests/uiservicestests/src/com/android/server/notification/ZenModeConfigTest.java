@@ -30,6 +30,8 @@ import android.service.notification.ZenModeConfig;
 import android.service.notification.ZenModeConfig.EventInfo;
 import android.service.notification.ZenPolicy;
 import android.test.suitebuilder.annotation.SmallTest;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import androidx.test.runner.AndroidJUnit4;
@@ -199,7 +201,7 @@ public class ZenModeConfigTest extends UiServiceTestCase {
         rule.name = "name";
         rule.snoozing = true;
 
-        XmlSerializer out = new FastXmlSerializer();
+        TypedXmlSerializer out = Xml.newFastSerializer();
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         out.setOutput(new BufferedOutputStream(baos), "utf-8");
         out.startDocument(null, true);
@@ -208,7 +210,7 @@ public class ZenModeConfigTest extends UiServiceTestCase {
         out.endTag(null, tag);
         out.endDocument();
 
-        XmlPullParser parser = Xml.newPullParser();
+        TypedXmlPullParser parser = Xml.newFastPullParser();
         parser.setInput(new BufferedInputStream(
                 new ByteArrayInputStream(baos.toByteArray())), null);
         parser.nextTag();

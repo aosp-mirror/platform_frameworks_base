@@ -369,16 +369,16 @@ public final class Settings {
 
     // The user's preferred activities associated with particular intent
     // filters.
-    final SparseArray<PreferredIntentResolver> mPreferredActivities =
+    private final SparseArray<PreferredIntentResolver> mPreferredActivities =
             new SparseArray<PreferredIntentResolver>();
 
     // The persistent preferred activities of the user's profile/device owner
     // associated with particular intent filters.
-    final SparseArray<PersistentPreferredIntentResolver> mPersistentPreferredActivities =
+    private final SparseArray<PersistentPreferredIntentResolver> mPersistentPreferredActivities =
             new SparseArray<PersistentPreferredIntentResolver>();
 
     // For every user, it is used to find to which other users the intent can be forwarded.
-    final SparseArray<CrossProfileIntentResolver> mCrossProfileIntentResolvers =
+    private final SparseArray<CrossProfileIntentResolver> mCrossProfileIntentResolvers =
             new SparseArray<CrossProfileIntentResolver>();
 
     final ArrayMap<String, SharedUserSetting> mSharedUsers = new ArrayMap<>();
@@ -467,7 +467,7 @@ public final class Settings {
     }
 
     private static void invalidatePackageCache() {
-        PackageManager.invalidatePackageInfoCache();
+        PackageManagerService.invalidatePackageInfoCache();
         ChangeIdStateCache.invalidate();
     }
 
@@ -5540,6 +5540,132 @@ public final class Settings {
                 if (callback != null) {
                     callback.run();
                 }
+            }
+        }
+    }
+
+    /**
+     * Accessor for preferred activities
+     */
+    PersistentPreferredIntentResolver getPersistentPreferredActivities(int userId) {
+        return mPersistentPreferredActivities.get(userId);
+    }
+
+    PreferredIntentResolver getPreferredActivities(int userId) {
+        return mPreferredActivities.get(userId);
+    }
+
+    CrossProfileIntentResolver getCrossProfileIntentResolvers(int userId) {
+        return mCrossProfileIntentResolvers.get(userId);
+    }
+
+    /** This method takes a specific user id as well as UserHandle.USER_ALL. */
+    void clearPackagePreferredActivities(String packageName,
+            @NonNull SparseBooleanArray outUserChanged, int userId) {
+        ArrayList<PreferredActivity> removed = null;
+        for (int i = 0; i < mPreferredActivities.size(); i++) {
+            final int thisUserId = mPreferredActivities.keyAt(i);
+            PreferredIntentResolver pir = mPreferredActivities.valueAt(i);
+            if (userId != UserHandle.USER_ALL && userId != thisUserId) {
+                continue;
+            }
+            Iterator<PreferredActivity> it = pir.filterIterator();
+            while (it.hasNext()) {
+                PreferredActivity pa = it.next();
+                // Mark entry for removal only if it matches the package name
+                // and the entry is of type "always".
+                if (packageName == null
+                        || (pa.mPref.mComponent.getPackageName().equals(packageName)
+                                && pa.mPref.mAlways)) {
+                    if (removed == null) {
+                        removed = new ArrayList<>();
+                    }
+                    removed.add(pa);
+                }
+            }
+            if (removed != null) {
+                for (int j = 0; j < removed.size(); j++) {
+                    PreferredActivity pa = removed.get(j);
+                    pir.removeFilter(pa);
+                }
+                outUserChanged.put(thisUserId, true);
+            }
+        }
+    }
+
+    boolean clearPackagePersistentPreferredActivities(String packageName, int userId) {
+        ArrayList<PersistentPreferredActivity> removed = null;
+        boolean changed = false;
+        for (int i = 0; i < mPersistentPreferredActivities.size(); i++) {
+            final int thisUserId = mPersistentPreferredActivities.keyAt(i);
+            PersistentPreferredIntentResolver ppir = mPersistentPreferredActivities.valueAt(i);
+            if (userId != thisUserId) {
+                continue;
+            }
+            Iterator<PersistentPreferredActivity> it = ppir.filterIterator();
+            while (it.hasNext()) {
+                PersistentPreferredActivity ppa = it.next();
+                // Mark entry for removal only if it matches the package name.
+                if (ppa.mComponent.getPackageName().equals(packageName)) {
+                    if (removed == null) {
+                        removed = new ArrayList<>();
+                    }
+                    removed.add(ppa);
+                }
+            }
+            if (removed != null) {
+                for (int j = 0; j < removed.size(); j++) {
+                    PersistentPreferredActivity ppa = removed.get(j);
+                    ppir.removeFilter(ppa);
+                }
+                changed = true;
+            }
+        }
+        return changed;
+    }
+
+    ArrayList<Integer> systemReady(ComponentResolver resolver) {
+        // Verify that all of the preferred activity components actually
+        // exist.  It is possible for applications to be updated and at
+        // that point remove a previously declared activity component that
+        // had been set as a preferred activity.  We try to clean this up
+        // the next time we encounter that preferred activity, but it is
+        // possible for the user flow to never be able to return to that
+        // situation so here we do a validity check to make sure we haven't
+        // left any junk around.
+        ArrayList<Integer> changed = new ArrayList<>();
+        ArrayList<PreferredActivity> removed = new ArrayList<>();
+        for (int i = 0; i < mPreferredActivities.size(); i++) {
+            PreferredIntentResolver pir = mPreferredActivities.valueAt(i);
+            removed.clear();
+            for (PreferredActivity pa : pir.filterSet()) {
+                if (!resolver.isActivityDefined(pa.mPref.mComponent)) {
+                    removed.add(pa);
+                }
+            }
+            if (removed.size() > 0) {
+                for (int r = 0; r < removed.size(); r++) {
+                    PreferredActivity pa = removed.get(r);
+                    Slog.w(TAG, "Removing dangling preferred activity: "
+                            + pa.mPref.mComponent);
+                    pir.removeFilter(pa);
+                }
+                changed.add(mPreferredActivities.keyAt(i));
+            }
+        }
+        return changed;
+    }
+
+    void dumpPreferred(PrintWriter pw, DumpState dumpState, String packageName) {
+        for (int i = 0; i < mPreferredActivities.size(); i++) {
+            PreferredIntentResolver pir = mPreferredActivities.valueAt(i);
+            int user = mPreferredActivities.keyAt(i);
+            if (pir.dump(pw,
+                         dumpState.getTitlePrinted()
+                         ? "\nPreferred Activities User " + user + ":"
+                         : "Preferred Activities User " + user + ":", "  ",
+                         packageName, true, false)) {
+                dumpState.setTitlePrinted(true);
             }
         }
     }

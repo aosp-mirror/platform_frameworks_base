@@ -18,7 +18,12 @@ package android.app.people;
 
 import android.annotation.NonNull;
 import android.content.Intent;
+import android.content.pm.LauncherApps;
 import android.content.pm.ShortcutInfo;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
 import android.net.Uri;
 import android.os.Parcel;
@@ -147,10 +152,10 @@ public class PeopleSpaceTile implements Parcelable {
             mPackageName = intent == null ? null : intent.getPackage();
         }
 
-        public Builder(ShortcutInfo info) {
+        public Builder(ShortcutInfo info, LauncherApps launcherApps) {
             mId = info.getId();
             mUserName = info.getLabel();
-            mUserIcon = info.getIcon();
+            mUserIcon = convertDrawableToIcon(launcherApps.getShortcutIconDrawable(info, 0));
             mUid = info.getUserId();
             mPackageName = info.getPackage();
         }
@@ -270,4 +275,32 @@ public class PeopleSpaceTile implements Parcelable {
                     return new PeopleSpaceTile[size];
                 }
             };
+
+    /** Converts {@code drawable} to a {@link Icon}. */
+    public static Icon convertDrawableToIcon(Drawable drawable) {
+        if (drawable == null) {
+            return null;
+        }
+
+        if (drawable instanceof BitmapDrawable) {
+            BitmapDrawable bitmapDrawable = (BitmapDrawable) drawable;
+            if (bitmapDrawable.getBitmap() != null) {
+                return Icon.createWithBitmap(bitmapDrawable.getBitmap());
+            }
+        }
+
+        Bitmap bitmap;
+        if (drawable.getIntrinsicWidth() <= 0 || drawable.getIntrinsicHeight() <= 0) {
+            bitmap = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
+            // Single color bitmap will be created of 1x1 pixel
+        } else {
+            bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(),
+                    drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+        }
+
+        Canvas canvas = new Canvas(bitmap);
+        drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+        drawable.draw(canvas);
+        return Icon.createWithBitmap(bitmap);
+    }
 }

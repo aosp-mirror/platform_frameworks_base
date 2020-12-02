@@ -34,7 +34,6 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
-import android.provider.Settings.Global;
 import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
 import android.util.Log;
@@ -670,15 +669,6 @@ public class UserRestrictionsUtils {
                                 Settings.Secure.DOZE_DOUBLE_TAP_GESTURE, 0, userId);
                     }
                     break;
-                case UserManager.DISALLOW_CONFIG_LOCATION:
-                    // When DISALLOW_CONFIG_LOCATION is set on any user, we undo the global
-                    // kill switch.
-                    if (newValue) {
-                        android.provider.Settings.Global.putString(
-                                context.getContentResolver(),
-                                Global.LOCATION_GLOBAL_KILL_SWITCH, "0");
-                    }
-                    break;
                 case UserManager.DISALLOW_APPS_CONTROL:
                     // Intentional fall-through
                 case UserManager.DISALLOW_UNINSTALL_APPS:
@@ -772,14 +762,6 @@ public class UserRestrictionsUtils {
                     return false;
                 }
                 restriction = UserManager.DISALLOW_AMBIENT_DISPLAY;
-                break;
-
-            case android.provider.Settings.Global.LOCATION_GLOBAL_KILL_SWITCH:
-                if ("0".equals(value)) {
-                    return false;
-                }
-                restriction = UserManager.DISALLOW_CONFIG_LOCATION;
-                checkAllUser = true;
                 break;
 
             case android.provider.Settings.System.SCREEN_BRIGHTNESS:

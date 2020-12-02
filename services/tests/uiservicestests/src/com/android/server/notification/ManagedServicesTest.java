@@ -54,6 +54,8 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.IntArray;
 import android.util.SparseArray;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import com.android.internal.util.FastXmlSerializer;
@@ -267,7 +269,7 @@ public class ManagedServicesTest extends UiServiceTestCase {
                     mIpm, approvalLevel);
 
             // approved services aren't in xml
-            XmlPullParser parser = Xml.newPullParser();
+            TypedXmlPullParser parser = Xml.newFastPullParser();
             parser.setInput(new BufferedInputStream(new ByteArrayInputStream(new byte[]{})),
                     null);
             writeExpectedValuesToSettings(approvalLevel);
@@ -335,7 +337,7 @@ public class ManagedServicesTest extends UiServiceTestCase {
             String testComponent = "user.test.component/C1";
             String resolvedValue =
                     (approvalLevel == APPROVAL_BY_COMPONENT) ? testComponent : testPackage;
-            XmlPullParser parser =
+            TypedXmlPullParser parser =
                     getParserWithEntries(service, getXmlEntry(resolvedValue, 0, true));
 
             service.readXml(parser, null, true, 10);
@@ -357,7 +359,7 @@ public class ManagedServicesTest extends UiServiceTestCase {
             String resolvedValue =
                     (approvalLevel == APPROVAL_BY_COMPONENT) ? testComponent : testPackage;
             String xmlEntry = getXmlEntry(resolvedValue, 0, true, false);
-            XmlPullParser parser = getParserWithEntries(service, xmlEntry);
+            TypedXmlPullParser parser = getParserWithEntries(service, xmlEntry);
 
             service.readXml(parser, null, true, 0);
 
@@ -384,7 +386,7 @@ public class ManagedServicesTest extends UiServiceTestCase {
         ManagedServices service2 =
                 new TestManagedServices(
                         getContext(), mLock, mUserProfiles, mIpm, APPROVAL_BY_COMPONENT);
-        XmlSerializer serializer = new FastXmlSerializer();
+        TypedXmlSerializer serializer = Xml.newFastSerializer();
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         BufferedOutputStream outStream = new BufferedOutputStream(baos);
         serializer.setOutput(outStream, "utf-8");
@@ -396,7 +398,7 @@ public class ManagedServicesTest extends UiServiceTestCase {
         serializer.endDocument();
         outStream.flush();
 
-        final XmlPullParser parser = Xml.newPullParser();
+        final TypedXmlPullParser parser = Xml.newFastPullParser();
         BufferedInputStream input = new BufferedInputStream(
                 new ByteArrayInputStream(baos.toByteArray()));
 
@@ -536,7 +538,7 @@ public class ManagedServicesTest extends UiServiceTestCase {
                     service,
                     Collections.singletonList(service.getPackageName(resolvedValue10)),
                     10);
-            XmlPullParser parser =
+            TypedXmlPullParser parser =
                     getParserWithEntries(
                             service,
                             getXmlEntry(resolvedValue0, 0, true),
@@ -544,7 +546,7 @@ public class ManagedServicesTest extends UiServiceTestCase {
             service.readXml(parser, null, false, UserHandle.USER_ALL);
 
             // Write backup.
-            XmlSerializer serializer = new FastXmlSerializer();
+            TypedXmlSerializer serializer = Xml.newFastSerializer();
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             serializer.setOutput(new BufferedOutputStream(baos), "utf-8");
             serializer.startDocument(null, true);
@@ -557,7 +559,7 @@ public class ManagedServicesTest extends UiServiceTestCase {
             service.setPackageOrComponentEnabled(resolvedValue10, 10, true, false);
 
             // Parse backup via restore.
-            XmlPullParser restoreParser = Xml.newPullParser();
+            TypedXmlPullParser restoreParser = Xml.newFastPullParser();
             restoreParser.setInput(
                     new BufferedInputStream(new ByteArrayInputStream(baos.toByteArray())), null);
             restoreParser.nextTag();
@@ -608,7 +610,7 @@ public class ManagedServicesTest extends UiServiceTestCase {
                 addExpectedServices(service, entriesExpectedToHaveServices, userInfo.id);
             }
 
-            XmlSerializer serializer = new FastXmlSerializer();
+            TypedXmlSerializer serializer = Xml.newFastSerializer();
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             serializer.setOutput(new BufferedOutputStream(baos), "utf-8");
             serializer.startDocument(null, true);
@@ -618,7 +620,7 @@ public class ManagedServicesTest extends UiServiceTestCase {
             serializer.endDocument();
             serializer.flush();
 
-            XmlPullParser parser = Xml.newPullParser();
+            TypedXmlPullParser parser = Xml.newFastPullParser();
             parser.setInput(new BufferedInputStream(
                     new ByteArrayInputStream(baos.toByteArray())), null);
             parser.nextTag();
@@ -640,7 +642,7 @@ public class ManagedServicesTest extends UiServiceTestCase {
                     mIpm, approvalLevel);
             loadXml(service);
 
-            XmlSerializer serializer = new FastXmlSerializer();
+            TypedXmlSerializer serializer = Xml.newFastSerializer();
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             serializer.setOutput(new BufferedOutputStream(baos), "utf-8");
             serializer.startDocument(null, true);
@@ -666,7 +668,7 @@ public class ManagedServicesTest extends UiServiceTestCase {
                     mIpm, approvalLevel);
             loadXml(service);
 
-            XmlSerializer serializer = new FastXmlSerializer();
+            TypedXmlSerializer serializer = Xml.newFastSerializer();
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             serializer.setOutput(new BufferedOutputStream(baos), "utf-8");
             serializer.startDocument(null, true);
@@ -674,7 +676,7 @@ public class ManagedServicesTest extends UiServiceTestCase {
             serializer.endDocument();
             serializer.flush();
 
-            XmlPullParser parser = Xml.newPullParser();
+            TypedXmlPullParser parser = Xml.newFastPullParser();
             byte[] rawOutput = baos.toByteArray();
             parser.setInput(new BufferedInputStream(
                     new ByteArrayInputStream(rawOutput)), null);
@@ -1387,7 +1389,7 @@ public class ManagedServicesTest extends UiServiceTestCase {
 
     private void loadXml(ManagedServices service) throws Exception {
         String xmlString = createXml(service);
-        XmlPullParser parser = Xml.newPullParser();
+        TypedXmlPullParser parser = Xml.newFastPullParser();
         parser.setInput(new BufferedInputStream(
                 new ByteArrayInputStream(xmlString.getBytes())), null);
         parser.nextTag();
@@ -1423,7 +1425,7 @@ public class ManagedServicesTest extends UiServiceTestCase {
         return xml.toString();
     }
 
-    private XmlPullParser getParserWithEntries(ManagedServices service, String... xmlEntries)
+    private TypedXmlPullParser getParserWithEntries(ManagedServices service, String... xmlEntries)
             throws Exception {
         final StringBuffer xml = new StringBuffer();
         xml.append("<" + service.getConfig().xmlTag + ">\n");
@@ -1432,7 +1434,7 @@ public class ManagedServicesTest extends UiServiceTestCase {
         }
         xml.append("</" + service.getConfig().xmlTag + ">");
 
-        XmlPullParser parser = Xml.newPullParser();
+        TypedXmlPullParser parser = Xml.newFastPullParser();
         parser.setInput(new BufferedInputStream(
                 new ByteArrayInputStream(xml.toString().getBytes())), null);
         parser.nextTag();

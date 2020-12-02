@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,25 @@
  * limitations under the License.
  */
 
-package android.net.wifi;
+#pragma once
 
-/** @hide */
-parcelable WifiApiServiceInfo {
-    String name;
-    IBinder binder;
-}
+#include "hwui/Canvas.h"
+#include "CanvasOpBuffer.h"
+
+#include <vector>
+
+namespace android::uirenderer {
+
+// Interop with existing HWUI Canvas
+class CanvasOpRecorder final : /* todo: public Canvas */ {
+public:
+    // Transform ops
+private:
+    struct SaveEntry {
+
+    };
+
+    std::vector<SaveEntry> mSaveStack;
+};
+
+}  // namespace android::uirenderer

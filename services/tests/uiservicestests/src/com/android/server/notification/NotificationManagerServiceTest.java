@@ -160,6 +160,8 @@ import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 import android.util.Xml;
 import android.widget.RemoteViews;
 
@@ -3446,7 +3448,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 new BufferedInputStream(new ByteArrayInputStream(upgradeXml.getBytes())),
                 false,
                 UserHandle.USER_ALL);
-        verify(mSnoozeHelper, times(1)).readXml(any(XmlPullParser.class), anyLong());
+        verify(mSnoozeHelper, times(1)).readXml(any(TypedXmlPullParser.class), anyLong());
     }
 
     @Test
@@ -3887,12 +3889,12 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         NotificationChannel channel = new NotificationChannel("a", "ab", IMPORTANCE_DEFAULT);
         channel.setSound(Uri.EMPTY, null);
 
-        XmlSerializer serializer = new FastXmlSerializer();
+        TypedXmlSerializer serializer = Xml.newFastSerializer();
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         serializer.setOutput(new BufferedOutputStream(baos), "utf-8");
         channel.writeXmlForBackup(serializer, getContext());
 
-        XmlPullParser parser = Xml.newPullParser();
+        TypedXmlPullParser parser = Xml.newFastPullParser();
         parser.setInput(new BufferedInputStream(
                 new ByteArrayInputStream(baos.toByteArray())), null);
         NotificationChannel restored = new NotificationChannel("a", "ab", IMPORTANCE_DEFAULT);
@@ -3915,7 +3917,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         NotificationChannel channel = new NotificationChannel("a", "ab", IMPORTANCE_DEFAULT);
         channel.setVibrationPattern(new long[0]);
 
-        XmlSerializer serializer = new FastXmlSerializer();
+        TypedXmlSerializer serializer = Xml.newFastSerializer();
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         serializer.setOutput(new BufferedOutputStream(baos), "utf-8");
         channel.writeXml(serializer);

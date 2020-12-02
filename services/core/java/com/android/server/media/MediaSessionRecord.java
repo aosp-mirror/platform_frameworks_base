@@ -23,7 +23,6 @@ import android.content.Intent;
 import android.content.pm.ParceledListSlice;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
-import android.media.AudioSystem;
 import android.media.MediaMetadata;
 import android.media.Rating;
 import android.media.VolumeProvider;
@@ -513,7 +512,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
             public void run() {
                 try {
                     if (useSuggested) {
-                        if (AudioSystem.isStreamActive(stream, 0)) {
+                        if (MediaServerUtils.isStreamActive(mAudioManager, stream)) {
                             mAudioManager.adjustSuggestedStreamVolumeForUid(stream,
                                     direction, flags, opPackageName, uid, pid,
                                     mContext.getApplicationInfo().targetSdkVersion);

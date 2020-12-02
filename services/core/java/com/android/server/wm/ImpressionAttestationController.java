@@ -18,6 +18,9 @@ package com.android.server.wm;
 
 import static android.service.attestation.ImpressionAttestationService.SERVICE_META_DATA_KEY_AVAILABLE_ALGORITHMS;
 
+import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
+import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
+
 import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -29,7 +32,9 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.res.Resources;
+import android.graphics.Matrix;
 import android.graphics.Rect;
+import android.graphics.RectF;
 import android.hardware.HardwareBuffer;
 import android.os.Binder;
 import android.os.Bundle;
@@ -43,6 +48,7 @@ import android.service.attestation.IImpressionAttestationService;
 import android.service.attestation.ImpressionAttestationService;
 import android.service.attestation.ImpressionToken;
 import android.util.Slog;
+import android.view.MagnificationSpec;
 
 import com.android.internal.annotations.GuardedBy;
 
@@ -59,7 +65,8 @@ import java.util.function.BiConsumer;
  * blocking calls into another service.
  */
 public class ImpressionAttestationController {
-    private static final String TAG = "ImpressionAttestationController";
+    private static final String TAG =
+            TAG_WITH_CLASS_NAME ? "ImpressionAttestationController" : TAG_WM;
     private static final boolean DEBUG = false;
 
     private final Object mServiceConnectionLock = new Object();
@@ -80,6 +87,10 @@ public class ImpressionAttestationController {
     private final Handler mHandler;
 
     private final String mSalt;
+
+    private final float[] mTmpFloat9 = new float[9];
+    private final Matrix mTmpMatrix = new Matrix();
+    private final RectF mTmpRectF = new RectF();
 
     private interface Command {
         void run(IImpressionAttestationService service) throws RemoteException;
@@ -148,6 +159,79 @@ public class ImpressionAttestationController {
         });
 
         return results.getParcelable(ImpressionAttestationService.EXTRA_IMPRESSION_TOKEN);
+    }
+
+    /**
+     * Calculate the bounds to take the screenshot when generating the impression token. This takes
+     * into account window transform, magnification, and display bounds.
+     *
+     * Call while holding {@link WindowManagerService#mGlobalLock}
+     *
+     * @param win Window that the impression token is generated for.
+     * @param boundsInWindow The bounds passed in about where in the window to take the screenshot.
+     * @param outBounds The result of the calculated bounds
+     */
+    void calculateImpressionTokenBoundsLocked(WindowState win, Rect boundsInWindow,
+            Rect outBounds) {
+        if (DEBUG) {
+            Slog.d(TAG, "calculateImpressionTokenBounds: boundsInWindow=" + boundsInWindow);
+        }
+        outBounds.set(boundsInWindow);
+
+        DisplayContent displayContent = win.getDisplayContent();
+        if (displayContent == null) {
+            return;
+        }
+
+        // Intersect boundsInWindow with the window to make sure it's not outside the window
+        // requesting the token. Offset the window bounds to 0,0 since the boundsInWindow are
+        // offset from the window location, not display.
+        final Rect windowBounds = new Rect();
+        win.getBounds(windowBounds);
+        windowBounds.offsetTo(0, 0);
+        outBounds.intersectUnchecked(windowBounds);
+
+        if (DEBUG) {
+            Slog.d(TAG, "calculateImpressionTokenBounds: boundsIntersectWindow=" + outBounds);
+        }
+
+        if (outBounds.isEmpty()) {
+            return;
+        }
+
+        // Transform the bounds using the window transform in case there's a scale or offset.
+        // This allows the bounds to be in display space.
+        win.getTransformationMatrix(mTmpFloat9, mTmpMatrix);
+        mTmpRectF.set(outBounds);
+        mTmpMatrix.mapRect(mTmpRectF, mTmpRectF);
+        outBounds.set((int) mTmpRectF.left, (int) mTmpRectF.top, (int) mTmpRectF.right,
+                (int) mTmpRectF.bottom);
+        if (DEBUG) {
+            Slog.d(TAG, "calculateImpressionTokenBounds: boundsInDisplay=" + outBounds);
+        }
+
+        // Apply the magnification spec values to the bounds since the content could be magnified
+        final MagnificationSpec magSpec = displayContent.getMagnificationSpec();
+        if (magSpec != null) {
+            outBounds.scale(magSpec.scale);
+            outBounds.offset((int) magSpec.offsetX, (int) magSpec.offsetY);
+        }
+
+        if (DEBUG) {
+            Slog.d(TAG, "calculateImpressionTokenBounds: boundsWithMagnification=" + outBounds);
+        }
+
+        if (outBounds.isEmpty()) {
+            return;
+        }
+
+        // Intersect with the display bounds since it shouldn't take a screenshot of content
+        // outside the display since it's not visible to the user.
+        final Rect displayBounds = displayContent.getBounds();
+        outBounds.intersectUnchecked(displayBounds);
+        if (DEBUG) {
+            Slog.d(TAG, "calculateImpressionTokenBounds: finalBounds=" + outBounds);
+        }
     }
 
     /**

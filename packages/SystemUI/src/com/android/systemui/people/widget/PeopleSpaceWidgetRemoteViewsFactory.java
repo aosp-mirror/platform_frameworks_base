@@ -18,11 +18,11 @@ package com.android.systemui.people.widget;
 
 import android.app.INotificationManager;
 import android.app.people.IPeopleManager;
+import android.app.people.PeopleSpaceTile;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.LauncherApps;
 import android.content.pm.PackageManager;
-import android.content.pm.ShortcutInfo;
 import android.os.ServiceManager;
 import android.util.Log;
 import android.widget.RemoteViews;
@@ -45,7 +45,7 @@ public class PeopleSpaceWidgetRemoteViewsFactory implements RemoteViewsService.R
     private INotificationManager mNotificationManager;
     private PackageManager mPackageManager;
     private LauncherApps mLauncherApps;
-    private List<Map.Entry<Long, ShortcutInfo>> mShortcutInfos = new ArrayList<>();
+    private List<Map.Entry<Long, PeopleSpaceTile>> mTiles = new ArrayList<>();
     private Context mContext;
 
     public PeopleSpaceWidgetRemoteViewsFactory(Context context, Intent intent) {
@@ -70,8 +70,8 @@ public class PeopleSpaceWidgetRemoteViewsFactory implements RemoteViewsService.R
      */
     private void setTileViewsWithPriorityConversations() {
         try {
-            mShortcutInfos = PeopleSpaceUtils.getShortcutInfos(mContext, mNotificationManager,
-                    mPeopleManager);
+            mTiles = PeopleSpaceUtils.getTiles(mContext, mNotificationManager,
+                    mPeopleManager, mLauncherApps);
         } catch (Exception e) {
             Log.e(TAG, "Couldn't retrieve conversations", e);
         }
@@ -85,12 +85,12 @@ public class PeopleSpaceWidgetRemoteViewsFactory implements RemoteViewsService.R
 
     @Override
     public void onDestroy() {
-        mShortcutInfos.clear();
+        mTiles.clear();
     }
 
     @Override
     public int getCount() {
-        return mShortcutInfos.size();
+        return mTiles.size();
     }
 
     @Override
@@ -100,30 +100,28 @@ public class PeopleSpaceWidgetRemoteViewsFactory implements RemoteViewsService.R
         RemoteViews personView = new RemoteViews(mContext.getPackageName(),
                 R.layout.people_space_widget_item);
         try {
-            Map.Entry<Long, ShortcutInfo> entry = mShortcutInfos.get(i);
-            ShortcutInfo shortcutInfo = entry.getValue();
+            Map.Entry<Long, PeopleSpaceTile> entry = mTiles.get(i);
+            PeopleSpaceTile tile = entry.getValue();
             long lastInteraction = entry.getKey();
 
             String status = PeopleSpaceUtils.getLastInteractionString(mContext, lastInteraction);
 
             personView.setTextViewText(R.id.status, status);
-            personView.setTextViewText(R.id.name, shortcutInfo.getLabel().toString());
+            personView.setTextViewText(R.id.name, tile.getUserName().toString());
 
             personView.setImageViewBitmap(
                     R.id.package_icon,
                     PeopleSpaceUtils.convertDrawableToBitmap(
-                            mPackageManager.getApplicationIcon(shortcutInfo.getPackage())
+                            mPackageManager.getApplicationIcon(tile.getPackageName())
                     )
             );
-            personView.setImageViewBitmap(
-                    R.id.person_icon,
-                    PeopleSpaceUtils.convertDrawableToBitmap(
-                            mLauncherApps.getShortcutIconDrawable(shortcutInfo, 0)
-                    )
-            );
+            personView.setImageViewIcon(R.id.person_icon, tile.getUserIcon());
 
             Intent fillInIntent = new Intent();
-            fillInIntent.putExtra(PeopleSpaceWidgetProvider.EXTRA_SHORTCUT_INFO, shortcutInfo);
+            fillInIntent.putExtra(PeopleSpaceWidgetProvider.EXTRA_TILE_ID, tile.getId());
+            fillInIntent.putExtra(
+                    PeopleSpaceWidgetProvider.EXTRA_PACKAGE_NAME, tile.getPackageName());
+            fillInIntent.putExtra(PeopleSpaceWidgetProvider.EXTRA_UID, tile.getUid());
             personView.setOnClickFillInIntent(R.id.item, fillInIntent);
         } catch (Exception e) {
             Log.e(TAG, "Couldn't retrieve shortcut information", e);

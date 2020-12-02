@@ -39,7 +39,7 @@ import android.app.WallpaperColors;
 import android.app.WallpaperInfo;
 import android.app.WallpaperManager;
 import android.app.WallpaperManager.SetWallpaperFlags;
-import android.app.admin.DevicePolicyManager;
+import android.app.admin.DevicePolicyManagerInternal;
 import android.app.backup.WallpaperBackupHelper;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -100,12 +100,12 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.DumpUtils;
-import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.JournaledFile;
 import com.android.server.EventLogTags;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
+import com.android.server.SystemService.TargetUser;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.utils.TimingsTraceAndSlog;
 import com.android.server.wm.WindowManagerInternal;
@@ -114,7 +114,6 @@ import libcore.io.IoUtils;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -125,7 +124,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -2848,10 +2846,8 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         if (!uidMatchPackage) {
             return false;   // callingPackage was faked.
         }
-
-        // TODO(b/144048540): DPM needs to take into account the userId, not just the package.
-        final DevicePolicyManager dpm = mContext.getSystemService(DevicePolicyManager.class);
-        if (dpm.isDeviceOwnerApp(callingPackage) || dpm.isProfileOwnerApp(callingPackage)) {
+        if (LocalServices.getService(DevicePolicyManagerInternal.class)
+                .isDeviceOrProfileOwnerInCallingUser(callingPackage)) {
             return true;
         }
         final int callingUserId = UserHandle.getCallingUserId();
@@ -2909,11 +2905,9 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
     private void saveSettingsLocked(int userId) {
         JournaledFile journal = makeJournaledFile(userId);
         FileOutputStream fstream = null;
-        BufferedOutputStream stream = null;
         try {
             fstream = new FileOutputStream(journal.chooseForWrite(), false);
-            stream = new BufferedOutputStream(fstream);
-            TypedXmlSerializer out = Xml.resolveSerializer(stream);
+            TypedXmlSerializer out = Xml.resolveSerializer(fstream);
             out.startDocument(null, true);
 
             WallpaperData wallpaper;
@@ -2929,56 +2923,56 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
 
             out.endDocument();
 
-            stream.flush(); // also flushes fstream
+            fstream.flush();
             FileUtils.sync(fstream);
-            stream.close(); // also closes fstream
+            fstream.close();
             journal.commit();
         } catch (IOException e) {
-            IoUtils.closeQuietly(stream);
+            IoUtils.closeQuietly(fstream);
             journal.rollback();
         }
     }
 
-    private void writeWallpaperAttributes(XmlSerializer out, String tag, WallpaperData wallpaper)
+    private void writeWallpaperAttributes(TypedXmlSerializer out, String tag,
+            WallpaperData wallpaper)
             throws IllegalArgumentException, IllegalStateException, IOException {
         if (DEBUG) {
             Slog.v(TAG, "writeWallpaperAttributes id=" + wallpaper.wallpaperId);
         }
         final DisplayData wpdData = getDisplayDataOrCreate(DEFAULT_DISPLAY);
         out.startTag(null, tag);
-        out.attribute(null, "id", Integer.toString(wallpaper.wallpaperId));
-        out.attribute(null, "width", Integer.toString(wpdData.mWidth));
-        out.attribute(null, "height", Integer.toString(wpdData.mHeight));
+        out.attributeInt(null, "id", wallpaper.wallpaperId);
+        out.attributeInt(null, "width", wpdData.mWidth);
+        out.attributeInt(null, "height", wpdData.mHeight);
 
-        out.attribute(null, "cropLeft", Integer.toString(wallpaper.cropHint.left));
-        out.attribute(null, "cropTop", Integer.toString(wallpaper.cropHint.top));
-        out.attribute(null, "cropRight", Integer.toString(wallpaper.cropHint.right));
-        out.attribute(null, "cropBottom", Integer.toString(wallpaper.cropHint.bottom));
+        out.attributeInt(null, "cropLeft", wallpaper.cropHint.left);
+        out.attributeInt(null, "cropTop", wallpaper.cropHint.top);
+        out.attributeInt(null, "cropRight", wallpaper.cropHint.right);
+        out.attributeInt(null, "cropBottom", wallpaper.cropHint.bottom);
 
         if (wpdData.mPadding.left != 0) {
-            out.attribute(null, "paddingLeft", Integer.toString(wpdData.mPadding.left));
+            out.attributeInt(null, "paddingLeft", wpdData.mPadding.left);
         }
         if (wpdData.mPadding.top != 0) {
-            out.attribute(null, "paddingTop", Integer.toString(wpdData.mPadding.top));
+            out.attributeInt(null, "paddingTop", wpdData.mPadding.top);
         }
         if (wpdData.mPadding.right != 0) {
-            out.attribute(null, "paddingRight", Integer.toString(wpdData.mPadding.right));
+            out.attributeInt(null, "paddingRight", wpdData.mPadding.right);
         }
         if (wpdData.mPadding.bottom != 0) {
-            out.attribute(null, "paddingBottom", Integer.toString(wpdData.mPadding.bottom));
+            out.attributeInt(null, "paddingBottom", wpdData.mPadding.bottom);
         }
 
         if (wallpaper.primaryColors != null) {
             int colorsCount = wallpaper.primaryColors.getMainColors().size();
-            out.attribute(null, "colorsCount", Integer.toString(colorsCount));
+            out.attributeInt(null, "colorsCount", colorsCount);
             if (colorsCount > 0) {
                 for (int i = 0; i < colorsCount; i++) {
                     final Color wc = wallpaper.primaryColors.getMainColors().get(i);
-                    out.attribute(null, "colorValue"+i, Integer.toString(wc.toArgb()));
+                    out.attributeInt(null, "colorValue" + i, wc.toArgb());
                 }
             }
-            out.attribute(null, "colorHints",
-                    Integer.toString(wallpaper.primaryColors.getColorHints()));
+            out.attributeInt(null, "colorHints", wallpaper.primaryColors.getColorHints());
         }
 
         out.attribute(null, "name", wallpaper.name);
@@ -3028,12 +3022,8 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         }
     }
 
-    private int getAttributeInt(XmlPullParser parser, String name, int defValue) {
-        String value = parser.getAttributeValue(null, name);
-        if (value == null) {
-            return defValue;
-        }
-        return Integer.parseInt(value);
+    private int getAttributeInt(TypedXmlPullParser parser, String name, int defValue) {
+        return parser.getAttributeInt(null, name, defValue);
     }
 
     /**
@@ -3213,11 +3203,11 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         }
     }
 
-    private void parseWallpaperAttributes(XmlPullParser parser, WallpaperData wallpaper,
-            boolean keepDimensionHints) {
-        final String idString = parser.getAttributeValue(null, "id");
-        if (idString != null) {
-            final int id = wallpaper.wallpaperId = Integer.parseInt(idString);
+    private void parseWallpaperAttributes(TypedXmlPullParser parser, WallpaperData wallpaper,
+            boolean keepDimensionHints) throws XmlPullParserException {
+        final int id = parser.getAttributeInt(null, "id", -1);
+        if (id != -1) {
+            wallpaper.wallpaperId = id;
             if (id > mWallpaperId) {
                 mWallpaperId = id;
             }
@@ -3228,8 +3218,8 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         final DisplayData wpData = getDisplayDataOrCreate(DEFAULT_DISPLAY);
 
         if (!keepDimensionHints) {
-            wpData.mWidth = Integer.parseInt(parser.getAttributeValue(null, "width"));
-            wpData.mHeight = Integer.parseInt(parser.getAttributeValue(null, "height"));
+            wpData.mWidth = parser.getAttributeInt(null, "width");
+            wpData.mHeight = parser.getAttributeInt(null, "height");
         }
         wallpaper.cropHint.left = getAttributeInt(parser, "cropLeft", 0);
         wallpaper.cropHint.top = getAttributeInt(parser, "cropTop", 0);

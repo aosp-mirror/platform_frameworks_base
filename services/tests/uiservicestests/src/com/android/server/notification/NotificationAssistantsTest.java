@@ -36,6 +36,8 @@ import android.content.pm.UserInfo;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.IntArray;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import com.android.server.UiServiceTestCase;
@@ -126,7 +128,7 @@ public class NotificationAssistantsTest extends UiServiceTestCase {
                 + "<service_listing approved=\"b/b\" user=\"10\" primary=\"true\" />"
                 + "</enabled_assistants>";
 
-        XmlPullParser parser = Xml.newPullParser();
+        TypedXmlPullParser parser = Xml.newFastPullParser();
         parser.setInput(new BufferedInputStream(
                 new ByteArrayInputStream(xml.toString().getBytes())), null);
         parser.nextTag();

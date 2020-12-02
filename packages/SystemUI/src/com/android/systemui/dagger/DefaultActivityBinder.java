@@ -22,6 +22,7 @@ import com.android.systemui.ForegroundServicesDialog;
 import com.android.systemui.keyguard.WorkLockActivity;
 import com.android.systemui.screenrecord.ScreenRecordDialog;
 import com.android.systemui.settings.brightness.BrightnessDialog;
+import com.android.systemui.statusbar.tv.notifications.TvNotificationPanelActivity;
 import com.android.systemui.tuner.TunerActivity;
 import com.android.systemui.usb.UsbDebuggingActivity;
 import com.android.systemui.usb.UsbDebuggingSecondaryUserActivity;
@@ -85,4 +86,10 @@ public abstract class DefaultActivityBinder {
     @IntoMap
     @ClassKey(CreateUserActivity.class)
     public abstract Activity bindCreateUserActivity(CreateUserActivity activity);
+
+    /** Inject into TvNotificationPanelActivity. */
+    @Binds
+    @IntoMap
+    @ClassKey(TvNotificationPanelActivity.class)
+    public abstract Activity bindTvNotificationPanelActivity(TvNotificationPanelActivity activity);
 }

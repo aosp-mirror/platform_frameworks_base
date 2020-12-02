@@ -367,7 +367,7 @@ public class SearchablesTest extends AndroidTestCase {
          * for you if needed; if you already have this information around, it can
          * be much more efficient to supply it here.
          * 
-         * @return Returns an XmlPullParser allowing you to parse out the XML
+         * @return Returns an TypedXmlPullParser allowing you to parse out the XML
          * data.  Returns null if the xml resource could not be found for any
          * reason.
          */

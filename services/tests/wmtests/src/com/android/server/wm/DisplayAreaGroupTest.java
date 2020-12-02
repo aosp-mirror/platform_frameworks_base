@@ -87,7 +87,7 @@ public class DisplayAreaGroupTest extends WindowTestsBase {
         final Task task = new TaskBuilder(mSupervisor)
                 .setTaskDisplayArea(mTaskDisplayArea).setCreateActivity(true).build();
         final ActivityRecord activity = task.getTopNonFinishingActivity();
-        doReturn(true).when(mDisplayContent).onDescendantOrientationChanged(any(), any());
+        doReturn(true).when(mDisplayContent).onDescendantOrientationChanged(any());
         activity.setRequestedOrientation(SCREEN_ORIENTATION_PORTRAIT);
 
         // Display is portrait, DisplayAreaGroup inherits that

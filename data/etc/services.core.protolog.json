@@ -2749,6 +2749,12 @@
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
+    "1105210816": {
+      "message": "Skipping config check in destroyed state %s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_CONFIGURATION",
+      "at": "com\/android\/server\/wm\/ActivityRecord.java"
+    },
     "1112047265": {
       "message": "finishDrawingWindow: %s mDrawState=%s",
       "level": "DEBUG",

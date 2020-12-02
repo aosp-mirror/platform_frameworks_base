@@ -89,6 +89,7 @@ interface IDevicePolicyManager {
     int getPasswordComplexity(boolean parent);
     void setRequiredPasswordComplexity(int passwordComplexity, boolean parent);
     int getRequiredPasswordComplexity(boolean parent);
+    int getAggregatedPasswordComplexityForUser(int userId);
     boolean isUsingUnifiedPassword(in ComponentName admin);
     int getCurrentFailedPasswordAttempts(int userHandle, boolean parent);
     int getProfileWithMinimumFailedPasswordsForWipe(int userHandle, boolean parent);
@@ -184,6 +185,7 @@ interface IDevicePolicyManager {
             in byte[] certBuffer, in byte[] certChainBuffer, String alias, boolean requestAccess,
             boolean isUserSelectable);
     boolean removeKeyPair(in ComponentName who, in String callerPackage, String alias);
+    boolean hasKeyPair(in String callerPackage, in String alias);
     boolean generateKeyPair(in ComponentName who, in String callerPackage, in String algorithm,
             in ParcelableKeyGenParameterSpec keySpec,
             in int idAttestationFlags, out KeymasterCertificateChain attestationChain);

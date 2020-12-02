@@ -43,6 +43,8 @@ import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.util.IntArray;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import androidx.test.runner.AndroidJUnit4;
@@ -95,7 +97,7 @@ public class SnoozeHelperTest extends UiServiceTestCase {
                 + "<notification version=\"1\" user-id=\"0\" notification=\"notification\" "
                 + "pkg=\"pkg\" key=\"key2\" time=\"" + max_time_str + "\"/>"
                 + "</snoozed-notifications>";
-        XmlPullParser parser = Xml.newPullParser();
+        TypedXmlPullParser parser = Xml.newFastPullParser();
         parser.setInput(new BufferedInputStream(
                 new ByteArrayInputStream(xml_string.getBytes())), null);
         mSnoozeHelper.readXml(parser, 1);
@@ -114,12 +116,12 @@ public class SnoozeHelperTest extends UiServiceTestCase {
                 + "<notification version=\"1\" user-id=\"0\" notification=\"notification\" "
                 + "pkg=\"pkg\" key=\"key2\" time=\"" + max_time_str + "\"/>"
                 + "</snoozed-notifications>";
-        XmlPullParser parser = Xml.newPullParser();
+        TypedXmlPullParser parser = Xml.newFastPullParser();
         parser.setInput(new BufferedInputStream(
                 new ByteArrayInputStream(xml_string.getBytes())), null);
         mSnoozeHelper.readXml(parser, 1);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        XmlSerializer serializer = new FastXmlSerializer();
+        TypedXmlSerializer serializer = Xml.newFastSerializer();
         serializer.setOutput(new BufferedOutputStream(baos), "utf-8");
         serializer.startDocument(null, true);
         mSnoozeHelper.writeXml(serializer);
@@ -137,7 +139,7 @@ public class SnoozeHelperTest extends UiServiceTestCase {
                 + "<context version=\"1\" user-id=\"0\" notification=\"notification\" "
                 + "pkg=\"pkg\" key=\"key2\" id=\"uri\"/>"
                 + "</snoozed-notifications>";
-        XmlPullParser parser = Xml.newPullParser();
+        TypedXmlPullParser parser = Xml.newFastPullParser();
         parser.setInput(new BufferedInputStream(
                 new ByteArrayInputStream(xml_string.getBytes())), null);
         mSnoozeHelper.readXml(parser, 1);
@@ -151,7 +153,7 @@ public class SnoozeHelperTest extends UiServiceTestCase {
             throws XmlPullParserException, IOException {
         NotificationRecord r = getNotificationRecord("pkg", 1, "one", UserHandle.SYSTEM);
         mSnoozeHelper.snooze(r, 999999999);
-        XmlSerializer serializer = new FastXmlSerializer();
+        TypedXmlSerializer serializer = Xml.newFastSerializer();
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         serializer.setOutput(new BufferedOutputStream(baos), "utf-8");
         serializer.startDocument(null, true);
@@ -159,7 +161,7 @@ public class SnoozeHelperTest extends UiServiceTestCase {
         serializer.endDocument();
         serializer.flush();
 
-        XmlPullParser parser = Xml.newPullParser();
+        TypedXmlPullParser parser = Xml.newFastPullParser();
         parser.setInput(new BufferedInputStream(
                 new ByteArrayInputStream(baos.toByteArray())), "utf-8");
         mSnoozeHelper.readXml(parser, 1);
@@ -175,7 +177,7 @@ public class SnoozeHelperTest extends UiServiceTestCase {
         NotificationRecord r = getNotificationRecord("pkg", 1, "one", UserHandle.SYSTEM);
         mSnoozeHelper.snooze(r, 0);
        // Thread.sleep(100);
-        XmlSerializer serializer = new FastXmlSerializer();
+        TypedXmlSerializer serializer = Xml.newFastSerializer();
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         serializer.setOutput(new BufferedOutputStream(baos), "utf-8");
         serializer.startDocument(null, true);
@@ -183,7 +185,7 @@ public class SnoozeHelperTest extends UiServiceTestCase {
         serializer.endDocument();
         serializer.flush();
         Thread.sleep(10);
-        XmlPullParser parser = Xml.newPullParser();
+        TypedXmlPullParser parser = Xml.newFastPullParser();
         parser.setInput(new BufferedInputStream(
                 new ByteArrayInputStream(baos.toByteArray())), "utf-8");
         mSnoozeHelper.readXml(parser, 2);
@@ -227,7 +229,7 @@ public class SnoozeHelperTest extends UiServiceTestCase {
                 + "<notification version=\"1\" user-id=\"0\" notification=\"notification\" "
                 + "pkg=\"pkg\" key=\"key2\" time=\"" + 15+ "\"/>"
                 + "</snoozed-notifications>";
-        XmlPullParser parser = Xml.newPullParser();
+        TypedXmlPullParser parser = Xml.newFastPullParser();
         parser.setInput(new BufferedInputStream(
                 new ByteArrayInputStream(xml_string.getBytes())), null);
         mSnoozeHelper.readXml(parser, 4);

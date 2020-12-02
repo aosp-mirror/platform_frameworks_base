@@ -107,7 +107,7 @@ public final class SensorPrivacyService extends SystemService {
                     TypedXmlSerializer serializer = Xml.resolveSerializer(outputStream);
                     serializer.startDocument(null, true);
                     serializer.startTag(null, XML_TAG_SENSOR_PRIVACY);
-                    serializer.attribute(null, XML_ATTRIBUTE_ENABLED, String.valueOf(enable));
+                    serializer.attributeBoolean(null, XML_ATTRIBUTE_ENABLED, enable);
                     serializer.endTag(null, XML_TAG_SENSOR_PRIVACY);
                     serializer.endDocument();
                     mAtomicFile.finishWrite(outputStream);
@@ -180,7 +180,7 @@ public final class SensorPrivacyService extends SystemService {
                     TypedXmlSerializer serializer = Xml.resolveSerializer(outputStream);
                     serializer.startDocument(null, true);
                     serializer.startTag(null, XML_TAG_SENSOR_PRIVACY);
-                    serializer.attribute(null, XML_ATTRIBUTE_ENABLED, String.valueOf(mEnabled));
+                    serializer.attributeBoolean(null, XML_ATTRIBUTE_ENABLED, mEnabled);
                     serializer.endTag(null, XML_TAG_SENSOR_PRIVACY);
                     serializer.endDocument();
                     mAtomicFile.finishWrite(outputStream);

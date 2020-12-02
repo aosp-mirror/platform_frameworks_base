@@ -95,6 +95,8 @@ import android.testing.TestableLooper;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.StatsEvent;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import com.android.internal.R;
@@ -189,14 +191,14 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                 + "&amp;end=7.0&amp;exitAtAlarm=true\"/>"
                 + "<disallow visualEffects=\"511\" />"
                 + "</zen>";
-        XmlPullParser parser = Xml.newPullParser();
+        TypedXmlPullParser parser = Xml.newFastPullParser();
         parser.setInput(new BufferedInputStream(new ByteArrayInputStream(xml.getBytes())), null);
         parser.nextTag();
         return new XmlResourceParserImpl(parser);
     }
 
     private ByteArrayOutputStream writeXmlAndPurge(Integer version) throws Exception {
-        XmlSerializer serializer = new FastXmlSerializer();
+        TypedXmlSerializer serializer = Xml.newFastSerializer();
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         serializer.setOutput(new BufferedOutputStream(baos), "utf-8");
         serializer.startDocument(null, true);
@@ -209,7 +211,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
 
     private ByteArrayOutputStream writeXmlAndPurgeForUser(Integer version, int userId)
             throws Exception {
-        XmlSerializer serializer = new FastXmlSerializer();
+        TypedXmlSerializer serializer = Xml.newFastSerializer();
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         serializer.setOutput(new BufferedOutputStream(baos), "utf-8");
         serializer.startDocument(null, true);
@@ -222,8 +224,8 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         return baos;
     }
 
-    private XmlPullParser getParserForByteStream(ByteArrayOutputStream baos) throws Exception {
-        XmlPullParser parser = Xml.newPullParser();
+    private TypedXmlPullParser getParserForByteStream(ByteArrayOutputStream baos) throws Exception {
+        TypedXmlPullParser parser = Xml.newFastPullParser();
         parser.setInput(
                 new BufferedInputStream(new ByteArrayInputStream(baos.toByteArray())), null);
         parser.nextTag();
@@ -837,7 +839,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         ZenModeConfig expected = mZenModeHelperSpy.mConfig.copy();
 
         ByteArrayOutputStream baos = writeXmlAndPurge(null);
-        XmlPullParser parser = getParserForByteStream(baos);
+        TypedXmlPullParser parser = getParserForByteStream(baos);
         mZenModeHelperSpy.readXml(parser, false, UserHandle.USER_ALL);
 
         assertEquals("Config mismatch: current vs expected: "
@@ -962,7 +964,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         mZenModeHelperSpy.mConfigs.put(11, newConfig11);
 
         // Parse backup data.
-        XmlPullParser parser = getParserForByteStream(baos);
+        TypedXmlPullParser parser = getParserForByteStream(baos);
         mZenModeHelperSpy.readXml(parser, true, 10);
         mZenModeHelperSpy.readXml(parser, true, 11);
 
@@ -980,7 +982,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         ZenModeConfig original = mZenModeHelperSpy.mConfig.copy();
 
         ByteArrayOutputStream baos = writeXmlAndPurgeForUser(null, UserHandle.USER_SYSTEM);
-        XmlPullParser parser = getParserForByteStream(baos);
+        TypedXmlPullParser parser = getParserForByteStream(baos);
         mZenModeHelperSpy.readXml(parser, true, UserHandle.USER_SYSTEM);
 
         assertEquals("Config mismatch: current vs original: "
@@ -1000,7 +1002,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         ByteArrayOutputStream baos = writeXmlAndPurgeForUser(null, UserHandle.USER_SYSTEM);
 
         // Restore data for user 10.
-        XmlPullParser parser = getParserForByteStream(baos);
+        TypedXmlPullParser parser = getParserForByteStream(baos);
         mZenModeHelperSpy.readXml(parser, true, 10);
 
         ZenModeConfig actual = mZenModeHelperSpy.mConfigs.get(10);
@@ -1045,7 +1047,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         ZenModeConfig expected = mZenModeHelperSpy.mConfig.copy();
 
         ByteArrayOutputStream baos = writeXmlAndPurge(null);
-        XmlPullParser parser = Xml.newPullParser();
+        TypedXmlPullParser parser = Xml.newFastPullParser();
         parser.setInput(new BufferedInputStream(
                 new ByteArrayInputStream(baos.toByteArray())), null);
         parser.nextTag();
@@ -1086,7 +1088,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         ZenModeConfig expected = mZenModeHelperSpy.mConfig.copy();
 
         ByteArrayOutputStream baos = writeXmlAndPurgeForUser(null, UserHandle.USER_SYSTEM);
-        XmlPullParser parser = getParserForByteStream(baos);
+        TypedXmlPullParser parser = getParserForByteStream(baos);
         mZenModeHelperSpy.readXml(parser, true, UserHandle.USER_SYSTEM);
 
         ZenModeConfig.ZenRule original = expected.automaticRules.get(ruleId);
@@ -1113,7 +1115,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
 
         // set previous version
         ByteArrayOutputStream baos = writeXmlAndPurge(5);
-        XmlPullParser parser = Xml.newPullParser();
+        TypedXmlPullParser parser = Xml.newFastPullParser();
         parser.setInput(new BufferedInputStream(
                 new ByteArrayInputStream(baos.toByteArray())), null);
         parser.nextTag();
@@ -1133,7 +1135,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                 + "<disallow visualEffects=\"511\" />"
                 + "</zen>";
 
-        XmlPullParser parser = Xml.newPullParser();
+        TypedXmlPullParser parser = Xml.newFastPullParser();
         parser.setInput(new BufferedInputStream(
                 new ByteArrayInputStream(xml.getBytes())), null);
         parser.nextTag();
@@ -1149,7 +1151,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                 + "<disallow visualEffects=\"511\" />"
                 + "</zen>";
 
-        parser = Xml.newPullParser();
+        parser = Xml.newFastPullParser();
         parser.setInput(new BufferedInputStream(
                 new ByteArrayInputStream(xml.getBytes())), null);
         parser.nextTag();
@@ -1168,7 +1170,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                 + "<disallow visualEffects=\"511\" />"
                 + "</zen>";
 
-        XmlPullParser parser = Xml.newPullParser();
+        TypedXmlPullParser parser = Xml.newFastPullParser();
         parser.setInput(new BufferedInputStream(
                 new ByteArrayInputStream(xml.getBytes())), null);
         parser.nextTag();
@@ -1187,7 +1189,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                 + "<disallow visualEffects=\"511\" />"
                 + "</zen>";
 
-        XmlPullParser parser = Xml.newPullParser();
+        TypedXmlPullParser parser = Xml.newFastPullParser();
         parser.setInput(new BufferedInputStream(
                 new ByteArrayInputStream(xml.getBytes())), null);
         parser.nextTag();
@@ -1206,7 +1208,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                 + "<disallow visualEffects=\"511\" />"
                 + "</zen>";
 
-        parser = Xml.newPullParser();
+        parser = Xml.newFastPullParser();
         parser.setInput(new BufferedInputStream(
                 new ByteArrayInputStream(xml.getBytes())), null);
         parser.nextTag();
@@ -1222,7 +1224,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                 + "<disallow visualEffects=\"511\" />"
                 + "</zen>";
 
-        parser = Xml.newPullParser();
+        parser = Xml.newFastPullParser();
         parser.setInput(new BufferedInputStream(
                 new ByteArrayInputStream(xml.getBytes())), null);
         parser.nextTag();
@@ -1242,7 +1244,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
 
         // set previous version
         ByteArrayOutputStream baos = writeXmlAndPurge(5);
-        XmlPullParser parser = Xml.newPullParser();
+        TypedXmlPullParser parser = Xml.newFastPullParser();
         parser.setInput(new BufferedInputStream(
                 new ByteArrayInputStream(baos.toByteArray())), null);
         parser.nextTag();
@@ -1278,7 +1280,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
 
         // set previous version
         ByteArrayOutputStream baos = writeXmlAndPurge(5);
-        XmlPullParser parser = Xml.newPullParser();
+        TypedXmlPullParser parser = Xml.newFastPullParser();
         parser.setInput(new BufferedInputStream(
                 new ByteArrayInputStream(baos.toByteArray())), null);
         parser.nextTag();
@@ -1330,7 +1332,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
 
         // set previous version
         ByteArrayOutputStream baos = writeXmlAndPurge(5);
-        XmlPullParser parser = Xml.newPullParser();
+        TypedXmlPullParser parser = Xml.newFastPullParser();
         parser.setInput(new BufferedInputStream(
                 new ByteArrayInputStream(baos.toByteArray())), null);
         parser.nextTag();
@@ -1399,7 +1401,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
 
         // set previous version
         ByteArrayOutputStream baos = writeXmlAndPurge(5);
-        XmlPullParser parser = Xml.newPullParser();
+        TypedXmlPullParser parser = Xml.newFastPullParser();
         parser.setInput(new BufferedInputStream(
                 new ByteArrayInputStream(baos.toByteArray())), null);
         parser.nextTag();
@@ -1628,12 +1630,12 @@ public class ZenModeHelperTest extends UiServiceTestCase {
     }
 
     /**
-     * Wrapper to use XmlPullParser as XmlResourceParser for Resources.getXml()
+     * Wrapper to use TypedXmlPullParser as XmlResourceParser for Resources.getXml()
      */
     final class XmlResourceParserImpl implements XmlResourceParser {
-        private XmlPullParser parser;
+        private TypedXmlPullParser parser;
 
-        public XmlResourceParserImpl(XmlPullParser parser) {
+        public XmlResourceParserImpl(TypedXmlPullParser parser) {
             this.parser = parser;
         }
 

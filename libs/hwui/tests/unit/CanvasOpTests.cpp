@@ -16,6 +16,7 @@
 
 #include <gtest/gtest.h>
 
+#include <canvas/CanvasFrontend.h>
 #include <canvas/CanvasOpBuffer.h>
 #include <canvas/CanvasOps.h>
 #include <canvas/CanvasOpRasterizer.h>
@@ -26,6 +27,7 @@
 #include "SkColor.h"
 #include "SkLatticeIter.h"
 #include "pipeline/skia/AnimatedDrawables.h"
+#include <SkNoDrawCanvas.h>
 
 using namespace android;
 using namespace android::uirenderer;
@@ -77,6 +79,21 @@ struct MockOp<MockTypes::Lifecycle> {
 };
 
 using MockBuffer = OpBuffer<MockTypes, MockOpContainer>;
+
+class CanvasOpCountingReceiver {
+public:
+    template <CanvasOpType T>
+    void push_container(CanvasOpContainer<T>&& op) {
+        mOpCounts[static_cast<size_t>(T)] += 1;
+    }
+
+    int operator[](CanvasOpType op) const {
+        return mOpCounts[static_cast<size_t>(op)];
+    }
+
+private:
+    std::array<int, static_cast<size_t>(CanvasOpType::COUNT)> mOpCounts;
+};
 
 template<typename T>
 static int countItems(const T& t) {
@@ -614,4 +631,35 @@ TEST(CanvasOp, immediateRendering) {
     rasterizer.draw(op);
     EXPECT_EQ(1, canvas->drawRectCount);
     EXPECT_EQ(1, canvas->sumTotalDrawCalls());
+}
+
+TEST(CanvasOp, frontendSaveCount) {
+    SkNoDrawCanvas skiaCanvas(100, 100);
+    CanvasFrontend<CanvasOpCountingReceiver> opCanvas(100, 100);
+    const auto& receiver = opCanvas.receiver();
+
+    EXPECT_EQ(1, skiaCanvas.getSaveCount());
+    EXPECT_EQ(1, opCanvas.saveCount());
+
+    skiaCanvas.save();
+    opCanvas.save(SaveFlags::MatrixClip);
+    EXPECT_EQ(2, skiaCanvas.getSaveCount());
+    EXPECT_EQ(2, opCanvas.saveCount());
+
+    skiaCanvas.restore();
+    opCanvas.restore();
+    EXPECT_EQ(1, skiaCanvas.getSaveCount());
+    EXPECT_EQ(1, opCanvas.saveCount());
+
+    skiaCanvas.restore();
+    opCanvas.restore();
+    EXPECT_EQ(1, skiaCanvas.getSaveCount());
+    EXPECT_EQ(1, opCanvas.saveCount());
+
+    EXPECT_EQ(1, receiver[Op::Save]);
+    EXPECT_EQ(1, receiver[Op::Restore]);
+}
+
+TEST(CanvasOp, frontendTransform) {
+
 }

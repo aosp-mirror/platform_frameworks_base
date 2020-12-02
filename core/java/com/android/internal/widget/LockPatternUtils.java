@@ -311,6 +311,15 @@ public class LockPatternUtils {
         return getDevicePolicyManager().getPasswordMinimumMetrics(userId);
     }
 
+    /**
+     * Returns the effective complexity for the user.
+     * @param userId  The user to return the complexity for.
+     * @return complexity level for the user.
+     */
+    public @DevicePolicyManager.PasswordComplexity int getRequestedPasswordComplexity(int userId) {
+        return getDevicePolicyManager().getAggregatedPasswordComplexityForUser(userId);
+    }
+
     public int getRequestedPasswordQuality(int userId) {
         return getDevicePolicyManager().getPasswordQuality(null, userId);
     }

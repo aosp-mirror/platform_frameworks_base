@@ -17,7 +17,10 @@
 package android.telephony.ims;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.StringDef;
+import android.annotation.SuppressLint;
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.PersistableBundle;
@@ -47,7 +50,8 @@ import java.lang.annotation.RetentionPolicy;
  * update.
  * @hide
  */
-public class SipDelegateImsConfiguration implements Parcelable {
+@SystemApi
+public final class SipDelegateImsConfiguration implements Parcelable {
 
     /**
      * IPV4 Address type.
@@ -354,7 +358,7 @@ public class SipDelegateImsConfiguration implements Parcelable {
     /**
      * Builder class to be used when constructing a new SipDelegateImsConfiguration.
      */
-    public static class Builder {
+    public static final class Builder {
         private final long mVersion;
         private final PersistableBundle mBundle;
 
@@ -381,7 +385,10 @@ public class SipDelegateImsConfiguration implements Parcelable {
         /**
          * Put a string value into this configuration bundle for the given key.
          */
-        public Builder putString(@StringConfigKey String key, String value) {
+        // getString is available below.
+        @SuppressLint("MissingGetterMatchingBuilder")
+        public @NonNull Builder addString(@NonNull @StringConfigKey String key,
+                @NonNull String value) {
             mBundle.putString(key, value);
             return this;
         }
@@ -389,7 +396,9 @@ public class SipDelegateImsConfiguration implements Parcelable {
         /**
          * Replace the existing default value with a new value for a given key.
          */
-        public Builder putInt(@IntConfigKey String key, int value) {
+        // getInt is available below.
+        @SuppressLint("MissingGetterMatchingBuilder")
+        public @NonNull Builder addInt(@NonNull @IntConfigKey String key, int value) {
             mBundle.putInt(key, value);
             return this;
         }
@@ -397,7 +406,9 @@ public class SipDelegateImsConfiguration implements Parcelable {
         /**
          * Replace the existing default value with a new value for a given key.
          */
-        public Builder putBoolean(@BooleanConfigKey String key, boolean value) {
+        // getBoolean is available below.
+        @SuppressLint("MissingGetterMatchingBuilder")
+        public @NonNull Builder addBoolean(@NonNull @BooleanConfigKey String key, boolean value) {
             mBundle.putBoolean(key, value);
             return this;
         }
@@ -405,7 +416,7 @@ public class SipDelegateImsConfiguration implements Parcelable {
         /**
          * @return a new SipDelegateImsConfiguration from this Builder.
          */
-        public SipDelegateImsConfiguration build() {
+        public @NonNull SipDelegateImsConfiguration build() {
             return new SipDelegateImsConfiguration(mVersion, mBundle);
         }
     }
@@ -424,30 +435,38 @@ public class SipDelegateImsConfiguration implements Parcelable {
     }
 
     /**
+     * @return {@code true} if this configuration object has a an entry for the key specified,
+     * {@code false} if it does not.
+     */
+    public boolean containsKey(@NonNull String key) {
+        return mBundle.containsKey(key);
+    }
+
+    /**
      * @return the string value associated with a given key or {@code null} if it doesn't exist.
      */
-    public @StringConfigKey String getString(String key) {
+    public @Nullable @StringConfigKey String getString(@NonNull String key) {
         return mBundle.getString(key);
     }
 
     /**
-     * @return the Integer value associated with a given key or {@code null} if the value doesn't
-     * exist.
+     * @return the integer value associated with a given key if it exists or the supplied default
+     * value if it does not.
      */
-    public @IntConfigKey Integer getInt(String key) {
+    public @IntConfigKey int getInt(@NonNull String key, int defaultValue) {
         if (!mBundle.containsKey(key)) {
-            return null;
+            return defaultValue;
         }
         return mBundle.getInt(key);
     }
 
     /**
-     * @return the Integer value associated with a given key or {@code null} if the value doesn't
-     * exist.
+     * @return the boolean value associated with a given key or the supplied default value if the
+     * value doesn't exist in the bundle.
      */
-    public @BooleanConfigKey Boolean getBoolen(String key) {
+    public @BooleanConfigKey boolean getBoolean(@NonNull String key, boolean defaultValue) {
         if (!mBundle.containsKey(key)) {
-            return null;
+            return defaultValue;
         }
         return mBundle.getBoolean(key);
     }
@@ -455,7 +474,7 @@ public class SipDelegateImsConfiguration implements Parcelable {
     /**
      * @return a shallow copy of the full configuration.
      */
-    public PersistableBundle copyBundle() {
+    public @NonNull PersistableBundle copyBundle() {
         return new PersistableBundle(mBundle);
     }
 
@@ -479,12 +498,12 @@ public class SipDelegateImsConfiguration implements Parcelable {
     }
 
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeLong(mVersion);
         dest.writePersistableBundle(mBundle);
     }
 
-    public static final Creator<SipDelegateImsConfiguration> CREATOR =
+    public static final @NonNull Creator<SipDelegateImsConfiguration> CREATOR =
             new Creator<SipDelegateImsConfiguration>() {
         @Override
         public SipDelegateImsConfiguration createFromParcel(Parcel source) {

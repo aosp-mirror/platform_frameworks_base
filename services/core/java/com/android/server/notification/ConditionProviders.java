@@ -34,6 +34,7 @@ import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
+import android.util.TypedXmlSerializer;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
@@ -110,7 +111,7 @@ public class ConditionProviders extends ManagedServices {
     }
 
     @Override
-    void writeDefaults(XmlSerializer out) throws IOException {
+    void writeDefaults(TypedXmlSerializer out) throws IOException {
         synchronized (mDefaultsLock) {
             String defaults = String.join(ENABLED_SERVICES_SEPARATOR, mDefaultPackages);
             out.attribute(null, ATT_DEFAULTS, defaults);

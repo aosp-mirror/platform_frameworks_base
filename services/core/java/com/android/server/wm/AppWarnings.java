@@ -492,7 +492,7 @@ class AppWarnings {
                 }
                 out.startTag(null, "package");
                 out.attribute(null, "name", pkg);
-                out.attribute(null, "flags", Integer.toString(mode));
+                out.attributeInt(null, "flags", mode);
                 out.endTag(null, "package");
             }
 

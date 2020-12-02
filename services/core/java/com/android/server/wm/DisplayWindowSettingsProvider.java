@@ -335,36 +335,31 @@ class DisplayWindowSettingsProvider implements SettingsProvider {
         return fileData;
     }
 
-    private static int getIntAttribute(XmlPullParser parser, String name, int defaultValue) {
-        try {
-            final String str = parser.getAttributeValue(null, name);
-            return str != null ? Integer.parseInt(str) : defaultValue;
-        } catch (NumberFormatException e) {
-            Slog.w(TAG, "Failed to parse display window settings attribute: " + name, e);
-            return defaultValue;
-        }
+    private static int getIntAttribute(TypedXmlPullParser parser, String name, int defaultValue) {
+        return parser.getAttributeInt(null, name, defaultValue);
     }
 
     @Nullable
-    private static Integer getIntegerAttribute(XmlPullParser parser, String name,
+    private static Integer getIntegerAttribute(TypedXmlPullParser parser, String name,
             @Nullable Integer defaultValue) {
         try {
-            final String str = parser.getAttributeValue(null, name);
-            return str != null ? Integer.valueOf(str) : defaultValue;
-        } catch (NumberFormatException e) {
-            Slog.w(TAG, "Failed to parse display window settings attribute: " + name, e);
+            return parser.getAttributeInt(null, name);
+        } catch (Exception ignored) {
             return defaultValue;
         }
     }
 
     @Nullable
-    private static Boolean getBooleanAttribute(XmlPullParser parser, String name,
+    private static Boolean getBooleanAttribute(TypedXmlPullParser parser, String name,
             @Nullable Boolean defaultValue) {
-        final String str = parser.getAttributeValue(null, name);
-        return str != null ? Boolean.valueOf(str) : defaultValue;
+        try {
+            return parser.getAttributeBoolean(null, name);
+        } catch (Exception ignored) {
+            return defaultValue;
+        }
     }
 
-    private static void readDisplay(XmlPullParser parser, FileData fileData)
+    private static void readDisplay(TypedXmlPullParser parser, FileData fileData)
             throws NumberFormatException, XmlPullParserException, IOException {
         String name = parser.getAttributeValue(null, "name");
         if (name != null) {
@@ -407,7 +402,7 @@ class DisplayWindowSettingsProvider implements SettingsProvider {
         XmlUtils.skipCurrentTag(parser);
     }
 
-    private static void readConfig(XmlPullParser parser, FileData fileData)
+    private static void readConfig(TypedXmlPullParser parser, FileData fileData)
             throws NumberFormatException,
             XmlPullParserException, IOException {
         fileData.mIdentifierType = getIntAttribute(parser, "identifier",
@@ -432,8 +427,7 @@ class DisplayWindowSettingsProvider implements SettingsProvider {
             out.startTag(null, "display-settings");
 
             out.startTag(null, "config");
-            out.attribute(null, "identifier",
-                    Integer.toString(data.mIdentifierType));
+            out.attributeInt(null, "identifier", data.mIdentifierType);
             out.endTag(null, "config");
 
             for (Map.Entry<String, SettingsEntry> entry
@@ -447,8 +441,7 @@ class DisplayWindowSettingsProvider implements SettingsProvider {
                 out.startTag(null, "display");
                 out.attribute(null, "name", displayIdentifier);
                 if (settingsEntry.mWindowingMode != WindowConfiguration.WINDOWING_MODE_UNDEFINED) {
-                    out.attribute(null, "windowingMode",
-                            Integer.toString(settingsEntry.mWindowingMode));
+                    out.attributeInt(null, "windowingMode", settingsEntry.mWindowingMode);
                 }
                 if (settingsEntry.mUserRotationMode != null) {
                     out.attribute(null, "userRotationMode",
@@ -459,22 +452,18 @@ class DisplayWindowSettingsProvider implements SettingsProvider {
                             settingsEntry.mUserRotation.toString());
                 }
                 if (settingsEntry.mForcedWidth != 0 && settingsEntry.mForcedHeight != 0) {
-                    out.attribute(null, "forcedWidth",
-                            Integer.toString(settingsEntry.mForcedWidth));
-                    out.attribute(null, "forcedHeight",
-                            Integer.toString(settingsEntry.mForcedHeight));
+                    out.attributeInt(null, "forcedWidth", settingsEntry.mForcedWidth);
+                    out.attributeInt(null, "forcedHeight", settingsEntry.mForcedHeight);
                 }
                 if (settingsEntry.mForcedDensity != 0) {
-                    out.attribute(null, "forcedDensity",
-                            Integer.toString(settingsEntry.mForcedDensity));
+                    out.attributeInt(null, "forcedDensity", settingsEntry.mForcedDensity);
                 }
                 if (settingsEntry.mForcedScalingMode != null) {
                     out.attribute(null, "forcedScalingMode",
                             settingsEntry.mForcedScalingMode.toString());
                 }
                 if (settingsEntry.mRemoveContentMode != REMOVE_CONTENT_MODE_UNDEFINED) {
-                    out.attribute(null, "removeContentMode",
-                            Integer.toString(settingsEntry.mRemoveContentMode));
+                    out.attributeInt(null, "removeContentMode", settingsEntry.mRemoveContentMode);
                 }
                 if (settingsEntry.mShouldShowWithInsecureKeyguard != null) {
                     out.attribute(null, "shouldShowWithInsecureKeyguard",

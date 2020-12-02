@@ -1500,7 +1500,6 @@ package android.provider {
     field public static final String HIDDEN_API_BLACKLIST_EXEMPTIONS = "hidden_api_blacklist_exemptions";
     field public static final String HIDDEN_API_POLICY = "hidden_api_policy";
     field public static final String HIDE_ERROR_DIALOGS = "hide_error_dialogs";
-    field public static final String LOCATION_GLOBAL_KILL_SWITCH = "location_global_kill_switch";
     field public static final String LOCATION_IGNORE_SETTINGS_PACKAGE_WHITELIST = "location_ignore_settings_package_whitelist";
     field public static final String LOW_POWER_MODE = "low_power";
     field public static final String LOW_POWER_MODE_STICKY = "low_power_sticky";

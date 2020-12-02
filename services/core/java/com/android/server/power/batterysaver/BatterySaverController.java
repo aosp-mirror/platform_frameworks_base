@@ -224,10 +224,9 @@ public class BatterySaverController implements BatterySaverPolicyListener {
         mFileUpdater = new FileUpdater(context);
         mBatterySavingStats = batterySavingStats;
 
+        // TODO(79580230): remove plugin code and maybe screen on/off listeners?
         // Initialize plugins.
-        mPlugins = new Plugin[] {
-                new BatterySaverLocationPlugin(mContext)
-        };
+        mPlugins = new Plugin[0];
         PowerManager.invalidatePowerSaveModeCaches();
     }
 
