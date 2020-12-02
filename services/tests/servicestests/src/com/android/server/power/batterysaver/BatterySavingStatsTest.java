@@ -25,6 +25,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import android.metrics.LogMaker;
+import android.util.IndentingPrintWriter;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -73,7 +74,7 @@ public class BatterySavingStatsTest {
 
         void assertDumpable() {
             final ByteArrayOutputStream out = new ByteArrayOutputStream();
-            dump(new PrintWriter(out), ""); // Just make sure it won't crash.
+            dump(new IndentingPrintWriter(new PrintWriter(out))); // Just make sure it won't crash.
         }
 
         void advanceClock(int minutes) {
