@@ -16653,6 +16653,19 @@ public final class Settings {
             // Companion os version constants
             /** @hide */
             public static final int COMPANION_OS_VERSION_UNDEFINED = -1;
+
+            /**
+             * A boolean value to indicate if we want to support all languages in LE edition on
+             * wear. 1 for supporting, 0 for not supporting.
+             * @hide
+             */
+            public static final String ENABLE_ALL_LANGUAGES = "enable_all_languages";
+
+            /**
+             * The Locale (as language tag) the user chose at startup.
+             * @hide
+             */
+            public static final String SETUP_LOCALE = "setup_locale";
         }
     }
 
