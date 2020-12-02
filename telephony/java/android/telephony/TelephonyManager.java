@@ -11693,18 +11693,6 @@ public class TelephonyManager {
     }
 
     /**
-     * In this mode, modem will not send specified indications when screen is off.
-     * @hide
-     */
-    public static final int INDICATION_UPDATE_MODE_NORMAL                   = 1;
-
-    /**
-     * In this mode, modem will still send specified indications when screen is off.
-     * @hide
-     */
-    public static final int INDICATION_UPDATE_MODE_IGNORE_SCREEN_OFF        = 2;
-
-    /**
      * The indication for signal strength update.
      * @hide
      */
