@@ -49,10 +49,10 @@ import android.telephony.TelephonyManager;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
-import com.android.server.VcnManagementService.VcnNetworkProvider;
 import com.android.server.vcn.TelephonySubscriptionTracker;
 import com.android.server.vcn.Vcn;
 import com.android.server.vcn.VcnContext;
+import com.android.server.vcn.VcnNetworkProvider;
 import com.android.server.vcn.util.PersistableBundleUtils;
 
 import org.junit.Test;
@@ -191,8 +191,7 @@ public class VcnManagementServiceTest {
     public void testSystemReady() throws Exception {
         mVcnMgmtSvc.systemReady();
 
-        verify(mConnMgr)
-                .registerNetworkProvider(any(VcnManagementService.VcnNetworkProvider.class));
+        verify(mConnMgr).registerNetworkProvider(any(VcnNetworkProvider.class));
         verify(mSubscriptionTracker).register();
     }
 
@@ -309,7 +308,7 @@ public class VcnManagementServiceTest {
         // Config cleared, SIM reloaded & config re-added right before teardown delay, staring new
         // vcnInstance.
         mTestLooper.moveTimeForward(
-                VcnManagementService.CARRIER_PRIVILEGES_LOST_TEARDOWN_DELAY_MS - 1);
+                VcnManagementService.CARRIER_PRIVILEGES_LOST_TEARDOWN_DELAY_MS / 2);
         mTestLooper.dispatchAll();
         mVcnMgmtSvc.clearVcnConfig(TEST_UUID_2);
         final Vcn newInstance = startAndGetVcnInstance(TEST_UUID_2);

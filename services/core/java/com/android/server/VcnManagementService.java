@@ -25,8 +25,6 @@ import android.annotation.NonNull;
 import android.app.AppOpsManager;
 import android.content.Context;
 import android.net.ConnectivityManager;
-import android.net.NetworkProvider;
-import android.net.NetworkRequest;
 import android.net.vcn.IVcnManagementService;
 import android.net.vcn.VcnConfig;
 import android.os.Binder;
@@ -50,6 +48,7 @@ import com.android.internal.annotations.VisibleForTesting.Visibility;
 import com.android.server.vcn.TelephonySubscriptionTracker;
 import com.android.server.vcn.Vcn;
 import com.android.server.vcn.VcnContext;
+import com.android.server.vcn.VcnNetworkProvider;
 import com.android.server.vcn.util.PersistableBundleUtils;
 
 import java.io.IOException;
@@ -390,6 +389,9 @@ public class VcnManagementService extends IVcnManagementService.Stub {
     private void startVcnLocked(@NonNull ParcelUuid subscriptionGroup, @NonNull VcnConfig config) {
         Slog.v(TAG, "Starting VCN config for subGrp: " + subscriptionGroup);
 
+        // TODO(b/176939047): Support multiple VCNs active at the same time, or limit to one active
+        //                    VCN.
+
         final Vcn newInstance = mDeps.newVcn(mVcnContext, subscriptionGroup, config);
         mVcns.put(subscriptionGroup, newInstance);
     }
@@ -491,26 +493,6 @@ public class VcnManagementService extends IVcnManagementService.Stub {
     public Map<ParcelUuid, Vcn> getAllVcns() {
         synchronized (mLock) {
             return Collections.unmodifiableMap(mVcns);
-        }
-    }
-
-    /**
-     * Network provider for VCN networks.
-     *
-     * @hide
-     */
-    public class VcnNetworkProvider extends NetworkProvider {
-        VcnNetworkProvider(Context context, Looper looper) {
-            super(context, looper, VcnNetworkProvider.class.getSimpleName());
-        }
-
-        @Override
-        public void onNetworkRequested(@NonNull NetworkRequest request, int score, int providerId) {
-            synchronized (mLock) {
-                for (Vcn instance : mVcns.values()) {
-                    instance.onNetworkRequested(request, score, providerId);
-                }
-            }
         }
     }
 }
