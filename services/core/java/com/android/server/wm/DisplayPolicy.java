@@ -2046,7 +2046,7 @@ public class DisplayPolicy {
                 // requests to hide the status bar.  Not sure if there is another way that to be the
                 // case though.
                 if (!topIsFullscreen || mDisplayContent.getDefaultTaskDisplayArea()
-                        .isStackVisible(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY)) {
+                        .isRootTaskVisible(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY)) {
                     topAppHidesStatusBar = false;
                 }
             }
@@ -2830,9 +2830,9 @@ public class DisplayPolicy {
 
     private int updateSystemBarsLw(WindowState win, int disableFlags) {
         final boolean dockedStackVisible = mDisplayContent.getDefaultTaskDisplayArea()
-                .isStackVisible(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
+                .isRootTaskVisible(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
         final boolean freeformStackVisible = mDisplayContent.getDefaultTaskDisplayArea()
-                .isStackVisible(WINDOWING_MODE_FREEFORM);
+                .isRootTaskVisible(WINDOWING_MODE_FREEFORM);
         final boolean resizing = mDisplayContent.getDockedDividerController().isResizing();
 
         // We need to force system bars when the docked stack is visible, when the freeform stack

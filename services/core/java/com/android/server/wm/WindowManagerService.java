@@ -2922,7 +2922,7 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     void getStackBounds(int windowingMode, int activityType, Rect bounds) {
-        final Task stack = mRoot.getStack(windowingMode, activityType);
+        final Task stack = mRoot.getRootTask(windowingMode, activityType);
         if (stack != null) {
             stack.getBounds(bounds);
             return;

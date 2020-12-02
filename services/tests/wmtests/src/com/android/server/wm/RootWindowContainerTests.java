@@ -92,7 +92,7 @@ public class RootWindowContainerTests extends WindowTestsBase {
     public void testAllPausedActivitiesComplete() {
         DisplayContent displayContent = mWm.mRoot.getDisplayContent(DEFAULT_DISPLAY);
         TaskDisplayArea taskDisplayArea = displayContent.getDefaultTaskDisplayArea();
-        Task stack = taskDisplayArea.getStackAt(0);
+        Task stack = taskDisplayArea.getRootTaskAt(0);
         ActivityRecord activity = createActivityRecord(displayContent);
         stack.mPausingActivity = activity;
 

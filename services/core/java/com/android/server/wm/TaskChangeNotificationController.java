@@ -193,7 +193,7 @@ class TaskChangeNotificationController {
             switch (msg.what) {
                 case LOG_STACK_STATE_MSG: {
                     synchronized (mServiceLock) {
-                        mTaskSupervisor.logStackState();
+                        mTaskSupervisor.logRootTaskState();
                     }
                     break;
                 }

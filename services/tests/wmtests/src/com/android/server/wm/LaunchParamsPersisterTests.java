@@ -115,7 +115,7 @@ public class LaunchParamsPersisterTests extends WindowTestsBase {
                 .thenReturn(mTestDisplay);
 
         Task stack = mTestDisplay.getDefaultTaskDisplayArea()
-                .createStack(TEST_WINDOWING_MODE, ACTIVITY_TYPE_STANDARD, /* onTop */ true);
+                .createRootTask(TEST_WINDOWING_MODE, ACTIVITY_TYPE_STANDARD, /* onTop */ true);
         mTestTask = new TaskBuilder(mSupervisor).setComponent(TEST_COMPONENT).setParentTask(stack)
                 .build();
         mTestTask.mUserId = TEST_USER_ID;
@@ -337,7 +337,7 @@ public class LaunchParamsPersisterTests extends WindowTestsBase {
     public void testClearsRecordsOfTheUserOnUserCleanUp() {
         mTarget.saveTask(mTestTask);
 
-        Task stack = mTestDisplay.getDefaultTaskDisplayArea().createStack(
+        Task stack = mTestDisplay.getDefaultTaskDisplayArea().createRootTask(
                 TEST_WINDOWING_MODE, ACTIVITY_TYPE_STANDARD, /* onTop */ true);
         final Task anotherTaskOfTheSameUser = new TaskBuilder(mSupervisor)
                 .setComponent(ALTERNATIVE_COMPONENT)
@@ -349,7 +349,7 @@ public class LaunchParamsPersisterTests extends WindowTestsBase {
         anotherTaskOfTheSameUser.setHasBeenVisible(true);
         mTarget.saveTask(anotherTaskOfTheSameUser);
 
-        stack = mTestDisplay.getDefaultTaskDisplayArea().createStack(TEST_WINDOWING_MODE,
+        stack = mTestDisplay.getDefaultTaskDisplayArea().createRootTask(TEST_WINDOWING_MODE,
                 ACTIVITY_TYPE_STANDARD, /* onTop */ true);
         final Task anotherTaskOfDifferentUser = new TaskBuilder(mSupervisor)
                 .setComponent(TEST_COMPONENT)

@@ -294,11 +294,11 @@ public class LaunchParamsControllerTests extends WindowTestsBase {
 
         mController.registerModifier(positioner);
 
-        doNothing().when(mRootWindowContainer).moveStackToTaskDisplayArea(anyInt(), any(),
+        doNothing().when(mRootWindowContainer).moveRootTaskToTaskDisplayArea(anyInt(), any(),
                 anyBoolean());
         mController.layoutTask(task, null /* windowLayout */);
-        verify(mRootWindowContainer, times(1)).moveStackToTaskDisplayArea(eq(task.getRootTaskId()),
-                eq(preferredTaskDisplayArea), anyBoolean());
+        verify(mRootWindowContainer, times(1)).moveRootTaskToTaskDisplayArea(
+                eq(task.getRootTaskId()), eq(preferredTaskDisplayArea), anyBoolean());
     }
 
     /**

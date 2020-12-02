@@ -2550,15 +2550,15 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return FINISH_RESULT_CANCELLED;
         }
 
-        final Task stack = getRootTask();
-        final boolean mayAdjustTop = (isState(RESUMED) || stack.mResumedActivity == null)
-                && stack.isFocusedStackOnDisplay()
+        final Task rootTask = getRootTask();
+        final boolean mayAdjustTop = (isState(RESUMED) || rootTask.mResumedActivity == null)
+                && rootTask.isFocusedStackOnDisplay()
                 // Do not adjust focus task because the task will be reused to launch new activity.
                 && !task.isClearingToReuseTask();
         final boolean shouldAdjustGlobalFocus = mayAdjustTop
                 // It must be checked before {@link #makeFinishingLocked} is called, because a stack
                 // is not visible if it only contains finishing activities.
-                && mRootWindowContainer.isTopDisplayFocusedStack(stack);
+                && mRootWindowContainer.isTopDisplayFocusedRootTask(rootTask);
 
         mAtmService.deferWindowLayout();
         try {
@@ -2623,12 +2623,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 // Tell window manager to prepare for this one to be removed.
                 setVisibility(false);
 
-                if (stack.mPausingActivity == null) {
+                if (rootTask.mPausingActivity == null) {
                     ProtoLog.v(WM_DEBUG_STATES, "Finish needs to pause: %s", this);
                     if (DEBUG_USER_LEAVING) {
                         Slog.v(TAG_USER_LEAVING, "finish() => pause with userLeaving=false");
                     }
-                    stack.startPausingLocked(false /* userLeaving */, false /* uiSleeping */,
+                    rootTask.startPausingLocked(false /* userLeaving */, false /* uiSleeping */,
                             null /* resuming */, "finish");
                 }
 
@@ -2827,7 +2827,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                     false /* markFrozenIfConfigChanged */, true /* deferResume */);
         }
         if (activityRemoved) {
-            mRootWindowContainer.resumeFocusedStacksTopActivities();
+            mRootWindowContainer.resumeFocusedTasksTopActivities();
         }
 
         ProtoLog.d(WM_DEBUG_CONTAINERS, "destroyIfPossible: r=%s destroy returned "
@@ -2849,7 +2849,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             mTaskSupervisor.mFinishingActivities.add(this);
         }
         resumeKeyDispatchingLocked();
-        return mRootWindowContainer.resumeFocusedStacksTopActivities();
+        return mRootWindowContainer.resumeFocusedTasksTopActivities();
     }
 
     /**
@@ -3014,7 +3014,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             removeFromHistory(reason);
         }
 
-        mRootWindowContainer.resumeFocusedStacksTopActivities();
+        mRootWindowContainer.resumeFocusedTasksTopActivities();
     }
 
     /**
@@ -5206,7 +5206,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             } else {
                 if (deferRelaunchUntilPaused) {
                     destroyImmediately("stop-config");
-                    mRootWindowContainer.resumeFocusedStacksTopActivities();
+                    mRootWindowContainer.resumeFocusedTasksTopActivities();
                 } else {
                     mRootWindowContainer.updatePreviousProcess(this);
                 }
@@ -5703,7 +5703,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // First find the real culprit...  if this activity has stopped, then the key dispatching
         // timeout should not be caused by this.
         if (stopped) {
-            final Task stack = mRootWindowContainer.getTopDisplayFocusedStack();
+            final Task stack = mRootWindowContainer.getTopDisplayFocusedRootTask();
             if (stack == null) {
                 return this;
             }
@@ -6091,7 +6091,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     @Override
     public void onAnimationLeashCreated(Transaction t, SurfaceControl leash) {
         t.setLayer(leash, getAnimationLayer());
-        getDisplayContent().assignStackOrdering();
+        getDisplayContent().assignRootTaskOrdering();
     }
 
     @Override

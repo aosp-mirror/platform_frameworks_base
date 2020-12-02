@@ -724,7 +724,7 @@ public class RecentTasksTest extends WindowTestsBase {
         mRecentTasks.setParameters(-1 /* min */, 3 /* max */, -1 /* ms */);
 
         final TaskDisplayArea taskDisplayArea = mRootWindowContainer.getDefaultTaskDisplayArea();
-        final Task alwaysOnTopTask = taskDisplayArea.createStack(WINDOWING_MODE_MULTI_WINDOW,
+        final Task alwaysOnTopTask = taskDisplayArea.createRootTask(WINDOWING_MODE_MULTI_WINDOW,
                 ACTIVITY_TYPE_STANDARD, true /* onTop */);
         alwaysOnTopTask.setAlwaysOnTop(true);
 
@@ -838,7 +838,7 @@ public class RecentTasksTest extends WindowTestsBase {
 
         Task stack = mTasks.get(2).getRootTask();
         stack.moveToFront("", mTasks.get(2));
-        doReturn(stack).when(mAtm.mRootWindowContainer).getTopDisplayFocusedStack();
+        doReturn(stack).when(mAtm.mRootWindowContainer).getTopDisplayFocusedRootTask();
 
         // Simulate the reset from the timeout
         mRecentTasks.resetFreezeTaskListReorderingOnTimeout();
@@ -858,7 +858,7 @@ public class RecentTasksTest extends WindowTestsBase {
         mRecentTasks.setParameters(-1 /* min */, 1 /* max */, -1 /* ms */);
 
         final Task homeStack = mTaskContainer.getRootHomeTask();
-        final Task aboveHomeStack = mTaskContainer.createStack(
+        final Task aboveHomeStack = mTaskContainer.createRootTask(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
 
         // Add a number of tasks (beyond the max) but ensure that nothing is trimmed because all
@@ -875,10 +875,10 @@ public class RecentTasksTest extends WindowTestsBase {
     public void testBehindHomeStackTasks_expectTaskTrimmed() {
         mRecentTasks.setParameters(-1 /* min */, 1 /* max */, -1 /* ms */);
 
-        final Task behindHomeStack = mTaskContainer.createStack(
+        final Task behindHomeStack = mTaskContainer.createRootTask(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
         final Task homeStack = mTaskContainer.getRootHomeTask();
-        final Task aboveHomeStack = mTaskContainer.createStack(
+        final Task aboveHomeStack = mTaskContainer.createRootTask(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
 
         // Add a number of tasks (beyond the max) but ensure that only the task in the stack behind
@@ -897,17 +897,17 @@ public class RecentTasksTest extends WindowTestsBase {
     public void testOtherDisplayTasks_expectNoTrim() {
         mRecentTasks.setParameters(-1 /* min */, 1 /* max */, -1 /* ms */);
 
-        final Task homeStack = mTaskContainer.getRootHomeTask();
+        final Task homeTask = mTaskContainer.getRootHomeTask();
         final DisplayContent otherDisplay = addNewDisplayContentAt(DisplayContent.POSITION_TOP);
-        final Task otherDisplayStack = otherDisplay.getDefaultTaskDisplayArea()
-                .createStack(WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
+        final Task otherDisplayRootTask = otherDisplay.getDefaultTaskDisplayArea().createRootTask(
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
 
         // Add a number of tasks (beyond the max) on each display, ensure that the tasks are not
         // removed
-        mRecentTasks.add(createTaskBuilder(".HomeTask1").setParentTask(homeStack).build());
-        mRecentTasks.add(createTaskBuilder(".Task1").setParentTask(otherDisplayStack).build());
-        mRecentTasks.add(createTaskBuilder(".Task2").setParentTask(otherDisplayStack).build());
-        mRecentTasks.add(createTaskBuilder(".HomeTask2").setParentTask(homeStack).build());
+        mRecentTasks.add(createTaskBuilder(".HomeTask1").setParentTask(homeTask).build());
+        mRecentTasks.add(createTaskBuilder(".Task1").setParentTask(otherDisplayRootTask).build());
+        mRecentTasks.add(createTaskBuilder(".Task2").setParentTask(otherDisplayRootTask).build());
+        mRecentTasks.add(createTaskBuilder(".HomeTask2").setParentTask(homeTask).build());
 
         triggerTrimAndAssertNoTasksTrimmed();
     }
@@ -1103,9 +1103,9 @@ public class RecentTasksTest extends WindowTestsBase {
     private void assertNotRestoreTask(Runnable action) {
         // Verify stack count doesn't change because task with fullscreen mode and standard type
         // would have its own stack.
-        final int originalStackCount = mTaskContainer.getStackCount();
+        final int originalStackCount = mTaskContainer.getRootTaskCount();
         action.run();
-        assertEquals(originalStackCount, mTaskContainer.getStackCount());
+        assertEquals(originalStackCount, mTaskContainer.getRootTaskCount());
     }
 
     @Test
