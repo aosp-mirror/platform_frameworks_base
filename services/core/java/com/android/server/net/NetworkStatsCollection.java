@@ -28,9 +28,9 @@ import static android.net.NetworkStats.SET_DEFAULT;
 import static android.net.NetworkStats.TAG_NONE;
 import static android.net.NetworkStats.UID_ALL;
 import static android.net.TrafficStats.UID_REMOVED;
-import static android.net.NetworkUtils.multiplySafeByRational;
 import static android.text.format.DateUtils.WEEK_IN_MILLIS;
 
+import static com.android.internal.net.NetworkUtilsInternal.multiplySafeByRational;
 import static com.android.server.net.NetworkStatsService.TAG;
 
 import android.net.NetworkIdentity;

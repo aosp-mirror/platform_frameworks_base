@@ -26,9 +26,9 @@ import static android.net.NetworkStatsHistory.DataStreamUtils.writeVarLongArray;
 import static android.net.NetworkStatsHistory.Entry.UNKNOWN;
 import static android.net.NetworkStatsHistory.ParcelUtils.readLongArray;
 import static android.net.NetworkStatsHistory.ParcelUtils.writeLongArray;
-import static android.net.NetworkUtils.multiplySafeByRational;
 import static android.text.format.DateUtils.SECOND_IN_MILLIS;
 
+import static com.android.internal.net.NetworkUtilsInternal.multiplySafeByRational;
 import static com.android.internal.util.ArrayUtils.total;
 
 import android.compat.annotation.UnsupportedAppUsage;
