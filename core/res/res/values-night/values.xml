@@ -25,18 +25,12 @@
         <item name="colorControlNormal">?attr/textColorPrimary</item>
         <item name="alertDialogTheme">@style/Theme.DeviceDefault.Dialog.Alert</item>
         <item name="forceDarkAllowed">false</item>
-
-        <!-- QS panel background -->
-        <item name="colorBackgroundFloating">@color/black</item>
-
-        <!-- volume background -->
-        <item name="panelColorBackground">@color/material_grey_800</item>
     </style>
 
     <style name="Theme.DeviceDefault.QuickSettings.Dialog" parent="Theme.DeviceDefault.Dialog" />
 
     <style name="TextAppearance.Material.Notification">
-        <item name="textColor">@color/notification_secondary_text_color_dark</item>
+        <item name="textColor">?attr/textColorPrimary</item>
         <item name="textSize">@dimen/notification_text_size</item>
     </style>
 </resources>
