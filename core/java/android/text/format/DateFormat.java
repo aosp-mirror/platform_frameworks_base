@@ -698,7 +698,7 @@ public class DateFormat {
     }
 
     private static String zeroPad(int inValue, int inMinDigits) {
-        return TextUtils.formatSimple("%0" + inMinDigits + "d", inValue);
+        return String.format(Locale.getDefault(), "%0" + inMinDigits + "d", inValue);
     }
 
     /**
