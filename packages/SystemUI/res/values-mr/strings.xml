@@ -951,7 +951,7 @@
     <string name="notification_channel_general" msgid="4384774889645929705">"सर्वसाधारण मेसेज"</string>
     <string name="notification_channel_storage" msgid="2720725707628094977">"स्टोरेज"</string>
     <string name="notification_channel_hints" msgid="7703783206000346876">"सूचना"</string>
-    <string name="instant_apps" msgid="8337185853050247304">"इन्सटंट अ‍ॅप्स"</string>
+    <string name="instant_apps" msgid="8337185853050247304">"Instant Apps"</string>
     <string name="instant_apps_title" msgid="8942706782103036910">"<xliff:g id="APP">%1$s</xliff:g> रन होत आहे"</string>
     <string name="instant_apps_message" msgid="6112428971833011754">"इंस्टॉल केल्याशिवाय अ‍ॅप उघडले."</string>
     <string name="instant_apps_message_with_help" msgid="1816952263531203932">"इंस्टॉल केल्याशिवाय अ‍ॅप उघडले. अधिक जाणून घेण्यासाठी टॅप करा."</string>

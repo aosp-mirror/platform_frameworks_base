@@ -1525,11 +1525,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return getDisplayContent().getDisplayInfo();
     }
 
+    /**
+     * Returns the insets state for the client. Its sources may be the copies with visibility
+     * modification according to the state of transient bars.
+     */
     InsetsState getInsetsState() {
-        final InsetsState insetsState = mToken.getFixedRotationTransformInsetsState();
-        if (insetsState != null) {
-            return insetsState;
-        }
         return getDisplayContent().getInsetsPolicy().getInsetsForDispatch(this);
     }
 
