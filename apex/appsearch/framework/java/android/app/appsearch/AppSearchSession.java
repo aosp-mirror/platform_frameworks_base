@@ -270,6 +270,61 @@ public final class AppSearchSession {
     }
 
     /**
+     * Searches a document based on a given query string.
+     *
+     * <p>Currently we support following features in the raw query format:
+     * <ul>
+     *     <li>AND
+     *     <p>AND joins (e.g. “match documents that have both the terms ‘dog’ and
+     *     ‘cat’”).
+     *     Example: hello world matches documents that have both ‘hello’ and ‘world’
+     *     <li>OR
+     *     <p>OR joins (e.g. “match documents that have either the term ‘dog’ or
+     *     ‘cat’”).
+     *     Example: dog OR puppy
+     *     <li>Exclusion
+     *     <p>Exclude a term (e.g. “match documents that do
+     *     not have the term ‘dog’”).
+     *     Example: -dog excludes the term ‘dog’
+     *     <li>Grouping terms
+     *     <p>Allow for conceptual grouping of subqueries to enable hierarchical structures (e.g.
+     *     “match documents that have either ‘dog’ or ‘puppy’, and either ‘cat’ or ‘kitten’”).
+     *     Example: (dog puppy) (cat kitten) two one group containing two terms.
+     *     <li>Property restricts
+     *     <p> Specifies which properties of a document to specifically match terms in (e.g.
+     *     “match documents where the ‘subject’ property contains ‘important’”).
+     *     Example: subject:important matches documents with the term ‘important’ in the
+     *     ‘subject’ property
+     *     <li>Schema type restricts
+     *     <p>This is similar to property restricts, but allows for restricts on top-level document
+     *     fields, such as schema_type. Clients should be able to limit their query to documents of
+     *     a certain schema_type (e.g. “match documents that are of the ‘Email’ schema_type”).
+     *     Example: { schema_type_filters: “Email”, “Video”,query: “dog” } will match documents
+     *     that contain the query term ‘dog’ and are of either the ‘Email’ schema type or the
+     *     ‘Video’ schema type.
+     * </ul>
+     *
+     * <p> This method is lightweight. The heavy work will be done in
+     * {@link SearchResults#getNextPage}.
+     *
+     * @param queryExpression Query String to search.
+     * @param searchSpec      Spec for setting filters, raw query etc.
+     * @param executor        Executor on which to invoke the callback of the following request
+     *                        {@link SearchResults#getNextPage}.
+     * @return The search result of performing this operation.
+     */
+    @NonNull
+    public SearchResults query(
+            @NonNull String queryExpression,
+            @NonNull SearchSpec searchSpec,
+            @NonNull @CallbackExecutor Executor executor) {
+        Objects.requireNonNull(queryExpression);
+        Objects.requireNonNull(searchSpec);
+        Objects.requireNonNull(executor);
+        return new SearchResults(mService, mDatabaseName, queryExpression, searchSpec, executor);
+    }
+
+    /**
      * Removes {@link GenericDocument}s from the index by URI.
      *
      * @param request Request containing URIs to be removed.
@@ -342,6 +397,4 @@ public final class AppSearchSession {
             throw e.rethrowFromSystemServer();
         }
     }
-
-    // TODO(b/162450968) port query() and SearchResults.java to platform.
 }
