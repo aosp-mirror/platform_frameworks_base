@@ -502,6 +502,8 @@ public class StatsPullAtomService extends SystemService {
                         synchronized (mProcessSystemIonHeapSizeLock) {
                             return pullProcessSystemIonHeapSizeLocked(atomTag, data);
                         }
+                    case FrameworkStatsLog.SYSTEM_MEMORY:
+                        return pullSystemMemory(atomTag, data);
                     case FrameworkStatsLog.TEMPERATURE:
                         synchronized (mTemperatureLock) {
                             return pullTemperatureLocked(atomTag, data);
@@ -796,6 +798,7 @@ public class StatsPullAtomService extends SystemService {
         registerSystemIonHeapSize();
         registerIonHeapSize();
         registerProcessSystemIonHeapSize();
+        registerSystemMemory();
         registerTemperature();
         registerCoolingDevice();
         registerBinderCallsStats();
@@ -1910,6 +1913,30 @@ public class StatsPullAtomService extends SystemService {
                     (int) (allocations.totalSizeInBytes / 1024), allocations.count,
                     (int) (allocations.maxSizeInBytes / 1024)));
         }
+        return StatsManager.PULL_SUCCESS;
+    }
+
+    private void registerSystemMemory() {
+        int tagId = FrameworkStatsLog.SYSTEM_MEMORY;
+        mStatsManager.setPullAtomCallback(
+                tagId,
+                null, // use default PullAtomMetadata values
+                DIRECT_EXECUTOR,
+                mStatsCallbackImpl
+        );
+    }
+
+    int pullSystemMemory(int atomTag, List<StatsEvent> pulledData) {
+        SystemMemoryUtil.Metrics metrics = SystemMemoryUtil.getMetrics();
+        pulledData.add(
+                FrameworkStatsLog.buildStatsEvent(
+                        atomTag,
+                        metrics.unreclaimableSlabKb,
+                        metrics.vmallocUsedKb,
+                        metrics.pageTablesKb,
+                        metrics.kernelStackKb,
+                        metrics.totalIonKb,
+                        metrics.unaccountedKb));
         return StatsManager.PULL_SUCCESS;
     }
 
