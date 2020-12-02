@@ -21,15 +21,6 @@ import static android.content.pm.UserInfo.FLAG_MANAGED_PROFILE;
 import static android.content.pm.UserInfo.FLAG_PRIMARY;
 import static android.content.pm.UserInfo.FLAG_RESTRICTED;
 import static android.net.ConnectivityManager.NetworkCallback;
-import static android.net.NetworkCapabilities.LINK_BANDWIDTH_UNSPECIFIED;
-import static android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET;
-import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_CONGESTED;
-import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_METERED;
-import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_ROAMING;
-import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_SUSPENDED;
-import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
-import static android.net.NetworkCapabilities.TRANSPORT_VPN;
-import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -619,102 +610,6 @@ public class VpnTest {
         // Notification should be cleared after unsetting always-on package.
         vpn.setAlwaysOnPackage(null, false, null, mKeyStore);
         order.verify(mNotificationManager).cancel(anyString(), anyInt());
-    }
-
-    @Test
-    public void testCapabilities() {
-        setMockedUsers(primaryUser);
-
-        final Network mobile = new Network(1);
-        final Network wifi = new Network(2);
-
-        final Map<Network, NetworkCapabilities> networks = new HashMap<>();
-        networks.put(
-                mobile,
-                new NetworkCapabilities()
-                        .addTransportType(TRANSPORT_CELLULAR)
-                        .addCapability(NET_CAPABILITY_INTERNET)
-                        .addCapability(NET_CAPABILITY_NOT_CONGESTED)
-                        .setLinkDownstreamBandwidthKbps(10));
-        networks.put(
-                wifi,
-                new NetworkCapabilities()
-                        .addTransportType(TRANSPORT_WIFI)
-                        .addCapability(NET_CAPABILITY_INTERNET)
-                        .addCapability(NET_CAPABILITY_NOT_METERED)
-                        .addCapability(NET_CAPABILITY_NOT_ROAMING)
-                        .addCapability(NET_CAPABILITY_NOT_CONGESTED)
-                        .addCapability(NET_CAPABILITY_NOT_SUSPENDED)
-                        .setLinkUpstreamBandwidthKbps(20));
-        setMockedNetworks(networks);
-
-        final NetworkCapabilities caps = new NetworkCapabilities();
-
-        Vpn.applyUnderlyingCapabilities(
-                mConnectivityManager, new Network[] {}, caps, false /* isAlwaysMetered */);
-        assertTrue(caps.hasTransport(TRANSPORT_VPN));
-        assertFalse(caps.hasTransport(TRANSPORT_CELLULAR));
-        assertFalse(caps.hasTransport(TRANSPORT_WIFI));
-        assertEquals(LINK_BANDWIDTH_UNSPECIFIED, caps.getLinkDownstreamBandwidthKbps());
-        assertEquals(LINK_BANDWIDTH_UNSPECIFIED, caps.getLinkUpstreamBandwidthKbps());
-        assertFalse(caps.hasCapability(NET_CAPABILITY_NOT_METERED));
-        assertTrue(caps.hasCapability(NET_CAPABILITY_NOT_ROAMING));
-        assertTrue(caps.hasCapability(NET_CAPABILITY_NOT_CONGESTED));
-        assertTrue(caps.hasCapability(NET_CAPABILITY_NOT_SUSPENDED));
-
-        Vpn.applyUnderlyingCapabilities(
-                mConnectivityManager,
-                new Network[] {mobile},
-                caps,
-                false /* isAlwaysMetered */);
-        assertTrue(caps.hasTransport(TRANSPORT_VPN));
-        assertTrue(caps.hasTransport(TRANSPORT_CELLULAR));
-        assertFalse(caps.hasTransport(TRANSPORT_WIFI));
-        assertEquals(10, caps.getLinkDownstreamBandwidthKbps());
-        assertEquals(LINK_BANDWIDTH_UNSPECIFIED, caps.getLinkUpstreamBandwidthKbps());
-        assertFalse(caps.hasCapability(NET_CAPABILITY_NOT_METERED));
-        assertFalse(caps.hasCapability(NET_CAPABILITY_NOT_ROAMING));
-        assertTrue(caps.hasCapability(NET_CAPABILITY_NOT_CONGESTED));
-        assertFalse(caps.hasCapability(NET_CAPABILITY_NOT_SUSPENDED));
-
-        Vpn.applyUnderlyingCapabilities(
-                mConnectivityManager, new Network[] {wifi}, caps, false /* isAlwaysMetered */);
-        assertTrue(caps.hasTransport(TRANSPORT_VPN));
-        assertFalse(caps.hasTransport(TRANSPORT_CELLULAR));
-        assertTrue(caps.hasTransport(TRANSPORT_WIFI));
-        assertEquals(LINK_BANDWIDTH_UNSPECIFIED, caps.getLinkDownstreamBandwidthKbps());
-        assertEquals(20, caps.getLinkUpstreamBandwidthKbps());
-        assertTrue(caps.hasCapability(NET_CAPABILITY_NOT_METERED));
-        assertTrue(caps.hasCapability(NET_CAPABILITY_NOT_ROAMING));
-        assertTrue(caps.hasCapability(NET_CAPABILITY_NOT_CONGESTED));
-        assertTrue(caps.hasCapability(NET_CAPABILITY_NOT_SUSPENDED));
-
-        Vpn.applyUnderlyingCapabilities(
-                mConnectivityManager, new Network[] {wifi}, caps, true /* isAlwaysMetered */);
-        assertTrue(caps.hasTransport(TRANSPORT_VPN));
-        assertFalse(caps.hasTransport(TRANSPORT_CELLULAR));
-        assertTrue(caps.hasTransport(TRANSPORT_WIFI));
-        assertEquals(LINK_BANDWIDTH_UNSPECIFIED, caps.getLinkDownstreamBandwidthKbps());
-        assertEquals(20, caps.getLinkUpstreamBandwidthKbps());
-        assertFalse(caps.hasCapability(NET_CAPABILITY_NOT_METERED));
-        assertTrue(caps.hasCapability(NET_CAPABILITY_NOT_ROAMING));
-        assertTrue(caps.hasCapability(NET_CAPABILITY_NOT_CONGESTED));
-        assertTrue(caps.hasCapability(NET_CAPABILITY_NOT_SUSPENDED));
-
-        Vpn.applyUnderlyingCapabilities(
-                mConnectivityManager,
-                new Network[] {mobile, wifi},
-                caps,
-                false /* isAlwaysMetered */);
-        assertTrue(caps.hasTransport(TRANSPORT_VPN));
-        assertTrue(caps.hasTransport(TRANSPORT_CELLULAR));
-        assertTrue(caps.hasTransport(TRANSPORT_WIFI));
-        assertEquals(10, caps.getLinkDownstreamBandwidthKbps());
-        assertEquals(20, caps.getLinkUpstreamBandwidthKbps());
-        assertFalse(caps.hasCapability(NET_CAPABILITY_NOT_METERED));
-        assertFalse(caps.hasCapability(NET_CAPABILITY_NOT_ROAMING));
-        assertTrue(caps.hasCapability(NET_CAPABILITY_NOT_CONGESTED));
-        assertTrue(caps.hasCapability(NET_CAPABILITY_NOT_SUSPENDED));
     }
 
     /**
