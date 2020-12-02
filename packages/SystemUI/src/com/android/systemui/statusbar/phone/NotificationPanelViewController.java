@@ -86,6 +86,7 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.doze.DozeLog;
 import com.android.systemui.fragments.FragmentHostManager;
 import com.android.systemui.fragments.FragmentHostManager.FragmentListener;
+import com.android.systemui.media.MediaDataManager;
 import com.android.systemui.media.MediaHierarchyManager;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.QS;
@@ -455,6 +456,7 @@ public class NotificationPanelViewController extends PanelViewController {
     private final CommandQueue mCommandQueue;
     private final NotificationLockscreenUserManager mLockscreenUserManager;
     private final ShadeController mShadeController;
+    private final MediaDataManager mMediaDataManager;
     private int mDisplayId;
 
     /**
@@ -546,7 +548,8 @@ public class NotificationPanelViewController extends PanelViewController {
             NotificationGroupManagerLegacy groupManager,
             NotificationIconAreaController notificationIconAreaController,
             AuthController authController,
-            QSDetailDisplayer qsDetailDisplayer) {
+            QSDetailDisplayer qsDetailDisplayer,
+            MediaDataManager mediaDataManager) {
         super(view, falsingManager, dozeLog, keyguardStateController,
                 (SysuiStatusBarStateController) statusBarStateController, vibratorHelper,
                 latencyTracker, flingAnimationUtilsBuilder, statusBarTouchableRegionManager);
@@ -576,6 +579,7 @@ public class NotificationPanelViewController extends PanelViewController {
         mPulseExpansionHandler = pulseExpansionHandler;
         mDozeParameters = dozeParameters;
         mBiometricUnlockController = biometricUnlockController;
+        mMediaDataManager = mediaDataManager;
         pulseExpansionHandler.setPulseExpandAbortListener(() -> {
             if (mQs != null) {
                 mQs.animateHeaderSlidingOut();
@@ -892,7 +896,8 @@ public class NotificationPanelViewController extends PanelViewController {
             int clockPreferredY = mKeyguardStatusViewController.getClockPreferredY(totalHeight);
             boolean bypassEnabled = mKeyguardBypassController.getBypassEnabled();
             final boolean hasVisibleNotifications = !bypassEnabled
-                    && mNotificationStackScrollLayoutController.getVisibleNotificationCount() != 0;
+                    && (mNotificationStackScrollLayoutController.getVisibleNotificationCount() != 0
+                    || mMediaDataManager.hasActiveMedia());
             mKeyguardStatusViewController.setHasVisibleNotifications(hasVisibleNotifications);
             mClockPositionAlgorithm.setup(mStatusBarMinHeight, totalHeight - bottomPadding,
                     mNotificationStackScrollLayoutController.getIntrinsicContentHeight(),
