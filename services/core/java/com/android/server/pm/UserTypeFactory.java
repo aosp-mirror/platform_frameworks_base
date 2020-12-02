@@ -303,7 +303,8 @@ public final class UserTypeFactory {
                 while (XmlUtils.nextElementWithin(parser, depth)) {
                     final String childName = parser.getName();
                     if ("default-restrictions".equals(childName)) {
-                        final Bundle restrictions = UserRestrictionsUtils.readRestrictions(parser);
+                        final Bundle restrictions = UserRestrictionsUtils
+                                .readRestrictions(XmlUtils.makeTyped(parser));
                         builder.setDefaultRestrictions(restrictions);
                     } else if (isProfile && "badge-labels".equals(childName)) {
                         setResAttributeArray(parser, builder::setBadgeLabels);

@@ -85,7 +85,8 @@ public class SecurityLog {
             TAG_CRYPTO_SELF_TEST_COMPLETED,
             TAG_KEY_INTEGRITY_VIOLATION,
             TAG_CERT_VALIDATION_FAILURE,
-            TAG_CAMERA_POLICY_SET
+            TAG_CAMERA_POLICY_SET,
+            TAG_PASSWORD_COMPLEXITY_REQUIRED
     })
     public @interface SecurityLogTag {}
 
@@ -478,6 +479,21 @@ public class SecurityLog {
             SecurityLogTags.SECURITY_CAMERA_POLICY_SET;
 
     /**
+     * Indicates that an admin has set a password complexity requirement, using the platform's
+     * pre-defined complexity levels. The log entry contains the following information about the
+     * event, encapsulated in an {@link Object} array and accessible via
+     * {@link SecurityEvent#getData()}:
+     * <li> [0] admin package name ({@code String})
+     * <li> [1] admin user ID ({@code Integer})
+     * <li> [2] target user ID ({@code Integer})
+     * <li> [3] Password complexity ({@code Integer})
+     *
+     * @see DevicePolicyManager#setRequiredPasswordComplexity(int)
+     */
+    public static final int TAG_PASSWORD_COMPLEXITY_REQUIRED =
+            SecurityLogTags.SECURITY_PASSWORD_COMPLEXITY_REQUIRED;
+
+    /**
      * Event severity level indicating that the event corresponds to normal workflow.
      */
     public static final int LEVEL_INFO = 1;
@@ -617,6 +633,7 @@ public class SecurityLog {
                 case TAG_USER_RESTRICTION_ADDED:
                 case TAG_USER_RESTRICTION_REMOVED:
                 case TAG_CAMERA_POLICY_SET:
+                case TAG_PASSWORD_COMPLEXITY_REQUIRED:
                     return LEVEL_INFO;
                 case TAG_CERT_AUTHORITY_REMOVED:
                 case TAG_CRYPTO_SELF_TEST_COMPLETED:

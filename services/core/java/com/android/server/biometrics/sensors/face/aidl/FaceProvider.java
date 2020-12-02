@@ -77,7 +77,7 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
     @NonNull private final Handler mHandler;
     @NonNull private final LockoutResetDispatcher mLockoutResetDispatcher;
     @NonNull private final UsageStats mUsageStats;
-    @NonNull private final IActivityTaskManager mActivityTaskManager;
+    @NonNull private final ActivityTaskManager mActivityTaskManager;
     @NonNull private final BiometricTaskStackListener mTaskStackListener;
 
     @Nullable private IFace mDaemon;
@@ -97,22 +97,18 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
                         continue; // Keyguard is always allowed
                     }
 
-                    try {
-                        final List<ActivityManager.RunningTaskInfo> runningTasks =
-                                mActivityTaskManager.getTasks(1);
-                        if (!runningTasks.isEmpty()) {
-                            final String topPackage =
-                                    runningTasks.get(0).topActivity.getPackageName();
-                            if (!topPackage.contentEquals(client.getOwnerString())
-                                    && !client.isAlreadyDone()) {
-                                Slog.e(getTag(), "Stopping background authentication, top: "
-                                        + topPackage + " currentClient: " + client);
-                                mSensors.valueAt(i).getScheduler()
-                                        .cancelAuthentication(client.getToken());
-                            }
+                    final List<ActivityManager.RunningTaskInfo> runningTasks =
+                            mActivityTaskManager.getTasks(1);
+                    if (!runningTasks.isEmpty()) {
+                        final String topPackage =
+                                runningTasks.get(0).topActivity.getPackageName();
+                        if (!topPackage.contentEquals(client.getOwnerString())
+                                && !client.isAlreadyDone()) {
+                            Slog.e(getTag(), "Stopping background authentication, top: "
+                                    + topPackage + " currentClient: " + client);
+                            mSensors.valueAt(i).getScheduler()
+                                    .cancelAuthentication(client.getToken());
                         }
-                    } catch (RemoteException e) {
-                        Slog.e(getTag(), "Unable to get running tasks", e);
                     }
                 }
             });
@@ -129,7 +125,7 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
         mHandler = new Handler(Looper.getMainLooper());
         mUsageStats = new UsageStats(context);
         mLockoutResetDispatcher = lockoutResetDispatcher;
-        mActivityTaskManager = ActivityTaskManager.getService();
+        mActivityTaskManager = ActivityTaskManager.getInstance();
         mTaskStackListener = new BiometricTaskStackListener();
 
         for (SensorProps prop : props) {

@@ -104,6 +104,7 @@ import android.os.Parcelable;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.proto.ProtoOutputStream;
+import android.view.Gravity.GravityFlags;
 import android.view.View.OnApplyWindowInsetsListener;
 import android.view.WindowInsets.Side;
 import android.view.WindowInsets.Side.InsetsSide;
@@ -2572,6 +2573,7 @@ public interface WindowManager extends ViewManager {
          *
          * @see Gravity
          */
+        @GravityFlags
         public int gravity;
 
         /**

@@ -86,7 +86,7 @@ public final class CallForwardingInfo implements Parcelable {
      * Call forwarding reason types
      * @hide
      */
-    @IntDef(flag = true, prefix = { "REASON_" }, value = {
+    @IntDef(prefix = { "REASON_" }, value = {
         REASON_UNCONDITIONAL,
         REASON_BUSY,
         REASON_NO_REPLY,

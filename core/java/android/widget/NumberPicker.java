@@ -2773,6 +2773,7 @@ public class NumberPicker extends LinearLayout {
                 int left, int top, int right, int bottom) {
             AccessibilityNodeInfo info = mInputText.createAccessibilityNodeInfo();
             info.setSource(NumberPicker.this, VIRTUAL_VIEW_ID_INPUT);
+            info.setAccessibilityFocused(mAccessibilityFocusedView == VIRTUAL_VIEW_ID_INPUT);
             if (mAccessibilityFocusedView != VIRTUAL_VIEW_ID_INPUT) {
                 info.addAction(AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS);
             }
@@ -2802,6 +2803,7 @@ public class NumberPicker extends LinearLayout {
             info.setClickable(true);
             info.setLongClickable(true);
             info.setEnabled(NumberPicker.this.isEnabled());
+            info.setAccessibilityFocused(mAccessibilityFocusedView == virtualViewId);
             Rect boundsInParent = mTempRect;
             boundsInParent.set(left, top, right, bottom);
             info.setVisibleToUser(isVisibleToUser(boundsInParent));
@@ -2843,6 +2845,7 @@ public class NumberPicker extends LinearLayout {
             info.setParent((View) getParentForAccessibility());
             info.setEnabled(NumberPicker.this.isEnabled());
             info.setScrollable(true);
+            info.setAccessibilityFocused(mAccessibilityFocusedView == View.NO_ID);
 
             final float applicationScale =
                 getContext().getResources().getCompatibilityInfo().applicationScale;

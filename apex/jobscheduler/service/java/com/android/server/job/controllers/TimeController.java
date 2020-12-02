@@ -282,12 +282,13 @@ public final class TimeController extends StateController {
             String nextDelayPackageName = null;
             boolean ready = false;
             Iterator<JobStatus> it = mTrackedJobs.iterator();
+            final long nowElapsedMillis = sElapsedRealtimeClock.millis();
             while (it.hasNext()) {
                 final JobStatus job = it.next();
                 if (!job.hasTimingDelayConstraint()) {
                     continue;
                 }
-                if (evaluateTimingDelayConstraint(job, sElapsedRealtimeClock.millis())) {
+                if (evaluateTimingDelayConstraint(job, nowElapsedMillis)) {
                     if (canStopTrackingJobLocked(job)) {
                         it.remove();
                     }

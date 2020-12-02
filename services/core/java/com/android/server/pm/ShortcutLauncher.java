@@ -24,6 +24,8 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;
 import android.util.Slog;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -36,15 +38,12 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
 
-import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -225,7 +224,7 @@ class ShortcutLauncher extends ShortcutPackageItem {
      * Persist.
      */
     @Override
-    public void saveToXml(XmlSerializer out, boolean forBackup)
+    public void saveToXml(TypedXmlSerializer out, boolean forBackup)
             throws IOException {
         if (forBackup && !getPackageInfo().isBackupAllowed()) {
             // If an launcher app doesn't support backup&restore, then nothing to do.
@@ -278,11 +277,8 @@ class ShortcutLauncher extends ShortcutPackageItem {
         }
 
         try {
-            final BufferedInputStream bis = new BufferedInputStream(in);
-
             ShortcutLauncher ret = null;
-            XmlPullParser parser = Xml.newPullParser();
-            parser.setInput(bis, StandardCharsets.UTF_8.name());
+            TypedXmlPullParser parser = Xml.resolvePullParser(in);
 
             int type;
             while ((type = parser.next()) != XmlPullParser.END_DOCUMENT) {
@@ -313,7 +309,7 @@ class ShortcutLauncher extends ShortcutPackageItem {
     /**
      * Load.
      */
-    public static ShortcutLauncher loadFromXml(XmlPullParser parser, ShortcutUser shortcutUser,
+    public static ShortcutLauncher loadFromXml(TypedXmlPullParser parser, ShortcutUser shortcutUser,
             int ownerUserId, boolean fromBackup) throws IOException, XmlPullParserException {
         final String launcherPackageName = ShortcutService.parseStringAttribute(parser,
                 ATTR_PACKAGE_NAME);

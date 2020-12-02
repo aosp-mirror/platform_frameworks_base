@@ -4265,10 +4265,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                         throw new IllegalStateException("no start tag found");
                     }
 
-                    final String versionString = parser.getAttributeValue(null, "v");
-                    if (versionString != null) {
-                        oldVersion = Integer.parseInt(versionString);
-                    }
+                    oldVersion = parser.getAttributeInt(null, "v", NO_VERSION);
 
                     int outerDepth = parser.getDepth();
                     while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
@@ -4368,9 +4365,9 @@ public class AppOpsService extends IAppOpsService.Stub {
         scheduleFastWriteLocked();
     }
 
-    private void readUidOps(XmlPullParser parser) throws NumberFormatException,
+    private void readUidOps(TypedXmlPullParser parser) throws NumberFormatException,
             XmlPullParserException, IOException {
-        final int uid = Integer.parseInt(parser.getAttributeValue(null, "n"));
+        final int uid = parser.getAttributeInt(null, "n");
         int outerDepth = parser.getDepth();
         int type;
         while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
@@ -4381,8 +4378,8 @@ public class AppOpsService extends IAppOpsService.Stub {
 
             String tagName = parser.getName();
             if (tagName.equals("op")) {
-                final int code = Integer.parseInt(parser.getAttributeValue(null, "n"));
-                final int mode = Integer.parseInt(parser.getAttributeValue(null, "m"));
+                final int code = parser.getAttributeInt(null, "n");
+                final int mode = parser.getAttributeInt(null, "m");
                 setUidMode(code, uid, mode);
             } else {
                 Slog.w(TAG, "Unknown element under <uid-ops>: "
@@ -4392,7 +4389,7 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
     }
 
-    private void readPackage(XmlPullParser parser)
+    private void readPackage(TypedXmlPullParser parser)
             throws NumberFormatException, XmlPullParserException, IOException {
         String pkgName = parser.getAttributeValue(null, "n");
         int outerDepth = parser.getDepth();
@@ -4414,9 +4411,9 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
     }
 
-    private void readUid(XmlPullParser parser, String pkgName)
+    private void readUid(TypedXmlPullParser parser, String pkgName)
             throws NumberFormatException, XmlPullParserException, IOException {
-        int uid = Integer.parseInt(parser.getAttributeValue(null, "n"));
+        int uid = parser.getAttributeInt(null, "n");
         final UidState uidState = getUidStateLocked(uid, true);
         int outerDepth = parser.getDepth();
         int type;
@@ -4437,19 +4434,20 @@ public class AppOpsService extends IAppOpsService.Stub {
         uidState.evalForegroundOps(mOpModeWatchers);
     }
 
-    private void readAttributionOp(XmlPullParser parser, @NonNull Op parent,
-            @Nullable String attribution) throws NumberFormatException, IOException {
+    private void readAttributionOp(TypedXmlPullParser parser, @NonNull Op parent,
+            @Nullable String attribution)
+            throws NumberFormatException, IOException, XmlPullParserException {
         final AttributedOp attributedOp = parent.getOrCreateAttribution(parent, attribution);
 
-        final long key = XmlUtils.readLongAttribute(parser, "n");
+        final long key = parser.getAttributeLong(null, "n");
         final int uidState = extractUidStateFromKey(key);
         final int opFlags = extractFlagsFromKey(key);
 
-        final long accessTime = XmlUtils.readLongAttribute(parser, "t", 0);
-        final long rejectTime = XmlUtils.readLongAttribute(parser, "r", 0);
-        final long accessDuration = XmlUtils.readLongAttribute(parser, "d", -1);
+        final long accessTime = parser.getAttributeLong(null, "t", 0);
+        final long rejectTime = parser.getAttributeLong(null, "r", 0);
+        final long accessDuration = parser.getAttributeLong(null, "d", -1);
         final String proxyPkg = XmlUtils.readStringAttribute(parser, "pp");
-        final int proxyUid = XmlUtils.readIntAttribute(parser, "pu", Process.INVALID_UID);
+        final int proxyUid = parser.getAttributeInt(null, "pu", Process.INVALID_UID);
         final String proxyAttributionTag = XmlUtils.readStringAttribute(parser, "pc");
 
         if (accessTime > 0) {
@@ -4461,14 +4459,13 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
     }
 
-    private void readOp(XmlPullParser parser, @NonNull UidState uidState, @NonNull String pkgName)
-            throws NumberFormatException,
-        XmlPullParserException, IOException {
-        int opCode = Integer.parseInt(parser.getAttributeValue(null, "n"));
+    private void readOp(TypedXmlPullParser parser,
+            @NonNull UidState uidState, @NonNull String pkgName)
+            throws NumberFormatException, XmlPullParserException, IOException {
+        int opCode = parser.getAttributeInt(null, "n");
         Op op = new Op(uidState, pkgName, opCode, uidState.uid);
 
-        final int mode = XmlUtils.readIntAttribute(parser, "m",
-                AppOpsManager.opToDefaultMode(op.op));
+        final int mode = parser.getAttributeInt(null, "m", AppOpsManager.opToDefaultMode(op.op));
         op.mode = mode;
 
         int outerDepth = parser.getDepth();
@@ -4515,7 +4512,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                 TypedXmlSerializer out = Xml.resolveSerializer(stream);
                 out.startDocument(null, true);
                 out.startTag(null, "app-ops");
-                out.attribute(null, "v", String.valueOf(CURRENT_VERSION));
+                out.attributeInt(null, "v", CURRENT_VERSION);
 
                 SparseArray<SparseIntArray> uidStatesClone;
                 synchronized (this) {
@@ -4545,15 +4542,14 @@ public class AppOpsService extends IAppOpsService.Stub {
                     SparseIntArray opModes = uidStatesClone.valueAt(uidStateNum);
                     if (opModes != null && opModes.size() > 0) {
                         out.startTag(null, "uid");
-                        out.attribute(null, "n",
-                                Integer.toString(uidStatesClone.keyAt(uidStateNum)));
+                        out.attributeInt(null, "n", uidStatesClone.keyAt(uidStateNum));
                         final int opCount = opModes.size();
                         for (int opCountNum = 0; opCountNum < opCount; opCountNum++) {
                             final int op = opModes.keyAt(opCountNum);
                             final int mode = opModes.valueAt(opCountNum);
                             out.startTag(null, "op");
-                            out.attribute(null, "n", Integer.toString(op));
-                            out.attribute(null, "m", Integer.toString(mode));
+                            out.attributeInt(null, "n", op);
+                            out.attributeInt(null, "m", mode);
                             out.endTag(null, "op");
                         }
                         out.endTag(null, "uid");
@@ -4573,14 +4569,14 @@ public class AppOpsService extends IAppOpsService.Stub {
                             out.attribute(null, "n", lastPkg);
                         }
                         out.startTag(null, "uid");
-                        out.attribute(null, "n", Integer.toString(pkg.getUid()));
+                        out.attributeInt(null, "n", pkg.getUid());
                         List<AppOpsManager.OpEntry> ops = pkg.getOps();
                         for (int j=0; j<ops.size(); j++) {
                             AppOpsManager.OpEntry op = ops.get(j);
                             out.startTag(null, "op");
-                            out.attribute(null, "n", Integer.toString(op.getOp()));
+                            out.attributeInt(null, "n", op.getOp());
                             if (op.getMode() != AppOpsManager.opToDefaultMode(op.getOp())) {
-                                out.attribute(null, "m", Integer.toString(op.getMode()));
+                                out.attributeInt(null, "m", op.getMode());
                             }
 
                             for (String attributionTag : op.getAttributedOpEntries().keySet()) {
@@ -4624,15 +4620,15 @@ public class AppOpsService extends IAppOpsService.Stub {
                                     if (attributionTag != null) {
                                         out.attribute(null, "id", attributionTag);
                                     }
-                                    out.attribute(null, "n", Long.toString(key));
+                                    out.attributeLong(null, "n", key);
                                     if (accessTime > 0) {
-                                        out.attribute(null, "t", Long.toString(accessTime));
+                                        out.attributeLong(null, "t", accessTime);
                                     }
                                     if (rejectTime > 0) {
-                                        out.attribute(null, "r", Long.toString(rejectTime));
+                                        out.attributeLong(null, "r", rejectTime);
                                     }
                                     if (accessDuration > 0) {
-                                        out.attribute(null, "d", Long.toString(accessDuration));
+                                        out.attributeLong(null, "d", accessDuration);
                                     }
                                     if (proxyPkg != null) {
                                         out.attribute(null, "pp", proxyPkg);
@@ -4641,7 +4637,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                                         out.attribute(null, "pc", proxyAttributionTag);
                                     }
                                     if (proxyUid >= 0) {
-                                        out.attribute(null, "pu", Integer.toString(proxyUid));
+                                        out.attributeInt(null, "pu", proxyUid);
                                     }
                                     out.endTag(null, "st");
                                 }

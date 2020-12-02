@@ -101,4 +101,9 @@ abstract class BaseIDevicePolicyManager extends IDevicePolicyManager.Stub {
     public boolean canProfileOwnerResetPasswordWhenLocked(int userId) {
         return false;
     }
+
+    public boolean hasKeyPair(String callerPackage, String alias) {
+        // STOPSHIP: implement delegation code in ArcDevicePolicyManagerWrapperService & nuke this.
+        return false;
+    }
 }

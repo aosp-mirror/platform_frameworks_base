@@ -15,6 +15,7 @@
 package com.android.systemui.qs;
 
 import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertNotNull;
 
 import static org.junit.Assert.assertFalse;
 import static org.mockito.Matchers.any;
@@ -24,6 +25,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.pm.UserInfo;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.VectorDrawable;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.Settings;
@@ -75,6 +78,7 @@ public class QSSecurityFooterTest extends SysuiTestCase {
     private ViewGroup mRootView;
     private TextView mFooterText;
     private TestableImageView mFooterIcon;
+    private TestableImageView mPrimaryFooterIcon;
     private QSSecurityFooter mFooter;
     @Mock
     private SecurityController mSecurityController;
@@ -95,6 +99,7 @@ public class QSSecurityFooterTest extends SysuiTestCase {
                 mActivityStarter, mSecurityController, looper);
         mFooterText = mRootView.findViewById(R.id.footer_text);
         mFooterIcon = mRootView.findViewById(R.id.footer_icon);
+        mPrimaryFooterIcon = mRootView.findViewById(R.id.primary_footer_icon);
         mFooter.setHostEnvironment(null);
     }
 
@@ -119,6 +124,7 @@ public class QSSecurityFooterTest extends SysuiTestCase {
                      mFooterText.getText());
         assertEquals(View.VISIBLE, mRootView.getVisibility());
         assertEquals(View.VISIBLE, mFooterIcon.getVisibility());
+        assertEquals(View.GONE, mPrimaryFooterIcon.getVisibility());
         // -1 == never set.
         assertEquals(-1, mFooterIcon.getLastImageResource());
     }
@@ -136,6 +142,7 @@ public class QSSecurityFooterTest extends SysuiTestCase {
                 mFooterText.getText());
         assertEquals(View.VISIBLE, mRootView.getVisibility());
         assertEquals(View.VISIBLE, mFooterIcon.getVisibility());
+        assertEquals(View.GONE, mPrimaryFooterIcon.getVisibility());
         // -1 == never set.
         assertEquals(-1, mFooterIcon.getLastImageResource());
     }
@@ -165,6 +172,7 @@ public class QSSecurityFooterTest extends SysuiTestCase {
         assertEquals(mContext.getString(R.string.quick_settings_disclosure_management_monitoring),
                 mFooterText.getText());
         assertEquals(View.VISIBLE, mFooterIcon.getVisibility());
+        assertEquals(View.GONE, mPrimaryFooterIcon.getVisibility());
         // -1 == never set.
         assertEquals(-1, mFooterIcon.getLastImageResource());
 
@@ -203,6 +211,7 @@ public class QSSecurityFooterTest extends SysuiTestCase {
                                         VPN_PACKAGE),
                      mFooterText.getText());
         assertEquals(View.VISIBLE, mFooterIcon.getVisibility());
+        assertEquals(View.GONE, mPrimaryFooterIcon.getVisibility());
         assertEquals(R.drawable.stat_sys_vpn_ic, mFooterIcon.getLastImageResource());
 
         // Same situation, but with organization name set
@@ -229,6 +238,7 @@ public class QSSecurityFooterTest extends SysuiTestCase {
         assertEquals(mContext.getString(R.string.quick_settings_disclosure_management_vpns),
                      mFooterText.getText());
         assertEquals(View.VISIBLE, mFooterIcon.getVisibility());
+        assertEquals(View.GONE, mPrimaryFooterIcon.getVisibility());
         assertEquals(R.drawable.stat_sys_vpn_ic, mFooterIcon.getLastImageResource());
 
         // Same situation, but with organization name set
@@ -252,6 +262,7 @@ public class QSSecurityFooterTest extends SysuiTestCase {
 
         TestableLooper.get(this).processAllMessages();
         assertEquals(View.VISIBLE, mFooterIcon.getVisibility());
+        assertEquals(View.GONE, mPrimaryFooterIcon.getVisibility());
         assertEquals(R.drawable.stat_sys_vpn_ic, mFooterIcon.getLastImageResource());
         assertEquals(mContext.getString(R.string.quick_settings_disclosure_management_monitoring),
                 mFooterText.getText());
@@ -534,12 +545,27 @@ public class QSSecurityFooterTest extends SysuiTestCase {
     @Test
     public void testParentalControls() {
         when(mSecurityController.isParentalControlsEnabled()).thenReturn(true);
+
+        Drawable testDrawable = new VectorDrawable();
+        when(mSecurityController.getIcon(any())).thenReturn(testDrawable);
+        assertNotNull(mSecurityController.getIcon(null));
+
         mFooter.refreshState();
 
         TestableLooper.get(this).processAllMessages();
 
         assertEquals(mContext.getString(R.string.quick_settings_disclosure_parental_controls),
                 mFooterText.getText());
+        assertEquals(View.VISIBLE, mPrimaryFooterIcon.getVisibility());
+
+        assertEquals(testDrawable, mPrimaryFooterIcon.getDrawable());
+
+        // Ensure the primary icon is set to gone when parental controls is disabled.
+        when(mSecurityController.isParentalControlsEnabled()).thenReturn(false);
+        mFooter.refreshState();
+        TestableLooper.get(this).processAllMessages();
+
+        assertEquals(View.GONE, mPrimaryFooterIcon.getVisibility());
     }
 
     @Test

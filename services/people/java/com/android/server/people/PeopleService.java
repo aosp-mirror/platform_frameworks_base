@@ -74,7 +74,14 @@ public class PeopleService extends SystemService {
 
     @Override
     public void onStart() {
-        publishBinderService(Context.PEOPLE_SERVICE, mService);
+        onStart(/* isForTesting= */ false);
+    }
+
+    @VisibleForTesting
+    protected void onStart(boolean isForTesting) {
+        if (!isForTesting) {
+            publishBinderService(Context.PEOPLE_SERVICE, mService);
+        }
         publishLocalService(PeopleServiceInternal.class, new LocalService());
     }
 

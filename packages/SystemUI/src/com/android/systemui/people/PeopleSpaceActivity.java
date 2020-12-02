@@ -19,10 +19,10 @@ package com.android.systemui.people;
 import android.app.Activity;
 import android.app.INotificationManager;
 import android.app.people.IPeopleManager;
+import android.app.people.PeopleSpaceTile;
 import android.content.Context;
 import android.content.pm.LauncherApps;
 import android.content.pm.PackageManager;
-import android.content.pm.ShortcutInfo;
 import android.os.Bundle;
 import android.os.ServiceManager;
 import android.util.Log;
@@ -68,13 +68,13 @@ public class PeopleSpaceActivity extends Activity {
      */
     private void setTileViewsWithPriorityConversations() {
         try {
-            List<Map.Entry<Long, ShortcutInfo>> shortcutInfos = PeopleSpaceUtils.getShortcutInfos(
-                    mContext, mNotificationManager, mPeopleManager);
-            for (Map.Entry<Long, ShortcutInfo> entry : shortcutInfos) {
-                ShortcutInfo shortcutInfo = entry.getValue();
+            List<Map.Entry<Long, PeopleSpaceTile>> tiles = PeopleSpaceUtils.getTiles(
+                    mContext, mNotificationManager, mPeopleManager, mLauncherApps);
+            for (Map.Entry<Long, PeopleSpaceTile> entry : tiles) {
+                PeopleSpaceTile tile = entry.getValue();
                 PeopleSpaceTileView tileView = new PeopleSpaceTileView(mContext, mPeopleSpaceLayout,
-                        shortcutInfo.getId());
-                setTileView(tileView, shortcutInfo, entry.getKey());
+                        tile.getId());
+                setTileView(tileView, tile, entry.getKey());
             }
         } catch (Exception e) {
             Log.e(TAG, "Couldn't retrieve conversations", e);
@@ -82,18 +82,18 @@ public class PeopleSpaceActivity extends Activity {
     }
 
     /** Sets {@code tileView} with the data in {@code conversation}. */
-    private void setTileView(PeopleSpaceTileView tileView, ShortcutInfo shortcutInfo,
+    private void setTileView(PeopleSpaceTileView tileView, PeopleSpaceTile tile,
             long lastInteraction) {
         try {
-            String pkg = shortcutInfo.getPackage();
+            String pkg = tile.getPackageName();
             String status =
                     PeopleSpaceUtils.getLastInteractionString(mContext, lastInteraction);
             tileView.setStatus(status);
 
-            tileView.setName(shortcutInfo.getLabel().toString());
+            tileView.setName(tile.getUserName().toString());
             tileView.setPackageIcon(mPackageManager.getApplicationIcon(pkg));
-            tileView.setPersonIcon(mLauncherApps.getShortcutIconDrawable(shortcutInfo, 0));
-            tileView.setOnClickListener(mLauncherApps, shortcutInfo);
+            tileView.setPersonIcon(tile.getUserIcon());
+            tileView.setOnClickListener(mLauncherApps, tile);
         } catch (Exception e) {
             Log.e(TAG, "Couldn't retrieve shortcut information", e);
         }

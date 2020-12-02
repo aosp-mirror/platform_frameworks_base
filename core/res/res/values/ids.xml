@@ -194,6 +194,12 @@
   <!-- A tag used to save the index where the custom view is stored -->
   <item type="id" name="notification_custom_view_index_tag" />
 
+  <!-- A tag used to store the margin end for this view when the right icon is visible -->
+  <item type="id" name="tag_margin_end_when_icon_gone" />
+
+  <!-- A tag used to store the margin end for this view when the right icon is gone -->
+  <item type="id" name="tag_margin_end_when_icon_visible" />
+
   <!-- Marks the "copy to clipboard" button in the ChooserActivity -->
   <item type="id" name="chooser_copy_button" />
 

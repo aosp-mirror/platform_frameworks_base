@@ -199,6 +199,7 @@ public abstract class WallpaperService extends Service {
         final InsetsSourceControl[] mTempControls = new InsetsSourceControl[0];
         final MergedConfiguration mMergedConfiguration = new MergedConfiguration();
         private final Point mSurfaceSize = new Point();
+        private final Point mLastSurfaceSize = new Point();
         private final Matrix mTmpMatrix = new Matrix();
         private final float[] mTmpValues = new float[9];
 
@@ -907,6 +908,14 @@ public abstract class WallpaperService extends Service {
                             mInsetsState, mTempControls, mSurfaceSize);
                     if (mSurfaceControl.isValid()) {
                         mSurfaceHolder.mSurface.copyFrom(mSurfaceControl);
+                    }
+                    if (!mLastSurfaceSize.equals(mSurfaceSize)) {
+                        mLastSurfaceSize.set(mSurfaceSize.x, mSurfaceSize.y);
+                        if (mSurfaceControl != null && mSurfaceControl.isValid()) {
+                            SurfaceControl.Transaction t = new SurfaceControl.Transaction();
+                            t.setBufferSize(mSurfaceControl, mSurfaceSize.x, mSurfaceSize.y);
+                            t.apply();
+                        }
                     }
 
                     if (DEBUG) Log.v(TAG, "New surface: " + mSurfaceHolder.mSurface

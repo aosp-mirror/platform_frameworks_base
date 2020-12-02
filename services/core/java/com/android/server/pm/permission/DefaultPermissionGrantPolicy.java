@@ -63,6 +63,7 @@ import android.util.SparseArray;
 import android.util.TypedXmlPullParser;
 import android.util.Xml;
 
+import com.android.internal.R;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.XmlUtils;
 import com.android.server.LocalServices;
@@ -72,7 +73,6 @@ import com.android.server.pm.permission.PermissionManagerServiceInternal.SyncAda
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
-import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -766,9 +766,14 @@ public final class DefaultPermissionGrantPolicy {
             grantSystemFixedPermissionsToSystemPackage(pm, wearPackage, userId, PHONE_PERMISSIONS);
 
             // Fitness tracking on watches
-            grantPermissionsToSystemPackage(pm,
+            if (mContext.getResources().getBoolean(R.bool.config_trackerAppNeedsPermissions)) {
+                Log.d(TAG, "Wear: Skipping permission grant for Default fitness tracker app : "
+                        + wearPackage);
+            } else {
+                grantPermissionsToSystemPackage(pm,
                     getDefaultSystemHandlerActivityPackage(pm, ACTION_TRACK, userId), userId,
                     SENSORS_PERMISSIONS, ALWAYS_LOCATION_PERMISSIONS);
+            }
         }
 
         // Print Spooler
@@ -1408,11 +1413,8 @@ public final class DefaultPermissionGrantPolicy {
                 Slog.w(TAG, "Default permissions file " + file + " cannot be read");
                 continue;
             }
-            try (
-                InputStream str = new BufferedInputStream(new FileInputStream(file))
-            ) {
-                TypedXmlPullParser parser = Xml.newFastPullParser();
-                parser.setInput(str, null);
+            try (InputStream str = new FileInputStream(file)) {
+                TypedXmlPullParser parser = Xml.resolvePullParser(str);
                 parse(pm, parser, grantExceptions);
             } catch (XmlPullParserException | IOException e) {
                 Slog.w(TAG, "Error reading default permissions file " + file, e);

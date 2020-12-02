@@ -307,6 +307,41 @@ public final class AppSearchSession {
         }
     }
 
+    /**
+     * Removes {@link GenericDocument}s from the index by Query. Documents will be removed if they
+     * match the {@code queryExpression} in given namespaces and schemaTypes which is set via
+     * {@link SearchSpec.Builder#addNamespace} and {@link SearchSpec.Builder#addSchema}.
+     *
+     * <p> An empty {@code queryExpression} matches all documents.
+     *
+     * <p> An empty set of namespaces or schemaTypes matches all namespaces or schemaTypes in
+     * the current database.
+     *
+     * @param queryExpression Query String to search.
+     * @param searchSpec Defines what and how to remove
+     * @param executor Executor on which to invoke the callback.
+     * @param callback Callback to receive errors resulting from removing the documents. If the
+     *                 operation succeeds, the callback will be invoked with {@code null}.
+     */
+    public void removeByQuery(@NonNull String queryExpression,
+            @NonNull SearchSpec searchSpec,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull Consumer<AppSearchResult<Void>> callback) {
+        Objects.requireNonNull(queryExpression);
+        Objects.requireNonNull(searchSpec);
+        Objects.requireNonNull(executor);
+        Objects.requireNonNull(callback);
+        try {
+            mService.removeByQuery(mDatabaseName, queryExpression, searchSpec.getBundle(),
+                    new IAppSearchResultCallback.Stub() {
+                        public void onResult(AppSearchResult result) {
+                            executor.execute(() -> callback.accept(result));
+                        }
+                    });
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
     // TODO(b/162450968) port query() and SearchResults.java to platform.
-    // TODO(b/162450968) port removeByQuery() to platform.
 }

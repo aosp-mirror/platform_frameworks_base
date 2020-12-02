@@ -24,6 +24,7 @@ import android.view.inputmethod.EditorInfo;
 import com.android.internal.view.InputBindResult;
 import com.android.internal.view.IInputContext;
 import com.android.internal.view.IInputMethodClient;
+import com.android.internal.inputmethod.IInputBindResultResultCallback;
 
 /**
  * Public interface to the global input method manager, used by all client
@@ -48,14 +49,15 @@ interface IInputMethodManager {
     // If windowToken is null, this just does startInput().  Otherwise this reports that a window
     // has gained focus, and if 'attribute' is non-null then also does startInput.
     // @NonNull
-    InputBindResult startInputOrWindowGainedFocus(
+    void startInputOrWindowGainedFocus(
             /* @StartInputReason */ int startInputReason,
             in IInputMethodClient client, in IBinder windowToken,
             /* @StartInputFlags */ int startInputFlags,
             /* @android.view.WindowManager.LayoutParams.SoftInputModeFlags */ int softInputMode,
             int windowFlags, in EditorInfo attribute, IInputContext inputContext,
             /* @InputConnectionInspector.MissingMethodFlags */ int missingMethodFlags,
-            int unverifiedTargetSdkVersion);
+            int unverifiedTargetSdkVersion,
+            in IInputBindResultResultCallback inputBindResult);
 
     void showInputMethodPickerFromClient(in IInputMethodClient client,
             int auxiliarySubtypeMode);

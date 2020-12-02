@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.flicker.pip
 
+import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.dsl.FlickerBuilder
@@ -36,6 +37,7 @@ import org.junit.runners.Parameterized
  * Test Pip launch.
  * To run this test: `atest WMShellFlickerTests:PipKeyboardTest`
  */
+@Presubmit
 @RequiresDevice
 @RunWith(Parameterized::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)

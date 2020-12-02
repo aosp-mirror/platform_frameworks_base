@@ -127,6 +127,8 @@ public class DevicePolicyManagerServiceTestable extends DevicePolicyManagerServi
         // Used as an override when set to nonzero.
         private long mCurrentTimeMillis = 0;
 
+        private final Map<Long, Pair<String, Integer>> mEnabledChanges = new ArrayMap<>();
+
         public MockInjector(MockSystemServices services, DpmMockContext context) {
             super(context);
             this.services = services;
@@ -486,6 +488,34 @@ public class DevicePolicyManagerServiceTestable extends DevicePolicyManagerServi
         @Override
         public long systemCurrentTimeMillis() {
             return mCurrentTimeMillis != 0 ? mCurrentTimeMillis : System.currentTimeMillis();
+        }
+
+        public void setChangeEnabledForPackage(
+                long changeId, boolean enabled, String packageName, int userId) {
+            if (enabled) {
+                mEnabledChanges.put(changeId, Pair.create(packageName, userId));
+            } else {
+                mEnabledChanges.remove(changeId);
+            }
+        }
+
+        public void clearEnabledChanges() {
+            mEnabledChanges.clear();
+        }
+
+        @Override
+        public boolean isChangeEnabled(long changeId, String packageName, int userId) {
+            Pair<String, Integer> packageAndUser = mEnabledChanges.get(changeId);
+            if (packageAndUser == null) {
+                return false;
+            }
+
+            if (!packageAndUser.first.equals(packageName)
+                    || !packageAndUser.second.equals(userId)) {
+                return false;
+            }
+
+            return true;
         }
     }
 }

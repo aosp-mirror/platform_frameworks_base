@@ -55,6 +55,8 @@ import static android.view.WindowInsets.Type.displayCutout;
 import static android.view.WindowInsets.Type.ime;
 import static android.view.WindowInsets.Type.systemBars;
 import static android.view.WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
+import static android.view.WindowManager.DISPLAY_IME_POLICY_FALLBACK_DISPLAY;
+import static android.view.WindowManager.DISPLAY_IME_POLICY_LOCAL;
 import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
@@ -73,8 +75,6 @@ import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_ERROR;
 import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
-import static android.view.WindowManager.DISPLAY_IME_POLICY_LOCAL;
-import static android.view.WindowManager.DISPLAY_IME_POLICY_FALLBACK_DISPLAY;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import static android.window.DisplayAreaOrganizer.FEATURE_ROOT;
@@ -93,7 +93,6 @@ import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_C
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_LAYOUT;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
 import static com.android.server.wm.DisplayContentProto.APP_TRANSITION;
-import static com.android.server.wm.DisplayContentProto.IME_POLICY;
 import static com.android.server.wm.DisplayContentProto.CLOSING_APPS;
 import static com.android.server.wm.DisplayContentProto.CURRENT_FOCUS;
 import static com.android.server.wm.DisplayContentProto.DISPLAY_FRAMES;
@@ -105,6 +104,7 @@ import static com.android.server.wm.DisplayContentProto.FOCUSED_APP;
 import static com.android.server.wm.DisplayContentProto.FOCUSED_ROOT_TASK_ID;
 import static com.android.server.wm.DisplayContentProto.ID;
 import static com.android.server.wm.DisplayContentProto.IME_INSETS_SOURCE_PROVIDER;
+import static com.android.server.wm.DisplayContentProto.IME_POLICY;
 import static com.android.server.wm.DisplayContentProto.INPUT_METHOD_CONTROL_TARGET;
 import static com.android.server.wm.DisplayContentProto.INPUT_METHOD_INPUT_TARGET;
 import static com.android.server.wm.DisplayContentProto.INPUT_METHOD_TARGET;
@@ -558,6 +558,9 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      * This controls the visibility and animation of the input method window.
      */
     InsetsControlTarget mInputMethodControlTarget;
+
+    /** The surface parent of the IME container. */
+    private SurfaceControl mInputMethodSurfaceParent;
 
     /** If true hold off on modifying the animation layer of mInputMethodTarget */
     boolean mInputMethodTargetWaitingAnim;
@@ -1300,10 +1303,9 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     }
 
     @Override
-    boolean onDescendantOrientationChanged(IBinder freezeDisplayToken,
-            WindowContainer requestingContainer) {
+    boolean onDescendantOrientationChanged(WindowContainer requestingContainer) {
         final Configuration config = updateOrientation(
-                getRequestedOverrideConfiguration(), freezeDisplayToken, false /* forceUpdate */);
+                getRequestedOverrideConfiguration(), requestingContainer, false /* forceUpdate */);
         // If display rotation class tells us that it doesn't consider app requested orientation,
         // this display won't rotate just because of an app changes its requested orientation. Thus
         // it indicates that this display chooses not to handle this request.
@@ -1355,11 +1357,11 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      * @param currentConfig The current requested override configuration (it is usually set from
      *                      the last {@link #sendNewConfiguration}) of the display. It is used to
      *                      check if the configuration container has the latest state.
-     * @param freezeDisplayToken Freeze the app window token if the orientation is changed.
+     * @param freezeDisplayWindow Freeze the app window if the orientation is changed.
      * @param forceUpdate See {@link DisplayRotation#updateRotationUnchecked(boolean)}
      */
-    Configuration updateOrientation(Configuration currentConfig, IBinder freezeDisplayToken,
-            boolean forceUpdate) {
+    Configuration updateOrientation(Configuration currentConfig,
+            WindowContainer freezeDisplayWindow, boolean forceUpdate) {
         if (!mDisplayReady) {
             return null;
         }
@@ -1368,9 +1370,9 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         if (updateOrientation(forceUpdate)) {
             // If we changed the orientation but mOrientationChangeComplete is already true,
             // we used seamless rotation, and we don't need to freeze the screen.
-            if (freezeDisplayToken != null && !mWmService.mRoot.mOrientationChangeComplete) {
-                final ActivityRecord activity = getActivityRecord(freezeDisplayToken);
-                if (activity != null) {
+            if (freezeDisplayWindow != null && !mWmService.mRoot.mOrientationChangeComplete) {
+                final ActivityRecord activity = freezeDisplayWindow.asActivityRecord();
+                if (activity != null && activity.mayFreezeScreenLocked()) {
                     activity.startFreezingScreen();
                 }
             }
@@ -1674,6 +1676,28 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         if (controller != null && !mDisplayRotation.hasSeamlessRotatingWindow()) {
             controller.show();
             mFixedRotationAnimationController = null;
+        }
+    }
+
+    void notifyInsetsChanged(Consumer<WindowState> dispatchInsetsChanged) {
+        if (mFixedRotationLaunchingApp != null) {
+            // The insets state of fixed rotation app is a rotated copy. Make sure the visibilities
+            // of insets sources are consistent with the latest state.
+            final InsetsState rotatedState =
+                    mFixedRotationLaunchingApp.getFixedRotationTransformInsetsState();
+            if (rotatedState != null) {
+                final InsetsState state = mInsetsStateController.getRawInsetsState();
+                for (int i = 0; i < InsetsState.SIZE; i++) {
+                    final InsetsSource source = state.peekSource(i);
+                    if (source != null) {
+                        rotatedState.setSourceVisible(i, source.isVisible());
+                    }
+                }
+            }
+        }
+        forAllWindows(dispatchInsetsChanged, true /* traverseTopToBottom */);
+        if (mRemoteInsetsControlTarget != null) {
+            mRemoteInsetsControlTarget.notifyInsetsChanged();
         }
     }
 
@@ -3610,7 +3634,9 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         ProtoLog.i(WM_DEBUG_IME, "setInputMethodTarget %s", target);
         mInputMethodTarget = target;
         mInputMethodTargetWaitingAnim = targetWaitingAnim;
-        assignWindowLayers(true /* setLayoutNeeded */);
+
+        // 1. Reparent the IME container window to the target root DA to get the correct bounds and
+        // config. (Only happens when the target window is in a different root DA)
         if (target != null) {
             RootDisplayArea targetRoot = target.getRootDisplayArea();
             if (targetRoot != null) {
@@ -3619,7 +3645,13 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 targetRoot.placeImeContainer(mImeWindowsContainers);
             }
         }
+        // 2. Reparent the IME container surface to either the input target app, or the IME window
+        // parent.
         updateImeParent();
+        // 3. Assign window layers based on the IME surface parent to make sure it is on top of the
+        // app.
+        assignWindowLayers(true /* setLayoutNeeded */);
+        // 4. Update the IME control target to apply any inset change and animation.
         updateImeControlTarget();
     }
 
@@ -3649,7 +3681,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
     void updateImeParent() {
         final SurfaceControl newParent = computeImeParent();
-        if (newParent != null) {
+        if (newParent != null && newParent != mInputMethodSurfaceParent) {
+            mInputMethodSurfaceParent = newParent;
             getPendingTransaction().reparent(mImeWindowsContainers.mSurfaceControl, newParent);
             scheduleAnimation();
         }
@@ -4426,18 +4459,15 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         //
         // In the case of split-screen windowing mode, we need to elevate the IME above the
         // docked divider while keeping the app itself below the docked divider, so instead
-        // we use relative layering of the IME targets child windows, and place the IME in
-        // the non-app layer (see {@link AboveAppWindowContainers#assignChildLayers}).
+        // we will put the docked divider below the IME. @see #assignRelativeLayerForImeTargetChild
         //
         // In the case the IME target is animating, the animation Z order may be different
         // than the WindowContainer Z order, so it's difficult to be sure we have the correct
-        // IME target. In this case we just layer the IME over all transitions by placing it
-        // in the above applications layer.
+        // IME target. In this case we just layer the IME over its parent surface.
         //
-        // In the case where we have no IME target we assign it where its base layer would
-        // place it in the AboveAppWindowContainers.
+        // In the case where we have no IME target we let its window parent to place it.
         //
-        // Keep IME window in mAboveAppWindowsContainers as long as app's starting window
+        // Keep IME window in surface parent as long as app's starting window
         // exists so it get's layered above the starting window.
         if (imeTarget != null && !(imeTarget.mActivityRecord != null
                 && imeTarget.mActivityRecord.hasStartingWindow()) && (
@@ -4448,6 +4478,11 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                     // TODO: We need to use an extra level on the app surface to ensure
                     // this is always above SurfaceView but always below attached window.
                     1);
+        } else if (mInputMethodSurfaceParent != null) {
+            // The IME surface parent may not be its window parent's surface
+            // (@see #computeImeParent), so set relative layer here instead of letting the window
+            // parent to assign layer.
+            mImeWindowsContainers.assignRelativeLayer(t, mInputMethodSurfaceParent, 1);
         }
         super.assignChildLayers(t);
     }
@@ -5197,7 +5232,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         mCurrentOverrideConfigurationChanges = currOverrideConfig.diff(overrideConfiguration);
         super.onRequestedOverrideConfigurationChanged(overrideConfiguration);
         mCurrentOverrideConfigurationChanges = 0;
-        mWmService.setNewDisplayOverrideConfiguration(overrideConfiguration, this);
+        mWmService.setNewDisplayOverrideConfiguration(currOverrideConfig, this);
         mAtmService.addWindowLayoutReasons(
                 ActivityTaskManagerService.LAYOUT_REASON_CONFIG_CHANGED);
     }
@@ -5688,5 +5723,9 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             count++;
         }
         return count;
+    }
+
+    MagnificationSpec getMagnificationSpec() {
+        return mMagnificationSpec;
     }
 }

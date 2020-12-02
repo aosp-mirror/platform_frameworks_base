@@ -558,7 +558,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             setChronometerRunning(true);
         }
         if (mNotificationParent != null) {
-            mNotificationParent.updateChildrenHeaderAppearance();
+            mNotificationParent.updateChildrenAppearance();
         }
         onAttachedChildrenCountChanged();
         // The public layouts expand button is always visible
@@ -2337,7 +2337,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         }
         getShowingLayout().updateBackgroundColor(false /* animate */);
         mPrivateLayout.updateExpandButtons(isExpandable());
-        updateChildrenHeaderAppearance();
+        updateChildrenAppearance();
         updateChildrenVisibility();
         applyChildrenRoundness();
     }
@@ -2382,9 +2382,12 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         return channels;
     }
 
-    public void updateChildrenHeaderAppearance() {
+    /**
+     * If this is a group, update the appearance of the children.
+     */
+    public void updateChildrenAppearance() {
         if (mIsSummaryWithChildren) {
-            mChildrenContainer.updateChildrenHeaderAppearance();
+            mChildrenContainer.updateChildrenAppearance();
         }
     }
 

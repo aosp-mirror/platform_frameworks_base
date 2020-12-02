@@ -30,6 +30,7 @@ import android.annotation.IdRes;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.Px;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
@@ -4873,6 +4874,7 @@ public class Notification implements Parcelable
             // Small icon doesn't need to be reset, as it's always set. Resetting would prevent
             // re-using the drawable when the notification is updated.
             contentView.setBoolean(R.id.expand_button, "setExpanded", false);
+            contentView.setViewVisibility(R.id.app_name_text, View.GONE);
             contentView.setTextViewText(R.id.app_name_text, null);
             contentView.setViewVisibility(R.id.chronometer, View.GONE);
             contentView.setViewVisibility(R.id.header_text, View.GONE);
@@ -5105,33 +5107,29 @@ public class Notification implements Parcelable
             if (result == null) {
                 result = new TemplateBindResult();
             }
-            boolean largeIconShown = bindLargeIcon(contentView, p);
+            final boolean largeIconShown = bindLargeIcon(contentView, p);
             calculateLargeIconMarginEnd(largeIconShown, result);
             if (p.mHeaderless) {
                 // views in the headerless (collapsed) state
-                contentView.setViewLayoutMarginEnd(R.id.notification_standard_view_column,
-                        result.getHeadingExtraMarginEnd());
+                result.mHeadingExtraMarginSet.applyToView(contentView,
+                        R.id.notification_headerless_view_column);
             } else {
                 // views in states with a header (big states)
-                contentView.setInt(R.id.notification_header, "setTopLineExtraMarginEnd",
-                        result.getHeadingExtraMarginEnd());
-                contentView.setViewLayoutMarginEnd(R.id.line1, result.getTitleMarginEnd());
+                result.mHeadingExtraMarginSet.applyToView(contentView, R.id.notification_header);
+                result.mTitleMarginSet.applyToView(contentView, R.id.line1);
             }
         }
 
         private void calculateLargeIconMarginEnd(boolean largeIconShown,
                 @NonNull TemplateBindResult result) {
-            int contentMargin = mContext.getResources().getDimensionPixelSize(
+            final Resources resources = mContext.getResources();
+            final int contentMargin = resources.getDimensionPixelOffset(
                     R.dimen.notification_content_margin_end);
-            int expanderSize = mContext.getResources().getDimensionPixelSize(
+            final int expanderSize = resources.getDimensionPixelSize(
                     R.dimen.notification_header_expand_icon_size) - contentMargin;
-            int extraMarginEnd = 0;
-            if (largeIconShown) {
-                int iconSize = mContext.getResources().getDimensionPixelSize(
-                        R.dimen.notification_right_icon_size);
-                extraMarginEnd = iconSize + contentMargin;
-            }
-            result.setRightIconState(largeIconShown, extraMarginEnd, expanderSize);
+            final int extraMarginEndIfVisible = resources.getDimensionPixelSize(
+                    R.dimen.notification_right_icon_size) + contentMargin;
+            result.setRightIconState(largeIconShown, extraMarginEndIfVisible, expanderSize);
         }
 
         /**
@@ -5153,9 +5151,14 @@ public class Notification implements Parcelable
 
         private void bindNotificationHeader(RemoteViews contentView, StandardTemplateParams p) {
             bindSmallIcon(contentView, p);
-            boolean hasTextToLeft = bindHeaderAppName(contentView, p);
+            // Populate text left-to-right so that separators are only shown between strings
+            boolean hasTextToLeft = bindHeaderAppName(contentView, p, false /* force */);
             hasTextToLeft |= bindHeaderTextSecondary(contentView, p, hasTextToLeft);
             hasTextToLeft |= bindHeaderText(contentView, p, hasTextToLeft);
+            if (!hasTextToLeft) {
+                // If there's still no text, force add the app name so there is some text.
+                hasTextToLeft |= bindHeaderAppName(contentView, p, true /* force */);
+            }
             bindHeaderChronometerAndTime(contentView, p, hasTextToLeft);
             bindProfileBadge(contentView, p);
             bindAlertedIcon(contentView, p);
@@ -5219,7 +5222,7 @@ public class Notification implements Parcelable
                     && mN.extras.getCharSequence(EXTRA_INFO_TEXT) != null) {
                 summaryText = mN.extras.getCharSequence(EXTRA_INFO_TEXT);
             }
-            if (summaryText != null) {
+            if (!TextUtils.isEmpty(summaryText)) {
                 // TODO: Remove the span entirely to only have the string with propper formating.
                 contentView.setTextViewText(R.id.header_text, processTextSpans(
                         processLegacyText(summaryText)));
@@ -5291,13 +5294,13 @@ public class Notification implements Parcelable
         /**
          * @return true if the app name will be visible
          */
-        private boolean bindHeaderAppName(RemoteViews contentView, StandardTemplateParams p) {
-            if (p.mViewType == StandardTemplateParams.VIEW_TYPE_MINIMIZED) {
-                contentView.setViewVisibility(R.id.app_name_text, View.GONE);
+        private boolean bindHeaderAppName(RemoteViews contentView, StandardTemplateParams p,
+                boolean force) {
+            if (p.mViewType == StandardTemplateParams.VIEW_TYPE_MINIMIZED && !force) {
+                // unless the force flag is set, don't show the app name in the minimized state.
                 return false;
             }
             if (p.mHeaderless && p.hasTitle()) {
-                contentView.setViewVisibility(R.id.app_name_text, View.GONE);
                 // the headerless template will have the TITLE in this position; return true to
                 // keep the divider visible between that title and the next text element.
                 return true;
@@ -7759,8 +7762,10 @@ public class Notification implements Parcelable
             addExtras(mBuilder.mN.extras);
             if (!isConversationLayout) {
                 // also update the end margin if there is an image
+                // NOTE: This template doesn't support moving this icon to the left, so we don't
+                // need to fully apply the MarginSet
                 contentView.setViewLayoutMarginEnd(R.id.notification_messaging,
-                        bindResult.getHeadingExtraMarginEnd());
+                        bindResult.mHeadingExtraMarginSet.getValue());
             }
             contentView.setInt(R.id.status_bar_latest_event_content, "setLayoutColor",
                     mBuilder.isColorized(p)
@@ -8757,9 +8762,8 @@ public class Notification implements Parcelable
             if (!headerless) {
                 // also update the end margin to account for the large icon or expander
                 Resources resources = mBuilder.mContext.getResources();
-                int endMargin = resources.getDimensionPixelSize(
-                        R.dimen.notification_content_margin_end) + result.getTitleMarginEnd();
-                remoteViews.setViewLayoutMarginEnd(R.id.notification_main_column, endMargin);
+                result.mTitleMarginSet.applyToView(remoteViews, R.id.notification_main_column,
+                        resources.getDimensionPixelOffset(R.dimen.notification_content_margin_end));
             }
         }
 
@@ -10997,42 +11001,74 @@ public class Notification implements Parcelable
      */
     private static class TemplateBindResult {
         boolean mRightIconVisible;
-        int mRightIconMarginEnd;
-        int mExpanderSize;
 
         /**
-         * @return the margin end that needs to be added to the heading so that it won't overlap
+         * The margin end that needs to be added to the heading so that it won't overlap
          * with the large icon.  This value includes the space required to accommodate the large
          * icon, but should be added to the space needed to accommodate the expander. This does
          * not include the 16dp content margin that all notification views must have.
          */
-        public int getHeadingExtraMarginEnd() {
-            return mRightIconMarginEnd;
-        }
+        public final MarginSet mHeadingExtraMarginSet = new MarginSet();
 
         /**
-         * @return the margin end that needs to be added to the heading so that it won't overlap
+         * The margin end that needs to be added to the heading so that it won't overlap
          * with the large icon.  This value includes the space required to accommodate the large
          * icon as well as the expander.  This does not include the 16dp content margin that all
          * notification views must have.
          */
-        public int getHeadingFullMarginEnd() {
-            return mRightIconMarginEnd + mExpanderSize;
-        }
+        public final MarginSet mHeadingFullMarginSet = new MarginSet();
 
         /**
-         * @return the margin end that needs to be added to the title text of the big state
+         * The margin end that needs to be added to the title text of the big state
          * so that it won't overlap with the large icon, but assuming the text can run under
          * the expander when that icon is not visible.
          */
-        public int getTitleMarginEnd() {
-            return mRightIconVisible ? getHeadingFullMarginEnd() : 0;
+        public final MarginSet mTitleMarginSet = new MarginSet();
+
+        public void setRightIconState(boolean visible, int marginEndIfVisible, int expanderSize) {
+            mRightIconVisible = visible;
+            mHeadingExtraMarginSet.setValues(0, marginEndIfVisible);
+            mHeadingFullMarginSet.setValues(expanderSize, marginEndIfVisible + expanderSize);
+            mTitleMarginSet.setValues(0, marginEndIfVisible + expanderSize);
         }
 
-        public void setRightIconState(boolean visible, int marginEnd, int expanderSize) {
-            mRightIconVisible = visible;
-            mRightIconMarginEnd = marginEnd;
-            mExpanderSize = expanderSize;
+        /**
+         * This contains the end margins for a view when the right icon is visible or not.  These
+         * values are both needed so that NotificationGroupingUtil can 'move' the right_icon to the
+         * left_icon and adjust the margins, and to undo that change as well.
+         */
+        private class MarginSet {
+            private int mValueIfGone;
+            private int mValueIfVisible;
+
+            public void setValues(int valueIfGone, int valueIfVisible) {
+                mValueIfGone = valueIfGone;
+                mValueIfVisible = valueIfVisible;
+            }
+
+            public void applyToView(@NonNull RemoteViews views, @IdRes int viewId) {
+                applyToView(views, viewId, 0);
+            }
+
+            public void applyToView(@NonNull RemoteViews views, @IdRes int viewId,
+                    @Px int extraMargin) {
+                final int marginEnd = getValue() + extraMargin;
+                if (viewId == R.id.notification_header) {
+                    views.setInt(R.id.notification_header, "setTopLineExtraMarginEnd", marginEnd);
+                } else {
+                    views.setViewLayoutMarginEnd(viewId, marginEnd);
+                }
+                if (mRightIconVisible) {
+                    views.setIntTag(viewId, R.id.tag_margin_end_when_icon_visible,
+                            mValueIfVisible + extraMargin);
+                    views.setIntTag(viewId, R.id.tag_margin_end_when_icon_gone,
+                            mValueIfGone + extraMargin);
+                }
+            }
+
+            public int getValue() {
+                return mRightIconVisible ? mValueIfVisible : mValueIfGone;
+            }
         }
     }
 
@@ -11074,7 +11110,9 @@ public class Notification implements Parcelable
         }
 
         final boolean hasTitle() {
-            return title != null && title.length() != 0 && !mHasCustomContent;
+            // We hide the title when the notification is a decorated custom view so that decorated
+            // custom views always have to include their own title.
+            return !TextUtils.isEmpty(title) && !mHasCustomContent;
         }
 
         final StandardTemplateParams viewType(int viewType) {

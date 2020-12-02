@@ -17,6 +17,7 @@
 package android.telephony.ims.stub;
 
 import android.annotation.NonNull;
+import android.annotation.SystemApi;
 import android.telephony.ims.DelegateMessageCallback;
 import android.telephony.ims.ImsService;
 import android.telephony.ims.SipDelegateImsConfiguration;
@@ -40,6 +41,7 @@ import android.telephony.ims.SipMessage;
  * {@link android.telephony.ims.DelegateStateCallback} for more information.
  * @hide
  */
+@SystemApi
 public interface SipDelegate {
 
     /**
@@ -57,7 +59,7 @@ public interface SipDelegate {
      *         {@link DelegateMessageCallback#onMessageSendFailure} should be called with code
      *         {@link SipDelegateManager#MESSAGE_FAILURE_REASON_STALE_IMS_CONFIGURATION}.
      */
-    void sendMessage(@NonNull SipMessage message, int configVersion);
+    void sendMessage(@NonNull SipMessage message, long configVersion);
 
     /**
      * The framework is requesting that routing resources associated with the SIP dialog using the

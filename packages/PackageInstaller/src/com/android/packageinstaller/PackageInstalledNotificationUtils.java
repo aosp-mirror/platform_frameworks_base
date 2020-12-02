@@ -243,8 +243,8 @@ class PackageInstalledNotificationUtils {
         }
 
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        return PendingIntent.getActivity(mContext,
-                0 /* request code */, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        return PendingIntent.getActivity(mContext, 0 /* request code */, intent,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
     }
 
     /**
@@ -260,8 +260,8 @@ class PackageInstalledNotificationUtils {
         }
 
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        return PendingIntent.getActivity(mContext,
-                0 /* request code */, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        return PendingIntent.getActivity(mContext, 0 /* request code */, intent,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
     }
 
     /**

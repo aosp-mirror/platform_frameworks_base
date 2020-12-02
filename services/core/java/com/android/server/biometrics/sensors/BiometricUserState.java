@@ -22,6 +22,7 @@ import android.hardware.biometrics.BiometricAuthenticator;
 import android.os.AsyncTask;
 import android.os.Environment;
 import android.util.Slog;
+import android.util.TypedXmlPullParser;
 import android.util.Xml;
 
 import com.android.internal.annotations.GuardedBy;
@@ -80,7 +81,7 @@ public abstract class BiometricUserState<T extends BiometricAuthenticator.Identi
     /**
      * @return
      */
-    protected abstract void parseBiometricsLocked(XmlPullParser parser)
+    protected abstract void parseBiometricsLocked(TypedXmlPullParser parser)
             throws IOException, XmlPullParserException;
 
 
@@ -176,8 +177,7 @@ public abstract class BiometricUserState<T extends BiometricAuthenticator.Identi
             return;
         }
         try {
-            XmlPullParser parser = Xml.newPullParser();
-            parser.setInput(in, null);
+            TypedXmlPullParser parser = Xml.resolvePullParser(in);
             parseStateLocked(parser);
 
         } catch (XmlPullParserException | IOException e) {
@@ -189,7 +189,7 @@ public abstract class BiometricUserState<T extends BiometricAuthenticator.Identi
     }
 
     @GuardedBy("this")
-    private void parseStateLocked(XmlPullParser parser)
+    private void parseStateLocked(TypedXmlPullParser parser)
             throws IOException, XmlPullParserException {
         final int outerDepth = parser.getDepth();
         int type;

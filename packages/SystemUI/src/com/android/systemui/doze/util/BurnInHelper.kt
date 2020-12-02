@@ -21,6 +21,7 @@ import android.util.MathUtils
 private const val MILLIS_PER_MINUTES = 1000 * 60f
 private const val BURN_IN_PREVENTION_PERIOD_Y = 521f
 private const val BURN_IN_PREVENTION_PERIOD_X = 83f
+private const val BURN_IN_PREVENTION_PERIOD_SCALE = 180f
 
 /**
  * Returns the translation offset that should be used to avoid burn in at
@@ -33,6 +34,14 @@ fun getBurnInOffset(amplitude: Int, xAxis: Boolean): Int {
     return zigzag(System.currentTimeMillis() / MILLIS_PER_MINUTES,
             amplitude.toFloat(),
             if (xAxis) BURN_IN_PREVENTION_PERIOD_X else BURN_IN_PREVENTION_PERIOD_Y).toInt()
+}
+
+/**
+ * Returns a value to scale a view in order to avoid burn in.
+ */
+fun getBurnInScale(): Float {
+    return 0.8f + zigzag(System.currentTimeMillis() / MILLIS_PER_MINUTES,
+            0.2f, BURN_IN_PREVENTION_PERIOD_SCALE)
 }
 
 /**

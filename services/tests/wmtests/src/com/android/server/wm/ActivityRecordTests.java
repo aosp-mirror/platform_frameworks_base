@@ -71,6 +71,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.never;
 
@@ -376,6 +377,27 @@ public class ActivityRecordTests extends WindowTestsBase {
     }
 
     @Test
+    public void testDestroyedActivityNotScheduleConfigChanged() throws RemoteException {
+        final ActivityRecord activity = new ActivityBuilder(mAtm)
+                .setCreateTask(true)
+                .setConfigChanges(CONFIG_ORIENTATION)
+                .build();
+        final Task task = activity.getTask();
+        activity.setState(DESTROYED, "Testing");
+
+        final Configuration newConfig = new Configuration(task.getConfiguration());
+        newConfig.orientation = newConfig.orientation == ORIENTATION_PORTRAIT
+                ? ORIENTATION_LANDSCAPE
+                : ORIENTATION_PORTRAIT;
+        task.onRequestedOverrideConfigurationChanged(newConfig);
+
+        ensureActivityConfiguration(activity);
+
+        verify(mAtm.getLifecycleManager(), never())
+                .scheduleTransaction(any(), any(), isA(ActivityConfigurationChangeItem.class));
+    }
+
+    @Test
     public void testSetRequestedOrientationUpdatesConfiguration() throws Exception {
         final ActivityRecord activity = new ActivityBuilder(mAtm)
                 .setCreateTask(true)
@@ -401,7 +423,7 @@ public class ActivityRecordTests extends WindowTestsBase {
 
         // Mimic the behavior that display doesn't handle app's requested orientation.
         final DisplayContent dc = activity.getTask().getDisplayContent();
-        doReturn(false).when(dc).onDescendantOrientationChanged(any(), any());
+        doReturn(false).when(dc).onDescendantOrientationChanged(any());
         doReturn(false).when(dc).handlesOrientationChangeFromDescendant();
 
         final int requestedOrientation;
@@ -1658,7 +1680,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         final int rotatedOrentation = r.getConfiguration().orientation == ORIENTATION_PORTRAIT
                 ? SCREEN_ORIENTATION_LANDSCAPE
                 : SCREEN_ORIENTATION_PORTRAIT;
-        doReturn(false).when(r).onDescendantOrientationChanged(any(), any());
+        doReturn(false).when(r).onDescendantOrientationChanged(any());
         r.setOrientation(rotatedOrentation);
     }
 

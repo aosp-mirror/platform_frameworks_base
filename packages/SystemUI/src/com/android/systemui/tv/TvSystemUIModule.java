@@ -43,6 +43,7 @@ import com.android.systemui.qs.tileimpl.QSFactoryImpl;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsImplementation;
 import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationLockscreenUserManagerImpl;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
@@ -62,6 +63,7 @@ import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedControllerImpl;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
+import com.android.systemui.statusbar.tv.notifications.TvNotificationHandler;
 
 import javax.inject.Named;
 
@@ -164,4 +166,11 @@ public abstract class TvSystemUIModule {
 
     @Binds
     abstract DozeHost provideDozeHost(DozeServiceHost dozeServiceHost);
+
+    @Provides
+    @SysUISingleton
+    static TvNotificationHandler provideTvNotificationHandler(Context context,
+            NotificationListener notificationListener) {
+        return new TvNotificationHandler(context, notificationListener);
+    }
 }

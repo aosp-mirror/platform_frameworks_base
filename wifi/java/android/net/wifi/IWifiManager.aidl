@@ -24,7 +24,9 @@ import android.net.wifi.hotspot2.IProvisioningCallback;
 
 import android.net.DhcpInfo;
 import android.net.Network;
+import android.net.wifi.CoexUnsafeChannel;
 import android.net.wifi.IActionListener;
+import android.net.wifi.ICoexCallback;
 import android.net.wifi.IDppCallback;
 import android.net.wifi.ILocalOnlyHotspotCallback;
 import android.net.wifi.INetworkRequestMatchCallback;
@@ -143,6 +145,16 @@ interface IWifiManager
     void releaseMulticastLock(String tag);
 
     void updateInterfaceIpState(String ifaceName, int mode);
+
+    void setCoexUnsafeChannels(in List<CoexUnsafeChannel> unsafeChannels, int mandatoryRestrictions);
+
+    List<CoexUnsafeChannel> getCoexUnsafeChannels();
+
+    int getCoexRestrictions();
+
+    void registerCoexCallback(in ICoexCallback callback);
+
+    void unregisterCoexCallback(in ICoexCallback callback);
 
     boolean startSoftAp(in WifiConfiguration wifiConfig, String packageName);
 

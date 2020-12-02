@@ -60,6 +60,8 @@ import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.GuardedBy;
@@ -443,7 +445,7 @@ abstract public class ManagedServices {
         }
     }
 
-    void writeDefaults(XmlSerializer out) throws IOException {
+    void writeDefaults(TypedXmlSerializer out) throws IOException {
         synchronized (mDefaultsLock) {
             List<String> componentStrings = new ArrayList<>(mDefaultComponents.size());
             for (int i = 0; i < mDefaultComponents.size(); i++) {
@@ -454,10 +456,10 @@ abstract public class ManagedServices {
         }
     }
 
-    public void writeXml(XmlSerializer out, boolean forBackup, int userId) throws IOException {
+    public void writeXml(TypedXmlSerializer out, boolean forBackup, int userId) throws IOException {
         out.startTag(null, getConfig().xmlTag);
 
-        out.attribute(null, ATT_VERSION, String.valueOf(DB_VERSION));
+        out.attributeInt(null, ATT_VERSION, DB_VERSION);
 
         writeDefaults(out);
 
@@ -485,8 +487,8 @@ abstract public class ManagedServices {
                                     : String.join(ENABLED_SERVICES_SEPARATOR, approved);
                             out.startTag(null, TAG_MANAGED_SERVICES);
                             out.attribute(null, ATT_APPROVED_LIST, allowedItems);
-                            out.attribute(null, ATT_USER_ID, Integer.toString(approvedUserId));
-                            out.attribute(null, ATT_IS_PRIMARY, Boolean.toString(isPrimary));
+                            out.attributeInt(null, ATT_USER_ID, approvedUserId);
+                            out.attributeBoolean(null, ATT_IS_PRIMARY, isPrimary);
                             if (userSet != null) {
                                 String userSetItems =
                                         String.join(ENABLED_SERVICES_SEPARATOR, userSet);
@@ -516,23 +518,23 @@ abstract public class ManagedServices {
     /**
      * Writes extra xml attributes to {@link #TAG_MANAGED_SERVICES} tag.
      */
-    protected void writeExtraAttributes(XmlSerializer out, int userId) throws IOException {}
+    protected void writeExtraAttributes(TypedXmlSerializer out, int userId) throws IOException {}
 
     /**
      * Writes extra xml tags within the parent tag specified in {@link Config#xmlTag}.
      */
-    protected void writeExtraXmlTags(XmlSerializer out) throws IOException {}
+    protected void writeExtraXmlTags(TypedXmlSerializer out) throws IOException {}
 
     /**
      * This is called to process tags other than {@link #TAG_MANAGED_SERVICES}.
      */
-    protected void readExtraTag(String tag, XmlPullParser parser) throws IOException {}
+    protected void readExtraTag(String tag, TypedXmlPullParser parser) throws IOException {}
 
     protected void migrateToXml() {
         loadAllowedComponentsFromSettings();
     }
 
-    void readDefaults(XmlPullParser parser) {
+    void readDefaults(TypedXmlPullParser parser) {
         String defaultComponents = XmlUtils.readStringAttribute(parser, ATT_DEFAULTS);
 
         if (!TextUtils.isEmpty(defaultComponents)) {
@@ -554,7 +556,7 @@ abstract public class ManagedServices {
     }
 
     public void readXml(
-            XmlPullParser parser,
+            TypedXmlPullParser parser,
             TriPredicate<String, Integer, String> allowedManagedServicePackages,
             boolean forRestore,
             int userId)
@@ -577,9 +579,9 @@ abstract public class ManagedServices {
                     final String approved = XmlUtils.readStringAttribute(parser, ATT_APPROVED_LIST);
                     // Ignore parser's user id for restore.
                     final int resolvedUserId = forRestore
-                            ? userId : XmlUtils.readIntAttribute(parser, ATT_USER_ID, 0);
+                            ? userId : parser.getAttributeInt(null, ATT_USER_ID, 0);
                     final boolean isPrimary =
-                            XmlUtils.readBooleanAttribute(parser, ATT_IS_PRIMARY, true);
+                            parser.getAttributeBoolean(null, ATT_IS_PRIMARY, true);
                     final String userSet = XmlUtils.readStringAttribute(parser, ATT_USER_SET);
                     readExtraAttributes(tag, parser, resolvedUserId);
                     if (allowedManagedServicePackages == null || allowedManagedServicePackages.test(
@@ -631,7 +633,7 @@ abstract public class ManagedServices {
     /**
      * Read extra attributes in the {@link #TAG_MANAGED_SERVICES} tag.
      */
-    protected void readExtraAttributes(String tag, XmlPullParser parser, int userId)
+    protected void readExtraAttributes(String tag, TypedXmlPullParser parser, int userId)
             throws IOException {}
 
     protected abstract String getRequiredPermission();

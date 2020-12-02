@@ -269,7 +269,8 @@ public class PackageInstallerImpl {
         // Create a matching PendingIntent and use it to generate the IntentSender
         Intent broadcastIntent = new Intent(action);
         PendingIntent pendingIntent = PendingIntent.getBroadcast(mContext, packageName.hashCode(),
-                broadcastIntent, PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_UPDATE_CURRENT);
+                broadcastIntent, PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_UPDATE_CURRENT
+                        | PendingIntent.FLAG_MUTABLE);
         return pendingIntent.getIntentSender();
     }
 

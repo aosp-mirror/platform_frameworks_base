@@ -99,6 +99,8 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Pair;
 import android.util.StatsEvent;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import androidx.test.InstrumentationRegistry;
@@ -280,7 +282,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     private ByteArrayOutputStream writeXmlAndPurge(
             String pkg, int uid, boolean forBackup, int userId, String... channelIds)
             throws Exception {
-        XmlSerializer serializer = new FastXmlSerializer();
+        TypedXmlSerializer serializer = Xml.newFastSerializer();
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         serializer.setOutput(new BufferedOutputStream(baos), "utf-8");
         serializer.startDocument(null, true);
@@ -300,7 +302,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
 
     private void loadByteArrayXml(byte[] byteArray, boolean forRestore, int userId)
             throws Exception {
-        XmlPullParser parser = Xml.newPullParser();
+        TypedXmlPullParser parser = Xml.newFastPullParser();
         parser.setInput(new BufferedInputStream(new ByteArrayInputStream(byteArray)), null);
         parser.nextTag();
         mHelper.readXml(parser, forRestore, userId);
@@ -717,7 +719,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         mHelper.onPackagesChanged(true, UserHandle.myUserId(), new String[]{PKG_N_MR1}, new int[]{
                 UID_N_MR1});
 
-        XmlPullParser parser = Xml.newPullParser();
+        TypedXmlPullParser parser = Xml.newFastPullParser();
         parser.setInput(new BufferedInputStream(new ByteArrayInputStream(baos.toByteArray())),
                 null);
         parser.nextTag();
@@ -772,7 +774,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
                 + "<package name=\"" + PKG_O + "\" uid=\"" + UID_O + "\" visibility=\""
                 + Notification.VISIBILITY_PRIVATE + "\" />\n"
                 + "</ranking>";
-        XmlPullParser parser = Xml.newPullParser();
+        TypedXmlPullParser parser = Xml.newFastPullParser();
         parser.setInput(new BufferedInputStream(new ByteArrayInputStream(preupgradeXml.getBytes())),
                 null);
         parser.nextTag();
@@ -2559,7 +2561,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
                 + " importance=\"3\"/>"
                 + "</package>"
                 + "</ranking>";
-        XmlPullParser parser = Xml.newPullParser();
+        TypedXmlPullParser parser = Xml.newFastPullParser();
         parser.setInput(new BufferedInputStream(new ByteArrayInputStream(xml.getBytes())),
                 null);
         parser.nextTag();
@@ -2580,7 +2582,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
                 + " importance=\"3\"/>"
                 + "</package>"
                 + "</ranking>";
-        XmlPullParser parser = Xml.newPullParser();
+        TypedXmlPullParser parser = Xml.newFastPullParser();
         parser.setInput(new BufferedInputStream(new ByteArrayInputStream(xml.getBytes())),
                 null);
         parser.nextTag();
@@ -2612,7 +2614,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
                 + " importance=\"3\"/>"
                 + "</package>"
                 + "</ranking>";
-        XmlPullParser parser = Xml.newPullParser();
+        TypedXmlPullParser parser = Xml.newFastPullParser();
         parser.setInput(new BufferedInputStream(new ByteArrayInputStream(xml.getBytes())),
                 null);
         parser.nextTag();
@@ -2753,7 +2755,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
                 + "<channel id=\"b\" name=\"b\" importance=\"3\"/>"
                 + "</package>"
                 + "</ranking>";
-        XmlPullParser parser = Xml.newPullParser();
+        TypedXmlPullParser parser = Xml.newFastPullParser();
         parser.setInput(new BufferedInputStream(new ByteArrayInputStream(xml.getBytes())),
                 null);
         parser.nextTag();
@@ -2779,7 +2781,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
                 + "<channel id=\"c\" name=\"c\" importance=\"3\"/>"
                 + "</package>"
                 + "</ranking>";
-        XmlPullParser parser = Xml.newPullParser();
+        TypedXmlPullParser parser = Xml.newFastPullParser();
         parser.setInput(new BufferedInputStream(new ByteArrayInputStream(xml.getBytes())),
                 null);
         parser.nextTag();
@@ -3047,7 +3049,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         toAdd.add(new Pair(PKG_O, UID_O));
         mHelper.updateDefaultApps(UserHandle.getUserId(UID_O), null, toAdd);
 
-        XmlPullParser parser = Xml.newPullParser();
+        TypedXmlPullParser parser = Xml.newFastPullParser();
         parser.setInput(new BufferedInputStream(new ByteArrayInputStream(baos.toByteArray())),
                 null);
         parser.nextTag();
@@ -3121,7 +3123,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
                 + "<channel id=\"" + extraChannel1 + "\" name=\"hi\" importance=\"3\"/>"
                 + "</package>"
                 + "</ranking>";
-        XmlPullParser parser = Xml.newPullParser();
+        TypedXmlPullParser parser = Xml.newFastPullParser();
         parser.setInput(new BufferedInputStream(new ByteArrayInputStream(xml.getBytes())),
                 null);
         parser.nextTag();
@@ -3154,12 +3156,12 @@ public class PreferencesHelperTest extends UiServiceTestCase {
                 + "</ranking>";
 
         // trigger a restore for both users
-        XmlPullParser parser = Xml.newPullParser();
+        TypedXmlPullParser parser = Xml.newFastPullParser();
         parser.setInput(new BufferedInputStream(new ByteArrayInputStream(xmlUser0.getBytes())),
                 null);
         parser.nextTag();
         mHelper.readXml(parser, true, 0);
-        parser = Xml.newPullParser();
+        parser = Xml.newFastPullParser();
         parser.setInput(new BufferedInputStream(new ByteArrayInputStream(xmlUser10.getBytes())),
                 null);
         parser.nextTag();
@@ -3242,7 +3244,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
                 + "<channel id=\"id\" name=\"hi\" importance=\"3\" conv_id=\"foo:placeholder_id\"/>"
                 + "</package>"
                 + "</ranking>";
-        XmlPullParser parser = Xml.newPullParser();
+        TypedXmlPullParser parser = Xml.newFastPullParser();
         parser.setInput(new BufferedInputStream(new ByteArrayInputStream(xml.getBytes())),
                 null);
         parser.nextTag();
@@ -3261,7 +3263,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
                 + "<channel id=\"id\" name=\"hi\" importance=\"3\" conv_id=\"other\"/>"
                 + "</package>"
                 + "</ranking>";
-        XmlPullParser parser = Xml.newPullParser();
+        TypedXmlPullParser parser = Xml.newFastPullParser();
         parser.setInput(new BufferedInputStream(new ByteArrayInputStream(xml.getBytes())),
                 null);
         parser.nextTag();
@@ -3280,7 +3282,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
                 + "<channel id=\"id\" name=\"hi\" importance=\"3\"/>"
                 + "</package>"
                 + "</ranking>";
-        XmlPullParser parser = Xml.newPullParser();
+        TypedXmlPullParser parser = Xml.newFastPullParser();
         parser.setInput(new BufferedInputStream(new ByteArrayInputStream(xml.getBytes())),
                 null);
         parser.nextTag();

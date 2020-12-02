@@ -51,7 +51,6 @@ android_test {
         "testng",
         "junit",
         "platform-compat-test-rules",
-
     ],
 
     aidl: {
@@ -117,6 +116,7 @@ java_library {
         "utils/**/*.java",
         "utils/**/*.kt",
         "utils-mockito/**/*.kt",
+        ":services.core-sources-deviceconfig-interface",
     ],
     static_libs: [
         "junit",
@@ -133,6 +133,7 @@ java_library {
         "utils/**/*.java",
         "utils/**/*.kt",
         "utils-mockito/**/*.kt",
+        ":services.core-sources-deviceconfig-interface",
     ],
     static_libs: [
         "junit",

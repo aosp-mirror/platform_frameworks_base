@@ -2590,7 +2590,7 @@ public class Activity extends ContextThemeWrapper
     protected void onStop() {
         if (DEBUG_LIFECYCLE) Slog.v(TAG, "onStop " + this);
         if (mActionBar != null) mActionBar.setShowHideAnimationEnabled(false);
-        mActivityTransitionState.onStop();
+        mActivityTransitionState.onStop(this);
         dispatchActivityStopped();
         mTranslucentCallback = null;
         mCalled = true;
@@ -5189,8 +5189,8 @@ public class Activity extends ContextThemeWrapper
      * result callbacks including {@link #onRequestPermissionsResult(int, String[], int[])}.
      * </p>
      * <p>
-     * The <a href="https://github.com/googlesamples/android-RuntimePermissions">
-     * RuntimePermissions</a> sample app demonstrates how to use this method to
+     * The <a href="https://github.com/android/permissions-samples">
+     * RuntimePermissions</a> sample apps demonstrate how to use this method to
      * request permissions at run time.
      * </p>
      *

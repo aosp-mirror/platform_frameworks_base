@@ -698,7 +698,7 @@ public class SizeCompatTests extends WindowTestsBase {
 
         // Update with new activity requested orientation and recompute bounds with no previous
         // size compat cache.
-        verify(mTask).onDescendantOrientationChanged(any(), same(newActivity));
+        verify(mTask).onDescendantOrientationChanged(same(newActivity));
         verify(mTask).computeFullscreenBounds(any(), any(), any(), anyInt());
 
         final Rect displayBounds = display.getBounds();
@@ -739,7 +739,7 @@ public class SizeCompatTests extends WindowTestsBase {
 
         // Update with new activity requested orientation and recompute bounds with no previous
         // size compat cache.
-        verify(mTask).onDescendantOrientationChanged(any(), same(newActivity));
+        verify(mTask).onDescendantOrientationChanged(same(newActivity));
         verify(mTask).computeFullscreenBounds(any(), any(), any(), anyInt());
 
         final Rect displayBounds = display.getBounds();

@@ -119,8 +119,9 @@ public class CrossProfileApps {
      *        {@link #getTargetUserProfiles()} if different to the calling user, otherwise a
      *        {@link SecurityException} will be thrown.
      * @param callingActivity The activity to start the new activity from for the purposes of
-     *        deciding which task the new activity should belong to. If {@code null}, the activity
-     *        will always be started in a new task.
+     *        passing back any result and deciding which task the new activity should belong to. If
+     *        {@code null}, the activity will always be started in a new task and no result will be
+     *        returned.
      */
     @RequiresPermission(anyOf = {
             android.Manifest.permission.INTERACT_ACROSS_PROFILES,
@@ -146,8 +147,9 @@ public class CrossProfileApps {
      *        {@link #getTargetUserProfiles()} if different to the calling user, otherwise a
      *        {@link SecurityException} will be thrown.
      * @param callingActivity The activity to start the new activity from for the purposes of
-     *        deciding which task the new activity should belong to. If {@code null}, the activity
-     *        will always be started in a new task.
+     *        passing back any result and deciding which task the new activity should belong to. If
+     *        {@code null}, the activity will always be started in a new task and no result will be
+     *        returned.
      * @param options The activity options or {@code null}. See {@link android.app.ActivityOptions}.
      */
     @RequiresPermission(anyOf = {

@@ -25,6 +25,7 @@ import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.TypedXmlPullParser;
 import android.util.Xml;
 
 import com.android.internal.util.HexDump;
@@ -571,14 +572,13 @@ final class HdmiUtils {
         // return a list of devices config
         public static List<DeviceConfig> parse(InputStream in)
                 throws XmlPullParserException, IOException {
-            XmlPullParser parser = Xml.newPullParser();
-            parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, false);
-            parser.setInput(in, null);
+            TypedXmlPullParser parser = Xml.resolvePullParser(in);
             parser.nextTag();
             return readDevices(parser);
         }
 
-        private static void skip(XmlPullParser parser) throws XmlPullParserException, IOException {
+        private static void skip(TypedXmlPullParser parser)
+                throws XmlPullParserException, IOException {
             if (parser.getEventType() != XmlPullParser.START_TAG) {
                 throw new IllegalStateException();
             }
@@ -595,7 +595,7 @@ final class HdmiUtils {
             }
         }
 
-        private static List<DeviceConfig> readDevices(XmlPullParser parser)
+        private static List<DeviceConfig> readDevices(TypedXmlPullParser parser)
                 throws XmlPullParserException, IOException {
             List<DeviceConfig> devices = new ArrayList<>();
 
@@ -624,7 +624,7 @@ final class HdmiUtils {
 
         // Processes device tags in the config.
         @Nullable
-        private static DeviceConfig readDeviceConfig(XmlPullParser parser, String deviceType)
+        private static DeviceConfig readDeviceConfig(TypedXmlPullParser parser, String deviceType)
                 throws XmlPullParserException, IOException {
             List<CodecSad> codecSads = new ArrayList<>();
             int format;

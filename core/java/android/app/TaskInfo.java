@@ -214,7 +214,6 @@ public class TaskInfo {
      */
     public int parentTaskId;
 
-
     /**
      * Parent bounds.
      * @hide
@@ -226,6 +225,12 @@ public class TaskInfo {
      * @hide
      */
     public boolean isFocused;
+
+    /**
+     * Whether this task is visible.
+     * @hide
+     */
+    public boolean isVisible;
 
     TaskInfo() {
         // Do nothing
@@ -311,7 +316,8 @@ public class TaskInfo {
                 && pictureInPictureParams == that.pictureInPictureParams
                 && getWindowingMode() == that.getWindowingMode()
                 && Objects.equals(taskDescription, that.taskDescription)
-                && isFocused == that.isFocused;
+                && isFocused == that.isFocused
+                && isVisible == that.isVisible;
     }
 
     private boolean equalsLetterboxParams(TaskInfo that) {
@@ -358,6 +364,7 @@ public class TaskInfo {
         parentTaskId = source.readInt();
         parentBounds = source.readTypedObject(Rect.CREATOR);
         isFocused = source.readBoolean();
+        isVisible = source.readBoolean();
     }
 
     /**
@@ -394,6 +401,7 @@ public class TaskInfo {
         dest.writeInt(parentTaskId);
         dest.writeTypedObject(parentBounds, flags);
         dest.writeBoolean(isFocused);
+        dest.writeBoolean(isVisible);
     }
 
     @Override
@@ -413,12 +421,13 @@ public class TaskInfo {
                 + " topActivityType=" + topActivityType
                 + " pictureInPictureParams=" + pictureInPictureParams
                 + " topActivityInfo=" + topActivityInfo
-                + " launchCookies" + launchCookies
+                + " launchCookies=" + launchCookies
                 + " letterboxActivityBounds=" + letterboxActivityBounds
                 + " positionInParent=" + positionInParent
                 + " parentTaskId=" + parentTaskId
                 + " parentBounds=" + parentBounds
                 + " isFocused=" + isFocused
+                + " isVisible=" + isVisible
                 + "}";
     }
 }

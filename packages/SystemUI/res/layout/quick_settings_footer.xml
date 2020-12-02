@@ -26,11 +26,19 @@
     android:layout_gravity="center_vertical|center_horizontal"
     android:background="@android:color/transparent">
 
+    <ImageView
+        android:id="@+id/primary_footer_icon"
+        android:layout_width="@dimen/qs_footer_icon_size"
+        android:layout_height="@dimen/qs_footer_icon_size"
+        android:gravity="start"
+        android:layout_marginEnd="8dp"
+        android:contentDescription="@null"
+        android:tint="?android:attr/textColorPrimary" />
+
     <com.android.systemui.util.AutoMarqueeTextView
         android:id="@+id/footer_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:gravity="start"
         android:layout_weight="1"
         android:singleLine="true"
         android:ellipsize="marquee"

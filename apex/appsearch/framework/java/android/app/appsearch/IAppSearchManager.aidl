@@ -119,13 +119,14 @@ interface IAppSearchManager {
      * @param databaseName The databaseName this query for.
      * @param queryExpression String to search for
      * @param searchSpecBundle SearchSpec bundle
-     * @param callback {@link AndroidFuture}&lt;{@link AppSearchResult}&lt;{@link SearchResults}&gt;&gt;
+     * @param callback {@link IAppSearchResultCallback#onResult} will be called with an
+     *     {@link AppSearchResult}&lt;{@link Void}&gt;.
      */
     void removeByQuery(
         in String databaseName,
         in String queryExpression,
         in Bundle searchSpecBundle,
-        in AndroidFuture<AppSearchResult> callback);
+        in IAppSearchResultCallback callback);
 
     /**
      * Creates and initializes AppSearchImpl for the calling app.
