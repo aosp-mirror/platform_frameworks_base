@@ -321,7 +321,8 @@ public class DeviceDiscoveryService extends Service {
     }
 
     void onDeviceSelected(String callingPackage, String deviceAddress) {
-        mServiceCallback.complete(new Association(getUserId(), deviceAddress, callingPackage));
+        mServiceCallback.complete(new Association(
+                getUserId(), deviceAddress, callingPackage, mRequest.getDeviceProfile(), false));
     }
 
     void onCancel() {
