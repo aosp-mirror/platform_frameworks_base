@@ -152,7 +152,7 @@ cc_defaults {
         "android.hardware.power.stats@1.0",
         "android.hardware.thermal@1.0",
         "android.hardware.tv.input@1.0",
-        "android.hardware.vibrator-cpp",
+        "android.hardware.vibrator-unstable-cpp",
         "android.hardware.vibrator@1.0",
         "android.hardware.vibrator@1.1",
         "android.hardware.vibrator@1.2",
