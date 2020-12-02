@@ -24,6 +24,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_ERROR;
 import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY;
 import static android.view.WindowManagerPolicyConstants.APPLICATION_LAYER;
 import static android.window.DisplayAreaOrganizer.FEATURE_DEFAULT_TASK_CONTAINER;
+import static android.window.DisplayAreaOrganizer.FEATURE_VENDOR_LAST;
 
 import android.annotation.Nullable;
 import android.os.Bundle;
@@ -166,32 +167,48 @@ class DisplayAreaPolicyBuilder {
         return this;
     }
 
-    /** Makes sure the setting meets the requirement. */
+    /**
+     * Makes sure the setting meets the requirement:
+     * 1. {@link mRootHierarchyBuilder} must be set.
+     * 2. {@link RootDisplayArea} and {@link TaskDisplayArea} must have unique ids.
+     * 3. {@link Feature} below the same {@link RootDisplayArea} must have unique ids.
+     * 4. There must be exactly one {@link HierarchyBuilder} that contains the IME container.
+     * 5. There must be exactly one {@link HierarchyBuilder} that contains the default
+     *    {@link TaskDisplayArea} with id {@link FEATURE_DEFAULT_TASK_CONTAINER}.
+     * 6. None of the ids is greater than {@link FEATURE_VENDOR_LAST}.
+     */
     private void validate() {
         if (mRootHierarchyBuilder == null) {
             throw new IllegalStateException("Root must be set for the display area policy.");
         }
 
-        final Set<Integer> rootIdSet = new ArraySet<>();
-        rootIdSet.add(mRootHierarchyBuilder.mRoot.mFeatureId);
+        final Set<Integer> uniqueIdSet = new ArraySet<>();
+        final Set<Integer> allIdSet = new ArraySet<>();
+        validateIds(mRootHierarchyBuilder, uniqueIdSet, allIdSet);
         boolean containsImeContainer = mRootHierarchyBuilder.mImeContainer != null;
         boolean containsDefaultTda = containsDefaultTaskDisplayArea(mRootHierarchyBuilder);
         for (int i = 0; i < mDisplayAreaGroupHierarchyBuilders.size(); i++) {
             HierarchyBuilder hierarchyBuilder = mDisplayAreaGroupHierarchyBuilders.get(i);
-            if (!rootIdSet.add(hierarchyBuilder.mRoot.mFeatureId)) {
-                throw new IllegalStateException("There should not be two RootDisplayAreas with id "
-                        + hierarchyBuilder.mRoot.mFeatureId);
-            }
+            validateIds(hierarchyBuilder, uniqueIdSet, allIdSet);
+
             if (hierarchyBuilder.mTaskDisplayAreas.isEmpty()) {
                 throw new IllegalStateException(
                         "DisplayAreaGroup must contain at least one TaskDisplayArea.");
             }
 
-            containsImeContainer = containsImeContainer || hierarchyBuilder.mImeContainer != null;
+            if (containsImeContainer) {
+                if (hierarchyBuilder.mImeContainer != null) {
+                    throw new IllegalStateException(
+                            "Only one DisplayArea hierarchy can contain the IME container");
+                }
+            } else {
+                containsImeContainer = hierarchyBuilder.mImeContainer != null;
+            }
+
             if (containsDefaultTda) {
                 if (containsDefaultTaskDisplayArea(hierarchyBuilder)) {
                     throw new IllegalStateException("Only one TaskDisplayArea can have the feature "
-                            + "of FEATURE_DEFAULT_TASK_CONTAINER");
+                            + "id of FEATURE_DEFAULT_TASK_CONTAINER");
                 }
             } else {
                 containsDefaultTda = containsDefaultTaskDisplayArea(hierarchyBuilder);
@@ -203,7 +220,8 @@ class DisplayAreaPolicyBuilder {
         }
 
         if (!containsDefaultTda) {
-            throw new IllegalStateException("There must be a default TaskDisplayArea.");
+            throw new IllegalStateException("There must be a default TaskDisplayArea with id of "
+                    + "FEATURE_DEFAULT_TASK_CONTAINER.");
         }
     }
 
@@ -216,6 +234,67 @@ class DisplayAreaPolicyBuilder {
             }
         }
         return false;
+    }
+
+    /**
+     * Makes sure that ids meet requirement.
+     * {@link RootDisplayArea} and {@link TaskDisplayArea} must have unique ids.
+     * {@link Feature} below the same {@link RootDisplayArea} must have unique ids, but
+     * {@link Feature} below different {@link RootDisplayArea} can have the same id so that we can
+     * organize them together.
+     * None of the ids is greater than {@link FEATURE_VENDOR_LAST}
+     *
+     * @param uniqueIdSet ids of {@link RootDisplayArea} and {@link TaskDisplayArea} that must be
+     *                    unique,
+     * @param allIdSet ids of {@link RootDisplayArea}, {@link TaskDisplayArea} and {@link Feature}.
+     */
+    private static void validateIds(HierarchyBuilder displayAreaHierarchy,
+            Set<Integer> uniqueIdSet, Set<Integer> allIdSet) {
+        // Root must have unique id.
+        final int rootId = displayAreaHierarchy.mRoot.mFeatureId;
+        if (!allIdSet.add(rootId) || !uniqueIdSet.add(rootId)) {
+            throw new IllegalStateException(
+                    "RootDisplayArea must have unique id, but id=" + rootId + " is not unique.");
+        }
+        if (rootId > FEATURE_VENDOR_LAST) {
+            throw new IllegalStateException(
+                    "RootDisplayArea should not have an id greater than FEATURE_VENDOR_LAST.");
+        }
+
+        // TDAs must have unique id.
+        for (int i = 0; i < displayAreaHierarchy.mTaskDisplayAreas.size(); i++) {
+            final int taskDisplayAreaId = displayAreaHierarchy.mTaskDisplayAreas.get(i).mFeatureId;
+            if (!allIdSet.add(taskDisplayAreaId) || !uniqueIdSet.add(taskDisplayAreaId)) {
+                throw new IllegalStateException("TaskDisplayArea must have unique id, but id="
+                        + taskDisplayAreaId + " is not unique.");
+            }
+            if (taskDisplayAreaId > FEATURE_VENDOR_LAST) {
+                throw new IllegalStateException("TaskDisplayArea declared in the policy should not"
+                        + "have an id greater than FEATURE_VENDOR_LAST.");
+            }
+        }
+
+        // Features below the same root must have unique ids.
+        final Set<Integer> featureIdSet = new ArraySet<>();
+        for (int i = 0; i < displayAreaHierarchy.mFeatures.size(); i++) {
+            final int featureId = displayAreaHierarchy.mFeatures.get(i).getId();
+            if (uniqueIdSet.contains(featureId)) {
+                throw new IllegalStateException("Feature must not have same id with any "
+                        + "RootDisplayArea or TaskDisplayArea, but id=" + featureId + " is used");
+            }
+            if (!featureIdSet.add(featureId)) {
+                throw new IllegalStateException("Feature below the same root must have unique id, "
+                        + "but id=" + featureId + " is not unique.");
+            }
+            if (featureId > FEATURE_VENDOR_LAST) {
+                throw new IllegalStateException(
+                        "Feature should not have an id greater than FEATURE_VENDOR_LAST.");
+            }
+        }
+
+        // Features below different roots can have the same id so that we can organize them
+        // together.
+        allIdSet.addAll(featureIdSet);
     }
 
     Result build(WindowManagerService wmService) {
