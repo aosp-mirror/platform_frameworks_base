@@ -70,6 +70,18 @@
             "name": "CtsAutoFillServiceTestCases",
             "options": [
                 {
+                    "include-filter": "android.autofillservice.cts.saveui.AutofillSaveDialogTest"
+                },
+                {
+                    "exclude-annotation": "androidx.test.filters.FlakyTest"
+                }
+            ],
+            "file_patterns": ["(/|^)Activity.java"]
+        },
+        {
+            "name": "CtsAutoFillServiceTestCases",
+            "options": [
+                {
                     "include-filter": "android.autofillservice.cts.saveui.PreSimpleSaveActivityTest"
                 },
                 {
