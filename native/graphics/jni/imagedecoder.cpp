@@ -61,6 +61,37 @@ int ResultToErrorCode(SkCodec::Result result) {
     }
 }
 
+const char* AImageDecoder_resultToString(int result) {
+    switch (result) {
+        case        ANDROID_IMAGE_DECODER_SUCCESS:
+            return "ANDROID_IMAGE_DECODER_SUCCESS";
+        case        ANDROID_IMAGE_DECODER_INCOMPLETE:
+            return "ANDROID_IMAGE_DECODER_INCOMPLETE";
+        case        ANDROID_IMAGE_DECODER_ERROR:
+            return "ANDROID_IMAGE_DECODER_ERROR";
+        case        ANDROID_IMAGE_DECODER_INVALID_CONVERSION:
+            return "ANDROID_IMAGE_DECODER_INVALID_CONVERSION";
+        case        ANDROID_IMAGE_DECODER_INVALID_SCALE:
+            return "ANDROID_IMAGE_DECODER_INVALID_SCALE";
+        case        ANDROID_IMAGE_DECODER_BAD_PARAMETER:
+            return "ANDROID_IMAGE_DECODER_BAD_PARAMETER";
+        case        ANDROID_IMAGE_DECODER_INVALID_INPUT:
+            return "ANDROID_IMAGE_DECODER_INVALID_INPUT";
+        case        ANDROID_IMAGE_DECODER_SEEK_ERROR:
+            return "ANDROID_IMAGE_DECODER_SEEK_ERROR";
+        case        ANDROID_IMAGE_DECODER_INTERNAL_ERROR:
+            return "ANDROID_IMAGE_DECODER_INTERNAL_ERROR";
+        case        ANDROID_IMAGE_DECODER_UNSUPPORTED_FORMAT:
+            return "ANDROID_IMAGE_DECODER_UNSUPPORTED_FORMAT";
+        case        ANDROID_IMAGE_DECODER_FINISHED:
+            return "ANDROID_IMAGE_DECODER_FINISHED";
+        case        ANDROID_IMAGE_DECODER_INVALID_STATE:
+            return "ANDROID_IMAGE_DECODER_INVALID_STATE";
+        default:
+            return nullptr;
+    }
+}
+
 static int createFromStream(std::unique_ptr<SkStreamRewindable> stream, AImageDecoder** outDecoder) {
     SkCodec::Result result;
     auto codec = SkCodec::MakeFromStream(std::move(stream), &result, nullptr,

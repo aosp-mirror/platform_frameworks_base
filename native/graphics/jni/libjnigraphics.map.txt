@@ -1,5 +1,6 @@
 LIBJNIGRAPHICS {
   global:
+    AImageDecoder_resultToString; # introduced=31
     AImageDecoder_createFromAAsset; # introduced=30
     AImageDecoder_createFromFd; # introduced=30
     AImageDecoder_createFromBuffer; # introduced=30
