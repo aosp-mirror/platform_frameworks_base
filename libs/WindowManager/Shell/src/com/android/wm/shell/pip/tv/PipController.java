@@ -36,7 +36,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ParceledListSlice;
 import android.content.res.Configuration;
-import android.content.res.Resources;
 import android.graphics.Rect;
 import android.os.Debug;
 import android.os.Handler;
@@ -59,13 +58,14 @@ import com.android.wm.shell.pip.PipTaskOrganizer;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Manages the picture-in-picture (PIP) UI and states.
  */
 public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallback {
-    private static final String TAG = "PipController";
-    static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
+    private static final String TAG = "TvPipController";
+    static final boolean DEBUG = false;
 
     /**
      * Unknown or invalid state
@@ -117,9 +117,6 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
     private int mResumeResizePinnedStackRunnableState = STATE_NO_PIP;
     private final Handler mHandler = new Handler();
     private List<Listener> mListeners = new ArrayList<>();
-    private Rect mPipBounds;
-    private Rect mDefaultPipBounds = new Rect();
-    private Rect mMenuModePipBounds;
     private int mLastOrientation = Configuration.ORIENTATION_UNDEFINED;
     private int mPipTaskId = TASK_ID_NO_PIP;
     private int mPinnedStackId = INVALID_STACK_ID;
@@ -187,11 +184,11 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
                     if (mImeVisible != imeVisible) {
                         if (imeVisible) {
                             // Save the IME height adjustment, and offset to not occlude the IME
-                            mPipBounds.offset(0, -imeHeight);
+                            mPipBoundsState.getNormalBounds().offset(0, -imeHeight);
                             mImeHeightAdjustment = imeHeight;
                         } else {
                             // Apply the inverse adjustment when the IME is hidden
-                            mPipBounds.offset(0, mImeHeightAdjustment);
+                            mPipBoundsState.getNormalBounds().offset(0, mImeHeightAdjustment);
                         }
                         mImeVisible = imeVisible;
                         resizePinnedStack(STATE_PIP);
@@ -206,10 +203,6 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
                 mTmpDisplayInfo.copyFrom(mPipBoundsState.getDisplayInfo());
 
                 mPipBoundsAlgorithm.getInsetBounds(mTmpInsetBounds);
-                mPipBounds.set(mPipBoundsAlgorithm.getNormalBounds());
-                if (mDefaultPipBounds.isEmpty()) {
-                    mDefaultPipBounds.set(mPipBoundsAlgorithm.getDefaultBounds());
-                }
             });
         }
 
@@ -302,14 +295,10 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
             return;
         }
 
-        Resources res = mContext.getResources();
-        mMenuModePipBounds = Rect.unflattenFromString(res.getString(
-                R.string.pip_menu_bounds));
+        final Rect menuBounds = Rect.unflattenFromString(
+                mContext.getResources().getString(R.string.pip_menu_bounds));
+        mPipBoundsState.setExpandedBounds(menuBounds);
 
-        // Reset the PIP bounds and apply. PIP bounds can be changed by two reasons.
-        //   1. Configuration changed due to the language change (RTL <-> RTL)
-        //   2. SystemUI restarts after the crash
-        mPipBounds = mDefaultPipBounds;
         resizePinnedStack(getPinnedTaskInfo() == null ? STATE_NO_PIP : STATE_PIP);
     }
 
@@ -379,16 +368,22 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
     }
 
     private void onActivityPinned(String packageName) {
-        if (DEBUG) Log.d(TAG, "onActivityPinned()");
-
-        RootTaskInfo taskInfo = getPinnedTaskInfo();
+        final RootTaskInfo taskInfo = getPinnedTaskInfo();
+        if (DEBUG) Log.d(TAG, "onActivityPinned, task=" + taskInfo);
         if (taskInfo == null) {
             Log.w(TAG, "Cannot find pinned stack");
             return;
         }
-        if (DEBUG) Log.d(TAG, "PINNED_STACK:" + taskInfo);
+
+        // At this point PipBoundsState knows the correct aspect ratio for this pinned task, so we
+        // use PipBoundsAlgorithm to calculate the normal bounds for the task (PipBoundsAlgorithm
+        // will query PipBoundsState for the aspect ratio) and pass the bounds over to the
+        // PipBoundsState.
+        mPipBoundsState.setNormalBounds(mPipBoundsAlgorithm.getNormalBounds());
+
         mPinnedStackId = taskInfo.taskId;
         mPipTaskId = taskInfo.childTaskIds[taskInfo.childTaskIds.length - 1];
+
         // Set state to STATE_PIP so we show it when the pinned stack animation ends.
         mState = STATE_PIP;
         mPipMediaController.onActivityPinned();
@@ -434,8 +429,7 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
             }
         }
         if (getState() == STATE_PIP) {
-            if (mPipBounds != mDefaultPipBounds) {
-                mPipBounds = mDefaultPipBounds;
+            if (!Objects.equals(mPipBoundsState.getBounds(), mPipBoundsState.getNormalBounds())) {
                 resizePinnedStack(STATE_PIP);
             }
         }
@@ -509,11 +503,11 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
                 }
                 break;
             case STATE_PIP_MENU:
-                newBounds = mMenuModePipBounds;
+                newBounds = mPipBoundsState.getExpandedBounds();
                 break;
             case STATE_PIP: // fallthrough
             default:
-                newBounds = mPipBounds;
+                newBounds = mPipBoundsState.getNormalBounds();
                 break;
         }
         if (newBounds != null) {
