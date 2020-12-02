@@ -19501,13 +19501,20 @@ public class PackageManagerService extends IPackageManager.Stub
                     if (outInfo != null) {
                         outInfo.removedAppId = removedAppId;
                     }
-                    final SharedUserSetting sus = deletedPs.getSharedUser();
-                    List<AndroidPackage> sharedUserPkgs = sus != null ? sus.getPackages() : null;
-                    if (sharedUserPkgs == null) {
-                        sharedUserPkgs = Collections.emptyList();
+                    if (!mSettings.isDisabledSystemPackageLPr(packageName)) {
+                        // If we don't have a disabled system package to reinstall, the package is
+                        // really gone and its permission state should be removed.
+                        final SharedUserSetting sus = deletedPs.getSharedUser();
+                        List<AndroidPackage> sharedUserPkgs = sus != null ? sus.getPackages()
+                                : null;
+                        if (sharedUserPkgs == null) {
+                            sharedUserPkgs = Collections.emptyList();
+                        }
+                        for (final int userId : allUserHandles) {
+                            mPermissionManager.onPackageUninstalled(packageName, deletedPs.appId,
+                                    deletedPs.pkg, sharedUserPkgs, userId);
+                        }
                     }
-                    mPermissionManager.onPackageStateRemoved(packageName, deletedPs.appId,
-                            deletedPs.pkg, sharedUserPkgs);
                     clearPackagePreferredActivitiesLPw(
                             deletedPs.name, changedUsers, UserHandle.USER_ALL);
                 }
@@ -19696,10 +19703,6 @@ public class PackageManagerService extends IPackageManager.Stub
         synchronized (mLock) {
             PackageSetting ps = mSettings.mPackages.get(pkg.getPackageName());
 
-            // The update permissions method below will take care of removing obsolete permissions
-            // and granting install permissions.
-            mPermissionManager.updatePermissions(pkg.getPackageName(), pkg);
-
             final boolean applyUserRestrictions = origUserHandles != null;
             if (applyUserRestrictions) {
                 boolean installedStateChanged = false;
@@ -19718,8 +19721,6 @@ public class PackageManagerService extends IPackageManager.Stub
                     if (installed) {
                         ps.setUninstallReason(UNINSTALL_REASON_UNKNOWN, userId);
                     }
-
-                    mSettings.writeRuntimePermissionsForUserLPr(userId, false);
                 }
                 // Regardless of writeSettings we need to ensure that this restriction
                 // state propagation is persisted
@@ -19728,6 +19729,16 @@ public class PackageManagerService extends IPackageManager.Stub
                     mSettings.writeKernelMappingLPr(ps);
                 }
             }
+
+            // The update permissions method below will take care of removing obsolete permissions
+            // and granting install permissions.
+            mPermissionManager.updatePermissions(pkg.getPackageName(), pkg);
+            if (applyUserRestrictions) {
+                for (int userId : allUserHandles) {
+                    mSettings.writeRuntimePermissionsForUserLPr(userId, false);
+                }
+            }
+
             // can downgrade to reader here
             if (writeSettings) {
                 writeSettingsLPrTEMP();
@@ -20026,6 +20037,11 @@ public class PackageManagerService extends IPackageManager.Stub
 
         destroyAppProfilesLIF(pkg);
 
+        final SharedUserSetting sus = ps.getSharedUser();
+        List<AndroidPackage> sharedUserPkgs = sus != null ? sus.getPackages() : null;
+        if (sharedUserPkgs == null) {
+            sharedUserPkgs = Collections.emptyList();
+        }
         final int[] userIds = (userId == UserHandle.USER_ALL) ? mUserManager.getUserIds()
                 : new int[] {userId};
         for (int nextUserId : userIds) {
@@ -20040,7 +20056,8 @@ public class PackageManagerService extends IPackageManager.Stub
             clearDefaultBrowserIfNeededForUser(ps.name, nextUserId);
             removeKeystoreDataIfNeeded(mInjector.getUserManagerInternal(), nextUserId, ps.appId);
             clearPackagePreferredActivities(ps.name, nextUserId);
-            mPermissionManager.resetRuntimePermissions(pkg, nextUserId);
+            mPermissionManager.onPackageUninstalled(ps.name, ps.appId, pkg, sharedUserPkgs,
+                    nextUserId);
         }
 
         if (outInfo != null) {
