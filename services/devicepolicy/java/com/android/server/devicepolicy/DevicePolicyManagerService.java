@@ -5839,7 +5839,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         // Should include alias in authentication policy
         try (KeyChainConnection connection = KeyChain.bindAsUser(mContext,
                 caller.getUserHandle())) {
-            if (!containsAlias(connection.getService().getCredentialManagementAppPolicy(), alias)) {
+            // The policy will be null if there is no credential management app
+            AppUriAuthenticationPolicy policy =
+                    connection.getService().getCredentialManagementAppPolicy();
+            if (policy == null || policy.getAppAndUriMappings().isEmpty()
+                    || !containsAlias(policy, alias)) {
                 return false;
             }
         } catch (RemoteException | InterruptedException e) {
