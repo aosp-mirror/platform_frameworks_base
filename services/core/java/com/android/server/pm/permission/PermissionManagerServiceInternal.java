@@ -16,7 +16,6 @@
 
 package com.android.server.pm.permission;
 
-import android.annotation.AppIdInt;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
@@ -141,41 +140,6 @@ public abstract class PermissionManagerServiceInternal extends PermissionManager
          */
         void setDefaultHomeAsync(@Nullable String packageName, @UserIdInt int userId,
                 @NonNull Consumer<Boolean> callback);
-    }
-
-    /**
-     * Callbacks invoked when interesting actions have been taken on a permission.
-     * <p>
-     * NOTE: The current arguments are merely to support the existing use cases. This
-     * needs to be properly thought out with appropriate arguments for each of the
-     * callback methods.
-     */
-    public static class PermissionCallback {
-        public void onGidsChanged(@AppIdInt int appId, @UserIdInt int userId) {
-        }
-        public void onPermissionChanged() {
-        }
-        public void onPermissionGranted(int uid, @UserIdInt int userId) {
-        }
-        public void onInstallPermissionGranted() {
-        }
-        public void onPermissionRevoked(int uid, @UserIdInt int userId, String reason) {
-        }
-        public void onInstallPermissionRevoked() {
-        }
-        public void onPermissionUpdated(@UserIdInt int[] updatedUserIds, boolean sync) {
-        }
-        public void onPermissionUpdatedNotifyListener(@UserIdInt int[] updatedUserIds, boolean sync,
-                int uid) {
-            onPermissionUpdated(updatedUserIds, sync);
-        }
-        public void onPermissionRemoved() {
-        }
-        public void onInstallPermissionUpdated() {
-        }
-        public void onInstallPermissionUpdatedNotifyListener(int uid) {
-            onInstallPermissionUpdated();
-        }
     }
 
     public abstract void systemReady();

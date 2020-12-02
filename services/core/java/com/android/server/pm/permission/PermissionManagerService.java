@@ -154,7 +154,6 @@ import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.permission.PermissionManagerServiceInternal.DefaultBrowserProvider;
 import com.android.server.pm.permission.PermissionManagerServiceInternal.DefaultDialerProvider;
 import com.android.server.pm.permission.PermissionManagerServiceInternal.DefaultHomeProvider;
-import com.android.server.pm.permission.PermissionManagerServiceInternal.PermissionCallback;
 import com.android.server.policy.PermissionPolicyInternal;
 import com.android.server.policy.SoftRestrictedPermissionPolicy;
 
@@ -5415,6 +5414,32 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         @Override
         public int[] getGidsForUid(int uid) {
             return PermissionManagerService.this.getGidsForUid(uid);
+        }
+    }
+
+    /**
+     * Callbacks invoked when interesting actions have been taken on a permission.
+     * <p>
+     * NOTE: The current arguments are merely to support the existing use cases. This
+     * needs to be properly thought out with appropriate arguments for each of the
+     * callback methods.
+     */
+    private static class PermissionCallback {
+        public void onGidsChanged(@AppIdInt int appId, @UserIdInt int userId) {}
+        public void onPermissionChanged() {}
+        public void onPermissionGranted(int uid, @UserIdInt int userId) {}
+        public void onInstallPermissionGranted() {}
+        public void onPermissionRevoked(int uid, @UserIdInt int userId, String reason) {}
+        public void onInstallPermissionRevoked() {}
+        public void onPermissionUpdated(@UserIdInt int[] updatedUserIds, boolean sync) {}
+        public void onPermissionUpdatedNotifyListener(@UserIdInt int[] updatedUserIds, boolean sync,
+                int uid) {
+            onPermissionUpdated(updatedUserIds, sync);
+        }
+        public void onPermissionRemoved() {}
+        public void onInstallPermissionUpdated() {}
+        public void onInstallPermissionUpdatedNotifyListener(int uid) {
+            onInstallPermissionUpdated();
         }
     }
 
