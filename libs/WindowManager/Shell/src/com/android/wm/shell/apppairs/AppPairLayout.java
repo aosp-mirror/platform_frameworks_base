@@ -16,7 +16,6 @@
 
 package com.android.wm.shell.apppairs;
 
-import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
 import static android.view.WindowManager.LayoutParams.FLAG_SLIPPERY;
@@ -45,21 +44,18 @@ import com.android.wm.shell.R;
 /**
  * Records and handles layout of a pair of apps.
  */
-// TODO(172704238): add tests
 final class AppPairLayout {
     private static final String DIVIDER_WINDOW_TITLE = "AppPairDivider";
-    private final Context mContext;
-    private final AppPairWindowManager mAppPairWindowManager;
-    private final SurfaceControlViewHost mViewHost;
-
+    private final Display mDisplay;
     private final int mDividerWindowWidth;
     private final int mDividerWindowInsets;
+    private final AppPairWindowManager mAppPairWindowManager;
 
-    private boolean mIsLandscape;
+    private Context mContext;
     private Rect mRootBounds;
     private DIVIDE_POLICY mDividePolicy;
 
-    private DividerView mDividerView;
+    private SurfaceControlViewHost mViewHost;
     private SurfaceControl mDividerLeash;
 
     AppPairLayout(
@@ -68,7 +64,7 @@ final class AppPairLayout {
             Configuration configuration,
             SurfaceControl rootLeash) {
         mContext = context.createConfigurationContext(configuration);
-        mIsLandscape = isLandscape(configuration);
+        mDisplay = display;
         mRootBounds = configuration.windowConfiguration.getBounds();
         mDividerWindowWidth = mContext.getResources().getDimensionPixelSize(
                 com.android.internal.R.dimen.docked_stack_divider_thickness);
@@ -76,26 +72,22 @@ final class AppPairLayout {
                 com.android.internal.R.dimen.docked_stack_divider_insets);
 
         mAppPairWindowManager = new AppPairWindowManager(configuration, rootLeash);
-        mViewHost = new SurfaceControlViewHost(mContext, display, mAppPairWindowManager);
         mDividePolicy = DIVIDE_POLICY.MIDDLE;
-        mDividePolicy.update(mIsLandscape, mRootBounds, mDividerWindowWidth, mDividerWindowInsets);
+        mDividePolicy.update(mRootBounds, mDividerWindowWidth, mDividerWindowInsets);
     }
 
     boolean updateConfiguration(Configuration configuration) {
         mAppPairWindowManager.setConfiguration(configuration);
         final Rect rootBounds = configuration.windowConfiguration.getBounds();
-        final boolean isLandscape = isLandscape(configuration);
-        if (mIsLandscape == isLandscape && isIdenticalBounds(mRootBounds, rootBounds)) {
+        if (isIdenticalBounds(mRootBounds, rootBounds)) {
             return false;
         }
 
-        mIsLandscape = isLandscape;
+        mContext = mContext.createConfigurationContext(configuration);
         mRootBounds = rootBounds;
-        mDividePolicy.update(mIsLandscape, mRootBounds, mDividerWindowWidth, mDividerWindowInsets);
-        mViewHost.relayout(
-                mDividePolicy.mDividerBounds.width(),
-                mDividePolicy.mDividerBounds.height());
-        // TODO(172704238): handle divider bar rotation.
+        mDividePolicy.update(mRootBounds, mDividerWindowWidth, mDividerWindowInsets);
+        release();
+        init();
         return true;
     }
 
@@ -116,22 +108,19 @@ final class AppPairLayout {
     }
 
     void release() {
-        if (mViewHost == null) return;
+        if (mViewHost == null) {
+            return;
+        }
         mViewHost.release();
+        mDividerLeash = null;
+        mViewHost = null;
     }
 
-    void setDividerVisibility(boolean visible) {
-        if (mDividerView == null) {
-            initDivider();
+    void init() {
+        if (mViewHost == null) {
+            mViewHost = new SurfaceControlViewHost(mContext, mDisplay, mAppPairWindowManager);
         }
-        if (visible) {
-            mDividerView.show();
-        } else {
-            mDividerView.hide();
-        }
-    }
 
-    private void initDivider() {
         final DividerView dividerView = (DividerView) LayoutInflater.from(mContext)
                 .inflate(R.layout.split_divider, null);
 
@@ -147,12 +136,7 @@ final class AppPairLayout {
         lp.privateFlags |= PRIVATE_FLAG_NO_MOVE_ANIMATION;
 
         mViewHost.setView(dividerView, lp);
-        mDividerView = dividerView;
         mDividerLeash = mAppPairWindowManager.getSurfaceControl(mViewHost.getWindowToken());
-    }
-
-    private static boolean isLandscape(Configuration configuration) {
-        return configuration.orientation == ORIENTATION_LANDSCAPE;
     }
 
     private static boolean isIdenticalBounds(Rect bounds1, Rect bounds2) {
@@ -167,8 +151,7 @@ final class AppPairLayout {
     enum DIVIDE_POLICY {
         MIDDLE;
 
-        void update(boolean isLandscape, Rect rootBounds, int dividerWindowWidth,
-                int dividerWindowInsets) {
+        void update(Rect rootBounds, int dividerWindowWidth, int dividerWindowInsets) {
             final int dividerOffset = dividerWindowWidth / 2;
             final int boundsOffset = dividerOffset - dividerWindowInsets;
 
@@ -179,7 +162,7 @@ final class AppPairLayout {
             switch (this) {
                 case MIDDLE:
                 default:
-                    if (isLandscape) {
+                    if (isLandscape(rootBounds)) {
                         mDividerBounds.left = rootBounds.width() / 2 - dividerOffset;
                         mDividerBounds.right = rootBounds.width() / 2 + dividerOffset;
                         mBounds1.left = rootBounds.width() / 2 + boundsOffset;
@@ -191,6 +174,10 @@ final class AppPairLayout {
                         mBounds2.top = rootBounds.height() / 2 + boundsOffset;
                     }
             }
+        }
+
+        private boolean isLandscape(Rect bounds) {
+            return bounds.width() > bounds.height();
         }
 
         Rect mDividerBounds;

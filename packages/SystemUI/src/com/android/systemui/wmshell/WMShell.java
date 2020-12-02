@@ -53,7 +53,6 @@ import com.android.systemui.statusbar.policy.UserInfoController;
 import com.android.systemui.tracing.ProtoTracer;
 import com.android.systemui.tracing.nano.SystemUiTraceProto;
 import com.android.wm.shell.ShellCommandHandler;
-import com.android.wm.shell.apppairs.AppPairs;
 import com.android.wm.shell.hidedisplaycutout.HideDisplayCutout;
 import com.android.wm.shell.nano.WmShellTraceProto;
 import com.android.wm.shell.onehanded.OneHanded;
@@ -99,13 +98,11 @@ public final class WMShell extends SystemUI
     private final Optional<HideDisplayCutout> mHideDisplayCutoutOptional;
     private final ProtoTracer mProtoTracer;
     private final Optional<ShellCommandHandler> mShellCommandHandler;
-    private final Optional<AppPairs> mAppPairsOptional;
 
     private boolean mIsSysUiStateValid;
     private KeyguardUpdateMonitorCallback mSplitScreenKeyguardCallback;
     private KeyguardUpdateMonitorCallback mPipKeyguardCallback;
     private KeyguardUpdateMonitorCallback mOneHandedKeyguardCallback;
-    private KeyguardUpdateMonitorCallback mAppPairsKeyguardCallback;
 
     @Inject
     public WMShell(Context context, CommandQueue commandQueue,
@@ -119,8 +116,7 @@ public final class WMShell extends SystemUI
             Optional<OneHanded> oneHandedOptional,
             Optional<HideDisplayCutout> hideDisplayCutoutOptional,
             ProtoTracer protoTracer,
-            Optional<ShellCommandHandler> shellCommandHandler,
-            Optional<AppPairs> appPairsOptional) {
+            Optional<ShellCommandHandler> shellCommandHandler) {
         super(context);
         mCommandQueue = commandQueue;
         mConfigurationController = configurationController;
@@ -135,7 +131,6 @@ public final class WMShell extends SystemUI
         mProtoTracer = protoTracer;
         mProtoTracer.add(this);
         mShellCommandHandler = shellCommandHandler;
-        mAppPairsOptional = appPairsOptional;
     }
 
     @Override
@@ -145,7 +140,6 @@ public final class WMShell extends SystemUI
         mSplitScreenOptional.ifPresent(this::initSplitScreen);
         mOneHandedOptional.ifPresent(this::initOneHanded);
         mHideDisplayCutoutOptional.ifPresent(this::initHideDisplayCutout);
-        mAppPairsOptional.ifPresent(this::initAppPairs);
     }
 
     @VisibleForTesting
@@ -292,16 +286,6 @@ public final class WMShell extends SystemUI
                 hideDisplayCutout.onConfigurationChanged(newConfig);
             }
         });
-    }
-
-    void initAppPairs(AppPairs appPairs) {
-        mAppPairsKeyguardCallback = new KeyguardUpdateMonitorCallback() {
-            @Override
-            public void onKeyguardVisibilityChanged(boolean showing) {
-                appPairs.onKeyguardVisibilityChanged(showing);
-            }
-        };
-        mKeyguardUpdateMonitor.registerCallback(mAppPairsKeyguardCallback);
     }
 
     @Override
