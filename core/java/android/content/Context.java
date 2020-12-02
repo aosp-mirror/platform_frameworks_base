@@ -3544,6 +3544,7 @@ public abstract class Context {
             LIGHTS_SERVICE,
             //@hide: PEOPLE_SERVICE,
             //@hide: DEVICE_STATE_SERVICE,
+            UWB_SERVICE,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ServiceName {}
@@ -5257,6 +5258,15 @@ public abstract class Context {
      * @hide
      */
     public static final String LIGHTS_SERVICE = "lights";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve a
+     * {@link android.uwb.UwbManager}.
+     *
+     * @see #getSystemService(String)
+     * @hide
+     */
+    public static final String UWB_SERVICE = "uwb";
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve a
