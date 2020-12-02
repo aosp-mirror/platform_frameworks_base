@@ -20,6 +20,7 @@ import android.media.metrics.NetworkEvent;
 import android.media.metrics.PlaybackErrorEvent;
 import android.media.metrics.PlaybackMetrics;
 import android.media.metrics.PlaybackStateEvent;
+import android.media.metrics.TrackChangeEvent;
 
 /**
  * Interface to the playback manager service.
@@ -31,4 +32,5 @@ interface IPlaybackMetricsManager {
     void reportNetworkEvent(in String sessionId, in NetworkEvent event, int userId);
     void reportPlaybackErrorEvent(in String sessionId, in PlaybackErrorEvent event, int userId);
     void reportPlaybackStateEvent(in String sessionId, in PlaybackStateEvent event, int userId);
+    void reportTrackChangeEvent(in String sessionId, in TrackChangeEvent event, int userId);
 }
