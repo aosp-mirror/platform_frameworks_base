@@ -423,7 +423,7 @@ public final class ViewRootImpl implements ViewParent,
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     int mHeight;
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    Rect mDirty;
+    private Rect mDirty;
     public boolean mIsAnimating;
 
     private boolean mUseMTRenderer;
@@ -446,6 +446,23 @@ public final class ViewRootImpl implements ViewParent,
     @UnsupportedAppUsage
     FallbackEventHandler mFallbackEventHandler;
     final Choreographer mChoreographer;
+    protected final ViewFrameInfo mViewFrameInfo = new ViewFrameInfo();
+
+    /**
+     * Update the Choreographer's FrameInfo object with the timing information for the current
+     * ViewRootImpl instance. Erase the data in the current ViewFrameInfo to prepare for the next
+     * frame.
+     * @return the updated FrameInfo object
+     */
+    protected @NonNull FrameInfo getUpdatedFrameInfo() {
+        // Since Choreographer is a thread-local singleton while we can have multiple
+        // ViewRootImpl's, populate the frame information from the current viewRootImpl before
+        // starting the draw
+        FrameInfo frameInfo = mChoreographer.mFrameInfo;
+        mViewFrameInfo.populateFrameInfo(frameInfo);
+        mViewFrameInfo.reset();
+        return frameInfo;
+    }
 
     // used in relayout to get SurfaceControl size
     // for BLAST adapter surface setup
@@ -2675,7 +2692,7 @@ public final class ViewRootImpl implements ViewParent,
                         // to resume them
                         mDirty.set(0, 0, mWidth, mHeight);
                     }
-                    mChoreographer.mFrameInfo.addFlags(FrameInfo.FLAG_WINDOW_LAYOUT_CHANGED);
+                    mViewFrameInfo.flags |= FrameInfo.FLAG_WINDOW_LAYOUT_CHANGED;
                 }
                 relayoutResult = relayoutWindow(params, viewVisibility, insetsPending);
 
@@ -8138,7 +8155,8 @@ public final class ViewRootImpl implements ViewParent,
                     oldestEventTime = me.getHistoricalEventTimeNano(0);
                 }
             }
-            mChoreographer.mFrameInfo.updateInputEventTime(eventTime, oldestEventTime);
+            mViewFrameInfo.updateOldestInputEvent(oldestEventTime);
+            mViewFrameInfo.updateNewestInputEvent(eventTime);
 
             deliverInputEvent(q);
         }

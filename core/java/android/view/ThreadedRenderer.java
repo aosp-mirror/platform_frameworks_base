@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.graphics.FrameInfo;
 import android.graphics.HardwareRenderer;
 import android.graphics.Picture;
 import android.graphics.Point;
@@ -610,8 +611,7 @@ public final class ThreadedRenderer extends HardwareRenderer {
      * @param attachInfo AttachInfo tied to the specified view.
      */
     void draw(View view, AttachInfo attachInfo, DrawCallbacks callbacks) {
-        final Choreographer choreographer = attachInfo.mViewRootImpl.mChoreographer;
-        choreographer.mFrameInfo.markDrawStart();
+        attachInfo.mViewRootImpl.mViewFrameInfo.markDrawStart();
 
         updateRootDisplayList(view, callbacks);
 
@@ -629,7 +629,9 @@ public final class ThreadedRenderer extends HardwareRenderer {
             attachInfo.mPendingAnimatingRenderNodes = null;
         }
 
-        int syncResult = syncAndDrawFrame(choreographer.mFrameInfo);
+        final FrameInfo frameInfo = attachInfo.mViewRootImpl.getUpdatedFrameInfo();
+
+        int syncResult = syncAndDrawFrame(frameInfo);
         if ((syncResult & SYNC_LOST_SURFACE_REWARD_IF_FOUND) != 0) {
             Log.w("OpenGLRenderer", "Surface lost, forcing relayout");
             // We lost our surface. For a relayout next frame which should give us a new
