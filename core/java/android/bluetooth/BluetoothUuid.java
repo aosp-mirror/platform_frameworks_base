@@ -153,7 +153,12 @@ public final class BluetoothUuid {
     @SystemApi
     public static final ParcelUuid HEARING_AID =
             ParcelUuid.fromString("0000FDF0-0000-1000-8000-00805f9b34fb");
-
+   /** Placeholder until specification is released
+     * @hide */
+    @NonNull
+    @SystemApi
+    public static final ParcelUuid LE_AUDIO =
+            ParcelUuid.fromString("EEEEEEEE-EEEE-EEEE-EEEE-EEEEEEEEEEEE");
     /** @hide */
     @NonNull
     @SystemApi
