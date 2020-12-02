@@ -263,7 +263,6 @@ import android.os.UserManager;
 import android.os.WorkSource;
 import android.os.storage.IStorageManager;
 import android.os.storage.StorageManager;
-import android.permission.PermissionManagerInternal.CheckPermissionDelegate;
 import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.server.ServerProtoEnums;
@@ -325,7 +324,6 @@ import com.android.internal.util.MemInfoReader;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.function.HeptFunction;
 import com.android.internal.util.function.QuadFunction;
-import com.android.internal.util.function.TriFunction;
 import com.android.server.AlarmManagerInternal;
 import com.android.server.AttributeCache;
 import com.android.server.DeviceIdleInternal;
@@ -392,7 +390,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Executor;
-import java.util.function.BiFunction;
 
 public class ActivityManagerService extends IActivityManager.Stub
         implements Watchdog.Monitor, BatteryStatsImpl.BatteryCallback {
@@ -14465,7 +14462,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 mAppOpsService.setMode(AppOpsManager.OP_NO_ISOLATED_STORAGE, app.uid,
                         app.info.packageName, AppOpsManager.MODE_ERRORED);
                 mAppOpsService.setAppOpsServiceDelegate(null);
-                getPermissionManagerInternalLocked().setCheckPermissionDelegate(null);
+                getPermissionManagerInternalLocked().stopShellPermissionIdentityDelegation();
                 mHandler.obtainMessage(SHUTDOWN_UI_AUTOMATION_CONNECTION_MSG,
                         instr.mUiAutomationConnection).sendToTarget();
             }
@@ -17185,12 +17182,6 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         // We allow delegation only to one instrumentation started from the shell
         synchronized (ActivityManagerService.this) {
-            // If there is a delegate it should be the same instance for app ops and permissions.
-            if (mAppOpsService.getAppOpsServiceDelegate()
-                    != getPermissionManagerInternalLocked().getCheckPermissionDelegate()) {
-                throw new IllegalStateException("Bad shell delegate state");
-            }
-
             // If the delegate is already set up for the target UID, nothing to do.
             if (mAppOpsService.getAppOpsServiceDelegate() != null) {
                 if (!(mAppOpsService.getAppOpsServiceDelegate() instanceof ShellDelegate)) {
@@ -17219,10 +17210,14 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
 
                 // Hook them up...
-                final ShellDelegate shellDelegate = new ShellDelegate(
-                        instr.mTargetInfo.packageName, delegateUid, permissions);
+                final ShellDelegate shellDelegate = new ShellDelegate(delegateUid,
+                        permissions);
                 mAppOpsService.setAppOpsServiceDelegate(shellDelegate);
-                getPermissionManagerInternalLocked().setCheckPermissionDelegate(shellDelegate);
+                final String packageName = instr.mTargetInfo.packageName;
+                final List<String> permissionNames = permissions != null ?
+                        Arrays.asList(permissions) : null;
+                getPermissionManagerInternalLocked().startShellPermissionIdentityDelegation(
+                        delegateUid, packageName, permissionNames);
                 return;
             }
         }
@@ -17236,17 +17231,15 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
         synchronized (ActivityManagerService.this) {
             mAppOpsService.setAppOpsServiceDelegate(null);
-            getPermissionManagerInternalLocked().setCheckPermissionDelegate(null);
+            getPermissionManagerInternalLocked().stopShellPermissionIdentityDelegation();
         }
     }
 
-    private class ShellDelegate implements CheckOpsDelegate, CheckPermissionDelegate {
-        private final String mTargetPackageName;
+    private class ShellDelegate implements CheckOpsDelegate {
         private final int mTargetUid;
         private @Nullable String[] mPermissions;
 
-        ShellDelegate(String targetPackageName, int targetUid, @Nullable String[] permissions) {
-            mTargetPackageName = targetPackageName;
+        ShellDelegate(int targetUid, @Nullable String[] permissions) {
             mTargetUid = targetUid;
             mPermissions = permissions;
         }
@@ -17307,34 +17300,6 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
             return superImpl.apply(code, uid, packageName, featureId, shouldCollectAsyncNotedOp,
                     message, shouldCollectMessage);
-        }
-
-        @Override
-        public int checkPermission(String permName, String pkgName, int userId,
-                TriFunction<String, String, Integer, Integer> superImpl) {
-            if (mTargetPackageName.equals(pkgName) && isTargetPermission(permName)) {
-                final long identity = Binder.clearCallingIdentity();
-                try {
-                    return superImpl.apply(permName, "com.android.shell", userId);
-                } finally {
-                    Binder.restoreCallingIdentity(identity);
-                }
-            }
-            return superImpl.apply(permName, pkgName, userId);
-        }
-
-        @Override
-        public int checkUidPermission(String permName, int uid,
-                BiFunction<String, Integer, Integer> superImpl) {
-            if (uid == mTargetUid  && isTargetPermission(permName)) {
-                final long identity = Binder.clearCallingIdentity();
-                try {
-                    return superImpl.apply(permName, Process.SHELL_UID);
-                } finally {
-                    Binder.restoreCallingIdentity(identity);
-                }
-            }
-            return superImpl.apply(permName, uid);
         }
 
         private boolean isTargetOp(int code) {

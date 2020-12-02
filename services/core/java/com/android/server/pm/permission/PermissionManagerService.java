@@ -114,7 +114,6 @@ import android.permission.IPermissionManager;
 import android.permission.PermissionControllerManager;
 import android.permission.PermissionManager;
 import android.permission.PermissionManagerInternal;
-import android.permission.PermissionManagerInternal.CheckPermissionDelegate;
 import android.permission.PermissionManagerInternal.OnRuntimePermissionStateChangedListener;
 import android.text.TextUtils;
 import android.util.ArrayMap;
@@ -138,6 +137,7 @@ import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.IntPair;
 import com.android.internal.util.Preconditions;
+import com.android.internal.util.function.TriFunction;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
@@ -173,6 +173,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.function.BiFunction;
 
 /**
  * Manages all permissions and handles permissions related tasks.
@@ -2285,6 +2286,32 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         for (int i = 0; i < listenerCount; i++) {
             listeners.get(i).onRuntimePermissionStateChanged(packageName, userId);
         }
+    }
+
+    private void startShellPermissionIdentityDelegationInternal(int uid,
+            @NonNull String packageName, @Nullable List<String> permissionNames) {
+        synchronized (mLock) {
+            final CheckPermissionDelegate oldDelegate = mCheckPermissionDelegate;
+            if (oldDelegate != null && oldDelegate.getDelegatedUid() != uid) {
+                throw new SecurityException(
+                        "Shell can delegate permissions only to one UID at a time");
+            }
+            final ShellDelegate delegate = new ShellDelegate(uid, packageName, permissionNames);
+            setCheckPermissionDelegateLocked(delegate);
+        }
+    }
+
+    private void stopShellPermissionIdentityDelegationInternal() {
+        synchronized (mLock) {
+            setCheckPermissionDelegateLocked(null);
+        }
+    }
+
+    private void setCheckPermissionDelegateLocked(@Nullable CheckPermissionDelegate delegate) {
+        if (delegate != null || mCheckPermissionDelegate != null) {
+            PackageManager.invalidatePackageInfoCache();
+        }
+        mCheckPermissionDelegate = delegate;
     }
 
     /**
@@ -5117,20 +5144,15 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         }
 
         @Override
-        public CheckPermissionDelegate getCheckPermissionDelegate() {
-            synchronized (mLock) {
-                return mCheckPermissionDelegate;
-            }
+        public void startShellPermissionIdentityDelegation(int uid, @NonNull String packageName,
+                @Nullable List<String> permissionNames) {
+            Objects.requireNonNull(packageName, "packageName");
+            startShellPermissionIdentityDelegationInternal(uid, packageName, permissionNames);
         }
 
         @Override
-        public void setCheckPermissionDelegate(CheckPermissionDelegate delegate) {
-            synchronized (mLock) {
-                if (delegate != null || mCheckPermissionDelegate != null) {
-                    PackageManager.invalidatePackageInfoCache();
-                }
-                mCheckPermissionDelegate = delegate;
-            }
+        public void stopShellPermissionIdentityDelegation() {
+            stopShellPermissionIdentityDelegationInternal();
         }
 
         @Override
@@ -5363,6 +5385,102 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             } finally {
                 mPermissionListeners.finishBroadcast();
             }
+        }
+    }
+
+    /**
+     * Interface to intercept permission checks and optionally pass through to the original
+     * implementation.
+     */
+    private interface CheckPermissionDelegate {
+        /**
+         * Get the UID whose permission checks is being delegated.
+         *
+         * @return the UID
+         */
+        int getDelegatedUid();
+
+        /**
+         * Check whether the given package has been granted the specified permission.
+         *
+         * @param permissionName the name of the permission to be checked
+         * @param packageName the name of the package to be checked
+         * @param userId the user ID
+         * @param superImpl the original implementation that can be delegated to
+         * @return {@link android.content.pm.PackageManager.PERMISSION_GRANTED} if the package has
+         * the permission, or {@link android.content.pm.PackageManager.PERMISSION_DENITED} otherwise
+         *
+         * @see android.content.pm.PackageManager#checkPermission(String, String)
+         */
+        int checkPermission(@NonNull String permissionName, @NonNull String packageName,
+                @UserIdInt int userId,
+                @NonNull TriFunction<String, String, Integer, Integer> superImpl);
+
+        /**
+         * Check whether the given UID has been granted the specified permission.
+         *
+         * @param permissionName the name of the permission to be checked
+         * @param uid the UID to be checked
+         * @param superImpl the original implementation that can be delegated to
+         * @return {@link android.content.pm.PackageManager.PERMISSION_GRANTED} if the package has
+         * the permission, or {@link android.content.pm.PackageManager.PERMISSION_DENITED} otherwise
+         */
+        int checkUidPermission(@NonNull String permissionName, int uid,
+                BiFunction<String, Integer, Integer> superImpl);
+    }
+
+    private class ShellDelegate implements CheckPermissionDelegate {
+        private final int mDelegatedUid;
+        @NonNull
+        private final String mDelegatedPackageName;
+        @Nullable
+        private final List<String> mDelegatedPermissionNames;
+
+        public ShellDelegate(int delegatedUid, @NonNull String delegatedPackageName,
+                @Nullable List<String> delegatedPermissionNames) {
+            mDelegatedUid = delegatedUid;
+            mDelegatedPackageName = delegatedPackageName;
+            mDelegatedPermissionNames = delegatedPermissionNames;
+        }
+
+        @Override
+        public int getDelegatedUid() {
+            return mDelegatedUid;
+        }
+
+        @Override
+        public int checkPermission(@NonNull String permissionName, @NonNull String packageName,
+                int userId, @NonNull TriFunction<String, String, Integer, Integer> superImpl) {
+            if (mDelegatedPackageName.equals(packageName)
+                    && isDelegatedPermission(permissionName)) {
+                final long identity = Binder.clearCallingIdentity();
+                try {
+                    return superImpl.apply(permissionName, "com.android.shell", userId);
+                } finally {
+                    Binder.restoreCallingIdentity(identity);
+                }
+            }
+            return superImpl.apply(permissionName, packageName, userId);
+        }
+
+        @Override
+        public int checkUidPermission(@NonNull String permissionName, int uid,
+                @NonNull BiFunction<String, Integer, Integer> superImpl) {
+            if (uid == mDelegatedUid && isDelegatedPermission(permissionName)) {
+                final long identity = Binder.clearCallingIdentity();
+                try {
+                    return superImpl.apply(permissionName, Process.SHELL_UID);
+                } finally {
+                    Binder.restoreCallingIdentity(identity);
+                }
+            }
+            return superImpl.apply(permissionName, uid);
+        }
+
+        private boolean isDelegatedPermission(@NonNull String permissionName) {
+            // null permissions means all permissions are targeted
+            return mDelegatedPermissionNames == null
+                    || mDelegatedPermissionNames.contains(permissionName);
         }
     }
 

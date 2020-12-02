@@ -180,18 +180,24 @@ public abstract class PermissionManagerServiceInternal extends PermissionManager
             @PermissionInfo.ProtectionFlags int protectionFlags);
 
     /**
-     * Returns the delegate used to influence permission checking.
+     * Start delegate the permission identity of the shell UID to the given UID.
      *
-     * @return The delegate instance.
+     * @param uid the UID to delegate shell permission identity to
+     * @param packageName the name of the package to delegate shell permission identity to
+     * @param permissionNames the names of the permissions to delegate shell permission identity
+     *                       for, or {@code null} for all permissions
      */
-    public abstract @Nullable CheckPermissionDelegate getCheckPermissionDelegate();
+    //@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
+    public abstract void startShellPermissionIdentityDelegation(int uid,
+            @NonNull String packageName, @Nullable List<String> permissionNames);
 
     /**
-     * Sets the delegate used to influence permission checking.
+     * Stop delegating the permission identity of the shell UID.
      *
-     * @param delegate A delegate instance or {@code null} to clear.
+     * @see #startShellPermissionIdentityDelegation(int, String, List)
      */
-    public abstract void setCheckPermissionDelegate(@Nullable CheckPermissionDelegate delegate);
+    //@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
+    public abstract void stopShellPermissionIdentityDelegation();
 
     /**
      * Sets the dialer application packages provider.
