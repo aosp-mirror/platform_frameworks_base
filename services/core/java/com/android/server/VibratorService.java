@@ -1662,6 +1662,10 @@ public class VibratorService extends IVibratorService.Stub
                                     // Vibrator is already ON, so just change its amplitude.
                                     doVibratorSetAmplitude(amplitude);
                                 }
+                            } else {
+                                // Previous vibration should have already finished, but we make sure
+                                // the vibrator will be off for the next step when amplitude is 0.
+                                doVibratorOff();
                             }
 
                             // We wait until the time this waveform step was supposed to end,
