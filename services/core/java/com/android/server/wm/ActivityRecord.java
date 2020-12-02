@@ -1491,13 +1491,14 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
     }
 
-    ActivityRecord(ActivityTaskManagerService _service, WindowProcessController _caller,
+    private ActivityRecord(ActivityTaskManagerService _service, WindowProcessController _caller,
             int _launchedFromPid, int _launchedFromUid, String _launchedFromPackage,
             @Nullable String _launchedFromFeature, Intent _intent, String _resolvedType,
             ActivityInfo aInfo, Configuration _configuration, ActivityRecord _resultTo,
             String _resultWho, int _reqCode, boolean _componentSpecified,
             boolean _rootVoiceInteraction, ActivityTaskSupervisor supervisor,
-            ActivityOptions options, ActivityRecord sourceRecord) {
+            ActivityOptions options, ActivityRecord sourceRecord, PersistableBundle persistentState,
+            TaskDescription _taskDescription, long _createTime) {
         super(_service.mWindowManager, new Token(_intent).asBinder(), TYPE_APPLICATION, true,
                 null /* displayContent */, false /* ownerCanManageAppTokens */);
 
@@ -1651,6 +1652,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                     ? (TaskDisplayArea) WindowContainer.fromBinder(daToken.asBinder()) : null;
             mHandoverLaunchDisplayId = options.getLaunchDisplayId();
             mLaunchCookie = options.getLaunchCookie();
+        }
+
+        mPersistentState = persistentState;
+        taskDescription = _taskDescription;
+        if (_createTime > 0) {
+            createTime = _createTime;
         }
     }
 
@@ -7544,18 +7551,18 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             throw new XmlPullParserException("restoreActivity resolver error. Intent=" + intent +
                     " resolvedType=" + resolvedType);
         }
-        final ActivityRecord r = new ActivityRecord(service, null /* caller */,
-                0 /* launchedFromPid */, launchedFromUid, launchedFromPackage, launchedFromFeature,
-                intent, resolvedType, aInfo, service.getConfiguration(), null /* resultTo */,
-                null /* resultWho */, 0 /* reqCode */, componentSpecified,
-                false /* rootVoiceInteraction */, taskSupervisor, null /* options */,
-                null /* sourceRecord */);
-
-        r.mPersistentState = persistentState;
-        r.taskDescription = taskDescription;
-        r.createTime = createTime;
-
-        return r;
+        return new ActivityRecord.Builder(service)
+                .setLaunchedFromUid(launchedFromUid)
+                .setLaunchedFromPackage(launchedFromPackage)
+                .setLaunchedFromFeature(launchedFromFeature)
+                .setIntent(intent)
+                .setResolvedType(resolvedType)
+                .setActivityInfo(aInfo)
+                .setComponentSpecified(componentSpecified)
+                .setPersistentState(persistentState)
+                .setTaskDescription(taskDescription)
+                .setCreateTime(createTime)
+                .build();
     }
 
     private static boolean isInVrUiMode(Configuration config) {
@@ -7982,5 +7989,139 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             }
         }
         return false;
+    }
+
+    static class Builder {
+        private final ActivityTaskManagerService mAtmService;
+        private WindowProcessController mCallerApp;
+        private int mLaunchedFromPid;
+        private int mLaunchedFromUid;
+        private String mLaunchedFromPackage;
+        private String mLaunchedFromFeature;
+        private Intent mIntent;
+        private String mResolvedType;
+        private ActivityInfo mActivityInfo;
+        private Configuration mConfiguration;
+        private ActivityRecord mResultTo;
+        private String mResultWho;
+        private int mRequestCode;
+        private boolean mComponentSpecified;
+        private boolean mRootVoiceInteraction;
+        private ActivityOptions mOptions;
+        private ActivityRecord mSourceRecord;
+        private PersistableBundle mPersistentState;
+        private TaskDescription mTaskDescription;
+        private long mCreateTime;
+
+        Builder(ActivityTaskManagerService service) {
+            mAtmService = service;
+        }
+
+        Builder setCaller(@NonNull WindowProcessController caller) {
+            mCallerApp = caller;
+            return this;
+        }
+
+        Builder setLaunchedFromPid(int pid) {
+            mLaunchedFromPid = pid;
+            return this;
+        }
+
+        Builder setLaunchedFromUid(int uid) {
+            mLaunchedFromUid = uid;
+            return this;
+        }
+
+        Builder setLaunchedFromPackage(String fromPackage) {
+            mLaunchedFromPackage = fromPackage;
+            return this;
+        }
+
+        Builder setLaunchedFromFeature(String fromFeature) {
+            mLaunchedFromFeature = fromFeature;
+            return this;
+        }
+
+        Builder setIntent(Intent intent) {
+            mIntent = intent;
+            return this;
+        }
+
+        Builder setResolvedType(String resolvedType) {
+            mResolvedType = resolvedType;
+            return this;
+        }
+
+        Builder setActivityInfo(ActivityInfo activityInfo) {
+            mActivityInfo = activityInfo;
+            return this;
+        }
+
+        Builder setResultTo(ActivityRecord resultTo) {
+            mResultTo = resultTo;
+            return this;
+        }
+
+        Builder setResultWho(String resultWho) {
+            mResultWho = resultWho;
+            return this;
+        }
+
+        Builder setRequestCode(int reqCode) {
+            mRequestCode = reqCode;
+            return this;
+        }
+
+        Builder setComponentSpecified(boolean componentSpecified) {
+            mComponentSpecified = componentSpecified;
+            return this;
+        }
+
+        Builder setRootVoiceInteraction(boolean rootVoiceInteraction) {
+            mRootVoiceInteraction = rootVoiceInteraction;
+            return this;
+        }
+
+        Builder setActivityOptions(ActivityOptions options) {
+            mOptions = options;
+            return this;
+        }
+
+        Builder setConfiguration(Configuration config) {
+            mConfiguration = config;
+            return this;
+        }
+
+        Builder setSourceRecord(ActivityRecord source) {
+            mSourceRecord = source;
+            return this;
+        }
+
+        private Builder setPersistentState(PersistableBundle persistentState) {
+            mPersistentState = persistentState;
+            return this;
+        }
+
+        private Builder setTaskDescription(TaskDescription taskDescription) {
+            mTaskDescription = taskDescription;
+            return this;
+        }
+
+        private Builder setCreateTime(long createTime) {
+            mCreateTime = createTime;
+            return this;
+        }
+
+        ActivityRecord build() {
+            if (mConfiguration == null) {
+                mConfiguration = mAtmService.getConfiguration();
+            }
+            return new ActivityRecord(mAtmService, mCallerApp, mLaunchedFromPid,
+                    mLaunchedFromUid, mLaunchedFromPackage, mLaunchedFromFeature, mIntent,
+                    mResolvedType, mActivityInfo, mConfiguration, mResultTo, mResultWho,
+                    mRequestCode, mComponentSpecified, mRootVoiceInteraction,
+                    mAtmService.mTaskSupervisor, mOptions, mSourceRecord, mPersistentState,
+                    mTaskDescription, mCreateTime);
+        }
     }
 }

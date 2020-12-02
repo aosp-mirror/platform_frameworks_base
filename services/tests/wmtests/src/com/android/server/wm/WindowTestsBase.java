@@ -27,6 +27,8 @@ import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 import static android.os.Process.SYSTEM_UID;
 import static android.view.View.VISIBLE;
+import static android.view.WindowManager.DISPLAY_IME_POLICY_FALLBACK_DISPLAY;
+import static android.view.WindowManager.DISPLAY_IME_POLICY_LOCAL;
 import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.LAST_APPLICATION_WINDOW;
@@ -40,8 +42,6 @@ import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_NOTIFICATION_SHADE;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
-import static android.view.WindowManager.DISPLAY_IME_POLICY_LOCAL;
-import static android.view.WindowManager.DISPLAY_IME_POLICY_FALLBACK_DISPLAY;
 
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
@@ -64,7 +64,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
-import android.content.res.Configuration;
 import android.hardware.display.DisplayManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -831,13 +830,14 @@ class WindowTestsBase extends SystemServiceTestsBase {
             if (mLaunchTaskBehind) {
                 options = ActivityOptions.makeTaskLaunchBehind();
             }
+            final ActivityRecord activity = new ActivityRecord.Builder(mService)
+                    .setLaunchedFromPid(mLaunchedFromPid)
+                    .setLaunchedFromUid(mLaunchedFromUid)
+                    .setIntent(intent)
+                    .setActivityInfo(aInfo)
+                    .setActivityOptions(options)
+                    .build();
 
-            final ActivityRecord activity = new ActivityRecord(mService, null /* caller */,
-                    mLaunchedFromPid /* launchedFromPid */, mLaunchedFromUid /* launchedFromUid */,
-                    null, null, intent, null, aInfo /*aInfo*/, new Configuration(),
-                    null /* resultTo */, null /* resultWho */, 0 /* reqCode */,
-                    false /*componentSpecified*/, false /* rootVoiceInteraction */,
-                    mService.mTaskSupervisor, options, null /* sourceRecord */);
             spyOn(activity);
             if (mTask != null) {
                 // fullscreen value is normally read from resources in ctor, so for testing we need

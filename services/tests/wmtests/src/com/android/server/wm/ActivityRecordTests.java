@@ -384,6 +384,7 @@ public class ActivityRecordTests extends WindowTestsBase {
                 .build();
         final Task task = activity.getTask();
         activity.setState(DESTROYED, "Testing");
+        clearInvocations(mAtm.getLifecycleManager());
 
         final Configuration newConfig = new Configuration(task.getConfiguration());
         newConfig.orientation = newConfig.orientation == ORIENTATION_PORTRAIT
@@ -408,6 +409,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         activity.setLastReportedConfiguration(new MergedConfiguration(new Configuration(),
                 activity.getConfiguration()));
 
+        clearInvocations(mAtm.getLifecycleManager());
         final Configuration newConfig = new Configuration(activity.getConfiguration());
         final int shortSide = Math.min(newConfig.screenWidthDp, newConfig.screenHeightDp);
         final int longSide = Math.max(newConfig.screenWidthDp, newConfig.screenHeightDp);
@@ -596,6 +598,7 @@ public class ActivityRecordTests extends WindowTestsBase {
 
         final Task stack = new TaskBuilder(mSupervisor).setCreateActivity(true).build();
         try {
+            clearInvocations(mAtm.getLifecycleManager());
             doReturn(false).when(stack).isTranslucent(any());
             assertTrue(task.shouldBeVisible(null /* starting */));
 
