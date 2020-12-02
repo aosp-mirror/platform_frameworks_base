@@ -6417,11 +6417,13 @@ public final class ActivityThread extends ClientTransactionHandler {
          */
         LocaleList.setDefault(data.config.getLocales());
 
-        try {
-            Typeface.setSystemFontMap(data.mSerializedSystemFontMap);
-        } catch (IOException | ErrnoException e) {
-            Slog.e(TAG, "Failed to parse serialized system font map");
-            Typeface.loadPreinstalledSystemFontMap();
+        if (Typeface.ENABLE_LAZY_TYPEFACE_INITIALIZATION) {
+            try {
+                Typeface.setSystemFontMap(data.mSerializedSystemFontMap);
+            } catch (IOException | ErrnoException e) {
+                Slog.e(TAG, "Failed to parse serialized system font map");
+                Typeface.loadPreinstalledSystemFontMap();
+            }
         }
 
         synchronized (mResourcesManager) {

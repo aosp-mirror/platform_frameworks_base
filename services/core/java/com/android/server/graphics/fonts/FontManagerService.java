@@ -64,6 +64,9 @@ public final class FontManagerService {
 
     @Nullable
     private SharedMemory getSerializedSystemFontMap() {
+        if (!Typeface.ENABLE_LAZY_TYPEFACE_INITIALIZATION) {
+            return null;
+        }
         synchronized (FontManagerService.this) {
             if (mSerializedSystemFontMap == null) {
                 mSerializedSystemFontMap = createSerializedSystemFontMapLocked();
