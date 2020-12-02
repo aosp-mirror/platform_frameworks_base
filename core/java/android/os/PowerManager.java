@@ -65,7 +65,7 @@ public final class PowerManager {
     /* NOTE: Wake lock levels were previously defined as a bit field, except that only a few
      * combinations were actually supported so the bit field was removed.  This explains
      * why the numbering scheme is so odd.  If adding a new wake lock level, any unused
-     * value (in frameworks/base/core/proto/android/os/enums.proto) can be used.
+     * value (in frameworks/proto_logging/stats/enums/os/enums.proto) can be used.
      */
 
     /**
