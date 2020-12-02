@@ -37,7 +37,8 @@ import com.android.server.accessibility.AccessibilityManagerService;
  * Handles all magnification controllers initialization, generic interactions
  * and magnification mode transition.
  */
-public class MagnificationController implements WindowMagnificationManager.Callback {
+public class MagnificationController implements WindowMagnificationManager.Callback,
+        MagnificationGestureHandler.ScaleChangedListener {
 
     private static final boolean DEBUG = false;
     private static final String TAG = "MagnificationController";
@@ -50,6 +51,7 @@ public class MagnificationController implements WindowMagnificationManager.Callb
 
     private FullScreenMagnificationController mFullScreenMagnificationController;
     private WindowMagnificationManager mWindowMagnificationMgr;
+    private int mMagnificationCapabilities = ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN;
 
     /**
      * A callback to inform the magnification transition result.
@@ -82,8 +84,16 @@ public class MagnificationController implements WindowMagnificationManager.Callb
     public void onPerformScaleAction(int displayId, float scale) {
         getWindowMagnificationMgr().setScale(displayId, scale);
         getWindowMagnificationMgr().persistScale(displayId);
-        mAms.onMagnificationScaleChanged(displayId,
+        onMagnificationScaleChanged(displayId,
                 Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW);
+    }
+
+    @Override
+    public void onMagnificationScaleChanged(int displayId, int mode) {
+        if (mMagnificationCapabilities != Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_ALL) {
+            return;
+        }
+        getWindowMagnificationMgr().showMagnificationButton(displayId, mode);
     }
 
     /**
@@ -180,6 +190,10 @@ public class MagnificationController implements WindowMagnificationManager.Callb
                 mWindowMagnificationMgr.onDisplayRemoved(displayId);
             }
         }
+    }
+
+    public void setMagnificationCapabilities(int capabilities) {
+        mMagnificationCapabilities = capabilities;
     }
 
     private DisableMagnificationCallback getDisableMagnificationEndRunnableLocked(
