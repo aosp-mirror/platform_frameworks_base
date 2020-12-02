@@ -231,8 +231,9 @@ public class MmTelFeature extends ImsFeature {
      * The capabilities that are used in MmTelFeature are defined as
      * {@link MmTelCapabilities#CAPABILITY_TYPE_VOICE},
      * {@link MmTelCapabilities#CAPABILITY_TYPE_VIDEO},
-     * {@link MmTelCapabilities#CAPABILITY_TYPE_UT}, and
-     * {@link MmTelCapabilities#CAPABILITY_TYPE_SMS}.
+     * {@link MmTelCapabilities#CAPABILITY_TYPE_UT},
+     * {@link MmTelCapabilities#CAPABILITY_TYPE_SMS}, and
+     * {@link MmTelCapabilities#CAPABILITY_TYPE_CALL_COMPOSER}.
      *
      * The capabilities of this MmTelFeature will be set by the framework.
      */
@@ -275,7 +276,8 @@ public class MmTelFeature extends ImsFeature {
                         CAPABILITY_TYPE_VOICE,
                         CAPABILITY_TYPE_VIDEO,
                         CAPABILITY_TYPE_UT,
-                        CAPABILITY_TYPE_SMS
+                        CAPABILITY_TYPE_SMS,
+                        CAPABILITY_TYPE_CALL_COMPOSER
                 })
         @Retention(RetentionPolicy.SOURCE)
         public @interface MmTelCapability {}
@@ -299,6 +301,11 @@ public class MmTelFeature extends ImsFeature {
          * This MmTelFeature supports SMS (IR.92)
          */
         public static final int CAPABILITY_TYPE_SMS = 1 << 3;
+
+        /**
+         * This MmTelFeature supports Call Composer (section 2.4 of RC.20)
+         */
+        public static final int CAPABILITY_TYPE_CALL_COMPOSER = 1 << 4;
 
         /**
          * @hide
@@ -343,6 +350,8 @@ public class MmTelFeature extends ImsFeature {
             builder.append(isCapable(CAPABILITY_TYPE_UT));
             builder.append(" SMS: ");
             builder.append(isCapable(CAPABILITY_TYPE_SMS));
+            builder.append(" CALL_COMPOSER: ");
+            builder.append(isCapable(CAPABILITY_TYPE_CALL_COMPOSER));
             builder.append("]");
             return builder.toString();
         }
