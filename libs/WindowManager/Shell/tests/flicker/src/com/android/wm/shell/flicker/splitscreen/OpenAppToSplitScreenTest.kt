@@ -17,7 +17,7 @@
 package com.android.wm.shell.flicker.splitscreen
 
 import android.platform.test.annotations.Presubmit
-import androidx.test.filters.FlakyTest
+import android.view.Surface
 import androidx.test.filters.RequiresDevice
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.server.wm.flicker.DOCKED_STACK_DIVIDER
@@ -54,7 +54,6 @@ import org.junit.runners.Parameterized
 @RequiresDevice
 @RunWith(Parameterized::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-@FlakyTest(bugId = 161435597)
 class OpenAppToSplitScreenTest(
     testName: String,
     flickerSpec: Flicker
@@ -67,7 +66,8 @@ class OpenAppToSplitScreenTest(
             val testApp = StandardAppHelper(instrumentation,
                 "com.android.wm.shell.flicker.testapp", "SimpleApp")
 
-            return FlickerTestRunnerFactory(instrumentation)
+            // b/161435597 causes the test not to work on 90 degrees
+            return FlickerTestRunnerFactory(instrumentation, listOf(Surface.ROTATION_0))
                 .buildTest { configuration ->
                     withTestName {
                         buildTestTag("appToSplitScreen", testApp, configuration)
