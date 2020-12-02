@@ -73,15 +73,31 @@ public class DisplayDeviceConfig {
     public static DisplayDeviceConfig create(long physicalDisplayId) {
         DisplayDeviceConfig config;
 
+        config = loadConfigFromDirectory(Environment.getProductDirectory(), physicalDisplayId);
+        if (config != null) {
+            return config;
+        }
+
+        config = loadConfigFromDirectory(Environment.getVendorDirectory(), physicalDisplayId);
+        if (config != null) {
+            return config;
+        }
+
+        return null;
+    }
+
+    private static DisplayDeviceConfig loadConfigFromDirectory(
+            File baseDirectory, long physicalDisplayId) {
+        DisplayDeviceConfig config;
         // Create config using filename from physical ID (including "stable" bit).
-        config = getConfigFromSuffix(STABLE_ID_SUFFIX_FORMAT, physicalDisplayId);
+        config = getConfigFromSuffix(baseDirectory, STABLE_ID_SUFFIX_FORMAT, physicalDisplayId);
         if (config != null) {
             return config;
         }
 
         // Create config using filename from physical ID (excluding "stable" bit).
         final long withoutStableFlag = physicalDisplayId & ~STABLE_FLAG;
-        config = getConfigFromSuffix(NO_SUFFIX_FORMAT, withoutStableFlag);
+        config = getConfigFromSuffix(baseDirectory, NO_SUFFIX_FORMAT, withoutStableFlag);
         if (config != null) {
             return config;
         }
@@ -90,7 +106,7 @@ public class DisplayDeviceConfig {
         final DisplayAddress.Physical physicalAddress =
                 DisplayAddress.fromPhysicalDisplayId(physicalDisplayId);
         int port = physicalAddress.getPort();
-        config = getConfigFromSuffix(PORT_SUFFIX_FORMAT, port);
+        config = getConfigFromSuffix(baseDirectory, PORT_SUFFIX_FORMAT, port);
         if (config != null) {
             return config;
         }
@@ -127,12 +143,13 @@ public class DisplayDeviceConfig {
         return str;
     }
 
-    private static DisplayDeviceConfig getConfigFromSuffix(String suffixFormat, long idNumber) {
+    private static DisplayDeviceConfig getConfigFromSuffix(File baseDirectory,
+            String suffixFormat, long idNumber) {
 
         final String suffix = String.format(suffixFormat, idNumber);
         final String filename = String.format(CONFIG_FILE_FORMAT, suffix);
         final File filePath = Environment.buildPath(
-                Environment.getProductDirectory(), ETC_DIR, DISPLAY_CONFIG_DIR, filename);
+                baseDirectory, ETC_DIR, DISPLAY_CONFIG_DIR, filename);
 
         if (filePath.exists()) {
             final DisplayDeviceConfig config = new DisplayDeviceConfig();
