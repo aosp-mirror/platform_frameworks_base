@@ -177,8 +177,28 @@ public class PowerStatsDataStorage {
             // filename, so any files that don't match the current version number can be deleted.
             File[] files = mDataStorageDir.listFiles();
             for (int i = 0; i < files.length; i++) {
-                if (!files[i].getName().matches(dataStorageFilename + "(.*)")) {
-                    files[i].delete();
+                // Meter and model files are stored in the same directory.
+                //
+                // The format of filenames on disk is:
+                //    log.powerstats.meter.version.timestamp
+                //    log.powerstats.model.version.timestamp
+                //
+                // The format of dataStorageFilenames is:
+                //    log.powerstats.meter.version
+                //    log.powerstats.model.version
+                //
+                // A PowerStatsDataStorage object is created for meter and model data.  Strip off
+                // the version and check that the current file we're checking starts with the stem
+                // (log.powerstats.meter or log.powerstats.model). If the stem matches and the
+                // version number is different, delete the old file.
+                int versionDot = dataStorageFilename.lastIndexOf('.');
+                String beforeVersionDot = dataStorageFilename.substring(0, versionDot);
+                // Check that the stems match.
+                if (files[i].getName().startsWith(beforeVersionDot)) {
+                    // Check that the version number matches.  If not, delete the old file.
+                    if (!files[i].getName().startsWith(dataStorageFilename)) {
+                        files[i].delete();
+                    }
                 }
             }
 
