@@ -1870,8 +1870,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
 
     private void updateLockScreenMode() {
         final int newMode = Settings.Global.getInt(mContext.getContentResolver(),
-                Settings.Global.SHOW_NEW_LOCKSCREEN,
-                isUdfpsEnrolled() ? 1 : 0);
+                Settings.Global.SHOW_NEW_LOCKSCREEN, LOCK_SCREEN_MODE_LAYOUT_1);
         if (newMode != mLockScreenMode) {
             mLockScreenMode = newMode;
             mHandler.sendEmptyMessage(MSG_LOCK_SCREEN_MODE);
