@@ -109,6 +109,7 @@ std::unique_ptr<const IdmapHeader> IdmapHeader::FromBinaryStream(std::istream& s
       !Read32(stream, &idmap_header->fulfilled_policies_) ||
       !Read32(stream, &enforce_overlayable) || !ReadString(stream, &idmap_header->target_path_) ||
       !ReadString(stream, &idmap_header->overlay_path_) ||
+      !ReadString(stream, &idmap_header->overlay_name_) ||
       !ReadString(stream, &idmap_header->debug_info_)) {
     return nullptr;
   }
@@ -119,6 +120,7 @@ std::unique_ptr<const IdmapHeader> IdmapHeader::FromBinaryStream(std::istream& s
 
 Result<Unit> IdmapHeader::IsUpToDate(const std::string& target_path,
                                      const std::string& overlay_path,
+                                     const std::string& overlay_name,
                                      PolicyBitmask fulfilled_policies,
                                      bool enforce_overlayable) const {
   const std::unique_ptr<const ZipFile> target_zip = ZipFile::Open(target_path);
@@ -141,12 +143,13 @@ Result<Unit> IdmapHeader::IsUpToDate(const std::string& target_path,
     return Error("failed to get overlay crc");
   }
 
-  return IsUpToDate(target_path, overlay_path, *target_crc, *overlay_crc, fulfilled_policies,
-                    enforce_overlayable);
+  return IsUpToDate(target_path, overlay_path, overlay_name, *target_crc, *overlay_crc,
+                    fulfilled_policies, enforce_overlayable);
 }
 
 Result<Unit> IdmapHeader::IsUpToDate(const std::string& target_path,
-                                     const std::string& overlay_path, uint32_t target_crc,
+                                     const std::string& overlay_path,
+                                     const std::string& overlay_name, uint32_t target_crc,
                                      uint32_t overlay_crc, PolicyBitmask fulfilled_policies,
                                      bool enforce_overlayable) const {
   if (magic_ != kIdmapMagic) {
@@ -185,6 +188,11 @@ Result<Unit> IdmapHeader::IsUpToDate(const std::string& target_path,
   if (overlay_path != overlay_path_) {
     return Error("bad overlay path: idmap version %s, file system version %s", overlay_path.c_str(),
                  overlay_path_.c_str());
+  }
+
+  if (overlay_name != overlay_name_) {
+    return Error("bad overlay name: idmap version %s, file system version %s", overlay_name.c_str(),
+                 overlay_name_.c_str());
   }
 
   return Unit{};
@@ -317,6 +325,7 @@ Result<std::unique_ptr<const IdmapData>> IdmapData::FromResourceMapping(
 
 Result<std::unique_ptr<const Idmap>> Idmap::FromApkAssets(const ApkAssets& target_apk_assets,
                                                           const ApkAssets& overlay_apk_assets,
+                                                          const std::string& overlay_name,
                                                           const PolicyBitmask& fulfilled_policies,
                                                           bool enforce_overlayable) {
   SYSTRACE << "Idmap::FromApkAssets";
@@ -352,15 +361,16 @@ Result<std::unique_ptr<const Idmap>> Idmap::FromApkAssets(const ApkAssets& targe
   header->enforce_overlayable_ = enforce_overlayable;
   header->target_path_ = target_apk_path;
   header->overlay_path_ = overlay_apk_path;
+  header->overlay_name_ = overlay_name;
 
-  auto overlay_info = utils::ExtractOverlayManifestInfo(overlay_apk_path);
-  if (!overlay_info) {
-    return overlay_info.GetError();
+  auto info = utils::ExtractOverlayManifestInfo(overlay_apk_path, overlay_name);
+  if (!info) {
+    return info.GetError();
   }
 
   LogInfo log_info;
   auto resource_mapping =
-      ResourceMapping::FromApkAssets(target_apk_assets, overlay_apk_assets, *overlay_info,
+      ResourceMapping::FromApkAssets(target_apk_assets, overlay_apk_assets, *info,
                                      fulfilled_policies, enforce_overlayable, log_info);
   if (!resource_mapping) {
     return resource_mapping.GetError();

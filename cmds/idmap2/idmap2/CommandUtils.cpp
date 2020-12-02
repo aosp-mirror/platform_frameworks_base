@@ -29,8 +29,8 @@ using android::idmap2::Result;
 using android::idmap2::Unit;
 
 Result<Unit> Verify(const std::string& idmap_path, const std::string& target_path,
-                    const std::string& overlay_path, PolicyBitmask fulfilled_policies,
-                    bool enforce_overlayable) {
+                    const std::string& overlay_path, const std::string& overlay_name,
+                    PolicyBitmask fulfilled_policies, bool enforce_overlayable) {
   SYSTRACE << "Verify " << idmap_path;
   std::ifstream fin(idmap_path);
   const std::unique_ptr<const IdmapHeader> header = IdmapHeader::FromBinaryStream(fin);
@@ -39,8 +39,8 @@ Result<Unit> Verify(const std::string& idmap_path, const std::string& target_pat
     return Error("failed to parse idmap header");
   }
 
-  const auto header_ok =
-      header->IsUpToDate(target_path, overlay_path, fulfilled_policies, enforce_overlayable);
+  const auto header_ok = header->IsUpToDate(target_path, overlay_path, overlay_name,
+                                            fulfilled_policies, enforce_overlayable);
   if (!header_ok) {
     return Error(header_ok.GetError(), "idmap not up to date");
   }

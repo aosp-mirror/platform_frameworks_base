@@ -195,12 +195,12 @@ Result<Unit> Lookup(const std::vector<std::string>& args) {
       }
       apk_assets.push_back(std::move(target_apk));
 
-      auto manifest_info =
-          ExtractOverlayManifestInfo(idmap_header->GetOverlayPath(), true /* assert_overlay */);
+      auto manifest_info = ExtractOverlayManifestInfo(idmap_header->GetOverlayPath(),
+                                                      idmap_header->GetOverlayName());
       if (!manifest_info) {
         return manifest_info.GetError();
       }
-      target_package_name = (*manifest_info).target_package;
+      target_package_name = manifest_info->target_package;
     } else if (target_path != idmap_header->GetTargetPath()) {
       return Error("different target APKs (expected target APK %s but %s has target APK %s)",
                    target_path.c_str(), idmap_path.c_str(), idmap_header->GetTargetPath().c_str());

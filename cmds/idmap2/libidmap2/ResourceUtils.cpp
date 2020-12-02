@@ -92,7 +92,7 @@ Result<std::string> ResToTypeEntryName(const AssetManager2& am, uint32_t resid) 
 }
 
 Result<OverlayManifestInfo> ExtractOverlayManifestInfo(const std::string& path,
-                                                       bool assert_overlay) {
+                                                       const std::string& name) {
   std::unique_ptr<const ZipFile> zip = ZipFile::Open(path);
   if (!zip) {
     return Error("failed to open %s as a zip file", path.c_str());
@@ -113,65 +113,49 @@ Result<OverlayManifestInfo> ExtractOverlayManifestInfo(const std::string& path,
     return Error("root element tag is not <manifest> in AndroidManifest.xml of %s", path.c_str());
   }
 
-  auto overlay_it = std::find_if(manifest_it.begin(), manifest_it.end(), [](const auto& it) {
-    return it.event() == XmlParser::Event::START_TAG && it.name() == "overlay";
-  });
-
-  OverlayManifestInfo info{};
-  if (overlay_it == manifest_it.end()) {
-    if (!assert_overlay) {
-      return info;
+  for (auto&& it : manifest_it) {
+    if (it.event() != XmlParser::Event::START_TAG || it.name() != "overlay") {
+      continue;
     }
-    return Error("<overlay> missing from AndroidManifest.xml of %s", path.c_str());
-  }
 
-  if (auto result_str = overlay_it->GetAttributeStringValue("targetPackage")) {
-    info.target_package = *result_str;
-  } else {
-    return Error("android:targetPackage missing from <overlay> of %s: %s", path.c_str(),
-                 result_str.GetErrorMessage().c_str());
-  }
+    OverlayManifestInfo info{};
+    if (auto result_str = it.GetAttributeStringValue("name")) {
+      if (*result_str != name) {
+        // A value for android:name was found, but either a the name does not match the requested
+        // name, or an <overlay> tag with no name was requested.
+        continue;
+      }
+      info.name = *result_str;
+    } else if (!name.empty()) {
+      // This tag does not have a value for android:name, but an <overlay> tag with a specific name
+      // has been requested.
+      continue;
+    }
 
-  if (auto result_str = overlay_it->GetAttributeStringValue("targetName")) {
-    info.target_name = *result_str;
-  }
-
-  if (auto result_value = overlay_it->GetAttributeValue("resourcesMap")) {
-    if (IsReference((*result_value).dataType)) {
-      info.resource_mapping = (*result_value).data;
+    if (auto result_str = it.GetAttributeStringValue("targetPackage")) {
+      info.target_package = *result_str;
     } else {
-      return Error("android:resourcesMap is not a reference in AndroidManifest.xml of %s",
-                   path.c_str());
+      return Error("android:targetPackage missing from <overlay> of %s: %s", path.c_str(),
+                   result_str.GetErrorMessage().c_str());
     }
-  }
 
-  if (auto result_value = overlay_it->GetAttributeValue("isStatic")) {
-    if ((*result_value).dataType >= Res_value::TYPE_FIRST_INT &&
-        (*result_value).dataType <= Res_value::TYPE_LAST_INT) {
-      info.is_static = (*result_value).data != 0U;
-    } else {
-      return Error("android:isStatic is not a boolean in AndroidManifest.xml of %s", path.c_str());
+    if (auto result_str = it.GetAttributeStringValue("targetName")) {
+      info.target_name = *result_str;
     }
-  }
 
-  if (auto result_value = overlay_it->GetAttributeValue("priority")) {
-    if ((*result_value).dataType >= Res_value::TYPE_FIRST_INT &&
-        (*result_value).dataType <= Res_value::TYPE_LAST_INT) {
-      info.priority = (*result_value).data;
-    } else {
-      return Error("android:priority is not an integer in AndroidManifest.xml of %s", path.c_str());
+    if (auto result_value = it.GetAttributeValue("resourcesMap")) {
+      if (IsReference((*result_value).dataType)) {
+        info.resource_mapping = (*result_value).data;
+      } else {
+        return Error("android:resourcesMap is not a reference in AndroidManifest.xml of %s",
+                     path.c_str());
+      }
     }
+    return info;
   }
 
-  if (auto result_str = overlay_it->GetAttributeStringValue("requiredSystemPropertyName")) {
-    info.requiredSystemPropertyName = *result_str;
-  }
-
-  if (auto result_str = overlay_it->GetAttributeStringValue("requiredSystemPropertyValue")) {
-    info.requiredSystemPropertyValue = *result_str;
-  }
-
-  return info;
+  return Error("<overlay> with android:name \"%s\" missing from AndroidManifest.xml of %s",
+               name.c_str(), path.c_str());
 }
 
 }  // namespace android::idmap2::utils

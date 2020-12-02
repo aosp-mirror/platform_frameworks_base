@@ -19,7 +19,8 @@
  *
  * idmap                      := header data*
  * header                     := magic version target_crc overlay_crc fulfilled_policies
- *                               enforce_overlayable target_path overlay_path debug_info
+ *                               enforce_overlayable target_path overlay_path overlay_name
+ *                               debug_info
  * data                       := data_header target_entry* target_inline_entry* overlay_entry*
  *                               string_pool
  * data_header                := target_package_id overlay_package_id padding(2) target_entry_count
@@ -37,6 +38,7 @@
  * overlay_entry_count        := <uint32_t>
  * overlay_id                 := <uint32_t>
  * overlay_package_id         := <uint8_t>
+ * overlay_name               := string
  * overlay_path               := string
  * padding(n)                 := <uint8_t>[n]
  * Res_value::size            := <uint16_t>
@@ -76,9 +78,6 @@ namespace android::idmap2 {
 
 class Idmap;
 class Visitor;
-
-static constexpr const ResourceId kPadding = 0xffffffffu;
-static constexpr const EntryId kNoEntry = 0xffffu;
 
 // magic number: all idmap files start with this
 static constexpr const uint32_t kIdmapMagic = android::kIdmapMagic;
@@ -125,6 +124,10 @@ class IdmapHeader {
     return overlay_path_;
   }
 
+  const std::string& GetOverlayName() const {
+    return overlay_name_;
+  }
+
   const std::string& GetDebugInfo() const {
     return debug_info_;
   }
@@ -133,16 +136,18 @@ class IdmapHeader {
   // field *must* be incremented. Because of this, we know that if the idmap
   // header is up-to-date the entire file is up-to-date.
   Result<Unit> IsUpToDate(const std::string& target_path, const std::string& overlay_path,
-                          PolicyBitmask fulfilled_policies, bool enforce_overlayable) const;
+                          const std::string& overlay_name, PolicyBitmask fulfilled_policies,
+                          bool enforce_overlayable) const;
+
   Result<Unit> IsUpToDate(const std::string& target_path, const std::string& overlay_path,
-                          uint32_t target_crc, uint32_t overlay_crc,
-                          PolicyBitmask fulfilled_policies, bool enforce_overlayable) const;
+                          const std::string& overlay_name, uint32_t target_crc,
+                          uint32_t overlay_crc, PolicyBitmask fulfilled_policies,
+                          bool enforce_overlayable) const;
 
   void accept(Visitor* v) const;
 
  private:
-  IdmapHeader() {
-  }
+  IdmapHeader() = default;
 
   uint32_t magic_;
   uint32_t version_;
@@ -152,6 +157,7 @@ class IdmapHeader {
   bool enforce_overlayable_;
   std::string target_path_;
   std::string overlay_path_;
+  std::string overlay_name_;
   std::string debug_info_;
 
   friend Idmap;
@@ -246,8 +252,7 @@ class IdmapData {
   void accept(Visitor* v) const;
 
  private:
-  IdmapData() {
-  }
+  IdmapData() = default;
 
   std::unique_ptr<const Header> header_;
   std::vector<TargetEntry> target_entries_;
@@ -272,14 +277,15 @@ class Idmap {
   // the target and overlay package names
   static Result<std::unique_ptr<const Idmap>> FromApkAssets(const ApkAssets& target_apk_assets,
                                                             const ApkAssets& overlay_apk_assets,
+                                                            const std::string& overlay_name,
                                                             const PolicyBitmask& fulfilled_policies,
                                                             bool enforce_overlayable);
 
-  inline const std::unique_ptr<const IdmapHeader>& GetHeader() const {
+  const std::unique_ptr<const IdmapHeader>& GetHeader() const {
     return header_;
   }
 
-  inline const std::vector<std::unique_ptr<const IdmapData>>& GetData() const {
+  const std::vector<std::unique_ptr<const IdmapData>>& GetData() const {
     return data_;
   }
 

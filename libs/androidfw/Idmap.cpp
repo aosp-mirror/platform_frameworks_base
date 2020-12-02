@@ -288,7 +288,8 @@ std::unique_ptr<const LoadedIdmap> LoadedIdmap::Load(const StringPiece& idmap_pa
   if (!target_path) {
     return {};
   }
-  if (!ReadString(&data_ptr, &data_size, "debug info")) {
+  if (!ReadString(&data_ptr, &data_size, "target name") ||
+      !ReadString(&data_ptr, &data_size, "debug info")) {
     return {};
   }
 

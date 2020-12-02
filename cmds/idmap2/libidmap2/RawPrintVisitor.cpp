@@ -45,6 +45,7 @@ void RawPrintVisitor::visit(const IdmapHeader& header) {
   print(static_cast<uint32_t>(header.GetEnforceOverlayable()), "enforce overlayable");
   print(header.GetTargetPath(), true /* print_value */, "target path");
   print(header.GetOverlayPath(), true /* print_value */, "overlay path");
+  print(header.GetOverlayName(), true /* print_value */, "overlay name");
   print(header.GetDebugInfo(), false /* print_value */, "debug info");
 
   auto target_apk_ = ApkAssets::Load(header.GetTargetPath());

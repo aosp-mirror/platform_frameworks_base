@@ -39,6 +39,10 @@ void PrettyPrintVisitor::visit(const IdmapHeader& header) {
           << TAB "target apk path  : " << header.GetTargetPath() << std::endl
           << TAB "overlay apk path : " << header.GetOverlayPath() << std::endl;
 
+  if (!header.GetOverlayName().empty()) {
+    stream_ << "Overlay name: " << header.GetOverlayName() << std::endl;
+  }
+
   const std::string& debug = header.GetDebugInfo();
   if (!debug.empty()) {
     std::istringstream debug_stream(debug);
