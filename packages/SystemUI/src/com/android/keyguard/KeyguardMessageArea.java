@@ -29,6 +29,7 @@ import android.util.TypedValue;
 import android.view.View;
 import android.widget.TextView;
 
+import com.android.settingslib.Utils;
 import com.android.systemui.R;
 
 import java.lang.ref.WeakReference;
@@ -69,11 +70,16 @@ public class KeyguardMessageArea extends TextView implements SecurityMessageDisp
 
     void onThemeChanged() {
         TypedArray array = mContext.obtainStyledAttributes(new int[] {
-                R.attr.wallpaperTextColor
+                android.R.attr.textColor
         });
         ColorStateList newTextColors = ColorStateList.valueOf(array.getColor(0, Color.RED));
         array.recycle();
         mDefaultColorState = newTextColors;
+        update();
+    }
+
+    void reloadColor() {
+        mDefaultColorState = Utils.getColorAttr(getContext(), android.R.attr.textColorPrimary);
         update();
     }
 

@@ -38,6 +38,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.ColorUtils;
 import com.android.internal.util.ContrastColorUtil;
 import com.android.internal.widget.CachingIconView;
+import com.android.settingslib.Utils;
 import com.android.systemui.statusbar.CrossFadeHelper;
 import com.android.systemui.statusbar.TransformableView;
 import com.android.systemui.statusbar.notification.TransformState;
@@ -324,8 +325,8 @@ public abstract class NotificationViewWrapper implements TransformableView {
         if (customBackgroundColor != 0) {
             return customBackgroundColor;
         }
-        return mView.getContext().getColor(
-                com.android.internal.R.color.notification_material_background_color);
+        return Utils.getColorAttr(mView.getContext(), android.R.attr.colorBackground)
+                .getDefaultColor();
     }
 
     public void setLegacy(boolean legacy) {

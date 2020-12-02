@@ -18,9 +18,11 @@ package com.android.keyguard;
 
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.graphics.drawable.Drawable;
 import android.os.PowerManager;
 import android.os.SystemClock;
 import android.util.AttributeSet;
+import android.view.ContextThemeWrapper;
 import android.view.HapticFeedbackConstants;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -30,6 +32,7 @@ import android.view.accessibility.AccessibilityManager;
 import android.widget.TextView;
 
 import com.android.internal.widget.LockPatternUtils;
+import com.android.settingslib.Utils;
 import com.android.systemui.R;
 
 public class NumPadKey extends ViewGroup {
@@ -121,10 +124,27 @@ public class NumPadKey extends ViewGroup {
 
         a = context.obtainStyledAttributes(attrs, android.R.styleable.View);
         if (!a.hasValueOrEmpty(android.R.styleable.View_background)) {
-            setBackground(mContext.getDrawable(R.drawable.ripple_drawable_pin));
+            Drawable rippleDrawable = new ContextThemeWrapper(mContext,
+                    R.style.Widget_TextView_NumPadKey).getDrawable(R.drawable.ripple_drawable_pin);
+            setBackground(rippleDrawable);
         }
         a.recycle();
         setContentDescription(mDigitText.getText().toString());
+    }
+
+    /**
+     * Reload colors from resources.
+     **/
+    public void reloadColors() {
+        int textColor = Utils.getColorAttr(getContext(), android.R.attr.textColorPrimary)
+                .getDefaultColor();
+        int klondikeColor = Utils.getColorAttr(getContext(), android.R.attr.textColorSecondary)
+                .getDefaultColor();
+        mDigitText.setTextColor(textColor);
+        mKlondikeText.setTextColor(klondikeColor);
+        Drawable rippleDrawable = new ContextThemeWrapper(mContext,
+                R.style.Widget_TextView_NumPadKey).getDrawable(R.drawable.ripple_drawable_pin);
+        setBackground(rippleDrawable);
     }
 
     @Override

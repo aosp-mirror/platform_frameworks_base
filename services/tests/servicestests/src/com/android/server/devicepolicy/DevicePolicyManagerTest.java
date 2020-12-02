@@ -4252,10 +4252,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
         mContext.packageName = admin1.getPackageName();
         mContext.applicationInfo = new ApplicationInfo();
-        when(mContext.resources.getColor(eq(R.color.notification_action_list), anyObject()))
-                .thenReturn(Color.WHITE);
-        when(mContext.resources.getColor(eq(R.color.notification_material_background_color),
-                anyObject())).thenReturn(Color.WHITE);
+        when(mContext.resources.getColor(anyInt(), anyObject())).thenReturn(Color.WHITE);
 
         // setUp() adds a secondary user for CALLER_USER_HANDLE. Remove it as otherwise the
         // feature is disabled because there are non-affiliated secondary users.
@@ -4301,10 +4298,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         setupDeviceOwner();
         mContext.packageName = admin1.getPackageName();
         mContext.applicationInfo = new ApplicationInfo();
-        when(mContext.resources.getColor(eq(R.color.notification_action_list), anyObject()))
-                .thenReturn(Color.WHITE);
-        when(mContext.resources.getColor(eq(R.color.notification_material_background_color),
-                anyObject())).thenReturn(Color.WHITE);
+        when(mContext.resources.getColor(anyInt(), anyObject())).thenReturn(Color.WHITE);
 
         // setUp() adds a secondary user for CALLER_USER_HANDLE. Remove it as otherwise the
         // feature is disabled because there are non-affiliated secondary users.

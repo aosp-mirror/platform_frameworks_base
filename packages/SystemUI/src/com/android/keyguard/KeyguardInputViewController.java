@@ -16,6 +16,7 @@
 
 package com.android.keyguard;
 
+import android.annotation.CallSuper;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.telephony.TelephonyManager;
@@ -24,6 +25,7 @@ import android.view.inputmethod.InputMethodManager;
 import com.android.internal.util.LatencyTracker;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
+import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.util.ViewController;
 import com.android.systemui.util.concurrency.DelayableExecutor;
@@ -37,6 +39,7 @@ public abstract class KeyguardInputViewController<T extends KeyguardInputView>
 
     private final SecurityMode mSecurityMode;
     private final KeyguardSecurityCallback mKeyguardSecurityCallback;
+    private final EmergencyButton mEmergencyButton;
     private boolean mPaused;
 
 
@@ -68,6 +71,7 @@ public abstract class KeyguardInputViewController<T extends KeyguardInputView>
         super(view);
         mSecurityMode = securityMode;
         mKeyguardSecurityCallback = keyguardSecurityCallback;
+        mEmergencyButton = view == null ? null : view.findViewById(R.id.emergency_call_button);
     }
 
     @Override
@@ -110,6 +114,16 @@ public abstract class KeyguardInputViewController<T extends KeyguardInputView>
 
     @Override
     public void showMessage(CharSequence message, ColorStateList colorState) {
+    }
+
+    /**
+     * Reload colors from resources.
+     **/
+    @CallSuper
+    public void reloadColors() {
+        if (mEmergencyButton != null) {
+            mEmergencyButton.reloadColors();
+        }
     }
 
     public void startAppearAnimation() {

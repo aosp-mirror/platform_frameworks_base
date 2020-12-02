@@ -84,6 +84,7 @@ public class LockscreenLockIconController {
     private boolean mDocked;
     private boolean mWakeAndUnlockRunning;
     private boolean mShowingLaunchAffordance;
+    private boolean mBouncerShowing;
     private boolean mBouncerShowingScrimmed;
     private boolean mFingerprintUnlock;
     private int mStatusBarState = StatusBarState.SHADE;
@@ -142,16 +143,13 @@ public class LockscreenLockIconController {
         private int mDensity;
 
         @Override
-        public void onThemeChanged() {
-            if (mLockIcon == null) {
-                return;
-            }
+        public void onUiModeChanged() {
+            updateColor();
+        }
 
-            TypedArray typedArray = mLockIcon.getContext().getTheme().obtainStyledAttributes(
-                    null, new int[]{ R.attr.wallpaperTextColor }, 0, 0);
-            int iconColor = typedArray.getColor(0, Color.WHITE);
-            typedArray.recycle();
-            mLockIcon.onThemeChange(iconColor);
+        @Override
+        public void onOverlayChanged() {
+            updateColor();
         }
 
         @Override
@@ -350,6 +348,7 @@ public class LockscreenLockIconController {
      */
     public void attach(LockIcon lockIcon) {
         mLockIcon = lockIcon;
+        updateColor();
 
         mLockIcon.setOnClickListener(this::handleClick);
         mLockIcon.setOnLongClickListener(this::handleLongClick);
@@ -408,11 +407,22 @@ public class LockscreenLockIconController {
     }
 
     /** Sets whether the bouncer is showing. */
-    public void setBouncerShowingScrimmed(boolean bouncerShowing) {
-        mBouncerShowingScrimmed = bouncerShowing;
-        if (mKeyguardBypassController.getBypassEnabled()) {
-            update();
+    public void setBouncerShowingScrimmed(boolean showing, boolean scrimmed) {
+        mBouncerShowing = showing;
+        mBouncerShowingScrimmed = scrimmed;
+        update();
+    }
+
+    private void updateColor() {
+        if (mLockIcon == null) {
+            return;
         }
+
+        TypedArray typedArray = mLockIcon.getContext().getTheme().obtainStyledAttributes(
+                null, new int[]{ android.R.attr.textColorPrimary }, 0, 0);
+        int iconColor = typedArray.getColor(0, Color.WHITE);
+        typedArray.recycle();
+        mLockIcon.updateColor(iconColor);
     }
 
     /**
@@ -510,7 +520,10 @@ public class LockscreenLockIconController {
             return changed;
         }
         boolean onAodOrDocked = mStatusBarStateController.isDozing() || mDocked;
-        boolean invisible = onAodOrDocked || mWakeAndUnlockRunning || mShowingLaunchAffordance;
+        boolean onKeyguardWithoutBouncer = mStatusBarState == StatusBarState.KEYGUARD
+                && !mBouncerShowing;
+        boolean invisible = onAodOrDocked || mWakeAndUnlockRunning || mShowingLaunchAffordance
+                || onKeyguardWithoutBouncer;
         boolean fingerprintOrBypass = mFingerprintUnlock
                 || mKeyguardBypassController.getBypassEnabled();
         if (fingerprintOrBypass && !mBouncerShowingScrimmed) {

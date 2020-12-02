@@ -143,8 +143,6 @@
     <color name="notification_default_color_dark">@color/primary_text_default_material_light</color>
     <color name="notification_default_color_light">#a3202124</color>
 
-    <color name="notification_material_background_color">#ffffffff</color>
-
     <color name="notification_default_color">#757575</color> <!-- Gray 600 -->
 
     <color name="notification_action_button_text_color">@color/notification_default_color</color>
