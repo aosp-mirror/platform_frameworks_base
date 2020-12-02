@@ -296,4 +296,8 @@ interface IWifiManager
     void startTemporarilyDisablingAllNonCarrierMergedWifi(int subId);
 
     void stopTemporarilyDisablingAllNonCarrierMergedWifi();
+
+    void setCarrierNetworkOffloadEnabled(int subscriptionId, boolean merged, boolean enabled);
+
+    boolean isCarrierNetworkOffloadEnabled(int subscriptionId, boolean merged);
 }
