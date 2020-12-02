@@ -568,6 +568,8 @@ public class SizeCompatTests extends ActivityTestsBase {
     private static WindowState addWindowToActivity(ActivityRecord activity) {
         final WindowManager.LayoutParams params = new WindowManager.LayoutParams();
         params.type = WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
+        params.setFitInsetsSides(0);
+        params.setFitInsetsTypes(0);
         final WindowTestUtils.TestWindowState w = new WindowTestUtils.TestWindowState(
                 activity.mWmService, mock(Session.class), new TestIWindow(), params, activity);
         WindowTestsBase.makeWindowVisible(w);

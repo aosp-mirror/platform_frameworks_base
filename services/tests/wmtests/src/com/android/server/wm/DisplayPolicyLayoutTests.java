@@ -52,10 +52,13 @@ import static android.view.WindowManagerPolicyConstants.ALT_BAR_LEFT;
 import static android.view.WindowManagerPolicyConstants.ALT_BAR_RIGHT;
 import static android.view.WindowManagerPolicyConstants.ALT_BAR_TOP;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
+
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertThat;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.spy;
 import static org.testng.Assert.expectThrows;
@@ -924,6 +927,25 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
 
         assertEquals(new ToStringComparatorWrapper<>(realInsetsState),
                 new ToStringComparatorWrapper<>(simulatedInsetsState));
+    }
+
+    @Test
+    public void testFixedRotationInsetsSourceFrame() {
+        final DisplayInfo info = mDisplayContent.getDisplayInfo();
+        info.rotation = mFrames.mRotation;
+        mDisplayContent.mBaseDisplayHeight = info.logicalHeight = mFrames.mDisplayHeight;
+        mDisplayContent.mBaseDisplayWidth = info.logicalWidth = mFrames.mDisplayWidth;
+        mDisplayContent.getInsetsStateController().onPostLayout();
+        mDisplayPolicy.beginLayoutLw(mFrames, mDisplayContent.getConfiguration().uiMode);
+        doReturn((mDisplayContent.getRotation() + 1) % 4).when(mDisplayContent)
+                .rotationForActivityInDifferentOrientation(eq(mWindow.mActivityRecord));
+        final Rect frame = mWindow.getInsetsState().getSource(ITYPE_STATUS_BAR).getFrame();
+        doReturn(mDisplayPolicy).when(mDisplayContent).getDisplayPolicy();
+        mDisplayContent.rotateInDifferentOrientationIfNeeded(mWindow.mActivityRecord);
+        final Rect rotatedFrame = mWindow.getInsetsState().getSource(ITYPE_STATUS_BAR).getFrame();
+
+        assertEquals(DISPLAY_WIDTH, frame.width());
+        assertEquals(DISPLAY_HEIGHT, rotatedFrame.width());
     }
 
     @Test
