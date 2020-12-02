@@ -2570,6 +2570,11 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
                 mService.getActivityStartController().postStartActivityProcessingForLastStarter(
                         task.getTopNonFinishingActivity(), ActivityManager.START_TASK_TO_FRONT,
                         task.getRootTask());
+
+                // As it doesn't go to ActivityStarter.executeRequest() path, we need to resume
+                // app switching here also.
+                mService.resumeAppSwitches();
+
                 return ActivityManager.START_TASK_TO_FRONT;
             }
             callingPackage = task.mCallingPackage;
