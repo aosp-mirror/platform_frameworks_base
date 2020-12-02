@@ -85,23 +85,18 @@ public class SearchResults implements Closeable {
         try {
             if (mIsFirstLoad) {
                 mIsFirstLoad = false;
-                //TODO(b/162450968) add support for global query.
-                mService.query(mDatabaseName, mQueryExpression, mSearchSpec.getBundle(),
-                        new IAppSearchResultCallback.Stub() {
-                            public void onResult(AppSearchResult result) {
-                                mExecutor.execute(() -> invokeCallback(result, callback));
-                            }
-                        });
+                if (mDatabaseName == null) {
+                    mService.globalQuery(mQueryExpression, mSearchSpec.getBundle(),
+                            wrapCallback(callback));
+                } else {
+                    mService.query(mDatabaseName, mQueryExpression, mSearchSpec.getBundle(),
+                            wrapCallback(callback));
+                }
             } else {
-                mService.getNextPage(mNextPageToken,
-                        new IAppSearchResultCallback.Stub() {
-                            public void onResult(AppSearchResult result) {
-                                mExecutor.execute(() -> invokeCallback(result, callback));
-                            }
-                        });
+                mService.getNextPage(mNextPageToken, wrapCallback(callback));
             }
         } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -130,5 +125,14 @@ public class SearchResults implements Closeable {
                 Log.d(TAG, "Unable to close the SearchResults", e);
             }
         });
+    }
+
+    private IAppSearchResultCallback wrapCallback(
+            @NonNull Consumer<AppSearchResult<List<SearchResult>>> callback) {
+        return new IAppSearchResultCallback.Stub() {
+            public void onResult(AppSearchResult result) {
+                mExecutor.execute(() -> invokeCallback(result, callback));
+            }
+        };
     }
 }
