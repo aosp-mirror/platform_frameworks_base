@@ -142,95 +142,104 @@ public class XmlUtils {
         }
 
         @Override
-        public byte[] getAttributeBytesHex(String namespace, String name)
+        public byte[] getAttributeBytesHex(int index)
                 throws XmlPullParserException {
             try {
-                return HexDump.hexStringToByteArray(getAttributeValue(namespace, name));
+                return HexDump.hexStringToByteArray(getAttributeValue(index));
             } catch (Exception e) {
-                throw new XmlPullParserException("Invalid attribute " + name + ": " + e);
+                throw new XmlPullParserException(
+                        "Invalid attribute " + getAttributeName(index) + ": " + e);
             }
         }
 
         @Override
-        public byte[] getAttributeBytesBase64(String namespace, String name)
+        public byte[] getAttributeBytesBase64(int index)
                 throws XmlPullParserException {
             try {
-                return Base64.decode(getAttributeValue(namespace, name), Base64.NO_WRAP);
+                return Base64.decode(getAttributeValue(index), Base64.NO_WRAP);
             } catch (Exception e) {
-                throw new XmlPullParserException("Invalid attribute " + name + ": " + e);
+                throw new XmlPullParserException(
+                        "Invalid attribute " + getAttributeName(index) + ": " + e);
             }
         }
 
         @Override
-        public int getAttributeInt(String namespace, String name)
+        public int getAttributeInt(int index)
                 throws XmlPullParserException {
             try {
-                return Integer.parseInt(getAttributeValue(namespace, name));
+                return Integer.parseInt(getAttributeValue(index));
             } catch (Exception e) {
-                throw new XmlPullParserException("Invalid attribute " + name + ": " + e);
+                throw new XmlPullParserException(
+                        "Invalid attribute " + getAttributeName(index) + ": " + e);
             }
         }
 
         @Override
-        public int getAttributeIntHex(String namespace, String name)
+        public int getAttributeIntHex(int index)
                 throws XmlPullParserException {
             try {
-                return Integer.parseInt(getAttributeValue(namespace, name), 16);
+                return Integer.parseInt(getAttributeValue(index), 16);
             } catch (Exception e) {
-                throw new XmlPullParserException("Invalid attribute " + name + ": " + e);
+                throw new XmlPullParserException(
+                        "Invalid attribute " + getAttributeName(index) + ": " + e);
             }
         }
 
         @Override
-        public long getAttributeLong(String namespace, String name)
+        public long getAttributeLong(int index)
                 throws XmlPullParserException {
             try {
-                return Long.parseLong(getAttributeValue(namespace, name));
+                return Long.parseLong(getAttributeValue(index));
             } catch (Exception e) {
-                throw new XmlPullParserException("Invalid attribute " + name + ": " + e);
+                throw new XmlPullParserException(
+                        "Invalid attribute " + getAttributeName(index) + ": " + e);
             }
         }
 
         @Override
-        public long getAttributeLongHex(String namespace, String name)
+        public long getAttributeLongHex(int index)
                 throws XmlPullParserException {
             try {
-                return Long.parseLong(getAttributeValue(namespace, name), 16);
+                return Long.parseLong(getAttributeValue(index), 16);
             } catch (Exception e) {
-                throw new XmlPullParserException("Invalid attribute " + name + ": " + e);
+                throw new XmlPullParserException(
+                        "Invalid attribute " + getAttributeName(index) + ": " + e);
             }
         }
 
         @Override
-        public float getAttributeFloat(String namespace, String name)
+        public float getAttributeFloat(int index)
                 throws XmlPullParserException {
             try {
-                return Float.parseFloat(getAttributeValue(namespace, name));
+                return Float.parseFloat(getAttributeValue(index));
             } catch (Exception e) {
-                throw new XmlPullParserException("Invalid attribute " + name + ": " + e);
+                throw new XmlPullParserException(
+                        "Invalid attribute " + getAttributeName(index) + ": " + e);
             }
         }
 
         @Override
-        public double getAttributeDouble(String namespace, String name)
+        public double getAttributeDouble(int index)
                 throws XmlPullParserException {
             try {
-                return Double.parseDouble(getAttributeValue(namespace, name));
+                return Double.parseDouble(getAttributeValue(index));
             } catch (Exception e) {
-                throw new XmlPullParserException("Invalid attribute " + name + ": " + e);
+                throw new XmlPullParserException(
+                        "Invalid attribute " + getAttributeName(index) + ": " + e);
             }
         }
 
         @Override
-        public boolean getAttributeBoolean(String namespace, String name)
+        public boolean getAttributeBoolean(int index)
                 throws XmlPullParserException {
-            final String value = getAttributeValue(namespace, name);
+            final String value = getAttributeValue(index);
             if ("true".equalsIgnoreCase(value)) {
                 return true;
             } else if ("false".equalsIgnoreCase(value)) {
                 return false;
             } else {
-                throw new XmlPullParserException("Invalid attribute " + name + ": " + value);
+                throw new XmlPullParserException(
+                        "Invalid attribute " + getAttributeName(index) + ": " + value);
             }
         }
     }
