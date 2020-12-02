@@ -16,17 +16,4 @@
 
 package android.media.metrics;
 
-import android.media.metrics.NetworkEvent;
-import android.media.metrics.PlaybackErrorEvent;
-import android.media.metrics.PlaybackMetrics;
-
-/**
- * Interface to the playback manager service.
- * @hide
- */
-interface IPlaybackMetricsManager {
-    void reportPlaybackMetrics(in String sessionId, in PlaybackMetrics metrics, int userId);
-    String getSessionId(int userId);
-    void reportPlaybackErrorEvent(in String sessionId, in PlaybackErrorEvent event, int userId);
-    void reportNetworkEvent(in String sessionId, in NetworkEvent event, int userId);
-}
+parcelable NetworkEvent;
