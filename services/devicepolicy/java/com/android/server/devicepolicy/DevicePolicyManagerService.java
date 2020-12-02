@@ -4288,11 +4288,17 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     updatePasswordQualityCacheForUserGroup(caller.getUserId());
                     saveSettingsLocked(caller.getUserId());
                 });
+
+                DevicePolicyEventLogger
+                        .createEvent(DevicePolicyEnums.SET_PASSWORD_COMPLEXITY)
+                        .setAdmin(admin.info.getPackageName())
+                        .setInt(passwordComplexity)
+                        .setBoolean(calledOnParent)
+                        .write();
             }
             logPasswordComplexityRequiredIfSecurityLogEnabled(admin.info.getComponent(),
                     caller.getUserId(), calledOnParent, passwordComplexity);
         }
-        //TODO: Log metrics.
     }
 
     private void logPasswordComplexityRequiredIfSecurityLogEnabled(ComponentName who, int userId,
