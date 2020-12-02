@@ -2846,8 +2846,9 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         if (!uidMatchPackage) {
             return false;   // callingPackage was faked.
         }
-        if (LocalServices.getService(DevicePolicyManagerInternal.class)
-                .isDeviceOrProfileOwnerInCallingUser(callingPackage)) {
+        final DevicePolicyManagerInternal dpmi =
+                LocalServices.getService(DevicePolicyManagerInternal.class);
+        if (dpmi != null && dpmi.isDeviceOrProfileOwnerInCallingUser(callingPackage)) {
             return true;
         }
         final int callingUserId = UserHandle.getCallingUserId();
