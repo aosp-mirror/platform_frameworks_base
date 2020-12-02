@@ -30,7 +30,6 @@ import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.ServiceManager;
 import android.os.UserHandle;
-import android.util.DisplayMetrics;
 import android.view.Choreographer;
 import android.view.IWindowManager;
 import android.view.LayoutInflater;
@@ -141,16 +140,6 @@ public class DependencyProvider {
         return networkController.getDataSaverController();
     }
 
-    /** */
-    @Provides
-    @SysUISingleton
-    public DisplayMetrics provideDisplayMetrics(Context context, WindowManager windowManager) {
-        DisplayMetrics displayMetrics = new DisplayMetrics();
-        context.getDisplay().getMetrics(displayMetrics);
-        return displayMetrics;
-    }
-
-    /** */
     @Provides
     @SysUISingleton
     public INotificationManager provideINotificationManager() {

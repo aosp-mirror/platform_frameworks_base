@@ -22,7 +22,6 @@ import android.util.DisplayMetrics;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.UiEventLoggerImpl;
 import com.android.systemui.util.concurrency.GlobalConcurrencyModule;
-import com.android.wm.shell.animation.FlingAnimationUtils;
 
 import javax.inject.Singleton;
 
@@ -49,15 +48,12 @@ import dagger.Provides;
         GlobalConcurrencyModule.class})
 public class GlobalModule {
 
-    // TODO(b/162923491): This should not be a singleton at all, the display metrics can change and
-    //                    callers should be creating a new builder on demand
-    @Singleton
+    /** */
     @Provides
-    static FlingAnimationUtils.Builder provideFlingAnimationUtilsBuilder(
-            Context context) {
+    public DisplayMetrics provideDisplayMetrics(Context context) {
         DisplayMetrics displayMetrics = new DisplayMetrics();
         context.getDisplay().getMetrics(displayMetrics);
-        return new FlingAnimationUtils.Builder(displayMetrics);
+        return displayMetrics;
     }
 
     /** Provides an instance of {@link com.android.internal.logging.UiEventLogger} */

@@ -140,6 +140,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 
 @StatusBarComponent.StatusBarScope
 public class NotificationPanelViewController extends PanelViewController {
@@ -184,7 +185,7 @@ public class NotificationPanelViewController extends PanelViewController {
     private final MetricsLogger mMetricsLogger;
     private final ActivityManager mActivityManager;
     private final ConfigurationController mConfigurationController;
-    private final FlingAnimationUtils.Builder mFlingAnimationUtilsBuilder;
+    private final Provider<FlingAnimationUtils.Builder> mFlingAnimationUtilsBuilder;
     private final NotificationStackScrollLayoutController mNotificationStackScrollLayoutController;
     private final NotificationIconAreaController mNotificationIconAreaController;
 
@@ -535,7 +536,7 @@ public class NotificationPanelViewController extends PanelViewController {
             KeyguardUpdateMonitor keyguardUpdateMonitor, MetricsLogger metricsLogger,
             ActivityManager activityManager,
             ConfigurationController configurationController,
-            FlingAnimationUtils.Builder flingAnimationUtilsBuilder,
+            Provider<FlingAnimationUtils.Builder> flingAnimationUtilsBuilder,
             StatusBarTouchableRegionManager statusBarTouchableRegionManager,
             ConversationNotificationManager conversationNotificationManager,
             MediaHierarchyManager mediaHierarchyManager,
@@ -549,7 +550,7 @@ public class NotificationPanelViewController extends PanelViewController {
             QSDetailDisplayer qsDetailDisplayer) {
         super(view, falsingManager, dozeLog, keyguardStateController,
                 (SysuiStatusBarStateController) statusBarStateController, vibratorHelper,
-                latencyTracker, flingAnimationUtilsBuilder, statusBarTouchableRegionManager);
+                latencyTracker, flingAnimationUtilsBuilder.get(), statusBarTouchableRegionManager);
         mView = view;
         mMetricsLogger = metricsLogger;
         mActivityManager = activityManager;
@@ -688,7 +689,7 @@ public class NotificationPanelViewController extends PanelViewController {
     @Override
     protected void loadDimens() {
         super.loadDimens();
-        mFlingAnimationUtils = mFlingAnimationUtilsBuilder.reset()
+        mFlingAnimationUtils = mFlingAnimationUtilsBuilder.get()
                 .setMaxLengthSeconds(0.4f).build();
         mStatusBarMinHeight = mResources.getDimensionPixelSize(
                 com.android.internal.R.dimen.status_bar_height);
