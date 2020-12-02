@@ -32,5 +32,5 @@ oneway interface ISubscribeResponseCallback {
     void onNetworkResponse(int code, in String reason);
     void onNotifyCapabilitiesUpdate(in List<String> pidfXmls);
     void onResourceTerminated(in List<RcsContactTerminatedReason> uriTerminatedReason);
-    void onTerminated(in String reason, in String retryAfter);
+    void onTerminated(in String reason, long retryAfterMilliseconds);
 }
