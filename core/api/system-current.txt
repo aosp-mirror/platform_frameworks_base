@@ -5041,9 +5041,9 @@ package android.media.tv.tuner {
     method public int disconnectFrontendToCiCam(int);
     method public int getAvSyncHwId(@NonNull android.media.tv.tuner.filter.Filter);
     method public long getAvSyncTime(int);
+    method @Nullable public java.util.List<android.media.tv.tuner.frontend.FrontendInfo> getAvailableFrontendInfos();
     method @Nullable public android.media.tv.tuner.DemuxCapabilities getDemuxCapabilities();
     method @Nullable public android.media.tv.tuner.frontend.FrontendInfo getFrontendInfo();
-    method @Nullable public java.util.List<android.media.tv.tuner.frontend.FrontendInfo> getFrontendInfoList();
     method @Nullable public android.media.tv.tuner.frontend.FrontendStatus getFrontendStatus(@NonNull int[]);
     method @Nullable @RequiresPermission(android.Manifest.permission.ACCESS_TV_DESCRAMBLER) public android.media.tv.tuner.Descrambler openDescrambler();
     method @Nullable public android.media.tv.tuner.dvr.DvrPlayback openDvrPlayback(long, @NonNull java.util.concurrent.Executor, @NonNull android.media.tv.tuner.dvr.OnPlaybackStatusChangedListener);

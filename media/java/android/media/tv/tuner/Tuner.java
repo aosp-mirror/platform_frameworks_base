@@ -977,9 +977,11 @@ public class Tuner implements AutoCloseable  {
     }
 
     /**
-     * Gets the initialized frontend information.
+     * Gets the currently initialized and activated frontend information. To get all the available
+     * frontend info on the device, use {@link getAvailableFrontendInfos()}.
      *
-     * @return The frontend information. {@code null} if the operation failed.
+     * @return The active frontend information. {@code null} if the operation failed.
+     * @throws IllegalStateException if there is no active frontend currently.
      */
     @Nullable
     public FrontendInfo getFrontendInfo() {
@@ -996,13 +998,20 @@ public class Tuner implements AutoCloseable  {
     }
 
     /**
-     * Get a list all the existed frontend information.
+     * Gets a list of all the available frontend information on the device. To get the information
+     * of the currently active frontend, use {@link getFrontendInfo()}. The active frontend
+     * information is also included in the list of the available frontend information.
      *
-     * @return The list of all the frontend information. {@code null} if the operation failed.
+     * @return The list of all the available frontend information. {@code null} if the operation
+     * failed.
      */
     @Nullable
-    public List<FrontendInfo> getFrontendInfoList() {
-        return Arrays.asList(getFrontendInfoListInternal());
+    public List<FrontendInfo> getAvailableFrontendInfos() {
+        FrontendInfo[] feInfoList = getFrontendInfoListInternal();
+        if (feInfoList == null) {
+            return null;
+        }
+        return Arrays.asList(feInfoList);
     }
 
     /** @hide */
