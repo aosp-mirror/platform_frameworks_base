@@ -1427,7 +1427,7 @@ public class DisplayPolicy {
                 : (task != null ? task.getBounds() : null);
         final InsetsState state =
                 mDisplayContent.getInsetsPolicy().getInsetsForWindowMetrics(attrs);
-        computeWindowBounds(attrs, state, outFrame);
+        computeWindowBounds(attrs, state, windowToken, outFrame);
         if (taskBounds != null) {
             outFrame.intersect(taskBounds);
         }
@@ -1714,11 +1714,11 @@ public class DisplayPolicy {
     }
 
     private void computeWindowBounds(WindowManager.LayoutParams attrs, InsetsState state,
-            Rect outBounds) {
+            @Nullable WindowToken windowToken, Rect outBounds) {
         final @InsetsType int typesToFit = attrs.getFitInsetsTypes();
         final @InsetsSide int sidesToFit = attrs.getFitInsetsSides();
         final ArraySet<Integer> types = InsetsState.toInternalType(typesToFit);
-        final Rect dfu = state.getDisplayFrame();
+        final Rect df = windowToken != null ? windowToken.getBounds() : state.getDisplayFrame();
         Insets insets = Insets.of(0, 0, 0, 0);
         for (int i = types.size() - 1; i >= 0; i--) {
             final InsetsSource source = state.peekSource(types.valueAt(i));
@@ -1726,13 +1726,13 @@ public class DisplayPolicy {
                 continue;
             }
             insets = Insets.max(insets, source.calculateInsets(
-                    dfu, attrs.isFitInsetsIgnoringVisibility()));
+                    df, attrs.isFitInsetsIgnoringVisibility()));
         }
         final int left = (sidesToFit & Side.LEFT) != 0 ? insets.left : 0;
         final int top = (sidesToFit & Side.TOP) != 0 ? insets.top : 0;
         final int right = (sidesToFit & Side.RIGHT) != 0 ? insets.right : 0;
         final int bottom = (sidesToFit & Side.BOTTOM) != 0 ? insets.bottom : 0;
-        outBounds.set(dfu.left + left, dfu.top + top, dfu.right - right, dfu.bottom - bottom);
+        outBounds.set(df.left + left, df.top + top, df.right - right, df.bottom - bottom);
     }
 
     /**
@@ -1772,7 +1772,7 @@ public class DisplayPolicy {
         final boolean layoutInsetDecor = (fl & FLAG_LAYOUT_INSET_DECOR) == FLAG_LAYOUT_INSET_DECOR;
 
         final InsetsState state = win.getInsetsState();
-        computeWindowBounds(attrs, state, df);
+        computeWindowBounds(attrs, state, win.mToken, df);
         if (attached == null) {
             pf.set(df);
             if ((pfl & PRIVATE_FLAG_INSET_PARENT_FRAME_BY_IME) != 0) {
@@ -1845,7 +1845,6 @@ public class DisplayPolicy {
             // They will later be cropped or shifted using the displayFrame in WindowState,
             // which prevents overlap with the DisplayCutout.
             if (!attachedInParent && !floatingInScreenWindow) {
-                getRotatedWindowBounds(displayFrames, win, sTmpRect);
                 sTmpRect.set(pf);
                 pf.intersectUnchecked(displayCutoutSafeExceptMaybeBars);
                 windowFrames.setParentFrameWasClippedByDisplayCutout(!sTmpRect.equals(pf));
