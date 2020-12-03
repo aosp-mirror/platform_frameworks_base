@@ -273,7 +273,7 @@ public class BrightnessSlider
         }
 
         /** Get the layout to inflate based on what slider to use */
-        public int getLayout() {
+        private int getLayout() {
             return mSettings.useThickSlider()
                     ? R.layout.quick_settings_brightness_dialog_thick
                     : R.layout.quick_settings_brightness_dialog;
