@@ -3534,8 +3534,9 @@ public class NotificationManagerService extends SystemService {
         public ParceledListSlice<ConversationChannelWrapper> getConversations(
                 boolean onlyImportant) {
             enforceSystemOrSystemUI("getConversations");
+            IntArray userIds = mUserProfiles.getCurrentProfileIds();
             ArrayList<ConversationChannelWrapper> conversations =
-                    mPreferencesHelper.getConversations(onlyImportant);
+                    mPreferencesHelper.getConversations(userIds, onlyImportant);
             for (ConversationChannelWrapper conversation : conversations) {
                 if (mShortcutHelper == null) {
                     conversation.setShortcutInfo(null);
