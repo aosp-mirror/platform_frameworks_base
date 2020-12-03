@@ -145,6 +145,7 @@ java_library_static {
         "SurfaceFlingerProperties",
         "com.android.sysprop.watchdog",
     ],
+    javac_shard_size: 50,
 }
 
 java_genrule {

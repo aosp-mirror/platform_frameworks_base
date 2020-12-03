@@ -86,9 +86,9 @@ public class RcsSubscribeResponseAidlWrapper implements SubscribeResponseCallbac
     }
 
     @Override
-    public void onTerminated(String reason, String retryAfter) throws ImsException {
+    public void onTerminated(String reason, long retryAfterMilliseconds) throws ImsException {
         try {
-            mResponseBinder.onTerminated(reason, retryAfter);
+            mResponseBinder.onTerminated(reason, retryAfterMilliseconds);
         } catch (RemoteException e) {
         }
     }

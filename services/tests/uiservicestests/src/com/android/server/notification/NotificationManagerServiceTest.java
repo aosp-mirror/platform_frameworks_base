@@ -172,7 +172,6 @@ import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
 import com.android.internal.logging.InstanceIdSequence;
 import com.android.internal.logging.InstanceIdSequenceFake;
 import com.android.internal.statusbar.NotificationVisibility;
-import com.android.internal.util.FastXmlSerializer;
 import com.android.server.DeviceIdleInternal;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
@@ -196,8 +195,6 @@ import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.stubbing.Answer;
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlSerializer;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -357,12 +354,14 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         @Override
         protected void setNotificationAssistantAccessGrantedForUserInternal(
-                ComponentName assistant, int userId, boolean granted) {
+                ComponentName assistant, int userId, boolean granted, boolean userSet) {
             if (mNotificationAssistantAccessGrantedCallback != null) {
-                mNotificationAssistantAccessGrantedCallback.onGranted(assistant, userId, granted);
+                mNotificationAssistantAccessGrantedCallback.onGranted(assistant, userId, granted,
+                        userSet);
                 return;
             }
-            super.setNotificationAssistantAccessGrantedForUserInternal(assistant, userId, granted);
+            super.setNotificationAssistantAccessGrantedForUserInternal(assistant, userId, granted,
+                    userSet);
         }
 
         @Override
@@ -376,7 +375,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         }
 
         interface NotificationAssistantAccessGrantedCallback {
-            void onGranted(ComponentName assistant, int userId, boolean granted);
+            void onGranted(ComponentName assistant, int userId, boolean granted, boolean userSet);
         }
     }
 
@@ -899,7 +898,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mService.setDefaultAssistantForUser(userId);
 
         verify(mAssistants).setPackageOrComponentEnabled(
-                eq(testComponent), eq(userId), eq(true), eq(true));
+                eq(testComponent), eq(userId), eq(true), eq(true), eq(false));
     }
 
     @Test
@@ -2909,7 +2908,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         verify(mContext, times(1)).sendBroadcastAsUser(any(), eq(user), any());
         verify(mAssistants, times(1)).setPackageOrComponentEnabled(
-                c.flattenToString(), user.getIdentifier(), true, true);
+                c.flattenToString(), user.getIdentifier(), true, true, true);
         verify(mAssistants).setUserSet(10, true);
         verify(mConditionProviders, times(1)).setPackageOrComponentEnabled(
                 c.flattenToString(), user.getIdentifier(), false, true);
@@ -2953,7 +2952,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         verify(mConditionProviders, times(1)).setPackageOrComponentEnabled(
                 c.getPackageName(), user.getIdentifier(), true, true);
         verify(mAssistants, never()).setPackageOrComponentEnabled(
-                any(), anyInt(), anyBoolean(), anyBoolean());
+                any(), anyInt(), anyBoolean(), anyBoolean(), anyBoolean());
         verify(mListeners, never()).setPackageOrComponentEnabled(
                 any(), anyInt(), anyBoolean(), anyBoolean());
     }
@@ -2968,7 +2967,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         verify(mConditionProviders, times(1)).setPackageOrComponentEnabled(
                 c.flattenToString(), 0, false, true, true);
         verify(mAssistants, never()).setPackageOrComponentEnabled(
-                any(), anyInt(), anyBoolean(), anyBoolean());
+                any(), anyInt(), anyBoolean(), anyBoolean(), anyBoolean());
     }
 
     @Test
@@ -2983,7 +2982,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mBinderService.setNotificationAssistantAccessGranted(c, true);
 
         verify(mAssistants, times(1)).setPackageOrComponentEnabled(
-                c.flattenToString(), 0, true, true);
+                c.flattenToString(), 0, true, true, true);
         verify(mConditionProviders, times(1)).setPackageOrComponentEnabled(
                 c.flattenToString(), 0, false, true);
         verify(mListeners, never()).setPackageOrComponentEnabled(
@@ -3005,9 +3004,9 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mBinderService.setNotificationAssistantAccessGranted(c, true);
 
         verify(mAssistants, times(1)).setPackageOrComponentEnabled(
-                c.flattenToString(), 0, true, true);
+                c.flattenToString(), 0, true, true, true);
         verify(mAssistants, times(1)).setPackageOrComponentEnabled(
-                c.flattenToString(), 10, true, true);
+                c.flattenToString(), 10, true, true, true);
         verify(mConditionProviders, times(1)).setPackageOrComponentEnabled(
                 c.flattenToString(), 0, false, true);
         verify(mConditionProviders, times(1)).setPackageOrComponentEnabled(
@@ -3031,7 +3030,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mBinderService.setNotificationAssistantAccessGranted(null, true);
 
         verify(mAssistants, times(1)).setPackageOrComponentEnabled(
-                c.flattenToString(), 0, true, false);
+                c.flattenToString(), 0, true, false, true);
         verify(mConditionProviders, times(1)).setPackageOrComponentEnabled(
                 c.flattenToString(), 0, false,  false);
         verify(mListeners, never()).setPackageOrComponentEnabled(
@@ -3055,7 +3054,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 null, user.getIdentifier(), true);
 
         verify(mAssistants, times(1)).setPackageOrComponentEnabled(
-                c.flattenToString(), user.getIdentifier(), true, false);
+                c.flattenToString(), user.getIdentifier(), true, false, true);
         verify(mAssistants).setUserSet(10, true);
         verify(mConditionProviders, times(1)).setPackageOrComponentEnabled(
                 c.flattenToString(), user.getIdentifier(), false,  false);
@@ -3084,9 +3083,9 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                     null, user.getIdentifier(), true);
 
         verify(mAssistants, times(1)).setPackageOrComponentEnabled(
-                c.flattenToString(), user.getIdentifier(), true, false);
+                c.flattenToString(), user.getIdentifier(), true, false, true);
         verify(mAssistants, times(1)).setPackageOrComponentEnabled(
-                c.flattenToString(), ui10.id, true, false);
+                c.flattenToString(), ui10.id, true, false, true);
         verify(mAssistants).setUserSet(0, true);
         verify(mAssistants).setUserSet(10, true);
         verify(mConditionProviders, times(1)).setPackageOrComponentEnabled(
@@ -3106,7 +3105,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         verify(mConditionProviders, times(1)).setPackageOrComponentEnabled(
                 c.getPackageName(), 0, true, true);
         verify(mAssistants, never()).setPackageOrComponentEnabled(
-                any(), anyInt(), anyBoolean(), anyBoolean());
+                any(), anyInt(), anyBoolean(), anyBoolean(), anyBoolean());
         verify(mListeners, never()).setPackageOrComponentEnabled(
                 any(), anyInt(), anyBoolean(), anyBoolean());
     }
@@ -3191,7 +3190,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         verify(mConditionProviders, times(1)).setPackageOrComponentEnabled(
                 c.flattenToString(), 0, false, true);
         verify(mAssistants, times(1)).setPackageOrComponentEnabled(
-                c.flattenToString(), 0, true, true);
+                c.flattenToString(), 0, true, true, true);
     }
 
     @Test
@@ -3207,7 +3206,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         verify(mConditionProviders, times(1)).setPackageOrComponentEnabled(
                 c.getPackageName(), 0, true, true);
         verify(mAssistants, never()).setPackageOrComponentEnabled(
-                any(), anyInt(), anyBoolean(), anyBoolean());
+                any(), anyInt(), anyBoolean(), anyBoolean(), anyBoolean());
     }
 
     @Test
@@ -5419,7 +5418,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mService.setDefaultAssistantForUser(0);
 
         verify(mNotificationAssistantAccessGrantedCallback)
-                .onGranted(eq(xmlConfig), eq(0), eq(true));
+                .onGranted(eq(xmlConfig), eq(0), eq(true), eq(false));
     }
 
     @Test
@@ -5441,7 +5440,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mService.setDefaultAssistantForUser(0);
 
         verify(mNotificationAssistantAccessGrantedCallback)
-                .onGranted(eq(deviceConfig), eq(0), eq(true));
+                .onGranted(eq(deviceConfig), eq(0), eq(true), eq(false));
     }
 
     @Test
@@ -5464,7 +5463,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mService.setDefaultAssistantForUser(0);
 
         verify(mNotificationAssistantAccessGrantedCallback)
-                .onGranted(eq(xmlConfig), eq(0), eq(true));
+                .onGranted(eq(xmlConfig), eq(0), eq(true), eq(false));
     }
 
     @Test

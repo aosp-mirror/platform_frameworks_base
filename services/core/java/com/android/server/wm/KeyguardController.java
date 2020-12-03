@@ -211,7 +211,7 @@ class KeyguardController {
             updateKeyguardSleepToken();
 
             // Some stack visibility might change (e.g. docked stack)
-            mRootWindowContainer.resumeFocusedStacksTopActivities();
+            mRootWindowContainer.resumeFocusedTasksTopActivities();
             mRootWindowContainer.ensureActivitiesVisible(null, 0, !PRESERVE_WINDOWS);
             mRootWindowContainer.addStartingWindowsForVisibleActivities();
             mWindowManager.executeAppTransition();
@@ -595,8 +595,8 @@ class KeyguardController {
         @Nullable
         private Task getRootTaskForControllingOccluding(DisplayContent display) {
             return display.getItemFromTaskDisplayAreas(taskDisplayArea -> {
-                for (int sNdx = taskDisplayArea.getStackCount() - 1; sNdx >= 0; --sNdx) {
-                    final Task task = taskDisplayArea.getStackAt(sNdx);
+                for (int sNdx = taskDisplayArea.getRootTaskCount() - 1; sNdx >= 0; --sNdx) {
+                    final Task task = taskDisplayArea.getRootTaskAt(sNdx);
                     if (task != null && task.isFocusableAndVisible()
                             && !task.inPinnedWindowingMode()) {
                         return task;

@@ -240,8 +240,7 @@ public class ScreenshotView extends FrameLayout implements
 
         setOnApplyWindowInsetsListener((v, insets) -> {
             if (QuickStepContract.isGesturalMode(mNavMode)) {
-                Insets gestureInsets = insets.getInsets(
-                        WindowInsets.Type.systemGestures());
+                Insets gestureInsets = insets.getInsets(WindowInsets.Type.systemGestures());
                 mLeftInset = gestureInsets.left;
                 mRightInset = gestureInsets.right;
             } else {
@@ -272,7 +271,7 @@ public class ScreenshotView extends FrameLayout implements
         mScreenshotSelectorView.requestFocus();
     }
 
-    void prepareForAnimation(Bitmap bitmap, Rect screenRect, Insets screenInsets) {
+    void prepareForAnimation(Bitmap bitmap, Insets screenInsets) {
         mScreenshotPreview.setImageDrawable(createScreenDrawable(mResources, bitmap, screenInsets));
         // make static preview invisible (from gone) so we can query its location on screen
         mScreenshotPreview.setVisibility(View.INVISIBLE);
@@ -284,6 +283,8 @@ public class ScreenshotView extends FrameLayout implements
 
         Rect previewBounds = new Rect();
         mScreenshotPreview.getBoundsOnScreen(previewBounds);
+        int[] previewLocation = new int[2];
+        mScreenshotPreview.getLocationInWindow(previewLocation);
 
         float cornerScale =
                 mCornerSizeX / (mOrientationPortrait ? bounds.width() : bounds.height());
@@ -310,7 +311,8 @@ public class ScreenshotView extends FrameLayout implements
 
         // animate from the current location, to the static preview location
         final PointF startPos = new PointF(bounds.centerX(), bounds.centerY());
-        final PointF finalPos = new PointF(previewBounds.centerX(), previewBounds.centerY());
+        final PointF finalPos = new PointF(previewLocation[0] + previewBounds.width() / 2f,
+                previewLocation[1] + previewBounds.height() / 2f);
 
         ValueAnimator toCorner = ValueAnimator.ofFloat(0, 1);
         toCorner.setDuration(SCREENSHOT_TO_CORNER_Y_DURATION_MS);

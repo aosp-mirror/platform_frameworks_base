@@ -98,6 +98,11 @@ import java.util.Set;
  * packages that are currently installed on the device.
  *
  * You can find this class through {@link Context#getPackageManager}.
+ *
+ * <p class="note"><strong>Note: </strong>If your app targets Android 11 (API level 30) or
+ * higher, the methods in this class each return a filtered list of apps. Learn more about how to
+ * <a href="/training/basics/intents/package-visibility">manage package visibility</a>.
+ * </p>
  */
 public abstract class PackageManager {
     private static final String TAG = "PackageManager";
@@ -2807,6 +2812,15 @@ public abstract class PackageManager {
      */
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_TELEPHONY_IMS = "android.hardware.telephony.ims";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: The device is capable of communicating with
+     * other devices via ultra wideband.
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_UWB = "android.hardware.uwb";
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and

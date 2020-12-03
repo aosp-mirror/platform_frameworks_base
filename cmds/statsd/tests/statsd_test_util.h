@@ -347,6 +347,8 @@ void ValidateAttributionUidAndTagDimension(
     const DimensionsValue& value, int atomId, int uid, const std::string& tag);
 void ValidateAttributionUidAndTagDimension(
     const DimensionsValue& value, int node_idx, int atomId, int uid, const std::string& tag);
+void ValidateStateValue(const google::protobuf::RepeatedPtrField<StateValue>& stateValues,
+                        int atomId, int64_t value);
 
 struct DimensionsPair {
     DimensionsPair(DimensionsValue m1, google::protobuf::RepeatedPtrField<StateValue> m2)

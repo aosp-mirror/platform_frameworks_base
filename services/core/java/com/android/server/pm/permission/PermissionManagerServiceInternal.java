@@ -512,16 +512,23 @@ public abstract class PermissionManagerServiceInternal extends PermissionManager
     public abstract void onPackageRemoved(@NonNull AndroidPackage pkg);
 
     /**
-     * Callback when the state for a package has been removed.
+     * Callback when a package has been uninstalled.
+     * <p>
+     * The package may have been fully removed from the system, or only marked as uninstalled for
+     * this user but still instlaled for other users.
      *
-     * @param packageName the name of the removed package
-     * @param appId the app ID of the removed package
-     * @param pkg the removed package, or {@code null} if unavailable
+     * TODO: Pass PackageState instead.
+     *
+     * @param packageName the name of the uninstalled package
+     * @param appId the app ID of the uninstalled package
+     * @param pkg the uninstalled package, or {@code null} if unavailable
      * @param sharedUserPkgs the packages that are in the same shared user
+     * @param userId the user ID the package is uninstalled for
      */
     //@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
-    public abstract void onPackageStateRemoved(@NonNull String packageName, int appId,
-            @Nullable AndroidPackage pkg, @NonNull List<AndroidPackage> sharedUserPkgs);
+    public abstract void onPackageUninstalled(@NonNull String packageName, int appId,
+            @Nullable AndroidPackage pkg, @NonNull List<AndroidPackage> sharedUserPkgs,
+            @UserIdInt int userId);
 
     /**
      * Check whether a permission can be propagated to instant app.

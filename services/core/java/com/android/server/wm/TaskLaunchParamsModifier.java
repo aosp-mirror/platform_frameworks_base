@@ -796,9 +796,9 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
             @NonNull Rect inOutBounds) {
         final List<Rect> taskBoundsToCheck = new ArrayList<>();
         display.forAllTaskDisplayAreas(taskDisplayArea -> {
-            int numStacks = taskDisplayArea.getStackCount();
+            int numStacks = taskDisplayArea.getRootTaskCount();
             for (int sNdx = 0; sNdx < numStacks; ++sNdx) {
-                final Task task = taskDisplayArea.getStackAt(sNdx);
+                final Task task = taskDisplayArea.getRootTaskAt(sNdx);
                 if (!task.inFreeformWindowingMode()) {
                     continue;
                 }

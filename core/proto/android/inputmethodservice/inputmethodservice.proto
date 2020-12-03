@@ -18,6 +18,7 @@ syntax = "proto2";
 
 import "frameworks/base/core/proto/android/inputmethodservice/softinputwindow.proto";
 import "frameworks/base/core/proto/android/view/inputmethod/editorinfo.proto";
+import "frameworks/base/core/proto/android/view/inputmethod/inputconnection.proto";
 
 package android.inputmethodservice;
 
@@ -51,6 +52,7 @@ message InputMethodServiceProto {
     optional int32 status_icon = 25;
     optional InsetsProto last_computed_insets = 26;
     optional string settings_observer = 27;
+    optional .android.view.inputmethod.InputConnectionCallProto input_connection_call = 28;
 
     message InsetsProto {
         optional int32 content_top_insets = 1;

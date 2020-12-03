@@ -47,6 +47,7 @@ import android.content.res.Resources.Theme;
 import android.database.sqlite.SQLiteCompatibilityWalFlags;
 import android.database.sqlite.SQLiteGlobal;
 import android.graphics.GraphicsStatsService;
+import android.graphics.Typeface;
 import android.hardware.display.DisplayManagerInternal;
 import android.net.ConnectivityManager;
 import android.net.ConnectivityModuleConnector;
@@ -120,6 +121,7 @@ import com.android.server.display.color.ColorDisplayService;
 import com.android.server.dreams.DreamManagerService;
 import com.android.server.emergency.EmergencyAffordanceService;
 import com.android.server.gpu.GpuService;
+import com.android.server.graphics.fonts.FontManagerService;
 import com.android.server.hdmi.HdmiControlService;
 import com.android.server.incident.IncidentCompanionService;
 import com.android.server.input.InputManagerService;
@@ -672,6 +674,11 @@ public final class SystemServer implements Dumpable {
             // Prepare the thread pool for init tasks that can be parallelized
             SystemServerInitThreadPool tp = SystemServerInitThreadPool.start();
             mDumper.addDumpable(tp);
+
+            // Load preinstalled system fonts for system server, so that WindowManagerService, etc
+            // can start using Typeface. Note that fonts are required not only for text rendering,
+            // but also for some text operations (e.g. TextUtils.makeSafeForPresentation()).
+            Typeface.loadPreinstalledSystemFontMap();
 
             // Attach JVMTI agent if this is a debuggable build and the system property is set.
             if (Build.IS_DEBUGGABLE) {
@@ -1602,6 +1609,10 @@ public final class SystemServer implements Dumpable {
             } catch (Throwable e) {
                 reportWtf("starting VCN Management Service", e);
             }
+            t.traceEnd();
+
+            t.traceBegin("StartFontManagerService");
+            mSystemServiceManager.startService(FontManagerService.Lifecycle.class);
             t.traceEnd();
 
             t.traceBegin("StartTextServicesManager");

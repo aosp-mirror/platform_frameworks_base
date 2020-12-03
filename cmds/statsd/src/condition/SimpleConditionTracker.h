@@ -74,14 +74,9 @@ public:
         }
     }
 
-    void getTrueSlicedDimensions(
-            const std::vector<sp<ConditionTracker>>& allConditions,
-            std::set<HashableDimensionKey>* dimensions) const override {
-        for (const auto& itr : mSlicedConditionState) {
-            if (itr.second > 0) {
-                dimensions->insert(itr.first);
-            }
-        }
+    const std::map<HashableDimensionKey, int>* getSlicedDimensionMap(
+            const std::vector<sp<ConditionTracker>>& allConditions) const override {
+        return &mSlicedConditionState;
     }
 
     bool IsChangedDimensionTrackable() const  override { return true; }

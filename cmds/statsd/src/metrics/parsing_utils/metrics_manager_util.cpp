@@ -450,7 +450,8 @@ optional<sp<MetricProducer>> createDurationMetricProducerAndUpdateMetadata(
         return nullopt;
     }
 
-    const Predicate& durationWhat = config.predicate(what_it->second);
+    const int whatIndex = what_it->second;
+    const Predicate& durationWhat = config.predicate(whatIndex);
     if (durationWhat.contents_case() != Predicate::ContentsCase::kSimplePredicate) {
         ALOGE("DurationMetric's \"what\" must be a simple condition");
         return nullopt;
@@ -518,6 +519,7 @@ optional<sp<MetricProducer>> createDurationMetricProducerAndUpdateMetadata(
     translateFieldMatcher(metric.dimensions_in_what(), &dimensionsInWhat);
     for (const auto& stateLink : metric.state_link()) {
         if (!handleMetricWithStateLink(stateLink.fields_in_what(), dimensionsInWhat)) {
+            ALOGW("DurationMetric's MetricStateLinks must be a subset of dimensions in what");
             return nullopt;
         }
     }
@@ -536,10 +538,15 @@ optional<sp<MetricProducer>> createDurationMetricProducerAndUpdateMetadata(
         return nullopt;
     }
 
-    return {new DurationMetricProducer(
-            key, metric, conditionIndex, initialConditionCache, startIndex, stopIndex, stopAllIndex,
-            nesting, wizard, metricHash, internalDimensions, timeBaseNs, currentTimeNs,
-            eventActivationMap, eventDeactivationMap, slicedStateAtoms, stateGroupMap)};
+    sp<MetricProducer> producer = new DurationMetricProducer(
+            key, metric, conditionIndex, initialConditionCache, whatIndex, startIndex, stopIndex,
+            stopAllIndex, nesting, wizard, metricHash, internalDimensions, timeBaseNs,
+            currentTimeNs, eventActivationMap, eventDeactivationMap, slicedStateAtoms,
+            stateGroupMap);
+    if (!producer->isValid()) {
+        return nullopt;
+    }
+    return {producer};
 }
 
 optional<sp<MetricProducer>> createEventMetricProducerAndUpdateMetadata(
@@ -677,6 +684,7 @@ optional<sp<MetricProducer>> createValueMetricProducerAndUpdateMetadata(
     translateFieldMatcher(metric.dimensions_in_what(), &dimensionsInWhat);
     for (const auto& stateLink : metric.state_link()) {
         if (!handleMetricWithStateLink(stateLink.fields_in_what(), dimensionsInWhat)) {
+            ALOGW("ValueMetric's MetricStateLinks must be a subset of the dimensions in what");
             return nullopt;
         }
     }

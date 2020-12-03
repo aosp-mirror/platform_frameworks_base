@@ -24,7 +24,6 @@ import androidx.test.filters.SmallTest;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.SyncTransactionQueue;
-import com.android.wm.shell.common.TaskStackListenerImpl;
 
 import org.junit.After;
 import org.junit.Before;
@@ -42,7 +41,6 @@ public class AppPairsPoolTests {
     @Mock private SyncTransactionQueue mSyncQueue;
     @Mock private ShellTaskOrganizer mTaskOrganizer;
     @Mock private DisplayController mDisplayController;
-    @Mock private TaskStackListenerImpl mTaskStackListener;
 
     @Before
     public void setUp() {
@@ -50,8 +48,7 @@ public class AppPairsPoolTests {
         mController = new TestAppPairsController(
                 mTaskOrganizer,
                 mSyncQueue,
-                mDisplayController,
-                mTaskStackListener);
+                mDisplayController);
         mPool = mController.getPool();
     }
 

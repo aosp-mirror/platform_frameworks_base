@@ -16,8 +16,6 @@
 
 package com.android.wm.shell.apppairs;
 
-import static android.app.ActivityTaskManager.INVALID_TASK_ID;
-
 import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_TASK_ORG;
 
 import android.app.ActivityManager;
@@ -30,15 +28,13 @@ import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.SyncTransactionQueue;
-import com.android.wm.shell.common.TaskStackListenerCallback;
-import com.android.wm.shell.common.TaskStackListenerImpl;
 
 import java.io.PrintWriter;
 
 /**
  * Class manages app-pairs multitasking mode and implements the main interface {@link AppPairs}.
  */
-public class AppPairsController implements AppPairs, TaskStackListenerCallback {
+public class AppPairsController implements AppPairs {
     private static final String TAG = AppPairsController.class.getSimpleName();
 
     private final ShellTaskOrganizer mTaskOrganizer;
@@ -48,14 +44,12 @@ public class AppPairsController implements AppPairs, TaskStackListenerCallback {
     // Active app-pairs mapped by root task id key.
     private final SparseArray<AppPair> mActiveAppPairs = new SparseArray<>();
     private final DisplayController mDisplayController;
-    private int mForegroundTaskId = INVALID_TASK_ID;
 
     public AppPairsController(ShellTaskOrganizer organizer, SyncTransactionQueue syncQueue,
-                DisplayController displayController, TaskStackListenerImpl taskStackListener) {
+                DisplayController displayController) {
         mTaskOrganizer = organizer;
         mSyncQueue = syncQueue;
         mDisplayController = displayController;
-        taskStackListener.addListener(this);
     }
 
     @Override
@@ -68,27 +62,6 @@ public class AppPairsController implements AppPairs, TaskStackListenerCallback {
     @VisibleForTesting
     void setPairsPool(AppPairsPool pool) {
         mPairsPool = pool;
-    }
-
-    @Override
-    public void onTaskMovedToFront(int taskId) {
-        mForegroundTaskId = INVALID_TASK_ID;
-        for (int i = mActiveAppPairs.size() - 1; i >= 0; --i) {
-            final AppPair candidate = mActiveAppPairs.valueAt(i);
-            final boolean containForegroundTask = candidate.contains(taskId);
-            candidate.setVisible(containForegroundTask);
-            if (containForegroundTask) {
-                mForegroundTaskId = candidate.getRootTaskId();
-            }
-        }
-    }
-
-    @Override
-    public void onKeyguardVisibilityChanged(boolean showing) {
-        if (mForegroundTaskId == INVALID_TASK_ID) {
-            return;
-        }
-        mActiveAppPairs.get(mForegroundTaskId).setVisible(!showing);
     }
 
     @Override

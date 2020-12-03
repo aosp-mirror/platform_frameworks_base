@@ -54,7 +54,6 @@ import androidx.test.runner.AndroidJUnit4;
 import com.android.server.accessibility.AccessibilityManagerService;
 import com.android.server.accessibility.EventStreamTransformation;
 import com.android.server.accessibility.magnification.FullScreenMagnificationController.MagnificationRequestObserver;
-import com.android.server.accessibility.magnification.MagnificationGestureHandler.ScaleChangedListener;
 import com.android.server.testutils.OffsettableClock;
 import com.android.server.testutils.TestHandler;
 import com.android.server.wm.WindowManagerInternal;
@@ -125,7 +124,7 @@ public class FullScreenMagnificationGestureHandlerTest {
     private Context mContext;
     FullScreenMagnificationController mFullScreenMagnificationController;
     @Mock
-    ScaleChangedListener mMockScaleChangedListener;
+    MagnificationGestureHandler.ScaleChangedListener mMockScaleChangedListener;
     @Mock
     MagnificationRequestObserver mMagnificationRequestObserver;
     @Mock
@@ -181,8 +180,8 @@ public class FullScreenMagnificationGestureHandlerTest {
             boolean detectShortcutTrigger) {
         FullScreenMagnificationGestureHandler h = new FullScreenMagnificationGestureHandler(
                 mContext, mFullScreenMagnificationController, mMockScaleChangedListener,
-                detectTripleTap, detectShortcutTrigger, mWindowMagnificationPromptController,
-                DISPLAY_0);
+                detectTripleTap, detectShortcutTrigger,
+                mWindowMagnificationPromptController, DISPLAY_0);
         mHandler = new TestHandler(h.mDetectingState, mClock) {
             @Override
             protected String messageToString(Message m) {

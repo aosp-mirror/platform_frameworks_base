@@ -17,21 +17,20 @@
 package com.android.server.utils;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
-
 import android.util.SparseBooleanArray;
 
 /**
  * A watched variant of SparseBooleanArray.  Changes to the array are notified to
  * registered {@link Watcher}s.
  */
-public class WatchedSparseBooleanArray extends WatchableImpl {
+public class WatchedSparseBooleanArray extends WatchableImpl
+        implements Snappable {
 
     // The storage
     private final SparseBooleanArray mStorage;
 
     // A private convenience function
-    private void dispatchChange() {
+    private void onChanged() {
         dispatchChange(this);
     }
 
@@ -81,7 +80,7 @@ public class WatchedSparseBooleanArray extends WatchableImpl {
      */
     public void delete(int key) {
         mStorage.delete(key);
-        dispatchChange();
+        onChanged();
     }
 
     /**
@@ -91,7 +90,7 @@ public class WatchedSparseBooleanArray extends WatchableImpl {
      */
     public void removeAt(int index) {
         mStorage.removeAt(index);
-        dispatchChange();
+        onChanged();
     }
 
     /**
@@ -102,7 +101,7 @@ public class WatchedSparseBooleanArray extends WatchableImpl {
     public void put(int key, boolean value) {
         if (mStorage.get(key) != value) {
             mStorage.put(key, value);
-            dispatchChange();
+            onChanged();
         }
     }
 
@@ -164,7 +163,7 @@ public class WatchedSparseBooleanArray extends WatchableImpl {
     public void setValueAt(int index, boolean value) {
         if (mStorage.valueAt(index) != value) {
             mStorage.setValueAt(index, value);
-            dispatchChange();
+            onChanged();
         }
     }
 
@@ -172,7 +171,7 @@ public class WatchedSparseBooleanArray extends WatchableImpl {
     public void setKeyAt(int index, int key) {
         if (mStorage.keyAt(index) != key) {
             mStorage.setKeyAt(index, key);
-            dispatchChange();
+            onChanged();
         }
     }
 
@@ -202,7 +201,7 @@ public class WatchedSparseBooleanArray extends WatchableImpl {
      */
     public void clear() {
         mStorage.clear();
-        dispatchChange();
+        onChanged();
     }
 
     /**
@@ -211,7 +210,7 @@ public class WatchedSparseBooleanArray extends WatchableImpl {
      */
     public void append(int key, boolean value) {
         mStorage.append(key, value);
-        dispatchChange();
+        onChanged();
     }
 
     @Override
@@ -232,5 +231,31 @@ public class WatchedSparseBooleanArray extends WatchableImpl {
     @Override
     public String toString() {
         return mStorage.toString();
+    }
+
+    /**
+     * Create a snapshot.  The snapshot does not include any {@link Watchable}
+     * information.
+     */
+    public WatchedSparseBooleanArray snapshot() {
+        WatchedSparseBooleanArray l = new WatchedSparseBooleanArray(this);
+        l.seal();
+        return l;
+    }
+
+    /**
+     * Make <this> a snapshot of the argument.  Note that <this> is immutable when the
+     * method returns.  <this> must be empty when the function is called.
+     * @param r The source array, which is copied into <this>
+     */
+    public void snapshot(@NonNull WatchedSparseBooleanArray r) {
+        if (size() != 0) {
+            throw new IllegalArgumentException("snapshot destination is not empty");
+        }
+        final int end = r.size();
+        for (int i = 0; i < end; i++) {
+            put(r.keyAt(i), r.valueAt(i));
+        }
+        seal();
     }
 }

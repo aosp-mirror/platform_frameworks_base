@@ -27,6 +27,8 @@ import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 import static android.os.Process.SYSTEM_UID;
 import static android.view.View.VISIBLE;
+import static android.view.WindowManager.DISPLAY_IME_POLICY_FALLBACK_DISPLAY;
+import static android.view.WindowManager.DISPLAY_IME_POLICY_LOCAL;
 import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.LAST_APPLICATION_WINDOW;
@@ -40,8 +42,6 @@ import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_NOTIFICATION_SHADE;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
-import static android.view.WindowManager.DISPLAY_IME_POLICY_LOCAL;
-import static android.view.WindowManager.DISPLAY_IME_POLICY_FALLBACK_DISPLAY;
 
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
@@ -64,7 +64,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
-import android.content.res.Configuration;
 import android.hardware.display.DisplayManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -797,7 +796,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
                 mTask = new TaskBuilder(mService.mTaskSupervisor)
                         .setComponent(mComponent)
                         .setParentTask(mParentTask).build();
-            } else if (mTask == null && mParentTask != null && DisplayContent.alwaysCreateStack(
+            } else if (mTask == null && mParentTask != null && DisplayContent.alwaysCreateRootTask(
                     mParentTask.getWindowingMode(), mParentTask.getActivityType())) {
                 // The stack can be the task root.
                 mTask = mParentTask;
@@ -831,13 +830,14 @@ class WindowTestsBase extends SystemServiceTestsBase {
             if (mLaunchTaskBehind) {
                 options = ActivityOptions.makeTaskLaunchBehind();
             }
+            final ActivityRecord activity = new ActivityRecord.Builder(mService)
+                    .setLaunchedFromPid(mLaunchedFromPid)
+                    .setLaunchedFromUid(mLaunchedFromUid)
+                    .setIntent(intent)
+                    .setActivityInfo(aInfo)
+                    .setActivityOptions(options)
+                    .build();
 
-            final ActivityRecord activity = new ActivityRecord(mService, null /* caller */,
-                    mLaunchedFromPid /* launchedFromPid */, mLaunchedFromUid /* launchedFromUid */,
-                    null, null, intent, null, aInfo /*aInfo*/, new Configuration(),
-                    null /* resultTo */, null /* resultWho */, 0 /* reqCode */,
-                    false /*componentSpecified*/, false /* rootVoiceInteraction */,
-                    mService.mTaskSupervisor, options, null /* sourceRecord */);
             spyOn(activity);
             if (mTask != null) {
                 // fullscreen value is normally read from resources in ctor, so for testing we need
@@ -871,7 +871,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
                     activity.processName, activity.info.applicationInfo.uid);
 
             // Resume top activities to make sure all other signals in the system are connected.
-            mService.mRootWindowContainer.resumeFocusedStacksTopActivities();
+            mService.mRootWindowContainer.resumeFocusedTasksTopActivities();
             return activity;
         }
     }
@@ -995,7 +995,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
 
             // Create parent task.
             if (mParentTask == null && mCreateParentTask) {
-                mParentTask = mTaskDisplayArea.createStack(
+                mParentTask = mTaskDisplayArea.createRootTask(
                         WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
             }
             if (mParentTask != null && !Mockito.mockingDetails(mParentTask).isSpy()) {
@@ -1020,9 +1020,9 @@ class WindowTestsBase extends SystemServiceTestsBase {
             }
 
             Task task;
-            final int taskId = mTaskId >= 0 ? mTaskId : mTaskDisplayArea.getNextStackId();
+            final int taskId = mTaskId >= 0 ? mTaskId : mTaskDisplayArea.getNextRootTaskId();
             if (mParentTask == null) {
-                task = mTaskDisplayArea.createStackUnchecked(
+                task = mTaskDisplayArea.createRootTaskUnchecked(
                         mWindowingMode, mActivityType, taskId, mOnTop, mActivityInfo, mIntent,
                         false /* createdByOrganizer */, false /* deferTaskAppear */,
                         null /* launchCookie */);
@@ -1114,8 +1114,8 @@ class WindowTestsBase extends SystemServiceTestsBase {
                     mSecondary.mRemoteToken.toWindowContainerToken());
             DisplayContent dc = mService.mRootWindowContainer.getDisplayContent(mDisplayId);
             dc.forAllTaskDisplayAreas(taskDisplayArea -> {
-                for (int sNdx = taskDisplayArea.getStackCount() - 1; sNdx >= 0; --sNdx) {
-                    final Task stack = taskDisplayArea.getStackAt(sNdx);
+                for (int sNdx = taskDisplayArea.getRootTaskCount() - 1; sNdx >= 0; --sNdx) {
+                    final Task stack = taskDisplayArea.getRootTaskAt(sNdx);
                     if (!WindowConfiguration.isSplitScreenWindowingMode(stack.getWindowingMode())) {
                         stack.reparent(mSecondary, POSITION_BOTTOM);
                     }

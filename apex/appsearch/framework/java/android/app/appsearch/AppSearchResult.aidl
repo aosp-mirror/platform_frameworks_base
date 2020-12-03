@@ -16,4 +16,4 @@
 package android.app.appsearch;
 
 /** {@hide} */
-parcelable AppSearchResult;
+parcelable AppSearchResult<ValueType>;

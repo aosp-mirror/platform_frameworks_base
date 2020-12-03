@@ -5932,8 +5932,7 @@ public class Notification implements Parcelable
             }
 
             int color;
-            int background = mContext.getColor(
-                    com.android.internal.R.color.notification_material_background_color);
+            int background = obtainBackgroundColor();
             if (rawColor == COLOR_DEFAULT) {
                 ensureColors(p);
                 color = ContrastColorUtil.resolveDefaultColor(mContext, background, mInNightMode);
@@ -5966,8 +5965,7 @@ public class Notification implements Parcelable
             if (mNeutralColor != COLOR_INVALID) {
                 return mNeutralColor;
             }
-            int background = mContext.getColor(
-                    com.android.internal.R.color.notification_material_background_color);
+            int background = obtainBackgroundColor();
             mNeutralColor = ContrastColorUtil.resolveDefaultColor(mContext, background,
                     mInNightMode);
             if (Color.alpha(mNeutralColor) < 255) {
@@ -6118,6 +6116,21 @@ public class Notification implements Parcelable
             return mN;
         }
 
+        private @ColorInt int obtainBackgroundColor() {
+            int defaultColor = mInNightMode ? Color.BLACK : Color.WHITE;
+            Resources.Theme theme = mContext.getTheme();
+            if (theme == null) {
+                return defaultColor;
+            }
+            TypedArray ta = theme.obtainStyledAttributes(new int[]{R.attr.colorBackground});
+            if (ta == null) {
+                return defaultColor;
+            }
+            int background = ta.getColor(0, defaultColor);
+            ta.recycle();
+            return background;
+        }
+
         /**
          * Apply this Builder to an existing {@link Notification} object.
          *
@@ -6251,8 +6264,7 @@ public class Notification implements Parcelable
         private int resolveBackgroundColor(StandardTemplateParams p) {
             int backgroundColor = getBackgroundColor(p);
             if (backgroundColor == COLOR_DEFAULT) {
-                backgroundColor = mContext.getColor(
-                        com.android.internal.R.color.notification_material_background_color);
+                backgroundColor = obtainBackgroundColor();
             }
             return backgroundColor;
         }

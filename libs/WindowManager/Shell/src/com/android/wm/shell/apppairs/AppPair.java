@@ -136,13 +136,6 @@ class AppPair implements ShellTaskOrganizer.TaskListener {
         mAppPairLayout = null;
     }
 
-    void setVisible(boolean visible) {
-        if (mAppPairLayout == null) {
-            return;
-        }
-        mAppPairLayout.setDividerVisibility(visible);
-    }
-
     @Override
     public void onTaskAppeared(ActivityManager.RunningTaskInfo taskInfo, SurfaceControl leash) {
         if (mRootTaskInfo == null || taskInfo.taskId == mRootTaskInfo.taskId) {
@@ -160,32 +153,41 @@ class AppPair implements ShellTaskOrganizer.TaskListener {
 
         if (mTaskLeash1 == null || mTaskLeash2 == null) return;
 
-        setVisible(true);
+        mAppPairLayout.init();
         final SurfaceControl dividerLeash = mAppPairLayout.getDividerLeash();
         final Rect dividerBounds = mAppPairLayout.getDividerBounds();
 
         // TODO: Is there more we need to do here?
-        mSyncQueue.runInSync(t -> t
-                .setPosition(mTaskLeash1, mTaskInfo1.positionInParent.x,
-                        mTaskInfo1.positionInParent.y)
-                .setPosition(mTaskLeash2, mTaskInfo2.positionInParent.x,
-                        mTaskInfo2.positionInParent.y)
-                .setLayer(dividerLeash, Integer.MAX_VALUE)
-                .setPosition(dividerLeash, dividerBounds.left, dividerBounds.top)
-                .show(mRootTaskLeash)
-                .show(dividerLeash)
-                .show(mTaskLeash1)
-                .show(mTaskLeash2));
+        mSyncQueue.runInSync(t -> {
+            t.setPosition(mTaskLeash1, mTaskInfo1.positionInParent.x,
+                    mTaskInfo1.positionInParent.y)
+                    .setPosition(mTaskLeash2, mTaskInfo2.positionInParent.x,
+                            mTaskInfo2.positionInParent.y)
+                    .setLayer(dividerLeash, Integer.MAX_VALUE)
+                    .setPosition(dividerLeash, dividerBounds.left, dividerBounds.top)
+                    .show(mRootTaskLeash)
+                    .show(mTaskLeash1)
+                    .show(mTaskLeash2);
+        });
     }
 
     @Override
     public void onTaskInfoChanged(ActivityManager.RunningTaskInfo taskInfo) {
         if (taskInfo.taskId == getRootTaskId()) {
+            if (mRootTaskInfo.isVisible != taskInfo.isVisible) {
+                mSyncQueue.runInSync(t -> {
+                    if (taskInfo.isVisible) {
+                        t.show(mRootTaskLeash);
+                    } else {
+                        t.hide(mRootTaskLeash);
+                    }
+                });
+            }
             mRootTaskInfo = taskInfo;
 
             if (mAppPairLayout != null
                     && mAppPairLayout.updateConfiguration(mRootTaskInfo.configuration)) {
-                // Update bounds when there is root bounds or orientation changed.
+                // Update bounds when root bounds or its orientation changed.
                 final WindowContainerTransaction wct = new WindowContainerTransaction();
                 final SurfaceControl dividerLeash = mAppPairLayout.getDividerLeash();
                 final Rect dividerBounds = mAppPairLayout.getDividerBounds();

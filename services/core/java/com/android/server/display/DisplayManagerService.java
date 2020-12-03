@@ -53,6 +53,7 @@ import android.hardware.display.AmbientBrightnessDayStats;
 import android.hardware.display.BrightnessChangeEvent;
 import android.hardware.display.BrightnessConfiguration;
 import android.hardware.display.Curve;
+import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManagerGlobal;
 import android.hardware.display.DisplayManagerInternal;
 import android.hardware.display.DisplayManagerInternal.DisplayTransactionListener;
@@ -1252,9 +1253,17 @@ public final class DisplayManagerService extends SystemService {
         mDisplayModeDirector.setShouldAlwaysRespectAppRequestedMode(enabled);
     }
 
-
     boolean shouldAlwaysRespectAppRequestedModeInternal() {
         return mDisplayModeDirector.shouldAlwaysRespectAppRequestedMode();
+    }
+
+    void setRefreshRateSwitchingTypeInternal(@DisplayManager.SwitchingType int newValue) {
+        mDisplayModeDirector.setModeSwitchingType(newValue);
+    }
+
+    @DisplayManager.SwitchingType
+    int getRefreshRateSwitchingTypeInternal() {
+        return mDisplayModeDirector.getModeSwitchingType();
     }
 
     private void setBrightnessConfigurationForUserInternal(
@@ -2590,6 +2599,32 @@ public final class DisplayManagerService extends SystemService {
             final long token = Binder.clearCallingIdentity();
             try {
                 return shouldAlwaysRespectAppRequestedModeInternal();
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override // Binder call
+        public void setRefreshRateSwitchingType(int newValue) {
+            mContext.enforceCallingOrSelfPermission(
+                    Manifest.permission.MODIFY_REFRESH_RATE_SWITCHING_TYPE,
+                    "Permission required to modify refresh rate switching type.");
+            final long token = Binder.clearCallingIdentity();
+            try {
+                setRefreshRateSwitchingTypeInternal(newValue);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override // Binder call
+        public int getRefreshRateSwitchingType() {
+            mContext.enforceCallingOrSelfPermission(
+                    Manifest.permission.MODIFY_REFRESH_RATE_SWITCHING_TYPE,
+                    "Permission required read refresh rate switching type.");
+            final long token = Binder.clearCallingIdentity();
+            try {
+                return getRefreshRateSwitchingTypeInternal();
             } finally {
                 Binder.restoreCallingIdentity(token);
             }

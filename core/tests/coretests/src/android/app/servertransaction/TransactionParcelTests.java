@@ -52,6 +52,7 @@ import android.os.Parcelable;
 import android.os.PersistableBundle;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
+import android.os.SharedMemory;
 import android.platform.test.annotations.Presubmit;
 import android.view.DisplayAdjustments.FixedRotationAdjustments;
 import android.view.DisplayCutout;
@@ -440,7 +441,8 @@ public class TransactionParcelTests {
                 IUiAutomationConnection iUiAutomationConnection, int i, boolean b, boolean b1,
                 boolean b2, boolean b3, Configuration configuration,
                 CompatibilityInfo compatibilityInfo, Map map, Bundle bundle1, String s1,
-                AutofillOptions ao, ContentCaptureOptions co, long[] disableCompatChanges)
+                AutofillOptions ao, ContentCaptureOptions co, long[] disableCompatChanges,
+                SharedMemory serializedSystemFontMap)
                 throws RemoteException {
         }
 

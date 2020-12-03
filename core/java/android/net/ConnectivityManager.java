@@ -684,7 +684,7 @@ public class ConnectivityManager {
      * {@hide}
      */
     @Deprecated
-    @UnsupportedAppUsage
+    @SystemApi
     public static final int TYPE_PROXY = 16;
 
     /**

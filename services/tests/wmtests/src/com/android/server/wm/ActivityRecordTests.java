@@ -155,7 +155,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         final Task rootTask = activity.getRootTask();
         rootTask.removeChild(task, null /*reason*/);
         // parentTask should be gone on task removal.
-        assertNull(mAtm.mRootWindowContainer.getStack(rootTask.mTaskId));
+        assertNull(mAtm.mRootWindowContainer.getRootTask(rootTask.mTaskId));
     }
 
     @Test
@@ -384,6 +384,7 @@ public class ActivityRecordTests extends WindowTestsBase {
                 .build();
         final Task task = activity.getTask();
         activity.setState(DESTROYED, "Testing");
+        clearInvocations(mAtm.getLifecycleManager());
 
         final Configuration newConfig = new Configuration(task.getConfiguration());
         newConfig.orientation = newConfig.orientation == ORIENTATION_PORTRAIT
@@ -408,6 +409,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         activity.setLastReportedConfiguration(new MergedConfiguration(new Configuration(),
                 activity.getConfiguration()));
 
+        clearInvocations(mAtm.getLifecycleManager());
         final Configuration newConfig = new Configuration(activity.getConfiguration());
         final int shortSide = Math.min(newConfig.screenWidthDp, newConfig.screenHeightDp);
         final int longSide = Math.max(newConfig.screenWidthDp, newConfig.screenHeightDp);
@@ -596,6 +598,7 @@ public class ActivityRecordTests extends WindowTestsBase {
 
         final Task stack = new TaskBuilder(mSupervisor).setCreateActivity(true).build();
         try {
+            clearInvocations(mAtm.getLifecycleManager());
             doReturn(false).when(stack).isTranslucent(any());
             assertTrue(task.shouldBeVisible(null /* starting */));
 
@@ -875,7 +878,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         topRootableTask.moveToFront("test");
         assertTrue(topRootableTask.isTopStackInDisplayArea());
         assertEquals(topRootableTask, topActivityOnNonTopDisplay.getDisplayArea()
-                .mPreferredTopFocusableStack);
+                .mPreferredTopFocusableRootTask);
 
         final ActivityRecord secondaryDisplayActivity =
                 createActivityOnDisplay(false /* defaultDisplay */, null /* process */);
@@ -883,7 +886,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         topRootableTask.moveToFront("test");
         assertTrue(topRootableTask.isTopStackInDisplayArea());
         assertEquals(topRootableTask,
-                secondaryDisplayActivity.getDisplayArea().mPreferredTopFocusableStack);
+                secondaryDisplayActivity.getDisplayArea().mPreferredTopFocusableRootTask);
 
         // The global top focus activity is on secondary display now.
         // Finish top activity on default display and verify the next preferred top focusable stack
@@ -892,7 +895,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         topActivityOnNonTopDisplay.finishIfPossible(0 /* resultCode */, null /* resultData */,
                 null /* resultGrants */, "test", false /* oomAdj */);
         assertEquals(task, task.getTopMostTask());
-        assertEquals(task, activity.getDisplayArea().mPreferredTopFocusableStack);
+        assertEquals(task, activity.getDisplayArea().mPreferredTopFocusableRootTask);
     }
 
     /**
@@ -1297,7 +1300,7 @@ public class ActivityRecordTests extends WindowTestsBase {
     @Test
     public void testDestroyIfPossible() {
         final ActivityRecord activity = createActivityWithTask();
-        doReturn(false).when(mRootWindowContainer).resumeFocusedStacksTopActivities();
+        doReturn(false).when(mRootWindowContainer).resumeFocusedTasksTopActivities();
         activity.destroyIfPossible("test");
 
         assertEquals(DESTROYING, activity.getState());
@@ -1319,7 +1322,7 @@ public class ActivityRecordTests extends WindowTestsBase {
             homeStack.removeChild(t, "test");
         }, true /* traverseTopToBottom */);
         activity.finishing = true;
-        doReturn(false).when(mRootWindowContainer).resumeFocusedStacksTopActivities();
+        doReturn(false).when(mRootWindowContainer).resumeFocusedTasksTopActivities();
 
         // Try to destroy the last activity above the home stack.
         activity.destroyIfPossible("test");

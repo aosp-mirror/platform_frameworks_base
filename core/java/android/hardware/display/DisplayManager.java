@@ -19,6 +19,7 @@ package android.hardware.display;
 import static android.view.Display.DEFAULT_DISPLAY;
 
 import android.Manifest;
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -38,8 +39,11 @@ import android.util.SparseArray;
 import android.view.Display;
 import android.view.Surface;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
+
 
 /**
  * Manages the properties of attached displays.
@@ -335,6 +339,40 @@ public final class DisplayManager {
      * @hide
      */
     public static final int VIRTUAL_DISPLAY_FLAG_OWN_DISPLAY_GROUP = 1 << 11;
+
+
+    /** @hide */
+    @IntDef(prefix = {"SWITCHING_TYPE_"}, value = {
+            SWITCHING_TYPE_NONE,
+            SWITCHING_TYPE_WITHIN_GROUPS,
+            SWITCHING_TYPE_ACROSS_AND_WITHIN_GROUPS,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface SwitchingType {}
+
+    /**
+     * No mode switching will happen.
+     * @hide
+     */
+    @TestApi
+    public static final int SWITCHING_TYPE_NONE = 0;
+
+    /**
+     * Allow only refresh rate switching between modes in the same configuration group. This way
+     * only switches without visual interruptions for the user will be allowed.
+     * @hide
+     */
+    @TestApi
+    public static final int SWITCHING_TYPE_WITHIN_GROUPS = 1;
+
+    /**
+     * Allow refresh rate switching between all refresh rates even if the switch with have visual
+     * interruptions for the user.
+     * @hide
+     */
+    @TestApi
+    public static final int SWITCHING_TYPE_ACROSS_AND_WITHIN_GROUPS = 2;
+
 
     /** @hide */
     public DisplayManager(Context context) {
@@ -872,6 +910,29 @@ public final class DisplayManager {
     @RequiresPermission(Manifest.permission.OVERRIDE_DISPLAY_MODE_REQUESTS)
     public boolean shouldAlwaysRespectAppRequestedMode() {
         return mGlobal.shouldAlwaysRespectAppRequestedMode();
+    }
+
+    /**
+     * Sets the refresh rate switching type.
+     * This matches {@link android.provider.Settings.Secure.MATCH_CONTENT_FRAME_RATE}
+     *
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(Manifest.permission.MODIFY_REFRESH_RATE_SWITCHING_TYPE)
+    public void setRefreshRateSwitchingType(@SwitchingType int newValue) {
+        mGlobal.setRefreshRateSwitchingType(newValue);
+    }
+
+    /**
+     * Returns the refresh rate switching type.
+     *
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(Manifest.permission.MODIFY_REFRESH_RATE_SWITCHING_TYPE)
+    @SwitchingType public int getRefreshRateSwitchingType() {
+        return mGlobal.getRefreshRateSwitchingType();
     }
 
     /**

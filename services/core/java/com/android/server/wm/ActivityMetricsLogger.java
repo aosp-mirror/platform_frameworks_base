@@ -425,20 +425,20 @@ class ActivityMetricsLogger {
         mLastLogTimeSecs = now;
 
         mWindowState = WINDOW_STATE_INVALID;
-        Task stack = mSupervisor.mRootWindowContainer.getTopDisplayFocusedStack();
-        if (stack == null) {
+        Task rootTask = mSupervisor.mRootWindowContainer.getTopDisplayFocusedRootTask();
+        if (rootTask == null) {
             return;
         }
 
-        if (stack.isActivityTypeAssistant()) {
+        if (rootTask.isActivityTypeAssistant()) {
             mWindowState = WINDOW_STATE_ASSISTANT;
             return;
         }
 
-        @WindowingMode int windowingMode = stack.getWindowingMode();
+        @WindowingMode int windowingMode = rootTask.getWindowingMode();
         if (windowingMode == WINDOWING_MODE_PINNED) {
-            stack = mSupervisor.mRootWindowContainer.findStackBehind(stack);
-            windowingMode = stack.getWindowingMode();
+            rootTask = mSupervisor.mRootWindowContainer.findRootTaskBehind(rootTask);
+            windowingMode = rootTask.getWindowingMode();
         }
         switch (windowingMode) {
             case WINDOWING_MODE_FULLSCREEN:
@@ -456,7 +456,7 @@ class ActivityMetricsLogger {
                 break;
             default:
                 if (windowingMode != WINDOWING_MODE_UNDEFINED) {
-                    throw new IllegalStateException("Unknown windowing mode for stack=" + stack
+                    throw new IllegalStateException("Unknown windowing mode for task=" + rootTask
                             + " windowingMode=" + windowingMode);
                 }
         }

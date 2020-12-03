@@ -125,6 +125,7 @@ android_library {
         "protolog-lib",
         "SettingsLib",
         "WindowManager-Shell-proto",
+        "jsr330"
     ],
     kotlincflags: ["-Xjvm-default=enable"],
     manifest: "AndroidManifest.xml",

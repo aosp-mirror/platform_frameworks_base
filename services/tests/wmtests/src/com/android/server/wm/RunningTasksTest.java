@@ -71,7 +71,7 @@ public class RunningTasksTest extends WindowTestsBase {
         final int numTasks = 10;
         int activeTime = 0;
         for (int i = 0; i < numTasks; i++) {
-            createTask(display.getDefaultTaskDisplayArea().getStackAt(i % numStacks),
+            createTask(display.getDefaultTaskDisplayArea().getRootTaskAt(i % numStacks),
                     ".Task" + i, i, activeTime++, null);
         }
 

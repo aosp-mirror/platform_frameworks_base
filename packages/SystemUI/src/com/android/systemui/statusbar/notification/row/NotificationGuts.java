@@ -19,7 +19,6 @@ package com.android.systemui.statusbar.notification.row;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
-import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -35,7 +34,6 @@ import android.widget.FrameLayout;
 import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
@@ -168,9 +166,6 @@ public class NotificationGuts extends FrameLayout {
                 }
             }
         };
-        final TypedArray ta = context.obtainStyledAttributes(attrs,
-                com.android.internal.R.styleable.Theme, 0, 0);
-        ta.recycle();
     }
 
     public NotificationGuts(Context context) {

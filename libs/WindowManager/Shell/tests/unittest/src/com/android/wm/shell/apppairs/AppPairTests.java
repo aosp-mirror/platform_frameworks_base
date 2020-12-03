@@ -34,7 +34,6 @@ import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.SyncTransactionQueue;
-import com.android.wm.shell.common.TaskStackListenerImpl;
 
 import org.junit.After;
 import org.junit.Before;
@@ -52,7 +51,6 @@ public class AppPairTests extends ShellTestCase {
     @Mock private SyncTransactionQueue mSyncQueue;
     @Mock private ShellTaskOrganizer mTaskOrganizer;
     @Mock private DisplayController mDisplayController;
-    @Mock private TaskStackListenerImpl mTaskStackListener;
 
     @Before
     public void setUp() {
@@ -60,8 +58,7 @@ public class AppPairTests extends ShellTestCase {
         mController = new TestAppPairsController(
                 mTaskOrganizer,
                 mSyncQueue,
-                mDisplayController,
-                mTaskStackListener);
+                mDisplayController);
         when(mDisplayController.getDisplayContext(anyInt())).thenReturn(mContext);
         when(mDisplayController.getDisplay(anyInt())).thenReturn(
                 mContext.getSystemService(DisplayManager.class).getDisplay(DEFAULT_DISPLAY));

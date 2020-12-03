@@ -16,20 +16,20 @@
 
 package com.android.systemui.screenshot;
 
-import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.view.Display.DEFAULT_DISPLAY;
+import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
+import static android.view.WindowManager.LayoutParams.TYPE_SCREENSHOT;
 
 import static java.util.Objects.requireNonNull;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.Nullable;
-import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.res.Configuration;
+import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
 import android.graphics.Insets;
 import android.graphics.PixelFormat;
@@ -52,7 +52,8 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.SurfaceControl;
 import android.view.View;
-import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
@@ -60,6 +61,8 @@ import android.widget.Toast;
 
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
 import com.android.internal.logging.UiEventLogger;
+import com.android.internal.policy.PhoneWindow;
+import com.android.settingslib.applications.InterestingConfigChanges;
 import com.android.systemui.R;
 import com.android.systemui.util.DeviceConfigProxy;
 
@@ -141,12 +144,13 @@ public class ScreenshotController {
 
     private final WindowManager mWindowManager;
     private final WindowManager.LayoutParams mWindowLayoutParams;
-    private final Display mDisplay;
     private final DisplayMetrics mDisplayMetrics;
     private final AccessibilityManager mAccessibilityManager;
     private final MediaActionSound mCameraSound;
     private final ScrollCaptureClient mScrollCaptureClient;
     private final DeviceConfigProxy mConfigProxy;
+    private final PhoneWindow mWindow;
+    private final View mDecorView;
 
     private final Binder mWindowToken;
     private ScreenshotView mScreenshotView;
@@ -156,9 +160,6 @@ public class ScreenshotController {
     private Animator mScreenshotAnimation;
 
     private Runnable mOnCompleteRunnable;
-    private boolean mInDarkMode;
-    private boolean mDirectionLTR;
-    private boolean mOrientationPortrait;
 
     private final Handler mScreenshotHandler = new Handler(Looper.getMainLooper()) {
         @Override
@@ -174,6 +175,15 @@ public class ScreenshotController {
         }
     };
 
+    /** Tracks config changes that require re-creating UI */
+    private final InterestingConfigChanges mConfigChanges = new InterestingConfigChanges(
+            ActivityInfo.CONFIG_ORIENTATION
+                    | ActivityInfo.CONFIG_LAYOUT_DIRECTION
+                    | ActivityInfo.CONFIG_LOCALE
+                    | ActivityInfo.CONFIG_UI_MODE
+                    | ActivityInfo.CONFIG_SCREEN_LAYOUT
+                    | ActivityInfo.CONFIG_ASSETS_PATHS);
+
     @Inject
     ScreenshotController(
             Context context,
@@ -188,25 +198,20 @@ public class ScreenshotController {
         mUiEventLogger = uiEventLogger;
 
         final DisplayManager dm = requireNonNull(context.getSystemService(DisplayManager.class));
-        mDisplay = dm.getDisplay(DEFAULT_DISPLAY);
-        mContext = context.createDisplayContext(mDisplay);
+        final Display display = dm.getDisplay(DEFAULT_DISPLAY);
+        final Context displayContext = context.createDisplayContext(display);
+        mContext = displayContext.createWindowContext(TYPE_SCREENSHOT, null);
         mWindowManager = mContext.getSystemService(WindowManager.class);
 
         mAccessibilityManager = AccessibilityManager.getInstance(mContext);
         mConfigProxy = configProxy;
 
-        reloadAssets();
-        Configuration config = mContext.getResources().getConfiguration();
-        mInDarkMode = config.isNightModeActive();
-        mDirectionLTR = config.getLayoutDirection() == View.LAYOUT_DIRECTION_LTR;
-        mOrientationPortrait = config.orientation == ORIENTATION_PORTRAIT;
         mWindowToken = new Binder("ScreenshotController");
         mScrollCaptureClient.setHostWindowToken(mWindowToken);
 
         // Setup the window that we are going to use
         mWindowLayoutParams = new WindowManager.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT, 0, 0,
-                WindowManager.LayoutParams.TYPE_SCREENSHOT,
+                MATCH_PARENT, MATCH_PARENT, /* xpos */ 0, /* ypos */ 0, TYPE_SCREENSHOT,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN
                         | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
                         | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
@@ -217,13 +222,21 @@ public class ScreenshotController {
         mWindowLayoutParams.setTitle("ScreenshotAnimation");
         mWindowLayoutParams.layoutInDisplayCutoutMode =
                 WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
-        mWindowLayoutParams.setFitInsetsTypes(0 /* types */);
         mWindowLayoutParams.token = mWindowToken;
         // This is needed to let touches pass through outside the touchable areas
         mWindowLayoutParams.privateFlags |= WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY;
 
+        mWindow = new PhoneWindow(mContext);
+        mWindow.setWindowManager(mWindowManager, null, null);
+        mWindow.requestFeature(Window.FEATURE_NO_TITLE);
+        mWindow.requestFeature(Window.FEATURE_ACTIVITY_TRANSITIONS);
+        mWindow.setBackgroundDrawableResource(android.R.color.transparent);
+        mDecorView = mWindow.getDecorView();
+
+        reloadAssets();
+
         mDisplayMetrics = new DisplayMetrics();
-        mDisplay.getRealMetrics(mDisplayMetrics);
+        display.getRealMetrics(mDisplayMetrics);
 
         // Setup the Camera shutter sound
         mCameraSound = new MediaActionSound();
@@ -233,7 +246,6 @@ public class ScreenshotController {
     void takeScreenshotFullscreen(Consumer<Uri> finisher, Runnable onComplete) {
         mOnCompleteRunnable = onComplete;
 
-        mDisplay.getRealMetrics(mDisplayMetrics);
         takeScreenshotInternal(
                 finisher,
                 new Rect(0, 0, mDisplayMetrics.widthPixels, mDisplayMetrics.heightPixels));
@@ -254,19 +266,18 @@ public class ScreenshotController {
             return;
         }
 
-        if (aspectRatiosMatch(screenshot, visibleInsets, screenshotScreenBounds)) {
-            saveScreenshot(screenshot, finisher, screenshotScreenBounds, visibleInsets, false);
-        } else {
-            saveScreenshot(screenshot, finisher,
-                    new Rect(0, 0, screenshot.getWidth(), screenshot.getHeight()), Insets.NONE,
-                    true);
+        boolean showFlash = false;
+        if (!aspectRatiosMatch(screenshot, visibleInsets, screenshotScreenBounds)) {
+            showFlash = true;
+            visibleInsets = Insets.NONE;
+            screenshotScreenBounds.set(0, 0, screenshot.getWidth(), screenshot.getHeight());
         }
+        saveScreenshot(screenshot, finisher, screenshotScreenBounds, visibleInsets, showFlash);
     }
 
     /**
      * Displays a screenshot selector
      */
-    @SuppressLint("ClickableViewAccessibility")
     void takeScreenshotPartial(final Consumer<Uri> finisher, Runnable onComplete) {
         dismissScreenshot(true);
         mOnCompleteRunnable = onComplete;
@@ -296,69 +307,26 @@ public class ScreenshotController {
         }
     }
 
-    private void onConfigChanged(Configuration newConfig) {
-        boolean needsUpdate = false;
-        // dark mode
-        if (newConfig.isNightModeActive()) {
-            // Night mode is active, we're using dark theme
-            if (!mInDarkMode) {
-                mInDarkMode = true;
-                needsUpdate = true;
-            }
-        } else {
-            // Night mode is not active, we're using the light theme
-            if (mInDarkMode) {
-                mInDarkMode = false;
-                needsUpdate = true;
-            }
-        }
-
-        // RTL configuration
-        switch (newConfig.getLayoutDirection()) {
-            case View.LAYOUT_DIRECTION_LTR:
-                if (!mDirectionLTR) {
-                    mDirectionLTR = true;
-                    needsUpdate = true;
-                }
-                break;
-            case View.LAYOUT_DIRECTION_RTL:
-                if (mDirectionLTR) {
-                    mDirectionLTR = false;
-                    needsUpdate = true;
-                }
-                break;
-        }
-
-        // portrait/landscape orientation
-        switch (newConfig.orientation) {
-            case ORIENTATION_PORTRAIT:
-                if (!mOrientationPortrait) {
-                    mOrientationPortrait = true;
-                    needsUpdate = true;
-                }
-                break;
-            case ORIENTATION_LANDSCAPE:
-                if (mOrientationPortrait) {
-                    mOrientationPortrait = false;
-                    needsUpdate = true;
-                }
-                break;
-        }
-
-        if (needsUpdate) {
-            reloadAssets();
-        }
-    }
-
     /**
      * Update assets (called when the dark theme status changes). We only need to update the dismiss
      * button and the actions container background, since the buttons are re-inflated on demand.
      */
     private void reloadAssets() {
-        boolean wasAttached = mScreenshotView != null && mScreenshotView.isAttachedToWindow();
+        boolean wasAttached = mDecorView.isAttachedToWindow();
         if (wasAttached) {
-            mWindowManager.removeView(mScreenshotView);
+            mWindowManager.removeView(mDecorView);
         }
+
+        // respect the display cutout in landscape (since we'd otherwise overlap) but not portrait
+        int orientation = mContext.getResources().getConfiguration().orientation;
+        mWindowLayoutParams.setFitInsetsTypes(
+                orientation == ORIENTATION_PORTRAIT ? 0 : WindowInsets.Type.displayCutout());
+
+        // ignore system bar insets for the purpose of window layout
+        mDecorView.setOnApplyWindowInsetsListener((v, insets) -> v.onApplyWindowInsets(
+                new WindowInsets.Builder(insets)
+                        .setInsets(WindowInsets.Type.all(), Insets.NONE)
+                        .build()));
 
         // Inflate the screenshot layout
         mScreenshotView = (ScreenshotView)
@@ -382,9 +350,8 @@ public class ScreenshotController {
             return false;
         });
 
-        if (wasAttached) {
-            mWindowManager.addView(mScreenshotView, mWindowLayoutParams);
-        }
+        // view is added to window manager in startAnimation
+        mWindow.setContentView(mScreenshotView, mWindowLayoutParams);
     }
 
     /**
@@ -448,7 +415,9 @@ public class ScreenshotController {
         mScreenBitmap.setHasAlpha(false);
         mScreenBitmap.prepareToDraw();
 
-        onConfigChanged(mContext.getResources().getConfiguration());
+        if (mConfigChanges.applyNewConfig(mContext.getResources())) {
+            reloadAssets();
+        }
 
         // The window is focusable by default
         setWindowFocusable(true);
@@ -510,10 +479,10 @@ public class ScreenshotController {
         mScreenshotHandler.removeMessages(MESSAGE_CORNER_TIMEOUT);
         mScreenshotHandler.post(() -> {
             if (!mScreenshotView.isAttachedToWindow()) {
-                mWindowManager.addView(mScreenshotView, mWindowLayoutParams);
+                mWindowManager.addView(mWindow.getDecorView(), mWindowLayoutParams);
             }
 
-            mScreenshotView.prepareForAnimation(mScreenBitmap, screenRect, screenInsets);
+            mScreenshotView.prepareForAnimation(mScreenBitmap, screenInsets);
 
             mScreenshotHandler.post(() -> {
                 mScreenshotView.getViewTreeObserver().addOnComputeInternalInsetsListener(
@@ -541,7 +510,7 @@ public class ScreenshotController {
 
     private void resetScreenshotView() {
         if (mScreenshotView.isAttachedToWindow()) {
-            mWindowManager.removeView(mScreenshotView);
+            mWindowManager.removeView(mDecorView);
         }
         mScreenshotView.reset();
         mOnCompleteRunnable.run();
@@ -636,8 +605,8 @@ public class ScreenshotController {
         } else {
             mWindowLayoutParams.flags |= WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
         }
-        if (mScreenshotView.isAttachedToWindow()) {
-            mWindowManager.updateViewLayout(mScreenshotView, mWindowLayoutParams);
+        if (mDecorView.isAttachedToWindow()) {
+            mWindowManager.updateViewLayout(mDecorView, mWindowLayoutParams);
         }
     }
 

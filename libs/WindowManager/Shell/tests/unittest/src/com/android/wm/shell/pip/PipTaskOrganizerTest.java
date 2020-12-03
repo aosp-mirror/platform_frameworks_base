@@ -44,7 +44,7 @@ import android.window.WindowContainerToken;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.common.DisplayController;
-import com.android.wm.shell.pip.phone.PipMenuActivityController;
+import com.android.wm.shell.pip.phone.PhonePipMenuController;
 import com.android.wm.shell.splitscreen.SplitScreen;
 
 import org.junit.Before;
@@ -66,7 +66,7 @@ public class PipTaskOrganizerTest extends ShellTestCase {
 
     @Mock private DisplayController mMockdDisplayController;
     @Mock private PipBoundsAlgorithm mMockPipBoundsAlgorithm;
-    @Mock private PipMenuActivityController mMenuActivityController;
+    @Mock private PhonePipMenuController mMockPhonePipMenuController;
     @Mock private PipSurfaceTransactionHelper mMockPipSurfaceTransactionHelper;
     @Mock private PipUiEventLogger mMockPipUiEventLogger;
     @Mock private Optional<SplitScreen> mMockOptionalSplitScreen;
@@ -83,9 +83,9 @@ public class PipTaskOrganizerTest extends ShellTestCase {
         mComponent2 = new ComponentName(mContext, "component2");
         mPipBoundsState = new PipBoundsState(mContext);
         mSpiedPipTaskOrganizer = spy(new PipTaskOrganizer(mContext, mPipBoundsState,
-                mMockPipBoundsAlgorithm, mMenuActivityController, mMockPipSurfaceTransactionHelper,
-                mMockOptionalSplitScreen, mMockdDisplayController, mMockPipUiEventLogger,
-                mMockShellTaskOrganizer));
+                mMockPipBoundsAlgorithm, mMockPhonePipMenuController,
+                mMockPipSurfaceTransactionHelper, mMockOptionalSplitScreen, mMockdDisplayController,
+                mMockPipUiEventLogger, mMockShellTaskOrganizer));
         preparePipTaskOrg();
     }
 

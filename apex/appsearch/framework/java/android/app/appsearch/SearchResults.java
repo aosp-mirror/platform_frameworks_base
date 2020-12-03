@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,63 +16,123 @@
 
 package android.app.appsearch;
 
+import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.os.Bundle;
-import android.os.Parcel;
-import android.os.Parcelable;
+import android.os.RemoteException;
+import android.util.Log;
 
-import java.util.ArrayList;
+import com.android.internal.util.Preconditions;
+
+import java.io.Closeable;
 import java.util.List;
+import java.util.concurrent.Executor;
+import java.util.function.Consumer;
 
 /**
- * Structure for transmitting a page of search results across binder.
+ * SearchResults are a returned object from a query API.
+ *
+ * <p>Each {@link SearchResult} contains a document and may contain other fields like snippets
+ * based on request.
+ *
+ * <p>Should close this object after finish fetching results.
+ *
+ * <p>This class is not thread safe.
  * @hide
  */
-public final class SearchResults implements Parcelable {
-    final List<SearchResult> mResults;
-    final long mNextPageToken;
+public class SearchResults implements Closeable {
+    private static final String TAG = "SearchResults";
 
-    public SearchResults(@NonNull List<SearchResult> results, long nextPageToken) {
-        mResults = results;
-        mNextPageToken = nextPageToken;
+    private final IAppSearchManager mService;
+
+    @Nullable
+    private final String mDatabaseName;
+
+    private final String mQueryExpression;
+
+    private final SearchSpec mSearchSpec;
+
+    private final Executor mExecutor;
+
+    private long mNextPageToken;
+
+    private boolean mIsFirstLoad = true;
+
+    SearchResults(@NonNull IAppSearchManager service,
+            @Nullable String databaseName,
+            @NonNull String queryExpression,
+            @NonNull SearchSpec searchSpec,
+            @NonNull @CallbackExecutor Executor executor) {
+        mService = Preconditions.checkNotNull(service);
+        mExecutor = Preconditions.checkNotNull(executor);
+        mDatabaseName = databaseName;
+        mQueryExpression = Preconditions.checkNotNull(queryExpression);
+        mSearchSpec = Preconditions.checkNotNull(searchSpec);
     }
 
-    private SearchResults(@NonNull Parcel in) {
-        List<Bundle> resultBundles = in.readArrayList(/*loader=*/ null);
-        mResults = new ArrayList<>(resultBundles.size());
-        for (int i = 0; i < resultBundles.size(); i++) {
-            SearchResult searchResult = new SearchResult(resultBundles.get(i));
-            mResults.add(searchResult);
+    /**
+     * Gets a whole page of {@link SearchResult}s.
+     *
+     * <p>Re-call this method to get next page of {@link SearchResult}, until it returns an
+     * empty list.
+     *
+     * <p>The page size is set by {@link SearchSpec.Builder#setNumPerPage}.
+     *
+     * @param callback Callback to receive the pending result of performing this operation.
+     */
+    public void getNextPage(@NonNull Consumer<AppSearchResult<List<SearchResult>>> callback) {
+        try {
+            if (mIsFirstLoad) {
+                mIsFirstLoad = false;
+                if (mDatabaseName == null) {
+                    mService.globalQuery(mQueryExpression, mSearchSpec.getBundle(),
+                            wrapCallback(callback));
+                } else {
+                    mService.query(mDatabaseName, mQueryExpression, mSearchSpec.getBundle(),
+                            wrapCallback(callback));
+                }
+            } else {
+                mService.getNextPage(mNextPageToken, wrapCallback(callback));
+            }
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
-        mNextPageToken = in.readLong();
     }
 
+    private void invokeCallback(AppSearchResult result,
+            @NonNull Consumer<AppSearchResult<List<SearchResult>>> callback) {
+        if (result.isSuccess()) {
+            try {
+                SearchResultPage searchResultPage =
+                        new SearchResultPage((Bundle) result.getResultValue());
+                mNextPageToken = searchResultPage.getNextPageToken();
+                callback.accept(AppSearchResult.newSuccessfulResult(
+                        searchResultPage.getResults()));
+            } catch (Throwable t) {
+                callback.accept(AppSearchResult.throwableToFailedResult(t));
+            }
+        } else {
+            callback.accept(result);
+        }
+    }
     @Override
-    public void writeToParcel(@NonNull Parcel dest, int flags) {
-        List<Bundle> resultBundles = new ArrayList<>(mResults.size());
-        for (int i = 0; i < mResults.size(); i++) {
-            resultBundles.add(mResults.get(i).getBundle());
-        }
-        dest.writeList(resultBundles);
-        dest.writeLong(mNextPageToken);
+    public void close() {
+        mExecutor.execute(() -> {
+            try {
+                mService.invalidateNextPageToken(mNextPageToken);
+            } catch (RemoteException e) {
+                Log.d(TAG, "Unable to close the SearchResults", e);
+            }
+        });
     }
 
-    @Override
-    public int describeContents() {
-        return 0;
+    private IAppSearchResultCallback wrapCallback(
+            @NonNull Consumer<AppSearchResult<List<SearchResult>>> callback) {
+        return new IAppSearchResultCallback.Stub() {
+            public void onResult(AppSearchResult result) {
+                mExecutor.execute(() -> invokeCallback(result, callback));
+            }
+        };
     }
-
-    public static final Creator<SearchResults> CREATOR = new Creator<SearchResults>() {
-        @NonNull
-        @Override
-        public SearchResults createFromParcel(@NonNull Parcel in) {
-            return new SearchResults(in);
-        }
-
-        @NonNull
-        @Override
-        public SearchResults[] newArray(int size) {
-            return new SearchResults[size];
-        }
-    };
 }

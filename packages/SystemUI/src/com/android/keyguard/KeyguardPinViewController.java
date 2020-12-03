@@ -53,6 +53,12 @@ public class KeyguardPinViewController
     }
 
     @Override
+    public void reloadColors() {
+        super.reloadColors();
+        mView.reloadColors();
+    }
+
+    @Override
     void resetState() {
         super.resetState();
         mMessageAreaController.setMessage("");

@@ -41,7 +41,7 @@ import dagger.Provides;
  * Provides dependencies from {@link com.android.wm.shell} which could be customized among different
  * branches of SystemUI.
  */
-@Module(includes = {WMShellBaseModule.class, TvPipModule.class})
+@Module(includes = {TvPipModule.class})
 public class TvWMShellModule {
     @WMSingleton
     @Provides

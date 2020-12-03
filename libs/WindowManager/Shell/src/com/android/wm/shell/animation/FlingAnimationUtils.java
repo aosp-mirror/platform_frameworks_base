@@ -23,6 +23,8 @@ import android.view.ViewPropertyAnimator;
 import android.view.animation.Interpolator;
 import android.view.animation.PathInterpolator;
 
+import javax.inject.Inject;
+
 /**
  * Utility class to calculate general fling animation when the finger is released.
  */
@@ -368,6 +370,7 @@ public class FlingAnimationUtils {
         float mX2;
         float mY2;
 
+        @Inject
         public Builder(DisplayMetrics displayMetrics) {
             mDisplayMetrics = displayMetrics;
             reset();

@@ -252,6 +252,7 @@ import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ServiceManager;
+import android.os.SharedMemory;
 import android.os.ShellCallback;
 import android.os.StrictMode;
 import android.os.SystemClock;
@@ -348,6 +349,7 @@ import com.android.server.appop.AppOpsService;
 import com.android.server.compat.PlatformCompat;
 import com.android.server.contentcapture.ContentCaptureManagerInternal;
 import com.android.server.firewall.IntentFirewall;
+import com.android.server.graphics.fonts.FontManagerInternal;
 import com.android.server.job.JobSchedulerInternal;
 import com.android.server.pm.Installer;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
@@ -4358,6 +4360,11 @@ public class ActivityManagerService extends IActivityManager.Stub
                             app.info.packageName);
                 }
             }
+            SharedMemory serializedSystemFontMap = null;
+            final FontManagerInternal fm = LocalServices.getService(FontManagerInternal.class);
+            if (fm != null) {
+                serializedSystemFontMap = fm.getSerializedSystemFontMap();
+            }
 
             checkTime(startTime, "attachApplicationLocked: immediately before bindApplication");
             bindApplicationTimeMillis = SystemClock.elapsedRealtime();
@@ -4383,7 +4390,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         app.compat, getCommonServicesLocked(app.isolated),
                         mCoreSettingsObserver.getCoreSettingsLocked(),
                         buildSerial, autofillOptions, contentCaptureOptions,
-                        app.mDisabledCompatChanges);
+                        app.mDisabledCompatChanges, serializedSystemFontMap);
             } else {
                 thread.bindApplication(processName, appInfo, providerList, null, profilerInfo,
                         null, null, null, testMode,
@@ -4393,7 +4400,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         app.compat, getCommonServicesLocked(app.isolated),
                         mCoreSettingsObserver.getCoreSettingsLocked(),
                         buildSerial, autofillOptions, contentCaptureOptions,
-                        app.mDisabledCompatChanges);
+                        app.mDisabledCompatChanges, serializedSystemFontMap);
             }
             if (profilerInfo != null) {
                 profilerInfo.closeFd();

@@ -85,13 +85,46 @@ interface IAppSearchManager {
      * @param databaseName The databaseName this query for.
      * @param queryExpression String to search for
      * @param searchSpecBundle SearchSpec bundle
-     * @param callback {@link AndroidFuture}&lt;{@link AppSearchResult}&lt;{@link SearchResults}&gt;&gt;
+     * @param callback {@link AppSearchResult}&lt;{@link Bundle}&gt; of performing this
+     *         operation.
      */
     void query(
         in String databaseName,
         in String queryExpression,
         in Bundle searchSpecBundle,
-        in AndroidFuture<AppSearchResult> callback);
+        in IAppSearchResultCallback callback);
+
+    /**
+     * Executes a global query, i.e. over all permitted databases, against the AppSearch index and
+     * returns results.
+     *
+     * @param queryExpression String to search for
+     * @param searchSpecBundle SearchSpec bundle
+     * @param callback {@link AppSearchResult}&lt;{@link Bundle}&gt; of performing this
+     *         operation.
+     */
+    void globalQuery(
+        in String queryExpression,
+        in Bundle searchSpecBundle,
+        in IAppSearchResultCallback callback);
+
+    /**
+     * Fetches the next page of results of a previously executed query. Results can be empty if
+     * next-page token is invalid or all pages have been returned.
+     *
+     * @param nextPageToken The token of pre-loaded results of previously executed query.
+     * @param callback {@link AppSearchResult}&lt;{@link Bundle}&gt; of performing this
+     *                  operation.
+     */
+    void getNextPage(in long nextPageToken, in IAppSearchResultCallback callback);
+
+    /**
+     * Invalidates the next-page token so that no more results of the related query can be returned.
+     *
+     * @param nextPageToken The token of pre-loaded results of previously executed query to be
+     *                      Invalidated.
+     */
+    void invalidateNextPageToken(in long nextPageToken);
 
     /**
      * Removes documents by URI.

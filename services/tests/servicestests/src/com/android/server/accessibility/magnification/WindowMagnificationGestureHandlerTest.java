@@ -32,7 +32,6 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.accessibility.EventStreamTransformation;
-import com.android.server.accessibility.magnification.MagnificationGestureHandler.ScaleChangedListener;
 import com.android.server.accessibility.utils.TouchEventGenerator;
 
 import org.junit.After;
@@ -74,7 +73,8 @@ public class WindowMagnificationGestureHandlerTest {
                 mock(WindowMagnificationManager.Callback.class));
         mMockConnection = new MockWindowMagnificationConnection();
         mWindowMagnificationGestureHandler = new WindowMagnificationGestureHandler(
-                mContext, mWindowMagnificationManager, mock(ScaleChangedListener.class),
+                mContext, mWindowMagnificationManager, mock(
+                MagnificationGestureHandler.ScaleChangedListener.class),
                 /** detectTripleTap= */true,   /** detectShortcutTrigger= */true, DISPLAY_0);
         mWindowMagnificationManager.setConnection(mMockConnection.getConnection());
         mWindowMagnificationGestureHandler.setNext(strictMock(EventStreamTransformation.class));

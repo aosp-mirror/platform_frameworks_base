@@ -85,15 +85,13 @@ public:
         const std::vector<sp<ConditionTracker>>& allConditions,
         const vector<Matcher>& dimensions) const override;
 
-    void getTrueSlicedDimensions(
-            const std::vector<sp<ConditionTracker>>& allConditions,
-            std::set<HashableDimensionKey>* dimensions) const override {
+    const std::map<HashableDimensionKey, int>* getSlicedDimensionMap(
+            const std::vector<sp<ConditionTracker>>& allConditions) const override {
         if (mSlicedChildren.size() == 1) {
-            return allConditions[mSlicedChildren.front()]->getTrueSlicedDimensions(
-                allConditions, dimensions);
+            return allConditions[mSlicedChildren.front()]->getSlicedDimensionMap(allConditions);
         }
+        return nullptr;
     }
-
 
 private:
     LogicalOperation mLogicalOperation;

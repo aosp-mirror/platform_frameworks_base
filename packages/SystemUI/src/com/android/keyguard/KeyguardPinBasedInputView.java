@@ -24,12 +24,16 @@ import static com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_TIMEOUT;
 import static com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_USER_REQUEST;
 
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.graphics.Rect;
 import android.util.AttributeSet;
+import android.view.ContextThemeWrapper;
 import android.view.KeyEvent;
 import android.view.View;
+import android.widget.ImageButton;
 
 import com.android.internal.widget.LockscreenCredential;
+import com.android.settingslib.Utils;
 import com.android.systemui.R;
 
 /**
@@ -39,8 +43,9 @@ public abstract class KeyguardPinBasedInputView extends KeyguardAbsKeyInputView 
 
     protected PasswordTextView mPasswordEntry;
     private View mOkButton;
-    private View mDeleteButton;
-    private View[] mButtons = new View[10];
+    private ImageButton mDeleteButton;
+    private NumPadKey[] mButtons = new NumPadKey[10];
+    private View mDivider;
 
     public KeyguardPinBasedInputView(Context context) {
         this(context, null);
@@ -147,6 +152,7 @@ public abstract class KeyguardPinBasedInputView extends KeyguardAbsKeyInputView 
 
         mDeleteButton = findViewById(R.id.delete_button);
         mDeleteButton.setVisibility(View.VISIBLE);
+        mDivider = findViewById(R.id.divider);
 
         mButtons[0] = findViewById(R.id.key0);
         mButtons[1] = findViewById(R.id.key1);
@@ -161,6 +167,26 @@ public abstract class KeyguardPinBasedInputView extends KeyguardAbsKeyInputView 
 
         mPasswordEntry.requestFocus();
         super.onFinishInflate();
+        reloadColors();
+    }
+
+    /**
+     * Reload colors from resources.
+     **/
+    public void reloadColors() {
+        for (NumPadKey key : mButtons) {
+            key.reloadColors();
+        }
+        mPasswordEntry.reloadColors();
+        int deleteColor = Utils.getColorAttr(getContext(), android.R.attr.textColorSecondary)
+                .getDefaultColor();
+        mDeleteButton.setImageTintList(ColorStateList.valueOf(deleteColor));
+        mDivider.setBackground(getContext().getDrawable(R.drawable.pin_divider));
+
+        ContextThemeWrapper themedContext = new ContextThemeWrapper(mContext,
+                R.style.Widget_TextView_NumPadKey);
+        mDeleteButton.setBackground(themedContext.getDrawable(R.drawable.ripple_drawable_pin));
+        mOkButton.setBackground(themedContext.getDrawable(R.drawable.ripple_drawable_pin));
     }
 
     @Override

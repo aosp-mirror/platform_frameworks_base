@@ -63,6 +63,7 @@ import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.classifier.FalsingCollectorFake;
 import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.doze.DozeLog;
+import com.android.systemui.media.MediaDataManager;
 import com.android.systemui.media.MediaHierarchyManager;
 import com.android.systemui.qs.QSDetailDisplayer;
 import com.android.systemui.statusbar.CommandQueue;
@@ -197,6 +198,8 @@ public class NotificationPanelViewTest extends SysuiTestCase {
     private NotificationStackScrollLayoutController mNotificationStackScrollLayoutController;
     @Mock
     private AuthController mAuthController;
+    @Mock
+    private MediaDataManager mMediaDataManager;
 
     private NotificationPanelViewController mNotificationPanelViewController;
     private View.AccessibilityDelegate mAccessibiltyDelegate;
@@ -267,7 +270,7 @@ public class NotificationPanelViewTest extends SysuiTestCase {
                 mDozeParameters, mCommandQueue, mVibratorHelper,
                 mLatencyTracker, mPowerManager, mAccessibilityManager, 0, mUpdateMonitor,
                 mMetricsLogger, mActivityManager, mConfigurationController,
-                flingAnimationUtilsBuilder, mStatusBarTouchableRegionManager,
+                () -> flingAnimationUtilsBuilder, mStatusBarTouchableRegionManager,
                 mConversationNotificationManager, mMediaHiearchyManager,
                 mBiometricUnlockController, mStatusBarKeyguardViewManager,
                 mNotificationStackScrollLayoutController,
@@ -275,7 +278,8 @@ public class NotificationPanelViewTest extends SysuiTestCase {
                 mGroupManager,
                 mNotificationAreaController,
                 mAuthController,
-                new QSDetailDisplayer());
+                new QSDetailDisplayer(),
+                mMediaDataManager);
         mNotificationPanelViewController.initDependencies(
                 mStatusBar,
                 mNotificationShelfController);

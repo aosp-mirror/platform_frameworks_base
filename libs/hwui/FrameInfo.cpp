@@ -20,7 +20,7 @@
 namespace android {
 namespace uirenderer {
 
-const std::string FrameInfoNames[] = {
+const std::array<std::string, static_cast<int>(FrameInfoIndex::NumIndexes)> FrameInfoNames = {
         "Flags",
         "FrameTimelineVsyncId",
         "IntendedVsync",
@@ -41,10 +41,6 @@ const std::string FrameInfoNames[] = {
         "QueueBufferDuration",
         "GpuCompleted",
 };
-
-static_assert((sizeof(FrameInfoNames) / sizeof(FrameInfoNames[0])) ==
-                      static_cast<int>(FrameInfoIndex::NumIndexes),
-              "size mismatch: FrameInfoNames doesn't match the enum!");
 
 static_assert(static_cast<int>(FrameInfoIndex::NumIndexes) == 19,
               "Must update value in FrameMetrics.java#FRAME_STATS_COUNT (and here)");

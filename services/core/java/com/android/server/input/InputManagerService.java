@@ -95,6 +95,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.os.SomeArgs;
+import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.XmlUtils;
 import com.android.server.DisplayThread;
@@ -145,6 +146,16 @@ public class InputManagerService extends IInputManager.Stub
     private static final int MSG_DELIVER_TABLET_MODE_CHANGED = 6;
 
     private static final int DEFAULT_VIBRATION_MAGNITUDE = 192;
+
+    /**
+     * We know the issue and are working to fix it, so suppressing the toast to not annoy
+     * dogfooders.
+     *
+     * TODO(b/169067926): Remove this
+     */
+    private static final String[] PACKAGE_BLOCKLIST_FOR_UNTRUSTED_TOUCHES_TOAST = {
+            "com.snapchat.android" // b/173297887
+    };
 
     // Pointer to native input manager service object.
     private final long mPtr;
@@ -2091,6 +2102,10 @@ public class InputManagerService extends IInputManager.Stub
     // Native callback
     private void notifyUntrustedTouch(String packageName) {
         // TODO(b/169067926): Remove toast after gathering feedback on dogfood.
+        if (ArrayUtils.contains(PACKAGE_BLOCKLIST_FOR_UNTRUSTED_TOUCHES_TOAST, packageName)) {
+            Log.i(TAG, "Suppressing untrusted touch toast for " + packageName);
+            return;
+        }
         DisplayThread.getHandler().post(() ->
                 Toast.makeText(mContext,
                         "Touch obscured by " + packageName

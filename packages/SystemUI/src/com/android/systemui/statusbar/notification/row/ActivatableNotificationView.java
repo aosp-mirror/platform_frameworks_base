@@ -34,6 +34,7 @@ import android.view.animation.Interpolator;
 import android.view.animation.PathInterpolator;
 
 import com.android.internal.jank.InteractionJankMonitor;
+import com.android.settingslib.Utils;
 import com.android.systemui.Gefingerpoken;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
@@ -169,13 +170,14 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     }
 
     private void updateColors() {
-        mNormalColor = mContext.getColor(R.color.notification_material_background_color);
+        mNormalColor = Utils.getColorAttr(mContext, android.R.attr.colorBackground)
+                .getDefaultColor();
         mTintedRippleColor = mContext.getColor(
                 R.color.notification_ripple_tinted_color);
         mNormalRippleColor = mContext.getColor(
                 R.color.notification_ripple_untinted_color);
         mDimmedAlpha = Color.alpha(mContext.getColor(
-                R.color.notification_material_background_dimmed_color));
+                R.color.notification_background_dimmed_color));
     }
 
     private void initDimens() {

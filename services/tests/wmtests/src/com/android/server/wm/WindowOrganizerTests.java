@@ -387,7 +387,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
     public void testSetIgnoreOrientationRequest_taskDisplayArea() {
         removeGlobalMinSizeRestriction();
         final TaskDisplayArea taskDisplayArea = mDisplayContent.getDefaultTaskDisplayArea();
-        final Task stack = taskDisplayArea.createStack(
+        final Task stack = taskDisplayArea.createRootTask(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, false /* onTop */);
         final ActivityRecord activity = new ActivityBuilder(mAtm).setTask(stack).build();
         taskDisplayArea.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
@@ -425,7 +425,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
     public void testSetIgnoreOrientationRequest_displayContent() {
         removeGlobalMinSizeRestriction();
         final TaskDisplayArea taskDisplayArea = mDisplayContent.getDefaultTaskDisplayArea();
-        final Task stack = taskDisplayArea.createStack(
+        final Task stack = taskDisplayArea.createRootTask(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, false /* onTop */);
         final ActivityRecord activity = new ActivityBuilder(mAtm).setTask(stack).build();
         mDisplayContent.setFocusedApp(activity);
@@ -743,8 +743,8 @@ public class WindowOrganizerTests extends WindowTestsBase {
     private List<Task> getTasksCreatedByOrganizer(DisplayContent dc) {
         ArrayList<Task> out = new ArrayList<>();
         dc.forAllTaskDisplayAreas(taskDisplayArea -> {
-            for (int sNdx = taskDisplayArea.getStackCount() - 1; sNdx >= 0; --sNdx) {
-                final Task t = taskDisplayArea.getStackAt(sNdx);
+            for (int sNdx = taskDisplayArea.getRootTaskCount() - 1; sNdx >= 0; --sNdx) {
+                final Task t = taskDisplayArea.getRootTaskAt(sNdx);
                 if (t.mCreatedByOrganizer) out.add(t);
             }
         });

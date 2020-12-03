@@ -41,6 +41,7 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.util.EmergencyAffordanceManager;
 import com.android.internal.widget.LockPatternUtils;
+import com.android.settingslib.Utils;
 import com.android.systemui.Dependency;
 import com.android.systemui.util.EmergencyDialerConstants;
 
@@ -146,6 +147,17 @@ public class EmergencyButton extends Button {
             }
         }
         return super.onTouchEvent(event);
+    }
+
+    /**
+     * Reload colors from resources.
+     **/
+    public void reloadColors() {
+        int color = Utils.getColorAttrDefaultColor(getContext(),
+                android.R.attr.textColorSecondary);
+        setTextColor(color);
+        setBackground(getContext()
+                .getDrawable(com.android.systemui.R.drawable.kg_emergency_button_background));
     }
 
     @Override

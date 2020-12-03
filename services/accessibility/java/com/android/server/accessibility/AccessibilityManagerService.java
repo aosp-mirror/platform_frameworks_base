@@ -119,7 +119,6 @@ import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.accessibility.magnification.FullScreenMagnificationController;
 import com.android.server.accessibility.magnification.MagnificationController;
-import com.android.server.accessibility.magnification.MagnificationGestureHandler;
 import com.android.server.accessibility.magnification.WindowMagnificationManager;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.wm.ActivityTaskManagerInternal;
@@ -153,7 +152,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         AccessibilityUserState.ServiceInfoChangeListener,
         AccessibilityWindowManager.AccessibilityEventSender,
         AccessibilitySecurityPolicy.AccessibilityUserManager,
-        MagnificationGestureHandler.ScaleChangedListener,
         SystemActionPerformer.SystemActionsChangedListener {
 
     private static final boolean DEBUG = false;
@@ -1063,17 +1061,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         synchronized (mLock) {
             notifyClearAccessibilityCacheLocked();
             notifyMagnificationChangedLocked(displayId, region, scale, centerX, centerY);
-        }
-    }
-
-    @Override
-    public void onMagnificationScaleChanged(int displayId, int mode) {
-        synchronized (mLock) {
-            final int capabilities =
-                    getCurrentUserStateLocked().getMagnificationCapabilitiesLocked();
-            if (capabilities == Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_ALL) {
-                getWindowMagnificationMgr().showMagnificationButton(displayId, mode);
-            }
         }
     }
 
@@ -3000,6 +2987,17 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         }
     }
 
+    /**
+     * Getter of {@link MagnificationController}.
+     *
+     * @return MagnificationController
+     */
+    MagnificationController getMagnificationController() {
+        synchronized (mLock) {
+            return mMagnificationController;
+        }
+    }
+
     @Override
     public void associateEmbeddedHierarchy(@NonNull IBinder host, @NonNull IBinder embedded) {
         synchronized (mLock) {
@@ -3584,6 +3582,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN, userState.mUserId);
         if (capabilities != userState.getMagnificationCapabilitiesLocked()) {
             userState.setMagnificationCapabilitiesLocked(capabilities);
+            mMagnificationController.setMagnificationCapabilities(capabilities);
             return true;
         }
         return false;

@@ -29,7 +29,6 @@ import android.cts.install.lib.host.InstallUtilsHost;
 import com.android.compatibility.common.tradefed.build.CompatibilityBuildHelper;
 import com.android.ddmlib.Log;
 import com.android.tests.rollback.host.AbandonSessionsRule;
-import com.android.tests.util.ModuleTestUtils;
 import com.android.tradefed.device.DeviceNotAvailableException;
 import com.android.tradefed.testtype.DeviceJUnit4ClassRunner;
 import com.android.tradefed.testtype.junit4.BaseHostJUnit4Test;
@@ -60,7 +59,6 @@ public class StagedInstallInternalTest extends BaseHostJUnit4Test {
     private static final String APK_A = "TestAppAv1.apk";
     private static final String APK_IN_APEX_TESTAPEX_NAME = "com.android.apex.apkrollback.test";
 
-    private final ModuleTestUtils mTestUtils = new ModuleTestUtils(this);
     private final InstallUtilsHost mHostUtils = new InstallUtilsHost(this);
 
     /**
@@ -161,7 +159,7 @@ public class StagedInstallInternalTest extends BaseHostJUnit4Test {
         assumeTrue("Device does not support updating APEX",
                 mHostUtils.isApexUpdateSupported());
 
-        final File apexFile = mTestUtils.getTestFile(SHIM_V2);
+        final File apexFile = mHostUtils.getTestFile(SHIM_V2);
         final String output = getDevice().executeAdbCommand("install", "--staged",
                 "--staged-ready-timeout", "60000", apexFile.getAbsolutePath());
         assertThat(output).contains("Reboot device to apply staged session");
@@ -176,7 +174,7 @@ public class StagedInstallInternalTest extends BaseHostJUnit4Test {
         assumeTrue("Device does not support updating APEX",
                 mHostUtils.isApexUpdateSupported());
 
-        final File apexFile = mTestUtils.getTestFile(SHIM_V2);
+        final File apexFile = mHostUtils.getTestFile(SHIM_V2);
         final String output = getDevice().executeAdbCommand("install", "--staged",
                 apexFile.getAbsolutePath());
         assertThat(output).contains("Reboot device to apply staged session");
@@ -191,7 +189,7 @@ public class StagedInstallInternalTest extends BaseHostJUnit4Test {
         assumeTrue("Device does not support updating APEX",
                 mHostUtils.isApexUpdateSupported());
 
-        final File apexFile = mTestUtils.getTestFile(SHIM_V2);
+        final File apexFile = mHostUtils.getTestFile(SHIM_V2);
         final String output = getDevice().executeAdbCommand("install", "--staged",
                 "--staged-ready-timeout", "0", apexFile.getAbsolutePath());
         assertThat(output).doesNotContain("Reboot device to apply staged session");
@@ -207,7 +205,7 @@ public class StagedInstallInternalTest extends BaseHostJUnit4Test {
         assumeTrue("Device does not support updating APEX",
                 mHostUtils.isApexUpdateSupported());
 
-        final File apexFile = mTestUtils.getTestFile(SHIM_V2);
+        final File apexFile = mHostUtils.getTestFile(SHIM_V2);
         String output = getDevice().executeAdbCommand("install", "--staged",
                 "--enable-rollback", apexFile.getAbsolutePath());
         assertThat(output).contains("Reboot device to apply staged session");
@@ -224,8 +222,8 @@ public class StagedInstallInternalTest extends BaseHostJUnit4Test {
         assumeTrue("Device does not support updating APEX",
                 mHostUtils.isApexUpdateSupported());
 
-        final File apexFile = mTestUtils.getTestFile(SHIM_V2);
-        final File apkFile = mTestUtils.getTestFile(APK_A);
+        final File apexFile = mHostUtils.getTestFile(SHIM_V2);
+        final File apkFile = mHostUtils.getTestFile(APK_A);
         final String output = getDevice().executeAdbCommand("install-multi-package",
                 apexFile.getAbsolutePath(), apkFile.getAbsolutePath());
         assertThat(output).contains("Created parent session");

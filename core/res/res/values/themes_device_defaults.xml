@@ -215,8 +215,10 @@ easier.
         <item name="colorPrimaryDark">@color/primary_dark_device_default_dark</item>
         <item name="colorAccent">@color/accent_device_default_dark</item>
         <item name="colorError">@color/error_color_device_default_dark</item>
+        <item name="colorBackground">@color/background_device_default_dark</item>
         <item name="colorBackgroundFloating">@color/background_floating_device_default_dark</item>
         <item name="colorPopupBackground">?attr/colorBackgroundFloating</item>
+        <item name="panelColorBackground">?attr/colorBackgroundFloating</item>
     </style>
 
     <style name="Theme.DeviceDefault" parent="Theme.DeviceDefaultBase" />
@@ -943,8 +945,10 @@ easier.
         <item name="colorPrimaryDark">@color/primary_dark_device_default_light</item>
         <item name="colorAccent">@color/accent_device_default_light</item>
         <item name="colorError">@color/error_color_device_default_light</item>
+        <item name="colorBackground">@color/background_device_default_light</item>
         <item name="colorBackgroundFloating">@color/background_floating_device_default_light</item>
         <item name="colorPopupBackground">?attr/colorBackgroundFloating</item>
+        <item name="panelColorBackground">?attr/colorBackgroundFloating</item>
     </style>
 
     <!-- Variant of the DeviceDefault (light) theme that has a solid (opaque) action bar with an
@@ -1517,9 +1521,6 @@ easier.
 
         <!-- Toolbar attributes -->
         <item name="toolbarStyle">@style/Widget.DeviceDefault.Toolbar</item>
-
-        <!-- volume background -->
-        <item name="panelColorBackground">@color/primary_material_light</item>
     </style>
 
     <style name="Theme.DeviceDefault.QuickSettings.Dialog" parent="Theme.DeviceDefault.Light.Dialog">

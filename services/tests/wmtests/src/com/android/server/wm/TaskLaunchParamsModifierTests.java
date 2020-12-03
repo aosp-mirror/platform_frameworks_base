@@ -1566,13 +1566,13 @@ public class TaskLaunchParamsModifierTests extends WindowTestsBase {
 
     private ActivityRecord createSourceActivity(TestDisplayContent display) {
         final Task stack = display.getDefaultTaskDisplayArea()
-                .createStack(display.getWindowingMode(), ACTIVITY_TYPE_STANDARD, true);
+                .createRootTask(display.getWindowingMode(), ACTIVITY_TYPE_STANDARD, true);
         return new ActivityBuilder(mAtm).setTask(stack).build();
     }
 
     private void addFreeformTaskTo(TestDisplayContent display, Rect bounds) {
         final Task stack = display.getDefaultTaskDisplayArea()
-                .createStack(display.getWindowingMode(), ACTIVITY_TYPE_STANDARD, true);
+                .createRootTask(display.getWindowingMode(), ACTIVITY_TYPE_STANDARD, true);
         stack.setWindowingMode(WINDOWING_MODE_FREEFORM);
         final Task task = new TaskBuilder(mSupervisor).setParentTask(stack).build();
         // Just work around the unnecessary adjustments for bounds.

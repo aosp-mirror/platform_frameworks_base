@@ -504,7 +504,7 @@ public class LockTaskController {
             return;
         }
         task.performClearTaskLocked();
-        mSupervisor.mRootWindowContainer.resumeFocusedStacksTopActivities();
+        mSupervisor.mRootWindowContainer.resumeFocusedTasksTopActivities();
     }
 
     /**
@@ -640,7 +640,7 @@ public class LockTaskController {
         if (andResume) {
             mSupervisor.findTaskToMoveToFront(task, 0, null, reason,
                     lockTaskModeState != LOCK_TASK_MODE_NONE);
-            mSupervisor.mRootWindowContainer.resumeFocusedStacksTopActivities();
+            mSupervisor.mRootWindowContainer.resumeFocusedTasksTopActivities();
             final Task rootTask = task.getRootTask();
             if (rootTask != null) {
                 rootTask.mDisplayContent.executeAppTransition();
@@ -717,7 +717,7 @@ public class LockTaskController {
         }
 
         if (taskChanged) {
-            mSupervisor.mRootWindowContainer.resumeFocusedStacksTopActivities();
+            mSupervisor.mRootWindowContainer.resumeFocusedTasksTopActivities();
         }
     }
 

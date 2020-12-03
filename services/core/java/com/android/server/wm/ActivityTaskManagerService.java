@@ -1156,7 +1156,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         synchronized (mGlobalLock) {
             // If this is coming from the currently resumed activity, it is
             // effectively saying that app switches are allowed at this point.
-            final Task stack = getTopDisplayFocusedStack();
+            final Task stack = getTopDisplayFocusedRootTask();
             if (stack != null && stack.mResumedActivity != null
                     && stack.mResumedActivity.info.applicationInfo.uid == Binder.getCallingUid()) {
                 mAppSwitchesAllowedTime = 0;
@@ -1470,7 +1470,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 sourceToken = resultTo;
             }
 
-            sourceRecord = mRootWindowContainer.isInAnyStack(sourceToken);
+            sourceRecord = mRootWindowContainer.isInAnyTask(sourceToken);
             if (sourceRecord == null) {
                 throw new SecurityException("Called with bad activity token: " + sourceToken);
             }
@@ -2039,7 +2039,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     public boolean isTopActivityImmersive() {
         enforceNotIsolatedCaller("isTopActivityImmersive");
         synchronized (mGlobalLock) {
-            final Task topFocusedStack = getTopDisplayFocusedStack();
+            final Task topFocusedStack = getTopDisplayFocusedRootTask();
             if (topFocusedStack == null) {
                 return false;
             }
@@ -2074,7 +2074,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     public int getFrontActivityScreenCompatMode() {
         enforceNotIsolatedCaller("getFrontActivityScreenCompatMode");
         synchronized (mGlobalLock) {
-            final Task stack = getTopDisplayFocusedStack();
+            final Task stack = getTopDisplayFocusedRootTask();
             final ActivityRecord r = stack != null ? stack.topRunningActivity() : null;
             if (r == null) {
                 return ActivityManager.COMPAT_MODE_UNKNOWN;
@@ -2089,7 +2089,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 "setFrontActivityScreenCompatMode");
         ApplicationInfo ai;
         synchronized (mGlobalLock) {
-            final Task stack = getTopDisplayFocusedStack();
+            final Task stack = getTopDisplayFocusedRootTask();
             final ActivityRecord r = stack != null ? stack.topRunningActivity() : null;
             if (r == null) {
                 Slog.w(TAG, "setFrontActivityScreenCompatMode failed: no top activity");
@@ -2165,7 +2165,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     public void notifyActivityDrawn(IBinder token) {
         if (DEBUG_VISIBILITY) Slog.d(TAG_VISIBILITY, "notifyActivityDrawn: token=" + token);
         synchronized (mGlobalLock) {
-            ActivityRecord r = mRootWindowContainer.isInAnyStack(token);
+            ActivityRecord r = mRootWindowContainer.isInAnyTask(token);
             if (r != null) {
                 r.getRootTask().notifyActivityDrawnLocked(r);
             }
@@ -2201,7 +2201,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         final long ident = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
-                Task focusedStack = getTopDisplayFocusedStack();
+                Task focusedStack = getTopDisplayFocusedRootTask();
                 if (focusedStack != null) {
                     return mRootWindowContainer.getRootTaskInfo(focusedStack.mTaskId);
                 }
@@ -2219,14 +2219,14 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         final long callingId = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
-                final Task task = mRootWindowContainer.getStack(taskId);
+                final Task task = mRootWindowContainer.getRootTask(taskId);
                 if (task == null) {
                     Slog.w(TAG, "setFocusedRootTask: No task with id=" + taskId);
                     return;
                 }
                 final ActivityRecord r = task.topRunningActivity();
                 if (r != null && r.moveFocusableActivityToTop("setFocusedRootTask")) {
-                    mRootWindowContainer.resumeFocusedStacksTopActivities();
+                    mRootWindowContainer.resumeFocusedTasksTopActivities();
                 }
             }
         } finally {
@@ -2248,7 +2248,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 }
                 final ActivityRecord r = task.topRunningActivityLocked();
                 if (r != null && r.moveFocusableActivityToTop("setFocusedTask")) {
-                    mRootWindowContainer.resumeFocusedStacksTopActivities();
+                    mRootWindowContainer.resumeFocusedTasksTopActivities();
                 }
             }
         } finally {
@@ -2508,7 +2508,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         synchronized (mGlobalLock) {
             final long origId = Binder.clearCallingIdentity();
             try {
-                final Task topFocusedStack = getTopDisplayFocusedStack();
+                final Task topFocusedStack = getTopDisplayFocusedRootTask();
                 if (topFocusedStack != null) {
                     topFocusedStack.unhandledBackLocked();
                 }
@@ -2820,7 +2820,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 ProtoLog.d(WM_DEBUG_TASKS, "moveTaskToRootTask: moving task=%d to "
                         + "rootTaskId=%d toTop=%b", taskId, rootTaskId, toTop);
 
-                final Task rootTask = mRootWindowContainer.getStack(rootTaskId);
+                final Task rootTask = mRootWindowContainer.getRootTask(rootTaskId);
                 if (rootTask == null) {
                     throw new IllegalStateException(
                             "moveTaskToRootTask: No rootTask for rootTaskId=" + rootTaskId);
@@ -3088,8 +3088,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             return;
         }
 
-        final Task stack = mRootWindowContainer.getTopDisplayFocusedStack();
-        if (stack == null || task != stack.getTopMostTask()) {
+        final Task rootTask = mRootWindowContainer.getTopDisplayFocusedRootTask();
+        if (rootTask == null || task != rootTask.getTopMostTask()) {
             throw new IllegalArgumentException("Invalid task, not in foreground");
         }
 
@@ -3370,7 +3370,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 }
 
                 final Task stack = r.getRootTask();
-                final Task task = stack.getDisplayArea().createStack(stack.getWindowingMode(),
+                final Task task = stack.getDisplayArea().createRootTask(stack.getWindowingMode(),
                         stack.getActivityType(), !ON_TOP, ainfo, intent,
                         false /* createdByOrganizer */);
 
@@ -3533,7 +3533,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             try {
                 ProtoLog.d(WM_DEBUG_TASKS, "moveRootTaskToDisplay: moving taskId=%d to "
                         + "displayId=%d", taskId, displayId);
-                mRootWindowContainer.moveStackToDisplay(taskId, displayId, ON_TOP);
+                mRootWindowContainer.moveRootTaskToDisplay(taskId, displayId, ON_TOP);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -3741,7 +3741,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 "enqueueAssistContext()");
 
         synchronized (mGlobalLock) {
-            final Task stack = getTopDisplayFocusedStack();
+            final Task stack = getTopDisplayFocusedRootTask();
             ActivityRecord activity = stack != null ? stack.getTopNonFinishingActivity() : null;
             if (activity == null) {
                 Slog.w(TAG, "getAssistContextExtras failed: no top activity");
@@ -3870,7 +3870,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     public boolean isAssistDataAllowedOnCurrentActivity() {
         int userId;
         synchronized (mGlobalLock) {
-            final Task focusedStack = getTopDisplayFocusedStack();
+            final Task focusedStack = getTopDisplayFocusedRootTask();
             if (focusedStack == null || focusedStack.isActivityTypeAssistant()) {
                 return false;
             }
@@ -3890,7 +3890,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         try {
             synchronized (mGlobalLock) {
                 ActivityRecord caller = ActivityRecord.forTokenLocked(token);
-                ActivityRecord top = getTopDisplayFocusedStack().getTopNonFinishingActivity();
+                ActivityRecord top = getTopDisplayFocusedRootTask().getTopNonFinishingActivity();
                 if (top != caller) {
                     Slog.w(TAG, "showAssistFromActivity failed: caller " + caller
                             + " is not current top " + top);
@@ -4069,7 +4069,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
             final long ident = Binder.clearCallingIdentity();
             try {
-                return mRootWindowContainer.moveTopStackActivityToPinnedRootTask(rootTaskId);
+                return mRootWindowContainer.moveTopRootTaskActivityToPinnedRootTask(rootTaskId);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -4113,7 +4113,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 r.setPictureInPictureParams(params);
                 final float aspectRatio = r.pictureInPictureArgs.getAspectRatio();
                 final List<RemoteAction> actions = r.pictureInPictureArgs.getActions();
-                mRootWindowContainer.moveActivityToPinnedStack(
+                mRootWindowContainer.moveActivityToPinnedRootTask(
                         r, "enterPictureInPictureMode");
                 final Task stack = r.getRootTask();
                 stack.setPictureInPictureAspectRatio(aspectRatio);
@@ -4345,7 +4345,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     public void startLocalVoiceInteraction(IBinder callingActivity, Bundle options) {
         Slog.i(TAG, "Activity tried to startLocalVoiceInteraction");
         synchronized (mGlobalLock) {
-            ActivityRecord activity = getTopDisplayFocusedStack().getTopNonFinishingActivity();
+            ActivityRecord activity = getTopDisplayFocusedRootTask().getTopNonFinishingActivity();
             if (ActivityRecord.forTokenLocked(callingActivity) != activity) {
                 throw new SecurityException("Only focused activity can call startVoiceInteraction");
             }
@@ -4749,7 +4749,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         if (r.requestedVrComponent != null && r.getDisplayId() != DEFAULT_DISPLAY) {
             Slog.i(TAG, "Moving " + r.shortComponentName + " from display " + r.getDisplayId()
                     + " to main display for VR");
-            mRootWindowContainer.moveStackToDisplay(
+            mRootWindowContainer.moveRootTaskToDisplay(
                     r.getRootTaskId(), DEFAULT_DISPLAY, true /* toTop */);
         }
         mH.post(() -> {
@@ -4813,8 +4813,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
     }
 
-    Task getTopDisplayFocusedStack() {
-        return mRootWindowContainer.getTopDisplayFocusedStack();
+    Task getTopDisplayFocusedRootTask() {
+        return mRootWindowContainer.getTopDisplayFocusedRootTask();
     }
 
     /** Pokes the task persister. */
@@ -5827,7 +5827,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     /** Applies latest configuration and/or visibility updates if needed. */
     boolean ensureConfigAndVisibilityAfterUpdate(ActivityRecord starting, int changes) {
         boolean kept = true;
-        final Task mainStack = mRootWindowContainer.getTopDisplayFocusedStack();
+        final Task mainStack = mRootWindowContainer.getTopDisplayFocusedRootTask();
         // mainStack is null during startup.
         if (mainStack != null) {
             if (changes != 0 && starting == null) {
@@ -6082,8 +6082,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         static final int REPORT_TIME_TRACKER_MSG = 1;
 
 
-        static final int FIRST_ACTIVITY_STACK_MSG = 100;
-        static final int FIRST_SUPERVISOR_STACK_MSG = 200;
+        static final int FIRST_ACTIVITY_TASK_MSG = 100;
+        static final int FIRST_SUPERVISOR_TASK_MSG = 200;
 
         H(Looper looper) {
             super(looper);
@@ -6292,7 +6292,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                             "setFocusedActivity: No activity record matching token=" + token);
                 }
                 if (r.moveFocusableActivityToTop("setFocusedActivity")) {
-                    mRootWindowContainer.resumeFocusedStacksTopActivities();
+                    mRootWindowContainer.resumeFocusedTasksTopActivities();
                 }
             }
         }
@@ -6796,7 +6796,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 if (!restarting && hasVisibleActivities) {
                     deferWindowLayout();
                     try {
-                        if (!mRootWindowContainer.resumeFocusedStacksTopActivities()) {
+                        if (!mRootWindowContainer.resumeFocusedTasksTopActivities()) {
                             // If there was nothing to resume, and we are not already restarting
                             // this process, but there is a visible activity that is hosted by the
                             // process...then make sure all visible activities are running, taking
@@ -6849,7 +6849,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 if (mRootWindowContainer.finishDisabledPackageActivities(
                         packageName, disabledClasses, true /* doit */, false /* evenPersistent */,
                         userId, false /* onlyRemoveNoProcess */) && booted) {
-                    mRootWindowContainer.resumeFocusedStacksTopActivities();
+                    mRootWindowContainer.resumeFocusedTasksTopActivities();
                     mTaskSupervisor.scheduleIdle();
                 }
 
@@ -6879,7 +6879,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         @Override
         public void resumeTopActivities(boolean scheduleIdle) {
             synchronized (mGlobalLock) {
-                mRootWindowContainer.resumeFocusedStacksTopActivities();
+                mRootWindowContainer.resumeFocusedTasksTopActivities();
                 if (scheduleIdle) {
                     mTaskSupervisor.scheduleIdle();
                 }
@@ -7056,7 +7056,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     mRootWindowContainer.dumpDisplayConfigs(pw, "  ");
                 }
                 if (dumpAll) {
-                    final Task topFocusedStack = getTopDisplayFocusedStack();
+                    final Task topFocusedStack = getTopDisplayFocusedRootTask();
                     if (dumpPackage == null && topFocusedStack != null) {
                         pw.println("  mConfigWillChange: " + topFocusedStack.mConfigWillChange);
                     }
@@ -7139,7 +7139,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             synchronized (mGlobalLock) {
                 if (dumpPackage == null) {
                     getGlobalConfiguration().dumpDebug(proto, GLOBAL_CONFIGURATION);
-                    final Task topFocusedStack = getTopDisplayFocusedStack();
+                    final Task topFocusedStack = getTopDisplayFocusedRootTask();
                     if (topFocusedStack != null) {
                         proto.write(CONFIG_WILL_CHANGE, topFocusedStack.mConfigWillChange);
                     }

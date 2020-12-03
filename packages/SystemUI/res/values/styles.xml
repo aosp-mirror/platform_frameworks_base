@@ -334,7 +334,6 @@
         <item name="wallpaperTextColorSecondary">@*android:color/secondary_text_material_light</item>
         <item name="android:colorError">@*android:color/error_color_material_light</item>
         <item name="android:colorControlHighlight">#40000000</item>
-        <item name="passwordStyle">@style/PasswordTheme.Light</item>
         <item name="shadowRadius">0</item>
 
         <!-- Needed for MediaRoute chooser dialog -->
@@ -356,8 +355,8 @@
     </style>
 
     <style name="LockPatternStyle">
-        <item name="*android:regularColor">?attr/wallpaperTextColor</item>
-        <item name="*android:successColor">?attr/wallpaperTextColor</item>
+        <item name="*android:regularColor">?android:attr/textColorPrimary</item>
+        <item name="*android:successColor">?android:attr/textColorPrimary</item>
         <item name="*android:errorColor">?android:attr/colorError</item>
     </style>
 
@@ -555,8 +554,8 @@
 
     <style
         name="TextAppearance.NotificationSectionHeaderButton"
-        parent="@android:style/Widget.Material.Button.Borderless">
-        <item name="android:textColor">?attr/wallpaperTextColor</item>
+        parent="@android:style/Widget.DeviceDefault.Button.Borderless">
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
         <item name="android:textAllCaps">false</item>
         <item name="android:textSize">14sp</item>
         <item name="android:minWidth">0dp</item>
