@@ -425,13 +425,13 @@ public final class BluetoothClass implements Parcelable {
                     return false;
             }
         } else if (profile == PROFILE_HID) {
-            return (getDeviceClass() & Device.Major.PERIPHERAL) == Device.Major.PERIPHERAL;
+            return getMajorDeviceClass() == Device.Major.PERIPHERAL;
         } else if (profile == PROFILE_PANU || profile == PROFILE_NAP) {
             // No good way to distinguish between the two, based on class bits.
             if (hasService(Service.NETWORKING)) {
                 return true;
             }
-            return (getDeviceClass() & Device.Major.NETWORKING) == Device.Major.NETWORKING;
+            return getMajorDeviceClass() == Device.Major.NETWORKING;
         } else {
             return false;
         }
