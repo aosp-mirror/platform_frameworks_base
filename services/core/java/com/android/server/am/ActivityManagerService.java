@@ -7142,67 +7142,68 @@ public class ActivityManagerService extends IActivityManager.Stub
                         "getContentProviderImpl: after checkContentProviderPermission");
 
                 final long origId = Binder.clearCallingIdentity();
+                try {
+                    checkTime(startTime, "getContentProviderImpl: incProviderCountLocked");
 
-                checkTime(startTime, "getContentProviderImpl: incProviderCountLocked");
-
-                // In this case the provider instance already exists, so we can
-                // return it right away.
-                conn = incProviderCountLocked(r, cpr, token, callingUid, callingPackage, callingTag,
-                        stable);
-                if (conn != null && (conn.stableCount+conn.unstableCount) == 1) {
-                    if (cpr.proc != null
-                            && r != null && r.setAdj <= ProcessList.PERCEPTIBLE_LOW_APP_ADJ) {
-                        // If this is a perceptible app accessing the provider,
-                        // make sure to count it as being accessed and thus
-                        // back up on the LRU list.  This is good because
-                        // content providers are often expensive to start.
-                        checkTime(startTime, "getContentProviderImpl: before updateLruProcess");
-                        mProcessList.updateLruProcessLocked(cpr.proc, false, null);
-                        checkTime(startTime, "getContentProviderImpl: after updateLruProcess");
+                    // Return the provider instance right away since it already exists.
+                    conn = incProviderCountLocked(r, cpr, token, callingUid, callingPackage,
+                            callingTag, stable);
+                    if (conn != null && (conn.stableCount+conn.unstableCount) == 1) {
+                        if (cpr.proc != null
+                                && r != null && r.setAdj <= ProcessList.PERCEPTIBLE_LOW_APP_ADJ) {
+                            // If this is a perceptible app accessing the provider,
+                            // make sure to count it as being accessed and thus
+                            // back up on the LRU list.  This is good because
+                            // content providers are often expensive to start.
+                            checkTime(startTime, "getContentProviderImpl: before updateLruProcess");
+                            mProcessList.updateLruProcessLocked(cpr.proc, false, null);
+                            checkTime(startTime, "getContentProviderImpl: after updateLruProcess");
+                        }
                     }
-                }
 
-                checkTime(startTime, "getContentProviderImpl: before updateOomAdj");
-                final int verifiedAdj = cpr.proc.verifiedAdj;
-                boolean success = updateOomAdjLocked(cpr.proc, true,
-                        OomAdjuster.OOM_ADJ_REASON_GET_PROVIDER);
-                // XXX things have changed so updateOomAdjLocked doesn't actually tell us
-                // if the process has been successfully adjusted.  So to reduce races with
-                // it, we will check whether the process still exists.  Note that this doesn't
-                // completely get rid of races with LMK killing the process, but should make
-                // them much smaller.
-                if (success && verifiedAdj != cpr.proc.setAdj && !isProcessAliveLocked(cpr.proc)) {
-                    success = false;
-                }
-                maybeUpdateProviderUsageStatsLocked(r, cpr.info.packageName, name);
-                checkTime(startTime, "getContentProviderImpl: after updateOomAdj");
-                if (DEBUG_PROVIDER) Slog.i(TAG_PROVIDER, "Adjust success: " + success);
-                // NOTE: there is still a race here where a signal could be
-                // pending on the process even though we managed to update its
-                // adj level.  Not sure what to do about this, but at least
-                // the race is now smaller.
-                if (!success) {
-                    // Uh oh...  it looks like the provider's process
-                    // has been killed on us.  We need to wait for a new
-                    // process to be started, and make sure its death
-                    // doesn't kill our process.
-                    Slog.wtf(TAG, "Existing provider " + cpr.name.flattenToShortString()
-                            + " is crashing; detaching " + r);
-                    boolean lastRef = decProviderCountLocked(conn, cpr, token, stable);
-                    if (!lastRef) {
-                        // This wasn't the last ref our process had on
-                        // the provider...  we will be killed during cleaning up, bail.
-                        return null;
+                    checkTime(startTime, "getContentProviderImpl: before updateOomAdj");
+                    final int verifiedAdj = cpr.proc.verifiedAdj;
+                    boolean success = updateOomAdjLocked(cpr.proc, true,
+                            OomAdjuster.OOM_ADJ_REASON_GET_PROVIDER);
+                    // XXX things have changed so updateOomAdjLocked doesn't actually tell us
+                    // if the process has been successfully adjusted.  So to reduce races with
+                    // it, we will check whether the process still exists.  Note that this doesn't
+                    // completely get rid of races with LMK killing the process, but should make
+                    // them much smaller.
+                    if (success && verifiedAdj != cpr.proc.setAdj
+                            && !isProcessAliveLocked(cpr.proc)) {
+                        success = false;
                     }
-                    // We'll just start a new process to host the content provider
-                    providerRunning = false;
-                    conn = null;
-                    dyingProc = cpr.proc;
-                } else {
-                    cpr.proc.verifiedAdj = cpr.proc.setAdj;
+                    maybeUpdateProviderUsageStatsLocked(r, cpr.info.packageName, name);
+                    checkTime(startTime, "getContentProviderImpl: after updateOomAdj");
+                    if (DEBUG_PROVIDER) Slog.i(TAG_PROVIDER, "Adjust success: " + success);
+                    // NOTE: there is still a race here where a signal could be
+                    // pending on the process even though we managed to update its
+                    // adj level.  Not sure what to do about this, but at least
+                    // the race is now smaller.
+                    if (!success) {
+                        // Uh oh...  it looks like the provider's process
+                        // has been killed on us.  We need to wait for a new
+                        // process to be started, and make sure its death
+                        // doesn't kill our process.
+                        Slog.wtf(TAG, "Existing provider " + cpr.name.flattenToShortString()
+                                + " is crashing; detaching " + r);
+                        boolean lastRef = decProviderCountLocked(conn, cpr, token, stable);
+                        if (!lastRef) {
+                            // This wasn't the last ref our process had on
+                            // the provider...  we will be killed during cleaning up, bail.
+                            return null;
+                        }
+                        // We'll just start a new process to host the content provider
+                        providerRunning = false;
+                        conn = null;
+                        dyingProc = cpr.proc;
+                    } else {
+                        cpr.proc.verifiedAdj = cpr.proc.setAdj;
+                    }
+                } finally {
+                    Binder.restoreCallingIdentity(origId);
                 }
-
-                Binder.restoreCallingIdentity(origId);
             }
 
             if (!providerRunning) {
