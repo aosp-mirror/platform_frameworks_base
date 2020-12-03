@@ -679,8 +679,10 @@ public class ActivityRecordTests extends WindowTestsBase {
                 new RemoteAnimationAdapter(new Stub() {
 
                     @Override
-                    public void onAnimationStart(RemoteAnimationTarget[] apps,
+                    public void onAnimationStart(@WindowManager.TransitionOldType int transit,
+                            RemoteAnimationTarget[] apps,
                             RemoteAnimationTarget[] wallpapers,
+                            RemoteAnimationTarget[] nonApps,
                             IRemoteAnimationFinishedCallback finishedCallback) {
                     }
 
