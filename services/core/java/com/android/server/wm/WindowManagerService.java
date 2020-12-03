@@ -7720,6 +7720,9 @@ public class WindowManagerService extends IWindowManager.Stub
                     dc.mInputMethodControlTarget.hideInsets(
                             WindowInsets.Type.ime(), true /* fromIme */);
                 }
+                if (dc != null) {
+                    dc.getInsetsStateController().getImeSourceProvider().setImeShowing(false);
+                }
             }
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         }

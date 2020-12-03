@@ -24,7 +24,6 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Point;
 import android.graphics.Rect;
-import android.os.Handler;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.Slog;
@@ -203,6 +202,8 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
                 if (mInsetsState.equals(insetsState)) {
                     return;
                 }
+
+                mImeShowing = insetsState.getSourceOrDefaultVisibility(InsetsState.ITYPE_IME);
 
                 final InsetsSource newSource = insetsState.getSource(InsetsState.ITYPE_IME);
                 final Rect newFrame = newSource.getFrame();
