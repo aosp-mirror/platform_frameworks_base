@@ -416,7 +416,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     // mOccludesParent field.
     final boolean hasWallpaper;
     // Input application handle used by the input dispatcher.
-    final InputApplicationHandle mInputApplicationHandle;
+    private InputApplicationHandle mInputApplicationHandle;
 
     final int launchedFromPid; // always the pid who started the activity.
     final int launchedFromUid; // always the uid who started the activity.
@@ -1501,7 +1501,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         info = aInfo;
         mUserId = UserHandle.getUserId(info.applicationInfo.uid);
         packageName = info.applicationInfo.packageName;
-        mInputApplicationHandle = new InputApplicationHandle(appToken);
         intent = _intent;
 
         // If the class name in the intent doesn't match that of the target, this is probably an
@@ -1683,6 +1682,21 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             }
         }
         return lockTaskLaunchMode;
+    }
+
+    @NonNull InputApplicationHandle getInputApplicationHandle(boolean update) {
+        if (mInputApplicationHandle == null) {
+            mInputApplicationHandle = new InputApplicationHandle(appToken, toString(),
+                    mInputDispatchingTimeoutNanos);
+        } else if (update) {
+            final String name = toString();
+            if (mInputDispatchingTimeoutNanos != mInputApplicationHandle.dispatchingTimeoutNanos
+                    || !name.equals(mInputApplicationHandle.name)) {
+                mInputApplicationHandle = new InputApplicationHandle(appToken, name,
+                        mInputDispatchingTimeoutNanos);
+            }
+        }
+        return mInputApplicationHandle;
     }
 
     @Override
