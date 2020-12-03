@@ -1738,6 +1738,7 @@ public class PackageManagerService extends IPackageManager.Stub
     final @Nullable String mOverlayConfigSignaturePackage;
     final @Nullable String mRecentsPackage;
 
+    @GuardedBy("mLock")
     private final PackageUsage mPackageUsage = new PackageUsage();
     private final CompilerStats mCompilerStats = new CompilerStats();
 
@@ -10630,13 +10631,14 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     public void shutdown() {
-        mPackageUsage.writeNow(mSettings.mPackages);
         mCompilerStats.writeNow();
         mDexManager.writePackageDexUsageNow();
         PackageWatchdog.getInstance(mContext).writeNow();
 
-        // This is the last chance to write out pending restriction settings
         synchronized (mLock) {
+            mPackageUsage.writeNow(mSettings.mPackages);
+
+            // This is the last chance to write out pending restriction settings
             if (mHandler.hasMessages(WRITE_PACKAGE_RESTRICTIONS)) {
                 mHandler.removeMessages(WRITE_PACKAGE_RESTRICTIONS);
                 for (int userId : mDirtyUsers) {
@@ -26049,7 +26051,9 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     boolean isHistoricalPackageUsageAvailable() {
-        return mPackageUsage.isHistoricalPackageUsageAvailable();
+        synchronized (mLock) {
+            return mPackageUsage.isHistoricalPackageUsageAvailable();
+        }
     }
 
     /**
