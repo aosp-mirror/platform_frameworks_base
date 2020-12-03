@@ -32,15 +32,15 @@ import android.view.RemoteAnimationDefinition;
  */
 interface IActivityClientController {
     oneway void activityIdle(in IBinder token, in Configuration config, in boolean stopProfiling);
-    void activityResumed(in IBinder token);
-    void activityTopResumedStateLost();
-    void activityPaused(in IBinder token);
-    void activityStopped(in IBinder token, in Bundle state, in PersistableBundle persistentState,
-            in CharSequence description);
+    oneway void activityResumed(in IBinder token);
+    oneway void activityTopResumedStateLost();
+    oneway void activityPaused(in IBinder token);
+    oneway void activityStopped(in IBinder token, in Bundle state,
+            in PersistableBundle persistentState, in CharSequence description);
     oneway void activityDestroyed(in IBinder token);
-    void activityRelaunched(in IBinder token);
+    oneway void activityRelaunched(in IBinder token);
 
-    void reportSizeConfigurations(in IBinder token, in int[] horizontalSizeConfiguration,
+    oneway void reportSizeConfigurations(in IBinder token, in int[] horizontalSizeConfiguration,
             in int[] verticalSizeConfigurations, in int[] smallestWidthConfigurations);
     boolean moveActivityTaskToBack(in IBinder token, boolean nonRoot);
     boolean shouldUpRecreateTask(in IBinder token, in String destAffinity);
@@ -75,8 +75,8 @@ interface IActivityClientController {
     void setPictureInPictureParams(in IBinder token, in PictureInPictureParams params);
     void toggleFreeformWindowingMode(in IBinder token);
 
-    void startLockTaskModeByToken(in IBinder token);
-    void stopLockTaskModeByToken(in IBinder token);
+    oneway void startLockTaskModeByToken(in IBinder token);
+    oneway void stopLockTaskModeByToken(in IBinder token);
     oneway void showLockTaskEscapeMessage(in IBinder token);
     void setTaskDescription(in IBinder token, in ActivityManager.TaskDescription values);
 
@@ -85,16 +85,16 @@ interface IActivityClientController {
     void startLocalVoiceInteraction(in IBinder token, in Bundle options);
     void stopLocalVoiceInteraction(in IBinder token);
 
-    void setShowWhenLocked(in IBinder token, boolean showWhenLocked);
-    void setInheritShowWhenLocked(in IBinder token, boolean setInheritShownWhenLocked);
-    void setTurnScreenOn(in IBinder token, boolean turnScreenOn);
-    void reportActivityFullyDrawn(in IBinder token, boolean restoredFromBundle);
-    void overridePendingTransition(in IBinder token, in String packageName,
+    oneway void setShowWhenLocked(in IBinder token, boolean showWhenLocked);
+    oneway void setInheritShowWhenLocked(in IBinder token, boolean setInheritShownWhenLocked);
+    oneway void setTurnScreenOn(in IBinder token, boolean turnScreenOn);
+    oneway void reportActivityFullyDrawn(in IBinder token, boolean restoredFromBundle);
+    oneway void overridePendingTransition(in IBinder token, in String packageName,
             int enterAnim, int exitAnim);
     int setVrMode(in IBinder token, boolean enabled, in ComponentName packageName);
 
     /** See {@link android.app.Activity#setDisablePreviewScreenshots}. */
-    void setDisablePreviewScreenshots(in IBinder token, boolean disable);
+    oneway void setDisablePreviewScreenshots(in IBinder token, boolean disable);
 
     /** Registers remote animations for a specific activity. */
     void registerRemoteAnimations(in IBinder token, in RemoteAnimationDefinition definition);
@@ -106,5 +106,5 @@ interface IActivityClientController {
      * Reports that an Activity received a back key press when there were no additional activities
      * on the back stack.
      */
-    void onBackPressedOnTaskRoot(in IBinder token);
+    oneway void onBackPressedOnTaskRoot(in IBinder token);
 }
