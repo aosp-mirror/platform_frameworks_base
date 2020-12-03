@@ -401,6 +401,17 @@ public class KeyguardClockSwitch extends RelativeLayout {
         }
     }
 
+    /**
+     * Notifies that the time format has changed.
+     *
+     * @param timeFormat "12" for 12-hour format, "24" for 24-hour format
+     */
+    public void onTimeFormatChanged(String timeFormat) {
+        if (mClockPlugin != null) {
+            mClockPlugin.onTimeFormatChanged(timeFormat);
+        }
+    }
+
     void updateColors(ColorExtractor.GradientColors colors) {
         mSupportsDarkText = colors.supportsDarkText();
         mColorPalette = colors.getColorPalette();

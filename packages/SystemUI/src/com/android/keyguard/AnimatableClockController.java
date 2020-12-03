@@ -24,6 +24,8 @@ import com.android.settingslib.Utils;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.util.ViewController;
 
+import java.util.TimeZone;
+
 /**
  * Controls the color of a GradientTextClock.
  */
@@ -62,10 +64,24 @@ public class AnimatableClockController extends ViewController<AnimatableClockVie
     }
 
     /**
-     * Updates the time for this view.
+     * Updates the time for the view.
      */
     public void refreshTime() {
         mView.refreshTime();
+    }
+
+    /**
+     * Updates the timezone for the view.
+     */
+    public void onTimeZoneChanged(TimeZone timeZone) {
+        mView.onTimeZoneChanged(timeZone);
+    }
+
+    /**
+     * Trigger a time format update
+     */
+    public void refreshFormat() {
+        mView.refreshFormat();
     }
 
     private void initColors() {
