@@ -4135,4 +4135,6 @@
   <java-symbol type="dimen" name="accessibility_focus_highlight_stroke_width" />
 
   <java-symbol type="bool" name="config_attachNavBarToAppDuringTransition" />
+
+  <java-symbol type="bool" name="config_enableBackSound" />
 </resources>

@@ -600,6 +600,9 @@ public class AudioService extends IAudioService.Stub
     // caches the value returned by AudioSystem.isMicrophoneMuted()
     private boolean mMicMuteFromSystemCached;
 
+    private boolean mFastScrollSoundEffectsEnabled;
+    private boolean mHomeSoundEffectEnabled;
+
     @GuardedBy("mSettingsLock")
     private int mAssistantUid;
 
@@ -2193,6 +2196,28 @@ public class AudioService extends IAudioService.Stub
                 == PackageManager.PERMISSION_GRANTED;
         adjustSuggestedStreamVolume(direction, suggestedStreamType, flags, callingPackage,
                 caller, Binder.getCallingUid(), hasModifyAudioSettings, VOL_ADJUST_NORMAL);
+    }
+
+    public void setFastScrollSoundEffectsEnabled(boolean enabled) {
+        mFastScrollSoundEffectsEnabled = enabled;
+    }
+
+    /**
+     * @return true if the fast scroll sound effects are enabled
+     */
+    public boolean areFastScrollSoundEffectsEnabled() {
+        return mFastScrollSoundEffectsEnabled;
+    }
+
+    public void setHomeSoundEffectEnabled(boolean enabled) {
+        mHomeSoundEffectEnabled = enabled;
+    }
+
+    /**
+     * @return true if the home sound effect is enabled
+     */
+    public boolean isHomeSoundEffectEnabled() {
+        return mHomeSoundEffectEnabled;
     }
 
     private void adjustSuggestedStreamVolume(int direction, int suggestedStreamType, int flags,

@@ -42,7 +42,10 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * A helper class for managing sound effects loading / unloading
@@ -180,7 +183,7 @@ class SoundEffectsHelper {
                         .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
                         .build())
                 .build();
-        loadTouchSoundAssets();
+        loadSoundAssets();
 
         mSoundPoolLoader = new SoundPoolLoader();
         mSoundPoolLoader.addHandler(new OnEffectsLoadCompleteHandler() {
@@ -316,15 +319,22 @@ class SoundEffectsHelper {
         return filePath;
     }
 
-    private void loadTouchSoundAssetDefaults() {
+    private void loadSoundAssetDefaults() {
         int defaultResourceIdx = mResources.size();
         mResources.add(new Resource("Effect_Tick.ogg"));
-        for (int i = 0; i < mEffects.length; i++) {
-            mEffects[i] = defaultResourceIdx;
-        }
+        Arrays.fill(mEffects, defaultResourceIdx);
     }
 
-    private void loadTouchSoundAssets() {
+    /**
+     * Loads the sound assets information from audio_assets.xml
+     * The expected format of audio_assets.xml is:
+     * <ul>
+     *  <li> all {@code <asset>s} listed directly in {@code <audio_assets>} </li>
+     *  <li> for backwards compatibility: exactly one {@code <group>} with name
+     *  {@link #GROUP_TOUCH_SOUNDS} </li>
+     * </ul>
+     */
+    private void loadSoundAssets() {
         XmlResourceParser parser = null;
 
         // only load assets once.
@@ -332,15 +342,14 @@ class SoundEffectsHelper {
             return;
         }
 
-        loadTouchSoundAssetDefaults();
+        loadSoundAssetDefaults();
 
         try {
             parser = mContext.getResources().getXml(com.android.internal.R.xml.audio_assets);
 
             XmlUtils.beginDocument(parser, TAG_AUDIO_ASSETS);
             String version = parser.getAttributeValue(null, ATTR_VERSION);
-            boolean inTouchSoundsGroup = false;
-
+            Map<Integer, Integer> parserCounter = new HashMap<>();
             if (ASSET_FILE_VERSION.equals(version)) {
                 while (true) {
                     XmlUtils.nextElement(parser);
@@ -350,19 +359,10 @@ class SoundEffectsHelper {
                     }
                     if (element.equals(TAG_GROUP)) {
                         String name = parser.getAttributeValue(null, ATTR_GROUP_NAME);
-                        if (GROUP_TOUCH_SOUNDS.equals(name)) {
-                            inTouchSoundsGroup = true;
-                            break;
+                        if (!GROUP_TOUCH_SOUNDS.equals(name)) {
+                            Log.w(TAG, "Unsupported group name: " + name);
                         }
-                    }
-                }
-                while (inTouchSoundsGroup) {
-                    XmlUtils.nextElement(parser);
-                    String element = parser.getName();
-                    if (element == null) {
-                        break;
-                    }
-                    if (element.equals(TAG_ASSET)) {
+                    } else if (element.equals(TAG_ASSET)) {
                         String id = parser.getAttributeValue(null, ATTR_ASSET_ID);
                         String file = parser.getAttributeValue(null, ATTR_ASSET_FILE);
                         int fx;
@@ -371,27 +371,52 @@ class SoundEffectsHelper {
                             Field field = AudioManager.class.getField(id);
                             fx = field.getInt(null);
                         } catch (Exception e) {
-                            Log.w(TAG, "Invalid touch sound ID: " + id);
+                            Log.w(TAG, "Invalid sound ID: " + id);
                             continue;
                         }
-
+                        int currentParserCount = parserCounter.getOrDefault(fx, 0) + 1;
+                        parserCounter.put(fx, currentParserCount);
+                        if (currentParserCount > 1) {
+                            Log.w(TAG, "Duplicate definition for sound ID: " + id);
+                        }
                         mEffects[fx] = findOrAddResourceByFileName(file);
                     } else {
                         break;
+                    }
+                }
+
+                boolean fastScrollSoundEffectsParsed = allFastScrollSoundsParsed(parserCounter);
+                boolean homeSoundParsed = parserCounter.getOrDefault(AudioManager.FX_HOME, 0) > 0;
+                if (fastScrollSoundEffectsParsed || homeSoundParsed) {
+                    AudioManager audioManager = mContext.getSystemService(AudioManager.class);
+                    if (audioManager != null && fastScrollSoundEffectsParsed) {
+                        audioManager.setFastScrollSoundEffectsEnabled(true);
+                    }
+                    if (audioManager != null && homeSoundParsed) {
+                        audioManager.setHomeSoundEffectEnabled(true);
                     }
                 }
             }
         } catch (Resources.NotFoundException e) {
             Log.w(TAG, "audio assets file not found", e);
         } catch (XmlPullParserException e) {
-            Log.w(TAG, "XML parser exception reading touch sound assets", e);
+            Log.w(TAG, "XML parser exception reading sound assets", e);
         } catch (IOException e) {
-            Log.w(TAG, "I/O exception reading touch sound assets", e);
+            Log.w(TAG, "I/O exception reading sound assets", e);
         } finally {
             if (parser != null) {
                 parser.close();
             }
         }
+    }
+
+    private boolean allFastScrollSoundsParsed(Map<Integer, Integer> parserCounter) {
+        int numFastScrollSoundEffectsParsed =
+                parserCounter.getOrDefault(AudioManager.FX_FAST_SCROLL_1, 0)
+                        + parserCounter.getOrDefault(AudioManager.FX_FAST_SCROLL_2, 0)
+                        + parserCounter.getOrDefault(AudioManager.FX_FAST_SCROLL_3, 0)
+                        + parserCounter.getOrDefault(AudioManager.FX_FAST_SCROLL_4, 0);
+        return numFastScrollSoundEffectsParsed == AudioManager.NUM_FAST_SCROLL_SOUND_EFFECTS;
     }
 
     private int findOrAddResourceByFileName(String fileName) {

@@ -19860,6 +19860,7 @@ package android.media {
     field public static final int FLAG_REMOVE_SOUND_AND_VIBRATE = 8; // 0x8
     field public static final int FLAG_SHOW_UI = 1; // 0x1
     field public static final int FLAG_VIBRATE = 16; // 0x10
+    field public static final int FX_BACK = 10; // 0xa
     field public static final int FX_FOCUS_NAVIGATION_DOWN = 2; // 0x2
     field public static final int FX_FOCUS_NAVIGATION_LEFT = 3; // 0x3
     field public static final int FX_FOCUS_NAVIGATION_RIGHT = 4; // 0x4

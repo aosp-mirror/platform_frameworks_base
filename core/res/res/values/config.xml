@@ -4588,4 +4588,9 @@
 
     <!-- If true, attach the navigation bar to the app during app transition -->
     <bool name="config_attachNavBarToAppDuringTransition">false</bool>
+
+    <!-- Flag indicating that the media framework should play a back sound when a back-transition
+         happens that doesn't result in bringing the home task to the front.
+         This is currently only used on TV. -->
+    <bool name="config_enableBackSound">false</bool>
 </resources>
