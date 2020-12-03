@@ -15215,6 +15215,7 @@ public class PackageManagerService extends IPackageManager.Stub
         final boolean forceQueryableOverride;
         final int mDataLoaderType;
         final long requiredInstalledVersionCode;
+        final PackageLite mPackageLite;
 
         InstallParams(OriginInfo origin, MoveInfo move, IPackageInstallObserver2 observer,
                 int installFlags, InstallSource installSource, String volumeUuid,
@@ -15236,11 +15237,13 @@ public class PackageManagerService extends IPackageManager.Stub
             this.forceQueryableOverride = false;
             this.mDataLoaderType = DataLoaderType.NONE;
             this.requiredInstalledVersionCode = PackageManager.VERSION_CODE_HIGHEST;
+            this.mPackageLite = null;
         }
 
         InstallParams(File stagedDir, IPackageInstallObserver2 observer,
                 PackageInstaller.SessionParams sessionParams, InstallSource installSource,
-                UserHandle user, SigningDetails signingDetails, int installerUid) {
+                UserHandle user, SigningDetails signingDetails, int installerUid,
+                PackageLite packageLite) {
             super(user);
             origin = OriginInfo.fromStagedFile(stagedDir);
             move = null;
@@ -15259,6 +15262,7 @@ public class PackageManagerService extends IPackageManager.Stub
             mDataLoaderType = (sessionParams.dataLoaderParams != null)
                     ? sessionParams.dataLoaderParams.getType() : DataLoaderType.NONE;
             requiredInstalledVersionCode = sessionParams.requiredInstalledVersionCode;
+            mPackageLite = packageLite;
         }
 
         @Override
@@ -15343,7 +15347,8 @@ public class PackageManagerService extends IPackageManager.Stub
                     try {
                         mInstaller.freeCache(null, sizeBytes + lowThreshold, 0, 0);
                         pkgLite = PackageManagerServiceUtils.getMinimalPackageInfo(mContext,
-                                origin.resolvedPath, installFlags, packageAbiOverride);
+                                mPackageLite, origin.resolvedPath, installFlags,
+                                packageAbiOverride);
                     } catch (InstallerException e) {
                         Slog.w(TAG, "Failed to free cache", e);
                     }
@@ -15404,7 +15409,7 @@ public class PackageManagerService extends IPackageManager.Stub
          */
         public void handleStartCopy() {
             PackageInfoLite pkgLite = PackageManagerServiceUtils.getMinimalPackageInfo(mContext,
-                    origin.resolvedPath, installFlags, packageAbiOverride);
+                    mPackageLite, origin.resolvedPath, installFlags, packageAbiOverride);
 
             // For staged session, there is a delay between its verification and install. Device
             // state can change within this delay and hence we need to re-verify certain conditions.
@@ -15524,9 +15529,11 @@ public class PackageManagerService extends IPackageManager.Stub
         private boolean mWaitForEnableRollbackToComplete;
         private int mRet;
 
+        final PackageLite mPackageLite;
+
         VerificationParams(UserHandle user, File stagedDir, IPackageInstallObserver2 observer,
                 PackageInstaller.SessionParams sessionParams, InstallSource installSource,
-                int installerUid, SigningDetails signingDetails, int sessionId) {
+                int installerUid, SigningDetails signingDetails, int sessionId, PackageLite lite) {
             super(user);
             origin = OriginInfo.fromStagedFile(stagedDir);
             this.observer = observer;
@@ -15544,6 +15551,7 @@ public class PackageManagerService extends IPackageManager.Stub
             mDataLoaderType = (sessionParams.dataLoaderParams != null)
                     ? sessionParams.dataLoaderParams.getType() : DataLoaderType.NONE;
             mSessionId = sessionId;
+            mPackageLite = lite;
         }
 
         @Override
@@ -15561,7 +15569,7 @@ public class PackageManagerService extends IPackageManager.Stub
             }
 
             PackageInfoLite pkgLite = PackageManagerServiceUtils.getMinimalPackageInfo(mContext,
-                    origin.resolvedPath, installFlags, packageAbiOverride);
+                    mPackageLite, origin.resolvedPath, installFlags, packageAbiOverride);
 
             mRet = verifyReplacingVersionCode(pkgLite, requiredInstalledVersionCode, installFlags);
             if (mRet != INSTALL_SUCCEEDED) {
