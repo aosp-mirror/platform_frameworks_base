@@ -103,7 +103,7 @@ public abstract class SystemUIDefaultModule {
 
     @Binds
     @Singleton
-    public abstract QSFactory provideQSFactory(QSFactoryImpl qsFactoryImpl);
+    public abstract QSFactory bindQSFactory(QSFactoryImpl qsFactoryImpl);
 
     @Binds
     abstract DockManager bindDockManager(DockManagerImpl dockManager);

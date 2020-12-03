@@ -32,6 +32,7 @@ import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.Mockito.`when`
 import org.mockito.Mockito.never
+import org.mockito.Mockito.reset
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 import java.util.concurrent.Executor
@@ -56,8 +57,6 @@ private fun <T> any(): T = Mockito.any()
 class MediaDataFilterTest : SysuiTestCase() {
 
     @Mock
-    private lateinit var combineLatest: MediaDataCombineLatest
-    @Mock
     private lateinit var listener: MediaDataManager.Listener
     @Mock
     private lateinit var broadcastDispatcher: BroadcastDispatcher
@@ -78,8 +77,9 @@ class MediaDataFilterTest : SysuiTestCase() {
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
-        mediaDataFilter = MediaDataFilter(combineLatest, broadcastDispatcher, mediaResumeListener,
-            mediaDataManager, lockscreenUserManager, executor)
+        mediaDataFilter = MediaDataFilter(broadcastDispatcher, mediaResumeListener,
+                lockscreenUserManager, executor)
+        mediaDataFilter.mediaDataManager = mediaDataManager
         mediaDataFilter.addListener(listener)
 
         // Start all tests as main user
@@ -152,8 +152,9 @@ class MediaDataFilterTest : SysuiTestCase() {
     @Test
     fun testOnUserSwitched_addsNewUserControls() {
         // GIVEN that we had some media for both users
-        val dataMap = mapOf(KEY to dataMain, KEY_ALT to dataGuest)
-        `when`(combineLatest.getData()).thenReturn(dataMap)
+        mediaDataFilter.onMediaDataLoaded(KEY, null, dataMain)
+        mediaDataFilter.onMediaDataLoaded(KEY_ALT, null, dataGuest)
+        reset(listener)
 
         // and we switch to guest user
         setUser(USER_GUEST)

@@ -1901,10 +1901,8 @@ class ContextImpl extends Context {
     @Override
     public Object getSystemService(String name) {
         if (vmIncorrectContextUseEnabled()) {
-            // We may override this API from outer context.
-            final boolean isUiContext = isUiContext() || isOuterUiContext();
             // Check incorrect Context usage.
-            if (isUiComponent(name) && !isUiContext) {
+            if (isUiComponent(name) && !isSelfOrOuterUiContext()) {
                 final String errorMessage = "Tried to access visual service "
                         + SystemServiceRegistry.getSystemServiceClassName(name)
                         + " from a non-visual Context:" + getOuterContext();
@@ -1921,13 +1919,15 @@ class ContextImpl extends Context {
         return SystemServiceRegistry.getSystemService(this, name);
     }
 
-    private boolean isOuterUiContext() {
-        return getOuterContext() != null && getOuterContext().isUiContext();
-    }
-
     @Override
     public String getSystemServiceName(Class<?> serviceClass) {
         return SystemServiceRegistry.getSystemServiceName(serviceClass);
+    }
+
+    // TODO(b/149463653): check if we still need this method after migrating IMS to WindowContext.
+    private boolean isSelfOrOuterUiContext() {
+        // We may override outer context's isUiContext
+        return isUiContext() || getOuterContext() != null && getOuterContext().isUiContext();
     }
 
     /** @hide */
@@ -2376,7 +2376,6 @@ class ContextImpl extends Context {
         context.setResources(createResources(mToken, mPackageInfo, mSplitName, displayId,
                 overrideConfiguration, getDisplayAdjustments(displayId).getCompatibilityInfo(),
                 mResources.getLoaders()));
-        context.mIsUiContext = isUiContext() || isOuterUiContext();
         return context;
     }
 
@@ -2396,6 +2395,11 @@ class ContextImpl extends Context {
                 mResources.getLoaders()));
         context.mDisplay = display;
         context.mIsAssociatedWithDisplay = true;
+        // Note that even if a display context is derived from an UI context, it should not be
+        // treated as UI context because it does not handle configuration changes from the server
+        // side. If the context does need to handle configuration changes, please use
+        // Context#createWindowContext(int, Bundle).
+        context.mIsUiContext = false;
         return context;
     }
 
@@ -2481,9 +2485,9 @@ class ContextImpl extends Context {
 
     @Override
     public Display getDisplay() {
-        if (!mIsSystemOrSystemUiContext && !mIsAssociatedWithDisplay) {
+        if (!mIsSystemOrSystemUiContext && !mIsAssociatedWithDisplay && !isSelfOrOuterUiContext()) {
             throw new UnsupportedOperationException("Tried to obtain display from a Context not "
-                    + "associated with  one. Only visual Contexts (such as Activity or one created "
+                    + "associated with one. Only visual Contexts (such as Activity or one created "
                     + "with Context#createWindowContext) or ones created with "
                     + "Context#createDisplayContext are associated with displays. Other types of "
                     + "Contexts are typically related to background entities and may return an "
@@ -2757,6 +2761,7 @@ class ContextImpl extends Context {
             mDisplay = container.mDisplay;
             mIsAssociatedWithDisplay = container.mIsAssociatedWithDisplay;
             mIsSystemOrSystemUiContext = container.mIsSystemOrSystemUiContext;
+            mIsUiContext = container.isSelfOrOuterUiContext();
         } else {
             mBasePackageName = packageInfo.mPackageName;
             ApplicationInfo ainfo = packageInfo.getApplicationInfo();

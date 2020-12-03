@@ -42,6 +42,8 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ShortcutInfo;
 import android.content.pm.ShortcutManager;
+import android.content.res.TypedArray;
+import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.UserHandle;
@@ -539,12 +541,21 @@ public class NotificationConversationInfo extends LinearLayout implements
                 && Settings.Global.getInt(mContext.getContentResolver(),
                         NOTIFICATION_BUBBLES, 0) == 1;
 
+        Drawable person =  mIconFactory.getBaseIconDrawable(mShortcutInfo);
+        if (person == null) {
+            person = mContext.getDrawable(R.drawable.ic_person).mutate();
+            TypedArray ta = mContext.obtainStyledAttributes(new int[]{android.R.attr.colorAccent});
+            int colorAccent = ta.getColor(0, 0);
+            ta.recycle();
+            person.setTint(colorAccent);
+        }
+
         PriorityOnboardingDialogController controller = mBuilderProvider.get()
                 .setContext(mUserContext)
                 .setView(onboardingView)
                 .setIgnoresDnd(ignoreDnd)
                 .setShowsAsBubble(showAsBubble)
-                .setIcon(mIconFactory.getBaseIconDrawable(mShortcutInfo))
+                .setIcon(person)
                 .setBadge(mIconFactory.getAppBadge(
                         mPackageName, UserHandle.getUserId(mSbn.getUid())))
                 .setOnSettingsClick(mOnConversationSettingsClickListener)

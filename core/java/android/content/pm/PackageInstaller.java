@@ -1291,9 +1291,8 @@ public class PackageInstaller {
          *
          * @throws PackageManager.NameNotFoundException if the new owner could not be found.
          * @throws SecurityException if called after the session has been committed or abandoned.
-         * @throws SecurityException if the session does not update the original installer
-         * @throws SecurityException if streams opened through
-         *                           {@link #openWrite(String, long, long) are still open.
+         * @throws IllegalArgumentException if streams opened through
+         *                                  {@link #openWrite(String, long, long) are still open.
          */
         public void transfer(@NonNull String packageName)
                 throws PackageManager.NameNotFoundException {

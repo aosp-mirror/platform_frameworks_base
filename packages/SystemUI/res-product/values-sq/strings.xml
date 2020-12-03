@@ -40,7 +40,4 @@
     <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4682221342671290678">"Ke tentuar <xliff:g id="NUMBER">%d</xliff:g> herë pa sukses për ta shkyçur telefonin. Profili i punës do të hiqet, gjë që do të fshijë të gjitha të dhënat e profilit."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="1860049973474855672">"Ke vizatuar <xliff:g id="NUMBER_0">%1$d</xliff:g> herë pa sukses motivin tënd të shkyçjes. Pas <xliff:g id="NUMBER_1">%2$d</xliff:g> tentativave të tjera të pasuksesshme, do të të duhet ta shkyçësh tabletin duke përdorur një llogari email-i.\n\n Provo sërish për <xliff:g id="NUMBER_2">%3$d</xliff:g> sekonda."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="44112553371516141">"Ke vizatuar <xliff:g id="NUMBER_0">%1$d</xliff:g> herë pa sukses motivin tënd. Pas <xliff:g id="NUMBER_1">%2$d</xliff:g> tentativave të tjera të pasuksesshme, do të të duhet ta shkyçësh telefonin duke përdorur një llogari email-i.\n\n Provo sërish për <xliff:g id="NUMBER_2">%3$d</xliff:g> sekonda."</string>
-    <string name="global_action_lock_message" product="default" msgid="7092460751050168771">"Shkyçe telefonin për më shumë opsione"</string>
-    <string name="global_action_lock_message" product="tablet" msgid="1024230056230539493">"Shkyçe tabletin për më shumë opsione"</string>
-    <string name="global_action_lock_message" product="device" msgid="3165224897120346096">"Shkyçe pajisjen për më shumë opsione"</string>
 </resources>

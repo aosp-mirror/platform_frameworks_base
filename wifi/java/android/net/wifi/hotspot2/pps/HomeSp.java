@@ -313,9 +313,7 @@ public final class HomeSp implements Parcelable {
      * @return a Unique identifier for a HomeSp object
      */
     public int getUniqueId() {
-        return Objects.hash(mFqdn, mFriendlyName, mHomeNetworkIds, Arrays.hashCode(mMatchAllOis),
-                Arrays.hashCode(mMatchAnyOis), Arrays.hashCode(mOtherHomePartners),
-                Arrays.hashCode(mRoamingConsortiumOis));
+        return Objects.hash(mFqdn);
     }
 
 

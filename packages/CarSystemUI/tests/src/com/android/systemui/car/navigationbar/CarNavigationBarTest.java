@@ -45,6 +45,7 @@ import com.android.internal.view.AppearanceRegion;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.car.CarDeviceProvisionedController;
+import com.android.systemui.car.CarSystemUiTest;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.phone.AutoHideController;
 import com.android.systemui.statusbar.phone.LightBarController;
@@ -63,6 +64,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+@CarSystemUiTest
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
 @SmallTest
@@ -140,7 +142,7 @@ public class CarNavigationBarTest extends SysuiTestCase {
                 mWindowManager, mDeviceProvisionedController, new CommandQueue(mContext),
                 mAutoHideController, mButtonSelectionStateListener, mHandler, mUiBgExecutor,
                 mBarService, () -> mKeyguardStateController, () -> mIconPolicy,
-                () -> mIconController);
+                () -> mIconController, new SystemBarConfigs(mTestableResources.getResources()));
     }
 
     @Test

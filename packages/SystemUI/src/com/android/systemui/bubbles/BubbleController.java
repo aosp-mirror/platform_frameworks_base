@@ -133,7 +133,8 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
     @IntDef({DISMISS_USER_GESTURE, DISMISS_AGED, DISMISS_TASK_FINISHED, DISMISS_BLOCKED,
             DISMISS_NOTIF_CANCEL, DISMISS_ACCESSIBILITY_ACTION, DISMISS_NO_LONGER_BUBBLE,
             DISMISS_USER_CHANGED, DISMISS_GROUP_CANCELLED, DISMISS_INVALID_INTENT,
-            DISMISS_OVERFLOW_MAX_REACHED, DISMISS_SHORTCUT_REMOVED, DISMISS_PACKAGE_REMOVED})
+            DISMISS_OVERFLOW_MAX_REACHED, DISMISS_SHORTCUT_REMOVED, DISMISS_PACKAGE_REMOVED,
+            DISMISS_NO_BUBBLE_UP})
     @Target({FIELD, LOCAL_VARIABLE, PARAMETER})
     @interface DismissReason {}
 
@@ -150,6 +151,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
     static final int DISMISS_OVERFLOW_MAX_REACHED = 11;
     static final int DISMISS_SHORTCUT_REMOVED = 12;
     static final int DISMISS_PACKAGE_REMOVED = 13;
+    static final int DISMISS_NO_BUBBLE_UP = 14;
 
     private final Context mContext;
     private final NotificationEntryManager mNotificationEntryManager;
@@ -167,6 +169,12 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
     private ScrimView mBubbleScrim;
     @Nullable private BubbleStackView mStackView;
     private BubbleIconFactory mBubbleIconFactory;
+
+    /**
+     * The relative position of the stack when we removed it and nulled it out. If the stack is
+     * re-created, it will re-appear at this position.
+     */
+    @Nullable private BubbleStackView.RelativeStackPosition mPositionFromRemovedStack;
 
     // Tracks the id of the current (foreground) user.
     private int mCurrentUserId;
@@ -398,7 +406,8 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
             if (bubble.getBubbleIntent() == null) {
                 return;
             }
-            if (bubble.isIntentActive()) {
+            if (bubble.isIntentActive()
+                    || mBubbleData.hasBubbleInStackWithKey(bubble.getKey())) {
                 bubble.setPendingIntentCanceled();
                 return;
             }
@@ -718,6 +727,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
                     mContext, mBubbleData, mSurfaceSynchronizer, mFloatingContentCoordinator,
                     mSysUiState, this::onAllBubblesAnimatedOut, this::onImeVisibilityChanged,
                     this::hideCurrentInputMethod);
+            mStackView.setStackStartPosition(mPositionFromRemovedStack);
             mStackView.addView(mBubbleScrim);
             if (mExpandListener != null) {
                 mStackView.setExpandListener(mExpandListener);
@@ -787,6 +797,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
         try {
             mAddedToWindowManager = false;
             if (mStackView != null) {
+                mPositionFromRemovedStack = mStackView.getRelativeStackPosition();
                 mWindowManager.removeView(mStackView);
                 mStackView.removeView(mBubbleScrim);
                 mStackView = null;
@@ -1109,8 +1120,17 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
         if (notif.getImportance() >= NotificationManager.IMPORTANCE_HIGH) {
             notif.setInterruption();
         }
-        Bubble bubble = mBubbleData.getOrCreateBubble(notif, null /* persistedBubble */);
-        inflateAndAdd(bubble, suppressFlyout, showInShade);
+        if (!notif.getRanking().visuallyInterruptive()
+                && (notif.getBubbleMetadata() != null
+                    && !notif.getBubbleMetadata().getAutoExpandBubble())
+                && mBubbleData.hasOverflowBubbleWithKey(notif.getKey())) {
+            // Update the bubble but don't promote it out of overflow
+            Bubble b = mBubbleData.getOverflowBubbleWithKey(notif.getKey());
+            b.setEntry(notif);
+        } else {
+            Bubble bubble = mBubbleData.getOrCreateBubble(notif, null /* persistedBubble */);
+            inflateAndAdd(bubble, suppressFlyout, showInShade);
+        }
     }
 
     void inflateAndAdd(Bubble bubble, boolean suppressFlyout, boolean showInShade) {
@@ -1234,8 +1254,18 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
             rankingMap.getRanking(key, mTmpRanking);
             boolean isActiveBubble = mBubbleData.hasAnyBubbleWithKey(key);
             if (isActiveBubble && !mTmpRanking.canBubble()) {
-                mBubbleData.dismissBubbleWithKey(entry.getKey(),
-                        BubbleController.DISMISS_BLOCKED);
+                // If this entry is no longer allowed to bubble, dismiss with the BLOCKED reason.
+                // This means that the app or channel's ability to bubble has been revoked.
+                mBubbleData.dismissBubbleWithKey(
+                        key, BubbleController.DISMISS_BLOCKED);
+            } else if (isActiveBubble
+                    && !mNotificationInterruptStateProvider.shouldBubbleUp(entry)) {
+                // If this entry is allowed to bubble, but cannot currently bubble up, dismiss it.
+                // This happens when DND is enabled and configured to hide bubbles. Dismissing with
+                // the reason DISMISS_NO_BUBBLE_UP will retain the underlying notification, so that
+                // the bubble will be re-created if shouldBubbleUp returns true.
+                mBubbleData.dismissBubbleWithKey(
+                        key, BubbleController.DISMISS_NO_BUBBLE_UP);
             } else if (entry != null && mTmpRanking.isBubble() && !isActiveBubble) {
                 entry.setFlagBubble(true);
                 onEntryUpdated(entry);
@@ -1312,8 +1342,10 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
                     mStackView.removeBubble(bubble);
                 }
 
-                // If the bubble is removed for user switching, leave the notification in place.
-                if (reason == DISMISS_USER_CHANGED) {
+                // Leave the notification in place if we're dismissing due to user switching, or
+                // because DND is suppressing the bubble. In both of those cases, we need to be able
+                // to restore the bubble from the notification later.
+                if (reason == DISMISS_USER_CHANGED || reason == DISMISS_NO_BUBBLE_UP) {
                     continue;
                 }
                 if (reason == DISMISS_NOTIF_CANCEL) {

@@ -387,6 +387,7 @@ public class Editor {
     private final SuggestionHelper mSuggestionHelper = new SuggestionHelper();
 
     private boolean mFlagCursorDragFromAnywhereEnabled;
+    private float mCursorDragDirectionMinXYRatio;
     private boolean mFlagInsertionHandleGesturesEnabled;
 
     // Specifies whether the new magnifier (with fish-eye effect) is enabled.
@@ -423,6 +424,11 @@ public class Editor {
         mFlagCursorDragFromAnywhereEnabled = AppGlobals.getIntCoreSetting(
                 WidgetFlags.KEY_ENABLE_CURSOR_DRAG_FROM_ANYWHERE,
                 WidgetFlags.ENABLE_CURSOR_DRAG_FROM_ANYWHERE_DEFAULT ? 1 : 0) != 0;
+        final int cursorDragMinAngleFromVertical = AppGlobals.getIntCoreSetting(
+                WidgetFlags.KEY_CURSOR_DRAG_MIN_ANGLE_FROM_VERTICAL,
+                WidgetFlags.CURSOR_DRAG_MIN_ANGLE_FROM_VERTICAL_DEFAULT);
+        mCursorDragDirectionMinXYRatio = EditorTouchState.getXYRatio(
+                cursorDragMinAngleFromVertical);
         mFlagInsertionHandleGesturesEnabled = AppGlobals.getIntCoreSetting(
                 WidgetFlags.KEY_ENABLE_INSERTION_HANDLE_GESTURES,
                 WidgetFlags.ENABLE_INSERTION_HANDLE_GESTURES_DEFAULT ? 1 : 0) != 0;
@@ -432,6 +438,8 @@ public class Editor {
         if (TextView.DEBUG_CURSOR) {
             logCursor("Editor", "Cursor drag from anywhere is %s.",
                     mFlagCursorDragFromAnywhereEnabled ? "enabled" : "disabled");
+            logCursor("Editor", "Cursor drag min angle from vertical is %d (= %f x/y ratio)",
+                    cursorDragMinAngleFromVertical, mCursorDragDirectionMinXYRatio);
             logCursor("Editor", "Insertion handle gestures is %s.",
                     mFlagInsertionHandleGesturesEnabled ? "enabled" : "disabled");
             logCursor("Editor", "New magnifier is %s.",
@@ -455,6 +463,11 @@ public class Editor {
     @VisibleForTesting
     public void setFlagCursorDragFromAnywhereEnabled(boolean enabled) {
         mFlagCursorDragFromAnywhereEnabled = enabled;
+    }
+
+    @VisibleForTesting
+    public void setCursorDragMinAngleFromVertical(int degreesFromVertical) {
+        mCursorDragDirectionMinXYRatio = EditorTouchState.getXYRatio(degreesFromVertical);
     }
 
     @VisibleForTesting
@@ -6059,12 +6072,7 @@ public class Editor {
             return trueLine;
         }
 
-        final int lineHeight = layout.getLineBottom(prevLine) - layout.getLineTop(prevLine);
-        int slop = (int)(LINE_SLOP_MULTIPLIER_FOR_HANDLEVIEWS
-                * (layout.getLineBottom(trueLine) - layout.getLineTop(trueLine)));
-        slop = Math.max(mLineChangeSlopMin,
-                Math.min(mLineChangeSlopMax, lineHeight + slop)) - lineHeight;
-        slop = Math.max(0, slop);
+        final int slop = (int)(LINE_SLOP_MULTIPLIER_FOR_HANDLEVIEWS * mTextView.getLineHeight());
 
         final float verticalOffset = mTextView.viewportToContentVerticalOffset();
         if (trueLine > prevLine && y >= layout.getLineBottom(prevLine) + slop + verticalOffset) {
@@ -6134,10 +6142,11 @@ public class Editor {
                     if (mIsDraggingCursor) {
                         performCursorDrag(event);
                     } else if (mFlagCursorDragFromAnywhereEnabled
-                                && mTextView.getLayout() != null
-                                && mTextView.isFocused()
-                                && mTouchState.isMovedEnoughForDrag()
-                                && !mTouchState.isDragCloseToVertical()) {
+                            && mTextView.getLayout() != null
+                            && mTextView.isFocused()
+                            && mTouchState.isMovedEnoughForDrag()
+                            && (mTouchState.getInitialDragDirectionXYRatio()
+                            > mCursorDragDirectionMinXYRatio || mTouchState.isOnHandle())) {
                         startCursorDrag(event);
                     }
                     break;
