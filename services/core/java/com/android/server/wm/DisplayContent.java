@@ -2298,10 +2298,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                             .setSubtype(getConfiguration().orientation)
                             .addTaggedData(MetricsEvent.FIELD_DISPLAY_ID, getDisplayId()));
         }
-
-        if (mPinnedStackControllerLocked != null) {
-            mPinnedStackControllerLocked.onDisplayInfoChanged(getDisplayInfo());
-        }
     }
 
     /**

@@ -20,6 +20,7 @@ import android.annotation.Nullable;
 import android.app.PictureInPictureParams;
 import android.content.ComponentName;
 import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
 import android.graphics.Rect;
 
 import com.android.wm.shell.common.annotations.ExternalThread;
@@ -79,6 +80,12 @@ public interface Pip {
      * Moves the PIPed activity to the fullscreen and closes PIP system UI.
      */
     default void movePipToFullscreen() {
+    }
+
+    /**
+     * Called when configuration is changed.
+     */
+    default void onConfigurationChanged(Configuration newConfig) {
     }
 
     /**
