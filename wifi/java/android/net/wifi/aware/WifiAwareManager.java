@@ -774,9 +774,13 @@ public class WifiAwareManager {
                                     (byte[]) msg.obj);
                             break;
                         case CALLBACK_MATCH_EXPIRED:
+                            if (!SdkLevel.isAtLeastS()) {
+                                break;
+                            }
                             mOriginalCallback
                                     .onServiceLost(new PeerHandle(msg.arg1),
                                             WIFI_AWARE_DISCOVERY_LOST_REASON_PEER_NOT_VISIBLE);
+                            break;
                     }
                 }
             };
