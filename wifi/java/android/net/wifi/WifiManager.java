@@ -53,6 +53,7 @@ import android.os.Looper;
 import android.os.RemoteException;
 import android.os.WorkSource;
 import android.os.connectivity.WifiActivityEnergyInfo;
+import android.telephony.SubscriptionInfo;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.CloseGuard;
@@ -6721,4 +6722,63 @@ public class WifiManager {
             throw e.rethrowFromSystemServer();
         }
     }
+
+    /**
+     * Sets the state of carrier offload on merged or unmerged networks for specified subscription.
+     *
+     * <p>
+     * When a subscription's carrier network offload is disabled, all network suggestions related to
+     * this subscription will not be considered for auto join.
+     * <p>
+     * If calling app want disable all carrier network offload from a specified subscription, should
+     * call this API twice to disable both merged and unmerged carrier network suggestions.
+     *
+     * @param subscriptionId See {@link SubscriptionInfo#getSubscriptionId()}.
+     * @param merged True for carrier merged network, false otherwise.
+     *               See {@link WifiNetworkSuggestion.Builder#setCarrierMerged(boolean)}
+     * @param enabled True for enable carrier network offload, false otherwise.
+     * @see #isCarrierNetworkOffloadEnabled(int, boolean)
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.NETWORK_SETTINGS,
+            android.Manifest.permission.NETWORK_SETUP_WIZARD})
+    public void setCarrierNetworkOffloadEnabled(int subscriptionId, boolean merged,
+            boolean enabled) {
+        if (!SdkLevel.isAtLeastS()) {
+            throw new UnsupportedOperationException();
+        }
+        try {
+            mService.setCarrierNetworkOffloadEnabled(subscriptionId, merged, enabled);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Get the carrier network offload state for merged or unmerged networks for specified
+     * subscription.
+     * @param subscriptionId subscription ID see {@link SubscriptionInfo#getSubscriptionId()}
+     * @param merged True for carrier merged network, false otherwise.
+     *               See {@link WifiNetworkSuggestion.Builder#setCarrierMerged(boolean)}
+     * @return True to indicate that carrier network offload is enabled, false otherwise.
+     * @see #setCarrierNetworkOffloadEnabled(int, boolean, boolean)
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.NETWORK_SETTINGS,
+            android.Manifest.permission.NETWORK_SETUP_WIZARD})
+    public boolean isCarrierNetworkOffloadEnabled(int subscriptionId, boolean merged) {
+        if (!SdkLevel.isAtLeastS()) {
+            throw new UnsupportedOperationException();
+        }
+        try {
+            return mService.isCarrierNetworkOffloadEnabled(subscriptionId, merged);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
 }
