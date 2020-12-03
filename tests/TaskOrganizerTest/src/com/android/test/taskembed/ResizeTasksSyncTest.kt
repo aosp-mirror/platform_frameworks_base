@@ -68,7 +68,8 @@ class ResizeTasksSyncTest {
         val firstBounds = Rect(0, 0, 1080, 800)
         val secondBounds = Rect(0, 1000, 1080, 1800)
 
-        val trace = withSFTracing(instrumentation, TRACE_FLAGS) {
+        val trace = withSFTracing(TRACE_FLAGS,
+                outputDir = instrumentation.targetContext.dataDir.toPath()) {
             lateinit var resizeReadyLatch: CountDownLatch
             scenarioRule.getScenario().onActivity {
                 resizeReadyLatch = it.resizeTaskView(firstBounds, secondBounds)

@@ -52,7 +52,8 @@ open class SurfaceTracingTestBase(useBlastAdapter: Boolean) :
     }
 
     fun withTrace(predicate: (it: MainActivity) -> Unit): LayersTrace {
-        return withSFTracing(instrumentation, TRACE_FLAGS) {
+        return withSFTracing(TRACE_FLAGS,
+                outputDir = instrumentation.targetContext.dataDir.toPath()) {
             scenarioRule.getScenario().onActivity {
                 predicate(it)
             }
