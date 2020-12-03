@@ -17,7 +17,6 @@
 package android.net;
 
 import static android.net.ConnectivityManager.TYPE_WIFI;
-import static android.net.ConnectivityManager.getNetworkTypeName;
 import static android.net.ConnectivityManager.isNetworkTypeMobile;
 
 import android.annotation.Nullable;
@@ -85,7 +84,7 @@ public class NetworkIdentity implements Comparable<NetworkIdentity> {
     @Override
     public String toString() {
         final StringBuilder builder = new StringBuilder("{");
-        builder.append("type=").append(getNetworkTypeName(mType));
+        builder.append("type=").append(mType);
         builder.append(", subType=");
         if (mSubType == SUBTYPE_COMBINED) {
             builder.append("COMBINED");
