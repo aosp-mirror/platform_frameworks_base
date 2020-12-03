@@ -2211,22 +2211,27 @@ public class PackageManagerService extends IPackageManager.Stub
                 res.removedInfo.sendPackageRemovedBroadcasts(killApp, false /*removedBySystem*/);
             }
 
+            final PermissionManagerServiceInternal.PackageInstalledParams.Builder
+                    permissionParamsBuilder =
+                    new PermissionManagerServiceInternal.PackageInstalledParams.Builder();
             final List<String> grantedPermissionsList;
             if (grantPermissions) {
                 if (grantedPermissions != null) {
-                    grantedPermissionsList = Arrays.asList(grantedPermissions);
+                    permissionParamsBuilder.setGrantedPermissions(Arrays.asList(
+                            grantedPermissions));
                 } else {
-                    grantedPermissionsList = res.pkg.getRequestedPermissions();
+                    permissionParamsBuilder.setGrantedPermissions(
+                            res.pkg.getRequestedPermissions());
                 }
-            } else {
-                grantedPermissionsList = Collections.emptyList();
             }
-            if (allowlistedRestrictedPermissions == null) {
-                allowlistedRestrictedPermissions = Collections.emptyList();
+            if (allowlistedRestrictedPermissions != null) {
+                permissionParamsBuilder.setAllowlistedRestrictedPermissions(
+                        allowlistedRestrictedPermissions);
             }
+            permissionParamsBuilder.setAutoRevokePermissionsMode(autoRevokePermissionsMode);
             for (final int userId : res.newUsers) {
-                mPermissionManager.onPackageInstalled(res.pkg, grantedPermissionsList,
-                        allowlistedRestrictedPermissions, autoRevokePermissionsMode, userId);
+                mPermissionManager.onPackageInstalled(res.pkg, permissionParamsBuilder.build(),
+                        userId);
             }
 
             final String installerPackageName =
@@ -3313,6 +3318,7 @@ public class PackageManagerService extends IPackageManager.Stub
             // Stub packages must either be replaced with full versions in the /data
             // partition or be disabled.
             final List<String> stubSystemApps = new ArrayList<>();
+            final int[] userIds = mUserManager.getUserIds();
             if (!mOnlyCore) {
                 // do this first before mucking with mPackages for the "expecting better" case
                 final int numPackages = mPackages.size();
@@ -3363,15 +3369,9 @@ public class PackageManagerService extends IPackageManager.Stub
                     }
 
                     if (!mSettings.isDisabledSystemPackageLPr(ps.name)) {
-                        mSettings.mPackages.removeAt(index);
                         logCriticalInfo(Log.WARN, "System package " + ps.name
                                 + " no longer exists; it's data will be wiped");
-
-                        // Assume package is truly gone and wipe residual permissions.
-                        mPermissionManager.updatePermissions(ps.name, null);
-
-                        // Actual deletion of code and data will be handled by later
-                        // reconciliation step
+                        removePackageDataLIF(ps, userIds, null, 0, false);
                     } else {
                         // we still have a disabled system package, but, it still might have
                         // been removed. check the code path still exists and check there's
@@ -3430,7 +3430,6 @@ public class PackageManagerService extends IPackageManager.Stub
                 // Remove disable package settings for updated system apps that were
                 // removed via an OTA. If the update is no longer present, remove the
                 // app completely. Otherwise, revoke their system privileges.
-                final int[] userIds = mUserManager.getUserIds();
                 for (int i = possiblyDeletedUpdatedSystemApps.size() - 1; i >= 0; --i) {
                     final String packageName = possiblyDeletedUpdatedSystemApps.get(i);
                     final AndroidPackage pkg = mPackages.get(packageName);
@@ -3765,7 +3764,6 @@ public class PackageManagerService extends IPackageManager.Stub
                             UserHandle.USER_SYSTEM).getLongVersionCode());
 
             // Initialize InstantAppRegistry's Instant App list for all users.
-            final int[] userIds = UserManagerService.getInstance().getUserIds();
             for (AndroidPackage pkg : mPackages.values()) {
                 if (pkg.isSystem()) {
                     continue;
@@ -3931,7 +3929,12 @@ public class PackageManagerService extends IPackageManager.Stub
                     } catch (PackageManagerException e) {
                         Slog.e(TAG, "updateAllSharedLibrariesLPw failed: ", e);
                     }
-                    mPermissionManager.updatePermissions(pkg.getPackageName(), pkg);
+                    final int[] userIds = mUserManager.getUserIds();
+                    for (final int userId : userIds) {
+                        mPermissionManager.onPackageInstalled(pkg,
+                                PermissionManagerServiceInternal.PackageInstalledParams.DEFAULT,
+                                userId);
+                    }
                     writeSettingsLPrTEMP();
                 }
             } catch (PackageManagerException e) {
@@ -13673,14 +13676,16 @@ public class PackageManagerService extends IPackageManager.Stub
 
             if (installed) {
                 if (pkgSetting.pkg != null) {
+                    final PermissionManagerServiceInternal.PackageInstalledParams.Builder
+                            permissionParamsBuilder =
+                            new PermissionManagerServiceInternal.PackageInstalledParams.Builder();
                     if ((installFlags & PackageManager.INSTALL_ALL_WHITELIST_RESTRICTED_PERMISSIONS)
                             != 0) {
-                        allowlistedRestrictedPermissions = pkgSetting.pkg.getRequestedPermissions();
-                    } else if (allowlistedRestrictedPermissions == null) {
-                        allowlistedRestrictedPermissions = Collections.emptyList();
+                        permissionParamsBuilder.setAllowlistedRestrictedPermissions(
+                                pkgSetting.pkg.getRequestedPermissions());
                     }
-                    mPermissionManager.onPackageInstalled(pkgSetting.pkg, Collections.emptyList(),
-                            allowlistedRestrictedPermissions, MODE_DEFAULT, userId);
+                    mPermissionManager.onPackageInstalled(pkgSetting.pkg,
+                            permissionParamsBuilder.build(), userId);
                 }
 
                 if (pkgSetting.pkg != null) {
@@ -16482,8 +16487,6 @@ public class PackageManagerService extends IPackageManager.Stub
 
         if (DEBUG_INSTALL) Slog.d(TAG, "New package installed in " + pkg.getPath());
         synchronized (mLock) {
-// NOTE: This changes slightly to include UPDATE_PERMISSIONS_ALL regardless of the size of pkg.permissions
-            mPermissionManager.updatePermissions(pkgName, pkg);
             // For system-bundled packages, we assume that installing an upgraded version
             // of the package implies that the user actually wants to run that new code,
             // so we enable the package.
@@ -19732,11 +19735,12 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
             }
 
-            // The update permissions method below will take care of removing obsolete permissions
-            // and granting install permissions.
-            mPermissionManager.updatePermissions(pkg.getPackageName(), pkg);
-            if (applyUserRestrictions) {
-                for (int userId : allUserHandles) {
+            for (final int userId : allUserHandles) {
+                // The method below will take care of removing obsolete permissions and granting
+                // install permissions.
+                mPermissionManager.onPackageInstalled(pkg,
+                        PermissionManagerServiceInternal.PackageInstalledParams.DEFAULT, userId);
+                if (applyUserRestrictions) {
                     mSettings.writeRuntimePermissionsForUserLPr(userId, false);
                 }
             }
