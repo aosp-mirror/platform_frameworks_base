@@ -24,12 +24,14 @@ import static android.net.INetd.FIREWALL_ALLOWLIST;
 import static android.net.INetd.FIREWALL_CHAIN_DOZABLE;
 import static android.net.INetd.FIREWALL_CHAIN_NONE;
 import static android.net.INetd.FIREWALL_CHAIN_POWERSAVE;
+import static android.net.INetd.FIREWALL_CHAIN_RESTRICTED;
 import static android.net.INetd.FIREWALL_CHAIN_STANDBY;
 import static android.net.INetd.FIREWALL_DENYLIST;
 import static android.net.INetd.FIREWALL_RULE_ALLOW;
 import static android.net.INetd.FIREWALL_RULE_DENY;
 import static android.net.NetworkPolicyManager.FIREWALL_CHAIN_NAME_DOZABLE;
 import static android.net.NetworkPolicyManager.FIREWALL_CHAIN_NAME_POWERSAVE;
+import static android.net.NetworkPolicyManager.FIREWALL_CHAIN_NAME_RESTRICTED;
 import static android.net.NetworkPolicyManager.FIREWALL_CHAIN_NAME_STANDBY;
 import static android.net.NetworkPolicyManager.FIREWALL_RULE_DEFAULT;
 import static android.net.NetworkStats.SET_DEFAULT;
@@ -88,7 +90,6 @@ import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FrameworkStatsLog;
@@ -122,7 +123,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
      * Helper class that encapsulates NetworkManagementService dependencies and makes them
      * easier to mock in unit tests.
      */
-    static class SystemServices {
+    static class Dependencies {
         public IBinder getService(String name) {
             return ServiceManager.getService(name);
         }
@@ -131,6 +132,10 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
         }
         public INetd getNetd() {
             return NetdService.get();
+        }
+
+        public int getCallingUid() {
+            return Binder.getCallingUid();
         }
     }
 
@@ -157,7 +162,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
 
     private final Handler mDaemonHandler;
 
-    private final SystemServices mServices;
+    private final Dependencies mDeps;
 
     private INetd mNetdService;
 
@@ -215,6 +220,11 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
      */
     @GuardedBy("mRulesLock")
     private SparseIntArray mUidFirewallPowerSaveRules = new SparseIntArray();
+    /**
+     * Contains the per-UID firewall rules that are used when Restricted Networking Mode is enabled.
+     */
+    @GuardedBy("mRulesLock")
+    private SparseIntArray mUidFirewallRestrictedRules = new SparseIntArray();
     /** Set of states for the child firewall chains. True if the chain is active. */
     @GuardedBy("mRulesLock")
     final SparseBooleanArray mFirewallChainStates = new SparseBooleanArray();
@@ -254,33 +264,32 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
      * @param context  Binder context for this service
      */
     private NetworkManagementService(
-            Context context, SystemServices services) {
+            Context context, Dependencies deps) {
         mContext = context;
-        mServices = services;
+        mDeps = deps;
 
         mDaemonHandler = new Handler(FgThread.get().getLooper());
 
         mNetdUnsolicitedEventListener = new NetdUnsolicitedEventListener();
 
-        mServices.registerLocalService(new LocalService());
+        mDeps.registerLocalService(new LocalService());
 
         synchronized (mTetheringStatsProviders) {
             mTetheringStatsProviders.put(new NetdTetheringStatsProvider(), "netd");
         }
     }
 
-    @VisibleForTesting
-    NetworkManagementService() {
+    private NetworkManagementService() {
         mContext = null;
         mDaemonHandler = null;
-        mServices = null;
+        mDeps = null;
         mNetdUnsolicitedEventListener = null;
     }
 
-    static NetworkManagementService create(Context context, SystemServices services)
+    static NetworkManagementService create(Context context, Dependencies deps)
             throws InterruptedException {
         final NetworkManagementService service =
-                new NetworkManagementService(context, services);
+                new NetworkManagementService(context, deps);
         if (DBG) Slog.d(TAG, "Creating NetworkManagementService");
         if (DBG) Slog.d(TAG, "Connecting native netd service");
         service.connectNativeNetdService();
@@ -289,7 +298,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
     }
 
     public static NetworkManagementService create(Context context) throws InterruptedException {
-        return create(context, new SystemServices());
+        return create(context, new Dependencies());
     }
 
     public void systemReady() {
@@ -310,7 +319,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
                 return mBatteryStats;
             }
             mBatteryStats =
-                    IBatteryStats.Stub.asInterface(mServices.getService(BatteryStats.SERVICE_NAME));
+                    IBatteryStats.Stub.asInterface(mDeps.getService(BatteryStats.SERVICE_NAME));
             return mBatteryStats;
         }
     }
@@ -511,7 +520,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
     }
 
     private void connectNativeNetdService() {
-        mNetdService = mServices.getNetd();
+        mNetdService = mDeps.getNetd();
         try {
             mNetdService.registerUnsolicitedEventListener(mNetdUnsolicitedEventListener);
             if (DBG) Slog.d(TAG, "Register unsolicited event listener");
@@ -602,9 +611,15 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
             syncFirewallChainLocked(FIREWALL_CHAIN_STANDBY, "standby ");
             syncFirewallChainLocked(FIREWALL_CHAIN_DOZABLE, "dozable ");
             syncFirewallChainLocked(FIREWALL_CHAIN_POWERSAVE, "powersave ");
+            syncFirewallChainLocked(FIREWALL_CHAIN_RESTRICTED, "restricted ");
 
-            final int[] chains =
-                    {FIREWALL_CHAIN_STANDBY, FIREWALL_CHAIN_DOZABLE, FIREWALL_CHAIN_POWERSAVE};
+            final int[] chains = {
+                    FIREWALL_CHAIN_STANDBY,
+                    FIREWALL_CHAIN_DOZABLE,
+                    FIREWALL_CHAIN_POWERSAVE,
+                    FIREWALL_CHAIN_RESTRICTED
+            };
+
             for (int chain : chains) {
                 if (getFirewallChainState(chain)) {
                     setFirewallChainEnabled(chain, true);
@@ -1437,7 +1452,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
 
     @Override
     public void setUidCleartextNetworkPolicy(int uid, int policy) {
-        if (Binder.getCallingUid() != uid) {
+        if (mDeps.getCallingUid() != uid) {
             NetworkStack.checkNetworkStackPermission(mContext);
         }
 
@@ -1695,6 +1710,8 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
                 return FIREWALL_CHAIN_NAME_DOZABLE;
             case FIREWALL_CHAIN_POWERSAVE:
                 return FIREWALL_CHAIN_NAME_POWERSAVE;
+            case FIREWALL_CHAIN_RESTRICTED:
+                return FIREWALL_CHAIN_NAME_RESTRICTED;
             default:
                 throw new IllegalArgumentException("Bad child chain: " + chain);
         }
@@ -1707,6 +1724,8 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
             case FIREWALL_CHAIN_DOZABLE:
                 return FIREWALL_ALLOWLIST;
             case FIREWALL_CHAIN_POWERSAVE:
+                return FIREWALL_ALLOWLIST;
+            case FIREWALL_CHAIN_RESTRICTED:
                 return FIREWALL_ALLOWLIST;
             default:
                 return isFirewallEnabled() ? FIREWALL_ALLOWLIST : FIREWALL_DENYLIST;
@@ -1751,6 +1770,9 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
                         break;
                     case FIREWALL_CHAIN_POWERSAVE:
                         mNetdService.firewallReplaceUidChain("fw_powersave", true, uids);
+                        break;
+                    case FIREWALL_CHAIN_RESTRICTED:
+                        mNetdService.firewallReplaceUidChain("fw_restricted", true, uids);
                         break;
                     case FIREWALL_CHAIN_NONE:
                     default:
@@ -1836,6 +1858,8 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
                 return mUidFirewallDozableRules;
             case FIREWALL_CHAIN_POWERSAVE:
                 return mUidFirewallPowerSaveRules;
+            case FIREWALL_CHAIN_RESTRICTED:
+                return mUidFirewallRestrictedRules;
             case FIREWALL_CHAIN_NONE:
                 return mUidFirewallRules;
             default:
@@ -1851,8 +1875,8 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
         return rule;
     }
 
-    private static void enforceSystemUid() {
-        final int uid = Binder.getCallingUid();
+    private void enforceSystemUid() {
+        final int uid = mDeps.getCallingUid();
         if (uid != Process.SYSTEM_UID) {
             throw new SecurityException("Only available to AID_SYSTEM");
         }
@@ -1910,17 +1934,22 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
         synchronized (mRulesLock) {
             dumpUidFirewallRule(pw, "", mUidFirewallRules);
 
-            pw.print("UID firewall standby chain enabled: "); pw.println(
-                    getFirewallChainState(FIREWALL_CHAIN_STANDBY));
+            pw.print("UID firewall standby chain enabled: ");
+            pw.println(getFirewallChainState(FIREWALL_CHAIN_STANDBY));
             dumpUidFirewallRule(pw, FIREWALL_CHAIN_NAME_STANDBY, mUidFirewallStandbyRules);
 
-            pw.print("UID firewall dozable chain enabled: "); pw.println(
-                    getFirewallChainState(FIREWALL_CHAIN_DOZABLE));
+            pw.print("UID firewall dozable chain enabled: ");
+            pw.println(getFirewallChainState(FIREWALL_CHAIN_DOZABLE));
             dumpUidFirewallRule(pw, FIREWALL_CHAIN_NAME_DOZABLE, mUidFirewallDozableRules);
 
-            pw.println("UID firewall powersave chain enabled: " +
-                    getFirewallChainState(FIREWALL_CHAIN_POWERSAVE));
+            pw.print("UID firewall powersave chain enabled: ");
+            pw.println(getFirewallChainState(FIREWALL_CHAIN_POWERSAVE));
             dumpUidFirewallRule(pw, FIREWALL_CHAIN_NAME_POWERSAVE, mUidFirewallPowerSaveRules);
+
+            pw.print("UID firewall restricted mode chain enabled: ");
+            pw.println(getFirewallChainState(FIREWALL_CHAIN_RESTRICTED));
+            dumpUidFirewallRule(pw, FIREWALL_CHAIN_NAME_RESTRICTED,
+                    mUidFirewallRestrictedRules);
         }
 
         synchronized (mIdleTimerLock) {
@@ -2071,6 +2100,11 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
                 if (DBG) Slog.d(TAG, "Uid " + uid + " restricted because of power saver mode");
                 return true;
             }
+            if (getFirewallChainState(FIREWALL_CHAIN_RESTRICTED)
+                    && mUidFirewallRestrictedRules.get(uid) != FIREWALL_RULE_ALLOW) {
+                if (DBG) Slog.d(TAG, "Uid " + uid + " restricted because of restricted mode");
+                return true;
+            }
             if (mUidRejectOnMetered.get(uid)) {
                 if (DBG) Slog.d(TAG, "Uid " + uid + " restricted because of no metered data"
                         + " in the background");
@@ -2096,60 +2130,10 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
         }
     }
 
-    @VisibleForTesting
-    class LocalService extends NetworkManagementInternal {
+    private class LocalService extends NetworkManagementInternal {
         @Override
         public boolean isNetworkRestrictedForUid(int uid) {
             return isNetworkRestrictedInternal(uid);
-        }
-    }
-
-    @VisibleForTesting
-    Injector getInjector() {
-        return new Injector();
-    }
-
-    @VisibleForTesting
-    class Injector {
-        void setDataSaverMode(boolean dataSaverMode) {
-            mDataSaverMode = dataSaverMode;
-        }
-
-        void setFirewallChainState(int chain, boolean state) {
-            NetworkManagementService.this.setFirewallChainState(chain, state);
-        }
-
-        void setFirewallRule(int chain, int uid, int rule) {
-            synchronized (mRulesLock) {
-                getUidFirewallRulesLR(chain).put(uid, rule);
-            }
-        }
-
-        void setUidOnMeteredNetworkList(boolean denylist, int uid, boolean enable) {
-            synchronized (mRulesLock) {
-                if (denylist) {
-                    mUidRejectOnMetered.put(uid, enable);
-                } else {
-                    mUidAllowOnMetered.put(uid, enable);
-                }
-            }
-        }
-
-        void reset() {
-            synchronized (mRulesLock) {
-                setDataSaverMode(false);
-                final int[] chains = {
-                        FIREWALL_CHAIN_DOZABLE,
-                        FIREWALL_CHAIN_STANDBY,
-                        FIREWALL_CHAIN_POWERSAVE
-                };
-                for (int chain : chains) {
-                    setFirewallChainState(chain, false);
-                    getUidFirewallRulesLR(chain).clear();
-                }
-                mUidAllowOnMetered.clear();
-                mUidRejectOnMetered.clear();
-            }
         }
     }
 }
