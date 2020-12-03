@@ -809,7 +809,7 @@ public class WifiNetworkSuggestionTest {
     /**
      * Ensure {@link WifiNetworkSuggestion.Builder#build()} throws an exception
      * when both {@link WifiNetworkSuggestion.Builder#setWpa3Passphrase(String)} and
-     * {@link WifiNetworkSuggestion.Builderi
+     * {@link WifiNetworkSuggestion.Builder
      * #setWpa3EnterpriseStandardModeConfig(WifiEnterpriseConfig)}
      * are invoked.
      */
@@ -1310,6 +1310,7 @@ public class WifiNetworkSuggestionTest {
                 .build();
         assertTrue(suggestion.isOemPaid());
         assertFalse(suggestion.isUserAllowedToManuallyConnect);
+        assertTrue(suggestion.getPasspointConfig().isOemPaid());
     }
 
     /**
@@ -1345,6 +1346,7 @@ public class WifiNetworkSuggestionTest {
                 .build();
         assertTrue(suggestion.isOemPrivate());
         assertFalse(suggestion.isUserAllowedToManuallyConnect);
+        assertTrue(suggestion.getPasspointConfig().isOemPrivate());
     }
 
     /**
@@ -1436,6 +1438,25 @@ public class WifiNetworkSuggestionTest {
                 .build();
         assertTrue(suggestion.isCarrierMerged());
         assertTrue(suggestion.wifiConfiguration.carrierMerged);
+    }
+
+    /**
+     * Validate {@link WifiNetworkSuggestion.Builder#setCarrierMerged(boolean)} (boolean)} set the
+     * correct value to the passpoint network.
+     */
+    @Test
+    public void testSetCarrierMergedNetworkOnPasspointNetwork() {
+        assumeTrue(SdkLevel.isAtLeastS());
+
+        PasspointConfiguration passpointConfiguration = PasspointTestUtils.createConfig();
+        WifiNetworkSuggestion suggestion = new WifiNetworkSuggestion.Builder()
+                .setPasspointConfig(passpointConfiguration)
+                .setSubscriptionId(1)
+                .setCarrierMerged(true)
+                .setIsMetered(true)
+                .build();
+        assertTrue(suggestion.isCarrierMerged());
+        assertTrue(suggestion.getPasspointConfig().isCarrierMerged());
     }
 
     /**
