@@ -768,6 +768,7 @@ public final class TvInputManagerService extends SystemService {
         SessionState sessionState = userState.sessionStateMap.remove(sessionToken);
 
         if (sessionState == null) {
+            Slog.e(TAG, "sessionState null, no more remove session action!");
             return;
         }
 
@@ -2525,8 +2526,16 @@ public final class TvInputManagerService extends SystemService {
                 ClientState clientState = userState.clientStateMap.get(clientToken);
                 if (clientState != null) {
                     while (clientState.sessionTokens.size() > 0) {
+                        IBinder sessionToken = clientState.sessionTokens.get(0);
                         releaseSessionLocked(
-                                clientState.sessionTokens.get(0), Process.SYSTEM_UID, userId);
+                                sessionToken, Process.SYSTEM_UID, userId);
+                        // the releaseSessionLocked function may return before the sessionToken
+                        // is removed if the related sessionState is null. So need to check again
+                        // to avoid death curculation.
+                        if (clientState.sessionTokens.contains(sessionToken)) {
+                            Slog.d(TAG, "remove sessionToken " + sessionToken + " for " + clientToken);
+                            clientState.sessionTokens.remove(sessionToken);
+                        }
                     }
                 }
                 clientToken = null;
