@@ -47,7 +47,7 @@ import java.util.stream.Collectors;
  */
 @SysUISingleton
 public class ThemeOverlayApplier implements Dumpable {
-    private static final String TAG = "ThemeOverlayManager";
+    private static final String TAG = "ThemeOverlayApplier";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     @VisibleForTesting

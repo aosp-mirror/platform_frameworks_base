@@ -80,20 +80,11 @@
     <!-- The color of the legacy notification background -->
     <color name="notification_legacy_background_color">#ff1a1a1a</color>
 
-    <!-- The color of the material notification background -->
-    <color name="notification_material_background_color">@*android:color/notification_material_background_color</color>
-
-    <!-- The color of the material notification background when dimmed -->
-    <color name="notification_material_background_dimmed_color">#ccffffff</color>
-
     <!-- The color of the material notification background when dark -->
     <color name="notification_material_background_dark_color">#ff333333</color>
 
     <!-- The color of the dividing line between grouped notifications. -->
     <color name="notification_divider_color">#FF616161</color>
-
-    <!-- The background color of the notification shade -->
-    <color name="notification_shade_background_color">@color/GM2_grey_200</color>
 
     <!-- The color of the ripples on the untinted notifications -->
     <color name="notification_ripple_untinted_color">#28000000</color>

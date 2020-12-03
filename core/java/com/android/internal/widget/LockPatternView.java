@@ -1090,6 +1090,20 @@ public class LockPatternView extends View {
         }
     }
 
+    /**
+     * Change theme colors
+     * @param regularColor The dot color
+     * @param successColor Color used when pattern is correct
+     * @param errorColor Color used when authentication fails
+     */
+    public void setColors(int regularColor, int successColor, int errorColor) {
+        mRegularColor = regularColor;
+        mErrorColor = errorColor;
+        mSuccessColor = successColor;
+        mPathPaint.setColor(regularColor);
+        invalidate();
+    }
+
     private float getCenterXForColumn(int column) {
         return mPaddingLeft + column * mSquareWidth + mSquareWidth / 2f;
     }

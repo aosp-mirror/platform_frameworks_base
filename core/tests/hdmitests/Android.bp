@@ -19,6 +19,7 @@ android_test {
     static_libs: [
         "androidx.test.rules",
         "frameworks-base-testutils",
+        "guava-android-testlib",
         "truth-prebuilt",
     ],
     libs: ["android.test.runner"],

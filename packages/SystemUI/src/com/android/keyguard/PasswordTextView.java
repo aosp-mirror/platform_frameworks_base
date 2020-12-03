@@ -42,6 +42,7 @@ import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 import android.widget.EditText;
 
+import com.android.settingslib.Utils;
 import com.android.systemui.R;
 
 import java.util.ArrayList;
@@ -131,8 +132,8 @@ public class PasswordTextView extends View {
             mCharPadding = a.getDimensionPixelSize(R.styleable.PasswordTextView_charPadding,
                     getContext().getResources().getDimensionPixelSize(
                             R.dimen.password_char_padding));
-            int textColor = a.getColor(R.styleable.PasswordTextView_android_textColor, Color.WHITE);
-            mDrawPaint.setColor(textColor);
+            mDrawPaint.setColor(a.getColor(R.styleable.PasswordTextView_android_textColor,
+                    Color.WHITE));
         } finally {
             a.recycle();
         }
@@ -182,6 +183,15 @@ public class PasswordTextView extends View {
                     charLength);
             currentDrawPosition += charWidth;
         }
+    }
+
+    /**
+     * Reload colors from resources.
+     **/
+    public void reloadColors() {
+        int textColor = Utils.getColorAttr(getContext(), android.R.attr.textColorPrimary)
+                .getDefaultColor();
+        mDrawPaint.setColor(textColor);
     }
 
     @Override

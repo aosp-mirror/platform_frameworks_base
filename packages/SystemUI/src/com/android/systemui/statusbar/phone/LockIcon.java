@@ -49,7 +49,7 @@ public class LockIcon extends KeyguardAffordanceView {
     static final int STATE_SCANNING_FACE = 2;
     static final int STATE_BIOMETRICS_ERROR = 3;
     private float mDozeAmount;
-    private int mIconColor;
+    private int mIconColor = Color.TRANSPARENT;
     private int mOldState;
     private int mState;
     private boolean mDozing;
@@ -149,7 +149,10 @@ public class LockIcon extends KeyguardAffordanceView {
         updateDarkTint();
     }
 
-    void onThemeChange(int iconColor) {
+    void updateColor(int iconColor) {
+        if (mIconColor == iconColor) {
+            return;
+        }
         mDrawableCache.clear();
         mIconColor = iconColor;
         updateDarkTint();

@@ -20,7 +20,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:background="@color/notification_material_background_color"
+    android:background="?android:attr/colorBackground"
     android:theme="@style/Theme.SystemUI">
 
     <RelativeLayout

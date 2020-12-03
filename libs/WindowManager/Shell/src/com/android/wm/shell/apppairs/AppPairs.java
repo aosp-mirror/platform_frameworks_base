@@ -36,6 +36,4 @@ public interface AppPairs {
     void dump(@NonNull PrintWriter pw, String prefix);
     /** Called when the shell organizer has been registered. */
     void onOrganizerRegistered();
-    /** Called when the visibility of the keyguard changes. */
-    void onKeyguardVisibilityChanged(boolean showing);
 }

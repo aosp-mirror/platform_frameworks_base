@@ -16,7 +16,6 @@
 
 package com.android.server.display;
 
-import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ContentResolver;
@@ -53,8 +52,6 @@ import com.android.server.display.utils.AmbientFilterFactory;
 import com.android.server.utils.DeviceConfigInterface;
 
 import java.io.PrintWriter;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -110,28 +107,11 @@ public class DisplayModeDirector {
 
     private boolean mAlwaysRespectAppRequest;
 
-    @IntDef(prefix = {"SWITCHING_TYPE_"}, value = {
-            SWITCHING_TYPE_NONE,
-            SWITCHING_TYPE_WITHIN_GROUPS,
-            SWITCHING_TYPE_ACROSS_AND_WITHIN_GROUPS,
-    })
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface SwitchingType {}
-
-    // No mode switching will happen.
-    public static final int SWITCHING_TYPE_NONE = 0;
-    // Allow only refresh rate switching between modes in the same configuration group. This way
-    // only switches without visual interruptions for the user will be allowed.
-    public static final int SWITCHING_TYPE_WITHIN_GROUPS = 1;
-    // Allow refresh rate switching between all refresh rates even if the switch with have visual
-    // interruptions for the user.
-    public static final int SWITCHING_TYPE_ACROSS_AND_WITHIN_GROUPS = 2;
-
     /**
      * The allowed refresh rate switching type. This is used by SurfaceFlinger.
      */
-    @SwitchingType
-    private int mModeSwitchingType = SWITCHING_TYPE_WITHIN_GROUPS;
+    @DisplayManager.SwitchingType
+    private int mModeSwitchingType = DisplayManager.SWITCHING_TYPE_WITHIN_GROUPS;
 
     public DisplayModeDirector(@NonNull Context context, @NonNull Handler handler) {
         this(context, handler, new RealInjector());
@@ -337,7 +317,7 @@ public class DisplayModeDirector {
             if (availableModes.length > 0) {
                 baseModeId = availableModes[0];
             }
-            if (mModeSwitchingType == SWITCHING_TYPE_NONE) {
+            if (mModeSwitchingType == DisplayManager.SWITCHING_TYPE_NONE) {
                 Display.Mode baseMode = null;
                 for (Display.Mode mode : modes) {
                     if (mode.getModeId() == baseModeId) {
@@ -359,7 +339,7 @@ public class DisplayModeDirector {
             }
 
             boolean allowGroupSwitching =
-                    mModeSwitchingType == SWITCHING_TYPE_ACROSS_AND_WITHIN_GROUPS;
+                    mModeSwitchingType == DisplayManager.SWITCHING_TYPE_ACROSS_AND_WITHIN_GROUPS;
             return new DesiredDisplayModeSpecs(baseModeId,
                     allowGroupSwitching,
                     new RefreshRateRange(
@@ -450,18 +430,21 @@ public class DisplayModeDirector {
 
     /**
      * Sets the display mode switching type.
-     * @param type
+     * @param newType
      */
-    public void setModeSwitchingType(@SwitchingType int type) {
+    public void setModeSwitchingType(@DisplayManager.SwitchingType int newType) {
         synchronized (mLock) {
-            mModeSwitchingType = type;
+            if (newType != mModeSwitchingType) {
+                mModeSwitchingType = newType;
+                notifyDesiredDisplayModeSpecsChangedLocked();
+            }
         }
     }
 
     /**
      * Returns the display mode switching type.
      */
-    @SwitchingType
+    @DisplayManager.SwitchingType
     public int getModeSwitchingType() {
         synchronized (mLock) {
             return mModeSwitchingType;
@@ -583,13 +566,13 @@ public class DisplayModeDirector {
         }
     }
 
-    private static String switchingTypeToString(@SwitchingType int type) {
+    private static String switchingTypeToString(@DisplayManager.SwitchingType int type) {
         switch (type) {
-            case SWITCHING_TYPE_NONE:
+            case DisplayManager.SWITCHING_TYPE_NONE:
                 return "SWITCHING_TYPE_NONE";
-            case SWITCHING_TYPE_WITHIN_GROUPS:
+            case DisplayManager.SWITCHING_TYPE_WITHIN_GROUPS:
                 return "SWITCHING_TYPE_WITHIN_GROUPS";
-            case SWITCHING_TYPE_ACROSS_AND_WITHIN_GROUPS:
+            case DisplayManager.SWITCHING_TYPE_ACROSS_AND_WITHIN_GROUPS:
                 return "SWITCHING_TYPE_ACROSS_AND_WITHIN_GROUPS";
             default:
                 return "Unknown SwitchingType " + type;

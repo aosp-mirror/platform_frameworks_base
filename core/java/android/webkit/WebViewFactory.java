@@ -251,15 +251,8 @@ public final class WebViewFactory {
             Trace.traceBegin(Trace.TRACE_TAG_WEBVIEW, "WebViewFactory.getProvider()");
             try {
                 Class<WebViewFactoryProvider> providerClass = getProviderClass();
-                Method staticFactory = null;
-                try {
-                    staticFactory = providerClass.getMethod(
+                Method staticFactory = providerClass.getMethod(
                         CHROMIUM_WEBVIEW_FACTORY_METHOD, WebViewDelegate.class);
-                } catch (Exception e) {
-                    if (DEBUG) {
-                        Log.w(LOGTAG, "error instantiating provider with static factory method", e);
-                    }
-                }
 
                 Trace.traceBegin(Trace.TRACE_TAG_WEBVIEW, "WebViewFactoryProvider invocation");
                 try {
@@ -267,12 +260,12 @@ public final class WebViewFactory {
                             staticFactory.invoke(null, new WebViewDelegate());
                     if (DEBUG) Log.v(LOGTAG, "Loaded provider: " + sProviderInstance);
                     return sProviderInstance;
-                } catch (Exception e) {
-                    Log.e(LOGTAG, "error instantiating provider", e);
-                    throw new AndroidRuntimeException(e);
                 } finally {
                     Trace.traceEnd(Trace.TRACE_TAG_WEBVIEW);
                 }
+            } catch (Exception e) {
+                Log.e(LOGTAG, "error instantiating provider", e);
+                throw new AndroidRuntimeException(e);
             } finally {
                 Trace.traceEnd(Trace.TRACE_TAG_WEBVIEW);
             }

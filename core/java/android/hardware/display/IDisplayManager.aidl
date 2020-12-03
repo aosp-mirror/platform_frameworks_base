@@ -134,4 +134,10 @@ interface IDisplayManager {
     // battery etc.
     void setShouldAlwaysRespectAppRequestedMode(boolean enabled);
     boolean shouldAlwaysRespectAppRequestedMode();
+
+    // Sets the refresh rate switching type.
+    void setRefreshRateSwitchingType(int newValue);
+
+    // Returns the refresh rate switching type.
+    int getRefreshRateSwitchingType();
 }

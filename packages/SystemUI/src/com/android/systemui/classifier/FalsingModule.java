@@ -16,16 +16,69 @@
 
 package com.android.systemui.classifier;
 
+import android.content.res.Resources;
+import android.view.ViewConfiguration;
+
+import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.statusbar.phone.NotificationTapHelper;
+
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
+import javax.inject.Named;
 
 import dagger.Binds;
 import dagger.Module;
+import dagger.Provides;
+import dagger.multibindings.ElementsIntoSet;
 
 /** Dagger Module for Falsing. */
 @Module
 public interface FalsingModule {
+    String BRIGHT_LINE_GESTURE_CLASSIFERS = "bright_line_gesture_classifiers";
+    String SINGLE_TAP_TOUCH_SLOP = "falsing_single_tap_touch_slop";
+    String DOUBLE_TAP_TOUCH_SLOP = "falsing_double_tap_touch_slop";
+    String DOUBLE_TAP_TIMEOUT_MS = "falsing_double_tap_timeout_ms";
+
     /** */
     @Binds
     @SysUISingleton
     FalsingCollector bindsFalsingCollector(FalsingCollectorImpl impl);
+
+    /** */
+    @Provides
+    @ElementsIntoSet
+    @Named(BRIGHT_LINE_GESTURE_CLASSIFERS)
+    static Set<FalsingClassifier> providesBrightLineGestureClassifiers(
+            DistanceClassifier distanceClassifier, ProximityClassifier proximityClassifier,
+            PointerCountClassifier pointerCountClassifier, TypeClassifier typeClassifier,
+            DiagonalClassifier diagonalClassifier, ZigZagClassifier zigZagClassifier) {
+        return new HashSet<>(Arrays.asList(
+                pointerCountClassifier, typeClassifier, diagonalClassifier, distanceClassifier,
+                proximityClassifier, zigZagClassifier));
+    }
+
+    /** */
+    @Provides
+    @Named(DOUBLE_TAP_TIMEOUT_MS)
+    static long providesDoubleTapTimeoutMs() {
+        return NotificationTapHelper.DOUBLE_TAP_TIMEOUT_MS;
+    }
+
+    /** */
+    @Provides
+    @Named(DOUBLE_TAP_TOUCH_SLOP)
+    static float providesDoubleTapTouchSlop(@Main Resources resources) {
+        return resources.getDimension(R.dimen.double_tap_slop);
+    }
+
+    /** */
+    @Provides
+    @Named(SINGLE_TAP_TOUCH_SLOP)
+    static float providesSingleTapTouchSlop(ViewConfiguration viewConfiguration) {
+        return viewConfiguration.getScaledTouchSlop();
+    }
 }

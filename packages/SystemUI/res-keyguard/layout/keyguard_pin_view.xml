@@ -46,11 +46,10 @@
                     android:id="@+id/pinEntry"
                     android:layout_width="@dimen/keyguard_security_width"
                     android:layout_height="match_parent"
-                    android:gravity="center"
+                    style="@style/Widget.TextView.Password"
                     android:layout_centerHorizontal="true"
                     android:layout_marginRight="72dp"
                     androidprv:scaledTextSize="@integer/scaled_password_text_size"
-                    android:textColor="?attr/wallpaperTextColor"
                     android:contentDescription="@string/keyguard_accessibility_pin_area"
                     />
             <View

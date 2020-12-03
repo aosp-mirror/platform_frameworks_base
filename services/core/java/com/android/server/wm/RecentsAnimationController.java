@@ -398,7 +398,7 @@ public class RecentsAnimationController implements DeathRecipient {
         final ArrayList<Task> visibleTasks = mDisplayContent.getDefaultTaskDisplayArea()
                 .getVisibleTasks();
         final Task targetStack = mDisplayContent.getDefaultTaskDisplayArea()
-                .getStack(WINDOWING_MODE_UNDEFINED, targetActivityType);
+                .getRootTask(WINDOWING_MODE_UNDEFINED, targetActivityType);
         if (targetStack != null) {
             final PooledConsumer c = PooledLambda.obtainConsumer((t, outList) ->
 	            { if (!outList.contains(t)) outList.add(t); }, PooledLambda.__(Task.class),

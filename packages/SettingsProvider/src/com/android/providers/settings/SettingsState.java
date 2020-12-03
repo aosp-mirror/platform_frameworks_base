@@ -496,11 +496,14 @@ final class SettingsState {
     public List<String> setSettingsLocked(String prefix, Map<String, String> keyValues,
             String packageName) {
         List<String> changedKeys = new ArrayList<>();
+        final Iterator<Map.Entry<String, Setting>> iterator = mSettings.entrySet().iterator();
         // Delete old keys with the prefix that are not part of the new set.
-        for (int i = 0; i < mSettings.keySet().size(); ++i) {
-            String key = mSettings.keyAt(i);
-            if (key.startsWith(prefix) && !keyValues.containsKey(key)) {
-                Setting oldState = mSettings.remove(key);
+        while (iterator.hasNext()) {
+            Map.Entry<String, Setting> entry = iterator.next();
+            final String key = entry.getKey();
+            final Setting oldState = entry.getValue();
+            if (key != null && key.startsWith(prefix) && !keyValues.containsKey(key)) {
+                iterator.remove();
 
                 FrameworkStatsLog.write(FrameworkStatsLog.SETTING_CHANGED, key,
                         /* value= */ "", /* newValue= */ "", oldState.value, /* tag */ "", false,

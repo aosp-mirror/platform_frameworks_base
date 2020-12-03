@@ -23,6 +23,7 @@ import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodCl
 import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodClientsTraceProto.ClientSideProto.EDITOR_INFO;
 import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodClientsTraceProto.ClientSideProto.IME_INSETS_SOURCE_CONSUMER;
 import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodClientsTraceProto.ClientSideProto.INPUT_CONNECTION;
+import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodClientsTraceProto.ClientSideProto.INPUT_CONNECTION_CALL;
 import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodClientsTraceProto.ClientSideProto.INPUT_METHOD_MANAGER;
 import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodClientsTraceProto.ClientSideProto.VIEW_ROOT_IMPL;
 import static android.view.inputmethod.InputMethodManagerProto.ACTIVE;
@@ -579,7 +580,8 @@ public final class InputMethodManager {
                 int windowFlags) {
             final View servedView;
             ImeTracing.getInstance().triggerClientDump(
-                    "InputMethodManager.DelegateImpl#startInput", InputMethodManager.this);
+                    "InputMethodManager.DelegateImpl#startInput", InputMethodManager.this,
+                    null /* icProto */);
             synchronized (mH) {
                 mCurrentTextBoxAttribute = null;
                 mCompletions = null;
@@ -1014,6 +1016,11 @@ public final class InputMethodManager {
         @Override
         public boolean isActive() {
             return mParentInputMethodManager.mActive && !isFinished();
+        }
+
+        @Override
+        public InputMethodManager getIMM() {
+            return mParentInputMethodManager;
         }
 
         void deactivate() {
@@ -1713,7 +1720,8 @@ public final class InputMethodManager {
      * {@link #RESULT_HIDDEN}.
      */
     public boolean showSoftInput(View view, int flags, ResultReceiver resultReceiver) {
-        ImeTracing.getInstance().triggerClientDump("InputMethodManager#showSoftInput", this);
+        ImeTracing.getInstance().triggerClientDump("InputMethodManager#showSoftInput", this,
+                null /* icProto */);
         // Re-dispatch if there is a context mismatch.
         final InputMethodManager fallbackImm = getFallbackInputMethodManagerIfNecessary(view);
         if (fallbackImm != null) {
@@ -1822,7 +1830,7 @@ public final class InputMethodManager {
     public boolean hideSoftInputFromWindow(IBinder windowToken, int flags,
             ResultReceiver resultReceiver) {
         ImeTracing.getInstance().triggerClientDump("InputMethodManager#hideSoftInputFromWindow",
-                this);
+                this, null /* icProto */);
         checkFocus();
         synchronized (mH) {
             final View servedView = getServedViewLocked();
@@ -2228,7 +2236,8 @@ public final class InputMethodManager {
      * @hide
      */
     public void notifyImeHidden(IBinder windowToken) {
-        ImeTracing.getInstance().triggerClientDump("InputMethodManager#notifyImeHidden", this);
+        ImeTracing.getInstance().triggerClientDump("InputMethodManager#notifyImeHidden", this,
+                null /* icProto */);
         synchronized (mH) {
             try {
                 if (mCurMethod != null && mCurRootView != null
@@ -3296,7 +3305,7 @@ public final class InputMethodManager {
         for (String arg : args) {
             if (arg.equals(PROTO_ARG)) {
                 final ProtoOutputStream proto = new ProtoOutputStream(fd);
-                dumpDebug(proto);
+                dumpDebug(proto, null /* icProto */);
                 proto.flush();
                 return true;
             }
@@ -3309,10 +3318,11 @@ public final class InputMethodManager {
      * {@link ProtoOutputStream}.
      *
      * @param proto The proto stream to which the dumps are written.
+     * @param icProto {@link InputConnection} call data in proto format.
      * @hide
      */
     @GuardedBy("mH")
-    public void dumpDebug(ProtoOutputStream proto) {
+    public void dumpDebug(ProtoOutputStream proto, ProtoOutputStream icProto) {
         if (mCurMethod == null) {
             return;
         }
@@ -3336,6 +3346,9 @@ public final class InputMethodManager {
             }
             if (mServedInputConnectionWrapper != null) {
                 mServedInputConnectionWrapper.dumpDebug(proto, INPUT_CONNECTION);
+            }
+            if (icProto != null) {
+                proto.write(INPUT_CONNECTION_CALL, icProto.getBytes());
             }
         }
     }

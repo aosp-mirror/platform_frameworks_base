@@ -964,6 +964,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * @hide
      */
     public static void preloadFontCache() {
+        if (Typeface.ENABLE_LAZY_TYPEFACE_INITIALIZATION) {
+            return;
+        }
         Paint p = new Paint();
         p.setAntiAlias(true);
         // Ensure that the Typeface is loaded here.

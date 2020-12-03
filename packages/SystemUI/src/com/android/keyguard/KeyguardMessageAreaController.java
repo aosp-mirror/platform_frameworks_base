@@ -93,6 +93,13 @@ public class KeyguardMessageAreaController extends ViewController<KeyguardMessag
         mView.setNextMessageColor(colorState);
     }
 
+    /**
+     * Reload colors from resources.
+     **/
+    public void reloadColors() {
+        mView.reloadColor();
+    }
+
     /** Factory for creating {@link com.android.keyguard.KeyguardMessageAreaController}. */
     public static class Factory {
         private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;

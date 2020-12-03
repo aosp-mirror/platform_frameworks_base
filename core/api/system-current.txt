@@ -1795,11 +1795,11 @@ package android.content {
 
   public class ContextWrapper extends android.content.Context {
     method public android.content.Context createCredentialProtectedStorageContext();
-    method public java.io.File getPreloadsFileCache();
+    method @Nullable public java.io.File getPreloadsFileCache();
     method public boolean isCredentialProtectedStorage();
-    method public void sendBroadcast(android.content.Intent, String, android.os.Bundle);
-    method public void sendBroadcastAsUser(android.content.Intent, android.os.UserHandle, String, android.os.Bundle);
-    method public void sendOrderedBroadcast(android.content.Intent, String, android.os.Bundle, android.content.BroadcastReceiver, android.os.Handler, int, String, android.os.Bundle);
+    method public void sendBroadcast(android.content.Intent, @Nullable String, @Nullable android.os.Bundle);
+    method public void sendBroadcastAsUser(android.content.Intent, android.os.UserHandle, @Nullable String, @Nullable android.os.Bundle);
+    method public void sendOrderedBroadcast(android.content.Intent, @Nullable String, @Nullable android.os.Bundle, @Nullable android.content.BroadcastReceiver, @Nullable android.os.Handler, int, @Nullable String, @Nullable android.os.Bundle);
   }
 
   public class Intent implements java.lang.Cloneable android.os.Parcelable {
@@ -6506,6 +6506,7 @@ package android.net {
     field @Deprecated public static final int TETHER_ERROR_NO_ERROR = 0; // 0x0
     field @Deprecated public static final int TETHER_ERROR_PROVISION_FAILED = 11; // 0xb
     field public static final int TYPE_NONE = -1; // 0xffffffff
+    field @Deprecated public static final int TYPE_PROXY = 16; // 0x10
     field @Deprecated public static final int TYPE_WIFI_P2P = 13; // 0xd
   }
 
@@ -9707,6 +9708,33 @@ package android.telecom {
     field @Deprecated public static final int ROUTE_WIRED_OR_EARPIECE = 5; // 0x5
   }
 
+  public final class BluetoothCallQualityReport implements android.os.Parcelable {
+    method public int describeContents();
+    method @IntRange(from=0) public int getNegativeAcknowledgementCount();
+    method @IntRange(from=0) public int getPacketsNotReceivedCount();
+    method @IntRange(from=0) public int getRetransmittedPacketsCount();
+    method @IntRange(from=0xffffff81, to=20) public int getRssiDbm();
+    method public long getSentTimestampMillis();
+    method public int getSnrDb();
+    method public boolean isChoppyVoice();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.telecom.BluetoothCallQualityReport> CREATOR;
+    field public static final String EVENT_BLUETOOTH_CALL_QUALITY_REPORT = "android.telecom.event.BLUETOOTH_CALL_QUALITY_REPORT";
+    field public static final String EXTRA_BLUETOOTH_CALL_QUALITY_REPORT = "android.telecom.extra.BLUETOOTH_CALL_QUALITY_REPORT";
+  }
+
+  public static final class BluetoothCallQualityReport.Builder {
+    ctor public BluetoothCallQualityReport.Builder();
+    method @NonNull public android.telecom.BluetoothCallQualityReport build();
+    method @NonNull public android.telecom.BluetoothCallQualityReport.Builder setChoppyVoice(boolean);
+    method @NonNull public android.telecom.BluetoothCallQualityReport.Builder setNegativeAcknowledgementCount(int);
+    method @NonNull public android.telecom.BluetoothCallQualityReport.Builder setPacketsNotReceivedCount(int);
+    method @NonNull public android.telecom.BluetoothCallQualityReport.Builder setRetransmittedPacketsCount(int);
+    method @NonNull public android.telecom.BluetoothCallQualityReport.Builder setRssiDbm(int);
+    method @NonNull public android.telecom.BluetoothCallQualityReport.Builder setSentTimestampMillis(long);
+    method @NonNull public android.telecom.BluetoothCallQualityReport.Builder setSnrDb(int);
+  }
+
   public final class Call {
     method @Deprecated public void addListener(android.telecom.Call.Listener);
     method public void enterBackgroundAudioProcessing();
@@ -10831,6 +10859,7 @@ package android.telephony {
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isEmergencyAssistanceEnabled();
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) @WorkerThread public boolean isIccLockEnabled();
     method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, android.Manifest.permission.READ_PHONE_STATE}) public boolean isIdle();
+    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isInEmergencySmsMode();
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isLteCdmaEvdoGsmWcdmaEnabled();
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isMobileDataPolicyEnabled(int);
     method public boolean isNrDualConnectivityEnabled();
@@ -11527,6 +11556,7 @@ package android.telephony.ims {
     method public boolean getCallExtraBoolean(String, boolean);
     method public int getCallExtraInt(String);
     method public int getCallExtraInt(String, int);
+    method @Nullable public <T extends android.os.Parcelable> T getCallExtraParcelable(@Nullable String);
     method public android.os.Bundle getCallExtras();
     method public int getCallType();
     method public static int getCallTypeFromVideoState(int);
@@ -11549,6 +11579,7 @@ package android.telephony.ims {
     method public void setCallExtra(String, String);
     method public void setCallExtraBoolean(String, boolean);
     method public void setCallExtraInt(String, int);
+    method public void setCallExtraParcelable(@NonNull String, @NonNull android.os.Parcelable);
     method public void setCallRestrictCause(int);
     method public void setCallerNumberVerificationStatus(int);
     method public void setEmergencyCallRouting(int);
@@ -11583,6 +11614,7 @@ package android.telephony.ims {
     field public static final String EXTRA_CALL_DISCONNECT_CAUSE = "android.telephony.ims.extra.CALL_DISCONNECT_CAUSE";
     field public static final String EXTRA_CALL_NETWORK_TYPE = "android.telephony.ims.extra.CALL_NETWORK_TYPE";
     field @Deprecated public static final String EXTRA_CALL_RAT_TYPE = "CallRadioTech";
+    field public static final String EXTRA_CALL_SUBJECT = "android.telephony.ims.extra.CALL_SUBJECT";
     field public static final String EXTRA_CHILD_NUMBER = "ChildNum";
     field public static final String EXTRA_CNA = "cna";
     field public static final String EXTRA_CNAP = "cnap";
@@ -11592,8 +11624,11 @@ package android.telephony.ims {
     field public static final String EXTRA_EMERGENCY_CALL = "e_call";
     field public static final String EXTRA_FORWARDED_NUMBER = "android.telephony.ims.extra.FORWARDED_NUMBER";
     field public static final String EXTRA_IS_CALL_PULL = "CallPull";
+    field public static final String EXTRA_LOCATION = "android.telephony.ims.extra.LOCATION";
     field public static final String EXTRA_OI = "oi";
     field public static final String EXTRA_OIR = "oir";
+    field public static final String EXTRA_PICTURE_URL = "android.telephony.ims.extra.PICTURE_URL";
+    field public static final String EXTRA_PRIORITY = "android.telephony.ims.extra.PRIORITY";
     field public static final String EXTRA_REMOTE_URI = "remote_uri";
     field public static final String EXTRA_USSD = "ussd";
     field public static final int OIR_DEFAULT = 0; // 0x0
@@ -11601,6 +11636,8 @@ package android.telephony.ims {
     field public static final int OIR_PRESENTATION_PAYPHONE = 4; // 0x4
     field public static final int OIR_PRESENTATION_RESTRICTED = 1; // 0x1
     field public static final int OIR_PRESENTATION_UNKNOWN = 3; // 0x3
+    field public static final int PRIORITY_NORMAL = 0; // 0x0
+    field public static final int PRIORITY_URGENT = 1; // 0x1
     field public static final int SERVICE_TYPE_EMERGENCY = 2; // 0x2
     field public static final int SERVICE_TYPE_NONE = 0; // 0x0
     field public static final int SERVICE_TYPE_NORMAL = 1; // 0x1

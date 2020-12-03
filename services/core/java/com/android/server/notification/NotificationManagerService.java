@@ -230,9 +230,9 @@ import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.StatsEvent;
-import android.util.Xml;
 import android.util.TypedXmlPullParser;
 import android.util.TypedXmlSerializer;
+import android.util.Xml;
 import android.util.proto.ProtoOutputStream;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
@@ -257,7 +257,6 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.ConcurrentUtils;
 import com.android.internal.util.DumpUtils;
-import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.XmlUtils;
 import com.android.internal.util.function.TriPredicate;
@@ -286,9 +285,7 @@ import libcore.io.IoUtils;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -737,7 +734,7 @@ public class NotificationManagerService extends SystemService {
                         null,
                         MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE, userId);
         if (candidate != null && validAssistants.contains(candidate)) {
-            setNotificationAssistantAccessGrantedForUserInternal(candidate, userId, true);
+            setNotificationAssistantAccessGrantedForUserInternal(candidate, userId, true, false);
             return true;
         }
         return false;
@@ -4913,7 +4910,8 @@ public class NotificationManagerService extends SystemService {
             }
             final long identity = Binder.clearCallingIdentity();
             try {
-                setNotificationAssistantAccessGrantedForUserInternal(assistant, userId, granted);
+                setNotificationAssistantAccessGrantedForUserInternal(assistant, userId, granted,
+                        true);
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
@@ -5164,7 +5162,7 @@ public class NotificationManagerService extends SystemService {
 
     @VisibleForTesting
     protected void setNotificationAssistantAccessGrantedForUserInternal(
-            ComponentName assistant, int baseUserId, boolean granted) {
+            ComponentName assistant, int baseUserId, boolean granted, boolean userSet) {
         List<UserInfo> users = mUm.getEnabledProfiles(baseUserId);
         if (users != null) {
             for (UserInfo user : users) {
@@ -5174,7 +5172,7 @@ public class NotificationManagerService extends SystemService {
                             mAssistants.getAllowedComponents(userId));
                     if (allowedAssistant != null) {
                         setNotificationAssistantAccessGrantedForUserInternal(
-                                allowedAssistant, userId, false);
+                                allowedAssistant, userId, false, userSet);
                     }
                     continue;
                 }
@@ -5183,7 +5181,7 @@ public class NotificationManagerService extends SystemService {
                     mConditionProviders.setPackageOrComponentEnabled(assistant.flattenToString(),
                             userId, false, granted);
                     mAssistants.setPackageOrComponentEnabled(assistant.flattenToString(),
-                            userId, true, granted);
+                            userId, true, granted, userSet);
 
                     getContext().sendBroadcastAsUser(
                             new Intent(ACTION_NOTIFICATION_POLICY_ACCESS_GRANTED_CHANGED)
@@ -9338,7 +9336,7 @@ public class NotificationManagerService extends SystemService {
 
         @Override
         protected void setPackageOrComponentEnabled(String pkgOrComponent, int userId,
-                boolean isPrimary, boolean enabled) {
+                boolean isPrimary, boolean enabled, boolean userSet) {
             // Ensures that only one component is enabled at a time
             if (enabled) {
                 List<ComponentName> allowedComponents = getAllowedComponents(userId);
@@ -9346,10 +9344,10 @@ public class NotificationManagerService extends SystemService {
                     ComponentName currentComponent = CollectionUtils.firstOrNull(allowedComponents);
                     if (currentComponent.flattenToString().equals(pkgOrComponent)) return;
                     setNotificationAssistantAccessGrantedForUserInternal(
-                            currentComponent, userId, false);
+                            currentComponent, userId, false, userSet);
                 }
             }
-            super.setPackageOrComponentEnabled(pkgOrComponent, userId, isPrimary, enabled);
+            super.setPackageOrComponentEnabled(pkgOrComponent, userId, isPrimary, enabled, userSet);
         }
 
         private boolean isVerboseLogEnabled() {

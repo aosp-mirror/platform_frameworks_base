@@ -299,6 +299,7 @@ public class SystemServicesTestRule implements TestRule {
         doNothing().when(mWmService.mRoot).ensureActivitiesVisible(any(),
                 anyInt(), anyBoolean(), anyBoolean(), anyBoolean());
         spyOn(mWmService.mDisplayWindowSettings);
+        spyOn(mWmService.mDisplayWindowSettingsProvider);
 
         // Setup factory classes to prevent calls to native code.
         mTransaction = spy(StubTransaction.class);
@@ -326,7 +327,7 @@ public class SystemServicesTestRule implements TestRule {
         // Set the default focused TDA.
         display.setLastFocusedTaskDisplayArea(taskDisplayArea);
         spyOn(taskDisplayArea);
-        final Task homeStack = taskDisplayArea.getStack(
+        final Task homeStack = taskDisplayArea.getRootTask(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_HOME);
         spyOn(homeStack);
     }

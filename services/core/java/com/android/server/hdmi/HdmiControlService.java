@@ -405,74 +405,7 @@ public class HdmiControlService extends SystemService {
     // Use getAtomWriter() instead of accessing directly, to allow dependency injection for testing.
     private HdmiCecAtomWriter mAtomWriter = new HdmiCecAtomWriter();
 
-    // Buffer for processing the incoming cec messages while allocating logical addresses.
-    private final class CecMessageBuffer {
-        private List<HdmiCecMessage> mBuffer = new ArrayList<>();
-
-        public boolean bufferMessage(HdmiCecMessage message) {
-            switch (message.getOpcode()) {
-                case Constants.MESSAGE_ACTIVE_SOURCE:
-                    bufferActiveSource(message);
-                    return true;
-                case Constants.MESSAGE_IMAGE_VIEW_ON:
-                case Constants.MESSAGE_TEXT_VIEW_ON:
-                    bufferImageOrTextViewOn(message);
-                    return true;
-                case Constants.MESSAGE_SYSTEM_AUDIO_MODE_REQUEST:
-                    bufferSystemAudioModeRequest(message);
-                    return true;
-                    // Add here if new message that needs to buffer
-                default:
-                    // Do not need to buffer messages other than above
-                    return false;
-            }
-        }
-
-        public void processMessages() {
-            for (final HdmiCecMessage message : mBuffer) {
-                runOnServiceThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        handleCecCommand(message);
-                    }
-                });
-            }
-            mBuffer.clear();
-        }
-
-        private void bufferActiveSource(HdmiCecMessage message) {
-            if (!replaceMessageIfBuffered(message, Constants.MESSAGE_ACTIVE_SOURCE)) {
-                mBuffer.add(message);
-            }
-        }
-
-        private void bufferImageOrTextViewOn(HdmiCecMessage message) {
-            if (!replaceMessageIfBuffered(message, Constants.MESSAGE_IMAGE_VIEW_ON) &&
-                !replaceMessageIfBuffered(message, Constants.MESSAGE_TEXT_VIEW_ON)) {
-                mBuffer.add(message);
-            }
-        }
-
-        private void bufferSystemAudioModeRequest(HdmiCecMessage message) {
-            if (!replaceMessageIfBuffered(message, Constants.MESSAGE_SYSTEM_AUDIO_MODE_REQUEST)) {
-                mBuffer.add(message);
-            }
-        }
-
-        // Returns true if the message is replaced
-        private boolean replaceMessageIfBuffered(HdmiCecMessage message, int opcode) {
-            for (int i = 0; i < mBuffer.size(); i++) {
-                HdmiCecMessage bufferedMessage = mBuffer.get(i);
-                if (bufferedMessage.getOpcode() == opcode) {
-                    mBuffer.set(i, message);
-                    return true;
-                }
-            }
-            return false;
-        }
-    }
-
-    private final CecMessageBuffer mCecMessageBuffer = new CecMessageBuffer();
+    private CecMessageBuffer mCecMessageBuffer = new CecMessageBuffer(this);
 
     private final SelectRequestBuffer mSelectRequestBuffer = new SelectRequestBuffer();
 
@@ -563,7 +496,6 @@ public class HdmiControlService extends SystemService {
         if (mMessageValidator == null) {
             mMessageValidator = new HdmiCecMessageValidator(this);
         }
-        mHdmiCecConfig.registerGlobalSettingsObserver(mIoLooper);
     }
 
     private void bootCompleted() {
@@ -986,6 +918,11 @@ public class HdmiControlService extends SystemService {
     @VisibleForTesting
     void setMessageValidator(HdmiCecMessageValidator messageValidator) {
         mMessageValidator = messageValidator;
+    }
+
+    @VisibleForTesting
+    void setCecMessageBuffer(CecMessageBuffer cecMessageBuffer) {
+        this.mCecMessageBuffer = cecMessageBuffer;
     }
 
     /**

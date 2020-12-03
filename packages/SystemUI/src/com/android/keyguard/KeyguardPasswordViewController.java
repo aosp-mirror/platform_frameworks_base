@@ -16,6 +16,7 @@
 
 package com.android.keyguard;
 
+import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.os.UserHandle;
 import android.text.Editable;
@@ -30,12 +31,14 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.view.inputmethod.InputMethodSubtype;
-import android.widget.TextView;
+import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView.OnEditorActionListener;
 
 import com.android.internal.util.LatencyTracker;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
+import com.android.settingslib.Utils;
 import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.util.concurrency.DelayableExecutor;
@@ -51,8 +54,8 @@ public class KeyguardPasswordViewController
     private final InputMethodManager mInputMethodManager;
     private final DelayableExecutor mMainExecutor;
     private final boolean mShowImeAtScreenOn;
-    private TextView mPasswordEntry;
-    private View mSwitchImeButton;
+    private EditText mPasswordEntry;
+    private ImageView mSwitchImeButton;
 
     private final OnEditorActionListener mOnEditorActionListener = (v, actionId, event) -> {
         // Check if this was the result of hitting the enter key
@@ -87,6 +90,18 @@ public class KeyguardPasswordViewController
             }
         }
     };
+
+    @Override
+    public void reloadColors() {
+        super.reloadColors();
+        int textColor = Utils.getColorAttr(mView.getContext(),
+                android.R.attr.textColorPrimary).getDefaultColor();
+        mPasswordEntry.setTextColor(textColor);
+        mPasswordEntry.setHighlightColor(textColor);
+        mPasswordEntry.setBackgroundTintList(ColorStateList.valueOf(textColor));
+        mPasswordEntry.setForegroundTintList(ColorStateList.valueOf(textColor));
+        mSwitchImeButton.setImageTintList(ColorStateList.valueOf(textColor));
+    }
 
     protected KeyguardPasswordViewController(KeyguardPasswordView view,
             KeyguardUpdateMonitor keyguardUpdateMonitor,

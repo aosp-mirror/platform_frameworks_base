@@ -33,6 +33,7 @@ import com.android.internal.widget.LockPatternView.Cell;
 import com.android.internal.widget.LockscreenCredential;
 import com.android.keyguard.EmergencyButton.EmergencyButtonCallback;
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
+import com.android.settingslib.Utils;
 import com.android.systemui.R;
 
 import java.util.List;
@@ -197,6 +198,7 @@ public class KeyguardPatternViewController
 
     @Override
     protected void onViewAttached() {
+        super.onViewAttached();
         mLockPatternView.setOnPatternListener(new UnlockPatternListener());
         mLockPatternView.setSaveEnabled(false);
         mLockPatternView.setInStealthMode(!mLockPatternUtils.isVisiblePatternEnabled(
@@ -249,6 +251,16 @@ public class KeyguardPatternViewController
         } else {
             displayDefaultSecurityMessage();
         }
+    }
+
+    @Override
+    public void reloadColors() {
+        super.reloadColors();
+        mMessageAreaController.reloadColors();
+        int textColor = Utils.getColorAttr(mLockPatternView.getContext(),
+                android.R.attr.textColorPrimary).getDefaultColor();
+        int errorColor = Utils.getColorError(mLockPatternView.getContext()).getDefaultColor();
+        mLockPatternView.setColors(textColor, textColor, errorColor);
     }
 
     @Override

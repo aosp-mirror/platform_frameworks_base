@@ -34,6 +34,7 @@ import com.android.internal.logging.UiEventLogger;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import org.junit.Before;
@@ -80,6 +81,8 @@ public class KeyguardSecurityContainerControllerTest extends SysuiTestCase {
     private KeyguardSecurityViewFlipper mSecurityViewFlipper;
     @Mock
     private KeyguardSecurityViewFlipperController mKeyguardSecurityViewFlipperController;
+    @Mock
+    private ConfigurationController mConfigurationController;
 
     private KeyguardSecurityContainerController mKeyguardSecurityContainerController;
 
@@ -92,8 +95,8 @@ public class KeyguardSecurityContainerControllerTest extends SysuiTestCase {
         mKeyguardSecurityContainerController = new KeyguardSecurityContainerController.Factory(
                 mView,  mAdminSecondaryLockScreenControllerFactory, mLockPatternUtils,
                 mKeyguardUpdateMonitor, mKeyguardSecurityModel, mMetricsLogger, mUiEventLogger,
-                mKeyguardStateController, mKeyguardSecurityViewFlipperController)
-                .create(mSecurityCallback);
+                mKeyguardStateController, mKeyguardSecurityViewFlipperController,
+                mConfigurationController).create(mSecurityCallback);
     }
 
     @Test

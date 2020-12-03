@@ -68,16 +68,16 @@ public class ActivityDisplayTests extends WindowTestsBase {
                 mRootWindowContainer.getDefaultDisplay().getDefaultTaskDisplayArea();
         final Task stack =
                 new TaskBuilder(mSupervisor).setOnTop(!ON_TOP).setCreateActivity(true).build();
-        final Task prevFocusedStack = taskDisplayAreas.getFocusedStack();
+        final Task prevFocusedStack = taskDisplayAreas.getFocusedRootTask();
 
         stack.moveToFront("moveStackToFront");
         // After moving the stack to front, the previous focused should be the last focused.
         assertTrue(stack.isFocusedStackOnDisplay());
-        assertEquals(prevFocusedStack, taskDisplayAreas.getLastFocusedStack());
+        assertEquals(prevFocusedStack, taskDisplayAreas.getLastFocusedRootTask());
 
         stack.moveToBack("moveStackToBack", null /* task */);
         // After moving the stack to back, the stack should be the last focused.
-        assertEquals(stack, taskDisplayAreas.getLastFocusedStack());
+        assertEquals(stack, taskDisplayAreas.getLastFocusedRootTask());
     }
 
     /**
@@ -88,7 +88,7 @@ public class ActivityDisplayTests extends WindowTestsBase {
     public void testFullscreenStackCanBeFocusedWhenFocusablePinnedStackExists() {
         // Create a pinned stack and move to front.
         final Task pinnedStack = mRootWindowContainer.getDefaultTaskDisplayArea()
-                .createStack(WINDOWING_MODE_PINNED, ACTIVITY_TYPE_STANDARD, ON_TOP);
+                .createRootTask(WINDOWING_MODE_PINNED, ACTIVITY_TYPE_STANDARD, ON_TOP);
         final Task pinnedTask = new TaskBuilder(mAtm.mTaskSupervisor)
                 .setParentTask(pinnedStack).build();
         new ActivityBuilder(mAtm).setActivityFlags(FLAG_ALWAYS_FOCUSABLE)
@@ -108,7 +108,7 @@ public class ActivityDisplayTests extends WindowTestsBase {
     }
 
     /**
-     * Test {@link TaskDisplayArea#mPreferredTopFocusableStack} will be cleared when
+     * Test {@link TaskDisplayArea#mPreferredTopFocusableRootTask} will be cleared when
      * the stack is removed or moved to back, and the focused stack will be according to z-order.
      */
     @Test
@@ -128,7 +128,7 @@ public class ActivityDisplayTests extends WindowTestsBase {
         assertTrue(stack1.isFocusedStackOnDisplay());
 
         // Stack2 should be focused after removing stack1.
-        stack1.getDisplayArea().removeStack(stack1);
+        stack1.getDisplayArea().removeRootTask(stack1);
         assertTrue(stack2.isFocusedStackOnDisplay());
     }
 
@@ -155,12 +155,12 @@ public class ActivityDisplayTests extends WindowTestsBase {
         display.remove();
 
         // The removed display should have no focused stack and its home stack should never resume.
-        assertNull(display.getFocusedStack());
+        assertNull(display.getFocusedRootTask());
         verify(homeStack, never()).resumeTopActivityUncheckedLocked(any(), any());
     }
 
     private Task createFullscreenStackWithSimpleActivityAt(DisplayContent display) {
-        final Task fullscreenStack = display.getDefaultTaskDisplayArea().createStack(
+        final Task fullscreenStack = display.getDefaultTaskDisplayArea().createRootTask(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, ON_TOP);
         final Task fullscreenTask = new TaskBuilder(mAtm.mTaskSupervisor)
                 .setParentTask(fullscreenStack).build();
@@ -191,7 +191,7 @@ public class ActivityDisplayTests extends WindowTestsBase {
 
         // Move stack with activity to top.
         stack.moveToFront("testStackToFront");
-        assertEquals(stack, display.getFocusedStack());
+        assertEquals(stack, display.getFocusedRootTask());
         assertEquals(activity, display.topRunningActivity());
         assertNull(display.topRunningActivity(true /* considerKeyguardState */));
 
@@ -207,7 +207,7 @@ public class ActivityDisplayTests extends WindowTestsBase {
         // Move empty stack to front. The running activity in focusable stack which below the
         // empty stack should be returned.
         emptyStack.moveToFront("emptyStackToFront");
-        assertEquals(stack, display.getFocusedStack());
+        assertEquals(stack, display.getFocusedRootTask());
         assertTopRunningActivity(showWhenLockedActivity, display);
     }
 
@@ -222,7 +222,7 @@ public class ActivityDisplayTests extends WindowTestsBase {
     @Test
     public void testAlwaysOnTopStackLocation() {
         final TaskDisplayArea taskDisplayArea = mRootWindowContainer.getDefaultTaskDisplayArea();
-        final Task alwaysOnTopStack = taskDisplayArea.createStack(WINDOWING_MODE_FREEFORM,
+        final Task alwaysOnTopStack = taskDisplayArea.createRootTask(WINDOWING_MODE_FREEFORM,
                 ACTIVITY_TYPE_STANDARD, true /* onTop */);
         final ActivityRecord activity = new ActivityBuilder(mAtm)
                 .setTask(alwaysOnTopStack).build();
@@ -232,31 +232,31 @@ public class ActivityDisplayTests extends WindowTestsBase {
         assertTrue(alwaysOnTopStack.isAlwaysOnTop());
         // Ensure always on top state is synced to the children of the stack.
         assertTrue(alwaysOnTopStack.getTopNonFinishingActivity().isAlwaysOnTop());
-        assertEquals(alwaysOnTopStack, taskDisplayArea.getTopStack());
+        assertEquals(alwaysOnTopStack, taskDisplayArea.getTopRootTask());
 
-        final Task pinnedStack = taskDisplayArea.createStack(
+        final Task pinnedStack = taskDisplayArea.createRootTask(
                 WINDOWING_MODE_PINNED, ACTIVITY_TYPE_STANDARD, true /* onTop */);
         assertEquals(pinnedStack, taskDisplayArea.getRootPinnedTask());
-        assertEquals(pinnedStack, taskDisplayArea.getTopStack());
+        assertEquals(pinnedStack, taskDisplayArea.getTopRootTask());
 
-        final Task anotherAlwaysOnTopStack = taskDisplayArea.createStack(
+        final Task anotherAlwaysOnTopStack = taskDisplayArea.createRootTask(
                 WINDOWING_MODE_FREEFORM, ACTIVITY_TYPE_STANDARD, true /* onTop */);
         anotherAlwaysOnTopStack.setAlwaysOnTop(true);
         taskDisplayArea.positionChildAt(POSITION_TOP, anotherAlwaysOnTopStack,
                 false /* includingParents */);
         assertTrue(anotherAlwaysOnTopStack.isAlwaysOnTop());
-        int topPosition = taskDisplayArea.getStackCount() - 1;
+        int topPosition = taskDisplayArea.getRootTaskCount() - 1;
         // Ensure the new alwaysOnTop stack is put below the pinned stack, but on top of the
         // existing alwaysOnTop stack.
-        assertEquals(anotherAlwaysOnTopStack, taskDisplayArea.getStackAt(topPosition - 1));
+        assertEquals(anotherAlwaysOnTopStack, taskDisplayArea.getRootTaskAt(topPosition - 1));
 
-        final Task nonAlwaysOnTopStack = taskDisplayArea.createStack(
+        final Task nonAlwaysOnTopStack = taskDisplayArea.createRootTask(
                 WINDOWING_MODE_FREEFORM, ACTIVITY_TYPE_STANDARD, true /* onTop */);
         assertEquals(taskDisplayArea, nonAlwaysOnTopStack.getDisplayArea());
-        topPosition = taskDisplayArea.getStackCount() - 1;
+        topPosition = taskDisplayArea.getRootTaskCount() - 1;
         // Ensure the non-alwaysOnTop stack is put below the three alwaysOnTop stacks, but above the
         // existing other non-alwaysOnTop stacks.
-        assertEquals(nonAlwaysOnTopStack, taskDisplayArea.getStackAt(topPosition - 3));
+        assertEquals(nonAlwaysOnTopStack, taskDisplayArea.getRootTaskAt(topPosition - 3));
 
         anotherAlwaysOnTopStack.setAlwaysOnTop(false);
         taskDisplayArea.positionChildAt(POSITION_TOP, anotherAlwaysOnTopStack,
@@ -264,37 +264,37 @@ public class ActivityDisplayTests extends WindowTestsBase {
         assertFalse(anotherAlwaysOnTopStack.isAlwaysOnTop());
         // Ensure, when always on top is turned off for a stack, the stack is put just below all
         // other always on top stacks.
-        assertEquals(anotherAlwaysOnTopStack, taskDisplayArea.getStackAt(topPosition - 2));
+        assertEquals(anotherAlwaysOnTopStack, taskDisplayArea.getRootTaskAt(topPosition - 2));
         anotherAlwaysOnTopStack.setAlwaysOnTop(true);
 
         // Ensure always on top state changes properly when windowing mode changes.
         anotherAlwaysOnTopStack.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
         assertFalse(anotherAlwaysOnTopStack.isAlwaysOnTop());
-        assertEquals(anotherAlwaysOnTopStack, taskDisplayArea.getStackAt(topPosition - 2));
+        assertEquals(anotherAlwaysOnTopStack, taskDisplayArea.getRootTaskAt(topPosition - 2));
         anotherAlwaysOnTopStack.setWindowingMode(WINDOWING_MODE_FREEFORM);
         assertTrue(anotherAlwaysOnTopStack.isAlwaysOnTop());
-        assertEquals(anotherAlwaysOnTopStack, taskDisplayArea.getStackAt(topPosition - 1));
+        assertEquals(anotherAlwaysOnTopStack, taskDisplayArea.getRootTaskAt(topPosition - 1));
 
-        final Task dreamStack = taskDisplayArea.createStack(
+        final Task dreamStack = taskDisplayArea.createRootTask(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_DREAM, true /* onTop */);
         assertEquals(taskDisplayArea, dreamStack.getDisplayArea());
         assertTrue(dreamStack.isAlwaysOnTop());
-        topPosition = taskDisplayArea.getStackCount() - 1;
+        topPosition = taskDisplayArea.getRootTaskCount() - 1;
         // Ensure dream shows above all activities, including PiP
-        assertEquals(dreamStack, taskDisplayArea.getTopStack());
-        assertEquals(pinnedStack, taskDisplayArea.getStackAt(topPosition - 1));
+        assertEquals(dreamStack, taskDisplayArea.getTopRootTask());
+        assertEquals(pinnedStack, taskDisplayArea.getRootTaskAt(topPosition - 1));
 
-        final Task assistStack = taskDisplayArea.createStack(
+        final Task assistStack = taskDisplayArea.createRootTask(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_ASSISTANT, true /* onTop */);
         assertEquals(taskDisplayArea, assistStack.getDisplayArea());
         assertFalse(assistStack.isAlwaysOnTop());
-        topPosition = taskDisplayArea.getStackCount() - 1;
+        topPosition = taskDisplayArea.getRootTaskCount() - 1;
 
         // Ensure Assistant shows as a non-always-on-top activity when config_assistantOnTopOfDream
         // is false and on top of everything when true.
         final boolean isAssistantOnTop = mContext.getResources()
                 .getBoolean(com.android.internal.R.bool.config_assistantOnTopOfDream);
-        assertEquals(assistStack, taskDisplayArea.getStackAt(
+        assertEquals(assistStack, taskDisplayArea.getRootTaskAt(
                     isAssistantOnTop ? topPosition : topPosition - 4));
     }
 
@@ -312,13 +312,13 @@ public class ActivityDisplayTests extends WindowTestsBase {
 
     private void removeStackTests(Runnable runnable) {
         final TaskDisplayArea taskDisplayArea = mRootWindowContainer.getDefaultTaskDisplayArea();
-        final Task stack1 = taskDisplayArea.createStack(WINDOWING_MODE_FULLSCREEN,
+        final Task stack1 = taskDisplayArea.createRootTask(WINDOWING_MODE_FULLSCREEN,
                 ACTIVITY_TYPE_STANDARD, ON_TOP);
-        final Task stack2 = taskDisplayArea.createStack(WINDOWING_MODE_FULLSCREEN,
+        final Task stack2 = taskDisplayArea.createRootTask(WINDOWING_MODE_FULLSCREEN,
                 ACTIVITY_TYPE_STANDARD, ON_TOP);
-        final Task stack3 = taskDisplayArea.createStack(WINDOWING_MODE_FULLSCREEN,
+        final Task stack3 = taskDisplayArea.createRootTask(WINDOWING_MODE_FULLSCREEN,
                 ACTIVITY_TYPE_STANDARD, ON_TOP);
-        final Task stack4 = taskDisplayArea.createStack(WINDOWING_MODE_FULLSCREEN,
+        final Task stack4 = taskDisplayArea.createRootTask(WINDOWING_MODE_FULLSCREEN,
                 ACTIVITY_TYPE_STANDARD, ON_TOP);
         final Task task1 = new TaskBuilder(mAtm.mTaskSupervisor).setParentTask(stack1).build();
         final Task task2 = new TaskBuilder(mAtm.mTaskSupervisor).setParentTask(stack2).build();
@@ -333,7 +333,7 @@ public class ActivityDisplayTests extends WindowTestsBase {
 
         // Removing stacks from the display while removing stacks.
         doAnswer(invocation -> {
-            taskDisplayArea.removeStack(stack2);
+            taskDisplayArea.removeRootTask(stack2);
             return true;
         }).when(mSupervisor).removeTask(eq(task2), anyBoolean(), anyBoolean(), any());
 

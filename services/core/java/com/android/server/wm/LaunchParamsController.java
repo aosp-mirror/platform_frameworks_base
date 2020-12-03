@@ -143,7 +143,7 @@ class LaunchParamsController {
         try {
             if (mTmpParams.mPreferredTaskDisplayArea != null
                     && task.getDisplayArea() != mTmpParams.mPreferredTaskDisplayArea) {
-                mService.mRootWindowContainer.moveStackToTaskDisplayArea(task.getRootTaskId(),
+                mService.mRootWindowContainer.moveRootTaskToTaskDisplayArea(task.getRootTaskId(),
                         mTmpParams.mPreferredTaskDisplayArea, true /* onTop */);
             }
 

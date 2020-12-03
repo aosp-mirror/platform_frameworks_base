@@ -725,6 +725,33 @@ public final class DisplayManagerGlobal {
         }
     }
 
+    /**
+     * Sets the refresh rate switching type.
+     *
+     * @hide
+     */
+    public void setRefreshRateSwitchingType(@DisplayManager.SwitchingType int newValue) {
+        try {
+            mDm.setRefreshRateSwitchingType(newValue);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns the refresh rate switching type.
+     *
+     * @hide
+     */
+    @DisplayManager.SwitchingType
+    public int getRefreshRateSwitchingType() {
+        try {
+            return mDm.getRefreshRateSwitchingType();
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
     private final class DisplayManagerCallback extends IDisplayManagerCallback.Stub {
         @Override
         public void onDisplayEvent(int displayId, int event) {

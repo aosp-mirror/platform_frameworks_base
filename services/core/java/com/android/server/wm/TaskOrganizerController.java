@@ -478,7 +478,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
         // We want to defer the task appear signal until the task is fully created and attached to
         // to the hierarchy so that the complete starting configuration is in the task info we send
         // over to the organizer.
-        final Task task = display.getDefaultTaskDisplayArea().createStack(windowingMode,
+        final Task task = display.getDefaultTaskDisplayArea().createRootTask(windowingMode,
                 ACTIVITY_TYPE_UNDEFINED, false /* onTop */, null /* info */, new Intent(),
                 true /* createdByOrganizer */, true /* deferTaskAppear */, launchCookie);
         task.setDeferTaskAppear(false /* deferTaskAppear */);
@@ -688,8 +688,8 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
                 }
                 ArrayList<RunningTaskInfo> out = new ArrayList<>();
                 dc.forAllTaskDisplayAreas(taskDisplayArea -> {
-                    for (int sNdx = taskDisplayArea.getStackCount() - 1; sNdx >= 0; --sNdx) {
-                        final Task task = taskDisplayArea.getStackAt(sNdx);
+                    for (int sNdx = taskDisplayArea.getRootTaskCount() - 1; sNdx >= 0; --sNdx) {
+                        final Task task = taskDisplayArea.getRootTaskAt(sNdx);
                         if (activityTypes != null
                                 && !ArrayUtils.contains(activityTypes, task.getActivityType())) {
                             continue;

@@ -27,6 +27,9 @@ import android.os.Message;
 import android.os.RemoteException;
 import android.os.Trace;
 import android.util.Log;
+import android.util.imetracing.ImeTracing;
+import android.util.imetracing.InputConnectionHelper;
+import android.util.proto.ProtoOutputStream;
 import android.view.KeyEvent;
 import android.view.inputmethod.CompletionInfo;
 import android.view.inputmethod.CorrectionInfo;
@@ -36,6 +39,7 @@ import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputConnectionInspector;
 import android.view.inputmethod.InputConnectionInspector.MissingMethodFlags;
 import android.view.inputmethod.InputContentInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.view.inputmethod.SurroundingText;
 
 import com.android.internal.annotations.GuardedBy;
@@ -124,7 +128,9 @@ public abstract class IInputConnectionWrapper extends IInputContext.Stub {
         }
     }
 
-    abstract protected boolean isActive();
+    protected abstract boolean isActive();
+
+    protected abstract InputMethodManager getIMM();
 
     public void getTextAfterCursor(int length, int flags, ICharSequenceResultCallback callback) {
         dispatchMessage(mH.obtainMessage(DO_GET_TEXT_AFTER_CURSOR, length, flags, callback));
@@ -264,6 +270,7 @@ public abstract class IInputConnectionWrapper extends IInputContext.Stub {
     }
 
     void executeMessage(Message msg) {
+        ProtoOutputStream icProto;
         switch (msg.what) {
             case DO_GET_TEXT_AFTER_CURSOR: {
                 Trace.traceBegin(Trace.TRACE_TAG_INPUT, "InputConnection#getTextAfterCursor");
@@ -277,6 +284,12 @@ public abstract class IInputConnectionWrapper extends IInputContext.Stub {
                         result = null;
                     } else {
                         result = ic.getTextAfterCursor(msg.arg1, msg.arg2);
+                    }
+                    if (ImeTracing.getInstance().isEnabled()) {
+                        icProto = InputConnectionHelper.buildGetTextAfterCursorProto(msg.arg1,
+                                msg.arg2, result);
+                        ImeTracing.getInstance().triggerClientDump(
+                                TAG + "#getTextAfterCursor", getIMM(), icProto);
                     }
                     try {
                         callback.onResult(result);
@@ -302,6 +315,12 @@ public abstract class IInputConnectionWrapper extends IInputContext.Stub {
                     } else {
                         result = ic.getTextBeforeCursor(msg.arg1, msg.arg2);
                     }
+                    if (ImeTracing.getInstance().isEnabled()) {
+                        icProto = InputConnectionHelper.buildGetTextBeforeCursorProto(msg.arg1,
+                                msg.arg2, result);
+                        ImeTracing.getInstance().triggerClientDump(
+                                TAG + "#getTextBeforeCursor", getIMM(), icProto);
+                    }
                     try {
                         callback.onResult(result);
                     } catch (RemoteException e) {
@@ -325,6 +344,11 @@ public abstract class IInputConnectionWrapper extends IInputContext.Stub {
                         result = null;
                     } else {
                         result = ic.getSelectedText(msg.arg1);
+                    }
+                    if (ImeTracing.getInstance().isEnabled()) {
+                        icProto = InputConnectionHelper.buildGetSelectedTextProto(msg.arg1, result);
+                        ImeTracing.getInstance().triggerClientDump(
+                                TAG + "#getSelectedText", getIMM(), icProto);
                     }
                     try {
                         callback.onResult(result);
@@ -354,6 +378,12 @@ public abstract class IInputConnectionWrapper extends IInputContext.Stub {
                     } else {
                         result = ic.getSurroundingText(beforeLength, afterLength, flags);
                     }
+                    if (ImeTracing.getInstance().isEnabled()) {
+                        icProto = InputConnectionHelper.buildGetSurroundingTextProto(beforeLength,
+                                afterLength, flags, result);
+                        ImeTracing.getInstance().triggerClientDump(
+                                TAG + "#getSurroundingText", getIMM(), icProto);
+                    }
                     try {
                         callback.onResult(result);
                     } catch (RemoteException e) {
@@ -377,6 +407,12 @@ public abstract class IInputConnectionWrapper extends IInputContext.Stub {
                         result = 0;
                     } else {
                         result = ic.getCursorCapsMode(msg.arg1);
+                    }
+                    if (ImeTracing.getInstance().isEnabled()) {
+                        icProto = InputConnectionHelper.buildGetCursorCapsModeProto(msg.arg1,
+                                result);
+                        ImeTracing.getInstance().triggerClientDump(
+                                TAG + "#getCursorCapsMode", getIMM(), icProto);
                     }
                     try {
                         callback.onResult(result);
@@ -403,6 +439,12 @@ public abstract class IInputConnectionWrapper extends IInputContext.Stub {
                         result = null;
                     } else {
                         result = ic.getExtractedText(request, msg.arg1);
+                    }
+                    if (ImeTracing.getInstance().isEnabled()) {
+                        icProto = InputConnectionHelper.buildGetExtractedTextProto(request,
+                                msg.arg1, result);
+                        ImeTracing.getInstance().triggerClientDump(
+                                TAG + "#getExtractedText", getIMM(), icProto);
                     }
                     try {
                         callback.onResult(result);

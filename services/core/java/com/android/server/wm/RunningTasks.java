@@ -67,7 +67,7 @@ class RunningTasks {
         mProfileIds = profileIds;
         mAllowed = allowed;
         mFilterOnlyVisibleRecents = filterOnlyVisibleRecents;
-        mTopDisplayFocusStack = root.getTopDisplayFocusedStack();
+        mTopDisplayFocusStack = root.getTopDisplayFocusedRootTask();
         mRecentTasks = root.mService.getRecentTasks();
 
         final PooledConsumer c = PooledLambda.obtainConsumer(RunningTasks::processTask, this,

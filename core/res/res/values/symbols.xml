@@ -2166,6 +2166,7 @@
   <java-symbol type="string" name="config_defaultNetworkScorerPackageName" />
   <java-symbol type="string" name="config_persistentDataPackageName" />
   <java-symbol type="string" name="config_deviceConfiguratorPackageName" />
+  <java-symbol type="array" name="config_autoTimeSourcesPriority" />
   <java-symbol type="bool" name="config_enableGeolocationTimeZoneDetection" />
   <java-symbol type="bool" name="config_enablePrimaryLocationTimeZoneOverlay" />
   <java-symbol type="string" name="config_primaryLocationTimeZoneProviderPackageName" />
@@ -3002,7 +3003,6 @@
   <java-symbol type="string" name="usb_mtp_launch_notification_description" />
 
   <java-symbol type="color" name="notification_action_list" />
-  <java-symbol type="color" name="notification_material_background_color" />
 
   <!-- Resolver target actions -->
   <java-symbol type="array" name="resolver_target_actions_pin" />

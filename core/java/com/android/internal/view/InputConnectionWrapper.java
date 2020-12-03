@@ -24,6 +24,9 @@ import android.inputmethodservice.AbstractInputMethodService;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.RemoteException;
+import android.util.imetracing.ImeTracing;
+import android.util.imetracing.InputConnectionHelper;
+import android.util.proto.ProtoOutputStream;
 import android.view.KeyEvent;
 import android.view.inputmethod.CompletionInfo;
 import android.view.inputmethod.CorrectionInfo;
@@ -87,8 +90,18 @@ public class InputConnectionWrapper implements InputConnection {
         } catch (RemoteException e) {
             return null;
         }
-        return Completable.getResultOrNull(
+        CharSequence result = Completable.getResultOrNull(
                 value, TAG, "getTextAfterCursor()", mCancellationGroup, MAX_WAIT_TIME_MILLIS);
+
+        final AbstractInputMethodService inputMethodService = mInputMethodService.get();
+        if (inputMethodService != null && ImeTracing.getInstance().isEnabled()) {
+            ProtoOutputStream icProto = InputConnectionHelper.buildGetTextAfterCursorProto(length,
+                    flags, result);
+            ImeTracing.getInstance().triggerServiceDump(TAG + "#getTextAfterCursor",
+                    inputMethodService, icProto);
+        }
+
+        return result;
     }
 
     /**
@@ -107,8 +120,18 @@ public class InputConnectionWrapper implements InputConnection {
         } catch (RemoteException e) {
             return null;
         }
-        return Completable.getResultOrNull(
+        CharSequence result = Completable.getResultOrNull(
                 value, TAG, "getTextBeforeCursor()", mCancellationGroup, MAX_WAIT_TIME_MILLIS);
+
+        final AbstractInputMethodService inputMethodService = mInputMethodService.get();
+        if (inputMethodService != null && ImeTracing.getInstance().isEnabled()) {
+            ProtoOutputStream icProto = InputConnectionHelper.buildGetTextBeforeCursorProto(length,
+                    flags, result);
+            ImeTracing.getInstance().triggerServiceDump(TAG + "#getTextBeforeCursor",
+                    inputMethodService, icProto);
+        }
+
+        return result;
     }
 
     @AnyThread
@@ -127,8 +150,18 @@ public class InputConnectionWrapper implements InputConnection {
         } catch (RemoteException e) {
             return null;
         }
-        return Completable.getResultOrNull(
+        CharSequence result = Completable.getResultOrNull(
                 value, TAG, "getSelectedText()", mCancellationGroup, MAX_WAIT_TIME_MILLIS);
+
+        final AbstractInputMethodService inputMethodService = mInputMethodService.get();
+        if (inputMethodService != null && ImeTracing.getInstance().isEnabled()) {
+            ProtoOutputStream icProto = InputConnectionHelper.buildGetSelectedTextProto(flags,
+                    result);
+            ImeTracing.getInstance().triggerServiceDump(TAG + "#getSelectedText",
+                    inputMethodService, icProto);
+        }
+
+        return result;
     }
 
     /**
@@ -161,8 +194,18 @@ public class InputConnectionWrapper implements InputConnection {
         } catch (RemoteException e) {
             return null;
         }
-        return Completable.getResultOrNull(
+        SurroundingText result = Completable.getResultOrNull(
                 value, TAG, "getSurroundingText()", mCancellationGroup, MAX_WAIT_TIME_MILLIS);
+
+        final AbstractInputMethodService inputMethodService = mInputMethodService.get();
+        if (inputMethodService != null && ImeTracing.getInstance().isEnabled()) {
+            ProtoOutputStream icProto = InputConnectionHelper.buildGetSurroundingTextProto(
+                    beforeLength, afterLength, flags, result);
+            ImeTracing.getInstance().triggerServiceDump(TAG + "#getSurroundingText",
+                    inputMethodService, icProto);
+        }
+
+        return result;
     }
 
     @AnyThread
@@ -177,8 +220,18 @@ public class InputConnectionWrapper implements InputConnection {
         } catch (RemoteException e) {
             return 0;
         }
-        return Completable.getResultOrZero(
+        int result = Completable.getResultOrZero(
                 value, TAG, "getCursorCapsMode()", mCancellationGroup, MAX_WAIT_TIME_MILLIS);
+
+        final AbstractInputMethodService inputMethodService = mInputMethodService.get();
+        if (inputMethodService != null && ImeTracing.getInstance().isEnabled()) {
+            ProtoOutputStream icProto = InputConnectionHelper.buildGetCursorCapsModeProto(
+                    reqModes, result);
+            ImeTracing.getInstance().triggerServiceDump(TAG + "#getCursorCapsMode",
+                    inputMethodService, icProto);
+        }
+
+        return result;
     }
 
     @AnyThread
@@ -193,8 +246,18 @@ public class InputConnectionWrapper implements InputConnection {
         } catch (RemoteException e) {
             return null;
         }
-        return Completable.getResultOrNull(
+        ExtractedText result = Completable.getResultOrNull(
                 value, TAG, "getExtractedText()", mCancellationGroup, MAX_WAIT_TIME_MILLIS);
+
+        final AbstractInputMethodService inputMethodService = mInputMethodService.get();
+        if (inputMethodService != null && ImeTracing.getInstance().isEnabled()) {
+            ProtoOutputStream icProto = InputConnectionHelper.buildGetExtractedTextProto(
+                    request, flags, result);
+            ImeTracing.getInstance().triggerServiceDump(TAG + "#getExtractedText",
+                    inputMethodService, icProto);
+        }
+
+        return result;
     }
 
     @AnyThread

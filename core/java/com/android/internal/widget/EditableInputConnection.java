@@ -28,6 +28,7 @@ import android.text.Editable;
 import android.text.Selection;
 import android.text.method.KeyListener;
 import android.util.Log;
+import android.util.imetracing.InputConnectionHelper;
 import android.util.proto.ProtoOutputStream;
 import android.view.inputmethod.BaseInputConnection;
 import android.view.inputmethod.CompletionInfo;
@@ -45,7 +46,6 @@ import android.widget.TextView;
 public class EditableInputConnection extends BaseInputConnection
         implements DumpableInputConnection {
     private static final boolean DEBUG = false;
-    private static final boolean DUMP_TEXT = false;
     private static final String TAG = "EditableInputConnection";
 
     private final TextView mTextView;
@@ -243,7 +243,7 @@ public class EditableInputConnection extends BaseInputConnection
         final long token = proto.start(fieldId);
         CharSequence editableText = mTextView.getText();
         CharSequence selectedText = getSelectedText(0 /* flags */);
-        if (DUMP_TEXT) {
+        if (InputConnectionHelper.DUMP_TEXT) {
             if (editableText != null) {
                 proto.write(EDITABLE_TEXT, editableText.toString());
             }

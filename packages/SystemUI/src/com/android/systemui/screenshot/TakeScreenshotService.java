@@ -41,6 +41,8 @@ import android.os.UserManager;
 import android.util.Log;
 import android.view.WindowManager;
 
+import androidx.annotation.NonNull;
+
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.util.ScreenshotHelper;
 import com.android.systemui.R;
@@ -57,9 +59,8 @@ public class TakeScreenshotService extends Service {
     private final UserManager mUserManager;
     private final UiEventLogger mUiEventLogger;
     private final ScreenshotNotificationsController mNotificationsController;
-
-    private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
-
+    private final Handler mHandler;
+    private final BroadcastReceiver mCloseSystemDialogs = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (ACTION_CLOSE_SYSTEM_DIALOGS.equals(intent.getAction()) && mScreenshot != null) {
@@ -68,72 +69,11 @@ public class TakeScreenshotService extends Service {
         }
     };
 
-    private Handler mHandler = new Handler(Looper.myLooper()) {
-        @Override
-        public void handleMessage(Message msg) {
-            final Messenger callback = msg.replyTo;
-            Consumer<Uri> uriConsumer = uri -> {
-                Message reply = Message.obtain(null, SCREENSHOT_MSG_URI, uri);
-                try {
-                    callback.send(reply);
-                } catch (RemoteException e) {
-                }
-            };
-            Runnable onComplete = () -> {
-                Message reply = Message.obtain(null, SCREENSHOT_MSG_PROCESS_COMPLETE);
-                try {
-                    callback.send(reply);
-                } catch (RemoteException e) {
-                }
-            };
-
-            // If the storage for this user is locked, we have no place to store
-            // the screenshot, so skip taking it instead of showing a misleading
-            // animation and error notification.
-            if (!mUserManager.isUserUnlocked()) {
-                Log.w(TAG, "Skipping screenshot because storage is locked!");
-                mNotificationsController.notifyScreenshotError(
-                        R.string.screenshot_failed_to_save_user_locked_text);
-                post(() -> uriConsumer.accept(null));
-                post(onComplete);
-                return;
-            }
-
-            ScreenshotHelper.ScreenshotRequest screenshotRequest =
-                    (ScreenshotHelper.ScreenshotRequest) msg.obj;
-
-            mUiEventLogger.log(ScreenshotEvent.getScreenshotSource(screenshotRequest.getSource()));
-
-            switch (msg.what) {
-                case WindowManager.TAKE_SCREENSHOT_FULLSCREEN:
-                    mScreenshot.takeScreenshotFullscreen(uriConsumer, onComplete);
-                    break;
-                case WindowManager.TAKE_SCREENSHOT_SELECTED_REGION:
-                    mScreenshot.takeScreenshotPartial(uriConsumer, onComplete);
-                    break;
-                case WindowManager.TAKE_SCREENSHOT_PROVIDED_IMAGE:
-                    Bitmap screenshot = BitmapUtil.bundleToHardwareBitmap(
-                            screenshotRequest.getBitmapBundle());
-                    Rect screenBounds = screenshotRequest.getBoundsInScreen();
-                    Insets insets = screenshotRequest.getInsets();
-                    int taskId = screenshotRequest.getTaskId();
-                    int userId = screenshotRequest.getUserId();
-                    ComponentName topComponent = screenshotRequest.getTopComponent();
-                    mScreenshot.handleImageAsScreenshot(screenshot, screenBounds, insets,
-                            taskId, userId, topComponent, uriConsumer, onComplete);
-                    break;
-                default:
-                    Log.d(TAG, "Invalid screenshot option: " + msg.what);
-            }
-        }
-    };
-
     @Inject
-    public TakeScreenshotService(
-            ScreenshotController screenshotController,
-            UserManager userManager,
+    public TakeScreenshotService(ScreenshotController screenshotController, UserManager userManager,
             UiEventLogger uiEventLogger,
             ScreenshotNotificationsController notificationsController) {
+        mHandler = new Handler(Looper.getMainLooper(), this::handleMessage);
         mScreenshot = screenshotController;
         mUserManager = userManager;
         mUiEventLogger = uiEventLogger;
@@ -141,13 +81,9 @@ public class TakeScreenshotService extends Service {
     }
 
     @Override
-    public IBinder onBind(Intent intent) {
-        // register broadcast receiver
-        IntentFilter filter = new IntentFilter(ACTION_CLOSE_SYSTEM_DIALOGS);
-        registerReceiver(mBroadcastReceiver, filter);
-
+    public IBinder onBind(@NonNull Intent intent) {
+        registerReceiver(mCloseSystemDialogs, new IntentFilter(ACTION_CLOSE_SYSTEM_DIALOGS));
         return new Messenger(mHandler).getBinder();
-
     }
 
     @Override
@@ -155,7 +91,73 @@ public class TakeScreenshotService extends Service {
         if (mScreenshot != null) {
             mScreenshot.dismissScreenshot(true);
         }
-        unregisterReceiver(mBroadcastReceiver);
+        unregisterReceiver(mCloseSystemDialogs);
+        return false;
+    }
+
+    /** Respond to incoming Message via Binder (Messenger) */
+    private boolean handleMessage(Message msg) {
+        final Messenger replyTo = msg.replyTo;
+        final Runnable onComplete = () -> sendComplete(replyTo);
+        final Consumer<Uri> uriConsumer = (uri) -> reportUri(replyTo, uri);
+
+        // If the storage for this user is locked, we have no place to store
+        // the screenshot, so skip taking it instead of showing a misleading
+        // animation and error notification.
+        if (!mUserManager.isUserUnlocked()) {
+            Log.w(TAG, "Skipping screenshot because storage is locked!");
+            mNotificationsController.notifyScreenshotError(
+                    R.string.screenshot_failed_to_save_user_locked_text);
+            uriConsumer.accept(null);
+            onComplete.run();
+            return true;
+        }
+
+        ScreenshotHelper.ScreenshotRequest screenshotRequest =
+                (ScreenshotHelper.ScreenshotRequest) msg.obj;
+
+        mUiEventLogger.log(ScreenshotEvent.getScreenshotSource(screenshotRequest.getSource()));
+
+        switch (msg.what) {
+            case WindowManager.TAKE_SCREENSHOT_FULLSCREEN:
+                mScreenshot.takeScreenshotFullscreen(uriConsumer, onComplete);
+                break;
+            case WindowManager.TAKE_SCREENSHOT_SELECTED_REGION:
+                mScreenshot.takeScreenshotPartial(uriConsumer, onComplete);
+                break;
+            case WindowManager.TAKE_SCREENSHOT_PROVIDED_IMAGE:
+                Bitmap screenshot = BitmapUtil.bundleToHardwareBitmap(
+                        screenshotRequest.getBitmapBundle());
+                Rect screenBounds = screenshotRequest.getBoundsInScreen();
+                Insets insets = screenshotRequest.getInsets();
+                int taskId = screenshotRequest.getTaskId();
+                int userId = screenshotRequest.getUserId();
+                ComponentName topComponent = screenshotRequest.getTopComponent();
+                mScreenshot.handleImageAsScreenshot(screenshot, screenBounds, insets,
+                        taskId, userId, topComponent, uriConsumer, onComplete);
+                break;
+            default:
+                Log.w(TAG, "Invalid screenshot option: " + msg.what);
+                return false;
+        }
         return true;
+    };
+
+    private void sendComplete(Messenger target) {
+        try {
+            Log.d(TAG, "sendComplete: " + target);
+            target.send(Message.obtain(null, SCREENSHOT_MSG_PROCESS_COMPLETE));
+        } catch (RemoteException e) {
+            Log.d(TAG, "ignored remote exception", e);
+        }
+    }
+
+    private void reportUri(Messenger target, Uri uri) {
+        try {
+            Log.d(TAG, "reportUri: " + target + " -> " + uri);
+            target.send(Message.obtain(null, SCREENSHOT_MSG_URI, uri));
+        } catch (RemoteException e) {
+            Log.d(TAG, "ignored remote exception", e);
+        }
     }
 }

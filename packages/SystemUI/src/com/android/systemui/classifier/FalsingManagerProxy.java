@@ -24,7 +24,6 @@ import android.view.MotionEvent;
 import androidx.annotation.NonNull;
 
 import com.android.systemui.Dumpable;
-import com.android.systemui.classifier.brightline.BrightLineFalsingManager;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;

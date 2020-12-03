@@ -1491,13 +1491,14 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
     }
 
-    ActivityRecord(ActivityTaskManagerService _service, WindowProcessController _caller,
+    private ActivityRecord(ActivityTaskManagerService _service, WindowProcessController _caller,
             int _launchedFromPid, int _launchedFromUid, String _launchedFromPackage,
             @Nullable String _launchedFromFeature, Intent _intent, String _resolvedType,
             ActivityInfo aInfo, Configuration _configuration, ActivityRecord _resultTo,
             String _resultWho, int _reqCode, boolean _componentSpecified,
             boolean _rootVoiceInteraction, ActivityTaskSupervisor supervisor,
-            ActivityOptions options, ActivityRecord sourceRecord) {
+            ActivityOptions options, ActivityRecord sourceRecord, PersistableBundle persistentState,
+            TaskDescription _taskDescription, long _createTime) {
         super(_service.mWindowManager, new Token(_intent).asBinder(), TYPE_APPLICATION, true,
                 null /* displayContent */, false /* ownerCanManageAppTokens */);
 
@@ -1651,6 +1652,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                     ? (TaskDisplayArea) WindowContainer.fromBinder(daToken.asBinder()) : null;
             mHandoverLaunchDisplayId = options.getLaunchDisplayId();
             mLaunchCookie = options.getLaunchCookie();
+        }
+
+        mPersistentState = persistentState;
+        taskDescription = _taskDescription;
+        if (_createTime > 0) {
+            createTime = _createTime;
         }
     }
 
@@ -2550,15 +2557,15 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return FINISH_RESULT_CANCELLED;
         }
 
-        final Task stack = getRootTask();
-        final boolean mayAdjustTop = (isState(RESUMED) || stack.mResumedActivity == null)
-                && stack.isFocusedStackOnDisplay()
+        final Task rootTask = getRootTask();
+        final boolean mayAdjustTop = (isState(RESUMED) || rootTask.mResumedActivity == null)
+                && rootTask.isFocusedStackOnDisplay()
                 // Do not adjust focus task because the task will be reused to launch new activity.
                 && !task.isClearingToReuseTask();
         final boolean shouldAdjustGlobalFocus = mayAdjustTop
                 // It must be checked before {@link #makeFinishingLocked} is called, because a stack
                 // is not visible if it only contains finishing activities.
-                && mRootWindowContainer.isTopDisplayFocusedStack(stack);
+                && mRootWindowContainer.isTopDisplayFocusedRootTask(rootTask);
 
         mAtmService.deferWindowLayout();
         try {
@@ -2623,12 +2630,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 // Tell window manager to prepare for this one to be removed.
                 setVisibility(false);
 
-                if (stack.mPausingActivity == null) {
+                if (rootTask.mPausingActivity == null) {
                     ProtoLog.v(WM_DEBUG_STATES, "Finish needs to pause: %s", this);
                     if (DEBUG_USER_LEAVING) {
                         Slog.v(TAG_USER_LEAVING, "finish() => pause with userLeaving=false");
                     }
-                    stack.startPausingLocked(false /* userLeaving */, false /* uiSleeping */,
+                    rootTask.startPausingLocked(false /* userLeaving */, false /* uiSleeping */,
                             null /* resuming */, "finish");
                 }
 
@@ -2827,7 +2834,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                     false /* markFrozenIfConfigChanged */, true /* deferResume */);
         }
         if (activityRemoved) {
-            mRootWindowContainer.resumeFocusedStacksTopActivities();
+            mRootWindowContainer.resumeFocusedTasksTopActivities();
         }
 
         ProtoLog.d(WM_DEBUG_CONTAINERS, "destroyIfPossible: r=%s destroy returned "
@@ -2849,7 +2856,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             mTaskSupervisor.mFinishingActivities.add(this);
         }
         resumeKeyDispatchingLocked();
-        return mRootWindowContainer.resumeFocusedStacksTopActivities();
+        return mRootWindowContainer.resumeFocusedTasksTopActivities();
     }
 
     /**
@@ -3014,7 +3021,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             removeFromHistory(reason);
         }
 
-        mRootWindowContainer.resumeFocusedStacksTopActivities();
+        mRootWindowContainer.resumeFocusedTasksTopActivities();
     }
 
     /**
@@ -5206,7 +5213,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             } else {
                 if (deferRelaunchUntilPaused) {
                     destroyImmediately("stop-config");
-                    mRootWindowContainer.resumeFocusedStacksTopActivities();
+                    mRootWindowContainer.resumeFocusedTasksTopActivities();
                 } else {
                     mRootWindowContainer.updatePreviousProcess(this);
                 }
@@ -5703,7 +5710,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // First find the real culprit...  if this activity has stopped, then the key dispatching
         // timeout should not be caused by this.
         if (stopped) {
-            final Task stack = mRootWindowContainer.getTopDisplayFocusedStack();
+            final Task stack = mRootWindowContainer.getTopDisplayFocusedRootTask();
             if (stack == null) {
                 return this;
             }
@@ -6091,7 +6098,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     @Override
     public void onAnimationLeashCreated(Transaction t, SurfaceControl leash) {
         t.setLayer(leash, getAnimationLayer());
-        getDisplayContent().assignStackOrdering();
+        getDisplayContent().assignRootTaskOrdering();
     }
 
     @Override
@@ -7544,18 +7551,18 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             throw new XmlPullParserException("restoreActivity resolver error. Intent=" + intent +
                     " resolvedType=" + resolvedType);
         }
-        final ActivityRecord r = new ActivityRecord(service, null /* caller */,
-                0 /* launchedFromPid */, launchedFromUid, launchedFromPackage, launchedFromFeature,
-                intent, resolvedType, aInfo, service.getConfiguration(), null /* resultTo */,
-                null /* resultWho */, 0 /* reqCode */, componentSpecified,
-                false /* rootVoiceInteraction */, taskSupervisor, null /* options */,
-                null /* sourceRecord */);
-
-        r.mPersistentState = persistentState;
-        r.taskDescription = taskDescription;
-        r.createTime = createTime;
-
-        return r;
+        return new ActivityRecord.Builder(service)
+                .setLaunchedFromUid(launchedFromUid)
+                .setLaunchedFromPackage(launchedFromPackage)
+                .setLaunchedFromFeature(launchedFromFeature)
+                .setIntent(intent)
+                .setResolvedType(resolvedType)
+                .setActivityInfo(aInfo)
+                .setComponentSpecified(componentSpecified)
+                .setPersistentState(persistentState)
+                .setTaskDescription(taskDescription)
+                .setCreateTime(createTime)
+                .build();
     }
 
     private static boolean isInVrUiMode(Configuration config) {
@@ -7982,5 +7989,139 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             }
         }
         return false;
+    }
+
+    static class Builder {
+        private final ActivityTaskManagerService mAtmService;
+        private WindowProcessController mCallerApp;
+        private int mLaunchedFromPid;
+        private int mLaunchedFromUid;
+        private String mLaunchedFromPackage;
+        private String mLaunchedFromFeature;
+        private Intent mIntent;
+        private String mResolvedType;
+        private ActivityInfo mActivityInfo;
+        private Configuration mConfiguration;
+        private ActivityRecord mResultTo;
+        private String mResultWho;
+        private int mRequestCode;
+        private boolean mComponentSpecified;
+        private boolean mRootVoiceInteraction;
+        private ActivityOptions mOptions;
+        private ActivityRecord mSourceRecord;
+        private PersistableBundle mPersistentState;
+        private TaskDescription mTaskDescription;
+        private long mCreateTime;
+
+        Builder(ActivityTaskManagerService service) {
+            mAtmService = service;
+        }
+
+        Builder setCaller(@NonNull WindowProcessController caller) {
+            mCallerApp = caller;
+            return this;
+        }
+
+        Builder setLaunchedFromPid(int pid) {
+            mLaunchedFromPid = pid;
+            return this;
+        }
+
+        Builder setLaunchedFromUid(int uid) {
+            mLaunchedFromUid = uid;
+            return this;
+        }
+
+        Builder setLaunchedFromPackage(String fromPackage) {
+            mLaunchedFromPackage = fromPackage;
+            return this;
+        }
+
+        Builder setLaunchedFromFeature(String fromFeature) {
+            mLaunchedFromFeature = fromFeature;
+            return this;
+        }
+
+        Builder setIntent(Intent intent) {
+            mIntent = intent;
+            return this;
+        }
+
+        Builder setResolvedType(String resolvedType) {
+            mResolvedType = resolvedType;
+            return this;
+        }
+
+        Builder setActivityInfo(ActivityInfo activityInfo) {
+            mActivityInfo = activityInfo;
+            return this;
+        }
+
+        Builder setResultTo(ActivityRecord resultTo) {
+            mResultTo = resultTo;
+            return this;
+        }
+
+        Builder setResultWho(String resultWho) {
+            mResultWho = resultWho;
+            return this;
+        }
+
+        Builder setRequestCode(int reqCode) {
+            mRequestCode = reqCode;
+            return this;
+        }
+
+        Builder setComponentSpecified(boolean componentSpecified) {
+            mComponentSpecified = componentSpecified;
+            return this;
+        }
+
+        Builder setRootVoiceInteraction(boolean rootVoiceInteraction) {
+            mRootVoiceInteraction = rootVoiceInteraction;
+            return this;
+        }
+
+        Builder setActivityOptions(ActivityOptions options) {
+            mOptions = options;
+            return this;
+        }
+
+        Builder setConfiguration(Configuration config) {
+            mConfiguration = config;
+            return this;
+        }
+
+        Builder setSourceRecord(ActivityRecord source) {
+            mSourceRecord = source;
+            return this;
+        }
+
+        private Builder setPersistentState(PersistableBundle persistentState) {
+            mPersistentState = persistentState;
+            return this;
+        }
+
+        private Builder setTaskDescription(TaskDescription taskDescription) {
+            mTaskDescription = taskDescription;
+            return this;
+        }
+
+        private Builder setCreateTime(long createTime) {
+            mCreateTime = createTime;
+            return this;
+        }
+
+        ActivityRecord build() {
+            if (mConfiguration == null) {
+                mConfiguration = mAtmService.getConfiguration();
+            }
+            return new ActivityRecord(mAtmService, mCallerApp, mLaunchedFromPid,
+                    mLaunchedFromUid, mLaunchedFromPackage, mLaunchedFromFeature, mIntent,
+                    mResolvedType, mActivityInfo, mConfiguration, mResultTo, mResultWho,
+                    mRequestCode, mComponentSpecified, mRootVoiceInteraction,
+                    mAtmService.mTaskSupervisor, mOptions, mSourceRecord, mPersistentState,
+                    mTaskDescription, mCreateTime);
+        }
     }
 }

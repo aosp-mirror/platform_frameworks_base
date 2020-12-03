@@ -44,8 +44,8 @@ import static android.provider.Settings.Global.DEVELOPMENT_ENABLE_FREEFORM_WINDO
 import static android.provider.Settings.Global.DEVELOPMENT_ENABLE_SIZECOMPAT_FREEFORM;
 import static android.provider.Settings.Global.DEVELOPMENT_FORCE_DESKTOP_MODE_ON_EXTERNAL_DISPLAYS;
 import static android.provider.Settings.Global.DEVELOPMENT_FORCE_RESIZABLE_ACTIVITIES;
-import static android.provider.Settings.Global.DEVELOPMENT_IGNORE_VENDOR_DISPLAY_SETTINGS;
 import static android.provider.Settings.Global.DEVELOPMENT_RENDER_SHADOWS_IN_COMPOSITOR;
+import static android.provider.Settings.Global.DEVELOPMENT_WM_DISPLAY_SETTINGS_PATH;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.view.WindowManager.DISPLAY_IME_POLICY_FALLBACK_DISPLAY;
@@ -796,8 +796,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 DEVELOPMENT_ENABLE_SIZECOMPAT_FREEFORM);
         private final Uri mRenderShadowsInCompositorUri = Settings.Global.getUriFor(
                 DEVELOPMENT_RENDER_SHADOWS_IN_COMPOSITOR);
-        private final Uri mIgnoreVendorDisplaySettingsUri = Settings.Global.getUriFor(
-                DEVELOPMENT_IGNORE_VENDOR_DISPLAY_SETTINGS);
+        private final Uri mDisplaySettingsPathUri = Settings.Global.getUriFor(
+                DEVELOPMENT_WM_DISPLAY_SETTINGS_PATH);
 
         public SettingsObserver() {
             super(new Handler());
@@ -822,7 +822,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     UserHandle.USER_ALL);
             resolver.registerContentObserver(mRenderShadowsInCompositorUri, false, this,
                     UserHandle.USER_ALL);
-            resolver.registerContentObserver(mIgnoreVendorDisplaySettingsUri, false, this,
+            resolver.registerContentObserver(mDisplaySettingsPathUri, false, this,
                     UserHandle.USER_ALL);
         }
 
@@ -867,8 +867,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 return;
             }
 
-            if (mIgnoreVendorDisplaySettingsUri.equals(uri)) {
-                updateIgnoreVendorDisplaySettings();
+            if (mDisplaySettingsPathUri.equals(uri)) {
+                updateDisplaySettingsLocation();
                 return;
             }
 
@@ -962,12 +962,12 @@ public class WindowManagerService extends IWindowManager.Stub
             mAtmService.mSizeCompatFreeform = sizeCompatFreeform;
         }
 
-        void updateIgnoreVendorDisplaySettings() {
+        void updateDisplaySettingsLocation() {
             final ContentResolver resolver = mContext.getContentResolver();
-            final boolean ignoreVendorSettings = Settings.Global.getInt(resolver,
-                    DEVELOPMENT_IGNORE_VENDOR_DISPLAY_SETTINGS, 0) != 0;
+            final String filePath = Settings.Global.getString(resolver,
+                    DEVELOPMENT_WM_DISPLAY_SETTINGS_PATH);
             synchronized (mGlobalLock) {
-                mDisplayWindowSettingsProvider.setVendorSettingsIgnored(ignoreVendorSettings);
+                mDisplayWindowSettingsProvider.setBaseSettingsFilePath(filePath);
                 mRoot.forAllDisplays(display -> {
                     mDisplayWindowSettings.applySettingsToDisplayLocked(display);
                     display.reconfigureDisplayLocked();
@@ -1330,10 +1330,12 @@ public class WindowManagerService extends IWindowManager.Stub
         mForceDesktopModeOnExternalDisplays = Settings.Global.getInt(resolver,
                 DEVELOPMENT_FORCE_DESKTOP_MODE_ON_EXTERNAL_DISPLAYS, 0) != 0;
 
-        final boolean ignoreVendorDisplaySettings = Settings.Global.getInt(resolver,
-                DEVELOPMENT_IGNORE_VENDOR_DISPLAY_SETTINGS, 0) != 0;
+        final String displaySettingsPath = Settings.Global.getString(resolver,
+                DEVELOPMENT_WM_DISPLAY_SETTINGS_PATH);
         mDisplayWindowSettingsProvider = new DisplayWindowSettingsProvider();
-        mDisplayWindowSettingsProvider.setVendorSettingsIgnored(ignoreVendorDisplaySettings);
+        if (displaySettingsPath != null) {
+            mDisplayWindowSettingsProvider.setBaseSettingsFilePath(displaySettingsPath);
+        }
         mDisplayWindowSettings = new DisplayWindowSettings(this, mDisplayWindowSettingsProvider);
 
         IntentFilter filter = new IntentFilter();
@@ -2922,7 +2924,7 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     void getStackBounds(int windowingMode, int activityType, Rect bounds) {
-        final Task stack = mRoot.getStack(windowingMode, activityType);
+        final Task stack = mRoot.getRootTask(windowingMode, activityType);
         if (stack != null) {
             stack.getBounds(bounds);
             return;

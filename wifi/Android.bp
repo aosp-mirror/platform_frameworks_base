@@ -147,7 +147,7 @@ java_sdk_library {
 // defaults for tests that need to build against framework-wifi's @hide APIs
 java_defaults {
     name: "framework-wifi-test-defaults",
-    sdk_version: "core_platform", // tests can use @CorePlatformApi's
+    sdk_version: "core_current",
     libs: [
         // order matters: classes in framework-wifi are resolved before framework, meaning
         // @hide APIs in framework-wifi are resolved before @SystemApi stubs in framework

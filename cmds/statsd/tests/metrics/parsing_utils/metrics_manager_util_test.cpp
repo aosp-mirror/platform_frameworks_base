@@ -875,8 +875,9 @@ TEST(MetricsManagerTest, TestCreateAnomalyTrackerDurationTooLong) {
     FieldMatcher dimensions;
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
     vector<sp<MetricProducer>> metricProducers({new DurationMetricProducer(
-            kConfigKey, metric, -1 /*no condition*/, {}, 1 /* start index */, 2 /* stop index */,
-            3 /* stop_all index */, false /*nesting*/, wizard, 0x0123456789, dimensions, 0, 0)});
+            kConfigKey, metric, -1 /*no condition*/, {}, -1 /* what index not needed*/,
+            1 /* start index */, 2 /* stop index */, 3 /* stop_all index */, false /*nesting*/,
+            wizard, 0x0123456789, dimensions, 0, 0)});
     sp<AlarmMonitor> anomalyAlarmMonitor;
     EXPECT_EQ(createAnomalyTracker(alert, anomalyAlarmMonitor, {{1, 0}}, metricProducers), nullopt);
 }

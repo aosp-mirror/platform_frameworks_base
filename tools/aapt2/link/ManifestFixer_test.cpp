@@ -445,6 +445,66 @@ TEST_F(ManifestFixerTest, ReplaceVersionNameAndCode) {
   EXPECT_THAT(attr->value, StrEq("0x20000000"));
 }
 
+TEST_F(ManifestFixerTest, UseDefaultRevisionCode) {
+  ManifestFixerOptions options;
+  options.revision_code_default = std::string("0x10000000");
+
+  std::unique_ptr<xml::XmlResource> doc = VerifyWithOptions(R"EOF(
+      <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+                package="android"
+                android:versionCode="0x00000001" />)EOF",
+                                                            options);
+  ASSERT_THAT(doc, NotNull());
+
+  xml::Element* manifest_el = doc->root.get();
+  ASSERT_THAT(manifest_el, NotNull());
+
+  xml::Attribute* attr = manifest_el->FindAttribute(xml::kSchemaAndroid, "revisionCode");
+  ASSERT_THAT(attr, NotNull());
+  EXPECT_THAT(attr->value, StrEq("0x10000000"));
+}
+
+TEST_F(ManifestFixerTest, DontUseDefaultRevisionCode) {
+  ManifestFixerOptions options;
+  options.revision_code_default = std::string("0x10000000");
+
+  std::unique_ptr<xml::XmlResource> doc = VerifyWithOptions(R"EOF(
+        <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+                  package="android"
+                  android:versionCode="0x00000001"
+                  android:revisionCode="0x00000002" />)EOF",
+                                                            options);
+  ASSERT_THAT(doc, NotNull());
+
+  xml::Element* manifest_el = doc->root.get();
+  ASSERT_THAT(manifest_el, NotNull());
+
+  xml::Attribute* attr = manifest_el->FindAttribute(xml::kSchemaAndroid, "revisionCode");
+  ASSERT_THAT(attr, NotNull());
+  EXPECT_THAT(attr->value, StrEq("0x00000002"));
+}
+
+TEST_F(ManifestFixerTest, ReplaceRevisionCode) {
+  ManifestFixerOptions options;
+  options.replace_version = true;
+  options.revision_code_default = std::string("0x10000000");
+
+  std::unique_ptr<xml::XmlResource> doc = VerifyWithOptions(R"EOF(
+        <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+                  package="android"
+                  android:versionCode="0x00000001"
+                  android:revisionCode="0x00000002" />)EOF",
+                                                            options);
+  ASSERT_THAT(doc, NotNull());
+
+  xml::Element* manifest_el = doc->root.get();
+  ASSERT_THAT(manifest_el, NotNull());
+
+  xml::Attribute* attr = manifest_el->FindAttribute(xml::kSchemaAndroid, "revisionCode");
+  ASSERT_THAT(attr, NotNull());
+  EXPECT_THAT(attr->value, StrEq("0x10000000"));
+}
+
 TEST_F(ManifestFixerTest, ReplaceVersionName) {
   ManifestFixerOptions options;
   options.replace_version = true;

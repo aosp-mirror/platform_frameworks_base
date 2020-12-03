@@ -9225,7 +9225,8 @@ public final class ViewRootImpl implements ViewParent,
             final ViewRootImpl viewAncestor = mViewAncestor.get();
             if (fromIme) {
                 ImeTracing.getInstance().triggerClientDump("ViewRootImpl.W#showInsets",
-                        viewAncestor.getInsetsController().getHost().getInputMethodManager());
+                        viewAncestor.getInsetsController().getHost().getInputMethodManager(),
+                        null /* icProto */);
             }
             if (viewAncestor != null) {
                 viewAncestor.showInsets(types, fromIme);
@@ -9238,7 +9239,8 @@ public final class ViewRootImpl implements ViewParent,
             final ViewRootImpl viewAncestor = mViewAncestor.get();
             if (fromIme) {
                 ImeTracing.getInstance().triggerClientDump("ViewRootImpl.W#hideInsets",
-                        viewAncestor.getInsetsController().getHost().getInputMethodManager());
+                        viewAncestor.getInsetsController().getHost().getInputMethodManager(),
+                        null /* icProto */);
             }
             if (viewAncestor != null) {
                 viewAncestor.hideInsets(types, fromIme);

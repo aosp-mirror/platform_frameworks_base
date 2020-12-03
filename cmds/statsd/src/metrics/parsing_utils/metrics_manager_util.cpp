@@ -450,7 +450,8 @@ optional<sp<MetricProducer>> createDurationMetricProducerAndUpdateMetadata(
         return nullopt;
     }
 
-    const Predicate& durationWhat = config.predicate(what_it->second);
+    const int whatIndex = what_it->second;
+    const Predicate& durationWhat = config.predicate(whatIndex);
     if (durationWhat.contents_case() != Predicate::ContentsCase::kSimplePredicate) {
         ALOGE("DurationMetric's \"what\" must be a simple condition");
         return nullopt;
@@ -536,10 +537,11 @@ optional<sp<MetricProducer>> createDurationMetricProducerAndUpdateMetadata(
         return nullopt;
     }
 
-    return {new DurationMetricProducer(
-            key, metric, conditionIndex, initialConditionCache, startIndex, stopIndex, stopAllIndex,
-            nesting, wizard, metricHash, internalDimensions, timeBaseNs, currentTimeNs,
-            eventActivationMap, eventDeactivationMap, slicedStateAtoms, stateGroupMap)};
+    return {new DurationMetricProducer(key, metric, conditionIndex, initialConditionCache,
+                                       whatIndex, startIndex, stopIndex, stopAllIndex, nesting,
+                                       wizard, metricHash, internalDimensions, timeBaseNs,
+                                       currentTimeNs, eventActivationMap, eventDeactivationMap,
+                                       slicedStateAtoms, stateGroupMap)};
 }
 
 optional<sp<MetricProducer>> createEventMetricProducerAndUpdateMetadata(

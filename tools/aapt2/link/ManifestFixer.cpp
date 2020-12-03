@@ -367,6 +367,16 @@ bool ManifestFixer::BuildRules(xml::XmlActionExecutor* executor,
       }
     }
 
+    if (options_.revision_code_default) {
+      if (options_.replace_version) {
+        el->RemoveAttribute(xml::kSchemaAndroid, "revisionCode");
+      }
+      if (el->FindAttribute(xml::kSchemaAndroid, "revisionCode") == nullptr) {
+        el->attributes.push_back(xml::Attribute{xml::kSchemaAndroid, "revisionCode",
+                                                options_.revision_code_default.value()});
+      }
+    }
+
     return true;
   });
 

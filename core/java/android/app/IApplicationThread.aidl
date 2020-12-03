@@ -43,6 +43,7 @@ import android.os.IInterface;
 import android.os.ParcelFileDescriptor;
 import android.os.PersistableBundle;
 import android.os.RemoteCallback;
+import android.os.SharedMemory;
 
 import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.content.ReferrerIntent;
@@ -75,7 +76,8 @@ oneway interface IApplicationThread {
             boolean restrictedBackupMode, boolean persistent, in Configuration config,
             in CompatibilityInfo compatInfo, in Map services,
             in Bundle coreSettings, in String buildSerial, in AutofillOptions autofillOptions,
-            in ContentCaptureOptions contentCaptureOptions, in long[] disabledCompatChanges);
+            in ContentCaptureOptions contentCaptureOptions, in long[] disabledCompatChanges,
+            in SharedMemory serializedSystemFontMap);
     void runIsolatedEntryPoint(in String entryPoint, in String[] entryPointArgs);
     void scheduleExit();
     void scheduleServiceArgs(IBinder token, in ParceledListSlice args);

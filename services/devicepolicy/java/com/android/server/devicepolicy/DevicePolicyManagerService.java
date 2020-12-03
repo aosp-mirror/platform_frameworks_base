@@ -267,7 +267,6 @@ import android.view.inputmethod.InputMethodInfo;
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.compat.IPlatformCompat;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.notification.SystemNotificationChannels;
@@ -555,7 +554,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     private final LockSettingsInternal mLockSettingsInternal;
     private final DeviceAdminServiceController mDeviceAdminServiceController;
     private final OverlayPackagesProvider mOverlayPackagesProvider;
-    private final IPlatformCompat mIPlatformCompat;
 
     private final DevicePolicyCacheImpl mPolicyCache = new DevicePolicyCacheImpl();
     private final DeviceStateCacheImpl mStateCache = new DeviceStateCacheImpl();
@@ -1163,11 +1161,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return LocalServices.getService(LockSettingsInternal.class);
         }
 
-        IPlatformCompat getIPlatformCompat() {
-            return IPlatformCompat.Stub.asInterface(
-                    ServiceManager.getService(Context.PLATFORM_COMPAT_SERVICE));
-        }
-
         boolean hasUserSetupCompleted(DevicePolicyData userData) {
             return userData.mUserSetupComplete;
         }
@@ -1438,7 +1431,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         mUsageStatsManagerInternal = Objects.requireNonNull(
                 injector.getUsageStatsManagerInternal());
         mIPackageManager = Objects.requireNonNull(injector.getIPackageManager());
-        mIPlatformCompat = Objects.requireNonNull(injector.getIPlatformCompat());
         mIPermissionManager = Objects.requireNonNull(injector.getIPermissionManager());
         mTelephonyManager = Objects.requireNonNull(injector.getTelephonyManager());
 
@@ -3382,13 +3374,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     private boolean passwordQualityInvocationOrderCheckEnabled(String packageName, int userId) {
-        try {
-            return mIPlatformCompat.isChangeEnabledByPackageName(ADMIN_APP_PASSWORD_COMPLEXITY,
-                    packageName, userId);
-        } catch (RemoteException e) {
-            Log.e(LOG_TAG, "Failed to get a response from PLATFORM_COMPAT_SERVICE", e);
-        }
-        return getTargetSdk(packageName, userId) > Build.VERSION_CODES.Q;
+        return mInjector.isChangeEnabled(ADMIN_APP_PASSWORD_COMPLEXITY, packageName, userId);
     }
 
     /**
@@ -4302,11 +4288,17 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     updatePasswordQualityCacheForUserGroup(caller.getUserId());
                     saveSettingsLocked(caller.getUserId());
                 });
+
+                DevicePolicyEventLogger
+                        .createEvent(DevicePolicyEnums.SET_PASSWORD_COMPLEXITY)
+                        .setAdmin(admin.info.getPackageName())
+                        .setInt(passwordComplexity)
+                        .setBoolean(calledOnParent)
+                        .write();
             }
             logPasswordComplexityRequiredIfSecurityLogEnabled(admin.info.getComponent(),
                     caller.getUserId(), calledOnParent, passwordComplexity);
         }
-        //TODO: Log metrics.
     }
 
     private void logPasswordComplexityRequiredIfSecurityLogEnabled(ComponentName who, int userId,
@@ -7488,6 +7480,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     admin.getPackageName(), userId, "set-device-owner");
 
             Slog.i(LOG_TAG, "Device owner set: " + admin + " on user " + userId);
+
+            if (mInjector.userManagerIsHeadlessSystemUserMode()) {
+                Slog.i(LOG_TAG, "manageUser: " + admin + " on user " + userId);
+
+                manageUser(admin, admin, caller.getUserId(), null);
+            }
             return true;
         }
     }
@@ -9541,29 +9539,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         final long id = mInjector.binderClearCallingIdentity();
         try {
-            final String adminPkg = admin.getPackageName();
-            try {
-                // Install the profile owner if not present.
-                if (!mIPackageManager.isPackageAvailable(adminPkg, userHandle)) {
-                    mIPackageManager.installExistingPackageAsUser(adminPkg, userHandle,
-                            PackageManager.INSTALL_ALL_WHITELIST_RESTRICTED_PERMISSIONS,
-                            PackageManager.INSTALL_REASON_POLICY, null);
-                }
-            } catch (RemoteException e) {
-                // Does not happen, same process
-            }
-
-            // Set admin.
-            setActiveAdmin(profileOwner, true, userHandle);
-            final String ownerName = getProfileOwnerName(Process.myUserHandle().getIdentifier());
-            setProfileOwner(profileOwner, ownerName, userHandle);
-
-            synchronized (getLockObject()) {
-                DevicePolicyData policyData = getUserData(userHandle);
-                policyData.mInitBundle = adminExtras;
-                policyData.mAdminBroadcastPending = true;
-                saveSettingsLocked(userHandle);
-            }
+            manageUser(admin, profileOwner, userHandle, adminExtras);
 
             if ((flags & DevicePolicyManager.SKIP_SETUP_WIZARD) != 0) {
                 Settings.Secure.putIntForUser(mContext.getContentResolver(),
@@ -9581,6 +9557,46 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             }
         } finally {
             mInjector.binderRestoreCallingIdentity(id);
+        }
+    }
+
+    private void manageUser(ComponentName admin, ComponentName profileOwner,
+            @UserIdInt int userId, PersistableBundle adminExtras) {
+        // Check for permission
+        final CallerIdentity caller = getCallerIdentity();
+        Preconditions.checkCallAuthorization(canManageUsers(caller));
+        Preconditions.checkCallAuthorization(
+                hasCallingOrSelfPermission(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS));
+        mInjector.binderWithCleanCallingIdentity(() ->
+                    manageUserNoCheck(admin, profileOwner, userId, adminExtras));
+    }
+
+    private void manageUserNoCheck(ComponentName admin, ComponentName profileOwner,
+            int user, PersistableBundle adminExtras) {
+
+        final String adminPkg = admin.getPackageName();
+        try {
+            // Install the profile owner if not present.
+            if (!mIPackageManager.isPackageAvailable(adminPkg, user)) {
+                mIPackageManager.installExistingPackageAsUser(adminPkg, user,
+                        PackageManager.INSTALL_ALL_WHITELIST_RESTRICTED_PERMISSIONS,
+                        PackageManager.INSTALL_REASON_POLICY, null);
+            }
+        } catch (RemoteException e) {
+            // Does not happen, same process
+        }
+
+        // Set admin.
+        setActiveAdmin(profileOwner, true, user);
+        final String ownerName = getProfileOwnerName(Process.myUserHandle().getIdentifier());
+        setProfileOwner(profileOwner, ownerName, user);
+
+        synchronized (getLockObject()) {
+            DevicePolicyData policyData = getUserData(user);
+            policyData.mInitBundle = adminExtras;
+            policyData.mAdminBroadcastPending = true;
+
+            saveSettingsLocked(user);
         }
     }
 
@@ -11024,16 +11040,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     private boolean isSetSecureSettingLocationModeCheckEnabled(String packageName, int userId) {
-        long ident = mInjector.binderClearCallingIdentity();
-        try {
-            return mIPlatformCompat.isChangeEnabledByPackageName(USE_SET_LOCATION_ENABLED,
-                    packageName, userId);
-        } catch (RemoteException e) {
-            Log.e(LOG_TAG, "Failed to get a response from PLATFORM_COMPAT_SERVICE", e);
-            return getTargetSdk(packageName, userId) > Build.VERSION_CODES.Q;
-        } finally {
-            mInjector.binderRestoreCallingIdentity(ident);
-        }
+        return mInjector.isChangeEnabled(USE_SET_LOCATION_ENABLED, packageName, userId);
     }
 
     @Override
@@ -12261,8 +12268,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 if (hasUserSetupCompleted(UserHandle.USER_SYSTEM)) {
                     return CODE_USER_SETUP_COMPLETED;
                 }
-            }  else {
-                // STOPSHIP Do proper check in split user mode
             }
             return CODE_OK;
         }

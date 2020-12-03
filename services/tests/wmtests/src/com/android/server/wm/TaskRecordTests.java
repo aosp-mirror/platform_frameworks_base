@@ -177,7 +177,7 @@ public class TaskRecordTests extends WindowTestsBase {
     public void testFitWithinBounds() {
         final Rect parentBounds = new Rect(10, 10, 200, 200);
         TaskDisplayArea taskDisplayArea = mAtm.mRootWindowContainer.getDefaultTaskDisplayArea();
-        Task stack = taskDisplayArea.createStack(WINDOWING_MODE_FREEFORM,
+        Task stack = taskDisplayArea.createRootTask(WINDOWING_MODE_FREEFORM,
                 ACTIVITY_TYPE_STANDARD, true /* onTop */);
         Task task = new TaskBuilder(mSupervisor).setParentTask(stack).build();
         final Configuration parentConfig = stack.getConfiguration();
@@ -497,7 +497,7 @@ public class TaskRecordTests extends WindowTestsBase {
     @Test
     public void testInsetDisregardedWhenFreeformOverlapsNavBar() {
         TaskDisplayArea taskDisplayArea = mAtm.mRootWindowContainer.getDefaultTaskDisplayArea();
-        Task stack = taskDisplayArea.createStack(WINDOWING_MODE_FULLSCREEN,
+        Task stack = taskDisplayArea.createRootTask(WINDOWING_MODE_FULLSCREEN,
                 ACTIVITY_TYPE_STANDARD, true /* onTop */);
         DisplayInfo displayInfo = new DisplayInfo();
         mAtm.mContext.getDisplay().getDisplayInfo(displayInfo);
@@ -1027,9 +1027,9 @@ public class TaskRecordTests extends WindowTestsBase {
         final TaskDisplayArea secondTaskDisplayArea = createTaskDisplayArea(
                 mDisplayContent, mRootWindowContainer.mWmService, "TestTaskDisplayArea",
                 FEATURE_VENDOR_FIRST);
-        final Task firstStack = firstTaskDisplayArea.createStack(
+        final Task firstStack = firstTaskDisplayArea.createRootTask(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, false /* onTop */);
-        final Task secondStack = secondTaskDisplayArea.createStack(
+        final Task secondStack = secondTaskDisplayArea.createRootTask(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, false /* onTop */);
         final ActivityRecord firstActivity = new ActivityBuilder(mAtm)
                 .setTask(firstStack).build();
@@ -1083,7 +1083,7 @@ public class TaskRecordTests extends WindowTestsBase {
             Rect expectedConfigBounds) {
 
         TaskDisplayArea taskDisplayArea = mAtm.mRootWindowContainer.getDefaultTaskDisplayArea();
-        Task stack = taskDisplayArea.createStack(windowingMode, ACTIVITY_TYPE_STANDARD,
+        Task stack = taskDisplayArea.createRootTask(windowingMode, ACTIVITY_TYPE_STANDARD,
                 true /* onTop */);
         Task task = new TaskBuilder(mSupervisor).setParentTask(stack).build();
 

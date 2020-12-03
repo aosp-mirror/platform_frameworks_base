@@ -26,7 +26,7 @@
         android:orientation="vertical"
         android:paddingStart="@*android:dimen/notification_content_margin_start"
         android:paddingEnd="@*android:dimen/notification_content_margin_end"
-        android:background="@color/notification_material_background_color"
+        android:background="?android:attr/colorBackground"
         android:theme="@*android:style/Theme.DeviceDefault.Light">
 
     <!-- Package Info -->

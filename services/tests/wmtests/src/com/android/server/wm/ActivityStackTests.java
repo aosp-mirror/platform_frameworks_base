@@ -48,7 +48,7 @@ import static com.android.server.wm.Task.REPARENT_MOVE_ROOT_TASK_TO_FRONT;
 import static com.android.server.wm.Task.TASK_VISIBILITY_INVISIBLE;
 import static com.android.server.wm.Task.TASK_VISIBILITY_VISIBLE;
 import static com.android.server.wm.Task.TASK_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT;
-import static com.android.server.wm.TaskDisplayArea.getStackAbove;
+import static com.android.server.wm.TaskDisplayArea.getRootTaskAbove;
 import static com.android.server.wm.WindowContainer.POSITION_BOTTOM;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
 
@@ -73,6 +73,8 @@ import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.SmallTest;
+
+import com.android.server.wm.TaskDisplayArea.OnRootTaskOrderChangedListener;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -154,7 +156,7 @@ public class ActivityStackTests extends WindowTestsBase {
         organizer.setMoveToSecondaryOnEnter(false);
 
         // Create primary splitscreen stack.
-        final Task primarySplitScreen = mDefaultTaskDisplayArea.createStack(
+        final Task primarySplitScreen = mDefaultTaskDisplayArea.createRootTask(
                 WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, ACTIVITY_TYPE_STANDARD, true /* onTop */);
 
         // Assert windowing mode.
@@ -179,7 +181,7 @@ public class ActivityStackTests extends WindowTestsBase {
     public void testMoveToPrimarySplitScreenThenMoveToBack() {
         TestSplitOrganizer organizer = new TestSplitOrganizer(mAtm);
         // This time, start with a fullscreen activitystack
-        final Task primarySplitScreen = mDefaultTaskDisplayArea.createStack(
+        final Task primarySplitScreen = mDefaultTaskDisplayArea.createRootTask(
                 WINDOWING_MODE_UNDEFINED, ACTIVITY_TYPE_STANDARD, true /* onTop */);
 
         primarySplitScreen.reparent(organizer.mPrimary, POSITION_TOP,
@@ -205,11 +207,11 @@ public class ActivityStackTests extends WindowTestsBase {
         TestSplitOrganizer organizer = new TestSplitOrganizer(mAtm);
         // Set up split-screen with primary on top and secondary containing the home task below
         // another stack.
-        final Task primaryTask = mDefaultTaskDisplayArea.createStack(
+        final Task primaryTask = mDefaultTaskDisplayArea.createRootTask(
                 WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, ACTIVITY_TYPE_STANDARD, true /* onTop */);
-        final Task homeRoot = mDefaultTaskDisplayArea.getStack(
+        final Task homeRoot = mDefaultTaskDisplayArea.getRootTask(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_HOME);
-        final Task secondaryTask = mDefaultTaskDisplayArea.createStack(
+        final Task secondaryTask = mDefaultTaskDisplayArea.createRootTask(
                 WINDOWING_MODE_SPLIT_SCREEN_SECONDARY, ACTIVITY_TYPE_STANDARD, true /* onTop */);
         mDefaultTaskDisplayArea.positionChildAt(POSITION_TOP, organizer.mPrimary,
                 false /* includingParents */);
@@ -257,7 +259,7 @@ public class ActivityStackTests extends WindowTestsBase {
 
     @Test
     public void testStackInheritsDisplayWindowingMode() {
-        final Task primarySplitScreen = mDefaultTaskDisplayArea.createStack(
+        final Task primarySplitScreen = mDefaultTaskDisplayArea.createRootTask(
                 WINDOWING_MODE_UNDEFINED, ACTIVITY_TYPE_STANDARD, true /* onTop */);
 
         assertEquals(WINDOWING_MODE_FULLSCREEN, primarySplitScreen.getWindowingMode());
@@ -272,7 +274,7 @@ public class ActivityStackTests extends WindowTestsBase {
 
     @Test
     public void testStackOverridesDisplayWindowingMode() {
-        final Task primarySplitScreen = mDefaultTaskDisplayArea.createStack(
+        final Task primarySplitScreen = mDefaultTaskDisplayArea.createRootTask(
                 WINDOWING_MODE_UNDEFINED, ACTIVITY_TYPE_STANDARD, true /* onTop */);
 
         assertEquals(WINDOWING_MODE_FULLSCREEN, primarySplitScreen.getWindowingMode());
@@ -365,7 +367,7 @@ public class ActivityStackTests extends WindowTestsBase {
         verify(stack2).positionChildAtBottom(any(), eq(false) /* includingParents */);
 
         // Also move display to back because there is only one stack left.
-        taskDisplayArea.removeStack(stack1);
+        taskDisplayArea.removeRootTask(stack1);
         stack2.moveToBack("testMoveStackToBackIncludingParent", stack2.getTopMostTask());
         verify(stack2).positionChildAtBottom(any(), eq(true) /* includingParents */);
     }
@@ -747,8 +749,8 @@ public class ActivityStackTests extends WindowTestsBase {
 
         // Ensure that we don't move the home stack if it is already behind the top fullscreen stack
         int homeStackIndex = mDefaultTaskDisplayArea.getIndexOf(homeStack);
-        assertEquals(fullscreenStack, getStackAbove(homeStack));
-        mDefaultTaskDisplayArea.moveStackBehindBottomMostVisibleStack(homeStack);
+        assertEquals(fullscreenStack, getRootTaskAbove(homeStack));
+        mDefaultTaskDisplayArea.moveRootTaskBehindBottomMostVisibleRootTask(homeStack);
         assertEquals(homeStackIndex, mDefaultTaskDisplayArea.getIndexOf(homeStack));
     }
 
@@ -765,8 +767,8 @@ public class ActivityStackTests extends WindowTestsBase {
 
         // Ensure that we don't move the home stack if it is already behind the top fullscreen stack
         int homeStackIndex = mDefaultTaskDisplayArea.getIndexOf(homeStack);
-        assertEquals(fullscreenStack, getStackAbove(homeStack));
-        mDefaultTaskDisplayArea.moveStackBehindBottomMostVisibleStack(homeStack);
+        assertEquals(fullscreenStack, getRootTaskAbove(homeStack));
+        mDefaultTaskDisplayArea.moveRootTaskBehindBottomMostVisibleRootTask(homeStack);
         assertEquals(homeStackIndex, mDefaultTaskDisplayArea.getIndexOf(homeStack));
     }
 
@@ -783,8 +785,8 @@ public class ActivityStackTests extends WindowTestsBase {
 
         // Ensure we don't move the home stack if it is already on top
         int homeStackIndex = mDefaultTaskDisplayArea.getIndexOf(homeStack);
-        assertNull(getStackAbove(homeStack));
-        mDefaultTaskDisplayArea.moveStackBehindBottomMostVisibleStack(homeStack);
+        assertNull(getRootTaskAbove(homeStack));
+        mDefaultTaskDisplayArea.moveRootTaskBehindBottomMostVisibleRootTask(homeStack);
         assertEquals(homeStackIndex, mDefaultTaskDisplayArea.getIndexOf(homeStack));
     }
 
@@ -807,9 +809,9 @@ public class ActivityStackTests extends WindowTestsBase {
 
         // Ensure that we move the home stack behind the bottom most fullscreen stack, ignoring the
         // pinned stack
-        assertEquals(fullscreenStack1, getStackAbove(homeStack));
-        mDefaultTaskDisplayArea.moveStackBehindBottomMostVisibleStack(homeStack);
-        assertEquals(fullscreenStack2, getStackAbove(homeStack));
+        assertEquals(fullscreenStack1, getRootTaskAbove(homeStack));
+        mDefaultTaskDisplayArea.moveRootTaskBehindBottomMostVisibleRootTask(homeStack);
+        assertEquals(fullscreenStack2, getRootTaskAbove(homeStack));
     }
 
     @Test
@@ -830,9 +832,9 @@ public class ActivityStackTests extends WindowTestsBase {
 
         // Ensure that we move the home stack behind the bottom most non-translucent fullscreen
         // stack
-        assertEquals(fullscreenStack1, getStackAbove(homeStack));
-        mDefaultTaskDisplayArea.moveStackBehindBottomMostVisibleStack(homeStack);
-        assertEquals(fullscreenStack1, getStackAbove(homeStack));
+        assertEquals(fullscreenStack1, getRootTaskAbove(homeStack));
+        mDefaultTaskDisplayArea.moveRootTaskBehindBottomMostVisibleRootTask(homeStack);
+        assertEquals(fullscreenStack1, getRootTaskAbove(homeStack));
     }
 
     @Test
@@ -852,7 +854,7 @@ public class ActivityStackTests extends WindowTestsBase {
 
         // Ensure we don't move the home stack behind itself
         int homeStackIndex = mDefaultTaskDisplayArea.getIndexOf(homeStack);
-        mDefaultTaskDisplayArea.moveStackBehindStack(homeStack, homeStack);
+        mDefaultTaskDisplayArea.moveRootTaskBehindRootTask(homeStack, homeStack);
         assertEquals(homeStackIndex, mDefaultTaskDisplayArea.getIndexOf(homeStack));
     }
 
@@ -873,14 +875,14 @@ public class ActivityStackTests extends WindowTestsBase {
         final Task homeStack = createStackForShouldBeVisibleTest(mDefaultTaskDisplayArea,
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_HOME, true /* onTop */);
 
-        mDefaultTaskDisplayArea.moveStackBehindStack(homeStack, fullscreenStack1);
-        assertEquals(fullscreenStack1, getStackAbove(homeStack));
-        mDefaultTaskDisplayArea.moveStackBehindStack(homeStack, fullscreenStack2);
-        assertEquals(fullscreenStack2, getStackAbove(homeStack));
-        mDefaultTaskDisplayArea.moveStackBehindStack(homeStack, fullscreenStack4);
-        assertEquals(fullscreenStack4, getStackAbove(homeStack));
-        mDefaultTaskDisplayArea.moveStackBehindStack(homeStack, fullscreenStack2);
-        assertEquals(fullscreenStack2, getStackAbove(homeStack));
+        mDefaultTaskDisplayArea.moveRootTaskBehindRootTask(homeStack, fullscreenStack1);
+        assertEquals(fullscreenStack1, getRootTaskAbove(homeStack));
+        mDefaultTaskDisplayArea.moveRootTaskBehindRootTask(homeStack, fullscreenStack2);
+        assertEquals(fullscreenStack2, getRootTaskAbove(homeStack));
+        mDefaultTaskDisplayArea.moveRootTaskBehindRootTask(homeStack, fullscreenStack4);
+        assertEquals(fullscreenStack4, getRootTaskAbove(homeStack));
+        mDefaultTaskDisplayArea.moveRootTaskBehindRootTask(homeStack, fullscreenStack2);
+        assertEquals(fullscreenStack2, getRootTaskAbove(homeStack));
     }
 
     @Test
@@ -889,7 +891,7 @@ public class ActivityStackTests extends WindowTestsBase {
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_HOME, true /* onTop */);
         final Task pinnedStack = createStackForShouldBeVisibleTest(mDefaultTaskDisplayArea,
                 WINDOWING_MODE_PINNED, ACTIVITY_TYPE_STANDARD, true /* onTop */);
-        assertEquals(pinnedStack, getStackAbove(homeStack));
+        assertEquals(pinnedStack, getRootTaskAbove(homeStack));
 
         final Task alwaysOnTopStack = createStackForShouldBeVisibleTest(
                 mDefaultTaskDisplayArea, WINDOWING_MODE_FREEFORM, ACTIVITY_TYPE_STANDARD,
@@ -897,13 +899,13 @@ public class ActivityStackTests extends WindowTestsBase {
         alwaysOnTopStack.setAlwaysOnTop(true);
         assertTrue(alwaysOnTopStack.isAlwaysOnTop());
         // Ensure (non-pinned) always on top stack is put below pinned stack.
-        assertEquals(pinnedStack, getStackAbove(alwaysOnTopStack));
+        assertEquals(pinnedStack, getRootTaskAbove(alwaysOnTopStack));
 
         final Task nonAlwaysOnTopStack = createStackForShouldBeVisibleTest(
                 mDefaultTaskDisplayArea, WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD,
                 true /* onTop */);
         // Ensure non always on top stack is put below always on top stacks.
-        assertEquals(alwaysOnTopStack, getStackAbove(nonAlwaysOnTopStack));
+        assertEquals(alwaysOnTopStack, getRootTaskAbove(nonAlwaysOnTopStack));
 
         final Task alwaysOnTopStack2 = createStackForShouldBeVisibleTest(
                 mDefaultTaskDisplayArea, WINDOWING_MODE_FREEFORM, ACTIVITY_TYPE_STANDARD,
@@ -911,21 +913,21 @@ public class ActivityStackTests extends WindowTestsBase {
         alwaysOnTopStack2.setAlwaysOnTop(true);
         assertTrue(alwaysOnTopStack2.isAlwaysOnTop());
         // Ensure newly created always on top stack is placed above other all always on top stacks.
-        assertEquals(pinnedStack, getStackAbove(alwaysOnTopStack2));
+        assertEquals(pinnedStack, getRootTaskAbove(alwaysOnTopStack2));
 
         alwaysOnTopStack2.setAlwaysOnTop(false);
         // Ensure, when always on top is turned off for a stack, the stack is put just below all
         // other always on top stacks.
-        assertEquals(alwaysOnTopStack, getStackAbove(alwaysOnTopStack2));
+        assertEquals(alwaysOnTopStack, getRootTaskAbove(alwaysOnTopStack2));
         alwaysOnTopStack2.setAlwaysOnTop(true);
 
         // Ensure always on top state changes properly when windowing mode changes.
         alwaysOnTopStack2.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
         assertFalse(alwaysOnTopStack2.isAlwaysOnTop());
-        assertEquals(alwaysOnTopStack, getStackAbove(alwaysOnTopStack2));
+        assertEquals(alwaysOnTopStack, getRootTaskAbove(alwaysOnTopStack2));
         alwaysOnTopStack2.setWindowingMode(WINDOWING_MODE_FREEFORM);
         assertTrue(alwaysOnTopStack2.isAlwaysOnTop());
-        assertEquals(pinnedStack, getStackAbove(alwaysOnTopStack2));
+        assertEquals(pinnedStack, getRootTaskAbove(alwaysOnTopStack2));
     }
 
     @Test
@@ -980,7 +982,8 @@ public class ActivityStackTests extends WindowTestsBase {
             int windowingMode, int activityType, boolean onTop, boolean twoLevelTask) {
         final Task task;
         if (activityType == ACTIVITY_TYPE_HOME) {
-            task = mDefaultTaskDisplayArea.getStack(WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_HOME);
+            task = mDefaultTaskDisplayArea.getRootTask(WINDOWING_MODE_FULLSCREEN,
+                    ACTIVITY_TYPE_HOME);
             mDefaultTaskDisplayArea.positionChildAt(onTop ? POSITION_TOP : POSITION_BOTTOM, task,
                     false /* includingParents */);
         } else if (twoLevelTask) {
@@ -1224,12 +1227,12 @@ public class ActivityStackTests extends WindowTestsBase {
     @Test
     public void testStackOrderChangedOnRemoveStack() {
         final Task task = new TaskBuilder(mSupervisor).build();
-        StackOrderChangedListener listener = new StackOrderChangedListener();
-        mDefaultTaskDisplayArea.registerStackOrderChangedListener(listener);
+        RootTaskOrderChangedListener listener = new RootTaskOrderChangedListener();
+        mDefaultTaskDisplayArea.registerRootTaskOrderChangedListener(listener);
         try {
-            mDefaultTaskDisplayArea.removeStack(task);
+            mDefaultTaskDisplayArea.removeRootTask(task);
         } finally {
-            mDefaultTaskDisplayArea.unregisterStackOrderChangedListener(listener);
+            mDefaultTaskDisplayArea.unregisterRootTaskOrderChangedListener(listener);
         }
         assertTrue(listener.mChanged);
     }
@@ -1237,31 +1240,31 @@ public class ActivityStackTests extends WindowTestsBase {
     @Test
     public void testStackOrderChangedOnAddPositionStack() {
         final Task task = new TaskBuilder(mSupervisor).build();
-        mDefaultTaskDisplayArea.removeStack(task);
+        mDefaultTaskDisplayArea.removeRootTask(task);
 
-        StackOrderChangedListener listener = new StackOrderChangedListener();
-        mDefaultTaskDisplayArea.registerStackOrderChangedListener(listener);
+        RootTaskOrderChangedListener listener = new RootTaskOrderChangedListener();
+        mDefaultTaskDisplayArea.registerRootTaskOrderChangedListener(listener);
         try {
             task.mReparenting = true;
             mDefaultTaskDisplayArea.addChild(task, 0);
         } finally {
-            mDefaultTaskDisplayArea.unregisterStackOrderChangedListener(listener);
+            mDefaultTaskDisplayArea.unregisterRootTaskOrderChangedListener(listener);
         }
         assertTrue(listener.mChanged);
     }
 
     @Test
     public void testStackOrderChangedOnPositionStack() {
-        StackOrderChangedListener listener = new StackOrderChangedListener();
+        RootTaskOrderChangedListener listener = new RootTaskOrderChangedListener();
         try {
             final Task fullscreenStack1 = createStackForShouldBeVisibleTest(
                     mDefaultTaskDisplayArea, WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD,
                     true /* onTop */);
-            mDefaultTaskDisplayArea.registerStackOrderChangedListener(listener);
+            mDefaultTaskDisplayArea.registerRootTaskOrderChangedListener(listener);
             mDefaultTaskDisplayArea.positionChildAt(POSITION_BOTTOM, fullscreenStack1,
                     false /*includingParents*/);
         } finally {
-            mDefaultTaskDisplayArea.unregisterStackOrderChangedListener(listener);
+            mDefaultTaskDisplayArea.unregisterRootTaskOrderChangedListener(listener);
         }
         assertTrue(listener.mChanged);
     }
@@ -1447,12 +1450,12 @@ public class ActivityStackTests extends WindowTestsBase {
         assertEquals(expected, task.shouldSleepActivities());
     }
 
-    private static class StackOrderChangedListener
-            implements TaskDisplayArea.OnStackOrderChangedListener {
+    private static class RootTaskOrderChangedListener
+            implements OnRootTaskOrderChangedListener {
         public boolean mChanged = false;
 
         @Override
-        public void onStackOrderChanged(Task stack) {
+        public void onRootTaskOrderChanged(Task rootTask) {
             mChanged = true;
         }
     }
