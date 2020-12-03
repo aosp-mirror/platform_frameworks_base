@@ -45,9 +45,9 @@ public class TvWMShellModule {
     @WMSingleton
     @Provides
     static DisplayImeController provideDisplayImeController(IWindowManager wmService,
-            DisplayController displayController, @ShellMainThread ShellExecutor shellMainExecutor,
+            DisplayController displayController, @ShellMainThread ShellExecutor mainExecutor,
             TransactionPool transactionPool) {
-        return new DisplayImeController(wmService, displayController, shellMainExecutor,
+        return new DisplayImeController(wmService, displayController, mainExecutor,
                 transactionPool);
     }
 

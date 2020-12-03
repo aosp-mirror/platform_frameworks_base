@@ -19,11 +19,11 @@ package com.android.wm.shell.onehanded;
 import static com.android.wm.shell.onehanded.OneHandedSettingsUtil.ONE_HANDED_TIMEOUT_MEDIUM_IN_SECONDS;
 
 import android.os.Handler;
-import android.os.Looper;
-import android.os.Message;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
+
+import com.android.wm.shell.common.ShellExecutor;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -35,18 +35,15 @@ import java.util.concurrent.TimeUnit;
  */
 public class OneHandedTimeoutHandler {
     private static final String TAG = "OneHandedTimeoutHandler";
-    private static boolean sIsDragging = false;
-    // Default timeout is ONE_HANDED_TIMEOUT_MEDIUM
-    private static @OneHandedSettingsUtil.OneHandedTimeout int sTimeout =
-            ONE_HANDED_TIMEOUT_MEDIUM_IN_SECONDS;
-    private static long sTimeoutMs = TimeUnit.SECONDS.toMillis(sTimeout);
-    private static OneHandedTimeoutHandler sInstance;
-    private static List<TimeoutListener> sListeners = new ArrayList<>();
 
-    @VisibleForTesting
-    static final int ONE_HANDED_TIMEOUT_STOP_MSG = 1;
-    @VisibleForTesting
-    static Handler sHandler;
+    private final ShellExecutor mMainExecutor;
+
+    // Default timeout is ONE_HANDED_TIMEOUT_MEDIUM
+    private @OneHandedSettingsUtil.OneHandedTimeout int mTimeout =
+            ONE_HANDED_TIMEOUT_MEDIUM_IN_SECONDS;
+    private long mTimeoutMs = TimeUnit.SECONDS.toMillis(mTimeout);
+    private final Runnable mTimeoutRunnable = this::onStop;
+    private List<TimeoutListener> mListeners = new ArrayList<>();
 
     /**
      * Get the current config of timeout
@@ -54,7 +51,7 @@ public class OneHandedTimeoutHandler {
      * @return timeout of current config
      */
     public @OneHandedSettingsUtil.OneHandedTimeout int getTimeout() {
-        return sTimeout;
+        return mTimeout;
     }
 
     /**
@@ -69,32 +66,36 @@ public class OneHandedTimeoutHandler {
         void onTimeout(int timeoutTime);
     }
 
+    public OneHandedTimeoutHandler(ShellExecutor mainExecutor) {
+        mMainExecutor = mainExecutor;
+    }
+
     /**
      * Set the specific timeout of {@link OneHandedSettingsUtil.OneHandedTimeout}
      */
-    public static void setTimeout(@OneHandedSettingsUtil.OneHandedTimeout int timeout) {
-        sTimeout = timeout;
-        sTimeoutMs = TimeUnit.SECONDS.toMillis(sTimeout);
+    public void setTimeout(@OneHandedSettingsUtil.OneHandedTimeout int timeout) {
+        mTimeout = timeout;
+        mTimeoutMs = TimeUnit.SECONDS.toMillis(mTimeout);
         resetTimer();
     }
 
     /**
      * Reset the timer when one handed trigger or user is operating in some conditions
      */
-    public static void removeTimer() {
-        sHandler.removeMessages(ONE_HANDED_TIMEOUT_STOP_MSG);
+    public void removeTimer() {
+        mMainExecutor.removeCallbacks(mTimeoutRunnable);
     }
 
     /**
      * Reset the timer when one handed trigger or user is operating in some conditions
      */
-    public static void resetTimer() {
+    public void resetTimer() {
         removeTimer();
-        if (sTimeout == OneHandedSettingsUtil.ONE_HANDED_TIMEOUT_NEVER) {
+        if (mTimeout == OneHandedSettingsUtil.ONE_HANDED_TIMEOUT_NEVER) {
             return;
         }
-        if (sTimeout != OneHandedSettingsUtil.ONE_HANDED_TIMEOUT_NEVER) {
-            sHandler.sendEmptyMessageDelayed(ONE_HANDED_TIMEOUT_STOP_MSG, sTimeoutMs);
+        if (mTimeout != OneHandedSettingsUtil.ONE_HANDED_TIMEOUT_NEVER) {
+            mMainExecutor.executeDelayed(mTimeoutRunnable, mTimeoutMs);
         }
     }
 
@@ -103,47 +104,19 @@ public class OneHandedTimeoutHandler {
      *
      * @param listener the listener be sent events when times up
      */
-    public static void registerTimeoutListener(TimeoutListener listener) {
-        sListeners.add(listener);
+    public void registerTimeoutListener(TimeoutListener listener) {
+        mListeners.add(listener);
     }
 
-    /**
-     * Private constructor due to Singleton pattern
-     */
-    private OneHandedTimeoutHandler() {
+    @VisibleForTesting
+    boolean hasScheduledTimeout() {
+        return mMainExecutor.hasCallback(mTimeoutRunnable);
     }
 
-    /**
-     * Singleton pattern to get {@link OneHandedTimeoutHandler} instance
-     *
-     * @return the static update thread instance
-     */
-    public static OneHandedTimeoutHandler get() {
-        synchronized (OneHandedTimeoutHandler.class) {
-            if (sInstance == null) {
-                sInstance = new OneHandedTimeoutHandler();
-            }
-            if (sHandler == null) {
-                sHandler = new Handler(Looper.myLooper()) {
-                    @Override
-                    public void handleMessage(Message msg) {
-                        if (msg.what == ONE_HANDED_TIMEOUT_STOP_MSG) {
-                            onStop();
-                        }
-                    }
-                };
-                if (sTimeout != OneHandedSettingsUtil.ONE_HANDED_TIMEOUT_NEVER) {
-                    sHandler.sendEmptyMessageDelayed(ONE_HANDED_TIMEOUT_STOP_MSG, sTimeoutMs);
-                }
-            }
-            return sInstance;
-        }
-    }
-
-    private static void onStop() {
-        for (int i = sListeners.size() - 1; i >= 0; i--) {
-            final TimeoutListener listener = sListeners.get(i);
-            listener.onTimeout(sTimeout);
+    private void onStop() {
+        for (int i = mListeners.size() - 1; i >= 0; i--) {
+            final TimeoutListener listener = mListeners.get(i);
+            listener.onTimeout(mTimeout);
         }
     }
 
@@ -151,9 +124,9 @@ public class OneHandedTimeoutHandler {
         final String innerPrefix = "  ";
         pw.println(TAG + "states: ");
         pw.print(innerPrefix + "sTimeout=");
-        pw.println(sTimeout);
+        pw.println(mTimeout);
         pw.print(innerPrefix + "sListeners=");
-        pw.println(sListeners);
+        pw.println(mListeners);
     }
 
 }

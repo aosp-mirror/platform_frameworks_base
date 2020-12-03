@@ -23,22 +23,30 @@ import android.testing.TestableLooper;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.wm.shell.common.ShellExecutor;
+
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
-@TestableLooper.RunWithLooper
 public class OneHandedTouchHandlerTest extends OneHandedTestCase {
-    OneHandedTouchHandler mTouchHandler;
+    private OneHandedTouchHandler mTouchHandler;
+
+    @Mock
+    private OneHandedTimeoutHandler mTimeoutHandler;
+
+    @Mock
+    private ShellExecutor mMainExecutor;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        mTouchHandler = new OneHandedTouchHandler();
+        mTouchHandler = new OneHandedTouchHandler(mTimeoutHandler, mMainExecutor);
     }
 
     @Test
