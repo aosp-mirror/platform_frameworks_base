@@ -23581,7 +23581,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     // Note: this code block is executed with the Installer lock
                     // already held, since it's invoked as a side-effect of
                     // executeBatchLI()
-                    if ((e != null) && pkg.isSystem()) {
+                    if (e != null) {
                         logCriticalInfo(Log.ERROR, "Failed to create app data for " + packageName
                                 + ", but trying to recover: " + e);
                         destroyAppDataLeafLIF(pkg, userId, flags);
