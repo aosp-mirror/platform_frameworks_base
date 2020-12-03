@@ -19,6 +19,7 @@ package android.view;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.view.InputDevice.SOURCE_CLASS_NONE;
+import static android.view.InsetsState.ITYPE_IME;
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_STATUS_BAR;
 import static android.view.InsetsState.SIZE;
@@ -7931,6 +7932,10 @@ public final class ViewRootImpl implements ViewParent,
         if (mTranslator != null) {
             mTranslator.translateInsetsStateInScreenToAppWindow(insetsState);
         }
+        if (insetsState != null && insetsState.getSource(ITYPE_IME).isVisible()) {
+            ImeTracing.getInstance().triggerClientDump("ViewRootImpl#dispatchInsetsChanged",
+                    getInsetsController().getHost().getInputMethodManager(), null /* icProto */);
+        }
         mHandler.obtainMessage(MSG_INSETS_CHANGED, insetsState).sendToTarget();
     }
 
@@ -7946,6 +7951,10 @@ public final class ViewRootImpl implements ViewParent,
         }
         if (mTranslator != null) {
             mTranslator.translateInsetsStateInScreenToAppWindow(insetsState);
+        }
+        if (insetsState != null && insetsState.getSource(ITYPE_IME).isVisible()) {
+            ImeTracing.getInstance().triggerClientDump("ViewRootImpl#dispatchInsetsControlChanged",
+                    getInsetsController().getHost().getInputMethodManager(), null /* icProto */);
         }
         SomeArgs args = SomeArgs.obtain();
         args.arg1 = insetsState;
