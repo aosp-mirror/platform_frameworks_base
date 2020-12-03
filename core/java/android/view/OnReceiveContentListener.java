@@ -35,12 +35,12 @@ import android.annotation.Nullable;
  *
  *     &#64;Override
  *     public ContentInfo onReceiveContent(View view, ContentInfo payload) {
- *         Map&lt;Boolean, ContentInfo&gt; split =
+ *         Pair&lt;ContentInfo, ContentInfo&gt; split =
  *                 payload.partition(item -&gt; item.getUri() != null);
- *         ContentInfo uriItems = split.get(true);
- *         ContentInfo remainingItems = split.get(false);
- *         if (uriItems != null) {
- *             ClipData clip = uriItems.getClip();
+ *         ContentInfo uriContent = split.first;
+ *         ContentInfo remaining = split.second;
+ *         if (uriContent != null) {
+ *             ClipData clip = uriContent.getClip();
  *             for (int i = 0; i < clip.getItemCount(); i++) {
  *                 Uri uri = clip.getItemAt(i).getUri();
  *                 // ... app-specific logic to handle the URI ...
@@ -48,7 +48,7 @@ import android.annotation.Nullable;
  *         }
  *         // Return anything that we didn't handle ourselves. This preserves the default platform
  *         // behavior for text and anything else for which we are not implementing custom handling.
- *         return remainingItems;
+ *         return remaining;
  *     }
  * }
  *

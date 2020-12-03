@@ -20,16 +20,16 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ClipData;
+import android.content.ClipDescription;
 import android.net.Uri;
 import android.os.Bundle;
-import android.util.ArrayMap;
+import android.util.Pair;
 
 import com.android.internal.util.Preconditions;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
-import java.util.Map;
 import java.util.Objects;
 import java.util.function.Predicate;
 
@@ -208,50 +208,51 @@ public final class ContentInfo {
     }
 
     /**
-     * Partitions the content based on the given predicate.
+     * Partitions this content based on the given predicate.
      *
-     * <p>Similar to a
-     * {@link java.util.stream.Collectors#partitioningBy(Predicate) partitioning collector},
-     * this function classifies the content and organizes it into a map, grouping the items that
-     * matched vs didn't match the predicate.
+     * <p>This function classifies the content and organizes it into a pair, grouping the items
+     * that matched vs didn't match the predicate.
      *
      * <p>Except for the {@link ClipData} items, the returned objects will contain all the same
-     * metadata as the original.
+     * metadata as this {@link ContentInfo}.
      *
      * @param itemPredicate The predicate to test each {@link ClipData.Item} to determine which
-     * partition to place it into.
-     * @return A map containing the partitioned content. The map will contain a single entry if
-     * all items were classified into the same partition (all matched or all didn't match the
-     * predicate) or two entries (if there's at least one item that matched the predicate and at
-     * least one item that didn't match the predicate).
+     *                      partition to place it into.
+     * @return A pair containing the partitioned content. The pair's first object will have the
+     * content that matched the predicate, or null if none of the items matched. The pair's
+     * second object will have the content that didn't match the predicate, or null if all of
+     * the items matched.
      */
     @NonNull
-    public Map<Boolean, ContentInfo> partition(@NonNull Predicate<ClipData.Item> itemPredicate) {
+    public Pair<ContentInfo, ContentInfo> partition(
+            @NonNull Predicate<ClipData.Item> itemPredicate) {
         if (mClip.getItemCount() == 1) {
-            Map<Boolean, ContentInfo> result = new ArrayMap<>(1);
-            result.put(itemPredicate.test(mClip.getItemAt(0)), this);
-            return result;
+            boolean matched = itemPredicate.test(mClip.getItemAt(0));
+            return Pair.create(matched ? this : null, matched ? null : this);
         }
-        ArrayList<ClipData.Item> accepted = new ArrayList<>();
-        ArrayList<ClipData.Item> remaining = new ArrayList<>();
+        ArrayList<ClipData.Item> acceptedItems = new ArrayList<>();
+        ArrayList<ClipData.Item> remainingItems = new ArrayList<>();
         for (int i = 0; i < mClip.getItemCount(); i++) {
             ClipData.Item item = mClip.getItemAt(i);
             if (itemPredicate.test(item)) {
-                accepted.add(item);
+                acceptedItems.add(item);
             } else {
-                remaining.add(item);
+                remainingItems.add(item);
             }
         }
-        Map<Boolean, ContentInfo> result = new ArrayMap<>(2);
-        if (!accepted.isEmpty()) {
-            ClipData acceptedClip = new ClipData(mClip.getDescription(), accepted);
-            result.put(true, new Builder(this).setClip(acceptedClip).build());
+        if (acceptedItems.isEmpty()) {
+            return Pair.create(null, this);
         }
-        if (!remaining.isEmpty()) {
-            ClipData remainingClip = new ClipData(mClip.getDescription(), remaining);
-            result.put(false, new Builder(this).setClip(remainingClip).build());
+        if (remainingItems.isEmpty()) {
+            return Pair.create(this, null);
         }
-        return result;
+        ContentInfo accepted = new Builder(this)
+                .setClip(new ClipData(new ClipDescription(mClip.getDescription()), acceptedItems))
+                .build();
+        ContentInfo remaining = new Builder(this)
+                .setClip(new ClipData(new ClipDescription(mClip.getDescription()), remainingItems))
+                .build();
+        return Pair.create(accepted, remaining);
     }
 
     /**
