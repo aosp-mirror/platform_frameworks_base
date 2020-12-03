@@ -47,6 +47,7 @@ import android.view.accessibility.AccessibilityWindowInfo;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.wm.shell.R;
 import com.android.wm.shell.common.FloatingContentCoordinator;
+import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.pip.PipAnimationController;
 import com.android.wm.shell.pip.PipBoundsAlgorithm;
 import com.android.wm.shell.pip.PipBoundsState;
@@ -157,7 +158,8 @@ public class PipTouchHandler {
             @NonNull PipBoundsState pipBoundsState,
             PipTaskOrganizer pipTaskOrganizer,
             FloatingContentCoordinator floatingContentCoordinator,
-            PipUiEventLogger pipUiEventLogger) {
+            PipUiEventLogger pipUiEventLogger,
+            ShellExecutor shellMainExecutor) {
         // Initialize the Pip input consumer
         mContext = context;
         mAccessibilityManager = context.getSystemService(AccessibilityManager.class);
@@ -188,7 +190,7 @@ public class PipTouchHandler {
         mFloatingContentCoordinator = floatingContentCoordinator;
         mConnection = new PipAccessibilityInteractionConnection(mContext, pipBoundsState,
                 mMotionHelper, pipTaskOrganizer, mPipBoundsAlgorithm.getSnapAlgorithm(),
-                this::onAccessibilityShowMenu, this::updateMovementBounds, mHandler);
+                this::onAccessibilityShowMenu, this::updateMovementBounds, shellMainExecutor);
 
         mPipUiEventLogger = pipUiEventLogger;
 
@@ -436,8 +438,11 @@ public class PipTouchHandler {
      * TODO Add appropriate description
      */
     public void onRegistrationChanged(boolean isRegistered) {
-        mAccessibilityManager.setPictureInPictureActionReplacingConnection(isRegistered
-                ? mConnection : null);
+        if (isRegistered) {
+            mConnection.register(mAccessibilityManager);
+        } else {
+            mAccessibilityManager.setPictureInPictureActionReplacingConnection(null);
+        }
         if (!isRegistered && mTouchState.isUserInteracting()) {
             // If the input consumer is unregistered while the user is interacting, then we may not
             // get the final TOUCH_UP event, so clean up the dismiss target as well

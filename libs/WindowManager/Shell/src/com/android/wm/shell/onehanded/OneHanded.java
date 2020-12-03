@@ -18,6 +18,7 @@ package com.android.wm.shell.onehanded;
 
 import androidx.annotation.NonNull;
 
+import com.android.wm.shell.common.annotations.ExternalThread;
 import com.android.wm.shell.onehanded.OneHandedGestureHandler.OneHandedGestureEventCallback;
 
 import java.io.PrintWriter;
@@ -25,6 +26,7 @@ import java.io.PrintWriter;
 /**
  * Interface to engage one handed feature.
  */
+@ExternalThread
 public interface OneHanded {
     /**
      * Return one handed settings enabled or not.

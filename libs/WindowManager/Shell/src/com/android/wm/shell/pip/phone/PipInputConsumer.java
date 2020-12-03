@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.common;
+package com.android.wm.shell.pip.phone;
 
 import static android.view.Display.DEFAULT_DISPLAY;
-import static android.view.WindowManager.INPUT_CONSUMER_PIP;
-import static android.view.WindowManager.INPUT_CONSUMER_RECENTS_ANIMATION;
 
 import android.os.Binder;
 import android.os.IBinder;
@@ -30,7 +28,6 @@ import android.view.Choreographer;
 import android.view.IWindowManager;
 import android.view.InputChannel;
 import android.view.InputEvent;
-import android.view.WindowManagerGlobal;
 
 import java.io.PrintWriter;
 

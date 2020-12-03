@@ -28,6 +28,17 @@ public class HandlerExecutor implements ShellExecutor {
     }
 
     @Override
+    public void execute(@NonNull Runnable command) {
+        if (mHandler.getLooper().isCurrentThread()) {
+            command.run();
+            return;
+        }
+        if (!mHandler.post(command)) {
+            throw new RuntimeException(mHandler + " is probably exiting");
+        }
+    }
+
+    @Override
     public void executeDelayed(@NonNull Runnable r, long delayMillis) {
         if (!mHandler.postDelayed(r, delayMillis)) {
             throw new RuntimeException(mHandler + " is probably exiting");
@@ -37,12 +48,5 @@ public class HandlerExecutor implements ShellExecutor {
     @Override
     public void removeCallbacks(@NonNull Runnable r) {
         mHandler.removeCallbacks(r);
-    }
-
-    @Override
-    public void execute(@NonNull Runnable command) {
-        if (!mHandler.post(command)) {
-            throw new RuntimeException(mHandler + " is probably exiting");
-        }
     }
 }

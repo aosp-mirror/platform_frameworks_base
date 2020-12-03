@@ -19,6 +19,8 @@ package com.android.wm.shell.splitscreen;
 import android.graphics.Rect;
 import android.window.WindowContainerToken;
 
+import com.android.wm.shell.common.annotations.ExternalThread;
+
 import java.io.PrintWriter;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -26,6 +28,7 @@ import java.util.function.Consumer;
 /**
  * Interface to engage split screen feature.
  */
+@ExternalThread
 public interface SplitScreen {
     /** Called when keyguard showing state changed. */
     void onKeyguardVisibilityChanged(boolean isShowing);

@@ -31,12 +31,14 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.util.ArrayMap;
 import android.util.Log;
+import android.util.Slog;
 import android.util.SparseArray;
 import android.view.SurfaceControl;
 import android.window.ITaskOrganizerController;
 import android.window.TaskAppearedInfo;
 import android.window.TaskOrganizer;
 
+import androidx.annotation.BinderThread;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
@@ -45,6 +47,7 @@ import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.TransactionPool;
+import com.android.wm.shell.common.annotations.ShellMainThread;
 import com.android.wm.shell.startingsurface.StartingSurfaceDrawer;
 
 import java.io.PrintWriter;
@@ -119,7 +122,7 @@ public class ShellTaskOrganizer extends TaskOrganizer {
             ShellExecutor mainExecutor, ShellExecutor animExecutor, Context context) {
         super(taskOrganizerController, mainExecutor);
         mTransitions = new Transitions(this, transactionPool, mainExecutor, animExecutor);
-        if (Transitions.ENABLE_SHELL_TRANSITIONS) registerTransitionPlayer(mTransitions);
+        if (Transitions.ENABLE_SHELL_TRANSITIONS) mTransitions.register(this);
         // TODO(b/131727939) temporarily live here, the starting surface drawer should be controlled
         //  by a controller, that class should be create while porting
         //  ActivityRecord#addStartingWindow to WMShell.

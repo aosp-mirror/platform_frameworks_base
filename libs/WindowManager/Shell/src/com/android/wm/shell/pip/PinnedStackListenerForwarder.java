@@ -19,12 +19,17 @@ package com.android.wm.shell.pip;
 import android.app.RemoteAction;
 import android.content.ComponentName;
 import android.content.pm.ParceledListSlice;
+import android.os.RemoteException;
 import android.view.DisplayInfo;
 import android.view.IPinnedStackController;
 import android.view.IPinnedStackListener;
+import android.view.WindowManagerGlobal;
+
+import androidx.annotation.BinderThread;
+
+import com.android.wm.shell.common.ShellExecutor;
 
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * PinnedStackListener that simply forwards all calls to each listener added via
@@ -32,8 +37,15 @@ import java.util.List;
  * {@link com.android.server.wm.WindowManagerService#registerPinnedStackListener} replaces any
  * previously set listener.
  */
-public class PinnedStackListenerForwarder extends IPinnedStackListener.Stub {
-    private List<PinnedStackListener> mListeners = new ArrayList<>();
+public class PinnedStackListenerForwarder {
+
+    private final IPinnedStackListener mListenerImpl = new PinnedStackListenerImpl();
+    private final ShellExecutor mShellMainExecutor;
+    private final ArrayList<PinnedStackListener> mListeners = new ArrayList<>();
+
+    public PinnedStackListenerForwarder(ShellExecutor shellMainExecutor) {
+        mShellMainExecutor = shellMainExecutor;
+    }
 
     /** Adds a listener to receive updates from the WindowManagerService. */
     public void addListener(PinnedStackListener listener) {
@@ -45,59 +57,115 @@ public class PinnedStackListenerForwarder extends IPinnedStackListener.Stub {
         mListeners.remove(listener);
     }
 
-    @Override
-    public void onListenerRegistered(IPinnedStackController controller) {
+    public void register(int displayId) throws RemoteException {
+        WindowManagerGlobal.getWindowManagerService().registerPinnedStackListener(
+                displayId, mListenerImpl);
+    }
+
+    private void onListenerRegistered(IPinnedStackController controller) {
         for (PinnedStackListener listener : mListeners) {
             listener.onListenerRegistered(controller);
         }
     }
 
-    @Override
-    public void onMovementBoundsChanged(boolean fromImeAdjustment) {
+    private void onMovementBoundsChanged(boolean fromImeAdjustment) {
         for (PinnedStackListener listener : mListeners) {
             listener.onMovementBoundsChanged(fromImeAdjustment);
         }
     }
 
-    @Override
-    public void onImeVisibilityChanged(boolean imeVisible, int imeHeight) {
+    private void onImeVisibilityChanged(boolean imeVisible, int imeHeight) {
         for (PinnedStackListener listener : mListeners) {
             listener.onImeVisibilityChanged(imeVisible, imeHeight);
         }
     }
 
-    @Override
-    public void onActionsChanged(ParceledListSlice<RemoteAction> actions) {
+    private void onActionsChanged(ParceledListSlice<RemoteAction> actions) {
         for (PinnedStackListener listener : mListeners) {
             listener.onActionsChanged(actions);
         }
     }
 
-    @Override
-    public void onActivityHidden(ComponentName componentName) {
+    private void onActivityHidden(ComponentName componentName) {
         for (PinnedStackListener listener : mListeners) {
             listener.onActivityHidden(componentName);
         }
     }
 
-    @Override
-    public void onDisplayInfoChanged(DisplayInfo displayInfo) {
+    private void onDisplayInfoChanged(DisplayInfo displayInfo) {
         for (PinnedStackListener listener : mListeners) {
             listener.onDisplayInfoChanged(displayInfo);
         }
     }
 
-    @Override
-    public void onConfigurationChanged() {
+    private void onConfigurationChanged() {
         for (PinnedStackListener listener : mListeners) {
             listener.onConfigurationChanged();
         }
     }
 
-    @Override
-    public void onAspectRatioChanged(float aspectRatio) {
+    private void onAspectRatioChanged(float aspectRatio) {
         for (PinnedStackListener listener : mListeners) {
             listener.onAspectRatioChanged(aspectRatio);
+        }
+    }
+
+    @BinderThread
+    private class PinnedStackListenerImpl extends IPinnedStackListener.Stub {
+        @Override
+        public void onListenerRegistered(IPinnedStackController controller) {
+            mShellMainExecutor.execute(() -> {
+                PinnedStackListenerForwarder.this.onListenerRegistered(controller);
+            });
+        }
+
+        @Override
+        public void onMovementBoundsChanged(boolean fromImeAdjustment) {
+            mShellMainExecutor.execute(() -> {
+                PinnedStackListenerForwarder.this.onMovementBoundsChanged(fromImeAdjustment);
+            });
+        }
+
+        @Override
+        public void onImeVisibilityChanged(boolean imeVisible, int imeHeight) {
+            mShellMainExecutor.execute(() -> {
+                PinnedStackListenerForwarder.this.onImeVisibilityChanged(imeVisible, imeHeight);
+            });
+        }
+
+        @Override
+        public void onActionsChanged(ParceledListSlice<RemoteAction> actions) {
+            mShellMainExecutor.execute(() -> {
+                PinnedStackListenerForwarder.this.onActionsChanged(actions);
+            });
+        }
+
+        @Override
+        public void onActivityHidden(ComponentName componentName) {
+            mShellMainExecutor.execute(() -> {
+                PinnedStackListenerForwarder.this.onActivityHidden(componentName);
+            });
+        }
+
+        @Override
+        public void onDisplayInfoChanged(DisplayInfo displayInfo) {
+            mShellMainExecutor.execute(() -> {
+                PinnedStackListenerForwarder.this.onDisplayInfoChanged(displayInfo);
+            });
+        }
+
+        @Override
+        public void onConfigurationChanged() {
+            mShellMainExecutor.execute(() -> {
+                PinnedStackListenerForwarder.this.onConfigurationChanged();
+            });
+        }
+
+        @Override
+        public void onAspectRatioChanged(float aspectRatio) {
+            mShellMainExecutor.execute(() -> {
+                PinnedStackListenerForwarder.this.onAspectRatioChanged(aspectRatio);
+            });
         }
     }
 
