@@ -336,6 +336,10 @@ public:
         return mSlicedStateAtoms;
     }
 
+    inline bool isValid() const {
+        return mValid;
+    }
+
     /* Adds an AnomalyTracker and returns it. */
     virtual sp<AnomalyTracker> addAnomalyTracker(const Alert &alert,
                                                  const sp<AlarmMonitor>& anomalyAlarmMonitor) {
@@ -467,6 +471,8 @@ protected:
     const uint64_t mProtoHash;
 
     const ConfigKey mConfigKey;
+
+    bool mValid;
 
     // The time when this metric producer was first created. The end time for the current bucket
     // can be computed from this based on mCurrentBucketNum.

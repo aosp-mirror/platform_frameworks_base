@@ -882,6 +882,43 @@ TEST(MetricsManagerTest, TestCreateAnomalyTrackerDurationTooLong) {
     EXPECT_EQ(createAnomalyTracker(alert, anomalyAlarmMonitor, {{1, 0}}, metricProducers), nullopt);
 }
 
+TEST(MetricsManagerTest, TestCreateDurationProducerDimensionsInWhatInvalid) {
+    StatsdConfig config;
+    config.add_allowed_log_source("AID_ROOT");
+    *config.add_atom_matcher() = CreateAcquireWakelockAtomMatcher();
+    *config.add_atom_matcher() = CreateReleaseWakelockAtomMatcher();
+    *config.add_atom_matcher() = CreateMoveToBackgroundAtomMatcher();
+    *config.add_atom_matcher() = CreateMoveToForegroundAtomMatcher();
+
+    Predicate holdingWakelockPredicate = CreateHoldingWakelockPredicate();
+    // The predicate is dimensioning by first attribution node by uid.
+    FieldMatcher dimensions =
+            CreateAttributionUidDimensions(util::WAKELOCK_STATE_CHANGED, {Position::FIRST});
+    *holdingWakelockPredicate.mutable_simple_predicate()->mutable_dimensions() = dimensions;
+    *config.add_predicate() = holdingWakelockPredicate;
+
+    DurationMetric* durationMetric = config.add_duration_metric();
+    durationMetric->set_id(StringToId("WakelockDuration"));
+    durationMetric->set_what(holdingWakelockPredicate.id());
+    durationMetric->set_aggregation_type(DurationMetric::SUM);
+    // The metric is dimensioning by first attribution node by uid AND tag.
+    // Invalid since the predicate only dimensions by uid.
+    *durationMetric->mutable_dimensions_in_what() = CreateAttributionUidAndOtherDimensions(
+            util::WAKELOCK_STATE_CHANGED, {Position::FIRST}, {3 /* tag */});
+    durationMetric->set_bucket(FIVE_MINUTES);
+
+    ConfigKey key(123, 987);
+    uint64_t timeNs = 456;
+    sp<StatsPullerManager> pullerManager = new StatsPullerManager();
+    sp<AlarmMonitor> anomalyAlarmMonitor;
+    sp<AlarmMonitor> periodicAlarmMonitor;
+    sp<UidMap> uidMap;
+    sp<MetricsManager> metricsManager =
+            new MetricsManager(key, config, timeNs, timeNs, uidMap, pullerManager,
+                               anomalyAlarmMonitor, periodicAlarmMonitor);
+    EXPECT_FALSE(metricsManager->isConfigValid());
+}
+
 }  // namespace statsd
 }  // namespace os
 }  // namespace android
