@@ -21,6 +21,7 @@ import android.media.metrics.IPlaybackMetricsManager;
 import android.media.metrics.NetworkEvent;
 import android.media.metrics.PlaybackErrorEvent;
 import android.media.metrics.PlaybackMetrics;
+import android.os.Binder;
 import android.util.Base64;
 import android.util.StatsEvent;
 import android.util.StatsLog;
@@ -54,7 +55,28 @@ public final class PlaybackMetricsManagerService extends SystemService {
     private final class BinderService extends IPlaybackMetricsManager.Stub {
         @Override
         public void reportPlaybackMetrics(String sessionId, PlaybackMetrics metrics, int userId) {
-            // TODO: log it to statsd
+            StatsEvent statsEvent = StatsEvent.newBuilder()
+                    .setAtomId(320)
+                    .writeInt(Binder.getCallingUid())
+                    .writeString(sessionId)
+                    .writeLong(metrics.getMediaDurationMillis())
+                    .writeInt(metrics.getStreamSource())
+                    .writeInt(metrics.getStreamType())
+                    .writeInt(metrics.getPlaybackType())
+                    .writeInt(metrics.getDrmType())
+                    .writeInt(metrics.getContentType())
+                    .writeString(metrics.getPlayerName())
+                    .writeString(metrics.getPlayerVersion())
+                    .writeByteArray(new byte[0]) // TODO: write experiments proto
+                    .writeInt(metrics.getVideoFramesPlayed())
+                    .writeInt(metrics.getVideoFramesDropped())
+                    .writeInt(metrics.getAudioUnderrunCount())
+                    .writeLong(metrics.getNetworkBytesRead())
+                    .writeLong(metrics.getLocalBytesRead())
+                    .writeLong(metrics.getNetworkTransferDurationMillis())
+                    .usePooledBuffer()
+                    .build();
+            StatsLog.write(statsEvent);
         }
 
         @Override
