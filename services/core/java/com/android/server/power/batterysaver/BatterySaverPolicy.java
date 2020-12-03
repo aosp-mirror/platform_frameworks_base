@@ -29,6 +29,7 @@ import android.os.PowerSaveState;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.ArrayMap;
+import android.util.IndentingPrintWriter;
 import android.util.KeyValueListParser;
 import android.util.Slog;
 import android.view.accessibility.AccessibilityManager;
@@ -1031,90 +1032,92 @@ public class BatterySaverPolicy extends ContentObserver {
     }
 
     public void dump(PrintWriter pw) {
+        final IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ");
+
         synchronized (mLock) {
-            pw.println();
-            mBatterySavingStats.dump(pw, "");
+            ipw.println();
+            mBatterySavingStats.dump(ipw);
 
-            pw.println();
-            pw.println("Battery saver policy (*NOTE* they only apply when battery saver is ON):");
-            pw.println("  Settings: " + Settings.Global.BATTERY_SAVER_CONSTANTS);
-            pw.println("    value: " + mSettings);
-            pw.println("  Settings: " + mDeviceSpecificSettingsSource);
-            pw.println("    value: " + mDeviceSpecificSettings);
+            ipw.println();
+            ipw.println("Battery saver policy (*NOTE* they only apply when battery saver is ON):");
+            ipw.increaseIndent();
+            ipw.println("Settings: " + Settings.Global.BATTERY_SAVER_CONSTANTS);
+            ipw.increaseIndent();
+            ipw.println("value: " + mSettings);
+            ipw.decreaseIndent();
+            ipw.println("Settings: " + mDeviceSpecificSettingsSource);
+            ipw.increaseIndent();
+            ipw.println("value: " + mDeviceSpecificSettings);
+            ipw.decreaseIndent();
 
-            pw.println("  Adaptive Settings: " + Settings.Global.BATTERY_SAVER_ADAPTIVE_CONSTANTS);
-            pw.println("    value: " + mAdaptiveSettings);
-            pw.println("  Adaptive Device Specific Settings: "
+            ipw.println("Adaptive Settings: " + Settings.Global.BATTERY_SAVER_ADAPTIVE_CONSTANTS);
+            ipw.increaseIndent();
+            ipw.println("value: " + mAdaptiveSettings);
+            ipw.decreaseIndent();
+            ipw.println("Adaptive Device Specific Settings: "
                     + Settings.Global.BATTERY_SAVER_ADAPTIVE_DEVICE_SPECIFIC_CONSTANTS);
-            pw.println("    value: " + mAdaptiveDeviceSpecificSettings);
+            ipw.increaseIndent();
+            ipw.println("value: " + mAdaptiveDeviceSpecificSettings);
+            ipw.decreaseIndent();
 
-            pw.println("  mAccessibilityEnabled=" + mAccessibilityEnabled.get());
-            pw.println("  mAutomotiveProjectionActive=" + mAutomotiveProjectionActive.get());
-            pw.println("  mPolicyLevel=" + mPolicyLevel);
+            ipw.println("mAccessibilityEnabled=" + mAccessibilityEnabled.get());
+            ipw.println("mAutomotiveProjectionActive=" + mAutomotiveProjectionActive.get());
+            ipw.println("mPolicyLevel=" + mPolicyLevel);
 
-            dumpPolicyLocked(pw, "  ", "full", mFullPolicy);
-            dumpPolicyLocked(pw, "  ", "default adaptive", mDefaultAdaptivePolicy);
-            dumpPolicyLocked(pw, "  ", "current adaptive", mAdaptivePolicy);
-            dumpPolicyLocked(pw, "  ", "effective", mEffectivePolicyRaw);
+            dumpPolicyLocked(ipw, "full", mFullPolicy);
+            dumpPolicyLocked(ipw, "default adaptive", mDefaultAdaptivePolicy);
+            dumpPolicyLocked(ipw, "current adaptive", mAdaptivePolicy);
+            dumpPolicyLocked(ipw, "effective", mEffectivePolicyRaw);
+
+            ipw.decreaseIndent();
         }
     }
 
-    private void dumpPolicyLocked(PrintWriter pw, String indent, String label, Policy p) {
+    private void dumpPolicyLocked(IndentingPrintWriter pw, String label, Policy p) {
         pw.println();
-        pw.print(indent);
         pw.println("Policy '" + label + "'");
-        pw.print(indent);
-        pw.println("  " + KEY_ADVERTISE_IS_ENABLED + "=" + p.advertiseIsEnabled);
-        pw.print(indent);
-        pw.println("  " + KEY_VIBRATION_DISABLED + "=" + p.disableVibration);
-        pw.print(indent);
-        pw.println("  " + KEY_ANIMATION_DISABLED + "=" + p.disableAnimation);
-        pw.print(indent);
-        pw.println("  " + KEY_FULLBACKUP_DEFERRED + "=" + p.deferFullBackup);
-        pw.print(indent);
-        pw.println("  " + KEY_KEYVALUE_DEFERRED + "=" + p.deferKeyValueBackup);
-        pw.print(indent);
-        pw.println("  " + KEY_ACTIVATE_FIREWALL_DISABLED + "=" + !p.enableFirewall);
-        pw.print(indent);
-        pw.println("  " + KEY_ACTIVATE_DATASAVER_DISABLED + "=" + !p.enableDataSaver);
-        pw.print(indent);
-        pw.println("  " + KEY_LAUNCH_BOOST_DISABLED + "=" + p.disableLaunchBoost);
-        pw.println(
-                "    " + KEY_ADJUST_BRIGHTNESS_DISABLED + "=" + !p.enableAdjustBrightness);
-        pw.print(indent);
-        pw.println("  " + KEY_ADJUST_BRIGHTNESS_FACTOR + "=" + p.adjustBrightnessFactor);
-        pw.print(indent);
-        pw.println("  " + KEY_GPS_MODE + "=" + p.locationMode);
-        pw.print(indent);
-        pw.println("  " + KEY_FORCE_ALL_APPS_STANDBY + "=" + p.forceAllAppsStandby);
-        pw.print(indent);
-        pw.println("  " + KEY_FORCE_BACKGROUND_CHECK + "=" + p.forceBackgroundCheck);
-        pw.println(
-                "    " + KEY_OPTIONAL_SENSORS_DISABLED + "=" + p.disableOptionalSensors);
-        pw.print(indent);
-        pw.println("  " + KEY_AOD_DISABLED + "=" + p.disableAod);
-        pw.print(indent);
-        pw.println("  " + KEY_SOUNDTRIGGER_DISABLED + "=" + p.disableSoundTrigger);
-        pw.print(indent);
-        pw.println("  " + KEY_QUICK_DOZE_ENABLED + "=" + p.enableQuickDoze);
-        pw.print(indent);
-        pw.println("  " + KEY_ENABLE_NIGHT_MODE + "=" + p.enableNightMode);
+        pw.increaseIndent();
+        pw.println(KEY_ADVERTISE_IS_ENABLED + "=" + p.advertiseIsEnabled);
+        pw.println(KEY_VIBRATION_DISABLED + "=" + p.disableVibration);
+        pw.println(KEY_ANIMATION_DISABLED + "=" + p.disableAnimation);
+        pw.println(KEY_FULLBACKUP_DEFERRED + "=" + p.deferFullBackup);
+        pw.println(KEY_KEYVALUE_DEFERRED + "=" + p.deferKeyValueBackup);
+        pw.println(KEY_ACTIVATE_FIREWALL_DISABLED + "=" + !p.enableFirewall);
+        pw.println(KEY_ACTIVATE_DATASAVER_DISABLED + "=" + !p.enableDataSaver);
+        pw.println(KEY_LAUNCH_BOOST_DISABLED + "=" + p.disableLaunchBoost);
+        pw.println(KEY_ADJUST_BRIGHTNESS_DISABLED + "=" + !p.enableAdjustBrightness);
+        pw.println(KEY_ADJUST_BRIGHTNESS_FACTOR + "=" + p.adjustBrightnessFactor);
+        pw.println(KEY_GPS_MODE + "=" + p.locationMode);
+        pw.println(KEY_FORCE_ALL_APPS_STANDBY + "=" + p.forceAllAppsStandby);
+        pw.println(KEY_FORCE_BACKGROUND_CHECK + "=" + p.forceBackgroundCheck);
+        pw.println(KEY_OPTIONAL_SENSORS_DISABLED + "=" + p.disableOptionalSensors);
+        pw.println(KEY_AOD_DISABLED + "=" + p.disableAod);
+        pw.println(KEY_SOUNDTRIGGER_DISABLED + "=" + p.disableSoundTrigger);
+        pw.println(KEY_QUICK_DOZE_ENABLED + "=" + p.enableQuickDoze);
+        pw.println(KEY_ENABLE_NIGHT_MODE + "=" + p.enableNightMode);
 
-        pw.print("    Interactive File values:\n");
-        dumpMap(pw, "      ", p.filesForInteractive);
+        pw.println("Interactive File values:");
+        pw.increaseIndent();
+        dumpMap(pw, p.filesForInteractive);
+        pw.decreaseIndent();
         pw.println();
 
-        pw.print("    Noninteractive File values:\n");
-        dumpMap(pw, "      ", p.filesForNoninteractive);
+        pw.println("Noninteractive File values:");
+        pw.increaseIndent();
+        dumpMap(pw, p.filesForNoninteractive);
+        pw.decreaseIndent();
+
+        // Decrease from indent right after "Policy" line
+        pw.decreaseIndent();
     }
 
-    private void dumpMap(PrintWriter pw, String prefix, ArrayMap<String, String> map) {
+    private void dumpMap(PrintWriter pw, ArrayMap<String, String> map) {
         if (map == null) {
+            pw.println("N/A");
             return;
         }
         final int size = map.size();
         for (int i = 0; i < size; i++) {
-            pw.print(prefix);
             pw.print(map.keyAt(i));
             pw.print(": '");
             pw.print(map.valueAt(i));
