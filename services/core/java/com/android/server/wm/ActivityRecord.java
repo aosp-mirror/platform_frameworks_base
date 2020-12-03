@@ -925,8 +925,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (mVoiceInteraction) {
             pw.println(prefix + "mVoiceInteraction=true");
         }
-        pw.print(prefix); pw.print("mOccludesParent="); pw.print(mOccludesParent);
-        pw.print(" mOrientation="); pw.println(mOrientation);
+        pw.print(prefix); pw.print("mOccludesParent="); pw.println(mOccludesParent);
+        pw.print(prefix); pw.print("mOrientation=");
+        pw.println(ActivityInfo.screenOrientationToString(mOrientation));
         pw.println(prefix + "mVisibleRequested=" + mVisibleRequested
                 + " mVisible=" + mVisible + " mClientVisible=" + mClientVisible
                 + ((mDeferHidingClient) ? " mDeferHidingClient=" + mDeferHidingClient : "")
@@ -1010,6 +1011,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             }
             if (info.supportsSizeChanges) {
                 pw.println(prefix + "supportsSizeChanges=true");
+            }
+            if (info.configChanges != 0) {
+                pw.println(prefix + "configChanges=0x" + Integer.toHexString(info.configChanges));
             }
         }
     }
