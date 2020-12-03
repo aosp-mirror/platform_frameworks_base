@@ -26,6 +26,7 @@ import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
 import static android.net.NetworkPolicy.LIMIT_DISABLED;
 import static android.net.NetworkPolicy.WARNING_DISABLED;
 import static android.net.NetworkTemplate.NETWORK_TYPE_ALL;
+import static android.net.NetworkTemplate.OEM_MANAGED_ALL;
 import static android.provider.Settings.Global.NETWORK_DEFAULT_DAILY_MULTIPATH_QUOTA_BYTES;
 import static android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID;
 
@@ -226,7 +227,7 @@ public class MultipathPolicyTracker {
             mNetworkTemplate = new NetworkTemplate(
                     NetworkTemplate.MATCH_MOBILE, subscriberId, new String[] { subscriberId },
                     null, NetworkStats.METERED_ALL, NetworkStats.ROAMING_ALL,
-                    NetworkStats.DEFAULT_NETWORK_NO, NETWORK_TYPE_ALL);
+                    NetworkStats.DEFAULT_NETWORK_NO, NETWORK_TYPE_ALL, OEM_MANAGED_ALL);
             mUsageCallback = new UsageCallback() {
                 @Override
                 public void onThresholdReached(int networkType, String subscriberId) {
@@ -274,7 +275,8 @@ public class MultipathPolicyTracker {
                     null /* networkId, unused for matching mobile networks */,
                     !nc.hasCapability(NET_CAPABILITY_NOT_ROAMING),
                     !nc.hasCapability(NET_CAPABILITY_NOT_METERED),
-                    false /* defaultNetwork, templates should have DEFAULT_NETWORK_ALL */);
+                    false /* defaultNetwork, templates should have DEFAULT_NETWORK_ALL */,
+                    OEM_MANAGED_ALL);
         }
 
         private long getRemainingDailyBudget(long limitBytes,

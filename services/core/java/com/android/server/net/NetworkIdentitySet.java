@@ -40,6 +40,7 @@ public class NetworkIdentitySet extends HashSet<NetworkIdentity> implements
     private static final int VERSION_ADD_NETWORK_ID = 3;
     private static final int VERSION_ADD_METERED = 4;
     private static final int VERSION_ADD_DEFAULT_NETWORK = 5;
+    private static final int VERSION_ADD_OEM_MANAGED_NETWORK = 6;
 
     public NetworkIdentitySet() {
     }
@@ -84,13 +85,20 @@ public class NetworkIdentitySet extends HashSet<NetworkIdentity> implements
                 defaultNetwork = true;
             }
 
+            final int oemNetCapabilities;
+            if (version >= VERSION_ADD_OEM_MANAGED_NETWORK) {
+                oemNetCapabilities = in.readInt();
+            } else {
+                oemNetCapabilities = NetworkIdentity.OEM_NONE;
+            }
+
             add(new NetworkIdentity(type, subType, subscriberId, networkId, roaming, metered,
-                    defaultNetwork));
+                    defaultNetwork, oemNetCapabilities));
         }
     }
 
     public void writeToStream(DataOutput out) throws IOException {
-        out.writeInt(VERSION_ADD_DEFAULT_NETWORK);
+        out.writeInt(VERSION_ADD_OEM_MANAGED_NETWORK);
         out.writeInt(size());
         for (NetworkIdentity ident : this) {
             out.writeInt(ident.getType());
@@ -100,6 +108,7 @@ public class NetworkIdentitySet extends HashSet<NetworkIdentity> implements
             out.writeBoolean(ident.getRoaming());
             out.writeBoolean(ident.getMetered());
             out.writeBoolean(ident.getDefaultNetwork());
+            out.writeInt(ident.getOemManaged());
         }
     }
 
