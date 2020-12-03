@@ -144,6 +144,8 @@ public class NetworkPolicyManager {
     public static final String FIREWALL_CHAIN_NAME_STANDBY = "standby";
     /** @hide */
     public static final String FIREWALL_CHAIN_NAME_POWERSAVE = "powersave";
+    /** @hide */
+    public static final String FIREWALL_CHAIN_NAME_RESTRICTED = "restricted";
 
     private static final boolean ALLOW_PLATFORM_APP_POLICY = true;
 
