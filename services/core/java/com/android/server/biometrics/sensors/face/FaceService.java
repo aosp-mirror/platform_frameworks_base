@@ -157,14 +157,13 @@ public class FaceService extends SystemService implements BiometricServiceCallba
         }
 
         @Override
-        public byte[] dumpSensorServiceStateProto() {
+        public byte[] dumpSensorServiceStateProto(int sensorId) {
             Utils.checkPermission(getContext(), USE_BIOMETRIC_INTERNAL);
 
             final ProtoOutputStream proto = new ProtoOutputStream();
-            for (ServiceProvider provider : mServiceProviders) {
-                for (FaceSensorPropertiesInternal props : provider.getSensorProperties()) {
-                    provider.dumpProtoState(props.sensorId, proto);
-                }
+            final ServiceProvider provider = getProviderForSensor(sensorId);
+            if (provider != null) {
+                provider.dumpProtoState(sensorId, proto);
             }
             proto.flush();
             return proto.getBytes();

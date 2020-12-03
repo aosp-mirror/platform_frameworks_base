@@ -115,15 +115,13 @@ public class FingerprintService extends SystemService implements BiometricServic
         }
 
         @Override
-        public byte[] dumpSensorServiceStateProto() {
+        public byte[] dumpSensorServiceStateProto(int sensorId) {
             Utils.checkPermission(getContext(), USE_BIOMETRIC_INTERNAL);
 
             final ProtoOutputStream proto = new ProtoOutputStream();
-            for (ServiceProvider provider : mServiceProviders) {
-                for (FingerprintSensorPropertiesInternal props
-                        : provider.getSensorProperties()) {
-                    provider.dumpProtoState(props.sensorId, proto);
-                }
+            final ServiceProvider provider = getProviderForSensor(sensorId);
+            if (provider != null) {
+                provider.dumpProtoState(sensorId, proto);
             }
             proto.flush();
             return proto.getBytes();
@@ -437,6 +435,7 @@ public class FingerprintService extends SystemService implements BiometricServic
                             pw.println("Dumping for sensorId: " + props.sensorId
                                     + ", provider: " + provider.getClass().getSimpleName());
                             provider.dumpInternal(props.sensorId, pw);
+                            pw.println();
                         }
                     }
                 }
