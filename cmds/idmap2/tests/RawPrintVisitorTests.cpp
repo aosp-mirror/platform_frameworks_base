@@ -65,7 +65,7 @@ TEST(RawPrintVisitorTests, CreateRawPrintVisitor) {
   (*idmap)->accept(&visitor);
 
   ASSERT_CONTAINS_REGEX(ADDRESS "504d4449  magic\n", stream.str());
-  ASSERT_CONTAINS_REGEX(ADDRESS "00000005  version\n", stream.str());
+  ASSERT_CONTAINS_REGEX(ADDRESS "00000006  version\n", stream.str());
   ASSERT_CONTAINS_REGEX(
       StringPrintf(ADDRESS "%s  target crc\n", android::idmap2::TestConstants::TARGET_CRC_STRING),
       stream.str());
@@ -85,7 +85,7 @@ TEST(RawPrintVisitorTests, CreateRawPrintVisitor) {
   ASSERT_CONTAINS_REGEX(ADDRESS "7f010000  overlay id: integer/int1\n", stream.str());
   ASSERT_CONTAINS_REGEX(ADDRESS "7f010000  target id: integer/int1\n", stream.str());
   ASSERT_CONTAINS_REGEX(ADDRESS "000000b4  string pool size\n", stream.str());
-  ASSERT_CONTAINS_REGEX("000002bc: ........  string pool: ...\n", stream.str());
+  ASSERT_CONTAINS_REGEX("000001bc: ........  string pool\n", stream.str());
 }
 
 TEST(RawPrintVisitorTests, CreateRawPrintVisitorWithoutAccessToApks) {
@@ -102,7 +102,7 @@ TEST(RawPrintVisitorTests, CreateRawPrintVisitorWithoutAccessToApks) {
   (*idmap)->accept(&visitor);
 
   ASSERT_CONTAINS_REGEX(ADDRESS "504d4449  magic\n", stream.str());
-  ASSERT_CONTAINS_REGEX(ADDRESS "00000005  version\n", stream.str());
+  ASSERT_CONTAINS_REGEX(ADDRESS "00000006  version\n", stream.str());
   ASSERT_CONTAINS_REGEX(ADDRESS "00001234  target crc\n", stream.str());
   ASSERT_CONTAINS_REGEX(ADDRESS "00005678  overlay crc\n", stream.str());
   ASSERT_CONTAINS_REGEX(ADDRESS "00000011  fulfilled policies: public|signature\n", stream.str());
@@ -121,7 +121,7 @@ TEST(RawPrintVisitorTests, CreateRawPrintVisitorWithoutAccessToApks) {
   ASSERT_CONTAINS_REGEX(ADDRESS "7f020000  overlay id\n", stream.str());
   ASSERT_CONTAINS_REGEX(ADDRESS "7f030002  target id\n", stream.str());
   ASSERT_CONTAINS_REGEX(ADDRESS "00000004  string pool size\n", stream.str());
-  ASSERT_CONTAINS_REGEX("00000278: ........  string pool: ...\n", stream.str());
+  ASSERT_CONTAINS_REGEX("00000098: ........  string pool\n", stream.str());
 }
 
 }  // namespace android::idmap2

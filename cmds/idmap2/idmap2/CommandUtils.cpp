@@ -39,8 +39,8 @@ Result<Unit> Verify(const std::string& idmap_path, const std::string& target_pat
     return Error("failed to parse idmap header");
   }
 
-  const auto header_ok = header->IsUpToDate(target_path.c_str(), overlay_path.c_str(),
-                                            fulfilled_policies, enforce_overlayable);
+  const auto header_ok =
+      header->IsUpToDate(target_path, overlay_path, fulfilled_policies, enforce_overlayable);
   if (!header_ok) {
     return Error(header_ok.GetError(), "idmap not up to date");
   }

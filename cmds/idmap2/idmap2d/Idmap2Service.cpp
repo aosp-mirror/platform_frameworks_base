@@ -156,7 +156,7 @@ Status Idmap2Service::verifyIdmap(const std::string& target_apk_path,
   }
 
   auto up_to_date =
-      header->IsUpToDate(target_apk_path.c_str(), overlay_apk_path.c_str(), target_crc, overlay_crc,
+      header->IsUpToDate(target_apk_path overlay_apk_path, target_crc, overlay_crc,
                          ConvertAidlArgToPolicyBitmask(fulfilled_policies), enforce_overlayable);
 
   *_aidl_return = static_cast<bool>(up_to_date);

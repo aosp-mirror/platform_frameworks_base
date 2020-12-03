@@ -230,8 +230,8 @@ Result<ResourceMapping> ResourceMapping::CreateResourceMappingLegacy(
         base::StringPrintf("%s:%s", target_package->GetPackageName().c_str(), name->c_str());
     auto target_resource_result = target_am->GetResourceId(full_name);
     if (!target_resource_result.has_value()) {
-      log_info.Warning(LogMessage() << "failed to find resource \"" << full_name
-                                    << "\" in target resources");
+      log_info.Warning(LogMessage()
+                       << "failed to find resource \"" << full_name << "\" in target resources");
       continue;
     }
 

@@ -188,29 +188,27 @@ Result<Unit> Lookup(const std::vector<std::string>& args) {
     }
 
     if (i == 0) {
-      target_path = idmap_header->GetTargetPath().to_string();
+      target_path = idmap_header->GetTargetPath();
       auto target_apk = ApkAssets::Load(target_path);
       if (!target_apk) {
         return Error("failed to read target apk from %s", target_path.c_str());
       }
       apk_assets.push_back(std::move(target_apk));
 
-      auto manifest_info = ExtractOverlayManifestInfo(idmap_header->GetOverlayPath().to_string(),
-                                                      true /* assert_overlay */);
+      auto manifest_info =
+          ExtractOverlayManifestInfo(idmap_header->GetOverlayPath(), true /* assert_overlay */);
       if (!manifest_info) {
         return manifest_info.GetError();
       }
       target_package_name = (*manifest_info).target_package;
     } else if (target_path != idmap_header->GetTargetPath()) {
       return Error("different target APKs (expected target APK %s but %s has target APK %s)",
-                   target_path.c_str(), idmap_path.c_str(),
-                   idmap_header->GetTargetPath().to_string().c_str());
+                   target_path.c_str(), idmap_path.c_str(), idmap_header->GetTargetPath().c_str());
     }
 
     auto overlay_apk = ApkAssets::LoadOverlay(idmap_path);
     if (!overlay_apk) {
-      return Error("failed to read overlay apk from %s",
-                   idmap_header->GetOverlayPath().to_string().c_str());
+      return Error("failed to read overlay apk from %s", idmap_header->GetOverlayPath().c_str());
     }
     apk_assets.push_back(std::move(overlay_apk));
   }
