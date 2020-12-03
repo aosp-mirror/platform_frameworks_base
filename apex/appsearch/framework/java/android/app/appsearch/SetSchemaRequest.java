@@ -30,10 +30,9 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Encapsulates a request to update the schema of an {@link AppSearchSession} database.
+ * Encapsulates a request to update the schema of an {@link AppSearchManager} database.
  *
- * @see AppSearchSession#setSchema
- * @hide
+ * @see AppSearchManager#setSchema
  */
 public final class SetSchemaRequest {
     private final Set<AppSearchSchema> mSchemas;
@@ -82,9 +81,9 @@ public final class SetSchemaRequest {
          * follow the new schema.
          *
          * <p>By default, this is {@code false} and schema incompatibility causes the {@link
-         * AppSearchSession#setSchema} call to fail.
+         * AppSearchManager#setSchema} call to fail.
          *
-         * @see AppSearchSession#setSchema
+         * @see AppSearchManager#setSchema
          */
         @NonNull
         public Builder setForceOverride(boolean forceOverride) {
