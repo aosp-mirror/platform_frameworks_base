@@ -472,7 +472,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     int mLidKeyboardAccessibility;
     int mLidNavigationAccessibility;
-    private boolean mLidControlsDisplayFold;
     int mShortPressOnPowerBehavior;
     int mLongPressOnPowerBehavior;
     int mVeryLongPressOnPowerBehavior;
@@ -1789,8 +1788,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 com.android.internal.R.integer.config_lidKeyboardAccessibility);
         mLidNavigationAccessibility = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_lidNavigationAccessibility);
-        mLidControlsDisplayFold = mContext.getResources().getBoolean(
-                com.android.internal.R.bool.config_lidControlsDisplayFold);
 
         mAllowTheaterModeWakeFromKey = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_allowTheaterModeWakeFromKey);
@@ -1847,12 +1844,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         readConfigurationDependentBehaviors();
 
-        if (mLidControlsDisplayFold) {
-            mDisplayFoldController = DisplayFoldController.create(context, DEFAULT_DISPLAY);
-        } else if (SystemProperties.getBoolean("persist.debug.force_foldable", false)) {
-            mDisplayFoldController = DisplayFoldController.createWithProxSensor(context,
-                    DEFAULT_DISPLAY);
-        }
+        mDisplayFoldController = DisplayFoldController.create(context, DEFAULT_DISPLAY);
 
         mAccessibilityManager = (AccessibilityManager) context.getSystemService(
                 Context.ACCESSIBILITY_SERVICE);
@@ -4853,9 +4845,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     private void applyLidSwitchState() {
         final int lidState = mDefaultDisplayPolicy.getLidState();
-        if (mLidControlsDisplayFold && mDisplayFoldController != null) {
-            mDisplayFoldController.requestDeviceFolded(lidState == LID_CLOSED);
-        } else if (lidState == LID_CLOSED) {
+        if (lidState == LID_CLOSED) {
             int lidBehavior = getLidBehavior();
             switch (lidBehavior) {
                 case LID_BEHAVIOR_LOCK:

@@ -1281,6 +1281,10 @@ public final class SystemServer implements Dumpable {
             inputManager = new InputManagerService(context);
             t.traceEnd();
 
+            t.traceBegin("DeviceStateManagerService");
+            mSystemServiceManager.startService(DeviceStateManagerService.class);
+            t.traceEnd();
+
             if (!disableCameraService) {
                 t.traceBegin("StartCameraServiceProxy");
                 mSystemServiceManager.startService(CameraServiceProxy.class);
@@ -1372,10 +1376,6 @@ public final class SystemServer implements Dumpable {
 
             t.traceBegin("AppIntegrityService");
             mSystemServiceManager.startService(AppIntegrityManagerService.class);
-            t.traceEnd();
-
-            t.traceBegin("DeviceStateManagerService");
-            mSystemServiceManager.startService(DeviceStateManagerService.class);
             t.traceEnd();
 
         } catch (Throwable e) {

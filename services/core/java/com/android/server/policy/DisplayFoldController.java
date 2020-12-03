@@ -20,12 +20,10 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.graphics.Rect;
 import android.hardware.ICameraService;
-import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
-import android.hardware.SensorManager;
+import android.hardware.devicestate.DeviceStateManager;
 import android.hardware.display.DisplayManagerInternal;
 import android.os.Handler;
+import android.os.HandlerExecutor;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.util.Slog;
@@ -63,7 +61,8 @@ class DisplayFoldController {
     private String mFocusedApp;
     private final DisplayFoldDurationLogger mDurationLogger = new DisplayFoldDurationLogger();
 
-    DisplayFoldController(WindowManagerInternal windowManagerInternal,
+    DisplayFoldController(
+            Context context, WindowManagerInternal windowManagerInternal,
             DisplayManagerInternal displayManagerInternal,
             @Nullable CameraServiceProxy cameraServiceProxy, int displayId, Rect foldedArea,
             Handler handler) {
@@ -73,6 +72,10 @@ class DisplayFoldController {
         mDisplayId = displayId;
         mFoldedArea = new Rect(foldedArea);
         mHandler = handler;
+
+        DeviceStateManager deviceStateManager = context.getSystemService(DeviceStateManager.class);
+        deviceStateManager.registerDeviceStateListener(new DeviceStateListener(context),
+                new HandlerExecutor(handler));
     }
 
     void finishedGoingToSleep() {
@@ -83,11 +86,7 @@ class DisplayFoldController {
         mDurationLogger.onFinishedWakingUp(mFolded);
     }
 
-    void requestDeviceFolded(boolean folded) {
-        mHandler.post(() -> setDeviceFolded(folded));
-    }
-
-    void setDeviceFolded(boolean folded) {
+    private void setDeviceFolded(boolean folded) {
         if (mFolded != null && mFolded == folded) {
             return;
         }
@@ -179,33 +178,6 @@ class DisplayFoldController {
         }
     }
 
-    /**
-     * Only used for the case that persist.debug.force_foldable is set.
-     * This is using proximity sensor to simulate the fold state switch.
-     */
-    static DisplayFoldController createWithProxSensor(Context context, int displayId) {
-        final SensorManager sensorManager = context.getSystemService(SensorManager.class);
-        final Sensor proxSensor = sensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
-        if (proxSensor == null) {
-            return null;
-        }
-
-        final DisplayFoldController result = create(context, displayId);
-        sensorManager.registerListener(new SensorEventListener() {
-            @Override
-            public void onSensorChanged(SensorEvent event) {
-                result.requestDeviceFolded(event.values[0] < 1f);
-            }
-
-            @Override
-            public void onAccuracyChanged(Sensor sensor, int accuracy) {
-                // Ignore.
-            }
-        }, proxSensor, SensorManager.SENSOR_DELAY_NORMAL);
-
-        return result;
-    }
-
     void onDefaultDisplayFocusChanged(String pkg) {
         mFocusedApp = pkg;
     }
@@ -227,7 +199,26 @@ class DisplayFoldController {
             foldedArea = Rect.unflattenFromString(configFoldedArea);
         }
 
-        return new DisplayFoldController(windowManagerService, displayService, cameraServiceProxy,
-                displayId, foldedArea, DisplayThread.getHandler());
+        return new DisplayFoldController(context, windowManagerService, displayService,
+                cameraServiceProxy, displayId, foldedArea, DisplayThread.getHandler());
+    }
+
+    /**
+     * Listens to changes in device state and reports the state as folded if the device state
+     * matches the value in the {@link com.android.internal.R.integer.config_foldedDeviceState}
+     * resource.
+     */
+    private class DeviceStateListener implements DeviceStateManager.DeviceStateListener {
+        private final int mFoldedDeviceState;
+
+        DeviceStateListener(Context context) {
+            mFoldedDeviceState = context.getResources().getInteger(
+                    com.android.internal.R.integer.config_foldedDeviceState);
+        }
+
+        @Override
+        public void onDeviceStateChanged(int deviceState) {
+            setDeviceFolded(deviceState == mFoldedDeviceState);
+        }
     }
 }
