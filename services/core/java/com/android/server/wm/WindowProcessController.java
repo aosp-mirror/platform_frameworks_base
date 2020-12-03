@@ -585,9 +585,8 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     }
 
     /**
-     * If there are no tokens, we don't allow *by token*. If there are tokens, we need to check if
-     * the callback handles all the tokens, if so we ask the callback if the activity should be
-     * started, otherwise we allow.
+     * If there are no tokens, we don't allow *by token*. If there are tokens, we ask the callback
+     * if the start is allowed for these tokens, otherwise if there is no callback we allow.
      */
     private boolean isBackgroundStartAllowedByToken() {
         if (mBackgroundActivityStartTokens.isEmpty()) {
@@ -597,16 +596,22 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
             // We have tokens but no callback to decide => allow
             return true;
         }
-        IBinder callbackToken = mBackgroundActivityStartCallback.getToken();
-        for (IBinder token : mBackgroundActivityStartTokens.values()) {
-            if (token != callbackToken) {
-                // The callback doesn't handle all the tokens => allow
-                return true;
-            }
+        // The callback will decide
+        return mBackgroundActivityStartCallback.isActivityStartAllowed(
+                mBackgroundActivityStartTokens.values(), mInfo.uid, mInfo.packageName);
+    }
+
+    /**
+     * Returns whether this process is allowed to close system dialogs via a background activity
+     * start token that allows the close system dialogs operation (eg. notification).
+     */
+    public boolean canCloseSystemDialogsByToken() {
+        synchronized (mAtm.mGlobalLock) {
+            return !mBackgroundActivityStartTokens.isEmpty()
+                    && mBackgroundActivityStartCallback != null
+                    && mBackgroundActivityStartCallback.canCloseSystemDialogs(
+                            mBackgroundActivityStartTokens.values(), mInfo.uid);
         }
-        // The callback handles all the tokens => callback decides
-        return mBackgroundActivityStartCallback.isActivityStartAllowed(mInfo.uid,
-                mInfo.packageName);
     }
 
     private boolean isBoundByForegroundUid() {
