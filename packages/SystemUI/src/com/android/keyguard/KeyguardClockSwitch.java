@@ -156,13 +156,17 @@ public class KeyguardClockSwitch extends RelativeLayout {
 
             statusAreaLP.removeRule(RelativeLayout.BELOW);
             statusAreaLP.addRule(RelativeLayout.ALIGN_PARENT_START);
+            statusAreaLP.addRule(RelativeLayout.START_OF, R.id.new_lockscreen_clock_view);
+            statusAreaLP.width = 0;
         } else {
             setPaddingRelative(0, 0, 0, 0);
             mSmallClockFrame.setVisibility(VISIBLE);
             mNewLockscreenClockFrame.setVisibility(GONE);
 
             statusAreaLP.removeRule(RelativeLayout.ALIGN_PARENT_START);
+            statusAreaLP.removeRule(RelativeLayout.START_OF);
             statusAreaLP.addRule(RelativeLayout.BELOW, R.id.clock_view);
+            statusAreaLP.width = ViewGroup.LayoutParams.WRAP_CONTENT;
         }
 
         requestLayout();
