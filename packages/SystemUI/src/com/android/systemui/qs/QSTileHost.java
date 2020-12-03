@@ -28,6 +28,7 @@ import android.provider.Settings.Secure;
 import android.service.quicksettings.Tile;
 import android.text.TextUtils;
 import android.util.ArraySet;
+import android.util.FeatureFlagUtils;
 import android.util.Log;
 
 import com.android.internal.logging.InstanceId;
@@ -444,6 +445,11 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
         final ArrayList<String> tiles = new ArrayList<String>();
         boolean addedDefault = false;
         Set<String> addedSpecs = new ArraySet<>();
+        // TODO(b/174753536): Move it into the config file.
+        if (FeatureFlagUtils.isEnabled(context, FeatureFlagUtils.SETTINGS_PROVIDER_MODEL)) {
+            tiles.add("internet");
+            addedSpecs.add("internet");
+        }
         for (String tile : tileList.split(",")) {
             tile = tile.trim();
             if (tile.isEmpty()) continue;
@@ -459,6 +465,12 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
                     addedDefault = true;
                 }
             } else {
+                // TODO(b/174753536): Move it into the config file.
+                if (FeatureFlagUtils.isEnabled(context, FeatureFlagUtils.SETTINGS_PROVIDER_MODEL)) {
+                    if (tile.equals("wifi") || tile.equals("cell")) {
+                        continue;
+                    }
+                }
                 if (!addedSpecs.contains(tile)) {
                     tiles.add(tile);
                     addedSpecs.add(tile);
