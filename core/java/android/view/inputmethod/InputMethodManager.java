@@ -598,8 +598,6 @@ public final class InputMethodManager {
          */
         @Override
         public void finishInput() {
-            ImeTracing.getInstance().triggerClientDump(
-                    "InputMethodManager.DelegateImpl#finishInput", InputMethodManager.this);
             synchronized (mH) {
                 finishInputLocked();
             }
@@ -642,10 +640,6 @@ public final class InputMethodManager {
                 @SoftInputModeFlags int softInputMode, int windowFlags, boolean forceNewFocus) {
             int startInputFlags = getStartInputFlags(focusedView, 0);
             startInputFlags |= StartInputFlags.WINDOW_GAINED_FOCUS;
-
-            ImeTracing.getInstance().triggerClientDump(
-                    "InputMethodManager.DelegateImpl#startInputAsyncOnWindowFocusGain",
-                    InputMethodManager.this);
 
             final ImeFocusController controller = getFocusController();
             if (controller == null) {
@@ -956,9 +950,6 @@ public final class InputMethodManager {
                 case MSG_APPLY_IME_VISIBILITY: {
                     synchronized (mH) {
                         if (mImeInsetsConsumer != null) {
-                            ImeTracing.getInstance().triggerClientDump(
-                                    "ImeInsetsSourceConsumer#applyImeVisibility",
-                                    InputMethodManager.this);
                             mImeInsetsConsumer.applyImeVisibility(msg.arg1 != 0);
                         }
                     }
@@ -1869,8 +1860,6 @@ public final class InputMethodManager {
      * {@link #HIDE_NOT_ALWAYS} bit set.
      **/
     public void toggleSoftInputFromWindow(IBinder windowToken, int showFlags, int hideFlags) {
-        ImeTracing.getInstance().triggerClientDump(
-                "InputMethodManager#toggleSoftInputFromWindow", InputMethodManager.this);
         synchronized (mH) {
             final View servedView = getServedViewLocked();
             if (servedView == null || servedView.getWindowToken() != windowToken) {
@@ -1898,8 +1887,6 @@ public final class InputMethodManager {
      * {@link #HIDE_NOT_ALWAYS} bit set.
      */
     public void toggleSoftInput(int showFlags, int hideFlags) {
-        ImeTracing.getInstance().triggerClientDump(
-                "InputMethodManager#toggleSoftInput", InputMethodManager.this);
         if (mCurMethod != null) {
             try {
                 mCurMethod.toggleSoftInput(showFlags, hideFlags);
