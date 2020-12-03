@@ -16,6 +16,7 @@
 
 package com.android.server.wm.flicker.launch
 
+import androidx.test.filters.FlakyTest
 import android.view.Surface
 import androidx.test.filters.RequiresDevice
 import androidx.test.platform.app.InstrumentationRegistry
@@ -53,6 +54,7 @@ import org.junit.runners.Parameterized
 @RequiresDevice
 @RunWith(Parameterized::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
+@FlakyTest(bugId = 174658929)
 class OpenAppFromOverviewTest(
     testName: String,
     flickerSpec: Flicker
