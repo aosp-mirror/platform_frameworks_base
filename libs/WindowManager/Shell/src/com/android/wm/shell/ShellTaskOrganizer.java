@@ -43,8 +43,6 @@ import androidx.annotation.Nullable;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.common.ShellExecutor;
-import com.android.wm.shell.common.SyncTransactionQueue;
-import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.startingsurface.StartingSurfaceDrawer;
 
 import java.io.PrintWriter;
@@ -102,24 +100,17 @@ public class ShellTaskOrganizer extends TaskOrganizer {
     /** @see #setPendingLaunchCookieListener */
     private final ArrayMap<IBinder, TaskListener> mLaunchCookieToListener = new ArrayMap<>();
 
-    // TODO(shell-transitions): move to a more "global" Shell location as this isn't only for Tasks
-    private final Transitions mTransitions;
-
     private final Object mLock = new Object();
     private final StartingSurfaceDrawer mStartingSurfaceDrawer;
 
-    public ShellTaskOrganizer(SyncTransactionQueue syncQueue, TransactionPool transactionPool,
-            ShellExecutor mainExecutor, ShellExecutor animExecutor, Context context) {
-        this(null, syncQueue, transactionPool, mainExecutor, animExecutor, context);
+    public ShellTaskOrganizer(ShellExecutor mainExecutor, Context context) {
+        this(null, mainExecutor, context);
     }
 
     @VisibleForTesting
-    ShellTaskOrganizer(ITaskOrganizerController taskOrganizerController,
-            SyncTransactionQueue syncQueue, TransactionPool transactionPool,
-            ShellExecutor mainExecutor, ShellExecutor animExecutor, Context context) {
+    ShellTaskOrganizer(ITaskOrganizerController taskOrganizerController, ShellExecutor mainExecutor,
+            Context context) {
         super(taskOrganizerController, mainExecutor);
-        mTransitions = new Transitions(this, transactionPool, mainExecutor, animExecutor);
-        if (Transitions.ENABLE_SHELL_TRANSITIONS) mTransitions.register(this);
         // TODO(b/131727939) temporarily live here, the starting surface drawer should be controlled
         //  by a controller, that class should be create while porting
         //  ActivityRecord#addStartingWindow to WMShell.

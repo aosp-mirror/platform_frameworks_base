@@ -40,6 +40,7 @@ public class ShellInit {
     private final Optional<AppPairs> mAppPairsOptional;
     private final LetterboxTaskListener mLetterboxTaskListener;
     private final FullscreenTaskListener mFullscreenTaskListener;
+    private final Transitions mTransitions;
 
     public ShellInit(DisplayImeController displayImeController,
             DragAndDropController dragAndDropController,
@@ -47,7 +48,8 @@ public class ShellInit {
             Optional<SplitScreen> splitScreenOptional,
             Optional<AppPairs> appPairsOptional,
             LetterboxTaskListener letterboxTaskListener,
-            FullscreenTaskListener fullscreenTaskListener) {
+            FullscreenTaskListener fullscreenTaskListener,
+            Transitions transitions) {
         mDisplayImeController = displayImeController;
         mDragAndDropController = dragAndDropController;
         mShellTaskOrganizer = shellTaskOrganizer;
@@ -55,6 +57,7 @@ public class ShellInit {
         mAppPairsOptional = appPairsOptional;
         mLetterboxTaskListener = letterboxTaskListener;
         mFullscreenTaskListener = fullscreenTaskListener;
+        mTransitions = transitions;
     }
 
     @ExternalThread
@@ -72,5 +75,9 @@ public class ShellInit {
         mAppPairsOptional.ifPresent(AppPairs::onOrganizerRegistered);
         // Bind the splitscreen impl to the drag drop controller
         mDragAndDropController.setSplitScreenController(mSplitScreenOptional);
+
+        if (Transitions.ENABLE_SHELL_TRANSITIONS) {
+            mTransitions.register(mShellTaskOrganizer);
+        }
     }
 }
