@@ -52,6 +52,4 @@ oneway interface IInputMethodSession {
     void notifyImeHidden();
 
     void removeImeSurface();
-
-    void finishInput();
 }

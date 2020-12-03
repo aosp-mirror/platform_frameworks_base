@@ -15,7 +15,6 @@
 
 package com.android.server.inputmethod;
 
-import static android.inputmethodservice.InputMethodService.FINISH_INPUT_NO_FALLBACK_CONNECTION;
 import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_CRITICAL;
 import static android.os.IServiceManager.DUMP_FLAG_PROTO;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
@@ -153,7 +152,6 @@ import android.view.inputmethod.InputMethodManager;
 import android.view.inputmethod.InputMethodSubtype;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.compat.IPlatformCompat;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.inputmethod.IInputContentUriToken;
 import com.android.internal.inputmethod.IInputMethodPrivilegedOperations;
@@ -710,8 +708,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
      * True if the device is currently interactive with user.  The value is true initially.
      */
     boolean mIsInteractive = true;
-
-    private IPlatformCompat mPlatformCompat;
 
     int mBackDisposition = InputMethodService.BACK_DISPOSITION_DEFAULT;
 
@@ -1674,8 +1670,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         mUserManagerInternal = LocalServices.getService(UserManagerInternal.class);
         mHasFeature = context.getPackageManager().hasSystemFeature(
                 PackageManager.FEATURE_INPUT_METHODS);
-        mPlatformCompat = IPlatformCompat.Stub.asInterface(
-                ServiceManager.getService(Context.PLATFORM_COMPAT_SERVICE));
         mSlotIme = mContext.getString(com.android.internal.R.string.status_bar_ime);
         mIsLowRam = ActivityManager.isLowRamDeviceStatic();
 
@@ -2312,8 +2306,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 }
             }
 
-            scheduleSetActiveToClient(mCurClient, false /* active */, false /* fullscreen */,
-                    false /* reportToImeController */);
+            executeOrSendMessage(mCurClient.client, mCaller.obtainMessageIIO(
+                    MSG_SET_ACTIVE, 0, 0, mCurClient));
             executeOrSendMessage(mCurClient.client, mCaller.obtainMessageIIO(
                     MSG_UNBIND_CLIENT, mCurSeq, unbindClientReason, mCurClient.client));
             mCurClient.sessionRequested = false;
@@ -2455,8 +2449,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
             // If the screen is on, inform the new client it is active
             if (mIsInteractive) {
-                scheduleSetActiveToClient(cs, true /* active */, false /* fullscreen */,
-                        false /* reportToImeController */);
+                executeOrSendMessage(cs.client, mCaller.obtainMessageIO(MSG_SET_ACTIVE, 1, cs));
             }
         }
 
@@ -4459,20 +4452,15 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 args.recycle();
                 return true;
             }
-            case MSG_SET_ACTIVE: {
-                args = (SomeArgs) msg.obj;
-                final ClientState clientState = (ClientState) args.arg1;
+            case MSG_SET_ACTIVE:
                 try {
-                    clientState.client.setActive(args.argi1 != 0 /* active */,
-                            args.argi2 != 0 /* fullScreen */,
-                            args.argi3 != 0 /* reportToImeController */);
+                    ((ClientState)msg.obj).client.setActive(msg.arg1 != 0, msg.arg2 != 0);
                 } catch (RemoteException e) {
                     Slog.w(TAG, "Got RemoteException sending setActive(false) notification to pid "
-                            + clientState.pid + " uid " + clientState.uid);
+                            + ((ClientState)msg.obj).pid + " uid "
+                            + ((ClientState)msg.obj).uid);
                 }
-                args.recycle();
                 return true;
-            }
             case MSG_SET_INTERACTIVE:
                 handleSetInteractive(msg.arg1 != 0);
                 return true;
@@ -4558,22 +4546,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
             // Inform the current client of the change in active status
             if (mCurClient != null && mCurClient.client != null) {
-                boolean reportToImeController = false;
-                try {
-                    reportToImeController = mPlatformCompat.isChangeEnabledByUid(
-                            FINISH_INPUT_NO_FALLBACK_CONNECTION, mCurMethodUid);
-                } catch (RemoteException e) {
-                }
-                scheduleSetActiveToClient(mCurClient, mIsInteractive, mInFullscreenMode,
-                        reportToImeController);
+                executeOrSendMessage(mCurClient.client, mCaller.obtainMessageIIO(
+                        MSG_SET_ACTIVE, mIsInteractive ? 1 : 0, mInFullscreenMode ? 1 : 0,
+                        mCurClient));
             }
         }
-    }
-
-    private void scheduleSetActiveToClient(ClientState state, boolean active, boolean fullscreen,
-            boolean reportToImeController) {
-        executeOrSendMessage(state.client, mCaller.obtainMessageIIIIO(MSG_SET_ACTIVE,
-                active ? 1 : 0, fullscreen ? 1 : 0, reportToImeController ? 1 : 0, 0, state));
     }
 
     private boolean chooseNewDefaultIMELocked() {
