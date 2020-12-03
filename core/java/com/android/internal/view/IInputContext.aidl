@@ -70,6 +70,8 @@ import com.android.internal.inputmethod.ISurroundingTextResultCallback;
     
     void clearMetaKeyStates(int states);
     
+    void performSpellCheck();
+
     void performPrivateCommand(String action, in Bundle data);
 
     void setComposingRegion(int start, int end);
