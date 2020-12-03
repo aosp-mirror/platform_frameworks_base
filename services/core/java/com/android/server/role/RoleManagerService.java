@@ -71,7 +71,6 @@ import com.android.server.FgThread;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.pm.UserManagerInternal;
-import com.android.server.pm.permission.PermissionManagerServiceInternal;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileDescriptor;
@@ -708,12 +707,6 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
                 } catch (InterruptedException | ExecutionException | TimeoutException e) {
                     Slog.e(LOG_TAG, "Exception while setting default browser: " + packageName, e);
                     return false;
-                }
-
-                if (packageName != null) {
-                    final PermissionManagerServiceInternal permissionManager =
-                            LocalServices.getService(PermissionManagerServiceInternal.class);
-                    permissionManager.grantDefaultPermissionsToDefaultBrowser(packageName, userId);
                 }
             } finally {
                 Binder.restoreCallingIdentity(identity);

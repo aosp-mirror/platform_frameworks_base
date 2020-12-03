@@ -380,6 +380,8 @@ import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
 import com.android.server.pm.parsing.pkg.PackageImpl;
 import com.android.server.pm.parsing.pkg.ParsedPackage;
+import com.android.server.pm.permission.LegacyPermissionManagerInternal;
+import com.android.server.pm.permission.LegacyPermissionManagerService;
 import com.android.server.pm.permission.Permission;
 import com.android.server.pm.permission.PermissionManagerService;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
@@ -961,6 +963,8 @@ public class PackageManagerService extends IPackageManager.Stub
         private final Singleton<PackageInstallerService> mPackageInstallerServiceProducer;
         private final ProducerWithArgument<InstantAppResolverConnection, ComponentName>
                 mInstantAppResolverConnectionProducer;
+        private final Singleton<LegacyPermissionManagerInternal>
+                mLegacyPermissionManagerInternalProducer;
         private final SystemWrapper mSystemWrapper;
         private final ServiceProducer mGetLocalServiceProducer;
         private final ServiceProducer mGetSystemServiceProducer;
@@ -993,6 +997,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 ProducerWithArgument<InstantAppResolverConnection, ComponentName> 
                         instantAppResolverConnectionProducer,
                 Producer<ModuleInfoProvider> moduleInfoProviderProducer,
+                Producer<LegacyPermissionManagerInternal> legacyPermissionManagerInternalProducer,
                 SystemWrapper systemWrapper,
                 ServiceProducer getLocalServiceProducer,
                 ServiceProducer getSystemServiceProducer) {
@@ -1026,6 +1031,8 @@ public class PackageManagerService extends IPackageManager.Stub
             mPackageInstallerServiceProducer = new Singleton<>(packageInstallerServiceProducer);
             mInstantAppResolverConnectionProducer = instantAppResolverConnectionProducer;
             mModuleInfoProviderProducer = new Singleton<>(moduleInfoProviderProducer);
+            mLegacyPermissionManagerInternalProducer = new Singleton<>(
+                    legacyPermissionManagerInternalProducer);
             mSystemWrapper = systemWrapper;
             mGetLocalServiceProducer = getLocalServiceProducer;
             mGetSystemServiceProducer = getSystemServiceProducer;
@@ -1174,6 +1181,10 @@ public class PackageManagerService extends IPackageManager.Stub
         public ModuleInfoProvider getModuleInfoProvider() {
             return mModuleInfoProviderProducer.get(this, mPackageManager);
         }
+
+        public LegacyPermissionManagerInternal getLegacyPermissionManagerInternal() {
+            return mLegacyPermissionManagerInternalProducer.get(this, mPackageManager);
+        }
     }
 
     /** Provides an abstraction to static access to system state. */
@@ -1232,6 +1243,7 @@ public class PackageManagerService extends IPackageManager.Stub
         public boolean isPreNupgrade;
         public boolean isPreQupgrade;
         public boolean isUpgrade;
+        public LegacyPermissionManagerInternal legacyPermissionManagerInternal;
         public DisplayMetrics Metrics;
         public ModuleInfoProvider moduleInfoProvider;
         public MoveCallbacks moveCallbacks;
@@ -1374,6 +1386,8 @@ public class PackageManagerService extends IPackageManager.Stub
     private final IncrementalManager mIncrementalManager;
 
     private final DefaultAppProvider mDefaultAppProvider;
+
+    private final LegacyPermissionManagerInternal mLegacyPermissionManager;
 
     private final PackageProperty mPackageProperty = new PackageProperty();
 
@@ -2838,8 +2852,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 (i, pm) -> new ViewCompiler(i.getInstallLock(), i.getInstaller()),
                 (i, pm) -> (IncrementalManager)
                         i.getContext().getSystemService(Context.INCREMENTAL_SERVICE),
-                (i, pm) -> new DefaultAppProvider(() -> context.getSystemService(RoleManager.class),
-                        i.getPermissionManagerServiceInternal()),
+                (i, pm) -> new DefaultAppProvider(() -> context.getSystemService(
+                        RoleManager.class)),
                 (i, pm) -> new DisplayMetrics(),
                 (i, pm) -> new PackageParser2(pm.mSeparateProcesses, pm.mOnlyCore,
                         i.getDisplayMetrics(), pm.mCacheDir,
@@ -2856,6 +2870,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 (i, pm, cn) -> new InstantAppResolverConnection(
                         i.getContext(), cn, Intent.ACTION_RESOLVE_INSTANT_APP_PACKAGE),
                 (i, pm) -> new ModuleInfoProvider(i.getContext(), pm),
+                (i, pm) -> LegacyPermissionManagerService.create(i.getContext()),
                 new DefaultSystemWrapper(),
                 LocalServices::getService,
                 context::getSystemService);
@@ -3032,6 +3047,7 @@ public class PackageManagerService extends IPackageManager.Stub
         mAvailableFeatures = testParams.availableFeatures;
         mDefParseFlags = testParams.defParseFlags;
         mDefaultAppProvider = testParams.defaultAppProvider;
+        mLegacyPermissionManager = testParams.legacyPermissionManagerInternal;
         mDexManager = testParams.dexManager;
         mDirsToScanAsSystem = testParams.dirsToScanAsSystem;
         mFactoryTest = testParams.factoryTest;
@@ -3136,6 +3152,7 @@ public class PackageManagerService extends IPackageManager.Stub
         mPermissionManagerService = injector.getPermissionManagerService();
         mIncrementalManager = mInjector.getIncrementalManager();
         mDefaultAppProvider = mInjector.getDefaultAppProvider();
+        mLegacyPermissionManager = mInjector.getLegacyPermissionManagerInternal();
         PlatformCompat platformCompat = mInjector.getCompatibility();
         mPackageParserCallback = new PackageParser2.Callback() {
             @Override
@@ -20702,7 +20719,7 @@ public class PackageManagerService extends IPackageManager.Stub
         final String defaultBrowserPackageName = mDefaultAppProvider.getDefaultBrowser(userId);
         if (!TextUtils.isEmpty(defaultBrowserPackageName)) {
             if (packageName.equals(defaultBrowserPackageName)) {
-                mDefaultAppProvider.setDefaultBrowser(null, true, true, userId);
+                mDefaultAppProvider.setDefaultBrowser(null, true, userId);
             }
         }
     }
@@ -20717,7 +20734,7 @@ public class PackageManagerService extends IPackageManager.Stub
             // If this browser is restored from user's backup, do not clear
             // default-browser state for this user
             if (installReason != PackageManager.INSTALL_REASON_DEVICE_RESTORE) {
-                mDefaultAppProvider.setDefaultBrowser(null, true, true, userId);
+                mDefaultAppProvider.setDefaultBrowser(null, true, userId);
             }
         }
 
@@ -20755,7 +20772,7 @@ public class PackageManagerService extends IPackageManager.Stub
             // significant refactoring to keep all default apps in the package
             // manager (cleaner but more work) or have the services provide
             // callbacks to the package manager to request a default app reset.
-            mDefaultAppProvider.setDefaultBrowser(null, true, true, userId);
+            mDefaultAppProvider.setDefaultBrowser(null, true, userId);
             resetNetworkPolicies(userId);
             synchronized (mLock) {
                 scheduleWritePackageRestrictionsLocked(userId);
@@ -20989,8 +21006,7 @@ public class PackageManagerService extends IPackageManager.Stub
                             defaultBrowser = mSettings.removeDefaultBrowserPackageNameLPw(userId1);
                         }
                         if (defaultBrowser != null) {
-                            mDefaultAppProvider.setDefaultBrowser(defaultBrowser, false, false,
-                                    userId1);
+                            mDefaultAppProvider.setDefaultBrowser(defaultBrowser, false, userId1);
                         }
                     });
         } catch (Exception e) {
@@ -22249,6 +22265,24 @@ public class PackageManagerService extends IPackageManager.Stub
         reconcileApps(StorageManager.UUID_PRIVATE_INTERNAL);
 
         mPermissionManager.systemReady();
+
+        int[] grantPermissionsUserIds = EMPTY_INT_ARRAY;
+        for (int userId : UserManagerService.getInstance().getUserIds()) {
+            if (mPmInternal.isPermissionUpgradeNeeded(userId)) {
+                grantPermissionsUserIds = ArrayUtils.appendInt(
+                        grantPermissionsUserIds, userId);
+            }
+        }
+        // If we upgraded grant all default permissions before kicking off.
+        for (int userId : grantPermissionsUserIds) {
+            mLegacyPermissionManager.grantDefaultPermissions(userId);
+        }
+        if (grantPermissionsUserIds == EMPTY_INT_ARRAY) {
+            // If we did not grant default permissions, we preload from this the
+            // default permission exceptions lazily to ensure we don't hit the
+            // disk on a new user creation.
+            mLegacyPermissionManager.scheduleReadDefaultPermissionExceptions();
+        }
 
         if (mInstantAppResolverConnection != null) {
             mContext.registerReceiver(new BroadcastReceiver() {
@@ -24331,14 +24365,9 @@ public class PackageManagerService extends IPackageManager.Stub
             Slog.d(TAG, "onNewUserCreated(id=" + userId
                     + ", convertedFromPreCreated=" + convertedFromPreCreated + ")");
         }
-        if (!convertedFromPreCreated) {
+        if (!convertedFromPreCreated || !readPermissionStateForUser(userId)) {
             mPermissionManager.onUserCreated(userId);
-            return;
-        }
-        if (!readPermissionStateForUser(userId)) {
-            // Could not read the existing permissions, re-grant them.
-            Slog.i(TAG, "re-granting permissions for pre-created user " + userId);
-            mPermissionManager.onUserCreated(userId);
+            mLegacyPermissionManager.grantDefaultPermissions(userId);
         }
     }
 
