@@ -18,6 +18,9 @@ package com.android.systemui.screenshot;
 
 import static android.os.AsyncTask.THREAD_POOL_EXECUTOR;
 
+import static com.android.systemui.screenshot.LogConfig.DEBUG_ACTIONS;
+import static com.android.systemui.screenshot.LogConfig.logTag;
+
 import android.app.ActivityManager;
 import android.app.Notification;
 import android.content.ComponentName;
@@ -27,7 +30,7 @@ import android.net.Uri;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.os.UserHandle;
-import android.util.Slog;
+import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.SystemUIFactory;
@@ -47,7 +50,7 @@ import javax.inject.Inject;
  */
 @SysUISingleton
 public class ScreenshotSmartActions {
-    private static final String TAG = "ScreenshotSmartActions";
+    private static final String TAG = logTag(ScreenshotSmartActions.class);
 
     @Inject
     public ScreenshotSmartActions() {}
@@ -57,18 +60,24 @@ public class ScreenshotSmartActions {
             String screenshotId, Uri screenshotUri, Bitmap image,
             ScreenshotNotificationSmartActionsProvider smartActionsProvider,
             boolean smartActionsEnabled, UserHandle userHandle) {
+        if (DEBUG_ACTIONS) {
+            Log.d(TAG, String.format("getSmartActionsFuture id=%s, uri=%s, provider=%s, "
+                            + "smartActionsEnabled=%b, userHandle=%s", screenshotId, screenshotUri,
+                    smartActionsProvider.getClass(), smartActionsEnabled, userHandle));
+        }
         if (!smartActionsEnabled) {
-            Slog.i(TAG, "Screenshot Intelligence not enabled, returning empty list.");
+            if (DEBUG_ACTIONS) {
+                Log.d(TAG, "Screenshot Intelligence not enabled, returning empty list.");
+            }
             return CompletableFuture.completedFuture(Collections.emptyList());
         }
         if (image.getConfig() != Bitmap.Config.HARDWARE) {
-            Slog.w(TAG, String.format(
-                    "Bitmap expected: Hardware, Bitmap found: %s. Returning empty list.",
-                    image.getConfig()));
+            if (DEBUG_ACTIONS) {
+                Log.d(TAG, String.format("Bitmap expected: Hardware, Bitmap found: %s. "
+                                + "Returning empty list.", image.getConfig()));
+            }
             return CompletableFuture.completedFuture(Collections.emptyList());
         }
-
-        Slog.d(TAG, "Screenshot from user profile: " + userHandle.getIdentifier());
         CompletableFuture<List<Notification.Action>> smartActionsFuture;
         long startTimeMs = SystemClock.uptimeMillis();
         try {
@@ -83,7 +92,9 @@ public class ScreenshotSmartActions {
         } catch (Throwable e) {
             long waitTimeMs = SystemClock.uptimeMillis() - startTimeMs;
             smartActionsFuture = CompletableFuture.completedFuture(Collections.emptyList());
-            Slog.e(TAG, "Failed to get future for screenshot notification smart actions.", e);
+            if (DEBUG_ACTIONS) {
+                Log.e(TAG, "Failed to get future for screenshot notification smart actions.", e);
+            }
             notifyScreenshotOp(screenshotId, smartActionsProvider,
                     ScreenshotNotificationSmartActionsProvider.ScreenshotOp.REQUEST_SMART_ACTIONS,
                     ScreenshotNotificationSmartActionsProvider.ScreenshotOpStatus.ERROR,
@@ -97,12 +108,18 @@ public class ScreenshotSmartActions {
             CompletableFuture<List<Notification.Action>> smartActionsFuture, int timeoutMs,
             ScreenshotNotificationSmartActionsProvider smartActionsProvider) {
         long startTimeMs = SystemClock.uptimeMillis();
+        if (DEBUG_ACTIONS) {
+            Log.d(TAG, String.format("getSmartActions id=%s, timeoutMs=%d, provider=%s",
+                    screenshotId, timeoutMs, smartActionsProvider.getClass()));
+        }
         try {
             List<Notification.Action> actions = smartActionsFuture.get(timeoutMs,
                     TimeUnit.MILLISECONDS);
             long waitTimeMs = SystemClock.uptimeMillis() - startTimeMs;
-            Slog.d(TAG, String.format("Got %d smart actions. Wait time: %d ms",
-                    actions.size(), waitTimeMs));
+            if (DEBUG_ACTIONS) {
+                Log.d(TAG, String.format("Got %d smart actions. Wait time: %d ms",
+                        actions.size(), waitTimeMs));
+            }
             notifyScreenshotOp(screenshotId, smartActionsProvider,
                     ScreenshotNotificationSmartActionsProvider.ScreenshotOp.WAIT_FOR_SMART_ACTIONS,
                     ScreenshotNotificationSmartActionsProvider.ScreenshotOpStatus.SUCCESS,
@@ -110,8 +127,10 @@ public class ScreenshotSmartActions {
             return actions;
         } catch (Throwable e) {
             long waitTimeMs = SystemClock.uptimeMillis() - startTimeMs;
-            Slog.e(TAG, String.format("Error getting smart actions. Wait time: %d ms", waitTimeMs),
-                    e);
+            if (DEBUG_ACTIONS) {
+                Log.e(TAG, String.format("Error getting smart actions. Wait time: %d ms",
+                        waitTimeMs), e);
+            }
             ScreenshotNotificationSmartActionsProvider.ScreenshotOpStatus status =
                     (e instanceof TimeoutException)
                             ? ScreenshotNotificationSmartActionsProvider.ScreenshotOpStatus.TIMEOUT
@@ -127,10 +146,14 @@ public class ScreenshotSmartActions {
             ScreenshotNotificationSmartActionsProvider smartActionsProvider,
             ScreenshotNotificationSmartActionsProvider.ScreenshotOp op,
             ScreenshotNotificationSmartActionsProvider.ScreenshotOpStatus status, long durationMs) {
+        if (DEBUG_ACTIONS) {
+            Log.d(TAG, String.format("%s notifyOp: %s id=%s, status=%s, durationMs=%d",
+                    smartActionsProvider.getClass(), op, screenshotId, status, durationMs));
+        }
         try {
             smartActionsProvider.notifyOp(screenshotId, op, status, durationMs);
         } catch (Throwable e) {
-            Slog.e(TAG, "Error in notifyScreenshotOp: ", e);
+            Log.e(TAG, "Error in notifyScreenshotOp: ", e);
         }
     }
 
@@ -140,9 +163,13 @@ public class ScreenshotSmartActions {
             ScreenshotNotificationSmartActionsProvider provider =
                     SystemUIFactory.getInstance().createScreenshotNotificationSmartActionsProvider(
                             context, THREAD_POOL_EXECUTOR, new Handler());
+            if (DEBUG_ACTIONS) {
+                Log.e(TAG, String.format("%s notifyAction: %s id=%s, isSmartAction=%b",
+                        provider.getClass(), action, screenshotId, isSmartAction));
+            }
             provider.notifyAction(screenshotId, action, isSmartAction);
         } catch (Throwable e) {
-            Slog.e(TAG, "Error in notifyScreenshotAction: ", e);
+            Log.e(TAG, "Error in notifyScreenshotAction: ", e);
         }
     }
 }

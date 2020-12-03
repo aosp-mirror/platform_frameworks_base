@@ -21,6 +21,14 @@ import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.WindowManager.LayoutParams.TYPE_SCREENSHOT;
 
+import static com.android.systemui.screenshot.LogConfig.DEBUG_ANIM;
+import static com.android.systemui.screenshot.LogConfig.DEBUG_CALLBACK;
+import static com.android.systemui.screenshot.LogConfig.DEBUG_DISMISS;
+import static com.android.systemui.screenshot.LogConfig.DEBUG_INPUT;
+import static com.android.systemui.screenshot.LogConfig.DEBUG_UI;
+import static com.android.systemui.screenshot.LogConfig.DEBUG_WINDOW;
+import static com.android.systemui.screenshot.LogConfig.logTag;
+
 import static java.util.Objects.requireNonNull;
 
 import android.animation.Animator;
@@ -75,6 +83,7 @@ import javax.inject.Inject;
  * Controls the state and flow for screenshots.
  */
 public class ScreenshotController {
+    private static final String TAG = logTag(ScreenshotController.class);
     /**
      * POD used in the AsyncTask which saves an image in the background.
      */
@@ -110,11 +119,9 @@ public class ScreenshotController {
         }
     }
 
-    abstract static class ActionsReadyListener {
-        abstract void onActionsReady(ScreenshotController.SavedImageData imageData);
+    interface ActionsReadyListener {
+        void onActionsReady(ScreenshotController.SavedImageData imageData);
     }
-
-    private static final String TAG = "ScreenshotController";
 
     // These strings are used for communicating the action invoked to
     // ScreenshotNotificationSmartActionsProvider.
@@ -166,6 +173,9 @@ public class ScreenshotController {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case MESSAGE_CORNER_TIMEOUT:
+                    if (DEBUG_UI) {
+                        Log.d(TAG, "Corner timeout hit");
+                    }
                     mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_INTERACTION_TIMEOUT);
                     ScreenshotController.this.dismissScreenshot(false);
                     break;
@@ -292,13 +302,17 @@ public class ScreenshotController {
      * Clears current screenshot
      */
     void dismissScreenshot(boolean immediate) {
+        if (DEBUG_DISMISS) {
+            Log.d(TAG, "dismissScreenshot(immediate=" + immediate + ")");
+        }
         // If we're already animating out, don't restart the animation
         // (but do obey an immediate dismissal)
         if (!immediate && mScreenshotView.isDismissing()) {
-            Log.v(TAG, "Already dismissing, ignoring duplicate command");
+            if (DEBUG_DISMISS) {
+                Log.v(TAG, "Already dismissing, ignoring duplicate command");
+            }
             return;
         }
-        Log.v(TAG, "Clearing screenshot");
         mScreenshotHandler.removeMessages(MESSAGE_CORNER_TIMEOUT);
         if (immediate) {
             resetScreenshotView();
@@ -308,12 +322,17 @@ public class ScreenshotController {
     }
 
     /**
-     * Update assets (called when the dark theme status changes). We only need to update the dismiss
-     * button and the actions container background, since the buttons are re-inflated on demand.
+     * Update resources on configuration change. Reinflate for theme/color changes.
      */
     private void reloadAssets() {
+        if (DEBUG_UI) {
+            Log.d(TAG, "reloadAssets()");
+        }
         boolean wasAttached = mDecorView.isAttachedToWindow();
         if (wasAttached) {
+            if (DEBUG_WINDOW) {
+                Log.d(TAG, "Removing screenshot window");
+            }
             mWindowManager.removeView(mDecorView);
         }
 
@@ -336,6 +355,9 @@ public class ScreenshotController {
         // TODO(159460485): Remove this when focus is handled properly in the system
         mScreenshotView.setOnTouchListener((v, event) -> {
             if (event.getActionMasked() == MotionEvent.ACTION_OUTSIDE) {
+                if (DEBUG_INPUT) {
+                    Log.d(TAG, "onTouch: ACTION_OUTSIDE");
+                }
                 // Once the user touches outside, stop listening for input
                 setWindowFocusable(false);
             }
@@ -344,6 +366,9 @@ public class ScreenshotController {
 
         mScreenshotView.setOnKeyListener((v, keyCode, event) -> {
             if (keyCode == KeyEvent.KEYCODE_BACK) {
+                if (DEBUG_INPUT) {
+                    Log.d(TAG, "onKeyEvent: KeyEvent.KEYCODE_BACK");
+                }
                 dismissScreenshot(false);
                 return true;
             }
@@ -373,10 +398,16 @@ public class ScreenshotController {
         Bitmap screenshot = screenshotBuffer == null ? null : screenshotBuffer.asBitmap();
 
         if (screenshot == null) {
-            Log.e(TAG, "Screenshot bitmap was null");
+            Log.e(TAG, "takeScreenshotInternal: Screenshot bitmap was null");
             mNotificationsController.notifyScreenshotError(
                     R.string.screenshot_failed_to_capture_text);
+            if (DEBUG_CALLBACK) {
+                Log.d(TAG, "Supplying null to Consumer<Uri>");
+            }
             finisher.accept(null);
+            if (DEBUG_CALLBACK) {
+                Log.d(TAG, "Calling mOnCompleteRunnable.run()");
+            }
             mOnCompleteRunnable.run();
             return;
         }
@@ -399,12 +430,17 @@ public class ScreenshotController {
             if (!mScreenshotView.isDismissing()) {
                 mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_REENTERED);
             }
+            if (DEBUG_WINDOW) {
+                Log.d(TAG, "saveScreenshot: screenshotView is already attached, resetting. "
+                        + "(dismissing=" + mScreenshotView.isDismissing()  + ")");
+            }
             mScreenshotView.reset();
         }
 
         mScreenBitmap = screenshot;
 
         if (!isUserSetupComplete()) {
+            Log.w(TAG, "User setup not complete, displaying toast only");
             // User setup isn't complete, so we don't want to show any UI beyond a toast, as editing
             // and sharing shouldn't be exposed to the user.
             saveScreenshotAndToast(finisher);
@@ -416,6 +452,9 @@ public class ScreenshotController {
         mScreenBitmap.prepareToDraw();
 
         if (mConfigChanges.applyNewConfig(mContext.getResources())) {
+            if (DEBUG_UI) {
+                Log.d(TAG, "saveScreenshot: reloading assets");
+            }
             reloadAssets();
         }
 
@@ -450,25 +489,21 @@ public class ScreenshotController {
             mCameraSound.play(MediaActionSound.SHUTTER_CLICK);
         });
 
-        saveScreenshotInWorkerThread(finisher,
-                new ScreenshotController.ActionsReadyListener() {
-                    @Override
-                    void onActionsReady(ScreenshotController.SavedImageData imageData) {
-                        finisher.accept(imageData.uri);
-                        if (imageData.uri == null) {
-                            mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_NOT_SAVED);
-                            mNotificationsController.notifyScreenshotError(
-                                    R.string.screenshot_failed_to_save_text);
-                        } else {
-                            mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_SAVED);
-
-                            mScreenshotHandler.post(() -> {
-                                Toast.makeText(mContext, R.string.screenshot_saved_title,
-                                        Toast.LENGTH_SHORT).show();
-                            });
-                        }
-                    }
-                });
+        saveScreenshotInWorkerThread(finisher, imageData -> {
+            if (DEBUG_CALLBACK) {
+                Log.d(TAG, "returning URI to finisher (Consumer<URI>): " + imageData.uri);
+            }
+            finisher.accept(imageData.uri);
+            if (imageData.uri == null) {
+                mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_NOT_SAVED);
+                mNotificationsController.notifyScreenshotError(
+                        R.string.screenshot_failed_to_save_text);
+            } else {
+                mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_SAVED);
+                mScreenshotHandler.post(() -> Toast.makeText(mContext,
+                        R.string.screenshot_saved_title, Toast.LENGTH_SHORT).show());
+            }
+        });
     }
 
     /**
@@ -479,37 +514,46 @@ public class ScreenshotController {
         mScreenshotHandler.removeMessages(MESSAGE_CORNER_TIMEOUT);
         mScreenshotHandler.post(() -> {
             if (!mScreenshotView.isAttachedToWindow()) {
+                if (DEBUG_WINDOW) {
+                    Log.d(TAG, "Adding screenshot window");
+                }
                 mWindowManager.addView(mWindow.getDecorView(), mWindowLayoutParams);
             }
 
             mScreenshotView.prepareForAnimation(mScreenBitmap, screenInsets);
 
             mScreenshotHandler.post(() -> {
+                if (DEBUG_WINDOW) {
+                    Log.d(TAG, "adding OnComputeInternalInsetsListener");
+                }
                 mScreenshotView.getViewTreeObserver().addOnComputeInternalInsetsListener(
                         mScreenshotView);
 
                 mScreenshotAnimation =
                         mScreenshotView.createScreenshotDropInAnimation(screenRect, showFlash);
 
-                saveScreenshotInWorkerThread(finisher,
-                        new ScreenshotController.ActionsReadyListener() {
-                            @Override
-                            void onActionsReady(
-                                    ScreenshotController.SavedImageData imageData) {
-                                showUiOnActionsReady(imageData);
-                            }
-                        });
+                saveScreenshotInWorkerThread(finisher, this::showUiOnActionsReady);
 
                 // Play the shutter sound to notify that we've taken a screenshot
                 mCameraSound.play(MediaActionSound.SHUTTER_CLICK);
 
+                if (DEBUG_ANIM) {
+                    Log.d(TAG, "starting post-screenshot animation");
+                }
                 mScreenshotAnimation.start();
             });
         });
     }
 
+    /** Reset screenshot view and then call onCompleteRunnable */
     private void resetScreenshotView() {
+        if (DEBUG_UI) {
+            Log.d(TAG, "resetScreenshotView");
+        }
         if (mScreenshotView.isAttachedToWindow()) {
+            if (DEBUG_WINDOW) {
+                Log.d(TAG, "Removing screenshot window");
+            }
             mWindowManager.removeView(mDecorView);
         }
         mScreenshotView.reset();
@@ -519,8 +563,7 @@ public class ScreenshotController {
     /**
      * Creates a new worker thread and saves the screenshot to the media store.
      */
-    private void saveScreenshotInWorkerThread(
-            Consumer<Uri> finisher,
+    private void saveScreenshotInWorkerThread(Consumer<Uri> finisher,
             @Nullable ScreenshotController.ActionsReadyListener actionsReadyListener) {
         ScreenshotController.SaveImageInBackgroundData
                 data = new ScreenshotController.SaveImageInBackgroundData();
@@ -530,13 +573,7 @@ public class ScreenshotController {
 
         if (mSaveInBgTask != null) {
             // just log success/failure for the pre-existing screenshot
-            mSaveInBgTask.setActionsReadyListener(
-                    new ScreenshotController.ActionsReadyListener() {
-                        @Override
-                        void onActionsReady(ScreenshotController.SavedImageData imageData) {
-                            logSuccessOnActionsReady(imageData);
-                        }
-                    });
+            mSaveInBgTask.setActionsReadyListener(this::logSuccessOnActionsReady);
         }
 
         mSaveInBgTask = new SaveImageInBackgroundTask(mContext, mScreenshotSmartActions, data);
@@ -555,6 +592,9 @@ public class ScreenshotController {
                 SCREENSHOT_CORNER_DEFAULT_TIMEOUT_MILLIS,
                 AccessibilityManager.FLAG_CONTENT_CONTROLS);
 
+        if (DEBUG_UI) {
+            Log.d(TAG, "Showing UI actions, dismiss timeout: " + timeoutMs + " ms");
+        }
         mScreenshotHandler.sendMessageDelayed(
                 mScreenshotHandler.obtainMessage(MESSAGE_CORNER_TIMEOUT),
                 timeoutMs);
@@ -600,6 +640,9 @@ public class ScreenshotController {
      * shown.
      */
     private void setWindowFocusable(boolean focusable) {
+        if (DEBUG_WINDOW) {
+            Log.d(TAG, "setWindowFocusable: " + focusable);
+        }
         if (focusable) {
             mWindowLayoutParams.flags &= ~WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
         } else {
@@ -618,9 +661,10 @@ public class ScreenshotController {
 
         if (insettedHeight == 0 || insettedWidth == 0 || bitmap.getWidth() == 0
                 || bitmap.getHeight() == 0) {
-            Log.e(TAG, String.format(
-                    "Provided bitmap and insets create degenerate region: %dx%d %s",
-                    bitmap.getWidth(), bitmap.getHeight(), bitmapInsets));
+            if (DEBUG_UI) {
+                Log.e(TAG, "Provided bitmap and insets create degenerate region: "
+                        + bitmap.getWidth() + "x" + bitmap.getHeight() + " " + bitmapInsets);
+            }
             return false;
         }
 
@@ -628,11 +672,10 @@ public class ScreenshotController {
         float boundsAspect = ((float) screenBounds.width()) / screenBounds.height();
 
         boolean matchWithinTolerance = Math.abs(insettedBitmapAspect - boundsAspect) < 0.1f;
-        if (!matchWithinTolerance) {
-            Log.d(TAG, String.format("aspectRatiosMatch: don't match bitmap: %f, bounds: %f",
-                    insettedBitmapAspect, boundsAspect));
+        if (DEBUG_UI) {
+            Log.d(TAG, "aspectRatiosMatch: don't match bitmap: " + insettedBitmapAspect
+                    + ", bounds: " + boundsAspect);
         }
-
         return matchWithinTolerance;
     }
 }

@@ -16,6 +16,8 @@
 
 package com.android.systemui.screenshot;
 
+import static com.android.systemui.screenshot.LogConfig.DEBUG_SCROLL;
+
 import static java.util.Objects.requireNonNull;
 
 import android.annotation.UiContext;
@@ -49,10 +51,7 @@ public class ScrollCaptureClient {
     @VisibleForTesting
     static final int MATCH_ANY_TASK = ActivityTaskManager.INVALID_TASK_ID;
 
-    private static final String TAG = "ScrollCaptureClient";
-
-    /** Whether to log method names and arguments for most calls */
-    private static final boolean DEBUG_TRACE = false;
+    private static final String TAG = LogConfig.logTag(ScrollCaptureClient.class);
 
     /**
      * A connection to a remote window. Starts a capture session.
@@ -155,7 +154,7 @@ public class ScrollCaptureClient {
      */
     public void request(int displayId, int taskId, Consumer<Connection> consumer) {
         try {
-            if (DEBUG_TRACE) {
+            if (DEBUG_SCROLL) {
                 Log.d(TAG, "requestScrollCapture(displayId=" + displayId + ", " + mHostWindowToken
                         + ", taskId=" + taskId + ", consumer=" + consumer + ")");
             }
@@ -189,7 +188,7 @@ public class ScrollCaptureClient {
         @Override
         public void onConnected(IScrollCaptureConnection connection, Rect scrollBounds,
                 Point positionInWindow) throws RemoteException {
-            if (DEBUG_TRACE) {
+            if (DEBUG_SCROLL) {
                 Log.d(TAG, "onConnected(connection=" + connection + ", scrollBounds=" + scrollBounds
                         + ", positionInWindow=" + positionInWindow + ")");
             }
@@ -202,7 +201,7 @@ public class ScrollCaptureClient {
 
         @Override
         public void onUnavailable() throws RemoteException {
-            if (DEBUG_TRACE) {
+            if (DEBUG_SCROLL) {
                 Log.d(TAG, "onUnavailable");
             }
             // The targeted app does not support scroll capture
@@ -211,7 +210,7 @@ public class ScrollCaptureClient {
 
         @Override
         public void onCaptureStarted() {
-            if (DEBUG_TRACE) {
+            if (DEBUG_SCROLL) {
                 Log.d(TAG, "onCaptureStarted()");
             }
             mSessionConsumer.accept(this);
@@ -224,7 +223,7 @@ public class ScrollCaptureClient {
             if (frameNumber != ScrollCaptureViewSupport.NO_FRAME_PRODUCED) {
                 image = mReader.acquireNextImage();
             }
-            if (DEBUG_TRACE) {
+            if (DEBUG_SCROLL) {
                 Log.d(TAG, "onCaptureBufferSent(frameNumber=" + frameNumber
                         + ", contentArea=" + contentArea + ") image=" + image);
             }
@@ -237,7 +236,7 @@ public class ScrollCaptureClient {
 
         @Override
         public void onConnectionClosed() {
-            if (DEBUG_TRACE) {
+            if (DEBUG_SCROLL) {
                 Log.d(TAG, "onConnectionClosed()");
             }
             disconnect();
@@ -261,7 +260,7 @@ public class ScrollCaptureClient {
         // -> Error handling: BiConsumer<Session, Throwable> ?
         @Override
         public void start(int maxBufferCount, Consumer<Session> sessionConsumer) {
-            if (DEBUG_TRACE) {
+            if (DEBUG_SCROLL) {
                 Log.d(TAG, "start(maxBufferCount=" + maxBufferCount
                         + ", sessionConsumer=" + sessionConsumer + ")");
             }
@@ -288,7 +287,7 @@ public class ScrollCaptureClient {
 
         @Override
         public void end(Runnable listener) {
-            if (DEBUG_TRACE) {
+            if (DEBUG_SCROLL) {
                 Log.d(TAG, "end(listener=" + listener + ")");
             }
             if (mStarted) {
@@ -319,7 +318,7 @@ public class ScrollCaptureClient {
 
         @Override
         public void requestTile(Rect contentRect, Consumer<CaptureResult> consumer) {
-            if (DEBUG_TRACE) {
+            if (DEBUG_SCROLL) {
                 Log.d(TAG, "requestTile(contentRect=" + contentRect + "consumer=" + consumer + ")");
             }
             mRequestRect = new Rect(contentRect);
@@ -337,7 +336,7 @@ public class ScrollCaptureClient {
          */
         @Override
         public void binderDied() {
-            if (DEBUG_TRACE) {
+            if (DEBUG_SCROLL) {
                 Log.d(TAG, "binderDied()");
             }
             disconnect();
