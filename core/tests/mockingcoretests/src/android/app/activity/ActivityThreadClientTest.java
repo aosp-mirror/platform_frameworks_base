@@ -38,13 +38,11 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import android.app.Activity;
-import android.app.ActivityTaskManager;
+import android.app.ActivityClient;
 import android.app.ActivityThread;
 import android.app.ActivityThread.ActivityClientRecord;
-import android.app.IActivityTaskManager;
 import android.app.LoadedApk;
 import android.app.servertransaction.PendingTransactionActions;
 import android.content.ComponentName;
@@ -54,7 +52,6 @@ import android.content.pm.ApplicationInfo;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.os.IBinder;
-import android.os.RemoteException;
 import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
 import android.testing.PollingCheck;
@@ -224,18 +221,19 @@ public class ActivityThreadClientTest {
         private MockitoSession mMockSession;
         private ActivityThread mThread;
 
-        private ClientMockSession() throws RemoteException {
+        private ClientMockSession() {
             mThread = ActivityThread.currentActivityThread();
             mMockSession = mockitoSession()
                     .strictness(Strictness.LENIENT)
-                    .spyStatic(ActivityTaskManager.class)
+                    .spyStatic(ActivityClient.class)
                     .spyStatic(WindowManagerGlobal.class)
                     .startMocking();
             doReturn(Mockito.mock(WindowManagerGlobal.class))
                     .when(WindowManagerGlobal::getInstance);
-            IActivityTaskManager mockAtm = Mockito.mock(IActivityTaskManager.class);
-            doReturn(mockAtm).when(ActivityTaskManager::getService);
-            when(mockAtm.finishActivity(any(), anyInt(), any(), anyInt())).thenReturn(true);
+            final ActivityClient mockAc = Mockito.mock(ActivityClient.class);
+            doReturn(mockAc).when(ActivityClient::getInstance);
+            doReturn(true).when(mockAc).finishActivity(any() /* token */,
+                    anyInt() /* resultCode */, any() /* resultData */, anyInt() /* finishTask */);
         }
 
         private Activity launchActivity(ActivityClientRecord r) {
