@@ -52,9 +52,7 @@ import com.android.internal.util.XmlUtils;
 
 import libcore.io.IoUtils;
 
-import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -149,6 +147,7 @@ public class PackageWatchdog {
     private static final String ATTR_DURATION = "duration";
     private static final String ATTR_EXPLICIT_HEALTH_CHECK_DURATION = "health-check-duration";
     private static final String ATTR_PASSED_HEALTH_CHECK = "passed-health-check";
+    private static final String ATTR_MITIGATION_CALLS = "mitigation-calls";
 
     @GuardedBy("PackageWatchdog.class")
     private static PackageWatchdog sPackageWatchdog;
@@ -1067,6 +1066,33 @@ public class PackageWatchdog {
         }
     }
 
+    /** Convert a {@code LongArrayQueue} to a String of comma-separated values. */
+    public static String longArrayQueueToString(LongArrayQueue queue) {
+        if (queue.size() > 0) {
+            StringBuilder sb = new StringBuilder();
+            sb.append(queue.get(0));
+            for (int i = 1; i < queue.size(); i++) {
+                sb.append(",");
+                sb.append(queue.get(i));
+            }
+            return sb.toString();
+        }
+        return "";
+    }
+
+    /** Parse a comma-separated String of longs into a LongArrayQueue. */
+    public static LongArrayQueue parseLongArrayQueue(String commaSeparatedValues) {
+        LongArrayQueue result = new LongArrayQueue();
+        if (!TextUtils.isEmpty(commaSeparatedValues)) {
+            String[] values = commaSeparatedValues.split(",");
+            for (String value : values) {
+                result.addLast(Long.parseLong(value));
+            }
+        }
+        return result;
+    }
+
+
     /** Dump status of every observer in mAllObservers. */
     public void dump(IndentingPrintWriter pw) {
         pw.println("Package Watchdog status");
@@ -1240,16 +1266,7 @@ public class PackageWatchdog {
                 while (XmlUtils.nextElementWithin(parser, innerDepth)) {
                     if (TAG_PACKAGE.equals(parser.getName())) {
                         try {
-                            String packageName = parser.getAttributeValue(
-                                    null, ATTR_NAME);
-                            long duration = parser.getAttributeLong(
-                                    null, ATTR_DURATION);
-                            long healthCheckDuration = parser.getAttributeLong(
-                                    null, ATTR_EXPLICIT_HEALTH_CHECK_DURATION);
-                            boolean hasPassedHealthCheck = parser.getAttributeBoolean(
-                                    null, ATTR_PASSED_HEALTH_CHECK, false);
-                            MonitoredPackage pkg = watchdog.newMonitoredPackage(packageName,
-                                    duration, healthCheckDuration, hasPassedHealthCheck);
+                            MonitoredPackage pkg = watchdog.parseMonitoredPackage(parser);
                             if (pkg != null) {
                                 packages.add(pkg);
                             }
@@ -1305,16 +1322,31 @@ public class PackageWatchdog {
 
     MonitoredPackage newMonitoredPackage(
             String name, long durationMs, boolean hasPassedHealthCheck) {
-        return newMonitoredPackage(name, durationMs, Long.MAX_VALUE, hasPassedHealthCheck);
+        return newMonitoredPackage(name, durationMs, Long.MAX_VALUE, hasPassedHealthCheck,
+                new LongArrayQueue());
     }
 
     MonitoredPackage newMonitoredPackage(String name, long durationMs, long healthCheckDurationMs,
-            boolean hasPassedHealthCheck) {
+            boolean hasPassedHealthCheck, LongArrayQueue mitigationCalls) {
         VersionedPackage pkg = getVersionedPackage(name);
         if (pkg == null) {
             return null;
         }
-        return new MonitoredPackage(pkg, durationMs, healthCheckDurationMs, hasPassedHealthCheck);
+        return new MonitoredPackage(pkg, durationMs, healthCheckDurationMs,
+                hasPassedHealthCheck, mitigationCalls);
+    }
+
+    MonitoredPackage parseMonitoredPackage(TypedXmlPullParser parser)
+            throws XmlPullParserException {
+        String packageName = parser.getAttributeValue(null, ATTR_NAME);
+        long duration = parser.getAttributeLong(null, ATTR_DURATION);
+        long healthCheckDuration = parser.getAttributeLong(null,
+                        ATTR_EXPLICIT_HEALTH_CHECK_DURATION);
+        boolean hasPassedHealthCheck = parser.getAttributeBoolean(null, ATTR_PASSED_HEALTH_CHECK);
+        LongArrayQueue mitigationCalls = parseLongArrayQueue(
+                parser.getAttributeValue(null, ATTR_MITIGATION_CALLS));
+        return newMonitoredPackage(packageName,
+                duration, healthCheckDuration, hasPassedHealthCheck, mitigationCalls);
     }
 
     /**
@@ -1332,7 +1364,7 @@ public class PackageWatchdog {
         // Times when an observer was called to mitigate this package's failure. Sorted in
         // ascending order.
         @GuardedBy("mLock")
-        private final LongArrayQueue mMitigationCalls = new LongArrayQueue();
+        private final LongArrayQueue mMitigationCalls;
         // One of STATE_[ACTIVE|INACTIVE|PASSED|FAILED]. Updated on construction and after
         // methods that could change the health check state: handleElapsedTimeLocked and
         // tryPassHealthCheckLocked
@@ -1353,12 +1385,14 @@ public class PackageWatchdog {
         @GuardedBy("mLock")
         private long mHealthCheckDurationMs = Long.MAX_VALUE;
 
-        private MonitoredPackage(VersionedPackage pkg, long durationMs,
-                long healthCheckDurationMs, boolean hasPassedHealthCheck) {
+        MonitoredPackage(VersionedPackage pkg, long durationMs,
+                long healthCheckDurationMs, boolean hasPassedHealthCheck,
+                LongArrayQueue mitigationCalls) {
             mPackage = pkg;
             mDurationMs = durationMs;
             mHealthCheckDurationMs = healthCheckDurationMs;
             mHasPassedHealthCheck = hasPassedHealthCheck;
+            mMitigationCalls = mitigationCalls;
             updateHealthCheckStateLocked();
         }
 
@@ -1370,6 +1404,8 @@ public class PackageWatchdog {
             out.attributeLong(null, ATTR_DURATION, mDurationMs);
             out.attributeLong(null, ATTR_EXPLICIT_HEALTH_CHECK_DURATION, mHealthCheckDurationMs);
             out.attributeBoolean(null, ATTR_PASSED_HEALTH_CHECK, mHasPassedHealthCheck);
+            LongArrayQueue normalizedCalls = normalizeMitigationCalls();
+            out.attribute(null, ATTR_MITIGATION_CALLS, longArrayQueueToString(normalizedCalls));
             out.endTag(null, TAG_PACKAGE);
         }
 
@@ -1420,6 +1456,23 @@ public class PackageWatchdog {
             }
 
             return mMitigationCalls.size();
+        }
+
+        /**
+         * Before writing to disk, make the mitigation call timestamps relative to the current
+         * system uptime. This is because they need to be relative to the uptime which will reset
+         * at the next boot.
+         *
+         * @return a LongArrayQueue of the mitigation calls relative to the current system uptime.
+         */
+        @GuardedBy("mLock")
+        public LongArrayQueue normalizeMitigationCalls() {
+            LongArrayQueue normalized = new LongArrayQueue();
+            final long now = mSystemClock.uptimeMillis();
+            for (int i = 0; i < mMitigationCalls.size(); i++) {
+                normalized.addLast(mMitigationCalls.get(i) - now);
+            }
+            return normalized;
         }
 
         /**
@@ -1581,6 +1634,16 @@ public class PackageWatchdog {
         /** Returns {@code value} if it is greater than 0 or {@link Long#MAX_VALUE} otherwise. */
         private long toPositive(long value) {
             return value > 0 ? value : Long.MAX_VALUE;
+        }
+
+        /** Compares the equality of this object with another {@link MonitoredPackage}. */
+        @VisibleForTesting
+        boolean isEqualTo(MonitoredPackage pkg) {
+            return (getName().equals(pkg.getName()))
+                    && mDurationMs == pkg.mDurationMs
+                    && mHasPassedHealthCheck == pkg.mHasPassedHealthCheck
+                    && mHealthCheckDurationMs == pkg.mHealthCheckDurationMs
+                    && (mMitigationCalls.toString()).equals(pkg.mMitigationCalls.toString());
         }
     }
 
