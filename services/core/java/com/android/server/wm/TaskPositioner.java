@@ -228,10 +228,8 @@ class TaskPositioner implements IBinder.DeathRecipient {
                 mClientChannel, mService.mAnimationHandler.getLooper(),
                 mService.mAnimator.getChoreographer());
 
-        mDragApplicationHandle = new InputApplicationHandle(new Binder());
-        mDragApplicationHandle.name = TAG;
-        mDragApplicationHandle.dispatchingTimeoutNanos =
-                WindowManagerService.DEFAULT_INPUT_DISPATCHING_TIMEOUT_NANOS;
+        mDragApplicationHandle = new InputApplicationHandle(new Binder(), TAG,
+                WindowManagerService.DEFAULT_INPUT_DISPATCHING_TIMEOUT_NANOS);
 
         mDragWindowHandle = new InputWindowHandle(mDragApplicationHandle,
                 displayContent.getDisplayId());
