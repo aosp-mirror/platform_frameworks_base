@@ -22,16 +22,13 @@ import android.annotation.NonNull;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.graphics.PixelFormat;
-import android.graphics.PointF;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.UserHandle;
 import android.provider.Settings;
-import android.util.MathUtils;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewConfiguration;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 import android.view.accessibility.AccessibilityManager;
@@ -46,11 +43,11 @@ import java.util.Collections;
 
 /**
  * Shows/hides a {@link android.widget.ImageView} on the screen and changes the values of
- * {@link Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE} when the UI is toggled.
+ * {@link Settings.Secure#ACCESSIBILITY_MAGNIFICATION_MODE} when the UI is toggled.
  * The button icon is movable by dragging. And the button UI would automatically be dismissed after
  * displaying for a period of time.
  */
-class MagnificationModeSwitch {
+class MagnificationModeSwitch implements MagnificationGestureDetector.OnGestureListener {
 
     @VisibleForTesting
     static final long FADING_ANIMATION_DURATION_MS = 300;
@@ -66,13 +63,11 @@ class MagnificationModeSwitch {
     private final AccessibilityManager mAccessibilityManager;
     private final WindowManager mWindowManager;
     private final ImageView mImageView;
-    private final PointF mLastDown = new PointF();
-    private final PointF mLastDrag = new PointF();
-    private final int mTapTimeout = ViewConfiguration.getTapTimeout();
-    private final int mTouchSlop;
     private int mMagnificationMode = Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN;
     private final LayoutParams mParams;
     private boolean mIsVisible = false;
+    private final MagnificationGestureDetector mGestureDetector;
+    private boolean mSingleTapDetected = false;
 
     MagnificationModeSwitch(Context context) {
         this(context, createView(context));
@@ -86,7 +81,6 @@ class MagnificationModeSwitch {
                 Context.WINDOW_SERVICE);
         mParams = createLayoutParams(context);
         mImageView = imageView;
-        mTouchSlop = ViewConfiguration.get(mContext).getScaledTouchSlop();
         applyResourcesValues();
         mImageView.setOnTouchListener(this::onTouch);
         mImageView.setAccessibilityDelegate(new View.AccessibilityDelegate() {
@@ -127,6 +121,8 @@ class MagnificationModeSwitch {
                     .start();
             mIsFadeOutAnimating = true;
         };
+        mGestureDetector = new MagnificationGestureDetector(context,
+                context.getMainThreadHandler(), this);
     }
 
     private CharSequence formatStateDescription() {
@@ -144,39 +140,38 @@ class MagnificationModeSwitch {
     }
 
     private boolean onTouch(View v, MotionEvent event) {
-        if (!mIsVisible || mImageView == null) {
+        if (!mIsVisible) {
             return false;
         }
-        switch (event.getAction()) {
-            case MotionEvent.ACTION_DOWN:
-                stopFadeOutAnimation();
-                mLastDown.set(event.getRawX(), event.getRawY());
-                mLastDrag.set(event.getRawX(), event.getRawY());
-                return true;
-            case MotionEvent.ACTION_MOVE:
-                // Move the button position.
-                moveButton(event.getRawX() - mLastDrag.x,
-                        event.getRawY() - mLastDrag.y);
-                mLastDrag.set(event.getRawX(), event.getRawY());
-                return true;
-            case MotionEvent.ACTION_UP:
-                // Single tap to toggle magnification mode and the button position will be reset
-                // after the action is performed.
-                final float distance = MathUtils.dist(mLastDown.x, mLastDown.y,
-                        event.getRawX(), event.getRawY());
-                if ((event.getEventTime() - event.getDownTime()) <= mTapTimeout
-                        && distance <= mTouchSlop) {
-                    handleSingleTap();
-                } else {
-                    showButton(mMagnificationMode);
-                }
-                return true;
-            case MotionEvent.ACTION_CANCEL:
-                showButton(mMagnificationMode);
-                return true;
-            default:
-                return false;
+        return mGestureDetector.onTouch(event);
+    }
+
+    @Override
+    public boolean onSingleTap() {
+        mSingleTapDetected = true;
+        handleSingleTap();
+        return true;
+    }
+
+    @Override
+    public boolean onDrag(float offsetX, float offsetY) {
+        moveButton(offsetX, offsetY);
+        return true;
+    }
+
+    @Override
+    public boolean onStart(float x, float y) {
+        stopFadeOutAnimation();
+        return true;
+    }
+
+    @Override
+    public boolean onFinish(float xOffset, float yOffset) {
+        if (!mSingleTapDetected) {
+            showButton(mMagnificationMode);
         }
+        mSingleTapDetected = false;
+        return true;
     }
 
     private void moveButton(float offsetX, float offsetY) {

@@ -73,7 +73,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @SmallTest
@@ -91,8 +90,8 @@ public class MagnificationModeSwitchTest extends SysuiTestCase {
     private ViewPropertyAnimator mViewPropertyAnimator;
     private MagnificationModeSwitch mMagnificationModeSwitch;
     private View.OnTouchListener mTouchListener;
-    private List<MotionEvent> mMotionEvents = new ArrayList<>();
     private Runnable mFadeOutAnimation;
+    private MotionEventHelper mMotionEventHelper = new MotionEventHelper();
 
     @Before
     public void setUp() throws Exception {
@@ -117,11 +116,8 @@ public class MagnificationModeSwitchTest extends SysuiTestCase {
 
     @After
     public void tearDown() {
-        for (MotionEvent event:mMotionEvents) {
-            event.recycle();
-        }
-        mMotionEvents.clear();
         mFadeOutAnimation = null;
+        mMotionEventHelper.recycleEvents();
     }
 
     @Test
@@ -436,9 +432,7 @@ public class MagnificationModeSwitchTest extends SysuiTestCase {
 
     private MotionEvent obtainMotionEvent(long downTime, long eventTime, int action, float x,
             float y) {
-        MotionEvent event = MotionEvent.obtain(downTime, eventTime, action, x, y, 0);
-        mMotionEvents.add(event);
-        return event;
+        return mMotionEventHelper.obtainMotionEvent(downTime, eventTime, action, x, y);
     }
 
     private void executeFadeOutAnimation() {
