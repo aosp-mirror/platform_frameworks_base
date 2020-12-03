@@ -3164,9 +3164,7 @@ public class StatsPullAtomService extends SystemService {
             mAttributionTag = attributionTag;
             mUid = uid;
             mOp = op;
-            mHash = ((op.getOpCode() * 961
-                    + (attributionTag == null ? 0 : attributionTag.hashCode()) * 31
-                    + packageName.hashCode() + RANDOM_SEED) & 0x7fffffff) % 100;
+            mHash = ((packageName.hashCode() + RANDOM_SEED) & 0x7fffffff) % 100;
         }
     }
 
