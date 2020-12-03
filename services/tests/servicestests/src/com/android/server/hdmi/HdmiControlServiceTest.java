@@ -151,7 +151,7 @@ public class HdmiControlServiceTest {
             }
 
             @Override
-            HdmiCecConfig getHdmiCecConfig() {
+            protected HdmiCecConfig getHdmiCecConfig() {
                 return hdmiCecConfig;
             }
         };
