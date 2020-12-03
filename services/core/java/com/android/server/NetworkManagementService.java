@@ -88,7 +88,6 @@ import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FrameworkStatsLog;
@@ -122,7 +121,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
      * Helper class that encapsulates NetworkManagementService dependencies and makes them
      * easier to mock in unit tests.
      */
-    static class SystemServices {
+    static class Dependencies {
         public IBinder getService(String name) {
             return ServiceManager.getService(name);
         }
@@ -131,6 +130,10 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
         }
         public INetd getNetd() {
             return NetdService.get();
+        }
+
+        public int getCallingUid() {
+            return Binder.getCallingUid();
         }
     }
 
@@ -157,7 +160,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
 
     private final Handler mDaemonHandler;
 
-    private final SystemServices mServices;
+    private final Dependencies mDeps;
 
     private INetd mNetdService;
 
@@ -254,33 +257,32 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
      * @param context  Binder context for this service
      */
     private NetworkManagementService(
-            Context context, SystemServices services) {
+            Context context, Dependencies deps) {
         mContext = context;
-        mServices = services;
+        mDeps = deps;
 
         mDaemonHandler = new Handler(FgThread.get().getLooper());
 
         mNetdUnsolicitedEventListener = new NetdUnsolicitedEventListener();
 
-        mServices.registerLocalService(new LocalService());
+        mDeps.registerLocalService(new LocalService());
 
         synchronized (mTetheringStatsProviders) {
             mTetheringStatsProviders.put(new NetdTetheringStatsProvider(), "netd");
         }
     }
 
-    @VisibleForTesting
-    NetworkManagementService() {
+    private NetworkManagementService() {
         mContext = null;
         mDaemonHandler = null;
-        mServices = null;
+        mDeps = null;
         mNetdUnsolicitedEventListener = null;
     }
 
-    static NetworkManagementService create(Context context, SystemServices services)
+    static NetworkManagementService create(Context context, Dependencies deps)
             throws InterruptedException {
         final NetworkManagementService service =
-                new NetworkManagementService(context, services);
+                new NetworkManagementService(context, deps);
         if (DBG) Slog.d(TAG, "Creating NetworkManagementService");
         if (DBG) Slog.d(TAG, "Connecting native netd service");
         service.connectNativeNetdService();
@@ -289,7 +291,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
     }
 
     public static NetworkManagementService create(Context context) throws InterruptedException {
-        return create(context, new SystemServices());
+        return create(context, new Dependencies());
     }
 
     public void systemReady() {
@@ -310,7 +312,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
                 return mBatteryStats;
             }
             mBatteryStats =
-                    IBatteryStats.Stub.asInterface(mServices.getService(BatteryStats.SERVICE_NAME));
+                    IBatteryStats.Stub.asInterface(mDeps.getService(BatteryStats.SERVICE_NAME));
             return mBatteryStats;
         }
     }
@@ -511,7 +513,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
     }
 
     private void connectNativeNetdService() {
-        mNetdService = mServices.getNetd();
+        mNetdService = mDeps.getNetd();
         try {
             mNetdService.registerUnsolicitedEventListener(mNetdUnsolicitedEventListener);
             if (DBG) Slog.d(TAG, "Register unsolicited event listener");
@@ -1437,7 +1439,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
 
     @Override
     public void setUidCleartextNetworkPolicy(int uid, int policy) {
-        if (Binder.getCallingUid() != uid) {
+        if (mDeps.getCallingUid() != uid) {
             NetworkStack.checkNetworkStackPermission(mContext);
         }
 
@@ -1851,8 +1853,8 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
         return rule;
     }
 
-    private static void enforceSystemUid() {
-        final int uid = Binder.getCallingUid();
+    private void enforceSystemUid() {
+        final int uid = mDeps.getCallingUid();
         if (uid != Process.SYSTEM_UID) {
             throw new SecurityException("Only available to AID_SYSTEM");
         }
@@ -2096,60 +2098,10 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
         }
     }
 
-    @VisibleForTesting
-    class LocalService extends NetworkManagementInternal {
+    private class LocalService extends NetworkManagementInternal {
         @Override
         public boolean isNetworkRestrictedForUid(int uid) {
             return isNetworkRestrictedInternal(uid);
-        }
-    }
-
-    @VisibleForTesting
-    Injector getInjector() {
-        return new Injector();
-    }
-
-    @VisibleForTesting
-    class Injector {
-        void setDataSaverMode(boolean dataSaverMode) {
-            mDataSaverMode = dataSaverMode;
-        }
-
-        void setFirewallChainState(int chain, boolean state) {
-            NetworkManagementService.this.setFirewallChainState(chain, state);
-        }
-
-        void setFirewallRule(int chain, int uid, int rule) {
-            synchronized (mRulesLock) {
-                getUidFirewallRulesLR(chain).put(uid, rule);
-            }
-        }
-
-        void setUidOnMeteredNetworkList(boolean denylist, int uid, boolean enable) {
-            synchronized (mRulesLock) {
-                if (denylist) {
-                    mUidRejectOnMetered.put(uid, enable);
-                } else {
-                    mUidAllowOnMetered.put(uid, enable);
-                }
-            }
-        }
-
-        void reset() {
-            synchronized (mRulesLock) {
-                setDataSaverMode(false);
-                final int[] chains = {
-                        FIREWALL_CHAIN_DOZABLE,
-                        FIREWALL_CHAIN_STANDBY,
-                        FIREWALL_CHAIN_POWERSAVE
-                };
-                for (int chain : chains) {
-                    setFirewallChainState(chain, false);
-                    getUidFirewallRulesLR(chain).clear();
-                }
-                mUidAllowOnMetered.clear();
-                mUidRejectOnMetered.clear();
-            }
         }
     }
 }
