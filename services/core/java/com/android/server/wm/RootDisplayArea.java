@@ -16,10 +16,16 @@
 
 package com.android.server.wm;
 
+import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
+import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG;
 import static android.view.WindowManagerPolicyConstants.APPLICATION_LAYER;
 import static android.window.DisplayAreaOrganizer.FEATURE_IME_PLACEHOLDER;
 
 import static com.android.server.wm.DisplayAreaPolicyBuilder.Feature;
+
+import android.annotation.Nullable;
+
+import com.android.server.policy.WindowManagerPolicy;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -72,7 +78,8 @@ class RootDisplayArea extends DisplayArea<DisplayArea> {
      * match the root.
      */
     void placeImeContainer(DisplayArea.Tokens imeContainer) {
-        if (imeContainer.getRootDisplayArea() == this) {
+        final RootDisplayArea previousRoot = imeContainer.getRootDisplayArea();
+        if (previousRoot == this) {
             // No need to reparent if IME container is below the same root.
             return;
         }
@@ -88,7 +95,9 @@ class RootDisplayArea extends DisplayArea<DisplayArea> {
                             + "FEATURE_IME_PLACEHOLDER");
                 }
 
+                previousRoot.updateImeContainerForLayers(null /* imeContainer */);
                 imeContainer.reparent(imeDisplayAreas.get(0), POSITION_TOP);
+                updateImeContainerForLayers(imeContainer);
                 return;
             }
         }
@@ -118,5 +127,11 @@ class RootDisplayArea extends DisplayArea<DisplayArea> {
         mFeatures = Collections.unmodifiableList(features);
         mAreaForLayer = areaForLayer;
         mFeatureToDisplayAreas = featureToDisplayAreas;
+    }
+
+    private void updateImeContainerForLayers(@Nullable DisplayArea.Tokens imeContainer) {
+        final WindowManagerPolicy policy = mWmService.mPolicy;
+        mAreaForLayer[policy.getWindowLayerFromTypeLw(TYPE_INPUT_METHOD)] = imeContainer;
+        mAreaForLayer[policy.getWindowLayerFromTypeLw(TYPE_INPUT_METHOD_DIALOG)] = imeContainer;
     }
 }

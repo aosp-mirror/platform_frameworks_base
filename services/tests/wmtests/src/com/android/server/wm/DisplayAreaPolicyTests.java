@@ -69,7 +69,7 @@ public class DisplayAreaPolicyTests {
         WindowManagerService wms = mSystemServices.getWindowManagerService();
         mRoot = new SurfacelessDisplayAreaRoot(wms);
         spyOn(mRoot);
-        DisplayArea<WindowContainer> ime = new DisplayArea<>(wms, ABOVE_TASKS, "Ime");
+        DisplayArea.Tokens ime = new DisplayArea.Tokens(wms, ABOVE_TASKS, "Ime");
         DisplayContent displayContent = mock(DisplayContent.class);
         doReturn(true).when(displayContent).isTrusted();
         mTaskDisplayArea1 = new TaskDisplayArea(displayContent, wms, "Tasks1",
@@ -143,7 +143,7 @@ public class DisplayAreaPolicyTests {
                 FEATURE_VENDOR_FIRST + 5);
         final TaskDisplayArea taskDisplayArea5 = new TaskDisplayArea(displayContent, wms, "Tasks5",
                 FEATURE_VENDOR_FIRST + 6);
-        final DisplayArea<WindowContainer> ime = new DisplayArea<>(wms, ABOVE_TASKS, "Ime");
+        final DisplayArea.Tokens ime = new DisplayArea.Tokens(wms, ABOVE_TASKS, "Ime");
         final DisplayAreaPolicy policy = new DisplayAreaPolicyBuilder()
                 .setRootHierarchy(new DisplayAreaPolicyBuilder.HierarchyBuilder(root)
                         .setImeContainer(ime)
