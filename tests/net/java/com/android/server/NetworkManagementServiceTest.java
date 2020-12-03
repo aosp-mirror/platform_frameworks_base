@@ -279,11 +279,18 @@ public class NetworkManagementServiceTest {
         isRestrictedForStandby.put(INetd.FIREWALL_RULE_ALLOW, false);
         isRestrictedForStandby.put(INetd.FIREWALL_RULE_DENY, true);
         expected.put(INetd.FIREWALL_CHAIN_STANDBY, isRestrictedForStandby);
+        // Restricted mode chain
+        final ArrayMap<Integer, Boolean> isRestrictedForRestrictedMode = new ArrayMap<>();
+        isRestrictedForRestrictedMode.put(NetworkPolicyManager.FIREWALL_RULE_DEFAULT, true);
+        isRestrictedForRestrictedMode.put(INetd.FIREWALL_RULE_ALLOW, false);
+        isRestrictedForRestrictedMode.put(INetd.FIREWALL_RULE_DENY, true);
+        expected.put(INetd.FIREWALL_CHAIN_RESTRICTED, isRestrictedForRestrictedMode);
 
         final int[] chains = {
                 INetd.FIREWALL_CHAIN_STANDBY,
                 INetd.FIREWALL_CHAIN_POWERSAVE,
-                INetd.FIREWALL_CHAIN_DOZABLE
+                INetd.FIREWALL_CHAIN_DOZABLE,
+                INetd.FIREWALL_CHAIN_RESTRICTED
         };
         final int[] states = {
                 INetd.FIREWALL_RULE_ALLOW,
