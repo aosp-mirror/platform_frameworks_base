@@ -87,6 +87,14 @@ public abstract class FileSystemProvider extends DocumentsProvider {
 
     protected abstract Uri buildNotificationUri(String docId);
 
+    /**
+     * Callback indicating that the given document has been deleted or moved. This gives
+     * the provider a hook to revoke the uri permissions.
+     */
+    protected void onDocIdDeleted(String docId) {
+        // Default is no-op
+    }
+
     @Override
     public boolean onCreate() {
         throw new UnsupportedOperationException(
@@ -221,6 +229,7 @@ public abstract class FileSystemProvider extends DocumentsProvider {
         }
 
         final String afterDocId = getDocIdForFile(after);
+        onDocIdDeleted(docId);
         moveInMediaStore(visibleFileBefore, getFileForDocId(afterDocId, true));
 
         if (!TextUtils.equals(docId, afterDocId)) {
@@ -246,6 +255,7 @@ public abstract class FileSystemProvider extends DocumentsProvider {
         }
 
         final String docId = getDocIdForFile(after);
+        onDocIdDeleted(sourceDocumentId);
         moveInMediaStore(visibleFileBefore, getFileForDocId(docId, true));
 
         return docId;
@@ -295,6 +305,7 @@ public abstract class FileSystemProvider extends DocumentsProvider {
             throw new IllegalStateException("Failed to delete " + file);
         }
 
+        onDocIdDeleted(docId);
         removeFromMediaStore(visibleFile, isDirectory);
     }
 
