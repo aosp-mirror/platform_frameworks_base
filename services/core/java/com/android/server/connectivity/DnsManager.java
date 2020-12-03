@@ -45,8 +45,8 @@ import android.os.ServiceSpecificException;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.TextUtils;
+import android.util.Log;
 import android.util.Pair;
-import android.util.Slog;
 
 import java.net.InetAddress;
 import java.util.Arrays;
@@ -279,7 +279,7 @@ public class DnsManager {
     }
 
     public PrivateDnsConfig updatePrivateDns(Network network, PrivateDnsConfig cfg) {
-        Slog.w(TAG, "updatePrivateDns(" + network + ", " + cfg + ")");
+        Log.w(TAG, "updatePrivateDns(" + network + ", " + cfg + ")");
         return (cfg != null)
                 ? mPrivateDnsMap.put(network.netId, cfg)
                 : mPrivateDnsMap.remove(network.netId);
@@ -389,7 +389,7 @@ public class DnsManager {
             mPrivateDnsValidationMap.remove(netId);
         }
 
-        Slog.d(TAG, String.format("sendDnsConfigurationForNetwork(%d, %s, %s, %d, %d, %d, %d, "
+        Log.d(TAG, String.format("sendDnsConfigurationForNetwork(%d, %s, %s, %d, %d, %d, %d, "
                 + "%d, %d, %s, %s)", paramsParcel.netId, Arrays.toString(paramsParcel.servers),
                 Arrays.toString(paramsParcel.domains), paramsParcel.sampleValiditySeconds,
                 paramsParcel.successThreshold, paramsParcel.minSamples,
@@ -400,7 +400,7 @@ public class DnsManager {
         try {
             mDnsResolver.setResolverConfiguration(paramsParcel);
         } catch (RemoteException | ServiceSpecificException e) {
-            Slog.e(TAG, "Error setting DNS configuration: " + e);
+            Log.e(TAG, "Error setting DNS configuration: " + e);
             return;
         }
     }
@@ -431,8 +431,8 @@ public class DnsManager {
                 DNS_RESOLVER_SAMPLE_VALIDITY_SECONDS,
                 DNS_RESOLVER_DEFAULT_SAMPLE_VALIDITY_SECONDS);
         if (mSampleValidity < 0 || mSampleValidity > 65535) {
-            Slog.w(TAG, "Invalid sampleValidity=" + mSampleValidity + ", using default=" +
-                    DNS_RESOLVER_DEFAULT_SAMPLE_VALIDITY_SECONDS);
+            Log.w(TAG, "Invalid sampleValidity=" + mSampleValidity + ", using default="
+                    + DNS_RESOLVER_DEFAULT_SAMPLE_VALIDITY_SECONDS);
             mSampleValidity = DNS_RESOLVER_DEFAULT_SAMPLE_VALIDITY_SECONDS;
         }
 
@@ -440,17 +440,17 @@ public class DnsManager {
                 DNS_RESOLVER_SUCCESS_THRESHOLD_PERCENT,
                 DNS_RESOLVER_DEFAULT_SUCCESS_THRESHOLD_PERCENT);
         if (mSuccessThreshold < 0 || mSuccessThreshold > 100) {
-            Slog.w(TAG, "Invalid successThreshold=" + mSuccessThreshold + ", using default=" +
-                    DNS_RESOLVER_DEFAULT_SUCCESS_THRESHOLD_PERCENT);
+            Log.w(TAG, "Invalid successThreshold=" + mSuccessThreshold + ", using default="
+                    + DNS_RESOLVER_DEFAULT_SUCCESS_THRESHOLD_PERCENT);
             mSuccessThreshold = DNS_RESOLVER_DEFAULT_SUCCESS_THRESHOLD_PERCENT;
         }
 
         mMinSamples = getIntSetting(DNS_RESOLVER_MIN_SAMPLES, DNS_RESOLVER_DEFAULT_MIN_SAMPLES);
         mMaxSamples = getIntSetting(DNS_RESOLVER_MAX_SAMPLES, DNS_RESOLVER_DEFAULT_MAX_SAMPLES);
         if (mMinSamples < 0 || mMinSamples > mMaxSamples || mMaxSamples > 64) {
-            Slog.w(TAG, "Invalid sample count (min, max)=(" + mMinSamples + ", " + mMaxSamples +
-                    "), using default=(" + DNS_RESOLVER_DEFAULT_MIN_SAMPLES + ", " +
-                    DNS_RESOLVER_DEFAULT_MAX_SAMPLES + ")");
+            Log.w(TAG, "Invalid sample count (min, max)=(" + mMinSamples + ", " + mMaxSamples
+                    + "), using default=(" + DNS_RESOLVER_DEFAULT_MIN_SAMPLES + ", "
+                    + DNS_RESOLVER_DEFAULT_MAX_SAMPLES + ")");
             mMinSamples = DNS_RESOLVER_DEFAULT_MIN_SAMPLES;
             mMaxSamples = DNS_RESOLVER_DEFAULT_MAX_SAMPLES;
         }
