@@ -746,14 +746,14 @@ public class FingerprintService extends SystemService implements BiometricServic
     }
 
     /**
-     * For devices with only a single provider, returns that provider. If no providers, or multiple
-     * providers exist, returns null.
+     * For devices with only a single provider, returns that provider. If multiple providers,
+     * returns the first one. If no providers, returns null.
      */
     @Nullable
     private Pair<Integer, ServiceProvider> getSingleProvider() {
         final List<FingerprintSensorPropertiesInternal> properties = getSensorProperties();
-        if (properties.size() != 1) {
-            Slog.e(TAG, "Multiple sensors found: " + properties.size());
+        if (properties.isEmpty()) {
+            Slog.e(TAG, "No providers found");
             return null;
         }
 
@@ -766,7 +766,7 @@ public class FingerprintService extends SystemService implements BiometricServic
             }
         }
 
-        Slog.e(TAG, "Single sensor, but provider not found");
+        Slog.e(TAG, "Provider not found");
         return null;
     }
 
