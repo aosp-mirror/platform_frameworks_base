@@ -2772,7 +2772,9 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * </ol>
      * </li>
      * <li>Setting {@link CaptureRequest#CONTROL_ZOOM_RATIO android.control.zoomRatio} to values different than 1.0 and
-     * {@link CaptureRequest#SCALER_CROP_REGION android.scaler.cropRegion} to be windowboxing at the same time is undefined behavior.</li>
+     * {@link CaptureRequest#SCALER_CROP_REGION android.scaler.cropRegion} to be windowboxing at the same time are not supported. In this
+     * case, the camera framework will override the {@link CaptureRequest#SCALER_CROP_REGION android.scaler.cropRegion} to be the active
+     * array.</li>
      * </ul>
      * <p>LEGACY capability devices will only support CENTER_ONLY cropping.</p>
      * <p><b>Possible values:</b>
