@@ -22,6 +22,7 @@ import android.annotation.Nullable;
 import android.apex.ApexInfo;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.Attribution;
 import android.content.pm.ComponentInfo;
 import android.content.pm.ConfigurationInfo;
 import android.content.pm.FallbackCategoryProvider;
@@ -42,6 +43,7 @@ import android.content.pm.Signature;
 import android.content.pm.SigningInfo;
 import android.content.pm.parsing.component.ComponentParseUtils;
 import android.content.pm.parsing.component.ParsedActivity;
+import android.content.pm.parsing.component.ParsedAttribution;
 import android.content.pm.parsing.component.ParsedComponent;
 import android.content.pm.parsing.component.ParsedInstrumentation;
 import android.content.pm.parsing.component.ParsedMainComponent;
@@ -273,6 +275,15 @@ public class PackageInfoWithoutStateUtils {
                     if (grantedPermissions != null && grantedPermissions.contains(perm)) {
                         pi.requestedPermissionsFlags[i] |= PackageInfo.REQUESTED_PERMISSION_GRANTED;
                     }
+                }
+            }
+        }
+        if ((flags & PackageManager.GET_ATTRIBUTIONS) != 0) {
+            int size = ArrayUtils.size(pkg.getAttributions());
+            if (size > 0) {
+                pi.attributions = new Attribution[size];
+                for (int i = 0; i < size; i++) {
+                    pi.attributions[i] = generateAttribution(pkg.getAttributions().get(i));
                 }
             }
         }
@@ -667,6 +678,12 @@ public class PackageInfoWithoutStateUtils {
         }
         pgi.metaData = pg.getMetaData();
         return pgi;
+    }
+
+    @Nullable
+    public static Attribution generateAttribution(ParsedAttribution pa) {
+        if (pa == null) return null;
+        return new Attribution(pa.tag, pa.label);
     }
 
     private static void assignSharedFieldsForComponentInfo(@NonNull ComponentInfo componentInfo,

@@ -218,6 +218,14 @@ public class PackageInfo implements Parcelable {
     public int[] requestedPermissionsFlags;
 
     /**
+     * Array of all {@link android.R.styleable#AndroidManifestAttribution
+     * &lt;attribution&gt;} tags included under &lt;manifest&gt;, or null if there were none. This
+     * is only filled if the flag {@link PackageManager#GET_ATTRIBUTIONS} was set.
+     */
+    @SuppressWarnings("ArrayReturn")
+    public @Nullable Attribution[] attributions;
+
+    /**
      * Flag for {@link #requestedPermissionsFlags}: the requested permission
      * is required for the application to run; the user can not optionally
      * disable it.  Currently all permissions are required.
@@ -471,6 +479,7 @@ public class PackageInfo implements Parcelable {
         dest.writeTypedArray(configPreferences, parcelableFlags);
         dest.writeTypedArray(reqFeatures, parcelableFlags);
         dest.writeTypedArray(featureGroups, parcelableFlags);
+        dest.writeTypedArray(attributions, parcelableFlags);
         dest.writeInt(installLocation);
         dest.writeInt(isStub ? 1 : 0);
         dest.writeInt(coreApp ? 1 : 0);
@@ -536,6 +545,7 @@ public class PackageInfo implements Parcelable {
         configPreferences = source.createTypedArray(ConfigurationInfo.CREATOR);
         reqFeatures = source.createTypedArray(FeatureInfo.CREATOR);
         featureGroups = source.createTypedArray(FeatureGroupInfo.CREATOR);
+        attributions = source.createTypedArray(Attribution.CREATOR);
         installLocation = source.readInt();
         isStub = source.readInt() != 0;
         coreApp = source.readInt() != 0;
