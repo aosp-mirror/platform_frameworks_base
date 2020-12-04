@@ -987,6 +987,11 @@
     <!-- Time to wait while a button is pressed before triggering a very long press. -->
     <integer name="config_veryLongPressTimeout">3500</integer>
 
+    <!-- Time to wait before sending a HOME intent when waking up from power/home button.
+         (0 - do not send HOME intent on wakeup)
+    -->
+    <integer name="config_wakeUpToLastStateTimeoutMillis">0</integer>
+
     <!-- Package name for default keyguard appwidget [DO NOT TRANSLATE] -->
     <string name="widget_default_package_name" translatable="false"></string>
 

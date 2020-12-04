@@ -1544,6 +1544,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             homeIntent.putExtra(WindowManagerPolicy.EXTRA_FROM_HOME_KEY, true);
             mWindowManager.cancelRecentsAnimation(REORDER_KEEP_IN_PLACE, "startHomeActivity");
         }
+        homeIntent.putExtra(WindowManagerPolicy.EXTRA_START_REASON, reason);
+
         // Update the reason for ANR debugging to verify if the user activity is the one that
         // actually launched.
         final String myReason = reason + ":" + userId + ":" + UserHandle.getUserId(
