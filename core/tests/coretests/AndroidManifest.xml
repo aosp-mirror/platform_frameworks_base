@@ -148,6 +148,9 @@
     <!-- WindowMetricsTest permissions -->
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
 
+    <!-- WindowContextTest permissions -->
+    <uses-permission android:name="android.permission.MANAGE_APP_TOKENS" />
+
     <!-- Allow use of PendingIntent.getIntent() -->
     <uses-permission android:name="android.permission.GET_INTENT_SENDER_INTENT" />
 
