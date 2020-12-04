@@ -65,7 +65,7 @@ final class CompatConfig {
     @GuardedBy("mChanges")
     private final LongSparseArray<CompatChange> mChanges = new LongSparseArray<>();
 
-    private IOverrideValidator mOverrideValidator;
+    private OverrideValidatorImpl mOverrideValidator;
 
     @VisibleForTesting
     CompatConfig(AndroidBuildClassifier androidBuildClassifier, Context context) {
@@ -161,7 +161,7 @@ final class CompatConfig {
      * @return {@code true} if the change existed before adding the override.
      */
     boolean addOverride(long changeId, String packageName, boolean enabled)
-            throws RemoteException, SecurityException {
+            throws SecurityException {
         boolean alreadyKnown = true;
         OverrideAllowedState allowedState =
                 mOverrideValidator.getOverrideAllowedState(changeId, packageName);
@@ -254,7 +254,7 @@ final class CompatConfig {
      * @return {@code true} if an override existed;
      */
     boolean removeOverride(long changeId, String packageName)
-            throws RemoteException, SecurityException {
+            throws SecurityException {
         boolean overrideExists = false;
         synchronized (mChanges) {
             CompatChange c = mChanges.get(changeId);
@@ -307,7 +307,7 @@ final class CompatConfig {
      *
      * @param packageName The package for which the overrides should be purged.
      */
-    void removePackageOverrides(String packageName) throws RemoteException, SecurityException {
+    void removePackageOverrides(String packageName) throws SecurityException {
         synchronized (mChanges) {
             for (int i = 0; i < mChanges.size(); ++i) {
                 CompatChange change = mChanges.valueAt(i);
@@ -323,20 +323,15 @@ final class CompatConfig {
         LongArray allowed = new LongArray();
         synchronized (mChanges) {
             for (int i = 0; i < mChanges.size(); ++i) {
-                try {
-                    CompatChange change = mChanges.valueAt(i);
-                    if (change.getEnableSinceTargetSdk() != targetSdkVersion) {
-                        continue;
-                    }
-                    OverrideAllowedState allowedState =
-                            mOverrideValidator.getOverrideAllowedState(change.getId(),
-                                                                       packageName);
-                    if (allowedState.state == OverrideAllowedState.ALLOWED) {
-                        allowed.add(change.getId());
-                    }
-                } catch (RemoteException e) {
-                    // Should never occur, since validator is in the same process.
-                    throw new AssertionError("Unable to call override validator!", e);
+                CompatChange change = mChanges.valueAt(i);
+                if (change.getEnableSinceTargetSdk() != targetSdkVersion) {
+                    continue;
+                }
+                OverrideAllowedState allowedState =
+                        mOverrideValidator.getOverrideAllowedState(change.getId(),
+                                                                    packageName);
+                if (allowedState.state == OverrideAllowedState.ALLOWED) {
+                    allowed.add(change.getId());
                 }
             }
         }
@@ -394,6 +389,11 @@ final class CompatConfig {
             return true;
         }
         return c.defaultValue();
+    }
+
+    @VisibleForTesting
+    void forceNonDebuggableFinalForTest(boolean value) {
+        mOverrideValidator.forceNonDebuggableFinalForTest(value);
     }
 
     @VisibleForTesting
@@ -515,19 +515,18 @@ final class CompatConfig {
             boolean shouldInvalidateCache = false;
             for (int idx = 0; idx < mChanges.size(); ++idx) {
                 CompatChange c = mChanges.valueAt(idx);
-                try {
-                    OverrideAllowedState allowedState =
-                            mOverrideValidator.getOverrideAllowedState(c.getId(), packageName);
-                    boolean allowedOverride = (allowedState.state == OverrideAllowedState.ALLOWED);
-                    shouldInvalidateCache |= c.recheckOverride(packageName, allowedOverride);
-                } catch (RemoteException e) {
-                    // Should never occur, since validator is in the same process.
-                    throw new AssertionError("Unable to call override validator!", e);
-                }
+                OverrideAllowedState allowedState =
+                        mOverrideValidator.getOverrideAllowedState(c.getId(), packageName);
+                boolean allowedOverride = (allowedState.state == OverrideAllowedState.ALLOWED);
+                shouldInvalidateCache |= c.recheckOverride(packageName, allowedOverride);
             }
             if (shouldInvalidateCache) {
                 invalidateCache();
             }
         }
+    }
+
+    void registerContentObserver() {
+        mOverrideValidator.registerContentObserver();
     }
 }

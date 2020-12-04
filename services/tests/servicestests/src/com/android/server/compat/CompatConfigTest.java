@@ -82,6 +82,8 @@ public class CompatConfigTest {
     @Test
     public void testUnknownChangeEnabled() throws Exception {
         CompatConfig compatConfig = new CompatConfig(mBuildClassifier, mContext);
+        compatConfig.forceNonDebuggableFinalForTest(false);
+
         assertThat(compatConfig.isChangeEnabled(1234L, ApplicationInfoBuilder.create().build()))
             .isTrue();
     }
@@ -181,6 +183,8 @@ public class CompatConfigTest {
     @Test
     public void testPackageOverrideUnknownPackage() throws Exception {
         CompatConfig compatConfig = new CompatConfig(mBuildClassifier, mContext);
+        compatConfig.forceNonDebuggableFinalForTest(false);
+
 
         compatConfig.addOverride(1234L, "com.some.package", false);
 
@@ -438,6 +442,8 @@ public class CompatConfigTest {
     @Test
     public void testLookupChangeIdNotPresent() throws Exception {
         CompatConfig compatConfig = new CompatConfig(mBuildClassifier, mContext);
+        compatConfig.forceNonDebuggableFinalForTest(false);
+
         assertThat(compatConfig.lookupChangeId("MY_CHANGE")).isEqualTo(-1L);
     }
 
@@ -452,6 +458,8 @@ public class CompatConfigTest {
         File dir = createTempDir();
         writeToFile(dir, "platform_compat_config.xml", configXml);
         CompatConfig compatConfig = new CompatConfig(mBuildClassifier, mContext);
+        compatConfig.forceNonDebuggableFinalForTest(false);
+
         compatConfig.initConfigFromLib(dir);
 
         assertThat(compatConfig.isChangeEnabled(1234L,
@@ -478,6 +486,8 @@ public class CompatConfigTest {
         writeToFile(dir, "libcore_platform_compat_config.xml", configXml1);
         writeToFile(dir, "frameworks_platform_compat_config.xml", configXml2);
         CompatConfig compatConfig = new CompatConfig(mBuildClassifier, mContext);
+        compatConfig.forceNonDebuggableFinalForTest(false);
+
         compatConfig.initConfigFromLib(dir);
 
         assertThat(compatConfig.isChangeEnabled(1234L,
