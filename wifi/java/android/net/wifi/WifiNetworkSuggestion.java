@@ -917,6 +917,9 @@ public final class WifiNetworkSuggestion implements Parcelable {
             mPasspointConfiguration.setCarrierId(mCarrierId);
             mPasspointConfiguration.setSubscriptionId(mSubscriptionId);
             mPasspointConfiguration.setMeteredOverride(wifiConfiguration.meteredOverride);
+            mPasspointConfiguration.setOemPrivate(mIsNetworkOemPrivate);
+            mPasspointConfiguration.setOemPaid(mIsNetworkOemPaid);
+            mPasspointConfiguration.setCarrierMerged(mIsCarrierMerged);
             wifiConfiguration.macRandomizationSetting = mIsEnhancedMacRandomizationEnabled
                     ? WifiConfiguration.RANDOMIZATION_ENHANCED
                     : WifiConfiguration.RANDOMIZATION_PERSISTENT;
