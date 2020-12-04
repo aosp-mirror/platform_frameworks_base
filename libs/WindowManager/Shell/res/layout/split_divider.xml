@@ -14,7 +14,7 @@
   ~ limitations under the License.
   -->
 
-<com.android.wm.shell.apppairs.DividerView
+<com.android.wm.shell.common.split.DividerView
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_height="match_parent"
     android:layout_width="match_parent">
@@ -24,4 +24,4 @@
         android:id="@+id/docked_divider_background"
         android:background="@color/docked_divider_background"/>
 
-</com.android.wm.shell.apppairs.DividerView>
+</com.android.wm.shell.common.split.DividerView>

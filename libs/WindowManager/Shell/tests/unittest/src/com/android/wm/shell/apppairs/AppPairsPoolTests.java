@@ -18,10 +18,14 @@ package com.android.wm.shell.apppairs;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.when;
+
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.wm.shell.ShellTaskOrganizer;
+import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.SyncTransactionQueue;
 
@@ -35,7 +39,7 @@ import org.mockito.MockitoAnnotations;
 /** Tests for {@link AppPairsPool} */
 @SmallTest
 @RunWith(AndroidJUnit4.class)
-public class AppPairsPoolTests {
+public class AppPairsPoolTests extends ShellTestCase {
     private TestAppPairsController mController;
     private TestAppPairsPool mPool;
     @Mock private SyncTransactionQueue mSyncQueue;
@@ -45,6 +49,7 @@ public class AppPairsPoolTests {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
+        when(mDisplayController.getDisplayContext(anyInt())).thenReturn(mContext);
         mController = new TestAppPairsController(
                 mTaskOrganizer,
                 mSyncQueue,
