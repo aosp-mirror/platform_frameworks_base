@@ -24,10 +24,10 @@ import com.android.server.wm.flicker.helpers.WindowUtils
 import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
 import com.android.wm.shell.flicker.helpers.FixedAppHelper
 import com.android.wm.shell.flicker.helpers.PipAppHelper
-import com.android.wm.shell.flicker.navBarLayerIsAlwaysVisible
-import com.android.wm.shell.flicker.navBarWindowIsAlwaysVisible
-import com.android.wm.shell.flicker.statusBarLayerIsAlwaysVisible
-import com.android.wm.shell.flicker.statusBarWindowIsAlwaysVisible
+import com.android.server.wm.flicker.navBarWindowIsAlwaysVisible
+import com.android.server.wm.flicker.statusBarLayerIsAlwaysVisible
+import com.android.server.wm.flicker.navBarLayerIsAlwaysVisible
+import com.android.server.wm.flicker.statusBarWindowIsAlwaysVisible
 import com.android.wm.shell.flicker.testapp.Components.PipActivity.ACTION_ENTER_PIP
 import com.android.wm.shell.flicker.testapp.Components.PipActivity.ACTION_SET_REQUESTED_ORIENTATION
 import com.android.wm.shell.flicker.testapp.Components.PipActivity.EXTRA_ENTER_PIP

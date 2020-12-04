@@ -18,78 +18,6 @@ package com.android.wm.shell.flicker
 
 import com.android.server.wm.flicker.dsl.EventLogAssertion
 import com.android.server.wm.flicker.dsl.LayersAssertion
-import com.android.server.wm.flicker.dsl.WmAssertion
-import com.android.server.wm.flicker.helpers.WindowUtils
-
-@JvmOverloads
-fun WmAssertion.statusBarWindowIsAlwaysVisible(
-    bugId: Int = 0,
-    enabled: Boolean = bugId == 0
-) {
-    all("statusBarWindowIsAlwaysVisible", bugId, enabled) {
-        this.showsAboveAppWindow(FlickerTestBase.STATUS_BAR_WINDOW_TITLE)
-    }
-}
-
-@JvmOverloads
-fun WmAssertion.navBarWindowIsAlwaysVisible(
-    bugId: Int = 0,
-    enabled: Boolean = bugId == 0
-) {
-    all("navBarWindowIsAlwaysVisible", bugId, enabled) {
-        this.showsAboveAppWindow(FlickerTestBase.NAVIGATION_BAR_WINDOW_TITLE)
-    }
-}
-
-@JvmOverloads
-fun LayersAssertion.noUncoveredRegions(
-    beginRotation: Int,
-    endRotation: Int = beginRotation,
-    allStates: Boolean = true,
-    bugId: Int = 0,
-    enabled: Boolean = bugId == 0
-) {
-    val startingBounds = WindowUtils.getDisplayBounds(beginRotation)
-    val endingBounds = WindowUtils.getDisplayBounds(endRotation)
-    if (allStates) {
-        all("noUncoveredRegions", bugId, enabled) {
-            if (startingBounds == endingBounds) {
-                this.coversAtLeastRegion(startingBounds)
-            } else {
-                this.coversAtLeastRegion(startingBounds)
-                        .then()
-                        .coversAtLeastRegion(endingBounds)
-            }
-        }
-    } else {
-        start("noUncoveredRegions_StartingPos") {
-            this.coversAtLeastRegion(startingBounds)
-        }
-        end("noUncoveredRegions_EndingPos") {
-            this.coversAtLeastRegion(endingBounds)
-        }
-    }
-}
-
-@JvmOverloads
-fun LayersAssertion.statusBarLayerIsAlwaysVisible(
-    bugId: Int = 0,
-    enabled: Boolean = bugId == 0
-) {
-    all("statusBarLayerIsAlwaysVisible", bugId, enabled) {
-        this.showsLayer(FlickerTestBase.STATUS_BAR_WINDOW_TITLE)
-    }
-}
-
-@JvmOverloads
-fun LayersAssertion.navBarLayerIsAlwaysVisible(
-    bugId: Int = 0,
-    enabled: Boolean = bugId == 0
-) {
-    all("navBarLayerIsAlwaysVisible", bugId, enabled) {
-        this.showsLayer(FlickerTestBase.NAVIGATION_BAR_WINDOW_TITLE)
-    }
-}
 
 @JvmOverloads
 fun LayersAssertion.appPairsDividerIsVisible(
@@ -128,48 +56,6 @@ fun LayersAssertion.dockedStackDividerIsInvisible(
 ) {
     end("dockedStackDividerIsInvisible", bugId, enabled) {
         this.hasNotLayer(FlickerTestBase.DOCKED_STACK_DIVIDER)
-    }
-}
-
-@JvmOverloads
-fun LayersAssertion.navBarLayerRotatesAndScales(
-    beginRotation: Int,
-    endRotation: Int = beginRotation,
-    bugId: Int = 0,
-    enabled: Boolean = bugId == 0
-) {
-    val startingPos = WindowUtils.getNavigationBarPosition(beginRotation)
-    val endingPos = WindowUtils.getNavigationBarPosition(endRotation)
-
-    start("navBarLayerRotatesAndScales_StartingPos", bugId, enabled) {
-        this.hasVisibleRegion(FlickerTestBase.NAVIGATION_BAR_WINDOW_TITLE, startingPos)
-    }
-    end("navBarLayerRotatesAndScales_EndingPost", bugId, enabled) {
-        this.hasVisibleRegion(FlickerTestBase.NAVIGATION_BAR_WINDOW_TITLE, endingPos)
-    }
-
-    if (startingPos == endingPos) {
-        all("navBarLayerRotatesAndScales", bugId, enabled) {
-            this.hasVisibleRegion(FlickerTestBase.NAVIGATION_BAR_WINDOW_TITLE, startingPos)
-        }
-    }
-}
-
-@JvmOverloads
-fun LayersAssertion.statusBarLayerRotatesScales(
-    beginRotation: Int,
-    endRotation: Int = beginRotation,
-    bugId: Int = 0,
-    enabled: Boolean = bugId == 0
-) {
-    val startingPos = WindowUtils.getStatusBarPosition(beginRotation)
-    val endingPos = WindowUtils.getStatusBarPosition(endRotation)
-
-    start("statusBarLayerRotatesScales_StartingPos", bugId, enabled) {
-        this.hasVisibleRegion(FlickerTestBase.STATUS_BAR_WINDOW_TITLE, startingPos)
-    }
-    end("statusBarLayerRotatesScales_EndingPos", bugId, enabled) {
-        this.hasVisibleRegion(FlickerTestBase.STATUS_BAR_WINDOW_TITLE, endingPos)
     }
 }
 
