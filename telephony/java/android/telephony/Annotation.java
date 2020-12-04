@@ -634,4 +634,15 @@ public class Annotation {
             TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_NR_NSA,
             TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_NR_NSA_MMWAVE})
     public @interface OverrideNetworkType {}
+
+    /**
+     *  Result of a thermal mitigation request.
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = { "THERMAL_MITIGATION_RESULT_" }, value = {
+        TelephonyManager.THERMAL_MITIGATION_RESULT_SUCCESS,
+        TelephonyManager.THERMAL_MITIGATION_RESULT_MODEM_ERROR,
+        TelephonyManager.THERMAL_MITIGATION_RESULT_INVALID_STATE,
+        TelephonyManager.THERMAL_MITIGATION_RESULT_UNKNOWN_ERROR})
+    public @interface ThermalMitigationResult {}
 }
