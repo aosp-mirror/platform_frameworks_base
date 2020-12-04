@@ -1968,6 +1968,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         // Update the capabilities before the mode.
         updateMagnificationCapabilitiesSettingsChangeLocked(userState);
         updateMagnificationModeChangeSettingsLocked(userState);
+        updateFocusAppearanceDataLocked(userState);
     }
 
     private void updateWindowsForAccessibilityCallbackLocked(AccessibilityUserState userState) {
@@ -3012,6 +3013,30 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         }
     }
 
+    /**
+     * Gets the stroke width of the focus rectangle.
+     * @return The stroke width.
+     */
+    public int getFocusStrokeWidth() {
+        synchronized (mLock) {
+            final AccessibilityUserState userState = getCurrentUserStateLocked();
+
+            return userState.getFocusStrokeWidthLocked();
+        }
+    }
+
+    /**
+     * Gets the color of the focus rectangle.
+     * @return The color.
+     */
+    public int getFocusColor() {
+        synchronized (mLock) {
+            final AccessibilityUserState userState = getCurrentUserStateLocked();
+
+            return userState.getFocusColorLocked();
+        }
+    }
+
     @Override
     public void dump(FileDescriptor fd, final PrintWriter pw, String[] args) {
         if (!DumpUtils.checkDumpPermission(mContext, LOG_TAG, pw)) return;
@@ -3622,5 +3647,19 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 mInputFilter.setGestureDetectionPassthroughRegion(displayId, region);
             }
         }
+    }
+
+    private void updateFocusAppearanceDataLocked(AccessibilityUserState userState) {
+        if (userState.mUserId != mCurrentUserId) {
+            return;
+        }
+
+        mMainHandler.post(() -> {
+            broadcastToClients(userState, ignoreRemoteException(client -> {
+                client.mCallback.setFocusAppearance(userState.getFocusStrokeWidthLocked(),
+                        userState.getFocusColorLocked());
+            }));
+        });
+
     }
 }

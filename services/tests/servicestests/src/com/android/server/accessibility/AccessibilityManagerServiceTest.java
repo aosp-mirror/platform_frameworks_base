@@ -35,6 +35,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
+import android.content.res.Resources;
 import android.graphics.drawable.Icon;
 import android.os.IBinder;
 import android.os.UserHandle;
@@ -94,6 +95,8 @@ public class AccessibilityManagerServiceTest extends AndroidTestCase {
     @Mock private IAccessibilityServiceClient mMockServiceClient;
     @Mock private WindowMagnificationManager mMockWindowMagnificationMgr;
     @Mock private MagnificationController mMockMagnificationController;
+    @Mock private Resources mMockResources;
+
     private AccessibilityUserState mUserState;
 
     private MessageCapturingHandler mHandler = new MessageCapturingHandler(null);
@@ -120,6 +123,9 @@ public class AccessibilityManagerServiceTest extends AndroidTestCase {
             mMockA11yWindowManager,
             mMockA11yDisplayListener,
             mMockMagnificationController);
+
+        mMockResources = mock(Resources.class);
+        when(mMockContext.getResources()).thenReturn(mMockResources);
 
         final AccessibilityUserState userState = new AccessibilityUserState(
                 mA11yms.getCurrentUserIdLocked(), mMockContext, mA11yms);

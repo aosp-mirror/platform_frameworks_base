@@ -1797,4 +1797,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
     public void setTouchExplorationPassthroughRegion(int displayId, Region region) {
         mSystemSupport.setTouchExplorationPassthroughRegion(displayId, region);
     }
+
+    @Override
+    public void setFocusAppearance(int strokeWidth, int color) { }
 }

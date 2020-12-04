@@ -553,6 +553,9 @@
     <!-- Width of the outline stroke used by the accessibility screen magnification indicator -->
     <dimen name="accessibility_magnification_indicator_width">4dip</dimen>
 
+    <!-- Width of the outline stroke used by the accessibility focus rectangle -->
+    <dimen name="accessibility_focus_highlight_stroke_width">4dp</dimen>
+
     <!-- Margin around the various security views -->
     <dimen name="keyguard_muliuser_selector_margin">8dp</dimen>
 
