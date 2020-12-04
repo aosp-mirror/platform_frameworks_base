@@ -2984,7 +2984,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         }
 
         if (wallpaper.allowBackup) {
-            out.attribute(null, "backup", "true");
+            out.attributeBoolean(null, "backup", true);
         }
 
         out.endTag(null, tag);
@@ -3249,7 +3249,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             wallpaper.primaryColors = new WallpaperColors(primary, secondary, tertiary, colorHints);
         }
         wallpaper.name = parser.getAttributeValue(null, "name");
-        wallpaper.allowBackup = "true".equals(parser.getAttributeValue(null, "backup"));
+        wallpaper.allowBackup = parser.getAttributeBoolean(null, "backup", false);
     }
 
     // Called by SystemBackupAgent after files are restored to disk.

@@ -19,6 +19,7 @@ package com.android.server.appwidget;
 import static android.content.Context.KEYGUARD_SERVICE;
 import static android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
+
 import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
 
 import android.annotation.UserIdInt;
@@ -102,6 +103,7 @@ import android.util.proto.ProtoOutputStream;
 import android.view.Display;
 import android.view.View;
 import android.widget.RemoteViews;
+
 import com.android.internal.R;
 import com.android.internal.app.SuspendedAppActivity;
 import com.android.internal.app.UnlaunchableAppActivity;
@@ -111,11 +113,14 @@ import com.android.internal.os.BackgroundThread;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
-import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.widget.IRemoteViewsFactory;
 import com.android.server.LocalServices;
 import com.android.server.WidgetBackupProvider;
 import com.android.server.policy.IconUtilities;
+
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -137,9 +142,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
 
 class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBackupProvider,
         OnCrossProfileWidgetProvidersChangeListener {
@@ -2497,85 +2499,80 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         }
     }
 
-    private static void serializeProvider(XmlSerializer out, Provider p) throws IOException {
+    private static void serializeProvider(TypedXmlSerializer out, Provider p) throws IOException {
         out.startTag(null, "p");
         out.attribute(null, "pkg", p.info.provider.getPackageName());
         out.attribute(null, "cl", p.info.provider.getClassName());
-        out.attribute(null, "tag", Integer.toHexString(p.tag));
+        out.attributeIntHex(null, "tag", p.tag);
         if (!TextUtils.isEmpty(p.infoTag)) {
             out.attribute(null, "info_tag", p.infoTag);
         }
         out.endTag(null, "p");
     }
 
-    private static void serializeHost(XmlSerializer out, Host host) throws IOException {
+    private static void serializeHost(TypedXmlSerializer out, Host host) throws IOException {
         out.startTag(null, "h");
         out.attribute(null, "pkg", host.id.packageName);
-        out.attribute(null, "id", Integer.toHexString(host.id.hostId));
-        out.attribute(null, "tag", Integer.toHexString(host.tag));
+        out.attributeIntHex(null, "id", host.id.hostId);
+        out.attributeIntHex(null, "tag", host.tag);
         out.endTag(null, "h");
     }
 
-    private static void serializeAppWidget(XmlSerializer out, Widget widget,
+    private static void serializeAppWidget(TypedXmlSerializer out, Widget widget,
             boolean saveRestoreCompleted) throws IOException {
         out.startTag(null, "g");
-        out.attribute(null, "id", Integer.toHexString(widget.appWidgetId));
-        out.attribute(null, "rid", Integer.toHexString(widget.restoredId));
-        out.attribute(null, "h", Integer.toHexString(widget.host.tag));
+        out.attributeIntHex(null, "id", widget.appWidgetId);
+        out.attributeIntHex(null, "rid", widget.restoredId);
+        out.attributeIntHex(null, "h", widget.host.tag);
         if (widget.provider != null) {
-            out.attribute(null, "p", Integer.toHexString(widget.provider.tag));
+            out.attributeIntHex(null, "p", widget.provider.tag);
         }
         if (widget.options != null) {
             int minWidth = widget.options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH);
             int minHeight = widget.options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT);
             int maxWidth = widget.options.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH);
             int maxHeight = widget.options.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT);
-            out.attribute(null, "min_width", Integer.toHexString((minWidth > 0) ? minWidth : 0));
-            out.attribute(null, "min_height", Integer.toHexString((minHeight > 0) ? minHeight : 0));
-            out.attribute(null, "max_width", Integer.toHexString((maxWidth > 0) ? maxWidth : 0));
-            out.attribute(null, "max_height", Integer.toHexString((maxHeight > 0) ? maxHeight : 0));
-            out.attribute(null, "host_category", Integer.toHexString(widget.options.getInt(
-                    AppWidgetManager.OPTION_APPWIDGET_HOST_CATEGORY)));
+            out.attributeIntHex(null, "min_width", (minWidth > 0) ? minWidth : 0);
+            out.attributeIntHex(null, "min_height", (minHeight > 0) ? minHeight : 0);
+            out.attributeIntHex(null, "max_width", (maxWidth > 0) ? maxWidth : 0);
+            out.attributeIntHex(null, "max_height", (maxHeight > 0) ? maxHeight : 0);
+            out.attributeIntHex(null, "host_category", widget.options.getInt(
+                    AppWidgetManager.OPTION_APPWIDGET_HOST_CATEGORY));
             if (saveRestoreCompleted) {
                 boolean restoreCompleted = widget.options.getBoolean(
                         AppWidgetManager.OPTION_APPWIDGET_RESTORE_COMPLETED);
-                out.attribute(null, "restore_completed", Boolean.toString(restoreCompleted));
+                out.attributeBoolean(null, "restore_completed", restoreCompleted);
             }
         }
         out.endTag(null, "g");
     }
 
-    private static Bundle parseWidgetIdOptions(XmlPullParser parser) {
+    private static Bundle parseWidgetIdOptions(TypedXmlPullParser parser) {
         Bundle options = new Bundle();
-        String restoreCompleted = parser.getAttributeValue(null, "restore_completed");
-        if (restoreCompleted != null) {
-            options.putBoolean(AppWidgetManager.OPTION_APPWIDGET_RESTORE_COMPLETED,
-                    Boolean.valueOf(restoreCompleted));
+        boolean restoreCompleted = parser.getAttributeBoolean(null, "restore_completed", false);
+        if (restoreCompleted) {
+            options.putBoolean(AppWidgetManager.OPTION_APPWIDGET_RESTORE_COMPLETED, true);
         }
-        String minWidthString = parser.getAttributeValue(null, "min_width");
-        if (minWidthString != null) {
-            options.putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH,
-                    Integer.parseInt(minWidthString, 16));
+        int minWidth = parser.getAttributeIntHex(null, "min_width", -1);
+        if (minWidth != -1) {
+            options.putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, minWidth);
         }
-        String minHeightString = parser.getAttributeValue(null, "min_height");
-        if (minHeightString != null) {
-            options.putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT,
-                    Integer.parseInt(minHeightString, 16));
+        int minHeight = parser.getAttributeIntHex(null, "min_height", -1);
+        if (minHeight != -1) {
+            options.putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, minHeight);
         }
-        String maxWidthString = parser.getAttributeValue(null, "max_width");
-        if (maxWidthString != null) {
-            options.putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH,
-                    Integer.parseInt(maxWidthString, 16));
+        int maxWidth = parser.getAttributeIntHex(null, "max_width", -1);
+        if (maxWidth != -1) {
+            options.putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH, maxWidth);
         }
-        String maxHeightString = parser.getAttributeValue(null, "max_height");
-        if (maxHeightString != null) {
-            options.putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT,
-                    Integer.parseInt(maxHeightString, 16));
+        int maxHeight = parser.getAttributeIntHex(null, "max_height", -1);
+        if (maxHeight != -1) {
+            options.putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT, maxHeight);
         }
-        String categoryString = parser.getAttributeValue(null, "host_category");
-        if (categoryString != null) {
-            options.putInt(AppWidgetManager.OPTION_APPWIDGET_HOST_CATEGORY,
-                    Integer.parseInt(categoryString, 16));
+        int category = parser.getAttributeIntHex(null, "host_category",
+                AppWidgetProviderInfo.WIDGET_CATEGORY_UNKNOWN);
+        if (category != AppWidgetProviderInfo.WIDGET_CATEGORY_UNKNOWN) {
+            options.putInt(AppWidgetManager.OPTION_APPWIDGET_HOST_CATEGORY, category);
         }
         return options;
     }
@@ -3080,7 +3077,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             TypedXmlSerializer out = Xml.resolveSerializer(stream);
             out.startDocument(null, true);
             out.startTag(null, "gs");
-            out.attribute(null, "version", String.valueOf(CURRENT_VERSION));
+            out.attributeInt(null, "version", CURRENT_VERSION);
 
             N = mProviders.size();
             for (int i = 0; i < N; i++) {
@@ -3149,12 +3146,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                 if (type == XmlPullParser.START_TAG) {
                     String tag = parser.getName();
                     if ("gs".equals(tag)) {
-                        String attributeValue = parser.getAttributeValue(null, "version");
-                        try {
-                            version = Integer.parseInt(attributeValue);
-                        } catch (NumberFormatException e) {
-                            version = 0;
-                        }
+                        version = parser.getAttributeInt(null, "version", 0);
                     } else if ("p".equals(tag)) {
                         legacyProviderIndex++;
                         // TODO: do we need to check that this package has the same signature
@@ -3193,9 +3185,8 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                             mProviders.add(provider);
                         }
 
-                        String tagAttribute = parser.getAttributeValue(null, "tag");
-                        final int providerTag = !TextUtils.isEmpty(tagAttribute)
-                                ? Integer.parseInt(tagAttribute, 16) : legacyProviderIndex;
+                        final int providerTag = parser.getAttributeIntHex(null, "tag",
+                                legacyProviderIndex);
                         provider.tag = providerTag;
 
                         provider.infoTag = parser.getAttributeValue(null, "info_tag");
@@ -3221,12 +3212,9 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                         if (!host.zombie || mSafeMode) {
                             // In safe mode, we don't discard the hosts we don't recognize
                             // so that they're not pruned from our list. Otherwise, we do.
-                            final int hostId = Integer.parseInt(parser.getAttributeValue(
-                                    null, "id"), 16);
-
-                            String tagAttribute = parser.getAttributeValue(null, "tag");
-                            final int hostTag = !TextUtils.isEmpty(tagAttribute)
-                                    ? Integer.parseInt(tagAttribute, 16) : legacyHostIndex;
+                            final int hostId = parser.getAttributeIntHex(null, "id");
+                            final int hostTag = parser.getAttributeIntHex(null, "tag",
+                                    legacyHostIndex);
 
                             host.tag = hostTag;
                             host.id = new HostId(uid, hostId, pkg);
@@ -3241,21 +3229,17 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                         }
                     } else if ("g".equals(tag)) {
                         Widget widget = new Widget();
-                        widget.appWidgetId = Integer.parseInt(parser.getAttributeValue(
-                                null, "id"), 16);
+                        widget.appWidgetId = parser.getAttributeIntHex(null, "id");
                         setMinAppWidgetIdLocked(userId, widget.appWidgetId + 1);
 
                         // restored ID is allowed to be absent
-                        String restoredIdString = parser.getAttributeValue(null, "rid");
-                        widget.restoredId = (restoredIdString == null) ? 0
-                                : Integer.parseInt(restoredIdString, 16);
+                        widget.restoredId = parser.getAttributeIntHex(null, "rid", 0);
                         widget.options = parseWidgetIdOptions(parser);
 
-                        final int hostTag = Integer.parseInt(parser.getAttributeValue(
-                                null, "h"), 16);
+                        final int hostTag = parser.getAttributeIntHex(null, "h");
                         String providerString = parser.getAttributeValue(null, "p");
-                        final int providerTag = (providerString != null) ? Integer.parseInt(
-                                parser.getAttributeValue(null, "p"), 16) : TAG_UNDEFINED;
+                        final int providerTag = (providerString != null)
+                                ? parser.getAttributeIntHex(null, "p") : TAG_UNDEFINED;
 
                         // We can match widgets with hosts and providers only after hosts
                         // and providers for all users have been loaded since the widget
@@ -4372,11 +4356,11 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                 }
 
                 try {
-                    XmlSerializer out = new FastXmlSerializer();
+                    TypedXmlSerializer out = Xml.newFastSerializer();
                     out.setOutput(stream, StandardCharsets.UTF_8.name());
                     out.startDocument(null, true);
                     out.startTag(null, "ws");      // widget state
-                    out.attribute(null, "version", String.valueOf(WIDGET_STATE_VERSION));
+                    out.attributeInt(null, "version", WIDGET_STATE_VERSION);
                     out.attribute(null, "pkg", backedupPackage);
 
                     // Remember all the providers that are currently hosted or published
@@ -4464,7 +4448,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                 // Hosts mentioned in the widget dataset by ordinal
                 ArrayList<Host> restoredHosts = new ArrayList<>();
 
-                XmlPullParser parser = Xml.newPullParser();
+                TypedXmlPullParser parser = Xml.newFastPullParser();
                 parser.setInput(stream, StandardCharsets.UTF_8.name());
 
                 synchronized (mLock) {
@@ -4474,11 +4458,9 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                         if (type == XmlPullParser.START_TAG) {
                             final String tag = parser.getName();
                             if ("ws".equals(tag)) {
-                                String version = parser.getAttributeValue(null, "version");
-
-                                final int versionNumber = Integer.parseInt(version);
+                                final int versionNumber = parser.getAttributeInt(null, "version");
                                 if (versionNumber > WIDGET_STATE_VERSION) {
-                                    Slog.w(TAG, "Unable to process state version " + version);
+                                    Slog.w(TAG, "Unable to process state version " + versionNumber);
                                     return;
                                 }
 
@@ -4520,8 +4502,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                                 String pkg = parser.getAttributeValue(null, "pkg");
 
                                 final int uid = getUidForPackage(pkg, userId);
-                                final int hostId = Integer.parseInt(
-                                        parser.getAttributeValue(null, "id"), 16);
+                                final int hostId = parser.getAttributeIntHex(null, "id");
 
                                 HostId id = new HostId(uid, hostId, pkg);
                                 Host h = lookupOrAddHostLocked(id);
@@ -4532,17 +4513,14 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                                             + "]: {" + h.id + "}");
                                 }
                             } else if ("g".equals(tag)) {
-                                int restoredId = Integer.parseInt(
-                                        parser.getAttributeValue(null, "id"), 16);
-                                int hostIndex = Integer.parseInt(
-                                        parser.getAttributeValue(null, "h"), 16);
+                                int restoredId = parser.getAttributeIntHex(null, "id");
+                                int hostIndex = parser.getAttributeIntHex(null, "h");
                                 Host host = restoredHosts.get(hostIndex);
                                 Provider p = null;
-                                String prov = parser.getAttributeValue(null, "p");
-                                if (prov != null) {
+                                int which = parser.getAttributeIntHex(null, "p", -1);
+                                if (which != -1) {
                                     // could have been null if the app had allocated an id
                                     // but not yet established a binding under that id
-                                    int which = Integer.parseInt(prov, 16);
                                     p = restoredProviders.get(which);
                                 }
 

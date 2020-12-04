@@ -29,18 +29,15 @@ import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.Preconditions;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
 /**
@@ -106,7 +103,7 @@ class TransferOwnershipMetadataManager {
         return false;
     }
 
-    private void insertSimpleTag(XmlSerializer serializer, String tagName, String value)
+    private void insertSimpleTag(TypedXmlSerializer serializer, String tagName, String value)
             throws IOException {
         serializer.startTag(null, tagName);
         serializer.text(value);
@@ -132,7 +129,7 @@ class TransferOwnershipMetadataManager {
         return null;
     }
 
-    private Metadata parseMetadataFile(XmlPullParser parser)
+    private Metadata parseMetadataFile(TypedXmlPullParser parser)
             throws XmlPullParserException, IOException {
         int type;
         final int outerDepth = parser.getDepth();

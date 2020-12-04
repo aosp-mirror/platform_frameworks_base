@@ -158,7 +158,7 @@ public final class SensorPrivacyService extends SystemService {
                 XmlUtils.beginDocument(parser, XML_TAG_SENSOR_PRIVACY);
                 parser.next();
                 String tagName = parser.getName();
-                enabled = Boolean.valueOf(parser.getAttributeValue(null, XML_ATTRIBUTE_ENABLED));
+                enabled = parser.getAttributeBoolean(null, XML_ATTRIBUTE_ENABLED, false);
             } catch (IOException | XmlPullParserException e) {
                 Log.e(TAG, "Caught an exception reading the state from storage: ", e);
                 // Delete the file to prevent the same error on subsequent calls and assume sensor

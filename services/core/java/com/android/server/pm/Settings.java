@@ -1969,28 +1969,28 @@ public final class Settings {
                     serializer.attributeLong(null, ATTR_CE_DATA_INODE, ustate.ceDataInode);
                 }
                 if (!ustate.installed) {
-                    serializer.attribute(null, ATTR_INSTALLED, "false");
+                    serializer.attributeBoolean(null, ATTR_INSTALLED, false);
                 }
                 if (ustate.stopped) {
-                    serializer.attribute(null, ATTR_STOPPED, "true");
+                    serializer.attributeBoolean(null, ATTR_STOPPED, true);
                 }
                 if (ustate.notLaunched) {
-                    serializer.attribute(null, ATTR_NOT_LAUNCHED, "true");
+                    serializer.attributeBoolean(null, ATTR_NOT_LAUNCHED, true);
                 }
                 if (ustate.hidden) {
-                    serializer.attribute(null, ATTR_HIDDEN, "true");
+                    serializer.attributeBoolean(null, ATTR_HIDDEN, true);
                 }
                 if (ustate.distractionFlags != 0) {
                     serializer.attributeInt(null, ATTR_DISTRACTION_FLAGS, ustate.distractionFlags);
                 }
                 if (ustate.suspended) {
-                    serializer.attribute(null, ATTR_SUSPENDED, "true");
+                    serializer.attributeBoolean(null, ATTR_SUSPENDED, true);
                 }
                 if (ustate.instantApp) {
-                    serializer.attribute(null, ATTR_INSTANT_APP, "true");
+                    serializer.attributeBoolean(null, ATTR_INSTANT_APP, true);
                 }
                 if (ustate.virtualPreload) {
-                    serializer.attribute(null, ATTR_VIRTUAL_PRELOAD, "true");
+                    serializer.attributeBoolean(null, ATTR_VIRTUAL_PRELOAD, true);
                 }
                 if (ustate.enabled != COMPONENT_ENABLED_STATE_DEFAULT) {
                     serializer.attributeInt(null, ATTR_ENABLED, ustate.enabled);
@@ -2731,7 +2731,7 @@ public final class Settings {
             serializer.attributeInt(null, "sharedUserId", pkg.appId);
         }
         if (pkg.uidError) {
-            serializer.attribute(null, "uidError", "true");
+            serializer.attributeBoolean(null, "uidError", true);
         }
         InstallSource installSource = pkg.installSource;
         if (installSource.installerPackageName != null) {
@@ -2742,13 +2742,13 @@ public final class Settings {
                     installSource.installerAttributionTag);
         }
         if (installSource.isOrphaned) {
-            serializer.attribute(null, "isOrphaned", "true");
+            serializer.attributeBoolean(null, "isOrphaned", true);
         }
         if (installSource.initiatingPackageName != null) {
             serializer.attribute(null, "installInitiator", installSource.initiatingPackageName);
         }
         if (installSource.isInitiatingPackageUninstalled) {
-            serializer.attribute(null, "installInitiatorUninstalled", "true");
+            serializer.attributeBoolean(null, "installInitiatorUninstalled", true);
         }
         if (installSource.originatingPackageName != null) {
             serializer.attribute(null, "installOriginator", installSource.originatingPackageName);
@@ -2760,16 +2760,16 @@ public final class Settings {
             serializer.attributeInt(null, "categoryHint", pkg.categoryHint);
         }
         if (pkg.updateAvailable) {
-            serializer.attribute(null, "updateAvailable", "true");
+            serializer.attributeBoolean(null, "updateAvailable", true);
         }
         if (pkg.forceQueryableOverride) {
-            serializer.attribute(null, "forceQueryable", "true");
+            serializer.attributeBoolean(null, "forceQueryable", true);
         }
         if (pkg.isPackageStartable()) {
-            serializer.attribute(null, "isStartable", "true");
+            serializer.attributeBoolean(null, "isStartable", true);
         }
         if (pkg.isPackageLoading()) {
-            serializer.attribute(null, "isLoading", "true");
+            serializer.attributeBoolean(null, "isLoading", true);
         }
 
         writeUsesStaticLibLPw(serializer, pkg.usesStaticLibraries, pkg.usesStaticLibrariesVersions);
@@ -3500,14 +3500,14 @@ public final class Settings {
         String systemStr = null;
         String installerPackageName = null;
         String installerAttributionTag = null;
-        String isOrphaned = null;
+        boolean isOrphaned = false;
         String installOriginatingPackageName = null;
         String installInitiatingPackageName = null;
-        String installInitiatorUninstalled = null;
+        boolean installInitiatorUninstalled = false;
         String volumeUuid = null;
-        String updateAvailable = null;
+        boolean updateAvailable = false;
         int categoryHint = ApplicationInfo.CATEGORY_UNDEFINED;
-        String uidError = null;
+        boolean uidError = false;
         int pkgFlags = 0;
         int pkgPrivateFlags = 0;
         long timeStamp = 0;
@@ -3515,14 +3515,14 @@ public final class Settings {
         long lastUpdateTime = 0;
         PackageSetting packageSetting = null;
         long versionCode = 0;
-        String installedForceQueryable = null;
-        String isStartable = null;
-        String isLoading = null;
+        boolean installedForceQueryable = false;
+        boolean isStartable = false;
+        boolean isLoading = false;
         try {
             name = parser.getAttributeValue(null, ATTR_NAME);
             realName = parser.getAttributeValue(null, "realName");
             userId = parser.getAttributeInt(null, "userId", 0);
-            uidError = parser.getAttributeValue(null, "uidError");
+            uidError = parser.getAttributeBoolean(null, "uidError", false);
             sharedUserId = parser.getAttributeInt(null, "sharedUserId", 0);
             codePathStr = parser.getAttributeValue(null, "codePath");
 
@@ -3532,10 +3532,10 @@ public final class Settings {
             primaryCpuAbiString = parser.getAttributeValue(null, "primaryCpuAbi");
             secondaryCpuAbiString = parser.getAttributeValue(null, "secondaryCpuAbi");
             cpuAbiOverrideString = parser.getAttributeValue(null, "cpuAbiOverride");
-            updateAvailable = parser.getAttributeValue(null, "updateAvailable");
-            installedForceQueryable = parser.getAttributeValue(null, "forceQueryable");
-            isStartable = parser.getAttributeValue(null, "isStartable");
-            isLoading = parser.getAttributeValue(null, "isLoading");
+            updateAvailable = parser.getAttributeBoolean(null, "updateAvailable", false);
+            installedForceQueryable = parser.getAttributeBoolean(null, "forceQueryable", false);
+            isStartable = parser.getAttributeBoolean(null, "isStartable", false);
+            isLoading = parser.getAttributeBoolean(null, "isLoading", false);
 
             if (primaryCpuAbiString == null && legacyCpuAbiString != null) {
                 primaryCpuAbiString = legacyCpuAbiString;
@@ -3544,11 +3544,11 @@ public final class Settings {
             versionCode = parser.getAttributeLong(null, "version", 0);
             installerPackageName = parser.getAttributeValue(null, "installer");
             installerAttributionTag = parser.getAttributeValue(null, "installerAttributionTag");
-            isOrphaned = parser.getAttributeValue(null, "isOrphaned");
+            isOrphaned = parser.getAttributeBoolean(null, "isOrphaned", false);
             installInitiatingPackageName = parser.getAttributeValue(null, "installInitiator");
             installOriginatingPackageName = parser.getAttributeValue(null, "installOriginator");
-            installInitiatorUninstalled = parser.getAttributeValue(null,
-                    "installInitiatorUninstalled");
+            installInitiatorUninstalled = parser.getAttributeBoolean(null,
+                    "installInitiatorUninstalled", false);
             volumeUuid = parser.getAttributeValue(null, "volumeUuid");
             categoryHint = parser.getAttributeInt(null, "categoryHint",
                     ApplicationInfo.CATEGORY_UNDEFINED);
@@ -3670,21 +3670,20 @@ public final class Settings {
                             + userId + " at " + parser.getPositionDescription());
         }
         if (packageSetting != null) {
-            packageSetting.uidError = "true".equals(uidError);
+            packageSetting.uidError = uidError;
             InstallSource installSource = InstallSource.create(
                     installInitiatingPackageName, installOriginatingPackageName,
-                    installerPackageName, installerAttributionTag, "true".equals(isOrphaned),
-                    "true".equals(installInitiatorUninstalled));
+                    installerPackageName, installerAttributionTag, isOrphaned,
+                    installInitiatorUninstalled);
             packageSetting.installSource = installSource;
             packageSetting.volumeUuid = volumeUuid;
             packageSetting.categoryHint = categoryHint;
             packageSetting.legacyNativeLibraryPathString = legacyNativeLibraryPathStr;
             packageSetting.primaryCpuAbiString = primaryCpuAbiString;
             packageSetting.secondaryCpuAbiString = secondaryCpuAbiString;
-            packageSetting.updateAvailable = "true".equals(updateAvailable);
-            packageSetting.forceQueryableOverride = "true".equals(installedForceQueryable);
-            packageSetting.incrementalStates = new IncrementalStates("true".equals(isStartable),
-                    "true".equals(isLoading));
+            packageSetting.updateAvailable = updateAvailable;
+            packageSetting.forceQueryableOverride = installedForceQueryable;
+            packageSetting.incrementalStates = new IncrementalStates(isStartable, isLoading);
             // Handle legacy string here for single-user mode
             final String enabledStr = parser.getAttributeValue(null, ATTR_ENABLED);
             if (enabledStr != null) {
@@ -3914,7 +3913,7 @@ public final class Settings {
         {
             name = parser.getAttributeValue(null, ATTR_NAME);
             int userId = parser.getAttributeInt(null, "userId", 0);
-            if ("true".equals(parser.getAttributeValue(null, "system"))) {
+            if (parser.getAttributeBoolean(null, "system", false)) {
                 pkgFlags |= ApplicationInfo.FLAG_SYSTEM;
             }
             if (name == null) {

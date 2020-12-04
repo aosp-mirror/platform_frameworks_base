@@ -16,11 +16,11 @@
 
 package android.content.pm;
 
-import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED;
-import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ASK;
 import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS;
 import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS_ASK;
+import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ASK;
 import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_NEVER;
+import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED;
 
 import android.annotation.SystemApi;
 import android.os.Parcel;
@@ -28,12 +28,13 @@ import android.os.Parcelable;
 import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.Log;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 
 import com.android.internal.util.XmlUtils;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -72,7 +73,7 @@ public final class IntentFilterVerificationInfo implements Parcelable {
     }
 
     /** @hide */
-    public IntentFilterVerificationInfo(XmlPullParser parser)
+    public IntentFilterVerificationInfo(TypedXmlPullParser parser)
             throws IOException, XmlPullParserException {
         readFromXml(parser);
     }
@@ -121,7 +122,7 @@ public final class IntentFilterVerificationInfo implements Parcelable {
         return sb.toString();
     }
 
-    String getStringFromXml(XmlPullParser parser, String attribute, String defaultValue) {
+    String getStringFromXml(TypedXmlPullParser parser, String attribute, String defaultValue) {
         String value = parser.getAttributeValue(null, attribute);
         if (value == null) {
             String msg = "Missing element under " + TAG +": " + attribute + " at " +
@@ -133,20 +134,12 @@ public final class IntentFilterVerificationInfo implements Parcelable {
         }
     }
 
-    int getIntFromXml(XmlPullParser parser, String attribute, int defaultValue) {
-        String value = parser.getAttributeValue(null, attribute);
-        if (TextUtils.isEmpty(value)) {
-            String msg = "Missing element under " + TAG +": " + attribute + " at " +
-                    parser.getPositionDescription();
-            Log.w(TAG, msg);
-            return defaultValue;
-        } else {
-            return Integer.parseInt(value);
-        }
+    int getIntFromXml(TypedXmlPullParser parser, String attribute, int defaultValue) {
+        return parser.getAttributeInt(null, attribute, defaultValue);
     }
 
     /** @hide */
-    public void readFromXml(XmlPullParser parser) throws XmlPullParserException,
+    public void readFromXml(TypedXmlPullParser parser) throws XmlPullParserException,
             IOException {
         mPackageName = getStringFromXml(parser, ATTR_PACKAGE_NAME, null);
         if (mPackageName == null) {
@@ -182,9 +175,9 @@ public final class IntentFilterVerificationInfo implements Parcelable {
     }
 
     /** @hide */
-    public void writeToXml(XmlSerializer serializer) throws IOException {
+    public void writeToXml(TypedXmlSerializer serializer) throws IOException {
         serializer.attribute(null, ATTR_PACKAGE_NAME, mPackageName);
-        serializer.attribute(null, ATTR_STATUS, String.valueOf(mStatus));
+        serializer.attributeInt(null, ATTR_STATUS, mStatus);
         for (String str : mDomains) {
             serializer.startTag(null, TAG_DOMAIN);
             serializer.attribute(null, ATTR_DOMAIN_NAME, str);
