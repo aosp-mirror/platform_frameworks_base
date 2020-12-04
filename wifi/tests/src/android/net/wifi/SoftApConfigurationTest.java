@@ -20,6 +20,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeTrue;
 
 import android.net.MacAddress;
 import android.os.Parcel;
@@ -371,6 +372,7 @@ public class SoftApConfigurationTest {
 
     @Test
     public void testDualBands() {
+        assumeTrue(SdkLevel.isAtLeastS());
         int[] dual_bands = new int[2];
         dual_bands[0] = SoftApConfiguration.BAND_2GHZ;
         dual_bands[1] = SoftApConfiguration.BAND_5GHZ;
@@ -384,6 +386,7 @@ public class SoftApConfigurationTest {
 
     @Test
     public void testDualChannels() {
+        assumeTrue(SdkLevel.isAtLeastS());
         int[] expected_dual_bands = new int[2];
         expected_dual_bands[0] = SoftApConfiguration.BAND_2GHZ;
         expected_dual_bands[1] = SoftApConfiguration.BAND_5GHZ;
@@ -417,6 +420,7 @@ public class SoftApConfigurationTest {
 
     @Test
     public void testInvalidBandWhenSetBands() {
+        assumeTrue(SdkLevel.isAtLeastS());
         boolean isIllegalArgumentExceptionHappened = false;
         int[] dual_bands = new int[2];
         dual_bands[0] = SoftApConfiguration.BAND_2GHZ;
@@ -457,6 +461,7 @@ public class SoftApConfigurationTest {
 
     @Test
     public void testInvalidConfigWhenSetChannels() {
+        assumeTrue(SdkLevel.isAtLeastS());
         boolean isIllegalArgumentExceptionHappened = false;
         SparseIntArray invalid_channels = new SparseIntArray();
         try {
