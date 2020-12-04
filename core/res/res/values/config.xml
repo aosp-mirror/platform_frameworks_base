@@ -4507,7 +4507,7 @@
     <integer name="config_pdp_reject_retry_delay_ms">-1</integer>
 
     <!-- Whether or not to enable the binder heavy hitter watcher by default -->
-    <bool name="config_defaultBinderHeavyHitterWatcherEnabled">true</bool>
+    <bool name="config_defaultBinderHeavyHitterWatcherEnabled">false</bool>
 
     <!-- The default batch size for the binder heavy hitter watcher -->
     <integer name="config_defaultBinderHeavyHitterWatcherBatchSize">2000</integer>
@@ -4518,7 +4518,7 @@
     </item>
 
     <!-- Whether or not to enable the binder heavy hitter auto sampler by default -->
-    <bool name="config_defaultBinderHeavyHitterAutoSamplerEnabled">true</bool>
+    <bool name="config_defaultBinderHeavyHitterAutoSamplerEnabled">false</bool>
 
     <!-- The default batch size for the binder heavy hitter auto sampler -->
     <integer name="config_defaultBinderHeavyHitterAutoSamplerBatchSize">400</integer>
