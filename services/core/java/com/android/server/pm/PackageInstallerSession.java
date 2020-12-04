@@ -104,6 +104,7 @@ import android.os.ParcelableException;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.RevocableFileDescriptor;
+import android.os.SELinux;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.incremental.IStorageHealthListener;
@@ -1083,6 +1084,31 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         assertCanWrite(fd != null);
         try {
             doWriteInternal(name, offsetBytes, lengthBytes, fd);
+        } catch (IOException e) {
+            throw ExceptionUtils.wrap(e);
+        }
+    }
+
+    @Override
+    public void stageViaHardLink(String path) {
+        final int callingUid = Binder.getCallingUid();
+        if (callingUid != Process.SYSTEM_UID) {
+            throw new SecurityException("link() can only be run by the system");
+        }
+
+        try {
+            final File target = new File(path);
+            final File source = new File(stageDir, target.getName());
+            try {
+                Os.link(path, source.getAbsolutePath());
+                // Grant READ access for APK to be read successfully
+                Os.chmod(source.getAbsolutePath(), 0644);
+            } catch (ErrnoException e) {
+                e.rethrowAsIOException();
+            }
+            if (!SELinux.restorecon(source)) {
+                throw new IOException("Can't relabel file: " + source);
+            }
         } catch (IOException e) {
             throw ExceptionUtils.wrap(e);
         }

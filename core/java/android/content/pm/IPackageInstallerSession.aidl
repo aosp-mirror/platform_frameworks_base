@@ -33,6 +33,7 @@ interface IPackageInstallerSession {
     ParcelFileDescriptor openRead(String name);
 
     void write(String name, long offsetBytes, long lengthBytes, in ParcelFileDescriptor fd);
+    void stageViaHardLink(String target);
 
     void addChecksums(String name, in Checksum[] checksums);
 
