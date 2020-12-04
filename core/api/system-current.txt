@@ -4991,6 +4991,7 @@ package android.media.tv.tuner {
   public class Descrambler implements java.lang.AutoCloseable {
     method public int addPid(int, int, @Nullable android.media.tv.tuner.filter.Filter);
     method public void close();
+    method public static boolean isValidKeyToken(@NonNull byte[]);
     method public int removePid(int, int, @Nullable android.media.tv.tuner.filter.Filter);
     method public int setKeyToken(@NonNull byte[]);
     field public static final int PID_TYPE_MMTP = 2; // 0x2
@@ -5065,7 +5066,6 @@ package android.media.tv.tuner {
     field public static final int INVALID_FIRST_MACROBLOCK_IN_SLICE = -1; // 0xffffffff
     field public static final int INVALID_FRONTEND_ID = -1; // 0xffffffff
     field public static final int INVALID_FRONTEND_SETTING_FREQUENCY = -1; // 0xffffffff
-    field @NonNull public static final byte[] INVALID_KEYTOKEN;
     field public static final int INVALID_LTS_ID = -1; // 0xffffffff
     field public static final int INVALID_MMTP_RECORD_EVENT_MPT_SEQUENCE_NUM = -1; // 0xffffffff
     field public static final int INVALID_STREAM_ID = 65535; // 0xffff
@@ -5081,6 +5081,7 @@ package android.media.tv.tuner {
     field public static final int SCAN_TYPE_AUTO = 1; // 0x1
     field public static final int SCAN_TYPE_BLIND = 2; // 0x2
     field public static final int SCAN_TYPE_UNDEFINED = 0; // 0x0
+    field @NonNull public static final byte[] VOID_KEYTOKEN;
   }
 
   public static interface Tuner.OnResourceLostListener {

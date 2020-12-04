@@ -166,13 +166,13 @@ public class Tuner implements AutoCloseable  {
     public static final int INVALID_LNB_ID =
             android.hardware.tv.tuner.V1_1.Constants.Constant.INVALID_LNB_ID;
     /**
-     * Invalid key token. It is used to remove the current key from descrambler.
+     * A void key token. It is used to remove the current key from descrambler.
      *
      * <p>If the current keyToken comes from a MediaCas session, App is recommended to
      * to use this constant to remove current key before closing MediaCas session.
      */
     @NonNull
-    public static final byte[] INVALID_KEYTOKEN =
+    public static final byte[] VOID_KEYTOKEN =
             {android.hardware.tv.tuner.V1_1.Constants.Constant.INVALID_KEYTOKEN};
 
     /** @hide */
