@@ -130,6 +130,11 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             updateStates();
             updateLockIcon();
         }
+
+        @Override
+        public void onExpansionChanged(float hideAmount) {
+            mStatusBar.setBouncerHideAmount(hideAmount);
+        }
     };
     private final DockManager.DockEventListener mDockEventListener =
             new DockManager.DockEventListener() {
