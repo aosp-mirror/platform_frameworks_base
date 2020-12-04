@@ -28,7 +28,7 @@ import android.content.Context;
 import android.content.pm.ParceledListSlice;
 import android.media.AudioManager;
 import android.media.IRemoteVolumeControllerCallback;
-import android.media.MediaFrameworkInitializer;
+import android.media.MediaFrameworkPlatformInitializer;
 import android.media.MediaSession2;
 import android.media.Session2Token;
 import android.os.Bundle;
@@ -122,7 +122,7 @@ public final class MediaSessionManager {
         // Consider rewriting like DisplayManagerGlobal
         // Decide if we need context
         mContext = context;
-        mService = ISessionManager.Stub.asInterface(MediaFrameworkInitializer
+        mService = ISessionManager.Stub.asInterface(MediaFrameworkPlatformInitializer
                 .getMediaServiceManager()
                 .getMediaSessionServiceRegisterer()
                 .get());

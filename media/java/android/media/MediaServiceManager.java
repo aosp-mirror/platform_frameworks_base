@@ -17,6 +17,8 @@ package android.media;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
+import android.annotation.SystemApi.Client;
 import android.os.IBinder;
 import android.os.ServiceManager;
 
@@ -27,7 +29,11 @@ import android.os.ServiceManager;
  * <p> Only the media mainline module will be able to access an instance of this class.
  * @hide
  */
+@SystemApi(client = Client.MODULE_LIBRARIES)
 public class MediaServiceManager {
+    private static final String MEDIA_SESSION_SERVICE = "media_session";
+    private static final String MEDIA_TRANSCODING_SERVICE = "media.transcoding";
+
     /**
      * @hide
      */
@@ -59,10 +65,18 @@ public class MediaServiceManager {
     }
 
     /**
-     * Returns {@link ServiceRegisterer} for the "media_session" service.
+     * Returns {@link ServiceRegisterer} for MEDIA_SESSION_SERVICE.
      */
     @NonNull
     public ServiceRegisterer getMediaSessionServiceRegisterer() {
-        return new ServiceRegisterer("media_session");
+        return new ServiceRegisterer(MEDIA_SESSION_SERVICE);
+    }
+
+    /**
+     * Returns {@link ServiceRegisterer} for MEDIA_TRANSCODING_SERVICE.
+     */
+    @NonNull
+    public ServiceRegisterer getMediaTranscodingServiceRegisterer() {
+        return new ServiceRegisterer(MEDIA_TRANSCODING_SERVICE);
     }
 }

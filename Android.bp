@@ -626,7 +626,6 @@ java_defaults {
         // in favor of an API stubs dependency in java_library "framework" below.
         "mimemap",
         "av-types-aidl-java",
-        "mediatranscoding_aidl_interface-java",
         "soundtrigger_middleware-aidl-java",
         "modules-utils-os",
     ],
