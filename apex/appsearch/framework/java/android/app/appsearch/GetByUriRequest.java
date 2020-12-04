@@ -29,8 +29,7 @@ import java.util.Set;
 /**
  * Encapsulates a request to retrieve documents by namespace and URI.
  *
- * @see AppSearchSession#getByUri
- * @hide
+ * @see AppSearchManager#getByUri
  */
 public final class GetByUriRequest {
     private final String mNamespace;
