@@ -24,6 +24,10 @@ import android.window.WindowContainerTransaction;
 import android.window.WindowContainerTransactionCallback;
 import android.window.WindowOrganizer;
 
+import androidx.annotation.BinderThread;
+
+import com.android.wm.shell.common.annotations.ShellMainThread;
+
 import java.util.ArrayList;
 
 /**
@@ -151,6 +155,7 @@ public final class SyncTransactionQueue {
             mHandler.postDelayed(mOnReplyTimeout, REPLY_TIMEOUT);
         }
 
+        @BinderThread
         @Override
         public void onTransactionReady(int id,
                 @NonNull SurfaceControl.Transaction t) {

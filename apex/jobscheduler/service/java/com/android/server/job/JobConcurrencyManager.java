@@ -205,7 +205,9 @@ class JobConcurrencyManager {
     }
 
     private boolean isFgJob(JobStatus job) {
-        return job.lastEvaluatedPriority >= JobInfo.PRIORITY_TOP_APP;
+        // (It's super confusing PRIORITY_BOUND_FOREGROUND_SERVICE isn't FG here)
+        return job.lastEvaluatedPriority >= JobInfo.PRIORITY_TOP_APP
+                || job.shouldTreatAsForegroundJob();
     }
 
     @GuardedBy("mLock")
@@ -335,6 +337,8 @@ class JobConcurrencyManager {
             if (jobRunningContext != -1) {
                 continue;
             }
+
+            // TODO(171305774): make sure HPJs aren't pre-empted and add dedicated contexts for them
 
             final boolean isPendingFg = isFgJob(nextPending);
 

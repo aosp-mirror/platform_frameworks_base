@@ -31,22 +31,16 @@ import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_CERTIFICATE
 import static android.content.pm.PackageManager.INSTALL_STAGED;
 import static android.content.pm.PackageManager.INSTALL_SUCCEEDED;
 import static android.content.pm.PackageParser.APEX_FILE_EXTENSION;
-import static android.content.pm.PackageParser.APK_FILE_EXTENSION;
 import static android.system.OsConstants.O_CREAT;
 import static android.system.OsConstants.O_RDONLY;
 import static android.system.OsConstants.O_WRONLY;
 
 import static com.android.internal.util.XmlUtils.readBitmapAttribute;
-import static com.android.internal.util.XmlUtils.readBooleanAttribute;
 import static com.android.internal.util.XmlUtils.readByteArrayAttribute;
-import static com.android.internal.util.XmlUtils.readIntAttribute;
-import static com.android.internal.util.XmlUtils.readLongAttribute;
 import static com.android.internal.util.XmlUtils.readStringAttribute;
 import static com.android.internal.util.XmlUtils.readUriAttribute;
 import static com.android.internal.util.XmlUtils.writeBooleanAttribute;
 import static com.android.internal.util.XmlUtils.writeByteArrayAttribute;
-import static com.android.internal.util.XmlUtils.writeIntAttribute;
-import static com.android.internal.util.XmlUtils.writeLongAttribute;
 import static com.android.internal.util.XmlUtils.writeStringAttribute;
 import static com.android.internal.util.XmlUtils.writeUriAttribute;
 import static com.android.server.pm.PackageInstallerService.prepareStageDir;
@@ -156,7 +150,6 @@ import libcore.util.EmptyArray;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -482,6 +475,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     @GuardedBy("mLock")
     private IncrementalFileStorages mIncrementalFileStorages;
+
+    @GuardedBy("mLock")
+    private PackageLite mPackageLite;
 
     private static final FileFilter sAddedApkFilter = new FileFilter() {
         @Override
@@ -2040,7 +2036,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
         // TODO(b/136257624): Some logic in this if block probably belongs in
         //  makeInstallParams().
-        if (!params.isMultiPackage && !isApexSession()) {
+        if (!isMultiPackage() && !isApexSession()) {
             Objects.requireNonNull(mPackageName);
             Objects.requireNonNull(mSigningDetails);
             Objects.requireNonNull(mResolvedBaseFile);
@@ -2094,12 +2090,18 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                             "Failed to inherit existing install", e);
                 }
             }
+            // For mode inherit existing, it would link/copy existing files to stage dir in the
+            // above block. Therefore, we need to parse the complete package in stage dir here.
+            // Besides, PackageLite may be null for staged sessions that don't complete pre-reboot
+            // verification.
+            mPackageLite = getOrParsePackageLiteLocked(stageDir, /* flags */ 0);
 
             // TODO: surface more granular state from dexopt
             mInternalProgress = 0.5f;
             computeProgressLocked(true);
 
-            extractNativeLibraries(stageDir, params.abiOverride, mayInheritNativeLibs());
+            extractNativeLibraries(mPackageLite, stageDir, params.abiOverride,
+                    mayInheritNativeLibs());
         }
 
         final IPackageInstallObserver2 localObserver;
@@ -2142,7 +2144,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             copiedParams.installFlags &= ~PackageManager.INSTALL_ENABLE_ROLLBACK;
         }
         return mPm.new VerificationParams(user, stageDir, localObserver, copiedParams,
-                mInstallSource, mInstallerUid, mSigningDetails, sessionId);
+                mInstallSource, mInstallerUid, mSigningDetails, sessionId, mPackageLite);
     }
 
     private void onVerificationComplete() {
@@ -2215,10 +2217,37 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             params.installFlags |= INSTALL_STAGED;
         }
 
+        if (!isMultiPackage() && !isApexSession()) {
+            synchronized (mLock) {
+                // This shouldn't be null, but have this code path just in case.
+                if (mPackageLite == null) {
+                    Slog.wtf(TAG, "Session: " + sessionId + ". Don't have a valid PackageLite.");
+                }
+                mPackageLite = getOrParsePackageLiteLocked(stageDir, /* flags */ 0);
+            }
+        }
+
         synchronized (mLock) {
             return mPm.new InstallParams(stageDir, localObserver, params, mInstallSource, user,
-                    mSigningDetails, mInstallerUid);
+                    mSigningDetails, mInstallerUid, mPackageLite);
         }
+    }
+
+    @GuardedBy("mLock")
+    private PackageLite getOrParsePackageLiteLocked(File packageFile, int flags)
+            throws PackageManagerException {
+        if (mPackageLite != null) {
+            return mPackageLite;
+        }
+
+        final ParseTypeImpl input = ParseTypeImpl.forDefaultParsing();
+        final ParseResult<PackageLite> result =
+                ApkLiteParseUtils.parsePackageLite(input, packageFile, flags);
+        if (result.isError()) {
+            throw new PackageManagerException(PackageManager.INSTALL_FAILED_INTERNAL_ERROR,
+                    result.getErrorMessage(), result.getException());
+        }
+        return result.getResult();
     }
 
     private static void maybeRenameFile(File from, File to) throws PackageManagerException {
@@ -2366,13 +2395,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
     }
 
-    private static String splitNameToFileName(String splitName) {
-        if (splitName == null) {
-            return "base";
-        }
-        return "split_" + splitName;
-    }
-
     /**
      * Validate install by confirming that all application packages are have
      * consistent package name, version code, and signing certificates.
@@ -2388,6 +2410,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     @GuardedBy("mLock")
     private void validateApkInstallLocked() throws PackageManagerException {
         ApkLite baseApk = null;
+        PackageLite packageLite = null;
+        mPackageLite = null;
         mPackageName = null;
         mVersionCode = -1;
         mSigningDetails = PackageParser.SigningDetails.UNKNOWN;
@@ -2431,6 +2455,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
         // Verify that all staged packages are internally consistent
         final ArraySet<String> stagedSplits = new ArraySet<>();
+        final ArrayMap<String, PackageParser.ApkLite> splitApks = new ArrayMap<>();
         ParseTypeImpl input = ParseTypeImpl.forDefaultParsing();
         for (File addedFile : addedFiles) {
             ParseResult<ApkLite> result = ApkLiteParseUtils.parseApkLite(input.reset(),
@@ -2458,8 +2483,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             assertApkConsistentLocked(String.valueOf(addedFile), apk);
 
             // Take this opportunity to enforce uniform naming
-            final String fileName = splitNameToFileName(apk.splitName);
-            final String targetName = fileName + APK_FILE_EXTENSION;
+            final String targetName = ApkLiteParseUtils.splitNameToFileName(apk);
             if (!FileUtils.isValidExtFilename(targetName)) {
                 throw new PackageManagerException(INSTALL_FAILED_INVALID_APK,
                         "Invalid filename: " + targetName);
@@ -2483,6 +2507,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             if (apk.splitName == null) {
                 mResolvedBaseFile = targetFile;
                 baseApk = apk;
+            } else {
+                splitApks.put(apk.splitName, apk);
             }
         }
 
@@ -2506,14 +2532,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 mVersionCode = pkgInfo.getLongVersionCode();
             }
             if (mSigningDetails == PackageParser.SigningDetails.UNKNOWN) {
-                try {
-                    mSigningDetails = ApkSignatureVerifier.unsafeGetCertsWithoutVerification(
-                            pkgInfo.applicationInfo.sourceDir,
-                            PackageParser.SigningDetails.SignatureSchemeVersion.JAR);
-                } catch (PackageParserException e) {
-                    throw new PackageManagerException(INSTALL_FAILED_INVALID_APK,
-                            "Couldn't obtain signatures from base APK");
-                }
+                mSigningDetails = unsafeGetCertsWithoutVerification(
+                        pkgInfo.applicationInfo.sourceDir);
             }
         }
 
@@ -2548,6 +2568,17 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 throw new PackageManagerException(INSTALL_FAILED_MISSING_SPLIT,
                         "Missing split for " + mPackageName);
             }
+            // For mode full install, we compose package lite for future usage instead of
+            // re-parsing it again and again.
+            final ParseResult<PackageLite> pkgLiteResult =
+                    ApkLiteParseUtils.composePackageLiteFromApks(input.reset(), stageDir, baseApk,
+                            splitApks, true);
+            if (pkgLiteResult.isError()) {
+                throw new PackageManagerException(pkgLiteResult.getErrorCode(),
+                        pkgLiteResult.getErrorMessage(), pkgLiteResult.getException());
+            }
+            mPackageLite = pkgLiteResult.getResult();
+            packageLite = mPackageLite;
         } else {
             final ApplicationInfo appInfo = pkgInfo.applicationInfo;
             ParseResult<PackageLite> pkgLiteResult = ApkLiteParseUtils.parsePackageLite(
@@ -2557,22 +2588,20 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                         pkgLiteResult.getErrorMessage(), pkgLiteResult.getException());
             }
             final PackageLite existing = pkgLiteResult.getResult();
-            ParseResult<ApkLite> apkLiteResult = ApkLiteParseUtils.parseApkLite(input.reset(),
-                    new File(appInfo.getBaseCodePath()),
-                    PackageParser.PARSE_COLLECT_CERTIFICATES);
-            if (apkLiteResult.isError()) {
-                throw new PackageManagerException(PackageManager.INSTALL_FAILED_INTERNAL_ERROR,
-                        apkLiteResult.getErrorMessage(), apkLiteResult.getException());
+            packageLite = existing;
+            assertPackageConsistentLocked("Existing", existing.packageName,
+                    existing.getLongVersionCode());
+            final PackageParser.SigningDetails signingDetails =
+                    unsafeGetCertsWithoutVerification(existing.baseCodePath);
+            if (!mSigningDetails.signaturesMatchExactly(signingDetails)) {
+                throw new PackageManagerException(INSTALL_FAILED_INVALID_APK,
+                        "Existing signatures are inconsistent");
             }
-            final ApkLite existingBase = apkLiteResult.getResult();
-
-            assertApkConsistentLocked("Existing base", existingBase);
 
             // Inherit base if not overridden.
             if (mResolvedBaseFile == null) {
                 mResolvedBaseFile = new File(appInfo.getBaseCodePath());
                 inheritFileLocked(mResolvedBaseFile);
-                baseApk = existingBase;
             }
 
             // Inherit splits if not overridden.
@@ -2659,7 +2688,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 }
             }
             // For the case of split required, failed if no splits existed
-            if (baseApk.isSplitRequired) {
+            if (packageLite.isSplitRequired) {
                 final int existingSplits = ArrayUtils.size(existing.splitNames);
                 final boolean allSplitsRemoved = (existingSplits == removeSplitList.size());
                 final boolean onlyBaseFileStaged = (stagedSplits.size() == 1
@@ -2670,7 +2699,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 }
             }
         }
-        if (baseApk.useEmbeddedDex) {
+        if (packageLite.useEmbeddedDex) {
             for (File file : mResolvedStagedFiles) {
                 if (file.getName().endsWith(".apk")
                         && !DexManager.auditUncompressedDexInApk(file.getPath())) {
@@ -2683,7 +2712,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
         final boolean isInstallerShell = (mInstallerUid == Process.SHELL_UID);
         if (isInstallerShell && isIncrementalInstallation() && mIncrementalFileStorages != null) {
-            if (!baseApk.debuggable && !baseApk.profilableByShell) {
+            if (!packageLite.debuggable && !packageLite.profilableByShell) {
                 mIncrementalFileStorages.disableReadLogs();
             }
         }
@@ -2838,23 +2867,40 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     @GuardedBy("mLock")
     private void assertApkConsistentLocked(String tag, ApkLite apk)
             throws PackageManagerException {
-        if (!mPackageName.equals(apk.packageName)) {
-            throw new PackageManagerException(INSTALL_FAILED_INVALID_APK, tag + " package "
-                    + apk.packageName + " inconsistent with " + mPackageName);
-        }
-        if (params.appPackageName != null && !params.appPackageName.equals(apk.packageName)) {
-            throw new PackageManagerException(INSTALL_FAILED_INVALID_APK, tag
-                    + " specified package " + params.appPackageName
-                    + " inconsistent with " + apk.packageName);
-        }
-        if (mVersionCode != apk.getLongVersionCode()) {
-            throw new PackageManagerException(INSTALL_FAILED_INVALID_APK, tag
-                    + " version code " + apk.versionCode + " inconsistent with "
-                    + mVersionCode);
-        }
+        assertPackageConsistentLocked(tag, apk.packageName, apk.getLongVersionCode());
         if (!mSigningDetails.signaturesMatchExactly(apk.signingDetails)) {
             throw new PackageManagerException(INSTALL_FAILED_INVALID_APK,
                     tag + " signatures are inconsistent");
+        }
+    }
+
+    @GuardedBy("mLock")
+    private void assertPackageConsistentLocked(String tag, String packageName,
+            long versionCode) throws PackageManagerException {
+        if (!mPackageName.equals(packageName)) {
+            throw new PackageManagerException(INSTALL_FAILED_INVALID_APK, tag + " package "
+                    + packageName + " inconsistent with " + mPackageName);
+        }
+        if (params.appPackageName != null && !params.appPackageName.equals(packageName)) {
+            throw new PackageManagerException(INSTALL_FAILED_INVALID_APK, tag
+                    + " specified package " + params.appPackageName
+                    + " inconsistent with " + packageName);
+        }
+        if (mVersionCode != versionCode) {
+            throw new PackageManagerException(INSTALL_FAILED_INVALID_APK, tag
+                    + " version code " + versionCode + " inconsistent with "
+                    + mVersionCode);
+        }
+    }
+
+    private PackageParser.SigningDetails unsafeGetCertsWithoutVerification(String path)
+            throws PackageManagerException {
+        try {
+            return ApkSignatureVerifier.unsafeGetCertsWithoutVerification(path,
+                    PackageParser.SigningDetails.SignatureSchemeVersion.JAR);
+        } catch (PackageParserException e) {
+            throw new PackageManagerException(INSTALL_FAILED_INVALID_APK,
+                    "Couldn't obtain signatures from APK : " + path);
         }
     }
 
@@ -2989,8 +3035,10 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         Slog.d(TAG, "Copied " + fromFiles.size() + " files into " + toDir);
     }
 
-    private void extractNativeLibraries(File packageDir, String abiOverride, boolean inherit)
+    private void extractNativeLibraries(PackageLite packageLite, File packageDir,
+            String abiOverride, boolean inherit)
             throws PackageManagerException {
+        Objects.requireNonNull(packageLite);
         final File libDir = new File(packageDir, NativeLibraryHelper.LIB_DIR_NAME);
         if (!inherit) {
             // Start from a clean slate
@@ -2999,7 +3047,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
         NativeLibraryHelper.Handle handle = null;
         try {
-            handle = NativeLibraryHelper.Handle.create(packageDir);
+            handle = NativeLibraryHelper.Handle.create(packageLite);
             final int res = NativeLibraryHelper.copyNativeBinariesWithOverride(handle, libDir,
                     abiOverride, isIncrementalInstallation());
             if (res != INSTALL_SUCCEEDED) {

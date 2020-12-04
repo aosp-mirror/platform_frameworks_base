@@ -238,16 +238,16 @@ public:
 
     /* --- InputReaderPolicyInterface implementation --- */
 
-    virtual void getReaderConfiguration(InputReaderConfiguration* outConfig);
-    virtual std::shared_ptr<PointerControllerInterface> obtainPointerController(int32_t deviceId);
-    virtual void notifyInputDevicesChanged(const std::vector<InputDeviceInfo>& inputDevices);
-    virtual std::shared_ptr<KeyCharacterMap> getKeyboardLayoutOverlay(
-            const InputDeviceIdentifier& identifier);
-    virtual std::string getDeviceAlias(const InputDeviceIdentifier& identifier);
-    virtual TouchAffineTransformation getTouchAffineTransformation(JNIEnv *env,
-            jfloatArray matrixArr);
-    virtual TouchAffineTransformation getTouchAffineTransformation(
-            const std::string& inputDeviceDescriptor, int32_t surfaceRotation);
+    void getReaderConfiguration(InputReaderConfiguration* outConfig) override;
+    std::shared_ptr<PointerControllerInterface> obtainPointerController(int32_t deviceId) override;
+    void notifyInputDevicesChanged(const std::vector<InputDeviceInfo>& inputDevices) override;
+    std::shared_ptr<KeyCharacterMap> getKeyboardLayoutOverlay(
+            const InputDeviceIdentifier& identifier) override;
+    std::string getDeviceAlias(const InputDeviceIdentifier& identifier) override;
+    TouchAffineTransformation getTouchAffineTransformation(const std::string& inputDeviceDescriptor,
+                                                           int32_t surfaceRotation) override;
+
+    TouchAffineTransformation getTouchAffineTransformation(JNIEnv* env, jfloatArray matrixArr);
 
     /* --- InputDispatcherPolicyInterface implementation --- */
 

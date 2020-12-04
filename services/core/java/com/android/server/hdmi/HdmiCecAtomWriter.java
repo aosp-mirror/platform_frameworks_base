@@ -18,9 +18,14 @@ package com.android.server.hdmi;
 
 import android.stats.hdmi.HdmiStatsEnums;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.FrameworkStatsLog;
 
-class HdmiCecAtomWriter {
+/**
+ * Provides methods for writing HDMI-CEC statsd atoms.
+ */
+@VisibleForTesting
+public class HdmiCecAtomWriter {
 
     private static final int FEATURE_ABORT_OPCODE_UNKNOWN = 0x100;
     private static final int ERROR_CODE_UNKNOWN = -1;

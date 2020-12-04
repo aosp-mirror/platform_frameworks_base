@@ -45,7 +45,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.RemoteException;
 import android.transition.Scene;
 import android.transition.Transition;
 import android.transition.TransitionManager;
@@ -635,7 +634,7 @@ public abstract class Window {
          * Moves the activity between {@link WindowConfiguration#WINDOWING_MODE_FREEFORM} windowing
          * mode and {@link WindowConfiguration#WINDOWING_MODE_FULLSCREEN}.
          */
-        void toggleFreeformWindowingMode() throws RemoteException;
+        void toggleFreeformWindowingMode();
 
         /**
          * Puts the activity in picture-in-picture mode if the activity supports.

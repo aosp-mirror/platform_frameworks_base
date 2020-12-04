@@ -160,20 +160,20 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
         switch (standbyAction) {
             case HdmiControlService.STANDBY_SCREEN_OFF:
                 // Get latest setting value
-                @HdmiControlManager.StandbyBehavior
+                @HdmiControlManager.PowerControlMode
                 String sendStandbyOnSleep = mService.getHdmiCecConfig().getStringValue(
-                        HdmiControlManager.CEC_SETTING_NAME_SEND_STANDBY_ON_SLEEP);
+                        HdmiControlManager.CEC_SETTING_NAME_POWER_CONTROL_MODE);
                 switch (sendStandbyOnSleep) {
-                    case HdmiControlManager.SEND_STANDBY_ON_SLEEP_TO_TV:
+                    case HdmiControlManager.POWER_CONTROL_MODE_TV:
                         mService.sendCecCommand(
                                 HdmiCecMessageBuilder.buildStandby(mAddress, Constants.ADDR_TV));
                         break;
-                    case HdmiControlManager.SEND_STANDBY_ON_SLEEP_BROADCAST:
+                    case HdmiControlManager.POWER_CONTROL_MODE_BROADCAST:
                         mService.sendCecCommand(
                                 HdmiCecMessageBuilder.buildStandby(mAddress,
                                         Constants.ADDR_BROADCAST));
                         break;
-                    case HdmiControlManager.SEND_STANDBY_ON_SLEEP_NONE:
+                    case HdmiControlManager.POWER_CONTROL_MODE_NONE:
                         break;
                 }
                 break;

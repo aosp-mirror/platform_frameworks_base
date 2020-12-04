@@ -19,6 +19,7 @@ package com.android.internal.app;
 import com.android.internal.os.BatteryStatsImpl;
 
 import android.bluetooth.BluetoothActivityEnergyInfo;
+import android.os.BatteryUsageStats;
 import android.os.ParcelFileDescriptor;
 import android.os.WorkSource;
 import android.os.connectivity.CellularBatteryStats;
@@ -49,6 +50,9 @@ interface IBatteryStats {
     void noteResetFlashlight();
 
     // Remaining methods are only used in Java.
+
+    BatteryUsageStats getBatteryUsageStats();
+
     @UnsupportedAppUsage
     byte[] getStatistics();
 

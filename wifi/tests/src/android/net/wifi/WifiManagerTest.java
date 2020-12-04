@@ -136,6 +136,7 @@ public class WifiManagerTest {
     private static final String[] TEST_MAC_ADDRESSES = {"da:a1:19:0:0:0"};
     private static final int TEST_AP_FREQUENCY = 2412;
     private static final int TEST_AP_BANDWIDTH = SoftApInfo.CHANNEL_WIDTH_20MHZ;
+    private static final int TEST_SUB_ID = 3;
 
     @Mock Context mContext;
     @Mock android.net.wifi.IWifiManager mWifiService;
@@ -2583,10 +2584,29 @@ public class WifiManagerTest {
 
     @Test
     public void testGetNetworkSuggestionUserApprovalStatus() throws Exception {
+        assumeTrue(SdkLevel.isAtLeastS());
+
         when(mWifiService.getNetworkSuggestionUserApprovalStatus(TEST_PACKAGE_NAME))
                 .thenReturn(WifiManager.STATUS_SUGGESTION_APPROVAL_APPROVED_BY_USER);
         assertEquals(WifiManager.STATUS_SUGGESTION_APPROVAL_APPROVED_BY_USER,
                 mWifiManager.getNetworkSuggestionUserApprovalStatus());
         verify(mWifiService).getNetworkSuggestionUserApprovalStatus(TEST_PACKAGE_NAME);
     }
+
+    @Test
+    public void testSetCarrierNetworkOffload() throws Exception {
+        assumeTrue(SdkLevel.isAtLeastS());
+        mWifiManager.setCarrierNetworkOffloadEnabled(TEST_SUB_ID, true, false);
+        verify(mWifiService).setCarrierNetworkOffloadEnabled(TEST_SUB_ID,
+                true, false);
+    }
+
+    @Test
+    public void testGetCarrierNetworkOffload() throws Exception {
+        assumeTrue(SdkLevel.isAtLeastS());
+        when(mWifiService.isCarrierNetworkOffloadEnabled(TEST_SUB_ID, false)).thenReturn(true);
+        assertTrue(mWifiManager.isCarrierNetworkOffloadEnabled(TEST_SUB_ID, false));
+        verify(mWifiService).isCarrierNetworkOffloadEnabled(TEST_SUB_ID, false);
+    }
+
 }

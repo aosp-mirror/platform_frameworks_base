@@ -30,6 +30,8 @@ import android.view.View;
 import androidx.annotation.IntDef;
 import androidx.annotation.Nullable;
 
+import com.android.wm.shell.common.annotations.ExternalThread;
+
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
@@ -40,6 +42,7 @@ import java.util.function.IntConsumer;
 /**
  * Interface to engage bubbles feature.
  */
+@ExternalThread
 public interface Bubbles {
 
     @Retention(SOURCE)

@@ -42,11 +42,6 @@ import java.util.Map;
  * Validators for the Secure Settings.
  */
 public class SecureSettingsValidators {
-    /**
-     * All settings in {@link Secure.SETTINGS_TO_BACKUP} and {@link
-     * DeviceSpecificSettings.DEVICE_SPECIFIC_SETTINGS_TO_BACKUP} array *must* have a non-null
-     * validator, otherwise they won't be restored.
-     */
     public static final Map<String, Validator> VALIDATORS = new ArrayMap<>();
 
     static {

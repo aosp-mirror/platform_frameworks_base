@@ -145,7 +145,7 @@ public class ConnectivityControllerTest {
 
         final ConnectivityController controller = new ConnectivityController(mService);
         when(mService.getMaxJobExecutionTimeMs(any()))
-                .thenReturn(JobServiceContext.EXECUTING_TIMESLICE_MILLIS);
+                .thenReturn(JobServiceContext.DEFAULT_EXECUTING_TIMESLICE_MILLIS);
 
         // Slow network is too slow
         assertFalse(controller.isSatisfied(createJobStatus(job), net,

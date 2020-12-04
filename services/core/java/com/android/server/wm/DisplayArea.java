@@ -307,6 +307,11 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
         return this;
     }
 
+    /** Cheap way of doing cast and instanceof. */
+    DisplayArea.Tokens asTokens() {
+        return null;
+    }
+
     @Override
     void forAllDisplayAreas(Consumer<DisplayArea> callback) {
         super.forAllDisplayAreas(callback);
@@ -543,6 +548,11 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
             }
             mLastOrientationSource = win;
             return req;
+        }
+
+        @Override
+        final DisplayArea.Tokens asTokens() {
+            return this;
         }
     }
 

@@ -20,11 +20,14 @@ import android.content.res.Configuration;
 
 import androidx.annotation.NonNull;
 
+import com.android.wm.shell.common.annotations.ExternalThread;
+
 import java.io.PrintWriter;
 
 /**
  * Interface to engage hide display cutout feature.
  */
+@ExternalThread
 public interface HideDisplayCutout {
     /**
      * Notifies {@link Configuration} changed.

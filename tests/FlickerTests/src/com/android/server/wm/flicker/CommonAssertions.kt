@@ -239,7 +239,7 @@ fun EventLogAssertion.focusChanges(
     bugId: Int = 0,
     enabled: Boolean = bugId == 0
 ) {
-    all(enabled = enabled, bugId = bugId) {
+    all("focusChanges", bugId, enabled) {
         this.focusChanges(windows)
     }
 }
@@ -248,7 +248,7 @@ fun EventLogAssertion.focusDoesNotChange(
     bugId: Int = 0,
     enabled: Boolean = bugId == 0
 ) {
-    all(enabled = enabled, bugId = bugId) {
+    all("focusDoesNotChange", bugId, enabled) {
         this.focusDoesNotChange()
     }
 }

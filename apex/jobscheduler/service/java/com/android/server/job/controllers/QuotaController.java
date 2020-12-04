@@ -36,6 +36,9 @@ import android.app.ActivityManagerInternal;
 import android.app.AlarmManager;
 import android.app.AppGlobals;
 import android.app.IUidObserver;
+import android.app.usage.UsageEvents;
+import android.app.usage.UsageStatsManagerInternal;
+import android.app.usage.UsageStatsManagerInternal.UsageEventListener;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -53,6 +56,7 @@ import android.util.IndentingPrintWriter;
 import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
+import android.util.SparseArray;
 import android.util.SparseArrayMap;
 import android.util.SparseBooleanArray;
 import android.util.SparseSetArray;
@@ -297,8 +301,15 @@ public final class QuotaController extends StateController {
     /** Timer for each package-userId combo. */
     private final SparseArrayMap<String, Timer> mPkgTimers = new SparseArrayMap<>();
 
-    /** List of all timing sessions for a package-userId combo, in chronological order. */
+    /** Timer for HPJs for each package-userId combo. */
+    private final SparseArrayMap<String, Timer> mHpjPkgTimers = new SparseArrayMap<>();
+
+    /** List of all regular timing sessions for a package-userId combo, in chronological order. */
     private final SparseArrayMap<String, List<TimingSession>> mTimingSessions =
+            new SparseArrayMap<>();
+
+    /** List of all hpj timing sessions for a package-userId combo, in chronological order. */
+    private final SparseArrayMap<String, List<TimingSession>> mHpjTimingSessions =
             new SparseArrayMap<>();
 
     /**
@@ -310,6 +321,10 @@ public final class QuotaController extends StateController {
     /** Cached calculation results for each app, with the standby buckets as the array indices. */
     private final SparseArrayMap<String, ExecutionStats[]> mExecutionStatsCache =
             new SparseArrayMap<>();
+
+    private final SparseArrayMap<String, ShrinkableDebits> mHpjStats = new SparseArrayMap<>();
+
+    private final SparseArrayMap<String, TopAppTimer> mTopAppTrackers = new SparseArrayMap<>();
 
     /** List of UIDs currently in the foreground. */
     private final SparseBooleanArray mForegroundUids = new SparseBooleanArray();
@@ -327,7 +342,7 @@ public final class QuotaController extends StateController {
     private final ActivityManagerInternal mActivityManagerInternal;
     private final AlarmManager mAlarmManager;
     private final ChargingTracker mChargeTracker;
-    private final Handler mHandler;
+    private final QcHandler mHandler;
     private final QcConstants mQcConstants;
 
     /** How much time each app will have to run jobs within their standby bucket window. */
@@ -474,14 +489,63 @@ public final class QuotaController extends StateController {
     private long mTimingSessionCoalescingDurationMs =
             QcConstants.DEFAULT_TIMING_SESSION_COALESCING_DURATION_MS;
 
+    /**
+     * The rolling window size for each standby bucket. Within each window, an app will have 10
+     * minutes to run its jobs.
+     */
+    private final long[] mHpjLimitsMs = new long[]{
+            QcConstants.DEFAULT_HPJ_LIMIT_ACTIVE_MS,
+            QcConstants.DEFAULT_HPJ_LIMIT_WORKING_MS,
+            QcConstants.DEFAULT_HPJ_LIMIT_FREQUENT_MS,
+            QcConstants.DEFAULT_HPJ_LIMIT_RARE_MS,
+            0, // NEVER
+            QcConstants.DEFAULT_HPJ_LIMIT_RESTRICTED_MS
+    };
+
+    /**
+     * The period of time used to calculate HPJ sessions. Apps can only have HPJ sessions
+     * totalling {@link #mHpjLimitsMs}[bucket within this period of time (without factoring in any
+     * rewards or free HPJs).
+     */
+    private long mHpjLimitWindowSizeMs = QcConstants.DEFAULT_HPJ_WINDOW_SIZE_MS;
+
+    /**
+     * Length of time used to split an app's top time into chunks.
+     */
+    public long mHpjTopAppTimeChunkSizeMs = QcConstants.DEFAULT_HPJ_TOP_APP_TIME_CHUNK_SIZE_MS;
+
+    /**
+     * How much HPJ quota to give back to an app based on the number of top app time chunks it had.
+     */
+    public long mHpjRewardTopAppMs = QcConstants.DEFAULT_HPJ_REWARD_TOP_APP_MS;
+
+    /**
+     * How much HPJ quota to give back to an app based on each non-top user interaction.
+     */
+    public long mHpjRewardInteractionMs = QcConstants.DEFAULT_HPJ_REWARD_INTERACTION_MS;
+
+    /**
+     * How much HPJ quota to give back to an app based on each notification seen event.
+     */
+    public long mHpjRewardNotificationSeenMs = QcConstants.DEFAULT_HPJ_REWARD_NOTIFICATION_SEEN_MS;
+
     /** An app has reached its quota. The message should contain a {@link Package} object. */
-    private static final int MSG_REACHED_QUOTA = 0;
+    @VisibleForTesting
+    static final int MSG_REACHED_QUOTA = 0;
     /** Drop any old timing sessions. */
     private static final int MSG_CLEAN_UP_SESSIONS = 1;
     /** Check if a package is now within its quota. */
     private static final int MSG_CHECK_PACKAGE = 2;
     /** Process state for a UID has changed. */
     private static final int MSG_UID_PROCESS_STATE_CHANGED = 3;
+    /** An app has reached its HPJ quota. The message should contain a {@link Package} object. */
+    @VisibleForTesting
+    static final int MSG_REACHED_HPJ_QUOTA = 4;
+    /**
+     * Process a new {@link UsageEvents.Event}. The event will be the message's object and the
+     * userId will the first arg.
+     */
+    private static final int MSG_PROCESS_USAGE_EVENT = 5;
 
     public QuotaController(JobSchedulerService service) {
         super(service);
@@ -498,6 +562,9 @@ public final class QuotaController extends StateController {
         // Set up the app standby bucketing tracker
         AppStandbyInternal appStandby = LocalServices.getService(AppStandbyInternal.class);
         appStandby.addListener(new StandbyTracker());
+
+        UsageStatsManagerInternal usmi = LocalServices.getService(UsageStatsManagerInternal.class);
+        usmi.registerListener(new UsageEventTracker());
 
         try {
             ActivityManager.getService().registerUidObserver(mUidObserver,
@@ -521,7 +588,15 @@ public final class QuotaController extends StateController {
         jobStatus.setTrackingController(JobStatus.TRACKING_QUOTA);
         final boolean isWithinQuota = isWithinQuotaLocked(jobStatus);
         setConstraintSatisfied(jobStatus, isWithinQuota);
-        if (!isWithinQuota) {
+        final boolean outOfHpjQuota;
+        if (jobStatus.isRequestedForegroundJob()) {
+            final boolean isWithinHpjQuota = isWithinHpjQuotaLocked(jobStatus);
+            jobStatus.setForegroundJobQuotaConstraintSatisfied(isWithinHpjQuota);
+            outOfHpjQuota = !isWithinHpjQuota;
+        } else {
+            outOfHpjQuota = false;
+        }
+        if (!isWithinQuota || outOfHpjQuota) {
             maybeScheduleStartAlarmLocked(userId, pkgName, jobStatus.getEffectiveStandbyBucket());
         }
     }
@@ -544,10 +619,12 @@ public final class QuotaController extends StateController {
 
         final int userId = jobStatus.getSourceUserId();
         final String packageName = jobStatus.getSourcePackageName();
-        Timer timer = mPkgTimers.get(userId, packageName);
+        final SparseArrayMap<String, Timer> timerMap =
+                jobStatus.shouldTreatAsForegroundJob() ? mHpjPkgTimers : mPkgTimers;
+        Timer timer = timerMap.get(userId, packageName);
         if (timer == null) {
-            timer = new Timer(uid, userId, packageName);
-            mPkgTimers.add(userId, packageName, timer);
+            timer = new Timer(uid, userId, packageName, !jobStatus.shouldTreatAsForegroundJob());
+            timerMap.add(userId, packageName, timer);
         }
         timer.startTrackingJobLocked(jobStatus);
     }
@@ -560,6 +637,13 @@ public final class QuotaController extends StateController {
                     jobStatus.getSourcePackageName());
             if (timer != null) {
                 timer.stopTrackingJob(jobStatus);
+            }
+            if (jobStatus.isRequestedForegroundJob()) {
+                timer = mHpjPkgTimers.get(jobStatus.getSourceUserId(),
+                        jobStatus.getSourcePackageName());
+                if (timer != null) {
+                    timer.stopTrackingJob(jobStatus);
+                }
             }
             ArraySet<JobStatus> jobs = mTrackedJobs.get(jobStatus.getSourceUserId(),
                     jobStatus.getSourcePackageName());
@@ -585,26 +669,37 @@ public final class QuotaController extends StateController {
     public void onUserRemovedLocked(int userId) {
         mTrackedJobs.delete(userId);
         mPkgTimers.delete(userId);
+        mHpjPkgTimers.delete(userId);
         mTimingSessions.delete(userId);
+        mHpjTimingSessions.delete(userId);
         mInQuotaAlarmListener.removeAlarmsLocked(userId);
         mExecutionStatsCache.delete(userId);
+        mHpjStats.delete(userId);
         mUidToPackageCache.clear();
     }
 
     /** Drop all historical stats and stop tracking any active sessions for the specified app. */
     public void clearAppStatsLocked(int userId, @NonNull String packageName) {
         mTrackedJobs.delete(userId, packageName);
-        Timer timer = mPkgTimers.get(userId, packageName);
+        Timer timer = mPkgTimers.delete(userId, packageName);
         if (timer != null) {
             if (timer.isActive()) {
                 Slog.e(TAG, "clearAppStats called before Timer turned off.");
                 timer.dropEverythingLocked();
             }
-            mPkgTimers.delete(userId, packageName);
+        }
+        timer = mHpjPkgTimers.delete(userId, packageName);
+        if (timer != null) {
+            if (timer.isActive()) {
+                Slog.e(TAG, "clearAppStats called before HPJ Timer turned off.");
+                timer.dropEverythingLocked();
+            }
         }
         mTimingSessions.delete(userId, packageName);
+        mHpjTimingSessions.delete(userId, packageName);
         mInQuotaAlarmListener.removeAlarmLocked(userId, packageName);
         mExecutionStatsCache.delete(userId, packageName);
+        mHpjStats.delete(userId, packageName);
     }
 
     private boolean isUidInForeground(int uid) {
@@ -627,9 +722,51 @@ public final class QuotaController extends StateController {
         if (mChargeTracker.isCharging()
                 || isTopStartedJobLocked(jobStatus)
                 || isUidInForeground(jobStatus.getSourceUid())) {
-            return JobServiceContext.EXECUTING_TIMESLICE_MILLIS;
+            return JobServiceContext.DEFAULT_EXECUTING_TIMESLICE_MILLIS;
+        }
+        if (jobStatus.shouldTreatAsForegroundJob()) {
+            return jobStatus.getStandbyBucket() == RESTRICTED_INDEX
+                    ? JobServiceContext.DEFAULT_RESTRICTED_HPJ_EXECUTING_TIMESLICE_MILLIS
+                    : JobServiceContext.DEFAULT_EXECUTING_TIMESLICE_MILLIS;
         }
         return getRemainingExecutionTimeLocked(jobStatus);
+    }
+
+    /** @return true if the job is within hpj quota. */
+    public boolean isWithinHpjQuotaLocked(@NonNull final JobStatus jobStatus) {
+        if (isQuotaFree(jobStatus.getEffectiveStandbyBucket())) {
+            return true;
+        }
+        // A job is within quota if one of the following is true:
+        //   1. it's already running (already executing HPJS should be allowed to finish)
+        //   2. the app is currently in the foreground
+        //   3. the app overall is within its quota
+        if (isTopStartedJobLocked(jobStatus) || isUidInForeground(jobStatus.getSourceUid())) {
+            return true;
+        }
+        Timer hpjTimer = mHpjPkgTimers.get(jobStatus.getSourceUserId(),
+                jobStatus.getSourcePackageName());
+        // Any already executing HPJs should be allowed to finish.
+        if (hpjTimer != null && hpjTimer.isRunning(jobStatus)) {
+            return true;
+        }
+
+        return 0 < getRemainingHpjExecutionTimeLocked(
+                jobStatus.getSourceUserId(), jobStatus.getSourcePackageName());
+    }
+
+    @NonNull
+    private ShrinkableDebits getHpjQuotaLocked(final int userId,
+            @NonNull final String packageName) {
+        ShrinkableDebits debits = mHpjStats.get(userId, packageName);
+        if (debits == null) {
+            debits = new ShrinkableDebits(
+                    JobSchedulerService.standbyBucketForPackage(
+                            packageName, userId, sElapsedRealtimeClock.millis())
+            );
+            mHpjStats.add(userId, packageName, debits);
+        }
+        return debits;
     }
 
     @VisibleForTesting
@@ -645,19 +782,22 @@ public final class QuotaController extends StateController {
                 jobStatus.getSourceUserId(), jobStatus.getSourcePackageName(), standbyBucket);
     }
 
+    private boolean isQuotaFree(final int standbyBucket) {
+        // Quota constraint is not enforced while charging.
+        if (mChargeTracker.isCharging()) {
+            // Restricted jobs require additional constraints when charging, so don't immediately
+            // mark quota as free when charging.
+            return standbyBucket != RESTRICTED_INDEX;
+        }
+        return false;
+    }
+
     @VisibleForTesting
     boolean isWithinQuotaLocked(final int userId, @NonNull final String packageName,
             final int standbyBucket) {
         if (standbyBucket == NEVER_INDEX) return false;
 
-        // Quota constraint is not enforced while charging.
-        if (mChargeTracker.isCharging()) {
-            // Restricted jobs require additional constraints when charging, so don't immediately
-            // mark quota as free when charging.
-            if (standbyBucket != RESTRICTED_INDEX) {
-                return true;
-            }
-        }
+        if (isQuotaFree(standbyBucket)) return true;
 
         ExecutionStats stats = getExecutionStatsLocked(userId, packageName, standbyBucket);
         return getRemainingExecutionTimeLocked(stats) > 0
@@ -715,6 +855,49 @@ public final class QuotaController extends StateController {
     private long getRemainingExecutionTimeLocked(@NonNull ExecutionStats stats) {
         return Math.min(mAllowedTimePerPeriodMs - stats.executionTimeInWindowMs,
                 mMaxExecutionTimeMs - stats.executionTimeInMaxPeriodMs);
+    }
+
+    @VisibleForTesting
+    long getRemainingHpjExecutionTimeLocked(final int userId, @NonNull final String packageName) {
+        ShrinkableDebits quota = getHpjQuotaLocked(userId, packageName);
+        if (quota.getStandbyBucketLocked() == NEVER_INDEX) {
+            return 0;
+        }
+        final long limitMs = mHpjLimitsMs[quota.getStandbyBucketLocked()];
+        long remainingMs = limitMs - quota.getTallyLocked();
+
+        // Stale sessions may still be factored into tally. Make sure they're removed.
+        List<TimingSession> timingSessions = mHpjTimingSessions.get(userId, packageName);
+        final long nowElapsed = sElapsedRealtimeClock.millis();
+        final long windowStartTimeElapsed = nowElapsed - mHpjLimitWindowSizeMs;
+        if (timingSessions != null) {
+            while (timingSessions.size() > 0) {
+                TimingSession ts = timingSessions.get(0);
+                if (ts.endTimeElapsed < windowStartTimeElapsed) {
+                    final long duration = ts.endTimeElapsed - ts.startTimeElapsed;
+                    remainingMs += duration;
+                    quota.transactOnDebitsLocked(-duration);
+                    timingSessions.remove(0);
+                } else if (ts.startTimeElapsed < windowStartTimeElapsed) {
+                    remainingMs += windowStartTimeElapsed - ts.startTimeElapsed;
+                    break;
+                } else {
+                    // Fully within the window.
+                    break;
+                }
+            }
+        }
+
+        Timer timer = mHpjPkgTimers.get(userId, packageName);
+        if (timer == null) {
+            return remainingMs;
+        }
+        // There's a case where the debits tally is 0 but a currently running HPJ still counts
+        // towards quota. If the app gets a reward in this case, the reward is lost and the HPJ
+        // run is still fully counted.
+        // TODO(171305774)/STOPSHIP: make sure getting rewards while HPJ currently executing isn't
+        // treated negatively
+        return remainingMs - timer.getCurrentDuration(sElapsedRealtimeClock.millis());
     }
 
     /**
@@ -800,6 +983,61 @@ public final class QuotaController extends StateController {
             Slog.wtf(TAG, "Calculated quota consumed time too high: " + timeUntilQuotaConsumedMs);
         }
         return timeUntilQuotaConsumedMs;
+    }
+
+    /**
+     * Returns the amount of time, in milliseconds, until the package would have reached its HPJ
+     * quota, assuming it has a job counting towards the quota the entire time and the quota isn't
+     * replenished at all in that time.
+     */
+    @VisibleForTesting
+    long getTimeUntilHpjQuotaConsumedLocked(final int userId, @NonNull final String packageName) {
+        final long remainingExecutionTimeMs =
+                getRemainingHpjExecutionTimeLocked(userId, packageName);
+
+        List<TimingSession> sessions = mHpjTimingSessions.get(userId, packageName);
+        if (sessions == null || sessions.size() == 0) {
+            return remainingExecutionTimeMs;
+        }
+
+        final long nowElapsed = sElapsedRealtimeClock.millis();
+        ShrinkableDebits quota = getHpjQuotaLocked(userId, packageName);
+        final long limitMs = mHpjLimitsMs[quota.getStandbyBucketLocked()];
+        final long startWindowElapsed = Math.max(0, nowElapsed - mHpjLimitWindowSizeMs);
+        long remainingDeadSpaceMs = remainingExecutionTimeMs;
+        // Total time looked at where a session wouldn't be phasing out.
+        long deadSpaceMs = 0;
+        // Time regained from sessions phasing out
+        long phasedOutSessionTimeMs = 0;
+
+        for (int i = 0; i < sessions.size(); ++i) {
+            TimingSession session = sessions.get(i);
+            if (session.endTimeElapsed < startWindowElapsed) {
+                // Edge case where a session became stale in the time between the call to
+                // getRemainingHpjExecutionTimeLocked and this line.
+                remainingDeadSpaceMs += session.endTimeElapsed - session.startTimeElapsed;
+                sessions.remove(i);
+                i--;
+            } else if (session.startTimeElapsed < startWindowElapsed) {
+                // Session straddles start of window
+                phasedOutSessionTimeMs = session.endTimeElapsed - startWindowElapsed;
+            } else {
+                // Session fully inside window
+                final long timeBetweenSessions = session.startTimeElapsed
+                        - (i == 0 ? startWindowElapsed : sessions.get(i - 1).endTimeElapsed);
+                final long usedDeadSpaceMs = Math.min(remainingDeadSpaceMs, timeBetweenSessions);
+                deadSpaceMs += usedDeadSpaceMs;
+                if (usedDeadSpaceMs == timeBetweenSessions) {
+                    phasedOutSessionTimeMs += session.endTimeElapsed - session.startTimeElapsed;
+                }
+                remainingDeadSpaceMs -= usedDeadSpaceMs;
+                if (remainingDeadSpaceMs <= 0) {
+                    break;
+                }
+            }
+        }
+
+        return Math.min(limitMs, deadSpaceMs + phasedOutSessionTimeMs + remainingDeadSpaceMs);
     }
 
     /** Returns the execution stats of the app in the most recent window. */
@@ -1053,18 +1291,36 @@ public final class QuotaController extends StateController {
 
     @VisibleForTesting
     void saveTimingSession(final int userId, @NonNull final String packageName,
-            @NonNull final TimingSession session) {
+            @NonNull final TimingSession session, boolean isHpj) {
         synchronized (mLock) {
-            List<TimingSession> sessions = mTimingSessions.get(userId, packageName);
+            final SparseArrayMap<String, List<TimingSession>> sessionMap =
+                    isHpj ? mHpjTimingSessions : mTimingSessions;
+            List<TimingSession> sessions = sessionMap.get(userId, packageName);
             if (sessions == null) {
                 sessions = new ArrayList<>();
-                mTimingSessions.add(userId, packageName, sessions);
+                sessionMap.add(userId, packageName, sessions);
             }
             sessions.add(session);
-            // Adding a new session means that the current stats are now incorrect.
-            invalidateAllExecutionStatsLocked(userId, packageName);
+            if (isHpj) {
+                final ShrinkableDebits quota = getHpjQuotaLocked(userId, packageName);
+                quota.transactOnDebitsLocked(session.endTimeElapsed - session.startTimeElapsed);
+            } else {
+                // Adding a new session means that the current stats are now incorrect.
+                invalidateAllExecutionStatsLocked(userId, packageName);
 
-            maybeScheduleCleanupAlarmLocked();
+                maybeScheduleCleanupAlarmLocked();
+            }
+        }
+    }
+
+    private void grantRewardForInstantEvent(
+            final int userId, @NonNull final String packageName, final long credit) {
+        synchronized (mLock) {
+            final ShrinkableDebits quota = getHpjQuotaLocked(userId, packageName);
+            quota.transactOnDebitsLocked(-credit);
+            if (maybeUpdateConstraintForPkgLocked(userId, packageName)) {
+                mStateChangedListener.onControllerStateChanged();
+            }
         }
     }
 
@@ -1100,6 +1356,7 @@ public final class QuotaController extends StateController {
         }
         mEarliestEndTimeFunctor.reset();
         mTimingSessions.forEach(mEarliestEndTimeFunctor);
+        mHpjTimingSessions.forEach(mEarliestEndTimeFunctor);
         final long earliestEndElapsed = mEarliestEndTimeFunctor.earliestEndElapsed;
         if (earliestEndElapsed == Long.MAX_VALUE) {
             // Couldn't find a good time to clean up. Maybe this was called after we deleted all
@@ -1155,6 +1412,7 @@ public final class QuotaController extends StateController {
             Slog.d(TAG, "handleNewChargingStateLocked: " + mChargeTracker.isCharging());
         }
         // Deal with Timers first.
+        mHpjPkgTimers.forEach(mTimerChargingUpdateFunctor);
         mPkgTimers.forEach(mTimerChargingUpdateFunctor);
         // Now update jobs.
         maybeUpdateAllConstraintsLocked();
@@ -1189,6 +1447,7 @@ public final class QuotaController extends StateController {
         // Quota is the same for all jobs within a package.
         final int realStandbyBucket = jobs.valueAt(0).getStandbyBucket();
         final boolean realInQuota = isWithinQuotaLocked(userId, packageName, realStandbyBucket);
+        boolean outOfHpjQuota = false;
         boolean changed = false;
         for (int i = jobs.size() - 1; i >= 0; --i) {
             final JobStatus js = jobs.valueAt(i);
@@ -1206,8 +1465,14 @@ public final class QuotaController extends StateController {
                 // This job is somehow exempted. Need to determine its own quota status.
                 changed |= setConstraintSatisfied(js, isWithinQuotaLocked(js));
             }
+
+            if (js.isRequestedForegroundJob()) {
+                boolean isWithinHpjQuota = isWithinHpjQuotaLocked(js);
+                changed |= js.setForegroundJobQuotaConstraintSatisfied(isWithinHpjQuota);
+                outOfHpjQuota |= !isWithinHpjQuota;
+            }
         }
-        if (!realInQuota) {
+        if (!realInQuota || outOfHpjQuota) {
             // Don't want to use the effective standby bucket here since that bump the bucket to
             // ACTIVE for one of the jobs, which doesn't help with other jobs that aren't
             // exempted.
@@ -1226,10 +1491,22 @@ public final class QuotaController extends StateController {
         @Override
         public void accept(JobStatus jobStatus) {
             wasJobChanged |= setConstraintSatisfied(jobStatus, isWithinQuotaLocked(jobStatus));
+            final boolean outOfHpjQuota;
+            if (jobStatus.isRequestedForegroundJob()) {
+                final boolean isWithinHpjQuota = isWithinHpjQuotaLocked(jobStatus);
+                wasJobChanged |= jobStatus.setForegroundJobQuotaConstraintSatisfied(
+                        isWithinHpjQuota);
+                outOfHpjQuota = !isWithinHpjQuota;
+            } else {
+                outOfHpjQuota = false;
+            }
+
             final int userId = jobStatus.getSourceUserId();
             final String packageName = jobStatus.getSourcePackageName();
             final int realStandbyBucket = jobStatus.getStandbyBucket();
-            if (isWithinQuotaLocked(userId, packageName, realStandbyBucket)) {
+            if (isWithinQuotaLocked(userId, packageName, realStandbyBucket) && !outOfHpjQuota) {
+                // TODO(141645789): we probably shouldn't cancel the alarm until we've verified
+                // that all jobs for the userId-package are within quota.
                 mInQuotaAlarmListener.removeAlarmLocked(userId, packageName);
             } else {
                 mToScheduleStartAlarms.add(userId, packageName, realStandbyBucket);
@@ -1280,11 +1557,13 @@ public final class QuotaController extends StateController {
         final boolean isUnderJobCountQuota = isUnderJobCountQuotaLocked(stats, standbyBucket);
         final boolean isUnderTimingSessionCountQuota = isUnderSessionCountQuotaLocked(stats,
                 standbyBucket);
+        final long remainingHpjQuota = getRemainingHpjExecutionTimeLocked(userId, packageName);
 
         if (stats.executionTimeInWindowMs < mAllowedTimePerPeriodMs
                 && stats.executionTimeInMaxPeriodMs < mMaxExecutionTimeMs
                 && isUnderJobCountQuota
-                && isUnderTimingSessionCountQuota) {
+                && isUnderTimingSessionCountQuota
+                && remainingHpjQuota > 0) {
             // Already in quota. Why was this method called?
             if (DEBUG) {
                 Slog.e(TAG, "maybeScheduleStartAlarmLocked called for " + pkgString
@@ -1297,19 +1576,44 @@ public final class QuotaController extends StateController {
             return;
         }
 
-        // The time this app will have quota again.
-        long inQuotaTimeElapsed = stats.inQuotaTimeElapsed;
-        if (!isUnderJobCountQuota && stats.bgJobCountInWindow < stats.jobCountLimit) {
-            // App hit the rate limit.
-            inQuotaTimeElapsed = Math.max(inQuotaTimeElapsed,
-                    stats.jobRateLimitExpirationTimeElapsed);
+        long inRegularQuotaTimeElapsed = Long.MAX_VALUE;
+        long inHpjQuotaTimeElapsed = Long.MAX_VALUE;
+        if (!(stats.executionTimeInWindowMs < mAllowedTimePerPeriodMs
+                && stats.executionTimeInMaxPeriodMs < mMaxExecutionTimeMs
+                && isUnderJobCountQuota
+                && isUnderTimingSessionCountQuota)) {
+            // The time this app will have quota again.
+            long inQuotaTimeElapsed = stats.inQuotaTimeElapsed;
+            if (!isUnderJobCountQuota && stats.bgJobCountInWindow < stats.jobCountLimit) {
+                // App hit the rate limit.
+                inQuotaTimeElapsed =
+                        Math.max(inQuotaTimeElapsed, stats.jobRateLimitExpirationTimeElapsed);
+            }
+            if (!isUnderTimingSessionCountQuota
+                    && stats.sessionCountInWindow < stats.sessionCountLimit) {
+                // App hit the rate limit.
+                inQuotaTimeElapsed =
+                        Math.max(inQuotaTimeElapsed, stats.sessionRateLimitExpirationTimeElapsed);
+            }
+            inRegularQuotaTimeElapsed = inQuotaTimeElapsed;
         }
-        if (!isUnderTimingSessionCountQuota
-                && stats.sessionCountInWindow < stats.sessionCountLimit) {
-            // App hit the rate limit.
-            inQuotaTimeElapsed = Math.max(inQuotaTimeElapsed,
-                    stats.sessionRateLimitExpirationTimeElapsed);
+        if (remainingHpjQuota <= 0) {
+            final long limitMs = mHpjLimitsMs[standbyBucket] - mQuotaBufferMs;
+            List<TimingSession> timingSessions = mHpjTimingSessions.get(userId, packageName);
+            long sumMs = 0;
+            for (int i = timingSessions.size() - 1; i >= 0; --i) {
+                TimingSession ts = timingSessions.get(i);
+                final long durationMs = ts.endTimeElapsed - ts.startTimeElapsed;
+                sumMs += durationMs;
+                if (sumMs >= limitMs) {
+                    inHpjQuotaTimeElapsed =
+                            ts.startTimeElapsed + (sumMs - limitMs) + mHpjLimitWindowSizeMs;
+                    break;
+                }
+            }
         }
+        long inQuotaTimeElapsed = Math.min(inRegularQuotaTimeElapsed, inHpjQuotaTimeElapsed);
+
         if (inQuotaTimeElapsed <= sElapsedRealtimeClock.millis()) {
             final long nowElapsed = sElapsedRealtimeClock.millis();
             Slog.wtf(TAG,
@@ -1450,9 +1754,52 @@ public final class QuotaController extends StateController {
         }
     }
 
+    private static final class ShrinkableDebits {
+        /** The amount of quota remaining. Can be negative if limit changes. */
+        private long mDebitTally;
+        private int mStandbyBucket;
+
+        ShrinkableDebits(int standbyBucket) {
+            mDebitTally = 0;
+            mStandbyBucket = standbyBucket;
+        }
+
+        long getTallyLocked() {
+            return mDebitTally;
+        }
+
+        /**
+         * Negative if the tally should decrease (therefore increasing available quota);
+         * or positive if the tally should increase (therefore decreasing available quota).
+         */
+        void transactOnDebitsLocked(final long amount) {
+            mDebitTally = Math.max(0, mDebitTally + amount);
+        }
+
+        void setStandbyBucketLocked(int standbyBucket) {
+            mStandbyBucket = standbyBucket;
+        }
+
+        int getStandbyBucketLocked() {
+            return mStandbyBucket;
+        }
+
+        @Override
+        public String toString() {
+            return "ShrinkableDebits { debit tally: "
+                    + mDebitTally + ", bucket: " + mStandbyBucket
+                    + " }";
+        }
+
+        void dumpLocked(IndentingPrintWriter pw) {
+            pw.println(toString());
+        }
+    }
+
     private final class Timer {
         private final Package mPkg;
         private final int mUid;
+        private final boolean mRegularJobTimer;
 
         // List of jobs currently running for this app that started when the app wasn't in the
         // foreground.
@@ -1460,9 +1807,10 @@ public final class QuotaController extends StateController {
         private long mStartTimeElapsed;
         private int mBgJobCount;
 
-        Timer(int uid, int userId, String packageName) {
+        Timer(int uid, int userId, String packageName, boolean regularJobTimer) {
             mPkg = new Package(userId, packageName);
             mUid = uid;
+            mRegularJobTimer = regularJobTimer;
         }
 
         void startTrackingJobLocked(@NonNull JobStatus jobStatus) {
@@ -1482,12 +1830,17 @@ public final class QuotaController extends StateController {
             mRunningBgJobs.add(jobStatus);
             if (shouldTrackLocked()) {
                 mBgJobCount++;
-                incrementJobCountLocked(mPkg.userId, mPkg.packageName, 1);
+                if (mRegularJobTimer) {
+                    incrementJobCountLocked(mPkg.userId, mPkg.packageName, 1);
+                }
                 if (mRunningBgJobs.size() == 1) {
                     // Started tracking the first job.
                     mStartTimeElapsed = sElapsedRealtimeClock.millis();
-                    // Starting the timer means that all cached execution stats are now incorrect.
-                    invalidateAllExecutionStatsLocked(mPkg.userId, mPkg.packageName);
+                    if (mRegularJobTimer) {
+                        // Starting the timer means that all cached execution stats are now
+                        // incorrect.
+                        invalidateAllExecutionStatsLocked(mPkg.userId, mPkg.packageName);
+                    }
                     scheduleCutoff();
                 }
             }
@@ -1529,13 +1882,15 @@ public final class QuotaController extends StateController {
                 return;
             }
             TimingSession ts = new TimingSession(mStartTimeElapsed, nowElapsed, mBgJobCount);
-            saveTimingSession(mPkg.userId, mPkg.packageName, ts);
+            saveTimingSession(mPkg.userId, mPkg.packageName, ts, !mRegularJobTimer);
             mBgJobCount = 0;
             // Don't reset the tracked jobs list as we need to keep tracking the current number
             // of jobs.
             // However, cancel the currently scheduled cutoff since it's not currently useful.
             cancelCutoff();
-            incrementTimingSessionCountLocked(mPkg.userId, mPkg.packageName);
+            if (mRegularJobTimer) {
+                incrementTimingSessionCountLocked(mPkg.userId, mPkg.packageName);
+            }
         }
 
         /**
@@ -1582,10 +1937,13 @@ public final class QuotaController extends StateController {
                     // repeatedly plugged in and unplugged, or an app changes foreground state
                     // very frequently, the job count for a package may be artificially high.
                     mBgJobCount = mRunningBgJobs.size();
-                    incrementJobCountLocked(mPkg.userId, mPkg.packageName, mBgJobCount);
-                    // Starting the timer means that all cached execution stats are now
-                    // incorrect.
-                    invalidateAllExecutionStatsLocked(mPkg.userId, mPkg.packageName);
+
+                    if (mRegularJobTimer) {
+                        incrementJobCountLocked(mPkg.userId, mPkg.packageName, mBgJobCount);
+                        // Starting the timer means that all cached execution stats are now
+                        // incorrect.
+                        invalidateAllExecutionStatsLocked(mPkg.userId, mPkg.packageName);
+                    }
                     // Schedule cutoff since we're now actively tracking for quotas again.
                     scheduleCutoff();
                 }
@@ -1605,11 +1963,15 @@ public final class QuotaController extends StateController {
                 if (!isActive()) {
                     return;
                 }
-                Message msg = mHandler.obtainMessage(MSG_REACHED_QUOTA, mPkg);
-                final long timeRemainingMs = getTimeUntilQuotaConsumedLocked(mPkg.userId,
-                        mPkg.packageName);
+                Message msg = mHandler.obtainMessage(
+                        mRegularJobTimer ? MSG_REACHED_QUOTA : MSG_REACHED_HPJ_QUOTA, mPkg);
+                final long timeRemainingMs = mRegularJobTimer
+                        ? getTimeUntilQuotaConsumedLocked(mPkg.userId, mPkg.packageName)
+                        : getTimeUntilHpjQuotaConsumedLocked(mPkg.userId, mPkg.packageName);
                 if (DEBUG) {
-                    Slog.i(TAG, "Job for " + mPkg + " has " + timeRemainingMs + "ms left.");
+                    Slog.i(TAG,
+                            (mRegularJobTimer ? "Regular job" : "HPJ") + " for " + mPkg + " has "
+                                    + timeRemainingMs + "ms left.");
                 }
                 // If the job was running the entire time, then the system would be up, so it's
                 // fine to use uptime millis for these messages.
@@ -1618,11 +1980,14 @@ public final class QuotaController extends StateController {
         }
 
         private void cancelCutoff() {
-            mHandler.removeMessages(MSG_REACHED_QUOTA, mPkg);
+            mHandler.removeMessages(
+                    mRegularJobTimer ? MSG_REACHED_QUOTA : MSG_REACHED_HPJ_QUOTA, mPkg);
         }
 
         public void dump(IndentingPrintWriter pw, Predicate<JobStatus> predicate) {
-            pw.print("Timer{");
+            pw.print("Timer<");
+            pw.print(mRegularJobTimer ? "REG" : " HPJ");
+            pw.print(">{");
             pw.print(mPkg);
             pw.print("} ");
             if (isActive()) {
@@ -1668,6 +2033,98 @@ public final class QuotaController extends StateController {
         }
     }
 
+    private final class TopAppTimer {
+        private final Package mPkg;
+
+        // List of jobs currently running for this app that started when the app wasn't in the
+        // foreground.
+        private final SparseArray<UsageEvents.Event> mActivities = new SparseArray<>();
+        private long mStartTimeElapsed;
+
+        TopAppTimer(int userId, String packageName) {
+            mPkg = new Package(userId, packageName);
+        }
+
+        void processEventLocked(@NonNull UsageEvents.Event event) {
+            final long nowElapsed = sElapsedRealtimeClock.millis();
+            switch (event.getEventType()) {
+                case UsageEvents.Event.ACTIVITY_RESUMED:
+                    if (mActivities.size() == 0) {
+                        mStartTimeElapsed = nowElapsed;
+                    }
+                    mActivities.put(event.mInstanceId, event);
+                    break;
+                case UsageEvents.Event.ACTIVITY_PAUSED:
+                case UsageEvents.Event.ACTIVITY_STOPPED:
+                case UsageEvents.Event.ACTIVITY_DESTROYED:
+                    final UsageEvents.Event existingEvent =
+                            mActivities.removeReturnOld(event.mInstanceId);
+                    if (existingEvent != null && mActivities.size() == 0) {
+                        final long totalTopTimeMs = nowElapsed - mStartTimeElapsed;
+                        int numTimeChunks = (int) (totalTopTimeMs / mHpjTopAppTimeChunkSizeMs);
+                        final long remainderMs = totalTopTimeMs % mHpjTopAppTimeChunkSizeMs;
+                        if (remainderMs >= SECOND_IN_MILLIS) {
+                            // "Round up"
+                            numTimeChunks++;
+                        }
+                        if (DEBUG) {
+                            Slog.d(TAG,
+                                    "Crediting " + mPkg + " for " + numTimeChunks + " time chunks");
+                        }
+                        final ShrinkableDebits quota =
+                                getHpjQuotaLocked(mPkg.userId, mPkg.packageName);
+                        quota.transactOnDebitsLocked(-mHpjRewardTopAppMs * numTimeChunks);
+                        if (maybeUpdateConstraintForPkgLocked(mPkg.userId, mPkg.packageName)) {
+                            mStateChangedListener.onControllerStateChanged();
+                        }
+                    }
+                    break;
+            }
+        }
+
+        boolean isActive() {
+            synchronized (mLock) {
+                return mActivities.size() > 0;
+            }
+        }
+
+        public void dump(IndentingPrintWriter pw) {
+            pw.print("TopAppTimer{");
+            pw.print(mPkg);
+            pw.print("} ");
+            if (isActive()) {
+                pw.print("started at ");
+                pw.print(mStartTimeElapsed);
+                pw.print(" (");
+                pw.print(sElapsedRealtimeClock.millis() - mStartTimeElapsed);
+                pw.print("ms ago)");
+            } else {
+                pw.print("NOT active");
+            }
+            pw.println();
+            pw.increaseIndent();
+            for (int i = 0; i < mActivities.size(); i++) {
+                UsageEvents.Event event = mActivities.valueAt(i);
+                pw.println(event.getClassName());
+            }
+            pw.decreaseIndent();
+        }
+
+        public void dump(ProtoOutputStream proto, long fieldId) {
+            final long token = proto.start(fieldId);
+
+            mPkg.dumpDebug(proto, StateControllerProto.QuotaController.TopAppTimer.PKG);
+            proto.write(StateControllerProto.QuotaController.TopAppTimer.IS_ACTIVE, isActive());
+            proto.write(StateControllerProto.QuotaController.TopAppTimer.START_TIME_ELAPSED,
+                    mStartTimeElapsed);
+            proto.write(StateControllerProto.QuotaController.TopAppTimer.ACTIVITY_COUNT,
+                    mActivities.size());
+            // TODO: maybe dump activities/events
+
+            proto.end(token);
+        }
+    }
+
     /**
      * Tracking of app assignments to standby buckets
      */
@@ -1693,8 +2150,14 @@ public final class QuotaController extends StateController {
         }
         List<JobStatus> restrictedChanges = new ArrayList<>();
         synchronized (mLock) {
+            ShrinkableDebits debits = mHpjStats.get(userId, packageName);
+            if (debits != null) {
+                debits.setStandbyBucketLocked(bucketIndex);
+            }
+
             ArraySet<JobStatus> jobs = mTrackedJobs.get(userId, packageName);
             if (jobs == null || jobs.size() == 0) {
+                // Nothing further to do.
                 return;
             }
             for (int i = jobs.size() - 1; i >= 0; i--) {
@@ -1711,12 +2174,26 @@ public final class QuotaController extends StateController {
             if (timer != null && timer.isActive()) {
                 timer.rescheduleCutoff();
             }
+            timer = mHpjPkgTimers.get(userId, packageName);
+            if (timer != null && timer.isActive()) {
+                timer.rescheduleCutoff();
+            }
             if (maybeUpdateConstraintForPkgLocked(userId, packageName)) {
                 mStateChangedListener.onControllerStateChanged();
             }
         }
         if (restrictedChanges.size() > 0) {
             mStateChangedListener.onRestrictedBucketChanged(restrictedChanges);
+        }
+    }
+
+    final class UsageEventTracker implements UsageEventListener {
+        /**
+         * Callback to inform listeners of a new event.
+         */
+        @Override
+        public void onUsageEvent(int userId, @NonNull UsageEvents.Event event) {
+            mHandler.obtainMessage(MSG_PROCESS_USAGE_EVENT, userId, 0, event);
         }
     }
 
@@ -1742,9 +2219,13 @@ public final class QuotaController extends StateController {
     @VisibleForTesting
     void deleteObsoleteSessionsLocked() {
         mTimingSessions.forEach(mDeleteOldSessionsFunctor);
+        // Don't delete HPJ timing sessions here. They'll be removed in
+        // getRemainingHpjExecutionTimeLocked().
     }
 
     private class QcHandler extends Handler {
+        private boolean mIsProcessing;
+
         QcHandler(Looper looper) {
             super(looper);
         }
@@ -1752,6 +2233,8 @@ public final class QuotaController extends StateController {
         @Override
         public void handleMessage(Message msg) {
             synchronized (mLock) {
+                mIsProcessing = true;
+
                 switch (msg.what) {
                     case MSG_REACHED_QUOTA: {
                         Package pkg = (Package) msg.obj;
@@ -1776,6 +2259,33 @@ public final class QuotaController extends StateController {
                                     pkg.packageName);
                             if (DEBUG) {
                                 Slog.d(TAG, pkg + " has " + timeRemainingMs + "ms left.");
+                            }
+                            sendMessageDelayed(rescheduleMsg, timeRemainingMs);
+                        }
+                        break;
+                    }
+                    case MSG_REACHED_HPJ_QUOTA: {
+                        Package pkg = (Package) msg.obj;
+                        if (DEBUG) {
+                            Slog.d(TAG, "Checking if " + pkg + " has reached its HPJ quota.");
+                        }
+
+                        long timeRemainingMs = getRemainingHpjExecutionTimeLocked(
+                                pkg.userId, pkg.packageName);
+                        if (timeRemainingMs <= 0) {
+                            if (DEBUG) Slog.d(TAG, pkg + " has reached its HPJ quota.");
+                            if (maybeUpdateConstraintForPkgLocked(pkg.userId, pkg.packageName)) {
+                                mStateChangedListener.onControllerStateChanged();
+                            }
+                        } else {
+                            // This could potentially happen if an old session phases out while a
+                            // job is currently running.
+                            // Reschedule message
+                            Message rescheduleMsg = obtainMessage(MSG_REACHED_HPJ_QUOTA, pkg);
+                            timeRemainingMs = getTimeUntilHpjQuotaConsumedLocked(
+                                    pkg.userId, pkg.packageName);
+                            if (DEBUG) {
+                                Slog.d(TAG, pkg + " has " + timeRemainingMs + "ms left for HPJ");
                             }
                             sendMessageDelayed(rescheduleMsg, timeRemainingMs);
                         }
@@ -1816,7 +2326,8 @@ public final class QuotaController extends StateController {
                                 isQuotaFree = false;
                             }
                             // Update Timers first.
-                            if (mPkgTimers.indexOfKey(userId) >= 0) {
+                            if (mPkgTimers.indexOfKey(userId) >= 0
+                                    || mHpjPkgTimers.indexOfKey(userId) >= 0) {
                                 ArraySet<String> packages = mUidToPackageCache.get(uid);
                                 if (packages == null) {
                                     try {
@@ -1834,7 +2345,11 @@ public final class QuotaController extends StateController {
                                 }
                                 if (packages != null) {
                                     for (int i = packages.size() - 1; i >= 0; --i) {
-                                        Timer t = mPkgTimers.get(userId, packages.valueAt(i));
+                                        Timer t = mHpjPkgTimers.get(userId, packages.valueAt(i));
+                                        if (t != null) {
+                                            t.onStateChangedLocked(nowElapsed, isQuotaFree);
+                                        }
+                                        t = mPkgTimers.get(userId, packages.valueAt(i));
                                         if (t != null) {
                                             t.onStateChangedLocked(nowElapsed, isQuotaFree);
                                         }
@@ -1847,8 +2362,46 @@ public final class QuotaController extends StateController {
                         }
                         break;
                     }
+                    case MSG_PROCESS_USAGE_EVENT: {
+                        final int userId = msg.arg1;
+                        final UsageEvents.Event event = (UsageEvents.Event) msg.obj;
+                        final String pkgName = event.getPackageName();
+                        switch (event.getEventType()) {
+                            case UsageEvents.Event.ACTIVITY_RESUMED:
+                            case UsageEvents.Event.ACTIVITY_PAUSED:
+                            case UsageEvents.Event.ACTIVITY_STOPPED:
+                            case UsageEvents.Event.ACTIVITY_DESTROYED:
+                                synchronized (mLock) {
+                                    TopAppTimer timer = mTopAppTrackers.get(userId, pkgName);
+                                    if (timer == null) {
+                                        timer = new TopAppTimer(userId, pkgName);
+                                        mTopAppTrackers.add(userId, pkgName, timer);
+                                    }
+                                    timer.processEventLocked(event);
+                                }
+                                break;
+                            case UsageEvents.Event.USER_INTERACTION:
+                            case UsageEvents.Event.CHOOSER_ACTION:
+                            case UsageEvents.Event.NOTIFICATION_INTERRUPTION:
+                                // Don't need to include SHORTCUT_INVOCATION. The app will be
+                                // launched through it (if it's not already on top).
+                                grantRewardForInstantEvent(
+                                        userId, pkgName, mHpjRewardInteractionMs);
+                                break;
+                            case UsageEvents.Event.NOTIFICATION_SEEN:
+                                // Intentionally don't give too much for notification seen.
+                                // Interactions will award more.
+                                grantRewardForInstantEvent(
+                                        userId, pkgName, mHpjRewardNotificationSeenMs);
+                                break;
+                        }
+
+                        break;
+                    }
                 }
             }
+
+            mIsProcessing = false;
         }
     }
 
@@ -2030,6 +2583,7 @@ public final class QuotaController extends StateController {
         mQcConstants.mShouldReevaluateConstraints = false;
         mQcConstants.mRateLimitingConstantsUpdated = false;
         mQcConstants.mExecutionPeriodConstantsUpdated = false;
+        mQcConstants.mHpjLimitConstantsUpdated = false;
     }
 
     @Override
@@ -2055,6 +2609,7 @@ public final class QuotaController extends StateController {
         private boolean mShouldReevaluateConstraints = false;
         private boolean mRateLimitingConstantsUpdated = false;
         private boolean mExecutionPeriodConstantsUpdated = false;
+        private boolean mHpjLimitConstantsUpdated = false;
 
         /** Prefix to use with all constant keys in order to "sub-namespace" the keys. */
         private static final String QC_CONSTANT_PREFIX = "qc_";
@@ -2128,6 +2683,36 @@ public final class QuotaController extends StateController {
         @VisibleForTesting
         static final String KEY_MIN_QUOTA_CHECK_DELAY_MS =
                 QC_CONSTANT_PREFIX + "min_quota_check_delay_ms";
+        @VisibleForTesting
+        static final String KEY_HPJ_LIMIT_ACTIVE_MS =
+                QC_CONSTANT_PREFIX + "hpj_limit_active_ms";
+        @VisibleForTesting
+        static final String KEY_HPJ_LIMIT_WORKING_MS =
+                QC_CONSTANT_PREFIX + "hpj_limit_working_ms";
+        @VisibleForTesting
+        static final String KEY_HPJ_LIMIT_FREQUENT_MS =
+                QC_CONSTANT_PREFIX + "hpj_limit_frequent_ms";
+        @VisibleForTesting
+        static final String KEY_HPJ_LIMIT_RARE_MS =
+                QC_CONSTANT_PREFIX + "hpj_limit_rare_ms";
+        @VisibleForTesting
+        static final String KEY_HPJ_LIMIT_RESTRICTED_MS =
+                QC_CONSTANT_PREFIX + "hpj_limit_restricted_ms";
+        @VisibleForTesting
+        static final String KEY_HPJ_WINDOW_SIZE_MS =
+                QC_CONSTANT_PREFIX + "hpj_window_size_ms";
+        @VisibleForTesting
+        static final String KEY_HPJ_TOP_APP_TIME_CHUNK_SIZE_MS =
+                QC_CONSTANT_PREFIX + "hpj_top_app_time_chunk_size_ms";
+        @VisibleForTesting
+        static final String KEY_HPJ_REWARD_TOP_APP_MS =
+                QC_CONSTANT_PREFIX + "hpj_reward_top_app_ms";
+        @VisibleForTesting
+        static final String KEY_HPJ_REWARD_INTERACTION_MS =
+                QC_CONSTANT_PREFIX + "hpj_reward_interaction_ms";
+        @VisibleForTesting
+        static final String KEY_HPJ_REWARD_NOTIFICATION_SEEN_MS =
+                QC_CONSTANT_PREFIX + "hpj_reward_notification_seen_ms";
 
         private static final long DEFAULT_ALLOWED_TIME_PER_PERIOD_MS =
                 10 * 60 * 1000L; // 10 minutes
@@ -2169,6 +2754,16 @@ public final class QuotaController extends StateController {
         private static final int DEFAULT_MAX_SESSION_COUNT_PER_RATE_LIMITING_WINDOW = 20;
         private static final long DEFAULT_TIMING_SESSION_COALESCING_DURATION_MS = 5000; // 5 seconds
         private static final long DEFAULT_MIN_QUOTA_CHECK_DELAY_MS = MINUTE_IN_MILLIS;
+        private static final long DEFAULT_HPJ_LIMIT_ACTIVE_MS = 30 * MINUTE_IN_MILLIS;
+        private static final long DEFAULT_HPJ_LIMIT_WORKING_MS = DEFAULT_HPJ_LIMIT_ACTIVE_MS;
+        private static final long DEFAULT_HPJ_LIMIT_FREQUENT_MS = 10 * MINUTE_IN_MILLIS;
+        private static final long DEFAULT_HPJ_LIMIT_RARE_MS = DEFAULT_HPJ_LIMIT_FREQUENT_MS;
+        private static final long DEFAULT_HPJ_LIMIT_RESTRICTED_MS = 5 * MINUTE_IN_MILLIS;
+        private static final long DEFAULT_HPJ_WINDOW_SIZE_MS = 24 * HOUR_IN_MILLIS;
+        private static final long DEFAULT_HPJ_TOP_APP_TIME_CHUNK_SIZE_MS = 30 * SECOND_IN_MILLIS;
+        private static final long DEFAULT_HPJ_REWARD_TOP_APP_MS = 10 * SECOND_IN_MILLIS;
+        private static final long DEFAULT_HPJ_REWARD_INTERACTION_MS = 15 * SECOND_IN_MILLIS;
+        private static final long DEFAULT_HPJ_REWARD_NOTIFICATION_SEEN_MS = 0;
 
         /** How much time each app will have to run jobs within their standby bucket window. */
         public long ALLOWED_TIME_PER_PERIOD_MS = DEFAULT_ALLOWED_TIME_PER_PERIOD_MS;
@@ -2328,6 +2923,74 @@ public final class QuotaController extends StateController {
         /** The minimum value that {@link #RATE_LIMITING_WINDOW_MS} can have. */
         private static final long MIN_RATE_LIMITING_WINDOW_MS = 30 * SECOND_IN_MILLIS;
 
+        /**
+         * The total session limit of the particular standby bucket. Apps in this standby bucket
+         * can
+         * only have HPJ sessions totalling HPJ_LIMIT (without factoring in any rewards or free
+         * HPJs).
+         */
+        public long HPJ_LIMIT_ACTIVE_MS = DEFAULT_HPJ_LIMIT_ACTIVE_MS;
+
+        /**
+         * The total session limit of the particular standby bucket. Apps in this standby bucket
+         * can
+         * only have HPJ sessions totalling HPJ_LIMIT (without factoring in any rewards or free
+         * HPJs).
+         */
+        public long HPJ_LIMIT_WORKING_MS = DEFAULT_HPJ_LIMIT_WORKING_MS;
+
+        /**
+         * The total session limit of the particular standby bucket. Apps in this standby bucket
+         * can
+         * only have HPJ sessions totalling HPJ_LIMIT (without factoring in any rewards or free
+         * HPJs).
+         */
+        public long HPJ_LIMIT_FREQUENT_MS = DEFAULT_HPJ_LIMIT_FREQUENT_MS;
+
+        /**
+         * The total session limit of the particular standby bucket. Apps in this standby bucket
+         * can
+         * only have HPJ sessions totalling HPJ_LIMIT (without factoring in any rewards or free
+         * HPJs).
+         */
+        public long HPJ_LIMIT_RARE_MS = DEFAULT_HPJ_LIMIT_RARE_MS;
+
+        /**
+         * The total session limit of the particular standby bucket. Apps in this standby bucket
+         * can
+         * only have HPJ sessions totalling HPJ_LIMIT (without factoring in any rewards or free
+         * HPJs).
+         */
+        public long HPJ_LIMIT_RESTRICTED_MS = DEFAULT_HPJ_LIMIT_RESTRICTED_MS;
+
+        /**
+         * The period of time used to calculate HPJ sessions. Apps can only have HPJ sessions
+         * totalling HPJ_LIMIT_<bucket>_MS within this period of time (without factoring in any
+         * rewards or free HPJs).
+         */
+        public long HPJ_WINDOW_SIZE_MS = DEFAULT_HPJ_WINDOW_SIZE_MS;
+
+        /**
+         * Length of time used to split an app's top time into chunks.
+         */
+        public long HPJ_TOP_APP_TIME_CHUNK_SIZE_MS = DEFAULT_HPJ_TOP_APP_TIME_CHUNK_SIZE_MS;
+
+        /**
+         * How much HPJ quota to give back to an app based on the number of top app time chunks it
+         * had.
+         */
+        public long HPJ_REWARD_TOP_APP_MS = DEFAULT_HPJ_REWARD_TOP_APP_MS;
+
+        /**
+         * How much HPJ quota to give back to an app based on each non-top user interaction.
+         */
+        public long HPJ_REWARD_INTERACTION_MS = DEFAULT_HPJ_REWARD_INTERACTION_MS;
+
+        /**
+         * How much HPJ quota to give back to an app based on each notification seen event.
+         */
+        public long HPJ_REWARD_NOTIFICATION_SEEN_MS = DEFAULT_HPJ_REWARD_NOTIFICATION_SEEN_MS;
+
         public void processConstantLocked(@NonNull DeviceConfig.Properties properties,
                 @NonNull String key) {
             switch (key) {
@@ -2346,6 +3009,15 @@ public final class QuotaController extends StateController {
                 case KEY_MAX_JOB_COUNT_PER_RATE_LIMITING_WINDOW:
                 case KEY_MAX_SESSION_COUNT_PER_RATE_LIMITING_WINDOW:
                     updateRateLimitingConstantsLocked();
+                    break;
+
+                case KEY_HPJ_LIMIT_ACTIVE_MS:
+                case KEY_HPJ_LIMIT_WORKING_MS:
+                case KEY_HPJ_LIMIT_FREQUENT_MS:
+                case KEY_HPJ_LIMIT_RARE_MS:
+                case KEY_HPJ_LIMIT_RESTRICTED_MS:
+                case KEY_HPJ_WINDOW_SIZE_MS:
+                    updateHpjLimitConstantsLocked();
                     break;
 
                 case KEY_MAX_JOB_COUNT_ACTIVE:
@@ -2458,6 +3130,64 @@ public final class QuotaController extends StateController {
                     mInQuotaAlarmListener.setMinQuotaCheckDelayMs(
                             Math.min(15 * MINUTE_IN_MILLIS, Math.max(0, MIN_QUOTA_CHECK_DELAY_MS)));
                     break;
+                case KEY_HPJ_TOP_APP_TIME_CHUNK_SIZE_MS:
+                    // We don't need to re-evaluate execution stats or constraint status for this.
+                    HPJ_TOP_APP_TIME_CHUNK_SIZE_MS =
+                            properties.getLong(key, DEFAULT_HPJ_TOP_APP_TIME_CHUNK_SIZE_MS);
+                    // Limit chunking to be in the range [1 millisecond, 15 minutes] per event.
+                    long newChunkSizeMs = Math.min(15 * MINUTE_IN_MILLIS,
+                            Math.max(1, HPJ_TOP_APP_TIME_CHUNK_SIZE_MS));
+                    if (mHpjTopAppTimeChunkSizeMs != newChunkSizeMs) {
+                        mHpjTopAppTimeChunkSizeMs = newChunkSizeMs;
+                        if (mHpjTopAppTimeChunkSizeMs < mHpjRewardTopAppMs) {
+                            // Not making chunk sizes and top rewards to be the upper/lower
+                            // limits of the other to allow trying different policies. Just log
+                            // the discrepancy.
+                            Slog.w(TAG, "HPJ top app time chunk less than reward: "
+                                    + mHpjTopAppTimeChunkSizeMs + " vs " + mHpjRewardTopAppMs);
+                        }
+                    }
+                    break;
+                case KEY_HPJ_REWARD_TOP_APP_MS:
+                    // We don't need to re-evaluate execution stats or constraint status for this.
+                    HPJ_REWARD_TOP_APP_MS =
+                            properties.getLong(key, DEFAULT_HPJ_REWARD_TOP_APP_MS);
+                    // Limit top reward to be in the range [10 seconds, 15 minutes] per event.
+                    long newTopReward = Math.min(15 * MINUTE_IN_MILLIS,
+                            Math.max(10 * SECOND_IN_MILLIS, HPJ_REWARD_TOP_APP_MS));
+                    if (mHpjRewardTopAppMs != newTopReward) {
+                        mHpjRewardTopAppMs = newTopReward;
+                        if (mHpjTopAppTimeChunkSizeMs < mHpjRewardTopAppMs) {
+                            // Not making chunk sizes and top rewards to be the upper/lower
+                            // limits of the other to allow trying different policies. Just log
+                            // the discrepancy.
+                            Slog.w(TAG, "HPJ top app time chunk less than reward: "
+                                    + mHpjTopAppTimeChunkSizeMs + " vs " + mHpjRewardTopAppMs);
+                        }
+                    }
+                    break;
+                case KEY_HPJ_REWARD_INTERACTION_MS:
+                    // We don't need to re-evaluate execution stats or constraint status for this.
+                    HPJ_REWARD_INTERACTION_MS =
+                            properties.getLong(key, DEFAULT_HPJ_REWARD_INTERACTION_MS);
+                    // Limit interaction reward to be in the range [5 seconds, 15 minutes] per
+                    // event.
+                    long newInteractionReward = Math.min(15 * MINUTE_IN_MILLIS,
+                            Math.max(5 * SECOND_IN_MILLIS, HPJ_REWARD_INTERACTION_MS));
+                    if (mHpjRewardInteractionMs != newInteractionReward) {
+                        mHpjRewardInteractionMs = newInteractionReward;
+                    }
+                    break;
+                case KEY_HPJ_REWARD_NOTIFICATION_SEEN_MS:
+                    // We don't need to re-evaluate execution stats or constraint status for this.
+                    HPJ_REWARD_NOTIFICATION_SEEN_MS =
+                            properties.getLong(key, DEFAULT_HPJ_REWARD_NOTIFICATION_SEEN_MS);
+                    // Limit notification seen reward to be in the range [0, 5] minutes per event.
+                    long newNotiSeenReward = Math.min(5 * MINUTE_IN_MILLIS,
+                            Math.max(0, HPJ_REWARD_NOTIFICATION_SEEN_MS));
+                    if (mHpjRewardNotificationSeenMs != newNotiSeenReward) {
+                        mHpjRewardNotificationSeenMs = newNotiSeenReward;
+                    }
             }
         }
 
@@ -2598,6 +3328,75 @@ public final class QuotaController extends StateController {
             }
         }
 
+        private void updateHpjLimitConstantsLocked() {
+            if (mHpjLimitConstantsUpdated) {
+                return;
+            }
+            mHpjLimitConstantsUpdated = true;
+
+            // Query the values as an atomic set.
+            final DeviceConfig.Properties properties = DeviceConfig.getProperties(
+                    DeviceConfig.NAMESPACE_JOB_SCHEDULER,
+                    KEY_HPJ_LIMIT_ACTIVE_MS, KEY_HPJ_LIMIT_WORKING_MS,
+                    KEY_HPJ_LIMIT_FREQUENT_MS, KEY_HPJ_LIMIT_RARE_MS,
+                    KEY_HPJ_LIMIT_RESTRICTED_MS, KEY_HPJ_WINDOW_SIZE_MS);
+            HPJ_LIMIT_ACTIVE_MS = properties.getLong(
+                    KEY_HPJ_LIMIT_ACTIVE_MS, DEFAULT_HPJ_LIMIT_ACTIVE_MS);
+            HPJ_LIMIT_WORKING_MS = properties.getLong(
+                    KEY_HPJ_LIMIT_WORKING_MS, DEFAULT_HPJ_LIMIT_WORKING_MS);
+            HPJ_LIMIT_FREQUENT_MS = properties.getLong(
+                    KEY_HPJ_LIMIT_FREQUENT_MS, DEFAULT_HPJ_LIMIT_FREQUENT_MS);
+            HPJ_LIMIT_RARE_MS = properties.getLong(
+                    KEY_HPJ_LIMIT_RARE_MS, DEFAULT_HPJ_LIMIT_RARE_MS);
+            HPJ_LIMIT_RESTRICTED_MS = properties.getLong(
+                    KEY_HPJ_LIMIT_RESTRICTED_MS, DEFAULT_HPJ_LIMIT_RESTRICTED_MS);
+            HPJ_WINDOW_SIZE_MS = properties.getLong(
+                    KEY_HPJ_WINDOW_SIZE_MS, DEFAULT_HPJ_WINDOW_SIZE_MS);
+
+            // The window must be in the range [1 hour, 24 hours].
+            long newWindowSizeMs = Math.max(HOUR_IN_MILLIS,
+                    Math.min(MAX_PERIOD_MS, HPJ_WINDOW_SIZE_MS));
+            if (mHpjLimitWindowSizeMs != newWindowSizeMs) {
+                mHpjLimitWindowSizeMs = newWindowSizeMs;
+                mShouldReevaluateConstraints = true;
+            }
+            // The limit must be in the range [15 minutes, window size].
+            long newActiveLimitMs = Math.max(15 * MINUTE_IN_MILLIS,
+                    Math.min(newWindowSizeMs, HPJ_LIMIT_ACTIVE_MS));
+            if (mHpjLimitsMs[ACTIVE_INDEX] != newActiveLimitMs) {
+                mHpjLimitsMs[ACTIVE_INDEX] = newActiveLimitMs;
+                mShouldReevaluateConstraints = true;
+            }
+            // The limit must be in the range [15 minutes, active limit].
+            long newWorkingLimitMs = Math.max(15 * MINUTE_IN_MILLIS,
+                    Math.min(newActiveLimitMs, HPJ_LIMIT_WORKING_MS));
+            if (mHpjLimitsMs[WORKING_INDEX] != newWorkingLimitMs) {
+                mHpjLimitsMs[WORKING_INDEX] = newWorkingLimitMs;
+                mShouldReevaluateConstraints = true;
+            }
+            // The limit must be in the range [10 minutes, working limit].
+            long newFrequentLimitMs = Math.max(10 * MINUTE_IN_MILLIS,
+                    Math.min(newWorkingLimitMs, HPJ_LIMIT_FREQUENT_MS));
+            if (mHpjLimitsMs[FREQUENT_INDEX] != newFrequentLimitMs) {
+                mHpjLimitsMs[FREQUENT_INDEX] = newFrequentLimitMs;
+                mShouldReevaluateConstraints = true;
+            }
+            // The limit must be in the range [10 minutes, frequent limit].
+            long newRareLimitMs = Math.max(10 * MINUTE_IN_MILLIS,
+                    Math.min(newFrequentLimitMs, HPJ_LIMIT_RARE_MS));
+            if (mHpjLimitsMs[RARE_INDEX] != newRareLimitMs) {
+                mHpjLimitsMs[RARE_INDEX] = newRareLimitMs;
+                mShouldReevaluateConstraints = true;
+            }
+            // The limit must be in the range [0 minutes, rare limit].
+            long newRestrictedLimitMs = Math.max(0,
+                    Math.min(newRareLimitMs, HPJ_LIMIT_RESTRICTED_MS));
+            if (mHpjLimitsMs[RESTRICTED_INDEX] != newRestrictedLimitMs) {
+                mHpjLimitsMs[RESTRICTED_INDEX] = newRestrictedLimitMs;
+                mShouldReevaluateConstraints = true;
+            }
+        }
+
         private void dump(IndentingPrintWriter pw) {
             pw.println();
             pw.println("QuotaController:");
@@ -2628,6 +3427,19 @@ public final class QuotaController extends StateController {
             pw.print(KEY_TIMING_SESSION_COALESCING_DURATION_MS,
                     TIMING_SESSION_COALESCING_DURATION_MS).println();
             pw.print(KEY_MIN_QUOTA_CHECK_DELAY_MS, MIN_QUOTA_CHECK_DELAY_MS).println();
+
+            pw.print(KEY_HPJ_LIMIT_ACTIVE_MS, HPJ_LIMIT_ACTIVE_MS).println();
+            pw.print(KEY_HPJ_LIMIT_WORKING_MS, HPJ_LIMIT_WORKING_MS).println();
+            pw.print(KEY_HPJ_LIMIT_FREQUENT_MS, HPJ_LIMIT_FREQUENT_MS).println();
+            pw.print(KEY_HPJ_LIMIT_RARE_MS, HPJ_LIMIT_RARE_MS).println();
+            pw.print(KEY_HPJ_LIMIT_RESTRICTED_MS, HPJ_LIMIT_RESTRICTED_MS).println();
+            pw.print(KEY_HPJ_WINDOW_SIZE_MS, HPJ_WINDOW_SIZE_MS).println();
+            pw.print(KEY_HPJ_TOP_APP_TIME_CHUNK_SIZE_MS, HPJ_TOP_APP_TIME_CHUNK_SIZE_MS).println();
+            pw.print(KEY_HPJ_REWARD_TOP_APP_MS, HPJ_REWARD_TOP_APP_MS).println();
+            pw.print(KEY_HPJ_REWARD_INTERACTION_MS, HPJ_REWARD_INTERACTION_MS).println();
+            pw.print(KEY_HPJ_REWARD_NOTIFICATION_SEEN_MS,
+                    HPJ_REWARD_NOTIFICATION_SEEN_MS).println();
+
             pw.decreaseIndent();
         }
 
@@ -2675,6 +3487,24 @@ public final class QuotaController extends StateController {
                     TIMING_SESSION_COALESCING_DURATION_MS);
             proto.write(ConstantsProto.QuotaController.MIN_QUOTA_CHECK_DELAY_MS,
                     MIN_QUOTA_CHECK_DELAY_MS);
+
+            proto.write(ConstantsProto.QuotaController.HPJ_LIMIT_ACTIVE_MS, HPJ_LIMIT_ACTIVE_MS);
+            proto.write(ConstantsProto.QuotaController.HPJ_LIMIT_WORKING_MS, HPJ_LIMIT_WORKING_MS);
+            proto.write(ConstantsProto.QuotaController.HPJ_LIMIT_FREQUENT_MS,
+                    HPJ_LIMIT_FREQUENT_MS);
+            proto.write(ConstantsProto.QuotaController.HPJ_LIMIT_RARE_MS, HPJ_LIMIT_RARE_MS);
+            proto.write(ConstantsProto.QuotaController.HPJ_LIMIT_RESTRICTED_MS,
+                    HPJ_LIMIT_RESTRICTED_MS);
+            proto.write(ConstantsProto.QuotaController.HPJ_WINDOW_SIZE_MS, HPJ_WINDOW_SIZE_MS);
+            proto.write(ConstantsProto.QuotaController.HPJ_TOP_APP_TIME_CHUNK_SIZE_MS,
+                    HPJ_TOP_APP_TIME_CHUNK_SIZE_MS);
+            proto.write(ConstantsProto.QuotaController.HPJ_REWARD_TOP_APP_MS,
+                    HPJ_REWARD_TOP_APP_MS);
+            proto.write(ConstantsProto.QuotaController.HPJ_REWARD_INTERACTION_MS,
+                    HPJ_REWARD_INTERACTION_MS);
+            proto.write(ConstantsProto.QuotaController.HPJ_REWARD_NOTIFICATION_SEEN_MS,
+                    HPJ_REWARD_NOTIFICATION_SEEN_MS);
+
             proto.end(qcToken);
         }
     }
@@ -2714,6 +3544,49 @@ public final class QuotaController extends StateController {
     @NonNull
     Handler getHandler() {
         return mHandler;
+    }
+
+    @VisibleForTesting
+    @NonNull
+    long[] getHpjLimitsMs() {
+        return mHpjLimitsMs;
+    }
+
+    @VisibleForTesting
+    @NonNull
+    long getHpjLimitWindowSizeMs() {
+        return mHpjLimitWindowSizeMs;
+    }
+
+    @VisibleForTesting
+    @NonNull
+    long getHpjRewardInteractionMs() {
+        return mHpjRewardInteractionMs;
+    }
+
+    @VisibleForTesting
+    @NonNull
+    long getHpjRewardNotificationSeenMs() {
+        return mHpjRewardNotificationSeenMs;
+    }
+
+    @VisibleForTesting
+    @NonNull
+    long getHpjRewardTopAppMs() {
+        return mHpjRewardTopAppMs;
+    }
+
+
+    @VisibleForTesting
+    @Nullable
+    List<TimingSession> getHpjTimingSessions(int userId, String packageName) {
+        return mHpjTimingSessions.get(userId, packageName);
+    }
+
+    @VisibleForTesting
+    @NonNull
+    long getHpjTopAppTimeChunkSizeMs() {
+        return mHpjTopAppTimeChunkSizeMs;
     }
 
     @VisibleForTesting
@@ -2763,6 +3636,11 @@ public final class QuotaController extends StateController {
         return mQcConstants;
     }
 
+    @VisibleForTesting
+    boolean isActiveBackgroundProcessing() {
+        return mHandler.mIsProcessing;
+    }
+
     //////////////////////////// DATA DUMP //////////////////////////////
 
     @Override
@@ -2805,16 +3683,24 @@ public final class QuotaController extends StateController {
                 pw.increaseIndent();
                 pw.print(JobStatus.bucketName(js.getEffectiveStandbyBucket()));
                 pw.print(", ");
-                if (js.isConstraintSatisfied(JobStatus.CONSTRAINT_WITHIN_QUOTA)) {
-                    pw.print("within quota");
+                if (js.shouldTreatAsForegroundJob()) {
+                    pw.print("within HPJ quota");
+                } else if (js.isConstraintSatisfied(JobStatus.CONSTRAINT_WITHIN_QUOTA)) {
+                    pw.print("within regular quota");
                 } else {
                     pw.print("not within quota");
                 }
                 pw.print(", ");
-                pw.print(getRemainingExecutionTimeLocked(js));
-                pw.print("ms remaining in quota");
-                pw.decreaseIndent();
+                if (js.shouldTreatAsForegroundJob()) {
+                    pw.print(getRemainingHpjExecutionTimeLocked(
+                            js.getSourceUserId(), js.getSourcePackageName()));
+                    pw.print("ms remaining in HPJ quota");
+                } else {
+                    pw.print(getRemainingExecutionTimeLocked(js));
+                    pw.print("ms remaining in quota");
+                }
                 pw.println();
+                pw.decreaseIndent();
             }
         });
 
@@ -2841,6 +3727,33 @@ public final class QuotaController extends StateController {
             }
         }
 
+        pw.println();
+        for (int u = 0; u < mHpjPkgTimers.numMaps(); ++u) {
+            final int userId = mHpjPkgTimers.keyAt(u);
+            for (int p = 0; p < mHpjPkgTimers.numElementsForKey(userId); ++p) {
+                final String pkgName = mHpjPkgTimers.keyAt(u, p);
+                mHpjPkgTimers.valueAt(u, p).dump(pw, predicate);
+                pw.println();
+                List<TimingSession> sessions = mHpjTimingSessions.get(userId, pkgName);
+                if (sessions != null) {
+                    pw.increaseIndent();
+                    pw.println("Saved sessions:");
+                    pw.increaseIndent();
+                    for (int j = sessions.size() - 1; j >= 0; j--) {
+                        TimingSession session = sessions.get(j);
+                        session.dump(pw);
+                    }
+                    pw.decreaseIndent();
+                    pw.decreaseIndent();
+                    pw.println();
+                }
+            }
+        }
+
+        pw.println();
+        mTopAppTrackers.forEach((timer) -> timer.dump(pw));
+
+        pw.println();
         pw.println("Cached execution stats:");
         pw.increaseIndent();
         for (int u = 0; u < mExecutionStatsCache.numMaps(); ++u) {
@@ -2860,6 +3773,22 @@ public final class QuotaController extends StateController {
                     }
                 }
                 pw.decreaseIndent();
+            }
+        }
+        pw.decreaseIndent();
+
+        pw.println();
+        pw.println("HPJ debits:");
+        pw.increaseIndent();
+        for (int u = 0; u < mHpjStats.numMaps(); ++u) {
+            final int userId = mHpjStats.keyAt(u);
+            for (int p = 0; p < mHpjStats.numElementsForKey(userId); ++p) {
+                final String pkgName = mHpjStats.keyAt(u, p);
+                ShrinkableDebits debits = mHpjStats.valueAt(u, p);
+
+                pw.print(string(userId, pkgName));
+                pw.print(": ");
+                debits.dumpLocked(pw);
             }
         }
         pw.decreaseIndent();
@@ -2919,6 +3848,12 @@ public final class QuotaController extends StateController {
                         js.isConstraintSatisfied(JobStatus.CONSTRAINT_WITHIN_QUOTA));
                 proto.write(StateControllerProto.QuotaController.TrackedJob.REMAINING_QUOTA_MS,
                         getRemainingExecutionTimeLocked(js));
+                proto.write(
+                        StateControllerProto.QuotaController.TrackedJob.IS_REQUESTED_FOREGROUND_JOB,
+                        js.isRequestedForegroundJob());
+                proto.write(
+                        StateControllerProto.QuotaController.TrackedJob.IS_WITHIN_FG_JOB_QUOTA,
+                        js.isConstraintSatisfied(JobStatus.CONSTRAINT_WITHIN_HPJ_QUOTA));
                 proto.end(jsToken);
             }
         });
@@ -2929,8 +3864,15 @@ public final class QuotaController extends StateController {
                 final String pkgName = mPkgTimers.keyAt(u, p);
                 final long psToken = proto.start(
                         StateControllerProto.QuotaController.PACKAGE_STATS);
+
                 mPkgTimers.valueAt(u, p).dump(proto,
                         StateControllerProto.QuotaController.PackageStats.TIMER, predicate);
+                final Timer hpjTimer = mHpjPkgTimers.get(userId, pkgName);
+                if (hpjTimer != null) {
+                    hpjTimer.dump(proto,
+                            StateControllerProto.QuotaController.PackageStats.FG_JOB_TIMER,
+                            predicate);
+                }
 
                 List<TimingSession> sessions = mTimingSessions.get(userId, pkgName);
                 if (sessions != null) {

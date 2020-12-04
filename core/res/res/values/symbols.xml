@@ -4113,4 +4113,6 @@
 
   <java-symbol type="bool" name="config_trackerAppNeedsPermissions"/>
 
+  <!-- Component with platform query permissions for AppSearch -->
+  <java-symbol type="string" name="config_defaultAppSearchPlatformQuerierComponent" />
 </resources>

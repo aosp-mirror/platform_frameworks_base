@@ -187,38 +187,6 @@ static jfloat Font_getFontMetrics(JNIEnv* env, jobject, jlong fontHandle, jlong 
 }
 
 // Critical Native
-static jlong Font_getFontInfo(CRITICAL_JNI_PARAMS_COMMA jlong fontHandle) {
-    const minikin::Font* font = reinterpret_cast<minikin::Font*>(fontHandle);
-    MinikinFontSkia* minikinSkia = static_cast<MinikinFontSkia*>(font->typeface().get());
-
-    uint64_t result = font->style().weight();
-    result |= font->style().slant() == minikin::FontStyle::Slant::ITALIC ? 0x10000 : 0x00000;
-    result |= ((static_cast<uint64_t>(minikinSkia->GetFontIndex())) << 32);
-    result |= ((static_cast<uint64_t>(minikinSkia->GetAxes().size())) << 48);
-    return result;
-}
-
-// Critical Native
-static jlong Font_getAxisInfo(CRITICAL_JNI_PARAMS_COMMA jlong fontHandle, jint index) {
-    const minikin::Font* font = reinterpret_cast<minikin::Font*>(fontHandle);
-    MinikinFontSkia* minikinSkia = static_cast<MinikinFontSkia*>(font->typeface().get());
-    const minikin::FontVariation& var = minikinSkia->GetAxes().at(index);
-    uint32_t floatBinary = *reinterpret_cast<const uint32_t*>(&var.value);
-    return (static_cast<uint64_t>(var.axisTag) << 32) | static_cast<uint64_t>(floatBinary);
-}
-
-// FastNative
-static jstring Font_getFontPath(JNIEnv* env, jobject, jlong fontHandle) {
-    const minikin::Font* font = reinterpret_cast<minikin::Font*>(fontHandle);
-    MinikinFontSkia* minikinSkia = static_cast<MinikinFontSkia*>(font->typeface().get());
-    const std::string& filePath = minikinSkia->getFilePath();
-    if (filePath.empty()) {
-        return nullptr;
-    }
-    return env->NewStringUTF(filePath.c_str());
-}
-
-// Critical Native
 static jlong Font_getNativeFontPtr(CRITICAL_JNI_PARAMS_COMMA jlong fontHandle) {
     FontWrapper* font = reinterpret_cast<FontWrapper*>(fontHandle);
     return reinterpret_cast<jlong>(font->font.get());
@@ -276,9 +244,6 @@ static const JNINativeMethod gFontBuilderMethods[] = {
 static const JNINativeMethod gFontMethods[] = {
     { "nGetGlyphBounds", "(JIJLandroid/graphics/RectF;)F", (void*) Font_getGlyphBounds },
     { "nGetFontMetrics", "(JJLandroid/graphics/Paint$FontMetrics;)F", (void*) Font_getFontMetrics },
-    { "nGetFontInfo", "(J)J", (void*) Font_getFontInfo },
-    { "nGetAxisInfo", "(JI)J", (void*) Font_getAxisInfo },
-    { "nGetFontPath", "(J)Ljava/lang/String;", (void*) Font_getFontPath },
     { "nGetNativeFontPtr", "(J)J", (void*) Font_getNativeFontPtr },
     { "nGetFontBufferAddress", "(J)J", (void*) Font_GetBufferAddress },
 };

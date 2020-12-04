@@ -165,9 +165,9 @@ final class OneTouchPlayAction extends HdmiCecFeatureAction {
         if (service.isAudioSystemDevice()) {
             return false;
         }
-        @HdmiControlManager.StandbyBehavior String sendStandbyOnSleep =
+        @HdmiControlManager.PowerControlMode String sendStandbyOnSleep =
                 service.getHdmiCecConfig().getStringValue(
-                        HdmiControlManager.CEC_SETTING_NAME_SEND_STANDBY_ON_SLEEP);
-        return sendStandbyOnSleep.equals(HdmiControlManager.SEND_STANDBY_ON_SLEEP_BROADCAST);
+                        HdmiControlManager.CEC_SETTING_NAME_POWER_CONTROL_MODE);
+        return sendStandbyOnSleep.equals(HdmiControlManager.POWER_CONTROL_MODE_BROADCAST);
     }
 }

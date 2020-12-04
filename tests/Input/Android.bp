@@ -6,6 +6,7 @@ android_test {
     static_libs: [
             "androidx.test.ext.junit",
             "androidx.test.rules",
+            "truth-prebuilt",
             "ub-uiautomator",
         ],
     test_suites: ["device-tests"],

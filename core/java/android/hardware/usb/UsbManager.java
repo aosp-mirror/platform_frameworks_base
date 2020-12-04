@@ -609,7 +609,7 @@ public class UsbManager {
     public @interface UsbFunctionMode {}
 
     /** @hide */
-    @IntDef(flag = true, prefix = { "GADGET_HAL_" }, value = {
+    @IntDef(prefix = { "GADGET_HAL_" }, value = {
             GADGET_HAL_NOT_SUPPORTED,
             GADGET_HAL_V1_0,
             GADGET_HAL_V1_1,

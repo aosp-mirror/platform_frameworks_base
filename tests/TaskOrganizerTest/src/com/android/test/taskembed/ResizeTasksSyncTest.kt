@@ -68,7 +68,8 @@ class ResizeTasksSyncTest {
         val firstBounds = Rect(0, 0, 1080, 800)
         val secondBounds = Rect(0, 1000, 1080, 1800)
 
-        val trace = withSFTracing(instrumentation, TRACE_FLAGS) {
+        val trace = withSFTracing(TRACE_FLAGS,
+                outputDir = instrumentation.targetContext.dataDir.toPath()) {
             lateinit var resizeReadyLatch: CountDownLatch
             scenarioRule.getScenario().onActivity {
                 resizeReadyLatch = it.resizeTaskView(firstBounds, secondBounds)
@@ -77,17 +78,13 @@ class ResizeTasksSyncTest {
         }
 
         // find the frame which match resized buffer size.
-        var frame: Long = -1
-        loop@ for (trace in trace.entries) {
-            for (layer in trace.flattenedLayers) {
-                if (layer.proto.activeBuffer != null &&
-                        layer.proto.activeBuffer.width == firstBounds.width() &&
-                        layer.proto.activeBuffer.height == firstBounds.height()) {
-                    frame = layer.proto.currFrame
-                    break@loop
-                }
-            }
-        }
+        val frame = trace.entries.flatMap { it.flattenedLayers }
+                .firstOrNull { layer ->
+                    !layer.isActiveBufferEmpty &&
+                        layer.activeBuffer?.width == firstBounds.width() &&
+                        layer.activeBuffer?.height == firstBounds.height()
+                }?.currFrame ?: -1
+
         assertNotEquals(-1, frame)
         // layer bounds should be related to parent surfaceview.
         secondBounds.offsetTo(0, 0)

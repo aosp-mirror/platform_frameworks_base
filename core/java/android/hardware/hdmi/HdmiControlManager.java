@@ -367,35 +367,35 @@ public final class HdmiControlManager {
     @Retention(RetentionPolicy.SOURCE)
     public @interface HdmiCecVersion {}
 
-    // -- Which devices the playback device can send a <Standby> message to upon going to sleep.
+    // -- Scope of CEC power control messages sent by a playback device.
     /**
-     * Send <Standby> to TV only.
+     * Send CEC power control messages to TV only.
      *
      * @hide
      */
-    public static final String SEND_STANDBY_ON_SLEEP_TO_TV = "to_tv";
+    public static final String POWER_CONTROL_MODE_TV = "to_tv";
     /**
-     * Broadcast <Standby> to all devices in the network.
+     * Broadcast CEC power control messages to all devices in the network.
      *
      * @hide
      */
-    public static final String SEND_STANDBY_ON_SLEEP_BROADCAST = "broadcast";
+    public static final String POWER_CONTROL_MODE_BROADCAST = "broadcast";
     /**
-     * Don't send any <Standby> message.
+     * Don't send any CEC power control messages.
      *
      * @hide
      */
-    public static final String SEND_STANDBY_ON_SLEEP_NONE = "none";
+    public static final String POWER_CONTROL_MODE_NONE = "none";
     /**
      * @hide
      */
     @StringDef({
-            SEND_STANDBY_ON_SLEEP_TO_TV,
-            SEND_STANDBY_ON_SLEEP_BROADCAST,
-            SEND_STANDBY_ON_SLEEP_NONE
+            POWER_CONTROL_MODE_TV,
+            POWER_CONTROL_MODE_BROADCAST,
+            POWER_CONTROL_MODE_NONE
     })
     @Retention(RetentionPolicy.SOURCE)
-    public @interface StandbyBehavior {}
+    public @interface PowerControlMode {}
 
     // -- Which power state action should be taken when Active Source is lost.
     /**
@@ -457,11 +457,11 @@ public final class HdmiControlManager {
      */
     public static final String CEC_SETTING_NAME_HDMI_CEC_VERSION = "hdmi_cec_version";
     /**
-     * Name of a setting deciding on the Standby message behaviour on sleep.
+     * Name of a setting deciding on the power control mode.
      *
      * @hide
      */
-    public static final String CEC_SETTING_NAME_SEND_STANDBY_ON_SLEEP = "send_standby_on_sleep";
+    public static final String CEC_SETTING_NAME_POWER_CONTROL_MODE = "send_standby_on_sleep";
     /**
      * Name of a setting deciding on power state action when losing Active Source.
      *
@@ -482,7 +482,7 @@ public final class HdmiControlManager {
     @StringDef({
         CEC_SETTING_NAME_HDMI_CEC_ENABLED,
         CEC_SETTING_NAME_HDMI_CEC_VERSION,
-        CEC_SETTING_NAME_SEND_STANDBY_ON_SLEEP,
+        CEC_SETTING_NAME_POWER_CONTROL_MODE,
         CEC_SETTING_NAME_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST,
         CEC_SETTING_NAME_SYSTEM_AUDIO_MODE_MUTING,
     })
@@ -1506,7 +1506,7 @@ public final class HdmiControlManager {
     }
 
     /**
-     * Set the 'send_standby_on_sleep' option.
+     * Set the 'power_control_mode' option.
      *
      * @param value the desired value
      * @throws IllegalArgumentException when the new value is not allowed.
@@ -1515,20 +1515,20 @@ public final class HdmiControlManager {
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.HDMI_CEC)
-    public void setSendStandbyOnSleep(@NonNull @StandbyBehavior String value) {
+    public void setPowerControlMode(@NonNull @PowerControlMode String value) {
         if (mService == null) {
             Log.e(TAG, "HdmiControlService is not available");
             throw new RuntimeException("HdmiControlService is not available");
         }
         try {
-            mService.setCecSettingStringValue(CEC_SETTING_NAME_SEND_STANDBY_ON_SLEEP, value);
+            mService.setCecSettingStringValue(CEC_SETTING_NAME_POWER_CONTROL_MODE, value);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
     }
 
     /**
-     * Get the value of 'send_standby_on_sleep' option.
+     * Get the value of 'power_control_mode' option.
      *
      * @return the current value.
      * @throws RuntimeException when the HdmiControlService is not available.
@@ -1536,15 +1536,15 @@ public final class HdmiControlManager {
      * @hide
      */
     @NonNull
-    @StandbyBehavior
+    @PowerControlMode
     @RequiresPermission(android.Manifest.permission.HDMI_CEC)
-    public String getSendStandbyOnSleep() {
+    public String getPowerControlMode() {
         if (mService == null) {
             Log.e(TAG, "HdmiControlService is not available");
             throw new RuntimeException("HdmiControlService is not available");
         }
         try {
-            return mService.getCecSettingStringValue(CEC_SETTING_NAME_SEND_STANDBY_ON_SLEEP);
+            return mService.getCecSettingStringValue(CEC_SETTING_NAME_POWER_CONTROL_MODE);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

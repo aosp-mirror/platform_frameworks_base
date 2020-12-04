@@ -18,9 +18,9 @@ package com.android.wm.shell.pip.phone;
 
 import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.PIP_STASHING;
 import static com.android.wm.shell.pip.PipAnimationController.TRANSITION_DIRECTION_TO_PIP;
-import static com.android.wm.shell.pip.phone.PipMenuActivityController.MENU_STATE_CLOSE;
-import static com.android.wm.shell.pip.phone.PipMenuActivityController.MENU_STATE_FULL;
-import static com.android.wm.shell.pip.phone.PipMenuActivityController.MENU_STATE_NONE;
+import static com.android.wm.shell.pip.phone.PhonePipMenuController.MENU_STATE_CLOSE;
+import static com.android.wm.shell.pip.phone.PhonePipMenuController.MENU_STATE_FULL;
+import static com.android.wm.shell.pip.phone.PhonePipMenuController.MENU_STATE_NONE;
 
 import android.annotation.NonNull;
 import android.annotation.SuppressLint;
@@ -47,6 +47,7 @@ import android.view.accessibility.AccessibilityWindowInfo;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.wm.shell.R;
 import com.android.wm.shell.common.FloatingContentCoordinator;
+import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.pip.PipAnimationController;
 import com.android.wm.shell.pip.PipBoundsAlgorithm;
 import com.android.wm.shell.pip.PipBoundsState;
@@ -78,7 +79,7 @@ public class PipTouchHandler {
     private IPinnedStackController mPinnedStackController;
     private WeakReference<Consumer<Rect>> mPipExclusionBoundsChangeListener;
 
-    private final PipMenuActivityController mMenuController;
+    private final PhonePipMenuController mMenuController;
     private final AccessibilityManager mAccessibilityManager;
     private boolean mShowPipMenuOnAnimationEnd = false;
 
@@ -125,7 +126,7 @@ public class PipTouchHandler {
     /**
      * A listener for the PIP menu activity.
      */
-    private class PipMenuListener implements PipMenuActivityController.Listener {
+    private class PipMenuListener implements PhonePipMenuController.Listener {
         @Override
         public void onPipMenuStateChanged(int menuState, boolean resize, Runnable callback) {
             setMenuState(menuState, resize, callback);
@@ -152,12 +153,13 @@ public class PipTouchHandler {
 
     @SuppressLint("InflateParams")
     public PipTouchHandler(Context context,
-            PipMenuActivityController menuController,
+            PhonePipMenuController menuController,
             PipBoundsAlgorithm pipBoundsAlgorithm,
             @NonNull PipBoundsState pipBoundsState,
             PipTaskOrganizer pipTaskOrganizer,
             FloatingContentCoordinator floatingContentCoordinator,
-            PipUiEventLogger pipUiEventLogger) {
+            PipUiEventLogger pipUiEventLogger,
+            ShellExecutor shellMainExecutor) {
         // Initialize the Pip input consumer
         mContext = context;
         mAccessibilityManager = context.getSystemService(AccessibilityManager.class);
@@ -188,7 +190,7 @@ public class PipTouchHandler {
         mFloatingContentCoordinator = floatingContentCoordinator;
         mConnection = new PipAccessibilityInteractionConnection(mContext, pipBoundsState,
                 mMotionHelper, pipTaskOrganizer, mPipBoundsAlgorithm.getSnapAlgorithm(),
-                this::onAccessibilityShowMenu, this::updateMovementBounds, mHandler);
+                this::onAccessibilityShowMenu, this::updateMovementBounds, shellMainExecutor);
 
         mPipUiEventLogger = pipUiEventLogger;
 
@@ -436,8 +438,11 @@ public class PipTouchHandler {
      * TODO Add appropriate description
      */
     public void onRegistrationChanged(boolean isRegistered) {
-        mAccessibilityManager.setPictureInPictureActionReplacingConnection(isRegistered
-                ? mConnection : null);
+        if (isRegistered) {
+            mConnection.register(mAccessibilityManager);
+        } else {
+            mAccessibilityManager.setPictureInPictureActionReplacingConnection(null);
+        }
         if (!isRegistered && mTouchState.isUserInteracting()) {
             // If the input consumer is unregistered while the user is interacting, then we may not
             // get the final TOUCH_UP event, so clean up the dismiss target as well

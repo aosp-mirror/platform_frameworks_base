@@ -21,6 +21,7 @@
 #include <cutils/compiler.h>
 #include <utils/Timers.h>
 
+#include <array>
 #include <memory.h>
 #include <string>
 
@@ -60,7 +61,7 @@ enum class FrameInfoIndex {
     NumIndexes
 };
 
-extern const std::string FrameInfoNames[];
+extern const std::array<std::string, static_cast<int>(FrameInfoIndex::NumIndexes)> FrameInfoNames;
 
 namespace FrameInfoFlags {
 enum {

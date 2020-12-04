@@ -42,6 +42,7 @@ import android.text.SpannedString;
 import android.text.TextWatcher;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.Pair;
 import android.view.ContentInfo;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -75,7 +76,6 @@ import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 import com.android.systemui.statusbar.phone.LightBarController;
 
 import java.util.HashMap;
-import java.util.Map;
 import java.util.function.Consumer;
 
 /**
@@ -593,16 +593,16 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
                             @Nullable
                             public ContentInfo onReceiveContent(@NonNull View view,
                                     @NonNull ContentInfo payload) {
-                                Map<Boolean, ContentInfo> split = payload.partition(
+                                Pair<ContentInfo, ContentInfo> split = payload.partition(
                                         item -> item.getUri() != null);
-                                ContentInfo uriItems = split.get(true);
-                                ContentInfo remainingItems = split.get(false);
-                                if (uriItems != null) {
-                                    ClipData clip = uriItems.getClip();
+                                ContentInfo uriContent = split.first;
+                                ContentInfo remaining = split.second;
+                                if (uriContent != null) {
+                                    ClipData clip = uriContent.getClip();
                                     ClipDescription description = clip.getDescription();
                                     if (clip.getItemCount() > 1
                                             || description.getMimeTypeCount() < 1
-                                            || remainingItems != null) {
+                                            || remaining != null) {
                                         // TODO(b/172363500): Update to loop over all the items
                                         return payload;
                                     }
@@ -612,7 +612,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
                                             .prepareRemoteInputFromData(mimeType, contentUri);
                                     mRemoteInputView.sendRemoteInput(dataIntent);
                                 }
-                                return remainingItems;
+                                return remaining;
                             }
                         });
             }

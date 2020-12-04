@@ -243,6 +243,8 @@ applications that come with the platform
         <permission name="android.permission.LOG_COMPAT_CHANGE" />
         <permission name="android.permission.READ_COMPAT_CHANGE_CONFIG" />
         <permission name="android.permission.REGISTER_STATS_PULL_ATOM" />
+        <!-- Permissions required for reading DeviceConfig -->
+        <permission name="android.permission.READ_DEVICE_CONFIG" />
     </privapp-permissions>
 
     <privapp-permissions package="com.android.providers.telephony">
@@ -375,6 +377,7 @@ applications that come with the platform
         <permission name="android.permission.SIGNAL_PERSISTENT_PROCESSES"/>
         <permission name="android.permission.STATUS_BAR"/>
         <permission name="android.permission.START_ACTIVITIES_FROM_BACKGROUND" />
+        <permission name="android.permission.START_FOREGROUND_SERVICES_FROM_BACKGROUND" />
         <permission name="android.permission.START_TASKS_FROM_RECENTS" />
         <permission name="android.permission.STOP_APP_SWITCHES"/>
         <permission name="android.permission.SUBSTITUTE_NOTIFICATION_APP_NAME"/>
@@ -445,6 +448,8 @@ applications that come with the platform
         <!-- Permissions required for CTS test - android.server.biometrics -->
         <permission name="android.permission.USE_BIOMETRIC" />
         <permission name="android.permission.TEST_BIOMETRIC" />
+        <!-- Permissions required for CTS test - CtsContactsProviderTestCases -->
+        <permission name="android.contacts.permission.MANAGE_SIM_ACCOUNTS" />
     </privapp-permissions>
 
     <privapp-permissions package="com.android.statementservice">

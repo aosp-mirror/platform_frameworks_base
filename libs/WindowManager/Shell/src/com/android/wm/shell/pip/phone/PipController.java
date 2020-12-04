@@ -52,7 +52,6 @@ import com.android.wm.shell.WindowManagerShellWrapper;
 import com.android.wm.shell.common.DisplayChangeController;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayLayout;
-import com.android.wm.shell.common.PipInputConsumer;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.TaskStackListenerCallback;
 import com.android.wm.shell.common.TaskStackListenerImpl;
@@ -92,7 +91,7 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
     private boolean mIsInFixedRotation;
     private Consumer<Boolean> mPinnedStackAnimationRecentsCallback;
 
-    protected PipMenuActivityController mMenuController;
+    protected PhonePipMenuController mMenuController;
     protected PipTaskOrganizer mPipTaskOrganizer;
     protected PinnedStackListenerForwarder.PinnedStackListener mPinnedStackListener =
             new PipControllerPinnedStackListener();
@@ -164,62 +163,54 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
             PinnedStackListenerForwarder.PinnedStackListener {
         @Override
         public void onListenerRegistered(IPinnedStackController controller) {
-            mMainExecutor.execute(() -> mTouchHandler.setPinnedStackController(controller));
+            mTouchHandler.setPinnedStackController(controller);
         }
 
         @Override
         public void onImeVisibilityChanged(boolean imeVisible, int imeHeight) {
-            mMainExecutor.execute(() -> {
-                mPipBoundsState.setImeVisibility(imeVisible, imeHeight);
-                mTouchHandler.onImeVisibilityChanged(imeVisible, imeHeight);
-            });
+            mPipBoundsState.setImeVisibility(imeVisible, imeHeight);
+            mTouchHandler.onImeVisibilityChanged(imeVisible, imeHeight);
         }
 
         @Override
         public void onMovementBoundsChanged(boolean fromImeAdjustment) {
-            mMainExecutor.execute(() -> updateMovementBounds(null /* toBounds */,
+            updateMovementBounds(null /* toBounds */,
                     false /* fromRotation */, fromImeAdjustment, false /* fromShelfAdjustment */,
-                    null /* windowContainerTransaction */));
+                    null /* windowContainerTransaction */);
         }
 
         @Override
         public void onActionsChanged(ParceledListSlice<RemoteAction> actions) {
-            mMainExecutor.execute(() -> mMenuController.setAppActions(actions));
+            mMenuController.setAppActions(actions);
         }
 
         @Override
         public void onActivityHidden(ComponentName componentName) {
-            mMainExecutor.execute(() -> {
-                if (componentName.equals(mPipBoundsState.getLastPipComponentName())) {
-                    // The activity was removed, we don't want to restore to the reentry state
-                    // saved for this component anymore.
-                    mPipBoundsState.setLastPipComponentName(null);
-                }
-            });
+            if (componentName.equals(mPipBoundsState.getLastPipComponentName())) {
+                // The activity was removed, we don't want to restore to the reentry state
+                // saved for this component anymore.
+                mPipBoundsState.setLastPipComponentName(null);
+            }
         }
 
         @Override
         public void onDisplayInfoChanged(DisplayInfo displayInfo) {
-            mMainExecutor.execute(() -> mPipBoundsState.setDisplayInfo(displayInfo));
+            mPipBoundsState.setDisplayInfo(displayInfo);
         }
 
         @Override
         public void onConfigurationChanged() {
-            mMainExecutor.execute(() -> {
-                mPipBoundsAlgorithm.onConfigurationChanged(mContext);
-                mTouchHandler.onConfigurationChanged();
-                mPipBoundsState.onConfigurationChanged();
-            });
+            mPipBoundsAlgorithm.onConfigurationChanged(mContext);
+            mTouchHandler.onConfigurationChanged();
+            mPipBoundsState.onConfigurationChanged();
         }
 
         @Override
         public void onAspectRatioChanged(float aspectRatio) {
             // TODO(b/169373982): Remove this callback as it is redundant with PipTaskOrg params
             // change.
-            mMainExecutor.execute(() -> {
-                mPipBoundsState.setAspectRatio(aspectRatio);
-                mTouchHandler.onAspectRatioChanged();
-            });
+            mPipBoundsState.setAspectRatio(aspectRatio);
+            mTouchHandler.onAspectRatioChanged();
         }
     }
 
@@ -229,7 +220,7 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
             PipBoundsAlgorithm pipBoundsAlgorithm,
             @NonNull PipBoundsState pipBoundsState,
             PipMediaController pipMediaController,
-            PipMenuActivityController pipMenuActivityController,
+            PhonePipMenuController phonePipMenuController,
             PipTaskOrganizer pipTaskOrganizer,
             PipTouchHandler pipTouchHandler,
             WindowManagerShellWrapper windowManagerShellWrapper,
@@ -250,7 +241,7 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
         mPipTaskOrganizer = pipTaskOrganizer;
         mMainExecutor = mainExecutor;
         mMediaController = pipMediaController;
-        mMenuController = pipMenuActivityController;
+        mMenuController = phonePipMenuController;
         mTouchHandler = pipTouchHandler;
         mAppOpsListener = pipAppOpsListener;
         mPipInputConsumer = new PipInputConsumer(WindowManagerGlobal.getWindowManagerService(),
@@ -632,7 +623,7 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
     public static PipController create(Context context, DisplayController displayController,
             PipAppOpsListener pipAppOpsListener, PipBoundsAlgorithm pipBoundsAlgorithm,
             PipBoundsState pipBoundsState, PipMediaController pipMediaController,
-            PipMenuActivityController pipMenuActivityController, PipTaskOrganizer pipTaskOrganizer,
+            PhonePipMenuController phonePipMenuController, PipTaskOrganizer pipTaskOrganizer,
             PipTouchHandler pipTouchHandler, WindowManagerShellWrapper windowManagerShellWrapper,
             TaskStackListenerImpl taskStackListener, ShellExecutor mainExecutor) {
         if (!context.getPackageManager().hasSystemFeature(FEATURE_PICTURE_IN_PICTURE)) {
@@ -641,7 +632,7 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
         }
 
         return new PipController(context, displayController, pipAppOpsListener, pipBoundsAlgorithm,
-                pipBoundsState, pipMediaController, pipMenuActivityController, pipTaskOrganizer,
+                pipBoundsState, pipMediaController, phonePipMenuController, pipTaskOrganizer,
                 pipTouchHandler, windowManagerShellWrapper, taskStackListener, mainExecutor);
     }
 }

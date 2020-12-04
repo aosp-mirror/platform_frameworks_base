@@ -17,6 +17,7 @@ package com.android.server.power.batterysaver;
 
 import android.os.BatteryManagerInternal;
 import android.os.SystemClock;
+import android.util.IndentingPrintWriter;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.TimeUtils;
@@ -26,7 +27,6 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.EventLogTags;
 import com.android.server.LocalServices;
 
-import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -391,18 +391,15 @@ public class BatterySavingStats {
         stat.endTime = 0;
     }
 
-    public void dump(PrintWriter pw, String indent) {
+    public void dump(IndentingPrintWriter pw) {
+        pw.println("Battery saving stats:");
+        pw.increaseIndent();
+
         synchronized (mLock) {
-            pw.print(indent);
-            pw.println("Battery saving stats:");
-
-            indent = indent + "  ";
-
             final long now = System.currentTimeMillis();
             final long nowElapsed = injectCurrentTime();
             final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 
-            pw.print(indent);
             pw.print("Battery Saver is currently: ");
             switch (BatterySaverState.fromIndex(mCurrentState)) {
                 case BatterySaverState.OFF:
@@ -416,9 +413,8 @@ public class BatterySavingStats {
                     break;
             }
 
+            pw.increaseIndent();
             if (mLastBatterySaverEnabledTime > 0) {
-                pw.print(indent);
-                pw.print("  ");
                 pw.print("Last ON time: ");
                 pw.print(sdf.format(new Date(now - nowElapsed + mLastBatterySaverEnabledTime)));
                 pw.print(" ");
@@ -427,8 +423,6 @@ public class BatterySavingStats {
             }
 
             if (mLastBatterySaverDisabledTime > 0) {
-                pw.print(indent);
-                pw.print("  ");
                 pw.print("Last OFF time: ");
                 pw.print(sdf.format(new Date(now - nowElapsed + mLastBatterySaverDisabledTime)));
                 pw.print(" ");
@@ -436,14 +430,10 @@ public class BatterySavingStats {
                 pw.println();
             }
 
-            pw.print(indent);
-            pw.print("  ");
             pw.print("Times full enabled: ");
             pw.println(mBatterySaverEnabledCount);
 
             if (mLastAdaptiveBatterySaverEnabledTime > 0) {
-                pw.print(indent);
-                pw.print("  ");
                 pw.print("Last ADAPTIVE ON time: ");
                 pw.print(sdf.format(
                         new Date(now - nowElapsed + mLastAdaptiveBatterySaverEnabledTime)));
@@ -452,8 +442,6 @@ public class BatterySavingStats {
                 pw.println();
             }
             if (mLastAdaptiveBatterySaverDisabledTime > 0) {
-                pw.print(indent);
-                pw.print("  ");
                 pw.print("Last ADAPTIVE OFF time: ");
                 pw.print(sdf.format(
                         new Date(now - nowElapsed + mLastAdaptiveBatterySaverDisabledTime)));
@@ -461,39 +449,36 @@ public class BatterySavingStats {
                 TimeUtils.formatDuration(mLastAdaptiveBatterySaverDisabledTime, nowElapsed, pw);
                 pw.println();
             }
-            pw.print(indent);
-            pw.print("  ");
             pw.print("Times adaptive enabled: ");
             pw.println(mAdaptiveBatterySaverEnabledCount);
 
+            pw.decreaseIndent();
             pw.println();
 
-            pw.print(indent);
             pw.println("Drain stats:");
 
-            pw.print(indent);
             pw.println("                   Battery saver OFF                          ON");
-            dumpLineLocked(pw, indent, InteractiveState.NON_INTERACTIVE, "NonIntr",
+            dumpLineLocked(pw, InteractiveState.NON_INTERACTIVE, "NonIntr",
                     DozeState.NOT_DOZING, "NonDoze");
-            dumpLineLocked(pw, indent, InteractiveState.INTERACTIVE, "   Intr",
+            dumpLineLocked(pw, InteractiveState.INTERACTIVE, "   Intr",
                     DozeState.NOT_DOZING, "       ");
 
-            dumpLineLocked(pw, indent, InteractiveState.NON_INTERACTIVE, "NonIntr",
+            dumpLineLocked(pw, InteractiveState.NON_INTERACTIVE, "NonIntr",
                     DozeState.DEEP, "Deep   ");
-            dumpLineLocked(pw, indent, InteractiveState.INTERACTIVE, "   Intr",
+            dumpLineLocked(pw, InteractiveState.INTERACTIVE, "   Intr",
                     DozeState.DEEP, "       ");
 
-            dumpLineLocked(pw, indent, InteractiveState.NON_INTERACTIVE, "NonIntr",
+            dumpLineLocked(pw, InteractiveState.NON_INTERACTIVE, "NonIntr",
                     DozeState.LIGHT, "Light  ");
-            dumpLineLocked(pw, indent, InteractiveState.INTERACTIVE, "   Intr",
+            dumpLineLocked(pw, InteractiveState.INTERACTIVE, "   Intr",
                     DozeState.LIGHT, "       ");
         }
+        pw.decreaseIndent();
     }
 
-    private void dumpLineLocked(PrintWriter pw, String indent,
+    private void dumpLineLocked(IndentingPrintWriter pw,
             int interactiveState, String interactiveLabel,
             int dozeState, String dozeLabel) {
-        pw.print(indent);
         pw.print(dozeLabel);
         pw.print(" ");
         pw.print(interactiveLabel);

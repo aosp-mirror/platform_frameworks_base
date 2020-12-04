@@ -19,6 +19,7 @@ package com.android.wm.shell;
 import android.view.Gravity;
 
 import com.android.wm.shell.apppairs.AppPairs;
+import com.android.wm.shell.common.annotations.ExternalThread;
 import com.android.wm.shell.hidedisplaycutout.HideDisplayCutout;
 import com.android.wm.shell.letterbox.LetterboxConfigController;
 import com.android.wm.shell.onehanded.OneHanded;
@@ -61,6 +62,7 @@ public final class ShellCommandHandler {
     }
 
     /** Dumps WM Shell internal state. */
+    @ExternalThread
     public void dump(PrintWriter pw) {
         mShellTaskOrganizer.dump(pw, "");
         pw.println();
@@ -76,6 +78,7 @@ public final class ShellCommandHandler {
 
 
     /** Returns {@code true} if command was found and executed. */
+    @ExternalThread
     public boolean handleCommand(String[] args, PrintWriter pw) {
         if (args.length < 2) {
             // Argument at position 0 is "WMShell".

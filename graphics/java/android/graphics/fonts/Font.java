@@ -124,6 +124,19 @@ public final class Font {
         }
 
         /**
+         * Construct a builder with a byte buffer and file path.
+         *
+         * This method is intended to be called only from SystemFonts.
+         * @param path font file path
+         * @param localeList comma concatenated BCP47 compliant language tag.
+         * @hide
+         */
+        public Builder(@NonNull File path, @NonNull String localeList) {
+            this(path);
+            mLocaleList = localeList;
+        }
+
+        /**
          * Constructs a builder with a file path.
          *
          * @param path a file path to the font file
@@ -809,29 +822,13 @@ public final class Font {
 
             // If not found, create Font object from native object for Java API users.
             ByteBuffer buffer = NativeFontBufferHelper.refByteBuffer(ptr);
-            long packed = nGetFontInfo(ptr);
-            int weight = (int) (packed & 0x0000_0000_0000_FFFFL);
-            boolean italic = (packed & 0x0000_0000_0001_0000L) != 0;
-            int ttcIndex = (int) ((packed & 0x0000_FFFF_0000_0000L) >> 32);
-            int axisCount = (int) ((packed & 0xFFFF_0000_0000_0000L) >> 48);
-            FontVariationAxis[] axes = new FontVariationAxis[axisCount];
-            char[] charBuffer = new char[4];
-            for (int i = 0; i < axisCount; ++i) {
-                long packedAxis = nGetAxisInfo(ptr, i);
-                float value = Float.intBitsToFloat((int) (packedAxis & 0x0000_0000_FFFF_FFFFL));
-                charBuffer[0] = (char) ((packedAxis & 0xFF00_0000_0000_0000L) >> 56);
-                charBuffer[1] = (char) ((packedAxis & 0x00FF_0000_0000_0000L) >> 48);
-                charBuffer[2] = (char) ((packedAxis & 0x0000_FF00_0000_0000L) >> 40);
-                charBuffer[3] = (char) ((packedAxis & 0x0000_00FF_0000_0000L) >> 32);
-                axes[i] = new FontVariationAxis(new String(charBuffer), value);
-            }
-            String path = nGetFontPath(ptr);
-            File file = (path == null) ? null : new File(path);
-            Font.Builder builder = new Font.Builder(buffer, file, "")
-                    .setWeight(weight)
-                    .setSlant(italic ? FontStyle.FONT_SLANT_ITALIC : FontStyle.FONT_SLANT_UPRIGHT)
-                    .setTtcIndex(ttcIndex)
-                    .setFontVariationSettings(axes);
+            NativeFont.Font font = NativeFont.readNativeFont(ptr);
+
+            Font.Builder builder = new Font.Builder(buffer, font.getFile(), "")
+                    .setWeight(font.getStyle().getWeight())
+                    .setSlant(font.getStyle().getSlant())
+                    .setTtcIndex(font.getIndex())
+                    .setFontVariationSettings(font.getAxes());
 
             Font newFont = null;
             try {
@@ -844,15 +841,6 @@ public final class Font {
             return newFont;
         }
     }
-
-    @CriticalNative
-    private static native long nGetFontInfo(long ptr);
-
-    @CriticalNative
-    private static native long nGetAxisInfo(long ptr, int i);
-
-    @FastNative
-    private static native String nGetFontPath(long ptr);
 
     @FastNative
     private static native float nGetGlyphBounds(long font, int glyphId, long paint, RectF rect);

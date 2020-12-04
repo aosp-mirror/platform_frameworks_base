@@ -61,7 +61,7 @@ public class PipControllerTest extends ShellTestCase {
     private PipController mPipController;
 
     @Mock private DisplayController mMockDisplayController;
-    @Mock private PipMenuActivityController mMockPipMenuActivityController;
+    @Mock private PhonePipMenuController mMockPhonePipMenuController;
     @Mock private PipAppOpsListener mMockPipAppOpsListener;
     @Mock private PipBoundsAlgorithm mMockPipBoundsAlgorithm;
     @Mock private PipMediaController mMockPipMediaController;
@@ -77,7 +77,7 @@ public class PipControllerTest extends ShellTestCase {
         MockitoAnnotations.initMocks(this);
         mPipController = new PipController(mContext, mMockDisplayController,
                 mMockPipAppOpsListener, mMockPipBoundsAlgorithm, mMockPipBoundsState,
-                mMockPipMediaController, mMockPipMenuActivityController, mMockPipTaskOrganizer,
+                mMockPipMediaController, mMockPhonePipMenuController, mMockPipTaskOrganizer,
                 mMockPipTouchHandler, mMockWindowManagerShellWrapper, mMockTaskStackListener,
                 mMockExecutor);
         doAnswer(invocation -> {
@@ -110,7 +110,7 @@ public class PipControllerTest extends ShellTestCase {
 
         assertNull(PipController.create(spyContext, mMockDisplayController,
                 mMockPipAppOpsListener, mMockPipBoundsAlgorithm, mMockPipBoundsState,
-                mMockPipMediaController, mMockPipMenuActivityController, mMockPipTaskOrganizer,
+                mMockPipMediaController, mMockPhonePipMenuController, mMockPipTaskOrganizer,
                 mMockPipTouchHandler, mMockWindowManagerShellWrapper, mMockTaskStackListener,
                 mMockExecutor));
     }

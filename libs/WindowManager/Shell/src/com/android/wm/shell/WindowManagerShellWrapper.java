@@ -18,11 +18,11 @@ package com.android.wm.shell;
 
 import static android.view.Display.DEFAULT_DISPLAY;
 
-import android.app.WindowConfiguration;
 import android.os.RemoteException;
-import android.view.WindowManagerGlobal;
 
+import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.pip.PinnedStackListenerForwarder;
+import com.android.wm.shell.pip.PinnedStackListenerForwarder.PinnedStackListener;
 
 /**
  * The singleton wrapper to communicate between WindowManagerService and WMShell features
@@ -31,32 +31,30 @@ import com.android.wm.shell.pip.PinnedStackListenerForwarder;
 public class WindowManagerShellWrapper {
     private static final String TAG = WindowManagerShellWrapper.class.getSimpleName();
 
-    public static final int WINDOWING_MODE_PINNED = WindowConfiguration.WINDOWING_MODE_PINNED;
-
     /**
      * Forwarder to which we can add multiple pinned stack listeners. Each listener will receive
      * updates from the window manager service.
      */
-    private PinnedStackListenerForwarder mPinnedStackListenerForwarder =
-            new PinnedStackListenerForwarder();
+    private final PinnedStackListenerForwarder mPinnedStackListenerForwarder;
+
+    public WindowManagerShellWrapper(ShellExecutor shellMainExecutor) {
+        mPinnedStackListenerForwarder = new PinnedStackListenerForwarder(shellMainExecutor);
+    }
 
     /**
      * Adds a pinned stack listener, which will receive updates from the window manager service
      * along with any other pinned stack listeners that were added via this method.
      */
-    public void addPinnedStackListener(PinnedStackListenerForwarder.PinnedStackListener listener)
-            throws
-            RemoteException {
+    public void addPinnedStackListener(PinnedStackListener listener)
+            throws RemoteException {
         mPinnedStackListenerForwarder.addListener(listener);
-        WindowManagerGlobal.getWindowManagerService().registerPinnedStackListener(
-                DEFAULT_DISPLAY, mPinnedStackListenerForwarder);
+        mPinnedStackListenerForwarder.register(DEFAULT_DISPLAY);
     }
 
     /**
      * Removes a pinned stack listener.
      */
-    public void removePinnedStackListener(
-            PinnedStackListenerForwarder.PinnedStackListener listener) {
+    public void removePinnedStackListener(PinnedStackListener listener) {
         mPinnedStackListenerForwarder.removeListener(listener);
     }
 

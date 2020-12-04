@@ -22,6 +22,7 @@ import com.android.systemui.dagger.WMSingleton;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.WindowManagerShellWrapper;
 import com.android.wm.shell.common.DisplayController;
+import com.android.wm.shell.common.SystemWindows;
 import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.pip.PipBoundsAlgorithm;
@@ -34,6 +35,7 @@ import com.android.wm.shell.pip.tv.PipController;
 import com.android.wm.shell.pip.tv.PipControlsView;
 import com.android.wm.shell.pip.tv.PipControlsViewController;
 import com.android.wm.shell.pip.tv.PipNotification;
+import com.android.wm.shell.pip.tv.TvPipMenuController;
 import com.android.wm.shell.splitscreen.SplitScreen;
 
 import java.util.Optional;
@@ -44,7 +46,7 @@ import dagger.Provides;
 /**
  * Dagger module for TV Pip.
  */
-@Module
+@Module(includes = {WMShellBaseModule.class})
 public abstract class TvPipModule {
     @WMSingleton
     @Provides
@@ -53,6 +55,7 @@ public abstract class TvPipModule {
             PipBoundsState pipBoundsState,
             PipBoundsAlgorithm pipBoundsAlgorithm,
             PipTaskOrganizer pipTaskOrganizer,
+            TvPipMenuController tvPipMenuController,
             PipMediaController pipMediaController,
             PipNotification pipNotification,
             TaskStackListenerImpl taskStackListener,
@@ -63,6 +66,7 @@ public abstract class TvPipModule {
                         pipBoundsState,
                         pipBoundsAlgorithm,
                         pipTaskOrganizer,
+                        tvPipMenuController,
                         pipMediaController,
                         pipNotification,
                         taskStackListener,
@@ -104,14 +108,22 @@ public abstract class TvPipModule {
 
     @WMSingleton
     @Provides
+    static TvPipMenuController providesPipTvMenuController(Context context,
+            PipBoundsState pipBoundsState, SystemWindows systemWindows) {
+        return new TvPipMenuController(context, pipBoundsState, systemWindows);
+    }
+
+    @WMSingleton
+    @Provides
     static PipTaskOrganizer providePipTaskOrganizer(Context context,
+            TvPipMenuController tvMenuController,
             PipBoundsState pipBoundsState,
             PipBoundsAlgorithm pipBoundsAlgorithm,
             PipSurfaceTransactionHelper pipSurfaceTransactionHelper,
             Optional<SplitScreen> splitScreenOptional, DisplayController displayController,
             PipUiEventLogger pipUiEventLogger, ShellTaskOrganizer shellTaskOrganizer) {
         return new PipTaskOrganizer(context, pipBoundsState, pipBoundsAlgorithm,
-                null /* menuActivityController */, pipSurfaceTransactionHelper, splitScreenOptional,
+                tvMenuController, pipSurfaceTransactionHelper, splitScreenOptional,
                 displayController, pipUiEventLogger, shellTaskOrganizer);
     }
 }

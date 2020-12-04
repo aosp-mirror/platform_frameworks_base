@@ -2154,7 +2154,7 @@ public final class ActivityThread extends ClientTransactionHandler {
             }
             if (a != null) {
                 mNewActivities = null;
-                IActivityTaskManager am = ActivityTaskManager.getService();
+                final ActivityClient ac = ActivityClient.getInstance();
                 ActivityClientRecord prev;
                 do {
                     if (localLOGV) Slog.v(
@@ -2162,12 +2162,8 @@ public final class ActivityThread extends ClientTransactionHandler {
                         " finished=" +
                         (a.activity != null && a.activity.mFinished));
                     if (a.activity != null && !a.activity.mFinished) {
-                        try {
-                            am.activityIdle(a.token, a.createdConfig, stopProfiling);
-                            a.createdConfig = null;
-                        } catch (RemoteException ex) {
-                            throw ex.rethrowFromSystemServer();
-                        }
+                        ac.activityIdle(a.token, a.createdConfig, stopProfiling);
+                        a.createdConfig = null;
                     }
                     prev = a;
                     a = a.nextIdle;
@@ -3576,13 +3572,7 @@ public final class ActivityThread extends ClientTransactionHandler {
     }
 
     private ContextImpl createBaseContextForActivity(ActivityClientRecord r) {
-        final int displayId;
-        try {
-            displayId = ActivityTaskManager.getService().getDisplayId(r.token);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-
+        final int displayId = ActivityClient.getInstance().getDisplayId(r.token);
         ContextImpl appContext = ContextImpl.createActivityContext(
                 this, r.packageInfo, r.activityInfo, r.token, displayId, r.overrideConfig);
 
@@ -3669,13 +3659,8 @@ public final class ActivityThread extends ClientTransactionHandler {
             }
         } else {
             // If there was an error, for any reason, tell the activity manager to stop us.
-            try {
-                ActivityTaskManager.getService()
-                        .finishActivity(r.token, Activity.RESULT_CANCELED, null,
-                                Activity.DONT_FINISH_TASK_WITH_ACTIVITY);
-            } catch (RemoteException ex) {
-                throw ex.rethrowFromSystemServer();
-            }
+            ActivityClient.getInstance().finishActivity(r.token, Activity.RESULT_CANCELED,
+                    null /* resultData */, Activity.DONT_FINISH_TASK_WITH_ACTIVITY);
         }
 
         return a;
@@ -3705,12 +3690,8 @@ public final class ActivityThread extends ClientTransactionHandler {
                 smallest.put(config.smallestScreenWidthDp, 0);
             }
         }
-        try {
-            ActivityTaskManager.getService().reportSizeConfigurations(r.token,
-                    horizontal.copyKeys(), vertical.copyKeys(), smallest.copyKeys());
-        } catch (RemoteException ex) {
-            throw ex.rethrowFromSystemServer();
-        }
+        ActivityClient.getInstance().reportSizeConfigurations(r.token, horizontal.copyKeys(),
+                vertical.copyKeys(), smallest.copyKeys());
     }
 
     private void deliverNewIntents(ActivityClientRecord r, List<ReferrerIntent> intents) {
@@ -4559,12 +4540,8 @@ public final class ActivityThread extends ClientTransactionHandler {
         // then go ahead and add the window.
         boolean willBeVisible = !a.mStartedActivity;
         if (!willBeVisible) {
-            try {
-                willBeVisible = ActivityTaskManager.getService().willActivityBeVisible(
-                        a.getActivityToken());
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
+            willBeVisible = ActivityClient.getInstance().willActivityBeVisible(
+                    a.getActivityToken());
         }
         if (r.window == null && !a.mFinished && willBeVisible) {
             r.window = r.activity.getWindow();
@@ -5209,11 +5186,7 @@ public final class ActivityThread extends ClientTransactionHandler {
             ((ContextImpl) c).scheduleFinalCleanup(r.activity.getClass().getName(), "Activity");
         }
         if (finishing) {
-            try {
-                ActivityTaskManager.getService().activityDestroyed(r.token);
-            } catch (RemoteException ex) {
-                throw ex.rethrowFromSystemServer();
-            }
+            ActivityClient.getInstance().activityDestroyed(r.token);
         }
         mSomeActivitiesChanged = true;
     }
@@ -5477,13 +5450,9 @@ public final class ActivityThread extends ClientTransactionHandler {
 
     @Override
     public void reportRelaunch(ActivityClientRecord r, PendingTransactionActions pendingActions) {
-        try {
-            ActivityTaskManager.getService().activityRelaunched(r.token);
-            if (pendingActions.shouldReportRelaunchToWindowManager() && r.window != null) {
-                r.window.reportActivityRelaunched();
-            }
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
+        ActivityClient.getInstance().activityRelaunched(r.token);
+        if (pendingActions.shouldReportRelaunchToWindowManager() && r.window != null) {
+            r.window.reportActivityRelaunched();
         }
     }
 
@@ -6417,11 +6386,13 @@ public final class ActivityThread extends ClientTransactionHandler {
          */
         LocaleList.setDefault(data.config.getLocales());
 
-        try {
-            Typeface.setSystemFontMap(data.mSerializedSystemFontMap);
-        } catch (IOException | ErrnoException e) {
-            Slog.e(TAG, "Failed to parse serialized system font map");
-            Typeface.loadPreinstalledSystemFontMap();
+        if (Typeface.ENABLE_LAZY_TYPEFACE_INITIALIZATION) {
+            try {
+                Typeface.setSystemFontMap(data.mSerializedSystemFontMap);
+            } catch (IOException | ErrnoException e) {
+                Slog.e(TAG, "Failed to parse serialized system font map");
+                Typeface.loadPreinstalledSystemFontMap();
+            }
         }
 
         synchronized (mResourcesManager) {

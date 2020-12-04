@@ -799,12 +799,6 @@
       "group": "WM_DEBUG_RECENTS_ANIMATIONS",
       "at": "com\/android\/server\/wm\/RecentsAnimation.java"
     },
-    "-1155279885": {
-      "message": "Frontmost changed immersion: %s",
-      "level": "DEBUG",
-      "group": "WM_DEBUG_IMMERSIVE",
-      "at": "com\/android\/server\/wm\/ActivityTaskManagerService.java"
-    },
     "-1144293044": {
       "message": "SURFACE SET FREEZE LAYER: %s",
       "level": "INFO",
@@ -1219,6 +1213,12 @@
       "group": "WM_DEBUG_ORIENTATION",
       "at": "com\/android\/server\/wm\/RootWindowContainer.java"
     },
+    "-655104359": {
+      "message": "Frontmost changed immersion: %s",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_IMMERSIVE",
+      "at": "com\/android\/server\/wm\/ActivityClientController.java"
+    },
     "-653156702": {
       "message": "createAppAnimations()",
       "level": "DEBUG",
@@ -1572,12 +1572,6 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_STATES",
       "at": "com\/android\/server\/wm\/Task.java"
-    },
-    "-272719931": {
-      "message": "startLockTaskModeLocked: %s",
-      "level": "WARN",
-      "group": "WM_DEBUG_LOCKTASK",
-      "at": "com\/android\/server\/wm\/ActivityTaskManagerService.java"
     },
     "-262984451": {
       "message": "Relaunch failed %s",
@@ -2046,6 +2040,12 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_ORIENTATION",
       "at": "com\/android\/server\/wm\/DisplayRotation.java"
+    },
+    "295861935": {
+      "message": "startLockTaskMode: %s",
+      "level": "WARN",
+      "group": "WM_DEBUG_LOCKTASK",
+      "at": "com\/android\/server\/wm\/ActivityTaskManagerService.java"
     },
     "302969511": {
       "message": "Task info changed taskId=%d",
@@ -2556,6 +2556,12 @@
       "level": "DEBUG",
       "group": "WM_DEBUG_TASKS",
       "at": "com\/android\/server\/wm\/TaskDisplayArea.java"
+    },
+    "883475718": {
+      "message": "Report configuration: %s %s %s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_CONFIGURATION",
+      "at": "com\/android\/server\/wm\/ActivityClientController.java"
     },
     "892244061": {
       "message": "Waiting for drawn %s: removed=%b visible=%b mHasSurface=%b drawState=%d",
@@ -3096,12 +3102,6 @@
       "level": "WARN",
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
-    },
-    "1576607724": {
-      "message": "Report configuration: %s %s %s",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_CONFIGURATION",
-      "at": "com\/android\/server\/wm\/ActivityTaskManagerService.java"
     },
     "1577579529": {
       "message": "win=%s destroySurfaces: appStopped=%b win.mWindowRemovalAllowed=%b win.mRemoveOnExit=%b",

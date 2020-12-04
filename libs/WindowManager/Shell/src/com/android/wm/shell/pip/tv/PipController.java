@@ -111,6 +111,7 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
     private final PipBoundsAlgorithm mPipBoundsAlgorithm;
     private final PipTaskOrganizer mPipTaskOrganizer;
     private final PipMediaController mPipMediaController;
+    private final TvPipMenuController mTvPipMenuController;
 
     private IActivityTaskManager mActivityTaskManager;
     private int mState = STATE_NO_PIP;
@@ -178,42 +179,33 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
             PinnedStackListenerForwarder.PinnedStackListener {
         @Override
         public void onImeVisibilityChanged(boolean imeVisible, int imeHeight) {
-            mHandler.post(() -> {
-                mPipBoundsState.setImeVisibility(imeVisible, imeHeight);
-                if (mState == STATE_PIP) {
-                    if (mImeVisible != imeVisible) {
-                        if (imeVisible) {
-                            // Save the IME height adjustment, and offset to not occlude the IME
-                            mPipBoundsState.getNormalBounds().offset(0, -imeHeight);
-                            mImeHeightAdjustment = imeHeight;
-                        } else {
-                            // Apply the inverse adjustment when the IME is hidden
-                            mPipBoundsState.getNormalBounds().offset(0, mImeHeightAdjustment);
-                        }
-                        mImeVisible = imeVisible;
-                        resizePinnedStack(STATE_PIP);
+            mPipBoundsState.setImeVisibility(imeVisible, imeHeight);
+            if (mState == STATE_PIP) {
+                if (mImeVisible != imeVisible) {
+                    if (imeVisible) {
+                        // Save the IME height adjustment, and offset to not occlude the IME
+                        mPipBoundsState.getNormalBounds().offset(0, -imeHeight);
+                        mImeHeightAdjustment = imeHeight;
+                    } else {
+                        // Apply the inverse adjustment when the IME is hidden
+                        mPipBoundsState.getNormalBounds().offset(0, mImeHeightAdjustment);
                     }
+                    mImeVisible = imeVisible;
+                    resizePinnedStack(STATE_PIP);
                 }
-            });
+            }
         }
 
         @Override
         public void onMovementBoundsChanged(boolean fromImeAdjustment) {
-            mHandler.post(() -> {
-                mTmpDisplayInfo.copyFrom(mPipBoundsState.getDisplayInfo());
-
-                mPipBoundsAlgorithm.getInsetBounds(mTmpInsetBounds);
-            });
+            mTmpDisplayInfo.copyFrom(mPipBoundsState.getDisplayInfo());
+            mPipBoundsAlgorithm.getInsetBounds(mTmpInsetBounds);
         }
 
         @Override
         public void onActionsChanged(ParceledListSlice<RemoteAction> actions) {
             mCustomActions = actions;
-            mHandler.post(() -> {
-                for (int i = mListeners.size() - 1; i >= 0; --i) {
-                    mListeners.get(i).onPipMenuActionsChanged(mCustomActions);
-                }
-            });
+            mTvPipMenuController.setAppActions(mCustomActions);
         }
     }
 
@@ -221,6 +213,7 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
             PipBoundsState pipBoundsState,
             PipBoundsAlgorithm pipBoundsAlgorithm,
             PipTaskOrganizer pipTaskOrganizer,
+            TvPipMenuController tvPipMenuController,
             PipMediaController pipMediaController,
             PipNotification pipNotification,
             TaskStackListenerImpl taskStackListener,
@@ -230,6 +223,8 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
         mPipNotification = pipNotification;
         mPipBoundsAlgorithm = pipBoundsAlgorithm;
         mPipMediaController = pipMediaController;
+        mTvPipMenuController = tvPipMenuController;
+        mTvPipMenuController.attachPipController(this);
         // Ensure that we have the display info in case we get calls to update the bounds
         // before the listener calls back
         final DisplayInfo displayInfo = new DisplayInfo();
@@ -282,9 +277,6 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
                         PipController.this.onActivityRestartAttempt(task, clearedTask);
                     }
                 });
-
-        // TODO(b/169395392) Refactor PipMenuActivity to PipMenuView
-        PipMenuActivity.setPipController(this);
     }
 
     private void loadConfigurationsAndApply(Configuration newConfig) {
@@ -445,7 +437,6 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
             Log.d(TAG,
                     "suspendPipResizing() reason=" + reason + " callers=" + Debug.getCallers(2));
         }
-
         mSuspendPipResizingReason |= reason;
     }
 
@@ -472,6 +463,7 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
      * @param state In Pip state also used to determine the new size for the Pip.
      */
     public void resizePinnedStack(int state) {
+
         if (DEBUG) {
             Log.d(TAG, "resizePinnedStack() state=" + stateToName(state) + ", current state="
                     + getStateDescription(), new Exception());
@@ -538,10 +530,8 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
         for (int i = mListeners.size() - 1; i >= 0; --i) {
             mListeners.get(i).onShowPipMenu();
         }
-        Intent intent = new Intent(mContext, PipMenuActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        intent.putExtra(PipMenuActivity.EXTRA_CUSTOM_ACTIONS, mCustomActions);
-        mContext.startActivity(intent);
+
+        mTvPipMenuController.showMenu();
     }
 
     /**
@@ -644,8 +634,6 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
         void onPipActivityClosed();
         /** Invoked when the PIP menu gets shown. */
         void onShowPipMenu();
-        /** Invoked when the PIP menu actions change. */
-        void onPipMenuActionsChanged(ParceledListSlice<RemoteAction> actions);
         /** Invoked when the PIPed activity is about to return back to the fullscreen. */
         void onMoveToFullscreen();
         /** Invoked when we are above to start resizing the Pip. */

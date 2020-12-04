@@ -22,6 +22,7 @@ import android.app.ApplicationErrorReport;
 import android.app.ContentProviderHolder;
 import android.app.GrantedUriPermission;
 import android.app.IApplicationThread;
+import android.app.IActivityClientController;
 import android.app.IActivityController;
 import android.app.IAppTask;
 import android.app.IAssistDataReceiver;
@@ -35,7 +36,6 @@ import android.app.IUidObserver;
 import android.app.IUserSwitchObserver;
 import android.app.Notification;
 import android.app.PendingIntent;
-import android.app.PictureInPictureParams;
 import android.app.ProfilerInfo;
 import android.app.WaitResult;
 import android.app.assist.AssistContent;
@@ -63,7 +63,6 @@ import android.os.Debug;
 import android.os.IBinder;
 import android.os.IProgressListener;
 import android.os.ParcelFileDescriptor;
-import android.os.PersistableBundle;
 import android.os.StrictMode;
 import android.os.WorkSource;
 import android.service.voice.IVoiceInteractionSession;
@@ -144,54 +143,25 @@ interface IActivityTaskManager {
             int userId);
 
     void unhandledBack();
-    boolean finishActivity(in IBinder token, int code, in Intent data, int finishTask);
-    boolean finishActivityAffinity(in IBinder token);
 
-    oneway void activityIdle(in IBinder token, in Configuration config,
-            in boolean stopProfiling);
-    void activityResumed(in IBinder token);
-    void activityTopResumedStateLost();
-    void activityPaused(in IBinder token);
-    void activityStopped(in IBinder token, in Bundle state,
-            in PersistableBundle persistentState, in CharSequence description);
-    oneway void activityDestroyed(in IBinder token);
-    void activityRelaunched(in IBinder token);
+    /** Returns an interface to control the activity related operations. */
+    IActivityClientController getActivityClientController();
+
     int getFrontActivityScreenCompatMode();
     void setFrontActivityScreenCompatMode(int mode);
-    String getCallingPackage(in IBinder token);
-    ComponentName getCallingActivity(in IBinder token);
     void setFocusedTask(int taskId);
     boolean removeTask(int taskId);
     void removeAllVisibleRecentTasks();
     List<ActivityManager.RunningTaskInfo> getTasks(int maxNum, boolean filterOnlyVisibleRecents);
-    boolean shouldUpRecreateTask(in IBinder token, in String destAffinity);
-    boolean navigateUpTo(in IBinder token, in Intent target, int resultCode,
-            in Intent resultData);
     void moveTaskToFront(in IApplicationThread app, in String callingPackage, int task,
             int flags, in Bundle options);
-    int getTaskForActivity(in IBinder token, in boolean onlyRoot);
-    /** Finish all activities that were started for result from the specified activity. */
-    void finishSubActivity(in IBinder token, in String resultWho, int requestCode);
     ParceledListSlice<ActivityManager.RecentTaskInfo> getRecentTasks(int maxNum, int flags,
             int userId);
-    boolean willActivityBeVisible(in IBinder token);
-    void setRequestedOrientation(in IBinder token, int requestedOrientation);
-    int getRequestedOrientation(in IBinder token);
-    boolean convertFromTranslucent(in IBinder token);
-    boolean convertToTranslucent(in IBinder token, in Bundle options);
-    void notifyActivityDrawn(in IBinder token);
-    void reportActivityFullyDrawn(in IBinder token, boolean restoredFromBundle);
-    int getDisplayId(in IBinder activityToken);
-    boolean isImmersive(in IBinder token);
-    void setImmersive(in IBinder token, boolean immersive);
     boolean isTopActivityImmersive();
-    boolean moveActivityTaskToBack(in IBinder token, boolean nonRoot);
     ActivityManager.TaskDescription getTaskDescription(int taskId);
-    void overridePendingTransition(in IBinder token, in String packageName,
-            int enterAnim, int exitAnim);
     int getLaunchedFromUid(in IBinder activityToken);
     String getLaunchedFromPackage(in IBinder activityToken);
-    void reportAssistContextExtras(in IBinder token, in Bundle extras,
+    void reportAssistContextExtras(in IBinder assistToken, in Bundle extras,
             in AssistStructure structure, in AssistContent content, in Uri referrer);
 
     void setFocusedRootTask(int taskId);
@@ -199,24 +169,16 @@ interface IActivityTaskManager {
     Rect getTaskBounds(int taskId);
 
     void cancelRecentsAnimation(boolean restoreHomeRootTaskPosition);
-    void startLockTaskModeByToken(in IBinder token);
-    void stopLockTaskModeByToken(in IBinder token);
     void updateLockTaskPackages(int userId, in String[] packages);
     boolean isInLockTaskMode();
     int getLockTaskModeState();
-    void setTaskDescription(in IBinder token, in ActivityManager.TaskDescription values);
-    Bundle getActivityOptions(in IBinder token);
     List<IBinder> getAppTasks(in String callingPackage);
     void startSystemLockTaskMode(int taskId);
     void stopSystemLockTaskMode();
     void finishVoiceTask(in IVoiceInteractionSession session);
-    boolean isTopOfTask(in IBinder token);
-    void notifyLaunchTaskBehindComplete(in IBinder token);
-    void notifyEnterAnimationComplete(in IBinder token);
     int addAppTask(in IBinder activityToken, in Intent intent,
             in ActivityManager.TaskDescription description, in Bitmap thumbnail);
     Point getAppTaskThumbnailSize();
-    boolean releaseActivityInstance(in IBinder token);
     /**
      * Only callable from the system. This token grants a temporary permission to call
      * #startActivityAsCallerWithToken. The token will time out after
@@ -236,7 +198,6 @@ interface IActivityTaskManager {
     void registerTaskStackListener(in ITaskStackListener listener);
     void unregisterTaskStackListener(in ITaskStackListener listener);
     void setTaskResizeable(int taskId, int resizeableMode);
-    void toggleFreeformWindowingMode(in IBinder token);
 
     /**
      * Resize the task with given bounds
@@ -287,9 +248,6 @@ interface IActivityTaskManager {
     boolean requestAutofillData(in IAssistDataReceiver receiver, in Bundle receiverExtras,
             in IBinder activityToken, int flags);
     boolean isAssistDataAllowedOnCurrentActivity();
-    boolean showAssistFromActivity(in IBinder token, in Bundle args);
-    boolean isRootVoiceInteraction(in IBinder token);
-    oneway void showLockTaskEscapeMessage(in IBinder token);
 
     /**
      * Notify the system that the keyguard is going away.
@@ -302,15 +260,9 @@ interface IActivityTaskManager {
     ComponentName getActivityClassForToken(in IBinder token);
     String getPackageForToken(in IBinder token);
 
-    void reportSizeConfigurations(in IBinder token, in int[] horizontalSizeConfiguration,
-            in int[] verticalSizeConfigurations, in int[] smallestWidthConfigurations);
-
     void suppressResizeConfigChanges(boolean suppress);
     boolean moveTopActivityToPinnedRootTask(int rootTaskId, in Rect bounds);
-    boolean enterPictureInPictureMode(in IBinder token, in PictureInPictureParams params);
-    void setPictureInPictureParams(in IBinder token, in PictureInPictureParams params);
     void requestPictureInPictureMode(in IBinder token);
-    IBinder getUriPermissionOwnerForActivity(in IBinder activityToken);
 
     /**
      * Resizes the docked stack, and all other stacks as the result of the dock stack bounds change.
@@ -343,9 +295,6 @@ interface IActivityTaskManager {
      * are changing the docked stack size.
      */
     void setSplitScreenResizing(boolean resizing);
-    int setVrMode(in IBinder token, boolean enabled, in ComponentName packageName);
-    void startLocalVoiceInteraction(in IBinder token, in Bundle options);
-    void stopLocalVoiceInteraction(in IBinder token);
     boolean supportsLocalVoiceInteraction();
 
     // Get device configuration
@@ -364,11 +313,6 @@ interface IActivityTaskManager {
      * @return a graphic buffer representing a screenshot of a task
      */
     ActivityManager.TaskSnapshot getTaskSnapshot(int taskId, boolean isLowResolution);
-
-    /**
-     * See {@link android.app.Activity#setDisablePreviewScreenshots}
-     */
-    void setDisablePreviewScreenshots(IBinder token, boolean disable);
 
     /**
      * It should only be called from home activity to remove its outdated snapshot. The home
@@ -392,20 +336,6 @@ interface IActivityTaskManager {
      */
     boolean updateConfiguration(in Configuration values);
     void updateLockTaskFeatures(int userId, int flags);
-
-    void setShowWhenLocked(in IBinder token, boolean showWhenLocked);
-    void setInheritShowWhenLocked(in IBinder token, boolean setInheritShownWhenLocked);
-    void setTurnScreenOn(in IBinder token, boolean turnScreenOn);
-
-    /**
-     * Registers remote animations for a specific activity.
-     */
-    void registerRemoteAnimations(in IBinder token, in RemoteAnimationDefinition definition);
-
-    /**
-     * Unregisters all remote animations for a specific activity.
-     */
-    void unregisterRemoteAnimations(in IBinder token);
 
     /**
      * Registers a remote animation to be run for all activity starts from a certain package during
@@ -448,10 +378,4 @@ interface IActivityTaskManager {
      * @param activityToken The token of the target activity to restart.
      */
     void restartActivityProcessIfVisible(in IBinder activityToken);
-
-    /**
-     * Reports that an Activity received a back key press when there were no additional activities
-     * on the back stack.
-     */
-    void onBackPressedOnTaskRoot(in IBinder activityToken);
 }

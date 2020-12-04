@@ -46,6 +46,8 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.ref.WeakReference;
@@ -437,7 +439,7 @@ public final class MediaController {
         }
 
         if (mSessionInfo == null) {
-            Log.w(TAG, "sessionInfo shouldn't be null.");
+            Log.d(TAG, "sessionInfo is not set.");
             mSessionInfo = Bundle.EMPTY;
         } else if (MediaSession.hasCustomParcelable(mSessionInfo)) {
             Log.w(TAG, "sessionInfo contains custom parcelable. Ignoring.");
@@ -512,6 +514,17 @@ public final class MediaController {
             mCbRegistered = false;
         }
         return success;
+    }
+
+    /**
+     * Gets associated handler for the given callback.
+     * @hide
+     */
+    @VisibleForTesting
+    public Handler getHandlerForCallback(Callback cb) {
+        synchronized (mLock) {
+            return getHandlerForCallbackLocked(cb);
+        }
     }
 
     private MessageHandler getHandlerForCallbackLocked(Callback cb) {

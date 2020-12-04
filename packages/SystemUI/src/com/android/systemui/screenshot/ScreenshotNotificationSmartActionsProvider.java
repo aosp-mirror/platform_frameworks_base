@@ -16,6 +16,9 @@
 
 package com.android.systemui.screenshot;
 
+import static com.android.systemui.screenshot.LogConfig.DEBUG_ACTIONS;
+import static com.android.systemui.screenshot.LogConfig.logTag;
+
 import android.app.Notification;
 import android.content.ComponentName;
 import android.graphics.Bitmap;
@@ -32,6 +35,9 @@ import java.util.concurrent.CompletableFuture;
  * in order to provide smart actions in the screenshot notification.
  */
 public class ScreenshotNotificationSmartActionsProvider {
+
+    private static final String TAG = logTag(ScreenshotNotificationSmartActionsProvider.class);
+
     /* Key provided in the notification action to get the type of smart action. */
     public static final String ACTION_TYPE = "action_type";
     public static final String DEFAULT_ACTION_TYPE = "Smart Action";
@@ -51,29 +57,21 @@ public class ScreenshotNotificationSmartActionsProvider {
         ERROR,
         TIMEOUT
     }
-
-    private static final String TAG = "ScreenshotActions";
-
     /**
      * Default implementation that returns an empty list.
      * This method is overridden in vendor-specific Sys UI implementation.
      *
-     * @param screenshotId       A generated random unique id for the screenshot.
-     * @param screenshotFileName name of the file where the screenshot will be written.
-     * @param bitmap             The bitmap of the screenshot. The bitmap config must be {@link
-     *                           HARDWARE}.
-     * @param componentName      Contains package and activity class names where the screenshot was
-     *                           taken. This is used as an additional signal to generate and rank
-     *                           more relevant actions.
-     * @param userHandle         The user handle of the app where the screenshot was taken.
+     * @param screenshotId       a unique id for the screenshot
+     * @param screenshotUri      uri where the screenshot has been stored
+     * @param bitmap             the screenshot, config must be {@link Bitmap.Config#HARDWARE}
+     * @param componentName      name of the foreground component when the screenshot was taken
+     * @param userHandle         user handle of the foreground task owner
      */
-    public CompletableFuture<List<Notification.Action>> getActions(
-            String screenshotId,
-            Uri screenshotUri,
-            Bitmap bitmap,
-            ComponentName componentName,
-            UserHandle userHandle) {
-        Log.d(TAG, "Returning empty smart action list.");
+    public CompletableFuture<List<Notification.Action>> getActions(String screenshotId,
+            Uri screenshotUri, Bitmap bitmap, ComponentName componentName, UserHandle userHandle) {
+        if (DEBUG_ACTIONS) {
+            Log.d(TAG, "Returning empty smart action list.");
+        }
         return CompletableFuture.completedFuture(Collections.emptyList());
     }
 
@@ -88,7 +86,9 @@ public class ScreenshotNotificationSmartActionsProvider {
      */
     public void notifyOp(String screenshotId, ScreenshotOp op, ScreenshotOpStatus status,
             long durationMs) {
-        Log.d(TAG, "Return without notify.");
+        if (DEBUG_ACTIONS) {
+            Log.d(TAG, "SmartActions: notifyOp() - return without notify");
+        }
     }
 
     /**
@@ -100,6 +100,8 @@ public class ScreenshotNotificationSmartActionsProvider {
      * @param isSmartAction whether action invoked was a smart action.
      */
     public void notifyAction(String screenshotId, String action, boolean isSmartAction) {
-        Log.d(TAG, "Return without notify.");
+        if (DEBUG_ACTIONS) {
+            Log.d(TAG, "SmartActions: notifyAction: return without notify");
+        }
     }
 }

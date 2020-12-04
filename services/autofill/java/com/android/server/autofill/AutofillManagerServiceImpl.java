@@ -1138,7 +1138,7 @@ final class AutofillManagerServiceImpl
         final int sessionCount = mSessions.size();
         for (int i = sessionCount - 1; i >= 0; i--) {
             final Session session = mSessions.valueAt(i);
-            if (session.isSavingLocked()) {
+            if (session.isSaveUiShowingLocked()) {
                 if (sDebug) Slog.d(TAG, "destroyFinishedSessionsLocked(): " + session.id);
                 session.forceRemoveFromServiceLocked();
             } else {
@@ -1660,7 +1660,7 @@ final class AutofillManagerServiceImpl
 
                     if (sessionToRemove != null && sessionsToRemove.valueAt(i)
                             == sessionToRemove.getActivityTokenLocked()) {
-                        if (sessionToRemove.isSavingLocked()) {
+                        if (sessionToRemove.isSaveUiShowingLocked()) {
                             if (sVerbose) {
                                 Slog.v(TAG, "Session " + sessionToRemove.id + " is saving");
                             }

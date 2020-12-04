@@ -406,9 +406,15 @@ public class PackageParser {
         public final boolean extractNativeLibs;
         public final boolean isolatedSplits;
 
-        public PackageLite(String codePath, ApkLite baseApk, String[] splitNames,
-                boolean[] isFeatureSplits, String[] usesSplitNames, String[] configForSplit,
-                String[] splitCodePaths, int[] splitRevisionCodes) {
+        // This does not represent the actual manifest structure since the 'profilable' tag
+        // could be used with attributes other than 'shell'. Extend if necessary.
+        public final boolean profilableByShell;
+        public final boolean isSplitRequired;
+        public final boolean useEmbeddedDex;
+
+        public PackageLite(String codePath, String baseCodePath, ApkLite baseApk,
+                String[] splitNames, boolean[] isFeatureSplits, String[] usesSplitNames,
+                String[] configForSplit, String[] splitCodePaths, int[] splitRevisionCodes) {
             this.packageName = baseApk.packageName;
             this.versionCode = baseApk.versionCode;
             this.versionCodeMajor = baseApk.versionCodeMajor;
@@ -418,8 +424,10 @@ public class PackageParser {
             this.isFeatureSplits = isFeatureSplits;
             this.usesSplitNames = usesSplitNames;
             this.configForSplit = configForSplit;
+            // The following paths may be different from the path in ApkLite because we
+            // move or rename the APK files. Use parameters to indicate the correct paths.
             this.codePath = codePath;
-            this.baseCodePath = baseApk.codePath;
+            this.baseCodePath = baseCodePath;
             this.splitCodePaths = splitCodePaths;
             this.baseRevisionCode = baseApk.revisionCode;
             this.splitRevisionCodes = splitRevisionCodes;
@@ -429,6 +437,9 @@ public class PackageParser {
             this.use32bitAbi = baseApk.use32bitAbi;
             this.extractNativeLibs = baseApk.extractNativeLibs;
             this.isolatedSplits = baseApk.isolatedSplits;
+            this.useEmbeddedDex = baseApk.useEmbeddedDex;
+            this.isSplitRequired = baseApk.isSplitRequired;
+            this.profilableByShell = baseApk.profilableByShell;
         }
 
         public List<String> getAllCodePaths() {
@@ -438,6 +449,10 @@ public class PackageParser {
                 Collections.addAll(paths, splitCodePaths);
             }
             return paths;
+        }
+
+        public long getLongVersionCode() {
+            return PackageInfo.composeLongVersionCode(versionCodeMajor, versionCode);
         }
     }
 
@@ -941,7 +956,8 @@ public class PackageParser {
         final ApkLite baseApk = parseApkLite(packageFile, flags);
         final String packagePath = packageFile.getAbsolutePath();
         Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
-        return new PackageLite(packagePath, baseApk, null, null, null, null, null, null);
+        return new PackageLite(packagePath, baseApk.codePath, baseApk, null, null, null, null, null,
+                null);
     }
 
     static PackageLite parseClusterPackageLite(File packageDir, int flags)
@@ -1031,8 +1047,8 @@ public class PackageParser {
         }
 
         final String codePath = packageDir.getAbsolutePath();
-        return new PackageLite(codePath, baseApk, splitNames, isFeatureSplits, usesSplitNames,
-                configForSplits, splitCodePaths, splitRevisionCodes);
+        return new PackageLite(codePath, baseApk.codePath, baseApk, splitNames, isFeatureSplits,
+                usesSplitNames, configForSplits, splitCodePaths, splitRevisionCodes);
     }
 
     /**

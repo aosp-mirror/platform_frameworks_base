@@ -19,13 +19,17 @@ package com.android.keyguard;
 import android.annotation.FloatRange;
 import android.annotation.IntRange;
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.icu.text.DateTimePatternGenerator;
 import android.text.format.DateFormat;
 import android.util.AttributeSet;
 import android.widget.TextView;
 
+import com.android.systemui.R;
+
 import java.util.Calendar;
+import java.util.TimeZone;
 
 import kotlin.Unit;
 
@@ -38,11 +42,14 @@ public class AnimatableClockView extends TextView {
     private static final CharSequence FORMAT_24_HOUR = "HH\nmm";
     private static final long ANIM_DURATION = 300;
 
+    private final Calendar mTime = Calendar.getInstance();
+
     private CharSequence mFormat;
     private CharSequence mDescFormat;
-    private Calendar mTime = Calendar.getInstance();
     private int[] mDozingColors;
     private int[] mLockScreenColors;
+    private final int mDozingWeight;
+    private final int mLockScreenWeight;
 
     private TextAnimator mTextAnimator = null;
     private Runnable mOnTextAnimatorInitialized;
@@ -62,13 +69,21 @@ public class AnimatableClockView extends TextView {
     public AnimatableClockView(Context context, AttributeSet attrs, int defStyleAttr,
             int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
-        updateTimeFormat();
+        TypedArray ta = context.obtainStyledAttributes(
+                attrs, R.styleable.AnimatableClockView, defStyleAttr, defStyleRes);
+        try {
+            mDozingWeight = ta.getInt(R.styleable.AnimatableClockView_dozeWeight, 100);
+            mLockScreenWeight = ta.getInt(R.styleable.AnimatableClockView_lockScreenWeight, 300);
+        } finally {
+            ta.recycle();
+        }
+        refreshFormat();
     }
 
     @Override
     public void onAttachedToWindow() {
         super.onAttachedToWindow();
-        updateTimeFormat();
+        refreshFormat();
     }
 
     @Override
@@ -80,6 +95,11 @@ public class AnimatableClockView extends TextView {
         mTime.setTimeInMillis(System.currentTimeMillis());
         setText(DateFormat.format(mFormat, mTime));
         setContentDescription(DateFormat.format(mDescFormat, mTime));
+    }
+
+    void onTimeZoneChanged(TimeZone timeZone) {
+        mTime.setTimeZone(timeZone);
+        refreshFormat();
     }
 
     @Override
@@ -113,7 +133,7 @@ public class AnimatableClockView extends TextView {
     }
 
     void animateDoze(boolean isDozing, boolean animate) {
-        setTextStyle(isDozing ? 100 : 300 /* weight */,
+        setTextStyle(isDozing ? mDozingWeight : mLockScreenWeight /* weight */,
                 -1,
                 isDozing ? mDozingColors : mLockScreenColors,
                 animate);
@@ -144,10 +164,11 @@ public class AnimatableClockView extends TextView {
         }
     }
 
-    private void updateTimeFormat() {
+    void refreshFormat() {
         final boolean use24HourFormat = DateFormat.is24HourFormat(getContext());
         mFormat =  use24HourFormat ? FORMAT_24_HOUR : FORMAT_12_HOUR;
         mDescFormat = getBestDateTimePattern(getContext(), use24HourFormat ? "Hm" : "hm");
+        refreshTime();
     }
 
     private static String getBestDateTimePattern(Context context, String skeleton) {

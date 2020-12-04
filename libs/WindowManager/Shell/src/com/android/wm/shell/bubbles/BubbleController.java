@@ -1213,7 +1213,7 @@ public class BubbleController implements Bubbles {
         @Override
         public void onImeVisibilityChanged(boolean imeVisible, int imeHeight) {
             if (mStackView != null) {
-                mStackView.post(() -> mStackView.onImeVisibilityChanged(imeVisible, imeHeight));
+                mStackView.onImeVisibilityChanged(imeVisible, imeHeight);
             }
         }
     }
