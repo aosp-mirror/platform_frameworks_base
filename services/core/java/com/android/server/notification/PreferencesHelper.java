@@ -51,6 +51,7 @@ import android.service.notification.RankingHelperProto;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.IntArray;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseBooleanArray;
@@ -1348,36 +1349,39 @@ public class PreferencesHelper implements RankingConfig {
         return groups;
     }
 
-    public ArrayList<ConversationChannelWrapper> getConversations(boolean onlyImportant) {
+    public ArrayList<ConversationChannelWrapper> getConversations(IntArray userIds,
+            boolean onlyImportant) {
         synchronized (mPackagePreferences) {
             ArrayList<ConversationChannelWrapper> conversations = new ArrayList<>();
-
             for (PackagePreferences p : mPackagePreferences.values()) {
-                int N = p.channels.size();
-                for (int i = 0; i < N; i++) {
-                    final NotificationChannel nc = p.channels.valueAt(i);
-                    if (!TextUtils.isEmpty(nc.getConversationId()) && !nc.isDeleted()
-                            && !nc.isDemoted()
-                            && (nc.isImportantConversation() || !onlyImportant)) {
-                        ConversationChannelWrapper conversation = new ConversationChannelWrapper();
-                        conversation.setPkg(p.pkg);
-                        conversation.setUid(p.uid);
-                        conversation.setNotificationChannel(nc);
-                        conversation.setParentChannelLabel(
-                                p.channels.get(nc.getParentChannelId()).getName());
-                        boolean blockedByGroup = false;
-                        if (nc.getGroup() != null) {
-                            NotificationChannelGroup group = p.groups.get(nc.getGroup());
-                            if (group != null) {
-                                if (group.isBlocked()) {
-                                    blockedByGroup = true;
-                                } else {
-                                    conversation.setGroupLabel(group.getName());
+                if (userIds.binarySearch(UserHandle.getUserId(p.uid)) >= 0) {
+                    int N = p.channels.size();
+                    for (int i = 0; i < N; i++) {
+                        final NotificationChannel nc = p.channels.valueAt(i);
+                        if (!TextUtils.isEmpty(nc.getConversationId()) && !nc.isDeleted()
+                                && !nc.isDemoted()
+                                && (nc.isImportantConversation() || !onlyImportant)) {
+                            ConversationChannelWrapper conversation =
+                                    new ConversationChannelWrapper();
+                            conversation.setPkg(p.pkg);
+                            conversation.setUid(p.uid);
+                            conversation.setNotificationChannel(nc);
+                            conversation.setParentChannelLabel(
+                                    p.channels.get(nc.getParentChannelId()).getName());
+                            boolean blockedByGroup = false;
+                            if (nc.getGroup() != null) {
+                                NotificationChannelGroup group = p.groups.get(nc.getGroup());
+                                if (group != null) {
+                                    if (group.isBlocked()) {
+                                        blockedByGroup = true;
+                                    } else {
+                                        conversation.setGroupLabel(group.getName());
+                                    }
                                 }
                             }
-                        }
-                        if (!blockedByGroup) {
-                            conversations.add(conversation);
+                            if (!blockedByGroup) {
+                                conversations.add(conversation);
+                            }
                         }
                     }
                 }
