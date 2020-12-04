@@ -489,8 +489,13 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      */
     ActivityRecord mFocusedApp = null;
 
-    /** The last focused {@link TaskDisplayArea} on this display. */
-    private TaskDisplayArea mLastFocusedTaskDisplayArea = null;
+    /**
+     * We only respect the orientation request from apps below this {@link TaskDisplayArea}.
+     * It is the last focused {@link TaskDisplayArea} on this display that handles orientation
+     * request.
+     */
+    @Nullable
+    private TaskDisplayArea mOrientationRequestingTaskDisplayArea = null;
 
     /**
      * The launching activity which is using fixed rotation transformation.
@@ -3326,7 +3331,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
             // Called even if the focused app is not changed in case the app is moved to a different
             // TaskDisplayArea.
-            setLastFocusedTaskDisplayArea(newFocus.getDisplayArea());
+            onLastFocusedTaskDisplayAreaChanged(newFocus.getDisplayArea());
         }
         if (mFocusedApp == newFocus) {
             return false;
@@ -3340,16 +3345,27 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     }
 
     /** Called when the focused {@link TaskDisplayArea} on this display may have changed. */
-    @VisibleForTesting
-    void setLastFocusedTaskDisplayArea(@Nullable TaskDisplayArea taskDisplayArea) {
-        if (taskDisplayArea != null) {
-            mLastFocusedTaskDisplayArea = taskDisplayArea;
+    void onLastFocusedTaskDisplayAreaChanged(@Nullable TaskDisplayArea taskDisplayArea) {
+        // Only record the TaskDisplayArea that handles orientation request.
+        if (taskDisplayArea != null && taskDisplayArea.handlesOrientationChangeFromDescendant()) {
+            mOrientationRequestingTaskDisplayArea = taskDisplayArea;
+            return;
+        }
+
+        // If the previous TDA no longer handles orientation request, clear it.
+        if (mOrientationRequestingTaskDisplayArea != null
+                && !mOrientationRequestingTaskDisplayArea
+                .handlesOrientationChangeFromDescendant()) {
+            mOrientationRequestingTaskDisplayArea = null;
         }
     }
 
-    /** Gets the last focused {@link TaskDisplayArea} on this display. */
-    TaskDisplayArea getLastFocusedTaskDisplayArea() {
-        return mLastFocusedTaskDisplayArea;
+    /**
+     * Gets the {@link TaskDisplayArea} that we respect orientation requests from apps below it.
+     */
+    @Nullable
+    TaskDisplayArea getOrientationRequestingTaskDisplayArea() {
+        return mOrientationRequestingTaskDisplayArea;
     }
 
     /** Updates the layer assignment of windows on this display. */

@@ -174,6 +174,13 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
             return false;
         }
 
+        if (mDisplayContent.mFocusedApp != null) {
+            // We record the last focused TDA that respects orientation request, check if this
+            // change may affect it.
+            mDisplayContent.onLastFocusedTaskDisplayAreaChanged(
+                    mDisplayContent.mFocusedApp.getDisplayArea());
+        }
+
         // The orientation request from this DA may now be respected.
         if (!ignoreOrientationRequest) {
             return mDisplayContent.updateOrientation();
