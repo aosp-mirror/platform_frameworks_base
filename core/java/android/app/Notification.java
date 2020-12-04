@@ -83,6 +83,7 @@ import android.util.Log;
 import android.util.Pair;
 import android.util.SparseArray;
 import android.util.proto.ProtoOutputStream;
+import android.view.ContextThemeWrapper;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -6118,7 +6119,8 @@ public class Notification implements Parcelable
 
         private @ColorInt int obtainBackgroundColor() {
             int defaultColor = mInNightMode ? Color.BLACK : Color.WHITE;
-            Resources.Theme theme = mContext.getTheme();
+            Resources.Theme theme = new ContextThemeWrapper(mContext,
+                    R.style.Theme_DeviceDefault_DayNight).getTheme();
             if (theme == null) {
                 return defaultColor;
             }

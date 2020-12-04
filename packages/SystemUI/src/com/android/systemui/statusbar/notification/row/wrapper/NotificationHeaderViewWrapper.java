@@ -20,6 +20,7 @@ import static com.android.systemui.statusbar.notification.TransformState.TRANSFO
 
 import android.app.Notification;
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.util.ArraySet;
 import android.view.NotificationHeaderView;
 import android.view.NotificationTopLineView;
@@ -168,9 +169,11 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
 
     public void applyConversationSkin() {
         if (mAppNameText != null) {
+            final ColorStateList colors = mAppNameText.getTextColors();
             mAppNameText.setTextAppearance(
                     com.android.internal.R.style
                             .TextAppearance_DeviceDefault_Notification_Conversation_AppName);
+            mAppNameText.setTextColor(colors);
             MarginLayoutParams layoutParams = (MarginLayoutParams) mAppNameText.getLayoutParams();
             layoutParams.setMarginStart(0);
         }
@@ -189,11 +192,13 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
 
     public void clearConversationSkin() {
         if (mAppNameText != null) {
+            final ColorStateList colors = mAppNameText.getTextColors();
             final int textAppearance = Utils.getThemeAttr(
                     mAppNameText.getContext(),
                     com.android.internal.R.attr.notificationHeaderTextAppearance,
                     com.android.internal.R.style.TextAppearance_DeviceDefault_Notification_Info);
             mAppNameText.setTextAppearance(textAppearance);
+            mAppNameText.setTextColor(colors);
             MarginLayoutParams layoutParams = (MarginLayoutParams) mAppNameText.getLayoutParams();
             final int marginStart = mAppNameText.getResources().getDimensionPixelSize(
                     com.android.internal.R.dimen.notification_header_app_name_margin_start);
