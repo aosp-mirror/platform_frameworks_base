@@ -55,7 +55,7 @@ class BinderLocationTimeZoneProvider extends LocationTimeZoneProvider {
 
     @Override
     void onInitialize() {
-        mProxy.setListener(new LocationTimeZoneProviderProxy.Listener() {
+        mProxy.initialize(new LocationTimeZoneProviderProxy.Listener() {
             @Override
             public void onReportLocationTimeZoneEvent(
                     @NonNull LocationTimeZoneEvent locationTimeZoneEvent) {

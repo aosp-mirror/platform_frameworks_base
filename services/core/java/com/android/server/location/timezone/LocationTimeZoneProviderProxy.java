@@ -70,9 +70,11 @@ abstract class LocationTimeZoneProviderProxy implements Dumpable {
     }
 
     /**
-     * Sets the listener. The listener can expect to receive all events after this point.
+     * Initializes the proxy. The supplied listener can expect to receive all events after this
+     * point. This method also calls {@link #onInitialize()} for subclasses to handle their own
+     * initialization.
      */
-    void setListener(@NonNull Listener listener) {
+    void initialize(@NonNull Listener listener) {
         Objects.requireNonNull(listener);
         synchronized (mSharedLock) {
             if (mListener != null) {
@@ -80,7 +82,13 @@ abstract class LocationTimeZoneProviderProxy implements Dumpable {
             }
             this.mListener = listener;
         }
+        onInitialize();
     }
+
+    /**
+     * Initializes the proxy. This is called after {@link #mListener} is set.
+     */
+    abstract void onInitialize();
 
     /**
      * Sets a new request for the provider.

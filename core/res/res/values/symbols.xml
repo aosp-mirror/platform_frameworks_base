@@ -2168,8 +2168,10 @@
   <java-symbol type="string" name="config_deviceConfiguratorPackageName" />
   <java-symbol type="array" name="config_autoTimeSourcesPriority" />
   <java-symbol type="bool" name="config_enableGeolocationTimeZoneDetection" />
+  <java-symbol type="bool" name="config_enablePrimaryLocationTimeZoneProvider" />
   <java-symbol type="bool" name="config_enablePrimaryLocationTimeZoneOverlay" />
   <java-symbol type="string" name="config_primaryLocationTimeZoneProviderPackageName" />
+  <java-symbol type="bool" name="config_enableSecondaryLocationTimeZoneProvider" />
   <java-symbol type="bool" name="config_enableSecondaryLocationTimeZoneOverlay" />
   <java-symbol type="string" name="config_secondaryLocationTimeZoneProviderPackageName" />
 
