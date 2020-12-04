@@ -4564,6 +4564,15 @@ public abstract class Context {
     public static final String PERMISSION_SERVICE = "permission";
 
     /**
+     * Official published name of the legacy (internal) permission service.
+     *
+     * @see #getSystemService(String)
+     * @hide
+     */
+    //@SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public static final String LEGACY_PERMISSION_SERVICE = "legacy_permission";
+
+    /**
      * Official published name of the (internal) permission controller service.
      *
      * @see #getSystemService(String)
