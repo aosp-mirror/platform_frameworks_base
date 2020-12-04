@@ -21,7 +21,6 @@ import android.content.ComponentName;
 import android.content.pm.ParceledListSlice;
 import android.graphics.Rect;
 import android.view.DisplayInfo;
-import android.view.IPinnedStackController;
 
 /**
  * Listener for changes to the pinned stack made by the WindowManager.
@@ -29,12 +28,6 @@ import android.view.IPinnedStackController;
  * @hide
  */
 oneway interface IPinnedStackListener {
-
-    /**
-     * Called when the listener is registered and provides an interface to call back to the pinned
-     * stack controller to update the controller of the pinned stack state.
-     */
-    void onListenerRegistered(IPinnedStackController controller);
 
     /**
      * Called when the window manager has detected a change that would cause the movement bounds
