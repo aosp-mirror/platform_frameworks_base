@@ -20723,8 +20723,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
         // We may also need to apply pending (restored) runtime permission grants
         // within these users.
-        mPermissionManager.restoreDelayedRuntimePermissions(packageName,
-                UserHandle.of(userId));
+        mPermissionManager.restoreDelayedRuntimePermissions(packageName, userId);
 
         // Persistent preferred activity might have came into effect due to this
         // install.
@@ -24333,13 +24332,13 @@ public class PackageManagerService extends IPackageManager.Stub
                     + ", convertedFromPreCreated=" + convertedFromPreCreated + ")");
         }
         if (!convertedFromPreCreated) {
-            mPermissionManager.onNewUserCreated(userId);
+            mPermissionManager.onUserCreated(userId);
             return;
         }
         if (!readPermissionStateForUser(userId)) {
             // Could not read the existing permissions, re-grant them.
             Slog.i(TAG, "re-granting permissions for pre-created user " + userId);
-            mPermissionManager.onNewUserCreated(userId);
+            mPermissionManager.onUserCreated(userId);
         }
     }
 
