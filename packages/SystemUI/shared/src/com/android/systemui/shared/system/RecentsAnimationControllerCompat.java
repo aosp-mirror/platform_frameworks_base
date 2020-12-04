@@ -137,4 +137,15 @@ public class RecentsAnimationControllerCompat {
             return false;
         }
     }
+
+    /**
+     * @see IRecentsAnimationController#detachNavigationBarFromApp
+     */
+    public void detachNavigationBarFromApp() {
+        try {
+            mAnimationController.detachNavigationBarFromApp();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to detach the navigation bar from app", e);
+        }
+    }
 }

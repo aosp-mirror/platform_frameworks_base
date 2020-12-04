@@ -364,6 +364,9 @@ public class RecentsAnimationController implements DeathRecipient {
                 Binder.restoreCallingIdentity(token);
             }
         }
+
+        @Override
+        public void detachNavigationBarFromApp() {}
     };
 
     /**
