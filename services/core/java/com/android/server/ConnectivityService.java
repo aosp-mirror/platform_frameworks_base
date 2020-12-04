@@ -7003,8 +7003,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
         releasePendingNetworkRequestWithDelay(pendingIntent);
     }
 
-    private void callCallbackForRequest(NetworkRequestInfo nri,
-            NetworkAgentInfo networkAgent, int notificationType, int arg1) {
+    private void callCallbackForRequest(@NonNull final NetworkRequestInfo nri,
+            @NonNull final NetworkAgentInfo networkAgent, final int notificationType,
+            final int arg1) {
         if (nri.messenger == null) {
             // Default request has no msgr. Also prevents callbacks from being invoked for
             // NetworkRequestInfos registered with ConnectivityDiagnostics requests. Those callbacks
@@ -7012,8 +7013,14 @@ public class ConnectivityService extends IConnectivityManager.Stub
             return;
         }
         Bundle bundle = new Bundle();
+        // In the case of multi-layer NRIs, the first request is not necessarily the one that
+        // is satisfied. This is vexing, but the ConnectivityManager code that receives this
+        // callback is only using the request as a token to identify the callback, so it doesn't
+        // matter too much at this point as long as the callback can be found.
+        // TODO b/177608132: make sure callbacks are indexed by NRIs and not NetworkRequest objects.
         // TODO: check if defensive copies of data is needed.
-        putParcelable(bundle, new NetworkRequest(nri.request));
+        final NetworkRequest nrForCallback = new NetworkRequest(nri.mRequests.get(0));
+        putParcelable(bundle, nrForCallback);
         Message msg = Message.obtain();
         if (notificationType != ConnectivityManager.CALLBACK_UNAVAIL) {
             putParcelable(bundle, networkAgent.network);
@@ -7026,7 +7033,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 putParcelable(
                         bundle,
                         createWithLocationInfoSanitizedIfNecessaryWhenParceled(
-                                nc, nri.mUid, nri.request.getRequestorPackageName()));
+                                nc, nri.mUid, nrForCallback.getRequestorPackageName()));
                 putParcelable(bundle, linkPropertiesRestrictedForCallerPermissions(
                         networkAgent.linkProperties, nri.mPid, nri.mUid));
                 // For this notification, arg1 contains the blocked status.
@@ -7045,7 +7052,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 putParcelable(
                         bundle,
                         createWithLocationInfoSanitizedIfNecessaryWhenParceled(
-                                netCap, nri.mUid, nri.request.getRequestorPackageName()));
+                                netCap, nri.mUid, nrForCallback.getRequestorPackageName()));
                 break;
             }
             case ConnectivityManager.CALLBACK_IP_CHANGED: {
@@ -7064,12 +7071,12 @@ public class ConnectivityService extends IConnectivityManager.Stub
         try {
             if (VDBG) {
                 String notification = ConnectivityManager.getCallbackName(notificationType);
-                log("sending notification " + notification + " for " + nri.request);
+                log("sending notification " + notification + " for " + nrForCallback);
             }
             nri.messenger.send(msg);
         } catch (RemoteException e) {
             // may occur naturally in the race of binder death.
-            loge("RemoteException caught trying to send a callback msg for " + nri.request);
+            loge("RemoteException caught trying to send a callback msg for " + nrForCallback);
         }
     }
 
