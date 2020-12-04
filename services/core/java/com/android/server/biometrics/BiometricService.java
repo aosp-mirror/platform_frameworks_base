@@ -30,6 +30,7 @@ import android.app.admin.DevicePolicyManager;
 import android.app.trust.ITrustManager;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.database.ContentObserver;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
@@ -809,12 +810,13 @@ public class BiometricService extends SystemService {
 
         public List<FingerprintSensorPropertiesInternal> getFingerprintSensorProperties(
                 Context context) {
-            final FingerprintManager fpm = context.getSystemService(FingerprintManager.class);
-            if (fpm != null) {
-                return fpm.getSensorPropertiesInternal();
-            } else {
-                return new ArrayList<>();
+            if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_FINGERPRINT)) {
+                final FingerprintManager fpm = context.getSystemService(FingerprintManager.class);
+                if (fpm != null) {
+                    return fpm.getSensorPropertiesInternal();
+                }
             }
+            return new ArrayList<>();
         }
     }
 
