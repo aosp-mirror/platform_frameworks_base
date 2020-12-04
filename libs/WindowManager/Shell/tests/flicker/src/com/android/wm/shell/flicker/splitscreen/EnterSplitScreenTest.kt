@@ -35,6 +35,8 @@ import com.android.server.wm.flicker.navBarWindowIsAlwaysVisible
 import com.android.server.wm.flicker.statusBarLayerIsAlwaysVisible
 import com.android.server.wm.flicker.navBarLayerIsAlwaysVisible
 import com.android.server.wm.flicker.statusBarWindowIsAlwaysVisible
+import com.android.wm.shell.flicker.dockedStackPrimaryBoundsIsVisible
+import com.android.wm.shell.flicker.dockedStackSecondaryBoundsIsVisible
 import org.junit.Assert
 import org.junit.FixMethodOrder
 import org.junit.Test
@@ -102,13 +104,8 @@ class EnterSplitScreenTest(
             assertions {
                 layersTrace {
                     dockedStackDividerIsVisible()
-                    end("appsEndingBounds", enabled = false) {
-                        val entry = this.trace.entries.firstOrNull()
-                                ?: throw IllegalStateException("Trace is empty")
-                        this.hasVisibleRegion(splitScreenApp.defaultWindowName,
-                                splitScreenApp.getPrimaryBounds(
-                                        entry.getVisibleBounds(DOCKED_STACK_DIVIDER)))
-                    }
+                    dockedStackPrimaryBoundsIsVisible(
+                            rotation, splitScreenApp.defaultWindowName, 169271943)
                 }
                 windowManagerTrace {
                     end {
@@ -136,17 +133,10 @@ class EnterSplitScreenTest(
             assertions {
                 layersTrace {
                     dockedStackDividerIsVisible()
-                    end("appsEndingBounds", enabled = false) {
-                        val entry = this.trace.entries.firstOrNull()
-                                ?: throw IllegalStateException("Trace is empty")
-                        this.hasVisibleRegion(splitScreenApp.defaultWindowName,
-                                splitScreenApp.getPrimaryBounds(
-                                        entry.getVisibleBounds(DOCKED_STACK_DIVIDER)))
-                                .and()
-                                .hasVisibleRegion(secondaryApp.defaultWindowName,
-                                        splitScreenApp.getSecondaryBounds(
-                                        entry.getVisibleBounds(DOCKED_STACK_DIVIDER)))
-                    }
+                    dockedStackPrimaryBoundsIsVisible(
+                            rotation, splitScreenApp.defaultWindowName, 169271943)
+                    dockedStackSecondaryBoundsIsVisible(
+                            rotation, secondaryApp.defaultWindowName, 169271943)
                 }
                 windowManagerTrace {
                     end {

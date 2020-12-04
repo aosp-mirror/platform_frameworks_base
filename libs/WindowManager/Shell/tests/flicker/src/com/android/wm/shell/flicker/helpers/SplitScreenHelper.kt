@@ -17,9 +17,7 @@
 package com.android.wm.shell.flicker.helpers
 
 import android.app.Instrumentation
-import android.graphics.Region
 import android.os.SystemClock
-import com.android.server.wm.flicker.helpers.WindowUtils
 import com.android.wm.shell.flicker.testapp.Components
 
 class SplitScreenHelper(
@@ -41,20 +39,6 @@ class SplitScreenHelper(
         uiDevice.click(x, y)
         // Wait for animation to complete.
         SystemClock.sleep(TIMEOUT_MS)
-    }
-
-    fun getPrimaryBounds(dividerBounds: Region): android.graphics.Region {
-        val primaryAppBounds = Region(0, 0, dividerBounds.bounds.right,
-                dividerBounds.bounds.bottom + WindowUtils.dockedStackDividerInset)
-        return primaryAppBounds
-    }
-
-    fun getSecondaryBounds(dividerBounds: Region): android.graphics.Region {
-        val displayBounds = WindowUtils.displayBounds
-        val secondaryAppBounds = Region(0,
-                dividerBounds.bounds.bottom - WindowUtils.dockedStackDividerInset,
-                displayBounds.right, displayBounds.bottom - WindowUtils.navigationBarHeight)
-        return secondaryAppBounds
     }
 
     companion object {
