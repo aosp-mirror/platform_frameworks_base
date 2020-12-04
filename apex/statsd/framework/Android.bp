@@ -45,6 +45,7 @@ filegroup {
     visibility: [
         "//frameworks/base", // For the "global" stubs.
         "//frameworks/base/apex/statsd:__subpackages__",
+        "//packages/modules/StatsD/apex:__subpackages__",
     ],
 }
 java_sdk_library {
@@ -72,7 +73,10 @@ java_sdk_library {
 
     hostdex: true, // for hiddenapi check
 
-    impl_library_visibility: ["//frameworks/base/apex/statsd/framework/test:__subpackages__"],
+    impl_library_visibility: [
+        "//frameworks/base/apex/statsd/framework/test:__subpackages__",
+        "//packages/modules/StatsD/apex/framework/test:__subpackages__",
+    ],
 
     apex_available: [
         "com.android.os.statsd",
