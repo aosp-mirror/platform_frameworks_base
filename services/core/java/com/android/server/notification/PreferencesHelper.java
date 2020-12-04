@@ -170,6 +170,8 @@ public class PreferencesHelper implements RankingConfig {
     private final AppOpsManager mAppOps;
 
     private SparseBooleanArray mBadgingEnabled;
+    private SparseBooleanArray mLockScreenShowNotifications;
+    private SparseBooleanArray mLockScreenPrivateNotifications;
     private boolean mBubblesEnabledGlobally = DEFAULT_GLOBAL_ALLOW_BUBBLE;
     private boolean mIsMediaNotificationFilteringEnabled = DEFAULT_MEDIA_NOTIFICATION_FILTERING;
     private boolean mAreChannelsBypassingDnd;
@@ -2399,6 +2401,60 @@ public class PreferencesHelper implements RankingConfig {
                             DEFAULT_SHOW_BADGE ? 1 : 0, userId) != 0);
         }
         return mBadgingEnabled.get(userId, DEFAULT_SHOW_BADGE);
+    }
+
+    public void updateLockScreenPrivateNotifications() {
+        if (mLockScreenPrivateNotifications == null) {
+            mLockScreenPrivateNotifications = new SparseBooleanArray();
+        }
+        boolean changed = false;
+        // update the cached values
+        for (int index = 0; index < mLockScreenPrivateNotifications.size(); index++) {
+            int userId = mLockScreenPrivateNotifications.keyAt(index);
+            final boolean oldValue = mLockScreenPrivateNotifications.get(userId);
+            final boolean newValue = Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                    Settings.Secure.LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS, 1, userId) != 0;
+            mLockScreenPrivateNotifications.put(userId, newValue);
+            changed |= oldValue != newValue;
+        }
+        if (changed) {
+            updateConfig();
+        }
+    }
+
+    public void updateLockScreenShowNotifications() {
+        if (mLockScreenShowNotifications == null) {
+            mLockScreenShowNotifications = new SparseBooleanArray();
+        }
+        boolean changed = false;
+        // update the cached values
+        for (int index = 0; index < mLockScreenShowNotifications.size(); index++) {
+            int userId = mLockScreenShowNotifications.keyAt(index);
+            final boolean oldValue = mLockScreenShowNotifications.get(userId);
+            final boolean newValue = Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                    Settings.Secure.LOCK_SCREEN_SHOW_NOTIFICATIONS, 1, userId) != 0;
+            mLockScreenShowNotifications.put(userId, newValue);
+            changed |= oldValue != newValue;
+        }
+        if (changed) {
+            updateConfig();
+        }
+    }
+
+    @Override
+    public boolean canShowNotificationsOnLockscreen(int userId) {
+        if (mLockScreenShowNotifications == null) {
+            mLockScreenShowNotifications = new SparseBooleanArray();
+        }
+        return mLockScreenShowNotifications.get(userId, true);
+    }
+
+    @Override
+    public boolean canShowPrivateNotificationsOnLockScreen(int userId) {
+        if (mLockScreenPrivateNotifications == null) {
+            mLockScreenPrivateNotifications = new SparseBooleanArray();
+        }
+        return mLockScreenPrivateNotifications.get(userId, true);
     }
 
     public void unlockAllNotificationChannels() {
