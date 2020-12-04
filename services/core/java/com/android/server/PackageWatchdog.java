@@ -778,7 +778,6 @@ public class PackageWatchdog {
 
     @GuardedBy("mLock")
     private Set<String> getPackagesPendingHealthChecksLocked() {
-        Slog.d(TAG, "Getting all observed packages pending health checks");
         Set<String> packages = new ArraySet<>();
         Iterator<ObserverInternal> oit = mAllObservers.values().iterator();
         while (oit.hasNext()) {
@@ -827,7 +826,6 @@ public class PackageWatchdog {
             Slog.i(TAG, "Cancelling state sync, nothing to sync");
             mUptimeAtLastStateSync = 0;
         } else {
-            Slog.i(TAG, "Scheduling next state sync in " + durationMs + "ms");
             mUptimeAtLastStateSync = mSystemClock.uptimeMillis();
             mShortTaskHandler.postDelayed(mSyncStateWithScheduledReason, durationMs);
         }
@@ -868,7 +866,6 @@ public class PackageWatchdog {
             return;
         }
 
-        Slog.i(TAG, "Removing " + elapsedMs + "ms from all packages on all observers");
         Iterator<ObserverInternal> it = mAllObservers.values().iterator();
         while (it.hasNext()) {
             ObserverInternal observer = it.next();
