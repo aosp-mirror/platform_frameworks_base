@@ -4131,6 +4131,14 @@ public abstract class PackageManager {
      */
     public static final int UNSTARTABLE_REASON_INSUFFICIENT_STORAGE = 2;
 
+    /**
+     * A manifest property to control app's participation in {@code adb backup}. Should only
+     * be used by system / privileged apps.
+     *
+     * @hide
+     */
+    public static final String PROPERTY_ALLOW_ADB_BACKUP = "android.backup.ALLOW_ADB_BACKUP";
+
     /** {@hide} */
     public int getUserId() {
         return UserHandle.myUserId();
