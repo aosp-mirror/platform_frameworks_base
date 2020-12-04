@@ -16,6 +16,8 @@
 
 package android.uwb;
 
+import android.content.Context;
+import android.content.pm.PackageManager;
 import android.os.SystemClock;
 
 import java.util.ArrayList;
@@ -23,6 +25,11 @@ import java.util.List;
 
 public class UwbTestUtils {
     private UwbTestUtils() {}
+
+    public static boolean isUwbSupported(Context context) {
+        PackageManager packageManager = context.getPackageManager();
+        return packageManager.hasSystemFeature(PackageManager.FEATURE_UWB);
+    }
 
     public static AngleMeasurement getAngleMeasurement() {
         return new AngleMeasurement.Builder()
