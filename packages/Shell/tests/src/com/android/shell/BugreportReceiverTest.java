@@ -576,9 +576,10 @@ public class BugreportReceiverTest {
      */
     private void sendBugreportStarted() throws Exception {
         Intent intent = new Intent(INTENT_BUGREPORT_REQUESTED);
-        intent.setPackage("com.android.shell");
-        intent.setFlags(Intent.FLAG_RECEIVER_FOREGROUND);
-        mContext.sendBroadcast(intent);
+        // Ideally, we should invoke BugreportRequestedReceiver by sending
+        // INTENT_BUGREPORT_REQUESTED. But the intent has been protected broadcast by the system
+        // starting from S.
+        new BugreportRequestedReceiver().onReceive(mContext, intent);
 
         ArgumentCaptor<IDumpstateListener> listenerCap = ArgumentCaptor.forClass(
                 IDumpstateListener.class);
