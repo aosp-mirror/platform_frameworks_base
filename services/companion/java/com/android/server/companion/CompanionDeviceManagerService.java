@@ -565,7 +565,8 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
         if (DEBUG) {
             Log.i(LOG_TAG, "recordAssociation(" + association + ")");
         }
-        updateAssociations(associations -> CollectionUtils.add(associations, association));
+        updateAssociations(associations -> CollectionUtils.add(associations, association),
+                        association.userId);
     }
 
     private void recordAssociation(String privilegedPackage, String deviceAddress) {
