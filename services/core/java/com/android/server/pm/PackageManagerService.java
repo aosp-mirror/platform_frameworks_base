@@ -25885,18 +25885,6 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         @Override
-        public void setReadExternalStorageEnforced(boolean enforced) {
-            synchronized (mLock) {
-                if (mSettings.mReadExternalStorageEnforced != null
-                        && mSettings.mReadExternalStorageEnforced == enforced) {
-                    return;
-                }
-                mSettings.mReadExternalStorageEnforced = enforced ? Boolean.TRUE : Boolean.FALSE;
-                writeSettingsLPrTEMP();
-            }
-        }
-
-        @Override
         public void setIntegrityVerificationResult(int verificationId, int verificationResult) {
             final Message msg = mHandler.obtainMessage(INTEGRITY_VERIFICATION_COMPLETE);
             msg.arg1 = verificationId;

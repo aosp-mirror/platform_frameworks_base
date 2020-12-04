@@ -949,9 +949,6 @@ public abstract class PackageManagerInternal {
     /** Returns whether or not permissions need to be upgraded for the given user */
     public abstract boolean isPermissionUpgradeNeeded(@UserIdInt int userId);
 
-    /** Sets the enforcement of reading external storage */
-    public abstract void setReadExternalStorageEnforced(boolean enforced);
-
     /**
      * Allows the integrity component to respond to the
      * {@link Intent#ACTION_PACKAGE_NEEDS_INTEGRITY_VERIFICATION package verification
