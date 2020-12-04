@@ -551,7 +551,7 @@ public class FrontendStatus {
         return mInnerFec;
     }
     /**
-     * Gets the currently configured modulation.
+     * Gets the currently modulation information.
      */
     @FrontendModulation
     public int getModulation() {
@@ -561,7 +561,7 @@ public class FrontendStatus {
         return mModulation;
     }
     /**
-     * Gets the currently configured Spectral Inversion for DVBC.
+     * Gets the currently Spectral Inversion information for DVBC.
      */
     @FrontendSettings.FrontendSpectralInversion
     public int getSpectralInversion() {
