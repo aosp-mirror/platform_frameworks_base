@@ -127,17 +127,6 @@ public class FaceService extends SystemService implements BiometricServiceCallba
         return properties;
     }
 
-    @NonNull
-    private List<Face> getEnrolledFaces(int userId, String opPackageName) {
-        final Pair<Integer, ServiceProvider> provider = getSingleProvider();
-        if (provider == null) {
-            Slog.w(TAG, "Null provider for getEnrolledFaces, caller: " + opPackageName);
-            return Collections.emptyList();
-        }
-
-        return provider.second.getEnrolledFaces(provider.first, userId);
-    }
-
     /**
      * Receives the incoming binder calls from FaceManager.
      */
@@ -438,6 +427,7 @@ public class FaceService extends SystemService implements BiometricServiceCallba
                             pw.println("Dumping for sensorId: " + props.sensorId
                                     + ", provider: " + provider.getClass().getSimpleName());
                             provider.dumpInternal(props.sensorId, pw);
+                            pw.println();
                         }
                     }
                 }
@@ -471,7 +461,13 @@ public class FaceService extends SystemService implements BiometricServiceCallba
                 Utils.checkPermission(getContext(), INTERACT_ACROSS_USERS);
             }
 
-            return FaceService.this.getEnrolledFaces(userId, opPackageName);
+            final ServiceProvider provider = getProviderForSensor(sensorId);
+            if (provider == null) {
+                Slog.w(TAG, "Null provider for getEnrolledFaces, caller: " + opPackageName);
+                return Collections.emptyList();
+            }
+
+            return provider.getEnrolledFaces(sensorId, userId);
         }
 
         @Override // Binder call
@@ -482,7 +478,16 @@ public class FaceService extends SystemService implements BiometricServiceCallba
                 Utils.checkPermission(getContext(), INTERACT_ACROSS_USERS);
             }
 
-            return !FaceService.this.getEnrolledFaces(userId, opPackageName).isEmpty();
+            final ServiceProvider provider = getProviderForSensor(sensorId);
+            if (provider == null) {
+                Slog.w(TAG, "Null provider for hasEnrolledFaces, caller: " + opPackageName);
+                return false;
+            }
+
+            final boolean enrolled = provider.getEnrolledFaces(sensorId, userId).size() > 0;
+            Slog.d(TAG, "hasEnrolledFaces, sensor: " + sensorId + ", enrolled: " + enrolled);
+
+            return provider.getEnrolledFaces(sensorId, userId).size() > 0;
         }
 
         @Override // Binder call
