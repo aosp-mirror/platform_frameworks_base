@@ -44,10 +44,10 @@ package com.android.server.policy.devicestate.config {
   public class SensorCondition {
     ctor public SensorCondition();
     method public String getName();
-    method public java.math.BigInteger getType();
+    method public String getType();
     method public java.util.List<com.android.server.policy.devicestate.config.NumericRange> getValue();
     method public void setName(String);
-    method public void setType(java.math.BigInteger);
+    method public void setType(String);
   }
 
   public class XmlParser {
