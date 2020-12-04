@@ -353,7 +353,7 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
                 mUidsToRemove.clear();
                 mCurrentFuture = null;
                 mUseLatestStates = true;
-                if ((updateFlags & UPDATE_ALL) != 0) {
+                if (updateFlags == UPDATE_ALL) {
                     cancelSyncDueToBatteryLevelChangeLocked();
                 }
                 if ((updateFlags & UPDATE_CPU) != 0) {
@@ -533,7 +533,7 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
                 mStats.updateCpuTimeLocked(onBattery, onBatteryScreenOff);
             }
 
-            if ((updateFlags & UPDATE_ALL) != 0) {
+            if (updateFlags == UPDATE_ALL) {
                 mStats.updateKernelWakelocksLocked(elapsedRealtimeUs);
                 mStats.updateKernelMemoryBandwidthLocked(elapsedRealtimeUs);
             }
