@@ -19,17 +19,16 @@ package android.telephony.ims.feature;
 import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.net.Uri;
 import android.os.RemoteException;
-import android.telephony.ims.RcsContactUceCapability;
 import android.telephony.ims.RcsUceAdapter;
 import android.telephony.ims.aidl.ICapabilityExchangeEventListener;
 import android.telephony.ims.aidl.IImsCapabilityCallback;
 import android.telephony.ims.aidl.IImsRcsFeature;
 import android.telephony.ims.aidl.IOptionsResponseCallback;
 import android.telephony.ims.aidl.IPublishResponseCallback;
-import android.telephony.ims.aidl.IRcsFeatureListener;
 import android.telephony.ims.aidl.ISubscribeResponseCallback;
 import android.telephony.ims.aidl.RcsOptionsResponseAidlWrapper;
 import android.telephony.ims.aidl.RcsPublishResponseAidlWrapper;
@@ -74,16 +73,6 @@ public class RcsFeature extends ImsFeature {
             mExecutor = executor;
         }
 
-        /**
-         * @deprecated This method is deprecated. Please call the method
-         * setCapabilityExchangeEventListener instead.
-         */
-        @Override
-        @Deprecated
-        public void setListener(IRcsFeatureListener listener) {
-            Log.w(LOG_TAG, "The method setListener is deprecated");
-        }
-
         @Override
         public int queryCapabilityStatus() throws RemoteException {
             return executeMethodAsyncForResult(
@@ -124,7 +113,7 @@ public class RcsFeature extends ImsFeature {
         // RcsCapabilityExchangeImplBase specific APIs
         @Override
         public void setCapabilityExchangeEventListener(
-                @NonNull ICapabilityExchangeEventListener listener) throws RemoteException {
+                @Nullable ICapabilityExchangeEventListener listener) throws RemoteException {
             executeMethodAsync(() -> mReference.setCapabilityExchangeEventListener(listener),
                     "setCapabilityExchangeEventListener");
         }
@@ -153,34 +142,6 @@ public class RcsFeature extends ImsFeature {
             executeMethodAsync(() -> mReference.getCapabilityExchangeImplBaseInternal()
                     .sendOptionsCapabilityRequest(contactUri, myCapabilities, callbackWrapper),
                     "sendOptionsCapabilityRequest");
-        }
-
-        // RcsPresenceExchangeImplBase specific APIS
-        @Override
-        public void requestCapabilities(List<Uri> uris, int operationToken) throws RemoteException {
-            throw new RemoteException("Unsupported operation: requestCapabilities");
-        }
-        @Override
-        public void updateCapabilities(RcsContactUceCapability capabilities, int operationToken)
-                throws RemoteException {
-            throw new RemoteException("Unsupported operation: updateCapabilities");
-        }
-        // RcsSipOptionsImplBase specific APIS
-        @Override
-        public void sendCapabilityRequest(Uri contactUri, RcsContactUceCapability capabilities,
-                int operationToken) throws RemoteException {
-            throw new RemoteException("Unsupported operation: sendCapabilityRequest");
-        }
-        @Override
-        public void respondToCapabilityRequest(String contactUri,
-                RcsContactUceCapability ownCapabilities, int operationToken)
-                throws RemoteException {
-            throw new RemoteException("Unsupported operation: respondToCapabilityRequest");
-        }
-        @Override
-        public void respondToCapabilityRequestWithError(Uri contactUri, int code, String reason,
-                int operationToken) throws RemoteException {
-            throw new RemoteException("Unsupported operation: respondToCapabilityRequestWithError");
         }
 
         // Call the methods with a clean calling identity on the executor and wait indefinitely for
