@@ -1754,21 +1754,21 @@ public class AdbDebuggingManager {
             dump.write("user_keys", AdbDebuggingManagerProto.USER_KEYS,
                     FileUtils.readTextFile(new File("/data/misc/adb/adb_keys"), 0, null));
         } catch (IOException e) {
-            Slog.e(TAG, "Cannot read user keys", e);
+            Slog.i(TAG, "Cannot read user keys", e);
         }
 
         try {
             dump.write("system_keys", AdbDebuggingManagerProto.SYSTEM_KEYS,
                     FileUtils.readTextFile(new File("/adb_keys"), 0, null));
         } catch (IOException e) {
-            Slog.e(TAG, "Cannot read system keys", e);
+            Slog.i(TAG, "Cannot read system keys", e);
         }
 
         try {
             dump.write("keystore", AdbDebuggingManagerProto.KEYSTORE,
                     FileUtils.readTextFile(getAdbTempKeysFile(), 0, null));
         } catch (IOException e) {
-            Slog.e(TAG, "Cannot read keystore: ", e);
+            Slog.i(TAG, "Cannot read keystore: ", e);
         }
 
         dump.end(token);
