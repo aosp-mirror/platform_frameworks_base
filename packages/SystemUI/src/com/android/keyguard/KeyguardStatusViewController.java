@@ -329,6 +329,11 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
         }
 
         @Override
+        public void onTimeFormatChanged(String timeFormat) {
+            mKeyguardClockSwitchController.refreshFormat(timeFormat);
+        }
+
+        @Override
         public void onKeyguardVisibilityChanged(boolean showing) {
             if (showing) {
                 if (DEBUG) Slog.v(TAG, "refresh statusview showing:" + showing);

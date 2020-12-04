@@ -834,6 +834,13 @@ public class JobSchedulerService extends com.android.server.SystemService
             // Higher override state (OVERRIDE_FULL) should be before lower state (OVERRIDE_SOFT)
             return o2.overrideState - o1.overrideState;
         }
+        if (o1.getSourceUid() == o2.getSourceUid()) {
+            final boolean o1FGJ = o1.isRequestedForegroundJob();
+            if (o1FGJ != o2.isRequestedForegroundJob()) {
+                // Attempt to run requested HPJs ahead of regular jobs, regardless of HPJ quota.
+                return o1FGJ ? -1 : 1;
+            }
+        }
         if (o1.enqueueTime < o2.enqueueTime) {
             return -1;
         }
@@ -1135,6 +1142,12 @@ public class JobSchedulerService extends com.android.server.SystemService
             }
 
             JobStatus jobStatus = JobStatus.createFromJobInfo(job, uId, packageName, userId, tag);
+
+            // Return failure early if HPJ quota used up.
+            if (jobStatus.isRequestedForegroundJob()
+                    && !mQuotaController.isWithinHpjQuotaLocked(jobStatus)) {
+                return JobScheduler.RESULT_FAILURE;
+            }
 
             // Give exemption if the source is in the foreground just now.
             // Note if it's a sync job, this method is called on the handler so it's not exactly
@@ -1791,9 +1804,9 @@ public class JobSchedulerService extends com.android.server.SystemService
      * time of the job to be the time of completion (i.e. the time at which this function is
      * called).
      * <p>This could be inaccurate b/c the job can run for as long as
-     * {@link com.android.server.job.JobServiceContext#EXECUTING_TIMESLICE_MILLIS}, but will lead
-     * to underscheduling at least, rather than if we had taken the last execution time to be the
-     * start of the execution.
+     * {@link com.android.server.job.JobServiceContext#DEFAULT_EXECUTING_TIMESLICE_MILLIS}, but
+     * will lead to underscheduling at least, rather than if we had taken the last execution time
+     * to be the start of the execution.
      *
      * @return A new job representing the execution criteria for this instantiation of the
      * recurring job.
@@ -1883,6 +1896,10 @@ public class JobSchedulerService extends com.android.server.SystemService
         if (DEBUG) {
             Slog.d(TAG, "Completed " + jobStatus + ", reschedule=" + needsReschedule);
         }
+
+        // Intentionally not checking HPJ quota here. An app can't find out if it's run out of quota
+        // when it asks JS to reschedule an HPJ. Instead, the rescheduled HPJ will just be demoted
+        // to a regular job if the app has no HPJ quota left.
 
         // If the job wants to be rescheduled, we first need to make the next upcoming
         // job so we can transfer any appropriate state over from the previous job when
@@ -2382,7 +2399,7 @@ public class JobSchedulerService extends com.android.server.SystemService
     public long getMaxJobExecutionTimeMs(JobStatus job) {
         synchronized (mLock) {
             return Math.min(mQuotaController.getMaxJobExecutionTimeMsLocked(job),
-                    JobServiceContext.EXECUTING_TIMESLICE_MILLIS);
+                    JobServiceContext.DEFAULT_EXECUTING_TIMESLICE_MILLIS);
         }
     }
 
@@ -2600,7 +2617,6 @@ public class JobSchedulerService extends com.android.server.SystemService
         // job that runs one of the app's services, as well as verifying that the
         // named service properly requires the BIND_JOB_SERVICE permission
         private void enforceValidJobRequest(int uid, JobInfo job) {
-            job.enforceValidity();
             final PackageManager pm = getContext()
                     .createContextAsUser(UserHandle.getUserHandleForUid(uid), 0)
                     .getPackageManager();
@@ -2649,6 +2665,7 @@ public class JobSchedulerService extends com.android.server.SystemService
         }
 
         private void validateJobFlags(JobInfo job, int callingUid) {
+            job.enforceValidity();
             if ((job.getFlags() & JobInfo.FLAG_WILL_BE_FOREGROUND) != 0) {
                 getContext().enforceCallingOrSelfPermission(
                         android.Manifest.permission.CONNECTIVITY_INTERNAL, TAG);

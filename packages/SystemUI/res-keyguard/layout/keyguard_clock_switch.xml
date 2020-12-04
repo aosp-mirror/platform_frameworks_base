@@ -73,13 +73,15 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="right"
-            android:textSize="80dp"
+            android:textSize="100dp"
             android:letterSpacing="0.02"
             android:lineSpacingMultiplier=".8"
             android:includeFontPadding="false"
             android:fontFamily="@font/clock"
             android:typeface="monospace"
             android:elegantTextHeight="false"
+            dozeWeight="200"
+            lockScreenWeight="300"
         />
     </FrameLayout>
     <FrameLayout
@@ -95,13 +97,15 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:gravity="center_horizontal"
-            android:textSize="180dp"
+            android:textSize="200dp"
             android:letterSpacing="0.02"
             android:lineSpacingMultiplier=".8"
             android:includeFontPadding="false"
             android:fontFamily="@font/clock"
             android:typeface="monospace"
             android:elegantTextHeight="false"
+            dozeWeight="100"
+            lockScreenWeight="400"
         />
     </FrameLayout>
     <include layout="@layout/keyguard_status_area"

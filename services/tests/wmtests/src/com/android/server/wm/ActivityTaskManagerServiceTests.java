@@ -80,13 +80,13 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
     public void testActivityFinish() {
         final Task stack = new TaskBuilder(mSupervisor).setCreateActivity(true).build();
         final ActivityRecord activity = stack.getBottomMostTask().getTopNonFinishingActivity();
-        assertTrue("Activity must be finished", mAtm.finishActivity(activity.appToken,
-                0 /* resultCode */, null /* resultData */,
+        assertTrue("Activity must be finished", mAtm.mActivityClientController.finishActivity(
+                activity.appToken, 0 /* resultCode */, null /* resultData */,
                 Activity.DONT_FINISH_TASK_WITH_ACTIVITY));
         assertTrue(activity.finishing);
 
         assertTrue("Duplicate activity finish request must also return 'true'",
-                mAtm.finishActivity(activity.appToken, 0 /* resultCode */,
+                mAtm.mActivityClientController.finishActivity(activity.appToken, 0 /* resultCode */,
                         null /* resultData */, Activity.DONT_FINISH_TASK_WITH_ACTIVITY));
     }
 
@@ -225,7 +225,7 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
         //to simulate NPE
         doReturn(null).when(record).getParent();
 
-        mAtm.enterPictureInPictureMode(token, params);
+        mAtm.mActivityClientController.enterPictureInPictureMode(token, params);
         //if record's null parent is not handled gracefully, test will fail with NPE
 
         mockSession.finishMocking();

@@ -59,7 +59,8 @@ import java.util.concurrent.ArrayBlockingQueue;
  * Note that the information cached in this class is not guaranteed to be up-to-date, especially OSD
  * names, power states can be outdated.
  */
-class HdmiCecNetwork {
+@VisibleForTesting
+public class HdmiCecNetwork {
     private static final String TAG = "HdmiCecNetwork";
 
     protected final Object mLock;

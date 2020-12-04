@@ -995,7 +995,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         getPendingTransaction().apply();
 
         // Setup the policy and build the display area hierarchy.
-        mDisplayAreaPolicy = mWmService.mDisplayAreaPolicyProvider.instantiate(
+        mDisplayAreaPolicy = mWmService.getDisplayAreaPolicyProvider().instantiate(
                 mWmService, this /* content */, this /* root */, mImeWindowsContainers);
 
         // Sets the display content for the children.
@@ -5683,6 +5683,9 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
         @Override
         public boolean getRequestedVisibility(@InternalInsetsType int type) {
+            if (type == ITYPE_IME) {
+                return getInsetsStateController().getImeSourceProvider().isImeShowing();
+            }
             return mRequestedInsetsState.getSourceOrDefaultVisibility(type);
         }
 

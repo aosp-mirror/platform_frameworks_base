@@ -21,6 +21,7 @@ import static com.android.wm.shell.ShellTaskOrganizer.TASK_LISTENER_TYPE_LETTERB
 
 import com.android.wm.shell.apppairs.AppPairs;
 import com.android.wm.shell.common.DisplayImeController;
+import com.android.wm.shell.common.annotations.ExternalThread;
 import com.android.wm.shell.draganddrop.DragAndDropController;
 import com.android.wm.shell.letterbox.LetterboxTaskListener;
 import com.android.wm.shell.splitscreen.SplitScreen;
@@ -56,6 +57,7 @@ public class ShellInit {
         mFullscreenTaskListener = fullscreenTaskListener;
     }
 
+    @ExternalThread
     public void init() {
         // Start listening for display changes
         mDisplayImeController.startMonitorDisplays();

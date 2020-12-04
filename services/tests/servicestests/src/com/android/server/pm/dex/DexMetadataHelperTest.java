@@ -227,8 +227,8 @@ public class DexMetadataHelperTest {
         File dm = createDexMetadataFile("install_split_base.apk");
         try (FileInputStream is = new FileInputStream(base)) {
             ApkLite baseApk = PackageParser.parseApkLite(is.getFD(), base.getAbsolutePath(), 0);
-            PackageLite pkgLite = new PackageLite(null, baseApk, null, null, null, null,
-                    null, null);
+            PackageLite pkgLite = new PackageLite(null, baseApk.codePath, baseApk, null, null, null,
+                    null, null, null);
             Assert.assertEquals(dm.length(), DexMetadataHelper.getPackageDexMetadataSize(pkgLite));
         }
 

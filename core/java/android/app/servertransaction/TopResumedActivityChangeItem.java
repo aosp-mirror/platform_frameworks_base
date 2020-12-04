@@ -19,12 +19,11 @@ import static android.os.Trace.TRACE_TAG_ACTIVITY_MANAGER;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.ActivityTaskManager;
+import android.app.ActivityClient;
 import android.app.ActivityThread.ActivityClientRecord;
 import android.app.ClientTransactionHandler;
 import android.os.IBinder;
 import android.os.Parcel;
-import android.os.RemoteException;
 import android.os.Trace;
 
 /**
@@ -56,11 +55,7 @@ public class TopResumedActivityChangeItem extends ActivityTransactionItem {
         // 2. Activity wasn't RESUMED yet, which means that it didn't receive the top state yet.
         // 3. Activity is PAUSED or in other lifecycle state after PAUSED. In this case top resumed
         // state loss was already called right before pausing.
-        try {
-            ActivityTaskManager.getService().activityTopResumedStateLost();
-        } catch (RemoteException ex) {
-            throw ex.rethrowFromSystemServer();
-        }
+        ActivityClient.getInstance().activityTopResumedStateLost();
     }
 
 

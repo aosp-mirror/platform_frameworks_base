@@ -635,7 +635,7 @@ final class HdmiCecController {
      */
     private int incomingMessageDirection(int srcAddress, int dstAddress) {
         boolean sourceIsLocal = false;
-        boolean destinationIsLocal = false;
+        boolean destinationIsLocal = dstAddress == Constants.ADDR_BROADCAST;
         for (HdmiCecLocalDevice localDevice : mService.getHdmiCecNetwork().getLocalDeviceList()) {
             int logicalAddress = localDevice.getDeviceInfo().getLogicalAddress();
             if (logicalAddress == srcAddress) {

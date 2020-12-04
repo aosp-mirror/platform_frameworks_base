@@ -107,8 +107,8 @@ abstract class HdmiCecLocalDeviceSource extends HdmiCecLocalDevice {
     protected void sendStandby(int deviceId) {
         assertRunOnServiceThread();
         String sendStandbyOnSleep = mService.getHdmiCecConfig().getStringValue(
-                HdmiControlManager.CEC_SETTING_NAME_SEND_STANDBY_ON_SLEEP);
-        if (sendStandbyOnSleep.equals(HdmiControlManager.SEND_STANDBY_ON_SLEEP_BROADCAST)) {
+                HdmiControlManager.CEC_SETTING_NAME_POWER_CONTROL_MODE);
+        if (sendStandbyOnSleep.equals(HdmiControlManager.POWER_CONTROL_MODE_BROADCAST)) {
             mService.sendCecCommand(
                     HdmiCecMessageBuilder.buildStandby(mAddress, Constants.ADDR_BROADCAST));
             return;

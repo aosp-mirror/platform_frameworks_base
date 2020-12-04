@@ -27953,10 +27953,26 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * Requests pointer capture mode.
      * <p>
      * When the window has pointer capture, the mouse pointer icon will disappear and will not
-     * change its position. Further mouse will be dispatched with the source
-     * {@link InputDevice#SOURCE_MOUSE_RELATIVE}, and relative position changes will be available
-     * through {@link MotionEvent#getX} and {@link MotionEvent#getY}. Non-mouse events
-     * (touchscreens, or stylus) will not be affected.
+     * change its position. Enabling pointer capture will change the behavior of input devices in
+     * the following ways:
+     * <ul>
+     *     <li>Events from a mouse will be delivered with the source
+     *     {@link InputDevice#SOURCE_MOUSE_RELATIVE}, and relative position changes will be
+     *     available through {@link MotionEvent#getX} and {@link MotionEvent#getY}.</li>
+     *
+     *     <li>Events from a touchpad will be delivered with the source
+     *     {@link InputDevice#SOURCE_TOUCHPAD}, where the absolute position of each of the pointers
+     *     on the touchpad will be available through {@link MotionEvent#getX(int)} and
+     *     {@link MotionEvent#getY(int)}, and their relative movements are stored in
+     *     {@link MotionEvent#AXIS_RELATIVE_X} and {@link MotionEvent#AXIS_RELATIVE_Y}.</li>
+     *
+     *     <li>Events from other types of devices, such as touchscreens, will not be affected.</li>
+     * </ul>
+     * <p>
+     * Events captured through pointer capture will be dispatched to
+     * {@link OnCapturedPointerListener#onCapturedPointer(View, MotionEvent)} if an
+     * {@link OnCapturedPointerListener} is set, and otherwise to
+     * {@link #onCapturedPointerEvent(MotionEvent)}.
      * <p>
      * If the window already has pointer capture, this call does nothing.
      * <p>
@@ -27965,6 +27981,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @see #releasePointerCapture()
      * @see #hasPointerCapture()
+     * @see #onPointerCaptureChange(boolean)
      */
     public void requestPointerCapture() {
         final ViewRootImpl viewRootImpl = getViewRootImpl();
@@ -27980,6 +27997,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * If the window does not have pointer capture, this call will do nothing.
      * @see #requestPointerCapture()
      * @see #hasPointerCapture()
+     * @see #onPointerCaptureChange(boolean)
      */
     public void releasePointerCapture() {
         final ViewRootImpl viewRootImpl = getViewRootImpl();

@@ -383,6 +383,10 @@ public final class UsageEvents implements Parcelable {
         public int mClassToken = UNASSIGNED_TOKEN;
 
         /**
+         * Uniquely identifies an activity. It's possible for two activities with the same
+         * pkg/class name to be in lifecycle at the same time. The mInstanceId is guaranteed to be
+         * unique per activity across all apps (not just within a single app).
+         *
          * {@hide}
          */
         public int mInstanceId;

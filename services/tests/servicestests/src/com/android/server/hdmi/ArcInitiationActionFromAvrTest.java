@@ -90,7 +90,7 @@ public class ArcInitiationActionFromAvrTest {
                     }
 
                     @Override
-                    PowerManager getPowerManager() {
+                    protected PowerManager getPowerManager() {
                         return powerManager;
                     }
 
@@ -110,7 +110,7 @@ public class ArcInitiationActionFromAvrTest {
                     }
 
                     @Override
-                    HdmiCecConfig getHdmiCecConfig() {
+                    protected HdmiCecConfig getHdmiCecConfig() {
                         return hdmiCecConfig;
                     }
                 };

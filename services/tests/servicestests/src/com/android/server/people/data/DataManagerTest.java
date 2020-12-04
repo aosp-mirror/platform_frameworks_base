@@ -22,6 +22,8 @@ import static android.service.notification.NotificationListenerService.NOTIFICAT
 
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -58,6 +60,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.LauncherApps.ShortcutChangeCallback;
+import android.content.pm.LauncherApps.ShortcutQuery;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.ShortcutInfo;
@@ -136,6 +139,7 @@ public final class DataManagerTest {
 
     @Captor private ArgumentCaptor<ShortcutChangeCallback> mShortcutChangeCallbackCaptor;
     @Captor private ArgumentCaptor<BroadcastReceiver> mBroadcastReceiverCaptor;
+    @Captor private ArgumentCaptor<Integer> mQueryFlagsCaptor;
 
     private ScheduledExecutorService mExecutorService;
     private NotificationChannel mNotificationChannel;
@@ -854,10 +858,34 @@ public final class DataManagerTest {
         List<ConversationChannel> result = mDataManager.getRecentConversations(USER_ID_PRIMARY);
         assertEquals(1, result.size());
         assertEquals(shortcut.getId(), result.get(0).getShortcutInfo().getId());
+        assertEquals(1, result.get(0).getShortcutInfo().getPersons().length);
+        assertEquals(CONTACT_URI, result.get(0).getShortcutInfo().getPersons()[0].getUri());
         assertEquals(mParentNotificationChannel.getId(),
                 result.get(0).getParentNotificationChannel().getId());
         assertEquals(mStatusBarNotification.getPostTime(), result.get(0).getLastEventTimestamp());
         assertTrue(result.get(0).hasActiveNotifications());
+    }
+
+    @Test
+    public void testGetRecentConversationsGetsPersonsData() {
+        mDataManager.onUserUnlocked(USER_ID_PRIMARY);
+
+        ShortcutInfo shortcut = buildShortcutInfo(TEST_PKG_NAME, USER_ID_PRIMARY, TEST_SHORTCUT_ID,
+                buildPerson());
+        shortcut.setCached(ShortcutInfo.FLAG_CACHED_NOTIFICATIONS);
+        mDataManager.addOrUpdateConversationInfo(shortcut);
+
+        NotificationListenerService listenerService =
+                mDataManager.getNotificationListenerServiceForTesting(USER_ID_PRIMARY);
+        listenerService.onNotificationPosted(mStatusBarNotification);
+
+        List<ConversationChannel> result = mDataManager.getRecentConversations(USER_ID_PRIMARY);
+
+        verify(mShortcutServiceInternal).getShortcuts(
+                anyInt(), anyString(), anyLong(), anyString(), anyList(), any(), any(),
+                mQueryFlagsCaptor.capture(), anyInt(), anyInt(), anyInt());
+        Integer queryFlags = mQueryFlagsCaptor.getValue();
+        assertThat(hasFlag(queryFlags, ShortcutQuery.FLAG_GET_PERSONS_DATA)).isTrue();
     }
 
     @Test
@@ -1066,6 +1094,13 @@ public final class DataManagerTest {
 
     private UserInfo buildUserInfo(int userId) {
         return new UserInfo(userId, "", 0);
+    }
+
+    /**
+     * Returns {@code true} iff {@link ShortcutQuery}'s {@code queryFlags} has {@code flag} set.
+     */
+    private static boolean hasFlag(int queryFlags, int flag) {
+        return (queryFlags & flag) != 0;
     }
 
     private class TestContactsQueryHelper extends ContactsQueryHelper {

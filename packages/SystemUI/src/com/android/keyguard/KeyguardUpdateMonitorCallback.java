@@ -58,6 +58,11 @@ public class KeyguardUpdateMonitorCallback {
     public void onTimeZoneChanged(TimeZone timeZone) { }
 
     /**
+     * Called when time format changes.
+     */
+    public void onTimeFormatChanged(String timeFormat) { }
+
+    /**
      * Called when the carrier PLMN or SPN changes.
      */
     public void onRefreshCarrierInfo() { }

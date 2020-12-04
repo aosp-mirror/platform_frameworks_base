@@ -23,6 +23,10 @@ import android.view.IDisplayWindowRotationController;
 import android.view.IWindowManager;
 import android.window.WindowContainerTransaction;
 
+import androidx.annotation.BinderThread;
+
+import com.android.wm.shell.common.annotations.ShellMainThread;
+
 import java.util.ArrayList;
 
 /**
@@ -35,39 +39,18 @@ public class DisplayChangeController {
 
     private final Handler mHandler;
     private final IWindowManager mWmService;
+    private final IDisplayWindowRotationController mControllerImpl;
 
     private final ArrayList<OnDisplayChangingListener> mRotationListener =
             new ArrayList<>();
     private final ArrayList<OnDisplayChangingListener> mTmpListeners = new ArrayList<>();
 
-    private final IDisplayWindowRotationController mDisplayRotationController =
-            new IDisplayWindowRotationController.Stub() {
-                @Override
-                public void onRotateDisplay(int displayId, final int fromRotation,
-                        final int toRotation, IDisplayWindowRotationCallback callback) {
-                    mHandler.post(() -> {
-                        WindowContainerTransaction t = new WindowContainerTransaction();
-                        synchronized (mRotationListener) {
-                            mTmpListeners.clear();
-                            // Make a local copy in case the handlers add/remove themselves.
-                            mTmpListeners.addAll(mRotationListener);
-                        }
-                        for (OnDisplayChangingListener c : mTmpListeners) {
-                            c.onRotateDisplay(displayId, fromRotation, toRotation, t);
-                        }
-                        try {
-                            callback.continueRotateDisplay(toRotation, t);
-                        } catch (RemoteException e) {
-                        }
-                    });
-                }
-            };
-
     public DisplayChangeController(Handler mainHandler, IWindowManager wmService) {
         mHandler = mainHandler;
         mWmService = wmService;
+        mControllerImpl = new DisplayWindowRotationControllerImpl();
         try {
-            mWmService.setDisplayWindowRotationController(mDisplayRotationController);
+            mWmService.setDisplayWindowRotationController(mControllerImpl);
         } catch (RemoteException e) {
             throw new RuntimeException("Unable to register rotation controller");
         }
@@ -91,10 +74,41 @@ public class DisplayChangeController {
         }
     }
 
+    private void onRotateDisplay(int displayId, final int fromRotation, final int toRotation,
+            IDisplayWindowRotationCallback callback) {
+        WindowContainerTransaction t = new WindowContainerTransaction();
+        synchronized (mRotationListener) {
+            mTmpListeners.clear();
+            // Make a local copy in case the handlers add/remove themselves.
+            mTmpListeners.addAll(mRotationListener);
+        }
+        for (OnDisplayChangingListener c : mTmpListeners) {
+            c.onRotateDisplay(displayId, fromRotation, toRotation, t);
+        }
+        try {
+            callback.continueRotateDisplay(toRotation, t);
+        } catch (RemoteException e) {
+        }
+    }
+
+    @BinderThread
+    private class DisplayWindowRotationControllerImpl
+            extends IDisplayWindowRotationController.Stub {
+        @Override
+        public void onRotateDisplay(int displayId, final int fromRotation,
+                final int toRotation, IDisplayWindowRotationCallback callback) {
+            mHandler.post(() -> {
+                DisplayChangeController.this.onRotateDisplay(displayId, fromRotation, toRotation,
+                        callback);
+            });
+        }
+    }
+
     /**
      * Give a listener a chance to queue up configuration changes to execute as part of a
      * display rotation. The contents of {@link #onRotateDisplay} must run synchronously.
      */
+    @ShellMainThread
     public interface OnDisplayChangingListener {
         /**
          * Called before the display is rotated. Contents of this method must run synchronously.

@@ -328,7 +328,7 @@ class InsetsSourceProvider {
         final Point surfacePosition = getWindowFrameSurfacePosition();
         mAdapter = new ControlAdapter(surfacePosition);
         if (getSource().getType() == ITYPE_IME) {
-            setClientVisible(InsetsState.getDefaultVisibility(mSource.getType()));
+            setClientVisible(target.getRequestedVisibility(mSource.getType()));
         }
         final Transaction t = mDisplayContent.getPendingTransaction();
         mWin.startAnimation(t, mAdapter, !mClientVisible /* hidden */,

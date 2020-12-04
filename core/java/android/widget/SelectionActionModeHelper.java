@@ -1124,6 +1124,7 @@ public final class SelectionActionModeHelper {
                         mTrimmedText, mRelativeStart, mRelativeEnd)
                         .setDefaultLocales(mDefaultLocales)
                         .setDarkLaunchAllowed(true)
+                        .setIncludeTextClassification(true)
                         .build();
                 selection = mTextClassifier.get().suggestSelection(request);
             } else {
@@ -1181,6 +1182,8 @@ public final class SelectionActionModeHelper {
                     // Do not show smart actions for text containing unsupported characters.
                     android.util.EventLog.writeEvent(0x534e4554, "116321860", -1, "");
                     classification = TextClassification.EMPTY;
+                } else if (selection != null && selection.getTextClassification() != null) {
+                    classification = selection.getTextClassification();
                 } else if (mContext.getApplicationInfo().targetSdkVersion
                         >= Build.VERSION_CODES.P) {
                     final TextClassification.Request request =

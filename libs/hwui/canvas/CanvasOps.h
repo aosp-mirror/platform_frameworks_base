@@ -28,6 +28,7 @@
 #include "CanvasProperty.h"
 
 #include "CanvasOpTypes.h"
+#include "Layer.h"
 
 #include <experimental/type_traits>
 #include <utility>
@@ -362,6 +363,11 @@ struct CanvasOp<CanvasOpType::DrawPicture> {
     void draw(SkCanvas* canvas) const {
         picture->playback(canvas);
     }
+};
+
+template<>
+struct CanvasOp<CanvasOpType::DrawLayer> {
+    sp<Layer> layer;
 };
 
 // cleanup our macros

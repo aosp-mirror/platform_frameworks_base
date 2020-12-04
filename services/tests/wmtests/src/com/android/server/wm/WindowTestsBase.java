@@ -49,6 +49,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.server.wm.WindowContainer.POSITION_BOTTOM;
+import static com.android.server.wm.WindowStateAnimator.HAS_DRAWN;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -351,6 +352,13 @@ class WindowTestsBase extends SystemServiceTestsBase {
             win.mHasSurface = true;
             win.mHidden = false;
             win.show(false /* doAnimation */, false /* requestAnim */);
+        }
+    }
+
+    static void makeWindowVisibleAndDrawn(WindowState... windows) {
+        makeWindowVisible(windows);
+        for (WindowState win : windows) {
+            win.mWinAnimator.mDrawState = HAS_DRAWN;
         }
     }
 

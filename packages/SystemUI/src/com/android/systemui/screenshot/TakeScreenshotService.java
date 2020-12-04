@@ -20,6 +20,10 @@ import static android.content.Intent.ACTION_CLOSE_SYSTEM_DIALOGS;
 
 import static com.android.internal.util.ScreenshotHelper.SCREENSHOT_MSG_PROCESS_COMPLETE;
 import static com.android.internal.util.ScreenshotHelper.SCREENSHOT_MSG_URI;
+import static com.android.systemui.screenshot.LogConfig.DEBUG_CALLBACK;
+import static com.android.systemui.screenshot.LogConfig.DEBUG_DISMISS;
+import static com.android.systemui.screenshot.LogConfig.DEBUG_SERVICE;
+import static com.android.systemui.screenshot.LogConfig.logTag;
 
 import android.app.Service;
 import android.content.BroadcastReceiver;
@@ -53,17 +57,21 @@ import java.util.function.Consumer;
 import javax.inject.Inject;
 
 public class TakeScreenshotService extends Service {
-    private static final String TAG = "TakeScreenshotService";
+    private static final String TAG = logTag(TakeScreenshotService.class);
 
     private final ScreenshotController mScreenshot;
     private final UserManager mUserManager;
     private final UiEventLogger mUiEventLogger;
     private final ScreenshotNotificationsController mNotificationsController;
     private final Handler mHandler;
+
     private final BroadcastReceiver mCloseSystemDialogs = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (ACTION_CLOSE_SYSTEM_DIALOGS.equals(intent.getAction()) && mScreenshot != null) {
+                if (DEBUG_DISMISS) {
+                    Log.d(TAG, "Received ACTION_CLOSE_SYSTEM_DIALOGS");
+                }
                 mScreenshot.dismissScreenshot(false);
             }
         }
@@ -73,6 +81,9 @@ public class TakeScreenshotService extends Service {
     public TakeScreenshotService(ScreenshotController screenshotController, UserManager userManager,
             UiEventLogger uiEventLogger,
             ScreenshotNotificationsController notificationsController) {
+        if (DEBUG_SERVICE) {
+            Log.d(TAG, "new " + this);
+        }
         mHandler = new Handler(Looper.getMainLooper(), this::handleMessage);
         mScreenshot = screenshotController;
         mUserManager = userManager;
@@ -81,18 +92,40 @@ public class TakeScreenshotService extends Service {
     }
 
     @Override
+    public void onCreate() {
+        if (DEBUG_SERVICE) {
+            Log.d(TAG, "onCreate()");
+        }
+    }
+
+    @Override
     public IBinder onBind(@NonNull Intent intent) {
         registerReceiver(mCloseSystemDialogs, new IntentFilter(ACTION_CLOSE_SYSTEM_DIALOGS));
-        return new Messenger(mHandler).getBinder();
+        final Messenger m = new Messenger(mHandler);
+        if (DEBUG_SERVICE) {
+            Log.d(TAG, "onBind: returning connection: " + m);
+        }
+        return m.getBinder();
     }
 
     @Override
     public boolean onUnbind(Intent intent) {
+        if (DEBUG_SERVICE) {
+            Log.d(TAG, "onUnbind");
+        }
         if (mScreenshot != null) {
             mScreenshot.dismissScreenshot(true);
         }
         unregisterReceiver(mCloseSystemDialogs);
         return false;
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (DEBUG_SERVICE) {
+            Log.d(TAG, "onDestroy");
+        }
     }
 
     /** Respond to incoming Message via Binder (Messenger) */
@@ -108,7 +141,13 @@ public class TakeScreenshotService extends Service {
             Log.w(TAG, "Skipping screenshot because storage is locked!");
             mNotificationsController.notifyScreenshotError(
                     R.string.screenshot_failed_to_save_user_locked_text);
+            if (DEBUG_CALLBACK) {
+                Log.d(TAG, "handleMessage: calling uriConsumer.accept(null)");
+            }
             uriConsumer.accept(null);
+            if (DEBUG_CALLBACK) {
+                Log.d(TAG, "handleMessage: calling onComplete.run()");
+            }
             onComplete.run();
             return true;
         }
@@ -120,12 +159,21 @@ public class TakeScreenshotService extends Service {
 
         switch (msg.what) {
             case WindowManager.TAKE_SCREENSHOT_FULLSCREEN:
+                if (DEBUG_SERVICE) {
+                    Log.d(TAG, "handleMessage: TAKE_SCREENSHOT_FULLSCREEN");
+                }
                 mScreenshot.takeScreenshotFullscreen(uriConsumer, onComplete);
                 break;
             case WindowManager.TAKE_SCREENSHOT_SELECTED_REGION:
+                if (DEBUG_SERVICE) {
+                    Log.d(TAG, "handleMessage: TAKE_SCREENSHOT_SELECTED_REGION");
+                }
                 mScreenshot.takeScreenshotPartial(uriConsumer, onComplete);
                 break;
             case WindowManager.TAKE_SCREENSHOT_PROVIDED_IMAGE:
+                if (DEBUG_SERVICE) {
+                    Log.d(TAG, "handleMessage: TAKE_SCREENSHOT_PROVIDED_IMAGE");
+                }
                 Bitmap screenshot = BitmapUtil.bundleToHardwareBitmap(
                         screenshotRequest.getBitmapBundle());
                 Rect screenBounds = screenshotRequest.getBoundsInScreen();
@@ -145,7 +193,9 @@ public class TakeScreenshotService extends Service {
 
     private void sendComplete(Messenger target) {
         try {
-            Log.d(TAG, "sendComplete: " + target);
+            if (DEBUG_CALLBACK) {
+                Log.d(TAG, "sendComplete: " + target);
+            }
             target.send(Message.obtain(null, SCREENSHOT_MSG_PROCESS_COMPLETE));
         } catch (RemoteException e) {
             Log.d(TAG, "ignored remote exception", e);
@@ -154,7 +204,9 @@ public class TakeScreenshotService extends Service {
 
     private void reportUri(Messenger target, Uri uri) {
         try {
-            Log.d(TAG, "reportUri: " + target + " -> " + uri);
+            if (DEBUG_CALLBACK) {
+                Log.d(TAG, "reportUri: " + target + " -> " + uri);
+            }
             target.send(Message.obtain(null, SCREENSHOT_MSG_URI, uri));
         } catch (RemoteException e) {
             Log.d(TAG, "ignored remote exception", e);

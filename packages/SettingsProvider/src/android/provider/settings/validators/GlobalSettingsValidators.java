@@ -34,10 +34,6 @@ import java.util.Map;
  * Validators for Global settings
  */
 public class GlobalSettingsValidators {
-    /**
-     * All settings in {@link Global.SETTINGS_TO_BACKUP} array *must* have a non-null validator,
-     * otherwise they won't be restored.
-     */
     public static final Map<String, Validator> VALIDATORS = new ArrayMap<>();
 
     static {

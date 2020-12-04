@@ -253,7 +253,7 @@ public class HdmiCecConfig {
                 return STORAGE_GLOBAL_SETTINGS;
             case HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_VERSION:
                 return STORAGE_GLOBAL_SETTINGS;
-            case HdmiControlManager.CEC_SETTING_NAME_SEND_STANDBY_ON_SLEEP:
+            case HdmiControlManager.CEC_SETTING_NAME_POWER_CONTROL_MODE:
                 return STORAGE_GLOBAL_SETTINGS;
             case HdmiControlManager.CEC_SETTING_NAME_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST:
                 return STORAGE_SHARED_PREFS;
@@ -271,7 +271,7 @@ public class HdmiCecConfig {
                 return Global.HDMI_CONTROL_ENABLED;
             case HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_VERSION:
                 return Global.HDMI_CEC_VERSION;
-            case HdmiControlManager.CEC_SETTING_NAME_SEND_STANDBY_ON_SLEEP:
+            case HdmiControlManager.CEC_SETTING_NAME_POWER_CONTROL_MODE:
                 return Global.HDMI_CONTROL_SEND_STANDBY_ON_SLEEP;
             case HdmiControlManager.CEC_SETTING_NAME_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST:
                 return setting.getName();

@@ -115,15 +115,13 @@ public class FingerprintService extends SystemService implements BiometricServic
         }
 
         @Override
-        public byte[] dumpSensorServiceStateProto() {
+        public byte[] dumpSensorServiceStateProto(int sensorId) {
             Utils.checkPermission(getContext(), USE_BIOMETRIC_INTERNAL);
 
             final ProtoOutputStream proto = new ProtoOutputStream();
-            for (ServiceProvider provider : mServiceProviders) {
-                for (FingerprintSensorPropertiesInternal props
-                        : provider.getSensorProperties()) {
-                    provider.dumpProtoState(props.sensorId, proto);
-                }
+            final ServiceProvider provider = getProviderForSensor(sensorId);
+            if (provider != null) {
+                provider.dumpProtoState(sensorId, proto);
             }
             proto.flush();
             return proto.getBytes();
@@ -437,6 +435,7 @@ public class FingerprintService extends SystemService implements BiometricServic
                             pw.println("Dumping for sensorId: " + props.sensorId
                                     + ", provider: " + provider.getClass().getSimpleName());
                             provider.dumpInternal(props.sensorId, pw);
+                            pw.println();
                         }
                     }
                 }
@@ -747,14 +746,14 @@ public class FingerprintService extends SystemService implements BiometricServic
     }
 
     /**
-     * For devices with only a single provider, returns that provider. If no providers, or multiple
-     * providers exist, returns null.
+     * For devices with only a single provider, returns that provider. If multiple providers,
+     * returns the first one. If no providers, returns null.
      */
     @Nullable
     private Pair<Integer, ServiceProvider> getSingleProvider() {
         final List<FingerprintSensorPropertiesInternal> properties = getSensorProperties();
-        if (properties.size() != 1) {
-            Slog.e(TAG, "Multiple sensors found: " + properties.size());
+        if (properties.isEmpty()) {
+            Slog.e(TAG, "No providers found");
             return null;
         }
 
@@ -767,7 +766,7 @@ public class FingerprintService extends SystemService implements BiometricServic
             }
         }
 
-        Slog.e(TAG, "Single sensor, but provider not found");
+        Slog.e(TAG, "Provider not found");
         return null;
     }
 

@@ -154,7 +154,6 @@ import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.permission.PermissionManagerServiceInternal.DefaultBrowserProvider;
 import com.android.server.pm.permission.PermissionManagerServiceInternal.DefaultDialerProvider;
 import com.android.server.pm.permission.PermissionManagerServiceInternal.DefaultHomeProvider;
-import com.android.server.pm.permission.PermissionManagerServiceInternal.PermissionCallback;
 import com.android.server.policy.PermissionPolicyInternal;
 import com.android.server.policy.SoftRestrictedPermissionPolicy;
 
@@ -4139,17 +4138,14 @@ public class PermissionManagerService extends IPermissionManager.Stub {
      *
      * @param packageName The package that is updated
      * @param pkg The package that is updated, or {@code null} if package is deleted
-     * @param allPackages All currently known packages
-     * @param callback Callback to call after permission changes
      */
-    private void updatePermissions(@NonNull String packageName, @Nullable AndroidPackage pkg,
-            @NonNull PermissionCallback callback) {
+    private void updatePermissions(@NonNull String packageName, @Nullable AndroidPackage pkg) {
         // If the package is being deleted, update the permissions of all the apps
         final int flags =
                 (pkg == null ? UPDATE_PERMISSIONS_ALL | UPDATE_PERMISSIONS_REPLACE_PKG
                         : UPDATE_PERMISSIONS_REPLACE_PKG);
         updatePermissions(
-                packageName, pkg, getVolumeUuidForPackage(pkg), flags, callback);
+                packageName, pkg, getVolumeUuidForPackage(pkg), flags, mDefaultPermissionCallback);
     }
 
     /**
@@ -4947,17 +4943,19 @@ public class PermissionManagerService extends IPermissionManager.Stub {
     }
 
     private void onPackageInstalledInternal(@NonNull AndroidPackage pkg,
-            @NonNull List<String> grantedPermissions,
-            @NonNull List<String> allowlistedRestrictedPermissions, int autoRevokePermissionsMode,
+            @NonNull PermissionManagerServiceInternal.PackageInstalledParams params,
             @UserIdInt int userId) {
-        addAllowlistedRestrictedPermissionsInternal(pkg, allowlistedRestrictedPermissions,
+        updatePermissions(pkg.getPackageName(), pkg);
+        addAllowlistedRestrictedPermissionsInternal(pkg,
+                params.getAllowlistedRestrictedPermissions(),
                 FLAG_PERMISSION_WHITELIST_INSTALLER, userId);
+        final int autoRevokePermissionsMode = params.getAutoRevokePermissionsMode();
         if (autoRevokePermissionsMode == AppOpsManager.MODE_ALLOWED
                 || autoRevokePermissionsMode == AppOpsManager.MODE_IGNORED) {
             setAutoRevokeExemptedInternal(pkg,
                     autoRevokePermissionsMode == AppOpsManager.MODE_IGNORED, userId);
         }
-        grantRequestedRuntimePermissionsInternal(pkg, grantedPermissions, userId);
+        grantRequestedRuntimePermissionsInternal(pkg, params.getGrantedPermissions(), userId);
     }
 
     private void addAllowlistedRestrictedPermissionsInternal(@NonNull AndroidPackage pkg,
@@ -4994,7 +4992,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             resetRuntimePermissionsInternal(pkg, userId);
             return;
         }
-        updatePermissions(packageName, null, mDefaultPermissionCallback);
+        updatePermissions(packageName, null);
         if (sharedUserPkgs.isEmpty()) {
             removeUidState(appId, userId);
         } else {
@@ -5147,11 +5145,6 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         public String[] getAppOpPermissionPackages(@NonNull String permissionName) {
             Objects.requireNonNull(permissionName, "permissionName");
             return PermissionManagerService.this.getAppOpPermissionPackagesInternal(permissionName);
-        }
-        @Override
-        public void updatePermissions(@NonNull String packageName, @Nullable AndroidPackage pkg) {
-            PermissionManagerService.this
-                    .updatePermissions(packageName, pkg, mDefaultPermissionCallback);
         }
         @Override
         public void updateAllPermissions(@Nullable String volumeUuid, boolean sdkUpdated) {
@@ -5420,16 +5413,11 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
         @Override
         public void onPackageInstalled(@NonNull AndroidPackage pkg,
-                @NonNull List<String> grantedPermissions,
-                @NonNull List<String> allowlistedRestrictedPermissions,
-                int autoRevokePermissionsMode, @UserIdInt int userId) {
+                @NonNull PackageInstalledParams params, @UserIdInt int userId) {
             Objects.requireNonNull(pkg, "pkg");
-            Objects.requireNonNull(grantedPermissions, "grantedPermissions");
-            Objects.requireNonNull(allowlistedRestrictedPermissions,
-                    "allowlistedRestrictedPermissions");
+            Objects.requireNonNull(params, "params");
             Preconditions.checkArgumentNonNegative(userId, "userId");
-            onPackageInstalledInternal(pkg, grantedPermissions, allowlistedRestrictedPermissions,
-                    autoRevokePermissionsMode, userId);
+            onPackageInstalledInternal(pkg, params, userId);
         }
 
         @Override
@@ -5475,6 +5463,32 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         @Override
         public int[] getGidsForUid(int uid) {
             return PermissionManagerService.this.getGidsForUid(uid);
+        }
+    }
+
+    /**
+     * Callbacks invoked when interesting actions have been taken on a permission.
+     * <p>
+     * NOTE: The current arguments are merely to support the existing use cases. This
+     * needs to be properly thought out with appropriate arguments for each of the
+     * callback methods.
+     */
+    private static class PermissionCallback {
+        public void onGidsChanged(@AppIdInt int appId, @UserIdInt int userId) {}
+        public void onPermissionChanged() {}
+        public void onPermissionGranted(int uid, @UserIdInt int userId) {}
+        public void onInstallPermissionGranted() {}
+        public void onPermissionRevoked(int uid, @UserIdInt int userId, String reason) {}
+        public void onInstallPermissionRevoked() {}
+        public void onPermissionUpdated(@UserIdInt int[] updatedUserIds, boolean sync) {}
+        public void onPermissionUpdatedNotifyListener(@UserIdInt int[] updatedUserIds, boolean sync,
+                int uid) {
+            onPermissionUpdated(updatedUserIds, sync);
+        }
+        public void onPermissionRemoved() {}
+        public void onInstallPermissionUpdated() {}
+        public void onInstallPermissionUpdatedNotifyListener(int uid) {
+            onInstallPermissionUpdated();
         }
     }
 

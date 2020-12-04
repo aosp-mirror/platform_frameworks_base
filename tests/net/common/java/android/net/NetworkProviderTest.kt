@@ -33,6 +33,9 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Mockito.doReturn
+import org.mockito.Mockito.mock
+import org.mockito.Mockito.verifyNoMoreInteractions
 import java.util.UUID
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
@@ -87,8 +90,8 @@ class NetworkProviderTest {
         ) = seenEvents.poll(DEFAULT_TIMEOUT_MS) { it is T && predicate(it) }
     }
 
-    private fun createNetworkProvider(): TestNetworkProvider {
-        return TestNetworkProvider(context, mHandlerThread.looper)
+    private fun createNetworkProvider(ctx: Context = context): TestNetworkProvider {
+        return TestNetworkProvider(ctx, mHandlerThread.looper)
     }
 
     @Test
@@ -169,7 +172,12 @@ class NetworkProviderTest {
 
     @Test
     fun testDeclareNetworkRequestUnfulfillable() {
-        val provider = createNetworkProvider()
+        val mockContext = mock(Context::class.java)
+        val provider = createNetworkProvider(mockContext)
+        // ConnectivityManager not required at creation time
+        verifyNoMoreInteractions(mockContext)
+        doReturn(mCm).`when`(mockContext).getSystemService(Context.CONNECTIVITY_SERVICE)
+
         mCm.registerNetworkProvider(provider)
 
         val specifier = StringNetworkSpecifier(UUID.randomUUID().toString())

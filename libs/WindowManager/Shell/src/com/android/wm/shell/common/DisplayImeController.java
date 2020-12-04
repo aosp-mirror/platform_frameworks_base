@@ -24,7 +24,6 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Point;
 import android.graphics.Rect;
-import android.os.Handler;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.Slog;
@@ -39,6 +38,8 @@ import android.view.SurfaceControl;
 import android.view.WindowInsets;
 import android.view.animation.Interpolator;
 import android.view.animation.PathInterpolator;
+
+import androidx.annotation.BinderThread;
 
 import com.android.internal.view.IInputMethodManager;
 
@@ -197,12 +198,15 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
             mRotation = initialRotation;
         }
 
+        @BinderThread
         @Override
         public void insetsChanged(InsetsState insetsState) {
             mExecutor.execute(() -> {
                 if (mInsetsState.equals(insetsState)) {
                     return;
                 }
+
+                mImeShowing = insetsState.getSourceOrDefaultVisibility(InsetsState.ITYPE_IME);
 
                 final InsetsSource newSource = insetsState.getSource(InsetsState.ITYPE_IME);
                 final Rect newFrame = newSource.getFrame();
@@ -216,6 +220,7 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
             });
         }
 
+        @BinderThread
         @Override
         public void insetsControlChanged(InsetsState insetsState,
                 InsetsSourceControl[] activeControls) {
@@ -266,6 +271,7 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
             }
         }
 
+        @BinderThread
         @Override
         public void showInsets(int types, boolean fromIme) {
             if ((types & WindowInsets.Type.ime()) == 0) {
@@ -275,6 +281,7 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
             mExecutor.execute(() -> startAnimation(true /* show */, false /* forceRestart */));
         }
 
+        @BinderThread
         @Override
         public void hideInsets(int types, boolean fromIme) {
             if ((types & WindowInsets.Type.ime()) == 0) {
@@ -284,6 +291,7 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
             mExecutor.execute(() -> startAnimation(false /* show */, false /* forceRestart */));
         }
 
+        @BinderThread
         @Override
         public void topFocusedWindowChanged(String packageName) {
             // no-op

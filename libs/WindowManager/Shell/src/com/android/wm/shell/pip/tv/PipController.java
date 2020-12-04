@@ -179,40 +179,33 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
             PinnedStackListenerForwarder.PinnedStackListener {
         @Override
         public void onImeVisibilityChanged(boolean imeVisible, int imeHeight) {
-            mHandler.post(() -> {
-                mPipBoundsState.setImeVisibility(imeVisible, imeHeight);
-                if (mState == STATE_PIP) {
-                    if (mImeVisible != imeVisible) {
-                        if (imeVisible) {
-                            // Save the IME height adjustment, and offset to not occlude the IME
-                            mPipBoundsState.getNormalBounds().offset(0, -imeHeight);
-                            mImeHeightAdjustment = imeHeight;
-                        } else {
-                            // Apply the inverse adjustment when the IME is hidden
-                            mPipBoundsState.getNormalBounds().offset(0, mImeHeightAdjustment);
-                        }
-                        mImeVisible = imeVisible;
-                        resizePinnedStack(STATE_PIP);
+            mPipBoundsState.setImeVisibility(imeVisible, imeHeight);
+            if (mState == STATE_PIP) {
+                if (mImeVisible != imeVisible) {
+                    if (imeVisible) {
+                        // Save the IME height adjustment, and offset to not occlude the IME
+                        mPipBoundsState.getNormalBounds().offset(0, -imeHeight);
+                        mImeHeightAdjustment = imeHeight;
+                    } else {
+                        // Apply the inverse adjustment when the IME is hidden
+                        mPipBoundsState.getNormalBounds().offset(0, mImeHeightAdjustment);
                     }
+                    mImeVisible = imeVisible;
+                    resizePinnedStack(STATE_PIP);
                 }
-            });
+            }
         }
 
         @Override
         public void onMovementBoundsChanged(boolean fromImeAdjustment) {
-            mHandler.post(() -> {
-                mTmpDisplayInfo.copyFrom(mPipBoundsState.getDisplayInfo());
-
-                mPipBoundsAlgorithm.getInsetBounds(mTmpInsetBounds);
-            });
+            mTmpDisplayInfo.copyFrom(mPipBoundsState.getDisplayInfo());
+            mPipBoundsAlgorithm.getInsetBounds(mTmpInsetBounds);
         }
 
         @Override
         public void onActionsChanged(ParceledListSlice<RemoteAction> actions) {
             mCustomActions = actions;
-            mHandler.post(() -> {
-                mTvPipMenuController.setAppActions(mCustomActions);
-            });
+            mTvPipMenuController.setAppActions(mCustomActions);
         }
     }
 

@@ -213,12 +213,12 @@ public class TaskOrganizer extends WindowOrganizer {
     private final ITaskOrganizer mInterface = new ITaskOrganizer.Stub() {
         @Override
         public void addStartingWindow(ActivityManager.RunningTaskInfo taskInfo, IBinder appToken) {
-            TaskOrganizer.this.addStartingWindow(taskInfo, appToken);
+            mExecutor.execute(() -> TaskOrganizer.this.addStartingWindow(taskInfo, appToken));
         }
 
         @Override
         public void removeStartingWindow(ActivityManager.RunningTaskInfo taskInfo) {
-            TaskOrganizer.this.removeStartingWindow(taskInfo);
+            mExecutor.execute(() -> TaskOrganizer.this.removeStartingWindow(taskInfo));
         }
 
         @Override

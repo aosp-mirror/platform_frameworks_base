@@ -23,9 +23,9 @@ import static android.window.TransitionInfo.TRANSIT_SHOW;
 
 import android.animation.Animator;
 import android.animation.ValueAnimator;
-import android.annotation.MainThread;
 import android.annotation.NonNull;
 import android.os.IBinder;
+import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.util.ArrayMap;
 import android.util.Slog;
@@ -35,15 +35,18 @@ import android.window.ITransitionPlayer;
 import android.window.TransitionInfo;
 import android.window.WindowOrganizer;
 
+import androidx.annotation.BinderThread;
+
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.TransactionPool;
+import com.android.wm.shell.common.annotations.ShellMainThread;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 
 import java.util.ArrayList;
 
 /** Plays transition animations */
-public class Transitions extends ITransitionPlayer.Stub {
+public class Transitions {
     private static final String TAG = "ShellTransitions";
 
     /** Set to {@code true} to enable shell transitions. */
@@ -54,6 +57,7 @@ public class Transitions extends ITransitionPlayer.Stub {
     private final TransactionPool mTransactionPool;
     private final ShellExecutor mMainExecutor;
     private final ShellExecutor mAnimExecutor;
+    private final TransitionPlayerImpl mPlayerImpl;
 
     /** Keeps track of currently tracked transitions and all the animations associated with each */
     private final ArrayMap<IBinder, ArrayList<Animator>> mActiveTransitions = new ArrayMap<>();
@@ -64,6 +68,11 @@ public class Transitions extends ITransitionPlayer.Stub {
         mTransactionPool = pool;
         mMainExecutor = mainExecutor;
         mAnimExecutor = animExecutor;
+        mPlayerImpl = new TransitionPlayerImpl();
+    }
+
+    public void register(ShellTaskOrganizer taskOrganizer) {
+        taskOrganizer.registerTransitionPlayer(mPlayerImpl);
     }
 
     // TODO(shell-transitions): real animations
@@ -115,77 +124,73 @@ public class Transitions extends ITransitionPlayer.Stub {
                 || type == WindowManager.TRANSIT_KEYGUARD_GOING_AWAY;
     }
 
-    @Override
-    public void onTransitionReady(@NonNull IBinder transitionToken, @NonNull TransitionInfo info,
+    private void onTransitionReady(@NonNull IBinder transitionToken, @NonNull TransitionInfo info,
             @NonNull SurfaceControl.Transaction t) {
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "onTransitionReady %s: %s",
                 transitionToken, info);
         // start task
-        mMainExecutor.execute(() -> {
-            if (!mActiveTransitions.containsKey(transitionToken)) {
-                Slog.e(TAG, "Got transitionReady for non-active transition " + transitionToken
-                        + " expecting one of " + mActiveTransitions.keySet());
-            }
-            if (mActiveTransitions.get(transitionToken) != null) {
-                throw new IllegalStateException("Got a duplicate onTransitionReady call for "
-                        + transitionToken);
-            }
-            mActiveTransitions.put(transitionToken, new ArrayList<>());
-            boolean isOpening = isOpeningType(info.getType());
-            if (info.getRootLeash().isValid()) {
-                t.show(info.getRootLeash());
-            }
-            // changes should be ordered top-to-bottom in z
-            for (int i = info.getChanges().size() - 1; i >= 0; --i) {
-                final TransitionInfo.Change change = info.getChanges().get(i);
-                final SurfaceControl leash = change.getLeash();
-                final int mode = info.getChanges().get(i).getMode();
+        if (!mActiveTransitions.containsKey(transitionToken)) {
+            Slog.e(TAG, "Got transitionReady for non-active transition " + transitionToken
+                    + " expecting one of " + mActiveTransitions.keySet());
+        }
+        if (mActiveTransitions.get(transitionToken) != null) {
+            throw new IllegalStateException("Got a duplicate onTransitionReady call for "
+                    + transitionToken);
+        }
+        mActiveTransitions.put(transitionToken, new ArrayList<>());
+        boolean isOpening = isOpeningType(info.getType());
+        if (info.getRootLeash().isValid()) {
+            t.show(info.getRootLeash());
+        }
+        // changes should be ordered top-to-bottom in z
+        for (int i = info.getChanges().size() - 1; i >= 0; --i) {
+            final TransitionInfo.Change change = info.getChanges().get(i);
+            final SurfaceControl leash = change.getLeash();
+            final int mode = info.getChanges().get(i).getMode();
 
-                // Don't animate anything with an animating parent
-                if (change.getParent() != null) {
-                    if (mode == TRANSIT_OPEN || mode == TRANSIT_SHOW) {
-                        t.show(leash);
-                        t.setMatrix(leash, 1, 0, 0, 1);
-                    }
-                    continue;
-                }
-
-                t.reparent(leash, info.getRootLeash());
-                t.setPosition(leash, change.getEndAbsBounds().left - info.getRootOffset().x,
-                        change.getEndAbsBounds().top - info.getRootOffset().y);
-                // Put all the OPEN/SHOW on top
+            // Don't animate anything with an animating parent
+            if (change.getParent() != null) {
                 if (mode == TRANSIT_OPEN || mode == TRANSIT_SHOW) {
                     t.show(leash);
                     t.setMatrix(leash, 1, 0, 0, 1);
-                    if (isOpening) {
-                        // put on top and fade in
-                        t.setLayer(leash, info.getChanges().size() - i);
-                        t.setAlpha(leash, 0.f);
-                        startExampleAnimation(transitionToken, leash, true /* show */);
-                    } else {
-                        // put on bottom and leave it visible without fade
-                        t.setLayer(leash, -i);
-                        t.setAlpha(leash, 1.f);
-                    }
-                } else if (mode == TRANSIT_CLOSE || mode == TRANSIT_HIDE) {
-                    if (isOpening) {
-                        // put on bottom and leave visible without fade
-                        t.setLayer(leash, -i);
-                    } else {
-                        // put on top and fade out
-                        t.setLayer(leash, info.getChanges().size() - i);
-                        startExampleAnimation(transitionToken, leash, false /* show */);
-                    }
-                } else {
-                    t.setLayer(leash, info.getChanges().size() - i);
                 }
+                continue;
             }
-            t.apply();
-            onFinish(transitionToken);
-        });
+
+            t.reparent(leash, info.getRootLeash());
+            t.setPosition(leash, change.getEndAbsBounds().left - info.getRootOffset().x,
+                    change.getEndAbsBounds().top - info.getRootOffset().y);
+            // Put all the OPEN/SHOW on top
+            if (mode == TRANSIT_OPEN || mode == TRANSIT_SHOW) {
+                t.show(leash);
+                t.setMatrix(leash, 1, 0, 0, 1);
+                if (isOpening) {
+                    // put on top and fade in
+                    t.setLayer(leash, info.getChanges().size() - i);
+                    t.setAlpha(leash, 0.f);
+                    startExampleAnimation(transitionToken, leash, true /* show */);
+                } else {
+                    // put on bottom and leave it visible without fade
+                    t.setLayer(leash, -i);
+                    t.setAlpha(leash, 1.f);
+                }
+            } else if (mode == TRANSIT_CLOSE || mode == TRANSIT_HIDE) {
+                if (isOpening) {
+                    // put on bottom and leave visible without fade
+                    t.setLayer(leash, -i);
+                } else {
+                    // put on top and fade out
+                    t.setLayer(leash, info.getChanges().size() - i);
+                    startExampleAnimation(transitionToken, leash, false /* show */);
+                }
+            } else {
+                t.setLayer(leash, info.getChanges().size() - i);
+            }
+        }
+        t.apply();
+        onFinish(transitionToken);
     }
 
-    @MainThread
     private void onFinish(IBinder transition) {
         if (!mActiveTransitions.get(transition).isEmpty()) return;
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS,
@@ -194,16 +199,32 @@ public class Transitions extends ITransitionPlayer.Stub {
         mOrganizer.finishTransition(transition, null, null);
     }
 
-    @Override
-    public void requestStartTransition(int type, @NonNull IBinder transitionToken) {
+    private void requestStartTransition(int type, @NonNull IBinder transitionToken) {
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "Transition requested: type=%d %s",
                 type, transitionToken);
-        mMainExecutor.execute(() -> {
-            if (mActiveTransitions.containsKey(transitionToken)) {
-                throw new RuntimeException("Transition already started " + transitionToken);
-            }
-            IBinder transition = mOrganizer.startTransition(type, transitionToken, null /* wct */);
-            mActiveTransitions.put(transition, null);
-        });
+
+        if (mActiveTransitions.containsKey(transitionToken)) {
+            throw new RuntimeException("Transition already started " + transitionToken);
+        }
+        IBinder transition = mOrganizer.startTransition(type, transitionToken, null /* wct */);
+        mActiveTransitions.put(transition, null);
+    }
+
+    @BinderThread
+    private class TransitionPlayerImpl extends ITransitionPlayer.Stub {
+        @Override
+        public void onTransitionReady(IBinder iBinder, TransitionInfo transitionInfo,
+                SurfaceControl.Transaction transaction) throws RemoteException {
+            mMainExecutor.execute(() -> {
+                Transitions.this.onTransitionReady(iBinder, transitionInfo, transaction);
+            });
+        }
+
+        @Override
+        public void requestStartTransition(int i, IBinder iBinder) throws RemoteException {
+            mMainExecutor.execute(() -> {
+                Transitions.this.requestStartTransition(i, iBinder);
+            });
+        }
     }
 }

@@ -16,14 +16,19 @@
 
 package com.android.systemui.wmshell;
 
+import static android.os.Process.THREAD_PRIORITY_DISPLAY;
+
+import android.animation.AnimationHandler;
 import android.app.IActivityManager;
 import android.content.Context;
 import android.content.pm.LauncherApps;
 import android.content.pm.PackageManager;
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.view.IWindowManager;
 import android.view.WindowManager;
 
+import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.dagger.WMSingleton;
@@ -36,7 +41,6 @@ import com.android.wm.shell.WindowManagerShellWrapper;
 import com.android.wm.shell.apppairs.AppPairs;
 import com.android.wm.shell.bubbles.BubbleController;
 import com.android.wm.shell.bubbles.Bubbles;
-import com.android.wm.shell.common.AnimationThread;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayImeController;
 import com.android.wm.shell.common.FloatingContentCoordinator;
@@ -46,6 +50,9 @@ import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.SystemWindows;
 import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.common.TransactionPool;
+import com.android.wm.shell.common.annotations.ChoreographerSfVsync;
+import com.android.wm.shell.common.annotations.ShellAnimationThread;
+import com.android.wm.shell.common.annotations.ShellMainThread;
 import com.android.wm.shell.draganddrop.DragAndDropController;
 import com.android.wm.shell.hidedisplaycutout.HideDisplayCutout;
 import com.android.wm.shell.hidedisplaycutout.HideDisplayCutoutController;
@@ -62,6 +69,7 @@ import com.android.wm.shell.pip.phone.PipTouchHandler;
 import com.android.wm.shell.splitscreen.SplitScreen;
 
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 import dagger.BindsOptionalOf;
 import dagger.Module;
@@ -73,6 +81,89 @@ import dagger.Provides;
  */
 @Module
 public abstract class WMShellBaseModule {
+
+    private static final boolean ENABLE_SHELL_MAIN_THREAD = false;
+
+    //
+    // Shell Concurrency - Components used for managing threading in the Shell and SysUI
+    //
+
+    /**
+     * Provide a SysUI main-thread Executor.
+     */
+    @WMSingleton
+    @Provides
+    @Main
+    public static ShellExecutor provideSysUIMainExecutor(@Main Handler sysuiMainHandler) {
+        return new HandlerExecutor(sysuiMainHandler);
+    }
+
+    /**
+     * Shell main-thread Handler, don't use this unless really necessary (ie. need to dedupe
+     * multiple types of messages, etc.)
+     */
+    @WMSingleton
+    @Provides
+    @ShellMainThread
+    public static Handler provideShellMainHandler(@Main Handler sysuiMainHandler) {
+        if (ENABLE_SHELL_MAIN_THREAD) {
+             HandlerThread shellMainThread = new HandlerThread("wmshell.main");
+             shellMainThread.start();
+             return shellMainThread.getThreadHandler();
+        }
+        return sysuiMainHandler;
+    }
+
+    /**
+     * Provide a Shell main-thread Executor.
+     */
+    @WMSingleton
+    @Provides
+    @ShellMainThread
+    public static ShellExecutor provideShellMainExecutor(@ShellMainThread Handler shellMainHandler,
+            @Main ShellExecutor sysuiMainExecutor) {
+        if (ENABLE_SHELL_MAIN_THREAD) {
+            return new HandlerExecutor(shellMainHandler);
+        }
+        return sysuiMainExecutor;
+    }
+
+    /**
+     * Provide a Shell animation-thread Executor.
+     */
+    @WMSingleton
+    @Provides
+    @ShellAnimationThread
+    public static ShellExecutor provideShellAnimationExecutor() {
+         HandlerThread shellAnimationThread = new HandlerThread("wmshell.anim",
+                 THREAD_PRIORITY_DISPLAY);
+         shellAnimationThread.start();
+         return new HandlerExecutor(shellAnimationThread.getThreadHandler());
+    }
+
+    /**
+     * Provide a Shell animation-thread AnimationHandler.  The AnimationHandler can be set on
+     * {@link android.animation.ValueAnimator}s and will ensure that the animation will run on
+     * the Shell animation-thread.
+     */
+    @WMSingleton
+    @Provides
+    @ChoreographerSfVsync
+    public static AnimationHandler provideShellAnimationExecutorSfVsyncAnimationHandler(
+            @ShellAnimationThread ShellExecutor shellAnimationExecutor) {
+        try {
+            AnimationHandler handler = new AnimationHandler();
+            shellAnimationExecutor.executeBlocking(() -> {
+                // This is called on the animation thread since it calls
+                // Choreographer.getSfInstance() which returns a thread-local Choreographer instance
+                // that uses the SF vsync
+                handler.setProvider(new SfVsyncFrameCallbackProvider());
+            }, 1, TimeUnit.SECONDS);
+            return handler;
+        } catch (InterruptedException e) {
+            throw new RuntimeException("Failed to initialize SfVsync animation handler in 1s", e);
+        }
+    }
 
     @WMSingleton
     @Provides
@@ -139,8 +230,9 @@ public abstract class WMShellBaseModule {
 
     @WMSingleton
     @Provides
-    static WindowManagerShellWrapper provideWindowManagerShellWrapper() {
-        return new WindowManagerShellWrapper();
+    static WindowManagerShellWrapper provideWindowManagerShellWrapper(
+            @ShellMainThread ShellExecutor shellMainExecutor) {
+        return new WindowManagerShellWrapper(shellMainExecutor);
     }
 
     @WMSingleton
@@ -187,9 +279,11 @@ public abstract class WMShellBaseModule {
     @WMSingleton
     @Provides
     static ShellTaskOrganizer provideShellTaskOrganizer(SyncTransactionQueue syncQueue,
-            ShellExecutor mainExecutor, TransactionPool transactionPool, Context context) {
-        return new ShellTaskOrganizer(syncQueue, transactionPool, mainExecutor,
-                AnimationThread.instance().getExecutor(), context);
+            @ShellMainThread ShellExecutor shellMainExecutor,
+            @ShellAnimationThread ShellExecutor shellAnimationExecutor,
+            TransactionPool transactionPool, Context context) {
+        return new ShellTaskOrganizer(syncQueue, transactionPool, shellMainExecutor,
+                shellAnimationExecutor, context);
     }
 
     @WMSingleton
@@ -230,12 +324,6 @@ public abstract class WMShellBaseModule {
 
     @WMSingleton
     @Provides
-    static ShellExecutor provideMainShellExecutor(@Main Handler handler) {
-        return new HandlerExecutor(handler);
-    }
-
-    @WMSingleton
-    @Provides
     static Optional<HideDisplayCutout> provideHideDisplayCutoutController(Context context,
             DisplayController displayController) {
         return Optional.ofNullable(HideDisplayCutoutController.create(context, displayController));
@@ -262,5 +350,4 @@ public abstract class WMShellBaseModule {
     static LetterboxConfigController provideLetterboxConfigController(Context context) {
         return new LetterboxConfigController(context);
     }
-
 }

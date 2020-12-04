@@ -122,6 +122,7 @@ android_library {
         "kotlinx-coroutines-android",
         "kotlinx-coroutines-core",
         "iconloader_base",
+        "jsr330",
         "protolog-lib",
         "SettingsLib",
         "WindowManager-Shell-proto",
