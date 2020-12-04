@@ -983,8 +983,15 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @Override
     public void setDevicePolicySafetyChecker(DevicePolicySafetyChecker safetyChecker) {
-        Slog.i(LOG_TAG, "Setting DevicePolicySafetyChecker as " + safetyChecker.getClass());
+        Slog.i(LOG_TAG, "Setting DevicePolicySafetyChecker as " + safetyChecker);
         mSafetyChecker = safetyChecker;
+    }
+
+    /**
+     * Used by {@link OneTimeSafetyChecker} only.
+     */
+    DevicePolicySafetyChecker getDevicePolicySafetyChecker() {
+        return mSafetyChecker;
     }
 
     /**
@@ -994,6 +1001,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
      */
     private void checkCanExecuteOrThrowUnsafe(@DevicePolicyOperation int operation) {
         if (!canExecute(operation)) {
+            if (mSafetyChecker == null) {
+                // Happens on CTS after it's set just once (by OneTimeSafetyChecker)
+                throw new UnsafeStateException(operation);
+            }
+            // Let mSafetyChecker customize it (for example, by explaining how to retry)
             throw mSafetyChecker.newUnsafeStateException(operation);
         }
     }
@@ -1003,6 +1015,17 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
      */
     boolean canExecute(@DevicePolicyOperation int operation) {
         return mSafetyChecker == null || mSafetyChecker.isDevicePolicyOperationSafe(operation);
+    }
+
+    /**
+     * Used by {@code cmd device_policy} to set the result of the next safety operation check.
+     */
+    void setNextOperationSafety(@DevicePolicyOperation int operation, boolean safe) {
+        Preconditions.checkCallAuthorization(
+                hasCallingOrSelfPermission(permission.MANAGE_DEVICE_ADMINS));
+        Slog.i(LOG_TAG, "setNextOperationSafety(" + DevicePolicyManager.operationToString(operation)
+                + ", " + safe + ")");
+        mSafetyChecker = new OneTimeSafetyChecker(this, operation, safe);
     }
 
     /**
