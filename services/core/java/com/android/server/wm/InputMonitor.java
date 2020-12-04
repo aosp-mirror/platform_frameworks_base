@@ -18,7 +18,6 @@ package com.android.server.wm;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
-import static android.view.Display.INVALID_DISPLAY;
 import static android.view.WindowManager.INPUT_CONSUMER_PIP;
 import static android.view.WindowManager.INPUT_CONSUMER_RECENTS_ANIMATION;
 import static android.view.WindowManager.INPUT_CONSUMER_WALLPAPER;
@@ -617,7 +616,6 @@ final class InputMonitor {
         inputWindowHandle.setScaleFactor(1f);
         inputWindowHandle.setLayoutParamsFlags(
                 FLAG_NOT_TOUCH_MODAL | FLAG_NOT_TOUCHABLE | FLAG_NOT_FOCUSABLE);
-        inputWindowHandle.setPortalToDisplayId(INVALID_DISPLAY);
         inputWindowHandle.clearTouchableRegion();
         inputWindowHandle.setTouchableRegionCrop(null);
     }

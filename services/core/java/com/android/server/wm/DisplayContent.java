@@ -5364,7 +5364,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         portalWindowHandle.scaleFactor = 1f;
         portalWindowHandle.ownerPid = Process.myPid();
         portalWindowHandle.ownerUid = Process.myUid();
-        portalWindowHandle.portalToDisplayId = mDisplayId;
         return portalWindowHandle;
     }
 
