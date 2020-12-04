@@ -18,6 +18,7 @@ package android.media;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.RequiresPermission;
 import android.annotation.TestApi;
 import android.bluetooth.BluetoothCodecConfig;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -1550,9 +1551,11 @@ public class AudioSystem
 
     /** @hide returns master balance value in range -1.f -> 1.f, where 0.f is dead center. */
     @TestApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SETTINGS)
     public static native float getMasterBalance();
     /** @hide Changes the audio balance of the device. */
     @TestApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SETTINGS)
     public static native int setMasterBalance(float balance);
 
     // helpers for android.media.AudioManager.getProperty(), see description there for meaning

@@ -981,9 +981,9 @@ package android.media {
   }
 
   public class AudioSystem {
-    method public static float getMasterBalance();
+    method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SETTINGS) public static float getMasterBalance();
     method public static final int getNumStreamTypes();
-    method public static int setMasterBalance(float);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SETTINGS) public static int setMasterBalance(float);
     field public static final int DEVICE_ROLE_DISABLED = 2; // 0x2
     field public static final int DEVICE_ROLE_NONE = 0; // 0x0
     field public static final int DEVICE_ROLE_PREFERRED = 1; // 0x1
