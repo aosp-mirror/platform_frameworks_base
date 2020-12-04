@@ -31,7 +31,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.app.AlarmManager;
 import android.database.ContentObserver;
 import android.hardware.Sensor;
 import android.hardware.display.AmbientDisplayConfiguration;
@@ -65,8 +64,6 @@ import java.util.function.Consumer;
 public class DozeSensorsTest extends SysuiTestCase {
 
     @Mock
-    private AlarmManager mAlarmManager;
-    @Mock
     private AsyncSensorManager mSensorManager;
     @Mock
     private DozeParameters mDozeParameters;
@@ -78,8 +75,6 @@ public class DozeSensorsTest extends SysuiTestCase {
     private DozeSensors.Callback mCallback;
     @Mock
     private Consumer<Boolean> mProxCallback;
-    @Mock
-    private AlwaysOnDisplayPolicy mAlwaysOnDisplayPolicy;
     @Mock
     private TriggerSensor mTriggerSensor;
     @Mock
@@ -115,7 +110,7 @@ public class DozeSensorsTest extends SysuiTestCase {
 
     @Test
     public void testSensorDebounce() {
-        mDozeSensors.setListening(true);
+        mDozeSensors.setListening(true, true);
 
         mWakeLockScreenListener.onSensorChanged(mock(SensorManagerPlugin.SensorEvent.class));
         mTestableLooper.processAllMessages();
@@ -133,7 +128,7 @@ public class DozeSensorsTest extends SysuiTestCase {
     @Test
     public void testSetListening_firstTrue_registerSettingsObserver() {
         verify(mSensorManager, never()).registerListener(any(), any(Sensor.class), anyInt());
-        mDozeSensors.setListening(true);
+        mDozeSensors.setListening(true, true);
 
         verify(mTriggerSensor).registerSettingsObserver(any(ContentObserver.class));
     }
@@ -141,8 +136,8 @@ public class DozeSensorsTest extends SysuiTestCase {
     @Test
     public void testSetListening_twiceTrue_onlyRegisterSettingsObserverOnce() {
         verify(mSensorManager, never()).registerListener(any(), any(Sensor.class), anyInt());
-        mDozeSensors.setListening(true);
-        mDozeSensors.setListening(true);
+        mDozeSensors.setListening(true, true);
+        mDozeSensors.setListening(true, true);
 
         verify(mTriggerSensor, times(1)).registerSettingsObserver(any(ContentObserver.class));
     }
