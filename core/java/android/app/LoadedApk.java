@@ -1284,7 +1284,7 @@ public final class LoadedApk {
                 Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
                 throw new RuntimeException(
                     "Unable to instantiate application " + appClass
-                    + ": " + e.toString(), e);
+                    + " package " + mPackageName + ": " + e.toString(), e);
             }
         }
         mActivityThread.mAllApplications.add(app);
