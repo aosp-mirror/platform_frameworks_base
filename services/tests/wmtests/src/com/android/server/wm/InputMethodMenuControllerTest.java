@@ -17,6 +17,7 @@
 package com.android.server.wm;
 
 import static android.view.Display.DEFAULT_DISPLAY;
+import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
@@ -26,7 +27,6 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 
@@ -70,13 +70,15 @@ public class InputMethodMenuControllerTest extends WindowTestsBase {
         spyOn(wms);
         doAnswer(invocation -> {
             Object[] args = invocation.getArguments();
-            final IBinder token = (IBinder) args[0];
-            final int windowType = (int) args[1];
-            new WindowToken(mWm, token, windowType, true /* persistOnEmpty */,
-                    mDefaultDisplay, true /* ownerCanManageAppTokens */, 1000 /* ownerUid */,
-                    false /* roundedCornerOverlay */, true /* fromClientToken */);
-            return WindowManagerGlobal.ADD_OKAY;
-        }).when(wms).addWindowTokenWithOptions(any(), anyInt(), anyInt(), any(), anyString());
+            IBinder clientToken = (IBinder) args[0];
+            int displayId = (int) args[2];
+            DisplayContent dc = mWm.mRoot.getDisplayContent(displayId);
+            mWm.mWindowContextListenerController.registerWindowContainerListener(clientToken,
+                    dc.getImeContainer(), 1000 /* ownerUid */, TYPE_INPUT_METHOD_DIALOG,
+                    null /* options */);
+            return true;
+        }).when(wms).registerWindowContextListener(any(), eq(TYPE_INPUT_METHOD_DIALOG),
+                anyInt(), any());
 
         mSecondaryDisplay = new TestDisplayContent.Builder(mAtm, 1000, 1000).build();
 
@@ -95,14 +97,12 @@ public class InputMethodMenuControllerTest extends WindowTestsBase {
 
         assertImeSwitchContextMetricsValidity(contextOnDefaultDisplay, mDefaultDisplay);
 
-        // Obtain the context again and check they are the same instance and match the display
-        // metrics of the secondary display.
+        // Obtain the context again and check if the window metrics match the IME container bounds
+        // of the secondary display.
         final Context contextOnSecondaryDisplay = mController.getSettingsContext(
                 mSecondaryDisplay.getDisplayId());
 
         assertImeSwitchContextMetricsValidity(contextOnSecondaryDisplay, mSecondaryDisplay);
-        assertThat(contextOnDefaultDisplay.getWindowContextToken())
-                .isEqualTo(contextOnSecondaryDisplay.getWindowContextToken());
     }
 
     private void assertImeSwitchContextMetricsValidity(Context context, DisplayContent dc) {
