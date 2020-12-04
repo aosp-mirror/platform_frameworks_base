@@ -448,6 +448,8 @@ applications that come with the platform
         <!-- Permissions required for CTS test - android.server.biometrics -->
         <permission name="android.permission.USE_BIOMETRIC" />
         <permission name="android.permission.TEST_BIOMETRIC" />
+        <!-- Permissions required for CTS test - CtsContactsProviderTestCases -->
+        <permission name="android.contacts.permission.MANAGE_SIM_ACCOUNTS" />
     </privapp-permissions>
 
     <privapp-permissions package="com.android.statementservice">
