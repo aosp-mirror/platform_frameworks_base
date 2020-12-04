@@ -62,12 +62,9 @@ import android.annotation.IntDef;
 import android.annotation.MainThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.TestApi;
 import android.annotation.UiContext;
 import android.app.ActivityManager;
 import android.app.Dialog;
-import android.compat.annotation.ChangeId;
-import android.compat.annotation.EnabledSince;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -415,29 +412,7 @@ public class InputMethodService extends AbstractInputMethodService {
 
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     int mTheme = 0;
-
-    /**
-     * Finish the {@link InputConnection} when the device becomes
-     * {@link android.os.PowerManager#isInteractive non-interactive}.
-     *
-     * <p>
-     * If enabled by the current {@link InputMethodService input method}, the current input
-     * connection will be {@link InputMethodService#onFinishInput finished} whenever the devices
-     * becomes non-interactive.
-     *
-     * <p>
-     * If not enabled, the current input connection will instead be silently deactivated when the
-     * devices becomes non-interactive, and an {@link InputMethodService#onFinishInput
-     * onFinishInput()} {@link InputMethodService#onStartInput onStartInput()} pair is dispatched
-     * when the device becomes interactive again.
-     *
-     * @hide
-     */
-    @TestApi
-    @ChangeId
-    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.S)
-    public static final long FINISH_INPUT_NO_FALLBACK_CONNECTION = 156215187L; // This is a bug id.
-
+    
     LayoutInflater mInflater;
     TypedArray mThemeAttrs;
     @UnsupportedAppUsage
@@ -2377,7 +2352,7 @@ public class InputMethodService extends AbstractInputMethodService {
     }
 
     void doStartInput(InputConnection ic, EditorInfo attribute, boolean restarting) {
-        if (!restarting && mInputStarted) {
+        if (!restarting) {
             doFinishInput();
         }
         ImeTracing.getInstance().triggerServiceDump("InputMethodService#doStartInput", this,

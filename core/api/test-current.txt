@@ -839,14 +839,6 @@ package android.hardware.soundtrigger {
 
 }
 
-package android.inputmethodservice {
-
-  public class InputMethodService extends android.inputmethodservice.AbstractInputMethodService {
-    field public static final long FINISH_INPUT_NO_FALLBACK_CONNECTION = 156215187L; // 0x94fa793L
-  }
-
-}
-
 package android.location {
 
   public final class GnssClock implements android.os.Parcelable {

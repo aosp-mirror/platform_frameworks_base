@@ -222,25 +222,6 @@ public final class ImeFocusController {
     }
 
     /**
-     * To handle the lifecycle of the input connection when the device interactivity state changed.
-     * (i.e. Calling IMS#onFinishInput when the device screen-off and Calling IMS#onStartInput
-     * when the device screen-on again).
-     */
-    @UiThread
-    public void onInteractiveChanged(boolean interactive) {
-        final InputMethodManagerDelegate immDelegate = getImmDelegate();
-        if (!immDelegate.isCurrentRootView(mViewRootImpl)) {
-            return;
-        }
-        if (interactive) {
-            final View focusedView = mViewRootImpl.mView.findFocus();
-            onViewFocusChanged(focusedView, focusedView != null);
-        } else {
-            mDelegate.finishInputAndReportToIme();
-        }
-    }
-
-    /**
      * @param windowAttribute {@link WindowManager.LayoutParams} to be checked.
      * @return Whether the window is in local focus mode or not.
      */
@@ -275,7 +256,6 @@ public final class ImeFocusController {
                 @WindowManager.LayoutParams.SoftInputModeFlags int softInputMode, int windowFlags,
                 boolean forceNewFocus);
         void finishInput();
-        void finishInputAndReportToIme();
         void closeCurrentIme();
         void finishComposingText();
         void setCurrentRootView(ViewRootImpl rootView);
