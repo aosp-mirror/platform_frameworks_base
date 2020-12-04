@@ -20,8 +20,6 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4567566098528588863">"அமைப்புகளின் சேமிப்பிடம்"</string>
-    <!-- no translation found for wifi_softap_config_change (5688373762357941645) -->
-    <skip />
-    <!-- no translation found for wifi_softap_config_change_summary (8946397286141531087) -->
-    <skip />
+    <string name="wifi_softap_config_change" msgid="5688373762357941645">"ஹாட்ஸ்பாட் அமைப்புகள் மாற்றப்பட்டன"</string>
+    <string name="wifi_softap_config_change_summary" msgid="8946397286141531087">"விவரங்களைப் பார்க்க, தட்டவும்"</string>
 </resources>
