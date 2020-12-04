@@ -89,7 +89,10 @@ public class SchemaToProtoConverterTest {
                                                                 TermMatchType.Code.PREFIX)))
                         .build();
 
-        assertThat(SchemaToProtoConverter.convert(emailSchema)).isEqualTo(expectedEmailProto);
+        assertThat(SchemaToProtoConverter.toSchemaTypeConfigProto(emailSchema))
+                .isEqualTo(expectedEmailProto);
+        assertThat(SchemaToProtoConverter.toAppSearchSchema(expectedEmailProto))
+                .isEqualTo(emailSchema);
     }
 
     @Test
@@ -151,7 +154,9 @@ public class SchemaToProtoConverterTest {
                                                                 TermMatchType.Code.UNKNOWN)))
                         .build();
 
-        assertThat(SchemaToProtoConverter.convert(musicRecordingSchema))
+        assertThat(SchemaToProtoConverter.toSchemaTypeConfigProto(musicRecordingSchema))
                 .isEqualTo(expectedMusicRecordingProto);
+        assertThat(SchemaToProtoConverter.toAppSearchSchema(expectedMusicRecordingProto))
+                .isEqualTo(musicRecordingSchema);
     }
 }
