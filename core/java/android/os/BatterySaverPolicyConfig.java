@@ -341,6 +341,38 @@ public final class BatterySaverPolicyConfig implements Parcelable {
         }
 
         /**
+         * Creates a Builder prepopulated with the values from the passed in
+         * {@link BatterySaverPolicyConfig}.
+         */
+        public Builder(@NonNull BatterySaverPolicyConfig batterySaverPolicyConfig) {
+            mAdjustBrightnessFactor = batterySaverPolicyConfig.getAdjustBrightnessFactor();
+            mAdvertiseIsEnabled = batterySaverPolicyConfig.getAdvertiseIsEnabled();
+            mDeferFullBackup = batterySaverPolicyConfig.getDeferFullBackup();
+            mDeferKeyValueBackup = batterySaverPolicyConfig.getDeferKeyValueBackup();
+
+            for (String key :
+                    batterySaverPolicyConfig.getDeviceSpecificSettings().keySet()) {
+                mDeviceSpecificSettings.put(key,
+                        batterySaverPolicyConfig.getDeviceSpecificSettings().get(key));
+            }
+
+            mDisableAnimation = batterySaverPolicyConfig.getDisableAnimation();
+            mDisableAod = batterySaverPolicyConfig.getDisableAod();
+            mDisableLaunchBoost = batterySaverPolicyConfig.getDisableLaunchBoost();
+            mDisableOptionalSensors = batterySaverPolicyConfig.getDisableOptionalSensors();
+            mDisableVibration = batterySaverPolicyConfig.getDisableVibration();
+            mEnableAdjustBrightness = batterySaverPolicyConfig.getEnableAdjustBrightness();
+            mEnableDataSaver = batterySaverPolicyConfig.getEnableDataSaver();
+            mEnableFirewall = batterySaverPolicyConfig.getEnableFirewall();
+            mEnableNightMode = batterySaverPolicyConfig.getEnableNightMode();
+            mEnableQuickDoze = batterySaverPolicyConfig.getEnableQuickDoze();
+            mForceAllAppsStandby = batterySaverPolicyConfig.getForceAllAppsStandby();
+            mForceBackgroundCheck = batterySaverPolicyConfig.getForceBackgroundCheck();
+            mLocationMode = batterySaverPolicyConfig.getLocationMode();
+            mSoundTriggerMode = batterySaverPolicyConfig.getSoundTriggerMode();
+        }
+
+        /**
          * Set how much to adjust the screen brightness while in Battery Saver. The value should
          * be in the [0, 1] range, where 1 will not change the brightness. This will have no
          * effect if {@link #setEnableAdjustBrightness(boolean)} is not called with {@code true}.

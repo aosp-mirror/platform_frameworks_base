@@ -1638,6 +1638,65 @@ public final class PowerManager {
     }
 
     /**
+     * Gets the current policy for full power save mode.
+     *
+     * @return The {@link BatterySaverPolicyConfig} which is currently set for the full power save
+     *          policy level.
+     *
+     * @hide
+     */
+    @SystemApi
+    @NonNull
+    public BatterySaverPolicyConfig getFullPowerSavePolicy() {
+        try {
+            return mService.getFullPowerSavePolicy();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Sets the policy for full power save mode.
+     *
+     * Any settings set by this API will persist for only one session of full battery saver mode.
+     * The settings set by this API are cleared upon exit of full battery saver mode, and the
+     * caller is expected to set the desired values again for the next full battery saver mode
+     * session if desired.
+     *
+     * Use-cases:
+     * 1. Set policy outside of full battery saver mode
+     *     - full policy set -> enter BS -> policy setting applied -> exit BS -> setting cleared
+     * 2. Set policy inside of full battery saver mode
+     *     - enter BS -> full policy set -> policy setting applied -> exit BS -> setting cleared
+     *
+     * This API is intended to be used with {@link #getFullPowerSavePolicy()} API when a client only
+     * wants to modify a specific setting(s) and leave the remaining policy attributes the same.
+     * Example:
+     * BatterySaverPolicyConfig newFullPolicyConfig =
+     *     new BatterySaverPolicyConfig.Builder(powerManager.getFullPowerSavePolicy())
+     *         .setSoundTriggerMode(PowerManager.SOUND_TRIGGER_MODE_ALL_DISABLED)
+     *         .build();
+     * powerManager.setFullPowerSavePolicy(newFullPolicyConfig);
+     *
+     * @return true if there was an effectual change. If full battery saver is enabled, then this
+     * will return true.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.DEVICE_POWER,
+            android.Manifest.permission.POWER_SAVER
+    })
+    public boolean setFullPowerSavePolicy(@NonNull BatterySaverPolicyConfig config) {
+        try {
+            return mService.setFullPowerSavePolicy(config);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Updates the current state of dynamic power savings and disable threshold. This is
      * a signal to the system which an app can update to serve as an indicator that
      * the user will be in a battery critical situation before being able to plug in.

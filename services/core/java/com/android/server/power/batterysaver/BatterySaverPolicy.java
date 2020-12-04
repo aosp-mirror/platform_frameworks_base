@@ -222,6 +222,10 @@ public class BatterySaverPolicy extends ContentObserver implements
     @GuardedBy("mLock")
     private Policy mAdaptivePolicy = DEFAULT_ADAPTIVE_POLICY;
 
+    /** The current default full policy. */
+    @GuardedBy("mLock")
+    private Policy mDefaultFullPolicy = DEFAULT_FULL_POLICY;
+
     /** The policy to be used for full battery saver. */
     @GuardedBy("mLock")
     private Policy mFullPolicy = DEFAULT_FULL_POLICY;
@@ -377,9 +381,8 @@ public class BatterySaverPolicy extends ContentObserver implements
                 }
             }
 
-            if (newFullPolicy != null && !mFullPolicy.equals(newFullPolicy)) {
-                mFullPolicy = newFullPolicy;
-                changed |= (mPolicyLevel == POLICY_LEVEL_FULL);
+            if (newFullPolicy != null) {
+                changed |= maybeUpdateDefaultFullPolicy(newFullPolicy);
             }
 
             if (newAdaptivePolicy != null && !mAdaptivePolicy.equals(newAdaptivePolicy)) {
@@ -447,13 +450,9 @@ public class BatterySaverPolicy extends ContentObserver implements
             Slog.i(TAG, "mDeviceSpecificSettings=" + mDeviceSpecificSettings);
         }
 
-        boolean changed = false;
-        Policy newFullPolicy = Policy.fromSettings(setting, deviceSpecificSetting,
-                mLastDeviceConfigProperties, null, DEFAULT_FULL_POLICY);
-        if (mPolicyLevel == POLICY_LEVEL_FULL && !mFullPolicy.equals(newFullPolicy)) {
-            changed = true;
-        }
-        mFullPolicy = newFullPolicy;
+        boolean changed = maybeUpdateDefaultFullPolicy(
+                Policy.fromSettings(setting, deviceSpecificSetting,
+                        mLastDeviceConfigProperties, null, DEFAULT_FULL_POLICY));
 
         mDefaultAdaptivePolicy = Policy.fromSettings("", "",
                 mLastDeviceConfigProperties, KEY_SUFFIX_ADAPTIVE, DEFAULT_ADAPTIVE_POLICY);
@@ -802,6 +801,33 @@ public class BatterySaverPolicy extends ContentObserver implements
             );
         }
 
+        BatterySaverPolicyConfig toConfig() {
+            return new BatterySaverPolicyConfig.Builder()
+                    .addDeviceSpecificSetting(KEY_CPU_FREQ_INTERACTIVE,
+                            cpuFrequenciesForInteractive.toString())
+                    .addDeviceSpecificSetting(KEY_CPU_FREQ_NONINTERACTIVE,
+                            cpuFrequenciesForNoninteractive.toString())
+                    .setAdjustBrightnessFactor(adjustBrightnessFactor)
+                    .setAdvertiseIsEnabled(advertiseIsEnabled)
+                    .setDeferFullBackup(deferFullBackup)
+                    .setDeferKeyValueBackup(deferKeyValueBackup)
+                    .setDisableAnimation(disableAnimation)
+                    .setDisableAod(disableAod)
+                    .setDisableLaunchBoost(disableLaunchBoost)
+                    .setDisableOptionalSensors(disableOptionalSensors)
+                    .setDisableVibration(disableVibration)
+                    .setEnableAdjustBrightness(enableAdjustBrightness)
+                    .setEnableDataSaver(enableDataSaver)
+                    .setEnableFirewall(enableFirewall)
+                    .setEnableNightMode(enableNightMode)
+                    .setEnableQuickDoze(enableQuickDoze)
+                    .setForceAllAppsStandby(forceAllAppsStandby)
+                    .setForceBackgroundCheck(forceBackgroundCheck)
+                    .setLocationMode(locationMode)
+                    .setSoundTriggerMode(soundTriggerMode)
+                    .build();
+        }
+
         @VisibleForTesting
         static Policy fromSettings(String settings, String deviceSpecificSettings,
                 DeviceConfig.Properties properties, String configSuffix) {
@@ -1032,6 +1058,11 @@ public class BatterySaverPolicy extends ContentObserver implements
             if (mPolicyLevel == level) {
                 return false;
             }
+            // If we are leaving the full policy level, then any overrides to the full policy set
+            // through #setFullPolicyLocked should be cleared.
+            if (mPolicyLevel == POLICY_LEVEL_FULL) {
+                mFullPolicy = mDefaultFullPolicy;
+            }
             switch (level) {
                 case POLICY_LEVEL_FULL:
                 case POLICY_LEVEL_ADAPTIVE:
@@ -1045,6 +1076,62 @@ public class BatterySaverPolicy extends ContentObserver implements
             updatePolicyDependenciesLocked();
             return true;
         }
+    }
+
+    /**
+     * Get the current policy for the provided policy level.
+     */
+    Policy getPolicyLocked(@PolicyLevel int policyLevel) {
+        switch (policyLevel) {
+            case POLICY_LEVEL_OFF:
+                return OFF_POLICY;
+            case POLICY_LEVEL_ADAPTIVE:
+                return mAdaptivePolicy;
+            case POLICY_LEVEL_FULL:
+                return mFullPolicy;
+        }
+
+        throw new IllegalArgumentException(
+                "getPolicyLocked: incorrect policy level provided - " + policyLevel);
+    }
+
+    /**
+     * Updates the default policy with the passed in policy.
+     * If the full policy is not overridden with runtime settings, then the full policy will be
+     * updated.
+     *
+     * @return True if the active policy requires an update, false if not.
+     */
+    private boolean maybeUpdateDefaultFullPolicy(Policy p) {
+        boolean fullPolicyChanged = false;
+        if (!mDefaultFullPolicy.equals(p)) {
+            // default policy can be overridden by #setFullPolicyLocked
+            boolean isDefaultFullPolicyOverridden = !mDefaultFullPolicy.equals(mFullPolicy);
+            if (!isDefaultFullPolicyOverridden) {
+                mFullPolicy = p;
+                fullPolicyChanged = (mPolicyLevel == POLICY_LEVEL_FULL);
+            }
+            mDefaultFullPolicy = p;
+        }
+        return fullPolicyChanged;
+    }
+
+    /** @return true if the current policy changed and the policy level is FULL. */
+    boolean setFullPolicyLocked(Policy p) {
+        if (p == null) {
+            Slog.wtf(TAG, "setFullPolicy given null policy");
+            return false;
+        }
+        if (mFullPolicy.equals(p)) {
+            return false;
+        }
+
+        mFullPolicy = p;
+        if (mPolicyLevel == POLICY_LEVEL_FULL) {
+            updatePolicyDependenciesLocked();
+            return true;
+        }
+        return false;
     }
 
     /** @return true if the current policy changed and the policy level is ADAPTIVE. */
@@ -1154,7 +1241,8 @@ public class BatterySaverPolicy extends ContentObserver implements
             ipw.println("mAutomotiveProjectionActive=" + mAutomotiveProjectionActive.get());
             ipw.println("mPolicyLevel=" + mPolicyLevel);
 
-            dumpPolicyLocked(ipw, "full", mFullPolicy);
+            dumpPolicyLocked(ipw, "default full", mDefaultFullPolicy);
+            dumpPolicyLocked(ipw, "current full", mFullPolicy);
             dumpPolicyLocked(ipw, "default adaptive", mDefaultAdaptivePolicy);
             dumpPolicyLocked(ipw, "current adaptive", mAdaptivePolicy);
             dumpPolicyLocked(ipw, "effective", mEffectivePolicyRaw);

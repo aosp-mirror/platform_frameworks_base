@@ -502,6 +502,33 @@ public class BatterySaverStateMachine {
     }
 
     /**
+     * Change the full battery saver policy.
+     */
+    public BatterySaverPolicyConfig getFullBatterySaverPolicy() {
+        if (DEBUG) {
+            Slog.d(TAG, "getFullBatterySaverPolicy");
+        }
+
+        synchronized (mLock) {
+            return mBatterySaverController.getPolicyLocked(BatterySaverPolicy.POLICY_LEVEL_FULL);
+        }
+    }
+
+    /**
+     * Change the full battery saver policy.
+     */
+    public boolean setFullBatterySaverPolicy(BatterySaverPolicyConfig config) {
+        if (DEBUG) {
+            Slog.d(TAG, "setFullBatterySaverPolicy: config=" + config);
+        }
+
+        synchronized (mLock) {
+            return mBatterySaverController.setFullPolicyLocked(config,
+                    BatterySaverController.REASON_FULL_POWER_SAVINGS_CHANGED);
+        }
+    }
+
+    /**
      * Enable or disable the current adaptive battery saver policy. This may not change what's in
      * effect if full battery saver is also enabled.
      */

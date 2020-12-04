@@ -58,6 +58,7 @@ import android.hardware.power.Boost;
 import android.hardware.power.Mode;
 import android.os.BatteryManager;
 import android.os.BatteryManagerInternal;
+import android.os.BatterySaverPolicyConfig;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
@@ -1142,5 +1143,34 @@ public class PowerManagerServiceTest {
         // Native call for interactive returns false.
         assertFalse(
                 mService.getBinderServiceInstance().setPowerModeChecked(Mode.INTERACTIVE, false));
+    }
+
+    @Test
+    public void testGetFullPowerSavePolicy_returnsStateMachineResult() {
+        createService();
+        mService.systemReady(null);
+        BatterySaverPolicyConfig mockReturnConfig = new BatterySaverPolicyConfig.Builder().build();
+        when(mBatterySaverStateMachineMock.getFullBatterySaverPolicy())
+                .thenReturn(mockReturnConfig);
+
+        mService.getBinderServiceInstance().setPowerSaveModeEnabled(true);
+        BatterySaverPolicyConfig policyConfig =
+                mService.getBinderServiceInstance().getFullPowerSavePolicy();
+        assertThat(mockReturnConfig).isEqualTo(policyConfig);
+        verify(mBatterySaverStateMachineMock).getFullBatterySaverPolicy();
+    }
+
+    @Test
+    public void testSetFullPowerSavePolicy_callsStateMachine() {
+        createService();
+        mService.systemReady(null);
+        BatterySaverPolicyConfig mockSetPolicyConfig =
+                new BatterySaverPolicyConfig.Builder().build();
+        when(mBatterySaverStateMachineMock.setFullBatterySaverPolicy(any())).thenReturn(true);
+
+        mService.getBinderServiceInstance().setPowerSaveModeEnabled(true);
+        assertThat(mService.getBinderServiceInstance()
+                .setFullPowerSavePolicy(mockSetPolicyConfig)).isTrue();
+        verify(mBatterySaverStateMachineMock).setFullBatterySaverPolicy(eq(mockSetPolicyConfig));
     }
 }
