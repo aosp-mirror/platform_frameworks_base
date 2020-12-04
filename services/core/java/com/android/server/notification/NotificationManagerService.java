@@ -242,7 +242,6 @@ import android.widget.Toast;
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.compat.IPlatformCompat;
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
 import com.android.internal.logging.InstanceId;
 import com.android.internal.logging.InstanceIdSequence;
@@ -468,7 +467,6 @@ public class NotificationManagerService extends SystemService {
     private UriGrantsManagerInternal mUgmInternal;
     private RoleObserver mRoleObserver;
     private UserManager mUm;
-    private IPlatformCompat mPlatformCompat;
     private ShortcutHelper mShortcutHelper;
 
     final IBinder mForegroundToken = new Binder();
@@ -1987,8 +1985,6 @@ public class NotificationManagerService extends SystemService {
         mDeviceIdleManager = getContext().getSystemService(DeviceIdleManager.class);
         mDpm = dpm;
         mUm = userManager;
-        mPlatformCompat = IPlatformCompat.Stub.asInterface(
-                ServiceManager.getService(Context.PLATFORM_COMPAT_SERVICE));
 
         mUiHandler = new Handler(UiThread.get().getLooper());
         String[] extractorNames;
@@ -2886,16 +2882,16 @@ public class NotificationManagerService extends SystemService {
         return userId == UserHandle.USER_ALL ? UserHandle.USER_SYSTEM : userId;
     }
 
-    private ToastRecord getToastRecord(int uid, int pid, String packageName, IBinder token,
-            @Nullable CharSequence text, @Nullable ITransientNotification callback, int duration,
-            Binder windowToken, int displayId,
+    private ToastRecord getToastRecord(int uid, int pid, String packageName, boolean isSystemToast,
+            IBinder token, @Nullable CharSequence text, @Nullable ITransientNotification callback,
+            int duration, Binder windowToken, int displayId,
             @Nullable ITransientNotificationCallback textCallback) {
         if (callback == null) {
-            return new TextToastRecord(this, mStatusBar, uid, pid, packageName, token, text,
-                    duration, windowToken, displayId, textCallback);
+            return new TextToastRecord(this, mStatusBar, uid, pid, packageName,
+                    isSystemToast, token, text, duration, windowToken, displayId, textCallback);
         } else {
-            return new CustomToastRecord(this, uid, pid, packageName, token, callback, duration,
-                    windowToken, displayId);
+            return new CustomToastRecord(this, uid, pid, packageName,
+                    isSystemToast, token, callback, duration, windowToken, displayId);
         }
     }
 
@@ -2966,31 +2962,10 @@ public class NotificationManagerService extends SystemService {
             }
 
             boolean isAppRenderedToast = (callback != null);
-            if (isAppRenderedToast && !isSystemToast && !isPackageInForegroundForToast(pkg,
-                    callingUid)) {
-                boolean block;
-                final long id = Binder.clearCallingIdentity();
-                try {
-                    // CHANGE_BACKGROUND_CUSTOM_TOAST_BLOCK is gated on targetSdk, so block will be
-                    // false for apps with targetSdk < R. For apps with targetSdk R+, text toasts
-                    // are not app-rendered, so isAppRenderedToast == true means it's a custom
-                    // toast.
-                    block = mPlatformCompat.isChangeEnabledByPackageName(
-                            CHANGE_BACKGROUND_CUSTOM_TOAST_BLOCK, pkg,
-                            callingUser.getIdentifier());
-                } catch (RemoteException e) {
-                    // Shouldn't happen have since it's a local local
-                    Slog.e(TAG, "Unexpected exception while checking block background custom toasts"
-                            + " change", e);
-                    block = false;
-                } finally {
-                    Binder.restoreCallingIdentity(id);
-                }
-                if (block) {
-                    Slog.w(TAG, "Blocking custom toast from package " + pkg
-                            + " due to package not in the foreground");
-                    return;
-                }
+            if (blockToast(callingUid, isSystemToast, isAppRenderedToast)) {
+                Slog.w(TAG, "Blocking custom toast from package " + pkg
+                        + " due to package not in the foreground at time the toast was posted");
+                return;
             }
 
             synchronized (mToastQueue) {
@@ -3023,8 +2998,8 @@ public class NotificationManagerService extends SystemService {
 
                         Binder windowToken = new Binder();
                         mWindowManagerInternal.addWindowToken(windowToken, TYPE_TOAST, displayId);
-                        record = getToastRecord(callingUid, callingPid, pkg, token, text, callback,
-                                duration, windowToken, displayId, textCallback);
+                        record = getToastRecord(callingUid, callingPid, pkg, isSystemToast, token,
+                                text, callback, duration, windowToken, displayId, textCallback);
                         mToastQueue.add(record);
                         index = mToastQueue.size() - 1;
                         keepProcessAliveForToastIfNeededLocked(callingPid);
@@ -3040,28 +3015,6 @@ public class NotificationManagerService extends SystemService {
                     Binder.restoreCallingIdentity(callingId);
                 }
             }
-        }
-
-        /**
-         * Implementation note: Our definition of foreground for toasts is an implementation matter
-         * and should strike a balance between functionality and anti-abuse effectiveness. We
-         * currently worry about the following cases:
-         * <ol>
-         *     <li>App with fullscreen activity: Allow toasts
-         *     <li>App behind translucent activity from other app: Block toasts
-         *     <li>App in multi-window: Allow toasts
-         *     <li>App with expanded bubble: Allow toasts
-         *     <li>App posting toasts on onCreate(), onStart(), onResume(): Allow toasts
-         *     <li>App posting toasts on onPause(), onStop(), onDestroy(): Block toasts
-         * </ol>
-         * Checking if the UID has any resumed activities satisfy use-cases above.
-         *
-         * <p>Checking if {@code mActivityManager.getUidImportance(callingUid) ==
-         * IMPORTANCE_FOREGROUND} does not work because it considers the app in foreground if it has
-         * any visible activities, failing case 2 in list above.
-         */
-        private boolean isPackageInForegroundForToast(String pkg, int callingUid) {
-            return mAtm.hasResumedActivity(callingUid);
         }
 
         @Override
@@ -7388,23 +7341,38 @@ public class NotificationManagerService extends SystemService {
                     CompatChanges.isChangeEnabled(RATE_LIMIT_TOASTS, record.uid);
             boolean isWithinQuota =
                     mToastRateLimiter.isWithinQuota(userId, record.pkg, TOAST_QUOTA_TAG);
-            if ((!rateLimitingEnabled || isWithinQuota) && record.show()) {
+
+            if (tryShowToast(record, rateLimitingEnabled, isWithinQuota)) {
                 scheduleDurationReachedLocked(record);
                 mIsCurrentToastShown = true;
                 if (rateLimitingEnabled) {
                     mToastRateLimiter.noteEvent(userId, record.pkg, TOAST_QUOTA_TAG);
                 }
                 return;
-            } else if (rateLimitingEnabled && !isWithinQuota) {
-                Slog.w(TAG, "Package " + record.pkg + " is above allowed toast quota, the "
-                        + "following toast was blocked and discarded: " + record);
             }
+
             int index = mToastQueue.indexOf(record);
             if (index >= 0) {
                 mToastQueue.remove(index);
             }
             record = (mToastQueue.size() > 0) ? mToastQueue.get(0) : null;
         }
+    }
+
+    /** Returns true if it successfully showed the toast. */
+    private boolean tryShowToast(ToastRecord record, boolean rateLimitingEnabled,
+            boolean isWithinQuota) {
+        if (rateLimitingEnabled && !isWithinQuota) {
+            Slog.w(TAG, "Package " + record.pkg + " is above allowed toast quota, the "
+                    + "following toast was blocked and discarded: " + record);
+            return false;
+        }
+        if (blockToast(record.uid, record.isSystemToast, record.isAppRendered())) {
+            Slog.w(TAG, "Blocking custom toast from package " + record.pkg
+                    + " due to package not in the foreground at the time of showing the toast");
+            return false;
+        }
+        return record.show();
     }
 
     @GuardedBy("mToastQueue")
@@ -7524,6 +7492,44 @@ public class NotificationManagerService extends SystemService {
         } catch (RemoteException e) {
             // Shouldn't happen.
         }
+    }
+
+    /**
+     * Implementation note: Our definition of foreground for toasts is an implementation matter
+     * and should strike a balance between functionality and anti-abuse effectiveness. We
+     * currently worry about the following cases:
+     * <ol>
+     *     <li>App with fullscreen activity: Allow toasts
+     *     <li>App behind translucent activity from other app: Block toasts
+     *     <li>App in multi-window: Allow toasts
+     *     <li>App with expanded bubble: Allow toasts
+     *     <li>App posting toasts on onCreate(), onStart(), onResume(): Allow toasts
+     *     <li>App posting toasts on onPause(), onStop(), onDestroy(): Block toasts
+     * </ol>
+     * Checking if the UID has any resumed activities satisfy use-cases above.
+     *
+     * <p>Checking if {@code mActivityManager.getUidImportance(callingUid) ==
+     * IMPORTANCE_FOREGROUND} does not work because it considers the app in foreground if it has
+     * any visible activities, failing case 2 in list above.
+     */
+    private boolean isPackageInForegroundForToast(int callingUid) {
+        return mAtm.hasResumedActivity(callingUid);
+    }
+
+    /**
+     * True if the toast should be blocked. It will return true if all of the following conditions
+     * apply: it's a custom toast, it's not a system toast, the package that sent the toast is in
+     * the background and CHANGE_BACKGROUND_CUSTOM_TOAST_BLOCK is enabled.
+     *
+     * CHANGE_BACKGROUND_CUSTOM_TOAST_BLOCK is gated on targetSdk, so it will return false for apps
+     * with targetSdk < R. For apps with targetSdk R+, text toasts are not app-rendered, so
+     * isAppRenderedToast == true means it's a custom toast.
+     */
+    private boolean blockToast(int uid, boolean isSystemToast, boolean isAppRenderedToast) {
+        return isAppRenderedToast
+                && !isSystemToast
+                && !isPackageInForegroundForToast(uid)
+                && CompatChanges.isChangeEnabled(CHANGE_BACKGROUND_CUSTOM_TOAST_BLOCK, uid);
     }
 
     private void handleRankingReconsideration(Message message) {
