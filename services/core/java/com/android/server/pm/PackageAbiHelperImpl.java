@@ -296,7 +296,7 @@ final class PackageAbiHelperImpl implements PackageAbiHelper {
 
     @Override
     public Pair<Abis, NativeLibraryPaths> derivePackageAbi(AndroidPackage pkg,
-            boolean isUpdatedSystemApp, String cpuAbiOverride)
+            boolean isUpdatedSystemApp, String cpuAbiOverride, File appLib32InstallDir)
             throws PackageManagerException {
         // Give ourselves some initial paths; we'll come back for another
         // pass once we've determined ABI below.
@@ -304,7 +304,7 @@ final class PackageAbiHelperImpl implements PackageAbiHelper {
         String pkgRawSecondaryCpuAbi = AndroidPackageUtils.getRawSecondaryCpuAbi(pkg);
         final NativeLibraryPaths initialLibraryPaths = deriveNativeLibraryPaths(
                 new Abis(pkgRawPrimaryCpuAbi, pkgRawSecondaryCpuAbi),
-                PackageManagerService.sAppLib32InstallDir, pkg.getPath(),
+                appLib32InstallDir, pkg.getPath(),
                 pkg.getBaseApkPath(), pkg.isSystem(),
                 isUpdatedSystemApp);
 
@@ -452,7 +452,7 @@ final class PackageAbiHelperImpl implements PackageAbiHelper {
 
         final Abis abis = new Abis(primaryCpuAbi, secondaryCpuAbi);
         return new Pair<>(abis,
-                deriveNativeLibraryPaths(abis, PackageManagerService.sAppLib32InstallDir,
+                deriveNativeLibraryPaths(abis, appLib32InstallDir,
                         pkg.getPath(), pkg.getBaseApkPath(), pkg.isSystem(),
                         isUpdatedSystemApp));
     }
