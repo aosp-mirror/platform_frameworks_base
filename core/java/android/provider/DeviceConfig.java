@@ -126,6 +126,14 @@ public final class DeviceConfig {
     public static final String NAMESPACE_AUTOFILL = "autofill";
 
     /**
+     * Namespace for battery saver feature.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String NAMESPACE_BATTERY_SAVER = "battery_saver";
+
+    /**
      * Namespace for blobstore feature that allows apps to share data blobs.
      *
      * @hide
