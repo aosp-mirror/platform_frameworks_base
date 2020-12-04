@@ -1662,21 +1662,22 @@ static void nativeAddJankDataListener(JNIEnv* env, jclass clazz,
     if (surface == nullptr) {
         return;
     }
-    JankDataListenerWrapper* wrapper =
+    sp<JankDataListenerWrapper> wrapper =
             reinterpret_cast<JankDataListenerWrapper*>(jankDataCallbackListenerPtr);
     TransactionCompletedListener::getInstance()->addJankListener(wrapper, surface);
 }
 
 static void nativeRemoveJankDataListener(JNIEnv* env, jclass clazz,
                                           jlong jankDataCallbackListenerPtr) {
-    JankDataListenerWrapper* wrapper =
+    sp<JankDataListenerWrapper> wrapper =
             reinterpret_cast<JankDataListenerWrapper*>(jankDataCallbackListenerPtr);
     TransactionCompletedListener::getInstance()->removeJankListener(wrapper);
 }
 
 static jlong nativeCreateJankDataListenerWrapper(JNIEnv* env, jclass clazz,
                                                  jobject jankDataListenerObject) {
-    return reinterpret_cast<jlong>(new JankDataListenerWrapper(env, jankDataListenerObject));
+    return reinterpret_cast<jlong>(
+            new JankDataListenerWrapper(env, jankDataListenerObject));
 }
 
 static jint nativeGetGPUContextPriority(JNIEnv* env, jclass clazz) {
