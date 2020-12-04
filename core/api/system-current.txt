@@ -7870,7 +7870,7 @@ package android.os {
     method public boolean getDisableAod();
     method public boolean getDisableLaunchBoost();
     method public boolean getDisableOptionalSensors();
-    method public boolean getDisableSoundTrigger();
+    method @Deprecated public boolean getDisableSoundTrigger();
     method public boolean getDisableVibration();
     method public boolean getEnableAdjustBrightness();
     method public boolean getEnableDataSaver();
@@ -7880,6 +7880,7 @@ package android.os {
     method public boolean getForceAllAppsStandby();
     method public boolean getForceBackgroundCheck();
     method public int getLocationMode();
+    method public int getSoundTriggerMode();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.os.BatterySaverPolicyConfig> CREATOR;
   }
@@ -7896,7 +7897,7 @@ package android.os {
     method @NonNull public android.os.BatterySaverPolicyConfig.Builder setDisableAod(boolean);
     method @NonNull public android.os.BatterySaverPolicyConfig.Builder setDisableLaunchBoost(boolean);
     method @NonNull public android.os.BatterySaverPolicyConfig.Builder setDisableOptionalSensors(boolean);
-    method @NonNull public android.os.BatterySaverPolicyConfig.Builder setDisableSoundTrigger(boolean);
+    method @Deprecated @NonNull public android.os.BatterySaverPolicyConfig.Builder setDisableSoundTrigger(boolean);
     method @NonNull public android.os.BatterySaverPolicyConfig.Builder setDisableVibration(boolean);
     method @NonNull public android.os.BatterySaverPolicyConfig.Builder setEnableAdjustBrightness(boolean);
     method @NonNull public android.os.BatterySaverPolicyConfig.Builder setEnableDataSaver(boolean);
@@ -7906,6 +7907,7 @@ package android.os {
     method @NonNull public android.os.BatterySaverPolicyConfig.Builder setForceAllAppsStandby(boolean);
     method @NonNull public android.os.BatterySaverPolicyConfig.Builder setForceBackgroundCheck(boolean);
     method @NonNull public android.os.BatterySaverPolicyConfig.Builder setLocationMode(int);
+    method @NonNull public android.os.BatterySaverPolicyConfig.Builder setSoundTriggerMode(int);
   }
 
   public final class BatteryStatsManager {
@@ -8266,6 +8268,9 @@ package android.os {
     field public static final int POWER_SAVE_MODE_TRIGGER_DYNAMIC = 1; // 0x1
     field public static final int POWER_SAVE_MODE_TRIGGER_PERCENTAGE = 0; // 0x0
     field public static final String REBOOT_USERSPACE = "userspace";
+    field public static final int SOUND_TRIGGER_MODE_ALL_DISABLED = 2; // 0x2
+    field public static final int SOUND_TRIGGER_MODE_ALL_ENABLED = 0; // 0x0
+    field public static final int SOUND_TRIGGER_MODE_CRITICAL_ONLY = 1; // 0x1
     field public static final int USER_ACTIVITY_EVENT_ACCESSIBILITY = 3; // 0x3
     field public static final int USER_ACTIVITY_EVENT_BUTTON = 1; // 0x1
     field public static final int USER_ACTIVITY_EVENT_OTHER = 0; // 0x0
