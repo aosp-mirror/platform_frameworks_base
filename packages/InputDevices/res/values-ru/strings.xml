@@ -26,6 +26,7 @@
     <string name="keyboard_layout_finnish" msgid="5585659438924315466">"финский"</string>
     <string name="keyboard_layout_croatian" msgid="4172229471079281138">"хорватский"</string>
     <string name="keyboard_layout_czech" msgid="1349256901452975343">"чешский"</string>
+    <string name="keyboard_layout_czech_qwerty" msgid="3331402534128515501">"чешский (QWERTY)"</string>
     <string name="keyboard_layout_estonian" msgid="8775830985185665274">"эстонский"</string>
     <string name="keyboard_layout_hungarian" msgid="4154963661406035109">"венгерский"</string>
     <string name="keyboard_layout_icelandic" msgid="5836645650912489642">"исландский"</string>
@@ -34,6 +35,7 @@
     <string name="keyboard_layout_slovak" msgid="2469379934672837296">"словацкий"</string>
     <string name="keyboard_layout_slovenian" msgid="1735933028924982368">"словенский"</string>
     <string name="keyboard_layout_turkish" msgid="7736163250907964898">"турецкий"</string>
+    <string name="keyboard_layout_turkish_f" msgid="9130320856010776018">"турецкий (тип F)"</string>
     <string name="keyboard_layout_ukrainian" msgid="8176637744389480417">"украинский"</string>
     <string name="keyboard_layout_arabic" msgid="5671970465174968712">"арабский"</string>
     <string name="keyboard_layout_greek" msgid="7289253560162386040">"греческий"</string>
@@ -42,6 +44,9 @@
     <string name="keyboard_layout_spanish_latin" msgid="5690539836069535697">"испанский (Латинская Америка)"</string>
     <string name="keyboard_layout_latvian" msgid="4405417142306250595">"латышский"</string>
     <string name="keyboard_layout_persian" msgid="3920643161015888527">"Персидский"</string>
-    <string name="keyboard_layout_azerbaijani" msgid="7315895417176467567">"Азербайджанский"</string>
+    <string name="keyboard_layout_azerbaijani" msgid="7315895417176467567">"азербайджанский"</string>
     <string name="keyboard_layout_polish" msgid="1121588624094925325">"польский"</string>
+    <string name="keyboard_layout_belarusian" msgid="7619281752698687588">"белорусский"</string>
+    <string name="keyboard_layout_mongolian" msgid="7678483495823936626">"монгольский"</string>
+    <string name="keyboard_layout_georgian" msgid="4596185456863747454">"грузинский"</string>
 </resources>
