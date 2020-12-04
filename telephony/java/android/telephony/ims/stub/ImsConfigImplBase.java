@@ -126,7 +126,7 @@ public class ImsConfigImplBase {
          */
         @Override
         public synchronized String getConfigString(int item) throws RemoteException {
-            if (mProvisionedIntValue.containsKey(item)) {
+            if (mProvisionedStringValue.containsKey(item)) {
                 return mProvisionedStringValue.get(item);
             } else {
                 String retVal = getImsConfigImpl().getConfigString(item);
