@@ -16,6 +16,9 @@
 
 package com.android.wm.shell.pip.tv;
 
+import static android.view.KeyEvent.ACTION_UP;
+import static android.view.KeyEvent.KEYCODE_BACK;
+
 import android.animation.Animator;
 import android.animation.AnimatorInflater;
 import android.annotation.Nullable;
@@ -36,41 +39,28 @@ import java.util.Collections;
 /**
  * The Menu View that shows controls of the PiP. Always fullscreen.
  */
-public class PipMenuView extends FrameLayout implements PipController.Listener {
+public class PipMenuView extends FrameLayout {
     private static final String TAG = "PipMenuView";
     private static final boolean DEBUG = PipController.DEBUG;
 
-    private final PipController mPipController;
     private final Animator mFadeInAnimation;
     private final Animator mFadeOutAnimation;
     private final PipControlsViewController mPipControlsViewController;
-    private boolean mRestorePipSizeWhenClose;
+    @Nullable
+    private OnBackPressListener mOnBackPressListener;
 
     public PipMenuView(Context context, PipController pipController) {
         super(context, null, 0);
-        mPipController = pipController;
-
         inflate(context, R.layout.tv_pip_menu, this);
 
         mPipControlsViewController = new PipControlsViewController(
-                findViewById(R.id.pip_controls), mPipController);
-        mRestorePipSizeWhenClose = true;
+                findViewById(R.id.pip_controls), pipController);
         mFadeInAnimation = AnimatorInflater.loadAnimator(
                 mContext, R.anim.tv_pip_menu_fade_in_animation);
         mFadeInAnimation.setTarget(mPipControlsViewController.getView());
         mFadeOutAnimation = AnimatorInflater.loadAnimator(
                 mContext, R.anim.tv_pip_menu_fade_out_animation);
         mFadeOutAnimation.setTarget(mPipControlsViewController.getView());
-    }
-
-    @Override
-    public boolean dispatchKeyEvent(KeyEvent event) {
-        if (event.getKeyCode() == KeyEvent.KEYCODE_BACK
-                && event.getAction() == KeyEvent.ACTION_UP) {
-            restorePipAndFinish();
-            return true;
-        }
-        return super.dispatchKeyEvent(event);
     }
 
     @Nullable
@@ -87,53 +77,39 @@ public class PipMenuView extends FrameLayout implements PipController.Listener {
     }
 
     void showMenu() {
-        mPipController.addListener(this);
         mFadeInAnimation.start();
         setAlpha(1.0f);
-        try {
-            WindowManagerGlobal.getWindowSession().grantEmbeddedWindowFocus(null /* window */,
-                    getViewRootImpl().getInputToken(), true /* grantFocus */);
-        } catch (Exception e) {
-            Log.e(TAG, "Unable to update focus as menu appears", e);
-        }
+        grantWindowFocus(true);
     }
 
     void hideMenu() {
-        mPipController.removeListener(this);
-        mPipController.resumePipResizing(
-                PipController.SUSPEND_PIP_RESIZE_REASON_WAITING_FOR_MENU_ACTIVITY_FINISH);
         mFadeOutAnimation.start();
         setAlpha(0.0f);
+        grantWindowFocus(false);
+    }
+
+    private void grantWindowFocus(boolean grantFocus) {
         try {
             WindowManagerGlobal.getWindowSession().grantEmbeddedWindowFocus(null /* window */,
-                    getViewRootImpl().getInputToken(), false /* grantFocus */);
+                    getViewRootImpl().getInputToken(), grantFocus);
         } catch (Exception e) {
             Log.e(TAG, "Unable to update focus as menu disappears", e);
         }
     }
 
-    private void restorePipAndFinish() {
-        if (DEBUG) Log.d(TAG, "restorePipAndFinish()");
+    void setOnBackPressListener(OnBackPressListener onBackPressListener) {
+        mOnBackPressListener = onBackPressListener;
+    }
 
-        if (mRestorePipSizeWhenClose) {
-            if (DEBUG) Log.d(TAG, "   > restoring to the default position");
-
-            // When PIP menu activity is closed, restore to the default position.
-            mPipController.resizePinnedStack(PipController.STATE_PIP);
+    @Override
+    public boolean dispatchKeyEvent(KeyEvent event) {
+        if (event.getKeyCode() == KEYCODE_BACK && event.getAction() == ACTION_UP
+                && mOnBackPressListener != null) {
+            mOnBackPressListener.onBackPress();
+            return true;
+        } else {
+            return super.dispatchKeyEvent(event);
         }
-        hideMenu();
-    }
-
-    @Override
-    public void onPipEntered(String packageName) {
-        if (DEBUG) Log.d(TAG, "onPipEntered(), packageName=" + packageName);
-    }
-
-    @Override
-    public void onPipActivityClosed() {
-        if (DEBUG) Log.d(TAG, "onPipActivityClosed()");
-
-        hideMenu();
     }
 
     void setAppActions(ParceledListSlice<RemoteAction> actions) {
@@ -144,27 +120,7 @@ public class PipMenuView extends FrameLayout implements PipController.Listener {
                 hasCustomActions ? actions.getList() : Collections.emptyList());
     }
 
-    @Override
-    public void onShowPipMenu() {
-        if (DEBUG) Log.d(TAG, "onShowPipMenu()");
-    }
-
-    @Override
-    public void onMoveToFullscreen() {
-        if (DEBUG) Log.d(TAG, "onMoveToFullscreen()");
-
-        // Moving PIP to fullscreen is implemented by resizing PINNED_STACK with null bounds.
-        // This conflicts with restoring PIP position, so disable it.
-        mRestorePipSizeWhenClose = false;
-        hideMenu();
-    }
-
-    @Override
-    public void onPipResizeAboutToStart() {
-        if (DEBUG) Log.d(TAG, "onPipResizeAboutToStart()");
-
-        hideMenu();
-        mPipController.suspendPipResizing(
-                PipController.SUSPEND_PIP_RESIZE_REASON_WAITING_FOR_MENU_ACTIVITY_FINISH);
+    interface OnBackPressListener {
+        void onBackPress();
     }
 }

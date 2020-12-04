@@ -39,7 +39,7 @@ import java.util.Objects;
  * <p>Once it's created, it will manage the PIP notification UI by itself except for handling
  * configuration changes.
  */
-public class PipNotification implements PipController.Listener {
+public class PipNotification {
     private static final boolean DEBUG = PipController.DEBUG;
     private static final String TAG = "PipNotification";
 
@@ -79,38 +79,21 @@ public class PipNotification implements PipController.Listener {
         onConfigurationChanged(context);
     }
 
-    @Override
-    public void onPipEntered(String packageName) {
+    void show(String packageName) {
         mPackageName = packageName;
-        notifyPipNotification();
+        update();
     }
 
-    @Override
-    public void onPipActivityClosed() {
-        dismissPipNotification();
+    void dismiss() {
+        mNotificationManager.cancel(NOTIFICATION_TAG, SystemMessage.NOTE_TV_PIP);
+        mNotified = false;
         mPackageName = null;
-    }
-
-    @Override
-    public void onShowPipMenu() {
-        // no-op.
-    }
-
-    @Override
-    public void onMoveToFullscreen() {
-        dismissPipNotification();
-        mPackageName = null;
-    }
-
-    @Override
-    public void onPipResizeAboutToStart() {
-        // no-op.
     }
 
     private void onMediaMetadataChanged(MediaMetadata metadata) {
         if (updateMediaControllerMetadata(metadata) && mNotified) {
             // update notification
-            notifyPipNotification();
+            update();
         }
     }
 
@@ -123,11 +106,11 @@ public class PipNotification implements PipController.Listener {
         mDefaultIconResId = R.drawable.pip_icon;
         if (mNotified) {
             // update notification
-            notifyPipNotification();
+            update();
         }
     }
 
-    private void notifyPipNotification() {
+    private void update() {
         mNotified = true;
         mNotificationBuilder
                 .setShowWhen(true)
@@ -142,11 +125,6 @@ public class PipNotification implements PipController.Listener {
         }
         mNotificationManager.notify(NOTIFICATION_TAG, SystemMessage.NOTE_TV_PIP,
                 mNotificationBuilder.build());
-    }
-
-    private void dismissPipNotification() {
-        mNotified = false;
-        mNotificationManager.cancel(NOTIFICATION_TAG, SystemMessage.NOTE_TV_PIP);
     }
 
     private boolean updateMediaControllerMetadata(MediaMetadata metadata) {
