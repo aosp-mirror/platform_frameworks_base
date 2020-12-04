@@ -18,7 +18,6 @@ package com.android.systemui.statusbar.policy;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
-import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.Notification;
@@ -75,6 +74,7 @@ import com.android.systemui.statusbar.notification.row.wrapper.NotificationViewW
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 import com.android.systemui.statusbar.phone.LightBarController;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.function.Consumer;
 
@@ -315,8 +315,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         mRemoteInputs = remoteInputs;
         mRemoteInput = remoteInput;
         mEditText.setHint(mRemoteInput.getLabel());
-        mEditText.mSupportedMimeTypes = (remoteInput.getAllowedDataTypes() == null) ? null
-                : remoteInput.getAllowedDataTypes().toArray(new String[0]);
+        mEditText.setSupportedMimeTypes(remoteInput.getAllowedDataTypes());
 
         mEntry.editedSuggestionInfo = editedSuggestionInfo;
         if (editedSuggestionInfo != null) {
@@ -570,12 +569,13 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
      */
     public static class RemoteEditText extends EditText {
 
+        private final OnReceiveContentListener mOnReceiveContentListener = this::onReceiveContent;
+
         private final Drawable mBackground;
         private RemoteInputView mRemoteInputView;
         boolean mShowImeOnInputConnection;
         private LightBarController mLightBarController;
         UserHandle mUser;
-        private String[] mSupportedMimeTypes;
 
         public RemoteEditText(Context context, AttributeSet attrs) {
             super(context, attrs);
@@ -583,39 +583,14 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
             mLightBarController = Dependency.get(LightBarController.class);
         }
 
-        @Override
-        protected void onFinishInflate() {
-            super.onFinishInflate();
-            if (mSupportedMimeTypes != null && mSupportedMimeTypes.length > 0) {
-                setOnReceiveContentListener(mSupportedMimeTypes,
-                        new OnReceiveContentListener() {
-                            @Override
-                            @Nullable
-                            public ContentInfo onReceiveContent(@NonNull View view,
-                                    @NonNull ContentInfo payload) {
-                                Pair<ContentInfo, ContentInfo> split = payload.partition(
-                                        item -> item.getUri() != null);
-                                ContentInfo uriContent = split.first;
-                                ContentInfo remaining = split.second;
-                                if (uriContent != null) {
-                                    ClipData clip = uriContent.getClip();
-                                    ClipDescription description = clip.getDescription();
-                                    if (clip.getItemCount() > 1
-                                            || description.getMimeTypeCount() < 1
-                                            || remaining != null) {
-                                        // TODO(b/172363500): Update to loop over all the items
-                                        return payload;
-                                    }
-                                    Uri contentUri = clip.getItemAt(0).getUri();
-                                    String mimeType = description.getMimeType(0);
-                                    Intent dataIntent = mRemoteInputView
-                                            .prepareRemoteInputFromData(mimeType, contentUri);
-                                    mRemoteInputView.sendRemoteInput(dataIntent);
-                                }
-                                return remaining;
-                            }
-                        });
+        void setSupportedMimeTypes(@Nullable Collection<String> mimeTypes) {
+            String[] types = null;
+            OnReceiveContentListener listener = null;
+            if (mimeTypes != null && !mimeTypes.isEmpty()) {
+                types = mimeTypes.toArray(new String[0]);
+                listener = mOnReceiveContentListener;
             }
+            setOnReceiveContentListener(types, listener);
         }
 
         private void defocusIfNeeded(boolean animate) {
@@ -758,6 +733,29 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
             } else {
                 setBackground(null);
             }
+        }
+
+        private ContentInfo onReceiveContent(View view, ContentInfo payload) {
+            Pair<ContentInfo, ContentInfo> split =
+                    payload.partition(item -> item.getUri() != null);
+            ContentInfo uriItems = split.first;
+            ContentInfo remainingItems = split.second;
+            if (uriItems != null) {
+                ClipData clip = uriItems.getClip();
+                ClipDescription description = clip.getDescription();
+                if (clip.getItemCount() > 1
+                        || description.getMimeTypeCount() < 1
+                        || remainingItems != null) {
+                    // TODO(b/172363500): Update to loop over all the items
+                    return payload;
+                }
+                Uri contentUri = clip.getItemAt(0).getUri();
+                String mimeType = description.getMimeType(0);
+                Intent dataIntent =
+                        mRemoteInputView.prepareRemoteInputFromData(mimeType, contentUri);
+                mRemoteInputView.sendRemoteInput(dataIntent);
+            }
+            return remainingItems;
         }
     }
 }
