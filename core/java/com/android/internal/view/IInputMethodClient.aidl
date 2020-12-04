@@ -25,7 +25,7 @@ import com.android.internal.view.InputBindResult;
 oneway interface IInputMethodClient {
     void onBindMethod(in InputBindResult res);
     void onUnbindMethod(int sequence, int unbindReason);
-    void setActive(boolean active, boolean fullscreen);
+    void setActive(boolean active, boolean fullscreen, boolean reportToImeController);
     void scheduleStartInputIfNecessary(boolean fullscreen);
     void reportFullscreenMode(boolean fullscreen);
     void applyImeVisibility(boolean setVisible);

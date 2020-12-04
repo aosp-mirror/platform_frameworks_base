@@ -607,6 +607,27 @@ public final class InputMethodManager {
         }
 
         /**
+         * Used by {@link ImeFocusController} to finish input connection and callback
+         * {@link InputMethodService#onFinishInput()}.
+         *
+         * This method is especially for when ImeFocusController received device screen-off event to
+         * ensure the entire finish input connection and the connection lifecycle callback to
+         * IME can be done for security concern.
+         */
+        @Override
+        public void finishInputAndReportToIme() {
+            synchronized (mH) {
+                finishInputLocked();
+                if (mCurMethod != null) {
+                    try {
+                        mCurMethod.finishInput();
+                    } catch (RemoteException e) {
+                    }
+                }
+            }
+        }
+
+        /**
          * Used by {@link ImeFocusController} to hide current input method editor.
          */
         @Override
@@ -864,12 +885,23 @@ public final class InputMethodManager {
                 case MSG_SET_ACTIVE: {
                     final boolean active = msg.arg1 != 0;
                     final boolean fullscreen = msg.arg2 != 0;
+                    final boolean reportToImeController = msg.obj != null && (boolean) msg.obj;
                     if (DEBUG) {
                         Log.i(TAG, "handleMessage: MSG_SET_ACTIVE " + active + ", was " + mActive);
                     }
                     synchronized (mH) {
                         mActive = active;
                         mFullscreenMode = fullscreen;
+
+                        // Report active state to ImeFocusController to handle IME input
+                        // connection lifecycle callback when it allowed.
+                        final ImeFocusController controller = getFocusController();
+                        final View rootView = mCurRootView != null ? mCurRootView.getView() : null;
+                        if (controller != null && rootView != null && reportToImeController) {
+                            rootView.post(() -> controller.onInteractiveChanged(active));
+                            return;
+                        }
+
                         if (!active) {
                             // Some other client has starting using the IME, so note
                             // that this happened and make sure our own editor's
@@ -1096,8 +1128,9 @@ public final class InputMethodManager {
         }
 
         @Override
-        public void setActive(boolean active, boolean fullscreen) {
-            mH.obtainMessage(MSG_SET_ACTIVE, active ? 1 : 0, fullscreen ? 1 : 0).sendToTarget();
+        public void setActive(boolean active, boolean fullscreen, boolean reportToImeController) {
+            mH.obtainMessage(MSG_SET_ACTIVE, active ? 1 : 0, fullscreen ? 1 : 0,
+                    reportToImeController).sendToTarget();
         }
 
         @Override
