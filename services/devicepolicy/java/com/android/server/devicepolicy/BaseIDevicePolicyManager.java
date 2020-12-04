@@ -54,6 +54,12 @@ abstract class BaseIDevicePolicyManager extends IDevicePolicyManager.Stub {
      */
     abstract void handleUnlockUser(int userId);
     /**
+     * To be called by {@link DevicePolicyManagerService#Lifecycle} after a user is being unlocked.
+     *
+     * @see {@link SystemService#onUserUnlocked}
+     */
+    abstract void handleOnUserUnlocked(int userId);
+    /**
      * To be called by {@link DevicePolicyManagerService#Lifecycle} when a user is being stopped.
      *
      * @see {@link SystemService#onUserStopping}

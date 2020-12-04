@@ -707,6 +707,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         public void onUserStopping(@NonNull TargetUser user) {
             mService.handleStopUser(user.getUserIdentifier());
         }
+
+        @Override
+        public void onUserUnlocked(@NonNull TargetUser user) {
+            mService.handleOnUserUnlocked(user.getUserIdentifier());
+        }
     }
 
     @GuardedBy("getLockObject()")
@@ -882,6 +887,14 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
                 mContext.sendBroadcastAsUser(intent, UserHandle.SYSTEM);
             }
+        }
+    }
+
+    private final class UserLifecycleListener implements UserManagerInternal.UserLifecycleListener {
+
+        @Override
+        public void onUserCreated(UserInfo user) {
+            mHandler.post(() -> handleNewUserCreated(user));
         }
     }
 
@@ -1542,6 +1555,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         mSetupContentObserver = new SetupContentObserver(mHandler);
 
         mUserManagerInternal.addUserRestrictionsListener(new RestrictionsListener(mContext));
+        mUserManagerInternal.addUserLifecycleListener(new UserLifecycleListener());
 
         loadOwners();
     }
@@ -2880,6 +2894,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     @Override
     void handleUnlockUser(int userId) {
         startOwnerService(userId, "unlock-user");
+    }
+
+    @Override
+    void handleOnUserUnlocked(int userId) {
+        showNewUserDisclaimerIfNecessary(userId);
     }
 
     @Override
@@ -7641,8 +7660,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 // Sets profile owner on current foreground user since
                 // the human user will complete the DO setup workflow from there.
                 manageUserUnchecked(/* deviceOwner= */ admin, /* profileOwner= */ admin,
-                            /* managedUser= */ currentForegroundUser,
-                            /* adminExtras= */ null);
+                        /* managedUser= */ currentForegroundUser, /* adminExtras= */ null,
+                        /* showDisclaimer= */ false);
             }
             return true;
         }
@@ -9691,7 +9710,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         final long id = mInjector.binderClearCallingIdentity();
         try {
-            manageUserUnchecked(admin, profileOwner, userHandle, adminExtras);
+            manageUserUnchecked(admin, profileOwner, userHandle, adminExtras,
+                    /* showDisclaimer= */ true);
 
             if ((flags & DevicePolicyManager.SKIP_SETUP_WIZARD) != 0) {
                 Settings.Secure.putIntForUser(mContext.getContentResolver(),
@@ -9713,7 +9733,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     private void manageUserUnchecked(ComponentName admin, ComponentName profileOwner,
-            @UserIdInt int userId, PersistableBundle adminExtras) {
+            @UserIdInt int userId, PersistableBundle adminExtras, boolean showDisclaimer) {
         final String adminPkg = admin.getPackageName();
         try {
             // Install the profile owner if not present.
@@ -9738,9 +9758,58 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             DevicePolicyData policyData = getUserData(userId);
             policyData.mInitBundle = adminExtras;
             policyData.mAdminBroadcastPending = true;
-
+            policyData.mNewUserDisclaimer = showDisclaimer
+                    ? DevicePolicyData.NEW_USER_DISCLAIMER_NEEDED
+                    : DevicePolicyData.NEW_USER_DISCLAIMER_NOT_NEEDED;
             saveSettingsLocked(userId);
         }
+    }
+
+    private void handleNewUserCreated(UserInfo user) {
+        if (!mOwners.hasDeviceOwner()) return;
+
+        final int userId = user.id;
+        Log.i(LOG_TAG, "User " + userId + " added on DO mode; setting ShowNewUserDisclaimer");
+
+        setShowNewUserDisclaimer(userId, DevicePolicyData.NEW_USER_DISCLAIMER_NEEDED);
+    }
+
+    @Override
+    public void resetNewUserDisclaimer() {
+        CallerIdentity callerIdentity = getCallerIdentity();
+        canManageUsers(callerIdentity);
+
+        setShowNewUserDisclaimer(callerIdentity.getUserId(),
+                DevicePolicyData.NEW_USER_DISCLAIMER_SHOWN);
+    }
+
+    private void setShowNewUserDisclaimer(@UserIdInt int userId, String value) {
+        Slog.i(LOG_TAG, "Setting new user disclaimer for user " + userId + " as " + value);
+        synchronized (getLockObject()) {
+            DevicePolicyData policyData = getUserData(userId);
+            policyData.mNewUserDisclaimer = value;
+            saveSettingsLocked(userId);
+        }
+    }
+
+    private void showNewUserDisclaimerIfNecessary(@UserIdInt int userId) {
+        boolean mustShow;
+        synchronized (getLockObject()) {
+            DevicePolicyData policyData = getUserData(userId);
+            if (VERBOSE_LOG) {
+                Slog.v(LOG_TAG, "showNewUserDisclaimerIfNecessary(" + userId + "): "
+                        + policyData.mNewUserDisclaimer + ")");
+            }
+            mustShow = DevicePolicyData.NEW_USER_DISCLAIMER_NEEDED
+                    .equals(policyData.mNewUserDisclaimer);
+        }
+        if (!mustShow) return;
+
+        Intent intent = new Intent(DevicePolicyManager.ACTION_SHOW_NEW_USER_DISCLAIMER);
+
+        // TODO(b/172691310): add CTS tests to make sure disclaimer is shown
+        Slog.i(LOG_TAG, "Dispatching ACTION_SHOW_NEW_USER_DISCLAIMER intent");
+        mContext.sendBroadcastAsUser(intent, UserHandle.of(userId));
     }
 
     @Override
