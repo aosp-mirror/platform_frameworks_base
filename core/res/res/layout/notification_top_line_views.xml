@@ -88,7 +88,7 @@
 
     <DateTimeView
         android:id="@+id/time"
-        android:textAppearance="@style/TextAppearance.Material.Notification.Time"
+        android:textAppearance="@style/TextAppearance.DeviceDefault.Notification.Time"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/notification_header_separating_margin"
