@@ -822,6 +822,11 @@ class WindowToken extends WindowContainer<WindowState> {
         return toString();
     }
 
+    @Override
+    WindowToken asWindowToken() {
+        return this;
+    }
+
     /**
      * Return whether windows from this token can layer above the
      * system bars, or in other words extend outside of the "Decor Frame"
@@ -840,5 +845,9 @@ class WindowToken extends WindowContainer<WindowState> {
 
     int getOwnerUid() {
         return mOwnerUid;
+    }
+
+    boolean isFromClient() {
+        return mFromClientToken;
     }
 }

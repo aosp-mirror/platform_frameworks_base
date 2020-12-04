@@ -79,7 +79,7 @@ public class WindowManagerServiceTests extends WindowTestsBase {
 
         WindowToken windowToken = mWm.mRoot.getWindowToken(token);
         assertFalse(windowToken.mRoundedCornerOverlay);
-        assertFalse(windowToken.mFromClientToken);
+        assertFalse(windowToken.isFromClient());
     }
 
     @Test
@@ -90,7 +90,7 @@ public class WindowManagerServiceTests extends WindowTestsBase {
 
         WindowToken windowToken = mWm.mRoot.getWindowToken(token);
         assertFalse(windowToken.mRoundedCornerOverlay);
-        assertTrue(windowToken.mFromClientToken);
+        assertTrue(windowToken.isFromClient());
     }
 
     @Test(expected = SecurityException.class)
