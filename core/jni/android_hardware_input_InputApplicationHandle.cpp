@@ -58,6 +58,11 @@ bool NativeInputApplicationHandle::updateInfo() {
     if (!obj) {
         return false;
     }
+    if (mInfo.token.get() != nullptr) {
+        // The java fields are immutable, so it doesn't need to update again.
+        env->DeleteLocalRef(obj);
+        return true;
+    }
 
     mInfo.name = getStringField(env, obj, gInputApplicationHandleClassInfo.name, "<null>");
 
