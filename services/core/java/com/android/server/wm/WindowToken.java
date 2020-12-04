@@ -419,6 +419,7 @@ class WindowToken extends WindowContainer<WindowState> {
         reportWindowTokenRemovedToClient();
     }
 
+    // TODO(b/159767464): Remove after we migrate to listener approach.
     private void reportWindowTokenRemovedToClient() {
         if (!shouldReportToClient()) {
             return;

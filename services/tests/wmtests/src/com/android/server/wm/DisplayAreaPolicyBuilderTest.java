@@ -47,6 +47,7 @@ import static org.testng.Assert.assertThrows;
 import static java.util.stream.Collectors.toList;
 
 import android.content.res.Resources;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.platform.test.annotations.Presubmit;
@@ -585,8 +586,8 @@ public class DisplayAreaPolicyBuilderTest {
                         .setTaskDisplayAreas(mTaskDisplayAreaList))
                 .addDisplayAreaGroupHierarchy(hierarchy1)
                 .addDisplayAreaGroupHierarchy(hierarchy2)
-                .setSelectRootForWindowFunc((token, options) -> {
-                    if (token.windowType == TYPE_STATUS_BAR) {
+                .setSelectRootForWindowFunc((type, options) -> {
+                    if (type == TYPE_STATUS_BAR) {
                         return mGroupRoot1;
                     }
                     return mGroupRoot2;
@@ -740,10 +741,9 @@ public class DisplayAreaPolicyBuilderTest {
     }
 
     private WindowToken tokenOfType(int type) {
-        WindowToken m = mock(WindowToken.class);
-        when(m.getWindowLayerFromType()).thenReturn(
-                mPolicy.getWindowLayerFromTypeLw(type, false /* canAddInternalSystemWindow */));
-        return m;
+        WindowToken token = new WindowToken(mWms, new Binder(), type, false /* persistOnEmpty */,
+                mDisplayContent, false /* ownerCanManageAppTokens */);
+        return token;
     }
 
     private static void assertMatchLayerOrder(List<DisplayArea<?>> actualOrder,

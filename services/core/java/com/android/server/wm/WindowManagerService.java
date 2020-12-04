@@ -769,6 +769,8 @@ public class WindowManagerService extends IWindowManager.Stub
     final AnrController mAnrController;
 
     private final ImpressionAttestationController mImpressionAttestationController;
+    private final WindowContextListenerController mWindowContextListenerController =
+            new WindowContextListenerController();
 
     @VisibleForTesting
     final class SettingsObserver extends ContentObserver {
@@ -2627,6 +2629,10 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     boolean checkCallingPermission(String permission, String func) {
+        return checkCallingPermission(permission, func, true /* printLog */);
+    }
+
+    boolean checkCallingPermission(String permission, String func, boolean printLog) {
         // Quick check: if the calling permission is me, it's all okay.
         if (Binder.getCallingPid() == myPid()) {
             return true;
@@ -2636,8 +2642,10 @@ public class WindowManagerService extends IWindowManager.Stub
                 == PackageManager.PERMISSION_GRANTED) {
             return true;
         }
-        ProtoLog.w(WM_ERROR, "Permission Denial: %s from pid=%d, uid=%d requires %s",
-                func, Binder.getCallingPid(), Binder.getCallingUid(), permission);
+        if (printLog) {
+            ProtoLog.w(WM_ERROR, "Permission Denial: %s from pid=%d, uid=%d requires %s",
+                    func, Binder.getCallingPid(), Binder.getCallingUid(), permission);
+        }
         return false;
     }
 
@@ -2727,6 +2735,52 @@ public class WindowManagerService extends IWindowManager.Stub
             Binder.restoreCallingIdentity(origId);
         }
         return WindowManagerGlobal.ADD_OKAY;
+    }
+
+    @Override
+    public boolean registerWindowContextListener(IBinder clientToken, int type, int displayId,
+            Bundle options) {
+        final boolean callerCanManageAppTokens = checkCallingPermission(MANAGE_APP_TOKENS,
+                "registerWindowContextListener", false /* printLog */);
+        final int callingUid = Binder.getCallingUid();
+        final long origId = Binder.clearCallingIdentity();
+        try {
+            synchronized (mGlobalLock) {
+                final DisplayContent dc = mRoot.getDisplayContentOrCreate(displayId);
+                if (dc == null) {
+                    ProtoLog.w(WM_ERROR, "registerWindowContextListener: trying to add listener to"
+                            + " a non-existing display:%d", displayId);
+                    return false;
+                }
+                // TODO(b/155340867): Investigate if we still need roundedCornerOverlay after
+                // the feature b/155340867 is completed.
+                final DisplayArea da = dc.getAreaForWindowToken(type, options,
+                        callerCanManageAppTokens, false /* roundedCornerOverlay */);
+                mWindowContextListenerController.registerWindowContainerListener(clientToken, da,
+                        callingUid);
+                return true;
+            }
+        } finally {
+            Binder.restoreCallingIdentity(origId);
+        }
+    }
+
+    @Override
+    public void unregisterWindowContextListener(IBinder clientToken) {
+        final boolean callerCanManageAppTokens = checkCallingPermission(MANAGE_APP_TOKENS,
+                "unregisterWindowContextListener", false /* printLog */);
+        final int callingUid = Binder.getCallingUid();
+        final long origId = Binder.clearCallingIdentity();
+        try {
+            synchronized (mGlobalLock) {
+                if (mWindowContextListenerController.assertCallerCanRemoveListener(clientToken,
+                        callerCanManageAppTokens, callingUid)) {
+                    mWindowContextListenerController.unregisterWindowContainerListener(clientToken);
+                }
+            }
+        } finally {
+            Binder.restoreCallingIdentity(origId);
+        }
     }
 
     @Override
