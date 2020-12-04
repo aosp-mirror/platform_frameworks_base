@@ -24,4 +24,10 @@
         android:id="@+id/docked_divider_background"
         android:background="@color/docked_divider_background"/>
 
+    <com.android.wm.shell.common.split.DividerHandleView
+        style="@style/DockedDividerHandle"
+        android:id="@+id/docked_divider_handle"
+        android:contentDescription="@string/accessibility_divider"
+        android:background="@null"/>
+
 </com.android.wm.shell.common.split.DividerView>

@@ -20,6 +20,9 @@ import static android.view.PointerIcon.TYPE_HORIZONTAL_DOUBLE_ARROW;
 import static android.view.PointerIcon.TYPE_VERTICAL_DOUBLE_ARROW;
 import static android.view.WindowManager.DOCKED_RIGHT;
 
+import static com.android.wm.shell.common.split.DividerView.TOUCH_ANIMATION_DURATION;
+import static com.android.wm.shell.common.split.DividerView.TOUCH_RELEASE_ANIMATION_DURATION;
+
 import android.animation.AnimationHandler;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -66,6 +69,7 @@ import com.android.internal.policy.DockedDividerUtils;
 import com.android.wm.shell.R;
 import com.android.wm.shell.animation.FlingAnimationUtils;
 import com.android.wm.shell.animation.Interpolators;
+import com.android.wm.shell.common.split.DividerHandleView;
 
 import java.util.function.Consumer;
 
@@ -81,9 +85,6 @@ public class DividerView extends FrameLayout implements OnTouchListener,
         void onDraggingStart();
         void onDraggingEnd();
     }
-
-    static final long TOUCH_ANIMATION_DURATION = 150;
-    static final long TOUCH_RELEASE_ANIMATION_DURATION = 200;
 
     public static final int INVALID_RECENTS_GROW_TARGET = -1;
 
