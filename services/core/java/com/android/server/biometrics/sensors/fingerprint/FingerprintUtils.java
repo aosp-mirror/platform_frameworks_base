@@ -75,12 +75,12 @@ public class FingerprintUtils implements BiometricUtils<Fingerprint> {
 
     /**
      * Legacy getter for {@link android.hardware.biometrics.fingerprint.V2_1} ands its extended
-     * subclasses, which do not support a well defined sensorId from the HAL.
+     * subclasses. Framework-side cache is always stored in the same file, regardless of sensorId.
      */
-    public static FingerprintUtils getInstance() {
+    public static FingerprintUtils getLegacyInstance(int sensorId) {
         // Note that sensorId for legacy services can be hard-coded to 0 since it's only used
         // to index into the sensor states map.
-        return getInstance(0 /* sensorId */, LEGACY_FINGERPRINT_FILE);
+        return getInstance(sensorId, LEGACY_FINGERPRINT_FILE);
     }
 
     private FingerprintUtils(String fileName) {

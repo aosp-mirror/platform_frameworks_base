@@ -166,7 +166,7 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
         @Override
         public void onEnrollResult(long deviceId, int faceId, int userId, int remaining) {
             mHandler.post(() -> {
-                final CharSequence name = FaceUtils.getInstance()
+                final CharSequence name = FaceUtils.getLegacyInstance(mSensorId)
                         .getUniqueName(mContext, userId);
                 final Face face = new Face(name, faceId, deviceId);
 
@@ -477,7 +477,7 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
     @Override
     @NonNull
     public List<Face> getEnrolledFaces(int sensorId, int userId) {
-        return FaceUtils.getInstance().getBiometricsForUser(mContext, userId);
+        return FaceUtils.getLegacyInstance(mSensorId).getBiometricsForUser(mContext, userId);
     }
 
     @Override
@@ -616,8 +616,8 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
 
             final FaceEnrollClient client = new FaceEnrollClient(mContext, mLazyDaemon, token,
                     new ClientMonitorCallbackConverter(receiver), userId, hardwareAuthToken,
-                    opPackageName, FaceUtils.getInstance(), disabledFeatures, ENROLL_TIMEOUT_SEC,
-                    surfaceHandle, mSensorId);
+                    opPackageName, FaceUtils.getLegacyInstance(mSensorId), disabledFeatures,
+                    ENROLL_TIMEOUT_SEC, surfaceHandle, mSensorId);
 
             mScheduler.scheduleClientMonitor(client, new ClientMonitor.Callback() {
                 @Override
@@ -671,7 +671,7 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
 
             final FaceRemovalClient client = new FaceRemovalClient(mContext, mLazyDaemon, token,
                     new ClientMonitorCallbackConverter(receiver), faceId, userId, opPackageName,
-                    FaceUtils.getInstance(), mSensorId, mAuthenticatorIds);
+                    FaceUtils.getLegacyInstance(mSensorId), mSensorId, mAuthenticatorIds);
             mScheduler.scheduleClientMonitor(client);
         });
     }
@@ -754,7 +754,7 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
             final List<Face> enrolledList = getEnrolledFaces(mSensorId, userId);
             final FaceInternalCleanupClient client = new FaceInternalCleanupClient(mContext,
                     mLazyDaemon, userId, mContext.getOpPackageName(), mSensorId, enrolledList,
-                    FaceUtils.getInstance(), mAuthenticatorIds);
+                    FaceUtils.getLegacyInstance(mSensorId), mAuthenticatorIds);
             mScheduler.scheduleClientMonitor(client);
         });
     }
@@ -783,7 +783,7 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
 
             final long userToken = proto.start(SensorStateProto.USER_STATES);
             proto.write(UserStateProto.USER_ID, userId);
-            proto.write(UserStateProto.NUM_ENROLLED, FaceUtils.getInstance()
+            proto.write(UserStateProto.NUM_ENROLLED, FaceUtils.getLegacyInstance(mSensorId)
                     .getBiometricsForUser(mContext, userId).size());
             proto.end(userToken);
         }
@@ -807,7 +807,8 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
             JSONArray sets = new JSONArray();
             for (UserInfo user : UserManager.get(mContext).getUsers()) {
                 final int userId = user.getUserHandle().getIdentifier();
-                final int c = FaceUtils.getInstance().getBiometricsForUser(mContext, userId).size();
+                final int c = FaceUtils.getLegacyInstance(mSensorId)
+                        .getBiometricsForUser(mContext, userId).size();
                 JSONObject set = new JSONObject();
                 set.put("id", userId);
                 set.put("count", c);

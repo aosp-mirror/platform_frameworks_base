@@ -111,6 +111,7 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
     @NonNull private final HalResultController mHalResultController;
     @Nullable private IUdfpsOverlayController mUdfpsOverlayController;
     private int mCurrentUserId = UserHandle.USER_NULL;
+    private final int mSensorId;
 
     private final class BiometricTaskStackListener extends TaskStackListener {
         @Override
@@ -171,13 +172,15 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
             void onHardwareUnavailable();
         }
 
+        private final int mSensorId;
         @NonNull private final Context mContext;
         @NonNull final Handler mHandler;
         @NonNull final BiometricScheduler mScheduler;
         @Nullable private Callback mCallback;
 
-        HalResultController(@NonNull Context context, @NonNull Handler handler,
+        HalResultController(int sensorId, @NonNull Context context, @NonNull Handler handler,
                 @NonNull BiometricScheduler scheduler) {
+            mSensorId = sensorId;
             mContext = context;
             mHandler = handler;
             mScheduler = scheduler;
@@ -198,7 +201,7 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
                 }
 
                 final int currentUserId = client.getTargetUserId();
-                final CharSequence name = FingerprintUtils.getInstance()
+                final CharSequence name = FingerprintUtils.getLegacyInstance(mSensorId)
                         .getUniqueName(mContext, currentUserId);
                 final Fingerprint fingerprint = new Fingerprint(name, groupId, fingerId, deviceId);
 
@@ -311,6 +314,7 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
             @NonNull LockoutResetDispatcher lockoutResetDispatcher,
             @NonNull HalResultController controller) {
         mContext = context;
+        mSensorId = sensorId;
         mScheduler = scheduler;
         mHandler = handler;
         mActivityTaskManager = ActivityTaskManager.getService();
@@ -365,7 +369,8 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
         final Handler handler = new Handler(Looper.getMainLooper());
         final BiometricScheduler scheduler =
                 new BiometricScheduler(TAG, gestureAvailabilityDispatcher);
-        final HalResultController controller = new HalResultController(context, handler, scheduler);
+        final HalResultController controller = new HalResultController(sensorId, context, handler,
+                scheduler);
         return new Fingerprint21(context, scheduler, handler, sensorId, strength,
                 lockoutResetDispatcher, controller);
     }
@@ -553,7 +558,7 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
 
             final FingerprintEnrollClient client = new FingerprintEnrollClient(mContext,
                     mLazyDaemon, token, new ClientMonitorCallbackConverter(receiver), userId,
-                    hardwareAuthToken, opPackageName, FingerprintUtils.getInstance(),
+                    hardwareAuthToken, opPackageName, FingerprintUtils.getLegacyInstance(mSensorId),
                     ENROLL_TIMEOUT_SEC, mSensorProperties.sensorId, mUdfpsOverlayController);
             mScheduler.scheduleClientMonitor(client, new ClientMonitor.Callback() {
                 @Override
@@ -628,7 +633,7 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
 
            final FingerprintRemovalClient client = new FingerprintRemovalClient(mContext,
                    mLazyDaemon, token, new ClientMonitorCallbackConverter(receiver), fingerId,
-                   userId, opPackageName, FingerprintUtils.getInstance(),
+                   userId, opPackageName, FingerprintUtils.getLegacyInstance(mSensorId),
                    mSensorProperties.sensorId, mAuthenticatorIds);
            mScheduler.scheduleClientMonitor(client);
         });
@@ -642,8 +647,8 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
                     mSensorProperties.sensorId, userId);
             final FingerprintInternalCleanupClient client = new FingerprintInternalCleanupClient(
                     mContext, mLazyDaemon, userId, mContext.getOpPackageName(),
-                    mSensorProperties.sensorId, enrolledList, FingerprintUtils.getInstance(),
-                    mAuthenticatorIds);
+                    mSensorProperties.sensorId, enrolledList,
+                    FingerprintUtils.getLegacyInstance(mSensorId), mAuthenticatorIds);
             mScheduler.scheduleClientMonitor(client);
         });
     }
@@ -661,14 +666,15 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
     @Override
     public void rename(int sensorId, int fingerId, int userId, @NonNull String name) {
         mHandler.post(() -> {
-            FingerprintUtils.getInstance().renameBiometricForUser(mContext, userId, fingerId, name);
+            FingerprintUtils.getLegacyInstance(mSensorId)
+                    .renameBiometricForUser(mContext, userId, fingerId, name);
         });
     }
 
     @Override
     @NonNull
     public List<Fingerprint> getEnrolledFingerprints(int sensorId, int userId) {
-        return FingerprintUtils.getInstance().getBiometricsForUser(mContext, userId);
+        return FingerprintUtils.getLegacyInstance(mSensorId).getBiometricsForUser(mContext, userId);
     }
 
     @Override
@@ -720,7 +726,7 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
 
             final long userToken = proto.start(SensorStateProto.USER_STATES);
             proto.write(UserStateProto.USER_ID, userId);
-            proto.write(UserStateProto.NUM_ENROLLED, FingerprintUtils.getInstance()
+            proto.write(UserStateProto.NUM_ENROLLED, FingerprintUtils.getLegacyInstance(mSensorId)
                     .getBiometricsForUser(mContext, userId).size());
             proto.end(userToken);
         }
@@ -741,7 +747,8 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
 
             proto.write(FingerprintUserStatsProto.USER_ID, userId);
             proto.write(FingerprintUserStatsProto.NUM_FINGERPRINTS,
-                    FingerprintUtils.getInstance().getBiometricsForUser(mContext, userId).size());
+                    FingerprintUtils.getLegacyInstance(mSensorId)
+                            .getBiometricsForUser(mContext, userId).size());
 
             // Normal fingerprint authentications (e.g. lockscreen)
             long countsToken = proto.start(FingerprintUserStatsProto.NORMAL);
@@ -781,7 +788,7 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
             JSONArray sets = new JSONArray();
             for (UserInfo user : UserManager.get(mContext).getUsers()) {
                 final int userId = user.getUserHandle().getIdentifier();
-                final int N = FingerprintUtils.getInstance()
+                final int N = FingerprintUtils.getLegacyInstance(mSensorId)
                         .getBiometricsForUser(mContext, userId).size();
                 JSONObject set = new JSONObject();
                 set.put("id", userId);

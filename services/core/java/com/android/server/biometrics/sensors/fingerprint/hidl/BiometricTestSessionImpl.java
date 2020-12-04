@@ -144,7 +144,7 @@ public class BiometricTestSessionImpl extends ITestSession.Stub {
         Utils.checkPermission(mContext, TEST_BIOMETRIC);
 
         // Fake authentication with any of the existing fingers
-        List<Fingerprint> fingerprints = FingerprintUtils.getInstance()
+        List<Fingerprint> fingerprints = FingerprintUtils.getLegacyInstance(mSensorId)
                 .getBiometricsForUser(mContext, userId);
         if (fingerprints.isEmpty()) {
             Slog.w(TAG, "No fingerprints, returning");
