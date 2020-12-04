@@ -56,6 +56,30 @@ public class HdmiCecMessageValidatorTest {
     }
 
     @Test
+    public void isValid_unregisteredSource() {
+        // Message invokes a broadcast response
+        //   <Get Menu Language>
+        assertMessageValidity("F4:91").isEqualTo(OK);
+        //   <Request Active Source>
+        assertMessageValidity("FF:85").isEqualTo(OK);
+
+        // Message by CEC Switch
+        //   <Routing Change>
+        assertMessageValidity("FF:80:00:00:10:00").isEqualTo(OK);
+
+        //   <Routing Information>
+        assertMessageValidity("FF:81:10:00").isEqualTo(OK);
+
+        // Standby
+        assertMessageValidity("F4:36").isEqualTo(OK);
+        assertMessageValidity("FF:36").isEqualTo(OK);
+
+        // <Report Physical Address> / <Active Source>
+        assertMessageValidity("FF:84:10:00:04").isEqualTo(OK);
+        assertMessageValidity("FF:82:10:00").isEqualTo(OK);
+    }
+
+    @Test
     public void isValid_giveDevicePowerStatus() {
         assertMessageValidity("04:8F").isEqualTo(OK);
 
