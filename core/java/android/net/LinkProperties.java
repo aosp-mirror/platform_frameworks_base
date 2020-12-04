@@ -82,8 +82,7 @@ public final class LinkProperties implements Parcelable {
 
     private static final int MIN_MTU    = 68;
 
-    /** @hide */
-    public static final int MIN_MTU_V6 = 1280;
+    private static final int MIN_MTU_V6 = 1280;
 
     private static final int MAX_MTU    = 10000;
 
