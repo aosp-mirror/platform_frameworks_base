@@ -13,4 +13,5 @@
     <string name="notification_action_reboot_to_origin" msgid="4013901243271889897">"Reiniciar"</string>
     <string name="toast_dynsystem_discarded" msgid="1733249860276017050">"Descartouse o sistema dinámico"</string>
     <string name="toast_failed_to_reboot_to_dynsystem" msgid="6336737274625452067">"Non se puido reiniciar nin cargar o sistema dinámico"</string>
+    <string name="toast_failed_to_disable_dynsystem" msgid="3285742944977744413">"Produciuse un erro ao desactivar o sistema dinámico"</string>
 </resources>
