@@ -298,7 +298,7 @@
     <string name="safeMode" msgid="8974401416068943888">"Безопасный режим"</string>
     <string name="android_system_label" msgid="5974767339591067210">"Система Android"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"Переключиться на личный профиль"</string>
-    <string name="managed_profile_label" msgid="7316778766973512382">"Переключиться на рабочий профиль"</string>
+    <string name="managed_profile_label" msgid="7316778766973512382">"Перейти в рабочий профиль"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Контакты"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"доступ к контактам"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"Местоположение"</string>
@@ -1261,7 +1261,7 @@
     <string name="volume_music_hint_silent_ringtone_selected" msgid="1514829655029062233">"Выбран режим \"Без звука\""</string>
     <string name="volume_call" msgid="7625321655265747433">"Громкость при разговоре"</string>
     <string name="volume_bluetooth_call" msgid="2930204618610115061">"Громкость при разговоре"</string>
-    <string name="volume_alarm" msgid="4486241060751798448">"Громкость сигнала предупреждения"</string>
+    <string name="volume_alarm" msgid="4486241060751798448">"Громкость будильника"</string>
     <string name="volume_notification" msgid="6864412249031660057">"Громкость уведомления"</string>
     <string name="volume_unknown" msgid="4041914008166576293">"Громкость"</string>
     <string name="volume_icon_description_bluetooth" msgid="7540388479345558400">"Громкость Bluetooth-устройства"</string>
@@ -1688,7 +1688,7 @@
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"Выберите функции, которые будут запускаться с помощью кнопки специальных возможностей"</string>
     <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"Выберите функции, которые будут запускаться с помощью кнопки регулировки громкости"</string>
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"Сервис \"<xliff:g id="SERVICE_NAME">%s</xliff:g>\" отключен."</string>
-    <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Изменить быстрые клавиши"</string>
+    <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Изменить ярлыки"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Готово"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Деактивировать быстрое включение"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Использовать быстрое включение"</string>
@@ -1838,8 +1838,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Обновлено администратором"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Удалено администратором"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ОК"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="5997766757551917769">"Чтобы продлить время работы от батареи, в режиме энергосбережения:\n\n• включается тёмная тема;\n• отключаются или ограничиваются фоновые процессы, некоторые визуальные эффекты и другие функции (например, распознавание команды \"Окей, Google\").\n\n"<annotation id="url">"Подробнее…"</annotation></string>
-    <string name="battery_saver_description" msgid="8587408568232177204">"Чтобы продлить время работы от батареи, в режиме энергосбережения:\n\n• включается тёмная тема;\n• отключаются или ограничиваются фоновые процессы, некоторые визуальные эффекты и другие функции (например, распознавание команды \"Окей, Google\")."</string>
+    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"Чтобы продлить время работы от батареи, в режиме энергосбережения:\n\n• включается тёмная тема;\n• отключаются или ограничиваются фоновые процессы, некоторые визуальные эффекты и другие функции (например, распознавание команды \"Окей, Google\").\n\n"<annotation id="url">"Подробнее…"</annotation></string>
+    <string name="battery_saver_description" msgid="6794188153647295212">"Чтобы продлить время работы от батареи, в режиме энергосбережения:\n\n• включается тёмная тема;\n• отключаются или ограничиваются фоновые процессы, некоторые визуальные эффекты и другие функции (например, распознавание команды \"Окей, Google\")."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"В режиме экономии трафика фоновая передача данных для некоторых приложений отключена. Приложение, которым вы пользуетесь, может получать и отправлять данные, но реже, чем обычно. Например, изображения могут не загружаться, пока вы не нажмете на них."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Включить экономию трафика?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Включить"</string>

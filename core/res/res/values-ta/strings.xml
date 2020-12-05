@@ -1307,7 +1307,7 @@
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"அனலாக் ஆடியோ துணைக்கருவி கண்டறியப்பட்டது"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"இணைத்துள்ள சாதனமானது இந்த மொபைலுடன் இணங்கவில்லை. மேலும் அறிய, தட்டவும்."</string>
     <string name="adb_active_notification_title" msgid="408390247354560331">"USB பிழைதிருத்தம் இணைக்கப்பட்டது"</string>
-    <string name="adb_active_notification_message" msgid="5617264033476778211">"USB பிழைதிருத்தத்தை ஆஃப் செய்ய தட்டவும்"</string>
+    <string name="adb_active_notification_message" msgid="5617264033476778211">"USB பிழைதிருத்தத்தை ஆஃப் செய்யத் தட்டவும்"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"USB பிழைதிருத்தத்தை முடக்க, தேர்ந்தெடுக்கவும்."</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"வைஃபை பிழைதிருத்தம் இணைக்கப்பட்டது"</string>
     <string name="adbwifi_active_notification_message" msgid="930987922852867972">"வைஃபை பிழைதிருத்தத்தை ஆஃப் செய்ய தட்டவும்"</string>
@@ -1792,8 +1792,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"உங்கள் நிர்வாகி புதுப்பித்துள்ளார்"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"உங்கள் நிர்வாகி நீக்கியுள்ளார்"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"சரி"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="5997766757551917769">"பேட்டரி நிலையை நீட்டிப்பதற்காக, பேட்டரி சேமிப்பான்:\n\n•டார்க் தீமினை ஆன் செய்யும்\n•பின்னணி செயல்பாடு, சில விஷுவல் எஃபெக்ட்கள், “Hey Google” போன்ற பிற அம்சங்களை ஆஃப் செய்யும் அல்லது கட்டுப்படுத்தும்\n\n"<annotation id="url">"மேலும் அறிக"</annotation></string>
-    <string name="battery_saver_description" msgid="8587408568232177204">"பேட்டரி நிலையை நீட்டிப்பதற்காக, பேட்டரி சேமிப்பான்:\n\n•டார்க் தீமினை ஆன் செய்யும்\n•பின்னணி செயல்பாடு, சில விஷுவல் எஃபெக்ட்கள், “Hey Google” போன்ற பிற அம்சங்களை ஆஃப் செய்யும் அல்லது கட்டுப்படுத்தும்"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"பேட்டரி நிலையை நீட்டிப்பதற்காக, பேட்டரி சேமிப்பான்:\n\n• டார்க் தீமினை ஆன் செய்யும்\n• பின்னணி செயல்பாடு, சில விஷுவல் எஃபெக்ட்கள், “Ok Google” போன்ற பிற அம்சங்களை ஆஃப் செய்யும் அல்லது கட்டுப்படுத்தும்\n\n"<annotation id="url">"மேலும் அறிக"</annotation></string>
+    <string name="battery_saver_description" msgid="6794188153647295212">"பேட்டரி நிலையை நீட்டிப்பதற்காக, பேட்டரி சேமிப்பான்:\n\n• டார்க் தீமினை ஆன் செய்யும்\n• பின்னணிச் செயல்பாடு, சில விஷுவல் எஃபெக்ட்கள், “Ok Google” போன்ற பிற அம்சங்களை ஆஃப் செய்யும் அல்லது கட்டுப்படுத்தும்"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"டேட்டா உபயோகத்தைக் குறைப்பதற்கு உதவ, பின்புலத்தில் டேட்டாவை அனுப்புவது அல்லது பெறுவதிலிருந்து சில ஆப்ஸை டேட்டா சேமிப்பான் தடுக்கும். தற்போது பயன்படுத்தும் ஆப்ஸானது எப்போதாவது டேட்டாவை அணுகலாம். எடுத்துக்காட்டாக, படங்களை நீங்கள் தட்டும் வரை அவை காட்டப்படாது."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"டேட்டா சேமிப்பானை இயக்கவா?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"இயக்கு"</string>
