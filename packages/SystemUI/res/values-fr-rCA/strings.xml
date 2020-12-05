@@ -327,6 +327,7 @@
     <string name="notification_group_overflow_indicator" msgid="7605120293801012648">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <plurals name="notification_group_overflow_description" formatted="false" msgid="91483442850649192">
       <item quantity="one"><xliff:g id="NUMBER_1">%s</xliff:g> autre notification à l\'intérieur.</item>
+      <item quantity="many"><xliff:g id="NUMBER_1">%s</xliff:g> more notifications inside.</item>
       <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> autres notifications à l\'intérieur.</item>
     </plurals>
     <string name="notification_summary_message_format" msgid="5158219088501909966">"<xliff:g id="CONTACT_NAME">%1$s</xliff:g> : <xliff:g id="MESSAGE_CONTENT">%2$s</xliff:g>"</string>
@@ -402,6 +403,7 @@
     <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="1280433136266439372">"Écon. données activé"</string>
     <plurals name="quick_settings_hotspot_secondary_label_num_devices" formatted="false" msgid="3142308865165871976">
       <item quantity="one">%d appareil</item>
+      <item quantity="many">%d devices</item>
       <item quantity="other">%d appareils</item>
     </plurals>
     <string name="quick_settings_notifications_label" msgid="3379631363952582758">"Notifications"</string>
@@ -461,7 +463,7 @@
     <string name="camera_hint" msgid="4519495795000658637">"Balayez à partir de l\'icône pour accéder à l\'appareil photo"</string>
     <string name="interruption_level_none_with_warning" msgid="8394434073508145437">"Aucune interruption : le son des lecteurs d\'écran sera également désactivé."</string>
     <string name="interruption_level_none" msgid="219484038314193379">"Aucune interruption"</string>
-    <string name="interruption_level_priority" msgid="661294280016622209">"Priorités seulement"</string>
+    <string name="interruption_level_priority" msgid="661294280016622209">"Prioritaires seulement"</string>
     <string name="interruption_level_alarms" msgid="2457850481335846959">"Alarmes seulement"</string>
     <string name="interruption_level_none_twoline" msgid="8579382742855486372">"Aucune\ninterruption"</string>
     <string name="interruption_level_priority_twoline" msgid="8523482736582498083">"Priorités\nuniquement"</string>
@@ -494,6 +496,7 @@
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Limite d\'utilisateurs atteinte"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
       <item quantity="one">Vous pouvez ajouter jusqu\'à <xliff:g id="COUNT">%d</xliff:g> utilisateur.</item>
+      <item quantity="many">You can add up to <xliff:g id="COUNT">%d</xliff:g> users.</item>
       <item quantity="other">Vous pouvez ajouter jusqu\'à <xliff:g id="COUNT">%d</xliff:g> utilisateurs.</item>
     </plurals>
     <string name="user_remove_user_title" msgid="9124124694835811874">"Supprimer l\'utilisateur?"</string>
@@ -718,7 +721,7 @@
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Garde votre attention à l\'aide d\'un raccourci flottant vers ce contenu."</string>
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"S\'affiche en haut de la section des conversations sous forme de bulle flottante et affiche la photo du profil sur l\'écran de verrouillage"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Paramètres"</string>
-    <string name="notification_priority_title" msgid="2079708866333537093">"Priorité"</string>
+    <string name="notification_priority_title" msgid="2079708866333537093">"Prioritaire"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> ne prend pas en charge les fonctionnalités de conversation"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Aucune bulle récente"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Les bulles récentes et les bulles ignorées s\'afficheront ici"</string>
@@ -760,10 +763,12 @@
     <string name="snoozed_for_time" msgid="7586689374860469469">"Reporté pour <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
     <plurals name="snoozeHourOptions" formatted="false" msgid="2066838694120718170">
       <item quantity="one">%d heure</item>
+      <item quantity="many">%d hours</item>
       <item quantity="other">%d heures</item>
     </plurals>
     <plurals name="snoozeMinuteOptions" formatted="false" msgid="8998483159208055980">
       <item quantity="one">%d minute</item>
+      <item quantity="many">%d minutes</item>
       <item quantity="other">%d minutes</item>
     </plurals>
     <string name="battery_panel_title" msgid="5931157246673665963">"Utilisation de la pile"</string>
@@ -954,7 +959,7 @@
     <string name="instant_apps_title" msgid="8942706782103036910">"<xliff:g id="APP">%1$s</xliff:g> en cours d\'exécution"</string>
     <string name="instant_apps_message" msgid="6112428971833011754">"Application ouverte sans avoir été installée."</string>
     <string name="instant_apps_message_with_help" msgid="1816952263531203932">"Application ouverte sans avoir été installée. Touchez ici pour en savoir plus."</string>
-    <string name="app_info" msgid="5153758994129963243">"Détails de l\'applic."</string>
+    <string name="app_info" msgid="5153758994129963243">"Détails de l\'appli"</string>
     <string name="go_to_web" msgid="636673528981366511">"Ouvrir le navigateur"</string>
     <string name="mobile_data" msgid="4564407557775397216">"Données cellulaires"</string>
     <string name="mobile_data_text_format" msgid="6806501540022589786">"<xliff:g id="ID_1">%1$s</xliff:g> : <xliff:g id="ID_2">%2$s</xliff:g>"</string>
@@ -1032,6 +1037,7 @@
     <string name="controls_providers_title" msgid="6879775889857085056">"Sélectionnez l\'application pour laquelle ajouter des commandes"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
       <item quantity="one"><xliff:g id="NUMBER_1">%s</xliff:g> commande ajoutée.</item>
+      <item quantity="many"><xliff:g id="NUMBER_1">%s</xliff:g> controls added.</item>
       <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> commandes ajoutées.</item>
     </plurals>
     <string name="controls_removed" msgid="3731789252222856959">"Supprimé"</string>
