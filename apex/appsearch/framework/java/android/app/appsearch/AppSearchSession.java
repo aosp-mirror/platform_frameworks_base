@@ -18,7 +18,6 @@ package android.app.appsearch;
 
 import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
-import android.app.appsearch.exceptions.AppSearchException;
 import android.os.Bundle;
 import android.os.ParcelableException;
 import android.os.RemoteException;
@@ -167,9 +166,9 @@ public final class AppSearchSession {
      *                 of the returned {@link AppSearchBatchResult} are the URIs of the input
      *                 documents. The values are {@code null} if they were successfully indexed,
      *                 or a failed {@link AppSearchResult} otherwise.
-     *                 Or {@link BatchResultCallback#onSystemError} will be invoked with an
-     *                 {@link AppSearchException} if an error occurred in AppSearch initialization
-     *                 or a cause {@link Throwable} if other error occurred in AppSearch service.
+     *                 Or {@link BatchResultCallback#onSystemError} will be invoked with a
+     *                 {@link Throwable} if an unexpected internal error occurred in AppSearch
+     *                 service.
      */
     public void putDocuments(
             @NonNull PutDocumentsRequest request,
@@ -210,9 +209,9 @@ public final class AppSearchSession {
      *                 {@link AppSearchResult} otherwise. URIs that are not found will return a
      *                 failed {@link AppSearchResult} with a result code of
      *                 {@link AppSearchResult#RESULT_NOT_FOUND}.
-     *                 Or {@link BatchResultCallback#onSystemError} will be invoked with an
-     *                 {@link AppSearchException} if an error occurred in AppSearch initialization
-     *                 or a cause {@link Throwable} if other error occurred in AppSearch service.
+     *                 Or {@link BatchResultCallback#onSystemError} will be invoked with a
+     *                 {@link Throwable} if an unexpected internal error occurred in AppSearch
+     *                 service.
      */
     public void getByUri(
             @NonNull GetByUriRequest request,
@@ -338,9 +337,9 @@ public final class AppSearchSession {
      *                 are {@code null} on success, or a failed {@link AppSearchResult} otherwise.
      *                 URIs that are not found will return a failed {@link AppSearchResult} with a
      *                 result code of {@link AppSearchResult#RESULT_NOT_FOUND}.
-     *                 Or {@link BatchResultCallback#onSystemError} will be invoked with an
-     *                 {@link AppSearchException} if an error occurred in AppSearch initialization
-     *                 or a cause {@link Throwable} if other error occurred in AppSearch service.
+     *                 Or {@link BatchResultCallback#onSystemError} will be invoked with a
+     *                 {@link Throwable} if an unexpected internal error occurred in AppSearch
+     *                 service.
      */
     public void removeByUri(
             @NonNull RemoveByUriRequest request,

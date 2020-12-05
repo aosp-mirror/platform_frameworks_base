@@ -41,7 +41,7 @@ public final class ImplInstanceManager {
     private ImplInstanceManager() {}
 
     /**
-     * Gets an instance of AppSearchImpl for the given user.
+     * Gets an instance of AppSearchImpl for the given user, or creates one if none exists.
      *
      * <p>If no AppSearchImpl instance exists for this user, Icing will be initialized and one will
      * be created.
@@ -51,7 +51,7 @@ public final class ImplInstanceManager {
      * @return An initialized {@link AppSearchImpl} for this user
      */
     @NonNull
-    public static AppSearchImpl getInstance(@NonNull Context context, @UserIdInt int userId)
+    public static AppSearchImpl getOrCreateInstance(@NonNull Context context, @UserIdInt int userId)
             throws AppSearchException {
         AppSearchImpl instance = sInstances.get(userId);
         if (instance == null) {
@@ -62,6 +62,28 @@ public final class ImplInstanceManager {
                     sInstances.put(userId, instance);
                 }
             }
+        }
+        return instance;
+    }
+
+    /**
+     * Gets an instance of AppSearchImpl for the given user.
+     *
+     * <p>This method should only be called by an initialized SearchSession, which has been already
+     * created the AppSearchImpl instance for the given user.
+     *
+     * @param userId The multi-user userId of the device user calling AppSearch
+     * @return An initialized {@link AppSearchImpl} for this user
+     */
+    @NonNull
+    public static AppSearchImpl getInstance(@UserIdInt int userId) {
+        AppSearchImpl instance = sInstances.get(userId);
+        if (instance == null) {
+            // Impossible scenario, user cannot call an uninitialized SearchSession,
+            // getInstance should always find the instance for the given user and never try to
+            // create an instance for this user again.
+            throw new IllegalStateException(
+                    "AppSearchImpl has never been created for this user: " + userId);
         }
         return instance;
     }
