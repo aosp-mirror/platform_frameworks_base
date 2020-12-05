@@ -41,5 +41,10 @@ enum StateChangeReason {
    * The adapter state changed because of a device system change.
    */
   SYSTEM_POLICY,
+
+  /**
+   * Used to signal the first adapter state message after boot
+   */
+   SYSTEM_BOOT,
 }
 

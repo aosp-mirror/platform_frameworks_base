@@ -17,6 +17,7 @@
 package android.telephony.ims;
 
 import android.annotation.NonNull;
+import android.annotation.SystemApi;
 import android.telephony.ims.stub.SipDelegate;
 
 /**
@@ -36,6 +37,7 @@ import android.telephony.ims.stub.SipDelegate;
  * @see SipDelegateManager#createSipDelegate
  * @hide
  */
+@SystemApi
 public interface SipDelegateConnection {
 
     /**
@@ -47,9 +49,8 @@ public interface SipDelegateConnection {
      * @param sipMessage The SipMessage to be sent.
      * @param configVersion The SipDelegateImsConfiguration version used to construct the
      *                      SipMessage. See {@link SipDelegateImsConfiguration#getVersion} for more
-     *                      information on this parameter and why it is used.
      */
-    void sendMessage(@NonNull SipMessage sipMessage, int configVersion);
+    void sendMessage(@NonNull SipMessage sipMessage, long configVersion);
 
     /**
      * Notify the {@link SipDelegate} that a SIP message received from

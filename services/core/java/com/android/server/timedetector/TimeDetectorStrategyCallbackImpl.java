@@ -16,6 +16,8 @@
 
 package com.android.server.timedetector;
 
+import static com.android.server.timedetector.TimeDetectorStrategy.ORIGIN_NETWORK;
+import static com.android.server.timedetector.TimeDetectorStrategy.ORIGIN_TELEPHONY;
 import static com.android.server.timedetector.TimeDetectorStrategy.stringToOrigin;
 
 import android.annotation.NonNull;
@@ -29,6 +31,9 @@ import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.provider.Settings;
 import android.util.Slog;
+
+import com.android.internal.R;
+import com.android.server.timedetector.TimeDetectorStrategy.Origin;
 
 import java.time.Instant;
 import java.util.Objects;
@@ -48,6 +53,13 @@ public final class TimeDetectorStrategyCallbackImpl implements TimeDetectorStrat
      */
     private static final Instant TIME_LOWER_BOUND = Instant.ofEpochMilli(
             Long.max(Environment.getRootDirectory().lastModified(), Build.TIME));
+
+    /**
+     * By default telephony and network only suggestions are accepted and telephony takes
+     * precedence over network.
+     */
+    private static final @Origin int[] DEFAULT_AUTOMATIC_TIME_ORIGIN_PRIORITIES =
+            { ORIGIN_TELEPHONY, ORIGIN_NETWORK };
 
     /**
      * If a newly calculated system clock time and the current system clock time differs by this or
@@ -76,14 +88,7 @@ public final class TimeDetectorStrategyCallbackImpl implements TimeDetectorStrat
                 SystemProperties.getInt("ro.sys.time_detector_update_diff",
                         SYSTEM_CLOCK_UPDATE_THRESHOLD_MILLIS_DEFAULT);
 
-        // TODO(b/172230856): Obtain these values from configuration.
-        String[] originStrings = { "telephony", "network" };
-        int[] origins = new int[originStrings.length];
-        for (int i = 0; i < originStrings.length; i++) {
-            int origin = stringToOrigin(originStrings[i]);
-            origins[i] = origin;
-        }
-        mOriginPriorities = origins;
+        mOriginPriorities = getOriginPriorities(context);
     }
 
     @Override
@@ -106,7 +111,7 @@ public final class TimeDetectorStrategyCallbackImpl implements TimeDetectorStrat
     }
 
     @Override
-    public int[] getAutoOriginPriorities() {
+    public int[] autoOriginPriorities() {
         return mOriginPriorities;
     }
 
@@ -143,6 +148,22 @@ public final class TimeDetectorStrategyCallbackImpl implements TimeDetectorStrat
     private void checkWakeLockHeld() {
         if (!mWakeLock.isHeld()) {
             Slog.wtf(TAG, "WakeLock " + mWakeLock + " not held");
+        }
+    }
+
+    private static int[] getOriginPriorities(@NonNull Context context) {
+        String[] originStrings =
+                context.getResources().getStringArray(R.array.config_autoTimeSourcesPriority);
+        if (originStrings.length == 0) {
+            return DEFAULT_AUTOMATIC_TIME_ORIGIN_PRIORITIES;
+        } else {
+            int[] origins = new int[originStrings.length];
+            for (int i = 0; i < originStrings.length; i++) {
+                int origin = stringToOrigin(originStrings[i]);
+                origins[i] = origin;
+            }
+
+            return origins;
         }
     }
 }

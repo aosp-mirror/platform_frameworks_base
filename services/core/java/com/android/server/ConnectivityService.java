@@ -41,6 +41,7 @@ import static android.net.INetworkMonitor.NETWORK_VALIDATION_RESULT_VALID;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_CAPTIVE_PORTAL;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_FOREGROUND;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_CONGESTED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_METERED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_ROAMING;
@@ -170,7 +171,6 @@ import android.util.ArraySet;
 import android.util.LocalLog;
 import android.util.Log;
 import android.util.Pair;
-import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.util.Xml;
@@ -1972,7 +1972,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     private void registerNetdEventCallback() {
         final IIpConnectivityMetrics ipConnectivityMetrics = mDeps.getIpConnectivityMetrics();
         if (ipConnectivityMetrics == null) {
-            Slog.wtf(TAG, "Missing IIpConnectivityMetrics");
+            Log.wtf(TAG, "Missing IIpConnectivityMetrics");
             return;
         }
 
@@ -2438,7 +2438,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             if (VDBG || DDBG) log("Setting MTU size: " + iface + ", " + mtu);
             mNetd.interfaceSetMtu(iface, mtu);
         } catch (RemoteException | ServiceSpecificException e) {
-            Slog.e(TAG, "exception in interfaceSetMtu()" + e);
+            loge("exception in interfaceSetMtu()" + e);
         }
     }
 
@@ -2460,7 +2460,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         if (tcpBufferSizes.equals(mCurrentTcpBufferSizes)) return;
 
         try {
-            if (VDBG || DDBG) Slog.d(TAG, "Setting tx/rx TCP buffers to " + tcpBufferSizes);
+            if (VDBG || DDBG) log("Setting tx/rx TCP buffers to " + tcpBufferSizes);
 
             String rmemValues = String.join(" ", values[0], values[1], values[2]);
             String wmemValues = String.join(" ", values[3], values[4], values[5]);
@@ -2761,7 +2761,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 case NetworkAgent.EVENT_NETWORK_CAPABILITIES_CHANGED: {
                     NetworkCapabilities networkCapabilities = (NetworkCapabilities) msg.obj;
                     if (networkCapabilities.hasConnectivityManagedCapability()) {
-                        Slog.wtf(TAG, "BUG: " + nai + " has CS-managed capability.");
+                        Log.wtf(TAG, "BUG: " + nai + " has CS-managed capability.");
                     }
                     if (networkCapabilities.hasTransport(TRANSPORT_TEST)) {
                         // Make sure the original object is not mutated. NetworkAgent normally
@@ -3066,7 +3066,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             // Legacy version of notifyNetworkTestedWithExtras.
             // Would only be called if the system has a NetworkStack module older than the
             // framework, which does not happen in practice.
-            Slog.wtf(TAG, "Deprecated notifyNetworkTested called: no action taken");
+            Log.wtf(TAG, "Deprecated notifyNetworkTested called: no action taken");
         }
 
         @Override
@@ -3543,7 +3543,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 numRequests = nai.numForegroundNetworkRequests();
                 break;
             default:
-                Slog.wtf(TAG, "Invalid reason. Cannot happen.");
+                Log.wtf(TAG, "Invalid reason. Cannot happen.");
                 return true;
         }
 
@@ -3705,7 +3705,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         synchronized (mUidToNetworkRequestCount) {
             final int requests = mUidToNetworkRequestCount.get(nri.mUid, 0);
             if (requests < 1) {
-                Slog.wtf(TAG, "BUG: too small request count " + requests + " for UID " + nri.mUid);
+                Log.wtf(TAG, "BUG: too small request count " + requests + " for UID " + nri.mUid);
             } else if (requests == 1) {
                 mUidToNetworkRequestCount.removeAt(mUidToNetworkRequestCount.indexOfKey(nri.mUid));
             } else {
@@ -3750,7 +3750,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
 
         if (!nai.networkAgentConfig.explicitlySelected) {
-            Slog.wtf(TAG, "BUG: setAcceptUnvalidated non non-explicitly selected network");
+            Log.wtf(TAG, "BUG: setAcceptUnvalidated non non-explicitly selected network");
         }
 
         if (accept != nai.networkAgentConfig.acceptUnvalidated) {
@@ -4020,7 +4020,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 highPriority = nai.networkAgentConfig.explicitlySelected;
                 break;
             default:
-                Slog.wtf(TAG, "Unknown notification type " + type);
+                Log.wtf(TAG, "Unknown notification type " + type);
                 return;
         }
 
@@ -4342,7 +4342,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         synchronized (this) {
             if (!mNetTransitionWakeLock.isHeld()) {
                 mWakelockLogs.log(String.format("RELEASE: already released (%s)", event));
-                Slog.w(TAG, "expected Net Transition WakeLock to be held");
+                Log.w(TAG, "expected Net Transition WakeLock to be held");
                 return;
             }
             mNetTransitionWakeLock.release();
@@ -4514,7 +4514,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
         @Override
         public void onChange(boolean selfChange) {
-            Slog.wtf(TAG, "Should never be reached.");
+            Log.wtf(TAG, "Should never be reached.");
         }
 
         @Override
@@ -4529,15 +4529,19 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
 
     private static void log(String s) {
-        Slog.d(TAG, s);
+        Log.d(TAG, s);
+    }
+
+    private static void logw(String s) {
+        Log.w(TAG, s);
     }
 
     private static void loge(String s) {
-        Slog.e(TAG, s);
+        Log.e(TAG, s);
     }
 
     private static void loge(String s, Throwable t) {
-        Slog.e(TAG, s, t);
+        Log.e(TAG, s, t);
     }
 
     /**
@@ -4824,7 +4828,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     @Override
     public boolean updateLockdownVpn() {
         if (Binder.getCallingUid() != Process.SYSTEM_UID) {
-            Slog.w(TAG, "Lockdown VPN only available to AID_SYSTEM");
+            logw("Lockdown VPN only available to AID_SYSTEM");
             return false;
         }
 
@@ -4834,21 +4838,21 @@ public class ConnectivityService extends IConnectivityManager.Stub
             if (mLockdownEnabled) {
                 byte[] profileTag = mKeyStore.get(Credentials.LOCKDOWN_VPN);
                 if (profileTag == null) {
-                    Slog.e(TAG, "Lockdown VPN configured but cannot be read from keystore");
+                    loge("Lockdown VPN configured but cannot be read from keystore");
                     return false;
                 }
                 String profileName = new String(profileTag);
                 final VpnProfile profile = VpnProfile.decode(
                         profileName, mKeyStore.get(Credentials.VPN + profileName));
                 if (profile == null) {
-                    Slog.e(TAG, "Lockdown VPN configured invalid profile " + profileName);
+                    loge("Lockdown VPN configured invalid profile " + profileName);
                     setLockdownTracker(null);
                     return true;
                 }
                 int user = UserHandle.getUserId(Binder.getCallingUid());
                 Vpn vpn = mVpns.get(user);
                 if (vpn == null) {
-                    Slog.w(TAG, "VPN for user " + user + " not ready yet. Skipping lockdown");
+                    logw("VPN for user " + user + " not ready yet. Skipping lockdown");
                     return false;
                 }
                 setLockdownTracker(new LockdownVpnTracker(mContext, this, mHandler, vpn, profile));
@@ -4908,7 +4912,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             if (vpn == null) {
                 // Shouldn't happen as all code paths that point here should have checked the Vpn
                 // exists already.
-                Slog.wtf(TAG, "User " + userId + " has no Vpn configuration");
+                Log.wtf(TAG, "User " + userId + " has no Vpn configuration");
                 return false;
             }
 
@@ -4924,7 +4928,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         synchronized (mVpns) {
             Vpn vpn = mVpns.get(userId);
             if (vpn == null) {
-                Slog.w(TAG, "User " + userId + " has no Vpn configuration");
+                logw("User " + userId + " has no Vpn configuration");
                 return false;
             }
             return vpn.isAlwaysOnPackageSupported(packageName, mKeyStore);
@@ -4945,7 +4949,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
             Vpn vpn = mVpns.get(userId);
             if (vpn == null) {
-                Slog.w(TAG, "User " + userId + " has no Vpn configuration");
+                logw("User " + userId + " has no Vpn configuration");
                 return false;
             }
             if (!vpn.setAlwaysOnPackage(packageName, lockdown, lockdownWhitelist, mKeyStore)) {
@@ -4967,7 +4971,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         synchronized (mVpns) {
             Vpn vpn = mVpns.get(userId);
             if (vpn == null) {
-                Slog.w(TAG, "User " + userId + " has no Vpn configuration");
+                logw("User " + userId + " has no Vpn configuration");
                 return null;
             }
             return vpn.getAlwaysOnPackage();
@@ -4982,7 +4986,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         synchronized (mVpns) {
             Vpn vpn = mVpns.get(userId);
             if (vpn == null) {
-                Slog.w(TAG, "User " + userId + " has no Vpn configuration");
+                logw("User " + userId + " has no Vpn configuration");
                 return false;
             }
             return vpn.getLockdown();
@@ -4997,7 +5001,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         synchronized (mVpns) {
             Vpn vpn = mVpns.get(userId);
             if (vpn == null) {
-                Slog.w(TAG, "User " + userId + " has no Vpn configuration");
+                logw("User " + userId + " has no Vpn configuration");
                 return null;
             }
             return vpn.getLockdownAllowlist();
@@ -5182,7 +5186,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     private void onPackageReplaced(String packageName, int uid) {
         if (TextUtils.isEmpty(packageName) || uid < 0) {
-            Slog.wtf(TAG, "Invalid package in onPackageReplaced: " + packageName + " | " + uid);
+            Log.wtf(TAG, "Invalid package in onPackageReplaced: " + packageName + " | " + uid);
             return;
         }
         final int userId = UserHandle.getUserId(uid);
@@ -5193,7 +5197,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             }
             // Legacy always-on VPN won't be affected since the package name is not set.
             if (TextUtils.equals(vpn.getAlwaysOnPackage(), packageName)) {
-                Slog.d(TAG, "Restarting always-on VPN package " + packageName + " for user "
+                log("Restarting always-on VPN package " + packageName + " for user "
                         + userId);
                 vpn.startAlwaysOnVpn(mKeyStore);
             }
@@ -5202,7 +5206,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     private void onPackageRemoved(String packageName, int uid, boolean isReplacing) {
         if (TextUtils.isEmpty(packageName) || uid < 0) {
-            Slog.wtf(TAG, "Invalid package in onPackageRemoved: " + packageName + " | " + uid);
+            Log.wtf(TAG, "Invalid package in onPackageRemoved: " + packageName + " | " + uid);
             return;
         }
 
@@ -5214,7 +5218,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             }
             // Legacy always-on VPN won't be affected since the package name is not set.
             if (TextUtils.equals(vpn.getAlwaysOnPackage(), packageName) && !isReplacing) {
-                Slog.d(TAG, "Removing always-on VPN package " + packageName + " for user "
+                log("Removing always-on VPN package " + packageName + " for user "
                         + userId);
                 vpn.setAlwaysOnPackage(null, false, null, mKeyStore);
             }
@@ -5830,7 +5834,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             // Avoid creating duplicates. even if an app makes a direct AIDL call.
             // This will never happen if an app calls ConnectivityManager#registerNetworkProvider,
             // as that will throw if a duplicate provider is registered.
-            Slog.e(TAG, "Attempt to register existing NetworkProviderInfo "
+            loge("Attempt to register existing NetworkProviderInfo "
                     + mNetworkProviderInfos.get(npi.messenger).name);
             return;
         }
@@ -6354,18 +6358,71 @@ public class ConnectivityService extends IConnectivityManager.Stub
         nai.declaredMetered = !nc.hasCapability(NET_CAPABILITY_NOT_METERED);
     }
 
-    /** Propagates to |nc| the capabilities declared by the underlying networks of |nai|. */
-    private void mixInUnderlyingCapabilities(NetworkAgentInfo nai, NetworkCapabilities nc) {
-        Network[] underlyingNetworks = nai.declaredUnderlyingNetworks;
-        Network defaultNetwork = getNetwork(getDefaultNetwork());
+    /** Modifies |caps| based on the capabilities of the specified underlying networks. */
+    @VisibleForTesting
+    void applyUnderlyingCapabilities(@Nullable Network[] underlyingNetworks,
+            @NonNull NetworkCapabilities caps,  boolean declaredMetered) {
+        final Network defaultNetwork = getNetwork(getDefaultNetwork());
         if (underlyingNetworks == null && defaultNetwork != null) {
             // null underlying networks means to track the default.
             underlyingNetworks = new Network[] { defaultNetwork };
         }
+        int[] transportTypes = new int[] { NetworkCapabilities.TRANSPORT_VPN };
+        int downKbps = NetworkCapabilities.LINK_BANDWIDTH_UNSPECIFIED;
+        int upKbps = NetworkCapabilities.LINK_BANDWIDTH_UNSPECIFIED;
+        boolean metered = declaredMetered; // metered if any underlying is metered, or agentMetered
+        boolean roaming = false; // roaming if any underlying is roaming
+        boolean congested = false; // congested if any underlying is congested
+        boolean suspended = true; // suspended if all underlying are suspended
 
-        // TODO(b/124469351): Get capabilities directly from ConnectivityService instead.
-        final ConnectivityManager cm = mContext.getSystemService(ConnectivityManager.class);
-        Vpn.applyUnderlyingCapabilities(cm, underlyingNetworks, nc, nai.declaredMetered);
+        boolean hadUnderlyingNetworks = false;
+        if (null != underlyingNetworks) {
+            for (Network underlyingNetwork : underlyingNetworks) {
+                final NetworkAgentInfo underlying =
+                        getNetworkAgentInfoForNetwork(underlyingNetwork);
+                if (underlying == null) continue;
+
+                final NetworkCapabilities underlyingCaps = underlying.networkCapabilities;
+                hadUnderlyingNetworks = true;
+                for (int underlyingType : underlyingCaps.getTransportTypes()) {
+                    transportTypes = ArrayUtils.appendInt(transportTypes, underlyingType);
+                }
+
+                // Merge capabilities of this underlying network. For bandwidth, assume the
+                // worst case.
+                downKbps = NetworkCapabilities.minBandwidth(downKbps,
+                        underlyingCaps.getLinkDownstreamBandwidthKbps());
+                upKbps = NetworkCapabilities.minBandwidth(upKbps,
+                        underlyingCaps.getLinkUpstreamBandwidthKbps());
+                // If this underlying network is metered, the VPN is metered (it may cost money
+                // to send packets on this network).
+                metered |= !underlyingCaps.hasCapability(NET_CAPABILITY_NOT_METERED);
+                // If this underlying network is roaming, the VPN is roaming (the billing structure
+                // is different than the usual, local one).
+                roaming |= !underlyingCaps.hasCapability(NET_CAPABILITY_NOT_ROAMING);
+                // If this underlying network is congested, the VPN is congested (the current
+                // condition of the network affects the performance of this network).
+                congested |= !underlyingCaps.hasCapability(NET_CAPABILITY_NOT_CONGESTED);
+                // If this network is not suspended, the VPN is not suspended (the VPN
+                // is able to transfer some data).
+                suspended &= !underlyingCaps.hasCapability(NET_CAPABILITY_NOT_SUSPENDED);
+            }
+        }
+        if (!hadUnderlyingNetworks) {
+            // No idea what the underlying networks are; assume reasonable defaults
+            metered = true;
+            roaming = false;
+            congested = false;
+            suspended = false;
+        }
+
+        caps.setTransportTypes(transportTypes);
+        caps.setLinkDownstreamBandwidthKbps(downKbps);
+        caps.setLinkUpstreamBandwidthKbps(upKbps);
+        caps.setCapability(NET_CAPABILITY_NOT_METERED, !metered);
+        caps.setCapability(NET_CAPABILITY_NOT_ROAMING, !roaming);
+        caps.setCapability(NET_CAPABILITY_NOT_CONGESTED, !congested);
+        caps.setCapability(NET_CAPABILITY_NOT_SUSPENDED, !suspended);
     }
 
     /**
@@ -6387,7 +6444,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             // stop being matched by the updated agent.
             String diff = nai.networkCapabilities.describeImmutableDifferences(nc);
             if (!TextUtils.isEmpty(diff)) {
-                Slog.wtf(TAG, "BUG: " + nai + " lost immutable capabilities:" + diff);
+                Log.wtf(TAG, "BUG: " + nai + " lost immutable capabilities:" + diff);
             }
         }
 
@@ -6422,7 +6479,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
 
         if (nai.supportsUnderlyingNetworks()) {
-            mixInUnderlyingCapabilities(nai, newNc);
+            applyUnderlyingCapabilities(nai.declaredUnderlyingNetworks, newNc, nai.declaredMetered);
         }
 
         return newNc;
@@ -6947,7 +7004,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             }
             newSatisfier.unlingerRequest(nri.request);
             if (!newSatisfier.addRequest(nri.request)) {
-                Slog.wtf(TAG, "BUG: " + newSatisfier.toShortString() + " already has "
+                Log.wtf(TAG, "BUG: " + newSatisfier.toShortString() + " already has "
                         + nri.request);
             }
         } else {
@@ -7295,7 +7352,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             networkAgent.everConnected = true;
 
             if (networkAgent.linkProperties == null) {
-                Slog.wtf(TAG, networkAgent.toShortString() + " connected with null LinkProperties");
+                Log.wtf(TAG, networkAgent.toShortString() + " connected with null LinkProperties");
             }
 
             // NetworkCapabilities need to be set before sending the private DNS config to
@@ -8143,8 +8200,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
         final NetworkRequestInfo nri = cbInfo.mRequestInfo;
 
-        if (uid != nri.mUid) {
-            if (VDBG) loge("Different uid than registrant attempting to unregister cb");
+        // Caller's UID must either be the registrants (if they are unregistering) or the System's
+        // (if the Binder died)
+        if (uid != nri.mUid && uid != Process.SYSTEM_UID) {
+            if (DBG) loge("Uid(" + uid + ") not registrant's (" + nri.mUid + ") or System's");
             return;
         }
 

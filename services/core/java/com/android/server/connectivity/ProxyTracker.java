@@ -35,7 +35,7 @@ import android.os.Handler;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.TextUtils;
-import android.util.Slog;
+import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
 
@@ -168,7 +168,7 @@ public class ProxyTracker {
                 proxyProperties = new ProxyInfo(host, port, exclList);
             }
             if (!proxyProperties.isValid()) {
-                if (DBG) Slog.d(TAG, "Invalid proxy properties, ignoring: " + proxyProperties);
+                if (DBG) Log.d(TAG, "Invalid proxy properties, ignoring: " + proxyProperties);
                 return;
             }
 
@@ -223,7 +223,7 @@ public class ProxyTracker {
         if (mPacManager.setCurrentProxyScriptUrl(proxyInfo) == PacManager.DONT_SEND_BROADCAST) {
             return;
         }
-        if (DBG) Slog.d(TAG, "sending Proxy Broadcast for " + proxyInfo);
+        if (DBG) Log.d(TAG, "sending Proxy Broadcast for " + proxyInfo);
         Intent intent = new Intent(Proxy.PROXY_CHANGE_ACTION);
         intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING |
                 Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
@@ -255,7 +255,7 @@ public class ProxyTracker {
             if (proxyInfo != null && (!TextUtils.isEmpty(proxyInfo.getHost()) ||
                     !Uri.EMPTY.equals(proxyInfo.getPacFileUrl()))) {
                 if (!proxyInfo.isValid()) {
-                    if (DBG) Slog.d(TAG, "Invalid proxy properties, ignoring: " + proxyInfo);
+                    if (DBG) Log.d(TAG, "Invalid proxy properties, ignoring: " + proxyInfo);
                     return;
                 }
                 mGlobalProxy = new ProxyInfo(proxyInfo);
@@ -296,7 +296,7 @@ public class ProxyTracker {
         synchronized (mProxyLock) {
             if (Objects.equals(mDefaultProxy, proxyInfo)) return;
             if (proxyInfo != null &&  !proxyInfo.isValid()) {
-                if (DBG) Slog.d(TAG, "Invalid proxy properties, ignoring: " + proxyInfo);
+                if (DBG) Log.d(TAG, "Invalid proxy properties, ignoring: " + proxyInfo);
                 return;
             }
 

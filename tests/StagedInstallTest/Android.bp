@@ -27,7 +27,6 @@ java_test_host {
     static_libs: [
         "testng",
         "compatibility-tradefed",
-        "module_test_util",
         "frameworks-base-hostutils",
         "cts-install-lib-host",
     ],

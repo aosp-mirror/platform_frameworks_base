@@ -250,7 +250,7 @@ public class RcsCapabilityExchangeImplBase {
          * This allows the framework to know that there will no longer be any
          * capability updates for the requested operationToken.
          */
-        void onTerminated(String reason, String retryAfter) throws ImsException;
+        void onTerminated(String reason, long retryAfterMilliseconds) throws ImsException;
     }
 
 
