@@ -1049,6 +1049,31 @@ public class PackageInstaller {
         }
 
         /**
+         * Populate an APK file by creating a hard link to avoid the need to copy.
+         * <p>
+         * Note this API is used by RollbackManager only and can only be called from system_server.
+         * {@code target} will be relabeled if link is created successfully. RollbackManager has
+         * to delete {@code target} when the session is committed successfully to avoid SELinux
+         * label conflicts.
+         * <p>
+         * Note No more bytes should be written to the file once the link is created successfully.
+         *
+         * @param target the path of the link target
+         *
+         * @hide
+         */
+        public void stageViaHardLink(String target) throws IOException {
+            try {
+                mSession.stageViaHardLink(target);
+            } catch (RuntimeException e) {
+                ExceptionUtils.maybeUnwrapIOException(e);
+                throw e;
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        /**
          * Ensure that any outstanding data for given stream has been committed
          * to disk. This is only valid for streams returned from
          * {@link #openWrite(String, long, long)}.

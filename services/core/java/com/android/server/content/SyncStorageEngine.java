@@ -1804,10 +1804,8 @@ public class SyncStorageEngine {
         int id = -1;
         try {
             id = parser.getAttributeInt(null, "id");
-        } catch (NumberFormatException e) {
+        } catch (XmlPullParserException e) {
             Slog.e(TAG, "error parsing the id of the authority", e);
-        } catch (NullPointerException e) {
-            Slog.e(TAG, "the id of the authority is null", e);
         }
         if (id >= 0) {
             String authorityName = parser.getAttributeValue(null, "authority");
@@ -1920,28 +1918,26 @@ public class SyncStorageEngine {
     private void parseExtra(TypedXmlPullParser parser, Bundle extras) {
         String name = parser.getAttributeValue(null, "name");
         String type = parser.getAttributeValue(null, "type");
-        String value1 = parser.getAttributeValue(null, "value1");
-        String value2 = parser.getAttributeValue(null, "value2");
 
         try {
             if ("long".equals(type)) {
-                extras.putLong(name, Long.parseLong(value1));
+                extras.putLong(name, parser.getAttributeLong(null, "value1"));
             } else if ("integer".equals(type)) {
-                extras.putInt(name, Integer.parseInt(value1));
+                extras.putInt(name, parser.getAttributeInt(null, "value1"));
             } else if ("double".equals(type)) {
-                extras.putDouble(name, Double.parseDouble(value1));
+                extras.putDouble(name, parser.getAttributeDouble(null, "value1"));
             } else if ("float".equals(type)) {
-                extras.putFloat(name, Float.parseFloat(value1));
+                extras.putFloat(name, parser.getAttributeFloat(null, "value1"));
             } else if ("boolean".equals(type)) {
-                extras.putBoolean(name, Boolean.parseBoolean(value1));
+                extras.putBoolean(name, parser.getAttributeBoolean(null, "value1"));
             } else if ("string".equals(type)) {
-                extras.putString(name, value1);
+                extras.putString(name, parser.getAttributeValue(null, "value1"));
             } else if ("account".equals(type)) {
+                final String value1 = parser.getAttributeValue(null, "value1");
+                final String value2 = parser.getAttributeValue(null, "value2");
                 extras.putParcelable(name, new Account(value1, value2));
             }
-        } catch (NumberFormatException e) {
-            Slog.e(TAG, "error parsing bundle value", e);
-        } catch (NullPointerException e) {
+        } catch (XmlPullParserException e) {
             Slog.e(TAG, "error parsing bundle value", e);
         }
     }

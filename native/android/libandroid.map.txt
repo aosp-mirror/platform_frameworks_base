@@ -1,5 +1,9 @@
 LIBANDROID {
   global:
+    AActivityManager_addUidImportanceListener; # apex # introduced=31
+    AActivityManager_removeUidImportanceListener; # apex # introduced=31
+    AActivityManager_isUidActive; # apex # introduced=31
+    AActivityManager_getUidImportance; # apex # introduced=31
     AAssetDir_close;
     AAssetDir_getNextFileName;
     AAssetDir_rewind;

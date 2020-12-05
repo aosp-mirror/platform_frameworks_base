@@ -18,6 +18,7 @@ package android.accessibilityservice;
 
 import android.accessibilityservice.GestureDescription.MotionEventGenerator;
 import android.annotation.CallbackExecutor;
+import android.annotation.ColorInt;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -2114,6 +2115,27 @@ public abstract class AccessibilityService extends Service {
             }));
         } catch (RemoteException re) {
             throw new RuntimeException(re);
+        }
+    }
+
+    /**
+     * Sets the strokeWidth and color of the accessibility focus rectangle.
+     *
+     * @param strokeWidth The stroke width of the rectangle in pixels.
+     *                    Setting this value to zero results in no focus rectangle being drawn.
+     * @param color The color of the rectangle.
+     */
+    public void setAccessibilityFocusAppearance(int strokeWidth, @ColorInt int color) {
+        IAccessibilityServiceConnection connection =
+                AccessibilityInteractionClient.getInstance().getConnection(mConnectionId);
+        if (connection != null) {
+            try {
+                connection.setFocusAppearance(strokeWidth, color);
+            } catch (RemoteException re) {
+                Log.w(LOG_TAG, "Error while setting the strokeWidth and color of the "
+                        + "accessibility focus rectangle", re);
+                re.rethrowFromSystemServer();
+            }
         }
     }
 

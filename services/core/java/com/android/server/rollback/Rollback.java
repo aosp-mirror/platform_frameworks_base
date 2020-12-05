@@ -581,9 +581,18 @@ class Rollback {
                             ParcelFileDescriptor.MODE_READ_ONLY)) {
                         final long token = Binder.clearCallingIdentity();
                         try {
-                            session.write(packageCodePath.getName(), 0,
-                                    packageCodePath.length(),
-                                    fd);
+                            boolean fallbackToCopy = false;
+                            try {
+                                // Populate apk/apex files using hard links to avoid copy
+                                session.stageViaHardLink(packageCodePath.getAbsolutePath());
+                            } catch (Exception ignore) {
+                                fallbackToCopy = true;
+                            }
+                            if (fallbackToCopy) {
+                                session.write(packageCodePath.getName(), 0,
+                                        packageCodePath.length(),
+                                        fd);
+                            }
                         } finally {
                             Binder.restoreCallingIdentity(token);
                         }

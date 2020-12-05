@@ -15,7 +15,7 @@
 android_test {
     name: "FrameworksMockingServicesTests",
 
-    srcs: ["src/**/*.java"],
+    srcs: ["src/**/*.java", "src/**/*.kt"],
 
     static_libs: [
         "services.core",
@@ -29,6 +29,10 @@ android_test {
         "mockito-target-extended-minus-junit4",
         "platform-test-annotations",
         "truth-prebuilt",
+        "hamcrest-library",
+        "servicestests-utils-mockito-extended",
+        "mockingservicestests-utils-mockito",
+        "servicestests-core-utils",
         "testables",
         // TODO: remove once Android migrates to JUnit 4.12, which provides assertThrows
         "testng",
@@ -53,4 +57,18 @@ android_test {
     optimize: {
         enabled: false,
     },
+}
+
+java_library {
+    name: "mockingservicestests-utils-mockito",
+    srcs: [
+        "utils-mockito/**/*.kt",
+    ],
+    static_libs: [
+        "junit",
+        "mockito-target-extended-minus-junit4",
+    ],
+    libs: [
+        "android.test.runner",
+    ],
 }

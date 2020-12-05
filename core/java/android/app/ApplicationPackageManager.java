@@ -30,6 +30,7 @@ import android.annotation.Nullable;
 import android.annotation.StringRes;
 import android.annotation.UserIdInt;
 import android.annotation.XmlRes;
+import android.app.role.RoleManager;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -2306,20 +2307,14 @@ public class ApplicationPackageManager extends PackageManager {
 
     @Override
     public String getDefaultBrowserPackageNameAsUser(int userId) {
-        try {
-            return mPermissionManager.getDefaultBrowser(userId);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        RoleManager roleManager = mContext.getSystemService(RoleManager.class);
+        return roleManager.getBrowserRoleHolder(userId);
     }
 
     @Override
     public boolean setDefaultBrowserPackageNameAsUser(String packageName, int userId) {
-        try {
-            return mPermissionManager.setDefaultBrowser(packageName, userId);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        RoleManager roleManager = mContext.getSystemService(RoleManager.class);
+        return roleManager.setBrowserRoleHolder(packageName, userId);
     }
 
     @Override

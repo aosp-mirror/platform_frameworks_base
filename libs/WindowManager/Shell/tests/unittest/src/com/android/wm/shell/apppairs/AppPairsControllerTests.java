@@ -55,14 +55,14 @@ public class AppPairsControllerTests extends ShellTestCase {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
+        when(mDisplayController.getDisplayContext(anyInt())).thenReturn(mContext);
+        when(mDisplayController.getDisplay(anyInt())).thenReturn(
+                mContext.getSystemService(DisplayManager.class).getDisplay(DEFAULT_DISPLAY));
         mController = new TestAppPairsController(
                 mTaskOrganizer,
                 mSyncQueue,
                 mDisplayController);
         mPool = mController.getPool();
-        when(mDisplayController.getDisplayContext(anyInt())).thenReturn(mContext);
-        when(mDisplayController.getDisplay(anyInt())).thenReturn(
-                mContext.getSystemService(DisplayManager.class).getDisplay(DEFAULT_DISPLAY));
     }
 
     @After

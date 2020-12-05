@@ -558,8 +558,8 @@ public class SnoozeHelper {
                         if (value < currentTime) {
                             return;
                         }
-                        out.attribute(null, XML_SNOOZED_NOTIFICATION_TIME,
-                                value.toString());
+                        out.attributeLong(null, XML_SNOOZED_NOTIFICATION_TIME,
+                                value);
                     });
             writeXml(out, mPersistedSnoozedNotificationsWithContext,
                     XML_SNOOZED_NOTIFICATION_CONTEXT,

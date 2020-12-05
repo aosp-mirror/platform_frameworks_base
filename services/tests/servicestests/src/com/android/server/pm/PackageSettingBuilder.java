@@ -22,6 +22,7 @@ import android.util.ArraySet;
 import android.util.SparseArray;
 
 import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.parsing.pkg.PackageImpl;
 
 import java.io.File;
 import java.util.Map;
@@ -38,14 +39,14 @@ public class PackageSettingBuilder {
     private int mPkgFlags;
     private int mPrivateFlags;
     private int mSharedUserId;
+    private String mVolumeUuid;
+    private int mAppId;
+    private SparseArray<PackageUserState> mUserStates = new SparseArray<>();
+    private AndroidPackage mPkg;
+    private InstallSource mInstallSource;
     private String[] mUsesStaticLibraries;
     private long[] mUsesStaticLibrariesVersions;
     private Map<String, ArraySet<String>> mMimeGroups;
-    private String mVolumeUuid;
-    private SparseArray<PackageUserState> mUserStates = new SparseArray<>();
-    private AndroidPackage mPkg;
-    private int mAppId;
-    private InstallSource mInstallSource;
     private PackageParser.SigningDetails mSigningDetails;
 
     public PackageSettingBuilder setPackage(AndroidPackage pkg) {
@@ -143,6 +144,14 @@ public class PackageSettingBuilder {
         return this;
     }
 
+    public PackageSettingBuilder setInstallState(int userId, boolean installed) {
+        if (mUserStates.indexOfKey(userId) < 0) {
+            mUserStates.put(userId, new PackageUserState());
+        }
+        mUserStates.get(userId).installed = installed;
+        return this;
+    }
+
     public PackageSettingBuilder setInstallSource(InstallSource installSource) {
         mInstallSource = installSource;
         return this;
@@ -173,6 +182,5 @@ public class PackageSettingBuilder {
             packageSetting.setUserState(mUserStates.keyAt(i), mUserStates.valueAt(i));
         }
         return packageSetting;
-
     }
 }

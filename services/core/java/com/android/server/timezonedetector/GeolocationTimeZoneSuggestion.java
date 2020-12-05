@@ -61,7 +61,7 @@ import java.util.StringTokenizer;
  */
 public final class GeolocationTimeZoneSuggestion {
 
-    @NonNull private final List<String> mZoneIds;
+    @Nullable private final List<String> mZoneIds;
     @Nullable private ArrayList<String> mDebugInfo;
 
     public GeolocationTimeZoneSuggestion(@Nullable List<String> zoneIds) {

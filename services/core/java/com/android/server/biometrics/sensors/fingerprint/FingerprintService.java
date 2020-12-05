@@ -587,13 +587,13 @@ public class FingerprintService extends SystemService implements BiometricServic
                 @Nullable byte [] hardwareAuthToken, String opPackageName) {
             Utils.checkPermission(getContext(), RESET_FINGERPRINT_LOCKOUT);
 
-            final Pair<Integer, ServiceProvider> provider = getSingleProvider();
+            final ServiceProvider provider = getProviderForSensor(sensorId);
             if (provider == null) {
                 Slog.w(TAG, "Null provider for resetLockout, caller: " + opPackageName);
                 return;
             }
 
-            provider.second.scheduleResetLockout(sensorId, userId, hardwareAuthToken);
+            provider.scheduleResetLockout(sensorId, userId, hardwareAuthToken);
         }
 
         @Override

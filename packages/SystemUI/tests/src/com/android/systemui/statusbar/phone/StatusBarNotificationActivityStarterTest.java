@@ -81,7 +81,9 @@ import com.android.systemui.wmshell.BubblesManager;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InOrder;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.stubbing.Answer;
 
@@ -261,11 +263,12 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
 
         verify(mAssistManager).hideAssist();
 
-        verify(mClickNotifier).onNotificationClick(
+        InOrder orderVerifier = Mockito.inOrder(mClickNotifier, mOnUserInteractionCallback);
+        orderVerifier.verify(mClickNotifier).onNotificationClick(
                 eq(sbn.getKey()), any(NotificationVisibility.class));
-
         // Notification calls dismiss callback to remove notification due to FLAG_AUTO_CANCEL
-        verify(mOnUserInteractionCallback).onDismiss(mNotificationRow.getEntry(), REASON_CLICK);
+        orderVerifier.verify(mOnUserInteractionCallback).onDismiss(mNotificationRow.getEntry(),
+                REASON_CLICK);
     }
 
     @Test

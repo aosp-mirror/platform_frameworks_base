@@ -1,6 +1,27 @@
 // Signature format: 2.0
 package android.app.appsearch {
 
+  public final class AppSearchBatchResult<KeyType, ValueType> {
+    method @NonNull public java.util.Map<KeyType,android.app.appsearch.AppSearchResult<ValueType>> getFailures();
+    method @NonNull public java.util.Map<KeyType,ValueType> getSuccesses();
+    method public boolean isSuccess();
+  }
+
+  public final class AppSearchResult<ValueType> {
+    method @Nullable public String getErrorMessage();
+    method public int getResultCode();
+    method @Nullable public ValueType getResultValue();
+    method public boolean isSuccess();
+    field public static final int RESULT_INTERNAL_ERROR = 2; // 0x2
+    field public static final int RESULT_INVALID_ARGUMENT = 3; // 0x3
+    field public static final int RESULT_INVALID_SCHEMA = 7; // 0x7
+    field public static final int RESULT_IO_ERROR = 4; // 0x4
+    field public static final int RESULT_NOT_FOUND = 6; // 0x6
+    field public static final int RESULT_OK = 0; // 0x0
+    field public static final int RESULT_OUT_OF_SPACE = 5; // 0x5
+    field public static final int RESULT_UNKNOWN_ERROR = 1; // 0x1
+  }
+
   public final class AppSearchSchema {
     method @NonNull public java.util.List<android.app.appsearch.AppSearchSchema.PropertyConfig> getProperties();
     method @NonNull public String getSchemaType();
@@ -85,6 +106,43 @@ package android.app.appsearch {
     method @NonNull public BuilderType setTtlMillis(long);
   }
 
+  public final class GetByUriRequest {
+    method @NonNull public String getNamespace();
+    method @NonNull public java.util.Set<java.lang.String> getUris();
+  }
+
+  public static final class GetByUriRequest.Builder {
+    ctor public GetByUriRequest.Builder();
+    method @NonNull public android.app.appsearch.GetByUriRequest.Builder addUri(@NonNull java.lang.String...);
+    method @NonNull public android.app.appsearch.GetByUriRequest.Builder addUri(@NonNull java.util.Collection<java.lang.String>);
+    method @NonNull public android.app.appsearch.GetByUriRequest build();
+    method @NonNull public android.app.appsearch.GetByUriRequest.Builder setNamespace(@NonNull String);
+  }
+
+  public final class PutDocumentsRequest {
+    method @NonNull public java.util.List<android.app.appsearch.GenericDocument> getDocuments();
+  }
+
+  public static final class PutDocumentsRequest.Builder {
+    ctor public PutDocumentsRequest.Builder();
+    method @NonNull public android.app.appsearch.PutDocumentsRequest.Builder addGenericDocument(@NonNull android.app.appsearch.GenericDocument...);
+    method @NonNull public android.app.appsearch.PutDocumentsRequest.Builder addGenericDocument(@NonNull java.util.Collection<android.app.appsearch.GenericDocument>);
+    method @NonNull public android.app.appsearch.PutDocumentsRequest build();
+  }
+
+  public final class RemoveByUriRequest {
+    method @NonNull public String getNamespace();
+    method @NonNull public java.util.Set<java.lang.String> getUris();
+  }
+
+  public static final class RemoveByUriRequest.Builder {
+    ctor public RemoveByUriRequest.Builder();
+    method @NonNull public android.app.appsearch.RemoveByUriRequest.Builder addUri(@NonNull java.lang.String...);
+    method @NonNull public android.app.appsearch.RemoveByUriRequest.Builder addUri(@NonNull java.util.Collection<java.lang.String>);
+    method @NonNull public android.app.appsearch.RemoveByUriRequest build();
+    method @NonNull public android.app.appsearch.RemoveByUriRequest.Builder setNamespace(@NonNull String);
+  }
+
   public final class SearchResult {
     method @NonNull public android.app.appsearch.GenericDocument getDocument();
     method @NonNull public java.util.List<android.app.appsearch.SearchResult.MatchInfo> getMatches();
@@ -137,6 +195,19 @@ package android.app.appsearch {
     method @NonNull public android.app.appsearch.SearchSpec.Builder setSnippetCount(@IntRange(from=0, to=android.app.appsearch.SearchSpec.MAX_SNIPPET_COUNT) int);
     method @NonNull public android.app.appsearch.SearchSpec.Builder setSnippetCountPerProperty(@IntRange(from=0, to=android.app.appsearch.SearchSpec.MAX_SNIPPET_PER_PROPERTY_COUNT) int);
     method @NonNull public android.app.appsearch.SearchSpec.Builder setTermMatch(int);
+  }
+
+  public final class SetSchemaRequest {
+    method @NonNull public java.util.Set<android.app.appsearch.AppSearchSchema> getSchemas();
+    method public boolean isForceOverride();
+  }
+
+  public static final class SetSchemaRequest.Builder {
+    ctor public SetSchemaRequest.Builder();
+    method @NonNull public android.app.appsearch.SetSchemaRequest.Builder addSchema(@NonNull android.app.appsearch.AppSearchSchema...);
+    method @NonNull public android.app.appsearch.SetSchemaRequest.Builder addSchema(@NonNull java.util.Collection<android.app.appsearch.AppSearchSchema>);
+    method @NonNull public android.app.appsearch.SetSchemaRequest build();
+    method @NonNull public android.app.appsearch.SetSchemaRequest.Builder setForceOverride(boolean);
   }
 
 }

@@ -21,7 +21,6 @@ import android.content.ComponentName;
 import android.content.pm.ParceledListSlice;
 import android.os.RemoteException;
 import android.view.DisplayInfo;
-import android.view.IPinnedStackController;
 import android.view.IPinnedStackListener;
 import android.view.WindowManagerGlobal;
 
@@ -60,12 +59,6 @@ public class PinnedStackListenerForwarder {
     public void register(int displayId) throws RemoteException {
         WindowManagerGlobal.getWindowManagerService().registerPinnedStackListener(
                 displayId, mListenerImpl);
-    }
-
-    private void onListenerRegistered(IPinnedStackController controller) {
-        for (PinnedStackListener listener : mListeners) {
-            listener.onListenerRegistered(controller);
-        }
     }
 
     private void onMovementBoundsChanged(boolean fromImeAdjustment) {
@@ -112,13 +105,6 @@ public class PinnedStackListenerForwarder {
 
     @BinderThread
     private class PinnedStackListenerImpl extends IPinnedStackListener.Stub {
-        @Override
-        public void onListenerRegistered(IPinnedStackController controller) {
-            mShellMainExecutor.execute(() -> {
-                PinnedStackListenerForwarder.this.onListenerRegistered(controller);
-            });
-        }
-
         @Override
         public void onMovementBoundsChanged(boolean fromImeAdjustment) {
             mShellMainExecutor.execute(() -> {
@@ -174,8 +160,6 @@ public class PinnedStackListenerForwarder {
      * Subclasses can ignore those methods they do not intend to take action upon.
      */
     public static class PinnedStackListener {
-        public void onListenerRegistered(IPinnedStackController controller) {}
-
         public void onMovementBoundsChanged(boolean fromImeAdjustment) {}
 
         public void onImeVisibilityChanged(boolean imeVisible, int imeHeight) {}

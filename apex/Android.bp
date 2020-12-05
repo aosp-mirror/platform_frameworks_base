@@ -15,6 +15,7 @@
 mainline_stubs_args =
     "--error UnhiddenSystemApi " +
     "--hide BroadcastBehavior " +
+    "--hide CallbackInterface " +
     "--hide DeprecationMismatch " +
     "--hide HiddenSuperclass " +
     "--hide HiddenTypedefConstant " +

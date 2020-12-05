@@ -37,11 +37,12 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Printer;
 import android.util.SparseArray;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -472,16 +473,15 @@ public final class DeviceAdminInfo implements Parcelable {
     }
 
     /** @hide */
-    public void writePoliciesToXml(XmlSerializer out)
+    public void writePoliciesToXml(TypedXmlSerializer out)
             throws IllegalArgumentException, IllegalStateException, IOException {
-        out.attribute(null, "flags", Integer.toString(mUsesPolicies));
+        out.attributeInt(null, "flags", mUsesPolicies);
     }
 
     /** @hide */
-    public void readPoliciesFromXml(XmlPullParser parser)
+    public void readPoliciesFromXml(TypedXmlPullParser parser)
             throws XmlPullParserException, IOException {
-        mUsesPolicies = Integer.parseInt(
-                parser.getAttributeValue(null, "flags"));
+        mUsesPolicies = parser.getAttributeInt(null, "flags");
     }
 
     public void dump(Printer pw, String prefix) {

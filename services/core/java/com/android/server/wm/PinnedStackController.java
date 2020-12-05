@@ -29,7 +29,6 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Slog;
 import android.view.DisplayInfo;
-import android.view.IPinnedStackController;
 import android.view.IPinnedStackListener;
 
 import java.io.PrintWriter;
@@ -63,8 +62,6 @@ class PinnedStackController {
     private final PinnedStackListenerDeathHandler mPinnedStackListenerDeathHandler =
             new PinnedStackListenerDeathHandler();
 
-    private final PinnedStackControllerCallback mCallbacks = new PinnedStackControllerCallback();
-
     /** Whether the PiP is entering or leaving. */
     private boolean mIsPipWindowingModeChanging;
 
@@ -84,18 +81,6 @@ class PinnedStackController {
 
     // Temp vars for calculation
     private final DisplayMetrics mTmpMetrics = new DisplayMetrics();
-
-    /**
-     * The callback object passed to listeners for them to notify the controller of state changes.
-     */
-    private class PinnedStackControllerCallback extends IPinnedStackController.Stub {
-        @Override
-        public int getDisplayRotation() {
-            synchronized (mService.mGlobalLock) {
-                return mDisplayInfo.rotation;
-            }
-        }
-    }
 
     /**
      * Handler for the case where the listener dies.
@@ -141,7 +126,6 @@ class PinnedStackController {
     void registerPinnedStackListener(IPinnedStackListener listener) {
         try {
             listener.asBinder().linkToDeath(mPinnedStackListenerDeathHandler, 0);
-            listener.onListenerRegistered(mCallbacks);
             mPinnedStackListener = listener;
             notifyDisplayInfoChanged(mDisplayInfo);
             notifyImeVisibilityChanged(mIsImeShowing, mImeHeight);

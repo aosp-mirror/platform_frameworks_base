@@ -137,12 +137,12 @@ class DisplayAreaPolicyBuilder {
     private ArrayList<HierarchyBuilder> mDisplayAreaGroupHierarchyBuilders = new ArrayList<>();
 
     /**
-     * When a window is created, the policy will use this function to select the
-     * {@link RootDisplayArea} to place that window in. The selected root can be either the one of
-     * the {@link #mRootHierarchyBuilder} or the one of any of the
+     * When a window is created, the policy will use this function, which takes window type and
+     * options, to select the {@link RootDisplayArea} to place that window in. The selected root
+     * can be either the one of the {@link #mRootHierarchyBuilder} or the one of any of the
      * {@link #mDisplayAreaGroupHierarchyBuilders}.
      **/
-    @Nullable private BiFunction<WindowToken, Bundle, RootDisplayArea> mSelectRootForWindowFunc;
+    @Nullable private BiFunction<Integer, Bundle, RootDisplayArea> mSelectRootForWindowFunc;
 
     /** Defines the root hierarchy for the whole logical display. */
     DisplayAreaPolicyBuilder setRootHierarchy(HierarchyBuilder rootHierarchyBuilder) {
@@ -162,7 +162,7 @@ class DisplayAreaPolicyBuilder {
 
     /** The policy will use this function to find the root to place windows in. */
     DisplayAreaPolicyBuilder setSelectRootForWindowFunc(
-            BiFunction<WindowToken, Bundle, RootDisplayArea> selectRootForWindowFunc) {
+            BiFunction<Integer, Bundle, RootDisplayArea> selectRootForWindowFunc) {
         mSelectRootForWindowFunc = selectRootForWindowFunc;
         return this;
     }
@@ -655,19 +655,19 @@ class DisplayAreaPolicyBuilder {
 
     static class Result extends DisplayAreaPolicy {
         final List<RootDisplayArea> mDisplayAreaGroupRoots;
-        final BiFunction<WindowToken, Bundle, RootDisplayArea> mSelectRootForWindowFunc;
+        final BiFunction<Integer, Bundle, RootDisplayArea> mSelectRootForWindowFunc;
         private final TaskDisplayArea mDefaultTaskDisplayArea;
 
         Result(WindowManagerService wmService, RootDisplayArea root,
                 List<RootDisplayArea> displayAreaGroupRoots,
-                @Nullable BiFunction<WindowToken, Bundle, RootDisplayArea>
+                @Nullable BiFunction<Integer, Bundle, RootDisplayArea>
                         selectRootForWindowFunc) {
             super(wmService, root);
             mDisplayAreaGroupRoots = Collections.unmodifiableList(displayAreaGroupRoots);
             mSelectRootForWindowFunc = selectRootForWindowFunc == null
                     // Always return the highest level root of the logical display when the func is
                     // not specified.
-                    ? (window, options) -> mRoot
+                    ? (type, options) -> mRoot
                     : selectRootForWindowFunc;
 
             // Cache the default TaskDisplayArea for quick access.
@@ -689,7 +689,8 @@ class DisplayAreaPolicyBuilder {
 
         @VisibleForTesting
         DisplayArea.Tokens findAreaForToken(WindowToken token) {
-            return mSelectRootForWindowFunc.apply(token, token.mOptions).findAreaForToken(token);
+            return mSelectRootForWindowFunc.apply(token.windowType, token.mOptions)
+                    .findAreaForToken(token);
         }
 
         @VisibleForTesting
@@ -726,6 +727,13 @@ class DisplayAreaPolicyBuilder {
         @Override
         public TaskDisplayArea getDefaultTaskDisplayArea() {
             return mDefaultTaskDisplayArea;
+        }
+
+        @Override
+        public DisplayArea.Tokens getDisplayAreaForWindowToken(int type, Bundle options,
+                boolean ownerCanManageAppTokens, boolean roundedCornerOverlay) {
+            return mSelectRootForWindowFunc.apply(type, options).findAreaForToken(type,
+                    ownerCanManageAppTokens, roundedCornerOverlay);
         }
     }
 

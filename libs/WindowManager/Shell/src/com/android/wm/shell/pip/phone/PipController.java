@@ -41,7 +41,6 @@ import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
 import android.view.DisplayInfo;
-import android.view.IPinnedStackController;
 import android.view.WindowManagerGlobal;
 import android.window.WindowContainerTransaction;
 
@@ -161,11 +160,6 @@ public class PipController implements Pip, PipTaskOrganizer.PipTransitionCallbac
      */
     private class PipControllerPinnedStackListener extends
             PinnedStackListenerForwarder.PinnedStackListener {
-        @Override
-        public void onListenerRegistered(IPinnedStackController controller) {
-            mTouchHandler.setPinnedStackController(controller);
-        }
-
         @Override
         public void onImeVisibilityChanged(boolean imeVisible, int imeHeight) {
             mPipBoundsState.setImeVisibility(imeVisible, imeHeight);

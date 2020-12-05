@@ -67,6 +67,7 @@ import com.android.server.lights.LightsManager;
 import com.android.server.notification.NotificationManagerService.NotificationAssistants;
 import com.android.server.notification.NotificationManagerService.NotificationListeners;
 import com.android.server.uri.UriGrantsManagerInternal;
+import com.android.server.utils.quota.MultiRateLimiter;
 import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.WindowManagerInternal;
 
@@ -156,7 +157,8 @@ public class RoleObserverTest extends UiServiceTestCase {
                     mock(UriGrantsManagerInternal.class),
                     mock(AppOpsManager.class), mUm, mock(NotificationHistoryManager.class),
                     mock(StatsManager.class), mock(TelephonyManager.class),
-                    mock(ActivityManagerInternal.class));
+                    mock(ActivityManagerInternal.class),
+                    mock(MultiRateLimiter.class));
         } catch (SecurityException e) {
             if (!e.getMessage().contains("Permission Denial: not allowed to send broadcast")) {
                 throw e;

@@ -1178,6 +1178,8 @@ public class ResourcesManager {
                         continue;
                     }
 
+                    // TODO(b/173090263): Improve the performance of AssetManager & ResourcesImpl
+                    // constructions.
                     final ResourcesImpl resourcesImpl =
                             findOrCreateResourcesImplForKeyLocked(newKey);
                     if (resourcesImpl != null && resourcesImpl != resources.getImpl()) {

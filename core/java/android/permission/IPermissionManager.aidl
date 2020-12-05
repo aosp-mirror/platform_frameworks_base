@@ -73,10 +73,6 @@ interface IPermissionManager {
 
     void resetRuntimePermissions();
 
-    boolean setDefaultBrowser(String packageName, int userId);
-
-    String getDefaultBrowser(int userId);
-
     void grantDefaultPermissionsToEnabledCarrierApps(in String[] packageNames, int userId);
 
     void grantDefaultPermissionsToEnabledImsServices(in String[] packageNames, int userId);

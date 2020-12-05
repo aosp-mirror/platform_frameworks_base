@@ -1509,8 +1509,15 @@ public class LocationManager {
     }
 
     /**
-     * Removes location updates for the specified {@link LocationListener}. Following this call,
-     * the listener will not receive any more invocations of any kind.
+     * Removes all location updates for the specified {@link LocationListener}. The given listener
+     * is guaranteed not to receive any invocations that <b>happens-after</b> this method is
+     * invoked.
+     *
+     * <p>If the given listener has any batched requests, this method will not flush any incomplete
+     * location batches before stopping location updates. If you wish to flush any pending locations
+     * before stopping, you must first call {@link #requestFlush(String, LocationListener, int)} and
+     * then call this method once the flush is complete. If this method is invoked before the flush
+     * is complete, you may not receive the flushed locations.
      *
      * @param listener listener that no longer needs location updates
      *
@@ -1536,6 +1543,8 @@ public class LocationManager {
     /**
      * Removes location updates for the specified {@link PendingIntent}. Following this call, the
      * PendingIntent will no longer receive location updates.
+     *
+     * <p>See {@link #removeUpdates(LocationListener)} for more detail on how this method works.
      *
      * @param pendingIntent pending intent that no longer needs location updates
      *

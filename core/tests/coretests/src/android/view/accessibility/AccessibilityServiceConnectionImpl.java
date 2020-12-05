@@ -161,4 +161,6 @@ public class AccessibilityServiceConnectionImpl extends IAccessibilityServiceCon
     public void setTouchExplorationPassthroughRegion(int displayId, Region region) {}
 
     public void setGestureDetectionPassthroughRegion(int displayId, Region region) {}
+
+    public void setFocusAppearance(int strokeWidth, int color) {}
 }

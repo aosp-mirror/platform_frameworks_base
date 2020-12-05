@@ -34,6 +34,8 @@ public interface RankingConfig {
     /** Returns true when feature is enabled that shows media notifications in quick settings. */
     boolean isMediaNotificationFilteringEnabled();
     boolean isGroupBlocked(String packageName, int uid, String groupId);
+    boolean canShowNotificationsOnLockscreen(int userId);
+    boolean canShowPrivateNotificationsOnLockScreen(int userId);
 
     Collection<NotificationChannelGroup> getNotificationChannelGroups(String pkg,
             int uid);

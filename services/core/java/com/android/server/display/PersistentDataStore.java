@@ -31,17 +31,12 @@ import android.util.Xml;
 import android.view.Display;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.XmlUtils;
 
 import libcore.io.IoUtils;
 
-import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -49,7 +44,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -628,15 +622,7 @@ final class PersistentDataStore {
                     }
 
                     String packageName = parser.getAttributeValue(null, ATTR_PACKAGE_NAME);
-                    String timeStampString = parser.getAttributeValue(null, ATTR_TIME_STAMP);
-                    long timeStamp = -1;
-                    if (timeStampString != null) {
-                        try {
-                            timeStamp = Long.parseLong(timeStampString);
-                        } catch (NumberFormatException nfe) {
-                            // Ignore we will just not restore the timestamp.
-                        }
-                    }
+                    long timeStamp = parser.getAttributeLong(null, ATTR_TIME_STAMP, -1);
 
                     try {
                         BrightnessConfiguration config =

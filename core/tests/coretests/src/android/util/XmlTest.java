@@ -205,7 +205,7 @@ public class XmlTest {
     private static final byte[] TEST_BYTES = new byte[] { 0, 1, 2, 3, 4, 3, 2, 1, 0 };
     private static final byte[] TEST_BYTES_EMPTY = new byte[0];
 
-    private static void doVerifyWrite(TypedXmlSerializer out) throws Exception {
+    static void doVerifyWrite(TypedXmlSerializer out) throws Exception {
         out.startDocument(StandardCharsets.UTF_8.name(), true);
         out.startTag(null, "one");
         {
@@ -244,7 +244,7 @@ public class XmlTest {
         out.endDocument();
     }
 
-    private static void doVerifyRead(TypedXmlPullParser in) throws Exception {
+    static void doVerifyRead(TypedXmlPullParser in) throws Exception {
         assertEquals(START_DOCUMENT, in.getEventType());
         assertNext(in, START_TAG, "one", 1);
         {

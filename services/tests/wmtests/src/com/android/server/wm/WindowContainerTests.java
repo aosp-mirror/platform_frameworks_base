@@ -948,6 +948,36 @@ public class WindowContainerTests extends WindowTestsBase {
         assertFalse(act.isAnimating(PARENTS));
     }
 
+    @Test
+    public void testRegisterWindowContainerListener() {
+        final WindowContainer container = new WindowContainer(mWm);
+        container.mDisplayContent = mDisplayContent;
+        final TestWindowContainerListener listener = new TestWindowContainerListener();
+        Configuration config = container.getConfiguration();
+        Rect bounds = new Rect(0, 0, 10, 10);
+        config.windowConfiguration.setBounds(bounds);
+        config.densityDpi = 100;
+        container.onRequestedOverrideConfigurationChanged(config);
+        container.registerWindowContainerListener(listener);
+
+        assertEquals(mDisplayContent, listener.mDisplayContent);
+        assertEquals(bounds, listener.mConfiguration.windowConfiguration.getBounds());
+        assertEquals(100, listener.mConfiguration.densityDpi);
+
+        container.onDisplayChanged(mDefaultDisplay);
+        assertEquals(listener.mDisplayContent, mDefaultDisplay);
+
+        config = new Configuration();
+        bounds = new Rect(0, 0, 20, 20);
+        config.windowConfiguration.setBounds(bounds);
+        config.densityDpi = 200;
+
+        container.onRequestedOverrideConfigurationChanged(config);
+
+        assertEquals(bounds, listener.mConfiguration.windowConfiguration.getBounds());
+        assertEquals(200, listener.mConfiguration.densityDpi);
+    }
+
     /* Used so we can gain access to some protected members of the {@link WindowContainer} class */
     private static class TestWindowContainer extends WindowContainer<TestWindowContainer> {
         private final int mLayer;
@@ -1129,6 +1159,21 @@ public class WindowContainerTests extends WindowTestsBase {
         @Override
         public void close() {
             mSession.kill();
+        }
+    }
+
+    private static class TestWindowContainerListener implements WindowContainerListener {
+        private Configuration mConfiguration = new Configuration();
+        private DisplayContent mDisplayContent;
+
+        @Override
+        public void onRequestedOverrideConfigurationChanged(Configuration overrideConfiguration) {
+            mConfiguration.setTo(overrideConfiguration);
+        }
+
+        @Override
+        public void onDisplayChanged(DisplayContent dc) {
+            mDisplayContent = dc;
         }
     }
 }

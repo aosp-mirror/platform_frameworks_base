@@ -475,7 +475,7 @@ public class PipMenuView extends FrameLayout {
             final Intent settingsIntent = new Intent(ACTION_PICTURE_IN_PICTURE_SETTINGS,
                     Uri.fromParts("package", topPipActivityInfo.first.getPackageName(), null));
             settingsIntent.setFlags(FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_CLEAR_TASK);
-            mContext.startActivityAsUser(settingsIntent, UserHandle.CURRENT);
+            mContext.startActivityAsUser(settingsIntent, UserHandle.of(topPipActivityInfo.second));
         }
     }
 

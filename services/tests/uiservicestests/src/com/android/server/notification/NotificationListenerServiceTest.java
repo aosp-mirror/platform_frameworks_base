@@ -102,7 +102,7 @@ public class NotificationListenerServiceTest extends UiServiceTestCase {
             String key = mKeys[i];
             Ranking ranking = new Ranking();
             service.getCurrentRanking().getRanking(key, ranking);
-            assertEquals(getVisibilityOverride(i), ranking.getVisibilityOverride());
+            assertEquals(getVisibilityOverride(i), ranking.getLockscreenVisibilityOverride());
             assertEquals(getOverrideGroupKey(key), ranking.getOverrideGroupKey());
             assertEquals(!isIntercepted(i), ranking.matchesInterruptionFilter());
             assertEquals(getSuppressedVisualEffects(i), ranking.getSuppressedVisualEffects());
@@ -173,7 +173,7 @@ public class NotificationListenerServiceTest extends UiServiceTestCase {
                 tweak.getKey(),
                 tweak.getRank(),
                 !tweak.matchesInterruptionFilter(), // note the inversion here!
-                tweak.getVisibilityOverride(),
+                tweak.getLockscreenVisibilityOverride(),
                 tweak.getSuppressedVisualEffects(),
                 tweak.getImportance(),
                 tweak.getImportanceExplanation(),
@@ -424,7 +424,7 @@ public class NotificationListenerServiceTest extends UiServiceTestCase {
         assertEquals(comment, a.getKey(), b.getKey());
         assertEquals(comment, a.getRank(), b.getRank());
         assertEquals(comment, a.matchesInterruptionFilter(), b.matchesInterruptionFilter());
-        assertEquals(comment, a.getVisibilityOverride(), b.getVisibilityOverride());
+        assertEquals(comment, a.getLockscreenVisibilityOverride(), b.getLockscreenVisibilityOverride());
         assertEquals(comment, a.getSuppressedVisualEffects(), b.getSuppressedVisualEffects());
         assertEquals(comment, a.getImportance(), b.getImportance());
         assertEquals(comment, a.getImportanceExplanation(), b.getImportanceExplanation());
@@ -440,7 +440,8 @@ public class NotificationListenerServiceTest extends UiServiceTestCase {
         assertEquals(comment, a.getSmartReplies(), b.getSmartReplies());
         assertEquals(comment, a.canBubble(), b.canBubble());
         assertEquals(comment, a.isConversation(), b.isConversation());
-        assertEquals(comment, a.getConversationShortcutInfo().getId(), b.getConversationShortcutInfo().getId());
+        assertEquals(comment, a.getConversationShortcutInfo().getId(),
+                b.getConversationShortcutInfo().getId());
         assertActionsEqual(a.getSmartActions(), b.getSmartActions());
     }
 

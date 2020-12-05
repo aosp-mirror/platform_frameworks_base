@@ -92,4 +92,8 @@ interface IAccessibilityManager {
     void associateEmbeddedHierarchy(IBinder host, IBinder embedded);
 
     void disassociateEmbeddedHierarchy(IBinder token);
+
+    int getFocusStrokeWidth();
+
+    int getFocusColor();
 }

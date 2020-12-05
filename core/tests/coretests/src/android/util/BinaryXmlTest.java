@@ -20,6 +20,8 @@ import static android.util.XmlTest.assertNext;
 import static android.util.XmlTest.buildPersistableBundle;
 import static android.util.XmlTest.doPersistableBundleRead;
 import static android.util.XmlTest.doPersistableBundleWrite;
+import static android.util.XmlTest.doVerifyRead;
+import static android.util.XmlTest.doVerifyWrite;
 
 import static org.junit.Assert.assertEquals;
 import static org.xmlpull.v1.XmlPullParser.START_TAG;
@@ -33,6 +35,11 @@ import org.junit.runner.RunWith;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 
 @RunWith(AndroidJUnit4.class)
@@ -95,5 +102,59 @@ public class BinaryXmlTest {
         // when working with nested objects and arrays
         final PersistableBundle actual = doPersistableBundleRead(secondIn, os.toByteArray());
         assertEquals(expected.toString(), actual.toString());
+    }
+
+    @Test
+    public void testResolve_File() throws Exception {
+        {
+            final File file = File.createTempFile("fast", ".xml");
+            try (OutputStream os = new FileOutputStream(file)) {
+                TypedXmlSerializer xml = Xml.newFastSerializer();
+                xml.setOutput(os, StandardCharsets.UTF_8.name());
+                doVerifyWrite(xml);
+            }
+            try (InputStream is = new FileInputStream(file)) {
+                doVerifyRead(Xml.resolvePullParser(is));
+            }
+        }
+        {
+            final File file = File.createTempFile("binary", ".xml");
+            try (OutputStream os = new FileOutputStream(file)) {
+                TypedXmlSerializer xml = Xml.newBinarySerializer();
+                xml.setOutput(os, StandardCharsets.UTF_8.name());
+                doVerifyWrite(xml);
+            }
+            try (InputStream is = new FileInputStream(file)) {
+                doVerifyRead(Xml.resolvePullParser(is));
+            }
+        }
+    }
+
+    @Test
+    public void testResolve_Memory() throws Exception {
+        {
+            final byte[] data;
+            try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
+                TypedXmlSerializer xml = Xml.newFastSerializer();
+                xml.setOutput(os, StandardCharsets.UTF_8.name());
+                doVerifyWrite(xml);
+                data = os.toByteArray();
+            }
+            try (InputStream is = new ByteArrayInputStream(data)) {
+                doVerifyRead(Xml.resolvePullParser(is));
+            }
+        }
+        {
+            final byte[] data;
+            try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
+                TypedXmlSerializer xml = Xml.newBinarySerializer();
+                xml.setOutput(os, StandardCharsets.UTF_8.name());
+                doVerifyWrite(xml);
+                data = os.toByteArray();
+            }
+            try (InputStream is = new ByteArrayInputStream(data)) {
+                doVerifyRead(Xml.resolvePullParser(is));
+            }
+        }
     }
 }

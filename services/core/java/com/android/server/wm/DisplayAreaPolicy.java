@@ -35,6 +35,7 @@ import static com.android.server.wm.DisplayAreaPolicyBuilder.Feature;
 import static com.android.server.wm.DisplayAreaPolicyBuilder.HierarchyBuilder;
 
 import android.content.res.Resources;
+import android.os.Bundle;
 import android.text.TextUtils;
 
 import java.util.ArrayList;
@@ -70,6 +71,10 @@ public abstract class DisplayAreaPolicy {
      * <p>This must attach the token to {@link #mRoot} (or one of its descendants).
      */
     public abstract void addWindow(WindowToken token);
+
+    /** Gets the {@link DisplayArea} which a {@link WindowToken} is about to be attached to. */
+    public abstract DisplayArea.Tokens getDisplayAreaForWindowToken(int type, Bundle options,
+            boolean ownerCanManageAppTokens, boolean roundedCornerOverlay);
 
     /**
      * Gets the set of {@link DisplayArea} that are created for the given feature to apply to.

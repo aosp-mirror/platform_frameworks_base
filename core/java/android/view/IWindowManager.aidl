@@ -780,4 +780,25 @@ interface IWindowManager
      *         verified.
      */
     boolean verifyImpressionToken(in ImpressionToken impressionToken);
+
+    /**
+     * Registers a listener for a {@link android.app.WindowContext} to handle configuration changes
+     * from the server side.
+     *
+     * @param clientToken the window context's token
+     * @param type Window type of the window context
+     * @param displayId The display associated with the window context
+     * @param options A bundle used to pass window-related options and choose the right DisplayArea
+     *
+     * @return {@code true} if the listener was registered successfully.
+     */
+    boolean registerWindowContextListener(IBinder clientToken, int type, int displayId,
+            in Bundle options);
+
+    /**
+     * Unregisters a listener which registered with {@link #registerWindowContextListener()}.
+     *
+     * @param clientToken the window context's token
+     */
+    void unregisterWindowContextListener(IBinder clientToken);
 }

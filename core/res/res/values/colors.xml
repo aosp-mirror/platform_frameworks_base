@@ -159,7 +159,7 @@
     <color name="keyguard_avatar_nick_color">#ffffffff</color>
     <color name="keyguard_avatar_frame_pressed_color">#ff35b5e5</color>
 
-    <color name="accessibility_focus_highlight">#bf39b500</color>
+    <color name="accessibility_focus_highlight_color">#bf39b500</color>
     <color name="autofilled_highlight">#4dffeb3b</color>
 
     <color name="system_notification_accent_color">#ff607D8B</color>

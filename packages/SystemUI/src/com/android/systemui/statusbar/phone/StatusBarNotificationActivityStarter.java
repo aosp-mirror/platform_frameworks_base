@@ -378,8 +378,8 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
                 // We have to post the removal to the UI thread for synchronization.
                 mMainThreadHandler.post(() -> {
                     final Runnable removeNotification = () -> {
-                        mOnUserInteractionCallback.onDismiss(entry, REASON_CLICK);
                         mClickNotifier.onNotificationClick(entry.getKey(), nv);
+                        mOnUserInteractionCallback.onDismiss(entry, REASON_CLICK);
                     };
                     if (mPresenter.isCollapsing()) {
                         // To avoid lags we're only performing the remove

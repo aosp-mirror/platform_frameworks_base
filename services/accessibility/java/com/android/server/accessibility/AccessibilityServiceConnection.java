@@ -120,6 +120,8 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
         AccessibilityUserState userState = mUserStateWeakReference.get();
         if (userState == null) return;
         userState.removeServiceLocked(this);
+        userState.resetFocusAppearanceLocked();
+        mSystemSupport.onClientChangeLocked(false);
         mSystemSupport.getFullScreenMagnificationController().resetAllIfNeeded(mId);
         mActivityTaskManagerService.setAllowAppSwitches(mComponentName.flattenToString(), -1,
                 userState.mUserId);
@@ -144,6 +146,7 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
                 } finally {
                     Binder.restoreCallingIdentity(identity);
                 }
+                userState.resetFocusAppearanceLocked();
                 mSystemSupport.onClientChangeLocked(false);
             }
         }
@@ -310,6 +313,7 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
             AccessibilityUserState userState = mUserStateWeakReference.get();
             if (userState != null) {
                 userState.serviceDisconnectedLocked(this);
+                userState.resetFocusAppearanceLocked();
             }
             resetLocked();
             mSystemSupport.getFullScreenMagnificationController().resetAllIfNeeded(mId);
@@ -389,6 +393,34 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
                     }
                 }
             }
+        }
+    }
+
+    @Override
+    public void setFocusAppearance(int strokeWidth, int color) {
+        AccessibilityUserState userState = mUserStateWeakReference.get();
+        if (userState == null) {
+            return;
+        }
+
+        synchronized (mLock) {
+            if (!hasRightsToCurrentUserLocked()) {
+                return;
+            }
+
+            if (!mSecurityPolicy.checkAccessibilityAccess(this)) {
+                return;
+            }
+
+            if (userState.getFocusStrokeWidthLocked() == strokeWidth
+                    && userState.getFocusColorLocked() == color) {
+                return;
+            }
+
+            // Sets the appearance data in the A11yUserState.
+            userState.setFocusAppearanceLocked(strokeWidth, color);
+            // Updates the appearance data in the A11yManager.
+            mSystemSupport.onClientChangeLocked(false);
         }
     }
 }

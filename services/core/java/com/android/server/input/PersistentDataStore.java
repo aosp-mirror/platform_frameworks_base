@@ -510,7 +510,7 @@ final class PersistentDataStore {
                 serializer.startTag(null, "keyboard-layout");
                 serializer.attribute(null, "descriptor", layout);
                 if (layout.equals(mCurrentKeyboardLayout)) {
-                    serializer.attribute(null, "current", "true");
+                    serializer.attributeBoolean(null, "current", true);
                 }
                 serializer.endTag(null, "keyboard-layout");
             }

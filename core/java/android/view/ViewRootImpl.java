@@ -119,6 +119,7 @@ import android.graphics.Rect;
 import android.graphics.Region;
 import android.graphics.RenderNode;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManager.DisplayListener;
 import android.hardware.input.InputManager;
@@ -4414,6 +4415,14 @@ public final class ViewRootImpl implements ViewParent,
                         mView.mContext.getDrawable(value.resourceId);
             }
         }
+        // Sets the focus appearance data into the accessibility focus drawable.
+        if (mAttachInfo.mAccessibilityFocusDrawable instanceof GradientDrawable) {
+            final GradientDrawable drawable =
+                    (GradientDrawable) mAttachInfo.mAccessibilityFocusDrawable;
+            drawable.setStroke(mAccessibilityManager.getAccessibilityFocusStrokeWidth(),
+                    mAccessibilityManager.getAccessibilityFocusColor());
+        }
+
         return mAttachInfo.mAccessibilityFocusDrawable;
     }
 

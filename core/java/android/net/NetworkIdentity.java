@@ -17,7 +17,6 @@
 package android.net;
 
 import static android.net.ConnectivityManager.TYPE_WIFI;
-import static android.net.ConnectivityManager.isNetworkTypeMobile;
 
 import android.annotation.Nullable;
 import android.content.Context;
@@ -26,7 +25,6 @@ import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.service.NetworkIdentityProto;
 import android.telephony.Annotation.NetworkType;
-import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 
 import java.util.Objects;
@@ -194,18 +192,9 @@ public class NetworkIdentity implements Comparable<NetworkIdentity> {
         boolean metered = !state.networkCapabilities.hasCapability(
                 NetworkCapabilities.NET_CAPABILITY_NOT_METERED);
 
-        if (isNetworkTypeMobile(type)) {
-            if (state.subscriberId == null) {
-                if (state.networkInfo.getState() != NetworkInfo.State.DISCONNECTED &&
-                        state.networkInfo.getState() != NetworkInfo.State.UNKNOWN) {
-                    Slog.w(TAG, "Active mobile network without subscriber! ni = "
-                            + state.networkInfo);
-                }
-            }
+        subscriberId = state.subscriberId;
 
-            subscriberId = state.subscriberId;
-
-        } else if (type == TYPE_WIFI) {
+        if (type == TYPE_WIFI) {
             if (state.networkId != null) {
                 networkId = state.networkId;
             } else {

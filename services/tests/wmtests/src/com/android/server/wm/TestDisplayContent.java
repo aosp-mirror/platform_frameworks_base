@@ -161,7 +161,7 @@ class TestDisplayContent extends DisplayContent {
             mService.mRootWindowContainer.addChild(newDisplay, mPosition);
 
             // Set the default focused TDA.
-            newDisplay.setLastFocusedTaskDisplayArea(newDisplay.getDefaultTaskDisplayArea());
+            newDisplay.onLastFocusedTaskDisplayAreaChanged(newDisplay.getDefaultTaskDisplayArea());
 
             return newDisplay;
         }

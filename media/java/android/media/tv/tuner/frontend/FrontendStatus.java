@@ -28,7 +28,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
- * Frontend status.
+ * A Frontend Status class that contains the metrics of the active frontend.
  *
  * @hide
  */
@@ -461,7 +461,7 @@ public class FrontendStatus {
     }
 
     /**
-     * Lock status for Demod.
+     * Gets if the demod is currently locked or not.
      */
     public boolean isDemodLocked() {
         if (mIsDemodLocked == null) {
@@ -470,7 +470,7 @@ public class FrontendStatus {
         return mIsDemodLocked;
     }
     /**
-     * Gets Signal to Noise Ratio in thousandths of a deciBel (0.001dB).
+     * Gets the current Signal to Noise Ratio in thousandths of a deciBel (0.001dB).
      */
     public int getSnr() {
         if (mSnr == null) {
@@ -479,7 +479,7 @@ public class FrontendStatus {
         return mSnr;
     }
     /**
-     * Gets Bit Error Ratio.
+     * Gets the current Bit Error Ratio.
      *
      * <p>The number of error bit per 1 billion bits.
      */
@@ -491,7 +491,7 @@ public class FrontendStatus {
     }
 
     /**
-     * Gets Packages Error Ratio.
+     * Gets the current Packages Error Ratio.
      *
      * <p>The number of error package per 1 billion packages.
      */
@@ -502,7 +502,7 @@ public class FrontendStatus {
         return mPer;
     }
     /**
-     * Gets Bit Error Ratio before Forward Error Correction (FEC).
+     * Gets the current Bit Error Ratio before Forward Error Correction (FEC).
      *
      * <p>The number of error bit per 1 billion bits before FEC.
      */
@@ -513,7 +513,7 @@ public class FrontendStatus {
         return mPerBer;
     }
     /**
-     * Gets Signal Quality in percent.
+     * Gets the current Signal Quality in percent.
      */
     public int getSignalQuality() {
         if (mSignalQuality == null) {
@@ -522,7 +522,7 @@ public class FrontendStatus {
         return mSignalQuality;
     }
     /**
-     * Gets Signal Strength in thousandths of a dBm (0.001dBm).
+     * Gets the current Signal Strength in thousandths of a dBm (0.001dBm).
      */
     public int getSignalStrength() {
         if (mSignalStrength == null) {
@@ -531,7 +531,7 @@ public class FrontendStatus {
         return mSignalStrength;
     }
     /**
-     * Gets symbol rate in symbols per second.
+     * Gets the current symbol rate in symbols per second.
      */
     public int getSymbolRate() {
         if (mSymbolRate == null) {
@@ -540,7 +540,7 @@ public class FrontendStatus {
         return mSymbolRate;
     }
     /**
-     *  Gets Inner Forward Error Correction type as specified in ETSI EN 300 468 V1.15.1
+     *  Gets the current Inner Forward Error Correction type as specified in ETSI EN 300 468 V1.15.1
      *  and ETSI EN 302 307-2 V1.1.1.
      */
     @FrontendSettings.InnerFec
@@ -551,7 +551,7 @@ public class FrontendStatus {
         return mInnerFec;
     }
     /**
-     * Gets modulation.
+     * Gets the currently modulation information.
      */
     @FrontendModulation
     public int getModulation() {
@@ -561,7 +561,7 @@ public class FrontendStatus {
         return mModulation;
     }
     /**
-     * Gets Spectral Inversion for DVBC.
+     * Gets the currently Spectral Inversion information for DVBC.
      */
     @FrontendSettings.FrontendSpectralInversion
     public int getSpectralInversion() {
@@ -571,7 +571,7 @@ public class FrontendStatus {
         return mInversion;
     }
     /**
-     * Gets Power Voltage Type for LNB.
+     * Gets the current Power Voltage Type for LNB.
      */
     @Lnb.Voltage
     public int getLnbVoltage() {
@@ -581,7 +581,7 @@ public class FrontendStatus {
         return mLnbVoltage;
     }
     /**
-     * Gets Physical Layer Pipe ID.
+     * Gets the current Physical Layer Pipe ID.
      */
     public int getPlpId() {
         if (mPlpId == null) {
@@ -599,7 +599,7 @@ public class FrontendStatus {
         return mIsEwbs;
     }
     /**
-     * Gets Automatic Gain Control value which is normalized from 0 to 255.
+     * Gets the current Automatic Gain Control value which is normalized from 0 to 255.
      */
     public int getAgc() {
         if (mAgc == null) {
@@ -617,7 +617,7 @@ public class FrontendStatus {
         return mIsLnaOn;
     }
     /**
-     * Gets Error status by layer.
+     * Gets the current Error information by layer.
      */
     @NonNull
     public boolean[] getLayerErrors() {
@@ -627,7 +627,7 @@ public class FrontendStatus {
         return mIsLayerErrors;
     }
     /**
-     * Gets Modulation Error Ratio in thousandths of a deciBel (0.001dB).
+     * Gets the current Modulation Error Ratio in thousandths of a deciBel (0.001dB).
      */
     public int getMer() {
         if (mMer == null) {
@@ -636,7 +636,7 @@ public class FrontendStatus {
         return mMer;
     }
     /**
-     * Gets frequency difference in Hz.
+     * Gets the current frequency difference in Hz.
      *
      * <p>Difference between tuning frequency and actual locked frequency.
      */
@@ -647,7 +647,7 @@ public class FrontendStatus {
         return mFreqOffset;
     }
     /**
-     * Gets hierarchy Type for DVBT.
+     * Gets the current hierarchy Type for DVBT.
      */
     @DvbtFrontendSettings.Hierarchy
     public int getHierarchy() {
@@ -657,7 +657,7 @@ public class FrontendStatus {
         return mHierarchy;
     }
     /**
-     * Gets lock status for RF.
+     * Gets if the RF is locked or not.
      */
     public boolean isRfLocked() {
         if (mIsRfLocked == null) {
@@ -666,7 +666,7 @@ public class FrontendStatus {
         return mIsRfLocked;
     }
     /**
-     * Gets an array of PLP status for tuned PLPs for ATSC3 frontend.
+     * Gets an array of the current tuned PLPs information of ATSC3 frontend.
      */
     @NonNull
     public Atsc3PlpTuningInfo[] getAtsc3PlpTuningInfo() {
@@ -677,9 +677,9 @@ public class FrontendStatus {
     }
 
     /**
-     * Gets an array of extended bit error ratio status.
+     * Gets an array of the current extended bit error ratio.
      *
-     * <p>This status query is only supported by Tuner HAL 1.1 or higher. Use
+     * <p>This query is only supported by Tuner HAL 1.1 or higher. Use
      * {@link TunerVersionChecker.getTunerVersion()} to check the version.
      */
     @NonNull
@@ -693,10 +693,9 @@ public class FrontendStatus {
     }
 
     /**
-     * Gets an array of code rates status. The {@link FrontendSettings.InnerFec} would be used to
-     * show the code rate.
+     * Gets an array of the current code rates.
      *
-     * <p>This status query is only supported by Tuner HAL 1.1 or higher. Use
+     * <p>This query is only supported by Tuner HAL 1.1 or higher. Use
      * {@link TunerVersionChecker.getTunerVersion()} to check the version.
      */
     @NonNull
@@ -711,9 +710,9 @@ public class FrontendStatus {
     }
 
     /**
-     * Gets bandwidth status.
+     * Gets the current bandwidth information.
      *
-     * <p>This status query is only supported by Tuner HAL 1.1 or higher. Use
+     * <p>This query is only supported by Tuner HAL 1.1 or higher. Use
      * {@link TunerVersionChecker.getTunerVersion()} to check the version.
      */
     @FrontendBandwidth
@@ -727,9 +726,9 @@ public class FrontendStatus {
     }
 
     /**
-     * Gets guard interval status.
+     * Gets the current guard interval information.
      *
-     * <p>This status query is only supported by Tuner HAL 1.1 or higher. Use
+     * <p>This query is only supported by Tuner HAL 1.1 or higher. Use
      * {@link TunerVersionChecker.getTunerVersion()} to check the version.
      */
     @FrontendGuardInterval
@@ -743,9 +742,9 @@ public class FrontendStatus {
     }
 
     /**
-     * Gets tansmission mode status.
+     * Gets the current transmission mode information.
      *
-     * <p>This status query is only supported by Tuner HAL 1.1 or higher. Use
+     * <p>This query is only supported by Tuner HAL 1.1 or higher. Use
      * {@link TunerVersionChecker.getTunerVersion()} to check the version.
      */
     @FrontendTransmissionMode
@@ -759,10 +758,10 @@ public class FrontendStatus {
     }
 
     /**
-     * Gets the Uncorrectable Error Counts of the frontend's Physical Layer Pipe (PLP) since the
-     * last tune operation.
+     * Gets the current Uncorrectable Error Counts of the frontend's Physical Layer Pipe (PLP)
+     * since the last tune operation.
      *
-     * <p>This status query is only supported by Tuner HAL 1.1 or higher. Use
+     * <p>This query is only supported by Tuner HAL 1.1 or higher. Use
      * {@link TunerVersionChecker.getTunerVersion()} to check the version.
      */
     public int getUec() {
@@ -775,9 +774,9 @@ public class FrontendStatus {
     }
 
     /**
-     * Gets the current DVB-T2 system id status.
+     * Gets the current DVB-T2 system id.
      *
-     * <p>This status query is only supported by Tuner HAL 1.1 or higher. Use
+     * <p>This query is only supported by Tuner HAL 1.1 or higher. Use
      * {@link TunerVersionChecker.getTunerVersion()} to check the version.
      */
     @IntRange(from = 0, to = 0xffff)
@@ -791,10 +790,9 @@ public class FrontendStatus {
     }
 
     /**
-     * Gets an array of interleaving status. Array value should be within {@link
-     * FrontendInterleaveMode}.
+     * Gets an array of the current interleaving mode information.
      *
-     * <p>This status query is only supported by Tuner HAL 1.1 or higher. Use
+     * <p>This query is only supported by Tuner HAL 1.1 or higher. Use
      * {@link TunerVersionChecker.getTunerVersion()} to check the version.
      */
     @NonNull
@@ -809,9 +807,10 @@ public class FrontendStatus {
     }
 
     /**
-     * Gets an array of the segments status in ISDB-T Specification of all the channels.
+     * Gets an array of the current segments information in ISDB-T Specification of all the
+     * channels.
      *
-     * <p>This status query is only supported by Tuner HAL 1.1 or higher. Use
+     * <p>This query is only supported by Tuner HAL 1.1 or higher. Use
      * {@link TunerVersionChecker.getTunerVersion()} to check the version.
      */
     @NonNull
@@ -828,7 +827,7 @@ public class FrontendStatus {
     /**
      * Gets an array of the Transport Stream Data Rate in BPS of the current channel.
      *
-     * <p>This status query is only supported by Tuner HAL 1.1 or higher. Use
+     * <p>This query is only supported by Tuner HAL 1.1 or higher. Use
      * {@link TunerVersionChecker.getTunerVersion()} to check the version.
      */
     @NonNull
@@ -842,13 +841,13 @@ public class FrontendStatus {
     }
 
     /**
-     * Gets an array of the extended modulations status. Array value should be withink {@link
-     * FrontendModulation}.
+     * Gets an array of the current extended modulations information.
      *
-     * <p>This status query is only supported by Tuner HAL 1.1 or higher. Use
+     * <p>This query is only supported by Tuner HAL 1.1 or higher. Use
      * {@link TunerVersionChecker.getTunerVersion()} to check the version.
      */
     @NonNull
+    @FrontendModulation
     public int[] getExtendedModulations() {
         TunerVersionChecker.checkHigherOrEqualVersionTo(
                 TunerVersionChecker.TUNER_VERSION_1_1, "getExtendedModulations status");
@@ -859,9 +858,9 @@ public class FrontendStatus {
     }
 
     /**
-     * Gets roll off status.
+     * Gets the current roll off information.
      *
-     * <p>This status query is only supported by Tuner HAL 1.1 or higher. Use
+     * <p>This query is only supported by Tuner HAL 1.1 or higher. Use
      * {@link TunerVersionChecker.getTunerVersion()} to check the version.
      */
     @FrontendRollOff
@@ -875,9 +874,9 @@ public class FrontendStatus {
     }
 
     /**
-     * Gets is MISO enabled status.
+     * Gets is MISO enabled or not.
      *
-     * <p>This status query is only supported by Tuner HAL 1.1 or higher. Use
+     * <p>This query is only supported by Tuner HAL 1.1 or higher. Use
      * {@link TunerVersionChecker.getTunerVersion()} to check the version.
      */
     public boolean isMisoEnabled() {
@@ -890,9 +889,9 @@ public class FrontendStatus {
     }
 
     /**
-     * Gets is the Code Rate of the frontend is linear or not status.
+     * Gets is the Code Rate of the frontend is linear or not.
      *
-     * <p>This status query is only supported by Tuner HAL 1.1 or higher. Use
+     * <p>This query is only supported by Tuner HAL 1.1 or higher. Use
      * {@link TunerVersionChecker.getTunerVersion()} to check the version.
      */
     public boolean isLinear() {
@@ -905,9 +904,9 @@ public class FrontendStatus {
     }
 
     /**
-     * Gets is the Short Frames enabled or not status.
+     * Gets is the Short Frames enabled or not.
      *
-     * <p>This status query is only supported by Tuner HAL 1.1 or higher. Use
+     * <p>This query is only supported by Tuner HAL 1.1 or higher. Use
      * {@link TunerVersionChecker.getTunerVersion()} to check the version.
      */
     public boolean isShortFramesEnabled() {
@@ -920,7 +919,7 @@ public class FrontendStatus {
     }
 
     /**
-     * Status for each tuning Physical Layer Pipes.
+     * Information of each tuning Physical Layer Pipes.
      */
     public static class Atsc3PlpTuningInfo {
         private final int mPlpId;

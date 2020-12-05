@@ -6119,11 +6119,13 @@ public class Notification implements Parcelable
 
         private @ColorInt int obtainBackgroundColor() {
             int defaultColor = mInNightMode ? Color.BLACK : Color.WHITE;
-            Resources.Theme theme = new ContextThemeWrapper(mContext,
-                    R.style.Theme_DeviceDefault_DayNight).getTheme();
+            Resources.Theme theme = mContext.getTheme();
             if (theme == null) {
+                // Running unit tests with mocked context
                 return defaultColor;
             }
+            theme = new ContextThemeWrapper(mContext, R.style.Theme_DeviceDefault_DayNight)
+                    .getTheme();
             TypedArray ta = theme.obtainStyledAttributes(new int[]{R.attr.colorBackground});
             if (ta == null) {
                 return defaultColor;

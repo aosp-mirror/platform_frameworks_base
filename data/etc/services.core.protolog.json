@@ -85,6 +85,12 @@
       "group": "WM_DEBUG_REMOTE_ANIMATIONS",
       "at": "com\/android\/server\/wm\/RemoteAnimationController.java"
     },
+    "-2014162875": {
+      "message": "Could not register window container listener token=%s, container=%s",
+      "level": "ERROR",
+      "group": "WM_ERROR",
+      "at": "com\/android\/server\/wm\/WindowContextListenerController.java"
+    },
     "-2012562539": {
       "message": "startAnimation(): Notify animation start:",
       "level": "DEBUG",
@@ -810,6 +816,12 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_FOCUS",
       "at": "com\/android\/server\/wm\/DisplayContent.java"
+    },
+    "-1136467585": {
+      "message": "The listener does not exist.",
+      "level": "INFO",
+      "group": "WM_DEBUG_ADD_REMOVE",
+      "at": "com\/android\/server\/wm\/WindowContextListenerController.java"
     },
     "-1136139407": {
       "message": "no-history finish of %s",
@@ -1819,6 +1831,18 @@
       "group": "WM_DEBUG_TASKS",
       "at": "com\/android\/server\/wm\/ActivityTaskManagerService.java"
     },
+    "90764070": {
+      "message": "Could not report token removal to the window token client.",
+      "level": "WARN",
+      "group": "WM_ERROR",
+      "at": "com\/android\/server\/wm\/WindowContextListenerController.java"
+    },
+    "91350919": {
+      "message": "Attempted to set IME flag to a display that does not exist: %d",
+      "level": "WARN",
+      "group": "WM_ERROR",
+      "at": "com\/android\/server\/wm\/WindowManagerService.java"
+    },
     "94402792": {
       "message": "Moving to RESUMED: %s (in existing)",
       "level": "VERBOSE",
@@ -1962,6 +1986,12 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_WINDOW_ORGANIZER",
       "at": "com\/android\/server\/wm\/TaskOrganizerController.java"
+    },
+    "236210101": {
+      "message": "registerWindowContextListener: trying to add listener to a non-existing display:%d",
+      "level": "WARN",
+      "group": "WM_ERROR",
+      "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
     "241961619": {
       "message": "Adding %s to %s",
@@ -3402,6 +3432,12 @@
       "level": "DEBUG",
       "group": "WM_DEBUG_TASKS",
       "at": "com\/android\/server\/wm\/RootWindowContainer.java"
+    },
+    "1948483534": {
+      "message": "Could not report config changes to the window token client.",
+      "level": "WARN",
+      "group": "WM_ERROR",
+      "at": "com\/android\/server\/wm\/WindowContextListenerController.java"
     },
     "1964565370": {
       "message": "Starting remote animation",

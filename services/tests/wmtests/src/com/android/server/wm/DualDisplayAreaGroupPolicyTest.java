@@ -110,7 +110,7 @@ public class DualDisplayAreaGroupPolicyTest extends WindowTestsBase {
     @Test
     public void testNotIgnoreOrientationRequest_differentOrientationFromDisplay_reversesRequest() {
         mFirstRoot.setIgnoreOrientationRequest(false /* ignoreOrientationRequest */);
-        mDisplay.setLastFocusedTaskDisplayArea(mFirstTda);
+        mDisplay.onLastFocusedTaskDisplayAreaChanged(mFirstTda);
 
         prepareUnresizable(mFirstActivity, SCREEN_ORIENTATION_LANDSCAPE);
 
@@ -127,7 +127,7 @@ public class DualDisplayAreaGroupPolicyTest extends WindowTestsBase {
     public void testNotIgnoreOrientationRequest_onlyRespectsFocusedTaskDisplayArea() {
         mFirstRoot.setIgnoreOrientationRequest(false /* ignoreOrientationRequest */);
         mSecondRoot.setIgnoreOrientationRequest(false /* ignoreOrientationRequest */);
-        mDisplay.setLastFocusedTaskDisplayArea(mFirstTda);
+        mDisplay.onLastFocusedTaskDisplayAreaChanged(mFirstTda);
 
         // Second TDA is not focused, so Display won't get the request
         prepareUnresizable(mSecondActivity, SCREEN_ORIENTATION_LANDSCAPE);
@@ -144,7 +144,7 @@ public class DualDisplayAreaGroupPolicyTest extends WindowTestsBase {
     public void testIgnoreOrientationRequest_displayDoesNotReceiveOrientationChange() {
         mFirstRoot.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
         mSecondRoot.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
-        mDisplay.setLastFocusedTaskDisplayArea(mFirstTda);
+        mDisplay.onLastFocusedTaskDisplayAreaChanged(mFirstTda);
 
         prepareUnresizable(mFirstActivity, SCREEN_ORIENTATION_LANDSCAPE);
 
@@ -156,7 +156,7 @@ public class DualDisplayAreaGroupPolicyTest extends WindowTestsBase {
     public void testLaunchPortraitApp_fillsDisplayAreaGroup() {
         mFirstRoot.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
         mSecondRoot.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
-        mDisplay.setLastFocusedTaskDisplayArea(mFirstTda);
+        mDisplay.onLastFocusedTaskDisplayAreaChanged(mFirstTda);
 
         prepareUnresizable(mFirstActivity, SCREEN_ORIENTATION_PORTRAIT);
         final Rect dagBounds = new Rect(mFirstRoot.getBounds());
@@ -174,7 +174,7 @@ public class DualDisplayAreaGroupPolicyTest extends WindowTestsBase {
     public void testLaunchPortraitApp_sizeCompatAfterRotation() {
         mFirstRoot.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
         mSecondRoot.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
-        mDisplay.setLastFocusedTaskDisplayArea(mFirstTda);
+        mDisplay.onLastFocusedTaskDisplayAreaChanged(mFirstTda);
 
         prepareUnresizable(mFirstActivity, SCREEN_ORIENTATION_PORTRAIT);
         final Rect dagBounds = new Rect(mFirstRoot.getBounds());
@@ -207,7 +207,7 @@ public class DualDisplayAreaGroupPolicyTest extends WindowTestsBase {
     public void testLaunchLandscapeApp_taskIsLetterboxInDisplayAreaGroup() {
         mFirstRoot.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
         mSecondRoot.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
-        mDisplay.setLastFocusedTaskDisplayArea(mFirstTda);
+        mDisplay.onLastFocusedTaskDisplayAreaChanged(mFirstTda);
 
         prepareUnresizable(mFirstActivity, SCREEN_ORIENTATION_LANDSCAPE);
         final Rect dagBounds = new Rect(mFirstRoot.getBounds());
@@ -227,7 +227,7 @@ public class DualDisplayAreaGroupPolicyTest extends WindowTestsBase {
     public void testLaunchLandscapeApp_taskLetterboxBecomesActivityLetterboxAfterRotation() {
         mFirstRoot.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
         mSecondRoot.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
-        mDisplay.setLastFocusedTaskDisplayArea(mFirstTda);
+        mDisplay.onLastFocusedTaskDisplayAreaChanged(mFirstTda);
 
         prepareUnresizable(mFirstActivity, SCREEN_ORIENTATION_LANDSCAPE);
         final Rect dagBounds = new Rect(mFirstRoot.getBounds());

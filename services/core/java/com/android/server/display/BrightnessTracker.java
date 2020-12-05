@@ -668,12 +668,11 @@ public class BrightnessTracker {
                     builder.setUserBrightnessPoint(
                             parser.getAttributeBoolean(null, ATTR_USER_POINT, false));
 
-                    String colorSampleDurationString =
-                            parser.getAttributeValue(null, ATTR_COLOR_SAMPLE_DURATION);
+                    long colorSampleDuration =
+                            parser.getAttributeLong(null, ATTR_COLOR_SAMPLE_DURATION, -1);
                     String colorValueBucketsString =
                             parser.getAttributeValue(null, ATTR_COLOR_VALUE_BUCKETS);
-                    if (colorSampleDurationString != null && colorValueBucketsString != null) {
-                        long colorSampleDuration = Long.parseLong(colorSampleDurationString);
+                    if (colorSampleDuration != -1 && colorValueBucketsString != null) {
                         String[] buckets = colorValueBucketsString.split(",");
                         long[] bucketValues = new long[buckets.length];
                         for (int i = 0; i < bucketValues.length; ++i) {

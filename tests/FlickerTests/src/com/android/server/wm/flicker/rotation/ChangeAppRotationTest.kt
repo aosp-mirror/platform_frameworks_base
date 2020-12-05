@@ -67,7 +67,7 @@ class ChangeAppRotationTest(
             val instrumentation = InstrumentationRegistry.getInstrumentation()
             val testApp = StandardAppHelper(instrumentation,
                 "com.android.server.wm.flicker.testapp", "SimpleApp")
-            return FlickerTestRunnerFactory(instrumentation)
+            return FlickerTestRunnerFactory(instrumentation, repetitions = 10)
                 .buildRotationTest { configuration ->
                     withTestName {
                         buildTestTag(

@@ -344,7 +344,7 @@ public class UserRestrictionsUtils {
             }
             if (USER_RESTRICTIONS.contains(key)) {
                 if (restrictions.getBoolean(key)) {
-                    serializer.attribute(null, key, "true");
+                    serializer.attributeBoolean(null, key, true);
                 }
                 continue;
             }
@@ -360,9 +360,9 @@ public class UserRestrictionsUtils {
     public static void readRestrictions(TypedXmlPullParser parser, Bundle restrictions) {
         restrictions.clear();
         for (String key : USER_RESTRICTIONS) {
-            final String value = parser.getAttributeValue(null, key);
-            if (value != null) {
-                restrictions.putBoolean(key, Boolean.parseBoolean(value));
+            final boolean value = parser.getAttributeBoolean(null, key, false);
+            if (value) {
+                restrictions.putBoolean(key, true);
             }
         }
     }
