@@ -16,8 +16,8 @@
 
 package com.android.server.location.gnss;
 
-import static android.hardware.gnss.IGnss.ELAPSED_REALTIME_HAS_TIMESTAMP_NS;
-import static android.hardware.gnss.IGnss.ELAPSED_REALTIME_HAS_TIME_UNCERTAINTY_NS;
+import static android.hardware.gnss.ElapsedRealtime.HAS_TIMESTAMP_NS;
+import static android.hardware.gnss.ElapsedRealtime.HAS_TIME_UNCERTAINTY_NS;
 
 import com.android.internal.util.Preconditions;
 
@@ -57,12 +57,12 @@ class GnssPowerStats {
 
     /** Returns true if {@link #getElapsedRealtimeNanos()} is available. */
     public boolean hasElapsedRealtimeNanos() {
-        return (mElapsedRealtimeFlags & ELAPSED_REALTIME_HAS_TIMESTAMP_NS) != 0;
+        return (mElapsedRealtimeFlags & HAS_TIMESTAMP_NS) != 0;
     }
 
     /** Returns true if {@link #getElapsedRealtimeUncertaintyNanos()} is available. */
     public boolean hasElapsedRealtimeUncertaintyNanos() {
-        return (mElapsedRealtimeFlags & ELAPSED_REALTIME_HAS_TIME_UNCERTAINTY_NS) != 0;
+        return (mElapsedRealtimeFlags & HAS_TIME_UNCERTAINTY_NS) != 0;
     }
 
     /**
