@@ -14,33 +14,37 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.policy;
+package com.android.settingslib.mobile;
 
-import com.android.systemui.R;
-import com.android.systemui.statusbar.policy.MobileSignalController.MobileIconGroup;
+import com.android.settingslib.AccessibilityContentDescriptions;
+import com.android.settingslib.R;
+import com.android.settingslib.SignalIcon.MobileIconGroup;
 
 import java.util.HashMap;
 import java.util.Map;
 
-class TelephonyIcons {
+/**
+ * Telephony related icons and strings for SysUI and Settings.
+ */
+public class TelephonyIcons {
     //***** Data connection icons
-    static final int FLIGHT_MODE_ICON = R.drawable.stat_sys_airplane_mode;
+    public static final int FLIGHT_MODE_ICON = R.drawable.stat_sys_airplane_mode;
 
-    static final int ICON_LTE = R.drawable.ic_lte_mobiledata;
-    static final int ICON_LTE_PLUS = R.drawable.ic_lte_plus_mobiledata;
-    static final int ICON_G = R.drawable.ic_g_mobiledata;
-    static final int ICON_E = R.drawable.ic_e_mobiledata;
-    static final int ICON_H = R.drawable.ic_h_mobiledata;
-    static final int ICON_H_PLUS = R.drawable.ic_h_plus_mobiledata;
-    static final int ICON_3G = R.drawable.ic_3g_mobiledata;
-    static final int ICON_4G = R.drawable.ic_4g_mobiledata;
-    static final int ICON_4G_PLUS = R.drawable.ic_4g_plus_mobiledata;
-    static final int ICON_5G_E = R.drawable.ic_5g_e_mobiledata;
-    static final int ICON_1X = R.drawable.ic_1x_mobiledata;
-    static final int ICON_5G = R.drawable.ic_5g_mobiledata;
-    static final int ICON_5G_PLUS = R.drawable.ic_5g_plus_mobiledata;
+    public static final int ICON_LTE = R.drawable.ic_lte_mobiledata;
+    public static final int ICON_LTE_PLUS = R.drawable.ic_lte_plus_mobiledata;
+    public static final int ICON_G = R.drawable.ic_g_mobiledata;
+    public static final int ICON_E = R.drawable.ic_e_mobiledata;
+    public static final int ICON_H = R.drawable.ic_h_mobiledata;
+    public static final int ICON_H_PLUS = R.drawable.ic_h_plus_mobiledata;
+    public static final int ICON_3G = R.drawable.ic_3g_mobiledata;
+    public static final int ICON_4G = R.drawable.ic_4g_mobiledata;
+    public static final int ICON_4G_PLUS = R.drawable.ic_4g_plus_mobiledata;
+    public static final int ICON_5G_E = R.drawable.ic_5g_e_mobiledata;
+    public static final int ICON_1X = R.drawable.ic_1x_mobiledata;
+    public static final int ICON_5G = R.drawable.ic_5g_mobiledata;
+    public static final int ICON_5G_PLUS = R.drawable.ic_5g_plus_mobiledata;
 
-    static final MobileIconGroup CARRIER_NETWORK_CHANGE = new MobileIconGroup(
+    public static final MobileIconGroup CARRIER_NETWORK_CHANGE = new MobileIconGroup(
             "CARRIER_NETWORK_CHANGE",
             null,
             null,
@@ -53,7 +57,7 @@ class TelephonyIcons {
             0,
             false);
 
-    static final MobileIconGroup THREE_G = new MobileIconGroup(
+    public static final MobileIconGroup THREE_G = new MobileIconGroup(
             "3G",
             null,
             null,
@@ -66,7 +70,7 @@ class TelephonyIcons {
             TelephonyIcons.ICON_3G,
             true);
 
-    static final MobileIconGroup WFC = new MobileIconGroup(
+    public static final MobileIconGroup WFC = new MobileIconGroup(
             "WFC",
             null,
             null,
@@ -77,7 +81,7 @@ class TelephonyIcons {
             AccessibilityContentDescriptions.PHONE_SIGNAL_STRENGTH[0],
             0, 0, false);
 
-    static final MobileIconGroup UNKNOWN = new MobileIconGroup(
+    public static final MobileIconGroup UNKNOWN = new MobileIconGroup(
             "Unknown",
             null,
             null,
@@ -88,7 +92,7 @@ class TelephonyIcons {
             AccessibilityContentDescriptions.PHONE_SIGNAL_STRENGTH[0],
             0, 0, false);
 
-    static final MobileIconGroup E = new MobileIconGroup(
+    public static final MobileIconGroup E = new MobileIconGroup(
             "E",
             null,
             null,
@@ -101,7 +105,7 @@ class TelephonyIcons {
             TelephonyIcons.ICON_E,
             false);
 
-    static final MobileIconGroup ONE_X = new MobileIconGroup(
+    public static final MobileIconGroup ONE_X = new MobileIconGroup(
             "1X",
             null,
             null,
@@ -114,7 +118,7 @@ class TelephonyIcons {
             TelephonyIcons.ICON_1X,
             true);
 
-    static final MobileIconGroup G = new MobileIconGroup(
+    public static final MobileIconGroup G = new MobileIconGroup(
             "G",
             null,
             null,
@@ -127,7 +131,7 @@ class TelephonyIcons {
             TelephonyIcons.ICON_G,
             false);
 
-    static final MobileIconGroup H = new MobileIconGroup(
+    public static final MobileIconGroup H = new MobileIconGroup(
             "H",
             null,
             null,
@@ -140,7 +144,7 @@ class TelephonyIcons {
             TelephonyIcons.ICON_H,
             false);
 
-    static final MobileIconGroup H_PLUS = new MobileIconGroup(
+    public static final MobileIconGroup H_PLUS = new MobileIconGroup(
             "H+",
             null,
             null,
@@ -153,7 +157,7 @@ class TelephonyIcons {
             TelephonyIcons.ICON_H_PLUS,
             false);
 
-    static final MobileIconGroup FOUR_G = new MobileIconGroup(
+    public static final MobileIconGroup FOUR_G = new MobileIconGroup(
             "4G",
             null,
             null,
@@ -166,12 +170,12 @@ class TelephonyIcons {
             TelephonyIcons.ICON_4G,
             true);
 
-    static final MobileIconGroup FOUR_G_PLUS = new MobileIconGroup(
+    public static final MobileIconGroup FOUR_G_PLUS = new MobileIconGroup(
             "4G+",
             null,
             null,
             AccessibilityContentDescriptions.PHONE_SIGNAL_STRENGTH,
-            0,0,
+            0, 0,
             0,
             0,
             AccessibilityContentDescriptions.PHONE_SIGNAL_STRENGTH[0],
@@ -179,7 +183,7 @@ class TelephonyIcons {
             TelephonyIcons.ICON_4G_PLUS,
             true);
 
-    static final MobileIconGroup LTE = new MobileIconGroup(
+    public static final MobileIconGroup LTE = new MobileIconGroup(
             "LTE",
             null,
             null,
@@ -192,7 +196,7 @@ class TelephonyIcons {
             TelephonyIcons.ICON_LTE,
             true);
 
-    static final MobileIconGroup LTE_PLUS = new MobileIconGroup(
+    public static final MobileIconGroup LTE_PLUS = new MobileIconGroup(
             "LTE+",
             null,
             null,
@@ -205,7 +209,7 @@ class TelephonyIcons {
             TelephonyIcons.ICON_LTE_PLUS,
             true);
 
-    static final MobileIconGroup LTE_CA_5G_E = new MobileIconGroup(
+    public static final MobileIconGroup LTE_CA_5G_E = new MobileIconGroup(
             "5Ge",
             null,
             null,
@@ -218,7 +222,7 @@ class TelephonyIcons {
             TelephonyIcons.ICON_5G_E,
             true);
 
-    static final MobileIconGroup NR_5G = new MobileIconGroup(
+    public static final MobileIconGroup NR_5G = new MobileIconGroup(
             "5G",
             null,
             null,
@@ -232,7 +236,7 @@ class TelephonyIcons {
             TelephonyIcons.ICON_5G,
             true);
 
-    static final MobileIconGroup NR_5G_PLUS = new MobileIconGroup(
+    public static final MobileIconGroup NR_5G_PLUS = new MobileIconGroup(
             "5G_PLUS",
             null,
             null,
@@ -246,7 +250,7 @@ class TelephonyIcons {
             TelephonyIcons.ICON_5G_PLUS,
             true);
 
-    static final MobileIconGroup DATA_DISABLED = new MobileIconGroup(
+    public static final MobileIconGroup DATA_DISABLED = new MobileIconGroup(
             "DataDisabled",
             null,
             null,
@@ -259,7 +263,7 @@ class TelephonyIcons {
             0,
             false);
 
-    static final MobileIconGroup NOT_DEFAULT_DATA = new MobileIconGroup(
+    public static final MobileIconGroup NOT_DEFAULT_DATA = new MobileIconGroup(
             "NotDefaultData",
             null,
             null,
@@ -276,7 +280,7 @@ class TelephonyIcons {
     // in QSCarrier#hasValidTypeContentDescription
 
     /** Mapping icon name(lower case) to the icon object. */
-    static final Map<String, MobileIconGroup> ICON_NAME_TO_ICON;
+    public static final Map<String, MobileIconGroup> ICON_NAME_TO_ICON;
     static {
         ICON_NAME_TO_ICON = new HashMap<>();
         ICON_NAME_TO_ICON.put("carrier_network_change", CARRIER_NETWORK_CHANGE);
