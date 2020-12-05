@@ -686,11 +686,6 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
             }
         }
 
-        if (params.whitelistedRestrictedPermissions != null) {
-            mPermissionManager.retainHardAndSoftRestrictedPermissions(
-                    params.whitelistedRestrictedPermissions);
-        }
-
         final int sessionId;
         final PackageInstallerSession session;
         synchronized (mSessions) {
