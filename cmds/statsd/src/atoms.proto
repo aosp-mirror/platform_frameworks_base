@@ -3661,6 +3661,12 @@ message AppStartFullyDrawn {
 
     // App startup time (until call to Activity#reportFullyDrawn()).
     optional int64 app_startup_time_millis = 6;
+
+    // The compiler filter used when when the package was optimized.
+    optional int32 package_optimization_compilation_filter = 7;
+
+    // The reason why the package was optimized.
+    optional int32 package_optimization_compilation_reason = 8;
 }
 
 /**
