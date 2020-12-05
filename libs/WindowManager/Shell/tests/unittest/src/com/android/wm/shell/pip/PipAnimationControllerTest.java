@@ -79,7 +79,8 @@ public class PipAnimationControllerTest extends ShellTestCase {
     @Test
     public void getAnimator_withBounds_returnBoundsAnimator() {
         final PipAnimationController.PipTransitionAnimator animator = mPipAnimationController
-                .getAnimator(mLeash, new Rect(), new Rect(), null, TRANSITION_DIRECTION_TO_PIP);
+                .getAnimator(mLeash, new Rect(), new Rect(), new Rect(), null,
+                        TRANSITION_DIRECTION_TO_PIP);
 
         assertEquals("Expect ANIM_TYPE_BOUNDS animation",
                 animator.getAnimationType(), PipAnimationController.ANIM_TYPE_BOUNDS);
@@ -87,16 +88,19 @@ public class PipAnimationControllerTest extends ShellTestCase {
 
     @Test
     public void getAnimator_whenSameTypeRunning_updateExistingAnimator() {
+        final Rect baseValue = new Rect(0, 0, 100, 100);
         final Rect startValue = new Rect(0, 0, 100, 100);
         final Rect endValue1 = new Rect(100, 100, 200, 200);
         final Rect endValue2 = new Rect(200, 200, 300, 300);
         final PipAnimationController.PipTransitionAnimator oldAnimator = mPipAnimationController
-                .getAnimator(mLeash, startValue, endValue1, null, TRANSITION_DIRECTION_TO_PIP);
+                .getAnimator(mLeash, baseValue, startValue, endValue1, null,
+                        TRANSITION_DIRECTION_TO_PIP);
         oldAnimator.setSurfaceControlTransactionFactory(DummySurfaceControlTx::new);
         oldAnimator.start();
 
         final PipAnimationController.PipTransitionAnimator newAnimator = mPipAnimationController
-                .getAnimator(mLeash, startValue, endValue2, null, TRANSITION_DIRECTION_TO_PIP);
+                .getAnimator(mLeash, baseValue, startValue, endValue2, null,
+                        TRANSITION_DIRECTION_TO_PIP);
 
         assertEquals("getAnimator with same type returns same animator",
                 oldAnimator, newAnimator);
@@ -122,11 +126,13 @@ public class PipAnimationControllerTest extends ShellTestCase {
     @Test
     @SuppressWarnings("unchecked")
     public void pipTransitionAnimator_updateEndValue() {
+        final Rect baseValue = new Rect(0, 0, 100, 100);
         final Rect startValue = new Rect(0, 0, 100, 100);
         final Rect endValue1 = new Rect(100, 100, 200, 200);
         final Rect endValue2 = new Rect(200, 200, 300, 300);
         final PipAnimationController.PipTransitionAnimator animator = mPipAnimationController
-                .getAnimator(mLeash, startValue, endValue1, null, TRANSITION_DIRECTION_TO_PIP);
+                .getAnimator(mLeash, baseValue, startValue, endValue1, null,
+                        TRANSITION_DIRECTION_TO_PIP);
 
         animator.updateEndValue(endValue2);
 
@@ -135,10 +141,12 @@ public class PipAnimationControllerTest extends ShellTestCase {
 
     @Test
     public void pipTransitionAnimator_setPipAnimationCallback() {
+        final Rect baseValue = new Rect(0, 0, 100, 100);
         final Rect startValue = new Rect(0, 0, 100, 100);
         final Rect endValue = new Rect(100, 100, 200, 200);
         final PipAnimationController.PipTransitionAnimator animator = mPipAnimationController
-                .getAnimator(mLeash, startValue, endValue, null, TRANSITION_DIRECTION_TO_PIP);
+                .getAnimator(mLeash, baseValue, startValue, endValue, null,
+                        TRANSITION_DIRECTION_TO_PIP);
         animator.setSurfaceControlTransactionFactory(DummySurfaceControlTx::new);
 
         animator.setPipAnimationCallback(mPipAnimationCallback);

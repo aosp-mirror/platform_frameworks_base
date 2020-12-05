@@ -470,6 +470,11 @@ public class PipTouchHandler {
             return true;
         }
 
+        if (mPipResizeGestureHandler.hasOngoingGesture()) {
+            mPipDismissTargetHandler.hideDismissTargetMaybe();
+            return true;
+        }
+
         if ((ev.getAction() == MotionEvent.ACTION_DOWN || mTouchState.isUserInteracting())
                 && mPipDismissTargetHandler.maybeConsumeMotionEvent(ev)) {
             // If the first touch event occurs within the magnetic field, pass the ACTION_DOWN event
