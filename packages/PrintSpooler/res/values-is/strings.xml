@@ -49,7 +49,7 @@
     <string name="print_options_collapsed" msgid="7455930445670414332">"Prentvalkostir minnkaðir"</string>
     <string name="search" msgid="5421724265322228497">"Leita"</string>
     <string name="all_printers_label" msgid="3178848870161526399">"Allir prentarar"</string>
-    <string name="add_print_service_label" msgid="5356702546188981940">"Bæta við þjónustu"</string>
+    <string name="add_print_service_label" msgid="5356702546188981940">"Bæta prentara við"</string>
     <string name="print_search_box_shown_utterance" msgid="7967404953901376090">"Leitarreitur sýndur"</string>
     <string name="print_search_box_hidden_utterance" msgid="5727755169343113351">"Leitarreitur falinn"</string>
     <string name="print_add_printer" msgid="1088656468360653455">"Bæta við prentara"</string>
