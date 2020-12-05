@@ -15,8 +15,11 @@
 */
 package com.android.server.notification;
 
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.admin.DevicePolicyManager;
 import android.content.Context;
-import android.service.notification.NotificationListenerService;
+import android.os.UserHandle;
 import android.util.Slog;
 
 /**
@@ -27,9 +30,11 @@ public class VisibilityExtractor implements NotificationSignalExtractor {
     private static final boolean DBG = false;
 
     private RankingConfig mConfig;
+    private DevicePolicyManager mDpm;
 
     public void initialize(Context ctx, NotificationUsageStats usageStats) {
         if (DBG) Slog.d(TAG, "Initializing  " + getClass().getSimpleName() + ".");
+        mDpm = ctx.getSystemService(DevicePolicyManager.class);
     }
 
     public RankingReconsideration process(NotificationRecord record) {
@@ -43,7 +48,38 @@ public class VisibilityExtractor implements NotificationSignalExtractor {
             return null;
         }
 
-        record.setPackageVisibilityOverride(record.getChannel().getLockscreenVisibility());
+        int userId = record.getUserId();
+
+        if (userId == UserHandle.USER_ALL) {
+            record.setPackageVisibilityOverride(record.getChannel().getLockscreenVisibility());
+        } else {
+            boolean userCanShowNotifications =
+                    mConfig.canShowNotificationsOnLockscreen(userId);
+            boolean dpmCanShowNotifications = adminAllowsKeyguardFeature(userId,
+                    DevicePolicyManager.KEYGUARD_DISABLE_SECURE_NOTIFICATIONS);
+            boolean channelCanShowNotifications = record.getChannel().getLockscreenVisibility()
+                    != Notification.VISIBILITY_SECRET;
+
+            if (!userCanShowNotifications || !dpmCanShowNotifications
+                    || !channelCanShowNotifications) {
+                record.setPackageVisibilityOverride(Notification.VISIBILITY_SECRET);
+            } else {
+                // notifications are allowed but should they be redacted?
+
+                boolean userCanShowContents =
+                        mConfig.canShowPrivateNotificationsOnLockScreen(userId);
+                boolean dpmCanShowContents = adminAllowsKeyguardFeature(userId,
+                        DevicePolicyManager.KEYGUARD_DISABLE_UNREDACTED_NOTIFICATIONS);
+                boolean channelCanShowContents = record.getChannel().getLockscreenVisibility()
+                        != Notification.VISIBILITY_PRIVATE;
+
+                if (!userCanShowContents || !dpmCanShowContents || !channelCanShowContents) {
+                    record.setPackageVisibilityOverride(Notification.VISIBILITY_PRIVATE);
+                } else {
+                    record.setPackageVisibilityOverride(NotificationManager.VISIBILITY_NO_OVERRIDE);
+                }
+            }
+        }
 
         return null;
     }
@@ -57,4 +93,13 @@ public class VisibilityExtractor implements NotificationSignalExtractor {
     public void setZenHelper(ZenModeHelper helper) {
 
     }
+
+    private boolean adminAllowsKeyguardFeature(int userHandle, int feature) {
+        if (userHandle == UserHandle.USER_ALL) {
+            return true;
+        }
+        final int dpmFlags = mDpm.getKeyguardDisabledFeatures(null /* admin */, userHandle);
+        return (dpmFlags & feature) == 0;
+    }
+
 }

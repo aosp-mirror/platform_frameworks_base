@@ -231,7 +231,7 @@ public class WindowTokenTests extends WindowTestsBase {
 
     @Test
     public void testWindowAttachedWithOptions() {
-        BiFunction<WindowToken, Bundle, RootDisplayArea> selectFunc =
+        BiFunction<Integer, Bundle, RootDisplayArea> selectFunc =
                 ((DisplayAreaPolicyBuilder.Result) mDisplayContent.mDisplayAreaPolicy)
                         .mSelectRootForWindowFunc;
         spyOn(selectFunc);
@@ -241,7 +241,7 @@ public class WindowTokenTests extends WindowTestsBase {
                 true /* ownerCanManageAppTokens */, INVALID_UID, true /* roundedCornerOverlay */,
                 false /* fromClientToken */, null /* options */);
 
-        verify(selectFunc).apply(token1, null);
+        verify(selectFunc).apply(token1.windowType, null);
 
         final Bundle options = new Bundle();
         final WindowToken token2 = new WindowToken(mDisplayContent.mWmService, mock(IBinder.class),
@@ -249,6 +249,6 @@ public class WindowTokenTests extends WindowTestsBase {
                 true /* ownerCanManageAppTokens */, INVALID_UID, true /* roundedCornerOverlay */,
                 false /* fromClientToken */, options /* options */);
 
-        verify(selectFunc).apply(token2, options);
+        verify(selectFunc).apply(token2.windowType, options);
     }
 }

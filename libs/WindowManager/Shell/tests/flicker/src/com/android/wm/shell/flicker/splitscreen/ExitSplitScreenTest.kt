@@ -29,8 +29,8 @@ import com.android.server.wm.flicker.helpers.resizeSplitScreen
 import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
 import com.android.wm.shell.flicker.dockedStackDividerIsInvisible
 import com.android.wm.shell.flicker.helpers.SplitScreenHelper.Companion.TEST_REPETITIONS
-import com.android.wm.shell.flicker.navBarWindowIsAlwaysVisible
-import com.android.wm.shell.flicker.statusBarWindowIsAlwaysVisible
+import com.android.server.wm.flicker.navBarWindowIsAlwaysVisible
+import com.android.server.wm.flicker.statusBarWindowIsAlwaysVisible
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith

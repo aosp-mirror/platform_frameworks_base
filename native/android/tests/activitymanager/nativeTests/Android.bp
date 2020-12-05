@@ -1,0 +1,39 @@
+cc_test {
+    name: "ActivityManagerNativeTestCases",
+
+    multilib: {
+        lib32: {
+            suffix: "32",
+        },
+        lib64: {
+            suffix: "64",
+        },
+    },
+
+    srcs: ["src/ActivityManagerNativeTest.cpp"],
+
+    shared_libs: [
+        "liblog",
+        "libutils",
+        "libandroid",
+        "libbinder",
+    ],
+
+    static_libs: [
+        "libbase",
+        "libgtest",
+    ],
+    stl: "c++_shared",
+
+    test_suites: [
+        "general-tests",
+    ],
+
+    cflags: [
+        "-Werror",
+        "-Wall",
+    ],
+    required: [
+        "UidImportanceHelperApp",
+    ],
+}

@@ -167,16 +167,12 @@ public final class LegacyPermission {
 
     private static int readInt(@NonNull TypedXmlPullParser parser, @Nullable String namespace,
             @NonNull String name, int defaultValue) {
-        final String value = parser.getAttributeValue(namespace, name);
-        if (value == null) {
-            return defaultValue;
-        }
         try {
-            return Integer.parseInt(value);
-        } catch (NumberFormatException e) {
+            return parser.getAttributeInt(namespace, name);
+        } catch (Exception ignored) {
             PackageManagerService.reportSettingsProblem(Log.WARN,
                     "Error in package manager settings: attribute " + name
-                            + " has bad integer value " + value + " at "
+                            + " has bad integer value at "
                             + parser.getPositionDescription());
             return defaultValue;
         }

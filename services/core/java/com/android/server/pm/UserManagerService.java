@@ -2918,16 +2918,16 @@ public class UserManagerService extends IUserManager.Stub {
             serializer.attribute(null,  ATTR_ICON_PATH, userInfo.iconPath);
         }
         if (userInfo.partial) {
-            serializer.attribute(null, ATTR_PARTIAL, "true");
+            serializer.attributeBoolean(null, ATTR_PARTIAL, true);
         }
         if (userInfo.preCreated) {
-            serializer.attribute(null, ATTR_PRE_CREATED, "true");
+            serializer.attributeBoolean(null, ATTR_PRE_CREATED, true);
         }
         if (userInfo.convertedFromPreCreated) {
-            serializer.attribute(null, ATTR_CONVERTED_FROM_PRE_CREATED, "true");
+            serializer.attributeBoolean(null, ATTR_CONVERTED_FROM_PRE_CREATED, true);
         }
         if (userInfo.guestToRemove) {
-            serializer.attribute(null, ATTR_GUEST_TO_REMOVE, "true");
+            serializer.attributeBoolean(null, ATTR_GUEST_TO_REMOVE, true);
         }
         if (userInfo.profileGroupId != UserInfo.NO_PROFILE_GROUP_ID) {
             serializer.attributeInt(null, ATTR_PROFILE_GROUP_ID, userInfo.profileGroupId);
@@ -3121,22 +3121,10 @@ public class UserManagerService extends IUserManager.Stub {
             profileBadge = parser.getAttributeInt(null, ATTR_PROFILE_BADGE, 0);
             restrictedProfileParentId = parser.getAttributeInt(null,
                     ATTR_RESTRICTED_PROFILE_PARENT_ID, UserInfo.NO_PROFILE_GROUP_ID);
-            String valueString = parser.getAttributeValue(null, ATTR_PARTIAL);
-            if ("true".equals(valueString)) {
-                partial = true;
-            }
-            valueString = parser.getAttributeValue(null, ATTR_PRE_CREATED);
-            if ("true".equals(valueString)) {
-                preCreated = true;
-            }
-            valueString = parser.getAttributeValue(null, ATTR_CONVERTED_FROM_PRE_CREATED);
-            if ("true".equals(valueString)) {
-                converted = true;
-            }
-            valueString = parser.getAttributeValue(null, ATTR_GUEST_TO_REMOVE);
-            if ("true".equals(valueString)) {
-                guestToRemove = true;
-            }
+            partial = parser.getAttributeBoolean(null, ATTR_PARTIAL, false);
+            preCreated = parser.getAttributeBoolean(null, ATTR_PRE_CREATED, false);
+            converted = parser.getAttributeBoolean(null, ATTR_CONVERTED_FROM_PRE_CREATED, false);
+            guestToRemove = parser.getAttributeBoolean(null, ATTR_GUEST_TO_REMOVE, false);
 
             seedAccountName = parser.getAttributeValue(null, ATTR_SEED_ACCOUNT_NAME);
             seedAccountType = parser.getAttributeValue(null, ATTR_SEED_ACCOUNT_TYPE);
@@ -4257,10 +4245,9 @@ public class UserManagerService extends IUserManager.Stub {
         if (type == XmlPullParser.START_TAG && parser.getName().equals(TAG_ENTRY)) {
             String key = parser.getAttributeValue(null, ATTR_KEY);
             String valType = parser.getAttributeValue(null, ATTR_VALUE_TYPE);
-            String multiple = parser.getAttributeValue(null, ATTR_MULTIPLE);
-            if (multiple != null) {
+            int count = parser.getAttributeInt(null, ATTR_MULTIPLE, -1);
+            if (count != -1) {
                 values.clear();
-                int count = Integer.parseInt(multiple);
                 while (count > 0 && (type = parser.next()) != XmlPullParser.END_DOCUMENT) {
                     if (type == XmlPullParser.START_TAG
                             && parser.getName().equals(TAG_VALUE)) {

@@ -101,7 +101,8 @@ public class ScanTests {
     @Before
     public void setupDefaultAbiBehavior() throws Exception {
         when(mMockPackageAbiHelper.derivePackageAbi(
-                any(AndroidPackage.class), anyBoolean(), nullable(String.class)))
+                any(AndroidPackage.class), anyBoolean(), nullable(String.class),
+                any(File.class)))
                 .thenReturn(new Pair<>(
                         new PackageAbiHelper.Abis("derivedPrimary", "derivedSecondary"),
                         new PackageAbiHelper.NativeLibraryPaths(

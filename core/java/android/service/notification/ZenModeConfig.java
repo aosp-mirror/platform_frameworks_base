@@ -45,13 +45,14 @@ import android.text.format.DateFormat;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.R;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -515,7 +516,7 @@ public class ZenModeConfig implements Parcelable {
         }
     }
 
-    public static ZenModeConfig readXml(XmlPullParser parser)
+    public static ZenModeConfig readXml(TypedXmlPullParser parser)
             throws XmlPullParserException, IOException {
         int type = parser.getEventType();
         if (type != XmlPullParser.START_TAG) return null;
@@ -611,28 +612,28 @@ public class ZenModeConfig implements Parcelable {
      * @param version uses XML_VERSION if version is null
      * @throws IOException
      */
-    public void writeXml(XmlSerializer out, Integer version) throws IOException {
+    public void writeXml(TypedXmlSerializer out, Integer version) throws IOException {
         out.startTag(null, ZEN_TAG);
         out.attribute(null, ZEN_ATT_VERSION, version == null
                 ? Integer.toString(XML_VERSION) : Integer.toString(version));
-        out.attribute(null, ZEN_ATT_USER, Integer.toString(user));
+        out.attributeInt(null, ZEN_ATT_USER, user);
         out.startTag(null, ALLOW_TAG);
-        out.attribute(null, ALLOW_ATT_CALLS, Boolean.toString(allowCalls));
-        out.attribute(null, ALLOW_ATT_REPEAT_CALLERS, Boolean.toString(allowRepeatCallers));
-        out.attribute(null, ALLOW_ATT_MESSAGES, Boolean.toString(allowMessages));
-        out.attribute(null, ALLOW_ATT_REMINDERS, Boolean.toString(allowReminders));
-        out.attribute(null, ALLOW_ATT_EVENTS, Boolean.toString(allowEvents));
-        out.attribute(null, ALLOW_ATT_CALLS_FROM, Integer.toString(allowCallsFrom));
-        out.attribute(null, ALLOW_ATT_MESSAGES_FROM, Integer.toString(allowMessagesFrom));
-        out.attribute(null, ALLOW_ATT_ALARMS, Boolean.toString(allowAlarms));
-        out.attribute(null, ALLOW_ATT_MEDIA, Boolean.toString(allowMedia));
-        out.attribute(null, ALLOW_ATT_SYSTEM, Boolean.toString(allowSystem));
-        out.attribute(null, ALLOW_ATT_CONV, Boolean.toString(allowConversations));
-        out.attribute(null, ALLOW_ATT_CONV_FROM, Integer.toString(allowConversationsFrom));
+        out.attributeBoolean(null, ALLOW_ATT_CALLS, allowCalls);
+        out.attributeBoolean(null, ALLOW_ATT_REPEAT_CALLERS, allowRepeatCallers);
+        out.attributeBoolean(null, ALLOW_ATT_MESSAGES, allowMessages);
+        out.attributeBoolean(null, ALLOW_ATT_REMINDERS, allowReminders);
+        out.attributeBoolean(null, ALLOW_ATT_EVENTS, allowEvents);
+        out.attributeInt(null, ALLOW_ATT_CALLS_FROM, allowCallsFrom);
+        out.attributeInt(null, ALLOW_ATT_MESSAGES_FROM, allowMessagesFrom);
+        out.attributeBoolean(null, ALLOW_ATT_ALARMS, allowAlarms);
+        out.attributeBoolean(null, ALLOW_ATT_MEDIA, allowMedia);
+        out.attributeBoolean(null, ALLOW_ATT_SYSTEM, allowSystem);
+        out.attributeBoolean(null, ALLOW_ATT_CONV, allowConversations);
+        out.attributeInt(null, ALLOW_ATT_CONV_FROM, allowConversationsFrom);
         out.endTag(null, ALLOW_TAG);
 
         out.startTag(null, DISALLOW_TAG);
-        out.attribute(null, DISALLOW_ATT_VISUAL_EFFECTS, Integer.toString(suppressedVisualEffects));
+        out.attributeInt(null, DISALLOW_ATT_VISUAL_EFFECTS, suppressedVisualEffects);
         out.endTag(null, DISALLOW_TAG);
 
         if (manualRule != null) {
@@ -651,14 +652,13 @@ public class ZenModeConfig implements Parcelable {
         }
 
         out.startTag(null, STATE_TAG);
-        out.attribute(null, STATE_ATT_CHANNELS_BYPASSING_DND,
-                Boolean.toString(areChannelsBypassingDnd));
+        out.attributeBoolean(null, STATE_ATT_CHANNELS_BYPASSING_DND, areChannelsBypassingDnd);
         out.endTag(null, STATE_TAG);
 
         out.endTag(null, ZEN_TAG);
     }
 
-    public static ZenRule readRuleXml(XmlPullParser parser) {
+    public static ZenRule readRuleXml(TypedXmlPullParser parser) {
         final ZenRule rt = new ZenRule();
         rt.enabled = safeBoolean(parser, RULE_ATT_ENABLED, true);
         rt.name = parser.getAttributeValue(null, RULE_ATT_NAME);
@@ -691,12 +691,12 @@ public class ZenModeConfig implements Parcelable {
         return rt;
     }
 
-    public static void writeRuleXml(ZenRule rule, XmlSerializer out) throws IOException {
-        out.attribute(null, RULE_ATT_ENABLED, Boolean.toString(rule.enabled));
+    public static void writeRuleXml(ZenRule rule, TypedXmlSerializer out) throws IOException {
+        out.attributeBoolean(null, RULE_ATT_ENABLED, rule.enabled);
         if (rule.name != null) {
             out.attribute(null, RULE_ATT_NAME, rule.name);
         }
-        out.attribute(null, RULE_ATT_ZEN, Integer.toString(rule.zenMode));
+        out.attributeInt(null, RULE_ATT_ZEN, rule.zenMode);
         if (rule.component != null) {
             out.attribute(null, RULE_ATT_COMPONENT, rule.component.flattenToString());
         }
@@ -707,7 +707,7 @@ public class ZenModeConfig implements Parcelable {
         if (rule.conditionId != null) {
             out.attribute(null, RULE_ATT_CONDITION_ID, rule.conditionId.toString());
         }
-        out.attribute(null, RULE_ATT_CREATION_TIME, Long.toString(rule.creationTime));
+        out.attributeLong(null, RULE_ATT_CREATION_TIME, rule.creationTime);
         if (rule.enabler != null) {
             out.attribute(null, RULE_ATT_ENABLER, rule.enabler);
         }
@@ -717,10 +717,10 @@ public class ZenModeConfig implements Parcelable {
         if (rule.zenPolicy != null) {
             writeZenPolicyXml(rule.zenPolicy, out);
         }
-        out.attribute(null, RULE_ATT_MODIFIED, Boolean.toString(rule.modified));
+        out.attributeBoolean(null, RULE_ATT_MODIFIED, rule.modified);
     }
 
-    public static Condition readConditionXml(XmlPullParser parser) {
+    public static Condition readConditionXml(TypedXmlPullParser parser) {
         final Uri id = safeUri(parser, CONDITION_ATT_ID);
         if (id == null) return null;
         final String summary = parser.getAttributeValue(null, CONDITION_ATT_SUMMARY);
@@ -737,21 +737,21 @@ public class ZenModeConfig implements Parcelable {
         }
     }
 
-    public static void writeConditionXml(Condition c, XmlSerializer out) throws IOException {
+    public static void writeConditionXml(Condition c, TypedXmlSerializer out) throws IOException {
         out.attribute(null, CONDITION_ATT_ID, c.id.toString());
         out.attribute(null, CONDITION_ATT_SUMMARY, c.summary);
         out.attribute(null, CONDITION_ATT_LINE1, c.line1);
         out.attribute(null, CONDITION_ATT_LINE2, c.line2);
-        out.attribute(null, CONDITION_ATT_ICON, Integer.toString(c.icon));
-        out.attribute(null, CONDITION_ATT_STATE, Integer.toString(c.state));
-        out.attribute(null, CONDITION_ATT_FLAGS, Integer.toString(c.flags));
+        out.attributeInt(null, CONDITION_ATT_ICON, c.icon);
+        out.attributeInt(null, CONDITION_ATT_STATE, c.state);
+        out.attributeInt(null, CONDITION_ATT_FLAGS, c.flags);
     }
 
     /**
      * Read the zen policy from xml
      * Returns null if no zen policy exists
      */
-    public static ZenPolicy readZenPolicyXml(XmlPullParser parser) {
+    public static ZenPolicy readZenPolicyXml(TypedXmlPullParser parser) {
         boolean policySet = false;
 
         ZenPolicy.Builder builder = new ZenPolicy.Builder();
@@ -845,7 +845,7 @@ public class ZenModeConfig implements Parcelable {
     /**
      * Writes zen policy to xml
      */
-    public static void writeZenPolicyXml(ZenPolicy policy, XmlSerializer out)
+    public static void writeZenPolicyXml(ZenPolicy policy, TypedXmlSerializer out)
             throws IOException {
         writeZenPolicyState(ALLOW_ATT_CALLS_FROM, policy.getPriorityCallSenders(), out);
         writeZenPolicyState(ALLOW_ATT_MESSAGES_FROM, policy.getPriorityMessageSenders(), out);
@@ -868,16 +868,16 @@ public class ZenModeConfig implements Parcelable {
                 out);
     }
 
-    private static void writeZenPolicyState(String attr, int val, XmlSerializer out)
+    private static void writeZenPolicyState(String attr, int val, TypedXmlSerializer out)
             throws IOException {
         if (Objects.equals(attr, ALLOW_ATT_CALLS_FROM)
                 || Objects.equals(attr, ALLOW_ATT_MESSAGES_FROM)) {
             if (val != ZenPolicy.PEOPLE_TYPE_UNSET) {
-                out.attribute(null, attr, Integer.toString(val));
+                out.attributeInt(null, attr, val);
             }
         } else {
             if (val != ZenPolicy.STATE_UNSET) {
-                out.attribute(null, attr, Integer.toString(val));
+                out.attributeInt(null, attr, val);
             }
         }
     }
@@ -894,15 +894,16 @@ public class ZenModeConfig implements Parcelable {
         return source >= SOURCE_ANYONE && source <= MAX_SOURCE;
     }
 
-    private static Boolean unsafeBoolean(XmlPullParser parser, String att) {
-        final String val = parser.getAttributeValue(null, att);
-        if (TextUtils.isEmpty(val)) return null;
-        return Boolean.parseBoolean(val);
+    private static Boolean unsafeBoolean(TypedXmlPullParser parser, String att) {
+        try {
+            return parser.getAttributeBoolean(null, att);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
-    private static boolean safeBoolean(XmlPullParser parser, String att, boolean defValue) {
-        final String val = parser.getAttributeValue(null, att);
-        return safeBoolean(val, defValue);
+    private static boolean safeBoolean(TypedXmlPullParser parser, String att, boolean defValue) {
+        return parser.getAttributeBoolean(null, att, defValue);
     }
 
     private static boolean safeBoolean(String val, boolean defValue) {
@@ -910,24 +911,23 @@ public class ZenModeConfig implements Parcelable {
         return Boolean.parseBoolean(val);
     }
 
-    private static int safeInt(XmlPullParser parser, String att, int defValue) {
-        final String val = parser.getAttributeValue(null, att);
-        return tryParseInt(val, defValue);
+    private static int safeInt(TypedXmlPullParser parser, String att, int defValue) {
+        return parser.getAttributeInt(null, att, defValue);
     }
 
-    private static ComponentName safeComponentName(XmlPullParser parser, String att) {
+    private static ComponentName safeComponentName(TypedXmlPullParser parser, String att) {
         final String val = parser.getAttributeValue(null, att);
         if (TextUtils.isEmpty(val)) return null;
         return ComponentName.unflattenFromString(val);
     }
 
-    private static Uri safeUri(XmlPullParser parser, String att) {
+    private static Uri safeUri(TypedXmlPullParser parser, String att) {
         final String val = parser.getAttributeValue(null, att);
         if (TextUtils.isEmpty(val)) return null;
         return Uri.parse(val);
     }
 
-    private static long safeLong(XmlPullParser parser, String att, long defValue) {
+    private static long safeLong(TypedXmlPullParser parser, String att, long defValue) {
         final String val = parser.getAttributeValue(null, att);
         return tryParseLong(val, defValue);
     }

@@ -350,6 +350,9 @@
     <!-- Permissions required for CTS test - CtsContactsProviderTestCases -->
     <uses-permission android:name="android.contacts.permission.MANAGE_SIM_ACCOUNTS" />
 
+    <!-- Permissions required for CTS test - CarrierMessagingServiceWrapprTest -->
+    <uses-permission android:name="android.permission.BIND_CARRIER_SERVICES" />
+
     <!-- Allows overriding the system's device state from the shell -->
     <uses-permission android:name="android.permission.CONTROL_DEVICE_STATE"/>
 

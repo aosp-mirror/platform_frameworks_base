@@ -153,7 +153,8 @@ public class BiometricTestSessionImpl extends ITestSession.Stub {
         Utils.checkPermission(mContext, TEST_BIOMETRIC);
 
         // Fake authentication with any of the existing fingers
-        List<Face> faces = FaceUtils.getInstance().getBiometricsForUser(mContext, userId);
+        List<Face> faces = FaceUtils.getLegacyInstance(mSensorId)
+                .getBiometricsForUser(mContext, userId);
         if (faces.isEmpty()) {
             Slog.w(TAG, "No faces, returning");
             return;

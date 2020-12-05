@@ -878,11 +878,13 @@ package android.app.admin {
     field public static final String EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_ICON_URI = "android.app.extra.PROVISIONING_DEVICE_ADMIN_PACKAGE_ICON_URI";
     field public static final String EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_LABEL = "android.app.extra.PROVISIONING_DEVICE_ADMIN_PACKAGE_LABEL";
     field public static final String EXTRA_PROVISIONING_ORGANIZATION_NAME = "android.app.extra.PROVISIONING_ORGANIZATION_NAME";
+    field public static final String EXTRA_PROVISIONING_SUPPORTED_MODES = "android.app.extra.PROVISIONING_SUPPORTED_MODES";
     field public static final String EXTRA_PROVISIONING_SUPPORT_URL = "android.app.extra.PROVISIONING_SUPPORT_URL";
     field public static final String EXTRA_PROVISIONING_TRIGGER = "android.app.extra.PROVISIONING_TRIGGER";
     field public static final String EXTRA_RESTRICTION = "android.app.extra.RESTRICTION";
     field public static final int PROVISIONING_TRIGGER_CLOUD_ENROLLMENT = 1; // 0x1
-    field public static final int PROVISIONING_TRIGGER_PERSISTENT_DEVICE_OWNER = 3; // 0x3
+    field public static final int PROVISIONING_TRIGGER_MANAGED_ACCOUNT = 4; // 0x4
+    field @Deprecated public static final int PROVISIONING_TRIGGER_PERSISTENT_DEVICE_OWNER = 3; // 0x3
     field public static final int PROVISIONING_TRIGGER_QR_CODE = 2; // 0x2
     field public static final int PROVISIONING_TRIGGER_UNSPECIFIED = 0; // 0x0
     field public static final int STATE_USER_PROFILE_COMPLETE = 4; // 0x4
@@ -891,6 +893,9 @@ package android.app.admin {
     field public static final int STATE_USER_SETUP_FINALIZED = 3; // 0x3
     field public static final int STATE_USER_SETUP_INCOMPLETE = 1; // 0x1
     field public static final int STATE_USER_UNMANAGED = 0; // 0x0
+    field public static final int SUPPORTED_MODES_ORGANIZATION_AND_PERSONALLY_OWNED = 3; // 0x3
+    field public static final int SUPPORTED_MODES_ORGANIZATION_OWNED = 1; // 0x1
+    field public static final int SUPPORTED_MODES_PERSONALLY_OWNED = 2; // 0x2
   }
 
   public final class SystemUpdatePolicy implements android.os.Parcelable {
@@ -8406,6 +8411,7 @@ package android.provider {
     field public static final String NAMESPACE_APP_COMPAT = "app_compat";
     field public static final String NAMESPACE_ATTENTION_MANAGER_SERVICE = "attention_manager_service";
     field public static final String NAMESPACE_AUTOFILL = "autofill";
+    field public static final String NAMESPACE_BATTERY_SAVER = "battery_saver";
     field public static final String NAMESPACE_BIOMETRICS = "biometrics";
     field public static final String NAMESPACE_BLOBSTORE = "blobstore";
     field public static final String NAMESPACE_BLUETOOTH = "bluetooth";
@@ -9091,6 +9097,26 @@ package android.service.carrier {
     ctor public ApnService();
     method @NonNull public android.os.IBinder onBind(@Nullable android.content.Intent);
     method @NonNull @WorkerThread public abstract java.util.List<android.content.ContentValues> onRestoreApns(int);
+  }
+
+  public final class CarrierMessagingServiceWrapper {
+    ctor public CarrierMessagingServiceWrapper();
+    method public boolean bindToCarrierMessagingService(@NonNull android.content.Context, @NonNull String, @NonNull java.util.concurrent.Executor, @NonNull Runnable);
+    method public void disposeConnection(@NonNull android.content.Context);
+    method public void downloadMms(@NonNull android.net.Uri, int, @NonNull android.net.Uri, @NonNull java.util.concurrent.Executor, @NonNull android.service.carrier.CarrierMessagingServiceWrapper.CarrierMessagingCallback);
+    method public void receiveSms(@NonNull android.service.carrier.MessagePdu, @NonNull String, int, int, @NonNull java.util.concurrent.Executor, @NonNull android.service.carrier.CarrierMessagingServiceWrapper.CarrierMessagingCallback);
+    method public void sendDataSms(@NonNull byte[], int, @NonNull String, int, int, @NonNull java.util.concurrent.Executor, @NonNull android.service.carrier.CarrierMessagingServiceWrapper.CarrierMessagingCallback);
+    method public void sendMms(@NonNull android.net.Uri, int, @NonNull android.net.Uri, @NonNull java.util.concurrent.Executor, @NonNull android.service.carrier.CarrierMessagingServiceWrapper.CarrierMessagingCallback);
+    method public void sendMultipartTextSms(@NonNull java.util.List<java.lang.String>, int, @NonNull String, int, @NonNull java.util.concurrent.Executor, @NonNull android.service.carrier.CarrierMessagingServiceWrapper.CarrierMessagingCallback);
+    method public void sendTextSms(@NonNull String, int, @NonNull String, int, @NonNull java.util.concurrent.Executor, @NonNull android.service.carrier.CarrierMessagingServiceWrapper.CarrierMessagingCallback);
+  }
+
+  public static interface CarrierMessagingServiceWrapper.CarrierMessagingCallback {
+    method public default void onDownloadMmsComplete(int);
+    method public default void onReceiveSmsComplete(int);
+    method public default void onSendMmsComplete(int, @Nullable byte[]);
+    method public default void onSendMultipartSmsComplete(int, @Nullable int[]);
+    method public default void onSendSmsComplete(int, int);
   }
 
 }

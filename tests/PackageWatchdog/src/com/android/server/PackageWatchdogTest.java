@@ -22,6 +22,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -43,10 +44,15 @@ import android.os.SystemProperties;
 import android.os.test.TestLooper;
 import android.provider.DeviceConfig;
 import android.util.AtomicFile;
+import android.util.LongArrayQueue;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
+import android.util.Xml;
 
 import androidx.test.InstrumentationRegistry;
 
 import com.android.dx.mockito.inline.extended.ExtendedMockito;
+import com.android.internal.util.XmlUtils;
 import com.android.server.PackageWatchdog.HealthCheckState;
 import com.android.server.PackageWatchdog.MonitoredPackage;
 import com.android.server.PackageWatchdog.PackageHealthObserver;
@@ -64,6 +70,7 @@ import org.mockito.quality.Strictness;
 import org.mockito.stubbing.Answer;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -739,7 +746,8 @@ public class PackageWatchdogTest {
                 false /* hasPassedHealthCheck */);
         MonitoredPackage m2 = wd.newMonitoredPackage(APP_B, LONG_DURATION, false);
         MonitoredPackage m3 = wd.newMonitoredPackage(APP_C, LONG_DURATION, false);
-        MonitoredPackage m4 = wd.newMonitoredPackage(APP_D, LONG_DURATION, SHORT_DURATION, true);
+        MonitoredPackage m4 = wd.newMonitoredPackage(APP_D, LONG_DURATION, SHORT_DURATION, true,
+                new LongArrayQueue());
 
         // Verify transition: inactive -> active -> passed
         // Verify initially inactive
@@ -1208,6 +1216,73 @@ public class PackageWatchdogTest {
                 VERSION_CODE)), PackageWatchdog.FAILURE_REASON_UNKNOWN);
 
         assertThat(observer.mMitigationCounts).isEqualTo(List.of(1, 2, 3, 3, 2, 3));
+    }
+
+    @Test
+    public void testNormalizingMitigationCalls()  {
+        PackageWatchdog watchdog = createWatchdog();
+
+        LongArrayQueue mitigationCalls = new LongArrayQueue();
+        mitigationCalls.addLast(1000);
+        mitigationCalls.addLast(2000);
+        mitigationCalls.addLast(3000);
+
+        MonitoredPackage pkg = watchdog.newMonitoredPackage(
+                "test", 123, 456, true, mitigationCalls);
+
+        // Make current system uptime 10000ms.
+        moveTimeForwardAndDispatch(9999);
+
+        LongArrayQueue expectedCalls = pkg.normalizeMitigationCalls();
+
+        assertThat(expectedCalls.size()).isEqualTo(mitigationCalls.size());
+
+        for (int i = 0; i < mitigationCalls.size(); i++) {
+            assertThat(expectedCalls.get(i)).isEqualTo(mitigationCalls.get(i) - 10000);
+        }
+    }
+
+    /**
+     * Ensure that a {@link MonitoredPackage} may be correctly written and read in order to persist
+     * across reboots.
+     */
+    @Test
+    public void testWritingAndReadingMonitoredPackage() throws Exception {
+        PackageWatchdog watchdog = createWatchdog();
+
+        LongArrayQueue mitigationCalls = new LongArrayQueue();
+        mitigationCalls.addLast(1000);
+        mitigationCalls.addLast(2000);
+        mitigationCalls.addLast(3000);
+        MonitoredPackage writePkg = watchdog.newMonitoredPackage(
+                "test.package", 1000, 2000, true, mitigationCalls);
+
+        // Move time forward so that the current uptime is 4000ms. Therefore, the written mitigation
+        // calls will each be reduced by 4000.
+        moveTimeForwardAndDispatch(3999);
+        LongArrayQueue expectedCalls = new LongArrayQueue();
+        expectedCalls.addLast(-3000);
+        expectedCalls.addLast(-2000);
+        expectedCalls.addLast(-1000);
+        MonitoredPackage expectedPkg = watchdog.newMonitoredPackage(
+                "test.package", 1000, 2000, true, expectedCalls);
+
+        // Write the package
+        File tmpFile = File.createTempFile("package-watchdog-test", ".xml");
+        AtomicFile testFile = new AtomicFile(tmpFile);
+        FileOutputStream stream = testFile.startWrite();
+        TypedXmlSerializer outputSerializer = Xml.resolveSerializer(stream);
+        outputSerializer.startDocument(null, true);
+        writePkg.writeLocked(outputSerializer);
+        outputSerializer.endDocument();
+        testFile.finishWrite(stream);
+
+        // Read the package
+        TypedXmlPullParser parser = Xml.resolvePullParser(testFile.openRead());
+        XmlUtils.beginDocument(parser, "package");
+        MonitoredPackage readPkg = watchdog.parseMonitoredPackage(parser);
+
+        assertTrue(readPkg.isEqualTo(expectedPkg));
     }
 
     private void adoptShellPermissions(String... permissions) {

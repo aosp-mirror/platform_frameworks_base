@@ -111,6 +111,16 @@ android_test {
 }
 
 java_library {
+    name: "servicestests-core-utils",
+    srcs: [
+        "src/com/android/server/pm/PackageSettingBuilder.java",
+    ],
+    static_libs: [
+        "services.core",
+    ],
+}
+
+java_library {
     name: "servicestests-utils",
     srcs: [
         "utils/**/*.java",

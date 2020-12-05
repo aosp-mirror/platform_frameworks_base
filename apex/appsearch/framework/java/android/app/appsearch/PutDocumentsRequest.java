@@ -29,10 +29,9 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Encapsulates a request to index a document into an {@link AppSearchSession} database.
+ * Encapsulates a request to index a document into an {@link AppSearchManager} database.
  *
- * @see AppSearchSession#putDocuments
- * @hide
+ * @see AppSearchManager#putDocuments
  */
 public final class PutDocumentsRequest {
     private final List<GenericDocument> mDocuments;

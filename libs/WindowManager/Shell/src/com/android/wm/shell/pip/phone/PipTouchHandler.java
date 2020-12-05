@@ -31,11 +31,8 @@ import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.os.Handler;
-import android.os.RemoteException;
 import android.provider.DeviceConfig;
-import android.util.Log;
 import android.util.Size;
-import android.view.IPinnedStackController;
 import android.view.InputEvent;
 import android.view.MotionEvent;
 import android.view.ViewConfiguration;
@@ -76,7 +73,6 @@ public class PipTouchHandler {
     private final PipDismissTargetHandler mPipDismissTargetHandler;
 
     private PipResizeGestureHandler mPipResizeGestureHandler;
-    private IPinnedStackController mPinnedStackController;
     private WeakReference<Consumer<Rect>> mPipExclusionBoundsChangeListener;
 
     private final PhonePipMenuController mMenuController;
@@ -464,10 +460,6 @@ public class PipTouchHandler {
         if (!(inputEvent instanceof MotionEvent)) {
             return true;
         }
-        // Skip touch handling until we are bound to the controller
-        if (mPinnedStackController == null) {
-            return true;
-        }
 
         MotionEvent ev = (MotionEvent) inputEvent;
         if (!mPipBoundsState.isStashed() && mPipResizeGestureHandler.willStartResizeGesture(ev)) {
@@ -591,13 +583,6 @@ public class PipTouchHandler {
     }
 
     /**
-     * Sets the controller to update the system of changes from user interaction.
-     */
-    void setPinnedStackController(IPinnedStackController controller) {
-        mPinnedStackController = controller;
-    }
-
-    /**
      * Sets the menu visibility.
      */
     private void setMenuState(int menuState, boolean resize, Runnable callback) {
@@ -625,13 +610,9 @@ public class PipTouchHandler {
                     // bounds which are now stale.  In such a case we defer the animation to the
                     // normal bounds until after the next onMovementBoundsChanged() call to get the
                     // bounds in the new orientation
-                    try {
-                        int displayRotation = mPinnedStackController.getDisplayRotation();
-                        if (mDisplayRotation != displayRotation) {
-                            mDeferResizeToNormalBoundsUntilRotation = displayRotation;
-                        }
-                    } catch (RemoteException e) {
-                        Log.e(TAG, "Could not get display rotation from controller");
+                    int displayRotation = mContext.getDisplay().getRotation();
+                    if (mDisplayRotation != displayRotation) {
+                        mDeferResizeToNormalBoundsUntilRotation = displayRotation;
                     }
                 }
 

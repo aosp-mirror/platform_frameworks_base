@@ -23,6 +23,7 @@ import static com.android.server.policy.DeviceStateProviderImpl.DEFAULT_DEVICE_S
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -170,16 +171,16 @@ public final class DeviceStateProviderImplTest {
 
     @Test
     public void create_sensor() throws Exception {
-        Sensor sensor = newSensor("sensor", Sensor.TYPE_HINGE_ANGLE);
-        when(mSensorManager.getSensorList(eq(sensor.getType()))).thenReturn(List.of(sensor));
+        Sensor sensor = newSensor("sensor", Sensor.STRING_TYPE_HINGE_ANGLE);
+        when(mSensorManager.getSensorList(anyInt())).thenReturn(List.of(sensor));
 
         String configString = "<device-state-config>\n"
                 + "    <device-state>\n"
                 + "        <identifier>1</identifier>\n"
                 + "        <conditions>\n"
                 + "            <sensor>\n"
+                + "                <type>" + sensor.getStringType() + "</type>\n"
                 + "                <name>" + sensor.getName() + "</name>\n"
-                + "                <type>" + sensor.getType() + "</type>\n"
                 + "                <value>\n"
                 + "                    <max>90</max>\n"
                 + "                </value>\n"
@@ -190,8 +191,8 @@ public final class DeviceStateProviderImplTest {
                 + "        <identifier>2</identifier>\n"
                 + "        <conditions>\n"
                 + "            <sensor>\n"
+                + "                <type>" + sensor.getStringType() + "</type>\n"
                 + "                <name>" + sensor.getName() + "</name>\n"
-                + "                <type>" + sensor.getType() + "</type>\n"
                 + "                <value>\n"
                 + "                    <min-inclusive>90</min-inclusive>\n"
                 + "                    <max>180</max>\n"
@@ -203,8 +204,8 @@ public final class DeviceStateProviderImplTest {
                 + "        <identifier>3</identifier>\n"
                 + "        <conditions>\n"
                 + "            <sensor>\n"
+                + "                <type>" + sensor.getStringType() + "</type>\n"
                 + "                <name>" + sensor.getName() + "</name>\n"
-                + "                <type>" + sensor.getType() + "</type>\n"
                 + "                <value>\n"
                 + "                    <min-inclusive>180</min-inclusive>\n"
                 + "                </value>\n"
@@ -262,13 +263,13 @@ public final class DeviceStateProviderImplTest {
         assertEquals(1, mIntegerCaptor.getValue().intValue());
     }
 
-    private static Sensor newSensor(String name, int type) throws Exception {
+    private static Sensor newSensor(String name, String type) throws Exception {
         Constructor<Sensor> constructor = Sensor.class.getDeclaredConstructor();
         constructor.setAccessible(true);
 
         Sensor sensor = constructor.newInstance();
         FieldSetter.setField(sensor, Sensor.class.getDeclaredField("mName"), name);
-        FieldSetter.setField(sensor, Sensor.class.getDeclaredField("mType"), type);
+        FieldSetter.setField(sensor, Sensor.class.getDeclaredField("mStringType"), type);
         return sensor;
     }
 

@@ -33,7 +33,6 @@ import java.util.Map;
  *
  * @param <KeyType> The type of the keys for {@link #getSuccesses} and {@link #getFailures}.
  * @param <ValueType> The type of result objects associated with the keys.
- * @hide
  */
 public final class AppSearchBatchResult<KeyType, ValueType> implements Parcelable {
     @NonNull private final Map<KeyType, ValueType> mSuccesses;
@@ -51,6 +50,7 @@ public final class AppSearchBatchResult<KeyType, ValueType> implements Parcelabl
         mFailures = Collections.unmodifiableMap(in.readHashMap(/*loader=*/ null));
     }
 
+    /** @hide */
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeMap(mSuccesses);
@@ -100,11 +100,14 @@ public final class AppSearchBatchResult<KeyType, ValueType> implements Parcelabl
         return "{\n  successes: " + mSuccesses + "\n  failures: " + mFailures + "\n}";
     }
 
+    /** @hide */
     @Override
     public int describeContents() {
         return 0;
     }
 
+    /** @hide */
+    @NonNull
     public static final Creator<AppSearchBatchResult> CREATOR =
             new Creator<AppSearchBatchResult>() {
         @NonNull

@@ -52,6 +52,7 @@ import android.service.notification.RankingHelperProto;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.IntArray;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseBooleanArray;
@@ -170,6 +171,8 @@ public class PreferencesHelper implements RankingConfig {
     private final AppOpsManager mAppOps;
 
     private SparseBooleanArray mBadgingEnabled;
+    private SparseBooleanArray mLockScreenShowNotifications;
+    private SparseBooleanArray mLockScreenPrivateNotifications;
     private boolean mBubblesEnabledGlobally = DEFAULT_GLOBAL_ALLOW_BUBBLE;
     private boolean mIsMediaNotificationFilteringEnabled = DEFAULT_MEDIA_NOTIFICATION_FILTERING;
     private boolean mAreChannelsBypassingDnd;
@@ -1379,36 +1382,39 @@ public class PreferencesHelper implements RankingConfig {
         return null;
     }
 
-    public ArrayList<ConversationChannelWrapper> getConversations(boolean onlyImportant) {
+    public ArrayList<ConversationChannelWrapper> getConversations(IntArray userIds,
+            boolean onlyImportant) {
         synchronized (mPackagePreferences) {
             ArrayList<ConversationChannelWrapper> conversations = new ArrayList<>();
-
             for (PackagePreferences p : mPackagePreferences.values()) {
-                int N = p.channels.size();
-                for (int i = 0; i < N; i++) {
-                    final NotificationChannel nc = p.channels.valueAt(i);
-                    if (!TextUtils.isEmpty(nc.getConversationId()) && !nc.isDeleted()
-                            && !nc.isDemoted()
-                            && (nc.isImportantConversation() || !onlyImportant)) {
-                        ConversationChannelWrapper conversation = new ConversationChannelWrapper();
-                        conversation.setPkg(p.pkg);
-                        conversation.setUid(p.uid);
-                        conversation.setNotificationChannel(nc);
-                        conversation.setParentChannelLabel(
-                                p.channels.get(nc.getParentChannelId()).getName());
-                        boolean blockedByGroup = false;
-                        if (nc.getGroup() != null) {
-                            NotificationChannelGroup group = p.groups.get(nc.getGroup());
-                            if (group != null) {
-                                if (group.isBlocked()) {
-                                    blockedByGroup = true;
-                                } else {
-                                    conversation.setGroupLabel(group.getName());
+                if (userIds.binarySearch(UserHandle.getUserId(p.uid)) >= 0) {
+                    int N = p.channels.size();
+                    for (int i = 0; i < N; i++) {
+                        final NotificationChannel nc = p.channels.valueAt(i);
+                        if (!TextUtils.isEmpty(nc.getConversationId()) && !nc.isDeleted()
+                                && !nc.isDemoted()
+                                && (nc.isImportantConversation() || !onlyImportant)) {
+                            ConversationChannelWrapper conversation =
+                                    new ConversationChannelWrapper();
+                            conversation.setPkg(p.pkg);
+                            conversation.setUid(p.uid);
+                            conversation.setNotificationChannel(nc);
+                            conversation.setParentChannelLabel(
+                                    p.channels.get(nc.getParentChannelId()).getName());
+                            boolean blockedByGroup = false;
+                            if (nc.getGroup() != null) {
+                                NotificationChannelGroup group = p.groups.get(nc.getGroup());
+                                if (group != null) {
+                                    if (group.isBlocked()) {
+                                        blockedByGroup = true;
+                                    } else {
+                                        conversation.setGroupLabel(group.getName());
+                                    }
                                 }
                             }
-                        }
-                        if (!blockedByGroup) {
-                            conversations.add(conversation);
+                            if (!blockedByGroup) {
+                                conversations.add(conversation);
+                            }
                         }
                     }
                 }
@@ -2399,6 +2405,60 @@ public class PreferencesHelper implements RankingConfig {
                             DEFAULT_SHOW_BADGE ? 1 : 0, userId) != 0);
         }
         return mBadgingEnabled.get(userId, DEFAULT_SHOW_BADGE);
+    }
+
+    public void updateLockScreenPrivateNotifications() {
+        if (mLockScreenPrivateNotifications == null) {
+            mLockScreenPrivateNotifications = new SparseBooleanArray();
+        }
+        boolean changed = false;
+        // update the cached values
+        for (int index = 0; index < mLockScreenPrivateNotifications.size(); index++) {
+            int userId = mLockScreenPrivateNotifications.keyAt(index);
+            final boolean oldValue = mLockScreenPrivateNotifications.get(userId);
+            final boolean newValue = Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                    Settings.Secure.LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS, 1, userId) != 0;
+            mLockScreenPrivateNotifications.put(userId, newValue);
+            changed |= oldValue != newValue;
+        }
+        if (changed) {
+            updateConfig();
+        }
+    }
+
+    public void updateLockScreenShowNotifications() {
+        if (mLockScreenShowNotifications == null) {
+            mLockScreenShowNotifications = new SparseBooleanArray();
+        }
+        boolean changed = false;
+        // update the cached values
+        for (int index = 0; index < mLockScreenShowNotifications.size(); index++) {
+            int userId = mLockScreenShowNotifications.keyAt(index);
+            final boolean oldValue = mLockScreenShowNotifications.get(userId);
+            final boolean newValue = Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                    Settings.Secure.LOCK_SCREEN_SHOW_NOTIFICATIONS, 1, userId) != 0;
+            mLockScreenShowNotifications.put(userId, newValue);
+            changed |= oldValue != newValue;
+        }
+        if (changed) {
+            updateConfig();
+        }
+    }
+
+    @Override
+    public boolean canShowNotificationsOnLockscreen(int userId) {
+        if (mLockScreenShowNotifications == null) {
+            mLockScreenShowNotifications = new SparseBooleanArray();
+        }
+        return mLockScreenShowNotifications.get(userId, true);
+    }
+
+    @Override
+    public boolean canShowPrivateNotificationsOnLockScreen(int userId) {
+        if (mLockScreenPrivateNotifications == null) {
+            mLockScreenPrivateNotifications = new SparseBooleanArray();
+        }
+        return mLockScreenPrivateNotifications.get(userId, true);
     }
 
     public void unlockAllNotificationChannels() {

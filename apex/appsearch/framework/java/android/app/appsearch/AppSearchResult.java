@@ -32,7 +32,6 @@ import java.util.Objects;
  * Information about the success or failure of an AppSearch call.
  *
  * @param <ValueType> The type of result object for successful calls.
- * @hide
  */
 public final class AppSearchResult<ValueType> implements Parcelable {
     /**
@@ -107,6 +106,7 @@ public final class AppSearchResult<ValueType> implements Parcelable {
         mErrorMessage = in.readString();
     }
 
+    /** @hide */
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeInt(mResultCode);
@@ -181,13 +181,15 @@ public final class AppSearchResult<ValueType> implements Parcelable {
         return "[FAILURE(" + mResultCode + ")]: " + mErrorMessage;
     }
 
+    /** @hide */
     @Override
     public int describeContents() {
         return 0;
     }
 
-    public static final Creator<AppSearchResult> CREATOR =
-            new Creator<AppSearchResult>() {
+    /** @hide */
+    @NonNull
+    public static final Creator<AppSearchResult> CREATOR = new Creator<AppSearchResult>() {
         @NonNull
         @Override
         public AppSearchResult createFromParcel(@NonNull Parcel in) {

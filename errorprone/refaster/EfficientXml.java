@@ -292,6 +292,30 @@ public class EfficientXml {
         }
     }
 
+    class BooleanToStringTrue {
+        @BeforeTemplate
+        void before(TypedXmlSerializer out, String n) throws Exception {
+            out.attribute(null, n, "true");
+        }
+
+        @AfterTemplate
+        void after(TypedXmlSerializer out, String n) throws Exception {
+            out.attributeBoolean(null, n, true);
+        }
+    }
+
+    class BooleanToStringFalse {
+        @BeforeTemplate
+        void before(TypedXmlSerializer out, String n) throws Exception {
+            out.attribute(null, n, "false");
+        }
+
+        @AfterTemplate
+        void after(TypedXmlSerializer out, String n) throws Exception {
+            out.attributeBoolean(null, n, false);
+        }
+    }
+
     class BooleanFromString {
         @BeforeTemplate
         boolean beforeParse(TypedXmlPullParser in, String n) throws Exception {

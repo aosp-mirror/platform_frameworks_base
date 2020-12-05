@@ -72,13 +72,13 @@ public class FaceUtils implements BiometricUtils<Face> {
     }
 
     /**
-     * Legacy getter for {@link android.hardware.biometrics.face.V1_0} and its extended subclasses,
-     * which do not support a well defined sensorId from the HAL.
+     * Legacy getter for {@link android.hardware.biometrics.face.V1_0} and its extended subclasses.
+     * Framework-side cache is always stored in the same file, regardless of sensorId.
      */
-    public static FaceUtils getInstance() {
+    public static FaceUtils getLegacyInstance(int sensorId) {
         // Note that sensorId for legacy services can be hard-coded to 0 since it's only used
         // to index into the sensor states map.
-        return getInstance(0 /* sensorId */, LEGACY_FACE_FILE);
+        return getInstance(sensorId, LEGACY_FACE_FILE);
     }
 
     private FaceUtils(String fileName) {

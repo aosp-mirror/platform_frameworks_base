@@ -368,12 +368,6 @@ public class BatterySaverController implements BatterySaverPolicyListener {
         }
     }
 
-    boolean setAdaptivePolicyLocked(String settings, String deviceSpecificSettings, int reason) {
-        return setAdaptivePolicyLocked(
-                BatterySaverPolicy.Policy.fromSettings(settings, deviceSpecificSettings),
-                reason);
-    }
-
     boolean setAdaptivePolicyLocked(BatterySaverPolicyConfig config, int reason) {
         return setAdaptivePolicyLocked(BatterySaverPolicy.Policy.fromConfig(config), reason);
     }

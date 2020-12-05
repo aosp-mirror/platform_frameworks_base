@@ -114,7 +114,6 @@ import android.permission.IPermissionManager;
 import android.permission.PermissionControllerManager;
 import android.permission.PermissionManager;
 import android.permission.PermissionManagerInternal;
-import android.permission.PermissionManagerInternal.CheckPermissionDelegate;
 import android.permission.PermissionManagerInternal.OnRuntimePermissionStateChangedListener;
 import android.text.TextUtils;
 import android.util.ArrayMap;
@@ -138,6 +137,7 @@ import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.IntPair;
 import com.android.internal.util.Preconditions;
+import com.android.internal.util.function.TriFunction;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
@@ -151,9 +151,6 @@ import com.android.server.pm.UserManagerInternal;
 import com.android.server.pm.UserManagerService;
 import com.android.server.pm.parsing.PackageInfoUtils;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
-import com.android.server.pm.permission.PermissionManagerServiceInternal.DefaultBrowserProvider;
-import com.android.server.pm.permission.PermissionManagerServiceInternal.DefaultDialerProvider;
-import com.android.server.pm.permission.PermissionManagerServiceInternal.DefaultHomeProvider;
 import com.android.server.policy.PermissionPolicyInternal;
 import com.android.server.policy.SoftRestrictedPermissionPolicy;
 
@@ -176,7 +173,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.function.Consumer;
+import java.util.function.BiFunction;
 
 /**
  * Manages all permissions and handles permissions related tasks.
@@ -303,15 +300,6 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
     @NonNull
     private final OnPermissionChangeListeners mOnPermissionChangeListeners;
-
-    @GuardedBy("mLock")
-    private DefaultBrowserProvider mDefaultBrowserProvider;
-
-    @GuardedBy("mLock")
-    private DefaultDialerProvider mDefaultDialerProvider;
-
-    @GuardedBy("mLock")
-    private DefaultHomeProvider mDefaultHomeProvider;
 
     // TODO: Take a look at the methods defined in the callback.
     // The callback was initially created to support the split between permission
@@ -2018,60 +2006,6 @@ public class PermissionManagerService extends IPermissionManager.Stub {
     }
 
     @Override
-    public String getDefaultBrowser(int userId) {
-        final int callingUid = Binder.getCallingUid();
-        if (UserHandle.getUserId(callingUid) != userId) {
-            mContext.enforceCallingOrSelfPermission(
-                    android.Manifest.permission.INTERACT_ACROSS_USERS_FULL, null);
-        }
-        if (mPackageManagerInt.getInstantAppPackageName(callingUid) != null) {
-            return null;
-        }
-        DefaultBrowserProvider provider;
-        synchronized (mLock) {
-            provider = mDefaultBrowserProvider;
-        }
-        return provider != null ? provider.getDefaultBrowser(userId) : null;
-    }
-
-    @Override
-    public boolean setDefaultBrowser(String packageName, int userId) {
-        mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.SET_PREFERRED_APPLICATIONS, null);
-        if (UserHandle.getCallingUserId() != userId) {
-            mContext.enforceCallingOrSelfPermission(
-                    android.Manifest.permission.INTERACT_ACROSS_USERS_FULL, null);
-        }
-        return setDefaultBrowserInternal(packageName, false, true, userId);
-    }
-
-    private boolean setDefaultBrowserInternal(String packageName, boolean async,
-            boolean doGrant, int userId) {
-        if (userId == UserHandle.USER_ALL) {
-            return false;
-        }
-        DefaultBrowserProvider provider;
-        synchronized (mLock) {
-            provider = mDefaultBrowserProvider;
-        }
-        if (provider == null) {
-            return false;
-        }
-        if (async) {
-            provider.setDefaultBrowserAsync(packageName, userId);
-        } else {
-            if (!provider.setDefaultBrowser(packageName, userId)) {
-                return false;
-            }
-        }
-        if (doGrant && packageName != null) {
-            mDefaultPermissionGrantPolicy.grantDefaultPermissionsToDefaultBrowser(packageName,
-                    userId);
-        }
-        return true;
-    }
-
-    @Override
     public void grantDefaultPermissionsToEnabledCarrierApps(String[] packageNames, int userId) {
         final int callingUid = Binder.getCallingUid();
         PackageManagerServiceUtils
@@ -2358,6 +2292,32 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         for (int i = 0; i < listenerCount; i++) {
             listeners.get(i).onRuntimePermissionStateChanged(packageName, userId);
         }
+    }
+
+    private void startShellPermissionIdentityDelegationInternal(int uid,
+            @NonNull String packageName, @Nullable List<String> permissionNames) {
+        synchronized (mLock) {
+            final CheckPermissionDelegate oldDelegate = mCheckPermissionDelegate;
+            if (oldDelegate != null && oldDelegate.getDelegatedUid() != uid) {
+                throw new SecurityException(
+                        "Shell can delegate permissions only to one UID at a time");
+            }
+            final ShellDelegate delegate = new ShellDelegate(uid, packageName, permissionNames);
+            setCheckPermissionDelegateLocked(delegate);
+        }
+    }
+
+    private void stopShellPermissionIdentityDelegationInternal() {
+        synchronized (mLock) {
+            setCheckPermissionDelegateLocked(null);
+        }
+    }
+
+    private void setCheckPermissionDelegateLocked(@Nullable CheckPermissionDelegate delegate) {
+        if (delegate != null || mCheckPermissionDelegate != null) {
+            PackageManager.invalidatePackageInfoCache();
+        }
+        mCheckPermissionDelegate = delegate;
     }
 
     /**
@@ -5233,62 +5193,15 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         }
 
         @Override
-        public CheckPermissionDelegate getCheckPermissionDelegate() {
-            synchronized (mLock) {
-                return mCheckPermissionDelegate;
-            }
+        public void startShellPermissionIdentityDelegation(int uid, @NonNull String packageName,
+                @Nullable List<String> permissionNames) {
+            Objects.requireNonNull(packageName, "packageName");
+            startShellPermissionIdentityDelegationInternal(uid, packageName, permissionNames);
         }
 
         @Override
-        public void setCheckPermissionDelegate(CheckPermissionDelegate delegate) {
-            synchronized (mLock) {
-                if (delegate != null || mCheckPermissionDelegate != null) {
-                    PackageManager.invalidatePackageInfoCache();
-                }
-                mCheckPermissionDelegate = delegate;
-            }
-        }
-
-        @Override
-        public void setDefaultBrowserProvider(@NonNull DefaultBrowserProvider provider) {
-            synchronized (mLock) {
-                mDefaultBrowserProvider = provider;
-            }
-        }
-
-        @Override
-        public void setDefaultBrowser(String packageName, boolean async, boolean doGrant,
-                int userId) {
-            setDefaultBrowserInternal(packageName, async, doGrant, userId);
-        }
-
-        @Override
-        public void setDefaultDialerProvider(@NonNull DefaultDialerProvider provider) {
-            synchronized (mLock) {
-                mDefaultDialerProvider = provider;
-            }
-        }
-
-        @Override
-        public void setDefaultHomeProvider(@NonNull DefaultHomeProvider provider) {
-            synchronized (mLock) {
-                mDefaultHomeProvider = provider;
-            }
-        }
-
-        @Override
-        public void setDefaultHome(String packageName, int userId, Consumer<Boolean> callback) {
-            if (userId == UserHandle.USER_ALL) {
-                return;
-            }
-            DefaultHomeProvider provider;
-            synchronized (mLock) {
-                provider = mDefaultHomeProvider;
-            }
-            if (provider == null) {
-                return;
-            }
-            provider.setDefaultHomeAsync(packageName, userId, callback);
+        public void stopShellPermissionIdentityDelegation() {
+            stopShellPermissionIdentityDelegationInternal();
         }
 
         @Override
@@ -5332,30 +5245,10 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         }
 
         @Override
-        public String getDefaultBrowser(int userId) {
-            DefaultBrowserProvider provider;
-            synchronized (mLock) {
-                provider = mDefaultBrowserProvider;
-            }
-            return provider != null ? provider.getDefaultBrowser(userId) : null;
-        }
-
-        @Override
-        public String getDefaultDialer(int userId) {
-            DefaultDialerProvider provider;
-            synchronized (mLock) {
-                provider = mDefaultDialerProvider;
-            }
-            return provider != null ? provider.getDefaultDialer(userId) : null;
-        }
-
-        @Override
-        public String getDefaultHome(int userId) {
-            DefaultHomeProvider provider;
-            synchronized (mLock) {
-                provider = mDefaultHomeProvider;
-            }
-            return provider != null ? provider.getDefaultHome(userId) : null;
+        public void grantDefaultPermissionsToDefaultBrowser(@NonNull String packageName,
+                @UserIdInt int userId) {
+            mDefaultPermissionGrantPolicy.grantDefaultPermissionsToDefaultBrowser(packageName,
+                    userId);
         }
 
         @Override
@@ -5541,6 +5434,102 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             } finally {
                 mPermissionListeners.finishBroadcast();
             }
+        }
+    }
+
+    /**
+     * Interface to intercept permission checks and optionally pass through to the original
+     * implementation.
+     */
+    private interface CheckPermissionDelegate {
+        /**
+         * Get the UID whose permission checks is being delegated.
+         *
+         * @return the UID
+         */
+        int getDelegatedUid();
+
+        /**
+         * Check whether the given package has been granted the specified permission.
+         *
+         * @param permissionName the name of the permission to be checked
+         * @param packageName the name of the package to be checked
+         * @param userId the user ID
+         * @param superImpl the original implementation that can be delegated to
+         * @return {@link android.content.pm.PackageManager.PERMISSION_GRANTED} if the package has
+         * the permission, or {@link android.content.pm.PackageManager.PERMISSION_DENITED} otherwise
+         *
+         * @see android.content.pm.PackageManager#checkPermission(String, String)
+         */
+        int checkPermission(@NonNull String permissionName, @NonNull String packageName,
+                @UserIdInt int userId,
+                @NonNull TriFunction<String, String, Integer, Integer> superImpl);
+
+        /**
+         * Check whether the given UID has been granted the specified permission.
+         *
+         * @param permissionName the name of the permission to be checked
+         * @param uid the UID to be checked
+         * @param superImpl the original implementation that can be delegated to
+         * @return {@link android.content.pm.PackageManager.PERMISSION_GRANTED} if the package has
+         * the permission, or {@link android.content.pm.PackageManager.PERMISSION_DENITED} otherwise
+         */
+        int checkUidPermission(@NonNull String permissionName, int uid,
+                BiFunction<String, Integer, Integer> superImpl);
+    }
+
+    private class ShellDelegate implements CheckPermissionDelegate {
+        private final int mDelegatedUid;
+        @NonNull
+        private final String mDelegatedPackageName;
+        @Nullable
+        private final List<String> mDelegatedPermissionNames;
+
+        public ShellDelegate(int delegatedUid, @NonNull String delegatedPackageName,
+                @Nullable List<String> delegatedPermissionNames) {
+            mDelegatedUid = delegatedUid;
+            mDelegatedPackageName = delegatedPackageName;
+            mDelegatedPermissionNames = delegatedPermissionNames;
+        }
+
+        @Override
+        public int getDelegatedUid() {
+            return mDelegatedUid;
+        }
+
+        @Override
+        public int checkPermission(@NonNull String permissionName, @NonNull String packageName,
+                int userId, @NonNull TriFunction<String, String, Integer, Integer> superImpl) {
+            if (mDelegatedPackageName.equals(packageName)
+                    && isDelegatedPermission(permissionName)) {
+                final long identity = Binder.clearCallingIdentity();
+                try {
+                    return superImpl.apply(permissionName, "com.android.shell", userId);
+                } finally {
+                    Binder.restoreCallingIdentity(identity);
+                }
+            }
+            return superImpl.apply(permissionName, packageName, userId);
+        }
+
+        @Override
+        public int checkUidPermission(@NonNull String permissionName, int uid,
+                @NonNull BiFunction<String, Integer, Integer> superImpl) {
+            if (uid == mDelegatedUid && isDelegatedPermission(permissionName)) {
+                final long identity = Binder.clearCallingIdentity();
+                try {
+                    return superImpl.apply(permissionName, Process.SHELL_UID);
+                } finally {
+                    Binder.restoreCallingIdentity(identity);
+                }
+            }
+            return superImpl.apply(permissionName, uid);
+        }
+
+        private boolean isDelegatedPermission(@NonNull String permissionName) {
+            // null permissions means all permissions are targeted
+            return mDelegatedPermissionNames == null
+                    || mDelegatedPermissionNames.contains(permissionName);
         }
     }
 

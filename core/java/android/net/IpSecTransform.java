@@ -17,8 +17,6 @@ package android.net;
 
 import static android.net.IpSecManager.INVALID_RESOURCE_ID;
 
-import static com.android.internal.util.Preconditions.checkNotNull;
-
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -28,7 +26,6 @@ import android.annotation.SystemApi;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Binder;
-import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -182,7 +179,6 @@ public final class IpSecTransform implements AutoCloseable {
         try {
             IIpSecService svc = getIpSecService();
             svc.deleteTransform(mResourceId);
-            stopNattKeepalive();
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         } catch (Exception e) {
@@ -213,36 +209,6 @@ public final class IpSecTransform implements AutoCloseable {
     private int mResourceId;
     private final Context mContext;
     private final CloseGuard mCloseGuard = CloseGuard.get();
-    private ConnectivityManager.PacketKeepalive mKeepalive;
-    private Handler mCallbackHandler;
-    private final ConnectivityManager.PacketKeepaliveCallback mKeepaliveCallback =
-            new ConnectivityManager.PacketKeepaliveCallback() {
-
-                @Override
-                public void onStarted() {
-                    synchronized (this) {
-                        mCallbackHandler.post(() -> mUserKeepaliveCallback.onStarted());
-                    }
-                }
-
-                @Override
-                public void onStopped() {
-                    synchronized (this) {
-                        mKeepalive = null;
-                        mCallbackHandler.post(() -> mUserKeepaliveCallback.onStopped());
-                    }
-                }
-
-                @Override
-                public void onError(int error) {
-                    synchronized (this) {
-                        mKeepalive = null;
-                        mCallbackHandler.post(() -> mUserKeepaliveCallback.onError(error));
-                    }
-                }
-            };
-
-    private NattKeepaliveCallback mUserKeepaliveCallback;
 
     /** @hide */
     @VisibleForTesting
@@ -272,76 +238,6 @@ public final class IpSecTransform implements AutoCloseable {
         public void onStopped() {}
         /** An error occurred. */
         public void onError(int error) {}
-    }
-
-    /**
-     * Start a NAT-T keepalive session for the current transform.
-     *
-     * For a transform that is using UDP encapsulated IPv4, NAT-T offloading provides
-     * a power efficient mechanism of sending NAT-T packets at a specified interval.
-     *
-     * @param userCallback a {@link #NattKeepaliveCallback} to receive asynchronous status
-     *      information about the requested NAT-T keepalive session.
-     * @param intervalSeconds the interval between NAT-T keepalives being sent. The
-     *      the allowed range is between 20 and 3600 seconds.
-     * @param handler a handler on which to post callbacks when received.
-     *
-     * @hide
-     */
-    @RequiresPermission(anyOf = {
-            android.Manifest.permission.MANAGE_IPSEC_TUNNELS,
-            android.Manifest.permission.PACKET_KEEPALIVE_OFFLOAD
-    })
-    public void startNattKeepalive(@NonNull NattKeepaliveCallback userCallback,
-            int intervalSeconds, @NonNull Handler handler) throws IOException {
-        checkNotNull(userCallback);
-        if (intervalSeconds < 20 || intervalSeconds > 3600) {
-            throw new IllegalArgumentException("Invalid NAT-T keepalive interval");
-        }
-        checkNotNull(handler);
-        if (mResourceId == INVALID_RESOURCE_ID) {
-            throw new IllegalStateException(
-                    "Packet keepalive cannot be started for an inactive transform");
-        }
-
-        synchronized (mKeepaliveCallback) {
-            if (mKeepaliveCallback != null) {
-                throw new IllegalStateException("Keepalive already active");
-            }
-
-            mUserKeepaliveCallback = userCallback;
-            ConnectivityManager cm = (ConnectivityManager) mContext.getSystemService(
-                    Context.CONNECTIVITY_SERVICE);
-            mKeepalive = cm.startNattKeepalive(
-                    mConfig.getNetwork(), intervalSeconds, mKeepaliveCallback,
-                    NetworkUtils.numericToInetAddress(mConfig.getSourceAddress()),
-                    4500, // FIXME urgently, we need to get the port number from the Encap socket
-                    NetworkUtils.numericToInetAddress(mConfig.getDestinationAddress()));
-            mCallbackHandler = handler;
-        }
-    }
-
-    /**
-     * Stop an ongoing NAT-T keepalive session.
-     *
-     * Calling this API will request that an ongoing NAT-T keepalive session be terminated.
-     * If this API is not called when a Transform is closed, the underlying NAT-T session will
-     * be terminated automatically.
-     *
-     * @hide
-     */
-    @RequiresPermission(anyOf = {
-            android.Manifest.permission.MANAGE_IPSEC_TUNNELS,
-            android.Manifest.permission.PACKET_KEEPALIVE_OFFLOAD
-    })
-    public void stopNattKeepalive() {
-        synchronized (mKeepaliveCallback) {
-            if (mKeepalive == null) {
-                Log.e(TAG, "No active keepalive to stop");
-                return;
-            }
-            mKeepalive.stop();
-        }
     }
 
     /** This class is used to build {@link IpSecTransform} objects. */

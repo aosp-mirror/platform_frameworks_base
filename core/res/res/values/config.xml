@@ -1613,21 +1613,28 @@
     <!-- Whether the geolocation time zone detection feature is enabled. -->
     <bool name="config_enableGeolocationTimeZoneDetection" translatable="false">true</bool>
 
-    <!-- Whether to enable primary location time zone provider overlay which allows the primary
-         location time zone provider to be replaced by an app at run-time. When disabled, only the
+    <!-- Whether the primary LocationTimeZoneProvider is enabled device.
+         Ignored if config_enableGeolocationTimeZoneDetection is false -->
+    <bool name="config_enablePrimaryLocationTimeZoneProvider" translatable="false">false</bool>
+    <!-- Used when enablePrimaryLocationTimeZoneProvider is true. Controls whether to enable primary
+         location time zone provider overlay which allows the primary location time zone provider to
+         be replaced by an app at run-time. When disabled, only the
          config_primaryLocationTimeZoneProviderPackageName package will be searched for the primary
          location time zone provider, otherwise any system package is eligible. Anyone who wants to
-         disable the overlay mechanism can set it to false. -->
+         disable the runtime overlay mechanism can set it to false. -->
     <bool name="config_enablePrimaryLocationTimeZoneOverlay" translatable="false">false</bool>
     <!-- Package name providing the primary location time zone provider. Used only when
          config_enablePrimaryLocationTimeZoneOverlay is false. -->
     <string name="config_primaryLocationTimeZoneProviderPackageName" translatable="false">@null</string>
 
-    <!-- Whether to enable secondary location time zone provider overlay which allows the secondary
-         location time zone provider to be replaced by an app at run-time. When disabled, only the
-         config_secondaryLocationTimeZoneProviderPackageName package will be searched for the
-         secondary location time zone provider, otherwise any system package is eligible. Anyone who
-         wants to disable the overlay mechanism can set it to false. -->
+    <!-- Whether the secondary LocationTimeZoneProvider is enabled device.
+         Ignored if config_enableGeolocationTimeZoneDetection is false -->
+    <bool name="config_enableSecondaryLocationTimeZoneProvider" translatable="false">true</bool>
+    <!-- Used when enableSecondaryLocationTimeZoneProvider is true. Controls whether to enable
+         secondary location time zone provider overlay which allows the primary location time zone
+         provider to config_secondaryLocationTimeZoneProviderPackageName package will be searched
+         for the secondary location time zone provider, otherwise any system package is eligible.
+         Anyone who wants to disable the runtime overlay mechanism can set it to false. -->
     <bool name="config_enableSecondaryLocationTimeZoneOverlay" translatable="false">false</bool>
     <!-- Package name providing the secondary location time zone provider. Used only when
          config_enableSecondaryLocationTimeZoneOverlay is false.
@@ -4515,7 +4522,7 @@
     <integer name="config_pdp_reject_retry_delay_ms">-1</integer>
 
     <!-- Whether or not to enable the binder heavy hitter watcher by default -->
-    <bool name="config_defaultBinderHeavyHitterWatcherEnabled">true</bool>
+    <bool name="config_defaultBinderHeavyHitterWatcherEnabled">false</bool>
 
     <!-- The default batch size for the binder heavy hitter watcher -->
     <integer name="config_defaultBinderHeavyHitterWatcherBatchSize">2000</integer>
@@ -4526,7 +4533,7 @@
     </item>
 
     <!-- Whether or not to enable the binder heavy hitter auto sampler by default -->
-    <bool name="config_defaultBinderHeavyHitterAutoSamplerEnabled">true</bool>
+    <bool name="config_defaultBinderHeavyHitterAutoSamplerEnabled">false</bool>
 
     <!-- The default batch size for the binder heavy hitter auto sampler -->
     <integer name="config_defaultBinderHeavyHitterAutoSamplerBatchSize">400</integer>

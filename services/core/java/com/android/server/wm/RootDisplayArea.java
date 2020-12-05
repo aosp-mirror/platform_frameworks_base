@@ -106,12 +106,23 @@ class RootDisplayArea extends DisplayArea<DisplayArea> {
     }
 
     /** Finds the {@link DisplayArea.Tokens} that this type of window should be attached to. */
+    @Nullable
     DisplayArea.Tokens findAreaForToken(WindowToken token) {
-        int windowLayerFromType = token.getWindowLayerFromType();
+        return findAreaForToken(token.windowType, token.mOwnerCanManageAppTokens,
+                token.mRoundedCornerOverlay);
+    }
+
+    @Nullable
+    DisplayArea.Tokens findAreaForToken(int windowType, boolean ownerCanManageAppTokens,
+            boolean roundedCornerOverlay) {
+        // TODO(b/159767464): cover TYPE_INPUT_METHOD(_DIALOG) case here. mAreaForLayer doesn't
+        // contain IME container.
+        int windowLayerFromType = mWmService.mPolicy.getWindowLayerFromTypeLw(windowType,
+                ownerCanManageAppTokens);
         if (windowLayerFromType == APPLICATION_LAYER) {
             throw new IllegalArgumentException(
                     "There shouldn't be WindowToken on APPLICATION_LAYER");
-        } else if (token.mRoundedCornerOverlay) {
+        } else if (roundedCornerOverlay) {
             windowLayerFromType = mAreaForLayer.length - 1;
         }
         return mAreaForLayer[windowLayerFromType];

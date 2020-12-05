@@ -98,11 +98,18 @@ interface IUwbAdapter {
   int getMaxSimultaneousSessions();
 
   /**
-   * Get the maximum number of remote devices per session
+   * Get the maximum number of remote devices per session when local device is initiator
    *
    * @return the maximum number of remote devices supported in a single session
    */
-  int getMaxRemoteDevicesPerSession();
+  int getMaxRemoteDevicesPerInitiatorSession();
+
+  /**
+   * Get the maximum number of remote devices per session when local device is responder
+   *
+   * @return the maximum number of remote devices supported in a single session
+   */
+  int getMaxRemoteDevicesPerResponderSession();
 
   /**
    * Provides the capabilities and features of the device

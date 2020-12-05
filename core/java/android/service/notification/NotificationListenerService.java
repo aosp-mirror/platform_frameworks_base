@@ -1517,8 +1517,10 @@ public abstract class NotificationListenerService extends Service {
      */
     public static class Ranking {
 
-        /** Value signifying that the user has not expressed a per-app visibility override value.
-         * @hide */
+        /**
+         * Value signifying that the user and device policy manager have not expressed a lockscreen
+         * visibility override for a notification.
+         */
         public static final int VISIBILITY_NO_OVERRIDE = NotificationManager.VISIBILITY_NO_OVERRIDE;
 
         /**
@@ -1695,14 +1697,13 @@ public abstract class NotificationListenerService extends Service {
         }
 
         /**
-         * Returns the user specified visibility for the package that posted
-         * this notification, or
+         * Returns the user or device policy manager specified visibility (see
+         * {@link Notification#VISIBILITY_PRIVATE}, {@link Notification#VISIBILITY_PUBLIC},
+         * {@link Notification#VISIBILITY_SECRET}) for this notification, or
          * {@link NotificationListenerService.Ranking#VISIBILITY_NO_OVERRIDE} if
          * no such preference has been expressed.
-         * @hide
          */
-        @UnsupportedAppUsage
-        public int getVisibilityOverride() {
+        public int getLockscreenVisibilityOverride() {
             return mVisibilityOverride;
         }
 

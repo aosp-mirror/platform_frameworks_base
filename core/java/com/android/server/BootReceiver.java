@@ -35,24 +35,23 @@ import android.text.TextUtils;
 import android.util.AtomicFile;
 import android.util.EventLog;
 import android.util.Slog;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
-import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.XmlUtils;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.regex.Matcher;
@@ -712,8 +711,7 @@ public class BootReceiver extends BroadcastReceiver {
             HashMap<String, Long> timestamps = new HashMap<String, Long>();
             boolean success = false;
             try (final FileInputStream stream = sFile.openRead()) {
-                XmlPullParser parser = Xml.newPullParser();
-                parser.setInput(stream, StandardCharsets.UTF_8.name());
+                TypedXmlPullParser parser = Xml.resolvePullParser(stream);
 
                 int type;
                 while ((type = parser.next()) != XmlPullParser.START_TAG
@@ -735,8 +733,7 @@ public class BootReceiver extends BroadcastReceiver {
                     String tagName = parser.getName();
                     if (tagName.equals("log")) {
                         final String filename = parser.getAttributeValue(null, "filename");
-                        final long timestamp = Long.valueOf(parser.getAttributeValue(
-                                    null, "timestamp"));
+                        final long timestamp = parser.getAttributeLong(null, "timestamp");
                         timestamps.put(filename, timestamp);
                     } else {
                         Slog.w(TAG, "Unknown tag: " + parser.getName());
@@ -775,8 +772,7 @@ public class BootReceiver extends BroadcastReceiver {
             }
 
             try {
-                XmlSerializer out = new FastXmlSerializer();
-                out.setOutput(stream, StandardCharsets.UTF_8.name());
+                TypedXmlSerializer out = Xml.resolveSerializer(stream);
                 out.startDocument(null, true);
                 out.startTag(null, "log-files");
 
@@ -785,7 +781,7 @@ public class BootReceiver extends BroadcastReceiver {
                     String filename = itor.next();
                     out.startTag(null, "log");
                     out.attribute(null, "filename", filename);
-                    out.attribute(null, "timestamp", timestamps.get(filename).toString());
+                    out.attributeLong(null, "timestamp", timestamps.get(filename));
                     out.endTag(null, "log");
                 }
 

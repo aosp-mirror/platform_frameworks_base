@@ -120,7 +120,7 @@ public class KeyguardCoordinator implements Coordinator {
                 // notifications to show in public mode
                 if (mLockscreenUserManager.isLockscreenPublicMode(currUserId)
                         || mLockscreenUserManager.isLockscreenPublicMode(notifUserId)) {
-                    if (entry.getRanking().getVisibilityOverride() == VISIBILITY_SECRET) {
+                    if (entry.getRanking().getLockscreenVisibilityOverride() == VISIBILITY_SECRET) {
                         return true;
                     }
 

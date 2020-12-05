@@ -210,9 +210,9 @@ public class Fingerprint21UdfpsMock extends Fingerprint21 implements TrustManage
         @NonNull private Fingerprint21UdfpsMock mFingerprint21;
         @Nullable private LastAuthArgs mLastAuthArgs;
 
-        MockHalResultController(@NonNull Context context, @NonNull Handler handler,
+        MockHalResultController(int sensorId, @NonNull Context context, @NonNull Handler handler,
                 @NonNull BiometricScheduler scheduler) {
-            super(context, handler, scheduler);
+            super(sensorId, context, handler, scheduler);
         }
 
         void init(@NonNull RestartAuthRunnable restartAuthRunnable,
@@ -280,7 +280,7 @@ public class Fingerprint21UdfpsMock extends Fingerprint21 implements TrustManage
         final TestableBiometricScheduler scheduler =
                 new TestableBiometricScheduler(TAG, gestureAvailabilityDispatcher);
         final MockHalResultController controller =
-                new MockHalResultController(context, handler, scheduler);
+                new MockHalResultController(sensorId, context, handler, scheduler);
         return new Fingerprint21UdfpsMock(context, scheduler, handler, sensorId, strength,
                 lockoutResetDispatcher, controller);
     }

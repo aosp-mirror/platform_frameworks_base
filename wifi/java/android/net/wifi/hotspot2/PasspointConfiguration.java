@@ -474,6 +474,27 @@ public final class PasspointConfiguration implements Parcelable {
      */
     private boolean mIsEnhancedMacRandomizationEnabled = false;
 
+
+    /**
+     * Indicate whether the network is oem paid or not. Networks are considered oem paid
+     * if the corresponding connection is only available to system apps.
+     * @hide
+     */
+    private boolean mIsOemPaid;
+
+    /**
+     * Indicate whether the network is oem private or not. Networks are considered oem private
+     * if the corresponding connection is only available to system apps.
+     * @hide
+     */
+    private boolean mIsOemPrivate;
+
+    /**
+     * Indicate whether or not the network is a carrier merged network.
+     * @hide
+     */
+    private boolean mIsCarrierMerged;
+
     /**
      * Indicates if the end user has expressed an explicit opinion about the
      * meteredness of this network, such as through the Settings app.
@@ -589,6 +610,54 @@ public final class PasspointConfiguration implements Parcelable {
     }
 
     /**
+     * Set whether the network is oem paid or not.
+     * @hide
+     */
+    public void setOemPaid(boolean isOemPaid) {
+        mIsOemPaid = isOemPaid;
+    }
+
+    /**
+     * Get whether the network is oem paid or not.
+     * @hide
+     */
+    public boolean isOemPaid() {
+        return mIsOemPaid;
+    }
+
+    /**
+     * Set whether the network is oem private or not.
+     * @hide
+     */
+    public void setOemPrivate(boolean isOemPrivate) {
+        mIsOemPrivate = isOemPrivate;
+    }
+
+    /**
+     * Get whether the network is oem private or not.
+     * @hide
+     */
+    public boolean isOemPrivate() {
+        return mIsOemPrivate;
+    }
+
+    /**
+     * Set whether the network is carrier merged or not.
+     * @hide
+     */
+    public void setCarrierMerged(boolean isCarrierMerged) {
+        mIsCarrierMerged = isCarrierMerged;
+    }
+
+    /**
+     * Get whether the network is carrier merged or not.
+     * @hide
+     */
+    public boolean isCarrierMerged() {
+        return mIsCarrierMerged;
+    }
+
+    /**
      * Constructor for creating PasspointConfiguration with default values.
      */
     public PasspointConfiguration() {}
@@ -635,6 +704,9 @@ public final class PasspointConfiguration implements Parcelable {
         mIsMacRandomizationEnabled = source.mIsMacRandomizationEnabled;
         mIsEnhancedMacRandomizationEnabled = source.mIsEnhancedMacRandomizationEnabled;
         mMeteredOverride = source.mMeteredOverride;
+        mIsCarrierMerged = source.mIsCarrierMerged;
+        mIsOemPaid = source.mIsOemPaid;
+        mIsOemPrivate = source.mIsOemPrivate;
     }
 
     @Override
@@ -669,6 +741,9 @@ public final class PasspointConfiguration implements Parcelable {
         dest.writeBoolean(mIsEnhancedMacRandomizationEnabled);
         dest.writeInt(mMeteredOverride);
         dest.writeInt(mSubscriptionId);
+        dest.writeBoolean(mIsCarrierMerged);
+        dest.writeBoolean(mIsOemPaid);
+        dest.writeBoolean(mIsOemPrivate);
     }
 
     @Override
@@ -700,6 +775,9 @@ public final class PasspointConfiguration implements Parcelable {
                 && mUsageLimitTimeLimitInMinutes == that.mUsageLimitTimeLimitInMinutes
                 && mCarrierId == that.mCarrierId
                 && mSubscriptionId == that.mSubscriptionId
+                && mIsOemPrivate == that.mIsOemPrivate
+                && mIsOemPaid == that.mIsOemPaid
+                && mIsCarrierMerged == that.mIsCarrierMerged
                 && mIsAutojoinEnabled == that.mIsAutojoinEnabled
                 && mIsMacRandomizationEnabled == that.mIsMacRandomizationEnabled
                 && mIsEnhancedMacRandomizationEnabled == that.mIsEnhancedMacRandomizationEnabled
@@ -715,7 +793,8 @@ public final class PasspointConfiguration implements Parcelable {
                 mSubscriptionExpirationTimeMillis, mUsageLimitUsageTimePeriodInMinutes,
                 mUsageLimitStartTimeInMillis, mUsageLimitDataLimit, mUsageLimitTimeLimitInMinutes,
                 mServiceFriendlyNames, mCarrierId, mIsAutojoinEnabled, mIsMacRandomizationEnabled,
-                mIsEnhancedMacRandomizationEnabled, mMeteredOverride, mSubscriptionId);
+                mIsEnhancedMacRandomizationEnabled, mMeteredOverride, mSubscriptionId,
+                mIsCarrierMerged, mIsOemPaid, mIsOemPrivate);
     }
 
     @Override
@@ -774,6 +853,9 @@ public final class PasspointConfiguration implements Parcelable {
         builder.append("mIsMacRandomizationEnabled:" + mIsMacRandomizationEnabled);
         builder.append("mIsEnhancedMacRandomizationEnabled:" + mIsEnhancedMacRandomizationEnabled);
         builder.append("mMeteredOverride:" + mMeteredOverride);
+        builder.append("mIsCarrierMerged:" + mIsCarrierMerged);
+        builder.append("mIsOemPaid:" + mIsOemPaid);
+        builder.append("mIsOemPrivate" + mIsOemPrivate);
         return builder.toString();
     }
 
@@ -884,6 +966,10 @@ public final class PasspointConfiguration implements Parcelable {
                 config.mIsEnhancedMacRandomizationEnabled = in.readBoolean();
                 config.mMeteredOverride = in.readInt();
                 config.mSubscriptionId = in.readInt();
+                config.mIsCarrierMerged = in.readBoolean();
+                config.mIsOemPaid = in.readBoolean();
+                config.mIsOemPrivate = in.readBoolean();
+
                 return config;
             }
 

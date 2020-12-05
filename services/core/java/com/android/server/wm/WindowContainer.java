@@ -98,6 +98,7 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -313,6 +314,8 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     BLASTSyncEngine.SyncGroup mSyncGroup = null;
     final SurfaceControl.Transaction mSyncTransaction;
     @SyncState int mSyncState = SYNC_STATE_NONE;
+
+    private final List<WindowContainerListener> mListeners = new ArrayList<>();
 
     WindowContainer(WindowManagerService wms) {
         mWmService = wms;
@@ -637,6 +640,10 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         if (mParent != null) {
             mParent.removeChild(this);
         }
+
+        for (int i = mListeners.size() - 1; i >= 0; --i) {
+            mListeners.get(i).onRemoved();
+        }
     }
 
     /**
@@ -818,6 +825,9 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         for (int i = mChildren.size() - 1; i >= 0; --i) {
             final WindowContainer child = mChildren.get(i);
             child.onDisplayChanged(dc);
+        }
+        for (int i = mListeners.size() - 1; i >= 0; --i) {
+            mListeners.get(i).onDisplayChanged(dc);
         }
     }
 
@@ -3105,5 +3115,20 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         // This container's situation has changed so we need to restart its sync.
         mSyncState = SYNC_STATE_NONE;
         prepareSync();
+    }
+
+    void registerWindowContainerListener(WindowContainerListener listener) {
+        if (mListeners.contains(listener)) {
+            return;
+        }
+        mListeners.add(listener);
+        // Also register to ConfigurationChangeListener to receive configuration changes.
+        registerConfigurationChangeListener(listener);
+        listener.onDisplayChanged(getDisplayContent());
+    }
+
+    void unregisterWindowContainerListener(WindowContainerListener listener) {
+        mListeners.remove(listener);
+        unregisterConfigurationChangeListener(listener);
     }
 }

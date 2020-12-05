@@ -289,6 +289,8 @@ public class KeyguardBouncer {
                     SysUiStatsLog.KEYGUARD_BOUNCER_STATE_CHANGED__STATE__HIDDEN);
             mDismissCallbackRegistry.notifyDismissCancelled();
         }
+        mExpansion = EXPANSION_HIDDEN;
+        dispatchExpansionChanged();
         mIsScrimmed = false;
         mFalsingCollector.onBouncerHidden();
         mCallback.onBouncerVisiblityChanged(false /* shown */);
@@ -377,6 +379,7 @@ public class KeyguardBouncer {
      */
     public void setExpansion(float fraction) {
         float oldExpansion = mExpansion;
+        boolean expansionChanged = mExpansion != fraction;
         mExpansion = fraction;
         if (mKeyguardViewController != null && !mIsAnimatingAway) {
             mKeyguardViewController.setExpansion(fraction);
@@ -393,6 +396,10 @@ public class KeyguardBouncer {
             if (mKeyguardViewController != null) {
                 mKeyguardViewController.onStartingToHide();
             }
+        }
+
+        if (expansionChanged) {
+            dispatchExpansionChanged();
         }
     }
 
@@ -518,6 +525,12 @@ public class KeyguardBouncer {
         }
     }
 
+    private void dispatchExpansionChanged() {
+        for (BouncerExpansionCallback callback : mExpansionCallbacks) {
+            callback.onExpansionChanged(mExpansion);
+        }
+    }
+
     public void dump(PrintWriter pw) {
         pw.println("KeyguardBouncer");
         pw.println("  isShowing(): " + isShowing());
@@ -534,6 +547,12 @@ public class KeyguardBouncer {
         void onStartingToHide();
         void onStartingToShow();
         void onFullyHidden();
+
+        /**
+         * From 0f {@link KeyguardBouncer#EXPANSION_VISIBLE} when fully visible
+         * to 1f {@link KeyguardBouncer#EXPANSION_HIDDEN} when fully hidden
+         */
+        default void onExpansionChanged(float bouncerHideAmount) {}
     }
 
     /** Create a {@link KeyguardBouncer} once a container and bouncer callback are available. */

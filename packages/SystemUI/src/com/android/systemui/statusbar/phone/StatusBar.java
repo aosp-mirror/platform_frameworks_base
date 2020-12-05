@@ -3794,6 +3794,14 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     /**
+     * Sets how hidden the bouncer is, where 0f is fully visible and 1f is fully hidden
+     * See {@link KeyguardBouncer#EXPANSION_VISIBLE} and {@link KeyguardBouncer#EXPANSION_HIDDEN}.
+     */
+    public void setBouncerHideAmount(float hideAmount) {
+        mLockscreenLockIconController.setBouncerHideAmount(hideAmount);
+    }
+
+    /**
      * Collapses the notification shade if it is tracking or expanded.
      */
     public void collapseShade() {

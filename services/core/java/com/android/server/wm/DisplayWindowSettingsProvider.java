@@ -450,12 +450,12 @@ class DisplayWindowSettingsProvider implements SettingsProvider {
                     out.attributeInt(null, "windowingMode", settingsEntry.mWindowingMode);
                 }
                 if (settingsEntry.mUserRotationMode != null) {
-                    out.attribute(null, "userRotationMode",
-                            settingsEntry.mUserRotationMode.toString());
+                    out.attributeInt(null, "userRotationMode",
+                            settingsEntry.mUserRotationMode);
                 }
                 if (settingsEntry.mUserRotation != null) {
-                    out.attribute(null, "userRotation",
-                            settingsEntry.mUserRotation.toString());
+                    out.attributeInt(null, "userRotation",
+                            settingsEntry.mUserRotation);
                 }
                 if (settingsEntry.mForcedWidth != 0 && settingsEntry.mForcedHeight != 0) {
                     out.attributeInt(null, "forcedWidth", settingsEntry.mForcedWidth);
@@ -465,30 +465,30 @@ class DisplayWindowSettingsProvider implements SettingsProvider {
                     out.attributeInt(null, "forcedDensity", settingsEntry.mForcedDensity);
                 }
                 if (settingsEntry.mForcedScalingMode != null) {
-                    out.attribute(null, "forcedScalingMode",
-                            settingsEntry.mForcedScalingMode.toString());
+                    out.attributeInt(null, "forcedScalingMode",
+                            settingsEntry.mForcedScalingMode);
                 }
                 if (settingsEntry.mRemoveContentMode != REMOVE_CONTENT_MODE_UNDEFINED) {
                     out.attributeInt(null, "removeContentMode", settingsEntry.mRemoveContentMode);
                 }
                 if (settingsEntry.mShouldShowWithInsecureKeyguard != null) {
-                    out.attribute(null, "shouldShowWithInsecureKeyguard",
-                            settingsEntry.mShouldShowWithInsecureKeyguard.toString());
+                    out.attributeBoolean(null, "shouldShowWithInsecureKeyguard",
+                            settingsEntry.mShouldShowWithInsecureKeyguard);
                 }
                 if (settingsEntry.mShouldShowSystemDecors != null) {
-                    out.attribute(null, "shouldShowSystemDecors",
-                            settingsEntry.mShouldShowSystemDecors.toString());
+                    out.attributeBoolean(null, "shouldShowSystemDecors",
+                            settingsEntry.mShouldShowSystemDecors);
                 }
                 if (settingsEntry.mImePolicy != null) {
                     out.attributeInt(null, "imePolicy", settingsEntry.mImePolicy);
                 }
                 if (settingsEntry.mFixedToUserRotation != null) {
-                    out.attribute(null, "fixedToUserRotation",
-                            settingsEntry.mFixedToUserRotation.toString());
+                    out.attributeInt(null, "fixedToUserRotation",
+                            settingsEntry.mFixedToUserRotation);
                 }
                 if (settingsEntry.mIgnoreOrientationRequest != null) {
-                    out.attribute(null, "ignoreOrientationRequest",
-                            settingsEntry.mIgnoreOrientationRequest.toString());
+                    out.attributeBoolean(null, "ignoreOrientationRequest",
+                            settingsEntry.mIgnoreOrientationRequest);
                 }
                 out.endTag(null, "display");
             }

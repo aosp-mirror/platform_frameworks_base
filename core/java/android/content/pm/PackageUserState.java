@@ -41,6 +41,8 @@ import android.util.ArraySet;
 import android.util.DebugUtils;
 import android.util.Pair;
 import android.util.Slog;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
@@ -560,7 +562,7 @@ public class PackageUserState {
          * @param out the {@link XmlSerializer} object
          * @throws IOException
          */
-        public void saveToXml(XmlSerializer out) throws IOException {
+        public void saveToXml(TypedXmlSerializer out) throws IOException {
             if (dialogInfo != null) {
                 out.startTag(null, TAG_DIALOG_INFO);
                 dialogInfo.saveToXml(out);
@@ -594,7 +596,7 @@ public class PackageUserState {
          * @param in the reader
          * @return
          */
-        public static SuspendParams restoreFromXml(XmlPullParser in) throws IOException {
+        public static SuspendParams restoreFromXml(TypedXmlPullParser in) throws IOException {
             SuspendDialogInfo readDialogInfo = null;
             PersistableBundle readAppExtras = null;
             PersistableBundle readLauncherExtras = null;

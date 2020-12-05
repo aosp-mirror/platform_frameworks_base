@@ -53,6 +53,7 @@ import java.util.Set;
 public class XmlUtils {
     private static final String STRING_ARRAY_SEPARATOR = ":";
 
+    @SuppressWarnings("AndroidFrameworkEfficientXml")
     private static class ForcedTypedXmlSerializer extends XmlSerializerWrapper
             implements TypedXmlSerializer {
         public ForcedTypedXmlSerializer(XmlSerializer wrapped) {
@@ -133,6 +134,7 @@ public class XmlUtils {
         }
     }
 
+    @SuppressWarnings("AndroidFrameworkEfficientXml")
     private static class ForcedTypedXmlPullParser extends XmlPullParserWrapper
             implements TypedXmlPullParser {
         public ForcedTypedXmlPullParser(XmlPullParser wrapped) {
@@ -1715,6 +1717,7 @@ public class XmlUtils {
         }
     }
 
+    @SuppressWarnings("AndroidFrameworkEfficientXml")
     public static int readIntAttribute(XmlPullParser in, String name, int defaultValue) {
         if (in instanceof TypedXmlPullParser) {
             return ((TypedXmlPullParser) in).getAttributeInt(null, name, defaultValue);
@@ -1730,6 +1733,7 @@ public class XmlUtils {
         }
     }
 
+    @SuppressWarnings("AndroidFrameworkEfficientXml")
     public static int readIntAttribute(XmlPullParser in, String name) throws IOException {
         if (in instanceof TypedXmlPullParser) {
             try {
@@ -1746,6 +1750,7 @@ public class XmlUtils {
         }
     }
 
+    @SuppressWarnings("AndroidFrameworkEfficientXml")
     public static void writeIntAttribute(XmlSerializer out, String name, int value)
             throws IOException {
         if (out instanceof TypedXmlSerializer) {
@@ -1755,6 +1760,7 @@ public class XmlUtils {
         out.attribute(null, name, Integer.toString(value));
     }
 
+    @SuppressWarnings("AndroidFrameworkEfficientXml")
     public static long readLongAttribute(XmlPullParser in, String name, long defaultValue) {
         if (in instanceof TypedXmlPullParser) {
             return ((TypedXmlPullParser) in).getAttributeLong(null, name, defaultValue);
@@ -1770,6 +1776,7 @@ public class XmlUtils {
         }
     }
 
+    @SuppressWarnings("AndroidFrameworkEfficientXml")
     public static long readLongAttribute(XmlPullParser in, String name) throws IOException {
         if (in instanceof TypedXmlPullParser) {
             try {
@@ -1786,6 +1793,7 @@ public class XmlUtils {
         }
     }
 
+    @SuppressWarnings("AndroidFrameworkEfficientXml")
     public static void writeLongAttribute(XmlSerializer out, String name, long value)
             throws IOException {
         if (out instanceof TypedXmlSerializer) {
@@ -1795,6 +1803,7 @@ public class XmlUtils {
         out.attribute(null, name, Long.toString(value));
     }
 
+    @SuppressWarnings("AndroidFrameworkEfficientXml")
     public static float readFloatAttribute(XmlPullParser in, String name) throws IOException {
         if (in instanceof TypedXmlPullParser) {
             try {
@@ -1811,6 +1820,7 @@ public class XmlUtils {
         }
     }
 
+    @SuppressWarnings("AndroidFrameworkEfficientXml")
     public static void writeFloatAttribute(XmlSerializer out, String name, float value)
             throws IOException {
         if (out instanceof TypedXmlSerializer) {
@@ -1820,10 +1830,12 @@ public class XmlUtils {
         out.attribute(null, name, Float.toString(value));
     }
 
+    @SuppressWarnings("AndroidFrameworkEfficientXml")
     public static boolean readBooleanAttribute(XmlPullParser in, String name) {
         return readBooleanAttribute(in, name, false);
     }
 
+    @SuppressWarnings("AndroidFrameworkEfficientXml")
     public static boolean readBooleanAttribute(XmlPullParser in, String name,
             boolean defaultValue) {
         if (in instanceof TypedXmlPullParser) {
@@ -1837,6 +1849,7 @@ public class XmlUtils {
         }
     }
 
+    @SuppressWarnings("AndroidFrameworkEfficientXml")
     public static void writeBooleanAttribute(XmlSerializer out, String name, boolean value)
             throws IOException {
         if (out instanceof TypedXmlSerializer) {
@@ -1869,6 +1882,7 @@ public class XmlUtils {
         }
     }
 
+    @SuppressWarnings("AndroidFrameworkEfficientXml")
     public static byte[] readByteArrayAttribute(XmlPullParser in, String name) {
         if (in instanceof TypedXmlPullParser) {
             try {
@@ -1885,6 +1899,7 @@ public class XmlUtils {
         }
     }
 
+    @SuppressWarnings("AndroidFrameworkEfficientXml")
     public static void writeByteArrayAttribute(XmlSerializer out, String name, byte[] value)
             throws IOException {
         if (value != null) {

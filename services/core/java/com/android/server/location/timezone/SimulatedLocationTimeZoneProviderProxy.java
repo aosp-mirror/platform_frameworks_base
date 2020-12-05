@@ -49,6 +49,11 @@ class SimulatedLocationTimeZoneProviderProxy extends LocationTimeZoneProviderPro
         mRequest = LocationTimeZoneProviderRequest.EMPTY_REQUEST;
     }
 
+    @Override
+    void onInitialize() {
+        // No-op - nothing to do for the simulated provider.
+    }
+
     void simulate(@NonNull SimulatedBinderProviderEvent event) {
         mThreadingDomain.assertCurrentThread();
 

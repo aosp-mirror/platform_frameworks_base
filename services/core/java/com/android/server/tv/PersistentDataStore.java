@@ -30,23 +30,17 @@ import android.util.TypedXmlPullParser;
 import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
-import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.XmlUtils;
 
 import libcore.io.IoUtils;
 
-import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -246,12 +240,7 @@ final class PersistentDataStore {
             if (parser.getName().equals(TAG_BLOCKED_RATINGS)) {
                 loadBlockedRatingsFromXml(parser);
             } else if (parser.getName().equals(TAG_PARENTAL_CONTROLS)) {
-                String enabled = parser.getAttributeValue(null, ATTR_ENABLED);
-                if (TextUtils.isEmpty(enabled)) {
-                    throw new XmlPullParserException(
-                            "Missing " + ATTR_ENABLED + " attribute on " + TAG_PARENTAL_CONTROLS);
-                }
-                mParentalControlsEnabled = Boolean.parseBoolean(enabled);
+                mParentalControlsEnabled = parser.getAttributeBoolean(null, ATTR_ENABLED);
             }
         }
     }

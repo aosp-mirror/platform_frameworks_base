@@ -29,12 +29,11 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.PersistableBundle;
 import android.util.Slog;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.XmlUtils;
-
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlSerializer;
 
 import java.io.IOException;
 import java.lang.annotation.Retention;
@@ -169,38 +168,38 @@ public final class SuspendDialogInfo implements Parcelable {
     /**
      * @hide
      */
-    public void saveToXml(XmlSerializer out) throws IOException {
+    public void saveToXml(TypedXmlSerializer out) throws IOException {
         if (mIconResId != ID_NULL) {
-            XmlUtils.writeIntAttribute(out, XML_ATTR_ICON_RES_ID, mIconResId);
+            out.attributeInt(null, XML_ATTR_ICON_RES_ID, mIconResId);
         }
         if (mTitleResId != ID_NULL) {
-            XmlUtils.writeIntAttribute(out, XML_ATTR_TITLE_RES_ID, mTitleResId);
+            out.attributeInt(null, XML_ATTR_TITLE_RES_ID, mTitleResId);
         }
         if (mDialogMessageResId != ID_NULL) {
-            XmlUtils.writeIntAttribute(out, XML_ATTR_DIALOG_MESSAGE_RES_ID, mDialogMessageResId);
+            out.attributeInt(null, XML_ATTR_DIALOG_MESSAGE_RES_ID, mDialogMessageResId);
         } else {
             XmlUtils.writeStringAttribute(out, XML_ATTR_DIALOG_MESSAGE, mDialogMessage);
         }
         if (mNeutralButtonTextResId != ID_NULL) {
-            XmlUtils.writeIntAttribute(out, XML_ATTR_BUTTON_TEXT_RES_ID, mNeutralButtonTextResId);
+            out.attributeInt(null, XML_ATTR_BUTTON_TEXT_RES_ID, mNeutralButtonTextResId);
         }
-        XmlUtils.writeIntAttribute(out, XML_ATTR_BUTTON_ACTION, mNeutralButtonAction);
+        out.attributeInt(null, XML_ATTR_BUTTON_ACTION, mNeutralButtonAction);
     }
 
     /**
      * @hide
      */
-    public static SuspendDialogInfo restoreFromXml(XmlPullParser in) {
+    public static SuspendDialogInfo restoreFromXml(TypedXmlPullParser in) {
         final SuspendDialogInfo.Builder dialogInfoBuilder = new SuspendDialogInfo.Builder();
         try {
-            final int iconId = XmlUtils.readIntAttribute(in, XML_ATTR_ICON_RES_ID, ID_NULL);
-            final int titleId = XmlUtils.readIntAttribute(in, XML_ATTR_TITLE_RES_ID, ID_NULL);
-            final int buttonTextId = XmlUtils.readIntAttribute(in, XML_ATTR_BUTTON_TEXT_RES_ID,
-                    ID_NULL);
-            final int buttonAction = XmlUtils.readIntAttribute(in, XML_ATTR_BUTTON_ACTION,
-                    BUTTON_ACTION_MORE_DETAILS);
-            final int dialogMessageResId = XmlUtils.readIntAttribute(
-                    in, XML_ATTR_DIALOG_MESSAGE_RES_ID, ID_NULL);
+            final int iconId = in.getAttributeInt(null, XML_ATTR_ICON_RES_ID, ID_NULL);
+            final int titleId = in.getAttributeInt(null, XML_ATTR_TITLE_RES_ID, ID_NULL);
+            final int buttonTextId =
+                    in.getAttributeInt(null, XML_ATTR_BUTTON_TEXT_RES_ID, ID_NULL);
+            final int buttonAction =
+                    in.getAttributeInt(null, XML_ATTR_BUTTON_ACTION, BUTTON_ACTION_MORE_DETAILS);
+            final int dialogMessageResId =
+                    in.getAttributeInt(null, XML_ATTR_DIALOG_MESSAGE_RES_ID, ID_NULL);
             final String dialogMessage = XmlUtils.readStringAttribute(in, XML_ATTR_DIALOG_MESSAGE);
 
             if (iconId != ID_NULL) {

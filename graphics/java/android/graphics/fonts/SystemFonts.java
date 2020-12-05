@@ -88,31 +88,19 @@ public final class SystemFonts {
     }
 
     private static @NonNull Set<Font> collectAllFonts() {
-        Map<String, Typeface> map = Typeface.getSystemFontMap();
-        HashSet<NativeFont.Font> seenFonts = new HashSet<>();
-        HashSet<Font> result = new HashSet<>();
-        for (Typeface typeface : map.values()) {
-            List<NativeFont.Family> families = NativeFont.readTypeface(typeface);
-            for (NativeFont.Family family : families) {
-                for (NativeFont.Font font : family.getFonts()) {
-                    if (seenFonts.contains(font)) {
-                        continue;
-                    }
-                    seenFonts.add(font);
-                    try {
-                        result.add(new Font.Builder(font.getFile(), family.getLocale())
-                                .setFontVariationSettings(font.getAxes())
-                                .setTtcIndex(font.getIndex())
-                                .setWeight(font.getStyle().getWeight())
-                                .setSlant(font.getStyle().getSlant())
-                                .build());
-                    } catch (IOException e) {
-                        Log.w(TAG, "Failed to load " + font.getFile(), e);
-                    }
+        final FontCustomizationParser.Result oemCustomization =
+                readFontCustomization("/product/etc/fonts_customization.xml", "/product/fonts/");
+        Map<String, FontFamily[]> map = new ArrayMap<>();
+        buildSystemFallback("/system/etc/fonts.xml", "/system/fonts/", oemCustomization, map);
+        Set<Font> res = new HashSet<>();
+        for (FontFamily[] families : map.values()) {
+            for (FontFamily family : families) {
+                for (int i = 0; i < family.getSize(); ++i) {
+                    res.add(family.getFont(i));
                 }
             }
         }
-        return result;
+        return res;
     }
 
     private static @Nullable ByteBuffer mmap(@NonNull String fullPath) {

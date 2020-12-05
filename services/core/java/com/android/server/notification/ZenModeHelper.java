@@ -81,6 +81,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.notification.SystemNotificationChannels;
+import com.android.internal.util.XmlUtils;
 import com.android.server.LocalServices;
 
 import libcore.io.IoUtils;
@@ -1165,7 +1166,7 @@ public class ZenModeHelper {
         try {
             parser = resources.getXml(R.xml.default_zen_mode_config);
             while (parser.next() != XmlPullParser.END_DOCUMENT) {
-                final ZenModeConfig config = ZenModeConfig.readXml(parser);
+                final ZenModeConfig config = ZenModeConfig.readXml(XmlUtils.makeTyped(parser));
                 if (config != null) return config;
             }
         } catch (Exception e) {

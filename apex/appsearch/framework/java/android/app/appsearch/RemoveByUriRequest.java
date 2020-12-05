@@ -29,8 +29,7 @@ import java.util.Set;
 /**
  * Encapsulates a request to remove documents by namespace and URI.
  *
- * @see AppSearchSession#removeByUri
- * @hide
+ * @see AppSearchManager#removeByUri
  */
 public final class RemoveByUriRequest {
     private final String mNamespace;

@@ -65,7 +65,7 @@ public class RankingBuilder {
         mKey = ranking.getKey();
         mRank = ranking.getRank();
         mMatchesInterruptionFilter = ranking.matchesInterruptionFilter();
-        mVisibilityOverride = ranking.getVisibilityOverride();
+        mVisibilityOverride = ranking.getLockscreenVisibilityOverride();
         mSuppressedVisualEffects = ranking.getSuppressedVisualEffects();
         mImportance = ranking.getImportance();
         mExplanation = ranking.getImportanceExplanation();

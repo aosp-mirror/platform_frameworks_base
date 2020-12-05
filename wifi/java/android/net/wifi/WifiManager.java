@@ -2489,6 +2489,12 @@ public class WifiManager {
     /** @hide */
     public static final long WIFI_FEATURE_SAE_PK          = 0x10000000000L; // SAE-PK
 
+    /** @hide */
+    public static final long WIFI_FEATURE_STA_BRIDGED_AP       = 0x20000000000L; // STA + Bridged AP
+
+    /** @hide */
+    public static final long WIFI_FEATURE_BRIDGED_AP           = 0x40000000000L; // Bridged AP
+
     private long getSupportedFeatures() {
         try {
             return mService.getSupportedFeatures();
@@ -2687,6 +2693,40 @@ public class WifiManager {
             throw e.rethrowFromSystemServer();
         }
     }
+
+    /**
+     * Query whether the device supports Station (STA) + Bridged access point (AP)
+     * concurrency or not.
+     *
+     * The bridged AP support means that the device supports AP + AP concurrency with the 2 APs
+     * bridged together.
+     *
+     * See {@link SoftApConfiguration.Builder#setBands(int[])}
+     * or {@link SoftApConfiguration.Builder#setChannels(SparseIntArray)} to configure bridged AP
+     * when the bridged AP supported.
+     *
+     * @return true if this device supports STA + bridged AP concurrency, false otherwise.
+     */
+    public boolean isStaBridgedApConcurrencySupported() {
+        return isFeatureSupported(WIFI_FEATURE_STA_BRIDGED_AP);
+    }
+
+    /**
+     * Query whether the device supports Bridged Access point (AP) concurrency or not.
+     *
+     * The bridged AP support means that the device supports AP + AP concurrency with the 2 APs
+     * bridged together.
+     *
+     * See {@link SoftApConfiguration.Builder#setBands(int[])}
+     * or {@link SoftApConfiguration.Builder#setChannels(SparseIntArray)} to configure bridged AP
+     * when the bridged AP supported.
+     *
+     * @return true if this device supports bridged AP concurrency, false otherwise.
+     */
+    public boolean isBridgedApConcurrencySupported() {
+        return isFeatureSupported(WIFI_FEATURE_BRIDGED_AP);
+    }
+
 
     /**
      * Interface for Wi-Fi activity energy info listener. Should be implemented by applications and
