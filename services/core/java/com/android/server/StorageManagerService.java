@@ -1391,12 +1391,13 @@ class StorageManagerService extends IStorageManager.Stub
                     final int oldState = vol.state;
                     final int newState = state;
                     vol.state = newState;
+                    final VolumeInfo vInfo = new VolumeInfo(vol);
                     final SomeArgs args = SomeArgs.obtain();
-                    args.arg1 = vol;
+                    args.arg1 = vInfo;
                     args.arg2 = oldState;
                     args.arg3 = newState;
                     mHandler.obtainMessage(H_VOLUME_STATE_CHANGED, args).sendToTarget();
-                    onVolumeStateChangedLocked(vol, oldState, newState);
+                    onVolumeStateChangedLocked(vInfo, oldState, newState);
                 }
             }
         }

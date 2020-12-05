@@ -70,6 +70,7 @@
     <uses-permission android:name="android.permission.SET_PROCESS_LIMIT" />
     <uses-permission android:name="android.permission.SET_ALWAYS_FINISH" />
     <uses-permission android:name="android.permission.DUMP" />
+    <uses-permission android:name="android.permission.CONTROL_UI_TRACING" />
     <uses-permission android:name="android.permission.SIGNAL_PERSISTENT_PROCESSES" />
     <uses-permission android:name="android.permission.KILL_BACKGROUND_PROCESSES" />
     <!-- Internal permissions granted to the shell. -->

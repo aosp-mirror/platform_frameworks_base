@@ -134,6 +134,8 @@ public final class DataCallResponse implements Parcelable {
     private final int mMtuV6;
     private final @HandoverFailureMode int mHandoverFailureMode;
     private final int mPduSessionId;
+    private final Qos mDefaultQos;
+    private final List<QosSession> mQosSessions;
 
     /**
      * @param cause Data call fail cause. {@link DataFailCause#NONE} indicates no error.
@@ -182,6 +184,8 @@ public final class DataCallResponse implements Parcelable {
         mMtu = mMtuV4 = mMtuV6 = mtu;
         mHandoverFailureMode = HANDOVER_FAILURE_MODE_LEGACY;
         mPduSessionId = PDU_SESSION_ID_NOT_SET;
+        mDefaultQos = null;
+        mQosSessions = new ArrayList<>();
     }
 
     private DataCallResponse(@DataFailureCause int cause, long suggestedRetryTime, int id,
@@ -189,7 +193,8 @@ public final class DataCallResponse implements Parcelable {
             @Nullable String interfaceName, @Nullable List<LinkAddress> addresses,
             @Nullable List<InetAddress> dnsAddresses, @Nullable List<InetAddress> gatewayAddresses,
             @Nullable List<InetAddress> pcscfAddresses, int mtu, int mtuV4, int mtuV6,
-            @HandoverFailureMode int handoverFailureMode, int pduSessionId) {
+            @HandoverFailureMode int handoverFailureMode, int pduSessionId,
+            @Nullable Qos defaultQos, @Nullable List<QosSession> qosSessions) {
         mCause = cause;
         mSuggestedRetryTime = suggestedRetryTime;
         mId = id;
@@ -209,6 +214,8 @@ public final class DataCallResponse implements Parcelable {
         mMtuV6 = mtuV6;
         mHandoverFailureMode = handoverFailureMode;
         mPduSessionId = pduSessionId;
+        mDefaultQos = defaultQos;
+        mQosSessions = qosSessions;
     }
 
     /** @hide */
@@ -233,6 +240,9 @@ public final class DataCallResponse implements Parcelable {
         mMtuV6 = source.readInt();
         mHandoverFailureMode = source.readInt();
         mPduSessionId = source.readInt();
+        mDefaultQos = source.readParcelable(Qos.class.getClassLoader());
+        mQosSessions = new ArrayList<>();
+        source.readList(mQosSessions, QosSession.class.getClassLoader());
     }
 
     /**
@@ -350,6 +360,28 @@ public final class DataCallResponse implements Parcelable {
         return mPduSessionId;
     }
 
+    /**
+     * @return default QOS of the data call received from the network
+     *
+     * @hide
+     */
+
+    @Nullable
+    public Qos getDefaultQos() {
+        return mDefaultQos;
+    }
+
+    /**
+     * @return All the dedicated bearer QOS sessions of the data call received from the network
+     *
+     * @hide
+     */
+
+    @NonNull
+    public List<QosSession> getQosSessions() {
+        return mQosSessions;
+    }
+
     @NonNull
     @Override
     public String toString() {
@@ -370,6 +402,8 @@ public final class DataCallResponse implements Parcelable {
            .append(" mtuV6=").append(getMtuV6())
            .append(" handoverFailureMode=").append(getHandoverFailureMode())
            .append(" pduSessionId=").append(getPduSessionId())
+           .append(" defaultQos=").append(mDefaultQos)
+           .append(" qosSessions=").append(mQosSessions)
            .append("}");
         return sb.toString();
     }
@@ -383,12 +417,22 @@ public final class DataCallResponse implements Parcelable {
         }
 
         DataCallResponse other = (DataCallResponse) o;
-        return this.mCause == other.mCause
-                && this.mSuggestedRetryTime == other.mSuggestedRetryTime
-                && this.mId == other.mId
-                && this.mLinkStatus == other.mLinkStatus
-                && this.mProtocolType == other.mProtocolType
-                && this.mInterfaceName.equals(other.mInterfaceName)
+
+        final boolean isQosSame = (mDefaultQos == null || other.mDefaultQos == null) ?
+                mDefaultQos == other.mDefaultQos :
+                mDefaultQos.equals(other.mDefaultQos);
+
+        final boolean isQosSessionsSame = (mQosSessions == null || mQosSessions == null) ?
+                mQosSessions == other.mQosSessions :
+                mQosSessions.size() == other.mQosSessions.size()
+                && mQosSessions.containsAll(other.mQosSessions);
+
+        return mCause == other.mCause
+                && mSuggestedRetryTime == other.mSuggestedRetryTime
+                && mId == other.mId
+                && mLinkStatus == other.mLinkStatus
+                && mProtocolType == other.mProtocolType
+                && mInterfaceName.equals(other.mInterfaceName)
                 && mAddresses.size() == other.mAddresses.size()
                 && mAddresses.containsAll(other.mAddresses)
                 && mDnsAddresses.size() == other.mDnsAddresses.size()
@@ -401,14 +445,17 @@ public final class DataCallResponse implements Parcelable {
                 && mMtuV4 == other.mMtuV4
                 && mMtuV6 == other.mMtuV6
                 && mHandoverFailureMode == other.mHandoverFailureMode
-                && mPduSessionId == other.mPduSessionId;
+                && mPduSessionId == other.mPduSessionId
+                && isQosSame
+                && isQosSessionsSame;
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(mCause, mSuggestedRetryTime, mId, mLinkStatus, mProtocolType,
                 mInterfaceName, mAddresses, mDnsAddresses, mGatewayAddresses, mPcscfAddresses,
-                mMtu, mMtuV4, mMtuV6, mHandoverFailureMode, mPduSessionId);
+                mMtu, mMtuV4, mMtuV6, mHandoverFailureMode, mPduSessionId, mDefaultQos,
+                mQosSessions);
     }
 
     @Override
@@ -433,6 +480,12 @@ public final class DataCallResponse implements Parcelable {
         dest.writeInt(mMtuV6);
         dest.writeInt(mHandoverFailureMode);
         dest.writeInt(mPduSessionId);
+        if (mDefaultQos.getType() == Qos.QOS_TYPE_EPS) {
+            dest.writeParcelable((EpsQos)mDefaultQos, flags);
+        } else {
+            dest.writeParcelable((NrQos)mDefaultQos, flags);
+        }
+        dest.writeList(mQosSessions);
     }
 
     public static final @android.annotation.NonNull Parcelable.Creator<DataCallResponse> CREATOR =
@@ -511,6 +564,10 @@ public final class DataCallResponse implements Parcelable {
         private @HandoverFailureMode int mHandoverFailureMode = HANDOVER_FAILURE_MODE_LEGACY;
 
         private int mPduSessionId = PDU_SESSION_ID_NOT_SET;
+
+        private Qos mDefaultQos;
+
+        private List<QosSession> mQosSessions = new ArrayList<>();
 
         /**
          * Default constructor for Builder.
@@ -706,6 +763,35 @@ public final class DataCallResponse implements Parcelable {
         }
 
         /**
+         * Set the default QOS for this data connection.
+         *
+         * @param defaultQos QOS (Quality Of Service) received from network.
+         *
+         * @return The same instance of the builder.
+         *
+         * @hide
+         */
+        public @NonNull Builder setDefaultQos(@Nullable Qos defaultQos) {
+            mDefaultQos = defaultQos;
+            return this;
+        }
+
+        /**
+         * Set the dedicated bearer QOS sessions for this data connection.
+         *
+         * @param qosSessions Dedicated bearer QOS (Quality Of Service) sessions received
+         * from network.
+         *
+         * @return The same instance of the builder.
+         *
+         * @hide
+         */
+        public @NonNull Builder setQosSessions(@NonNull List<QosSession> qosSessions) {
+            mQosSessions = qosSessions;
+            return this;
+        }
+
+        /**
          * Build the DataCallResponse.
          *
          * @return the DataCallResponse object.
@@ -713,7 +799,8 @@ public final class DataCallResponse implements Parcelable {
         public @NonNull DataCallResponse build() {
             return new DataCallResponse(mCause, mSuggestedRetryTime, mId, mLinkStatus,
                     mProtocolType, mInterfaceName, mAddresses, mDnsAddresses, mGatewayAddresses,
-                    mPcscfAddresses, mMtu, mMtuV4, mMtuV6, mHandoverFailureMode, mPduSessionId);
+                    mPcscfAddresses, mMtu, mMtuV4, mMtuV6, mHandoverFailureMode, mPduSessionId,
+                    mDefaultQos, mQosSessions);
         }
     }
 }

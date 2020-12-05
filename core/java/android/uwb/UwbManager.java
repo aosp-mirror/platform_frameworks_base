@@ -16,13 +16,21 @@
 
 package android.uwb;
 
+import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.SuppressLint;
+import android.annotation.SystemService;
+import android.content.Context;
+import android.os.IBinder;
 import android.os.PersistableBundle;
+import android.os.RemoteException;
+import android.os.ServiceManager;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Executor;
@@ -36,7 +44,13 @@ import java.util.concurrent.Executor;
  *
  * @hide
  */
+@SystemService(Context.UWB_SERVICE)
 public final class UwbManager {
+    private IUwbAdapter mUwbAdapter;
+    private static final String SERVICE_NAME = "uwb";
+
+    private AdapterStateListener mAdapterStateListener;
+
     /**
      * Interface for receiving UWB adapter state changes
      */
@@ -96,10 +110,31 @@ public final class UwbManager {
 
     /**
      * Use <code>Context.getSystemService(UwbManager.class)</code> to get an instance.
+     *
+     * @param adapter an instance of an {@link android.uwb.IUwbAdapter}
      */
-    private UwbManager() {
-        throw new UnsupportedOperationException();
+    private UwbManager(IUwbAdapter adapter) {
+        mUwbAdapter = adapter;
+        mAdapterStateListener = new AdapterStateListener(adapter);
     }
+
+    /**
+     * @hide
+     */
+    public static UwbManager getInstance() {
+        IBinder b = ServiceManager.getService(SERVICE_NAME);
+        if (b == null) {
+            return null;
+        }
+
+        IUwbAdapter adapter = IUwbAdapter.Stub.asInterface(b);
+        if (adapter == null) {
+            return null;
+        }
+
+        return new UwbManager(adapter);
+    }
+
     /**
      * Register an {@link AdapterStateCallback} to listen for UWB adapter state changes
      * <p>The provided callback will be invoked by the given {@link Executor}.
@@ -112,8 +147,9 @@ public final class UwbManager {
      * @param executor an {@link Executor} to execute given callback
      * @param callback user implementation of the {@link AdapterStateCallback}
      */
-    public void registerAdapterStateCallback(Executor executor, AdapterStateCallback callback) {
-        throw new UnsupportedOperationException();
+    public void registerAdapterStateCallback(@NonNull @CallbackExecutor Executor executor,
+            @NonNull AdapterStateCallback callback) {
+        mAdapterStateListener.register(executor, callback);
     }
 
     /**
@@ -125,8 +161,8 @@ public final class UwbManager {
      *
      * @param callback user implementation of the {@link AdapterStateCallback}
      */
-    public void unregisterAdapterStateCallback(AdapterStateCallback callback) {
-        throw new UnsupportedOperationException();
+    public void unregisterAdapterStateCallback(@NonNull AdapterStateCallback callback) {
+        mAdapterStateListener.unregister(callback);
     }
 
     /**
@@ -139,7 +175,11 @@ public final class UwbManager {
      */
     @NonNull
     public PersistableBundle getSpecificationInfo() {
-        throw new UnsupportedOperationException();
+        try {
+            return mUwbAdapter.getSpecificationInfo();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -148,7 +188,11 @@ public final class UwbManager {
      * @return true if ranging is supported
      */
     public boolean isRangingSupported() {
-        throw new UnsupportedOperationException();
+        try {
+            return mUwbAdapter.isRangingSupported();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     @Retention(RetentionPolicy.SOURCE)
@@ -197,7 +241,24 @@ public final class UwbManager {
      */
     @AngleOfArrivalSupportType
     public int getAngleOfArrivalSupport() {
-        throw new UnsupportedOperationException();
+        try {
+            switch (mUwbAdapter.getAngleOfArrivalSupport()) {
+                case AngleOfArrivalSupport.TWO_DIMENSIONAL:
+                    return ANGLE_OF_ARRIVAL_SUPPORT_TYPE_2D;
+
+                case AngleOfArrivalSupport.THREE_DIMENSIONAL_HEMISPHERICAL:
+                    return ANGLE_OF_ARRIVAL_SUPPORT_TYPE_3D_HEMISPHERICAL;
+
+                case AngleOfArrivalSupport.THREE_DIMENSIONAL_SPHERICAL:
+                    return ANGLE_OF_ARRIVAL_SUPPORT_TYPE_3D_SPHERICAL;
+
+                case AngleOfArrivalSupport.NONE:
+                default:
+                    return ANGLE_OF_ARRIVAL_SUPPORT_TYPE_NONE;
+            }
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -211,7 +272,15 @@ public final class UwbManager {
      */
     @NonNull
     public List<Integer> getSupportedChannelNumbers() {
-        throw new UnsupportedOperationException();
+        List<Integer> channels = new ArrayList<>();
+        try {
+            for (int channel : mUwbAdapter.getSupportedChannels()) {
+                channels.add(channel);
+            }
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+        return channels;
     }
 
     /**
@@ -222,7 +291,15 @@ public final class UwbManager {
      */
     @NonNull
     public Set<Integer> getSupportedPreambleCodeIndices() {
-        throw new UnsupportedOperationException();
+        Set<Integer> preambles = new HashSet<>();
+        try {
+            for (int preamble : mUwbAdapter.getSupportedPreambleCodes()) {
+                preambles.add(preamble);
+            }
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+        return preambles;
     }
 
     /**
@@ -234,7 +311,11 @@ public final class UwbManager {
      */
     @SuppressLint("MethodNameUnits")
     public long elapsedRealtimeResolutionNanos() {
-        throw new UnsupportedOperationException();
+        try {
+            return mUwbAdapter.getTimestampResolutionNanos();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -243,7 +324,11 @@ public final class UwbManager {
      * @return the maximum allowed number of simultaneously open {@link RangingSession} instances.
      */
     public int getMaxSimultaneousSessions() {
-        throw new UnsupportedOperationException();
+        try {
+            return mUwbAdapter.getMaxSimultaneousSessions();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -253,7 +338,11 @@ public final class UwbManager {
      * @return the maximum number of remote devices per {@link RangingSession}
      */
     public int getMaxRemoteDevicesPerInitiatorSession() {
-        throw new UnsupportedOperationException();
+        try {
+            return mUwbAdapter.getMaxRemoteDevicesPerInitiatorSession();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -263,7 +352,11 @@ public final class UwbManager {
      * @return the maximum number of remote devices per {@link RangingSession}
      */
     public int getMaxRemoteDevicesPerResponderSession() {
-        throw new UnsupportedOperationException();
+        try {
+            return mUwbAdapter.getMaxRemoteDevicesPerResponderSession();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**

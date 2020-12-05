@@ -26,9 +26,9 @@ import android.os.Build;
 import android.util.SparseArray;
 
 import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
 
 import com.android.testutils.DevSdkIgnoreRule.IgnoreUpTo;
+import com.android.testutils.DevSdkIgnoreRunner;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -38,7 +38,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @IgnoreUpTo(Build.VERSION_CODES.R)
-@RunWith(AndroidJUnit4.class)
+@RunWith(DevSdkIgnoreRunner.class)
 @SmallTest
 public class OemNetworkPreferencesTest {
 
