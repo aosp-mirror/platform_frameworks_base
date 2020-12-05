@@ -1219,7 +1219,7 @@
     <string name="volume_music" msgid="7727274216734955095">"Մեդիա ձայնի բարձրություն"</string>
     <string name="volume_music_hint_playing_through_bluetooth" msgid="2614142915948898228">"Նվագարկում է Bluetooth-ի միջոցով"</string>
     <string name="volume_music_hint_silent_ringtone_selected" msgid="1514829655029062233">"Սահմանվել է անձայն զանգերանգ"</string>
-    <string name="volume_call" msgid="7625321655265747433">"Մուտքային զանգի ձայնի ուժգնությունը"</string>
+    <string name="volume_call" msgid="7625321655265747433">"Խոսակցություն"</string>
     <string name="volume_bluetooth_call" msgid="2930204618610115061">"Bluetooth-ի ներզանգի բարձրություն"</string>
     <string name="volume_alarm" msgid="4486241060751798448">"Զարթուցիչի ձայնը"</string>
     <string name="volume_notification" msgid="6864412249031660057">"Ծանուցումների ձայնի ուժգնությունը"</string>
@@ -1792,8 +1792,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Թարմացվել է ձեր ադմինիստրատորի կողմից"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Ջնջվել է ձեր ադմինիստրատորի կողմից"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"Եղավ"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="5997766757551917769">"Մարտկոցի աշխատաժամանակը երկարացնելու համար «Մարտկոցի տնտեսում» գործառույթը.\n\n•Միացնում է մուգ թեման։\n•Անջատում կամ սահմանափակում է աշխատանքը ֆոնային ռեժիմում, որոշ վիզուալ էֆեկտներ և այլ գործառույթներ, օրինակ՝ «Ok Google» հրահանգը։\n\n"<annotation id="url">"Իմանալ ավելին"</annotation></string>
-    <string name="battery_saver_description" msgid="8587408568232177204">"Մարտկոցի աշխատաժամանակը երկարացնելու համար «Մարտկոցի տնտեսում» գործառույթը.\n\n•Միացնում է մուգ թեման։\n•Անջատում կամ սահմանափակում է աշխատանքը ֆոնային ռեժիմում, որոշ վիզուալ էֆեկտներ և այլ գործառույթներ, օրինակ՝ «Ok Google» հրահանգը:"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"Մարտկոցի աշխատաժամանակը երկարացնելու համար «Մարտկոցի տնտեսում» գործառույթը՝\n\n• Միացնում է մուգ թեման։\n• Անջատում կամ սահմանափակում է աշխատանքը ֆոնային ռեժիմում, որոշ վիզուալ էֆեկտներ և այլ գործառույթներ, օրինակ՝ «Ok Google» հրահանգը։\n\n"<annotation id="url">"Իմանալ ավելին"</annotation></string>
+    <string name="battery_saver_description" msgid="6794188153647295212">"Մարտկոցի աշխատաժամանակը երկարացնելու համար «Մարտկոցի տնտեսում» գործառույթը՝\n\n• Միացնում է մուգ թեման։\n• Անջատում կամ սահմանափակում է աշխատանքը ֆոնային ռեժիմում, որոշ վիզուալ էֆեկտներ և այլ գործառույթներ, օրինակ՝ «Ok Google» հրահանգը։"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Թրաֆիկի տնտեսման ռեժիմում որոշ հավելվածների համար տվյալների ֆոնային փոխանցումն անջատված է։ Հավելվածը, որն օգտագործում եք, կարող է տվյալներ փոխանցել և ստանալ, սակայն ոչ այնքան հաճախ: Օրինակ՝ պատկերները կցուցադրվեն միայն դրանց վրա սեղմելուց հետո։"</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Միացնե՞լ թրաֆիկի տնտեսումը"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Միացնել"</string>
@@ -1907,7 +1907,7 @@
     <string name="app_info" msgid="6113278084877079851">"Հավելվածի մասին"</string>
     <string name="negative_duration" msgid="1938335096972945232">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="demo_starting_message" msgid="6577581216125805905">"Ցուցադրական օգտատերը գործարկվում է…"</string>
-    <string name="demo_restarting_message" msgid="1160053183701746766">"Սարաքը վերակայվում է…"</string>
+    <string name="demo_restarting_message" msgid="1160053183701746766">"Սարքը վերակայվում է…"</string>
     <string name="suspended_widget_accessibility" msgid="6331451091851326101">"Անջատած <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="conference_call" msgid="5731633152336490471">"Կոնֆերանս զանգ"</string>
     <string name="tooltip_popup_title" msgid="7863719020269945722">"Հուշակ"</string>
