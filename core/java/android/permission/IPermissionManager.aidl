@@ -87,10 +87,6 @@ interface IPermissionManager {
 
     void revokeDefaultPermissionsFromLuiApps(in String[] packageNames, int userId);
 
-    void setPermissionEnforced(String permName, boolean enforced);
-
-    boolean isPermissionEnforced(String permName);
-
     boolean shouldShowRequestPermissionRationale(String permName,
             String packageName, int userId);
 

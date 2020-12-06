@@ -2061,38 +2061,6 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                 .revokeDefaultPermissionsFromLuiApps(packageNames, userId));
     }
 
-    @Override
-    public void setPermissionEnforced(String permName, boolean enforced) {
-        // TODO: Now that we no longer change GID for storage, this should to away.
-        mContext.enforceCallingOrSelfPermission(Manifest.permission.GRANT_RUNTIME_PERMISSIONS,
-                "setPermissionEnforced");
-        if (READ_EXTERNAL_STORAGE.equals(permName)) {
-            mPackageManagerInt.setReadExternalStorageEnforced(enforced);
-            // kill any non-foreground processes so we restart them and
-            // grant/revoke the GID.
-            final IActivityManager am = ActivityManager.getService();
-            if (am != null) {
-                final long token = Binder.clearCallingIdentity();
-                try {
-                    am.killProcessesBelowForeground("setPermissionEnforcement");
-                } catch (RemoteException e) {
-                } finally {
-                    Binder.restoreCallingIdentity(token);
-                }
-            }
-        } else {
-            throw new IllegalArgumentException("No selective enforcement for " + permName);
-        }
-    }
-
-    /** @deprecated */
-    @Override
-    @Deprecated
-    public boolean isPermissionEnforced(String permName) {
-        // allow instant applications
-        return true;
-    }
-
     /**
      * This change makes it so that apps are told to show rationale for asking for background
      * location access every time they request.
