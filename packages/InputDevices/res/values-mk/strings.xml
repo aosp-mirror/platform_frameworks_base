@@ -3,12 +3,12 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="8016145283189546017">"Влезни уреди"</string>
     <string name="keyboard_layouts_label" msgid="6688773268302087545">"Тастатура за Android"</string>
-    <string name="keyboard_layout_english_uk_label" msgid="6664258463319999632">"Англиски (О.К.)"</string>
-    <string name="keyboard_layout_english_us_label" msgid="8994890249649106291">"Англиски (САД)"</string>
-    <string name="keyboard_layout_english_us_intl" msgid="3705168594034233583">"Англиски (САД), меѓународен стил"</string>
-    <string name="keyboard_layout_english_us_colemak_label" msgid="4194969610343455380">"Англиски (САД), Colemak стил"</string>
-    <string name="keyboard_layout_english_us_dvorak_label" msgid="793528923171145202">"Англиски (САД), Dvorak стил"</string>
-    <string name="keyboard_layout_english_us_workman_label" msgid="2944541595262173111">"Англиски (САД), Workman стил"</string>
+    <string name="keyboard_layout_english_uk_label" msgid="6664258463319999632">"англиски (О.К.)"</string>
+    <string name="keyboard_layout_english_us_label" msgid="8994890249649106291">"англиски (САД)"</string>
+    <string name="keyboard_layout_english_us_intl" msgid="3705168594034233583">"англиски (САД), меѓународен стил"</string>
+    <string name="keyboard_layout_english_us_colemak_label" msgid="4194969610343455380">"англиски (САД), Colemak стил"</string>
+    <string name="keyboard_layout_english_us_dvorak_label" msgid="793528923171145202">"англиски (САД), Dvorak стил"</string>
+    <string name="keyboard_layout_english_us_workman_label" msgid="2944541595262173111">"англиски (САД), Workman стил"</string>
     <string name="keyboard_layout_german_label" msgid="8451565865467909999">"Германски"</string>
     <string name="keyboard_layout_french_label" msgid="813450119589383723">"Француски"</string>
     <string name="keyboard_layout_french_ca_label" msgid="365352601060604832">"Француски (Канада)"</string>
@@ -26,6 +26,7 @@
     <string name="keyboard_layout_finnish" msgid="5585659438924315466">"Фински"</string>
     <string name="keyboard_layout_croatian" msgid="4172229471079281138">"Хрватски"</string>
     <string name="keyboard_layout_czech" msgid="1349256901452975343">"Чешки"</string>
+    <string name="keyboard_layout_czech_qwerty" msgid="3331402534128515501">"Чешка QWERTY-тастатура"</string>
     <string name="keyboard_layout_estonian" msgid="8775830985185665274">"Естонски"</string>
     <string name="keyboard_layout_hungarian" msgid="4154963661406035109">"Унгарски"</string>
     <string name="keyboard_layout_icelandic" msgid="5836645650912489642">"Исландски"</string>
@@ -34,6 +35,7 @@
     <string name="keyboard_layout_slovak" msgid="2469379934672837296">"Словачки"</string>
     <string name="keyboard_layout_slovenian" msgid="1735933028924982368">"Словенечки"</string>
     <string name="keyboard_layout_turkish" msgid="7736163250907964898">"Турски"</string>
+    <string name="keyboard_layout_turkish_f" msgid="9130320856010776018">"Турски F"</string>
     <string name="keyboard_layout_ukrainian" msgid="8176637744389480417">"Украински"</string>
     <string name="keyboard_layout_arabic" msgid="5671970465174968712">"арапски"</string>
     <string name="keyboard_layout_greek" msgid="7289253560162386040">"грчки"</string>
@@ -44,4 +46,7 @@
     <string name="keyboard_layout_persian" msgid="3920643161015888527">"персиски"</string>
     <string name="keyboard_layout_azerbaijani" msgid="7315895417176467567">"азербејџански"</string>
     <string name="keyboard_layout_polish" msgid="1121588624094925325">"полски"</string>
+    <string name="keyboard_layout_belarusian" msgid="7619281752698687588">"белоруски"</string>
+    <string name="keyboard_layout_mongolian" msgid="7678483495823936626">"монголски"</string>
+    <string name="keyboard_layout_georgian" msgid="4596185456863747454">"грузиски"</string>
 </resources>
