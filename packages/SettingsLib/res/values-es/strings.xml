@@ -257,7 +257,6 @@
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Mostrar dispositivos Bluetooth sin nombre"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"Inhabilitar volumen absoluto"</string>
     <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"Habilitar Gabeldorsche"</string>
-    <string name="enhanced_connectivity" msgid="7201127377781666804">"Conectividad mejorada"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="1710571610177659127">"Versión AVRCP de Bluetooth"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7846922290083709633">"Selecciona la versión AVRCP de Bluetooth"</string>
     <string name="bluetooth_select_map_version_string" msgid="526308145174175327">"Versión de MAP de Bluetooth"</string>
@@ -511,7 +510,7 @@
     <string name="media_transfer_this_device_name" msgid="2716555073132169240">"Altavoz del teléfono"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"No se ha podido conectar; reinicia el dispositivo"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Dispositivo de audio con cable"</string>
-    <string name="help_label" msgid="3528360748637781274">"Ayuda y sugerencias"</string>
+    <string name="help_label" msgid="3528360748637781274">"Ayuda y comentarios"</string>
     <string name="storage_category" msgid="2287342585424631813">"Almacenamiento"</string>
     <string name="shared_data_title" msgid="1017034836800864953">"Datos compartidos"</string>
     <string name="shared_data_summary" msgid="5516326713822885652">"Ver y modificar los datos compartidos"</string>

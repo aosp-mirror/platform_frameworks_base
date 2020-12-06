@@ -81,7 +81,7 @@
     <string name="bluetooth_battery_level" msgid="2893696778200201555">"Узровень зараду: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_battery_level_untethered" msgid="4002282355111504349">"Л: акумулятар: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, П: акумулятар: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>"</string>
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"Уключана"</string>
-    <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Аўдыё медыяпрылады"</string>
+    <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Аўдыя медыяфайлаў"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"Тэлефонныя выклікі"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Перадача файлаў"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"Прылада ўводу"</string>
@@ -257,7 +257,6 @@
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Паказваць прылады Bluetooth без назваў"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"Адключыць абсалютны гук"</string>
     <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"Уключыць Gabeldorsche"</string>
-    <string name="enhanced_connectivity" msgid="7201127377781666804">"Палепшанае падключэнне"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="1710571610177659127">"Версія Bluetooth AVRCP"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7846922290083709633">"Выбраць версію Bluetooth AVRCP"</string>
     <string name="bluetooth_select_map_version_string" msgid="526308145174175327">"Версія Bluetooth MAP"</string>

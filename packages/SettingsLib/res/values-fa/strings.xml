@@ -28,7 +28,7 @@
     <string name="wifi_disabled_network_failure" msgid="2660396183242399585">"‏پیکربندی IP انجام نشد"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="1302938248432705534">"اتصال ناموفق به دلیل شبکه با کیفیت پایین"</string>
     <string name="wifi_disabled_wifi_failure" msgid="8819554899148331100">"‏اتصال Wi-Fi برقرار نشد"</string>
-    <string name="wifi_disabled_password_failure" msgid="6892387079613226738">"مشکل احراز هویت"</string>
+    <string name="wifi_disabled_password_failure" msgid="6892387079613226738">"مشکل اصالت‌سنجی"</string>
     <string name="wifi_cant_connect" msgid="5718417542623056783">"برقراری اتصال ممکن نیست"</string>
     <string name="wifi_cant_connect_to_ap" msgid="3099667989279700135">"برقراری اتصال به «<xliff:g id="AP_NAME">%1$s</xliff:g>» ممکن نیست"</string>
     <string name="wifi_check_password_try_again" msgid="8817789642851605628">"گذرواژه را بررسی و دوباره امتحان کنید"</string>
@@ -257,7 +257,6 @@
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"نمایش دستگاه‌های بلوتوث بدون نام"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"غیرفعال کردن میزان صدای مطلق"</string>
     <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"‏فعال کردن Gabeldorsche"</string>
-    <string name="enhanced_connectivity" msgid="7201127377781666804">"اتصال بهبودیافته"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="1710571610177659127">"‏نسخه AVRCP بلوتوث"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7846922290083709633">"‏انتخاب نسخه AVRCP بلوتوث"</string>
     <string name="bluetooth_select_map_version_string" msgid="526308145174175327">"‏نسخه MAP بلوتوث"</string>

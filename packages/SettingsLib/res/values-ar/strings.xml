@@ -85,7 +85,7 @@
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"المكالمات الهاتفية"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"نقل الملف"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"جهاز الإرسال"</string>
-    <string name="bluetooth_profile_pan" msgid="1006235139308318188">"الدخول إلى الإنترنت"</string>
+    <string name="bluetooth_profile_pan" msgid="1006235139308318188">"استخدام الإنترنت"</string>
     <string name="bluetooth_profile_pbap" msgid="7064307749579335765">"مشاركة جهة الاتصال"</string>
     <string name="bluetooth_profile_pbap_summary" msgid="2955819694801952056">"استخدام مع مشاركة جهة الاتصال"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"مشاركة اتصال الإنترنت"</string>
@@ -257,7 +257,6 @@
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"عرض أجهزة البلوتوث بدون أسماء"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"إيقاف مستوى الصوت المطلق"</string>
     <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"‏تفعيل Gabeldorsche"</string>
-    <string name="enhanced_connectivity" msgid="7201127377781666804">"إمكانية اتصال محسّن"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="1710571610177659127">"‏إصدار Bluetooth AVRCP"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7846922290083709633">"‏اختيار إصدار Bluetooth AVRCP"</string>
     <string name="bluetooth_select_map_version_string" msgid="526308145174175327">"‏إصدار Bluetooth MAP"</string>
@@ -515,7 +514,7 @@
     <string name="media_transfer_this_device_name" msgid="2716555073132169240">"مكبر صوت الهاتف"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"حدثت مشكلة أثناء الاتصال. يُرجى إيقاف الجهاز ثم إعادة تشغيله."</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"جهاز سماعي سلكي"</string>
-    <string name="help_label" msgid="3528360748637781274">"المساعدة والتعليقات"</string>
+    <string name="help_label" msgid="3528360748637781274">"المساعدة والملاحظات والآراء"</string>
     <string name="storage_category" msgid="2287342585424631813">"مساحة التخزين"</string>
     <string name="shared_data_title" msgid="1017034836800864953">"البيانات المشتركة"</string>
     <string name="shared_data_summary" msgid="5516326713822885652">"عرض البيانات المشتركة وتعديلها"</string>

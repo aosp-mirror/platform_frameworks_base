@@ -28,7 +28,7 @@
     <string name="wifi_disabled_network_failure" msgid="2660396183242399585">"IP тохируулга амжилтгүй"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="1302938248432705534">"Сүлжээний чанар муу байгаа тул холбогдож чадсангүй"</string>
     <string name="wifi_disabled_wifi_failure" msgid="8819554899148331100">"WiFi холболт амжилтгүй"</string>
-    <string name="wifi_disabled_password_failure" msgid="6892387079613226738">"Гэрчлэлийн асуудал"</string>
+    <string name="wifi_disabled_password_failure" msgid="6892387079613226738">"Баталгаажуулалтын асуудал"</string>
     <string name="wifi_cant_connect" msgid="5718417542623056783">"Холбогдож чадсангүй"</string>
     <string name="wifi_cant_connect_to_ap" msgid="3099667989279700135">"\'<xliff:g id="AP_NAME">%1$s</xliff:g>\'-д холбогдож чадсангүй"</string>
     <string name="wifi_check_password_try_again" msgid="8817789642851605628">"Нууц үгийг шалгаад дахин оролдоно уу"</string>
@@ -70,7 +70,7 @@
     <string name="bluetooth_pairing" msgid="4269046942588193600">"Хослуулж байна…"</string>
     <string name="bluetooth_connected_no_headset" msgid="2224101138659967604">"Холбогдсон (утас байхгүй)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_a2dp" msgid="8566874395813947092">"Холбогдсон (медиа байхгүй)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_connected_no_map" msgid="3381860077002724689">"Холбогдсон (зурвасын хандалт байхгүй)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_map" msgid="3381860077002724689">"Холбогдсон (мессежийн хандалт байхгүй)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp" msgid="2893204819854215433">"Холбогдсон (утас эсвэл медиа байхгүй)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_battery_level" msgid="5410325759372259950">"Холбогдсон, батерей <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_battery_level" msgid="2661863370509206428">"Холбогдсон (утас байхгүй), батерей <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
@@ -257,7 +257,6 @@
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Нэргүй Bluetooth төхөөрөмжийг харуулах"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"Үнэмлэхүй дууны түвшинг идэвхгүй болгох"</string>
     <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"Gabeldorsche-г идэвхжүүлэх"</string>
-    <string name="enhanced_connectivity" msgid="7201127377781666804">"Сайжруулсан холболт"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="1710571610177659127">"Bluetooth AVRCP хувилбар"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7846922290083709633">"Bluetooth AVRCP хувилбарыг сонгох"</string>
     <string name="bluetooth_select_map_version_string" msgid="526308145174175327">"Bluetooth MAP хувилбар"</string>
@@ -288,7 +287,7 @@
     <string name="wifi_metered_label" msgid="8737187690304098638">"Хязгаартай"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Хязгааргүй"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Логгерын буферын хэмжээ"</string>
-    <string name="select_logd_size_dialog_title" msgid="2105401994681013578">"Лог буфер бүрт ногдох логгерын хэмжээг сонгоно уу"</string>
+    <string name="select_logd_size_dialog_title" msgid="2105401994681013578">"Лог буфер бүрд ногдох логгерын хэмжээг сонгоно уу"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="8631859265777337991">"Нэвтрэгчийн тогтмол санг устгах уу?"</string>
     <string name="dev_logpersist_clear_warning_message" msgid="6447590867594287413">"Бид байнгын логоор хянаагүй үед таны төхөөрөмжтэй холбоотой нэвтрэгч өгөгдлийг устгах шаардлагатай."</string>
     <string name="select_logpersist_title" msgid="447071974007104196">"Төхөөрөмжид тогтмол нэвтрэгчийн өгөгдлийн сан"</string>
@@ -531,7 +530,7 @@
     <string name="user_add_user_item_title" msgid="2394272381086965029">"Хэрэглэгч"</string>
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"Хязгаарлагдсан профайл"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"Шинэ хэрэглэгч нэмэх үү?"</string>
-    <string name="user_add_user_message_long" msgid="1527434966294733380">"Та нэмэлт хэрэглэгч үүсгэх замаар бусад хүмүүстэй энэ төхөөрөмжийг хуваалцаж болно. Хэрэглэгч тус бүр апп, ханын цаас болон бусад зүйлээ өөрчлөх боломжтой хувийн орон зайтай байдаг. Түүнчлэн хэрэглэгч нь бүх хэрэглэгчид нөлөөлөх боломжтой Wi-Fi зэрэг төхөөрөмжийн тохиргоог өөрчлөх боломжтой.\n\nХэрэв та шинэ хэрэглэгч нэмэх бол тухайн хүн хувийн орон зайгаа бүрдүүлэх ёстой.\n\nХэрэглэгч бүр бусад бүх хэрэглэгчийн өмнөөс апп шинэчилж болно. Хүртээмжийн тохиргоо болон үйлчилгээг шинэ хэрэглэгчид шилжүүлэх боломжгүй байж болзошгүй."</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"Та нэмэлт хэрэглэгч үүсгэх замаар бусад хүмүүстэй энэ төхөөрөмжийг хуваалцаж болно. Хэрэглэгч тус бүр апп, дэлгэцийн зураг болон бусад зүйлээ өөрчлөх боломжтой хувийн орон зайтай байдаг. Түүнчлэн хэрэглэгч нь бүх хэрэглэгчид нөлөөлөх боломжтой Wi-Fi зэрэг төхөөрөмжийн тохиргоог өөрчлөх боломжтой.\n\nХэрэв та шинэ хэрэглэгч нэмэх бол тухайн хүн хувийн орон зайгаа бүрдүүлэх ёстой.\n\nХэрэглэгч бүр бусад бүх хэрэглэгчийн өмнөөс апп шинэчилж болно. Хүртээмжийн тохиргоо болон үйлчилгээг шинэ хэрэглэгчид шилжүүлэх боломжгүй байж болзошгүй."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Та шинэ хэрэглэгч нэмбэл тухайн хүн өөрийн профайлыг тохируулах шаардлагатай.\n\nАль ч хэрэглэгч бүх хэрэглэгчийн апп-уудыг шинэчлэх боломжтой."</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Хэрэглэгчийг одоо тохируулах уу?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Хэрэглэгч төхөөрөмжийг авч өөрийн профайлыг тохируулах боломжтой эсэхийг шалгана уу"</string>
