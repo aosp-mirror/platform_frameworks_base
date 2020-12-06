@@ -20,8 +20,8 @@
     <string name="notification_sound_default" msgid="8133121186242636840">"Standart bildirishnoma tovushi"</string>
     <string name="alarm_sound_default" msgid="4787646764557462649">"Standart signal tovushi"</string>
     <string name="add_ringtone_text" msgid="6642389991738337529">"Rington qo‘shish"</string>
-    <string name="add_alarm_text" msgid="3545497316166999225">"Signal qo‘shish"</string>
-    <string name="add_notification_text" msgid="4431129543300614788">"Bildirishnoma qo‘shish"</string>
+    <string name="add_alarm_text" msgid="3545497316166999225">"Signal kiritish"</string>
+    <string name="add_notification_text" msgid="4431129543300614788">"Bildirishnoma kiritish"</string>
     <string name="delete_ringtone_text" msgid="201443984070732499">"O‘chirish"</string>
     <string name="unable_to_add_ringtone" msgid="4583511263449467326">"Maxsus rington qo‘shib bo‘lmadi"</string>
     <string name="unable_to_delete_ringtone" msgid="6792301380142859496">"Maxsus ringtonni o‘chirib bo‘lmadi"</string>
