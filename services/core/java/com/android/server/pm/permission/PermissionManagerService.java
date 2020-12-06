@@ -114,7 +114,6 @@ import android.permission.IPermissionManager;
 import android.permission.PermissionControllerManager;
 import android.permission.PermissionManager;
 import android.permission.PermissionManagerInternal;
-import android.permission.PermissionManagerInternal.OnRuntimePermissionStateChangedListener;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -151,6 +150,7 @@ import com.android.server.pm.UserManagerInternal;
 import com.android.server.pm.UserManagerService;
 import com.android.server.pm.parsing.PackageInfoUtils;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.permission.PermissionManagerServiceInternal.OnRuntimePermissionStateChangedListener;
 import com.android.server.policy.PermissionPolicyInternal;
 import com.android.server.policy.SoftRestrictedPermissionPolicy;
 
@@ -2197,19 +2197,20 @@ public class PermissionManagerService extends IPermissionManager.Stub {
      *
      * <p>Can not be called on main thread.
      *
-     * @param user The user the data should be extracted for
+     * @param userId The user ID the data should be extracted for
      *
      * @return The state as a xml file
      */
-    private @Nullable byte[] backupRuntimePermissions(@NonNull UserHandle user) {
+    @Nullable
+    private byte[] backupRuntimePermissions(@UserIdInt int userId) {
         CompletableFuture<byte[]> backup = new CompletableFuture<>();
-        mPermissionControllerManager.getRuntimePermissionBackup(user, mContext.getMainExecutor(),
-                backup::complete);
+        mPermissionControllerManager.getRuntimePermissionBackup(UserHandle.of(userId),
+                mContext.getMainExecutor(), backup::complete);
 
         try {
             return backup.get(BACKUP_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
         } catch (InterruptedException | ExecutionException  | TimeoutException e) {
-            Slog.e(TAG, "Cannot create permission backup for " + user, e);
+            Slog.e(TAG, "Cannot create permission backup for user " + userId, e);
             return null;
         }
     }
@@ -2221,13 +2222,14 @@ public class PermissionManagerService extends IPermissionManager.Stub {
      * applied via {@link #restoreDelayedRuntimePermissions}.
      *
      * @param backup The state as an xml file
-     * @param user The user the data should be restored for
+     * @param userId The user ID the data should be restored for
      */
-    private void restoreRuntimePermissions(@NonNull byte[] backup, @NonNull UserHandle user) {
+    private void restoreRuntimePermissions(@NonNull byte[] backup, @UserIdInt int userId) {
         synchronized (mLock) {
-            mHasNoDelayedPermBackup.delete(user.getIdentifier());
+            mHasNoDelayedPermBackup.delete(userId);
         }
-        mPermissionControllerManager.stageAndApplyRuntimePermissionsBackup(backup, user);
+        mPermissionControllerManager.stageAndApplyRuntimePermissionsBackup(backup,
+                UserHandle.of(userId));
     }
 
     /**
@@ -2236,24 +2238,24 @@ public class PermissionManagerService extends IPermissionManager.Stub {
      * <p>Can not be called on main thread.
      *
      * @param packageName The package that is newly installed
-     * @param user The user the package is installed for
+     * @param userId The user ID the package is installed for
      *
      * @see #restoreRuntimePermissions
      */
     private void restoreDelayedRuntimePermissions(@NonNull String packageName,
-            @NonNull UserHandle user) {
+            @UserIdInt int userId) {
         synchronized (mLock) {
-            if (mHasNoDelayedPermBackup.get(user.getIdentifier(), false)) {
+            if (mHasNoDelayedPermBackup.get(userId, false)) {
                 return;
             }
         }
-        mPermissionControllerManager.applyStagedRuntimePermissionBackup(packageName, user,
-                mContext.getMainExecutor(), (hasMoreBackup) -> {
+        mPermissionControllerManager.applyStagedRuntimePermissionBackup(packageName,
+                UserHandle.of(userId), mContext.getMainExecutor(), (hasMoreBackup) -> {
                     if (hasMoreBackup) {
                         return;
                     }
                     synchronized (mLock) {
-                        mHasNoDelayedPermBackup.put(user.getIdentifier(), true);
+                        mHasNoDelayedPermBackup.put(userId, true);
                     }
                 });
     }
@@ -5058,7 +5060,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         }
     }
 
-    private class PermissionManagerServiceInternalImpl extends PermissionManagerServiceInternal {
+    private class PermissionManagerServiceInternalImpl implements PermissionManagerServiceInternal {
         @Override
         public void systemReady() {
             PermissionManagerService.this.systemReady();
@@ -5083,6 +5085,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         }
         @Override
         public void onUserRemoved(@UserIdInt int userId) {
+            Preconditions.checkArgumentNonNegative(userId, "userId");
             PermissionManagerService.this.onUserRemoved(userId);
         }
         @NonNull
@@ -5162,20 +5165,26 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             return matchingPermissions;
         }
 
+        @Nullable
         @Override
-        public @Nullable byte[] backupRuntimePermissions(@NonNull UserHandle user) {
-            return PermissionManagerService.this.backupRuntimePermissions(user);
+        public byte[] backupRuntimePermissions(@UserIdInt int userId) {
+            Preconditions.checkArgumentNonNegative(userId, "userId");
+            return PermissionManagerService.this.backupRuntimePermissions(userId);
         }
 
         @Override
-        public void restoreRuntimePermissions(@NonNull byte[] backup, @NonNull UserHandle user) {
-            PermissionManagerService.this.restoreRuntimePermissions(backup, user);
+        public void restoreRuntimePermissions(@NonNull byte[] backup, @UserIdInt int userId) {
+            Objects.requireNonNull(backup, "backup");
+            Preconditions.checkArgumentNonNegative(userId, "userId");
+            PermissionManagerService.this.restoreRuntimePermissions(backup, userId);
         }
 
         @Override
         public void restoreDelayedRuntimePermissions(@NonNull String packageName,
-                @NonNull UserHandle user) {
-            PermissionManagerService.this.restoreDelayedRuntimePermissions(packageName, user);
+                @UserIdInt int userId) {
+            Objects.requireNonNull(packageName, "packageName");
+            Preconditions.checkArgumentNonNegative(userId, "userId");
+            PermissionManagerService.this.restoreDelayedRuntimePermissions(packageName, userId);
         }
 
         @Override
@@ -5264,7 +5273,8 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         }
 
         @Override
-        public void onNewUserCreated(int userId) {
+        public void onUserCreated(@UserIdInt int userId) {
+            Preconditions.checkArgumentNonNegative(userId, "userId");
             // NOTE: This adds UPDATE_PERMISSIONS_REPLACE_PKG
             PermissionManagerService.this.updateAllPermissions(StorageManager.UUID_PRIVATE_INTERNAL,
                     true, mDefaultPermissionCallback);

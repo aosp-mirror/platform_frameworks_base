@@ -34,14 +34,14 @@ import java.util.Set;
 /**
  * Internal interfaces services.
  *
- * TODO: Should be merged into PermissionManagerInternal, but currently uses internal classes.
+ * TODO: Move into module.
  */
-public abstract class PermissionManagerServiceInternal extends PermissionManagerInternal
-        implements LegacyPermissionDataProvider {
+public interface PermissionManagerServiceInternal extends PermissionManagerInternal,
+        LegacyPermissionDataProvider {
     /**
      * Provider for package names.
      */
-    public interface PackagesProvider {
+    interface PackagesProvider {
 
         /**
          * Gets the packages for a given user.
@@ -54,7 +54,7 @@ public abstract class PermissionManagerServiceInternal extends PermissionManager
     /**
      * Provider for package names.
      */
-    public interface SyncAdapterPackagesProvider {
+    interface SyncAdapterPackagesProvider {
 
         /**
          * Gets the sync adapter packages for given authority and user.
@@ -65,7 +65,23 @@ public abstract class PermissionManagerServiceInternal extends PermissionManager
         String[] getPackages(String authority, int userId);
     }
 
-    public abstract void systemReady();
+    /**
+     * Adds a listener for runtime permission state (permissions or flags) changes.
+     *
+     * @param listener The listener.
+     */
+    void addOnRuntimePermissionStateChangedListener(
+            @NonNull OnRuntimePermissionStateChangedListener listener);
+
+    /**
+     * Removes a listener for runtime permission state (permissions or flags) changes.
+     *
+     * @param listener The listener.
+     */
+    void removeOnRuntimePermissionStateChangedListener(
+            @NonNull OnRuntimePermissionStateChangedListener listener);
+
+    void systemReady();
 
     /**
      * Get whether permission review is required for a package.
@@ -75,7 +91,7 @@ public abstract class PermissionManagerServiceInternal extends PermissionManager
      * @return whether permission review is required
      */
     //@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
-    public abstract boolean isPermissionsReviewRequired(@NonNull String packageName,
+    boolean isPermissionsReviewRequired(@NonNull String packageName,
             @UserIdInt int userId);
 
     /**
@@ -90,7 +106,7 @@ public abstract class PermissionManagerServiceInternal extends PermissionManager
      * @param allPackages All currently known packages
      * @param callback Callback to call after permission changes
      */
-    public abstract void updateAllPermissions(@Nullable String volumeUuid, boolean sdkUpdate);
+    void updateAllPermissions(@Nullable String volumeUuid, boolean sdkUpdate);
 
     /**
      * Reset the runtime permission state changes for a package.
@@ -101,7 +117,7 @@ public abstract class PermissionManagerServiceInternal extends PermissionManager
      * @param userId the user ID
      */
     //@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
-    public abstract void resetRuntimePermissions(@NonNull AndroidPackage pkg,
+    void resetRuntimePermissions(@NonNull AndroidPackage pkg,
             @UserIdInt int userId);
 
     /**
@@ -110,7 +126,7 @@ public abstract class PermissionManagerServiceInternal extends PermissionManager
      * @param userId the user ID
      */
     //@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
-    public abstract void resetAllRuntimePermissions(@UserIdInt int userId);
+    void resetAllRuntimePermissions(@UserIdInt int userId);
 
     /**
      * Read legacy permission state from package settings.
@@ -119,7 +135,7 @@ public abstract class PermissionManagerServiceInternal extends PermissionManager
      * {@code PackageSetting} which is a implementation detail that permission should not know.
      * Instead, it should retrieve the legacy state via a defined API.
      */
-    public abstract void readLegacyPermissionStateTEMP();
+    void readLegacyPermissionStateTEMP();
 
     /**
      * Write legacy permission state to package settings.
@@ -127,12 +143,7 @@ public abstract class PermissionManagerServiceInternal extends PermissionManager
      * TODO(zhanghai): This is a temporary method and should be removed once we migrated persistence
      * for permission.
      */
-    public abstract void writeLegacyPermissionStateTEMP();
-
-    /**
-     * Notify that a user has been removed and its permission state should be removed as well.
-     */
-    public abstract void onUserRemoved(@UserIdInt int userId);
+    void writeLegacyPermissionStateTEMP();
 
     /**
      * Get all the permissions granted to a package.
@@ -143,8 +154,7 @@ public abstract class PermissionManagerServiceInternal extends PermissionManager
      */
     //@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
     @NonNull
-    public abstract Set<String> getGrantedPermissions(@NonNull String packageName,
-            @UserIdInt int userId);
+    Set<String> getGrantedPermissions(@NonNull String packageName, @UserIdInt int userId);
 
     /**
      * Get the GIDs of a permission.
@@ -155,7 +165,7 @@ public abstract class PermissionManagerServiceInternal extends PermissionManager
      */
     //@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
     @NonNull
-    public abstract int[] getPermissionGids(@NonNull String permissionName, @UserIdInt int userId);
+    int[] getPermissionGids(@NonNull String permissionName, @UserIdInt int userId);
 
     /**
      * Get the packages that have requested an app op permission.
@@ -165,18 +175,19 @@ public abstract class PermissionManagerServiceInternal extends PermissionManager
      */
     //@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
     @NonNull
-    public abstract String[] getAppOpPermissionPackages(@NonNull String permissionName);
+    String[] getAppOpPermissionPackages(@NonNull String permissionName);
 
     /** HACK HACK methods to allow for partial migration of data to the PermissionManager class */
     @Nullable
-    public abstract Permission getPermissionTEMP(@NonNull String permName);
+    Permission getPermissionTEMP(@NonNull String permName);
 
     /** Get all permissions that have a certain protection */
-    public abstract @NonNull ArrayList<PermissionInfo> getAllPermissionsWithProtection(
+    @NonNull
+    ArrayList<PermissionInfo> getAllPermissionsWithProtection(
             @PermissionInfo.Protection int protection);
 
     /** Get all permissions that have certain protection flags */
-    public abstract @NonNull ArrayList<PermissionInfo> getAllPermissionsWithProtectionFlags(
+    @NonNull ArrayList<PermissionInfo> getAllPermissionsWithProtectionFlags(
             @PermissionInfo.ProtectionFlags int protectionFlags);
 
     /**
@@ -188,7 +199,7 @@ public abstract class PermissionManagerServiceInternal extends PermissionManager
      *                       for, or {@code null} for all permissions
      */
     //@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
-    public abstract void startShellPermissionIdentityDelegation(int uid,
+    void startShellPermissionIdentityDelegation(int uid,
             @NonNull String packageName, @Nullable List<String> permissionNames);
 
     /**
@@ -197,89 +208,85 @@ public abstract class PermissionManagerServiceInternal extends PermissionManager
      * @see #startShellPermissionIdentityDelegation(int, String, List)
      */
     //@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
-    public abstract void stopShellPermissionIdentityDelegation();
+    void stopShellPermissionIdentityDelegation();
 
     /**
      * Sets the dialer application packages provider.
      * @param provider The provider.
      */
-    public abstract void setDialerAppPackagesProvider(PackagesProvider provider);
+    void setDialerAppPackagesProvider(PackagesProvider provider);
 
     /**
      * Set the location extra packages provider.
      * @param provider The packages provider.
      */
-    public abstract  void setLocationExtraPackagesProvider(PackagesProvider provider);
+    void setLocationExtraPackagesProvider(PackagesProvider provider);
 
     /**
      * Sets the location provider packages provider.
      * @param provider The packages provider.
      */
-    public abstract void setLocationPackagesProvider(PackagesProvider provider);
+    void setLocationPackagesProvider(PackagesProvider provider);
 
     /**
      * Sets the SIM call manager packages provider.
      * @param provider The provider.
      */
-    public abstract void setSimCallManagerPackagesProvider(PackagesProvider provider);
+    void setSimCallManagerPackagesProvider(PackagesProvider provider);
 
     /**
      * Sets the SMS application packages provider.
      * @param provider The provider.
      */
-    public abstract void setSmsAppPackagesProvider(PackagesProvider provider);
+    void setSmsAppPackagesProvider(PackagesProvider provider);
 
     /**
      * Sets the sync adapter packages provider.
      * @param provider The provider.
      */
-    public abstract void setSyncAdapterPackagesProvider(SyncAdapterPackagesProvider provider);
+    void setSyncAdapterPackagesProvider(SyncAdapterPackagesProvider provider);
 
     /**
      * Sets the Use Open Wifi packages provider.
      * @param provider The packages provider.
      */
-    public abstract void setUseOpenWifiAppPackagesProvider(PackagesProvider provider);
+    void setUseOpenWifiAppPackagesProvider(PackagesProvider provider);
 
     /**
      * Sets the voice interaction packages provider.
      * @param provider The packages provider.
      */
-    public abstract void setVoiceInteractionPackagesProvider(PackagesProvider provider);
+    void setVoiceInteractionPackagesProvider(PackagesProvider provider);
 
     /**
      * Requests granting of the default permissions to the current default browser.
      * @param packageName The default browser package name.
      * @param userId The user for which to grant the permissions.
      */
-    public abstract void grantDefaultPermissionsToDefaultBrowser(
-            @NonNull String packageName, @UserIdInt int userId);
+    void grantDefaultPermissionsToDefaultBrowser(@NonNull String packageName,
+            @UserIdInt int userId);
 
     /**
      * Requests granting of the default permissions to the current default Use Open Wifi app.
      * @param packageName The default use open wifi package name.
      * @param userId The user for which to grant the permissions.
      */
-    public abstract void grantDefaultPermissionsToDefaultSimCallManager(
-            @NonNull String packageName, @UserIdInt int userId);
+    void grantDefaultPermissionsToDefaultSimCallManager(@NonNull String packageName,
+            @UserIdInt int userId);
 
     /**
      * Requests granting of the default permissions to the current default Use Open Wifi app.
      * @param packageName The default use open wifi package name.
      * @param userId The user for which to grant the permissions.
      */
-    public abstract void grantDefaultPermissionsToDefaultUseOpenWifiApp(
-            @NonNull String packageName, @UserIdInt int userId);
-
-    /** Called when a new user has been created. */
-    public abstract void onNewUserCreated(@UserIdInt int userId);
+    void grantDefaultPermissionsToDefaultUseOpenWifiApp(@NonNull String packageName,
+            @UserIdInt int userId);
 
     /**
      * Removes invalid permissions which are not {@link PermissionInfo#FLAG_HARD_RESTRICTED} or
      * {@link PermissionInfo#FLAG_SOFT_RESTRICTED} from the input.
      */
-    public abstract void retainHardAndSoftRestrictedPermissions(
-            @NonNull List<String> permissionNames);
+    void retainHardAndSoftRestrictedPermissions(@NonNull List<String> permissionNames);
 
     /**
      * Read legacy permissions from legacy permission settings.
@@ -288,8 +295,7 @@ public abstract class PermissionManagerServiceInternal extends PermissionManager
      * {@code LegacyPermissionSettings} which is a implementation detail that permission should not
      * know. Instead, it should retrieve the legacy permissions via a defined API.
      */
-    public abstract void readLegacyPermissionsTEMP(
-            @NonNull LegacyPermissionSettings legacyPermissionSettings);
+    void readLegacyPermissionsTEMP(@NonNull LegacyPermissionSettings legacyPermissionSettings);
 
     /**
      * Write legacy permissions to legacy permission settings.
@@ -297,8 +303,23 @@ public abstract class PermissionManagerServiceInternal extends PermissionManager
      * TODO(zhanghai): This is a temporary method and should be removed once we migrated persistence
      * for permission.
      */
-    public abstract void writeLegacyPermissionsTEMP(
-            @NonNull LegacyPermissionSettings legacyPermissionSettings);
+    void writeLegacyPermissionsTEMP(@NonNull LegacyPermissionSettings legacyPermissionSettings);
+
+    /**
+     * Callback when a user has been created.
+     *
+     * @param userId the created user ID
+     */
+    //@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
+    void onUserCreated(@UserIdInt int userId);
+
+    /**
+     * Callback when a user has been removed.
+     *
+     * @param userId the removed user ID
+     */
+    //@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
+    void onUserRemoved(@UserIdInt int userId);
 
     /**
      * Callback when a package has been added.
@@ -308,7 +329,7 @@ public abstract class PermissionManagerServiceInternal extends PermissionManager
      * @param oldPkg the old package, or {@code null} if none
      */
     //@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
-    public abstract void onPackageAdded(@NonNull AndroidPackage pkg, boolean isInstantApp,
+    void onPackageAdded(@NonNull AndroidPackage pkg, boolean isInstantApp,
             @Nullable AndroidPackage oldPkg);
 
     /**
@@ -319,8 +340,8 @@ public abstract class PermissionManagerServiceInternal extends PermissionManager
      * @param userId the user ID this package is installed for
      */
     //@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
-    public abstract void onPackageInstalled(@NonNull AndroidPackage pkg,
-            @NonNull PackageInstalledParams params, @UserIdInt int userId);
+    void onPackageInstalled(@NonNull AndroidPackage pkg, @NonNull PackageInstalledParams params,
+            @UserIdInt int userId);
 
     /**
      * Callback when a package has been removed.
@@ -328,7 +349,7 @@ public abstract class PermissionManagerServiceInternal extends PermissionManager
      * @param pkg the removed package
      */
     //@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
-    public abstract void onPackageRemoved(@NonNull AndroidPackage pkg);
+    void onPackageRemoved(@NonNull AndroidPackage pkg);
 
     /**
      * Callback when a package has been uninstalled.
@@ -345,9 +366,8 @@ public abstract class PermissionManagerServiceInternal extends PermissionManager
      * @param userId the user ID the package is uninstalled for
      */
     //@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
-    public abstract void onPackageUninstalled(@NonNull String packageName, int appId,
-            @Nullable AndroidPackage pkg, @NonNull List<AndroidPackage> sharedUserPkgs,
-            @UserIdInt int userId);
+    void onPackageUninstalled(@NonNull String packageName, int appId, @Nullable AndroidPackage pkg,
+            @NonNull List<AndroidPackage> sharedUserPkgs, @UserIdInt int userId);
 
     /**
      * Check whether a permission can be propagated to instant app.
@@ -355,7 +375,23 @@ public abstract class PermissionManagerServiceInternal extends PermissionManager
      * @param permissionName the name of the permission
      * @return whether the permission can be propagated
      */
-    public abstract boolean canPropagatePermissionToInstantApp(@NonNull String permissionName);
+    boolean canPropagatePermissionToInstantApp(@NonNull String permissionName);
+
+    /**
+     * Listener for package permission state (permissions or flags) changes.
+     */
+    interface OnRuntimePermissionStateChangedListener {
+
+        /**
+         * Called when the runtime permission state (permissions or flags) changed.
+         *
+         * @param packageName The package for which the change happened.
+         * @param userId the user id for which the change happened.
+         */
+        @Nullable
+        void onRuntimePermissionStateChanged(@NonNull String packageName,
+                @UserIdInt int userId);
+    }
 
     /**
      * The permission-related parameters passed in for package installation.
@@ -363,7 +399,7 @@ public abstract class PermissionManagerServiceInternal extends PermissionManager
      * @see android.content.pm.PackageInstaller.SessionParams
      */
     //@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
-    public static final class PackageInstalledParams {
+    final class PackageInstalledParams {
         /**
          * A static instance whose parameters are all in their default state.
          */
