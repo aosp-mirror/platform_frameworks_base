@@ -28,7 +28,7 @@
     <string name="bugreport_finished_pending_screenshot_text" product="tv" msgid="2343263822812016950">"Klepnutím zdieľajte hlásenie chyby bez snímky obrazovky alebo počkajte na dokončenie snímky obrazovky"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"Klepnutím zdieľajte hlásenie chyby bez snímky obrazovky alebo počkajte na dokončenie snímky obrazovky"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"Klepnutím zdieľajte hlásenie chyby bez snímky obrazovky alebo počkajte na dokončenie snímky obrazovky"</string>
-    <string name="bugreport_confirm" msgid="5917407234515812495">"Hlásenia chýb obsahujú údaje z rôznych súborov denníkov systému, ktoré môžu zahŕňať údaje považované za citlivé (napr. údaje o využití aplikácie a polohe). Zdieľajte ich preto iba s dôveryhodnými ľuďmi a aplikáciami."</string>
+    <string name="bugreport_confirm" msgid="5917407234515812495">"Hlásenia chýb obsahujú údaje z rôznych denníkov systému a môžu zahŕňať údaje, ktoré považujete za citlivé (napríklad údaje o využití aplikácií a polohe). Zdieľajte hlásenia chýb iba s ľuďmi a aplikáciami, ktorým dôverujete."</string>
     <string name="bugreport_confirm_dont_repeat" msgid="6179945398364357318">"Nabudúce nezobrazovať"</string>
     <string name="bugreport_storage_title" msgid="5332488144740527109">"Hlásenia chýb"</string>
     <string name="bugreport_unreadable_text" msgid="586517851044535486">"Súbor s hlásením chyby sa nepodarilo prečítať"</string>
