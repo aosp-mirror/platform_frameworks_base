@@ -39,33 +39,6 @@ import java.util.Set;
 public interface PermissionManagerServiceInternal extends PermissionManagerInternal,
         LegacyPermissionDataProvider {
     /**
-     * Provider for package names.
-     */
-    interface PackagesProvider {
-
-        /**
-         * Gets the packages for a given user.
-         * @param userId The user id.
-         * @return The package names.
-         */
-        String[] getPackages(int userId);
-    }
-
-    /**
-     * Provider for package names.
-     */
-    interface SyncAdapterPackagesProvider {
-
-        /**
-         * Gets the sync adapter packages for given authority and user.
-         * @param authority The authority.
-         * @param userId The user id.
-         * @return The package names.
-         */
-        String[] getPackages(String authority, int userId);
-    }
-
-    /**
      * Adds a listener for runtime permission state (permissions or flags) changes.
      *
      * @param listener The listener.
@@ -209,78 +182,6 @@ public interface PermissionManagerServiceInternal extends PermissionManagerInter
      */
     //@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
     void stopShellPermissionIdentityDelegation();
-
-    /**
-     * Sets the dialer application packages provider.
-     * @param provider The provider.
-     */
-    void setDialerAppPackagesProvider(PackagesProvider provider);
-
-    /**
-     * Set the location extra packages provider.
-     * @param provider The packages provider.
-     */
-    void setLocationExtraPackagesProvider(PackagesProvider provider);
-
-    /**
-     * Sets the location provider packages provider.
-     * @param provider The packages provider.
-     */
-    void setLocationPackagesProvider(PackagesProvider provider);
-
-    /**
-     * Sets the SIM call manager packages provider.
-     * @param provider The provider.
-     */
-    void setSimCallManagerPackagesProvider(PackagesProvider provider);
-
-    /**
-     * Sets the SMS application packages provider.
-     * @param provider The provider.
-     */
-    void setSmsAppPackagesProvider(PackagesProvider provider);
-
-    /**
-     * Sets the sync adapter packages provider.
-     * @param provider The provider.
-     */
-    void setSyncAdapterPackagesProvider(SyncAdapterPackagesProvider provider);
-
-    /**
-     * Sets the Use Open Wifi packages provider.
-     * @param provider The packages provider.
-     */
-    void setUseOpenWifiAppPackagesProvider(PackagesProvider provider);
-
-    /**
-     * Sets the voice interaction packages provider.
-     * @param provider The packages provider.
-     */
-    void setVoiceInteractionPackagesProvider(PackagesProvider provider);
-
-    /**
-     * Requests granting of the default permissions to the current default browser.
-     * @param packageName The default browser package name.
-     * @param userId The user for which to grant the permissions.
-     */
-    void grantDefaultPermissionsToDefaultBrowser(@NonNull String packageName,
-            @UserIdInt int userId);
-
-    /**
-     * Requests granting of the default permissions to the current default Use Open Wifi app.
-     * @param packageName The default use open wifi package name.
-     * @param userId The user for which to grant the permissions.
-     */
-    void grantDefaultPermissionsToDefaultSimCallManager(@NonNull String packageName,
-            @UserIdInt int userId);
-
-    /**
-     * Requests granting of the default permissions to the current default Use Open Wifi app.
-     * @param packageName The default use open wifi package name.
-     * @param userId The user for which to grant the permissions.
-     */
-    void grantDefaultPermissionsToDefaultUseOpenWifiApp(@NonNull String packageName,
-            @UserIdInt int userId);
 
     /**
      * Removes invalid permissions which are not {@link PermissionInfo#FLAG_HARD_RESTRICTED} or

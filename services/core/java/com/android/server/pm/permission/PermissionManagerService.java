@@ -144,7 +144,6 @@ import com.android.server.ServiceThread;
 import com.android.server.SystemConfig;
 import com.android.server.Watchdog;
 import com.android.server.pm.ApexManager;
-import com.android.server.pm.PackageManagerServiceUtils;
 import com.android.server.pm.PackageSetting;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.pm.UserManagerService;
@@ -238,9 +237,6 @@ public class PermissionManagerService extends IPermissionManager.Stub {
     @NonNull
     private final SparseArray<OneTimePermissionUserManager> mOneTimePermissionUserManagers =
             new SparseArray<>();
-
-    /** Default permission policy to provide proper behaviour out-of-the-box */
-    private final DefaultPermissionGrantPolicy mDefaultPermissionGrantPolicy;
 
     /** App ops manager */
     private final AppOpsManager mAppOpsManager;
@@ -390,8 +386,6 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         mHandler = new Handler(mHandlerThread.getLooper());
         Watchdog.getInstance().addThread(mHandler);
 
-        mDefaultPermissionGrantPolicy = new DefaultPermissionGrantPolicy(
-                context, mHandlerThread.getLooper());
         SystemConfig systemConfig = SystemConfig.getInstance();
         mSystemPermissions = systemConfig.getSystemPermissions();
         mGlobalGids = systemConfig.getGlobalGids();
@@ -2007,58 +2001,40 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
     @Override
     public void grantDefaultPermissionsToEnabledCarrierApps(String[] packageNames, int userId) {
-        final int callingUid = Binder.getCallingUid();
-        PackageManagerServiceUtils
-                .enforceSystemOrPhoneCaller("grantPermissionsToEnabledCarrierApps", callingUid);
-        Binder.withCleanCallingIdentity(() -> mDefaultPermissionGrantPolicy
-                .grantDefaultPermissionsToEnabledCarrierApps(packageNames, userId));
+        LocalServices.getService(LegacyPermissionManagerInternal.class)
+                .grantDefaultPermissionsToEnabledCarrierApps(packageNames, userId);
     }
 
     @Override
     public void grantDefaultPermissionsToEnabledImsServices(String[] packageNames, int userId) {
-        final int callingUid = Binder.getCallingUid();
-        PackageManagerServiceUtils.enforceSystemOrPhoneCaller(
-                "grantDefaultPermissionsToEnabledImsServices", callingUid);
-        Binder.withCleanCallingIdentity(() -> mDefaultPermissionGrantPolicy
-                .grantDefaultPermissionsToEnabledImsServices(packageNames, userId));
+        LocalServices.getService(LegacyPermissionManagerInternal.class)
+                .grantDefaultPermissionsToEnabledImsServices(packageNames, userId);
     }
 
     @Override
     public void grantDefaultPermissionsToEnabledTelephonyDataServices(
             String[] packageNames, int userId) {
-        final int callingUid = Binder.getCallingUid();
-        PackageManagerServiceUtils.enforceSystemOrPhoneCaller(
-                "grantDefaultPermissionsToEnabledTelephonyDataServices", callingUid);
-        Binder.withCleanCallingIdentity(() -> mDefaultPermissionGrantPolicy
-                .grantDefaultPermissionsToEnabledTelephonyDataServices(packageNames, userId));
+        LocalServices.getService(LegacyPermissionManagerInternal.class)
+                .grantDefaultPermissionsToEnabledTelephonyDataServices(packageNames, userId);
     }
 
     @Override
     public void revokeDefaultPermissionsFromDisabledTelephonyDataServices(
             String[] packageNames, int userId) {
-        final int callingUid = Binder.getCallingUid();
-        PackageManagerServiceUtils.enforceSystemOrPhoneCaller(
-                "revokeDefaultPermissionsFromDisabledTelephonyDataServices", callingUid);
-        Binder.withCleanCallingIdentity(() -> mDefaultPermissionGrantPolicy
-                .revokeDefaultPermissionsFromDisabledTelephonyDataServices(packageNames, userId));
+        LocalServices.getService(LegacyPermissionManagerInternal.class)
+                .revokeDefaultPermissionsFromDisabledTelephonyDataServices(packageNames, userId);
     }
 
     @Override
     public void grantDefaultPermissionsToActiveLuiApp(String packageName, int userId) {
-        final int callingUid = Binder.getCallingUid();
-        PackageManagerServiceUtils
-                .enforceSystemOrPhoneCaller("grantDefaultPermissionsToActiveLuiApp", callingUid);
-        Binder.withCleanCallingIdentity(() -> mDefaultPermissionGrantPolicy
-                .grantDefaultPermissionsToActiveLuiApp(packageName, userId));
+        LocalServices.getService(LegacyPermissionManagerInternal.class)
+                .grantDefaultPermissionsToActiveLuiApp(packageName, userId);
     }
 
     @Override
     public void revokeDefaultPermissionsFromLuiApps(String[] packageNames, int userId) {
-        final int callingUid = Binder.getCallingUid();
-        PackageManagerServiceUtils
-                .enforceSystemOrPhoneCaller("revokeDefaultPermissionsFromLuiApps", callingUid);
-        Binder.withCleanCallingIdentity(() -> mDefaultPermissionGrantPolicy
-                .revokeDefaultPermissionsFromLuiApps(packageNames, userId));
+        LocalServices.getService(LegacyPermissionManagerInternal.class)
+                .revokeDefaultPermissionsFromLuiApps(packageNames, userId);
     }
 
     /**
@@ -4551,24 +4527,6 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
         mPermissionControllerManager = mContext.getSystemService(PermissionControllerManager.class);
         mPermissionPolicyInternal = LocalServices.getService(PermissionPolicyInternal.class);
-
-        int[] grantPermissionsUserIds = EMPTY_INT_ARRAY;
-        for (int userId : UserManagerService.getInstance().getUserIds()) {
-            if (mPackageManagerInt.isPermissionUpgradeNeeded(userId)) {
-                grantPermissionsUserIds = ArrayUtils.appendInt(
-                        grantPermissionsUserIds, userId);
-            }
-        }
-        // If we upgraded grant all default permissions before kicking off.
-        for (int userId : grantPermissionsUserIds) {
-            mDefaultPermissionGrantPolicy.grantDefaultPermissions(userId);
-        }
-        if (grantPermissionsUserIds == EMPTY_INT_ARRAY) {
-            // If we did not grant default permissions, we preload from this the
-            // default permission exceptions lazily to ensure we don't hit the
-            // disk on a new user creation.
-            mDefaultPermissionGrantPolicy.scheduleReadDefaultPermissionExceptions();
-        }
     }
 
     private static String getVolumeUuidForPackage(AndroidPackage pkg) {
@@ -5182,71 +5140,11 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         }
 
         @Override
-        public void setDialerAppPackagesProvider(PackagesProvider provider) {
-            mDefaultPermissionGrantPolicy.setDialerAppPackagesProvider(provider);
-        }
-
-        @Override
-        public void setLocationExtraPackagesProvider(PackagesProvider provider) {
-            mDefaultPermissionGrantPolicy.setLocationExtraPackagesProvider(provider);
-        }
-
-        @Override
-        public void setLocationPackagesProvider(PackagesProvider provider) {
-            mDefaultPermissionGrantPolicy.setLocationPackagesProvider(provider);
-        }
-
-        @Override
-        public void setSimCallManagerPackagesProvider(PackagesProvider provider) {
-            mDefaultPermissionGrantPolicy.setSimCallManagerPackagesProvider(provider);
-        }
-
-        @Override
-        public void setSmsAppPackagesProvider(PackagesProvider provider) {
-            mDefaultPermissionGrantPolicy.setSmsAppPackagesProvider(provider);
-        }
-
-        @Override
-        public void setSyncAdapterPackagesProvider(SyncAdapterPackagesProvider provider) {
-            mDefaultPermissionGrantPolicy.setSyncAdapterPackagesProvider(provider);
-        }
-
-        @Override
-        public void setUseOpenWifiAppPackagesProvider(PackagesProvider provider) {
-            mDefaultPermissionGrantPolicy.setUseOpenWifiAppPackagesProvider(provider);
-        }
-
-        @Override
-        public void setVoiceInteractionPackagesProvider(PackagesProvider provider) {
-            mDefaultPermissionGrantPolicy.setVoiceInteractionPackagesProvider(provider);
-        }
-
-        @Override
-        public void grantDefaultPermissionsToDefaultBrowser(@NonNull String packageName,
-                @UserIdInt int userId) {
-            mDefaultPermissionGrantPolicy.grantDefaultPermissionsToDefaultBrowser(packageName,
-                    userId);
-        }
-
-        @Override
-        public void grantDefaultPermissionsToDefaultSimCallManager(String packageName, int userId) {
-            mDefaultPermissionGrantPolicy.grantDefaultPermissionsToDefaultSimCallManager(
-                    packageName, userId);
-        }
-
-        @Override
-        public void grantDefaultPermissionsToDefaultUseOpenWifiApp(String packageName, int userId) {
-            mDefaultPermissionGrantPolicy.grantDefaultPermissionsToDefaultUseOpenWifiApp(
-                    packageName, userId);
-        }
-
-        @Override
         public void onUserCreated(@UserIdInt int userId) {
             Preconditions.checkArgumentNonNegative(userId, "userId");
             // NOTE: This adds UPDATE_PERMISSIONS_REPLACE_PKG
             PermissionManagerService.this.updateAllPermissions(StorageManager.UUID_PRIVATE_INTERNAL,
                     true, mDefaultPermissionCallback);
-            mDefaultPermissionGrantPolicy.grantDefaultPermissions(userId);
         }
 
         @Override

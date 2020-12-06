@@ -27,7 +27,6 @@ import android.util.Slog;
 import com.android.internal.infra.AndroidFuture;
 import com.android.internal.util.CollectionUtils;
 import com.android.server.FgThread;
-import com.android.server.pm.permission.PermissionManagerServiceInternal;
 
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
@@ -42,19 +41,14 @@ import java.util.function.Supplier;
 public class DefaultAppProvider {
     @NonNull
     private final Supplier<RoleManager> mRoleManagerSupplier;
-    @NonNull
-    private final PermissionManagerServiceInternal mPermissionManager;
 
     /**
      * Create a new instance of this class
      *
      * @param roleManagerSupplier the supplier for {@link RoleManager}
-     * @param permissionManager the {@link PermissionManagerServiceInternal}
      */
-    public DefaultAppProvider(@NonNull Supplier<RoleManager> roleManagerSupplier, @NonNull
-            PermissionManagerServiceInternal permissionManager) {
+    public DefaultAppProvider(@NonNull Supplier<RoleManager> roleManagerSupplier) {
         mRoleManagerSupplier = roleManagerSupplier;
-        mPermissionManager = permissionManager;
     }
 
     /**
@@ -73,11 +67,10 @@ public class DefaultAppProvider {
      *
      * @param packageName package name of the default browser, or {@code null} to unset
      * @param async whether the operation should be asynchronous
-     * @param doGrant whether to grant default permissions
      * @param userId the user ID
      * @return whether the default browser was successfully set.
      */
-    public boolean setDefaultBrowser(@Nullable String packageName, boolean async, boolean doGrant,
+    public boolean setDefaultBrowser(@Nullable String packageName, boolean async,
             @UserIdInt int userId) {
         if (userId == UserHandle.USER_ALL) {
             return false;
@@ -113,9 +106,6 @@ public class DefaultAppProvider {
                             + packageName, e);
                     return false;
                 }
-            }
-            if (doGrant && packageName != null) {
-                mPermissionManager.grantDefaultPermissionsToDefaultBrowser(packageName, userId);
             }
         } finally {
             Binder.restoreCallingIdentity(identity);
