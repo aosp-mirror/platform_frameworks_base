@@ -30,6 +30,7 @@ import static com.android.wm.shell.pip.PipAnimationController.TRANSITION_DIRECTI
 import static com.android.wm.shell.pip.PipAnimationController.TRANSITION_DIRECTION_NONE;
 import static com.android.wm.shell.pip.PipAnimationController.TRANSITION_DIRECTION_REMOVE_STACK;
 import static com.android.wm.shell.pip.PipAnimationController.TRANSITION_DIRECTION_SAME;
+import static com.android.wm.shell.pip.PipAnimationController.TRANSITION_DIRECTION_SNAP_AFTER_RESIZE;
 import static com.android.wm.shell.pip.PipAnimationController.TRANSITION_DIRECTION_TO_PIP;
 import static com.android.wm.shell.pip.PipAnimationController.isInPipDirection;
 import static com.android.wm.shell.pip.PipAnimationController.isOutPipDirection;
@@ -814,6 +815,20 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
                 TRANSITION_DIRECTION_NONE, duration, updateBoundsCallback);
     }
 
+    /**
+     * Animates resizing of the pinned stack given the duration and start bounds.
+     * This is used when the starting bounds is not the current PiP bounds.
+     */
+    public void scheduleAnimateResizePip(Rect fromBounds, Rect toBounds, int duration,
+            Consumer<Rect> updateBoundsCallback) {
+        if (mShouldDeferEnteringPip) {
+            Log.d(TAG, "skip scheduleAnimateResizePip, entering pip deferred");
+            return;
+        }
+        scheduleAnimateResizePip(fromBounds, toBounds, null /* sourceHintRect */,
+                TRANSITION_DIRECTION_SNAP_AFTER_RESIZE, duration, updateBoundsCallback);
+    }
+
     private void scheduleAnimateResizePip(Rect currentBounds, Rect destinationBounds,
             Rect sourceHintRect, @PipAnimationController.TransitionDirection int direction,
             int durationMs, Consumer<Rect> updateBoundsCallback) {
@@ -1073,8 +1088,11 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             Log.w(TAG, "Abort animation, invalid leash");
             return;
         }
+        Rect baseBounds = direction == TRANSITION_DIRECTION_SNAP_AFTER_RESIZE
+                ? mPipBoundsState.getBounds() : currentBounds;
         mPipAnimationController
-                .getAnimator(mLeash, currentBounds, destinationBounds, sourceHintRect, direction)
+                .getAnimator(mLeash, baseBounds, currentBounds, destinationBounds, sourceHintRect,
+                        direction)
                 .setTransitionDirection(direction)
                 .setPipAnimationCallback(mPipAnimationCallback)
                 .setDuration(durationMs)

@@ -1192,7 +1192,7 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
         NotificationRecord r = getLightsNotification();
         mService.buzzBeepBlinkLocked(r);
         verifyNeverLights();
-        assertFalse(r.isInterruptive());
+        assertTrue(r.isInterruptive());
         assertEquals(-1, r.getLastAudiblyAlertedMs());
     }
 

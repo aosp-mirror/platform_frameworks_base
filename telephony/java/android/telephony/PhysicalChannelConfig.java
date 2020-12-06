@@ -29,10 +29,6 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
 import java.util.Objects;
 
-/**
- * @hide
- */
-@SystemApi
 public final class PhysicalChannelConfig implements Parcelable {
 
     // TODO(b/72993578) consolidate these enums in a central location.
@@ -86,7 +82,7 @@ public final class PhysicalChannelConfig implements Parcelable {
     private int mFrequencyRange;
 
     /**
-     * The absolute radio frequency channel number, {@link CHANNEL_NUMBER_UNKNOWN} if unknown.
+     * The absolute radio frequency channel number, {@link #CHANNEL_NUMBER_UNKNOWN} if unknown.
      */
     private int mChannelNumber;
 
@@ -97,7 +93,7 @@ public final class PhysicalChannelConfig implements Parcelable {
     private int[] mContextIds;
 
     /**
-     * The physical cell identifier for this cell - PCI, PSC, {@link PHYSICAL_CELL_ID_UNKNOWN}
+     * The physical cell identifier for this cell - PCI, PSC, {@link #PHYSICAL_CELL_ID_UNKNOWN}
      * if unknown.
      */
     private int mPhysicalCellId;
@@ -153,7 +149,7 @@ public final class PhysicalChannelConfig implements Parcelable {
 
     /**
      * @return the absolute radio frequency channel number for this physical channel,
-     * {@link CHANNEL_NUMBER_UNKNOWN} if unknown.
+     * {@link #CHANNEL_NUMBER_UNKNOWN} if unknown.
      */
     public int getChannelNumber() {
         return mChannelNumber;
@@ -169,7 +165,7 @@ public final class PhysicalChannelConfig implements Parcelable {
      * In 5G RAN, this value is physical layer cell identity. The range is [0, 1007].
      * Reference: 3GPP TS 38.211 section 7.4.2.1.
      *
-     * @return the physical cell identifier for this cell, {@link PHYSICAL_CELL_ID_UNKNOWN}
+     * @return the physical cell identifier for this cell, {@link #PHYSICAL_CELL_ID_UNKNOWN}
      * if {@link android.telephony.CellInfo#UNAVAILABLE}.
      */
     @IntRange(from = 0, to = 1007)

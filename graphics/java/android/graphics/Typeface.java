@@ -82,7 +82,7 @@ public class Typeface {
     private static String TAG = "Typeface";
 
     /** @hide */
-    public static final boolean ENABLE_LAZY_TYPEFACE_INITIALIZATION = false;
+    public static final boolean ENABLE_LAZY_TYPEFACE_INITIALIZATION = true;
 
     private static final NativeAllocationRegistry sRegistry =
             NativeAllocationRegistry.createMalloced(

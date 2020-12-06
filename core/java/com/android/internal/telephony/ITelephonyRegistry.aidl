@@ -41,16 +41,9 @@ interface ITelephonyRegistry {
             IOnSubscriptionsChangedListener callback);
     void removeOnSubscriptionsChangedListener(String pkg,
             IOnSubscriptionsChangedListener callback);
-    /**
-      * @deprecated Use {@link #listenWithFeature(String, String, IPhoneStateListener, int,
-      * boolean) instead
-      */
-    @UnsupportedAppUsage
-    void listen(String pkg, IPhoneStateListener callback, int events, boolean notifyNow);
-    void listenWithFeature(String pkg, String featureId, IPhoneStateListener callback, long events,
-            boolean notifyNow);
-    void listenForSubscriber(in int subId, String pkg, String featureId,
-            IPhoneStateListener callback, long events, boolean notifyNow);
+
+    void listenWithEventList(in int subId, String pkg, String featureId,
+            IPhoneStateListener callback, in int[] events, boolean notifyNow);
     @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     void notifyCallStateForAllSubs(int state, String incomingNumber);
     void notifyCallState(in int phoneId, in int subId, int state, String incomingNumber);
@@ -99,6 +92,6 @@ interface ITelephonyRegistry {
     void notifyRegistrationFailed(int slotIndex, int subId, in CellIdentity cellIdentity,
             String chosenPlmn, int domain, int causeCode, int additionalCauseCode);
     void notifyBarringInfoChanged(int slotIndex, int subId, in BarringInfo barringInfo);
-    void notifyPhysicalChannelConfigurationForSubscriber(in int subId,
+    void notifyPhysicalChannelConfigForSubscriber(in int subId,
             in List<PhysicalChannelConfig> configs);
 }
