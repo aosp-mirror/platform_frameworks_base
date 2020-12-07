@@ -25,6 +25,8 @@ import static com.android.server.hdmi.Constants.ADDR_UNREGISTERED;
 import static com.android.server.hdmi.Constants.MESSAGE_DEVICE_VENDOR_ID;
 import static com.android.server.hdmi.Constants.MESSAGE_REPORT_PHYSICAL_ADDRESS;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
@@ -264,4 +266,14 @@ public class HdmiCecLocalDeviceTest {
 
         assertFalse(result);
     }
+
+    @Test
+    public void handleCecVersion_isHandled() {
+        boolean result = mHdmiLocalDevice.onMessage(
+                HdmiCecMessageBuilder.buildCecVersion(ADDR_PLAYBACK_1, mHdmiLocalDevice.mAddress,
+                        HdmiControlManager.HDMI_CEC_VERSION_1_4_b));
+
+        assertThat(result).isTrue();
+    }
+
 }
