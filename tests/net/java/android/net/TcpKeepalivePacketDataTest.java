@@ -147,5 +147,11 @@ public final class TcpKeepalivePacketDataTest {
         assertEquals(resultData.rcvWndScale, wndScale);
         assertEquals(resultData.tos, tos);
         assertEquals(resultData.ttl, ttl);
+
+        final String expected = ""
+                + "android.net.TcpKeepalivePacketDataParcelable{srcAddress: [10, 0, 0, 1],"
+                + " srcPort: 1234, dstAddress: [10, 0, 0, 5], dstPort: 4321, seq: 286331153,"
+                + " ack: 572662306, rcvWnd: 48000, rcvWndScale: 2, tos: 4, ttl: 64}";
+        assertEquals(expected, resultData.toString());
     }
 }
