@@ -136,6 +136,12 @@ public class UserManager {
     public static final String USER_TYPE_PROFILE_MANAGED = "android.os.usertype.profile.MANAGED";
 
     /**
+     * User type representing a generic profile for testing purposes. Only on debuggable builds.
+     * @hide
+     */
+    public static final String USER_TYPE_PROFILE_TEST = "android.os.usertype.profile.TEST";
+
+    /**
      * User type representing a {@link UserHandle#USER_SYSTEM system} user that is <b>not</b> a
      * human user.
      * This type of user cannot be created; it can only pre-exist on first boot.
