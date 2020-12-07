@@ -158,6 +158,13 @@ prebuilt_etc {
 }
 
 prebuilt_etc {
+    name: "privapp_allowlist_com.google.android.car.networking.preferenceupdater",
+    sub_dir: "permissions",
+    src: "com.google.android.car.networking.preferenceupdater.xml",
+    filename_from_src: true,
+}
+
+prebuilt_etc {
     name: "privapp_whitelist_com.android.car.ui.paintbooth",
     sub_dir: "permissions",
     src: "com.android.car.ui.paintbooth.xml",
