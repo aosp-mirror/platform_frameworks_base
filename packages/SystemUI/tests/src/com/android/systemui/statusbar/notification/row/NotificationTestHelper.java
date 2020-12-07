@@ -455,7 +455,10 @@ public class NotificationTestHelper {
 
     private BubbleMetadata makeBubbleMetadata(PendingIntent deleteIntent) {
         Intent target = new Intent(mContext, BubblesTestActivity.class);
-        PendingIntent bubbleIntent = PendingIntent.getActivity(mContext, 0, target, 0);
+        // TODO(b/175014468) Please replace FLAG_MUTABLE_UNAUDITED below
+        // with either FLAG_IMMUTABLE (recommended) or FLAG_MUTABLE.
+        PendingIntent bubbleIntent = PendingIntent.getActivity(mContext, 0, target,
+                PendingIntent.FLAG_MUTABLE_UNAUDITED);
 
         return new BubbleMetadata.Builder(bubbleIntent,
                         Icon.createWithResource(mContext, R.drawable.android))
