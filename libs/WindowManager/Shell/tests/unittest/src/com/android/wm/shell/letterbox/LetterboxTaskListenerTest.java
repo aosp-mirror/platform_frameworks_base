@@ -99,7 +99,8 @@ public final class LetterboxTaskListenerTest extends ShellTestCase {
                         /* maxBounds= */ new Rect(0, 0, 200, 100), // equal to parent bounds
                         /* parentBounds */ new Rect(0, 0, 200, 100),
                         /* activityBounds */ new Rect(75, 0, 125, 75),
-                        /* taskBounds */ new Rect(50, 0, 125, 100)),
+                        /* taskBounds */ new Rect(50, 0, 125, 100),
+                        /* activityInsets */ new Rect(0, 0, 0, 0)),
                 mLeash);
 
         // Task doesn't need to repositioned
@@ -114,7 +115,8 @@ public final class LetterboxTaskListenerTest extends ShellTestCase {
                         /* parentBounds */ new Rect(0, 0, 200, 100),
                         // Activity is offset by 25 to the left
                         /* activityBounds */ new Rect(50, 0, 100, 75),
-                        /* taskBounds */ new Rect(50, 0, 125, 100)));
+                        /* taskBounds */ new Rect(50, 0, 125, 100),
+                        /* activityInsets */ new Rect(0, 0, 0, 0)));
 
         // Task needs to be repositioned by 25 to the left
         verifySetPosition(75, 0);
@@ -135,7 +137,8 @@ public final class LetterboxTaskListenerTest extends ShellTestCase {
                         /* maxBounds= */ new Rect(0, 0, 200, 100), // equal to parent bounds
                         /* parentBounds */ new Rect(0, 0, 200, 100),
                         /* activityBounds */ new Rect(150, 0, 200, 75),
-                        /* taskBounds */ new Rect(125, 0, 200, 100)),
+                        /* taskBounds */ new Rect(125, 0, 200, 100),
+                        /* activityInsets */ new Rect(0, 10, 10, 0)),
                 mLeash);
 
         verifySetPosition(-15, 0);
@@ -156,7 +159,8 @@ public final class LetterboxTaskListenerTest extends ShellTestCase {
                         /* maxBounds= */ new Rect(0, 0, 200, 100), // equal to parent bounds
                         /* parentBounds */ new Rect(0, 0, 200, 100),
                         /* activityBounds */ new Rect(150, 0, 200, 75),
-                        /* taskBounds */ new Rect(125, 0, 200, 100)),
+                        /* taskBounds */ new Rect(125, 0, 200, 100),
+                        /* activityInsets */ new Rect(0, 10, 10, 0)),
                 mLeash);
 
         verifySetPosition(55, 0);
@@ -177,7 +181,8 @@ public final class LetterboxTaskListenerTest extends ShellTestCase {
                         /* maxBounds= */ new Rect(0, 0, 200, 100), // equal to parent bounds
                         /* parentBounds */ new Rect(0, 0, 200, 100),
                         /* activityBounds */ new Rect(50, 0, 100, 75),
-                        /* taskBounds */ new Rect(25, 0, 100, 100)),
+                        /* taskBounds */ new Rect(25, 0, 100, 100),
+                        /* activityInsets */ new Rect(0, 10, 10, 0)),
                 mLeash);
 
         verifySetPosition(115, 0);
@@ -198,7 +203,8 @@ public final class LetterboxTaskListenerTest extends ShellTestCase {
                         /* maxBounds= */ new Rect(0, 0, 100, 150), // equal to parent bounds
                         /* parentBounds */ new Rect(0, 0, 100, 150),
                         /* activityBounds */ new Rect(0, 75, 50, 125),
-                        /* taskBounds */ new Rect(0, 50, 100, 125)),
+                        /* taskBounds */ new Rect(0, 50, 100, 125),
+                        /* activityInsets */ new Rect(10, 0, 0, 0)),
                 mLeash);
 
         verifySetPosition(20, -15);
@@ -219,12 +225,36 @@ public final class LetterboxTaskListenerTest extends ShellTestCase {
                         /* maxBounds= */ new Rect(0, 0, 100, 150), // equal to parent bounds
                         /* parentBounds */ new Rect(0, 0, 100, 150),
                         /* activityBounds */ new Rect(0, 75, 50, 125),
-                        /* taskBounds */ new Rect(0, 50, 100, 125)),
+                        /* taskBounds */ new Rect(0, 50, 100, 125),
+                        /* activityInsets */ new Rect(10, 0, 0, 0)),
                 mLeash);
 
         verifySetPosition(20, 20);
         // Should return activity coordinates offset by task coordinates minus unwanted left inset
         verifySetWindowCrop(new Rect(10, 25, 50, 75));
+    }
+
+    @Test
+    public void testOnTaskInfoAppeared_portraitWithCenterGravity_visibleLeftInset() {
+        mLetterboxConfigController.setPortraitGravity(Gravity.CENTER);
+        setWindowBoundsAndInsets(
+                /* windowBounds= */ new Rect(0, 0, 100, 150), // equal to parent bounds
+                Insets.of(/* left= */ 10, /* top= */ 10, /* right= */ 10, /* bottom= */ 20));
+
+        mLetterboxTaskListener.onTaskAppeared(
+                createTaskInfo(
+                        /* taskId */ 1,
+                        /* maxBounds= */ new Rect(0, 0, 100, 150), // equal to parent bounds
+                        /* parentBounds */ new Rect(0, 0, 100, 150),
+                        /* activityBounds */ new Rect(0, 75, 50, 125),
+                        /* taskBounds */ new Rect(0, 50, 100, 125),
+                        // Activity is drawn under the left inset.
+                        /* activityInsets */ new Rect(0, 0, 0, 0)),
+                mLeash);
+
+        verifySetPosition(20, 20);
+        // Should return activity coordinates offset by task coordinates
+        verifySetWindowCrop(new Rect(0, 25, 50, 75));
     }
 
     @Test
@@ -240,7 +270,8 @@ public final class LetterboxTaskListenerTest extends ShellTestCase {
                         /* maxBounds= */ new Rect(0, 0, 100, 150), // equal to parent bounds
                         /* parentBounds */ new Rect(0, 0, 100, 150),
                         /* activityBounds */ new Rect(0, 75, 50, 125),
-                        /* taskBounds */ new Rect(0, 50, 100, 125)),
+                        /* taskBounds */ new Rect(0, 50, 100, 125),
+                        /* activityInsets */ new Rect(10, 0, 0, 0)),
                 mLeash);
 
         verifySetPosition(20, 55);
@@ -261,14 +292,14 @@ public final class LetterboxTaskListenerTest extends ShellTestCase {
                         /* maxBounds= */ new Rect(0, 0, 200, 125), // equal to parent bounds
                         /* parentBounds */ new Rect(0, 0, 200, 125),
                         /* activityBounds */ new Rect(15, 0, 175, 120),
-                        /* taskBounds */ new Rect(0, 0, 100, 125)), // equal to parent bounds
+                        /* taskBounds */ new Rect(0, 0, 200, 125),
+                        /* activityInsets */ new Rect(10, 25, 10, 10)), // equal to parent bounds
                 mLeash);
 
         // Activity fully covers parent bounds with insets so doesn't need to be moved.
         verifySetPosition(0, 0);
-        // Should return activity coordinates offset by task coordinates minus all insets
-        // except top one (keep status bar decor visible).
-        verifySetWindowCrop(new Rect(25, 0, 165, 110));
+        // Should return activity coordinates offset by task coordinates
+        verifySetWindowCrop(new Rect(15, 0, 175, 120));
     }
 
     @Test
@@ -284,7 +315,8 @@ public final class LetterboxTaskListenerTest extends ShellTestCase {
                         /* maxBounds= */ new Rect(0, 0, 100, 150),
                         /* parentBounds */ new Rect(0, 75, 100, 225),
                         /* activityBounds */ new Rect(25, 75, 75, 125),
-                        /* taskBounds */ new Rect(0, 75, 100, 125)),
+                        /* taskBounds */ new Rect(0, 75, 100, 125),
+                        /* activityInsets */ new Rect(10, 0, 0, 0)),
                 mLeash);
 
         verifySetPosition(0, 0);
@@ -295,7 +327,8 @@ public final class LetterboxTaskListenerTest extends ShellTestCase {
     public void testOnTaskAppeared_calledSecondTimeWithSameTaskId_throwsException() {
         setWindowBoundsAndInsets(new Rect(),  Insets.NONE);
         RunningTaskInfo taskInfo =
-                createTaskInfo(/* taskId */ 1, new Rect(),  new Rect(), new Rect(), new Rect());
+                createTaskInfo(/* taskId */ 1, new Rect(),  new Rect(), new Rect(), new Rect(),
+                new Rect());
         mLetterboxTaskListener.onTaskAppeared(taskInfo, mLeash);
         mLetterboxTaskListener.onTaskAppeared(taskInfo, mLeash);
     }
@@ -319,13 +352,15 @@ public final class LetterboxTaskListenerTest extends ShellTestCase {
                 final Rect maxBounds,
                 final Rect parentBounds,
                 final Rect activityBounds,
-                final Rect taskBounds) {
+                final Rect taskBounds,
+                final Rect activityInsets) {
         RunningTaskInfo taskInfo = new RunningTaskInfo();
         taskInfo.taskId = taskId;
         taskInfo.configuration.windowConfiguration.setMaxBounds(maxBounds);
         taskInfo.parentBounds = parentBounds;
         taskInfo.configuration.windowConfiguration.setBounds(taskBounds);
         taskInfo.letterboxActivityBounds = Rect.copyOrNull(activityBounds);
+        taskInfo.letterboxActivityInsets = Rect.copyOrNull(activityInsets);
 
         return taskInfo;
     }

@@ -519,6 +519,11 @@ class Task extends WindowContainer<WindowContainer> {
     @Nullable
     private Rect mLetterboxActivityBounds;
 
+    // Activity insets if this task or its top activity is presented in letterbox mode and
+    // {@code null} otherwise.
+    @Nullable
+    private Rect mLetterboxActivityInsets;
+
     // Whether the task is currently being drag-resized
     private boolean mDragResizing;
     private int mDragResizeMode;
@@ -4083,6 +4088,7 @@ class Task extends WindowContainer<WindowContainer> {
         // bounds, e.g. fullscreen bounds instead of letterboxed bounds. To work around this,
         // assigning bounds from ActivityRecord#layoutLetterbox when they are ready.
         info.letterboxActivityBounds = Rect.copyOrNull(mLetterboxActivityBounds);
+        info.letterboxActivityInsets = Rect.copyOrNull(mLetterboxActivityInsets);
         info.positionInParent = getRelativePosition();
         info.parentBounds = getParentBounds();
 
@@ -4110,15 +4116,17 @@ class Task extends WindowContainer<WindowContainer> {
                 ? null : new PictureInPictureParams(rootActivity.pictureInPictureArgs);
     }
 
-    void maybeUpdateLetterboxBounds(
-                ActivityRecord activityRecord, @Nullable Rect letterboxActivityBounds) {
+    void maybeUpdateLetterboxInTaskOrganizer(
+                ActivityRecord activityRecord,
+                @Nullable Rect activityBounds,
+                @Nullable Rect activityInsets) {
         if (isOrganized()
                 && mReuseActivitiesReport.top == activityRecord
                 // Want to force update only if letterbox bounds have changed.
-                && !Objects.equals(
-                    mLetterboxActivityBounds,
-                    letterboxActivityBounds)) {
-            mLetterboxActivityBounds = Rect.copyOrNull(letterboxActivityBounds);
+                && (!Objects.equals(mLetterboxActivityBounds, activityBounds)
+                        || !Objects.equals(mLetterboxActivityInsets, activityInsets))) {
+            mLetterboxActivityBounds = Rect.copyOrNull(activityBounds);
+            mLetterboxActivityInsets = Rect.copyOrNull(activityInsets);
             // Forcing update to reduce visual jank during the transition.
             dispatchTaskInfoChangedIfNeeded(true /* force */);
         }
