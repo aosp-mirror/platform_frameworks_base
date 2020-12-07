@@ -2410,15 +2410,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             wm = (WindowManager) context.getSystemService(WINDOW_SERVICE);
             view = win.getDecorView();
 
-            // Ignore to show splash screen if the decorView is not opaque.
-            if (!view.isOpaque()) {
-                if (DEBUG_SPLASH_SCREEN) {
-                    Slog.d(TAG, "addSplashScreen: the view of " + packageName
-                            + " is not opaque, cancel it");
-                }
-                return null;
-            }
-
             if (DEBUG_SPLASH_SCREEN) Slog.d(TAG, "Adding splash screen window for "
                 + packageName + " / " + appToken + ": " + (view.getParent() != null ? view : null));
 
