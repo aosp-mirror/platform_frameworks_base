@@ -26,7 +26,6 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.util.DebugUtils;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 import android.view.SurfaceControl;
@@ -388,7 +387,7 @@ class SurfaceAnimator {
         if (DEBUG_ANIM) Slog.i(TAG, "Reparenting to leash");
         final SurfaceControl.Builder builder = animatable.makeAnimationLeash()
                 .setParent(animatable.getAnimationLeashParent())
-                .setName(surface + " - animation-leash")
+                .setName(surface + " - animation-leash of " + animationTypeToString(type))
                 // TODO(b/151665759) Defer reparent calls
                 // We want the leash to be visible immediately because the transaction which shows
                 // the leash may be deferred but the reparent will not. This will cause the leashed
@@ -430,8 +429,7 @@ class SurfaceAnimator {
 
     void dump(PrintWriter pw, String prefix) {
         pw.print(prefix); pw.print("mLeash="); pw.print(mLeash);
-        pw.print(" mAnimationType=" + DebugUtils.valueToString(SurfaceAnimator.class,
-                "ANIMATION_TYPE_", mAnimationType));
+        pw.print(" mAnimationType=" + animationTypeToString(mAnimationType));
         pw.println(mAnimationStartDelayed ? " mAnimationStartDelayed=true" : "");
         pw.print(prefix); pw.print("Animation: "); pw.println(mAnimation);
         if (mAnimation != null) {
@@ -511,6 +509,23 @@ class SurfaceAnimator {
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface AnimationType {}
+
+    /**
+     * Converts {@link AnimationType} to String.
+     */
+    private static String animationTypeToString(@AnimationType int type) {
+        switch (type) {
+            case ANIMATION_TYPE_NONE: return "none";
+            case ANIMATION_TYPE_APP_TRANSITION: return "app_transition";
+            case ANIMATION_TYPE_SCREEN_ROTATION: return "screen_rotation";
+            case ANIMATION_TYPE_DIMMER: return "dimmer";
+            case ANIMATION_TYPE_RECENTS: return "recents_animation";
+            case ANIMATION_TYPE_WINDOW_ANIMATION: return "window_animation";
+            case ANIMATION_TYPE_INSETS_CONTROL: return "insets_animation";
+            case ANIMATION_TYPE_FIXED_TRANSFORM: return "fixed_rotation";
+            default: return "unknown type:" + type;
+        }
+    }
 
     /**
      * Callback to be passed into {@link AnimationAdapter#startAnimation} to be invoked by the

@@ -113,7 +113,7 @@ import com.android.server.location.provider.MockLocationProvider;
 import com.android.server.location.provider.PassiveLocationProvider;
 import com.android.server.location.provider.PassiveLocationProviderManager;
 import com.android.server.location.provider.proxy.ProxyLocationProvider;
-import com.android.server.pm.permission.PermissionManagerServiceInternal;
+import com.android.server.pm.permission.LegacyPermissionManagerInternal;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -261,8 +261,8 @@ public class LocationManagerService extends ILocationManager.Stub {
 
         // Let the package manager query which are the default location
         // providers as they get certain permissions granted by default.
-        PermissionManagerServiceInternal permissionManagerInternal = LocalServices.getService(
-                PermissionManagerServiceInternal.class);
+        LegacyPermissionManagerInternal permissionManagerInternal = LocalServices.getService(
+                LegacyPermissionManagerInternal.class);
         permissionManagerInternal.setLocationPackagesProvider(
                 userId -> mContext.getResources().getStringArray(
                         com.android.internal.R.array.config_locationProviderPackageNames));

@@ -114,7 +114,6 @@ import android.permission.IPermissionManager;
 import android.permission.PermissionControllerManager;
 import android.permission.PermissionManager;
 import android.permission.PermissionManagerInternal;
-import android.permission.PermissionManagerInternal.OnRuntimePermissionStateChangedListener;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -145,12 +144,12 @@ import com.android.server.ServiceThread;
 import com.android.server.SystemConfig;
 import com.android.server.Watchdog;
 import com.android.server.pm.ApexManager;
-import com.android.server.pm.PackageManagerServiceUtils;
 import com.android.server.pm.PackageSetting;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.pm.UserManagerService;
 import com.android.server.pm.parsing.PackageInfoUtils;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.permission.PermissionManagerServiceInternal.OnRuntimePermissionStateChangedListener;
 import com.android.server.policy.PermissionPolicyInternal;
 import com.android.server.policy.SoftRestrictedPermissionPolicy;
 
@@ -238,9 +237,6 @@ public class PermissionManagerService extends IPermissionManager.Stub {
     @NonNull
     private final SparseArray<OneTimePermissionUserManager> mOneTimePermissionUserManagers =
             new SparseArray<>();
-
-    /** Default permission policy to provide proper behaviour out-of-the-box */
-    private final DefaultPermissionGrantPolicy mDefaultPermissionGrantPolicy;
 
     /** App ops manager */
     private final AppOpsManager mAppOpsManager;
@@ -390,8 +386,6 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         mHandler = new Handler(mHandlerThread.getLooper());
         Watchdog.getInstance().addThread(mHandler);
 
-        mDefaultPermissionGrantPolicy = new DefaultPermissionGrantPolicy(
-                context, mHandlerThread.getLooper());
         SystemConfig systemConfig = SystemConfig.getInstance();
         mSystemPermissions = systemConfig.getSystemPermissions();
         mGlobalGids = systemConfig.getGlobalGids();
@@ -2007,90 +2001,40 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
     @Override
     public void grantDefaultPermissionsToEnabledCarrierApps(String[] packageNames, int userId) {
-        final int callingUid = Binder.getCallingUid();
-        PackageManagerServiceUtils
-                .enforceSystemOrPhoneCaller("grantPermissionsToEnabledCarrierApps", callingUid);
-        Binder.withCleanCallingIdentity(() -> mDefaultPermissionGrantPolicy
-                .grantDefaultPermissionsToEnabledCarrierApps(packageNames, userId));
+        LocalServices.getService(LegacyPermissionManagerInternal.class)
+                .grantDefaultPermissionsToEnabledCarrierApps(packageNames, userId);
     }
 
     @Override
     public void grantDefaultPermissionsToEnabledImsServices(String[] packageNames, int userId) {
-        final int callingUid = Binder.getCallingUid();
-        PackageManagerServiceUtils.enforceSystemOrPhoneCaller(
-                "grantDefaultPermissionsToEnabledImsServices", callingUid);
-        Binder.withCleanCallingIdentity(() -> mDefaultPermissionGrantPolicy
-                .grantDefaultPermissionsToEnabledImsServices(packageNames, userId));
+        LocalServices.getService(LegacyPermissionManagerInternal.class)
+                .grantDefaultPermissionsToEnabledImsServices(packageNames, userId);
     }
 
     @Override
     public void grantDefaultPermissionsToEnabledTelephonyDataServices(
             String[] packageNames, int userId) {
-        final int callingUid = Binder.getCallingUid();
-        PackageManagerServiceUtils.enforceSystemOrPhoneCaller(
-                "grantDefaultPermissionsToEnabledTelephonyDataServices", callingUid);
-        Binder.withCleanCallingIdentity(() -> mDefaultPermissionGrantPolicy
-                .grantDefaultPermissionsToEnabledTelephonyDataServices(packageNames, userId));
+        LocalServices.getService(LegacyPermissionManagerInternal.class)
+                .grantDefaultPermissionsToEnabledTelephonyDataServices(packageNames, userId);
     }
 
     @Override
     public void revokeDefaultPermissionsFromDisabledTelephonyDataServices(
             String[] packageNames, int userId) {
-        final int callingUid = Binder.getCallingUid();
-        PackageManagerServiceUtils.enforceSystemOrPhoneCaller(
-                "revokeDefaultPermissionsFromDisabledTelephonyDataServices", callingUid);
-        Binder.withCleanCallingIdentity(() -> mDefaultPermissionGrantPolicy
-                .revokeDefaultPermissionsFromDisabledTelephonyDataServices(packageNames, userId));
+        LocalServices.getService(LegacyPermissionManagerInternal.class)
+                .revokeDefaultPermissionsFromDisabledTelephonyDataServices(packageNames, userId);
     }
 
     @Override
     public void grantDefaultPermissionsToActiveLuiApp(String packageName, int userId) {
-        final int callingUid = Binder.getCallingUid();
-        PackageManagerServiceUtils
-                .enforceSystemOrPhoneCaller("grantDefaultPermissionsToActiveLuiApp", callingUid);
-        Binder.withCleanCallingIdentity(() -> mDefaultPermissionGrantPolicy
-                .grantDefaultPermissionsToActiveLuiApp(packageName, userId));
+        LocalServices.getService(LegacyPermissionManagerInternal.class)
+                .grantDefaultPermissionsToActiveLuiApp(packageName, userId);
     }
 
     @Override
     public void revokeDefaultPermissionsFromLuiApps(String[] packageNames, int userId) {
-        final int callingUid = Binder.getCallingUid();
-        PackageManagerServiceUtils
-                .enforceSystemOrPhoneCaller("revokeDefaultPermissionsFromLuiApps", callingUid);
-        Binder.withCleanCallingIdentity(() -> mDefaultPermissionGrantPolicy
-                .revokeDefaultPermissionsFromLuiApps(packageNames, userId));
-    }
-
-    @Override
-    public void setPermissionEnforced(String permName, boolean enforced) {
-        // TODO: Now that we no longer change GID for storage, this should to away.
-        mContext.enforceCallingOrSelfPermission(Manifest.permission.GRANT_RUNTIME_PERMISSIONS,
-                "setPermissionEnforced");
-        if (READ_EXTERNAL_STORAGE.equals(permName)) {
-            mPackageManagerInt.setReadExternalStorageEnforced(enforced);
-            // kill any non-foreground processes so we restart them and
-            // grant/revoke the GID.
-            final IActivityManager am = ActivityManager.getService();
-            if (am != null) {
-                final long token = Binder.clearCallingIdentity();
-                try {
-                    am.killProcessesBelowForeground("setPermissionEnforcement");
-                } catch (RemoteException e) {
-                } finally {
-                    Binder.restoreCallingIdentity(token);
-                }
-            }
-        } else {
-            throw new IllegalArgumentException("No selective enforcement for " + permName);
-        }
-    }
-
-    /** @deprecated */
-    @Override
-    @Deprecated
-    public boolean isPermissionEnforced(String permName) {
-        // allow instant applications
-        return true;
+        LocalServices.getService(LegacyPermissionManagerInternal.class)
+                .revokeDefaultPermissionsFromLuiApps(packageNames, userId);
     }
 
     /**
@@ -2197,19 +2141,20 @@ public class PermissionManagerService extends IPermissionManager.Stub {
      *
      * <p>Can not be called on main thread.
      *
-     * @param user The user the data should be extracted for
+     * @param userId The user ID the data should be extracted for
      *
      * @return The state as a xml file
      */
-    private @Nullable byte[] backupRuntimePermissions(@NonNull UserHandle user) {
+    @Nullable
+    private byte[] backupRuntimePermissions(@UserIdInt int userId) {
         CompletableFuture<byte[]> backup = new CompletableFuture<>();
-        mPermissionControllerManager.getRuntimePermissionBackup(user, mContext.getMainExecutor(),
-                backup::complete);
+        mPermissionControllerManager.getRuntimePermissionBackup(UserHandle.of(userId),
+                mContext.getMainExecutor(), backup::complete);
 
         try {
             return backup.get(BACKUP_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
         } catch (InterruptedException | ExecutionException  | TimeoutException e) {
-            Slog.e(TAG, "Cannot create permission backup for " + user, e);
+            Slog.e(TAG, "Cannot create permission backup for user " + userId, e);
             return null;
         }
     }
@@ -2221,13 +2166,14 @@ public class PermissionManagerService extends IPermissionManager.Stub {
      * applied via {@link #restoreDelayedRuntimePermissions}.
      *
      * @param backup The state as an xml file
-     * @param user The user the data should be restored for
+     * @param userId The user ID the data should be restored for
      */
-    private void restoreRuntimePermissions(@NonNull byte[] backup, @NonNull UserHandle user) {
+    private void restoreRuntimePermissions(@NonNull byte[] backup, @UserIdInt int userId) {
         synchronized (mLock) {
-            mHasNoDelayedPermBackup.delete(user.getIdentifier());
+            mHasNoDelayedPermBackup.delete(userId);
         }
-        mPermissionControllerManager.stageAndApplyRuntimePermissionsBackup(backup, user);
+        mPermissionControllerManager.stageAndApplyRuntimePermissionsBackup(backup,
+                UserHandle.of(userId));
     }
 
     /**
@@ -2236,24 +2182,24 @@ public class PermissionManagerService extends IPermissionManager.Stub {
      * <p>Can not be called on main thread.
      *
      * @param packageName The package that is newly installed
-     * @param user The user the package is installed for
+     * @param userId The user ID the package is installed for
      *
      * @see #restoreRuntimePermissions
      */
     private void restoreDelayedRuntimePermissions(@NonNull String packageName,
-            @NonNull UserHandle user) {
+            @UserIdInt int userId) {
         synchronized (mLock) {
-            if (mHasNoDelayedPermBackup.get(user.getIdentifier(), false)) {
+            if (mHasNoDelayedPermBackup.get(userId, false)) {
                 return;
             }
         }
-        mPermissionControllerManager.applyStagedRuntimePermissionBackup(packageName, user,
-                mContext.getMainExecutor(), (hasMoreBackup) -> {
+        mPermissionControllerManager.applyStagedRuntimePermissionBackup(packageName,
+                UserHandle.of(userId), mContext.getMainExecutor(), (hasMoreBackup) -> {
                     if (hasMoreBackup) {
                         return;
                     }
                     synchronized (mLock) {
-                        mHasNoDelayedPermBackup.put(user.getIdentifier(), true);
+                        mHasNoDelayedPermBackup.put(userId, true);
                     }
                 });
     }
@@ -4581,24 +4527,6 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
         mPermissionControllerManager = mContext.getSystemService(PermissionControllerManager.class);
         mPermissionPolicyInternal = LocalServices.getService(PermissionPolicyInternal.class);
-
-        int[] grantPermissionsUserIds = EMPTY_INT_ARRAY;
-        for (int userId : UserManagerService.getInstance().getUserIds()) {
-            if (mPackageManagerInt.isPermissionUpgradeNeeded(userId)) {
-                grantPermissionsUserIds = ArrayUtils.appendInt(
-                        grantPermissionsUserIds, userId);
-            }
-        }
-        // If we upgraded grant all default permissions before kicking off.
-        for (int userId : grantPermissionsUserIds) {
-            mDefaultPermissionGrantPolicy.grantDefaultPermissions(userId);
-        }
-        if (grantPermissionsUserIds == EMPTY_INT_ARRAY) {
-            // If we did not grant default permissions, we preload from this the
-            // default permission exceptions lazily to ensure we don't hit the
-            // disk on a new user creation.
-            mDefaultPermissionGrantPolicy.scheduleReadDefaultPermissionExceptions();
-        }
     }
 
     private static String getVolumeUuidForPackage(AndroidPackage pkg) {
@@ -5058,7 +4986,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         }
     }
 
-    private class PermissionManagerServiceInternalImpl extends PermissionManagerServiceInternal {
+    private class PermissionManagerServiceInternalImpl implements PermissionManagerServiceInternal {
         @Override
         public void systemReady() {
             PermissionManagerService.this.systemReady();
@@ -5083,6 +5011,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         }
         @Override
         public void onUserRemoved(@UserIdInt int userId) {
+            Preconditions.checkArgumentNonNegative(userId, "userId");
             PermissionManagerService.this.onUserRemoved(userId);
         }
         @NonNull
@@ -5162,20 +5091,26 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             return matchingPermissions;
         }
 
+        @Nullable
         @Override
-        public @Nullable byte[] backupRuntimePermissions(@NonNull UserHandle user) {
-            return PermissionManagerService.this.backupRuntimePermissions(user);
+        public byte[] backupRuntimePermissions(@UserIdInt int userId) {
+            Preconditions.checkArgumentNonNegative(userId, "userId");
+            return PermissionManagerService.this.backupRuntimePermissions(userId);
         }
 
         @Override
-        public void restoreRuntimePermissions(@NonNull byte[] backup, @NonNull UserHandle user) {
-            PermissionManagerService.this.restoreRuntimePermissions(backup, user);
+        public void restoreRuntimePermissions(@NonNull byte[] backup, @UserIdInt int userId) {
+            Objects.requireNonNull(backup, "backup");
+            Preconditions.checkArgumentNonNegative(userId, "userId");
+            PermissionManagerService.this.restoreRuntimePermissions(backup, userId);
         }
 
         @Override
         public void restoreDelayedRuntimePermissions(@NonNull String packageName,
-                @NonNull UserHandle user) {
-            PermissionManagerService.this.restoreDelayedRuntimePermissions(packageName, user);
+                @UserIdInt int userId) {
+            Objects.requireNonNull(packageName, "packageName");
+            Preconditions.checkArgumentNonNegative(userId, "userId");
+            PermissionManagerService.this.restoreDelayedRuntimePermissions(packageName, userId);
         }
 
         @Override
@@ -5205,70 +5140,11 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         }
 
         @Override
-        public void setDialerAppPackagesProvider(PackagesProvider provider) {
-            mDefaultPermissionGrantPolicy.setDialerAppPackagesProvider(provider);
-        }
-
-        @Override
-        public void setLocationExtraPackagesProvider(PackagesProvider provider) {
-            mDefaultPermissionGrantPolicy.setLocationExtraPackagesProvider(provider);
-        }
-
-        @Override
-        public void setLocationPackagesProvider(PackagesProvider provider) {
-            mDefaultPermissionGrantPolicy.setLocationPackagesProvider(provider);
-        }
-
-        @Override
-        public void setSimCallManagerPackagesProvider(PackagesProvider provider) {
-            mDefaultPermissionGrantPolicy.setSimCallManagerPackagesProvider(provider);
-        }
-
-        @Override
-        public void setSmsAppPackagesProvider(PackagesProvider provider) {
-            mDefaultPermissionGrantPolicy.setSmsAppPackagesProvider(provider);
-        }
-
-        @Override
-        public void setSyncAdapterPackagesProvider(SyncAdapterPackagesProvider provider) {
-            mDefaultPermissionGrantPolicy.setSyncAdapterPackagesProvider(provider);
-        }
-
-        @Override
-        public void setUseOpenWifiAppPackagesProvider(PackagesProvider provider) {
-            mDefaultPermissionGrantPolicy.setUseOpenWifiAppPackagesProvider(provider);
-        }
-
-        @Override
-        public void setVoiceInteractionPackagesProvider(PackagesProvider provider) {
-            mDefaultPermissionGrantPolicy.setVoiceInteractionPackagesProvider(provider);
-        }
-
-        @Override
-        public void grantDefaultPermissionsToDefaultBrowser(@NonNull String packageName,
-                @UserIdInt int userId) {
-            mDefaultPermissionGrantPolicy.grantDefaultPermissionsToDefaultBrowser(packageName,
-                    userId);
-        }
-
-        @Override
-        public void grantDefaultPermissionsToDefaultSimCallManager(String packageName, int userId) {
-            mDefaultPermissionGrantPolicy.grantDefaultPermissionsToDefaultSimCallManager(
-                    packageName, userId);
-        }
-
-        @Override
-        public void grantDefaultPermissionsToDefaultUseOpenWifiApp(String packageName, int userId) {
-            mDefaultPermissionGrantPolicy.grantDefaultPermissionsToDefaultUseOpenWifiApp(
-                    packageName, userId);
-        }
-
-        @Override
-        public void onNewUserCreated(int userId) {
+        public void onUserCreated(@UserIdInt int userId) {
+            Preconditions.checkArgumentNonNegative(userId, "userId");
             // NOTE: This adds UPDATE_PERMISSIONS_REPLACE_PKG
             PermissionManagerService.this.updateAllPermissions(StorageManager.UUID_PRIVATE_INTERNAL,
                     true, mDefaultPermissionCallback);
-            mDefaultPermissionGrantPolicy.grantDefaultPermissions(userId);
         }
 
         @Override
