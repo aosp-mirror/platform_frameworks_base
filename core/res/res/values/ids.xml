@@ -206,6 +206,9 @@
   <!-- Marks the "nearby" button in the ChooserActivity -->
   <item type="id" name="chooser_nearby_button" />
 
+  <!-- Marks the "edit" button in the ChooserActivity -->
+  <item type="id" name="chooser_edit_button" />
+
   <!-- Accessibility action identifier for {@link android.accessibilityservice.AccessibilityService#GLOBAL_ACTION_BACK}. -->
   <item type="id" name="accessibilitySystemActionBack" />
 

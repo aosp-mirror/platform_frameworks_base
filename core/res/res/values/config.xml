@@ -4605,4 +4605,9 @@
          happens that doesn't result in bringing the home task to the front.
          This is currently only used on TV. -->
     <bool name="config_enableBackSound">false</bool>
+
+    <!-- Chooser image editing activity.  Must handle ACTION_EDIT image/png intents.
+         If omitted, image editing will not be offered via Chooser.
+         This name is in the ComponentName flattened format (package/class) [DO NOT TRANSLATE]  -->
+    <string name="config_systemImageEditor" translatable="false"></string>
 </resources>
