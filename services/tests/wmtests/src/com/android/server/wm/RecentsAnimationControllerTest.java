@@ -437,6 +437,7 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
 
         final WindowState homeWindow = createWindow(null, TYPE_BASE_APPLICATION, homeActivity,
                 "homeWindow");
+        makeWindowVisible(homeWindow);
         homeActivity.addWindow(homeWindow);
         homeWindow.getAttrs().flags |= FLAG_SHOW_WALLPAPER;
 
