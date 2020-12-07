@@ -158,7 +158,7 @@ abstract class AndroidKeyStoreRSACipherSpi extends AndroidKeyStoreCipherSpiBase 
     }
 
     /**
-     * RSA cipher with OAEP encryption padding. Only SHA-1 based MGF1 is supported as MGF.
+     * RSA cipher with OAEP encryption padding.
      */
     abstract static class OAEPWithMGF1Padding extends AndroidKeyStoreRSACipherSpi {
 
