@@ -476,7 +476,10 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
 
     private NotificationEntry createBubble() {
         Notification.BubbleMetadata data = new Notification.BubbleMetadata.Builder(
-                PendingIntent.getActivity(mContext, 0, new Intent(), 0),
+                // TODO(b/174970399) Please replace FLAG_MUTABLE_UNAUDITED below
+                // with either FLAG_IMMUTABLE (recommended) or FLAG_MUTABLE.
+                PendingIntent.getActivity(mContext, 0, new Intent(),
+                    PendingIntent.FLAG_MUTABLE_UNAUDITED),
                         Icon.createWithResource(mContext.getResources(), R.drawable.android))
                 .build();
         Notification n = new Notification.Builder(getContext(), "a")
