@@ -41,6 +41,7 @@ import android.content.pm.ParceledListSlice;
 import android.content.pm.PermissionGroupInfo;
 import android.content.pm.PermissionInfo;
 import android.content.pm.permission.SplitPermissionInfoParcelable;
+import android.media.AudioManager;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
@@ -114,6 +115,7 @@ public final class PermissionManager {
 
     private final ArrayMap<PackageManager.OnPermissionsChangedListener,
             IOnPermissionsChangeListener> mPermissionListeners = new ArrayMap<>();
+    private PermissionUsageHelper mUsageHelper;
 
     private List<SplitPermissionInfo> mSplitPermissionInfos;
 
@@ -851,6 +853,22 @@ public final class PermissionManager {
         mSplitPermissionInfos = splitPermissionInfoListToNonParcelableList(parcelableList);
 
         return mSplitPermissionInfos;
+    }
+
+    /**
+     * @return A list of permission groups currently or recently used by all apps by all users in
+     * the current profile group.
+     *
+     * @hide
+     */
+    @NonNull
+    @RequiresPermission(Manifest.permission.GET_APP_OPS_STATS)
+    public List<PermGroupUsage> getIndicatorAppOpUsageData() {
+        // Lazily initialize the usage helper
+        if (mUsageHelper == null) {
+            mUsageHelper = new PermissionUsageHelper(mContext);
+        }
+        return mUsageHelper.getOpUsageData(new AudioManager().isMicrophoneMute());
     }
 
     /**
