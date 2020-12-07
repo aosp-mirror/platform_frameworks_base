@@ -30,24 +30,22 @@ import android.os.RemoteException;
 import android.util.ArrayMap;
 import android.util.AtomicFile;
 import android.util.Log;
+import android.util.SparseBooleanArray;
 import android.util.TypedXmlPullParser;
 import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.XmlUtils;
 import com.android.internal.util.function.pooled.PooledLambda;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.NoSuchElementException;
 
 /** @hide */
@@ -57,7 +55,9 @@ public final class SensorPrivacyService extends SystemService {
 
     private static final String SENSOR_PRIVACY_XML_FILE = "sensor_privacy.xml";
     private static final String XML_TAG_SENSOR_PRIVACY = "sensor-privacy";
+    private static final String XML_TAG_INDIVIDUAL_SENSOR_PRIVACY = "individual-sensor-privacy";
     private static final String XML_ATTRIBUTE_ENABLED = "enabled";
+    private static final String XML_ATTRIBUTE_SENSOR = "sensor";
 
     private final SensorPrivacyServiceImpl mSensorPrivacyServiceImpl;
 
@@ -80,6 +80,7 @@ public final class SensorPrivacyService extends SystemService {
         private final AtomicFile mAtomicFile;
         @GuardedBy("mLock")
         private boolean mEnabled;
+        private SparseBooleanArray mIndividualEnabled = new SparseBooleanArray();
 
         SensorPrivacyServiceImpl(Context context) {
             mContext = context;
@@ -88,7 +89,7 @@ public final class SensorPrivacyService extends SystemService {
                     SENSOR_PRIVACY_XML_FILE);
             mAtomicFile = new AtomicFile(sensorPrivacyFile);
             synchronized (mLock) {
-                mEnabled = readPersistedSensorPrivacyEnabledLocked();
+                readPersistedSensorPrivacyStateLocked();
             }
         }
 
@@ -101,22 +102,17 @@ public final class SensorPrivacyService extends SystemService {
             enforceSensorPrivacyPermission();
             synchronized (mLock) {
                 mEnabled = enable;
-                FileOutputStream outputStream = null;
-                try {
-                    outputStream = mAtomicFile.startWrite();
-                    TypedXmlSerializer serializer = Xml.resolveSerializer(outputStream);
-                    serializer.startDocument(null, true);
-                    serializer.startTag(null, XML_TAG_SENSOR_PRIVACY);
-                    serializer.attributeBoolean(null, XML_ATTRIBUTE_ENABLED, enable);
-                    serializer.endTag(null, XML_TAG_SENSOR_PRIVACY);
-                    serializer.endDocument();
-                    mAtomicFile.finishWrite(outputStream);
-                } catch (IOException e) {
-                    Log.e(TAG, "Caught an exception persisting the sensor privacy state: ", e);
-                    mAtomicFile.failWrite(outputStream);
-                }
+                persistSensorPrivacyStateLocked();
             }
             mHandler.onSensorPrivacyChanged(enable);
+        }
+
+        public void setIndividualSensorPrivacy(int sensor, boolean enable) {
+            enforceSensorPrivacyPermission();
+            synchronized (mLock) {
+                mIndividualEnabled.put(sensor, enable);
+                persistSensorPrivacyState();
+            }
         }
 
         /**
@@ -143,30 +139,48 @@ public final class SensorPrivacyService extends SystemService {
             }
         }
 
+        @Override
+        public boolean isIndividualSensorPrivacyEnabled(int sensor) {
+            synchronized (mLock) {
+                return mIndividualEnabled.get(sensor, false);
+            }
+        }
+
         /**
          * Returns the state of sensor privacy from persistent storage.
          */
-        private boolean readPersistedSensorPrivacyEnabledLocked() {
+        private void readPersistedSensorPrivacyStateLocked() {
             // if the file does not exist then sensor privacy has not yet been enabled on
             // the device.
             if (!mAtomicFile.exists()) {
-                return false;
+                return;
             }
-            boolean enabled;
             try (FileInputStream inputStream = mAtomicFile.openRead()) {
                 TypedXmlPullParser parser = Xml.resolvePullParser(inputStream);
                 XmlUtils.beginDocument(parser, XML_TAG_SENSOR_PRIVACY);
                 parser.next();
-                String tagName = parser.getName();
-                enabled = parser.getAttributeBoolean(null, XML_ATTRIBUTE_ENABLED, false);
+                mEnabled = parser.getAttributeBoolean(null, XML_ATTRIBUTE_ENABLED, false);
+
+                XmlUtils.nextElement(parser);
+                while (parser.getEventType() != XmlPullParser.END_DOCUMENT) {
+                    String tagName = parser.getName();
+                    if (XML_TAG_INDIVIDUAL_SENSOR_PRIVACY.equals(tagName)) {
+                        int sensor = XmlUtils.readIntAttribute(parser, XML_ATTRIBUTE_SENSOR);
+                        boolean enabled = XmlUtils.readBooleanAttribute(parser,
+                                XML_ATTRIBUTE_ENABLED);
+                        mIndividualEnabled.put(sensor, enabled);
+                        XmlUtils.skipCurrentTag(parser);
+                    } else {
+                        XmlUtils.nextElement(parser);
+                    }
+                }
+
             } catch (IOException | XmlPullParserException e) {
                 Log.e(TAG, "Caught an exception reading the state from storage: ", e);
                 // Delete the file to prevent the same error on subsequent calls and assume sensor
                 // privacy is not enabled.
                 mAtomicFile.delete();
-                enabled = false;
             }
-            return enabled;
         }
 
         /**
@@ -174,20 +188,33 @@ public final class SensorPrivacyService extends SystemService {
          */
         private void persistSensorPrivacyState() {
             synchronized (mLock) {
-                FileOutputStream outputStream = null;
-                try {
-                    outputStream = mAtomicFile.startWrite();
-                    TypedXmlSerializer serializer = Xml.resolveSerializer(outputStream);
-                    serializer.startDocument(null, true);
-                    serializer.startTag(null, XML_TAG_SENSOR_PRIVACY);
-                    serializer.attributeBoolean(null, XML_ATTRIBUTE_ENABLED, mEnabled);
-                    serializer.endTag(null, XML_TAG_SENSOR_PRIVACY);
-                    serializer.endDocument();
-                    mAtomicFile.finishWrite(outputStream);
-                } catch (IOException e) {
-                    Log.e(TAG, "Caught an exception persisting the sensor privacy state: ", e);
-                    mAtomicFile.failWrite(outputStream);
+                persistSensorPrivacyStateLocked();
+            }
+        }
+
+        private void persistSensorPrivacyStateLocked() {
+            FileOutputStream outputStream = null;
+            try {
+                outputStream = mAtomicFile.startWrite();
+                TypedXmlSerializer serializer = Xml.resolveSerializer(outputStream);
+                serializer.startDocument(null, true);
+                serializer.startTag(null, XML_TAG_SENSOR_PRIVACY);
+                serializer.attributeBoolean(null, XML_ATTRIBUTE_ENABLED, mEnabled);
+                int numIndividual = mIndividualEnabled.size();
+                for (int i = 0; i < numIndividual; i++) {
+                    serializer.startTag(null, XML_TAG_INDIVIDUAL_SENSOR_PRIVACY);
+                    int sensor = mIndividualEnabled.keyAt(i);
+                    boolean enabled = mIndividualEnabled.valueAt(i);
+                    serializer.attributeInt(null, XML_ATTRIBUTE_SENSOR, sensor);
+                    serializer.attributeBoolean(null, XML_ATTRIBUTE_ENABLED, enabled);
+                    serializer.endTag(null, XML_TAG_INDIVIDUAL_SENSOR_PRIVACY);
                 }
+                serializer.endTag(null, XML_TAG_SENSOR_PRIVACY);
+                serializer.endDocument();
+                mAtomicFile.finishWrite(outputStream);
+            } catch (IOException e) {
+                Log.e(TAG, "Caught an exception persisting the sensor privacy state: ", e);
+                mAtomicFile.failWrite(outputStream);
             }
         }
 

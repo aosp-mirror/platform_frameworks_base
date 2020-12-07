@@ -32,4 +32,12 @@ interface ISensorPrivacyManager {
 
     void setSensorPrivacy(boolean enable);
     // =============== End of transactions used on native side as well ============================
+
+    // TODO(evanseverson) add to native interface
+    boolean isIndividualSensorPrivacyEnabled(int sensor);
+
+    // TODO(evanseverson) add to native interface
+    void setIndividualSensorPrivacy(int sensor, boolean enable);
+
+    // TODO(evanseverson) listeners
 }
