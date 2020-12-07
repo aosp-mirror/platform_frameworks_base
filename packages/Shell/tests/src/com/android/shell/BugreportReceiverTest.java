@@ -40,6 +40,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.timeout;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import android.app.ActivityManager;
@@ -532,6 +533,18 @@ public class BugreportReceiverTest {
         assertServiceNotRunning();
         Bundle extras = acceptBugreportAndGetSharedIntent(mBugreportId);
         assertActionSendMultiple(extras);
+    }
+
+    @Test
+    public void testBugreportRequestTwice_oneStartBugreportInvoked() throws Exception {
+        sendBugreportStarted();
+        new BugreportRequestedReceiver().onReceive(mContext,
+                new Intent(INTENT_BUGREPORT_REQUESTED));
+        getInstrumentation().waitForIdleSync();
+
+        verify(mMockIDumpstate, times(1)).startBugreport(anyInt(), any(), any(), any(),
+                anyInt(), any(), anyBoolean());
+        sendBugreportFinished();
     }
 
     private void cancelExistingNotifications() {
