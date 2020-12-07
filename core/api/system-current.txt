@@ -11122,7 +11122,9 @@ package android.telephony.ims {
     method public void callSessionHoldFailed(android.telephony.ims.ImsReasonInfo);
     method public void callSessionHoldReceived(android.telephony.ims.ImsCallProfile);
     method public void callSessionInitiated(android.telephony.ims.ImsCallProfile);
-    method public void callSessionInitiatedFailed(android.telephony.ims.ImsReasonInfo);
+    method @Deprecated public void callSessionInitiatedFailed(android.telephony.ims.ImsReasonInfo);
+    method public void callSessionInitiating(@NonNull android.telephony.ims.ImsCallProfile);
+    method public void callSessionInitiatingFailed(@NonNull android.telephony.ims.ImsReasonInfo);
     method public void callSessionInviteParticipantsRequestDelivered();
     method public void callSessionInviteParticipantsRequestFailed(android.telephony.ims.ImsReasonInfo);
     method @Deprecated public void callSessionMayHandover(int, int);

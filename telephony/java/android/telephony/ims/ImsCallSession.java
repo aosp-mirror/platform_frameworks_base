@@ -101,10 +101,29 @@ public class ImsCallSession {
      */
     public static class Listener {
         /**
-         * Called when a request is sent out to initiate a new session
-         * and 1xx response is received from the network.
+         * Called when the session is initiating.
          *
-         * @param session the session object that carries out the IMS session
+         * see: {@link ImsCallSessionListener#callSessionInitiating(ImsCallProfile)}
+         */
+        public void callSessionInitiating(ImsCallSession session,
+                ImsCallProfile profile) {
+            // no-op
+        }
+
+        /**
+         * Called when the session failed before initiating was called.
+         *
+         * see: {@link ImsCallSessionListener#callSessionInitiatingFailed(ImsReasonInfo)}
+         */
+        public void callSessionInitiatingFailed(ImsCallSession session,
+                ImsReasonInfo reasonInfo) {
+            // no-op
+        }
+
+        /**
+         * Called when the session is progressing.
+         *
+         * see: {@link ImsCallSessionListener#callSessionProgressing(ImsStreamMediaProfile)}
          */
         public void callSessionProgressing(ImsCallSession session,
                 ImsStreamMediaProfile profile) {
@@ -1179,6 +1198,13 @@ public class ImsCallSession {
          * Notifies the result of the basic session operation (setup / terminate).
          */
         @Override
+        public void callSessionInitiating(ImsCallProfile profile) {
+            if (mListener != null) {
+                mListener.callSessionInitiating(ImsCallSession.this, profile);
+            }
+        }
+
+        @Override
         public void callSessionProgressing(ImsStreamMediaProfile profile) {
             if (mListener != null) {
                 mListener.callSessionProgressing(ImsCallSession.this, profile);
@@ -1189,6 +1215,13 @@ public class ImsCallSession {
         public void callSessionInitiated(ImsCallProfile profile) {
             if (mListener != null) {
                 mListener.callSessionStarted(ImsCallSession.this, profile);
+            }
+        }
+
+        @Override
+        public void callSessionInitiatingFailed(ImsReasonInfo reasonInfo) {
+            if (mListener != null) {
+                mListener.callSessionStartFailed(ImsCallSession.this, reasonInfo);
             }
         }
 
