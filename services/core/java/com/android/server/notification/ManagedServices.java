@@ -437,9 +437,15 @@ abstract public class ManagedServices {
                         }
                     }
                 }
-                Settings.Secure.putStringForUser(
-                        mContext.getContentResolver(), element, value, userId);
-                loadAllowedComponentsFromSettings();
+                if (shouldReflectToSettings()) {
+                    Settings.Secure.putStringForUser(
+                            mContext.getContentResolver(), element, value, userId);
+                }
+
+                for (UserInfo user : mUm.getUsers()) {
+                    addApprovedList(value, user.id, mConfig.secureSettingName.equals(element));
+                }
+                Slog.d(TAG, "Done loading approved values from settings");
                 rebindServices(false, userId);
             }
         }
@@ -498,10 +504,13 @@ abstract public class ManagedServices {
                             out.endTag(null, TAG_MANAGED_SERVICES);
 
                             if (!forBackup && isPrimary) {
-                                // Also write values to settings, for observers who haven't migrated yet
-                                Settings.Secure.putStringForUser(mContext.getContentResolver(),
-                                        getConfig().secureSettingName, allowedItems,
-                                        approvedUserId);
+                                if (shouldReflectToSettings()) {
+                                    // Also write values to settings, for observers who haven't
+                                    // migrated yet
+                                    Settings.Secure.putStringForUser(mContext.getContentResolver(),
+                                            getConfig().secureSettingName, allowedItems,
+                                            approvedUserId);
+                                }
                             }
 
                         }
@@ -513,6 +522,13 @@ abstract public class ManagedServices {
         writeExtraXmlTags(out);
 
         out.endTag(null, getConfig().xmlTag);
+    }
+
+    /**
+     * Returns whether the approved list of services should also be written to the Settings db
+     */
+    protected boolean shouldReflectToSettings() {
+        return false;
     }
 
     /**
@@ -530,8 +546,20 @@ abstract public class ManagedServices {
      */
     protected void readExtraTag(String tag, TypedXmlPullParser parser) throws IOException {}
 
-    protected void migrateToXml() {
-        loadAllowedComponentsFromSettings();
+    protected final void migrateToXml() {
+        for (UserInfo user : mUm.getUsers()) {
+            final ContentResolver cr = mContext.getContentResolver();
+            addApprovedList(Settings.Secure.getStringForUser(
+                    cr,
+                    getConfig().secureSettingName,
+                    user.id), user.id, true);
+            if (!TextUtils.isEmpty(getConfig().secondarySettingName)) {
+                addApprovedList(Settings.Secure.getStringForUser(
+                        cr,
+                        getConfig().secondarySettingName,
+                        user.id), user.id, false);
+            }
+        }
     }
 
     void readDefaults(TypedXmlPullParser parser) {
@@ -637,23 +665,6 @@ abstract public class ManagedServices {
             throws IOException {}
 
     protected abstract String getRequiredPermission();
-
-    private void loadAllowedComponentsFromSettings() {
-        for (UserInfo user : mUm.getUsers()) {
-            final ContentResolver cr = mContext.getContentResolver();
-            addApprovedList(Settings.Secure.getStringForUser(
-                    cr,
-                    getConfig().secureSettingName,
-                    user.id), user.id, true);
-            if (!TextUtils.isEmpty(getConfig().secondarySettingName)) {
-                addApprovedList(Settings.Secure.getStringForUser(
-                        cr,
-                        getConfig().secondarySettingName,
-                        user.id), user.id, false);
-            }
-        }
-        Slog.d(TAG, "Done loading approved values from settings");
-    }
 
     protected void addApprovedList(String approved, int userId, boolean isPrimary) {
         addApprovedList(approved, userId, isPrimary, approved);
