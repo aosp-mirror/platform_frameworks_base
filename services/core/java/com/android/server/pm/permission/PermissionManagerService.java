@@ -66,7 +66,6 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.AppOpsManager;
-import android.app.ApplicationPackageManager;
 import android.app.IActivityManager;
 import android.app.admin.DevicePolicyManagerInternal;
 import android.app.role.RoleManager;
@@ -794,8 +793,8 @@ public class PermissionManagerService extends IPermissionManager.Stub {
     private void updatePermissionFlagsInternal(String permName, String packageName, int flagMask,
             int flagValues, int callingUid, int userId, boolean overridePolicy,
             PermissionCallback callback) {
-        if (ApplicationPackageManager.DEBUG_TRACE_PERMISSION_UPDATES
-                && ApplicationPackageManager.shouldTraceGrant(packageName, permName, userId)) {
+        if (PermissionManager.DEBUG_TRACE_PERMISSION_UPDATES
+                && PermissionManager.shouldTraceGrant(packageName, permName, userId)) {
             Log.i(TAG, "System is updating flags for " + packageName + " "
                             + permName + " for user " + userId  + " "
                             + DebugUtils.flagsToString(
@@ -1455,8 +1454,8 @@ public class PermissionManagerService extends IPermissionManager.Stub {
     // TODO swap permission name and package name
     private void grantRuntimePermissionInternal(String permName, String packageName,
             boolean overridePolicy, int callingUid, final int userId, PermissionCallback callback) {
-        if (ApplicationPackageManager.DEBUG_TRACE_GRANTS
-                && ApplicationPackageManager.shouldTraceGrant(packageName, permName, userId)) {
+        if (PermissionManager.DEBUG_TRACE_GRANTS
+                && PermissionManager.shouldTraceGrant(packageName, permName, userId)) {
             Log.i(TAG, "System is granting " + packageName + " "
                     + permName + " for user " + userId + " on behalf of uid " + callingUid
                     + " " + mPackageManagerInt.getNameForUid(callingUid),
@@ -1621,8 +1620,8 @@ public class PermissionManagerService extends IPermissionManager.Stub {
     private void revokeRuntimePermissionInternal(String permName, String packageName,
             boolean overridePolicy, int callingUid, final int userId, String reason,
             PermissionCallback callback) {
-        if (ApplicationPackageManager.DEBUG_TRACE_PERMISSION_UPDATES
-                && ApplicationPackageManager.shouldTraceGrant(packageName, permName, userId)) {
+        if (PermissionManager.DEBUG_TRACE_PERMISSION_UPDATES
+                && PermissionManager.shouldTraceGrant(packageName, permName, userId)) {
             Log.i(TAG, "System is revoking " + packageName + " "
                             + permName + " for user " + userId + " on behalf of uid " + callingUid
                             + " " + mPackageManagerInt.getNameForUid(callingUid),
