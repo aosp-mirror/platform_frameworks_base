@@ -1323,6 +1323,60 @@ public abstract class PackageManager {
     public static final int INSTALL_REASON_ROLLBACK = 5;
 
     /** @hide */
+    @IntDef(prefix = { "INSTALL_SCENARIO_" }, value = {
+            INSTALL_SCENARIO_DEFAULT,
+            INSTALL_SCENARIO_FAST,
+            INSTALL_SCENARIO_BULK,
+            INSTALL_SCENARIO_BULK_SECONDARY,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface InstallScenario {}
+
+    /**
+     * A value to indicate the lack of CUJ information, disabling all installation scenario logic.
+     *
+     * @hide
+     */
+    public static final int INSTALL_SCENARIO_DEFAULT = 0;
+
+    /**
+     * Installation scenario providing the fastest “install button to launch" experience possible.
+     *
+     * @hide
+     */
+    public static final int INSTALL_SCENARIO_FAST = 1;
+
+    /**
+     * Installation scenario indicating a bulk operation with the desired result of a fully
+     * optimized application.  If the system is busy or resources are scarce the system will
+     * perform less work to avoid impacting system health.
+     *
+     * Examples of bulk installation scenarios might include device restore, background updates of
+     * multiple applications, or user-triggered updates for all applications.
+     *
+     * The decision to use BULK or BULK_SECONDARY should be based on the desired user experience.
+     * BULK_SECONDARY operations may take less time to complete but, when they do, will produce
+     * less optimized applications.  The device state (e.g. memory usage or battery status) should
+     * not be considered when making this decision as those factors are taken into account by the
+     * Package Manager when acting on the installation scenario.
+     *
+     * @hide
+     */
+    public static final int INSTALL_SCENARIO_BULK = 2;
+
+    /**
+     * Installation scenario indicating a bulk operation that prioritizes minimal system health
+     * impact over application optimization.  The application may undergo additional optimization
+     * if the system is idle and system resources are abundant.  The more elements of a bulk
+     * operation that are marked BULK_SECONDARY, the faster the entire bulk operation will be.
+     *
+     * See the comments for INSTALL_SCENARIO_BULK for more information.
+     *
+     * @hide
+     */
+    public static final int INSTALL_SCENARIO_BULK_SECONDARY = 3;
+
+    /** @hide */
     @IntDef(prefix = { "UNINSTALL_REASON_" }, value = {
             UNINSTALL_REASON_UNKNOWN,
             UNINSTALL_REASON_USER_TYPE,

@@ -18,6 +18,8 @@ package com.android.server.pm;
 
 import android.os.SystemProperties;
 
+import com.android.server.pm.dex.DexoptOptions;
+
 import dalvik.system.DexFile;
 
 /**
@@ -26,10 +28,22 @@ import dalvik.system.DexFile;
 public class PackageManagerServiceCompilerMapping {
     // Names for compilation reasons.
     public static final String REASON_STRINGS[] = {
-            "first-boot", "boot", "install", "bg-dexopt", "ab-ota", "inactive", "shared"
+        "first-boot",
+        "boot",
+        "install",
+        "install-fast",
+        "install-bulk",
+        "install-bulk-secondary",
+        "install-bulk-downgraded",
+        "install-bulk-secondary-downgraded",
+        "bg-dexopt",
+        "ab-ota",
+        "inactive",
+        // "shared" must be the last entry
+        "shared"
     };
 
-    static final int REASON_SHARED_INDEX = 6;
+    static final int REASON_SHARED_INDEX = REASON_STRINGS.length - 1;
 
     // Static block to ensure the strings array is of the right length.
     static {
@@ -53,8 +67,9 @@ public class PackageManagerServiceCompilerMapping {
     // exception in case the reason or value are invalid.
     private static String getAndCheckValidity(int reason) {
         String sysPropValue = SystemProperties.get(getSystemPropertyName(reason));
-        if (sysPropValue == null || sysPropValue.isEmpty() ||
-                !DexFile.isValidCompilerFilter(sysPropValue)) {
+        if (sysPropValue == null || sysPropValue.isEmpty()
+                || !(sysPropValue.equals(DexoptOptions.COMPILER_FILTER_NOOP)
+                        || DexFile.isValidCompilerFilter(sysPropValue))) {
             throw new IllegalStateException("Value \"" + sysPropValue +"\" not valid "
                     + "(reason " + REASON_STRINGS[reason] + ")");
         } else if (!isFilterAllowedForReason(reason, sysPropValue)) {
