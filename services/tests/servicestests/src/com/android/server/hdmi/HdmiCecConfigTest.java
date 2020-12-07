@@ -18,17 +18,13 @@ package com.android.server.hdmi;
 import static com.google.common.truth.Truth.assertThat;
 
 import static junit.framework.Assert.assertTrue;
-import static junit.framework.Assert.fail;
 
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertThrows;
 
-import android.annotation.NonNull;
 import android.content.Context;
 import android.hardware.hdmi.HdmiControlManager;
-import android.os.test.TestLooper;
 import android.platform.test.annotations.Presubmit;
 import android.provider.Settings.Global;
 
@@ -42,23 +38,15 @@ import org.junit.runners.JUnit4;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-
 @SmallTest
 @Presubmit
 @RunWith(JUnit4.class)
 public final class HdmiCecConfigTest {
     private static final String TAG = "HdmiCecConfigTest";
 
-    private static final int TIMEOUT_CONTENT_CHANGE_SEC = 4;
-
-    private final TestLooper mTestLooper = new TestLooper();
-
     private Context mContext;
 
     @Mock private HdmiCecConfig.StorageAdapter mStorageAdapter;
-    @Mock private HdmiCecConfig.SettingChangeListener mSettingChangeListener;
 
     @Before
     public void setUp() throws Exception {
@@ -1030,125 +1018,5 @@ public final class HdmiCecConfigTest {
         verify(mStorageAdapter).storeSharedPref(
                 HdmiControlManager.CEC_SETTING_NAME_SYSTEM_AUDIO_MODE_MUTING,
                 Integer.toString(HdmiControlManager.SYSTEM_AUDIO_MODE_MUTING_DISABLED));
-    }
-
-    @Test
-    public void registerChangeListener_SharedPref_BasicSanity() {
-        HdmiCecConfig hdmiCecConfig = HdmiCecConfig.createFromStrings(
-                mContext, mStorageAdapter,
-                "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>"
-                        + "<cec-settings>"
-                        + "  <setting name=\"system_audio_mode_muting\""
-                        + "           value-type=\"int\""
-                        + "           user-configurable=\"true\">"
-                        + "    <allowed-values>"
-                        + "      <value int-value=\"0\" />"
-                        + "      <value int-value=\"1\" />"
-                        + "    </allowed-values>"
-                        + "    <default-value int-value=\"1\" />"
-                        + "  </setting>"
-                        + "</cec-settings>", null);
-        hdmiCecConfig.registerChangeListener(
-                HdmiControlManager.CEC_SETTING_NAME_SYSTEM_AUDIO_MODE_MUTING,
-                mSettingChangeListener);
-        hdmiCecConfig.setIntValue(
-                HdmiControlManager.CEC_SETTING_NAME_SYSTEM_AUDIO_MODE_MUTING,
-                HdmiControlManager.SYSTEM_AUDIO_MODE_MUTING_DISABLED);
-        verify(mSettingChangeListener).onChange(
-                HdmiControlManager.CEC_SETTING_NAME_SYSTEM_AUDIO_MODE_MUTING);
-    }
-
-    @Test
-    public void removeChangeListener_SharedPref_BasicSanity() {
-        HdmiCecConfig hdmiCecConfig = HdmiCecConfig.createFromStrings(
-                mContext, mStorageAdapter,
-                "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>"
-                        + "<cec-settings>"
-                        + "  <setting name=\"system_audio_mode_muting\""
-                        + "           value-type=\"int\""
-                        + "           user-configurable=\"true\">"
-                        + "    <allowed-values>"
-                        + "      <value int-value=\"0\" />"
-                        + "      <value int-value=\"1\" />"
-                        + "    </allowed-values>"
-                        + "    <default-value int-value=\"1\" />"
-                        + "  </setting>"
-                        + "</cec-settings>", null);
-        hdmiCecConfig.registerChangeListener(
-                HdmiControlManager.CEC_SETTING_NAME_SYSTEM_AUDIO_MODE_MUTING,
-                mSettingChangeListener);
-        hdmiCecConfig.removeChangeListener(
-                HdmiControlManager.CEC_SETTING_NAME_SYSTEM_AUDIO_MODE_MUTING,
-                mSettingChangeListener);
-        hdmiCecConfig.setIntValue(
-                HdmiControlManager.CEC_SETTING_NAME_SYSTEM_AUDIO_MODE_MUTING,
-                HdmiControlManager.SYSTEM_AUDIO_MODE_MUTING_DISABLED);
-        verify(mSettingChangeListener, never()).onChange(
-                HdmiControlManager.CEC_SETTING_NAME_SYSTEM_AUDIO_MODE_MUTING);
-    }
-
-    /**
-     * Externally modified Global Settings still need to be supported. This test verifies that
-     * setting change notification is being forwarded to listeners registered via HdmiCecConfig.
-     */
-    @Test
-    public void globalSettingObserver_BasicSanity() throws Exception {
-        CountDownLatch notifyLatch = new CountDownLatch(1);
-        // Get current value of the setting in the system.
-        String originalValue = Global.getString(mContext.getContentResolver(),
-                Global.HDMI_CONTROL_ENABLED);
-        try {
-            HdmiCecConfig hdmiCecConfig = HdmiCecConfig.createFromStrings(
-                    mContext, mStorageAdapter,
-                    "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>"
-                            + "<cec-settings>"
-                            + "  <setting name=\"hdmi_cec_enabled\""
-                            + "           value-type=\"int\""
-                            + "           user-configurable=\"true\">"
-                            + "    <allowed-values>"
-                            + "      <value int-value=\"0\" />"
-                            + "      <value int-value=\"1\" />"
-                            + "    </allowed-values>"
-                            + "    <default-value int-value=\"1\" />"
-                            + "  </setting>"
-                            + "</cec-settings>", null);
-            hdmiCecConfig.registerGlobalSettingsObserver(mTestLooper.getLooper());
-            HdmiCecConfig.SettingChangeListener latchUpdateListener =
-                    new HdmiCecConfig.SettingChangeListener() {
-                        @Override
-                        public void onChange(
-                                @NonNull @HdmiControlManager.CecSettingName String setting) {
-                            notifyLatch.countDown();
-                            assertThat(setting).isEqualTo(
-                                    HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_ENABLED);
-                        }
-                    };
-            hdmiCecConfig.registerChangeListener(
-                    HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_ENABLED,
-                    latchUpdateListener);
-            mTestLooper.dispatchAll();
-
-            // Flip the value of the setting.
-            String valueToSet = ((originalValue == null || originalValue.equals("1")) ? "0" : "1");
-            Global.putString(mContext.getContentResolver(), Global.HDMI_CONTROL_ENABLED,
-                    valueToSet);
-            assertThat(Global.getString(mContext.getContentResolver(),
-                    Global.HDMI_CONTROL_ENABLED)).isEqualTo(valueToSet);
-
-            // Write Setting a 2nd time as the listener doesn't always trigger on the first write
-            // in the test.
-            Global.putString(mContext.getContentResolver(), Global.HDMI_CONTROL_ENABLED,
-                    valueToSet);
-            mTestLooper.dispatchAll();
-
-            if (!notifyLatch.await(TIMEOUT_CONTENT_CHANGE_SEC, TimeUnit.SECONDS)) {
-                fail("Timed out waiting for the notify callback");
-            }
-            hdmiCecConfig.unregisterGlobalSettingsObserver();
-        } finally {
-            // Restore the previous value of the setting in the system.
-            Global.putString(mContext.getContentResolver(), Global.HDMI_CONTROL_ENABLED,
-                    originalValue);
-        }
     }
 }
