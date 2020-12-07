@@ -832,6 +832,11 @@ package android.location {
 
 package android.media {
 
+  public final class AudioAttributes implements android.os.Parcelable {
+    method @NonNull public static String usageToXsdString(int);
+    method public static int xsdStringToUsage(@NonNull String);
+  }
+
   public final class AudioFocusRequest {
     method @Nullable public android.media.AudioManager.OnAudioFocusChangeListener getOnAudioFocusChangeListener();
   }
