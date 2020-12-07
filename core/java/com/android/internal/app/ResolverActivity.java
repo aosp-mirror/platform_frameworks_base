@@ -350,13 +350,7 @@ public class ResolverActivity extends Activity implements
         // from managed profile to owner or other way around.
         setProfileSwitchMessageId(intent.getContentUserHint());
 
-        try {
-            mLaunchedFromUid = ActivityTaskManager.getService().getLaunchedFromUid(
-                    getActivityToken());
-        } catch (RemoteException e) {
-            mLaunchedFromUid = -1;
-        }
-
+        mLaunchedFromUid = getLaunchedFromUid();
         if (mLaunchedFromUid < 0 || UserHandle.isIsolated(mLaunchedFromUid)) {
             // Gulp!
             finish();
@@ -1300,15 +1294,8 @@ public class ResolverActivity extends Activity implements
                 maybeLogCrossProfileTargetLaunch(cti, currentUserHandle);
             }
         } catch (RuntimeException e) {
-            String launchedFromPackage;
-            try {
-                launchedFromPackage = ActivityTaskManager.getService().getLaunchedFromPackage(
-                        getActivityToken());
-            } catch (RemoteException e2) {
-                launchedFromPackage = "??";
-            }
             Slog.wtf(TAG, "Unable to launch as uid " + mLaunchedFromUid
-                    + " package " + launchedFromPackage + ", while running in "
+                    + " package " + getLaunchedFromPackage() + ", while running in "
                     + ActivityThread.currentProcessName(), e);
         }
     }

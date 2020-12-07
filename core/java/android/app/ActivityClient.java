@@ -221,6 +221,22 @@ public class ActivityClient {
         }
     }
 
+    public int getLaunchedFromUid(IBinder token) {
+        try {
+            return getActivityClientController().getLaunchedFromUid(token);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    public String getLaunchedFromPackage(IBinder token) {
+        try {
+            return getActivityClientController().getLaunchedFromPackage(token);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
     Bundle getActivityOptions(IBinder token) {
         try {
             return getActivityClientController().getActivityOptions(token);

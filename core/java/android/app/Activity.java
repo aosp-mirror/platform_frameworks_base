@@ -6230,6 +6230,23 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
+     * Returns the uid who started this activity.
+     * @hide
+     */
+    public int getLaunchedFromUid() {
+        return ActivityClient.getInstance().getLaunchedFromUid(getActivityToken());
+    }
+
+    /**
+     * Returns the package who started this activity.
+     * @hide
+     */
+    @Nullable
+    public String getLaunchedFromPackage() {
+        return ActivityClient.getInstance().getLaunchedFromPackage(getActivityToken());
+    }
+
+    /**
      * Control whether this activity's main window is visible.  This is intended
      * only for the special case of an activity that is not going to show a
      * UI itself, but can't just finish prior to onResume() because it needs
