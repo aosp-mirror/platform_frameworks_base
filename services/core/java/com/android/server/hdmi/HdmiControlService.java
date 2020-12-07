@@ -498,6 +498,7 @@ public class HdmiControlService extends SystemService {
         if (mMessageValidator == null) {
             mMessageValidator = new HdmiCecMessageValidator(this);
         }
+        mHdmiCecConfig.registerGlobalSettingsObserver(mIoLooper);
     }
 
     private void bootCompleted() {
