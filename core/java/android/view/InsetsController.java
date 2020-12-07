@@ -644,7 +644,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         updateState(state);
         applyLocalVisibilityOverride();
 
-        if (!mState.equals(lastState, true /* excludingCaptionInsets */,
+        if (!mState.equals(lastState, false /* excludingCaptionInsets */,
                 true /* excludeInvisibleIme */)) {
             if (DEBUG) Log.d(TAG, "onStateChanged, notifyInsetsChanged");
             mHost.notifyInsetsChanged();
@@ -673,15 +673,13 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
             getSourceConsumer(type).updateSource(source, animationType);
         }
         for (@InternalInsetsType int type = 0; type < InsetsState.SIZE; type++) {
+            // Only update the server side insets here.
+            if (type == ITYPE_CAPTION_BAR) continue;
             InsetsSource source = mState.peekSource(type);
             if (source == null) continue;
             if (newState.peekSource(type) == null) {
                 mState.removeSource(type);
             }
-        }
-        if (mCaptionInsetsHeight != 0) {
-            mState.getSource(ITYPE_CAPTION_BAR).setFrame(new Rect(mFrame.left, mFrame.top,
-                    mFrame.right, mFrame.top + mCaptionInsetsHeight));
         }
 
         updateDisabledUserAnimationTypes(disabledUserAnimationTypes);
@@ -1474,7 +1472,16 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
 
     @Override
     public void setCaptionInsetsHeight(int height) {
-        mCaptionInsetsHeight = height;
+        if (mCaptionInsetsHeight != height) {
+            mCaptionInsetsHeight = height;
+            if (mCaptionInsetsHeight != 0) {
+                mState.getSource(ITYPE_CAPTION_BAR).setFrame(new Rect(mFrame.left, mFrame.top,
+                        mFrame.right, mFrame.top + mCaptionInsetsHeight));
+            } else {
+                mState.removeSource(ITYPE_CAPTION_BAR);
+            }
+            mHost.notifyInsetsChanged();
+        }
     }
 
     @Override

@@ -45,6 +45,7 @@ import static org.mockito.ArgumentMatchers.notNull;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -677,6 +678,19 @@ public class InsetsControllerTest {
             // The caption bar source should not be there at all, because we don't add empty
             // caption to the state from the server.
             assertNull(mController.getState().peekSource(ITYPE_CAPTION_BAR));
+        });
+    }
+
+    @Test
+    public void testNotifyCaptionInsetsOnlyChange() {
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
+            final InsetsState state = new InsetsState(mController.getState(), true);
+            reset(mTestHost);
+            mController.setCaptionInsetsHeight(100);
+            verify(mTestHost).notifyInsetsChanged();
+            reset(mTestHost);
+            mController.setCaptionInsetsHeight(0);
+            verify(mTestHost).notifyInsetsChanged();
         });
     }
 
