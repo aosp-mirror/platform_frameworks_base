@@ -316,6 +316,25 @@ abstract class AndroidKeyStoreRSACipherSpi extends AndroidKeyStoreCipherSpiBase 
         protected final int getAdditionalEntropyAmountForFinish() {
             return (isEncrypting()) ? mDigestOutputSizeBytes : 0;
         }
+
+        @Override
+        protected final String getTransform() {
+            switch (mKeymasterDigest) {
+                case KeymasterDefs.KM_DIGEST_SHA1:
+                    return "RSA/ECB/OAEPWithSHA-1AndMGF1Padding";
+                case KeymasterDefs.KM_DIGEST_SHA_2_224:
+                    return "RSA/ECB/OAEPWithSHA-224AndMGF1Padding";
+                case KeymasterDefs.KM_DIGEST_SHA_2_256:
+                    return "RSA/ECB/OAEPWithSHA-256AndMGF1Padding";
+                case KeymasterDefs.KM_DIGEST_SHA_2_384:
+                    return "RSA/ECB/OAEPWithSHA-384AndMGF1Padding";
+                case KeymasterDefs.KM_DIGEST_SHA_2_512:
+                    return "RSA/ECB/OAEPWithSHA-512AndMGF1Padding";
+                default:
+                    return "RSA/ECB/OAEPPadding";
+            }
+        }
+
     }
 
     public static class OAEPWithSHA1AndMGF1Padding extends OAEPWithMGF1Padding {
@@ -355,6 +374,11 @@ abstract class AndroidKeyStoreRSACipherSpi extends AndroidKeyStoreCipherSpiBase 
 
     AndroidKeyStoreRSACipherSpi(int keymasterPadding) {
         mKeymasterPadding = keymasterPadding;
+    }
+
+    @Override
+    protected String getTransform() {
+        return "RSA/ECB/" + KeyProperties.EncryptionPadding.fromKeymaster(mKeymasterPadding);
     }
 
     @Override
