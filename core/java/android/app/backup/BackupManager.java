@@ -205,13 +205,16 @@ public class BackupManager {
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({
         OperationType.BACKUP,
-        OperationType.MIGRATION
+        OperationType.MIGRATION,
+        OperationType.ADB_BACKUP,
     })
     public @interface OperationType {
-        // A regular backup / restore operation.
+        // A backup / restore to / from an off-device location, e.g. cloud.
         int BACKUP = 0;
-        // A full migration: all app data for non-system apps is eligible.
+        // A direct transfer to another device.
         int MIGRATION = 1;
+        // Backup via adb, data saved on the host machine.
+        int ADB_BACKUP = 3;
     }
 
     private Context mContext;

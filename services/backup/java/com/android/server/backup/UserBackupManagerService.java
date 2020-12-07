@@ -3030,9 +3030,11 @@ public class UserBackupManagerService {
             }
             Slog.i(TAG, addUserIdToLogMessage(mUserId, "Beginning adb backup..."));
 
+            BackupEligibilityRules eligibilityRules = getEligibilityRulesForOperation(
+                    OperationType.ADB_BACKUP);
             AdbBackupParams params = new AdbBackupParams(fd, includeApks, includeObbs,
                     includeShared, doWidgets, doAllApps, includeSystem, compress, doKeyValue,
-                    pkgList, mScheduledBackupEligibility);
+                    pkgList, eligibilityRules);
             final int token = generateRandomIntegerToken();
             synchronized (mAdbBackupRestoreConfirmations) {
                 mAdbBackupRestoreConfirmations.put(token, params);

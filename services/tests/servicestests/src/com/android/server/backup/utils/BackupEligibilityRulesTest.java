@@ -18,14 +18,17 @@ package com.android.server.backup.utils;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import android.app.backup.BackupManager.OperationType;
+import android.compat.testing.PlatformCompatChangeRule;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.Property;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.PackageParser;
 import android.content.pm.Signature;
@@ -38,9 +41,15 @@ import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.backup.UserBackupManagerService;
+import com.android.server.pm.parsing.pkg.AndroidPackage;
+
+import libcore.junit.util.compat.CoreCompatChangeRule.DisableCompatChanges;
+import libcore.junit.util.compat.CoreCompatChangeRule.EnableCompatChanges;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TestRule;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -50,17 +59,19 @@ import org.mockito.MockitoAnnotations;
 @RunWith(AndroidJUnit4.class)
 public class BackupEligibilityRulesTest {
     private static final String CUSTOM_BACKUP_AGENT_NAME = "custom.backup.agent";
-    private static final String TEST_PACKAGE_NAME = "test_package";
+    private static final String TEST_PACKAGE_NAME = "com.android.frameworks.servicestests";
 
     private static final Signature SIGNATURE_1 = generateSignature((byte) 1);
     private static final Signature SIGNATURE_2 = generateSignature((byte) 2);
     private static final Signature SIGNATURE_3 = generateSignature((byte) 3);
     private static final Signature SIGNATURE_4 = generateSignature((byte) 4);
 
+    @Rule public TestRule compatChangeRule = new PlatformCompatChangeRule();
+
     @Mock private PackageManagerInternal mMockPackageManagerInternal;
     @Mock private PackageManager mPackageManager;
-    private BackupEligibilityRules mBackupEligibilityRules;
 
+    private BackupEligibilityRules mBackupEligibilityRules;
     private int mUserId;
 
     @Before
@@ -225,9 +236,84 @@ public class BackupEligibilityRulesTest {
             throws Exception {
         ApplicationInfo applicationInfo = getApplicationInfo(Process.SYSTEM_UID,
                 /* flags */ 0, CUSTOM_BACKUP_AGENT_NAME);
-
         BackupEligibilityRules eligibilityRules = getBackupEligibilityRules(
                 OperationType.MIGRATION);
+        boolean isEligible = eligibilityRules.appIsEligibleForBackup(applicationInfo);
+
+        assertThat(isEligible).isFalse();
+    }
+
+    @Test
+    @EnableCompatChanges({BackupEligibilityRules.RESTRICT_ADB_BACKUP})
+    public void appIsEligibleForBackup_adbBackupNotAllowed_returnsFalseForAdbBackup()
+            throws Exception {
+        ApplicationInfo applicationInfo = getApplicationInfo(Process.FIRST_APPLICATION_UID,
+                /* flags */ ApplicationInfo.PRIVATE_FLAG_PRIVILEGED, CUSTOM_BACKUP_AGENT_NAME);
+        BackupEligibilityRules eligibilityRules = getBackupEligibilityRules(
+                OperationType.ADB_BACKUP);
+        when(mPackageManager.getProperty(eq(PackageManager.PROPERTY_ALLOW_ADB_BACKUP),
+                eq(TEST_PACKAGE_NAME))).thenReturn(getAdbBackupProperty(
+                        /* allowAdbBackup */ false));
+
+        boolean isEligible = eligibilityRules.appIsEligibleForBackup(applicationInfo);
+
+        assertThat(isEligible).isFalse();
+    }
+
+    @Test
+    @EnableCompatChanges({BackupEligibilityRules.RESTRICT_ADB_BACKUP})
+    public void appIsEligibleForBackup_adbBackupAllowed_returnsTrueForAdbBackup()
+            throws Exception {
+        ApplicationInfo applicationInfo = getApplicationInfo(Process.FIRST_APPLICATION_UID,
+                /* flags */ ApplicationInfo.PRIVATE_FLAG_PRIVILEGED, CUSTOM_BACKUP_AGENT_NAME);
+        BackupEligibilityRules eligibilityRules = getBackupEligibilityRules(
+                OperationType.ADB_BACKUP);
+        when(mPackageManager.getProperty(eq(PackageManager.PROPERTY_ALLOW_ADB_BACKUP),
+                eq(TEST_PACKAGE_NAME))).thenReturn(getAdbBackupProperty(
+                /* allowAdbBackup */ true));
+
+        boolean isEligible = eligibilityRules.appIsEligibleForBackup(applicationInfo);
+
+        assertThat(isEligible).isTrue();
+    }
+
+    @Test
+    @EnableCompatChanges({BackupEligibilityRules.RESTRICT_ADB_BACKUP})
+    public void appIsEligibleForBackup_debuggableNonPrivilegedApp_returnsTrueForAdbBackup()
+            throws Exception {
+        ApplicationInfo applicationInfo = getApplicationInfo(Process.FIRST_APPLICATION_UID,
+                /* flags */ ApplicationInfo.FLAG_DEBUGGABLE, CUSTOM_BACKUP_AGENT_NAME);
+        BackupEligibilityRules eligibilityRules = getBackupEligibilityRules(
+                OperationType.ADB_BACKUP);
+
+        boolean isEligible = eligibilityRules.appIsEligibleForBackup(applicationInfo);
+
+        assertThat(isEligible).isTrue();
+    }
+
+    @Test
+    @DisableCompatChanges({BackupEligibilityRules.RESTRICT_ADB_BACKUP})
+    public void appIsEligibleForBackup_allowBackupTrueBeforeS_returnsTrueForAdbBackup()
+            throws Exception {
+        ApplicationInfo applicationInfo = getApplicationInfo(Process.FIRST_APPLICATION_UID,
+                ApplicationInfo.FLAG_ALLOW_BACKUP, CUSTOM_BACKUP_AGENT_NAME);
+        BackupEligibilityRules eligibilityRules = getBackupEligibilityRules(
+                OperationType.ADB_BACKUP);
+
+        boolean isEligible = eligibilityRules.appIsEligibleForBackup(applicationInfo);
+
+        assertThat(isEligible).isTrue();
+    }
+
+    @Test
+    @DisableCompatChanges({BackupEligibilityRules.RESTRICT_ADB_BACKUP})
+    public void appIsEligibleForBackup_allowBackupFalseBeforeS_returnsFalseForAdbBackup()
+            throws Exception {
+        ApplicationInfo applicationInfo = getApplicationInfo(Process.FIRST_APPLICATION_UID,
+                /* flags */ 0, CUSTOM_BACKUP_AGENT_NAME);
+        BackupEligibilityRules eligibilityRules = getBackupEligibilityRules(
+                OperationType.ADB_BACKUP);
+
         boolean isEligible = eligibilityRules.appIsEligibleForBackup(applicationInfo);
 
         assertThat(isEligible).isFalse();
@@ -789,10 +875,15 @@ public class BackupEligibilityRulesTest {
     private static ApplicationInfo getApplicationInfo(int appUid, int flags,
             String backupAgentName) {
         ApplicationInfo applicationInfo = new ApplicationInfo();
-        applicationInfo.flags = 0;
+        applicationInfo.flags = flags;
         applicationInfo.packageName = TEST_PACKAGE_NAME;
         applicationInfo.uid = appUid;
         applicationInfo.backupAgentName = backupAgentName;
         return applicationInfo;
+    }
+
+    private static Property getAdbBackupProperty(boolean allowAdbBackup) {
+        return new Property(PackageManager.PROPERTY_ALLOW_ADB_BACKUP, allowAdbBackup,
+                TEST_PACKAGE_NAME, /* className */ "");
     }
 }
