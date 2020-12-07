@@ -213,8 +213,11 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 notification, UserHandle.CURRENT, null, 0);
         mEntry = new NotificationEntryBuilder().setSbn(mSbn).setShortcutInfo(mShortcutInfo).build();
 
+        // TODO(b/175005650) Please replace FLAG_MUTABLE_UNAUDITED below
+        // with either FLAG_IMMUTABLE (recommended) or FLAG_MUTABLE.
         PendingIntent bubbleIntent = PendingIntent.getActivity(mContext, 0,
-                new Intent(mContext, BubblesTestActivity.class), 0);
+                new Intent(mContext, BubblesTestActivity.class),
+                PendingIntent.FLAG_MUTABLE_UNAUDITED);
         mBubbleSbn = new SbnBuilder(mSbn).setBubbleMetadata(
                 new Notification.BubbleMetadata.Builder(bubbleIntent,
                         Icon.createWithResource(mContext, R.drawable.android)).build())
