@@ -763,7 +763,7 @@ public class RecentsAnimationController implements DeathRecipient {
                 taskAdapter.mTask.dontAnimateDimExit();
             }
             removeAnimation(taskAdapter);
-            taskAdapter.maybeApplyFinishBounds();
+            taskAdapter.onCleanup();
         }
 
         for (int i = mPendingWallpaperAnimations.size() - 1; i >= 0; i--) {
@@ -987,14 +987,19 @@ public class RecentsAnimationController implements DeathRecipient {
             return mTarget;
         }
 
-        void maybeApplyFinishBounds() {
+        void onCleanup() {
             if (!mFinishBounds.isEmpty()) {
+                // Apply any pending bounds changes
                 final SurfaceControl taskSurface = mTask.getSurfaceControl();
                 mTask.getPendingTransaction()
                         .setPosition(taskSurface, mFinishBounds.left, mFinishBounds.top)
                         .setWindowCrop(taskSurface, mFinishBounds.width(), mFinishBounds.height())
                         .apply();
                 mFinishBounds.setEmpty();
+            } else {
+                // Apply the task's pending transaction in case it is detached and its transaction
+                // is not reachable.
+                mTask.getPendingTransaction().apply();
             }
         }
 
