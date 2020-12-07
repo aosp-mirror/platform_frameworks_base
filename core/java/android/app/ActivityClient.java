@@ -451,8 +451,20 @@ public class ActivityClient {
         return sInstance.get();
     }
 
+    /**
+     * If system server has passed the controller interface, store it so the subsequent access can
+     * speed up.
+     */
+    public static IActivityClientController setActivityClientController(
+            IActivityClientController activityClientController) {
+        // No lock because it is no harm to encounter race condition. The thread safe Singleton#get
+        // will take over that case.
+        return INTERFACE_SINGLETON.mKnownInstance = activityClientController;
+    }
+
     private static IActivityClientController getActivityClientController() {
-        return sActivityClientController.get();
+        final IActivityClientController controller = INTERFACE_SINGLETON.mKnownInstance;
+        return controller != null ? controller : INTERFACE_SINGLETON.get();
     }
 
     private static final Singleton<ActivityClient> sInstance = new Singleton<ActivityClient>() {
@@ -462,8 +474,17 @@ public class ActivityClient {
         }
     };
 
-    private static final Singleton<IActivityClientController> sActivityClientController =
-            new Singleton<IActivityClientController>() {
+    private static final ActivityClientControllerSingleton INTERFACE_SINGLETON =
+            new ActivityClientControllerSingleton();
+
+    private static class ActivityClientControllerSingleton
+            extends Singleton<IActivityClientController> {
+        /**
+         * A quick look up to reduce potential extra binder transactions. E.g. getting activity
+         * task manager from service manager and controller from activity task manager.
+         */
+        IActivityClientController mKnownInstance;
+
         @Override
         protected IActivityClientController create() {
             try {
@@ -472,5 +493,5 @@ public class ActivityClient {
                 throw e.rethrowFromSystemServer();
             }
         }
-    };
+    }
 }
