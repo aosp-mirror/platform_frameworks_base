@@ -1810,6 +1810,9 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Secure.ACCESSIBILITY_MAGNIFICATION_CAPABILITY,
                 SecureSettingsProto.Accessibility.ACCESSIBILITY_MAGNIFICATION_CAPABILITY);
+        dumpSetting(s, p,
+                Settings.Secure.ACCESSIBILITY_BUTTON_MODE,
+                SecureSettingsProto.Accessibility.ACCESSIBILITY_BUTTON_MODE);
         p.end(accessibilityToken);
 
         final long adaptiveSleepToken = p.start(SecureSettingsProto.ADAPTIVE_SLEEP);

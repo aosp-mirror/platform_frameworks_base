@@ -269,5 +269,9 @@ public class SecureSettingsValidators {
         VALIDATORS.put(
                 Secure.ASSIST_HANDLES_LEARNING_TIME_ELAPSED_MILLIS, NONE_NEGATIVE_LONG_VALIDATOR);
         VALIDATORS.put(Secure.ASSIST_HANDLES_LEARNING_EVENT_COUNT, NON_NEGATIVE_INTEGER_VALIDATOR);
+        VALIDATORS.put(Secure.ACCESSIBILITY_BUTTON_MODE,
+                new InclusiveIntegerRangeValidator(
+                        Secure.ACCESSIBILITY_BUTTON_MODE_NAVIGATION_BAR,
+                        Secure.ACCESSIBILITY_BUTTON_MODE_FLOATING_MENU));
     }
 }

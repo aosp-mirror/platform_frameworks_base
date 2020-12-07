@@ -180,6 +180,7 @@ public class SecureSettings {
         Settings.Secure.EMERGENCY_GESTURE_SOUND_ENABLED,
         Settings.Secure.ADAPTIVE_CONNECTIVITY_ENABLED,
         Settings.Secure.ASSIST_HANDLES_LEARNING_TIME_ELAPSED_MILLIS,
-        Settings.Secure.ASSIST_HANDLES_LEARNING_EVENT_COUNT
+        Settings.Secure.ASSIST_HANDLES_LEARNING_EVENT_COUNT,
+        Settings.Secure.ACCESSIBILITY_BUTTON_MODE
     };
 }
