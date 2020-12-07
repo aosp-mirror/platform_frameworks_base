@@ -3689,7 +3689,7 @@ public final class BluetoothAdapter {
      *
      * @hide
      */
-    public abstract class BluetoothConnectionCallback {
+    public abstract static class BluetoothConnectionCallback {
         /**
          * Callback triggered when a bluetooth device (classic or BLE) is connected
          * @param device is the connected bluetooth device
