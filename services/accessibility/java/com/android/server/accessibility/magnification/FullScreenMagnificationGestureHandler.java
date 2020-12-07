@@ -395,7 +395,6 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
             if (DEBUG_PANNING_SCALING) Slog.i(mLogTag, "Scaled content to: " + scale + "x");
             mFullScreenMagnificationController.setScale(mDisplayId, scale, pivotX, pivotY, false,
                     AccessibilityManagerService.MAGNIFICATION_GESTURE_HANDLER_ID);
-            mListener.onMagnificationScaleChanged(mDisplayId, getMode());
             return /* handled: */ true;
         }
 

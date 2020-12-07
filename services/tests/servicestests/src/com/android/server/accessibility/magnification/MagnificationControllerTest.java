@@ -278,32 +278,6 @@ public class MagnificationControllerTest {
 
         verify(mWindowMagnificationManager).setScale(eq(TEST_DISPLAY), eq(newScale));
         verify(mWindowMagnificationManager).persistScale(eq(TEST_DISPLAY));
-        verify(mMagnificationController).onMagnificationScaleChanged(eq(TEST_DISPLAY),
-                eq(MODE_WINDOW));
-    }
-
-    @Test
-    public void onMagnificationScaleChanged_capabilitiesAllMode_showMagnificationButton()
-            throws RemoteException {
-        mMagnificationController.setMagnificationCapabilities(
-                Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_ALL);
-
-        mMagnificationController.onMagnificationScaleChanged(TEST_DISPLAY, MODE_WINDOW);
-
-        verify(mWindowMagnificationManager).showMagnificationButton(eq(TEST_DISPLAY),
-                eq(MODE_WINDOW));
-    }
-
-    @Test
-    public void onMagnificationScaleChanged_capabilitiesNotAllMode_notShowMagnificationButton()
-            throws RemoteException {
-        mMagnificationController.setMagnificationCapabilities(
-                Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN);
-
-        mMagnificationController.onMagnificationScaleChanged(TEST_DISPLAY, MODE_WINDOW);
-
-        verify(mWindowMagnificationManager, never()).showMagnificationButton(eq(TEST_DISPLAY),
-                eq(MODE_WINDOW));
     }
 
     private void setMagnificationEnabled(int mode) throws RemoteException {

@@ -115,7 +115,6 @@ public class WindowMagnificationGestureHandler extends MagnificationGestureHandl
                             @Override
                             public void setScale(int displayId, float scale) {
                                 mWindowMagnificationMgr.setScale(displayId, scale);
-                                mListener.onMagnificationScaleChanged(displayId, getMode());
                             }
 
                             @Override

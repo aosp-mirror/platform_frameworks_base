@@ -61,13 +61,7 @@ public abstract class MagnificationGestureHandler extends BaseEventStreamTransfo
 
     /** Interface for listening to the magnification scaling gesture. */
     public interface ScaleChangedListener {
-        /**
-         * Called when the magnification scale is changed by users.
-         *
-         * @param displayId The logical display id
-         * @param mode      The magnification mode
-         */
-        void onMagnificationScaleChanged(int displayId, int mode);
+
     }
 
     protected final ScaleChangedListener mListener;

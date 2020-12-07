@@ -42,7 +42,6 @@ import android.content.Context;
 import android.graphics.PointF;
 import android.os.Handler;
 import android.os.Message;
-import android.provider.Settings;
 import android.util.DebugUtils;
 import android.view.InputDevice;
 import android.view.MotionEvent;
@@ -554,8 +553,6 @@ public class FullScreenMagnificationGestureHandlerTest {
                 check(mMgh.mCurrentState == mMgh.mPanningScalingState,
                         state);
                 check(mMgh.mPanningScalingState.mScaling, state);
-                verify(mMockScaleChangedListener).onMagnificationScaleChanged(DISPLAY_0,
-                        Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN);
             } break;
             default: throw new IllegalArgumentException("Illegal state: " + state);
         }

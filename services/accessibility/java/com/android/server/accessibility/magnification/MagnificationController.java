@@ -84,16 +84,6 @@ public class MagnificationController implements WindowMagnificationManager.Callb
     public void onPerformScaleAction(int displayId, float scale) {
         getWindowMagnificationMgr().setScale(displayId, scale);
         getWindowMagnificationMgr().persistScale(displayId);
-        onMagnificationScaleChanged(displayId,
-                Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW);
-    }
-
-    @Override
-    public void onMagnificationScaleChanged(int displayId, int mode) {
-        if (mMagnificationCapabilities != Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_ALL) {
-            return;
-        }
-        getWindowMagnificationMgr().showMagnificationButton(displayId, mode);
     }
 
     /**
