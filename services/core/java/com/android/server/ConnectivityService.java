@@ -6052,6 +6052,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
      * Stores into |nai| any data coming from the agent that might also be written to the network's
      * LinkProperties by ConnectivityService itself. This ensures that the data provided by the
      * agent is not lost when updateLinkProperties is called.
+     * This method should never alter the agent's LinkProperties, only store data in |nai|.
      */
     private void processLinkPropertiesFromAgent(NetworkAgentInfo nai, LinkProperties lp) {
         lp.ensureDirectlyConnectedRoutes();
@@ -6353,6 +6354,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
      * Stores into |nai| any data coming from the agent that might also be written to the network's
      * NetworkCapabilities by ConnectivityService itself. This ensures that the data provided by the
      * agent is not lost when updateCapabilities is called.
+     * This method should never alter the agent's NetworkCapabilities, only store data in |nai|.
      */
     private void processCapabilitiesFromAgent(NetworkAgentInfo nai, NetworkCapabilities nc) {
         nai.declaredMetered = !nc.hasCapability(NET_CAPABILITY_NOT_METERED);
