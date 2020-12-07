@@ -16,8 +16,6 @@
 
 package com.android.server.locksettings;
 
-import static android.app.admin.DevicePolicyManager.PASSWORD_COMPLEXITY_NONE;
-
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_NONE;
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PATTERN;
 
@@ -271,15 +269,17 @@ class LockSettingsShellCommand extends ShellCommand {
     private boolean isNewCredentialSufficient(LockscreenCredential credential) {
         final PasswordMetrics requiredMetrics =
                 mLockPatternUtils.getRequestedPasswordMetrics(mCurrentUserId);
+        final int requiredComplexity =
+                mLockPatternUtils.getRequestedPasswordComplexity(mCurrentUserId);
         final List<PasswordValidationError> errors;
         if (credential.isPassword() || credential.isPin()) {
-            errors = PasswordMetrics.validatePassword(requiredMetrics, PASSWORD_COMPLEXITY_NONE,
+            errors = PasswordMetrics.validatePassword(requiredMetrics, requiredComplexity,
                     credential.isPin(), credential.getCredential());
         } else {
             PasswordMetrics metrics = new PasswordMetrics(
                     credential.isPattern() ? CREDENTIAL_TYPE_PATTERN : CREDENTIAL_TYPE_NONE);
             errors = PasswordMetrics.validatePasswordMetrics(
-                    requiredMetrics, PASSWORD_COMPLEXITY_NONE, false /* isPin */, metrics);
+                    requiredMetrics, requiredComplexity, false /* isPin */, metrics);
         }
         if (!errors.isEmpty()) {
             getOutPrintWriter().println(
