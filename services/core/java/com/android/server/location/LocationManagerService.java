@@ -57,6 +57,7 @@ import android.location.IGpsGeofenceHardware;
 import android.location.ILocationCallback;
 import android.location.ILocationListener;
 import android.location.ILocationManager;
+import android.location.LastLocationRequest;
 import android.location.Location;
 import android.location.LocationManager;
 import android.location.LocationManagerInternal;
@@ -588,6 +589,30 @@ public class LocationManagerService extends ILocationManager.Stub {
                 new String[0]);
     }
 
+    @Nullable
+    @Override
+    public ICancellationSignal getCurrentLocation(String provider, LocationRequest request,
+            ILocationCallback consumer, String packageName, String attributionTag,
+            String listenerId) {
+        CallerIdentity identity = CallerIdentity.fromBinder(mContext, packageName, attributionTag,
+                listenerId);
+        int permissionLevel = LocationPermissions.getPermissionLevel(mContext, identity.getUid(),
+                identity.getPid());
+        LocationPermissions.enforceLocationPermission(identity.getUid(), permissionLevel,
+                PERMISSION_COARSE);
+
+        // clients in the system process must have an attribution tag set
+        Preconditions.checkState(identity.getPid() != Process.myPid() || attributionTag != null);
+
+        request = validateLocationRequest(request, identity);
+
+        LocationProviderManager manager = getLocationProviderManager(provider);
+        Preconditions.checkArgument(manager != null,
+                "provider \"" + provider + "\" does not exist");
+
+        return manager.getCurrentLocation(request, identity, permissionLevel, consumer);
+    }
+
     @Override
     public void registerLocationListener(String provider, LocationRequest request,
             ILocationListener listener, String packageName, @Nullable String attributionTag,
@@ -741,7 +766,8 @@ public class LocationManagerService extends ILocationManager.Stub {
     }
 
     @Override
-    public Location getLastLocation(String provider, String packageName, String attributionTag) {
+    public Location getLastLocation(String provider, LastLocationRequest request,
+            String packageName, String attributionTag) {
         CallerIdentity identity = CallerIdentity.fromBinder(mContext, packageName, attributionTag);
         int permissionLevel = LocationPermissions.getPermissionLevel(mContext, identity.getUid(),
                 identity.getPid());
@@ -751,36 +777,29 @@ public class LocationManagerService extends ILocationManager.Stub {
         // clients in the system process must have an attribution tag set
         Preconditions.checkArgument(identity.getPid() != Process.myPid() || attributionTag != null);
 
+        request = validateLastLocationRequest(request);
+
         LocationProviderManager manager = getLocationProviderManager(provider);
         if (manager == null) {
             return null;
         }
 
-        return manager.getLastLocation(identity, permissionLevel, false);
+        return manager.getLastLocation(request, identity, permissionLevel);
     }
 
-    @Nullable
-    @Override
-    public ICancellationSignal getCurrentLocation(String provider, LocationRequest request,
-            ILocationCallback consumer, String packageName, String attributionTag,
-            String listenerId) {
-        CallerIdentity identity = CallerIdentity.fromBinder(mContext, packageName, attributionTag,
-                listenerId);
-        int permissionLevel = LocationPermissions.getPermissionLevel(mContext, identity.getUid(),
-                identity.getPid());
-        LocationPermissions.enforceLocationPermission(identity.getUid(), permissionLevel,
-                PERMISSION_COARSE);
+    private LastLocationRequest validateLastLocationRequest(LastLocationRequest request) {
+        if (request.isHiddenFromAppOps()) {
+            mContext.enforceCallingOrSelfPermission(
+                    permission.UPDATE_APP_OPS_STATS,
+                    "hiding from app ops requires " + permission.UPDATE_APP_OPS_STATS);
+        }
+        if (request.isLocationSettingsIgnored()) {
+            mContext.enforceCallingOrSelfPermission(
+                    permission.WRITE_SECURE_SETTINGS,
+                    "ignoring location settings requires " + permission.WRITE_SECURE_SETTINGS);
+        }
 
-        // clients in the system process must have an attribution tag set
-        Preconditions.checkState(identity.getPid() != Process.myPid() || attributionTag != null);
-
-        request = validateLocationRequest(request, identity);
-
-        LocationProviderManager manager = getLocationProviderManager(provider);
-        Preconditions.checkArgument(manager != null,
-                "provider \"" + provider + "\" does not exist");
-
-        return manager.getCurrentLocation(request, identity, permissionLevel, consumer);
+        return request;
     }
 
     @Override
