@@ -543,7 +543,8 @@ public class HdmiCecNetwork {
             HdmiDeviceInfo updatedDeviceInfo = new HdmiDeviceInfo(deviceInfo.getLogicalAddress(),
                     physicalAddress,
                     physicalAddressToPortId(physicalAddress), type, deviceInfo.getVendorId(),
-                    deviceInfo.getDisplayName(), deviceInfo.getDevicePowerStatus());
+                    deviceInfo.getDisplayName(), deviceInfo.getDevicePowerStatus(),
+                    deviceInfo.getCecVersion());
             updateCecDevice(updatedDeviceInfo);
         }
     }
@@ -586,7 +587,7 @@ public class HdmiCecNetwork {
         updateCecDevice(new HdmiDeviceInfo(deviceInfo.getLogicalAddress(),
                 deviceInfo.getPhysicalAddress(), deviceInfo.getPortId(),
                 deviceInfo.getDeviceType(), deviceInfo.getVendorId(), osdName,
-                deviceInfo.getDevicePowerStatus()));
+                deviceInfo.getDevicePowerStatus(), deviceInfo.getCecVersion()));
     }
 
     @ServiceThreadOnly
@@ -602,7 +603,8 @@ public class HdmiCecNetwork {
             HdmiDeviceInfo updatedDeviceInfo = new HdmiDeviceInfo(deviceInfo.getLogicalAddress(),
                     deviceInfo.getPhysicalAddress(),
                     deviceInfo.getPortId(), deviceInfo.getDeviceType(), vendorId,
-                    deviceInfo.getDisplayName(), deviceInfo.getDevicePowerStatus());
+                    deviceInfo.getDisplayName(), deviceInfo.getDevicePowerStatus(),
+                    deviceInfo.getCecVersion());
             updateCecDevice(updatedDeviceInfo);
         }
     }

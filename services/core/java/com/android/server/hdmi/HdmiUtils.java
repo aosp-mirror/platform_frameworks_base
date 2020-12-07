@@ -396,7 +396,7 @@ final class HdmiUtils {
     static HdmiDeviceInfo cloneHdmiDeviceInfo(HdmiDeviceInfo info, int newPowerStatus) {
         return new HdmiDeviceInfo(info.getLogicalAddress(),
                 info.getPhysicalAddress(), info.getPortId(), info.getDeviceType(),
-                info.getVendorId(), info.getDisplayName(), newPowerStatus);
+                info.getVendorId(), info.getDisplayName(), newPowerStatus, info.getCecVersion());
     }
 
     /**
