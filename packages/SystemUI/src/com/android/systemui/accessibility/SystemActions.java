@@ -400,7 +400,10 @@ public class SystemActions extends SystemUI {
                 case INTENT_ACTION_ACCESSIBILITY_SHORTCUT: {
                     Intent intent = new Intent(intentAction);
                     intent.setPackage(context.getPackageName());
-                    return PendingIntent.getBroadcast(context, 0, intent, 0);
+                    // TODO(b/173157883) Please replace FLAG_MUTABLE_UNAUDITED below
+                    // with either FLAG_IMMUTABLE (recommended) or FLAG_MUTABLE.
+                    return PendingIntent.getBroadcast(context, 0, intent,
+                            PendingIntent.FLAG_MUTABLE_UNAUDITED);
                 }
                 default:
                     break;
