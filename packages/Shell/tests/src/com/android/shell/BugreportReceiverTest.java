@@ -513,6 +513,17 @@ public class BugreportReceiverTest {
     }
 
     @Test
+    public void testBugreportFinished_withEmptyBugreportFile() throws Exception {
+        sendBugreportStarted();
+
+        IoUtils.closeQuietly(mBugreportFd);
+        mBugreportFd = null;
+        sendBugreportFinished();
+
+        assertServiceNotRunning();
+    }
+
+    @Test
     public void testShareBugreportAfterServiceDies() throws Exception {
         sendBugreportStarted();
         waitForScreenshotButtonEnabled(true);
@@ -647,7 +658,9 @@ public class BugreportReceiverTest {
      * Callbacks to service to finish the bugreport.
      */
     private void sendBugreportFinished() throws Exception {
-        writeZipFile(mBugreportFd, BUGREPORT_FILE, BUGREPORT_CONTENT);
+        if (mBugreportFd != null) {
+            writeZipFile(mBugreportFd, BUGREPORT_FILE, BUGREPORT_CONTENT);
+        }
         if (mScreenshotFd != null) {
             writeScreenshotFile(mScreenshotFd, SCREENSHOT_CONTENT);
         }

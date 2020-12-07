@@ -380,6 +380,11 @@ public class BugreportProgressService extends Service {
         public void onFinished() {
             mInfo.renameBugreportFile();
             mInfo.renameScreenshots();
+            if (mInfo.bugreportFile.length() == 0) {
+                Log.e(TAG, "Bugreport file empty. File path = " + mInfo.bugreportFile);
+                onError(BUGREPORT_ERROR_RUNTIME);
+                return;
+            }
             synchronized (mLock) {
                 sendBugreportFinishedBroadcastLocked();
                 mMainThreadHandler.post(() -> mInfoDialog.onBugreportFinished(mInfo));
@@ -408,10 +413,6 @@ public class BugreportProgressService extends Service {
         @GuardedBy("mLock")
         private void sendBugreportFinishedBroadcastLocked() {
             final String bugreportFilePath = mInfo.bugreportFile.getAbsolutePath();
-            if (mInfo.bugreportFile.length() == 0) {
-                Log.e(TAG, "Bugreport file empty. File path = " + bugreportFilePath);
-                return;
-            }
             if (mInfo.type == BugreportParams.BUGREPORT_MODE_REMOTE) {
                 sendRemoteBugreportFinishedBroadcast(mContext, bugreportFilePath,
                         mInfo.bugreportFile);
