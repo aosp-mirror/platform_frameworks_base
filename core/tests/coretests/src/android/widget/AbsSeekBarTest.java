@@ -60,35 +60,35 @@ public class AbsSeekBarTest {
     @Test
     public void testExclusionForThumb_limitedTo48dp() {
         mBar.setPadding(10, 10, 10, 10);
-        mBar.setThumb(newThumb(dpToPx(20)));
+        mBar.setThumb(newThumb(dpToPxSize(20)));
         mBar.setMin(0);
         mBar.setMax(100);
         mBar.setProgress(50);
-        measureAndLayout(dpToPx(200), dpToPx(100));
+        measureAndLayout(dpToPxSize(200), dpToPxSize(100));
         List<Rect> exclusions = mBar.getSystemGestureExclusionRects();
 
         assertEquals("exclusions should be size 1, but was " + exclusions, 1, exclusions.size());
         assertEquals("exclusion should be centered on thumb",
                 center(mBar), center(exclusions.get(0)));
-        assertEquals("exclusion should be 48dp high", dpToPx(48), exclusions.get(0).height());
-        assertEquals("exclusion should be 48dp wide", dpToPx(48), exclusions.get(0).width());
+        assertEquals("exclusion should be 48dp high", dpToPxSize(48), exclusions.get(0).height());
+        assertEquals("exclusion should be 48dp wide", dpToPxSize(48), exclusions.get(0).width());
     }
 
     @Test
     public void testExclusionForThumb_limitedToHeight() {
         mBar.setPadding(10, 10, 10, 10);
-        mBar.setThumb(newThumb(dpToPx(20)));
+        mBar.setThumb(newThumb(dpToPxSize(20)));
         mBar.setMin(0);
         mBar.setMax(100);
         mBar.setProgress(50);
-        measureAndLayout(dpToPx(200), dpToPx(32));
+        measureAndLayout(dpToPxSize(200), dpToPxSize(32));
         List<Rect> exclusions = mBar.getSystemGestureExclusionRects();
 
         assertEquals("exclusions should be size 1, but was " + exclusions, 1, exclusions.size());
         assertEquals("exclusion should be centered on thumb",
                 center(mBar), center(exclusions.get(0)));
-        assertEquals("exclusion should be 32dp high", dpToPx(32), exclusions.get(0).height());
-        assertEquals("exclusion should be 32dp wide", dpToPx(32), exclusions.get(0).width());
+        assertEquals("exclusion should be 32dp high", dpToPxSize(32), exclusions.get(0).height());
+        assertEquals("exclusion should be 32dp wide", dpToPxSize(32), exclusions.get(0).width());
     }
 
     @Test
@@ -96,11 +96,11 @@ public class AbsSeekBarTest {
         mBar.setSystemGestureExclusionRects(Arrays.asList(new Rect(1, 2, 3, 4)));
 
         mBar.setPadding(10, 10, 10, 10);
-        mBar.setThumb(newThumb(dpToPx(20)));
+        mBar.setThumb(newThumb(dpToPxSize(20)));
         mBar.setMin(0);
         mBar.setMax(100);
         mBar.setProgress(50);
-        measureAndLayout(dpToPx(200), dpToPx(32));
+        measureAndLayout(dpToPxSize(200), dpToPxSize(32));
 
         assertThat(mBar.getSystemGestureExclusionRects(), hasItem(new Rect(1, 2, 3, 4)));
         assertThat(mBar.getSystemGestureExclusionRects(), hasSize(2));
@@ -130,7 +130,7 @@ public class AbsSeekBarTest {
         mBar.layout(0, 0, wPx, hPx);
     }
 
-    private int dpToPx(int dp) {
-        return (int) (mContext.getResources().getDisplayMetrics().density * dp);
+    private int dpToPxSize(int dp) {
+        return (int) (mContext.getResources().getDisplayMetrics().density * dp + 0.5f);
     }
 }
