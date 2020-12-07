@@ -17,6 +17,7 @@
 package com.android.wm.shell.flicker
 
 import android.graphics.Region
+import com.android.server.wm.flicker.DOCKED_STACK_DIVIDER
 import com.android.server.wm.flicker.dsl.EventLogAssertion
 import com.android.server.wm.flicker.dsl.LayersAssertion
 import com.android.server.wm.flicker.helpers.WindowUtils
@@ -48,6 +49,30 @@ fun LayersAssertion.dockedStackDividerIsVisible(
 ) {
     end("dockedStackDividerIsVisible", bugId, enabled) {
         this.showsLayer(FlickerTestBase.DOCKED_STACK_DIVIDER)
+    }
+}
+
+@JvmOverloads
+fun LayersAssertion.dockedStackDividerBecomesVisible(
+    bugId: Int = 0,
+    enabled: Boolean = bugId == 0
+) {
+    all("dividerLayerBecomesVisible") {
+        this.hidesLayer(DOCKED_STACK_DIVIDER)
+                .then()
+                .showsLayer(DOCKED_STACK_DIVIDER)
+    }
+}
+
+@JvmOverloads
+fun LayersAssertion.dockedStackDividerBecomesInvisible(
+    bugId: Int = 0,
+    enabled: Boolean = bugId == 0
+) {
+    all("dividerLayerBecomesInvisible") {
+        this.showsLayer(DOCKED_STACK_DIVIDER)
+                .then()
+                .hidesLayer(DOCKED_STACK_DIVIDER)
     }
 }
 
