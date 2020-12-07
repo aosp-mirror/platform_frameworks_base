@@ -362,8 +362,6 @@ public final class Settings {
         }
     }
 
-    Boolean mReadExternalStorageEnforced;
-
     /** Device identity for the purpose of package verification. */
     private VerifierDeviceIdentity mVerifierDeviceIdentity;
 
@@ -2342,13 +2340,6 @@ public final class Settings {
                 serializer.endTag(null, "verifier");
             }
 
-            if (mReadExternalStorageEnforced != null) {
-                serializer.startTag(null, TAG_READ_EXTERNAL_STORAGE);
-                serializer.attribute(
-                        null, ATTR_ENFORCEMENT, mReadExternalStorageEnforced ? "1" : "0");
-                serializer.endTag(null, TAG_READ_EXTERNAL_STORAGE);
-            }
-
             serializer.startTag(null, "permission-trees");
             mPermissions.writePermissionTrees(serializer);
             serializer.endTag(null, "permission-trees");
@@ -2959,9 +2950,7 @@ public final class Settings {
                                 + e.getMessage());
                     }
                 } else if (TAG_READ_EXTERNAL_STORAGE.equals(tagName)) {
-                    final String enforcement = parser.getAttributeValue(null, ATTR_ENFORCEMENT);
-                    mReadExternalStorageEnforced =
-                            "1".equals(enforcement) ? Boolean.TRUE : Boolean.FALSE;
+                    // No longer used.
                 } else if (tagName.equals("keyset-settings")) {
                     mKeySetManagerService.readKeySetsLPw(parser, mKeySetRefs);
                 } else if (TAG_VERSION.equals(tagName)) {
@@ -4900,8 +4889,7 @@ public final class Settings {
             DumpState dumpState) {
         LegacyPermissionSettings.dumpPermissions(pw, packageName, permissionNames,
                 mPermissionDataProvider.getLegacyPermissions(),
-                mPermissionDataProvider.getAllAppOpPermissionPackages(),
-                (mReadExternalStorageEnforced == Boolean.TRUE), dumpState);
+                mPermissionDataProvider.getAllAppOpPermissionPackages(), true, dumpState);
     }
 
     void dumpSharedUsersLPr(PrintWriter pw, String packageName, ArraySet<String> permissionNames,

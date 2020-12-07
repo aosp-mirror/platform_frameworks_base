@@ -76,8 +76,7 @@ import com.android.internal.util.DumpUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
-import com.android.server.SystemService.TargetUser;
-import com.android.server.pm.permission.PermissionManagerServiceInternal;
+import com.android.server.pm.permission.LegacyPermissionManagerInternal;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -296,8 +295,8 @@ public final class ContentService extends IContentService.Stub {
 
         // Let the package manager query for the sync adapters for a given authority
         // as we grant default permissions to sync adapters for specific authorities.
-        final PermissionManagerServiceInternal permissionManagerInternal =
-                LocalServices.getService(PermissionManagerServiceInternal.class);
+        final LegacyPermissionManagerInternal permissionManagerInternal =
+                LocalServices.getService(LegacyPermissionManagerInternal.class);
         permissionManagerInternal.setSyncAdapterPackagesProvider((authority, userId) -> {
             return getSyncAdapterPackagesForAuthorityAsUser(authority, userId);
         });

@@ -2324,7 +2324,7 @@ class PackageManagerShellCommand extends ShellCommand {
             getErrPrintWriter().println("Error: no enforcement specified");
             return 1;
         }
-        mPermissionManager.setPermissionEnforced(permission, Boolean.parseBoolean(enforcedRaw));
+        // Permissions are always enforced now.
         return 0;
     }
 
