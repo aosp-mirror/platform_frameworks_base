@@ -300,4 +300,6 @@ interface IWifiManager
     void setCarrierNetworkOffloadEnabled(int subscriptionId, boolean merged, boolean enabled);
 
     boolean isCarrierNetworkOffloadEnabled(int subscriptionId, boolean merged);
+
+    void restartWifiSubsystem(String reason);
 }
