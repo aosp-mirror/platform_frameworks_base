@@ -78,4 +78,125 @@ public class AppSearchSchemaCtsTest {
                                                 .build()));
         assertThat(e).hasMessageThat().contains("Property defined more than once: subject");
     }
+
+    @Test
+    public void testEquals_identical() {
+        AppSearchSchema schema1 =
+                new AppSearchSchema.Builder("Email")
+                        .addProperty(
+                                new PropertyConfig.Builder("subject")
+                                        .setDataType(PropertyConfig.DATA_TYPE_STRING)
+                                        .setCardinality(PropertyConfig.CARDINALITY_OPTIONAL)
+                                        .setIndexingType(PropertyConfig.INDEXING_TYPE_PREFIXES)
+                                        .setTokenizerType(PropertyConfig.TOKENIZER_TYPE_PLAIN)
+                                        .build())
+                        .build();
+        AppSearchSchema schema2 =
+                new AppSearchSchema.Builder("Email")
+                        .addProperty(
+                                new PropertyConfig.Builder("subject")
+                                        .setDataType(PropertyConfig.DATA_TYPE_STRING)
+                                        .setCardinality(PropertyConfig.CARDINALITY_OPTIONAL)
+                                        .setIndexingType(PropertyConfig.INDEXING_TYPE_PREFIXES)
+                                        .setTokenizerType(PropertyConfig.TOKENIZER_TYPE_PLAIN)
+                                        .build())
+                        .build();
+        assertThat(schema1).isEqualTo(schema2);
+        assertThat(schema1.hashCode()).isEqualTo(schema2.hashCode());
+    }
+
+    @Test
+    public void testEquals_differentOrder() {
+        AppSearchSchema schema1 =
+                new AppSearchSchema.Builder("Email")
+                        .addProperty(
+                                new PropertyConfig.Builder("subject")
+                                        .setDataType(PropertyConfig.DATA_TYPE_STRING)
+                                        .setCardinality(PropertyConfig.CARDINALITY_OPTIONAL)
+                                        .setIndexingType(PropertyConfig.INDEXING_TYPE_PREFIXES)
+                                        .setTokenizerType(PropertyConfig.TOKENIZER_TYPE_PLAIN)
+                                        .build())
+                        .build();
+        AppSearchSchema schema2 =
+                new AppSearchSchema.Builder("Email")
+                        .addProperty(
+                                new PropertyConfig.Builder("subject")
+                                        .setTokenizerType(PropertyConfig.TOKENIZER_TYPE_PLAIN)
+                                        .setIndexingType(PropertyConfig.INDEXING_TYPE_PREFIXES)
+                                        .setDataType(PropertyConfig.DATA_TYPE_STRING)
+                                        .setCardinality(PropertyConfig.CARDINALITY_OPTIONAL)
+                                        .build())
+                        .build();
+        assertThat(schema1).isEqualTo(schema2);
+        assertThat(schema1.hashCode()).isEqualTo(schema2.hashCode());
+    }
+
+    @Test
+    public void testEquals_failure() {
+        AppSearchSchema schema1 =
+                new AppSearchSchema.Builder("Email")
+                        .addProperty(
+                                new PropertyConfig.Builder("subject")
+                                        .setDataType(PropertyConfig.DATA_TYPE_STRING)
+                                        .setCardinality(PropertyConfig.CARDINALITY_OPTIONAL)
+                                        .setIndexingType(PropertyConfig.INDEXING_TYPE_PREFIXES)
+                                        .setTokenizerType(PropertyConfig.TOKENIZER_TYPE_PLAIN)
+                                        .build())
+                        .build();
+        AppSearchSchema schema2 =
+                new AppSearchSchema.Builder("Email")
+                        .addProperty(
+                                new PropertyConfig.Builder("subject")
+                                        .setDataType(PropertyConfig.DATA_TYPE_STRING)
+                                        .setCardinality(PropertyConfig.CARDINALITY_OPTIONAL)
+                                        .setIndexingType(
+                                                PropertyConfig
+                                                        .INDEXING_TYPE_EXACT_TERMS) // Different
+                                        .setTokenizerType(PropertyConfig.TOKENIZER_TYPE_PLAIN)
+                                        .build())
+                        .build();
+        assertThat(schema1).isNotEqualTo(schema2);
+        assertThat(schema1.hashCode()).isNotEqualTo(schema2.hashCode());
+    }
+
+    @Test
+    public void testEquals_failure_differentOrder() {
+        AppSearchSchema schema1 =
+                new AppSearchSchema.Builder("Email")
+                        .addProperty(
+                                new PropertyConfig.Builder("subject")
+                                        .setDataType(PropertyConfig.DATA_TYPE_STRING)
+                                        .setCardinality(PropertyConfig.CARDINALITY_OPTIONAL)
+                                        .setIndexingType(PropertyConfig.INDEXING_TYPE_PREFIXES)
+                                        .setTokenizerType(PropertyConfig.TOKENIZER_TYPE_PLAIN)
+                                        .build())
+                        .addProperty(
+                                new PropertyConfig.Builder("body")
+                                        .setDataType(PropertyConfig.DATA_TYPE_STRING)
+                                        .setCardinality(PropertyConfig.CARDINALITY_OPTIONAL)
+                                        .setIndexingType(PropertyConfig.INDEXING_TYPE_PREFIXES)
+                                        .setTokenizerType(PropertyConfig.TOKENIZER_TYPE_PLAIN)
+                                        .build())
+                        .build();
+        // Order of 'body' and 'subject' has been switched
+        AppSearchSchema schema2 =
+                new AppSearchSchema.Builder("Email")
+                        .addProperty(
+                                new PropertyConfig.Builder("body")
+                                        .setDataType(PropertyConfig.DATA_TYPE_STRING)
+                                        .setCardinality(PropertyConfig.CARDINALITY_OPTIONAL)
+                                        .setIndexingType(PropertyConfig.INDEXING_TYPE_PREFIXES)
+                                        .setTokenizerType(PropertyConfig.TOKENIZER_TYPE_PLAIN)
+                                        .build())
+                        .addProperty(
+                                new PropertyConfig.Builder("subject")
+                                        .setDataType(PropertyConfig.DATA_TYPE_STRING)
+                                        .setCardinality(PropertyConfig.CARDINALITY_OPTIONAL)
+                                        .setIndexingType(PropertyConfig.INDEXING_TYPE_PREFIXES)
+                                        .setTokenizerType(PropertyConfig.TOKENIZER_TYPE_PLAIN)
+                                        .build())
+                        .build();
+        assertThat(schema1).isNotEqualTo(schema2);
+        assertThat(schema1.hashCode()).isNotEqualTo(schema2.hashCode());
+    }
 }

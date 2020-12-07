@@ -140,7 +140,11 @@ public final class AppSearchSession {
             schemaBundles.add(schema.getBundle());
         }
         try {
-            mService.setSchema(mDatabaseName, schemaBundles, request.isForceOverride(),
+            mService.setSchema(
+                    mDatabaseName,
+                    schemaBundles,
+                    new ArrayList<>(request.getSchemasNotPlatformSurfaceable()),
+                    request.isForceOverride(),
                     new IAppSearchResultCallback.Stub() {
                         public void onResult(AppSearchResult result) {
                             executor.execute(() -> callback.accept(result));

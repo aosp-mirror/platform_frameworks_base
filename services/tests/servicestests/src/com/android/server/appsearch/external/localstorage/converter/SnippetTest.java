@@ -83,7 +83,7 @@ public class SnippetTest {
 
         // Making ResultReader and getting Snippet values.
         SearchResultPage searchResultPage =
-                SearchResultToProtoConverter.convertToSearchResultPage(searchResultProto);
+                SearchResultToProtoConverter.toSearchResultPage(searchResultProto);
         for (SearchResult result : searchResultPage.getResults()) {
             SearchResult.MatchInfo match = result.getMatches().get(0);
             assertThat(match.getPropertyPath()).isEqualTo(propertyKeyString);
@@ -131,7 +131,7 @@ public class SnippetTest {
                 SearchResultProto.newBuilder().addResults(resultProto).build();
 
         SearchResultPage searchResultPage =
-                SearchResultToProtoConverter.convertToSearchResultPage(searchResultProto);
+                SearchResultToProtoConverter.toSearchResultPage(searchResultProto);
         for (SearchResult result : searchResultPage.getResults()) {
             assertThat(result.getMatches()).isEmpty();
         }
@@ -196,7 +196,7 @@ public class SnippetTest {
 
         // Making ResultReader and getting Snippet values.
         SearchResultPage searchResultPage =
-                SearchResultToProtoConverter.convertToSearchResultPage(searchResultProto);
+                SearchResultToProtoConverter.toSearchResultPage(searchResultProto);
         for (SearchResult result : searchResultPage.getResults()) {
 
             SearchResult.MatchInfo match1 = result.getMatches().get(0);

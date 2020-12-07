@@ -94,20 +94,24 @@ public class GenericDocumentToProtoConverterTest {
                 PropertyProto.newBuilder()
                         .setName("documentKey1")
                         .addDocumentValues(
-                                GenericDocumentToProtoConverter.convert(DOCUMENT_PROPERTIES_1)));
+                                GenericDocumentToProtoConverter.toDocumentProto(
+                                        DOCUMENT_PROPERTIES_1)));
         propertyProtoMap.put(
                 "documentKey2",
                 PropertyProto.newBuilder()
                         .setName("documentKey2")
                         .addDocumentValues(
-                                GenericDocumentToProtoConverter.convert(DOCUMENT_PROPERTIES_2)));
+                                GenericDocumentToProtoConverter.toDocumentProto(
+                                        DOCUMENT_PROPERTIES_2)));
         List<String> sortedKey = new ArrayList<>(propertyProtoMap.keySet());
         Collections.sort(sortedKey);
         for (String key : sortedKey) {
             documentProtoBuilder.addProperties(propertyProtoMap.get(key));
         }
         DocumentProto documentProto = documentProtoBuilder.build();
-        assertThat(GenericDocumentToProtoConverter.convert(document)).isEqualTo(documentProto);
-        assertThat(document).isEqualTo(GenericDocumentToProtoConverter.convert(documentProto));
+        assertThat(GenericDocumentToProtoConverter.toDocumentProto(document))
+                .isEqualTo(documentProto);
+        assertThat(document)
+                .isEqualTo(GenericDocumentToProtoConverter.toGenericDocument(documentProto));
     }
 }

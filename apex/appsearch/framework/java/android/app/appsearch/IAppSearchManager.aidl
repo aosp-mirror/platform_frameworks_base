@@ -32,6 +32,8 @@ interface IAppSearchManager {
      *
      * @param databaseName  The databaseName this document resides in.
      * @param schemaBundles List of AppSearchSchema bundles.
+     * @param schemasNotPlatformSurfaceable Schema types that should not be surfaced on platform
+     *     surfaces.
      * @param forceOverride Whether to apply the new schema even if it is incompatible. All
      *     incompatible documents will be deleted.
      * @param callback {@link IAppSearchResultCallback#onResult} will be called with an
@@ -40,6 +42,7 @@ interface IAppSearchManager {
     void setSchema(
         in String databaseName,
         in List<Bundle> schemaBundles,
+        in List<String> schemasNotPlatformSurfaceable,
         boolean forceOverride,
         in IAppSearchResultCallback callback);
 
