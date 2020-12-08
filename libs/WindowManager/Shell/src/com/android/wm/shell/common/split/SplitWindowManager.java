@@ -22,6 +22,7 @@ import static android.view.WindowManager.LayoutParams.FLAG_SLIPPERY;
 import static android.view.WindowManager.LayoutParams.FLAG_SPLIT_TOUCH;
 import static android.view.WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMATION;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
 
 import android.content.Context;
@@ -89,7 +90,7 @@ public final class SplitWindowManager extends WindowlessWindowManager {
                 PixelFormat.TRANSLUCENT);
         lp.token = new Binder();
         lp.setTitle(DIVIDER_WINDOW_TITLE);
-        lp.privateFlags |= PRIVATE_FLAG_NO_MOVE_ANIMATION;
+        lp.privateFlags |= PRIVATE_FLAG_NO_MOVE_ANIMATION | PRIVATE_FLAG_TRUSTED_OVERLAY;
         mViewHost.setView(dividerView, lp);
         dividerView.setup(splitLayout, mViewHost, null /* dragListener */);
     }
