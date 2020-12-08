@@ -1098,25 +1098,6 @@ public class ResolverActivity extends Activity {
                         if (TextUtils.isEmpty(packageName)) {
                             pm.setDefaultBrowserPackageNameAsUser(ri.activityInfo.packageName, userId);
                         }
-                    } else {
-                        // Update Domain Verification status
-                        ComponentName cn = intent.getComponent();
-                        String packageName = cn.getPackageName();
-                        String dataScheme = (data != null) ? data.getScheme() : null;
-
-                        boolean isHttpOrHttps = (dataScheme != null) &&
-                                (dataScheme.equals(IntentFilter.SCHEME_HTTP) ||
-                                        dataScheme.equals(IntentFilter.SCHEME_HTTPS));
-
-                        boolean isViewAction = (action != null) && action.equals(Intent.ACTION_VIEW);
-                        boolean hasCategoryBrowsable = (categories != null) &&
-                                categories.contains(Intent.CATEGORY_BROWSABLE);
-
-                        if (isHttpOrHttps && isViewAction && hasCategoryBrowsable) {
-                            pm.updateIntentVerificationStatusAsUser(packageName,
-                                    PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS,
-                                    userId);
-                        }
                     }
                 } else {
                     try {
