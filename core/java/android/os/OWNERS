@@ -16,6 +16,12 @@ per-file IPowerManager.aidl = michaelwr@google.com, santoscordon@google.com
 per-file PowerManager.java = michaelwr@google.com, santoscordon@google.com
 per-file PowerManagerInternal.java = michaelwr@google.com, santoscordon@google.com
 
+# BatteryStats
+per-file *BatteryConsumer* = file:/BATTERY_STATS_OWNERS
+per-file BatteryManager* = file:/BATTERY_STATS_OWNERS
+per-file BatteryStats* = file:/BATTERY_STATS_OWNERS
+per-file BatteryUsageStats* = file:/BATTERY_STATS_OWNERS
+per-file PowerComponents.java = file:/BATTERY_STATS_OWNERS
 
 per-file GraphicsEnvironment.java = chrisforbes@google.com, cnorthrop@google.com, lpy@google.com, timvp@google.com, zzyiwei@google.com
 
