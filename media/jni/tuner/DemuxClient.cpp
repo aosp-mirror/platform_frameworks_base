@@ -44,26 +44,59 @@ void DemuxClient::setHidlDemux(sp<IDemux> demux) {
     mDemux = demux;
 }
 
-Result DemuxClient::setFrontendDataSource(sp<FrontendClient> tunerFrontend) {
+Result DemuxClient::setFrontendDataSource(sp<FrontendClient> frontendClient) {
     // TODO: pending aidl interface
     /*if (mTunerDemux != NULL) {
         // TODO: handle error message
-        mTunerDemux->setFrontendDataSource(tunerFrontend->getAidlFrontend());
+        mTunerDemux->setFrontendDataSource(frontendClient->getAidlFrontend());
         return (int) Result::SUCCESS;
     }*/
 
     if (mDemux != NULL) {
-        Result res = mDemux->setFrontendDataSource(tunerFrontend->getId());
+        Result res = mDemux->setFrontendDataSource(frontendClient->getId());
         return res;
     }
 
     return Result::INVALID_STATE;
 }
 
-//FilterClient openFilter(int mainType, int subType, int bufferSize, FilterClientCallback cb);
+sp<FilterClient> DemuxClient::openFilter(DemuxFilterType type, int bufferSize,
+        sp<FilterClientCallback> cb) {
+    // TODO: pending aidl interface
 
-int DemuxClient::getAvSyncHwId(FilterClient /*tunerFilter*/) {
-    return 0;
+    if (mDemux != NULL) {
+        sp<HidlFilterCallback> callback = new HidlFilterCallback(cb);
+        sp<IFilter> hidlFilter = openHidlFilter(type, bufferSize, callback);
+        if (hidlFilter != NULL) {
+            sp<FilterClient> filterClient = new FilterClient();
+            filterClient->setHidlFilter(hidlFilter);
+            return filterClient;
+        }
+    }
+
+    // TODO: handle share av memory handle
+
+    return NULL;
+}
+
+int DemuxClient::getAvSyncHwId(sp<FilterClient> filterClient) {
+    // pending aidl interface
+
+    if (mDemux != NULL) {
+        uint32_t avSyncHwId;
+        Result res;
+        sp<IFilter> halFilter = filterClient->getHalFilter();
+        mDemux->getAvSyncHwId(halFilter,
+                [&](Result r, uint32_t id) {
+                    res = r;
+                    avSyncHwId = id;
+                });
+        if (res == Result::SUCCESS) {
+            return (int) avSyncHwId;
+        }
+    }
+
+    return -1;
 }
 
 long DemuxClient::getAvSyncTime(int avSyncHwId) {
@@ -119,5 +152,27 @@ Result DemuxClient::close() {
     }
 
     return Result::INVALID_STATE;
+}
+
+/////////////// DemuxClient Helper Methods ///////////////////////
+
+sp<IFilter> DemuxClient::openHidlFilter(DemuxFilterType type, int bufferSize,
+        sp<HidlFilterCallback> callback) {
+    if (mDemux == NULL) {
+        return NULL;
+    }
+
+    sp<IFilter> hidlFilter;
+    Result res;
+    mDemux->openFilter(type, bufferSize, callback,
+            [&](Result r, const sp<IFilter>& filter) {
+                hidlFilter = filter;
+                res = r;
+            });
+    if (res != Result::SUCCESS || hidlFilter == NULL) {
+        return NULL;
+    }
+
+    return hidlFilter;
 }
 }  // namespace android

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "FrontendClient"
+#define LOG_TAG "FilterClient"
 
 #include <android-base/logging.h>
 #include <utils/Log.h>
@@ -24,10 +24,6 @@
 using ::android::hardware::tv::tuner::V1_0::DemuxQueueNotifyBits;
 
 namespace android {
-
-//shared_ptr<ITunerFilter> FilterClient::mTunerFilter;
-sp<IFilter> FilterClient::mFilter;
-sp<::android::hardware::tv::tuner::V1_1::IFilter> FilterClient::mFilter_1_1;
 
 /////////////// FilterClient ///////////////////////
 
@@ -48,8 +44,6 @@ void FilterClient::setHidlFilter(sp<IFilter> filter) {
     mFilter = filter;
     mFilter_1_1 = ::android::hardware::tv::tuner::V1_1::IFilter::castFrom(mFilter);
 }
-
-//Result setCallback(FilterClientCallback filterClientCallback);
 
 int FilterClient::read(uint8_t* buffer, int size) {
     // TODO: pending aidl interface
@@ -197,6 +191,33 @@ Result FilterClient::close() {
     }
 
     return Result::INVALID_STATE;
+}
+
+/////////////// IFilterCallback ///////////////////////
+
+HidlFilterCallback::HidlFilterCallback(sp<FilterClientCallback> filterClientCallback)
+        : mFilterClientCallback(filterClientCallback) {}
+
+Return<void> HidlFilterCallback::onFilterStatus(const DemuxFilterStatus status) {
+    if (mFilterClientCallback != NULL) {
+        mFilterClientCallback->onFilterStatus(status);
+    }
+    return Void();
+}
+
+Return<void> HidlFilterCallback::onFilterEvent(const DemuxFilterEvent& filterEvent) {
+    if (mFilterClientCallback != NULL) {
+        mFilterClientCallback->onFilterEvent(filterEvent);
+    }
+    return Void();
+}
+
+Return<void> HidlFilterCallback::onFilterEvent_1_1(const DemuxFilterEvent& filterEvent,
+        const DemuxFilterEventExt& filterEventExt) {
+    if (mFilterClientCallback != NULL) {
+        mFilterClientCallback->onFilterEvent_1_1(filterEvent, filterEventExt);
+    }
+    return Void();
 }
 
 /////////////// FilterClient Helper Methods ///////////////////////
