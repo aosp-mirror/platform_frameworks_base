@@ -38,6 +38,7 @@ import android.graphics.drawable.Drawable;
 import android.media.MediaRoute2Info;
 import android.media.MediaRouter2Manager;
 import android.text.TextUtils;
+import android.util.Log;
 
 import androidx.annotation.IntDef;
 import androidx.annotation.VisibleForTesting;
@@ -46,6 +47,7 @@ import com.android.settingslib.R;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -199,6 +201,10 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
      */
 
     public void requestSetVolume(int volume) {
+        if (mRouteInfo == null) {
+            Log.w(TAG, "Unable to set volume. RouteInfo is empty");
+            return;
+        }
         mRouterManager.setRouteVolume(mRouteInfo, volume);
     }
 
@@ -208,6 +214,10 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
      * @return max volume.
      */
     public int getMaxVolume() {
+        if (mRouteInfo == null) {
+            Log.w(TAG, "Unable to get max volume. RouteInfo is empty");
+            return 0;
+        }
         return mRouteInfo.getVolumeMax();
     }
 
@@ -217,6 +227,10 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
      * @return current volume.
      */
     public int getCurrentVolume() {
+        if (mRouteInfo == null) {
+            Log.w(TAG, "Unable to get current volume. RouteInfo is empty");
+            return 0;
+        }
         return mRouteInfo.getVolume();
     }
 
@@ -226,6 +240,10 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
      * @return package name.
      */
     public String getClientPackageName() {
+        if (mRouteInfo == null) {
+            Log.w(TAG, "Unable to get client package name. RouteInfo is empty");
+            return null;
+        }
         return mRouteInfo.getClientPackageName();
     }
 
@@ -244,6 +262,10 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
      * @return result of transfer media
      */
     public boolean connect() {
+        if (mRouteInfo == null) {
+            Log.w(TAG, "Unable to connect. RouteInfo is empty");
+            return false;
+        }
         setConnectedRecord();
         mRouterManager.selectRoute(mPackageName, mRouteInfo);
         return true;
@@ -358,6 +380,10 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
      * Gets the supported features of the route.
      */
     public List<String> getFeatures() {
+        if (mRouteInfo == null) {
+            Log.w(TAG, "Unable to get features. RouteInfo is empty");
+            return new ArrayList<>();
+        }
         return mRouteInfo.getFeatures();
     }
 
