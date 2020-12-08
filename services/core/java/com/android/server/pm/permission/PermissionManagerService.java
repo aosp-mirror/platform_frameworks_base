@@ -5148,20 +5148,6 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         }
 
         @Override
-        public void retainHardAndSoftRestrictedPermissions(@NonNull List<String> permissionNames) {
-            synchronized (mLock) {
-                Iterator<String> iterator = permissionNames.iterator();
-                while (iterator.hasNext()) {
-                    final String permissionName = iterator.next();
-                    final Permission permission = mRegistry.getPermission(permissionName);
-                    if (permission == null || !permission.isHardOrSoftRestricted()) {
-                        iterator.remove();
-                    }
-                }
-            }
-        }
-
-        @Override
         public void readLegacyPermissionsTEMP(
                 @NonNull LegacyPermissionSettings legacyPermissionSettings) {
             PermissionManagerService.this.readLegacyPermissions(legacyPermissionSettings);

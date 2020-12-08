@@ -49,6 +49,7 @@ import android.content.Intent;
 import android.location.Criteria;
 import android.location.ILocationCallback;
 import android.location.ILocationListener;
+import android.location.LastLocationRequest;
 import android.location.Location;
 import android.location.LocationManager;
 import android.location.LocationManagerInternal;
@@ -1467,9 +1468,9 @@ public class LocationProviderManager extends
         }
     }
 
-    public @Nullable Location getLastLocation(CallerIdentity identity,
-            @PermissionLevel int permissionLevel, boolean ignoreLocationSettings) {
-        if (!isActive(ignoreLocationSettings, identity)) {
+    public @Nullable Location getLastLocation(LastLocationRequest request,
+            CallerIdentity identity, @PermissionLevel int permissionLevel) {
+        if (!isActive(request.isLocationSettingsIgnored(), identity)) {
             return null;
         }
 
@@ -1483,7 +1484,7 @@ public class LocationProviderManager extends
                 getLastLocationUnsafe(
                         identity.getUserId(),
                         permissionLevel,
-                        ignoreLocationSettings,
+                        request.isLocationSettingsIgnored(),
                         Long.MAX_VALUE),
                 permissionLevel);
 

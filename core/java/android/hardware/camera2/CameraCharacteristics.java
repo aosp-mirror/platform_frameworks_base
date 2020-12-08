@@ -1467,12 +1467,13 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * to any real physical measurement, but <code>0.0f</code> still represents farthest
      * focus, and {@link CameraCharacteristics#LENS_INFO_MINIMUM_FOCUS_DISTANCE android.lens.info.minimumFocusDistance} represents the
      * nearest focus the device can achieve.</p>
-     * <p><b>Possible values:</b>
+     * <p><b>Possible values:</b></p>
      * <ul>
      *   <li>{@link #LENS_INFO_FOCUS_DISTANCE_CALIBRATION_UNCALIBRATED UNCALIBRATED}</li>
      *   <li>{@link #LENS_INFO_FOCUS_DISTANCE_CALIBRATION_APPROXIMATE APPROXIMATE}</li>
      *   <li>{@link #LENS_INFO_FOCUS_DISTANCE_CALIBRATION_CALIBRATED CALIBRATED}</li>
-     * </ul></p>
+     * </ul>
+     *
      * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      * <p><b>Limited capability</b> -
      * Present on all camera devices that report being at least {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED HARDWARE_LEVEL_LIMITED} devices in the
@@ -1495,12 +1496,13 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
     /**
      * <p>Direction the camera faces relative to
      * device screen.</p>
-     * <p><b>Possible values:</b>
+     * <p><b>Possible values:</b></p>
      * <ul>
      *   <li>{@link #LENS_FACING_FRONT FRONT}</li>
      *   <li>{@link #LENS_FACING_BACK BACK}</li>
      *   <li>{@link #LENS_FACING_EXTERNAL EXTERNAL}</li>
-     * </ul></p>
+     * </ul>
+     *
      * <p>This key is available on all devices.</p>
      * @see #LENS_FACING_FRONT
      * @see #LENS_FACING_BACK
@@ -1726,12 +1728,13 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * {@link CameraCharacteristics#LENS_POSE_TRANSLATION android.lens.poseTranslation} and {@link CameraCharacteristics#LENS_POSE_ROTATION android.lens.poseRotation}.</p>
      * <p>Different calibration methods and use cases can produce better or worse results
      * depending on the selected coordinate origin.</p>
-     * <p><b>Possible values:</b>
+     * <p><b>Possible values:</b></p>
      * <ul>
      *   <li>{@link #LENS_POSE_REFERENCE_PRIMARY_CAMERA PRIMARY_CAMERA}</li>
      *   <li>{@link #LENS_POSE_REFERENCE_GYROSCOPE GYROSCOPE}</li>
      *   <li>{@link #LENS_POSE_REFERENCE_UNDEFINED UNDEFINED}</li>
-     * </ul></p>
+     * </ul>
+     *
      * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      * <p><b>Permission {@link android.Manifest.permission#CAMERA } is needed to access this property</b></p>
      *
@@ -2057,7 +2060,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * </ul>
      * <p>Other capabilities may be available on either FULL or LIMITED
      * devices, but the application should query this key to be sure.</p>
-     * <p><b>Possible values:</b>
+     * <p><b>Possible values:</b></p>
      * <ul>
      *   <li>{@link #REQUEST_AVAILABLE_CAPABILITIES_BACKWARD_COMPATIBLE BACKWARD_COMPATIBLE}</li>
      *   <li>{@link #REQUEST_AVAILABLE_CAPABILITIES_MANUAL_SENSOR MANUAL_SENSOR}</li>
@@ -2075,7 +2078,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      *   <li>{@link #REQUEST_AVAILABLE_CAPABILITIES_SECURE_IMAGE_DATA SECURE_IMAGE_DATA}</li>
      *   <li>{@link #REQUEST_AVAILABLE_CAPABILITIES_SYSTEM_CAMERA SYSTEM_CAMERA}</li>
      *   <li>{@link #REQUEST_AVAILABLE_CAPABILITIES_OFFLINE_PROCESSING OFFLINE_PROCESSING}</li>
-     * </ul></p>
+     * </ul>
+     *
      * <p>This key is available on all devices.</p>
      *
      * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
@@ -2777,11 +2781,12 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * array.</li>
      * </ul>
      * <p>LEGACY capability devices will only support CENTER_ONLY cropping.</p>
-     * <p><b>Possible values:</b>
+     * <p><b>Possible values:</b></p>
      * <ul>
      *   <li>{@link #SCALER_CROPPING_TYPE_CENTER_ONLY CENTER_ONLY}</li>
      *   <li>{@link #SCALER_CROPPING_TYPE_FREEFORM FREEFORM}</li>
-     * </ul></p>
+     * </ul>
+     *
      * <p>This key is available on all devices.</p>
      *
      * @see CaptureRequest#CONTROL_ZOOM_RATIO
@@ -2966,7 +2971,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * represents the colors in the top-left 2x2 section of
      * the sensor, in reading order, for a Bayer camera, or the
      * light spectrum it captures for MONOCHROME camera.</p>
-     * <p><b>Possible values:</b>
+     * <p><b>Possible values:</b></p>
      * <ul>
      *   <li>{@link #SENSOR_INFO_COLOR_FILTER_ARRANGEMENT_RGGB RGGB}</li>
      *   <li>{@link #SENSOR_INFO_COLOR_FILTER_ARRANGEMENT_GRBG GRBG}</li>
@@ -2975,7 +2980,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      *   <li>{@link #SENSOR_INFO_COLOR_FILTER_ARRANGEMENT_RGB RGB}</li>
      *   <li>{@link #SENSOR_INFO_COLOR_FILTER_ARRANGEMENT_MONO MONO}</li>
      *   <li>{@link #SENSOR_INFO_COLOR_FILTER_ARRANGEMENT_NIR NIR}</li>
-     * </ul></p>
+     * </ul>
+     *
      * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      * <p><b>Full capability</b> -
      * Present on all camera devices that report being {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_FULL HARDWARE_LEVEL_FULL} devices in the
@@ -3117,11 +3123,12 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * may not based on a time source that can be compared to other system time sources.</p>
      * <p>This characteristic defines the source for the timestamps, and therefore whether they
      * can be compared against other system time sources/timestamps.</p>
-     * <p><b>Possible values:</b>
+     * <p><b>Possible values:</b></p>
      * <ul>
      *   <li>{@link #SENSOR_INFO_TIMESTAMP_SOURCE_UNKNOWN UNKNOWN}</li>
      *   <li>{@link #SENSOR_INFO_TIMESTAMP_SOURCE_REALTIME REALTIME}</li>
-     * </ul></p>
+     * </ul>
+     *
      * <p>This key is available on all devices.</p>
      * @see #SENSOR_INFO_TIMESTAMP_SOURCE_UNKNOWN
      * @see #SENSOR_INFO_TIMESTAMP_SOURCE_REALTIME
@@ -3231,7 +3238,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * {@link CameraCharacteristics#SENSOR_REFERENCE_ILLUMINANT2 android.sensor.referenceIlluminant2} and its corresponding matrices.</p>
      * <p>Starting from Android Q, this key will not be present for a MONOCHROME camera, even if
      * the camera device has RAW capability.</p>
-     * <p><b>Possible values:</b>
+     * <p><b>Possible values:</b></p>
      * <ul>
      *   <li>{@link #SENSOR_REFERENCE_ILLUMINANT1_DAYLIGHT DAYLIGHT}</li>
      *   <li>{@link #SENSOR_REFERENCE_ILLUMINANT1_FLUORESCENT FLUORESCENT}</li>
@@ -3252,7 +3259,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      *   <li>{@link #SENSOR_REFERENCE_ILLUMINANT1_D75 D75}</li>
      *   <li>{@link #SENSOR_REFERENCE_ILLUMINANT1_D50 D50}</li>
      *   <li>{@link #SENSOR_REFERENCE_ILLUMINANT1_ISO_STUDIO_TUNGSTEN ISO_STUDIO_TUNGSTEN}</li>
-     * </ul></p>
+     * </ul>
+     *
      * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      * <p><b>Permission {@link android.Manifest.permission#CAMERA } is needed to access this property</b></p>
      *
@@ -3727,10 +3735,11 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
 
     /**
      * <p>A list of camera LEDs that are available on this system.</p>
-     * <p><b>Possible values:</b>
+     * <p><b>Possible values:</b></p>
      * <ul>
      *   <li>{@link #LED_AVAILABLE_LEDS_TRANSMIT TRANSMIT}</li>
-     * </ul></p>
+     * </ul>
+     *
      * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      * @see #LED_AVAILABLE_LEDS_TRANSMIT
      * @hide
@@ -3799,14 +3808,15 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      *   ({@link CameraCharacteristics#LENS_INFO_AVAILABLE_OPTICAL_STABILIZATION android.lens.info.availableOpticalStabilization},
      *    {@link CameraCharacteristics#CONTROL_AVAILABLE_VIDEO_STABILIZATION_MODES android.control.availableVideoStabilizationModes})</li>
      * </ul>
-     * <p><b>Possible values:</b>
+     * <p><b>Possible values:</b></p>
      * <ul>
      *   <li>{@link #INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED LIMITED}</li>
      *   <li>{@link #INFO_SUPPORTED_HARDWARE_LEVEL_FULL FULL}</li>
      *   <li>{@link #INFO_SUPPORTED_HARDWARE_LEVEL_LEGACY LEGACY}</li>
      *   <li>{@link #INFO_SUPPORTED_HARDWARE_LEVEL_3 3}</li>
      *   <li>{@link #INFO_SUPPORTED_HARDWARE_LEVEL_EXTERNAL EXTERNAL}</li>
-     * </ul></p>
+     * </ul>
+     *
      * <p>This key is available on all devices.</p>
      *
      * @see CameraCharacteristics#CONTROL_AVAILABLE_VIDEO_STABILIZATION_MODES
@@ -3850,11 +3860,12 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * must occur before the camera device knows for a fact that the new
      * submitted camera settings have been applied in outgoing frames.</p>
      * <p><b>Units</b>: Frame counts</p>
-     * <p><b>Possible values:</b>
+     * <p><b>Possible values:</b></p>
      * <ul>
      *   <li>{@link #SYNC_MAX_LATENCY_PER_FRAME_CONTROL PER_FRAME_CONTROL}</li>
      *   <li>{@link #SYNC_MAX_LATENCY_UNKNOWN UNKNOWN}</li>
-     * </ul></p>
+     * </ul>
+     *
      * <p><b>Available values for this device:</b><br>
      * A positive value, PER_FRAME_CONTROL, or UNKNOWN.</p>
      * <p>This key is available on all devices.</p>
@@ -4102,11 +4113,12 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * onCaptureStarted callback.</p>
      * <p>This tag is only applicable if the logical camera device supports concurrent physical
      * streams from different physical cameras.</p>
-     * <p><b>Possible values:</b>
+     * <p><b>Possible values:</b></p>
      * <ul>
      *   <li>{@link #LOGICAL_MULTI_CAMERA_SENSOR_SYNC_TYPE_APPROXIMATE APPROXIMATE}</li>
      *   <li>{@link #LOGICAL_MULTI_CAMERA_SENSOR_SYNC_TYPE_CALIBRATED CALIBRATED}</li>
-     * </ul></p>
+     * </ul>
+     *
      * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      * <p><b>Limited capability</b> -
      * Present on all camera devices that report being at least {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED HARDWARE_LEVEL_LIMITED} devices in the

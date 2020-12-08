@@ -58,8 +58,11 @@ public class NotificationIntrusivenessExtractorTest extends UiServiceTestCase {
         NotificationChannel channel = new NotificationChannel("a", "a", IMPORTANCE_DEFAULT);
         final Notification.Builder builder = new Notification.Builder(getContext())
                 .setContentTitle("foo")
+                // TODO(b/174258141) Please replace FLAG_MUTABLE_UNAUDITED below
+                // with either FLAG_IMMUTABLE (recommended) or FLAG_MUTABLE.
                 .setFullScreenIntent(PendingIntent.getActivity(
-                        getContext(), 0, new Intent(""), 0), true)
+                        getContext(), 0, new Intent(""), PendingIntent.FLAG_MUTABLE_UNAUDITED),
+                        true)
                 .setSmallIcon(android.R.drawable.sym_def_app_icon);
 
         Notification n = builder.build();
@@ -76,8 +79,11 @@ public class NotificationIntrusivenessExtractorTest extends UiServiceTestCase {
         NotificationChannel channel = new NotificationChannel("a", "a", IMPORTANCE_DEFAULT);
         final Notification.Builder builder = new Notification.Builder(getContext())
                 .setContentTitle("foo")
+                // TODO(b/174258141) Please replace FLAG_MUTABLE_UNAUDITED below
+                // with either FLAG_IMMUTABLE (recommended) or FLAG_MUTABLE.
                 .setFullScreenIntent(PendingIntent.getActivity(
-                        getContext(), 0, new Intent(""), 0), true)
+                        getContext(), 0, new Intent(""), PendingIntent.FLAG_MUTABLE_UNAUDITED),
+                        true)
                 .setSmallIcon(android.R.drawable.sym_def_app_icon);
 
         Notification n = builder.build();

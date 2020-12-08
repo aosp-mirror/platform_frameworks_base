@@ -24,6 +24,7 @@ import static com.android.server.backup.BackupPasswordManager.PBKDF_FALLBACK;
 import static com.android.server.backup.UserBackupManagerService.BACKUP_FILE_HEADER_MAGIC;
 import static com.android.server.backup.UserBackupManagerService.BACKUP_FILE_VERSION;
 
+import android.app.backup.BackupManager;
 import android.app.backup.IFullBackupRestoreObserver;
 import android.content.pm.PackageManagerInternal;
 import android.os.ParcelFileDescriptor;
@@ -104,11 +105,13 @@ public class PerformAdbRestoreTask implements Runnable {
                 return;
             }
 
+            BackupEligibilityRules eligibilityRules = new BackupEligibilityRules(
+                    mBackupManagerService.getPackageManager(),
+                    LocalServices.getService(PackageManagerInternal.class),
+                    mBackupManagerService.getUserId(), BackupManager.OperationType.ADB_BACKUP);
             FullRestoreEngine mEngine = new FullRestoreEngine(mBackupManagerService, null,
                     mObserver, null, null, true, 0 /*unused*/, true,
-                    BackupEligibilityRules.forBackup(mBackupManagerService.getPackageManager(),
-                                    LocalServices.getService(PackageManagerInternal.class),
-                                    mBackupManagerService.getUserId()));
+                    eligibilityRules);
             FullRestoreEngineThread mEngineThread = new FullRestoreEngineThread(mEngine,
                     tarInputStream);
             mEngineThread.run();

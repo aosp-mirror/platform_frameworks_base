@@ -21,6 +21,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
 import android.app.appsearch.exceptions.IllegalSchemaException;
+import android.app.appsearch.util.BundleUtil;
 import android.os.Bundle;
 import android.util.ArraySet;
 
@@ -31,6 +32,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -40,7 +42,7 @@ import java.util.Set;
  *
  * <p>The schema consists of type information, properties, and config (like tokenization type).
  *
- * @see AppSearchManager#setSchema
+ * @see AppSearchSession#setSchema
  */
 public final class AppSearchSchema {
     private static final String SCHEMA_TYPE_FIELD = "schemaType";
@@ -94,17 +96,37 @@ public final class AppSearchSchema {
         return ret;
     }
 
+    @Override
+    public boolean equals(@Nullable Object other) {
+        if (this == other) {
+            return true;
+        }
+        if (!(other instanceof AppSearchSchema)) {
+            return false;
+        }
+        AppSearchSchema otherSchema = (AppSearchSchema) other;
+        if (!getSchemaType().equals(otherSchema.getSchemaType())) {
+            return false;
+        }
+        return getProperties().equals(otherSchema.getProperties());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getSchemaType(), getProperties());
+    }
+
     /** Builder for {@link AppSearchSchema objects}. */
     public static final class Builder {
-        private final String mTypeName;
+        private final String mSchemaType;
         private final ArrayList<Bundle> mPropertyBundles = new ArrayList<>();
         private final Set<String> mPropertyNames = new ArraySet<>();
         private boolean mBuilt = false;
 
         /** Creates a new {@link AppSearchSchema.Builder}. */
-        public Builder(@NonNull String typeName) {
-            Preconditions.checkNotNull(typeName);
-            mTypeName = typeName;
+        public Builder(@NonNull String schemaType) {
+            Preconditions.checkNotNull(schemaType);
+            mSchemaType = schemaType;
         }
 
         /** Adds a property to the given type. */
@@ -133,7 +155,7 @@ public final class AppSearchSchema {
         public AppSearchSchema build() {
             Preconditions.checkState(!mBuilt, "Builder has already been used");
             Bundle bundle = new Bundle();
-            bundle.putString(AppSearchSchema.SCHEMA_TYPE_FIELD, mTypeName);
+            bundle.putString(AppSearchSchema.SCHEMA_TYPE_FIELD, mSchemaType);
             bundle.putParcelableArrayList(AppSearchSchema.PROPERTIES_FIELD, mPropertyBundles);
             mBuilt = true;
             return new AppSearchSchema(bundle);
@@ -279,6 +301,8 @@ public final class AppSearchSchema {
 
         final Bundle mBundle;
 
+        @Nullable private Integer mHashCode;
+
         PropertyConfig(@NonNull Bundle bundle) {
             mBundle = Preconditions.checkNotNull(bundle);
         }
@@ -325,6 +349,26 @@ public final class AppSearchSchema {
         /** Returns how this property is tokenized (split into words). */
         public @TokenizerType int getTokenizerType() {
             return mBundle.getInt(TOKENIZER_TYPE_FIELD);
+        }
+
+        @Override
+        public boolean equals(@Nullable Object other) {
+            if (this == other) {
+                return true;
+            }
+            if (!(other instanceof PropertyConfig)) {
+                return false;
+            }
+            PropertyConfig otherProperty = (PropertyConfig) other;
+            return BundleUtil.deepEquals(this.mBundle, otherProperty.mBundle);
+        }
+
+        @Override
+        public int hashCode() {
+            if (mHashCode == null) {
+                mHashCode = BundleUtil.deepHashCode(mBundle);
+            }
+            return mHashCode;
         }
 
         /**

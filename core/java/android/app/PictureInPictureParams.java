@@ -26,6 +26,7 @@ import android.util.Rational;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Represents a set of parameters used to initialize and update an Activity in picture-in-picture
@@ -194,6 +195,16 @@ public final class PictureInPictureParams implements Parcelable {
     }
 
     /**
+     * Makes a copy from the other picture-in-picture args.
+     * @hide
+     */
+    public PictureInPictureParams(PictureInPictureParams other) {
+        this(other.mAspectRatio, other.mUserActions,
+                other.hasSourceBoundsHint() ? new Rect(other.getSourceRectHint()) : null,
+                other.mAutoEnterEnabled);
+    }
+
+    /**
      * Copies the set parameters from the other picture-in-picture args.
      * @hide
      */
@@ -294,6 +305,22 @@ public final class PictureInPictureParams implements Parcelable {
     public boolean empty() {
         return !hasSourceBoundsHint() && !hasSetActions() && !hasSetAspectRatio()
                 && !mAutoEnterEnabled;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof PictureInPictureParams)) return false;
+        PictureInPictureParams that = (PictureInPictureParams) o;
+        return mAutoEnterEnabled == that.mAutoEnterEnabled
+                && Objects.equals(mAspectRatio, that.mAspectRatio)
+                && Objects.equals(mUserActions, that.mUserActions)
+                && Objects.equals(mSourceRectHint, that.mSourceRectHint);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(mAspectRatio, mUserActions, mSourceRectHint, mAutoEnterEnabled);
     }
 
     @Override

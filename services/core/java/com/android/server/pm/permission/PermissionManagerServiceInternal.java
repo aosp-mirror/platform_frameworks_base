@@ -184,12 +184,6 @@ public interface PermissionManagerServiceInternal extends PermissionManagerInter
     void stopShellPermissionIdentityDelegation();
 
     /**
-     * Removes invalid permissions which are not {@link PermissionInfo#FLAG_HARD_RESTRICTED} or
-     * {@link PermissionInfo#FLAG_SOFT_RESTRICTED} from the input.
-     */
-    void retainHardAndSoftRestrictedPermissions(@NonNull List<String> permissionNames);
-
-    /**
      * Read legacy permissions from legacy permission settings.
      *
      * TODO(zhanghai): This is a temporary method because we should not expose

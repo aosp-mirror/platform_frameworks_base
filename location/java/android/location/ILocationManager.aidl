@@ -30,6 +30,7 @@ import android.location.IGnssStatusListener;
 import android.location.IGnssNavigationMessageListener;
 import android.location.ILocationCallback;
 import android.location.ILocationListener;
+import android.location.LastLocationRequest;
 import android.location.Location;
 import android.location.LocationRequest;
 import android.location.LocationTime;
@@ -45,7 +46,7 @@ import com.android.internal.location.ProviderProperties;
  */
 interface ILocationManager
 {
-    @nullable Location getLastLocation(String provider, String packageName, String attributionTag);
+    @nullable Location getLastLocation(String provider, in LastLocationRequest request, String packageName, String attributionTag);
     @nullable ICancellationSignal getCurrentLocation(String provider, in LocationRequest request, in ILocationCallback callback, String packageName, String attributionTag, String listenerId);
 
     void registerLocationListener(String provider, in LocationRequest request, in ILocationListener listener, String packageName, String attributionTag, String listenerId);

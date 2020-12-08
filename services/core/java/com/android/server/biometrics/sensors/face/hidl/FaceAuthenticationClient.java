@@ -198,9 +198,11 @@ class FaceAuthenticationClient extends AuthenticationClient<IBiometricsFace> {
             final Intent intent = new Intent("android.settings.FACE_SETTINGS");
             intent.setPackage("com.android.settings");
 
+            // TODO(b/174187097) Please replace FLAG_MUTABLE_UNAUDITED below
+            // with either FLAG_IMMUTABLE (recommended) or FLAG_MUTABLE.
             final PendingIntent pendingIntent = PendingIntent.getActivityAsUser(getContext(),
-                    0 /* requestCode */, intent, 0 /* flags */, null /* options */,
-                    UserHandle.CURRENT);
+                    0 /* requestCode */, intent, PendingIntent.FLAG_MUTABLE_UNAUDITED /* flags */,
+                    null /* options */, UserHandle.CURRENT);
 
             final String channelName = "FaceEnrollNotificationChannel";
 

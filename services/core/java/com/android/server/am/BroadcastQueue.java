@@ -896,7 +896,8 @@ public final class BroadcastQueue {
         return false;
     }
 
-    final void scheduleTempWhitelistLocked(int uid, long duration, BroadcastRecord r) {
+    final void scheduleTempWhitelistLocked(int uid, long duration, BroadcastRecord r,
+            @BroadcastOptions.TempAllowListType int type) {
         if (duration > Integer.MAX_VALUE) {
             duration = Integer.MAX_VALUE;
         }
@@ -919,9 +920,9 @@ public final class BroadcastQueue {
         }
         if (DEBUG_BROADCAST) {
             Slog.v(TAG, "Broadcast temp whitelist uid=" + uid + " duration=" + duration
-                    + " : " + b.toString());
+                    + " type=" + type + " : " + b.toString());
         }
-        mService.tempWhitelistUidLocked(uid, duration, b.toString());
+        mService.tempWhitelistUidLocked(uid, duration, b.toString(), type);
     }
 
     /**
@@ -1318,7 +1319,8 @@ public final class BroadcastQueue {
                 }
                 if (brOptions != null && brOptions.getTemporaryAppWhitelistDuration() > 0) {
                     scheduleTempWhitelistLocked(filter.owningUid,
-                            brOptions.getTemporaryAppWhitelistDuration(), r);
+                            brOptions.getTemporaryAppWhitelistDuration(), r,
+                            brOptions.getTemporaryAppWhitelistType());
                 }
             }
             return;
@@ -1610,7 +1612,8 @@ public final class BroadcastQueue {
                 (brOptions != null && brOptions.getTemporaryAppWhitelistDuration() > 0);
         if (isActivityCapable) {
             scheduleTempWhitelistLocked(receiverUid,
-                    brOptions.getTemporaryAppWhitelistDuration(), r);
+                    brOptions.getTemporaryAppWhitelistDuration(), r,
+                    brOptions.getTemporaryAppWhitelistType());
         }
 
         // Broadcast is being executed, its package can't be stopped.

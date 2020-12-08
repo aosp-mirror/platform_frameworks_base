@@ -27,39 +27,39 @@ import java.util.Collections;
 import java.util.Set;
 
 /**
- * Encapsulates a request to retrieve documents by namespace and URI.
+ * Encapsulates a request to remove documents by namespace and URI.
  *
- * @see AppSearchManager#getByUri
+ * @see AppSearchSession#removeByUri
  */
-public final class GetByUriRequest {
+public final class RemoveByUriRequest {
     private final String mNamespace;
     private final Set<String> mUris;
 
-    GetByUriRequest(@NonNull String namespace, @NonNull Set<String> uris) {
+    RemoveByUriRequest(String namespace, Set<String> uris) {
         mNamespace = namespace;
         mUris = uris;
     }
 
-    /** Returns the namespace to get documents from. */
+    /** Returns the namespace to remove documents from. */
     @NonNull
     public String getNamespace() {
         return mNamespace;
     }
 
-    /** Returns the URIs to get from the namespace. */
+    /** Returns the URIs to remove from the namespace. */
     @NonNull
     public Set<String> getUris() {
         return Collections.unmodifiableSet(mUris);
     }
 
-    /** Builder for {@link GetByUriRequest} objects. */
+    /** Builder for {@link RemoveByUriRequest} objects. */
     public static final class Builder {
         private String mNamespace = GenericDocument.DEFAULT_NAMESPACE;
         private final Set<String> mUris = new ArraySet<>();
         private boolean mBuilt = false;
 
         /**
-         * Sets which namespace these documents will be retrieved from.
+         * Sets which namespace these documents will be removed from.
          *
          * <p>If this is not set, it defaults to {@link GenericDocument#DEFAULT_NAMESPACE}.
          */
@@ -87,12 +87,12 @@ public final class GetByUriRequest {
             return this;
         }
 
-        /** Builds a new {@link GetByUriRequest}. */
+        /** Builds a new {@link RemoveByUriRequest}. */
         @NonNull
-        public GetByUriRequest build() {
+        public RemoveByUriRequest build() {
             Preconditions.checkState(!mBuilt, "Builder has already been used");
             mBuilt = true;
-            return new GetByUriRequest(mNamespace, mUris);
+            return new RemoveByUriRequest(mNamespace, mUris);
         }
     }
 }

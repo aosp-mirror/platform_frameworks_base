@@ -25,12 +25,16 @@ import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
 import android.annotation.Nullable;
 import android.app.backup.BackupManager.OperationType;
 import android.app.backup.BackupTransport;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledSince;
+import android.app.compat.CompatChanges;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.Signature;
 import android.content.pm.SigningInfo;
+import android.os.Build;
 import android.os.UserHandle;
 import android.util.Slog;
 
@@ -41,6 +45,7 @@ import com.android.server.backup.transport.TransportClient;
 
 import com.google.android.collect.Sets;
 
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -56,6 +61,15 @@ public class BackupEligibilityRules {
     private final PackageManagerInternal mPackageManagerInternal;
     private final int mUserId;
     @OperationType  private final int mOperationType;
+
+    /**
+     * When  this change is enabled, {@code adb backup}  is automatically turned on for apps
+     * running as debuggable ({@code android:debuggable} set to {@code true}) and unavailable to
+     * any other apps.
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.S)
+    static final long RESTRICT_ADB_BACKUP = 171032338L;
 
     public static BackupEligibilityRules forBackup(PackageManager packageManager,
             PackageManagerInternal packageManagerInternal,
@@ -134,12 +148,53 @@ public class BackupEligibilityRules {
     * @return boolean indicating whether backup is allowed.
     */
     public boolean isAppBackupAllowed(ApplicationInfo app) {
-        if (mOperationType == OperationType.MIGRATION && !UserHandle.isCore(app.uid)) {
-            // Backup / restore of all apps is force allowed during device-to-device migration.
-            return true;
-        }
+        boolean isSystemApp = UserHandle.isCore(app.uid);
+        boolean allowBackup = (app.flags & ApplicationInfo.FLAG_ALLOW_BACKUP) != 0;
+        switch (mOperationType) {
+            case OperationType.MIGRATION:
+                // Backup / restore of all non-system apps is force allowed during
+                // device-to-device migration.
+                return !isSystemApp || allowBackup;
+            case OperationType.ADB_BACKUP:
+                String packageName = app.packageName;
+                if (packageName == null) {
+                    Slog.w(TAG, "Invalid ApplicationInfo object");
+                    return false;
+                }
 
-        return (app.flags & ApplicationInfo.FLAG_ALLOW_BACKUP) != 0;
+                if (!CompatChanges.isChangeEnabled(RESTRICT_ADB_BACKUP, packageName,
+                        UserHandle.of(mUserId))) {
+                    return allowBackup;
+                }
+
+                if (PLATFORM_PACKAGE_NAME.equals(packageName)) {
+                    // Always enable adb backup for SystemBackupAgent in "android" package (this is
+                    // done to avoid breaking existing integration tests and might change in the
+                    // future).
+                    return true;
+                }
+
+                boolean isPrivileged = (app.flags & ApplicationInfo.PRIVATE_FLAG_PRIVILEGED) != 0;
+                boolean isDebuggable = (app.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
+                if (isSystemApp || isPrivileged) {
+                    try {
+                        return mPackageManager.getProperty(PackageManager.PROPERTY_ALLOW_ADB_BACKUP,
+                                packageName).getBoolean();
+                    } catch (PackageManager.NameNotFoundException e) {
+                        Slog.w(TAG, "Failed to read allowAdbBackup property for + "
+                                + packageName);
+                        return false;
+                    }
+                } else {
+                    // All other apps can use adb backup only when running in debuggable mode.
+                    return isDebuggable;
+                }
+            case OperationType.BACKUP:
+                return allowBackup;
+            default:
+                Slog.w(TAG, "Unknown operation type:" + mOperationType);
+                return false;
+        }
     }
 
     /**

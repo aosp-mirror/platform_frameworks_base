@@ -33,15 +33,14 @@ import android.os.Bundle;
 import android.os.ParcelableException;
 import android.os.RemoteException;
 import android.os.UserHandle;
-import android.util.ArraySet;
 import android.util.Log;
 
 import com.android.internal.util.Preconditions;
 import com.android.server.SystemService;
 import com.android.server.appsearch.external.localstorage.AppSearchImpl;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 /**
  * TODO(b/142567528): add comments when implement this class
@@ -64,6 +63,7 @@ public class AppSearchManagerService extends SystemService {
         public void setSchema(
                 @NonNull String databaseName,
                 @NonNull List<Bundle> schemaBundles,
+                @NonNull List<String> schemasNotPlatformSurfaceable,
                 boolean forceOverride,
                 @NonNull IAppSearchResultCallback callback) {
             Preconditions.checkNotNull(databaseName);
@@ -73,13 +73,13 @@ public class AppSearchManagerService extends SystemService {
             int callingUserId = UserHandle.getUserId(callingUid);
             final long callingIdentity = Binder.clearCallingIdentity();
             try {
-                Set<AppSearchSchema> schemas = new ArraySet<>(schemaBundles.size());
+                List<AppSearchSchema> schemas = new ArrayList<>(schemaBundles.size());
                 for (int i = 0; i < schemaBundles.size(); i++) {
                     schemas.add(new AppSearchSchema(schemaBundles.get(i)));
                 }
                 AppSearchImpl impl = ImplInstanceManager.getInstance(getContext(), callingUserId);
                 databaseName = rewriteDatabaseNameWithUid(databaseName, callingUid);
-                impl.setSchema(databaseName, schemas, forceOverride);
+                impl.setSchema(databaseName, schemas, schemasNotPlatformSurfaceable, forceOverride);
                 invokeCallbackOnResult(callback,
                         AppSearchResult.newSuccessfulResult(/*result=*/ null));
             } catch (Throwable t) {

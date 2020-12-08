@@ -110,6 +110,7 @@ import com.android.server.LocalServices;
 import com.android.server.LockGuard;
 import com.android.server.SystemService;
 import com.android.server.am.UserState;
+import com.android.server.pm.UserManagerInternal.UserLifecycleListener;
 import com.android.server.pm.UserManagerInternal.UserRestrictionsListener;
 import com.android.server.storage.DeviceStorageMonitorInternal;
 import com.android.server.utils.TimingsTraceAndSlog;
@@ -437,6 +438,9 @@ public class UserManagerService extends IUserManager.Stub {
     @GuardedBy("mUserRestrictionsListeners")
     private final ArrayList<UserRestrictionsListener> mUserRestrictionsListeners =
             new ArrayList<>();
+
+    @GuardedBy("mUserRemovedListeners")
+    private final ArrayList<UserLifecycleListener> mUserLifecycleListeners = new ArrayList<>();
 
     private final LockPatternUtils mLockPatternUtils;
 
@@ -3633,6 +3637,14 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     private void dispatchUserAdded(@NonNull UserInfo userInfo) {
+        // Notify internal listeners first...
+        synchronized (mUserLifecycleListeners) {
+            for (int i = 0; i < mUserLifecycleListeners.size(); i++) {
+                mUserLifecycleListeners.get(i).onUserCreated(userInfo);
+            }
+        }
+
+        //...then external ones
         Intent addedIntent = new Intent(Intent.ACTION_USER_ADDED);
         addedIntent.putExtra(Intent.EXTRA_USER_HANDLE, userInfo.id);
         // Also, add the UserHandle for mainline modules which can't use the @hide
@@ -4018,11 +4030,17 @@ public class UserManagerService extends IUserManager.Stub {
             user = getUserInfoLU(userId);
         }
         if (user != null && user.preCreated) {
-            Slog.i(LOG_TAG, "Removing a precreated user with user id: " + userId);
+            Slog.i(LOG_TAG, "Removing a pre-created user with user id: " + userId);
             // Don't want to fire ACTION_USER_REMOVED, so cleanup the state and exit early.
             LocalServices.getService(ActivityTaskManagerInternal.class).onUserStopped(userId);
             removeUserState(userId);
             return;
+        }
+
+        synchronized (mUserLifecycleListeners) {
+            for (int i = 0; i < mUserLifecycleListeners.size(); i++) {
+                mUserLifecycleListeners.get(i).onUserRemoved(user);
+            }
         }
 
         // Let other services shutdown any activity and clean up their state before completely
@@ -4960,6 +4978,15 @@ public class UserManagerService extends IUserManager.Stub {
             pw.println("  System user allocations: " + mUser0Allocations.get());
         }
 
+        pw.println();
+        pw.println("Number of listeners for");
+        synchronized (mUserRestrictionsListeners) {
+            pw.println("  restrictions: " + mUserRestrictionsListeners.size());
+        }
+        synchronized (mUserLifecycleListeners) {
+            pw.println("  user lifecycle events: " + mUserLifecycleListeners.size());
+        }
+
         // Dump UserTypes
         pw.println();
         pw.println("User types version: " + mUserTypeVersion);
@@ -5074,6 +5101,20 @@ public class UserManagerService extends IUserManager.Stub {
         public void removeUserRestrictionsListener(UserRestrictionsListener listener) {
             synchronized (mUserRestrictionsListeners) {
                 mUserRestrictionsListeners.remove(listener);
+            }
+        }
+
+        @Override
+        public void addUserLifecycleListener(UserLifecycleListener listener) {
+            synchronized (mUserLifecycleListeners) {
+                mUserLifecycleListeners.add(listener);
+            }
+        }
+
+        @Override
+        public void removeUserLifecycleListener(UserLifecycleListener listener) {
+            synchronized (mUserLifecycleListeners) {
+                mUserLifecycleListeners.remove(listener);
             }
         }
 

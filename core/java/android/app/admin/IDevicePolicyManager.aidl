@@ -484,5 +484,7 @@ interface IDevicePolicyManager {
 
     long getManagedProfileMaximumTimeOff(in ComponentName admin);
     void setManagedProfileMaximumTimeOff(in ComponentName admin, long timeoutMs);
-    boolean canProfileOwnerResetPasswordWhenLocked(in int userId);
+    boolean canProfileOwnerResetPasswordWhenLocked(int userId);
+
+    void setNextOperationSafety(int operation, boolean safe);
 }

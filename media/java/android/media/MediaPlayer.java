@@ -4232,8 +4232,10 @@ public class MediaPlayer extends PlayerBase
      * @see OnRtpRxNoticeListener
      *
      * @param listener the listener called after a notice from RTP Rx
-     * @param handler the {@link Handler} that receives RTP Tx events
-     *
+     * @param handler the {@link Handler} that receives RTP Tx events. If null is passed,
+     *                notifications will be posted on the thread that created this MediaPlayer
+     *                instance. If the creating thread does not have a {@link Looper}, then
+     *                notifications will be posted on the main thread.
      * @hide
      */
     @SystemApi

@@ -249,13 +249,13 @@ public class ManagedServicesTest extends UiServiceTestCase {
                         backupPrimary.get(approvalLevel).get(userId),
                         Build.VERSION_CODES.N_MR1, userId);
             }
-            verifyExpectedApprovedEntries(service, true);
 
             for (int userId : backupSecondary.get(approvalLevel).keySet()) {
                 service.onSettingRestored(service.getConfig().secondarySettingName,
                         backupSecondary.get(approvalLevel).get(userId),
                         Build.VERSION_CODES.N_MR1, userId);
             }
+            // both sets of approved entries should be allowed
             verifyExpectedApprovedEntries(service);
             verifyExpectedApprovedEntries(service, backupPrimary.get(approvalLevel));
             verifyExpectedApprovedEntries(service, backupSecondary.get(approvalLevel));
@@ -638,8 +638,8 @@ public class ManagedServicesTest extends UiServiceTestCase {
     @Test
     public void testWriteXml_writesSetting() throws Exception {
         for (int approvalLevel : new int[] {APPROVAL_BY_COMPONENT, APPROVAL_BY_PACKAGE}) {
-            ManagedServices service = new TestManagedServices(getContext(), mLock, mUserProfiles,
-                    mIpm, approvalLevel);
+            ManagedServices service = new TestManagedServicesSettings(getContext(), mLock,
+                    mUserProfiles, mIpm, approvalLevel);
             loadXml(service);
 
             TypedXmlSerializer serializer = Xml.newFastSerializer();
@@ -657,6 +657,36 @@ public class ManagedServicesTest extends UiServiceTestCase {
                         getContext().getContentResolver(),
                         service.getConfig().secureSettingName, userId));
                 assertContentsInAnyOrder(actual, expected);
+            }
+        }
+    }
+
+    @Test
+    public void testWriteXml_doesNotWriteSetting() throws Exception {
+        for (int approvalLevel : new int[] {APPROVAL_BY_COMPONENT, APPROVAL_BY_PACKAGE}) {
+            ManagedServices service = new TestManagedServices(getContext(), mLock, mUserProfiles,
+                    mIpm, approvalLevel);
+
+            for (int userId : mUserProfiles.getCurrentProfileIds().toArray()) {
+                Settings.Secure.putStringForUser(
+                        getContext().getContentResolver(),
+                        service.getConfig().secureSettingName, null, userId);
+            }
+            loadXml(service);
+
+            TypedXmlSerializer serializer = Xml.newFastSerializer();
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            serializer.setOutput(new BufferedOutputStream(baos), "utf-8");
+            serializer.startDocument(null, true);
+            service.writeXml(serializer, false, UserHandle.USER_ALL);
+            serializer.endDocument();
+            serializer.flush();
+
+            for (int userId : mUserProfiles.getCurrentProfileIds().toArray()) {
+                String actual = Settings.Secure.getStringForUser(
+                        getContext().getContentResolver(),
+                        service.getConfig().secureSettingName, userId);
+                assertTrue(TextUtils.isEmpty(actual));
             }
         }
     }
@@ -1415,11 +1445,11 @@ public class ManagedServicesTest extends UiServiceTestCase {
         xml.append("<" + ManagedServices.TAG_MANAGED_SERVICES + " "
                         + ManagedServices.ATT_USER_ID + "=\"99\" "
                         + ManagedServices.ATT_IS_PRIMARY + "=\"true\" "
-                        + ManagedServices.ATT_APPROVED_LIST + "=\"99\" />\n");
+                        + ManagedServices.ATT_APPROVED_LIST + "=\"990\" />\n");
         xml.append("<" + ManagedServices.TAG_MANAGED_SERVICES + " "
                 + ManagedServices.ATT_USER_ID + "=\"98\" "
                 + ManagedServices.ATT_IS_PRIMARY + "=\"false\" "
-                + ManagedServices.ATT_APPROVED_LIST + "=\"98\" />\n");
+                + ManagedServices.ATT_APPROVED_LIST + "=\"981\" />\n");
         xml.append("</" + xmlTag + ">");
 
         return xml.toString();
@@ -1483,7 +1513,7 @@ public class ManagedServicesTest extends UiServiceTestCase {
 
     private void assertContentsInAnyOrder(Collection<?> expected, Collection<?> actual) {
         assertNotNull(actual);
-        assertEquals(expected.size(), actual.size());
+        assertEquals(expected + " : " + actual, expected.size(), actual.size());
 
         for (Object o : expected) {
             assertTrue("Actual missing " + o, actual.contains(o));
@@ -1663,6 +1693,19 @@ public class ManagedServicesTest extends UiServiceTestCase {
         @Override
         protected String getRequiredPermission() {
             return null;
+        }
+    }
+
+    class TestManagedServicesSettings extends TestManagedServices {
+
+        public TestManagedServicesSettings(Context context, Object mutex, UserProfiles userProfiles,
+                IPackageManager pm, int approvedServiceType) {
+            super(context, mutex, userProfiles, pm, approvedServiceType);
+        }
+
+        @Override
+        public boolean shouldReflectToSettings() {
+            return true;
         }
     }
 }
