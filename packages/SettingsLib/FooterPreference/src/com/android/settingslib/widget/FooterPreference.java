@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package com.android.settingslib.widget;
 
-import android.annotation.StringRes;
 import android.content.Context;
 import android.text.TextUtils;
 import android.text.method.LinkMovementMethod;
@@ -24,11 +23,10 @@ import android.util.AttributeSet;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.StringRes;
 import androidx.core.content.res.TypedArrayUtils;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceViewHolder;
-
-import com.android.settingslib.R;
 
 /**
  * A custom preference acting as "footer" of a page. It has a field for icon and text. It is added
@@ -36,8 +34,8 @@ import com.android.settingslib.R;
  */
 public class FooterPreference extends Preference {
 
-    static final int ORDER_FOOTER = Integer.MAX_VALUE - 1;
     public static final String KEY_FOOTER = "footer_preference";
+    static final int ORDER_FOOTER = Integer.MAX_VALUE - 1;
 
     public FooterPreference(Context context, AttributeSet attrs) {
         super(context, attrs, TypedArrayUtils.getAttr(
