@@ -92,4 +92,10 @@ public class MediaOutputSliceConstants {
      * SystemUi package name.
      */
     public static final String SYSTEMUI_PACKAGE_NAME = "com.android.systemui";
+
+    /**
+     * An intent action to close settings panel.
+     */
+    public static final String ACTION_CLOSE_PANEL =
+            "com.android.settings.panel.action.CLOSE_PANEL";
 }
