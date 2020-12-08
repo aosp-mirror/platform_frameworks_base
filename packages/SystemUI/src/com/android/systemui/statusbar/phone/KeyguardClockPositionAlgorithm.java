@@ -116,6 +116,11 @@ public class KeyguardClockPositionAlgorithm {
      */
     private float mDarkAmount;
 
+    /**
+     * How visible the quick settings panel is.
+     */
+    private float mQsExpansion;
+
     private float mEmptyDragAmount;
 
     /**
@@ -159,7 +164,8 @@ public class KeyguardClockPositionAlgorithm {
     public void setup(int statusBarMinHeight, int maxShadeBottom, int notificationStackHeight,
             float panelExpansion, int parentHeight, int keyguardStatusHeight, int clockPreferredY,
             boolean hasCustomClock, boolean hasVisibleNotifs, float dark, float emptyDragAmount,
-            boolean bypassEnabled, int unlockedStackScrollerPadding, boolean udfpsEnrolled) {
+            boolean bypassEnabled, int unlockedStackScrollerPadding, boolean udfpsEnrolled,
+            float qsExpansion) {
         mMinTopMargin = statusBarMinHeight + (udfpsEnrolled ? mContainerTopPaddingWithoutLockIcon :
                 mContainerTopPaddingWithLockIcon);
         mMaxShadeBottom = maxShadeBottom;
@@ -174,6 +180,7 @@ public class KeyguardClockPositionAlgorithm {
         mEmptyDragAmount = emptyDragAmount;
         mBypassEnabled = bypassEnabled;
         mUnlockedStackScrollerPadding = unlockedStackScrollerPadding;
+        mQsExpansion = qsExpansion;
     }
 
     public void run(Result result) {
@@ -274,6 +281,7 @@ public class KeyguardClockPositionAlgorithm {
      */
     private float getClockAlpha(int y) {
         float alphaKeyguard = Math.max(0, y / Math.max(1f, getClockY(1f)));
+        alphaKeyguard *= (1f - mQsExpansion);
         alphaKeyguard = Interpolators.ACCELERATE.getInterpolation(alphaKeyguard);
         return MathUtils.lerp(alphaKeyguard, 1f, mDarkAmount);
     }
