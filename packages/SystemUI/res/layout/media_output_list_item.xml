@@ -15,97 +15,124 @@
   ~ limitations under the License.
   -->
 
-<FrameLayout
-    android:id="@+id/device_container"
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/device_container"
     android:layout_width="match_parent"
-    android:layout_height="64dp">
-
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
     <FrameLayout
-        android:layout_width="36dp"
-        android:layout_height="36dp"
-        android:layout_gravity="center_vertical"
-        android:layout_marginStart="16dp">
-        <ImageView
-            android:id="@+id/title_icon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"/>
-    </FrameLayout>
+        android:layout_width="match_parent"
+        android:layout_height="64dp">
 
-    <TextView
-        android:id="@+id/title"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
-        android:layout_marginStart="68dp"
-        android:ellipsize="end"
-        android:maxLines="1"
-        android:textColor="?android:attr/textColorPrimary"
-        android:textSize="14sp"/>
+        <FrameLayout
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_gravity="center_vertical"
+            android:layout_marginStart="16dp">
+            <ImageView
+                android:id="@+id/title_icon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"/>
+        </FrameLayout>
 
-    <RelativeLayout
-        android:id="@+id/two_line_layout"
-        android:layout_width="wrap_content"
-        android:layout_height="48dp"
-        android:layout_marginStart="52dp"
-        android:layout_marginEnd="69dp"
-        android:layout_marginTop="10dp">
         <TextView
-            android:id="@+id/two_line_title"
+            android:id="@+id/title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginEnd="15dp"
+            android:layout_gravity="center_vertical"
+            android:layout_marginStart="68dp"
             android:ellipsize="end"
             android:maxLines="1"
             android:textColor="?android:attr/textColorPrimary"
             android:textSize="14sp"/>
-        <TextView
-            android:id="@+id/subtitle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginEnd="15dp"
-            android:layout_marginBottom="7dp"
-            android:layout_alignParentBottom="true"
-            android:ellipsize="end"
-            android:maxLines="1"
-            android:textColor="?android:attr/textColorSecondary"
-            android:textSize="12sp"
-            android:fontFamily="roboto-regular"
-            android:visibility="gone"/>
-        <SeekBar
-            android:id="@+id/volume_seekbar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"/>
-    </RelativeLayout>
 
-    <ProgressBar
-        android:id="@+id/volume_indeterminate_progress"
-        style="@*android:style/Widget.Material.ProgressBar.Horizontal"
-        android:layout_width="258dp"
-        android:layout_height="18dp"
-        android:layout_marginStart="68dp"
-        android:layout_marginTop="40dp"
-        android:indeterminate="true"
-        android:indeterminateOnly="true"
-        android:visibility="gone"/>
+        <RelativeLayout
+            android:id="@+id/two_line_layout"
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:layout_marginStart="52dp"
+            android:layout_marginEnd="69dp"
+            android:layout_marginTop="10dp">
+            <TextView
+                android:id="@+id/two_line_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="15dp"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:textColor="?android:attr/textColorPrimary"
+                android:textSize="14sp"/>
+            <TextView
+                android:id="@+id/subtitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="15dp"
+                android:layout_marginBottom="7dp"
+                android:layout_alignParentBottom="true"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:textColor="?android:attr/textColorSecondary"
+                android:textSize="12sp"
+                android:fontFamily="roboto-regular"
+                android:visibility="gone"/>
+            <SeekBar
+                android:id="@+id/volume_seekbar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"/>
+        </RelativeLayout>
+
+        <ProgressBar
+            android:id="@+id/volume_indeterminate_progress"
+            style="@*android:style/Widget.Material.ProgressBar.Horizontal"
+            android:layout_width="258dp"
+            android:layout_height="18dp"
+            android:layout_marginStart="68dp"
+            android:layout_marginTop="40dp"
+            android:indeterminate="true"
+            android:indeterminateOnly="true"
+            android:visibility="gone"/>
+
+        <View
+            android:id="@+id/end_divider"
+            android:layout_width="1dp"
+            android:layout_height="36dp"
+            android:layout_marginEnd="68dp"
+            android:layout_gravity="right|center_vertical"
+            android:background="?android:attr/listDivider"
+            android:visibility="gone"/>
+
+        <ImageView
+            android:id="@+id/add_icon"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_gravity="right|center_vertical"
+            android:layout_marginEnd="24dp"
+            android:src="@drawable/ic_add"
+            android:tint="?android:attr/colorAccent"
+            android:visibility="gone"/>
+
+        <CheckBox
+            android:id="@+id/check_box"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_gravity="right|center_vertical"
+            android:layout_marginEnd="24dp"
+            android:button="@drawable/ic_check_box"
+            android:visibility="gone"/>
+    </FrameLayout>
 
     <View
-        android:layout_width="1dp"
-        android:layout_height="36dp"
-        android:layout_marginEnd="68dp"
-        android:layout_gravity="right|center_vertical"
+        android:id="@+id/bottom_divider"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginBottom="12dp"
+        android:layout_gravity="bottom"
         android:background="?android:attr/listDivider"
         android:visibility="gone"/>
-
-    <ImageView
-        android:id="@+id/end_icon"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
-        android:layout_gravity="right|center_vertical"
-        android:layout_marginEnd="24dp"
-        android:visibility="gone"/>
-</FrameLayout>
+</LinearLayout>

@@ -109,34 +109,45 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
             super.onBind(device, topMargin, bottomMargin);
             final boolean currentlyConnected = isCurrentlyConnected(device);
             if (currentlyConnected) {
-                mConnectedItem = mFrameLayout;
+                mConnectedItem = mContainerLayout;
+            }
+            mBottomDivider.setVisibility(View.GONE);
+            mCheckBox.setVisibility(View.GONE);
+            if (currentlyConnected && mController.isActiveRemoteDevice(device)) {
+                // Init active device layout
+                mDivider.setVisibility(View.VISIBLE);
+                mDivider.setTransitionAlpha(1);
+                mAddIcon.setVisibility(View.VISIBLE);
+                mAddIcon.setTransitionAlpha(1);
+                mAddIcon.setOnClickListener(v -> onEndItemClick());
+            } else {
+                // Init non-active device layout
+                mDivider.setVisibility(View.GONE);
+                mAddIcon.setVisibility(View.GONE);
             }
             if (mController.isTransferring()) {
                 if (device.getState() == MediaDeviceState.STATE_CONNECTING
                         && !mController.hasAdjustVolumeUserRestriction()) {
-                    setTwoLineLayout(device, null /* title */, true /* bFocused */,
-                            false /* showSeekBar*/, true /* showProgressBar */,
-                            false /* showSubtitle */);
+                    setTwoLineLayout(device, true /* bFocused */, false /* showSeekBar*/,
+                            true /* showProgressBar */, false /* showSubtitle */);
                 } else {
                     setSingleLineLayout(getItemTitle(device), false /* bFocused */);
                 }
             } else {
                 // Set different layout for each device
                 if (device.getState() == MediaDeviceState.STATE_CONNECTING_FAILED) {
-                    setTwoLineLayout(device, null /* title */, false /* bFocused */,
-                            false /* showSeekBar*/, false /* showProgressBar */,
+                    setTwoLineLayout(device, false /* bFocused */,
+                            false /* showSeekBar */, false /* showProgressBar */,
                             true /* showSubtitle */);
                     mSubTitleText.setText(R.string.media_output_dialog_connect_failed);
-                    mFrameLayout.setOnClickListener(v -> onItemClick(v, device));
-                } else if (!mController.hasAdjustVolumeUserRestriction()
-                        && currentlyConnected) {
-                    setTwoLineLayout(device, null /* title */, true /* bFocused */,
-                            true /* showSeekBar*/, false /* showProgressBar */,
-                            false /* showSubtitle */);
+                    mContainerLayout.setOnClickListener(v -> onItemClick(v, device));
+                } else if (!mController.hasAdjustVolumeUserRestriction() && currentlyConnected) {
+                    setTwoLineLayout(device, true /* bFocused */, true /* showSeekBar */,
+                            false /* showProgressBar */, false /* showSubtitle */);
                     initSeekbar(device);
                 } else {
                     setSingleLineLayout(getItemTitle(device), false /* bFocused */);
-                    mFrameLayout.setOnClickListener(v -> onItemClick(v, device));
+                    mContainerLayout.setOnClickListener(v -> onItemClick(v, device));
                 }
             }
         }
@@ -145,13 +156,17 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
         void onBind(int customizedItem, boolean topMargin, boolean bottomMargin) {
             super.onBind(customizedItem, topMargin, bottomMargin);
             if (customizedItem == CUSTOMIZED_ITEM_PAIR_NEW) {
+                mCheckBox.setVisibility(View.GONE);
+                mDivider.setVisibility(View.GONE);
+                mAddIcon.setVisibility(View.GONE);
+                mBottomDivider.setVisibility(View.GONE);
                 setSingleLineLayout(mContext.getText(R.string.media_output_dialog_pairing_new),
                         false /* bFocused */);
                 final Drawable d = mContext.getDrawable(R.drawable.ic_add);
                 d.setColorFilter(new PorterDuffColorFilter(
                         Utils.getColorAccentDefaultColor(mContext), PorterDuff.Mode.SRC_IN));
                 mTitleIcon.setImageDrawable(d);
-                mFrameLayout.setOnClickListener(v -> onItemClick(CUSTOMIZED_ITEM_PAIR_NEW));
+                mContainerLayout.setOnClickListener(v -> onItemClick(CUSTOMIZED_ITEM_PAIR_NEW));
             }
         }
 
@@ -172,6 +187,10 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
             if (customizedItem == CUSTOMIZED_ITEM_PAIR_NEW) {
                 mController.launchBluetoothPairing();
             }
+        }
+
+        private void onEndItemClick() {
+            mController.launchMediaOutputGroupDialog();
         }
     }
 }
