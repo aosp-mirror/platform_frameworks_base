@@ -84,8 +84,10 @@ public class WMShellModule {
     @WMSingleton
     @Provides
     static AppPairs provideAppPairs(ShellTaskOrganizer shellTaskOrganizer,
-            SyncTransactionQueue syncQueue, DisplayController displayController) {
-        return new AppPairsController(shellTaskOrganizer, syncQueue, displayController);
+            SyncTransactionQueue syncQueue, DisplayController displayController,
+            @ShellMainThread ShellExecutor mainExecutor) {
+        return AppPairsController.create(shellTaskOrganizer, syncQueue, displayController,
+                mainExecutor);
     }
 
     @WMSingleton
