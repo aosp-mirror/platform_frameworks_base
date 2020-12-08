@@ -224,7 +224,6 @@ import com.android.server.uri.NeededUriGrants;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
 
 import java.io.FileDescriptor;
 import java.io.IOException;
@@ -4108,7 +4107,7 @@ class Task extends WindowContainer<WindowContainer> {
         if (top == null) return null;
         final ActivityRecord rootActivity = top.getRootActivity();
         return (rootActivity == null || rootActivity.pictureInPictureArgs.empty())
-                ? null : rootActivity.pictureInPictureArgs;
+                ? null : new PictureInPictureParams(rootActivity.pictureInPictureArgs);
     }
 
     void maybeUpdateLetterboxBounds(
