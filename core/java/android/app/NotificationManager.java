@@ -34,6 +34,7 @@ import android.content.pm.ParceledListSlice;
 import android.content.pm.ShortcutInfo;
 import android.graphics.drawable.Icon;
 import android.net.Uri;
+import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -532,15 +533,23 @@ public class NotificationManager {
     public static final int IMPORTANCE_MAX = 5;
 
     /**
-     * @hide
+     * Indicates that the no bubbles are allowed from the app. If the app sends bubbles, only the
+     * notification will appear. The notification will have an affordance allowing the user to
+     * bubble it. If the user selects this affordance, that notification is approved to bubble
+     * and the apps' bubble preference will be upgraded to {@link #BUBBLE_PREFERENCE_SELECTED}.
      */
     public static final int BUBBLE_PREFERENCE_NONE = 0;
+
     /**
-     * @hide
+     * Indicates that all bubbles are allowed from the app. If the app sends bubbles, the bubble
+     * will appear along with the notification.
      */
     public static final int BUBBLE_PREFERENCE_ALL = 1;
+
     /**
-     * @hide
+     * Indicates that only notifications selected by the user will appear as bubbles. If
+     * the app sends bubbles that haven't been selected, only the notification appear. If the
+     * bubble has been approved by the user, it will appear along with the notification.
      */
     public static final int BUBBLE_PREFERENCE_SELECTED = 2;
 
@@ -1323,14 +1332,44 @@ public class NotificationManager {
      * notification shade, floating over other apps' content.
      *
      * <p>This value will be ignored for notifications that are posted to channels that do not
-     * allow bubbles ({@link NotificationChannel#canBubble()}.
+     * allow bubbles ({@link NotificationChannel#canBubble()}).
      *
      * @see Notification#getBubbleMetadata()
+     * @deprecated use {@link #getBubblePreference()} instead.
      */
+    @Deprecated
     public boolean areBubblesAllowed() {
         INotificationManager service = getService();
         try {
             return service.areBubblesAllowed(mContext.getPackageName());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Gets the bubble preference for the app. This preference only applies to notifications that
+     * have been properly configured to bubble.
+     *
+     * <p>
+     * If {@link #BUBBLE_PREFERENCE_ALL}, then any bubble notification will appear as a bubble, as
+     * long as the user hasn't excluded it ({@link NotificationChannel#canBubble()}).
+     *
+     * <p>
+     * If {@link #BUBBLE_PREFERENCE_SELECTED}, then any bubble notification will appear as a bubble,
+     * as long as the user has selected it.
+     *
+     * <p>
+     * If {@link #BUBBLE_PREFERENCE_NONE}, then no notification may appear as a bubble from the app.
+     *
+     * @see Notification#getBubbleMetadata()
+     * @return the users' bubble preference for the app.
+     */
+    public int getBubblePreference() {
+        INotificationManager service = getService();
+        try {
+            return service.getBubblePreferenceForPackage(mContext.getPackageName(),
+                    Binder.getCallingUid());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

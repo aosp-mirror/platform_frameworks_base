@@ -1848,7 +1848,7 @@ public final class Settings {
 
     /**
      * Activity Action: Show notification bubble settings for a single app.
-     * See {@link NotificationManager#areBubblesAllowed()}.
+     * See {@link NotificationManager#getBubblePreference()}.
      * <p>
      *     Input: {@link #EXTRA_APP_PACKAGE}, the package to display.
      * <p>
