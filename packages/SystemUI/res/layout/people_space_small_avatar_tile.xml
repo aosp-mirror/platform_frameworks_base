@@ -16,53 +16,48 @@
   -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:padding="4dp"
-    android:layout_height="wrap_content"
+    android:layout_height="match_parent"
     android:orientation="vertical">
     <LinearLayout
         android:background="@drawable/people_space_tile_view_card"
         android:id="@+id/item"
         android:orientation="vertical"
-        android:padding="4dp"
-        android:layout_marginBottom="2dp"
-        android:elevation="4dp"
+        android:paddingTop="6dp"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
+        android:layout_height="match_parent">
         <LinearLayout
             android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:paddingStart="12dp"
+            android:paddingHorizontal="12dp"
+            android:paddingBottom="4dp"
+            android:gravity="top"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
             <ImageView
                 android:id="@+id/person_icon"
-                android:layout_width="60dp"
-                android:layout_height="60dp" />
+                android:layout_width="34dp"
+                android:layout_height="34dp" />
 
             <LinearLayout
                 android:background="@drawable/people_space_rounded_border"
-                android:layout_marginStart="-12dp"
-                android:layout_marginTop="28dp"
-                android:layout_marginBottom="14dp"
-                android:layout_width="16dp"
-                android:layout_height="16dp">
+                android:layout_marginStart="-5dp"
+                android:layout_marginTop="18dp"
+                android:layout_width="8dp"
+                android:layout_height="8dp">
 
                 <ImageView
                     android:id="@+id/package_icon"
-                    android:layout_width="12dp"
-                    android:layout_marginStart="2dp"
-                    android:layout_marginEnd="2dp"
-                    android:layout_marginBottom="2dp"
-                    android:layout_marginTop="2dp"
-                    android:layout_height="12dp" />
+                    android:layout_width="6dp"
+                    android:layout_marginEnd="1dp"
+                    android:layout_marginStart="1dp"
+                    android:layout_marginBottom="1dp"
+                    android:layout_marginTop="1dp"
+                    android:layout_height="6dp" />
             </LinearLayout>
 
             <LinearLayout
                 android:orientation="vertical"
-                android:paddingStart="8dp"
-                android:paddingEnd="12dp"
+                android:paddingStart="6dp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
@@ -70,23 +65,33 @@
                     android:id="@+id/name"
                     android:textAppearance="@*android:style/TextAppearance.DeviceDefault.ListItem"
                     android:textColor="?android:attr/textColorPrimary"
-                    android:textSize="16sp"
+                    android:textSize="14sp"
                     android:maxLines="1"
                     android:ellipsize="end"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" />
 
                 <TextView
-                    android:id="@+id/status"
+                    android:id="@+id/time"
                     android:textColor="?android:attr/textColorSecondary"
                     android:textAppearance="@*android:style/TextAppearance.DeviceDefault.ListItem"
-                    android:paddingVertical="2dp"
-                    android:textSize="12sp"
+                    android:textSize="10sp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:maxLines="3"
+                    android:maxLines="1"
                     android:ellipsize="end" />
             </LinearLayout>
         </LinearLayout>
+        <TextView
+            android:id="@+id/content"
+            android:paddingVertical="3dp"
+            android:paddingHorizontal="12dp"
+            android:textAppearance="@*android:style/TextAppearance.DeviceDefault.ListItem"
+            android:background="@drawable/people_space_content_background"
+            android:textSize="14sp"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:maxLines="2"
+            android:ellipsize="end" />
     </LinearLayout>
 </LinearLayout>
