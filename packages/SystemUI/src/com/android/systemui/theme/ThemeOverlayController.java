@@ -254,12 +254,6 @@ public class ThemeOverlayController extends SystemUI implements Dumpable {
         ColorUtils.RGBToHSL(Color.red(color), Color.green(color), Color.blue(color), hslMain);
         hslMain[0] /= 360f;
 
-        // To close to white or black, let's use the default system theme instead of
-        // applying a colorized one.
-        if (hslMain[2] < 0.05 || hslMain[2] > 0.95) {
-            return Color.TRANSPARENT;
-        }
-
         float minDistance = Float.MAX_VALUE;
         int closestColor = Color.TRANSPARENT;
         for (int candidate: candidates) {
@@ -287,7 +281,7 @@ public class ThemeOverlayController extends SystemUI implements Dumpable {
         final String overlayPackageJson = mSecureSettings.getStringForUser(
                 Settings.Secure.THEME_CUSTOMIZATION_OVERLAY_PACKAGES,
                 currentUser);
-        if (DEBUG) Log.d(TAG, "updateThemeOverlays. Setting: " + overlayPackageJson);
+        if (DEBUG) Log.d(TAG, "updateThemeOverlays: " + overlayPackageJson);
         boolean hasSystemPalette = false;
         boolean hasAccentColor = false;
         final Map<String, String> categoryToPackage = new ArrayMap<>();
