@@ -4099,6 +4099,8 @@ public class StatusBar extends SystemUI implements DemoMode,
             mScrimController.transitionTo(ScrimState.UNLOCKED, mUnlockScrimCallback);
         } else if (mBrightnessMirrorVisible) {
             mScrimController.transitionTo(ScrimState.BRIGHTNESS_MIRROR);
+        } else if (mState == StatusBarState.SHADE_LOCKED) {
+            mScrimController.transitionTo(ScrimState.SHADE_LOCKED);
         } else if (mDozeServiceHost.isPulsing()) {
             mScrimController.transitionTo(ScrimState.PULSING,
                     mDozeScrimController.getScrimCallback());
