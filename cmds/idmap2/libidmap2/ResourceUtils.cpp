@@ -32,6 +32,12 @@ using android::idmap2::ZipFile;
 using android::util::Utf16ToUtf8;
 
 namespace android::idmap2::utils {
+namespace {
+constexpr ResourceId kAttrName = 0x01010003;
+constexpr ResourceId kAttrResourcesMap = 0x01010609;
+constexpr ResourceId kAttrTargetName = 0x0101044d;
+constexpr ResourceId kAttrTargetPackage = 0x01010021;
+}  // namespace
 
 bool IsReference(uint8_t data_type) {
   return data_type == Res_value::TYPE_REFERENCE || data_type == Res_value::TYPE_DYNAMIC_REFERENCE;
@@ -119,7 +125,7 @@ Result<OverlayManifestInfo> ExtractOverlayManifestInfo(const std::string& path,
     }
 
     OverlayManifestInfo info{};
-    if (auto result_str = it.GetAttributeStringValue("name")) {
+    if (auto result_str = it.GetAttributeStringValue(kAttrName, "android:name")) {
       if (*result_str != name) {
         // A value for android:name was found, but either a the name does not match the requested
         // name, or an <overlay> tag with no name was requested.
@@ -132,18 +138,18 @@ Result<OverlayManifestInfo> ExtractOverlayManifestInfo(const std::string& path,
       continue;
     }
 
-    if (auto result_str = it.GetAttributeStringValue("targetPackage")) {
+    if (auto result_str = it.GetAttributeStringValue(kAttrTargetPackage, "android:targetPackage")) {
       info.target_package = *result_str;
     } else {
       return Error("android:targetPackage missing from <overlay> of %s: %s", path.c_str(),
                    result_str.GetErrorMessage().c_str());
     }
 
-    if (auto result_str = it.GetAttributeStringValue("targetName")) {
+    if (auto result_str = it.GetAttributeStringValue(kAttrTargetName, "android:targetName")) {
       info.target_name = *result_str;
     }
 
-    if (auto result_value = it.GetAttributeValue("resourcesMap")) {
+    if (auto result_value = it.GetAttributeValue(kAttrResourcesMap, "android:resourcesMap")) {
       if (IsReference((*result_value).dataType)) {
         info.resource_mapping = (*result_value).data;
       } else {

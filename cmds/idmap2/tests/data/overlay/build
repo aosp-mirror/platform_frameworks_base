@@ -38,4 +38,11 @@ aapt2 link \
     -o overlay-legacy.apk \
     compiled.flata
 
+aapt2 link \
+    --no-resource-removal \
+    -I "$FRAMEWORK_RES_APK" \
+    --manifest AndroidManifestInvalid.xml \
+    -o overlay-invalid.apk \
+    compiled.flata
+
 rm compiled.flata
