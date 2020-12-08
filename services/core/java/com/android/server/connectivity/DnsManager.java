@@ -59,7 +59,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
-
 /**
  * Encapsulate the management of DNS settings for networks.
  *
@@ -266,23 +265,23 @@ public class DnsManager {
     }
 
     public void removeNetwork(Network network) {
-        mPrivateDnsMap.remove(network.netId);
-        mPrivateDnsValidationMap.remove(network.netId);
-        mTransportsMap.remove(network.netId);
-        mLinkPropertiesMap.remove(network.netId);
+        mPrivateDnsMap.remove(network.getNetId());
+        mPrivateDnsValidationMap.remove(network.getNetId());
+        mTransportsMap.remove(network.getNetId());
+        mLinkPropertiesMap.remove(network.getNetId());
     }
 
     // This is exclusively called by ConnectivityService#dumpNetworkDiagnostics() which
     // is not on the ConnectivityService handler thread.
     public PrivateDnsConfig getPrivateDnsConfig(@NonNull Network network) {
-        return mPrivateDnsMap.getOrDefault(network.netId, PRIVATE_DNS_OFF);
+        return mPrivateDnsMap.getOrDefault(network.getNetId(), PRIVATE_DNS_OFF);
     }
 
     public PrivateDnsConfig updatePrivateDns(Network network, PrivateDnsConfig cfg) {
         Log.w(TAG, "updatePrivateDns(" + network + ", " + cfg + ")");
         return (cfg != null)
-                ? mPrivateDnsMap.put(network.netId, cfg)
-                : mPrivateDnsMap.remove(network.netId);
+                ? mPrivateDnsMap.put(network.getNetId(), cfg)
+                : mPrivateDnsMap.remove(network.getNetId());
     }
 
     public void updatePrivateDnsStatus(int netId, LinkProperties lp) {
@@ -309,8 +308,7 @@ public class DnsManager {
     }
 
     public void updatePrivateDnsValidation(PrivateDnsValidationUpdate update) {
-        final PrivateDnsValidationStatuses statuses =
-                mPrivateDnsValidationMap.get(update.netId);
+        final PrivateDnsValidationStatuses statuses = mPrivateDnsValidationMap.get(update.netId);
         if (statuses == null) return;
         statuses.updateStatus(update);
     }
