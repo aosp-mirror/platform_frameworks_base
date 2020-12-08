@@ -29,7 +29,6 @@ import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
 import android.inputmethodservice.InputMethodService;
-import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.SystemClock;
 import android.perftests.utils.ManualBenchmarkState;
@@ -420,23 +419,20 @@ public class ImePerfTest extends ImePerfTestBase
                 });
     }
 
-    private void startAsyncAtrace() throws IOException {
+    private void startAsyncAtrace() {
         mIsTraceStarted = true;
         // IMF uses 'wm' component for trace in InputMethodService, InputMethodManagerService,
         // WindowManagerService and 'view' for client window (InsetsController).
         // TODO(b/167947940): Consider a separate input_method atrace
-        UI_AUTOMATION.executeShellCommand("atrace -b 32768 --async_start wm view");
-        // Avoid atrace isn't ready immediately.
-        SystemClock.sleep(TimeUnit.NANOSECONDS.toMillis(TIME_1_S_IN_NS));
+        startAsyncAtrace("wm view");
     }
 
     private void stopAsyncAtrace() {
         if (!mIsTraceStarted) {
             return;
         }
-        final ParcelFileDescriptor pfd = UI_AUTOMATION.executeShellCommand("atrace --async_stop");
         mIsTraceStarted = false;
-        final InputStream inputStream = new ParcelFileDescriptor.AutoCloseInputStream(pfd);
+        final InputStream inputStream = stopAsyncAtraceWithStream();
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
             String line;
             while ((line = reader.readLine()) != null) {
